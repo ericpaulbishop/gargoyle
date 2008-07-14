@@ -1,0 +1,94 @@
+#!/bin/sh /etc/rc.common
+#
+# Copyright (C) 2008 Eric Bishop <eric@gargoyle-router.com>
+#
+START=51
+
+
+bin="httpd_gargoyle"
+run_dir="/var/run"
+pid_http="$run_dir/$bin-http.pid"
+pid_https="$run_dir/$bin-https.pid"
+cgi_pattern="cgi-bin/**|**.sh|**.cgi"
+user="root"
+cert_file="/etc/$bin.pem"
+
+start() 
+{
+
+	# kill httpd if for some reason it hasn't been disabled
+	# postinst should have stopped and disabled it, but let's be doubly sure
+	rc_httpd=$(ls /etc/rc.d/*httpd 2>/dev/null)
+	if [ -n "rc_httpd" ] ; then
+		/etc/init.d/httpd stop 2>/dev/null
+		/etc/init.d/httpd disable 2>/dev/null
+	fi
+
+	# Generate /etc/httpd_gargoyle.password from root password
+	pass_str=$(cat /etc/passwd | awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' )
+	echo "admin:$pass_str" >  "/etc/httpd_gargoyle.password"
+	echo "root:$pass_str"  >> "/etc/httpd_gargoyle.password"
+
+
+	#load config options 
+	# 
+	# The following options can be specified:
+	# 
+	# web_protocol (https, http, or both)
+	# http_port
+	# https_port
+	# web_root
+	# default_realm_name
+	# default_realm_password_file
+
+	config_load "httpd_gargoyle"
+
+	config_get web_protocol "server" web_protocol
+	config_get http_port "server" http_port
+	config_get https_port "server" https_port
+	config_get web_root "server" web_root
+	config_get default_page_file "server" default_page_file
+	config_get default_realm_name "server" default_realm_name
+	config_get default_realm_password_file "server" default_realm_password_file
+
+
+	if [ -z "$web_protocol" ] ; then web_protocol="https" ; fi
+	if [ -z "$http_port" ] ; then http_port=80 ; fi
+	if [ -z "$https_port" ] ; then https_port=443 ; fi
+	if [ -z "$web_root" ] ; then web_root="/www" ; fi
+	if [ -z "$default_realm_name" ] ; then default_realm_name="Router" ; fi
+	if [ -z "$default_realm_password_file" ] ; then default_realm_password_file="/etc/httpd_gargoyle.password" ; fi
+
+	dpf_string=""
+	if [ -n "$default_page_file" ] ; then
+		dpf_string="-DPF $default_page_file"
+	fi
+
+	if ! [ -d $run_dir ] ; then
+	       	mkdir -p $run_dir
+	fi
+
+	#start with ssl
+	if [ "$web_protocol" = "https" ] || [ "$web_protocol" = "both" ] ; then
+		$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https"  $dpf_string   -DRN "$default_realm_name" -DRP "$default_realm_password_file" 2>/dev/null
+	fi
+
+	#start without ssl
+	if [ "$web_protocol" = "http" ] || [ "$web_protocol" = "both" ] ; then
+		$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http"  $dpf_string  -DRN "$default_realm_name" -DRP "$default_realm_password_file" 2>/dev/null
+	fi
+
+}	
+
+stop()
+{
+	if [ -f $pid_http ] ; then
+		kill $(cat $pid_http) 2>/dev/null
+	fi
+
+	if [ -f $pid_https ] ; then
+		kill $(cat $pid_https) 2>/dev/null
+	fi
+
+}
+

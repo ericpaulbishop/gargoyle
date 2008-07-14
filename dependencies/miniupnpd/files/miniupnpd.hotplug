@@ -1,0 +1,2 @@
+#!/bin/sh
+[ "$ACTION" = "ifup" -a "$INTERFACE" = "wan" ] && /etc/init.d/miniupnpd enabled && /etc/init.d/miniupnpd restart

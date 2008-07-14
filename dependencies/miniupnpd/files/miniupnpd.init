@@ -1,0 +1,37 @@
+#!/bin/sh /etc/rc.common
+START=95
+start() {
+	config_load "upnpd"
+	include /lib/network
+	scan_interfaces
+	. /var/state/network
+	config_get ifname wan ifname
+	config_get ipaddr lan ipaddr
+	
+	echo "miniupnpd starting ..."
+	stop
+	iptables_init.sh
+	# get bitspeed information, if provided
+	config_get upnpd_up_bitspeed config upload
+	config_get upnpd_down_bitspeed config download
+	bitspeed_str=""
+	[ -n "$upnpd_up_bitspeed" ] && [ -n "$upnpd_down_bitspeed" ] && {
+		# covert to bytespeed
+		upnpd_up_bytespeed=$(($upnpd_up_bitspeed * 1024 / 8))
+		upnpd_down_bytespeed=$(($upnpd_down_bitspeed * 1024 / 8))
+		bitspeed_str="-B $upnpd_down_bytespeed $upnpd_up_bytespeed"
+	}
+	config_get log_output config log_output
+	if [ "$log_output" = "1" ]; then
+		miniupnpd -i "$ifname" -a "$ipaddr" -p 5000 -U $bitspeed_str -d | logger -t miniupnpd &
+	else
+		miniupnpd -i "$ifname" -a "$ipaddr" -p 5000 -U $bitspeed_str
+	fi
+}
+
+stop() {
+	pnpd_pid=$(cat /var/run/miniupnpd.pid) 2>&- >&-
+	iptables_flush.sh 2>&- >&-
+	kill $pnpd_pid 2>&-
+	iptables_removeall.sh 2>&- >&-
+}

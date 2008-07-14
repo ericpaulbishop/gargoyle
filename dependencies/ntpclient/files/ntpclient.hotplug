@@ -1,0 +1,45 @@
+#!/bin/sh
+# Copyright (C) 2006 OpenWrt.org
+
+. /etc/functions.sh
+
+DONE=0
+config_cb() {
+	local cfg="$CONFIG_SECTION"
+	local cfgtype
+	config_get cfgtype "$cfg" TYPE
+
+	# initial frequency offset, if configured
+	case "$cfgtype" in
+		ntpdrift)
+			config_get freq		$cfg freq
+
+			if [ ! "$freq" = "" ]; then
+				adjtimex -f $freq >/dev/null
+			fi
+		;;
+	esac
+
+	case "$cfgtype" in
+		ntpclient)
+			config_get hostname	$cfg hostname
+			config_get port		$cfg port
+			config_get count	$cfg count
+
+			[ "$DONE" = "1" ] && exit 0
+			ps | grep 'bin/[n]tpclient' >&- || {
+				route -n 2>&- | grep '^0.0.0.0' >&- && {
+					/usr/sbin/ntpclient -c ${count:-1} -s -h $hostname -p ${port:-123} 2>&- >&- && DONE=1
+				}
+			}
+		;;
+	esac
+}
+case "${ACTION:-ifup}" in
+	ifup)
+		config_load ntpclient&
+	;;
+	ifdown)
+		route -n 2>&- | grep '^0.0.0.0' >&- || killall ntpclient 2>&- >&-
+	;;
+esac

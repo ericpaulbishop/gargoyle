@@ -1,0 +1,413 @@
+#!/bin/sh /etc/rc.common
+START=55
+
+include /lib/network
+
+delete_chain_from_table()
+{
+	table=$1
+	target=$2
+
+
+	chains=$(iptables -t $table -L | awk ' $0 ~ /^Chain/ { print $2; } '  )
+	for chain in $chains ; do
+		
+		#Sort rules, so we can delete higher number rule nums first. This makes sure rule numbers remain valid
+		sorted_rules=$(iptables -t $table -L $chain --line-numbers | awk " \$1~/^[0-9]+$/ &&  \$2 ~/^$target/  {print \$1 ;}" | sort -n -r)
+		
+		
+		if [ -n "$sorted_rules" ] ; then
+			for rule_num in $sorted_rules ; do
+				iptables -t $table -D $chain $rule_num
+			done
+		fi
+		
+		if [ $chain = $target ] ; then
+			iptables -t $table -F $target
+			iptables -t $table -X $target
+		fi
+	done
+}
+
+start()
+{
+	scan_interfaces
+	config_load network
+	config_get wan_if wan ifname
+
+	if [ -e /var/run/bwmond.pid ] ; then
+		old_pid=$(cat /var/run/bwmond.pid)
+		kill $old_pid 2>&- >&-
+	fi
+
+	if [ -z "$wan_if" ] ; then
+		return 0
+	fi
+	
+
+	download_table=filter
+	download_chain=bw_ingress
+	delete_chain_from_table $download_table $download_chain
+	iptables -t $download_table -N $download_chain
+	iptables -t $download_table -I INPUT 1  -i $wan_if -j $download_chain
+	iptables -t $download_table -I FORWARD 1 -i $wan_if -j $download_chain
+	iptables -t $download_table -A $download_chain  #matches everything to monitor all download bandwidth
+
+	
+	upload_table=mangle
+	upload_chain=bw_egress
+	delete_chain_from_table $upload_table $upload_chain
+	iptables -t $upload_table -N $upload_chain
+	iptables -t $upload_table -A POSTROUTING -o $wan_if -j $upload_chain
+	iptables -t $upload_table -A $upload_chain  #matches everything to monitor all upload bandwidth
+	
+	#initially write to RAM disk, which is MUCH faster than writing directly to flash
+	conf_file="/etc/bwmond.conf"
+	tmp_conf_file="/tmp/bwmond.conf" 
+	if [ -e "$tmp_conf_file" ] ; then
+		rm "$tmp_conf_file"
+	fi
+
+	# regular backups go in backup_dir
+	# 
+	# tmp_backup_dir is in /tmp which is RAM disk
+	# it has more space available but gets wiped when router reboots
+	# It is useful to have tmp_backup_dir so we can restore data when we
+	# are restarting firewall (though it's not available when router reboots)
+	backup_dir="/usr/data/bwmon"
+	tmp_backup_dir="/tmp/data/bwmon"
+	mkdir -p "$backup_dir"
+	mkdir -p "$tmp_backup_dir"
+
+	minute_s=60;
+	hour_s=$(($minute_s*60));
+	day_s=$(($hour_s*24));
+
+
+
+	# 15m-download monitor (spans 15m, tmp backup only)
+	echo "monitor total-download-15m" >> "$tmp_conf_file"
+	echo "	interval_length 2" >> "$tmp_conf_file"
+	echo "	history_length 450" >> "$tmp_conf_file"
+	echo "	table $download_table" >> "$tmp_conf_file"
+	echo "	chain $download_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="total-download-15m"
+	
+	# 15h-download monitor (spans 15 hours, backup only on program exit)
+	echo "monitor total-download-15h" >> "$tmp_conf_file"
+	echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+	echo "	history_length 450" >> "$tmp_conf_file"
+	echo "	table $download_table" >> "$tmp_conf_file"
+	echo "	chain $download_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-download-15h"
+
+	# 15d-download monitor (spans 15 days, backup daily)
+	echo "monitor total-download-15d" >> "$tmp_conf_file"
+	echo "	interval_end hour" >> "$tmp_conf_file"
+	echo "	history_length 360" >> "$tmp_conf_file"
+	echo "	table $download_table" >> "$tmp_conf_file"
+	echo "	chain $download_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "	backup_freq $day_s" >> $tmp_conf_file
+	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-download-15d"
+
+
+	# 1y-download monitor (spans 1year, backup daily)
+	echo "monitor total-download-1y" >> "$tmp_conf_file"
+	echo "	interval_end day" >> "$tmp_conf_file"
+	echo "	history_length 366" >> "$tmp_conf_file"
+	echo "	table $download_table" >> "$tmp_conf_file"
+	echo "	chain $download_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "	backup_freq $day_s" >> $tmp_conf_file
+	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-download-1y"
+
+
+	# 15m-upload monitor (spans 15m, tmp backup only)
+	echo "monitor total-upload-15m" >> "$tmp_conf_file"
+	echo "	interval_length 2" >> "$tmp_conf_file"
+	echo "	history_length 450" >> "$tmp_conf_file"
+	echo "	table $upload_table" >> "$tmp_conf_file"
+	echo "	chain $upload_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-upload-15m"
+	
+	# 15h-upload monitor (spans 15 hours, backup only on program exit)
+	echo "monitor total-upload-15h" >> "$tmp_conf_file"
+	echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+	echo "	history_length 450" >> "$tmp_conf_file"
+	echo "	table $upload_table" >> "$tmp_conf_file"
+	echo "	chain $upload_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-upload-15h"
+
+	# 15d-upload monitor (spans 15 days, backup daily)
+	echo "monitor total-upload-15d" >> "$tmp_conf_file"
+	echo "	interval_end hour" >> "$tmp_conf_file"
+	echo "	history_length 360" >> "$tmp_conf_file"
+	echo "	table $upload_table" >> "$tmp_conf_file"
+	echo "	chain $upload_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "	backup_freq $day_s" >> $tmp_conf_file
+	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-upload-15d"
+
+	# 1y-upload monitor (spans 1year, backup daily)
+	echo "monitor total-upload-1y" >> "$tmp_conf_file"
+	echo "	interval_end day" >> "$tmp_conf_file"
+	echo "	history_length 366" >> "$tmp_conf_file"
+	echo "	table $upload_table" >> "$tmp_conf_file"
+	echo "	chain $upload_chain" >> "$tmp_conf_file"
+	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
+	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+	echo "	backup_freq $day_s" >> $tmp_conf_file
+	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+	echo "" >> "$tmp_conf_file"
+	backup_file_match="$backup_file_match|total-upload-1y"
+
+	
+	bw_rule_num=2
+	if [ -e /etc/ethers ] ; then
+		ethers=$(cat /etc/ethers | awk ' {print $2} ')
+		
+
+		#add config sections for all static ips
+		for static_ip in $ethers ; do
+			iptables -t $download_table -A $download_chain -d $static_ip
+			iptables -t $upload_table -A $upload_chain -s $static_ip
+
+			# 15m-download monitor (spans 15m, tmp backup only)
+			echo "monitor $static_ip-download-15m" >> "$tmp_conf_file"
+			echo "	interval_length 2" >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $download_table" >> "$tmp_conf_file"
+			echo "	chain $download_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-download-15m"
+
+
+			# 15h-download monitor (spans 15 hours, tmp backup only)
+			echo "monitor $static_ip-download-15h" >> "$tmp_conf_file"
+			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $download_table" >> "$tmp_conf_file"
+			echo "	chain $download_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-download-15h"
+			
+			# 15d-download monitor (spans 15 days, backup daily)
+			echo "monitor $static_ip-download-15d" >> "$tmp_conf_file"
+			echo "	interval_end hour" >> "$tmp_conf_file"
+			echo "	history_length 360" >> "$tmp_conf_file"
+			echo "	table $download_table" >> "$tmp_conf_file"
+			echo "	chain $download_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+			echo "	backup_freq $day_s" >> $tmp_conf_file
+			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-download-15d"
+
+
+			# 15m-upload monitor (spans 15m, tmp backup only)
+			echo "monitor $static_ip-upload-15m" >> "$tmp_conf_file"
+			echo "	interval_length 2" >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $upload_table" >> "$tmp_conf_file"
+			echo "	chain $upload_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-upload-15m"
+
+
+
+			# 15h-upload monitor (spans 15 hours, tmp backup only)
+			echo "monitor $static_ip-upload-15h" >> "$tmp_conf_file"
+			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $upload_table" >> "$tmp_conf_file"
+			echo "	chain $upload_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-upload-15h"
+
+			# 15d-upload monitor (spans 15 days, backup daily)
+			echo "monitor $static_ip-upload-15d" >> "$tmp_conf_file"
+			echo "	interval_end hour" >> "$tmp_conf_file"
+			echo "	history_length 360" >> "$tmp_conf_file"
+			echo "	table $upload_table" >> "$tmp_conf_file"
+			echo "	chain $upload_chain" >> "$tmp_conf_file"
+			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+			echo "	backup_freq $day_s" >> $tmp_conf_file
+			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$static_ip-upload-15d"
+
+			bw_rule_num=$((bw_rule_num+1))
+		done
+	fi
+
+
+	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
+	if [ -n "$qos_enabled" ] && [ -e /etc/qos_class_marks ] ; then
+		qos_table="mangle"
+		qos_upload_chain="qos_egress"
+		qos_download_chain="qos_ingress"
+
+		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "qos-upload-"$2":"$3};}' )
+		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "qos-download-"$2":"$3};}' )
+
+		for upload_info in $upload_data ; do
+			
+			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')
+			class=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $1; }')
+
+			# 15m-upload monitor (spans 15m, tmp backup only)
+			echo "monitor $class-15m" >> "$tmp_conf_file"
+			echo "	interval_length 2" >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"			
+			backup_file_match="$backup_file_match|$class-15m"
+			
+			# 15h-upload monitor (spans 15 hours, tmp backup only)
+			echo "monitor $class-15h" >> "$tmp_conf_file"
+			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$class-15h"
+
+			# 15d-upload monitor (spans 15 days, backup daily)
+			echo "monitor $class-15d" >> "$tmp_conf_file"
+			echo "	interval_end hour" >> "$tmp_conf_file"
+			echo "	history_length 360" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+			echo "	backup_freq $day_s" >> $tmp_conf_file
+			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$class-15d"
+		done
+		
+		
+		for download_info in $download_data ; do
+			
+			mark=$(echo $download_info | awk ' BEGIN { FS=":";} { print $2; }')
+			class=$(echo $download_info | awk ' BEGIN { FS=":";} { print $1; }')
+			
+			# 15m-download monitor (spans 15m, tmp backup only)
+			echo "monitor $class-15m" >> "$tmp_conf_file"
+			echo "	interval_length 2" >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"		
+			backup_file_match="$backup_file_match|$class-15m"
+
+			# 15h-upload monitor (spans 15 hours, tmp backup only)
+			echo "monitor $class-15h" >> "$tmp_conf_file"
+			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
+			echo "	history_length 450" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$class-15h"
+
+			# 15d-upload monitor (spans 15 days, backup daily)
+			echo "monitor $class-15d" >> "$tmp_conf_file"
+			echo "	interval_end hour" >> "$tmp_conf_file"
+			echo "	history_length 360" >> "$tmp_conf_file"
+			echo "	table $qos_table" >> "$tmp_conf_file"
+			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
+			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
+			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
+			echo "	backup_freq $day_s" >> $tmp_conf_file
+			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
+			echo "" >> "$tmp_conf_file"
+			backup_file_match="$backup_file_match|$class-15d"
+		done
+
+	fi
+
+
+	#remove all old data files that no longer corrospond to active monitors
+	ls -d "$backup_dir"/* 2>/dev/null | egrep -v "$backup_file_match" | xargs -n1 -r rm -r
+	ls -d "$tmp_backup_dir"/* 2>/dev/null | egrep -v "$backup_file_match" | xargs -n1 -r rm -r
+
+	#only write to flash if conf_file has changed
+	if [ -e "$conf_file" ] ; then
+		old_md5=$(md5sum "$conf_file" | awk ' { print $1 ; }')
+		new_md5=$(md5sum "$tmp_conf_file" | awk ' { print $1 ; }')
+		if [ "$old_md5" = "new_md5" ] ; then
+			rm  "$tmp_conf_file"
+		else
+			mv "$tmp_conf_file" "$conf_file"
+		fi
+	
+	else
+		mv "$tmp_conf_file" "$conf_file"
+	fi
+	
+	/usr/bin/bwmond -C $conf_file
+	
+
+}
+
+stop()
+{
+	if [ -e /var/run/bwmond.pid ] ; then
+		old_pid=$(cat /var/run/bwmond.pid)
+		kill $old_pid 2>&- >&-
+	fi
+
+	download_table=filter
+	download_chain=bw_ingress
+	delete_chain_from_table $download_table $download_chain
+
+	upload_table=mangle
+	upload_chain=bw_egress
+	delete_chain_from_table $upload_table $upload_chain
+}
+
+restart()
+{
+	start ;
+}

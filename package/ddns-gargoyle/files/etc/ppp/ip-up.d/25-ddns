@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf 
