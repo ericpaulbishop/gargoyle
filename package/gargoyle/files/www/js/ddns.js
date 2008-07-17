@@ -127,6 +127,10 @@ function saveChangesPart2(response)
 
 function resetData()
 {
+	//set description visibility
+	initializeDescriptionVisibility(uciOriginal, "ddns_1");
+	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
+
 	// setup providers in add section
 	removeAllOptionsFromSelectElement(document.getElementById("ddns_provider"));
 	serviceProviders=parseProviderData();

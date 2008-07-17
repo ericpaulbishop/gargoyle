@@ -351,6 +351,51 @@ function getWirelessMode(uciTest)
 }
 
 
+function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hideText)
+{
+	defaultDisplay = (defaultDisplay == null) ? "inline" : defaultDisplay;
+	displayText = (displayText == null) ? "More Info" : displayText;
+	hideText = (hideText == null) ? "Hide Text" : hideText;
+
+	var ref = document.getElementById( descriptionId + "_ref" );
+	var txt = document.getElementById( descriptionId + "_txt" );
+	var command = "uci set gargoyle.help." + descriptionId + "=";
+	if(ref.firstChild.data == displayText)
+	{
+		txt.style.display=defaultDisplay;
+		ref.firstChild.data = hideText;
+		command = command + "1\n";
+	}
+	else
+	{
+		txt.style.display="none";
+		ref.firstChild.data = displayText;
+		command = command + "0\n";
+	}
+
+	// we don't wait/notify user on completion so update seems instant
+	var param = getParameterDefinition("commands", command);
+	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; }); 
+}
+
+function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay, displayText, hideText)
+{
+	defaultDisplay = (defaultDisplay == null) ? "inline" : defaultDisplay;
+	displayText = (displayText == null) ? "More Info" : displayText;
+	hideText = (hideText == null) ? "Hide Text" : hideText;
+
+	var descLinkText = displayText;
+	var descDisplay = "none";
+	if(testUci.get("gargoyle", "help", descriptionId) == "1")
+	{
+		descLinkText = hideText
+		descDisplay = defaultDisplay;
+	}
+	document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
+	document.getElementById(descriptionId + "_txt").style.display = descDisplay;
+}
+
+
 
 function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, fieldDocument )
 {

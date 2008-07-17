@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	
-	gargoyle_header_footer -h -s "connection" -p "dyndns" -c "internal.css" -j "table.js ddns.js" ddns_gargoyle
+	gargoyle_header_footer -h -s "connection" -p "dyndns" -c "internal.css" -j "table.js ddns.js" gargoyle ddns_gargoyle
 
 ?>
 
@@ -50,30 +50,33 @@
 				<label class='leftcolumn' for='ddns_check' id='ddns_check_label'>Check Interval:</label>
 				<input type='text' class='rightcolumn' id='ddns_check'  size='8' onkeyup='proofreadNumeric(this)'/>
 				<em>minutes</em>
-				<div class='indent'>
-					<p>
-					The check interval specifies how often the router will check whether your current IP matches the one currently associated with your
-					domain name.  This check is performed without connecting to your dynamic DNS service provider, which means that this will not cause 
-					problems with providers that ban users who connect too frequently (e.g. dyndns.com).  However, a network connection is established 
-					to perform this check, so this value should not be too low.  A check interval between 10 and 20 minutes is usually appropriate.
-					</p>
-				</div>
 			</div>
 			<div class='indent'>
 				<label class='leftcolumn' for='ddns_force' id='ddns_force_label'>Force Update Interval:</label>
 				<input type='text' class='rightcolumn' id='ddns_force'  size='8' onkeyup='proofreadNumeric(this)'/>
 				<em>days</em>
-				<div class='indent'>
-					<p>
-					The force update interval specifies how often the router will connect to your dynamic DNS service provider and update their records,
-					even if your IP has not changed.  Service providers will ban users who update too frequently, but may close accounts of users who do
-					not update for over a month.  It is recommended that this parameter be set between 3 and 7 days.
-					</p>
-				</div>
 			</div>
 			
 			<div class='indent'>
 				<input type="button" id="add_service_button" class="default_button" value="Add DDNS Service" onclick="addDdnsService()" />
+			</div>
+			
+			<div class='indent'><div class='indent' id='ddns_1'>
+				<span id='ddns_1_txt'>
+					<p>
+					<em>Check Interval</em> specifies how often the router will check whether your current IP matches the one currently associated with your
+					domain name.  This check is performed without connecting to your dynamic DNS service provider, which means that this will not cause 
+					problems with providers that ban users who connect too frequently (e.g. dyndns.com).  However, a network connection is established 
+					to perform this check, so this value should not be too low.  A check interval between 10 and 20 minutes is usually appropriate.
+					</p>
+
+					<p>
+					<em>Force Update Interval</em> specifies how often the router will connect to your dynamic DNS service provider and update their records,
+					even if your IP has not changed.  Service providers will ban users who update too frequently, but may close accounts of users who do
+					not update for over a month.  It is recommended that this parameter be set between 3 and 7 days.
+					</p>
+				</span>
+				<a onclick='setDescriptionVisibility("ddns_1")'  id="ddns_1_ref" href="#ddns_1">Hide Text</a>
 			</div>
 		</div>
 	

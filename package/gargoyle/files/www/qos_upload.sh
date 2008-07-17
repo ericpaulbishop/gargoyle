@@ -51,18 +51,20 @@
 
 		</div>
 		
-		<div class="indent">
-			<p> Be sure that the specified total bandwidth is as accurate as possible.  QoS ensures that this bandwidth is never exceeded.  
-			Therefore if you specify less bandwidth than is actually available you will artificially slow down your connection.  However, if
-			you specify a value that is too high, QoS will not be able to accurately allocate bandwidth because of network congestion. Note 
-			that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
+		<div id="qos_up_1" class="indent">
+			<span id='qos_up_1_txt'>
+				<p> Be sure that the specified total bandwidth is as accurate as possible.  QoS ensures that this bandwidth is never exceeded.  
+				Therefore if you specify less bandwidth than is actually available you will artificially slow down your connection.  However, if
+				you specify a value that is too high, QoS will not be able to accurately allocate bandwidth because of network congestion. Note 
+				that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
 			
-			<p>The default service class specifies how packets that do not match any rule should be classified.</p>
+				<p>The default service class specifies how packets that do not match any rule should be classified.</p>
 
-			<p>Packets are tested against the rules in the order specified -- rules toward the top are tested first.
-			As soon as a packet matches a rule it is classified, and the rest of the rules are ignored.  The order of 
-			the rules can be altered using the arrow controls.</p>
-		
+				<p>Packets are tested against the rules in the order specified -- rules toward the top are tested first.
+				As soon as a packet matches a rule it is classified, and the rest of the rules are ignored.  The order of 
+				the rules can be altered using the arrow controls.</p>
+			</span>
+			<a onclick='setDescriptionVisibility("qos_up_1")'  id="qos_up_1_ref" href="#qos_up_1">Hide Text</a>
 		</div>		
 
 		
@@ -175,22 +177,25 @@
 		<legend class="sectionheader">QoS (Upload) -- Service Classes</legend>
 		<div id='qos_class_table_container' class="bottom_gap"></div>
 
-		<div class="indent">
-			<p>Each service class is specified by three parameters: percent bandwidth at capacity, maximum bandwidth and minimize delay.</p>
+		<div id="qos_up_2" class="indent">
+			<span id='qos_up_2_txt'>
+				<p>Each service class is specified by three parameters: percent bandwidth at capacity, maximum bandwidth and minimize delay.</p>
 			
-			<p><em>Percent bandwidth at capcity</em> is the percentage of the total available bandwidth that should be allocated to this class of 
-			connection when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
-			The percentages can be configured to equal more (or less) than 100, but when the settings are applied the percentages will be adjusted
-			proportionally so that they add to 100.</p>
+				<p><em>Percent bandwidth at capcity</em> is the percentage of the total available bandwidth that should be allocated to this class of 
+				connection when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
+				The percentages can be configured to equal more (or less) than 100, but when the settings are applied the percentages will be adjusted
+				proportionally so that they add to 100.</p>
 
-			<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth a service class will be allocated in kbit/s.  Even if unused bandwidth
-			is available, this service class will never use more than this amount of bandwidth.</p>
+				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth a service class will be allocated in kbit/s.  Even if unused bandwidth
+				is available, this service class will never use more than this amount of bandwidth.</p>
 
-			<p><em>Minimize delay</em> is an option that should be selected if it is important to minimize the delay of individual packets of this service class.
-			This ensures that so long as the average bandwidth being used by this service class is less than the maximum allowed, individual packets will not spend a
-			significant amount of time waiting in a queue. For example it may be important that the packets of a VoIP connection be delivered as soon as they are produced,
-		       	while all that matters for an FTP is the average speed.  Therefore you might select to minimize the packet delay of the VoIP connection, but not the 
-			FTP connection.</p>
+				<p><em>Minimize delay</em> is an option that should be selected if it is important to minimize the delay of individual packets of this service class.
+				This ensures that so long as the average bandwidth being used by this service class is less than the maximum allowed, individual packets will not spend a
+				significant amount of time waiting in a queue. For example it may be important that the packets of a VoIP connection be delivered as soon as they are produced,
+		       		while all that matters for an FTP is the average speed.  Therefore you might select to minimize the packet delay of the VoIP connection, but not the 
+				FTP connection.</p>
+			</span>
+			<a onclick='setDescriptionVisibility("qos_up_2")'  id="qos_up_2_ref" href="#qos_up_2">Hide Text</a>
 		</div>
 		
 		<div class="internal_divider"></div>

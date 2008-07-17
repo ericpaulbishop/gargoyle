@@ -241,6 +241,12 @@ function saveChanges()
 
 function resetData()
 {
+	//set description visibility
+	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_1");
+	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_2");
+	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
+	
+
 	totalBandwidth = uciOriginal.get("qos_gargoyle", direction, "total_bandwidth");
 	totalBandwidth = totalBandwidth == "" ? -1 : totalBandwidth;
 	document.getElementById("qos_enabled").checked = qosEnabled && totalBandwidth > 0;
