@@ -27,10 +27,8 @@
 	current_time=$(date "+%D %H:%M %Z")
 	echo "var currentTime=\"$current_time\";"
 
-	ram_disk_size=$(df -k | grep "none.*/tmp" | awk ' { print $4 } ')
 	total_mem=$(cat /proc/meminfo | grep "MemTotal:" | awk ' { print $2 } ')
 	free_mem=$(cat /proc/meminfo | grep "MemFree:" | awk ' { print $2 } ')
-	echo "var ramDiskSize=$ram_disk_size;"
 	echo "var totalMemory=$total_mem;"
 	echo "var freeMemory=$free_mem;"
 
