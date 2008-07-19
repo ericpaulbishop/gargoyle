@@ -29,11 +29,32 @@ function saveChanges()
 
 
 
+		var preCommands = "";	
 		var allWirelessSections = uci.getAllSections("wireless");
 		var allWifiDeviceSections = uci.getAllSectionsOfType("wireless", "wifi-device");
 		var firstWirelessDevice = allWifiDeviceSections[0];
+		
+		if(firstWirelessDevice == null)
+		{
+			while(allWirelessSections.length > 0)
+			{
+				var sectionName = allWirelessSections.shift();
+				preCommands = preCommands + "uci del wireless." + sectionName + "\n";
+				uci.removeSection("wireless", sectionName);
+				uciCompare.removeSection("wireless", sectionName);
+			}
+			preCommands = preCommands + "uci commit\n";
 
-		var preCommands = "";	
+			firstWirelessDevice = wirelessDriver == "broadcom" ? "wl0" : "wifi0";
+			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + "=wifi-device\n";
+			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + ".type=" + wirelessDriver + "\n";
+			preCommands = preCommands + "uci commit\n";
+			uci.set("wireless", firstWirelessDevice, "", "wifi-device");
+			uci.set("wireless", firstWirelessDevice, "type", wirelessDriver);
+
+		}
+
+
 		if(document.getElementById('wan_protocol') == 'none')
 		{
 			uci.remove("network", "wan", "ifname");
@@ -43,7 +64,7 @@ function saveChanges()
 			preCommands = preCommands + "uci set network.wan=interface\n";
 			if(trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
 			{
-				if(uci.get('wireless', firstWirelessDevice, 'type') == 'atheros')
+				if(wirelessDriver == 'atheros')
 				{
 					wirelessClientIf = document.getElementById("wifi_ssid1_container").style.display != 'none' && document.getElementById("wifi_ssid1_container").style.display != 'none' ? 'ath1' : 'ath0';
 					uci.set('network', 'wan', 'ifname', wirelessClientIf);
@@ -81,7 +102,7 @@ function saveChanges()
 			uci.set('network', 'lan', 'ifname', defaultLanIf);
 		}
 
-
+		
 
 		//clear old wifi sections
 		wifiCfg2="";
