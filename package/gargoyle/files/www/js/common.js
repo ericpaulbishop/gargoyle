@@ -396,6 +396,59 @@ function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay,
 }
 
 
+function getSubnetRange(mask, ip)
+{
+	//first we need to get size of subnet
+	var splitMask = mask.split(".");
+	if(splitMask.length != 4)
+	{
+		return [];
+	}
+	var masks = [ "255","254","252","248","240","224","192","128", "0" ];
+	var bits  = [ 0,  1,  2,  3,  4,  5,  6,  7,   8 ];
+	var subnetBits = 0;
+	while(splitMask.length > 0)
+	{
+		var nextPart = splitMask.shift();
+		var nextBits = -1;
+		for(testIndex=0 ; testIndex < 9 && nextBits < 0; testIndex++)
+		{
+			nextBits = masks[testIndex] == nextPart ? bits[testIndex] : nextBits;
+		}
+		if(nextBits < 0)
+		{
+			return [];
+		}
+		subnetBits = subnetBits + nextBits;
+	}
+	
+	var subnetLength = Math.pow(2, subnetBits);
+	var testIpEnd = parseInt( (ip.split("."))[3] );
+
+	var subnetStart = 0;
+	while(subnetStart + subnetLength < testIpEnd)
+	{
+		subnetStart = subnetStart + subnetLength;
+	}
+	return [subnetStart, (subnetStart + subnetLength - 1) ];
+}
+
+function rangeInSubnet(mask, ip, start, end)
+{
+	var range = getSubnetRange(mask, ip);
+	var subnetStart = range[0];
+	var subnetEnd = range[1];
+
+	if(subnetStart != null && subnetEnd != null)
+	{
+		if(subnetStart <= start && subnetEnd >= end)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, fieldDocument )
 {

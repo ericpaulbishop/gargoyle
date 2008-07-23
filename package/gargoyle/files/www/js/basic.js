@@ -209,9 +209,32 @@ function saveChanges()
 		}
 
 
-
-
-
+		//if current dhcp range is not in new subnet, or current dhcp range contains new router ip adjust it
+		var dhcpSection = getDhcpSection(uciOriginal);
+		var newMask = document.getElementById("lan_mask").value;
+		var newIp = document.getElementById("lan_ip").value;
+		var routerIpEnd = parseInt( (newIp.split("."))[3] );
+		var oldStart = parseInt( uciOriginal.get("dhcp", dhcpSection, "start") );
+		var oldEnd = oldStart + parseInt( uciOriginal.get("dhcp", dhcpSection, "limit") ) - 1;
+		if(!rangeInSubnet(newMask, newIp, oldStart, oldEnd) || (routerIpEnd >= oldStart && routerIpEnd <= oldEnd))
+		{
+			//compute new dhcp range, note this cannot include router's static ip
+			var newRange =getSubnetRange(newMask, newIp);
+			var newStart;
+			var newEnd;
+			if(routerIpEnd - newRange[0] > newRange[1] - routerIpEnd)
+			{
+				newStart = newRange[0];
+				newEnd = routerIpEnd-1;
+			}
+			else
+			{
+				newStart = routerIpEnd+1;
+				newEnd = newRange[1];
+			}
+			uci.set("dhcp", dhcpSection, "start", newStart);
+			uci.set("dhcp", dhcpSection, "limit", (newEnd+1-newStart) );
+		}
 
 
 		ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];

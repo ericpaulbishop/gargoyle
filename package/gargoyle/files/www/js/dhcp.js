@@ -34,7 +34,7 @@ function saveChanges()
 		dhcpOptions = ['start', 'limit', 'leasetime'];
 	
 		dhcpFunctions = [setVariableFromValue, setVariableFromCombined, setVariableFromModifiedValue];
-		limitParams =  [false, function(values){ return values[1] - values[0]; }];
+		limitParams =  [false, function(values){ return (1*values[1] + 1*1 - 1*values[0]); }];
 		leaseParams = [false, function(value){ return value + "h"; }];
 		dhcpParams = [false, limitParams,leaseParams];	
 	
@@ -123,7 +123,7 @@ function resetData()
 	dhcpOptions = ['start', ['start','limit'], 'leasetime'];
 	
 	enabledTest = function(value){return value != 1;};
-	endCombineFunc= function(values) { return (1*values[0])+(1*values[1]); };
+	endCombineFunc= function(values) { return (1*values[0])+(1*values[1])-1; };
 	leaseModFunc = function(value)
 	{
 		var leaseHourValue;
@@ -232,6 +232,24 @@ function proofreadAdd()
 			}
 		}
 	}
+	if(errors.length == 0)
+	{
+		var dhcpSection = getDhcpSection(uciOriginal);
+		var mask = uciOriginal.get("network", "lan", "netmask");
+		var ip = uciOriginal.get("network", "lan", "ipaddr");
+		var testIp = document.getElementById('add_ip').value;
+		var testEnd = parseInt( (testIp.split("."))[3] );
+
+		if(!rangeInSubnet(mask, ip, testEnd, testEnd))
+		{
+			errors.push("Specified static IP falls outside LAN subnet.");
+		}
+		if(ip == testIp)
+		{
+			errors.push("Specified static IP is current router IP.");
+		}	
+	}
+
 	return errors;
 
 }
@@ -245,12 +263,25 @@ function proofreadAll()
 	visibilityIds= dhcpIds;
 	errors = proofreadFields(dhcpIds, labelIds, functions, returnCodes, visibilityIds);
 
-	//do not proofread add fields -- nothing is done with them when settings of whole page are applied	
-	//addErrors = proofreadAdd();
-	//for(addErrorIndex in addErrors)
-	//{
-	//	errors.push(addErrors[addErrorIndex]);
-	//}
+	//test that dhcp range is within subnet
+	if(errors.length == 0)
+	{
+		var dhcpSection = getDhcpSection(uciOriginal);
+		var mask = uciOriginal.get("network", "lan", "netmask");
+		var ip = uciOriginal.get("network", "lan", "ipaddr");
+		var start = parseInt(document.getElementById("dhcp_start").value);
+		var end = parseInt(document.getElementById("dhcp_end").value );
+		if(!rangeInSubnet(mask, ip, start, end))
+		{
+			errors.push("Specified DHCP range falls outside LAN subnet.");
+		}
+		
+		var ipEnd = parseInt( (ip.split("."))[3] );
+		if(ipEnd >= start && ipEnd <= end)
+		{
+			errors.push("Specified DHCP range contains current LAN IP.");
+		}
+	}
 
 	return errors;
 }
