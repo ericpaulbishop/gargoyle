@@ -1,0 +1,928 @@
+--- ../kamikaze-7.09-orig/target/linux/atheros-2.6/files/drivers/net/ar2313/ar2313.c	2008-07-23 21:56:02.000000000 -0400
++++ target/linux/atheros-2.6/files/drivers/net/ar2313/ar2313.c	2008-07-23 22:00:20.000000000 -0400
+@@ -1,8 +1,10 @@
+ /*
+  * ar2313.c: Linux driver for the Atheros AR231x Ethernet device.
+  *
+- * Copyright (C) 2004 by Sameer Dekate <sdekate@arubanetworks.com>
+- * Copyright (C) 2006 Imre Kaloz <kaloz@openwrt.org>
++ * Modified for foneraplus FON2201
++ *
++ * Copyright (C) 2004 Sameer Dekate <sdekate@arubanetworks.com>
++ * Copyright (C) 2006-2007 Imre Kaloz <kaloz@openwrt.org>
+  * Copyright (C) 2006-2007 Felix Fietkau <nbd@openwrt.org>
+  *
+  * Thanks to Atheros for providing hardware and documentation
+@@ -39,6 +41,7 @@
+ #include <linux/ethtool.h>
+ #include <linux/ctype.h>
+ #include <linux/platform_device.h>
++#include <linux/if_vlan.h>
+ 
+ #include <net/sock.h>
+ #include <net/ip.h>
+@@ -55,6 +58,12 @@
+ #define AR2313_QUEUES                  (2*AR2313_PRIOS)
+ #define AR2313_DESCR_ENTRIES           64
+ 
++#if defined(CONFIG_VLAN_8021Q) || defined(CONFIG_VLAN_8021Q_MODULE)
++#define DO_VLAN 1
++#else
++#define DO_VLAN 0
++#endif
++
+ #undef INDEX_DEBUG
+ #define DEBUG     0
+ #define DEBUG_TX  0
+@@ -132,12 +141,13 @@
+ #define RX_LOW_THRES	        ((3*RX_RING_SIZE)/4)
+ #define CRC_LEN                 4
+ #define RX_OFFSET               2
++#define VLAN_TRAILER_LEN	4
+ 
+-#define AR2313_BUFSIZE		(AR2313_MTU + ETH_HLEN + CRC_LEN + RX_OFFSET)
++#define AR2313_BUFSIZE		(AR2313_MTU + ETH_HLEN + CRC_LEN + RX_OFFSET + VLAN_TRAILER_LEN)
+ 
+ #ifdef MODULE
+-MODULE_LICENSE("GPL");
+-MODULE_AUTHOR("Sameer Dekate <sdekate@arubanetworks.com>, Imre Kaloz <kaloz@openwrt.org>, Felix Fietkau <nbd@openwrt.org>");
++MODULE_AUTHOR
++	("Sameer Dekate <sdekate@arubanetworks.com>, Imre Kaloz <kaloz@openwrt.org>, Felix Fietkau <nbd@openwrt.org>");
+ MODULE_DESCRIPTION("AR2313 Ethernet driver");
+ #endif
+ 
+@@ -158,6 +168,110 @@
+ #define ERR(fmt, args...) printk("%s: " fmt, __func__, ##args)
+ #endif
+ 
++#if DO_VLAN
++/*
++ * Marvell switches are too braindead to do real VLAN,
++ * so we have to deal with their custom crap here...
++ */
++
++static int marvell_find_vlan(struct ar2313_private *sp,
++							 struct sk_buff *skb)
++{
++	unsigned char *buf = skb->data + skb->len - 4;
++	int ret = -1;
++
++	/* Is this a Marvell trailer? */
++	if (*buf != 0x80)
++		return 0;
++
++	/* FIXME: ugly, ugly hack! */
++	switch (buf[1]) {
++	case 4:					/* Packet came from the WAN port */
++		ret = 1;
++		break;
++	default:					/* Packet probably came from LAN */
++		ret = 0;
++		break;
++	}
++
++	return ret;
++}
++
++static struct sk_buff *marvell_add_vlan(struct ar2313_private *sp,
++										struct sk_buff *skb)
++{
++	u8 *buf = NULL;
++	struct sk_buff *newskb;
++	u8 vid;
++
++	if (unlikely(skb->len < 16))
++		return skb;
++
++	vid = skb->data[15];
++
++	/* XXX: clean up this garbage! */
++	if (skb->len <= 64) {
++		newskb = skb_copy_expand(skb, skb_headroom(skb), 68, GFP_ATOMIC);
++		if (!newskb) {
++			if (net_ratelimit())
++				printk("%s: failed to expand skb!\n", sp->dev->name);
++			goto done;
++		}
++		dev_kfree_skb(skb);
++		skb = newskb;
++		buf = skb->data + 64;
++		skb->len = 68;
++		goto tag_move;
++	}
++	
++	if (unlikely(skb_tailroom(skb) < 4)) {
++		/* not enough tailroom:
++		 * remove the vlan tag by closing the gap between the ethernet header
++		 * and the rest of the packet */
++		memmove(skb->data + 12, skb->data + 16, skb->len - 16);
++		/* skb->nh.raw -= 4; */
++		buf = skb->data + skb->len - 4;
++		goto tag_append;
++	}
++
++tag_move:
++	/* move the ethernet header 4 bytes forward, overwriting the vlan tag */
++	memmove(skb->data + 4, skb->data, 12);
++	/* skb->mac.raw += 4; */
++	skb->data += 4;
++	skb->len -= 4;
++	
++tag_append:
++	buf = (buf ?: skb_put(skb, 4));
++	if (!buf)
++		return skb;
++
++	*((u32 *) buf) = vid ? cpu_to_be32(
++		(0x80 << 24) |
++		(0x10 << 16)
++	) : 0; 
++
++done:
++	return skb;
++}
++
++static void ar2313_vlan_rx_register(struct net_device *dev,
++									struct vlan_group *grp)
++{
++	struct ar2313_private *sp = (struct ar2313_private *) dev->priv;
++
++	sp->vlgrp = grp;
++}
++
++static void ar2313_vlan_rx_kill_vid(struct net_device *dev,
++									unsigned short vid)
++{
++	struct ar2313_private *sp = (struct ar2313_private *) dev->priv;
++
++/*	if (sp->vlgrp)
++		sp->vlgrp->vlan_devices[vid] = NULL; */
++}
++#endif
+ 
+ int __init ar2313_probe(struct platform_device *pdev)
+ {
+@@ -267,6 +381,22 @@
+ 		return -ENODEV;
+ 	}
+ 
++	/* FIXME: does this work? */
++	printk("PHY ID: %04x:%04x\n", (u16) armiiread(dev, 0x1f, 1),
++		   (u16) armiiread(dev, 0x1f, 2));
++	if (armiiread(dev, 0x1f, 1) != -1)
++		sp->marvell = 1;
++	else
++		sp->phy = 1;
++
++#if DO_VLAN
++	if (sp->marvell) {
++		dev->features |= NETIF_F_HW_VLAN_RX;
++		dev->vlan_rx_register = ar2313_vlan_rx_register;
++		dev->vlan_rx_kill_vid = ar2313_vlan_rx_kill_vid;
++	}
++#endif
++
+ 	if (register_netdev(dev)) {
+ 		printk("%s: register_netdev failed\n", __func__);
+ 		return -1;
+@@ -277,6 +407,49 @@
+ 		   dev->dev_addr[0], dev->dev_addr[1], dev->dev_addr[2],
+ 		   dev->dev_addr[3], dev->dev_addr[4], dev->dev_addr[5], dev->irq);
+ 
++	if (sp->marvell) {
++		int i;
++
++		printk("Initialising Marvell switch... ");
++
++		/* reset chip 
++		armiiwrite(dev, 0x1f, 0xa, 0xa130);
++		do {
++			udelay(1000);
++			i = armiiread(dev, sp->phy, 0xa);
++		} while (i & 0x8000);*/
++
++		/* configure MAC address */
++		armiiwrite(dev, sp->phy, 0x1,
++				   dev->dev_addr[0] << 8 | dev->dev_addr[1]);
++		armiiwrite(dev, sp->phy, 0x2,
++				   dev->dev_addr[2] << 8 | dev->dev_addr[3]);
++		armiiwrite(dev, sp->phy, 0x3,
++				   dev->dev_addr[4] << 8 | dev->dev_addr[5]);
++
++		/* set ports to forwarding */
++		armiiwrite(dev, 0x18, 0x4, 0x3);	/* port 0 */
++		armiiwrite(dev, 0x19, 0x4, 0x3);	/* port 1 */
++		armiiwrite(dev, 0x1a, 0x4, 0x3);	/* port 2 */
++		armiiwrite(dev, 0x1b, 0x4, 0x3);	/* port 3 */
++		armiiwrite(dev, 0x1c, 0x4, 0x3);	/* port 4 - WAN */
++		armiiwrite(dev, 0x1d, 0x4, 0x4103);	/* port 5 - connected to CPU */
++
++		/* put ports into vlans */
++		armiiwrite(dev, 0x18, 0x6, 0x2e);	/* port 0 */
++		armiiwrite(dev, 0x19, 0x6, 0x2d);	/* port 1 */
++		armiiwrite(dev, 0x1a, 0x6, 0x2b);	/* port 2 */
++		armiiwrite(dev, 0x1b, 0x6, 0x27);	/* port 3 */
++		armiiwrite(dev, 0x1c, 0x6, 0x1020);	/* port 4 - WAN */
++		armiiwrite(dev, 0x1d, 0x6, 0x0f);	/* port 5 - connected to CPU */
++
++		/* hmz */
++		for (i = 0; i <= 5; i++)
++			armiiwrite(dev, 0x18 + i, 11, 1 << i);
++
++		printk("done.\n");
++	}
++
+ 	/* start link poll timer */
+ 	ar2313_setup_timer(dev);
+ 
+@@ -867,6 +1040,9 @@
+ 	u32 idx;
+ 	int pkts = 0;
+ 	int rval;
++#if DO_VLAN
++	int vlan_id;
++#endif
+ 
+ 	idx = sp->cur_rx;
+ 
+@@ -927,7 +1103,15 @@
+ 				sp->stats.rx_bytes += skb->len;
+ 				skb->protocol = eth_type_trans(skb, dev);
+ 				/* pass the packet to upper layers */
+-				netif_rx(skb);
++
++#if DO_VLAN
++				if ((sp->marvell = 1) && sp->vlgrp) {
++					vlan_id = marvell_find_vlan(sp, skb);
++					vlan_hwaccel_rx(skb, sp->vlgrp, vlan_id);
++				} else
++#endif
++
++					netif_rx(skb);
+ 
+ 				skb_new->dev = dev;
+ 				/* 16 bit align */
+@@ -1177,6 +1361,10 @@
+ 	ar2313_descr_t *td;
+ 	u32 idx;
+ 
++#if DO_VLAN
++	if (sp->marvell)
++		skb = marvell_add_vlan(sp, skb);
++#endif
+ 	idx = sp->tx_prd;
+ 	td = &sp->tx_ring[idx];
+ 
+--- ../kamikaze-7.09-orig/target/linux/atheros-2.6/files/drivers/net/ar2313/ar2313.h	2008-07-23 21:56:02.000000000 -0400
++++ target/linux/atheros-2.6/files/drivers/net/ar2313/ar2313.h	2008-07-23 22:00:20.000000000 -0400
+@@ -8,7 +8,7 @@
+ /*
+  * probe link timer - 5 secs
+  */
+-#define LINK_TIMER    (5*HZ)
++#define LINK_TIMER    (5*HZ) 
+ 
+ #define IS_DMA_TX_INT(X)   (((X) & (DMA_STATUS_TI)) != 0)
+ #define IS_DMA_RX_INT(X)   (((X) & (DMA_STATUS_RI)) != 0)
+@@ -22,13 +22,13 @@
+ #define DSC_RING_ENTRIES_SIZE	(AR2313_DESCR_ENTRIES * sizeof(struct desc))
+ #define DSC_NEXT(idx)	        ((idx + 1) & (AR2313_DESCR_ENTRIES - 1))
+ 
+-static inline int tx_space(u32 csm, u32 prd)
++static inline int tx_space (u32 csm, u32 prd)
+ {
+ 	return (csm - prd - 1) & (AR2313_DESCR_ENTRIES - 1);
+ }
+ 
+ #if MAX_SKB_FRAGS
+-#define TX_RESERVED	(MAX_SKB_FRAGS+1)	/* +1 for message header */
++#define TX_RESERVED	(MAX_SKB_FRAGS+1) /* +1 for message header */
+ #define tx_ring_full(csm, prd)	(tx_space(csm, prd) <= TX_RESERVED)
+ #else
+ #define tx_ring_full		0
+@@ -51,16 +51,16 @@
+ // New Combo structure for Both Eth0 AND eth1
+ //
+ typedef struct {
+-	volatile unsigned int mac_control;	/* 0x00 */
+-	volatile unsigned int mac_addr[2];	/* 0x04 - 0x08 */
+-	volatile unsigned int mcast_table[2];	/* 0x0c - 0x10 */
+-	volatile unsigned int mii_addr;	/* 0x14 */
+-	volatile unsigned int mii_data;	/* 0x18 */
+-	volatile unsigned int flow_control;	/* 0x1c */
+-	volatile unsigned int vlan_tag;	/* 0x20 */
+-	volatile unsigned int pad[7];	/* 0x24 - 0x3c */
+-	volatile unsigned int ucast_table[8];	/* 0x40-0x5c */
+-
++  volatile unsigned int mac_control;    /* 0x00 */
++  volatile unsigned int mac_addr[2];    /* 0x04 - 0x08*/
++  volatile unsigned int mcast_table[2]; /* 0x0c - 0x10 */
++  volatile unsigned int mii_addr;       /* 0x14 */
++  volatile unsigned int mii_data;       /* 0x18 */
++  volatile unsigned int flow_control;   /* 0x1c */
++  volatile unsigned int vlan_tag;       /* 0x20 */
++  volatile unsigned int pad[7];         /* 0x24 - 0x3c */
++  volatile unsigned int ucast_table[8]; /* 0x40-0x5c */
++  
+ } ETHERNET_STRUCT;
+ 
+ /********************************************************************
+@@ -68,31 +68,31 @@
+  ********************************************************************/
+ 
+ typedef struct {
+-	volatile unsigned int wdog_control;	/* 0x08 */
+-	volatile unsigned int wdog_timer;	/* 0x0c */
+-	volatile unsigned int misc_status;	/* 0x10 */
+-	volatile unsigned int misc_mask;	/* 0x14 */
+-	volatile unsigned int global_status;	/* 0x18 */
+-	volatile unsigned int reserved;	/* 0x1c */
+-	volatile unsigned int reset_control;	/* 0x20 */
++  volatile unsigned int wdog_control;		/* 0x08 */
++  volatile unsigned int wdog_timer;		/* 0x0c */
++  volatile unsigned int misc_status;		/* 0x10 */
++  volatile unsigned int misc_mask;		/* 0x14 */
++  volatile unsigned int global_status;		/* 0x18 */
++  volatile unsigned int reserved;		/* 0x1c */
++  volatile unsigned int reset_control;		/* 0x20 */
+ } INTERRUPT;
+ 
+ /********************************************************************
+  * DMA controller
+  ********************************************************************/
+ typedef struct {
+-	volatile unsigned int bus_mode;	/* 0x00 (CSR0) */
+-	volatile unsigned int xmt_poll;	/* 0x04 (CSR1) */
+-	volatile unsigned int rcv_poll;	/* 0x08 (CSR2) */
+-	volatile unsigned int rcv_base;	/* 0x0c (CSR3) */
+-	volatile unsigned int xmt_base;	/* 0x10 (CSR4) */
+-	volatile unsigned int status;	/* 0x14 (CSR5) */
+-	volatile unsigned int control;	/* 0x18 (CSR6) */
+-	volatile unsigned int intr_ena;	/* 0x1c (CSR7) */
+-	volatile unsigned int rcv_missed;	/* 0x20 (CSR8) */
+-	volatile unsigned int reserved[11];	/* 0x24-0x4c (CSR9-19) */
+-	volatile unsigned int cur_tx_buf_addr;	/* 0x50 (CSR20) */
+-	volatile unsigned int cur_rx_buf_addr;	/* 0x50 (CSR21) */
++  volatile unsigned int bus_mode;        /* 0x00 (CSR0) */
++  volatile unsigned int xmt_poll;        /* 0x04 (CSR1) */
++  volatile unsigned int rcv_poll;        /* 0x08 (CSR2) */
++  volatile unsigned int rcv_base;        /* 0x0c (CSR3) */
++  volatile unsigned int xmt_base;        /* 0x10 (CSR4) */
++  volatile unsigned int status;          /* 0x14 (CSR5) */
++  volatile unsigned int control;         /* 0x18 (CSR6) */
++  volatile unsigned int intr_ena;        /* 0x1c (CSR7) */
++  volatile unsigned int rcv_missed;      /* 0x20 (CSR8) */
++  volatile unsigned int reserved[11];    /* 0x24-0x4c (CSR9-19) */
++  volatile unsigned int cur_tx_buf_addr; /* 0x50 (CSR20) */
++  volatile unsigned int cur_rx_buf_addr; /* 0x50 (CSR21) */
+ } DMA;
+ 
+ /*
+@@ -105,69 +105,72 @@
+  * Frequently accessed variables are put at the beginning of the
+  * struct to help the compiler generate better/shorter code.
+  */
+-struct ar2313_private {
++struct ar2313_private
++{
+ 	struct net_device *dev;
+-	int version;
+-	u32 mb[2];
+-
+-	volatile ETHERNET_STRUCT *phy_regs;
+-	volatile ETHERNET_STRUCT *eth_regs;
+-	volatile DMA *dma_regs;
+-	volatile u32 *int_regs;
++	int			version;
++	u32                     mb[2];
++	
++	volatile ETHERNET_STRUCT	*phy_regs;
++	volatile ETHERNET_STRUCT	*eth_regs;
++	volatile DMA			*dma_regs;
++	volatile u32		        *int_regs;
+ 	struct ar531x_eth *cfg;
+ 
+-	spinlock_t lock;			/* Serialise access to device */
++	spinlock_t lock; 	/* Serialise access to device */
+ 
+-	/* 
++	/*
+ 	 * RX and TX descriptors, must be adjacent
+ 	 */
+-	ar2313_descr_t *rx_ring;
+-	ar2313_descr_t *tx_ring;
++	ar2313_descr_t	        *rx_ring;
++	ar2313_descr_t	        *tx_ring;
+ 
+ 
+-	struct sk_buff **rx_skb;
+-	struct sk_buff **tx_skb;
++	struct sk_buff		**rx_skb;
++	struct sk_buff		**tx_skb;
+ 
+-	/* 
++	/*
+ 	 * RX elements
+ 	 */
+-	u32 rx_skbprd;
+-	u32 cur_rx;
++	u32			rx_skbprd;
++	u32			cur_rx;
+ 
+-	/* 
++	/*
+ 	 * TX elements
+ 	 */
+-	u32 tx_prd;
+-	u32 tx_csm;
++	u32			tx_prd;
++	u32		        tx_csm;
+ 
+-	/* 
++	/*
+ 	 * Misc elements
+ 	 */
+-	int board_idx;
+-	char name[48];
++	int			board_idx;
++	char			name[48];
+ 	struct net_device_stats stats;
+ 	struct {
+-		u32 address;
+-		u32 length;
+-		char *mapping;
++	    u32 address;
++	    u32 length;
++	    char *mapping;
+ 	} desc;
+ 
+ 
+ 	struct timer_list link_timer;
+-	unsigned short phy;			/* merlot phy = 1, samsung phy = 0x1f */
++	unsigned short phy;  /* merlot phy = 1,  samsung phy = 0x1f */
+ 	unsigned short mac;
+-	unsigned short link;		/* 0 - link down, 1 - link up */
++	unsigned short link; /* 0 - link down,  1 - link up */
+ 	u16 phyData;
+ 
+ 	struct tasklet_struct rx_tasklet;
+ 	int unloading;
++	int marvell;
++	struct vlan_group *vlgrp;
+ };
+ 
+ 
+ /*
+  * Prototypes
+  */
+-static int ar2313_init(struct net_device *dev);
++static int  ar2313_init(struct net_device *dev);
+ #ifdef TX_TIMEOUT
+ static void ar2313_tx_timeout(struct net_device *dev);
+ #endif
+@@ -176,18 +179,17 @@
+ #endif
+ static int ar2313_restart(struct net_device *dev);
+ #if DEBUG
+-static void ar2313_dump_regs(struct net_device *dev);
++static void  ar2313_dump_regs(struct net_device *dev);
+ #endif
+ static void ar2313_load_rx_ring(struct net_device *dev, int bufs);
+ static irqreturn_t ar2313_interrupt(int irq, void *dev_id);
+-static int ar2313_open(struct net_device *dev);
+-static int ar2313_start_xmit(struct sk_buff *skb, struct net_device *dev);
+-static int ar2313_close(struct net_device *dev);
+-static int ar2313_ioctl(struct net_device *dev, struct ifreq *ifr,
+-						int cmd);
++static int  ar2313_open(struct net_device *dev);
++static int  ar2313_start_xmit(struct sk_buff *skb, struct net_device *dev);
++static int  ar2313_close(struct net_device *dev);
++static int  ar2313_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd);
+ static void ar2313_init_cleanup(struct net_device *dev);
+-static int ar2313_setup_timer(struct net_device *dev);
++static int  ar2313_setup_timer(struct net_device *dev);
+ static void ar2313_link_timer_fn(unsigned long data);
+ static void ar2313_check_link(struct net_device *dev);
+ static struct net_device_stats *ar2313_get_stats(struct net_device *dev);
+-#endif							/* _AR2313_H_ */
++#endif /* _AR2313_H_ */
+--- ../kamikaze-7.09-orig/package/base-files/files/etc/config/network	2008-07-23 21:55:52.000000000 -0400
++++ package/base-files/files/etc/config/network	2008-07-23 22:07:39.000000000 -0400
+@@ -1,5 +1,9 @@
+ # Copyright (C) 2006 OpenWrt.org
+ 
++config switch eth0
++	option vlan0 "1 2 3 4 5*"
++	option vlan1 "0 5"
++
+ config interface loopback
+ 	option ifname	lo
+ 	option proto	static
+@@ -7,8 +11,14 @@
+ 	option netmask	255.0.0.0
+ 
+ config interface lan
+-	option ifname	eth0
+-	option type 	bridge
++	option type	bridge
++	option ifname	"eth0.0 ath0"
+ 	option proto	static
+ 	option ipaddr	192.168.1.1
+ 	option netmask	255.255.255.0
++
++config interface wan
++	option ifname "eth0.1"
++	option proto dhcp
++#	option nameserver 208.67.222.222
++
+--- /home/eric/tmp/kamikaze-7.09-src/package/madwifi/files/lib/wifi/madwifi.sh	2007-09-30 14:03:49.000000000 -0400
++++ package/madwifi/files/lib/wifi/madwifi.sh	2008-06-29 15:33:34.000000000 -0400
+@@ -71,9 +71,12 @@
+ )
+ 
+ enable_atheros() {
++	local device="$1"
+ 	config_get channel "$device" channel
+ 	config_get vifs "$device" vifs
+-	
++
++	[ auto = "$channel" ] && channel=0
++
+ 	local first=1
+ 	for vif in $vifs; do
+ 		nosbeacon=
+@@ -103,18 +106,19 @@
+ 				*) agmode=auto;;
+ 			esac
+ 			iwconfig "$ifname" channel "$channel" >/dev/null 2>/dev/null 
+-			ifconfig "$ifname" up
+-			sleep 1
+ 			iwpriv "$ifname" mode "$agmode"
+ 			iwpriv "$ifname" pureg "$pureg"
+ 			iwconfig "$ifname" channel "$channel" >/dev/null 2>/dev/null 
++			ifconfig "$ifname" up
+ 		}
+ 	
+ 		config_get_bool hidden "$vif" hidden 0
+ 		iwpriv "$ifname" hide_ssid "$hidden"
+ 
+-		config_get_bool ff "$vif" ff 0
+-		iwpriv "$ifname" ff "$ff"
++		config_get ff "$vif" ff
++		if [ -n "$ff" ]; then
++			iwpriv "$ifname" ff "$ff"
++		fi
+ 
+ 		config_get wds "$vif" wds
+ 		case "$wds" in
+@@ -156,43 +160,88 @@
+ 		esac
+ 		config_get ssid "$vif" ssid
+ 
+-		[ "$mode" = "sta" ] && {
+-			config_get_bool bgscan "$vif" bgscan 1
+-			iwpriv "$ifname" bgscan "$bgscan"
+-		}
++		config_get_bool bgscan "$vif" bgscan
++		[ -n "$bgscan" ] && iwpriv "$ifname" bgscan "$bgscan"
+ 
+-		config_get_bool antdiv "$device" diversity 1
+-		sysctl -w dev."$device".diversity="$antdiv" >&-
++		config_get_bool antdiv "$device" diversity
++		[ -n "$antdiv" ] && sysctl -w dev."$device".diversity="$antdiv" >&-
+ 
+ 		config_get antrx "$device" rxantenna
+-		if [ -n "$antrx" ]; then
+-			sysctl -w dev."$device".rxantenna="$antrx" >&-
+-		fi
++		[ -n "$antrx" ] && sysctl -w dev."$device".rxantenna="$antrx" >&-
+ 
+ 		config_get anttx "$device" txantenna
+-		if [ -n "$anttx" ]; then
+-			sysctl -w dev."$device".txantenna="$anttx" >&-
+-		fi
++		[ -n "$anttx" ] && sysctl -w dev."$device".txantenna="$anttx" >&-
+ 
+ 		config_get distance "$device" distance
+-		if [ -n "$distance" ]; then
+-			athctrl -i "$device" -d "$distance" >&-
+-		fi
++		[ -n "$distance" ] && athctrl -i "$device" -d "$distance" >&-
+ 
+ 		config_get txpwr "$vif" txpower
+-		if [ -n "$txpwr" ]; then
+-			iwconfig "$ifname" txpower "${txpwr%%.*}"
+-		fi
++		[ -n "$txpwr" ] && iwconfig "$ifname" txpower "${txpwr%%.*}"
++
++		config_get rate "$vif" rate
++		[ -n "$rate" ] && iwconfig "$ifname" rate "${rate%%.*}"
++
++		config_get mcast_rate "$vif" mcast_rate
++		[ -n "$mcast_rate" ] && iwpriv "$ifname" mcast_rate "${mcast_rate%%.*}"
+ 
+ 		config_get frag "$vif" frag
+-		if [ -n "$frag" ]; then
+-			iwconfig "$ifname" frag "${frag%%.*}"
+-		fi
++		[ -n "$frag" ] && iwconfig "$ifname" frag "${frag%%.*}"
+ 
+ 		config_get rts "$vif" rts
+-		if [ -n "$rts" ]; then
+-			iwconfig "$ifname" rts "${rts%%.*}"
+-		fi
++		[ -n "$rts" ] && iwconfig "$ifname" rts "${rts%%.*}"
++
++		config_get_bool doth "$vif" 80211h
++		[ -n "$doth" ] && iwpriv "$ifname" doth "$doth"
++
++		config_get_bool comp "$vif" compression
++		[ -n "$comp" ] && iwpriv "$ifname" compression "$comp"
++
++		config_get_bool minrate "$vif" minrate
++		[ -n "$minrate" ] && iwpriv "$ifname" minrate "$minrate"
++
++		config_get_bool maxrate "$vif" maxrate
++		[ -n "$maxrate" ] && iwpriv "$ifname" maxrate "$maxrate"
++
++		config_get_bool burst "$vif" bursting
++		[ -n "$burst" ] && iwpriv "$ifname" burst "$burst"
++
++		config_get_bool wmm "$vif" wmm
++		[ -n "$wmm" ] && iwpriv "$ifname" wmm "$wmm"
++
++		config_get_bool xr "$vif" xr
++		[ -n "$xr" ] && iwpriv "$ifname" xr "$xr"
++
++		config_get_bool ar "$vif" ar
++		[ -n "$ar" ] && iwpriv "$ifname" ar "$ar"
++
++		config_get_bool turbo "$vif" turbo
++		[ -n "$turbo" ] && iwpriv "$ifname" turbo "$turbo"
++
++		config_get_bool doth "$vif" doth 0
++		[ -n "$doth" ] && iwpriv "$ifname" doth "$doth"
++
++		config_get maclist "$vif" maclist
++		[ -n "$maclist" ] && {
++			# flush MAC list
++			iwpriv "$ifname" maccmd 3
++			for mac in $maclist; do
++				iwpriv "$ifname" addmac "$mac"
++			done
++		}
++
++		config_get macpolicy "$vif" macpolicy
++		case "$macpolicy" in
++			allow)
++				iwpriv "$ifname" maccmd 1
++			;;
++			deny)
++				iwpriv "$ifname" maccmd 2
++			;;
++			*)
++				# default deny policy if mac list exists
++				[ -n "$maclist" ] && iwpriv "$ifname" maccmd 2
++			;;
++		esac
+ 
+ 		ifconfig "$ifname" up
+ 		iwconfig "$ifname" channel "$channel" >/dev/null 2>/dev/null 
+@@ -222,22 +271,34 @@
+ 				fi
+ 			;;
+ 			wds|sta)
+-				case "$enc" in 
++				config_get_bool usepassphrase "$vif" passphrase 1
++				case "$enc" in
+ 					PSK|psk|PSK2|psk2)
+ 						case "$enc" in
+ 							PSK|psk)
+-								proto='proto=WPA';;
++								proto='proto=WPA'
++								if [ "$usepassphrase" = "1" ]; then
++									passphrase="psk=\"${key}\""
++								else
++									passphrase="psk=${key}"
++								fi
++								;;
+ 							PSK2|psk2)
+-								proto='proto=RSN';;
++								proto='proto=RSN'
++                                                                if [ "$usepassphrase" = "1" ]; then
++                                                                        passphrase="psk=\"${key}\""
++                                                                else
++                                                                        passphrase="psk=${key}"
++                                                                fi
++								;;
+ 						esac
+ 						cat > /var/run/wpa_supplicant-$ifname.conf <<EOF
+-ctrl_interface=/var/run/wpa_supplicant
+ network={
+ 	scan_ssid=1
+ 	ssid="$ssid"
+ 	key_mgmt=WPA-PSK
+ 	$proto
+-	psk="$key"
++	$passphrase
+ }
+ EOF
+ 					;;
+@@ -262,7 +323,7 @@
+ 		cat <<EOF
+ config wifi-device  $dev
+ 	option type     atheros
+-	option channel  5
++	option channel  auto
+ 
+ 	# REMOVE THIS LINE TO ENABLE WIFI:
+ 	option disabled 1
+--- ../kamikaze-7.09-orig/package/broadcom-wl/files/lib/wifi/broadcom.sh	2007-09-20 04:54:54.000000000 -0400
++++ package/broadcom-wl/files/lib/wifi/broadcom.sh	2008-07-01 06:41:01.000000000 -0400
+@@ -52,7 +52,7 @@
+ 	case "$adhoc:$sta:$apmode" in
+ 		1*)
+ 			ap=0
+-			mssid=0
++			mssid=
+ 			infra=0
+ 		;;
+ 		:1:1)
+@@ -62,7 +62,7 @@
+ 		:1:)
+ 			wet=1
+ 			ap=0
+-			mssid=0
++			mssid=
+ 		;;
+ 		::)
+ 			radio=0
+@@ -97,6 +97,9 @@
+ 	config_get slottime "$device" slottime
+ 	config_get rxant "$device" rxant
+ 	config_get txant "$device" txant
++	config_get_bool frameburst "$device" frameburst
++	config_get macfilter "$device" macfilter
++	config_get maclist "$device" maclist
+ 	local vif_pre_up vif_post_up vif_do_up
+ 
+ 	_c=0
+@@ -112,6 +115,18 @@
+ 	} || {
+ 		slottime="${slottime:--1}"
+ 	}
++	
++	case "$macfilter" in
++		allow|2)
++			macfilter=2;
++		;;
++		deny|1)
++			macfilter=1;
++		;;
++		disable|none|0)
++			macfilter=0;
++		;;
++	esac
+ 
+ 	for vif in $vifs; do
+ 		config_get mode "$vif" mode
+@@ -144,11 +159,11 @@
+ 							config_get k "$vif" key$knr
+ 							[ -n "$k" ] || continue
+ 							[ "$defkey" = "$knr" ] && def="=" || def=""
+-							append vif_pre_up "wepkey $def$knr,$k" "$N"
++							append vif_do_up "wepkey $def$knr,$k" "$N"
+ 						done
+ 					;;
+ 					"");;
+-					*) append vif_pre_up "wepkey =1,$key" "$N";;
++					*) append vif_do_up "wepkey =1,$key" "$N";;
+ 				esac
+ 			;;
+ 			*psk*|*PSK*)
+@@ -177,17 +192,15 @@
+ 				nasopts="-r \"\$${vif}_key\" -h $server -p $port"
+ 			;;
+ 		esac
+-		append vif_post_up "wsec $wsec" "$N"
+-		append vif_post_up "wpa_auth $auth" "$N"
+-		append vif_post_up "wsec_restrict $wsec_r" "$N"
+-		append vif_post_up "eap_restrict $eap_r" "$N"
++		append vif_do_up "wsec $wsec" "$N"
++		append vif_do_up "wpa_auth $auth" "$N"
++		append vif_do_up "wsec_restrict $wsec_r" "$N"
++		append vif_do_up "eap_restrict $eap_r" "$N"
+ 		
+ 		config_get ssid "$vif" ssid
+ 		append vif_post_up "vlan_mode 0" "$N"
+ 		append vif_post_up "ssid $ssid" "$N"
+-		case "$mode" in
+-			sta|adhoc) append vif_do_up "ssid $ssid" "$N";;
+-		esac
++		append vif_do_up "ssid $ssid" "$N"
+ 		
+ 		append vif_post_up "enabled 1" "$N"
+ 		
+@@ -207,8 +220,8 @@
+ 			[ "$mode" = "sta" ] && {
+ 				nas_mode="-S"
+ 				[ -z "$bridge" ] || {
+-					append vif_pre_up "supplicant 1" "$N"
+-					append vif_pre_up "passphrase $key" "$N"
++					append vif_post_up "supplicant 1" "$N"
++					append vif_post_up "passphrase $key" "$N"
+ 					
+ 					use_nas=0
+ 				}
+@@ -221,9 +234,9 @@
+ 	wlc stdin <<EOF
+ $ifdown
+ 
+-ap $ap
+-mssid $mssid
+ apsta $apsta
++ap $ap
++${mssid:+mssid $mssid}
+ infra $infra
+ ${wet:+wet 1}
+ 802.11d 0
+@@ -232,14 +245,15 @@
+ txant ${txant:-3}
+ 
+ radio ${radio:-1}
+-macfilter 0
+-maclist none
++macfilter ${macfilter:-0}
++maclist ${maclist:-none}
+ wds none
+ ${wds:+wds $wds}
+-${channel:+channel $channel}
+ country ${country:-IL0}
++${channel:+channel $channel}
+ maxassoc ${maxassoc:-128}
+ slottime ${slottime:--1}
++${frameburst:+frameburst $frameburst}
+ 
+ $vif_pre_up
+ up
+--- ../kamikaze-7.09-orig/include/verbose.mk	2007-09-20 04:53:16.000000000 -0400
++++ include/verbose.mk	2008-07-08 10:46:15.000000000 -0400
+@@ -38,7 +38,7 @@
+   else
+     export QUIET:=1
+     ifeq ($(KBUILD_VERBOSE),0)
+-      MAKE:=&>/dev/null $(MAKE)
++      MAKE:= >/dev/null 2>&1 $(MAKE)
+     endif
+     MAKE:=cmd() { $(MAKE) $$* || {  echo "Build failed. Please re-run make with V=99 to see what's going on"; false; } } 3>&1 4>&2; cmd
+   endif
+--- ../kamikaze-7.09-orig/include/image.mk	2007-09-20 04:53:16.000000000 -0400
++++ include/image.mk	2008-07-10 20:43:15.000000000 -0400
+@@ -89,6 +89,26 @@
+ 	find $(BUILD_DIR)/root -type d | $(XARGS) chmod 0755
+ 	mkdir -p $(BUILD_DIR)/root/tmp
+ 	chmod 0777 $(BUILD_DIR)/root/tmp
++
++
++	#############################################################################
++	############# CUSTOM GARGOYLE CONFIGURATION #################################
++	#############################################################################
++	# we put custom configuration here because this is the absolute last thing called before we build an image
++	# right now it isn't as important that all configuration be done this late, but putting it here makes sure
++	# no other scripts can be called before images are built, modifying or reversing our changes.
++
++	# remove init scripts of things that should not be active by default
++	IPKG_INSTROOT=$(BUILD_DIR)/root sh $(BUILD_DIR)/root/etc/rc.common $(BUILD_DIR)/root/etc/init.d/httpd disable
++	IPKG_INSTROOT=$(BUILD_DIR)/root sh $(BUILD_DIR)/root/etc/rc.common $(BUILD_DIR)/root/etc/init.d/miniupnpd disable
++	IPKG_INSTROOT=$(BUILD_DIR)/root sh $(BUILD_DIR)/root/etc/rc.common $(BUILD_DIR)/root/etc/init.d/qos_gargoyle disable
++
++	# ensure ntpclient is active
++	chmod 700 $(BUILD_DIR)/root/etc/hotplug.d/iface/20-ntpclient
++
++
++	##############################################################################
++
+ endef
+ 
+ define Image/mkfs/prepare
+--- ../kamikaze-7.09-orig/package/base-files/files/etc/passwd	2007-09-20 04:54:42.000000000 -0400
++++ package/base-files/files/etc/passwd	2008-07-02 20:47:12.000000000 -0400
+@@ -1,2 +1,2 @@
+-root:!:0:0:root:/tmp:/bin/ash
++root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:root:/tmp:/bin/ash
+ nobody:*:65534:65534:nobody:/var:/bin/false
+--- ../kamikaze-7.09-orig/target/sdk/files/Makefile	2007-09-20 04:54:28.000000000 -0400
++++ target/sdk/files/Makefile	2008-07-07 10:51:34.000000000 -0400
+@@ -74,9 +74,9 @@
+ 	$(MAKE) package/compile
+ 	-( \
+ 		cd package; \
+-		find . -maxdepth 2 -name Config.in | \
+-			sed -e 's,/Config.in,,g' | \
+-			xargs -n1 $(MAKE) compile -C; \
++		for configfile in `find . -maxdepth 2 -name Config.in` ; do \
++			$(MAKE) compile -C `dirname $$configfile` ; \
++		done \
+ 	)
+ 
+ clean: FORCE
