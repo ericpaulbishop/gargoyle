@@ -376,7 +376,7 @@ start()
 	if [ -e "$conf_file" ] ; then
 		old_md5=$(md5sum "$conf_file" | awk ' { print $1 ; }')
 		new_md5=$(md5sum "$tmp_conf_file" | awk ' { print $1 ; }')
-		if [ "$old_md5" = "new_md5" ] ; then
+		if [ "$old_md5" = "$new_md5" ] ; then
 			rm  "$tmp_conf_file"
 		else
 			mv "$tmp_conf_file" "$conf_file"
