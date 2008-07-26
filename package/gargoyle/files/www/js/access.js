@@ -59,9 +59,24 @@ function saveChanges()
 		
 		//update dropbear and httpd_gargoyle uci configuration
 		uci = uciOriginal.clone();
+
+
+
 		uci.set("dropbear", dropbearSections[0], "Port", document.getElementById("local_ssh_port").value);
 		dropbearRestart = oldLocalSshPort == document.getElementById("local_ssh_port").value ? "" : "/etc/init.d/dropbear restart\n"; //only restart dropbear if we need to
 
+
+		//set web password enabled/disabled
+		if(document.getElementById("disable_web_password").checked)
+		{
+			uci.set("httpd_gargoyle", "server", "no_password", "1");
+		}
+		else
+		{
+			uci.remove("httpd_gargoyle", "server", "no_password");
+
+		}
+		//set local web protocols
 		localWebProtocol = getSelectedValue("local_web_protocol");
 		uci.set("httpd_gargoyle", "server", "web_protocol", localWebProtocol);
 		if(localWebProtocol == "https" || localWebProtocol == "both")
@@ -180,10 +195,13 @@ function proofreadAll()
 
 function resetData()
 {
+	document.getElementById("disable_web_password").checked = uciOriginal.get("httpd_gargoyle", "server", "no_password") == "1" ? true : false;
+	
 	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
 	httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
 	localProtocol = uciOriginal.get("httpd_gargoyle", "server", "web_protocol");
 	setSelectedValue("local_web_protocol", localProtocol);
+
 
 	if(localProtocol == "https" ||  localProtocol == "both")
 	{	

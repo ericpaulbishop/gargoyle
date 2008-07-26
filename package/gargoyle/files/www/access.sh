@@ -25,10 +25,9 @@
 
 
 <form>
-
-
 	<fieldset>
 		<legend class='sectionheader'>Web Access</legend>
+		
 
 
 		<div>
@@ -39,6 +38,7 @@
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
 		</div>
+		
 		<div class='indent'>
 			<div id='local_http_port_container'>
 				<label class='leftcolumn' for='local_http_port' id='local_http_port_label'>Local HTTP Port:</label>
@@ -67,6 +67,10 @@
 				<label class='leftcolumn' for='remote_https_port' id='remote_https_port_label'>Remote HTTPS Port:</label>
 				<input type='text' class='rightcolumn' id='remote_https_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 			</div>
+		</div>
+		<div class="nocolumn">
+			<input type='checkbox' id='disable_web_password' />
+			<label id='disable_web_password_label' for='disable_web_password'>Disable password protection of web interface</label> <em>(Not Recommended!)</em>
 		</div>
 
 	</fieldset>

@@ -25,22 +25,24 @@ start()
 	fi
 
 	# Generate /etc/httpd_gargoyle.password from root password
-	pass_str=$(cat /etc/passwd | awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' )
-	echo "admin:$pass_str" >  "/etc/httpd_gargoyle.password"
-	echo "root:$pass_str"  >> "/etc/httpd_gargoyle.password"
-
+	pass_str=$(cat /etc/passwd | awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' 2>/dev/null )
+	tmp_path="/tmp/httpd_gargoyle.password" 
+	real_path="/etc/httpd_gargoyle.password" 
+	echo "admin:$pass_str" >  "$tmp_path"
+	echo "root:$pass_str"  >> "$tmp_path"
+	if [ -e "$real_path" ] ; then
+		old_md5=$(md5sum "$real_path" | awk ' { print $1 ; }')
+		new_md5=$(md5sum "$tmp_path" | awk ' { print $1 ; }')
+		if [ "$old_md5" = "$new_md5" ] ; then
+			rm "$tmp_path" 2>/dev/null
+		else
+			mv "$tmp_path" "$real_path"  2>/dev/null
+		fi
+	else
+		mv "$tmp_path" "$real_path"  2>/dev/null
+	fi
 
 	#load config options 
-	# 
-	# The following options can be specified:
-	# 
-	# web_protocol (https, http, or both)
-	# http_port
-	# https_port
-	# web_root
-	# default_realm_name
-	# default_realm_password_file
-
 	config_load "httpd_gargoyle"
 
 	config_get web_protocol "server" web_protocol
@@ -50,34 +52,44 @@ start()
 	config_get default_page_file "server" default_page_file
 	config_get default_realm_name "server" default_realm_name
 	config_get default_realm_password_file "server" default_realm_password_file
-
+	config_get no_password "server" no_password
 
 	if [ -z "$web_protocol" ] ; then web_protocol="https" ; fi
 	if [ -z "$http_port" ] ; then http_port=80 ; fi
 	if [ -z "$https_port" ] ; then https_port=443 ; fi
 	if [ -z "$web_root" ] ; then web_root="/www" ; fi
+	if [ -z "$default_page_file" ] ; then default_page_file="index.html" ; fi
 	if [ -z "$default_realm_name" ] ; then default_realm_name="Router" ; fi
 	if [ -z "$default_realm_password_file" ] ; then default_realm_password_file="/etc/httpd_gargoyle.password" ; fi
 
-	dpf_string=""
-	if [ -n "$default_page_file" ] ; then
-		dpf_string="-DPF $default_page_file"
+
+	if ! [ -d "$run_dir" ] ; then
+	       	mkdir -p "$run_dir" 2>/dev/null
+	fi
+	if ! [ -d "$web_root" ] ; then
+		mkdir -p "$web_root" 2>/dev/null
 	fi
 
-	if ! [ -d $run_dir ] ; then
-	       	mkdir -p $run_dir
-	fi
 
-	#start with ssl
+	## start with ssl
 	if [ "$web_protocol" = "https" ] || [ "$web_protocol" = "both" ] ; then
-		$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https"  $dpf_string   -DRN "$default_realm_name" -DRP "$default_realm_password_file" 2>/dev/null
+		if [ -n "$no_password" ] ; then
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file"  2>/dev/null
+		else
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file"  2>/dev/null
+			
+		fi
 	fi
 
-	#start without ssl
+	## start without ssl
 	if [ "$web_protocol" = "http" ] || [ "$web_protocol" = "both" ] ; then
-		$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http"  $dpf_string  -DRN "$default_realm_name" -DRP "$default_realm_password_file" 2>/dev/null
-	fi
+		if [ -n "$no_password" ] ; then
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file"  2>/dev/null
 
+		else
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file"  2>/dev/null
+		fi
+	fi
 }	
 
 stop()
@@ -89,6 +101,5 @@ stop()
 	if [ -f $pid_https ] ; then
 		kill $(cat $pid_https) 2>/dev/null
 	fi
-
 }
 
