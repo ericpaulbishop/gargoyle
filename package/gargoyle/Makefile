@@ -10,9 +10,9 @@ PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/gargoyle
-	SUBMENU:=Web
-	SECTION:=net
-	CATEGORY:=Network
+	SUBMENU:=Gargoyle Web Interface
+	SECTION:=admin
+	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
 	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle 
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
