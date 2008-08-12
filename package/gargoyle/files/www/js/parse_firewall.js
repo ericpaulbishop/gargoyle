@@ -207,7 +207,7 @@ function parseFirewallLines(firewallLines, routerIp)
 				(line.match(/[\t ]+\-\-dport[\t ]+/) == null) 
 				)
 			{
-				toIp=line1.match(/[\t ]+\-\-to[\t ]+([^\t ]+)($|[\t ]+)/)[1];
+				toIp=line.match(/[\t ]+\-\-to[\t ]+([^\t ]+)($|[\t ]+)/)[1];
 				dmzFirstIndices[toIp] = lineIndex;
 			}
 			else if(	line.match(/^[\t ]*iptables[\t ]+/) && 
@@ -217,8 +217,8 @@ function parseFirewallLines(firewallLines, routerIp)
 					(line.match(/[\t ]+\-\-dport[\t ]+/) == null) 
 					)
 			{
-				toIp=line1.match(/[\t ]+\-d[\t ]+([^\t ]+)($|[\t ]+)/)[1];
-				dmzSecondIndices[toIp];
+				toIp=line.match(/[\t ]+\-d[\t ]+([^\t ]+)($|[\t ]+)/)[1];
+				dmzSecondIndices[toIp] = lineIndex;
 			}
 		}
 	}
