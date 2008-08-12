@@ -51,6 +51,12 @@ function saveChanges()
 			newPortfData.push( [rowData[0], rowData[1], true, rowData[2], rowData[3], rowData[4], rowData[5].checked] );	
 		}
 		firewallData[1] = newPortfData;
+		
+		
+		//dmz
+		firewallData[3] = document.getElementById('dmz_enabled').checked ? document.getElementById('dmz_ip').value : null;
+	
+			
 		createFirewallCommands = getFirewallWriteCommands(firewallData, currentLanIp);
 		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
 
@@ -99,10 +105,10 @@ function saveChanges()
 
 function proofreadAll()
 {
-	controlIds=['upnp_up', 'upnp_down'];
-	labelIds= ['upnp_up_label', 'upnp_down_label'];
-	functions = [validateNumeric, validateNumeric];
-	returnCodes = [0,0];
+	controlIds=['dmz_ip', 'upnp_up', 'upnp_down'];
+	labelIds= ['dmz_ip_label', 'upnp_up_label', 'upnp_down_label'];
+	functions = [validateIP, validateNumeric, validateNumeric];
+	returnCodes = [0,0,0];
 	visibilityIds=controlIds;
 	errors = proofreadFields(controlIds, labelIds, functions, returnCodes, visibilityIds);
 	return errors;
@@ -415,6 +421,35 @@ function resetData()
 		document.getElementById(clearIds[clearIndex]).value = '';
 	}
 
+
+	//dmz
+	document.getElementById("dmz_enabled").checked = (firewallData[3] != null);
+	if(firewallData[3] != null)
+	{
+		document.getElementById("dmz_ip").value = firewallData[3];
+	}
+	else
+	{
+		var defaultDmz = (currentLanIp.split(/\.[^\.]*$/))[0];
+		var lanIpEnd = parseInt((currentLanIp.split("."))[3]);
+		if(lanIpEnd >= 254)
+		{
+			lanIpEnd--;
+		}
+		else
+		{
+			lanIpEnd++;
+		}
+		defaultDmz = defaultDmz + "." + lanIpEnd;
+		document.getElementById("dmz_ip").value = defaultDmz;
+	}
+	setDmzEnabled();
+
+	
+
+
+	
+
 	//upnp
 	document.getElementById("upnp_enabled").checked = upnpdEnabled;
 	upElement = document.getElementById("upnp_up");
@@ -436,3 +471,7 @@ function setUpnpEnabled()
 	enableAssociatedField(document.getElementById("upnp_enabled"), 'upnp_down', document.getElementById('upnp_down').value);
 }
 
+function setDmzEnabled()
+{
+	enableAssociatedField(document.getElementById("dmz_enabled"), 'dmz_ip', document.getElementById('dmz_ip').value);
+}

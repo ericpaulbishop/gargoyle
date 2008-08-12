@@ -102,10 +102,22 @@
 		<div id='portfrange_table_container' class="bottom_gap"></div>		
 	</fieldset>
 
+	<fieldset>
+		<legend class="sectionheader">DMZ</legend>
+		<div id='dmz_enabled_container'>
+			<input type='checkbox' id='dmz_enabled' onclick="setDmzEnabled()" />
+			<label id='dmz_enabled_label' for='dmz_enabled'>Use DMZ (De-Militarized Zone)</label>
+		</div>
+		<div id="dmz_ip_container" class="indent">
+			<label class='leftcolumn' for='dmz_ip' id='dmz_ip_label'>DMZ IP:</label>
+			<input type='text' class='rightcolumn' name='dmz_ip' id='dmz_ip' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+		</div>
+	</fieldset>
+
 	
 	<fieldset>
 		<legend class="sectionheader">UPnP</legend>
-		<div id='upnp_enabled_container' class='nocolumn'>
+		<div id='upnp_enabled_container'>
 			<input type='checkbox' id='upnp_enabled' onclick="setUpnpEnabled()" />
 			<label id='upnp_enabled_label' for='upnp_enabled'>UPnP Enabled</label>
 		</div>
