@@ -14,6 +14,7 @@
 * 	index0=otherLines
 *	index1=portForwards
 *	index2=remoteAccepts
+*	index3=dmz
 *
 *
 * otherLines is just an array of lines that doesn't belong
@@ -31,16 +32,16 @@
 * 	index6=enabled (true/false)
 *
 *
-*
 * remoteAccepts is an array of arrays, each one representing an accept:
 *	index1=local port
 *	index2=remote port
 *
 * 
-
+* dmz will either be null or a string (single ip)
+*
 *
 * The structure of the file when it is saved will always be
-* the other lines, the forwards, then the accepts
+* the other lines, the forwards, the accepts (minus the drop lines), the dmz, and then the accept drop lines
 *
 *
 */
@@ -155,6 +156,8 @@ function parseFirewallLines(firewallLines, routerIp)
 			
 			nonGargPortfLine2Hash[ proto + "-" + toIp + "-" + toPort ] = lineIndex;
 		}
+
+
 	}
 	
 
@@ -181,14 +184,56 @@ function parseFirewallLines(firewallLines, routerIp)
 				portfIndices[ nonGargPortfLine1Hash[otherRule][0] ] = 1;
 				portfIndices[ nonGargPortfLine2Hash[otherRule] ] = 1;
 				line1Data[1] = 'Both';
-				
 			}
 			portForwards.push(line1Data);
 		}
 	}
 
 
+	//find DMZ lines
+	var dmzIp = null;
+	var dmzFirstIndices = [];
+	var dmzSecondIndices= [];
+	for(lineIndex = 0; lineIndex < firewallLines.length; lineIndex++)
+	{
+		if(portfIndices[lineIndex] == null)
+		{
+			line = firewallLines[lineIndex];
+			if(	line.match(/^[\t ]*iptables[\t ]+/) && 
+				line.match(/[\t ]+\-t[\t ]+nat/) && 
+				line.match(/[\t ]+\-A[\t ]+prerouting_wan/) && 
+				line.match(/[\t ]+\-j[\t ]+DNAT/) && 
+				line.match(/[\t ]+\-\-to[\t ]+/) && 
+				(line.match(/[\t ]+\-\-dport[\t ]+/) == null) 
+				)
+			{
+				toIp=line1.match(/[\t ]+\-\-to[\t ]+([^\t ]+)($|[\t ]+)/)[1];
+				dmzFirstIndices[toIp] = lineIndex;
+			}
+			else if(	line.match(/^[\t ]*iptables[\t ]+/) && 
+					line.match(/[\t ]+\-A[\t ]+forwarding_wan/)  && 
+					line.match(/[\t ]+-d[\t ]+/) && 
+					line.match(/[\t ]+\-j[\t ]+ACCEPT/) && 
+					(line.match(/[\t ]+\-\-dport[\t ]+/) == null) 
+					)
+			{
+				toIp=line1.match(/[\t ]+\-d[\t ]+([^\t ]+)($|[\t ]+)/)[1];
+				dmzSecondIndices[toIp];
+			}
+		}
+	}
+	for (nextIp in dmzFirstIndices)
+	{
+		if(dmzSecondIndices[nextIp] != null)
+		{
+			dmzIp = nextIp;
+			portfIndices[ dmzFirstIndices[dmzIp] ] = 1;
+			portfIndices[ dmzSecondIndices[dmzIp] ] = 1;
+		}
+	}
 
+	
+	
 
 
 	//local port -> [ aray of line types, can be: pre_accept-index, pre_reject-index, pre_forward-index-remoteport, input_accept-index ]
@@ -339,7 +384,7 @@ function parseFirewallLines(firewallLines, routerIp)
 		}
 	}
 
-	return [otherLines, portForwards, remoteAccepts];
+	return [otherLines, portForwards, remoteAccepts, dmzIp];
 }
 
 
@@ -348,6 +393,7 @@ function getFirewallWriteCommands(firewallData, routerIp)
 	otherLines=firewallData[0];
 	portForwards=firewallData[1];
 	remoteAccepts=firewallData[2];
+	dmzIp = firewallData[3];
 
 
 	firewallLines = [];
@@ -359,6 +405,7 @@ function getFirewallWriteCommands(firewallData, routerIp)
 	firewallLines.push("");
 
 	/*
+	*	port forwards:
 	* 	index0=name 
 	*	index1=protocol
 	* 	index2=multiport forward (true/false)
@@ -394,7 +441,9 @@ function getFirewallWriteCommands(firewallData, routerIp)
 	}
 
 
+
 	/*
+	*	remote accepts:
 	*	index1=local port
 	*	index2=remote port	
 	*/
@@ -404,18 +453,42 @@ function getFirewallWriteCommands(firewallData, routerIp)
 		if(accept[0] == accept[1])
 		{
 			firewallLines.push("iptables -t nat -A prerouting_wan -p tcp --dport " + accept[0] + " -j ACCEPT");
-			firewallLines.push("iptables        -A input_wan      -p tcp --dport " + accept[0] + " -j ACCEPT");	
+			firewallLines.push("iptables        -A input_wan      -p tcp --dport " + accept[0] + " -j ACCEPT");
 		}
 		else
 		{
-			firewallLines.push("iptables -t nat -A prerouting_wan -p tcp --dport " + accept[0] + " -j DROP");
 			firewallLines.push("iptables -t nat -A prerouting_wan -p tcp --dport " + accept[1] + " -j DNAT --to " + routerIp + ":" + accept[0]);
 			firewallLines.push("iptables        -A input_wan      -p tcp --dport " + accept[0] + " -j ACCEPT");
 		}
 		firewallLines.push("");
 		firewallLines.push("");
 	}
+
+	/*
+ 	*	output DMZ, if it exists
+	*/
+	if(dmzIp != null)
+	{
+		firewallLines.push("iptables -t nat -A prerouting_wan -j DNAT --to " + dmzIp );
+		firewallLines.push("iptables        -A forwarding_wan -d " + dmzIp + " -j ACCEPT");
+		firewallLines.push("");
+		firewallLines.push("");
+
+	}
 	
+	/*
+	*	For remote accepts where local port != remote port, if there is no DMZ
+	*	then incoming packets on port being forwarded to will be valid unless we drop them here
+	*/
+	for(acceptIndex = 0; acceptIndex < remoteAccepts.length; acceptIndex++)
+	{
+		accept = remoteAccepts[acceptIndex];
+		if(accept[0] != accept[1])
+		{
+			firewallLines.push("iptables -t nat -A prerouting_wan -p tcp --dport " + accept[0] + " -j DROP");
+		}
+	}
+
 	
 	commands = ["touch /etc/firewall.user", "rm /etc/firewall.user"];
 	for(firewallIndex = 0; firewallIndex < firewallLines.length; firewallIndex++)
