@@ -473,5 +473,5 @@ function setUpnpEnabled()
 
 function setDmzEnabled()
 {
-	enableAssociatedField(document.getElementById("dmz_enabled"), 'dmz_ip', document.getElementById('dmz_ip').value);
+	enableAssociatedField(document.getElementById("dmz_enabled").checked, 'dmz_ip', document.getElementById('dmz_ip').value);
 }
