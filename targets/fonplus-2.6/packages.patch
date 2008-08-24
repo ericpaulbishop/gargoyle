@@ -1,11 +1,11 @@
---- ../package/gargoyle/Makefile	2008-08-03 10:55:06.000000000 -0400
-+++ package/gargoyle/Makefile	2008-08-03 11:28:30.000000000 -0400
+--- ../package/gargoyle/Makefile	2008-08-23 21:56:12.000000000 -0400
++++ package/gargoyle/Makefile	2008-08-23 22:29:38.000000000 -0400
 @@ -14,7 +14,7 @@
  	SECTION:=admin
  	CATEGORY:=Administration
  	TITLE:=Gargoyle Web Interface
--	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle 
-+	DEPENDS:=+wpa-supplicant +hostapd +uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle
+-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle 
++	DEPENDS:=+wpa-supplicant +hostapd +uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle 
  	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
  endef
  
