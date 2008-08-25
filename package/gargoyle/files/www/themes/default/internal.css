@@ -604,14 +604,51 @@ td.connection_table_column_5
 
 td.mac_table_column_1
 {
+	text-align:left;
 	border-left:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
 td.mac_table_column_2
 {
+	text-align:left;
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
 
+td.ip_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.ip_table_column_2
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+td.webmon_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.webmon_table_column_2
+{
+	text-align:left;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.webmon_table_column3
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}

@@ -21,15 +21,19 @@
 	fi
 
 	echo "var includeData=[];"
-	include_file=$(uci get webmon_gargoyle.webmon.exclude_ip_file 2>/dev/null)
+	echo "var includeExists = false;"
+	include_file=$(uci get webmon_gargoyle.webmon.include_ip_file 2>/dev/null)
 	if [ -e "$include_file" ] ; then
-                cat "$include_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "includeData.push([\""$1"\",\""$2"\"]);"};'
+                cat "$include_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "includeData.push([\""$1"\"]);"};'
+		echo "includeExists = true;"
         fi
 
 	echo "var excludeData=[];"
+	echo "var excludeExists = false;"
 	exclude_file=$(uci get webmon_gargoyle.webmon.exclude_ip_file 2>/dev/null)
 	if [ -e "$exclude_file" ] ; then
-                cat "$exclude_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "excludeData.push([\""$1"\",\""$2"\"]);"};'
+                cat "$exclude_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "excludeData.push([\""$1"\"]);"};'
+		echo "excludeExists = true;"
         fi
 	
 	

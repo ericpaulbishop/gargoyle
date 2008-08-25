@@ -25,16 +25,16 @@ start()
 	fi
 
 	#start webmon	
-	if [ -n "$exclude_ip_file" ] && [ -n "$include_ip_file ] ; then
+	if [ -n "$exclude_ip_file" ] && [ -n "$include_ip_file" ] ; then
 		/usr/sbin/webmon_gargoyle  -d -i $interface -x "$exclude_ip_file" -o "$include_ip_file" -s "$save_path"
 	fi	
-	if [ -n "$exclude_ip_file" ] && [ -z "$include_ip_file ] ; then
+	if [ -n "$exclude_ip_file" ] && [ -z "$include_ip_file" ] ; then
 		/usr/sbin/webmon_gargoyle  -d -i $interface -x "$exclude_ip_file" -s "$save_path"
 	fi
-	if [ -z "$exclude_ip_file" ] && [ -n "$include_ip_file ] ; then
+	if [ -z "$exclude_ip_file" ] && [ -n "$include_ip_file" ] ; then
 		/usr/sbin/webmon_gargoyle  -d -i $interface  -o "$include_ip_file" -s "$save_path"
 	fi
-	if [ -z "$exclude_ip_file" ] && [ -z "$include_ip_file ] ; then
+	if [ -z "$exclude_ip_file" ] && [ -z "$include_ip_file" ] ; then
 		/usr/sbin/webmon_gargoyle  -d -i $interface   -s "$save_path"
 	fi
 }

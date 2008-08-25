@@ -19,16 +19,17 @@ function saveChanges()
 	{
 		return;
 	}
+	updateInProgress = true;
 
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
+		updateInProgress = false;
 		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
 		alert(errorString);
 	}
 	else
 	{
-		updateInProgress = true;
 		document.body.style.cursor="wait";
 		document.getElementById("bottom_button_container").style.display="none";
 		document.getElementById("update_container").style.display="block";
@@ -98,10 +99,12 @@ function saveChanges()
 				if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ip_file") != "")
 				{
 					includeData=getTableDataArray(ipTable, true, false);
+					includeExists = true;
 				}
 				else if(uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ip_file") != "")
 				{
 					excludeData=getTableDataArray(ipTable, true, false);
+					excludeExists = true;
 				}
 
 				uciOriginal = uci.clone();
@@ -178,26 +181,22 @@ function resetData()
 	var numRecords = uciOriginal.get("webmon_gargoyle", "webmon", "num_records");
 	document.getElementById("num_records").value = numRecords == "" ? 300 : numRecords;
 	
-	var data = [];
-	if(includeData.length == 0 && excludeData == 0)
+	var ipTableData = [];
+	if( (!includeExists) && (!excludeExists) )
 	{
 		setSelectedValue("include_exclude", "all");
 	}
-	else if(includeData.length > 0)
+	else if(includeExists)
 	{
 		setSelectedValue("include_exclude", "include");
-		data = includeData;
+		ipTableData = includeData;
 	}
 	else
 	{
 		setSelectedValue("include_exclude", "exclude");
-		data = excludeData;
+		ipTableData = excludeData;
 	}
-	var ipTableData = [];
-	for(tableIndex=0; tableIndex < data.length; tableIndex++)
-	{
-		ipTableData.push( [ data[tableIndex] ] );
-	}
+	
 	ipTable=createTable([""], ipTableData, "ip_table", true, false);
 	tableContainer = document.getElementById('ip_table_container');
 	if(tableContainer.firstChild != null)
