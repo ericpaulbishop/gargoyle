@@ -15,10 +15,11 @@
 	
 	mkdir -p /tmp/up	
 	mv $FORM_upgrade_file /tmp/up/upgrade
-	
+	mv $FORM_upgrade_file2 /tmp/up/upgrade2
+
+	upgrade2_size=$(du /tmp/up/upgrade2 | awk ' { print $1 } ' 2>/dev/null)
 	vmlinux_mtd=""
-	if [ -n "$FORM_upgrade_file2" ] ; then
-		mv $FORM_upgrade_file2 /tmp/up/upgrade2
+	if [ ! "$upgrade2_size" = "0" ] ; then
 		vmlinux_mtd=$(cat /proc/mtd | awk 'BEGIN {FS="\"" ; } { print $2 ; }' | grep linux)
 		if [ -z "$vmlinux_mtd" ] ; then
 			echo "<script type=\"text/javascript\">top.failure();</script>"
@@ -31,7 +32,7 @@
 	echo "<script type=\"text/javascript\">top.uploaded();</script>"
 	echo "</body></html>"
 
-	if [ -n "$FORM_upgrade_file2" ] ; then
+	if [ ! "$upgrade2_size" = "0" ] ; then
 		mtd -r write upgrade rootfs
 		mtd -r write upgrade2 $vmlinux_mtd
 	else
