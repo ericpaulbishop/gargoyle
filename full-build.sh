@@ -15,6 +15,18 @@ openwrt_src_dir="kamikaze-7.09-src"
 targets_dir="targets"
 targets=$(ls $targets_dir 2>/dev/null)
 
+#get gargoyle version for naming image files
+gargoyle_version=$(grep "^PKG_VERSION" package/gargoyle/Makefile | sed "s/^.*=//g" 2>/dev/null)
+gargoyle_release=$(grep "^PKG_RELEASE" package/gargoyle/Makefile | sed "s/^.*=//g" 2>/dev/null)
+if [ -n "$gargoyle_release" ] ; then
+	if [ $gargoyle_release -le 5 ] ; then
+		gargoyle_version=$gargoyle_version"_beta"$gargoyle_release
+	elif [ $gargoyle_release -le 9 ] ; then
+		rc=$(($gargoyle_release - 5))
+		gargoyle_version=$gargoyle_version"_rc"$rc
+	fi
+fi
+
 
 if [ ! -d "$openwrt_src_dir" ] ; then
 	echo "fetching kamikaze 7.09 source"
@@ -79,7 +91,7 @@ for target in $targets ; do
 		image_files=$(ls bin 2>/dev/null)
 		for i in $image_files ; do
 			if [ ! -d "bin/$i" ] ; then
-				newname=$(echo $i | sed 's/openwrt/gargoyle/g')
+				newname=$(echo $i | sed "s/openwrt/gargoyle_$gargoyle_version/g")
 				cp "bin/$i" ../images/$target/$newname
 			fi
 		done
