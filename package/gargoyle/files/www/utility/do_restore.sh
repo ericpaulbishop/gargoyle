@@ -22,12 +22,12 @@
 	mv $FORM_restore_file /tmp/restore/restore.tar.gz
 	cd /tmp/restore
 	
-	# bwmon writes everything when it shuts down
-	# we therefore need to shut it down, otherwise
+	# bwmon & webmon write everything when they shut down
+	# we therefore need to shut them down, otherwise
 	# all the new data gets over-written when we restart it
-	if [ -e /etc/init.d/bwmon_gargoyle ] ; then
-		/etc/init.d/bwmon_gargoyle stop
-	fi
+	/etc/init.d/bwmon_gargoyle stop 2>/dev/null
+	/etc/init.d/webmon_gargoyle stop 2>/dev/null
+	
 	
 	tar xzf restore.tar.gz -C / 2>error
 	error=$(cat error)

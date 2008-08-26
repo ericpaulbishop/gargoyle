@@ -35,13 +35,14 @@ done
 /etc/init.d/dropbear stop >/dev/null 2>&1
 /etc/init.d/miniupnpd stop >/dev/null 2>&1 
 /etc/init.d/ddns_gargoyle stop >/dev/null 2>&1
-
+/etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
 
 #restart everything
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 ddns_enabled=$(ls /etc/rc.d/*ddns_gargoyle 2>/dev/null)
 upnp_enabled=$(ls /etc/rc.d/*miniupnpd* 2>/dev/null)
+webmon_enabled=$(ls /etc/rc.d/*webmon* 2>/dev/null)
 /etc/init.d/network start >/dev/null 2>&1 
 /etc/init.d/firewall start >/dev/null 2>&1
 /etc/init.d/cron start >/dev/null 2>&1
@@ -60,6 +61,10 @@ if [ -n "$upnp_enabled" ] ; then
 	/etc/init.d/miniupnpd start
 fi
 /etc/init.d/dnsmasq start >/dev/null 2>&1 
+if [ -n "$webmon_enabled" ] ; then
+	/etc/init.d/webmon_gargoyle start
+fi
+
 
 hostname=$(uci show system | grep hostname | awk ' BEGIN { FS="=" ; } { print $2 ; } ')
 echo "$hostname" > /proc/sys/kernel/hostname

@@ -96,6 +96,10 @@ function saveChanges()
 				includeData = [];
 				excludeData = [];
 				var ipTable = document.getElementById('ip_table_container').firstChild;
+				
+				uciOriginal = uci.clone();
+				includeExists = false;
+				excludeExists = false;
 				if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ip_file") != "")
 				{
 					includeData=getTableDataArray(ipTable, true, false);
@@ -107,7 +111,6 @@ function saveChanges()
 					excludeExists = true;
 				}
 
-				uciOriginal = uci.clone();
 				document.getElementById("update_container").style.display="none";		
 				document.getElementById("bottom_button_container").style.display="block";
 				document.body.style.cursor='auto';

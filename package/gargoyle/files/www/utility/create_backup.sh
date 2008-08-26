@@ -4,7 +4,17 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-backup_locations='/etc/config /etc/init.d /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/jklmnop /etc/crontabs /tmp/data /usr/data'
+#force write of webmon & bwmon
+bwmon_enabled = $(ls /etc/rc.d/*bwmon* 2>/dev/null)
+webmon_enabled = $(ls /etc/rc.d/*webmon* 2>/dev/null)
+if [ -n "$bwmon_enabled" ] ; then
+	/etc/init.d/bwmon_gargoyle restart
+fi
+if [ -n "$webmon_enabled" ] ; then
+	/etc/init.d/webmon_gargoyle restart
+fi
+
+backup_locations='/etc/config /etc/init.d /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/webmon_ips /etc/crontabs /tmp/data /usr/data'
 existing_locations=""
 for bl in $backup_locations ; do
 	if [ -e "$bl" ] ; then
