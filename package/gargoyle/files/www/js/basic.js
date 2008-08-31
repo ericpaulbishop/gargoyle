@@ -337,9 +337,9 @@ function saveChanges()
 		}
 
 
-		oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
-		adjustIpCommands = ""
-		if(oldLanIp != currentLanIp)
+		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
+		var adjustIpCommands = ""
+		if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
 		{
 			adjustIpCommands = "\nsh " + gargoyleBinRoot + "/utility/update_router_ip.sh " + oldLanIp + "  " + currentLanIp;
 		}
@@ -682,6 +682,11 @@ function resetData()
 	cfg3mode=uciOriginal.get("wireless", wifiCfg3, "mode");
 	apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
 	othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
+
+	if( ( cfg2mode == 'sta' || cfg3mode == 'sta') && wirelessDriver == 'atheros' && uciOriginal.get("wireless", othercfg, "encryption") == "psk2")
+	{
+		uciOriginal.set("wireless", othercfg, "encryption", "psk");
+	}
 
 
 

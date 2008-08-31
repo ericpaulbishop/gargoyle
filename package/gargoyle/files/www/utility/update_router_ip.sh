@@ -17,7 +17,7 @@ do_file_ip_replace()
 	#echo "newnet=$newnet"
 
 	newfile="$file.update.tmp"
-	cat "$file" | sed "s/$oldip/$newip/g" | sed "s/$oldnet/$newnet/g" > "$newfile"
+	cat "$file" | sed -r "s/$oldip$/$newip/g"  | sed -r "s/$oldip([^0-9])/$newip\1/g" | sed -r "s/$oldnet/$newnet/g" > "$newfile"
 	mv "$newfile" "$file"
 }
 
