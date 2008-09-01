@@ -66,6 +66,9 @@
 		<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
 	</div>
 	<div>
+		<span class='leftcolumn'>LAN Netmask:</span><span id="lan_mask" class='rightcolumn'></span>
+	</div>
+	<div>
 		<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
 	</div>
 
@@ -73,6 +76,9 @@
 
 	<div>
 		<span class='leftcolumn'>WAN IP Address:</span><span id="wan_ip" class='rightcolumn'></span>
+	</div>
+	<div>
+		<span class='leftcolumn'>WAN Netmask:</span><span id="wan_mask" class='rightcolumn'></span>
 	</div>
 	<div>
 		<span class='leftcolumn'>WAN MAC Address:</span><span id="wan_mac" class='rightcolumn'></span>

@@ -51,9 +51,11 @@ function resetData()
 
 
 	setChildText("lan_ip", currentLanIp);
+	setChildText("lan_mask", currentLanMask);
 	setChildText("lan_mac", currentLanMac );
 	
 	setChildText("wan_ip", currentWanIp);
+	setChildText("wan_mask", currentWanMask);
 	setChildText("wan_mac", currentWanMac );
 
 	setChildText("wireless_mode", wirelessMode);

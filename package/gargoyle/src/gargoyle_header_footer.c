@@ -43,6 +43,7 @@ void print_interface_vars(void);
 void print_js_var(char* var, char* value);
 char* get_interface_mac(char* if_name);
 char* get_interface_ip(char* if_name);
+char* get_interface_netmask(char* if_name);
 char** load_interfaces_from_proc_file(char* filename);
 
 
@@ -583,6 +584,7 @@ void print_interface_vars(void)
 	char* uci_wan_if = NULL;
 	char* uci_lan_if = NULL;
 	char* uci_lan_ip = NULL;
+	char* uci_lan_mask = NULL;
 	char* uci_wireless = NULL;
 
 	struct uci_context *ctx;
@@ -607,6 +609,11 @@ void print_interface_vars(void)
 		{
 			uci_lan_ip=strdup(uci_to_option(e)->value);
 		}
+		if(uci_lookup(ctx, &e, p, "lan", "netmask") == UCI_OK)
+		{
+			uci_lan_mask=strdup(uci_to_option(e)->value);
+		}
+
 	}
 	if(uci_load(ctx, "wireless", &p) == UCI_OK)
 	{
@@ -620,10 +627,16 @@ void print_interface_vars(void)
 		}
 	}
 
-	char* current_lan_mac = get_interface_mac(uci_lan_if);
+	//if multiple interfaces in bridge, uci_lan_if will contain multiple ifs, 
+	//which get_interface_mac wouldn't be able to handle
+	//thus we need to lookup br-lan instead of uci_lan_if
+	char* current_lan_mac = get_interface_mac("br-lan");
 	char* current_lan_ip = uci_lan_ip != NULL ? uci_lan_ip : get_interface_ip("br-lan");
+	char* current_lan_mask = uci_lan_mask != NULL ? uci_lan_mask : get_interface_netmask("br-lan");
+
 	char* current_wan_mac = get_interface_mac(uci_wan_if);
 	char* current_wan_ip = get_interface_ip(uci_wan_if);
+	char* current_wan_mask = get_interface_netmask(uci_wan_if);
 	char* current_wireless_mac = get_interface_mac(wireless_if);
 
 	char* default_wan_mac = NULL;
@@ -681,6 +694,7 @@ void print_interface_vars(void)
 	print_js_var("currentLanIf", uci_lan_if);
 	print_js_var("currentLanMac", current_lan_mac);
 	print_js_var("currentLanIp", current_lan_ip);
+	print_js_var("currentLanMask", current_lan_mask);
 
 
 	print_js_var("defaultWanIf", default_wan_if);
@@ -688,6 +702,7 @@ void print_interface_vars(void)
 	print_js_var("defaultWanMac", default_wan_mac);
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
+	print_js_var("currentWanMask", current_wan_mask);
 
 }
 
@@ -750,6 +765,28 @@ char* get_interface_ip(char* if_name)
 		close(s);
 	}
 	return ip;
+}
+
+char* get_interface_netmask(char* if_name)
+{
+	char* mask = NULL;
+	if(if_name != NULL)
+	{
+		struct ifreq buffer;
+		int s = socket(PF_INET, SOCK_DGRAM, 0);
+		memset(&buffer, 0x00, sizeof(buffer));
+		strcpy(buffer.ifr_name, if_name);
+	
+		if(ioctl(s, SIOCGIFNETMASK, &buffer) != -1)
+		{
+			struct sockaddr_in *addr = (struct sockaddr_in*)(&buffer.ifr_addr);
+			struct in_addr sin= (struct in_addr)addr->sin_addr;
+			mask =  strdup((char*)inet_ntoa(sin));
+		}
+		close(s);
+	}
+	return mask;
+
 }
 
 char** load_interfaces_from_proc_file(char* filename)
