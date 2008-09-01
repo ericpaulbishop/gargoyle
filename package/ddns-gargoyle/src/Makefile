@@ -4,6 +4,8 @@
 USE_OPENSSL:=1
 
 
+CFLAGS:=$(CFLAGS) -Wall -Os
+MOREFLAGS:=
 LIBS:=
 SSL_DEFS:=
 SSL_OBJ:=
@@ -16,22 +18,17 @@ ifeq ($(USE_OPENSSL), 1)
 	SSL_DEFS:= -DUSE_OPENSSL -DHAVE_SSL
 	LIBS:=$(LIBS) -lcrypto -lssl
 endif
-CFLAGS:=$(CFLAGS) -Wall -Os 
-MOREFLAGS:= $(SSL_DEFS) -DUSE_STRING_UTIL
+
+MOREFLAGS:= $(SSL_DEFS) -DUSE_ERICS_TOOLS
+LIBS:=$(LIBS) -lericstools 
 
 all: ddns_updater
-ddns_updater: ddns_updater.o http_minimal_client.o priority_queue.o string_map.o string_util.o $(SSL_OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(MOREFLAGS) ddns_updater.o http_minimal_client.o priority_queue.o string_map.o string_util.o $(SSL_OBJ) -o $@ $(LIBS)
+ddns_updater: ddns_updater.o http_minimal_client.o $(SSL_OBJ)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(MOREFLAGS) ddns_updater.o http_minimal_client.o $(SSL_OBJ) -o $@ $(LIBS)
 ddns_updater.o: ddns_updater.c
 	$(CC) $(CFLAGS) $(MOREFLAGS) -c ddns_updater.c
 http_minimal_client.o: http_minimal_client.c
 	$(CC) $(CFLAGS) $(MOREFLAGS) -c http_minimal_client.c
-priority_queue.o: priority_queue.c
-	$(CC) $(CFLAGS) $(MOREFLAGS) -c priority_queue.c
-string_map.o: string_map.c
-	$(CC) $(CFLAGS) $(MOREFLAGS) -c string_map.c
-string_util.o: string_util.c
-	$(CC) $(CFLAGS) $(MOREFLAGS) -c string_util.c
 matrixssl_helper.o: matrixssl_helper.c matrixssl_helper.h
 	$(CC) $(CFLAGS) $(MOREFLAGS) -c matrixssl_helper.c
 

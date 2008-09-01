@@ -43,10 +43,11 @@
 #include <getopt.h>
 #include <sys/errno.h>
 #include <dlfcn.h>
+
+
+#include <erics_tools.h>
 #include "libiptc/libiptc.h"
 
-
-#include "string_util.h"
 
 #define MSG_ID 12
 #define REQUEST_MSG_TYPE 24

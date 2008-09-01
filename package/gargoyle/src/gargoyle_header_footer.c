@@ -30,9 +30,8 @@
 #include <net/if.h>
 
 
-#include "uci.h"
-#include "priority_queue.h"
-#include "string_util.h"
+#include <erics_tools.h>
+#include <uci.h>
 
 #define MINIMAL_HEADER 1
 #define HEADER 2

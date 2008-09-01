@@ -14,7 +14,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle 
+	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +libericstools 
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -27,6 +27,13 @@ define Build/Prepare
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
+define Build/Compile
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		$(TARGET_CONFIGURE_OPTS) \
+		STAGING_DIR="$(STAGING_DIR)" \
+		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" 
+endef
 
 define Package/gargoyle/install
 	$(INSTALL_DIR) $(1)

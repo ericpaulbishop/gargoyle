@@ -22,11 +22,8 @@
  */
 
 
-
+#include <erics_tools.h>
 #include "http_minimal_client.h"
-#include "string_util.h"
-#include "string_map.h"
-#include "priority_queue.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -64,7 +61,7 @@
 #define UPDATE_SUCCESSFUL	5
 
 
-#define UPDATE_INFO_DIR		"/var/last_ddns_updates/" 			//where to store files containing time of last updates
+#define UPDATE_INFO_DIR		"/var/last_ddns_updates/" 	//where to store files containing time of last updates
 #define PID_PATH		"/var/run/ddns_updaterd.pid" 	//pid file for program when run in daemon mode
 #define MSG_ID			112
 #define REQUEST_MSG_TYPE 	124
@@ -572,9 +569,9 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	// local_ips: 		interface name/internet -> last value (char*)
 	// remote_ips: 		domain -> last value (char*)
 	//
-	string_map* local_ip_updates = initialize_map();
-	string_map* local_ips = initialize_map();
-	string_map* remote_ips = initialize_map();
+	string_map* local_ip_updates = initialize_map(1);
+	string_map* local_ips = initialize_map(1);
+	string_map* remote_ips = initialize_map(1);
 
 	//printf("starting update loop\n");
 
@@ -1135,7 +1132,7 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 
 	
 	//intialize service_confs to an empty string_map
-	string_map* service_confs = initialize_map();
+	string_map* service_confs = initialize_map(1);
 	
 	//parse the config file
 	FILE* service_configuration_file = fopen(filename, "r");	
@@ -1172,7 +1169,7 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 				service_conf->ip_source = -1;
 				service_conf->ip_url = NULL;
 				service_conf->ip_interface = NULL;
-				service_conf->variable_definitions = initialize_map(); 	
+				service_conf->variable_definitions = initialize_map(1); 	
 				int service_enabled = 0;
 
 				free(variable[0]);
@@ -1332,7 +1329,7 @@ int get_multiple_for_unit(char* unit)
 
 string_map* load_service_providers(char* filename)
 {	
-	string_map* service_providers = initialize_map();
+	string_map* service_providers = initialize_map(1);
 	
 	//parse the config file
 	FILE *service_provider_file = fopen(filename, "r");	

@@ -21,7 +21,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/bwmon-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+iptables
+	DEPENDS:=+iptables +libericstools
 	TITLE:=Bandwidth monitor for Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
@@ -42,8 +42,9 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
 		STAGING_DIR="$(STAGING_DIR)" \
-		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
-		LIBS="$(STAGING_DIR)/usr/lib/libiptc.a"
+		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
+		LIBS="$(STAGING_DIR)/usr/lib/libiptc.a -lericstools "
 endef
 
 define Package/bwmon-gargoyle/install

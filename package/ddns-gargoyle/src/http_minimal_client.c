@@ -19,8 +19,8 @@
 
 #include "http_minimal_client.h"
 
-#ifdef USE_STRING_UTIL
-#include "string_util.h"
+#ifdef USE_ERICS_TOOLS
+#include <erics_tools.h>
 #endif
 
 #include <stdio.h>
@@ -48,7 +48,7 @@ static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 
 
 //general utility functions
-#ifndef STRING_UTIL_H
+#ifndef USE_ERICS_TOOLS
 char* dynamic_strcat(int num_strs, ...);  //multi string concatenation function (uses dynamic memory allocation)
 void to_lowercase(char* str);
 #endif
@@ -658,7 +658,7 @@ void encode_block_base64( unsigned char in[3], unsigned char out[4], int len )
     out[3] = (unsigned char) (len > 2 ? cb64[ in[2] & 0x3f ] : '=');
 }
 
-#ifndef STRING_UTIL_H
+#ifndef USE_ERICS_TOOLS
 
 void to_lowercase(char* str)
 {

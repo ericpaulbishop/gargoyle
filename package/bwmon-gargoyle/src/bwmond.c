@@ -24,7 +24,6 @@
 
 
 #include "bwmon.h"
-#include "priority_queue.h"
 
 #define MINUTE	101
 #define HOUR	102

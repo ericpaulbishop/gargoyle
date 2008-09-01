@@ -22,6 +22,8 @@
  */
 
 
+
+
 #include <pcap.h>
 
 #include <stdio.h>
@@ -46,8 +48,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#include "string_map.h"
-#include "string_util.h"
+#include <erics_tools.h>
 
 #define PID_PATH "/var/run/webmond.pid"
 #define DEFAULT_MAX_QUEUE_LENGTH 300
@@ -316,9 +317,9 @@ void daemonize(void)
 		}
 	}
 	
-	/********************************
-	* child continues as a daemon after parent exits
-	********************************/
+	//////////////////////////////////////////////////////
+	/// child continues as a daemon after parent exits
+	//////////////////////////////////////////////////////
 	// obtain a new process group & close all file descriptors 
 	setsid();
 	for(i=getdtablesize();i>=0;--i)
@@ -330,7 +331,6 @@ void daemonize(void)
         close(STDOUT_FILENO);
         close(STDIN_FILENO);
         close(STDERR_FILENO);
-	
 
 	// record pid to lockfile
 	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
