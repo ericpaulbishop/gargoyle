@@ -39,27 +39,18 @@ endef
 define Build/Configure
 endef
 
-define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
-		$(TARGET_CONFIGURE_OPTS) \
-		DFLAGS="$(TARGET_CFLAGS) -Wall"
-endef
-
 define Build/InstallDev
 	mkdir -p $(STAGING_DIR)/usr/include/
 	$(CP) $(PKG_BUILD_DIR)/*.h $(STAGING_DIR)/usr/include/
 
 	mkdir -p $(STAGING_DIR)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/*.so $(STAGING_DIR)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/*.so* $(STAGING_DIR)/usr/lib/
 
 endef
 
-# define library as the so file that isn't a symlink
-# for backwards compatibility we need to create symlink to libmatrixssl.so.1
-# after installing library
 define Package/libericstools/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/*.so $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/*.so* $(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,libericstools))

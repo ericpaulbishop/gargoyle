@@ -1,5 +1,7 @@
 /*
  *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *
+ *  NOTE THAT UNLIKE OTHER PARTS OF GARGOYLE THIS LIBRARY FALLS UNDER THE LGPL, NOT THE GPL
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU Lesser General Public License as published by the

@@ -1,6 +1,8 @@
 /*
  *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
- * 
+ *
+ *  NOTE THAT UNLIKE OTHER PARTS OF GARGOYLE THIS LIBRARY FALLS UNDER THE LGPL, NOT THE GPL
+ *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU Lesser General Public License as published by the
  *  Free Software Foundation, either version 2 of the License, or (at your
@@ -153,7 +155,10 @@ priority_queue_node* pop_priority_queue(priority_queue_node** node_list)
 	priority_queue_node* first_node = NULL;
 	if(node_list != NULL)
 	{
-		first_node =  remove_priority_node(node_list, (*node_list)->id);
+		if(*node_list != NULL)
+		{
+			first_node =  remove_priority_node(node_list, (*node_list)->id);
+		}
 	}
 	return first_node;
 }
