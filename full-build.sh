@@ -85,6 +85,9 @@ for target in $targets ; do
 			for p in $package_files ; do
 				cp "$p" ../built/$target
 			done
+			if [ -e "bin/packages/Packages" ] ; then
+				cp "bin/packages/Packages" ../built/$target
+			fi
 		fi
 
 		mkdir -p ../images/$target
