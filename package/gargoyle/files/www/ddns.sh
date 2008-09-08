@@ -61,7 +61,7 @@
 				<input type="button" id="add_service_button" class="default_button" value="Add DDNS Service" onclick="addDdnsService()" />
 			</div>
 			
-			<div class='indent'><div class='indent' id='ddns_1'>
+			<div class='indent'>
 				<span id='ddns_1_txt'>
 					<p>
 					<em>Check Interval</em> specifies how often the router will check whether your current IP matches the one currently associated with your
