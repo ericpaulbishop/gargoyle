@@ -42,6 +42,22 @@ if [ ! -e "$openwrt_buildroot_dir/.config" ] ; then
 	exit
 fi
 
+
+new_module_dirs=""
+new_module_list=$(ls "$module_dir" 2>/dev/null)
+for d in $new_module_list ; do
+	if [ -d "$module_dir/$d" ] ; then
+		new_name=$(cat $module_dir/$d/name 2>/dev/null)
+		if [ -n "$new_name" ] ; then
+			new_module_dirs="$d $new_module_dirs"
+		fi	
+	fi
+done
+if [ -z "$new_module_dirs" ] ; then
+	#nothing to do, exit cleanly without error
+	exit
+fi
+
 #make paths absolute
 exec_dir=$(pwd);
 openwrt_buildroot_dir="$exec_dir/$openwrt_buildroot_dir"
@@ -144,88 +160,83 @@ mv iptables iptables.orig
 cp -r iptables.orig iptables.new
 
 
-new_module_dirs=$(ls "$module_dir" 2>/dev/null)
-new_module_names=""
 for new_d in $new_module_dirs ; do
 	new_d="$module_dir/$new_d"
 	new_name=$(cat $new_d/name 2>/dev/null)
 	upper_name=$(echo "$new_name" | tr "[:lower:]" "[:upper:]")
 	lower_name=$(echo "$new_name" | tr "[:upper:]" "[:lower:]")
-	if [ -n "$new_name" ] ; then
-		echo "found $upper_name module, patching..."
-		new_module_names="$new_module_names $new_name"
+	echo "found $upper_name module, patching..."
 	
 			
-		#copy files for netfilter module
-		cp -r $new_d/module/* linux.new/net/ipv4/netfilter/
-		cp -r $new_d/header/* linux.new/include/linux/netfilter_ipv4/
-		
-		#update netfilter Makefile
-		match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Makefile | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
-		config_line='obj-$(CONFIG_IP_NF_MATCH_'$upper_name') += ipt_'$lower_name'.o' 
-		insert_lines_at "$match_comment_line_num" "$config_line" "linux.new/net/ipv4/netfilter/Makefile" "1"
-		cp  "linux.new/net/ipv4/netfilter/Makefile" ./test1
+	#copy files for netfilter module
+	cp -r $new_d/module/* linux.new/net/ipv4/netfilter/
+	cp -r $new_d/header/* linux.new/include/linux/netfilter_ipv4/
+	
+	#update netfilter Makefile
+	match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Makefile | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
+	config_line='obj-$(CONFIG_IP_NF_MATCH_'$upper_name') += ipt_'$lower_name'.o' 
+	insert_lines_at "$match_comment_line_num" "$config_line" "linux.new/net/ipv4/netfilter/Makefile" "1"
+	cp  "linux.new/net/ipv4/netfilter/Makefile" ./test1
 
-		#update netfilter Config.in/Kconfig file
-		if [ -e linux.new/net/ipv4/netfilter/Kconfig ] ; then
-			end_line_num=$(cat linux.new/net/ipv4/netfilter/Kconfig | egrep -n "endmenu" | sed 's/:.*$//g' )
-			insert_line_num=$(($end_line_num-1))
-			config_lines=$(printf "%s\n"  "config IP_NF_MATCH_$upper_name" "	tristate \"$lower_name match support\"" "	depends on IP_NF_IPTABLES" "	help" "		This option enables $lower_name match support." "" "")
-			insert_lines_at "$insert_line_num" "$config_lines" "linux.new/net/ipv4/netfilter/Kconfig" "1"
-		fi
-		if [ -e linux.new/net/ipv4/netfilter/Config.in ] ; then
-			match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Config.in | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
-			match_comment_line="  dep_tristate '  $lower_name match support' CONFIG_IP_NF_MATCH_$upper_name \$CONFIG_IP_NF_IPTABLES"
-			insert_lines_at "$match_comment_line_num" "$match_comment_line" "linux.new/net/ipv4/netfilter/Config.in" "1"
-			cp  "linux.new/net/ipv4/netfilter/Config.in" ./test2
-		fi
-	
-		#copy files for iptables extension
-		cp -r $new_d/extension/* iptables.new/extensions
-
-		#create test file, which is used by iptables Makefile
-		echo "#!/bin/sh" > "iptables.new/extensions/.$lower_name-test"
-		echo "[ -f \$KERNEL_DIR/include/linux/netfilter_ipv4/ipt_$lower_name.h ] && echo $lower_name" >> "iptables.new/extensions/.$lower_name-test"
-		chmod 777 "iptables.new/extensions/.$lower_name-test"
-	
-		#update config templates -- just for simplicity do so for both 2.4-generic and 2.6-generic 
-		config_2_6=$(grep -l CONFIG_IP_NF_MATCH ../target/linux/generic-2.6/*)
-		config_2_4=$(grep -l CONFIG_IP_NF_MATCH ../target/linux/generic-2.4/*)
-		for config in $config_2_6 $config_2_4 ; do
-			echo "CONFIG_IP_NF_MATCH_$upper_name=m" >> $config
-		done
-		
-		#add OpenWrt package definition for netfilter module
-		echo "" >>../package/kernel/modules/netfilter.mk
-		echo "" >>../package/kernel/modules/netfilter.mk
-		echo "define KernelPackage/ipt-$lower_name" >>../package/kernel/modules/netfilter.mk
-		echo "  TITLE:=$lower_name" >>../package/kernel/modules/netfilter.mk
-		echo "  DESCRIPTION:=enable $lower_name match support" >>../package/kernel/modules/netfilter.mk
-		echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../package/kernel/modules/netfilter.mk
-		echo "  SUBMENU:=\$(NFMENU)" >>../package/kernel/modules/netfilter.mk
-		echo "  AUTOLOAD:=\$(call AutoLoad,40,\$(notdir \$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)))" >>../package/kernel/modules/netfilter.mk
-		echo "endef" >>../package/kernel/modules/netfilter.mk
-		echo "\$(eval \$(call KernelPackage,ipt-$lower_name))" >>../package/kernel/modules/netfilter.mk
-
-		#add OpenWrt package definition for iptables extension
-		echo "" >>../package/iptables/Makefile 
-		echo "" >>../package/iptables/Makefile 
-		echo "define Package/iptables-mod-$lower_name" >>../package/iptables/Makefile 
-		echo "  \$(call Package/iptables/Default)" >>../package/iptables/Makefile 
-		echo "  DEPENDS:=iptables +kmod-ipt-$lower_name" >>../package/iptables/Makefile 
-		echo "  TITLE:=$lower_name" >>../package/iptables/Makefile 
-		echo "  DESCRIPTION:=enable $lower_name matching support" >>../package/iptables/Makefile 
-		echo "endef" >>../package/iptables/Makefile 
-		echo "\$(eval \$(call BuildPlugin,iptables-mod-$lower_name,\$(IPT_$upper_name-m)))" >>../package/iptables/Makefile 
-	
-	
-		#update include/netfilter.mk with new module
-		echo "">>../include/netfilter.mk
-		echo "">>../include/netfilter.mk
-		echo "IPT_$upper_name-m :=">>../include/netfilter.mk
-		echo "IPT_$upper_name-\$(CONFIG_IP_NF_MATCH_$upper_name) += \$(P_V4)ipt_$lower_name">>../include/netfilter.mk
-		echo "IPT_BUILTIN += \$(IPT_$upper_name-y)">>../include/netfilter.mk
+	#update netfilter Config.in/Kconfig file
+	if [ -e linux.new/net/ipv4/netfilter/Kconfig ] ; then
+		end_line_num=$(cat linux.new/net/ipv4/netfilter/Kconfig | egrep -n "endmenu" | sed 's/:.*$//g' )
+		insert_line_num=$(($end_line_num-1))
+		config_lines=$(printf "%s\n"  "config IP_NF_MATCH_$upper_name" "	tristate \"$lower_name match support\"" "	depends on IP_NF_IPTABLES" "	help" "		This option enables $lower_name match support." "" "")
+		insert_lines_at "$insert_line_num" "$config_lines" "linux.new/net/ipv4/netfilter/Kconfig" "1"
 	fi
+	if [ -e linux.new/net/ipv4/netfilter/Config.in ] ; then
+		match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Config.in | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
+		match_comment_line="  dep_tristate '  $lower_name match support' CONFIG_IP_NF_MATCH_$upper_name \$CONFIG_IP_NF_IPTABLES"
+		insert_lines_at "$match_comment_line_num" "$match_comment_line" "linux.new/net/ipv4/netfilter/Config.in" "1"
+		cp  "linux.new/net/ipv4/netfilter/Config.in" ./test2
+	fi
+	
+	#copy files for iptables extension
+	cp -r $new_d/extension/* iptables.new/extensions
+
+	#create test file, which is used by iptables Makefile
+	echo "#!/bin/sh" > "iptables.new/extensions/.$lower_name-test"
+	echo "[ -f \$KERNEL_DIR/include/linux/netfilter_ipv4/ipt_$lower_name.h ] && echo $lower_name" >> "iptables.new/extensions/.$lower_name-test"
+	chmod 777 "iptables.new/extensions/.$lower_name-test"
+
+	#update config templates -- just for simplicity do so for both 2.4-generic and 2.6-generic 
+	config_2_6=$(grep -l CONFIG_IP_NF_MATCH ../target/linux/generic-2.6/*)
+	config_2_4=$(grep -l CONFIG_IP_NF_MATCH ../target/linux/generic-2.4/*)
+	for config in $config_2_6 $config_2_4 ; do
+		echo "CONFIG_IP_NF_MATCH_$upper_name=m" >> $config
+	done
+		
+	#add OpenWrt package definition for netfilter module
+	echo "" >>../package/kernel/modules/netfilter.mk
+	echo "" >>../package/kernel/modules/netfilter.mk
+	echo "define KernelPackage/ipt-$lower_name" >>../package/kernel/modules/netfilter.mk
+	echo "  TITLE:=$lower_name" >>../package/kernel/modules/netfilter.mk
+	echo "  DESCRIPTION:=enable $lower_name match support" >>../package/kernel/modules/netfilter.mk
+	echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../package/kernel/modules/netfilter.mk
+	echo "  SUBMENU:=\$(NFMENU)" >>../package/kernel/modules/netfilter.mk
+	echo "  AUTOLOAD:=\$(call AutoLoad,40,\$(notdir \$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)))" >>../package/kernel/modules/netfilter.mk
+	echo "endef" >>../package/kernel/modules/netfilter.mk
+	echo "\$(eval \$(call KernelPackage,ipt-$lower_name))" >>../package/kernel/modules/netfilter.mk
+
+	#add OpenWrt package definition for iptables extension
+	echo "" >>../package/iptables/Makefile 
+	echo "" >>../package/iptables/Makefile 
+	echo "define Package/iptables-mod-$lower_name" >>../package/iptables/Makefile 
+	echo "  \$(call Package/iptables/Default)" >>../package/iptables/Makefile 
+	echo "  DEPENDS:=iptables +kmod-ipt-$lower_name" >>../package/iptables/Makefile 
+	echo "  TITLE:=$lower_name" >>../package/iptables/Makefile 
+	echo "  DESCRIPTION:=enable $lower_name matching support" >>../package/iptables/Makefile 
+	echo "endef" >>../package/iptables/Makefile 
+	echo "\$(eval \$(call BuildPlugin,iptables-mod-$lower_name,\$(IPT_$upper_name-m)))" >>../package/iptables/Makefile 
+	
+	
+	#update include/netfilter.mk with new module
+	echo "">>../include/netfilter.mk
+	echo "">>../include/netfilter.mk
+	echo "IPT_$upper_name-m :=">>../include/netfilter.mk
+	echo "IPT_$upper_name-\$(CONFIG_IP_NF_MATCH_$upper_name) += \$(P_V4)ipt_$lower_name">>../include/netfilter.mk
+	echo "IPT_BUILTIN += \$(IPT_$upper_name-y)">>../include/netfilter.mk
 done
 
 #build netfilter patch file

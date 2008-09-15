@@ -62,14 +62,14 @@ for target in $targets ; do
 			fi
 		done
 
-		if [ -e $targets_dir/$target/.config ] ; then
-			cp "$targets_dir/$target/.config" "$target-src"
-		fi
+		cp "$targets_dir/$target/.config" "$target-src"
 		cp "$targets_dir/$target/buildroot.patch" "$target-src"
 		cp "$targets_dir/$target/packages.patch" "$target-src"	
 		cd "$target-src"
 		patch -p 0 < buildroot.patch
 		patch -p 0 < packages.patch
+
+		sh ../netfilter-match-modules/integrate_netfilter_modules.sh . ../netfilter-match-modules
 	
 		if [ "$target" = "custom" ] ; then
 			make menuconfig
