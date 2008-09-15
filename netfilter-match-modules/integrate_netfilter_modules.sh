@@ -241,25 +241,39 @@ done
 
 #build netfilter patch file
 generic_dir=$(cat generic-dir)
-config_file=""
-if [ -e "linux.new/net/ipv4/netfilter/Config.in" ] ; then
-        config_file="Config.in"
-else
-        config_file="Kconfig"
-fi
-diff -uN  "linux.orig/net/ipv4/netfilter/ipt_webstr.c" "linux.new/net/ipv4/netfilter/ipt_webstr.c" > tmp.tmp.1
-diff -uN  "linux.orig/include/linux/netfilter_ipv4/ipt_webstr.h" "linux.new/include/linux/netfilter_ipv4/ipt_webstr.h" > tmp.tmp.2
-diff -uN  "linux.orig/net/ipv4/netfilter/Makefile" "linux.new/net/ipv4/netfilter/Makefile" > tmp.tmp.3
-diff -uN  "linux.orig/net/ipv4/netfilter/$config_file" "linux.new/net/ipv4/netfilter/$config_file" > tmp.tmp.4
-cat tmp.tmp.* > $generic_dir/patches/650-custom_netfilter_match_modules.patch
-rm tmp.tmp.*
+rm -rf $generic_dir/patches/650-custom_netfilter_match_modules.patch 2>/dev/null
+cd linux.new
+module_files=$(find net/ipv4/netfilter)
+include_files=$(find include/linux/netfilter_ipv4)
+test_files="$module_files $include_files"
+cd ..
+for t in $test_files ; do
+	if [ ! -d "linux.new/$t" ] ; then
+		if [ -e "linux.orig/$t" ] ; then
+			diff -u "linux.orig/$t" "linux.new/$t" >> $generic_dir/patches/650-custom_netfilter_match_modules.patch
+		else
+			diff -u /dev/null "linux.new/$t" >> $generic_dir/patches/650-custom_netfilter_match_modules.patch
+		fi	
+	fi
+done
 
-diff -uN "iptables.orig/extensions/libipt_webstr.c" "iptables.new/extensions/libipt_webstr.c" > tmp.tmp.1
-diff -uN "iptables.orig/extensions/.webstr-test" "iptables.new/extensions/.webstr-test" > tmp.tmp.2
-cat tmp.tmp.* > ../package/iptables/patches/200-custom_netfilter_match_modules.patch
-rm tmp.tmp.*
+#build iptables patch file
+rm -f ../package/iptables/patches/200-custom_netfilter_match_modules.patch 2>/dev/null
+cd iptables.new
+test_files=$(find extensions)
+cd ..
+for t in $test_files ; do
+	if [ ! -d "iptables.new/$t" ] ; then
+		if [ -e "iptables.orig/$t" ] ; then
+			diff -u "iptables.orig/$t" "iptables.new/$t" >>../package/iptables/patches/200-custom_netfilter_match_modules.patch
+		else
+			diff -u /dev/null "iptables.new/$t" >>../package/iptables/patches/200-custom_netfilter_match_modules.patch 
+		fi
+	fi	
+done
 
 
+#cleanup
 cd ..
 rm -rf nf-patch-build
 
