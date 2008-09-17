@@ -110,11 +110,6 @@ for target in $targets ; do
 	
 
 		cd ..
-		if [ -n "$image_files" ] && [ "$target" != "custom" ] ;  then
-			rm -rf "$target-src"
-		else
-			exit
-		fi
 	fi
 done
 
