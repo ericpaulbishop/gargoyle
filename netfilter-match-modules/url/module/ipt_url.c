@@ -74,7 +74,7 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	return ((char *)s);
 }
 
-int http_match(const char* match_string, const char* match_type, const unsigned char* packet_data, int packet_length)
+int http_match(const struct ipt_url_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0; 
 	
@@ -145,10 +145,15 @@ int http_match(const char* match_string, const char* match_type, const unsigned 
 		strcat(url, path);
 		printk("url = \"%s\"\n", url);
 		
-
-		test = (strstr(url, match_string) != NULL);
+		if(info->use_regex == 0)
+		{
+			test = (strstr(url, info->test_str) != NULL);
+		}
+		else
+		{
+			test = regexec(info->test_regex, url);
+		}
 	}
-
 	return test;
 }
 
@@ -180,7 +185,7 @@ static int match(	const struct sk_buff *skb,
 	}
 	else
 	{
-		linear_skb = skb;
+		linear_skb = (struct sk_buff*)skb;
 		skb_copied = 0;
 	}
 
@@ -219,7 +224,7 @@ static int match(	const struct sk_buff *skb,
 	int test = 0;
 	if(payload_length > 10)
 	{
-		test = http_match(info->test_str, "url", payload, payload_length);
+		test = http_match(info, payload, payload_length);
 	}
 	
 	

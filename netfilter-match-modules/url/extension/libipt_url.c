@@ -20,6 +20,10 @@
 static void help(void)
 {
 	printf(	"url options:\n  --contains [!] [STRING]\n  --contains_regex [!] [REGEX]\n");
+	
+	//char pattern[30] = "gargoyle";
+	//int len = strlen(pattern);
+	//struct regexp* test = regcomp(pattern, &len);
 }
 
 static struct option opts[] = 
@@ -90,6 +94,17 @@ static int parse(	int c,
 		       	if(testlen > 0 && testlen < MAX_TEST_STR)
 			{
 				strcpy(info->test_str, argv[optind-1]);
+			
+				int regex_length = info->test_str;
+				struct regexp* test = regcomp(info->test_str, &regex_length);
+				if( !test )
+				{
+					exit_error(PARAMETER_PROBLEM, "Invalid regular expression");
+				}
+				else
+				{
+					info->test_regex=test;
+				}
 			}
 			else if(testlen >= MAX_TEST_STR)
 			{
