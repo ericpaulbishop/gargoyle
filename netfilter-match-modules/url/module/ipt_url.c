@@ -14,6 +14,8 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_url.h>
 
+#include "regexp/regexp.c"
+#include "string_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 #define ipt_register_match      xt_register_match
@@ -26,6 +28,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match URL in HTTP requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
+string_map* compiled_map = NULL;
 
 int strnicmp(const char * cs,const char * ct,size_t count)
 {
@@ -151,7 +154,18 @@ int http_match(const struct ipt_url_info* info, const unsigned char* packet_data
 		}
 		else
 		{
-			test = regexec(info->test_regex, url);
+			if(compiled_map == NULL)
+			{
+				compiled_map = initialize_map(0);
+			}
+			struct regexp* r = get_map_element(compiled_map, info->test_str);
+			if(r == NULL)
+			{
+				int rlen = strlen(info->test_str);
+				r= regcomp(info->test_str, &rlen);
+				set_map_element(compiled_map, info->test_str, r);
+			}
+			test = regexec(r, url);
 		}
 	}
 	return test;
