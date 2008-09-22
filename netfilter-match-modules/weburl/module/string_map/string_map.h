@@ -18,7 +18,6 @@
  */
 
 #include <linux/kernel.h>
-#include <linux/string.h>
 
 typedef struct
 {
@@ -50,7 +49,7 @@ extern unsigned long sdbm_string_hash(const char *key);
 
 
 // kernel strdup 
-static inline char *kstrdup(const char *str)
+static inline char *kernel_strdup(const char *str)
 {
 	char *tmp;
 	long int s;
@@ -96,7 +95,7 @@ void get_node_keys(map_node* node, char** key_list, int* next_key_index)
 	{
 		get_node_keys(node->left, key_list, next_key_index);
 		
-		key_list[ *next_key_index ] = kstrdup(node->key_str);
+		key_list[ *next_key_index ] = kernel_strdup(node->key_str);
 		(*next_key_index)++;
 		
 		get_node_keys(node->right, key_list, next_key_index);
@@ -116,7 +115,7 @@ void* set_map_element(string_map* map, const char* key, char* value)
 	new_node->right = NULL;
 	if(map->store_keys > 0)
 	{
-		new_node->key_str = kstrdup(key);
+		new_node->key_str = kernel_strdup(key);
 	}
 	else 
 	{

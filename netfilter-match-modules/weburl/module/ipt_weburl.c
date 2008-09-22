@@ -165,12 +165,12 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 			{
 				compiled_map = initialize_map(0);
 			}
-			struct regexp* r = get_map_element(compiled_map, info->test_str);
+			struct regexp* r = (struct regexp*)get_map_element(compiled_map, info->test_str);
 			if(r == NULL)
 			{
 				int rlen = strlen(info->test_str);
-				r= regcomp(info->test_str, &rlen);
-				set_map_element(compiled_map, info->test_str, r);
+				r= regcomp((char*)info->test_str, &rlen);
+				set_map_element(compiled_map, info->test_str, (void*)r);
 			}
 			test = regexec(r, url);
 			if(!test && strcmp(path, "/") == 0)
