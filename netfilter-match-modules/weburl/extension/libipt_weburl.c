@@ -6,12 +6,12 @@
 #include <getopt.h>
 
 #include <iptables.h>
-#include <linux/netfilter_ipv4/ipt_url.h>
+#include <linux/netfilter_ipv4/ipt_weburl.h>
 
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"url options:\n  --contains [!] [STRING]\n  --contains_regex [!] [REGEX]\n");
+	printf(	"weburl options:\n  --contains [!] [STRING]\n  --contains_regex [!] [REGEX]\n");
 }
 
 static struct option opts[] = 
@@ -33,7 +33,7 @@ static int parse(	int c,
 			struct ipt_entry_match **match
 			)
 {
-	struct ipt_url_info *info = (struct ipt_url_info *)(*match)->data;
+	struct ipt_weburl_info *info = (struct ipt_weburl_info *)(*match)->data;
 
 	int testlen;
 	switch (c)
@@ -107,7 +107,7 @@ static int parse(	int c,
 }
 
 
-static void print_url_args(struct ipt_url_info* info)
+static void print_weburl_args(struct ipt_weburl_info* info)
 {
 	//invert
 	if(info->invert > 0)
@@ -140,26 +140,26 @@ static void final_check(unsigned int flags)
 /* Prints out the matchinfo. */
 static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
 {
-	printf("URL ");
-	struct ipt_url_info *info = (struct ipt_url_info *)match->data;
+	printf("WEBURL ");
+	struct ipt_weburl_info *info = (struct ipt_weburl_info *)match->data;
 
-	print_url_args(info);
+	print_weburl_args(info);
 }
 
 /* Saves the union ipt_matchinfo in parsable form to stdout. */
 static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 {
-	struct ipt_url_info *info = (struct ipt_url_info *)match->data;
-	print_url_args(info);
+	struct ipt_weburl_info *info = (struct ipt_weburl_info *)match->data;
+	print_weburl_args(info);
 }
 
-static struct iptables_match url = 
+static struct iptables_match weburl = 
 { 
 	.next		= NULL,
- 	.name		= "url",
+ 	.name		= "weburl",
 	.version	= IPTABLES_VERSION,
-	.size		= IPT_ALIGN(sizeof(struct ipt_url_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_url_info)),
+	.size		= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
+	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
 	.help		= &help,
 	.parse		= &parse,
 	.final_check	= &final_check,
@@ -170,5 +170,5 @@ static struct iptables_match url =
 
 void _init(void)
 {
-	register_match(&url);
+	register_match(&weburl);
 }

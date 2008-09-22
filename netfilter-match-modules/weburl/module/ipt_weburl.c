@@ -12,10 +12,10 @@
 #include <net/tcp.h>
 
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_url.h>
+#include <linux/netfilter_ipv4/ipt_weburl.h>
 
 #include "regexp/regexp.c"
-#include "string_map.h"
+#include "string_map/string_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 #define ipt_register_match      xt_register_match
@@ -77,7 +77,7 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	return ((char *)s);
 }
 
-int http_match(const struct ipt_url_info* info, const unsigned char* packet_data, int packet_length)
+int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0; 
 	
@@ -142,15 +142,22 @@ int http_match(const struct ipt_url_info* info, const unsigned char* packet_data
 		}
 	
 		
-		printk("path = \"%s\", host=\"%s\"\n", 	path, host);
 		char url[625] = "http://";
 		strcat(url, host);
-		strcat(url, path);
-		printk("url = \"%s\"\n", url);
+		if(strcmp(path, "/") != 0)
+		{
+			strcat(url, path);
+		}
+		//printk("url = \"%s\"\n", url);
 		
 		if(info->use_regex == 0)
 		{
 			test = (strstr(url, info->test_str) != NULL);
+			if(!test && strcmp(path, "/") == 0)
+			{
+				strcat(url, path);
+				test = (strstr(url, info->test_str) != NULL);
+			}
 		}
 		else
 		{
@@ -166,6 +173,12 @@ int http_match(const struct ipt_url_info* info, const unsigned char* packet_data
 				set_map_element(compiled_map, info->test_str, r);
 			}
 			test = regexec(r, url);
+			if(!test && strcmp(path, "/") == 0)
+			{
+				strcat(url, path);
+				test = regexec(r, url);
+			}
+
 		}
 	}
 	return test;
@@ -187,7 +200,7 @@ static int match(	const struct sk_buff *skb,
 #endif
 			int *hotdrop)
 {
-	const struct ipt_url_info *info = (const struct ipt_url_info*)matchinfo;
+	const struct ipt_weburl_info *info = (const struct ipt_weburl_info*)matchinfo;
 
 	//linearize skb if necessary
 	struct sk_buff *linear_skb;
@@ -211,27 +224,6 @@ static int match(	const struct sk_buff *skb,
 	unsigned short payload_length	= ntohs(iph->tot_len) - doff;
 
 
-	/*
-	printk("from hdr, dest port = %d\n", ntohs(tcp_hdr->dest));
-	printk("from hdr, tcp length = %d bytes\n", doff);
-	printk("from hdr, datlen = %d bytes\n", payload_length);
-	*/
-	
-	/*
-	int data_index;
-	for(data_index = 0; data_index < dlen_1; data_index++)
-	{
-		unsigned char next =  d_1[data_index];
-		printk("%X ", next);
-	}
-	printk("\n");
-	for(data_index = 0; data_index < dlen_1; data_index++)
-	{
-		unsigned char next = d_1[data_index];
-		if(next >= 'A' && next <= 'z'){ printk("%c", next); } else { printk("."); }
-	}
-	printk("\n");
-	*/
 
 
 	//if payload length <= 10 bytes don't bother doing a check, otherwise check for match
@@ -249,7 +241,7 @@ static int match(	const struct sk_buff *skb,
 	}
 
 
-	printk("returning %d from url\n\n\n", test);
+	//printk("returning %d from weburl\n\n\n", test);
 	return test;
 }
 
@@ -273,22 +265,22 @@ static int checkentry(	const char *tablename,
 }
 
 
-static struct ipt_match url_match = 
+static struct ipt_match weburl_match = 
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	{ NULL, NULL },
-	"url",
+	"weburl",
 	&match,
 	&checkentry,
 	NULL,
 	THIS_MODULE
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-	.name		= "url",
+	.name		= "weburl",
 	.match		= &match,
 	.family		= AF_INET,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-	.matchsize	= sizeof(struct ipt_url_info),
+	.matchsize	= sizeof(struct ipt_weburl_info),
 #endif
 	.checkentry	= &checkentry,
 	.me		= THIS_MODULE,
@@ -297,12 +289,12 @@ static struct ipt_match url_match =
 
 static int __init init(void)
 {
-	return ipt_register_match(&url_match);
+	return ipt_register_match(&weburl_match);
 }
 
 static void __exit fini(void)
 {
-	ipt_unregister_match(&url_match);
+	ipt_unregister_match(&weburl_match);
 }
 
 module_init(init);
