@@ -17,15 +17,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+CONFIG_APPEND=
 uci_load() {
 	local PACKAGE="$1"
 	local DATA
 	local RET
 
 	_C=0
-	export ${NO_EXPORT:+-n} CONFIG_SECTIONS=
-	export ${NO_EXPORT:+-n} CONFIG_NUM_SECTIONS=0
-	export ${NO_EXPORT:+-n} CONFIG_SECTION=
+	if [ -z "$CONFIG_APPEND" ]; then
+		export ${NO_EXPORT:+-n} CONFIG_SECTIONS=
+		export ${NO_EXPORT:+-n} CONFIG_NUM_SECTIONS=0
+		export ${NO_EXPORT:+-n} CONFIG_SECTION=
+	fi
 
 	DATA="$(/sbin/uci ${LOAD_STATE:+-P /var/state} -S -n export "$PACKAGE" 2>/dev/null)"
 	RET="$?"
@@ -57,7 +60,7 @@ uci_set_state() {
 	local OPTION="$3"
 	local VALUE="$4"
 
-	[ -z "$VALUE" ] && return 0
+	[ "$#" = 4 ] || return 0
 	/sbin/uci -P /var/state set "$PACKAGE.$CONFIG${OPTION:+.$OPTION}=$VALUE"
 }
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright Â© 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -44,6 +44,10 @@ char* get_interface_mac(char* if_name);
 char* get_interface_ip(char* if_name);
 char* get_interface_netmask(char* if_name);
 char** load_interfaces_from_proc_file(char* filename);
+char* get_option_value_string(struct uci_option* uopt);
+int get_option(struct uci_context* ctx, struct uci_element** e, char* package_name, char* section_name, char* option_name);
+
+
 
 
 int main(int argc, char **argv)
@@ -134,6 +138,7 @@ int main(int argc, char **argv)
 	ctx = uci_alloc_context();
 
 	
+	
 	struct uci_package *p = NULL;
 	struct uci_element *e = NULL;
 	
@@ -153,33 +158,33 @@ int main(int argc, char **argv)
 		char* js_root = "js";
 		char* web_root = "/www";
 		char* bin_root = ".";
-		if(uci_lookup(ctx, &e, p, "global", "theme_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "theme_root") == UCI_OK)
 		{
-			theme_root=strdup(uci_to_option(e)->value);
+			theme_root=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "global", "theme") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "theme") == UCI_OK)
 		{
-			theme=strdup(uci_to_option(e)->value);
+			theme=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "global", "js_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "js_root") == UCI_OK)
 		{
-			js_root=strdup(uci_to_option(e)->value);
+			js_root=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "global", "web_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "web_root") == UCI_OK)
 		{
-			web_root=strdup(uci_to_option(e)->value);
+			web_root=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "global", "bin_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "bin_root") == UCI_OK)
 		{
-			bin_root=strdup(uci_to_option(e)->value);
+			bin_root=get_option_value_string(uci_to_option(e));
 		}
 
 		char** all_css;
 		char** all_js;
 		char whitespace_separators[] = { '\t', ' ' };
-		if(uci_lookup(ctx, &e, p, "global", "common_css") == UCI_OK && display_type == HEADER)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "common_css") == UCI_OK && display_type == HEADER)
 		{
-			char* css_list = dynamic_strcat(3, uci_to_option(e)->value, " ", css_includes);
+			char* css_list = dynamic_strcat(3, get_option_value_string(uci_to_option(e)), " ", css_includes);
 			all_css=split_on_separators(css_list, whitespace_separators, 2, -1, 0);
 			free(css_list);
 		}
@@ -189,9 +194,9 @@ int main(int argc, char **argv)
 		}
 		
 		
-		if(uci_lookup(ctx, &e, p, "global", "common_js") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "common_js") == UCI_OK)
 		{
-			char* js_list = dynamic_strcat(3, uci_to_option(e)->value, " ", js_includes);
+			char* js_list = dynamic_strcat(3, get_option_value_string(uci_to_option(e)), " ", js_includes);
 			all_js=split_on_separators(js_list, whitespace_separators, 2, -1, 0);
 			free(js_list);
 		}
@@ -217,7 +222,7 @@ int main(int argc, char **argv)
 				{
 					if(strcmp(e2->name,"hostname")==0)
 					{
-						hostname = strdup(uci_to_option(e2)->value);
+						hostname = get_option_value_string(uci_to_option(e2));
 					}
 				}
 			}
@@ -283,13 +288,13 @@ int main(int argc, char **argv)
 	
 		char* web_root = "/www";
 		char* bin_root = ".";
-		if(uci_lookup(ctx, &e, p, "global", "web_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "web_root") == UCI_OK)
 		{
-			web_root=strdup(uci_to_option(e)->value);
+			web_root=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "global", "bin_root") == UCI_OK)
+		if(get_uci_option(ctx, &e, "gargoyle", "global", "bin_root") == UCI_OK)
 		{
-			bin_root=strdup(uci_to_option(e)->value);
+			bin_root=get_option_value_string(uci_to_option(e));
 		}
 
 
@@ -309,7 +314,7 @@ int main(int argc, char **argv)
 				uci_foreach_element(&section->options, e2) 
 				{
 					int page_rank;
-					if(sscanf(uci_to_option(e2)->value, "%d", &page_rank) > 0)
+					if(sscanf(get_option_value_string(uci_to_option(e2)), "%d", &page_rank) > 0)
 					{
 						insert_priority_node(section_pages, strdup(e2->name), page_rank, NULL); 
 					}
@@ -336,9 +341,9 @@ int main(int argc, char **argv)
 			char* section_display = "";
 			priority_queue section_pages;
 		       	section_pages	= (priority_queue)next_section->data;
-			if(uci_lookup(ctx, &e, p, "display", next_section->id) == UCI_OK)
+			if(get_uci_option(ctx, &e, "gargoyle", "display", next_section->id) == UCI_OK)
 			{
-				section_display = strdup(uci_to_option(e)->value);
+				section_display = get_option_value_string(uci_to_option(e));
 			}
 
 			
@@ -385,13 +390,13 @@ int main(int argc, char **argv)
 						char* page_display="";
 						char* page_script="";
 						char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
-						if(uci_lookup(ctx, &e, p, "display", lookup) == UCI_OK)
+						if(get_uci_option(ctx, &e, "gargoyle", "display", lookup) == UCI_OK)
 						{
-							page_display = strdup(uci_to_option(e)->value);
+							page_display = get_option_value_string(uci_to_option(e));
 						}
-						if(uci_lookup(ctx, &e, p, "scripts", lookup) == UCI_OK)
+						if(get_uci_option(ctx, &e, "gargoyle", "scripts", lookup) == UCI_OK)
 						{
-							page_script = strdup(uci_to_option(e)->value);
+							page_script = get_option_value_string(uci_to_option(e));
 						}
 						if(strcmp(next_section_page->id, selected_page)==0)
 						{
@@ -426,17 +431,17 @@ int main(int argc, char **argv)
 				if( (next_section_page=pop_priority_queue(section_pages)) != NULL)
 				{
 					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
-					if(uci_lookup(ctx, &e, p, "scripts", lookup) == UCI_OK)
+					if(get_uci_option(ctx, &e, "gargoyle", "scripts", lookup) == UCI_OK)
 					{
-						next_section_script = strdup(uci_to_option(e)->value);
+						next_section_script = get_option_value_string(uci_to_option(e));
 					}
 					free(lookup);
 				}
 				else
 				{
-					if(uci_lookup(ctx, &e, p, "scripts", next_section->id) == UCI_OK)
+					if(get_uci_option(ctx, &e, "gargoyle", "scripts", next_section->id) == UCI_OK)
 					{
-						next_section_script = strdup(uci_to_option(e)->value);
+						next_section_script = get_option_value_string(uci_to_option(e));
 					}
 				}
 				printf("\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, next_section_script, section_display);
@@ -497,7 +502,7 @@ void define_package_vars(char** package_vars_to_load)
 					struct uci_element *e2;
 					uci_foreach_element(&section->options, e2) 	
 					{
-						printf("\tuciOriginal.set(\"%s\", \"%s\", \"%s\", \"%s\");\n",package_vars_to_load[package_index], section->e.name, e2->name, uci_to_option(e2)->value);
+						printf("\tuciOriginal.set(\"%s\", \"%s\", \"%s\", \"%s\");\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
 					}
 				
 				}
@@ -592,25 +597,25 @@ void print_interface_vars(void)
 	struct uci_element *e = NULL;
 	if(uci_load(ctx, "network", &p) == UCI_OK)
 	{
-		if(uci_lookup(ctx, &e, p, "wan", "macaddr") == UCI_OK)
+		if(get_uci_option(ctx, &e, "network", "wan", "macaddr") == UCI_OK)
 		{
-			uci_wan_mac=strdup(uci_to_option(e)->value);
+			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "wan", "ifname") == UCI_OK)
+		if(get_uci_option(ctx, &e, "network", "wan", "ifname") == UCI_OK)
 		{
-			uci_wan_if=strdup(uci_to_option(e)->value);
+			uci_wan_if=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "lan", "ifname") == UCI_OK)
+		if(get_uci_option(ctx, &e, "network", "lan", "ifname") == UCI_OK)
 		{
-			uci_lan_if=strdup(uci_to_option(e)->value);
+			uci_lan_if=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "lan", "ifaddr") == UCI_OK)
+		if(get_uci_option(ctx, &e, "network", "lan", "ifaddr") == UCI_OK)
 		{
-			uci_lan_ip=strdup(uci_to_option(e)->value);
+			uci_lan_ip=get_option_value_string(uci_to_option(e));
 		}
-		if(uci_lookup(ctx, &e, p, "lan", "netmask") == UCI_OK)
+		if(get_uci_option(ctx, &e, "network", "lan", "netmask") == UCI_OK)
 		{
-			uci_lan_mask=strdup(uci_to_option(e)->value);
+			uci_lan_mask=get_option_value_string(uci_to_option(e));
 		}
 
 	}
@@ -839,4 +844,60 @@ char** load_interfaces_from_proc_file(char* filename)
 	}
 
 	return interfaces;
+}
+
+
+// this function dynamically allocates memory for
+// the option string, but since this program exits
+// almost immediately (after printing variable info)
+// the massive memory leak we're opening up shouldn't
+// cause any problems.  This is your reminder/warning
+// that this might be an issue if you use this code to
+// do anything fancy.
+char* get_option_value_string(struct uci_option* uopt)
+{
+	char* opt_str = NULL;
+	if(uopt->type == UCI_TYPE_STRING)
+	{
+		opt_str = strdup(uopt->v.string);
+	}
+	if(uopt->type == UCI_TYPE_LIST)
+	{
+		struct uci_element* e;
+		uci_foreach_element(&uopt->v.list, e)
+		{
+			if(opt_str == NULL)
+			{
+				opt_str = strdup(e->name);
+			}
+			else
+			{
+				char* tmp;
+				tmp = dynamic_strcat(3, opt_str, " ", e->name);
+				free(opt_str);
+				opt_str = tmp;
+			}
+		}
+	}
+	return opt_str;
+}
+
+int get_uci_option(struct uci_context* ctx, struct uci_element** e, char* package_name, char* section_name, char* option_name)
+{
+	struct uci_ptr ptr;
+	char* lookup_str = dynamic_strcat(5, package_name, ".", section_name, ".", option_name);
+	int ret_value = uci_lookup_ptr(ctx, &ptr, lookup_str, 1);
+	if(ret_value == UCI_OK)
+	{
+		if( !(ptr.flags & UCI_LOOKUP_COMPLETE))
+		{
+			ret_value = UCI_ERR_NOTFOUND;
+		}
+		else
+		{
+			*e = (struct uci_element*)ptr.o;
+		}
+	}
+	free(lookup_str);
+	return ret_value;
 }

@@ -8,16 +8,16 @@
 
 include $(TOPDIR)/rules.mk
 
-UCI_VERSION=0.3
-UCI_RELEASE=3
+UCI_VERSION=0.6
+UCI_RELEASE=2
 
 PKG_NAME:=uci
 PKG_VERSION:=$(UCI_VERSION)$(if $(UCI_RELEASE),.$(UCI_RELEASE))
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://mirror2.openwrt.org/sources
-PKG_MD5SUM:=e1d3204629938adb21c6bf84a08ce001
+PKG_SOURCE_URL:=http://downloads.openwrt.org/sources
+PKG_MD5SUM:=00379a1da940eb6427c57e79c0d9605c
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -37,24 +37,11 @@ define Package/uci
   TITLE:=Utility for the Unified Configuration Interface (UCI)
 endef
 
-define Package/uci-sh
-  SECTION:=base
-  CATEGORY:=Base system
-  DEPENDS:=@!PACKAGE_uci
-  TITLE:=Old shell/awk implementation of UCI
-endef
-
-define Package/uci/preinst
-	rm -rf $${IPKG_INSTROOT}/etc/functions.sh   2>/dev/null
-	rm -rf $${IPKG_INSTROOT}/lib/config/uci.sh  2>/dev/null
-	rm -rf $${IPKG_INSTROOT}/lib/config/uci.awk 2>/dev/null
-	rm -rf $${IPKG_INSTROOT}/bin/uci 2>/dev/null
-	ls >/dev/null 2>&1
-endef
 
 define Build/Configure
 endef
 
+TARGET_CFLAGS += $(FPIC)
 UCI_MAKEOPTS = \
 		$(TARGET_CONFIGURE_OPTS) \
 		COPTS="$(TARGET_CFLAGS)" \
@@ -74,23 +61,18 @@ endef
 
 
 define Package/uci/install
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/uci $(1)/sbin/
-	$(CP) ./files/uci/* $(1)/
-endef
-
-define Package/uci-sh/install
-	$(INSTALL_DIR) $(1)
-	$(CP) ./files/uci-sh/* $(1)/
+	$(CP) ./files/* $(1)/
 endef
 
 define Build/InstallDev
-	mkdir -p $(STAGING_DIR)/usr/include
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/include
 	$(CP) $(PKG_BUILD_DIR)/uci{,_config}.h $(STAGING_DIR)/usr/include
-	mkdir -p $(STAGING_DIR)/usr/lib
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib
 	$(CP) $(PKG_BUILD_DIR)/libuci.so* $(STAGING_DIR)/usr/lib
 endef
 
 $(eval $(call BuildPackage,uci))
 $(eval $(call BuildPackage,libuci))
-$(eval $(call BuildPackage,uci-sh))
