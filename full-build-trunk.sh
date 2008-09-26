@@ -115,6 +115,15 @@ for target in $targets ; do
 			fi
 		done
 
+                #save downloaded files so we don't have to download them again
+                dl_files=$(ls ./dl 2>/dev/null)
+                if [ -n "$dl_files" ] ; then
+                        if [ ! -d "../kamikaze-trunk-src/dl" ] ; then
+                                mkdir "../kamikaze-trunk-src/dl"
+                        fi
+                        cp -r dl/* ../kamikaze-trunk-src/dl
+                fi
+
 	
 		cd ..
 	fi
