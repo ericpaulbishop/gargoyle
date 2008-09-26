@@ -2,9 +2,6 @@
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
- * 		Note that this module relies on the regex library included with layer7 module
- * 		be sure to have the source for layer7 match support (even if you don't build it)
- * 		otherwise you'll get errors if you try to build weburl
  *
  *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
@@ -36,14 +33,19 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_weburl.h>
 
-#include "regexp/regexp.c"
-#include "string_map/string_map.h"
+#include "weburl_deps/regexp.c"
+#include "weburl_deps/string_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-#define ipt_register_match      xt_register_match
-#define ipt_unregister_match    xt_unregister_match
+	#define ipt_register_match      xt_register_match
+	#define ipt_unregister_match    xt_unregister_match
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+	#include <linux/ip.h>
+#else
+	#define skb_network_header(skb) (skb)->nh.raw 
+#endif
 
 
 MODULE_LICENSE("GPL");
@@ -239,8 +241,8 @@ static int match(	const struct sk_buff *skb,
 	}
 
 	//get payload
-	struct iphdr *iph		= (struct iphdr*)linear_skb->data;
-	struct tcphdr* tcp_hdr		= (struct tcphdr*)(linear_skb->data + (iph->ihl*4));
+	struct iphdr *iph		= (struct iphdr*)(skb_network_header(skb));
+	struct tcphdr* tcp_hdr		= (struct tcphdr*)(iph + (iph->ihl*4));
 	unsigned short doff 		= tcp_hdr->doff*4;
 	unsigned char* payload 		= (unsigned char*)(tcp_hdr) + doff;
 	unsigned short payload_length	= ntohs(iph->tot_len) - doff;

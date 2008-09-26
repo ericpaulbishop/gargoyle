@@ -2,6 +2,7 @@
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
+ *
  *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it

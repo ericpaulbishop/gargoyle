@@ -2,9 +2,6 @@
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
- * 		Note that this module relies on the regex library included with layer7 module
- * 		be sure to have the source for layer7 match support (even if you don't build it)
- * 		otherwise you'll get errors if you try to build weburl
  *
  *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
