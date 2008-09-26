@@ -11,61 +11,37 @@
 #	H) mkdir images & copy image files to it
 # 3) extract SDKs for building standalone packages with build-packages.sh
 
-
-#uncomment below to set a specific revision number to check out
-#rnum="11800"
-
-
-revision=""
-if [ -n "$rnum" ] ; then
-	revision=" -r $rnum "
-fi
-
-#always remove old source, we may be checking out different revision
-if [ -d "kamikaze-trunk-src" ] ; then
-	rm -rf kamikaze-trunk-src
-fi
-if [ -d "trunk" ] ; then
-	rm -rf trunk
-fi
-
-#remove old package/image directories
-if [ -d built ] ; then
-	rm -r built
-fi
-if [ -d images ] ; then
-	rm -r images
-fi
-
-
-
-
-#checkout source
-echo "fetching kamikaze trunk source"
-svn checkout $revision https://svn.openwrt.org/openwrt/trunk/
-mv trunk kamikaze-trunk-src
-cd kamikaze-trunk-src
-find . -name ".svn" | xargs -r rm -rf
-cd .. 
-
-
-if [ -d built ] ; then
-	rm -r built
-fi
-if [ -d images ] ; then
-	rm -r images
-fi
-
-targets_dir="targets-trunk"
-
+openwrt_src_dir="kamikaze-7.09-src"
+targets_dir="targets"
 targets=$(ls $targets_dir 2>/dev/null)
+
+#get gargoyle version for naming image files
+gargoyle_version=$(grep "^PKG_VERSION" package/gargoyle/Makefile | sed "s/^.*=//g" 2>/dev/null)
+gargoyle_release=$(grep "^PKG_RELEASE" package/gargoyle/Makefile | sed "s/^.*=//g" 2>/dev/null)
+if [ -n "$gargoyle_release" ] ; then
+	if [ $gargoyle_release -le 5 ] ; then
+		gargoyle_version=$gargoyle_version"_beta"$gargoyle_release
+	elif [ $gargoyle_release -le 9 ] ; then
+		rc=$(($gargoyle_release - 5))
+		gargoyle_version=$gargoyle_version"_rc"$rc
+	fi
+fi
+
+
+if [ ! -d "$openwrt_src_dir" ] ; then
+	echo "fetching kamikaze 7.09 source"
+	wget http://downloads.openwrt.org/kamikaze/7.09/kamikaze_7.09.tar.bz2
+	tar xjf kamikaze_7.09.tar.bz2
+	mv kamikaze_7.09 "$openwrt_src_dir"
+fi
+
 
 for target in $targets ; do
 	if ( [ "$1" = "custom" ] && [ "$target" = "custom" ] ) || ([ "$1" != "custom" ] && [ "$target" != "custom" ]) ; then
 		if [ -e "$target-src" ] ; then 
 			rm -rf "$target-src"
 		fi
-		cp -r kamikaze-trunk-src "$target-src"
+		cp -r "$openwrt_src_dir" "$target-src"
 	
 		gargoyle_packages=$(ls package ; ls dependencies)
 		for gp in $gargoyle_packages ; do
@@ -74,46 +50,22 @@ for target in $targets ; do
 					cp -r package/$gp $target-src/package
 				else
 					cp -r dependencies/$gp $target-src/package
-				
 				fi
 			fi
 		done
 
-		if [ -e $targets_dir/$target/.config ] ; then
-			cp "$targets_dir/$target/.config" "$target-src"
-		fi
+		cp "$targets_dir/$target/.config" "$target-src"
 		cp "$targets_dir/$target/buildroot.patch" "$target-src"
 		cp "$targets_dir/$target/packages.patch" "$target-src"	
 		cd "$target-src"
 		patch -p 0 < buildroot.patch
 		patch -p 0 < packages.patch
 
-		#build netfilter patches
-		sh ../netfilter-match-modules/integrate_netfilter_modules_trunk.sh . ../netfilter-match-modules
+		sh ../netfilter-match-modules/integrate_netfilter_modules.sh . ../netfilter-match-modules
 	
 		if [ "$target" = "custom" ] ; then
 			make menuconfig
 		fi
-	
-		#make
-		make V=99
-
-		mkdir -p ../built/$target
-		if [ -d "bin/packages/" ] ; then
-			package_files=$(find bin -name "*.ipk")
-			for p in $package_files ; do
-				cp "$p" ../built/$target
-			done
-		fi
-
-		mkdir -p ../images/$target
-		image_files=$(ls bin 2>/dev/null)
-		for i in $image_files ; do
-			if [ ! -d "bin/$i" ] ; then
-				newname=$(echo $i | sed 's/openwrt/gargoyle/g')
-				cp "bin/$i" ../images/$target/$newname
-			fi
-		done
 
 	
 		cd ..

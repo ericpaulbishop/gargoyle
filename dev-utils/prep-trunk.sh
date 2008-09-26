@@ -49,12 +49,6 @@ find . -name ".svn" | xargs -r rm -rf
 cd .. 
 
 
-if [ -d built ] ; then
-	rm -r built
-fi
-if [ -d images ] ; then
-	rm -r images
-fi
 
 targets_dir="targets-trunk"
 
@@ -62,6 +56,8 @@ targets=$(ls $targets_dir 2>/dev/null)
 
 for target in $targets ; do
 	if ( [ "$1" = "custom" ] && [ "$target" = "custom" ] ) || ([ "$1" != "custom" ] && [ "$target" != "custom" ]) ; then
+	
+
 		if [ -e "$target-src" ] ; then 
 			rm -rf "$target-src"
 		fi
@@ -84,39 +80,18 @@ for target in $targets ; do
 		fi
 		cp "$targets_dir/$target/buildroot.patch" "$target-src"
 		cp "$targets_dir/$target/packages.patch" "$target-src"	
+		
+
 		cd "$target-src"
+		pwd		
+		
 		patch -p 0 < buildroot.patch
 		patch -p 0 < packages.patch
 
 		#build netfilter patches
 		sh ../netfilter-match-modules/integrate_netfilter_modules_trunk.sh . ../netfilter-match-modules
-	
-		if [ "$target" = "custom" ] ; then
-			make menuconfig
-		fi
-	
-		#make
-		make V=99
 
-		mkdir -p ../built/$target
-		if [ -d "bin/packages/" ] ; then
-			package_files=$(find bin -name "*.ipk")
-			for p in $package_files ; do
-				cp "$p" ../built/$target
-			done
-		fi
-
-		mkdir -p ../images/$target
-		image_files=$(ls bin 2>/dev/null)
-		for i in $image_files ; do
-			if [ ! -d "bin/$i" ] ; then
-				newname=$(echo $i | sed 's/openwrt/gargoyle/g')
-				cp "bin/$i" ../images/$target/$newname
-			fi
-		done
-
-	
-		cd ..
+		cd ..	
 	fi
 done
 
