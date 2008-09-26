@@ -78,9 +78,21 @@ fi
 
 
 target_name=$(cat .config | egrep  "CONFIG_TARGET_([^_]+)=y" | sed 's/^.*_//g' | sed 's/=y$//g' )
-board_var=$(cat target/linux/$target_name/Makefile | grep BOARD)
-kernel_var=$(cat target/linux/$target_name/Makefile | grep KERNEL)
-linux_ver_var=$(cat target/linux/$target_name/Makefile | grep LINUX_VERSION) 
+if [ -z "$target_name" ] ; then
+	test_names=$(cat .config | egrep  "CONFIG_TARGET_.*=y" | sed 's/CONFIG_TARGET_//g' | sed 's/_.*$//g' )
+	for name in $test_names ; do
+		for kernel in 2.2 2.4 2.6 2.8 3.0 3.2 3.4 ; do  #let's plan ahead!!!
+			if [ -d "target/linux/$name-$kernel" ] ; then
+				target_name="$name-$kernel"
+			fi
+		done
+	done
+fi
+
+
+board_var=$(cat target/linux/$target_name/Makefile | grep "BOARD.*:=")
+kernel_var=$(cat target/linux/$target_name/Makefile | grep "KERNEL.*:=")
+linux_ver_var=$(cat target/linux/$target_name/Makefile | grep "LINUX_VERSION.*:=") 
 defines=$(printf "$board_var\n$kernel_var\n$linux_ver_var\n")
 
 

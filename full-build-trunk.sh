@@ -87,6 +87,9 @@ for target in $targets ; do
 		cd "$target-src"
 		patch -p 0 < buildroot.patch
 		patch -p 0 < packages.patch
+
+		#build netfilter patches
+		sh ../netfilter-match-modules/integrate_netfilter_modules_trunk.sh . ../netfilter-match-modules
 	
 		if [ "$target" = "custom" ] ; then
 			make menuconfig
