@@ -108,6 +108,8 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 	//first test if we're dealing with a web page request
 	if(strnicmp((char*)packet_data, "GET ", 4) == 0 || strnicmp(  (char*)packet_data, "POST ", 5) == 0 || strnicmp((char*)packet_data, "HEAD ", 5) == 0)
 	{
+		//printk("found a  web page request\n");
+		
 		//get path portion of URL
 		char path[300] = "";
 		int path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
@@ -204,7 +206,14 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 			}
 
 		}
+
+		//if invert flag is set, return true if this IS a web request, but it didn't match (always return false for non-web requests)
+		if(info->invert > 0)
+		{
+			test = test == 0 ? 1 : 0;
+		}
 	}
+
 	return test;
 }
 
@@ -242,13 +251,13 @@ static int match(	const struct sk_buff *skb,
 
 	//get payload
 	struct iphdr *iph		= (struct iphdr*)(skb_network_header(skb));
-	struct tcphdr* tcp_hdr		= (struct tcphdr*)(iph + (iph->ihl*4));
-	unsigned short doff 		= tcp_hdr->doff*4;
-	unsigned char* payload 		= (unsigned char*)(tcp_hdr) + doff;
-	unsigned short payload_length	= ntohs(iph->tot_len) - doff;
+	struct tcphdr* tcp_hdr		= (struct tcphdr*)( ((unsigned char*)iph) + (iph->ihl*4) );
+	unsigned short payload_offset 	= (tcp_hdr->doff*4) + (iph->ihl*4);
+	unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
+	unsigned short payload_length	= ntohs(iph->tot_len) - payload_offset;
 
-
-
+	//printk("payload_offset = %d, payload length = %d\n", payload_offset, payload_length);
+	
 
 	//if payload length <= 10 bytes don't bother doing a check, otherwise check for match
 	int test = 0;

@@ -56,73 +56,46 @@ static int parse(	int c,
 {
 	struct ipt_weburl_info *info = (struct ipt_weburl_info *)(*match)->data;
 
-	int testlen;
 	switch (c)
 	{
 		case 's':
 			//use simple string match, not regex
-			info->use_regex = 0;
-			
-			//test whether to invert rule
-			check_inverse(optarg, &invert, &optind, 0);
-			info->invert = invert ? 1 : 0;
-
-			//test that test string is reasonable length, then to info
-			testlen = strlen(argv[optind-1]);
-		       	if(testlen > 0 && testlen < MAX_TEST_STR)
-			{
-				strcpy(info->test_str, argv[optind-1]);
-			}
-			else if(testlen >= MAX_TEST_STR)
-			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
-			}
-			else
-			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
-			}	
-			
-			if(*flags == 1)
-			{
-				exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
-			}		
-			*flags = 1;
+			info->use_regex = 0;	
 			break;
-			
+
 		case 'r':
 			
 			//use regex instead of simple string match
 			info->use_regex = 1;
-			
-			//test whether to invert rule
-			check_inverse(optarg, &invert, &optind, 0);
-			info->invert = invert ? 1 : 0;
-
-			//test that test string is reasonable length, then to info
-			testlen = strlen(argv[optind-1]);
-		       	if(testlen > 0 && testlen < MAX_TEST_STR)
-			{
-				strcpy(info->test_str, argv[optind-1]);
-			}
-			else if(testlen >= MAX_TEST_STR)
-			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
-			}
-			else
-			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
-			}	
-		
-			if(*flags == 1)
-			{
-				exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
-			}	
-			*flags = 1;
 			break;
-
 		default:
 			return 0;
 	}
+	
+	//test whether to invert rule
+	check_inverse(optarg, &invert, &optind, 0);
+	info->invert = invert ? 1 : 0;
+	
+	//test that test string is reasonable length, then to info
+	int testlen = strlen(argv[optind-1]);
+	if(testlen > 0 && testlen < MAX_TEST_STR)
+	{
+		strcpy(info->test_str, argv[optind-1]);
+	}
+	else if(testlen >= MAX_TEST_STR)
+	{
+		exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
+	}
+	else
+	{
+		exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
+	}
+
+	if(*flags == 1)
+	{
+		exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
+	}	
+	*flags = 1;
 
 	return 1;
 }
