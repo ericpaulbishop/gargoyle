@@ -29,6 +29,7 @@
 #include <iptables.h>
 #include <linux/netfilter_ipv4/ipt_weburl.h>
 
+
 /* Function which prints out usage message. */
 static void help(void)
 {
@@ -49,8 +50,12 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
+#ifdef ipt_entry_match
+			const void *entry,
+#else
 			const struct ipt_entry *entry,
 			unsigned int *nfcache,
+#endif			
 			struct ipt_entry_match **match
 			)
 {
@@ -101,7 +106,8 @@ static int parse(	int c,
 }
 
 
-static void print_weburl_args(struct ipt_weburl_info* info)
+	
+static void print_weburl_args(	struct ipt_weburl_info* info )
 {
 	//invert
 	if(info->invert > 0)
@@ -132,7 +138,11 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
+#ifdef ipt_entry_match
+static void print(const void *ip, const struct xt_entry_match *match, int numeric)
+#else	
 static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
+#endif
 {
 	printf("WEBURL ");
 	struct ipt_weburl_info *info = (struct ipt_weburl_info *)match->data;
@@ -141,7 +151,11 @@ static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, 
 }
 
 /* Saves the union ipt_matchinfo in parsable form to stdout. */
+#ifdef ipt_entry_match
+static void save(const void *ip, const struct xt_entry_match *match)
+#else
 static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
+#endif
 {
 	struct ipt_weburl_info *info = (struct ipt_weburl_info *)match->data;
 	print_weburl_args(info);
