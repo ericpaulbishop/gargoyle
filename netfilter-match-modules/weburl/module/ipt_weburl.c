@@ -249,8 +249,15 @@ static int match(	const struct sk_buff *skb,
 		skb_copied = 0;
 	}
 
-	//get payload
+	//ignore packets that are not TCP
 	struct iphdr *iph		= (struct iphdr*)(skb_network_header(skb));
+	if(iph->protocol != IPPROTO_TCP)
+	{
+		return 0;
+	}
+	
+	
+	//get payload
 	struct tcphdr* tcp_hdr		= (struct tcphdr*)( ((unsigned char*)iph) + (iph->ihl*4) );
 	unsigned short payload_offset 	= (tcp_hdr->doff*4) + (iph->ihl*4);
 	unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
