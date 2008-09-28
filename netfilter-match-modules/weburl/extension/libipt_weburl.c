@@ -26,8 +26,14 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-#include <iptables.h>
+//in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
+//we can use to check whether we need to deal with the new requirements
+//in pre-processor directives below
+#include <iptables.h>  
 #include <linux/netfilter_ipv4/ipt_weburl.h>
+
+
+
 
 
 /* Function which prints out usage message. */
@@ -50,7 +56,7 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef ipt_entry_match
+#ifdef _XTABLES_H
 			const void *entry,
 #else
 			const struct ipt_entry *entry,
@@ -138,7 +144,7 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef ipt_entry_match
+#ifdef _XTABLES_H
 static void print(const void *ip, const struct xt_entry_match *match, int numeric)
 #else	
 static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
@@ -151,7 +157,7 @@ static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, 
 }
 
 /* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef ipt_entry_match
+#ifdef _XTABLES_H
 static void save(const void *ip, const struct xt_entry_match *match)
 #else
 static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
