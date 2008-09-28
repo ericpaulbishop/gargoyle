@@ -249,30 +249,28 @@ static int match(	const struct sk_buff *skb,
 		skb_copied = 0;
 	}
 
+	int test = 0;
+	
+
 	//ignore packets that are not TCP
 	struct iphdr *iph		= (struct iphdr*)(skb_network_header(skb));
-	if(iph->protocol != IPPROTO_TCP)
+	if(iph->protocol == IPPROTO_TCP)
 	{
-		return 0;
-	}
-	
-	
-	//get payload
-	struct tcphdr* tcp_hdr		= (struct tcphdr*)( ((unsigned char*)iph) + (iph->ihl*4) );
-	unsigned short payload_offset 	= (tcp_hdr->doff*4) + (iph->ihl*4);
-	unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
-	unsigned short payload_length	= ntohs(iph->tot_len) - payload_offset;
+		//get payload
+		struct tcphdr* tcp_hdr		= (struct tcphdr*)( ((unsigned char*)iph) + (iph->ihl*4) );
+		unsigned short payload_offset 	= (tcp_hdr->doff*4) + (iph->ihl*4);
+		unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
+		unsigned short payload_length	= ntohs(iph->tot_len) - payload_offset;
 
-	//printk("payload_offset = %d, payload length = %d\n", payload_offset, payload_length);
+		//printk("payload_offset = %d, payload length = %d\n", payload_offset, payload_length);
 	
 
-	//if payload length <= 10 bytes don't bother doing a check, otherwise check for match
-	int test = 0;
-	if(payload_length > 10)
-	{
-		test = http_match(info, payload, payload_length);
+		//if payload length <= 10 bytes don't bother doing a check, otherwise check for match
+		if(payload_length > 10)
+		{
+			test = http_match(info, payload, payload_length);
+		}
 	}
-	
 	
 	//free skb if we made a copy to linearize it
 	if(skb_copied == 1)
