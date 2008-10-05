@@ -124,27 +124,17 @@ dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 	{
 		fsetpos(open_file, &start_pos);
 		char *str = (char*)malloc(size_to_read+1);
-		fgets(str, size_to_read+1, open_file);
+		int i = 0;
+		for(i=0; i<size_to_read; i++)
+		{
+			str[i] = (char)fgetc(open_file);
+		}
+		str[size_to_read] = NULL;
 		ret_value.str = str;
 	}
-	
+	fgetc(open_file); //read the separator
 
-	int nextch = fgetc(open_file);
-	while(terminator_found == 1)
-	{
-		int terminator_index = 0;
-		terminator_found = 0;
-		for(terminator_index = 0; terminator_index < num_terminators && terminator_found == 0; terminator_index++)
-		{
-			terminator_found = (nextch == terminators[terminator_index]) ? 1 : 0;
-		}
-		if(terminator_found == 1)
-		{
-			fgetpos(open_file, &start_pos);
-			nextch = fgetc(open_file);
-		}
-	}
-	fsetpos(open_file, &start_pos);
+
 	return ret_value;
 }
 
