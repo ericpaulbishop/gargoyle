@@ -74,5 +74,14 @@ define Build/InstallDev
 	$(CP) $(PKG_BUILD_DIR)/libuci.so* $(STAGING_DIR)/usr/lib
 endef
 
+define Package/uci/preinst
+	rm -rf $${IPKG_INSTROOT}/etc/functions.sh   2>/dev/null
+	rm -rf $${IPKG_INSTROOT}/lib/config/uci.sh  2>/dev/null
+	rm -rf $${IPKG_INSTROOT}/lib/config/uci.awk 2>/dev/null
+	rm -rf $${IPKG_INSTROOT}/bin/uci 2>/dev/null
+	ls >/dev/null 2>&1
+endef
+
+
 $(eval $(call BuildPackage,uci))
 $(eval $(call BuildPackage,libuci))
