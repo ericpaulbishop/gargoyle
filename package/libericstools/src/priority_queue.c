@@ -1,20 +1,37 @@
 /*
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ * Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ * 
+ * This work ‘as-is’ we provide.
+ * No warranty, express or implied.
+ * We’ve done our best,
+ * to debug and test.
+ * Liability for damages denied.
  *
- *  NOTE THAT UNLIKE OTHER PARTS OF GARGOYLE THIS LIBRARY FALLS UNDER THE LGPL, NOT THE GPL
+ * Permission is granted hereby,
+ * to copy, share, and modify.
+ * Use as is fit,
+ * free or for profit.
+ * On this notice these rights rely.
  *
- *  This file is free software: you may copy, redistribute and/or modify it
- *  under the terms of the GNU Lesser General Public License as published by the
- *  Free Software Foundation, either version 2 of the License, or (at your
- *  option) any later version.
  *
- *  This file is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *  Note that unlike other portions of Gargoyle this code
+ *  does not fall under the GPL, but the rather whimsical
+ *  'Poetic License' above.
+ *
+ *  Basically, this library contains a bunch of utilities
+ *  that I find useful.  I'm sure other libraries exist
+ *  that are just as good or better, but I like these tools 
+ *  because I personally wrote them, so I know their quirks.
+ *  (i.e. I know where the bodies are buried).  I want to 
+ *  make sure that I can re-use these utilities for whatever
+ *  code I may want to write in the future be it
+ *  proprietary or open-source, so I've put them under
+ *  a very, very permissive license.
+ *
+ *  If you find this code useful, use it.  If not, don't.
+ *  I really don't care.
+ *
  */
 
 #include "erics_tools.h"

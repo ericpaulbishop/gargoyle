@@ -1,21 +1,39 @@
 /*
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ * Copyright Â© 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
- *  NOTE THAT UNLIKE OTHER PARTS OF GARGOYLE THIS LIBRARY FALLS UNDER THE LGPL, NOT THE GPL
+ * This work 'as-is' we provide.
+ * No warranty, express or implied.
+ * We've done our best,
+ * to debug and test.
+ * Liability for damages denied.
  *
- *  This file is free software: you may copy, redistribute and/or modify it
- *  under the terms of the GNU Lesser General Public License as published by the
- *  Free Software Foundation, either version 2 of the License, or (at your
- *  option) any later version.
+ * Permission is granted hereby,
+ * to copy, share, and modify.
+ * Use as is fit,
+ * free or for profit.
+ * On this notice these rights rely.
  *
- *  This file is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  Note that unlike other portions of Gargoyle this code
+ *  does not fall under the GPL, but the rather whimsical
+ *  'Poetic License' above.
+ *
+ *  Basically, this library contains a bunch of utilities
+ *  that I find useful.  I'm sure other libraries exist
+ *  that are just as good or better, but I like these tools 
+ *  because I personally wrote them, so I know their quirks.
+ *  (i.e. I know where the bodies are buried).  I want to 
+ *  make sure that I can re-use these utilities for whatever
+ *  code I may want to write in the future be it
+ *  proprietary or open-source, so I've put them under
+ *  a very, very permissive license.
+ *
+ *  If you find this code useful, use it.  If not, don't.
+ *  I really don't care.
+ *
  */
+
 #ifndef ERICS_TOOLS_H
 #define ERICS_TOOLS_H
 
@@ -26,7 +44,65 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-// priority_queue structs / prototypes
+
+/* tree_map structs / prototypes */
+typedef struct long_tree_map_node
+{
+	unsigned long key;
+	void* value;
+	
+	signed char balance; 
+	struct long_tree_map_node* left;
+	struct long_tree_map_node* right;
+} long_map_node;
+
+typedef struct 
+{
+	long_map_node* root;
+	unsigned long num_elements;
+
+}long_map;
+
+typedef struct
+{
+	long_map lm;
+	unsigned char store_keys;
+	unsigned long num_elements;
+
+}string_map;
+
+
+/* long map functions */
+extern long_map* initialize_long_map(void);
+extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
+extern void* get_long_map_element(long_map* map, unsigned long key);
+extern void* remove_long_map_element(long_map* map, unsigned long key);
+extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned);
+extern void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned);
+
+
+/* string map functions */
+extern string_map* initialize_string_map(unsigned char store_keys);
+extern void* set_string_map_element(string_map* map, const char* key, void* value);
+extern void* get_string_map_element(string_map* map, const char* key);
+extern void* remove_string_map_element(string_map* map, const char* key);
+extern char** get_string_map_keys(string_map* map); 
+extern void** get_string_map_values(string_map* map, unsigned long* values_returned);
+
+/* 
+ * for convenience & backwards compatibility alias get_map_XXX to get_string_map_XXX, 
+ * since string map is often more useful than long map
+ */
+#define initialize_map      initialize_string_map
+#define set_map_element     set_string_map_element
+#define get_map_element     get_string_map_element
+#define remove_map_element  remove_string_map_element
+#define get_map_keys        get_string_map_keys
+#define get_map_values      get_string_map_values
+
+
+
+/* priority_queue structs / prototypes */
 
 typedef struct 
 {
@@ -54,38 +130,7 @@ extern priority_queue initialize_priority_queue(void);
 extern void free_empty_priority_queue(priority_queue node_list);
 
 
-// string_map structs / prototypes
-
-
-typedef struct
-{
-	unsigned long hashed_key;
-	void* value;
-	char* key_str;
-
-	void* left;
-	void* right;
-} map_node;
-
-typedef struct 
-{
-	map_node* root;
-	int num_elements;
-	unsigned char store_keys;
-
-}string_map;
-
-extern string_map* initialize_map(unsigned char store_keys);
-
-extern void* set_map_element(string_map* map, const char* key, char* value);
-extern void* get_map_element(string_map* map, const char* key);
-extern void* remove_map_element(string_map* map, const char* key);
-extern char** get_map_keys(string_map* map);
-extern void get_node_keys(map_node* node, char** key_list, int* next_key_index);
-
-extern unsigned long sdbm_string_hash(const char *key);
-
-// string_util structs / prototypes
+/* string_util structs / prototypes */
 
 typedef struct 
 {
@@ -103,4 +148,4 @@ extern char** split_on_separators(char* line, char* separators, int num_separato
 extern void to_lowercase(char* str);
 extern void to_uppercase(char* str);
 
-#endif //ERICS_TOOLS_H
+#endif /* ERICS_TOOLS_H */
