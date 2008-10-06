@@ -155,6 +155,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		}
 		
 		/* get host portion of URL */
+		host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
 		if(host_match != NULL)
 		{
 			int host_end_index;
