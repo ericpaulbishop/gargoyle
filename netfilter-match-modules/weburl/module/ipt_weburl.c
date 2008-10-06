@@ -34,7 +34,7 @@
 #include <linux/netfilter_ipv4/ipt_weburl.h>
 
 #include "weburl_deps/regexp.c"
-#include "weburl_deps/string_map.h"
+#include "weburl_deps/tree_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	#define ipt_register_match      xt_register_match
@@ -52,7 +52,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match URL in HTTP requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
-string_map* compiled_map = NULL;
+string_map* compiled_map;
 
 int strnicmp(const char * cs,const char * ct,size_t count)
 {
@@ -105,32 +105,40 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 {
 	int test = 0; 
 	
-	//first test if we're dealing with a web page request
+	/* first test if we're dealing with a web page request */
 	if(strnicmp((char*)packet_data, "GET ", 4) == 0 || strnicmp(  (char*)packet_data, "POST ", 5) == 0 || strnicmp((char*)packet_data, "HEAD ", 5) == 0)
 	{
-		//printk("found a  web page request\n");
-		
-		//get path portion of URL
+		/* printk("found a  web page request\n"); */
 		char path[300] = "";
-		int path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
+		char host[300] = "";
+		char url[625] = "http://";
+		int path_start_index;
+		int path_end_index;
+		int last_header_index;
+		char last_two_buf[2];
+		int end_found;
+		char* host_match;
+
+	
+		/* get path portion of URL */
+		path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
 		while( packet_data[path_start_index] == ' ')
 		{
 			path_start_index++;
 		}
-		int path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
+		path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
 		if(path_end_index > 0) 
 		{
 			int path_length = path_end_index-path_start_index;
-			path_length = path_length < 300 ? path_length : 299; //prevent overflow
+			path_length = path_length < 300 ? path_length : 299; /* prevent overflow */
 			memcpy(path, packet_data+path_start_index, path_length);
 			path[ path_length] = '\0';
 		}
 		
-		//get header length
-		int last_header_index = 2;
-		char last_two_buf[2];
+		/* get header length */
+		last_header_index = 2;
 		memcpy(last_two_buf,(char*)packet_data, 2);
-		int end_found = 0;
+		end_found = 0;
 		while(end_found == 0 && last_header_index < packet_length)
 		{
 			char next = (char)packet_data[last_header_index];
@@ -146,35 +154,34 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 			}
 		}
 		
-		//get host portion of URL
-		char host[300];
-		char* host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
+		/* get host portion of URL */
 		if(host_match != NULL)
 		{
-			host_match = host_match + 5; //character after "Host:"
+			int host_end_index;
+			host_match = host_match + 5; /* character after "Host:" */
 			while(host_match[0] == ' ')
 			{
 				host_match = host_match+1;
 			}
-			int host_end_index = 0;
+			
+			host_end_index = 0;
 			while(host_match[host_end_index] != '\n' && host_match[host_end_index] != '\r' && host_match[host_end_index] != ' ' && ((char*)host_match - (char*)packet_data)+host_end_index < last_header_index )
 			{
 				host_end_index++;
 			}
 			memcpy(host, host_match, host_end_index);
-			host_end_index = host_end_index < 300 ? host_end_index : 299; //prevent overflow
+			host_end_index = host_end_index < 300 ? host_end_index : 299; /* prevent overflow */
 			host[host_end_index] = '\0';
 			
 		}
 	
 		
-		char url[625] = "http://";
 		strcat(url, host);
 		if(strcmp(path, "/") != 0)
 		{
 			strcat(url, path);
 		}
-		//printk("url = \"%s\"\n", url);
+		/* printk("url = \"%s\"\n", url); */
 		
 		if(info->use_regex == 0)
 		{
@@ -187,11 +194,13 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		}
 		else
 		{
+			struct regexp* r;
 			if(compiled_map == NULL)
 			{
 				compiled_map = initialize_map(0);
 			}
-			struct regexp* r = (struct regexp*)get_map_element(compiled_map, info->test_str);
+			
+			r = (struct regexp*)get_map_element(compiled_map, info->test_str);
 			if(r == NULL)
 			{
 				int rlen = strlen(info->test_str);
@@ -207,7 +216,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 
 		}
 
-		//if invert flag is set, return true if this IS a web request, but it didn't match (always return false for non-web requests)
+		/* if invert flag is set, return true if this IS a web request, but it didn't match (always return false for non-web requests) */
 		if(info->invert > 0)
 		{
 			test = test == 0 ? 1 : 0;
@@ -233,9 +242,11 @@ static int match(	const struct sk_buff *skb,
 #endif
 			int *hotdrop)
 {
+	int test = 0;
 	const struct ipt_weburl_info *info = (const struct ipt_weburl_info*)matchinfo;
+	struct iphdr* iph;	
 
-	//linearize skb if necessary
+	/* linearize skb if necessary */
 	struct sk_buff *linear_skb;
 	int skb_copied;
 	if(skb_is_nonlinear(skb))
@@ -249,37 +260,35 @@ static int match(	const struct sk_buff *skb,
 		skb_copied = 0;
 	}
 
-	int test = 0;
 	
 
-	//ignore packets that are not TCP
-	struct iphdr *iph		= (struct iphdr*)(skb_network_header(skb));
+	/* ignore packets that are not TCP */
+	iph = (struct iphdr*)(skb_network_header(skb));
 	if(iph->protocol == IPPROTO_TCP)
 	{
-		//get payload
+		/* get payload */
 		struct tcphdr* tcp_hdr		= (struct tcphdr*)( ((unsigned char*)iph) + (iph->ihl*4) );
 		unsigned short payload_offset 	= (tcp_hdr->doff*4) + (iph->ihl*4);
 		unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
 		unsigned short payload_length	= ntohs(iph->tot_len) - payload_offset;
 
-		//printk("payload_offset = %d, payload length = %d\n", payload_offset, payload_length);
 	
 
-		//if payload length <= 10 bytes don't bother doing a check, otherwise check for match
+		/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
 		if(payload_length > 10)
 		{
 			test = http_match(info, payload, payload_length);
 		}
 	}
 	
-	//free skb if we made a copy to linearize it
+	/* free skb if we made a copy to linearize it */
 	if(skb_copied == 1)
 	{
 		kfree_skb(linear_skb);
 	}
 
 
-	//printk("returning %d from weburl\n\n\n", test);
+	/* printk("returning %d from weburl\n\n\n", test); */
 	return test;
 }
 
@@ -328,11 +337,25 @@ static struct ipt_match weburl_match =
 static int __init init(void)
 {
 	return ipt_register_match(&weburl_match);
+	compiled_map = NULL;
+
 }
 
 static void __exit fini(void)
 {
 	ipt_unregister_match(&weburl_match);
+	if(compiled_map != NULL)
+	{
+		char** keys = get_map_keys(compiled_map);
+		int key_index;
+		for(key_index=0; keys[key_index] != NULL; key_index++)
+		{
+			struct regexp* r = (struct regexp*)remove_map_element(compiled_map, keys[key_index]);
+			kfree(r);
+			kfree(keys[key_index]);
+		}
+		kfree(keys);
+	}
 }
 
 module_init(init);

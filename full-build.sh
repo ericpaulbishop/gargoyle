@@ -108,6 +108,9 @@ for target in $targets ; do
 			cp -r dl/* ../kamikaze-7.09-src/dl
 		fi
 	
+		if [ ! -e bin/*.trx ] && [ ! -e bin/*.bin ] && [ ! -e bin/*.lzma ] ; then
+			exit
+		fi	       
 
 		cd ..
 	fi
