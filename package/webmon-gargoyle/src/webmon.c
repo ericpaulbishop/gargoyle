@@ -411,7 +411,7 @@ void load_data(void)
 			char newline_terminator[] = { '\n', '\r' };
 			char whitespace_chars[] = { '\t', ' ' };
 			dyn_read_t next = dynamic_read(in, newline_terminator, 2);
-			while (next.str != NULL)
+			while (next.terminator != EOF)
 			{
 				trim_flanking_whitespace(next.str);
 				char** split = split_on_separators(next.str, whitespace_chars, 2, -1, 0);
@@ -477,7 +477,7 @@ string_map* load_file_lines(char* filename)
 		*indicates_defined = 1;
 		char newline_terminator[] = { '\n', '\r' };
 		dyn_read_t next = dynamic_read(in, newline_terminator, 2);
-		while (next.str != NULL)
+		while (next.terminator != EOF)
 		{
 			trim_flanking_whitespace(next.str);
 			if(next.str[0] != '\0')
@@ -485,7 +485,6 @@ string_map* load_file_lines(char* filename)
 				set_map_element(line_map, next.str, (void*)indicates_defined);
 			}
 			free(next.str);
-			next.str = NULL;
 			next = dynamic_read(in, newline_terminator, 2);
 		}
 		fclose(in);
