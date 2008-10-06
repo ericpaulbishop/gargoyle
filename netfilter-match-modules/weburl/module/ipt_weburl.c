@@ -52,7 +52,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match URL in HTTP requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
-string_map* compiled_map;
+string_map* compiled_map = NULL;
 
 int strnicmp(const char * cs,const char * ct,size_t count)
 {
@@ -336,8 +336,8 @@ static struct ipt_match weburl_match =
 
 static int __init init(void)
 {
-	return ipt_register_match(&weburl_match);
 	compiled_map = NULL;
+	return ipt_register_match(&weburl_match);
 
 }
 
