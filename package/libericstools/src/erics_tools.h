@@ -72,6 +72,7 @@ typedef struct
 }string_map;
 
 
+
 /* long map functions */
 extern long_map* initialize_long_map(void);
 extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
@@ -79,7 +80,7 @@ extern void* get_long_map_element(long_map* map, unsigned long key);
 extern void* remove_long_map_element(long_map* map, unsigned long key);
 extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned);
 extern void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned);
-
+extern void** destroy_long_map(long_map* map, int destruction_type);
 
 /* string map functions */
 extern string_map* initialize_string_map(unsigned char store_keys);
@@ -88,18 +89,26 @@ extern void* get_string_map_element(string_map* map, const char* key);
 extern void* remove_string_map_element(string_map* map, const char* key);
 extern char** get_string_map_keys(string_map* map); 
 extern void** get_string_map_values(string_map* map, unsigned long* values_returned);
+extern void** destroy_string_map(string_map* map, int destruction_type);
+
+/*
+ * three different ways to deal with values when map is destroyed
+ */
+#define DESTROY_MAP_RETURN_VALUES	1
+#define DESTROY_MAP_FREE_VALUES		2
+#define DESTROY_MAP_IGNORE_VALUES 	3
 
 /* 
- * for convenience & backwards compatibility alias get_map_XXX to get_string_map_XXX, 
- * since string map is often more useful than long map
+ * for convenience & backwards compatibility alias _string_map_ functions to 
+ *  _map_ functions since string map is used more often than long map
  */
-#define initialize_map      initialize_string_map
-#define set_map_element     set_string_map_element
-#define get_map_element     get_string_map_element
-#define remove_map_element  remove_string_map_element
-#define get_map_keys        get_string_map_keys
-#define get_map_values      get_string_map_values
-
+#define initialize_map		initialize_string_map
+#define set_map_element		set_string_map_element
+#define get_map_element		get_string_map_element
+#define remove_map_element	remove_string_map_element
+#define get_map_keys		get_string_map_keys
+#define get_map_values		get_string_map_values
+#define destroy_map		destroy_string_map
 
 
 /* priority_queue structs / prototypes */

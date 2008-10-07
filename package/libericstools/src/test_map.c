@@ -49,7 +49,7 @@ int main (void)
 {
 	unsigned long  num_insertions = 25000;
 	unsigned long  max_insertion = 50000;
-	int num_repeats = 2;
+	int num_repeats = 3;
 	
 	unsigned int seed = (unsigned int)time(NULL);
 	srand (seed);
@@ -58,7 +58,7 @@ int main (void)
 
 
 	printf("initializing map....\n");
-	long_map* tm = initialize_long_map();
+	long_map* lm = initialize_long_map();
 	printf("initialized!\n\n");
 
 
@@ -77,7 +77,7 @@ int main (void)
 		for(i=0; i<num_insertions; i++)
 		{
 			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-			if( set_long_map_element(tm, r, "a") != NULL)
+			if( set_long_map_element(lm, r, "a") != NULL)
 			{
 				dupes++;
 			}
@@ -85,10 +85,10 @@ int main (void)
 
 		unsigned long right_depth = 0;
 		unsigned long left_depth = 0;
-		get_max_depth(tm->root->left, &left_depth, 0);
-		get_max_depth(tm->root->right, &right_depth, 0);
+		get_max_depth(lm->root->left, &left_depth, 0);
+		get_max_depth(lm->root->right, &right_depth, 0);
 
-		unsigned long original_size = tm->num_elements;
+		unsigned long original_size = lm->num_elements;
 		printf("insertion complete\n");
 		printf("after insertion, tree size = %ld \n", original_size);
 		printf("(note this may be less than %ld because the same numbers can be selected for insertion more than once, replacing the original node)\n", num_insertions); 
@@ -96,59 +96,70 @@ int main (void)
 		printf("depth of left branch = %ld, depth of right branch = %ld\n\n", left_depth, right_depth);
 
 
-		printf("randomly selecting %ld numbers between 0 and %ld to remove from tree.\n", num_insertions, max_insertion);
-		printf("note that these keys will not necessarily be present in tree -- the selection process is entirely random.\n");
-	
-		int j;
-		int found = 0;
-		for(j=0; j < num_insertions; j++)
+		if(repeat+1 < num_repeats)
 		{
-			
-			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-			if( remove_long_map_element(tm, r) != NULL)
-			{
-				found++;
-			}
-		}
-		right_depth = 0;
-		left_depth = 0;
-		get_max_depth(tm->root->left, &left_depth, 0);
-		get_max_depth(tm->root->right, &right_depth, 0);
 
-		printf("removal complete\n");
-		printf("after removal, tree size = %ld \n", tm->num_elements);
-		printf("depth of left branch = %ld, depth of right branch = %ld\n", left_depth, right_depth);
-		if(original_size - found == tm->num_elements)
-		{
-			printf("size consistent with number of nodes successfully removed\n\n");
+			printf("randomly selecting %ld numbers between 0 and %ld to remove from tree.\n", num_insertions, max_insertion);
+			printf("note that these keys will not necessarily be present in tree -- the selection process is entirely random.\n");
+	
+			int j;
+			int found = 0;
+			for(j=0; j < num_insertions; j++)
+			{
+				
+				unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
+				if( remove_long_map_element(lm, r) != NULL)
+				{
+					found++;
+				}
+			}
+			right_depth = 0;
+			left_depth = 0;
+			get_max_depth(lm->root->left, &left_depth, 0);
+			get_max_depth(lm->root->right, &right_depth, 0);
+	
+			printf("removal complete\n");
+			printf("after removal, tree size = %ld \n", lm->num_elements);
+			printf("depth of left branch = %ld, depth of right branch = %ld\n", left_depth, right_depth);
+			if(original_size - found == lm->num_elements)
+			{
+				printf("size consistent with number of nodes successfully removed\n\n");
+			}
+			else
+			{
+				printf("SIZE IS BAD -- IS NOT CONSISTENT WITH NUMBER OF NODES REMOVED !!!!\n\n");
+			}
+
+			printf("removing remaining nodes in tree in random order\n");
+			unsigned long length;
+			unsigned long *keys = get_sorted_long_map_keys(lm, &length);
+			while(lm->root != NULL && lm->num_elements > 0)
+			{
+				unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
+				if( remove_long_map_element(lm, keys[r]) != NULL)
+				{
+					found++;
+					if(original_size - found != lm->num_elements)
+					{
+						printf("SIZE IS BAD!!!!\n");
+					}
+				}
+			}
+			printf("done removing remaining nodes\n");
+			printf("tree size is now %ld, and root is %s\n\n", lm->num_elements, lm->root == NULL ? "null" : "not null");
+
+
+			printf("repeating insertion/deletion\n\n");
 		}
 		else
 		{
-			printf("SIZE IS BAD -- IS NOT CONSISTENT WITH NUMBER OF NODES REMOVED !!!!\n\n");
-		}
+			printf("destroying map...\n");
+			void** values = destroy_long_map(lm, DESTROY_MAP_RETURN_VALUES);
+			printf("map destroyed.\n");
+			int v=0;
+			for(v=0; values[v] != NULL; v++){}
+			printf("number of values returned after map destruction = %d\n", v);
 
-		printf("removing remaining nodes in tree in random order\n");
-		unsigned long length;
-		unsigned long *keys = get_sorted_long_map_keys(tm, &length);
-		while(tm->root != NULL && tm->num_elements > 0)
-		{
-			unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
-			if( remove_long_map_element(tm, keys[r]) != NULL)
-			{
-				found++;
-				if(original_size - found != tm->num_elements)
-				{
-					printf("SIZE IS BAD!!!!\n");
-				}
-			}
-		}
-		printf("done removing remaining nodes\n");
-		printf("tree size is now %ld, and root is %s\n\n", tm->num_elements, tm->root == NULL ? "null" : "not null");
-
-
-		if(repeat+1 < num_repeats)
-		{
-			printf("repeating insertion/deletion\n\n");
 		}
 	}
 
@@ -192,61 +203,70 @@ int main (void)
 		printf("depth of left branch = %ld, depth of right branch = %ld\n\n", left_depth, right_depth);
 
 
-		printf("randomly selecting %ld numbers between 0 and %ld to remove from tree.\n", num_insertions, max_insertion);
-		printf("note that these keys will not necessarily be present in tree -- the selection process is entirely random.\n");
-	
-		int j;
-		int found = 0;
-		for(j=0; j < num_insertions; j++)
-		{
-			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-			char* new_str = (char*)malloc(20*sizeof(char));
-			sprintf(new_str, "%ld", r);
-			if( remove_string_map_element(sm, new_str) != NULL)
-			{
-				found++;
-			}
-			free(new_str);
-		}
-		right_depth = 0;
-		left_depth = 0;
-		get_max_depth(sm->lm.root->left, &left_depth, 0);
-		get_max_depth(sm->lm.root->right, &right_depth, 0);
-
-		printf("removal complete\n");
-		printf("after removal, tree size = %ld \n", sm->num_elements);
-		printf("depth of left branch = %ld, depth of right branch = %ld\n", left_depth, right_depth);
-		if(original_size - found == sm->num_elements)
-		{
-			printf("size consistent with number of nodes successfully removed\n\n");
-		}
-		else
-		{
-			printf("SIZE IS BAD -- IS NOT CONSISTENT WITH NUMBER OF NODES REMOVED !!!!\n\n");
-		}
-
-		printf("removing remaining nodes in tree in random order\n");
-		unsigned long length = sm->num_elements;
-		char** keys = get_string_map_keys(sm);
-		while(sm->lm.root != NULL && sm->num_elements > 0)
-		{
-			unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
-			if( remove_string_map_element(sm, keys[r]) != NULL)
-			{
-				found++;
-				if(original_size - found != sm->num_elements)
-				{
-					printf("SIZE IS BAD!!!!\n");
-				}
-			}
-		}
-		printf("done removing remaining nodes\n");
-		printf("tree size is now %ld, and root is %s\n\n", sm->num_elements, sm->lm.root == NULL ? "null" : "not null");
-
 
 		if(repeat+1 < num_repeats)
 		{
+			printf("randomly selecting %ld numbers between 0 and %ld to remove from tree.\n", num_insertions, max_insertion);
+			printf("note that these keys will not necessarily be present in tree -- the selection process is entirely random.\n");
+	
+			int j;
+			int found = 0;
+			for(j=0; j < num_insertions; j++)
+			{
+				unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
+				char* new_str = (char*)malloc(20*sizeof(char));
+				sprintf(new_str, "%ld", r);
+				if( remove_string_map_element(sm, new_str) != NULL)
+				{
+					found++;
+				}
+				free(new_str);
+			}
+			right_depth = 0;
+			left_depth = 0;
+			get_max_depth(sm->lm.root->left, &left_depth, 0);
+			get_max_depth(sm->lm.root->right, &right_depth, 0);
+
+			printf("removal complete\n");
+			printf("after removal, tree size = %ld \n", sm->num_elements);
+			printf("depth of left branch = %ld, depth of right branch = %ld\n", left_depth, right_depth);
+			if(original_size - found == sm->num_elements)
+			{
+				printf("size consistent with number of nodes successfully removed\n\n");
+			}
+			else
+			{
+				printf("SIZE IS BAD -- IS NOT CONSISTENT WITH NUMBER OF NODES REMOVED !!!!\n\n");
+			}
+
+			printf("removing remaining nodes in tree in random order\n");
+			unsigned long length = sm->num_elements;
+			char** keys = get_string_map_keys(sm);
+			while(sm->lm.root != NULL && sm->num_elements > 0)
+			{
+				unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
+				if( remove_string_map_element(sm, keys[r]) != NULL)
+				{
+					found++;
+					if(original_size - found != sm->num_elements)
+					{
+						printf("SIZE IS BAD!!!!\n");
+					}
+				}
+			}
+			printf("done removing remaining nodes\n");
+			printf("tree size is now %ld, and root is %s\n\n", sm->num_elements, sm->lm.root == NULL ? "null" : "not null");
+
 			printf("repeating insertion/deletion\n\n");
+		}
+		else
+		{
+			printf("destroying map...\n");
+			void** values = destroy_string_map(sm, DESTROY_MAP_RETURN_VALUES);
+			printf("map destroyed.\n");
+			int v=0;
+			for(v=0; values[v] != NULL; v++){}
+			printf("number of values returned after map destruction = %d\n", v);
 		}
 	}
 

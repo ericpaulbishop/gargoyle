@@ -83,6 +83,9 @@ void print_list(list_node *l)
 
 
 
+/***************************************************
+ * string_map function definitions
+ ***************************************************/
 
 string_map* initialize_string_map(unsigned char store_keys)
 {
@@ -195,6 +198,45 @@ void** get_string_map_values(string_map* map, unsigned long* values_returned)
 }
 
 
+
+void** destroy_string_map(string_map* map, int destruction_type)
+{
+	void** return_values = NULL;
+	char** key_list = get_string_map_keys(map);
+	unsigned long key_index = 0;
+
+	if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+	{
+		return_values = (void**)malloc((1+map->num_elements)*sizeof(void*));
+		return_values[ map->num_elements ] = NULL;
+	}
+	while(map->num_elements > 0)
+	{
+		void* removed_value = remove_string_map_element(map, key_list[key_index]);
+		if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+		{
+			return_values[key_index] = removed_value;
+		}
+		if(destruction_type == DESTROY_MAP_FREE_VALUES)
+		{
+			free(removed_value);
+		}
+
+		free(key_list[key_index]);
+		key_index++;
+	}
+	free(key_list);
+	free(map);
+
+	return return_values;
+}
+
+
+
+/***************************************************
+ * long_map function definitions
+ ***************************************************/
+
 long_map* initialize_long_map(void)
 {
 	long_map* map = (long_map*)malloc(sizeof(long_map));
@@ -204,61 +246,6 @@ long_map* initialize_long_map(void)
 	return map;
 }
 
-
-
-/* note: returned keys are dynamically allocated, you need to free them! */
-unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned)
-{
-	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
-
-	unsigned long next_key_index = 0;
-	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
-	
-	*keys_returned = map->num_elements;
-
-	return key_list;
-}
-
-
-void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
-{
-	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
-
-	unsigned long next_value_index = 0;
-	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
-	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
-
-	*values_returned = map->num_elements;
-	return value_list;
-
-}
-
-
-void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
-{
-	if(node != NULL)
-	{
-		get_sorted_node_keys(node->left, key_list, next_key_index, depth+1);
-		
-		key_list[ *next_key_index ] = node->key;
-		(*next_key_index)++;
-
-		get_sorted_node_keys(node->right, key_list, next_key_index, depth+1);
-	}
-}
-
-void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
-{
-	if(node != NULL)
-	{
-		get_sorted_node_values(node->left, value_list, next_value_index, depth+1);
-		
-		value_list[ *next_value_index ] = node->value;
-		(*next_value_index)++;
-
-		get_sorted_node_values(node->right, value_list, next_value_index, depth+1);
-	}
-}
 
 /* if replacement performed, returns replaced value, otherwise null */
 void* set_long_map_element(long_map* map, unsigned long key, void* value)
@@ -563,6 +550,100 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 	
 	return value;
 }
+
+
+/* note: returned keys are dynamically allocated, you need to free them! */
+unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned)
+{
+	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
+
+	unsigned long next_key_index = 0;
+	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
+	
+	*keys_returned = map->num_elements;
+
+	return key_list;
+}
+
+
+void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
+{
+	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
+
+	unsigned long next_value_index = 0;
+	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
+	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
+
+	*values_returned = map->num_elements;
+	return value_list;
+
+}
+
+
+void** destroy_long_map(long_map* map, int destruction_type)
+{
+	void** return_values = NULL;
+	unsigned long num_keys;
+	unsigned long* key_list = get_sorted_long_map_keys(map, &num_keys);
+	unsigned long key_index = 0;
+
+
+	if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+	{
+		return_values = (void**)malloc((map->num_elements+1)*sizeof(void*));
+		return_values[map->num_elements] = NULL;
+	}
+	while(map->num_elements > 0)
+	{
+		void* removed_value = remove_long_map_element(map, key_list[key_index]);
+		if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+		{
+			return_values[key_index] = removed_value;
+		}
+		if(destruction_type == DESTROY_MAP_FREE_VALUES)
+		{
+			free(removed_value);
+		}
+		key_index++;
+	}
+	free(key_list);
+	free(map);
+
+	return return_values;
+}
+
+
+/***************************************************
+ * internal utility function definitions
+ ***************************************************/
+
+void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
+{
+	if(node != NULL)
+	{
+		get_sorted_node_keys(node->left, key_list, next_key_index, depth+1);
+		
+		key_list[ *next_key_index ] = node->key;
+		(*next_key_index)++;
+
+		get_sorted_node_keys(node->right, key_list, next_key_index, depth+1);
+	}
+}
+
+void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
+{
+	if(node != NULL)
+	{
+		get_sorted_node_values(node->left, value_list, next_value_index, depth+1);
+		
+		value_list[ *next_value_index ] = node->value;
+		(*next_value_index)++;
+
+		get_sorted_node_values(node->right, value_list, next_value_index, depth+1);
+	}
+}
+
+
 
 /*
  * direction = -1 indicates left subtree updated, direction = 1 for right subtree
