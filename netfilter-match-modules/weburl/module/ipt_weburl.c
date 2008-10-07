@@ -345,18 +345,7 @@ static int __init init(void)
 static void __exit fini(void)
 {
 	ipt_unregister_match(&weburl_match);
-	if(compiled_map != NULL)
-	{
-		char** keys = get_map_keys(compiled_map);
-		int key_index;
-		for(key_index=0; keys[key_index] != NULL; key_index++)
-		{
-			struct regexp* r = (struct regexp*)remove_map_element(compiled_map, keys[key_index]);
-			kfree(r);
-			kfree(keys[key_index]);
-		}
-		kfree(keys);
-	}
+	destroy_map(compiled_map, DESTROY_MAP_FREE_VALUES);
 }
 
 module_init(init);
