@@ -18,12 +18,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <linux/kernel.h>
 
 #if __KERNEL__
 	#define malloc(foo)	kmalloc(foo,GFP_ATOMIC)
 	#define free(foo)	kfree(foo)
-	#define printf(format,args...)	printf(format,##args)
+	#define printf(format,args...)	printk(format,##args)
+
+	/* kernel strdup */
+	static inline char *kernel_strdup(const char *str);
+	static inline char *kernel_strdup(const char *str)
+	{
+		char *tmp;
+		long int s;
+		s=strlen(str) + 1;
+		tmp = kmalloc(s, GFP_ATOMIC);
+		if (tmp)
+		{
+			memcpy(tmp, str, s);
+		}
+		return tmp;
+	}
+	#define strdup kernel_strdup
+
 #endif
 
 
