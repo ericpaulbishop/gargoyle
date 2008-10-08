@@ -345,7 +345,10 @@ static int __init init(void)
 static void __exit fini(void)
 {
 	ipt_unregister_match(&weburl_match);
-	destroy_map(compiled_map, DESTROY_MAP_FREE_VALUES);
+	if(compiled_map != NULL)
+	{
+		destroy_map(compiled_map, DESTROY_MAP_FREE_VALUES);
+	}
 }
 
 module_init(init);
