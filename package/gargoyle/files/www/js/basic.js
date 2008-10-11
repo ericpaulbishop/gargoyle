@@ -488,8 +488,7 @@ function setGlobalVisibility()
 	}
 	else
 	{
-		setAllowableSelections('wan_protocol', ['dhcp', 'pppoe', 'static', 'none'], ['DHCP', 'PPPoE', 'Static', 'Disabled']);		
-
+		setAllowableSelections('wan_protocol', ['dhcp', 'pppoe', 'static', 'none'], ['DHCP', 'PPPoE', 'Static', 'Disabled']);
 		currentMode=getSelectedValue('wifi_mode');
 		setAllowableSelections('wifi_mode', ['ap', 'adhoc', 'disabled'], ['Access Point (AP)', 'Ad Hoc', 'Disabled']);
 		if(currentMode == 'ap+sta' || currentMode == 'sta')
@@ -551,9 +550,9 @@ function setWanVisibility()
 	wanVisibilities['none'] = disabledVisability;
 	
 	selectedVisibility= wanVisibilities[document.getElementById('wan_protocol').value];
-	selectedVisibility[5] = selectedVisibility[5] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'demand' ? 1 : 0;
-	selectedVisibility[6] = selectedVisibility[6] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
-	selectedVisibility[7] = selectedVisibility[7] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
+	selectedVisibility[3] = selectedVisibility[3] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'demand' ? 1 : 0;
+	selectedVisibility[4] = selectedVisibility[4] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
+	selectedVisibility[5] = selectedVisibility[5] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
 
 	setVisibility(wanIds, selectedVisibility);
 }

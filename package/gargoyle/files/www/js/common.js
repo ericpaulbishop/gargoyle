@@ -771,7 +771,8 @@ function setVariableFromConcatenation(params)
 		if(idVisible==true && value != '')
 		{
 			value = document.getElementById(elementIds[nextIdIndex]).value;
-			concat = concat + value + ' ';	
+			endSpace = nextIdIndex < elementIds.length - 1 ? " " : "";
+			concat = concat + value + endSpace;
 		}
 		nextIdIndex++;
 	}
