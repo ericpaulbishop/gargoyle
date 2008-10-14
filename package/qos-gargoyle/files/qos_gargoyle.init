@@ -149,6 +149,7 @@ apply_all_rules()
 	local class_mark_list="$2"
 	local chain="$3"
 	local table="$4"
+	local mark_mask="$5"
 
 
 	# add filter rules
@@ -201,13 +202,13 @@ apply_all_rules()
 			if [ -n "$proto" ] || [ -n "$match_str" ] ; then
 				next_mark=$(get_classname_mark "$class" "$class_mark_list" )
 				if [ "$proto" = "tcp" ] || [ "$proto" = "both" ] || [ -z "$proto" ] ; then
-					iptables -t $table -A $chain -m mark --mark 0 -p tcp $match_str -j MARK --set-mark $next_mark
-					echo "iptables -t $table -A $chain -m mark --mark 0 -p tcp $match_str -j MARK --set-mark $next_mark"
+					iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p tcp $match_str -j CONNMARK --set-mark $next_mark
+					echo "iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p tcp $match_str -j CONNMARK --set-mark $next_mark"
 	
 				fi
 				if [ "$proto" = "udp" ] || [ "$proto" = "both" ] || [ -z "$proto" ] ; then
-					iptables -t $table -A $chain -m mark --mark 0 -p udp $match_str -j MARK --set-mark $next_mark
-					echo "iptables -t $table -A $chain -m mark --mark 0 -p udp $match_str -j MARK --set-mark $next_mark"
+					iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p udp $match_str -j CONNMARK --set-mark $next_mark
+					echo "iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p udp $match_str -j CONNMARK --set-mark $next_mark"
 				fi
 			fi
 		fi
@@ -387,11 +388,15 @@ initialize_qos()
 	
 		
 		class_mark_list=""
-		next_classid=10
+		upload_mask="0x00FF"
+		upload_shift=0
+		next_class_index=10
+		next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
+		
 		for uclass_name in $upload_class_list ; do
 			
 			
-			class_mark_list="$class_mark_list$uclass_name:$next_classid  "
+			class_mark_list="$class_mark_list$uclass_name:$next_classid/$upload_mask  "
 			uclass_def=$(eval echo "\$$uclass_name")
 			
 			#bandwidth for this class
@@ -419,44 +424,78 @@ initialize_qos()
 			fi
 		
 	
-			tc class add dev $qos_interface parent 1:1 classid 1:$next_classid hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str	
-			tc qdisc add dev $qos_interface parent 1:$next_classid sfq quantum $max_trans_unit perturb 10
-			tc filter add dev $qos_interface parent 1:0 prio $next_classid protocol ip handle $next_classid fw flowid 1:$next_classid
-	
-			next_classid=$(($next_classid+10))
+			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str
+			tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+			echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
+
+
+			next_class_index=$(($next_class_index+1))
+			next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
 		done
 	
 	
-		hidden_mark=$next_classid
+		hidden_mark="$next_classid"
 		m1=$burst_speed
-		tc class add dev $qos_interface parent 1:1 classid 1:$next_classid hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
-		tc qdisc add dev $qos_interface parent 1:$next_classid sfq quantum $max_trans_unit perturb 10
-		tc filter add dev $qos_interface parent 1:0 prio $next_classid protocol ip handle $next_classid fw flowid 1:$next_classid
+		tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
+		tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+		tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 	
 		# Set up egress chain
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
 	
 	
+		# if connmark is default, reset it to 0 (we may need to re-classify)
+		default_mark=$( get_classname_mark "$upload_default_class" "$class_mark_list" )
+		iptables -t mangle -A qos_egress -m connmark --mark $default_mark -j CONNMARK --set-mark 0/$upload_mask
+
 	
-		
 	
-	
-		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"	
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle" "$upload_mask"	
 	
 	
 	
 		# add rule to classify SYN/ACK packets, and ICMP into our special hidden class
+		# use MARK, not CONNMARK, so if we initialize a connection we won't keep it in this class
 		iptables -t mangle -A qos_egress -p tcp -m length --length :128 --tcp-flags SYN,RST,ACK ACK -j MARK --set-mark $hidden_mark
 		iptables -t mangle -A qos_egress -p icmp -j MARK --set-mark $hidden_mark
 		iptables -t mangle -A qos_egress -p ipv6-icmp -j MARK --set-mark $hidden_mark
-	
+
+		# restore mark from connmark
+		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --restore-mark --mask $upload_mask
+
 		# mark everything not yet classified to have default class
-		default_mark=$( get_classname_mark "$upload_default_class" "$class_mark_list" )
-		iptables -t mangle -A qos_egress -m mark --mark 0 -j MARK --set-mark $default_mark
+		# we use connmark here so bwmon doesn't pick it up, then reset it above (yes, another hack 'cuz I'm lazy)
+		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --set-mark $default_mark
+		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --restore-mark --mask $upload_mask
 
 
-		echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("upload	%s\n", $i); }} ' | sed 's/:/	/g' >> "$qos_mark_file"
+		# Because I'm an idiot this qos script was initially implemented to set MARKs, not CONNMARKs
+		# Therefore bwmon is set up to recognize rules that set a MARK, not CONNMARK
+		# Instead of modifying bwmon to recognize CONNMARKs instead of MARKs  (probably the right way to do it), 
+		# let's just redundantly set marks, which will get monitored.
+		#
+		# I'm such a lazy bastard.
+		for mark_def in $class_mark_list ; do
+			mark_part=$(echo $mark_def | sed 's/^.*://g')
+			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
+			iptables -t mangle -A qos_egress -m connmark --mark $next_mark/$upload_mask -j MARK --set-mark $next_mark 
+			echo "iptables -t mangle -A qos_egress -m connmark --mark $next_mark/$upload_mask -j MARK --set-mark $next_mark"
+		done	
+
+
+		#save which mark is associated with which traffic class
+		for mark_def in $class_mark_list ; do
+			id_part=$(echo $mark_def | sed 's/:.*$//g')
+			mark_part=$(echo $mark_def | sed 's/^.*://g')
+			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
+			next_mask=$(echo $mark_part | sed 's/^.*\///g')
+			printf "upload $id_part %d $next_mask\n" $next_mark >> /tmp/tmp_qos_mark 
+		done
+		
+		
+		#echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("upload	%s\n", $i); }} ' | sed 's/:/	/g' | sed 's/\//	/g' >> "$qos_mark_file"
 	fi
 
 
@@ -534,11 +573,15 @@ initialize_qos()
 
 
 		class_mark_list=""
-		next_classid=10
+		download_mask="0xFF00"
+		download_shift=8
+		next_class_index=10
+		next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
+		
 		for dclass_name in $download_class_list ; do
 			
 			
-			class_mark_list="$class_mark_list$dclass_name:$next_classid  "
+			class_mark_list="$class_mark_list$dclass_name:$next_classid/$download_mask  "
 			dclass_def=$(eval echo "\$$dclass_name")
 			
 			#bandwidth for this class
@@ -566,17 +609,18 @@ initialize_qos()
 			fi
 		
 	
-			tc class add dev imq0 parent 1:1 classid 1:$next_classid hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str	
-			tc qdisc add dev imq0 parent 1:$next_classid red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
-			tc filter add dev imq0 parent 1:0 prio $next_classid protocol ip handle $next_classid fw flowid 1:$next_classid
+			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str	
+			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
+			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 	
-			next_classid=$(($next_classid+10))
+			next_class_index=$(($next_class_index+1))
+			next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
 		done
 		hidden_mark=$next_classid
 		m1=$burst_speed
-		tc class add dev imq0 parent 1:1 classid 1:$next_classid hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
-		tc qdisc add dev imq0 parent 1:$next_classid red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
-		tc filter add dev imq0 parent 1:0 prio $next_classid protocol ip handle $next_classid fw flowid 1:$next_classid
+		tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
+		tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
+		tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 	
 		
 		# Create ingress chain
@@ -593,12 +637,12 @@ initialize_qos()
 
 
 
+		# if connmark is default, reset it to 0 (we may need to re-classify)
+		default_mark=$( get_classname_mark "$download_default_class" "$class_mark_list" )
+		iptables -t mangle -A qos_ingress -m connmark --mark $default_mark -j CONNMARK --set-mark 0/$download_mask
 
 
-
-		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle"
-
-
+		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
 
 
@@ -607,12 +651,44 @@ initialize_qos()
 		iptables -t mangle -A qos_ingress -p icmp -j MARK --set-mark $hidden_mark
 		iptables -t mangle -A qos_ingress -p ipv6-icmp -j MARK --set-mark $hidden_mark
 	
-		# mark everything not yet classified to have default class
-		default_mark=$( get_classname_mark "$download_default_class" "$class_mark_list" )
-		iptables -t mangle -A qos_ingress -m mark --mark 0 -j MARK --set-mark $default_mark
 
-	
-		echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("download	%s\n", $i); }} ' | sed 's/:/	/g' >> "$qos_mark_file"
+		# restore mark from connmark
+		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --restore-mark --mask $download_mask
+
+		# mark everything not yet classified to have default class
+		# we use connmark here so bwmon doesn't pick it up, then reset it above (yes, another hack 'cuz I'm lazy)
+		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --set-mark $default_mark
+		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --restore-mark --mask $download_mask
+
+
+		# Because I'm an idiot this qos script was initially implemented to set MARKs, not CONNMARKs
+		# Therefore bwmon is set up to recognize rules that set a MARK, not CONNMARK
+		# Instead of modifying bwmon to recognize CONNMARKs instead of MARKs  (probably the right way to do it), 
+		# let's just redundantly set marks, which will get monitored.
+		#
+		# I'm such a lazy bastard.
+		for mark_def in $class_mark_list ; do
+			mark_part=$(echo $mark_def | sed 's/^.*://g')
+			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
+			iptables -t mangle -A qos_ingress -m connmark --mark $next_mark/$download_mask -j MARK --set-mark $next_mark 
+			echo "iptables -t mangle -A qos_ingress -m connmark --mark $next_mark/$download_mask -j MARK --set-mark $next_mark"
+		done	
+
+
+		#save which mark is associated with which traffic class
+		for mark_def in $class_mark_list ; do
+			id_part=$(echo $mark_def | sed 's/:.*$//g')
+			mark_part=$(echo $mark_def | sed 's/^.*://g')
+			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
+			next_mask=$(echo $mark_part | sed 's/^.*\///g')
+			printf "download $id_part %d $next_mask\n" $next_mark >> /tmp/tmp_qos_mark 
+		done
+		
+		#echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("download	%s\n", $i); }} ' | sed 's/:/	/g' | sed 's/\//	/g' >> "$qos_mark_file"
+	fi
+
+	if [ -e /tmp/tmp_qos_mark ] ; then
+		mv /tmp/tmp_qos_mark $qos_mark_file
 	fi
 
 	return 0	
