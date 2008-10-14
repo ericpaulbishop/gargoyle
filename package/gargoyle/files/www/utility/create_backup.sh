@@ -14,7 +14,8 @@ if [ -n "$webmon_enabled" ] ; then
 	/etc/init.d/webmon_gargoyle restart
 fi
 
-backup_locations='/etc/config /etc/init.d /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/webmon_ips /etc/crontabs /tmp/data /usr/data'
+#note, we DO NOT backup password, as we don't want to cause confusion/problems after restore
+backup_locations='/etc/config  /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/hosts /etc/webmon_ips /etc/crontabs /etc/dropbear  /tmp/data /usr/data'
 existing_locations=""
 for bl in $backup_locations ; do
 	if [ -e "$bl" ] ; then
