@@ -154,7 +154,7 @@ int main (void)
 		else
 		{
 			printf("destroying map...\n");
-			void** values = destroy_long_map(lm, DESTROY_MAP_RETURN_VALUES);
+			void** values = destroy_long_map(lm, DESTROY_MODE_RETURN_VALUES);
 			printf("map destroyed.\n");
 			int v=0;
 			for(v=0; values[v] != NULL; v++){}
@@ -262,7 +262,7 @@ int main (void)
 		else
 		{
 			printf("destroying map...\n");
-			void** values = destroy_string_map(sm, DESTROY_MAP_RETURN_VALUES);
+			void** values = destroy_string_map(sm, DESTROY_MODE_RETURN_VALUES);
 			printf("map destroyed.\n");
 			int v=0;
 			for(v=0; values[v] != NULL; v++){}

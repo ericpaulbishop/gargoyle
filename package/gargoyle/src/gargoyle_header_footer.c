@@ -300,7 +300,7 @@ int main(int argc, char **argv)
 
 
 		
-		priority_queue sections = initialize_priority_queue();
+		priority_queue* sections = initialize_priority_queue();
 		
 		uci_foreach_element( &p->sections, e)
 		{
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
 			int section_rank;
 			if(sscanf(section->type, "%d", &section_rank) > 0)
 			{
-				priority_queue section_pages =  initialize_priority_queue();
+				priority_queue* section_pages =  initialize_priority_queue();
 					
 				struct uci_element *e2;
 				uci_foreach_element(&section->options, e2) 
@@ -316,10 +316,10 @@ int main(int argc, char **argv)
 					int page_rank;
 					if(sscanf(get_option_value_string(uci_to_option(e2)), "%d", &page_rank) > 0)
 					{
-						insert_priority_node(section_pages, strdup(e2->name), page_rank, NULL); 
+						push_priority_queue(section_pages, page_rank, strdup(e2->name), NULL); 
 					}
 				}
-				insert_priority_node(sections, strdup(section->e.name),  section_rank, section_pages);
+				push_priority_queue(sections, section_rank, strdup(section->e.name),  section_pages);
 			}
 		}
 
@@ -336,11 +336,11 @@ int main(int argc, char **argv)
 		int first_section=1;
 		int prev_section_selected=0;
 		priority_queue_node *next_section;
-		while( (next_section=pop_priority_queue(sections)) != NULL)
+		while( (next_section=shift_priority_queue_node(sections)) != NULL)
 		{
 			char* section_display = "";
-			priority_queue section_pages;
-		       	section_pages	= (priority_queue)next_section->data;
+			priority_queue* section_pages;
+		       	section_pages	= (priority_queue*)next_section->value;
 			if(get_uci_option(ctx, &e, p, "gargoyle", "display", next_section->id) == UCI_OK)
 			{
 				section_display = get_option_value_string(uci_to_option(e));
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
 
 
 
-				if(get_first_in_priority_queue(section_pages) == NULL)
+				if(peek_priority_queue_node(section_pages) == NULL)
 				{
 					printf("\t\t\t\t\t\t\t<div class=\"selected_single_header\">%s</div>\n", section_display);
 				}
@@ -385,7 +385,7 @@ int main(int argc, char **argv)
 					printf("\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
 					printf("\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
 					priority_queue_node *next_section_page;
-					while( (next_section_page=pop_priority_queue(section_pages)) != NULL)
+					while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 					{
 						char* page_display="";
 						char* page_script="";
@@ -428,7 +428,7 @@ int main(int argc, char **argv)
 				
 				priority_queue_node *next_section_page;
 				char* next_section_script = "";
-				if( (next_section_page=pop_priority_queue(section_pages)) != NULL)
+				if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 				{
 					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
 					if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)

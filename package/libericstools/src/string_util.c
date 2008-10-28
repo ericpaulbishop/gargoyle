@@ -45,7 +45,7 @@ char* replace_prefix(char* original, char* old_prefix, char* new_prefix)
 		int new_prefix_length = strlen(new_prefix);
 		int remainder_length = strlen(original) - old_prefix_length;
 		int new_length = new_prefix_length + remainder_length;
-		//printf("%d %d %d %d\n", old_prefix_length, new_prefix_length, remainder_length, new_length);
+		/* printf("%d %d %d %d\n", old_prefix_length, new_prefix_length, remainder_length, new_length); */
 		
 		replaced = malloc(new_length+1);
 		memcpy(replaced, new_prefix, new_prefix_length);
@@ -57,15 +57,12 @@ char* replace_prefix(char* original, char* old_prefix, char* new_prefix)
 
 char* trim_flanking_whitespace(char* str)
 {
-	int new_start = 0;;
+	int new_start = 0;
 	int new_length = 0;
 
-	char whitespace[5];
+	char whitespace[5] = { ' ', '\t', '\n', '\r', '\0' };
 	int num_whitespace_chars = 4;
-	whitespace[0] = ' ';
-	whitespace[1] = '\t';
-	whitespace[2] = '\n';
-	whitespace[3] = '\r';
+	
 	
 	int index = 0;
 	int is_whitespace = 1;
@@ -109,14 +106,18 @@ char* trim_flanking_whitespace(char* str)
 	return str;
 }
 
-//note: return value is dynamically allocated, need to free
+/* note: str element in return value is dynamically allocated, need to free */
 dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 {
 	fpos_t start_pos;
-	fgetpos(open_file, &start_pos);
 	int size_to_read = 0;
 	int terminator_found = 0;
 	int terminator;
+	char* str;
+	dyn_read_t ret_value;
+
+	fgetpos(open_file, &start_pos);
+	
 	while(terminator_found == 0)
 	{
 		int nextch = fgetc(open_file);
@@ -134,22 +135,21 @@ dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 		}
 	}
 
-	char *str = (char*)malloc((size_to_read+1)*sizeof(char));
+	str = (char*)malloc((size_to_read+1)*sizeof(char));
 	if(size_to_read > 0)
 	{
+		int i;
 		fsetpos(open_file, &start_pos);
-		int i = 0;
 		for(i=0; i<size_to_read; i++)
 		{
 			str[i] = (char)fgetc(open_file);
 		}
-		fgetc(open_file); //read the terminator
+		fgetc(open_file); /* read the terminator */
 	}
 	str[size_to_read] = '\0';
 	
 	
 	
-	dyn_read_t ret_value;
 	ret_value.str = str;
 	ret_value.terminator = terminator;
 
@@ -179,8 +179,8 @@ char* read_entire_file(FILE* in, int read_block_size)
 		end_found = (nextch == EOF) ? 1 : 0;
 		if(end_found == 0)
 		{
-			max_read_size = max_read_size + read_block_size;
 			char *new_str = (char*)malloc(max_read_size+1);
+			max_read_size = max_read_size + read_block_size;
 			strcpy(new_str, read_string);
 			free(read_string);
 			read_string = new_str;
@@ -208,26 +208,32 @@ int safe_strcmp(const char* str1, const char* str2)
 	return strcmp(str1, str2);
 }
 
-
-// line is the line to be parsed -- it is not modified in any way
-// max_pieces indicates number of pieces to return, if negative this is determined dynamically
-// include_remainder_at_max indicates whether the last piece, when max pieces are reached, 
-// 	should be what it would normally be (0) or the entire remainder of the line (1)
-// 	if max_pieces < 0 this parameter is ignored
-//
-//
-//returns all non-separator pieces in a line
-// result is dynamically allocated, MUST be freed after call-- even if 
-// line is empty (you still get a valid char** pointer to to a NULL char*)
+/*
+ * line is the line to be parsed -- it is not modified in any way
+ * max_pieces indicates number of pieces to return, if negative this is determined dynamically
+ * include_remainder_at_max indicates whether the last piece, when max pieces are reached, 
+ * 	should be what it would normally be (0) or the entire remainder of the line (1)
+ * 	if max_pieces < 0 this parameter is ignored
+ *
+ *
+ * returns all non-separator pieces in a line
+ * result is dynamically allocated, MUST be freed after call-- even if 
+ * line is empty (you still get a valid char** pointer to to a NULL char*)
+ */
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max)
 {
 	char** split;
 
 	if(line != NULL)
 	{
+		int split_index;
+		int non_separator_found;
+		char* dup_line;
+		char* start;
+
 		if(max_pieces < 0)
 		{
-			//count number of separator characters in line -- this count + 1 is an upperbound on number of pieces
+			/* count number of separator characters in line -- this count + 1 is an upperbound on number of pieces */
 			int separator_count = 0;
 			int line_index;
 			for(line_index = 0; line[line_index] != '\0'; line_index++)
@@ -243,13 +249,13 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 			max_pieces = separator_count + 1;
 		}
 		split = (char**)malloc((1+max_pieces)*sizeof(char*));
-		int split_index = 0;
+		split_index = 0;
 		split[split_index] = NULL;
 
 
-		char* dup_line = strdup(line);
-		char* start = dup_line;
-		int non_separator_found = 0;
+		dup_line = strdup(line);
+		start = dup_line;
+		non_separator_found = 0;
 		while(non_separator_found == 0)
 		{
 			int matches = 0;
@@ -267,7 +273,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 
 		while(start[0] != '\0' && split_index < max_pieces)
 		{
-			//find first separator index
+			/* find first separator index */
 			int first_separator_index = 0;
 			int separator_found = 0;
 			while(	separator_found == 0 )
@@ -283,7 +289,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 				}
 			}
 			
-			//copy next piece to split array
+			/* copy next piece to split array */
 			if(first_separator_index > 0)
 			{
 				char* next_piece = NULL;
@@ -303,7 +309,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 			}
 
 
-			//find next non-separator index, indicating start of next piece
+			/* find next non-separator index, indicating start of next piece */
 			start = start+ first_separator_index;
 			non_separator_found = 0;
 			while(non_separator_found == 0)
@@ -353,9 +359,11 @@ char* dynamic_strcat(int num_strs, ...)
 	
 	va_list strs;
 	int new_length = 0;
-	
-	va_start(strs, num_strs);
 	int i;
+	int next_start;
+	char* new_str;
+		
+	va_start(strs, num_strs);
 	for(i=0; i < num_strs; i++)
 	{
 		char* next_arg = va_arg(strs, char*);
@@ -366,9 +374,9 @@ char* dynamic_strcat(int num_strs, ...)
 	}
 	va_end(strs);
 	
-	char* new_str = malloc((1+new_length)*sizeof(char));
+	new_str = malloc((1+new_length)*sizeof(char));
 	va_start(strs, num_strs);
-	int next_start = 0;
+	next_start = 0;
 	for(i=0; i < num_strs; i++)
 	{
 		char* next_arg = va_arg(strs, char*);

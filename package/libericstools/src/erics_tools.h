@@ -75,28 +75,33 @@ typedef struct
 
 /* long map functions */
 extern long_map* initialize_long_map(void);
-extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
 extern void* get_long_map_element(long_map* map, unsigned long key);
+void* get_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
+void* get_largest_long_map_element(long_map* map, unsigned long* largest_key);
+void* remove_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
+void* remove_largest_long_map_element(long_map* map, unsigned long* largest_key);
+extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
 extern void* remove_long_map_element(long_map* map, unsigned long key);
-extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned);
-extern void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned);
-extern void** destroy_long_map(long_map* map, int destruction_type);
+extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned);
+extern void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned);
+extern void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed);
 
 /* string map functions */
 extern string_map* initialize_string_map(unsigned char store_keys);
-extern void* set_string_map_element(string_map* map, const char* key, void* value);
 extern void* get_string_map_element(string_map* map, const char* key);
+extern void* set_string_map_element(string_map* map, const char* key, void* value);
 extern void* remove_string_map_element(string_map* map, const char* key);
-extern char** get_string_map_keys(string_map* map); 
-extern void** get_string_map_values(string_map* map, unsigned long* values_returned);
-extern void** destroy_string_map(string_map* map, int destruction_type);
+extern char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned); 
+extern void** get_string_map_values(string_map* map, unsigned long* num_values_returned);
+extern void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed);
 
 /*
- * three different ways to deal with values when map is destroyed
+ * three different ways to deal with values when data structure is destroyed
  */
-#define DESTROY_MAP_RETURN_VALUES	1
-#define DESTROY_MAP_FREE_VALUES		2
-#define DESTROY_MAP_IGNORE_VALUES 	3
+#define DESTROY_MODE_RETURN_VALUES	20
+#define DESTROY_MODE_FREE_VALUES 	21
+#define DESTROY_MODE_IGNORE_VALUES	22
+
 
 /* 
  * for convenience & backwards compatibility alias _string_map_ functions to 
@@ -111,32 +116,99 @@ extern void** destroy_string_map(string_map* map, int destruction_type);
 #define destroy_map		destroy_string_map
 
 
+
+/* list structs / prototypes */
+
+typedef struct list_node_struct
+{
+	struct list_node_struct* next;
+	struct list_node_struct* previous;
+	void* value;
+} list_node;
+
+typedef struct list_struct
+{
+	long length;
+	list_node* head;
+	list_node* tail;
+	
+}list;
+
+extern list* initialize_list(void);			/* O(1) */
+
+
+
+extern void* shift_list(list* l);			/* O(1) */
+extern void  unshift_list(list* l, void* value);	/* O(1) */
+extern void* pop_list(list* l);				/* O(1) */
+extern void  push_list(list*l, void* value);		/* O(1) */
+
+
+extern void**  destroy_list(list* l, int destruction_type, unsigned long* num_destroyed);	/* O(n) */
+extern void* list_element_at(list* l, unsigned long index);					/* O(n) */
+extern void** get_list_values(list* l, unsigned long* num_values_returned);			/* O(n) */
+
+/* The idea behind the remove_internal_node function and
+ * the other functions below that perform list operations on
+ * list_node pointers instead of values is as follows:
+ *
+ * It is O(n) to remove arbitrary node from list. BUT, if
+ * we have a pointer to that node already it is O(1).  So,
+ * provide functions to manipulate list with list_node pointers
+ * instead of values & a function to remove an internal node
+ * given a pointer to that node.  This means we can have
+ * access to internal nodes & use another
+ * data structure to store internal nodes and delete in O(1)
+ */
+extern void remove_internal_list_node(list*l, list_node* internal);		/* O(1) */
+
+extern list_node* create_list_node(void* value);			/* O(1) */
+extern void* free_list_node(list_node* delete_node);			/* O(1) */
+	
+extern list_node* shift_list_node(list* l);				/* O(1) */
+extern void  unshift_list_node(list* l, list_node* new_node);		/* O(1) */
+extern list_node* pop_list_node(list* l);				/* O(1) */
+extern void  push_list_node(list*l, list_node* new_node);		/* O(1) */
+
+
+
+
+
+
 /* priority_queue structs / prototypes */
 
-typedef struct 
+typedef struct priority_queue_node_struct
 {
-	int priority;
+	unsigned long priority;
 	char* id;
-	
-	void* next_node;
-	void* previous_node;
-	
-	void* data;
-	
+	void* value;
 } priority_queue_node;
 
-typedef priority_queue_node** priority_queue;
 
-extern void insert_priority_node(priority_queue_node** node_list, char* id, int priority, void* data);
-extern void set_node_priority(priority_queue_node** node_list, char* id, int new_priority);
-extern priority_queue_node* remove_priority_node(priority_queue_node** node_list, char* id);
-extern priority_queue_node* get_priority_node(priority_queue_node** node_list, char* id);
+typedef struct priority_queue_struct
+{
+	long_map* priorities;
+	string_map* ids;
+	priority_queue_node* first;
+	long length;
+} priority_queue;
 
-extern priority_queue_node* get_first_in_priority_queue(priority_queue_node** node_list);
-extern priority_queue_node* pop_priority_queue(priority_queue_node** node_list);
+extern priority_queue* initialize_priority_queue(void);
+extern priority_queue_node* create_priority_node(unsigned long priority, char* id, void* value);
+extern void* free_priority_queue_node(priority_queue_node* pn);
+extern void push_priority_queue(priority_queue* pq, unsigned long priority, char* id, void * value);
+extern void* shift_priority_queue(priority_queue* pq, unsigned long* priority, char** id);
+extern void* peek_priority_queue(priority_queue* pq, unsigned long* priority, char** id, int dynamic_alloc_id);
+extern void* get_priority_queue_element_with_id(priority_queue* pq, char* id, long* priority);
+extern void* remove_priority_queue_element_with_id(priority_queue* pq, char* id, long* priority);
+extern void push_priority_queue_node(priority_queue* pq, priority_queue_node* pn);
+extern priority_queue_node* shift_priority_queue_node(priority_queue* pq);
+extern priority_queue_node* get_priority_queue_node_with_id(priority_queue* pq, char* id);
+extern priority_queue_node* remove_priority_queue_node_with_id(priority_queue* pq, char* id);
+extern void set_priority_for_id_in_priority_queue(priority_queue* pq, char* id, unsigned long priority);
+extern priority_queue_node* peek_priority_queue_node(priority_queue* pq);
+extern void** destroy_priority_queue(priority_queue* pq, int destroy_mode, unsigned long* num_destroyed);
 
-extern priority_queue initialize_priority_queue(void);
-extern void free_empty_priority_queue(priority_queue node_list);
 
 
 /* string_util structs / prototypes */

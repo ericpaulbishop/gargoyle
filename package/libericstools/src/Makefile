@@ -1,25 +1,97 @@
 all: erics_tools
+VERSION=1
 
-test_string: test_string.o erics_tools
-	$(CC) $(CFLAGS) $(LDFLAGS) test_string.o string_util.o -o test_string
+
+ifeq ($(CC),)
+  CC=gcc
+endif
+
+ifeq ($(LD),)
+  LD=ld
+endif
+
+ifeq ($(AR),)
+  AR=ar
+endif
+
+ifeq ($(RANLIB),)
+  RANLIB=ranlib
+endif
+
+
+
+OS=$(shell uname)
+ifeq ($(OS),Darwin)
+  LINK=$(LD)
+  SHLIB_EXT=dylib
+  SHLIB_FLAGS=-dylib
+  SHLIB_FILE=libericstools.$(SHLIB_EXT).$(VERSION)
+else
+  LINK=$(CC)
+  SHLIB_EXT=so
+  SHLIB_FILE=libericstools.$(SHLIB_EXT).$(VERSION)
+  SHLIB_FLAGS=-shared -Wl,-soname,$(SHLIB_FILE)
+endif
+
+WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
+MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
+
+test_list_and_queue: test_list_and_queue.c libericstools.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+test_list_and_queue.o: test_list_and_queue.c
+	$(CC) $(CFLAGS) $(MINIMAL_WARNING_FLAGS) -o $@ -c $^
+
+test_string: test_string.o libericstools.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 test_string.o: test_string.c
-	$(CC) $(CFLAGS) -Wall -Wstrict-prototypes -c test_string.c -o test_string.o
+	$(CC) $(CFLAGS) $(MINIMAL_WARNING_FLAGS) -c $^ -o $@
 
-test_map: test_map.o erics_tools
-	$(CC) $(CFLAGS) $(LDFLAGS) test_map.o tree_map.o -o test_map
+
+test_map: test_map.o libericstools.a
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 test_map.o: test_map.c
-	$(CC) $(CFLAGS) -Wall -Wstrict-prototypes -c test_map.c -o test_map.o
+	$(CC) $(CFLAGS) $(MINIMAL_WARNING_FLAGS) -c $^ -o $@
 
-erics_tools: priority_queue.o tree_map.o string_util.o
-	$(CC) -shared $(LDFLAGS) $(CFLAGS) -fPIC -Wl,-soname,libericstools.so.1  priority_queue.o tree_map.o string_util.o -o libericstools.so.1
-	if [ -e libericstools.so ] ; then rm libericstools.so ; fi
-	ln -s libericstools.so.1 libericstools.so
-priority_queue.o: priority_queue.c erics_tools.h
-	$(CC) $(CFLAGS) -fPIC -Wall -Wstrict-prototypes -c priority_queue.c
-tree_map.o: tree_map.c erics_tools.h
-	$(CC) $(CFLAGS) -fPIC -Wall -Wstrict-prototypes -pedantic -c tree_map.c
-string_util.o: string_util.c erics_tools.h
-	$(CC) $(CFLAGS) -fPIC -Wall -Wstrict-prototypes -c string_util.c
+
+
+
+all: erics_tools
+
+erics_tools: libericstools.$(SHLIB_EXT) libericstools.a
+
+
+libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_util_static.o
+	if [ -e $@ ] ; then rm $@ ; fi
+	$(AR) rc $@ $^
+	$(RANLIB) $@
+	
+
+libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o
+	if [ -e libericstools.$(SHLIB_EXT) ] ; then rm libericstools.$(SHLIB_EXT)* ; fi
+	$(LINK) $(LDFLAGS) $(CFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
+	ln -s $(SHLIB_FILE) libericstools.$(SHLIB_EXT)
+
+list_dyn.o: list.c
+	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
+priority_queue_dyn.o: priority_queue.c
+	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
+tree_map_dyn.o: tree_map.c 
+	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
+string_util_dyn.o: string_util.c 
+	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
+
+
+list_static.o: list.c
+	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
+priority_queue_static.o: priority_queue.c
+	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
+tree_map_static.o: tree_map.c 
+	$(CC) $(CFLAGS) $(WARNING_FLAGS) -pedantic -o $@ -c $^
+string_util_static.o: string_util.c 
+	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
+
+
+
 clean:
-	touch tmp.o tmp.so tmp~ .tmp.swp test_map 
-	rm *.o *.so* .*sw* *~ test_map 
+	touch tmp.a tmp.o tmp.$(SHLIB_EXT) tmp~ .tmp.swp test_map test_string test_list_and_queue
+	rm *.a *.o *.$(SHLIB_EXT)* .*sw* *~ test_map test_string test_list_and_queue

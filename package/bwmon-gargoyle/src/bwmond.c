@@ -204,14 +204,14 @@ int main( int argc, char** argv )
 
 	//initialize update queue
 	time_t reference_time = time(NULL);
-	priority_queue update_queue = initialize_priority_queue();
+	priority_queue* update_queue = initialize_priority_queue();
 	for(monitor_index=0; monitors[monitor_index] != NULL; monitor_index++)
 	{
 		bw_monitor* monitor = monitors[monitor_index];
 
 		update_node* next_update = (update_node*)malloc(sizeof(update_node));
 		*next_update = get_next_update_time(monitors, monitor_index);
-		insert_priority_node(update_queue, monitor->name, next_update->update_time - reference_time, next_update);
+		push_priority_queue(update_queue,  next_update->update_time - reference_time, monitor->name, next_update);
 		
 		//time_t next = next_update->update_time;
 		//struct tm* detailedTime = localtime(&next);
@@ -231,8 +231,8 @@ int main( int argc, char** argv )
 		if(current_time != last_checked)
 		{
 			last_checked = current_time;
-			priority_queue_node *check = get_first_in_priority_queue(update_queue);
-			if(current_time >= ((update_node*)check->data)->update_time)
+			priority_queue_node *check = peek_priority_queue_node(update_queue);
+			if(current_time >= ((update_node*)check->value)->update_time)
 			{
 				// we need to save iptables snapshots so we don't make extra work
 				// retrieving the same data every time
@@ -244,13 +244,12 @@ int main( int argc, char** argv )
 				recent_iptables_snapshots[0] = NULL;
 				recent_iptables_names[0] = NULL;
 
-				while(current_time >= ((update_node*)check->data)->update_time)
+				while(current_time >= ((update_node*)check->value)->update_time)
 				{
 					//pop next update from priority queue
-					priority_queue_node *pop = pop_priority_queue(update_queue);
-					update_node* next_update = (update_node*)pop->data;
+					priority_queue_node *p = shift_priority_queue_node(update_queue);
+					update_node* next_update = (update_node*)free_priority_queue_node(p);
 					next_update->update_time = current_time;
-					free(pop);
 	
 					//do update
 					int monitor_index = next_update->monitor_index;
@@ -260,11 +259,11 @@ int main( int argc, char** argv )
 
 					//schedule next update for this monitor & return to queue
 					*next_update = get_next_update_time(monitors, monitor_index);
-					insert_priority_node(update_queue, monitor->name, next_update->update_time-reference_time, next_update);
+					push_priority_queue(update_queue,  next_update->update_time-reference_time, monitor->name, next_update);
 				
 
 					//make sure there's not another monitor we need to update
-					check = get_first_in_priority_queue(update_queue);
+					check = peek_priority_queue_node(update_queue);
 				}
 
 				//free iptables snapshots

@@ -290,7 +290,8 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 	}
 	if(all_found == 1)
 	{
-		service_names = get_map_keys(service_configs);
+		unsigned long num_keys;
+		service_names = get_map_keys(service_configs, &num_keys);
 	}
 	
 	
@@ -405,7 +406,8 @@ void run_request_through_daemon(string_map* service_configs, char** service_name
 	}
 	if(all_found == 1)
 	{
-		service_names = get_map_keys(service_configs);
+		unsigned long num_keys;
+		service_names = get_map_keys(service_configs, &num_keys);
 	}
 	for(name_index = 0; service_names[name_index] != NULL; name_index++)
 	{
@@ -503,10 +505,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	// based on this, initialize update queue
 	// in the context of daemon, force_update indicates whether we
 	// should force an update on initial check
-	priority_queue update_queue = initialize_priority_queue();
-	priority_queue request_queue = initialize_priority_queue();
+	priority_queue* update_queue = initialize_priority_queue();
+	priority_queue* request_queue = initialize_priority_queue();
 
-	char** service_names = get_map_keys(service_configs);
+	unsigned long num_keys;
+	char** service_names = get_map_keys(service_configs, &num_keys);
 	time_t reference_time = time(NULL);
 	int name_index;
 	for(name_index=0; service_names[name_index] != NULL; name_index++)
@@ -556,7 +559,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 		{
 			next_update->last_full_update = last_update;
 		}
-		insert_priority_node(update_queue, next_update->service_name, next_update->next_time - reference_time, next_update); 
+		push_priority_queue(update_queue,  next_update->next_time - reference_time, next_update->service_name, next_update); 
 	}
 
 	// store last update times for local ips from various interfaces & internet
@@ -584,9 +587,9 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 		if(current_time != last_checked)
 		{
 			last_checked = current_time;
-			priority_queue_node *check_rq = get_first_in_priority_queue(request_queue);
-			priority_queue_node *check_uq = check_rq == NULL ? get_first_in_priority_queue(update_queue) : check_rq;
-			while(current_time >= ((update_node*)check_uq->data)->next_time || check_rq != NULL)
+			priority_queue_node *check_rq = peek_priority_queue_node(request_queue);
+			priority_queue_node *check_uq = check_rq == NULL ? peek_priority_queue_node(update_queue) : check_rq;
+			while(current_time >= ((update_node*)check_uq->value)->next_time || check_rq != NULL)
 			{
 				//updates can take a bit of time since we're doing network i/o so constantly update current time
 				current_time = time(NULL); 
@@ -595,16 +598,15 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				priority_queue_node *p;
 			       	if(check_rq != NULL)
 				{
-					p = pop_priority_queue(request_queue);
+					p = shift_priority_queue_node(request_queue);
 
 				}
 				else
 				{
-					p = pop_priority_queue(update_queue);
+					p = shift_priority_queue_node(update_queue);
 				}
-				update_node* next_update = (update_node*)p->data;
+				update_node* next_update = (update_node*)free_priority_queue_node(p);
 				next_update->next_time = current_time;
-				free(p);
 			
 				//determine whether to force an update or just check	
 				ddns_service_config* service_config = get_map_element(service_configs, next_update->service_name);
@@ -732,10 +734,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 				//printf("waiting %d seconds before next update\n", (int)(next_update->next_time - current_time));
 
-				insert_priority_node(update_queue, next_update->service_name, next_update->next_time-reference_time, next_update);
+				push_priority_queue(update_queue, next_update->next_time-reference_time, next_update->service_name, next_update);
 				
-				check_rq = get_first_in_priority_queue(request_queue);
-				check_uq = get_first_in_priority_queue(update_queue);
+				check_rq = peek_priority_queue_node(request_queue);
+				check_uq = peek_priority_queue_node(update_queue);
 			}
 		}
 
@@ -760,16 +762,15 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				//printf("requested %s\n", req_name);
 				if(service_config != NULL)
 				{
-					priority_queue_node *p = remove_priority_node(update_queue, req_name);
-					update_node* next_update = (update_node*)p->data;
+					priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, req_name);
+					update_node* next_update = free_priority_queue_node(p);
 					next_update->next_time = current_time;
-					free(p);
 
 					if(force_requested == 1)
 					{
 						next_update->last_full_update = 0;
 					}
-					insert_priority_node(request_queue, next_update->service_name, message_count, next_update);
+					push_priority_queue(request_queue, message_count, next_update->service_name, next_update);
 				}
 				else
 				{
@@ -1286,7 +1287,8 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 					free(service_conf->ip_url);
 					free(service_conf->ip_interface);
 					
-					char** keys = get_map_keys(service_conf->variable_definitions);
+					unsigned long num_keys;
+					char** keys = get_map_keys(service_conf->variable_definitions, &num_keys);
 					int key_index;
 					for(key_index = 0; keys[key_index] != NULL; key_index++)
 					{
