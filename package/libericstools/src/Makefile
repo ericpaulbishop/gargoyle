@@ -33,6 +33,7 @@ else
   SHLIB_FLAGS=-shared -Wl,-soname,$(SHLIB_FILE)
 endif
 
+CFLAGS:=$(CFLAGS) -Os
 WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
 MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
 
@@ -68,7 +69,7 @@ libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_
 
 libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o
 	if [ -e libericstools.$(SHLIB_EXT) ] ; then rm libericstools.$(SHLIB_EXT)* ; fi
-	$(LINK) $(LDFLAGS) $(CFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
+	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
 	ln -s $(SHLIB_FILE) libericstools.$(SHLIB_EXT)
 
 list_dyn.o: list.c

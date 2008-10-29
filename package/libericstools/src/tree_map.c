@@ -177,17 +177,16 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 	return str_keys;
 }
 
-void** get_string_map_values(string_map* map, unsigned long* values_returned)
+void** get_string_map_values(string_map* map, unsigned long* num_values_returned)
 {
 	void** values;
-	unsigned long list_length;
 	string_map_key_value** long_values;
 	unsigned long value_index;
 	if(map->store_keys >0)
 	{
 		values = (void**)malloc((map->num_elements+1)*sizeof(void*));
-		long_values = (string_map_key_value**)get_sorted_long_map_values ( &(map->lm), &list_length );
-		for(value_index=0; value_index < list_length; value_index++)
+		long_values = (string_map_key_value**)get_sorted_long_map_values ( &(map->lm), num_values_returned );
+		for(value_index=0; value_index < *num_values_returned; value_index++)
 		{
 			values[value_index] = (long_values[value_index])->value;
 		}
@@ -195,8 +194,7 @@ void** get_string_map_values(string_map* map, unsigned long* values_returned)
 	}
 	else
 	{
-		values = get_sorted_long_map_values ( &(map->lm), &list_length );
-
+		values = get_sorted_long_map_values ( &(map->lm), num_values_returned );
 	}
 	return values;
 }
@@ -603,20 +601,20 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 
 
 /* note: returned keys are dynamically allocated, you need to free them! */
-unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned)
+unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned)
 {
 	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
 
 	unsigned long next_key_index = 0;
 	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
 	
-	*keys_returned = map->num_elements;
+	*num_keys_returned = map->num_elements;
 
 	return key_list;
 }
 
 
-void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
+void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned)
 {
 	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
 
@@ -624,7 +622,7 @@ void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
 	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
 	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
 
-	*values_returned = map->num_elements;
+	*num_values_returned = map->num_elements;
 	return value_list;
 
 }
