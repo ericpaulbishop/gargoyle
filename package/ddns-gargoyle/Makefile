@@ -37,7 +37,8 @@ define Build/Compile
 		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
 		USE_MATRIXSSL="1" \
-		USE_OPENSSL="0" 
+		USE_OPENSSL="0" \
+		STATIC_ERICSTOOLS="0"
 endef
 
 define Package/ddns-gargoyle/install
