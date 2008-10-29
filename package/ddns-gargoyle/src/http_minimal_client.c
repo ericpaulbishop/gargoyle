@@ -20,7 +20,7 @@
 #include "http_minimal_client.h"
 
 #ifdef USE_ERICS_TOOLS
-#include <erics_tools.h>
+#include "erics_tools.h"
 #endif
 
 #include <stdio.h>

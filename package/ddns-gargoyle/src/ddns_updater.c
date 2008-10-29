@@ -22,7 +22,7 @@
  */
 
 
-#include <erics_tools.h>
+#include "erics_tools.h"
 #include "http_minimal_client.h"
 
 #include <stdio.h>
@@ -56,17 +56,20 @@
 #define INTERFACE	1
 #define INTERNET	2
 
-#define UPDATE_FAILED		3
-#define UPDATE_NOT_NEEDED	4
-#define UPDATE_SUCCESSFUL	5
+#define UPDATE_FAILED				3
+#define UPDATE_NOT_NEEDED			4
+#define UPDATE_SUCCESSFUL			5
+#define UPDATE_OF_MULTIPLE_SERVICES_SCHEDULED	6
 
+
+#define UPDATE_ALL_REQUEST_STR	"UPDATE_OF_ALL_DEFINED_DDNS_SERVICE_CONFIGURATIONS_REQUESTED"
 
 #define UPDATE_INFO_DIR		"/var/last_ddns_updates/" 	//where to store files containing time of last updates
 #define PID_PATH		"/var/run/ddns_updaterd.pid" 	//pid file for program when run in daemon mode
 #define MSG_ID			112
 #define REQUEST_MSG_TYPE 	124
 #define RESPONSE_MSG_TYPE	136
-#define MAX_MSG_LINE 		75
+#define MAX_MSG_LINE 		250
 
 
 typedef struct
@@ -135,7 +138,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 char* lookup_domain_ip(char* url_str);
 
 void run_request(string_map *service_configs, string_map *service_providers, char **service_names, int force_update, char display_format, int verbose);
-void run_request_through_daemon(string_map *service_configs, char **service_names, int force_update, char display_format);
+void run_request_through_daemon(char **service_names, int force_update, char display_format);
 void run_daemon(string_map *service_configs, string_map *service_providers, int force_update);
 
 void daemonize(int background);
@@ -231,49 +234,55 @@ int main(int argc, char** argv)
 		service_names[name_length] = NULL;
 	}
 
-	string_map *service_providers = load_service_providers(service_provider_file);
-	string_map *service_configs = load_service_configurations(config_file, service_providers);
-	if(service_configs->num_elements == 0)
+
+
+	//test if a daemon is already running by trying to open the message queue (which daemon creates)
+	int testq = msgget(ftok(PID_PATH, MSG_ID), 0777);
+	int daemon_running = testq < 0 ? 0 : 1;
+
+	//if we're not running a request through the daemon, load config files
+	if(daemon_running == 0)
 	{
-		if(service_providers->num_elements == 0)
+		string_map *service_providers = load_service_providers(service_provider_file);
+		string_map *service_configs = load_service_configurations(config_file, service_providers);
+		if(service_configs->num_elements == 0)
 		{
-			printf("ERROR: No dynamic DNS service definitions found\n(Did you specify correct definition file path?)\n");
+			if(service_providers->num_elements == 0)
+			{
+				printf("ERROR: No dynamic DNS service definitions found\n(Did you specify correct definition file path?)\n");
+			}
+			else
+			{
+				printf("ERROR: No valid dynamic DNS service configurations defined\n(Did you specify correct configuration file path?)\n");
+			}
 		}
 		else
 		{
-			printf("ERROR: No valid dynamic DNS service configurations defined\n(Did you specify correct configuration file path?)\n");
+
+			if(is_daemon)
+			{
+				//start update daemon
+				run_daemon(service_configs, service_providers, force_update);
+			}
+			else
+			{
+				run_request(service_configs, service_providers, service_names, force_update, display_format, verbose);
+				// handle each service requested or all if none specified
+			}
 		}
-	}
+	}	
 	else
-	{
-		//test if a daemon is already running by trying to open the message queue (which daemon creates)
-		int testq = msgget(ftok(PID_PATH, MSG_ID), 0777);
-		int daemon_running = testq < 0 ? 0 : 1;
-
-
-
-		if(daemon_running == 0 && is_daemon == 0)
-		{
-			// handle each service requested or all if none specified
-			run_request(service_configs, service_providers, service_names, force_update, display_format, verbose);
-		}
-		else if(daemon_running == 1 && is_daemon == 0)
-		{
-			//send a request to daemon to check/update each service requested, or all if none specified
-			run_request_through_daemon(service_configs, service_names, force_update, display_format);
-		}
-		else if(daemon_running ==0 && is_daemon == 1)
-		{
-			//start update daemon
-			run_daemon(service_configs, service_providers, force_update);
-		}
-		else
+	{	
+		if(is_daemon)
 		{
 			printf("ERROR: Daemon is already running, cannot start a new daemon.\n");
 		}
+		else
+		{
+			//send a request to daemon to check/update each service requested, or all if none specified
+			run_request_through_daemon(service_names, force_update, display_format);
+		}
 	}
-
-
 
 
 	return 0;
@@ -370,7 +379,7 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 }
 
 
-void run_request_through_daemon(string_map* service_configs, char** service_names, int force_update, char display_format)
+void run_request_through_daemon(char** service_names, int force_update, char display_format)
 {
 	
 	// get queue
@@ -398,24 +407,34 @@ void run_request_through_daemon(string_map* service_configs, char** service_name
 	}
 
 	//send requests to queue
+	int all_found = service_names[0] == NULL ? 1 : 0;
 	int name_index = 0;
-	int all_found = service_names[name_index] == NULL ? 1 : 0;
 	for(name_index = 0; service_names[name_index] != NULL && all_found == 0; name_index++)
 	{
 		all_found = safe_strcmp(service_names[name_index], "all") == 0 ? 1 : 0;
 	}
+	
+	unsigned long messages_expected;
 	if(all_found == 1)
-	{
-		unsigned long num_keys;
-		service_names = get_map_keys(service_configs, &num_keys);
-	}
-	for(name_index = 0; service_names[name_index] != NULL; name_index++)
 	{
 		message_t req_msg;
 		req_msg.msg_type = REQUEST_MSG_TYPE;
 		req_msg.msg_line[0] = force_update == 1 ? 'f' : ' ';
-		sprintf(req_msg.msg_line + 1, "%s", service_names[name_index]);
+		sprintf(req_msg.msg_line + 1, "%s", UPDATE_ALL_REQUEST_STR);
 		msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
+		messages_expected = 1;
+	}
+	else
+	{
+		for(name_index = 0; service_names[name_index] != NULL; name_index++)
+		{
+			message_t req_msg;
+			req_msg.msg_type = REQUEST_MSG_TYPE;
+			req_msg.msg_line[0] = force_update == 1 ? 'f' : ' ';
+			sprintf(req_msg.msg_line + 1, "%s", service_names[name_index]);
+			msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
+		}
+		messages_expected = name_index;
 	}
 
 
@@ -425,22 +444,26 @@ void run_request_through_daemon(string_map* service_configs, char** service_name
 
 
 	message_t resp_msg;
-	int messages_read = 0;
-	while(messages_read < name_index) //blocking read
+	unsigned long messages_read = 0;
+	while(messages_read < messages_expected) //blocking read
 	{
 		int q_read_status = msgrcv(mq, (void *)&resp_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 0);
 		if(q_read_status > 0)
 		{
 			int update_status = (int)resp_msg.msg_line[0];
+			messages_expected = messages_expected + ( update_status == UPDATE_OF_MULTIPLE_SERVICES_SCHEDULED ? *((unsigned long*)(resp_msg.msg_line + 1)) : 0);
+
 			if(display_format == 'h')
 			{
 				char *service_name = (char*)resp_msg.msg_line +1;
 				char* test_domain = service_name;
+				/*
 				ddns_service_config* service_config = (ddns_service_config*)get_map_element(service_configs, service_name);
 				if(service_config != NULL)
 				{
 					test_domain = get_map_element(service_config->variable_definitions, "domain");
 				}
+				*/
 				switch(update_status)
 				{
 					case UPDATE_SUCCESSFUL:
@@ -469,8 +492,8 @@ void run_request_through_daemon(string_map* service_configs, char** service_name
 						break;
 				}
 			}
+			messages_read++;
 		}
-		messages_read++;
 	}
 	printf("\n");
 }
@@ -758,28 +781,107 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				message_count++;
 				int force_requested = next_req_message.msg_line[0] == 'f' ? 1 : 0;
 				char *req_name = next_req_message.msg_line + 1;
-				ddns_service_config *service_config = get_map_element(service_configs, req_name);
-				//printf("requested %s\n", req_name);
-				if(service_config != NULL)
+				if(safe_strcmp(req_name, UPDATE_ALL_REQUEST_STR) == 0)
 				{
-					priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, req_name);
-					update_node* next_update = free_priority_queue_node(p);
-					next_update->next_time = current_time;
-
-					if(force_requested == 1)
+					unsigned long num_configs;
+					ddns_service_config** all_configs = (ddns_service_config**)get_map_values(service_configs, &num_configs);
+				
+					/* inform client how many updates we're scheduling */
+					if(num_configs > 1)
 					{
-						next_update->last_full_update = 0;
+						message_t resp_msg;
+						resp_msg.msg_type = RESPONSE_MSG_TYPE;
+						resp_msg.msg_line[0] = UPDATE_OF_MULTIPLE_SERVICES_SCHEDULED;
+						*((unsigned long*)(resp_msg.msg_line + 1)) = num_configs;
+						msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
 					}
-					push_priority_queue(request_queue, message_count, next_update->service_name, next_update);
+					
+					int config_index = 0;
+					for(config_index = 0; config_index < num_configs; config_index++)
+					{
+						//printf("running update %d of %ld\n", config_index+1, num_configs);
+						ddns_service_config *service_config = all_configs[config_index];
+						if(service_config != NULL)
+						{
+							priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, service_config->name);
+							update_node* next_update = (update_node*)free_priority_queue_node(p);
+							next_update->next_time = current_time;
+	
+							if(force_requested == 1)
+							{
+								next_update->last_full_update = 0;
+							}
+							push_priority_queue(request_queue, message_count, next_update->service_name, next_update);
+						}
+						else
+						{
+							message_t resp_msg;
+							resp_msg.msg_type = RESPONSE_MSG_TYPE;
+							resp_msg.msg_line[0] = UPDATE_FAILED;
+							
+							char* service_domain = get_map_element(service_config->variable_definitions, "domain");
+							int name_len = strlen(service_config->name);
+							int domain_len = strlen(service_domain);
+							if(name_len + domain_len < MAX_MSG_LINE - 5)
+							{
+								sprintf(resp_msg.msg_line+1, "%s (%s)", service_config->name, service_domain);
+							}
+							else if(name_len < MAX_MSG_LINE -2)
+							{
+								sprintf(resp_msg.msg_line+1, "%s", service_config->name);
+							}
+							else
+							{
+								sprintf(resp_msg.msg_line+1, "next service");
+							}
+							
+							msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
+						}
+
+					}
+					
+					free(all_configs);
 				}
 				else
 				{
-					message_t resp_msg;
-					resp_msg.msg_type = RESPONSE_MSG_TYPE;
-					resp_msg.msg_line[0] = UPDATE_FAILED;
-					sprintf(resp_msg.msg_line+1, "%s", req_name);
-					msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
-				}
+					ddns_service_config *service_config = get_map_element(service_configs, req_name);
+					//printf("requested %s\n", req_name);
+					if(service_config != NULL)
+					{
+						priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, req_name);
+						update_node* next_update = (update_node*)free_priority_queue_node(p);
+						next_update->next_time = current_time;
+	
+						if(force_requested == 1)
+						{
+							next_update->last_full_update = 0;
+						}
+						push_priority_queue(request_queue, message_count, next_update->service_name, next_update);
+					}
+					else
+					{
+						message_t resp_msg;
+						resp_msg.msg_type = RESPONSE_MSG_TYPE;
+						resp_msg.msg_line[0] = UPDATE_FAILED;
+						
+						char* service_domain = get_map_element(service_config->variable_definitions, "domain");
+						int name_len = strlen(service_config->name);
+						int domain_len = strlen(service_domain);
+						if(name_len + domain_len < MAX_MSG_LINE - 5)
+						{
+							sprintf(resp_msg.msg_line+1, "%s (%s)", service_config->name, service_domain);
+						}
+						else if(name_len < MAX_MSG_LINE -2)
+						{
+							sprintf(resp_msg.msg_line+1, "%s", service_config->name);
+						}
+						else
+						{
+							sprintf(resp_msg.msg_line+1, "next service");
+						}
+						msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
+					}
+				}			
 			}
 			output_requested = 0;
 		
