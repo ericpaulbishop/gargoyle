@@ -23,12 +23,18 @@ int main(void)
 	remove_internal_list_node(l, a_node);
 	remove_internal_list_node(l, x_node);
 	
-	
+	free_list_node(z_node);
+	free_list_node(a_node);
+	free_list_node(x_node);
+
 	while(l->length > 0)
 	{
 		printf("%s\n", (char*)pop_list(l));
 	}
-
+	
+	
+	unsigned long dl;
+	destroy_list(l, DESTROY_MODE_IGNORE_VALUES, &dl);
 
 
 	printf("-------queue test-------------\n");	
@@ -46,7 +52,7 @@ int main(void)
 	push_priority_queue(pq, 30, "id_7", "value_7");
 
 	
-	printf("queue length = %d\n", pq->length);
+	printf("queue length = %ld\n", pq->length);
 	unsigned long num_destroyed;
 
 	char* tmp = peek_priority_queue(pq, &priority, &id, 0);
@@ -77,7 +83,9 @@ int main(void)
 	{
 		char* value = (char*)shift_priority_queue(pq, &priority, &id);
 		printf("%s\n", value);
+		free(id);
 	}
+	destroy_priority_queue(pq, DESTROY_MODE_FREE_VALUES, &dl);
 	
 	return 0;
 }

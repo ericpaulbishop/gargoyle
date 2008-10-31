@@ -47,8 +47,8 @@ void print_map(long_map_node* n, int depth);
 
 int main (void)
 {
-	unsigned long  num_insertions = 25000;
-	unsigned long  max_insertion = 50000;
+	unsigned long  num_insertions = 2500;
+	unsigned long  max_insertion = 5000;
 	int num_repeats = 3;
 	
 	unsigned int seed = (unsigned int)time(NULL);
@@ -77,7 +77,8 @@ int main (void)
 		for(i=0; i<num_insertions; i++)
 		{
 			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-			if( set_long_map_element(lm, r, "a") != NULL)
+			void* old;
+			if( (old = set_long_map_element(lm, r, "a")) != NULL)
 			{
 				dupes++;
 			}
@@ -148,20 +149,24 @@ int main (void)
 			printf("done removing remaining nodes\n");
 			printf("tree size is now %ld, and root is %s\n\n", lm->num_elements, lm->root == NULL ? "null" : "not null");
 
-
+			free(keys);
+			
 			printf("repeating insertion/deletion\n\n");
 		}
 		else
 		{
+			unsigned long num_destroyed;
 			printf("destroying map...\n");
-			void** values = destroy_long_map(lm, DESTROY_MODE_RETURN_VALUES);
+			void** values = destroy_long_map(lm, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
 			printf("map destroyed.\n");
 			int v=0;
 			for(v=0; values[v] != NULL; v++){}
+			free(values);
 			printf("number of values returned after map destruction = %d\n", v);
 
 		}
 	}
+
 
 	printf("LONG MAP TESTING COMPLETE.  TESTING STRING MAP (WITH KEY STORAGE) \n\n");
 
@@ -183,9 +188,11 @@ int main (void)
 			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
 			char* new_str = (char*)malloc(20*sizeof(char));
 			sprintf(new_str, "%ld", r);
-			if( set_string_map_element(sm, new_str, "a") != NULL )
+			void* old;
+			if( (old = set_string_map_element(sm, new_str, "a")) != NULL )
 			{
 				dupes++;
+				free(old);
 			}
 			free(new_str);
 		}
@@ -216,9 +223,11 @@ int main (void)
 				unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
 				char* new_str = (char*)malloc(20*sizeof(char));
 				sprintf(new_str, "%ld", r);
-				if( remove_string_map_element(sm, new_str) != NULL)
+				void* old;
+				if( (old = remove_string_map_element(sm, new_str)) != NULL)
 				{
 					found++;
+					free(old);
 				}
 				free(new_str);
 			}
@@ -241,7 +250,7 @@ int main (void)
 
 			printf("removing remaining nodes in tree in random order\n");
 			unsigned long length = sm->num_elements;
-			char** keys = get_string_map_keys(sm);
+			char** keys = get_string_map_keys(sm, &length);
 			while(sm->lm.root != NULL && sm->num_elements > 0)
 			{
 				unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
@@ -254,6 +263,14 @@ int main (void)
 					}
 				}
 			}
+			
+			int k;
+			for(k=0; k<length; k++)
+			{
+				free(keys[k]);
+			}
+			free(keys);
+
 			printf("done removing remaining nodes\n");
 			printf("tree size is now %ld, and root is %s\n\n", sm->num_elements, sm->lm.root == NULL ? "null" : "not null");
 
@@ -261,12 +278,17 @@ int main (void)
 		}
 		else
 		{
+			unsigned long num_destroyed;
 			printf("destroying map...\n");
-			void** values = destroy_string_map(sm, DESTROY_MODE_RETURN_VALUES);
+			void** values = destroy_string_map(sm, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
 			printf("map destroyed.\n");
 			int v=0;
-			for(v=0; values[v] != NULL; v++){}
+			for(v=0; values[v] != NULL; v++){ free(values[v]); }
+			free(values);
 			printf("number of values returned after map destruction = %d\n", v);
+			
+
+		
 		}
 	}
 
