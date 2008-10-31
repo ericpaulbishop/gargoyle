@@ -250,7 +250,7 @@ priority_queue_node* get_priority_queue_node_with_id(priority_queue* pq, char* i
 	priority_queue_node* return_node = NULL;
 	if(pq != NULL && id != NULL)
 	{
-		id_map_node* idn = (id_map_node*)remove_string_map_element(pq->ids, return_node->id);
+		id_map_node* idn = (id_map_node*)get_string_map_element(pq->ids, return_node->id);
 		if(idn != NULL)
 		{
 			return_node = (priority_queue_node*)idn->id_node->value;
@@ -279,6 +279,7 @@ priority_queue_node* remove_priority_queue_node_with_id(priority_queue* pq, char
 				remove_long_map_element(pq->priorities, return_node->priority);
 				destroy_list(idn->id_list, DESTROY_MODE_IGNORE_VALUES, &tmp);
 			}
+			free(idn);
 
 			/* if we're removing first node, reset it */
 			if(return_node == pq->first)

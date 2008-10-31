@@ -229,6 +229,7 @@ void**  destroy_list(list* l, int destruction_type, unsigned long* num_values)
 		{
 			values[value_index] = NULL;
 		}
+		free(l);
 	}
 	*num_values = value_index;
 	return values;
