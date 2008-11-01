@@ -170,6 +170,8 @@ int main (void)
 
 	printf("LONG MAP TESTING COMPLETE.  TESTING STRING MAP (WITH KEY STORAGE) \n\n");
 
+
+
 	printf("initializing map....\n");
 	string_map* sm = initialize_string_map(1);
 	printf("initialized!\n\n");
@@ -181,18 +183,18 @@ int main (void)
 
 		printf("randomly inserting %ld integer strings randomly selected (not in order) between 0 and %ld\n", num_insertions, max_insertion);
 
+		
 		unsigned long i;
 		unsigned long  dupes = 0;
 		for(i=0; i<num_insertions; i++)
 		{
 			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-			char* new_str = (char*)malloc(20*sizeof(char));
+			char* new_str = (char*)malloc(40*sizeof(char));
 			sprintf(new_str, "%ld", r);
 			void* old;
 			if( (old = set_string_map_element(sm, new_str, "a")) != NULL )
 			{
 				dupes++;
-				free(old);
 			}
 			free(new_str);
 		}
@@ -201,6 +203,7 @@ int main (void)
 		unsigned long left_depth = 0;
 		get_max_depth(sm->lm.root->left, &left_depth, 0);
 		get_max_depth(sm->lm.root->right, &right_depth, 0);
+		
 
 		unsigned long original_size = sm->num_elements;
 		printf("insertion complete\n");
@@ -208,7 +211,6 @@ int main (void)
 		printf("(note this may be less than %ld because the same numbers can be selected for insertion more than once, replacing the original node)\n", num_insertions); 
 		printf("dupes = %ld\n", dupes);	
 		printf("depth of left branch = %ld, depth of right branch = %ld\n\n", left_depth, right_depth);
-
 
 
 		if(repeat+1 < num_repeats)
@@ -221,13 +223,12 @@ int main (void)
 			for(j=0; j < num_insertions; j++)
 			{
 				unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
-				char* new_str = (char*)malloc(20*sizeof(char));
+				char* new_str = (char*)malloc(40*sizeof(char));
 				sprintf(new_str, "%ld", r);
 				void* old;
 				if( (old = remove_string_map_element(sm, new_str)) != NULL)
 				{
 					found++;
-					free(old);
 				}
 				free(new_str);
 			}
@@ -283,7 +284,7 @@ int main (void)
 			void** values = destroy_string_map(sm, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
 			printf("map destroyed.\n");
 			int v=0;
-			for(v=0; values[v] != NULL; v++){ free(values[v]); }
+			for(v=0; values[v] != NULL; v++){  }
 			free(values);
 			printf("number of values returned after map destruction = %d\n", v);
 			
