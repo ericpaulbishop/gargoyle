@@ -101,8 +101,7 @@ string_map* initialize_string_map(unsigned char store_keys)
 void* get_string_map_element(string_map* map, const char* key)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
-	return_value =  get_long_map_element( &(map->lm), hashed_key);
+	void* return_value =  get_long_map_element( &(map->lm), hashed_key);
 	if(return_value != NULL && map->store_keys)
 	{
 		string_map_key_value* r = (string_map_key_value*)return_value;
@@ -115,7 +114,7 @@ void* get_string_map_element(string_map* map, const char* key)
 void* set_string_map_element(string_map* map, const char* key, void* value)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
+	void* return_value = NULL;
 	if(map->store_keys)
 	{
 		string_map_key_value* kv = (string_map_key_value*)malloc(sizeof(string_map_key_value));
@@ -141,8 +140,7 @@ void* set_string_map_element(string_map* map, const char* key, void* value)
 void* remove_string_map_element(string_map* map, const char* key)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
-	return_value =  remove_long_map_element( &(map->lm), hashed_key);
+	void* return_value =  remove_long_map_element( &(map->lm), hashed_key);
 	
 	if(return_value != NULL && map->store_keys)
 	{
@@ -179,8 +177,8 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 
 void** get_string_map_values(string_map* map, unsigned long* num_values_returned)
 {
-	void** values;
-	string_map_key_value** long_values;
+	void** values = NULL;
+	string_map_key_value** long_values = NULL;
 	unsigned long value_index;
 	if(map->store_keys >0)
 	{

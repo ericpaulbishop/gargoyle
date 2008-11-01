@@ -171,7 +171,7 @@ char* read_entire_file(FILE* in, int read_block_size)
 			nextch = fgetc(in);
 			if(nextch != EOF)
 			{
-				read_string[bytes_read] = nextch;
+				read_string[bytes_read] = (char)nextch;
 				bytes_read++;
 			}
 		}
@@ -179,9 +179,10 @@ char* read_entire_file(FILE* in, int read_block_size)
 		end_found = (nextch == EOF) ? 1 : 0;
 		if(end_found == 0)
 		{
-			char *new_str = (char*)malloc(max_read_size+1);
+			char *new_str;
 			max_read_size = max_read_size + read_block_size;
-			strcpy(new_str, read_string);
+		       	new_str = (char*)malloc(max_read_size+1);
+			memcpy(new_str, read_string, bytes_read);
 			free(read_string);
 			read_string = new_str;
 		}
