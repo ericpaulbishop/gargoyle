@@ -977,7 +977,7 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 		next_update_time = last_update_time - seconds_since_sunday_midnight + next_block_interval;
 		*update_type = next_event_index % 2 == 0 ? UPDATE_BLOCK_INSERT : UPDATE_BLOCK_REMOVE;
 	
-		//printf("\tlast update time = %ld, seconds sincd sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", last_update_time, seconds_since_sunday_midnight, next_block_interval, next_update_time);
+		//printf("\tlast update time = %ld, seconds since sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", last_update_time, seconds_since_sunday_midnight, next_block_interval, next_update_time);
 	}
 	else
 	{
@@ -1119,8 +1119,8 @@ void compute_block_rules(update_node* unode)
 	{
 		*num_rules = 2;
 		block_rule_list = (char**)malloc( ((*num_rules)+1) * sizeof(char*) );
-		block_rule_list[0] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, "-p tcp ",  common_str, " -j REJECT");
-		block_rule_list[1] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, "-p udp ", common_str, " -j REJECT");
+		block_rule_list[0] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ",  common_str, " -j REJECT");
+		block_rule_list[1] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p udp ", common_str, " -j REJECT");
 		block_rule_list[2] = NULL;
 	}
 	else
