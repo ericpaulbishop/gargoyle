@@ -1,0 +1,144 @@
+#!/bin/sh /etc/rc.common
+START=55
+
+include /lib/network
+
+ingress_filter_table=filter
+ingress_filter_chain=block_ingress
+egress_filter_table=filter
+egress_filter_chain=block_egress
+
+ingress_bandwidth_table=filter
+ingress_bandwidth_chain=bw_ingress
+egress_bandwidth_table=mangle
+egress_bandwidth_chain=bw_egress
+
+delete_chain_from_table()
+{
+	table=$1
+	target=$2
+
+
+	chains=$(iptables -t $table -L | awk ' $0 ~ /^Chain/ { print $2; } '  )
+	for chain in $chains ; do
+		
+		#Sort rules, so we can delete higher number rule nums first. This makes sure rule numbers remain valid
+		sorted_rules=$(iptables -t $table -L $chain --line-numbers | awk " \$1~/^[0-9]+$/ &&  \$2 ~/^$target/  {print \$1 ;}" | sort -n -r)
+		
+		
+		if [ -n "$sorted_rules" ] ; then
+			for rule_num in $sorted_rules ; do
+				iptables -t $table -D $chain $rule_num
+			done
+		fi
+		
+		if [ $chain = $target ] ; then
+			iptables -t $table -F $target
+			iptables -t $table -X $target
+		fi
+	done
+}
+
+# Converts uci config to one that can be parsed by the daemon.
+# Formats are very similar, but minor adjustments are necessary.
+convert_config()
+{
+	pkg_name="$1"
+	config_cb() 
+	{
+		echo "$1	$2"
+		if [ "$1" = "global" ] ; then
+			echo "	ingress_filter_table $ingress_filter_table"
+			echo "	ingress_filter_chain $ingress_filter_chain"
+			echo "	egress_filter_table $egress_filter_table"
+			echo "	egress_filter_chain $egress_filter_chain"
+			echo "	ingress_bandwidth_table $ingress_bandwidth_table"
+			echo "	ingress_bandwidth_chain $ingress_bandwidth_chain"
+			echo "	egress_bandwidth_table $egress_bandwidth_table"
+			echo "	egress_bandwidth_chain $egress_bandwidth_chain"
+		fi
+		option_cb()
+		{
+			handled=""
+			if [ -z "$handled" ] ; then
+				echo "	$1	$2"
+			fi
+		}
+	}
+	config_load "$pkg_name"
+}
+rebuild_if_necessary()
+{
+	rebuild_config="y"
+	if [ -e /etc/md5/restricter_gargoyle.md5 ] && [ -e /etc/config/restricter_gargoyle ] && [ -e /etc/restricter_gargoyle.conf ] ; then
+		old_md5=$(cat /etc/md5/restricter_gargoyle.md5)
+		current_md5=$(md5sum /etc/config/restricter_gargoyle | awk ' { print $1 ; } ' )
+		if [ "$old_md5" = "$current_md5" ] ; then
+			rebuild_config="n"
+		fi
+	fi
+
+	if [ "$rebuild_config" = "y" ] ; then
+		out_data=$(convert_config restricter_gargoyle)
+		echo "$out_data" > /etc/restricter_gargoyle.conf
+		mkdir -p /etc/md5
+		md5sum /etc/config/restricter_gargoyle | awk ' { print $1 ; }' > /etc/md5/restricter_gargoyle.md5
+	fi
+	echo $rebuild_config
+}
+
+start()
+{
+	scan_interfaces
+	config_load network
+	config_get wan_if wan ifname
+
+	if [ -e /var/run/restricterd.pid ] ; then
+		old_pid=$(cat /var/run/restricterd.pid)
+		kill $old_pid 2>/dev/null
+	fi
+
+	if [ -z "$wan_if" ] ; then
+		return 0
+	fi
+	
+	
+	ingress_bw_exists=$(iptables -t $ingress_bandwidth_table -L $ingress_bandwidth_chain 2>/dev/null)
+	if [ -z "$ingress_bw_exists" ] ; then
+		iptables -t $ingress_bandwidth_table -N $ingress_bandwidth_chain
+		iptables -t $ingress_bandwidth_table -I INPUT  -i $wan_if -j $ingress_bandwidth_chain
+		iptables -t $ingress_bandwidth_table -I FORWARD -i $wan_if -j $ingress_bandwidth_chain
+	fi
+	egress_bw_exists=$(iptables -t $egress_bandwidth_table -L $egress_bandwidth_chain 2>/dev/null)
+	if [ -z "$egress_bw_exists" ] ; then
+		iptables -t $egress_bandwidth_table -N $egress_bandwidth_chain
+		iptables -t $egress_bandwidth_table -A POSTROUTING  -o $wan_if -j $egress_bandwidth_chain
+	fi
+	ingress_filter_exists=$(iptables -t $ingress_filter_table -L $ingress_filter_chain 2>/dev/null)
+	if [ -z "$ingress_filter_exists" ] ; then
+		iptables -t $ingress_filter_table -N $ingress_filter_chain
+		iptables -t $ingress_filter_table -I INPUT  -i $wan_if -j $ingress_filter_chain
+		iptables -t $ingress_filter_table -I FORWARD -i $wan_if -j $ingress_filter_chain
+	fi
+	egress_filter_exists=$(iptables -t $egress_filter_table -L $egress_filter_chain 2>/dev/null)
+	if [ -z "$egress_filter_exists" ] ; then
+		iptables -t $egress_filter_table -N $egress_filter_chain
+		iptables -t $egress_filter_table -I OUTPUT -o $wan_if -j $egress_filter_chain
+		iptables -t $egress_filter_table -I FORWARD -o $wan_if -j $egress_filter_chain
+	fi
+
+	rebuilt=$(rebuild_if_necessary)
+
+	/usr/bin/restricter_gargoyle -d -C /etc/restricter_gargoyle.conf
+}
+
+stop()
+{
+	if [ -e /var/run/restricterd.pid ] ; then
+		old_pid=$(cat /var/run/restricterd.pid)
+		kill $old_pid 2>/dev/null 
+	fi
+
+	delete_chain_from_table $ingress_filter_table $ingress_filter_chain
+	delete_chain_from_table $egress_filter_table $egress_filter_chain
+}
