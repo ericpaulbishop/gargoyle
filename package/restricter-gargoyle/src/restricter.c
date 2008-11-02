@@ -442,7 +442,7 @@ void run_daemon(char* config_file_path)
 	save_update->chain = NULL;
 	save_update->update_type = UPDATE_SAVE_QUOTA_DATA;
 	save_update->update_time = current_time + save_quota_interval;
-	push_priority_queue(update_queue, save_update->update_time - reference_time, " QUOTA_SAVE_UPDATE_QUEUE_NODE ", save_update);
+	push_priority_queue(update_queue, (unsigned long)(save_update->update_time - reference_time), " QUOTA_SAVE_UPDATE_QUEUE_NODE ", save_update);
 
 	
 
@@ -453,13 +453,14 @@ void run_daemon(char* config_file_path)
 	{
 		time_t current_time = time(NULL);
 		priority_queue_node* next_pq = peek_priority_queue_node(update_queue);
-		while(next_pq->priority <= (long)(current_time - reference_time) )
+		while(next_pq->priority <= (unsigned long)(current_time - reference_time) )
 		{
 			next_pq = shift_priority_queue_node(update_queue);
 			char* priority_id = strdup(next_pq->id);
 			update_node* next_update = (update_node*)free_priority_queue_node(next_pq);
 			
-			if(next_update->update_type == UPDATE_BLOCK_INSERT || next_update->update_type == UPDATE_BLOCK_INSERT)
+
+			if(next_update->update_type == UPDATE_BLOCK_INSERT || next_update->update_type == UPDATE_BLOCK_REMOVE)
 			{
 				update_block(next_update, &update_queue, global_data, priority_id, reference_time);
 			}
@@ -475,7 +476,7 @@ void run_daemon(char* config_file_path)
 			{
 				save_all_quota_data(global_data, update_queue);
 				next_update->update_time = current_time + save_quota_interval;
-				push_priority_queue(update_queue, next_update->update_time - reference_time, priority_id, next_update);
+				push_priority_queue(update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id, next_update);
 			}
 			free(priority_id);
 
@@ -726,7 +727,7 @@ void signal_handler(int sig)
 
 void quota_test(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time)
 {
-	//printf("quota test, seconds to next reset = %ld\n", (long)(next_update->next_reset_time - next_update->update_time)); 
+	//printf("quota test %s, seconds to next reset = %ld\n", priority_id, (long)(next_update->next_reset_time - next_update->update_time)); 
 	
 	/*
 	 * 1) if current time is past next reset time, schedule a quota reset for right now & return, otherwise...
@@ -741,7 +742,7 @@ void quota_test(update_node *next_update, priority_queue** update_queue, string_
 		//printf("quota test time-out reset\n");
 		//schedule reset for right now
 		next_update->update_type = UPDATE_QUOTA_RESET;
-		push_priority_queue(*update_queue,  (long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
+		push_priority_queue(*update_queue,  (unsigned long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
 	}
 	else
 	{
@@ -801,7 +802,7 @@ void quota_test(update_node *next_update, priority_queue** update_queue, string_
 			
 			next_update->update_type = UPDATE_QUOTA_RESET;
 			next_update->update_time = next_update->next_reset_time;
-			push_priority_queue(*update_queue, (long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
+			push_priority_queue(*update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
 		}
 		else
 		{
@@ -809,7 +810,7 @@ void quota_test(update_node *next_update, priority_queue** update_queue, string_
 			
 			//schedule another quota_test
 			next_update->update_time = next_update->update_time + 1;
-			push_priority_queue(*update_queue, (long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
+			push_priority_queue(*update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
 		}
 	}
 
@@ -889,22 +890,23 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 	* 3) calculate time of next block event (remove/insert) 
 	* 4) set update node to reflect next event, and re-insert into update_queue
 	*/
+	//printf("DOING  BLOCK UPDATE, OF TYPE %s, TIME= %ld, FIRST RULE INDEX = %ld, \n", next_update->update_type == UPDATE_BLOCK_REMOVE ? "REMOVE" : "INSERT", next_update->update_time, next_update->rule_index1 );
 	char** rule_list = (char**)get_map_element(next_update->definition, "iptables_rule_list");
 	long* rule_list_length = (long*)get_map_element(next_update->definition, "iptables_rule_list_length");
 	if(next_update->update_type == UPDATE_BLOCK_REMOVE && next_update->rule_index1 > 0)
 	{
 		//remove rules & update rule indices, set rule indices to negative values in update node
-		long rule_list_index;
 		long iptables_index = next_update->rule_index1;
+		char iptables_index_str[25];
+		sprintf(iptables_index_str, "%ld", iptables_index);
+		char* delete_command = dynamic_strcat(6, "iptables -t ", next_update->table, " -D ", next_update->chain, " ", iptables_index_str);
+
+		long rule_list_index;
 		for(rule_list_index = 0; rule_list_index < *rule_list_length; rule_list_index++)
 		{
-			char tmp[20];
-			sprintf(tmp, "%ld", iptables_index);
-			char* delete_command = dynamic_strcat(6, "iptables -t ", next_update->table, " -D ", next_update->chain, " ", tmp);
-			system( rule_list[rule_list_index] );
-			free(delete_command);
-			iptables_index++;
+			system( delete_command );
 		}
+		free(delete_command);
 		
 		adjust_update_rule_numbers(update_queue, global_data, next_update->table, next_update->chain, next_update->rule_index1,*rule_list_length);
 		
@@ -934,8 +936,12 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 	unsigned char next_update_type;
 	next_update->update_time = get_next_block_update_time(next_update, &next_update_type);	
 	next_update->update_type = next_update_type;
+	if(next_update_type == UPDATE_BLOCK_REMOVE)
+	{
+		//printf("remove of %s scheduled for %ld\n", priority_id, next_update->update_time);
+	}
 	
-	push_priority_queue(*update_queue, (long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
+	push_priority_queue(*update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id, (void*)next_update );
 }
 
 
@@ -967,8 +973,11 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 
 		long next_block_interval = 	weekly_block_times[next_event_index] <= seconds_since_sunday_midnight ? 
 						weekly_block_times[next_event_index] + (7*24*60*60) : weekly_block_times[next_event_index];
+		
 		next_update_time = last_update_time - seconds_since_sunday_midnight + next_block_interval;
 		*update_type = next_event_index % 2 == 0 ? UPDATE_BLOCK_INSERT : UPDATE_BLOCK_REMOVE;
+	
+		//printf("\tlast update time = %ld, seconds sincd sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", last_update_time, seconds_since_sunday_midnight, next_block_interval, next_update_time);
 	}
 	else
 	{
@@ -1641,16 +1650,16 @@ void adjust_update_rule_numbers(priority_queue** update_queue, string_map* globa
 		{
 			//index 2 may contain a rule in ingress filter table & index 3 may contain a rule in egress filter table
 			if(	u->rule_index2 > 0 && u->rule_index2 > first_removed_rule && 
-				safe_strcmp( (char*)get_map_element(global_data, "ingress_filter_table"), table) && 
-				safe_strcmp( (char*)get_map_element(global_data, "ingress_filter_chain"), chain) 
+				safe_strcmp( (char*)get_map_element(global_data, "ingress_filter_table"), table) == 0 && 
+				safe_strcmp( (char*)get_map_element(global_data, "ingress_filter_chain"), chain) == 0
 			  	)
 			{
 				u->rule_index2 = u->rule_index2 - num_removed_rules;
 				//printf("(2) WE ARE SHIFTING RULE INDEXES ! ----- BAAAAAAAAAAAAAAAAAAD\n");
 			}
 			if(	u->rule_index3 > 0 && u->rule_index3 > first_removed_rule &&
-				safe_strcmp( (char*)get_map_element(global_data, "egress_filter_table"), table) && 
-				safe_strcmp( (char*)get_map_element(global_data, "egress_filter_chain"), chain) 
+				safe_strcmp( (char*)get_map_element(global_data, "egress_filter_table"), table) == 0 && 
+				safe_strcmp( (char*)get_map_element(global_data, "egress_filter_chain"), chain) == 0
 			  	)
 			{
 				u->rule_index3 = u->rule_index3 - num_removed_rules;

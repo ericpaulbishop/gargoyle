@@ -89,6 +89,9 @@ rebuild_if_necessary()
 
 start()
 {
+	insmod ipt_weburl >/dev/null 2>&1 
+
+
 	scan_interfaces
 	config_load network
 	config_get wan_if wan ifname
