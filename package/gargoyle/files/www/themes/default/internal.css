@@ -43,7 +43,11 @@ fieldset select
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 }
-
+fieldset label
+{
+	font-family:verdana, arial, sans-serif;
+	font-size:10px;
+}
 
 
 
@@ -62,7 +66,7 @@ fieldset select
 .rightcolumnonly
 {
 	display:block;
-	margin-left:205px;
+	margin-left:210px;
 }
 .rightcolumnindent
 {
