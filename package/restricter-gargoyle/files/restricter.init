@@ -95,14 +95,15 @@ start()
 	scan_interfaces
 	config_load network
 	config_get wan_if wan ifname
+	config_get lan_if lan ifname
 
 	if [ -e /var/run/restricterd.pid ] ; then
 		old_pid=$(cat /var/run/restricterd.pid)
 		kill $old_pid 2>/dev/null
 	fi
 
-	if [ -z "$wan_if" ] ; then
-		return 0
+	if [ -z "$wan_if" ] || [ -z "$lan_if" ] ; then
+		exit
 	fi
 	
 	
@@ -120,14 +121,12 @@ start()
 	ingress_filter_exists=$(iptables -t $ingress_filter_table -L $ingress_filter_chain 2>/dev/null)
 	if [ -z "$ingress_filter_exists" ] ; then
 		iptables -t $ingress_filter_table -N $ingress_filter_chain
-		iptables -t $ingress_filter_table -I INPUT  -i $wan_if -j $ingress_filter_chain
-		iptables -t $ingress_filter_table -I FORWARD -i $wan_if -j $ingress_filter_chain
+		iptables -t $ingress_filter_table -I FORWARD -i $wan_if -o $lan_if -j $ingress_filter_chain
 	fi
 	egress_filter_exists=$(iptables -t $egress_filter_table -L $egress_filter_chain 2>/dev/null)
 	if [ -z "$egress_filter_exists" ] ; then
 		iptables -t $egress_filter_table -N $egress_filter_chain
-		iptables -t $egress_filter_table -I OUTPUT -o $wan_if -j $egress_filter_chain
-		iptables -t $egress_filter_table -I FORWARD -o $wan_if -j $egress_filter_chain
+		iptables -t $egress_filter_table -I FORWARD -i $lan_if -o $wan_if -j $egress_filter_chain
 	fi
 
 	rebuilt=$(rebuild_if_necessary)

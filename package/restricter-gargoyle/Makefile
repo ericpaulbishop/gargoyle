@@ -38,7 +38,7 @@ define Build/Compile
 		STAGING_DIR="$(STAGING_DIR)" \
 		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
-		LIBS="$(STAGING_DIR)/usr/lib/libiptc.a"
+		LIBS="$(STAGING_DIR)/usr/lib/libiptc.a -lm"
 endef
 
 

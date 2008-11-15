@@ -1,4 +1,4 @@
-LIBS:=/usr/lib/libiptc.a 
+LIBS:=/usr/lib/libiptc.a -lm 
 
 all: restricter
 

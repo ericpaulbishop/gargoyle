@@ -44,6 +44,7 @@
 #include <sys/errno.h>
 #include <dlfcn.h>
 
+#include <math.h>
 
 #include "erics_tools.h"
 #include <libiptc/libiptc.h>
@@ -131,10 +132,16 @@ typedef struct u_n
 char* get_ip_str(struct in_addr ip);
 
 void** load_restricterd_config(char* filename);
-
-list_node* get_new_list_node(void);
 char** parse_variable_definition_line(char* line);
+
+
+
+void get_ip_range_strs(int* start, int* end, char* prefix, int list_length, list* range_strs);
+char** parse_ips(char* ip_str);
+char** parse_ports(char* port_str);
+char** parse_marks(char* list_str, unsigned long max_mask);
 char** parse_quoted_list(char* list_str, char quote_char, char escape_char, char add_remainder_if_uneven_quotes);
+
 
 long* combine_daily_and_hourly(char** daily, long* hourly);
 long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range);
@@ -158,7 +165,11 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 time_t get_next_interval_end(time_t current_time, int end_type);
 
 void initialize_quota_rules_for_direction(list** quota_rules, int direction, string_map* global_data, priority_queue** update_queue, time_t reference_time, time_t current_time);
+
+
 void compute_block_rules(update_node* unode);
+int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
+char* dcat_and_free(char** one, char** two, int free1, int free2);
 
 
 void quota_test(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
@@ -407,11 +418,11 @@ void run_daemon(char* config_file_path)
 			unsigned char next_update_type;
 			get_next_block_update_time(next_update, &next_update_type);
 			
-			
-			//time_t next_time = get_next_block_update_time(next_update, &next_update_type);
-			//if(next_update_type == UPDATE_BLOCK_REMOVE) { printf("next block update is remove\n"); } else { printf("next block update is insert\n"); };
-			//printf("next time is %ld, current time is %ld\n", next_time, current_time);	
-
+			/*
+			time_t next_time = get_next_block_update_time(next_update, &next_update_type);
+			if(next_update_type == UPDATE_BLOCK_REMOVE) { printf("next block update is remove\n"); } else { printf("next block update is insert\n"); };
+			printf("next time is %ld, current time is %ld\n", next_time, current_time);	
+			*/
 
 			char *priority_id = get_map_element( next_block_def, "name");
 			if(priority_id == NULL)
@@ -426,7 +437,8 @@ void run_daemon(char* config_file_path)
 		}	
 		block_index++;
 	}
-	
+
+		
 
 	/* intitialize save data update, save will take place every 24 hours */
 	unsigned long save_quota_interval = 24*60*60;
@@ -500,7 +512,9 @@ void run_daemon(char* config_file_path)
 					resp_msg.msg_type = RESPONSE_MSG_TYPE;
 					
 					char* request_name = next_req_message.msg_line + 2;
+					printf("output requested, trying to get node with name = \"%s\"\n", request_name);
 					priority_queue_node *p = get_priority_queue_node_with_id(update_queue, request_name);
+					printf("%s\n", p==NULL ? "got null node with id" : "got valid node with id" );
 					if(p != NULL)
 					{
 						update_node* u = (update_node*)p->value;
@@ -514,7 +528,7 @@ void run_daemon(char* config_file_path)
 						resp_msg.msg_line[0] = OUTPUT_RETURNED_FAILURE;
 						if(output_format == 'm')
 						{
-							sprintf(resp_msg.msg_line + 1, "-1 ");
+							sprintf(resp_msg.msg_line + 1, "-1,-1 ");
 						}
 						else
 						{
@@ -613,6 +627,8 @@ void run_daemon(char* config_file_path)
 
 }
 
+
+
 char* get_output_for_update(update_node* update, char* update_name,  char output_format)
 {
 	char* output_str = NULL;
@@ -642,19 +658,34 @@ char* get_output_for_update(update_node* update, char* update_name,  char output
 	}
 	else if(update->update_type == UPDATE_BLOCK_INSERT || update->update_type == UPDATE_BLOCK_REMOVE)
 	{
+		time_t next_time_active = update->update_time;
 		if(output_format == 'h')
 		{
-			char* status_str = update->update_type == UPDATE_BLOCK_INSERT ? " is not currently active\n" : " is currently active\n";
-			output_str = dynamic_strcat(3, "block rule ", update_name, status_str);
+			struct tm* next_time_info = localtime( &next_time_active );
+			
+			
+			if(next_time_active > 0)
+			{
+				char* status_str = update->update_type == UPDATE_BLOCK_REMOVE ? " is currently active, and will next be deactivated " : " is not currently active, and will next be active ";
+				output_str = dynamic_strcat(4, "block rule ", update_name, status_str, asctime(next_time_info));
+			}
+			else
+			{
+				char* status_str = update->update_type == UPDATE_BLOCK_REMOVE ? " is currently active, and will never be deactivated " : " is not currently active and will never be active";
+				output_str = dynamic_strcat(3, "block rule ", update_name, status_str);
+			}
 		}
 		else
 		{
-			output_str = update->update_type == UPDATE_BLOCK_INSERT ? strdup("0 ") : strdup("1 ");
+			char tmp[25];
+			sprintf(tmp, "%d,%ld ",  update->update_type == UPDATE_BLOCK_REMOVE ? 1 : 0, (unsigned long)next_time_active);
+			output_str = strdup(tmp);
 		}
 	}
 	return output_str;
-
 }
+
+
 void daemonize(int background) //background variable is useful for debugging, causes program to run in foreground if 0
 {
 
@@ -961,23 +992,39 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 	time_t next_update_time;
 	if(weekly_block_times != NULL)
 	{
+		/* compute number of elements in weekly_block_times array */
 		int wbt_length = 0;
 		for(wbt_length = 0; weekly_block_times[wbt_length] > 0; wbt_length++){}
 
-		int next_event_index =	weekly_block_times[wbt_length-1] < weekly_block_times[0] && 
-					weekly_block_times[wbt_length-1] > seconds_since_sunday_midnight ? 
-					wbt_length-1 : 0;
-		for( ; next_event_index < wbt_length && weekly_block_times[next_event_index] <= seconds_since_sunday_midnight ; next_event_index++){}
 		
-		next_event_index = next_event_index == wbt_length ? next_event_index -1 : next_event_index;
+		/* compute seconds since last sunday midnight rule will next be active */		
+		int last_before_first = weekly_block_times[wbt_length-1] < weekly_block_times[0];
+		int next_event_index = last_before_first ? wbt_length-1 : 0;
+		long week_count = 0;
+		long next_event_seconds_since_sunday_midnight = week_count + weekly_block_times[next_event_index];
+		while( next_event_seconds_since_sunday_midnight <= seconds_since_sunday_midnight)
+		{
+			
+			next_event_index++;
+			week_count = week_count + (	
+							(next_event_index == wbt_length && (!last_before_first)) || 
+							(next_event_index == wbt_length-1 && last_before_first) ?
+							7*24*60*60 : 0
+							);
+			next_event_index = next_event_index == wbt_length ? 0 : next_event_index;
+			next_event_seconds_since_sunday_midnight = week_count + weekly_block_times[next_event_index];
+		}
 
-		long next_block_interval = 	weekly_block_times[next_event_index] <= seconds_since_sunday_midnight ? 
-						weekly_block_times[next_event_index] + (7*24*60*60) : weekly_block_times[next_event_index];
-		
-		next_update_time = last_update_time - seconds_since_sunday_midnight + next_block_interval;
+
+		/* compute update time and return */
+		next_update_time = last_update_time - seconds_since_sunday_midnight + next_event_seconds_since_sunday_midnight;
 		*update_type = next_event_index % 2 == 0 ? UPDATE_BLOCK_INSERT : UPDATE_BLOCK_REMOVE;
 	
-		//printf("\tlast update time = %ld, seconds since sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", last_update_time, seconds_since_sunday_midnight, next_block_interval, next_update_time);
+		/*
+		printf(	"\tlast update time = %ld, seconds since sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", 
+			last_update_time, seconds_since_sunday_midnight, next_block_interval, next_update_time
+			);
+		*/
 	}
 	else
 	{
@@ -1044,59 +1091,44 @@ time_t get_next_interval_end(time_t current_time, int end_type)
 
 
 
+/* 
+ * Note we've currently maxed out out one whole byte of address space
+ * in the connmark at this point.  If we want to match in
+ * further dimensions, we will have to be greedy and take 
+ * even more address space
+ */
 void compute_block_rules(update_node* unode)
 {
 	string_map* rule_def = unode->definition;
-
-	
-	
-	char src[75] = "";
-	char dst[75] = "";
-	char sport[75] = "";
-	char dport[75] = "";
-	char layer7[75] = "";
-	char ipp2p[75] = "";
-
+		
 	char* is_ingress_str = get_map_element(rule_def, "is_ingress");
 	int is_ingress = (is_ingress_str == NULL || safe_strcmp(is_ingress_str, "0") == 0 ) ? 0 : 1;
 
+
+	list* multi_rules = initialize_list();
+	char* single_check = strdup("");
+	char* rule_prefix = dynamic_strcat(5, "iptables -t ", unode->table, " -A ", unode->chain, " ");
+	
 	/*
-	 * for ingress source = remote, destination = local 
-	 * for egress source = local, destination = remote
+	 * layer7 && ipp2p can not be negated.  To negate them
+	 * set a mark/connmark and negate that
 	 */
-	char* src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
-	char* dst_def = get_map_element(rule_def, (is_ingress ? "local_addr"  : "remote_addr"));
-	char* sport_def = get_map_element(rule_def, (is_ingress ? "remote_port" : "local_port"));
-	char* dport_def = get_map_element(rule_def, (is_ingress ? "local_port"  : "remote_port"));
 	char* layer7_def = get_map_element(rule_def, "layer7");
-	char* ipp2p_def = get_map_element(rule_def, "ipp2p");
-	
-	if(src_def != NULL){ sprintf(src, " -s %s ", src_def); }
-	if(dst_def != NULL){ sprintf(dst, " -d %s ", dst_def); }
-	if(sport_def != NULL){ sprintf(sport, " --sport %s ", sport_def); }
-	if(dport_def != NULL){ sprintf(dport, " -dport %s ", dport_def); }
-	if(layer7_def != NULL){ sprintf(layer7, " -m layer7 --l7proto %s ", layer7_def); }
-	if(ipp2p_def != NULL){ sprintf(ipp2p, " -m ipp2p %s ", src_def); }
-
-	char* common_str = dynamic_strcat(6, sport, dport, src, dst, layer7, ipp2p);
-	
-
-	char has_url_regex = get_map_element(rule_def, "block_url_regex") != NULL || get_map_element(rule_def, "only_url_regex") != NULL;
-	char has_url_block = get_map_element(rule_def, "block_url_regex") != NULL || get_map_element(rule_def, "block_url") != NULL;
-	char has_url = has_url_regex || (get_map_element(rule_def, "block_url") != NULL || get_map_element(rule_def, "only_url") != NULL);
-	if(has_url) /* by definition url matches HAVE to be TCP, so override defined proto */
+	if(layer7_def != NULL)
 	{
-		char* prev = set_map_element(rule_def, "proto", strdup("tcp"));
-		free(prev);
+		char* tmp = dynamic_strcat(2, " -m layer7 --l7proto ", layer7_def );
+		dcat_and_free(&single_check, &tmp, 1, 1);
+	}
+	char* ipp2p_def = get_map_element(rule_def, "ipp2p");
+	if(ipp2p_def != NULL)
+	{
+		char* tmp = dynamic_strcat(2, " -m ipp2p --", ipp2p_def );
+		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 
 
-	char** block_rule_list = NULL;
-	long* num_rules = (long*)malloc(sizeof(long));
-	*num_rules = 0;
 
-	
-	
+
 	/* make sure proto is lower case */
 	char* proto = get_map_element(rule_def, "proto");
 	if(proto == NULL)
@@ -1111,88 +1143,207 @@ void compute_block_rules(update_node* unode)
 		char* tmp;
 		tmp = set_map_element(rule_def, "proto", strdup("both"));
 		free(tmp);
-		proto = get_map_element(rule_def, "proto");
+		proto = (char*)get_map_element(rule_def, "proto");
 	}
+	int include_proto = strcmp(proto, "both") == 0 ? 0 : 1;
+
+
+	/* parse multi rules */
+	int mask_byte_index = 0;
+	list* initial_mask_list = initialize_list();
+	list* final_mask_list = initialize_list();
+
+
 	
 	
-	if(safe_strcmp(proto, "both") == 0)
+	/* url matches are a bit of a special case, handle them first */
+	/* we have to save this mask_byte_index specially, because it must be set separately, so it only gets set if packet is http request */
+	int url_mask_byte_index = mask_byte_index; 
+	char** url_match_def = (char**)get_map_element(rule_def, "url");
+	char** url_regex_def = (char**)get_map_element(rule_def, "url_regex");
+	int url_is_negated = url_match_def == NULL && url_regex_def == NULL ? 1 : 0;
+	url_match_def = url_is_negated ? (char**)get_map_element(rule_def, "not_url") : url_match_def;
+	url_regex_def = url_is_negated ? (char**)get_map_element(rule_def, "not_url_regex") : url_regex_def;
+	proto = url_match_def == NULL && url_regex_def == NULL ? proto : "tcp";
+	int url_rule_count = 0;
+	int url_rule_index = 0;
+	if(url_match_def != NULL){ for(url_rule_index=0; url_match_def[url_rule_index] != NULL; url_rule_index++){ url_rule_count++;} }
+	if(url_regex_def != NULL){ for(url_rule_index=0; url_regex_def[url_rule_index] != NULL; url_rule_index++){ url_rule_count++;} }
+	int url_is_multi = url_rule_count <= 1 ? 0 : 1;
+	compute_multi_rules( url_match_def, multi_rules, &single_check, url_is_multi, rule_prefix, " -m weburl --contains ", "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
+	compute_multi_rules( url_regex_def, multi_rules, &single_check, url_is_multi, rule_prefix, " -m weburl --contains_regex ", "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
+	push_list(initial_mask_list, (void*)&url_is_negated);
+	push_list(final_mask_list, (void*)&url_is_multi);
+	mask_byte_index++;
+
+	/* mark matches */
+	char** mark_def = get_map_element(rule_def, "mark");
+	int mark_is_negated = mark_def == NULL ? 1 : 0;
+	mark_def = mark_def == NULL ? get_map_element(rule_def, "not_mark") : mark_def;
+	/* we can't do single negation with mark match, so always add seperate multi-match if mark is negated */
+	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " -m mark ", " --mark ", mark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	push_list(initial_mask_list, (void*)&mark_is_negated);
+	push_list(final_mask_list, (void*)&mark_is_multi);
+	mask_byte_index++;	
+
+	/* connmark matches */
+	char** connmark_def = get_map_element(rule_def, "connmark");
+	int connmark_is_negated = connmark_def == NULL ? 1 : 0;
+	connmark_def = connmark_def == NULL ? get_map_element(rule_def, "not_connmark") : connmark_def;
+	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " -m connmark ", " --mark ", connmark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	push_list(initial_mask_list, (void*)&connmark_is_negated);
+	push_list(final_mask_list, (void*)&connmark_is_multi);
+	mask_byte_index++;	
+
+
+	/*
+	 * for ingress source = remote, destination = local 
+	 * for egress source = local, destination = remote
+	 */
+	char** src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
+	int src_is_negated = src_def == NULL ? 1 : 0;
+	src_def = src_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_addr" : "not_local_addr")) : src_def;
+	int src_is_multi = compute_multi_rules(src_def, multi_rules, &single_check, 0, rule_prefix, " -s ", "",  src_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	push_list(initial_mask_list, (void*)&src_is_negated);
+	push_list(final_mask_list, (void*)&src_is_multi);
+	mask_byte_index++;	
+
+	char** dst_def = get_map_element(rule_def, (is_ingress ? "local_addr"  : "remote_addr"));
+	int dst_is_negated = dst_def == NULL ? 1 : 0;
+	dst_def = dst_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_addr" : "not_remote_addr")) : dst_def;
+	int dst_is_multi = compute_multi_rules(dst_def, multi_rules, &single_check, 0, rule_prefix, " -d ", "",  dst_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	push_list(initial_mask_list, (void*)&dst_is_negated);
+	push_list(final_mask_list, (void*)&dst_is_multi);
+	mask_byte_index++;
+
+
+
+	char** sport_def = get_map_element(rule_def, (is_ingress ? "remote_port" : "local_port"));
+	int sport_is_negated = sport_def == NULL ? 1 : 0;
+	sport_def = sport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_port" : "not_local_port")) : sport_def;
+	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, mask_byte_index, proto, 1, 0) == 2;
+	push_list(initial_mask_list, (void*)&sport_is_negated);
+	push_list(final_mask_list, (void*)&sport_is_multi);
+	mask_byte_index++;		
+
+
+	char** dport_def = get_map_element(rule_def, (is_ingress ? "local_port"  : "remote_port"));
+	int dport_is_negated = dport_def == NULL ? 1 : 0;
+	dport_def = dport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_port" : "not_remote_port")) : dport_def;
+	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " --dport ", "", dport_is_negated, mask_byte_index, proto, 1, 0) == 2;
+	push_list(initial_mask_list, (void*)&dport_is_negated);
+	push_list(final_mask_list, (void*)&dport_is_multi);
+	mask_byte_index++;	
+
+	list* all_rules = initialize_list();
+	if(multi_rules->length > 0)
 	{
-		*num_rules = 2;
-		block_rule_list = (char**)malloc( ((*num_rules)+1) * sizeof(char*) );
-		block_rule_list[0] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ",  common_str, " -j REJECT");
-		block_rule_list[1] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p udp ", common_str, " -j REJECT");
-		block_rule_list[2] = NULL;
-	}
-	else
-	{
-		if(has_url)
+		if(strlen(single_check) > 0)
 		{
-			char** url_list = has_url_block ? (char**)get_map_element(rule_def, "block_url") : (char**)get_map_element(rule_def, "only_url");
-			char** url_regex_list =  has_url_block ? (char**)get_map_element(rule_def, "block_url_regex") : (char**)get_map_element(rule_def, "only_url_regex");
-			int num_url = 0;
-			int num_url_regex = 0;
-			if(url_list != NULL)
+			char* dummy_multi[] = { single_check, NULL };
+			int requires_proto = strcmp(proto, "both") == 0 && sport_def == NULL && dport_def == NULL ? 0 : 1;
+			compute_multi_rules(dummy_multi, multi_rules, &single_check, 1, rule_prefix, " ", "", 0, mask_byte_index, proto, requires_proto, 0);
+			mask_byte_index++;
+		}
+	
+
+		/*
+		printf("final mask length = %ld\n", final_mask_list->length);
+		printf("src is multi = %d\n", src_is_multi);
+		unsigned long mi;
+		int* one = shift_list(final_mask_list);
+		int* two = shift_list(final_mask_list);
+		printf("one = %d, two = %d\n", *one, *two);
+		unshift_list(final_mask_list, two);
+		unshift_list(final_mask_list, one);
+		*/
+
+		unsigned long initial_url_mark = 0x01000000 * url_is_negated * url_is_multi;
+		unsigned long initial_main_mark = 0;
+		unsigned long final_match = 0;
+		int next_mask_index;
+		for(next_mask_index = 0; next_mask_index <mask_byte_index ; next_mask_index++)
+		{
+			int tmp  = 1;
+			int* next_is_multi = &tmp;
+			if(final_mask_list->length > 0)
 			{
-				for(num_url=0; url_list[num_url] != NULL ; num_url++){}
-			}
-			if(url_regex_list != NULL)
-			{
-				for(num_url_regex=0; url_regex_list[num_url_regex] != NULL ; num_url_regex++){}
-			}
-			
-			*num_rules = has_url_block ? num_url + num_url_regex : num_url + num_url_regex + 2;
-			block_rule_list = (char**)malloc(((*num_rules)+1)*sizeof(char*));
-			int block_rule_index = 0;
-			char* target_str;
-			
-			
-			
-			
-			
-			if(!has_url_block)
-			{
-				/* 
-				 * unfortunately MARK doesn't allow setting marks with a mask, so we have to use CONNMARK 
-				 * set mark if this is an http packet, and remove if it matches any of specified rules
-				 * then, after all matches, reject if it has mark
-				 */
-				block_rule_list[0] =  dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ",  common_str, " -m weburl --contains http -j CONNMARK --set-mark 0x01000000 --mask 0xFF000000");
-				block_rule_index++;
-				target_str = strdup(" -j CONNMARK --set-mark 0 --mask 0xFF000000");
+				next_is_multi = shift_list(final_mask_list);
 			}
 			else
 			{
-				target_str = strdup(" -j REJECT");
+				*next_is_multi = 1;
 			}
-			for(num_url=0; url_list[num_url] != NULL ; num_url++)
-			{
-				block_rule_list[block_rule_index] = dynamic_strcat(10, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ", common_str, " -m weburl --contains \"", url_list[num_url], "\" ", target_str);
-				block_rule_index++;
-			}
-			for(num_url_regex=0; url_regex_list[num_url_regex] != NULL ; num_url_regex++)
-			{
-				block_rule_list[block_rule_index] = dynamic_strcat(10, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ", common_str, " -m weburl --contains_regex \"", url_regex_list[num_url_regex], "\" ", target_str);
-				block_rule_index++;
-			}
-			if(!has_url_block)
-			{
-				block_rule_list[block_rule_index] = dynamic_strcat(7, "iptables -t ", unode->table, " -A ", unode->chain, " -p tcp ", common_str,  " -m connmark --mark 0x01000000/0xFF000000 -j REJECT");
-				block_rule_index++;
+			
 
+			unsigned long next_mark_bit = 0x01000000 * (unsigned long)pow(2, next_mask_index) * (*next_is_multi);
+			final_match = final_match + next_mark_bit;
+			if(initial_mask_list->length > 0)
+			{
+				int* is_negation = (int*)shift_list(initial_mask_list);
+				if(*is_negation == 1 && next_mask_index != url_mask_byte_index )
+				{
+					initial_main_mark = initial_main_mark + next_mark_bit;
+				}
 			}
-			block_rule_list[block_rule_index] = NULL;
-			free(target_str);
+			/* else it's last single_check mark which is never initialized to one */
+		
+		}
+
+		if(initial_main_mark > 0)
+		{
+			//set main_mark unconditionally
+			char mark[12];
+			sprintf(mark, "0x%lX", initial_main_mark);
+			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -j CONNMARK --set-mark ", mark, "/0xFF000000" ));
+		}
+		if(initial_url_mark > 0) //do url_mark second since because in order to set main mark we use full mask of 0xFF000000
+		{
+			//set proper mark if this is an http request
+			char mark[12];
+			sprintf(mark, "0x%lX", initial_url_mark);
+			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " -p tcp  -m weburl --contains http -j CONNMARK --set-mark ", mark, "/", mark));
+		}
+		
+		//put all rules in place from multi_rules list
+		while(multi_rules->length > 0)
+		{
+			push_list(all_rules, shift_list(multi_rules));
+		}
+		unsigned long tmp_length;
+		destroy_list(multi_rules, DESTROY_MODE_IGNORE_VALUES, &tmp_length);
+
+		//if final mark matches perfectly with mask of 0xFF000000, REJECT
+		char final_match_str[12];
+		sprintf(final_match_str, "0x%lX", final_match);
+		push_list(all_rules, dynamic_strcat(4, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT" ));
+
+		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
+	}
+	else
+	{
+		if( strcmp(proto, "both") == 0 )
+		{	
+			if( dport_def == NULL && sport_def == NULL )
+			{
+				push_list(all_rules, dynamic_strcat(3, rule_prefix, single_check, " -j REJECT" ));
+			}
+			else
+			{
+				push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT" ));
+				push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p udp ", single_check, " -j REJECT" ));
+			}
 		}
 		else
 		{
-			*num_rules = 1;
-			block_rule_list = (char**)malloc(((*num_rules)+1)*sizeof(char*));
-			block_rule_list[0] = dynamic_strcat(8, "iptables -t ", unode->table, " -A ", unode->chain, "-p ", proto, common_str, " -j REJECT");
-			block_rule_list[1] = NULL;
+			push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p ", proto, " ", single_check, " -j REJECT" ));
 		}
 	}
 
 
+	unsigned long* num_rules = (unsigned long*)malloc(sizeof(unsigned long));
+	char** block_rule_list = (char**) destroy_list( all_rules, DESTROY_MODE_RETURN_VALUES, num_rules);
 	set_map_element(rule_def, "iptables_rule_list", block_rule_list);
 	set_map_element(rule_def, "iptables_rule_list_length", num_rules);
 	
@@ -1203,10 +1354,76 @@ void compute_block_rules(update_node* unode)
 		printf("%s\n", block_rule_list[i]);
 	}
 	*/
-
-	free(common_str);	
-	
 }
+
+
+
+char* dcat_and_free(char** one, char** two, int free1, int free2)
+{
+	char* s = NULL;
+	
+	if(one != NULL && two != NULL) { s = dynamic_strcat(2, *one, *two); }
+	else if(one != NULL) { s = strdup(*one); }
+	else if(two != NULL) { s = strdup(*two); }
+	else { s= strdup(""); }
+
+	if(free1){ free(*one); *one=s; }
+	if(free2){ free(*two); *two=s; }
+	
+	return s;
+}
+
+/* returns 0 if no rules found, 1 if one rule found AND included in single_check, otherwise 2 */
+int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args)
+{
+	int parse_type = 0;
+	if(def != NULL)
+	{
+		int num_rules; 
+		for(num_rules=0; def[num_rules] != NULL; num_rules++){}
+		if(num_rules == 1 && !never_single)
+		{
+			parse_type = 1;
+			char* tmp = dynamic_strcat(7, " ", test_prefix1, (is_negation ? " ! " : " "), test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
+			dcat_and_free(&tmp, single_check, 1, 1 );
+		}
+		else
+		{
+			parse_type = 2;
+			unsigned long mask = 0x01000000 * (unsigned long)pow(2, mask_byte_index);
+			char mask_str[12];
+			sprintf(mask_str, "0x%lX", mask);
+			char* connmark_part = dynamic_strcat(4, " -j CONNMARK --set-mark ", (is_negation ? "0x0" : mask_str), "/", mask_str);
+
+
+			int rule_index =0;
+			for(rule_index=0; def[rule_index] != NULL; rule_index++)
+			{
+				char* common_part = dynamic_strcat(7, test_prefix1, " ", test_prefix2, (quoted_args ? " \"" : " "),  def[rule_index], (quoted_args ? "\" " : " "), connmark_part);
+				if(strcmp(proto, "both") == 0)
+				{
+					if(requires_proto)
+					{
+						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " -p tcp ", common_part));
+						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " -p udp ", common_part));
+					}
+					else
+					{
+						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " ", common_part ));
+					}
+				}
+				else
+				{
+					push_list(multi_rules, dynamic_strcat(5, rule_prefix, " -p ", proto, " ", common_part));
+				}
+				free(common_part);
+			}
+			free(connmark_part);
+		}
+	}
+	return parse_type;
+}
+
 
 
 /* 
@@ -1320,7 +1537,7 @@ long* combine_daily_and_hourly(char** daily, long* hourly)
 	}
 	adjusted_hourly[ah_index] = -1;
 
-	/*	
+	/*
 	int a=0;
 	for(a=0; adjusted_hourly[a] >= 0 ; a++)
 	{
@@ -1382,6 +1599,7 @@ long* combine_daily_and_hourly(char** daily, long* hourly)
 
 	return weekly;	
 }
+
 
 /* is_weekly_range indicates whether we're parsing hours within a single day or a range over a whole week */
 long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range)
@@ -1579,6 +1797,65 @@ string_map* initialize_weekday_hash(void)
 
 
 
+/*
+ * parses a list of marks/connmarks
+ * the max_mask parameter specfies a maximal mask that will be used
+ * when matching marks/connmarks.  If a user-defined mask is specified
+ * (by defining [mark]/[mask]) this is bitwise-anded with the maximum
+ * mask to get the final mask.  This is especially necessary for
+ * connmarks, because the mechanism to handle negation when multiple
+ * test rules are needed uses the last (high) byte of the connmark 
+ * address space, so this HAS to be masked out when matching 
+ * connmarks, using max_mask=0x00FFFFFF
+ */
+char** parse_marks(char* list_str, unsigned long max_mask)
+{
+	char** marks = NULL;
+	if(list_str != NULL)
+	{
+		marks = split_on_separators(list_str, ",", 1, -1, 0);
+		if(marks[0] == NULL)
+		{
+			free(marks);
+			marks = NULL;
+		}
+		else 
+		{
+			int mark_index;
+			for(mark_index = 0; marks[mark_index] != NULL; mark_index++)
+			{
+				trim_flanking_whitespace(marks[mark_index]);
+				if(max_mask != 0xFFFFFFFF)
+				{
+
+					char* m = marks[mark_index];
+					char* mask_start;
+					if( (mask_start = strchr(m, '/')) != NULL )
+					{
+						unsigned long mask = 0xFFFFFFFF;
+						mask_start++;
+						sscanf(mask_start, "%lX", &mask);
+					
+						mask = mask & max_mask;
+					
+						*(mask_start) = '\0';
+						char new_mask_str[12];
+						sprintf(new_mask_str, "0x%lX", mask);
+						marks[mark_index] = dynamic_strcat(2, m, new_mask_str);
+					}
+					else
+					{
+						char new_mask_str[12];
+						sprintf(new_mask_str, "0x%lX", max_mask);
+						marks[mark_index] = dynamic_strcat(3, m, "/", new_mask_str);
+					}
+					free(m);
+				}
+			}
+		}
+	}
+	return marks;
+}
 
 
 
@@ -2125,6 +2402,152 @@ int create_path(const char *name, int mode)
 }
 
 
+
+
+
+char** parse_ports(char* port_str)
+{
+	char** ports = split_on_separators(port_str, ",", 1, -1, 0);
+	int port_index = 0;
+	for(port_index=0; ports[port_index] != NULL; port_index++)
+	{
+		char* dash_ptr;
+		while((dash_ptr=strchr(ports[port_index], ',')) != NULL)
+		{
+			dash_ptr[0] = ':';
+		}
+	}
+	return ports;
+}
+
+char** parse_ips(char* ip_str)
+{
+	char** ip_parts = split_on_separators(ip_str, ",", 1, -1, 0);
+	list* ip_list = initialize_list();
+	
+	int ip_part_index;
+	for(ip_part_index=0; ip_parts[ip_part_index] != NULL; ip_part_index++)
+	{
+		char* next_str = ip_parts[ip_part_index];
+		if(strchr(next_str, '-') != NULL)
+		{
+			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1);
+			char* start = trim_flanking_whitespace(range_parts[0]);
+			char* end = trim_flanking_whitespace(range_parts[1]);
+			int start_ip[4];
+			int end_ip[4];
+			int start_valid = sscanf(start, "%d.%d.%d.%d", start_ip, start_ip+1, start_ip+2, start_ip+3);
+			int end_valid = sscanf(end, "%d.%d.%d.%d", end_ip, end_ip+1, end_ip+2, end_ip+3);
+			if(start_valid == 4 && end_valid == 4)
+			{
+				get_ip_range_strs(start_ip, end_ip, "", 4, ip_list);
+			}
+
+			free(start);
+			free(end);	
+			free(range_parts);
+			free(next_str);
+		}
+		else
+		{
+			push_list(ip_list, trim_flanking_whitespace(next_str));
+		}
+		
+	}
+	free(ip_parts);
+	unsigned long num;
+	return (char**)destroy_list(ip_list, DESTROY_MODE_RETURN_VALUES, &num);
+}
+
+void get_ip_range_strs(int* start, int* end, char* prefix, int list_length, list* range_strs)
+{
+	//mask = 8*(4-list_length)
+	if(list_length > 1 )
+	{
+		if(start[0] == end[0])
+		{
+			char new_prefix[20];
+			sprintf(new_prefix, "%s%d.", prefix, start[0]);
+			get_ip_range_strs(start+1, end+1, new_prefix, list_length-1, range_strs);
+		}
+		else
+		{
+			int start_is_all_zeros = 1;
+			int end_is_all_ones = 1;
+			int test_index;
+			for(test_index=0; test_index < list_length && start_is_all_zeros; test_index++){ start_is_all_zeros = start[test_index] == 0; }
+			for(test_index=0; test_index < list_length && end_is_all_ones; test_index++){ end_is_all_ones = end[test_index] == 255; }
+
+
+			int next;
+			char new_prefix[20];
+			sprintf(new_prefix, "%s%d.", prefix, start[0]);
+			if(start_is_all_zeros)
+			{
+				next = start[0];
+			}
+			else
+			{
+				int all_ones[4] = {255, 255, 255, 255 };
+				get_ip_range_strs(start+1, all_ones, new_prefix, list_length-1, range_strs);
+				next = start[0] + 1;
+			}
+			
+			char postfix[20] = "";
+			int postfix_index;
+			for(postfix_index=0; postfix_index < (list_length-1); postfix_index++){ strcat(postfix, ".0"); }
+			int last = end_is_all_ones ? end[0] : end[0] -1;
+
+			while(next <= last )
+			{
+				int max = 0;
+				for(max = 0; next % ((int)pow(2,max)) == 0 && next + (int)pow(2,max) <= last+1 ; max++){}
+				max = max > 0 ? max -1 : max;
+
+				char next_str[25];
+				sprintf(next_str, "%s%d%s/%d", prefix, next, postfix, (8*(4-list_length))+(8-max) );
+				push_list(range_strs, strdup(next_str));
+
+				next = next + (int)pow(2, max);
+			}
+		
+			if(!end_is_all_ones)
+			{	
+				int all_zeros[4] = { 0, 0, 0, 0 };
+				sprintf(new_prefix, "%s%d.", prefix, end[0]);
+				get_ip_range_strs(all_zeros, end+1, new_prefix, list_length-1, range_strs);
+			}
+		}
+	}
+	else
+	{
+		int next = start[0];
+		while(next <= end[0])
+		{
+			int max = 0;
+			for(max = 0; next % ((int)pow(2,max)) == 0 && next + (int)pow(2,max) <= end[0] + 1; max++){}
+			max = max > 0 ? max -1 : max;
+
+			char next_str[25];
+			if(max > 0)
+			{
+				sprintf(next_str, "%s%d/%d", prefix, next, 24+(8-max) );
+			}
+			else
+			{
+				sprintf(next_str, "%s%d", prefix,next );
+
+			}
+			push_list(range_strs, strdup(next_str));
+			
+			next = next + (int)pow(2, max);
+		}
+	}
+}
+
+
+
+
 //returns an array of length 3, first element is a pointer to a string_map containing global variables, second is 
 //a pointer to a the first list_node in a list containing all block rules, the third the first list_node in a 
 //list of quota rules
@@ -2136,6 +2559,9 @@ void** load_restricterd_config(char* filename)
 	config[2] = (void*)initialize_list();
 	config[3] = NULL;
 
+	
+	
+				
 	FILE *config_file = fopen(filename, "r");	
 	char newline_terminator[3] = "\n\r";
 	if(config_file != NULL)
@@ -2239,10 +2665,10 @@ void** load_restricterd_config(char* filename)
 							}
 							free(variable[1]);
 						}
-						else if(	safe_strcmp(variable[0], "block_url") == 0 ||
-								safe_strcmp(variable[0], "block_url_regex") == 0 ||
-								safe_strcmp(variable[0], "only_url") == 0 ||
-								safe_strcmp(variable[0], "only_url_regex") == 0
+						else if(	safe_strcmp(variable[0], "url") == 0 ||
+								safe_strcmp(variable[0], "url_regex") == 0 ||
+								safe_strcmp(variable[0], "not_url") == 0 ||
+								safe_strcmp(variable[0], "not_url_regex") == 0
 								)
 						{
 							/*
@@ -2265,6 +2691,46 @@ void** load_restricterd_config(char* filename)
 								set_map_element(definition, variable[0], url_list);
 							}
 						}
+						else if(	safe_strcmp(variable[0], "mark") == 0 ||
+								safe_strcmp(variable[0], "not_mark") == 0
+						       )
+						{
+							set_map_element(definition, variable[0], parse_marks(variable[1], 0xFFFFFFFF));
+							free(variable[1]);
+						}
+						else if(	safe_strcmp(variable[0], "connmark") == 0 ||
+								safe_strcmp(variable[0], "not_connmark") == 0
+								)
+						{
+							set_map_element(definition, variable[0], parse_marks(variable[1], 0x00FFFFFF));
+							free(variable[1]);
+						}
+						else if(	safe_strcmp(variable[0], "remote_addr") == 0 ||
+								safe_strcmp(variable[0], "local_addr") == 0 ||
+								safe_strcmp(variable[0], "not_remote_addr") == 0 ||
+								safe_strcmp(variable[0], "not_local_addr") == 0 
+						       		)
+						{
+							char** parsed_ips = parse_ips(variable[1]);
+							if(parsed_ips != NULL)
+							{
+								set_map_element(definition, variable[0], parsed_ips);
+							}
+							free(variable[1]);
+						}
+						else if(	safe_strcmp(variable[0], "remote_port") == 0 ||
+								safe_strcmp(variable[0], "local_port") == 0 ||
+								safe_strcmp(variable[0], "not_remote_port") == 0 ||
+								safe_strcmp(variable[0], "not_local_port") == 0 
+								)
+						{
+							char** parsed_ports = parse_ports(variable[1]);
+							if(parsed_ports != NULL)
+							{
+								set_map_element(definition, variable[0], parsed_ports);
+							}
+							free(variable[1]);
+						}
 						else
 						{
 							set_map_element(definition, variable[0], variable[1]);
@@ -2283,9 +2749,18 @@ void** load_restricterd_config(char* filename)
 				{
 					long* weekly_block_times = combine_daily_and_hourly(weekdays_blocked, hours_blocked);
 					set_map_element(definition, "weekly_block_times", weekly_block_times);
+				
+					/*
+					int combined_index;
+					for(combined_index = 0; weekly_block_times[combined_index] >= 0; combined_index++)
+					{
+						printf("%ld, ", weekly_block_times[combined_index]);
+					}
+					printf("\n");
+					*/
 				}
 				
-				// do some error checking here
+				// do some more error checking here
 				// ...
 				// ...someday :-P
 			
@@ -2312,8 +2787,13 @@ void** load_restricterd_config(char* filename)
 				}
 				else if(config_index <= 2)
 				{
-					list* l = (list*)config[config_index];
-					push_list(l, definition);
+					/* if enabled value is present, only load configuration if it is equal to one or "true"*/
+					char* enabled_str = (char*)get_map_element(definition, "enabled");
+					if( enabled_str == NULL || safe_strcmp(enabled_str, "1") == 0 || safe_strcmp(enabled_str, "true") == 0 )
+					{
+						list* l = (list*)config[config_index];
+						push_list(l, definition);
+					}
 				}
 			}
 		}
@@ -2321,6 +2801,11 @@ void** load_restricterd_config(char* filename)
 
 	return config;
 }
+
+
+
+
+
 
 
 
@@ -2360,8 +2845,6 @@ char** parse_variable_definition_line(char* line)
 	}
 	return variable_definition;
 }
-
-
 
 
 
