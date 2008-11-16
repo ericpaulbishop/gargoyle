@@ -497,12 +497,12 @@ void define_package_vars(char** package_vars_to_load)
 				{
 					struct uci_section *section = uci_to_section(e);
 					
-					printf("\tuciOriginal.set(\"%s\", \"%s\", \"\", \"%s\");\n",package_vars_to_load[package_index], section->e.name, section->type);
+					printf("\tuciOriginal.set('%s', '%s', '', '%s');\n",package_vars_to_load[package_index], section->e.name, section->type);
 					
 					struct uci_element *e2;
 					uci_foreach_element(&section->options, e2) 	
 					{
-						printf("\tuciOriginal.set(\"%s\", \"%s\", \"%s\", \"%s\");\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
+						printf("\tuciOriginal.set('%s', '%s', '%s', '%s');\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
 					}
 				
 				}
