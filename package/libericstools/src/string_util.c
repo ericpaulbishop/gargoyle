@@ -393,3 +393,19 @@ char* dynamic_strcat(int num_strs, ...)
 	return new_str;
 }
 
+char* dcat_and_free(char** one, char** two, int free1, int free2)
+{
+	char* s = NULL;
+	
+	if(one != NULL && two != NULL) { s = dynamic_strcat(2, *one, *two); }
+	else if(one != NULL) { s = strdup(*one); }
+	else if(two != NULL) { s = strdup(*two); }
+	else { s= strdup(""); }
+
+	if(free1){ free(*one); *one=s; }
+	if(free2){ free(*two); *two=s; }
+	
+	return s;
+}
+
+

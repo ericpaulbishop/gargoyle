@@ -223,10 +223,11 @@ extern char* replace_prefix(char* original, char* old_prefix, char* new_prefix);
 extern char* trim_flanking_whitespace(char* str);
 extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators);
 extern char* read_entire_file(FILE* in, int read_block_size);
-extern char* dynamic_strcat(int num_strs, ...);
 extern int safe_strcmp(const char* str1, const char* str2);
 extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 extern void to_lowercase(char* str);
 extern void to_uppercase(char* str);
+extern char* dynamic_strcat(int num_strs, ...);
+extern char* dcat_and_free(char** one, char** two, int free1, int free2);
 
 #endif /* ERICS_TOOLS_H */

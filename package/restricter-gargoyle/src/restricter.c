@@ -169,7 +169,6 @@ void initialize_quota_rules_for_direction(list** quota_rules, int direction, str
 
 void compute_block_rules(update_node* unode);
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
-char* dcat_and_free(char** one, char** two, int free1, int free2);
 
 
 void quota_test(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
@@ -1356,22 +1355,6 @@ void compute_block_rules(update_node* unode)
 	*/
 }
 
-
-
-char* dcat_and_free(char** one, char** two, int free1, int free2)
-{
-	char* s = NULL;
-	
-	if(one != NULL && two != NULL) { s = dynamic_strcat(2, *one, *two); }
-	else if(one != NULL) { s = strdup(*one); }
-	else if(two != NULL) { s = strdup(*two); }
-	else { s= strdup(""); }
-
-	if(free1){ free(*one); *one=s; }
-	if(free2){ free(*two); *two=s; }
-	
-	return s;
-}
 
 /* returns 0 if no rules found, 1 if one rule found AND included in single_check, otherwise 2 */
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args)
