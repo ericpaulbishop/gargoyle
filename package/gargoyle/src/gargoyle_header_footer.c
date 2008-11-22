@@ -497,12 +497,12 @@ void define_package_vars(char** package_vars_to_load)
 				{
 					struct uci_section *section = uci_to_section(e);
 					
-					printf("\tuciOriginal.set('%s', '%s', '', '%s');\n",package_vars_to_load[package_index], section->e.name, section->type);
+					printf("\tuciOriginal.set('%s', '%s', '', \"%s\");\n",package_vars_to_load[package_index], section->e.name, section->type);
 					
 					struct uci_element *e2;
 					uci_foreach_element(&section->options, e2) 	
 					{
-						printf("\tuciOriginal.set('%s', '%s', '%s', '%s');\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
+						printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\");\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
 					}
 				
 				}
@@ -850,7 +850,17 @@ char** load_interfaces_from_proc_file(char* filename)
 #ifdef UCI_OLD_VERSION //valid for uci version 0.3.3 for kamikaze 7.09
 char* get_option_value_string(struct uci_option* uopt)
 {
-	return strdup(uopt->value);
+	char* opt_str = strdup(uopt->value);
+	
+	/* escape backslash characters & quote characters so javascript can parse variables properly */
+	char* tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\\", "\\\\");
+	free(tmp);
+	tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\"", "\\\"");
+	free(tmp);
+
+	return opt_str;
 }
 int get_uci_option(struct uci_context* ctx,  struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name)
 {
@@ -891,6 +901,16 @@ char* get_option_value_string(struct uci_option* uopt)
 			}
 		}
 	}
+
+	/* escape backslash characters & quote characters so javascript can parse variables properly */
+	char* tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\\", "\\\\");
+	free(tmp);
+	tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\"", "\\\"");
+	free(tmp);
+
+
 	return opt_str;
 }
 
@@ -911,6 +931,7 @@ int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_p
 		}
 	}
 	free(lookup_str);
+
 	return ret_value;
 }
 
