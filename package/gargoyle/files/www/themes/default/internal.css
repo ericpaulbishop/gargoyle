@@ -79,6 +79,28 @@ fieldset label
 	margin-left:5px;
 	margin-right:5px;
 }
+.narrowleftcolumn
+{
+	display:block;
+	float:left;
+	width:125px;
+	margin-left:5px;
+	margin-right:5px;
+}
+.widerightcolumnonly
+{
+	display:block;
+	margin-left:135px;
+}
+.middlecolumn
+{
+	display:block;
+	float:left;
+	width:110px;
+	margin-right:10px;
+	margin-bottom:5px;
+}
+
 .indent
 {
 	display:block;
@@ -649,10 +671,84 @@ td.webmon_table_column_2
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.webmon_table_column3
+td.webmon_table_column_3
 {
 	text-align:left;
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
+/*
+td.applies_to_table (2 cells no dividers)
+td.remote_ip_table (2 cells no dividers)
+td.url_match_table (3 cells no dividers)
+td.restriction_table (4 cells no dividers)
+*/
+td.applies_to_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.applies_to_table_column_2
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.remote_ip_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+
+}
+td.remote_ip_table_column_2
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.url_match_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+
+}
+td.url_match_table_column_2
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.url_match_table_column_3
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.restriction_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.restriction_table_column_2
+{
+	text-align:center;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.restriction_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.restriction_table_column_4
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
