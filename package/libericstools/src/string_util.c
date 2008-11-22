@@ -106,92 +106,6 @@ char* trim_flanking_whitespace(char* str)
 	return str;
 }
 
-/* note: str element in return value is dynamically allocated, need to free */
-dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
-{
-	fpos_t start_pos;
-	int size_to_read = 0;
-	int terminator_found = 0;
-	int terminator;
-	char* str;
-	dyn_read_t ret_value;
-
-	fgetpos(open_file, &start_pos);
-	
-	while(terminator_found == 0)
-	{
-		int nextch = fgetc(open_file);
-		int terminator_index = 0;
-		for(terminator_index = 0; terminator_index < num_terminators && terminator_found == 0; terminator_index++)
-		{
-			terminator_found = nextch == terminators[terminator_index] ? 1 : 0;
-			terminator = nextch;
-		}
-		terminator_found = nextch == EOF ? 1 : terminator_found;
-		terminator = nextch == EOF ? EOF : nextch;
-		if(terminator_found == 0)
-		{
-			size_to_read++;
-		}
-	}
-
-	str = (char*)malloc((size_to_read+1)*sizeof(char));
-	if(size_to_read > 0)
-	{
-		int i;
-		fsetpos(open_file, &start_pos);
-		for(i=0; i<size_to_read; i++)
-		{
-			str[i] = (char)fgetc(open_file);
-		}
-		fgetc(open_file); /* read the terminator */
-	}
-	str[size_to_read] = '\0';
-	
-	
-	
-	ret_value.str = str;
-	ret_value.terminator = terminator;
-
-
-	return ret_value;
-}
-
-char* read_entire_file(FILE* in, int read_block_size)
-{
-	int max_read_size = read_block_size;
-	char* read_string = (char*)malloc(max_read_size+1);
-	int bytes_read = 0;
-	int end_found = 0;
-	while(end_found == 0)
-	{
-		int nextch = '?';
-		while(nextch != EOF && bytes_read < max_read_size)
-		{
-			nextch = fgetc(in);
-			if(nextch != EOF)
-			{
-				read_string[bytes_read] = (char)nextch;
-				bytes_read++;
-			}
-		}
-		read_string[bytes_read] = '\0';
-		end_found = (nextch == EOF) ? 1 : 0;
-		if(end_found == 0)
-		{
-			char *new_str;
-			max_read_size = max_read_size + read_block_size;
-		       	new_str = (char*)malloc(max_read_size+1);
-			memcpy(new_str, read_string, bytes_read);
-			free(read_string);
-			read_string = new_str;
-		}
-	}
-	return read_string;
-}
-
-
-
 int safe_strcmp(const char* str1, const char* str2)
 {
 	if(str1 == NULL && str2 == NULL)
@@ -208,6 +122,79 @@ int safe_strcmp(const char* str1, const char* str2)
 	}
 	return strcmp(str1, str2);
 }
+
+
+void to_lowercase(char* str)
+{
+	int i;
+	for(i = 0; str[i] != '\0'; i++)
+	{
+		str[i] = tolower(str[i]);
+	}
+}
+void to_uppercase(char* str)
+{
+	int i;
+	for(i = 0; str[i] != '\0'; i++)
+	{
+		str[i] = toupper(str[i]);
+	}
+}
+
+
+char* dynamic_strcat(int num_strs, ...)
+{
+	
+	va_list strs;
+	int new_length = 0;
+	int i;
+	int next_start;
+	char* new_str;
+		
+	va_start(strs, num_strs);
+	for(i=0; i < num_strs; i++)
+	{
+		char* next_arg = va_arg(strs, char*);
+		if(next_arg != NULL)
+		{
+			new_length = new_length + strlen(next_arg);
+		}
+	}
+	va_end(strs);
+	
+	new_str = malloc((1+new_length)*sizeof(char));
+	va_start(strs, num_strs);
+	next_start = 0;
+	for(i=0; i < num_strs; i++)
+	{
+		char* next_arg = va_arg(strs, char*);
+		if(next_arg != NULL)
+		{
+			int next_length = strlen(next_arg);
+			memcpy(new_str+next_start,next_arg, next_length);
+			next_start = next_start+next_length;
+		}
+	}
+	new_str[next_start] = '\0';
+	
+	return new_str;
+}
+
+char* dcat_and_free(char** one, char** two, int free1, int free2)
+{
+	char* s = NULL;
+	
+	if(one != NULL && two != NULL) { s = dynamic_strcat(2, *one, *two); }
+	else if(one != NULL) { s = strdup(*one); }
+	else if(two != NULL) { s = strdup(*two); }
+	else { s= strdup(""); }
+
+	if(free1){ free(*one); *one=s; }
+	if(free2){ free(*two); *two=s; }
+	
+	return s;
+}
+
 
 /*
  * line is the line to be parsed -- it is not modified in any way
@@ -366,74 +353,118 @@ char* join_strs(char* separator, char** parts, int max_parts, int free_parts, in
 	return joined;
 }
 
-void to_lowercase(char* str)
+
+char* dynamic_replace(char* template_str, char* old_str, char* new_str)
 {
-	int i;
-	for(i = 0; str[i] != '\0'; i++)
+	char* replaced = NULL;
+	if(template_str != NULL && old_str != NULL && new_str != NULL && safe_strcmp(old_str, "") != 0)
 	{
-		str[i] = tolower(str[i]);
+		char* template = strdup(template_str);
+		int old_strlen = strlen(old_str);
+		char* template_ptr = template;
+		char* next_ptr;
+		char* tmp;
+		replaced = strdup("");
+		while( (next_ptr = strstr(template_ptr, old_str)) != NULL)
+		{
+			tmp = replaced;
+			next_ptr[0] = '\0';
+			replaced = dynamic_strcat(3, replaced, template_ptr, new_str);
+			free(tmp);
+			template_ptr = next_ptr + old_strlen;
+		}
+		tmp = replaced;
+		replaced = dynamic_strcat(2, replaced, template_ptr);
+		free(tmp);
+		free(template);
 	}
-}
-void to_uppercase(char* str)
-{
-	int i;
-	for(i = 0; str[i] != '\0'; i++)
-	{
-		str[i] = toupper(str[i]);
-	}
+	return replaced;
 }
 
-char* dynamic_strcat(int num_strs, ...)
+
+/* note: str element in return value is dynamically allocated, need to free */
+dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 {
+	fpos_t start_pos;
+	int size_to_read = 0;
+	int terminator_found = 0;
+	int terminator;
+	char* str;
+	dyn_read_t ret_value;
+
+	fgetpos(open_file, &start_pos);
 	
-	va_list strs;
-	int new_length = 0;
-	int i;
-	int next_start;
-	char* new_str;
-		
-	va_start(strs, num_strs);
-	for(i=0; i < num_strs; i++)
+	while(terminator_found == 0)
 	{
-		char* next_arg = va_arg(strs, char*);
-		if(next_arg != NULL)
+		int nextch = fgetc(open_file);
+		int terminator_index = 0;
+		for(terminator_index = 0; terminator_index < num_terminators && terminator_found == 0; terminator_index++)
 		{
-			new_length = new_length + strlen(next_arg);
+			terminator_found = nextch == terminators[terminator_index] ? 1 : 0;
+			terminator = nextch;
+		}
+		terminator_found = nextch == EOF ? 1 : terminator_found;
+		terminator = nextch == EOF ? EOF : nextch;
+		if(terminator_found == 0)
+		{
+			size_to_read++;
 		}
 	}
-	va_end(strs);
-	
-	new_str = malloc((1+new_length)*sizeof(char));
-	va_start(strs, num_strs);
-	next_start = 0;
-	for(i=0; i < num_strs; i++)
+
+	str = (char*)malloc((size_to_read+1)*sizeof(char));
+	if(size_to_read > 0)
 	{
-		char* next_arg = va_arg(strs, char*);
-		if(next_arg != NULL)
+		int i;
+		fsetpos(open_file, &start_pos);
+		for(i=0; i<size_to_read; i++)
 		{
-			int next_length = strlen(next_arg);
-			memcpy(new_str+next_start,next_arg, next_length);
-			next_start = next_start+next_length;
+			str[i] = (char)fgetc(open_file);
+		}
+		fgetc(open_file); /* read the terminator */
+	}
+	str[size_to_read] = '\0';
+	
+	
+	
+	ret_value.str = str;
+	ret_value.terminator = terminator;
+
+
+	return ret_value;
+}
+
+char* read_entire_file(FILE* in, int read_block_size)
+{
+	int max_read_size = read_block_size;
+	char* read_string = (char*)malloc(max_read_size+1);
+	int bytes_read = 0;
+	int end_found = 0;
+	while(end_found == 0)
+	{
+		int nextch = '?';
+		while(nextch != EOF && bytes_read < max_read_size)
+		{
+			nextch = fgetc(in);
+			if(nextch != EOF)
+			{
+				read_string[bytes_read] = (char)nextch;
+				bytes_read++;
+			}
+		}
+		read_string[bytes_read] = '\0';
+		end_found = (nextch == EOF) ? 1 : 0;
+		if(end_found == 0)
+		{
+			char *new_str;
+			max_read_size = max_read_size + read_block_size;
+		       	new_str = (char*)malloc(max_read_size+1);
+			memcpy(new_str, read_string, bytes_read);
+			free(read_string);
+			read_string = new_str;
 		}
 	}
-	new_str[next_start] = '\0';
-	
-	return new_str;
+	return read_string;
 }
 
-char* dcat_and_free(char** one, char** two, int free1, int free2)
-{
-	char* s = NULL;
-	
-	if(one != NULL && two != NULL) { s = dynamic_strcat(2, *one, *two); }
-	else if(one != NULL) { s = strdup(*one); }
-	else if(two != NULL) { s = strdup(*two); }
-	else { s= strdup(""); }
-
-	if(free1){ free(*one); *one=s; }
-	if(free2){ free(*two); *two=s; }
-	
-	return s;
-}
 
 
