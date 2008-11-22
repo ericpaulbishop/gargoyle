@@ -338,6 +338,34 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 	return split;
 }
 
+char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array)
+{
+	char* joined = NULL;
+	int num_parts = 0;
+	for(num_parts=0; parts[num_parts] != NULL && (max_parts < 0 || num_parts < max_parts); num_parts++){}
+	if(num_parts > 0)
+	{
+		num_parts--;
+		joined = strdup(parts[num_parts]);
+		if(free_parts){ free(parts[num_parts]); }
+		num_parts--;
+
+		while(num_parts >= 0)
+		{
+			char* tmp = joined;
+			joined = dynamic_strcat(3, parts[num_parts], separator, joined);
+			free(tmp);
+			if(free_parts){ free(parts[num_parts]); }
+			num_parts--;
+		}
+	}
+	if(free_parts_array)
+	{
+		free(parts);
+	}
+	return joined;
+}
+
 void to_lowercase(char* str)
 {
 	int i;

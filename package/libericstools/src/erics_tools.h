@@ -225,6 +225,7 @@ extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_termi
 extern char* read_entire_file(FILE* in, int read_block_size);
 extern int safe_strcmp(const char* str1, const char* str2);
 extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
+extern char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array);
 extern void to_lowercase(char* str);
 extern void to_uppercase(char* str);
 extern char* dynamic_strcat(int num_strs, ...);
