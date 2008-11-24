@@ -1,33 +1,9 @@
 #!/bin/sh /etc/rc.common
 START=55
 
+source /usr/lib/gargoyle_firewall_util.sh
 include /lib/network
 
-delete_chain_from_table()
-{
-	table=$1
-	target=$2
-
-
-	chains=$(iptables -t $table -L | awk ' $0 ~ /^Chain/ { print $2; } '  )
-	for chain in $chains ; do
-		
-		#Sort rules, so we can delete higher number rule nums first. This makes sure rule numbers remain valid
-		sorted_rules=$(iptables -t $table -L $chain --line-numbers | awk " \$1~/^[0-9]+$/ &&  \$2 ~/^$target/  {print \$1 ;}" | sort -n -r)
-		
-		
-		if [ -n "$sorted_rules" ] ; then
-			for rule_num in $sorted_rules ; do
-				iptables -t $table -D $chain $rule_num
-			done
-		fi
-		
-		if [ $chain = $target ] ; then
-			iptables -t $table -F $target
-			iptables -t $table -X $target
-		fi
-	done
-}
 
 start()
 {

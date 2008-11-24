@@ -4,37 +4,13 @@
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 
-include /lib/network
 START=50
+
+source /usr/lib/gargoyle_firewall_util.sh
+include /lib/network
 
 config_file_name="qos_gargoyle"
 
-delete_chain_from_table()
-{
-	table=$1
-	target=$2
-
-
-	chains=$(iptables -t $table -L | awk ' {if($0 ~ /^Chain/){ print $2; };} '  )
-	for chain in $chains ; do
-		rule_nums=$(iptables -t $table -L $chain --line-numbers | awk " {if(\$1~/^[0-9]+$/ && \$2 ~/^$target/){ printf(\"%s\n\", \$1);};}")
-		
-		#delete higher number rule nums first so rule numbers remain valid
-		sorted_rules=$(echo -e "$rule_nums" | sort -n -r )
-		if [ -n "$sorted_rules" ] ; then
-			for rule_num in $sorted_rules ; do
-				iptables -t $table -D $chain $rule_num
-			done
-		fi
-
-		
-		if [ $chain = $target ] ; then
-			iptables -t $table -F $target
-			iptables -t $table -X $target
-		fi
-	done
-	
-}
 
 load_all_config_options()
 {
@@ -182,11 +158,26 @@ apply_all_rules()
 
 				;;
 				layer7)
-					match_str="$match_str -m layer7 --l7proto $option_value"
+					layer7_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$option_value" | awk '{ print $2 }')
+					layer7_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$option_value" | awk '{ print $3 }')
+					if [ -n "$layer7_connmark" ] ; then
+						match_str="$match_str -m connmark --mark $layer7_connmark/$layer7_mask "
+					else
+						match_str="$match_str -m layer7 --l7proto $option_value"
+					fi
 				;;
 				ipp2p)
-					if [ "$option_value" = "all" ] ; then option_value="ipp2p" ; fi
-					match_str="$match_str -m ipp2p --$option_value"
+					if [ "$option_value" = "ipp2p" ] || [ "$option_value" = "all" ] ; then
+						ipp2p_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "ipp2p" | awk '{ print $2 }')
+						ipp2p_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "ipp2p" | awk '{ print $3 }')
+						if [ -n "$ipp2p_connmark" ] ; then
+							match_str="$match_str -m connmark --mark $ipp2p_connmark/$ipp2p_mask "
+						else
+							match_str="$match_str -m ipp2p --ipp2p"
+						fi
+					else
+						match_str="$match_str -m ipp2p --$option_value"
+					fi
 				;;
 			esac
 		done
@@ -222,6 +213,9 @@ apply_all_rules()
 
 initialize_qos()
 {
+	#initialize layer7_marker if necessary
+	create_l7marker_chain	
+
 	#load global variables
 	load_all_config_options "$config_file_name" "global"
 	
@@ -316,7 +310,6 @@ initialize_qos()
 
 	
 	if [ $total_upload_bandwidth -ge 0 ] ; then
-
 		# Attach egress queuing discipline to QoS interface
 		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 10
 		
@@ -440,6 +433,7 @@ initialize_qos()
 		tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
 		tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
 		tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+		echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 	
 		# Set up egress chain
 		iptables -t mangle -N qos_egress
@@ -612,6 +606,7 @@ initialize_qos()
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str	
 			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+			echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 	
 			next_class_index=$(($next_class_index+1))
 			next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
@@ -621,6 +616,7 @@ initialize_qos()
 		tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
 		tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
 		tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+		echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 	
 		
 		# Create ingress chain
@@ -629,11 +625,9 @@ initialize_qos()
 		# Mark ingress in FORWARD and INPUT chains to make sure any DNAT (virt. server) is taken into account
 		# Mark ingress in FORWARD chain for LAN and send through the IMQ device
 		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
-		iptables -t mangle -A FORWARD -i $qos_interface -j IMQ --todev 0
 
 		# Mark ingress in INPUT chain for this router and send through the IMQ device
 		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
-		iptables -t mangle -A INPUT -i $qos_interface -j IMQ --todev 0
 
 
 
@@ -674,7 +668,10 @@ initialize_qos()
 			echo "iptables -t mangle -A qos_ingress -m connmark --mark $next_mark/$download_mask -j MARK --set-mark $next_mark"
 		done	
 
-
+		#pass traffic through IMQ
+		iptables -t mangle -A qos_ingress -j IMQ --todev 0
+		
+	
 		#save which mark is associated with which traffic class
 		for mark_def in $class_mark_list ; do
 			id_part=$(echo $mark_def | sed 's/:.*$//g')

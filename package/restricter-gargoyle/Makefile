@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/restricter-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+libericstools +iptables-mod-weburl +kmod-ipt-weburl
+	DEPENDS:=+libericstools +gargoyle-firewall-util +iptables-mod-weburl +kmod-ipt-weburl
 	TITLE:=Access Restriction Scheduler for Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
