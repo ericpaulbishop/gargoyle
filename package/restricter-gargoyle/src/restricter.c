@@ -145,7 +145,7 @@ char** parse_quoted_list(char* list_str, char quote_char, char escape_char, char
 
 long* combine_daily_and_hourly(char** daily, long* hourly);
 long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range);
-void merge_adjacent_time_ranges(long* time_ranges);
+void merge_adjacent_time_ranges(long* time_ranges, unsigned char is_weekly_range);
 unsigned long parse_time(char* time_str);
 string_map* initialize_weekday_hash(void);
 string_map* weekdays;
@@ -1558,18 +1558,7 @@ long* combine_daily_and_hourly(char** daily, long* hourly)
 
 
 	/* merge time ranges where end of first = start of second */	
-	if(weekly[0] == 0 && weekly[weekly_index-1] == 7*24*60*60 && weekly_index > 2)
-	{
-		long first_end = weekly[1];
-		int adj_index = 2;
-		for(adj_index = 2; weekly[adj_index] >= 0; adj_index++)
-		{
-			weekly[adj_index-2] = weekly[adj_index];
-		}
-		weekly[adj_index-2] = 7*24*60*60;
-		weekly[adj_index-1] = first_end;
-	}
-	merge_adjacent_time_ranges(weekly);
+	merge_adjacent_time_ranges(weekly, 1);
 	
 
 	/* if always active, free & return NULL */
@@ -1677,7 +1666,7 @@ long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range)
 	
 
 	/* merge time ranges where end of first = start of second */	
-	merge_adjacent_time_ranges(parsed);
+	merge_adjacent_time_ranges(parsed, is_weekly_range);
 
 
 	/* if always active, free & return NULL */
@@ -1691,26 +1680,69 @@ long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range)
 	return parsed;
 }
 
-void merge_adjacent_time_ranges(long* time_ranges)
+
+
+void merge_adjacent_time_ranges(long* time_ranges, unsigned char is_weekly_range)
 {
+	list* merged_list = initialize_list();
+	long* next = (long*)malloc(sizeof(long));
+	*next = time_ranges[0];
+	push_list(merged_list, next);
+	
 	int next_index = 1;
 	while(time_ranges[next_index] >= 0)
 	{
-		if(time_ranges[next_index-1] == time_ranges[next_index] )
+		long *previous = (long*)pop_list(merged_list);
+		long prev_value;
+		if(previous == NULL) { prev_value = -1; } else {prev_value = *previous; }
+		if(prev_value != time_ranges[next_index] )
 		{
-			int adj_index;
-			for(adj_index = next_index+1; time_ranges[adj_index] >= 0; adj_index++)
+			next = (long*)malloc(sizeof(long));
+			*next = time_ranges[next_index];
+			if(previous != NULL)
 			{
-				time_ranges[adj_index-2] = time_ranges[adj_index];
+				push_list(merged_list, previous);
 			}
-			time_ranges[adj_index-2] = time_ranges[adj_index];
+			push_list(merged_list, next);
 		}
 		else
 		{
-			next_index++;
+			free(previous);
 		}
+		next_index++;
 	}
+	
+	long* first = shift_list(merged_list);
+	long* last = pop_list(merged_list);
+	long max_end = is_weekly_range ? 7*24*60*60 : 24*60*60;
+	if(*first == 0 && *last == max_end && merged_list->length > 0)
+	{
+		push_list(merged_list, shift_list(merged_list));
+		free(first);
+		free(last);
+	}
+	else
+	{
+		unshift_list(merged_list, first);
+		push_list(merged_list, last);
+	}
+
+	next_index=0;
+	while(merged_list->length > 0)
+	{
+		next = shift_list(merged_list);
+		time_ranges[next_index] = *next;
+		free(next);
+		next_index++;
+	}
+	time_ranges[next_index] = -1;
+	
+	destroy_list(merged_list, DESTROY_MODE_FREE_VALUES, next);
 }
+
+
+
+
 
 /* 
  * assumes 24hr time, not am/pm, in format:
