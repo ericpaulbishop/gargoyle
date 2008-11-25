@@ -78,6 +78,8 @@ function resetData()
 	// the restricter_daemon is not enabled
 	var blockSections = uciOriginal.getAllSectionsOfType("restricter_gargoyle", "block");
 	var restrictionTableData = new Array();
+	var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
+	var areChecked = [];
 	for(blockIndex=0; blockIndex < blockSections.length; blockIndex++)
 	{
 		var isIngress = uciOriginal.get("restricter_gargoyle", blockSections[blockIndex], "is_ingress");
@@ -90,7 +92,10 @@ function resetData()
 			var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") && restricterEnabled;
 			var enabledCheck = createEnabledCheckbox(enabledBool);
 			enabledCheck.id = blockSections[blockIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
-		
+			
+			checkElements.push(enabledCheck);
+			areChecked.push(enabledBool);
+
 			restrictionTableData.push([description, enabledCheck, createEditButton(enabledBool)]);
 		}
 	}
@@ -103,6 +108,13 @@ function resetData()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(restrictionTable);
+
+	while(checkElements.length > 0)
+	{
+		var c = checkElements.shift();
+		var b = areChecked.shift();
+		c.checked = b;
+	}
 
 	setDocumentFromUci(document, new UCIContainer(), "");
 
@@ -704,18 +716,20 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId)
 			{
 				tableContainer.removeChild(tableContainer.firstChild);
 			}
-			var table = createTable(["Match Type", "URL"], [], "url_match_table", true, false);
+			var table = createTable(["Match Type", "URL"], [], "url_match_table", true, false, null, null, controlDocument);
 			for(containsIndex=0; containsIndex < contains.length; containsIndex++)
 			{
-				addTableRow(table, ["contains", createUrlSpan(contains[containsIndex], controlDocument) ], true, false);
+				addTableRow(table, ["contains", createUrlSpan(contains[containsIndex], controlDocument) ], true, false, null, null, controlDocument);
+
 			}
 			for(regexIndex=0; regexIndex < regex.length; regexIndex++)
 			{
-				addTableRow(table, ["regex", createUrlSpan(regex[regexIndex], controlDocument)], true, false);
+				addTableRow(table, ["regex", createUrlSpan(regex[regexIndex], controlDocument)], true, false, null, null, controlDocument);
+
 			}
 			for(exactIndex=0; exactIndex < exact.length; exactIndex++)
 			{
-				addTableRow(table, ["exact", createUrlSpan(exact[exactIndex], controlDocument)], true, false);
+				addTableRow(table, ["exact", createUrlSpan(exact[exactIndex], controlDocument)], true, false, null, null, controlDocument);
 			}
 			tableContainer.appendChild(table);
 		}
@@ -756,10 +770,10 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
-		var table = createTable([""], [], tableId, true, false);
+		var table = createTable([""], [], tableId, true, false, null, null, controlDocument);
 		while(ips.length > 0)
 		{
-			addTableRow(table, [ ips.shift() ], true, false);
+			addTableRow(table, [ ips.shift() ], true, false, null, null, controlDocument);
 		}
 		tableContainer.appendChild(table);
 		

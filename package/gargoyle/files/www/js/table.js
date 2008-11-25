@@ -7,28 +7,30 @@
  */
 
 
-function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback)
+function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback, controlDocument)
 {
-	var newTable = document.createElement('table');
-	var tableBody = document.createElement('tbody');
+	controlDocument = controlDocument == null ? document : controlDocument;
+	
+	var newTable = controlDocument.createElement('table');
+	var tableBody = controlDocument.createElement('tbody');
 	newTable.appendChild(tableBody);
 	newTable.id=tableId;
 
-	row = document.createElement('tr');
+	row = controlDocument.createElement('tr');
 	row.className='header_row';
 	tableBody.appendChild(row);
 		
 	for (columnIndex in columnNames)
 	{
-		header = document.createElement('th');
-		headerContent = document.createTextNode(columnNames[columnIndex]);
+		header = controlDocument.createElement('th');
+		headerContent = controlDocument.createTextNode(columnNames[columnIndex]);
 		header.appendChild(headerContent);
 		row.appendChild(header);
 	}
 	if(rowsAreRemovable)
 	{
-		header = document.createElement('th');
-		headerContent = document.createTextNode('');
+		header = controlDocument.createElement('th');
+		headerContent = controlDocument.createTextNode('');
 		header.appendChild(headerContent);
 		row.appendChild(header);
 	}
@@ -36,8 +38,8 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	{
 		for(i=1; i<2; i++)
 		{
-			header = document.createElement('th');
-			headerContent = document.createTextNode('');
+			header = controlDocument.createElement('th');
+			headerContent = controlDocument.createTextNode('');
 			header.appendChild(headerContent);
 			row.appendChild(header);
 		}
@@ -55,14 +57,15 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 }
 
 
-function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback)
+function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback, controlDocument)
 {
-
+	controlDocument = controlDocument == null ? document : controlDocument;
+	
 	rowRemoveCallback = rowRemoveCallback == null ? function(){} : rowRemoveCallback;
 	rowMoveCallback = rowMoveCallback == null ? function(){} : rowMoveCallback;
 
 
-	row = document.createElement('tr');
+	row = controlDocument.createElement('tr');
 	tableBody=table.firstChild;
 	numRows= tableBody.rows.length;
 	tableBody.appendChild(row);
@@ -70,10 +73,10 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	cellIndex = 1;
 	while(cellIndex <= rowData.length)
 	{
-		cell = document.createElement('td');
+		cell = controlDocument.createElement('td');
 		if(typeof(rowData[cellIndex-1]) == 'string')
 		{
-			cellContent = document.createTextNode(rowData[cellIndex-1]);
+			cellContent = controlDocument.createTextNode(rowData[cellIndex-1]);
 			cell.appendChild(cellContent);
 		}
 		else
@@ -86,11 +89,11 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	}
 	if(rowsAreRemovable)
 	{
-		cellContent = createButton();
+		cellContent = createButton(controlDocument);
 		cellContent.value = 'Remove';
 		cellContent.className="default_button";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); }; 
-		cell = document.createElement('td');
+		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
 		cell.appendChild(cellContent);
 		row.appendChild(cell);
@@ -100,21 +103,21 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	}
 	if(rowsAreMovable)
 	{
-		cellContent = createButton();
+		cellContent = createButton(controlDocument);
 		cellContent.value = String.fromCharCode(8593);
 		cellContent.className="default_button";
 		cellContent.onclick= function() { moveThisCellsRowUp(this); rowMoveCallback(this, "up"); };
-		cell = document.createElement('td');
+		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
 		cell.appendChild(cellContent);
 		row.appendChild(cell);
 		cellIndex++;
 
-		cellContent = createButton();
+		cellContent = createButton(controlDocument);
 		cellContent.value = String.fromCharCode(8595);
 		cellContent.className="default_button";
 		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); }; 
-		cell = document.createElement('td');
+		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
 		cell.appendChild(cellContent);
 		row.appendChild(cell);
@@ -242,16 +245,17 @@ function setRowClasses(table, enabled)
 	}
 }
 
-function createButton()
+function createButton(controlDocument)
 {
+	controlDocument = controlDocument == null ? document : controlDocument;
 	try
 	{
-		button = document.createElement('input');
+		button = controlDocument.createElement('input');
 		button.type = 'button';
 	}
 	catch(e)
 	{
-		button = document.createElement('<input type="button" />');
+		button = controlDocument.createElement('<input type="button" />');
 	}
 	return button;
 }

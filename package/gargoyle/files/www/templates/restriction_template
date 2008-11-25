@@ -19,8 +19,8 @@
 </div>
 <div>
 	<label class='narrowleftcolumn' for='restriction_name' id='restriction_name_label'>Schedule:</label>
-	<input type='checkbox' id='all_day' onchange='setVisibility()' /><label for="all_day">All Day</label>
-	<input type='checkbox' id='every_day' onchange='setVisibility()' /><label for="every_day">Every Day</label>&nbsp;&nbsp;
+	<input type='checkbox' id='all_day' onclick='setVisibility()' /><label for="all_day">All Day</label>
+	<input type='checkbox' id='every_day' onclick='setVisibility()' /><label for="every_day">Every Day</label>&nbsp;&nbsp;
 	<select id='schedule_repeats' onchange='setVisibility()'>
 		<option value='daily'>Schedule Repeats Daily</option>
 		<option value='weekly'>Schedule Repeats Weekly</option>

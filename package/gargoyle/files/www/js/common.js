@@ -645,7 +645,7 @@ function removeAllOptionsFromSelectElement(selectElement)
 {
 	while(selectElement.length > 0)
 	{
-		selectElement.remove(0);
+		try { selectElement.remove(0); } catch(e){}
 	}
 }
 

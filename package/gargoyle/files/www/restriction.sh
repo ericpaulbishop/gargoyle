@@ -30,9 +30,9 @@
 	<fieldset>
 		<legend class="sectionheader">Access Restrictions</legend>
 	
-		<span id="add_restriction_label"><p>Add New Restriction Rule:</p></span>	
+		<span id="add_restriction_label"><p style="text-decoration:underline">New Restriction Rule:</p></span>	
 		
-		<div class='indent'>
+		<div>
 			<? cat templates/restriction_template ?>
 			<div>
 				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick="addNewRule()" />
