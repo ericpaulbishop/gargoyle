@@ -56,6 +56,7 @@ config scripts scripts
 config 300 firewall
 	option portforwarding	'100'
 	option restriction	'125'
+	option quotas		'175'
 	option qosupload	'200'
 	option qosdownload	'300'
 

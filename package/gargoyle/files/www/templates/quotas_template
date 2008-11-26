@@ -1,0 +1,63 @@
+<div>
+	<span class='narrowleftcolumn'>
+		<label id="applies_to_label" for='applies_to'>Applies to:</label>
+	</span>
+	<span class = 'rightcolumn'>
+		<select id="applies_to_type"  onchange='setVisibility()' >
+			<option value="all">All IPs</option>
+			<option value="only">Only the following IP</option>
+		</select>
+		<input  type='text' id='applies_to' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+	</span>	
+</div>
+
+<div>
+	<span class='narrowleftcolumn'>
+		<label id="quota_reset_label" for='quota_reset'>Quota Resets:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id="quota_reset" >
+			<option value="hourly">Every Hour</option>
+			<option value="daily">Every Day</option>
+			<option value="weekly">Every Week</option>
+			<option value="monthly">Every Month</option>
+		</select>
+
+	</span>
+</div>
+
+
+<div>
+
+	<span class='narrowleftcolumn'>
+		<label id="max_up_label" for='max_up'>Max Upload:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id="max_up_type" onchange='setVisibility()'>
+			<option value="unlimited">Unlimited</option>
+			<option value="limited">Limit to</option>
+		</select>&nbsp;
+		<span id="max_up_container">
+			<input  type='text' id='max_up' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<em>Megabytes</em>
+		</span>
+	</span>
+</div>
+<div>
+
+	<span class='narrowleftcolumn'>
+		<label id="max_down_label" for='max_down'>Max Download:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id="max_down_type" onchange='setVisibility()'>
+			<option value="unlimited">Unlimited</option>
+			<option value="limited">Limit to</option>
+		</select>&nbsp;
+		<span id="max_down_container">
+			<input  type='text' id='max_down' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<em>Megabytes</em>
+		</span>
+	</span>
+</div>
+
+

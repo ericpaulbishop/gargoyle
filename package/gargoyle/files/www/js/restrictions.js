@@ -45,7 +45,7 @@ function saveChanges()
 	var newBlockSections = uci.getAllSectionsOfType(pkg, "block");
 	for(blockIndex=0; blockIndex < newBlockSections.length; blockIndex++)
 	{
-		createSectionCommands.push("uci set " + pkg + "." + newBlockSections[blockIndex] + "=block");
+		createSectionCommands.push("uci set " + pkg + "." + newBlockSections[blockIndex] + "='block'");
 	}
 	createSectionCommands.push("uci commit");
 	
@@ -100,7 +100,7 @@ function resetData()
 		}
 	}
 
-	columnNames=["Rule Description", "Enabled", ""];
+	columnNames=["Rule Description", "Enabled", "", ""];
 	restrictionTable = createTable(columnNames, restrictionTableData, "restriction_table", true, false, removeRuleCallback);
 	tableContainer = document.getElementById('restriction_table_container');
 	if(tableContainer.firstChild != null)
@@ -261,7 +261,6 @@ function removeRuleCallback(table, row)
 
 function editRule()
 {
-	
 	if( typeof(editRuleWindow) != "undefined" )
 	{
 		//opera keeps object around after
