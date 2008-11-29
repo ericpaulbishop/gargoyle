@@ -2031,7 +2031,7 @@ void initialize_quota_rules_for_direction(list** quota_rules, int direction, str
 		
 		if(is_ingress)
 		{
-			num_rules = num_rules + ( direction == DIRECTION_INGRESS ? 0 : 1 );
+			num_rules = num_rules + ( direction == DIRECTION_INGRESS ? 1 : 0 );
 		}
 		else
 		{
