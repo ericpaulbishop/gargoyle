@@ -1,9 +1,14 @@
 include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=gargoyle
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=2
 
+WPA_DEPS=""
+ifeq ($(BOARD),atheros)
+     WPA_DEPS="+wpa-supplicant +hostapd"
+endif
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
@@ -14,7 +19,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +libericstools 
+	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +restricter-gargoyle +libericstools $(WPA_DEPS) 
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
