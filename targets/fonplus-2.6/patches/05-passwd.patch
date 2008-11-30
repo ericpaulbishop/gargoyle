@@ -1,0 +1,6 @@
+--- kamikaze-7.09-src/package/base-files/files/etc/passwd	2007-09-20 04:54:42.000000000 -0400
++++ kamikaze-7.09-gargoyle-src/package/base-files/files/etc/passwd	2008-11-29 22:01:38.000000000 -0500
+@@ -1,2 +1,2 @@
+-root:!:0:0:root:/tmp:/bin/ash
++root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:root:/tmp:/bin/ash
+ nobody:*:65534:65534:nobody:/var:/bin/false

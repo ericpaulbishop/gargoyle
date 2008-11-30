@@ -63,11 +63,9 @@ for target in $targets ; do
 		done
 
 		cp "$targets_dir/$target/.config" "$target-src"
-		cp "$targets_dir/$target/buildroot.patch" "$target-src"
-		cp "$targets_dir/$target/packages.patch" "$target-src"	
 		cd "$target-src"
-		patch -p 0 < buildroot.patch
-		patch -p 0 < packages.patch
+		scripts/patch-kernel.sh . ../$targets_dir/$target/patches/
+		
 
 		sh ../netfilter-match-modules/integrate_netfilter_modules.sh . ../netfilter-match-modules
 	
