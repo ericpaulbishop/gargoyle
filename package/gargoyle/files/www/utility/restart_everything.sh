@@ -39,7 +39,7 @@ done
 /etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
 
 #restart everything
-restricter_enabled=$(ls/etc/rc.d/*restricter_gargoyle 2>/dev/null)
+restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 ddns_enabled=$(ls /etc/rc.d/*ddns_gargoyle 2>/dev/null)

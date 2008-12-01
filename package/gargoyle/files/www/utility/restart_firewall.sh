@@ -5,7 +5,7 @@
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
 
-restricter_enabled=$(ls/etc/rc.d/*restricter_gargoyle 2>/dev/null)
+restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 

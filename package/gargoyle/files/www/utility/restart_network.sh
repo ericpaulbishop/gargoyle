@@ -36,7 +36,7 @@ done
 
 #restart everything
 dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
-restricter_enabled=$(ls/etc/rc.d/*restricter_gargoyle 2>/dev/null)
+restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 /etc/init.d/network start >/dev/null 2>&1 
