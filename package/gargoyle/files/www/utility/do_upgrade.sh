@@ -33,7 +33,7 @@
 	echo "</body></html>"
 
 	if [ ! "$upgrade2_size" = "0" ] ; then
-		mtd -r write upgrade rootfs
+		mtd write upgrade rootfs
 		mtd -r write upgrade2 $vmlinux_mtd
 	else
 		mtd -r write upgrade linux
