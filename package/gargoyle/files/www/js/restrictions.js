@@ -145,6 +145,8 @@ function addNewRule()
 		addTableRow(table, [description, enabledCheck, createEditButton(true)], true, false, removeRuleCallback);	
 
 		setDocumentFromUci(document, new UCIContainer(), "");
+
+		enabledCheck.checked = true;
 	}
 }
 

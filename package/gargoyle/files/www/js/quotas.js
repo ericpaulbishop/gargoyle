@@ -172,6 +172,10 @@ function resetData()
 		var upPercentage = quotaPercentages[ uploadSection ] == null || (!upEnabledBool) ? "N/A" : quotaPercentages[ uploadSection ];
 		var downPercentage = quotaPercentages[ downloadSection ] == null || (!downEnabledBool) ? "N/A" : quotaPercentages[ downloadSection ];
 
+		checkElements.push(enabledCheck);
+		areChecked.push(upEnabledBool || downEnabledBool);
+
+
 		quotaTableData.push( [ ip, upPercentage, downPercentage, enabledCheck, createEditButton(upEnabledBool || downEnabledBool) ] );
 	}
 	
@@ -218,6 +222,8 @@ function addNewQuota()
 		addTableRow(table, [ip, "N/A", "N/A", enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);	
 		
 		setDocumentFromUci(document, new UCIContainer(), "");
+
+		enabledCheck.checked = true;
 	}
 }
 
