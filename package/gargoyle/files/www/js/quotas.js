@@ -429,7 +429,6 @@ function removeQuotaCallback(table, row)
 		uci.removeSection(pkg, ids[1]);
 	}
 	allIps[ row.childNodes[0].firstChild.data ] = null;
-	alert(uci.getAllSectionsOfType(pkg, "quota").join(","));
 }
 
 function editRule()

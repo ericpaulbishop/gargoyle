@@ -100,7 +100,7 @@ function resetData()
 		}
 	}
 
-	columnNames=["Rule Description", "Enabled", "", ""];
+	columnNames=["Rule Description", "Enabled", ""];
 	restrictionTable = createTable(columnNames, restrictionTableData, "restriction_table", true, false, removeRuleCallback);
 	tableContainer = document.getElementById('restriction_table_container');
 	if(tableContainer.firstChild != null)
@@ -256,7 +256,7 @@ function setRowEnabled()
 function removeRuleCallback(table, row)
 {
 	var ruleId = row.childNodes[1].firstChild.id;
-	uci.removeSection("restricter_gargoyle", id);
+	uci.removeSection("restricter_gargoyle", ruleId);
 }
 
 function editRule()

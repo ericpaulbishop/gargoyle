@@ -728,6 +728,7 @@ td.url_match_table_column_3
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
 td.restriction_table_column_1
 {
 	border-left:1px solid black;
@@ -751,4 +752,43 @@ td.restriction_table_column_4
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
+
+td.quota_table_column_1
+{
+	text-align:center;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_table_column_2
+{
+	text-align:center;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_table_column_3
+{
+	text-align:center;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_table_column_4
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_table_column_5
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_table_column_6
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+
 
