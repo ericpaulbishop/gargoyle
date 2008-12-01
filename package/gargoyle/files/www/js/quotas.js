@@ -16,9 +16,17 @@ function saveChanges()
 	var quotaTableData = getTableDataArray(quotaTable);
 	for(quotaIndex =0; quotaIndex < quotaTableData.length; quotaIndex++)
 	{
-		var check = quotaTableData[quotaIndex][1];
-		enabledQuotaFound = enabledQuotaFound || check.checked; 
-		uci.set(pkg, check.id, "enabled", check.checked ? "1" : "0");
+		var check = quotaTableData[quotaIndex][3];
+		enabledQuotaFound = enabledQuotaFound || check.checked;
+		var sections = check.id.split(".");
+		if( uci.get(pkg, sections[0]) == "quota" )
+		{
+			uci.set(pkg, sections[0], "enabled", check.checked ? "1" : "0");
+		}
+		if( uci.get(pkg, sections[1]) == "quota" )
+		{
+			uci.set(pkg, sections[1], "enabled", check.checked ? "1" : "0");
+		}
 	}
 	if(enabledQuotaFound || restricterEnabled)
 	{
@@ -61,7 +69,6 @@ function saveChanges()
 
 
 	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n";
-	alert(commands);
 
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
@@ -72,22 +79,24 @@ function saveChanges()
 			uciOriginal = uci.clone();
 			
 			
-			alert(req.responseText);
 			var outLines = req.responseText.split(/[\r\n]+/);
-			if(outLines.shift().match(/Success/))
+			var popLine = outLines.pop();
+			while(outLines.length > 0 && (!popLine.match(/Success/)))
 			{
-				
-				quotaData = outLines.shift();
-				quotaNames = outLines.shift();
+				popLine = outLines.pop();
+			}
+			if(popLine.match(/Success/))
+			{
+				quotaData = outLines.pop();
+				quotaNames = outLines.pop();
 				if(quotaData == "-")
 				{
 					quotaData = "";
 				}
 			}
-			alert("quotaNames = " + quotaNames + "\n quotaData = " + quotaData);
 			
 			resetData();
-			document.getElementById("update_container").style.display="none";		
+			document.getElementById("update_container").style.display="none";
 			document.getElementById("save_button").style.display="inline";
 			document.getElementById("reset_button").style.display="inline";
 			document.body.style.cursor='auto';
@@ -95,9 +104,9 @@ function saveChanges()
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-
-
 }
+
+
 function resetData()
 {
 	var splitQuotaNames = quotaNames.split(/[\t ]+/);
@@ -151,8 +160,6 @@ function resetData()
 				}
 			}
 		}
-		var upPercentage = quotaPercentages[ uploadSection ] == null ? "N/A" : quotaPercentages[ uploadSection ];
-		var downPercentage = quotaPercentages[ downloadSection ] == null ? "N/A" : quotaPercentages[ downloadSection ];
 		
 		var upEnabledStr = uciOriginal.get("restricter_gargoyle", uploadSection, "enabled");
 		var upEnabledBool =  (upEnabledStr == "" || upEnabledStr == "1" || upEnabledStr == "true") && (uploadSection != "") && restricterEnabled;
@@ -160,6 +167,10 @@ function resetData()
 		var downEnabledBool =  (downEnabledStr == "" || downEnabledStr == "1" || downEnabledStr == "true") && (downloadSection != "") && restricterEnabled;
 		var enabledCheck = createEnabledCheckbox(upEnabledBool || downEnabledBool);
 		enabledCheck.id = uploadSection + "." + downloadSection;
+
+
+		var upPercentage = quotaPercentages[ uploadSection ] == null || (!upEnabledBool) ? "N/A" : quotaPercentages[ uploadSection ];
+		var downPercentage = quotaPercentages[ downloadSection ] == null || (!downEnabledBool) ? "N/A" : quotaPercentages[ downloadSection ];
 
 		quotaTableData.push( [ ip, upPercentage, downPercentage, enabledCheck, createEditButton(upEnabledBool || downEnabledBool) ] );
 	}

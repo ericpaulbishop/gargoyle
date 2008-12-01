@@ -43,7 +43,7 @@
 	<fieldset>
 		<legend class="sectionheader">Bandwidth Quotas</legend>
 	
-		<span id="add_quota_label" style="text-decoration:underline">Add New Quota:</span>	
+		<span id="add_quota_label" style="text-decoration:underline" >Add New Quota:</span>	
 		
 		<div>
 
@@ -59,7 +59,7 @@
 	
 
 
-		<span id="active_quotas_label"><p>Active Quotas:</p></span>	
+		<span id="active_quotas_label" style="text-decoration:underline" >Active Quotas:</span>	
 
 		<div id="quota_table_container"></div>
 		

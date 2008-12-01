@@ -30,7 +30,7 @@
 	<fieldset>
 		<legend class="sectionheader">Access Restrictions</legend>
 	
-		<span id="add_restriction_label"><p style="text-decoration:underline">New Restriction Rule:</p></span>	
+		<span id="add_restriction_label" style="text-decoration:underline" >New Restriction Rule:</span>	
 		
 		<div>
 			<? cat templates/restriction_template ?>
@@ -44,7 +44,7 @@
 	
 
 
-		<span id="current_restrictions_label"><p>Current Restrictions:</p></span>	
+		<span id="current_restrictions_label" style="text-decoration:underline" >Current Restrictions:</span>	
 
 		<div id="restriction_table_container"></div>
 		
