@@ -31,6 +31,11 @@
 
 #include <matrixSsl/matrixSsl.h>
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
+
 typedef struct __SSL {
   int fd;
   ssl_t *ssl;

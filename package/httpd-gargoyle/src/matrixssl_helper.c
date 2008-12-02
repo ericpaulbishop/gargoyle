@@ -1,6 +1,7 @@
 /*
  * MatrixSSL helper functions
  *
+ * Copyright (C) 2008 Bill Lewis
  * Copyright (C) 2008 Eric Bishop <eric@gargoyle-router.com>
  * Copyright (C) 2005 Nicolas Thill <nthill@free.fr>
  *
@@ -10,6 +11,9 @@
  *    - fixed bug caused by ssl->outBufferCount never being initialized
  *    - Initialized ssl->status & ssl->partial, since these weren't initialized either
  *    - Added functions SSL_peek & SSL_connect to allow use in a client
+ *
+ * Updated December 2008 by Bill Lewis
+ * 	- fixed bug in SSL_peek
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -195,22 +199,8 @@ int SSL_peek(SSL *ssl, char *buf, int bufsize)
 	unsigned long available = (unsigned long)(ssl->inbuf.end) - (unsigned long)(ssl->inbuf.start);
 	if(available > 0)
 	{
-		//we seem never to get here BUT the _ssl_read method in the helper functions
-		//already had the provision to return with the data in the inbuf if it has
-		//data in it.  This suggests  there might be data in it under some bizarre
-		//condition and we certainly don't want to lose it if it exists.  So -- if there 
-		//is data in there we'll just use that instead of trying to read more and 
-		//putting it in the inbuf
-		if(available >= bufsize)
-		{
-			memcpy(buf, ssl->inbuf.start, bufsize);
-			read_bytes = bufsize;
-		}
-		else
-		{
-			memcpy(buf, ssl->inbuf.start, available);
-			read_bytes = (int)available;
-		}
+		read_bytes = available >= bufsize ? bufsize : (int)available;
+		memcpy(buf, ssl->inbuf.start, read_bytes);
 	}
 	else
 	{	
@@ -219,11 +209,9 @@ int SSL_peek(SSL *ssl, char *buf, int bufsize)
 		if(read_bytes > 0)
 		{
 			memcpy(buf, newBuf, read_bytes);
-			free(ssl->inbuf.buf);
-			ssl->inbuf.start = ssl->inbuf.buf = (unsigned char*)newBuf;
-			ssl->inbuf.end = (unsigned char*)newBuf+read_bytes;
-			ssl->inbuf.size = bufsize;
+			ssl->inbuf.start -= read_bytes;
 		}
+		free(newBuf);
 	}
 	return read_bytes;	
 }
