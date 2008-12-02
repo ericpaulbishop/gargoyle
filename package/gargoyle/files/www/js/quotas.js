@@ -109,8 +109,9 @@ function saveChanges()
 
 function resetData()
 {
-	var splitQuotaNames = quotaNames.split(/[\t ]+/);
-	var splitQuotaData = quotaData.split(/[\t ]+/);
+	
+	var splitQuotaNames = quotaNames != null ? quotaNames.split(/[\t ]+/) : [];
+	var splitQuotaData = quotaData != null ? quotaData.split(/[\t ]+/) : [];
 	var quotaPercentages = new Array();
 	for(quotaIndex=0; quotaIndex < splitQuotaNames.length && quotaIndex < splitQuotaData.length; quotaIndex++)
 	{
