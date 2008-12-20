@@ -115,6 +115,7 @@ int max_queue_length;
 string_map* exclude_ips;
 string_map* include_ips;
 char* save_path;
+int terminated;
 
 int main(int argc, char **argv)
 {
@@ -179,6 +180,7 @@ int main(int argc, char **argv)
 	if(is_daemon == 1) //start monitor daemon
 	{
 		daemonize();
+		terminated = 0;
 		
 		recent_websites = (queue*)malloc(sizeof(queue));
 		recent_websites->first = NULL;
@@ -203,7 +205,7 @@ int main(int argc, char **argv)
 		pcap_lookupnet(interface, &net, &mask, errbuf);
 
 		//handle = pcap_open_live(interface, BUFSIZ, 1, 1000, errbuf);
-		handle = pcap_open_live(interface, BUFSIZ, 0, 1000, errbuf);
+		handle = pcap_open_live(interface, BUFSIZ, 1, 250, errbuf);
 		
 		if(handle == NULL)
 		{
@@ -214,7 +216,20 @@ int main(int argc, char **argv)
 		pcap_compile(handle, &filter, filter_app, 0, net);
 		pcap_setfilter(handle, &filter);
 	
-		pcap_loop(handle,-1,web_packet_callback,NULL);
+		//pcap_loop(handle,-1,web_packet_callback,NULL);
+		struct pcap_pkthdr* next_hdr;
+		const u_char* next_pkt;
+		while(terminated == 0)
+		{
+			int read_status = pcap_next_ex(handle, &next_hdr, &next_pkt);
+			if(read_status > 0)
+			{
+				web_packet_callback(NULL, next_hdr, next_pkt);
+			}		
+		}	
+		
+
+
 	}
 	else //request output
 	{
@@ -359,9 +374,10 @@ void signal_handler(int sig)
 	{
 		//exit cleanly on SIGTERM signal
 		//save history here when we implement save/restore
+		terminated = 1;
 		save_data();
 		unlink(PID_PATH);
-		exit(0); 
+		exit(0);
 	}
 	else if(sig == SIGUSR1)
 	{
@@ -494,6 +510,11 @@ string_map* load_file_lines(char* filename)
 
 void web_packet_callback(u_char *useless, const struct pcap_pkthdr* pkthdr,const u_char*  packet)
 {
+	if(terminated == 1)
+	{
+		return;
+	}
+
 	struct in_addr* dst_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 16);
 	struct in_addr* src_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 12);
 	char* dst_ip = strdup(inet_ntoa(*dst_ip_addr));
