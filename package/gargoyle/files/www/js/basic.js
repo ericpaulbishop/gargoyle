@@ -337,6 +337,20 @@ function saveChanges()
 		}
 
 
+		//In X-Wrt option defaultroute = 1 is set for wan section when pppoe is active
+		//I have no idea how this solves the issue, but people report this makes pppoe work
+		//So, let's try it...
+		if(getSelectedValue("wan_protocol", document) == "pppoe")
+		{
+			uci.set("network", "wan", "defaultroute", "1");
+		}
+		else
+		{
+			uci.remove("network", "wan", "defaultroute");
+		}
+
+
+
 		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
 		var adjustIpCommands = ""
 		if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
