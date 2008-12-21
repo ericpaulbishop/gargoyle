@@ -1,3 +1,6 @@
+var pkg = "restricter_gargoyle";
+
+
 function saveChanges()
 {
 	document.body.style.cursor="wait";
@@ -5,7 +8,6 @@ function saveChanges()
 	document.getElementById("reset_button").style.display="none";
 	document.getElementById("update_container").style.display="block";
 	
-	var pkg = "restricter_gargoyle";
 	
 	//set enabled status to corrospond with checked in table
 	enabledRuleFound = false;
@@ -31,7 +33,7 @@ function saveChanges()
 	var originalBlockSections = uciOriginal.getAllSectionsOfType(pkg, "block");
 	for(blockIndex=0; blockIndex < originalBlockSections.length; blockIndex++)
 	{
-		var isIngress = uciOriginal.get("restricter_gargoyle", originalBlockSections[blockIndex], "is_ingress");
+		var isIngress = uciOriginal.get(pkg, originalBlockSections[blockIndex], "is_ingress");
 		if(isIngress != "1")
 		{
 			uciOriginal.removeSection(pkg, originalBlockSections[blockIndex]);
@@ -76,19 +78,19 @@ function resetData()
 {
 	// Instead of having enabled/disabled button, just display all rules to disabled if 
 	// the restricter_daemon is not enabled
-	var blockSections = uciOriginal.getAllSectionsOfType("restricter_gargoyle", "block");
+	var blockSections = uciOriginal.getAllSectionsOfType(pkg, "block");
 	var restrictionTableData = new Array();
 	var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
 	var areChecked = [];
 	for(blockIndex=0; blockIndex < blockSections.length; blockIndex++)
 	{
-		var isIngress = uciOriginal.get("restricter_gargoyle", blockSections[blockIndex], "is_ingress");
+		var isIngress = uciOriginal.get(pkg, blockSections[blockIndex], "is_ingress");
 		if(isIngress != "1")
 		{
-			var description = uciOriginal.get("restricter_gargoyle", blockSections[blockIndex], "description");
+			var description = uciOriginal.get(pkg, blockSections[blockIndex], "description");
 			description = description == "" ? blockSections[blockIndex] : description;
 			
-			var enabledStr =   uciOriginal.get("restricter_gargoyle", blockSections[blockIndex], "enabled");
+			var enabledStr =   uciOriginal.get(pkg, blockSections[blockIndex], "enabled");
 			var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") && restricterEnabled;
 			var enabledCheck = createEnabledCheckbox(enabledBool);
 			enabledCheck.id = blockSections[blockIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
@@ -136,7 +138,7 @@ function addNewRule()
 		var newId = "rule_" + (tableData.length+1);
 		setUciFromDocument(document, newId);
 
-		var description = uciOriginal.get("restricter_gargoyle", newId, "description");
+		var description = uci.get(pkg, newId, "description");
 		description = description == "" ? newId : description;
 
 		var enabledCheck = createEnabledCheckbox(true);
@@ -253,12 +255,12 @@ function setRowEnabled()
 	enabledRow.childNodes[2].firstChild.disabled  = this.checked ? false : true;
 	enabledRow.childNodes[2].firstChild.className = this.checked ? "default_button" : "default_button_disabled" ;
 
-	uci.set("restricter_gargoyle", enabledId, "enabled", enabled);
+	uci.set(pkg, enabledId, "enabled", enabled);
 }
 function removeRuleCallback(table, row)
 {
 	var ruleId = row.childNodes[1].firstChild.id;
-	uci.removeSection("restricter_gargoyle", ruleId);
+	uci.removeSection(pkg, ruleId);
 }
 
 function editRule()
@@ -328,6 +330,10 @@ function editRule()
 					else
 					{
 						setUciFromDocument(editRuleWindow.document, editRuleSectionId);
+						if(uci.get(pkg, editRuleSectionId, "description") != "")
+						{
+							editRow.childNodes[0].firstChild.data = uci.get(pkg, editRuleSectionId, "description");
+						}
 						editRuleWindow.close();
 					}
 					
@@ -580,7 +586,6 @@ function parseUrlSpan(urlSpan)
 function setDocumentFromUci(controlDocument, sourceUci, sectionId)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var pkg = "restricter_gargoyle";
 
 	var description = sourceUci.get(pkg, sectionId, "description");
 	description = description == "" ? sectionId : description;	
@@ -637,6 +642,12 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId)
 		urlType = containsStr == "" && regexStr == "" ? "all" : "except";
 	}
 	setSelectedValue("url_type", urlType, controlDocument);
+	var tableContainer = controlDocument.getElementById("url_match_table_container");
+	if(tableContainer.childNodes.length > 0)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+
 	if(urlType != "all")
 	{
 		var contains = [];
@@ -712,11 +723,6 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId)
 		}
 		if(exact.length > 0 || regex.length > 0 || contains.length > 0)
 		{
-			var tableContainer = controlDocument.getElementById("url_match_table_container");
-			if(tableContainer.childNodes.length > 0)
-			{
-				tableContainer.removeChild(tableContainer.firstChild);
-			}
 			var table = createTable(["Match Type", "URL"], [], "url_match_table", true, false, null, null, controlDocument);
 			for(containsIndex=0; containsIndex < contains.length; containsIndex++)
 			{
@@ -759,18 +765,20 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 		type = optionValue != "" ? "except" : "all";
 	}
 	setSelectedValue(prefixSelectId, type, controlDocument);
-	
+
+
+	var tableContainer = controlDocument.getElementById(tableContainerId);
+	if(tableContainer.childNodes.length > 0)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}	
 	if(optionValue != "")
 	{
 		optionValue = optionValue.replace(/^[\t ]*/, "");
 		optionValue = optionValue.replace(/[\t ]*$/, "");
 		var ips = optionValue.split(/[\t ]*,[\t ]*/);
 
-		var tableContainer = controlDocument.getElementById(tableContainerId);
-		if(tableContainer.childNodes.length > 0)
-		{
-			tableContainer.removeChild(tableContainer.firstChild);
-		}
+
 		var table = createTable([""], [], tableId, true, false, null, null, controlDocument);
 		while(ips.length > 0)
 		{
@@ -801,13 +809,12 @@ function setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, opt
 function setUciFromDocument(controlDocument, sectionId)
 {
 	// note: we assume error checking has already been done 
-	uci.removeSection("restricter_gargoyle", sectionId);
-	uci.set("restricter_gargoyle", sectionId, "", "block");
-	uci.set("restricter_gargoyle", sectionId, "is_ingress", "0");
+	uci.removeSection(pkg, sectionId);
+	uci.set(pkg, sectionId, "", "block");
+	uci.set(pkg, sectionId, "is_ingress", "0");
 
 
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var pkg = "restricter_gargoyle";
 	
 	uci.set(pkg, sectionId, "", "block");
 	uci.set(pkg, sectionId, "description", controlDocument.getElementById("restriction_name").value);
