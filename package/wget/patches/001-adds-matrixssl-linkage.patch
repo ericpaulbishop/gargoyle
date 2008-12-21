@@ -909,13 +909,13 @@
 +
 +#include <stdlib.h>
 +
-+#include "matrixssl_helper.h"
-+
 +#include "wget.h"
 +#include "utils.h"
 +#include "connect.h"
 +#include "url.h"
 +#include "ssl.h"
++
++#include "matrixssl_helper.h"
 +
 +static int certChecker(sslCertInfo_t *cert, void *arg);
 +
