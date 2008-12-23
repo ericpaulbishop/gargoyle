@@ -44,11 +44,11 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	cd .. 
 fi
 
-if [ ! -d "downloaded_src" ] ; then
-	mkdir "downloaded_src"
+if [ ! -d "downloaded" ] ; then
+	mkdir "downloaded"
 fi
 if [ ! -e $openwrt_src_dir/dl ] ; then
-	ln -s $top_dir/downloaded_src $openwrt_src_dir/dl
+	ln -s $top_dir/downloaded $openwrt_src_dir/dl
 fi
 
 
@@ -111,7 +111,7 @@ for target in $targets ; do
 		for i in $image_files ; do
 			if [ ! -d "bin/$i" ] ; then
 				newname=$(echo $i | sed "s/openwrt/gargoyle_$gargoyle_version/g")
-				cp "bin/$i" ../images/$target/$newname
+				cp "bin/$i" "../images/$target/$newname"
 			fi
 		done
 		
