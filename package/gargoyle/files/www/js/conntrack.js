@@ -21,23 +21,31 @@ function initializeConnectionTable()
 	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
 	httpPort= uciOriginal.get("httpd_gargoyle", "server", "http_port");
 	
-	var remoteAccepts=firewallData[2];
+
 	remoteHttpsPort = "";
 	remoteHttpPort = "";
-	for(acceptIndex = 0; acceptIndex < remoteAccepts.length; acceptIndex++)
+	var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept");
+	var acceptIndex=0;
+	for(acceptIndex = 0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
 	{
-		localPort = remoteAccepts[acceptIndex][0];
-		remotePort = remoteAccepts[acceptIndex][1];
-		if(localPort == httpsPort)
+		var section = remoteAcceptSections[acceptIndex];
+		var localPort = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+		if((zone == "wan" || zone == "") && (proto == "tcp" || proto == ""))
 		{
-			remoteHttpsPort = remotePort;
-		}
-		else if(localPort == httpPort)
-		{
-			remoteHttpPort = remotePort;
+			remotePort = remotePort == "" ? localPort : remotePort;
+			if(localPort == httpsPort && localPort != "")
+			{
+				remoteHttpsPort = remotePort;
+			}
+			else if(localPort == httpPort && localPort != "")
+			{
+				remoteHttpPort = remotePort;
+			}
 		}
 	}
-
 
 
 	updateInProgress = false;

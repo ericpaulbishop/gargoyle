@@ -22,48 +22,61 @@ function saveChanges()
 		document.getElementById("update_container").style.display="block";
 
 
-		
 
+		//remove all old firewall remote_accept sections that redirected to ssh or http server
+		var dropbearSections = uciOriginal.getAllSections("dropbear");
+		var oldLocalSshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
+		var oldLocalHttpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
+		var oldLocalHttpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
 
-
-		/* remove old remote accepts for SSH, HTTP and HTTPS from firewallData */
-		dropbearSections = uciOriginal.getAllSections("dropbear");
-		oldLocalSshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
-		oldLocalHttpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
-		oldLocalHttpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
-		oldRemoteAccepts = firewallData[2];
-		newRemoteAccepts = [];
-		for(raIndex=0; raIndex < oldRemoteAccepts.length; raIndex++)
+		var firewallSectionCommands = [];
+		var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept");
+		while(remoteAcceptSections.length > 0)
 		{
-			localPort = oldRemoteAccepts[raIndex][0];
-			if(localPort != oldLocalSshPort && localPort != oldLocalHttpsPort && localPort != oldLocalHttpPort)
+			var lastSection = remoteAcceptSections.pop();
+			var localPort = uciOriginal.get("firewall", lastSection, "local_port");
+			if(localPort == oldLocalSshPort || localPort == oldLocalHttpsPort || localPort == oldLocalHttpPort)
 			{
-				newRemoteAccepts.push(oldRemoteAccepts[raIndex]);
+				uciOriginal.removeSection("firewall", lastSection);
+				firewallSectionCommands.push("uci del firewall." + lastSection);
 			}
 		}
+		var uci = uciOriginal.clone();
 		
-		/* add updated remote accepts */
+		
+		
+		// add updated remote accepts 
+		var addAccept = function(local,remote,index)
+		{
+			var id = "@remote_accept[" + index + "]";
+			uci.set("firewall", id, "", "remote_accept");
+			uci.set("firewall", id, "local_port", local);
+			uci.set("firewall", id, "remote_port", remote);
+			uci.set("firewall", id, "proto", "tcp");
+			uci.set("firewall", id, "zone", "wan");
+			firewallSectionCommands.push("uci add firewall remote_accept");
+		}
 		if(document.getElementById("remote_https_port_container").style.display != "none")
 		{
-			newRemoteAccepts.push( [ document.getElementById("local_https_port").value, document.getElementById("remote_https_port").value ]);
+			addAccept( document.getElementById("local_https_port").value, document.getElementById("remote_https_port").value, "-1");
 		}
 		if(document.getElementById("remote_http_port_container").style.display != "none")
 		{
-			newRemoteAccepts.push( [ document.getElementById("local_http_port").value, document.getElementById("remote_http_port").value ]);
-		}	
+		
+			addAccept( document.getElementById("local_http_port").value, document.getElementById("remote_http_port").value, "-1");
+		}
 		if(!document.getElementById("remote_ssh_port").disabled)
 		{
-			newRemoteAccepts.push( [ document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value ]);
-		}	
-		firewallData[2] = newRemoteAccepts;	
+			addAccept( document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value, "-1");
+		}
 		
+
+
+
 		//update dropbear and httpd_gargoyle uci configuration
-		uci = uciOriginal.clone();
-
-
-
 		uci.set("dropbear", dropbearSections[0], "Port", document.getElementById("local_ssh_port").value);
 		dropbearRestart = oldLocalSshPort == document.getElementById("local_ssh_port").value ? "" : "/etc/init.d/dropbear restart\n"; //only restart dropbear if we need to
+
 
 
 		//set web password enabled/disabled
@@ -99,10 +112,8 @@ function saveChanges()
 
 		
 		
-		
-		createFirewallCommands = getFirewallWriteCommands(firewallData, currentLanIp);
 		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
-		commands =passwordCommands + uci.getScriptCommands(uciOriginal) + "\n" + createFirewallCommands.join("\n") + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
+		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
 		//document.getElementById("output").value = commands;
 
 
@@ -222,26 +233,34 @@ function resetData()
 
 
 
-
-	remoteAccepts=firewallData[2];
-	remoteHttpsPort = "";
-	remoteHttpPort = "";
-	remoteSshPort = "";
-	for(acceptIndex = 0; acceptIndex < remoteAccepts.length; acceptIndex++)
+	
+	var remoteHttpsPort = "";
+	var remoteHttpPort = "";
+	var remoteSshPort = "";
+	var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+	var acceptIndex=0;
+	for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
 	{
-		localPort = remoteAccepts[acceptIndex][0];
-		remotePort = remoteAccepts[acceptIndex][1];
-		if(localPort == httpsPort)
+		var section = remoteAcceptSections[acceptIndex];
+		var localPort = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+		if((zone == "wan" || zone == "") && (proto == "tcp" || proto == ""))
 		{
-			remoteHttpsPort = remotePort;
-		}
-		else if(localPort == httpPort)
-		{
-			remoteHttpPort = remotePort;
-		}
-		else if(localPort == sshPort)
-		{
-			remoteSshPort = remotePort;
+			remotePort = remotePort == "" ? localPort : remotePort;
+			if(localPort == httpsPort)
+			{
+				remoteHttpsPort = remotePort;
+			}
+			else if(localPort == httpPort)
+			{
+				remoteHttpPort = remotePort;
+			}
+			else if(localPort == sshPort)
+			{
+				remoteSshPort = remotePort;
+			}
 		}
 	}
 	

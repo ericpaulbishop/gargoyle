@@ -6,22 +6,8 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "status" -p "connections" -c "internal.css" -j "conntrack.js table.js parse_firewall.js" -i httpd_gargoyle
+	gargoyle_header_footer -h -s "status" -p "connections" -c "internal.css" -j "conntrack.js table.js" -i firewall httpd_gargoyle
 ?>
-
-
-<script>
-<!--
-<?
-	echo "var firewallLines = new Array();"
-	if [ -e /etc/firewall.user ] ; then
-		cat /etc/firewall.user | awk '{print "firewallLines.push(\""$0"\");"}'
-	fi
-	echo "";
-	echo "var firewallData = parseFirewallLines(firewallLines,currentLanIp);"
-?>
-//-->
-</script>
 
 
 <form>

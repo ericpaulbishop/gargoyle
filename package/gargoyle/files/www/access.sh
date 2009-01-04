@@ -6,22 +6,8 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	
-	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js parse_firewall.js" -i httpd_gargoyle dropbear gargoyle network
+	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -i httpd_gargoyle dropbear gargoyle firewall network 
 ?>
-
-
-<script>
-<!--
-<?
-	echo "var firewallLines = new Array();"
-	if [ -e /etc/firewall.user ] ; then
-		cat /etc/firewall.user | awk '{print "firewallLines.push(\""$0"\");"}'
-	fi
-	echo "";
-	echo "var firewallData = parseFirewallLines(firewallLines,currentLanIp);"
-?>
-//-->
-</script>
 
 
 <form>

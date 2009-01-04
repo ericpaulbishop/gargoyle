@@ -23,7 +23,9 @@ do_file_ip_replace()
 
 do_file_ip_replace "/etc/ethers" "$1" "$2"
 do_file_ip_replace "/etc/hosts" "$1" "$2"
-do_file_ip_replace "/etc/firewall.user" "$1" "$2"
+do_file_ip_replace "/etc/config/firewall" "$1" "$2"
 do_file_ip_replace "/etc/config/qos_gargoyle" "$1" "$2"
+do_file_ip_replace "/etc/config/restricter_gargoyle" "$1" "$2"
+if [ -e /etc/webmon_ips ] ; then do_file_ip_replace "/etc/webmon_ips" "$1" "$2" ; fi
 
 
