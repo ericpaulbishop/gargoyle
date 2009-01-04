@@ -1,6 +1,6 @@
---- kamikaze-8.09-src/include/image.mk	2008-12-21 20:46:48.000000000 -0500
-+++ atheros-2.6-src/include/image.mk	2008-12-21 22:21:51.000000000 -0500
-@@ -108,6 +108,30 @@
+--- kamikaze-8.09-src/include/image.mk	2009-01-04 15:35:03.000000000 -0500
++++ kamikaze-8.09-gargoyle-src/include/image.mk	2009-01-04 18:08:43.000000000 -0500
+@@ -108,6 +108,33 @@
  	find $(TARGET_DIR) -type d | $(XARGS) chmod 0755
  	$(INSTALL_DIR) $(TARGET_DIR)/tmp
  	chmod 0777 $(TARGET_DIR)/tmp
@@ -24,6 +24,9 @@
 +	# ensure ntpclient is active
 +	chmod 755 $(TARGET_DIR)/etc/hotplug.d/iface/20-ntpclient
 +
++	# by default, update time every 12 hours
++	mkdir -p $(TARGET_DIR)/etc/crontabs
++	echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $(TARGET_DIR)/etc/crontabs/root
 +
 +	##############################################################################
 +

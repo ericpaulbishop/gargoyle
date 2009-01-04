@@ -76,7 +76,7 @@ function saveChanges()
 		document.getElementById("update_container").style.display="block";
 		
 		sectionDeleteCommands = [];
-		ntpSections = uciOriginal.getAllSections("ntpclient");
+		ntpSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 		for(sectionIndex=0; sectionIndex < ntpSections.length; sectionIndex++)
 		{
 			sectionDeleteCommands.push("uci del ntpclient." + ntpSections[sectionIndex]);
@@ -178,13 +178,16 @@ function resetData()
 	setSelectedValue("timezone", currentTimezoneDefinition);
 
 	
-	ntpSections = uciOriginal.getAllSections("ntpclient");
+	ntpSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 	tzServers = [];
 	for(sectionIndex=0; sectionIndex < ntpSections.length; sectionIndex++)
 	{
 		server = uciOriginal.get("ntpclient", ntpSections[sectionIndex], "hostname");
-		tzServers.push(server );
-		document.getElementById("server" + (1+sectionIndex)).value = server;
+		if(server != "" && sectionIndex < 3)
+		{
+			tzServers.push(server );
+			document.getElementById("server" + (1+sectionIndex)).value = server;
+		}
 	}			
 
 	ntpCronLines = parseCron(cronLines)[0];
