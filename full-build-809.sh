@@ -109,12 +109,16 @@ for target in $targets ; do
 		mkdir -p ../images/$target
 		image_files=$(ls bin 2>/dev/null)
 		for i in $image_files ; do
+			#echo "testing $i . . ."
 			if [ ! -d "bin/$i" ] ; then
-				newname=$(echo $i | sed "s/openwrt/gargoyle_$gargoyle_version/g")
+				#echo "renaming $i"
+				newname=$(echo "$i" | sed "s/openwrt/gargoyle_$gargoyle_version/g")
+				#echo "renamed to $newname"
+				#echo cp "bin/$i" "../images/$target/$newname"
+				#echo ""
 				cp "bin/$i" "../images/$target/$newname"
 			fi
 		done
-		
 		
 		if [ ! -e bin/*.trx ] && [ ! -e bin/*.bin ] && [ ! -e bin/*.lzma ] ; then
 			exit
