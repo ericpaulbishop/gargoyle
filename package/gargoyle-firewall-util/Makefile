@@ -29,9 +29,16 @@ endef
 define Build/Compile
 endef
 
+define Package/gargoyle-firewall-util/postinst
+	included=$$(cat $${IPKG_INSTROOT}/etc/config/firewall | grep 'parse_remote_accept.firewall'  )
+	if [ -z "$$included" ] ; then printf "config include\n\toption path /etc/parse_remote_accept.firewall\n\n" >> $${IPKG_INSTROOT}/etc/config/firewall ; fi
+endef
+
 define Package/gargoyle-firewall-util/install
 	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util.sh
+	$(INSTALL_BIN) ./files/parse_remote_accept.firewall $(1)/etc/parse_remote_accept.firewall
 endef
 
 
