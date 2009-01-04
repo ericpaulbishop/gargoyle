@@ -7,6 +7,8 @@
  */
 
 
+
+
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -22,56 +24,108 @@ function saveChanges()
 		document.getElementById("reset_button").style.display="none";
 		document.getElementById("update_container").style.display="block";
 
-
-
-		/*
-		* IN PORTF FIREWALL DATA:
-		* 	index0=name 
-		*	index1=protocol
-		* 	index2=multiport forward (true/false)
-		* 	index3=from port (start)
-		* 	index4=to port / end source port range (depending on whether this is a multi-port forward)
-		* 	index5=destination ip
-		* 	index6=enabled (true/false)
-		*/
-		newPortfData = [];
-		portfTable = document.getElementById('portf_table_container').firstChild;	
-		tableData = getTableDataArray(portfTable, true, false);
-		for(rowIndex = 0; rowIndex < tableData.length; rowIndex++)
+		var firewallSectionCommands = [];
+		var redirectSectionTypes = ["redirect", "redirect_disabled"];
+		for(typeIndex=0; typeIndex < redirectSectionTypes.length; typeIndex++)
 		{
-			rowData = tableData[rowIndex];
-			newPortfData.push( [rowData[0], rowData[1], false, rowData[2], rowData[4], rowData[3], rowData[5].checked] );	
+			var sectionType = redirectSectionTypes[typeIndex];
+			var sections = uciOriginal.getAllSectionsOfType("firewall", sectionType);
+			while(sections.length > 0)
+			{
+				var lastSection = sections.pop();
+				uciOriginal.removeSection("firewall", lastSection);
+				firewallSectionCommands.push("uci del firewall." + lastSection);
+			}
 		}
 		
-		rangeTable = document.getElementById('portfrange_table_container').firstChild;	
-		tableData = getTableDataArray(rangeTable, true, false);
-		for(rowIndex = 0; rowIndex < tableData.length; rowIndex++)
-		{
-			rowData = tableData[rowIndex];
-			newPortfData.push( [rowData[0], rowData[1], true, rowData[2], rowData[3], rowData[4], rowData[5].checked] );	
-		}
-		firewallData[1] = newPortfData;
+
+		var uci = uciOriginal.clone();
 		
+
+		var singlePortTable = document.getElementById('portf_table_container').firstChild;	
+		var singlePortData= getTableDataArray(singlePortTable, true, false);	
+		var enabledIndex = 0;
+		var disabledIndex = 0;
+		for(rowIndex = 0; rowIndex < singlePortData.length; rowIndex++)
+		{
+
+			var rowData = singlePortData[rowIndex];
+			var enabled = rowData[5].checked;
+			
+			var protos = rowData[1].toLowerCase() == "both" ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protoIndex=0;
+			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
+			{
+				var id = "@" + (enabled ? "redirect" : "redirect_disabled") + "[" + (enabled ? enabledIndex : disabledIndex) + "]";
+				firewallSectionCommands.push("uci add firewall " + (enabled ? "redirect" : "redirect_disabled"));
+
+				uci.set("firewall", id, "", (enabled ? "redirect" : "redirect_disabled"));
+				uci.set("firewall", id, "name", rowData[0]);
+				uci.set("firewall", id, "src", "wan");
+				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "proto", protos[protoIndex]);
+				uci.set("firewall", id, "src_dport", rowData[2]);
+				uci.set("firewall", id, "dest_ip", rowData[3]);
+				uci.set("firewall", id, "dest_port", rowData[4]);
+				enabledIndex = enabledIndex + (enabled ? 1 : 0);
+				disabledIndex = disabledIndex + (enabled ? 0 : 1);
+			}
+		}
+
+
+		var portRangeTable = document.getElementById('portfrange_table_container').firstChild;	
+		var portRangeData= getTableDataArray(portRangeTable, true, false);	
+		for(rowIndex = 0; rowIndex < portRangeData.length; rowIndex++)
+		{
+			var rowData = portRangeData[rowIndex];
+			var enabled = rowData[5].checked;
+			var id = "@" + (enabled ? "redirect" : "redirect_disabled") + "[" + (enabled ? enabledIndex : disabledIndex) + "]";
+			firewallSectionCommands.push("uci add firewall " + (enabled ? "redirect" : "redirect_disabled"));
+
+			var protos = rowData[1].toLowerCase() == "both" ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protoIndex=0;
+			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
+			{
+				uci.set("firewall", id, "", (enabled ? "redirect" : "redirect_disabled"));
+				uci.set("firewall", id, "name", rowData[0]);
+				uci.set("firewall", id, "src", "wan");
+				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "proto", protos[protoIndex]);
+				uci.set("firewall", id, "src_dport", rowData[2] + "-" + rowData[3]);
+				uci.set("firewall", id, "dest_ip", rowData[4]);
+			
+				enabledIndex = enabledIndex + (enabled ? 1 : 0);
+				disabledIndex = disabledIndex + (enabled ? 0 : 1);
+			}
+		}
+
 		
 		//dmz
-		firewallData[3] = document.getElementById('dmz_enabled').checked ? document.getElementById('dmz_ip').value : null;
-	
+		//firewallData[3] = document.getElementById('dmz_enabled').checked ? document.getElementById('dmz_ip').value : null;
+		if(document.getElementById('dmz_enabled').checked )
+		{
+			var id = "@redirect[-1]";
+			firewallSectionCommands.push("uci add firewall redirect");
 			
-		createFirewallCommands = getFirewallWriteCommands(firewallData, currentLanIp);
+			uci.set("firewall", id, "", "redirect");
+			uci.set("firewall", id, "src", "wan");
+			uci.set("firewall", id, "dest", "lan");
+			uci.set("firewall", id, "dest_ip", document.getElementById('dmz_ip').value);
+		}
+		firewallSectionCommands.push("uci commit");
+			
 		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
 
 
 		//upnp
 		upnpStartCommands = new Array();
 		upnpStartCommands.push("/etc/init.d/miniupnpd stop");
-		uci = uciOriginal.clone();
 		upnpdEnabled = document.getElementById("upnp_enabled").checked;
 		if(upnpdEnabled)
 		{
 			upnpStartCommands.push("/etc/init.d/miniupnpd enable");
 			uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
 			uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
-			upnpStartCommands.push(uci.getScriptCommands(uciOriginal));
 			upnpStartCommands.push("/etc/init.d/miniupnpd start");
 		}
 		else
@@ -80,9 +134,9 @@ function saveChanges()
 		}
 	
 
-
-		commands = createFirewallCommands.join("\n") + restartFirewallCommand + upnpStartCommands.join("\n");
+		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + upnpStartCommands.join("\n");
 		//document.getElementById("output").value = commands;
+
 
 		var param = getParameterDefinition("commands", commands);
 		var stateChangeFunction = function(req)
@@ -341,40 +395,89 @@ function proofreadAdd()
 
 function resetData()
 {
-	//asume firewallData already initialized
-	portfData = firewallData[1];	
 	
-	singlePortTableData = new Array();
-	portRangeTableData = new Array();
-	singlePortEnabledStatus = new Array();
-	portRangeEnabledStatus = new Array();
-	/*
-	* 	index0=name 
-	*	index1=protocol
-	* 	index2=multiport forward (true/false)
-	* 	index3=from port (start)
-	* 	index4=to port / end source port range (depending on whether this is a multi-port forward)
-	* 	index5=destination ip
-	* 	index6=enabled (true/false)
-	*/
-	for(portfIndex=0; portfIndex < portfData.length; portfIndex++)
-	{
-		portf = portfData[portfIndex];
-		checkbox = createInput('checkbox');
-		checkbox.checked = portf[6];
-	
-		if(portf[2]) //if range
-		{
-			portRangeTableData.push([portf[0], portf[1], portf[3], portf[4], portf[5],checkbox]);
-			portRangeEnabledStatus.push(checkbox.checked);
-		}
-		else
-		{
-			singlePortTableData.push([portf[0], portf[1], portf[3], portf[5], portf[4],checkbox]);
-			singlePortEnabledStatus.push(checkbox.checked);
-		}	
-	}
+	var singlePortTableData = new Array();
+	var portRangeTableData = new Array();
+	var singlePortEnabledStatus = new Array();
+	var portRangeEnabledStatus = new Array();
+	var dmzIp = "";
 
+	var singlePortProtoHash = [];
+	var portRangeProtoHash = [];
+	singlePortProtoHash["tcp"] = [];
+	singlePortProtoHash["udp"] = [];
+	portRangeProtoHash["tcp"] = [];
+	portRangeProtoHash["udp"] = [];
+
+
+	// parse (both enabled & disabled) redirects
+	// uci firewall doesn't parse redirect_disabled sections, so we can store this info there
+	// without any complications.  Likewise we store rule name in "name" variable that doesn't
+	// get parsed by the uci firewall script.
+	var redirectSectionTypes = ["redirect", "redirect_disabled"];
+	for(typeIndex=0; typeIndex < redirectSectionTypes.length; typeIndex++)
+	{
+		var sectionType = redirectSectionTypes[typeIndex];
+		var redirectSections = uciOriginal.getAllSectionsOfType("firewall", redirectSectionTypes[typeIndex]);
+		for(rdIndex=0; rdIndex < redirectSections.length; rdIndex++)
+		{
+			var rId = redirectSections[rdIndex];
+			var name = uciOriginal.get("firewall", rId, "name");
+			name = name == "" ? "-" : name;
+			var proto	= uciOriginal.get("firewall", rId, "proto").toLowerCase();
+			var srcdport	= uciOriginal.get("firewall", rId, "src_dport");
+			var destip	= uciOriginal.get("firewall", rId, "dest_ip");
+			var destport	= uciOriginal.get("firewall", rId, "dest_port");
+	
+			
+			if(srcdport == "" && destport == "" && sectionType == "redirect")
+			{	
+				dmzIp = dmzIp == "" ? destip : dmzIp;
+			}
+			else if(proto.toLowerCase() == "tcp" || proto.toLowerCase() == "udp")
+			{
+				checkbox = createInput('checkbox');
+				checkbox.checked = sectionType == "redirect" ? true : false;
+
+				destport = destport == "" ? srcdport : destport;
+				otherProto = proto == "tcp" ? "udp" : "tcp";
+				hashStr = name + "-" + srcdport + "-" + destip + "-" + destport;
+				if(srcdport.match(/-/))
+				{
+					var splitPorts = srcdport.split(/-/);
+					// if same rule, different protocol exists, merge into one rule
+					// otherwise, add rule to table data
+					if(portRangeProtoHash[otherProto][hashStr] != null)
+					{
+						portRangeProtoHash[otherProto][hashStr][1] = "Both";
+					}
+					else
+					{
+						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox];
+						portRangeTableData.push(nextTableRowData);
+						portRangeProtoHash[proto][hashStr] = nextTableRowData;
+						portRangeEnabledStatus.push(checkbox.checked);
+					}
+				}
+				else
+				{
+					// if same rule, different protocol exists, merge into one rule
+					// otherwise, add rule to table data
+					if(singlePortProtoHash[otherProto][hashStr] != null)
+					{
+						singlePortProtoHash[otherProto][hashStr][1] = "Both";
+					}
+					else
+					{
+						var nextTableRowData = [name, proto.toUpperCase(), srcdport, destip, destport, checkbox];
+						singlePortTableData.push(nextTableRowData);
+						singlePortProtoHash[proto][hashStr] = nextTableRowData;
+						singlePortEnabledStatus.push(checkbox.checked);
+					}
+				}
+			}
+		}
+	}
 
 
 	columnNames = ['Application', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled']
@@ -423,10 +526,10 @@ function resetData()
 
 
 	//dmz
-	document.getElementById("dmz_enabled").checked = (firewallData[3] != null);
-	if(firewallData[3] != null)
+	document.getElementById("dmz_enabled").checked = (dmzIp != "");
+	if( dmzIp != "")
 	{
-		document.getElementById("dmz_ip").value = firewallData[3];
+		document.getElementById("dmz_ip").value = dmzIp;
 	}
 	else
 	{
@@ -473,5 +576,5 @@ function setUpnpEnabled()
 
 function setDmzEnabled()
 {
-	enableAssociatedField(document.getElementById("dmz_enabled").checked, 'dmz_ip', document.getElementById('dmz_ip').value);
+	enableAssociatedField(document.getElementById("dmz_enabled"), 'dmz_ip', document.getElementById('dmz_ip').value);
 }

@@ -6,21 +6,12 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "firewall" -p "portforwarding" -c "internal.css" -j "port_forwarding.js parse_firewall.js table.js" -i network dropbear upnpd
+	gargoyle_header_footer -h -s "firewall" -p "portforwarding" -c "internal.css" -j "port_forwarding.js parse_firewall.js table.js" -i firewall network dropbear upnpd
 ?>
 
 <script>
 <!--
 <?
-
-	echo "var firewallLines = new Array();"
-	if [ -e /etc/firewall.user ] ; then
-		cat /etc/firewall.user | awk '{print "firewallLines.push(\""$0"\");"}'
-	fi
-	echo "var firewallData = parseFirewallLines(firewallLines,currentLanIp);"
-	echo "";
-
-
 	if [ -h /etc/rc.d/S95miniupnpd ] ; then
 		echo "var upnpdEnabled = true;"
 	else

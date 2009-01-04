@@ -68,6 +68,13 @@ function runAjax(method, url, params, stateChangeFunction)
 	}
 }
 
+// The way we store keys is massively inefficient, but
+// there are generally few enough keys defined that
+// the O(N) time we're using doesn't impact performance.
+//
+// This implementation is necessary so we can control order
+// of sections, i.e. sections will be added in the order
+// they are defined with set method
 function UCIContainer()
 {
 	this.keys = new Array();
@@ -102,7 +109,15 @@ function UCIContainer()
 		var value = this.values[next_key];
 		return value != null ? value : '';
 	}
-
+	this.removeAllSectionsOfType = function(pkg, type)
+	{
+		var removeSections = this.getAllSectionsOfType(pkg, type);
+		var rmIndex=0;
+		for(rmIndex=0; rmIndex < removeSections.length; rmIndex++)
+		{
+			this.removeSection(pkg, removeSections[rmIndex]);
+		}
+	}
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();
@@ -137,23 +152,22 @@ function UCIContainer()
 
 	this.remove = function(pkg, section, option)
 	{
-		var next_key = pkg + "\." + section;
+		var removeKey = pkg + "\." + section;
 	       	if(option != "")
 		{
-			next_key = next_key + "\." + option;
+			removeKey = removeKey + "\." + option;
 		}
-		var value = this.values[next_key];
+		var value = this.values[removeKey] == null ? '' : this.values[removeKey] ;
 		if(value != null)
 		{
-			this.values[next_key] = null;
-			while( (next = this.keys.shift()) != next_key)
+			this.values[removeKey] = null;
+			var newKeys = [];
+			while(this.keys.length > 0)
 			{
-				this.keys.push(next);
+				var nextKey = this.keys.shift();
+				if(nextKey != removeKey){ newKeys.push(nextKey); }
 			}
-		}
-		else
-		{
-			value='';
+			this.keys = newKeys;
 		}
 		return value;
 	}
@@ -189,13 +203,14 @@ function UCIContainer()
 	this.clone = function()
 	{
 		var copy = new UCIContainer();
-		for (key in this.keys)
+		var keyIndex = 0;
+		for(keyIndex = 0; keyIndex < this.keys.length; keyIndex++)
 		{
-			
-			splitKey = this.keys[key].match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
+			var key = this.keys[keyIndex];
+			var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
 			if(splitKey == null)
 			{
-				splitKey = this.keys[key].match(/^([^\.]+)\.([^\.]+)$/);
+				splitKey = key.match(/^([^\.]+)\.([^\.]+)$/);
 				if(splitKey != null)
 				{
 					splitKey.push("");
@@ -205,40 +220,45 @@ function UCIContainer()
 					//should never get here -- if problems put debugging code here
 				}
 			}
-			copy.set(splitKey[1], splitKey[2], splitKey[3], this.values[this.keys[key]]);
+			copy.set(splitKey[1], splitKey[2], splitKey[3], this.values[key]);
 		}
 		return copy;
 	}
 
 	this.print = function()
 	{
-		str="";
-		for (key in this.keys)
+		var str="";
+		var keyIndex=0;
+		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
 		{
-			str=str+ "\n" + this.keys[key] + " = \"" + this.values[this.keys[key]] + "\"";
+			var key = this.keys[keyIndex]
+			str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
 		}
 		return str;
 	}
 
+	// sections are printed in the same order they were added (with the set method)
 	this.getScriptCommands = function(oldSettings)
 	{
 		var commandArray = new Array();
-		for(keyIndex in oldSettings.keys)
+		
+		var keyIndex=0;	
+		for(keyIndex=0; keyIndex < oldSettings.keys.length; keyIndex++)
 		{
-			key = oldSettings.keys[keyIndex];
-			oldValue = oldSettings.values[key];
-			newValue = this.values[key];
+			var key = oldSettings.keys[keyIndex];
+			var oldValue = oldSettings.values[key];
+			var newValue = this.values[key];
 			if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
 			{
 				commandArray.push( "uci del " + key);
 			}
 		}
 
-		for (keyIndex in this.keys)
+		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
 		{
-			key = this.keys[keyIndex];
-			oldValue = oldSettings.values[key];
-			newValue = this.values[key];
+			var key = this.keys[keyIndex];
+			var oldValue = oldSettings.values[key];
+			var newValue = this.values[key];
 			if(oldValue != newValue && (newValue != null && newValue !=''))
 			{
 				commandArray.push( "uci set " + key + "=\'" + newValue + "\'" );
