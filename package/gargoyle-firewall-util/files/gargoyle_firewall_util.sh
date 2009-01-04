@@ -39,10 +39,10 @@ delete_chain_from_table()
 create_death_mark_chain()
 {
 	delete_chain_from_table "filter" "death_mark"
-	iptables -t mangle -N death_mark
-	iptables -t filter -I 1 INPUT -j death_mark
-	iptables -t filter -I 1 FORWARD -j death_mark
-	iptables -t filter -I 1 death_mark -m connmark --mark 0xFF000000/FF000000 -j REJECT
+	iptables -t filter -N death_mark
+	iptables -t filter -I INPUT 1 -j death_mark
+	iptables -t filter -I FORWARD 1 -j death_mark
+	iptables -t filter -I death_mark 1 -m connmark --mark 0xFF000000/0xFF000000 -j REJECT
 }
 
 death_mark_exists()
@@ -51,7 +51,7 @@ death_mark_exists()
 	for=$(iptables -t filter -L FORWARD | grep "death_mark" 2>/dev/null)
 	exists=0
 	if [ -n "$inp" ] && [ -n "$for" ] ; then exists=1; fi
-	return $exists
+	echo $exists
 }
 
 # creates a chain that sets third byte of connmark to a value that denotes what l7 proto 

@@ -92,7 +92,7 @@ start()
 	fi
 	
 	filter_insert_index=1
-	if [ death_mark_exists = 1 ] ; then filter_insert_index=2 ; fi	
+	if [ $(death_mark_exists) = 1 ] ; then filter_insert_index=2 ; fi	
 	
 	ingress_filter_exists=$(iptables -t $ingress_filter_table -L $ingress_filter_chain 2>/dev/null)
 	if [ -z "$ingress_filter_exists" ] ; then

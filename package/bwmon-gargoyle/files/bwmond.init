@@ -21,7 +21,7 @@ start()
 	fi
 
 	filter_insert_index=1
-	if [ death_mark_exists = 1 ] ; then filter_insert_index=2 ; fi	
+	if [ $(death_mark_exists) = 1 ] ; then filter_insert_index=2 ; fi	
 
 	download_table=filter
 	download_chain=bw_ingress
@@ -30,6 +30,7 @@ start()
 	iptables -t $download_table -I INPUT $filter_insert_index  -i $wan_if -j $download_chain
 	iptables -t $download_table -I FORWARD $filter_insert_index -i $wan_if -j $download_chain
 	iptables -t $download_table -A $download_chain  #matches everything to monitor all download bandwidth
+
 
 	
 	upload_table=mangle
