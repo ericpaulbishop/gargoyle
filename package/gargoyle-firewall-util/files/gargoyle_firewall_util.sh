@@ -31,20 +31,22 @@ delete_chain_from_table()
 }
 
 
+# creates a chain that sets third byte of connmark to a value that denotes what l7 proto 
+# is associated with connection. This only sets the connmark, it does not save it to mark
 create_l7marker_chain()
 {
 	# eliminate chain if it exists
 	delete_chain_from_table "mangle" "l7marker"
 
-	iptables -t mangle -N l7marker
-	iptables -t mangle -I INPUT -j l7marker
-	iptables -t mangle -I FORWARD -j l7marker
-	iptables -t mangle -I POSTROUTING -j l7marker
-	
-
 	app_proto_num=1
 	app_proto_shift=16
 	app_proto_mask="0xFF0000"
+
+	iptables -t mangle -N l7marker
+	iptables -t mangle -I PREROUTING  -m connmark --mark 0x0/$app_proto_mask -j l7marker
+	iptables -t mangle -I POSTROUTING -m connmark --mark 0x0/$app_proto_mask -j l7marker
+
+
 	prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
 	for proto in $prots ; do
 		app_proto_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
