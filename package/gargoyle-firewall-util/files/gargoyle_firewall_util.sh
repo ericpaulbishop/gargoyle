@@ -30,6 +30,29 @@ delete_chain_from_table()
 	
 }
 
+# creates a chain in the filter table that always rejects
+# if the last byte of the connmark is FF.  This byte is
+# set in dnat table if we are redirecting port, but don't
+# want to allow connections on original port.  This same
+# byte is used by restricter, but at beginning of filter
+#table, this hasn't been hit yet
+create_death_mark_chain()
+{
+	delete_chain_from_table "filter" "death_mark"
+	iptables -t mangle -N death_mark
+	iptables -t filter -I 1 INPUT -j death_mark
+	iptables -t filter -I 1 FORWARD -j death_mark
+	iptables -t filter -I 1 death_mark -m connmark --mark 0xFF000000/FF000000 -j REJECT
+}
+
+death_mark_exists()
+{
+	inp=$(iptables -t filter -L INPUT | grep "death_mark" 2>/dev/null)
+	for=$(iptables -t filter -L FORWARD | grep "death_mark" 2>/dev/null)
+	exists=0
+	if [ -n "$inp" ] && [ -n "$for" ] ; then exists=1; fi
+	return $exists
+}
 
 # creates a chain that sets third byte of connmark to a value that denotes what l7 proto 
 # is associated with connection. This only sets the connmark, it does not save it to mark

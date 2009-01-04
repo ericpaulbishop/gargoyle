@@ -19,14 +19,16 @@ start()
 	if [ -z "$wan_if" ] ; then
 		return 0
 	fi
-	
+
+	filter_insert_index=1
+	if [ death_mark_exists = 1 ] ; then filter_insert_index=2 ; fi	
 
 	download_table=filter
 	download_chain=bw_ingress
 	delete_chain_from_table $download_table $download_chain
 	iptables -t $download_table -N $download_chain
-	iptables -t $download_table -I INPUT 1  -i $wan_if -j $download_chain
-	iptables -t $download_table -I FORWARD 1 -i $wan_if -j $download_chain
+	iptables -t $download_table -I INPUT $filter_insert_index  -i $wan_if -j $download_chain
+	iptables -t $download_table -I FORWARD $filter_insert_index -i $wan_if -j $download_chain
 	iptables -t $download_table -A $download_chain  #matches everything to monitor all download bandwidth
 
 	

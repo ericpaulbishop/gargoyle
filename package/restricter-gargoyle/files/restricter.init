@@ -91,27 +91,29 @@ start()
 		exit
 	fi
 	
+	filter_insert_index=1
+	if [ death_mark_exists = 1 ] ; then filter_insert_index=2 ; fi	
 	
+	ingress_filter_exists=$(iptables -t $ingress_filter_table -L $ingress_filter_chain 2>/dev/null)
+	if [ -z "$ingress_filter_exists" ] ; then
+		iptables -t $ingress_filter_table -N $ingress_filter_chain
+		iptables -t $ingress_filter_table -I FORWARD $filter_insert_index -i $wan_if -o $lan_if -j $ingress_filter_chain
+	fi
+	egress_filter_exists=$(iptables -t $egress_filter_table -L $egress_filter_chain 2>/dev/null)
+	if [ -z "$egress_filter_exists" ] ; then
+		iptables -t $egress_filter_table -N $egress_filter_chain
+		iptables -t $egress_filter_table -I FORWARD $filter_insert_index -i $lan_if -o $wan_if -j $egress_filter_chain
+	fi
 	ingress_bw_exists=$(iptables -t $ingress_bandwidth_table -L $ingress_bandwidth_chain 2>/dev/null)
 	if [ -z "$ingress_bw_exists" ] ; then
 		iptables -t $ingress_bandwidth_table -N $ingress_bandwidth_chain
-		iptables -t $ingress_bandwidth_table -I INPUT  -i $wan_if -j $ingress_bandwidth_chain
-		iptables -t $ingress_bandwidth_table -I FORWARD -i $wan_if -j $ingress_bandwidth_chain
+		iptables -t $ingress_bandwidth_table -I INPUT $filter_insert_index  -i $wan_if -j $ingress_bandwidth_chain
+		iptables -t $ingress_bandwidth_table -I FORWARD $filter_insert_index -i $wan_if -j $ingress_bandwidth_chain
 	fi
 	egress_bw_exists=$(iptables -t $egress_bandwidth_table -L $egress_bandwidth_chain 2>/dev/null)
 	if [ -z "$egress_bw_exists" ] ; then
 		iptables -t $egress_bandwidth_table -N $egress_bandwidth_chain
 		iptables -t $egress_bandwidth_table -A POSTROUTING  -o $wan_if -j $egress_bandwidth_chain
-	fi
-	ingress_filter_exists=$(iptables -t $ingress_filter_table -L $ingress_filter_chain 2>/dev/null)
-	if [ -z "$ingress_filter_exists" ] ; then
-		iptables -t $ingress_filter_table -N $ingress_filter_chain
-		iptables -t $ingress_filter_table -I FORWARD -i $wan_if -o $lan_if -j $ingress_filter_chain
-	fi
-	egress_filter_exists=$(iptables -t $egress_filter_table -L $egress_filter_chain 2>/dev/null)
-	if [ -z "$egress_filter_exists" ] ; then
-		iptables -t $egress_filter_table -N $egress_filter_chain
-		iptables -t $egress_filter_table -I FORWARD -i $lan_if -o $wan_if -j $egress_filter_chain
 	fi
 
 	rebuilt=$(rebuild_if_necessary)
