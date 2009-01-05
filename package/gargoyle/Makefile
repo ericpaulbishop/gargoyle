@@ -61,7 +61,6 @@ endef
 
 
 define Package/gargoyle/postinst
-	
 	#initialize ntpclient
 	if [ -e $${IPKG_INSTROOT}/etc/TZ ] ; then
 		rm $${IPKG_INSTROOT}/etc/TZ.tmp  2>/dev/null
@@ -70,7 +69,6 @@ define Package/gargoyle/postinst
 	fi
 	if [ -e $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient ] ; then
 		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
-		ACTION=ifup $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 	fi
 	mkdir -p $${IPKG_INSTROOT}/etc/crontabs
 	echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $${IPKG_INSTROOT}/etc/crontabs/root
@@ -86,8 +84,12 @@ define Package/gargoyle/postinst
 	#install new miniupnpd init script and restart httpd_gargoyle
 	mv $${IPKG_INSTROOT}/etc/init.d/miniupnpd.tmp $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
-	$${IPKG_INSTROOT}/etc/init.d/httpd_gargoyle restart 2>/dev/null
 
+	#if we're installing as a package restart daemons
+	if [ -z "$${IPKG_INSTROOT}" ] ; then
+		/etc/init.d/httpd_gargoyle restart 2>/dev/null
+		/etc/init.d/ntpclient restart 2>/dev/null
+	fi
 endef
 
 $(eval $(call BuildPackage,gargoyle))
