@@ -14,7 +14,7 @@
 top_dir=$(pwd)
 openwrt_src_dir="$top_dir/kamikaze-8.09-src"
 targets_dir="$top_dir/targets-8.09"
-netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_trunk.sh"
+netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_809.sh"
 
 
 targets=$(ls $targets_dir 2>/dev/null)

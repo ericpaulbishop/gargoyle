@@ -62,22 +62,6 @@ endef
 
 define Package/gargoyle/postinst
 	
-	#install new broadcom wireless init script if necessary
-	if [ -e $${IPKG_INSTROOT}/lib/wifi/broadcom.sh ] ; then
-		mv $${IPKG_INSTROOT}/lib/wifi/broadcom.sh.tmp $${IPKG_INSTROOT}/lib/wifi/broadcom.sh 2>/dev/null
-		chmod 744 $${IPKG_INSTROOT}/lib/wifi/broadcom.sh 2>/dev/null
-	else
-		rm -rf $${IPKG_INSTROOT}/lib/wifi/broadcom.sh.tmp 2>/dev/null
-	fi
-
-	#install new madwifi wireless init script if necessary
-	if [ -e $${IPKG_INSTROOT}/lib/wifi/madwifi.sh ] ; then
-		mv $${IPKG_INSTROOT}/lib/wifi/madwifi.sh.tmp $${IPKG_INSTROOT}/lib/wifi/madwifi.sh 2>/dev/null
-		chmod 744 $${IPKG_INSTROOT}/lib/wifi/madwifi.sh 2>/dev/null
-	else
-		rm -rf $${IPKG_INSTROOT}/lib/wifi/madwifi.sh.tmp 2>/dev/null
-	fi
-
 	#initialize ntpclient
 	if [ -e $${IPKG_INSTROOT}/etc/TZ ] ; then
 		rm $${IPKG_INSTROOT}/etc/TZ.tmp  2>/dev/null
@@ -85,9 +69,12 @@ define Package/gargoyle/postinst
 		mv $${IPKG_INSTROOT}/etc/TZ.tmp $${IPKG_INSTROOT}/etc/TZ  2>/dev/null
 	fi
 	if [ -e $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient ] ; then
-		chmod 700 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
+		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 		ACTION=ifup $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 	fi
+	mkdir -p $${IPKG_INSTROOT}/etc/crontabs
+	echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $${IPKG_INSTROOT}/etc/crontabs/root
+
 	
 	#if qos enabled, initialize status chart
 	qos_enabled=$$(ls $${IPKG_INSTROOT}/etc/rc.d/*qos_gargoyle* 2>/dev/null)
@@ -101,7 +88,6 @@ define Package/gargoyle/postinst
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
 	$${IPKG_INSTROOT}/etc/init.d/httpd_gargoyle restart 2>/dev/null
 
-	ls >/dev/null 2>&1
 endef
 
 $(eval $(call BuildPackage,gargoyle))
