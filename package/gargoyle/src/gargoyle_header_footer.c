@@ -513,7 +513,7 @@ void define_package_vars(char** package_vars_to_load)
 
 void print_interface_vars(void)
 {
-	// load interface names from /proc/net/dev
+	// load default interface names from /proc/net/dev
 	// and wireless names from /proc/net/wireless
 	//
 	// this is wicked trashy (highly non-portable)
@@ -536,6 +536,11 @@ void print_interface_vars(void)
 	free(wireless_ifs);
 
 
+
+	
+	char* default_lan_if  = NULL;
+	char* default_wan_if  = NULL;
+
 	// load lan & wan interface names
 	// because we want DEFAULT interfaces, we can't load from config
 	// by default lan interface is first eth* interface and wan is second
@@ -549,10 +554,7 @@ void print_interface_vars(void)
 	{
 		have_switched_eths = strstr(interfaces[interface_index], "eth") != NULL && strstr(interfaces[interface_index], ".") != NULL ? 1 : 0;
 	}
-
 	
-	char* default_lan_if = NULL;
-	char* default_wan_if = NULL;
 	for(interface_index=0; interfaces[interface_index] != NULL; interface_index++)
 	{
 		if(	strstr(interfaces[interface_index], "eth") != NULL && 
@@ -584,10 +586,11 @@ void print_interface_vars(void)
 	/*
 	 * Load UCI interface variables
 	*/
-	char* uci_wan_mac = NULL;
-	char* uci_wan_if = NULL;
-	char* uci_lan_if = NULL;
-	char* uci_lan_ip = NULL;
+	char* uci_wan_mac  = NULL;
+	char* uci_wan_if   = NULL;
+	char* uci_wan_dev  = NULL
+	char* uci_lan_if   = NULL;
+	char* uci_lan_ip   = NULL;
 	char* uci_lan_mask = NULL;
 	char* uci_wireless = NULL;
 
@@ -601,25 +604,37 @@ void print_interface_vars(void)
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+	}
+	uci_free_ctx(ctx);
+
+
+	struct uci_context *state_ctx = uci_alloc_context();
+       	uci_set_confdir(state_ctx, "/var/state"); 
+	if(uci_load(state_ctx, "network", &p) == UCI_OK)
+	{
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
+		{
+			uci_wan_dev=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
 		{
 			uci_wan_if=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
 		{
 			uci_lan_if=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "lan", "ifaddr") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifaddr") == UCI_OK)
 		{
 			uci_lan_ip=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "lan", "netmask") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "netmask") == UCI_OK)
 		{
 			uci_lan_mask=get_option_value_string(uci_to_option(e));
 		}
 
 	}
-	if(uci_load(ctx, "wireless", &p) == UCI_OK)
+	if(uci_load(state_ctx, "wireless", &p) == UCI_OK)
 	{
 		uci_foreach_element( &p->sections, e)
 		{
@@ -631,6 +646,9 @@ void print_interface_vars(void)
 		}
 	}
 
+	uci_free_ctx(state_ctx);
+
+
 	//if multiple interfaces in bridge, uci_lan_if will contain multiple ifs, 
 	//which get_interface_mac wouldn't be able to handle
 	//thus we need to lookup br-lan instead of uci_lan_if
@@ -638,7 +656,7 @@ void print_interface_vars(void)
 	char* current_lan_ip = uci_lan_ip != NULL ? uci_lan_ip : get_interface_ip("br-lan");
 	char* current_lan_mask = uci_lan_mask != NULL ? uci_lan_mask : get_interface_netmask("br-lan");
 
-	char* current_wan_mac = get_interface_mac(uci_wan_if);
+	char* current_wan_mac = get_interface_mac(uci_wan_dev);
 	char* current_wan_ip = get_interface_ip(uci_wan_if);
 	char* current_wan_mask = get_interface_netmask(uci_wan_if);
 	char* current_wireless_mac = get_interface_mac(wireless_if);

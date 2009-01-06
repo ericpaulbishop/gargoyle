@@ -221,8 +221,9 @@ initialize_qos()
 	
 	#load qos_interface from global variables
 	if [ -z "$interface" ] ; then
-		scan_interfaces
-		config_get qos_interface $network ifname
+		#scan_interfaces
+		#config_get qos_interface $network ifname
+		qos_interface=$(uci -P "/var/state" show network.$network.ifname)
 	else
 		qos_interface="$interface"
 	fi

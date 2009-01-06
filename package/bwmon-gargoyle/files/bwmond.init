@@ -7,9 +7,10 @@ include /lib/network
 
 start()
 {
-	scan_interfaces
-	config_load network
-	config_get wan_if wan ifname
+	#scan_interfaces
+	#config_load network
+	#config_get wan_if wan ifname
+	wan_if=$(uci -P "/var/state" show network.wan.ifname)
 
 	if [ -e /var/run/bwmond.pid ] ; then
 		old_pid=$(cat /var/run/bwmond.pid)
