@@ -588,7 +588,7 @@ void print_interface_vars(void)
 	*/
 	char* uci_wan_mac  = NULL;
 	char* uci_wan_if   = NULL;
-	char* uci_wan_dev  = NULL
+	char* uci_wan_dev  = NULL;
 	char* uci_lan_if   = NULL;
 	char* uci_lan_ip   = NULL;
 	char* uci_lan_mask = NULL;
@@ -605,11 +605,11 @@ void print_interface_vars(void)
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
 	}
-	uci_free_ctx(ctx);
 
 
 	struct uci_context *state_ctx = uci_alloc_context();
-       	uci_set_confdir(state_ctx, "/var/state"); 
+	uci_add_history_path(state_ctx, state_ctx->savedir);
+       	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
@@ -646,7 +646,6 @@ void print_interface_vars(void)
 		}
 	}
 
-	uci_free_ctx(state_ctx);
 
 
 	//if multiple interfaces in bridge, uci_lan_if will contain multiple ifs, 
@@ -726,6 +725,8 @@ void print_interface_vars(void)
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
 
+	uci_free_context(ctx);
+	uci_free_context(state_ctx);
 }
 
 
