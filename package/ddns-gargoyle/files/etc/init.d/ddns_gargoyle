@@ -26,7 +26,7 @@ convert_config()
 				fi
 			fi
 			if [ "$1" = "ip_network" ] ; then
-				iface=$(uci -P "/var/state" show network.$2.ifname)
+				iface=$(uci -P "/var/state" get network.$2.ifname)
 				if [ -n "$iface" ] ; then
 					echo "	ip_interface	$iface"
 					handled=1

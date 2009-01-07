@@ -82,7 +82,7 @@ start()
 		kill $old_pid 2>/dev/null
 	fi
 	
-	wan_if=$(uci -P "/var/state" show network.wan.ifname)
+	wan_if=$(uci -P "/var/state" get network.wan.ifname)
 	if [ -z "$wan_if" ]  ; then
 		exit
 	fi
