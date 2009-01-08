@@ -1144,6 +1144,7 @@ void compute_block_rules(update_node* unode)
 		free(tmp);
 		proto = (char*)get_map_element(rule_def, "proto");
 	}
+	char* reject_with = (strcmp(proto, "tcp") == 0) ? "" : " --reject-with tcp-reset ";
 	int include_proto = strcmp(proto, "both") == 0 ? 0 : 1;
 
 
@@ -1223,7 +1224,7 @@ void compute_block_rules(update_node* unode)
 	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&sport_is_negated);
 	push_list(final_mask_list, (void*)&sport_is_multi);
-	mask_byte_index++;		
+	mask_byte_index++;
 
 
 	char** dport_def = get_map_element(rule_def, (is_ingress ? "local_port"  : "remote_port"));
@@ -1315,7 +1316,7 @@ void compute_block_rules(update_node* unode)
 		//if final mark matches perfectly with mask of 0xFF000000, REJECT
 		char final_match_str[12];
 		sprintf(final_match_str, "0x%lX", final_match);
-		push_list(all_rules, dynamic_strcat(4, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT" ));
+		push_list(all_rules, dynamic_strcat(5, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT ", reject_with ));
 
 		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
@@ -1326,17 +1327,17 @@ void compute_block_rules(update_node* unode)
 		{	
 			if( dport_def == NULL && sport_def == NULL )
 			{
-				push_list(all_rules, dynamic_strcat(3, rule_prefix, single_check, " -j REJECT" ));
+				push_list(all_rules, dynamic_strcat(4, rule_prefix, single_check, " -j REJECT ", reject_with ));
 			}
 			else
 			{
-				push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT" ));
-				push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p udp ", single_check, " -j REJECT" ));
+				push_list(all_rules, dynamic_strcat(5, rule_prefix, " -p tcp ", single_check, " -j REJECT ", reject_with ));
+				push_list(all_rules, dynamic_strcat(5, rule_prefix, " -p udp ", single_check, " -j REJECT ", reject_with ));
 			}
 		}
 		else
 		{
-			push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p ", proto, " ", single_check, " -j REJECT" ));
+			push_list(all_rules, dynamic_strcat(7, rule_prefix, " -p ", proto, " ", single_check, " -j REJECT ", reject_with ));
 		}
 	}
 
