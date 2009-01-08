@@ -71,22 +71,26 @@ define Package/gargoyle/postinst
 		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 	fi
 	mkdir -p $${IPKG_INSTROOT}/etc/crontabs
-	echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $${IPKG_INSTROOT}/etc/crontabs/root
-
-	
-	#if qos enabled, initialize status chart
-	qos_enabled=$$(ls $${IPKG_INSTROOT}/etc/rc.d/*qos_gargoyle* 2>/dev/null)
-	if [ -n "$$qos_enabled" ] ; then
-		uci set gargoyle.status.qos=300 2>/dev/null
+	if [ ! -e $${IPKG_INSTROOT}/etc/crontabs/root ] ; then
+		echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $${IPKG_INSTROOT}/etc/crontabs/root
 	fi
 
-
-	#install new miniupnpd init script and restart httpd_gargoyle
+	#install new miniupnpd and network init scripts
 	mv $${IPKG_INSTROOT}/etc/init.d/miniupnpd.tmp $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
+	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
+	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 
-	#if we're installing as a package restart daemons
+
+	#if we're installing as a package on an active openwrt system, initialize by doing the following:
 	if [ -z "$${IPKG_INSTROOT}" ] ; then
+		#if qos enabled, initialize status chart
+		qos_enabled=$$(ls $${IPKG_INSTROOT}/etc/rc.d/*qos_gargoyle* 2>/dev/null)
+		if [ -n "$$qos_enabled" ] ; then
+			uci set gargoyle.status.qos=300 2>/dev/null
+		fi
+
+		#restart web server and run ntp client update
 		/etc/init.d/httpd_gargoyle restart 2>/dev/null
 		/etc/init.d/ntpclient restart 2>/dev/null
 	fi

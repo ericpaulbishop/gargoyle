@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008, 2009 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -27,7 +27,7 @@
 
 <fieldset>
 	<legend class="sectionheader">License</legend>
-	<p>Gargoyle is copyright &copy; 2008 by Eric Bishop</p>
+	<p>Gargoyle is copyright &copy; 2008, 2009 by Eric Bishop</p>
 
 	<p>Gargoyle is free software; you can redistribute it and/or modify it under the terms of the 
 	<a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License version 2.0</a>

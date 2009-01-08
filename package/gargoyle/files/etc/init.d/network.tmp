@@ -1,0 +1,59 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+START=40
+STOP=40
+
+brcm_wifi_dhcp_hack()
+{
+	# I have no idea why, but we have to restart udhcpc 
+	# after network is initialized to get broadcom wireless
+	# client working properly.  This hack corrects the problem
+	# by restarting udhcpc on the wan if it should be started but
+	# it hasn't gotten an IP yet.  The problem started in Kamikaze 8.09.
+	wan_if=$(uci -P "/var/state" get network.wan.ifname 2>/dev/null  )
+	wan_proto=$(uci -P "/var/state" get network.wan.proto 2>/dev/null )
+	wan_ip=$(uci -P "/var/state" get network.wan.ipaddr 2>/dev/null )
+	if [ "$wan_proto" = "dhcp" ] && [ -n "$wan_if" ] && [ -z "$wan_ip" ] ; then
+		current_udhcpc=$(ps | grep "udhcp.*$wan_if" | grep -v "grep" | awk ' { print $1 }' )
+		#echo "current_udhcpc = $current_udhcpc"
+		if [ -n "$current_udhcpc" ] ; then
+			kill $current_udhcpc
+		fi
+		udhcpc -t 0 -i $wan_if -b -p /var/run/$wan_if.pid -R  >/dev/null 2>&1
+	fi
+	#echo "wan_if=$wan_if, wan_proto=$wan_proto, wan_ip=\"$wan_ip\""
+}
+
+boot() {
+	setup_switch() { return 0; }
+
+	include /lib/network
+	setup_switch
+	[ -s /etc/config/wireless ] || \
+		/sbin/wifi detect > /etc/config/wireless
+	/sbin/wifi up
+	brcm_wifi_dhcp_hack
+}
+
+
+
+start() {
+	ifup -a
+	/sbin/wifi up
+	brcm_wifi_dhcp_hack
+}
+
+restart() {
+	setup_switch() { return 0; }
+	
+	include /lib/network
+	setup_switch
+	ifup -a
+	/sbin/wifi up
+	brcm_wifi_dhcp_hack
+}
+
+stop() {
+	ifdown -a
+}

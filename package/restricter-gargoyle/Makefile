@@ -49,7 +49,6 @@ define Package/restricter-gargoyle/install
 	$(CP) ./files/restricter.init $(1)/etc/init.d/restricter_gargoyle
 	$(INSTALL_DIR) $(1)/etc/config
 	$(CP) ./files/restricter.config $(1)/etc/config/restricter_gargoyle
-	$(CP) ./files/* $(1)/
 endef
 
 
