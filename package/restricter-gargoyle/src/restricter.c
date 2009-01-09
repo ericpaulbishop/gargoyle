@@ -1316,7 +1316,8 @@ void compute_block_rules(update_node* unode)
 		//if final mark matches perfectly with mask of 0xFF000000, REJECT
 		char final_match_str[12];
 		sprintf(final_match_str, "0x%lX", final_match);
-		push_list(all_rules, dynamic_strcat(5, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT ", reject_with ));
+		char* final_proto = strstr(reject_with, "tcp-reset") == NULL ? "" : " -p tcp ";
+		push_list(all_rules, dynamic_strcat(6, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT ", reject_with ));
 
 		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
