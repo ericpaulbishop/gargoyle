@@ -4,7 +4,7 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# $Id: Makefile 11544 2008-06-20 13:02:02Z florian $
+# $Id: Makefile 12305 2008-08-14 12:03:55Z blogic $
 
 include $(TOPDIR)/rules.mk
 
@@ -41,8 +41,6 @@ define Package/ntpclient/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/ntpclient.config $(1)/etc/config/ntpclient
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/ntpclient.init $(1)/etc/init.d/ntpclient
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ntpclient $(1)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/adjtimex $(1)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/rate.awk $(1)/usr/sbin/

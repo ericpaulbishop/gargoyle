@@ -1,37 +1,54 @@
 #!/bin/sh /etc/rc.common
 START=95
+
+include /lib/miniupnpd
+
 start() {
+	local extif
+	local intif
+	local upload
+	local download
+	local logging
+
 	config_load "upnpd"
-	include /lib/network
-	scan_interfaces
-	. /var/state/network
-	config_get ifname wan ifname
-	config_get ipaddr lan ipaddr
+	config_get extif    config external_iface
+	config_get intif    config internal_iface
+	config_get upload   config upload
+	config_get download config download
+	config_get_bool logging config log_output 0
+
+	config_get extif ${extif:-wan} ifname
 	
-	echo "miniupnpd starting ..."
-	stop
-	iptables_init.sh
-	# get bitspeed information, if provided
-	config_get upnpd_up_bitspeed config upload
-	config_get upnpd_down_bitspeed config download
-	bitspeed_str=""
-	[ -n "$upnpd_up_bitspeed" ] && [ -n "$upnpd_down_bitspeed" ] && {
-		# covert to bytespeed
-		upnpd_up_bytespeed=$(($upnpd_up_bitspeed * 1024 / 8))
-		upnpd_down_bytespeed=$(($upnpd_down_bitspeed * 1024 / 8))
-		bitspeed_str="-B $upnpd_down_bytespeed $upnpd_up_bytespeed"
-	}
-	config_get log_output config log_output
-	if [ "$log_output" = "1" ]; then
-		miniupnpd -i "$ifname" -a "$ipaddr" -p 5000 -U $bitspeed_str -d | logger -t miniupnpd &
+	if [ -n "$extif" ]; then
+		logger -t "upnp daemon" "starting ..."
+
+		upnp_firewall_start
+
+		local args="-i $extif"
+
+		for iface in ${intif:-lan}; do
+			local ipaddr
+			config_get ipaddr "$iface" ipaddr
+			[ -n "$ipaddr" ] && append args "-a $ipaddr"
+		done
+
+		append args "-p 5000 -U"
+
+		[ -n "$upload" -a -n "$download" ] && \
+			append args "-B $(($upload * 1024 / 8)) $(($download * 1024 / 8))"
+
+		if [ "$logging" = "1" ]; then
+			eval start-stop-daemon -S -x miniupnpd -- $args -d | logger -t miniupnpd &
+		else
+			eval start-stop-daemon -S -x miniupnpd -- $args 2>/dev/null
+		fi
 	else
-		miniupnpd -i "$ifname" -a "$ipaddr" -p 5000 -U $bitspeed_str
+		logger -t "upnp daemon" "external interface not found, not starting"
 	fi
 }
 
 stop() {
-	pnpd_pid=$(cat /var/run/miniupnpd.pid) 2>&- >&-
-	iptables_flush.sh 2>&- >&-
-	kill $pnpd_pid 2>&-
-	iptables_removeall.sh 2>&- >&-
+	logger -t "upnp daemon" "stopping ..."
+	start-stop-daemon -K -q -x miniupnpd -p /var/run/miniupnpd.pid
+	upnp_firewall_stop
 }

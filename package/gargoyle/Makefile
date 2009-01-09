@@ -62,25 +62,20 @@ endef
 
 define Package/gargoyle/postinst
 	#initialize ntpclient
-	if [ -e $${IPKG_INSTROOT}/etc/TZ ] ; then
-		rm $${IPKG_INSTROOT}/etc/TZ.tmp  2>/dev/null
-	else
-		mv $${IPKG_INSTROOT}/etc/TZ.tmp $${IPKG_INSTROOT}/etc/TZ  2>/dev/null
-	fi
 	if [ -e $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient ] ; then
 		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 	fi
-	mkdir -p $${IPKG_INSTROOT}/etc/crontabs
-	if [ ! -e $${IPKG_INSTROOT}/etc/crontabs/root ] ; then
-		echo '0	0,12	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient' >> $${IPKG_INSTROOT}/etc/crontabs/root
-	fi
-
+	cat $${IPKG_INSTROOT}/etc/config/system | sed 's/timezone.*UTC/timezone "GMT0BST,M3.5.0/2,M10.5.0/2"/g' > cat $${IPKG_INSTROOT}/etc/config/system.tmp
+	mv cat $${IPKG_INSTROOT}/etc/config/system.tmp cat $${IPKG_INSTROOT}/etc/config/system
+	
+	
 	#install new miniupnpd and network init scripts
 	mv $${IPKG_INSTROOT}/etc/init.d/miniupnpd.tmp $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
 	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 
+	
 
 	#if we're installing as a package on an active openwrt system, initialize by doing the following:
 	if [ -z "$${IPKG_INSTROOT}" ] ; then
@@ -92,7 +87,7 @@ define Package/gargoyle/postinst
 
 		#restart web server and run ntp client update
 		/etc/init.d/httpd_gargoyle restart 2>/dev/null
-		/etc/init.d/ntpclient restart 2>/dev/null
+		ACTION=ifup /etc/hotplug.d/iface/20-ntpclient
 	fi
 endef
 
