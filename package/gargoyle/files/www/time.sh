@@ -1,21 +1,16 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" ntpclient 
+	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" ntpclient system 
 ?>
 <script>
 <!--
 <?
-	echo "var cronLines = new Array();"
-	if [ -e /etc/crontabs/root ] ; then
-		cat /etc/crontabs/root | awk '{print "cronLines.push(\""$0"\");"}'
-	fi
-	echo ""
 	
 	echo "var timezoneLines = new Array();"
 	if [ -e ./data/timezones.txt ] ; then
@@ -23,13 +18,6 @@
 	fi
 	echo "var timezoneData = parseTimezones(timezoneLines);"
 	
-	current_zone="PST8PDT,M3.2.0/2,M11.1.0/2"
-	if [ -e /etc/TZ ] ; then
-		current_zone=$( cat /etc/TZ)
-	fi
-	echo ""
-	echo "var currentTimezoneDefinition = \"$current_zone\";"
-	echo "var previousTimezoneDefinition = currentTimezoneDefinition;"
 	current_time=$(date "+%D %H:%M %Z")
 	echo "var currentTime = \"$current_time\";"
 ?>
@@ -59,13 +47,12 @@
 		<div class="indent">
 			<div>
 				<select class='nocolumn' id='update_frequency' >
-					<option value="0	*">Every Hour</option>
-					<option value="0	0,2,4,6,8,10,12,14,16,18,20,22">Every 2 Hours</option>
-					<option value="0	0,4,8,12,16,20">Every 4 Hours</option>
-					<option value="0	0,8,16">Every 8 Hours</option>
-					<option value="0	0,12">Every 12 Hours</option>
-					<option value="0	0">Every 24 Hours</option>
-					<option value="never">Never</option>
+					<option value="3600">Every Hour</option>
+					<option value="7200">Every 2 Hours</option>
+					<option value="14400">Every 4 Hours</option>
+					<option value="28800">Every 8 Hours</option>
+					<option value="43200">Every 12 Hours</option>
+					<option value="86400">Every 24 Hours</option>
 				</select>
 			</div>
 		</div>

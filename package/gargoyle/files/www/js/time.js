@@ -76,11 +76,11 @@ function saveChanges()
 		document.getElementById("update_container").style.display="block";
 		
 		sectionDeleteCommands = [];
-		ntpSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-		for(sectionIndex=0; sectionIndex < ntpSections.length; sectionIndex++)
+		ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
+		for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
 		{
-			sectionDeleteCommands.push("uci del ntpclient." + ntpSections[sectionIndex]);
-			uciOriginal.removeSection("ntpclient", ntpSections[sectionIndex]);
+			sectionDeleteCommands.push("uci del ntpclient." + ntpServerSections[sectionIndex]);
+			uciOriginal.removeSection("ntpclient", ntpServerSections[sectionIndex]);
 		}
 		sectionDeleteCommands.push("uci commit");
 
@@ -91,35 +91,22 @@ function saveChanges()
 			if(serverName != "")
 			{
 				sectionName = "cfg" + (sectionIndex+1);
-				uci.set("ntpclient", sectionName, "", "ntpclient");
+				uci.set("ntpclient", sectionName, "", "ntpserver");
 				uci.set("ntpclient", sectionName, "port", "123");
-				uci.set("ntpclient", sectionName, "count", "1");
 				uci.set("ntpclient", sectionName, "hostname", document.getElementById("server" + (sectionIndex+1)).value);
 			}
 		}
 	
-		otherCronLines = parseCron(cronLines)[1];
-		newFrequency = getSelectedValue("update_frequency");
-		if(newFrequency != "never")
-		{
-			newCronLine = newFrequency + "	*	*	*	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient"
-			otherCronLines.push(newCronLine);
-		}
-		cronLines = otherCronLines;
+		//update timezone and update frequency
+		uci.set("ntpclient", "@ntpclient[0]", "interval", getSelectedValue("update_frequency"));
+		uci.set("system", "@system[0]", "timezone", getSelectedValue("timezone"));
+		
+		var setTimezoneCommand = "uci get system.@system[0].timezone >/etc/TZ\n";
+		var outputDateCommand = "date \"+%D %H:%M %Z\"";
 
-
-		cronOutputCommands = [];
-		cronOutputCommands = ["touch /etc/crontabs/root", "rm /etc/crontabs/root"];
-		for(lineIndex=0; lineIndex < otherCronLines.length; lineIndex++)
-		{
-			cronOutputCommands.push("echo \'" + otherCronLines[lineIndex] + "\' >> /etc/crontabs/root");
-		}
-	
-		outputDateCommand = "date \"+%D %H:%M %Z\"";
-		//outputDateCommand = "\ndate\n";
 			
-		currentTimezoneDefinition = getSelectedValue("timezone");
-		commands = commands = sectionDeleteCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\necho \'" + currentTimezoneDefinition + "\' > /etc/TZ\nACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n" + cronOutputCommands.join("\n") + "\n/etc/init.d/cron restart\n" + outputDateCommand;
+
+		commands = commands = sectionDeleteCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n" + outputDateCommand;
 		
 		//document.getElementById("output").value = commands;	
 
@@ -175,14 +162,15 @@ function resetData()
 		timezone = timezoneList[tzIndex];
 		addOptionToSelectElement("timezone", timezone, timezoneDefinitions[timezone]);
 	}
+	setSelectedValue("timezone", "PST8PDT,M3.2.0/2,M11.1.0/2");
 	setSelectedValue("timezone", currentTimezoneDefinition);
 
 	
-	ntpSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-	tzServers = [];
-	for(sectionIndex=0; sectionIndex < ntpSections.length; sectionIndex++)
+	var ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
+	var tzServers = [];
+	for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
 	{
-		server = uciOriginal.get("ntpclient", ntpSections[sectionIndex], "hostname");
+		server = uciOriginal.get("ntpclient", ntpServerSections[sectionIndex], "hostname");
 		if(server != "" && sectionIndex < 3)
 		{
 			tzServers.push(server );
@@ -190,17 +178,12 @@ function resetData()
 		}
 	}			
 
-	ntpCronLines = parseCron(cronLines)[0];
-	updateFrequency="never";
-	if(ntpCronLines.length > 0)
-	{
-		updateMatch = ntpCronLines[0].match(/^([^\t]+\t[^\t]*)\t/);
-		if(updateMatch)
-		{
-			updateFrequency = updateMatch[1];
-		}
- 	}
-	setSelectedValue("update_frequency", updateFrequency);
+
+	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
+	var updateFrequencySeconds = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
+	
+	setSelectedValue("update_frequency", "43200"); //set default value
+	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
 		
 
 
