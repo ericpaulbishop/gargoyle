@@ -6,6 +6,8 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
+
 function parseTimezones(timezoneLines)
 {
 	timezoneList = [];
@@ -40,24 +42,6 @@ function stripQuotes(str)
 	return str;
 }
 
-function parseCron(cronLines)
-{
-	ntpLines = [];
-	otherLines = [];
-	for(lineIndex = 0; lineIndex < cronLines.length; lineIndex++)
-	{
-		line = cronLines[lineIndex];
-		if(line.match(/\/etc\/hotplug.d\/iface\/.*ntpclient/))
-		{
-			ntpLines.push(line);
-		}
-		else
-		{
-			otherLines.push(line);
-		}
-	}
-	return([ntpLines, otherLines]);
-}
 
 
 function saveChanges()
@@ -98,8 +82,10 @@ function saveChanges()
 		}
 	
 		//update timezone and update frequency
-		uci.set("ntpclient", "@ntpclient[0]", "interval", getSelectedValue("update_frequency"));
-		uci.set("system", "@system[0]", "timezone", getSelectedValue("timezone"));
+		var systemSections = uciOriginal.getAllSections("system");
+		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
+		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
+		uci.set("system", systemSections[0], "timezone", getSelectedValue("timezone"));
 		
 		var setTimezoneCommand = "uci get system.@system[0].timezone >/etc/TZ\n";
 		var outputDateCommand = "date \"+%D %H:%M %Z\"";
@@ -162,10 +148,23 @@ function resetData()
 		timezone = timezoneList[tzIndex];
 		addOptionToSelectElement("timezone", timezone, timezoneDefinitions[timezone]);
 	}
-	setSelectedValue("timezone", "PST8PDT,M3.2.0/2,M11.1.0/2");
-	setSelectedValue("timezone", currentTimezoneDefinition);
 
-	
+	var systemSections = uciOriginal.getAllSections("system");
+	var currentTimezone = uciOriginal.get("system", systemSections[0], "timezone");
+	currentTimezone = currentTimezone == "UTC" ? "UTC0" : currentTimezone;
+	setSelectedValue("timezone", previousTimezoneDefinition); //set default value
+	setSelectedValue("timezone", currentTimezone); //set value from config
+	previousTimezoneDefinition = currentTimezone;
+
+
+	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
+	var updateFrequency = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
+	setSelectedValue("update_frequency", "43200"); //set default value
+	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
+
+
+
+
 	var ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
 	var tzServers = [];
 	for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
@@ -176,18 +175,8 @@ function resetData()
 			tzServers.push(server );
 			document.getElementById("server" + (1+sectionIndex)).value = server;
 		}
-	}			
+	}
 
-
-	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-	var updateFrequencySeconds = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
-	
-	setSelectedValue("update_frequency", "43200"); //set default value
-	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
-		
-
-
-	
 	currentRegion = "custom";
 	if(tzServers.length >= 3)
 	{
@@ -216,7 +205,8 @@ function resetData()
 		}
 	}
 	
-	setSelectedValue("region", currentRegion);
+	setSelectedValue("region", "custom"); // set default value
+	setSelectedValue("region", currentRegion); //set value from config
 
 	updateServerList();
 

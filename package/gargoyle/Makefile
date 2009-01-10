@@ -65,14 +65,12 @@ define Package/gargoyle/postinst
 	if [ -e $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient ] ; then
 		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 	fi
-	cat $${IPKG_INSTROOT}/etc/config/system | sed 's/timezone.*UTC/timezone "GMT0BST,M3.5.0/2,M10.5.0/2"/g' > cat $${IPKG_INSTROOT}/etc/config/system.tmp
-	mv cat $${IPKG_INSTROOT}/etc/config/system.tmp cat $${IPKG_INSTROOT}/etc/config/system
+	cat $${IPKG_INSTROOT}/etc/config/system | sed -r 's/timezone.*UTC/timezone \"GMT0BST\,M3\.5\.0\/2,M10\.5\.0\/2\"/' > $${IPKG_INSTROOT}/etc/config/system.tmp
+	mv $${IPKG_INSTROOT}/etc/config/system.tmp $${IPKG_INSTROOT}/etc/config/system
 	
 	
-	#install new miniupnpd and network init scripts
-	mv $${IPKG_INSTROOT}/etc/init.d/miniupnpd.tmp $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
+	#install new network init script
 	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
-	chmod 744 $${IPKG_INSTROOT}/etc/init.d/miniupnpd 2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 
 	
