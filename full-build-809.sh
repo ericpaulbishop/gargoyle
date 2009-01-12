@@ -17,6 +17,12 @@ targets_dir="$top_dir/targets-8.09"
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_809.sh"
 
 
+# set svn revesion number to use 
+# you can set this to an alternate revision 
+# or empty to checkout latest 8.09 branch
+rnum=13988
+
+
 targets=$(ls $targets_dir 2>/dev/null)
 
 #get gargoyle version for naming image files
