@@ -20,7 +20,7 @@ brcm_wifi_dhcp_hack()
 		if [ -n "$current_udhcpc" ] ; then
 			kill $current_udhcpc
 		fi
-		udhcpc -t 0 -i $wan_if -b -p /var/run/$wan_if.pid -R  >/dev/null 2>&1
+		udhcpc -t 0 -i $wan_if -b -p /var/run/$wan_if.pid -R&
 	fi
 	#echo "wan_if=$wan_if, wan_proto=$wan_proto, wan_ip=\"$wan_ip\""
 }
