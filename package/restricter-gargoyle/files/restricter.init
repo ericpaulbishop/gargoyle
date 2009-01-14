@@ -1,8 +1,8 @@
 #!/bin/sh /etc/rc.common
 START=60
 
-source /usr/lib/gargoyle_firewall_util.sh
 include /lib/network
+include /usr/lib/gargoyle_firewall_util
 
 ingress_filter_table=filter
 ingress_filter_chain=block_ingress

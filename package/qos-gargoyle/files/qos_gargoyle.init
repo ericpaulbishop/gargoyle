@@ -6,8 +6,8 @@
 
 START=50
 
-source /usr/lib/gargoyle_firewall_util.sh
 include /lib/network
+include /usr/lib/gargoyle_firewall_util
 
 config_file_name="qos_gargoyle"
 
