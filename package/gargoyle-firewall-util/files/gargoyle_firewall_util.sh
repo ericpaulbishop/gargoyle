@@ -1,7 +1,7 @@
 # Copyright Eric Bishop, 2008
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
-source /etc/functions.sh
+. /etc/functions.sh
 include /lib/network
 
 death_mark="0xFF000000/0xFF000000"

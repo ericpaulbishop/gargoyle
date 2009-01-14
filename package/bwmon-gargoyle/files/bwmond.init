@@ -1,8 +1,8 @@
 #!/bin/sh /etc/rc.common
 START=55
 
-source /usr/lib/gargoyle_firewall_util.sh
 include /lib/network
+include /usr/lib/gargoyle_firewall_util
 
 
 start()

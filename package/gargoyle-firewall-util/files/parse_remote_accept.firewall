@@ -1,2 +1,2 @@
-. /usr/lib/gargoyle_firewall_util.sh
+. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 insert_remote_accept_rules

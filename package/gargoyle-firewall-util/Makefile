@@ -35,9 +35,9 @@ define Package/gargoyle-firewall-util/postinst
 endef
 
 define Package/gargoyle-firewall-util/install
-	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/usr/lib/gargoyle_firewall_util
 	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util.sh
+	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 	$(INSTALL_BIN) ./files/parse_remote_accept.firewall $(1)/etc/parse_remote_accept.firewall
 endef
 
