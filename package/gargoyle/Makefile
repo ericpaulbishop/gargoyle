@@ -69,10 +69,10 @@ define Package/gargoyle/postinst
 	mv $${IPKG_INSTROOT}/etc/config/system.tmp $${IPKG_INSTROOT}/etc/config/system
 	
 	
-	#install new network init script
-	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
+	#install new network config script and new network script
+	mv $${IPKG_INSTROOT}/lib/network/config.sh.tmp $${IPKG_INSTROOT}/lib/network/config.sh  2>/dev/null
+	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network  2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
-
 	
 
 	#if we're installing as a package on an active openwrt system, initialize by doing the following:
