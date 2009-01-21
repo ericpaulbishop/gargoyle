@@ -101,6 +101,38 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	return ((char *)s);
 }
 
+int do_match_test(unsigned char match_type,  const char* reference, char* query)
+{
+	int matches = 0;
+	struct regexp* r;
+	switch(match_type)
+	{
+		case WEBURL_CONTAINS_TYPE:
+			matches = (strstr(query, reference) != NULL);
+			break;
+		case WEBURL_REGEX_TYPE:
+
+			if(compiled_map == NULL)
+			{
+				compiled_map = initialize_map(0);
+			}
+			r = (struct regexp*)get_map_element(compiled_map, reference);
+			if(r == NULL)
+			{
+				int rlen = strlen(reference);
+				r= regcomp((char*)reference, &rlen);
+				set_map_element(compiled_map, reference, (void*)r);
+			}
+			matches = regexec(r, query);
+			break;
+		case WEBURL_EXACT_TYPE:
+			matches = (strstr(query, reference) != NULL) && strlen(query) == strlen(reference);
+			break;
+	}
+
+	return matches;
+}
+
 int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0; 
@@ -109,15 +141,16 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 	if(strnicmp((char*)packet_data, "GET ", 4) == 0 || strnicmp(  (char*)packet_data, "POST ", 5) == 0 || strnicmp((char*)packet_data, "HEAD ", 5) == 0)
 	{
 		/* printk("found a  web page request\n"); */
-		char path[300] = "";
-		char host[300] = "";
-		char url[625] = "http://";
+		char path[625] = "";
+		char host[625] = "";
 		int path_start_index;
 		int path_end_index;
 		int last_header_index;
 		char last_two_buf[2];
 		int end_found;
 		char* host_match;
+		char* http_url = NULL;
+		char* plain_url = NULL;
 
 	
 		/* get path portion of URL */
@@ -130,7 +163,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		if(path_end_index > 0) 
 		{
 			int path_length = path_end_index-path_start_index;
-			path_length = path_length < 300 ? path_length : 299; /* prevent overflow */
+			path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
 			memcpy(path, packet_data+path_start_index, path_length);
 			path[ path_length] = '\0';
 		}
@@ -171,57 +204,73 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 				host_end_index++;
 			}
 			memcpy(host, host_match, host_end_index);
-			host_end_index = host_end_index < 300 ? host_end_index : 299; /* prevent overflow */
+			host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
 			host[host_end_index] = '\0';
 			
 		}
 	
+		/* printk("host = \"%s\", path =\"%s\"\n", host, path); */
 		
-		strcat(url, host);
-		if(strcmp(path, "/") != 0)
-		{
-			strcat(url, path);
-		}
-		/* printk("url = \"%s\"\n", url); */
-		
-		if(info->use_regex == 0)
-		{
-			test = (strstr(url, info->test_str) != NULL);
-			if(!test && strcmp(path, "/") == 0)
-			{
-				strcat(url, path);
-				test = (strstr(url, info->test_str) != NULL);
-			}
-		}
-		else
-		{
-			struct regexp* r;
-			if(compiled_map == NULL)
-			{
-				compiled_map = initialize_map(0);
-			}
-			
-			r = (struct regexp*)get_map_element(compiled_map, info->test_str);
-			if(r == NULL)
-			{
-				int rlen = strlen(info->test_str);
-				r= regcomp((char*)info->test_str, &rlen);
-				set_map_element(compiled_map, info->test_str, (void*)r);
-			}
-			test = regexec(r, url);
-			if(!test && strcmp(path, "/") == 0)
-			{
-				strcat(url, path);
-				test = regexec(r, url);
-			}
 
-		}
-
-		/* if invert flag is set, return true if this IS a web request, but it didn't match (always return false for non-web requests) */
-		if(info->invert > 0)
+		switch(info->match_part)
 		{
-			test = test == 0 ? 1 : 0;
-		}
+			case WEBURL_DOMAIN_PART:
+				test = do_match_test(info->match_type, info->test_str, host);
+				break;
+			case WEBURL_PATH_PART:
+				test = do_match_test(info->match_type, info->test_str, path);
+				if( !test && path[0] == '/' )
+				{
+					test = do_match_test(info->match_type, info->test_str, (path+1));
+				}
+				break;
+			case WEBURL_ALL_PART:
+				http_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+				http_url[0] = '\0';
+				strcat(http_url, "http://");
+				strcat(http_url, host);
+				if(strcmp(path, "/") != 0)
+				{
+					strcat(http_url, path);
+				}
+				test = do_match_test(info->match_type, info->test_str, http_url);
+				if(!test && strcmp(path, "/") == 0)
+				{
+					strcat(plain_url, path);
+					test = do_match_test(info->match_type, info->test_str, http_url);
+				}
+				kfree(http_url);
+
+
+				if(!test)
+				{
+					plain_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+					plain_url[0] = '\0';
+					strcat(plain_url, "http://");
+					strcat(plain_url, host);
+					if(strcmp(path, "/") != 0)
+					{
+						strcat(plain_url, path);
+					}
+					test = do_match_test(info->match_type, info->test_str, plain_url);
+					if(!test && strcmp(path, "/") == 0)
+					{
+						strcat(plain_url, path);
+						test = do_match_test(info->match_type, info->test_str, plain_url);
+					}
+
+					kfree(plain_url);
+				}
+				break;	
+		}		
+
+
+
+		/* 
+		 * If invert flag is set, return true if this IS a web request, but it didn't match 
+		 * Always return false for non-web requests
+		 */
+		test = info->invert ? !test : test;
 	}
 
 	return test;
@@ -347,7 +396,8 @@ static void __exit fini(void)
 	ipt_unregister_match(&weburl_match);
 	if(compiled_map != NULL)
 	{
-		destroy_map(compiled_map, DESTROY_MAP_FREE_VALUES);
+		unsigned long num_destroyed;
+		destroy_map(compiled_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	}
 }
 

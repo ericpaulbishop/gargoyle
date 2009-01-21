@@ -1,23 +1,39 @@
-/*  weburl --	A netfilter module to match URLs in HTTP requests 
- *  		This module can match using string match or regular expressions
- *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
- *
- *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+/*
+ * Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
- *  This file is free software: you may copy, redistribute and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation, either version 2 of the License, or (at your
- *  option) any later version.
+ * This work 'as-is' we provide.
+ * No warranty, express or implied.
+ * We've done our best,
+ * to debug and test.
+ * Liability for damages denied.
  *
- *  This file is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * Permission is granted hereby,
+ * to copy, share, and modify.
+ * Use as is fit,
+ * free or for profit.
+ * On this notice these rights rely.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ *  Note that unlike other portions of Gargoyle this code
+ *  does not fall under the GPL, but the rather whimsical
+ *  'Poetic License' above.
+ *
+ *  Basically, this library contains a bunch of utilities
+ *  that I find useful.  I'm sure other libraries exist
+ *  that are just as good or better, but I like these tools 
+ *  because I personally wrote them, so I know their quirks.
+ *  (i.e. I know where the bodies are buried).  I want to 
+ *  make sure that I can re-use these utilities for whatever
+ *  code I may want to write in the future be it
+ *  proprietary or open-source, so I've put them under
+ *  a very, very permissive license.
+ *
+ *  If you find this code useful, use it.  If not, don't.
+ *  I really don't care.
+ *
  */
+
 
 #if __KERNEL__
 	#define malloc(foo)	kmalloc(foo,GFP_ATOMIC)
@@ -41,6 +57,7 @@
 	#define strdup kernel_strdup
 
 #endif
+
 
 
 /* tree_map structs / prototypes */
@@ -72,29 +89,34 @@ typedef struct
 
 
 /* long map functions */
-long_map* initialize_long_map(void);
-void* set_long_map_element(long_map* map, unsigned long key, void* value);
-void* get_long_map_element(long_map* map, unsigned long key);
-void* remove_long_map_element(long_map* map, unsigned long key);
-unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned);
-void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned);
-void** destroy_long_map(long_map* map, int destruction_type);
+extern long_map* initialize_long_map(void);
+extern void* get_long_map_element(long_map* map, unsigned long key);
+void* get_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
+void* get_largest_long_map_element(long_map* map, unsigned long* largest_key);
+void* remove_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
+void* remove_largest_long_map_element(long_map* map, unsigned long* largest_key);
+extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
+extern void* remove_long_map_element(long_map* map, unsigned long key);
+extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned);
+extern void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned);
+extern void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed);
 
 /* string map functions */
-string_map* initialize_string_map(unsigned char store_keys);
-void* set_string_map_element(string_map* map, const char* key, void* value);
-void* get_string_map_element(string_map* map, const char* key);
-void* remove_string_map_element(string_map* map, const char* key);
-char** get_string_map_keys(string_map* map); 
-void** get_string_map_values(string_map* map, unsigned long* values_returned);
-void** destroy_string_map(string_map* map, int destruction_type);
+extern string_map* initialize_string_map(unsigned char store_keys);
+extern void* get_string_map_element(string_map* map, const char* key);
+extern void* set_string_map_element(string_map* map, const char* key, void* value);
+extern void* remove_string_map_element(string_map* map, const char* key);
+extern char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned); 
+extern void** get_string_map_values(string_map* map, unsigned long* num_values_returned);
+extern void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed);
 
 /*
- * three different ways to deal with values when map is destroyed
+ * three different ways to deal with values when data structure is destroyed
  */
-#define DESTROY_MAP_RETURN_VALUES	1
-#define DESTROY_MAP_FREE_VALUES		2
-#define DESTROY_MAP_IGNORE_VALUES 	3
+#define DESTROY_MODE_RETURN_VALUES	20
+#define DESTROY_MODE_FREE_VALUES 	21
+#define DESTROY_MODE_IGNORE_VALUES	22
+
 
 /* 
  * for convenience & backwards compatibility alias _string_map_ functions to 
@@ -110,12 +132,12 @@ void** destroy_string_map(string_map* map, int destruction_type);
 
 
 /* internal utility structures/ functions */
-typedef struct l_node
+typedef struct stack_node_struct
 {
 	long_map_node** node_ptr;
 	signed char direction;
-	struct l_node* previous;
-} list_node;
+	struct stack_node_struct* previous;
+} stack_node;
 
 void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
 void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
@@ -138,9 +160,9 @@ unsigned long sdbm_string_hash(const char *key);
  * For testing only
  ***************************************************/
 /*
-void print_list(list_node *l);
+void print_list(stack_node *l);
 
-void print_list(list_node *l)
+void print_list(stack_node *l)
 {
 	if(l != NULL)
 	{
@@ -171,10 +193,23 @@ string_map* initialize_string_map(unsigned char store_keys)
 	return map;
 }
 
+void* get_string_map_element(string_map* map, const char* key)
+{
+	unsigned long hashed_key = sdbm_string_hash(key);
+	void* return_value =  get_long_map_element( &(map->lm), hashed_key);
+	if(return_value != NULL && map->store_keys)
+	{
+		string_map_key_value* r = (string_map_key_value*)return_value;
+		return_value = r->value;
+	}
+	map->num_elements = map->lm.num_elements;
+	return return_value;
+}
+
 void* set_string_map_element(string_map* map, const char* key, void* value)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
+	void* return_value = NULL;
 	if(map->store_keys)
 	{
 		string_map_key_value* kv = (string_map_key_value*)malloc(sizeof(string_map_key_value));
@@ -196,24 +231,11 @@ void* set_string_map_element(string_map* map, const char* key, void* value)
 	map->num_elements = map->lm.num_elements;
 	return return_value;
 }
-void* get_string_map_element(string_map* map, const char* key)
-{
-	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
-	return_value =  get_long_map_element( &(map->lm), hashed_key);
-	if(return_value != NULL && map->store_keys)
-	{
-		string_map_key_value* r = (string_map_key_value*)return_value;
-		return_value = r->value;
-	}
-	map->num_elements = map->lm.num_elements;
-	return return_value;
-}
+
 void* remove_string_map_element(string_map* map, const char* key)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
-	void* return_value;
-	return_value =  remove_long_map_element( &(map->lm), hashed_key);
+	void* return_value =  remove_long_map_element( &(map->lm), hashed_key);
 	
 	if(return_value != NULL && map->store_keys)
 	{
@@ -226,11 +248,12 @@ void* remove_string_map_element(string_map* map, const char* key)
 	return return_value;
 }
 
-char** get_string_map_keys(string_map* map)
+char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 {
 	char** str_keys;
 	str_keys = (char**)malloc((map->num_elements+1)*sizeof(char*));
 	str_keys[0] = NULL;
+	*num_keys_returned = 0;
 	if(map->store_keys && map->num_elements > 0)
 	{
 		unsigned long list_length;
@@ -239,6 +262,7 @@ char** get_string_map_keys(string_map* map)
 		for(key_index = 0; key_index < list_length; key_index++)
 		{
 			str_keys[key_index] = strdup( ((string_map_key_value*)(long_values[key_index]))->key);
+			*num_keys_returned = *num_keys_returned + 1;
 		}
 		str_keys[list_length] = NULL;
 		free(long_values);
@@ -246,17 +270,16 @@ char** get_string_map_keys(string_map* map)
 	return str_keys;
 }
 
-void** get_string_map_values(string_map* map, unsigned long* values_returned)
+void** get_string_map_values(string_map* map, unsigned long* num_values_returned)
 {
-	void** values;
-	unsigned long list_length;
-	string_map_key_value** long_values;
+	void** values = NULL;
+	string_map_key_value** long_values = NULL;
 	unsigned long value_index;
 	if(map->store_keys >0)
 	{
 		values = (void**)malloc((map->num_elements+1)*sizeof(void*));
-		long_values = (string_map_key_value**)get_sorted_long_map_values ( &(map->lm), &list_length );
-		for(value_index=0; value_index < list_length; value_index++)
+		long_values = (string_map_key_value**)get_sorted_long_map_values ( &(map->lm), num_values_returned );
+		for(value_index=0; value_index < *num_values_returned; value_index++)
 		{
 			values[value_index] = (long_values[value_index])->value;
 		}
@@ -264,21 +287,21 @@ void** get_string_map_values(string_map* map, unsigned long* values_returned)
 	}
 	else
 	{
-		values = get_sorted_long_map_values ( &(map->lm), &list_length );
-
+		values = get_sorted_long_map_values ( &(map->lm), num_values_returned );
 	}
 	return values;
 }
 
 
 
-void** destroy_string_map(string_map* map, int destruction_type)
+void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed)
 {
 	void** return_values = NULL;
-	char** key_list = get_string_map_keys(map);
+	char** key_list = get_string_map_keys(map, num_destroyed);
 	unsigned long key_index = 0;
-
-	if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+	
+	*num_destroyed = 0;
+	if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 	{
 		return_values = (void**)malloc((1+map->num_elements)*sizeof(void*));
 		return_values[ map->num_elements ] = NULL;
@@ -286,17 +309,18 @@ void** destroy_string_map(string_map* map, int destruction_type)
 	while(map->num_elements > 0)
 	{
 		void* removed_value = remove_string_map_element(map, key_list[key_index]);
-		if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 		{
 			return_values[key_index] = removed_value;
 		}
-		if(destruction_type == DESTROY_MAP_FREE_VALUES)
+		if(destruction_type == DESTROY_MODE_FREE_VALUES)
 		{
 			free(removed_value);
 		}
 
 		free(key_list[key_index]);
 		key_index++;
+		*num_destroyed = *num_destroyed + 1;
 	}
 	free(key_list);
 	free(map);
@@ -319,18 +343,82 @@ long_map* initialize_long_map(void)
 	return map;
 }
 
+void* get_long_map_element(long_map* map, unsigned long key)
+{
+	void* value = NULL;
+
+	if(map->root != NULL)
+	{
+		long_map_node* parent_node = map->root;
+		long_map_node* next_node;	
+		while( key != parent_node->key && (next_node = (long_map_node *)(key < parent_node->key ? parent_node->left : parent_node->right))  != NULL)
+		{
+			parent_node = next_node;
+		}
+		if(parent_node->key == key)
+		{
+			value = parent_node->value;
+		}
+	}
+	return value;
+}
+
+void* get_smallest_long_map_element(long_map* map, unsigned long* smallest_key)
+{
+	void* value = NULL;
+	if(map->root != NULL)
+	{
+		long_map_node* next_node = map->root;	
+		while( next_node->left != NULL)
+		{
+			next_node = next_node->left;
+		}
+		value = next_node->value;
+		*smallest_key = next_node->key;
+	}
+	return value;
+}
+
+void* get_largest_long_map_element(long_map* map, unsigned long* largest_key)
+{
+	void* value = NULL;
+	if(map->root != NULL)
+	{
+		long_map_node* next_node = map->root;	
+		while( next_node->right != NULL)
+		{
+			next_node = next_node->right;
+		}
+		value = next_node->value;
+		*largest_key = next_node->key;
+	}
+	return value;
+}
+
+void* remove_smallest_long_map_element(long_map* map, unsigned long* smallest_key)
+{
+	get_smallest_long_map_element(map, smallest_key);
+	return remove_long_map_element(map, *smallest_key);
+}
+
+void* remove_largest_long_map_element(long_map* map, unsigned long* largest_key)
+{
+	get_largest_long_map_element(map, largest_key);
+	return remove_long_map_element(map, *largest_key);
+}
+
 
 /* if replacement performed, returns replaced value, otherwise null */
 void* set_long_map_element(long_map* map, unsigned long key, void* value)
 {
-	list_node* parent_list = NULL;
+	stack_node* parent_list = NULL;
 	void* old_value = NULL;
 	int old_value_found = 0;
 
 	long_map_node* parent_node;
 	long_map_node* next_node;
-	list_node* next_parent;
-	list_node* previous_parent;
+	stack_node* next_parent;
+	stack_node* previous_parent;
 	signed char new_balance;
 
 
@@ -351,14 +439,14 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 	{
 		parent_node = map->root;
 			
-		next_parent = (list_node*)malloc(sizeof(list_node));
+		next_parent = (stack_node*)malloc(sizeof(stack_node));
 		next_parent->node_ptr =  &(map->root);
 		next_parent->previous = parent_list;
 		parent_list = next_parent;	
 			
 		while( key != parent_node->key && (next_node = (key < parent_node->key ? parent_node->left : parent_node->right) )  != NULL)
 		{
-			next_parent = (list_node*)malloc(sizeof(list_node));
+			next_parent = (stack_node*)malloc(sizeof(stack_node));
 			next_parent->node_ptr = key < parent_node->key ? &(parent_node->left) : &(parent_node->right);
 			next_parent->previous = parent_list;
 			next_parent->previous->direction = key < parent_node->key ? -1 : 1;
@@ -419,33 +507,13 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 }
 
 
-void* get_long_map_element(long_map* map, unsigned long key)
-{
-	void* value = NULL;
-
-	if(map->root != NULL)
-	{
-		long_map_node* parent_node = map->root;
-		long_map_node* next_node;	
-		while( key != parent_node->key && (next_node = (long_map_node *)(key < parent_node->key ? parent_node->left : parent_node->right))  != NULL)
-		{
-			parent_node = next_node;
-		}
-		if(parent_node->key == key)
-		{
-			value = parent_node->value;
-		}
-	}
-	return value;
-}
-
 void* remove_long_map_element(long_map* map, unsigned long key)
 {
 
 	void* value = NULL;
 	
 	long_map_node* root_node = map->root;	
-	list_node* parent_list = NULL;
+	stack_node* parent_list = NULL;
 
 
 	long_map_node* remove_parent;
@@ -456,9 +524,9 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 	long_map_node* replacement_parent;
 	long_map_node* replacement_next;
 
-	list_node* next_parent;
-	list_node* previous_parent;
-	list_node* replacement_list_node;
+	stack_node* next_parent;
+	stack_node* previous_parent;
+	stack_node* replacement_stack_node;
 
 
 	signed char new_balance;
@@ -472,13 +540,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 		
 		if(remove_node != NULL && key != remove_parent->key)
 		{
-			next_parent = (list_node*)malloc(sizeof(list_node));
+			next_parent = (stack_node*)malloc(sizeof(stack_node));
 			next_parent->node_ptr =  &(map->root);
 			next_parent->previous = parent_list;
 			parent_list = next_parent;	
 			while( key != remove_node->key && (next_node = (key < remove_node->key ? remove_node->left : remove_node->right))  != NULL)
 			{
-				next_parent = (list_node*)malloc(sizeof(list_node));
+				next_parent = (stack_node*)malloc(sizeof(stack_node));
 				next_parent->node_ptr = key < remove_parent->key ? &(remove_parent->left) : &(remove_parent->right);
 				next_parent->previous = parent_list;
 				next_parent->previous->direction = key < remove_parent->key ? -1 : 1; 
@@ -512,36 +580,36 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				replacement->balance = remove_node->balance;
 
 				/* put pointer to replacement node into list for balance update */
-				replacement_list_node = (list_node*)malloc(sizeof(list_node));;
-				replacement_list_node->previous = parent_list;
-				replacement_list_node->direction = 1; /* replacement is from right */
+				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));;
+				replacement_stack_node->previous = parent_list;
+				replacement_stack_node->direction = 1; /* replacement is from right */
 				if(remove_node == remove_parent) /* special case for root node */
 				{
-					replacement_list_node->node_ptr = &(map->root);
+					replacement_stack_node->node_ptr = &(map->root);
 				}
 				else
 				{
-					replacement_list_node->node_ptr = key < remove_parent-> key ? &(remove_parent->left) : &(remove_parent->right);
+					replacement_stack_node->node_ptr = key < remove_parent-> key ? &(remove_parent->left) : &(remove_parent->right);
 				}
-				parent_list = replacement_list_node;
+				parent_list = replacement_stack_node;
 
 			}
 			else
 			{
 				/* put pointer to replacement node into list for balance update */
-				replacement_list_node = (list_node*)malloc(sizeof(list_node));
-				replacement_list_node->previous = parent_list;
-				replacement_list_node->direction = 1; /* we always look for replacement on right */
+				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));
+				replacement_stack_node->previous = parent_list;
+				replacement_stack_node->direction = 1; /* we always look for replacement on right */
 				if(remove_node == remove_parent) /* special case for root node */
 				{
-					replacement_list_node->node_ptr = &(map->root);
+					replacement_stack_node->node_ptr = &(map->root);
 				}
 				else
 				{
-					replacement_list_node->node_ptr = key < remove_parent-> key ? &(remove_parent->left) : &(remove_parent->right);
+					replacement_stack_node->node_ptr = key < remove_parent-> key ? &(remove_parent->left) : &(remove_parent->right);
 				}
 
-				parent_list = replacement_list_node;
+				parent_list = replacement_stack_node;
 				
 
 				/*
@@ -549,10 +617,10 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				 * this node will have to be updated with the proper pointer
 				 * after we have identified the replacement
 				 */
-				replacement_list_node = (list_node*)malloc(sizeof(list_node));
-				replacement_list_node->previous = parent_list;
-				replacement_list_node->direction = -1; /* we always look for replacement to left of this node */
-				parent_list = replacement_list_node;
+				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));
+				replacement_stack_node->previous = parent_list;
+				replacement_stack_node->direction = -1; /* we always look for replacement to left of this node */
+				parent_list = replacement_stack_node;
 				
 				/* find smallest node on right (large) side of tree */
 				replacement_parent = remove_node->right;
@@ -560,7 +628,7 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				
 				while((replacement_next = replacement->left)  != NULL)
 				{
-					next_parent = (list_node*)malloc(sizeof(list_node));
+					next_parent = (stack_node*)malloc(sizeof(stack_node));
 					next_parent->node_ptr = &(replacement_parent->left);
 					next_parent->previous = parent_list;
 					next_parent->direction = -1; /* we always go left */
@@ -576,7 +644,7 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				replacement->left = remove_node->left;
 				replacement->right = remove_node->right;
 				replacement->balance = remove_node->balance;
-				replacement_list_node->node_ptr = &(replacement->right);
+				replacement_stack_node->node_ptr = &(replacement->right);
 			}
 			
 			/* insert replacement at proper location in tree */
@@ -626,20 +694,20 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 
 
 /* note: returned keys are dynamically allocated, you need to free them! */
-unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* keys_returned)
+unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned)
 {
 	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
 
 	unsigned long next_key_index = 0;
 	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
 	
-	*keys_returned = map->num_elements;
+	*num_keys_returned = map->num_elements;
 
 	return key_list;
 }
 
 
-void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
+void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned)
 {
 	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
 
@@ -647,21 +715,22 @@ void** get_sorted_long_map_values(long_map* map, unsigned long* values_returned)
 	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
 	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
 
-	*values_returned = map->num_elements;
+	*num_values_returned = map->num_elements;
 	return value_list;
 
 }
 
 
-void** destroy_long_map(long_map* map, int destruction_type)
+void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed)
 {
 	void** return_values = NULL;
 	unsigned long num_keys;
 	unsigned long* key_list = get_sorted_long_map_keys(map, &num_keys);
 	unsigned long key_index = 0;
 
+	*num_destroyed = 0;
 
-	if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+	if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 	{
 		return_values = (void**)malloc((map->num_elements+1)*sizeof(void*));
 		return_values[map->num_elements] = NULL;
@@ -669,15 +738,16 @@ void** destroy_long_map(long_map* map, int destruction_type)
 	while(map->num_elements > 0)
 	{
 		void* removed_value = remove_long_map_element(map, key_list[key_index]);
-		if(destruction_type == DESTROY_MAP_RETURN_VALUES)
+		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 		{
 			return_values[key_index] = removed_value;
 		}
-		if(destruction_type == DESTROY_MAP_FREE_VALUES)
+		if(destruction_type == DESTROY_MODE_FREE_VALUES)
 		{
 			free(removed_value);
 		}
 		key_index++;
+		*num_destroyed = *num_destroyed + 1;
 	}
 	free(key_list);
 	free(map);
@@ -864,4 +934,5 @@ unsigned long sdbm_string_hash(const char *key)
 	}
 	return hashed_key;
 }
+
 

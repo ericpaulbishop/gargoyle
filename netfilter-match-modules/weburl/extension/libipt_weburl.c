@@ -39,13 +39,16 @@
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"weburl options:\n  --contains [!] [STRING]\n  --contains_regex [!] [REGEX]\n");
+	printf(	"weburl options:\n  --contains [!] [STRING]\n  --contains_regex [!] [REGEX]\n --matches_exactly [!] [STRING]\n --domain_only\n --path_only\n");
 }
 
 static struct option opts[] = 
 {
-	{ .name = "contains", 		.has_arg = 1, .flag = 0, .val = 's' }, //string
-	{ .name = "contains_regex", 	.has_arg = 1, .flag = 0, .val = 'r' },  //regex
+	{ .name = "contains", 		.has_arg = 1, .flag = 0, .val = WEBURL_CONTAINS_TYPE },	//string
+	{ .name = "contains_regex", 	.has_arg = 1, .flag = 0, .val = WEBURL_REGEX_TYPE },	//regex
+	{ .name = "matches_exactly",	.has_arg = 1, .flag = 0, .val = WEBURL_EXACT_TYPE },	//exact string match
+	{ .name = "domain_only",	.has_arg = 0, .flag = 0, .val = WEBURL_DOMAIN_PART },	//only match domain portion of url
+	{ .name = "path_only",		.has_arg = 0, .flag = 0, .val = WEBURL_PATH_PART },	//only match path portion of url
 	{ .name = 0 }
 };
 
@@ -66,49 +69,62 @@ static int parse(	int c,
 			)
 {
 	struct ipt_weburl_info *info = (struct ipt_weburl_info *)(*match)->data;
+	int valid_arg = 0;
+
+	if(*flags < 10)
+	{
+		info->match_part = WEBURL_ALL_PART;
+	}
 
 	switch (c)
 	{
-		case 's':
-			//use simple string match, not regex
-			info->use_regex = 0;	
-			break;
+		case WEBURL_CONTAINS_TYPE:
+		case WEBURL_REGEX_TYPE:
+		case WEBURL_EXACT_TYPE:
+			info->match_type = c;
 
-		case 'r':
+			//test whether to invert rule
+			check_inverse(optarg, &invert, &optind, 0);
+			info->invert = invert ? 1 : 0;
+	
+			//test that test string is reasonable length, then to info
+			int testlen = strlen(argv[optind-1]);
+			if(testlen > 0 && testlen < MAX_TEST_STR)
+			{
+				strcpy(info->test_str, argv[optind-1]);
+			}
+			else if(testlen >= MAX_TEST_STR)
+			{
+				exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
+			}
+			else
+			{
+				exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
+			}
+
+			if(*flags % 10 == 1)
+			{
+				exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
+			}
+			*flags = *flags + 1;
 			
-			//use regex instead of simple string match
-			info->use_regex = 1;
+			valid_arg = 1;
 			break;
-		default:
-			return 0;
+
+		case WEBURL_DOMAIN_PART:
+		case WEBURL_PATH_PART:
+			info->match_part = c;
+			if(*flags >= 10)
+			{
+				exit_error(PARAMETER_PROBLEM, "You may specify at most one part of the url to match:\n\t--domain_only, --path_only or neither (to match full url)\n");
+			}
+			*flags = *flags+10;
+			
+			valid_arg = 1;
+			break;
 	}
 	
-	//test whether to invert rule
-	check_inverse(optarg, &invert, &optind, 0);
-	info->invert = invert ? 1 : 0;
-	
-	//test that test string is reasonable length, then to info
-	int testlen = strlen(argv[optind-1]);
-	if(testlen > 0 && testlen < MAX_TEST_STR)
-	{
-		strcpy(info->test_str, argv[optind-1]);
-	}
-	else if(testlen >= MAX_TEST_STR)
-	{
-		exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
-	}
-	else
-	{
-		exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
-	}
-
-	if(*flags == 1)
-	{
-		exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
-	}	
-	*flags = 1;
-
-	return 1;
+	return valid_arg;
 }
 
 
@@ -121,25 +137,43 @@ static void print_weburl_args(	struct ipt_weburl_info* info )
 		printf("! ");
 	}
 	//match type
-	if(info->use_regex > 0)
+	switch (info->match_type)
 	{
-		printf("--contains_regex ");
-	}
-	else
-	{
-		printf("--contains ");
+		case WEBURL_CONTAINS_TYPE:
+			printf("--contains ");
+			break;
+		case WEBURL_REGEX_TYPE:
+			printf("--contains_regex ");
+			break;
+		case WEBURL_EXACT_TYPE:
+			printf("--matches_exactly ");
+			break;
 	}
 	//test string
 	printf("%s ", info->test_str);
+
+	//match part
+	switch(info->match_part)
+	{
+		case WEBURL_DOMAIN_PART:
+			printf("--domain_only ");
+			break;
+		case WEBURL_PATH_PART:
+			printf("--path_only ");
+			break;
+		case WEBURL_ALL_PART:
+			//print nothing
+			break;
+	}
 	
 }
 
 /* Final check; must have specified a test string with either --contains or --contains_regex. */
 static void final_check(unsigned int flags)
 {
-	if (!flags)
+	if (flags %10 == 0)
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify '--contains' or '--contains_regex'");
+		exit_error(PARAMETER_PROBLEM, "You must specify '--contains' or '--contains_regex' or '--matches_exactly'");
 	}
 }
 

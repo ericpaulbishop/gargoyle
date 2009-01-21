@@ -26,12 +26,20 @@
 #define _IPT_WEBURL_H
 
 
-#define MAX_TEST_STR 512
+#define MAX_TEST_STR 1024
+
+#define WEBURL_CONTAINS_TYPE 1
+#define WEBURL_REGEX_TYPE 2
+#define WEBURL_EXACT_TYPE 3
+#define WEBURL_ALL_PART 4
+#define WEBURL_DOMAIN_PART 5
+#define WEBURL_PATH_PART 6
 
 struct ipt_weburl_info
 {
 	char test_str[MAX_TEST_STR];
-	unsigned char use_regex;
+	unsigned char match_type;
+	unsigned char match_part;
 	unsigned char invert;
 };
 #endif /*_IPT_WEBURL_H*/
