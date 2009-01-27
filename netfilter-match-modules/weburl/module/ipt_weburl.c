@@ -236,7 +236,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 				test = do_match_test(info->match_type, info->test_str, http_url);
 				if(!test && strcmp(path, "/") == 0)
 				{
-					strcat(plain_url, path);
+					strcat(http_url, path);
 					test = do_match_test(info->match_type, info->test_str, http_url);
 				}
 				kfree(http_url);
