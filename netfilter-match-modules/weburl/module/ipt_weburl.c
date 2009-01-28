@@ -68,10 +68,12 @@ int strnicmp(const char * cs,const char * ct,size_t count)
 	}
 	return __res;
 }
+
 char *strnistr(const char *s, const char *find, size_t slen)
 {
 	char c, sc;
 	size_t len;
+
 
 	if ((c = *find++) != '\0') 
 	{
@@ -87,7 +89,7 @@ char *strnistr(const char *s, const char *find, size_t slen)
       				--slen;
       				++s;
       			}
-			while (sc != c);
+			while ( toupper(sc) != toupper(c));
       			
 			if (len > slen)
 			{
@@ -100,6 +102,7 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	}
       	return ((char *)s);
 }
+
 
 int do_match_test(unsigned char match_type,  const char* reference, char* query)
 {
@@ -149,9 +152,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		char last_two_buf[2];
 		int end_found;
 		char* host_match;
-		char* http_url = NULL;
-		char* plain_url = NULL;
-
+		char* test_prefixes[6];
 	
 		/* get path portion of URL */
 		path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
@@ -192,6 +193,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		if(host_match != NULL)
 		{
 			int host_end_index;
+			char* port_ptr;
 			host_match = host_match + 5; /* character after "Host:" */
 			while(host_match[0] == ' ')
 			{
@@ -199,13 +201,19 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 			}
 			
 			host_end_index = 0;
-			while(host_match[host_end_index] != '\n' && host_match[host_end_index] != '\r' && host_match[host_end_index] != ' ' && ((char*)host_match - (char*)packet_data)+host_end_index < last_header_index )
+			while(	host_match[host_end_index] != '\n' && 
+				host_match[host_end_index] != '\r' && 
+				host_match[host_end_index] != ' ' && 
+				host_match[host_end_index] != ':' && 
+				((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
+				)
 			{
 				host_end_index++;
 			}
 			memcpy(host, host_match, host_end_index);
 			host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
 			host[host_end_index] = '\0';
+
 			
 		}
 	
@@ -216,54 +224,74 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		{
 			case WEBURL_DOMAIN_PART:
 				test = do_match_test(info->match_type, info->test_str, host);
+				if(!test && strstr(host, "www.") == host)
+				{
+					test = do_match_test(info->match_type, info->test_str, ((char*)host+4) );	
+				}
 				break;
 			case WEBURL_PATH_PART:
 				test = do_match_test(info->match_type, info->test_str, path);
 				if( !test && path[0] == '/' )
 				{
-					test = do_match_test(info->match_type, info->test_str, (path+1));
+					test = do_match_test(info->match_type, info->test_str, ((char*)path+1) );
 				}
 				break;
 			case WEBURL_ALL_PART:
-				http_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
-				http_url[0] = '\0';
-				strcat(http_url, "http://");
-				strcat(http_url, host);
-				if(strcmp(path, "/") != 0)
-				{
-					strcat(http_url, path);
-				}
-				test = do_match_test(info->match_type, info->test_str, http_url);
-				if(!test && strcmp(path, "/") == 0)
-				{
-					strcat(http_url, path);
-					test = do_match_test(info->match_type, info->test_str, http_url);
-				}
-				kfree(http_url);
+				test_prefixes[0] = "http://";
+				test_prefixes[1] = "";
+				test_prefixes[2] = NULL;
 
-
-				if(!test)
+				
+				int prefix_index;
+				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 				{
-					plain_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
-					plain_url[0] = '\0';
-					strcat(plain_url, "http://");
-					strcat(plain_url, host);
+					char* test_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+					test_url[0] = '\0';
+					strcat(test_url, test_prefixes[prefix_index]);
+					strcat(test_url, host);
 					if(strcmp(path, "/") != 0)
 					{
-						strcat(plain_url, path);
+						strcat(test_url, path);
 					}
-					test = do_match_test(info->match_type, info->test_str, plain_url);
+					test = do_match_test(info->match_type, info->test_str, test_url);
 					if(!test && strcmp(path, "/") == 0)
 					{
-						strcat(plain_url, path);
-						test = do_match_test(info->match_type, info->test_str, plain_url);
+						strcat(test_url, path);
+						test = do_match_test(info->match_type, info->test_str, test_url);
 					}
-
-					kfree(plain_url);
+					
+					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+					
+					free(test_url);
 				}
-				break;	
+				if(!test && strstr(host, "www.") == host)
+				{
+					char* www_host = ((char*)host+4);
+					for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
+					{
+						char* test_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+						test_url[0] = '\0';
+						strcat(test_url, test_prefixes[prefix_index]);
+						strcat(test_url, www_host);
+						if(strcmp(path, "/") != 0)
+						{
+							strcat(test_url, path);
+						}
+						test = do_match_test(info->match_type, info->test_str, test_url);
+						if(!test && strcmp(path, "/") == 0)
+						{
+							strcat(test_url, path);
+							test = do_match_test(info->match_type, info->test_str, test_url);
+						}
+					
+						/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+					
+						free(test_url);
+					}
+				}
+				break;
+			
 		}		
-
 
 
 		/* 
@@ -275,6 +303,8 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 
 	return test;
 }
+
+
 
 static int match(	const struct sk_buff *skb,
 			const struct net_device *in,
