@@ -88,6 +88,10 @@
 #define OUTPUT_RETURNED_SUCCESS		115
 #define OUTPUT_RETURNED_FAILURE		116
 
+#define MATCH_IP_INDEX 0
+#define MATCH_IP_RANGE_INDEX 1
+#define MATCH_MAC_INDEX 2
+
 typedef struct
 {
 	long int msg_type;
@@ -137,7 +141,7 @@ char** parse_variable_definition_line(char* line);
 
 
 void get_ip_range_strs(int* start, int* end, char* prefix, int list_length, list* range_strs);
-char** parse_ips(char* ip_str);
+char*** parse_ips_and_macs(char* addr_str);
 char** parse_ports(char* port_str);
 char** parse_marks(char* list_str, unsigned long max_mask);
 char** parse_quoted_list(char* list_str, char quote_char, char escape_char, char add_remainder_if_uneven_quotes);
@@ -180,7 +184,7 @@ void signal_handler(int sig);
 
 char* get_output_for_update(update_node* update, char* update_name, char output_format);
 void request_output(char** request_args, char output_format);
-void run_daemon(char* config_file_path);
+void run_daemon(char* config_file_path, int background);
 
 int terminated;
 int output_requested;
@@ -210,8 +214,9 @@ int main (int argc, char **argv)
 	int is_daemon = 0;
 	char output_format = 'h';
 	int next_opt;
+	int background = 1;
 	char* config_file_path = strdup("/etc/restricterd.conf");
-	while((next_opt = getopt(argc, argv, "c:C:dDmMhHuU")) != -1)
+	while((next_opt = getopt(argc, argv, "c:C:dDfFmMhHuU")) != -1)
 	{	
 		switch(next_opt)
 		{
@@ -222,6 +227,10 @@ int main (int argc, char **argv)
 			case 'd':
 			case 'D':
 				is_daemon = 1;
+				break;
+			case 'f':
+			case 'F':
+				background=0;
 				break;
 			case 'm':
 			case 'M':
@@ -266,7 +275,7 @@ int main (int argc, char **argv)
 		}
 		else
 		{
-			run_daemon(config_file_path);
+			run_daemon(config_file_path, background);
 		}
 	}
 	else
@@ -366,9 +375,9 @@ void request_output(char** request_args, char output_format)
 
 
 
-void run_daemon(char* config_file_path)
+void run_daemon(char* config_file_path, int background)
 {
-	daemonize(1);
+	daemonize(background);
 	
 	//open message queue 
 	int mq = msgget(ftok(PID_PATH, MSG_ID), 0777 | IPC_CREAT );
@@ -1158,23 +1167,51 @@ void compute_block_rules(update_node* unode)
 	
 	/* url matches are a bit of a special case, handle them first */
 	/* we have to save this mask_byte_index specially, because it must be set separately, so it only gets set if packet is http request */
-	int url_mask_byte_index = mask_byte_index; 
-	char** url_match_def = (char**)get_map_element(rule_def, "url");
-	char** url_regex_def = (char**)get_map_element(rule_def, "url_regex");
-	int url_is_negated = url_match_def == NULL && url_regex_def == NULL ? 1 : 0;
-	url_match_def = url_is_negated ? (char**)get_map_element(rule_def, "not_url") : url_match_def;
-	url_regex_def = url_is_negated ? (char**)get_map_element(rule_def, "not_url_regex") : url_regex_def;
-	proto = url_match_def == NULL && url_regex_def == NULL ? proto : "tcp";
-	int url_rule_count = 0;
-	int url_rule_index = 0;
-	if(url_match_def != NULL){ for(url_rule_index=0; url_match_def[url_rule_index] != NULL; url_rule_index++){ url_rule_count++;} }
-	if(url_regex_def != NULL){ for(url_rule_index=0; url_regex_def[url_rule_index] != NULL; url_rule_index++){ url_rule_count++;} }
+	int url_mask_byte_index = mask_byte_index;
+	
+	char* url_match_vars[] = { "url_contains", "url_regex", "url_exact", "url_domain_contains", "url_domain_regex", "url_domain_exact" };
+	char* url_neg_match_vars[] = { "not_url_contains", "not_url_regex", "not_url_exact", "not_url_domain_contains", "not_url_domain_regex", "not_url_domain_exact" };
+	char* url_prefixes[] = { " -m weburl --contains ", " -m weburl --contains_regex ", " -m weburl --matches_exactly ",  " -m weburl --domain_only --contains ", " -m weburl --domain_only --contains_regex ", " -m weburl --domain_only --matches_exactly " };
+	char** url_defs[6];
+	int url_var_index=0;
+	int url_rule_count=0;
+	int url_is_negated=0;
+	
+	for(url_is_negated=0; url_is_negated < 2 && url_rule_count == 0; url_is_negated++)
+	{
+		char** url_vars = url_is_negated ? url_neg_match_vars : url_match_vars;
+		for(url_var_index=0; url_var_index < 6; url_var_index++)
+		{
+			char** url_def = (char**)get_map_element(rule_def, url_vars[url_var_index]);
+			if(url_def != NULL)
+			{
+				int ur_index=0;
+				for(ur_index=0; url_def[ur_index] != NULL; ur_index++){}
+				url_rule_count = url_rule_count + ur_index;
+			}
+			url_defs[url_var_index] = url_def;
+		}
+	}
+	url_is_negated--;
+	
+
+	proto = url_rule_count > 0 ? "tcp" : proto;
 	int url_is_multi = url_rule_count <= 1 ? 0 : 1;
-	compute_multi_rules( url_match_def, multi_rules, &single_check, url_is_multi, rule_prefix, " -m weburl --contains ", "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
-	compute_multi_rules( url_regex_def, multi_rules, &single_check, url_is_multi, rule_prefix, " -m weburl --contains_regex ", "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
+	for(url_var_index=0; url_var_index < 6; url_var_index++)
+	{
+		char** url_def = url_defs[url_var_index];
+		if(url_def != NULL)
+		{
+			if(url_def[0] != NULL)
+			{
+				compute_multi_rules( url_def, multi_rules, &single_check, url_is_multi, rule_prefix, url_prefixes[url_var_index], "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
+			}
+		}
+	}
 	push_list(initial_mask_list, (void*)&url_is_negated);
 	push_list(final_mask_list, (void*)&url_is_multi);
 	mask_byte_index++;
+
 
 	/* mark matches */
 	char** mark_def = get_map_element(rule_def, "mark");
@@ -1199,22 +1236,58 @@ void compute_block_rules(update_node* unode)
 	/*
 	 * for ingress source = remote, destination = local 
 	 * for egress source = local, destination = remote
+	 *
+	 * addresses are a bit tricky, since we need to handle 3 different kinds of matches: ips, ip ranges and macs
 	 */
-	char** src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
+	char*** src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
 	int src_is_negated = src_def == NULL ? 1 : 0;
 	src_def = src_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_addr" : "not_local_addr")) : src_def;
-	int src_is_multi = compute_multi_rules(src_def, multi_rules, &single_check, 0, rule_prefix, " -s ", "",  src_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
-	push_list(initial_mask_list, (void*)&src_is_negated);
-	push_list(final_mask_list, (void*)&src_is_multi);
-	mask_byte_index++;	
 
-	char** dst_def = get_map_element(rule_def, (is_ingress ? "local_addr"  : "remote_addr"));
+	char*** dst_def = get_map_element(rule_def, (is_ingress ? "local_addr"  : "remote_addr"));
 	int dst_is_negated = dst_def == NULL ? 1 : 0;
 	dst_def = dst_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_addr" : "not_remote_addr")) : dst_def;
-	int dst_is_multi = compute_multi_rules(dst_def, multi_rules, &single_check, 0, rule_prefix, " -d ", "",  dst_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
-	push_list(initial_mask_list, (void*)&dst_is_negated);
-	push_list(final_mask_list, (void*)&dst_is_multi);
-	mask_byte_index++;
+
+	char*** addr_defs[2] = { src_def, dst_def };
+	int addr_negated[2] = { src_is_negated, dst_is_negated };
+	char* addr_prefix1[2][3] = { { " -s ", " -m iprange ", " -m mac --mac-source " }, { " -d", "-m iprange ", NULL } };
+	char* addr_prefix2[2][3] = { {"", " --src-range ", "" }, { "", " --dst-range ", NULL } };
+
+	int addr_index = 0;
+	for(addr_index = 0; addr_index < 2; addr_index++)
+	{
+		char*** addrs = addr_defs[addr_index];
+		if(addrs != NULL)
+		{
+			int total_rules = 0;
+			int test_list_index;
+			for(test_list_index=0; test_list_index < 3; test_list_index++)
+			{
+				char** test_list = addrs[test_list_index];
+				if(test_list != NULL && addr_prefix1[addr_index][test_list_index] != NULL)
+				{
+					while(test_list[0] != NULL){ test_list++; total_rules++; }
+				}
+			}
+			int is_multi = total_rules > 1 ? 1 : 0;
+			int is_negated = addr_negated[addr_index];
+
+			for(test_list_index=0; test_list_index < 3; test_list_index++)
+			{
+				char** test_list = addrs[test_list_index];
+				if(test_list != NULL && addr_prefix1[addr_index][test_list_index] != NULL)
+				{
+					if(test_list[0] != NULL)
+					{
+						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],is_negated, mask_byte_index, proto, include_proto, 0);
+					}
+				}
+			}
+			
+			push_list(initial_mask_list, (void*)&is_negated);
+			push_list(final_mask_list, (void*)&is_multi);
+			mask_byte_index++;	
+		}
+	}
 
 
 
@@ -1347,12 +1420,12 @@ void compute_block_rules(update_node* unode)
 	char** block_rule_list = (char**) destroy_list( all_rules, DESTROY_MODE_RETURN_VALUES, num_rules);
 	set_map_element(rule_def, "iptables_rule_list", block_rule_list);
 	set_map_element(rule_def, "iptables_rule_list_length", num_rules);
-	
-	/*
+
+	/*	
 	int i;
 	for(i=0; block_rule_list[i] != NULL; i++)
 	{
-		printf("%s\n", block_rule_list[i]);
+		fprintf(stderr, "%s\n", block_rule_list[i]);
 	}
 	*/
 }
@@ -2438,16 +2511,26 @@ char** parse_ports(char* port_str)
 	return ports;
 }
 
-char** parse_ips(char* ip_str)
+char*** parse_ips_and_macs(char* addr_str)
 {
-	char** ip_parts = split_on_separators(ip_str, ",", 1, -1, 0);
+	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 	list* ip_list = initialize_list();
+	list* ip_range_list = initialize_list();
+	list* mac_list = initialize_list();
 	
 	int ip_part_index;
-	for(ip_part_index=0; ip_parts[ip_part_index] != NULL; ip_part_index++)
+	for(ip_part_index=0; addr_parts[ip_part_index] != NULL; ip_part_index++)
 	{
-		char* next_str = ip_parts[ip_part_index];
-		if(strchr(next_str, '-') != NULL)
+		char* next_str = addr_parts[ip_part_index];
+		if(strchr(next_str, ':'))
+		{
+			trim_flanking_whitespace(next_str);
+			if(strlen(next_str) == 17)
+			{
+				push_list(mac_list, trim_flanking_whitespace(next_str));
+			}
+		}
+		else if(strchr(next_str, '-') != NULL)
 		{
 			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1);
 			char* start = trim_flanking_whitespace(range_parts[0]);
@@ -2456,25 +2539,45 @@ char** parse_ips(char* ip_str)
 			int end_ip[4];
 			int start_valid = sscanf(start, "%d.%d.%d.%d", start_ip, start_ip+1, start_ip+2, start_ip+3);
 			int end_valid = sscanf(end, "%d.%d.%d.%d", end_ip, end_ip+1, end_ip+2, end_ip+3);
+			
 			if(start_valid == 4 && end_valid == 4)
 			{
-				get_ip_range_strs(start_ip, end_ip, "", 4, ip_list);
+				//get_ip_range_strs(start_ip, end_ip, "", 4, ip_list);
+				push_list(ip_range_list, trim_flanking_whitespace(next_str));
 			}
 
 			free(start);
 			free(end);	
 			free(range_parts);
-			free(next_str);
+			//free(next_str);
 		}
 		else
 		{
-			push_list(ip_list, trim_flanking_whitespace(next_str));
+			int parsed_ip[4];
+			int valid = sscanf(next_str, "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
+			if(valid == 4)
+			{
+				push_list(ip_list, trim_flanking_whitespace(next_str));
+			}
 		}
-		
 	}
-	free(ip_parts);
-	unsigned long num;
-	return (char**)destroy_list(ip_list, DESTROY_MODE_RETURN_VALUES, &num);
+	free(addr_parts);
+	
+	unsigned long num1, num2, num3;
+	char*** return_value = (char***)malloc(3*sizeof(char**));
+	return_value[MATCH_IP_INDEX] = (char**)destroy_list(ip_list, DESTROY_MODE_RETURN_VALUES, &num1);
+	return_value[MATCH_IP_RANGE_INDEX] = (char**)destroy_list(ip_range_list, DESTROY_MODE_RETURN_VALUES, &num2);
+	return_value[MATCH_MAC_INDEX] = (char**)destroy_list(mac_list, DESTROY_MODE_RETURN_VALUES, &num3);
+
+	if(num1 + num2 + num3 == 0)
+	{
+		free(return_value[0]);
+		free(return_value[1]);
+		free(return_value[2]);
+		free(return_value);
+		return_value = NULL;
+	}
+	return return_value;
 }
 
 void get_ip_range_strs(int* start, int* end, char* prefix, int list_length, list* range_strs)
@@ -2683,10 +2786,18 @@ void** load_restricterd_config(char* filename)
 							}
 							free(variable[1]);
 						}
-						else if(	safe_strcmp(variable[0], "url") == 0 ||
+						else if(	safe_strcmp(variable[0], "url_contains") == 0 ||
 								safe_strcmp(variable[0], "url_regex") == 0 ||
-								safe_strcmp(variable[0], "not_url") == 0 ||
-								safe_strcmp(variable[0], "not_url_regex") == 0
+								safe_strcmp(variable[0], "url_exact") == 0 ||
+								safe_strcmp(variable[0], "url_domain_contains") == 0 ||
+								safe_strcmp(variable[0], "url_domain_regex") == 0 ||
+								safe_strcmp(variable[0], "url_domain_exact") == 0 ||
+								safe_strcmp(variable[0], "not_url_contains") == 0 ||
+								safe_strcmp(variable[0], "not_url_regex") == 0 ||
+								safe_strcmp(variable[0], "not_url_exact") == 0 ||
+								safe_strcmp(variable[0], "not_url_domain_contains") == 0 ||
+								safe_strcmp(variable[0], "not_url_domain_regex") == 0 ||
+								safe_strcmp(variable[0], "not_url_domain_exact") == 0 
 								)
 						{
 							/*
@@ -2729,10 +2840,14 @@ void** load_restricterd_config(char* filename)
 								safe_strcmp(variable[0], "not_local_addr") == 0 
 						       		)
 						{
-							char** parsed_ips = parse_ips(variable[1]);
-							if(parsed_ips != NULL)
+							char*** parsed_addr = parse_ips_and_macs(variable[1]);
+							if(parsed_addr != NULL)
 							{
-								set_map_element(definition, variable[0], parsed_ips);
+								if( safe_strcmp(variable[0], "not_remote_addr") == 0  || safe_strcmp(variable[0], "remote_addr") == 0 )
+								{
+									parsed_addr[MATCH_MAC_INDEX][0] = NULL; //doesn't make sense to match remote MAC address
+								}
+								set_map_element(definition, variable[0], parsed_addr);
 							}
 							free(variable[1]);
 						}
