@@ -67,7 +67,7 @@
 	<div><embed id="download_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
 
 	<fieldset id="total_bandwidth_use" style="display:none" >
-		<legend class="sectionheader">Total Bandwidth Useage</legend>
+		<legend class="sectionheader">Total Bandwidth Usage</legend>
 		<div class="bottom_gap">
 
 			<label for='total_time_frame' id='total_time_frame_label'>Display Time Interval:</label>

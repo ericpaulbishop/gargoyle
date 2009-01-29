@@ -46,9 +46,9 @@ function saveChanges()
 		
 		
 		// add updated remote accepts 
-		var addAccept = function(local,remote,index)
+		var addAccept = function(local,remote)
 		{
-			var id = "@remote_accept[" + index + "]";
+			var id = "ra_" + local + "_" + remote;
 			uci.set("firewall", id, "", "remote_accept");
 			uci.set("firewall", id, "local_port", local);
 			uci.set("firewall", id, "remote_port", remote);
@@ -58,16 +58,15 @@ function saveChanges()
 		}
 		if(document.getElementById("remote_https_port_container").style.display != "none")
 		{
-			addAccept( document.getElementById("local_https_port").value, document.getElementById("remote_https_port").value, "-1");
+			addAccept( document.getElementById("local_https_port").value, document.getElementById("remote_https_port").value);
 		}
 		if(document.getElementById("remote_http_port_container").style.display != "none")
 		{
-		
-			addAccept( document.getElementById("local_http_port").value, document.getElementById("remote_http_port").value, "-1");
+			addAccept( document.getElementById("local_http_port").value, document.getElementById("remote_http_port").value);
 		}
 		if(!document.getElementById("remote_ssh_port").disabled)
 		{
-			addAccept( document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value, "-1");
+			addAccept( document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value);
 		}
 		
 
