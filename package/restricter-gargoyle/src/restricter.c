@@ -50,44 +50,54 @@
 #include <libiptc/libiptc.h>
 
 /* directions */
-#define DIRECTION_EGRESS	100
-#define DIRECTION_INGRESS	200
+#define DIRECTION_EGRESS	10
+#define DIRECTION_INGRESS	20
 
 /* update_types */
 #define UPDATE_QUOTA_TEST	30
 #define UPDATE_QUOTA_RESET	40
-#define UPDATE_BLOCK_INSERT	50
-#define UPDATE_BLOCK_REMOVE	60
+#define UPDATE_RULE_INSERT	50
+#define UPDATE_RULE_REMOVE	60
 #define UPDATE_SAVE_QUOTA_DATA	70
 
+/* rule types */
+#define QUOTA_RULE 80
+#define BLOCK_RULE 90
+#define WHITELIST_RULE 100
+
+/* target types */
+#define REJECT_TARGET 110
+#define ACCEPT_TARGET 120
 
 /* quota reset intervals */
-#define INTERVAL_MINUTE	101
-#define INTERVAL_HOUR	102
-#define INTERVAL_DAY	103
-#define INTERVAL_WEEK	104
-#define	INTERVAL_MONTH	105
+#define INTERVAL_MINUTE	130
+#define INTERVAL_HOUR	140
+#define INTERVAL_DAY	150
+#define INTERVAL_WEEK	160
+#define	INTERVAL_MONTH	170
 
 /* pid */
 #define PID_PATH	"/var/run/restricterd.pid"
 
 /* useful for message queue */
-#define MSG_ID			148
-#define REQUEST_MSG_TYPE 	160
-#define RESPONSE_MSG_TYPE	172
-#define MAX_MSG_LINE		250
+#define MSG_ID			180
+#define REQUEST_MSG_TYPE 	190
+#define RESPONSE_MSG_TYPE	200
+#define MAX_MSG_LINE		250	/* this is a length, don't change! */
 
 /* output request types */
-#define OUTPUT_REQUEST_ALL_QUOTAS	110
-#define OUTPUT_REQUEST_ALL_BLOCKS	111
-#define OUTPUT_REQUEST_ALL		112
-#define OUTPUT_REQUEST_INDIVIDUAL	113
+#define OUTPUT_REQUEST_ALL_QUOTAS	10
+#define OUTPUT_REQUEST_ALL_BLOCKS	20
+#define OUTPUT_REQUEST_ALL_WHITELISTS	30
+#define OUTPUT_REQUEST_ALL		40
+#define OUTPUT_REQUEST_INDIVIDUAL	50
 
 /* tells client if more than one update is scheduled */
-#define OUTPUT_RETURNED_MULTIPLE	114
-#define OUTPUT_RETURNED_SUCCESS		115
-#define OUTPUT_RETURNED_FAILURE		116
+#define OUTPUT_RETURNED_MULTIPLE	60
+#define OUTPUT_RETURNED_SUCCESS		70
+#define OUTPUT_RETURNED_FAILURE		80
 
+/* these are indices don't change! */
 #define MATCH_IP_INDEX 0
 #define MATCH_IP_RANGE_INDEX 1
 #define MATCH_MAC_INDEX 2
@@ -102,6 +112,7 @@ typedef struct
 
 typedef struct u_n
 {
+	unsigned char rule_type;
 	time_t update_time;
 	unsigned char update_type;
 	char* table;
@@ -160,24 +171,25 @@ void save_all_quota_data(string_map* global_data, priority_queue* update_queue);
 int create_path(const char *name, int mode);
 
 void flush_iptables_chain(char* table, char* chain);
-update_node* initialize_generic_update_node(string_map* def, string_map* global_data, int is_block);
+void delete_iptables_chain(char* table, char* chain);
+update_node* initialize_generic_update_node(string_map* def, string_map* global_data, int is_quota);
 
 int count_rules_in_chain(char* table, char* chain);
 void adjust_update_rule_numbers(priority_queue** update_queue, string_map* global_data, char* table, char* chain, int first_removed_rule, int num_removed_rules);
 
-time_t get_next_block_update_time(update_node *last_update, unsigned char* update_type);
+time_t get_next_rule_update_time(update_node *last_update, unsigned char* update_type);
 time_t get_next_interval_end(time_t current_time, int end_type);
 
 void initialize_quota_rules_for_direction(list** quota_rules, int direction, string_map* global_data, priority_queue** update_queue, time_t reference_time, time_t current_time);
 
 
-void compute_block_rules(update_node* unode);
+void compute_rules(update_node* unode, int target_type);
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
 
 
 void quota_test(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
 void quota_reset(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
-void update_block(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
+void update_rule(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time);
 
 void daemonize(int background);
 void signal_handler(int sig);
@@ -340,6 +352,10 @@ void request_output(char** request_args, char output_format)
 			{
 				req_msg.msg_line[0] = OUTPUT_REQUEST_ALL_BLOCKS;
 			}
+			else if(safe_strcmp(req_name, "ALL_WHITELISTS") == 0)
+			{
+				req_msg.msg_line[0] = OUTPUT_REQUEST_ALL_WHITELISTS;
+			}
 			else
 			{
 				req_msg.msg_line[0] = OUTPUT_REQUEST_INDIVIDUAL;
@@ -391,13 +407,48 @@ void run_daemon(char* config_file_path, int background)
 	priority_queue* update_queue = initialize_priority_queue();
 
 
-	/* flush block rule chains (if they exist)*/
+	/* flush block rule chains (if they exist) and create white list chain*/
 	string_map* global_data = (string_map*)data[0];
+
 	if(global_data != NULL)
 	{
-		flush_iptables_chain( get_map_element(global_data, "ingress_filter_table"), get_map_element(global_data, "ingress_filter_chain"));
-		flush_iptables_chain( get_map_element(global_data, "egress_filter_table"), get_map_element(global_data, "egress_filter_chain"));
+		char* egress_filter_table = get_map_element(global_data, "egress_filter_table");
+		char* ingress_filter_table = get_map_element(global_data, "ingress_filter_table");
+		char* egress_filter_chain = get_map_element(global_data, "egress_filter_chain");
+		char* ingress_filter_chain = get_map_element(global_data, "ingress_filter_chain");
+
+		if(ingress_filter_table != NULL && ingress_filter_chain != NULL)
+		{
+			
+			flush_iptables_chain( ingress_filter_table, ingress_filter_chain);
+			delete_iptables_chain( ingress_filter_table, "ingress_whitelist");
+		
+			char* create_ingress_whitelist = dynamic_strcat(3, "iptables -t ", ingress_filter_table, " -N ingress_whitelist");
+			char* use_ingress_whitelist = dynamic_strcat(5, "iptables -t ", ingress_filter_table,  " -I ", ingress_filter_chain, " -j ingress_whitelist");
+			
+			system(create_ingress_whitelist);
+			system(use_ingress_whitelist);
+			
+			free(create_ingress_whitelist);
+			free(use_ingress_whitelist);
+		}
+		if(egress_filter_table != NULL && egress_filter_chain != NULL)
+		{		
+			flush_iptables_chain( egress_filter_table, egress_filter_chain);
+			delete_iptables_chain( egress_filter_table, "egress_whitelist");
+		
+			char* create_egress_whitelist = dynamic_strcat(3, "iptables -t ", egress_filter_table, " -N egress_whitelist");
+			char* use_egress_whitelist = dynamic_strcat(5, "iptables -t ", egress_filter_table,  " -I ", egress_filter_chain, " -j egress_whitelist");
+			
+			system(create_egress_whitelist);
+			system(use_egress_whitelist);
+			
+			free(create_egress_whitelist);
+			free(use_egress_whitelist);
+		}
+	
 	}
+	
 
 	/* initialize reference time */
 	time_t reference_time = time(NULL);
@@ -415,20 +466,20 @@ void run_daemon(char* config_file_path, int background)
 	while(block_list->length >0)
 	{
 		string_map *next_block_def = (string_map*)shift_list(block_list);
-		update_node* next_update = initialize_generic_update_node(next_block_def, global_data, 1);
+		update_node* next_update = initialize_generic_update_node(next_block_def, global_data, 0);
 		if(next_update != NULL)
 		{
-			compute_block_rules(next_update);
+			compute_rules(next_update, REJECT_TARGET);
 	
 			/* we initialize by performing whatever update is OPPOSITE from what NEXT action is */	
 			next_update->update_time = current_time;
 			
 			unsigned char next_update_type;
-			get_next_block_update_time(next_update, &next_update_type);
+			get_next_rule_update_time(next_update, &next_update_type);
 			
 			/*
-			time_t next_time = get_next_block_update_time(next_update, &next_update_type);
-			if(next_update_type == UPDATE_BLOCK_REMOVE) { printf("next block update is remove\n"); } else { printf("next block update is insert\n"); };
+			time_t next_time = get_next_rule_update_time(next_update, &next_update_type);
+			if(next_update_type == UPDATE_RULE_REMOVE) { printf("next block update is remove\n"); } else { printf("next block update is insert\n"); };
 			printf("next time is %ld, current time is %ld\n", next_time, current_time);	
 			*/
 
@@ -440,10 +491,47 @@ void run_daemon(char* config_file_path, int background)
 				priority_id = dynamic_strcat(5, next_update->table, "-", next_update->chain, "-", tmp);
 				set_map_element(next_block_def, "name", priority_id);
 			}
-			next_update->update_type = next_update_type == UPDATE_BLOCK_INSERT ? UPDATE_BLOCK_REMOVE : UPDATE_BLOCK_INSERT;
-			update_block(next_update, &update_queue, global_data, priority_id, reference_time);
+			next_update->update_type = next_update_type == UPDATE_RULE_INSERT ? UPDATE_RULE_REMOVE : UPDATE_RULE_INSERT;
+			update_rule(next_update, &update_queue, global_data, priority_id, reference_time);
 		}	
 		block_index++;
+	}
+
+	/* initialize white list rules */
+	list* whitelist_list = (list*)data[3];
+	long whitelist_index = 0;
+	while(whitelist_list->length >0)
+	{
+		string_map *next_whitelist_def = (string_map*)shift_list(whitelist_list);
+		update_node* next_update = initialize_generic_update_node(next_whitelist_def, global_data, 0);
+		if(next_update != NULL)
+		{
+			compute_rules(next_update, ACCEPT_TARGET);
+	
+			/* we initialize by performing whatever update is OPPOSITE from what NEXT action is */	
+			next_update->update_time = current_time;
+			
+			unsigned char next_update_type;
+			get_next_rule_update_time(next_update, &next_update_type);
+			
+			/*
+			time_t next_time = get_next_rule_update_time(next_update, &next_update_type);
+			if(next_update_type == UPDATE_RULE_REMOVE) { printf("next whitelist update is remove\n"); } else { printf("next whitelist update is insert\n"); };
+			printf("next time is %ld, current time is %ld\n", next_time, current_time);	
+			*/
+
+			char *priority_id = get_map_element( next_whitelist_def, "name");
+			if(priority_id == NULL)
+			{
+				char tmp[50];
+				sprintf(tmp, "%ld", whitelist_index);
+				priority_id = dynamic_strcat(5, next_update->table, "-", next_update->chain, "-", tmp);
+				set_map_element(next_whitelist_def, "name", priority_id);
+			}
+			next_update->update_type = next_update_type == UPDATE_RULE_INSERT ? UPDATE_RULE_REMOVE : UPDATE_RULE_INSERT;
+			update_rule(next_update, &update_queue, global_data, priority_id, reference_time);
+		}	
+		whitelist_index++;
 	}
 
 		
@@ -480,9 +568,9 @@ void run_daemon(char* config_file_path, int background)
 			update_node* next_update = (update_node*)free_priority_queue_node(next_pq);
 			
 
-			if(next_update->update_type == UPDATE_BLOCK_INSERT || next_update->update_type == UPDATE_BLOCK_REMOVE)
+			if(next_update->update_type == UPDATE_RULE_INSERT || next_update->update_type == UPDATE_RULE_REMOVE)
 			{
-				update_block(next_update, &update_queue, global_data, priority_id, reference_time);
+				update_rule(next_update, &update_queue, global_data, priority_id, reference_time);
 			}
 			else if(next_update->update_type == UPDATE_QUOTA_TEST)
 			{
@@ -520,9 +608,9 @@ void run_daemon(char* config_file_path, int background)
 					resp_msg.msg_type = RESPONSE_MSG_TYPE;
 					
 					char* request_name = next_req_message.msg_line + 2;
-					printf("output requested, trying to get node with name = \"%s\"\n", request_name);
+					/* printf("output requested, trying to get node with name = \"%s\"\n", request_name); */
 					priority_queue_node *p = get_priority_queue_node_with_id(update_queue, request_name);
-					printf("%s\n", p==NULL ? "got null node with id" : "got valid node with id" );
+					/* printf("%s\n", p==NULL ? "got null node with id" : "got valid node with id" ); */
 					if(p != NULL)
 					{
 						update_node* u = (update_node*)p->value;
@@ -540,7 +628,7 @@ void run_daemon(char* config_file_path, int background)
 						}
 						else
 						{
-							sprintf(resp_msg.msg_line + 1, "No quotas or block rules defined with id %s\n", request_name);
+							sprintf(resp_msg.msg_line + 1, "No quotas or  rules defined with id %s\n", request_name);
 						}
 					}
 					msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
@@ -557,18 +645,25 @@ void run_daemon(char* config_file_path, int background)
 					{
 						priority_queue_node* p = shift_priority_queue_node(update_queue);
 						update_node* u = (update_node*)p->value;
-						if( 	(u->update_type == UPDATE_QUOTA_RESET || u->update_type == UPDATE_QUOTA_TEST) && 
+						if(	(u->rule_type == QUOTA_RULE) && 
 							(request_type == OUTPUT_REQUEST_ALL_QUOTAS || request_type == OUTPUT_REQUEST_ALL)
 						  	)
 						{
 							num_to_send++;
 						}
-						if( 	(u->update_type == UPDATE_BLOCK_INSERT || u->update_type == UPDATE_BLOCK_REMOVE) && 
-							(request_type == OUTPUT_REQUEST_ALL_BLOCKS || request_type == OUTPUT_REQUEST_ALL)
+						else if((u->rule_type == BLOCK_RULE) && 
+							((request_type == OUTPUT_REQUEST_ALL_BLOCKS) || request_type == OUTPUT_REQUEST_ALL)
 						  	)
 						{
 							num_to_send++;
 						}
+						else if((u->rule_type == WHITELIST_RULE) && 
+							((request_type == OUTPUT_REQUEST_ALL_WHITELISTS) || request_type == OUTPUT_REQUEST_ALL)
+						  	)
+						{
+							num_to_send++;
+						}
+
 						push_priority_queue_node(tmp_queue, p);
 					}
 					resp_msg.msg_line[0] = OUTPUT_RETURNED_MULTIPLE;
@@ -579,7 +674,7 @@ void run_daemon(char* config_file_path, int background)
 					{
 						priority_queue_node* p= shift_priority_queue_node(tmp_queue);
 						update_node* u = (update_node*)p->value;
-						if( 	(u->update_type == UPDATE_QUOTA_RESET || u->update_type == UPDATE_QUOTA_TEST) && 
+						if( 	(u->rule_type == QUOTA_RULE) && 
 							(request_type == OUTPUT_REQUEST_ALL_QUOTAS || request_type == OUTPUT_REQUEST_ALL)
 						  	)
 						{
@@ -590,8 +685,19 @@ void run_daemon(char* config_file_path, int background)
 							msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
 						
 						}
-						if( 	(u->update_type == UPDATE_BLOCK_INSERT || u->update_type == UPDATE_BLOCK_REMOVE) && 
+						else if((u->rule_type == BLOCK_RULE) && 
 							(request_type == OUTPUT_REQUEST_ALL_BLOCKS || request_type == OUTPUT_REQUEST_ALL)
+						  	)
+						{
+							char* output = get_output_for_update(u, p->id,  output_format);
+							resp_msg.msg_line[0] = OUTPUT_RETURNED_SUCCESS;
+							sprintf(resp_msg.msg_line + 1, "%s", output);
+							free(output);
+							msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
+
+						}
+						else if((u->rule_type == WHITELIST_RULE) && 
+							(request_type == OUTPUT_REQUEST_ALL_WHITELISTS || request_type == OUTPUT_REQUEST_ALL)
 						  	)
 						{
 							char* output = get_output_for_update(u, p->id,  output_format);
@@ -618,8 +724,22 @@ void run_daemon(char* config_file_path, int background)
 	/* on kill signal, flush filter chains */	
 	if(global_data != NULL)
 	{
-		flush_iptables_chain( get_map_element(global_data, "ingress_filter_table"), get_map_element(global_data, "ingress_filter_chain"));
-		flush_iptables_chain( get_map_element(global_data, "egress_filter_table"), get_map_element(global_data, "egress_filter_chain"));
+
+		char* egress_filter_table = get_map_element(global_data, "egress_filter_table");
+		char* ingress_filter_table = get_map_element(global_data, "ingress_filter_table");
+		char* egress_filter_chain = get_map_element(global_data, "egress_filter_chain");
+		char* ingress_filter_chain = get_map_element(global_data, "ingress_filter_chain");
+
+		if(ingress_filter_table != NULL && ingress_filter_chain != NULL)
+		{
+			flush_iptables_chain( ingress_filter_table, ingress_filter_chain);
+			delete_iptables_chain( ingress_filter_table, "ingress_whitelist");
+		}
+		if(egress_filter_table != NULL && egress_filter_chain != NULL)
+		{		
+			flush_iptables_chain( egress_filter_table, egress_filter_chain);
+			delete_iptables_chain( egress_filter_table, "egress_whitelist");
+		}	
 	}
 
 	/* save quota data */
@@ -640,7 +760,7 @@ void run_daemon(char* config_file_path, int background)
 char* get_output_for_update(update_node* update, char* update_name,  char output_format)
 {
 	char* output_str = NULL;
-	if(update->update_type == UPDATE_QUOTA_RESET || update->update_type == UPDATE_QUOTA_TEST)
+	if(update->rule_type == QUOTA_RULE)
 	{
 		char counter_str[25];
 		char max_count_str[25];
@@ -664,31 +784,34 @@ char* get_output_for_update(update_node* update, char* update_name,  char output
 			output_str = dynamic_strcat(4, counter_str, ",", max_count_str, " ");
 		}
 	}
-	else if(update->update_type == UPDATE_BLOCK_INSERT || update->update_type == UPDATE_BLOCK_REMOVE)
+	else if(update->rule_type == BLOCK_RULE || update->rule_type == WHITELIST_RULE)
 	{
 		time_t next_time_active = update->update_time;
 		if(output_format == 'h')
 		{
 			struct tm* next_time_info = localtime( &next_time_active );
-			
-			
+			char* rule_type_name = update->rule_type == BLOCK_RULE ? "block rule " : "white list rule ";	
 			if(next_time_active > 0)
 			{
-				char* status_str = update->update_type == UPDATE_BLOCK_REMOVE ? " is currently active, and will next be deactivated " : " is not currently active, and will next be active ";
-				output_str = dynamic_strcat(4, "block rule ", update_name, status_str, asctime(next_time_info));
+				char* status_str = update->update_type == UPDATE_RULE_REMOVE ? " is currently active, and will next be deactivated " : " is not currently active, and will next be active ";
+				output_str = dynamic_strcat(5, rule_type_name, update_name, status_str, asctime(next_time_info), "\n");
 			}
 			else
 			{
-				char* status_str = update->update_type == UPDATE_BLOCK_REMOVE ? " is currently active, and will never be deactivated " : " is not currently active and will never be active";
-				output_str = dynamic_strcat(3, "block rule ", update_name, status_str);
+				char* status_str = update->update_type == UPDATE_RULE_REMOVE ? " is currently active, and will never be deactivated\n" : " is not currently active and will never be active\n";
+				output_str = dynamic_strcat(3, rule_type_name, update_name, status_str);
 			}
 		}
 		else
 		{
 			char tmp[25];
-			sprintf(tmp, "%d,%ld ",  update->update_type == UPDATE_BLOCK_REMOVE ? 1 : 0, (unsigned long)next_time_active);
+			sprintf(tmp, "%d,%ld ",  update->update_type == UPDATE_RULE_REMOVE ? 1 : 0, (unsigned long)next_time_active);
 			output_str = strdup(tmp);
 		}
+	}
+	else
+	{
+		output_str = dynamic_strcat(2," AN UNKNOWN ERROR OCCURRED WHEN FETCHING DATA FOR RULE ", update_name);
 	}
 	return output_str;
 }
@@ -921,7 +1044,7 @@ void quota_reset(update_node *next_update, priority_queue** update_queue, string
 	push_priority_queue(*update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id,  (void*)next_update );
 
 }
-void update_block(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time)
+void update_rule(update_node *next_update, priority_queue** update_queue, string_map* global_data, char* priority_id, time_t reference_time)
 {
 	/*
 	* 1) if this is a remove, remove the rules & update rule indices in rest of update_queue
@@ -929,10 +1052,10 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 	* 3) calculate time of next block event (remove/insert) 
 	* 4) set update node to reflect next event, and re-insert into update_queue
 	*/
-	//printf("DOING  BLOCK UPDATE, OF TYPE %s, TIME= %ld, FIRST RULE INDEX = %ld, \n", next_update->update_type == UPDATE_BLOCK_REMOVE ? "REMOVE" : "INSERT", next_update->update_time, next_update->rule_index1 );
+	//printf("DOING  BLOCK UPDATE, OF TYPE %s, TIME= %ld, FIRST RULE INDEX = %ld, \n", next_update->update_type == UPDATE_RULE_REMOVE ? "REMOVE" : "INSERT", next_update->update_time, next_update->rule_index1 );
 	char** rule_list = (char**)get_map_element(next_update->definition, "iptables_rule_list");
 	long* rule_list_length = (long*)get_map_element(next_update->definition, "iptables_rule_list_length");
-	if(next_update->update_type == UPDATE_BLOCK_REMOVE && next_update->rule_index1 > 0)
+	if(next_update->update_type == UPDATE_RULE_REMOVE && next_update->rule_index1 > 0)
 	{
 		//remove rules & update rule indices, set rule indices to negative values in update node
 		long iptables_index = next_update->rule_index1;
@@ -954,7 +1077,7 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 		next_update->rule_index2 = -1;
 
 	}
-	else if(next_update->update_type == UPDATE_BLOCK_INSERT)
+	else if(next_update->update_type == UPDATE_RULE_INSERT)
 	{
 		//insert rules & set rule indices in update node
 		long current_num_rules = count_rules_in_chain(next_update->table, next_update->chain);
@@ -973,9 +1096,9 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 
 
 	unsigned char next_update_type;
-	next_update->update_time = get_next_block_update_time(next_update, &next_update_type);	
+	next_update->update_time = get_next_rule_update_time(next_update, &next_update_type);	
 	next_update->update_type = next_update_type;
-	if(next_update_type == UPDATE_BLOCK_REMOVE)
+	if(next_update_type == UPDATE_RULE_REMOVE)
 	{
 		//printf("remove of %s scheduled for %ld\n", priority_id, next_update->update_time);
 	}
@@ -984,7 +1107,7 @@ void update_block(update_node *next_update, priority_queue** update_queue, strin
 }
 
 
-time_t get_next_block_update_time(update_node *last_update, unsigned char* update_type)
+time_t get_next_rule_update_time(update_node *last_update, unsigned char* update_type)
 {
 	string_map* rule_def = last_update->definition;
 	long* weekly_block_times = (long*)get_map_element(rule_def, "weekly_block_times");
@@ -1026,7 +1149,7 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 
 		/* compute update time and return */
 		next_update_time = last_update_time - seconds_since_sunday_midnight + next_event_seconds_since_sunday_midnight;
-		*update_type = next_event_index % 2 == 0 ? UPDATE_BLOCK_INSERT : UPDATE_BLOCK_REMOVE;
+		*update_type = next_event_index % 2 == 0 ? UPDATE_RULE_INSERT : UPDATE_RULE_REMOVE;
 	
 		/*
 		printf(	"\tlast update time = %ld, seconds since sunday midnight = %ld, next_block_interval = %ld, next_update_time = %ld\n", 
@@ -1038,7 +1161,7 @@ time_t get_next_block_update_time(update_node *last_update, unsigned char* updat
 	{
 		/* always active */
 		next_update_time = (time_t)0;
-		*update_type = UPDATE_BLOCK_REMOVE;	
+		*update_type = UPDATE_RULE_REMOVE;	
 	}
 	return next_update_time;
 }
@@ -1105,7 +1228,7 @@ time_t get_next_interval_end(time_t current_time, int end_type)
  * further dimensions, we will have to be greedy and take 
  * even more address space
  */
-void compute_block_rules(update_node* unode)
+void compute_rules(update_node* unode, int target_type)
 {
 	string_map* rule_def = unode->definition;
 		
@@ -1153,7 +1276,6 @@ void compute_block_rules(update_node* unode)
 		free(tmp);
 		proto = (char*)get_map_element(rule_def, "proto");
 	}
-	char* reject_with = (strcmp(proto, "tcp") == 0) ? "" : " --reject-with tcp-reset ";
 	int include_proto = strcmp(proto, "both") == 0 ? 0 : 1;
 
 
@@ -1309,6 +1431,8 @@ void compute_block_rules(update_node* unode)
 	mask_byte_index++;	
 
 	list* all_rules = initialize_list();
+	char* target = target_type == REJECT_TARGET ? " REJECT " : " ACCEPT ";
+	char* reject_with = (strcmp(proto, "tcp") == 0) && target_type == REJECT_TARGET ? " --reject-with tcp-reset " : "";
 	if(multi_rules->length > 0)
 	{
 		if(strlen(single_check) > 0)
@@ -1386,11 +1510,11 @@ void compute_block_rules(update_node* unode)
 		unsigned long tmp_length;
 		destroy_list(multi_rules, DESTROY_MODE_IGNORE_VALUES, &tmp_length);
 
-		//if final mark matches perfectly with mask of 0xFF000000, REJECT
+		//if final mark matches perfectly with mask of 0xFF000000, jump to  (REJECT/ACCEPT) target
 		char final_match_str[12];
 		sprintf(final_match_str, "0x%lX", final_match);
 		char* final_proto = strstr(reject_with, "tcp-reset") == NULL ? "" : " -p tcp ";
-		push_list(all_rules, dynamic_strcat(6, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT ", reject_with ));
+		push_list(all_rules, dynamic_strcat(7, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j ", target, reject_with ));
 
 		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
@@ -1401,17 +1525,17 @@ void compute_block_rules(update_node* unode)
 		{	
 			if( dport_def == NULL && sport_def == NULL )
 			{
-				push_list(all_rules, dynamic_strcat(4, rule_prefix, single_check, " -j REJECT ", reject_with ));
+				push_list(all_rules, dynamic_strcat(5, rule_prefix, single_check, " -j ",target, reject_with ));
 			}
 			else
 			{
-				push_list(all_rules, dynamic_strcat(5, rule_prefix, " -p tcp ", single_check, " -j REJECT ", reject_with ));
-				push_list(all_rules, dynamic_strcat(5, rule_prefix, " -p udp ", single_check, " -j REJECT ", reject_with ));
+				push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p tcp ", single_check, " -j ", target, reject_with ));
+				push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p udp ", single_check, " -j ", target, reject_with ));
 			}
 		}
 		else
 		{
-			push_list(all_rules, dynamic_strcat(7, rule_prefix, " -p ", proto, " ", single_check, " -j REJECT ", reject_with ));
+			push_list(all_rules, dynamic_strcat(8, rule_prefix, " -p ", proto, " ", single_check, " -j ", target, reject_with ));
 		}
 	}
 
@@ -1421,13 +1545,11 @@ void compute_block_rules(update_node* unode)
 	set_map_element(rule_def, "iptables_rule_list", block_rule_list);
 	set_map_element(rule_def, "iptables_rule_list_length", num_rules);
 
-	/*	
 	int i;
 	for(i=0; block_rule_list[i] != NULL; i++)
 	{
 		fprintf(stderr, "%s\n", block_rule_list[i]);
 	}
-	*/
 }
 
 
@@ -1955,30 +2077,42 @@ char** parse_marks(char* list_str, unsigned long max_mask)
 
 
 
-update_node* initialize_generic_update_node(string_map* def, string_map* global_data, int is_block)
+update_node* initialize_generic_update_node(string_map* def, string_map* global_data, int is_quota)
 {
+	char* rule_type_def = get_map_element(def, "rule_type");
+	unsigned char rule_type = BLOCK_RULE;
+	if(safe_strcmp(rule_type_def, "block") == 0) { rule_type = BLOCK_RULE; }
+	if(safe_strcmp(rule_type_def, "quota") == 0) { rule_type = QUOTA_RULE; }
+	if(safe_strcmp(rule_type_def, "white_list") == 0) { rule_type = WHITELIST_RULE; }
+
 	char* is_ingress_str = get_map_element(def, "is_ingress");
 	int is_ingress = (is_ingress_str == NULL || safe_strcmp(is_ingress_str, "0") == 0 ) ? 0 : 1;
 
 	char lookup_table_str[25];
 	char lookup_chain_str[25];
-	sprintf(lookup_table_str, "%s_%s_table", is_ingress ? "ingress" : "egress", is_block ? "filter" : "bandwidth");
-	sprintf(lookup_chain_str, "%s_%s_chain", is_ingress ? "ingress" : "egress", is_block ? "filter" : "bandwidth");
+	sprintf(lookup_table_str, "%s_%s_table", is_ingress ? "ingress" : "egress", is_quota ? "bandwidth" : "filter");
+	sprintf(lookup_chain_str, "%s_%s_chain", is_ingress ? "ingress" : "egress", is_quota ? "bandwidth" : "filter");
 
 	//printf("lookup_table_str = %s\n", lookup_table_str);
 	//printf("lookup_chain_str = %s\n", lookup_chain_str);
 
 	char* table = get_map_element(global_data, lookup_table_str);
 	char* chain = get_map_element(global_data, lookup_chain_str);
+	if(table != NULL && chain != NULL && safe_strcmp(rule_type_def, "white_list") == 0)
+	{
+		chain = (is_ingress ? "ingress_whitelist" : "egress_whitelist");
+	}
+
 	update_node* next_update= NULL;
 	if(table != NULL && chain != NULL)
 	{
 		next_update = (update_node*)malloc(sizeof(update_node));
-		
+	
+		next_update->rule_type = rule_type;	
 		next_update->update_time = (time_t)0;
 		next_update->update_type = 0;
-		next_update->table = strdup(table);
-		next_update->chain = strdup(chain);
+		next_update->table = table;  //this shouldn't get modified, so we shouldn't need to strdup()
+		next_update->chain = chain;  //this shouldn't get modified, so we shouldn't need to strdup()
 		next_update->update_type = 0;
 		next_update->rule_index1 = -1;
 		next_update->rule_index2 = -1;
@@ -2010,7 +2144,7 @@ void adjust_update_rule_numbers(priority_queue** update_queue, string_map* globa
 			//printf("\t\trule chain=\"%s\", test chain = \"%s\", rule priority_id=%s, rule index = %ld, index of rule being removed = %ld\n", u->chain, chain, next->id, u->rule_index1, first_removed_rule);
 		
 			u->rule_index1 = u->rule_index1 - num_removed_rules;
-			u->rule_index2 = u->update_type == UPDATE_BLOCK_INSERT || u->update_type == UPDATE_BLOCK_REMOVE ? u->rule_index2 - num_removed_rules : u->rule_index2;
+			u->rule_index2 = u->update_type == UPDATE_RULE_INSERT || u->update_type == UPDATE_RULE_REMOVE ? u->rule_index2 - num_removed_rules : u->rule_index2;
 
 		}
 		if(u->update_type == UPDATE_QUOTA_RESET)
@@ -2081,7 +2215,26 @@ void flush_iptables_chain(char* table, char* chain)
 	}
 }
 
-
+void delete_iptables_chain(char* table, char* chain)
+{
+	if(table != NULL && chain != NULL)
+	{
+		iptc_handle_t iptables_snapshot = iptc_init(table);
+		if(iptables_snapshot != NULL)
+		{
+			if(iptc_is_chain(chain, iptables_snapshot))
+			{
+				char *flush_command = dynamic_strcat(4, "iptables -t ", table, " -F ", chain);
+				char *delete_command = dynamic_strcat(4, "iptables -t ", table, " -X ", chain);
+				system(flush_command);
+				system(delete_command);
+				free(flush_command);
+				free(delete_command);
+			}
+			iptc_free(&iptables_snapshot);
+		}
+	}
+}
 
 
 
@@ -2266,7 +2419,7 @@ void initialize_quota_rules_for_direction(list** quota_rules, int direction, str
 					//note, even if quota already has been reached we schedule a QUOTA_TEST
 					//update, so block is inserted when we start updating  This eliminates redundant code
 					
-					update_node* next_update = initialize_generic_update_node(def, global_data, 0);
+					update_node* next_update = initialize_generic_update_node(def, global_data, 1);
 					next_update->update_time = current_time;
 					next_update->update_type = UPDATE_QUOTA_TEST;
 					next_update->rule_index1 = *next_ip_index;
@@ -2678,9 +2831,10 @@ void** load_restricterd_config(char* filename)
 	config[0] = NULL;
 	config[1] = (void*)initialize_list();
 	config[2] = (void*)initialize_list();
-	config[3] = NULL;
+	config[3] = (void*)initialize_list();
+	config[4] = NULL;
 
-	
+		
 	
 				
 	FILE *config_file = fopen(filename, "r");	
@@ -2694,7 +2848,12 @@ void** load_restricterd_config(char* filename)
 		while(next.terminator != EOF)
 		{
 			//cycle past space outside definition line
-			while(next.terminator != EOF && safe_strcmp(variable[0], "global") != 0 && safe_strcmp(variable[0], "quota") && safe_strcmp(variable[0], "block") )
+			while(	next.terminator != EOF && 
+				safe_strcmp(variable[0], "global") != 0 && 
+				safe_strcmp(variable[0], "quota")  != 0 && 
+				safe_strcmp(variable[0], "block")  != 0 && 
+				safe_strcmp(variable[0], "white_list") != 0  
+				)
 			{
 				if(variable[0] != NULL)
 				{
@@ -2725,7 +2884,12 @@ void** load_restricterd_config(char* filename)
 				
 				next = dynamic_read(config_file, newline_terminator, 2);
 				variable = parse_variable_definition_line(next.str);
-				while(next.terminator != EOF && safe_strcmp(variable[0], "global") != 0 && safe_strcmp(variable[0], "quota") && safe_strcmp(variable[0], "block") )
+				while(	next.terminator != EOF && 
+					safe_strcmp(variable[0], "global") != 0 && 
+					safe_strcmp(variable[0], "quota")  != 0 && 
+					safe_strcmp(variable[0], "block")  != 0 &&
+					safe_strcmp(variable[0], "white_list") != 0
+					)
 				{
 					if(variable[0] != NULL && variable[1] != NULL)
 					{
@@ -2905,7 +3069,7 @@ void** load_restricterd_config(char* filename)
 				{
 					config_index = 0;
 				}
-				if(strcmp("block", get_map_element(definition, "rule_type")) == 0)
+				else if(strcmp("block", get_map_element(definition, "rule_type")) == 0)
 				{
 					config_index = 1;
 				}
@@ -2913,12 +3077,18 @@ void** load_restricterd_config(char* filename)
 				{
 					config_index = 2;
 				}
+				else if(strcmp("white_list", get_map_element(definition, "rule_type")) == 0)
+				{
+					config_index = 3;
+				}
+
+
 
 				if(config_index == 0)
 				{
 					config[0] = (void*)definition;
 				}
-				else if(config_index <= 2)
+				else if(config_index <= 3)
 				{
 					/* if enabled value is present, only load configuration if it is equal to one or "true"*/
 					char* enabled_str = (char*)get_map_element(definition, "enabled");

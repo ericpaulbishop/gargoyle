@@ -13,6 +13,8 @@ delete_chain_from_table()
 	target=$2
 
 
+	found_chain="0"
+
 	chains=$(iptables -t $table -L | awk ' {if($0 ~ /^Chain/){ print $2; };} '  )
 	for chain in $chains ; do
 		rule_nums=$(iptables -t $table -L $chain --line-numbers | awk " {if(\$1~/^[0-9]+$/ && \$2 ~/^$target/){ printf(\"%s\n\", \$1);};}")
@@ -25,11 +27,14 @@ delete_chain_from_table()
 			done
 		fi
 		
-		if [ $chain = $target ] ; then
-			iptables -t $table -F $target
-			iptables -t $table -X $target
+		if [ "$chain" = "$target" ] ; then
+			found_chain="1"
 		fi
 	done
+	if [ "$found_chain" = "1" ] ; then
+		iptables -t $table -F $target
+		iptables -t $table -X $target
+	fi
 	
 }
 

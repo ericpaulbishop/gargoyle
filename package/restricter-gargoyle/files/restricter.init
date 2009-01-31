@@ -123,6 +123,7 @@ stop()
 		old_pid=$(cat /var/run/restricterd.pid)
 		kill $old_pid 2>/dev/null 
 	fi
+	sleep 1
 
 	delete_chain_from_table $ingress_filter_table $ingress_filter_chain
 	delete_chain_from_table $egress_filter_table $egress_filter_chain
