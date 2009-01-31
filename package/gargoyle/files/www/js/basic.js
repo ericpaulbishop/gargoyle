@@ -274,7 +274,8 @@ function saveChanges()
 		visibilityIds = [];
 		pkgs = [];
 		sections = [];
-		for (idIndex in inputIds)
+		var idIndex;
+		for (idIndex=0; idIndex < inputIds.length; idIndex++)
 		{
 			if(isArray(inputIds[idIndex]))
 			{
@@ -286,7 +287,7 @@ function saveChanges()
 			}
 			
 			
-			if(idIndex < 8)
+			if(idIndex < 9)
 			{
 				pkgs.push('network');
 				sections.push('wan');
@@ -322,7 +323,7 @@ function saveChanges()
 		//preserve wan mac definition even if wan is disabled if this is a bcm94704
 		if(isBcm94704 && (uci.get("network", "wan", "ifname") != wirelessIf))
 		{
-			if(uci.get("network", "wan", "macaddr") == null)
+			if(uci.get("network", "wan", "macaddr") == "")
 			{
 				uci.set("network", "wan", "macaddr", defaultWanMac);
 			}

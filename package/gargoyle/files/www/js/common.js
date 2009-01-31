@@ -520,6 +520,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		element.disabled=false;
 		if(element.type == "text")
 		{
+			element.style.color="#000000";
 			element.className="" ;
 		}
 		if(element.type == "select-one" || element.type == "select-multiple")
@@ -536,13 +537,14 @@ function setElementEnabled(element, enabled, defaultValue)
 		element.disabled=true;
 		if(element.type == "text")
 		{
-			element.className="text_disabled";
 			element.value=defaultValue;
+			element.style.color="#AAAAAA";
+			element.className="text_disabled";
 		}
 		if(element.type == "select-one" || element.type == "select-multiple")
 		{
-			element.className="select_disabled";
 			setSelectedValue(element.id, defaultValue, element.ownerDocument);
+			element.className="select_disabled";
 		}
 		if(element.type == "button")
 		{
@@ -550,6 +552,8 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 	}
 }
+
+
 
 function getSelectedValue(selectId, controlDocument)
 {
@@ -821,6 +825,7 @@ function setVariableConditionally(params)
 	if(isVisible==true)
 	{
 		value = useValueFromElement == true ? document.getElementById(elementId).value : alternateValue;
+		
 		if(testFunction(value))
 		{
 			uci.set(pkg, section, option, value);
