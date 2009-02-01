@@ -30,12 +30,12 @@
 	<fieldset>
 		<legend class="sectionheader">Access Restrictions</legend>
 	
-		<span id="add_restriction_label" style="text-decoration:underline" >New Restriction Rule:</span>	
+		<span id="add_rule_label" style="text-decoration:underline" >New Restriction Rule:</span>	
 		
 		<div>
 			<? cat templates/restriction_template ?>
 			<div>
-				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick="addNewRule()" />
+				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("block", "rule_")' />
 			</div>	
 		</div>
 	
@@ -44,9 +44,32 @@
 	
 
 
-		<span id="current_restrictions_label" style="text-decoration:underline" >Current Restrictions:</span>	
+		<span id="current_rule_label" style="text-decoration:underline" >Current Restrictions:</span>	
 
-		<div id="restriction_table_container"></div>
+		<div id="rule_table_container"></div>
+		
+	</fieldset>
+
+		<fieldset>
+		<legend class="sectionheader">Exceptions (White List)</legend>
+	
+		<span id="add_exception_label" style="text-decoration:underline" >New Exception:</span>	
+		
+		<div>
+			<? cat templates/whitelist_template ?>
+			<div>
+				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("white_list", "exception_")' />
+			</div>	
+		</div>
+	
+	
+		<div id='internal_divider1' class='internal_divider'></div>
+	
+
+
+		<span id="current_exceptions_label" style="text-decoration:underline" >Current Exceptions:</span>	
+
+		<div id="exception_table_container"></div>
 		
 	</fieldset>
 	<div id="bottom_button_container">

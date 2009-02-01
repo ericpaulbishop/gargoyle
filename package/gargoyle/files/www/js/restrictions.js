@@ -8,19 +8,53 @@ function saveChanges()
 	document.getElementById("reset_button").style.display="none";
 	document.getElementById("update_container").style.display="block";
 	
-	
-	//set enabled status to corrospond with checked in table
-	enabledRuleFound = false;
+	var enabledRuleFound = false;
 	var runCommands = [];
-	var ruleTableContainer = document.getElementById('restriction_table_container');
-	var ruleTable = ruleTableContainer.firstChild;
-	var ruleData = getTableDataArray(ruleTable);
-	for(ruleIndex =0; ruleIndex < ruleData.length; ruleIndex++)
+
+
+	var ruleTypes = [ "block", "white_list" ];
+	var rulePrefixes   = [ "rule_", "exception_" ];
+	var typeIndex=0;
+	for(typeIndex=0; typeIndex < ruleTypes.length; typeIndex++)
 	{
-		var check = ruleData[ruleIndex][1];
-		enabledRuleFound = enabledRuleFound || check.checked; 
-		uci.set(pkg, check.id, "enabled", check.checked ? "1" : "0");
+		//set enabled status to corrospond with checked in table
+		var ruleTableContainer = document.getElementById(rulePrefixes[typeIndex] + 'table_container');
+		var ruleTable = ruleTableContainer.firstChild;
+		var ruleData = getTableDataArray(ruleTable);
+		for(ruleIndex =0; ruleIndex < ruleData.length; ruleIndex++)
+		{
+			var check = ruleData[ruleIndex][1];
+			enabledRuleFound = enabledRuleFound || check.checked; 
+			uci.set(pkg, check.id, "enabled", check.checked ? "1" : "0");
+		}
+
+
+		//delete all sections of type in uciOriginal & remove them from uciOriginal
+		var deleteSectionCommands = [];
+		var originalSections = uciOriginal.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
+		var sectionIndex = 0;
+		for(sectionIndex=0; sectionIndex < originalSections.length; sectionIndex++)
+		{
+			var isIngress = uciOriginal.get(pkg, originalSections[sectionIndex], "is_ingress");
+			if(isIngress != "1")
+			{
+				uciOriginal.removeSection(pkg, originalSections[sectionIndex]);
+				deleteSectionCommands.push("uci del " + pkg + "." + originalSections[sectionIndex]);
+			}
+		}
+	
+		//create/initialize  sections in uci
+		var createSectionCommands = [];
+		var newSections = uci.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
+		for(sectionIndex=0; sectionIndex < newSections.length; sectionIndex++)
+		{
+			createSectionCommands.push("uci set " + pkg + "." + newSections[sectionIndex] + "='" + ruleTypes[typeIndex] + "'");
+		}
 	}
+	deleteSectionCommands.push("uci commit");
+	createSectionCommands.push("uci commit");
+	
+
 	if(enabledRuleFound || restricterEnabled)
 	{
 		runCommands.push("/etc/init.d/restricter_gargoyle enable");
@@ -28,31 +62,7 @@ function saveChanges()
 	}
 
 
-	//delete all block ingress sections in uciOriginal & remove them from uciOriginal
-	var deleteSectionCommands = [];
-	var originalBlockSections = uciOriginal.getAllSectionsOfType(pkg, "block");
-	for(blockIndex=0; blockIndex < originalBlockSections.length; blockIndex++)
-	{
-		var isIngress = uciOriginal.get(pkg, originalBlockSections[blockIndex], "is_ingress");
-		if(isIngress != "1")
-		{
-			uciOriginal.removeSection(pkg, originalBlockSections[blockIndex]);
-			deleteSectionCommands.push("uci del " + pkg + "." + originalBlockSections[blockIndex]);
-		}
-	}
-	deleteSectionCommands.push("uci commit");
-	
-	//create/initialize all block sections in uci
-	var createSectionCommands = [];
-	var newBlockSections = uci.getAllSectionsOfType(pkg, "block");
-	for(blockIndex=0; blockIndex < newBlockSections.length; blockIndex++)
-	{
-		createSectionCommands.push("uci set " + pkg + "." + newBlockSections[blockIndex] + "='block'");
-	}
-	createSectionCommands.push("uci commit");
-	
 	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n";
-
 
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
@@ -76,67 +86,79 @@ function saveChanges()
 
 function resetData()
 {
-	// Instead of having enabled/disabled button, just display all rules to disabled if 
-	// the restricter_daemon is not enabled
-	var blockSections = uciOriginal.getAllSectionsOfType(pkg, "block");
-	var restrictionTableData = new Array();
-	var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
-	var areChecked = [];
-	for(blockIndex=0; blockIndex < blockSections.length; blockIndex++)
+	var ruleTypes = [ "block", "white_list" ];
+	var rulePrefixes   = [ "rule_", "exception_" ];
+	var typeIndex=0;
+	for(typeIndex=0; typeIndex < ruleTypes.length; typeIndex++)
 	{
-		var isIngress = uciOriginal.get(pkg, blockSections[blockIndex], "is_ingress");
-		if(isIngress != "1")
+		var ruleType = ruleTypes[typeIndex];
+		var rulePrefix = rulePrefixes[typeIndex];
+
+		// Instead of having enabled/disabled button, just display all rules to disabled if 
+		// the restricter_daemon is not enabled
+		var sections = uciOriginal.getAllSectionsOfType(pkg, ruleType);
+		var ruleTableData = new Array();
+		var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
+		var areChecked = [];
+		for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
 		{
-			var description = uciOriginal.get(pkg, blockSections[blockIndex], "description");
-			description = description == "" ? blockSections[blockIndex] : description;
-			
-			var enabledStr =   uciOriginal.get(pkg, blockSections[blockIndex], "enabled");
-			var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") && restricterEnabled;
-			var enabledCheck = createEnabledCheckbox(enabledBool);
-			enabledCheck.id = blockSections[blockIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
-			
-			checkElements.push(enabledCheck);
-			areChecked.push(enabledBool);
-
-			restrictionTableData.push([description, enabledCheck, createEditButton(enabledBool)]);
+			var isIngress = uciOriginal.get(pkg, sections[sectionIndex], "is_ingress");
+			if(isIngress != "1")
+			{
+				var description = uciOriginal.get(pkg, sections[sectionIndex], "description");
+				description = description == "" ? sections[sectionIndex] : description;
+				
+				var enabledStr =   uciOriginal.get(pkg, sections[sectionIndex], "enabled");
+				var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") && restricterEnabled;
+				var enabledCheck = createEnabledCheckbox(enabledBool);
+				enabledCheck.id = sections[sectionIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
+				
+				checkElements.push(enabledCheck);
+				areChecked.push(enabledBool);
+	
+				ruleTableData.push([description, enabledCheck, createEditButton(enabledBool)]);
+			}
 		}
+		
+		var firstColumn = ruleType == "block" ? "Rule Description" : "Exception Description";
+		columnNames=[firstColumn, "Enabled", ""];
+		ruleTable = createTable(columnNames, ruleTableData, rulePrefix + "table", true, false, removeRuleCallback);
+		
+		tableContainer = document.getElementById(rulePrefix + 'table_container');
+		
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(ruleTable);
+
+		while(checkElements.length > 0)
+		{
+			var c = checkElements.shift();
+			var b = areChecked.shift();
+			c.checked = b;
+		}
+
+		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
+		setVisibility(document, rulePrefix);
 	}
-
-	columnNames=["Rule Description", "Enabled", ""];
-	restrictionTable = createTable(columnNames, restrictionTableData, "restriction_table", true, false, removeRuleCallback);
-	tableContainer = document.getElementById('restriction_table_container');
-	if(tableContainer.firstChild != null)
-	{
-		tableContainer.removeChild(tableContainer.firstChild);
-	}
-	tableContainer.appendChild(restrictionTable);
-
-	while(checkElements.length > 0)
-	{
-		var c = checkElements.shift();
-		var b = areChecked.shift();
-		c.checked = b;
-	}
-
-	setDocumentFromUci(document, new UCIContainer(), "");
-
-	setVisibility();
 }
 
-function addNewRule()
+
+function addNewRule(ruleType, rulePrefix)
 {
-	var errors = validateRule(document);
+	var errors = validateRule(document, rulePrefix);
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\nCould not add rule.");
 	}
 	else
 	{
-		var tableContainer = document.getElementById('restriction_table_container');
+		var tableContainer = document.getElementById(rulePrefix + 'table_container');
 		var table = tableContainer.firstChild;
 		var tableData = getTableDataArray(table);
-		var newId = "rule_" + (tableData.length+1);
-		setUciFromDocument(document, newId);
+		var newId = rulePrefix + (tableData.length+1);
+		setUciFromDocument(document, newId, ruleType, rulePrefix);
 
 		var description = uci.get(pkg, newId, "description");
 		description = description == "" ? newId : description;
@@ -146,39 +168,39 @@ function addNewRule()
 		
 		addTableRow(table, [description, enabledCheck, createEditButton(true)], true, false, removeRuleCallback);	
 
-		setDocumentFromUci(document, new UCIContainer(), "");
+		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
 
 		enabledCheck.checked = true;
 	}
 }
 
-function setVisibility(controlDocument)
+function setVisibility(controlDocument, rulePrefix)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	
 	
-	setInvisibleIfAnyChecked(["all_access"], "restricted_resources", "block", controlDocument);
-	setInvisibleIfAnyChecked(["all_day"], "hours_active_container", "block", controlDocument);
-	setInvisibleIfAnyChecked(["every_day"], "days_active", "block", controlDocument);
-	setInvisibleIfAnyChecked(["all_day", "every_day"], "days_and_hours_active_container", "block", controlDocument);
-	setInvisibleIfAnyChecked(["all_day", "every_day"], "schedule_repeats", "inline", controlDocument);
+	setInvisibleIfAnyChecked([rulePrefix + "all_access"], rulePrefix + "resources", "block", controlDocument);
+	setInvisibleIfAnyChecked([rulePrefix + "all_day"], rulePrefix + "hours_active_container", "block", controlDocument);
+	setInvisibleIfAnyChecked([rulePrefix + "every_day"], rulePrefix + "days_active", "block", controlDocument);
+	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "days_and_hours_active_container", "block", controlDocument);
+	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "schedule_repeats", "inline", controlDocument);
 
 
-	var scheduleRepeats = controlDocument.getElementById("schedule_repeats");
+	var scheduleRepeats = controlDocument.getElementById(rulePrefix + "schedule_repeats");
 	if(scheduleRepeats.style.display != "none")
 	{
-		setInvisibleIfIdMatches("schedule_repeats", "daily", "days_and_hours_active_container", "block", controlDocument);
-		setInvisibleIfIdMatches("schedule_repeats", "weekly", "days_active", "block", controlDocument);
-		setInvisibleIfIdMatches("schedule_repeats", "weekly", "hours_active_container", "block", controlDocument);
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "daily", rulePrefix + "days_and_hours_active_container", "block", controlDocument);
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "days_active", "block", controlDocument);
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "hours_active_container", "block", controlDocument);
 	}
 
 
-	setInvisibleIfIdMatches("rule_applies_to", "all", "rule_applies_to_container", "block", controlDocument);
-	setInvisibleIfIdMatches("remote_ip_type", "all", "remote_ip_container", "block", controlDocument);
-	setInvisibleIfIdMatches("remote_port_type", "all", "remote_port", "inline", controlDocument);
-	setInvisibleIfIdMatches("local_port_type", "all", "local_port", "inline", controlDocument);
-	setInvisibleIfIdMatches("app_protocol_type", "all", "app_protocol", "inline", controlDocument);
-	setInvisibleIfIdMatches("url_type", "all", "url_match_list", "block", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "applies_to", "all", rulePrefix + "applies_to_container", "block", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "remote_ip_type", "all", rulePrefix + "remote_ip_container", "block", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "remote_port_type", "all", rulePrefix + "remote_port", "inline", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "local_port_type", "all", rulePrefix + "local_port", "inline", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "app_protocol_type", "all", rulePrefix + "app_protocol", "inline", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "url_type", "all", rulePrefix + "url_match_list", "block", controlDocument);
 }
 
 function setInvisibleIfAnyChecked(checkIds, associatedElementId, defaultDisplayMode, controlDocument)
@@ -234,7 +256,7 @@ function createEnabledCheckbox(enabled)
 	return enabledCheckbox;
 }
 
-function createEditButton(enabled)
+function createEditButton(enabled, ruleType, rulePrefix)
 {
 	editButton = createButton();
 	editButton.value = "Edit";
@@ -265,6 +287,19 @@ function removeRuleCallback(table, row)
 
 function editRule()
 {
+	editRow = this.parentNode.parentNode;
+	editTable = editRow.parentNode.parentNode;
+	if(editTable.id.match("rule_"))
+	{
+		editRuleType = "block";
+		editRulePrefix = "rule_";
+	}
+	else
+	{
+		editRuleType = "white_list";
+		editRulePrefix = "exception_";
+	}
+
 	if( typeof(editRuleWindow) != "undefined" )
 	{
 		//opera keeps object around after
@@ -290,7 +325,7 @@ function editRule()
 	}
 
 
-	editRuleWindow = window.open("restriction_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editRuleWindow = window.open(editRuleType == "block" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
 	
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
@@ -299,7 +334,6 @@ function editRule()
 	closeButton.value = "Close and Discard Changes";
 	closeButton.className = "default_button";
 
-	editRow=this.parentNode.parentNode;
 	editRuleSectionId = editRow.childNodes[1].firstChild.id;
 
 	runOnEditorLoaded = function () 
@@ -311,9 +345,9 @@ function editRule()
 			{
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
-				setDocumentFromUci(editRuleWindow.document, uci, editRuleSectionId);
-				setVisibility(editRuleWindow.document);
+		
+				setDocumentFromUci(editRuleWindow.document, uci, editRuleSectionId, editRuleType, editRulePrefix);
+				setVisibility(editRuleWindow.document, editRulePrefix);
 
 				closeButton.onclick = function()
 				{
@@ -322,14 +356,14 @@ function editRule()
 				saveButton.onclick = function()
 				{
 					// error checking goes here
-					var errors = validateRule(editRuleWindow.document);
+					var errors = validateRule(editRuleWindow.document, editRulePrefix);
 					if(errors.length > 0)
 					{
 						alert(errors.join("\n") + "\nCould not add rule.");
 					}
 					else
 					{
-						setUciFromDocument(editRuleWindow.document, editRuleSectionId);
+						setUciFromDocument(editRuleWindow.document, editRuleSectionId, editRuleType, editRulePrefix);
 						if(uci.get(pkg, editRuleSectionId, "description") != "")
 						{
 							editRow.childNodes[0].firstChild.data = uci.get(pkg, editRuleSectionId, "description");
@@ -353,22 +387,22 @@ function editRule()
 	runOnEditorLoaded();
 }
 
-function addIpsToTable(controlDocument, textId, tableContainerId, tableId)
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var newIps = controlDocument.getElementById(textId).value;
-	var valid = validateMultipleIps(newIps);
+	var newAddrs = controlDocument.getElementById(textId).value;
+	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
 	if(valid == 0)
 	{
 		var tableContainer = controlDocument.getElementById(tableContainerId);
 		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
-		newIps = newIps.replace(/^[\t ]*/, "");
-		newIps = newIps.replace(/[\t ]*$/, "");
-		var ips = newIps.split(/[\t ]*,[\t ]*/);
+		newAddrs = newAddrs.replace(/^[\t ]*/, "");
+		newAddrs = newAddrs.replace(/[\t ]*$/, "");
+		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
 		
-		while(ips.length > 0)
+		while(addrs.length > 0)
 		{
-			addTableRow(table, [ ips.shift() ], true, false);
+			addTableRow(table, [ addrs.shift() ], true, false);
 		}
 		
 		if(tableContainer.childNodes.length == 0)
@@ -379,7 +413,7 @@ function addIpsToTable(controlDocument, textId, tableContainerId, tableId)
 	}
 	else
 	{
-		alert("ERROR: Invalid IP or IP range\n");
+		alert("ERROR: Invalid Address\n");
 	}
 }
 
@@ -394,8 +428,8 @@ function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tabl
 	{
 		var urlSpan = createUrlSpan(newUrl, controlDocument);
 		var tableContainer = controlDocument.getElementById(tableContainerId);
-		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable(["Match Type", "URL"], [], tableId, true, false);
-		addTableRow(table, [urlType, urlSpan ], true, false);
+		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable(["URL Part", "Match Type", "Match Text / Expression"], [], tableId, true, false);
+		addTableRow(table, [(urlType.match("domain") ? "domain" : "full"), urlType.substring(urlType.lastIndexOf("_")+1), urlSpan ], true, false);
 		if(tableContainer.childNodes.length == 0)
 		{
 			tableContainer.appendChild(table);
@@ -404,29 +438,29 @@ function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tabl
 	}
 	else
 	{
-		if( (!newUrl.match(/^http:\/\//)) && urlType == "exact")
+		if( newUrl.length == 0)
 		{
-			alert("ERROR: Exact URL match must start with \"http://\"\n");
+			alert("ERROR: URL match length must be greater than zero");
 		}
 		else
 		{
-			alert("ERROR: URL cannot contain quote or newline characters\n");
+			alert("ERROR: URL match cannot contain quote or newline characters\n");
 		}
 	}
 }
 
-function validateRule(controlDocument)
+function validateRule(controlDocument, rulePrefix)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var inputIds = ["hours_active", "days_and_hours_active", "remote_port", "local_port"];
-	var labelIds = ["hours_active_label", "days_and_hours_active_label", "remote_port_label", "local_port_label"];
+	var inputIds = [rulePrefix + "hours_active", rulePrefix + "days_and_hours_active", rulePrefix + "remote_port", rulePrefix + "local_port"];
+	var labelIds = [rulePrefix + "hours_active_label", rulePrefix + "days_and_hours_active_label", rulePrefix + "remote_port_label", rulePrefix + "local_port_label"];
 	var functions = [validateHours, validateDaysAndHours, validateMultiplePorts, validateMultiplePorts];
 	var validReturnCodes = [0,0,0,0];
-	var visibilityIds = ["hours_active_container", "days_and_hours_active_container", "remote_port", "local_port"];
-	if(controlDocument.getElementById("all_access").checked)
+	var visibilityIds = [rulePrefix + "hours_active_container", rulePrefix + "days_and_hours_active_container", rulePrefix + "remote_port", rulePrefix + "local_port"];
+	if(controlDocument.getElementById(rulePrefix + "all_access").checked)
 	{
-		visibilityIds[2] = "restricted_resources";
-		visibilityIds[3] = "restricted_resources";
+		visibilityIds[2] = rulePrefix + "resources";
+		visibilityIds[3] = rulePrefix + "resources";
 	}
 	
 	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
@@ -503,6 +537,36 @@ function proofreadMultipleIps(input)
 {
 	proofreadText(input, validateMultipleIps, 0);
 }
+function proofreadMultipleIpsOrMacs(input)
+{
+	proofreadText(input, validateMultipleIpsOrMacs, 0);
+}
+function validateMultipleIpsOrMacs(addresses)
+{
+	var addr = addresses.replace(/^[\t ]+/g, "");
+	addr = addr.replace(/[\t ]+$/g, "");
+	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
+	var valid = splitAddr.length > 0 ? 0 : 1;
+	while(valid == 0 && splitAddr.length > 0)
+	{
+		var nextAddr = splitAddr.pop();
+		if(nextAddr.match(/-/))
+		{
+			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
+			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
+		}
+		else if(nextAddr.match(/:/))
+		{
+			valid = validateMac(nextAddr);
+		}
+		else
+		{
+			valid = validateIpRange(nextAddr);
+		}
+	}
+	return valid;
+
+}
 
 function validateMultiplePorts(portStr)
 {
@@ -527,11 +591,7 @@ function validateUrl(url, selectId, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	var urlType = getSelectedValue(selectId, controlDocument);
-	var valid = url.match(/[\n\r\"\']/) ? 1 : 0;
-	if(urlType == "exact")
-	{
-		valid = valid ==0 && url.match(/^http:\/\//) ? 0 : 1;
-	}
+	var valid = url.match(/[\n\r\"\']/) || url.length == 0 ? 1 : 0;
 	return valid;
 }
 
@@ -583,31 +643,33 @@ function parseUrlSpan(urlSpan)
 }
 
 
-function setDocumentFromUci(controlDocument, sourceUci, sectionId)
+function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rulePrefix)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 
 	var description = sourceUci.get(pkg, sectionId, "description");
 	description = description == "" ? sectionId : description;	
-	controlDocument.getElementById("restriction_name").value = description;
+	controlDocument.getElementById(rulePrefix + "name").value = description;
 
-	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_addr", "applies_to_table_container", "applies_to_table", "rule_applies_to", "applies_to_ip");
+	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
 
 
 	var daysAndHours = sourceUci.get(pkg, sectionId, "weekly_block_times");
 	var hours = sourceUci.get(pkg, sectionId, "hours_blocked");
 	var allDay = (daysAndHours == "" && hours == "");
-	controlDocument.getElementById("hours_active").value = hours;
-	controlDocument.getElementById("all_day").checked = allDay;
-	controlDocument.getElementById("days_and_hours_active").value = daysAndHours;
+	controlDocument.getElementById(rulePrefix + "hours_active").value = hours;
+	controlDocument.getElementById(rulePrefix + "all_day").checked = allDay;
+	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = daysAndHours;
 
 	
 	var days =  sourceUci.get(pkg, sectionId, "weekdays_blocked");
 	var dayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+	var dayIndex = 0;
+	for(dayIndex = 0; dayIndex < dayIds.length; dayIndex++) { dayIds[dayIndex] = rulePrefix + dayIds[dayIndex]; }
+
 	var everyDay = (daysAndHours == "");
 	days = days.split(/,/);
 	days = days.length != 7 ? ["1","1","1","1","1","1","1"] : days;
-	
 	for(dayIndex = 0; dayIndex < days.length; dayIndex++)
 	{
 		days[dayIndex] = days[dayIndex].replace(/^[\t ]*/, "");
@@ -615,144 +677,93 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId)
 		everyDay = everyDay && (days[dayIndex] != "0");
 		controlDocument.getElementById(dayIds[dayIndex]).checked = (days[dayIndex] != "0");
 	}
-	controlDocument.getElementById("every_day").checked = everyDay;
+	controlDocument.getElementById(rulePrefix + "every_day").checked = everyDay;
 
-	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "remote_addr", "remote_ip_table_container", "remote_ip_table", "remote_ip_type", "remote_ip");
-	setTextAndSelectFromUci(controlDocument, sourceUci,  pkg, sectionId, "remote_port", "remote_port", "remote_port_type");
-	setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_port", "local_port", "local_port_type");
+	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_table", rulePrefix + "remote_ip_type", rulePrefix + "remote_ip");
+	setTextAndSelectFromUci(controlDocument, sourceUci,  pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
+	setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
 
 	var proto = sourceUci.get(pkg, sectionId, "proto");
 	proto = proto != "tcp" && proto != "udp" ? "both" : proto;
-	setSelectedValue("transport_protocol", proto, controlDocument);
+	setSelectedValue(rulePrefix + "transport_protocol", proto, controlDocument);
 
 	var app_proto = sourceUci.get(pkg, sectionId, "app_proto");
 	var app_proto_type = app_proto == "" ? "except" : "only";
 	app_proto = app_proto == "" ? sourceUci.get(pkg, sectionId, "not_app_proto") : app_proto;
 	app_proto_type = app_proto == "" ? "all" : app_proto_type;
-	setSelectedValue("app_protocol_type", app_proto_type, controlDocument);
-	setSelectedValue("app_protocol", app_proto, controlDocument);
+	setSelectedValue(rulePrefix + "app_protocol_type", app_proto_type, controlDocument);
+	setSelectedValue(rulePrefix + "app_protocol", app_proto, controlDocument);
 	
-	var containsStr = sourceUci.get(pkg, sectionId, "url");
-	var regexStr = sourceUci.get(pkg, sectionId, "url_regex");
-	var urlType = containsStr == "" && regexStr == "" ? "except" : "only";
-	if(urlType == "except")
-	{
-		containsStr = sourceUci.get(pkg, sectionId, "not_url");
-		regexStr = sourceUci.get(pkg, sectionId, "not_url_regex");
-		urlType = containsStr == "" && regexStr == "" ? "all" : "except";
-	}
-	setSelectedValue("url_type", urlType, controlDocument);
-	var tableContainer = controlDocument.getElementById("url_match_table_container");
-	if(tableContainer.childNodes.length > 0)
-	{
-		tableContainer.removeChild(tableContainer.firstChild);
-	}
 
-	if(urlType != "all")
-	{
-		var contains = [];
-		var regex = [];
-		var exact = [];
 
-		if(containsStr != "")
+
+
+	var urlTypes = [ "url_contains", "url_regex", "url_exact", "url_domain_contains", "url_domain_regex", "url_domain_exact" ];
+	var urlExprTypes = [ "contains", "regex", "exact", "contains", "regex", "exact" ];
+	var urlPartTypes = [ "full", "full", "full", "domain", "domain", "domain" ];
+	var urlPrefix = "";
+	var urlDefinitions = [];
+	var urlDefFound = false;
+	var urlTypeIndex = 0;
+	var urlMatchType = "all";
+	for(urlTypeIndex=0; urlTypeIndex < urlTypes.length; urlTypeIndex++)
+	{
+		urlDefinitions[urlTypeIndex] = sourceUci.get(pkg, sectionId, urlTypes[urlTypeIndex]);
+		urlDefFound = urlDefinitions[urlTypeIndex] != "" ? true : urlDefFound;
+		urlMatchType = urlDefinitions[urlTypeIndex] != "" ? "only" : urlMatchType;
+	}
+	if(!urlDefFound)
+	{
+		urlPrefix = "not_";
+		for(urlTypeIndex=0; urlTypeIndex < urlTypes.length; urlTypeIndex++)
 		{
-			containsStr = containsStr.replace(/^[\t ]*\"/, "");
-			containsStr = containsStr.replace(/\"[\t ]*$/, "");
-			contains = containsStr.match(/\".*\"/) ? containsStr.split(/\"[\t, ]*\"/) : [ containsStr ];
+			urlDefinitions[urlTypeIndex] = sourceUci.get(pkg, sectionId, urlPrefix + urlTypes[urlTypeIndex]);
+			urlDefFound = urlDefinitions[urlTypeIndex] != "" ? true : urlDefFound;
+			urlMatchType = urlDefinitions[urlTypeIndex] != "" ? "except" : urlMatchType;
 		}
-		if(regexStr != "")
-		{
-			regexStr = regexStr.replace(/^[\t ]*\"/, "");
-			regexStr = regexStr.replace(/\"[\t ]*$/, "");
-			var splitStr = regexStr.match(/\".*\"/) ? regexStr.split(/\"[\t, ]*\"/) : [ regexStr ];
-			for(splitIndex = 0; splitIndex < splitStr.length; splitIndex++)
-			{
-				//determine if this is an exact match
-				var testStr = splitStr[splitIndex];
-				var isExact = false;
-				var matchesStartAndEnd = testStr.match(/^\^http:\/\/.*\$$/) ? true : false;
-				
-				testStr = testStr.replace(/^\^/, "");
-				testStr = testStr.replace(/\$$/, "");
-				
-						
-				var unescapedSpecial = 	testStr.match(/[^\\]\*/) || 
-							testStr.match(/[^\\]\./) ||
-							testStr.match(/[^\\]\]/) ||
-							testStr.match(/[^\\]\[/) ||
-							testStr.match(/[^\\]\)/) ||
-							testStr.match(/[^\\]\(/) ||
-							testStr.match(/[^\\]\}/) ||
-							testStr.match(/[^\\]\{/) ||
-							testStr.match(/[^\\]\+/) ||
-							testStr.match(/[^\\]\-/) ||
-							testStr.match(/[^\\]\?/) ||
-							testStr.match(/[^\\]\$/) ||
-							testStr.match(/[^\\]\^/) ? true : false;
-				
-				if(matchesStartAndEnd && (!unescapedSpecial))
-				{
-					testStr = testStr.replace(/\\\*/g, "*");
-					testStr = testStr.replace(/\\\./g, ".");
-					testStr = testStr.replace(/\\\]/g, "]");
-					testStr = testStr.replace(/\\\[/g, "[");
-					testStr = testStr.replace(/\\\)/g, ")");
-					testStr = testStr.replace(/\\\(/g, "(");
-					testStr = testStr.replace(/\\\}/g, "}");
-					testStr = testStr.replace(/\\\{/g, "{");
-					testStr = testStr.replace(/\\\+/g, "+");
-					testStr = testStr.replace(/\\\-/g, "-");
-					testStr = testStr.replace(/\\\?/g, "?");
-					testStr = testStr.replace(/\\\^/g, "^");
-					testStr = testStr.replace(/\\\$/g, "$");
-					
-					var testStr2 = testStr.replace(/\\\\/, "");
-					if(!testStr2.match(/\\/))
-					{
-						testStr = testStr.replace(/\\\\/, /\\/);
-						exact.push(testStr);
-						isExact = true;
-					}
+	}
+	setSelectedValue(rulePrefix + "url_type", urlMatchType, controlDocument);
+	var urlTableContainer = controlDocument.getElementById(rulePrefix + "url_match_table_container");
+	if(urlTableContainer.childNodes.length > 0)
+	{
+		urlTableContainer.removeChild(tableContainer.firstChild);
+	}
 
-				}
-				if(!isExact)
+
+	if(urlDefFound)
+	{
+		var table = createTable(["URL Part", "Match Type", "Match Text / Expression"], [], rulePrefix + "url_match_table", true, false, null, null, controlDocument);
+		for(urlTypeIndex=0; urlTypeIndex < urlTypes.length; urlTypeIndex++)
+		{
+			var defStr = urlDefinitions[urlTypeIndex];
+			if(defStr != "")
+			{
+				defStr = defStr.replace(/^[\t ]*\"/, "");
+				defStr = defStr.replace(/\"[\t ]*$/, "");
+				def = defStr.match(/\".*\"/) ? defStr.split(/\"[\t, ]*\"/) : [ defStr ];
+				var defIndex=0;
+				for(defIndex=0; defIndex < def.length; defIndex++)
 				{
-					regex.push( splitStr[splitIndex] );
+					addTableRow(table, [ urlPartTypes[urlTypeIndex], urlExprTypes[urlTypeIndex], createUrlSpan(def[defIndex], controlDocument) ], true, false, null, null, controlDocument);
 				}
 			}
 		}
-		if(exact.length > 0 || regex.length > 0 || contains.length > 0)
-		{
-			var table = createTable(["Match Type", "URL"], [], "url_match_table", true, false, null, null, controlDocument);
-			for(containsIndex=0; containsIndex < contains.length; containsIndex++)
-			{
-				addTableRow(table, ["contains", createUrlSpan(contains[containsIndex], controlDocument) ], true, false, null, null, controlDocument);
-
-			}
-			for(regexIndex=0; regexIndex < regex.length; regexIndex++)
-			{
-				addTableRow(table, ["regex", createUrlSpan(regex[regexIndex], controlDocument)], true, false, null, null, controlDocument);
-
-			}
-			for(exactIndex=0; exactIndex < exact.length; exactIndex++)
-			{
-				addTableRow(table, ["exact", createUrlSpan(exact[exactIndex], controlDocument)], true, false, null, null, controlDocument);
-			}
-			tableContainer.appendChild(table);
-		}
+		urlTableContainer.appendChild(table);
 	}
-	controlDocument.getElementById("url_match").value = "";
+
+
+	controlDocument.getElementById(rulePrefix + "url_match").value = "";
 	
 	var allResourcesBlocked = true;
 	var resourceTypeIds = ["remote_ip_type", "remote_port_type", "local_port_type", "transport_protocol", "app_protocol_type", "url_type" ];
 	for(typeIndex=0; typeIndex < resourceTypeIds.length; typeIndex++)
 	{
-		var type = getSelectedValue(resourceTypeIds[typeIndex], controlDocument);
+		var type = getSelectedValue(rulePrefix + resourceTypeIds[typeIndex], controlDocument);
 		allResourcesBlocked = allResourcesBlocked && (type == "all" || type == "both");
 	}
-	controlDocument.getElementById("all_access").checked = allResourcesBlocked;
-	
-	setVisibility(controlDocument);
+	controlDocument.getElementById(rulePrefix + "all_access").checked = allResourcesBlocked;
+
+	setVisibility(controlDocument, rulePrefix);
 }
 function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, optionId, tableContainerId, tableId, prefixSelectId, textId)
 {
@@ -806,104 +817,93 @@ function setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, opt
 }
 
 
-function setUciFromDocument(controlDocument, sectionId)
+function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 {
 	// note: we assume error checking has already been done 
 	uci.removeSection(pkg, sectionId);
-	uci.set(pkg, sectionId, "", "block");
+	uci.set(pkg, sectionId, "", ruleType);
 	uci.set(pkg, sectionId, "is_ingress", "0");
 
 
 	controlDocument = controlDocument == null ? document : controlDocument;
 	
-	uci.set(pkg, sectionId, "", "block");
-	uci.set(pkg, sectionId, "description", controlDocument.getElementById("restriction_name").value);
+	uci.set(pkg, sectionId, "", ruleType);
+	uci.set(pkg, sectionId, "description", controlDocument.getElementById(rulePrefix + "name").value);
 	
-	setFromIpTable(controlDocument, pkg, sectionId, "local_addr", "applies_to_table_container", "rule_applies_to");
+	setFromIpTable(controlDocument, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to");
 
-	var daysActive = controlDocument.getElementById("days_active");
+	var daysActive = controlDocument.getElementById(rulePrefix + "days_active");
 	if(daysActive.style.display != "none")
 	{
 		var daysActiveStr = "";
 		var dayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 		for(dayIndex =0; dayIndex < dayIds.length; dayIndex++)
 		{
-			daysActiveStr = daysActiveStr + (controlDocument.getElementById(dayIds[dayIndex]).checked ? "1," : "0,");
+			daysActiveStr = daysActiveStr + (controlDocument.getElementById(rulePrefix + dayIds[dayIndex]).checked ? "1," : "0,");
 		}
 		daysActiveStr = daysActiveStr.replace(/,$/, "");
 		uci.set(pkg, sectionId, "weekdays_blocked", daysActiveStr);
 	}
-	setIfVisible(controlDocument, pkg, sectionId, "hours_blocked", "hours_active");
-	setIfVisible(controlDocument, pkg, sectionId, "weekly_block_times", "days_and_hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "hours_blocked", rulePrefix + "hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "weekly_block_times", rulePrefix + "days_and_hours_active");
 
-	if(!controlDocument.getElementById("all_access").checked)
+	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
 	{
-		setFromIpTable(controlDocument, pkg, sectionId, "remote_addr", "remote_ip_table_container", "remote_ip_type");
-		setIfVisible(controlDocument, pkg, sectionId, "remote_port", "remote_port", "remote_port_type");
-		setIfVisible(controlDocument, pkg, sectionId, "local_port", "local_port", "local_port_type");
+		setFromIpTable(controlDocument, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
+		setIfVisible(controlDocument, pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
+		setIfVisible(controlDocument, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
 		
-		uci.set(pkg, sectionId, "proto", getSelectedValue("transport_protocol", controlDocument));
+		uci.set(pkg, sectionId, "proto", getSelectedValue(rulePrefix + "transport_protocol", controlDocument));
 
-		var appProtocolType = getSelectedValue("app_protocol_type", controlDocument);
+		var appProtocolType = getSelectedValue(rulePrefix + "app_protocol_type", controlDocument);
 		if(appProtocolType != "all")
 		{
 			var prefix = appProtocolType == "except" ? "not_" : "";
-			uci.set(pkg, sectionId, prefix + "app_proto", getSelectedValue("app_protocol", controlDocument));
+			uci.set(pkg, sectionId, prefix + "app_proto", getSelectedValue(rulePrefix + "app_protocol", controlDocument));
 		}
 
-		var urlType = getSelectedValue("url_type", controlDocument);
-		var urlTable = controlDocument.getElementById("url_match_table_container").firstChild;
-		if(urlType != "all" && urlTable != null)
+
+
+
+		var urlMatchType = getSelectedValue(rulePrefix + "url_type", controlDocument);
+		var urlTable = controlDocument.getElementById(rulePrefix + "url_match_table_container").firstChild;
+		if(urlMatchType != "all" && urlTable != null)
 		{
-			var regexStr = "";
-			var containsStr = "";
 			var urlData = getTableDataArray(urlTable, true, false);
+			var urlPrefix = urlMatchType == "except" ? "not_" : "";
+			var urlDefStrings = [];
+			var urlIndex;
 			for(urlIndex = 0; urlIndex < urlData.length; urlIndex++)
 			{
-				var urlMatchType = urlData[urlIndex][0];
-				var urlMatch = parseUrlSpan(urlData[urlIndex][1]);
-			
-				if(urlMatchType == "contains")
+				var urlId = urlData[urlIndex][0];
+				urlId = (urlId.match("domain") ? "url_domain_" : "url_") + urlData[urlIndex][1];
+				urlStr = parseUrlSpan(urlData[urlIndex][2]);
+				if(urlDefStrings[urlId] != null)
 				{
-					containsStr = containsStr + "\"" + urlMatch + "\",";
+					urlDefStrings[urlId] = urlDefStrings[urlId] + ",\"" + urlStr + "\"";
 				}
-				else if(urlMatchType == "exact")
+				else
 				{
-					urlMatch = urlMatch.replace("\\", "\\\\");
-					urlMatch = urlMatch.replace("*", "\\*");
-					urlMatch = urlMatch.replace(".", "\\.");
-					urlMatch = urlMatch.replace("]", "\\]");
-					urlMatch = urlMatch.replace("[", "\\[");
-					urlMatch = urlMatch.replace(")", "\\)");
-					urlMatch = urlMatch.replace("(", "\\(");
-					urlMatch = urlMatch.replace("}", "\\}");
-					urlMatch = urlMatch.replace("{", "\\{");
-					urlMatch = urlMatch.replace("+", "\\+");
-					urlMatch = urlMatch.replace("-", "\\-");
-					urlMatch = urlMatch.replace("?", "\\?");
-					urlMatch = urlMatch.replace("^", "\\^");
-					urlMatch = urlMatch.replace("$", "\\$");
-					urlMatch = urlMatch.replace("|", "\\|");
-					regexStr = regexStr + "\"^" + urlMatch + "$\",";
-				}
-				else if(urlMatchType == "regex")
-				{
-					regexStr = regexStr + "\"" + urlMatch + "\",";
+					urlDefStrings[urlId] = "\"" + urlStr + "\""
 				}
 			}
-			containsStr = containsStr.replace(/,$/, "");
-			regexStr = regexStr.replace(/,$/, "");
-		
-		
-			var prefix = urlType == "except" ? "not_" : "";
-			if(containsStr.length > 0)
+
+			var parts = ["url_", "url_domain_"];
+			var exprs = ["exact", "contains", "regex"];
+			var partIndex=0;
+			var exprIndex=0;
+			for(partIndex=0; partIndex < 2; partIndex++)
 			{
-				uci.set(pkg, sectionId, prefix + "url", containsStr);
+				for(exprIndex=0; exprIndex < 3; exprIndex++)
+				{
+					var id = parts[partIndex] + exprs[exprIndex];
+					if(urlDefStrings[id] != null)
+					{
+						uci.set(pkg, sectionId, urlPrefix + id, urlDefStrings[id]);
+					}
+				}
 			}
-			if(regexStr.length > 0)
-			{
-				uci.set(pkg, sectionId, prefix + "url_regex", regexStr);
-			}
+
 		}
 	}
 }

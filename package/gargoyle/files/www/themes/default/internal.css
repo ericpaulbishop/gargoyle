@@ -680,73 +680,151 @@ td.webmon_table_column_3
 }
 
 /*
-td.applies_to_table (2 cells no dividers)
-td.remote_ip_table (2 cells no dividers)
-td.url_match_table (3 cells no dividers)
-td.restriction_table (4 cells no dividers)
+td.rule_applies_to_table (2 cells no dividers)
+td.rule_remote_ip_table (2 cells no dividers)
+td.rule_url_match_table (4 cells no dividers)
+td.rule_restriction_table (4 cells no dividers)
 */
-td.applies_to_table_column_1
+td.rule_applies_to_table_column_1
 {
 	border-left:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.applies_to_table_column_2
+td.rule_applies_to_table_column_2
 {
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.remote_ip_table_column_1
+td.rule_remote_ip_table_column_1
 {
 	border-left:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 
 }
-td.remote_ip_table_column_2
+td.rule_remote_ip_table_column_2
 {
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.url_match_table_column_1
+td.rule_url_match_table_column_1
 {
 	border-left:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 
 }
-td.url_match_table_column_2
+td.rule_url_match_table_column_2
 {
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.url_match_table_column_3
+td.rule_url_match_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.rule_url_match_table_column_4
 {
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
 
-td.restriction_table_column_1
+td.rule_table_column_1
 {
 	border-left:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.restriction_table_column_2
+td.rule_table_column_2
 {
 	text-align:center;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.restriction_table_column_3
+td.rule_table_column_3
 {
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-td.restriction_table_column_4
+td.rule_table_column_4
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+td.exception_applies_to_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_applies_to_table_column_2
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_remote_ip_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+
+}
+td.exception_remote_ip_table_column_2
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_url_match_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+
+}
+td.exception_url_match_table_column_2
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_url_match_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_url_match_table_column_4
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+td.exception_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_table_column_2
+{
+	text-align:center;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.exception_table_column_4
 {
 	border-right:1px solid black;
 	border-top:1px solid black;
