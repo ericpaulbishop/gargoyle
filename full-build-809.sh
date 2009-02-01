@@ -89,12 +89,14 @@ for target in $targets ; do
 		cp "$targets_dir/$target/.config" "$target-src"
 		cd "$target-src"
 		scripts/patch-kernel.sh . $targets_dir/$target/patches/
-		
 
-		sh $netfilter_patch_script . ../netfilter-match-modules
 	
 		if [ "$target" = "custom" ] ; then
+			sh $netfilter_patch_script . ../netfilter-match-modules 1 0
 			make menuconfig
+			sh $netfilter_patch_script . ../netfilter-match-modules 0 1
+		else
+			sh $netfilter_patch_script . ../netfilter-match-modules
 		fi
 
 	
