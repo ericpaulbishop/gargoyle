@@ -723,10 +723,11 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 		}
 	}
 	setSelectedValue(rulePrefix + "url_type", urlMatchType, controlDocument);
+	
 	var urlTableContainer = controlDocument.getElementById(rulePrefix + "url_match_table_container");
 	if(urlTableContainer.childNodes.length > 0)
 	{
-		urlTableContainer.removeChild(tableContainer.firstChild);
+		urlTableContainer.removeChild(urlTableContainer.firstChild);
 	}
 
 
