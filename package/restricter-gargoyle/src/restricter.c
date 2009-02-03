@@ -1539,6 +1539,18 @@ void compute_rules(update_node* unode, int target_type)
 		}
 	}
 
+	/* handle very special case: if we're white-listing a URL we need to make
+	 * sure other, non-request packets in connection get through too.  So, we allow all traffic
+	 * with a destination port of 80 that is NOT an HTTP request.  This should allow
+	 * HTTP connections to persist but prevent connections to any websites but those
+	 * specified
+	 */
+	if(url_rule_count > 0 && target_type == ACCEPT_TARGET && is_ingress == 0)
+	{
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  \"http\" -j CONNMARK --set-mark mark 0xFF000000/0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 80 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
+	}
 
 	unsigned long* num_rules = (unsigned long*)malloc(sizeof(unsigned long));
 	char** block_rule_list = (char**) destroy_list( all_rules, DESTROY_MODE_RETURN_VALUES, num_rules);
