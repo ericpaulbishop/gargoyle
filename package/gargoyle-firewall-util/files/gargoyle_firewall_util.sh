@@ -4,7 +4,8 @@
 . /etc/functions.sh
 include /lib/network
 
-death_mark="0xFF000000/0xFF000000"
+death_mask="0xFF000000"
+death_mark="0xDD000000/$death_mask"
 
 
 delete_chain_from_table()
@@ -40,7 +41,7 @@ delete_chain_from_table()
 
 
 # creates a chain in the filter table that always rejects
-# if the last byte of the connmark is FF.  This byte is
+# if the last byte of the connmark is DD.  This byte is
 # set in dnat table if we are redirecting port, but don't
 # want to allow connections on original port.  This same
 # byte is used by restricter, but at beginning of filter
@@ -51,7 +52,7 @@ create_death_mark_chain()
 	iptables -t filter -N death_mark
 	iptables -t filter -I INPUT 1 -j death_mark
 	iptables -t filter -I FORWARD 1 -j death_mark
-	iptables -t filter -I death_mark 1 -m connmark --mark "$death_mark" -j REJECT
+	iptables -t filter -I death_mark 1 -m connmark --mark "$death_mark" -m state --state NEW -j REJECT
 }
 
 # echo "1" if death_mark chain exists, otherwise echo "0"
@@ -97,11 +98,17 @@ insert_remote_accept_rules()
 	config_load "$config_name"
 	config_foreach parse_remote_accept_config "$section_type"
 
-	
+	#remove any marks on relevant byte of connmark
+	if [ -n "$death_mark_ports" ] ; then
+		iptables -t nat -A zone_"$zone"_prerouting  -j CONNMARK --set-mark "0x0/$death_mask"
+	fi
+
 	#add death marks
 	for dmp in $death_mark_ports ; do
-		echo iptables -t nat -A zone_"$zone"_prerouting -p "$proto" --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-		iptables -t nat -A zone_"$zone"_prerouting -p "$proto" --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		echo iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		echo iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
 	done
 
 	if [ -n "$death_mark_ports" ] ; then
