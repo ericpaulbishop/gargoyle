@@ -15,6 +15,8 @@ function saveChanges()
 	var ruleTypes = [ "block", "white_list" ];
 	var rulePrefixes   = [ "rule_", "exception_" ];
 	var typeIndex=0;
+	var deleteSectionCommands = [];
+	var createSectionCommands = [];
 	for(typeIndex=0; typeIndex < ruleTypes.length; typeIndex++)
 	{
 		//set enabled status to corrospond with checked in table
@@ -28,9 +30,8 @@ function saveChanges()
 			uci.set(pkg, check.id, "enabled", check.checked ? "1" : "0");
 		}
 
-
+		
 		//delete all sections of type in uciOriginal & remove them from uciOriginal
-		var deleteSectionCommands = [];
 		var originalSections = uciOriginal.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
 		var sectionIndex = 0;
 		for(sectionIndex=0; sectionIndex < originalSections.length; sectionIndex++)
@@ -44,7 +45,6 @@ function saveChanges()
 		}
 	
 		//create/initialize  sections in uci
-		var createSectionCommands = [];
 		var newSections = uci.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
 		for(sectionIndex=0; sectionIndex < newSections.length; sectionIndex++)
 		{
