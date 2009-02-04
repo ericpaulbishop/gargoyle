@@ -1547,7 +1547,7 @@ void compute_rules(update_node* unode, int target_type)
 	 */
 	if(url_rule_count > 0 && target_type == ACCEPT_TARGET && is_ingress == 0)
 	{
-		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  \"http\" -j CONNMARK --set-mark mark 0xFF000000/0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  http -j CONNMARK --set-mark 0xFF000000/0xFF000000" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 80 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
 	}
