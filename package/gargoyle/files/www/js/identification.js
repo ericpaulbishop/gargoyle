@@ -65,7 +65,7 @@ function proofreadAll()
 
 function resetData()
 {
-	systemSections = uciOriginal.getAllSections("system");
+	systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 	hostname = uciOriginal.get("system", systemSections[0], "hostname");
 	document.getElementById("hostname").value = hostname;
 }
