@@ -799,7 +799,7 @@ int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, ch
 	struct timer periodic_timer, arp_timer;
 
 	char* file_names[3] = { file_1_filename, file_2_filename, file_3_filename };
-	char* file_ids[3] = {"file_1", "file_2", "file_3"};
+	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
 	unsigned char* file_buffers[3] = { file_1_buf, file_2_buf, file_3_buf };
 	unsigned long* file_size_ptrs[3] = { &file_1_size, &file_2_size, &file_3_size };
 	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
