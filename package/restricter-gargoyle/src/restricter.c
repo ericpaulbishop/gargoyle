@@ -167,7 +167,7 @@ string_map* weekdays;
 
 void load_quota_data(string_map* global_data, update_node* template_node, time_t current_time);
 void save_quota_data(string_map* global_data, update_node* quota_update_node);
-void save_all_quota_data(string_map* global_data, priority_queue* update_queue);
+void save_all_quota_data(string_map* global_data, priority_queue** update_queue);
 int create_path(const char *name, int mode);
 
 void flush_iptables_chain(char* table, char* chain);
@@ -582,7 +582,7 @@ void run_daemon(char* config_file_path, int background)
 			}
 			else if(next_update->update_type == UPDATE_SAVE_QUOTA_DATA)
 			{
-				save_all_quota_data(global_data, update_queue);
+				save_all_quota_data(global_data, &update_queue);
 				next_update->update_time = current_time + save_quota_interval;
 				push_priority_queue(update_queue, (unsigned long)(next_update->update_time - reference_time), priority_id, next_update);
 			}
@@ -743,7 +743,7 @@ void run_daemon(char* config_file_path, int background)
 	}
 
 	/* save quota data */
-	save_all_quota_data(global_data, update_queue);
+	save_all_quota_data(global_data, &update_queue);
 
 
 	/* remove pid file */
@@ -2567,12 +2567,12 @@ void load_quota_data(string_map* global_data, update_node* template_node, time_t
 }
 
 
-void save_all_quota_data(string_map* global_data, priority_queue* update_queue)
+void save_all_quota_data(string_map* global_data, priority_queue** update_queue)
 {
 	priority_queue* tmp_queue = initialize_priority_queue();
-	while(update_queue->length > 0)
+	while((*update_queue)->length > 0)
 	{
-		priority_queue_node* pq = shift_priority_queue_node(update_queue);
+		priority_queue_node* pq = shift_priority_queue_node(*update_queue);
 		update_node* un = (update_node*)pq->value;
 		if(un->update_type == UPDATE_QUOTA_RESET || un->update_type == UPDATE_QUOTA_TEST)
 		{
@@ -2582,8 +2582,8 @@ void save_all_quota_data(string_map* global_data, priority_queue* update_queue)
 	}
 
 	unsigned long tmp;
-	destroy_priority_queue(update_queue, DESTROY_MODE_IGNORE_VALUES, &tmp);
-	update_queue = tmp_queue;
+	destroy_priority_queue(*update_queue, DESTROY_MODE_IGNORE_VALUES, &tmp);
+	*update_queue = tmp_queue;
 }
 
 void save_quota_data(string_map* global_data, update_node* quota_update_node)
