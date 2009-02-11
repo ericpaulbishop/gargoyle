@@ -15,8 +15,8 @@ var downloadMonitors;
 var updateInProgress;
 var graphType;
 
-var dailyUploadData;
-var dailyDownloadData;
+var dailyUploadData = null;
+var dailyDownloadData = null;
 
 var updateUploadPlot = null;
 var updateDownloadPlot = null;
@@ -92,35 +92,15 @@ function initializePlotsAndTable()
 
 
 
+
+
+
+
 	uploadMonitors = ["","",""];
 	downloadMonitors = ["","",""];
 	updateInProgress = false;
 	resetPlots();
 	setInterval( 'doUpdate()', 2000);
-
-
-	//setup table
-	var param = getParameterDefinition("monitor", "total-upload-1y  total-download-1y" );
-	var stateChangeFunction = function(dailyReq)
-	{
-		var monitors=null;
-		if(dailyReq.readyState == 4)
-		{
-			monitors = parseMonitors(dailyReq.responseText);
-			if(monitors["total-upload-1y"] != null)
-			{
-				document.getElementById("total_bandwidth_use").style.display="block";
-				addOptionToSelectElement("total_time_frame", "Daily", "daily"); 
-				addOptionToSelectElement("total_time_frame", "Monthly", "monthly");
-				setSelectedValue("total_time_frame", "daily");
-				
-				dailyUploadData=monitors["total-upload-1y"];
-				dailyDownloadData=monitors["total-download-1y"];
-				updateTotalTable();
-			}
-		}
-	}
-	runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
 }
 
 
@@ -134,9 +114,47 @@ function getEmbeddedSvgPlotFunction(embeddedId)
 	return null;
 }
 
+function loadTotalTableData()
+{
+	//setup table
+	var param = getParameterDefinition("monitor", "total-upload-1y  total-download-1y" );
+	var stateChangeFunction = function(dailyReq)
+	{
+		var monitors=null;
+		if(dailyReq.readyState == 4)
+		{
+			if(!dailyReq.responseText.match(/ERROR/))
+			{
+				monitors = parseMonitors(dailyReq.responseText);
+				if(monitors["total-upload-1y"] != null)
+				{
+					document.getElementById("total_bandwidth_use").style.display="block";
+					addOptionToSelectElement("total_time_frame", "Daily", "daily"); 
+					addOptionToSelectElement("total_time_frame", "Monthly", "monthly");
+					setSelectedValue("total_time_frame", "daily");
+				
+					dailyUploadData=monitors["total-upload-1y"];
+					dailyDownloadData=monitors["total-download-1y"];
+					updateTotalTable();
+				}
+				else
+				{
+					dailyUploadData = "no_monitor";
+					dailyDownloadData = "no_monitor";
+				}
+			}
+		}
+	}
+	runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
+}
 
 function updateTotalTable()
 {
+	if(dailyUploadData == null || dailyUploadData == "no_monitor" || dailyDownloadData == null || dailyDownloadData == "no_monitor")
+	{
+		return;
+	}
+
 	selectedTotalTimeFrame=getSelectedValue("total_time_frame");
 	totalTableData = new Array();
 	columnNames = columnNames = ["", "Total Upload Bandwidth", "Total Download Bandwidth"];
@@ -400,49 +418,58 @@ function doUpdate()
 			var monitors=null;
 			if(req.readyState == 4)
 			{
-				monitors = parseMonitors(req.responseText);
+				if(!req.responseText.match(/ERROR/))
+				{
+					monitors = parseMonitors(req.responseText);
 
-				var uploadMonitorPointSets = new Array();
-				var downloadMonitorPointSets = new Array();
-				var lastTimePoint = Math.floor( (new Date()).getTime()/1000 );
-				for(monitorIndex=0; monitorIndex < uploadMonitors.length; monitorIndex++)
-				{
-					dataLoaded = false;
-					if(uploadMonitors[monitorIndex] != "")
+					var uploadMonitorPointSets = new Array();
+					var downloadMonitorPointSets = new Array();
+					var lastTimePoint = Math.floor( (new Date()).getTime()/1000 );
+					for(monitorIndex=0; monitorIndex < uploadMonitors.length; monitorIndex++)
 					{
-						if(monitors[uploadMonitors[monitorIndex]] != null)
+						dataLoaded = false;
+						if(uploadMonitors[monitorIndex] != "")
 						{
-							uploadMonitorPointSets.push(monitors[uploadMonitors[monitorIndex]][0]);
-							lastTimePoint = monitors[uploadMonitors[monitorIndex]][1];
-							dataLoaded=true;
+							if(monitors[uploadMonitors[monitorIndex]] != null)
+							{
+								uploadMonitorPointSets.push(monitors[uploadMonitors[monitorIndex]][0]);
+								lastTimePoint = monitors[uploadMonitors[monitorIndex]][1];
+								dataLoaded=true;
+							}
+						}
+						if(!dataLoaded)
+						{
+							uploadMonitorPointSets.push(null);
 						}
 					}
-					if(!dataLoaded)
+					for(monitorIndex=0; monitorIndex < downloadMonitors.length; monitorIndex++)
 					{
-						uploadMonitorPointSets.push(null);
-					}
-				}
-				for(monitorIndex=0; monitorIndex < downloadMonitors.length; monitorIndex++)
-				{
-					dataLoaded = false;
-					if(downloadMonitors[monitorIndex] != "")
-					{
-						if(monitors[downloadMonitors[monitorIndex]] != null)
+						dataLoaded = false;
+						if(downloadMonitors[monitorIndex] != "")
 						{
-							downloadMonitorPointSets.push(monitors[downloadMonitors[monitorIndex]][0]);
-							lastTimePoint = monitors[downloadMonitors[monitorIndex]][1];
-							dataLoaded=true;
+							if(monitors[downloadMonitors[monitorIndex]] != null)
+							{
+								downloadMonitorPointSets.push(monitors[downloadMonitors[monitorIndex]][0]);
+								lastTimePoint = monitors[downloadMonitors[monitorIndex]][1];
+								dataLoaded=true;
+							}
+						}
+						if(!dataLoaded)
+						{
+							downloadMonitorPointSets.push(null);
 						}
 					}
-					if(!dataLoaded)
-					{
-						downloadMonitorPointSets.push(null);
-					}
+				
+					updateUploadPlot(graphType, uploadMonitorPointSets, lastTimePoint );
+					updateDownloadPlot(graphType, downloadMonitorPointSets, lastTimePoint );
 				}
 				
-				updateUploadPlot(graphType, uploadMonitorPointSets, lastTimePoint );
-				updateDownloadPlot(graphType, downloadMonitorPointSets, lastTimePoint );
-			
+				//get daily download/upload data for table if we haven't tried yet
+				//if we've tried and failed these will be set to "no_monitor"
+				if(dailyDownloadData == null || dailyUploadData == null)
+				{
+					loadTotalTableData();
+				}
 				updateInProgress = false;
 			}
 		}
