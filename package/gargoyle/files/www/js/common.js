@@ -504,6 +504,54 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 	return errorArray;
 }
 
+function parseBytes(bytes, units)
+{
+	var parsed;
+	units = units != "KBytes" && units != "MBytes" && units != "GBytes" && units != "TBytes" ? "mixed" : units;
+	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || units == "TBytes")
+	{
+		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " TBytes";
+	}
+	else if( (units == "mixed" && bytes > 1024*1024*1024) || units == "GBytes")
+	{
+		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " GBytes";
+	}
+	else if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes" )
+	{
+		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes";
+	}
+	else
+	{
+		parsed = truncateDecimal(bytes/(1024)) + " KBytes";
+	}
+	
+	return parsed;
+}
+function truncateDecimal(dec)
+{
+	result = "" + ((Math.floor(dec*1000))/1000);
+	
+	//make sure we have exactly three decimal places so 
+	//results line up properly in table presentation
+	decMatch=result.match(/.*\.(.*)$/);
+	if(decMatch == null)
+	{
+		result = result + ".000"
+	}
+	else 
+	{
+		if(decMatch[1].length==1)
+		{
+			result = result + "00";
+		}
+		else if(decMatch[1].length==2)
+		{
+			result = result + "0";
+		}
+	}
+	return result;
+}
+
 function enableAssociatedField(checkbox, associatedId, defaultValue, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;

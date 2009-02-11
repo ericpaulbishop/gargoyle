@@ -129,9 +129,20 @@ function loadTotalTableData()
 				if(monitors["total-upload-1y"] != null)
 				{
 					document.getElementById("total_bandwidth_use").style.display="block";
+					
+					removeAllOptionsFromSelectElement(document.getElementById("total_time_frame"));
 					addOptionToSelectElement("total_time_frame", "Daily", "daily"); 
 					addOptionToSelectElement("total_time_frame", "Monthly", "monthly");
 					setSelectedValue("total_time_frame", "daily");
+					
+					removeAllOptionsFromSelectElement(document.getElementById("total_table_units"));
+					addOptionToSelectElement("total_table_units", "Auto (Mixed)", "mixed"); 
+					addOptionToSelectElement("total_table_units", "KBytes", "KBytes"); 
+					addOptionToSelectElement("total_table_units", "MBytes", "MBytes");
+					addOptionToSelectElement("total_table_units", "GBytes", "GBytes");
+					setSelectedValue("total_table_units", "mixed");
+
+
 				
 					dailyUploadData=monitors["total-upload-1y"];
 					dailyDownloadData=monitors["total-download-1y"];
@@ -155,9 +166,10 @@ function updateTotalTable()
 		return;
 	}
 
-	selectedTotalTimeFrame=getSelectedValue("total_time_frame");
-	totalTableData = new Array();
-	columnNames = columnNames = ["", "Total Upload Bandwidth", "Total Download Bandwidth"];
+	var selectedTotalTimeFrame=getSelectedValue("total_time_frame");
+	var displayUnits = getSelectedValue("total_table_units");
+	var totalTableData = new Array();
+	var columnNames = ["", "Total Upload Bandwidth", "Total Download Bandwidth"];
 	if(selectedTotalTimeFrame == "daily")
 	{
 		columnNames[0] = "Date";
@@ -171,7 +183,7 @@ function updateTotalTable()
 			dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
 			dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
 
-			totalTableData.push([ (nextDate.getMonth()+1)+ "/" +nextDate.getDate() + "/" + nextDate.getFullYear() , parseBytes(dailyUploadData[0][dailyIndex]), parseBytes(dailyDownloadData[0][dailyIndex]) ]);
+			totalTableData.push([ (nextDate.getMonth()+1)+ "/" +nextDate.getDate() + "/" + nextDate.getFullYear() , parseBytes(dailyUploadData[0][dailyIndex], displayUnits), parseBytes(dailyDownloadData[0][dailyIndex], displayUnits) ]);
 			newTime = nextDate.getTime() - (24*60*60*1000);
 			nextDate.setTime(newTime);
 		}
@@ -207,7 +219,7 @@ function updateTotalTable()
 				nextDate.setTime(newTime);
 				dailyIndex--;
 			}
-			totalTableData.push([ monthNames[month] + " " + year, parseBytes(monthUploadSum), parseBytes(monthDownloadSum) ]);
+			totalTableData.push([ monthNames[month] + " " + year, parseBytes(monthUploadSum, displayUnits), parseBytes(monthDownloadSum, displayUnits) ]);
 		}
 	}
 	totalTable=createTable(columnNames, totalTableData, "total_bandwidth_table", false, false);
@@ -217,53 +229,6 @@ function updateTotalTable()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(totalTable);
-}
-
-function parseBytes(bytes)
-{
-	var parsed;
-	if(bytes > 1024*1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " TBytes";
-	}
-	else if(bytes > 1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " GBytes";
-	}
-	else if(bytes > 1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes";
-	}
-	else
-	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes";
-	}
-	return parsed;
-}
-
-function truncateDecimal(dec)
-{
-	result = "" + ((Math.floor(dec*1000))/1000);
-	
-	//make sure we have exactly three decimal places so 
-	//results line up properly in table presentation
-	decMatch=result.match(/.*\.(.*)$/);
-	if(decMatch == null)
-	{
-		result = result + ".000"
-	}
-	else 
-	{
-		if(decMatch[1].length==1)
-		{
-			result = result + "00";
-		}
-		else if(decMatch[1].length==2)
-		{
-			result = result + "0";
-		}
-	}
-	return result;
 }
 
 

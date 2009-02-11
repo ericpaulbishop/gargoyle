@@ -15,13 +15,22 @@
 		<legend class="sectionheader">Current Connections</legend>
 
 		<div>
-			<label for="refresh_rate" class="leftcolumn">Refresh Rate:</label>
+			<label for="refresh_rate" class="narrowleftcolumn">Refresh Rate:</label>
 			<select id="refresh_rate" class="rightcolumn" >
 				<option value="2000">2 Seconds</option>
 				<option value="10000">10 Seconds</option>
 				<option value="30000">30 Seconds</option>
 				<option value="60000">60 Seconds</option>
 				<option value="never">Never</option>
+			</select>
+		</div>
+		<div>
+			<label for="bw_units" class="narrowleftcolumn" onchange="updateConnectionTable()">Bandwidth Units:</label>
+			<select id="bw_units" class="rightcolumn">
+				<option value="mixed">Auto (Mixed)</option>
+				<option value="KBytes">KBytes</option>
+				<option value="MBytes">MBytes</option>
+				<option value="GBytes">GBytes</option>
 			</select>
 		</div>
 		<div id="connection_table_container"></div>

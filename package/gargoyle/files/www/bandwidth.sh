@@ -67,11 +67,14 @@
 	<div><embed id="download_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
 
 	<fieldset id="total_bandwidth_use" style="display:none" >
-		<legend class="sectionheader">Total Bandwidth Usage</legend>
+		<legend class="sectionheader">Total Bandwidth Useage</legend>
+		<div>
+			<label for='total_time_frame' class="narrowleftcolumn" id='total_time_frame_label'>Display Time Interval:</label>
+			<select id="total_time_frame" class="rightcolumn" onchange="updateTotalTable()"></select>
+		</div>	
 		<div class="bottom_gap">
-
-			<label for='total_time_frame' id='total_time_frame_label'>Display Time Interval:</label>
-			<select id="total_time_frame" onchange="updateTotalTable()"></select>
+			<label for='total_table_units' class="narrowleftcolumn" id='total_table_units_label'>Table Units:</label>
+			<select id="total_table_units" class="rightcolumn" onchange="updateTotalTable()"></select>
 		</div>
 		<div id="total_bandwidth_table_container">
 		</div>

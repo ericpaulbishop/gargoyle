@@ -78,6 +78,7 @@ function updateConnectionTable()
 		{
 			if(req.readyState == 4)
 			{
+				var bwUnits = getSelectedValue("bw_units");
 				//alert(req.responseText);
 				conntrackLines = req.responseText.split(/[\n\r]+/);
 				tableData = new Array();
@@ -102,7 +103,7 @@ function updateConnectionTable()
 						}
 						else
 						{
-							tableData.push([protocol, srcIp + ":" + srcPort, dstIp + ":" + dstPort, parseBytes(uploadBytes), parseBytes(downloadBytes)]);
+							tableData.push([protocol, srcIp + ":" + srcPort, dstIp + ":" + dstPort, parseBytes(uploadBytes, bwUnits), parseBytes(downloadBytes, bwUnits)]);
 						}
 					}
 					catch(e){}
@@ -124,57 +125,4 @@ function updateConnectionTable()
 	}
 }
 
-function parseBytes(bytes)
-{
-	var parsed;
-	if(bytes == "0" || bytes == "" || bytes == null )
-	{
-		parsed = "0 bytes";
-	}
-	else if(bytes > 1024*1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " TBytes";
-	}
-	else if(bytes > 1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " GBytes";
-	}
-	else if(bytes > 1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes";
-	}
-	else if(bytes > 1024)
-	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes";
-	}
-	else
-	{
-		parsed = bytes + " bytes"
-	}
-	return parsed;
-}
 
-function truncateDecimal(dec)
-{
-	result = "" + ((Math.floor(dec*1000))/1000);
-	
-	//make sure we have exactly three decimal places so 
-	//results line up properly in table presentation
-	decMatch=result.match(/.*\.(.*)$/);
-	if(decMatch == null)
-	{
-		result = result + ".000"
-	}
-	else 
-	{
-		if(decMatch[1].length==1)
-		{
-			result = result + "00";
-		}
-		else if(decMatch[1].length==2)
-		{
-			result = result + "0";
-		}
-	}
-	return result;
-}
