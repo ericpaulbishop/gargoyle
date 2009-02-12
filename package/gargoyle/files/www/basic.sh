@@ -128,6 +128,11 @@ else
 			<label class='leftcolumn' for='wan_static_mask' id='wan_static_ip_label'>Subnet Mask:</label>
 			<input type='text' class='rightcolumn' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='17' maxlength='15' />
 		</div>
+		<div id='wan_static_gateway_container' class='indent'>
+			<label class='leftcolumn' for='wan_static_gateway' id='wan_static_gateway_label'>Gateway:</label>
+			<input type='text' class='rightcolumn' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+		</div>
+
 
 
 

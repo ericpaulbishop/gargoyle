@@ -239,15 +239,15 @@ function saveChanges()
 
 		ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
 		dnsIds = ['lan_dns1', 'lan_dns2', 'lan_dns3'];
-		inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', dnsIds, 'wifi_channel', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+		inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', dnsIds, 'wifi_channel', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 		
-		options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key', 'key'];
+		options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key', 'key'];
 		
 		var sv=  setVariableFromValue;
 		var svm= setVariableFromModifiedValue;
 		var svcat= setVariableFromConcatenation;
 		var svcond= setVariableConditionally;
-		setFunctions = [sv,sv,sv,svm,svcat,sv,sv,svcond,svcond,sv,sv,sv,svcat,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv];
+		setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,svcat,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv];
 		
 		var f=false;
 		var t=true;
@@ -263,7 +263,7 @@ function saveChanges()
 		var hiddenParams = [ifHiddenChecked,f,'1'];
 		var isolateParams = [ifIsolateChecked,f,'1'];
 		
-		additionalParams = [f,f,f, demandParams,f,f,f,macParams,mtuParams,f,f,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f];
+		additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f];
 
 		
 		
@@ -287,13 +287,13 @@ function saveChanges()
 			}
 			
 			
-			if(idIndex < 9)
+			if(idIndex < 10)
 			{
 				pkgs.push('network');
 				sections.push('wan');
 				uci.remove('network', 'wan', options[idIndex]);
 			}
-			else if(idIndex < 13)
+			else if(idIndex < 14)
 			{
 				pkgs.push('network');
 				sections.push('lan')
@@ -423,7 +423,7 @@ function setToWepKey(id, length)
 
 function proofreadAll()
 {
-	inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
+	inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
 	
 
 	vlr1 = function(text){return validateLengthRange(text,1,999);};
@@ -436,7 +436,7 @@ function proofreadAll()
 	
 		
 	
-	functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vm, vn, vip, vnm, vip, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw];
+	functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw];
 	
 	returnCodes= new Array();
 	visibilityIds = new Array();
@@ -487,7 +487,7 @@ function setGlobalVisibility()
 	{
 		selectedVisibility=wirelessWanVisibility;
 
-		setAllowableSelections('wan_protocol', ['dhcp', 'static'], ['DHCP', 'PPPoE', 'Static']);
+		setAllowableSelections('wan_protocol', ['dhcp', 'static'], ['DHCP', 'Static']);
 
 
 		currentMode=getSelectedValue('wifi_mode');
@@ -549,14 +549,14 @@ function setGlobalVisibility()
 
 function setWanVisibility()
 {
-	wanIds=['wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_mac_container', 'wan_mtu_container', 'lan_gateway_container'];
+	wanIds=['wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'lan_gateway_container'];
 
 	notWifi= document.getElementById('wan_via_wifi').checked == true ? 0 : 1;
 
-	dhcpVisability     = [0,0,0,0,0,0,  0,0,  notWifi,notWifi, 0];
-	pppoeVisability    = [1,1,1,1,1,1,  0,0,  notWifi,notWifi, 0];
-	staticVisability   = [0,0,0,0,0,0,  1,1,  notWifi,notWifi, 0];
-	disabledVisability = [0,0,0,0,0,0,  0,0,  0,0,             1];
+	dhcpVisability     = [0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0];
+	pppoeVisability    = [1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0];
+	staticVisability   = [0,0,0,0,0,0,  1,1,1,  notWifi,notWifi, 0];
+	disabledVisability = [0,0,0,0,0,0,  0,0,0,  0,0,             1];
 	
 	wanVisibilities= new Array();
 	wanVisibilities['dhcp'] = dhcpVisability;
@@ -604,16 +604,7 @@ function setWifiVisibility()
 	else
 	{
 		document.getElementById("wifi_ssid2_label").firstChild.data = "SSID to Join:";
-		if( (wifiMode == 'ap+sta' || wifiMode == 'sta') && wirelessDriver == 'atheros')
-		{
-			//for some reason atheros in client (sta) mode doesn't like connecting to WPA2 but, does fine with WPA
-			setAllowableSelections('wifi_encryption2', ['none', 'psk', 'wep'], ['None', 'WPA PSK', 'WEP']);
-		}
-		else
-		{
-			setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], ['None', 'WPA2 PSK', 'WPA PSK', 'WEP']);
-
-		}
+		setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], ['None', 'WPA2 PSK', 'WPA PSK', 'WEP']);
 	}
 	
 	setVisibility(wifiIds, wifiVisibility);
@@ -623,15 +614,15 @@ function setWifiVisibility()
 function resetData()
 {
 	//first load basic variables for wan & lan sections
-	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'lan_dns1', 'lan_dns2', 'lan_dns3'];
+	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'lan_dns1', 'lan_dns2', 'lan_dns3'];
 	networkPkgs = new Array();
 	for (idIndex in networkIds)
 	{
 		networkPkgs.push('network');
 	}
 
-	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan', 'lan', 'lan', 'lan'];
-	networkOptions  = ['proto', 'username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'dns', 'dns'];
+	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan', 'lan', 'lan', 'lan'];
+	networkOptions  = ['proto', 'username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'dns', 'dns'];
 
 
 	
@@ -648,7 +639,7 @@ function resetData()
 	useMtuTest = function(v){return (v=='' || v==null || v==1500 ? false : true);}
 	useMacTest = function(v){v = (v== null ? '' : v);  return (v=='' || v.toLowerCase()==defaultWanMac.toLowerCase() ? false : true);}
 
-	networkParams = ['dhcp', '', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1', dns1Params,dns2Params,dns3Params];
+	networkParams = ['dhcp', '', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1', dns1Params,dns2Params,dns3Params];
 
 	
 
@@ -657,7 +648,7 @@ function resetData()
 	lvm=loadValueFromVariableMultiple;
 	lvi=loadValueFromVariableAtIndex;
 	lc=loadChecked;
-	networkFunctions = [lsv,lv,lv,lvm,lvi,lvi,lv,lv,lc,lv,lc,lv,lv,lv,lv,lvi,lvi,lvi];
+	networkFunctions = [lsv,lv,lv,lvm,lvi,lvi,lv,lv,lv,lc,lv,lc,lv,lv,lv,lv,lvi,lvi,lvi];
 	
 	loadVariables(uciOriginal, networkIds, networkPkgs, networkSections, networkOptions, networkParams, networkFunctions);
 
@@ -697,10 +688,6 @@ function resetData()
 	apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
 	othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
 
-	if( ( cfg2mode == 'sta' || cfg3mode == 'sta') && wirelessDriver == 'atheros' && uciOriginal.get("wireless", othercfg, "encryption") == "psk2")
-	{
-		uciOriginal.set("wireless", othercfg, "encryption", "psk");
-	}
 
 
 
