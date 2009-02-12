@@ -24,16 +24,6 @@
 #include "uipopt.h"
 #include "psock.h"
 
-typedef struct fon_flash_state {
-	struct psock p;
-	struct uip_udp_conn *tftpconn;
-	char inputbuffer[4096];
-} uip_tcp_appstate_t;
-
-void fon_flash_appcall(void);
-
-
-
 
 #define SIZE_TYPE 1
 #define MAX_TYPE 2
@@ -70,6 +60,38 @@ typedef struct flash_config_struct
 } flash_configuration;
 
 
+void make_configuration_absolute(flash_configuration* config, unsigned long flash_start_address, unsigned long flash_size, unsigned long flash_page_size, const char** file_ids, unsigned long* file_sizes);
+char** get_partition_command_list(flash_configuration* absolute_config, unsigned long freememlow);
+
+
+flash_configuration* get_gargoyle_configuration(void);
+flash_configuration* get_fonera_configuration(void);
+
+flash_configuration* create_generic_config(void);
+partition* create_generic_partition(void);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct fon_flash_state {
+	struct psock p;
+	struct uip_udp_conn *tftpconn;
+	char inputbuffer[4096];
+} uip_tcp_appstate_t;
+
+void fon_flash_appcall(void);
+
+
 
 #ifndef UIP_APPCALL
 #define UIP_APPCALL fon_flash_appcall
@@ -79,8 +101,11 @@ typedef int uip_udp_appstate_t;
 void fon_flash_tftp_appcall(void);
 #define UIP_UDP_APPCALL fon_flash_tftp_appcall
 
-int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, char* file_2_filename, char* file_3_filename);
+int fon_flash(flash_configuration* conf, char* device);
 
 extern void (*gui_output_funcptr)(const char* str);
+
+
+
 
 #endif /* __fon_FLASH_H__ */

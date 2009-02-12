@@ -21,7 +21,7 @@ all: fon-flash
 
 CC      = g++
 AR      = ar
-CFLAGS  = -Wall -ggdb -I../uip -I. -fpack-struct -Os
+CFLAGS  = -Wall  -I. -Os
 OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
 
 #CFLAGS += -D_DEBUG
@@ -29,9 +29,18 @@ OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+all-in-one: $(OBJS) all-in-one.o file_1.o file_2.o file_3.o
+	$(CC) $(CFLAGS) $(OBJS) file_1.o file_2.o file_3.o all-in-one.o -lpcap -o $@
+	
+all-in-one.o: 
+	$(CC) $(CFLAGS) -DINCLUDE_BINARIES -c fon-flash.c -o all-in-one.o
+
+bin2c:
+	$(CC) bin2c.c -o bin2c
+
 fon-flash: $(OBJS) fon-flash.o Makefile
 	$(CC) $(CFLAGS) $(OBJS) fon-flash.o -lpcap -o $@
 	strip $@
 
 clean:
-	rm -fr *.o *~ *.plg *.ncb fon-flash
+	rm -fr *.o *~ *.plg *.ncb fon-flash bin2c all-in-one

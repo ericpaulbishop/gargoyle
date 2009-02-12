@@ -18,9 +18,6 @@
  */
 
  
-#ifdef _DEBUG
-/* #define DEBUG_ALL */
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,17 +28,9 @@
 #include "fon-flash.h"
 
 
-
-void make_configuration_absolute(flash_configuration* config, unsigned long flash_start_address, unsigned long flash_size, unsigned long flash_page_size, const char** file_ids, unsigned long* file_sizes);
-char** get_partition_command_list(flash_configuration* absolute_config, unsigned long freememlow);
-
-
-flash_configuration* get_gargoyle_configuration(void);
-flash_configuration* get_fonera_configuration(void);
-
-flash_configuration* create_generic_config(void);
-partition* create_generic_partition(void);
-
+#ifdef INCLUDE_BINARIES
+#include "install_binaries.h"
+#endif
 
 void make_configuration_absolute(flash_configuration* config, unsigned long flash_start_address, unsigned long flash_size, unsigned long flash_page_size, const char** file_ids, unsigned long* file_sizes)
 {
@@ -792,21 +781,13 @@ void fon_flash_tftp_appcall(void)
 		}
 	}
 }
-int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, char* file_2_filename, char* file_3_filename)
-{
-	uip_ipaddr_t netmask;
-	struct uip_eth_addr srcmac, dstmac, brcmac;
-	struct timer periodic_timer, arp_timer;
 
+int initialize_buffers_from_files(char* file_1_filename, char* file_2_filename, char* file_3_filename)
+{
 	char* file_names[3] = { file_1_filename, file_2_filename, file_3_filename };
-	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
 	unsigned char* file_buffers[3] = { file_1_buf, file_2_buf, file_3_buf };
 	unsigned long* file_size_ptrs[3] = { &file_1_size, &file_2_size, &file_3_size };
-	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
 	int file_index;
-
-	uip_init();
-	uip_arp_init();
 
 	for(file_index = 0; file_index < 3; file_index++)
 	{
@@ -845,17 +826,73 @@ int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, ch
 			printf("Reading image file %s with %d bytes, rounded to 0x%08lx\n", file_name, raw_size, rounded_size);
 			unsigned long* file_size_ptr = file_size_ptrs[file_index];
 			*file_size_ptr = rounded_size;
-			file_sizes[file_index] = rounded_size;
 		}
 	}
-	printf("here\n");
-	
 	
 	//set buffers to initialized values
 	file_1_buf = file_buffers[0];
 	file_2_buf = file_buffers[1];
 	file_3_buf = file_buffers[2];
 
+
+	return 0;
+}
+
+
+int initialize_buffers_from_data(unsigned char* raw_1, unsigned char* raw_2, unsigned char* raw_3, unsigned long raw_size_1, unsigned long raw_size_2, unsigned long raw_size_3)
+{
+	unsigned char* file_buffers[3]   = { file_1_buf, file_2_buf, file_3_buf };
+	unsigned long* file_size_ptrs[3] = { &file_1_size, &file_2_size, &file_3_size };
+	unsigned char* raw_buffers[3]    = { raw_1, raw_2, raw_3 };
+	unsigned long  raw_sizes[3]      = { raw_size_1, raw_size_2, raw_size_3};
+	int file_index;
+	for(file_index = 0; file_index < 3; file_index++)
+	{
+		unsigned long raw_size = raw_sizes[file_index];
+		unsigned char* raw_buffer = raw_buffers[file_index];
+		printf("raw size %d = %ld\n", (file_index+1), raw_size);
+		if(raw_size > 0 && raw_buffer != NULL)
+		{
+			unsigned long rounded_size = (((raw_size-1)/FLASH_PAGE_SIZE)+1)*FLASH_PAGE_SIZE;
+			unsigned char* next_buf = (unsigned char*)malloc(rounded_size);
+			
+			/*
+			unsigned long i =0;
+			for(i=0; i < raw_size; i++)
+			{
+				if(i % 2 == 0) { printf("i = %ld\n", i); }
+				next_buf[i] = raw_buffer[i];
+			}
+			*/
+			
+			memcpy(next_buf, raw_buffer, raw_size);
+			file_buffers[file_index] = next_buf;
+			unsigned long* file_size_ptr = file_size_ptrs[file_index];
+			*file_size_ptr = rounded_size;
+		}
+	}
+
+	//set buffers to initialized values
+	file_1_buf = file_buffers[0];
+	file_2_buf = file_buffers[1];
+	file_3_buf = file_buffers[2];
+
+	return 0;
+}
+
+
+int fon_flash(flash_configuration* conf, char* device)
+{
+	uip_ipaddr_t netmask;
+	struct uip_eth_addr srcmac, dstmac, brcmac;
+	struct timer periodic_timer, arp_timer;
+
+
+	uip_init();
+	uip_arp_init();
+
+	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
+	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
 
 
 	make_configuration_absolute(conf, flash_start_address, flash_size, FLASH_PAGE_SIZE, (const char**)file_ids, file_sizes);
@@ -924,14 +961,6 @@ int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, ch
 	
 	while(1)
 	{
-#ifdef WIN32_GUI
-		MSG msg;
-		while(PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-#endif
 		uip_len = pcap_read();
 		if(uip_len > 0)
 		{
@@ -1026,9 +1055,12 @@ int fon_flash(flash_configuration* conf, char* device, char* file_1_filename, ch
 	return 0;
 }
 
-#ifndef WIN32_GUI
 
 
+
+#ifndef GUI
+
+#ifndef INCLUDE_BINARIES
 void print_usage(char *prgname)
 {
 	printf("Usage: %s -i [network interface] -c [configuration] [configuration files]\n", prgname);
@@ -1037,7 +1069,6 @@ void print_usage(char *prgname)
 	printf("\t\topenwrt  [rootfs file path] [kernel file path]\n");
 	printf("\t\tfonera   [loader file path] [image file path] [image2 file path]\n");
 }
-
 
 
 int main(int argc, char* argv[])
@@ -1116,8 +1147,60 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 		
-
-	return fon_flash(conf, interface, f1, f2, f3);
+	if(initialize_buffers_from_files(f1, f2, f3) == 0)
+	{
+		return fon_flash(conf, interface);
+	}
+	else
+	{
+		return 1;
+	}
 }
+#else
+
+
+int main(int argc, char* argv[])
+{
+	char* interface = NULL;
+
+	char c;	
+	while((c = getopt(argc, argv, "I:i:")) != -1)
+	{	
+		switch(c)
+		{
+			case 'I':
+			case 'i':
+				interface = strdup(optarg);
+				break;
+		}
+	}
+	if(interface == NULL)
+	{
+		printf("ERROR: you must specify a network interface\n");
+		printf("Usage: %s -i [interface]\n", argv[0]);
+		return 1;
+	}
+
+
+	/*
+	if(_binary_1_data != NULL)
+	{
+		printf("bin1 size = %ld\n", _binary_1_size);
+		printf("first byte = %d\n", _binary_1_data[0]);
+	}
+	*/
+
+	//binary 1-3 and binary_size 1-3 along with default_conf defined in install_binaries header
+	initialize_buffers_from_data(_binary_1_data, _binary_2_data, _binary_3_data, _binary_1_size, _binary_2_size, _binary_3_size);
+	fon_flash(default_conf, interface);
+	
+	return 0;
+
+}
+
+
+
+#endif
+
 
 #endif
