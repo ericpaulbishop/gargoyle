@@ -39,6 +39,10 @@ if [ -z "$file_1" ] ; then
 	echo "unsigned char* _binary_1_data = NULL;" >> "file_1.c"
 	echo "unsigned long  _binary_1_size = 0;" >> "file_1.c"
 else
+	if [ ! -e "$file_1" ] ; then
+		echo "ERROR: file $file_1 does not exist"
+		exit
+	fi
 	./bin2c "$file_1" "1"
 	mv "1.c" file_1.c
 fi
@@ -47,6 +51,10 @@ if [ -z "$file_2" ] ; then
 	echo "unsigned char* _binary_2_data = NULL;" >> "file_2.c"
 	echo "unsigned long  _binary_2_size = 0;" >> "file_2.c"
 else
+	if [ ! -e "$file_2" ] ; then
+		echo "ERROR: file $file_2 does not exist"
+		exit
+	fi
 	./bin2c "$file_2" "2"
 	mv "2.c" file_2.c
 fi
@@ -55,6 +63,11 @@ if [ -z "$file_3" ] ; then
 	echo "unsigned char* _binary_3_data = NULL;" >> "file_3.c"
 	echo "unsigned long  _binary_3_size = 0;" >> "file_3.c"
 else
+	if [ ! -e "$file_3" ] ; then
+		echo "ERROR: file $file_3 does not exist"
+		exit
+	fi
+
 	./bin2c "$file_3" "3"
 	mv "3.c" file_3.c
 fi

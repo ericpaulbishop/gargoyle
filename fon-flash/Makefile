@@ -43,4 +43,4 @@ fon-flash: $(OBJS) fon-flash.o Makefile
 	strip $@
 
 clean:
-	rm -fr *.o *~ *.plg *.ncb fon-flash bin2c all-in-one
+	rm -fr *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one
