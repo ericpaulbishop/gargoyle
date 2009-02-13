@@ -443,6 +443,8 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 	kill((pid_t)daemon_pid, SIGUSR1);
 
 
+	string_map* result_map = initialize_map(1);
+
 	message_t resp_msg;
 	unsigned long messages_read = 0;
 	while(messages_read < messages_expected) //blocking read
@@ -452,49 +454,72 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 		{
 			int update_status = (int)resp_msg.msg_line[0];
 			messages_expected = messages_expected + ( update_status == UPDATE_OF_MULTIPLE_SERVICES_SCHEDULED ? *((unsigned long*)(resp_msg.msg_line + 1)) : 0);
+			//printf("mesages_expected = %ld\n", messages_expected);
 
+			char *service_name = (char*)resp_msg.msg_line +1;
 			if(display_format == 'h')
 			{
-				char *service_name = (char*)resp_msg.msg_line +1;
-				char* test_domain = service_name;
-				/*
-				ddns_service_config* service_config = (ddns_service_config*)get_map_element(service_configs, service_name);
-				if(service_config != NULL)
-				{
-					test_domain = get_map_element(service_config->variable_definitions, "domain");
-				}
-				*/
 				switch(update_status)
 				{
 					case UPDATE_SUCCESSFUL:
-						printf("\nupdate of %s successful\n", test_domain);
+						printf("\nupdate of %s successful\n", service_name);
 						break;
 					case UPDATE_NOT_NEEDED:
-						printf("\nupdate of %s not needed\n", test_domain);
+						printf("\nupdate of %s not needed\n", service_name);
 						break;
 					case UPDATE_FAILED:
-						printf("\nupdate of %s failed\n", test_domain);
+						printf("\nupdate of %s failed\n", service_name);
 						break;
 				}
 			}
 			else
 			{
+				int* next_status = (int*)malloc(sizeof(int));
 				switch(update_status)
 				{
 					case UPDATE_SUCCESSFUL:
-						printf("2 ");
+						*next_status = 2;
 						break;
 					case UPDATE_NOT_NEEDED:
-						printf("1 ");
+						*next_status = 1;
 						break;
 					case UPDATE_FAILED:
-						printf("0 ");
+					default:
+						*next_status = 0;
 						break;
+				}
+				if(!all_found)
+				{
+					set_map_element(result_map, service_name, next_status);
+				}
+				else 
+				{
+					printf("%d ", *next_status);
+					free(next_status);
 				}
 			}
 			messages_read++;
 		}
 	}
+
+	if(display_format != 'h' && !all_found)
+	{
+		for(name_index = 0; service_names[name_index] != NULL; name_index++)
+		{
+			char* service_name = service_names[name_index];
+			int* result = (int*)get_map_element(result_map, service_name);
+			if(result != NULL)
+			{
+				printf("%d ", *result);
+			}
+			else
+			{
+				printf("0 ");
+			}
+		}
+
+	}
+
 	printf("\n");
 }
 
@@ -653,14 +678,14 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				}
 				//printf("remote ip = %s\n", remote_ip);
 	
-				//determine local ip, loading from saved list if ip was obtained less than check_interval seconds ago
+				//determine local ip, loading from saved list if ip was obtained less than 3 seconds ago (in case of multiple simultaneous updates)
 				char *interface_name = service_config->ip_source == INTERFACE ? service_config->ip_interface : "internet";
 				char *local_ip = (char*)get_map_element(local_ips, interface_name);
 				int using_predefined_local_ip = local_ip == NULL ? 0 : 1;
 				if(using_predefined_local_ip == 1)
 				{
 					time_t* update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
-					using_predefined_local_ip = (current_time - *update_time) < service_config->check_interval ? 1 : 0;
+					using_predefined_local_ip = (current_time - *update_time) < 3 ? 1 : 0;
 				}
 				if(using_predefined_local_ip == 0)
 				{
@@ -818,23 +843,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 							message_t resp_msg;
 							resp_msg.msg_type = RESPONSE_MSG_TYPE;
 							resp_msg.msg_line[0] = UPDATE_FAILED;
-							
-							char* service_domain = get_map_element(service_config->variable_definitions, "domain");
-							int name_len = strlen(service_config->name);
-							int domain_len = strlen(service_domain);
-							if(name_len + domain_len < MAX_MSG_LINE - 5)
-							{
-								sprintf(resp_msg.msg_line+1, "%s (%s)", service_config->name, service_domain);
-							}
-							else if(name_len < MAX_MSG_LINE -2)
-							{
-								sprintf(resp_msg.msg_line+1, "%s", service_config->name);
-							}
-							else
-							{
-								sprintf(resp_msg.msg_line+1, "next service");
-							}
-							
+							sprintf(resp_msg.msg_line+1, "%s", req_name);
 							msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
 						}
 
@@ -848,6 +857,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 					//printf("requested %s\n", req_name);
 					if(service_config != NULL)
 					{
+						//printf("service config %s not null\n", req_name);
 						priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, req_name);
 						update_node* next_update = (update_node*)free_priority_queue_node(p);
 						next_update->next_time = current_time;
@@ -860,25 +870,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 					}
 					else
 					{
+						//printf("service config %s is null\n", req_name);
 						message_t resp_msg;
 						resp_msg.msg_type = RESPONSE_MSG_TYPE;
 						resp_msg.msg_line[0] = UPDATE_FAILED;
-						
-						char* service_domain = get_map_element(service_config->variable_definitions, "domain");
-						int name_len = strlen(service_config->name);
-						int domain_len = strlen(service_domain);
-						if(name_len + domain_len < MAX_MSG_LINE - 5)
-						{
-							sprintf(resp_msg.msg_line+1, "%s (%s)", service_config->name, service_domain);
-						}
-						else if(name_len < MAX_MSG_LINE -2)
-						{
-							sprintf(resp_msg.msg_line+1, "%s", service_config->name);
-						}
-						else
-						{
-							sprintf(resp_msg.msg_line+1, "next service");
-						}
+						sprintf(resp_msg.msg_line+1, "%s", req_name);
 						msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
 					}
 				}			
