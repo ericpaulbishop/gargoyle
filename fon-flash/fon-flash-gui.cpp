@@ -39,15 +39,19 @@ class WorkerThread: public wxThread
 		wxEvtHandler* parentHandler;
 		int inProgress;
 		char* dev;
-		char* kernel;
-		char* root;
+		flash_configuration* config;
+		char* file1;
+		char* file2;
+		char* file3;
 	public:
-    		WorkerThread(wxEvtHandler* pParent, char* d, char* k, char* r) : wxThread(), parentHandler(pParent)
+    		WorkerThread(wxEvtHandler* pParent, char* d, flash_configuration* c, char* f1, char* f2, char* f3) : wxThread(), parentHandler(pParent)
 		{
 			inProgress = 0; 
 			dev = d;
-			kernel = k;
-			root = r;
+			config = c;
+			file1 = f1;
+			file2 = f2;
+			file3 = f3;
 		}
     		wxThread::ExitCode Entry();
 		void DoPrint(wxString s);
@@ -59,12 +63,29 @@ wxThread::ExitCode WorkerThread::Entry()
 
 	inProgress = 1;
 
-	//gargoyle_flash(dev, root, kernel, 0, 0, 0);	
+	if(file_1_buf != NULL)
+	{
+		free(file_1_buf);
+		file_1_buf = NULL;
+	}
+	if(file_2_buf != NULL)
+	{
+		free(file_2_buf);
+		file_2_buf = NULL;
+	}
+	if(file_3_buf != NULL)
+	{
+		free(file_3_buf);
+		file_3_buf = NULL;
+	}
+	initialize_buffers_from_files(file1, file2, file3);
+	fon_flash(config, dev);	
 	
 	//parameters are dynamicall allocated, free them
 	free(dev);
-	free(kernel);
-	free(root);
+	free(file1);
+	free(file2);
+	free(file3);
 	
 	inProgress = 0;
 	return EXIT_SUCCESS;
@@ -100,8 +121,8 @@ ImagePanel::ImagePanel(wxFrame* parent) : wxPanel(parent) { }
 void ImagePanel::paintEvent(wxPaintEvent& evt)
 {
 	wxPaintDC dc(this);
-	wxBitmap gargoyleLogo(gargoyle_transfer_xpm);
-	dc.DrawBitmap(gargoyleLogo, 215, 0, false);
+	wxBitmap fonFlashLogo(fon_flash_xpm);
+	dc.DrawBitmap(fonFlashLogo, 215, 0, false);
 }
 
 
@@ -175,8 +196,8 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(NULL, -1, title, wxDefault
 	current_conf = NULL;
 
 	wxArrayString* firmwareTypes = new wxArrayString();
-	firmwareTypes->Add(wxT("OpenWrt / Gargoyle Firmware"));
-	firmwareTypes->Add(wxT("Official Fonera Firmware"));
+	firmwareTypes->Add(wxT("OpenWrt / Gargoyle"));
+	firmwareTypes->Add(wxT("Fonera Firmware"));
 
 	wxStaticText *firmwareLabel = new wxStaticText(panel,-1,wxT("Select Firmware Type:"),wxPoint(3,10));
 	firmwareChoice = new wxChoice(panel, SELECT_FIRMWARE_ID, wxPoint(3,30), wxSize(195,25), *firmwareTypes, 0, wxDefaultValidator);
@@ -324,54 +345,89 @@ void MainFrame::OpenFile3Dialog(wxCommandEvent& evt)
 
 void MainFrame::FlashRouter(wxCommandEvent& evt)
 {
-	//test that files have been selected and that they exist
-	/*
-	wxString kernelPath = kernelFileText->GetValue();
-	wxString rootPath = rootFileText->GetValue();
-	
-	FILE *testKernel = fopen(kernelPath.ToAscii(), "r");
-	FILE *testRoot = fopen(rootPath.ToAscii(), "r");
-	if(testKernel == NULL || testRoot == NULL)
-	{
-		wxString errorString;
-		if(testKernel == NULL && testRoot == NULL)
-		{
-			errorString = wxT("Error: Neither the specified kernel file or the specified rootfs file exists.\n\nPlease indicate the correct loacation of the necessary files and try again.");
-		}
-		else if(testKernel == NULL)
-		{
-			errorString = wxT("Error: The specified kernel file does not exist.\n\nPlease indicate the correct loacation of the kernel file and try again.");
-		}
-		else
-		{
-			errorString = wxT("Error: The specified rootfs file does not exist.\n\nPlease indicate the correct loacation of the rootfs file and try again.");
-		}
-		
-		
-		if(testKernel != NULL) { fclose(testKernel); }
-		if(testRoot != NULL) { fclose(testRoot); }
-	
+	int firmwareSelection = firmwareChoice->GetCurrentSelection();
+	int is_valid = 1;
 
+	//test that files have been selected and that they exist
+	wxString file1Path = file1Text->GetValue();
+	wxString file2Path = file2Text->GetValue();
+	wxString file3Path = file3Text->GetValue();
+	
+	FILE *test1 = fopen(file1Path.ToAscii(), "r");
+	wxString errorString;
+	if(test1 == NULL)
+	{
+		is_valid = 0;
+		errorString = firmwareSelection == 1 ? 
+				wxT("ERROR: The specified loader file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
+				wxT("ERROR: The specified rootfs file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+	
 		//print error
 		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
 		errorDialog->ShowModal();
+
 	}
 	else
 	{
-		fclose(testKernel);
-		fclose(testRoot);
+		fclose(test1);
+	}
+
+
+	FILE *test2 = fopen(file2Path.ToAscii(), "r");
+	if(test2 == NULL && is_valid)
+	{
+		is_valid = 0;
+		errorString = firmwareSelection == 1 ? 
+				wxT("ERROR: The specified image file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
+				wxT("ERROR: The specified kernel file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+	
+		//print error
+		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
+		errorDialog->ShowModal();
+
+	}
+	else
+	{
+		fclose(test2);
+	}
+
+	
+	
+	FILE* test3 = firmwareSelection == 1 ? fopen(file3Path.ToAscii(), "r") : NULL;
+	if(test3 == NULL && firmwareSelection == 1 && is_valid)
+	{
+		is_valid = 0;
+		errorString = 	wxT("ERROR: The specified image2 file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+	
+		//print error
+		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
+		errorDialog->ShowModal();
+
+	}
+	else if(test3 != NULL)
+	{
+		fclose(test1);
+	}
+
+
+	if(is_valid)
+	{
 		
 		//actually flash
 		outputText->SetValue(wxT(""));
 		char* dev = strdup( (devNames->Item(interfaceChoice->GetCurrentSelection())).ToAscii() );
-		char* kernel = strdup(kernelPath.ToAscii());
-		char* root = strdup(rootPath.ToAscii());
-		testThread =new WorkerThread(this, dev, kernel, root);
+		
+		
+		char* file1 = strdup(file1Path.ToAscii());
+		char* file2 = strdup(file2Path.ToAscii());
+		char* file3 = firmwareSelection == 1 ? strdup(file3Path.ToAscii()) : NULL;
+
+		testThread =new WorkerThread(this, dev, current_conf, file1, file2, file3);
 		testThread->Create();
 		testThread->Run();
 		//gui_printf("This is where we'd show the output if we were actually flashing anything");
 	}
-	*/
+	
 }
 
 void MainFrame::OnThreadMessage(wxCommandEvent& evt)
