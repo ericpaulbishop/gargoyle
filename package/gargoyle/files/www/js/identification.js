@@ -21,21 +21,22 @@ function saveChanges()
 		document.getElementById("reset_button").style.display="none";
 		document.getElementById("update_container").style.display="block";
 
-		systemSections = uciOriginal.getAllSections("system");
-		uciOriginal.removeSection("system", systemSections[0]);
+		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
+		var dnsmasqSections= uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq");
+	
 		
-		
-		uci = uciOriginal.clone();
-		hostname =  document.getElementById("hostname").value;
-		uci.set("system", "system", "", "system");
-		uci.set("system", "system", "hostname", document.getElementById("hostname").value);
+		var uci = uciOriginal.clone();
+		var hostname = document.getElementById("hostname").value;
+		var domain =   document.getElementById("domain").value;
+		uci.set("system", systemSections[0], "hostname", hostname);
+		uci.set("dhcp", dnsmasqSections[0], "domain", domain);
 
 		
-		gargLogoHostname = document.getElementById("garg_host");
+		var gargLogoHostname = document.getElementById("garg_host");
 		gargLogoHostname.replaceChild( document.createTextNode("Device Name: " + hostname), gargLogoHostname.firstChild );
 
 		
-		commands = "uci del system." + systemSections[0] + "\nuci commit\n" + uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n";
+		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n";
 		//document.getElementById("output").value = commands;
 
 
@@ -60,12 +61,16 @@ function saveChanges()
 
 function proofreadAll()
 {
-	return proofreadFields( ["hostname"], ["hostname_label"], [function(text){ return validateLengthRange(text,1,999); }], [0], ["hostname"]);
+	var notEmpty = function(text){ return validateLengthRange(text,1,999); }
+	return proofreadFields( ["hostname", "domain"], ["hostname_label", "domain"], [notEmpty, notEmpty], [0,0], ["hostname", "domain"]); 
 }
 
 function resetData()
 {
-	systemSections = uciOriginal.getAllSectionsOfType("system", "system");
-	hostname = uciOriginal.get("system", systemSections[0], "hostname");
+	var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
+	var dnsmasqSections= uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq");
+	var hostname = uciOriginal.get("system", systemSections[0], "hostname");
+	var domain = uciOriginal.get("dhcp", dnsmasqSections[0], "domain");
 	document.getElementById("hostname").value = hostname;
+	document.getElementById("domain").value = domain;
 }

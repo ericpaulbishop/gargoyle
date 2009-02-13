@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "system" -p "ident" -c "internal.css" -j "identification.js" system
+	gargoyle_header_footer -h -s "system" -p "ident" -c "internal.css" -j "identification.js" system dhcp
 ?>
 
 
@@ -17,9 +17,14 @@
 	<fieldset>
 		<legend class="sectionheader">Identification</legend>
 		<div>
-			<label class='leftcolumn' for='hostname' id='hostname_label'>Hostname:</label>
-			<input type='text' class='rightcolumnindent' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='15' maxlength='15' />
+			<label class='narrowleftcolumn' for='hostname' id='hostname_label'>Hostname:</label>
+			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' />
 		</div>
+		<div>
+			<label class='narrowleftcolumn' for='domain' id='domain_label'>Domain:</label>
+			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
+		</div>
+	
 	</fieldset>
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
