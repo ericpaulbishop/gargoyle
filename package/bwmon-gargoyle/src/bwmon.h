@@ -89,7 +89,8 @@ void push_history(bw_history* history, history_node* new_node, time_t interval_s
 history_node* pop_history(bw_history* history);
 int get_interval_length(bw_history* history);
 void print_history(bw_history* history);
-
+int get_next_message(int queue, void* message_data, size_t message_size, long message_type, unsigned long max_wait_milliseconds);
+int send_next_message(int queue, void* message_data, size_t message_size, unsigned long max_wait_milliseconds);
 
 
 bw_history* initialize_history(void)
@@ -224,5 +225,36 @@ void print_history(bw_history* history)
 	}
 	printf("\n\n\n");
 }
+int get_next_message(int queue, void* message_data, size_t message_size, long message_type, unsigned long max_wait_milliseconds)
+{
+	int iteration = 0;
+	int got_data = -1;
+	while(iteration*25 < max_wait_milliseconds  && got_data < 0)
+	{
+		if(iteration > 0)
+		{
+			usleep(25*1000); //wait 25 milliseconds & try again
+		}
+		got_data = msgrcv(queue, message_data, message_size, message_type, IPC_NOWAIT);
+		iteration++;
+	}
+	return got_data;
+}
+int send_next_message(int queue, void* message_data, size_t message_size, unsigned long max_wait_milliseconds)
+{
+	int iteration = 0;
+	int sent = -1;
+	while(iteration*25 < max_wait_milliseconds  && sent < 0)
+	{
+		if(iteration > 0)
+		{
+			usleep(25*1000); //wait 25 milliseconds & try again
+		}
+		sent = msgsnd(queue, message_data, message_size, IPC_NOWAIT);
+		iteration++;
+	}
+	return sent;
+}
+
 
 #endif //BWMON_H

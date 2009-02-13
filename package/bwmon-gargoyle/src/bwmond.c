@@ -442,15 +442,15 @@ void handle_output_request(bw_monitor** monitors)
 			{
 
 				sprintf(next_response_message.msg_line, "%s\n", monitor->name);
-				msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+				send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 			
 				
 				sprintf(next_response_message.msg_line, "%d\n", (int)monitor->history->oldest_interval_start);
-				msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+				send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 				sprintf(next_response_message.msg_line, "%d\n", (int)monitor->history->oldest_interval_end);
-				msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+				send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 				sprintf(next_response_message.msg_line, "%d\n", (int)monitor->history->recent_interval_end);
-				msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+				send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 
 
 
@@ -466,7 +466,7 @@ void handle_output_request(bw_monitor** monitors)
 					{
 						sprintf(next_response_message.msg_line, "%lld\n", next_node->bandwidth);
 					}
-					msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+					send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 					next_node = next_node->previous;
 				}
 			}
@@ -477,7 +477,7 @@ void handle_output_request(bw_monitor** monitors)
 		{
 			next_req_message.msg_line[0] = '\0';
 			sprintf(next_response_message.msg_line, "END");
-			msgsnd(mq, (void*)&next_response_message, MAX_MSG_LINE, 0);
+			send_next_message(mq, (void*)&next_response_message, MAX_MSG_LINE, 500);
 		}
 	}
 }

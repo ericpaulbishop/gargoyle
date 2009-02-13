@@ -25,7 +25,7 @@
 
 #include "bwmon.h"
 
-int get_next_message(int queue, void* message_data, size_t message_size, long message_type);
+
 void signal_handler(int sig);
 
 // message queue is a global variable so
@@ -142,7 +142,7 @@ int main( int argc, char** argv )
 		if(monitor_names[0] == NULL)
 		{
 			sprintf(req_msg.msg_line,"ALL");
-			msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
+			msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, IPC_NOWAIT);
 		}
 		else
 		{
@@ -150,7 +150,7 @@ int main( int argc, char** argv )
 			for(monitor_index = 0; monitor_names[monitor_index] != NULL; monitor_index++)
 			{
 				sprintf(req_msg.msg_line, monitor_names[monitor_index]);
-				msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
+				msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, IPC_NOWAIT);
 			}
 		}
 
@@ -166,7 +166,7 @@ int main( int argc, char** argv )
 		{
 			if(format == 'm')
 			{
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					printf("%s", response_msg.msg_line);
@@ -176,7 +176,7 @@ int main( int argc, char** argv )
 			{
 				//get name of monitor
 				char monitor_name[MAX_MSG_LINE];
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sprintf(monitor_name, "%s", response_msg.msg_line);
@@ -187,19 +187,19 @@ int main( int argc, char** argv )
 				time_t oldest_end;
 				time_t recent_end;
 				long read;
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
 					oldest_start = (time_t)read;
 				}
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
 					oldest_end = (time_t)read;
 				}
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
@@ -216,7 +216,7 @@ int main( int argc, char** argv )
 					char next_end_char = ',';
 					while( strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0 &&  next_end_char == ',' )
 					{
-						read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE);
+						read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 						if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 						{
 							next_end_char = response_msg.msg_line[ strlen(response_msg.msg_line) - 1 ];
@@ -271,21 +271,6 @@ int main( int argc, char** argv )
 	return 0;
 }
 
-int get_next_message(int queue, void* message_data, size_t message_size, long message_type)
-{
-	int iteration = 0;
-	int got_data = -1;
-	while(iteration < 3 && got_data < 0)
-	{
-		if(iteration > 0)
-		{
-			usleep(25*1000); //wait 25 milliseconds & try again
-		}
-		got_data = msgrcv(queue, message_data, message_size, message_type, IPC_NOWAIT);
-		iteration++;
-	}
-	return got_data;
-}
 
 void signal_handler(int sig)
 {
