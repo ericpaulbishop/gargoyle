@@ -365,7 +365,17 @@ start()
 	else
 		mv "$tmp_conf_file" "$conf_file"
 	fi
-	
+
+	#be absolutely sure old instance is done
+	#give it 2 more seconds to finish then nuke it
+	if [ -e /var/run/bwmond.pid ] ; then
+		sleep 2
+		if [ -e /var/run/bwmond.pid ] ; then
+			killall -9 bwmond  2>/dev/null
+			killall -9 bwstats 2>/dev/null
+			rm -rf /var/run/bwmond.pid
+		fi
+	fi
 	/usr/bin/bwmond -C $conf_file
 	
 
