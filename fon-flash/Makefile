@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: fon-flash 
+all: fon-flash fon-flash-gui
 
 
 CC      = g++
@@ -28,6 +28,21 @@ OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+fon-flash-gui: $(OBJS) libpcap.a wx-config fon-flash-gui.o
+	g++  -o fon-flash-gui $(OBJS)   fon-flash-gui.o libpcap.a `./wx-config --cxxflags --libs --static=yes` 
+
+
+fon-flash-gui.o: wx-config 
+	g++ -c fon-flash-gui.cpp  -o fon-flash-gui.o `./wx-config --cxxflags  --static=yes` 
+
+libpcap.a:
+	sh build-static-pcap.sh
+
+wx-config:
+	sh build-static-wx.sh
+
+
 
 all-in-one: $(OBJS) all-in-one.o file_1.o file_2.o file_3.o
 	$(CC) $(CFLAGS) $(OBJS) file_1.o file_2.o file_3.o all-in-one.o -lpcap -o $@
@@ -43,4 +58,7 @@ fon-flash: $(OBJS) fon-flash.o Makefile
 	strip $@
 
 clean:
-	rm -fr *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one
+	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui
+
+deepclean:
+	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui *.a *pcap*.h static-pcap pcap wx-config static-wx
