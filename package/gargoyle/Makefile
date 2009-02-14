@@ -6,8 +6,10 @@ PKG_VERSION:=1.0.0
 PKG_RELEASE:=4
 
 WPA_DEPS=""
+LED_DEPS=""
 ifeq ($(BOARD),atheros)
      WPA_DEPS="+wpa-supplicant +hostapd"
+     LED_DEPS="+gpioctl"
 endif
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
@@ -19,7 +21,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +restricter-gargoyle +libericstools $(WPA_DEPS) 
+	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +restricter-gargoyle +libericstools $(WPA_DEPS) $(LED_DEPS) 
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -74,6 +76,16 @@ define Package/gargoyle/postinst
 	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network  2>/dev/null
 	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 	
+	#if this is atheros device, set uci options that set fonera power led to on
+	#this may cause further weirdness with other atheros devices, but quite frankly, I don't give a shit
+	#fons are by far the most popular devices with atheros cpus
+	if [ -n "$(LED_DEPS)" ] ; then
+		echo "" >> $${IPKG_INSTROOT}/etc/config/system
+		echo "config led power" >> $${IPKG_INSTROOT}/etc/config/system
+		echo "	option sysfs gpio7" >> $${IPKG_INSTROOT}/etc/config/system
+		echo "	option default 1" >> $${IPKG_INSTROOT}/etc/config/system
+		echo "" >> $${IPKG_INSTROOT}/etc/config/system
+	fi
 
 	#if we're installing as a package on an active openwrt system, initialize by doing the following:
 	if [ -z "$${IPKG_INSTROOT}" ] ; then
