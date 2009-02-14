@@ -613,6 +613,25 @@ function setWifiVisibility()
 
 function resetData()
 {
+	//reset default wan mac if isBcm94704 is true
+	if(isBcm94704 && uciOriginal.get("network", "wan", "ifname") != wirelessIf && uciOriginal.get("network", "wan", "macaddr") != "")
+	{
+		var currentMac = uciOriginal.get("network", "wan", "macaddr").toUpperCase();
+		var currentStart = currentMac.substr(0, 15);
+		var currentEnd = currentMac.substr(15, 2);
+		var lanMacIndex=0;
+		for(lanMacIndex=0; lanMacIndex < allLanMacs.length; lanMacIndex++)
+		{
+			var nextMac = allLanMacs[lanMacIndex].toUpperCase();
+			var nextStart = nextMac.substr(0,15);
+			var nextEnd = nextMac.substr(15,2);
+			if(nextStart == currentStart && Math.abs(parseInt(nextEnd,16) - parseInt(currentEnd,16)) == 1)
+			{
+				defaultWanMac = currentMac;
+			}
+		}
+	}
+	
 	//first load basic variables for wan & lan sections
 	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'lan_dns1', 'lan_dns2', 'lan_dns3'];
 	networkPkgs = new Array();

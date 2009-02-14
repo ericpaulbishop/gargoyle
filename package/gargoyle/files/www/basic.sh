@@ -35,6 +35,9 @@
 		isbcm94704='false'
 	fi
 	echo "var isBcm94704 = $isbcm94704;"
+	echo "var allLanMacs = [];"
+	brctl showmacs br-lan | grep "yes" | awk ' { print "allLanMacs.push(\"" $2 "\");" } '
+
 
 	echo "var allWifi = new Array();"
 	all_wif=$(iwconfig 2>/dev/null | egrep  "^[^\t ]" | awk ' { print $1 } ')
