@@ -198,19 +198,26 @@ insert_pf_loopback_rules()
 				config_get $var $1 $var
 				loaded=$(eval echo "\$$var")
 				#echo $var =  $loaded
-				if [ -z "$loaded" ] ; then
+				if [ -z "$loaded" ] && [ ! "$var" = "$src_dport" ] ; then
 					all_defined="0"
 				fi
 			done	
-				
-			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ] && [ ! "$src_dport" = "$dest_port" ] ; then
-				#echo "here!"
-				#echo iptables -t nat    -A pf_loopback_A -p $proto --dport $src_dport -j DNAT --to-destination $dest_ip:$dest_port
-				#echo iptables -t filter -A pf_loopback_B -p $proto --dport $dest_port -d $dest_ip -j ACCEPT
-				#echo iptables -t nat    -A pf_loopback_C -p $proto --dport $dest_port -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
-				iptables -t nat    -A pf_loopback_A -p $proto --dport $src_dport -j DNAT --to-destination $dest_ip:$dest_port
-				iptables -t filter -A pf_loopback_B -p $proto --dport $dest_port -d $dest_ip -j ACCEPT
-				iptables -t nat    -A pf_loopback_C -p $proto --dport $dest_port -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
+			
+			if [ -z "$src_dport" ] ; then
+				src_dport=$dest_port
+			fi
+			
+			sdp_dash=$src_dport
+			sdp_colon=$(echo $sdp_dash | sed 's/\-/:/g')
+			dp_dash=$dest_port
+			dp_colon=$(echo $dp_dash | sed 's/\-/:/g')
+			
+			
+			
+			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ]  ; then
+				iptables -t nat    -A pf_loopback_A -p $proto --dport $sdp_colon -j DNAT --to-destination $dest_ip:$dp_dash
+				iptables -t filter -A pf_loopback_B -p $proto --dport $dp_colon -d $dest_ip -j ACCEPT
+				iptables -t nat    -A pf_loopback_C -p $proto --dport $dp_colon -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
 			fi	
 		}
 
