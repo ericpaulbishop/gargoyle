@@ -54,7 +54,7 @@ function saveChanges()
 			uci.set("firewall", id, "remote_port", remote);
 			uci.set("firewall", id, "proto", "tcp");
 			uci.set("firewall", id, "zone", "wan");
-			firewallSectionCommands.push("uci add firewall remote_accept");
+			firewallSectionCommands.push("uci set firewall." + id + "=remote_accept");
 		}
 		if(document.getElementById("remote_https_port_container").style.display != "none")
 		{
