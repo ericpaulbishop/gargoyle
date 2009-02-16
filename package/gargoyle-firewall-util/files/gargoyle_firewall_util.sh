@@ -167,3 +167,55 @@ create_l7marker_chain()
 	
 }
 
+insert_pf_loopback_rules()
+{
+	config_name="firewall"
+	section_type="redirect"
+
+	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
+	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
+
+	if [ -n "$wan_ip" ] && [ -n "$lan_mask" ] ; then
+		delete_chain_from_table "nat"    "pf_loopback_A"
+		delete_chain_from_table "filter" "pf_loopback_B"
+		delete_chain_from_table "nat"    "pf_loopback_C"
+
+
+		iptables -t nat    -N "pf_loopback_A"
+		iptables -t filter -N "pf_loopback_B"
+		iptables -t nat    -N "pf_loopback_C"
+
+		iptables -t nat    -I zone_lan_prerouting -d $wan_ip -j pf_loopback_A
+		iptables -t filter -I zone_lan_forward               -j pf_loopback_B
+		iptables -t nat    -I postrouting_rule -o br-lan     -j pf_loopback_C
+
+
+		add_pf_loopback()
+		{
+			local vars="src dest proto src_dport dest_ip dest_port"
+			local all_defined="1"
+			for var in $vars ; do
+				config_get $var $1 $var
+				loaded=$(eval echo "\$$var")
+				#echo $var =  $loaded
+				if [ -z "$loaded" ] ; then
+					all_defined="0"
+				fi
+			done	
+				
+			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ] && [ ! "$src_dport" = "$dest_port" ] ; then
+				#echo "here!"
+				#echo iptables -t nat    -A pf_loopback_A -p $proto --dport $src_dport -j DNAT --to-destination $dest_ip:$dest_port
+				#echo iptables -t filter -A pf_loopback_B -p $proto --dport $dest_port -d $dest_ip -j ACCEPT
+				#echo iptables -t nat    -A pf_loopback_C -p $proto --dport $dest_port -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
+				iptables -t nat    -A pf_loopback_A -p $proto --dport $src_dport -j DNAT --to-destination $dest_ip:$dest_port
+				iptables -t filter -A pf_loopback_B -p $proto --dport $dest_port -d $dest_ip -j ACCEPT
+				iptables -t nat    -A pf_loopback_C -p $proto --dport $dest_port -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
+			fi	
+		}
+
+		config_load "$config_name"
+		config_foreach add_pf_loopback "$section_type"
+	fi
+}
+
