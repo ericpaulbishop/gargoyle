@@ -82,13 +82,12 @@ insert_remote_accept_rules()
 			config_get $var $1 $var
 		done
 		if [ -n "$local_port" ] ; then
-			echo "LOCAL_PORT = $local_port"
 			if [ -z "$remote_port"  ] ; then
 				remote_port="$local_port"
 			fi
 			if [ "$remote_port" != "$local_port" ] ; then
-				echo iptables -t nat -A "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-				iptables -t nat -A "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
+				#echo iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
+				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
 				death_mark_ports="$local_port $death_mark_ports"
 			fi
 			echo iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
@@ -105,8 +104,8 @@ insert_remote_accept_rules()
 
 	#add death marks
 	for dmp in $death_mark_ports ; do
-		echo iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-		echo iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		#echo iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
+		#echo iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
 		iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
 		iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
 	done

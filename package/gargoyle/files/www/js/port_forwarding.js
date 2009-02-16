@@ -56,7 +56,7 @@ function saveChanges()
 			var protoIndex=0;
 			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
 			{
-				var id = "redirect_number_" +  (enabled ? enabledIndex : disabledIndex);
+				var id = "redirect_" + (enabled ? "enabled" : "disabled") + "_number_" +  (enabled ? enabledIndex : disabledIndex);
 				firewallSectionCommands.push("uci set firewall." + id + "=" + (enabled ? "redirect" : "redirect_disabled"));
 				uci.set("firewall", id, "", (enabled ? "redirect" : "redirect_disabled"));
 				uci.set("firewall", id, "name", rowData[0]);
@@ -78,7 +78,7 @@ function saveChanges()
 		{
 			var rowData = portRangeData[rowIndex];
 			var enabled = rowData[5].checked;
-			var id = "redirect_number_" +  (enabled ? enabledIndex : disabledIndex);
+			var id = "redirect_" + (enabled ? "enabled" : "disabled") + "_number_" +  (enabled ? enabledIndex : disabledIndex);
 			firewallSectionCommands.push("uci set firewall." + id + "=" + (enabled ? "redirect" : "redirect_disabled"));
 
 			var protos = rowData[1].toLowerCase() == "both" ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
