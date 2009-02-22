@@ -13,8 +13,10 @@
 <!--
 <?
         echo "var dhcpLeaseLines = new Array();"
-	cat /tmp/dhcp.leases | awk '{print "dhcpLeaseLines.push(\""$0"\");"}'
-
+	if [ -e /tmp/dhcp.leases ] ; then
+		cat /tmp/dhcp.leases | awk '{print "dhcpLeaseLines.push(\""$0"\");"}'
+	fi
+	
 	echo "var wifiLines = new Array();"
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var isBrcm=true;"

@@ -9,7 +9,7 @@
 
 function resetData()
 {
-	if(dhcpLeaseLines.length > 0)
+	if(uciOriginal.get("dhcp", "lan", "ignore") != "1")
 	{
 		document.getElementById("dhcp_data").style.display="block";
 		var columnNames=["Host IP", "Host MAC", "Time Before Lease Expiration"];
@@ -35,7 +35,9 @@ function resetData()
 	{
 		apFound = uciOriginal.get("wireless", wifiIfs[ifIndex], "mode") == "ap" ? true : apFound;
 	}
-
+	var wifiDevs = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
+	apFound = apFound && (uciOriginal.get("wireless", wifiDevs[0], "disabled") != "1");
+	
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
@@ -159,7 +161,8 @@ function parseConntrack(arpHash, currentWanIp, lines)
 			var num = protoHash[ ip + "-" + proto ];
 		}	
 			
-		if(ipHash[ip] == null && ip != currentWanIp && ip != currentLanIp)
+		//for some reason I'm seeing src ips of 0.0.0.0 -- WTF???
+		if(ipHash[ip] == null && ip != currentWanIp && ip != currentLanIp && ip != "0.0.0.0")
 		{
 			ipList.push(ip);
 			ipHash[ip] = 1;
