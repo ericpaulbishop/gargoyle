@@ -78,9 +78,10 @@ wxThread::ExitCode WorkerThread::Entry()
 		free(file_3_buf);
 		file_3_buf = NULL;
 	}
+
 	initialize_buffers_from_files(file1, file2, file3);
 	fon_flash(config, dev);	
-	
+
 	//parameters are dynamicall allocated, free them
 	free(dev);
 	free(file1);
@@ -130,7 +131,7 @@ void ImagePanel::paintEvent(wxPaintEvent& evt)
 class MainFrame : public wxFrame
 {
 	public:
-		MainFrame(const wxString& title);
+		MainFrame(wxApp* a, const wxString& title);
 
 		void SetFirmware(wxCommandEvent& evt);
 
@@ -144,6 +145,9 @@ class MainFrame : public wxFrame
 		flash_configuration* gargoyle_conf;
 		flash_configuration* fonera_conf;
 		flash_configuration* current_conf;
+
+		wxApp*   app;
+		wxPanel* panel;
 
 		wxChoice      *firmwareChoice; 
 		wxChoice      *interfaceChoice;
@@ -161,7 +165,7 @@ class MainFrame : public wxFrame
 		wxTextCtrl   *file3Text;
 		wxButton     *file3Button;
 
-
+		wxButton     *startButton;
 
 		wxTextCtrl *outputText;
 		WorkerThread* testThread;
@@ -185,10 +189,12 @@ MainFrame *globalAppFrame = NULL;
 
 
 
-MainFrame::MainFrame(const wxString& title) : wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(550, 550))
+MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(550, 550))
 {
-	Centre();	
-	wxPanel* panel = new ImagePanel(this);
+	app = a;
+	Centre();
+
+	panel = new ImagePanel(this);
 	testThread = NULL;	
 
 	gargoyle_conf = get_gargoyle_configuration();
@@ -272,7 +278,7 @@ MainFrame::MainFrame(const wxString& title) : wxFrame(NULL, -1, title, wxDefault
 		wxSize(525, 130),
 		wxTE_READONLY | wxTE_MULTILINE);
 
-	wxButton *startButton = new wxButton(panel, FLASH_ROUTER_BUTTON_ID, wxT("Flash Router Now!"), wxPoint(75,500), wxSize(400, 40));
+	startButton = new wxButton(panel, FLASH_ROUTER_BUTTON_ID, wxT("Flash Router Now!"), wxPoint(75,500), wxSize(400, 40));
 
 	wxCommandEvent evt;
 	SetFirmware(evt);
@@ -300,7 +306,7 @@ void MainFrame::SetFirmware(wxCommandEvent& evt)
 		file3Label->Show(true);
 		file3Text->Show(true);
 		file3Button->Show(true);
-
+		
 		current_conf = fonera_conf;
 	}
 }
@@ -412,7 +418,48 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 
 	if(is_valid)
 	{
+		//disable controls, so everything is now fixed
+		firmwareChoice->Enable(false);
+		interfaceChoice->Enable(false);
+		file1Button->Enable(false);
+		file2Button->Enable(false);
+		file3Button->Enable(false);
+		startButton->Enable(false);
+	
+		//set text as readonly
+		wxString old1 = file1Text->GetValue();
+		delete(file1Text);
+		file1Text = new wxTextCtrl( 
+			this->panel,
+			5,
+			old1,
+			wxPoint(5, 165),
+			wxSize(450, 30),
+			wxTE_READONLY);
 		
+		wxString old2 = file2Text->GetValue();
+		delete(file2Text);
+		file2Text = new wxTextCtrl( 
+			this->panel,
+			5,
+			old2,
+			wxPoint(5, 240),
+			wxSize(450, 30),
+			wxTE_READONLY);
+
+		if(firmwareSelection == 1)
+		{
+			wxString old3 = file3Text->GetValue();
+			delete(file3Text);
+			file3Text = new wxTextCtrl( 
+				this->panel,
+				5,
+				old3,
+				wxPoint(5, 315),
+				wxSize(450, 30),
+				wxTE_READONLY);
+		}
+
 		//actually flash
 		outputText->SetValue(wxT(""));
 		char* dev = strdup( (devNames->Item(interfaceChoice->GetCurrentSelection())).ToAscii() );
@@ -425,7 +472,6 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 		testThread =new WorkerThread(this, dev, current_conf, file1, file2, file3);
 		testThread->Create();
 		testThread->Run();
-		//gui_printf("This is where we'd show the output if we were actually flashing anything");
 	}
 	
 }
@@ -434,8 +480,27 @@ void MainFrame::OnThreadMessage(wxCommandEvent& evt)
 {
 	if(globalAppFrame != NULL)
 	{
-		globalAppFrame->outputText->SetInsertionPointEnd();	
-		globalAppFrame->outputText->WriteText( evt.GetString()  );
+		wxString msg = evt.GetString();
+		if(msg.compare(wxT("FON_FLASH_APPLICATION_END_SUCCESS")) == 0)
+		{
+			//report success and exit
+			wxMessageDialog* success = new wxMessageDialog(NULL, wxT("Device Flashed Successfully"), wxT("Success"), wxOK );
+			success->ShowModal();
+			app->ExitMainLoop();
+		}
+		else if(msg.compare(wxT("FON_FLASH_APPLICATION_END_FAILURE")) == 0)
+		{
+			//report failure and exit
+			wxMessageDialog* failure = new wxMessageDialog(NULL, wxT("Flashing Failed"), wxT("Failure"), wxOK | wxICON_ERROR);
+			failure->ShowModal();
+			app->ExitMainLoop();
+		}
+		else
+		{
+			//print message to output box
+			globalAppFrame->outputText->SetInsertionPointEnd();	
+			globalAppFrame->outputText->WriteText( msg  );
+		}
 	}
 }
 
@@ -453,16 +518,16 @@ void MainFrame::OnThreadMessage(wxCommandEvent& evt)
 
 
 
-class GargoyleFlash : public wxApp
+class FonFlash : public wxApp
 {
 	public:
 		virtual bool OnInit();
 		char* programName;
 };
-IMPLEMENT_APP(GargoyleFlash)
+IMPLEMENT_APP(FonFlash)
 
 
-bool GargoyleFlash::OnInit()
+bool FonFlash::OnInit()
 {
 	pcap_if_t *alldevs;
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -475,10 +540,7 @@ bool GargoyleFlash::OnInit()
 		errorDialog->ShowModal();
 
 		
-		/*
-		wxMessageDialog* d2 = new wxMessageDialog(NULL, wxString::FromAscii(programName), wxT("Error"), wxOK | wxICON_ERROR);
-		d2->ShowModal();
-		*/
+
 
 
 
@@ -516,13 +578,12 @@ bool GargoyleFlash::OnInit()
 			}
 		}
 #endif
-	
-	
+		
 		return false;
 	}
 	else
 	{
-		globalAppFrame = new MainFrame(wxT("Gargoyle Easy Flash"));
+		globalAppFrame = new MainFrame(this,wxT("Fon Flash"));
 		globalAppFrame->Show(true);
 		SetTopWindow(globalAppFrame);
 
@@ -576,6 +637,15 @@ int gui_fprintf(FILE* stream, const char* format, ...)
 	return ret_val;
 }
 
-void gui_exit(int status){}
-
+void gui_exit(int status)
+{
+	if(status == 0)
+	{
+		globalAppFrame->testThread->DoPrint(wxT("FON_FLASH_APPLICATION_END_SUCCESS"));
+	}
+	else
+	{
+		globalAppFrame->testThread->DoPrint(wxT("FON_FLASH_APPLICATION_END_FAILURE"));
+	}
+}
 
