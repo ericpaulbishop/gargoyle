@@ -7,9 +7,14 @@ PKG_RELEASE:=4
 
 WPA_DEPS=""
 LED_DEPS=""
+WL_DEPS=""
 ifeq ($(BOARD),atheros)
      WPA_DEPS="+wpa-supplicant +hostapd"
      LED_DEPS="+gpioctl"
+endif
+
+ifeq ($(BOARD),brcm-2.4)
+     WL_DEPS="+wl"
 endif
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
@@ -21,7 +26,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +restricter-gargoyle +libericstools $(WPA_DEPS) $(LED_DEPS) 
+	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +restricter-gargoyle +libericstools $(WPA_DEPS) $(LED_DEPS) $(WL_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 

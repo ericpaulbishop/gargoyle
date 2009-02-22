@@ -19,7 +19,8 @@ config display display
 	option status_bandwidth		'Bandwidth Usage'
 	option status_webmon		'Web Usage'
 	option status_qos		'QoS Distribution'
-	option status_connections	'Current Connections'
+	option status_hosts		'Connected Hosts'
+	option status_connections	'Connection List'
 	option connection		'Connection'
 	option connection_dyndns	'Dynamic DNS'
 	option connection_dhcp		'DHCP'
@@ -42,6 +43,7 @@ config scripts scripts
 	option status_bandwidth		'bandwidth.sh'
 	option status_webmon		'webmon.sh'
 	option status_qos		'qos_distribution.sh'
+	option status_hosts		'hosts.sh'
 	option status_connections	'conntrack.sh'
 	option connection_dyndns	'ddns.sh'
 	option connection_basic		'basic.sh'
@@ -64,7 +66,8 @@ config 100 status
 	option overview		'100'
 	option bandwidth	'200'
 	option webmon		'250'
-	option connections	'400'
+	option hosts		'400'
+	option connections	'500'
 
 config 200 connection
 	option basic	'100'
