@@ -31,6 +31,7 @@ config display display
 	option system_time		'Time'
 	option system_backup		'Backup / Restore'
 	option system_update		'Update Firmware'
+	option system_reboot		'Reboot'
 	option about			'About'
 
 config scripts scripts
@@ -53,6 +54,7 @@ config scripts scripts
 	option system_time		'time.sh'
 	option system_backup		'backup.sh'
 	option system_update		'update.sh'
+	option system_reboot		'reboot.sh'
 	option about			'about.sh'
 
 config 300 firewall
@@ -80,6 +82,7 @@ config 400 system
 	option time	'300'
 	option backup	'400'
 	option update	'500'
+	option reboot	'600'
 
 config 500 about
 
