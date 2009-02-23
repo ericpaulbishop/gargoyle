@@ -26,7 +26,7 @@ function resetData()
 		document.getElementById("dhcp_data").style.display="none";
 	}
 
-	var arpHash = parseArp(arpLines);
+	var arpHash = parseArp(arpLines, dhcpLeaseLines);
 	
 	var apFound = false;
 	var wifiIfs = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
@@ -94,20 +94,33 @@ function parseDhcp(leases)
 	return dhcpTableData;
 }
 
-function parseArp(lines)
+function parseArp(arpLines, leaseLines)
 {
 	var arpHash = [];
-	lines.shift(); //skip header
+	
+	arpLines.shift(); //skip header
 	var lineIndex = 0;
-	for(lineIndex=0; lineIndex < lines.length; lineIndex++)
+	for(lineIndex=0; lineIndex < arpLines.length; lineIndex++)
 	{
-		var nextLine = lines[lineIndex];
+		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
 		var mac = splitLine[3].toUpperCase();
 		var ip = splitLine[0];
 		arpHash[ mac ] = ip;
 		arpHash[ ip  ] = mac;
 	}
+	
+
+	for(lineIndex=0; lineIndex < leaseLines.length; lineIndex++)
+	{
+		var leaseLine = leaseLines[lineIndex];
+		var splitLease = leaseLine.split(/[\t ]+/);
+		var mac = splitLease[1].toUpperCase();
+		var ip = splitLease[2];
+		arpHash[ mac ] = ip;
+		arpHash[ ip  ] = mac;
+	}
+
 	return arpHash;
 }
 
