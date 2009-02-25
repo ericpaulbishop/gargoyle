@@ -29,15 +29,13 @@ OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-fon-flash-gui: $(OBJS) libpcap.a wx-config fon-flash-gui.o
-	g++  -o fon-flash-gui $(OBJS)   fon-flash-gui.o libpcap.a `./wx-config --cxxflags --libs --static=yes` 
+fon-flash-gui: $(OBJS) wx-config fon-flash-gui.o
+	g++  -o fon-flash-gui $(OBJS)  fon-flash-gui.o -lpcap `./wx-config --cxxflags --libs --static=yes` 
 
 
 fon-flash-gui.o: wx-config 
 	g++ -c fon-flash-gui.cpp  -o fon-flash-gui.o `./wx-config --cxxflags  --static=yes` 
 
-libpcap.a:
-	sh build-static-pcap.sh
 
 wx-config:
 	sh build-static-wx.sh
@@ -61,4 +59,4 @@ clean:
 	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui
 
 deepclean:
-	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui *.a *pcap*.h static-pcap pcap wx-config static-wx
+	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui wx-config static-wx
