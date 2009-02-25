@@ -6,8 +6,34 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var updateInProgress = false;
 
 function resetData()
+{
+	resetVariables();
+	setInterval("reloadVariables()", 2000); 
+}
+
+function reloadVariables()
+{
+	if(!updateInProgress)
+	{
+		updateInProgress = true;
+		var param = getParameterDefinition("commands", "sh /www/utility/define_host_vars.sh"); 
+		var stateChangeFunction = function(req) 
+		{ 
+			if(req.readyState == 4) 
+			{
+				var jsHostVars = req.responseText.replace(/Success/, "");
+				eval(jsHostVars);
+				resetVariables();
+				updateInProgress = false;
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
+function resetVariables()
 {
 	if(uciOriginal.get("dhcp", "lan", "ignore") != "1")
 	{
@@ -155,30 +181,39 @@ function parseConntrack(arpHash, currentWanIp, lines)
 	for(lineIndex=0; lineIndex < lines.length; lineIndex++)
 	{
 		var nextLine = lines[lineIndex];
-		var splitLine = nextLine.split(/src=/); //we want FIRST src definition
 		
-		var ipPart = splitLine[1];
-		var splitIp = ipPart.split(/[\t ]+/);
-		var ip = splitIp[0];
+		var splitLine = nextLine.split(/src=/); //we want FIRST src definition
+		var srcIpPart = splitLine[1];
+		var splitSrcIp = srcIpPart.split(/[\t ]+/);
+		var srcIp = splitSrcIp[0];
+		
+		splitLine = nextLine.split(/dst=/); //we want FIRST dst definition
+		var dstIpPart = splitLine[1];
+		var splitDstIp = dstIpPart.split(/[\t ]+/);
+		var dstIp = splitDstIp[0];
+		
+		
 		
 		splitLine=nextLine.split(/[\t ]+/);
 		var proto = splitLine[0].toLowerCase();
 		if(proto == "tcp")
 		{
-			var state = splitLine[3].toUpperCase() == "TIME_WAIT" ? "closed" : "open";
-			proto = proto + "-" + state;
+			var state = splitLine[3].toUpperCase();
+			var stateStr = state == "TIME_WAIT" || state == "CLOSE" ? "closed" : "open";
+			proto = proto + "-" + stateStr;
 		}
-		protoHash[ ip + "-" + proto ] =  protoHash[ ip + "-" + proto ] == null ? 1 : protoHash[ ip + "-" + proto ] + 1;
+		protoHash[ srcIp + "-" + proto ] =  protoHash[ srcIp + "-" + proto ] == null ? 1 : protoHash[ srcIp + "-" + proto ] + 1;
 		if(proto == "udp")
 		{
-			var num = protoHash[ ip + "-" + proto ];
+			var num = protoHash[ srcIp + "-" + proto ];
 		}	
 			
 		//for some reason I'm seeing src ips of 0.0.0.0 -- WTF???
-		if(ipHash[ip] == null && ip != currentWanIp && ip != currentLanIp && ip != "0.0.0.0")
+		//exclude anything starting at router, or ending at external wan ip, since this is probably a connection to router from outside
+		if(ipHash[srcIp] == null && srcIp != currentWanIp && srcIp != currentLanIp && dstIp != currentWanIp && srcIp != "0.0.0.0")
 		{
-			ipList.push(ip);
-			ipHash[ip] = 1;
+			ipList.push(srcIp);
+			ipHash[srcIp] = 1;
 		}
 	}
 
