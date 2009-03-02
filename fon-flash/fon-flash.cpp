@@ -268,7 +268,7 @@ flash_configuration* get_ddwrt_configuration()
 	ddwrt_conf = create_generic_config();	
 	
 	linux_part = create_generic_partition();
-	linux_part->name = "rootfs";
+	linux_part->name = "linux";
 	linux_part->file_id = "file_1";
 	linux_part->flash_address = 0; 	//indicates starting at first available address
 	linux_part->length_type = FILE_TYPE;	
