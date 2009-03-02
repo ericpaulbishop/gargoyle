@@ -1623,7 +1623,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\WpdPack\Include\pcap.h"
+				RelativePath="c:\WpdPack\Include\pcap.h"
 				>
 			</File>
 			<File
@@ -1668,11 +1668,11 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath="..\..\..\WpdPack\Lib\Packet.lib"
+			RelativePath="c:\WpdPack\Lib\Packet.lib"
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\WpdPack\Lib\wpcap.lib"
+			RelativePath="c:\WpdPack\Lib\wpcap.lib"
 			>
 		</File>
 	</Files>

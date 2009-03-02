@@ -262,20 +262,20 @@ flash_configuration* get_fonera_configuration()
 flash_configuration* get_ddwrt_configuration()
 {
 	flash_configuration* ddwrt_conf;
-	partition* linux;
+	partition* linux_part;
 	char** boot;
 
 	ddwrt_conf = create_generic_config();	
 	
-	linux = create_generic_partition();
-	linux->name = "rootfs";
-	linux->file_id = "file_1";
-	linux->flash_address = 0; 	//indicates starting at first available address
-	linux->length_type = FILE_TYPE;	
-	linux->set_entry = 1;		//set entry to 0x00000000
-	linux->set_memory = 1;
-	linux->entry_address  = 0x80041000;
-	linux->memory_address = 0x80041000;
+	linux_part = create_generic_partition();
+	linux_part->name = "rootfs";
+	linux_part->file_id = "file_1";
+	linux_part->flash_address = 0; 	//indicates starting at first available address
+	linux_part->length_type = FILE_TYPE;	
+	linux_part->set_entry = 1;		//set entry to 0x00000000
+	linux_part->set_memory = 1;
+	linux_part->entry_address  = 0x80041000;
+	linux_part->memory_address = 0x80041000;
 
 	
 
@@ -286,7 +286,7 @@ flash_configuration* get_ddwrt_configuration()
 	
 	
 	
-	ddwrt_conf->part1 = linux;	
+	ddwrt_conf->part1 = linux_part;	
 	ddwrt_conf->part2 = NULL;
 	ddwrt_conf->part3 = NULL;
 	ddwrt_conf->bootloader_lines = boot;
