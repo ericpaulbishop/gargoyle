@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- 
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +31,8 @@
 #ifdef INCLUDE_BINARIES
 #include "install_binaries.h"
 #endif
+
+
 
 void make_configuration_absolute(flash_configuration* config, unsigned long flash_start_address, unsigned long flash_size, unsigned long flash_page_size, const char** file_ids, unsigned long* file_sizes)
 {
@@ -154,11 +156,18 @@ char** get_partition_command_list(flash_configuration* config, unsigned long fre
 	return commands;
 }
 
+
+
 flash_configuration* get_gargoyle_configuration()
 {
-	flash_configuration* gargoyle_conf = create_generic_config();	
+	flash_configuration* gargoyle_conf;
+	partition* rootfs;
+	partition* kernel;
+	char** boot;
+
+	gargoyle_conf = create_generic_config();	
 	
-	partition* rootfs = create_generic_partition();
+	rootfs = create_generic_partition();
 	rootfs->name = "rootfs";
 	rootfs->file_id = "file_1";
 	rootfs->flash_address = 0; 	//indicates starting at first available address
@@ -167,8 +176,7 @@ flash_configuration* get_gargoyle_configuration()
 	rootfs->set_memory = 0;
 	rootfs->entry_address = 0x00000000;
 
-
-	partition* kernel = create_generic_partition();
+	kernel = create_generic_partition();
 	kernel->name = "vmlinux.bin.l7";
 	kernel->file_id = "file_2";
 	kernel->flash_address = 0;		//indicates starting at first available address
@@ -179,7 +187,7 @@ flash_configuration* get_gargoyle_configuration()
 	kernel->memory_address = 0x80041000;
 	
 
-	char** boot = (char**)malloc(3*sizeof(char*));
+	boot = (char**)malloc(3*sizeof(char*));
 	boot[0] = strdup("fis load -l vmlinux.bin.l7\n");
 	boot[1] = strdup("exec\n");
 	boot[2] = NULL ;
@@ -195,9 +203,15 @@ flash_configuration* get_gargoyle_configuration()
 }
 flash_configuration* get_fonera_configuration()
 {
-	flash_configuration* fon_conf = create_generic_config();
+	flash_configuration* fon_conf;
+	partition* loader;
+	partition* image;
+	partition* image2;
+	char** boot;
+	
+	fon_conf = create_generic_config();
 
-	partition* loader = create_generic_partition();
+	loader = create_generic_partition();
 	loader->name = "loader";
 	loader->file_id = "file_1";
 	loader->flash_address = 0; 
@@ -209,7 +223,7 @@ flash_configuration* get_fonera_configuration()
 
 
 
-	partition* image = create_generic_partition();
+	image = create_generic_partition();
 	image->name = "image";
 	image->file_id = "file_2";
 	image->flash_address = 0; 
@@ -220,7 +234,7 @@ flash_configuration* get_fonera_configuration()
 	image->memory_address = 0x80040400;
 
 
-	partition* image2 = create_generic_partition();
+	image2 = create_generic_partition();
 	image2->name = "image2";
 	image2->file_id = "file_3";
 	image2->flash_address = 0xA8660000;	
@@ -230,7 +244,7 @@ flash_configuration* get_fonera_configuration()
 	image2->entry_address   = 0x80040400;
 	
 
-	char** boot = (char**)malloc(3*sizeof(char*));
+	boot = (char**)malloc(3*sizeof(char*));
 	boot[0] = strdup("fis load loader\n");
 	boot[1] = strdup("go\n");
 	boot[2] = NULL ;
@@ -245,28 +259,67 @@ flash_configuration* get_fonera_configuration()
 	return fon_conf;	
 }
 
+flash_configuration* get_ddwrt_configuration()
+{
+	flash_configuration* ddwrt_conf;
+	partition* linux;
+	char** boot;
+
+	ddwrt_conf = create_generic_config();	
+	
+	linux = create_generic_partition();
+	linux->name = "rootfs";
+	linux->file_id = "file_1";
+	linux->flash_address = 0; 	//indicates starting at first available address
+	linux->length_type = FILE_TYPE;	
+	linux->set_entry = 1;		//set entry to 0x00000000
+	linux->set_memory = 1;
+	linux->entry_address  = 0x80041000;
+	linux->memory_address = 0x80041000;
+
+	
+
+	boot = (char**)malloc(3*sizeof(char*));
+	boot[0] = strdup("fis load -l linux\n");
+	boot[1] = strdup("exec\n");
+	boot[2] = NULL ;
+	
+	
+	
+	ddwrt_conf->part1 = linux;	
+	ddwrt_conf->part2 = NULL;
+	ddwrt_conf->part3 = NULL;
+	ddwrt_conf->bootloader_lines = boot;
+	
+	return ddwrt_conf;
+}
+
+
+
+
 flash_configuration* create_generic_config(void)
 {
-	flash_configuration* generic = (flash_configuration*)malloc(sizeof(flash_configuration));
-	generic->part1 = NULL;
-	generic->part2 = NULL;
-	generic->part3 = NULL;
-	generic->bootloader_lines = NULL;
-	return generic;
+	flash_configuration* generic_conf = (flash_configuration*)malloc(sizeof(flash_configuration));
+	generic_conf->part1 = NULL;
+	generic_conf->part2 = NULL;
+	generic_conf->part3 = NULL;
+	generic_conf->bootloader_lines = NULL;
+	return generic_conf;
 }
+
 partition* create_generic_partition(void)
 {
-	partition* generic = (partition*)malloc(sizeof(partition));
-	generic->file_id = NULL;
-	generic->name = NULL;
-	generic->length_type = FILE_TYPE;
-	generic->length = 0;
-	generic->flash_address = 0;
-	generic->entry_address = 0;
-	generic->memory_address = 0;
-	generic->set_entry = 0;
-	generic->set_memory = 0;
-	return generic;
+	partition* generic_part = (partition*)malloc(sizeof(partition));
+	generic_part->file_id = NULL;
+	generic_part->name = NULL;
+	generic_part->length_type = FILE_TYPE;
+	generic_part->length = 0;
+	generic_part->flash_address = 0;
+	generic_part->entry_address = 0;
+	generic_part->memory_address = 0;
+	generic_part->set_entry = 0;
+	generic_part->set_memory = 0;
+	return generic_part;
 }
 
 
@@ -327,8 +380,6 @@ struct arphdr
 	unsigned short	ar_op;		/* ARP opcode (command)		*/
 
 };
-#include <windows.h>
-#include "resource.h"
 
 #else /* WIN32 */
 
@@ -797,6 +848,7 @@ int initialize_buffers_from_files(char* file_1_filename, char* file_2_filename, 
 		unsigned char* file_buffer = file_buffers[file_index];
 		if(file_name != NULL)
 		{
+			unsigned long* file_size_ptr;
 			if (-1 == (fd = open(file_name, O_RDONLY | O_BINARY)))
 			{
 				perror(file_name);
@@ -824,7 +876,7 @@ int initialize_buffers_from_files(char* file_1_filename, char* file_2_filename, 
 			}
 			file_buffers[file_index] = file_buffer;
 			printf("Reading image file %s with %d bytes, rounded to 0x%08lx\n", file_name, raw_size, rounded_size);
-			unsigned long* file_size_ptr = file_size_ptrs[file_index];
+			file_size_ptr = file_size_ptrs[file_index];
 			*file_size_ptr = rounded_size;
 		}
 	}
@@ -853,9 +905,11 @@ int initialize_buffers_from_data(unsigned char* raw_1, unsigned char* raw_2, uns
 		printf("raw size %d = %ld\n", (file_index+1), raw_size);
 		if(raw_size > 0 && raw_buffer != NULL)
 		{
+
 			unsigned long rounded_size = (((raw_size-1)/FLASH_PAGE_SIZE)+1)*FLASH_PAGE_SIZE;
 			unsigned char* next_buf = (unsigned char*)malloc(rounded_size);
-			
+			unsigned long* file_size_ptr;
+
 			/*
 			unsigned long i =0;
 			for(i=0; i < raw_size; i++)
@@ -867,7 +921,7 @@ int initialize_buffers_from_data(unsigned char* raw_1, unsigned char* raw_2, uns
 			
 			memcpy(next_buf, raw_buffer, raw_size);
 			file_buffers[file_index] = next_buf;
-			unsigned long* file_size_ptr = file_size_ptrs[file_index];
+			file_size_ptr = file_size_ptrs[file_index];
 			*file_size_ptr = rounded_size;
 		}
 	}
@@ -886,13 +940,13 @@ int fon_flash(flash_configuration* conf, char* device)
 	uip_ipaddr_t netmask;
 	struct uip_eth_addr srcmac, dstmac, brcmac;
 	struct timer periodic_timer, arp_timer;
-
+	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
+	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
 
 	uip_init();
 	uip_arp_init();
 
-	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
-	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
+
 
 
 	make_configuration_absolute(conf, flash_start_address, flash_size, FLASH_PAGE_SIZE, (const char**)file_ids, file_sizes);
@@ -1068,6 +1122,7 @@ void print_usage(char *prgname)
 	printf("\t\tgargoyle [rootfs file path] [kernel file path]\n");
 	printf("\t\topenwrt  [rootfs file path] [kernel file path]\n");
 	printf("\t\tfonera   [loader file path] [image file path] [image2 file path]\n");
+	printf("\t\tddwrt    [firmware file path]\n");
 }
 
 
@@ -1097,6 +1152,11 @@ int main(int argc, char* argv[])
 				{
 					conf = get_fonera_configuration();
 					num_files_expected = 3;
+				}
+				else if(strcmp(optarg, "ddwrt") == 0)
+				{
+					conf = get_ddwrt_configuration();
+					num_files_expected = 1;
 				}
 				break;
 
@@ -1155,13 +1215,14 @@ int main(int argc, char* argv[])
 	{
 		return 1;
 	}
+
 }
 #else
 
 
 int main(int argc, char* argv[])
 {
-	char* interface = NULL;
+	char* iface = NULL;
 
 	char c;	
 	while((c = getopt(argc, argv, "I:i:")) != -1)
@@ -1170,14 +1231,14 @@ int main(int argc, char* argv[])
 		{
 			case 'I':
 			case 'i':
-				interface = strdup(optarg);
+				iface = strdup(optarg);
 				break;
 		}
 	}
-	if(interface == NULL)
+	if(iface == NULL)
 	{
-		printf("ERROR: you must specify a network interface\n");
-		printf("Usage: %s -i [interface]\n", argv[0]);
+		printf("ERROR: you must specify a network iface\n");
+		printf("Usage: %s -i [iface]\n", argv[0]);
 		return 1;
 	}
 
@@ -1192,7 +1253,7 @@ int main(int argc, char* argv[])
 
 	//binary 1-3 and binary_size 1-3 along with default_conf defined in install_binaries header
 	initialize_buffers_from_data(_binary_1_data, _binary_2_data, _binary_3_data, _binary_1_size, _binary_2_size, _binary_3_size);
-	fon_flash(default_conf, interface);
+	fon_flash(default_conf, iface);
 	
 	return 0;
 

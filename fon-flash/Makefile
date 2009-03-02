@@ -23,19 +23,20 @@ CC      = g++
 AR      = ar
 CFLAGS  = -Wall  -I. -Os
 OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
+OS=$(shell uname)
+
 
 #CFLAGS += -D_DEBUG
 
-%.o: %.c
+%.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 fon-flash-gui: $(OBJS) wx-config fon-flash-gui.o
-	g++  -o fon-flash-gui $(OBJS)  fon-flash-gui.o -lpcap `./wx-config --cxxflags --libs --static=yes` 
-
+	$(CC)  -o fon-flash-gui $(OBJS)   fon-flash-gui.o -lpcap `./wx-config --cxxflags --libs --static=yes` 
+	if [ "$(OS)" = "Darwin" ] && [ -e fon-flash-gui ] ; then cp -r osx_bundle_files FonFlash.app ; mv fon-flash-gui FonFlash.app/Contents/MacOS/ ; fi
 
 fon-flash-gui.o: wx-config 
-	g++ -c fon-flash-gui.cpp  -o fon-flash-gui.o `./wx-config --cxxflags  --static=yes` 
-
+	$(CC) -c fon-flash-gui.cpp  -o fon-flash-gui.o `./wx-config --cxxflags  --static=yes` 
 
 wx-config:
 	sh build-static-wx.sh
@@ -46,17 +47,16 @@ all-in-one: $(OBJS) all-in-one.o file_1.o file_2.o file_3.o
 	$(CC) $(CFLAGS) $(OBJS) file_1.o file_2.o file_3.o all-in-one.o -lpcap -o $@
 	
 all-in-one.o: 
-	$(CC) $(CFLAGS) -DINCLUDE_BINARIES -c fon-flash.c -o all-in-one.o
+	$(CC) $(CFLAGS) -DINCLUDE_BINARIES -c fon-flash.cpp -o all-in-one.o
 
 bin2c:
 	$(CC) bin2c.c -o bin2c
 
 fon-flash: $(OBJS) fon-flash.o Makefile
 	$(CC) $(CFLAGS) $(OBJS) fon-flash.o -lpcap -o $@
-	strip $@
 
 clean:
-	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui
+	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui FonFlash.app
 
 deepclean:
-	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui wx-config static-wx
+	rm -rf *.o *~ *.plg *.ncb fon-flash bin2c file_1.c file_2.c file_3.c install_binaries.h all-in-one fon-flash-gui *.a *pcap*.h static-pcap pcap wx-config static-wx FonFlash.app

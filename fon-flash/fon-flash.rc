@@ -1,0 +1,4 @@
+aaaaa ICON "fon-flash.ico"
+fon_flash_icon ICON "fon-flash.ico"
+#include "wx/msw/wx.rc"
+

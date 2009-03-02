@@ -1,3 +1,7 @@
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN 
+#endif
+
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/choice.h>
@@ -21,7 +25,7 @@ void gui_exit(int status);
 #define exit gui_exit
 #define GUI
 
-#include "fon-flash.c"
+#include "fon-flash.cpp"
 #include "fon-flash.xpm"
 
 
@@ -123,8 +127,9 @@ void ImagePanel::paintEvent(wxPaintEvent& evt)
 {
 	wxPaintDC dc(this);
 	wxBitmap fonFlashLogo(fon_flash_xpm);
-	dc.DrawBitmap(fonFlashLogo, 215, 0, false);
+	dc.DrawBitmap(fonFlashLogo, 215, 0, true);
 }
+
 
 
 
@@ -144,6 +149,7 @@ class MainFrame : public wxFrame
 	
 		flash_configuration* gargoyle_conf;
 		flash_configuration* fonera_conf;
+		flash_configuration* ddwrt_conf;
 		flash_configuration* current_conf;
 
 		wxApp*   app;
@@ -189,25 +195,31 @@ MainFrame *globalAppFrame = NULL;
 
 
 
-MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(550, 550))
+MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title, wxDefaultPosition, wxSize(560, 590))
 {
 	app = a;
 	Centre();
 
+#ifdef WIN32
+	SetIcon(wxICON(fon_flash_icon));
+#endif
+	
 	panel = new ImagePanel(this);
 	testThread = NULL;	
 
 	gargoyle_conf = get_gargoyle_configuration();
 	fonera_conf   = get_fonera_configuration();
+	ddwrt_conf    = get_ddwrt_configuration();
 	current_conf = NULL;
 
 	wxArrayString* firmwareTypes = new wxArrayString();
 	firmwareTypes->Add(wxT("OpenWrt / Gargoyle"));
 	firmwareTypes->Add(wxT("Fonera Firmware"));
+	firmwareTypes->Add(wxT("DD-WRT"));
 
-	wxStaticText *firmwareLabel = new wxStaticText(panel,-1,wxT("Select Firmware Type:"),wxPoint(3,10));
-	firmwareChoice = new wxChoice(panel, SELECT_FIRMWARE_ID, wxPoint(3,30), wxSize(195,25), *firmwareTypes, 0, wxDefaultValidator);
-	
+	wxStaticText *firmwareLabel = new wxStaticText(panel,-1,wxT("Select Firmware Type:"),wxPoint(3,30));
+	firmwareChoice = new wxChoice(panel, SELECT_FIRMWARE_ID, wxPoint(3,50), wxSize(195,25), *firmwareTypes, 0, wxDefaultValidator);
+	firmwareChoice->SetSelection(0);
 	
 	
 	wxArrayString *devChoiceNames = new wxArrayString();
@@ -232,53 +244,59 @@ MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title,
 			devNames->Add(wxString::FromAscii(d->name), 1);
 		}
 	}
-	wxStaticText *interfaceLabel = new wxStaticText(panel,-1,wxT("Select Network Interface:"),wxPoint(5,75));
-	interfaceChoice = new wxChoice(panel, -1, wxPoint(5,95), wxSize(195,25), *devChoiceNames, 0, wxDefaultValidator);
 
+	wxStaticText *interfaceLabel = new wxStaticText(panel,-1,wxT("Select Network Interface:"),wxPoint(5,115));
+
+#ifdef WIN32
+	interfaceChoice = new wxChoice(panel, -1, wxPoint(5,135), wxSize(450,25), *devChoiceNames, 0, wxDefaultValidator);
+#else
+	interfaceChoice = new wxChoice(panel, -1, wxPoint(5,135), wxSize(195,25), *devChoiceNames, 0, wxDefaultValidator);
+#endif
+	interfaceChoice->SetSelection(0);
 
 
 
 		
-	file1Label = new wxStaticText(panel,-1,wxT("Select File 1:"),wxPoint(5,145), wxSize(200, 20));
+	file1Label = new wxStaticText(panel,-1,wxT("Select File 1:"),wxPoint(5,185), wxSize(200, 20));
 	file1Text = new wxTextCtrl( 
 		panel,
 		5,
 		wxString(wxT("")),
-		wxPoint(5, 165),
-		wxSize(450, 30),
+		wxPoint(5, 205),
+		wxSize(450, 25),
 		0);
-	file1Button = new wxButton(panel, FILE1_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,165), wxSize(85, 30));
+	file1Button = new wxButton(panel, FILE1_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,205), wxSize(85, 25));
 
-	file2Label = new wxStaticText(panel,-1,wxT("Select File 2:"),wxPoint(5,220), wxSize(200, 20));
+	file2Label = new wxStaticText(panel,-1,wxT("Select File 2:"),wxPoint(5,250), wxSize(200, 20));
 	file2Text = new wxTextCtrl( 
 		panel,
 		5,
 		wxString(wxT("")),
-		wxPoint(5, 240),
-		wxSize(450, 30),
+		wxPoint(5, 270),
+		wxSize(450, 25),
 		0);
-	file2Button = new wxButton(panel, FILE2_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,240), wxSize(85, 30));
+	file2Button = new wxButton(panel, FILE2_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,270), wxSize(85, 25));
 	
-	file3Label = new wxStaticText(panel,-1,wxT("Select File 3:"),wxPoint(5,295), wxSize(200, 20));
+	file3Label = new wxStaticText(panel,-1,wxT("Select File 3:"),wxPoint(5,315), wxSize(200, 20));
 	file3Text = new wxTextCtrl( 
 		panel,
 		5,
 		wxString(wxT("")),
-		wxPoint(5, 315),
-		wxSize(450, 30),
+		wxPoint(5, 335),
+		wxSize(450, 25),
 		0);
-	file3Button = new wxButton(panel, FILE3_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,315), wxSize(85, 30));
+	file3Button = new wxButton(panel, FILE3_BROWSE_BUTTON_ID, wxT("Browse"), wxPoint(455,335), wxSize(85, 25));
 
 
 	outputText = new wxTextCtrl( 
 		panel,
 		5,
 		wxString(wxT("")),
-		wxPoint(12, 360),
-		wxSize(525, 130),
+		wxPoint(5, 380),
+		wxSize(535, 130),
 		wxTE_READONLY | wxTE_MULTILINE);
 
-	startButton = new wxButton(panel, FLASH_ROUTER_BUTTON_ID, wxT("Flash Router Now!"), wxPoint(75,500), wxSize(400, 40));
+	startButton = new wxButton(panel, FLASH_ROUTER_BUTTON_ID, wxT("Flash Router Now!"), wxPoint(75,520), wxSize(400, 25));
 
 	wxCommandEvent evt;
 	SetFirmware(evt);
@@ -292,22 +310,47 @@ void MainFrame::SetFirmware(wxCommandEvent& evt)
 	{
 		file1Label->SetLabel(wxT("Select Rootfs File:"));
 		file2Label->SetLabel(wxT("Select Kernel File:"));
+		
+		file2Label->Show(true);
+		file2Text->Show(true);
+		file2Button->Show(true);
+
+		
 		file3Label->Show(false);
 		file3Text->Show(false);
 		file3Button->Show(false);
 
 		current_conf = gargoyle_conf;
 	}
-	else //fonera
+	else if(selection==1) //fonera
 	{
 		file1Label->SetLabel(wxT("Select Loader File:"));
 		file2Label->SetLabel(wxT("Select Image File:"));
 		file3Label->SetLabel(wxT("Select Image2 File:"));
+
+		file2Label->Show(true);
+		file2Text->Show(true);
+		file2Button->Show(true);
+
 		file3Label->Show(true);
 		file3Text->Show(true);
 		file3Button->Show(true);
 		
 		current_conf = fonera_conf;
+	}
+	else if(selection == 2)
+	{
+		file1Label->SetLabel(wxT("Select Firmware File:"));
+		
+		file2Label->Show(false);
+		file2Text->Show(false);
+		file2Button->Show(false);
+
+		file3Label->Show(false);
+		file3Text->Show(false);
+		file3Button->Show(false);
+
+		current_conf = ddwrt_conf;
 	}
 }
 
@@ -367,6 +410,10 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 		errorString = firmwareSelection == 1 ? 
 				wxT("ERROR: The specified loader file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
 				wxT("ERROR: The specified rootfs file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+		errorString = firmwareSelection == 2 ?
+				wxT("ERROR: The specified firmware file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
+				errorString;
+
 	
 		//print error
 		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
@@ -379,8 +426,8 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 	}
 
 
-	FILE *test2 = fopen(file2Path.ToAscii(), "r");
-	if(test2 == NULL && is_valid)
+	FILE *test2 = firmwareSelection != 2 ? fopen(file2Path.ToAscii(), "r") : NULL;
+	if(test2 == NULL && is_valid && firmwareSelection != 2)
 	{
 		is_valid = 0;
 		errorString = firmwareSelection == 1 ? 
@@ -392,7 +439,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 		errorDialog->ShowModal();
 
 	}
-	else
+	else if(test2 != NULL)
 	{
 		fclose(test2);
 	}
@@ -412,7 +459,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 	}
 	else if(test3 != NULL)
 	{
-		fclose(test1);
+		fclose(test3);
 	}
 
 
@@ -436,17 +483,19 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 			wxPoint(5, 165),
 			wxSize(450, 30),
 			wxTE_READONLY);
-		
-		wxString old2 = file2Text->GetValue();
-		delete(file2Text);
-		file2Text = new wxTextCtrl( 
-			this->panel,
-			5,
-			old2,
-			wxPoint(5, 240),
-			wxSize(450, 30),
-			wxTE_READONLY);
-
+	
+		if(firmwareSelection != 2)
+		{	
+			wxString old2 = file2Text->GetValue();
+			delete(file2Text);
+			file2Text = new wxTextCtrl( 
+				this->panel,
+				5,
+				old2,
+				wxPoint(5, 240),
+				wxSize(450, 30),
+				wxTE_READONLY);
+		}
 		if(firmwareSelection == 1)
 		{
 			wxString old3 = file3Text->GetValue();
@@ -466,7 +515,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 		
 		
 		char* file1 = strdup(file1Path.ToAscii());
-		char* file2 = strdup(file2Path.ToAscii());
+		char* file2 = firmwareSelection != 2 ? strdup(file2Path.ToAscii()) : NULL;
 		char* file3 = firmwareSelection == 1 ? strdup(file3Path.ToAscii()) : NULL;
 
 		testThread =new WorkerThread(this, dev, current_conf, file1, file2, file3);
