@@ -480,7 +480,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 			this->panel,
 			5,
 			old1,
-			wxPoint(5, 165),
+			wxPoint(5, 205),
 			wxSize(450, 30),
 			wxTE_READONLY);
 	
@@ -492,7 +492,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 				this->panel,
 				5,
 				old2,
-				wxPoint(5, 240),
+				wxPoint(5, 270),
 				wxSize(450, 30),
 				wxTE_READONLY);
 		}
@@ -504,7 +504,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 				this->panel,
 				5,
 				old3,
-				wxPoint(5, 315),
+				wxPoint(5, 335),
 				wxSize(450, 30),
 				wxTE_READONLY);
 		}
