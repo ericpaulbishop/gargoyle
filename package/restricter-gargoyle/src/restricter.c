@@ -943,7 +943,7 @@ void quota_test(update_node *next_update, priority_queue** update_queue, string_
 				next_update->rule_index2 = current_num_rules + 1;
 				
 				char* ip = get_map_element(next_update->definition, "ip");
-				char* rule_end =  ip != NULL ? dynamic_strcat(3, " -d ", ip, " -j REJECT") : strdup(" -j REJECT");
+				char* rule_end =  ip != NULL  && safe_strcmp(ip, "ALL") != 0 ? dynamic_strcat(3, " -d ", ip, " -j REJECT") : strdup(" -j REJECT");
 				char* rule = dynamic_strcat(6, "iptables -t ", ingress_filter_table, " -A ", ingress_filter_chain, " ", rule_end);
 				system( rule );
 				free(rule_end);
@@ -955,7 +955,7 @@ void quota_test(update_node *next_update, priority_queue** update_queue, string_
 				next_update->rule_index3 = current_num_rules + 1;
 				
 				char* ip = get_map_element(next_update->definition, "ip");
-				char* rule_end =  ip != NULL ? dynamic_strcat(3, " -s ", ip, " -j REJECT") : strdup(" -j REJECT");
+				char* rule_end =  ip != NULL && safe_strcmp(ip, "ALL") != 0 ? dynamic_strcat(3, " -s ", ip, " -j REJECT") : strdup(" -j REJECT");
 				char* rule = dynamic_strcat(6, "iptables -t ", egress_filter_table, " -A ", egress_filter_chain, " ", rule_end);
 				system( rule );
 				free(rule_end);
