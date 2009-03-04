@@ -4,9 +4,11 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
+
+
 #force write of webmon & bwmon
-bwmon_enabled = $(ls /etc/rc.d/*bwmon* 2>/dev/null)
-webmon_enabled = $(ls /etc/rc.d/*webmon* 2>/dev/null)
+bwmon_enabled=$(ls /etc/rc.d/*bwmon* 2>/dev/null)
+webmon_enabled=$(ls /etc/rc.d/*webmon* 2>/dev/null)
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle restart
 fi
@@ -35,6 +37,7 @@ if [ -z "$garg_web_root" ] ; then
 	garg_web_root = "/www"
 fi
 cd $garg_web_root
+if [ -e backup.tar.gz ] ; then rm backup.tar.gz ; fi
 ln -s /tmp/backup/backup.tar.gz
 chmod 777 backup.tar.gz
 

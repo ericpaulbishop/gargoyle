@@ -8,7 +8,7 @@
 
 function getBackup()
 {
-	setControlsEnabled(false, true);
+	setControlsEnabled(false, true, "Preparing Backup File");
 	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/create_backup.sh ;\n" );
 	var stateChangeFunction = function(req)
 	{
@@ -32,12 +32,21 @@ function doRestore()
 		confirmRestore = window.confirm("This will completely erase your current settings and replace them with new ones from the selected configuration file.  Are you sure you want to continue?");
 		if(confirmRestore)
 		{
-			setControlsEnabled(false, true);	
 			document.getElementById('restore_form').submit();
+			setControlsEnabled(false, true, "Uploading Configuration File");	
 		}
 	}
 }
+function doDefaultRestore()
+{
+	var confirmRestore = window.confirm("This will completely erase your current settings and replace them with the original, default settings.  Are you sure you want to continue?");
+	if(confirmRestore)
+	{
+		document.getElementById('restore_original_form').submit();
+		setControlsEnabled(false, true, "Loading Original Configuration File");	
+	}
 
+}
 function restoreFailed()
 {
 	setControlsEnabled(true);
@@ -46,7 +55,8 @@ function restoreFailed()
 
 function restoreSuccessful(lanIp)
 {
-	setControlsEnabled(false, true, "Configuration file uploaded successfully. Please wait while your new settings are applied");
+	setControlsEnabled(false, true, "Please wait while new settings are applied")
+	
 
 	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/restart_everything.sh ;\n" );
 	var stateChangeFunction = function(req) { return 0; } ;
@@ -58,6 +68,6 @@ function restoreSuccessful(lanIp)
 		currentProtocol = location.href.match(/^https:/) ? "https" : "http";
 		window.location = currentProtocol + "://" + lanIp + ":" + window.location.port + window.location.pathname;
 	}
-	setTimeout( "doRedirect()", 30000);
+	setTimeout( "doRedirect()", 45000);
 	
 }

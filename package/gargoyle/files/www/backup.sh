@@ -20,25 +20,30 @@
 	<legend class="sectionheader">Restore Old Configuration</legend>
 	<div>
 		<form id='restore_form' enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
-			<label class='leftcolumn'>Select Configuration File to Restore From:</label>
+			<label class='leftcolumn'>Select Old Configuration File:</label>
 			<input class='rightcolumn' type="file" id="restore_file" name="restore_file" />
 		</form>
 	</div>
 	<div>
 		<span class='leftcolumn'><input id="restore_button" type='button' class="default_button" value="Restore Configuration Now" onclick="doRestore()"/></span>
 	</div>
-
 	<iframe id="do_restore" name="do_restore" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
 
+
 </fieldset>
 
-
-<fieldset  id="restore_in_progress" style="display:none">
-	<legend class="sectionheader">Restore In Progress</legend>
+<fieldset id="restore_original_section">
+	<legend class="sectionheader">Restore Default Configuration</legend>
+	<form id='restore_original_form' enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
+	</form>
 	<div>
-		</p>Configuration file uploaded successfully.  Please wait while your new settings are applied.</p>
+		<span class='leftcolumn'><input id="restore_original_button" type='button' class="default_button" value="Restore Default Configuration Now" onclick="doDefaultRestore()"/></span>
 	</div>
+	<iframe id="do_restore_original" name="do_restore_original" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
 </fieldset>
+
+
+
 
 
 
