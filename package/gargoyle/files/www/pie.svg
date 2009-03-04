@@ -13,6 +13,10 @@
 <script type="text/ecmascript"> <![CDATA[
 		var svgNs="http://www.w3.org/2000/svg";
 		var svgDoc;
+		var selectedId = null;
+		var unselectedColors = [];
+		var selectedColors = [];
+
 		function init(evt)
 		{
 			svgDoc = evt.target.ownerDocument;
@@ -27,7 +31,7 @@
 		function setPieChartData(data, labels)
 		{
 			//first construct labels;
-			pieChartLabels = [];	
+			pieChartLabels = [];
 			labelX = 1;
 			nextLabelY=25;
 			labelYIncrement=30;
@@ -37,6 +41,11 @@
 			nextColorIncrement = 0;
 			for(labelIndex = 0; labelIndex < labels.length; labelIndex++)
 			{
+				var unselectedColor = getColorStr(incrementColor(color, nextColorIncrement));
+				var selectedColor = getColorStr(getSelectedRgb(incrementColor(color, nextColorIncrement)));
+				unselectedColors[labelIndex] = unselectedColor;
+				selectedColors[labelIndex] = selectedColor;
+
 				labelRect = svgDoc.createElementNS(svgNs, "rect");
 				labelRect.setAttribute("x", labelX);
 				labelRect.setAttribute("y", nextLabelY);
@@ -44,8 +53,9 @@
 				labelRect.setAttribute("height", labelBoxWidth);
 				labelRect.setAttribute("stroke", "black");
 				labelRect.setAttribute("stroke-width", "1");
-				labelRect.setAttribute("fill",  getColorStr(incrementColor(color, nextColorIncrement)));
 				labelRect.setAttribute("id", "color_" + labelIndex);
+				labelRect.setAttribute("fill",  unselectedColor);
+
 
 				labelText = svgDoc.createElementNS(svgNs, "text");
 				labelText.setAttribute("x", labelX+25);
@@ -54,6 +64,15 @@
 				labelText.setAttribute("font-family", "serif");
 				labelText.appendChild( svgDoc.createTextNode( labels[labelIndex] ));
 				labelText.setAttribute("id", "label_" + labelIndex);
+
+
+				if(selectedId == labelIndex)
+				{
+					labelRect.setAttribute("stroke-width", 3);
+					labelText.setAttribute("font-weight", "bolder");
+					labelRect.setAttribute("fill", selectedColor);
+				}
+
 
 				labelGroup = svgDoc.createElementNS(svgNs, "g");
 				labelGroup.setAttribute("id", "group_" + labelIndex);
@@ -70,7 +89,7 @@
 
 		
 			//now construct pie slices
-			centerX=350;
+			centerX=325;
 			centerY=150;
 			radius=125;
 			dataSum = 0;
@@ -112,11 +131,16 @@
 
 				newPath = svgDoc.createElementNS(svgNs, "path");
 				newPath.setAttribute("d", defaultPathData );
-				newPath.setAttribute("fill", getColorStr(incrementColor(color, nextColorIncrement)));
+				newPath.setAttribute("fill", unselectedColors[dataIndex]);
 				newPath.setAttribute("stroke", "black");
 				newPath.setAttribute("stroke-width", "1");
 				newPath.setAttribute("stroke-linejoin", "round");
 				newPath.setAttribute("id", "slice_" + dataIndex);
+				if(selectedId == dataIndex)
+				{
+					newPath.setAttribute("stroke-width", "3");
+					newPath.setAttribute("fill", selectedColors[dataIndex]);
+				}
 				newPath.onmouseover=piePieceSelected;
 				newPath.onmouseout=piePieceDeselected;
 				pieChartPaths.push(newPath);
@@ -152,10 +176,15 @@
 		function piePieceSelected()
 		{
 			id = this.id.match(/_(.*)$/)[1];
+			selectedId = id;
 			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", 3);
+			svgDoc.getElementById("color_" + id).setAttribute("fill", selectedColors[id]);
 			svgDoc.getElementById("label_" + id).setAttribute("font-weight", "bolder");
+			
 			slice = svgDoc.getElementById("slice_" + id);
 			slice.setAttribute("stroke-width", "3");
+			slice.setAttribute("fill", selectedColors[id]);
+			
 			pieContainer = svgDoc.getElementById("pie_container");
 			pieContainer.removeChild(slice);
 			pieContainer.appendChild(slice);
@@ -163,12 +192,33 @@
 		function piePieceDeselected()
 		{
 			id = this.id.match(/_(.*)$/)[1];
+			if(id == selectedId) { selectedId = null; }
 			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", "1");
+			svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColors[id]);
 			svgDoc.getElementById("label_" + id).setAttribute("font-weight", "normal");
+			
 			slice = svgDoc.getElementById("slice_" + id);
 			slice.setAttribute("stroke-width", "1");
+			slice.setAttribute("fill", unselectedColors[id]);
+			
+			pieContainer = svgDoc.getElementById("pie_container");
+			pieContainer.removeChild(slice);
+			pieContainer.appendChild(slice);
+
 		}
 
+		function getSelectedRgb(unselectedRgb)
+		{
+			var selectedRgb = [];
+			var index=0;
+			for(index=0; index < 3; index++)
+			{
+				var c = unselectedRgb[index];
+				c = c == 0 ? 0 : ( c > 35 ? c-35 : 1 );
+				selectedRgb[index] = c;
+			}
+			return selectedRgb;
+		}
 
 		// takes R,G,B, array & increment size (in degrees of the color wheel), returns rgb array
 		//
@@ -230,7 +280,6 @@
 			}
 			return "#" + toHex(rgb[0]) + toHex(rgb[1]) + toHex(rgb[2]);
 		}
-		
 ]]>
 </script>
 
