@@ -30,9 +30,7 @@ function saveChanges()
 	}
 	else
 	{
-		document.body.style.cursor="wait";
-		document.getElementById("bottom_button_container").style.display="none";
-		document.getElementById("update_container").style.display="block";
+		setControlsEnabled(false, true);
 		if(webmonUpdater != null)
 		{
 			clearInterval(webmonUpdater);
@@ -111,9 +109,7 @@ function saveChanges()
 					excludeExists = true;
 				}
 
-				document.getElementById("update_container").style.display="none";		
-				document.getElementById("bottom_button_container").style.display="block";
-				document.body.style.cursor='auto';
+				setControlsEnabled(true);
 				updateInProgress = false;
 				if(webmonEnabled)
 				{	
@@ -134,9 +130,7 @@ function clearHistory()
 		return;
 	}
 	updateInProgress = true;
-	document.body.style.cursor="wait";
-	document.getElementById("bottom_button_container").style.display="none";
-	document.getElementById("update_container").style.display="block";
+	setControlsEnabled(false, true);
 
 	
 	var commands = "/etc/init.d/webmon_gargoyle stop\nrm -rf " + uciOriginal.get("webmon_gargoyle", "webmon", "save_path") + " 2>/dev/null";
@@ -149,9 +143,7 @@ function clearHistory()
 	{
 		if(req.readyState == 4)
 		{
-			document.getElementById("update_container").style.display="none";		
-			document.getElementById("bottom_button_container").style.display="block";
-			document.body.style.cursor='auto';
+			setControlsEnabled(true);
 			updateInProgress = false;
 			
 			tableContainer = document.getElementById('webmon_table_container');

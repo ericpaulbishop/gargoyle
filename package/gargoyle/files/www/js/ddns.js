@@ -14,13 +14,8 @@ var updatedSections;
 
 function saveChanges()
 {
-
-	document.body.style.cursor="wait";
-	document.getElementById("save_button").style.display="none";
-	document.getElementById("reset_button").style.display="none";
-	document.getElementById("update_container").style.display="block";
-
-
+	setControlsEnabled(false, true);
+	
 	//completely re-build config data
 	deleteCommands = [];
 	sections = uciOriginal.getAllSections("ddns_gargoyle");
@@ -115,10 +110,7 @@ function saveChangesPart2(response)
 
 			uciOriginal = uci.clone();
 			resetData();
-			document.getElementById("update_container").style.display="none";		
-			document.getElementById("save_button").style.display="inline";
-			document.getElementById("reset_button").style.display="inline";
-			document.body.style.cursor='auto';
+			setControlsEnabled(true);
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
@@ -482,7 +474,7 @@ function forceUpdateForRow()
 	}
 	else
 	{
-		document.body.style.cursor="wait";
+		setControlsEnabled(false, true);
 		commands = "/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf -m -f " + sectionName;
 		commands = commands + "\n" + "echo $(cat /var/last_ddns_updates/" + sectionName + ") ";
 		var param = getParameterDefinition("commands", commands);
@@ -492,6 +484,7 @@ function forceUpdateForRow()
 			if(req.readyState == 4)
 			{
 				responseLines=req.responseText.split(/[\r\n]+/);
+				setControlsEnabled(true);
 				if(responseLines[0] == "0")
 				{
 					alert("Update failed.  Ensure your configuration is valid and that you are connected to the internet.");
@@ -502,7 +495,6 @@ function forceUpdateForRow()
 					updateTimes[sectionName] = responseLines[1];
 					resetData();
 				}
-				document.body.style.cursor='auto';
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);

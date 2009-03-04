@@ -3,10 +3,7 @@ var allIps = new Array();
 
 function saveChanges()
 {
-	document.body.style.cursor="wait";
-	document.getElementById("save_button").style.display="none";
-	document.getElementById("reset_button").style.display="none";
-	document.getElementById("update_container").style.display="block";
+	setControlsEnabled(false, true);
 
 	//set enabled status to corrospond with checked in table
 	enabledQuotaFound = false;
@@ -96,11 +93,7 @@ function saveChanges()
 			}
 			
 			resetData();
-			document.getElementById("update_container").style.display="none";
-			document.getElementById("save_button").style.display="inline";
-			document.getElementById("reset_button").style.display="inline";
-			document.body.style.cursor='auto';
-		
+			setControlsEnabled(true);	
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);

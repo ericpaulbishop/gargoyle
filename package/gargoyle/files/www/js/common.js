@@ -5,6 +5,100 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+function setControlsEnabled(enabled, showWaitMessage, waitText)
+{
+	var dark = document.getElementById("darken");
+	var msg  = document.getElementById("wait_msg");
+	if (!enabled)
+	{
+
+		var totalHeight="100%";
+		var totalWidth="100%";
+		if(document.body.parentNode.scrollHeight)
+		{
+			totalHeight = document.body.parentNode.scrollHeight + "px";
+		}
+		else if(document.height)
+		{
+			totalHeight = document.height + "px";
+		}
+		if(document.body.parentNode.scrollWidth)
+		{
+			totalWidth  = document.body.parentNode.scrollWidth + "px";
+		}
+		else if(document.width)
+		{
+			totalWidth = document.width + "px";
+		}
+
+		var viewportHeight;
+		var vewportWidth;
+		if(self.innerHeight)
+		{
+			viewportHeight = window.innerHeight;
+			viewportWidth = window.innerWidth;
+		}
+		else if(document.documentElement && document.documentElement.clientHeight)
+		{
+			viewportHeight = document.documentElement.clientHeight;
+			viewportWidth = document.documentElement.clientWidth;
+		}
+		else if(document.body)
+		{
+			viewportHeight = document.body.clientHeight;
+			viewportWidth = document.body.clientWidth;
+		}
+
+		var leftOffset = Math.floor((viewportWidth-300)/2);
+		var topOffset  = Math.floor((viewportHeight-150)/2); 
+		var is_ie = false;
+		if(document.all)
+		{
+			is_ie = true;
+		}
+		if(is_ie)
+		{
+			var di = document.getElementById("d_iframe");
+			di.style.display="block";
+			di.style.width=totalWidth;
+			di.style.height=totalHeight;
+
+			var dm = document.getElementById("m_iframe");
+			dm.style.display="block";
+			dm.style.width="300px";
+			dm.style.height="150px";
+
+			msg.style.position="absolute";
+			topOffset  = topOffset  + document.documentElement.scrollTop;
+			leftOffset = leftOffset + document.documentElement.scrollLeft;
+		}
+
+		dark.style.height=totalHeight;
+		dark.style.width=totalWidth;
+
+
+
+		msg.style.left = leftOffset >= 0 ? leftOffset+"px" : "0px";
+		msg.style.top  = topOffset >=0 ? topOffset+"px" : "0px";
+
+		
+		dark.style.display="block";
+
+		if(showWaitMessage)
+		{
+			msg.style.display= "block";
+			if(waitText != null)
+			{
+				document.getElementById("wait_txt").firstChild.data = waitText;
+			}
+		}
+	}
+	else
+	{
+		dark.style.display="none";
+		msg.style.display= "none";
+	}
+}
 
 
 function getRequestObj()

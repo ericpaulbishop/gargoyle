@@ -19,10 +19,7 @@ function saveChanges()
 	}
 	else
 	{
-		document.body.style.cursor="wait";
-		document.getElementById("save_button").style.display="none";
-		document.getElementById("reset_button").style.display="none";
-		document.getElementById("update_container").style.display="block";
+		setControlsEnabled(false, true);
 
 		var firewallSectionCommands = [];
 		var redirectSectionTypes = ["redirect", "redirect_disabled"];
@@ -145,11 +142,7 @@ function saveChanges()
 			{
 				uciOriginal = uci.clone();
 				resetData();
-				document.getElementById("update_container").style.display="none";		
-				document.getElementById("save_button").style.display="inline";
-				document.getElementById("reset_button").style.display="inline";
-				document.body.style.cursor='auto';
-		
+				setControlsEnabled(true);
 				//alert(req.responseText);
 			}
 		}

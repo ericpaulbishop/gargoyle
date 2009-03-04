@@ -173,11 +173,7 @@ function saveChanges()
 	}
 	else if(commands.length > 0)
 	{
-		document.body.style.cursor="wait";
-		document.getElementById("save_button").style.display="none";
-		document.getElementById("reset_button").style.display="none";
-		document.getElementById("update_container").style.display="block";
-
+		setControlsEnabled(false, true);
 
 		var stateChangeFunction = function(req)
 		{
@@ -185,11 +181,7 @@ function saveChanges()
 			{
 				uciOriginal = uci.clone();
 				resetData();
-				document.getElementById("update_container").style.display="none";		
-				document.getElementById("save_button").style.display="inline";
-				document.getElementById("reset_button").style.display="inline";
-				document.body.style.cursor='auto';
-			
+				setControlsEnabled(true);
 				//alert(req.responseText);
 			}
 		}

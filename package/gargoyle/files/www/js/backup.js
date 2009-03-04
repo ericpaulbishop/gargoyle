@@ -8,13 +8,13 @@
 
 function getBackup()
 {
-	document.body.style.cursor="wait";
+	setControlsEnabled(false, true);
 	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/create_backup.sh ;\n" );
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
 		{
-			document.body.style.cursor='auto';
+			setControlsEnabled(true);
 			window.location="backup.tar.gz"
 		}
 	}
@@ -32,12 +32,7 @@ function doRestore()
 		confirmRestore = window.confirm("This will completely erase your current settings and replace them with new ones from the selected configuration file.  Are you sure you want to continue?");
 		if(confirmRestore)
 		{
-			document.body.style.cursor="wait";
-			document.getElementById("backup_button").disabled = true;
-			document.getElementById("backup_button").className = "default_button_disabled";
-			document.getElementById("restore_button").disabled = true;
-			document.getElementById("restore_button").className = "default_button_disabled";
-	
+			setControlsEnabled(false, true);	
 			document.getElementById('restore_form').submit();
 		}
 	}
@@ -45,21 +40,13 @@ function doRestore()
 
 function restoreFailed()
 {
+	setControlsEnabled(true);
 	alert("Restore failed.  Ensure that uploaded file is a valid Gargoyle configuration file and try again.");
-	
-	document.getElementById("backup_button").disabled = false;
-	document.getElementById("backup_button").className = "default_button";
-	document.getElementById("restore_button").disabled = false;
-	document.getElementById("restore_button").className = "default_button";
-	document.body.style.cursor="auto";
 }
 
 function restoreSuccessful(lanIp)
 {
-	document.getElementById("backup_section").style.display="none";
-	document.getElementById("restore_section").style.display="none";
-	document.getElementById("restore_in_progress").style.display="block";
-
+	setControlsEnabled(false, true, "Configuration file uploaded successfully. Please wait while your new settings are applied");
 
 	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/restart_everything.sh ;\n" );
 	var stateChangeFunction = function(req) { return 0; } ;

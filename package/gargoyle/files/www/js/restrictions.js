@@ -3,10 +3,7 @@ var pkg = "restricter_gargoyle";
 
 function saveChanges()
 {
-	document.body.style.cursor="wait";
-	document.getElementById("save_button").style.display="none";
-	document.getElementById("reset_button").style.display="none";
-	document.getElementById("update_container").style.display="block";
+	setControlsEnabled(false, true);
 	
 	var enabledRuleFound = false;
 	var runCommands = [];
@@ -72,11 +69,7 @@ function saveChanges()
 			restricterEnabled = restricterEnabled || enabledRuleFound;
 			uciOriginal = uci.clone();
 			resetData();
-			document.getElementById("update_container").style.display="none";		
-			document.getElementById("save_button").style.display="inline";
-			document.getElementById("reset_button").style.display="inline";
-			document.body.style.cursor='auto';
-		
+			setControlsEnabled(true);	
 			//alert(req.responseText);
 		}
 	}

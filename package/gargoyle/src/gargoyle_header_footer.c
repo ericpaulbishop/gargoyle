@@ -248,6 +248,18 @@ int main(int argc, char **argv)
 
 		if(display_type == HEADER)
 		{
+			printf("\t<div id=\"darken\" ><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n");
+			printf("\t<div id=\"wait_msg\">\n");
+			printf("\t\t<div id=\"wait_txt\">\n");
+			printf("\t\t\tPlease Wait While Settings Are Applied\n");
+			printf("\t\t</div>\n");
+			printf("\t\t<div id=\"wait_icon\">\n");
+			printf("\t\t\t<img src=\"/%s/%s/images/wait_icon.gif\" />\n", theme_root, theme);
+			printf("\t\t</div>\n");
+			printf("\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n");
+			printf("\t</div>\n");
+
+
 			printf("\t<div id=\"outer_logo\">\n");
 			printf("\t\t<div id=\"inner_logo\">\n");
 			printf("\t\t\t<div id=\"garg_title\">Gargoyle</div>\n");

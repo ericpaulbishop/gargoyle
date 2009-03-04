@@ -6,6 +6,8 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var stopRedirect = false;
+
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -16,11 +18,8 @@ function saveChanges()
 	}
 	else
 	{
-		document.body.style.cursor="wait";
-		document.getElementById("save_button").style.display="none";
-		document.getElementById("reset_button").style.display="none";
-		document.getElementById("update_container").style.display="block";
 
+		setControlsEnabled(false, true);
 
 
 		//remove all old firewall remote_accept sections that redirected to ssh or http server
@@ -116,8 +115,9 @@ function saveChanges()
 		//document.getElementById("output").value = commands;
 
 
+		stopRedirect = false;
 		var param = getParameterDefinition("commands", commands);
-		runAjax("POST", "utility/run_commands.sh", param, function(){ return ""; });
+		runAjax("POST", "utility/run_commands.sh", param, function(){ setControlsEnabled(true); stopRedirect=true; });
 
 		//we're going to assume user is connecting locally,
 		//redirect for remote connections can get fubar, 
@@ -130,12 +130,15 @@ function saveChanges()
 		//shut out)
 		doRedirect= function()
 		{
-			currentProtocol = location.href.match(/^https:/) ? "https" : "http";
-			otherProtocol = currentProtocol == "https" ? "http" : "https";
-			destinationProtocol = localWebProtocol == "both" || localWebProtocol == currentProtocol ? currentProtocol : otherProtocol;
-			destinationPort = document.getElementById("local_" + destinationProtocol + "_port").value;
-			accessPage = uciOriginal.get("gargoyle", "global", "bin_root") + "/" + uciOriginal.get("gargoyle", "scripts", "system_access");
-			window.location= destinationProtocol + "://" + currentLanIp + ":" + destinationPort + "/" + accessPage;
+			if(!stopRedirect)
+			{
+				currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+				otherProtocol = currentProtocol == "https" ? "http" : "https";
+				destinationProtocol = localWebProtocol == "both" || localWebProtocol == currentProtocol ? currentProtocol : otherProtocol;
+				destinationPort = document.getElementById("local_" + destinationProtocol + "_port").value;
+				accessPage = uciOriginal.get("gargoyle", "global", "bin_root") + "/" + uciOriginal.get("gargoyle", "scripts", "system_access");
+				window.location= destinationProtocol + "://" + currentLanIp + ":" + destinationPort + "/" + accessPage;
+			}
 		}
 		setTimeout( "doRedirect()", 15000);
 	}
