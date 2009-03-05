@@ -405,7 +405,7 @@
 			tickNum++;
 		}
 		svgDoc.getElementById("x-major-ticks").setAttribute("d", majorPathString);
-		svgDoc.getElementById("graph-border").setAttribute("width", (timePoints+2));
+		svgDoc.getElementById("graph-border").setAttribute("width", (timePoints));
 		
 		return timePoints;
 	}
