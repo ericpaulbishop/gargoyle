@@ -117,7 +117,15 @@ function saveChanges()
 
 		stopRedirect = false;
 		var param = getParameterDefinition("commands", commands);
-		runAjax("POST", "utility/run_commands.sh", param, function(){ setControlsEnabled(true); stopRedirect=true; });
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				setControlsEnabled(true); 
+				stopRedirect=true; 
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 		//we're going to assume user is connecting locally,
 		//redirect for remote connections can get fubar, 
