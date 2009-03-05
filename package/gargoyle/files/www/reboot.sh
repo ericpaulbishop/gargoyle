@@ -11,19 +11,13 @@
 
 <form>
 	<fieldset>
-		<legend class="sectionheader">Rebooting</legend>
-		<p><em>System is now rebooting . . .</em></p>	
+		<legend class="sectionheader">Reboot</legend>
+		<center><input type='button' value='Reboot Now' id="reboot_button" class="bottom_button" onclick='reboot()' /></center>
+
 	</fieldset>
 </form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
-
-
-<script>
-<!--
-	reboot();
-//-->
-</script>
 
 
 <?

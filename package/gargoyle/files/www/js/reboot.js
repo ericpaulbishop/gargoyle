@@ -8,7 +8,8 @@
 
 function reboot()
 {
-		
+	setControlsEnabled(false, true, "System Is Now Rebooting");
+	
 	var commands = "\n/etc/init.d/webmon_gargoyle stop\n/etc/init.d/bwmon_gargoyle stop\n/etc/init.d/restricter_gargoyle stop\nreboot\n";
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
@@ -16,6 +17,11 @@ function reboot()
 		if(req.readyState == 4){}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-	
+			
+	doRedirect= function()
+	{
+		window.location.reload(false);
+	}
+	setTimeout( "doRedirect()", 90000);
 }
 
