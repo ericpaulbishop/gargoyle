@@ -36,7 +36,7 @@
 
 		topCoor=1;
 		leftCoor=1;
-		rightCoor=leftCoor+graphXMax;
+		rightCoor=leftCoor+graphXMax+1;
 		bottomCoor=topCoor+300;
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
