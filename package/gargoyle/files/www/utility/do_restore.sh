@@ -28,9 +28,16 @@
 	/etc/init.d/bwmon_gargoyle stop 2>/dev/null
 	/etc/init.d/webmon_gargoyle stop 2>/dev/null
 	
-	
+	rm -rf /etc/config/*
+	rm -rf /etc/rc.d/*
+	rm -rf /tmp/data/*
+	rm -rf /usr/data/*
+	rm -rf /etc/crontabs/*
+	rm -rf /etc/hosts
+
 	tar xzf restore.tar.gz -C / 2>error
 	error=$(cat error)
+
 
 	cd /tmp
 	if [ -e /tmp/restore ] ; then

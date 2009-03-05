@@ -1,7 +1,5 @@
 #!/bin/sh /etc/rc.common
-START=06
-
-
+START=41
 
 
 start() {
