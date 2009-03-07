@@ -250,12 +250,15 @@ int main( int argc, char** argv )
 					priority_queue_node *p = shift_priority_queue_node(update_queue);
 					update_node* next_update = (update_node*)free_priority_queue_node(p);
 					next_update->update_time = current_time;
-	
+					
+					
+
 					//do update
 					int monitor_index = next_update->monitor_index;
 					bw_monitor* monitor = monitors[ monitor_index ];
 					update_monitor(monitor, *next_update, recent_iptables_snapshots, recent_iptables_names);
-				
+			
+					//printf("updating %s at %ld\n", monitor->name, current_time);	
 
 					//schedule next update for this monitor & return to queue
 					*next_update = get_next_update_time(monitors, monitor_index);
@@ -278,8 +281,10 @@ int main( int argc, char** argv )
 		
 		//sleep for 400 milliseconds, or until signal is caught
 		usleep(400*1000); 
-		queue_test_counter = queue_test_counter + 400;
 
+	
+
+		queue_test_counter = queue_test_counter + 400;
 		if(output_requested > 0)
 		{
 			handle_output_request(monitors);
@@ -305,6 +310,40 @@ int main( int argc, char** argv )
 					output_requested = 0;
 				}
 			}
+		}
+
+		
+		//if we just jumped more than 25 minutes (i.e. date/time was reset -- usually done in increments of hours) , reset all times
+		time_t time_test2 = time(NULL);
+		if( time_test2 - current_time > 25*60 || time_test2 < current_time)
+		{
+			long adjustment_seconds = time_test2 - current_time;
+			reference_time = reference_time + adjustment_seconds;
+
+			priority_queue* new_update_queue = initialize_priority_queue();
+			while(update_queue->length > 0)
+			{
+				priority_queue_node *p = shift_priority_queue_node(update_queue);
+
+				update_node* next_update = (update_node*)p->value;
+				next_update->update_time = next_update->update_time + adjustment_seconds;
+
+				bw_monitor* monitor = monitors[ next_update->monitor_index ];
+				monitor->last_update = monitor->last_update + adjustment_seconds;
+				monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+				monitor->last_backup = monitor->last_backup + adjustment_seconds;
+				
+				bw_history* history = monitor->history;
+				history->oldest_interval_start = history->oldest_interval_start + adjustment_seconds;
+				history->oldest_interval_end   = history->oldest_interval_end + adjustment_seconds;
+				history->recent_interval_end   = history->recent_interval_end + adjustment_seconds;
+			
+				push_priority_queue_node(new_update_queue, p);
+			}
+
+			long num_destroyed;
+			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			update_queue = new_update_queue;
 		}
 	}
 
@@ -568,13 +607,35 @@ void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* rece
 			{
 				new_node = pop_history(monitor->history);
 			}
-			int interval_start = monitor->last_update;
-			int interval_end = update.update_time;
-			new_node->bandwidth = monitor->accumulator_count;
-			push_history(monitor->history, new_node, interval_start, interval_end);
-
 			
-			monitor->last_update = update.update_time;
+			time_t interval_start = monitor->last_update;
+			time_t nominal_end = (monitor->interval_end > 0) ? get_next_interval_end( monitor->last_update, monitor->interval_end) : monitor->last_update + monitor->interval_length;
+			unsigned long nominal_length = (monitor->interval_end > 0) ? get_next_interval_end( nominal_end, monitor->interval_end) - nominal_end : monitor->interval_length;
+			time_t actual_end = update.update_time;
+			
+			//if current time is way ahead of where it should be in series, insert intermediate history nodes
+			while(actual_end > nominal_end+nominal_length)
+			{
+				new_node->bandwidth = -1;
+				push_history(monitor->history, new_node, interval_start, nominal_end);
+
+				nominal_end = (monitor->interval_end > 0) ? get_next_interval_end( nominal_end, monitor->interval_end) : nominal_end + monitor->interval_length;
+				if(monitor->history->length < monitor->history_length)
+				{
+					new_node = (history_node*)malloc(sizeof(history_node));
+				}
+				else
+				{
+					new_node = pop_history(monitor->history);
+				}
+			}
+			
+			new_node->bandwidth = monitor->accumulator_count;
+			push_history(monitor->history, new_node, interval_start, nominal_end);
+			
+			//set update_time to nominal_end so next is scheduled on time
+			update.update_time = nominal_end;
+			monitor->last_update = nominal_end;
 			monitor->accumulator_count = 0;
 
 			//print_history(monitor->history);
