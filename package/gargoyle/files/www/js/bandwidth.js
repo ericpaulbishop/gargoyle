@@ -173,10 +173,8 @@ function updateTotalTable()
 	if(selectedTotalTimeFrame == "daily")
 	{
 		columnNames[0] = "Date";
-		nextDate=new Date();
-		nextDate.setTime((dailyUploadData[1]*1000)-(60*60*1000)); //this is end time point so subtract one hour so it is 11pm on day we have bandwidth for
-		
-
+		var nextDate=new Date();
+		nextDate.setTime((dailyUploadData[1]*1000)-(3*60*60*1000)); //this is end time point so subtract a few  hours so it is evening on day we have bandwidth for
 		
 		for(dailyIndex=dailyUploadData[0].length-1; dailyIndex >=0; dailyIndex--)
 		{
@@ -191,10 +189,10 @@ function updateTotalTable()
 	else if(selectedTotalTimeFrame == "monthly")
 	{
 		columnNames[0] = "Month";
-		monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-		nextDate=new Date();
+		var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+		var nextDate=new Date();
 		nextDate.setTime((dailyUploadData[1]*1000)-(60*60*1000)); //this is end time point so subtract one hour so it is 11pm on day we have bandwidth for
-		dailyIndex = dailyUploadData[0].length-1;
+		var dailyIndex = dailyUploadData[0].length-1;
 		while( dailyIndex >= 0 )
 		{
 			//make sums floating points to deal with 64bit / 32bit conversion which can be an issue
@@ -358,12 +356,14 @@ function parseMonitors(outputData)
 		{
 			monitorName = dataLines[lineIndex];
 			lineIndex++; 
-			lineIndex++; //ignore first interval start
-			lineIndex++; //ignore first interval end
+			firstTimeStart = dataLines[lineIndex];
+			lineIndex++;
+			firstTimeEnd = dataLines[lineIndex];
+			lineIndex++; 
 			lastTimePoint = dataLines[lineIndex];
 			lineIndex++;
 			points = dataLines[lineIndex].split(",");
-			monitors[monitorName] = [points, lastTimePoint];
+			monitors[monitorName] = [points, lastTimePoint ];
 		}
 	}
 	return monitors;

@@ -50,23 +50,26 @@ function initializePieCharts()
 			downIdHash[classId] = 1;
 		}
 	}
-	for( id in upIdHash)
+	for(id in upIdHash)
 	{
 		uploadClassIds.push(id);
 	}
-	for( id in downIdHash)
+	for(id in downIdHash)
 	{
 		downloadClassIds.push(id);
 	}
 
-	var initializePies = function()
+	initializePies = function()
 	{
-		if(setUploadPie == null || setDownloadPie == null)
+		if(setUploadPie == null)
 		{
 			setUploadPie = getEmbeddedSvgSetFunction("upload_pie");
+		}
+		if(setDownloadPie == null)
+		{
 			setDownloadPie = getEmbeddedSvgSetFunction("download_pie");	
 		}
-		else
+		if(setUploadPie == null || setDownloadPie == null)
 		{
 			setTimeout( "initializePies()", 100);
 		}
