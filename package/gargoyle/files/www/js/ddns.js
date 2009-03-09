@@ -368,7 +368,7 @@ function createEnabledCheckbox()
 
 function createEditButton()
 {
-	editButton = createButton();
+	editButton = createInput("button");
 	editButton.value = "Edit";
 	editButton.className="default_button";
 	editButton.onclick = editServiceTableRow;
@@ -377,7 +377,7 @@ function createEditButton()
 
 function createForceUpdateButton()
 {
-	updateButton = createButton();
+	updateButton = createInput("button");
 	updateButton.value = "Force Update";
 	updateButton.className="default_button";
 	updateButton.onclick = forceUpdateForRow;

@@ -89,7 +89,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	}
 	if(rowsAreRemovable)
 	{
-		cellContent = createButton(controlDocument);
+		cellContent = createInput("button", controlDocument);
 		cellContent.value = 'Remove';
 		cellContent.className="default_button";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); }; 
@@ -103,7 +103,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	}
 	if(rowsAreMovable)
 	{
-		cellContent = createButton(controlDocument);
+		cellContent = createInput("button", controlDocument);
 		cellContent.value = String.fromCharCode(8593);
 		cellContent.className="default_button";
 		cellContent.onclick= function() { moveThisCellsRowUp(this); rowMoveCallback(this, "up"); };
@@ -113,7 +113,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		row.appendChild(cell);
 		cellIndex++;
 
-		cellContent = createButton(controlDocument);
+		cellContent = createInput("button", controlDocument);
 		cellContent.value = String.fromCharCode(8595);
 		cellContent.className="default_button";
 		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); }; 
@@ -245,17 +245,5 @@ function setRowClasses(table, enabled)
 	}
 }
 
-function createButton(controlDocument)
-{
-	controlDocument = controlDocument == null ? document : controlDocument;
-	try
-	{
-		button = controlDocument.createElement('input');
-		button.type = 'button';
-	}
-	catch(e)
-	{
-		button = controlDocument.createElement('<input type="button" />');
-	}
-	return button;
-}
+
+

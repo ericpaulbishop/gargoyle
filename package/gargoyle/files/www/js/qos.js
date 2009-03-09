@@ -629,7 +629,7 @@ function removeServiceClassCallback(table, row)
 
 function createRuleTableEditButton()
 {
-	editRuleButton = createButton();
+	editRuleButton = createInput("button");
 	editRuleButton.value = "Edit";
 	editRuleButton.className="default_button";
 	editRuleButton.onclick = editRuleTableRow;
@@ -805,7 +805,7 @@ function editRuleTableRow()
 
 function createClassTableEditButton()
 {
-	editClassButton = createButton();
+	editClassButton = createInput("button");
 	editClassButton.value = "Edit";
 	editClassButton.className="default_button";
 	editClassButton.onclick = editClassTableRow;

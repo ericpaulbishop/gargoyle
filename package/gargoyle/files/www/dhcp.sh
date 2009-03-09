@@ -103,20 +103,7 @@ for (etherIndex in etherData)
 		</div>
 		<div class='bottom_gap'>
 			<div id='staticip_add_container' class='indent'>
-				<table>
-					<tr class='table_row_add_header'>
-						<th><label id='add_host_label' for='add_host'>Hostname</label><br><em>(optional)</em></th>
-						<th><label id='add_mac_label' for='add_mac'>MAC</label></th>
-						<th><label id='add_ip_label' for='add_ip'>IP</label></th>
-						<th></th>
-					</tr>
-					<tr class='table_row_add'>
-						<td><input type='text' id='add_host'  size='15'/></td>
-						<td><input type='text' id='add_mac' size='17' onkeyup='proofreadMac(this)' maxLEngth='17'/></td>
-						<td><input type='text' id='add_ip' size='15' onkeyup='proofreadIp(this)' maxLength='15'/></td>
-						<td><input type='button' id='add_button' value="Add" class='default_button' onclick='addStatic()'/></td>
-					</tr>	
-				</table>
+				<? cat templates/static_ip_template ?>
 			</div>
 		</div>
 		

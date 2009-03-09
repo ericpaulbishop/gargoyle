@@ -387,7 +387,7 @@ function createEnabledCheckbox(enabled)
 
 function createEditButton(enabled)
 {
-	editButton = createButton();
+	editButton = createInput("button");
 	editButton.value = "Edit";
 	editButton.className="default_button";
 	editButton.onclick = editRule;

@@ -96,9 +96,25 @@ function saveChanges()
 	}
 }
 
+function createEditButton()
+{
+	var editButton = createInput("button");
+	editButton.value = "Edit";
+	editButton.className="default_button";
+	editButton.onclick = editStatic;
+	return editButton;
+}
+
 function resetData()
 {
-	columnNames=['Hostname', 'MAC', 'IP'];
+	var rowIndex=0;
+	for(rowIndex=0; rowIndex < staticIpTableData ; rowIndex++)
+	{
+		var rowData = staticIpTableData[rowIndex];
+		rowData.push(createEditButton);
+		
+	}
+	columnNames=['Hostname', 'MAC', 'IP', ''];
 	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false);
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)
@@ -172,7 +188,7 @@ function setEnabled(enabled)
 
 function addStatic()
 {
-	errors = proofreadAdd();
+	errors = proofreadStatic(document);
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\nCould not add row.");
@@ -185,41 +201,49 @@ function addStatic()
 		{
 			v = document.getElementById(ids[idIndex]).value;
 			v = v== '' ? '-' : v;
-			values.push(v);;
+			values.push(v);
 			document.getElementById(ids[idIndex]).value = "";
 		}
+		values.push(createEditButton());
 		staticIpTable = document.getElementById('staticip_table_container').firstChild;
 		addTableRow(staticIpTable,values, true, false);
 
 	}
 }
 
-function proofreadAdd()
+function proofreadStatic(controlDocument, tableDocument, excludeRow)
 {
+	controlDocument = controlDocument == null ? document : controlDocument;
+	tableDocument = tableDocument == null ? document : tableDocument;
+	
 	addIds=['add_mac', 'add_ip'];
 	labelIds= ['add_mac_label', 'add_ip_label'];
 	functions = [validateMac, validateIP];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
-	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds);
+	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
 	if(errors.length == 0)
 	{
-		staticIpTable = document.getElementById('staticip_table_container').firstChild;
-		currentData = getTableDataArray(staticIpTable, true, false);
-		for (rowDataIndex in currentData)
+		var staticIpTable = tableDocument.getElementById('staticip_table_container').firstChild;
+		var currentData = getTableDataArray(staticIpTable, true, false);
+		var rowDataIndex = 0;
+		for (rowDataIndex=0; rowDataIndex < currentData.length ; rowDataIndex++)
 		{
-			rowData = currentData[rowDataIndex];
-			if(rowData[0] != '' && rowData[0] != '-' && rowData[0] == document.getElementById('add_host').value)
+			if(staticIpTable.rows[rowDataIndex+1] != excludeRow)
 			{
-				errors.push("duplicate Hostname");
-			}
-			if(rowData[1] == document.getElementById('add_mac').value)
-			{
-				errors.push("duplicate MAC");
-			}
-			if(rowData[2] == document.getElementById('add_ip').value)
-			{
-				errors.push("duplicate IP address");
+				rowData = currentData[rowDataIndex];
+				if(rowData[0] != '' && rowData[0] != '-' && rowData[0] == controlDocument.getElementById('add_host').value)
+				{
+					errors.push("duplicate Hostname");
+				}
+				if(rowData[1] == controlDocument.getElementById('add_mac').value)
+				{
+					errors.push("duplicate MAC");
+				}
+				if(rowData[2] == controlDocument.getElementById('add_ip').value)
+				{
+					errors.push("duplicate IP address");
+				}
 			}
 		}
 	}
@@ -228,7 +252,7 @@ function proofreadAdd()
 		var dhcpSection = getDhcpSection(uciOriginal);
 		var mask = uciOriginal.get("network", "lan", "netmask");
 		var ip = uciOriginal.get("network", "lan", "ipaddr");
-		var testIp = document.getElementById('add_ip').value;
+		var testIp = controlDocument.getElementById('add_ip').value;
 		var testEnd = parseInt( (testIp.split("."))[3] );
 
 		if(!rangeInSubnet(mask, ip, testEnd, testEnd))
@@ -240,9 +264,7 @@ function proofreadAdd()
 			errors.push("Specified static IP is current router IP.");
 		}	
 	}
-
 	return errors;
-
 }
 
 function proofreadAll()
@@ -276,3 +298,92 @@ function proofreadAll()
 
 	return errors;
 }
+
+function editStatic()
+{
+	if( typeof(editStaticWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editStaticWindow.close();
+		}
+		catch(e){}
+	}
+
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+
+	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	
+	saveButton = createInput("button", editStaticWindow.document);
+	closeButton = createInput("button", editStaticWindow.document);
+	saveButton.value = "Close and Apply Changes";
+	saveButton.className = "default_button";
+	closeButton.value = "Close and Discard Changes";
+	closeButton.className = "default_button";
+
+	editRow=this.parentNode.parentNode;
+
+	runOnEditorLoaded = function () 
+	{
+		updateDone=false;
+		if(editStaticWindow.document != null)
+		{
+			if(editStaticWindow.document.getElementById("bottom_button_container") != null)
+			{
+				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
+				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+			
+				//set edit values
+				editStaticWindow.document.getElementById("add_host").value = editRow.childNodes[0].firstChild.data;
+				editStaticWindow.document.getElementById("add_mac").value  = editRow.childNodes[1].firstChild.data;
+				editStaticWindow.document.getElementById("add_ip").value   = editRow.childNodes[2].firstChild.data;
+				editStaticWindow.document.getElementById("add_button").style.display="none";				
+				closeButton.onclick = function()
+				{
+					editStaticWindow.close();
+				}
+				saveButton.onclick = function()
+				{
+					// error checking goes here
+					var errors = proofreadStatic(editStaticWindow.document, document, editRow);
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\nCould not update static ip.");
+					}
+					else
+					{
+						//update document with new data
+						editRow.childNodes[0].firstChild.data = editStaticWindow.document.getElementById("add_host").value;
+						editRow.childNodes[1].firstChild.data = editStaticWindow.document.getElementById("add_mac").value;
+						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_ip").value;
+						
+						editStaticWindow.close();
+					}
+				}
+				editStaticWindow.moveTo(xCoor,yCoor);
+				editStaticWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout( "runOnEditorLoaded()", 250);
+		}
+	}
+	runOnEditorLoaded();
+}
+
