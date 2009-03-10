@@ -4,12 +4,12 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-
+miniupnpd_enabled=$(ls /etc/rc.d/*miniupnpd 2>/dev/null)
 restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
-
+/etc/init.d/miniupnpd stop >/dev/null 2>&1
 /etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
 /etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 /etc/init.d/qos_gargoyle stop >/dev/null 2>&1
@@ -23,5 +23,8 @@ if [ -n "$bwmon_enabled" ] ; then
 fi
 if [ -n "$restricter_enabled" ] ; then
 	/etc/init.d/restricter_gargoyle start
+fi
+if [ -n "$miniupnpd_enabled" ] ; then
+	/etc/init.d/miniupnpd start
 fi
 

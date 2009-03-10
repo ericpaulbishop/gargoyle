@@ -116,14 +116,12 @@ function saveChanges()
 
 		//upnp
 		upnpStartCommands = new Array();
-		upnpStartCommands.push("/etc/init.d/miniupnpd stop");
 		upnpdEnabled = document.getElementById("upnp_enabled").checked;
 		if(upnpdEnabled)
 		{
 			upnpStartCommands.push("/etc/init.d/miniupnpd enable");
 			uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
 			uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
-			upnpStartCommands.push("/etc/init.d/miniupnpd start");
 		}
 		else
 		{
@@ -131,9 +129,9 @@ function saveChanges()
 		}
 	
 
-		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + upnpStartCommands.join("\n");
+		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + upnpStartCommands.join("\n") + "\n" + restartFirewallCommand;
 		//document.getElementById("output").value = commands;
-
+			
 
 		var param = getParameterDefinition("commands", commands);
 		var stateChangeFunction = function(req)
