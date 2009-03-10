@@ -53,6 +53,9 @@ webmon_enabled=$(ls /etc/rc.d/*webmon* 2>/dev/null)
 if [ -n "$qos_enabled" ] ; then
 	/etc/init.d/qos_gargoyle start
 fi
+if [ -n "$upnp_enabled" ] ; then
+	/etc/init.d/miniupnpd start
+fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle start
 fi
@@ -61,9 +64,6 @@ if [ -n "$restricter_enabled" ] ; then
 fi
 if [ -n "$ddns_enabled" ] ; then
 	/etc/init.d/ddns_gargoyle start
-fi
-if [ -n "$upnp_enabled" ] ; then
-	/etc/init.d/miniupnpd start
 fi
 /etc/init.d/dnsmasq start >/dev/null 2>&1 
 if [ -n "$webmon_enabled" ] ; then
