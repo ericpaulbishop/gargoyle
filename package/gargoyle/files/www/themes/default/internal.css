@@ -438,6 +438,10 @@ td.portf_table_column_7
 {
 	border:1px solid black;
 }
+td.portf_table_column_8
+{
+	border:1px solid black;
+}
 
 td.portf_range_table_column_1
 {
@@ -472,8 +476,10 @@ td.portf_range_table_column_7
 {
 	border:1px solid black;
 }
-
-
+td.portf_range_table_column_8
+{
+	border:1px solid black;
+}
 
 
 td.qos_class_table_column_1
