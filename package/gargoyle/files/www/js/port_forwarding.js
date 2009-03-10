@@ -163,7 +163,7 @@ function proofreadAll()
 
 function addPortfRule()
 {
-	errors = proofreadAdd();
+	errors = proofreadForwardSingle();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\nCould not add forwarding rule.");
@@ -184,7 +184,6 @@ function addPortfRule()
 			}
 		}
 		values[4] = values[4] == '-' ? values[2] : values[4];
-		
 
 
 		//check if this is identical to another rule, but for a different protocol
@@ -223,6 +222,7 @@ function addPortfRule()
 			checkbox = createInput('checkbox');
 			checkbox.checked = true;
 			values.push(checkbox);
+			values.push(createEditButton(true));	
 			addTableRow(portfTable,values, true, false);
 		}
 	}
@@ -232,7 +232,7 @@ function addPortfRule()
 
 function addPortfRangeRule()
 {
-	errors = proofreadAddRange();
+	errors = proofreadForwardRange();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\nCould not add forwarding rule.");
@@ -286,6 +286,7 @@ function addPortfRangeRule()
 			checkbox = createInput('checkbox');	
 			checkbox.checked = true;
 			values.push(checkbox);
+			values.push(createEditButton(false));	
 
 			portfrangeTable = document.getElementById('portfrange_table_container').firstChild;
 			addTableRow(portfrangeTable,values, true, false);
@@ -293,44 +294,51 @@ function addPortfRangeRule()
 	}
 }
 
-function proofreadAddRange()
+function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 {
-	addIds = ['addr_sp', 'addr_ep', 'addr_ip'];
-	labelIds = ['addr_sp_label', 'addr_ep_label', 'addr_ip_label'];
-	functions = [validateNumeric, validateNumeric, validateIP];
-	returnCodes = [0,0,0];
-	visibilityIds = addIds;
-	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds);
+	controlDocument = controlDocument == null ? document : controlDocument;
+	tableDocument = tableDocument == null ? document : tableDocument;
+
+	var addIds = ['addr_sp', 'addr_ep', 'addr_ip'];
+	var labelIds = ['addr_sp_label', 'addr_ep_label', 'addr_ip_label'];
+	var functions = [validateNumeric, validateNumeric, validateIP];
+	var returnCodes = [0,0,0];
+	var visibilityIds = addIds;
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
 	if(errors.length == 0)
 	{
-		if( (1*document.getElementById('addr_sp').value) > (1*document.getElementById('addr_ep').value) )
+		if( (1*controlDocument.getElementById('addr_sp').value) > (1*controlDocument.getElementById('addr_ep').value) )
 		{
 			errors.push("Start Port > End Port");
 		}
 		
 		
-		portfTable = document.getElementById('portf_table_container').firstChild;
-		currentPortfData = getTableDataArray(portfTable, true, false);
-		addStartPort = document.getElementById('addr_sp').value;
-		addEndPort = document.getElementById('addr_ep').value;
-		addProtocol = document.getElementById('addr_prot').value;
-		for (rowDataIndex in currentPortfData)
+		var portfTable = tableDocument.getElementById('portf_table_container').firstChild;
+		var currentPortfData = getTableDataArray(portfTable, true, false);
+		var addStartPort = controlDocument.getElementById('addr_sp').value;
+		var addEndPort = controlDocument.getElementById('addr_ep').value;
+		var addProtocol = controlDocument.getElementById('addr_prot').value;
+		var rowDataIndex=0;
+		for (rowDataIndex=0; rowDataIndex < currentPortfData.length ; rowDataIndex++)
 		{
-			rowData = currentPortfData[rowDataIndex];
+			var rowData = currentPortfData[rowDataIndex];
 			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') &&  addStartPort*1 <= rowData[2]*1 && addEndPort*1 >= rowData[2]*1 )
 			{
 				errors.push("Port(s) Within Range Is/Are Already Being Forwarded");
 			}
 		}
 
-		portfRangeTable = document.getElementById('portfrange_table_container').firstChild;
-		currentRangeData = getTableDataArray(portfRangeTable, true, false);
-		for (rowDataIndex in currentRangeData)
+		var portfRangeTable = tableDocument.getElementById('portfrange_table_container').firstChild;
+		var currentRangeData = getTableDataArray(portfRangeTable, true, false);
+		for (rowDataIndex=0; rowDataIndex < currentRangeData.length; rowDataIndex++)
 		{
-			rowData = currentRangeData[rowDataIndex];
-			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1)
+			if(portfRangeTable.rows[rowDataIndex+1] != excludeRow)
 			{
-				errors.push("Port(s) Within Range Is/Are Already Being Forwarded");
+				var rowData = currentRangeData[rowDataIndex];
+				if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1)
+				{
+					errors.push("Port(s) Within Range Is/Are Already Being Forwarded");
+				}
 			}
 		}
 	}
@@ -340,42 +348,48 @@ function proofreadAddRange()
 
 }
 
-function proofreadAdd()
+function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 {
-	
-	addIds = ['add_fp', 'add_ip'];
-	labelIds = ['add_fp_label', 'add_ip_label', 'add_dp_label'];
-	functions = [validateNumeric, validateIP, validateNumeric];
-	returnCodes = [0,0,0];
-	visibilityIds = addIds;
-	if(document.getElementById('add_dp').value.length > 0)
+	controlDocument = controlDocument == null ? document : controlDocument;
+	tableDocument = tableDocument == null ? document : tableDocument;
+
+	var addIds = ['add_fp', 'add_ip'];
+	var labelIds = ['add_fp_label', 'add_ip_label', 'add_dp_label'];
+	var functions = [validateNumeric, validateIP, validateNumeric];
+	var returnCodes = [0,0,0];
+	var visibilityIds = addIds;
+	if(controlDocument.getElementById('add_dp').value.length > 0)
 	{
 		addIds.push('add_dp');
 	}
-	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds);
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
 
 
 
 	if(errors.length == 0)
 	{
-		portfTable = document.getElementById('portf_table_container').firstChild;
-		currentPortfData = getTableDataArray(portfTable, true, false);
-		addPort = document.getElementById('add_fp').value;
-		addProtocol = document.getElementById('add_prot').value;
-		for (rowDataIndex in currentPortfData)
+		var portfTable = tableDocument.getElementById('portf_table_container').firstChild;
+		var currentPortfData = getTableDataArray(portfTable, true, false);
+		var addPort = controlDocument.getElementById('add_fp').value;
+		var addProtocol = controlDocument.getElementById('add_prot').value;
+		var rowDataIndex=0;
+		for (rowDataIndex=0; rowDataIndex < currentPortfData.length; rowDataIndex++)
 		{
-			rowData = currentPortfData[rowDataIndex];
-			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') &&  addPort == rowData[2])
+			if(portfTable.rows[rowDataIndex+1] != excludeRow)
 			{
-				errors.push("Port Is Already Being Forwarded");
+				var rowData = currentPortfData[rowDataIndex];
+				if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') &&  addPort == rowData[2])
+				{
+					errors.push("Port Is Already Being Forwarded");
+				}
 			}
 		}
 
-		portfRangeTable = document.getElementById('portfrange_table_container').firstChild;
-		currentRangeData = getTableDataArray(portfRangeTable, true, false);
-		for (rowDataIndex in currentRangeData)
+		var portfRangeTable = tableDocument.getElementById('portfrange_table_container').firstChild;
+		var currentRangeData = getTableDataArray(portfRangeTable, true, false);
+		for (rowDataIndex=0; rowDataIndex < currentRangeData; rowDataIndex++)
 		{
-			rowData = currentRangeData[rowDataIndex];
+			var rowData = currentRangeData[rowDataIndex];
 			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1)
 			{
 				errors.push("Port Is Already Being Forwarded");
@@ -446,7 +460,7 @@ function resetData()
 					}
 					else
 					{
-						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox];
+						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox, createEditButton(false)];
 						portRangeTableData.push(nextTableRowData);
 						portRangeProtoHash[proto][hashStr] = nextTableRowData;
 						portRangeEnabledStatus.push(checkbox.checked);
@@ -462,7 +476,7 @@ function resetData()
 					}
 					else
 					{
-						var nextTableRowData = [name, proto.toUpperCase(), srcdport, destip, destport, checkbox];
+						var nextTableRowData = [name, proto.toUpperCase(), srcdport, destip, destport, checkbox, createEditButton(true)];
 						singlePortTableData.push(nextTableRowData);
 						singlePortProtoHash[proto][hashStr] = nextTableRowData;
 						singlePortEnabledStatus.push(checkbox.checked);
@@ -473,7 +487,7 @@ function resetData()
 	}
 
 
-	columnNames = ['Application', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled']
+	columnNames = ['Application', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled', '']
 	portfTable=createTable(columnNames, singlePortTableData, "portf_table", true, false);
 	table1Container = document.getElementById('portf_table_container');
 	
@@ -487,7 +501,7 @@ function resetData()
 	
 	
 
-	columnNames = ['Application', 'Protocol', 'Start Port', 'End Port', 'To IP', 'Enabled']
+	columnNames = ['Application', 'Protocol', 'Start Port', 'End Port', 'To IP', 'Enabled', '']
 	portfrangeTable=createTable(columnNames, portRangeTableData, "portf_range_table", true, false);
 	table2Container = document.getElementById('portfrange_table_container');
 	if(document.getElementById('portfrange_table_container').firstChild != null)
@@ -571,3 +585,135 @@ function setDmzEnabled()
 {
 	enableAssociatedField(document.getElementById("dmz_enabled"), 'dmz_ip', document.getElementById('dmz_ip').value);
 }
+
+
+function createEditButton(isSingle)
+{
+	var editButton = createInput("button");
+	editButton.value = "Edit";
+	editButton.className="default_button";
+	editButton.onclick = isSingle ? function(){ editForward(true, this); } : function(){ editForward(false, this); } ;
+	return editButton;
+}
+
+function editForward(isSingle, triggerElement)
+{
+	if( typeof(editForwardWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editForwardWindow.close();
+		}
+		catch(e){}
+	}
+
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+
+	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
+	editForwardWindow = window.open(editLocation, "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	
+	saveButton = createInput("button", editForwardWindow.document);
+	closeButton = createInput("button", editForwardWindow.document);
+	saveButton.value = "Close and Apply Changes";
+	saveButton.className = "default_button";
+	closeButton.value = "Close and Discard Changes";
+	closeButton.className = "default_button";
+
+	editRow=triggerElement.parentNode.parentNode;
+
+	runOnEditorLoaded = function () 
+	{
+		updateDone=false;
+		if(editForwardWindow.document != null)
+		{
+			if(editForwardWindow.document.getElementById("bottom_button_container") != null)
+			{
+				editForwardWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
+				editForwardWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+			
+				//set edit values
+				var r= isSingle ? "" : "r";
+				editForwardWindow.document.getElementById("add" + r + "_button").style.display="none";
+				editForwardWindow.document.getElementById("add" + r + "_app").value = editRow.childNodes[0].firstChild.data;
+				setSelectedText("add" + r + "_prot", editRow.childNodes[1].firstChild.data, editForwardWindow.document);
+				if(isSingle)
+				{
+					editForwardWindow.document.getElementById("add_fp").value   = editRow.childNodes[2].firstChild.data;
+					editForwardWindow.document.getElementById("add_ip").value   = editRow.childNodes[3].firstChild.data;
+					editForwardWindow.document.getElementById("add_dp").value   = editRow.childNodes[4].firstChild.data;
+				}
+				else
+				{
+					editForwardWindow.document.getElementById("addr_sp").value   = editRow.childNodes[2].firstChild.data;
+					editForwardWindow.document.getElementById("addr_ep").value   = editRow.childNodes[3].firstChild.data;
+					editForwardWindow.document.getElementById("addr_ip").value   = editRow.childNodes[4].firstChild.data;
+				}
+				
+				closeButton.onclick = function()
+				{
+					editForwardWindow.close();
+				}
+				saveButton.onclick = function()
+				{
+					// error checking goes here
+					var errors;
+				       	if(isSingle)
+					{
+						errors = proofreadForwardSingle(editForwardWindow.document, document, editRow);
+					}
+					else
+					{
+						errors = proofreadForwardRange(editForwardWindow.document, document, editRow);
+					}
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\nCould not update port forward.");
+					}
+					else
+					{
+						//update document with new data
+						
+						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_app").value;
+						editRow.childNodes[1].firstChild.data = getSelectedText( "add" + r + "_prot", editForwardWindow.document );
+						if(isSingle)
+						{
+							editRow.childNodes[2].firstChild.data = editForwardWindow.document.getElementById("add_fp").value;
+							editRow.childNodes[3].firstChild.data = editForwardWindow.document.getElementById("add_ip").value;
+							editRow.childNodes[4].firstChild.data = editForwardWindow.document.getElementById("add_dp").value;
+						}
+						else
+						{
+							editRow.childNodes[2].firstChild.data = editForwardWindow.document.getElementById("addr_sp").value;
+							editRow.childNodes[3].firstChild.data = editForwardWindow.document.getElementById("addr_ep").value;
+							editRow.childNodes[4].firstChild.data = editForwardWindow.document.getElementById("addr_ip").value;
+						}
+						editForwardWindow.close();
+					}
+				}
+				editForwardWindow.moveTo(xCoor,yCoor);
+				editForwardWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout( "runOnEditorLoaded()", 250);
+		}
+	}
+	runOnEditorLoaded();
+}
+

@@ -1,0 +1,19 @@
+				<table>
+					<tr class='table_row_add_header'>
+						<th><label id='add_app_label' for='add_host'>Application Name</label><br><em>(optional)</em></th>
+						<th><label id='add_prot_label' for='add_prot'>Protocol</label></th>
+						<th><label id='add_fp_label' for='add_fp'>From Port</label></th>
+						<th><label id='add_ip_label' for='add_ip'>To IP</label></th>
+						<th><label id='add_tp_label' for='add_dp'>To Port<br><em>(optional)</em></label></th>
+						<th></th>
+					</tr>
+					<tr class='table_row_add'>
+						<td><input type='text' id='add_app'  size='10' maxLength='10'/></td>
+						<td><select id='add_prot'><option value='Both'>Both</both><option value='TCP'>TCP</option><option value='UDP'>UDP</option></select></td>
+						<td><input type='text' id='add_fp' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5'/></td>
+						<td><input type='text' id='add_ip' size='15' onkeyup='proofreadIp(this)' maxLength='15'/></td>
+						<td><input type='text' id='add_dp' size='5' onkeyup='proofreadNumeric(this,1,65535)' maxLength='5'/></td>
+							
+						<td><input type='button' id='add_button' value='Add' class='default_button' onclick='addPortfRule()'/></td>
+					</tr>
+				</table>
