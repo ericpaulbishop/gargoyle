@@ -66,6 +66,10 @@ int main(int argc, char** argv)
 			else
 			{	
 				fclose(adjFile);
+				if(offset > 0)
+				{
+					fprintf(stderr, "ERROR: Invalid bin/trx file, no header found\n");
+				}
 			}
 		}
 	}
