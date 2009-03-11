@@ -183,7 +183,8 @@ int main( int argc, char** argv )
 		daemonize();
 	}
 
-
+	//initialize reference time
+	time_t reference_time = time(NULL);
 
 
 	
@@ -203,15 +204,16 @@ int main( int argc, char** argv )
 
 
 	//initialize update queue
-	time_t reference_time = time(NULL);
 	priority_queue* update_queue = initialize_priority_queue();
 	for(monitor_index=0; monitors[monitor_index] != NULL; monitor_index++)
 	{
 		bw_monitor* monitor = monitors[monitor_index];
+		unsigned long priority;
 
 		update_node* next_update = (update_node*)malloc(sizeof(update_node));
 		*next_update = get_next_update_time(monitors, monitor_index);
-		push_priority_queue(update_queue,  next_update->update_time - reference_time, monitor->name, next_update);
+		priority= next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
+		push_priority_queue(update_queue, priority, monitor->name, next_update);
 		
 		//time_t next = next_update->update_time;
 		//struct tm* detailedTime = localtime(&next);
@@ -246,6 +248,8 @@ int main( int argc, char** argv )
 
 				while(current_time >= ((update_node*)check->value)->update_time)
 				{
+					unsigned long priority;
+
 					//pop next update from priority queue
 					priority_queue_node *p = shift_priority_queue_node(update_queue);
 					update_node* next_update = (update_node*)free_priority_queue_node(p);
@@ -262,6 +266,7 @@ int main( int argc, char** argv )
 
 					//schedule next update for this monitor & return to queue
 					*next_update = get_next_update_time(monitors, monitor_index);
+					priority= next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
 					push_priority_queue(update_queue,  next_update->update_time-reference_time, monitor->name, next_update);
 				
 
@@ -317,16 +322,18 @@ int main( int argc, char** argv )
 		time_t time_test2 = time(NULL);
 		if( time_test2 - current_time > 25*60 || time_test2 < current_time)
 		{
+			
 			long adjustment_seconds = time_test2 - current_time;
 			reference_time = reference_time + adjustment_seconds;
 
 			priority_queue* new_update_queue = initialize_priority_queue();
 			while(update_queue->length > 0)
 			{
+				unsigned long priority;
+
 				priority_queue_node *p = shift_priority_queue_node(update_queue);
 
 				update_node* next_update = (update_node*)p->value;
-				next_update->update_time = next_update->update_time + adjustment_seconds;
 
 				bw_monitor* monitor = monitors[ next_update->monitor_index ];
 				monitor->last_update = monitor->last_update + adjustment_seconds;
@@ -338,6 +345,10 @@ int main( int argc, char** argv )
 				history->oldest_interval_end   = history->oldest_interval_end + adjustment_seconds;
 				history->recent_interval_end   = history->recent_interval_end + adjustment_seconds;
 			
+				//next_update->update_time = next_update->update_time + adjustment_seconds;
+				*next_update = get_next_update_time(monitors, next_update->monitor_index);
+				priority = next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
+				p->priority = priority;
 				push_priority_queue_node(new_update_queue, p);
 			}
 
