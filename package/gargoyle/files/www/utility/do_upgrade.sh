@@ -20,22 +20,44 @@
 	upgrade2_size=$(du /tmp/up/upgrade2 | awk ' { print $1 } ' 2>/dev/null)
 	vmlinux_mtd=""
 	if [ ! "$upgrade2_size" = "0" ] ; then
-		vmlinux_mtd=$(cat /proc/mtd | awk 'BEGIN {FS="\"" ; } { print $2 ; }' | grep linux)
+		vmlinux_mtd=$(cat /proc/mtd | awk 'BEGIN {FS="\"" ; } { print $2 ; }' | grep vmlinux)
+		if [ -z "$vmlinux_mtd" ] ; then
+			vmlinux_mtd=$(cat /proc/mtd | grep 000b0000 |  awk 'BEGIN {FS="\"" ; } { print $2 ; }')
+		fi
+		if [ -z "$vmlinux_mtd" ] ; then
+			vmlinux_mtd=$(cat /proc/mtd | grep 000a0000 |  awk 'BEGIN {FS="\"" ; } { print $2 ; }')
+		fi
+		if [ -z "$vmlinux_mtd" ] ; then
+			vmlinux_mtd=$(cat /proc/mtd | grep 000c0000 |  awk 'BEGIN {FS="\"" ; } { print $2 ; }')
+		fi
+		if [ -z "$vmlinux_mtd" ] ; then
+			vmlinux_mtd=$(cat /proc/mtd | grep 000d0000 |  awk 'BEGIN {FS="\"" ; } { print $2 ; }')
+		fi		
+		if [ -z "$vmlinux_mtd" ] ; then
+			vmlinux_mtd=$(cat /proc/mtd | grep 000e0000 |  awk 'BEGIN {FS="\"" ; } { print $2 ; }')
+		fi			
 		if [ -z "$vmlinux_mtd" ] ; then
 			echo "<script type=\"text/javascript\">top.failure();</script>"
 			echo "</body></html>"
-			return 0;
+			exit
+		fi
+	else
+		bin2trx /tmp/up/upgrade >/tmp/up/trxtest 2>&1
+		trx_test=$(cat /tmp/up/trxtest)
+		if [ -n "$trx_test" ] ; then
+			echo "<script type=\"text/javascript\">top.failure();</script>"
+			echo "</body></html>"
+			exit
 		fi
 	fi
 
 	cd /tmp/up/
 	echo "<script type=\"text/javascript\">top.uploaded();</script>"
-	echo "</body></html>"
 
 	if [ ! "$upgrade2_size" = "0" ] ; then
 		mtd write upgrade rootfs
-		mtd -r write upgrade2 $vmlinux_mtd
+		mtd write upgrade2 $vmlinux_mtd ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>"; reboot
 	else
-		mtd -r write upgrade linux
+		mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>"; reboot
 	fi
 ?>

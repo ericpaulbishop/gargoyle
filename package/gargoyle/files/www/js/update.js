@@ -23,30 +23,42 @@ function doUpgrade()
 		confirmUpgrade = window.confirm("This will erase your current settings, and may completely disable (\"brick\") your router if the firmware file is not valid.  Are you sure you want to continue?");
 		if(confirmUpgrade)
 		{
-			document.getElementById('upgrade_button').disabled=true;
-			document.getElementById('upgrade_button').className="default_button_disabled";
 			document.getElementById('upgrade_form').submit();
+			setControlsEnabled(false, true, "Uploading Firmware");
 		}
 	}
 }
 
 function uploaded()
 {
-	document.getElementById("upgrade_section").style.display="none";
-	document.getElementById("upgrade_in_progress").style.display="block";
+	setControlsEnabled(false, true, "Upgrading, Please Wait.");
 }
-
+function upgraded()
+{
+	setControlsEnabled(false, true, "Upgrade Complete, Rebooting...");
+	doRedirect= function()
+	{
+		window.location =  "http://192.168.1.1/";
+	}
+	setTimeout( "doRedirect()", 90000);
+}
 function failure()
 {
+	setControlsEnabled(true);
 	alert("An error has occurred: Your router can not be upgraded.\n");
+
 }
 
 function setUpgradeFormat()
 {
 	if(isRedboot)
 	{
-		document.getElementById("upgrade_label").firstChild.data = "Select root Firmware File:";
+		document.getElementById("upgrade_label").firstChild.data = "Select Root (squashfs/jffs) File:";
 		document.getElementById("upgrade_file2_container").style.display="block";
+	}
+	else
+	{
+		document.getElementById("upgrade_label").firstChild.data = "Select (*.trx) Firmware File:";
 	}
 
 }

@@ -41,7 +41,7 @@
 				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
 			</div>
 			<div id="upgrade_file2_container" style="display:none" >
-				<label id="upgrade_label2" class='leftcolumn' for="upgrade_file2">Select vmlinux Firmware File:</label>
+				<label id="upgrade_label2" class='leftcolumn' for="upgrade_file2">Select Kernel (*.lzma) File:</label>
 				<input class='rightcolumn' type="file" id="upgrade_file2" name="upgrade_file2" />
 			</div>
 		</form>
@@ -52,15 +52,6 @@
 
 	<iframe id="do_upgrade" name="do_upgrade" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
 
-</fieldset>
-<fieldset id="upgrade_in_progress" style="display:none">
-	<legend class="sectionheader">Upgrade in Progress</legend>
-	<p>Firmware file uploaded successfully.</p>
-
-	<p>Your firmware is currently being upgraded.  This typically takes about 10 minutes.
-	Do not touch anything while upgrade is in progress.  Wait 10 minutes and then 
-	reboot your router.</p>
-</fieldset>
 
 <script>
 <!--
