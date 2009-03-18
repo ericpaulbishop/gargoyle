@@ -4,8 +4,8 @@
 . /etc/functions.sh
 include /lib/network
 
-death_mask="0xFF000000"
-death_mark="0xDD000000/$death_mask"
+ra_mask="0x0080"
+ra_mark="0x0080/$ra_mask"
 
 
 delete_chain_from_table()
@@ -40,30 +40,13 @@ delete_chain_from_table()
 }
 
 
-# creates a chain in the filter table that always rejects
-# if the last byte of the connmark is DD.  This byte is
-# set in dnat table if we are redirecting port, but don't
-# want to allow connections on original port.  This same
-# byte is used by restricter, but at beginning of filter
-#table, this hasn't been hit yet
-create_death_mark_chain()
-{
-	delete_chain_from_table "filter" "death_mark"
-	iptables -t filter -N death_mark
-	iptables -t filter -I INPUT 1 -j death_mark
-	iptables -t filter -I FORWARD 1 -j death_mark
-	iptables -t filter -I death_mark 1 -m connmark --mark "$death_mark" -m state --state NEW -j REJECT
-}
-
 # echo "1" if death_mark chain exists, otherwise echo "0"
 death_mark_exists()
 {
-	local inp=$(iptables -t filter -L INPUT | grep "death_mark" 2>/dev/null)
-	local fow=$(iptables -t filter -L FORWARD | grep "death_mark" 2>/dev/null)
-	local exists=0
-	if [ -n "$inp" ] && [ -n "$fow" ] ; then exists=1; fi
-	echo $exists
+	echo 0
 }
+
+
 
 # parse remote_accept sections in firewall config and add necessary rules
 insert_remote_accept_rules()
@@ -72,7 +55,6 @@ insert_remote_accept_rules()
 	local section_type="remote_accept"
 
 	#add rules for remote_accepts
-	death_mark_ports=""
 	parse_remote_accept_config()
 	{
 		vars="local_port remote_port proto zone"
@@ -86,33 +68,19 @@ insert_remote_accept_rules()
 				remote_port="$local_port"
 			fi
 			if [ "$remote_port" != "$local_port" ] ; then
-				#echo iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
+				#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
 				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-				death_mark_ports="$local_port $death_mark_ports"
+				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"
+				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
+			else
+				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
 			fi
-			echo iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
-			iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
+			echo iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
 		fi
 	}
 	config_load "$config_name"
 	config_foreach parse_remote_accept_config "$section_type"
 
-	#remove any marks on relevant byte of connmark
-	if [ -n "$death_mark_ports" ] ; then
-		iptables -t nat -A zone_"$zone"_prerouting  -j CONNMARK --set-mark "0x0/$death_mask"
-	fi
-
-	#add death marks
-	for dmp in $death_mark_ports ; do
-		#echo iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-		#echo iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-		iptables -t nat -A zone_"$zone"_prerouting -p tcp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-		iptables -t nat -A zone_"$zone"_prerouting -p udp --dport "$dmp" -j CONNMARK --set-mark "$death_mark"
-	done
-
-	if [ -n "$death_mark_ports" ] ; then
-		create_death_mark_chain
-	fi
 }
 
 
@@ -225,3 +193,28 @@ insert_pf_loopback_rules()
 	fi
 }
 
+insert_dmz_rule()
+{
+	local config_name="firewall"
+	local section_type="dmz"
+
+	#add rules for remote_accepts
+	parse_dmz_config()
+	{
+		vars="to_ip from"
+		for var in $vars ; do
+			config_get $var $1 $var
+		done
+		if [ -n "$from" ] ; then
+			from_if=$(uci -p /tmp/state get network.$from.ifname)
+		fi
+		echo "from_if = $from_if"
+		if [ -n "$to_ip" ] && [ -n "$from"  ] && [ -n "$from_if" ] ; then
+			iptables -t nat -A PREROUTING -i $from_if -j DNAT --to-destination $to_ip
+			echo "iptables -t nat -A PREROUTING -i $from_if -j DNAT --to-destination $to_ip"
+			iptables -t filter -I "zone_"$from"_forward" -d $to_ip -j ACCEPT
+		fi
+	}
+	config_load "$config_name"
+	config_foreach parse_dmz_config "$section_type"
+}

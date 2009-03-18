@@ -7,69 +7,57 @@ upnp_ipt() {
 }
 
 upnp_firewall_addif() {
-	local intif
-	local intip
-	local coldplug="$1"
+	local extif
+	local extip
+	local iface
 
 	config_load upnpd
-	config_get intif config internal_iface
+	config_get iface config external_iface
+
+	[ -n "$INTERFACE" -a "$INTERFACE" != "$iface" ] && return
 
 	config_load network
+	config_get extip "${iface:-wan}" ipaddr
+	config_get extif "${iface:-wan}" ifname
 
-	for iface in ${intif:-lan}; do
-		if [ -n "$coldplug" -o "$iface" == "$INTERFACE" ]; then
-			config_get intip "$iface" ipaddr
-			config_get intif "$iface" ifname
+	logger -t "upnp firewall" "adding wan interface $extif($extip)"
 
-			[ -n "$intif" -a -n "$intip" ] && {
-				logger -t "upnp firewall" "adding interface $iface($intip)"
+	upnp_ipt -t nat -N miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t nat -A miniupnpd_${iface:-wan}_rule -i $extif -d $extip -j MINIUPNPD
+	upnp_ipt -t nat -A prerouting_rule -j miniupnpd_${iface:-wan}_rule
 
-				upnp_ipt -t nat -N MINIUPNPD
-				upnp_ipt -t nat -N miniupnpd_${iface}_rule
-				upnp_ipt -t nat -A miniupnpd_${iface}_rule -i $intif -d $intip -j MINIUPNPD 
-				upnp_ipt -t nat -A prerouting_rule -j miniupnpd_${iface}_rule
-
-				upnp_ipt -t filter -N MINIUPNPD
-				upnp_ipt -t filter -N miniupnpd_${iface}_rule
-				upnp_ipt -t filter -A miniupnpd_${iface}_rule -i $intif -o ! $intif -j MINIUPNPD
-				upnp_ipt -t filter -A forwarding_rule -j miniupnpd_${iface}_rule
-			}
-		fi
-	done
+	upnp_ipt -t filter -N miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t filter -A miniupnpd_${iface:-wan}_rule -i $extif -o ! $extif -j MINIUPNPD
+	upnp_ipt -t filter -A forwarding_rule -j miniupnpd_${iface:-wan}_rule
 }
 
 upnp_firewall_delif() {
-	local iface="${1:-$INTERFACE}"
+	local iface
 
-	if [ -n "$iface" ]; then
-		logger -t "upnp firewall" "removing interface $iface"
+	config_load upnpd
+	config_get iface config external_iface
 
-		upnp_ipt -t nat -D prerouting_rule -j miniupnpd_${iface}_rule
-		upnp_ipt -t nat -F miniupnpd_${iface}_rule
-		upnp_ipt -t nat -X miniupnpd_${iface}_rule
+	[ -n "$INTERFACE" -a "$INTERFACE" != "$iface" ] && return
 
-		upnp_ipt -t filter -D forwarding_rule -j miniupnpd_${iface}_rule
-		upnp_ipt -t filter -F miniupnpd_${iface}_rule
-		upnp_ipt -t filter -X miniupnpd_${iface}_rule
-	fi
+	logger -t "upnp firewall" "removing wan interface"
+
+	upnp_ipt -t nat -D prerouting_rule -j miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t nat -F miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t nat -X miniupnpd_${iface:-wan}_rule
+
+	upnp_ipt -t filter -D forwarding_rule -j miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t filter -F miniupnpd_${iface:-wan}_rule
+	upnp_ipt -t filter -X miniupnpd_${iface:-wan}_rule
 }
 
 upnp_firewall_start() {
-	logger -t "upnp firewall" "starting ..."
-	upnp_firewall_addif coldplug
+	upnp_ipt -t nat -N MINIUPNPD
+	upnp_ipt -t filter -N MINIUPNPD
+	upnp_firewall_addif
 }
 
 upnp_firewall_stop() {
-	local intif
-	config_load upnpd
-	config_get intif config internal_iface
-
-	logger -t "upnp firewall" "stopping ..."
-
-	for iface in ${intif:-lan}; do
-		upnp_firewall_delif "$iface"
-	done
-
+	upnp_firewall_delif
 	upnp_ipt -t nat -F MINIUPNPD
 	upnp_ipt -t nat -X MINIUPNPD
 	upnp_ipt -t filter -F MINIUPNPD

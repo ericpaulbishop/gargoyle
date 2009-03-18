@@ -4,13 +4,13 @@
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
-# $Id: Makefile 13742 2008-12-25 03:25:13Z jow $
+# $Id: Makefile 14175 2009-01-25 14:59:25Z jow $
 
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
 PKG_VERSION:=1.1
-PKG_RELEASE:=3
+PKG_RELEASE:=5
 PKG_MD5SUM:=a0f6651476721db9b554668c8c83b151
 
 PKG_SOURCE_URL:=http://miniupnp.free.fr/files

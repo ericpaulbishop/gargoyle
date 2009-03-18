@@ -22,7 +22,7 @@ function saveChanges()
 		setControlsEnabled(false, true);
 
 		var firewallSectionCommands = [];
-		var redirectSectionTypes = ["redirect", "redirect_disabled"];
+		var redirectSectionTypes = ["redirect", "redirect_disabled", "dmz"];
 		for(typeIndex=0; typeIndex < redirectSectionTypes.length; typeIndex++)
 		{
 			var sectionType = redirectSectionTypes[typeIndex];
@@ -96,19 +96,18 @@ function saveChanges()
 			}
 		}
 
-		
+
 		//dmz
-		//firewallData[3] = document.getElementById('dmz_enabled').checked ? document.getElementById('dmz_ip').value : null;
 		if(document.getElementById('dmz_enabled').checked )
 		{
-			var id = "dmz_redirect";
-			firewallSectionCommands.push("uci firewall." + id + "=redirect" );
+			var id = "dmz";
+			firewallSectionCommands.push("uci firewall.dmz=dmz" );
 			
-			uci.set("firewall", id, "", "redirect");
-			uci.set("firewall", id, "src", "wan");
-			uci.set("firewall", id, "dest", "lan");
-			uci.set("firewall", id, "dest_ip", document.getElementById('dmz_ip').value);
-		}
+			uci.set("firewall", id, "", "dmz");
+			uci.set("firewall", id, "from", "wan");
+			uci.set("firewall", id, "to_ip", document.getElementById('dmz_ip').value);
+		}		
+
 		firewallSectionCommands.push("uci commit");
 			
 		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
@@ -531,10 +530,11 @@ function resetData()
 
 
 	//dmz
-	document.getElementById("dmz_enabled").checked = (dmzIp != "");
-	if( dmzIp != "")
+	var dmzSections = uciOriginal.getAllSectionsOfType("firewall", "dmz");
+	document.getElementById("dmz_enabled").checked = (dmzSections.length > 0);
+	if( dmzSections.length > 0)
 	{
-		document.getElementById("dmz_ip").value = dmzIp;
+		document.getElementById("dmz_ip").value = uciOriginal.get("firewall", dmzSections[0], "to_ip");
 	}
 	else
 	{

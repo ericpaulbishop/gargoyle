@@ -22,7 +22,6 @@ start()
 	fi
 
 	filter_insert_index=1
-	if [ $(death_mark_exists) = 1 ] ; then filter_insert_index=2 ; fi	
 
 	download_table=filter
 	download_chain=bw_ingress

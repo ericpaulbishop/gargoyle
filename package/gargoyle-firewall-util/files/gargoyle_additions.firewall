@@ -1,4 +1,5 @@
 . /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 insert_remote_accept_rules
 insert_pf_loopback_rules
+insert_dmz_rule
 iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT

@@ -89,10 +89,6 @@ start()
 	
 	bw_insert_index=1
 	filter_insert_index=2
-	if [ $(death_mark_exists) = 1 ] ; then 
-		bw_insert_index=2
-		filter_insert_index=3 
-	fi	
 
 	ingress_bw_exists=$(iptables -t $ingress_bandwidth_table -L $ingress_bandwidth_chain 2>/dev/null)
 	if [ -z "$ingress_bw_exists" ] ; then

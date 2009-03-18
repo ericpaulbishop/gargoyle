@@ -382,7 +382,7 @@ initialize_qos()
 	
 		
 		class_mark_list=""
-		upload_mask="0x00FF"
+		upload_mask="0x007F"
 		upload_shift=0
 		next_class_index=10
 		next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
@@ -568,7 +568,7 @@ initialize_qos()
 
 
 		class_mark_list=""
-		download_mask="0xFF00"
+		download_mask="0x7F00"
 		download_shift=8
 		next_class_index=10
 		next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
