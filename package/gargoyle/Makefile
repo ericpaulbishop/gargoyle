@@ -9,7 +9,7 @@ ATH_DEPS=""
 LED_DEPS=""
 BRCM_DEPS=""
 ifeq ($(BOARD),atheros)
-     ATH_DEPS="+wpa-supplicant +hostapd"
+     ATH_DEPS="+wpa-supplicant +hostapd +ebtables +kmod-ebtables"
      LED_DEPS="+gpioctl"
 endif
 
