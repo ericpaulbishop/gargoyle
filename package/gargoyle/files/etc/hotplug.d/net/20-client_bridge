@@ -1,16 +1,12 @@
 if [ "$ACTION" = "add" -o "$ACTION" = "register" ]; then
 	is_ath=$(echo $INTERFACE | grep ath)
-	echo "is_ath=$is_ath" > /tmp/is_ath
 	if [ -n "$is_ath" ] ; then
 		managed=$(iwconfig $INTERFACE 2>/dev/null | grep "Mode:Managed")
 		if [ -n "$managed" ] ; then
-			echo "managed if = $INTERFACE" >/tmp/managed_if
 			sta_section=$(uci show wireless | grep "mode=sta$" | sed 's/\.mode=sta$//g' )			
 			if [ -n "$sta_section" ] ; then
 				client_bridge=$(uci get "$sta_section.client_bridge")
 				if [ "$client_bridge" = "1" ] ; then
-					echo "$sta_section.client_bridge=$client_bridge" > /tmp/sta_br	
-					
 					ebtables -t nat -F PREROUTING
 					ebtables -t nat -F POSTROUTING
 					ebtables -t broute -F BROUTING
