@@ -63,6 +63,10 @@ function saveChanges()
 			}
 		}
 		preCommands = preCommands + "uci commit \n";
+		
+		
+		//always remove this option, if wireless is set to disabled merely delete all interface sections
+		uci.remove('wireless', firstWirelessDevice, 'disabled'); 
 
 
 		var adjustIpCommands = ""
@@ -201,8 +205,6 @@ function saveChanges()
 					}
 				}
 			}
-			//always remove this option, if wireless is set to disabled merely delete all interface sections
-			uci.remove('wireless', firstWirelessDevice, 'disabled'); 
 
 
 
