@@ -67,7 +67,7 @@ function saveChanges()
 
 		var adjustIpCommands = ""
 		var currentLanIp = "";
-		var dnsmasqEnabledCommand = "";
+		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_router").checked )
 		{
 			if(document.getElementById('wan_protocol') == 'none')
@@ -182,6 +182,7 @@ function saveChanges()
 				uci.set("wireless", "cfg2", "device", firstWirelessDevice);
 				preCommands = preCommands + "uci set wireless.cfg2='wifi-iface' \n"
 			}
+			preCommands = preCommands + "uci commit \n";
 
 		
 			if(section2 != '')
@@ -388,12 +389,18 @@ function saveChanges()
 
 
 
-			var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
-			if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
-			{
-				adjustIpCommands = "\nsh " + gargoyleBinRoot + "/utility/update_router_ip.sh " + oldLanIp + "  " + currentLanIp;
-			}
-			dnsmasqEnabledCommand = "\nuci commit\n/etc/init.d/dnsmasq enable\n";
+
+			
+			
+			var bridgeCommandList = [];
+			bridgeCommandList.push("/etc/init.d/dnsmasq enable");
+			bridgeCommandList.push("uci set gargoyle.connection.dhcp=200");
+			bridgeCommandList.push("uci set gargoyle.firewall.portforwarding=100");
+			bridgeCommandList.push("uci set gargoyle.firewall.restriction=125");
+			bridgeCommandList.push("uci set gargoyle.firewall.quotas=175");
+			bridgeCommandList.push("uci set qos_gargoyle.global.network=wan");
+			bridgeCommandList.push("uci commit");
+			bridgeEnabledCommands = "\n" + bridgeCommandList.join("\n") + "\n";
 		}
 		else
 		{
@@ -505,12 +512,33 @@ function saveChanges()
 				}
 
 			}
-			dnsmasqEnabledCommand = "\nuci commit\n/etc/init.d/dnsmasq disable\n";
+			preCommands = preCommands + "\nuci commit\n";
+
+			var bridgeCommandList = [];
+			bridgeCommandList.push("/etc/init.d/dnsmasq disable");
+			bridgeCommandList.push("/etc/init.d/miniupnpd disable");
+			bridgeCommandList.push("uci del gargoyle.connection.dhcp");
+			bridgeCommandList.push("uci del gargoyle.firewall.portforwarding");
+			bridgeCommandList.push("uci del gargoyle.firewall.restriction");
+			bridgeCommandList.push("uci del gargoyle.firewall.quotas");
+			bridgeCommandList.push("uci del gargoyle.firewall.portforwarding");
+			bridgeCommandList.push("uci set qos_gargoyle.global.network=lan");
+
+			bridgeCommandList.push("uci commit");
+			bridgeEnabledCommands = "\n" + bridgeCommandList.join("\n") + "\n";
+
+
 		}
-		
+
+		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
+		if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
+		{
+			adjustIpCommands = "\nsh " + gargoyleBinRoot + "/utility/update_router_ip.sh " + oldLanIp + "  " + currentLanIp;
+		}
+
 		var commands = uci.getScriptCommands(uciCompare);
 		var restartNetworkCommand = "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
-		commands = preCommands + commands + adjustIpCommands + dnsmasqEnabledCommand + restartNetworkCommand;
+		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
 
 		
 		//document.getElementById("output").value = commands;
@@ -789,40 +817,6 @@ function setWifiVisibility()
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
 
-}
-
-function getBridgeSection(testUci)
-{
-	//all bridges will have either option wds=1, option mode=wds, or option client_bridge=1 in one of the wireless sections
-	//in the case of broadcom, the client_bridge=1 doesn't do anything, but we put it there for convenience anyway.
-
-	var allWirelessSections = uciOriginal.getAllSections("wireless");
-	var wanDef = uciOriginal.get("network", "wan", "");
-	var bridgeSection = "";
-	var sectionIndex;
-	for(sectionIndex=0; sectionIndex < allWirelessSections.length && bridgeSection == ""; sectionIndex++)
-	{
-		if( testUci.get("wireless", allWirelessSections[sectionIndex], "mode").toLowerCase() == "wds" && wanDef == "")
-		{
-			bridgeSection = allWirelessSections[sectionIndex];
-		}
-		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "wds") == "1" && wanDef == "")
-		{
-			bridgeSection = allWirelessSections[sectionIndex];
-		}
-		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "client_bridge") == "1")
-		{
-			bridgeSection = allWirelessSections[sectionIndex];
-		}
-	}
-	return bridgeSection;
-}
-
-function isBridge(testUci)
-{
-	//is it a router or a bridge configuration?
-	var bridgeTest = getBridgeSection(testUci) == "" ? false : true;
-	return bridgeTest;
 }
 function setBridgeVisibility()
 {

@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "system" -p "ident" -c "internal.css" -j "identification.js" system dhcp
+	gargoyle_header_footer -h -s "system" -p "ident" -c "internal.css" -j "identification.js" system dhcp network wireless
 ?>
 
 

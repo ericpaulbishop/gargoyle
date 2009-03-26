@@ -1482,3 +1482,37 @@ function getEmbeddedSvgWindow(embeddedId)
 }
 
 
+function getBridgeSection(testUci)
+{
+	//all bridges will have either option wds=1, option mode=wds, or option client_bridge=1 in one of the wireless sections
+	//in the case of broadcom, the client_bridge=1 doesn't do anything, but we put it there for convenience anyway.
+
+	var allWirelessSections = uciOriginal.getAllSections("wireless");
+	var wanDef = uciOriginal.get("network", "wan", "");
+	var bridgeSection = "";
+	var sectionIndex;
+	for(sectionIndex=0; sectionIndex < allWirelessSections.length && bridgeSection == ""; sectionIndex++)
+	{
+		if( testUci.get("wireless", allWirelessSections[sectionIndex], "mode").toLowerCase() == "wds" && wanDef == "")
+		{
+			bridgeSection = allWirelessSections[sectionIndex];
+		}
+		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "wds") == "1" && wanDef == "")
+		{
+			bridgeSection = allWirelessSections[sectionIndex];
+		}
+		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "client_bridge") == "1")
+		{
+			bridgeSection = allWirelessSections[sectionIndex];
+		}
+	}
+	return bridgeSection;
+}
+
+function isBridge(testUci)
+{
+	//is it a router or a bridge configuration?
+	var bridgeTest = getBridgeSection(testUci) == "" ? false : true;
+	return bridgeTest;
+}
+

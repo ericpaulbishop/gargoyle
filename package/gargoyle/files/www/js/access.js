@@ -274,41 +274,51 @@ function resetData()
 		}
 	}
 	
-
-
 	allOptionValueHash=getRemoteOptionValueHash();
-	setSelectElementOptions("remote_web_protocol", ["both", "https", "http", "disabled"], allOptionValueHash);
-	if(remoteHttpsPort != "" && remoteHttpPort != "")
+	setSelectElementOptions("remote_web_protocol", ["both", "https", "http", "disabled"], allOptionValueHash);	
+	if(!isBridge(uciOriginal))
 	{
-		setSelectedValue("remote_web_protocol", "both");
-	}
-	else if(remoteHttpsPort != "")
-	{
-		setSelectedValue("remote_web_protocol", "https");
-	}
-	else if(remoteHttpPort != "")
-	{
-		setSelectedValue("remote_web_protocol", "http");
+
+		if(remoteHttpsPort != "" && remoteHttpPort != "")
+		{
+			setSelectedValue("remote_web_protocol", "both");
+		}
+		else if(remoteHttpsPort != "")
+		{
+			setSelectedValue("remote_web_protocol", "https");
+		}
+		else if(remoteHttpPort != "")
+		{
+			setSelectedValue("remote_web_protocol", "http");
+		}
+		else
+		{
+			setSelectedValue("remote_web_protocol", "disabled");
+		}
+		document.getElementById("remote_https_port").value = remoteHttpsPort;
+		document.getElementById("remote_http_port").value  = remoteHttpPort;
+		document.getElementById("remote_ssh_port").value  = remoteSshPort;
+
+		if(remoteSshPort != "")
+		{
+			document.getElementById("remote_ssh_enabled").checked = true;
+		}
+		else
+		{
+			document.getElementById("remote_ssh_enabled").checked = false;
+		}
 	}
 	else
 	{
 		setSelectedValue("remote_web_protocol", "disabled");
-	}
-	document.getElementById("remote_https_port").value = remoteHttpsPort;
-	document.getElementById("remote_http_port").value  = remoteHttpPort;
-	document.getElementById("remote_ssh_port").value  = remoteSshPort;
-
-	if(remoteSshPort != "")
-	{
-		document.getElementById("remote_ssh_enabled").checked = true;
-	}
-	else
-	{
 		document.getElementById("remote_ssh_enabled").checked = false;
+		var hideIds = [ "remote_web_protocol_container", "remote_web_ports_container", "remote_ssh_enabled_container", "remote_ssh_port_container" ];
+		var hi;
+		for(hi=0; hi < hideIds.length; hi++)
+		{
+			document.getElementById(hideIds[hi]).style.display="none";
+		}
 	}
-	
-	
-	
 	
 	//clear password fields
 	document.getElementById("password1").value = "";

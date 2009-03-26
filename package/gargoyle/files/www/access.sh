@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	
-	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -i httpd_gargoyle dropbear gargoyle firewall network 
+	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -i httpd_gargoyle dropbear gargoyle firewall network wireless 
 ?>
 
 
@@ -35,7 +35,7 @@
 				<input type='text' class='rightcolumn' id='local_https_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 			</div>
 		</div>
-		<div>
+		<div id='remote_web_protocol_container'>
 			<label class='leftcolumn' id='remote_web_protocol_label' for='remote_web_protocol'>Remote Web Admin Access:</label>
 			<select class='rightcolumn' id='remote_web_protocol' onchange='updateVisibility()'>
 				<option value='disabled'>Disabled</option>
@@ -44,7 +44,7 @@
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
 		</div>
-		<div class='indent'>
+		<div class='indent' id='remote_web_ports_container'>
 			<div id='remote_http_port_container'>
 				<label class='leftcolumn' for='remote_http_port' id='remote_http_port_label'>Remote HTTP Port:</label>
 				<input type='text' class='rightcolumn' id='remote_http_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
@@ -69,11 +69,11 @@
 			<input type='text' class='rightcolumn' id='local_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 		</div>
 
-		<div class='nocolumn'>
+		<div class='nocolumn' id='remote_ssh_enabled_container'>
 			<input type='checkbox' id='remote_ssh_enabled' onclick="updateVisibility()" />
 			<label id='remote_ssh_enabled_label' for='remote_ssh_enabled'>Enable Remote SSH Access</label>
 		</div>
-		<div class='indent'>
+		<div class='indent' id='remote_ssh_port_container'>
 			<label class='leftcolumn' for='remote_ssh_port' id='remote_ssh_port_label'>Remote SSH Port:</label>
 			<input type='text' class='rightcolumn' id='remote_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 		</div>

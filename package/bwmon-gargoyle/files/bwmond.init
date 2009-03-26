@@ -7,18 +7,15 @@ include /usr/lib/gargoyle_firewall_util
 
 start()
 {
-	#scan_interfaces
-	#config_load network
-	#config_get wan_if wan ifname
-	wan_if=$(uci -P "/var/state" get network.wan.ifname)
+	bw_if=$(uci -P "/var/state" get network.wan.ifname)
 
 	if [ -e /var/run/bwmond.pid ] ; then
 		old_pid=$(cat /var/run/bwmond.pid)
 		kill $old_pid 2>&- >&-
 	fi
 
-	if [ -z "$wan_if" ] ; then
-		return 0
+	if [ -z "$bw_if" ] ; then
+		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
 	filter_insert_index=1
@@ -27,8 +24,8 @@ start()
 	download_chain=bw_ingress
 	delete_chain_from_table $download_table $download_chain
 	iptables -t $download_table -N $download_chain
-	iptables -t $download_table -I INPUT $filter_insert_index  -i $wan_if -j $download_chain
-	iptables -t $download_table -I FORWARD $filter_insert_index -i $wan_if -j $download_chain
+	iptables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
+	iptables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
 	iptables -t $download_table -A $download_chain  #matches everything to monitor all download bandwidth
 
 
@@ -37,7 +34,7 @@ start()
 	upload_chain=bw_egress
 	delete_chain_from_table $upload_table $upload_chain
 	iptables -t $upload_table -N $upload_chain
-	iptables -t $upload_table -A POSTROUTING -o $wan_if -j $upload_chain
+	iptables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
 	iptables -t $upload_table -A $upload_chain  #matches everything to monitor all upload bandwidth
 	
 	#initially write to RAM disk, which is MUCH faster than writing directly to flash

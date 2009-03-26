@@ -26,8 +26,10 @@ function saveChanges()
 		var hostname = document.getElementById("hostname").value;
 		var domain =   document.getElementById("domain").value;
 		uci.set("system", systemSections[0], "hostname", hostname);
-		uci.set("dhcp", dnsmasqSections[0], "domain", domain);
-
+		if(!isBridge(uciOriginal))
+		{
+			uci.set("dhcp", dnsmasqSections[0], "domain", domain);
+		}
 		
 		var gargLogoHostname = document.getElementById("garg_host");
 		gargLogoHostname.replaceChild( document.createTextNode("Device Name: " + hostname), gargLogoHostname.firstChild );
@@ -55,7 +57,16 @@ function saveChanges()
 function proofreadAll()
 {
 	var notEmpty = function(text){ return validateLengthRange(text,1,999); }
-	return proofreadFields( ["hostname", "domain"], ["hostname_label", "domain"], [notEmpty, notEmpty], [0,0], ["hostname", "domain"]); 
+	var errors;
+	if(!isBridge(uciOriginal))
+	{
+		errors = proofreadFields( ["hostname", "domain"], ["hostname_label", "domain_label"], [notEmpty, notEmpty], [0,0], ["hostname", "domain"]); 
+	}
+	else
+	{
+		errors = proofreadFields( ["hostname"], ["hostname_label"], [notEmpty], [0], ["hostname"]);
+	}
+	return errors;
 }
 
 function resetData()
@@ -66,4 +77,9 @@ function resetData()
 	var domain = uciOriginal.get("dhcp", dnsmasqSections[0], "domain");
 	document.getElementById("hostname").value = hostname;
 	document.getElementById("domain").value = domain;
+	if(isBridge(uciOriginal))
+	{
+		document.getElementById("domain_container").style.display = "none";
+	}
+
 }

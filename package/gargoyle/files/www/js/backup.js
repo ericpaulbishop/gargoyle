@@ -58,16 +58,15 @@ function restoreSuccessful(lanIp)
 	setControlsEnabled(false, true, "Please wait while new settings are applied")
 	
 
-	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/restart_everything.sh ;\n" );
+	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/reboot.sh ;\n" );
 	var stateChangeFunction = function(req) { return 0; } ;
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
-		
 	doRedirect= function()
 	{
 		currentProtocol = location.href.match(/^https:/) ? "https" : "http";
 		window.location = currentProtocol + "://" + lanIp + ":" + window.location.port + window.location.pathname;
 	}
-	setTimeout( "doRedirect()", 45000);
+	setTimeout( "doRedirect()", 60000);
 	
 }
