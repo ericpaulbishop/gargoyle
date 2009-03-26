@@ -81,15 +81,7 @@ function saveChanges()
 				preCommands = preCommands + "\nuci set network.wan=interface\n";
 				if(trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
 				{
-					if(wirelessDriver == 'atheros')
-					{
-						wirelessClientIf = document.getElementById("wifi_ssid1_container").style.display != 'none' && document.getElementById("wifi_ssid1_container").style.display != 'none' ? 'ath1' : 'ath0';
-						uci.set('network', 'wan', 'ifname', wirelessClientIf);
-					}
-					else
-					{
-						uci.set('network', 'wan', 'ifname', wirelessIf);
-					}
+					uci.set('network', 'wan', 'ifname', "");
 				}
 				else if(trueAndVisible('wan_via_single_port', 'wan_via_single_port_container'))
 				{
@@ -201,6 +193,10 @@ function saveChanges()
 					if(!trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
 					{
 						uci.set('wireless', section2, 'network', 'lan');
+					}
+					else
+					{
+						uci.set('wireless', section2, 'network', 'wan');
 					}
 				}
 			}
@@ -1145,7 +1141,7 @@ function resetData()
 	lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
 
 
-	wanIsWifi = wanUciIf != '' && (wanUciIf == wirelessIf || wanUciIf == firstWirelessDevice || wanUciIf.match(/^ath/));
+	wanIsWifi = wanUciIf == '' && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 
 	document.getElementById('wan_via_single_port').checked = (wanUciIf == defaultLanIf && defaultWanIf == '');
 	document.getElementById('wan_via_wifi').checked = wanIsWifi;
