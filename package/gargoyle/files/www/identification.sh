@@ -20,7 +20,7 @@
 			<label class='narrowleftcolumn' for='hostname' id='hostname_label'>Hostname:</label>
 			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' />
 		</div>
-		<div>
+		<div id="domain_container">
 			<label class='narrowleftcolumn' for='domain' id='domain_label'>Domain:</label>
 			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
 		</div>
