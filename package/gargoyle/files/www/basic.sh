@@ -69,7 +69,113 @@ else
 
 
 <form>
-	<fieldset>
+	<fieldset id="config_fieldset">
+		<legend class="sectionheader">Device Configuration</legend>
+		<label class='leftcolumn' style="text-decoration:underline">Configure Device As:</label>
+		<div class='indent'>
+			<input type="radio" id="global_router" name="global_configuration" value="router" onclick="setBridgeVisibility()" >Router</input>
+			<br/>
+			<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" >Wireless Bridge/Repeater</input>
+		</div>
+	</fieldset>
+	
+	<fieldset id="bridge_fieldset">
+		<legend class="sectionheader">Wireless Bridge/Repeater</legend>
+		<div id='bridge_ip_container'>
+			<label class='leftcolumn' for='bridge_ip' id='bridge_ip_label'>Bridge IP:</label>
+			<input type='text' class='rightcolumn' name='bridge_ip' id='bridge_ip' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+			<em>(must be in AP subnet)</em>
+		</div>
+		<div id='bridge_mask_container'>
+			<label class='leftcolumn' for='bridge_mask' id='bridge_mask_label'>Subnet Mask:</label>
+			<input type='text' class='rightcolumn' name='bridge_mask' id='bridge_mask' onkeyup='proofreadMask(this)' size='15' maxlength='15' />
+			<em>(same as AP mask)</em>
+
+		</div>
+		<div id='bridge_gateway_container'>
+			<label class='leftcolumn' for='bridge_gateway' id='bridge_gateway_label'>AP/Gateway IP:</label>
+			<input type='text' class='rightcolumn' name='bridge_gateway' id='bridge_gateway' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+		</div>
+		<div class='internal_divider'></div>
+		
+		<div id='bridge_mode_container'>
+			<select class='nocolumn' id='bridge_mode' onchange='setBridgeVisibility()'>
+				<option value='client_bridge'>Connect Via Client Bridge</option>
+				<option value='wds'>Connect Via WDS</option>
+			</select>
+		</div>
+		<div class="indent">
+			<div id='bridge_repeater_container'>
+				<label class='leftcolumn' for='bridge_repeater' id='bridge_repeater_label'>Repeater:</label>
+				<select class='rightcolumn' id='bridge_repeater' onchange='setBridgeVisibility()'>
+					<option value='enabled'>Repeater Enabled</option>
+					<option value='disabled'>Repeater Disabled</option>
+				</select>
+			</div>
+			<div id='bridge_channel_container'>
+				<label class='leftcolumn' for='bridge_channel' id='bridge_channel_label'>Wireless Channel:</label>
+					<select class='rightcolumn' id='bridge_channel'>
+					<option value='auto'>auto</option>
+					<option value='1'>1</option>
+					<option value='2'>2</option>
+					<option value='3'>3</option>
+					<option value='4'>4</option>
+					<option value='5'>5</option>
+					<option value='6'>6</option>
+					<option value='7'>7</option>
+					<option value='8'>8</option>
+					<option value='9'>9</option>
+					<option value='10'>10</option>
+					<option value='11'>11</option>
+					<option value='12'>12</option>
+					<option value='13'>13</option>
+					<option value='14'>14</option>
+				</select>
+			</div>	
+			<div id='bridge_ssid_container'>
+				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID:</label>
+				<input type='text' id='bridge_ssid'  size='17' onkeyup='proofreadLengthRange(this,1,999)'/>
+			</div>
+			
+			<div id='bridge_encryption_container'>
+				<label class='leftcolumn' for='bridge_encryption' id='bridge_encryption_label'>Encryption:</label>
+				<select class='rightcolumn' id='bridge_encryption' onchange='setBridgeVisibility()'>
+					<option value='none'>None</option>
+					<option value='psk2'>WPA2 PSK</option>
+					<option value='psk'>WPA PSK</option>
+					<option value='wep'>WEP</option>
+				</select>
+			</div>
+			<div id='bridge_pass_container' class='indent'>
+				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'>Password:</label>
+				<input type='password' id='bridge_pass' size='17' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			</div>
+			<div id='bridge_wep_container' class='indent'>
+				<div style="display:block;">
+					<label class='leftcolumn' for='brige_wep' id='brige_wep_label'>WEP Hex Key:</label>
+					<input type='text' id='bridge_wep' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
+				</div>
+				<div>
+					<input class='rightcolumnonly' type='button' value='Random 40/64 Bit WEP Key' id='bwepgen40' onclick='setToWepKey("bridge_wep",10)'>
+				</div>
+				<div>
+					<input class='rightcolumnonly' type='button' value='Random 104/128 Bit WEP Key' id='bwepgen104' onclick='setToWepKey("bridge_wep",26)'>
+				</div>
+			</div>
+			<div id="bridge_wds_container">
+				<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of Other WDS Devices:</label>
+				<div class='rightcolumnonly'>
+					<div class="indent">	
+						<input type='text' id='add_bridge_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+						<input type="button" class="default_button" id="add_bridge_wds_mac_button" value="Add" onclick='addMacToWds("bridge")' />
+					</div>
+				</div>
+				<div class="rightcolumnonly"><div class="indent" id="bridge_wds_mac_table_container"></div></div>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset id="wan_fieldset">
 		<legend class="sectionheader">Internet / WAN</legend>
 
 		
@@ -181,7 +287,7 @@ else
 		</div>
 	</fieldset>
 	
-	<fieldset>
+	<fieldset id="lan_fieldset">
 		<legend class="sectionheader">Local Network / LAN</legend>
 	
 		<div id='lan_ip_container'>
@@ -213,7 +319,7 @@ else
 		</div>
 	</fieldset>
 
-	<fieldset>
+	<fieldset id="wifi_fieldset">
 		
 		<legend class="sectionheader">Wireless</legend>
 
@@ -221,6 +327,7 @@ else
 			<label class='leftcolumn' for='wifi_mode' id='wifi_mode_label'>Wireless Mode:</label>
 			<select class='rightcolumn' id='wifi_mode'  onchange='setWifiVisibility()'>
 				<option value='ap'>Access Point (AP)</option>
+				<option value='ap+wds'>AP+WDS</option>
 				<option value='sta'>Client</option>
 				<option value='ap+sta'>AP+Client</option>
 				<option value='adhoc'>Ad Hoc</option>
@@ -231,6 +338,7 @@ else
 		<div id='wifi_channel_container'>
 			<label class='leftcolumn' for='wifi_channel' id='wifi_channel_label'>Wireless Channel:</label>
 			<select class='rightcolumn' id='wifi_channel'>
+				<option value='auto'>auto</option>
 				<option value='1'>1</option>
 				<option value='2'>2</option>
 				<option value='3'>3</option>
@@ -339,6 +447,17 @@ else
 			<label class='leftcolumn' for='wifi_port1' id='wifi_port1_label'>RADIUS Server Port:</label>
 			<input type='text' id='wifi_port1'  size='17' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
 		</div>
+		
+		<div id="wifi_wds_container">
+			<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of Other WDS Devices:</label>
+			<div class='rightcolumnonly'>
+				<div class="indent">	
+					<input type='text' id='add_wifi_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+					<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="Add" onclick='addMacToWds("wifi")' />
+				</div>
+			</div>
+			<div class="rightcolumnonly"><div class="indent" id="wifi_wds_mac_table_container"></div></div>
+		</div>
 
 		<div id='internal_divider2' class='internal_divider'></div>
 		
@@ -379,8 +498,8 @@ else
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
+
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
