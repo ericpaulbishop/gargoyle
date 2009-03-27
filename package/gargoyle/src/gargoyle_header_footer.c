@@ -671,6 +671,10 @@ void print_interface_vars(void)
 	char* current_wan_ip = get_interface_ip(uci_wan_if);
 	char* current_wan_mask = get_interface_netmask(uci_wan_if);
 	char* current_wireless_mac = get_interface_mac(wireless_if);
+	if(current_wireless_mac == NULL)
+	{
+		current_wireless_mac = get_interface_mac(uci_wireless);
+	}
 
 	char* default_wan_mac = NULL;
 	if(default_wan_if != NULL && uci_wan_mac == NULL)

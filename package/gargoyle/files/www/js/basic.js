@@ -822,6 +822,13 @@ function setWifiVisibility()
 }
 function setBridgeVisibility()
 {
+	var bridgeWifiMacContainer = document.getElementById("bridge_wifi_mac");
+	if(bridgeWifiMacContainer.firstChild != null)
+	{
+		bridgeWifiMacContainer.removeChild(bridgeWifiMacContainer.firstChild);
+	}
+	bridgeWifiMacContainer.appendChild( document.createTextNode(currentWirelessMac) );
+
 	showIds = document.getElementById("global_router").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
 	hideIds = document.getElementById("global_router").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
 	var allIds = [hideIds, showIds];
@@ -840,6 +847,7 @@ function setBridgeVisibility()
 		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" ? "block" : "none";
 		document.getElementById("bridge_pass_container").style.display = getSelectedValue("bridge_encryption") != "wep" && getSelectedValue("bridge_encryption") != "none" ? "block" : "none";
 		document.getElementById("bridge_wep_container").style.display = getSelectedValue("bridge_encryption") == "wep" ? "block" : "none";
+		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
 		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
 	}
 }

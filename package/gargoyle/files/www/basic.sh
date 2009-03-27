@@ -105,6 +105,10 @@ else
 			</select>
 		</div>
 		<div class="indent">
+			<div id='bridge_wifi_mac_container'>
+				<label class='leftcolumn' id='bridge_wifi_mac_label'>Wireless MAC Of <em>This</em> Device:</label>
+				<span class='rightcolumn' id='bridge_wifi_mac'></span>
+			</div>
 			<div id='bridge_repeater_container'>
 				<label class='leftcolumn' for='bridge_repeater' id='bridge_repeater_label'>Repeater:</label>
 				<select class='rightcolumn' id='bridge_repeater' onchange='setBridgeVisibility()'>
@@ -163,7 +167,7 @@ else
 				</div>
 			</div>
 			<div id="bridge_wds_container">
-				<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of Other WDS Devices:</label>
+				<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of <em>Other</em> WDS Devices:</label>
 				<div class='rightcolumnonly'>
 					<div class="indent">	
 						<input type='text' id='add_bridge_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
