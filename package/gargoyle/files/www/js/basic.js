@@ -796,7 +796,7 @@ function setWifiVisibility()
 	
 	
 	
-	var wifiIds=['wifi_channel_container', 'mac_enabled_container', 'mac_filter_container', 'internal_divider1', 'wifi_ssid1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
+	var wifiIds=['wifi_channel_container', 'mac_enabled_container', 'mac_filter_container', 'internal_divider1', 'wifi_ssid1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
 
 	var mf = document.getElementById("mac_filter_enabled").checked ? 1 : 0;
 	var d1 = mf == 1 ? 0 : 1;
@@ -809,12 +809,12 @@ function setWifiVisibility()
 	var w2 = (e2 == 'wep') ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 0,  0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 1,  0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,  0,1,1,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,  1,mf,  d1,1,1,1,1,p1,w1,r1,r1, 0,  1,1,1,p2,w2];
-	wifiVisibilities['adhoc']    = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,  0,1,1,p2,w2];
-	wifiVisibilities['disabled'] = [0,  0,0,    0,0,0,0,0,0,0,0,0,     0,  0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,  1,mf,  d1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,p2,w2];
+	wifiVisibilities['adhoc']    = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,p2,w2];
+	wifiVisibilities['disabled'] = [0,  0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -822,12 +822,7 @@ function setWifiVisibility()
 }
 function setBridgeVisibility()
 {
-	var bridgeWifiMacContainer = document.getElementById("bridge_wifi_mac");
-	if(bridgeWifiMacContainer.firstChild != null)
-	{
-		bridgeWifiMacContainer.removeChild(bridgeWifiMacContainer.firstChild);
-	}
-	bridgeWifiMacContainer.appendChild( document.createTextNode(currentWirelessMac) );
+
 
 	showIds = document.getElementById("global_router").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
 	hideIds = document.getElementById("global_router").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
@@ -859,6 +854,19 @@ function resetData()
 		removeOptionFromSelectElement("bridge_channel", "auto", document);
 		removeOptionFromSelectElement("wifi_channel", "auto", document);
 	}
+
+	var macElements = [ "bridge_wifi_mac", "wifi_mac" ];
+	var meIndex;
+	for(meIndex = 0; meIndex < macElements.length; meIndex++)
+	{
+		var me = document.getElementById(macElements[meIndex]);
+		if(me.firstChild != null)
+		{
+			me.removeChild(me.firstChild);
+		}
+		me.appendChild( document.createTextNode(currentWirelessMac) );
+	}
+
 
 	var confIsBridge = isBridge(uciOriginal);
 	var confIsRouter = !confIsBridge;
