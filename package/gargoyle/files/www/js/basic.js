@@ -74,7 +74,7 @@ function saveChanges()
 		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_router").checked )
 		{
-			if(document.getElementById('wan_protocol') == 'none')
+			if(getSelectedValue('wan_protocol') == 'none')
 			{
 				preCommands = preCommands + "\nuci del network.wan\nuci commit\n";
 				uci.removeSection("network", "wan");
@@ -97,8 +97,8 @@ function saveChanges()
 				}
 			}
 			
-
-		
+			
+			
 			if(trueAndVisible('wan_port_to_lan', 'wan_port_to_lan_container'))
 			{
 				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
@@ -349,9 +349,9 @@ function saveChanges()
 		
 
 			//if wan protocol is 'none' do not set it
-			if(uci.get('network', 'wan', 'proto') == 'none')
+			if(getSelectedValue('wan_protocol') == 'none')
 			{
-				uci.remove('network', 'wan', 'proto');
+				uci.removeSection("network", "wan");
 			}
 			if(uci.get('network', 'lan', 'proto') === '')
 			{
@@ -557,7 +557,7 @@ function saveChanges()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	
 	
-		var waitTime = wirelessDriver == "broadcom" ? 30*1000 : 90*1000;	
+		var waitTime = wirelessDriver == "broadcom" ? 45*1000 : 180*1000;
 		doRedirect= function()
 		{
 			currentProtocol = location.href.match(/^https:/) ? "https" : "http";

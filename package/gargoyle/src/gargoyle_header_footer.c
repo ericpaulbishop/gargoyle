@@ -598,13 +598,14 @@ void print_interface_vars(void)
 	/*
 	 * Load UCI interface variables
 	*/
-	char* uci_wan_mac  = NULL;
-	char* uci_wan_if   = NULL;
-	char* uci_wan_dev  = NULL;
-	char* uci_lan_if   = NULL;
-	char* uci_lan_ip   = NULL;
-	char* uci_lan_mask = NULL;
-	char* uci_wireless = NULL;
+	char* uci_wan_mac     = NULL;
+	char* uci_wan_if      = NULL;
+	char* uci_wan_dev     = NULL;
+	char* uci_wan_gateway = NULL;
+	char* uci_lan_if      = NULL;
+	char* uci_lan_ip      = NULL;
+	char* uci_lan_mask    = NULL;
+	char* uci_wireless    = NULL;
 
 	struct uci_context *ctx;
 	ctx = uci_alloc_context();
@@ -632,6 +633,11 @@ void print_interface_vars(void)
 		{
 			uci_wan_if=get_option_value_string(uci_to_option(e));
 		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
+		{
+			uci_wan_gateway=get_option_value_string(uci_to_option(e));
+		}
+
 		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
 		{
 			uci_lan_if=get_option_value_string(uci_to_option(e));
@@ -701,25 +707,7 @@ void print_interface_vars(void)
 	}
 
 
-	/*
-	printf("wireless_if=%s\n", wireless_if);
-	printf("uci_wireless=%s\n", uci_wireless);
-	printf("current_wireless_mac=%s\n\n", current_wireless_mac);
 
-
-	printf("default_lan_if=%s\n", default_lan_if);
-	printf("current_lan_if=%s\n", uci_lan_if);
-	printf("current_lan_mac=%s\n", current_lan_mac);
-	printf("current_lan_ip=%s\n\n", current_lan_ip);
-
-
-	
-	printf("default_wan_if=%s\n", default_wan_if);
-	printf("current_wan_if=%s\n", uci_wan_if);
-	printf("default_wan_mac=%s\n", default_wan_mac);
-	printf("current_wan_mac=%s\n", current_wan_mac);
-	printf("current_wan_ip=%s\n\n", current_wan_ip);
-	*/
 
 
 	print_js_var("wirelessIf", wireless_if);
@@ -735,11 +723,12 @@ void print_interface_vars(void)
 
 
 	print_js_var("defaultWanIf", default_wan_if);
-	print_js_var("currentWanIf", uci_wan_if);
 	print_js_var("defaultWanMac", default_wan_mac);
+	print_js_var("currentWanIf", uci_wan_if);
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
+	print_js_var("currentWanGateway", uci_wan_gateway);
 
 	uci_free_context(ctx);
 	uci_free_context(state_ctx);

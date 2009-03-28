@@ -39,75 +39,115 @@
 
 <fieldset>
 	<legend class="sectionheader">Status</legend>
+
+	<div id="device_container">	
+		<div>
+			<span class='leftcolumn'>Device Name:</span><span id="device_name" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Gargoyle Version:</span><span id="gargoyle_version" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Device Configuration:</span><span id="device_config" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+	<div id="time_container">
+		<div>
+			<span class='leftcolumn'>Uptime:</span><span id="uptime" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Current Date &amp; Time:</span><span id="current_time" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+	<div id="bridge_container">
+		<div>
+			<span class='leftcolumn'>Bridge IP Address:</span><span id="bridge_ip" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Bridge Netmask:</span><span id="bridge_mask" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Bridge MAC Address:</span><span id="bridge_mac" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>LAN Gateway IP:</span><span id="bridge_gateway" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Connected Via:</span><span id="bridge_mode" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Bridge SSID:</span><span id="bridge_ssid" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+	<div id="lan_container">
+		<div>
+			<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>LAN Netmask:</span><span id="lan_mask" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+	<div id="wan_container">
+		<div>
+			<span class='leftcolumn'>WAN IP Address:</span><span id="wan_ip" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>WAN Netmask:</span><span id="wan_mask" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>WAN MAC Address:</span><span id="wan_mac" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>WAN Gateway IP:</span><span id="wan_gateway" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+	<div id="wifi_container">
+		<div>
+			<span class='leftcolumn'>Wireless Mode:</span><span id="wireless_mode" class='rightcolumn'></span>
+		</div>
+		<div id="wireless_mac_div">
+			<span class='leftcolumn'>Wireless MAC Address:</span><span id="wireless_mac" class='rightcolumn'></span>
+		</div>
+		<div id="wireless_apssid_div">
+			<span class='leftcolumn' id="wireless_apssid_label">Access Point SSID:</span><span id="wireless_apssid" class='rightcolumn'></span>
+		</div>
+		<div id="wireless_otherssid_div">
+			<span class='leftcolumn' id="wireless_otherssid_label">SSID Joined By Client:</span><span id="wireless_otherssid" class='rightcolumn'></span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+
+
 	
-	<div>
-		<span class='leftcolumn'>Device Name:</span><span id="device_name" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>Gargoyle Version:</span><span id="gargoyle_version" class='rightcolumn'></span>
-
-	</div>
-
-	<div>
-		<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
-	</div>
-	<div class="internal_divider"></div>
-
-	<div>
-		<span class='leftcolumn'>Uptime:</span><span id="uptime" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>Current Date &amp; Time:</span><span id="current_time" class='rightcolumn'></span>
-	</div>
-
-	<div class="internal_divider"></div>
-	
-	<div>
-		<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>LAN Netmask:</span><span id="lan_mask" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
-	</div>
-
-	<div class="internal_divider"></div>
-
-	<div>
-		<span class='leftcolumn'>WAN IP Address:</span><span id="wan_ip" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>WAN Netmask:</span><span id="wan_mask" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>WAN MAC Address:</span><span id="wan_mac" class='rightcolumn'></span>
-	</div>
-
-	<div class="internal_divider"></div>
-
-	<div>
-		<span class='leftcolumn'>Wireless Mode:</span><span id="wireless_mode" class='rightcolumn'></span>
-	</div>
-	<div id="wireless_mac_div">
-		<span class='leftcolumn'>Wireless MAC address:</span><span id="wireless_mac" class='rightcolumn'></span>
-	</div>
-	<div id="wireless_apssid_div">
-		<span class='leftcolumn' id="wireless_apssid_label">Access Point SSID:</span><span id="wireless_apssid" class='rightcolumn'></span>
-	</div>
-	<div id="wireless_otherssid_div">
-		<span class='leftcolumn' id="wireless_otherssid_label">SSID Joined By Client:</span><span id="wireless_otherssid" class='rightcolumn'></span>
-	</div>
-
-
-
-	<div class="internal_divider"></div>
-
-	<div>
-		<span class='leftcolumn'>QoS Upload:</span><span id="qos_upload" class='rightcolumn'></span>
-	</div>
-	<div>
-		<span class='leftcolumn'>QoS Download:</span><span id="qos_download" class='rightcolumn'></span>
+	<div id="services_container">
+		<div>
+			<span class='leftcolumn'>QoS Upload:</span><span id="qos_upload" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>QoS Download:</span><span id="qos_download" class='rightcolumn'></span>
+		</div>
 	</div>
 
 </fieldset>

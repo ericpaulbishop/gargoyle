@@ -38,7 +38,7 @@ function resetData()
 	qosDownloadStatus = qosEnabled && uciOriginal.get("qos_gargoyle", "download", "total_bandwidth") != "" ? "Enabled" : "Disabled";
 
 
-
+	
 
 
 	var systemSections = uciOriginal.getAllSections("system");
@@ -50,70 +50,98 @@ function resetData()
 	setChildText("current_time", currentTime);
 
 
-	setChildText("lan_ip", currentLanIp);
-	setChildText("lan_mask", currentLanMask);
-	setChildText("lan_mac", currentLanMac );
-	
-	setChildText("wan_ip", currentWanIp);
-	setChildText("wan_mask", currentWanMask);
-	setChildText("wan_mac", currentWanMac );
-
-	setChildText("wireless_mode", wirelessMode);
-	if(wirelessModeId != "disabled")
+	var bridgeSection = getBridgeSection(uciOriginal);
+	setChildText("device_config", bridgeSection == "" ? "Router" : "Wireless Bridge/Repeater");
+	if(bridgeSection == "")
 	{
-		var allWirelessSections = uciOriginal.getAllSections("wireless");
-		var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
-		var firstWirelessDevice = allWifiDeviceSections[0];
+		document.getElementById("bridge_container").style.display = "none";
 
-		wifiCfg2="";
-		wifiCfg3="";
-		if(allWirelessSections.length >= 2)
-		{
-			wifiCfg2 = allWirelessSections[1];
-		}
-		if(allWirelessSections.length >= 3)
-		{
-			wifiCfg3 = allWirelessSections[2];
-		}
-		cfg2mode=uciOriginal.get("wireless", wifiCfg2, "mode");
-		cfg3mode=uciOriginal.get("wireless", wifiCfg3, "mode");
-		apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
-		othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
-		apssid=uciOriginal.get("wireless", apcfg, "ssid");
-		otherssid=uciOriginal.get("wireless", othercfg, "ssid");
+		setChildText("lan_ip", currentLanIp);
+		setChildText("lan_mask", currentLanMask);
+		setChildText("lan_mac", currentLanMac );
 
+	
+		if(uciOriginal.get("network", "wan", "") == "")
+		{
+			alert("here!\n");
+			document.getElementById("wan_container").style.display = "none";
+		}
+		setChildText("wan_ip", currentWanIp);
+		setChildText("wan_mask", currentWanMask);
+		setChildText("wan_mac", currentWanMac );
+		setChildText("wan_gateway", currentWanGateway );
 
-		setChildText("wireless_mac", currentWirelessMac);
-		if(apssid != '')
+		setChildText("wireless_mode", wirelessMode);
+		if(wirelessModeId != "disabled")
 		{
-			setChildText("wireless_apssid", apssid);
-		}
-		else
-		{
-			document.getElementById("wireless_apssid_div").style.display="none";
-		}
-		if(othercfg != '')
-		{
-			if(cfg2mode != 'sta' && cfg3mode !='sta')
+			var allWirelessSections = uciOriginal.getAllSections("wireless");
+			var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
+			var firstWirelessDevice = allWifiDeviceSections[0];
+
+			wifiCfg2="";
+			wifiCfg3="";
+			if(allWirelessSections.length >= 2)
 			{
-				setChildText("wireless_otherssid_label", "SSID:");
+				wifiCfg2 = allWirelessSections[1];
+			}
+			if(allWirelessSections.length >= 3)
+			{
+				wifiCfg3 = allWirelessSections[2];
+			}
+			cfg2mode=uciOriginal.get("wireless", wifiCfg2, "mode");
+			cfg3mode=uciOriginal.get("wireless", wifiCfg3, "mode");
+			apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
+			othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
+			apssid=uciOriginal.get("wireless", apcfg, "ssid");
+			otherssid=uciOriginal.get("wireless", othercfg, "ssid");
+
+
+			setChildText("wireless_mac", currentWirelessMac);
+			if(apssid != '')
+			{
+				setChildText("wireless_apssid", apssid);
 			}
 			else
 			{
-				setChildText("wireless_otherssid_label", "SSID Joined By Client:");
+				document.getElementById("wireless_apssid_div").style.display="none";
 			}
-			setChildText("wireless_otherssid", otherssid);
+			if(othercfg != '' && otherssid != '' && uciOriginal.get("wireless", othercfg, "mode") != "wds")
+			{
+				if(cfg2mode != 'sta' && cfg3mode !='sta')
+				{
+					setChildText("wireless_otherssid_label", "SSID:");
+				}
+				else
+				{
+					setChildText("wireless_otherssid_label", "SSID Joined By Client:");
+					if(currentWirelessMac != ""){ setChildText("wan_mac", currentWirelessMac); }
+				}
+				setChildText("wireless_otherssid", otherssid);
+			}
+			else
+			{
+				document.getElementById("wireless_otherssid_div").style.display="none";
+			}
 		}
 		else
 		{
+			document.getElementById("wireless_mac_div").style.display="none";
+			document.getElementById("wireless_apssid_div").style.display="none";
 			document.getElementById("wireless_otherssid_div").style.display="none";
 		}
 	}
 	else
 	{
-		document.getElementById("wireless_mac_div").style.display="none";
-		document.getElementById("wireless_apssid_div").style.display="none";
-		document.getElementById("wireless_otherssid_div").style.display="none";
+		document.getElementById("wan_container").style.display = "none";
+		document.getElementById("lan_container").style.display = "none";
+		document.getElementById("wifi_container").style.display = "none";
+		
+		setChildText("bridge_ip", currentLanIp);
+		setChildText("bridge_mask", currentLanMask);
+		setChildText("bridge_mac", currentLanMac );
+		setChildText("bridge_gateway", uciOriginal.get("network", "lan", "gateway") );
+		setChildText("bridge_mode", uciOriginal.get("wireless", bridgeSection, "client_bridge") == "1" ? "Client Bridge" : "WDS");
+		setChildText("bridge_ssid", uciOriginal.get("wireless", bridgeSection, "ssid") );
 	}
 
 	setChildText("qos_upload", qosUploadStatus);
