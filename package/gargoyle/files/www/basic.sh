@@ -507,6 +507,7 @@ else
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
+	<iframe id="reboot_test" style="display:none" ></iframe>
 </form>
 
 

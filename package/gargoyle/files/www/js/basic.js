@@ -6,6 +6,7 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var currentLanIp;
 
 function saveChanges()
 {
@@ -69,8 +70,8 @@ function saveChanges()
 		uci.remove('wireless', firstWirelessDevice, 'disabled'); 
 
 
+		currentLanIp = "";
 		var adjustIpCommands = ""
-		var currentLanIp = "";
 		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_router").checked )
 		{
@@ -556,16 +557,36 @@ function saveChanges()
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	
-	
-		var waitTime = wirelessDriver == "broadcom" ? 45*1000 : 180*1000;
-		doRedirect= function()
+		currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+		testLocation = currentProtocol + "://" + currentLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
+		rebootTests = 0;
+		doRebootTest= function()
 		{
-			currentProtocol = location.href.match(/^https:/) ? "https" : "http";
-			window.location = currentProtocol + "://" + currentLanIp + ":" + window.location.port + window.location.pathname;
+			document.getElementById("reboot_test").src = testLocation ; 
+			rebootTests++;
+			
+			//give up after 5 minutes
+			if(rebootTests < 60)
+			{
+				setTimeout("doRebootTest()", 5*1000);
+			}
+			else
+			{
+				reloadPage();
+			}
 		}
-		setTimeout( "doRedirect()", waitTime);
+		setTimeout( "doRebootTest()", 25*1000);
 	}
 }
+
+
+function reloadPage()
+{
+	document.getElementById("reboot_test").src = "";
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	window.location = currentProtocol + "://" + currentLanIp + ":" + window.location.port + window.location.pathname;
+}
+
 
 
 function generateWepKey(length)

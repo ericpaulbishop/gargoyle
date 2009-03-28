@@ -17,11 +17,31 @@ function reboot()
 		if(req.readyState == 4){}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-			
-	doRedirect= function()
+
+	//test for router coming back up
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	testLocation = currentProtocol + "://" + window.location.host + "/utility/reboot_test.sh";
+	rebootTests=0;	
+	doRebootTest= function()
 	{
-		window.location.reload(false);
+		document.getElementById("reboot_test").src = testLocation ; 
+		rebootTests++;
+			
+		//give up after 5 minutes
+		if(rebootTests < 60)
+		{
+			setTimeout("doRebootTest()", 5*1000);
+		}
+		else
+		{
+			reloadPage();
+		}
 	}
-	setTimeout( "doRedirect()", 90000);
+	setTimeout( "doRebootTest()", 25*1000);
 }
 
+function reloadPage()
+{
+	document.getElementById("reboot_test").src = "";
+	window.location.href = window.location.href;
+}

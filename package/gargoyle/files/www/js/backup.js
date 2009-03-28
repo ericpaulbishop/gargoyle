@@ -5,6 +5,7 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var globalLanIp;
 
 function getBackup()
 {
@@ -57,16 +58,41 @@ function restoreSuccessful(lanIp)
 {
 	setControlsEnabled(false, true, "Please wait while new settings are applied")
 	
+	globalLanIp = lanIp;
 
 	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/reboot.sh ;\n" );
 	var stateChangeFunction = function(req) { return 0; } ;
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
-	doRedirect= function()
+
+
+
+	//test for router coming back up
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	testLocation = currentProtocol + "://" + globalLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
+	rebootTests=0;	
+	doRebootTest= function()
 	{
-		currentProtocol = location.href.match(/^https:/) ? "https" : "http";
-		window.location = currentProtocol + "://" + lanIp + ":" + window.location.port + window.location.pathname;
+		document.getElementById("reboot_test").src = testLocation ; 
+		rebootTests++;
+			
+		//give up after 5 minutes
+		if(rebootTests < 60)
+		{
+			setTimeout("doRebootTest()", 5*1000);
+		}
+		else
+		{
+			reloadPage();
+		}
 	}
-	setTimeout( "doRedirect()", 60000);
-	
+	setTimeout( "doRebootTest()", 25*1000);
 }
+
+function reloadPage()
+{
+	document.getElementById("reboot_test").src = "";
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	window.location = currentProtocol + "://" + globalLanIp + ":" + window.location.port + window.location.pathname;
+}
+

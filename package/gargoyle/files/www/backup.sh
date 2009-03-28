@@ -41,6 +41,7 @@
 	</div>
 	<iframe id="do_restore_original" name="do_restore_original" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
 </fieldset>
+<iframe id="reboot_test" style="display:none" ></iframe>
 
 
 

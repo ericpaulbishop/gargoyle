@@ -16,6 +16,7 @@
 
 	</fieldset>
 </form>
+<iframe id="reboot_test" style="display:none" ></iframe>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

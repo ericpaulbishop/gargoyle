@@ -40,8 +40,12 @@ function upgraded()
 	{
 		window.location =  "http://192.168.1.1/";
 	}
-	setTimeout( "doRedirect()", 90000);
+	setTimeout( "doRedirect()", 120*1000);
 }
+
+
+
+
 function failure()
 {
 	setControlsEnabled(true);
