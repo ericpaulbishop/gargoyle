@@ -4,7 +4,9 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-
+# This script will effictively restart things if the wifi chip is brcm
+# but things get completely FUBAR if the wifi is atheros
+# If the wifi is Atheros, the router HAS to be restarted
 
 # for some reason network interfaces are not all down
 # after running "/etc/init.d/network stop",
@@ -25,9 +27,15 @@ qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
 
 #stop firewall,dnsmasq,qos,bwmon
-/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
-/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
-/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
+if [ -n "$restricter_enabled" ] ; then
+	/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
+fi
+if [ -n "$bwmon_enabled" ] ; then
+	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
+fi
+if [ -n "$qos_enabled" ] ; then
+	/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
+fi
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
 

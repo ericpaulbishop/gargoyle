@@ -4,10 +4,17 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-#stop firewall,dnsmasq,qos,bwmon
-/etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
-/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
-/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
-sleep 3
-reboot
+webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle 2>/dev/null)
+restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
+bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 
+if [ -n "$restricter_enabled" ] ; then
+	/etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
+fi
+if [ -n "$restricter_enabled" ] ; then
+	/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
+fi
+if [ -n "$bwmon_enabled" ] ; then
+	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
+fi
+reboot

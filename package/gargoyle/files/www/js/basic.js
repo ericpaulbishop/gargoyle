@@ -19,7 +19,16 @@ function saveChanges()
 	}
 	else
 	{
-		setControlsEnabled(false, true);
+		//let user know if we're rebooting -- broadcom wifi can be restarted
+		//without rebooting, but under certain conditions atheros devices shit themselves
+		if(wirelessDriver == "broadcom")
+		{
+			setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
+		}
+		else
+		{
+			setControlsEnabled(false, true, "Please Wait While Settings Are Applied And Device Is Restarted");
+		}
 
 		var uci = uciOriginal.clone();
 		var uciCompare = uciOriginal.clone();
@@ -540,42 +549,54 @@ function saveChanges()
 		}
 
 		var commands = uci.getScriptCommands(uciCompare);
-		var restartNetworkCommand = "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
+		var restartNetworkCommand = wirelessDriver== "broadcom" ? "\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
 
 		
 		//document.getElementById("output").value = commands;
 		var param = getParameterDefinition("commands", commands);
 		
-
+		
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
 			{
 				//alert(req.responseText);
+				if(wirelessDriver == "broadcom" && oldLanIp == currentLanIp)
+				{
+					uciOriginal = uci.clone();
+					resetData();
+					setControlsEnabled(true);
+				}
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-	
-		currentProtocol = location.href.match(/^https:/) ? "https" : "http";
-		testLocation = currentProtocol + "://" + currentLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
-		rebootTests = 0;
-		doRebootTest= function()
+
+
+		//if we're rebooting, this tests whether reboot is done, otherwise
+		//it tests if router is up at new ip
+		if(wirelessDriver != "broadcom" || oldLanIp != currentLanIp)
 		{
-			document.getElementById("reboot_test").src = testLocation ; 
-			rebootTests++;
+			currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+			testLocation = currentProtocol + "://" + currentLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
+			rebootTests = 0;
+			doRebootTest= function()
+			{
+				document.getElementById("reboot_test").src = testLocation ; 
+				rebootTests++;
 			
-			//give up after 5 minutes
-			if(rebootTests < 60)
-			{
-				setTimeout("doRebootTest()", 5*1000);
+				//give up after 5 minutes
+				if(rebootTests < 60)
+				{
+					setTimeout("doRebootTest()", 5*1000);
+				}
+				else
+				{
+					reloadPage();
+				}
 			}
-			else
-			{
-				reloadPage();
-			}
+			setTimeout( "doRebootTest()", 25*1000);
 		}
-		setTimeout( "doRebootTest()", 25*1000);
 	}
 }
 
