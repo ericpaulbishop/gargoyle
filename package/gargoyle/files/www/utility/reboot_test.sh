@@ -14,6 +14,6 @@
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
 	echo '<html xmlns="http://www.w3.org/1999/xhtml">'
 	echo '<body>'
-	echo "<script type=\"text/javascript\">top.reloadPage();</script>"
+	echo "<div id='reloaded_test'>LOADED! WOOGAWOOGA!</div>"
 	echo "</body></html>"
 ?>

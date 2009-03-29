@@ -27,7 +27,7 @@
 	<div>
 		<span class='leftcolumn'><input id="restore_button" type='button' class="default_button" value="Restore Configuration Now" onclick="doRestore()"/></span>
 	</div>
-	<iframe id="do_restore" name="do_restore" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
+	<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe> 
 
 
 </fieldset>
@@ -39,9 +39,9 @@
 	<div>
 		<span class='leftcolumn'><input id="restore_original_button" type='button' class="default_button" value="Restore Default Configuration Now" onclick="doDefaultRestore()"/></span>
 	</div>
-	<iframe id="do_restore_original" name="do_restore_original" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
+	<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe> 
 </fieldset>
-<iframe id="reboot_test" style="display:none" ></iframe>
+<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
 
 

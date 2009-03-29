@@ -99,7 +99,7 @@ for (etherIndex in etherData)
 
 
 		<div id='staticip_add_heading_container'>
-			<label class='nocolumn' id='staticip_add_heading_label'>Add Static IP Address:</label>
+			<label class='nocolumn' id='staticip_add_heading_label' style='text-decoration:underline'>Add Static IP Address:</label>
 		</div>
 		<div class='bottom_gap'>
 			<div id='staticip_add_container'>

@@ -50,7 +50,7 @@
 		<span class='leftcolumn'><input id="upgrade_button" type='button' class="default_button" value="Upgrade Now" onclick="doUpgrade()"/></span>
 	</div>
 
-	<iframe id="do_upgrade" name="do_upgrade" src="#" style="width:0;height:0;border:0px solid #fff;"></iframe> 
+	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe> 
 
 <script>
 <!--
