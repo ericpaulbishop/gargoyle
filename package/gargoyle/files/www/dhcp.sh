@@ -102,7 +102,7 @@ for (etherIndex in etherData)
 			<label class='nocolumn' id='staticip_add_heading_label'>Add Static IP Address:</label>
 		</div>
 		<div class='bottom_gap'>
-			<div id='staticip_add_container' class='indent'>
+			<div id='staticip_add_container'>
 				<? cat templates/static_ip_template ?>
 			</div>
 		</div>
