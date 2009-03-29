@@ -63,7 +63,7 @@
 			</div>
 			<div class="indent" id="add_ip_container">
 				<div>
-					<input type='text' id='add_ip' onkeyup='proofreadIp(this)' size='15' maxlength='17' />
+					<input type='text' id='add_ip' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 					<input type="button" class="default_button" id="add_ip_button" value="Add IP To List" onclick="addIp()" />
 				</div>
 				<div id="ip_table_container"></div>

@@ -65,7 +65,7 @@
 		</div>
 		<div id="dmz_ip_container" class="indent">
 			<label class='leftcolumn' for='dmz_ip' id='dmz_ip_label'>DMZ IP:</label>
-			<input type='text' class='rightcolumn' name='dmz_ip' id='dmz_ip' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+			<input type='text' class='rightcolumn' name='dmz_ip' id='dmz_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 	</fieldset>
 

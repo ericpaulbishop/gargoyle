@@ -24,12 +24,14 @@
 //-->
 </script>
 
+
 <form>
 	<fieldset>
 		<legend class="sectionheader">Time</legend>
-		
+	
 		<div>
-			<span class='nocolumn' ><label id='current_time_label' for='timezone'>Current Date &amp Time:&nbsp;&nbsp;&nbsp;&nbsp;</label><span id="current_time"></span></span>
+			<label id='current_time_label' for='timezone'>Current Date &amp; Time:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+			<span id="current_time"></span>
 		</div>
 		
 		<div class="internal_divider"></div>
@@ -75,9 +77,9 @@
 					</select>
 				</div>
 				<div class="indent">
-					<div><input type='text' class='leftcolumn' id="server1" /></div>
-					<div><input type='text' class='leftcolumn' id="server2" /></div>
-					<div><input type='text' class='leftcolumn' id="server3" /></div>
+					<div><input type='text' class='leftcolumn' id="server1" size="35" /></div>
+					<div><input type='text' class='leftcolumn' id="server2" size="35" /></div>
+					<div><input type='text' class='leftcolumn' id="server3" size="35" /></div>
 				</div>
 			</div>
 		</div>

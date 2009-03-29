@@ -109,7 +109,7 @@ function saveChanges()
 			
 			
 			
-			if(trueAndVisible('wan_port_to_lan', 'wan_port_to_lan_container'))
+			if( document.getElementById("wan_port_to_lan_container").style.display != "none" && getSelectedValue('wan_port_to_lan') == "bridge" )
 			{
 				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
 			}
@@ -416,6 +416,15 @@ function saveChanges()
 		}
 		else
 		{
+			if( document.getElementById("bridge_wan_port_to_lan_container").style.display != "none" && getSelectedValue('bridge_wan_port_to_lan') == "bridge" )
+			{
+				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
+			}
+			else
+			{
+				uci.set('network', 'lan', 'ifname', defaultLanIf);
+			}
+
 			currentLanIp = document.getElementById("bridge_ip").value;
 			//compute configuration  for bridge
 			preCommands = preCommands + "\nuci del network.wan\nuci commit\n";
@@ -865,7 +874,6 @@ function setWifiVisibility()
 function setBridgeVisibility()
 {
 
-
 	showIds = document.getElementById("global_router").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
 	hideIds = document.getElementById("global_router").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
 	var allIds = [hideIds, showIds];
@@ -887,10 +895,21 @@ function setBridgeVisibility()
 		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
 		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
 	}
+	if(defaultWanIf == '')
+	{
+		document.getElementById("bridge_wan_port_to_lan_container").style.display = "none";
+	}
+	else
+	{
+		document.getElementById("bridge_wan_port_to_lan_container").style.display = "block";
+
+	}
 }
 
 function resetData()
 {
+
+
 	if(wirelessDriver == "broadcom")
 	{
 		removeOptionFromSelectElement("bridge_channel", "auto", document);
@@ -976,8 +995,6 @@ function resetData()
 	}
 	bridgeWdsTableContainer.appendChild(bridgeWdsMacTable);
 	setBridgeVisibility();
-
-
 
 
 	//reset default wan mac if isBcm94704 is true
@@ -1199,8 +1216,9 @@ function resetData()
 
 	document.getElementById('wan_via_single_port').checked = (wanUciIf == defaultLanIf && defaultWanIf == '');
 	document.getElementById('wan_via_wifi').checked = wanIsWifi;
-	document.getElementById('wan_port_disabled').checked = (lanUciIf.indexOf(defaultWanIf) < 0);
-	document.getElementById('wan_port_to_lan').checked = (lanUciIf.indexOf(defaultWanIf) >= 0);
+	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
+	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
+	setSelectedValue('wan_port_to_lan', wanToLanStatus);
 
 
 	//load bssids for wds if necessary

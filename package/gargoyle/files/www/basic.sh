@@ -83,19 +83,29 @@ else
 		<legend class="sectionheader">Wireless Bridge/Repeater</legend>
 		<div id='bridge_ip_container'>
 			<label class='leftcolumn' for='bridge_ip' id='bridge_ip_label'>Bridge IP:</label>
-			<input type='text' class='rightcolumn' name='bridge_ip' id='bridge_ip' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='bridge_ip' id='bridge_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 			<em>(must be in AP subnet)</em>
 		</div>
 		<div id='bridge_mask_container'>
 			<label class='leftcolumn' for='bridge_mask' id='bridge_mask_label'>Subnet Mask:</label>
-			<input type='text' class='rightcolumn' name='bridge_mask' id='bridge_mask' onkeyup='proofreadMask(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='bridge_mask' id='bridge_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 			<em>(same as AP mask)</em>
 
 		</div>
 		<div id='bridge_gateway_container'>
 			<label class='leftcolumn' for='bridge_gateway' id='bridge_gateway_label'>AP/Gateway IP:</label>
-			<input type='text' class='rightcolumn' name='bridge_gateway' id='bridge_gateway' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='bridge_gateway' id='bridge_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
+
+		<div id= "bridge_wan_port_to_lan_container">
+			<select class='nocolumn' id='bridge_wan_port_to_lan' onchange='setBridgeVisibility()'>
+				<option value='disable'>Disable WAN Ethernet Port</option>
+				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
+			</select>
+		</div>
+		<br/>
+
+
 		<div class='internal_divider'></div>
 		
 		<div id='bridge_mode_container'>
@@ -135,7 +145,7 @@ else
 			</div>	
 			<div id='bridge_ssid_container'>
 				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID:</label>
-				<input type='text' id='bridge_ssid'  size='17' onkeyup='proofreadLengthRange(this,1,999)'/>
+				<input type='text' id='bridge_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
 			
 			<div id='bridge_encryption_container'>
@@ -149,7 +159,7 @@ else
 			</div>
 			<div id='bridge_pass_container' class='indent'>
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'>Password:</label>
-				<input type='password' id='bridge_pass' size='17' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
 			</div>
 			<div id='bridge_wep_container' class='indent'>
 				<div style="display:block;">
@@ -171,7 +181,7 @@ else
 				<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of <em>Other</em> WDS Devices:</label>
 				<div class='rightcolumnonly'>
 					<div class="indent">	
-						<input type='text' id='add_bridge_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+						<input type='text' id='add_bridge_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 						<input type="button" class="default_button" id="add_bridge_wds_mac_button" value="Add" onclick='addMacToWds("bridge")' />
 					</div>
 				</div>
@@ -197,11 +207,11 @@ else
 		
 		<div id='wan_pppoe_user_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_user' id='wan_pppoe_user_label'>User Name:</label>
-			<input type='text' class='rightcolumn' id='wan_pppoe_user'  size='17' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<input type='text' class='rightcolumn' id='wan_pppoe_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
 		<div id='wan_pppoe_pass_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_pass' id='wan_pppoe_pass_label'>Password:</label>
-			<input type='password' class='rightcolumn' id='wan_pppoe_pass'  size='17'  onkeyup='proofreadLengthRange(this,1,999)'/>
+			<input type='password' class='rightcolumn' id='wan_pppoe_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
 		<div id='wan_pppoe_reconnect_mode_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_mode'>Reconnect Mode:</label>
@@ -213,7 +223,7 @@ else
 		<div id='wan_pppoe_max_idle_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_max_idle' id='wan_pppoe_max_idle_label'>Max Idle Time:</label>
 			<div class='rightcolumn'>
-				<input type='text' class='rightcolumn' id='wan_pppoe_max_idle' onkeyup='proofreadNumeric(this)' size='17' maxlength='4' />
+				<input type='text' class='rightcolumn' id='wan_pppoe_max_idle' onkeyup='proofreadNumeric(this)' size='20' maxlength='4' />
 				<em>(minutes)</em>
 			</div>
 		</div>
@@ -221,14 +231,14 @@ else
 		<div id='wan_pppoe_reconnect_pings_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_pings' id='wan_pppoe_reconnect_pings_label'>Failed Pings Before Reconnect:</label>
 			<div class='rightcolumn'>
-				<input type='text' id='wan_pppoe_reconnect_pings' onkeyup='proofreadNumeric(this)'  size='17' maxlength='4' />
+				<input type='text' id='wan_pppoe_reconnect_pings' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
 			</div>
 		</div>
 
 		<div id='wan_pppoe_interval_container' class='indent'>
 			<label class='leftcolumn' for='wan_pppoe_interval' id='wan_pppoe_interval_label'>Ping Interval:</label>
 			<div class='rightcolumn'>
-				<input type='text' id='wan_pppoe_interval' onkeyup='proofreadNumeric(this)'  size='17' maxlength='4' />
+				<input type='text' id='wan_pppoe_interval' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
 				<em>(seconds)</em>
 			</div>
 		</div>
@@ -236,15 +246,15 @@ else
 		
 		<div id='wan_static_ip_container' class='indent'>
 			<label class='leftcolumn' for='wan_static_ip' id='wan_static_ip_label'>Static IP:</label>
-			<input type='text' class='rightcolumn' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+			<input type='text' class='rightcolumn' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 		<div id='wan_static_mask_container' class='indent'>
 			<label class='leftcolumn' for='wan_static_mask' id='wan_static_ip_label'>Subnet Mask:</label>
-			<input type='text' class='rightcolumn' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='17' maxlength='15' />
+			<input type='text' class='rightcolumn' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
 		<div id='wan_static_gateway_container' class='indent'>
 			<label class='leftcolumn' for='wan_static_gateway' id='wan_static_gateway_label'>Gateway:</label>
-			<input type='text' class='rightcolumn' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
+			<input type='text' class='rightcolumn' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
 
@@ -265,15 +275,11 @@ else
 			</div>
 		</div>
 
-		<div id='wan_port_to_lan_container' class='indent'>
-			<div>
-				<input type='radio' id='wan_port_disabled' name='wan_port_to_lan' value='disable'/>
-				<label id='wan_port_to_lan_label' for='wan_port_disabled'>Disable WAN ethernet port</label>
-			</div>
-			<div>
-				<input type='radio' id='wan_port_to_lan' name='wan_port_to_lan' value='lan'/>
-				<label id='wan_port_to_lan_label' for='wan_port_to_lan'>Bridge WAN ethernet port to LAN</label>
-			</div>
+		<div id='wan_port_to_lan_container'>
+			<select class='nocolumn' id='wan_port_to_lan'>
+				<option value='disable'>Disable WAN Ethernet Port</option>
+				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
+			</select>
 		</div>
 		
 		<div id='wan_mac_container'>
@@ -281,14 +287,14 @@ else
 				<input type='checkbox' id='wan_use_mac' onclick='enableAssociatedField(this, "wan_mac", defaultWanMac)'/>
 				<label for='wan_mac' id='wan_mac_label'>Use Custom MAC Address:</label>
 			</span>
-			<input type='text' class='rightcolumn' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+			<input type='text' class='rightcolumn' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 		</div>
 		<div id='wan_mtu_container'>
 			<span class='leftcolumn'>
 				<input type='checkbox' id='wan_use_mtu' onclick='enableAssociatedField(this, "wan_mtu", 1500)'/>
 				<label for='wan_mtu' id='wan_mtu_label'>Use Custom MTU:</label>
 			</span>
-			<input type='text' class='rightcolumn' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)'  size='17' maxlength='4' /> 
+			<input type='text' class='rightcolumn' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' /> 
 		</div>
 	</fieldset>
 	
@@ -297,29 +303,29 @@ else
 	
 		<div id='lan_ip_container'>
 			<label class='leftcolumn' for='lan_ip' id='lan_ip_label'>Router IP:</label>
-			<input type='text' class='rightcolumn' name='lan_ip' id='lan_ip' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='lan_ip' id='lan_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 		<div id='lan_mask_container'>
 			<label class='leftcolumn' for='lan_mask' id='lan_mask_label'>Subnet Mask:</label>
-			<input type='text' class='rightcolumn' name='lan_mask' id='lan_mask' onkeyup='proofreadMask(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='lan_mask' id='lan_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
 		<div id='lan_gateway_container'>
 			<label class='leftcolumn' for='lan_gateway' id='lan_gateway_label'>Gateway:</label>
-			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 		<div id='lan_dns_container'>
 			<div>
 				<label class='leftcolumn' >DNS Servers:</label>
 				<label for='lan_dns1' id='lan_dns1_label' style="display:none">DNS Server 1:</label>
-				<input class='rightcolumn' type='text' id='lan_dns1' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+				<input class='rightcolumn' type='text' id='lan_dns1' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 			</div>
 			<div>
 				<label class='leftcolumn' for='lan_dns2' id='lan_dns2_label' style="visibility:hidden">DNS Server 2:</label>
-				<input class='rightcolumn' type='text' id='lan_dns2' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+				<input class='rightcolumn' type='text' id='lan_dns2' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 			</div>
 			<div>
 				<label class='leftcolumn' for='lan_dns3' id='lan_dns3_label'style="visibility:hidden">DNS Server 3:</label>
-				<input class='rightcolumn' type='text' id='lan_dns3' onkeyup='proofreadIp(this)' size='15' maxlength='15' />
+				<input class='rightcolumn' type='text' id='lan_dns3' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 			</div>
 		</div>
 	</fieldset>
@@ -384,7 +390,7 @@ else
 			</div>
 			<div class='rightcolumnonly'>
 				<div class="indent">	
-					<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+					<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 					<input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter()" />
 				</div>
 			</div>
@@ -398,7 +404,7 @@ else
 		
 		<div id='wifi_ssid1_container'>
 			<label class='leftcolumn' for='wifi_ssid1' id='wifi_ssid1_label'>Access Point SSID:</label>
-			<input type='text' id='wifi_ssid1'  size='17' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+			<input type='text' id='wifi_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		</div>
 
 		<div id='wifi_hidden_container' class='indent'>
@@ -428,7 +434,7 @@ else
 
 		<div id='wifi_pass1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass1' id='wifi_pass1_label'>Password:</label>
-			<input type='password' id='wifi_pass1'  size='17' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
 		</div>
 		<div id='wifi_wep1_container' class='indent'>
 			<div style="display:block;">
@@ -446,11 +452,11 @@ else
 
 		<div id='wifi_server1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_server1' id='wifi_server1_label'>RADIUS Server IP:</label>
-			<input type='text' id='wifi_server1'  size='17' onkeyup='proofreadIP(this)'/><br/>
+			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIP(this)'/><br/>
 		</div>
 		<div id='wifi_port1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_port1' id='wifi_port1_label'>RADIUS Server Port:</label>
-			<input type='text' id='wifi_port1'  size='17' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
+			<input type='text' id='wifi_port1'  size='20' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
 		</div>
 	
 		<div id='wifi_mac_container'>
@@ -461,7 +467,7 @@ else
 			<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of <em>Other</em> WDS Devices:</label>
 			<div class='rightcolumnonly'>
 				<div class="indent">	
-					<input type='text' id='add_wifi_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+					<input type='text' id='add_wifi_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 					<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="Add" onclick='addMacToWds("wifi")' />
 				</div>
 			</div>
@@ -472,7 +478,7 @@ else
 		
 		<div id='wifi_ssid2_container'>
 			<label class='leftcolumn' for='wifi_ssid2' id='wifi_ssid2_label'>SSID:</label>
-			<input type='text' id='wifi_ssid2'  size='17' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<input type='text' id='wifi_ssid2'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
 		
 		<div id='wifi_encryption2_container'>
@@ -486,7 +492,7 @@ else
 		</div>
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'>Password:</label>
-			<input type='password' id='wifi_pass2' size='17' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
 		</div>
 		<div id='wifi_wep2_container' class='indent'>
 			<div style="display:block;">

@@ -28,7 +28,7 @@
 	</div>	
 	<div>
 		<span class='leftcolumn'><input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter(document)" /></span>
-		<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='17' maxlength='17' />
+		<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 	</div>
 	
 	<div id="mac_table_container"></div>
