@@ -5,6 +5,21 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+window.onresize = function onresize()
+{
+	//in case this gets called while initializing page, you may get error if element isnt defined,
+	//so use a try/catch
+	try
+	{
+		if(document.getElementById("darken").style.display == "block")
+		{
+			setControlsEnabled(false, document.getElementById("wait_msg").style.display == "block");
+		}
+	}
+	catch(e){}
+}
+
+
 function setControlsEnabled(enabled, showWaitMessage, waitText)
 {
 	var dark = document.getElementById("darken");
@@ -24,7 +39,12 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 		}
 		if(document.body.parentNode.scrollWidth)
 		{
-			totalWidth  = document.body.parentNode.scrollWidth + "px";
+			totalWidth  = document.body.parentNode.scrollWidth;
+			if(document.width)
+			{
+				totalWidth = document.width > totalWidth ? document.width : totalWidth;
+			}
+			totalWidth = totalWidth + "px";
 		}
 		else if(document.width)
 		{
