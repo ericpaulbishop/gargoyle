@@ -99,8 +99,8 @@ create_l7marker_chain()
 	app_proto_mask="0xFF0000"
 
 	iptables -t mangle -N l7marker
-	iptables -t mangle -I PREROUTING  -m connmark --mark 0x0/$app_proto_mask -j l7marker
-	iptables -t mangle -I POSTROUTING -m connmark --mark 0x0/$app_proto_mask -j l7marker
+	iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:75 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
+	iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:75 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
 
 	prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
