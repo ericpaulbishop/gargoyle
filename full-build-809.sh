@@ -43,7 +43,11 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 		revision=" -r $rnum "
 	fi
 	echo "fetching kamikaze 8.09 source"
-	svn checkout $revision https://svn.openwrt.org/openwrt/branches/8.09/
+	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/8.09/
+	if [ ! -d "8.09" ] ; then
+		echo "ERROR: could not download source, exiting"
+		exit
+	fi
 	mv 8.09 $openwrt_src_dir
 	cd $openwrt_src_dir
 	find . -name ".svn" | xargs -r rm -rf
