@@ -1,0 +1,21 @@
+if [ $ACTION = "add" ] || [ $ACTION = "register" ] ; then
+	wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+	if [ "$wan_if" = $INTERFACE ]  ; then
+		#echo "found wan if $INTERFACE" > /tmp/wan_test
+		wan_proto=$(uci -P /var/state get network.wan.proto 2>/dev/null)
+		if [ "$wan_proto" = "dhcp" ] ; then
+			#echo  "wan is dhcp" > "/tmp/wan_dhcp_test"
+			sleep 20 #wait a while to be sure
+			wan_if_ip=$(ifconfig $wan_if | grep -o -e "inet addr\:[0-9\.]* " | sed 's/inet addr\://g' )
+			if [ -z "$wan_if_ip" ] ; then
+				#echo "restarting dhcp for wan" > /tmp/wan_dhcp_run
+				current_udhcpc=$(ps | grep "udhcp.*$wan_if" | grep -v "grep" | awk ' { print $1 }' )
+				if [ -n "$current_udhcpc" ] ; then
+					kill $current_udhcpc
+				fi
+				udhcpc -t 0 -i $wan_if -b -p /var/run/$wan_if.pid -R&
+			fi
+		fi
+	fi
+fi
+

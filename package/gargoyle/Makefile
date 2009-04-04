@@ -75,14 +75,13 @@ define Package/gargoyle/postinst
 	cat $${IPKG_INSTROOT}/etc/config/system | sed -r 's/timezone.*UTC/timezone \"GMT0BST\,M3\.5\.0\/2,M10\.5\.0\/2\"/' > $${IPKG_INSTROOT}/etc/config/system.tmp
 	mv $${IPKG_INSTROOT}/etc/config/system.tmp $${IPKG_INSTROOT}/etc/config/system
 
+	#if this is brcm-2.4, remove client bridge hotplug script, this isn't necessary for brcm-2.4
 	if [ -e $${IPKG_INSTROOT}/usr/sbin/nas ] ; then
 		rm $${IPKG_INSTROOT}/etc/hotplug.d/net/20-client_bridge 
 	fi
 	
-	#install new network config script and new network script
+	#install new network config script
 	mv $${IPKG_INSTROOT}/lib/network/config.sh.tmp $${IPKG_INSTROOT}/lib/network/config.sh  2>/dev/null
-	mv $${IPKG_INSTROOT}/etc/init.d/network.tmp $${IPKG_INSTROOT}/etc/init.d/network  2>/dev/null
-	chmod 744 $${IPKG_INSTROOT}/etc/init.d/network 2>/dev/null
 	
 	#if this is atheros device, set uci options that set fonera power led to on
 	#this may cause further weirdness with other atheros devices, but quite frankly, I don't give a shit
