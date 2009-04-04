@@ -63,7 +63,6 @@ function resetData()
 	
 		if(uciOriginal.get("network", "wan", "") == "")
 		{
-			alert("here!\n");
 			document.getElementById("wan_container").style.display = "none";
 		}
 		setChildText("wan_ip", currentWanIp);
