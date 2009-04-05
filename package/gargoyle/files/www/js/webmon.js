@@ -310,9 +310,9 @@ function updateMonitorTable()
 						var domainLink = document.createElement("a");
 						domainLink.setAttribute('href',"http://" + domain);
 						var domainText = domain;
-						if(domainText.length > 48)
+						if(domainText.length > 43)
 						{
-							domainText = domainText.substr(0, 45) + "...";
+							domainText = domainText.substr(0, 40) + "...";
 						}
 						domainLink.appendChild( document.createTextNode(domainText) );
 
