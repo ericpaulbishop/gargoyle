@@ -94,9 +94,11 @@ function saveChanges()
 			else
 			{
 				preCommands = preCommands + "\nuci set network.wan=interface\n";
+				uci.remove('network', 'wan', 'type');
 				if(trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
 				{
-					uci.set('network', 'wan', 'ifname', "");
+					uci.remove('network', 'wan', 'ifname');
+					uci.set('network', 'wan', 'type', 'bridge');
 				}
 				else if(trueAndVisible('wan_via_single_port', 'wan_via_single_port_container'))
 				{
