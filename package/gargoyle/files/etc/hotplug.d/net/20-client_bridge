@@ -11,6 +11,11 @@ if [ -n "$is_ath" ] ; then
 					ebtables -t nat -F PREROUTING
 					ebtables -t nat -F POSTROUTING
 					ebtables -t broute -F BROUTING
+				
+					bridge_ip=$(uci get network.lan.ipaddr)
+					if [ -n "$bridge_ip" ] ; then
+						ebtables -t nat -A PREROUTING -p IPv4 --ip-dst $bridge_ip -j ACCEPT
+					fi
 					
 					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
 					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
