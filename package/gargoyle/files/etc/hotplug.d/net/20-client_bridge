@@ -14,7 +14,7 @@ if [ -n "$is_ath" ] ; then
 				
 					bridge_ip=$(uci get network.lan.ipaddr)
 					if [ -n "$bridge_ip" ] ; then
-						ebtables -t nat -A PREROUTING -p IPv4 --ip-dst $bridge_ip -j ACCEPT
+						ebtables -t nat -A PREROUTING  -p IPv4 --ip-protocol TCP --ip-dst $bridge_ip -j redirect --redirect-target ACCEPT
 					fi
 					
 					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
