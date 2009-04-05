@@ -107,6 +107,9 @@ int get_next_message(int queue, void* message_data, size_t message_size, long me
 void load_data(void);
 void save_data(void);
 
+char * strnstr(const char *s, const char *find, size_t slen);
+
+
 // Global variables
 queue* recent_websites;
 string_map* web_ips;
@@ -217,10 +220,10 @@ int main(int argc, char **argv)
 		pcap_setfilter(handle, &filter);
 	
 		//pcap_loop(handle,-1,web_packet_callback,NULL);
-		struct pcap_pkthdr* next_hdr;
-		const u_char* next_pkt;
 		while(terminated == 0)
 		{
+			struct pcap_pkthdr* next_hdr = NULL;
+			const u_char* next_pkt = NULL;
 			int read_status = pcap_next_ex(handle, &next_hdr, &next_pkt);
 			if(read_status > 0)
 			{
@@ -530,34 +533,42 @@ void web_packet_callback(u_char *useless, const struct pcap_pkthdr* pkthdr,const
 		monitor_src_ip = get_map_element(include_ips, src_ip) != NULL ? monitor_src_ip : 0;
 	}
 	if(monitor_src_ip == 1)
-	{	
+	{
+
 		char* domain = NULL;
 		char* ip_key = dynamic_strcat(3, src_ip, "-", dst_ip);
 		if( get_map_element(web_ips, ip_key) == NULL)
 		{
 			short tcp_dst_port = ntohs( *((u_int16_t*)(packet + sizeof(struct ether_header) + sizeof(ip_header) + 2)) );
-			char* payload = (char *)(packet + sizeof(struct ether_header) + sizeof(ip_header) + sizeof(struct tcphdr));
-			char* domainMatch = strstr(payload, "Host:");
-			if(domainMatch != NULL)
+			
+			int total_header_length = sizeof(struct ether_header) + sizeof(ip_header) + sizeof(struct tcphdr);
+			int payload_length = pkthdr->caplen - total_header_length;
+			if(payload_length > 0)
 			{
-				int startIndex = 6;
-				int endIndex = startIndex;
-				while(domainMatch[startIndex] == ' ' || domainMatch[startIndex] == '\t')
+				char* payload = (char *)(packet + total_header_length);
+			
+				char* domainMatch = strnstr(payload, "Host:", payload_length);
+				if(domainMatch != NULL)
 				{
-					startIndex++;
+					int startIndex = 6;
+					int endIndex = startIndex;
+					while(domainMatch[startIndex] == ' ' || domainMatch[startIndex] == '\t')
+					{
+						startIndex++;
+					}
+					while(domainMatch[endIndex] != '\0' && domainMatch[endIndex] != '\n' && domainMatch[endIndex] != '\r')
+					{
+						endIndex++;
+					}
+					int length = (endIndex+1-startIndex);
+					domain = malloc( (length+1)*sizeof(char) );
+					memcpy(domain, domainMatch+startIndex, length);
+					domain[length] = '\0';
 				}
-				while(domainMatch[endIndex] != '\0' && domainMatch[endIndex] != '\n' && domainMatch[endIndex] != '\r')
+				else if(tcp_dst_port == 443)
 				{
-					endIndex++;
+					domain = get_domain_for_ip(dst_ip);
 				}
-				int length = (endIndex+1-startIndex);
-				domain = malloc( (length+1)*sizeof(char) );
-				memcpy(domain, domainMatch+startIndex, length);
-				domain[length] = '\0';
-			}
-			else if(tcp_dst_port == 443)
-			{
-				domain = get_domain_for_ip(dst_ip);
 			}
 		}
 		else
@@ -687,6 +698,34 @@ void add_next_entry(char* dst_ip, char* src_ip, char* domain)
 	}
 	printf("\n\n");
 	*/
+}
+char * strnstr(const char *s, const char *find, size_t slen)
+{
+	char c, sc;
+	size_t len;
+
+	if ((c = *find++) != '\0')
+	{
+		len = strlen(find);
+		do
+		{
+			do
+			{
+				if (slen < 1 || (sc = *s) == '\0')
+				{
+					return (NULL);
+				}
+				--slen;
+				++s;
+			}while (sc != c);
+			if (len > slen)
+			{
+				return (NULL);
+			}
+		}while (strncmp(s, find, len) != 0);
+		s--;
+	}
+	return s;
 }
 
 

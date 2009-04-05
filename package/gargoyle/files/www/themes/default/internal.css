@@ -6,6 +6,15 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+a
+{
+	color:#211679;
+}
+a:visited
+{
+	color:#a400b3;
+}
+
 legend
 {
 	font-family: verdana, arial, sans-serif;

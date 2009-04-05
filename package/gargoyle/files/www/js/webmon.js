@@ -306,8 +306,19 @@ function updateMonitorTable()
 						var lastVisit = (1*1 + parseInt(lastVisitDate.getMonth())) + "/" + lastVisitDate.getDate() + " " + lastVisitDate.getHours() + ":" + minutes + ":" + seconds;
 						var ip = splitLine[1];	
 						var domain = splitLine[3];
+
+						var domainLink = document.createElement("a");
+						domainLink.setAttribute('href',"http://" + domain);
+						var domainText = domain;
+						if(domainText.length > 48)
+						{
+							domainText = domainText.substr(0, 45) + "...";
+						}
+						domainLink.appendChild( document.createTextNode(domainText) );
+
+
 				
-						tableData.push([ip, lastVisit, domain]);
+						tableData.push([ip, lastVisit, domainLink]);
 					}
 				}	
 				
