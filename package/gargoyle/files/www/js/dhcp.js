@@ -111,7 +111,7 @@ function resetData()
 	for(rowIndex=0; rowIndex < staticIpTableData ; rowIndex++)
 	{
 		var rowData = staticIpTableData[rowIndex];
-		rowData.push(createEditButton);
+		rowData.push(createEditButton());
 		
 	}
 	columnNames=['Hostname', 'MAC', 'IP', ''];
