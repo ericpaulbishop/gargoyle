@@ -434,9 +434,10 @@ function saveChanges()
 			uci.removeSection("network", "wan");
 			uciCompare.removeSection("network", "wan");
 
-			uci.set("network", "lan", "ipaddr", document.getElementById("bridge_ip").value);
+			uci.set("network", "lan", "ipaddr",  document.getElementById("bridge_ip").value);
 			uci.set("network", "lan", "netmask", document.getElementById("bridge_mask").value);
 			uci.set("network", "lan", "gateway", document.getElementById("bridge_gateway").value);
+			uci.set("network", "lan", "dns",     document.getElementById("bridge_gateway").value);
 			uci.set("wireless", firstWirelessDevice, "channel", getSelectedValue("bridge_channel"));
 			
 			var encryption = getSelectedValue("bridge_encryption");
