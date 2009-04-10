@@ -25,6 +25,7 @@
 #include <string.h>
 #include <pcap.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include "fon-flash.h"
 
 
@@ -617,7 +618,7 @@ static int handle_connection(struct fon_flash_state *s)
 		PSOCK_SEND_STR(343, &s->p, "\x03");
 		s->inputbuffer[0] = 0;
 		PSOCK_READTO(345, &s->p, '>');
-		if (NULL == strstr(s->inputbuffer, "RedBoot>")) {
+		if (NULL == strstr(s->inputbuffer, ">")) {
 			fprintf(stderr, "No RedBoot prompt. Exit in line %d\n", __LINE__);
 			PSOCK_CLOSE(&s->p);
 			PSOCK_EXIT(&s->p);
@@ -1110,6 +1111,19 @@ int fon_flash(flash_configuration* conf, char* device)
 }
 
 
+int ends_with(char* str, char* end)
+{
+	if(str == NULL || end == NULL) { return 0; }
+	int slen = strlen(str);
+	int elen = strlen(end);
+	char* end_test = str + (slen-elen);
+	char* t1 = strdup(end);
+	char* t2 = strdup(end_test);
+	int i;
+	for(i=0; t1[i] != '\0' ; i++) { t1[i] = toupper( t1[i] ); }
+	for(i=0; t2[i] != '\0' ; i++) { t2[i] = toupper( t2[i] ); }
+	return strcmp(t1,t2) == 0 ? 1 : 0;
+}
 
 
 #ifndef GUI
@@ -1206,7 +1220,29 @@ int main(int argc, char* argv[])
 		print_usage(argv[0]);
 		exit(0);
 	}
-		
+	
+
+	int is_gz = ends_with(f1, ".gz") == 1 || ends_with(f2, ".gz") == 1 || ends_with(f3, ".gz") == 1 ? 1 : 0;
+	if(is_gz == 1)
+	{
+		char** boot = conf->bootloader_lines;
+		int boot_index=0;
+		for(boot_index=0; boot[boot_index] != NULL; boot_index++)
+		{
+			if(strstr(boot[boot_index], "fis load -l") != NULL)
+			{
+				char* old_boot = boot[boot_index];
+				char* boot_end = old_boot + strlen("fis load -l");
+				char new_boot[100];
+				sprintf(new_boot, "fis load -d%s", boot_end);
+				boot[boot_index] = strdup(new_boot);
+				free(old_boot);
+			}
+		}
+	}
+
+
+
 	if(initialize_buffers_from_files(f1, f2, f3) == 0)
 	{
 		return fon_flash(conf, interface);

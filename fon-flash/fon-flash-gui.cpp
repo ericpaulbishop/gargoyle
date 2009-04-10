@@ -518,6 +518,26 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 		char* file2 = firmwareSelection != 2 ? strdup(file2Path.ToAscii()) : NULL;
 		char* file3 = firmwareSelection == 1 ? strdup(file3Path.ToAscii()) : NULL;
 
+		int is_gz = ends_with(file1, ".gz") == 1 || ends_with(file2, ".gz") == 1 || ends_with(file3, ".gz") == 1 ? 1 : 0;
+		if(is_gz == 1)
+		{
+			char** boot = current_conf->bootloader_lines;
+			int boot_index=0;
+			for(boot_index=0; boot[boot_index] != NULL; boot_index++)
+			{
+				if(strstr(boot[boot_index], "fis load -l") != NULL)
+				{
+					char* old_boot = boot[boot_index];
+					char* boot_end = old_boot + strlen("fis load -l");
+					char new_boot[100];
+					sprintf(new_boot, "fis load -d%s", boot_end);
+					boot[boot_index] = strdup(new_boot);
+					free(old_boot);
+				}
+			}
+		}
+
+
 		testThread =new WorkerThread(this, dev, current_conf, file1, file2, file3);
 		testThread->Create();
 		testThread->Run();
