@@ -631,7 +631,7 @@ static int handle_connection(struct fon_flash_state *s)
 		PSOCK_SEND_STR(356, &s->p, str);
 		s->inputbuffer[0] = 0;
 		PSOCK_READTO(358, &s->p, '>');
-		if (NULL == strstr(s->inputbuffer, "RedBoot>")) 
+		if (NULL == strstr(s->inputbuffer, ">")) 
 		{
 			fprintf(stderr, "No RedBoot prompt. Exit in line %d\n", __LINE__);
 			PSOCK_CLOSE(&s->p);
@@ -708,7 +708,7 @@ static int handle_connection(struct fon_flash_state *s)
 		PSOCK_READTO(485, &s->p, '>');
 		printf("\n");
 
-		if (NULL == strstr(s->inputbuffer, "RedBoot>")) {
+		if (NULL == strstr(s->inputbuffer, ">")) {
 			fprintf(stderr, "No RedBoot prompt. Exit in line %d\n", __LINE__);
 			PSOCK_CLOSE(&s->p);
 			PSOCK_EXIT(&s->p);
