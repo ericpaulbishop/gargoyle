@@ -72,8 +72,9 @@ function saveChanges()
 			createHostCommands.push("echo \"" + ip + "\t" + host + "\" >> /etc/hosts");
 		}
 
-		var restartNetworkCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n";
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartNetworkCommand ;
+		var restartDhcpCommand = document.getElementById("dhcp_enabled").checked ? "\n/etc/init.d/dnsmasq restart ;\n" : "\n/etc/init.d/dnsmasq stop ;\n" ; 
+
+		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand ;
 		
 
 		//document.getElementById("output").value = commands;
@@ -108,11 +109,11 @@ function createEditButton()
 function resetData()
 {
 	var rowIndex=0;
-	for(rowIndex=0; rowIndex < staticIpTableData ; rowIndex++)
+	for(rowIndex=0; rowIndex < staticIpTableData.length ; rowIndex++)
 	{
 		var rowData = staticIpTableData[rowIndex];
 		rowData.push(createEditButton());
-		
+		staticIpTableData[rowIndex] = rowData;
 	}
 	columnNames=['Hostname', 'MAC', 'IP', ''];
 	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false);
