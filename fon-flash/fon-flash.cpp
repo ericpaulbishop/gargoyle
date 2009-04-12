@@ -593,17 +593,26 @@ void pcap_send(void)
 	}
 }
 
+
+flash_configuration* final_flash_configuration;
 char** create_partition_commands = { NULL };
 char** bootloader_lines = { NULL };
+static int configuration_initialization_complete = 0;
 static int initialization_complete = 0;
 static int command_line_index = 0;
 static int load_found = 0;
 static int bootloader_line_index = 0;	
 
+
 static int handle_connection(struct fon_flash_state *s)
 {
 	char str[4096];
 	char* next_command = NULL;
+	char* read_test;
+	
+	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
+	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
+
 
 
 	PSOCK_BEGIN(&s->p);
@@ -638,6 +647,76 @@ static int handle_connection(struct fon_flash_state *s)
 			PSOCK_EXIT(&s->p);
 		}
 		
+		//load device address configuration
+		if(!configuration_initialization_complete)
+		{
+
+			//determine flash start & and flash length
+			PSOCK_SEND_STR(360, &s->p, "fis list\n");
+			s->inputbuffer[0] = 0;
+			PSOCK_READTO(361, &s->p, '>');
+			if (NULL == strstr(s->inputbuffer, ">")) 
+			{
+				fprintf(stderr, "No RedBoot prompt. Exit in line %d\n", __LINE__);
+				PSOCK_CLOSE(&s->p);
+				PSOCK_EXIT(&s->p);
+			}	
+			read_test = strstr(s->inputbuffer, "RedBoot");
+			if(read_test != NULL)
+			{
+				if(read_test[6] != '>')
+				{
+					unsigned int red_start, red_length, fisdir_start;
+					char* read1 = strstr(read_test, "0x");
+					char* read2 = strstr(read1+2, "0x");
+					char* read3 = strstr(read2+2, "0x");
+					
+					sscanf(read1+2, "%x", &red_start);
+					sscanf(read3+2, "%x", &red_length);
+					
+					read_test = strstr(read_test, "FIS directory");
+					if(read_test != NULL)
+					{
+						read1 = strstr(read_test, "0x");
+						sscanf(read1+2, "%x", &fisdir_start);
+					
+				
+						flash_start_address = red_start + red_length;
+						flash_size =  fisdir_start - flash_start_address;
+
+						//printf("flash_start_address = 0x%08x, flash_size = 0x%08x\n", flash_start_address, flash_size);
+					}
+				}
+			}
+			
+			//if freememlo variable is defined, load it, otherwise use default (guess)
+			PSOCK_SEND_STR(365, &s->p, "\%{FREEMEMLO}\n");
+			s->inputbuffer[0] = 0;
+			PSOCK_READTO(366, &s->p, '>');
+			if (NULL == strstr(s->inputbuffer, ">")) 
+			{
+				fprintf(stderr, "No RedBoot prompt. Exit in line %d\n", __LINE__);
+				PSOCK_CLOSE(&s->p);
+				PSOCK_EXIT(&s->p);
+			}
+			read_test = strstr(s->inputbuffer, "0x");
+			if(read_test != NULL)
+			{
+				unsigned int mem;
+				sscanf(read_test+2, "%x", &mem);
+				freememlow = mem;
+				//printf("freememlo = %08x\n", mem);
+			}
+
+			make_configuration_absolute(final_flash_configuration, flash_start_address, flash_size, FLASH_PAGE_SIZE, (const char**)file_ids, file_sizes);
+			create_partition_commands = get_partition_command_list(final_flash_configuration, freememlow);
+			bootloader_lines = final_flash_configuration->bootloader_lines;
+			configuration_initialization_complete = 1;
+		}	
+
+
+
+
 		
 		printf("\nInitializing partitions ...\nfis init\n");
 		PSOCK_SEND_STR(388, &s->p, "fis init\n");
@@ -941,18 +1020,15 @@ int fon_flash(flash_configuration* conf, char* device)
 	uip_ipaddr_t netmask;
 	struct uip_eth_addr srcmac, dstmac, brcmac;
 	struct timer periodic_timer, arp_timer;
-	char* file_ids[3] = { (char*)"file_1", (char*)"file_2", (char*)"file_3"};
-	unsigned long file_sizes[3] = { file_1_size, file_2_size, file_3_size };
+
 
 	uip_init();
 	uip_arp_init();
 
+	final_flash_configuration = conf;
 
 
 
-	make_configuration_absolute(conf, flash_start_address, flash_size, FLASH_PAGE_SIZE, (const char**)file_ids, file_sizes);
-	create_partition_commands = get_partition_command_list(conf, freememlow);
-	bootloader_lines = conf->bootloader_lines;
 
 	/*
 	int i = 0; 
@@ -1111,19 +1187,24 @@ int fon_flash(flash_configuration* conf, char* device)
 }
 
 
-int ends_with(char* str, char* end)
+int ends_with(const char* str, const char* end)
 {
 	if(str == NULL || end == NULL) { return 0; }
 	int slen = strlen(str);
 	int elen = strlen(end);
-	char* end_test = str + (slen-elen);
+	const char* end_test = str + (slen-elen);
 	char* t1 = strdup(end);
 	char* t2 = strdup(end_test);
 	int i;
+	
 	for(i=0; t1[i] != '\0' ; i++) { t1[i] = toupper( t1[i] ); }
 	for(i=0; t2[i] != '\0' ; i++) { t2[i] = toupper( t2[i] ); }
-	return strcmp(t1,t2) == 0 ? 1 : 0;
-}
+	i = strcmp(t1,t2) == 0 ? 1 : 0;
+
+	free(t1);
+	free(t2);
+	return i;
+}	
 
 
 #ifndef GUI
