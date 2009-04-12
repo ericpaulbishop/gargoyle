@@ -73,7 +73,7 @@ fi
 
 
 for target in $targets ; do
-	if ( [ "$1" = "custom" ] && [ "$target" = "custom" ] ) || ([ "$1" != "custom" ] && [ "$target" != "custom" ]) ; then
+	if ([ "$1" = "$target" ]) || ([ "$1" = "" ] && [ "$target" != "custom" ]) ; then
 		if [ -e "$target-src" ] ; then 
 			rm -rf "$target-src"
 		fi
