@@ -39,6 +39,9 @@
 	tar xzf restore.tar.gz -C / 2>error
 	error=$(cat error)
 
+	#deal with firewall include file path being swapped
+	cat /etc/config/firewall | sed 's/\/etc\/parse_remote_accept\.firewall/\/usr\/lib\/gargoyle_firewall_util\/gargoyle_additions\.firewall/g' >/etc/config/firewall.tmp
+	mv /etc/config/firewall.tmp /etc/config/firewall
 
 	cd /tmp
 	if [ -e /tmp/restore ] ; then
