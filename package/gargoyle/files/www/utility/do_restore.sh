@@ -34,6 +34,7 @@
 	rm -rf /usr/data/*
 	rm -rf /etc/crontabs/*
 	rm -rf /etc/hosts
+	rm -rf /etc/ethers
 
 	tar xzf restore.tar.gz -C / 2>error
 	error=$(cat error)
