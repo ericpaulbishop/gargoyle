@@ -1,5 +1,6 @@
 var pkg = "restricter_gargoyle";
 var allIps = new Array();
+var changedIps = new Array();
 
 function saveChanges()
 {
@@ -25,10 +26,11 @@ function saveChanges()
 			uci.set(pkg, sections[1], "enabled", check.checked ? "1" : "0");
 		}
 	}
+	var stopCommand = "/etc/init.d/restricter_gargoyle stop";
 	if(enabledQuotaFound || restricterEnabled)
 	{
 		runCommands.push("/etc/init.d/restricter_gargoyle enable");
-		runCommands.push("/etc/init.d/restricter_gargoyle restart");
+		runCommands.push("/etc/init.d/restricter_gargoyle start");
 		runCommands.push("q=$(uci show restricter_gargoyle | grep \"=quota\" | sed \" s/^.*\\.//g \" | sed \"s/=.*\\$//g\" )")
 		runCommands.push("quotas=$(echo $q)");
 		runCommands.push("echo $quotas");
@@ -63,9 +65,17 @@ function saveChanges()
 	}
 	createSectionCommands.push("uci commit");
 
+	var clearDataCommands = [];
+	var changedIndex = 0;
+	for(changedIndex=0; changedIndex < changedIps.length; changedIndex++)
+	{
+		var clearUp   = "rm -rf /usr/data/restricter/quota_up_"   + changedIps[changedIndex].replace(/\./g, "_");  
+		var clearDown = "rm -rf /usr/data/restricter/quota_down_" + changedIps[changedIndex].replace(/\./g, "_");  
+		clearDataCommands.push(clearUp);
+		clearDataCommands.push(clearDown);
+	}
 
-
-	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n";
+	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + stopCommand + "\n" + clearDataCommands.join("\n") + "\n" + runCommands.join("\n") + "\n";
 
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
@@ -73,8 +83,10 @@ function saveChanges()
 		if(req.readyState == 4)
 		{	
 			restricterEnabled = restricterEnabled || enabledQuotaFound;
+			changedIps = new Array();
 			uciOriginal = uci.clone();
 			
+
 			
 			var outLines = req.responseText.split(/[\r\n]+/);
 			var popLine = outLines.pop();
@@ -102,7 +114,6 @@ function saveChanges()
 
 function resetData()
 {
-	
 	var splitQuotaNames = quotaNames != null ? quotaNames.split(/[\t ]+/) : [];
 	var splitQuotaData = quotaData != null ? quotaData.split(/[\t ]+/) : [];
 	var quotaPercentages = new Array();
@@ -199,7 +210,7 @@ function addNewQuota()
 	var errors = validateQuota(document, "none");
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\nCould not add rule.");
+		alert(errors.join("\n") + "\nCould not add quota.");
 	}
 	else
 	{
@@ -214,7 +225,8 @@ function addNewQuota()
 		var tableContainer = document.getElementById("quota_table_container");
 		var table = tableContainer.firstChild;	
 		addTableRow(table, [ip, "N/A", "N/A", enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);	
-		
+		changedIps.push(ip);
+
 		setDocumentFromUci(document, new UCIContainer(), "");
 
 		enabledCheck.checked = true;
@@ -390,7 +402,7 @@ function createEditButton(enabled)
 	editButton = createInput("button");
 	editButton.value = "Edit";
 	editButton.className="default_button";
-	editButton.onclick = editRule;
+	editButton.onclick = editQuota;
 	
 	editButton.className = enabled ? "default_button" : "default_button_disabled" ;
 	editButton.disabled  = enabled ? false : true;
@@ -429,9 +441,11 @@ function removeQuotaCallback(table, row)
 		uci.removeSection(pkg, ids[1]);
 	}
 	allIps[ row.childNodes[0].firstChild.data ] = null;
+
+	changedIps.push( row.childNodes[0].firstChild.data );
 }
 
-function editRule()
+function editQuota()
 {
 	if( typeof(editQuotaWindow) != "undefined" )
 	{
@@ -468,7 +482,12 @@ function editRule()
 	closeButton.className = "default_button";
 
 	editRow=this.parentNode.parentNode;
-	editIp = editRow.childNodes[0].firstChild.data;
+	editIp      = editRow.childNodes[0].firstChild.data;
+	editUpPrc   = editRow.childNodes[1].firstChild.data.replace(/%/g, "");
+	editDownPrc = editRow.childNodes[2].firstChild.data.replace(/%/g, "");
+	editUpMax   = uci.get(pkg, "quota_down_" + editIp.replace(/\./g, "_"), "max_bandwidth");
+	editDownMax = uci.get(pkg, "quota_up_" + editIp.replace(/\./g, "_"), "max_bandwidth");
+	
 
 	runOnEditorLoaded = function () 
 	{
@@ -493,17 +512,40 @@ function editRule()
 					var errors = validateQuota(editQuotaWindow.document, editIp);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not add rule.");
+						alert(errors.join("\n") + "\nCould not add quota.");
 					}
 					else
 					{
 						setUciFromDocument(editQuotaWindow.document);
-						editRow.childNodes[0].firstChild.data = getSelectedValue("applies_to_type", editQuotaWindow.document) == "all" ? "ALL" : editQuotaWindow.document.getElementById("applies_to").value;
-						editRow.childNodes[1].firstChild.data = "N/A";
-						editRow.childNodes[2].firstChild.data = "N/A";
+						var newIp = getSelectedValue("applies_to_type", editQuotaWindow.document) == "all" ? "ALL" : editQuotaWindow.document.getElementById("applies_to").value;
+						if(newIp != editIp)
+						{
+							uci.removeSection(pkg, "quota_down_" + editIp.replace(/\./g, "_") );
+							uci.removeSection(pkg, "quota_up_" + editIp.replace(/\./g, "_") );
+							
+							editRow.childNodes[0].firstChild.data = newIp;
+							changedIps.push(editIp);
+							changedIps.push(newIp);
+							editRow.childNodes[1].firstChild.data = "N/A";
+							editRow.childNodes[2].firstChild.data = "N/A";
+						}
+						else
+						{
+							var adjustPercent = function(oldMaxStr, newMaxStr, oldPercentStr)
+							{
+								var oldUsed = parseInt(oldMaxStr)*parseFloat(oldPercentStr); //because it's already a percent it's 100x actual used
+								var newPercent = Math.round(oldUsed*100/parseInt(newMaxStr)) / 100.0;
+								return newPercent + "%";
+							}
+
+							var upMax   = editQuotaWindow.document.getElementById("max_up").value;
+							var downMax = editQuotaWindow.document.getElementById("max_down").value;
+							editRow.childNodes[1].firstChild.data = upMax  == "" || editUpMax   == "" ? "N/A" : adjustPercent(editUpMax, upMax, editUpPrc);
+							editRow.childNodes[2].firstChild.data = downMax == "" || editDownMax == "" ? "N/A" : adjustPercent(editDownMax, downMax, editDownPrc);
+						}
+						
 						editQuotaWindow.close();
 					}
-					
 				}
 				editQuotaWindow.moveTo(xCoor,yCoor);
 				editQuotaWindow.focus();
