@@ -95,7 +95,7 @@ function saveChanges()
 			{
 				preCommands = preCommands + "\nuci set network.wan=interface\n";
 				uci.remove('network', 'wan', 'type');
-				if(trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
+				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
 					uci.remove('network', 'wan', 'ifname');
 					uci.set('network', 'wan', 'type', 'bridge');
@@ -208,7 +208,7 @@ function saveChanges()
 				if(mode2 != "wds")
 				{
 					uci.set('wireless', section2, 'mode', mode2);
-					if(!trueAndVisible('wan_via_wifi', 'wan_via_wifi_container'))
+					if(!getSelectedValue("wan_protocol").match(/wireless/))
 					{
 						uci.set('wireless', section2, 'network', 'lan');
 					}
@@ -368,6 +368,10 @@ function saveChanges()
 			{
 				uci.removeSection("network", "wan");
 			}
+			else
+			{
+				uci.set("network", "wan", "protocol", getSelectedValue('wan_protocol').replace(/_.*$/g));
+			}
 			if(uci.get('network', 'lan', 'proto') === '')
 			{
 				uci.set('network', 'lan', 'proto', 'static');
@@ -375,7 +379,7 @@ function saveChanges()
 			
 
 			//preserve wan mac definition even if wan is disabled if this is a bcm94704
-			if(isBcm94704 && (uci.get("network", "wan", "ifname") != wirelessIf))
+			if(isBcm94704 && (uci.get("network", "wan", "type") != "bridge"))
 			{
 				if(uci.get("network", "wan", "macaddr") == "")
 				{
@@ -736,19 +740,15 @@ function proofreadAll()
 function setGlobalVisibility()
 {
 	//deal with possibility of wireless routed WAN 
-	globalIds=['wan_via_wifi_container', 'wan_via_single_port_container', 'wan_port_to_lan_container'];
-	wirelessWanVisibility       = defaultWanIf != '' ? [1,0,1,0] : [1,0,0,0];
-	defaultVisibility           = defaultWanIf != '' ? [1,0,0,1] : [1,1,0,1];
-
+	globalIds=['wan_via_single_port_container', 'wan_port_to_lan_container'];
+	wirelessWanVisibility       = defaultWanIf != '' ? [0,1] : [0,0];
+	defaultVisibility           = defaultWanIf != '' ? [0,0] : [1,0];
 
 
 	selectedVisibility=defaultVisibility;
-	if( document.getElementById('wan_via_wifi').checked == true)
+	if( getSelectedValue("wan_protocol").match(/wireless/) )
 	{
 		selectedVisibility=wirelessWanVisibility;
-
-		setAllowableSelections('wan_protocol', ['dhcp', 'static'], ['DHCP', 'Static']);
-
 
 		currentMode=getSelectedValue('wifi_mode');
 		setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'Client+AP']);
@@ -763,7 +763,6 @@ function setGlobalVisibility()
 	}
 	else
 	{
-		setAllowableSelections('wan_protocol', ['dhcp', 'pppoe', 'static', 'none'], ['DHCP', 'PPPoE', 'Static', 'Disabled']);
 		currentMode=getSelectedValue('wifi_mode');
 		setAllowableSelections('wifi_mode', ['ap', 'ap+wds', 'adhoc', 'disabled'], ['Access Point (AP)', 'AP+WDS', 'Ad Hoc', 'Disabled']);
 		if(currentMode == 'ap+sta' || currentMode == 'sta')
@@ -777,24 +776,20 @@ function setGlobalVisibility()
 	}
 
 
-	if(defaultWanIf == '')
+	if(defaultWanIf == '' )
 	{
-		if(document.getElementById('wan_via_wifi').checked == true || document.getElementById('wan_via_single_port').checked == true)
-		{
-			setAllowableSelections('wan_protocol', ['dhcp', 'static'], ['DHCP', 'Static']);
-		}
-		else
+		if(!getSelectedValue("wan_protocol").match(/wireless/) )
 		{
 			setSelectedValue("wan_protocol", 'none' );
-			setAllowableSelections('wan_protocol', ['none'], ['Disabled']);
 		}
-	
-		if(document.getElementById('wan_via_single_port').checked == true)
-		{
-			selectedVisibility[0] = 0;
-		}
+		setAllowableSelections('wan_protocol', ['dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wireless)', 'Static (Wireless)', 'Disabled']);
 	}
-	
+	else
+	{
+		setAllowableSelections('wan_protocol', ['dhcp_wired', 'dhcp_wireless', 'pppoe_wired', 'static_wired', 'static_wireless', 'none'], ['DHCP (Wired)', 'DHCP (Wireless)', 'PPPoE (Wired)', 'Static (Wired)', 'Static (Wireless)','Disabled']);
+	}
+
+
 	setVisibility(globalIds, selectedVisibility);
 	
 	
@@ -809,7 +804,7 @@ function setWanVisibility()
 {
 	wanIds=['wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'lan_gateway_container'];
 
-	notWifi= document.getElementById('wan_via_wifi').checked == true ? 0 : 1;
+	notWifi= getSelectedValue('wan_protocol').match(/wireless/) ? 0 : 1;
 
 	dhcpVisability     = [0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0];
 	pppoeVisability    = [1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0];
@@ -822,7 +817,8 @@ function setWanVisibility()
 	wanVisibilities['static'] = staticVisability;
 	wanVisibilities['none'] = disabledVisability;
 	
-	selectedVisibility= wanVisibilities[document.getElementById('wan_protocol').value];
+	selectedVisibility= wanVisibilities[ getSelectedValue("wan_protocol").replace(/_.*$/g, "") ];
+	
 	selectedVisibility[3] = selectedVisibility[3] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'demand' ? 1 : 0;
 	selectedVisibility[4] = selectedVisibility[4] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
 	selectedVisibility[5] = selectedVisibility[5] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
@@ -854,8 +850,6 @@ function setWifiVisibility()
 	}
 	
 	
-	
-	//var wifiIds=['wifi_channel1_container', 'mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
 
 	var wifiIds=['mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container','wifi_channel1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_channel2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
 
@@ -1026,16 +1020,32 @@ function resetData()
 		}
 	}
 	
+	//set wan proto && wan/wifi/bridge variables
+	var wp = uciOriginal.get("network", "wan", "proto");
+	var wanUciIf= uciOriginal.get('network', 'wan', 'ifname');
+	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
+	var wanIsWifi = wanUciIf == '' && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
+	wp = wp == "" ? "none" : wp;
+	if(wp != "none") { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
+	setSelectedValue("wan_protocol", wp);
+
+	document.getElementById('wan_via_single_port').checked = (wanUciIf == defaultLanIf && defaultWanIf == '');
+	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
+	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
+	setSelectedValue('wan_port_to_lan', wanToLanStatus);
+
+
+
 	//first load basic variables for wan & lan sections
-	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway'];
+	networkIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway'];
 	networkPkgs = new Array();
 	for (idIndex in networkIds)
 	{
 		networkPkgs.push('network');
 	}
 
-	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan'];
-	networkOptions  = ['proto', 'username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway'];
+	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan'];
+	networkOptions  = ['username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway'];
 
 
 
@@ -1045,7 +1055,9 @@ function resetData()
 	useMtuTest = function(v){return (v=='' || v==null || v==1500 ? false : true);}
 	useMacTest = function(v){v = (v== null ? '' : v);  return (v=='' || v.toLowerCase()==defaultWanMac.toLowerCase() ? false : true);}
 
-	networkParams = ['dhcp', '', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1'];
+	networkParams = ['', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1'];
+
+	
 
 	
 
@@ -1054,7 +1066,7 @@ function resetData()
 	lvm=loadValueFromVariableMultiple;
 	lvi=loadValueFromVariableAtIndex;
 	lc=loadChecked;
-	networkFunctions = [lsv,lv,lv,lvm,lvi,lvi,lv,lv,lv,lc,lv,lc,lv,lv,lv,lv];
+	networkFunctions = [lv,lv,lvm,lvi,lvi,lv,lv,lv,lc,lv,lc,lv,lv,lv,lv];
 	
 	loadVariables(uciOriginal, networkIds, networkPkgs, networkSections, networkOptions, networkParams, networkFunctions);
 
@@ -1246,18 +1258,7 @@ function resetData()
 		}
 		encryptNum++;
 	}
-	//finally deal with wifi routing/bridging/single port variables
-	wanUciIf= uciOriginal.get('network', 'wan', 'ifname');
-	lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
 
-
-	wanIsWifi = wanUciIf == '' && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
-
-	document.getElementById('wan_via_single_port').checked = (wanUciIf == defaultLanIf && defaultWanIf == '');
-	document.getElementById('wan_via_wifi').checked = wanIsWifi;
-	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
-	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
-	setSelectedValue('wan_port_to_lan', wanToLanStatus);
 
 
 	//load bssids for wds if necessary
