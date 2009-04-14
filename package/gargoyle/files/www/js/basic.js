@@ -85,6 +85,7 @@ function saveChanges()
 		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_router").checked )
 		{
+			currentLanIp = document.getElementById("lan_ip").value;
 			if(getSelectedValue('wan_protocol') == 'none')
 			{
 				preCommands = preCommands + "\nuci del network.wan\nuci commit\n";
@@ -587,9 +588,9 @@ function saveChanges()
 		//document.getElementById("output").value = commands;
 		var param = getParameterDefinition("commands", commands);
 		
-		
 		var stateChangeFunction = function(req)
 		{
+			alert(req.readyState);
 			if(req.readyState == 4)
 			{
 				//alert(req.responseText);
