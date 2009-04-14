@@ -98,11 +98,25 @@ else
 		</div>
 
 		<div id= "bridge_wan_port_to_lan_container">
-			<select class='nocolumn' id='bridge_wan_port_to_lan' onchange='setBridgeVisibility()'>
+			<label class='leftcolumn' for='bridge_wan_port_to_lan' id='bridge_wan_port_to_lan_label'>Wan Ethernet Port:</label>
+			<select class='rightcolumn' id='bridge_wan_port_to_lan' onchange='setBridgeVisibility()'>
 				<option value='disable'>Disable WAN Ethernet Port</option>
 				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
 			</select>
 		</div>
+		
+		<div id="bridge_dns_container">
+			<span class="leftcolumn">
+				<input type='checkbox' id='bridge_use_dns' onclick='setDnsEnabled(this)'/>
+				<label id='bridge_use_dns_label' for='bridge_use_dns'>Custom DNS:</label>
+			</span>
+			<span class='rightcolumn'>
+				<input type='text' id='add_bridge_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
+				<input type="button" class="default_button" id="add_bridge_dns_button" value="Add" onclick='addDns("bridge")' />
+			</span>
+			<div class="rightcolumnonly"><div id="bridge_dns_table_container"></div></div>
+		</div>
+
 		<br/>
 
 
@@ -123,9 +137,14 @@ else
 					<option value='disabled'>Repeater Disabled</option>
 				</select>
 			</div>
+
+			<div id='bridge_ssid_container'>
+				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID:</label>
+				<input type='text' id='bridge_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			</div>
 			<div id='bridge_channel_container'>
 				<label class='leftcolumn' for='bridge_channel' id='bridge_channel_label'>Wireless Channel:</label>
-					<select class='rightcolumn' id='bridge_channel'>
+					<select class='rightcolumn' id='bridge_channel' onchange='setChannel(this)'>
 					<option value='auto'>auto</option>
 					<option value='1'>1</option>
 					<option value='2'>2</option>
@@ -142,12 +161,7 @@ else
 					<option value='13'>13</option>
 					<option value='14'>14</option>
 				</select>
-			</div>	
-			<div id='bridge_ssid_container'>
-				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID:</label>
-				<input type='text' id='bridge_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
-			</div>
-			
+			</div>		
 			<div id='bridge_encryption_container'>
 				<label class='leftcolumn' for='bridge_encryption' id='bridge_encryption_label'>Encryption:</label>
 				<select class='rightcolumn' id='bridge_encryption' onchange='setBridgeVisibility()'>
@@ -161,7 +175,7 @@ else
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'>Password:</label>
 				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
 			</div>
-			<div id='bridge_wep_container' class='indent'>
+			<div id='bridge_wep_container'>
 				<div style="display:block;">
 					<label class='leftcolumn' for='brige_wep' id='brige_wep_label'>WEP Hex Key:</label>
 					<input type='text' id='bridge_wep' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
@@ -173,20 +187,20 @@ else
 					<input class='rightcolumnonly' type='button' value='Random 104/128 Bit WEP Key' id='bwepgen104' onclick='setToWepKey("bridge_wep",26)'>
 				</div>
 			</div>
-			<div id='bridge_wifi_mac_container'>
-				<label class='leftcolumn' id='bridge_wifi_mac_label'>Wireless MAC Of <em>This</em> Device:</label>
-				<span class='rightcolumn' id='bridge_wifi_mac'></span>
+
+			<div id='bridge_wifi_mac_container' >
+				<label class='leftcolumn' id='bridge_wifi_mac_label'>MAC Addr. Of <em>This</em> Device:</label>
+				<span class='rightcolumn' id='bridge_wifi_mac'> </span>
+			</div>	
+			<div id="bridge_wds_container" >
+				<label class='leftcolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addr. Of <em>Other</em> WDS Devices:</label>
+				<span class='rightcolumn'>
+					<input type='text' id='add_bridge_wds_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
+					<input type="button" class="default_button" id="add_bridge_wds_mac_button" value="Add" onclick='addMacToWds("bridge")' />
+				</span>
+				<div class="rightcolumnonly"><div id="bridge_wds_mac_table_container"></div></div>
 			</div>
-			<div id="bridge_wds_container">
-				<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of <em>Other</em> WDS Devices:</label>
-				<div class='rightcolumnonly'>
-					<div class="indent">	
-						<input type='text' id='add_bridge_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
-						<input type="button" class="default_button" id="add_bridge_wds_mac_button" value="Add" onclick='addMacToWds("bridge")' />
-					</div>
-				</div>
-				<div class="rightcolumnonly"><div class="indent" id="bridge_wds_mac_table_container"></div></div>
-			</div>
+
 		</div>
 	</fieldset>
 
@@ -203,6 +217,7 @@ else
 				<option value='none'>Disabled</option>
 			</select>
 		</div>
+
 
 		
 		<div id='wan_pppoe_user_container' class='indent'>
@@ -261,35 +276,35 @@ else
 
 
 
-		<div id='wan_via_wifi_container'>
+		<div id='wan_via_wifi_container' class='indent'>
 			<div class='nocolumn'>
 				<input type='checkbox' id='wan_via_wifi' onclick='setGlobalVisibility()'/>
 				<label id='wan_via_wifi_label' for='wan_via_wifi'>Connect via Wireless Client (Routed)</label>
 			</div>
 		</div>
 
-		<div id='wan_via_single_port_container'>
+		<div id='wan_via_single_port_container' class='indent'>
 			<div class='nocolumn'>
 				<input type='checkbox' id='wan_via_single_port' onclick='setGlobalVisibility()'/>
 				<label id='wan_via_single_port_label' for='wan_via_single_port'>Ethernet Port Connects to WAN (not LAN)</label>
 			</div>
 		</div>
-
-		<div id='wan_port_to_lan_container'>
-			<select class='nocolumn' id='wan_port_to_lan'>
+		<div id='wan_port_to_lan_container' class='indent'>
+			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
+			<select class='rightcolumn' id='wan_port_to_lan'>
 				<option value='disable'>Disable WAN Ethernet Port</option>
 				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
 			</select>
 		</div>
 		
-		<div id='wan_mac_container'>
+		<div id='wan_mac_container' class='indent'>
 			<span class='leftcolumn'>
 				<input type='checkbox' id='wan_use_mac' onclick='enableAssociatedField(this, "wan_mac", defaultWanMac)'/>
 				<label for='wan_mac' id='wan_mac_label'>Use Custom MAC Address:</label>
 			</span>
 			<input type='text' class='rightcolumn' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 		</div>
-		<div id='wan_mtu_container'>
+		<div id='wan_mtu_container' class='indent'>
 			<span class='leftcolumn'>
 				<input type='checkbox' id='wan_use_mtu' onclick='enableAssociatedField(this, "wan_mtu", 1500)'/>
 				<label for='wan_mtu' id='wan_mtu_label'>Use Custom MTU:</label>
@@ -313,21 +328,22 @@ else
 			<label class='leftcolumn' for='lan_gateway' id='lan_gateway_label'>Gateway:</label>
 			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
-		<div id='lan_dns_container'>
-			<div>
-				<label class='leftcolumn' >DNS Servers:</label>
-				<label for='lan_dns1' id='lan_dns1_label' style="display:none">DNS Server 1:</label>
-				<input class='rightcolumn' type='text' id='lan_dns1' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
-			</div>
-			<div>
-				<label class='leftcolumn' for='lan_dns2' id='lan_dns2_label' style="visibility:hidden">DNS Server 2:</label>
-				<input class='rightcolumn' type='text' id='lan_dns2' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
-			</div>
-			<div>
-				<label class='leftcolumn' for='lan_dns3' id='lan_dns3_label'style="visibility:hidden">DNS Server 3:</label>
-				<input class='rightcolumn' type='text' id='lan_dns3' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
-			</div>
+
+	
+	
+		<div id="lan_dns_container">
+			<span class="leftcolumn">
+				<input type='checkbox' id='lan_use_dns' onclick='setDnsEnabled(this)'/>
+				<label id='lan_use_dns_label' for='lan_use_dns'>Custom DNS:</label>
+			</span>
+			<span class='rightcolumn'>
+				<input type='text' id='add_lan_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
+				<input type="button" class="default_button" id="add_lan_dns_button" value="Add" onclick='addDns("lan")' />
+			</span>
+			<div class="rightcolumnonly"><div id="lan_dns_table_container"></div></div>
 		</div>
+
+
 	</fieldset>
 
 	<fieldset id="wifi_fieldset">
@@ -340,15 +356,53 @@ else
 				<option value='ap'>Access Point (AP)</option>
 				<option value='ap+wds'>AP+WDS</option>
 				<option value='sta'>Client</option>
-				<option value='ap+sta'>AP+Client</option>
+				<option value='ap+sta'>Client+AP</option>
 				<option value='adhoc'>Ad Hoc</option>
 				<option value='disabled'>Disabled</option>
 			</select>
 		</div>
 
-		<div id='wifi_channel_container'>
-			<label class='leftcolumn' for='wifi_channel' id='wifi_channel_label'>Wireless Channel:</label>
-			<select class='rightcolumn' id='wifi_channel'>
+
+	
+
+		<div id="mac_enabled_container">
+			<input type='checkbox' id='mac_filter_enabled' onclick='setWifiVisibility()' />
+			<label for='mac_filter_enabled'>Enable Wireless MAC Filter</label>
+		</div>
+		<div id="mac_filter_container" class="indent">
+			<div>
+				<p><em>Be aware that MAC filtering applies to all wireless interfaces, 
+				including those in client mode.  If you are using a MAC filter
+				and are in client mode either set the policy to Deny only 
+				listed MACs, or include the MAC of the Access Point you are
+				connecting to in the MAC list below.</em></p>
+			</div>
+			<div>
+				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
+				<select class='rightcolumn' id='mac_filter_policy'>
+					<option value='allow'>Allow Only MACs Listed Below</option>
+					<option value='deny' >Deny Only MACs Listed Below</option>
+				</select>
+			</div>
+			<div class='rightcolumnonly'>
+				<div>	
+					<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
+					<input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter()" />
+				</div>
+			</div>
+			<div class="rightcolumnonly"><div id="mac_table_container"></div></div>
+		</div>
+		
+		<div id='internal_divider1' class='internal_divider'></div>
+
+
+		<div id='wifi_ssid2_container'>
+			<label class='leftcolumn' for='wifi_ssid2' id='wifi_ssid2_label'>SSID:</label>
+			<input type='text' id='wifi_ssid2'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+		</div>
+		<div id='wifi_channel2_container' class='indent'>
+			<label class='leftcolumn' for='wifi_channel2' id='wifi_channel2_label'>Wireless Channel:</label>
+			<select class='rightcolumn' id='wifi_channel2' onchange='setChannel(this)' >
 				<option value='auto'>auto</option>
 				<option value='1'>1</option>
 				<option value='2'>2</option>
@@ -366,61 +420,58 @@ else
 				<option value='14'>14</option>
 			</select>
 		</div>
-	
-
-		<div id="mac_enabled_container" class="nocolumn">
-			<input type='checkbox' id='mac_filter_enabled' onclick='setWifiVisibility()' />
-			<label for='mac_filter_enabled'>Enable Wireless MAC Filter</label>
+		<div id='wifi_encryption2_container' class='indent'>
+			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
+			<select class='rightcolumn' id='wifi_encryption2' onchange='setWifiVisibility()'>
+				<option value='none'>None</option>
+				<option value='psk2'>WPA2 PSK</option>
+				<option value='psk'>WPA PSK</option>
+				<option value='wep'>WEP</option>
+			</select>
 		</div>
-		<div id="mac_filter_container" class="indent">
-			<div>
-				<p>Be aware that MAC filtering applies to all wireless interfaces, 
-				including those in client mode.  If you are using a MAC filter
-				and are in client mode either set the policy to Deny only 
-				listed MACs, or include the MAC of the Access Point you are
-				connecting to in the MAC list below.</p>
+		<div id='wifi_pass2_container' class='indent'>
+			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'>Password:</label>
+			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+		</div>
+		<div id='wifi_wep2_container' class='indent'>
+			<div style="display:block;">
+				<label class='leftcolumn' for='wifi_wep2' id='wifi_wep2_label'>WEP Hex Key:</label>
+				<input type='text' id='wifi_wep2' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
 			</div>
-			<div class="internal_divider"></div>
-			<div>
-				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
-				<select class='rightcolumn' id='mac_filter_policy'>
-					<option value='allow'>Allow Only MACs Listed Below</option>
-					<option value='deny' >Deny Only MACs Listed Below</option>
-				</select>
-			</div>
-			<div class='rightcolumnonly'>
-				<div class="indent">	
-					<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
-					<input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter()" />
-				</div>
-			</div>
-			<div class="rightcolumnonly"><div class="indent" id="mac_table_container"></div></div>
-			<div class="internal_divider"></div>	
-
 		</div>
 
 		
-		<div id='internal_divider1' class='internal_divider'></div>
-		
+		<div id='internal_divider2' class='internal_divider'></div>
+
+
 		<div id='wifi_ssid1_container'>
 			<label class='leftcolumn' for='wifi_ssid1' id='wifi_ssid1_label'>Access Point SSID:</label>
 			<input type='text' id='wifi_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		</div>
 
-		<div id='wifi_hidden_container' class='indent'>
-			<div class='leftcolumn'>
-				<input type='checkbox' id='wifi_hidden' />
-				<label id='wifi_hidden_label' for='wifi_hidden'>Do Not Broadcast SSID</label>
-			</div>
-		</div>
-		<div id='wifi_isolate_container' class='indent'>
-			<div class='leftcolumn'>
-				<input type='checkbox' id='wifi_isolate' />
-				<label id='wifi_isolate_label' for='wifi_isolate'>Isolate Wireless Clients</label>
-			</div>
+		<div id='wifi_channel1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_channel1' id='wifi_channel1_label'>Wireless Channel:</label>
+			<select class='rightcolumn' id='wifi_channel1' onchange='setChannel(this)' >
+				<option value='auto'>auto</option>
+				<option value='1'>1</option>
+				<option value='2'>2</option>
+				<option value='3'>3</option>
+				<option value='4'>4</option>
+				<option value='5'>5</option>
+				<option value='6'>6</option>
+				<option value='7'>7</option>
+				<option value='8'>8</option>
+				<option value='9'>9</option>
+				<option value='10'>10</option>
+				<option value='11'>11</option>
+				<option value='12'>12</option>
+				<option value='13'>13</option>
+				<option value='14'>14</option>
+			</select>
 		</div>
 
-		<div id='wifi_encryption1_container'>
+
+		<div id='wifi_encryption1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption1' id='wifi_encryption1_label'>Encryption:</label>
 			<select class='rightcolumn' id='wifi_encryption1' onchange='setWifiVisibility()'>
 				<option value='none'>None</option>
@@ -458,54 +509,35 @@ else
 			<label class='leftcolumn' for='wifi_port1' id='wifi_port1_label'>RADIUS Server Port:</label>
 			<input type='text' id='wifi_port1'  size='20' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
 		</div>
-	
-		<div id='wifi_mac_container'>
-			<label class='leftcolumn' id='wifi_mac_label'>Wireless MAC Of <em>This</em> Device:</label>
-			<span class='rightcolumn' id='wifi_mac'></span>
-		</div>	
-		<div id="wifi_wds_container">
-			<label class='nocolumn' for='brige_wds_label' id='brige_wds_label'>MAC Addresses Of <em>Other</em> WDS Devices:</label>
-			<div class='rightcolumnonly'>
-				<div class="indent">	
-					<input type='text' id='add_wifi_wds_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
-					<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="Add" onclick='addMacToWds("wifi")' />
-				</div>
-			</div>
-			<div class="rightcolumnonly"><div class="indent" id="wifi_wds_mac_table_container"></div></div>
-		</div>
 
-		<div id='internal_divider2' class='internal_divider'></div>
-		
-		<div id='wifi_ssid2_container'>
-			<label class='leftcolumn' for='wifi_ssid2' id='wifi_ssid2_label'>SSID:</label>
-			<input type='text' id='wifi_ssid2'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+		<div id='wifi_hidden_container' class='indent'>
+			<span class='leftcolumn'>
+				<input type='checkbox' id='wifi_hidden' />
+				<label id='wifi_hidden_label' for='wifi_hidden'>Do Not Broadcast SSID</label>
+			</span>
 		</div>
-		
-		<div id='wifi_encryption2_container'>
-			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
-			<select class='rightcolumn' id='wifi_encryption2' onchange='setWifiVisibility()'>
-				<option value='none'>None</option>
-				<option value='psk2'>WPA2 PSK</option>
-				<option value='psk'>WPA PSK</option>
-				<option value='wep'>WEP</option>
-			</select>
+		<div id='wifi_isolate_container' class='indent'>
+			<span class='leftcolumn'>
+				<input type='checkbox' id='wifi_isolate' />
+				<label id='wifi_isolate_label' for='wifi_isolate'>Isolate Wireless Clients</label>
+			</span>
 		</div>
-		<div id='wifi_pass2_container' class='indent'>
-			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'>Password:</label>
-			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+		<br/>
+		<br/>
+		<div id='wifi_mac_container' class="indent">
+			<label class='leftcolumn' id='wifi_mac_label'>MAC Addr. Of <em>This</em> Device:</label>
+			<span class='rightcolumn' id='wifi_mac'> </span>
+		</div>	
+		<div id="wifi_wds_container" class="indent">
+			<label class='leftcolumn' for='wifi_wds_label' id='wifi_wds_label'>MAC Addr. Of <em>Other</em> WDS Devices:</label>
+			<span class='rightcolumn'>
+				<input type='text' id='add_wifi_wds_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
+				<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="Add" onclick='addMacToWds("wifi")' />
+			</span>
+			<div class="rightcolumnonly"><div id="wifi_wds_mac_table_container"></div></div>
 		</div>
-		<div id='wifi_wep2_container' class='indent'>
-			<div style="display:block;">
-				<label class='leftcolumn' for='wifi_wep2' id='wifi_wep2_label'>WEP Hex Key:</label>
-				<input type='text' id='wifi_wep2' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
-			</div>
-			<div>
-				<input class='rightcolumnonly' type='button' value='Random 40/64 Bit WEP Key' id='wep2gen40' onclick='setToWepKey("wifi_wep2",10)'>
-			</div>
-			<div>
-				<input class='rightcolumnonly' type='button' value='Random 104/128 Bit WEP Key' id='wep2gen104' onclick='setToWepKey("wifi_wep2",26)'>
-			</div>
-		</div>
+	
+
 	
 	</fieldset>
 

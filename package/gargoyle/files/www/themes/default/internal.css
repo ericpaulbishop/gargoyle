@@ -118,6 +118,21 @@ fieldset label
 	margin-left:25px;
 }
 
+.wideleftcolumn
+{
+	display:block;                          
+	float:left;                             
+	width:250px;                            
+	margin-left:5px;                        
+	margin-right:5px;
+}
+.farrightcolumnonly
+{
+	display:block;
+	margin-left:260px;
+}
+
+
 .internal_divider
 {
 	display:block;
@@ -664,6 +679,64 @@ td.mac_table_column_2
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
+td.wifi_wds_mac_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.wifi_wds_mac_table_column_2
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bridge_wds_mac_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bridge_wds_mac_table_column_2
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bridge_dns_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bridge_dns_table_column_2
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.lan_dns_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.lan_dns_table_column_2
+{
+	text-align:left;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
 
 td.ip_table_column_1
 {

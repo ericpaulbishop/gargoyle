@@ -287,18 +287,19 @@ function saveChanges()
 			}
 
 
+			var wifi_channel_id = getSelectedValue('wifi_mode') == "ap" || getSelectedValue('wifi_mode') == "ap+wds" ? "wifi_channel1" : "wifi_channel2";
+
 
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
-			dnsIds = ['lan_dns1', 'lan_dns2', 'lan_dns3'];
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', dnsIds, 'wifi_channel', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifi_channel_id, 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 			
-			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key', 'key'];
+			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key', 'key'];
 		
 			var sv=  setVariableFromValue;
 			var svm= setVariableFromModifiedValue;
 			var svcat= setVariableFromConcatenation;
 			var svcond= setVariableConditionally;
-			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,svcat,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv];
+			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv];
 			
 			var f=false;
 			var t=true;
@@ -314,13 +315,12 @@ function saveChanges()
 			var hiddenParams = [ifHiddenChecked,f,'1'];
 			var isolateParams = [ifIsolateChecked,f,'1'];
 		
-			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f];
+			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f];
 
 		
 		
-			dnsVisibilityIds = ['lan_dns_container', 'lan_dns_container', 'lan_dns_container'];
 			pppoeReconnectVisibilityIds = ['wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container'];
-			multipleVisibilityIds= [pppoeReconnectVisibilityIds, dnsVisibilityIds];
+			multipleVisibilityIds= [pppoeReconnectVisibilityIds];
 			wirelessSections=[firstWirelessDevice, section1, section1, section1, section1, section1, section1, section1, section1, section2, section2, section2, section2, section2];
 			visibilityIds = [];
 			pkgs = [];
@@ -344,7 +344,7 @@ function saveChanges()
 					sections.push('wan');
 					uci.remove('network', 'wan', options[idIndex]);
 				}
-				else if(idIndex < 14)
+				else if(idIndex < 13)
 				{
 					pkgs.push('network');
 					sections.push('lan')
@@ -358,6 +358,8 @@ function saveChanges()
 			}
 
 			setVariables(inputIds, visibilityIds, uci, pkgs, sections, options, setFunctions, additionalParams);
+			
+
 
 		
 
@@ -381,14 +383,6 @@ function saveChanges()
 				}
 			}
 		
-			//update lan dns to include router ip
-			var setDns = uci.get("network", "lan", "dns");
-			currentLanIp = uci.get("network", "lan", "ipaddr");
-			if( !setDns.match(currentLanIp))
-			{
-				uci.set("network", "lan", "dns", currentLanIp + " " + setDns);
-			}
-
 
 			//In X-Wrt option defaultroute = 1 is set for wan section when pppoe is active
 			//I have no idea how this solves the issue, but people report this makes pppoe work
@@ -539,6 +533,7 @@ function saveChanges()
 			}
 			preCommands = preCommands + "\nuci commit\n";
 
+
 			var bridgeCommandList = [];
 			bridgeCommandList.push("/etc/init.d/dnsmasq disable");
 			bridgeCommandList.push("/etc/init.d/miniupnpd disable");
@@ -554,6 +549,25 @@ function saveChanges()
 
 
 		}
+
+
+		//set lan dns from table
+		//this code is the same for both router & bridge
+		//we set from lan table, but we keep bridge & lan dns tables synchronized
+		//so they should be identical
+		var lanGateway = uci.get("network", "lan", "gateway");
+		lanGateway = lanGateway == "" ? uci.get("network", "lan", "ipaddr") : lanGateway;
+		var dns = lanGateway;
+		if(document.getElementById("lan_use_dns").checked)
+		{
+			var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
+			var dnsList = [];
+			var dnsIndex=0;
+			for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++) { dnsList.push(dnsData[dnsIndex][0]); }
+			dns = dnsList.length > 0 ? dnsList.join(" ") : dns;
+		}
+		uci.set("network", "lan", "dns", dns);
+
 
 		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
 		if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
@@ -684,19 +698,6 @@ function proofreadAll()
 			visibilityIds.push( inputIds[idIndex] + "_container" );
 		}
 
-		var dnsNum;
-		for(dnsNum=1; dnsNum<=3; dnsNum++)
-		{
-			var dnsId="lan_dns" + dnsNum;
-			var dnsValue=document.getElementById(dnsId).value;
-			if(dnsValue != '')
-			{
-				inputIds.push(dnsId);
-				functions.push(vip);
-				returnCodes.push(0);
-				visibilityIds.push( 'lan_dns_container' );
-			}
-		}
 	
 		var labelIds = new Array();
 		for (idIndex in inputIds)
@@ -750,7 +751,7 @@ function setGlobalVisibility()
 
 
 		currentMode=getSelectedValue('wifi_mode');
-		setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'AP+Client']);
+		setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'Client+AP']);
 	       	if(currentMode == 'ap' || currentMode == 'ap+wds')
 		{
 			setSelectedValue("wifi_mode", 'ap+sta');
@@ -854,10 +855,11 @@ function setWifiVisibility()
 	
 	
 	
-	var wifiIds=['wifi_channel_container', 'mac_enabled_container', 'mac_filter_container', 'internal_divider1', 'wifi_ssid1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
+	//var wifiIds=['wifi_channel1_container', 'mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
+
+	var wifiIds=['mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container','wifi_channel1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_channel2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
 
 	var mf = document.getElementById("mac_filter_enabled").checked ? 1 : 0;
-	var d1 = mf == 1 ? 0 : 1;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
@@ -867,12 +869,12 @@ function setWifiVisibility()
 	var w2 = (e2 == 'wep') ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,  1,mf,   0,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,  1,mf,  d1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,p2,w2];
-	wifiVisibilities['adhoc']    = [1,  1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,p2,w2];
-	wifiVisibilities['disabled'] = [0,  0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,1,p2,w2];
+	wifiVisibilities['adhoc']    = [1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -920,7 +922,8 @@ function resetData()
 	if(wirelessDriver == "broadcom")
 	{
 		removeOptionFromSelectElement("bridge_channel", "auto", document);
-		removeOptionFromSelectElement("wifi_channel", "auto", document);
+		removeOptionFromSelectElement("wifi_channel1", "auto", document);
+		removeOptionFromSelectElement("wifi_channel2", "auto", document);
 	}
 
 	var macElements = [ "bridge_wifi_mac", "wifi_mac" ];
@@ -1024,32 +1027,25 @@ function resetData()
 	}
 	
 	//first load basic variables for wan & lan sections
-	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'lan_dns1', 'lan_dns2', 'lan_dns3'];
+	networkIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle','wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_use_mac', 'wan_mac', 'wan_use_mtu', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway'];
 	networkPkgs = new Array();
 	for (idIndex in networkIds)
 	{
 		networkPkgs.push('network');
 	}
 
-	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan', 'lan', 'lan', 'lan'];
-	networkOptions  = ['proto', 'username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway', 'dns', 'dns', 'dns'];
+	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan'];
+	networkOptions  = ['proto', 'username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway'];
 
 
-	
-	dnsList = uciOriginal.get('network', 'lan', 'dns');
-	dnsSplit = dnsList.split(/[\t ]+/);
-	dnsStartIndex = dnsSplit[0] == uciOriginal.get('network', 'lan', 'ipaddr') ? 1 : 0;
 
 	pppoeDemandParams = [5*60,1/60];
 	pppoeReconnectParams = [3,0];
 	pppoeIntervalParams = [5,1];
-	dns1Params = ['', dnsStartIndex];
-	dns2Params = ['', dnsStartIndex+1];
-	dns3Params = ['', dnsStartIndex+2];
 	useMtuTest = function(v){return (v=='' || v==null || v==1500 ? false : true);}
 	useMacTest = function(v){v = (v== null ? '' : v);  return (v=='' || v.toLowerCase()==defaultWanMac.toLowerCase() ? false : true);}
 
-	networkParams = ['dhcp', '', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1', dns1Params,dns2Params,dns3Params];
+	networkParams = ['dhcp', '', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1'];
 
 	
 
@@ -1058,7 +1054,7 @@ function resetData()
 	lvm=loadValueFromVariableMultiple;
 	lvi=loadValueFromVariableAtIndex;
 	lc=loadChecked;
-	networkFunctions = [lsv,lv,lv,lvm,lvi,lvi,lv,lv,lv,lc,lv,lc,lv,lv,lv,lv,lvi,lvi,lvi];
+	networkFunctions = [lsv,lv,lv,lvm,lvi,lvi,lv,lv,lv,lc,lv,lc,lv,lv,lv,lv];
 	
 	loadVariables(uciOriginal, networkIds, networkPkgs, networkSections, networkOptions, networkParams, networkFunctions);
 
@@ -1077,6 +1073,41 @@ function resetData()
 	reconnect_mode=(keepalive != '' || demand == '') ? 'keepalive' : 'demand';
 	document.getElementById("wan_pppoe_reconnect_mode").value = reconnect_mode;
 	
+	//initialize dns table
+	var origDns = uciOriginal.get("netowrk", "lan", "dns").split(/[\t ]+/);
+	var routerIp = uciOriginal.get("network", "lan", "ipaddr");
+	var dIndex = 0;
+	var dnsTableData = [];
+	for(dIndex=0; dIndex < origDns.length; dIndex++)
+	{
+		if(origDns[dIndex] != routerIp && validateIP(origDns[dIndex]) == 0)
+		{
+			dnsTableData.push([origDns[dIndex]]);
+		}
+	}
+	
+	var lanDnsTable=createTable([""], dnsTableData, "lan_dns_table", true, false);
+	var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
+	if(lanDnsTableContainer.firstChild != null)
+	{
+		lanDnsTableContainer.removeChild(lanDnsTableContainer.firstChild);
+	}
+	lanDnsTableContainer.appendChild(lanDnsTable);
+
+	var bridgeDnsTable = createTable([""], dnsTableData, "bridge_dns_table", true, false);
+	var bridgeDnsTableContainer = document.getElementById('bridge_dns_table_container');
+	if(bridgeDnsTableContainer.firstChild != null)
+	{
+		bridgeDnsTableContainer.removeChild(bridgeDnsTableContainer.firstChild);
+	}
+	bridgeDnsTableContainer.appendChild(bridgeDnsTable);
+
+
+	document.getElementById("lan_use_dns").checked = dnsTableData.length > 0 ? true : false;
+	setDnsEnabled(document.getElementById("lan_use_dns")); //bridge check gets set automatically
+
+
+
 	
 	//now load wireless variables
 	var allWirelessSections = uciOriginal.getAllSections("wireless");
@@ -1105,23 +1136,24 @@ function resetData()
 
 
 
-	wirelessIds=['wifi_channel', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+	wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 	wirelessPkgs= new Array();
 	for( wIndex in wirelessIds)
 	{
 		wirelessPkgs.push('wireless');
 	}
-	wirelessSections=[firstWirelessDevice, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
-	wirelessOptions=['channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
+	wirelessSections=[firstWirelessDevice, firstWirelessDevice, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
+	wirelessOptions=['channel', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
 	ifOne = function(p) { return p == 1 ? true : false; };
-	wirelessParams=[wirelessDriver=="broadcom" ? '5' : "auto", 'Gargoyle', ifOne, ifOne, 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
-	wirelessFunctions=[lsv,lv,lc,lc,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
+	wirelessParams=[wirelessDriver=="broadcom" ? '5' : "auto", wirelessDriver=="broadcom" ? '5' : "auto", 'Gargoyle', ifOne, ifOne, 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
+	wirelessFunctions=[lsv,lsv,lv,lc,lc,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	
 	resetWirelessMode();
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
 
-	setSelectedValue('wifi_channel', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
+	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
+	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
 	setSelectedValue('bridge_channel', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
 
 
@@ -1275,7 +1307,13 @@ function resetData()
 	setGlobalVisibility();
 }
 
-
+function setChannel(selectElement)
+{
+	var selectedValue = getSelectedValue(selectElement.id);
+	setSelectedValue("wifi_channel1",  selectedValue);
+	setSelectedValue("wifi_channel2",  selectedValue);
+	setSelectedValue("bridge_channel", selectedValue);
+}
 
 function resetWirelessMode()
 {
@@ -1292,33 +1330,65 @@ function proofreadWep(input)
 	proofreadText(input, validateWep, 0);
 }
 
-function addMacToTable(macTextId, tableContainerId)
+
+function addTextToSingleColumnTable(textId, tableContainerId, validator, preprocessor, validReturn, duplicatesAllowed, columnName)
 {
-	var macStr=document.getElementById(macTextId).value;
-	if(validateMac(macStr) != 0)
+	var val=document.getElementById(textId).value;
+	if(validator(val) != validReturn)
 	{
-		alert("ERROR: Specified MAC is not valid.");
+		alert("ERROR: Specified " + columnName + " is not valid.");
 	}
 	else
 	{
-		macStr = macStr.toUpperCase();
-		macTable = document.getElementById(tableContainerId).firstChild;
-		macData = getTableDataArray(macTable, true, false);
-		inTable = false;
-		for(macIndex = 0; macIndex < macData.length; macIndex++)
+		val = preprocessor(val);
+		var singleTable = document.getElementById(tableContainerId).firstChild;
+		var singleTableData = getTableDataArray(singleTable, true, false);
+		var inTable = false;
+		var tabIndex = 0
+		for(tabIndex = 0; tabIndex < singleTableData.length; tabIndex++)
 		{
-			var testMac = macData[macIndex];
-			inTable = inTable || (macStr == testMac);
+			var test = singleTableData[macIndex];
+			inTable = inTable || (val == test[0]);
 		}
-		if(inTable)
+		if(inTable && !duplicatesAllowed)
 		{
-			alert("ERROR: Duplicate MAC.");
+			alert("ERROR: Duplicate " + columnName);
 		}
 		else
 		{
-			addTableRow(macTable, [macStr], true, false, null, null );
-			document.getElementById(macTextId).value = "";
+			addTableRow(singleTable, [val], true, false, null, null );
+			document.getElementById(textId).value = "";
 		}
+	}
+}
+
+function setDnsEnabled(useDnsCheck)
+{
+	var enabled = useDnsCheck.checked;
+
+
+	document.getElementById("bridge_use_dns").checked = enabled;
+	setElementEnabled(document.getElementById("add_bridge_dns"), enabled, "");
+	setElementEnabled(document.getElementById("add_bridge_dns_button"), enabled, "");
+	document.getElementById("bridge_dns_table_container").style.display = enabled ? "block" : "none";
+
+	
+	document.getElementById("lan_use_dns").checked = enabled;
+	setElementEnabled(document.getElementById("add_lan_dns"), enabled, "");
+	setElementEnabled(document.getElementById("add_lan_dns_button"), enabled, "");
+	document.getElementById("lan_dns_table_container").style.display = enabled ? "block" : "none";
+}
+
+function addDns(section)
+{
+	var textId = "add_" + section + "_dns";
+	addIp = document.getElementById(textId).value;
+	addTextToSingleColumnTable(textId, "lan_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP"); 
+	if(addIp != "" && document.getElementById(textId).value == "")
+	{
+
+		document.getElementById(textId).value = addIp;
+		addTextToSingleColumnTable("add_" + section + "_dns", "bridge_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP"); 
 	}
 }
 
@@ -1326,12 +1396,12 @@ function addMacToWds(section)
 {
 	var textId = "add_" + section + "_wds_mac";
 	var tableContainer = section + "_wds_mac_table_container";
-	addMacToTable(textId, tableContainer);
+	addTextToSingleColumnTable(textId, tableContainerId, validateMac, function(str){ return str.toUpperCase(); }, 0, false, "MAC"); 
 }
 
 
 function addMacToFilter()
 {
-	addMacToTable("add_mac", 'mac_table_container');
+	addTextToSingleColumnTable("add_mac", "mac_table_container", validateMac, function(str){ return str.toUpperCase(); }, 0, false, "MAC"); 
 }
 
