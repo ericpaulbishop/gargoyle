@@ -590,7 +590,6 @@ function saveChanges()
 		
 		var stateChangeFunction = function(req)
 		{
-			alert(req.readyState);
 			if(req.readyState == 4)
 			{
 				//alert(req.responseText);
@@ -852,7 +851,7 @@ function setWifiVisibility()
 	
 	
 
-	var wifiIds=['mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container','wifi_channel1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_channel2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
+	var wifiIds=['internal_divider1', 'mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container','wifi_channel1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_channel2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
 
 	var mf = document.getElementById("mac_filter_enabled").checked ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
@@ -864,12 +863,12 @@ function setWifiVisibility()
 	var w2 = (e2 == 'wep') ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,1,p2,w2];
-	wifiVisibilities['adhoc']    = [1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,1,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);

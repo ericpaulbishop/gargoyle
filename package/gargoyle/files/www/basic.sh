@@ -361,12 +361,10 @@ else
 			<input class="rightcolumn" type='checkbox' id='mac_filter_enabled' onclick='setWifiVisibility()' />
 		</div>
 		<div id="mac_filter_container">
-			<div>
-				<p><em>Be aware that MAC filtering applies to all wireless interfaces, 
-				including those in client mode.  If you are using a MAC filter
-				and are in client mode either set the policy to Deny only 
-				listed MACs, or include the MAC of the Access Point you are
-				connecting to in the MAC list below.</em></p>
+			<div class="rightcolumnonly">
+				<em>MAC filtering applies to all wireless interfaces, 
+				including those in client mode.  In client mode you must be sure
+				to allow the MAC address of this wireless device</em>
 			</div>
 			<div>
 				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
