@@ -370,7 +370,7 @@ function saveChanges()
 			}
 			else
 			{
-				uci.set("network", "wan", "protocol", getSelectedValue('wan_protocol').replace(/_.*$/g));
+				uci.set("network", "wan", "proto", getSelectedValue('wan_protocol').replace(/_.*$/g, ""));
 			}
 			if(uci.get('network', 'lan', 'proto') === '')
 			{
