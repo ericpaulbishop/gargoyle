@@ -117,9 +117,6 @@ else
 			<div class="rightcolumnonly"><div id="bridge_dns_table_container"></div></div>
 		</div>
 
-		<br/>
-
-
 		<div class='internal_divider'></div>
 		
 		<div id='bridge_mode_container'>
@@ -138,10 +135,28 @@ else
 				</select>
 			</div>
 
-			<div id='bridge_ssid_container'>
-				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID:</label>
-				<input type='text' id='bridge_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+
+			<div id='bridge_list_ssid_container'>
+				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
+				<span class="rightcolumn">
+					<select id="bridge_list_ssid"  onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
+					<input type='button' class='default_button' id='bridge_rescan_button' value='Re-Scan' onclick='scanWifi("bridge_custom_ssid")' />
+				</span>
 			</div>
+			<div id='bridge_custom_ssid_container'>
+				<input type='text' class='rightcolumnonly' id='bridge_custom_ssid'size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			</div>
+			<div id='bridge_ssid_container'>
+				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID to Join:</label>
+				<span class='rightcolumn'>
+					<input style="float:left;"  type='text' id='bridge_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+					<input style="float:left;"  type='button' class='default_button' id='bridge_scan_button' value='Scan' onclick='scanWifi("bridge_ssid")' />
+				</span>
+			</div>
+
+
+
+
 			<div id='bridge_channel_container'>
 				<label class='leftcolumn' for='bridge_channel' id='bridge_channel_label'>Wireless Channel:</label>
 					<select class='rightcolumn' id='bridge_channel' onchange='setChannel(this)'>
@@ -161,7 +176,13 @@ else
 					<option value='13'>13</option>
 					<option value='14'>14</option>
 				</select>
-			</div>		
+			</div>
+			<div id='bridge_fixed_channel_container'>
+				<label class='leftcolumn' for='bridge_fixed_channel' id='bridge_fixed_channel_label'>Wireless Channel:</label>
+				<span class='rightcolumn' id='bridge_fixed_channel'>&nbsp;</span>
+			</div>
+
+
 			<div id='bridge_encryption_container'>
 				<label class='leftcolumn' for='bridge_encryption' id='bridge_encryption_label'>Encryption:</label>
 				<select class='rightcolumn' id='bridge_encryption' onchange='setBridgeVisibility()'>
@@ -171,6 +192,12 @@ else
 					<option value='wep'>WEP</option>
 				</select>
 			</div>
+			<div id='bridge_fixed_encryption_container' >
+				<label class='leftcolumn' for='bridge_fixed_encryption' id='bridge_fixed_encryption_label'>Encryption:</label>
+				<span class='rightcolumn' id='bridge_fixed_encryption'>&nbsp;</span>
+			</div>
+
+
 			<div id='bridge_pass_container'>
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'>Password:</label>
 				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
@@ -364,7 +391,7 @@ else
 			<div class="rightcolumnonly">
 				<em>MAC filtering applies to all wireless interfaces, 
 				including those in client mode.  In client mode you must be sure
-				to allow the MAC address of this wireless device</em>
+				to allow the MAC address of the AP to which you are connected.</em>
 			</div>
 			<div>
 				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
@@ -385,9 +412,22 @@ else
 		<div id='internal_divider1' class='internal_divider'></div>
 
 
+		<div id='wifi_list_ssid2_container'>
+			<label class='leftcolumn' for='wifi_list_ssid2' id='wifi_list_ssid2_label'>SSID to Join:</label>
+			<span class="rightcolumn">
+				<select id="wifi_list_ssid2" onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
+				<input type='button' class='default_button' id='wifi_rescan_button' value='Re-Scan' onclick='scanWifi("wifi_custom_ssid2")'  />
+			</span>
+		</div>
+		<div id='wifi_custom_ssid2_container'>
+			<input type='text' class='rightcolumnonly' id='wifi_custom_ssid2' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+		</div>
 		<div id='wifi_ssid2_container'>
 			<label class='leftcolumn' for='wifi_ssid2' id='wifi_ssid2_label'>SSID:</label>
-			<input type='text' id='wifi_ssid2'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<span class='rightcolumn'>
+				<input style="float:left;" type='text'  id='wifi_ssid2'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+				<input style="float:left;" type='button' class="default_button" id='wifi_scan_button' value='Scan' onclick='scanWifi("wifi_ssid2")' />
+			</span>
 		</div>
 		<div id='wifi_channel2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel2' id='wifi_channel2_label'>Wireless Channel:</label>
@@ -409,6 +449,11 @@ else
 				<option value='14'>14</option>
 			</select>
 		</div>
+		<div id='wifi_fixed_channel2_container' class='indent'>
+			<label class='leftcolumn' for='wifi_fixed_channel2' id='wifi_fixed_channel2_label'>Wireless Channel:</label>
+			<span class='rightcolumn' id='wifi_fixed_channel2'>&nbsp;</span>
+		</div>
+
 		<div id='wifi_encryption2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
 			<select class='rightcolumn' id='wifi_encryption2' onchange='setWifiVisibility()'>
@@ -417,6 +462,10 @@ else
 				<option value='psk'>WPA PSK</option>
 				<option value='wep'>WEP</option>
 			</select>
+		</div>
+		<div id='wifi_fixed_encryption2_container' class='indent'>
+			<label class='leftcolumn' for='wifi_fixed_encryption2' id='wifi_fixed_encryption2_label'>Encryption:</label>
+			<span class='rightcolumn' id='wifi_fixed_encryption2'>&nbsp;</span>
 		</div>
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'>Password:</label>
@@ -458,7 +507,10 @@ else
 				<option value='14'>14</option>
 			</select>
 		</div>
-
+		<div id='wifi_fixed_channel1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_fixed_channel1' id='wifi_fixed_channel1_label'>Wireless Channel:</label>
+			<span class='rightcolumn' id='wifi_fixed_channel1'>&nbsp;</span>
+		</div>
 
 		<div id='wifi_encryption1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption1' id='wifi_encryption1_label'>Encryption:</label>

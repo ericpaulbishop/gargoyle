@@ -6,6 +6,7 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var scannedSsids = [];
 var toggleReload = false;
 var currentLanIp;
 
@@ -288,19 +289,18 @@ function saveChanges()
 			}
 
 
-			var wifi_channel_id = getSelectedValue('wifi_mode') == "ap" || getSelectedValue('wifi_mode') == "ap+wds" ? "wifi_channel1" : "wifi_channel2";
 
 
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifi_channel_id, 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2'];
 			
-			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'channel', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key', 'key'];
+			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key'];
 		
 			var sv=  setVariableFromValue;
 			var svm= setVariableFromModifiedValue;
 			var svcat= setVariableFromConcatenation;
 			var svcond= setVariableConditionally;
-			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv];
+			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv];
 			
 			var f=false;
 			var t=true;
@@ -316,7 +316,7 @@ function saveChanges()
 			var hiddenParams = [ifHiddenChecked,f,'1'];
 			var isolateParams = [ifIsolateChecked,f,'1'];
 		
-			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f];
+			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f];
 
 		
 		
@@ -361,7 +361,36 @@ function saveChanges()
 			setVariables(inputIds, visibilityIds, uci, pkgs, sections, options, setFunctions, additionalParams);
 			
 
+			//set wifi channel, ssid2, encryption2
+			//this is a bit complex (and we have to do it here) because of options introduced by wireless scanning
+			if(getSelectedValue("wifi_mode") != 'disabled')
+			{
+				var ssid2 ="";
+				var enc2 = "";
+				if(document.getElementById("wifi_ssid2").style.display != "none")
+				{
+					ssid2 = document.getElementById("wifi_ssid2").value;
+					enc2 = getSelectedValue("wifi_encryption2");
+				}
+				else if(document.getElementById("wifi_custom_ssid2").style.display != "none")
+				{
+					ssid2 = document.getElementById("wifi_custom_ssid2").value;
+					enc2 = getSelectedValue("wifi_encryption2");
+				}
+				else if(document.getElementById("wifi_custom_ssid2").style.display != "none")
+				{
+					ssid2 = scannedSsids[0][ parseInt(getSelectedValue("wifi_list_ssid2")) ];
+					enc2  = scannedSsids[1][ parseInt(getSelectedValue("wifi_list_ssid2")) ];
+				}
+				if(ssid2 != "")
+				{
+					uci.set("wireless", section2, "ssid", ssid2);
+					uci.set("wireless", section2, "encryption", enc2);
+				}
 
+				var chan = document.getElementById("wifi_fixed_channel2").style.display != "none" ?  document.getElementById("wifi_fixed_channel2").firstChild.data : getSelectedValue("wifi_channel2");
+				uci.set("wireless", firstWirelessDevice, "channel", chan);
+			}
 		
 
 			//if wan protocol is 'none' do not set it
@@ -851,29 +880,62 @@ function setWifiVisibility()
 	
 	
 
-	var wifiIds=['internal_divider1', 'mac_enabled_container', 'mac_filter_container', 'wifi_ssid1_container','wifi_channel1_container', 'wifi_hidden_container', 'wifi_isolate_container', 'wifi_encryption1_container', 'wifi_pass1_container', 'wifi_wep1_container', 'wifi_server1_container', 'wifi_port1_container', 'wifi_mac_container', 'wifi_wds_container', 'internal_divider2', 'wifi_ssid2_container', 'wifi_channel2_container', 'wifi_encryption2_container', 'wifi_pass2_container', 'wifi_wep2_container'];
+	var wifiIds=[	'internal_divider1', 
+	    		'mac_enabled_container', 
+			'mac_filter_container', 
+			
+			'wifi_ssid1_container',
+			'wifi_channel1_container',
+			'wifi_fixed_channel1_container',
+			'wifi_hidden_container', 
+			'wifi_isolate_container', 
+			'wifi_encryption1_container', 
+			'wifi_pass1_container', 
+			'wifi_wep1_container', 
+			'wifi_server1_container', 
+			'wifi_port1_container', 
+			'wifi_mac_container', 
+			'wifi_wds_container', 
+			
+			'internal_divider2', 
+			"wifi_list_ssid2_container", 
+			"wifi_custom_ssid2_container", 
+			'wifi_ssid2_container', 
+			'wifi_scan_button', 
+			'wifi_channel2_container', 
+			'wifi_fixed_channel2_container',
+			'wifi_encryption2_container',
+			'wifi_fixed_encryption2_container',
+			'wifi_pass2_container', 
+			'wifi_wep2_container'
+			];
 
 	var mf = document.getElementById("mac_filter_enabled").checked ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
-	var e2 = document.getElementById('wifi_encryption2').value;
-	var p2 = (e2 != 'none' && e2 != 'wep') ? 1 : 0;
-	var w2 = (e2 == 'wep') ? 1 : 0;
+	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
+	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
+	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,mf,   1,1,1,1,1,p1,w1,r1,r1, 0,0,  1,1,1,1,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,mf,   0,0,0,0,0,0,0,0,0,     0,0,  0,1,1,1,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,    0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,    0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
 
+	if(wifiMode.match(/sta/))
+	{
+		setSsidVisibility("wifi_list_ssid2");
+	}
 }
+
 function setBridgeVisibility()
 {
 
@@ -890,14 +952,7 @@ function setBridgeVisibility()
 			document.getElementById(ids[idIndex]).style.display = statIndex==0 ? "none" : "block";
 		}
 	}
-	if(document.getElementById("global_bridge").checked)
-	{
-		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" ? "block" : "none";
-		document.getElementById("bridge_pass_container").style.display = getSelectedValue("bridge_encryption") != "wep" && getSelectedValue("bridge_encryption") != "none" ? "block" : "none";
-		document.getElementById("bridge_wep_container").style.display = getSelectedValue("bridge_encryption") == "wep" ? "block" : "none";
-		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
-		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
-	}
+
 	if(defaultWanIf == '')
 	{
 		document.getElementById("bridge_wan_port_to_lan_container").style.display = "none";
@@ -905,14 +960,28 @@ function setBridgeVisibility()
 	else
 	{
 		document.getElementById("bridge_wan_port_to_lan_container").style.display = "block";
-
 	}
+
+	if(document.getElementById("global_bridge").checked)
+	{
+		var brenc = document.getElementById("bridge_fixed_encryption_container").style.display == "none" ? getSelectedValue("bridge_encryption") : document.getElementById("bridge_fixed_encryption").firstChild.data;
+		document.getElementById("bridge_pass_container").style.display = brenc.match(/psk/) || brenc.match(/WPA/) ? "block" : "none";
+		document.getElementById("bridge_wep_container").style.display  = brenc.match(/wep/) || brenc.match(/WEP/) ? "block" : "none";
+		//alert("fixed_display=" + document.getElementById("bridge_fixed_encryption_container").style.display + "brenc = " + brenc);
+
+		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" ? "block" : "none";
+		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
+		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
+		document.getElementById("bridge_fixed_encryption_container").style.display="none";
+		document.getElementById("bridge_fixed_channel_container").style.display="none";
+
+		setSsidVisibility("bridge_list_ssid");
+	}
+	setGlobalVisibility();
 }
 
 function resetData()
 {
-
-
 	if(wirelessDriver == "broadcom")
 	{
 		removeOptionFromSelectElement("bridge_channel", "auto", document);
@@ -1406,3 +1475,105 @@ function addMacToFilter()
 	addTextToSingleColumnTable("add_mac", "mac_table_container", validateMac, function(str){ return str.toUpperCase(); }, 0, false, "MAC"); 
 }
 
+function scanWifi(ssidField)
+{
+	setControlsEnabled(false, true, "Scanning For Wifi Networks");
+	scannedSsids = wirelessDriver == "brcm" ? scanWifiBrcm() : scanWifiAtheros();
+	
+	scanDone = function()
+	{	
+		if(scannedSsids.length > 0)
+		{
+			var oldSsid = document.getElementById(ssidField).value;
+			document.getElementById("wifi_custom_ssid2").value = oldSsid;
+			document.getElementById("bridge_custom_ssid").value = oldSsid;
+			
+			var ssidDisplay = [];
+			var ssidValue = [];
+			var ssidIndex=0;
+			for(ssidIndex=0; ssidIndex < scannedSsids[0].length; ssidIndex++)
+			{
+				var ssid = scannedSsids[0][ssidIndex];
+				var enc  = scannedSsids[1][ssidIndex];
+				enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
+				ssidDisplay.push( ssid + " (" + enc + ")");
+				ssidValue.push(ssidIndex + "");
+			}
+			ssidDisplay.push( "Custom" );
+			ssidValue.push(  "custom" );
+			
+			setAllowableSelections("wifi_list_ssid2", ssidValue, ssidDisplay);
+			setAllowableSelections("bridge_list_ssid", ssidValue, ssidDisplay);
+			setSelectedValue("wifi_list_ssid2", "0");
+			setSelectedValue("bridge_list_ssid", "0");	
+		}
+		else
+		{
+			alert("No Wireless Networks found!");
+		}
+		setSsidVisibility("wifi_list_ssid2");
+		setControlsEnabled(true);
+	}
+	setTimeout( "scanDone()", 3*1000);
+}
+
+function setSsidVisibility(selectId)
+{
+	var visIds =	[	
+			"bridge_list_ssid_container", "bridge_custom_ssid_container", "bridge_ssid_container", "bridge_channel_container", "bridge_fixed_channel_container", "bridge_encryption_container", "bridge_fixed_encryption_container",
+	   		"wifi_list_ssid2_container", "wifi_custom_ssid2_container", "wifi_ssid2_container",   "wifi_channel2_container",  "wifi_fixed_channel2_container",  "wifi_encryption2_container",  "wifi_fixed_encryption2_container",
+			'wifi_fixed_channel1',
+			'wifi_pass2_container', 'wifi_wep2_container', 'bridge_pass_container', 'bridge_wep_container'
+			];
+	if(scannedSsids.length > 0)
+	{
+		var ic = getSelectedValue(selectId) == "custom" ? 1 : 0;
+		var inc = ic == 0 ? 1 : 0;
+		if(inc)
+		{
+			var scannedIndex = parseInt(getSelectedValue(selectId));
+			var enc  = scannedSsids[1][scannedIndex];
+			var chan = scannedSsids[2][scannedIndex];
+			
+			setSelectedValue("wifi_encryption2", enc);
+			setSelectedValue("bridge_encryption", enc);
+			setSelectedValue("wifi_channel1", chan);
+			setSelectedValue("wifi_channel2", chan);
+			setSelectedValue("bridge_channel", chan);
+			
+			enc = getSelectedText("wifi_encryption2");
+			setChildText("wifi_fixed_encryption2", enc);
+			setChildText("bridge_fixed_encryption", enc);
+			setChildText("wifi_fixed_channel1", chan);
+			setChildText("wifi_fixed_channel2", chan);
+			setChildText("bridge_fixed_channel", chan);
+		}
+		var be = getSelectedValue('bridge_encryption');
+		var we = getSelectedValue('wifi_encryption2');
+		var bp = be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
+		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
+		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
+		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
+		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  inc,  wp,ww,bp,bw] );
+	}
+	else
+	{
+		var be = getSelectedValue('bridge_encryption');
+		var we = getSelectedValue('wifi_encryption2');
+		var bp = be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
+		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
+		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
+		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
+		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         0,    wp,ww,bp,bw] );
+	}
+}
+
+//return SSID list / encryption list / channel list
+function scanWifiAtheros()
+{
+	return [ ["AP1", "AP2", "AP3",  "AP4"], ["psk", "wep", "psk2", "none"], ["5", "10", "5", "6"] ];
+}
+function scanWifiBrcm()
+{
+	return [ ["AP1", "AP2", "AP3",  "AP4"], ["psk", "wep", "psk2", "none"], ["5", "10", "5", "6"] ];
+}
