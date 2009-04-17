@@ -139,7 +139,7 @@ else
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
 				<span class="rightcolumn">
-					<select id="bridge_list_ssid"  onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
+					<select id="bridge_list_ssid"  style='width:180px;max-width:180px' onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
 					<input type='button' class='default_button' id='bridge_rescan_button' value='Re-Scan' onclick='scanWifi("bridge_custom_ssid")' />
 				</span>
 			</div>
@@ -415,7 +415,7 @@ else
 		<div id='wifi_list_ssid2_container'>
 			<label class='leftcolumn' for='wifi_list_ssid2' id='wifi_list_ssid2_label'>SSID to Join:</label>
 			<span class="rightcolumn">
-				<select id="wifi_list_ssid2" onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
+				<select id="wifi_list_ssid2" style='width:180px;max-width:180px' onchange='setSsidVisibility(this.id)' ><option value="custom">Custom</option></select>
 				<input type='button' class='default_button' id='wifi_rescan_button' value='Re-Scan' onclick='scanWifi("wifi_custom_ssid2")'  />
 			</span>
 		</div>

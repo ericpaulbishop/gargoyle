@@ -6,7 +6,7 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-var scannedSsids = [];
+var scannedSsids = [[],[],[],[]];
 var toggleReload = false;
 var currentLanIp;
 
@@ -1478,43 +1478,49 @@ function addMacToFilter()
 function scanWifi(ssidField)
 {
 	setControlsEnabled(false, true, "Scanning For Wifi Networks");
-	scannedSsids = wirelessDriver == "brcm" ? scanWifiBrcm() : scanWifiAtheros();
-	
-	scanDone = function()
-	{	
-		if(scannedSsids.length > 0)
+	var param = getParameterDefinition("commands", "");
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
 		{
-			var oldSsid = document.getElementById(ssidField).value;
-			document.getElementById("wifi_custom_ssid2").value = oldSsid;
-			document.getElementById("bridge_custom_ssid").value = oldSsid;
-			
-			var ssidDisplay = [];
-			var ssidValue = [];
-			var ssidIndex=0;
-			for(ssidIndex=0; ssidIndex < scannedSsids[0].length; ssidIndex++)
+			scannedSsids = parseWifiScan(req.responseText);	
+			if(scannedSsids[0].length > 0)
 			{
-				var ssid = scannedSsids[0][ssidIndex];
-				var enc  = scannedSsids[1][ssidIndex];
-				enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
-				ssidDisplay.push( ssid + " (" + enc + ")");
-				ssidValue.push(ssidIndex + "");
+				var oldSsid = document.getElementById(ssidField).value;
+				document.getElementById("wifi_custom_ssid2").value = oldSsid;
+				document.getElementById("bridge_custom_ssid").value = oldSsid;
+				
+				var ssidDisplay = [];
+				var ssidValue = [];
+				var ssidIndex=0;
+				for(ssidIndex=0; ssidIndex < scannedSsids[0].length; ssidIndex++)
+				{
+					var ssid = scannedSsids[0][ssidIndex];
+					var enc  = scannedSsids[1][ssidIndex];
+					var qual = scannedSsids[3][ssidIndex];
+
+					enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
+					ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal)");
+					ssidValue.push(ssidIndex + "");
+				}
+				ssidDisplay.push( "Custom" );
+				ssidValue.push(  "custom" );
+				
+				setAllowableSelections("wifi_list_ssid2", ssidValue, ssidDisplay);
+				setAllowableSelections("bridge_list_ssid", ssidValue, ssidDisplay);
+				setSelectedValue("wifi_list_ssid2", "0");
+				setSelectedValue("bridge_list_ssid", "0");	
 			}
-			ssidDisplay.push( "Custom" );
-			ssidValue.push(  "custom" );
-			
-			setAllowableSelections("wifi_list_ssid2", ssidValue, ssidDisplay);
-			setAllowableSelections("bridge_list_ssid", ssidValue, ssidDisplay);
-			setSelectedValue("wifi_list_ssid2", "0");
-			setSelectedValue("bridge_list_ssid", "0");	
+			else
+			{
+				alert("No Wireless Networks found!");
+			}
+			setSsidVisibility("wifi_list_ssid2");
+			setControlsEnabled(true);
 		}
-		else
-		{
-			alert("No Wireless Networks found!");
-		}
-		setSsidVisibility("wifi_list_ssid2");
-		setControlsEnabled(true);
 	}
-	setTimeout( "scanDone()", 3*1000);
+	runAjax("POST", "utility/scan_wifi.sh", param, stateChangeFunction);
+
 }
 
 function setSsidVisibility(selectId)
@@ -1525,7 +1531,7 @@ function setSsidVisibility(selectId)
 			'wifi_fixed_channel1',
 			'wifi_pass2_container', 'wifi_wep2_container', 'bridge_pass_container', 'bridge_wep_container'
 			];
-	if(scannedSsids.length > 0)
+	if(scannedSsids[0].length > 0)
 	{
 		var ic = getSelectedValue(selectId) == "custom" ? 1 : 0;
 		var inc = ic == 0 ? 1 : 0;
@@ -1568,12 +1574,78 @@ function setSsidVisibility(selectId)
 	}
 }
 
-//return SSID list / encryption list / channel list
-function scanWifiAtheros()
+function parseWifiScan(rawScanOutput)
 {
-	return [ ["AP1", "AP2", "AP3",  "AP4"], ["psk", "wep", "psk2", "none"], ["5", "10", "5", "6"] ];
+	var parsed = [ [],[],[],[] ];
+	var cells = rawScanOutput.split(/Cell/);
+	cells.shift(); //get rid of anything before first AP data
+	
+	var getCellValues=function(id, cellLines)
+	{
+		var vals=[];
+		var lineIndex;
+		for(lineIndex=0; lineIndex < cellLines.length && val==null; lineIndex++)
+		{
+			var line = cellLines[lineIndex];
+			var idIndex = line.indexOf(id);
+			var cIndex = line.indexOf(":");
+			if(idIndex >= 0 && cIndex > idIndex)
+			{
+				var val=line.substr(cIndex+1);
+				val = val.replace(/^[^\"]*\"/g, "");
+				val = val.replace(/\".*$/g, "");
+				vals.push(val);
+			}
+		}
+		return vals;
+	}
+	
+	while(cells.length > 0)
+	{
+		var cellData = cells.shift();
+		var cellLines = cellData.split(/[\r\n]+/);
+		var ssid = getCellValues("ESSID", cellLines).shift();
+		var channel = getCellValues("Channel", cellLines).shift();
+		var encOn = getCellValues("Encryption key", cellLines).shift();
+		var ie = getCellValues("IE", cellLines);
+		var qualStr = getCellValues("Quality", cellLines).shift();
+		if(ssid != null && ssid != "" && encOn != null && qualStr != null)
+		{
+			var encType = "wep";
+			while(ie.length > 0)
+			{
+				e = ie.shift();
+				encType = e.match(/WPA2/) ? "psk2" : encType;
+				encType = encType=="wep" && e.match(/WPA/) ? "psk" : encType;
+			}
+			var enc = encOn == "on" ? encType : "none";
+			
+			var splitQual =qualStr.replace(/[\t ]+Sig.*$/g, "").split(/\//);
+			var quality = Math.round( (parseInt(splitQual[0])*100)/parseInt(splitQual[1]) );
+			
+
+			parsed[0].push(ssid);
+			parsed[1].push(enc);
+			parsed[2].push(channel);
+			parsed[3].push(quality);
+		}
+	}
+
+	var qualityIndices = [];
+	var qIndex;
+	for(qIndex=0; qIndex < parsed[3].length; qIndex++) { qualityIndices.push( [ qIndex, parsed[3][qIndex] ] ); }
+	var sortQuality = function(q1,q2){ return q2[1] - q1[1]; };
+	qualityIndices = qualityIndices.sort(sortQuality);
+	
+	var sortedParsed = [ [],[],[],[] ];
+	while(qualityIndices.length > 0)
+	{
+		var i = qualityIndices.shift()[0];
+		var pIndex;
+		for(pIndex=0; pIndex < 4; pIndex++){ sortedParsed[pIndex].push( parsed[pIndex][i] ); }
+	}
+
+
+	return sortedParsed;
 }
-function scanWifiBrcm()
-{
-	return [ ["AP1", "AP2", "AP3",  "AP4"], ["psk", "wep", "psk2", "none"], ["5", "10", "5", "6"] ];
-}
+
