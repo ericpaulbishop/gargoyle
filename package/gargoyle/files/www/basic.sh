@@ -100,8 +100,8 @@ else
 		<div id= "bridge_wan_port_to_lan_container">
 			<label class='leftcolumn' for='bridge_wan_port_to_lan' id='bridge_wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='bridge_wan_port_to_lan' onchange='setBridgeVisibility()'>
-				<option value='disable'>Disable WAN Ethernet Port</option>
-				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
+				<option value='disable'>Disable</option>
+				<option value='bridge'>Bridge To LAN</option>
 			</select>
 		</div>
 		
@@ -232,10 +232,10 @@ else
 			<label class='leftcolumn' for='wan_protocol'>Connect Via:</label>
 			<select class='rightcolumn' id='wan_protocol' onchange='setGlobalVisibility()'>
 				<option value='dhcp_wired'>DHCP (Wired)</option>
-				<option value='dhcp_wireless'>DHCP (Wireless)</option>
 				<option value='pppoe_wired'>PPPoE (Wired)</option>
-				<option value='static_wired'>Static (Wired)</option>
-				<option value='static_wireless'>Static (Wireless)</option>
+				<option value='static_wired'>Static IP (Wired)</option>
+				<option value='dhcp_wireless'>DHCP (Wireless)</option>
+				<option value='static_wireless'>Static IP (Wireless)</option>
 				<option value='none'>Disabled</option>
 			</select>
 		</div>
@@ -296,17 +296,20 @@ else
 
 		<div id='wan_via_single_port_container' >
 			<span class='leftcolumn'>
-				<label id='wan_via_single_port_label' for='wan_via_single_port'>Ethernet Port Connects to WAN (not LAN):</label>
+				<label id='wan_via_single_port_label' for='wan_via_single_port'>Ethernet Port Connects to:</label>
 			</span>
 			<span class='rightcolumn'>
-				<input type='checkbox' id='wan_via_single_port' onclick='setGlobalVisibility()'/>
+				<select id='wan_via_single_port' onchange='setGlobalVisibility()'>
+					<option value='lan'>LAN</option>
+					<option value='wan'>WAN</option>
+				</select>
 			</span>
 		</div>
 		<div id='wan_port_to_lan_container' >
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
-				<option value='disable'>Disable WAN Ethernet Port</option>
-				<option value='bridge'>Bridge WAN Ethernet Port To LAN</option>
+				<option value='disable'>Disable</option>
+				<option value='bridge'>Bridge To LAN</option>
 			</select>
 		</div>
 		
@@ -384,8 +387,11 @@ else
 	
 
 		<div id="mac_enabled_container">
-			<label class="leftcolumn" for='mac_filter_enabled'>Enable Wireless MAC Filter:</label>
-			<input class="rightcolumn" type='checkbox' id='mac_filter_enabled' onclick='setWifiVisibility()' />
+			<label class="leftcolumn" for='mac_filter_enabled'>Wireless MAC Filter:</label>
+			<select class="rightcolumn" id='mac_filter_enabled' onchange='setWifiVisibility()' >
+				<option value='disabled'>Disabled</option>
+				<option value='enabled'>Enabled</option>
+			</select>
 		</div>
 		<div id="mac_filter_container">
 			<div class="rightcolumnonly">
@@ -552,12 +558,18 @@ else
 		</div>
 
 		<div id='wifi_hidden_container' class='indent'>
-			<label class='leftcolumn' id='wifi_hidden_label' for='wifi_hidden'>Disable Broadcast SSID:</label>
-			<input class='rightcolumn' type='checkbox' id='wifi_hidden' />
+			<label class='leftcolumn' id='wifi_hidden_label' for='wifi_hidden'>Broadcast SSID:</label>
+			<select class='rightcolumn' id='wifi_hidden' >
+				<option value='disabled'>Disabled</option>
+				<option value='enabled'>Enabled</option>
+			</select>
 		</div>
 		<div id='wifi_isolate_container' class='indent'>
-			<label class='leftcolumn' id='wifi_isolate_label' for='wifi_isolate'>Isolate Wireless Clients:</label>
-			<input class='rightcolumn'type='checkbox' id='wifi_isolate' />
+			<label class='leftcolumn' id='wifi_isolate_label' for='wifi_isolate'>Wireless Client Isolation:</label>
+			<select class='rightcolumn' id='wifi_isolate' >
+				<option value='disabled'>Disabled</option>
+				<option value='enabled'>Enabled</option>
+			</select>
 		</div>
 		<div id='wifi_mac_container' class="indent">
 			<label class='leftcolumn' id='wifi_mac_label'>MAC Of <em>This</em> Device:</label>
