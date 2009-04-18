@@ -387,7 +387,7 @@ function saveChanges()
 					uci.set("wireless", section2, "encryption", enc2);
 				}
 
-				var chan = document.getElementById("wifi_fixed_channel2").style.display != "none" ?  document.getElementById("wifi_fixed_channel2").firstChild.data : getSelectedValue("wifi_channel2");
+				var chan = document.getElementById("wifi_fixed_channel2_container").style.display != "none" ?  document.getElementById("wifi_fixed_channel2").firstChild.data : getSelectedValue("wifi_channel2");
 				uci.set("wireless", firstWirelessDevice, "channel", chan);
 			}
 		
@@ -485,7 +485,7 @@ function saveChanges()
 				encryption  = scannedSsids[1][ parseInt(getSelectedValue("bridge_list_ssid")) ];
 			}
 			var key = encryption == "none" ? "" : ( encryption == "wep" ? document.getElementById("bridge_wep").value : document.getElementById("bridge_pass").value );
-			var chan = document.getElementById("bridge_fixed_channel").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
+			var chan = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
 			uci.set("wireless", firstWirelessDevice, "channel", chan);
 
 			if( getSelectedValue("bridge_mode") == "client_bridge")
@@ -1037,7 +1037,7 @@ function resetData()
 		document.getElementById("bridge_ssid").value = uciOriginal.get("wireless", bridgeSection, "ssid");
 	
 		var repeaterEnabled = "disabled";
-		var testSections = getAllSectionsOfType("wireless", "wifi-iface");
+		var testSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 		while(testSections.length > 0 && repeaterEnabled == "disabled") { repeaterEnabled = uciOriginal.get("wireless", testSections.shift(), "mode") == "ap" ? "enabled" : "disabled"; }
 		setSelectedValue("bridge_repeater", repeaterEnabled);
 
@@ -1528,13 +1528,19 @@ function scanWifi(ssidField)
 					ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal)");
 					ssidValue.push(ssidIndex + "");
 				}
-				ssidDisplay.push( "Custom" );
+				ssidDisplay.push( "Other" );
 				ssidValue.push(  "custom" );
 				
 				setAllowableSelections("wifi_list_ssid2", ssidValue, ssidDisplay);
 				setAllowableSelections("bridge_list_ssid", ssidValue, ssidDisplay);
-				setSelectedValue("wifi_list_ssid2", "0");
-				setSelectedValue("bridge_list_ssid", "0");	
+
+				var matchIndex = -1;
+				var testIndex;
+				var oldVal = document.getElementById(ssidField).value;
+				for(testIndex=0; testIndex < scannedSsids[0].length && matchIndex < 0; testIndex++){ matchIndex = scannedSsids[0][testIndex] == oldVal ? testIndex : matchIndex; }
+				if(matchIndex < 0) { matchIndex = oldVal == "Gargoyle" || oldVal == "OpenWrt" || oldVal == "" ? "0" : "custom"; }
+				setSelectedValue("wifi_list_ssid2",  matchIndex + "");
+				setSelectedValue("bridge_list_ssid", matchIndex + "");
 			}
 			else
 			{
