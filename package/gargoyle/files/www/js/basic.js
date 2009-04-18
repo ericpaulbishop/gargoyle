@@ -1508,6 +1508,7 @@ function scanWifi(ssidField)
 	{
 		if(req.readyState == 4)
 		{
+			//alert("response = \n" + req.responseText)
 			scannedSsids = parseWifiScan(req.responseText);	
 			if(scannedSsids[0].length > 0)
 			{
@@ -1559,7 +1560,7 @@ function setSsidVisibility(selectId)
 	var visIds =	[	
 			"bridge_list_ssid_container", "bridge_custom_ssid_container", "bridge_ssid_container", "bridge_channel_container", "bridge_fixed_channel_container", "bridge_encryption_container", "bridge_fixed_encryption_container",
 	   		"wifi_list_ssid2_container", "wifi_custom_ssid2_container", "wifi_ssid2_container",   "wifi_channel2_container",  "wifi_fixed_channel2_container",  "wifi_encryption2_container",  "wifi_fixed_encryption2_container",
-			'wifi_fixed_channel1',
+			'wifi_channel1_container', 'wifi_fixed_channel1_container',
 			'wifi_pass2_container', 'wifi_wep2_container', 'bridge_pass_container', 'bridge_wep_container'
 			];
 	if(scannedSsids[0].length > 0)
@@ -1591,7 +1592,7 @@ function setSsidVisibility(selectId)
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
 		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
-		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  inc,  wp,ww,bp,bw] );
+		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  ic,inc,  wp,ww,bp,bw] );
 	}
 	else
 	{
@@ -1601,7 +1602,7 @@ function setSsidVisibility(selectId)
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
 		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
-		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         0,    wp,ww,bp,bw] );
+		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         1,0,    wp,ww,bp,bw] );
 	}
 }
 
@@ -1619,10 +1620,16 @@ function parseWifiScan(rawScanOutput)
 		{
 			var line = cellLines[lineIndex];
 			var idIndex = line.indexOf(id);
-			var cIndex = line.indexOf(":");
-			if(idIndex >= 0 && cIndex > idIndex)
+			var cIndex  = line.indexOf(":");
+			var eqIndex = line.indexOf("=");
+			var splitIndex = cIndex;
+			if(splitIndex < 0 || (eqIndex >= 0 && eqIndex < splitIndex))
 			{
-				var val=line.substr(cIndex+1);
+				splitIndex = eqIndex;
+			}
+			if(idIndex >= 0 && splitIndex > idIndex)
+			{
+				var val=line.substr(splitIndex+1);
 				val = val.replace(/^[^\"]*\"/g, "");
 				val = val.replace(/\".*$/g, "");
 				vals.push(val);
@@ -1637,9 +1644,11 @@ function parseWifiScan(rawScanOutput)
 		var cellLines = cellData.split(/[\r\n]+/);
 		var ssid = getCellValues("ESSID", cellLines).shift();
 		var channel = getCellValues("Channel", cellLines).shift();
+		var freq = getCellValues("Frequency", cellLines).shift();
 		var encOn = getCellValues("Encryption key", cellLines).shift();
 		var ie = getCellValues("IE", cellLines);
 		var qualStr = getCellValues("Quality", cellLines).shift();
+		
 		if(ssid != null && ssid != "" && encOn != null && qualStr != null)
 		{
 			var encType = "wep";
@@ -1653,7 +1662,12 @@ function parseWifiScan(rawScanOutput)
 			
 			var splitQual =qualStr.replace(/[\t ]+Sig.*$/g, "").split(/\//);
 			var quality = Math.round( (parseInt(splitQual[0])*100)/parseInt(splitQual[1]) );
-			
+		
+			if(channel == null)
+			{
+				channel = freq.split(/\(Channel /)[1];
+				channel = channel.split(/\)/)[0];
+			}	
 
 			parsed[0].push(ssid);
 			parsed[1].push(enc);
