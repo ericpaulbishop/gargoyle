@@ -798,11 +798,11 @@ function setGlobalVisibility()
 
 		currentMode=getSelectedValue('wifi_mode');
 		setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'Client+AP']);
-	       	if(currentMode == 'ap' || currentMode == 'ap+wds')
+	       	if(currentMode.match(/ap/))
 		{
 			setSelectedValue("wifi_mode", 'ap+sta');
 		}
-		else if(currentMode == 'disabled')
+		else
 		{
 			setSelectedValue("wifi_mode", 'sta');
 		}
@@ -1093,7 +1093,6 @@ function resetData()
 		bridgeWdsTableContainer.removeChild(bridgeWdsTableContainer.firstChild);
 	}
 	bridgeWdsTableContainer.appendChild(bridgeWdsMacTable);
-	setBridgeVisibility();
 
 
 	//reset default wan mac if isBcm94704 is true
@@ -1254,7 +1253,6 @@ function resetData()
 	wirelessOptions=['channel', 'channel', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
 	wirelessParams=[wirelessDriver=="broadcom" ? '5' : "auto", wirelessDriver=="broadcom" ? '5' : "auto", 'Gargoyle', 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
 	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
-	resetWirelessMode();
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
 
@@ -1397,9 +1395,9 @@ function resetData()
 	wifiWdsTableContainer.appendChild(wifiWdsMacTable);
 
 
-
-	proofreadAll();	
-	setGlobalVisibility();
+	resetWirelessMode();
+	proofreadAll();
+	setBridgeVisibility();
 }
 
 function setChannel(selectElement)
@@ -1563,6 +1561,7 @@ function setSsidVisibility(selectId)
 			'wifi_channel1_container', 'wifi_fixed_channel1_container',
 			'wifi_pass2_container', 'wifi_wep2_container', 'bridge_pass_container', 'bridge_wep_container'
 			];
+	var isAp = getSelectedValue("wifi_mode").match(/ap/) ? 1 : 0;
 	if(scannedSsids[0].length > 0)
 	{
 		var ic = getSelectedValue(selectId) == "custom" ? 1 : 0;
@@ -1592,7 +1591,7 @@ function setSsidVisibility(selectId)
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
 		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
-		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  ic,inc,  wp,ww,bp,bw] );
+		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  ic*isAp,inc*isAp,  wp,ww,bp,bw] );
 	}
 	else
 	{
@@ -1602,7 +1601,7 @@ function setSsidVisibility(selectId)
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
 		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
-		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         1,0,    wp,ww,bp,bw] );
+		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         isAp,0,    wp,ww,bp,bw] );
 	}
 }
 
@@ -1662,6 +1661,7 @@ function parseWifiScan(rawScanOutput)
 			
 			var splitQual =qualStr.replace(/[\t ]+Sig.*$/g, "").split(/\//);
 			var quality = Math.round( (parseInt(splitQual[0])*100)/parseInt(splitQual[1]) );
+			quality = quality > 100 ? 100 : quality;
 		
 			if(channel == null)
 			{
