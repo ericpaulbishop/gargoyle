@@ -204,7 +204,7 @@ else
 			</div>
 			<div id='bridge_wep_container'>
 				<div style="display:block;">
-					<label class='leftcolumn' for='brige_wep' id='brige_wep_label'>WEP Hex Key:</label>
+					<label class='leftcolumn' for='bridge_wep' id='bridge_wep_label' >WEP Hex Key:</label>
 					<input type='text' id='bridge_wep' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
 				</div>
 			</div>
@@ -214,7 +214,7 @@ else
 				<span class='rightcolumn' id='bridge_wifi_mac'> </span>
 			</div>	
 			<div id="bridge_wds_container" >
-				<label class='leftcolumn' for='brige_wds_label' id='brige_wds_label'><em>Other</em> WDS MAC Addresses:</label>
+				<label class='leftcolumn' for='bridge_wds_label' id='bridge_wds_label'><em>Other</em> WDS MAC Addresses:</label>
 				<span class='rightcolumn'>
 					<input type='text' id='add_bridge_wds_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 					<input type="button" class="default_button" id="add_bridge_wds_mac_button" value="Add" onclick='addMacToWds("bridge")' />

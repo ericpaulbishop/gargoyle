@@ -609,8 +609,16 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 
 			if(f(input.value) != validReturnCodes[idIndex])
 			{
-				labelStr = fieldDocument.getElementById(labelIds[idIndex]).firstChild.data;
-				labelStr = labelStr.replace(/:/, "");
+				labelStr = labelIds[idIndex] + "";
+				if( fieldDocument.getElementById(labelIds[idIndex]) != null)
+				{
+					labelStr = fieldDocument.getElementById(labelIds[idIndex]).firstChild.data;
+					labelStr = labelStr.replace(/:/, "");
+				}
+				else
+				{
+					alert("error in proofread: label with id " +  labelIds[idIndex] + " is not defined");
+				}
 				errorArray.push("There is an error in " + labelStr);
 			}
 		}
