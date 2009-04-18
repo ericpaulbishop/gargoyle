@@ -54,7 +54,8 @@
 	scan_brcm()
 	{
 		if_exists=$(ifconfig | grep wl0)
-		if [ -z "$if_exists" ] ; then
+		is_disabled=$(uci get wireless.wl0.disabled)
+		if [ -z "$if_exists" ] || [ "$is_disabled" = 1 ] ; then
 			wl up
 			ifconfig wl0 up
 		fi
