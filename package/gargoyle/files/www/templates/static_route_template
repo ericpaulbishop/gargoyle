@@ -7,7 +7,7 @@
 					</tr>
 					<tr class='table_row_add'>
 						<td><input type='text' id='add_dest' size='26' onkeyup='proofreadIpRange(this)' maxLength='35'/></td>
-						<td><select id='add_iface'><option value="wan">LAN</option><option value="lan">LAN</option></select></td>
+						<td><select id='add_iface'><option value="wan">WAN</option><option value="lan">LAN</option></select></td>
 						<td><input type='text' id='add_gateway' size='20' onkeyup='proofreadIp(this)' maxLength='15'/></td>
 						<td><input type='button' id='add_button' value="Add" class='default_button' onclick='addStaticRoute()'/></td>
 					</tr>	
