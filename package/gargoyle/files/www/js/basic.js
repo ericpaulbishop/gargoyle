@@ -1712,7 +1712,6 @@ function setSignalStrength(selectId, textId)
 	setElementEnabled(bridge_text, enabled, "30");			
 	if(enabled)
 	{
-		alert("is enabled");
 		var sig=document.getElementById(textId).value;
 		wifi_text.value   = sig;
 		bridge_text.value = sig;
