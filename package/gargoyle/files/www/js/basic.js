@@ -898,6 +898,7 @@ function setWifiVisibility()
 	
 
 	var wifiIds=[	'internal_divider1', 
+	    		'wifi_signal_container',
 	    		'mac_enabled_container', 
 			'mac_filter_container', 
 			
@@ -937,11 +938,11 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['ap']       = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
 	wifiVisibilities['disabled'] = [0,0,0,    0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
@@ -1255,7 +1256,12 @@ function resetData()
 	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
-
+	var signal = uciOriginal.get("wireless", firstWirelessDevice, "txpower");
+	var max = signal== "" ? "max" : "custom";
+	setSelectedValue("wifi_max_signal", max);	 
+	if(max == "custom") { document.getElementById("wifi_custom_signal").value = signal; }
+	setSignalStrength("wifi_max_signal", "wifi_custom_signal");
+	
 	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
 	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
 	setSelectedValue('bridge_channel', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
@@ -1694,3 +1700,21 @@ function parseWifiScan(rawScanOutput)
 	return sortedParsed;
 }
 
+function setSignalStrength(selectId, textId)
+{
+	var max = getSelectedValue(selectId);
+	var enabled = max == "max" ? false : true;
+	var wifi_text = document.getElementById("wifi_custom_signal");
+	var bridge_text = document.getElementById("bridge_custom_signal");
+	setSelectedValue("wifi_max_signal", max);
+	setElementEnabled(wifi_text, enabled, "30");			
+	setSelectedValue("bridge_custom_signal", max);
+	setElementEnabled(bridge_text, enabled, "30");			
+	if(enabled)
+	{
+		alert("is enabled");
+		var sig=document.getElementById(textId).value;
+		wifi_text.value   = sig;
+		bridge_text.value = sig;
+	}
+}

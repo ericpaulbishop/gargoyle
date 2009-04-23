@@ -134,7 +134,18 @@ else
 					<option value='disabled'>Repeater Disabled</option>
 				</select>
 			</div>
-
+			<div id='bridge_signal_container'>
+				<label class='leftcolumn' for='bridge_signal_max' id='bridge_signal_label'>Signal Strength:</label>
+				<span class='rightcolumn'>
+					<select id='bridge_max_signal' onchange='setSignalStrength("bridge_max_signal","bridge_custom_signal")'>
+						<option value='max'>Max</option>
+						<option value='custom'>Custom</option>
+					</select>
+					&nbsp;
+					<input type='text' id='bridge_custom_signal' onkeyup='proofreadNumeric(this)' size='10' />
+					<em>dBm</em>
+				</span>
+			</div>
 
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
@@ -383,7 +394,15 @@ else
 			</select>
 		</div>
 
-
+		<div id='wifi_signal_container'>
+			<label class='leftcolumn' for='wifi_signal_max' id='wifi_mode_label'>Signal Strength:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_max_signal' onchange='setSignalStrength("wifi_max_signal","wifi_custom_signal")'><option value='max'>Max</option><option value='custom'>Custom</option></select>
+				&nbsp;
+				<input type='text' id='wifi_custom_signal' onkeyup='proofreadNumeric(this)' size='10' />
+				<em>dBm</em>
+			</span>
+		</div>
 	
 
 		<div id="mac_enabled_container">
