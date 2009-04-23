@@ -64,6 +64,8 @@
 	</div>
 	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
+<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
+
 
 
 
