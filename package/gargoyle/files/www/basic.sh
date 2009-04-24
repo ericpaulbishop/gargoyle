@@ -75,7 +75,7 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
 		<legend class="sectionheader">Device Configuration</legend>
 		<label class='leftcolumn' style="text-decoration:underline">Configure Device As:</label>
 		<div class='indent'>
-			<input type="radio" id="global_router" name="global_configuration" value="router" onclick="setBridgeVisibility()" >Router</input>
+			<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" >Gateway (Default)</input>
 			<br/>
 			<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" >Wireless Bridge/Repeater</input>
 		</div>

@@ -51,7 +51,7 @@ function resetData()
 
 
 	var bridgeSection = getBridgeSection(uciOriginal);
-	setChildText("device_config", bridgeSection == "" ? "Router" : "Wireless Bridge/Repeater");
+	setChildText("device_config", bridgeSection == "" ? "Gateway" : "Wireless Bridge/Repeater");
 	if(bridgeSection == "")
 	{
 		document.getElementById("bridge_container").style.display = "none";

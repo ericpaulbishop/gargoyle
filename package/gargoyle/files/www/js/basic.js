@@ -84,7 +84,7 @@ function saveChanges()
 		currentLanIp = "";
 		var adjustIpCommands = ""
 		var bridgeEnabledCommands = "";
-		if( document.getElementById("global_router").checked )
+		if( document.getElementById("global_gateway").checked )
 		{
 			currentLanIp = document.getElementById("lan_ip").value;
 			if(getSelectedValue('wan_protocol') == 'none')
@@ -754,7 +754,7 @@ function proofreadAll()
 
 
 	var errors = [];
-	if(document.getElementById("global_router").checked)
+	if(document.getElementById("global_gateway").checked)
 	{
 		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
 	
@@ -980,8 +980,8 @@ function setWifiVisibility()
 function setBridgeVisibility()
 {
 
-	showIds = document.getElementById("global_router").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
-	hideIds = document.getElementById("global_router").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
+	showIds = document.getElementById("global_gateway").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
+	hideIds = document.getElementById("global_gateway").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
 	var allIds = [hideIds, showIds];
 	var statIndex;
 	for(statIndex=0; statIndex < 2; statIndex++)
@@ -1044,8 +1044,8 @@ function resetData()
 
 
 	var confIsBridge = isBridge(uciOriginal);
-	var confIsRouter = !confIsBridge;
-	document.getElementById("global_router").checked = confIsRouter;
+	var confIsGateway = !confIsBridge;
+	document.getElementById("global_gateway").checked = confIsGateway;
 	document.getElementById("global_bridge").checked = confIsBridge;
 
 	//set bridge variables
@@ -1473,7 +1473,7 @@ function addTextToSingleColumnTable(textId, tableContainerId, validator, preproc
 		var tabIndex = 0
 		for(tabIndex = 0; tabIndex < singleTableData.length; tabIndex++)
 		{
-			var test = singleTableData[macIndex];
+			var test = singleTableData[tabIndex];
 			inTable = inTable || (val == test[0]);
 		}
 		if(inTable && !duplicatesAllowed)
@@ -1733,14 +1733,21 @@ function setTransmitPower(selectId, textId)
 	var enabled = max == "max" ? false : true;
 	var wifi_text = document.getElementById("wifi_txpower");
 	var bridge_text = document.getElementById("bridge_txpower");
+	var wifi_dbm = document.getElementById("wifi_dbm");
+	var bridge_dbm = document.getElementById("bridge_dbm");
+	
 	setSelectedValue("wifi_max_txpower", max);
 	setElementEnabled(wifi_text, enabled, "" + txPowerMax);			
 	setSelectedValue("bridge_max_txpower", max);
 	setElementEnabled(bridge_text, enabled, "" + txPowerMax);			
+	
+	wifi_dbm.style.color = enabled ? "black" : "gray";
+	bridge_dbm.style.color = enabled ? "black" : "gray";
+	
 	if(enabled)
 	{
-		var sig=document.getElementById(textId).value;
-		wifi_text.value   = sig;
-		bridge_text.value = sig;
+		var txpow =document.getElementById(textId).value;
+		wifi_text.value   = txpow;
+		bridge_text.value = txpow;
 	}
 }
