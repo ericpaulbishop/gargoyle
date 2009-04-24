@@ -1027,3 +1027,54 @@ td.active_table_column_5
 	border-bottom:1px solid black;
 }
 
+td.active_route_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.active_route_table_column_2
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.active_route_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.active_route_table_column_4
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+td.static_route_table_column_1
+{
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.static_route_table_column_2
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.static_route_table_column_3
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.static_route_table_column_4
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+td.static_route_table_column_5
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}

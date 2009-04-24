@@ -133,7 +133,7 @@ function resetData()
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var staticRouteTable = createTable(["Destination", "Interface", "Gateway", ""], staticRouteTableData , "active_route_table", true, false);	
+	var staticRouteTable = createTable(["Destination", "Interface", "Gateway", ""], staticRouteTableData , "static_route_table", true, false);	
 	tableContainer.appendChild( staticRouteTable );
 
 }
