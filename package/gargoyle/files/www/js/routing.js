@@ -2,15 +2,22 @@ var toggleReload = false;
 
 function saveChanges()
 {
-	setControlsEnabled(false, true);
-
+	if(wirelessDriver == "broadcom")
+	{
+		setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
+	}
+	else
+	{
+		setControlsEnabled(false, true, "Please Wait While Settings Are Applied And Device Is Restarted");
+	}
+	
 	var removeCommands = [];
 	var oldSections = uciOriginal.getAllSectionsOfType("network", "route");
 	while(oldSections.length > 0)
 	{
 		var delSection = oldSections.pop();
 		uciOriginal.removeSection("network", delSection);
-		removeCommands.push("uci del firewall." + delSection);
+		removeCommands.push("uci del network." + delSection);
 	}
 	removeCommands.push("uci commit");
 
@@ -34,15 +41,12 @@ function saveChanges()
 		if(netmask != ""){ uci.set("network", routeId, "netmask", netmask); }
 	}
 	
-	commands = removeCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal)  + "\nifdown -a\nifup -a\n";
+	commands = removeCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal)  +  (wirelessDriver == "broadcom" ? "\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n" );
+;
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
 	{
-		if(req.readyState == 4)
-		{
-			toggleReload=false;
-			window.location.href = window.location.href;	
-		}
+		if(req.readyState == 4){}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
@@ -52,10 +56,10 @@ function saveChanges()
 	testReboot = function()
 	{
 		toggleReload = true;
-		setTimeout( "testReboot()", 5*1000);  //try again after 5 seconds
+		setTimeout( "testReboot()", 5*1000);  //try again after 12 seconds
 		document.getElementById("reboot_test").src = testLocation; 
 	}
-	setTimeout( "testReboot()", 5*1000);  //start testing after 5 seconds
+	setTimeout( "testReboot()", 15*1000);  //start testing after 15 seconds
 	setTimeout( "reloadPage()", 240*1000); //after 4 minutes, try to reload anyway
 }
 
@@ -73,7 +77,7 @@ function reloadPage()
 		{
 			toggleReload = false;
 			document.getElementById("reboot_test").src = "";
-			window.location.href = window.location.href;
+			setTimeout( "window.location.href = window.location.href;", 1500);
 		}
 	}
 }

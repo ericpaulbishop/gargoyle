@@ -20,6 +20,16 @@
 	echo "var routingData = new Array();"
 	route | awk ' {print "routingData.push(\""$0"\");"};'
 
+
+	if [ -e /lib/wifi/broadcom.sh ] ; then
+		echo "var wirelessDriver=\"broadcom\";"
+	else
+		if [ -e /lib/wifi/madwifi.sh ] ; then
+			echo "var wirelessDriver=\"atheros\";"
+		else
+			echo "var wirelessDriver=\"\";"
+		fi
+	fi
 ?>
 
 
