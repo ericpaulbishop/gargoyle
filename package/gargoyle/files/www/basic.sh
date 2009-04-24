@@ -64,6 +64,8 @@ else
 {
 	policyOption="macpolicy";
 }
+var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
+
 //-->
 </script>
 
@@ -134,16 +136,16 @@ else
 					<option value='disabled'>Repeater Disabled</option>
 				</select>
 			</div>
-			<div id='bridge_signal_container'>
-				<label class='leftcolumn' for='bridge_signal_max' id='bridge_signal_label'>Signal Strength:</label>
+			<div id='bridge_txpower_container'>
+				<label class='leftcolumn' for='bridge_txpower_max' id='bridge_txpower_label'>Transmit Power:</label>
 				<span class='rightcolumn'>
-					<select id='bridge_max_signal' onchange='setSignalStrength("bridge_max_signal","bridge_custom_signal")'>
+					<select id='bridge_max_txpower' onchange='setTransmitPower("bridge_max_txpower","bridge_txpower")'>
 						<option value='max'>Max</option>
 						<option value='custom'>Custom</option>
 					</select>
 					&nbsp;
-					<input type='text' id='bridge_custom_signal' onkeyup='proofreadNumeric(this)' size='10' />
-					<em>dBm</em>
+					<input type='text' id='bridge_txpower'  onkeyup='proofreadNumericRange(this,0,txPowerMax)' size='10' />
+					<em><span id="bridge_dbm">dBm</span></em>
 				</span>
 			</div>
 
@@ -394,13 +396,16 @@ else
 			</select>
 		</div>
 
-		<div id='wifi_signal_container'>
-			<label class='leftcolumn' for='wifi_signal_max' id='wifi_mode_label'>Signal Strength:</label>
+		<div id='wifi_txpower_container'>
+			<label class='leftcolumn' for='wifi_txpower_max' id='wifi_txpower_label'>Transmit Power:</label>
 			<span class='rightcolumn'>
-				<select id='wifi_max_signal' onchange='setSignalStrength("wifi_max_signal","wifi_custom_signal")'><option value='max'>Max</option><option value='custom'>Custom</option></select>
+				<select id='wifi_max_txpower' onchange='setTransmitPower("wifi_max_txpower","wifi_txpower")'>
+					<option value='max'>Max</option>
+					<option value='custom'>Custom</option>
+				</select>
 				&nbsp;
-				<input type='text' id='wifi_custom_signal' onkeyup='proofreadNumeric(this)' size='10' />
-				<em>dBm</em>
+				<input type='text' id='wifi_txpower' onkeyup='proofreadNumericRange(this,0,txPowerMax)' size='10' />
+				<em><span id="wifi_dbm">dBm</span></em>
 			</span>
 		</div>
 	

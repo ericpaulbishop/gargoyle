@@ -389,6 +389,15 @@ function saveChanges()
 
 				var chan = document.getElementById("wifi_fixed_channel2_container").style.display != "none" ?  document.getElementById("wifi_fixed_channel2").firstChild.data : getSelectedValue("wifi_channel2");
 				uci.set("wireless", firstWirelessDevice, "channel", chan);
+			
+				if(getSelectedValue("wifi_max_txpower") == "max")
+				{
+					uci.remove("wireless", firstWirelessDevice, "txpower")
+				}
+				else
+				{
+					uci.set("wireless", firstWirelessDevice, "txpower", document.getElementById("wifi_txpower").value);
+				}
 			}
 		
 
@@ -487,6 +496,16 @@ function saveChanges()
 			var key = encryption == "none" ? "" : ( encryption == "wep" ? document.getElementById("bridge_wep").value : document.getElementById("bridge_pass").value );
 			var chan = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
 			uci.set("wireless", firstWirelessDevice, "channel", chan);
+
+			if(getSelectedValue("bridge_max_txpower") == "max")
+			{
+				uci.remove("wireless", firstWirelessDevice, "txpower")
+			}
+			else
+			{
+				uci.set("wireless", firstWirelessDevice, "txpower", document.getElementById("bridge_txpower").value);
+			}
+
 
 			if( getSelectedValue("bridge_mode") == "client_bridge")
 			{
@@ -627,7 +646,7 @@ function saveChanges()
 		}
 
 		var commands = uci.getScriptCommands(uciCompare);
-		var restartNetworkCommand = wirelessDriver== "broadcom" ? "\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
+		var restartNetworkCommand = wirelessDriver== "broadcom" ? "\niwconfig wl0 txpower 31\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
 
 		
@@ -720,6 +739,7 @@ function proofreadAll()
 	var vm = validateMac;
 	var vn = validateNumeric;
 	var vw = validateWep;
+	var vtp = function(text){ return validateNumericRange(text, 0, txPowerMax); };
 
 	var testWds = function(tableContainerId, selectId, wdsValue)
 	{
@@ -736,21 +756,24 @@ function proofreadAll()
 	var errors = [];
 	if(document.getElementById("global_router").checked)
 	{
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
+		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
 	
-		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw];
+		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw];
 	
 		var returnCodes= new Array();
 		var visibilityIds = new Array();
-		for (idIndex in inputIds)
+		var idIndex;
+		for (idIndex= 0; idIndex < inputIds.length; idIndex++)
 		{
 			returnCodes.push(0);
-			visibilityIds.push( inputIds[idIndex] + "_container" );
+			var id = inputIds[idIndex];
+			var container = id + "_container";
+			visibilityIds.push( container );
 		}
 
 	
 		var labelIds = new Array();
-		for (idIndex in inputIds)
+		for (idIndex= 0; idIndex < inputIds.length; idIndex++)
 		{
 			labelIds.push( inputIds[idIndex] + "_label");
 		}
@@ -761,8 +784,8 @@ function proofreadAll()
 	}
 	else
 	{
-		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_ssid', 'bridge_pass', 'bridge_wep'];
-		var functions = [vip, vnm, vip, vlr1,vlr8,vw];
+		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_txpower', 'bridge_ssid', 'bridge_pass', 'bridge_wep'];
+		var functions = [vip, vnm, vip, vtp, vlr1,vlr8,vw];
 		var returnCodes=[];
 		var visibilityIds=[];
 		var labelIds=[];
@@ -898,7 +921,7 @@ function setWifiVisibility()
 	
 
 	var wifiIds=[	'internal_divider1', 
-	    		'wifi_signal_container',
+	    		'wifi_txpower_container',
 	    		'mac_enabled_container', 
 			'mac_filter_container', 
 			
@@ -1256,11 +1279,15 @@ function resetData()
 	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
-	var signal = uciOriginal.get("wireless", firstWirelessDevice, "txpower");
-	var max = signal== "" ? "max" : "custom";
-	setSelectedValue("wifi_max_signal", max);	 
-	if(max == "custom") { document.getElementById("wifi_custom_signal").value = signal; }
-	setSignalStrength("wifi_max_signal", "wifi_custom_signal");
+	var txpower = uciOriginal.get("wireless", firstWirelessDevice, "txpower");
+	var max = txpower== "" ? "max" : "custom";
+	var dbm = "(0 - " + txPowerMax + "dBm)";
+	setSelectedValue("wifi_max_txpower", max);	 
+	if(max == "custom") { document.getElementById("wifi_txpower").value = txpower; }
+	setTransmitPower("wifi_max_txpower", "wifi_txpower");
+	document.getElementById("bridge_dbm").firstChild.data = dbm;
+	document.getElementById("wifi_dbm").firstChild.data = dbm;
+
 	
 	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
 	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
@@ -1700,16 +1727,16 @@ function parseWifiScan(rawScanOutput)
 	return sortedParsed;
 }
 
-function setSignalStrength(selectId, textId)
+function setTransmitPower(selectId, textId)
 {
 	var max = getSelectedValue(selectId);
 	var enabled = max == "max" ? false : true;
-	var wifi_text = document.getElementById("wifi_custom_signal");
-	var bridge_text = document.getElementById("bridge_custom_signal");
-	setSelectedValue("wifi_max_signal", max);
-	setElementEnabled(wifi_text, enabled, "30");			
-	setSelectedValue("bridge_custom_signal", max);
-	setElementEnabled(bridge_text, enabled, "30");			
+	var wifi_text = document.getElementById("wifi_txpower");
+	var bridge_text = document.getElementById("bridge_txpower");
+	setSelectedValue("wifi_max_txpower", max);
+	setElementEnabled(wifi_text, enabled, "" + txPowerMax);			
+	setSelectedValue("bridge_max_txpower", max);
+	setElementEnabled(bridge_text, enabled, "" + txPowerMax);			
 	if(enabled)
 	{
 		var sig=document.getElementById(textId).value;
