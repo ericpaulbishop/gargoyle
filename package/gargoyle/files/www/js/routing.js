@@ -167,6 +167,8 @@ function addStaticRoute()
 		var row = [dest, iface, gateway, createEditButton() ];
 		var staticRouteTable = document.getElementById('static_route_table_container').firstChild;
 		addTableRow(staticRouteTable,row, true, false);
+		document.getElementById("add_dest").value = "";
+		document.getElementById("add_gateway").value = "";
 
 	}
 }
