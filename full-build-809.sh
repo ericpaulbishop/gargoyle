@@ -78,7 +78,9 @@ for target in $targets ; do
 			rm -rf "$target-src"
 		fi
 		cp -r "$openwrt_src_dir" "$target-src"
-	
+
+				
+
 		gargoyle_packages=$(ls package ; ls dependencies)
 		for gp in $gargoyle_packages ; do
 			if [ ! -d "$target-src/package/$gp" ] ; then
@@ -89,6 +91,25 @@ for target in $targets ; do
 				fi
 			fi
 		done
+		
+		if [ "$target" = "custom" ] ; then
+			if [ ! -d packages_8.09 ] ; then
+				svn checkout $revision svn://svn.openwrt.org/openwrt/branches/packages_8.09
+				
+				cd packages_8.09
+				find . -name ".svn" | xargs rm -rf
+				for gp in $gargoyle_packages ; do
+					find . -name "$gp" | xargs rm -rf
+				done
+				cd ..
+			fi
+			other_packages=$(ls packages_8.09)
+			for other in $other_packages ; do
+				if [ ! -d "$target-src/package/$other" ] ; then
+					cp -r packages_8.09/$other $target-src/package
+				fi
+			done
+		fi
 
 		cp "$targets_dir/$target/.config" "$target-src"
 		cd "$target-src"
