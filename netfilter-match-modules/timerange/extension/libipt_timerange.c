@@ -49,14 +49,14 @@ char* trim_flanking_whitespace(char* str);
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"timerange options:\n  --hours [HOURLY RANGES] --weekdays [WEEKDAYS ACTIVE] --weekly_range [WEEKLY RANGES]\n");
+	printf(	"timerange options:\n  --hours [HOURLY RANGES] --weekdays [WEEKDAYS ACTIVE] --weekly_ranges [WEEKLY RANGES]\n");
 }
 
 static struct option opts[] = 
 {
 	{ .name = "hours",        .has_arg = 1, .flag = 0, .val = HOURS },
 	{ .name = "weekdays",     .has_arg = 1, .flag = 0, .val = WEEKDAYS },
-	{ .name = "weekly_range", .has_arg = 1, .flag = 0, .val = WEEKLY_RANGE },
+	{ .name = "weekly_ranges", .has_arg = 1, .flag = 0, .val = WEEKLY_RANGE },
 	{ .name = 0 }
 };
 
@@ -185,7 +185,7 @@ static void print_timerange_args(	struct ipt_timerange_info* info )
 			}
 			break;
 		case WEEKLY_RANGE:
-			printf(" --weekly_range ");
+			printf(" --weekly_ranges ");
 			for(i=0; info->ranges[i] != -1; i++)
 			{
 				printf("%ld", info->ranges[i]);
@@ -551,7 +551,7 @@ unsigned long parse_time(char* time_str)
 	if(weekday >= 0)
 	{
 		time_str = time_str + 3;
-		while((*time_str == ' ' || *time_str == '\t') && *time_str != '\0') { time_str++; }
+		while( (*time_str < 48 || *time_str > 57) && *time_str != '\0') { time_str++; }
 	}
 
 	char** time_parts=split_on_separators(time_str, ":", 1, -1, 0);

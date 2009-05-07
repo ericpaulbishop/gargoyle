@@ -30,6 +30,7 @@
 #include <net/sock.h>
 #include <net/ip.h>
 #include <net/tcp.h>
+#include <linux/time.h>
 
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_timerange.h>
@@ -81,23 +82,15 @@ static int match(	const struct sk_buff *skb,
 	int test_index;
 	int match_found;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-	if (skb->tstamp.tv64 == 0)
-	{
-		__net_timestamp((struct sk_buff *)skb);
-	}
-	stamp = ktime_to_ns(skb->tstamp);
-	stamp = div_s64(stamp, NSEC_PER_SEC); /* convert nanoseconds to seconds */ 
-	stamp_time = (time_t)stamp;
-#else
-	stamp_time = skb->stamp.tv_sec;
-#endif
-	stamp_time = stamp_time -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	struct timeval test_time;
 	
+	do_gettimeofday(&test_time);
+	stamp_time = test_time.tv_sec;
+	stamp_time = stamp_time -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	seconds_since_midnight = stamp_time % 86400; /* 86400 seconds per day */
 	weekday = (4 + (stamp_time/86400)) % 7;      /* 1970-01-01 (time=0) was a Thursday (4). */
 
-	printk("time=%ld, since midnight = %ld, day=%ld\n", stamp_time, seconds_since_midnight, weekday);
+	printk("time=%ld, since midnight = %ld, day=%ld, minuteswest=%d\n", stamp_time, seconds_since_midnight, weekday, sys_tz.tz_minuteswest);
 
 
 	match_found = 0;
@@ -134,7 +127,6 @@ static int match(	const struct sk_buff *skb,
 		
 	}
 	
-	printk("timerange match = %d\n", match_found);
 
 	return match_found;
 }

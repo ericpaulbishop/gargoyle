@@ -12,7 +12,7 @@ define Package/gargoyle-firewall-util
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall initialization
-	DEPENDS:=+iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack +iptables-mod-conntrack-extra +iptables-mod-nat +iptables-mod-nat-extra +iptables-mod-iprange +iptables-mod-timerange +iptables-mod-weburl
+	DEPENDS:=+set-kernel-timezone +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack +iptables-mod-conntrack-extra +iptables-mod-nat +iptables-mod-nat-extra +iptables-mod-iprange +iptables-mod-timerange +iptables-mod-weburl
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 

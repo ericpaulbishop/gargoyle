@@ -1,0 +1,22 @@
+#!/bin/sh /etc/rc.common
+START=30
+
+start()
+{
+	/usr/bin/set_kernel_timezone
+	mkdir -p /etc/crontabs
+	touch /etc/crontabs/root
+	echo '1,11,21,31,41,51 * * * * /usr/bin/set_kernel_time > /dev/null' >> /etc/crontabs/root
+	/etc/init.d/cron enable
+
+}
+
+
+
+stop()
+{
+	cat /etc/crontabs/root | grep -v "set_kernel_time" >> /tmp/new_cron
+	mv /tmp/new_cron /etc/crontabs/root
+	/etc/init.d/cron restart
+}
+
