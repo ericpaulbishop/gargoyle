@@ -75,7 +75,6 @@ static int match(	const struct sk_buff *skb,
 			int *hotdrop)
 {
 	const struct ipt_timerange_info *info = matchinfo;
-	s64 stamp;
 	time_t stamp_time;
 	int weekday;
 	int seconds_since_midnight;
@@ -90,8 +89,9 @@ static int match(	const struct sk_buff *skb,
 	seconds_since_midnight = stamp_time % 86400; /* 86400 seconds per day */
 	weekday = (4 + (stamp_time/86400)) % 7;      /* 1970-01-01 (time=0) was a Thursday (4). */
 
-	printk("time=%ld, since midnight = %ld, day=%ld, minuteswest=%d\n", stamp_time, seconds_since_midnight, weekday, sys_tz.tz_minuteswest);
-
+	/*
+	printk("time=%d, since midnight = %d, day=%d, minuteswest=%d\n", stamp_time, seconds_since_midnight, weekday, sys_tz.tz_minuteswest);
+	*/
 
 	match_found = 0;
 	if(info->type == HOURS)
