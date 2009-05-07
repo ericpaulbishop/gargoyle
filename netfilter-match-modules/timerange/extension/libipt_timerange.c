@@ -163,15 +163,15 @@ static void print_timerange_args(	struct ipt_timerange_info* info )
 	int i;
 	switch(info->type)
 	{
-		case HOURS_DAYS:
+		case DAYS_HOURS:
 		case HOURS:
 			printf(" --hours ");
-			for(i=0; info->range[i] != -1; i++)
+			for(i=0; info->ranges[i] != -1; i++)
 			{
-				printf("%d", info->range[i]);
-				if(range[i+1] != -1)
+				printf("%ld", info->ranges[i]);
+				if(info->ranges[i+1] != -1)
 				{
-					if(i % 2 = 0){ printf("-"); }
+					if(i % 2 == 0){ printf("-"); }
 					else { printf(","); }
 				}
 			}
@@ -181,17 +181,17 @@ static void print_timerange_args(	struct ipt_timerange_info* info )
 			for(i=0; i<7; i++)
 			{
 				printf("%d", info->days[i]);
-				if(i !=6){ printf(","); }
+				if(i != 6){ printf(","); }
 			}
 			break;
 		case WEEKLY_RANGE:
 			printf(" --weekly_range ");
-			for(i=0; info->range[i] != -1; i++)
+			for(i=0; info->ranges[i] != -1; i++)
 			{
-				printf("%d", info->range[i]);
-				if(range[i+1] != -1)
+				printf("%ld", info->ranges[i]);
+				if(info->ranges[i+1] != -1)
 				{
-					if(i % 2 = 0){ printf("-"); }
+					if(i % 2 == 0){ printf("-"); }
 					else { printf(","); }
 				}
 			}
