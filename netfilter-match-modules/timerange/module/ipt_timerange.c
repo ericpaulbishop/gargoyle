@@ -97,6 +97,9 @@ static int match(	const struct sk_buff *skb,
 	seconds_since_midnight = stamp_time % 86400; /* 86400 seconds per day */
 	weekday = (4 + (stamp_time/86400)) % 7;      /* 1970-01-01 (time=0) was a Thursday (4). */
 
+	printk("time=%ld, since midnight = %ld, day=%ld\n", stamp_time, seconds_since_midnight, weekday);
+
+
 	match_found = 0;
 	if(info->type == HOURS)
 	{
@@ -130,6 +133,8 @@ static int match(	const struct sk_buff *skb,
 		}
 		
 	}
+	
+	printk("timerange match = %d\n", match_found);
 
 	return match_found;
 }
