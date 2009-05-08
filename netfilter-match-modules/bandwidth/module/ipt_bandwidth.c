@@ -19,6 +19,8 @@
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/skbuff.h>
+#include <linux/spinlock.h>
+#include <linux/interrupt.h>
 
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>

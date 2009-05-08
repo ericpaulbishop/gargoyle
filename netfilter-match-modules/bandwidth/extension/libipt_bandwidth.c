@@ -22,6 +22,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 
 //in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
 //we can use to check whether we need to deal with the new requirements
@@ -41,10 +44,10 @@ static void help(void)
 
 static struct option opts[] = 
 {
-	{ .name = "--less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
-	{ .name = "--greater_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
-	{ .name = "--current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
-	{ .name = "--reset_interval",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET },
+	{ .name = "less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
+	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
+	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
+	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET },
 	{ .name = 0 }
 };
 
@@ -152,6 +155,35 @@ static int parse(	int c,
 	
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
+	/* determine current time in seconds since epoch, with offset for current timezone */
+	time_t now;
+	struct tm* utc_info;
+	struct tm* tz_info;
+	int utc_day;
+	int utc_hour;
+	int utc_minute;
+	int tz_day;
+	int tz_hour;
+	int tz_minute;
+	int minuteswest;
+
+	time(&now);
+	utc_info = gmtime(&now);
+	utc_day = utc_info->tm_mday;
+	utc_hour = utc_info->tm_hour;
+	utc_minute = utc_info->tm_min;
+	tz_info = localtime(&now);
+	tz_day = tz_info->tm_mday;
+	tz_hour = tz_info->tm_hour;
+	tz_minute = tz_info->tm_min;
+
+	utc_day = utc_day < tz_day  - 1 ? tz_day  + 1 : utc_day;
+	tz_day =  tz_day  < utc_day - 1 ? utc_day + 1 : tz_day;
+	
+	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
+
+	now = now - (minuteswest*60);
+
 	if(info->gt_lt == BANDWIDTH_GT)
 	{
 		printf(" --greater_than %lld ", info->bandwidth_cutoff);
@@ -160,7 +192,18 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	{
 		printf(" --less_than %lld ", info->bandwidth_cutoff);
 	}
-	printf(" --current_bandwidth %lld ", info->current_bandwidth);
+	if( info->reset_interval != BANDWIDTH_NEVER && info->next_reset != 0 && info->next_reset < now)
+	{
+		/* 
+		 * current bandwidth only gets reset when first packet after reset interval arrives, so output
+		 * zero if we're already past interval, but no packets have arrived 
+		 */
+		printf(" --current_bandwidth 0 ");
+	}
+	else
+	{
+		printf(" --current_bandwidth %lld ", info->current_bandwidth);
+	}
 	if(info->reset_interval == BANDWIDTH_MINUTE)
 	{
 		printf(" --reset_interval minute ");
@@ -181,6 +224,13 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	{
 		printf(" --reset_interval month ");
 	}
+	
+	/*
+	if(info->reset_interval != BANDWIDTH_NEVER)
+	{
+		printf("now=%ld, reset=%ld\n", now, info->next_reset);
+	}
+	*/	
 }
 
 /* Final check; must have specified a test string with either --contains or --contains_regex. */
