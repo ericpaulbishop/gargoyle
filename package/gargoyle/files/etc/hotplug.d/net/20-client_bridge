@@ -1,3 +1,12 @@
+######################################################################
+# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
+# Copyright Eric Bishop, 2009 eric@gargoyle-router.com 
+# Created for Gargoyle, www.gargoyle-router.com
+#
+#This is free software licensed under the terms of the GNU GPL v2.0
+# 
+# You must have the arpnat ebtables module for this to work
+######################################################################
 is_ath=$(echo $INTERFACE | grep ath)
 if [ -n "$is_ath" ] ; then
 	if [ "$ACTION" = "add" -o "$ACTION" = "register" ] ; then
