@@ -268,6 +268,7 @@ void** get_list_values(list* l, unsigned long* num_values) /* returns null termi
 		for(value_index = 0; value_index < l->length; value_index++)
 		{
 			values[value_index] = current_node->value;
+			current_node = current_node->next;
 		}
 		values[value_index] = NULL;
 	}
