@@ -1521,7 +1521,7 @@ function addDns(section)
 function addMacToWds(section)
 {
 	var textId = "add_" + section + "_wds_mac";
-	var tableContainer = section + "_wds_mac_table_container";
+	var tableContainerId = section + "_wds_mac_table_container";
 	addTextToSingleColumnTable(textId, tableContainerId, validateMac, function(str){ return str.toUpperCase(); }, 0, false, "MAC"); 
 }
 
