@@ -219,3 +219,78 @@ insert_dmz_rule()
 	config_load "$config_name"
 	config_foreach parse_dmz_config "$section_type"
 }
+
+insert_restriction_rules()
+{
+	wan_if=$(uci -P "/var/state" get network.wan.ifname)                                                   
+	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
+	
+	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
+	ingress_exits=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
+	if [ -n "$egress_exists" ] ; then
+		delete_chain_from_table filter egress_restrictions
+	fi
+	if [ -n "$ingress_exists" ] ; then
+		delete_chain_from_table filter ingress_restrictions
+	fi
+	
+	iptables -t filter -N egress_restrictions	
+	iptables -t filter -N ingress_restrictions	
+
+	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions	
+	iptables -t filter -I OUTPUT -o $wan_if -j egress_restrictions	
+	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions	
+	iptables -t filter -I INPUT -i $wan_if -j ingress_restrictions	
+	
+	
+	package_name="firewall"	
+	parse_rule_config()
+	{
+		section=$1
+		section_type=$(uci get "$package_name"."$section")
+		
+		config_get "enabled" "$section" "enabled"
+		if [ -z "$enabled" ] ; then enabled="1" ; fi
+		if [ "$enabled" = "1" ] ; then
+			#convert app_proto && not_app_proto to connmark here
+			config_get "app_proto" "$section" "app_proto"
+			config_get "not_app_proto" "$section" "not_app_proto"
+			if [ -n "$app_proto" ] ; then
+				app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $2 }')
+				app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $3 }')
+				uci set "$package_name"."$section".connmark="$app_proto_connmark/$app_proto_mask"
+			fi	
+			if [ -n "$not_app_proto" ] ; then
+				not_app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $2 }')
+				not_app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $3 }')
+				uci set "$package_name"."$section".not_connmark="$not_app_proto_connmark/$not_app_proto_mask"
+			fi
+			
+			table="filter"
+			chain="egress_restrictions"
+			ingress=""
+			target="REJECT"
+			
+			config_get "is_ingress" "$section" "is_ingress"
+			if [ "$is_ingress" = "1" ] ; then
+				ingress=" -i "
+				chain="ingress_restrictions"
+			fi
+		
+			if [ "$section_type" = "restriction_whitelist" ] ; then
+				target="ACCEPT"
+			fi
+			
+			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress
+			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress -r
+				
+			uci del "$package_name"."$section".connmark 2>/dev/null	
+			uci del "$package_name"."$section".not_connmark	 2>/dev/null
+		fi
+	}
+
+	config_load "$package_name"
+	config_foreach parse_rule_config "whitelist_rule"
+	config_foreach parse_rule_config "restriction_rule"
+}
+

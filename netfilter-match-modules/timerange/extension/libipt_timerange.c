@@ -197,6 +197,7 @@ static void print_timerange_args(	struct ipt_timerange_info* info )
 			}
 			break;
 	}
+	printf(" ");
 	
 }
 
