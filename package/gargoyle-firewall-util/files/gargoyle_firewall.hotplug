@@ -23,7 +23,6 @@ config_foreach load_zones zone
 	for z in $ZONE; do 
 		if [ "$z" = "wan" ] ; then
 			insert_pf_loopback_rules
-			insert_restriction_rules
 		fi
 	done
 }
