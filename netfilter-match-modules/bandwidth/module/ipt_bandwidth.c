@@ -244,8 +244,40 @@ static int checkentry(	const char *tablename,
 			unsigned int hook_mask
 			)
 {
-	struct ipt_bandwidth_info *b = (struct ipt_bandwidth_info*)matchinfo;
-	b->non_const_self = b;
+	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+	info->non_const_self = info;
+	
+	if(info->reset_interval != BANDWIDTH_NEVER)
+	{
+		struct timeval test_time;
+		time_t now;
+		do_gettimeofday(&test_time);
+		now = test_time.tv_sec;
+		now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+
+		if(info->next_reset == 0)
+		{
+			spin_lock_bh(&bandwidth_lock);
+			if(info->next_reset == 0) /* check again after waiting for lock */
+			{
+				info->next_reset = get_next_reset_time(info, now);
+				
+				/* if we specify last backup time, check that next reset is consistent, otherwise reset current_bandwidth to 0 */
+				if(info->last_backup_time != 0)
+				{
+					time_t next_reset_of_last_backup;
+					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+					next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
+					if(next_reset_of_last_backup != info->next_reset)
+					{
+						info->current_bandwidth = 0;
+					}
+					info->last_backup_time = 0;
+				}
+			}
+			spin_unlock_bh(&bandwidth_lock);
+		}
+	}
 	return 1;
 }
 

@@ -73,14 +73,12 @@ static int parse(	int c,
 	int num_read;
 	u_int64_t read_64;
 	time_t read_time;
-	
-	int inc_flags = 1;
-	
+
 	switch (c)
 	{
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0 && *flags % BANDWIDTH_CURRENT == 0)
+			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
 			{
 				info->gt_lt = BANDWIDTH_LT;
 				info->bandwidth_cutoff = read_64;
@@ -89,7 +87,7 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_GT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0 && *flags % BANDWIDTH_CURRENT == 0)
+			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
 			{
 				info->gt_lt = BANDWIDTH_GT;
 				info->bandwidth_cutoff = read_64;
@@ -106,7 +104,6 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_RESET:
 			valid_arg = 1;
-			*flags = *flags + BANDWIDTH_RESET;
 			if(strcmp(argv[optind-1],"minute") ==0)
 			{
 				info->reset_interval = BANDWIDTH_MINUTE;
@@ -133,7 +130,6 @@ static int parse(	int c,
 			}
 			else
 			{
-				inc_flags = 0;
 				valid_arg = 0;
 			}
 			break;
@@ -144,24 +140,19 @@ static int parse(	int c,
 				info->last_backup_time = read_time;
 				valid_arg = 1;
 			}
-			valid_arg = 1;
 			break;
 	}
+	*flags = *flags + (unsigned int)c;
 
-
-	if(inc_flags)
-	{
-		*flags = *flags + (unsigned int)c;
-	}
-	if(!(*flags & CURRENT_BANDWIDTH ))
+	if((*flags & BANDWIDTH_CURRENT ) != BANDWIDTH_CURRENT)
 	{
 		info->current_bandwidth = 0;
 	}
-	if(!(*flags & BANDWIDTH_RESET))
+	if((*flags & BANDWIDTH_RESET) != BANDWIDTH_RESET)
 	{
 		info->reset_interval = BANDWIDTH_NEVER;
 	}
-	if(!(*flags & BANDWIDTH_LAST_BACKUP))
+	if((*flags & BANDWIDTH_LAST_BACKUP) != BANDWIDTH_LAST_BACKUP)
 	{
 		info->last_backup_time = 0;
 	}
@@ -219,7 +210,7 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 		 */
 		printf(" --current_bandwidth 0 ");
 	}
-	else
+	else 
 	{
 		printf(" --current_bandwidth %lld ", info->current_bandwidth);
 	}
@@ -255,7 +246,7 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 /* Final check; must have specified a test string with either --contains or --contains_regex. */
 static void final_check(unsigned int flags)
 {
-	if(flags % BANDWIDTH_CURRENT != BANDWIDTH_LT && flags % BANDWIDTH_CURRENT != BANDWIDTH_GT )
+	if( (flags & BANDWIDTH_LT) == 0 && (flags & BANDWIDTH_GT) == 0 )
 	{
 		exit_error(PARAMETER_PROBLEM, "You must specify '--greater_than' or '--less_than' '");
 	}
