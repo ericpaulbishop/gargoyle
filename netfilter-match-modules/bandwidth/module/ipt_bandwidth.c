@@ -181,14 +181,33 @@ static int match(	const struct sk_buff *skb,
 		if(info->next_reset == 0)
 		{
 			spin_lock_bh(&bandwidth_lock);
-			info->next_reset = get_next_reset_time(info, now);
+			if(info->next_reset == 0) /* check again after waiting for lock */
+			{
+				info->next_reset = get_next_reset_time(info, now);
+				
+				/* if we specify last backup time, check that next reset is consistent, otherwise reset current_bandwidth to 0 */
+				if(info->last_backup_time != 0)
+				{
+					time_t next_reset_of_last_backup;
+					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+					next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
+					if(next_reset_of_last_backup != info->next_reset)
+					{
+						info->current_bandwidth = 0;
+					}
+					info->last_backup_time = 0;
+				}
+			}
 			spin_unlock_bh(&bandwidth_lock);
 		}
 		else if(info->next_reset < now)
 		{
 			spin_lock_bh(&bandwidth_lock);
-			info->current_bandwidth = 0;
-			info->next_reset = get_next_reset_time(info, now);
+			if(info->next_reset < now) /* check again after waiting for lock */
+			{
+				info->current_bandwidth = 0;
+				info->next_reset = get_next_reset_time(info, now);
+			}
 			spin_unlock_bh(&bandwidth_lock);
 		}
 	}

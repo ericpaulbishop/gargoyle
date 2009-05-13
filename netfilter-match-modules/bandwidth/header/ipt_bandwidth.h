@@ -1,6 +1,6 @@
 /*  
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -21,8 +21,9 @@
 
 #define BANDWIDTH_GT		 1
 #define BANDWIDTH_LT		 2
-#define BANDWIDTH_CURRENT	 5
-#define BANDWIDTH_RESET		 50
+#define BANDWIDTH_CURRENT	 4
+#define BANDWIDTH_RESET		 8
+#define BANDWIDTH_LAST_BACKUP	 16
 
 #define BANDWIDTH_MINUTE	10
 #define BANDWIDTH_HOUR		11
@@ -38,6 +39,7 @@ struct ipt_bandwidth_info
 	u_int64_t bandwidth_cutoff;
 	u_int64_t current_bandwidth;
 	time_t next_reset;
+	time_t last_backup_time;
 	struct ipt_bandwidth_info* non_const_self;
 };
 #endif /*_IPT_BANDWIDTH_H*/

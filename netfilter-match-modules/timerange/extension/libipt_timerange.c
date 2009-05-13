@@ -231,7 +231,10 @@ static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 #endif
 {
 	struct ipt_timerange_info *info = (struct ipt_timerange_info *)match->data;
+	time_t now;
 	print_timerange_args(info);
+	time(&now);
+	printf("--last_backup_time %ld ", now);
 }
 
 static struct iptables_match timerange = 

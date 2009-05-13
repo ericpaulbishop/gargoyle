@@ -1,6 +1,6 @@
 /* 
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -39,7 +39,7 @@
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_Bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n");
+	printf(	"bandwidth options:\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
 }
 
 static struct option opts[] = 
@@ -48,6 +48,7 @@ static struct option opts[] =
 	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
 	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
 	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET },
+	{ .name = "last_backup_time",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
 	{ .name = 0 }
 };
 
@@ -70,34 +71,36 @@ static int parse(	int c,
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)(*match)->data;
 	int valid_arg = 0;
 	int num_read;
-	u_int64_t read;
-
+	u_int64_t read_64;
+	time_t read_time;
+	
+	int inc_flags = 1;
 	
 	switch (c)
 	{
 		case BANDWIDTH_LT:
-			num_read = sscanf(argv[optind-1], "%lld", &read);
+			num_read = sscanf(argv[optind-1], "%lld", &read_64);
 			if(num_read > 0 && *flags % BANDWIDTH_CURRENT == 0)
 			{
 				info->gt_lt = BANDWIDTH_LT;
-				info->bandwidth_cutoff = read;
+				info->bandwidth_cutoff = read_64;
 				valid_arg = 1;
 			}
 			break;
 		case BANDWIDTH_GT:
-			num_read = sscanf(argv[optind-1], "%lld", &read);
+			num_read = sscanf(argv[optind-1], "%lld", &read_64);
 			if(num_read > 0 && *flags % BANDWIDTH_CURRENT == 0)
 			{
 				info->gt_lt = BANDWIDTH_GT;
-				info->bandwidth_cutoff = read;
+				info->bandwidth_cutoff = read_64;
 				valid_arg = 1;
 			}
 			break;
 		case BANDWIDTH_CURRENT:
-			num_read = sscanf(argv[optind-1], "%lld", &read);
+			num_read = sscanf(argv[optind-1], "%lld", &read_64);
 			if(num_read > 0 )
 			{
-				info->current_bandwidth = read;
+				info->current_bandwidth = read_64;
 				valid_arg = 1;
 			}
 			break;
@@ -130,22 +133,38 @@ static int parse(	int c,
 			}
 			else
 			{
-				*flags = *flags - BANDWIDTH_RESET;
+				inc_flags = 0;
 				valid_arg = 0;
 			}
 			break;
+		case BANDWIDTH_LAST_BACKUP:
+			num_read = sscanf(argv[optind-1], "%ld", &read_time);
+			if(num_read > 0 )
+			{
+				info->last_backup_time = read_time;
+				valid_arg = 1;
+			}
+			valid_arg = 1;
+			break;
 	}
-	*flags = *flags + (unsigned int)c;
-	
-	if(*flags % BANDWIDTH_RESET < BANDWIDTH_CURRENT)
+
+
+	if(inc_flags)
+	{
+		*flags = *flags + (unsigned int)c;
+	}
+	if(!(*flags & CURRENT_BANDWIDTH ))
 	{
 		info->current_bandwidth = 0;
 	}
-	if(*flags < BANDWIDTH_RESET)
+	if(!(*flags & BANDWIDTH_RESET))
 	{
 		info->reset_interval = BANDWIDTH_NEVER;
 	}
-
+	if(!(*flags & BANDWIDTH_LAST_BACKUP))
+	{
+		info->last_backup_time = 0;
+	}
 	info->next_reset = 0;
 
 	return valid_arg;
@@ -263,7 +282,12 @@ static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 #endif
 {
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)match->data;
+	time_t now;
+	
 	print_bandwidth_args(info);
+	
+	time(&now);
+	printf("--last_backup-time %ld ", now);
 }
 
 static struct iptables_match bandwidth = 
