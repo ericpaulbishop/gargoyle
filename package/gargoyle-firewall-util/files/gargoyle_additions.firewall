@@ -4,3 +4,4 @@ insert_pf_loopback_rules
 insert_dmz_rule
 iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
 insert_restriction_rules
+initialize_quotas
