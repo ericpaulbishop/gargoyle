@@ -100,41 +100,52 @@ create_l7marker_chain()
 	app_proto_shift=16
 	app_proto_mask="0xFF0000"
 
-	iptables -t mangle -N l7marker
-	iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:75 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
-	iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:75 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
+	all_prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
+	qos_l7=$(echo $(uci show qos_gargoyle | grep "layer7=" | sed 's/^.*=//g') $( uci show qos_gargoyle | grep -o "ipp2p") )
+	fw_l7=$(echo $(uci show firewall | grep app_proto | sed 's/^.*=//g')
+	all_used=$(echo $qos_l7 $fw_l7)
 
+	if [ -n "$all_used" ] ; then
+		iptables -t mangle -N l7marker
+		iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
+		iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
-	prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
-	for proto in $prots ; do
-		app_proto_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
-		iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m layer7 --l7proto $proto -j CONNMARK --set-mark $app_proto_mark/$app_proto_mask
-		echo "$proto	$app_proto_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
-		app_proto_num=$((app_proto_num + 1))
-	done
-
-	ipp2p_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
-	iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m ipp2p --ipp2p -j CONNMARK --set-mark $ipp2p_mark/$app_proto_mask
-	echo "ipp2p	$ipp2p_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
 	
-	copy_file="y"
-	if [ -e /etc/md5/layer7.md5 ] ; then
-		old_md5=$(cat /etc/md5/layer7.md5)
-		current_md5=$(md5sum /tmp/l7marker.marks.tmp | awk ' { print $1 ; } ' )
-		if [ "$current_md5" = "$old_md5" ] ; then
-			copy_file="n"
+
+		for proto in $all_prots ; do
+			proto_is_used=$(echo "$all_used" | grep "$prot")
+			if [ -n "$proto_is_used" ] ; then
+				app_proto_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
+				iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m layer7 --l7proto $proto -j CONNMARK --set-mark $app_proto_mark/$app_proto_mask
+				echo "$proto	$app_proto_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
+				app_proto_num=$((app_proto_num + 1))
+			fi
+		done
+
+		ipp2p_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
+		proto_is_used=$(echo "$all_used" | grep "ipp2p")
+		if [ -n "$proto_is_used" ] ; then
+			iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m ipp2p --ipp2p -j CONNMARK --set-mark $ipp2p_mark/$app_proto_mask
+			echo "ipp2p	$ipp2p_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
+		fi
+	
+		copy_file="y"
+		if [ -e /etc/md5/layer7.md5 ] ; then
+			old_md5=$(cat /etc/md5/layer7.md5)
+			current_md5=$(md5sum /tmp/l7marker.marks.tmp | awk ' { print $1 ; } ' )
+			if [ "$current_md5" = "$old_md5" ] ; then
+				copy_file="n"
+			fi
+		fi
+
+		if [ "$copy_file" = "y" ] ; then
+			mv /tmp/l7marker.marks.tmp /etc/l7marker.marks
+			mkdir -p /etc/md5
+			md5sum /etc/l7marker.marks | awk ' { print $1 ; }' > /etc/md5/layer7.md5
+		else
+			rm /tmp/l7marker.marks.tmp
 		fi
 	fi
-
-	if [ "$copy_file" = "y" ] ; then
-		mv /tmp/l7marker.marks.tmp /etc/l7marker.marks
-		mkdir -p /etc/md5
-		md5sum /etc/l7marker.marks | awk ' { print $1 ; }' > /etc/md5/layer7.md5
-	else
-		rm /tmp/l7marker.marks.tmp
-	fi
-
-	
 }
 
 insert_pf_loopback_rules()
@@ -436,5 +447,16 @@ initialize_quotas()
 		/etc/init.d/cron restart
 	fi
 
+}
+
+initialize_firewall()
+{
+	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
+	insert_remote_accept_rules
+	insert_pf_loopback_rules
+	insert_dmz_rule
+	create_l7marker_chain
+	insert_restriction_rules
+	initialize_quotas
 }
 
