@@ -1299,6 +1299,12 @@ function validateMac(mac)
 	return errorCode;
 }
 
+function validateDecimal(num)
+{
+	var errorCode = num.match(/^[\d]*\.?[\d]+$/) != null || num.match(/^[\d]+\.?[\d]*$/) != null ? 0 : 1;
+	return errorCode;
+}
+
 function validateNumeric(num)
 {
 	var errorCode = num.match(/^[\d]+$/) == null ? 1 : 0;
@@ -1464,6 +1470,10 @@ function proofreadIpRange(input)
 function proofreadMac(input)
 {
 	proofreadText(input, validateMac, 0);
+}
+function proofreadDecimal(input)
+{
+	proofreadText(input, validateDecimal, 0);
 }
 function proofreadNumeric(input)
 {

@@ -1,5 +1,5 @@
 <div>
-	<span class='narrowleftcolumn'>
+	<span class='leftcolumn'>
 		<label id="applies_to_label" for='applies_to'>Applies to:</label>
 	</span>
 	<span class = 'rightcolumn'>
@@ -12,15 +12,15 @@
 </div>
 
 <div>
-	<span class='narrowleftcolumn'>
+	<span class='leftcolumn'>
 		<label id="quota_reset_label" for='quota_reset'>Quota Resets:</label>
 	</span>
 	<span class='rightcolumn'>
 		<select id="quota_reset" >
-			<option value="hourly">Every Hour</option>
-			<option value="daily">Every Day</option>
-			<option value="weekly">Every Week</option>
-			<option value="monthly">Every Month</option>
+			<option value="hour">Every Hour</option>
+			<option value="day">Every Day</option>
+			<option value="week">Every Week</option>
+			<option value="month">Every Month</option>
 		</select>
 
 	</span>
@@ -28,7 +28,7 @@
 
 
 <div>
-	<span class='narrowleftcolumn'>
+	<span class='leftcolumn'>
 		<label id="max_up_label" for='max_up'>Max Upload:</label>
 	</span>
 	<span class='rightcolumn'>
@@ -37,13 +37,13 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_up_container">
-			<input  type='text' id='max_up' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<input  type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
 			<em>Megabytes</em>
 		</span>
 	</span>
 </div>
 <div>
-	<span class='narrowleftcolumn'>
+	<span class='leftcolumn'>
 		<label id="max_down_label" for='max_down'>Max Download:</label>
 	</span>
 	<span class='rightcolumn'>
@@ -52,13 +52,13 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_down_container">
-			<input  type='text' id='max_down' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<input  type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
 			<em>Megabytes</em>
 		</span>
 	</span>
 </div>
 <div>
-	<span class='narrowleftcolumn'>
+	<span class='leftcolumn'>
 		<label id="max_combined_label" for='max_combined'>Max Combined Up & Down:</label>
 	</span>
 	<span class='rightcolumn'>
@@ -67,7 +67,7 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_combined_container">
-			<input  type='text' id='max_combined' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<input  type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
 			<em>Megabytes</em>
 		</span>
 	</span>

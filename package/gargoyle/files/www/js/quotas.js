@@ -15,8 +15,9 @@ function saveChanges()
 	
 	// remove all quota sections that got deleted	
 	var origSections = uciOriginal.getAllSectionsOfType(pkg,"quota");
+	var newSections = uci.getAllSectionsOfType(pkg, "quota");
 	var sIndex;
-	for(siIndex=0; sIndex < origSections.length; sIndex++)
+	for(sIndex=0; sIndex < origSections.length; sIndex++)
 	{
 		if( uci.get(pkg, newSections[sIndex], "") == "")
 		{
@@ -25,17 +26,18 @@ function saveChanges()
 	}
 
 	//add new sections
-	var newSections = uci.getAllSectionsOfType(pkg, "quota");
-	for(siIndex=0; sIndex < newSections.length; sIndex++)
+	for(sIndex=0; sIndex < newSections.length; sIndex++)
 	{
 		if( uciOriginal.get(pkg, origSections[sIndex], "") == "")
 		{
 			commands.push("uci set " + pkg + "." + newSections[sIndex] + "=quota");
 		}
 	}
+
+
 	
 	//set variables within each section
-	for(siIndex=0; sIndex < newSections.length; sIndex++)
+	for(sIndex=0; sIndex < newSections.length; sIndex++)
 	{
 		var s = newSections[sIndex];		
 		var getCommand = function (option)
@@ -60,17 +62,28 @@ function saveChanges()
 		commands.push( getCommand("combined_limit") );
 		
 		//if ip has changed, reset saved data
-		if( changedIps[ uci.get(pkg,s,ip) ] == 1 )
+		if( changedIps[ uci.get(pkg,s,"ip") ] == 1 )
 		{
 			commands.push( "uci set " + pkg + "." + s + ".egress_used=0");
 			commands.push( "uci set " + pkg + "." + s + ".ingress_used=0");
 			commands.push( "uci set " + pkg + "." + s + ".combined_used=0");
 		}
 	}
+	
+	var quotaTable = document.getElementById('quota_table_container').firstChild;
+	var quotaTableData = getTableDataArray(quotaTable, true, false);
+	var qtIndex=0;
+	for(qtIndex=0; qtIndex < quotaTableData.length; qtIndex++)
+	{
+		var enabledCheck = quotaTableData[qtIndex][4];
+		commands.push("uci set " + pkg + "." + enabledCheck.id + ".enabled=" + (enabledCheck.checked ? "1" : "0") );
+	}
+	
 	commands.push("uci commit");	
-	commands.push("sh utility/restart_firewall.sh");
+	commands.push("sh " + gargoyleBinRoot + "/utility/restart_firewall.sh");
+	commands.push("");
 
-	var param = getParameterDefinition("commands", commands);
+	var param = getParameterDefinition("commands", commands.join("\n"));
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
@@ -111,7 +124,6 @@ function resetData()
 	}
 	for(sectionIndex = 0; sectionIndex < quotaSections.length; sectionIndex++)
 	{
-		var enabled = uciOriginal.get(pkg, quotaSections[sectionIndex], "enabled");
 		var ip = uciOriginal.get(pkg, quotaSections[sectionIndex], "ip").toUpperCase();
 		var downLimit = uciOriginal.get(pkg, quotaSections[sectionIndex], "ingress_limit");
 		var upLimit = uciOriginal.get(pkg, quotaSections[sectionIndex], "egress_limit");
@@ -120,6 +132,10 @@ function resetData()
 		var upUsed = uciOriginal.get(pkg, quotaSections[sectionIndex], "egress_used");
 		var combinedUsed = uciOriginal.get(pkg, quotaSections[sectionIndex], "combined_used");
 
+		var enabled = uciOriginal.get(pkg, quotaSections[sectionIndex], "enabled");
+		enabled = enabled != "0" ? true : false;
+	
+		
 		var enabledCheck = createEnabledCheckbox(enabled);
 		enabledCheck.id= quotaSections[sectionIndex];
 		checkElements.push(enabledCheck);
@@ -128,7 +144,6 @@ function resetData()
 		quotaTableData.push( [ ip, getPercent(upLimit,upUsed), getPercent(downLimit,downUsed), getPercent(combinedLimit,combinedUsed), enabledCheck, createEditButton(enabled) ] );
 	
 		allIps[ip] = 1;
-		changedIps[ip] = 1;
 	}
 
 	
@@ -193,6 +208,7 @@ function setVisibility(controlDocument)
 	setInvisibleIfIdMatches("applies_to_type", "all", "applies_to", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_up_type", "unlimited", "max_up_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_down_type", "unlimited", "max_down_container", "inline", controlDocument);
+	setInvisibleIfIdMatches("max_combined_type", "unlimited", "max_combined_container", "inline", controlDocument);
 }
 
 function setInvisibleIfIdMatches(selectId, invisibleOptionValue, associatedElementId, defaultDisplayMode, controlDocument )
@@ -216,7 +232,7 @@ function validateQuota(controlDocument, originalQuotaIp)
 	controlDocument = controlDocument == null ? document : controlDocument;
 	var inputIds = ["applies_to", "max_up", "max_down", "max_combined"];
 	var labelIds = ["appies_to_label", "max_up_label", "max_down_label", "max_combined_label"];
-	var functions = [validateIP, validateNumeric, validateNumeric, validateNumeric];
+	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal];
 	var validReturnCodes = [0,0,0,0];
 	var visibilityIds = ["applies_to", "max_up_container","max_down_container","max_combined_container"];
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
@@ -256,11 +272,11 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	}
 
 
-	var resetInterval = srcUci.get(pkg, uploadSection, "reset_interval");
-	var uploadLimit = srcUci.get(pkg, uploadSection, "egress_limit");
-	var downloadLimit = srcUci.get(pkg, uploadSection, "ingress_limit");
-	var combinedLimit = srcUci.get(pkg, uploadSection, "combined_limit");
-	resetInterval = resetInterval == "" || resetInterval == "minutely" ? "daily" : resetInterval;
+	var resetInterval = srcUci.get(pkg, quotaSection, "reset_interval");
+	var uploadLimit = srcUci.get(pkg, quotaSection, "egress_limit");
+	var downloadLimit = srcUci.get(pkg, quotaSection, "ingress_limit");
+	var combinedLimit = srcUci.get(pkg, quotaSection, "combined_limit");
+	resetInterval = resetInterval == "" || resetInterval == "minute" ? "day" : resetInterval;
 
 	setSelectedValue("applies_to_type", ip=="" || ip=="ALL" ? "all" : "only", controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
@@ -269,9 +285,9 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	setSelectedValue("max_combined_type", combinedLimit == "" ? "unlimited" : "limited", controlDocument );
 
 	controlDocument.getElementById("applies_to").value = (ip == "" || ip == "ALL" ? "" : ip);
-	controlDocument.getElementById("max_up").value = Math.round(uploadLimit/(1024*1024)) > 0 ? Math.round(uploadLimit/(1024*1024)) : 1;
-	controlDocument.getElementById("max_down").value = Math.round(downloadLimit/(1024*1024)) > 0 ? Math.round(downloadLimit/(1024*1024)) : 1;
-	controlDocument.getElementById("max_combined").value = Math.round(combinedLimit/(1024*1024)) > 0 ? Math.round(combinedLimit/(1024*1024)) : 1;
+	controlDocument.getElementById("max_up").value = Math.round(uploadLimit/(1024*1024)) >= 0 ? Math.round(uploadLimit*1000/(1024*1024))/1000 : 0;
+	controlDocument.getElementById("max_down").value = Math.round(downloadLimit/(1024*1024)) >= 0 ? Math.round(downloadLimit*1000/(1024*1024))/1000 : 0;
+	controlDocument.getElementById("max_combined").value = Math.round(combinedLimit/(1024*1024)) >= 0 ? Math.round(combinedLimit*1000/(1024*1024))/1000 : 0;
 
 	setVisibility(controlDocument);
 }
@@ -286,7 +302,7 @@ function setUciFromDocument(controlDocument)
 	ip = ip.toUpperCase();
 
 	var quotaSection = "";
-	var sections = srcUci.getAllSectionsOfType(pkg, "quota");
+	var sections = uci.getAllSectionsOfType(pkg, "quota");
 	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
 	{
 		if(uci.get(pkg, sections[sectionIndex], "ip") == ip || (ip == "ALL" && uci.get(pkg, sections[sectionIndex], "ip") == ""))
@@ -299,7 +315,7 @@ function setUciFromDocument(controlDocument)
 		var quota_num = 1;
 		while( uci.get(pkg, "quota_" + quotaNum, "") != "") { quotaNum++; }
 		quotaSection = "quota_" + quotaNum;
-		uci.set(pkg, quotaSection, "");
+		uci.set(pkg, quotaSection, "", "quota");
 	}
 
 	var oldIp = uci.get(pkg, quotaSection, "ip");
@@ -309,12 +325,12 @@ function setUciFromDocument(controlDocument)
 	}
 
 	
-	var uploadLimit = getSelectedValue("max_up_type", controlDocument) == "unlimited" ? "" : controlDocument.getElementById("max_up").value;
-	var downloadLimit = getSelectedValue("max_down_type", controlDocument) == "unlimited" ? "" : controlDocument.getElementById("max_down").value;
-	var combinedLimit = getSelectedValue("max_combined_type", controlDocument) == "unlimited" ? "" : controlDocument.getElementById("max_combined").value;
-	uci.set(pkg, quotaSection, "ingress_limit", Math.round(parseFloat(uploadLimit)*1024*1024));
-	uci.set(pkg, quotaSection, "egress_limit", Math.round(parseFloat(combinedLimit)*1024*1024));
-	uci.set(pkg, quotaSection, "combined_limit", Math.round(parseFloat(combinedLimit)*1024*1024));
+	var uploadLimit = getSelectedValue("max_up_type", controlDocument) == "unlimited" ? "" : Math.round(parseFloat(controlDocument.getElementById("max_up").value)*1024*1024);
+	var downloadLimit = getSelectedValue("max_down_type", controlDocument) == "unlimited" ? "" : Math.round(parseFloat(controlDocument.getElementById("max_down").value)*1024*1024);
+	var combinedLimit = getSelectedValue("max_combined_type", controlDocument) == "unlimited" ? "" : Math.round(parseFloat(controlDocument.getElementById("max_combined").value)*1024*1024);
+	uci.set(pkg, quotaSection, "ingress_limit", downloadLimit);
+	uci.set(pkg, quotaSection, "egress_limit", uploadLimit);
+	uci.set(pkg, quotaSection, "combined_limit", combinedLimit);
 	uci.set(pkg, quotaSection, "reset_interval", getSelectedValue("quota_reset", controlDocument));
 	uci.set(pkg, quotaSection, "ip", ip);
 }
@@ -420,7 +436,7 @@ function editQuota()
 	editCombinedPrc = editRow.childNodes[3].firstChild.data.replace(/%/g, "");
 
 	editSection = "";
-	var sections = ui.getAllSectionsOfType(pkg, "quota");
+	var sections = uci.getAllSectionsOfType(pkg, "quota");
 	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
 	{
 		if(uci.get(pkg, sections[sectionIndex], "ip") == editIp || (editIp == "ALL" && uci.get(pkg, sections[sectionIndex], "ip") == ""))
@@ -465,8 +481,8 @@ function editQuota()
 						if(newIp != editIp)
 						{
 							editRow.childNodes[0].firstChild.data = newIp;
-							changedIps.push(editIp);
-							changedIps.push(newIp);
+							changedIps[editIp] = 1;
+							changedIps[newIp] = 1;
 							editRow.childNodes[1].firstChild.data = uci.get(pkg, editSection, "egress_limit") == "" ? "N/A" : "0%";
 							editRow.childNodes[2].firstChild.data = uci.get(pkg, editSection, "ingress_limit") == "" ? "N/A" : "0%";
 							editRow.childNodes[3].firstChild.data = uci.get(pkg, editSection, "combined_limit") == "" ? "N/A" : "0%";
@@ -477,16 +493,20 @@ function editQuota()
 							{
 								var oldUsed = uci.get(pkg, editSection, usedOption);
 								oldUsed = oldUsed == "" ? 0 : parseInt(oldUsed);
-								var newPercent =  Math.round(oldUsed*100/parseInt(newMaxStr)) / 100.0;
+								var newPercent =  Math.round(oldUsed*100/(parseFloat(newMaxStr)*1024*1024)) / 100.0;
 								return newPercent + "%";
 							}
 
 							var upMax   = editQuotaWindow.document.getElementById("max_up").value;
 							var downMax = editQuotaWindow.document.getElementById("max_down").value;
 							var combinedMax = editQuotaWindow.document.getElementById("max_combined").value;
-							editRow.childNodes[1].firstChild.data = upMax  == "" || editUpMax   == "" ? "N/A" : adjustPercent("egress_used", upMax);
-							editRow.childNodes[2].firstChild.data = downMax == "" || editDownMax == "" ? "N/A" : adjustPercent("ingress_used", downMax);
-							editRow.childNodes[3].firstChild.data = combinedMax == "" || editCombinedMax == "" ? "N/A" : adjustPercent("combined_used", combinedMax);
+							var useUpMax = getSelectedValue("max_up_type", editQuotaWindow.document) != "unlimited";
+							var useDownMax = getSelectedValue("max_down_type", editQuotaWindow.document) != "unlimited";
+							var useCombinedMax = getSelectedValue("max_combined_type", editQuotaWindow.document) != "unlimited";
+							
+							editRow.childNodes[1].firstChild.data = useUpMax   ? adjustPercent("egress_used", upMax) : "N/A";
+							editRow.childNodes[2].firstChild.data = useDownMax   ? adjustPercent("ingress_used", downMax) : "N/A";
+							editRow.childNodes[3].firstChild.data = useCombinedMax  ? adjustPercent("combined_used", combinedMax) : "N/A";
 
 							/*
 							var adjustPercent = function(oldMaxStr, newMaxStr, oldPercentStr)
