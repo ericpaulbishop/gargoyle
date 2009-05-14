@@ -279,7 +279,7 @@ insert_restriction_rules()
 				chain="ingress_restrictions"
 			fi
 		
-			if [ "$section_type" = "restriction_whitelist" ] ; then
+			if [ "$section_type" = "whitelist_rule" ] ; then
 				target="ACCEPT"
 			fi
 			

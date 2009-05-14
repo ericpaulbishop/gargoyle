@@ -1,4 +1,4 @@
-var pkg = "restricter_gargoyle";
+var pkg = "firewall";
 
 
 function saveChanges()
@@ -9,7 +9,7 @@ function saveChanges()
 	var runCommands = [];
 
 
-	var ruleTypes = [ "block", "white_list" ];
+	var ruleTypes = [ "restriction_rule", "whitelist_rule" ];
 	var rulePrefixes   = [ "rule_", "exception_" ];
 	var typeIndex=0;
 	var deleteSectionCommands = [];
@@ -52,14 +52,7 @@ function saveChanges()
 	createSectionCommands.push("uci commit");
 	
 
-	if(enabledRuleFound || restricterEnabled)
-	{
-		runCommands.push("/etc/init.d/restricter_gargoyle enable");
-		runCommands.push("/etc/init.d/restricter_gargoyle restart");
-	}
-
-
-	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n";
+	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n" + "sh /www/utility/restart_firewall.sh";
 
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
@@ -79,7 +72,7 @@ function saveChanges()
 
 function resetData()
 {
-	var ruleTypes = [ "block", "white_list" ];
+	var ruleTypes = [ "restriction_rule", "whitelist_rule" ];
 	var rulePrefixes   = [ "rule_", "exception_" ];
 	var typeIndex=0;
 	for(typeIndex=0; typeIndex < ruleTypes.length; typeIndex++)
@@ -113,7 +106,7 @@ function resetData()
 			}
 		}
 		
-		var firstColumn = ruleType == "block" ? "Rule Description" : "Exception Description";
+		var firstColumn = ruleType == "restriction_rule" ? "Rule Description" : "Exception Description";
 		columnNames=[firstColumn, "Enabled", ""];
 		ruleTable = createTable(columnNames, ruleTableData, rulePrefix + "table", true, false, removeRuleCallback);
 		
@@ -226,7 +219,7 @@ function setInvisibleIfAnyChecked(checkIds, associatedElementId, defaultDisplayM
 function setInvisibleIfIdMatches(selectId, invisibleOptionValue, associatedElementId, defaultDisplayMode, controlDocument )
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	defaultDisplayMode = defaultDisplayMode == null ? "block" : defaultDisplayMode;
+	defaultDisplayMode = defaultDisplayMode == null ? "restriction_rule" : defaultDisplayMode;
 	var visElement = controlDocument.getElementById(associatedElementId);
 	
 	if(getSelectedValue(selectId, controlDocument) == invisibleOptionValue && visElement != null)
@@ -284,12 +277,12 @@ function editRule()
 	editTable = editRow.parentNode.parentNode;
 	if(editTable.id.match("rule_"))
 	{
-		editRuleType = "block";
+		editRuleType = "restriction_rule";
 		editRulePrefix = "rule_";
 	}
 	else
 	{
-		editRuleType = "white_list";
+		editRuleType = "whitelist_rule";
 		editRulePrefix = "exception_";
 	}
 
@@ -318,7 +311,7 @@ function editRule()
 	}
 
 
-	editRuleWindow = window.open(editRuleType == "block" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editRuleWindow = window.open(editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
 	
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
@@ -647,30 +640,41 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
 
 
-	var daysAndHours = sourceUci.get(pkg, sectionId, "weekly_block_times");
-	var hours = sourceUci.get(pkg, sectionId, "hours_blocked");
+	var daysAndHours = sourceUci.get(pkg, sectionId, "active_weekly_ranges");
+	var hours = sourceUci.get(pkg, sectionId, "active_hours");
 	var allDay = (daysAndHours == "" && hours == "");
 	controlDocument.getElementById(rulePrefix + "hours_active").value = hours;
 	controlDocument.getElementById(rulePrefix + "all_day").checked = allDay;
 	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = daysAndHours;
 
-	
-	var days =  sourceUci.get(pkg, sectionId, "weekdays_blocked");
-	var dayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-	var dayIndex = 0;
-	for(dayIndex = 0; dayIndex < dayIds.length; dayIndex++) { dayIds[dayIndex] = rulePrefix + dayIds[dayIndex]; }
-
-	var everyDay = (daysAndHours == "");
-	days = days.split(/,/);
-	days = days.length != 7 ? ["1","1","1","1","1","1","1"] : days;
-	for(dayIndex = 0; dayIndex < days.length; dayIndex++)
+	var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+	var dayStr =  sourceUci.get(pkg, sectionId, "active_weekdays");
+	var days = [];
+	if(dayStr == "")
 	{
-		days[dayIndex] = days[dayIndex].replace(/^[\t ]*/, "");
-		days[dayIndex] = days[dayIndex].replace(/[\t ]*$/, "");
-		everyDay = everyDay && (days[dayIndex] != "0");
-		controlDocument.getElementById(dayIds[dayIndex]).checked = (days[dayIndex] != "0");
+		days = allDays;
+	}
+	else
+	{
+		days = dayStr.split(/,/);
+	}
+	
+	var everyDay = (daysAndHours == "");
+	var dayIndex=0;
+	for(dayIndex = 0; dayIndex < allDays.length; dayIndex++)
+	{
+		var nextDay = allDays[dayIndex];
+		var dayFound = false;
+		var testIndex=0;
+		for(testIndex=0; testIndex < days.length && !dayFound; testIndex++)
+		{
+			dayFound = days[testIndex] == nextDay;
+		}
+		everyDay = everyDay && dayFound;
+		controlDocument.getElementById(rulePrefix + allDays[dayIndex]).checked = dayFound;
 	}
 	controlDocument.getElementById(rulePrefix + "every_day").checked = everyDay;
+
 
 	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_table", rulePrefix + "remote_ip_type", rulePrefix + "remote_ip");
 	setTextAndSelectFromUci(controlDocument, sourceUci,  pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
@@ -829,17 +833,21 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 	var daysActive = controlDocument.getElementById(rulePrefix + "days_active");
 	if(daysActive.style.display != "none")
 	{
-		var daysActiveStr = "";
+		var daysActive = [];
 		var dayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+		
 		for(dayIndex =0; dayIndex < dayIds.length; dayIndex++)
 		{
-			daysActiveStr = daysActiveStr + (controlDocument.getElementById(rulePrefix + dayIds[dayIndex]).checked ? "1," : "0,");
+			if(controlDocument.getElementById(rulePrefix + dayIds[dayIndex]).checked)
+			{
+				daysActive.push(dayIds[dayIndex]);
+			}
 		}
-		daysActiveStr = daysActiveStr.replace(/,$/, "");
-		uci.set(pkg, sectionId, "weekdays_blocked", daysActiveStr);
+		daysActiveStr = daysActiveStr.join(",");
+		uci.set(pkg, sectionId, "active_weekdays", daysActiveStr);
 	}
-	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "hours_blocked", rulePrefix + "hours_active");
-	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "weekly_block_times", rulePrefix + "days_and_hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "active_hours", rulePrefix + "hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "active_weekly_ranges", rulePrefix + "days_and_hours_active");
 
 	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
 	{
