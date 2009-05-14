@@ -21,21 +21,18 @@ ifs=$(cat /proc/net/dev 2>/dev/null | awk 'BEGIN {FS = ":"}; $0 ~ /:/ { print $1
 
 
 dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
-restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
 
 #stop firewall,dnsmasq,qos,bwmon
-if [ -n "$restricter_enabled" ] ; then
-	/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
-fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 fi
 if [ -n "$qos_enabled" ] ; then
 	/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
 fi
+dump_quotas
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
 
@@ -60,9 +57,6 @@ if [ -n "$qos_enabled" ] ; then
 fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle start
-fi
-if [ -n "$restricter_enabled" ] ; then
-	/etc/init.d/restricter_gargoyle start
 fi
 if [ -n "$dnsmasq_enabled" ] ; then
 	/etc/init.d/dnsmasq start >/dev/null 2>&1 

@@ -5,14 +5,10 @@
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
 webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle 2>/dev/null)
-restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 
-if [ -n "$restricter_enabled" ] ; then
+if [ -n "$webmon_enabled" ] ; then
 	/etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
-fi
-if [ -n "$restricter_enabled" ] ; then
-	/etc/init.d/restricter_gargoyle stop >/dev/null 2>&1
 fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1

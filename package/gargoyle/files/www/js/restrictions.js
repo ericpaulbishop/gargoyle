@@ -80,8 +80,6 @@ function resetData()
 		var ruleType = ruleTypes[typeIndex];
 		var rulePrefix = rulePrefixes[typeIndex];
 
-		// Instead of having enabled/disabled button, just display all rules to disabled if 
-		// the restricter_daemon is not enabled
 		var sections = uciOriginal.getAllSectionsOfType(pkg, ruleType);
 		var ruleTableData = new Array();
 		var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document

@@ -12,15 +12,7 @@
 
 <script>
 <!--
-<?
-	restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle* 2>/dev/null)
-	if [ -n "$restricter_enabled" ] ; then
-		echo "var restricterEnabled = true;"
-	else
-		echo "var restricterEnabled = false;"
-	fi
-	echo "var uci = uciOriginal.clone();"
-?>
+	var uci = uciOriginal.clone();
 //-->
 </script>
 
