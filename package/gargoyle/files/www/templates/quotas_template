@@ -4,7 +4,7 @@
 	</span>
 	<span class = 'rightcolumn'>
 		<select id="applies_to_type"  onchange='setVisibility()' >
-			<option value="all">All IPs</option>
+			<option value="all">Entire Local Network</option>
 			<option value="only">Only the following IP</option>
 		</select>
 		<input  type='text' id='applies_to' onkeyup='proofreadIp(this)' size='17' maxlength='15' />
@@ -28,7 +28,6 @@
 
 
 <div>
-
 	<span class='narrowleftcolumn'>
 		<label id="max_up_label" for='max_up'>Max Upload:</label>
 	</span>
@@ -44,7 +43,6 @@
 	</span>
 </div>
 <div>
-
 	<span class='narrowleftcolumn'>
 		<label id="max_down_label" for='max_down'>Max Download:</label>
 	</span>
@@ -59,5 +57,19 @@
 		</span>
 	</span>
 </div>
-
+<div>
+	<span class='narrowleftcolumn'>
+		<label id="max_combined_label" for='max_combined'>Max Combined Up & Down:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id="max_combined_type" onchange='setVisibility()'>
+			<option value="unlimited">Unlimited</option>
+			<option value="limited">Limit to</option>
+		</select>&nbsp;
+		<span id="max_combined_container">
+			<input  type='text' id='max_combined' onkeyup='proofreadNumeric(this)' size='17' maxlength='15' />
+			<em>Megabytes</em>
+		</span>
+	</span>
+</div>
 

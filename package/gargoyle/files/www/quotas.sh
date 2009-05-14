@@ -1,38 +1,19 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	
-	gargoyle_header_footer -h -s "firewall" -p "quotas" -c "internal.css" -j "table.js quotas.js" gargoyle restricter_gargoyle
+	dump_quotas	
+	gargoyle_header_footer -h -s "firewall" -p "quotas" -c "internal.css" -j "table.js quotas.js" gargoyle firewall
 
 ?>
 
 
 <script>
 <!--
-<?
-	restricter_enabled=$(ls /etc/rc.d/*restricter_gargoyle* 2>/dev/null)
-	if [ -n "$restricter_enabled" ] ; then
-		echo "var restricterEnabled = true;"
-	else
-		echo "var restricterEnabled = false;"
-	fi
-
-	q=$(uci show restricter_gargoyle | grep "=quota$" | sed ' s/^.*\.//g ' | sed 's/=.*$//g')
-	quotas=$(echo $q)
-	echo "var quotaNames = \"$quotas\";"
-	if [ -n "$restricter_enabled" ] ; then
-		quota_data=$(restricter_gargoyle -m $quotas)
-		echo "var quotaData = \"$quota_data\";"
-	else
-		echo "var quotaData = \"\";"
-	fi
-
-	echo "var uci = uciOriginal.clone();"
-?>
+	var uci = uciOriginal.clone();
 //-->
 </script>
 
