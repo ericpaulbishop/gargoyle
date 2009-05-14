@@ -321,7 +321,17 @@ initialize_quotas()
 
 	wan_if=$(uci -P "/var/state" get network.wan.ifname)                                                   
 	quota_sections=$(uci show $quota_package | grep "quota$" | sed 's/^.*\.//g' | sed 's/=.*$//g')
-	if [ -z "$wan_if" ] || [ -z "$quota_sections" ]  ; then return ; fi
+	if [ -z "$wan_if" ] || [ -z "$quota_sections" ]  ; then 
+		if [ -e "/etc/crontabs/root" ] ; then
+			cat /etc/crontabs/root | grep -v "dump_quotas" >> /tmp/new_cron
+			mv /tmp/new_cron /etc/crontabs/root
+			cron_active=$(ps | grep "crond" | grep -v "grep" )
+			if [ -n "$cron_active" ] ; then
+				/etc/init.d/cron restart
+			fi
+		fi
+		return 
+	fi
 
 	iptables -t mangle -N ingress_quotas
 	iptables -t mangle -N egress_quotas
@@ -410,5 +420,21 @@ initialize_quotas()
 	uci set $quota_package.quota_order.egress_quota_sections="$egress_quota_sections"
 	uci set $quota_package.quota_order.combined_quota_sections="$combined_quota_sections"
 	uci commit
+
+	mkdir -p /etc/crontabs
+	touch /etc/crontabs/root
+	cat /etc/crontabs/root | grep -v "dump_quotas" >> /tmp/new_cron
+	echo '0 0,4,8,12,16,20 * * * /usr/bin/dump_quotas >/dev/null 2>&1' >> /tmp/new_cron
+	mv /tmp/new_cron /etc/crontabs/root
+	/etc/init.d/cron enable
+
+	#only restart cron if it is currently running
+	#since we initialize this before cron, this will
+	#make sure we don't start cron twice at boot
+	cron_active=$(ps | grep "crond" | grep -v "grep" )
+	if [ -n "$cron_active" ] ; then
+		/etc/init.d/cron restart
+	fi
+
 }
 
