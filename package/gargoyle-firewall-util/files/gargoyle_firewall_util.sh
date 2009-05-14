@@ -362,9 +362,9 @@ initialize_quotas()
 	iptables -t mangle -A forward_quotas -m connmark --mark 0xFF000000/0xFF000000 -j combined_quotas
 	iptables -t mangle -A forward_quotas -j CONNMARK --set-mark 0x0/0xFF000000
 
-	iptables -I ingress_quotas  -j CONNMARK --set-mark 0x0/$death_mask
-	iptables -I egress_quotas   -j CONNMARK --set-mark 0x0/$death_mask
-	iptables -I combined_quotas -j CONNMARK --set-mark 0x0/$death_mask
+	iptables -t mangle -I ingress_quotas  -j CONNMARK --set-mark 0x0/$death_mask
+	iptables -t mangle -I egress_quotas   -j CONNMARK --set-mark 0x0/$death_mask
+	iptables -t mangle -I combined_quotas -j CONNMARK --set-mark 0x0/$death_mask
 
 
 	ingress_quota_sections=""
