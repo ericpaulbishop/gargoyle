@@ -22,7 +22,7 @@ fi
 #and dump will occour *before* this script is called
 quota_dump_times=$(uci show firewall | grep "last_backup_time=" | sed 's/^.*=//g')
 if [ -n "$quota_dump_times" ] ; then
-	last_quota_time=$(printf "%d " $quota_dump_times | sort -n | awk '{print $1 }' )
+	last_quota_time=$(printf "%d\n" $quota_dump_times | sort -n -r | head -n 1 )
 	now=$(date +%s)
 	last_now_diff=$(($now - $last_quota_time))
 	if [ $last_now_diff -gt 10 ] ; then

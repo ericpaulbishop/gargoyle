@@ -102,7 +102,7 @@ void dump_quota_chain(struct uci_context *ctx, char* table, char* chain, char* p
 			char time_id[1024];
 			u_int64_t *next_len = (u_int64_t*)shift_list(quota_vals);
 	       		sprintf(used_id, "firewall.%s.%s=%lld", type_sections[section_index], type_option, *next_len);
-			sprintf(time_id, "firewall.%s.last_update_time=%ld", type_sections[section_index], now);
+			sprintf(time_id, "firewall.%s.last_backup_time=%ld", type_sections[section_index], now);
 			if (uci_lookup_ptr(ctx, &ptr, used_id, true) == UCI_OK){ uci_set(ctx, &ptr); }
 			if (uci_lookup_ptr(ctx, &ptr, time_id, true) == UCI_OK){ uci_set(ctx, &ptr); }
 
