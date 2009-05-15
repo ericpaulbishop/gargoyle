@@ -27,7 +27,7 @@
 		<div>
 			<? cat templates/restriction_template ?>
 			<div>
-				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("block", "rule_")' />
+				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("restriction_rule", "rule_")' />
 			</div>	
 		</div>
 	
@@ -50,7 +50,7 @@
 		<div>
 			<? cat templates/whitelist_template ?>
 			<div>
-				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("white_list", "exception_")' />
+				<input type="button" id="add_restriction_button" class="default_button" value="Add New Rule" onclick='addNewRule("whitelist_rule", "exception_")' />
 			</div>	
 		</div>
 	

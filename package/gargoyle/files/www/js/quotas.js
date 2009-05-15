@@ -34,8 +34,6 @@ function saveChanges()
 		}
 	}
 
-
-	
 	//set variables within each section
 	for(sIndex=0; sIndex < newSections.length; sIndex++)
 	{
@@ -177,7 +175,7 @@ function addNewQuota()
 	}
 	else
 	{
-		var quota_num = 1;
+		var quotaNum = 1;
 		while( uci.get(pkg, "quota_" + quotaNum, "") != "") { quotaNum++; }
 
 		setUciFromDocument(document);
@@ -312,7 +310,7 @@ function setUciFromDocument(controlDocument)
 	}
 	if(quotaSection == "")
 	{
-		var quota_num = 1;
+		var quotaNum = 1;
 		while( uci.get(pkg, "quota_" + quotaNum, "") != "") { quotaNum++; }
 		quotaSection = "quota_" + quotaNum;
 		uci.set(pkg, quotaSection, "", "quota");
@@ -378,16 +376,8 @@ function setRowEnabled()
 }
 function removeQuotaCallback(table, row)
 {
-	var idStr = row.childNodes[3].firstChild.id;
-	var ids = idStr.split(/\./);
-	if(uci.get(pkg, ids[0]) != "")
-	{
-		uci.removeSection(pkg, ids[0]);
-	}
-	if(uci.get(pkg, ids[1]) != "")
-	{
-		uci.removeSection(pkg, ids[1]);
-	}
+	var id = row.childNodes[4].firstChild.id;
+	uci.removeSection(pkg, id);
 	allIps[ row.childNodes[0].firstChild.data ] = null;
 
 	changedIps [ row.childNodes[0].firstChild.data ] = 1;

@@ -59,7 +59,6 @@ function saveChanges()
 	{
 		if(req.readyState == 4)
 		{	
-			restricterEnabled = restricterEnabled || enabledRuleFound;
 			uciOriginal = uci.clone();
 			resetData();
 			setControlsEnabled(true);	
@@ -93,7 +92,7 @@ function resetData()
 				description = description == "" ? sections[sectionIndex] : description;
 				
 				var enabledStr =   uciOriginal.get(pkg, sections[sectionIndex], "enabled");
-				var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") && restricterEnabled;
+				var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") ;
 				var enabledCheck = createEnabledCheckbox(enabledBool);
 				enabledCheck.id = sections[sectionIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
 				
