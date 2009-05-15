@@ -840,11 +840,11 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 				daysActive.push(dayIds[dayIndex]);
 			}
 		}
-		daysActiveStr = daysActiveStr.join(",");
+		daysActiveStr = daysActive.join(",");
 		uci.set(pkg, sectionId, "active_weekdays", daysActiveStr);
 	}
-	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "active_hours", rulePrefix + "hours_active");
-	setIfVisible(controlDocument, pkg, sectionId, rulePrefix + "active_weekly_ranges", rulePrefix + "days_and_hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, "active_hours", rulePrefix + "hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active");
 
 	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
 	{
