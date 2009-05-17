@@ -21,22 +21,20 @@ function saveChanges()
 	}
 	else
 	{
-		//let user know if we're rebooting -- broadcom wifi can be restarted
-		//without rebooting, but under certain conditions atheros devices shit themselves
-		if(wirelessDriver == "broadcom")
-		{
-			setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
-		}
-		else
-		{
-			setControlsEnabled(false, true, "Please Wait While Settings Are Applied And Device Is Restarted");
-		}
 
 		var uci = uciOriginal.clone();
 		var uciCompare = uciOriginal.clone();
 
-
-
+		
+		var doReboot= (!isBridge(uciOriginal)) && document.getElementById("global_bridge").checked ;
+		if(doReboot)
+		{
+			setControlsEnabled(false, true, "Please Wait While Settings Are Applied And Device Is Restarted");
+		}
+		else
+		{
+			setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
+		}
 
 		var preCommands = "";	
 		var allWirelessSections = uci.getAllSections("wireless");
@@ -646,10 +644,14 @@ function saveChanges()
 		}
 
 		var commands = uci.getScriptCommands(uciCompare);
-		var restartNetworkCommand = wirelessDriver== "broadcom" ? "\niwconfig wl0 txpower 31\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n";
+		var restartNetworkCommand = (wirelessDriver== "broadcom" ? "\niwconfig wl0 txpower 31\n" : "") + "sh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n" ;
+		if(doReboot)
+		{
+			restartNetworkCommand = "\nsh " + gargoyleBinRoot +"/utility/reboot.sh ;\n";
+		}
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
 
-		
+				
 		//document.getElementById("output").value = commands;
 		var param = getParameterDefinition("commands", commands);
 		
@@ -657,8 +659,7 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
-				//alert(req.responseText);
-				if(wirelessDriver == "broadcom" && oldLanIp == currentLanIp)
+				if(oldLanIp == currentLanIp && (!doReboot))
 				{
 					uciOriginal = uci.clone();
 					resetData();
@@ -671,7 +672,7 @@ function saveChanges()
 
 		//if we're rebooting, this tests whether reboot is done, otherwise
 		//it tests if router is up at new ip
-		if(wirelessDriver != "broadcom" || oldLanIp != currentLanIp)
+		if(oldLanIp != currentLanIp || doReboot)
 		{
 			currentProtocol = location.href.match(/^https:/) ? "https" : "http";
 			testLocation = currentProtocol + "://" + currentLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
