@@ -107,7 +107,7 @@ int get_next_message(int queue, void* message_data, size_t message_size, long me
 void load_data(void);
 void save_data(void);
 
-char * strnstr(const char *s, const char *find, size_t slen);
+char* strnstr(const char *s, const char *find, size_t slen);
 
 
 // Global variables
@@ -320,6 +320,7 @@ int get_next_message(int queue, void* message_data, size_t message_size, long me
 
 void daemonize(void)
 {
+	/*
 	//fork and end parent process
 	int i=fork();
 	if (i != 0)
@@ -349,6 +350,7 @@ void daemonize(void)
         close(STDOUT_FILENO);
         close(STDIN_FILENO);
         close(STDERR_FILENO);
+	*/
 
 	// record pid to lockfile
 	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
@@ -513,89 +515,103 @@ string_map* load_file_lines(char* filename)
 
 void web_packet_callback(u_char *useless, const struct pcap_pkthdr* pkthdr,const u_char*  packet)
 {
+	//printf("here\n");
 	if(terminated == 1)
 	{
 		return;
 	}
 
-	struct in_addr* dst_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 16);
-	struct in_addr* src_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 12);
-	char* dst_ip = strdup(inet_ntoa(*dst_ip_addr));
-	char* src_ip = strdup(inet_ntoa(*src_ip_addr));
-	
-	int monitor_src_ip = 1;
-	if(exclude_ips != NULL)
-	{
-		monitor_src_ip = get_map_element(exclude_ips, src_ip) == NULL ? monitor_src_ip : 0;
-	}
-	if(include_ips != NULL)
-	{
-		monitor_src_ip = get_map_element(include_ips, src_ip) != NULL ? monitor_src_ip : 0;
-	}
-	if(monitor_src_ip == 1)
-	{
+	unsigned short tcp_offset = sizeof(struct ether_header) + sizeof(ip_header);
+	unsigned short tcp_length = 4*(((struct tcphdr*)(packet + tcp_offset))->doff);
+	unsigned short total_header_length = tcp_offset + tcp_length;
+	unsigned short payload_length = pkthdr->caplen - total_header_length;
 
-		char* domain = NULL;
-		char* ip_key = dynamic_strcat(3, src_ip, "-", dst_ip);
-		if( get_map_element(web_ips, ip_key) == NULL)
+	if(payload_length > 0)
+	{
+		char* payload = (char *)(packet + total_header_length);	
+		char* domainMatch = strnstr(payload, "Host:", payload_length);
+		short tcp_dst_port = -1;
+
+		if(domainMatch == NULL)
 		{
-			short tcp_dst_port = ntohs( *((u_int16_t*)(packet + sizeof(struct ether_header) + sizeof(ip_header) + 2)) );
-			
-			int total_header_length = sizeof(struct ether_header) + sizeof(ip_header) + sizeof(struct tcphdr);
-			int payload_length = pkthdr->caplen - total_header_length;
-			if(payload_length > 0)
+			tcp_dst_port = ntohs( *((u_int16_t*)(packet + sizeof(struct ether_header) + sizeof(ip_header) + 2)) );
+		}
+		if(domainMatch != NULL || tcp_dst_port == 443)
+		{
+			char* domain = NULL;
+			struct in_addr* dst_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 16);
+			struct in_addr* src_ip_addr = (struct in_addr*)(packet + sizeof(struct ether_header) + 12);
+			char* dst_ip = strdup(inet_ntoa(*dst_ip_addr));
+			char* src_ip = strdup(inet_ntoa(*src_ip_addr));
+
+			int monitor_src_ip = 1;
+			if(exclude_ips != NULL)
 			{
-				char* payload = (char *)(packet + total_header_length);
-			
-				char* domainMatch = strnstr(payload, "Host:", payload_length);
-				if(domainMatch != NULL)
-				{
-					int startIndex = 6;
-					int endIndex = startIndex;
-					while(domainMatch[startIndex] == ' ' || domainMatch[startIndex] == '\t')
-					{
-						startIndex++;
-					}
-					while(domainMatch[endIndex] != '\0' && domainMatch[endIndex] != '\n' && domainMatch[endIndex] != '\r')
-					{
-						endIndex++;
-					}
-					int length = (endIndex+1-startIndex);
-					domain = malloc( (length+1)*sizeof(char) );
-					memcpy(domain, domainMatch+startIndex, length);
-					domain[length] = '\0';
-				}
-				else if(tcp_dst_port == 443)
-				{
-					domain = get_domain_for_ip(dst_ip);
-				}
+				monitor_src_ip = get_map_element(exclude_ips, src_ip) == NULL ? monitor_src_ip : 0;
 			}
-		}
-		else
-		{
-			//update time and set queue node to front of queue so we won't delete it anytime soon
-			update_node_time( (queue_node*)get_map_element(web_ips, ip_key) );
-		}
+			if(include_ips != NULL)
+			{
+				monitor_src_ip = get_map_element(include_ips, src_ip) != NULL ? monitor_src_ip : 0;
+			}
+			if(monitor_src_ip == 1)
+			{		
+				char* ip_key = dynamic_strcat(3, src_ip, "-", dst_ip);
+				if( get_map_element(web_ips, ip_key) == NULL)
+				{
+					if(domainMatch != NULL)
+					{
+						int startIndex = 6;
+						int endIndex = startIndex;
+						while(domainMatch[startIndex] == ' ' || domainMatch[startIndex] == '\t')
+						{
+							startIndex++;
+						}
+						while(domainMatch[endIndex] != '\0' && domainMatch[endIndex] != '\n' && domainMatch[endIndex] != '\r')
+						{
+							endIndex++;
+						}
+						int length = (endIndex+1-startIndex);
+						domain = malloc( (length+1)*sizeof(char) );
+						memcpy(domain, domainMatch+startIndex, length);
+						domain[length] = '\0';
+					}
+					else //https
+					{
+						domain = get_domain_for_ip(dst_ip);
+
+					}
+				}
+				else
+				{
+					//update time and set queue node to front of queue so we won't delete it anytime soon
+					update_node_time( (queue_node*)get_map_element(web_ips, ip_key) );
+					if(domain != NULL) //if we're dealing with https
+					{
+						free(domain);
+						domain = NULL;
+					}
+				}
 		
-		if(domain != NULL)
-		{
-			char* domain_key = dynamic_strcat(3, src_ip, "-", domain);
-			if( get_map_element(web_domains, domain_key) == NULL)
-			{
-				add_next_entry(dst_ip, src_ip, domain);
+				if(domain != NULL)
+				{
+					char* domain_key = dynamic_strcat(3, src_ip, "-", domain);
+					if( get_map_element(web_domains, domain_key) == NULL)
+					{
+						add_next_entry(dst_ip, src_ip, domain);
+					}
+					else
+					{
+						update_node_time( (queue_node*)get_map_element(web_domains, domain_key) );
+					}
+					free(domain_key);
+					free(domain);
+				}
+				free(ip_key);
 			}
-			else
-			{
-				update_node_time( (queue_node*)get_map_element(web_domains, domain_key) );
-			}
-			free(domain_key);
-			free(domain);
+			free(dst_ip);
+			free(src_ip);
 		}
-		free(ip_key);
 	}
-	free(dst_ip);
-	free(src_ip);
-	
 }
 
 void update_node_time(queue_node* update_node)
@@ -699,7 +715,7 @@ void add_next_entry(char* dst_ip, char* src_ip, char* domain)
 	printf("\n\n");
 	*/
 }
-char * strnstr(const char *s, const char *find, size_t slen)
+char* strnstr(const char *s, const char *find, size_t slen)
 {
 	char c, sc;
 	size_t len;
