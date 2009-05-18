@@ -98,8 +98,7 @@ void update_node_time(queue_node* update_node);
 void add_next_entry(char* dst_ip, char* src_ip, char* domain);
 string_map* load_file_lines(char* file_name);
 
-
-void daemonize(void);
+void daemonize(int background);
 void signal_handler(int sig);
 void handle_output_request();
 int get_next_message(int queue, void* message_data, size_t message_size, long message_type);
@@ -128,16 +127,21 @@ int main(int argc, char **argv)
 	save_path = NULL;
 	char *interface = NULL;
 	int is_daemon = 0;
-	
+	int foreground = 0;
+
 	int c;
 	int read;
-	while((c = getopt(argc, argv, "dDI:i:S:s:O:o:X:x:n:N:uU")) != -1)
+	while((c = getopt(argc, argv, "dDfFI:i:S:s:O:o:X:x:n:N:uU")) != -1)
 	{	
 		switch(c)
 		{
 			case 'd':
 			case 'D':
 				is_daemon = 1;
+				break;
+			case 'f':
+			case 'F':
+				foreground = 1;
 				break;
 			case 'I':
 			case 'i':
@@ -168,6 +172,7 @@ int main(int argc, char **argv)
 			default :
 				printf("USAGE: %s [OPTIONS]\n", argv[0]);
 				printf("\t-d run as daemon, indicates we want to start monitor daemon not dump monitor data");
+				printf("\t-f run daemon in foreground");
 				printf("\t-i [interface] the interface to monitor\n");
 				printf("\t-s [file] path of file to load from / save to\n");
 				printf("\t-o [file] only monitor ips listed in this file\n");
@@ -182,7 +187,14 @@ int main(int argc, char **argv)
 
 	if(is_daemon == 1) //start monitor daemon
 	{
-		daemonize();
+		if(foreground == 1)
+		{
+			daemonize(0);
+		}
+		else
+		{
+			daemonize(1);
+		}
 		terminated = 0;
 		
 		recent_websites = (queue*)malloc(sizeof(queue));
@@ -317,40 +329,41 @@ int get_next_message(int queue, void* message_data, size_t message_size, long me
 }
 
 
-
-void daemonize(void)
+void daemonize(int background) //background variable is useful for debugging, causes program to run in foreground if 0
 {
-	/*
-	//fork and end parent process
-	int i=fork();
-	if (i != 0)
-	{	
-		if(i < 0) //exit on fork error
-		{
-			printf("fork error!\n");
-			exit(1);
-		}
-		else //this is parent, exit cleanly
-		{
-			exit(0);
-		}
-	}
-	
-	//////////////////////////////////////////////////////
-	/// child continues as a daemon after parent exits
-	//////////////////////////////////////////////////////
-	// obtain a new process group & close all file descriptors 
-	setsid();
-	for(i=getdtablesize();i>=0;--i)
+
+	if(background != 0)
 	{
-		close(i);
+		//fork and end parent process
+		int i=fork();
+		if (i != 0)
+		{	
+			if(i < 0) //exit on fork error
+			{
+				exit(1);
+			}
+			else //this is parent, exit cleanly
+			{
+				exit(0);
+			}
+		}
+	
+		/********************************
+		* child continues as a daemon after parent exits
+		********************************/
+		// obtain a new process group & close all file descriptors 
+		setsid();
+		for(i=getdtablesize();i>=0;--i)
+		{
+			close(i);
+		}
+
+		// close standard i/o  
+        	close(STDOUT_FILENO);
+		close(STDIN_FILENO);
+		close(STDERR_FILENO);
 	}
 
-	// close standard i/o  
-        close(STDOUT_FILENO);
-        close(STDIN_FILENO);
-        close(STDERR_FILENO);
-	*/
 
 	// record pid to lockfile
 	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
@@ -372,6 +385,7 @@ void daemonize(void)
 	signal(SIGINT, signal_handler);
 	signal(SIGUSR1,signal_handler);
 }
+
 
 void signal_handler(int sig)
 {
