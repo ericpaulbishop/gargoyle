@@ -13,4 +13,5 @@ fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 fi
+dump_quotas >dev/null 2>&1
 reboot

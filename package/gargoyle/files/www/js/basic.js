@@ -1024,12 +1024,28 @@ function setBridgeVisibility()
 
 function resetData()
 {
+	var removeChannels = [];
 	if(wirelessDriver == "broadcom")
 	{
-		removeOptionFromSelectElement("bridge_channel", "auto", document);
-		removeOptionFromSelectElement("wifi_channel1", "auto", document);
-		removeOptionFromSelectElement("wifi_channel2", "auto", document);
+		//no auto for brcm
+		removeChannels.push("auto");
 	}
+	else
+	{
+		//atheros can't handle channels 12-14
+		removeChannels.push("12");
+		removeChannels.push("13");
+		removeChannels.push("14");
+	}
+	while(removeChannels.length > 0)
+	{
+		var rc = removeChannels.shift();
+		removeOptionFromSelectElement("bridge_channel", rc, document);
+		removeOptionFromSelectElement("wifi_channel1", rc, document);
+		removeOptionFromSelectElement("wifi_channel2", rc, document);
+	}
+
+
 
 	var macElements = [ "bridge_wifi_mac", "wifi_mac" ];
 	var meIndex;
