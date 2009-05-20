@@ -1,16 +1,19 @@
-prefix=/usr
-DESTDIR=
+GHF_LIBS:= -luci -lericstools
+GSV_LIBS:= -lcrypt -lericstools
 
-LIBS:= -luci -lericstools
-
-
-all: gargoyle_header_footer 
+all: gargoyle_header_footer gargoyle_session_validator 
 
 gargoyle_header_footer: gargoyle_header_footer.o  
-	$(CC) $(LDFLAGS) gargoyle_header_footer.o  -o gargoyle_header_footer $(LIBS)
+	$(CC) $(LDFLAGS) gargoyle_header_footer.o  -o gargoyle_header_footer $(GHF_LIBS)
 gargoyle_header_footer.o: gargoyle_header_footer.c
 	$(CC) $(CFLAGS) -c gargoyle_header_footer.c
 
+gargoyle_session_validator: gargoyle_session_validator.o sha256.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(GSV_LIBS)
+
+gargoyle_session_validator.o: gargoyle_session_validator.c
+	$(CC) $(CFLAGS) -c $^ -o $@
+sha256.o: sha256.c
+	$(CC) $(CFLAGS) -c $^ -o $@
 clean:
-	touch gargoyle_header_footer tmp.o tmp~ .tmp.swp
-	rm *.o *~ .*sw* gargoyle_header_footer 
+	rm -rf *.o *~ .*sw* gargoyle_header_footer gargoyle_session_validator sha256 
