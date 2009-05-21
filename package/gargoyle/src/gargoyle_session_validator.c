@@ -78,7 +78,7 @@ int main (int argc, char **argv)
 			if(read > 0)
 			{
 				expired = 1;
-				if(exp_time > now && exp_time - (SESSION_TIMEOUT_MINUTES*60) < now)
+				if(exp_time > now && (exp_time - (SESSION_TIMEOUT_MINUTES*60) - 2) <= now)
 				{
 					expired = 0;
 				}
@@ -89,7 +89,7 @@ int main (int argc, char **argv)
 			char* hashed = get_sha256_hash_hex_str(combined);
 			if(strcmp(hashed, cookie_hash) == 0)
 			{
-				if(expired == 0)
+				if(expired == 0 && read > 0)
 				{
 					valid = 1;
 				}
