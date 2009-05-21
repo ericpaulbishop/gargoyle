@@ -13,5 +13,5 @@
 
 	#prevent brute force attacks by forcing this script to take at least 1 second
 	sleep 1
-	eval $( gargoyle_session_validator -p "$POST_password" )
+	eval $( gargoyle_session_validator -p "$POST_password" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" )
 ?>

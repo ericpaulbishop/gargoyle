@@ -18,12 +18,15 @@ char* get_root_hash(void);
 
 int main (int argc, char **argv)
 {
+	char *password = NULL;
 	char *cookie_hash = NULL;
 	char *cookie_exp = NULL;
-	char *password = NULL;
+	char *user_agent = NULL;
+	char *src_ip = NULL;
+	char *redirect = NULL;
 
 	int next_opt;
-	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:")) != -1)
+	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:")) != -1)
 	{	
 		switch(next_opt)
 		{
@@ -38,6 +41,18 @@ int main (int argc, char **argv)
 			case 'e':
 			case 'E':
 				cookie_exp = strdup(optarg);
+				break;
+			case 'a':
+			case 'A':
+				user_agent = strdup(optarg);
+				break;
+			case 'i':
+			case 'I':
+				src_ip = strdup(optarg);
+				break;
+			case 'r':
+			case 'R':
+				redirect = strdup(optarg);
 				break;
 		}
 	}
@@ -55,7 +70,7 @@ int main (int argc, char **argv)
 		{
 			valid = strcmp( crypt(password, root_hash), root_hash) == 0 ? 1 : 0;
 		}
-		else if(cookie_hash != NULL && cookie_exp != NULL)
+		else if(cookie_hash != NULL && cookie_exp != NULL && user_agent != NULL && src_ip != NULL)
 		{
 			// first check that session hasn't expired
 			time_t exp_time;
@@ -70,7 +85,7 @@ int main (int argc, char **argv)
 			}
 
 			//now check if hash is valid
-			char *combined = dynamic_strcat(2, root_hash, cookie_exp);
+			char *combined = dynamic_strcat(4, root_hash, cookie_exp, user_agent, src_ip);
 			char* hashed = get_sha256_hash_hex_str(combined);
 			if(strcmp(hashed, cookie_hash) == 0)
 			{
@@ -87,14 +102,14 @@ int main (int argc, char **argv)
 			free(hashed);
 			free(combined);
 		}
-		if(valid == 1)
+		if(valid == 1 && src_ip != NULL && user_agent != NULL)
 		{
 			//set new cookie with new timout
 			char* new_hash;
 			char *combined;
 			char new_exp[100] = "";
 			sprintf(new_exp, "%ld", (now+(SESSION_TIMEOUT_MINUTES*60)));
-			combined = dynamic_strcat(2, root_hash, new_exp);
+			combined = dynamic_strcat(4, root_hash, new_exp, user_agent, src_ip);
 			new_hash = get_sha256_hash_hex_str(combined);
 			printf("echo \"Set-Cookie:hash=%s;\"; echo \"Set-Cookie:exp=%s;\"; ", new_hash, new_exp);
 			free(new_hash);
@@ -102,7 +117,7 @@ int main (int argc, char **argv)
 		}
 		else
 		{
-			if(password == NULL)
+			if(redirect != NULL)
 			{
 				//do redirect to login page
 				char exp_str[20] = "";
@@ -110,7 +125,7 @@ int main (int argc, char **argv)
 				{
 					sprintf(exp_str, "?expired=1");
 				}
-				printf("echo \"HTTP/1.1 301 Moved Permanently\" ;echo \"Location: login.sh%s\" ;", exp_str);
+				printf("echo \"HTTP/1.1 301 Moved Permanently\" ;echo \"Location: %s%s\" ;", redirect, exp_str);
 			}
 			else
 			{
