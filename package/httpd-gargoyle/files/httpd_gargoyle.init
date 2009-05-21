@@ -53,6 +53,7 @@ start()
 	config_get default_realm_name "server" default_realm_name
 	config_get default_realm_password_file "server" default_realm_password_file
 	config_get no_password "server" no_password
+	config_get page_not_found_file "server" page_not_found_file
 
 	if [ -z "$web_protocol" ] ; then web_protocol="https" ; fi
 	if [ -z "$http_port" ] ; then http_port=80 ; fi
@@ -61,6 +62,7 @@ start()
 	if [ -z "$default_page_file" ] ; then default_page_file="index.html" ; fi
 	if [ -z "$default_realm_name" ] ; then default_realm_name="Router" ; fi
 	if [ -z "$default_realm_password_file" ] ; then default_realm_password_file="/etc/httpd_gargoyle.password" ; fi
+	if [ -z "$page_not_found_file" ] ; then page_not_found_file="404.html" ; fi
 
 
 	if ! [ -d "$run_dir" ] ; then
@@ -74,9 +76,9 @@ start()
 	## start with both ssl and non-ssl ports
 	if [ "$web_protocol" = "both" ] ; then
 		if [ -n "$no_password" ] ; then
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file" -PNF "$page_not_found_file" 2>/dev/null
 		else
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi	
 	fi
 
@@ -84,19 +86,19 @@ start()
 	## start with ssl
 	if [ "$web_protocol" = "https" ] ; then
 		if [ -n "$no_password" ] ; then
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
 		else
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi
 	fi
 
 	## start without ssl
 	if [ "$web_protocol" = "http" ]  ; then
 		if [ -n "$no_password" ] ; then
-			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file"  2>/dev/null
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
 
 		else
-			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file"  2>/dev/null
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi
 	fi
 }	

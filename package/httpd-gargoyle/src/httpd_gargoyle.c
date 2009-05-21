@@ -240,6 +240,7 @@ static int got_hup;
 static char* defaultRealmName;
 static char* defaultRealmPasswordFile;
 static char* defaultPageFile;
+static char* pageNotFoundFile;
 static unsigned short sslPort; 
 static int listen4s_fd, listen6s_fd;  
 /* end gargoyle variables */
@@ -399,6 +400,7 @@ main( int argc, char** argv )
     defaultRealmName = NULL;
     defaultRealmPasswordFile = NULL;
     defaultPageFile = NULL;
+    pageNotFoundFile = NULL;
     sslPort = 0;
     /* end added gargoyle defaults */
 
@@ -507,6 +509,12 @@ main( int argc, char** argv )
 		++argn;
 		defaultPageFile = argv[argn];
 	}
+	else if( strcmp( argv[argn], "-PNF" ) == 0 && argn + 1 < argc )
+	{
+		++argn;
+		pageNotFoundFile = argv[argn];
+	}
+
 #ifdef USE_SSL
 	else if( strcmp( argv[argn], "-SP" ) == 0 && argn + 1 < argc )
 	{
@@ -1037,9 +1045,9 @@ usage( void )
     {
 	    /*add in gargoyle variables (at the end) here */
 #ifdef USE_SSL
-    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-S use ssl, if no ssl port is specified all connections will be SSL ] [-E certfile] [-SP ssl port ] [-Y cipher] [-p port ] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file]\n", argv0 );
+    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-S use ssl, if no ssl port is specified all connections will be SSL ] [-E certfile] [-SP ssl port ] [-Y cipher] [-p port ] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file] [-PNF Page to load when 404 Not Found error occurs] \n", argv0 );
 #else /* USE_SSL */
-    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-p port] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file]\n", argv0 );
+    (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-p port] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file] [-PNF Page to load when 404 Not Found error occurs]  \n", argv0 );
 #endif /* USE_SSL */
     exit( 1 );
     }
@@ -1193,6 +1201,13 @@ read_config( char* filename )
 		value_required( name, value );
 		defaultPageFile = e_strdup( value );
 	    	}
+	    else if( strcasecmp( name, "page_not_found_file" ) == 0 )
+	    	{
+		value_required( name, value );
+		pageNotFoundFile = e_strdup( value );
+	    	}
+
+
 
 	    /* end gargoyle variables */
 #ifdef USE_SSL
@@ -1522,9 +1537,39 @@ handle_request( int is_ssl, unsigned short conn_port )
 
     r = stat( file, &sb );
     if ( r < 0 )
+    {
 	r = get_pathinfo();
+    }
     if ( r < 0 )
-	send_error( 404, "Not Found", "", "File not found.", is_ssl );
+    {
+	/*
+	FILE* f = fopen("/tmp/test1.tmp", "w");
+	fprintf(f, "not found occured, file=%s\n", file);
+	fclose(f);
+	*/
+
+	if(pageNotFoundFile != NULL)
+	{
+		/*
+		f = fopen("/tmp/test2.tmp", "w");
+		fprintf(f, "not found occured, have pageNotFoundFile = %s\n", pageNotFoundFile);
+		fclose(f);
+		*/
+
+		file=pageNotFoundFile;
+		r = stat( file, &sb );
+		if ( r < 0 )
+		{
+			r = get_pathinfo();
+		}
+	}
+	if(r < 0)
+	{
+		send_error( 404, "Not Found", "", "File not found.", is_ssl );
+	}
+    }
+
+
     file_len = strlen( file );
     if ( ! S_ISDIR( sb.st_mode ) )
 	{
