@@ -6,6 +6,7 @@ config global global
 	option theme		'default'
 	option common_css	'common.css'
 	option common_js	'common.js'
+	require_web_password	'1'
 
 config display display
 	option firewall			'Firewall'

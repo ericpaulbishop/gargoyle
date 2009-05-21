@@ -24,9 +24,10 @@ int main (int argc, char **argv)
 	char *user_agent = NULL;
 	char *src_ip = NULL;
 	char *redirect = NULL;
+	int unconditionally_generate = 0;
 
 	int next_opt;
-	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:")) != -1)
+	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:gG")) != -1)
 	{	
 		switch(next_opt)
 		{
@@ -53,6 +54,10 @@ int main (int argc, char **argv)
 			case 'r':
 			case 'R':
 				redirect = strdup(optarg);
+				break;
+			case 'g':
+			case 'G':
+				unconditionally_generate = 1;
 				break;
 		}
 	}
@@ -101,6 +106,10 @@ int main (int argc, char **argv)
 			}
 			free(hashed);
 			free(combined);
+		}
+		if(unconditionally_generate == 1)
+		{
+			valid = 1;
 		}
 		if(valid == 1 && src_ip != NULL && user_agent != NULL)
 		{

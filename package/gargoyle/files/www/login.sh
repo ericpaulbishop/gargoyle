@@ -7,11 +7,17 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	
 	valid=$( eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR"  ) | grep "Set-Cookie" )
+	require=$(uci get gargoyle.global.require_web_password)
+	if [ "$require" = "0" ] ; then
+		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR"  ) 
+		valid="1"
+	fi
 	if [ -n "$valid" ] ; then
 		echo "HTTP/1.1 301 Moved Permanently" 
 		echo "Location: overview.sh"
 		exit
 	fi
+
 	gargoyle_header_footer -h  -c "internal.css" -j "login.js"
 ?>
 
