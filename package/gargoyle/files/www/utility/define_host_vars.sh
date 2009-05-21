@@ -1,3 +1,6 @@
+
+
+
 echo "dhcpLeaseLines = new Array();"
 if [ -e /tmp/dhcp.leases ] ; then
 	cat /tmp/dhcp.leases | awk '{print "dhcpLeaseLines.push(\""$0"\");"}'

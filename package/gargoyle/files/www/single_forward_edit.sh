@@ -6,6 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" )
 	gargoyle_header_footer -m  -c "internal.css" -j "port_forwarding.js table.js"
 ?>
 <fieldset id="edit_container">
