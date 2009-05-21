@@ -13,5 +13,6 @@ fi
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 fi
-dump_quotas >dev/null 2>&1
+dump_quotas >/dev/null 2>&1
+date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
 reboot

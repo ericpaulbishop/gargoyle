@@ -312,7 +312,29 @@ insert_restriction_rules()
 	config_foreach parse_rule_config "restriction_rule"
 }
 
+restore_time_backup()
+{
+	#set backup date if it exists
+	#this makes sure we're in the same ballpark
+	#as the correct time (e.g. probably right year,maybe right day/hour)
+	if [ -e "/usr/data/time_backup" ] ; then
+		date -u -s $(cat /usr/data/time_backup)
+	fi
 
+	#set cron to periodically backup date
+	touch /etc/crontabs/root
+	cat /etc/crontabs/root | grep -v "time_backup" > /tmp/new_cron
+	echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /tmp/new_cron
+	
+	#only restart cron if it is currently running
+	#since we initialize this before cron, this will
+	#make sure we don't start cron twice at boot
+	cron_active=$(ps | grep "crond" | grep -v "grep" )
+	if [ -n "$cron_active" ] ; then
+		/etc/init.d/cron restart
+	fi
+
+}
 
 initialize_quotas()
 {
@@ -339,7 +361,7 @@ initialize_quotas()
 	quota_sections=$(uci show $quota_package | grep "quota$" | sed 's/^.*\.//g' | sed 's/=.*$//g')
 	if [ -z "$wan_if" ] || [ -z "$quota_sections" ]  ; then 
 		if [ -e "/etc/crontabs/root" ] ; then
-			cat /etc/crontabs/root | grep -v "dump_quotas" >> /tmp/new_cron
+			cat /etc/crontabs/root | grep -v "dump_quotas" > /tmp/new_cron
 			mv /tmp/new_cron /etc/crontabs/root
 			cron_active=$(ps | grep "crond" | grep -v "grep" )
 			if [ -n "$cron_active" ] ; then
@@ -439,7 +461,7 @@ initialize_quotas()
 
 	mkdir -p /etc/crontabs
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "dump_quotas" >> /tmp/new_cron
+	cat /etc/crontabs/root | grep -v "dump_quotas" > /tmp/new_cron
 	echo '0 0,4,8,12,16,20 * * * /usr/bin/dump_quotas >/dev/null 2>&1' >> /tmp/new_cron
 	mv /tmp/new_cron /etc/crontabs/root
 	/etc/init.d/cron enable
@@ -457,6 +479,7 @@ initialize_quotas()
 initialize_firewall()
 {
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
+	restore_time_backup
 	insert_remote_accept_rules
 	insert_pf_loopback_rules
 	insert_dmz_rule

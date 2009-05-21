@@ -6,7 +6,7 @@ start()
 	/usr/bin/set_kernel_timezone
 	mkdir -p /etc/crontabs
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "set_kernel_timezone" >> /tmp/new_cron
+	cat /etc/crontabs/root | grep -v "set_kernel_timezone" > /tmp/new_cron
 	echo '0,1,11,21,31,41,51 * * * * /usr/bin/set_kernel_timezone >/dev/null 2>&1' >> /tmp/new_cron
 	mv /tmp/new_cron /etc/crontabs/root
 	/etc/init.d/cron enable
