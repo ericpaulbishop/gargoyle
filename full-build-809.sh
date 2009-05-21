@@ -20,7 +20,7 @@ netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_mod
 # set svn revesion number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 8.09 branch
-rnum=15488
+#rnum=15488
 
 
 targets=$(ls $targets_dir 2>/dev/null)
