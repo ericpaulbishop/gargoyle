@@ -78,7 +78,7 @@ function saveChanges()
 	}
 	
 	commands.push("uci commit");	
-	commands.push("sh " + gargoyleBinRoot + "/utility/restart_firewall.sh");
+	commands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
 	commands.push("");
 
 	var param = getParameterDefinition("commands", commands.join("\n"));

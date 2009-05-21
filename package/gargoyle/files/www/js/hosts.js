@@ -19,7 +19,7 @@ function reloadVariables()
 	if(!updateInProgress)
 	{
 		updateInProgress = true;
-		var param = getParameterDefinition("commands", "sh /www/utility/define_host_vars.sh"); 
+		var param = getParameterDefinition("commands", "sh /usr/lib/gargoyle/define_host_vars.sh"); 
 		var stateChangeFunction = function(req) 
 		{ 
 			if(req.readyState == 4) 

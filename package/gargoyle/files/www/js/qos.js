@@ -14,7 +14,7 @@ function saveChanges()
 	commands = "";
 	errors = "";
 
-	restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
+	restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
 	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	

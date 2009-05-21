@@ -12,7 +12,7 @@ function reboot()
 {
 	setControlsEnabled(false, true, "System Is Now Rebooting");
 	
-	var commands = "\nsh /www/utility/reboot.sh\n";
+	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
 	{

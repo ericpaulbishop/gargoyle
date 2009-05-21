@@ -110,7 +110,7 @@ function saveChanges()
 
 		firewallSectionCommands.push("uci commit");
 			
-		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
+		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
 
 
 		//upnp

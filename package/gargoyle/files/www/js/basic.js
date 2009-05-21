@@ -640,14 +640,14 @@ function saveChanges()
 		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
 		if(oldLanIp != currentLanIp && oldLanIp != "" && currentLanIp != "")
 		{
-			adjustIpCommands = "\nsh " + gargoyleBinRoot + "/utility/update_router_ip.sh " + oldLanIp + "  " + currentLanIp;
+			adjustIpCommands = "\nsh /usr/lib/gargoyle/update_router_ip.sh " + oldLanIp + "  " + currentLanIp;
 		}
 
 		var commands = uci.getScriptCommands(uciCompare);
-		var restartNetworkCommand = (wirelessDriver== "broadcom" ? "\niwconfig wl0 txpower 31\n" : "") + "sh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n" ;
+		var restartNetworkCommand = (wirelessDriver== "broadcom" ? "\niwconfig wl0 txpower 31\n" : "") + "sh /usr/lib/gargoyle/restart_network.sh ;\n" ;
 		if(doReboot)
 		{
-			restartNetworkCommand = "\nsh " + gargoyleBinRoot +"/utility/reboot.sh ;\n";
+			restartNetworkCommand = "\nsh /usr/lib/gargoyle/reboot.sh ;\n";
 		}
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
 

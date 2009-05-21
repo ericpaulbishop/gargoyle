@@ -110,7 +110,7 @@ function saveChanges()
 
 		
 		
-		restartFirewallCommand = "\nsh " + gargoyleBinRoot + "/utility/restart_firewall.sh ;\n";
+		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
 		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
 		//document.getElementById("output").value = commands;
 

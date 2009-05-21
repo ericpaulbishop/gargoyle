@@ -11,7 +11,7 @@ var globalLanIp;
 function getBackup()
 {
 	setControlsEnabled(false, true, "Preparing Backup File");
-	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/create_backup.sh ;\n" );
+	var param = getParameterDefinition("commands", "sh /usr/lib/gargoyle/create_backup.sh ;\n" );
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
@@ -61,7 +61,7 @@ function restoreSuccessful(lanIp)
 	
 	globalLanIp = lanIp;
 
-	var param = getParameterDefinition("commands", "sh " + gargoyleBinRoot + "/utility/reboot.sh ;\n" );
+	var param = getParameterDefinition("commands", "sh /usr/lib/gargoyle/reboot.sh ;\n" );
 	var stateChangeFunction = function(req) { return 0; } ;
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 

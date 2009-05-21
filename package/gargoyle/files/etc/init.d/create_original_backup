@@ -4,7 +4,7 @@ START=41
 
 start() {
 	/etc/init.d/create_original_backup disable
-	sh /www/utility/create_backup.sh
+	sh /usr/lib/gargoyle/create_backup.sh
 	mkdir /etc/original_backup
 	cp /tmp/backup/backup.tar.gz /etc/original_backup/backup.tar.gz
 }

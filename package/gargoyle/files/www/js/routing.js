@@ -41,7 +41,7 @@ function saveChanges()
 		if(netmask != ""){ uci.set("network", routeId, "netmask", netmask); }
 	}
 	
-	commands = removeCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal)  +  (wirelessDriver == "broadcom" ? "\nsh " + gargoyleBinRoot + "/utility/restart_network.sh ;\n"  : "\nsh " + gargoyleBinRoot + "/utility/reboot.sh ;\n" );
+	commands = removeCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal)  +  "\nsh /usr/lib/gargoyle/restart_network.sh ;\n";
 ;
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)

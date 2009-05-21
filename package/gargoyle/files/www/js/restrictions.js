@@ -52,7 +52,7 @@ function saveChanges()
 	createSectionCommands.push("uci commit");
 	
 
-	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n" + "sh /www/utility/restart_firewall.sh";
+	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n" + "sh /usr/lib/gargoyle/restart_firewall.sh";
 
 	var param = getParameterDefinition("commands", commands);
 	var stateChangeFunction = function(req)
