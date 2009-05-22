@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" )
-	gargoyle_header_footer -h -s "about" -p "" -c "internal.css" -j ""
+	gargoyle_header_footer -h -s "system" -p "about" -c "internal.css" -j ""
 ?>
 
 
@@ -63,5 +63,5 @@
 </fieldset>
 
 <?
-	gargoyle_header_footer -f -s "about" -p ""
+	gargoyle_header_footer -f -s "system" -p "about"
 ?>

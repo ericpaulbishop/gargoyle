@@ -34,7 +34,8 @@ config display display
 	option system_backup		'Backup / Restore'
 	option system_update		'Update Firmware'
 	option system_reboot		'Reboot'
-	option about			'About'
+	option system_about		'About'
+	option logout			'Logout'
 
 config scripts scripts
 	option firewall_portforwarding	'port_forwarding.sh'
@@ -58,7 +59,8 @@ config scripts scripts
 	option system_backup		'backup.sh'
 	option system_update		'update.sh'
 	option system_reboot		'reboot.sh'
-	option about			'about.sh'
+	option system_about		'about.sh'
+	option logout			'logout.sh'
 
 config 300 firewall
 	option portforwarding	'100'
@@ -87,8 +89,9 @@ config 400 system
 	option backup	'400'
 	option update	'500'
 	option reboot	'600'
+	option about	'1000'
 
-config 500 about
+config 500 logout
 
 config help help
 	option ddns_1		1

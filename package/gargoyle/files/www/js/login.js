@@ -19,6 +19,7 @@ function doLogin()
 		
 		sessionExpired=false;
 		passInvalid=false;
+		loggedOut=false;
 
 		var param = getParameterDefinition("password", password);
 		var stateChangeFunction = function(req)
@@ -58,15 +59,19 @@ function setStatus()
 {
 	if(sessionExpired)
 	{
-		setChildText("login_status", "Session Expired");
+		setChildText("login_status", "Session Expired", "red");
 	}
 	else if(passInvalid)
 	{
-		setChildText("login_status", "Invalid Password");
+		setChildText("login_status", "Invalid Password", "red");
+	}
+	else if(loggedOut)
+	{
+		setChildText("login_status", "Logged Out", "black");
 	}
 	else
 	{
-		setChildText("login_status", "");
+		setChildText("login_status", "", "black");
 	}
 	
 }

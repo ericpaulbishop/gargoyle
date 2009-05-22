@@ -412,14 +412,21 @@ function fullEscape(str)
 
 
 
-function setChildText(parentId, text)
+function setChildText(parentId, text, color)
 {
 	parentElement = document.getElementById(parentId);
-	if(parentElement.firstChild != null)
+	if(parentElement != null)
 	{
-		parentElement.removeChild(parentElement.firstChild);
+		if(color != null)
+		{
+			parentElement.style.color = color;
+		}
+		if(parentElement.firstChild != null)
+		{
+			parentElement.removeChild(parentElement.firstChild);
+		}
+		parentElement.appendChild(document.createTextNode(text));
 	}
-	parentElement.appendChild(document.createTextNode(text));
 }
 
 function createInput(type, controlDocument)

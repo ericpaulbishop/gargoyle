@@ -32,6 +32,12 @@ var passInvalid = false;
 	else
 		echo "var sessionExpired = false;"
 	fi
+	if [ "$FORM_logout" = "1" ] ; then
+		echo "var loggedOut = true;"
+	else
+		echo "var loggedOut = false;"
+	fi
+
 ?>
 //-->
 </script>
@@ -40,7 +46,7 @@ var passInvalid = false;
 
 <fieldset>
 	<legend class="sectionheader">Login</legend>
-	<span class="leftcolumn" style="color:red">
+	<span class="leftcolumn" >
 		<p>
 			<strong>
 				<span id="login_status"></span>
