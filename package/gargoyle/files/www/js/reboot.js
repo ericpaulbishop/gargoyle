@@ -13,7 +13,8 @@ function reboot()
 	setControlsEnabled(false, true, "System Is Now Rebooting");
 	
 	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
-	var param = getParameterDefinition("commands", commands);
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4){}

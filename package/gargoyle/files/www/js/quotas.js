@@ -81,7 +81,8 @@ function saveChanges()
 	commands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
 	commands.push("");
 
-	var param = getParameterDefinition("commands", commands.join("\n"));
+	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+;
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)

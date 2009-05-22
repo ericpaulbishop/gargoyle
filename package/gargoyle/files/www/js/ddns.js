@@ -35,7 +35,8 @@ function saveChanges()
 	
 	commands =  deleteCommands.join("\n") + "\n" + createCommands + "\n" + testCommands.join("\n");
 	//document.getElementById("output").value = commands;
-	var param = getParameterDefinition("commands", commands);
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 	
 
 	var stateChangeFunction = function(req)
@@ -95,7 +96,8 @@ function saveChangesPart2(response)
 	}
 
 	commands =  deleteCommands.join("\n") + "\n" + "/etc/init.d/ddns_gargoyle enable\n" + "/etc/init.d/ddns_gargoyle restart\n" + getUpdateTimeCommands.join("\n");
-	var param = getParameterDefinition("commands", commands);
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+;
 
 	var stateChangeFunction = function(req)
 	{
@@ -477,7 +479,8 @@ function forceUpdateForRow()
 		setControlsEnabled(false, true);
 		commands = "/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf -m -f " + sectionName;
 		commands = commands + "\n" + "echo $(cat /var/last_ddns_updates/" + sectionName + ") ";
-		var param = getParameterDefinition("commands", commands);
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 
 		var stateChangeFunction = function(req)
 		{

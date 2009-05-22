@@ -55,12 +55,10 @@
 				<input type='text' class='rightcolumn' id='remote_https_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 			</div>
 		</div>
-<!--
 		<div class="nocolumn">
 			<input type='checkbox' id='disable_web_password' />
 			<label id='disable_web_password_label' for='disable_web_password'>Disable password protection of web interface</label> <em>(Not Recommended!)</em>
 		</div>
--->
 
 	</fieldset>
 

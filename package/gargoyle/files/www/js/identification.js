@@ -39,7 +39,7 @@ function saveChanges()
 		//document.getElementById("output").value = commands;
 
 
-		var param = getParameterDefinition("commands", commands);
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
@@ -48,6 +48,7 @@ function saveChanges()
 				resetData();
 				setControlsEnabled(true);
 				//alert(req.responseText);
+				window.location.href=window.location.href; //need to reload to refresh section names which may have changed
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);

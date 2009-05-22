@@ -85,7 +85,7 @@ function saveChanges()
 		//document.getElementById("output").value = commands;
 
 
-		var param = getParameterDefinition("commands", commands);
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
@@ -158,7 +158,7 @@ function clearHistory()
 			}
 		}
 	}
-	var param = getParameterDefinition("commands", commands);
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
 
@@ -285,7 +285,7 @@ function updateMonitorTable()
 	{
 		updateInProgress = true;
 		var commands="/usr/sbin/webmon_gargoyle";
-		var param = getParameterDefinition("commands", commands);
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)

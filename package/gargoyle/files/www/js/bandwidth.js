@@ -117,7 +117,8 @@ function getEmbeddedSvgPlotFunction(embeddedId)
 function loadTotalTableData()
 {
 	//setup table
-	var param = getParameterDefinition("monitor", "total-upload-1y  total-download-1y" );
+	var param = getParameterDefinition("monitor", "total-upload-1y  total-download-1y" )  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 	var stateChangeFunction = function(dailyReq)
 	{
 		var monitors=null;
@@ -377,7 +378,8 @@ function doUpdate()
 
 		var monitorNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ");
 
-		var param = getParameterDefinition("monitor", monitorNames);
+		var param = getParameterDefinition("monitor", monitorNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 		var stateChangeFunction = function(req)
 		{
 			var monitors=null;

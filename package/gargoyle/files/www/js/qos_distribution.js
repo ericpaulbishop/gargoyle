@@ -130,7 +130,8 @@ function updatePieCharts()
 				monitorNames.push("qos-" + direction + "-" + classIdList[classIndex] + "-" + timeFrame);
 			}
 		}
-		var param = getParameterDefinition("monitor", monitorNames.join(" "));
+		var param = getParameterDefinition("monitor", monitorNames.join(" ")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 
 		var stateChangeFunction = function(req)
 		{

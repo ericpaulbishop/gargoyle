@@ -508,7 +508,8 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 	}
 
 	// we don't wait/notify user on completion so update seems instant
-	var param = getParameterDefinition("commands", command);
+	var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; }); 
 }
 

@@ -77,18 +77,15 @@ function saveChanges()
 
 
 
-		/*
 		//set web password enabled/disabled
 		if(document.getElementById("disable_web_password").checked)
 		{
-			uci.set("httpd_gargoyle", "server", "no_password", "1");
+			uci.set("gargoyle", "global", "require_web_password", "0");
 		}
 		else
 		{
-			uci.remove("httpd_gargoyle", "server", "no_password");
-
+			uci.set("gargoyle", "global", "require_web_password", "1");
 		}
-		*/
 
 		//set local web protocols
 		localWebProtocol = getSelectedValue("local_web_protocol");
@@ -119,7 +116,8 @@ function saveChanges()
 
 
 		stopRedirect = false;
-		var param = getParameterDefinition("commands", commands);
+		var param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
@@ -219,7 +217,7 @@ function proofreadAll()
 
 function resetData()
 {
-	//document.getElementById("disable_web_password").checked = uciOriginal.get("httpd_gargoyle", "server", "no_password") == "1" ? true : false;
+	document.getElementById("disable_web_password").checked = uciOriginal.get("gargoyle", "global", "require_web_password") == "0" ? true : false;
 	
 	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
 	httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
