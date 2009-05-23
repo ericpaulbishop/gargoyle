@@ -623,6 +623,7 @@ function saveChanges()
 		//this code is the same for both router & bridge
 		//we set from lan table, but we keep bridge & lan dns tables synchronized
 		//so they should be identical
+		uci.remove('network', 'wan', 'dns'); 
 		var lanGateway = uci.get("network", "lan", "gateway");
 		lanGateway = lanGateway == "" ? uci.get("network", "lan", "ipaddr") : lanGateway;
 		var dns = lanGateway;
@@ -633,8 +634,15 @@ function saveChanges()
 			var dnsIndex=0;
 			for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++) { dnsList.push(dnsData[dnsIndex][0]); }
 			dns = dnsList.length > 0 ? dnsList.join(" ") : dns;
+			
+			//if a wan is active and we have custom DNS settings, propagate to the wan too
+			if( document.getElementById("global_gateway").checked && uci.get("network", "wan", "") != "" && dns != lanGateway)
+			{
+				uci.set("network", "wan", "dns", dns);
+			}
 		}
 		uci.set("network", "lan", "dns", dns);
+		
 
 
 		var oldLanIp = uciOriginal.get("network", "lan", "ipaddr");
@@ -1222,7 +1230,7 @@ function resetData()
 	document.getElementById("wan_pppoe_reconnect_mode").value = reconnect_mode;
 	
 	//initialize dns table
-	var origDns = uciOriginal.get("netowrk", "lan", "dns").split(/[\t ]+/);
+	var origDns = uciOriginal.get("network", "lan", "dns").split(/[\t ]+/);
 	var routerIp = uciOriginal.get("network", "lan", "ipaddr");
 	var dIndex = 0;
 	var dnsTableData = [];
