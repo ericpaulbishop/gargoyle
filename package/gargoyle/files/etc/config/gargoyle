@@ -7,6 +7,7 @@ config global global
 	option common_css	'common.css'
 	option common_js	'common.js'
 	option require_web_password	'1'
+	option is_first_boot		'1'
 
 config display display
 	option firewall			'Firewall'

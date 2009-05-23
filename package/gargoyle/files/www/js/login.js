@@ -44,8 +44,7 @@ function doLogin()
 							document.cookie=cookie;	
 						}
 					}
-					currentProtocol = window.location.href.match(/^https:/) ? "https" : "http";
-					window.location.href = currentProtocol + "://" + window.location.host + "/overview.sh";
+					window.location.href = window.location.href;
 				}
 				setControlsEnabled(true);
 					

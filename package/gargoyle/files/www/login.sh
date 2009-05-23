@@ -13,8 +13,13 @@
 		valid="1"
 	fi
 	if [ -n "$valid" ] ; then
+		firstboot=$( uci get gargoyle.global.is_first_boot 2>/dev/null )
 		echo "HTTP/1.1 301 Moved Permanently" 
-		echo "Location: overview.sh"
+		if [ "$firstboot" = "1" ] ; then
+			echo "Location: firstboot.sh"
+		else
+			echo "Location: overview.sh"
+		fi
 		exit
 	fi
 
