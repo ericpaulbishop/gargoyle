@@ -22,6 +22,19 @@
 		fi
 		exit
 	fi
+	dump_quotas
+	quotas=$(uci show firewall | grep "=quota$" | sed 's/^.*\.//g' | sed 's/=.*$//g' )
+	allq=""
+	ipq=""
+	for q in $quotas ; do
+		ip=$(uci get firewall.$q.ip 2>/dev/null)
+		if [ "$ip" = "ALL" ] ; then
+			allq="$q"
+		fi
+		if [ "$ip" = "$REMOTE_ADDR" ] ; then
+			ipq="$q"
+		fi
+	done
 
 	gargoyle_header_footer -h  -c "internal.css" -j "login.js"
 ?>
@@ -42,7 +55,14 @@ var passInvalid = false;
 	else
 		echo "var loggedOut = false;"
 	fi
-
+	echo "var allq= [];"
+	echo "var ipq= [];"
+	if [ -n "$allq" ] ; then
+		uci show "firewall.$allq" | sed 's/^/allq.push("'/g | sed 's/$/");/g'
+	fi
+	if [ -n "$ipq" ] ; then
+		uci show "firewall.$ipq" | sed 's/^/ipq.push("'/g | sed 's/$/");/g'
+	fi
 ?>
 //-->
 </script>
@@ -67,12 +87,27 @@ var passInvalid = false;
 	</div>
 	
 </fieldset>
+<fieldset id="your_quota" style="display:none">
+	<legend class="sectionheader">Your Quota</legend>
+	<div class="nocolumn" id="up_your_quota_container"><p id="up_your_quota"></p></div>
+	<div class="nocolumn" id="down_your_quota_container"><p id="down_your_quota"></p></div>
+	<div class="nocolumn" id="combined_your_quota_container"><p id="combined_your_quota"></p></div>
+
+</fieldset>
+<fieldset id="network_quota" style="display:none">
+	<legend class="sectionheader">Entire Network Quota</legend>
+	<div class="nocolumn" id="up_all_quota_container"><p id="up_all_quota"></p></div>
+	<div class="nocolumn" id="down_all_quota_container"><p id="down_all_quota"></p></div>
+	<div class="nocolumn" id="combined_all_quota_container"><p id="combined_all_quota"></p></div>
+
+</fieldset>
+
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
 <script>
 <!--
-	setStatus();
+	setStatusAndQuotas();
 //-->
 </script>
 	
