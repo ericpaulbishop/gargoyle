@@ -1560,7 +1560,7 @@ function addMacToFilter()
 function scanWifi(ssidField)
 {
 	setControlsEnabled(false, true, "Scanning For Wifi Networks");
-	var param = getParameterDefinition("commands", "")  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var param = getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 	var stateChangeFunction = function(req)
 	{
