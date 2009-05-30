@@ -358,11 +358,12 @@ initialize_quotas()
 	iptables -t mangle -I OUTPUT  1 -o $wan_if -j egress_quotas
 	iptables -t mangle -I OUTPUT  2 -o $wan_if -j combined_quotas
 
+	no_death_mark_test=" -m connmark --mark 0x0/$death_mask "
 	iptables -t mangle -I FORWARD -j forward_quotas
-	iptables -t mangle -A forward_quotas -i $wan_if -j ingress_quotas
-	iptables -t mangle -A forward_quotas -o $wan_if -j egress_quotas
-	iptables -t mangle -A forward_quotas -i $wan_if -j CONNMARK --set-mark 0xFF000000/0xFF000000
-	iptables -t mangle -A forward_quotas -o $wan_if -j CONNMARK --set-mark 0xFF000000/0xFF000000
+	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j ingress_quotas
+	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j egress_quotas
+	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j CONNMARK --set-mark 0xFF000000/0xFF000000
+	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j CONNMARK --set-mark 0xFF000000/0xFF000000
 	iptables -t mangle -A forward_quotas -m connmark --mark 0xFF000000/0xFF000000 -j combined_quotas
 	iptables -t mangle -A forward_quotas -j CONNMARK --set-mark 0x0/0xFF000000
 
