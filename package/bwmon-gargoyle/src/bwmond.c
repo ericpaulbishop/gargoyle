@@ -6,7 +6,7 @@
  * 			http://www.gargoyle-router.com
  * 		  
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008,2009 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -94,6 +94,7 @@ bw_monitor** initialize_monitors(bw_monitor** potential_monitors);
 void load_monitor_history_from_file(bw_monitor* monitor);
 FILE* open_monitor_backup_file(bw_monitor* monitor, const char* open_mode);
 
+int get_minutes_west(void);
 
 
 update_node get_next_update_time(bw_monitor** monitors, int monitor_index);
@@ -230,6 +231,7 @@ int main( int argc, char** argv )
 	while(terminated == 0)
 	{
 		time_t current_time = time(NULL);
+		int current_minutes_west = get_minutes_west();
 		if(current_time != last_checked)
 		{
 			last_checked = current_time;
@@ -318,7 +320,7 @@ int main( int argc, char** argv )
 		}
 
 		
-		//if we just jumped more than 25 minutes (i.e. date/time was reset -- usually done in increments of hours) , reset all times
+		//if we just jumped more than 25 minutes (i.e. date/time was reset dramatically) , reset all times
 		time_t time_test2 = time(NULL);
 		if( time_test2 - current_time > 25*60 || time_test2 < current_time)
 		{
@@ -352,6 +354,127 @@ int main( int argc, char** argv )
 				push_priority_queue_node(new_update_queue, p);
 			}
 
+			long num_destroyed;
+			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			update_queue = new_update_queue;
+		}
+
+
+		//if timezone was just reset, deal with it
+		int new_minutes_west = get_minutes_west();
+		if(new_minutes_west != current_minutes_west)
+		{
+			printf("adjusting for timezone, time being adjusted by %d minutes\n", (new_minutes_west - current_minutes_west) );
+
+			long adjustment_seconds = (new_minutes_west - current_minutes_west)*60;
+			priority_queue* new_update_queue = initialize_priority_queue();
+			while(update_queue->length > 0)
+			{
+				unsigned long priority;
+				priority_queue_node *p = shift_priority_queue_node(update_queue);
+				update_node* next_update = (update_node*)p->value;
+				bw_monitor* monitor = monitors[ next_update->monitor_index ];
+				if(monitor->interval_end > 0) //only out of whack if we update with specific interval_end, otherwise non-timezone-specific
+				{
+					/* CASE1: the correct time is now after it was (e.g. it was 2, it is now 4, we measure at 3 -> we SKIPPED a measurement
+					 *        solution: add a measurement, must still add a measurement if no measurements exist
+					 * CASE2: the correct time is now before it was (e.g. it was 4, it is now 2, we measure at 3 -> TOO MANY measurements
+					 *        solution: remove a measurement, if no measurements exist don't bother
+					 */
+					
+					printf("For %s, old next_update=%d\n", monitor->name, p->priority + reference_time);	
+					
+					/* let's pretend we measured at the right time points instead of the wrong ones for this time zone*/	
+					bw_history* history = monitor->history;
+					time_t oldest_start = history->oldest_interval_start == 0 ? monitor->last_update + adjustment_seconds : history->oldest_interval_start + adjustment_seconds ;
+					time_t oldest_end = history->oldest_interval_end == 0 ? get_next_interval_end(monitor->last_update +adjustment_seconds, monitor->interval_end) : history->oldest_interval_end + adjustment_seconds;
+					printf("history->oldest_start = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_start = %d\n", history->oldest_interval_start, monitor->last_update, adjustment_seconds, oldest_start);
+					printf("history->oldest_end = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_end = %d\n", history->oldest_interval_end, monitor->last_update, adjustment_seconds, oldest_end);
+					
+					int increment;
+					if(monitor->interval_end > 0)
+					{
+						time_t time1 = get_next_interval_end(monitor->last_update, monitor->interval_end);
+						time_t time2 = get_next_interval_end(time1, monitor->interval_end);
+						increment = time2 - time1;
+					}
+					else //shouldn't be possible... but code was copied & pasted, and it works, so what the hell?
+					{
+						increment = monitor->interval_length;
+					}
+
+
+					bw_history* new_history = initialize_history();
+					int node_num = 0;
+					time_t next_start = oldest_start;
+					time_t next_end = oldest_end;
+					
+					
+				
+
+					while(history->length > 0)
+					{
+						history_node* old_node = pop_history(history);						
+						if(next_end < current_time)
+						{
+							printf("Adjusting for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+							push_history(new_history, old_node, next_start, next_end);
+						}
+						else 
+						{
+							if(next_start < current_time)
+							{
+								monitor->accumulator_count = old_node->bandwidth;
+							}
+							free(old_node);
+						}
+						node_num++;
+						next_start = oldest_end +((node_num-1)*increment);
+						next_end = oldest_end + (node_num*increment);
+					}
+
+					printf("After adjust, before add for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+
+					while(next_end < current_time)
+					{
+						printf("Adding for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+						history_node* next_node = (history_node*)malloc(sizeof(history_node));
+						next_node->bandwidth = monitor->accumulator_count > 0 ? monitor->accumulator_count : -1;
+						monitor->accumulator_count = 0;
+						push_history(new_history, next_node, next_start, next_end);
+						monitor->accumulator_count = 0;
+				
+						//pop off & free nodes that are too old
+						while(new_history->length > monitor->history_length)
+						{
+							history_node* old_node = pop_history(new_history);
+							free(old_node);
+						}
+
+						node_num++;
+						next_start = oldest_end +((node_num-1)*increment);
+						next_end = oldest_end + (node_num*increment);
+					}
+
+					free(history);
+					monitor->history = new_history;
+					monitor->last_update = monitor->last_update + adjustment_seconds;
+					if(monitor->accumulator_freq > 0)
+					{
+						monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+					}
+
+				
+					
+					*next_update = get_next_update_time(monitors, next_update->monitor_index); //gets calculated correctly since we set monitor->last_update correctly above
+					priority = next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
+					p->priority = priority;
+					
+					printf("For %s, new next_update=%d\n", monitor->name, priority + reference_time);	
+				}
+				push_priority_queue_node(new_update_queue, p);
+			}
+			
 			long num_destroyed;
 			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			update_queue = new_update_queue;
@@ -801,6 +924,58 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			}
 			free(history);
 		}
+		else if(current_time < last_update)
+		{
+			int increment;
+			if(monitor->interval_end > 0)
+			{
+				time_t time1 = get_next_interval_end(last_update, monitor->interval_end);
+				time_t time2 = get_next_interval_end(time1, monitor->interval_end);
+				increment = time2 - time1;
+			}
+			else
+			{
+				increment = monitor->interval_length;
+			}
+
+			//we don't want to completely whack all old data, but something is definitely FUBAR if we're getting data in the future
+			//hope it's vaguely correct, and delete data after current time
+			bw_history* new_history = initialize_history();
+			monitor->accumulator_count = 0;
+			int node_num = 0;
+			while(history->length > 0)
+			{
+				history_node* old_node = pop_history(history);
+				int next_start;
+				int next_end;
+				if(node_num == 0)
+				{
+					next_start = oldest_start;
+					next_end = oldest_end;
+				}
+				else
+				{
+					next_start = oldest_end +((node_num-1)*increment);
+					next_end = oldest_end + (node_num*increment);
+				}
+				if(next_end < current_time)
+				{
+					push_history(new_history, old_node, next_start, next_end);
+				}
+				else if(next_start < current_time)
+				{
+					monitor->accumulator_count = old_node->bandwidth;
+				}
+
+				free(old_node);
+				node_num++;
+			}
+			free(history);
+			
+			bw_history* old_history = monitor->history;
+			monitor->history = new_history;
+			free(old_history);
+		}
 		else
 		{
 			//add nodes with undefined (-1) bandwidth until we're up to date
@@ -821,6 +996,7 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 				history_node* old_node = pop_history(history);
 				free(old_node);
 			}
+
 			
 			//update monitor
 			monitor->last_update = history->recent_interval_end;
@@ -1450,3 +1626,37 @@ int* parse_comma_list(char* list)
 	return values;
 }
 
+
+int get_minutes_west(void)
+{
+	time_t now;
+	struct tm* utc_info;
+	struct tm* tz_info;
+	int utc_day;
+	int utc_hour;
+	int utc_minute;
+	int tz_day;
+	int tz_hour;
+	int tz_minute;
+	int minuteswest;
+
+	struct timeval tv;
+	struct timezone old_tz;
+	struct timezone new_tz;
+
+	time(&now);
+	utc_info = gmtime(&now);
+	utc_day = utc_info->tm_mday;
+	utc_hour = utc_info->tm_hour;
+	utc_minute = utc_info->tm_min;
+	tz_info = localtime(&now);
+	tz_day = tz_info->tm_mday;
+	tz_hour = tz_info->tm_hour;
+	tz_minute = tz_info->tm_min;
+
+	utc_day = utc_day < tz_day  - 1 ? tz_day  + 1 : utc_day;
+	tz_day =  tz_day  < utc_day - 1 ? utc_day + 1 : tz_day;
+	
+	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
+	return minuteswest;
+}

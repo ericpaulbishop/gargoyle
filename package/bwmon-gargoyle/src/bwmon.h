@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/time.h>
 
 #include <getopt.h>
 #include <sys/errno.h>
