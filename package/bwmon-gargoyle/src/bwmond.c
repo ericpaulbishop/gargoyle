@@ -364,7 +364,7 @@ int main( int argc, char** argv )
 		int new_minutes_west = get_minutes_west();
 		if(new_minutes_west != current_minutes_west)
 		{
-			printf("adjusting for timezone, time being adjusted by %d minutes\n", (new_minutes_west - current_minutes_west) );
+			//printf("adjusting for timezone, time being adjusted by %d minutes\n", (new_minutes_west - current_minutes_west) );
 
 			long adjustment_seconds = (new_minutes_west - current_minutes_west)*60;
 			priority_queue* new_update_queue = initialize_priority_queue();
@@ -374,7 +374,7 @@ int main( int argc, char** argv )
 				priority_queue_node *p = shift_priority_queue_node(update_queue);
 				update_node* next_update = (update_node*)p->value;
 				bw_monitor* monitor = monitors[ next_update->monitor_index ];
-				if(monitor->interval_end > 0) //only out of whack if we update with specific interval_end, otherwise non-timezone-specific
+				if(monitor->interval_end > 0 ) //only out of whack if we update with specific interval_end, otherwise non-timezone-specific
 				{
 					/* CASE1: the correct time is now after it was (e.g. it was 2, it is now 4, we measure at 3 -> we SKIPPED a measurement
 					 *        solution: add a measurement, must still add a measurement if no measurements exist
@@ -382,14 +382,20 @@ int main( int argc, char** argv )
 					 *        solution: remove a measurement, if no measurements exist don't bother
 					 */
 					
-					printf("For %s, old next_update=%d\n", monitor->name, p->priority + reference_time);	
+					//printf("For %s, old next_update=%d\n", monitor->name, p->priority + reference_time);	
 					
 					/* let's pretend we measured at the right time points instead of the wrong ones for this time zone*/	
 					bw_history* history = monitor->history;
 					time_t oldest_start = history->oldest_interval_start == 0 ? monitor->last_update + adjustment_seconds : history->oldest_interval_start + adjustment_seconds ;
 					time_t oldest_end = history->oldest_interval_end == 0 ? get_next_interval_end(monitor->last_update +adjustment_seconds, monitor->interval_end) : history->oldest_interval_end + adjustment_seconds;
-					printf("history->oldest_start = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_start = %d\n", history->oldest_interval_start, monitor->last_update, adjustment_seconds, oldest_start);
-					printf("history->oldest_end = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_end = %d\n", history->oldest_interval_end, monitor->last_update, adjustment_seconds, oldest_end);
+					if(oldest_start > current_time)
+					{
+						oldest_start = current_time;
+						oldest_end = get_next_interval_end(current_time, monitor->interval_end);
+					}
+					//printf("current_time = %d\n", current_time);
+					//printf("history->oldest_start = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_start = %d\n", history->oldest_interval_start, monitor->last_update, adjustment_seconds, oldest_start);
+					//printf("history->oldest_end = %d, monitor->last_update = %d, adjustment_seconds = %d, oldest_end = %d\n", history->oldest_interval_end, monitor->last_update, adjustment_seconds, oldest_end);
 					
 					int increment;
 					if(monitor->interval_end > 0)
@@ -410,20 +416,28 @@ int main( int argc, char** argv )
 					time_t next_end = oldest_end;
 					
 					
-				
-
+					if(monitor->last_update + adjustment_seconds <= current_time)
+					{	
+						monitor->last_update = monitor->last_update + adjustment_seconds;
+					}
+					else
+					{
+						monitor->last_update = current_time;
+					}
 					while(history->length > 0)
 					{
 						history_node* old_node = pop_history(history);						
 						if(next_end < current_time)
 						{
-							printf("Adjusting for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+							//printf("Adjusting for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
 							push_history(new_history, old_node, next_start, next_end);
+							monitor->last_update = next_end;
 						}
 						else 
 						{
 							if(next_start < current_time)
 							{
+								monitor->last_update = next_start;
 								monitor->accumulator_count = old_node->bandwidth;
 							}
 							free(old_node);
@@ -433,17 +447,22 @@ int main( int argc, char** argv )
 						next_end = oldest_end + (node_num*increment);
 					}
 
-					printf("After adjust, before add for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
-
+					//printf("After adjust, before add for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+					
 					while(next_end < current_time)
 					{
-						printf("Adding for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+						//printf("Adding for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
 						history_node* next_node = (history_node*)malloc(sizeof(history_node));
 						next_node->bandwidth = monitor->accumulator_count > 0 ? monitor->accumulator_count : -1;
 						monitor->accumulator_count = 0;
 						push_history(new_history, next_node, next_start, next_end);
 						monitor->accumulator_count = 0;
-				
+						
+						if(next_end > monitor->last_update)
+						{
+							monitor->last_update = next_end;
+						}
+
 						//pop off & free nodes that are too old
 						while(new_history->length > monitor->history_length)
 						{
@@ -458,10 +477,9 @@ int main( int argc, char** argv )
 
 					free(history);
 					monitor->history = new_history;
-					monitor->last_update = monitor->last_update + adjustment_seconds;
 					if(monitor->accumulator_freq > 0)
 					{
-						monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+						monitor->last_accumulator_update = monitor->last_update;
 					}
 
 				
@@ -470,7 +488,10 @@ int main( int argc, char** argv )
 					priority = next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
 					p->priority = priority;
 					
-					printf("For %s, new next_update=%d\n", monitor->name, priority + reference_time);	
+					//printf("For %s, new next_update=%d\n", monitor->name, priority + reference_time);
+					//printf("For %s next update type = %d\n", monitor->name, next_update->update_type);
+					//printf("For %s, history length = %d\n", monitor->name, new_history->length);
+						
 				}
 				push_priority_queue_node(new_update_queue, p);
 			}
@@ -478,6 +499,7 @@ int main( int argc, char** argv )
 			long num_destroyed;
 			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			update_queue = new_update_queue;
+			//printf("\n\n\n");
 		}
 	}
 
