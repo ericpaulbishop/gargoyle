@@ -232,6 +232,21 @@ function UCIContainer()
 			this.removeSection(pkg, removeSections[rmIndex]);
 		}
 	}
+	this.getAllOptionsInSection = function(pkg, section)
+	{
+		var matches = new Array();
+		for (keyIndex in this.keys)
+		{
+			var key = this.keys[keyIndex];
+			var test = pkg + "." + section;
+			if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) )
+			{
+				var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
+				matches.push(option);
+			}
+		}
+		return matches;
+	}
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();

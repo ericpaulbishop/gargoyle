@@ -80,17 +80,36 @@ function saveChanges()
 	
 		//update timezone and update frequency
 		var systemSections = uciOriginal.getAllSections("system");
+		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
 		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
-		uci.set("system", systemSections[0], "timezone", getSelectedValue("timezone"));
 		
-		var setTimezoneCommand = "uci get system.@system[0].timezone >/etc/TZ\n";
+		//copy old system section to new one with specific name
+		var systemCommands = [];
+		uci.set("system", systemSections[0], "timezone", getSelectedValue("timezone"));
+		if(systemSections[0] != "system")
+		{
+			systemCommands.push("uci del system." + systemSections[0] );
+			systemCommands.push("uci commit");
+			systemCommands.push("uci set system.system=system");
+			systemCommands.push("uci commit");
+		}	
+		uci.set("system", "system", "", "system");
+		var sysIndex=0;
+		for(sysIndex=0; sysIndex < systemOptions.length; sysIndex++)
+		{
+			uci.set("system", "system", systemOptions[sysIndex], uci.get("system", systemSections[0], systemOptions[sysIndex]));
+		}
+		if(systemSections[0] != "system")
+		{
+			uciOriginal.removeSection("system", systemSections[0]);
+			uci.removeSection("system", systemSections[0]);
+		}
+		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ\n";
 		var outputDateCommand = "date \"+%D %H:%M %Z\"";
 
-			
 
-		commands = commands = sectionDeleteCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" + outputDateCommand;
-		
+		commands = commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
 		//document.getElementById("output").value = commands;	
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
