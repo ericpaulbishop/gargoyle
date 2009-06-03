@@ -228,6 +228,8 @@ MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title,
 	pcap_if_t *d;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_findalldevs(&alldevs, errbuf);
+	int selectedDevIndex = 0;
+	int nextDevIndex = 0;
 	for(d= alldevs; d != NULL; d= d->next)
 	{
 		if(strstr(d->name, "lo") != d->name)
@@ -236,13 +238,22 @@ MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title,
 			{
 				wxString s = wxString::FromAscii(d->description);
 				devChoiceNames->Add( wxString::FromAscii(d->description), 1);
+				if(strstr(d->description, "VPN") != NULL && selectedDevIndex == nextDevIndex)
+				{
+					selectedDevIndex++;
+				}
 			}
 			else
 			{
 				devChoiceNames->Add(wxString::FromAscii(d->name), 1);
 			}
 			devNames->Add(wxString::FromAscii(d->name), 1);
+			nextDevIndex++;
 		}
+	}
+	if(selectedDevIndex == nextDevIndex)
+	{
+		selectedDevIndex = 0;
 	}
 
 	wxStaticText *interfaceLabel = new wxStaticText(panel,-1,wxT("Select Network Interface:"),wxPoint(5,115));
@@ -252,8 +263,7 @@ MainFrame::MainFrame(wxApp* a, const wxString& title) : wxFrame(NULL, -1, title,
 #else
 	interfaceChoice = new wxChoice(panel, -1, wxPoint(5,135), wxSize(195,25), *devChoiceNames, 0, wxDefaultValidator);
 #endif
-	interfaceChoice->SetSelection(0);
-
+	interfaceChoice->SetSelection(selectedDevIndex);
 
 
 		
@@ -408,10 +418,10 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 	{
 		is_valid = 0;
 		errorString = firmwareSelection == 1 ? 
-				wxT("ERROR: The specified loader file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
-				wxT("ERROR: The specified rootfs file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+				wxT("ERROR: The specified loader file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.") :
+				wxT("ERROR: The specified rootfs file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.");
 		errorString = firmwareSelection == 2 ?
-				wxT("ERROR: The specified firmware file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
+				wxT("ERROR: The specified firmware file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.") :
 				errorString;
 
 	
@@ -431,8 +441,8 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 	{
 		is_valid = 0;
 		errorString = firmwareSelection == 1 ? 
-				wxT("ERROR: The specified image file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.") :
-				wxT("ERROR: The specified kernel file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+				wxT("ERROR: The specified image file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.") :
+				wxT("ERROR: The specified kernel file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.");
 	
 		//print error
 		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
@@ -450,7 +460,7 @@ void MainFrame::FlashRouter(wxCommandEvent& evt)
 	if(test3 == NULL && firmwareSelection == 1 && is_valid)
 	{
 		is_valid = 0;
-		errorString = 	wxT("ERROR: The specified image2 file does not exist.\n\nPlease indicate the correct loacation of the necessary files and try again.");
+		errorString = 	wxT("ERROR: The specified image2 file does not exist.\n\nPlease indicate the correct location of the necessary files and try again.");
 	
 		//print error
 		wxMessageDialog *errorDialog = new wxMessageDialog(NULL, errorString, wxT("Error"), wxOK | wxICON_ERROR);
