@@ -10,11 +10,12 @@
 
 #include "sha256.h"
 
-#define SESSION_TIMEOUT_MINUTES 10
+#define DEFAULT_SESSION_TIMEOUT_MINUTES 15
 
 extern char* crypt( const char* key, const char* setting );
 
 char* get_root_hash(void);
+char* get_cookie_time(time_t t);
 
 int main (int argc, char **argv)
 {
@@ -24,10 +25,12 @@ int main (int argc, char **argv)
 	char *user_agent = NULL;
 	char *src_ip = NULL;
 	char *redirect = NULL;
+	int timeout_minutes = DEFAULT_SESSION_TIMEOUT_MINUTES;
 	int unconditionally_generate = 0;
 
 	int next_opt;
-	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:gG")) != -1)
+	int read;
+	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:gG")) != -1)
 	{	
 		switch(next_opt)
 		{
@@ -54,6 +57,18 @@ int main (int argc, char **argv)
 			case 'r':
 			case 'R':
 				redirect = strdup(optarg);
+				break;
+			case 't':
+			case 'T':
+				read = sscanf(optarg, "%d", &timeout_minutes);
+				if(read > 0)
+				{
+					timeout_minutes = timeout_minutes > 0 ? timeout_minutes : DEFAULT_SESSION_TIMEOUT_MINUTES;
+				}
+				else
+				{
+					timeout_minutes = DEFAULT_SESSION_TIMEOUT_MINUTES;
+				}
 				break;
 			case 'g':
 			case 'G':
@@ -83,7 +98,7 @@ int main (int argc, char **argv)
 			if(read > 0)
 			{
 				expired = 1;
-				if(exp_time > now && (exp_time - (SESSION_TIMEOUT_MINUTES*60) - 2) <= now)
+				if(exp_time > now && (exp_time - (timeout_minutes*60) - 2) <= now)
 				{
 					expired = 0;
 				}
@@ -115,14 +130,17 @@ int main (int argc, char **argv)
 		{
 			//set new cookie with new timout
 			char* new_hash;
-			char *combined;
+			char* combined;
 			char new_exp[100] = "";
-			sprintf(new_exp, "%ld", (now+(SESSION_TIMEOUT_MINUTES*60)));
+			time_t new_exp_t = now+(timeout_minutes*60);
+			sprintf(new_exp, "%ld", new_exp_t);
+			char* cookie_exp = get_cookie_time(new_exp_t);
 			combined = dynamic_strcat(4, root_hash, new_exp, user_agent, src_ip);
 			new_hash = get_sha256_hash_hex_str(combined);
-			printf("echo \"Set-Cookie:hash=%s;\"; echo \"Set-Cookie:exp=%s;\"; ", new_hash, new_exp);
+			printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s, path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
 			free(new_hash);
 			free(combined);
+			free(cookie_exp);
 		}
 		else
 		{
@@ -185,4 +203,79 @@ char* get_root_hash(void)
 		fclose(pw);
 	}
 	return root_hash;
+}
+
+
+char* get_cookie_time(time_t t)
+{
+	struct tm* utc = gmtime(&t);
+	char wday[4];
+	char month[4];
+	switch(utc->tm_wday)
+	{
+		case 0:
+			sprintf(wday, "Sun");
+			break;
+		case 1:
+			sprintf(wday, "Mon");
+			break;
+		case 2:
+			sprintf(wday, "Tue");
+			break;
+		case 3:
+			sprintf(wday, "Wed");
+			break;
+		case 4:
+			sprintf(wday, "Thu");
+			break;
+		case 5:
+			sprintf(wday, "Fri");
+			break;
+		case 6:
+			sprintf(wday, "Sat");
+			break;
+	}
+	switch(utc->tm_mon)
+	{
+		case 0:
+			sprintf(month, "Jan");
+			break;
+		case 1:
+			sprintf(month, "Feb");
+			break;
+		case 2:
+			sprintf(month, "Mar");
+			break;
+		case 3:
+			sprintf(month, "Apr");
+			break;
+		case 4:
+			sprintf(month, "May");
+			break;
+		case 5:
+			sprintf(month, "Jun");
+			break;
+		case 6:
+			sprintf(month, "Jul");
+			break;
+		case 7:
+			sprintf(month, "Aug");
+			break;
+		case 8:
+			sprintf(month, "Sep");
+			break;
+		case 9:
+			sprintf(month, "Oct");
+			break;
+		case 10:
+			sprintf(month, "Nov");
+			break;
+
+		case 11:
+			sprintf(month, "Dec");
+			break;
+	}
+	char utc_str[200];
+	sprintf(utc_str, "%s, %d %s %d %02d:%02d:%02d UTC", wday, utc->tm_mday, month, (utc->tm_year + 1900), utc->tm_hour, utc->tm_min, utc->tm_sec);
+	return strdup(utc_str);
 }
