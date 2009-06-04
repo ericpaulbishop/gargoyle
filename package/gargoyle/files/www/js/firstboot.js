@@ -46,11 +46,11 @@ function setPassword()
 				{
 					if(responseLines[rIndex].match(/hash=/))
 					{
-						hashCookie = responseLines[rIndex].replace(/^.*hash=/, "").replace(/[;\t ]+/, "");
+						hashCookie = responseLines[rIndex].replace(/^.*hash=/, "").replace(/\";.*$/, "");
 					}
 					if(responseLines[rIndex].match(/exp=/))
 					{
-						expCookie = responseLines[rIndex].replace(/^.*exp=/, "").replace(/[;\t ]+/, "");
+						expCookie = responseLines[rIndex].replace(/^.*exp=/, "").replace(/\";.*$/, "");
 					}
 				}
 				

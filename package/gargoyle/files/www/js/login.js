@@ -37,7 +37,7 @@ function doLogin()
 					var cIndex=0;
 					for(cIndex=0; cIndex < cookieLines.length; cIndex++)
 					{
-						var cookie = cookieLines[cIndex].replace(/^.*:/, "").replace(/;.*$/, "");
+						var cookie = cookieLines[cIndex].replace(/^.*:/, "").replace(/\";.*$/, "");
 						if(cookie.match(/=/))
 						{
 							//alert(cookie);
