@@ -23,6 +23,7 @@ function doUpgrade()
 		confirmUpgrade = window.confirm("This will erase your current settings, and may completely disable (\"brick\") your router if the firmware file is not valid.  Are you sure you want to continue?");
 		if(confirmUpgrade)
 		{
+			document.getElementById('upgrade_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('upgrade_form').submit();
 			setControlsEnabled(false, true, "Uploading Firmware");
 		}

@@ -35,6 +35,7 @@ function doRestore()
 		confirmRestore = window.confirm("This will completely erase your current settings and replace them with new ones from the selected configuration file.  Are you sure you want to continue?");
 		if(confirmRestore)
 		{
+			document.getElementById('restore_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('restore_form').submit();
 			setControlsEnabled(false, true, "Uploading Configuration File");	
 		}
@@ -45,6 +46,7 @@ function doDefaultRestore()
 	var confirmRestore = window.confirm("This will completely erase your current settings and replace them with the original, default settings.  Are you sure you want to continue?");
 	if(confirmRestore)
 	{
+		document.getElementById('restore_original_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 		document.getElementById('restore_original_form').submit();
 		setControlsEnabled(false, true, "Loading Original Configuration File");	
 	}

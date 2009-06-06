@@ -45,6 +45,7 @@
 				<label id="upgrade_label2" class='leftcolumn' for="upgrade_file2">Select Kernel (*.lzma) File:</label>
 				<input class='rightcolumn' type="file" id="upgrade_file2" name="upgrade_file2" />
 			</div>
+			<input id='upgrade_hash' name="hash" type='hidden' value='' />
 		</form>
 	</div>
 	<div>
