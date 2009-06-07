@@ -8,6 +8,7 @@ config global global
 	option common_js	'common.js'
 	option require_web_password	'1'
 	option is_first_boot		'1'
+	option session_timeout		'15'
 
 config display display
 	option firewall			'Firewall'

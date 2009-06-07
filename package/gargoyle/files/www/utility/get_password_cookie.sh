@@ -10,8 +10,7 @@
 
 	echo "Content-type: text/plain"
 	echo ""
-
 	#prevent brute force attacks by forcing this script to take at least 1 second
 	sleep 1
-	eval $( gargoyle_session_validator -p "$POST_password" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" )
+	eval $( gargoyle_session_validator -p "$POST_password" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout)  )
 ?>

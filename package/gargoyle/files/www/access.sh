@@ -5,8 +5,7 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	
-	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" )
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) )
 	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -i httpd_gargoyle dropbear gargoyle firewall network wireless 
 ?>
 
@@ -55,6 +54,19 @@
 				<input type='text' class='rightcolumn' id='remote_https_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 			</div>
 		</div>
+		<div id='session_length_container'>
+			<label class='leftcolumn' id='session_length_label' for='session_length'>Web Login Session Length:</label>
+			<select class='rightcolumn' id='session_length' >
+				<option value='15'>15 minutes</option>
+				<option value='30'>30 minutes</option>
+				<option value='60'>1 hour</option>
+				<option value='120'>2 hours</option>
+				<option value='240'>4 hours</option>
+				<option value='720'>12 hours</option>
+				<option value='1440'>24 hours</option>
+			</select>
+		</div>
+
 		<div class="nocolumn">
 			<input type='checkbox' id='disable_web_password' />
 			<label id='disable_web_password_label' for='disable_web_password'>Disable password protection of web interface</label> <em>(Not Recommended!)</em>

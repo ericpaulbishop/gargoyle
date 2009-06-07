@@ -86,6 +86,10 @@ function saveChanges()
 		{
 			uci.set("gargoyle", "global", "require_web_password", "1");
 		}
+		
+		//set web session timout
+		uci.set("gargoyle", "global", "session_timeout", getSelectedValue("session_length"));
+
 
 		//set local web protocols
 		localWebProtocol = getSelectedValue("local_web_protocol");
@@ -218,7 +222,8 @@ function proofreadAll()
 function resetData()
 {
 	document.getElementById("disable_web_password").checked = uciOriginal.get("gargoyle", "global", "require_web_password") == "0" ? true : false;
-	
+	setSelectedValue("session_length", uciOriginal.get("gargoyle", "global", "session_timeout"));
+
 	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
 	httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
 	localProtocol = uciOriginal.get("httpd_gargoyle", "server", "web_protocol");
