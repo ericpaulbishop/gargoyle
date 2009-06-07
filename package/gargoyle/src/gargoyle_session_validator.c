@@ -157,7 +157,17 @@ int main (int argc, char **argv)
 			}
 			combined = dynamic_strcat(4, root_hash, new_exp, user_agent, src_ip);
 			new_hash = get_sha256_hash_hex_str(combined);
-			printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+			
+			//if we don't know browser time, don't set cookie expiration (in the browser -- server timeout still implemented), otherwise set it
+			if(browser_time == 0)
+			{
+				printf("echo \"Set-Cookie:hash=%s; path=/\"; echo \"Set-Cookie:exp=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+			}
+			else
+			{
+				printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+			}
+
 			free(new_hash);
 			free(combined);
 			free(cookie_exp);

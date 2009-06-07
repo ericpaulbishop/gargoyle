@@ -25,9 +25,10 @@ function setPassword()
 		setControlsEnabled(false, true);
 
 		var passwordCommands = "";
+		var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
 		passwordCommands = "(echo \"" + p1 + "\" ; sleep 1 ; echo \"" + p1 + "\") | passwd root \n";
 		passwordCommands = passwordCommands + "\n/etc/init.d/dropbear restart\n";
-		passwordCommands = passwordCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" )";
+		passwordCommands = passwordCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
 		passwordCommands = passwordCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
 
 		
