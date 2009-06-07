@@ -283,6 +283,7 @@ int main(int argc, char **argv)
 			print_interface_vars();
 		}
 		define_package_vars(package_variables_to_load);
+		printf("\n\tsetBrowserTimeCookie();\n");
 		printf("\n\tvar testAjax = getRequestObj();\n");
 		printf("\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n");
 		printf("//-->\n");

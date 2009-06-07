@@ -26,11 +26,12 @@ int main (int argc, char **argv)
 	char *src_ip = NULL;
 	char *redirect = NULL;
 	int timeout_minutes = DEFAULT_SESSION_TIMEOUT_MINUTES;
+	unsigned long browser_time = 0;
 	int unconditionally_generate = 0;
 
 	int next_opt;
 	int read;
-	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:gG")) != -1)
+	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:b:B:gG")) != -1)
 	{	
 		switch(next_opt)
 		{
@@ -69,6 +70,13 @@ int main (int argc, char **argv)
 				{
 					timeout_minutes = DEFAULT_SESSION_TIMEOUT_MINUTES;
 				}
+				break;
+			case 'b':
+			case 'B':
+				read = sscanf(optarg, "%ld", &browser_time);
+				browser_time = read > 0 ? browser_time : 0;
+				break;
+
 				break;
 			case 'g':
 			case 'G':
@@ -134,7 +142,19 @@ int main (int argc, char **argv)
 			char new_exp[100] = "";
 			time_t new_exp_t = now+(timeout_minutes*60);
 			sprintf(new_exp, "%ld", new_exp_t);
-			char* cookie_exp = get_cookie_time(new_exp_t);
+			char* cookie_exp;
+		       	if( browser_time > 0 && ((browser_time - now) < (-5*60) || (browser_time - now) > (5*60)) )
+			{
+				//set cookie expiration based on browser time if server time & browser time disagree by more than 5 minutes, and browser time is defined
+				time_t cookie_exp_t = browser_time+(timeout_minutes*60);
+				cookie_exp = get_cookie_time(cookie_exp_t);
+
+			}
+			else
+			{
+				//set cookie based on server time
+				cookie_exp = get_cookie_time(new_exp_t);
+			}
 			combined = dynamic_strcat(4, root_hash, new_exp, user_agent, src_ip);
 			new_hash = get_sha256_hash_hex_str(combined);
 			printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);

@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -118,8 +118,18 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 		dark.style.display="none";
 		msg.style.display= "none";
 	}
+
+	//let's be sneaky -- instead of adding setBrowserTimeCookie() to the saveChanges() function on every page
+	//just add it to this function which almost always gets called just before we set parameters
+	//This covers all instances not taken care of by the runAjax() function, e.g. when submitting a form
+	setBrowserTimeCookie();
 }
 
+function setBrowserTimeCookie()
+{
+	var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
+	document.cookie="browser_time=" +browserSecondsUtc + "; path=/"; //don't bother with expiration -- who cares when the cookie was set? It just contains the current time, which the browser already knows
+}
 
 function getRequestObj()
 {
@@ -155,6 +165,11 @@ function getRequestObj()
 
 function runAjax(method, url, params, stateChangeFunction)
 {
+
+	//let's be sneaky -- instead of adding setBrowserTimeCookie() to the saveChanges() function on every page
+	//add it to this function, which gets run on every ajax call.  This covers all instances not taken care of
+	//by the setControlsEnabled() function
+	setBrowserTimeCookie();
 	var req = getRequestObj();
 	if(req)
 	{
