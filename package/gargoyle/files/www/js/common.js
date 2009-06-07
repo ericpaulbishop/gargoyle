@@ -1262,7 +1262,7 @@ function validateIP(address)
 	//0 == valid IP
 	//1 = 0.0.0.0
 	//2 = 255.255.255.255
-	//3 = some other mixture of 255/0s 
+	//3 = ends with 255 (actually, broadcast address can end with other value if subnet smaller than 255... but let's not worry about that)
 	//4 = value >255 in at least one field
 	//5 = improper format
 
@@ -1290,7 +1290,7 @@ function validateIP(address)
 				{
 					errorCode = 4;
 				}
-				if(ipFields[field] == 255)
+				if(ipFields[field] == 255 && field==4)
 				{
 					errorCode = 3;
 				}
