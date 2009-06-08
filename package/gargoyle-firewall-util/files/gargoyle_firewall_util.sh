@@ -362,14 +362,17 @@ initialize_quotas()
 	iptables -t mangle -I FORWARD -j forward_quotas
 	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j ingress_quotas
 	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j egress_quotas
-	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j CONNMARK --set-mark 0xFF000000/0xFF000000
-	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j CONNMARK --set-mark 0xFF000000/0xFF000000
-	iptables -t mangle -A forward_quotas -m connmark --mark 0xFF000000/0xFF000000 -j combined_quotas
-	iptables -t mangle -A forward_quotas -j CONNMARK --set-mark 0x0/0xFF000000
+	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j CONNMARK --set-mark 0x0F000000/0x0F000000
+	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j CONNMARK --set-mark 0x0F000000/0x0F000000
+	iptables -t mangle -A forward_quotas -m connmark --mark 0x0F000000/0x0F000000 -j combined_quotas
+	iptables -t mangle -A forward_quotas -j CONNMARK --set-mark 0x0/0x0F000000
 
 	iptables -t mangle -I ingress_quotas  -j CONNMARK --set-mark 0x0/$death_mask
 	iptables -t mangle -I egress_quotas   -j CONNMARK --set-mark 0x0/$death_mask
 	iptables -t mangle -I combined_quotas -j CONNMARK --set-mark 0x0/$death_mask
+	iptables -t mangle -I ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000
+	iptables -t mangle -I egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000
+	iptables -t mangle -I combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000
 
 
 	ingress_quota_sections=""
@@ -378,12 +381,14 @@ initialize_quotas()
 
 	set_death_mark=" -j CONNMARK --set-mark $death_mark "
 	config_load $quota_package
+	all_others_section=""
 	for q in $quota_sections ; do
 		vars="enabled ip ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval last_backup_time"
 		for var in $vars ; do
 			config_get $var $q $var
 		done
-		if [ "$enabled" != "0" ] ; then
+		if [ "$ip" = "ALL_OTHERS" ] && [ "$enabled" != "0" ]; then all_others_section="$q"; fi
+		if [ "$enabled" != "0" ] && [ "$ip" != "ALL_OTHERS" ] ; then
 			reset=""
 			if [ -n "$reset_interval" ] ; then
 				if [ -n "$last_backup_time" ] ; then
@@ -392,12 +397,14 @@ initialize_quotas()
 					reset=" --reset_interval $reset_interval "
 				fi
 			fi
-			
 			if [ -n "$ingress_limit" ] ; then
 				current=""
 				dst=""
 				if [ -n "$ingress_used" ] ; then current=" --current_bandwidth $ingress_used " ; fi
-				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then dst=" --dst $ip " ; fi
+				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then 
+					dst=" --dst $ip "
+					iptables -t mangle -A ingress_quotas -j CONNMARK --set-mark 0xF0000000/0xF0000000
+				fi
 				echo iptables -t mangle -A ingress_quotas $dst -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
 				iptables -t mangle -A ingress_quotas $dst -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
 				ingress_quota_sections=$( echo "$ingress_quota_sections $q" | sed 's/^ //g')
@@ -406,7 +413,10 @@ initialize_quotas()
 				current=""
 				src=""
 				if [ -n "$egress_used" ] ; then current=" --current_bandwidth $egress_used " ; fi
-				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then dst=" --src $ip " ; fi
+				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then
+					src=" --src $ip "
+					iptables -t mangle -A egress_quotas -j CONNMARK --set-mark 0xF0000000/0xF0000000
+				fi
 				echo iptables -t mangle -A egress_quotas $src -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark 
 				iptables -t mangle -A egress_quotas $src -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark
 				egress_quota_sections=$( echo "$egress_quota_sections $q" | sed 's/^ //g')
@@ -416,10 +426,10 @@ initialize_quotas()
 				ip_test=""
 				if [ -n "$combined_used" ] ; then current=" --current_bandwidth $combined_used " ; fi
 				if [ -n "$ip" ] && [ "$ip" != "ALL" ] ; then
-					iptables -t mangle -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000
+					iptables -t mangle -A combined_quotas -j CONNMARK --set-mark 0x0/0x0F000000
 					iptables -t mangle -A combined_quotas -i $wan_if --dst $ip -j CONNMARK --set-mark 0xFF000000/0xFF000000
 					iptables -t mangle -A combined_quotas -o $wan_if --src $ip -j CONNMARK --set-mark 0xFF000000/0xFF000000
-					ip_test=" -m connmark --mark 0xFF000000/0xFF000000 "
+					ip_test=" -m connmark --mark 0x0F000000/0x0F000000 "
 				fi
 				echo iptables -t mangle -A combined_quotas $ip_test -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
 				iptables -t mangle -A combined_quotas $ip_test -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
@@ -427,7 +437,47 @@ initialize_quotas()
 			fi
 		fi
 	done
+	if [ -n "$all_others_section" ] ; then
+		echo "all_others_section = $all_others_section"
+		vars="ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval last_backup_time"
+		for var in $vars ; do
+			config_get $var $all_others_section $var
+		done
+		reset=""
+		if [ -n "$reset_interval" ] ; then
+			if [ -n "$last_backup_time" ] ; then
+				reset=" --reset_interval $reset_interval --last_backup_time $last_backup_time "
+			else		
+				reset=" --reset_interval $reset_interval "
+			fi
+		fi
+		not_yet_matched=" -m connmark --mark 0x0/0xF0000000 "
+		if [ -n "$ingress_limit" ] ; then
+			current=""
+			if [ -n "$ingress_used" ] ; then current=" --current_bandwidth $ingress_used " ; fi
+			echo iptables -t mangle -A ingress_quotas $not_yet_matched -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
+			iptables -t mangle -A ingress_quotas $not_yet_matched -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
+			ingress_quota_sections=$( echo "$ingress_quota_sections $all_others_section" | sed 's/^ //g')
+		fi
+		if [ -n "$egress_limit" ] ; then
+			current=""
+			if [ -n "$egress_used" ] ; then current=" --current_bandwidth $egress_used " ; fi
+			echo iptables -t mangle -A egress_quotas $not_yet_matched -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark 
+			iptables -t mangle -A egress_quotas $not_yet_matched -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark
+			egress_quota_sections=$( echo "$egress_quota_sections $all_others_section" | sed 's/^ //g')
+		fi
+		if [ -n "$combined_limit" ] ; then
+			current=""
+			if [ -n "$combined_used" ] ; then current=" --current_bandwidth $combined_used " ; fi
+			echo iptables -t mangle -A combined_quotas $not_yet_matched -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
+			iptables -t mangle -A combined_quotas $not_yet_matched -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
+			combined_quota_sections=$( echo "$combined_quota_sections $all_others_section" | sed 's/^ //g')
+		fi
+	fi
+
 	iptables -t mangle -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000
+	iptables -t mangle -A ingress_quotas -j CONNMARK --set-mark 0x0/0xFF000000
+	iptables -t mangle -A egress_quotas -j CONNMARK --set-mark 0x0/0xFF000000
 	iptables -t filter -I egress_restrictions -m connmark --mark $death_mark -j REJECT
 	iptables -t filter -I ingress_restrictions -m connmark --mark $death_mark -j REJECT
 
