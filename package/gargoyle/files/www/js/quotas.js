@@ -140,7 +140,7 @@ function resetData()
 		checkElements.push(enabledCheck);
 		areChecked.push(enabled);
 
-		quotaTableData.push( [ ip, getPercent(upLimit,upUsed), getPercent(downLimit,downUsed), getPercent(combinedLimit,combinedUsed), enabledCheck, createEditButton(enabled) ] );
+		quotaTableData.push( [ ip.replace(/_/, " "), getPercent(upLimit,upUsed), getPercent(downLimit,downUsed), getPercent(combinedLimit,combinedUsed), enabledCheck, createEditButton(enabled) ] );
 	
 		allIps[ip] = 1;
 	}
@@ -194,7 +194,7 @@ function addNewQuota()
 		var down = uci.get(pkg, "quota_" + quotaNum, "ingress_limit") == "" ? "N/A" : "0"; 
 		var up = uci.get(pkg, "quota_" + quotaNum, "egress_limit") == "" ? "N/A" : "0"; 
 		var combined = uci.get(pkg, "quota_" + quotaNum, "combined_limit") == "" ? "N/A" : "0"; 
-		addTableRow(table, [ip, up, down, combined, enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);	
+		addTableRow(table, [ip.replace(/_/, " "), up, down, combined, enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);	
 
 		setDocumentFromUci(document, new UCIContainer(), "");
 
@@ -259,7 +259,18 @@ function validateQuota(controlDocument, originalQuotaIp)
 			getSelectedValue("applies_to_type", controlDocument) == "others" ? "ALL_OTHERS" : controlDocument.getElementById("applies_to").value;
 		if(ip != originalQuotaIp && allIps[ip] == 1)
 		{
-			errors.push("Duplicate IP -- only one quota per IP is allowed");
+			if(!ip.match(/ALL/))
+			{
+				errors.push("Duplicate IP -- only one quota per IP is allowed");
+			}
+			else if(ip.match(/OTHER/))
+			{
+				errors.push("You may have only one quota for hosts without explicit quotas");
+			}
+			else
+			{
+				errors.push("You may have only one quota that applies to entire network");
+			}
 		}
 	}
 	return errors;
@@ -391,9 +402,9 @@ function removeQuotaCallback(table, row)
 {
 	var id = row.childNodes[4].firstChild.id;
 	uci.removeSection(pkg, id);
-	allIps[ row.childNodes[0].firstChild.data ] = null;
+	allIps[ row.childNodes[0].firstChild.data.replace(/ /, "_") ] = null;
 
-	changedIps [ row.childNodes[0].firstChild.data ] = 1;
+	changedIps [ row.childNodes[0].firstChild.data.replace(/ /, "_") ] = 1;
 }
 
 function editQuota()
@@ -433,7 +444,7 @@ function editQuota()
 	closeButton.className = "default_button";
 
 	editRow=this.parentNode.parentNode;
-	editIp          = editRow.childNodes[0].firstChild.data;
+	editIp          = editRow.childNodes[0].firstChild.data.replace(/ /, "_");
 	editUpPrc       = editRow.childNodes[1].firstChild.data.replace(/%/g, "");
 	editDownPrc     = editRow.childNodes[2].firstChild.data.replace(/%/g, "");
 	editCombinedPrc = editRow.childNodes[3].firstChild.data.replace(/%/g, "");
@@ -484,7 +495,7 @@ function editQuota()
 							(getSelectedValue("applies_to_type", editQuotaWindow.document) == "others" ? "ALL_OTHERS" : editQuotaWindow.document.getElementById("applies_to").value );
 						if(newIp != editIp)
 						{
-							editRow.childNodes[0].firstChild.data = newIp;
+							editRow.childNodes[0].firstChild.data = newIp.replace(/_/, " ");
 							changedIps[editIp] = 1;
 							changedIps[newIp] = 1;
 							editRow.childNodes[1].firstChild.data = uci.get(pkg, editSection, "egress_limit") == "" ? "N/A" : "0%";

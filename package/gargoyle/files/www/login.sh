@@ -26,6 +26,7 @@
 	quotas=$(uci show firewall | grep "=quota$" | sed 's/^.*\.//g' | sed 's/=.*$//g' )
 	allq=""
 	ipq=""
+	otherq=""
 	for q in $quotas ; do
 		ip=$(uci get firewall.$q.ip 2>/dev/null)
 		if [ "$ip" = "ALL" ] ; then
@@ -34,7 +35,13 @@
 		if [ "$ip" = "$REMOTE_ADDR" ] ; then
 			ipq="$q"
 		fi
+		if [ "$ip" = "ALL_OTHERS" ] ; then
+			otherq="$q"
+		fi
 	done
+	if [ -z "$ipq" ] && [ -n "$otherq" ] ; then
+		ipq="$otherq"
+	fi
 
 	gargoyle_header_footer -h  -c "internal.css" -j "login.js"
 ?>
