@@ -42,6 +42,12 @@
 	cat /etc/config/firewall | sed 's/\/etc\/parse_remote_accept\.firewall/\/usr\/lib\/gargoyle_firewall_util\/gargoyle_additions\.firewall/g' >/etc/config/firewall.tmp
 	mv /etc/config/firewall.tmp /etc/config/firewall
 
+	#make sure we have a session timout defined
+	session_timeout=$(uci get gargoyle.global.session_timeout)
+	if [ -z "$session_timeout" ] ; then
+		uci set gargoyle.global.session_timeout=15
+	fi
+
 	cd /tmp
 	if [ -e /tmp/restore ] ; then
 		rm -rf /tmp/restore
