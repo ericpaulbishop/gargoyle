@@ -72,10 +72,34 @@ function saveChanges()
 			createHostCommands.push("echo \"" + ip + "\t" + host + "\" >> /etc/hosts");
 		}
 
+		var firewallCommands = [];
+		var firewallDefaultSections = uci.getAllSectionsOfType("firewall", "defaults");
+		var oldBlockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+		var newBlockMismatches = document.getElementById("block_mismatches").checked;
+		if(newBlockMismatches != oldBlockMismatches)
+		{
+			if(newBlockMismatches)
+			{ 
+				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
+				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
+			}
+			else
+			{
+				uci.remove("firewall", firewallDefaultSections[0], "block_static_ip_mismatches");
+				firewallCommands.push("uci del firewall.@defaults[0].block_statip_mismatches");
+			}
+			firewallCommands.push("uci commit");
+			firewallCommands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
+		}
+
+
+
+
+
+
 		var restartDhcpCommand = document.getElementById("dhcp_enabled").checked ? "\n/etc/init.d/dnsmasq restart ;\n" : "\n/etc/init.d/dnsmasq stop ;\n" ; 
 
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand ;
-		
+		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand + "\n" + firewallCommands.join("\n") ;
 
 		//document.getElementById("output").value = commands;
 
@@ -160,12 +184,15 @@ function resetData()
 	document.getElementById("dhcp_enabled").checked = dhcpEnabled;
 	setEnabled(document.getElementById('dhcp_enabled').checked);
 
+	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
+	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+	document.getElementById("block_mismatches").checked = blockMismatches;
 }
 
 function setEnabled(enabled)
 {
 	var disabled = (enabled != true);
-	ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'add_host', 'add_mac', 'add_ip', 'add_button'];
+	ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
 	for (idIndex in ids)
 	{
 		element = document.getElementById(ids[idIndex]);

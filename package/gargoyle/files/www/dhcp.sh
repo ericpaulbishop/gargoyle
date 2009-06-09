@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "dhcp" -c "internal.css" -j "table.js dhcp.js" network wireless dhcp
+	gargoyle_header_footer -h -s "connection" -p "dhcp" -c "internal.css" -j "table.js dhcp.js" network wireless dhcp firewall
 	subnet=$(ifconfig br-lan | awk 'BEGIN {FS=":"}; $0 ~ /inet.addr/ {print $2}' | awk 'BEGIN {FS="."}; {print $1"\."$2"\."$3"\."}')
 ?>
 
@@ -96,7 +96,12 @@ for (etherIndex in etherData)
 	<fieldset>
 		<legend class="sectionheader">Static IPs</legend>
 
-
+		<div id='block_mismatch_container'>
+			<div class='nocolumn'>
+				<input type='checkbox' id='block_mismatch' onclick="setEnabled(this.checked)" />
+				<label id='block_mismatch_label' for='block_mismatch'>Block MAC addresses assigned a static IP that connect from a different IP</label>
+			</div>
+		</div>
 
 		<div id='staticip_add_heading_container'>
 			<label class='nocolumn' id='staticip_add_heading_label' style='text-decoration:underline'>Add Static IP Address:</label>

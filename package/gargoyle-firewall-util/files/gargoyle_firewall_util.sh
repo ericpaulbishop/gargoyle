@@ -1,4 +1,4 @@
-# Copyright Eric Bishop, 2008
+# Copyright Eric Bishop, 2008,2009
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 . /etc/functions.sh
@@ -504,6 +504,14 @@ initialize_quotas()
 
 }
 
+block_static_ip_mismatches
+{
+	block_mismatches=$(uci get firewall.@defaults[0].block_static_ip_mismatches)
+	if [ "$block_mismatches" = "1" ] ; then
+		eval $(cat ethers.txt | awk '  { print "iptables -t filter -A egress_restrictions -s ! " $2 " -m mac --src-mac " $1 " -j REJECT " ; } ' )
+	fi
+}
+
 initialize_firewall()
 {
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
@@ -513,5 +521,7 @@ initialize_firewall()
 	create_l7marker_chain
 	insert_restriction_rules
 	initialize_quotas
+	block_static_ip_mismatches
+
 }
 
