@@ -383,7 +383,7 @@ initialize_quotas()
 	config_load $quota_package
 	all_others_section=""
 	for q in $quota_sections ; do
-		vars="enabled ip ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval last_backup_time"
+		vars="enabled ip ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval reset_time last_backup_time"
 		for var in $vars ; do
 			config_get $var $q $var
 		done
@@ -391,10 +391,12 @@ initialize_quotas()
 		if [ "$enabled" != "0" ] && [ "$ip" != "ALL_OTHERS" ] ; then
 			reset=""
 			if [ -n "$reset_interval" ] ; then
+				reset=" --reset_interval $reset_interval"
+				if [ -n "$reset_time" ] ; then
+					reset="$reset --reset_time $reset_time"
+				fi
 				if [ -n "$last_backup_time" ] ; then
-					reset=" --reset_interval $reset_interval --last_backup_time $last_backup_time "
-				else		
-					reset=" --reset_interval $reset_interval "
+					reset="$reset --last_backup_time $last_backup_time"
 				fi
 			fi
 			if [ -n "$ingress_limit" ] ; then
@@ -439,16 +441,18 @@ initialize_quotas()
 	done
 	if [ -n "$all_others_section" ] ; then
 		echo "all_others_section = $all_others_section"
-		vars="ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval last_backup_time"
+		vars="ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval reset_time last_backup_time"
 		for var in $vars ; do
 			config_get $var $all_others_section $var
 		done
 		reset=""
 		if [ -n "$reset_interval" ] ; then
+			reset=" --reset_interval $reset_interval"
+			if [ -n "$reset_time" ] ; then
+				reset="$reset --reset_time $reset_time "
+			fi
 			if [ -n "$last_backup_time" ] ; then
-				reset=" --reset_interval $reset_interval --last_backup_time $last_backup_time "
-			else		
-				reset=" --reset_interval $reset_interval "
+				reset="$reset --last_backup_time $last_backup_time"
 			fi
 		fi
 		not_yet_matched=" -m connmark --mark 0x0/0xF0000000 "

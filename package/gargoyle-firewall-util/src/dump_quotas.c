@@ -24,11 +24,18 @@ int main()
 	
 	time_t now;
 	time(&now);
-
-	dump_quota_chain(ctx, "mangle", "ingress_quotas",  "firewall", ingress_list,  "ingress_used", now);
-	dump_quota_chain(ctx, "mangle", "egress_quotas",   "firewall", egress_list,   "egress_used", now);
-	dump_quota_chain(ctx, "mangle", "combined_quotas", "firewall", combined_list, "combined_used", now);
-
+	if(ingress_list != NULL)
+	{
+		dump_quota_chain(ctx, "mangle", "ingress_quotas",  "firewall", ingress_list,  "ingress_used", now);
+	}
+	if(egress_list != NULL)
+	{
+		dump_quota_chain(ctx, "mangle", "egress_quotas",   "firewall", egress_list,   "egress_used", now);
+	}
+	if(combined_list != NULL)
+	{
+		dump_quota_chain(ctx, "mangle", "combined_quotas", "firewall", combined_list, "combined_used", now);
+	}
 
 	struct uci_ptr ptr;
 	if (uci_lookup_ptr(ctx, &ptr, "firewall", true) == UCI_OK)
@@ -66,7 +73,7 @@ void dump_quota_chain(struct uci_context *ctx, char* table, char* chain, char* p
 	char search_str[] = "--current_bandwidth ";
 	int search_length = strlen(search_str);
 
-	output_command = dynamic_strcat(4, "iptables -t ", table, " -L ", chain);
+	output_command = dynamic_strcat(4, "iptables -t ", table, " -L  2>/dev/null ", chain);
 
 	output = popen(output_command, "r");
 	while (fgets(line, 1024, output) != NULL)
