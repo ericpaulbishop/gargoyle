@@ -96,10 +96,10 @@ for (etherIndex in etherData)
 	<fieldset>
 		<legend class="sectionheader">Static IPs</legend>
 
-		<div id='block_mismatch_container'>
+		<div id='block_mismatches_container'>
 			<div class='nocolumn'>
-				<input type='checkbox' id='block_mismatch' onclick="setEnabled(this.checked)" />
-				<label id='block_mismatch_label' for='block_mismatch'>Block MAC addresses assigned a static IP that connect from a different IP</label>
+				<input type='checkbox' id='block_mismatches' />
+				<label id='block_mismatch_label' for='block_mismatches'>Block MAC addresses assigned a static IP that connect from a different IP</label>
 			</div>
 		</div>
 
