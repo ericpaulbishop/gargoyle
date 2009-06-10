@@ -47,7 +47,8 @@ static struct option opts[] =
 	{ .name = "less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
 	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
 	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
-	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET },
+	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_INTERVAL },
+	{ .name = "reset_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
 	{ .name = "last_backup_time",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
 	{ .name = 0 }
 };
@@ -73,6 +74,7 @@ static int parse(	int c,
 	int num_read;
 	u_int64_t read_64;
 	time_t read_time;
+
 
 	switch (c)
 	{
@@ -102,7 +104,7 @@ static int parse(	int c,
 				valid_arg = 1;
 			}
 			break;
-		case BANDWIDTH_RESET:
+		case BANDWIDTH_RESET_INTERVAL:
 			valid_arg = 1;
 			if(strcmp(argv[optind-1],"minute") ==0)
 			{
@@ -133,6 +135,14 @@ static int parse(	int c,
 				valid_arg = 0;
 			}
 			break;
+		case BANDWIDTH_RESET_TIME:
+			num_read = sscanf(argv[optind-1], "%ld", &read_time);
+			if(num_read > 0 )
+			{
+				info->reset_time = read_time;
+				valid_arg = 1;
+			}	
+			break;
 		case BANDWIDTH_LAST_BACKUP:
 			num_read = sscanf(argv[optind-1], "%ld", &read_time);
 			if(num_read > 0 )
@@ -148,15 +158,35 @@ static int parse(	int c,
 	{
 		info->current_bandwidth = 0;
 	}
-	if((*flags & BANDWIDTH_RESET) != BANDWIDTH_RESET)
+	if((*flags & BANDWIDTH_RESET_INTERVAL) != BANDWIDTH_RESET_INTERVAL)
 	{
 		info->reset_interval = BANDWIDTH_NEVER;
+	}
+	if((*flags & BANDWIDTH_RESET_TIME) != BANDWIDTH_RESET_TIME)
+	{
+		info->reset_time=0;
 	}
 	if((*flags & BANDWIDTH_LAST_BACKUP) != BANDWIDTH_LAST_BACKUP)
 	{
 		info->last_backup_time = 0;
 	}
 	info->next_reset = 0;
+
+	//if we have both reset_interval & reset_time, check reset_time is in valid range
+	if((*flags & BANDWIDTH_RESET_TIME) == BANDWIDTH_RESET_TIME && (*flags & BANDWIDTH_RESET_INTERVAL) == BANDWIDTH_RESET_INTERVAL)
+	{
+		if(	(info->reset_interval == BANDWIDTH_NEVER) ||
+			(info->reset_interval == BANDWIDTH_MONTH && info->reset_time >= 60*60*24*28) ||
+			(info->reset_interval == BANDWIDTH_WEEK && info->reset_time >= 60*60*24*7) ||
+			(info->reset_interval == BANDWIDTH_DAY && info->reset_time >= 60*60*24) ||
+			(info->reset_interval == BANDWIDTH_HOUR && info->reset_time >= 60*60) ||
+			(info->reset_interval == BANDWIDTH_MINUTE && info->reset_time >= 60) 
+		  )
+		{
+			valid_arg = 0;
+		}
+	}	
+
 
 	return valid_arg;
 }
@@ -234,7 +264,10 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	{
 		printf(" --reset_interval month ");
 	}
-	
+	if(info->reset_time > 0)
+	{
+		printf(" --reset_time %ld ", info->reset_time);
+	}	
 	/*
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
@@ -243,12 +276,18 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	*/	
 }
 
-/* Final check; must have specified a test string with either --contains or --contains_regex. */
+/* Final check; must have specified a test string with either --contains or --contains_regex. 
+   Also, we can't have reset_time without reset_interval
+ */
 static void final_check(unsigned int flags)
 {
 	if( (flags & BANDWIDTH_LT) == 0 && (flags & BANDWIDTH_GT) == 0 )
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify '--greater_than' or '--less_than' '");
+		exit_error(PARAMETER_PROBLEM, "You must specify '--greater_than' or '--less_than' ");
+	}
+	if( flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
+	{
+		exit_error(PARAMETER_PROBLEM, "You may not specify '--reset_time' without '--reset_interval' ");
 	}
 }
 

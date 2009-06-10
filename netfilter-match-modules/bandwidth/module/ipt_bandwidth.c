@@ -93,25 +93,45 @@ static inline int is_leap(unsigned int y)
 
 static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now)
 {
+	//first calculate when next reset would be if reset_time is 0 (which it may be)
 	time_t next_reset = 0;
 	if(info->reset_interval == BANDWIDTH_MINUTE)
 	{
 		next_reset = ( (long)(now/60) + 1)*60;
+		if(info->reset_time > 0)
+		{
+			time_t alt_reset = next_reset + info->reset_time - 60;
+			next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
+		}
 	}
 	else if(info->reset_interval == BANDWIDTH_HOUR)
 	{
 		next_reset = ( (long)(now/(60*60)) + 1)*60*60;
+		if(info->reset_time > 0)
+		{
+			time_t alt_reset = next_reset + info->reset_time - (60*60);
+			next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
+		}
 	}
 	else if(info->reset_interval == BANDWIDTH_DAY)
 	{
 		next_reset = ( (long)(now/(60*60*24)) + 1)*60*60*24;
+		if(info->reset_time > 0)
+		{
+			time_t alt_reset = next_reset + info->reset_time - (60*60*24);
+			next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
+		}
 	}	
 	else if(info->reset_interval == BANDWIDTH_WEEK)
 	{
 		long days_since_epoch = now/(60*60*24);
 		long current_weekday = (4 + days_since_epoch ) % 7 ;
 		next_reset = (days_since_epoch + (7-current_weekday) )*(60*60*24);
-
+		if(info->reset_time > 0)
+		{
+			time_t alt_reset = next_reset + info->reset_time - (60*60*24*7);
+			next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
+		}
 	}
 	else if(info->reset_interval == BANDWIDTH_MONTH)
 	{
@@ -137,16 +157,25 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now)
 			month_start_days = (u_int16_t*)days_since_year;
 		}
 		for (month = 11 ; month > 0 && month_start_days[month] > year_day; month--){}
-
-		if(month == 11)
+		
+		/* end majority of yoinkage */
+		
+		time_t alt_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month])*(60*60*24) + info->reset_time;
+		if(alt_reset > now)
 		{
-			next_reset = days_since_epoch_for_each_year_start[year_index-1]*(60*60*24);
+			reset_time = alt_reset;
+		}
+		else if(month == 11)
+		{
+			next_reset = days_since_epoch_for_each_year_start[year_index-1]*(60*60*24) + info_reset_time;
 		}
 		else
 		{
-			next_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month+1])*(60*60*24);
+			next_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month+1])*(60*60*24) + info->reset_time;
 		}
 	}
+
+
 	return next_reset;
 }
 
@@ -223,7 +252,6 @@ static int match(	const struct sk_buff *skb,
 		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : 0;
 	}
 	spin_unlock_bh(&bandwidth_lock);
-
 
 	return match_found;
 }

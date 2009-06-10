@@ -19,11 +19,12 @@
 #ifndef _IPT_BANDWIDTH_H
 #define _IPT_BANDWIDTH_H
 
-#define BANDWIDTH_GT		 1
-#define BANDWIDTH_LT		 2
-#define BANDWIDTH_CURRENT	 4
-#define BANDWIDTH_RESET		 8
-#define BANDWIDTH_LAST_BACKUP	 16
+#define BANDWIDTH_GT			  1
+#define BANDWIDTH_LT			  2
+#define BANDWIDTH_CURRENT		  4
+#define BANDWIDTH_RESET_INTERVAL	  8
+#define BANDWIDTH_RESET_TIME		 16
+#define BANDWIDTH_LAST_BACKUP		 32
 
 #define BANDWIDTH_MINUTE	10
 #define BANDWIDTH_HOUR		11
@@ -36,6 +37,7 @@ struct ipt_bandwidth_info
 {
 	unsigned char gt_lt;
 	unsigned char reset_interval;
+	time_t reset_time; //seconds from start of month/week/day/hour/minute to do reset
 	u_int64_t bandwidth_cutoff;
 	u_int64_t current_bandwidth;
 	time_t next_reset;
