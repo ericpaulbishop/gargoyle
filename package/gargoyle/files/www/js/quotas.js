@@ -52,9 +52,10 @@ function saveChanges()
 			}
 			return cmd;
 		}
-		//set ip, limit and reset_interval variables no matter what
+		//set ip, reset_interval, reset_time and limit variables no matter what
 		commands.push( getCommand("ip") );
 		commands.push( getCommand("reset_interval") );
+		commands.push( getCommand("reset_time") );
 		commands.push( getCommand("egress_limit") );
 		commands.push( getCommand("ingress_limit") );
 		commands.push( getCommand("combined_limit") );
@@ -118,8 +119,9 @@ function resetData()
 			used = used == "" ? 0 : parseInt(used);
 			pct = Math.round( (used*100*100)/parseInt(limit) )/100.0;
 			pct = pct > 100 ? 100.0 : pct;
+			pct = pct + "%"
 		}
-		return pct + "%";
+		return pct;
 	}
 	for(sectionIndex = 0; sectionIndex < quotaSections.length; sectionIndex++)
 	{
@@ -206,9 +208,52 @@ function setVisibility(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	setInvisibleIfIdMatches("applies_to_type", ["all","others"], "applies_to", "inline", controlDocument);
+	setInvisibleIfIdMatches("quota_reset", ["hour", "day"], "quota_day_container", "block", controlDocument);
+	setInvisibleIfIdMatches("quota_reset", ["hour"], "quota_hour_container", "block", controlDocument);
 	setInvisibleIfIdMatches("max_up_type", ["unlimited"], "max_up_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_down_type", ["unlimited"], "max_down_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_combined_type", ["unlimited"], "max_combined_container", "inline", controlDocument);
+
+
+	var qri=getSelectedValue("quota_reset", controlDocument);
+	if(qri == "month")
+	{
+		var vals = [];	
+		var names = [];	
+		var day=1;
+		for(day=1; day <= 28; day++)
+		{
+			var dayStr = "" + day;
+			var lastDigit = dayStr.substr( dayStr.length-1, 1);
+			var suffix="th"
+			if( day % 100  != 11 && lastDigit == "1")
+			{
+				suffix="st"
+			}
+			if( day % 100 != 12 && lastDigit == "2")
+			{
+				suffix="nd"
+			}
+			if( day %100 != 13 && lastDigit == "3")
+			{
+				suffix="rd"
+			}
+			names.push(dayStr + suffix);
+			vals.push( ((day-1)*60*60*24) + "" );
+		}
+		setAllowableSelections("quota_day", vals, names, controlDocument);
+	}
+	if(qri == "week")
+	{
+		var names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+		var vals = [];
+		var dayIndex;
+		for(dayIndex=0; dayIndex < 7; dayIndex++)
+		{
+			vals.push( (dayIndex*60*60*24) + "")
+		}
+		setAllowableSelections("quota_day", vals, names, controlDocument);
+	}
 }
 
 function setInvisibleIfIdMatches(selectId, invisibleOptionValues, associatedElementId, defaultDisplayMode, controlDocument )
@@ -233,6 +278,15 @@ function setInvisibleIfIdMatches(selectId, invisibleOptionValues, associatedElem
 			visElement.style.display = defaultDisplayMode;
 		}
 	}
+}
+
+function getDaySeconds(offset)
+{
+	return ( Math.floor(offset/(60*60*24))*(60*60*24)) ;
+}
+function getHourSeconds(offset)
+{
+	return ( Math.floor((offset%(60*60*24))/(60*60)) * (60*60) );
 }
 
 function validateQuota(controlDocument, originalQuotaIp)
@@ -297,7 +351,11 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	var downloadLimit = srcUci.get(pkg, quotaSection, "ingress_limit");
 	var combinedLimit = srcUci.get(pkg, quotaSection, "combined_limit");
 	resetInterval = resetInterval == "" || resetInterval == "minute" ? "day" : resetInterval;
-
+	var offset = srcUci.get(pkg, quotaSection, "reset_time");
+	offset = offset == "" ? 0 : parseInt(offset);
+	var resetDay = getDaySeconds(offset);
+	var resetHour = getHourSeconds(offset);
+	
 	setSelectedValue("applies_to_type", ip=="" || ip=="ALL" ? "all" : ( ip=="ALL_OTHERS" ? "others" : "only"), controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
 	setSelectedValue("max_up_type", uploadLimit == "" ? "unlimited" : "limited", controlDocument );
@@ -310,6 +368,8 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	controlDocument.getElementById("max_combined").value = Math.round(combinedLimit/(1024*1024)) >= 0 ? Math.round(combinedLimit*1000/(1024*1024))/1000 : 0;
 
 	setVisibility(controlDocument);
+	setSelectedValue("quota_day", resetDay + "", controlDocument);
+	setSelectedValue("quota_hour", resetHour + "", controlDocument);
 }
 
 
@@ -355,6 +415,21 @@ function setUciFromDocument(controlDocument)
 	uci.set(pkg, quotaSection, "combined_limit", combinedLimit);
 	uci.set(pkg, quotaSection, "reset_interval", getSelectedValue("quota_reset", controlDocument));
 	uci.set(pkg, quotaSection, "ip", ip);
+
+	var qd = getSelectedValue("quota_day", controlDocument);
+	var qh = getSelectedValue("quota_hour", controlDocument);
+	qd = qd == "" ? "0" : qd;
+	qh = qh == "" ? "0" : qh;
+	var resetTime= parseInt(qd) + parseInt(qh);
+	if(resetTime > 0)
+	{
+		var resetTimeStr = resetTime + "";
+		uci.set(pkg, quotaSection, "reset_time", resetTimeStr);
+	}
+	else
+	{
+		uci.remove(pkg, quotaSection, "reset_time");
+	}
 }
 
 
@@ -472,9 +547,7 @@ function editQuota()
 			{
 				editQuotaWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editQuotaWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
 				setDocumentFromUci(editQuotaWindow.document, uci, editIp);
-				setVisibility(editQuotaWindow.document);
 
 				closeButton.onclick = function()
 				{

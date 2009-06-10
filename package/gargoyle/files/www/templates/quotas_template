@@ -18,16 +18,57 @@
 		<label id="quota_reset_label" for='quota_reset'>Quota Resets:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id="quota_reset" >
+		<select id="quota_reset" onchange='setVisibility()' >
 			<option value="hour">Every Hour</option>
 			<option value="day">Every Day</option>
 			<option value="week">Every Week</option>
 			<option value="month">Every Month</option>
 		</select>
-
 	</span>
 </div>
 
+<div id="quota_day_container">
+	<span class='leftcolumn'>
+		<label id="quota_day_label" for='quota_day'>Reset Day:</label>
+	</span>
+	<span class="rightcolumn">
+		<select id='quota_day'></select>
+	</span>
+</div>
+
+<div id="quota_hour_container">
+	<span class='leftcolumn'>
+		<label id="quota_hour_label" for='quota_hour'>Reset Hour:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id='quota_hour'>
+			<option value="0">12:00 AM</option>
+			<option value="3600">01:00 AM</option>
+			<option value="7200">02:00 AM</option>
+			<option value="10800">03:00 AM</option>
+			<option value="14400">04:00 AM</option>
+			<option value="18000">05:00 AM</option>
+			<option value="21600">06:00 AM</option>
+			<option value="25200">07:00 AM</option>
+			<option value="28800">08:00 AM</option>
+			<option value="32400">09:00 AM</option>
+			<option value="36000">10:00 AM</option>
+			<option value="39600">11:00 AM</option>
+			<option value="43200">12:00 PM</option>
+			<option value="46800">01:00 PM</option>
+			<option value="50400">02:00 PM</option>
+			<option value="54000">03:00 PM</option>
+			<option value="57600">04:00 PM</option>
+			<option value="61200">05:00 PM</option>
+			<option value="64800">06:00 PM</option>
+			<option value="68400">07:00 PM</option>
+			<option value="72000">08:00 PM</option>
+			<option value="75600">09:00 PM</option>
+			<option value="79200">10:00 PM</option>
+			<option value="82800">11:00 PM</option>
+		</select>
+	</span>
+</div>
 
 <div>
 	<span class='leftcolumn'>

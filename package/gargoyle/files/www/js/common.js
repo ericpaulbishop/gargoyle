@@ -767,6 +767,12 @@ function getSelectedValue(selectId, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	
+	if(controlDocument.getElementById(selectId) == null)
+	{
+		alert("ERROR:" + selectId + " does not exist");
+		return;
+	}
+
 	selectedIndex = controlDocument.getElementById(selectId).selectedIndex;
 	selectedValue = "";
 	if(selectedIndex >= 0)
@@ -881,17 +887,19 @@ function removeAllOptionsFromSelectElement(selectElement)
 	}
 }
 
-function setAllowableSelections(selectId, allowableValues, allowableNames)
+function setAllowableSelections(selectId, allowableValues, allowableNames, controlDocument)
 {
+	if(controlDocument == null) { controlDocument = document; }
+
 	if(allowableNames != null && allowableValues != null)
 	{
-		currentSelection=getSelectedValue(selectId);
-		removeAllOptionsFromSelectElement(document.getElementById(selectId));
+		currentSelection=getSelectedValue(selectId, controlDocument);
+		removeAllOptionsFromSelectElement(controlDocument.getElementById(selectId));
 		for(addIndex=0; addIndex < allowableValues.length; addIndex++)
 		{
-			addOptionToSelectElement(selectId, allowableNames[addIndex], allowableValues[addIndex]);
+			addOptionToSelectElement(selectId, allowableNames[addIndex], allowableValues[addIndex], null, controlDocument);
 		}
-		setSelectedValue(selectId, currentSelection); //restore original settings if still valid
+		setSelectedValue(selectId, currentSelection, controlDocument); //restore original settings if still valid
 	}
 }
 
