@@ -1424,7 +1424,7 @@ function resetData()
 			{
 				if(uciOriginal.get("wireless", allWirelessSections[sectionIndex], "mode") == "wds")
 				{
-					wifiWdsData.push( [ uciOriginal.get("wireless", allWirelessSections[sectionIndex].toUpperCase(), "bssid")  ] );
+					wifiWdsData.push( [ uciOriginal.get("wireless", allWirelessSections[sectionIndex], "bssid").toUpperCase()  ] );
 					setSelectedValue("wifi_mode", "ap+wds");
 				}
 			}
