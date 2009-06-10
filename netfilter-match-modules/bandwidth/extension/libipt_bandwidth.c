@@ -39,7 +39,7 @@
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
+	printf(	"bandwidth options:\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
 }
 
 static struct option opts[] = 
@@ -285,7 +285,7 @@ static void final_check(unsigned int flags)
 	{
 		exit_error(PARAMETER_PROBLEM, "You must specify '--greater_than' or '--less_than' ");
 	}
-	if( flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
+	if( (flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
 	{
 		exit_error(PARAMETER_PROBLEM, "You may not specify '--reset_time' without '--reset_interval' ");
 	}

@@ -163,11 +163,11 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now)
 		time_t alt_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month])*(60*60*24) + info->reset_time;
 		if(alt_reset > now)
 		{
-			reset_time = alt_reset;
+			next_reset = alt_reset;
 		}
 		else if(month == 11)
 		{
-			next_reset = days_since_epoch_for_each_year_start[year_index-1]*(60*60*24) + info_reset_time;
+			next_reset = days_since_epoch_for_each_year_start[year_index-1]*(60*60*24) + info->reset_time;
 		}
 		else
 		{
