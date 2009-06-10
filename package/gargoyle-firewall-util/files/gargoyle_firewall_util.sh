@@ -508,7 +508,6 @@ block_static_ip_mismatches()
 {
 	block_mismatches=$(uci get firewall.@defaults[0].block_static_ip_mismatches 2> /dev/null)
 	if [ "$block_mismatches" = "1" ] && [ -e /etc/ethers ] ; then
-		eval $(cat /etc/ethers | awk '  { print "iptables -t filter -I input -s ! " $2 " -m mac --mac-source " $1 " -j REJECT " ; } ' )
 		eval $(cat /etc/ethers | awk '  { print "iptables -t filter -I forward -s ! " $2 " -m mac --mac-source " $1 " -j REJECT " ; } ' )
 	fi
 }
