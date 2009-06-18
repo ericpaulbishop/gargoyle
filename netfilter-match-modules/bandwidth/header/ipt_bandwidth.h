@@ -19,27 +19,59 @@
 #ifndef _IPT_BANDWIDTH_H
 #define _IPT_BANDWIDTH_H
 
-#define BANDWIDTH_GT			  1
-#define BANDWIDTH_LT			  2
-#define BANDWIDTH_CURRENT		  4
-#define BANDWIDTH_RESET_INTERVAL	  8
-#define BANDWIDTH_RESET_TIME		 16
-#define BANDWIDTH_LAST_BACKUP		 32
+/*flags -- first three don't map to parameters the rest do */
+#define BANDWIDTH_INITIALIZED		  1
+#define BANDWIDTH_REQUIRES_SUBNET	  2
+#define BANDWIDTH_SUBNET		  4
+#define BANDWIDTH_CMP			  8
+#define BANDWIDTH_CURRENT		 16
+#define BANDWIDTH_RESET_INTERVAL	 32
+#define BANDWIDTH_RESET_TIME		 64
+#define BANDWIDTH_LAST_BACKUP		128
 
-#define BANDWIDTH_MINUTE	10
-#define BANDWIDTH_HOUR		11
-#define BANDWIDTH_DAY		12
-#define BANDWIDTH_WEEK		13
-#define BANDWIDTH_MONTH		14
-#define BANDWIDTH_NEVER		15
+
+/* parameter defs that don't map to flag bits */
+#define BANDWIDTH_TYPE			 10
+#define BANDWIDTH_ID			 11
+#define BANDWIDTH_GT			 12
+#define BANDWIDTH_LT			 13
+
+
+/* possible reset intervals */
+#define BANDWIDTH_MINUTE		 20
+#define BANDWIDTH_HOUR			 21
+#define BANDWIDTH_DAY			 22
+#define BANDWIDTH_WEEK			 23
+#define BANDWIDTH_MONTH			 24
+#define BANDWIDTH_NEVER			 25
+
+/* possible monitoring types */
+#define BANDWIDTH_COMBINED 		 41
+#define BANDWIDTH_INDIVIDUAL_SRC	 42
+#define BANDWIDTH_INDIVIDUAL_DST 	 43
+#define BANDWIDTH_INDIVIDUAL_LOCAL	 44
+#define BANDWIDTH_INDIVIDUAL_REMOTE	 45
+
+/* socket id parameters (for userspace i/o) */
+#define BANDWIDTH_SET 2048
+#define BANDWIDTH_GET 2049
+
+/* max id length */
+#define BANDWIDTH_MAX_ID_LENGTH 35
+
 
 struct ipt_bandwidth_info
 {
-	unsigned char gt_lt;
+	char id[BANDWIDTH_MAX_ID_LENGTH];
+	unsigned char type;
+	uint32_t local_subnet;
+	uint32_t local_subnet_mask;
+
+	unsigned char cmp;
 	unsigned char reset_interval;
 	time_t reset_time; //seconds from start of month/week/day/hour/minute to do reset
-	u_int64_t bandwidth_cutoff;
-	u_int64_t current_bandwidth;
+	uint64_t bandwidth_cutoff;
+	uint64_t current_bandwidth;
 	time_t next_reset;
 	time_t last_backup_time;
 	struct ipt_bandwidth_info* non_const_self;

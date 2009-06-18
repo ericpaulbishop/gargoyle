@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <limits.h>
 
 //in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
 //we can use to check whether we need to deal with the new requirements
@@ -39,11 +40,14 @@
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
+	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
 }
 
 static struct option opts[] = 
 {
+	{ .name = "id", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_ID },	
+	{ .name = "type", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_TYPE },	
+	{ .name = "subnet", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_SUBNET },	
 	{ .name = "less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
 	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
 	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
@@ -72,29 +76,120 @@ static int parse(	int c,
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)(*match)->data;
 	int valid_arg = 0;
 	int num_read;
-	u_int64_t read_64;
+	uint64_t read_64;
 	time_t read_time;
+	unsigned int read,A,B,C,D,mask;
 
+	/* set defaults first time we get here */
+	if(*flags == 0)
+	{
+		/* generate random id */
+		srand ( time(NULL) );
+		unsigned long id_num = rand();
+		sprintf(info->id, "%lu", id_num);
+
+		info->type = BANDWIDTH_COMBINED;
+		info->local_subnet = 0;
+		info->local_subnet_mask = 0;
+		info->current_bandwidth = 0;
+		info->reset_interval = BANDWIDTH_NEVER;
+		info->reset_time=0;
+		info->last_backup_time = 0;
+		info->next_reset = 0;
+
+		*flags = *flags + BANDWIDTH_INITIALIZED;
+	}
 
 	switch (c)
 	{
+		case BANDWIDTH_ID:
+			if(strlen(optarg) < BANDWIDTH_MAX_ID_LENGTH)
+			{
+				sprintf(info->id, "%s", optarg);
+				valid_arg = 1;
+			}
+			c=0;
+			break;
+		case BANDWIDTH_TYPE:
+			valid_arg = 1;
+			if(strcmp(optarg, "combined") == 0)
+			{
+				info->type = BANDWIDTH_COMBINED;
+			}
+			else if(strcmp(optarg, "individual_src") == 0)
+			{
+				info->type = BANDWIDTH_INDIVIDUAL_SRC;
+			}
+			else if(strcmp(optarg, "individual_dst") == 0)
+			{
+				info->type = BANDWIDTH_INDIVIDUAL_DST;
+			}
+			else if(strcmp(optarg, "individual_local") == 0)
+			{
+				info->type = BANDWIDTH_INDIVIDUAL_LOCAL;
+				*flags = *flags + BANDWIDTH_REQUIRES_SUBNET;
+			}
+			else if(strcmp(optarg, "individual_remote") == 0)
+			{
+				info->type = BANDWIDTH_INDIVIDUAL_REMOTE;
+				*flags = *flags + BANDWIDTH_REQUIRES_SUBNET;
+			}
+			else
+			{
+				valid_arg = 0;
+			}
+
+			c=0;
+			break;
+		case BANDWIDTH_SUBNET:
+			read = sscanf(optarg, "%u.%u.%u.%u/%u", &A, &B, &C, &D, &mask);
+			if(read == 5)
+			{
+				if( A <= 255 && B <= 255 && C <= 255 && D <= 255 && mask <= 32)
+				{
+					int pow_index;
+					unsigned char* sub = (unsigned char*)(&(info->local_subnet));
+					*( sub ) = (unsigned char)A;
+					*( sub + 1 ) = (unsigned char)B;
+					*( sub + 2 ) = (unsigned char)C;
+					*( sub + 3 ) = (unsigned char)D;
+
+					unsigned char* msk = (unsigned char*)(&(info->local_subnet_mask));
+					int msk_index;
+					for(msk_index=0; msk_index*8 < mask; msk_index++)
+					{
+						int bit_index;
+						msk[msk_index] = 0;
+						for(bit_index=0; msk_index*8 + bit_index < mask && bit_index < 8; bit_index++)
+						{
+							msk[msk_index] = msk[msk_index] + get_pow(2, 7-bit_index);
+						}
+					}
+
+					info->local_subnet = (info->local_subnet & info->local_subnet_mask );
+					valid_arg = 1;
+				}
+			}
+			break;
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
 			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
 			{
-				info->gt_lt = BANDWIDTH_LT;
+				info->cmp = BANDWIDTH_LT;
 				info->bandwidth_cutoff = read_64;
 				valid_arg = 1;
 			}
+			c = BANDWIDTH_CMP; //only need one flag for less_than/greater_than
 			break;
 		case BANDWIDTH_GT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
 			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
 			{
-				info->gt_lt = BANDWIDTH_GT;
+				info->cmp = BANDWIDTH_GT;
 				info->bandwidth_cutoff = read_64;
 				valid_arg = 1;
 			}
+			c = BANDWIDTH_CMP; //only need one flag for less_than/greater_than
 			break;
 		case BANDWIDTH_CURRENT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
@@ -154,23 +249,6 @@ static int parse(	int c,
 	}
 	*flags = *flags + (unsigned int)c;
 
-	if((*flags & BANDWIDTH_CURRENT ) != BANDWIDTH_CURRENT)
-	{
-		info->current_bandwidth = 0;
-	}
-	if((*flags & BANDWIDTH_RESET_INTERVAL) != BANDWIDTH_RESET_INTERVAL)
-	{
-		info->reset_interval = BANDWIDTH_NEVER;
-	}
-	if((*flags & BANDWIDTH_RESET_TIME) != BANDWIDTH_RESET_TIME)
-	{
-		info->reset_time=0;
-	}
-	if((*flags & BANDWIDTH_LAST_BACKUP) != BANDWIDTH_LAST_BACKUP)
-	{
-		info->last_backup_time = 0;
-	}
-	info->next_reset = 0;
 
 	//if we have both reset_interval & reset_time, check reset_time is in valid range
 	if((*flags & BANDWIDTH_RESET_TIME) == BANDWIDTH_RESET_TIME && (*flags & BANDWIDTH_RESET_INTERVAL) == BANDWIDTH_RESET_INTERVAL)
@@ -185,14 +263,14 @@ static int parse(	int c,
 		{
 			valid_arg = 0;
 		}
-	}	
+	}
 
 
 	return valid_arg;
 }
 
 
-	
+
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
 	/* determine current time in seconds since epoch, with offset for current timezone */
@@ -224,11 +302,11 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 
 	now = now - (minuteswest*60);
 
-	if(info->gt_lt == BANDWIDTH_GT)
+	if(info->cmp == BANDWIDTH_GT)
 	{
 		printf(" --greater_than %lld ", info->bandwidth_cutoff);
 	}
-	if(info->gt_lt == BANDWIDTH_LT)
+	if(info->cmp == BANDWIDTH_LT)
 	{
 		printf(" --less_than %lld ", info->bandwidth_cutoff);
 	}
@@ -276,18 +354,18 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	*/	
 }
 
-/* Final check; must have specified a test string with either --contains or --contains_regex. 
-   Also, we can't have reset_time without reset_interval
+/* 
+ * Final check, we can't have reset_time without reset_interval
  */
 static void final_check(unsigned int flags)
 {
-	if( (flags & BANDWIDTH_LT) == 0 && (flags & BANDWIDTH_GT) == 0 )
-	{
-		exit_error(PARAMETER_PROBLEM, "You must specify '--greater_than' or '--less_than' ");
-	}
 	if( (flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
 	{
 		exit_error(PARAMETER_PROBLEM, "You may not specify '--reset_time' without '--reset_interval' ");
+	}
+	if( (flags & BANDWIDTH_REQUIRES_SUBNET) == BANDWIDTH_REQUIRES_SUBNET && (flags & BANDWIDTH_SUBNET) == 0 )
+	{
+		exit_error(PARAMETER_PROBLEM, "You must specify a subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
 	}
 }
 
