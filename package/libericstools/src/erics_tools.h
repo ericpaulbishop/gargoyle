@@ -85,6 +85,8 @@ extern void* remove_long_map_element(long_map* map, unsigned long key);
 extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned);
 extern void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned);
 extern void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed);
+extern void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value));
+
 
 /* string map functions */
 extern string_map* initialize_string_map(unsigned char store_keys);
@@ -94,7 +96,7 @@ extern void* remove_string_map_element(string_map* map, const char* key);
 extern char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned); 
 extern void** get_string_map_values(string_map* map, unsigned long* num_values_returned);
 extern void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed);
-
+extern void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value));
 /*
  * three different ways to deal with values when data structure is destroyed
  */

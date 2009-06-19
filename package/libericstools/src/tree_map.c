@@ -44,6 +44,8 @@ typedef struct stack_node_struct
 	struct stack_node_struct* previous;
 } stack_node;
 
+void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
+void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
 void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
 void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
 signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
@@ -660,10 +662,50 @@ void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_
 	return return_values;
 }
 
+void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value))
+{
+	apply_to_every_long_map_node(map->root, apply_func);
+}
+void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value))
+{
+	apply_to_every_string_map_node( (map->lm).root, map->store_keys, apply_func);
+}
+
 
 /***************************************************
  * internal utility function definitions
  ***************************************************/
+
+void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
+{
+	if(node != NULL)
+	{
+		apply_to_every_long_map_node(node->left,  apply_func);
+		
+		apply_func(node->key, node->value);
+
+		apply_to_every_long_map_node(node->right, apply_func);
+	}
+}
+void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
+{
+	if(node != NULL)
+	{
+		apply_to_every_string_map_node(node->left, has_key,  apply_func);
+		
+		if(has_key)
+		{
+			string_map_key_value* kv = (string_map_key_value*)(node->value);
+			apply_func(kv->key, kv->value);
+		}
+		else
+		{
+			apply_func(NULL, node->value);
+		}
+		apply_to_every_string_map_node(node->right, has_key, apply_func);
+	}
+}
+
 
 void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
 {
