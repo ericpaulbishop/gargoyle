@@ -21,7 +21,10 @@
 #include <linux/skbuff.h>
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
+#include <asm/uaccess.h>
 
+
+#include "bandwidth_deps/tree_map.h"
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>
 
@@ -38,15 +41,30 @@
 #endif
 
 
+
+
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match bandwidth used, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
 static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
 
+static string_map* id_map = NULL;
+
+static unsigned char* output_buffer = NULL;
+static unsigned long output_buffer_index = 0;
+static unsigned long output_buffer_length = 0;
+
+static unsigned char* input_buffer = NULL;
+static unsigned long input_buffer_index = 0;
+static unsigned long input_buffer_length = 0;
+
+
 /*
  * Shamelessly yoinked from xt_time.c
- * "That is so amazingly amazing, I think I'd like to steal it." -- Zaphod Beeblebrox
+ * "That is so amazingly amazing, I think I'd like to steal it." 
+ *      -- Zaphod Beeblebrox
  */
 
 extern struct timezone sys_tz; /* ouch */
@@ -179,6 +197,12 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now)
 	return next_reset;
 }
 
+static void set_bandwidth_to_zero(unsigned long key, void*value)
+{
+	*((uint64_t*)value) = 0;
+}
+
+
 static int match(	const struct sk_buff *skb,
 			const struct net_device *in,
 			const struct net_device *out,
@@ -199,57 +223,118 @@ static int match(	const struct sk_buff *skb,
 
 	struct timeval test_time;
 	time_t now;
-	int match_found = 0;
+	int match_found;
+
+	/* want to get this within lock, intialize to NULL */
+	long_map* ip_map = NULL;
 
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
-		do_gettimeofday(&test_time);
-		now = test_time.tv_sec;
-		now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-
-		if(info->next_reset == 0)
-		{
-			spin_lock_bh(&bandwidth_lock);
-			if(info->next_reset == 0) /* check again after waiting for lock */
-			{
-				info->next_reset = get_next_reset_time(info, now);
-				
-				/* if we specify last backup time, check that next reset is consistent, otherwise reset current_bandwidth to 0 */
-				if(info->last_backup_time != 0)
-				{
-					time_t next_reset_of_last_backup;
-					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
-					next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
-					if(next_reset_of_last_backup != info->next_reset)
-					{
-						info->current_bandwidth = 0;
-					}
-					info->last_backup_time = 0;
-				}
-			}
-			spin_unlock_bh(&bandwidth_lock);
-		}
-		else if(info->next_reset < now)
+		if(info->next_reset < now)
 		{
 			spin_lock_bh(&bandwidth_lock);
 			if(info->next_reset < now) /* check again after waiting for lock */
 			{
+				//do reset
 				info->current_bandwidth = 0;
 				info->next_reset = get_next_reset_time(info, now);
+				
+				ip_map = (long_map*)get_string_map_element(id_map, info->id);
+				apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
 			}
 			spin_unlock_bh(&bandwidth_lock);
 		}
 	}
 
-	spin_lock_bh(&bandwidth_lock);
-	info->current_bandwidth = info->current_bandwidth + skb->len;
-	if(info->gt_lt == BANDWIDTH_GT)
+	uint64_t* bws[2] = {NULL, NULL};
+	if(info->type == COMBINED)
 	{
-		match_found = info->current_bandwidth > info->bandwidth_cutoff ? 1 : 0;
+		spin_lock_bh(&bandwidth_lock);
+		if(ip_map == NULL)
+		{
+			ip_map = (long_map*)get_string_map_element(id_map, info->id);
+		}
+		bws[0] = (uint64_t*)get_long_map_element(ip_map, 255);
+		if(bws[0] == NULL)
+		{
+			bws[0] = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+			*(bws[0]) = skb->len;
+			set_long_map_element(ip_map, (unsigned long)bw_ip, (void*)(bws[0]) );
+		}
+		else
+		{
+			*(bws[0]) = *(bws[0]) + skb->len;
+		}
+		info->current_bandwidth = *(bws[0]);
 	}
-	else if(info->gt_lt == BANDWIDTH_LT)
+	else
 	{
-		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : 0;
+		int bw_ip_index;
+		uint32_t bw_ips[2] = {0, 0};
+		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
+		if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_SRC)
+		{
+			//src ip
+			bw_ips[0] = iph->saddr;
+		}
+		else if (info->monitor_type == IPT_DUMMY_INDIVIDUAL_DST)
+		{
+			//dst ip
+			bw_ips[0] = iph->daddr;
+		}
+		else if(info->monitor_type ==  IPT_DUMMY_INDIVIDUAL_LOCAL ||  info->monitor_type == IPT_DUMMY_INDIVIDUAL_REMOTE)
+		{
+			//remote or local ip -- need to test both src && dst
+			uint32_t src_ip = iph->saddr;
+			uint32_t dst_ip = iph->daddr;
+			if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_LOCAL)
+			{
+				bw_ips[0] = ((info->local_subnet_mask & src_ip) == info->local_subnet) ? src_ip : 0;
+				bw_ips[1] = ((info->local_subnet_mask & dst_ip) == info->local_subnet) ? dst_ip : 0;
+			}
+			else if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_REMOTE)
+			{
+				bw_ips[0] = ((info->local_subnet_mask & src_ip) != info->local_subnet ) ? src_ip : 0;
+				bw_ips[1] = ((info->local_subnet_mask & dst_ip) != info->local_subnet ) ? dst_ip : 0;
+			}
+		}
+		
+		spin_lock_bh(&bandwidth_lock);
+		if(ip_map == NULL)
+		{
+			ip_map = (long_map*)get_string_map_element(id_map, info->id);
+		}
+		for(bw_ip_index=0; bw_ip_index < 2; bw_ip_index++)
+		{
+			uint32_t bw_ip = bw_ips[bw_ip_index];
+			if(bw_ip != 0)
+			{
+				uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
+				if(oldval == NULL)
+				{
+					oldval  = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+					*oldval = skb->len;
+					set_long_map_element(ip_map, (unsigned long)bw_ip, (void*)oldval);
+				}
+				else
+				{
+					*oldval = *oldval + skb->len;
+				}
+				bws[bw_ip_index] = oldval;
+			}
+		}
+	}
+
+	match_found = 0;
+	if(info->cmp == BANDWIDTH_GT)
+	{
+		match_found = bws[0] != NULL ? ( *(bws[0]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+		match_found = bws[1] != NULL ? ( *(bws[1]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+	}
+	else if(info->cmp == BANDWIDTH_LT)
+	{
+		match_found = bws[0] != NULL ? ( *(bws[0]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+		match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
 	}
 	spin_unlock_bh(&bandwidth_lock);
 
@@ -275,6 +360,7 @@ static int checkentry(	const char *tablename,
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
 	info->non_const_self = info;
 	
+	spin_lock_bh(&bandwidth_lock);
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
 		struct timeval test_time;
@@ -285,13 +371,18 @@ static int checkentry(	const char *tablename,
 
 		if(info->next_reset == 0)
 		{
-			spin_lock_bh(&bandwidth_lock);
 			if(info->next_reset == 0) /* check again after waiting for lock */
 			{
 				info->next_reset = get_next_reset_time(info, now);
 				
-				/* if we specify last backup time, check that next reset is consistent, otherwise reset current_bandwidth to 0 */
-				if(info->last_backup_time != 0)
+				/* 
+				 * if we specify last backup time, check that next reset is consistent, 
+				 * otherwise reset current_bandwidth to 0 
+				 * 
+				 * only applies to combined type -- otherwise we need to handle setting bandwidth
+				 * through userspace library
+				 */
+				if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
 				{
 					time_t next_reset_of_last_backup;
 					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
@@ -303,11 +394,174 @@ static int checkentry(	const char *tablename,
 					info->last_backup_time = 0;
 				}
 			}
-			spin_unlock_bh(&bandwidth_lock);
 		}
 	}
+
+	long_map* ip_map = initialize_long_map();
+	set_string_map_element(id_map, info->id, ip_map);
+	if(info->type == BANDWIDTH_COMBINED)
+	{
+		set_long_map_element(ip_map, 255, info->current_bandwidth);
+	}
+	spin_unlock_bh(&bandwidth_lock);
+
 	return 1;
 }
+
+
+static int ipt_dummy_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+{
+	return 0;
+}
+
+
+static int ipt_dummy_get_ctl(struct sock *sk, int cmd, void *user, int *len)
+{
+	char query[BANDWIDTH_QUERY_LENGTH];
+	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
+	
+	char id[BANDWIDTH_MAX_ID_LENGTH] = "";
+	char type[BANDWIDTH_MAX_ID_LENGTH] = "";
+	int read = sscanf(query, "%s %s", id, type);
+	
+
+	printk("ipt_dummy query: id=\"%s\" type=\"%s\"\n", id, type);
+	
+	// reinitialize output buffer to necessary length dynamically, begin output
+	// last byte of output will be 0 if all data is finished dumping, 1 if theres more
+	// and client needs to query again with blank query to get rest
+	memset( query, 0, BANDWIDTH_QUERY_LENGTH);
+	if(strcmp(id, "") != 0) /* this is initial query, not follow-up requesting more data from a previous query */
+	{
+		spin_lock_bh(&bandwidth_lock);
+		long_map* ip_map = NULL;
+		if(strlen(id) > 0)
+		{
+			ip_map = (long_map*)get_string_map_element(id_map, id);
+			if(ip_map != NULL)
+			{
+				printk("ip_map found for id=\"%s\"\n", id);
+			}
+			else
+			{
+				printk("ip_map NOT found for id=\"%s\"\n", id);
+			}
+		}
+		spin_unlock_bh(&bandwidth_lock);
+
+		if( ip_map != NULL && (strcmp(type, "ALL") == 0 || strcmp(type, "") == 0))
+		{
+			unsigned long num_ips;
+			unsigned long *all_ips;
+			/*int out_index=0; */
+			int ip_index = 0;
+			int query_index = 0;
+			
+			
+			if(output_buffer != NULL)
+			{
+				kfree(output_buffer);
+				output_buffer = NULL;
+			}
+			output_buffer_index = 0;
+			output_buffer_length = 0;
+
+
+			spin_lock_bh(&bandwidth_lock);
+			printk("    num ips = %ld\n", ip_map->num_elements);
+			all_ips = get_sorted_long_map_keys(ip_map, &num_ips);
+			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
+			output_buffer = (char *)kmalloc(output_buffer_length, GFP_ATOMIC);
+			for(ip_index=0; ip_index < ip_map->num_elements; ip_index++)
+			{
+				uint64_t* bw = (uint64_t*)get_long_map_element(ip_map, all_ips[ip_index]);
+				uint32_t ip = (uint32_t)all_ips[ip_index];
+				/*printk("   dumping ip: %u.%u.%u.%u\n", NIPQUAD(ip));*/
+
+				*((uint32_t*)(output_buffer (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
+				*((uint64_t*)(output_buffer + 4 + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = *bw;
+			}
+			spin_unlock_bh(&bandwidth_lock);
+			
+			kfree(all_ips);
+
+			
+			*((uint32_t*)(query)) = output_buffer_length;
+			for(	query_index=4; 
+				output_buffer_index < output_buffer_length && 
+				query_index + BANDWIDTH_ENTRY_LENGTH < BANDWIDTH_QUERY_LENGTH; 
+				query_index=query_index+BANDWIDTH_ENTRY_LENGTH
+				)
+			{
+				*((uint32_t*)(query + query_index)) = *((uint32_t*)(output_buffer + output_buffer_index));
+				*((uint64_t*)(query + query_index + 4)) = *((uint64_t*)(output_buffer + output_buffer_index + 4));
+				output_buffer_index=output_buffer_index+BANDWIDTH_ENTRY_LENGTH;
+			}
+			if(output_buffer_index < output_buffer_length)
+			{
+				query[BANDWIDTH_QUERY_LENGTH-1] = 1;
+			}
+			else
+			{
+				kfree(output_buffer);
+				output_buffer = NULL;
+				output_buffer_index = 0;
+				output_buffer_length = 0;
+			}
+		}
+	}
+	else
+	{
+		memset( query, 0, BANDWIDTH_QUERY_LENGTH);
+		if(output_buffer != NULL )
+		{
+			if(output_buffer[output_buffer_index] != '\0')
+			{
+				int query_index;
+				*((uint32_t*)(query)) = output_buffer_length;
+				for(	query_index=4;
+					output_buffer_index < output_buffer_length && 
+					query_index + BANDWIDTH_ENTRY_LENGTH < BANDWIDTH_QUERY_LENGTH; 
+					query_index=query_index+BANDWIDTH_ENTRY_LENGTH
+					)
+				{
+					*((uint32_t*)(query + query_index)) = *((uint32_t*)(output_buffer + output_buffer_index));
+					*((uint64_t*)(query + query_index + 4)) = *((uint64_t*)(output_buffer + output_buffer_index + 4));
+					output_buffer_index=output_buffer_index+BANDWIDTH_ENTRY_LENGTH;
+				}
+				if(output_buffer_index < output_buffer_length)
+				{
+					query[BANDWIDTH_QUERY_LENGTH-1] = 1;
+				}
+				else
+				{
+					kfree(output_buffer);
+					output_buffer = NULL;
+					output_buffer_index = 0;
+					output_buffer_length = 0;
+				}
+			}
+		}
+	}
+	copy_to_user(user, query, BANDWIDTH_QUERY_LENGTH);
+
+
+	return 0;
+}
+
+
+
+static struct nf_sockopt_ops ipt_bandwidth_sockopts = 
+{
+	.pf = PF_INET,
+	.set_optmin = BANDWIDTH_SET,
+	.set_optmax = BANDWIDTH_SET+1,
+	.set = ipt_bandwidth_set_ctl,
+	.get_optmin = BANDWIDTH_GET,
+	.get_optmax = BANDWIDTH_GET+1,
+	.get = ipt_bandwidth_get_ctl
+};
+
 
 
 static struct ipt_match bandwidth_match = 
@@ -334,13 +588,35 @@ static struct ipt_match bandwidth_match =
 
 static int __init init(void)
 {
+	/* Register setsockopt */
+	if (nf_register_sockopt(&ipt_bandwidth_sockopts) < 0)
+	{
+		printk("ipt_bandwidth: Can't register sockopts. Aborting\n");
+	}
+
+	id_map = initialize_string_map(0);
+
 	return ipt_register_match(&bandwidth_match);
 
 }
 
 static void __exit fini(void)
 {
+	spin_lock_bh(&bandwidth_lock);
+	if(id_map != NULL)
+	{
+		unsigned long num_returned;
+		long_map** ip_maps = (long_map**)destroy_string_map(id_map, DESTROY_MODE_RETURN_VALUES, &num_returned);
+		int ip_map_index;
+		for(ip_map_index=0; ip_map_index < num_returned; ip_map_index++)
+		{
+			long_map* ip_map = ip_maps[ip_map_index];
+			unsigned long num_destroyed;
+			destroy_long_map(id_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+		}
+	}
 	ipt_unregister_match(&bandwidth_match);
+	spin_unlock_bh(&bandwidth_lock);
 }
 
 module_init(init);

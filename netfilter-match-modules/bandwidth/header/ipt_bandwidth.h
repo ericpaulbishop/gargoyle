@@ -20,44 +20,49 @@
 #define _IPT_BANDWIDTH_H
 
 /*flags -- first three don't map to parameters the rest do */
-#define BANDWIDTH_INITIALIZED		  1
-#define BANDWIDTH_REQUIRES_SUBNET	  2
-#define BANDWIDTH_SUBNET		  4
-#define BANDWIDTH_CMP			  8
-#define BANDWIDTH_CURRENT		 16
-#define BANDWIDTH_RESET_INTERVAL	 32
-#define BANDWIDTH_RESET_TIME		 64
-#define BANDWIDTH_LAST_BACKUP		128
+#define BANDWIDTH_INITIALIZED		   1
+#define BANDWIDTH_REQUIRES_SUBNET	   2
+#define BANDWIDTH_SUBNET		   4
+#define BANDWIDTH_CMP			   8
+#define BANDWIDTH_CURRENT		  16
+#define BANDWIDTH_RESET_INTERVAL	  32
+#define BANDWIDTH_RESET_TIME		  64
+#define BANDWIDTH_LAST_BACKUP		 128
 
 
 /* parameter defs that don't map to flag bits */
-#define BANDWIDTH_TYPE			 10
-#define BANDWIDTH_ID			 11
-#define BANDWIDTH_GT			 12
-#define BANDWIDTH_LT			 13
+#define BANDWIDTH_TYPE			  10
+#define BANDWIDTH_ID			  11
+#define BANDWIDTH_GT			  12
+#define BANDWIDTH_LT			  13
+#define BANDWIDTH_MONITOR		  14
 
 
 /* possible reset intervals */
-#define BANDWIDTH_MINUTE		 20
-#define BANDWIDTH_HOUR			 21
-#define BANDWIDTH_DAY			 22
-#define BANDWIDTH_WEEK			 23
-#define BANDWIDTH_MONTH			 24
-#define BANDWIDTH_NEVER			 25
+#define BANDWIDTH_MINUTE		  20
+#define BANDWIDTH_HOUR			  21
+#define BANDWIDTH_DAY			  22
+#define BANDWIDTH_WEEK			  23
+#define BANDWIDTH_MONTH			  24
+#define BANDWIDTH_NEVER			  25
 
 /* possible monitoring types */
-#define BANDWIDTH_COMBINED 		 41
-#define BANDWIDTH_INDIVIDUAL_SRC	 42
-#define BANDWIDTH_INDIVIDUAL_DST 	 43
-#define BANDWIDTH_INDIVIDUAL_LOCAL	 44
-#define BANDWIDTH_INDIVIDUAL_REMOTE	 45
+#define BANDWIDTH_COMBINED 		  41
+#define BANDWIDTH_INDIVIDUAL_SRC	  42
+#define BANDWIDTH_INDIVIDUAL_DST 	  43
+#define BANDWIDTH_INDIVIDUAL_LOCAL	  44
+#define BANDWIDTH_INDIVIDUAL_REMOTE	  45
 
 /* socket id parameters (for userspace i/o) */
-#define BANDWIDTH_SET 2048
-#define BANDWIDTH_GET 2049
+#define BANDWIDTH_SET 			2048
+#define BANDWIDTH_GET 			2049
 
 /* max id length */
-#define BANDWIDTH_MAX_ID_LENGTH 35
+#define BANDWIDTH_MAX_ID_LENGTH		  35
+
+/* 4 bytes for total number of entries, 100 entries of 12 bytes each, + 1 byte indicating whether all have been dumped */
+#define BANDWIDTH_QUERY_LENGTH		1205 
+#define BANDWIDTH_ENTRY_LENGTH		  12
 
 
 struct ipt_bandwidth_info

@@ -36,6 +36,17 @@
 
 
 
+/* 
+ * implement a simple function to get positive powers of positive integers so we don't have to mess with math.h 
+ * all we really need are powers of 2 for calculating netmask
+ * This is only called a couple of times, so speed isn't an issue either
+ */
+static unsigned long get_pow(unsigned long base, unsigned long pow)
+{
+	unsigned long ret = pow == 0 ? 1 : base*get_pow(base, pow-1);
+	return ret;
+}
+
 
 /* Function which prints out usage message. */
 static void help(void)
@@ -91,6 +102,7 @@ static int parse(	int c,
 		info->type = BANDWIDTH_COMBINED;
 		info->local_subnet = 0;
 		info->local_subnet_mask = 0;
+		info->cmp = BANDWIDTH_MONITOR; /* don't test greater/less than, just monitor bandwidth */
 		info->current_bandwidth = 0;
 		info->reset_interval = BANDWIDTH_NEVER;
 		info->reset_time=0;
@@ -262,9 +274,14 @@ static int parse(	int c,
 		  )
 		{
 			valid_arg = 0;
+			exit_error(PARAMETER_PROBLEM, "Parameter for '--reset_time' is not in valid range");
 		}
 	}
-
+	if(info->type != BANDWIDTH_COMBINED && (*flags & BANDWIDTH_CURRENT) == BANDWIDTH_CURRENT)
+	{
+			valid_arg = 0;
+			exit_error(PARAMETER_PROBLEM, "You may only specify current bandwidth for combined type\n  Use user-space library for setting bandwidth for individual types");
+	}
 
 	return valid_arg;
 }
@@ -301,50 +318,87 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
 
 	now = now - (minuteswest*60);
+	printf(" --id %s ", info->id);
+	if(info->local_subnet != 0)
+	{
+		unsigned char* sub = (unsigned char*)(&(info->local_subnet));
+		int msk_bits=0;
+		int pow=0;
+		for(pow=0; pow<32; pow++)
+		{
+			uint32_t test = get_pow(2, pow);
+			msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
+		}
+		printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
+	}
+	if(info->type == BANDWIDTH_COMBINED)
+	{
+		printf("--type combined ");
+	}
+	if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
+	{
+		printf("--type individual_src ");
+	}
+	if(info->type == BANDWIDTH_INDIVIDUAL_DST)
+	{
+		printf("--type individual_dst ");
+	}
+	if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
+	{
+		printf("--type individual_local ");
+	}
+	if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
+	{
+		printf("--type individual_remote ");
+	}
+
 
 	if(info->cmp == BANDWIDTH_GT)
 	{
-		printf(" --greater_than %lld ", info->bandwidth_cutoff);
+		printf("--greater_than %lld ", info->bandwidth_cutoff);
 	}
 	if(info->cmp == BANDWIDTH_LT)
 	{
-		printf(" --less_than %lld ", info->bandwidth_cutoff);
+		printf("--less_than %lld ", info->bandwidth_cutoff);
 	}
-	if( info->reset_interval != BANDWIDTH_NEVER && info->next_reset != 0 && info->next_reset < now)
+	if (info->type == BANDWIDTH_COMBINED) /* too much data to print for multi types, have to use socket to get/set data */
 	{
-		/* 
-		 * current bandwidth only gets reset when first packet after reset interval arrives, so output
-		 * zero if we're already past interval, but no packets have arrived 
-		 */
-		printf(" --current_bandwidth 0 ");
-	}
-	else 
-	{
-		printf(" --current_bandwidth %lld ", info->current_bandwidth);
+		if( info->reset_interval != BANDWIDTH_NEVER && info->next_reset != 0 && info->next_reset < now)
+		{
+			/* 
+			 * current bandwidth only gets reset when first packet after reset interval arrives, so output
+			 * zero if we're already past interval, but no packets have arrived 
+			 */
+			printf("--current_bandwidth 0 ");
+		}
+		else 
+		{
+			printf("--current_bandwidth %lld ", info->current_bandwidth);
+		}
 	}
 	if(info->reset_interval == BANDWIDTH_MINUTE)
 	{
-		printf(" --reset_interval minute ");
+		printf("--reset_interval minute ");
 	}
 	else if(info->reset_interval == BANDWIDTH_HOUR)
 	{
-		printf(" --reset_interval hour ");
+		printf("--reset_interval hour ");
 	}
 	else if(info->reset_interval == BANDWIDTH_DAY)
 	{
-		printf(" --reset_interval day ");
+		printf("--reset_interval day ");
 	}
 	else if(info->reset_interval == BANDWIDTH_WEEK)
 	{
-		printf(" --reset_interval week ");
+		printf("--reset_interval week ");
 	}
 	else if(info->reset_interval == BANDWIDTH_MONTH)
 	{
-		printf(" --reset_interval month ");
+		printf("--reset_interval month ");
 	}
 	if(info->reset_time > 0)
 	{
-		printf(" --reset_time %ld ", info->reset_time);
+		printf("--reset_time %ld ", info->reset_time);
 	}	
 	/*
 	if(info->reset_interval != BANDWIDTH_NEVER)
