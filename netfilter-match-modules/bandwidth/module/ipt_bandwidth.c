@@ -247,7 +247,7 @@ static int match(	const struct sk_buff *skb,
 	}
 
 	uint64_t* bws[2] = {NULL, NULL};
-	if(info->type == COMBINED)
+	if(info->type == BANDWIDTH_COMBINED)
 	{
 		spin_lock_bh(&bandwidth_lock);
 		if(ip_map == NULL)
@@ -259,7 +259,7 @@ static int match(	const struct sk_buff *skb,
 		{
 			bws[0] = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
 			*(bws[0]) = skb->len;
-			set_long_map_element(ip_map, (unsigned long)bw_ip, (void*)(bws[0]) );
+			set_long_map_element(ip_map, (unsigned long)(*(bws[0])), (void*)(bws[0]) );
 		}
 		else
 		{
@@ -272,27 +272,27 @@ static int match(	const struct sk_buff *skb,
 		int bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
-		if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_SRC)
+		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
 		{
 			//src ip
 			bw_ips[0] = iph->saddr;
 		}
-		else if (info->monitor_type == IPT_DUMMY_INDIVIDUAL_DST)
+		else if (info->type == BANDWIDTH_INDIVIDUAL_DST)
 		{
 			//dst ip
 			bw_ips[0] = iph->daddr;
 		}
-		else if(info->monitor_type ==  IPT_DUMMY_INDIVIDUAL_LOCAL ||  info->monitor_type == IPT_DUMMY_INDIVIDUAL_REMOTE)
+		else if(info->type ==  BANDWIDTH_INDIVIDUAL_LOCAL ||  info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
 		{
 			//remote or local ip -- need to test both src && dst
 			uint32_t src_ip = iph->saddr;
 			uint32_t dst_ip = iph->daddr;
-			if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_LOCAL)
+			if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
 			{
 				bw_ips[0] = ((info->local_subnet_mask & src_ip) == info->local_subnet) ? src_ip : 0;
 				bw_ips[1] = ((info->local_subnet_mask & dst_ip) == info->local_subnet) ? dst_ip : 0;
 			}
-			else if(info->monitor_type == IPT_DUMMY_INDIVIDUAL_REMOTE)
+			else if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
 			{
 				bw_ips[0] = ((info->local_subnet_mask & src_ip) != info->local_subnet ) ? src_ip : 0;
 				bw_ips[1] = ((info->local_subnet_mask & dst_ip) != info->local_subnet ) ? dst_ip : 0;
@@ -401,7 +401,9 @@ static int checkentry(	const char *tablename,
 	set_string_map_element(id_map, info->id, ip_map);
 	if(info->type == BANDWIDTH_COMBINED)
 	{
-		set_long_map_element(ip_map, 255, info->current_bandwidth);
+		uint64_t *bw = (uint64_t*)malloc(sizeof(uint64_t));
+		*bw = info->current_bandwidth;
+		set_long_map_element(ip_map, 255, bw);
 	}
 	spin_unlock_bh(&bandwidth_lock);
 
@@ -409,13 +411,13 @@ static int checkentry(	const char *tablename,
 }
 
 
-static int ipt_dummy_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
 	return 0;
 }
 
 
-static int ipt_dummy_get_ctl(struct sock *sk, int cmd, void *user, int *len)
+static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 {
 	char query[BANDWIDTH_QUERY_LENGTH];
 	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
@@ -478,7 +480,7 @@ static int ipt_dummy_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 				uint32_t ip = (uint32_t)all_ips[ip_index];
 				/*printk("   dumping ip: %u.%u.%u.%u\n", NIPQUAD(ip));*/
 
-				*((uint32_t*)(output_buffer (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
+				*((uint32_t*)(output_buffer + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
 				*((uint64_t*)(output_buffer + 4 + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = *bw;
 			}
 			spin_unlock_bh(&bandwidth_lock);
@@ -612,7 +614,7 @@ static void __exit fini(void)
 		{
 			long_map* ip_map = ip_maps[ip_map_index];
 			unsigned long num_destroyed;
-			destroy_long_map(id_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			destroy_long_map(ip_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		}
 	}
 	ipt_unregister_match(&bandwidth_match);
