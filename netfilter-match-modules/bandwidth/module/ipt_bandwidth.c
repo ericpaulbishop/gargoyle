@@ -52,6 +52,12 @@ static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
 
 static string_map* id_map = NULL;
 
+typedef struct info_map_pair_struct
+{
+	struct ipt_bandwidth_info* info;
+	long_map* ip_map;
+}info_map_pair;
+
 static unsigned char* output_buffer = NULL;
 static unsigned long output_buffer_index = 0;
 static unsigned long output_buffer_length = 0;
@@ -59,7 +65,8 @@ static unsigned long output_buffer_length = 0;
 static unsigned char* input_buffer = NULL;
 static unsigned long input_buffer_index = 0;
 static unsigned long input_buffer_length = 0;
-
+static char input_id[BANDWIDTH_MAX_ID_LENGTH] = "";
+static time_t input_backup_time = 0;
 
 /*
  * Shamelessly yoinked from xt_time.c
@@ -228,6 +235,10 @@ static int match(	const struct sk_buff *skb,
 	/* want to get this within lock, intialize to NULL */
 	long_map* ip_map = NULL;
 
+	do_gettimeofday(&test_time);
+	now = test_time.tv_sec;
+	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
 		if(info->next_reset < now)
@@ -236,11 +247,16 @@ static int match(	const struct sk_buff *skb,
 			if(info->next_reset < now) /* check again after waiting for lock */
 			{
 				//do reset
+				info_map_pair* imp = NULL;
 				info->current_bandwidth = 0;
 				info->next_reset = get_next_reset_time(info, now);
 				
-				ip_map = (long_map*)get_string_map_element(id_map, info->id);
-				apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+				imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+				if(imp != NULL)
+				{
+					ip_map = imp->ip_map;
+					apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+				}
 			}
 			spin_unlock_bh(&bandwidth_lock);
 		}
@@ -252,20 +268,27 @@ static int match(	const struct sk_buff *skb,
 		spin_lock_bh(&bandwidth_lock);
 		if(ip_map == NULL)
 		{
-			ip_map = (long_map*)get_string_map_element(id_map, info->id);
+			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			if(imp != NULL)
+			{
+				ip_map = imp->ip_map;
+			}	
 		}
-		bws[0] = (uint64_t*)get_long_map_element(ip_map, 255);
-		if(bws[0] == NULL)
+		if(ip_map != NULL)
 		{
-			bws[0] = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
-			*(bws[0]) = skb->len;
-			set_long_map_element(ip_map, (unsigned long)(*(bws[0])), (void*)(bws[0]) );
+			bws[0] = (uint64_t*)get_long_map_element(ip_map, 0);
+			if(bws[0] == NULL)
+			{
+				bws[0] = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+				*(bws[0]) = skb->len;
+				set_long_map_element(ip_map, (unsigned long)(*(bws[0])), (void*)(bws[0]) );
+			}
+			else
+			{
+				*(bws[0]) = *(bws[0]) + skb->len;
+			}
 		}
-		else
-		{
-			*(bws[0]) = *(bws[0]) + skb->len;
-		}
-		info->current_bandwidth = *(bws[0]);
+		info->current_bandwidth = info->current_bandwidth + skb->len;
 	}
 	else
 	{
@@ -302,9 +325,13 @@ static int match(	const struct sk_buff *skb,
 		spin_lock_bh(&bandwidth_lock);
 		if(ip_map == NULL)
 		{
-			ip_map = (long_map*)get_string_map_element(id_map, info->id);
+			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			if(imp != NULL)
+			{
+				ip_map = imp->ip_map;
+			}	
 		}
-		for(bw_ip_index=0; bw_ip_index < 2; bw_ip_index++)
+		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
 			if(bw_ip != 0)
@@ -330,11 +357,13 @@ static int match(	const struct sk_buff *skb,
 	{
 		match_found = bws[0] != NULL ? ( *(bws[0]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
 		match_found = bws[1] != NULL ? ( *(bws[1]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+		match_found = info->current_bandwidth > info->bandwidth_cutoff ? 1 : match_found;
 	}
 	else if(info->cmp == BANDWIDTH_LT)
 	{
 		match_found = bws[0] != NULL ? ( *(bws[0]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
 		match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
 	}
 	spin_unlock_bh(&bandwidth_lock);
 
@@ -342,77 +371,147 @@ static int match(	const struct sk_buff *skb,
 }
 
 
-
-static int checkentry(	const char *tablename,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-			const void *ip,
-			const struct xt_match *match,
-#else
-			const struct ipt_ip *ip,
-#endif
-			void *matchinfo,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-	    		unsigned int matchsize,
-#endif
-			unsigned int hook_mask
-			)
-{
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
-	info->non_const_self = info;
-	
-	spin_lock_bh(&bandwidth_lock);
-	if(info->reset_interval != BANDWIDTH_NEVER)
-	{
-		struct timeval test_time;
-		time_t now;
-		do_gettimeofday(&test_time);
-		now = test_time.tv_sec;
-		now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-
-		if(info->next_reset == 0)
-		{
-			if(info->next_reset == 0) /* check again after waiting for lock */
-			{
-				info->next_reset = get_next_reset_time(info, now);
-				
-				/* 
-				 * if we specify last backup time, check that next reset is consistent, 
-				 * otherwise reset current_bandwidth to 0 
-				 * 
-				 * only applies to combined type -- otherwise we need to handle setting bandwidth
-				 * through userspace library
-				 */
-				if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
-				{
-					time_t next_reset_of_last_backup;
-					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
-					next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
-					if(next_reset_of_last_backup != info->next_reset)
-					{
-						info->current_bandwidth = 0;
-					}
-					info->last_backup_time = 0;
-				}
-			}
-		}
-	}
-
-	long_map* ip_map = initialize_long_map();
-	set_string_map_element(id_map, info->id, ip_map);
-	if(info->type == BANDWIDTH_COMBINED)
-	{
-		uint64_t *bw = (uint64_t*)malloc(sizeof(uint64_t));
-		*bw = info->current_bandwidth;
-		set_long_map_element(ip_map, 255, bw);
-	}
-	spin_unlock_bh(&bandwidth_lock);
-
-	return 1;
-}
-
-
 static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
+	char query[BANDWIDTH_QUERY_LENGTH];
+	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
+	
+
+	/* 
+	 * buffer starts with length of total entries to expect (-1 for first entry which should be last_backup_time) 
+	 * Unlike when we're doing a get, buffer length is valid only with first query, otherwise it is zero.
+	 * In the case it is non-zero (initial query) it is followed by the id that is being querried.
+	 */
+	uint32_t *buffer_length = (uint32_t*)query;
+	int query_index = 4; /* offset after buffer_length */
+	if(*buffer_length != 0)
+	{
+		if(input_buffer != NULL)
+		{
+			kfree(input_buffer);
+		}
+		input_buffer_index = 0;
+		input_buffer_length = *buffer_length;
+		input_buffer = (char*)kmalloc(input_buffer_length, GFP_ATOMIC);
+		
+		/* read id, and offset query index */
+		memcpy(input_id, query+4, BANDWIDTH_MAX_ID_LENGTH);
+		query_index = query_index + BANDWIDTH_MAX_ID_LENGTH;
+
+		/* read backup_time */
+		input_backup_time = *( (time_t*)(query+query_index) );
+		query_index = query_index + sizeof(time_t);
+
+	}
+
+	int clear_input_buffer = 1;
+	long_map* ip_map = NULL;
+	struct ipt_bandwidth_info* info = NULL;
+	if(input_buffer_index < input_buffer_length && strlen(input_id) > 0)
+	{
+		info_map_pair* imp;
+		spin_lock_bh(&bandwidth_lock);
+		
+		imp = get_string_map_element(id_map, input_id);
+		if(imp != NULL)
+		{
+			ip_map = imp->ip_map;
+			info = imp->info;
+		}
+		clear_input_buffer = ip_map == NULL ? 1 : 0;
+		spin_unlock_bh(&bandwidth_lock);
+
+		/* note: even though we release spinlock we retain ip_map variable for later. 
+		 * There's no reason this should cause a problem -- we re-activate lock before
+		 * we query/change anything.  We just retain the pointer, which shouldn't change
+		 * Nowhere, except when entire module is removed, do ip maps get freed.
+		 */
+	}
+	if(clear_input_buffer == 0)
+	{
+		int query_start_index = query_index;
+		while(query_index+BANDWIDTH_ENTRY_LENGTH < BANDWIDTH_QUERY_LENGTH-1 && input_buffer_index < input_buffer_length)
+		{
+			query_index=query_index+BANDWIDTH_ENTRY_LENGTH;
+			input_buffer_index=input_buffer_index+BANDWIDTH_ENTRY_LENGTH;
+		}
+		memcpy(input_buffer, query+query_start_index, input_buffer_index);
+
+		/* done reading input, set it */
+		if(input_buffer_index >= input_buffer_length)
+		{
+
+			int backup_time_is_consistent = 1;
+			spin_lock_bh(&bandwidth_lock);
+			
+			/* 
+			 * if we specify last backup time, check that next reset is consistent, 
+			 * otherwise reset current_bandwidth to 0 
+			 * 
+			 * only applies to combined type -- otherwise we need to handle setting bandwidth
+			 * through userspace library
+			 */
+			if(input_backup_time != 0 && info->reset_interval != BANDWIDTH_NEVER)
+			{
+				struct timeval test_time;
+				time_t now;
+				time_t next_reset;
+				
+				do_gettimeofday(&test_time);
+				now = test_time.tv_sec;
+				next_reset = get_next_reset_time(info, now);
+
+				time_t next_reset_of_last_backup;
+				time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+				next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
+				if(next_reset_of_last_backup != info->next_reset)
+				{
+					backup_time_is_consistent = 0;
+				}
+			}
+			if(backup_time_is_consistent)
+			{
+				/* set values from input buffer to ip_map */
+				uint32_t out_index;
+				for(out_index=0; out_index < input_buffer_length; out_index=out_index+BANDWIDTH_ENTRY_LENGTH)
+				{
+					uint32_t *ip = (uint32_t*)(input_buffer + out_index);
+					uint64_t *bw = (uint64_t*)(input_buffer + out_index + 4);
+					uint64_t *map_bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)(*ip) );
+					if(map_bw == NULL)
+					{
+						map_bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+						*map_bw = *bw;
+						set_long_map_element(ip_map, (unsigned long)(*ip), map_bw);
+					}
+					else
+					{
+						*map_bw = *bw;
+					}
+					if(*ip == 0)
+					{
+						info->current_bandwidth = *bw;
+					}
+				}
+			}
+
+
+			spin_unlock_bh(&bandwidth_lock);
+			clear_input_buffer = 1;
+		}
+	}
+	if(clear_input_buffer) /* either we had an invalid id, or set operation is complete */
+	{
+		if(input_buffer != NULL)
+		{
+			kfree(input_buffer);
+		}
+		input_buffer = NULL;
+		input_buffer_index = 0;
+		input_buffer_length = 0;
+		input_backup_time = 0;
+		input_id[0] = '\0';
+	}
 	return 0;
 }
 
@@ -424,7 +523,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	
 	char id[BANDWIDTH_MAX_ID_LENGTH] = "";
 	char type[BANDWIDTH_MAX_ID_LENGTH] = "";
-	int read = sscanf(query, "%s %s", id, type);
+	sscanf(query, "%s %s", id, type);
 	
 
 	printk("ipt_dummy query: id=\"%s\" type=\"%s\"\n", id, type);
@@ -437,17 +536,27 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	{
 		spin_lock_bh(&bandwidth_lock);
 		long_map* ip_map = NULL;
+		struct ipt_bandwidth_info* info = NULL;
 		if(strlen(id) > 0)
 		{
-			ip_map = (long_map*)get_string_map_element(id_map, id);
-			if(ip_map != NULL)
+
+			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			if(imp != NULL)
 			{
+				ip_map = imp->ip_map;
+				info = imp->info;
 				printk("ip_map found for id=\"%s\"\n", id);
 			}
 			else
 			{
 				printk("ip_map NOT found for id=\"%s\"\n", id);
 			}
+
+			/* note: even though we release spinlock we retain ip_map variable for later. 
+			 * There's no reason this should cause a problem -- we re-activate lock before
+			 * we query/change anything.  We just retain the pointer, which shouldn't change.
+			 * Nowhere, except when entire module is removed, do ip maps get freed.
+			 */
 		}
 		spin_unlock_bh(&bandwidth_lock);
 
@@ -455,10 +564,11 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 		{
 			unsigned long num_ips;
 			unsigned long *all_ips;
-			/*int out_index=0; */
 			int ip_index = 0;
 			int query_index = 0;
-			
+			struct timeval test_time;
+			time_t now;
+
 			
 			if(output_buffer != NULL)
 			{
@@ -470,6 +580,26 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 
 
 			spin_lock_bh(&bandwidth_lock);
+
+			/* values only reset when a packet hits a rule, so 
+			 * reset may have expired without data being reset.
+			 * So, test if we need to reset values to zero 
+			 */
+			do_gettimeofday(&test_time);
+			now = test_time.tv_sec;
+			now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+			if(info->reset_interval != BANDWIDTH_NEVER)
+			{
+				if(info->next_reset < now)
+				{
+					//do reset
+					info->current_bandwidth = 0;
+					info->next_reset = get_next_reset_time(info, now);
+					apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+				}
+			}
+
+
 			printk("    num ips = %ld\n", ip_map->num_elements);
 			all_ips = get_sorted_long_map_keys(ip_map, &num_ips);
 			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
@@ -553,6 +683,76 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 
 
 
+
+static int checkentry(	const char *tablename,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+			const void *ip,
+			const struct xt_match *match,
+#else
+			const struct ipt_ip *ip,
+#endif
+			void *matchinfo,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+	    		unsigned int matchsize,
+#endif
+			unsigned int hook_mask
+			)
+{
+	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+	info->non_const_self = info;
+	
+	spin_lock_bh(&bandwidth_lock);
+	if(info->reset_interval != BANDWIDTH_NEVER)
+	{
+		struct timeval test_time;
+		time_t now;
+		do_gettimeofday(&test_time);
+		now = test_time.tv_sec;
+		now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+
+		if(info->next_reset == 0)
+		{
+			info->next_reset = get_next_reset_time(info, now);
+				
+			/* 
+			 * if we specify last backup time, check that next reset is consistent, 
+			 * otherwise reset current_bandwidth to 0 
+			 * 
+			 * only applies to combined type -- otherwise we need to handle setting bandwidth
+			 * through userspace library
+			 */
+			if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
+			{
+				time_t next_reset_of_last_backup;
+				time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+				next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
+				if(next_reset_of_last_backup != info->next_reset)
+				{
+					info->current_bandwidth = 0;
+				}
+				info->last_backup_time = 0;
+			}
+		}
+	}
+
+	info_map_pair  *imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
+	imp->ip_map = initialize_long_map();
+	imp->info = info;
+	set_string_map_element(id_map, info->id, imp);
+	if(info->type == BANDWIDTH_COMBINED)
+	{
+		uint64_t *bw = (uint64_t*)malloc(sizeof(uint64_t));
+		*bw = info->current_bandwidth;
+		set_long_map_element(imp->ip_map, 0, bw);
+	}
+	spin_unlock_bh(&bandwidth_lock);
+
+	return 1;
+}
+
+
+
+
 static struct nf_sockopt_ops ipt_bandwidth_sockopts = 
 {
 	.pf = PF_INET,
@@ -599,7 +799,6 @@ static int __init init(void)
 	id_map = initialize_string_map(0);
 
 	return ipt_register_match(&bandwidth_match);
-
 }
 
 static void __exit fini(void)
@@ -608,13 +807,16 @@ static void __exit fini(void)
 	if(id_map != NULL)
 	{
 		unsigned long num_returned;
-		long_map** ip_maps = (long_map**)destroy_string_map(id_map, DESTROY_MODE_RETURN_VALUES, &num_returned);
-		int ip_map_index;
-		for(ip_map_index=0; ip_map_index < num_returned; ip_map_index++)
+		info_map_pair **imps = (info_map_pair**)destroy_string_map(id_map, DESTROY_MODE_RETURN_VALUES, &num_returned);
+		int imp_index;
+		for(imp_index=0; imp_index < num_returned; imp_index++)
 		{
-			long_map* ip_map = ip_maps[ip_map_index];
+			info_map_pair* imp = imps[imp_index];
+			long_map* ip_map = imp->ip_map;
 			unsigned long num_destroyed;
 			destroy_long_map(ip_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			kfree(imp);
+			/* info portion of imp gets taken care of automatically */
 		}
 	}
 	ipt_unregister_match(&bandwidth_match);
