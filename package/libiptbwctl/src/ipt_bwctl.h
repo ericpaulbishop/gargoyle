@@ -8,11 +8,25 @@
 #include <linux/if.h>
 #include <arpa/inet.h>
 
-#define BANDWIDTH_SET 2048
-#define BANDWIDTH_GET 2049
+#define BANDWIDTH_QUERY_LENGTH		1205
 
-#define QUERY_BUFFER_LENGTH 1205
-#define BANDWIDTH_ENTRY_LENGTH 12
+/* socket id parameters (for userspace i/o) */
+#define BANDWIDTH_SET 			2048
+#define BANDWIDTH_GET 			2049
 
-extern unsigned char* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips);
+
+/* max id length */
+#define BANDWIDTH_MAX_ID_LENGTH		  35
+
+
+
+
+typedef struct ip_bw_struct
+{
+	struct in_addr ip;
+	uint64_t bw;
+}ip_bw;
+
+extern ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips);
+void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, ip_bw* data);
 

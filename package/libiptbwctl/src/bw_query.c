@@ -1,9 +1,11 @@
 #include "ipt_bwctl.h"
 
+static uint32_t bandwidth_entry_length = sizeof(ip_bw);
+
 int main(int argc, char **argv)
 {
 	unsigned long num_ips;
-	unsigned char *ip_buf;
+	ip_bw *ip_buf;
 	char id[50];
 	unsigned long out_index;
 
@@ -19,15 +21,14 @@ int main(int argc, char **argv)
 
 	for(out_index=0; out_index < num_ips; out_index++)
 	{
-		struct in_addr ip = *((struct in_addr*)(ip_buf + (out_index*BANDWIDTH_ENTRY_LENGTH) ));
-		uint64_t bw = *((uint64_t*)(ip_buf + 4 + (out_index*BANDWIDTH_ENTRY_LENGTH) ));
-		if(  *((uint32_t*)(&ip)) != 0 )
+		ip_bw next = ip_buf[out_index];
+		if(  *((uint32_t*)(&(next.ip))) != 0 )
 		{
-			printf("%15s\t%lld\n", inet_ntoa(ip), (long long int)bw);
+			printf("%15s\t%lld\n", inet_ntoa(next.ip), (long long int)next.bw);
 		}
 		else
 		{
-			printf("%15s\t%lld\n", "COMBINED", (long long int)bw);
+			printf("%15s\t%lld\n", "COMBINED", (long long int)next.bw);
 		}
 	}
 	if(num_ips == 0)

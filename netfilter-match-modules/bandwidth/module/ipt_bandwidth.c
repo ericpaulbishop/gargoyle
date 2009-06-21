@@ -471,6 +471,11 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 			}
 			if(backup_time_is_consistent)
 			{
+				/* reset existing bandwidth values to 0 */
+				info->current_bandwidth = 0;
+				apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+
+
 				/* set values from input buffer to ip_map */
 				uint32_t out_index;
 				for(out_index=0; out_index < input_buffer_length; out_index=out_index+BANDWIDTH_ENTRY_LENGTH)
@@ -540,7 +545,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 		if(strlen(id) > 0)
 		{
 
-			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, id);
 			if(imp != NULL)
 			{
 				ip_map = imp->ip_map;
