@@ -52,6 +52,7 @@ endef
 define Package/libiptbwctl/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_query $(1)/usr/bin/bw_query
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_set $(1)/usr/bin/bw_set
 endef
 
 
