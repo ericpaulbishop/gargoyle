@@ -675,55 +675,53 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 				output_buffer_length = 0;
 			}
 		}
-	}
-	else if( ip_map != NULL )
-	{
-		uint32_t query_ip = 0;
-		uint32_t A,B,C,D, num_read;
-		unsigned char* ipbuf = (unsigned char*)(&query_ip);
-		num_read = sscanf(type, "%u.%u.%u.%u", &A, &B, &C, &D);
-		if(num_read == 4)
+		else if( ip_map != NULL )
 		{
-
-			struct timeval test_time;
-			time_t now;	
-			uint64_t* bw = NULL;
-
-			spin_lock_bh(&bandwidth_lock);
-			/* values only reset when a packet hits a rule, so 
-			 * reset may have expired without data being reset.
-			 * So, test if we need to reset values to zero 
-			 */
-			do_gettimeofday(&test_time);
-			now = test_time.tv_sec;
-			now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-			if(info->reset_interval != BANDWIDTH_NEVER)
+			uint32_t query_ip = 0;
+			uint32_t A,B,C,D, num_read;
+			unsigned char* ip_buf = (unsigned char*)(&query_ip);
+			num_read = sscanf(type, "%u.%u.%u.%u", &A, &B, &C, &D);
+			if(num_read == 4)
 			{
-				if(info->next_reset < now)
-				{
-					//do reset
-					info->current_bandwidth = 0;
-					info->next_reset = get_next_reset_time(info, now);
-					apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
-				}
-			}
 	
-			query_ip[0] = (unsigned char)A;
-			query_ip[1] = (unsigned char)B;
-			query_ip[2] = (unsigned char)C;
-			query_ip[3] = (unsigned char)D;
+				struct timeval test_time;
+				time_t now;	
+				uint64_t* bw = NULL;
 
-			*( (uint32_t*)buf ) = 1;
-			*( (uint32_t*)(buf+4) ) = query_ip;
-			*( (uint64_t*)(buf+8) ) =  0;
-			bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)query_ip);
-			if(bw != NULL)
-			{
-				*( (uint32_t*)buf ) = 1;
-				*( (uint32_t*)(buf+4) ) = query_ip;
-				*( (uint64_t*)(buf+8) ) =  *bw;
+				spin_lock_bh(&bandwidth_lock);
+				/* values only reset when a packet hits a rule, so 
+				 * reset may have expired without data being reset.
+				 * So, test if we need to reset values to zero 
+				 */
+				do_gettimeofday(&test_time);
+				now = test_time.tv_sec;
+				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+				if(info->reset_interval != BANDWIDTH_NEVER)
+				{
+					if(info->next_reset < now)
+					{
+						//do reset
+						info->current_bandwidth = 0;
+						info->next_reset = get_next_reset_time(info, now);
+						apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+					}
+				}
+	
+				ip_buf[0] = (unsigned char)A;
+				ip_buf[1] = (unsigned char)B;
+				ip_buf[2] = (unsigned char)C;
+				ip_buf[3] = (unsigned char)D;
+
+				*( (uint32_t*)query ) = 1;
+				*( (uint32_t*)(query+4) ) = query_ip;
+				*( (uint64_t*)(query+8) ) =  0;
+				bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)query_ip);
+				if(bw != NULL)
+				{
+					*( (uint64_t*)(query+8) ) =  *bw;
+				}
+				spin_unlock_bh(&bandwidth_lock);
 			}
-			spin_unlock_bh(&bandwidth_lock);
 		}
 	}
 	else
@@ -793,7 +791,6 @@ static int checkentry(	const char *tablename,
 	info_map_pair  *imp = (info_map_pair*)get_string_map_element(id_map, info->id);
 	if(imp != NULL)
 	{
-		DEBUGP("IPT_BANDWIDTH: error, \"%s\" is a duplicate id\n", info->id);
 		printk("IPT_BANDWIDTH: error, \"%s\" is a duplicate id\n", info->id);
 		spin_unlock_bh(&bandwidth_lock);
 		return 0;
