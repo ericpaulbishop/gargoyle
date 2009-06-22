@@ -49,9 +49,21 @@ define Build/Compile
 		all
 endef
 
+
+define Build/InstallDev
+	mkdir -p $(STAGING_DIR)/usr/include/
+	$(CP) $(PKG_BUILD_DIR)/*.h $(STAGING_DIR)/usr/include/
+
+	mkdir -p $(STAGING_DIR)/usr/lib
+	$(CP) $(PKG_BUILD_DIR)/*.so* $(STAGING_DIR)/usr/lib/
+
+endef
+
 define Package/libiptbwctl/install
+	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_query $(1)/usr/bin/bw_query
+	$(CP) $(PKG_BUILD_DIR)/*.so* $(1)/usr/lib/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_get $(1)/usr/bin/bw_get
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_set $(1)/usr/bin/bw_set
 endef
 
