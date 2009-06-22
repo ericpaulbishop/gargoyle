@@ -19,6 +19,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/libiptbwctl
 	SECTION:=net
 	CATEGORY:=Network
+	DEPENDS:=+libpthread
 	TITLE:=IPT bandwidth control library
 	URL:=http://www.gargoyle-router.com
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>

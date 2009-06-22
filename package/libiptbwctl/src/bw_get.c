@@ -8,6 +8,8 @@ int main(int argc, char **argv)
 	char id[50];
 	unsigned long out_index;
 
+	unlock_bandwidth_semaphore_on_exit();
+
 	if(argc > 1)
 	{
 		sprintf(id, "%s", argv[1]);
@@ -16,7 +18,9 @@ int main(int argc, char **argv)
 	{
 		sprintf(id, "%s", "id_1");
 	}
-	ip_buf = get_all_bandwidth_usage_for_rule_id(id, &num_ips);
+
+
+	ip_buf = get_all_bandwidth_usage_for_rule_id(id, &num_ips, 0);
 
 	/* printf("num ips = %ld\n", num_ips); */
 

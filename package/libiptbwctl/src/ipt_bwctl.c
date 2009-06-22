@@ -1,8 +1,12 @@
 #include "ipt_bwctl.h"
 
+static char bw_sem_name[] = "ipt_bandwidth_userspace_semaphore";
 
-ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
+static ip_bw* get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips, unsigned long max_wait_milliseconds)
 {
+	sem_t *bw_sem = sem_open(bw_sem_name, O_CREAT);
+	int got_lock = 0;
+	
 	ip_bw* ret = NULL;
 	uint32_t ret_length = 0;
 	uint32_t ret_index = 0;
@@ -14,10 +18,21 @@ ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
 	*num_ips = 0;
 
 	sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-	sprintf((char*)buf, "%s %s", id, "ALL");
+	
+	struct timespec wait_time;
+	wait_time.tv_sec = (long)(max_wait_milliseconds/1000);
+	wait_time.tv_nsec = (max_wait_milliseconds % 1000 ) * 1000 *1000;
 
 
-	while(!done && sockfd >= 0)
+	
+	
+	
+	
+	sprintf((char*)buf, "%s %s", id, type);
+
+	got_lock = sem_timedwait(bw_sem, &wait_time) == 0 ? 1 : 0;
+	
+	while(!done && sockfd >= 0 && got_lock)
 	{
 		int buf_index;
 		uint32_t size = BANDWIDTH_QUERY_LENGTH;
@@ -44,10 +59,28 @@ ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
 	{
 		close(sockfd);
 	}
+	if(got_lock)
+	{
+		sem_post(bw_sem);
+	}
+	sem_close(bw_sem);
 	return ret;
 }
 
-void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data)
+
+ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips, unsigned long max_wait_milliseconds)
+{
+	return get_all_bandwidth_usage(id, "ALL", num_ips, max_wait_milliseconds);
+}
+
+ip_bw* get_ip_bandwidth_usage_for_rule_id(char* id, char* ip, unsigned long max_wait_milliseconds)
+{
+	unsigned long num_ips;
+	return get_all_bandwidth_usage(id, ip, &num_ips, max_wait_milliseconds);
+}
+
+
+void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data, unsigned long max_wait_milliseconds)
 {
 	uint32_t data_index = 0;
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
@@ -55,7 +88,16 @@ void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t las
 	int done = 0;
 
 	sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-	while(!done && sockfd >= 0)
+	
+	sem_t *bw_sem = sem_open(bw_sem_name, O_CREAT);
+	int got_lock = 0;
+	struct timespec wait_time;
+	wait_time.tv_sec = (long)(max_wait_milliseconds/1000);
+	wait_time.tv_nsec = (max_wait_milliseconds % 1000 ) * 1000 *1000;
+	got_lock = sem_timedwait(bw_sem, &wait_time) == 0 ? 1 : 0;
+
+
+	while(!done && sockfd >= 0 && got_lock)
 	{
 		int buf_index = 0;
 		if(data_index == 0)
@@ -84,5 +126,36 @@ void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t las
 
 		done = data_index >= num_ips ? 1 : 0;
 	}
-
+	if(sockfd >= 0)
+	{
+		close(sockfd);
+	}
+	if(got_lock)
+	{
+		sem_post(bw_sem);
+	}
+	sem_close(bw_sem);
 }
+
+extern void unlock_bandwidth_semaphore(void)
+{
+	sem_t* bw_sem = sem_open(bw_sem_name, O_CREAT);
+	sem_post(bw_sem);
+	sem_close(bw_sem);
+}
+
+static void signal_handler(int sig)
+{
+	if(sig == SIGTERM || sig == SIGINT )
+	{
+		unlock_bandwidth_semaphore();
+		exit(0);
+	}
+}
+
+extern void unlock_bandwidth_semaphore_on_exit(void)
+{
+	signal(SIGTERM,signal_handler);
+	signal(SIGINT, signal_handler);
+}
+

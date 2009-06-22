@@ -6,6 +6,8 @@ int main(int argc, char **argv)
 	unsigned long num_ips;
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 
+	unlock_bandwidth_semaphore_on_exit();
+
 	if(argc > 1)
 	{
 		sprintf(id, "%s", argv[1]);
@@ -49,7 +51,7 @@ int main(int argc, char **argv)
 		num_ips = data_index; /* number that were successfully read */
 		if(num_ips > 0)
 		{
-			set_bandwidth_usage_for_rule_id(id, num_ips, 0, data);
+			set_bandwidth_usage_for_rule_id(id, num_ips, 0, data, 0);
 		}
 	}
 	
