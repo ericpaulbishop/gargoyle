@@ -1,6 +1,5 @@
 #include "ipt_bwctl.h"
 
-static uint32_t bandwidth_entry_length = sizeof(ip_bw);
 
 int main(int argc, char **argv)
 {
@@ -19,25 +18,28 @@ int main(int argc, char **argv)
 	num_ips = argc -2;
 	if(num_ips > 0)
 	{
-       		ip_bw* data = (ip_bw*)malloc(bandwidth_entry_length*num_ips);
+       		ip_bw* data = (ip_bw*)malloc(BANDWIDTH_ENTRY_LENGTH*num_ips);
 		int arg_index = 2;
 		int data_index = 0;
 		while(arg_index < argc)
 		{
 			ip_bw next;
-			int invalid = inet_aton(argv[arg_index], &(next.ip));
+			struct in_addr ipaddr;
+			int valid = inet_aton(argv[arg_index], &ipaddr);
 			arg_index++;
-			if(!invalid && arg_index < argc)
+			
+			if(valid && arg_index < argc)
 			{
-				invalid = sscanf(argv[arg_index], "%lld", (long long int*)&(next.bw) ) < 1 ? 1 : 0;
+				next.ip = ipaddr.s_addr;
+				valid = sscanf(argv[arg_index], "%lld", (long long int*)&(next.bw) );
 			}
 			else
 			{
-				invalid = 1;
+				valid = 0;
 			}
 			arg_index++;
 
-			if(!invalid)
+			if(valid)
 			{
 				data[data_index] = next;
 				data_index++;

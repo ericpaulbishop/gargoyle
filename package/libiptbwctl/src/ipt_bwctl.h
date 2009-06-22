@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 
 #define BANDWIDTH_QUERY_LENGTH		1205
+#define BANDWIDTH_ENTRY_LENGTH		  12
 
 /* socket id parameters (for userspace i/o) */
 #define BANDWIDTH_SET 			2048
@@ -23,7 +24,7 @@
 
 typedef struct ip_bw_struct
 {
-	struct in_addr ip;
+	uint32_t ip;
 	uint64_t bw;
 }ip_bw;
 
