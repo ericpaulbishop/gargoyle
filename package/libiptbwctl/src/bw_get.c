@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 	}
 	ip_buf = get_all_bandwidth_usage_for_rule_id(id, &num_ips);
 
-	printf("num ips = %ld\n", num_ips);
+	/* printf("num ips = %ld\n", num_ips); */
 
 	for(out_index=0; out_index < num_ips; out_index++)
 	{

@@ -16,7 +16,6 @@ ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
 	sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 	sprintf((char*)buf, "%s %s", id, "ALL");
 
-	printf("sockfd = %d\n", sockfd);
 
 	while(!done && sockfd >= 0)
 	{
@@ -29,17 +28,16 @@ ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
 			ret_length =  *( (uint32_t*)(buf) );
 			*num_ips = ret_length/BANDWIDTH_ENTRY_LENGTH;
 			ret = (ip_bw*)malloc( (*num_ips)*sizeof(ip_bw) );
-			printf("BANDWIDTH_ENTRY_LENGTH = %d\n", BANDWIDTH_ENTRY_LENGTH);
-			printf("ret length = %d, num ips = %ld\n", ret_length, *num_ips);
+			
+			/* printf("ret length = %d, num ips = %ld\n", ret_length, *num_ips); */
 		}
 		for(buf_index=4; buf_index+BANDWIDTH_ENTRY_LENGTH < BANDWIDTH_QUERY_LENGTH && ret_index < *num_ips; buf_index=buf_index+BANDWIDTH_ENTRY_LENGTH)
 		{
-			printf("buf_index = %d\n", buf_index);
 			(ret[ret_index]).ip  = *( (uint32_t*)(buf + buf_index) );
 			(ret[ret_index]).bw  = *( (uint64_t*)(buf + 4 + buf_index) );
 			ret_index++;
 		}
-		memset(buf, 0, BANDWIDTH_QUERY_LENGTH); //re-zero to indicate we're doing a follow-up query
+		memset(buf, 0, BANDWIDTH_QUERY_LENGTH); /* re-zero to indicate we're doing a follow-up query */
 		done = ret_index >= *num_ips ? 1 : 0;
 	}
 	if(sockfd >= 0)
@@ -49,7 +47,7 @@ ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
 	return ret;
 }
 
-void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, ip_bw* data)
+void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data)
 {
 	uint32_t data_index = 0;
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
@@ -66,6 +64,8 @@ void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, ip_bw* dat
 			buf_index = 4;
 			sprintf( (char*)(buf + buf_index), "%s", id);
 			buf_index = buf_index + BANDWIDTH_MAX_ID_LENGTH;
+			*( (time_t*)(buf + buf_index) ) = last_backup;
+			buf_index = buf_index + sizeof(time_t);
 		}
 		else
 		{

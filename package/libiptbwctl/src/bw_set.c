@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 
 			if(valid)
 			{
+				/* printf("ip=%d, bw=%lld\n", next.ip, (long long int)next.bw); */
 				data[data_index] = next;
 				data_index++;
 			}	
@@ -48,7 +49,7 @@ int main(int argc, char **argv)
 		num_ips = data_index; /* number that were successfully read */
 		if(num_ips > 0)
 		{
-			set_bandwidth_usage_for_rule_id(id, num_ips, data);
+			set_bandwidth_usage_for_rule_id(id, num_ips, 0, data);
 		}
 	}
 	

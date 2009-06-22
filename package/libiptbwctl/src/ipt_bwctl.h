@@ -29,5 +29,5 @@ typedef struct ip_bw_struct
 }ip_bw;
 
 extern ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips);
-void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, ip_bw* data);
+void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data);
 
