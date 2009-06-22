@@ -22,6 +22,7 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 #include <asm/uaccess.h>
+#include <asm/semaphore.h>
 
 
 #include "bandwidth_deps/tree_map.h"
@@ -49,6 +50,7 @@ MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match bandwidth used, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
 static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
+static struct semaphore userspace_lock;
 
 static string_map* id_map = NULL;
 
@@ -67,6 +69,8 @@ static unsigned long input_buffer_index = 0;
 static unsigned long input_buffer_length = 0;
 static char input_id[BANDWIDTH_MAX_ID_LENGTH] = "";
 static time_t input_backup_time = 0;
+
+
 
 /*
  * Shamelessly yoinked from xt_time.c
@@ -204,10 +208,20 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now)
 	return next_reset;
 }
 
+
 static void set_bandwidth_to_zero(unsigned long key, void*value)
 {
 	*((uint64_t*)value) = 0;
 }
+
+
+static void add_to_output_buffer(unsigned long key, void*value)
+{
+	*( (uint32_t*)(output_buffer + output_buffer_index) ) = (uint32_t)key;
+	*( (uint64_t*)(output_buffer + 4 + output_buffer_index) ) = *( (uint64_t*)value );
+	output_buffer_index = output_buffer_index + BANDWIDTH_ENTRY_LENGTH;
+}
+
 
 
 static int match(	const struct sk_buff *skb,
@@ -373,6 +387,8 @@ static int match(	const struct sk_buff *skb,
 
 static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
+	down(&userspace_lock);
+
 	char query[BANDWIDTH_QUERY_LENGTH];
 	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
 	
@@ -517,12 +533,16 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		input_backup_time = 0;
 		input_id[0] = '\0';
 	}
+	up(&userspace_lock);
+
 	return 0;
 }
 
 
 static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 {
+	down(&userspace_lock);
+
 	char query[BANDWIDTH_QUERY_LENGTH];
 	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
 	
@@ -531,7 +551,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	sscanf(query, "%s %s", id, type);
 	
 
-	printk("ipt_dummy query: id=\"%s\" type=\"%s\"\n", id, type);
+	/* printk("ipt_bandwidth query: id=\"%s\" type=\"%s\"\n", id, type); */
 	
 	// reinitialize output buffer to necessary length dynamically, begin output
 	// last byte of output will be 0 if all data is finished dumping, 1 if theres more
@@ -550,7 +570,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			{
 				ip_map = imp->ip_map;
 				info = imp->info;
-				printk("ip_map found for id=\"%s\"\n", id);
+				/* printk("ip_map found for id=\"%s\"\n", id); */
 			}
 			else
 			{
@@ -605,19 +625,28 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			}
 
 
-			printk("    num ips = %ld\n", ip_map->num_elements);
-			all_ips = get_sorted_long_map_keys(ip_map, &num_ips);
+			/* printk("    num ips = %ld\n", ip_map->num_elements); */
+			
+			
 			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
 			output_buffer = (char *)kmalloc(output_buffer_length, GFP_ATOMIC);
+			output_buffer_index = 0;
+			apply_to_every_long_map_value(ip_map, add_to_output_buffer);
+			output_buffer_index = 0;
+
+			/*
+			all_ips = get_sorted_long_map_keys(ip_map, &num_ips);
 			for(ip_index=0; ip_index < ip_map->num_elements; ip_index++)
 			{
 				uint64_t* bw = (uint64_t*)get_long_map_element(ip_map, all_ips[ip_index]);
 				uint32_t ip = (uint32_t)all_ips[ip_index];
-				/*printk("   dumping ip: %u.%u.%u.%u\n", NIPQUAD(ip));*/
+				printk("   dumping ip: %u.%u.%u.%u\n", NIPQUAD(ip));
 
 				*((uint32_t*)(output_buffer + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
 				*((uint64_t*)(output_buffer + 4 + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = *bw;
 			}
+			*/
+
 			spin_unlock_bh(&bandwidth_lock);
 			
 			kfree(all_ips);
@@ -647,9 +676,58 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			}
 		}
 	}
+	else if( ip_map != NULL )
+	{
+		uint32_t query_ip = 0;
+		uint32_t A,B,C,D, num_read;
+		unsigned char* ipbuf = (unsigned char*)(&query_ip);
+		num_read = sscanf(type, "%u.%u.%u.%u", &A, &B, &C, &D);
+		if(num_read == 4)
+		{
+
+			struct timeval test_time;
+			time_t now;	
+			uint64_t* bw = NULL;
+
+			spin_lock_bh(&bandwidth_lock);
+			/* values only reset when a packet hits a rule, so 
+			 * reset may have expired without data being reset.
+			 * So, test if we need to reset values to zero 
+			 */
+			do_gettimeofday(&test_time);
+			now = test_time.tv_sec;
+			now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+			if(info->reset_interval != BANDWIDTH_NEVER)
+			{
+				if(info->next_reset < now)
+				{
+					//do reset
+					info->current_bandwidth = 0;
+					info->next_reset = get_next_reset_time(info, now);
+					apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
+				}
+			}
+	
+			query_ip[0] = (unsigned char)A;
+			query_ip[1] = (unsigned char)B;
+			query_ip[2] = (unsigned char)C;
+			query_ip[3] = (unsigned char)D;
+
+			*( (uint32_t*)buf ) = 1;
+			*( (uint32_t*)(buf+4) ) = query_ip;
+			*( (uint64_t*)(buf+8) ) =  0;
+			bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)query_ip);
+			if(bw != NULL)
+			{
+				*( (uint32_t*)buf ) = 1;
+				*( (uint32_t*)(buf+4) ) = query_ip;
+				*( (uint64_t*)(buf+8) ) =  *bw;
+			}
+			spin_unlock_bh(&bandwidth_lock);
+		}
+	}
 	else
 	{
-		memset( query, 0, BANDWIDTH_QUERY_LENGTH);
 		if(output_buffer != NULL )
 		{
 			if(output_buffer[output_buffer_index] != '\0')
@@ -682,6 +760,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	}
 	copy_to_user(user, query, BANDWIDTH_QUERY_LENGTH);
 
+	up(&userspace_lock);
 
 	return 0;
 }
@@ -703,10 +782,23 @@ static int checkentry(	const char *tablename,
 			unsigned int hook_mask
 			)
 {
+	down(&userspace_lock);
+
+
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
 	info->non_const_self = info;
 	
 	spin_lock_bh(&bandwidth_lock);
+	
+	info_map_pair  *imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+	if(imp != NULL)
+	{
+		DEBUGP("IPT_BANDWIDTH: error, \"%s\" is a duplicate id\n", info->id);
+		printk("IPT_BANDWIDTH: error, \"%s\" is a duplicate id\n", info->id);
+		spin_unlock_bh(&bandwidth_lock);
+		return 0;
+	}
+
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
 		struct timeval test_time;
@@ -740,7 +832,7 @@ static int checkentry(	const char *tablename,
 		}
 	}
 
-	info_map_pair  *imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
+	imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
 	imp->ip_map = initialize_long_map();
 	imp->info = info;
 	set_string_map_element(id_map, info->id, imp);
@@ -752,11 +844,38 @@ static int checkentry(	const char *tablename,
 	}
 	spin_unlock_bh(&bandwidth_lock);
 
+	up(&userspace_lock);
+
 	return 1;
 }
 
-
-
+static int destroy(	
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+			void* matchinfo,
+			unsigned int matchinfosize
+#else
+			const struct xt_match *match,
+			void* matchinfo
+#endif
+		)
+{
+	
+	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+	
+	down(&userspace_lock);
+	spin_lock_bh(&bandwidth_lock);
+	info_map_pair* imp = (info_map_pair*)remove_string_map_element(id_map, info->id);
+	if(imp != NULL)
+	{
+		long_map* ip_map = imp->ip_map;
+		unsigned long num_destroyed;
+		destroy_long_map(ip_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+		kfree(imp);
+		/* info portion of imp gets taken care of automatically */
+	}	
+	spin_unlock_bh(&bandwidth_lock);
+	up(&userspace_lock);
+}
 
 static struct nf_sockopt_ops ipt_bandwidth_sockopts = 
 {
@@ -778,7 +897,7 @@ static struct ipt_match bandwidth_match =
 	"bandwidth",
 	&match,
 	&checkentry,
-	NULL,
+	&destroy,
 	THIS_MODULE
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
@@ -789,6 +908,7 @@ static struct ipt_match bandwidth_match =
 	.matchsize	= sizeof(struct ipt_bandwidth_info),
 #endif
 	.checkentry	= &checkentry,
+	.destroy	= &destroy,
 	.me		= THIS_MODULE,
 #endif
 };
@@ -803,11 +923,14 @@ static int __init init(void)
 
 	id_map = initialize_string_map(0);
 
+	init_MUTEX(&userspace_lock); 
+
 	return ipt_register_match(&bandwidth_match);
 }
 
 static void __exit fini(void)
 {
+	down(&userspace_lock);
 	spin_lock_bh(&bandwidth_lock);
 	if(id_map != NULL)
 	{
@@ -826,6 +949,8 @@ static void __exit fini(void)
 	}
 	ipt_unregister_match(&bandwidth_match);
 	spin_unlock_bh(&bandwidth_lock);
+	up(&userspace_lock);
+
 }
 
 module_init(init);
