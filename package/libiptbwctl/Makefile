@@ -48,25 +48,32 @@ define Build/Compile
 		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
 		all
-endef
-
-
-define Build/InstallDev
+	
 	mkdir -p $(STAGING_DIR)/usr/include/
 	$(CP) $(PKG_BUILD_DIR)/*.h $(STAGING_DIR)/usr/include/
 
 	mkdir -p $(STAGING_DIR)/usr/lib
 	$(CP) $(PKG_BUILD_DIR)/*.so* $(STAGING_DIR)/usr/lib/
-
+	
+	$(MAKE) -C $(PKG_BUILD_DIR)/utils \
+		$(TARGET_CONFIGURE_OPTS) \
+		STAGING_DIR="$(STAGING_DIR)" \
+		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
+		all
 endef
+
+
 
 define Package/libiptbwctl/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/*.so* $(1)/usr/lib/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_get $(1)/usr/bin/bw_get
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_set $(1)/usr/bin/bw_set
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/bw_get $(1)/usr/bin/bw_get
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/bw_set $(1)/usr/bin/bw_set
+
 endef
 
 
 $(eval $(call BuildPackage,libiptbwctl))
+

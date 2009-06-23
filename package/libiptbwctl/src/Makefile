@@ -37,12 +37,7 @@ WARNING_FLAGS=-Wall -Wstrict-prototypes
 
 
 
-all: libiptbwctl bw_set bw_get
-
-bw_set: bw_set.c libiptbwctl.a
-	$(CC) $(CFLAGS) $(LDFLAGS)   $^ -o $@ 
-bw_get: bw_get.c libiptbwctl.a
-	$(CC) $(CFLAGS) $(LDFLAGS)  $^ -o $@ 
+all: libiptbwctl
 
 libiptbwctl: libiptbwctl.$(SHLIB_EXT) libiptbwctl.a
 
@@ -68,4 +63,7 @@ iptbwctl_static.o: ipt_bwctl.c
 
 
 clean:
+	cd utils
+	rm -rf bw_get bw_set *.$(SHLIB_EXT)* *.a *.o *~ .*sw*
+	cd ..
 	rm -rf bw_get bw_set *.$(SHLIB_EXT)* *.a *.o *~ .*sw*
