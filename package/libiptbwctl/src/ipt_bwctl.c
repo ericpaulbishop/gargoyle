@@ -1,7 +1,5 @@
 #include "ipt_bwctl.h"
 
-#include <errno.h>
-
 static char bw_mutex_file_name[] = "/tmp/ipt_bandwidth_userspace_mutex";
 static int bw_mutex_file = -1;
 

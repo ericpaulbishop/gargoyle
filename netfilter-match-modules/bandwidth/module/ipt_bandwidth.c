@@ -22,7 +22,13 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 #include <asm/uaccess.h>
-#include <asm/semaphore.h>
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) 
+#include <linux/semaphore.h> 
+#else 
+#include <asm/semaphore.h> 
+#endif 
 
 
 #include "bandwidth_deps/tree_map.h"
@@ -220,7 +226,6 @@ static void add_to_output_buffer(unsigned long key, void*value)
 	*( (uint32_t*)(output_buffer + output_buffer_index) ) = (uint32_t)key;
 	*( (uint64_t*)(output_buffer + 4 + output_buffer_index) ) = *( (uint64_t*)value );
 	output_buffer_index = output_buffer_index + BANDWIDTH_ENTRY_LENGTH;
-	printk("output buffer index = %d\n", output_buffer_index);
 }
 
 
@@ -441,7 +446,6 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		/* note: even though we release spinlock we retain ip_map variable for later. 
 		 * There's no reason this should cause a problem -- we re-activate lock before
 		 * we query/change anything.  We just retain the pointer, which shouldn't change
-		 * Nowhere, except when entire module is removed, do ip maps get freed.
 		 */
 	}
 	if(clear_input_buffer == 0)
@@ -476,6 +480,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				
 				do_gettimeofday(&test_time);
 				now = test_time.tv_sec;
+				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 				next_reset = get_next_reset_time(info, now);
 
 				time_t next_reset_of_last_backup;
@@ -552,7 +557,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	sscanf(query, "%s %s", id, type);
 	
 
-	printk("ipt_bandwidth query: id=\"%s\" type=\"%s\"\n", id, type);
+	/* printk("ipt_bandwidth: query id=\"%s\" type=\"%s\"\n", id, type); */
 	
 	// reinitialize output buffer to necessary length dynamically, begin output
 	// last byte of output will be 0 if all data is finished dumping, 1 if theres more
@@ -571,17 +576,16 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			{
 				ip_map = imp->ip_map;
 				info = imp->info;
-				 printk("ip_map found for id=\"%s\"\n", id); 
+				/* printk("ipt_bandwidth: ip_map found for id=\"%s\"\n", id); */
 			}
 			else
 			{
-				printk("ip_map NOT found for id=\"%s\"\n", id);
+				printk("ipt_bandwidth: ip_map NOT found for id=\"%s\"\n", id);
 			}
 
 			/* note: even though we release spinlock we retain ip_map variable for later. 
 			 * There's no reason this should cause a problem -- we re-activate lock before
 			 * we query/change anything.  We just retain the pointer, which shouldn't change.
-			 * Nowhere, except when entire module is removed, do ip maps get freed.
 			 */
 		}
 		spin_unlock_bh(&bandwidth_lock);
@@ -626,28 +630,12 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			}
 
 
-			printk("    num ips = %ld\n", ip_map->num_elements);
-			
 			
 			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
 			output_buffer = (unsigned char *)kmalloc(output_buffer_length, GFP_ATOMIC);
 			output_buffer_index = 0;
 			apply_to_every_long_map_value(ip_map, add_to_output_buffer);
 			output_buffer_index = 0;
-
-			/*
-			all_ips = get_sorted_long_map_keys(ip_map, &num_ips);
-			for(ip_index=0; ip_index < ip_map->num_elements; ip_index++)
-			{
-				uint64_t* bw = (uint64_t*)get_long_map_element(ip_map, all_ips[ip_index]);
-				uint32_t ip = (uint32_t)all_ips[ip_index];
-				printk("   dumping ip: %u.%u.%u.%u\n", NIPQUAD(ip));
-
-				*((uint32_t*)(output_buffer + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
-				*((uint64_t*)(output_buffer + 4 + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = *bw;
-			}
-			kfree(all_ips);
-			*/
 
 			spin_unlock_bh(&bandwidth_lock);
 			
@@ -713,7 +701,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 				ip_buf[2] = (unsigned char)C;
 				ip_buf[3] = (unsigned char)D;
 
-				*( (uint32_t*)query ) = 1;
+				*( (uint32_t*)query ) = BANDWIDTH_ENTRY_LENGTH;
 				*( (uint32_t*)(query+4) ) = query_ip;
 				*( (uint64_t*)(query+8) ) =  0;
 				bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)query_ip);
@@ -792,8 +780,9 @@ static int checkentry(	const char *tablename,
 	info_map_pair  *imp = (info_map_pair*)get_string_map_element(id_map, info->id);
 	if(imp != NULL)
 	{
-		printk("IPT_BANDWIDTH: error, \"%s\" is a duplicate id\n", info->id);
+		printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id);
 		spin_unlock_bh(&bandwidth_lock);
+		up(&userspace_lock);
 		return 0;
 	}
 

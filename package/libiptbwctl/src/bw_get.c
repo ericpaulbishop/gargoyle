@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
+		num_ips = 1;
 		query_succeeded = get_ip_bandwidth_usage_for_rule_id(id, address, &ip_buf);
 	}
 	if(!query_succeeded)
