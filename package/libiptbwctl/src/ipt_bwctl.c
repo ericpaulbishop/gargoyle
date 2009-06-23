@@ -35,15 +35,15 @@ static int unlock(void)
 
 
 
-static ip_bw* get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips)
+static int get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips, ip_bw** data)
 {	
-	ip_bw* ret = NULL;
 	uint32_t ret_length = 0;
 	uint32_t ret_index = 0;
 	
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	int done = 0;
 	
+	ip_bw *ret = *data = NULL;
 	*num_ips = 0;
 
 
@@ -64,7 +64,8 @@ static ip_bw* get_all_bandwidth_usage(char* id, char* type, unsigned long* num_i
 		{
 			ret_length =  *( (uint32_t*)(buf) );
 			*num_ips = ret_length/BANDWIDTH_ENTRY_LENGTH;
-			ret = (ip_bw*)malloc( (*num_ips)*sizeof(ip_bw) );
+			*data = (ip_bw*)malloc( (*num_ips)*sizeof(ip_bw) );
+			ret = *data;
 			
 			/* printf("ret length = %d, num ips = %ld\n", ret_length, *num_ips); */
 		}
@@ -85,23 +86,23 @@ static ip_bw* get_all_bandwidth_usage(char* id, char* type, unsigned long* num_i
 	{
 		unlock();
 	}
-	return ret;
+	return got_lock;
 }
 
 
-ip_bw* get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips)
+int get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips, ip_bw** data)
 {
-	return get_all_bandwidth_usage(id, "ALL", num_ips);
+	return get_all_bandwidth_usage(id, "ALL", num_ips, data);
 }
 
-ip_bw* get_ip_bandwidth_usage_for_rule_id(char* id, char* ip)
+int get_ip_bandwidth_usage_for_rule_id(char* id, char* ip, ip_bw** data)
 {
 	unsigned long num_ips;
-	return get_all_bandwidth_usage(id, ip, &num_ips);
+	return get_all_bandwidth_usage(id, ip, &num_ips, data);
 }
 
 
-void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data)
+int set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data)
 {
 	uint32_t data_index = 0;
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
@@ -148,14 +149,15 @@ void set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t las
 	{
 		unlock();
 	}
+	return got_lock;
 }
 
-extern void unlock_bandwidth_semaphore(void)
+void unlock_bandwidth_semaphore(void)
 {
 	unlock();
 }
 
-static void signal_handler(int sig)
+void signal_handler(int sig)
 {
 	if(sig == SIGTERM || sig == SIGINT )
 	{
@@ -164,7 +166,7 @@ static void signal_handler(int sig)
 	}
 }
 
-extern void unlock_bandwidth_semaphore_on_exit(void)
+void unlock_bandwidth_semaphore_on_exit(void)
 {
 	signal(SIGTERM,signal_handler);
 	signal(SIGINT, signal_handler);
