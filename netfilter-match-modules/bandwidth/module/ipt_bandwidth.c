@@ -220,6 +220,7 @@ static void add_to_output_buffer(unsigned long key, void*value)
 	*( (uint32_t*)(output_buffer + output_buffer_index) ) = (uint32_t)key;
 	*( (uint64_t*)(output_buffer + 4 + output_buffer_index) ) = *( (uint64_t*)value );
 	output_buffer_index = output_buffer_index + BANDWIDTH_ENTRY_LENGTH;
+	printk("output buffer index = %d\n", output_buffer_index);
 }
 
 
@@ -551,7 +552,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	sscanf(query, "%s %s", id, type);
 	
 
-	/* printk("ipt_bandwidth query: id=\"%s\" type=\"%s\"\n", id, type); */
+	printk("ipt_bandwidth query: id=\"%s\" type=\"%s\"\n", id, type);
 	
 	// reinitialize output buffer to necessary length dynamically, begin output
 	// last byte of output will be 0 if all data is finished dumping, 1 if theres more
@@ -570,7 +571,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			{
 				ip_map = imp->ip_map;
 				info = imp->info;
-				/* printk("ip_map found for id=\"%s\"\n", id); */
+				 printk("ip_map found for id=\"%s\"\n", id); 
 			}
 			else
 			{
@@ -625,11 +626,11 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			}
 
 
-			/* printk("    num ips = %ld\n", ip_map->num_elements); */
+			printk("    num ips = %ld\n", ip_map->num_elements);
 			
 			
 			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
-			output_buffer = (char *)kmalloc(output_buffer_length, GFP_ATOMIC);
+			output_buffer = (unsigned char *)kmalloc(output_buffer_length, GFP_ATOMIC);
 			output_buffer_index = 0;
 			apply_to_every_long_map_value(ip_map, add_to_output_buffer);
 			output_buffer_index = 0;
@@ -645,11 +646,11 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 				*((uint32_t*)(output_buffer + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = ip;
 				*((uint64_t*)(output_buffer + 4 + (ip_index*BANDWIDTH_ENTRY_LENGTH))) = *bw;
 			}
+			kfree(all_ips);
 			*/
 
 			spin_unlock_bh(&bandwidth_lock);
 			
-			kfree(all_ips);
 
 			
 			*((uint32_t*)(query)) = output_buffer_length;

@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 		num_ips = data_index; /* number that were successfully read */
 		if(num_ips > 0)
 		{
-			set_bandwidth_usage_for_rule_id(id, num_ips, 0, data, 0);
+			set_bandwidth_usage_for_rule_id(id, num_ips, 0, data);
 		}
 	}
 	

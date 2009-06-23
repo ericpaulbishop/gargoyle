@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 	}
 
 
-	ip_buf = get_all_bandwidth_usage_for_rule_id(id, &num_ips, 0);
+	ip_buf = get_all_bandwidth_usage_for_rule_id(id, &num_ips);
 
 	/* printf("num ips = %ld\n", num_ips); */
 
