@@ -451,12 +451,13 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	if(clear_input_buffer == 0)
 	{
 		int query_start_index = query_index;
+		int input_buffer_start_index = input_buffer_index;
 		while(query_index+BANDWIDTH_ENTRY_LENGTH < BANDWIDTH_QUERY_LENGTH-1 && input_buffer_index < input_buffer_length)
 		{
 			query_index=query_index+BANDWIDTH_ENTRY_LENGTH;
 			input_buffer_index=input_buffer_index+BANDWIDTH_ENTRY_LENGTH;
 		}
-		memcpy(input_buffer, query+query_start_index, input_buffer_index);
+		memcpy(input_buffer+input_buffer_start_index, query+query_start_index, input_buffer_index-input_buffer_start_index );
 
 		/* done reading input, set it */
 		if(input_buffer_index >= input_buffer_length)

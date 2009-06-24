@@ -1,34 +1,136 @@
 #include "ipt_bwctl.h"
 
-static char bw_mutex_file_name[] = "/tmp/ipt_bandwidth_userspace_mutex";
-static int bw_mutex_file = -1;
+static int bandwidth_semaphore = -1;
+
+
+static union semun 
+{
+	int val; /* Value for SETVAL */
+	struct semid_ds *buf; /* Buffer for IPC_STAT, IPC_SET */
+	unsigned short *array; /* Array for GETALL, SETALL */
+	struct seminfo *__buf; /* Buffer for IPC_INFO (Linux specific) */
+};
+
+
+static unsigned short get_sem_member_count(int sid)
+{
+        union semun semopts;
+        struct semid_ds mysemds;
+
+        semopts.buf = &mysemds;
+
+        /* Return number of members in the semaphore set */
+        return(semopts.buf->sem_nsems);
+}
+static int get_sem_val(int sid, int member)
+{
+        int semval;
+        semval = semctl(sid, member, GETVAL, 0);
+        return(semval);
+}
+
+static int get_sem(int *sid, key_t key)
+{
+        int cntr;
+        union semun semopts;
+	int members = 1;
+
+
+	
+	int success = ((*sid = semget(key, members, IPC_CREAT|IPC_EXCL|0666))== -1) ? 0 : 1;
+	if(success)
+	{
+		semopts.val = 1;
+        	/* Initialize all members (could be done with SETALL) */        
+        	for(cntr=0; cntr<members; cntr++)
+		{
+			semctl(*sid, cntr, SETVAL, semopts);
+		}
+	}
+	else
+	{
+		success = ((*sid = semget(key, 0, 0666)) == -1) ? 0 : 1;
+	}
+	return success;
+}
+
+
+static int lock_sem(int sid)
+{
+	int member = 0;
+        struct sembuf sem_lock={ 0, -1, IPC_NOWAIT};
+	int success = 0;
+
+	if(member >= 0 && member < (get_sem_member_count(sid)-1))
+	{
+        	/* Attempt to lock the semaphore set */
+        	if(get_sem_val(sid, member))
+        	{
+        		sem_lock.sem_num = member;
+        		if((semop(sid, &sem_lock, 1)) != -1)
+			{
+				success = 1;
+			}
+		}
+	}
+	return success;
+}
+
+static int unlock_sem(int sid)
+{
+	int member = 0;
+        struct sembuf sem_unlock={ member, 1, IPC_NOWAIT};
+        int semval;
+	int success = 0; 
+	/* will fail if we can't get semaphore or for some reason we can't unlock it, 
+	 * will NOT fail if semaphore is already unlocked
+	 */
+
+	if(member >= 0 && member < (get_sem_member_count(sid)-1))
+	{
+		success = 1;
+
+		/* Is the semaphore set locked? */
+		semval = get_sem_val(sid, member);
+		if(semval == 0)
+		{
+			/* it's locked, unlock it */
+			sem_unlock.sem_num = member;
+        		success = ((semop(sid, &sem_unlock, 1)) == -1) ? 0 : 1;
+		}
+	}
+	return success;
+}
+
+
 
 static int lock(void)
 {
 	int locked = 0;
-	bw_mutex_file = open(bw_mutex_file_name,O_RDWR|O_CREAT,0644);
-	if(bw_mutex_file >= 0)
+	if(bandwidth_semaphore == -1)
 	{
-		locked = lockf(bw_mutex_file,F_TLOCK,0)<0 ? 0 : 1;
-		if(!locked)
-		{
-			close(bw_mutex_file);
-			bw_mutex_file = -1;
-		}
+		get_sem(&bandwidth_semaphore, (key_t)(BANDWIDTH_SEMAPHORE_KEY) );
+	}
+	if(bandwidth_semaphore != -1)
+	{
+		locked = lock_sem(bandwidth_semaphore);
 	}
 	return locked;
 }
 
 static int unlock(void)
 {
-	int success = 0;
-	if(bw_mutex_file >=0)
+	int unlocked = 0;
+	if(bandwidth_semaphore == -1)
 	{
-		success = lockf(bw_mutex_file,F_ULOCK,0) < 0 ? 0 : 1;
-		close(bw_mutex_file);
-		bw_mutex_file = -1;
+		get_sem(&bandwidth_semaphore, (key_t)(BANDWIDTH_SEMAPHORE_KEY) );
 	}
-	return success;
+	if(bandwidth_semaphore != -1)
+	{
+		unlocked = unlock_sem(bandwidth_semaphore);
+	}
+	return unlocked;
+	
 }
 
 

@@ -10,7 +10,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <signal.h>
-
+#include <sys/ipc.h>
+#include <errno.h>
+#include <sys/sem.h> 
 
 #define BANDWIDTH_QUERY_LENGTH		1205
 #define BANDWIDTH_ENTRY_LENGTH		  12
@@ -23,7 +25,9 @@
 /* max id length */
 #define BANDWIDTH_MAX_ID_LENGTH		  35
 
-
+/* pick something rather random... let's make it end in 666 to
+ * freak out the crazy fundies out there ;-) */
+#define BANDWIDTH_SEMAPHORE_KEY 12699666
 
 
 typedef struct ip_bw_struct
