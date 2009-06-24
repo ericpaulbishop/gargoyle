@@ -79,6 +79,8 @@ struct ipt_bandwidth_info
 	uint64_t current_bandwidth;
 	time_t next_reset;
 	time_t last_backup_time;
+
 	struct ipt_bandwidth_info* non_const_self;
+	unsigned long* ref_count;
 };
 #endif /*_IPT_BANDWIDTH_H*/

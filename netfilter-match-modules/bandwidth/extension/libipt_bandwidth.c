@@ -109,6 +109,9 @@ static int parse(	int c,
 		info->last_backup_time = 0;
 		info->next_reset = 0;
 
+		info->non_const_self = NULL;
+		info->ref_count = NULL;
+
 		*flags = *flags + BANDWIDTH_INITIALIZED;
 	}
 

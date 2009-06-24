@@ -3,7 +3,7 @@
 static int bandwidth_semaphore = -1;
 
 
-static union semun 
+union semun 
 {
 	int val; /* Value for SETVAL */
 	struct semid_ds *buf; /* Buffer for IPC_STAT, IPC_SET */
@@ -33,11 +33,10 @@ static int get_sem(int *sid, key_t key)
 {
         int cntr;
         union semun semopts;
-	int members = 1;
-
+	int members = 2;
 
 	
-	int success = ((*sid = semget(key, members, IPC_CREAT|IPC_EXCL|0666))== -1) ? 0 : 1;
+	int success = ((*sid = semget(key, members, IPC_CREAT|IPC_EXCL|0777))== -1) ? 0 : 1;
 	if(success)
 	{
 		semopts.val = 1;
@@ -49,7 +48,7 @@ static int get_sem(int *sid, key_t key)
 	}
 	else
 	{
-		success = ((*sid = semget(key, 0, 0666)) == -1) ? 0 : 1;
+		success = ((*sid = semget(key, members, 0777)) == -1) ? 0 : 1;
 	}
 	return success;
 }
@@ -60,19 +59,20 @@ static int lock_sem(int sid)
 	int member = 0;
         struct sembuf sem_lock={ 0, -1, IPC_NOWAIT};
 	int success = 0;
+	
+	//printf("locking sem, member count = %d\n", get_sem_member_count(sid)  );
 
-	if(member >= 0 && member < (get_sem_member_count(sid)-1))
-	{
-        	/* Attempt to lock the semaphore set */
-        	if(get_sem_val(sid, member))
-        	{
-        		sem_lock.sem_num = member;
-        		if((semop(sid, &sem_lock, 1)) != -1)
-			{
-				success = 1;
-			}
+       	/* Attempt to lock the semaphore set */
+	int semval = get_sem_val(sid, member);
+	if(semval > 0)
+       	{
+       		sem_lock.sem_num = member;
+       		if((semop(sid, &sem_lock, 1)) != -1)
+		{
+			success = 1;
 		}
 	}
+
 	return success;
 }
 
@@ -80,24 +80,20 @@ static int unlock_sem(int sid)
 {
 	int member = 0;
         struct sembuf sem_unlock={ member, 1, IPC_NOWAIT};
-        int semval;
-	int success = 0; 
-	/* will fail if we can't get semaphore or for some reason we can't unlock it, 
+	
+	/* will fail if we can't can't unlock semaphore for some reason, 
 	 * will NOT fail if semaphore is already unlocked
 	 */
+	int success = 1; 
 
-	if(member >= 0 && member < (get_sem_member_count(sid)-1))
+
+	/* Is the semaphore set locked? */
+	int semval = get_sem_val(sid, member);
+	if(semval == 0)
 	{
-		success = 1;
-
-		/* Is the semaphore set locked? */
-		semval = get_sem_val(sid, member);
-		if(semval == 0)
-		{
-			/* it's locked, unlock it */
-			sem_unlock.sem_num = member;
-        		success = ((semop(sid, &sem_unlock, 1)) == -1) ? 0 : 1;
-		}
+		/* it's locked, unlock it */
+		sem_unlock.sem_num = member;
+        	success = ((semop(sid, &sem_unlock, 1)) == -1) ? 0 : 1;
 	}
 	return success;
 }
