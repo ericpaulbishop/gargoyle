@@ -188,7 +188,7 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
+			if(num_read > 0)
 			{
 				info->cmp = BANDWIDTH_LT;
 				info->bandwidth_cutoff = read_64;
@@ -198,7 +198,7 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_GT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0 && (*flags & BANDWIDTH_LT) == 0 && (*flags & BANDWIDTH_GT) == 0)
+			if(num_read > 0)
 			{
 				info->cmp = BANDWIDTH_GT;
 				info->bandwidth_cutoff = read_64;
@@ -416,6 +416,10 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
  */
 static void final_check(unsigned int flags)
 {
+	if (flags == 0)
+	{
+		exit_error(PARAMETER_PROBLEM, "You must specify at least one argument. ");
+	}
 	if( (flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
 	{
 		exit_error(PARAMETER_PROBLEM, "You may not specify '--reset_time' without '--reset_interval' ");
