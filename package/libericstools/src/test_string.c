@@ -4,8 +4,10 @@ int main(void)
 {
 	FILE* f = fopen("tmp", "r");	
 	char terminators[] = "\n\r";
-	
-	char* file_data = read_entire_file(f, 100);
+
+
+	unsigned long length;
+	char* file_data = (char*)read_entire_file(f, 100, &length);
 	printf("%s\n", file_data);
 	fclose(f);
 
@@ -14,7 +16,7 @@ int main(void)
 	next.terminator = '\n';
 	while(next.terminator != EOF)
 	{
-       		next =  dynamic_read(f, terminators, 2);
+       		next =  dynamic_read(f, terminators, 2, &length);
 		printf("read \"%s\"\n", next.str);
 		free(next.str);
 	}

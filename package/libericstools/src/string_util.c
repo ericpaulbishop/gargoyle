@@ -208,10 +208,11 @@ char* dcat_and_free(char** one, char** two, int free1, int free2)
  * result is dynamically allocated, MUST be freed after call-- even if 
  * line is empty (you still get a valid char** pointer to to a NULL char*)
  */
-char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max)
+char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long *num_pieces)
 {
 	char** split;
-
+	
+	*num_pieces = 0;
 	if(line != NULL)
 	{
 		int split_index;
@@ -316,6 +317,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 			}
 		}
 		free(dup_line);
+		*num_pieces = split_index;
 	}
 	else
 	{
@@ -383,10 +385,10 @@ char* dynamic_replace(char* template_str, char* old_str, char* new_str)
 
 
 /* note: str element in return value is dynamically allocated, need to free */
-dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
+dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators, unsigned long* read_length)
 {
 	fpos_t start_pos;
-	int size_to_read = 0;
+	unsigned long size_to_read = 0;
 	int terminator_found = 0;
 	int terminator;
 	char* str;
@@ -423,7 +425,7 @@ dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 		fgetc(open_file); /* read the terminator */
 	}
 	str[size_to_read] = '\0';
-	
+	*read_length = size_to_read;
 	
 	
 	ret_value.str = str;
@@ -433,11 +435,11 @@ dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators)
 	return ret_value;
 }
 
-char* read_entire_file(FILE* in, int read_block_size)
+unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigned long *length)
 {
 	int max_read_size = read_block_size;
-	char* read_string = (char*)malloc(max_read_size+1);
-	int bytes_read = 0;
+	unsigned char* read_string = (unsigned char*)malloc(max_read_size+1);
+	unsigned long bytes_read = 0;
 	int end_found = 0;
 	while(end_found == 0)
 	{
@@ -447,7 +449,7 @@ char* read_entire_file(FILE* in, int read_block_size)
 			nextch = fgetc(in);
 			if(nextch != EOF)
 			{
-				read_string[bytes_read] = (char)nextch;
+				read_string[bytes_read] = (unsigned char)nextch;
 				bytes_read++;
 			}
 		}
@@ -455,14 +457,15 @@ char* read_entire_file(FILE* in, int read_block_size)
 		end_found = (nextch == EOF) ? 1 : 0;
 		if(end_found == 0)
 		{
-			char *new_str;
+			unsigned char *new_str;
 			max_read_size = max_read_size + read_block_size;
-		       	new_str = (char*)malloc(max_read_size+1);
+		       	new_str = (unsigned char*)malloc(max_read_size+1);
 			memcpy(new_str, read_string, bytes_read);
 			free(read_string);
 			read_string = new_str;
 		}
 	}
+	*length = bytes_read;
 	return read_string;
 }
 
