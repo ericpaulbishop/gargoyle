@@ -76,12 +76,12 @@ int main(int argc, char **argv)
 	
 	if(address == NULL)
 	{
-		query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf);
+		query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 1000);
 	}
 	else
 	{
 		num_ips = 1;
-		query_succeeded = get_ip_bandwidth_usage_for_rule_id(id, address, &ip_buf);
+		query_succeeded = get_ip_bandwidth_usage_for_rule_id(id, address, &ip_buf, 1000);
 	}
 	if(!query_succeeded)
 	{

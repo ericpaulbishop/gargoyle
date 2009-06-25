@@ -100,7 +100,7 @@ static int unlock_sem(int sid)
 
 
 
-static int lock(void)
+static int lock(unsigned long max_wait_milliseconds)
 {
 	int locked = 0;
 	if(bandwidth_semaphore == -1)
@@ -109,7 +109,15 @@ static int lock(void)
 	}
 	if(bandwidth_semaphore != -1)
 	{
-		locked = lock_sem(bandwidth_semaphore);
+		do
+		{
+			locked = lock_sem(bandwidth_semaphore);
+			if(locked == 0 && max_wait_milliseconds > 25)
+			{
+				usleep(1000*25);
+			}
+			max_wait_milliseconds = max_wait_milliseconds > 25 ? max_wait_milliseconds - 25 : 0;
+		} while(locked == 0 && max_wait_milliseconds > 0);
 	}
 	return locked;
 }
@@ -131,7 +139,7 @@ static int unlock(void)
 
 
 
-static int get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips, ip_bw** data)
+static int get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips, ip_bw** data, unsigned long max_wait_milliseconds)
 {	
 	uint32_t ret_length = 0;
 	uint32_t ret_index = 0;
@@ -143,7 +151,7 @@ static int get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips,
 	*num_ips = 0;
 
 
-	int got_lock = lock();
+	int got_lock = lock(max_wait_milliseconds);
 	int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 
 	
@@ -186,26 +194,26 @@ static int get_all_bandwidth_usage(char* id, char* type, unsigned long* num_ips,
 }
 
 
-int get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips, ip_bw** data)
+int get_all_bandwidth_usage_for_rule_id(char* id, unsigned long* num_ips, ip_bw** data, unsigned long max_wait_milliseconds)
 {
-	return get_all_bandwidth_usage(id, "ALL", num_ips, data);
+	return get_all_bandwidth_usage(id, "ALL", num_ips, data, max_wait_milliseconds);
 }
 
-int get_ip_bandwidth_usage_for_rule_id(char* id, char* ip, ip_bw** data)
+int get_ip_bandwidth_usage_for_rule_id(char* id, char* ip, ip_bw** data, unsigned long max_wait_milliseconds)
 {
 	unsigned long num_ips;
-	return get_all_bandwidth_usage(id, ip, &num_ips, data);
+	return get_all_bandwidth_usage(id, ip, &num_ips, data, max_wait_milliseconds);
 }
 
 
-int set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data)
+int set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time_t last_backup, ip_bw* data, unsigned long max_wait_milliseconds)
 {
 	uint32_t data_index = 0;
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	int done = 0;
 
 		
-	int got_lock = lock();
+	int got_lock = lock(max_wait_milliseconds);
 	int sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 
 	while(!done && sockfd >= 0 && got_lock)

@@ -109,14 +109,14 @@ int main(int argc, char **argv)
 		}	
 	}
 	num_ips = buffer_index; /* number that were successfully read */
-	int query_succeeded = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer);
+	int query_succeeded = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
 	if(!query_succeeded)
 	{
-		printf("ERROR: bandwidth module does not allow simultaneous queries.  Please try again.\n\n");
+		fprintf(stderr, "ERROR: Could not set data. Please try again.\n\n");
 	}
 	else
 	{
-		printf("Data set successfully\n\n");
+		fprintf(stderr, "Data set successfully\n\n");
 	}
 
 	return 0;
