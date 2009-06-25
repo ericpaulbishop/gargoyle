@@ -89,26 +89,29 @@ typedef struct
 
 
 /* long map functions */
-extern long_map* initialize_long_map(void);
-extern void* get_long_map_element(long_map* map, unsigned long key);
+long_map* initialize_long_map(void);
+void* get_long_map_element(long_map* map, unsigned long key);
 void* get_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
 void* get_largest_long_map_element(long_map* map, unsigned long* largest_key);
 void* remove_smallest_long_map_element(long_map* map, unsigned long* smallest_key);
 void* remove_largest_long_map_element(long_map* map, unsigned long* largest_key);
-extern void* set_long_map_element(long_map* map, unsigned long key, void* value);
-extern void* remove_long_map_element(long_map* map, unsigned long key);
-extern unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned);
-extern void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned);
-extern void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed);
+void* set_long_map_element(long_map* map, unsigned long key, void* value);
+void* remove_long_map_element(long_map* map, unsigned long key);
+unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned);
+void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned);
+void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed);
+void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value));
 
 /* string map functions */
-extern string_map* initialize_string_map(unsigned char store_keys);
-extern void* get_string_map_element(string_map* map, const char* key);
-extern void* set_string_map_element(string_map* map, const char* key, void* value);
-extern void* remove_string_map_element(string_map* map, const char* key);
-extern char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned); 
-extern void** get_string_map_values(string_map* map, unsigned long* num_values_returned);
-extern void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed);
+string_map* initialize_string_map(unsigned char store_keys);
+void* get_string_map_element(string_map* map, const char* key);
+void* set_string_map_element(string_map* map, const char* key, void* value);
+void* remove_string_map_element(string_map* map, const char* key);
+char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned); 
+void** get_string_map_values(string_map* map, unsigned long* num_values_returned);
+void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed);
+void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value));
+
 
 /*
  * three different ways to deal with values when data structure is destroyed
@@ -139,6 +142,9 @@ typedef struct stack_node_struct
 	struct stack_node_struct* previous;
 } stack_node;
 
+
+void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
+void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
 void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
 void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
 signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
@@ -270,22 +276,11 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 	return str_keys;
 }
 
+
 void** get_string_map_values(string_map* map, unsigned long* num_values_returned)
 {
 	void** values = NULL;
-	string_map_key_value** long_values = NULL;
-	unsigned long value_index;
-	if(map->store_keys >0)
-	{
-		values = (void**)malloc((map->num_elements+1)*sizeof(void*));
-		long_values = (string_map_key_value**)get_sorted_long_map_values ( &(map->lm), num_values_returned );
-		for(value_index=0; value_index < *num_values_returned; value_index++)
-		{
-			values[value_index] = (long_values[value_index])->value;
-		}
-		free(long_values);
-	}
-	else
+	if(map != NULL)
 	{
 		values = get_sorted_long_map_values ( &(map->lm), num_values_returned );
 	}
@@ -296,37 +291,19 @@ void** get_string_map_values(string_map* map, unsigned long* num_values_returned
 
 void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed)
 {
+
 	void** return_values = NULL;
-	char** key_list = get_string_map_keys(map, num_destroyed);
-	unsigned long key_index = 0;
-	
-	*num_destroyed = 0;
-	if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+	if(map != NULL)
 	{
-		return_values = (void**)malloc((1+map->num_elements)*sizeof(void*));
-		return_values[ map->num_elements ] = NULL;
+		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
+		long_map* destroy = (long_map*)malloc(sizeof(long_map));
+		*destroy = map->lm;
+		return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
+		free(map);
 	}
-	while(map->num_elements > 0)
-	{
-		void* removed_value = remove_string_map_element(map, key_list[key_index]);
-		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
-		{
-			return_values[key_index] = removed_value;
-		}
-		if(destruction_type == DESTROY_MODE_FREE_VALUES)
-		{
-			free(removed_value);
-		}
-
-		free(key_list[key_index]);
-		key_index++;
-		*num_destroyed = *num_destroyed + 1;
-	}
-	free(key_list);
-	free(map);
-
 	return return_values;
 }
+
 
 
 
@@ -724,9 +701,7 @@ void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_retur
 void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed)
 {
 	void** return_values = NULL;
-	unsigned long num_keys;
-	unsigned long* key_list = get_sorted_long_map_keys(map, &num_keys);
-	unsigned long key_index = 0;
+	unsigned long return_index = 0;
 
 	*num_destroyed = 0;
 
@@ -737,28 +712,70 @@ void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_
 	}
 	while(map->num_elements > 0)
 	{
-		void* removed_value = remove_long_map_element(map, key_list[key_index]);
+		unsigned long smallest_key;
+		void* removed_value = remove_smallest_long_map_element(map, &smallest_key);
 		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 		{
-			return_values[key_index] = removed_value;
+			return_values[return_index] = removed_value;
 		}
 		if(destruction_type == DESTROY_MODE_FREE_VALUES)
 		{
 			free(removed_value);
 		}
-		key_index++;
+		return_index++;
 		*num_destroyed = *num_destroyed + 1;
 	}
-	free(key_list);
 	free(map);
 
 	return return_values;
 }
 
 
+void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value))
+{
+	apply_to_every_long_map_node(map->root, apply_func);
+}
+void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value))
+{
+	apply_to_every_string_map_node( (map->lm).root, map->store_keys, apply_func);
+}
+
+
 /***************************************************
  * internal utility function definitions
  ***************************************************/
+
+void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
+{
+	if(node != NULL)
+	{
+		apply_to_every_long_map_node(node->left,  apply_func);
+		
+		apply_func(node->key, node->value);
+
+		apply_to_every_long_map_node(node->right, apply_func);
+	}
+}
+void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
+{
+	if(node != NULL)
+	{
+		apply_to_every_string_map_node(node->left, has_key,  apply_func);
+		
+		if(has_key)
+		{
+			string_map_key_value* kv = (string_map_key_value*)(node->value);
+			apply_func(kv->key, kv->value);
+		}
+		else
+		{
+			apply_func(NULL, node->value);
+		}
+		apply_to_every_string_map_node(node->right, has_key, apply_func);
+	}
+}
+
+
 
 void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
 {
