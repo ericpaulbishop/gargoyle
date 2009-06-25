@@ -255,9 +255,10 @@ int main(int argc, char **argv)
 		if(pid_file != NULL)
 		{
 			char newline_terminator[3];
+			unsigned long read_length;
 			newline_terminator[0] = '\n';
 			newline_terminator[1] = '\r';
-			dyn_read_t pid_read = dynamic_read(pid_file, newline_terminator, 2);
+			dyn_read_t pid_read = dynamic_read(pid_file, newline_terminator, 2, &read_length);
 			if(sscanf(pid_read.str, "%d", &pid) == EOF)
 			{
 				pid = -1;
@@ -445,11 +446,13 @@ void load_data(void)
 		{
 			char newline_terminator[] = { '\n', '\r' };
 			char whitespace_chars[] = { '\t', ' ' };
-			dyn_read_t next = dynamic_read(in, newline_terminator, 2);
+			unsigned long read_length;
+			dyn_read_t next = dynamic_read(in, newline_terminator, 2, &read_length);
 			while (next.terminator != EOF)
 			{
 				trim_flanking_whitespace(next.str);
-				char** split = split_on_separators(next.str, whitespace_chars, 2, -1, 0);
+				unsigned long num_pieces;
+				char** split = split_on_separators(next.str, whitespace_chars, 2, -1, 0, &num_pieces);
 				free(next.str);
 			
 				//check that there are 4 pieces (time, src_ip, dst_ip, domain_name)
@@ -478,7 +481,7 @@ void load_data(void)
 				free(split);
 			
 			
-				next = dynamic_read(in, newline_terminator, 2);
+				next = dynamic_read(in, newline_terminator, 2, &read_length);
 			}
 			fclose(in);
 		}
@@ -511,7 +514,8 @@ string_map* load_file_lines(char* filename)
 		unsigned char *indicates_defined = (unsigned char*)malloc(sizeof(char));
 		*indicates_defined = 1;
 		char newline_terminator[] = { '\n', '\r' };
-		dyn_read_t next = dynamic_read(in, newline_terminator, 2);
+		unsigned long read_length;
+		dyn_read_t next = dynamic_read(in, newline_terminator, 2, &read_length);
 		while (next.terminator != EOF)
 		{
 			trim_flanking_whitespace(next.str);
@@ -520,7 +524,7 @@ string_map* load_file_lines(char* filename)
 				set_map_element(line_map, next.str, (void*)indicates_defined);
 			}
 			free(next.str);
-			next = dynamic_read(in, newline_terminator, 2);
+			next = dynamic_read(in, newline_terminator, 2, &read_length);
 		}
 		fclose(in);
 	}

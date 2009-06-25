@@ -185,24 +185,28 @@ int main(int argc, char **argv)
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "common_css") == UCI_OK && display_type == HEADER)
 		{
 			char* css_list = dynamic_strcat(3, get_option_value_string(uci_to_option(e)), " ", css_includes);
-			all_css=split_on_separators(css_list, whitespace_separators, 2, -1, 0);
+			unsigned long num_pieces;
+			all_css=split_on_separators(css_list, whitespace_separators, 2, -1, 0, &num_pieces);
 			free(css_list);
 		}
 		else
 		{
-			all_css=split_on_separators(css_includes, whitespace_separators, 2, -1, 0);
+			unsigned long num_pieces;
+			all_css=split_on_separators(css_includes, whitespace_separators, 2, -1, 0, &num_pieces);
 		}
 		
 		
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "common_js") == UCI_OK)
 		{
+			unsigned long num_pieces;
 			char* js_list = dynamic_strcat(3, get_option_value_string(uci_to_option(e)), " ", js_includes);
-			all_js=split_on_separators(js_list, whitespace_separators, 2, -1, 0);
+			all_js=split_on_separators(js_list, whitespace_separators, 2, -1, 0, &num_pieces);
 			free(js_list);
 		}
 		else
 		{
-			all_js=split_on_separators(js_includes, whitespace_separators, 2, -1, 0);
+			unsigned long num_pieces;
+			all_js=split_on_separators(js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
 		}
 		
 		
@@ -827,8 +831,10 @@ char** load_interfaces_from_proc_file(char* filename)
 	char newline_terminator[]= {'\n', '\r'};
 	if(interface_file != NULL)
 	{
-		char* file_data = read_entire_file(interface_file, 100);
-		file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0);
+		unsigned long read_length;
+		char* file_data = read_entire_file(interface_file, 100, &read_length);
+		unsigned long num_pieces;
+		file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_pieces);
 		fclose(interface_file);
 		free(file_data);
 		

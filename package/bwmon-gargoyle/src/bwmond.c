@@ -1310,7 +1310,8 @@ bw_monitor** load_bwmon_config(char *filename)
 	{
 
 		dyn_read_t next;
-		next = dynamic_read(config_file, newline_terminator, 2);
+		unsigned long read_length;
+		next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 		while(next.terminator != EOF)
 		{
 			if( strstr(next.str, "monitor ") == next.str || strstr(next.str, "monitor\t") == next.str)
@@ -1318,7 +1319,7 @@ bw_monitor** load_bwmon_config(char *filename)
 				num_monitors++;
 			}
 			free(next.str);
-			next = dynamic_read(config_file, newline_terminator, 2);
+			next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 		}
 
 		//if last line of file we can ignore data, since we need to have sub-data for each monitor
@@ -1339,7 +1340,9 @@ bw_monitor** load_bwmon_config(char *filename)
 	if(config_file != NULL)
 	{
 		dyn_read_t next;
-		next = dynamic_read(config_file, newline_terminator, 2);
+		unsigned long read_length;
+
+		next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 		char** variable = parse_variable_definition_line(next.str);
 		while(next.terminator != EOF)
 		{
@@ -1352,7 +1355,7 @@ bw_monitor** load_bwmon_config(char *filename)
 					free(variable[1]);
 				}
 				free(variable);
-				next = dynamic_read(config_file, newline_terminator, 2);
+				next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 				variable = parse_variable_definition_line(next.str);
 			}
 			
@@ -1385,7 +1388,7 @@ bw_monitor** load_bwmon_config(char *filename)
 				
 				free(variable[0]);
 				free(variable);
-				next = dynamic_read(config_file, newline_terminator, 2);
+				next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 				variable = parse_variable_definition_line(next.str);
 				while(next.terminator != EOF && safe_strcmp(variable[0], "monitor") != 0)
 				{
@@ -1507,7 +1510,7 @@ bw_monitor** load_bwmon_config(char *filename)
 						free(variable[0]);
 					}
 					free(variable);
-					next = dynamic_read(config_file, newline_terminator, 2);
+					next = dynamic_read(config_file, newline_terminator, 2, &read_length);
 					variable = parse_variable_definition_line(next.str);
 				}
 		
@@ -1569,7 +1572,8 @@ char** parse_variable_definition_line(char* line)
 		if(is_comment != 1)
 		{
 			char whitespace_separators[] = {'\t', ' '};
-			char** split_line = split_on_separators(trimmed_line, whitespace_separators, 2, 2, 1);
+			unsigned long num_pieces;
+			char** split_line = split_on_separators(trimmed_line, whitespace_separators, 2, 2, 1, &num_pieces);
 			if(split_line[0] != NULL)
 			{
 				variable_definition[0] = split_line[0];

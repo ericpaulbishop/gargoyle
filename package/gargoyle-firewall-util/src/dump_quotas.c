@@ -57,7 +57,8 @@ char** get_section_list(struct uci_context *ctx, char* package, char* list_secti
 	{
 		char* list_str = get_option_value_string(uci_to_option(e));
 		char spacers[] = {' ', '\t'};
-		section_list = split_on_separators(list_str, spacers, 2, -1, 0);
+		unsigned long num_pieces;
+		section_list = split_on_separators(list_str, spacers, 2, -1, 0, &num_pieces);
 		free(list_str);
 	}
 	

@@ -740,7 +740,8 @@ char* get_option_value_string(struct uci_option* uopt)
 
 char*** parse_ips_and_macs(char* addr_str)
 {
-	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
+	unsigned long num_pieces;
+	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0, &num_pieces);
 	list* ip_list = initialize_list();
 	list* ip_range_list = initialize_list();
 	list* mac_list = initialize_list();
@@ -759,7 +760,7 @@ char*** parse_ips_and_macs(char* addr_str)
 		}
 		else if(strchr(next_str, '-') != NULL)
 		{
-			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1);
+			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
 			char* start = trim_flanking_whitespace(range_parts[0]);
 			char* end = trim_flanking_whitespace(range_parts[1]);
 			int start_ip[4];
@@ -811,7 +812,8 @@ char*** parse_ips_and_macs(char* addr_str)
 
 char** parse_ports(char* port_str)
 {
-	char** ports = split_on_separators(port_str, ",", 1, -1, 0);
+	unsigned long num_pieces;
+	char** ports = split_on_separators(port_str, ",", 1, -1, 0, &num_pieces);
 	int port_index = 0;
 	for(port_index=0; ports[port_index] != NULL; port_index++)
 	{
@@ -842,7 +844,8 @@ char** parse_marks(char* list_str, unsigned long max_mask)
 	char** marks = NULL;
 	if(list_str != NULL)
 	{
-		marks = split_on_separators(list_str, ",", 1, -1, 0);
+		unsigned long num_pieces;
+		marks = split_on_separators(list_str, ",", 1, -1, 0, &num_pieces);
 		if(marks[0] == NULL)
 		{
 			free(marks);

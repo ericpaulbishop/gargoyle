@@ -93,9 +93,10 @@ int main( int argc, char** argv )
 	if(pid_file != NULL)
 	{
 		char newline_terminator[3];
+		unsigned long read_length;
 		newline_terminator[0] = '\n';
 		newline_terminator[1] = '\r';
-		dyn_read_t pid_read = dynamic_read(pid_file, newline_terminator, 2);
+		dyn_read_t pid_read = dynamic_read(pid_file, newline_terminator, 2, &read_length);
 		if(sscanf(pid_read.str, "%d", &bwmond_pid) == EOF)
 		{
 			bwmond_pid = -1;
