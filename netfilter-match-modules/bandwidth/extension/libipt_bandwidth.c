@@ -157,7 +157,6 @@ static int parse(	int c,
 			{
 				if( A <= 255 && B <= 255 && C <= 255 && D <= 255 && mask <= 32)
 				{
-					int pow_index;
 					unsigned char* sub = (unsigned char*)(&(info->local_subnet));
 					*( sub ) = (unsigned char)A;
 					*( sub + 1 ) = (unsigned char)B;
@@ -289,7 +288,9 @@ static int parse(	int c,
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
 	/* determine current time in seconds since epoch, with offset for current timezone */
-	minuteswest = get_minutes_west();
+	int minuteswest = get_minutes_west();
+	time_t now;
+	time(&now);
 	now = now - (minuteswest*60);
 	printf(" --id %s ", info->id);
 	if(info->local_subnet != 0)

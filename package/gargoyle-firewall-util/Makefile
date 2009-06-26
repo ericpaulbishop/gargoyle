@@ -46,9 +46,10 @@ define Package/gargoyle-firewall-util/postinst
 endef
 
 define Package/gargoyle-firewall-util/install
-	$(INSTALL_DIR) $(1)/usr/lib/gargoyle_firewall_util
+	$(INSTALL_DIR) $(1)/usr/lib/gargoyle_firewall_util/
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface/
-	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/etc/init.d/
 	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/make_iptables_rules $(1)/usr/bin/make_iptables_rules
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dump_quotas $(1)/usr/bin/dump_quotas
