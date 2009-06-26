@@ -1,9 +1,8 @@
-/*  timerange --	An iptables extension to match URLs in HTTP requests 
- *  		This module can match using string match or regular expressions
- *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
+/*  timerange --	An iptables extension to match multiple timeranges within a week
+ *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -25,8 +24,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <time.h>
 #include <ctype.h>
+#include <time.h>
+#include <sys/time.h>
 
 //in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
 //we can use to check whether we need to deal with the new requirements
@@ -45,6 +45,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 void to_lowercase(char* str);
 char* trim_flanking_whitespace(char* str);
 
+void set_kernel_timezone(void);
 
 /* Function which prints out usage message. */
 static void help(void)
@@ -208,6 +209,9 @@ static void final_check(unsigned int flags)
 	{
 		exit_error(PARAMETER_PROBLEM, "Invalid arguments to time_range");
 	}
+
+	/* update timezone minutes_west in kernel to match userspace*/
+	set_kernel_timezone();
 }
 
 /* Prints out the matchinfo. */
@@ -763,4 +767,45 @@ char* trim_flanking_whitespace(char* str)
 	return str;
 }
 
+void set_kernel_timezone(void)
+{
+	time_t now;
+	struct tm* utc_info;
+	struct tm* tz_info;
+	int utc_day;
+	int utc_hour;
+	int utc_minute;
+	int tz_day;
+	int tz_hour;
+	int tz_minute;
+	int minuteswest;
 
+	struct timeval tv;
+	struct timezone old_tz;
+	struct timezone new_tz;
+
+	time(&now);
+	utc_info = gmtime(&now);
+	utc_day = utc_info->tm_mday;
+	utc_hour = utc_info->tm_hour;
+	utc_minute = utc_info->tm_min;
+	tz_info = localtime(&now);
+	tz_day = tz_info->tm_mday;
+	tz_hour = tz_info->tm_hour;
+	tz_minute = tz_info->tm_min;
+
+	utc_day = utc_day < tz_day  - 1 ? tz_day  + 1 : utc_day;
+	tz_day =  tz_day  < utc_day - 1 ? utc_day + 1 : tz_day;
+	
+	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
+	new_tz.tz_minuteswest = minuteswest;
+	new_tz.tz_dsttime = 0;
+
+	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
+	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
+	gettimeofday(&tv, &old_tz);
+
+	/* set timezone */
+	settimeofday(&tv, &new_tz);
+
+}

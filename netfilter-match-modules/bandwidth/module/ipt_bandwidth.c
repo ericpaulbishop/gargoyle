@@ -1,6 +1,11 @@
-/*
+/*  bandwidth --	An iptables extension for bandwidth monitoring/control
+ *  			Can be used to efficiently monitor bandwidth and/or implement bandwidth quotas
+ *  			Can be queried using the iptbwctl userspace library
+ *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
+ *
+ *
  *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
- * 
+ *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
  *  Free Software Foundation, either version 2 of the License, or (at your

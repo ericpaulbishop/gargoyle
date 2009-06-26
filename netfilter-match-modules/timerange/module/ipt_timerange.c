@@ -1,6 +1,5 @@
-/*  timerange --	A netfilter module to match URLs in HTTP requests 
- *  		This module can match using string match or regular expressions
- *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
+/*  timerange --	An iptables extension to match multiple timeranges within a week
+ *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
  *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>

@@ -1,4 +1,8 @@
-/* 
+/*  bandwidth --	An iptables extension for bandwidth monitoring/control
+ *  			Can be used to efficiently monitor bandwidth and/or implement bandwidth quotas
+ *  			Can be queried using the iptbwctl userspace library
+ *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
+ *
  *
  *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  * 
@@ -33,19 +37,10 @@
 #include <iptables.h>  
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>
 
+int get_minutes_west(void);
+void set_kernel_timezone(void);
+static unsigned long get_pow(unsigned long base, unsigned long pow);
 
-
-
-/* 
- * implement a simple function to get positive powers of positive integers so we don't have to mess with math.h 
- * all we really need are powers of 2 for calculating netmask
- * This is only called a couple of times, so speed isn't an issue either
- */
-static unsigned long get_pow(unsigned long base, unsigned long pow)
-{
-	unsigned long ret = pow == 0 ? 1 : base*get_pow(base, pow-1);
-	return ret;
-}
 
 
 /* Function which prints out usage message. */
@@ -294,32 +289,7 @@ static int parse(	int c,
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
 	/* determine current time in seconds since epoch, with offset for current timezone */
-	time_t now;
-	struct tm* utc_info;
-	struct tm* tz_info;
-	int utc_day;
-	int utc_hour;
-	int utc_minute;
-	int tz_day;
-	int tz_hour;
-	int tz_minute;
-	int minuteswest;
-
-	time(&now);
-	utc_info = gmtime(&now);
-	utc_day = utc_info->tm_mday;
-	utc_hour = utc_info->tm_hour;
-	utc_minute = utc_info->tm_min;
-	tz_info = localtime(&now);
-	tz_day = tz_info->tm_mday;
-	tz_hour = tz_info->tm_hour;
-	tz_minute = tz_info->tm_min;
-
-	utc_day = utc_day < tz_day  - 1 ? tz_day  + 1 : utc_day;
-	tz_day =  tz_day  < utc_day - 1 ? utc_day + 1 : tz_day;
-	
-	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
-
+	minuteswest = get_minutes_west();
 	now = now - (minuteswest*60);
 	printf(" --id %s ", info->id);
 	if(info->local_subnet != 0)
@@ -403,12 +373,7 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 	{
 		printf("--reset_time %ld ", info->reset_time);
 	}	
-	/*
-	if(info->reset_interval != BANDWIDTH_NEVER)
-	{
-		printf("now=%ld, reset=%ld\n", now, info->next_reset);
-	}
-	*/	
+
 }
 
 /* 
@@ -428,6 +393,9 @@ static void final_check(unsigned int flags)
 	{
 		exit_error(PARAMETER_PROBLEM, "You must specify a subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
 	}
+
+	/* update timezone minutes_west in kernel to match userspace*/
+	set_kernel_timezone();
 }
 
 /* Prints out the matchinfo. */
@@ -477,4 +445,65 @@ static struct iptables_match bandwidth =
 void _init(void)
 {
 	register_match(&bandwidth);
+}
+
+
+/* 
+ * implement a simple function to get positive powers of positive integers so we don't have to mess with math.h 
+ * all we really need are powers of 2 for calculating netmask
+ * This is only called a couple of times, so speed isn't an issue either
+ */
+static unsigned long get_pow(unsigned long base, unsigned long pow)
+{
+	unsigned long ret = pow == 0 ? 1 : base*get_pow(base, pow-1);
+	return ret;
+}
+
+
+int get_minutes_west(void)
+{
+	time_t now;
+	struct tm* utc_info;
+	struct tm* tz_info;
+	int utc_day;
+	int utc_hour;
+	int utc_minute;
+	int tz_day;
+	int tz_hour;
+	int tz_minute;
+	int minuteswest;
+
+	time(&now);
+	utc_info = gmtime(&now);
+	utc_day = utc_info->tm_mday;
+	utc_hour = utc_info->tm_hour;
+	utc_minute = utc_info->tm_min;
+	tz_info = localtime(&now);
+	tz_day = tz_info->tm_mday;
+	tz_hour = tz_info->tm_hour;
+	tz_minute = tz_info->tm_min;
+
+	utc_day = utc_day < tz_day  - 1 ? tz_day  + 1 : utc_day;
+	tz_day =  tz_day  < utc_day - 1 ? utc_day + 1 : tz_day;
+	
+	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
+
+	return minuteswest;
+}
+
+void set_kernel_timezone(void)
+{
+	struct timeval tv;
+	struct timezone old_tz;
+	struct timezone new_tz;
+
+	new_tz.tz_minuteswest = get_minutes_west();;
+	new_tz.tz_dsttime = 0;
+
+	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
+	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
+	gettimeofday(&tv, &old_tz);
+
+	/* set timezone */
+	settimeofday(&tv, &new_tz);
 }
