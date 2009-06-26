@@ -8,7 +8,8 @@ int main(int argc, char **argv)
 	char *id = NULL;
 	FILE* in_file = NULL;
 	time_t last_backup = 0;
-	
+	int last_backup_from_cl = 0
+
 	unlock_bandwidth_semaphore_on_exit();
 
 	int c;
@@ -36,6 +37,7 @@ int main(int argc, char **argv)
 					fprintf(stderr, "ERROR: invalid backup time specified. Should be unix epoch seconds -- number of seconds since 1970 (UTC)\n");
 					exit(0);
 				}
+				last_backup_from_cl = 1;
 				break;
 			case 'f':
 			case 'F':
@@ -88,25 +90,29 @@ int main(int argc, char **argv)
 		ip_bw next;
 		struct in_addr ipaddr;
 		int valid = inet_aton(data_parts[data_index], &ipaddr);
+		if((!valid) && (!last_backup_from_cl))
+		{
+			sscanf(data_parts[data_index], "%ld", &last_backup);
+		}
 		data_index++;
-			
+
 		if(valid && data_index < num_data_parts)
 		{
 			next.ip = ipaddr.s_addr;
 			valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
+			data_index++;
 		}
 		else
 		{
 			valid = 0;
 		}
-		data_index++;
 
 		if(valid)
 		{
 			/* printf("ip=%d, bw=%lld\n", next.ip, (long long int)next.bw); */
 			buffer[buffer_index] = next;
 			buffer_index++;
-		}	
+		}
 	}
 	num_ips = buffer_index; /* number that were successfully read */
 	int query_succeeded = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);

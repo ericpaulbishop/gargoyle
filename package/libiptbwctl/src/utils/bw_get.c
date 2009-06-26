@@ -91,6 +91,11 @@ int main(int argc, char **argv)
 
 	/* printf("num ips = %ld\n", num_ips); */
 
+	time_t now;
+	time(&now);
+	fprintf(out_file, "%-15ld\n", now);
+
+
 	for(out_index=0; out_index < num_ips; out_index++)
 	{
 		ip_bw next = ip_buf[out_index];
