@@ -13,7 +13,7 @@
 #include <sys/ipc.h>
 #include <errno.h>
 #include <sys/sem.h> 
-
+#include <sys/time.h>
 #define BANDWIDTH_QUERY_LENGTH		1205
 #define BANDWIDTH_ENTRY_LENGTH		  12
 
@@ -45,4 +45,5 @@ extern int set_bandwidth_usage_for_rule_id(char* id, unsigned long num_ips, time
 extern void unlock_bandwidth_semaphore(void);
 extern void unlock_bandwidth_semaphore_on_exit(void);
 
-
+/* sets kernel timezone minuteswest to match user timezone */
+extern void set_kernel_timezone(void);

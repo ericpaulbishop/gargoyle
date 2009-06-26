@@ -8,9 +8,8 @@ int main(int argc, char **argv)
 	char *id = NULL;
 	FILE* in_file = NULL;
 	time_t last_backup = 0;
-	int last_backup_from_cl = 0
+	int last_backup_from_cl = 0;
 
-	unlock_bandwidth_semaphore_on_exit();
 
 	int c;
 	while((c = getopt(argc, argv, "i:I:b:B:f:F:UuHh")) != -1)
@@ -114,6 +113,8 @@ int main(int argc, char **argv)
 			buffer_index++;
 		}
 	}
+	set_kernel_timezone();
+	unlock_bandwidth_semaphore_on_exit();
 	num_ips = buffer_index; /* number that were successfully read */
 	int query_succeeded = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
 	if(!query_succeeded)

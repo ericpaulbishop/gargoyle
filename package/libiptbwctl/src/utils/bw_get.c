@@ -1,4 +1,4 @@
-#include "ipt_bwctl.h"
+#include <ipt_bwctl.h>
 
 
 int main(int argc, char **argv)
@@ -66,7 +66,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	unlock_bandwidth_semaphore_on_exit();
 
 	if(id == NULL)
 	{
@@ -74,6 +73,8 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 	
+	set_kernel_timezone();	
+	unlock_bandwidth_semaphore_on_exit();
 	if(address == NULL)
 	{
 		query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 1000);

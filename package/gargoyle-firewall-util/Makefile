@@ -12,7 +12,7 @@ define Package/gargoyle-firewall-util
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall initialization
-	DEPENDS:=+libericstools +uci +set-kernel-timezone +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack +iptables-mod-conntrack-extra +iptables-mod-nat +iptables-mod-nat-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +libiptbwctl
+	DEPENDS:=+libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack +iptables-mod-conntrack-extra +iptables-mod-nat +iptables-mod-nat-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -49,11 +49,14 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_DIR) $(1)/usr/lib/gargoyle_firewall_util
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface/
 	$(INSTALL_DIR) $(1)/usr/bin
+	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/make_iptables_rules $(1)/usr/bin/make_iptables_rules
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dump_quotas $(1)/usr/bin/dump_quotas
+	
 	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 	$(INSTALL_BIN) ./files/gargoyle_additions.firewall $(1)/usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall 
 	$(INSTALL_BIN) ./files/gargoyle_firewall.hotplug $(1)/etc/hotplug.d/iface/21-gargoyle_firewall
+	$(INSTALL_BIN) ./files/set_kernel_timezone.init $(1)/etc/init.d/set_kernel_timezone
 endef
 
 

@@ -71,7 +71,7 @@ define Package/libiptbwctl/install
 	$(CP) $(PKG_BUILD_DIR)/*.so* $(1)/usr/lib/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/bw_get $(1)/usr/bin/bw_get
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/bw_set $(1)/usr/bin/bw_set
-
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/set_kernel_timezone $(1)/usr/bin/set_kernel_timezone
 endef
 
 
