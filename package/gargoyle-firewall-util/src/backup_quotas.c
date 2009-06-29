@@ -45,7 +45,7 @@ int main(void)
 		char* next_quota = shift_list(quota_sections);
 		char* ignore_backup = get_uci_option(ctx, "firewall", next_quota, "ignore_backup_at_next_restore");
 		int do_backup = 1;
-		if(ignore_backup == NULL)
+		if(ignore_backup != NULL)
 		{
 			if(strcmp(ignore_backup, "1") == 0)
 			{
