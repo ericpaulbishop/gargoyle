@@ -26,7 +26,7 @@
 
 #include <erics_tools.h>
 #include <uci.h>
-#include <iptbwctl.h>
+#include <ipt_bwctl.h>
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type);
 void  backup_quota(char* quota_id, char* quota_backup_dir);
@@ -70,7 +70,7 @@ int main(void)
 				{
 					char* type_id = dynamic_strcat(2, backup_id, postfixes[type_index]);
 					
-					backup_quota(type_id, backup_dir);
+					backup_quota(type_id, "/usr/data/quotas" );
 
 					free(type_id);
 					free(defined);
@@ -114,19 +114,19 @@ list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* sec
 	return sections_of_type;
 }
 
-void backup_quota(char* quota_id, char* quota_backup_dir)
+void backup_quota(char* id, char* quota_backup_dir)
 {
 	/* if we ever bother to allow quotas to apply to subnets 
 	 * specified with '/', this may be necessary 
 	 */
 	char* quota_file_name;
-	if(strstr(backup_id, "/") != NULL)
+	if(strstr(id, "/") != NULL)
 	{
-		char* quota_file_name = dynamic_replace(backup_id, "/", "_");
+		char* quota_file_name = dynamic_replace(id, "/", "_");
 	}
 	else
 	{
-		quota_file_name = strdup(quota_id);
+		quota_file_name = strdup(id);
 	}
 
 	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", quota_file_name);
@@ -136,8 +136,8 @@ void backup_quota(char* quota_id, char* quota_backup_dir)
 	int query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 5000);
 	if(query_succeeded)
 	{
-		FILE* out = fopen(quota_file_path);
-		if(out != NULL)
+		FILE* out_file = fopen(quota_file_path, "w");
+		if(out_file != NULL)
 		{
 			//dump backup time
 			time_t now;
@@ -154,7 +154,7 @@ void backup_quota(char* quota_id, char* quota_backup_dir)
 				fprintf(out_file, "%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
 			}
 		}
-		fclose(out);
+		fclose(out_file);
 		free(ip_buf);
 	}
 	free(quota_file_path);
@@ -176,7 +176,7 @@ char* get_uci_option(struct uci_context* ctx, char* package_name, char* section_
 		else
 		{
 			struct uci_element *e = (struct uci_element*)ptr.o;
-			option_value = get_option_value_string(uci_to_option(e))
+			option_value = get_option_value_string(uci_to_option(e));
 		}
 	}
 	free(lookup_str);
