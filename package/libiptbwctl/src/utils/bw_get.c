@@ -33,6 +33,7 @@ int main(int argc, char **argv)
 	unsigned long out_index;
 	int query_succeeded;
 
+
 	int c;
 	struct in_addr read_addr;
 	while((c = getopt(argc, argv, "i:I:a:A:f:F:uUhH")) != -1)
@@ -111,11 +112,13 @@ int main(int argc, char **argv)
 		exit(0);
 	}
 
-	/* printf("num ips = %ld\n", num_ips); */
 
-	time_t now;
-	time(&now);
-	fprintf(out_file, "%-15ld\n", now);
+	if(out_file != NULL)
+	{
+		time_t now;
+		time(&now);
+		fprintf(out_file, "%-15ld\n", now);
+	}
 
 
 	for(out_index=0; out_index < num_ips; out_index++)
