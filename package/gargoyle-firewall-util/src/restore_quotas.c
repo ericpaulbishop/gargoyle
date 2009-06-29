@@ -8,6 +8,11 @@
 #include <uci.h>
 #include <ipt_bwctl.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
 void restore_backup_for_id(char* id, char* quota_backup_dir);
 
 
@@ -60,7 +65,7 @@ int main(int argc, char** argv)
 	}
 
 	/* even if parameters are wrong, whack old rules */
-	char quota_table[] = "mangle";
+	char *quota_table = strdup("mangle");
 	delete_chain_from_table(quota_table, "egress_quotas");
 	delete_chain_from_table(quota_table, "ingress_quotas");
 	delete_chain_from_table(quota_table, "combined_quotas");
@@ -118,16 +123,15 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
 
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
 		char* other_quota_section_name = NULL;
 		unlock_bandwidth_semaphore_on_exit();
 		while(quota_sections->length > 0 && other_quota_section_name == NULL)
 		{
-
 			char* next_quota = NULL;
 			int process_other_quota = 0;
 			if(quota_sections->length > 0)
@@ -141,7 +145,7 @@ int main(int argc, char** argv)
 				other_quota_section_name = NULL;
 			}
 			
-			char* quota_enabled_var  = get_uci_option(ctx, "firewall", next_quota, "quota_enabled");
+			char* quota_enabled_var  = get_uci_option(ctx, "firewall", next_quota, "enabled");
 			int enabled = 1;
 			if(quota_enabled_var != NULL)
 			{
@@ -156,7 +160,7 @@ int main(int argc, char** argv)
 			{
 				char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 				if(ip == NULL) { ip = strdup("ALL"); }
-				if( (strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL")) && (!process_other_quota)  )
+				if( (strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0) && (!process_other_quota)  )
 				{
 					other_quota_section_name = strdup(next_quota);
 				}
@@ -204,6 +208,7 @@ int main(int argc, char** argv)
 							char* type_id = dynamic_replace(ip, "/", "_");
 							type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);	
 							
+
 							char* ip_test = strdup(""); 
 							if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
 							{
@@ -262,7 +267,7 @@ int main(int argc, char** argv)
 								restore_backup_for_id(type_id, "/usr/data/quotas");
 							}
 							
-							free(applies_to);
+							
 							free(ip_test);
 							free(type_id);
 							free(limit);
@@ -298,7 +303,7 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 	char* quota_file_name;
 	if(strstr(id, "/") != NULL)
 	{
-		char* quota_file_name = dynamic_replace(id, "/", "_");
+		quota_file_name = dynamic_replace(id, "/", "_");
 	}
 	else
 	{
@@ -307,19 +312,21 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 
 	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", quota_file_name);
 	FILE* in_file = fopen(quota_file_path, "r");
-	free(quota_file_path);
+	//printf("quota_file_path = %s\n", quota_file_path);
 	
 	if(in_file != NULL)
 	{
 		unsigned long num_data_parts = 0;
 		char* file_data = read_entire_file(in_file, 4086, &num_data_parts);
+		fclose(in_file);
 		char whitespace[] =  {'\n', '\r', '\t', ' '};
 		char** data_parts = split_on_separators(file_data, whitespace, 4, -1, 0, &num_data_parts);
 		free(file_data);
 
 		time_t last_backup = 0;
-		unsigned long num_ips = num_data_parts/2;
+		unsigned long num_ips = (num_data_parts/2) + 1;
        		ip_bw* buffer = (ip_bw*)malloc(BANDWIDTH_ENTRY_LENGTH*num_ips);
+		num_ips = 0;
 		unsigned long data_index = 0;
 		unsigned long buffer_index = 0;
 		while(data_index < num_data_parts)
@@ -338,6 +345,8 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 				next.ip = ipaddr.s_addr;
 				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
 				data_index++;
+
+				//printf("ip=%s, bw=%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
 			}
 			else
 			{
@@ -346,16 +355,17 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 
 			if(valid)
 			{
-				/* printf("ip=%d, bw=%lld\n", next.ip, (long long int)next.bw); */
 				buffer[buffer_index] = next;
 				buffer_index++;
+				num_ips++;
 			}
 		}
-		set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
-
-
-		fclose(in_file);
+		//printf("num_ips = %ld\n", num_ips);
+		int result = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
+		//printf("done, result = %d\n", result);
 	}
+	free(quota_file_path);
+	free(quota_file_name);
 }
 
 void delete_chain_from_table(char* table, char* delete_chain)
@@ -416,6 +426,7 @@ void delete_chain_from_table(char* table, char* delete_chain)
 
 void run_shell_command(char* command, int free_command_str)
 {
+	//printf("%s\n", command);
 	system(command);
 	if(free_command_str)
 	{
