@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	char* local_subnet = NULL;
 	char* death_mark = NULL;
 	char* death_mask = NULL;
-	char* backup_crontab_line = NULL;
+	char* crontab_line = NULL;
 	
 	char c;
 	while((c = getopt(argc, argv, "W:w:l:L:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
@@ -58,14 +58,16 @@ int main(int argc, char** argv)
 				break;
 			case 'C':
 			case 'c':
-				backup_crontab_line = strdup(optarg);
+				crontab_line = strdup(optarg);
 				break;
 
 		}
 	}
 
 	/* even if parameters are wrong, whack old rules */
-	char *quota_table = strdup("mangle");
+	char quota_table[] = "mangle";
+	char crontab_dir[] = "/etc/crontabs/";
+	char crontab_file_path[] = "/etc/crontabs/root";
 	delete_chain_from_table(quota_table, "egress_quotas");
 	delete_chain_from_table(quota_table, "ingress_quotas");
 	delete_chain_from_table(quota_table, "combined_quotas");
@@ -96,6 +98,7 @@ int main(int argc, char** argv)
 
 
 	struct uci_context *ctx = uci_alloc_context();
+	struct uci_ptr ptr;
 
 	list* quota_sections = get_all_sections_of_type(ctx, "firewall", "quota");
 	if(quota_sections->length > 0)
@@ -170,10 +173,16 @@ int main(int argc, char** argv)
 					int do_restore = 1;
 					if(ignore_backup != NULL)
 					{
-						do_restore = strcmp(ignore_backup, "0") == 0 ? 0 : 1;
+						do_restore = strcmp(ignore_backup, "1") == 0 ? 0 : 1;
 						if(!do_restore)
 						{
-							//remove variable from uci & commit
+							//remove variable from uci 
+							char* var_name = dynamic_strcat(3, "firewall.", next_quota, ".ignore_backup_at_next_restore");
+							if (uci_lookup_ptr(ctx, &ptr, var_name, true) == UCI_OK)
+							{
+								uci_delete(ctx, &ptr);
+							}
+							free(var_name);
 						}
 					}
 					free(ignore_backup);
@@ -184,6 +193,7 @@ int main(int argc, char** argv)
 					if(reset_interval != NULL)
 					{
 						char* reset_time     = get_uci_option(ctx, "firewall", next_quota, "reset_time");
+						
 						char* interval_option = strdup(" --reset_interval ");
 						reset = dcat_and_free(&reset, &interval_option, 1, 1);
 						reset = dcat_and_free(&reset, &reset_interval, 1, 1);
@@ -194,6 +204,41 @@ int main(int argc, char** argv)
 							reset = dcat_and_free(&reset, &reset_time, 1, 1);
 						}
 					}
+				
+					char* offpeak = strdup("");	
+					char* offpeak_hours     = get_uci_option(ctx, "firewall", next_quota, "offpeak_hours");
+					char* offpeak_weekdays     = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekdays");
+					char* offpeak_weekly_ranges     = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekly_ranges");
+
+					if(offpeak_hours != NULL && offpeak_weekdays != NULL && offpeak_weekly_ranges != NULL)
+					{
+						char timerange_match[] = " -m timerange \"";
+						char hour_match[] = " --hours \"";
+						char weekday_match[] = " --weekdays \"";
+						char weekly_match[] = " --weekly_ranges \"";
+						char quote_end[] = "\" ";
+						dcat_and_free(&offpeak, (char**)&timerange_match,  1,0);
+						if(offpeak_hours != NULL && offpeak_weekly_ranges == NULL)
+						{
+							dcat_and_free(&offpeak, (char**)&hour_match, 1, 0);	
+							dcat_and_free(&offpeak, &offpeak_hours, 1, 1);	
+							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+						}
+						if(offpeak_weekdays != NULL && offpeak_weekly_ranges == NULL)
+						{
+							dcat_and_free(&offpeak, (char**)&weekday_match, 1, 0);	
+							dcat_and_free(&offpeak, &offpeak_weekdays, 1, 1);
+							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+						}
+						if(offpeak_weekly_ranges != NULL)
+						{
+							dcat_and_free(&offpeak, (char**)&weekly_match, 1, 0);
+							dcat_and_free(&offpeak, &offpeak_weekly_ranges, 1, 1);
+							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+						}
+
+					}
+					
 					char* types[] = { "ingress_limit", "egress_limit", "combined_limit" };
 					char* postfixes[] = { "_ingress", "_egress", "_combined" };
 					char* chains[] =  { "ingress_quotas", "egress_quotas", "combined_quotas" };
@@ -206,7 +251,7 @@ int main(int argc, char** argv)
 						if(limit != NULL)
 						{
 							char* type_id = dynamic_replace(ip, "/", "_");
-							type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);	
+							type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);
 							
 
 							char* ip_test = strdup(""); 
@@ -260,7 +305,7 @@ int main(int argc, char** argv)
 							}
 							
 							//insert rule
-							run_shell_command(dynamic_strcat(14, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
+							run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, offpeak, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
 							//restore from backup
 							if(do_restore)
 							{
@@ -286,13 +331,85 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(5,"iptables -t filter -I FORWARD -m connmark --mark ", death_mark, "/", death_mask, " -j REJECT 2>/dev/null"), 1);
 
 		//make sure crontab is up to date
+		if(crontab_line != NULL)
+		{
+			FILE* crontab_file = fopen(crontab_file_path,"r");
+			int cron_line_found = 0;
+			if(crontab_file == NULL)
+			{
+				run_shell_command(dynamic_strcat(2, "mkdir -p ", crontab_dir), 1);
+			}
+			else
+			{
+				unsigned long read_length;
+				char* all_cron_data = (char*)read_entire_file(crontab_file, 2048, &read_length);
+				fclose(crontab_file);
 
+				unsigned long num_lines;
+				char linebreaks[] = { '\n', '\r' };
+				char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, num_lines);
+				int line_index = 0;
+				for(line_index=0; line_index < num_lines && (!cron_line_found); line_index++)
+				{
+					if(strcmp(cron_lines[line_index], crontab_line) == 0)
+					{
+						cron_line_found = 1;
+					}
+				}
+				free_null_terminated_string_array(cron_lines);
+			}
+			if(!cron_line_found)
+			{
+				crontab_file = fopen(crontab_file_path, "a");
+				fprintf(crontab_file, "%s\n", crontab_line);
+				fclose(crontab_file);
+			}
+		}
 	}
 	else
 	{
-		//remove crontab if it exists
+		//remove crontab line if it exists
+		FILE* crontab_file = fopen(crontab_file_path,"r");
+		if(crontab_file != NULL)
+		{
+			unsigned long cron_line_found = 0;
+			unsigned long read_length;
+			unsigned long num_lines;
+			char linebreaks[] = { '\n', '\r' };
+			char* all_cron_data = (char*)read_entire_file(crontab_file, 2048, &read_length);
+			fclose(crontab_file);
+			char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, num_lines);
+			int line_index = 0;
+			for(line_index=0; line_index < num_lines && (!cron_line_found); line_index++)
+			{
+				if(strcmp(cron_lines[line_index], crontab_line) == 0)
+				{
+					cron_line_found = 1;
+				}
+			}
+			if(cron_line_found)
+			{
+				fopen(crontab_file_path, "w");
+				for(line_index=0; line_index < num_lines && (!cron_line_found); line_index++)
+				{
+					if(strcmp(cron_lines[line_index], crontab_line) != 0)
+					{
+						fprintf(crontab_file, "%s\n", cron_lines[line_index]);
+					}
+				}
+				fclose(crontab_file);
+			}
+			free_null_terminated_string_array(cron_lines);
+		}
+
+
 	}
 
+	/* commit changes to uci, to remove ignore_backup_at_next_restore variables permanently */
+	if (uci_lookup_ptr(ctx, &ptr, "firewall", true) == UCI_OK)
+	{
+		uci_commit(ctx, &ptr.p, false);
+	}
 	uci_free_context(ctx);
 
 	return 0;

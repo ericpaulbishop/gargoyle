@@ -38,12 +38,23 @@ int main(void)
 {
 	struct uci_context *ctx = uci_alloc_context();
 	list* quota_sections = get_all_sections_of_type(ctx, "firewall", "quota");
+	system("mkdir -p /usr/data/quotas");
 	unlock_bandwidth_semaphore_on_exit();
 	while(quota_sections->length > 0)
 	{
 		char* next_quota = shift_list(quota_sections);
-		char* do_not_backup = get_uci_option(ctx, "firewall", next_quota, "ignore_backup_at_next_restore");
-		if(do_not_backup == NULL)
+		char* ignore_backup = get_uci_option(ctx, "firewall", next_quota, "ignore_backup_at_next_restore");
+		int do_backup = 1;
+		if(ignore_backup == NULL)
+		{
+			if(strcmp(ignore_backup, "1") == 0)
+			{
+				do_backup = 0;
+			}
+			free(ignore_backup);
+		}
+
+		if(do_backup)
 		{
 			//do backup
 			
@@ -78,10 +89,6 @@ int main(void)
 
 			}
 			free(backup_id);
-		}
-		else
-		{
-			free(do_not_backup);
 		}
 		free(next_quota);
 	}

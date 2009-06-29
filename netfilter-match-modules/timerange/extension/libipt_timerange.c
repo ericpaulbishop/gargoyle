@@ -160,6 +160,12 @@ static int parse(	int c,
 static void print_timerange_args(	struct ipt_timerange_info* info )
 {
 	int i;
+	
+	if(info->invert == 1)
+	{
+		printf(" ! ");
+	}
+
 	switch(info->type)
 	{
 		case DAYS_HOURS:
