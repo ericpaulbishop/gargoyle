@@ -404,7 +404,9 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	char query[BANDWIDTH_QUERY_LENGTH];
 	copy_from_user(query, user, BANDWIDTH_QUERY_LENGTH);
 	
-
+	#ifdef BANDWIDTH_DEBUG
+		printk("ipt_bandwidth: set called\n"); 
+	#endif
 	/* 
 	 * buffer starts with length of total entries to expect (-1 for first entry which should be last_backup_time) 
 	 * Unlike when we're doing a get, buffer length is valid only with first query, otherwise it is zero.
@@ -426,9 +428,20 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		memcpy(input_id, query+4, BANDWIDTH_MAX_ID_LENGTH);
 		query_index = query_index + BANDWIDTH_MAX_ID_LENGTH;
 
+		#ifdef BANDWIDTH_DEBUG
+			printk("ipt_bandwidth: set id = %s\n", input_id); 
+		#endif
+
+
 		/* read backup_time */
 		input_backup_time = *( (time_t*)(query+query_index) );
 		query_index = query_index + sizeof(time_t);
+
+		
+		#ifdef BANDWIDTH_DEBUG
+			printk("ipt_bandwidth: set backup time = %ld\n", input_backup_time); 
+		#endif
+
 
 	}
 
@@ -468,7 +481,9 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		/* done reading input, set it */
 		if(input_buffer_index >= input_buffer_length)
 		{
-
+			#ifdef BANDWIDTH_DEBUG
+				printk("ipt_bandwidth: read input, setting it\n"); 
+			#endif
 			int backup_time_is_consistent = 1;
 			spin_lock_bh(&bandwidth_lock);
 			
@@ -491,15 +506,24 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				next_reset = get_next_reset_time(info, now);
 
 				time_t next_reset_of_last_backup;
-				time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+				time_t adjusted_last_backup_time = input_backup_time - (60 * sys_tz.tz_minuteswest); 
 				next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
 				if(next_reset_of_last_backup != info->next_reset)
 				{
+					#ifdef BANDWIDTH_DEBUG
+						printk("ipt_bandwidth: backup time is NOT consistent, now=%ld, next_reset=%ld, adjusted_last_backup=%ld, next_reset_of_last_backup=%ld\n", now, info->next_reset, adjusted_last_backup_time, next_reset_of_last_backup); 
+					#endif
+
+
 					backup_time_is_consistent = 0;
 				}
 			}
 			if(backup_time_is_consistent)
 			{
+				#ifdef BANDWIDTH_DEBUG
+					printk("ipt_bandwidth: backup time is consistent\n"); 
+				#endif
+
 				/* reset existing bandwidth values to 0 */
 				info->current_bandwidth = 0;
 				apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
@@ -512,6 +536,12 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 					uint32_t *ip = (uint32_t*)(input_buffer + out_index);
 					uint64_t *bw = (uint64_t*)(input_buffer + out_index + 4);
 					uint64_t *map_bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)(*ip) );
+				
+					unsigned char* char_ip_buf = (input_buffer + out_index);
+					#ifdef BANDWIDTH_DEBUG
+						printk("ipt_bandwidth: setting ip %u.%u.%u.%u bandwidth to %lld\n", (unsigned char)char_ip_buf[0], (unsigned char)char_ip_buf[1], (unsigned char)char_ip_buf[2], (unsigned char)char_ip_buf[3],  (long long int)(*bw));
+					#endif
+
 					if(map_bw == NULL)
 					{
 						map_bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
@@ -525,6 +555,10 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 					if(*ip == 0)
 					{
 						info->current_bandwidth = *bw;
+						#ifdef BANDWIDTH_DEBUG
+							printk("ipt_bandwidth: setting combined bandwidth to %lld\n", (long long int)(*bw)); 
+						#endif
+
 					}
 				}
 			}
