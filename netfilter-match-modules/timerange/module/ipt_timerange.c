@@ -126,7 +126,7 @@ static int match(	const struct sk_buff *skb,
 		
 	}
 	
-
+	match_found = info->invert == 0 ? match_found : !match_found;
 	return match_found;
 }
 

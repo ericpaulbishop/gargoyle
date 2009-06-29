@@ -28,9 +28,9 @@
 #define RANGE_LENGTH 51
 
 #define HOURS 1
-#define WEEKDAYS 3
-#define DAYS_HOURS 4
-#define WEEKLY_RANGE 10
+#define WEEKDAYS 2
+#define DAYS_HOURS (HOURS+WEEKDAYS)
+#define WEEKLY_RANGE 4
 
 
 struct ipt_timerange_info
@@ -38,5 +38,6 @@ struct ipt_timerange_info
 	long ranges[RANGE_LENGTH];
 	char days[7];
 	char type;
+	unsigned char invert;
 };
 #endif /*_IPT_TIMERANGE_H*/

@@ -79,12 +79,10 @@ static int parse(	int c,
 {
 	struct ipt_timerange_info *info = (struct ipt_timerange_info *)(*match)->data;
 	int valid_arg = 0;
-	
-	if(*flags != 0 && *flags !=1 && *flags !=3 && *flags != 4 && *flags !=10)
+	if(*flags == 0)
 	{
-		//error!  return, we're already fubar
-		return valid_arg;
-
+		check_inverse(optarg, &invert, &optind, 0);
+		info->invert = invert ? 1 : 0;
 	}
 
 	long* parsed = NULL;
@@ -92,7 +90,7 @@ static int parse(	int c,
 	{
 		case HOURS:
 			parsed = parse_time_ranges(argv[optind-1], 0);
-			if(parsed != NULL)
+			if(parsed != NULL && (*flags & HOURS) == 0 && (*flags & WEEKLY_RANGE) == 0)
 			{
 				int range_index = 0;
 				for(range_index = 0; parsed[range_index] != -1; range_index++)
@@ -108,7 +106,7 @@ static int parse(	int c,
 
 
 				valid_arg = 1;
-				*flags = *flags+ 1;
+				*flags = *flags+ c;
 				info->type = *flags;
 			}
 			break;
@@ -116,7 +114,7 @@ static int parse(	int c,
 
 		case WEEKDAYS:
 			parsed = parse_weekdays(argv[optind-1]);
-			if(parsed != NULL)
+			if(parsed != NULL && (*flags & WEEKDAYS) == 0 && (*flags & WEEKLY_RANGE) == 0)
 			{
 				int day_index;
 				for(day_index=0; day_index < 7; day_index++)
@@ -126,13 +124,13 @@ static int parse(	int c,
 				free(parsed);
 
 				valid_arg = 1 ;
-				*flags = *flags + 3;
+				*flags = *flags + c;
 				info->type = *flags;
 			}
 			break;
 		case WEEKLY_RANGE:
 			parsed = parse_time_ranges(argv[optind-1], 1);
-			if(parsed != NULL)
+			if(parsed != NULL && (*flags & HOURS) == 0 && (*flags & WEEKDAYS) == 0 && (*flags & WEEKLY_RANGE) == 0 )
 			{
 				int range_index = 0;
 				for(range_index = 0; parsed[range_index] != -1; range_index++)
@@ -148,7 +146,7 @@ static int parse(	int c,
 				free(parsed);
 
 				valid_arg = 1;
-				*flags = *flags+ 10;
+				*flags = *flags+c;
 				info->type = *flags;
 			}
 			break;
@@ -205,7 +203,7 @@ static void print_timerange_args(	struct ipt_timerange_info* info )
 /* Final check; must have specified a test string with either --contains or --contains_regex. */
 static void final_check(unsigned int flags)
 {
-	if(flags !=1 && flags !=3 && flags != 4 && flags !=10)
+	if(flags ==0)
 	{
 		exit_error(PARAMETER_PROBLEM, "Invalid arguments to time_range");
 	}
