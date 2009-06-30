@@ -347,7 +347,7 @@ int main(int argc, char** argv)
 
 				unsigned long num_lines;
 				char linebreaks[] = { '\n', '\r' };
-				char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, num_lines);
+				char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, &num_lines);
 				int line_index = 0;
 				for(line_index=0; line_index < num_lines && (!cron_line_found); line_index++)
 				{
@@ -378,7 +378,7 @@ int main(int argc, char** argv)
 			char linebreaks[] = { '\n', '\r' };
 			char* all_cron_data = (char*)read_entire_file(crontab_file, 2048, &read_length);
 			fclose(crontab_file);
-			char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, num_lines);
+			char** cron_lines = split_on_separators(all_cron_data, linebreaks, 2, -1, 0, &num_lines);
 			int line_index = 0;
 			for(line_index=0; line_index < num_lines && (!cron_line_found); line_index++)
 			{

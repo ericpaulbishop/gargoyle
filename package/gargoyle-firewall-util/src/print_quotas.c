@@ -42,21 +42,21 @@ int main(void)
 	unlock_bandwidth_semaphore_on_exit();
 
 	/* for each ip have uint64_t[6], */
-	string_map ip_to_bandwidth = initialize_string_map(1);	
+	string_map *ip_to_bandwidth = initialize_string_map(1);	
 	while(quota_sections->length > 0)
 	{
 		char* next_quota = shift_list(quota_sections);
 			
 		/* base id for quota is the ip associated with it*/
-		char *id = get_uci_option(ctx, "firewall", next_quota, "ip");
+		char *ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 			
-		if(id == NULL)
+		if(ip == NULL)
 		{
-			id = strdup("ALL");
+			ip = strdup("ALL");
 		}
-		else if(strcmp(backup_id, "") == 0)
+		else if(strcmp(ip, "") == 0)
 		{
-			backup_id = strdup("ALL");
+			ip = strdup("ALL");
 		}
 
 			
@@ -70,10 +70,10 @@ int main(void)
 			char* defined = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
 			if(defined != NULL)
 			{
-				char* type_id = dynamic_strcat(2, backup_id, postfixes[type_index]);
+				char* type_id = dynamic_strcat(2, ip, postfixes[type_index]);
 				ip_bw* ip_buf;
 				unsigned long num_ips = 0; 
-				int query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 5000);
+				int query_succeeded = get_all_bandwidth_usage_for_rule_id(ip, &num_ips, &ip_buf, 5000);
 				if(query_succeeded && num_ips > 0)
 				{
 					unsigned long ip_index = 0;
@@ -111,17 +111,16 @@ int main(void)
 				}
 				free(type_id);
 				free(defined);
-			}
 
 			}
-			free(backup_id);
+			free(ip);
 		}
 		free(next_quota);
 	}
 	
 
 	unsigned long num_ips;
-	char* ip_list = get_string_map_keys(ip_to_bandwidth, &num_ips);
+	char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ips);
 	printf("var quota_ip_list = [ ");
 	int print_comma = 0;
 	unsigned long ip_index;
@@ -143,10 +142,11 @@ int main(void)
 	{
 		char* next_ip = ip_list[ip_index];
 		uint64_t* def = get_string_map_element(ip_to_bandwidth, next_ip);
-		if(def != null)
+		if(def != NULL)
 		{
 			print_comma = 0;
 			printf("quota_defs[%s] = [ ", next_ip);
+			int type_index;
 			for(type_index=0; type_index < 3; type_index++)
 			{
 				if(print_comma)
@@ -157,7 +157,7 @@ int main(void)
 				{
 					print_comma = 1;
 				}
-				if(!def[type])
+				if(!def[type_index])
 				{
 					printf("-1");
 				}

@@ -55,6 +55,7 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dump_quotas $(1)/usr/bin/dump_quotas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/backup_quotas $(1)/usr/bin/backup_quotas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restore_quotas $(1)/usr/bin/restore_quotas
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restore_quotas $(1)/usr/bin/print_quotas
 	
 	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 	$(INSTALL_BIN) ./files/gargoyle_additions.firewall $(1)/usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall 

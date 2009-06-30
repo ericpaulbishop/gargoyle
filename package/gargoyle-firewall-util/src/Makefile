@@ -1,4 +1,7 @@
-all: make_iptables_rules dump_quotas delete_chain_from_table backup_quotas restore_quotas
+all: make_iptables_rules dump_quotas delete_chain_from_table backup_quotas restore_quotas print_quotas
+
+print_quotas: print_quotas.c
+	        $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -luci -liptbwctl
 
 restore_quotas: restore_quotas.c
 	        $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -luci -liptbwctl
