@@ -46,7 +46,8 @@ int main(void)
 	while(quota_sections->length > 0)
 	{
 		char* next_quota = shift_list(quota_sections);
-			
+		
+
 		/* base id for quota is the ip associated with it*/
 		char *ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 			
@@ -72,12 +73,12 @@ int main(void)
 			{
 				char* type_id = dynamic_strcat(2, ip, postfixes[type_index]);
 				ip_bw* ip_buf;
-				unsigned long num_ips = 0; 
-				int query_succeeded = get_all_bandwidth_usage_for_rule_id(ip, &num_ips, &ip_buf, 5000);
+				unsigned long num_ips = 0;
+				int query_succeeded = get_all_bandwidth_usage_for_rule_id(type_id, &num_ips, &ip_buf, 5000);
 				if(query_succeeded && num_ips > 0)
 				{
 					unsigned long ip_index = 0;
-					for(ip_index = 0; ip_index < num_ips; ip++)
+					for(ip_index = 0; ip_index < num_ips; ip_index++)
 					{
 						ip_bw next = ip_buf[ip_index];
 						char* next_ip = NULL;
@@ -91,7 +92,6 @@ int main(void)
 							addr.s_addr = next.ip;
 							next_ip = strdup(inet_ntoa(addr));
 						}
-
 						uint64_t *bw_list = get_string_map_element(ip_to_bandwidth,next_ip);
 						if(bw_list == NULL)
 						{
@@ -105,16 +105,15 @@ int main(void)
 							set_string_map_element(ip_to_bandwidth, next_ip, bw_list);
 						}
 						bw_list[type_index] = 1;
-						bw_list[type_index*2] = next.bw;
-					
+						bw_list[type_index+3] = next.bw;
 					}
 				}
 				free(type_id);
 				free(defined);
 
 			}
-			free(ip);
 		}
+		free(ip);
 		free(next_quota);
 	}
 	
@@ -128,15 +127,15 @@ int main(void)
 	{
 		if(print_comma)
 		{
-			printf(", %s", ip_list[ip_index]);
+			printf(", \"%s\"", ip_list[ip_index]);
 		}
 		else
 		{
 			print_comma = 1;
-			printf("%s", ip_list[ip_index]);
+			printf("\"%s\"", ip_list[ip_index]);
 		}
 	}
-	printf("];\n");
+	printf(" ];\n");
 	printf("var quota_defs = new Array();\n");
 	for(ip_index=0; ip_index < num_ips; ip_index++)
 	{
@@ -145,7 +144,7 @@ int main(void)
 		if(def != NULL)
 		{
 			print_comma = 0;
-			printf("quota_defs[%s] = [ ", next_ip);
+			printf("quota_defs[ \"%s\" ] = [ ", next_ip);
 			int type_index;
 			for(type_index=0; type_index < 3; type_index++)
 			{
@@ -163,10 +162,10 @@ int main(void)
 				}
 				else
 				{
-					printf("%lld", (long long int)def[type_index*2]);
+					printf("%lld", (long long int)def[type_index+3]);
 				}
 			}
-			printf("];\n");
+			printf(" ];\n");
 		}
 	}
 
