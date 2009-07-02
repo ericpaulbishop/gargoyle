@@ -71,27 +71,39 @@ function setStatusAndQuotas()
 	{
 		setChildText("login_status", "", "black");
 	}
-	
-	if(ipq.length != 0)
+
+	ipQuotaName = "ALL_OTHERS";
+	if( quotaUsed[ connectedIp ] != null)
 	{
-		var parsedIpQuota = parseQuotaData(ipq);
-		if(parsedIpQuota[0] != null) { setChildText("up_your_quota", parsedIpQuota[0]); }
-		if(parsedIpQuota[1] != null) { setChildText("down_your_quota", parsedIpQuota[1]); }
-		if(parsedIpQuota[2] != null) { setChildText("combined_your_quota", parsedIpQuota[2]); }
-		document.getElementById("up_your_quota_container").style.display = parsedIpQuota[0] == null ? "none" : "block";
-		document.getElementById("down_your_quota_container").style.display = parsedIpQuota[1] == null ? "none" : "block";
-		document.getElementById("combined_your_quota_container").style.display = parsedIpQuota[2] == null ? "none" : "block";
+		ipQuotaName = connectedIp;
+	}
+	
+	if( quotaUsed[ ipQuotaName ] != null )
+	{
+		var ipQuotaUsed = quotaUsed[ ipQuotaName ];
+		var ipQuotaLimits = quotaLimits[ ipQuotaName ];
+		var ipQuotaPercents = quotaPercents[ ipQuotaName ];
+		var ipQuotaData = getQuotaLines(ipQuotaUsed, ipQuotaLimits, ipQuotaPercents);
+		if(ipQuotaData[0] != null) { setChildText("up_your_quota", ipQuotaData[0]); }
+		if(ipQuotaData[1] != null) { setChildText("down_your_quota", ipQuotaData[1]); }
+		if(ipQuotaData[2] != null) { setChildText("combined_your_quota", ipQuotaData[2]); }
+		document.getElementById("up_your_quota_container").style.display = ipQuotaData[0] == null ? "none" : "block";
+		document.getElementById("down_your_quota_container").style.display = ipQuotaData[1] == null ? "none" : "block";
+		document.getElementById("combined_your_quota_container").style.display = ipQuotaData[2] == null ? "none" : "block";
 		document.getElementById("your_quota").style.display="block";
 	}
-	if(allq.length != 0)
+	if( quotaUsed["ALL"] != null )
 	{
-		var parsedAllQuota = parseQuotaData(allq);
-		if(parsedAllQuota[0] != null) { setChildText("up_all_quota", parsedAllQuota[0]); }
-		if(parsedAllQuota[1] != null) { setChildText("down_all_quota", parsedAllQuota[1]); }
-		if(parsedAllQuota[2] != null) { setChildText("combined_all_quota", parsedAllQuota[2]); }
-		document.getElementById("up_all_quota_container").style.display = parsedAllQuota[0] == null ? "none" : "block";
-		document.getElementById("down_all_quota_container").style.display = parsedAllQuota[1] == null ? "none" : "block";
-		document.getElementById("combined_all_quota_container").style.display = parsedAllQuota[2] == null ? "none" : "block";
+		var allQuotaUsed     = quotaUsed[ "ALL" ];
+		var allQuotaLimits   = quotaLimits["ALL"];
+		var allQuotaPercents = quotaPercents["ALL"];
+		var allQuotaData     = getQuotaLines(allQuotaUsed, allQuotaLimits, allQuotaPercents);
+		if(allQuotaData[0] != null) { setChildText("up_all_quota", allQuotaData[0]); }
+		if(allQuotaData[1] != null) { setChildText("down_all_quota", allQuotaData[1]); }
+		if(allQuotaData[2] != null) { setChildText("combined_all_quota", allQuotaData[2]); }
+		document.getElementById("up_all_quota_container").style.display = allQuotaData[0] == null ? "none" : "block";
+		document.getElementById("down_all_quota_container").style.display = allQuotaData[1] == null ? "none" : "block";
+		document.getElementById("combined_all_quota_container").style.display = allQuotaData[2] == null ? "none" : "block";
 		document.getElementById("network_quota").style.display="block";
 	}
 
@@ -99,61 +111,23 @@ function setStatusAndQuotas()
 
 }
 
-function parseQuotaData(quotaData)
+function getQuotaLines(usd, lim, pct)
 {
-	var upLimit = -1;
-	var downLimit = -1;
-	var combinedLimit = -1;
-	var upUsed = 0;
-	var downUsed = 0;
-	var combinedUsed = 0;
-
-
-	var qIndex=0;
-	for(qIndex=0; qIndex < quotaData.length; qIndex++)
+	names = ["upload", "download", "combined upload/download" ];
+	var lines = [null, null, null];
+	var typeIndex;
+	for(typeIndex=0; typeIndex < 3; typeIndex++)
 	{
-		if(quotaData[qIndex].match(/egress_limit=/))
+		if(lim[typeIndex] >= 0)
 		{
-			upLimit = parseInt(quotaData[qIndex].replace(/^.*egress_limit=/, "").replace(/[;\t ]+/, ""));
-		}
-		if(quotaData[qIndex].match(/ingress_limit=/))
-		{
-			downLimit = parseInt(quotaData[qIndex].replace(/^.*ingress_limit=/, "").replace(/[;\t ]+/, ""));
-		}
-		if(quotaData[qIndex].match(/combined_limit=/))
-		{
-			combinedLimit = parseInt(quotaData[qIndex].replace(/^.*combined_limit=/, "").replace(/[;\t ]+/, ""));
-		}
-		if(quotaData[qIndex].match(/egress_used=/))
-		{
-			upUsed = parseInt(quotaData[qIndex].replace(/^.*egress_used=/, "").replace(/[;\t ]+/, ""));
-		}
-		if(quotaData[qIndex].match(/ingress_used=/))
-		{
-			downUsed = parseInt(quotaData[qIndex].replace(/^.*ingress_used=/, "").replace(/[;\t ]+/, ""));
-		}
-		if(quotaData[qIndex].match(/combined_used=/))
-		{
-			combinedUsed = parseInt(quotaData[qIndex].replace(/^.*combined_used=/, "").replace(/[;\t ]+/, ""));
+			var name  = names[typeIndex];
+			var limit = parseBytes(lim[typeIndex]);
+			var unit  = limit.replace(/^.* /, "");
+			var used  = parseBytes(usd[typeIndex], unit).replace(/ .*$/, "");
+			var perc   = truncateDecimal( pct[typeIndex] );
+			lines[typeIndex] = perc + "% of " + name + " quota has been used (" + used + "/" + limit + ")";
 		}
 	}
-	
-	var getLineForQuota = function(limit, used, name)
-	{
-		var line = null;
-		if(limit > 0)
-		{
-			var percent = truncateDecimal( (used*100)/limit );
-			percent = percent > 100 ? 100 : percent;
-			var parsedLimit = parseBytes(limit);
-			var unit = parsedLimit.replace(/^.* /, "");
-			var parsedUsed = parseBytes(used, unit).replace(/ .*$/, "");
-			line = percent + "% of " + name + " quota has been used (" + parsedUsed + "/" + parsedLimit + ")";
-		}
-		return line;
-	}
-	
-	var quotaReportLines = [ getLineForQuota(upLimit, upUsed, "upload"),  getLineForQuota(downLimit, downUsed, "download"), getLineForQuota(combinedLimit, combinedUsed, "combined upload/download") ];
 
-	return quotaReportLines;
+	return lines;
 }
