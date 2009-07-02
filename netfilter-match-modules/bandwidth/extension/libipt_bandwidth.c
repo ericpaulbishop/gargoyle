@@ -39,6 +39,7 @@
 
 int get_minutes_west(void);
 void set_kernel_timezone(void);
+int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask);
 static unsigned long get_pow(unsigned long base, unsigned long pow);
 
 
@@ -152,33 +153,7 @@ static int parse(	int c,
 			c=0;
 			break;
 		case BANDWIDTH_SUBNET:
-			read = sscanf(optarg, "%u.%u.%u.%u/%u", &A, &B, &C, &D, &mask);
-			if(read == 5)
-			{
-				if( A <= 255 && B <= 255 && C <= 255 && D <= 255 && mask <= 32)
-				{
-					unsigned char* sub = (unsigned char*)(&(info->local_subnet));
-					*( sub ) = (unsigned char)A;
-					*( sub + 1 ) = (unsigned char)B;
-					*( sub + 2 ) = (unsigned char)C;
-					*( sub + 3 ) = (unsigned char)D;
-
-					unsigned char* msk = (unsigned char*)(&(info->local_subnet_mask));
-					int msk_index;
-					for(msk_index=0; msk_index*8 < mask; msk_index++)
-					{
-						int bit_index;
-						msk[msk_index] = 0;
-						for(bit_index=0; msk_index*8 + bit_index < mask && bit_index < 8; bit_index++)
-						{
-							msk[msk_index] = msk[msk_index] + get_pow(2, 7-bit_index);
-						}
-					}
-
-					info->local_subnet = (info->local_subnet & info->local_subnet_mask );
-					valid_arg = 1;
-				}
-			}
+			valid_arg =  parse_sub(optarg, &(info->local_subnet), &(info->local_subnet_mask));
 			break;
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
@@ -392,7 +367,7 @@ static void final_check(unsigned int flags)
 	}
 	if( (flags & BANDWIDTH_REQUIRES_SUBNET) == BANDWIDTH_REQUIRES_SUBNET && (flags & BANDWIDTH_SUBNET) == 0 )
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify a subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
+		exit_error(PARAMETER_PROBLEM, "You must specify a local subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
 	}
 
 	/* update timezone minutes_west in kernel to match userspace*/
@@ -459,6 +434,62 @@ static unsigned long get_pow(unsigned long base, unsigned long pow)
 	unsigned long ret = pow == 0 ? 1 : base*get_pow(base, pow-1);
 	return ret;
 }
+
+
+int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask)
+{
+
+	int valid = 0;
+	unsigned int A,B,C,D,E,F,G,H;
+	int read = sscanf(subnet_string, "%u.%u.%u.%u/%u.%u.%u.%u", &A, &B, &C, &D, &E, &F, &G, &H);
+	if(read >= 5)
+	{
+		if( A <= 255 && B <= 255 && C <= 255 && D <= 255)
+		{
+			unsigned char* sub = (unsigned char*)(subnet);
+			unsigned char* msk = (unsigned char*)(subnet_mask);
+			
+			*( sub ) = (unsigned char)A;
+			*( sub + 1 ) = (unsigned char)B;
+			*( sub + 2 ) = (unsigned char)C;
+			*( sub + 3 ) = (unsigned char)D;
+
+			if(read == 5)
+			{
+				unsigned int mask = E;
+				if(mask <= 32)
+				{
+					int msk_index;
+					for(msk_index=0; msk_index*8 < mask; msk_index++)
+					{
+						int bit_index;
+						msk[msk_index] = 0;
+						for(bit_index=0; msk_index*8 + bit_index < mask && bit_index < 8; bit_index++)
+						{
+							msk[msk_index] = msk[msk_index] + get_pow(2, 7-bit_index);
+						}
+					}
+				}
+				valid = 1;
+			}
+			if(read == 8)
+			{
+				if( E <= 255 && F <= 255 && G <= 255 && H <= 255)
+				*( msk ) = (unsigned char)E;
+				*( msk + 1 ) = (unsigned char)F;
+				*( msk + 2 ) = (unsigned char)G;
+				*( msk + 3 ) = (unsigned char)H;
+				valid = 1;
+			}
+		}
+	}
+	if(valid)
+	{
+		*subnet = (*subnet & *subnet_mask );
+	}
+	return valid;
+}
+
 
 
 int get_minutes_west(void)
