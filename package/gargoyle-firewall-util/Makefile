@@ -52,7 +52,7 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_DIR) $(1)/etc/init.d/
 	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/make_iptables_rules $(1)/usr/bin/make_iptables_rules
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dump_quotas $(1)/usr/bin/dump_quotas
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/delete_chain_from_table $(1)/usr/bin/delete_chain_from_table
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/backup_quotas $(1)/usr/bin/backup_quotas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restore_quotas $(1)/usr/bin/restore_quotas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/print_quotas $(1)/usr/bin/print_quotas

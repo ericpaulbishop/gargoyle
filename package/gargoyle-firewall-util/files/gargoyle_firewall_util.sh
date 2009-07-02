@@ -8,46 +8,10 @@ ra_mask="0x0080"
 ra_mark="$ra_mask/$ra_mask"
 
 death_mask=0x8000
-death_mark="$death_mask/$death_mask"
-
-delete_chain_from_table()
-{
-	table=$1
-	target=$2
+death_mark="$death_mask"
 
 
-	found_chain="0"
-
-	chains=$(iptables -t $table -L | awk ' {if($0 ~ /^Chain/){ print $2; };} '  )
-	for chain in $chains ; do
-		rule_nums=$(iptables -t $table -L $chain --line-numbers | awk " {if(\$1~/^[0-9]+$/ && \$2 ~/^$target/){ printf(\"%s\n\", \$1);};}")
-		
-		#delete higher number rule nums first so rule numbers remain valid
-		sorted_rules=$(echo -e "$rule_nums" | sort -n -r )
-		if [ -n "$sorted_rules" ] ; then
-			for rule_num in $sorted_rules ; do
-				iptables -t $table -D $chain $rule_num
-			done
-		fi
-		
-		if [ "$chain" = "$target" ] ; then
-			found_chain="1"
-		fi
-	done
-	if [ "$found_chain" = "1" ] ; then
-		iptables -t $table -F $target
-		iptables -t $table -X $target
-	fi
-	
-}
-
-
-# echo "1" if death_mark chain exists, otherwise echo "0"
-death_mark_exists()
-{
-	echo 0
-}
-
+wan_if=$(uci -P "/var/state" get network.wan.ifname) 
 
 
 # parse remote_accept sections in firewall config and add necessary rules
@@ -240,7 +204,6 @@ insert_dmz_rule()
 
 insert_restriction_rules()
 {
-	wan_if=$(uci -P "/var/state" get network.wan.ifname)                                                   
 	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
 	
 	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
@@ -315,192 +278,15 @@ insert_restriction_rules()
 
 initialize_quotas()
 {
-	quota_package=firewall
-
-	ing_exists=$(iptables -t mangle -L ingress_quotas 2>/dev/null)
-	egr_exists=$(iptables -t mangle -L egress_quotas 2>/dev/null)
-	com_exists=$(iptables -t mangle -L combined_quotas 2>/dev/null)
-	fwr_exists=$(iptables -t mangle -L forward_quotas 2>/dev/null)
-	if [ -n "$ing_exists" ] ; then
-		delete_chain_from_table mangle ingress_quotas
-	fi
-	if [ -n "$egr_exists" ] ; then
-		delete_chain_from_table mangle egress_quotas
-	fi
-	if [ -n "$com_exists" ] ; then
-		delete_chain_from_table mangle combined_quotas
-	fi
-	if [ -n "$fwr_exists" ] ; then
-		delete_chain_from_table mangle forward_quotas
-	fi
-
-	wan_if=$(uci -P "/var/state" get network.wan.ifname)                                                   
-	quota_sections=$(uci show $quota_package | grep "quota$" | sed 's/^.*\.//g' | sed 's/=.*$//g')
-	if [ -z "$wan_if" ] || [ -z "$quota_sections" ]  ; then 
-		if [ -e "/etc/crontabs/root" ] ; then
-			cat /etc/crontabs/root | grep -v "dump_quotas" > /tmp/new_cron
-			mv /tmp/new_cron /etc/crontabs/root
-			cron_active=$(ps | grep "crond" | grep -v "grep" )
-			if [ -n "$cron_active" ] ; then
-				/etc/init.d/cron restart
-			fi
-		fi
-		return 
-	fi
-
-	iptables -t mangle -N ingress_quotas
-	iptables -t mangle -N egress_quotas
-	iptables -t mangle -N combined_quotas
-	iptables -t mangle -N forward_quotas
+	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	
-	iptables -t mangle -I INPUT   1 -i $wan_if -j ingress_quotas
-	iptables -t mangle -I INPUT   2 -i $wan_if -j combined_quotas
-	iptables -t mangle -I OUTPUT  1 -o $wan_if -j egress_quotas
-	iptables -t mangle -I OUTPUT  2 -o $wan_if -j combined_quotas
+	restore_quotas -w $wan_if -d $death_mark -m $death_mask -l "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
 
-	no_death_mark_test=" -m connmark --mark 0x0/$death_mask "
-	iptables -t mangle -I FORWARD -j forward_quotas
-	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j ingress_quotas
-	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j egress_quotas
-	iptables -t mangle -A forward_quotas -i $wan_if $no_death_mark_test -j CONNMARK --set-mark 0x0F000000/0x0F000000
-	iptables -t mangle -A forward_quotas -o $wan_if $no_death_mark_test -j CONNMARK --set-mark 0x0F000000/0x0F000000
-	iptables -t mangle -A forward_quotas -m connmark --mark 0x0F000000/0x0F000000 -j combined_quotas
-	iptables -t mangle -A forward_quotas -j CONNMARK --set-mark 0x0/0x0F000000
-
-	iptables -t mangle -I ingress_quotas  -j CONNMARK --set-mark 0x0/$death_mask
-	iptables -t mangle -I egress_quotas   -j CONNMARK --set-mark 0x0/$death_mask
-	iptables -t mangle -I combined_quotas -j CONNMARK --set-mark 0x0/$death_mask
-	iptables -t mangle -I ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t mangle -I egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t mangle -I combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000
-
-
-	ingress_quota_sections=""
-	egress_quota_sections=""
-	combined_quota_sections=""
-
-	set_death_mark=" -j CONNMARK --set-mark $death_mark "
-	config_load $quota_package
-	all_others_section=""
-	for q in $quota_sections ; do
-		vars="enabled ip ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval reset_time last_backup_time"
-		for var in $vars ; do
-			config_get $var $q $var
-		done
-		if [ "$ip" = "ALL_OTHERS" ] && [ "$enabled" != "0" ]; then all_others_section="$q"; fi
-		if [ "$enabled" != "0" ] && [ "$ip" != "ALL_OTHERS" ] ; then
-			reset=""
-			if [ -n "$reset_interval" ] ; then
-				reset=" --reset_interval $reset_interval"
-				if [ -n "$reset_time" ] ; then
-					reset="$reset --reset_time $reset_time"
-				fi
-				if [ -n "$last_backup_time" ] ; then
-					reset="$reset --last_backup_time $last_backup_time"
-				fi
-			fi
-			if [ -n "$ingress_limit" ] ; then
-				current=""
-				dst=""
-				if [ -n "$ingress_used" ] ; then current=" --current_bandwidth $ingress_used " ; fi
-				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then 
-					dst=" --dst $ip "
-					iptables -t mangle -A ingress_quotas -j CONNMARK --set-mark 0xF0000000/0xF0000000
-				fi
-				echo iptables -t mangle -A ingress_quotas $dst -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
-				iptables -t mangle -A ingress_quotas $dst -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
-				ingress_quota_sections=$( echo "$ingress_quota_sections $q" | sed 's/^ //g')
-			fi
-			if [ -n "$egress_limit" ] ; then
-				current=""
-				src=""
-				if [ -n "$egress_used" ] ; then current=" --current_bandwidth $egress_used " ; fi
-				if [ -n "$ip" ] && [ "$ip" != "ALL" ]  ; then
-					src=" --src $ip "
-					iptables -t mangle -A egress_quotas -j CONNMARK --set-mark 0xF0000000/0xF0000000
-				fi
-				echo iptables -t mangle -A egress_quotas $src -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark 
-				iptables -t mangle -A egress_quotas $src -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark
-				egress_quota_sections=$( echo "$egress_quota_sections $q" | sed 's/^ //g')
-			fi
-			if [ -n "$combined_limit" ] ; then
-				current=""
-				ip_test=""
-				if [ -n "$combined_used" ] ; then current=" --current_bandwidth $combined_used " ; fi
-				if [ -n "$ip" ] && [ "$ip" != "ALL" ] ; then
-					iptables -t mangle -A combined_quotas -j CONNMARK --set-mark 0x0/0x0F000000
-					iptables -t mangle -A combined_quotas -i $wan_if --dst $ip -j CONNMARK --set-mark 0xFF000000/0xFF000000
-					iptables -t mangle -A combined_quotas -o $wan_if --src $ip -j CONNMARK --set-mark 0xFF000000/0xFF000000
-					ip_test=" -m connmark --mark 0x0F000000/0x0F000000 "
-				fi
-				echo iptables -t mangle -A combined_quotas $ip_test -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
-				iptables -t mangle -A combined_quotas $ip_test -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
-				combined_quota_sections=$( echo "$combined_quota_sections $q" | sed 's/^ //g')
-			fi
-		fi
-	done
-	if [ -n "$all_others_section" ] ; then
-		echo "all_others_section = $all_others_section"
-		vars="ingress_limit egress_limit combined_limit ingress_used egress_used combined_used reset_interval reset_time last_backup_time"
-		for var in $vars ; do
-			config_get $var $all_others_section $var
-		done
-		reset=""
-		if [ -n "$reset_interval" ] ; then
-			reset=" --reset_interval $reset_interval"
-			if [ -n "$reset_time" ] ; then
-				reset="$reset --reset_time $reset_time "
-			fi
-			if [ -n "$last_backup_time" ] ; then
-				reset="$reset --last_backup_time $last_backup_time"
-			fi
-		fi
-		not_yet_matched=" -m connmark --mark 0x0/0xF0000000 "
-		if [ -n "$ingress_limit" ] ; then
-			current=""
-			if [ -n "$ingress_used" ] ; then current=" --current_bandwidth $ingress_used " ; fi
-			echo iptables -t mangle -A ingress_quotas $not_yet_matched -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
-			iptables -t mangle -A ingress_quotas $not_yet_matched -m bandwidth --greater_than $ingress_limit $current $reset $set_death_mark
-			ingress_quota_sections=$( echo "$ingress_quota_sections $all_others_section" | sed 's/^ //g')
-		fi
-		if [ -n "$egress_limit" ] ; then
-			current=""
-			if [ -n "$egress_used" ] ; then current=" --current_bandwidth $egress_used " ; fi
-			echo iptables -t mangle -A egress_quotas $not_yet_matched -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark 
-			iptables -t mangle -A egress_quotas $not_yet_matched -m bandwidth --greater_than $egress_limit $current $reset $set_death_mark
-			egress_quota_sections=$( echo "$egress_quota_sections $all_others_section" | sed 's/^ //g')
-		fi
-		if [ -n "$combined_limit" ] ; then
-			current=""
-			if [ -n "$combined_used" ] ; then current=" --current_bandwidth $combined_used " ; fi
-			echo iptables -t mangle -A combined_quotas $not_yet_matched -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
-			iptables -t mangle -A combined_quotas $not_yet_matched -m bandwidth --greater_than $combined_limit $current $reset $set_death_mark
-			combined_quota_sections=$( echo "$combined_quota_sections $all_others_section" | sed 's/^ //g')
-		fi
-	fi
-
-	iptables -t mangle -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t mangle -A ingress_quotas -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t mangle -A egress_quotas -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t filter -I egress_restrictions -m connmark --mark $death_mark -j REJECT
-	iptables -t filter -I ingress_restrictions -m connmark --mark $death_mark -j REJECT
-
-	uci set $quota_package.quota_order=quota_order
-	uci set $quota_package.quota_order.ingress_quota_sections="$ingress_quota_sections"
-	uci set $quota_package.quota_order.egress_quota_sections="$egress_quota_sections"
-	uci set $quota_package.quota_order.combined_quota_sections="$combined_quota_sections"
-	uci commit
-
-	mkdir -p /etc/crontabs
-	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "dump_quotas" > /tmp/new_cron
-	echo '0 0,4,8,12,16,20 * * * /usr/bin/dump_quotas >/dev/null 2>&1' >> /tmp/new_cron
-	mv /tmp/new_cron /etc/crontabs/root
-	/etc/init.d/cron enable
-
-	#only restart cron if it is currently running
+	#enable cron, but only restart cron if it is currently running
 	#since we initialize this before cron, this will
 	#make sure we don't start cron twice at boot
+	/etc/init.d/cron enable
 	cron_active=$(ps | grep "crond" | grep -v "grep" )
 	if [ -n "$cron_active" ] ; then
 		/etc/init.d/cron restart
