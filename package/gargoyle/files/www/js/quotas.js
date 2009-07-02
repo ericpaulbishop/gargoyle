@@ -11,7 +11,7 @@ function saveChanges()
 	var commands = [];
 
 	//first we backup all current quota data to uci
-	commands.push("dump_quotas");
+	commands.push("backup_quotas");
 	
 	// remove all quota sections that got deleted	
 	var origSections = uciOriginal.getAllSectionsOfType(pkg,"quota");
@@ -63,9 +63,7 @@ function saveChanges()
 		//if ip has changed, reset saved data
 		if( changedIps[ uci.get(pkg,s,"ip") ] == 1 )
 		{
-			commands.push( "uci set " + pkg + "." + s + ".egress_used=0");
-			commands.push( "uci set " + pkg + "." + s + ".ingress_used=0");
-			commands.push( "uci set " + pkg + "." + s + ".combined_used=0");
+			commands.push( "uci set " + pkg + "." + s + ".ignore_backup_at_next_restore=1");
 		}
 	}
 	
@@ -107,32 +105,21 @@ function resetData()
 	var areChecked = [];
 	allIps = [];
 	changedIps = [];
-	var getPercent = function(limit, used)
-	{
-		var pct;
-		if(limit == "")
-		{
-			pct="N/A"; 
-		}
-		else
-		{
-			used = used == "" ? 0 : parseInt(used);
-			pct = Math.round( (used*100*100)/parseInt(limit) )/100.0;
-			pct = pct > 100 ? 100.0 : pct;
-			pct = pct + "%"
-		}
-		return pct;
-	}
 	for(sectionIndex = 0; sectionIndex < quotaSections.length; sectionIndex++)
 	{
 		var ip = uciOriginal.get(pkg, quotaSections[sectionIndex], "ip").toUpperCase();
-		var downLimit = uciOriginal.get(pkg, quotaSections[sectionIndex], "ingress_limit");
-		var upLimit = uciOriginal.get(pkg, quotaSections[sectionIndex], "egress_limit");
-		var combinedLimit = uciOriginal.get(pkg, quotaSections[sectionIndex], "combined_limit");
-		var downUsed = uciOriginal.get(pkg, quotaSections[sectionIndex], "ingress_used");
-		var upUsed = uciOriginal.get(pkg, quotaSections[sectionIndex], "egress_used");
-		var combinedUsed = uciOriginal.get(pkg, quotaSections[sectionIndex], "combined_used");
-
+		var pctUp       = "N/A";
+		var pctDown     = "N/A";
+		var pctCombined = "N/A";
+		ip = ip.replace(/\//, "_");
+		if(quotaPercents[ip] != null)
+		{
+			var pcts = quotaPercents[ip];
+			pctUp = pcts[0] >= 0 ? pcts[0] + "%" : pctUp;
+			pctDown = pcts[1] >= 0 ? pcts[1] + "%" : pctDown;
+			pctCombined = pcts[2] >= 0 ? pcts[2] + "%" : pctCombined;
+		}		
+		
 		var enabled = uciOriginal.get(pkg, quotaSections[sectionIndex], "enabled");
 		enabled = enabled != "0" ? true : false;
 	
@@ -142,7 +129,7 @@ function resetData()
 		checkElements.push(enabledCheck);
 		areChecked.push(enabled);
 
-		quotaTableData.push( [ ip.replace(/_/, " "), getPercent(upLimit,upUsed), getPercent(downLimit,downUsed), getPercent(combinedLimit,combinedUsed), enabledCheck, createEditButton(enabled) ] );
+		quotaTableData.push( [ ip.replace(/_/, " "), pctUp, pctDown, pctCombined, enabledCheck, createEditButton(enabled) ] );
 	
 		allIps[ip] = 1;
 	}
@@ -577,11 +564,17 @@ function editQuota()
 						}
 						else
 						{
-							var adjustPercent = function(usedOption, newMaxStr)
+							var adjustPercent = function(usedOptionIndex, newMaxStr)
 							{
-								var oldUsed = uci.get(pkg, editSection, usedOption);
-								oldUsed = oldUsed == "" ? 0 : parseInt(oldUsed);
-								var newPercent =  Math.round(oldUsed*100/(parseFloat(newMaxStr)*1024*1024)) / 100.0;
+								var oldUsedQ = quotaUsed[newIp];
+								var newPercent = "0";
+								if(oldUsedQ != null)
+								{
+									var oldUsed = oldUsedQ[usedOptionIndex];
+									oldUsed = oldUsed == "" ? 0 : parseInt(oldUsed);
+									var limit = parseFloat(newMaxStr)*1024.0*1024.0;
+									newPercent =  Math.round((oldUsed*100*1000)/(limit))/1000 ;
+								}
 								return newPercent + "%";
 							}
 
@@ -592,21 +585,10 @@ function editQuota()
 							var useDownMax = getSelectedValue("max_down_type", editQuotaWindow.document) != "unlimited";
 							var useCombinedMax = getSelectedValue("max_combined_type", editQuotaWindow.document) != "unlimited";
 							
-							editRow.childNodes[1].firstChild.data = useUpMax   ? adjustPercent("egress_used", upMax) : "N/A";
-							editRow.childNodes[2].firstChild.data = useDownMax   ? adjustPercent("ingress_used", downMax) : "N/A";
-							editRow.childNodes[3].firstChild.data = useCombinedMax  ? adjustPercent("combined_used", combinedMax) : "N/A";
+							editRow.childNodes[1].firstChild.data = useUpMax   ? adjustPercent(0, upMax) : "N/A";
+							editRow.childNodes[2].firstChild.data = useDownMax   ? adjustPercent(1, downMax) : "N/A";
+							editRow.childNodes[3].firstChild.data = useCombinedMax  ? adjustPercent(2, combinedMax) : "N/A";
 
-							/*
-							var adjustPercent = function(oldMaxStr, newMaxStr, oldPercentStr)
-							{
-								var oldUsed = parseInt(oldMaxStr)*parseFloat(oldPercentStr); //because it's already a percent it's 100x actual used
-								var newPercent = Math.round(oldUsed*100/parseInt(newMaxStr)) / 100.0;
-								return newPercent + "%";
-							}
-							editRow.childNodes[1].firstChild.data = upMax  == "" || editUpMax   == "" ? "N/A" : adjustPercent(editUpMax, upMax, editUpPrc);
-							editRow.childNodes[2].firstChild.data = downMax == "" || editDownMax == "" ? "N/A" : adjustPercent(editDownMax, downMax, editDownPrc);
-							editRow.childNodes[3].firstChild.data = combinedMax == "" || editCombinedMax == "" ? "N/A" : adjustPercent(editCombinedMax, combinedMax, editCombinedPrc);
-							*/
 						}
 						
 						editQuotaWindow.close();
