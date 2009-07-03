@@ -113,7 +113,8 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I INPUT  2 -i ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I OUTPUT 1 -o ", wan_if, no_death_mark_test, " -j egress_quotas   2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I OUTPUT 2 -o ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
-		
+	
+
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -I FORWARD -j forward_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -o ", wan_if, no_death_mark_test, " -j egress_quotas  2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
@@ -133,7 +134,7 @@ int main(int argc, char** argv)
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
 		char* other_quota_section_name = NULL;
 		unlock_bandwidth_semaphore_on_exit();
-		while(quota_sections->length > 0 && other_quota_section_name == NULL)
+		while(quota_sections->length > 0 || other_quota_section_name != NULL)
 		{
 			char* next_quota = NULL;
 			int process_other_quota = 0;
@@ -147,7 +148,7 @@ int main(int argc, char** argv)
 				next_quota = other_quota_section_name;
 				other_quota_section_name = NULL;
 			}
-			
+
 			char* quota_enabled_var  = get_uci_option(ctx, "firewall", next_quota, "enabled");
 			int enabled = 1;
 			if(quota_enabled_var != NULL)
@@ -260,7 +261,6 @@ int main(int argc, char** argv)
 								char* dst_test = dynamic_strcat(3, " --dst ", ip, " "); 
 								char* src_test = dynamic_strcat(3, " --src ", ip, " ");
 								
-								run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ", chains[type_index], " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
 								if(strcmp(types[type_index], "egress_limit") == 0)
 								{
 									ip_test=dcat_and_free(&ip_test, &src_test, 1, 0);
@@ -276,6 +276,7 @@ int main(int argc, char** argv)
 									char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
 									ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
 								}
+								run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
 								free(dst_test);
 								free(src_test);
 							}
@@ -283,24 +284,29 @@ int main(int argc, char** argv)
 							{
 								char* rule_end = strdup(" -m connmark --mark 0x0/0xF0000000 ");
 								ip_test=dcat_and_free(&ip_test, &rule_end, 1, 1);
-								if(strcmp(ip, "ALL_OTHERS_INDIVIDUAL"))
+								if(strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
 								{
 									free(applies_to);
 									if(strcmp(types[type_index], "egress_limit") == 0)
 									{
+										char* subnet_test = dynamic_strcat(3, " -s ", local_subnet, " ");
+										ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
 										applies_to = strdup("individual_src");
 									}
 									else if(strcmp(types[type_index], "ingress_limit") == 0)
 									{
+										char* subnet_test = dynamic_strcat(3, " -d ", local_subnet, " ");
+										ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
 										applies_to = strdup("individual_dst");
 									}
 									else if(strcmp(types[type_index], "combined_limit") == 0)
 									{
 										applies_to = strdup("individual_local");
-										char* subnet_option =strdup(" --subnet ");
-										subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 1);
-										subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
 									}
+									
+									char *subnet_option = strdup(" --subnet ");
+									subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 1);
+									subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
 								}
 							}
 							

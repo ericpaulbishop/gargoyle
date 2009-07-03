@@ -28,7 +28,7 @@ done
 #stop firewall,dnsmasq,qos,bwmon
 /etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 /etc/init.d/qos_gargoyle stop >/dev/null 2>&1
-dump_quotas
+backup_quotas
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
 /etc/init.d/cron stop >/dev/null 2>&1

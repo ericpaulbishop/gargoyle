@@ -17,20 +17,7 @@ if [ -n "$qos_enabled" ] ; then
 	/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
 fi
 
-#only dump quotas if we have not done so in the last 10 seconds
-#this deals with special case where we're modifying quota uci
-#and dump will occour *before* this script is called
-quota_dump_times=$(uci show firewall | grep "last_backup_time=" | sed 's/^.*=//g')
-if [ -n "$quota_dump_times" ] ; then
-	last_quota_time=$(printf "%d\n" $quota_dump_times | sort -n -r | head -n 1 )
-	now=$(date +%s)
-	last_now_diff=$(($now - $last_quota_time))
-	if [ $last_now_diff -gt 10 ] ; then
-		dump_quotas
-	fi
-else
-	dump_quotas
-fi	
+backup_quotas
 
 /etc/init.d/firewall stop >/dev/null 2>&1
 /etc/init.d/firewall start >/dev/null 2>&1

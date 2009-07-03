@@ -35,7 +35,7 @@ fi
 if [ -n "$qos_enabled" ] ; then
 	/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
 fi
-dump_quotas >/dev/null 2>&1
+backup_quotas >/dev/null 2>&1
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
 

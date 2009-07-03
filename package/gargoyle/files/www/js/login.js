@@ -72,7 +72,7 @@ function setStatusAndQuotas()
 		setChildText("login_status", "", "black");
 	}
 
-	ipQuotaName = "ALL_OTHERS";
+	ipQuotaName = "ALL_OTHERS_COMBINED";
 	if( quotaUsed[ connectedIp ] != null)
 	{
 		ipQuotaName = connectedIp;
