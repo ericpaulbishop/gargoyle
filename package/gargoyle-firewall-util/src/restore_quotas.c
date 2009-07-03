@@ -243,73 +243,78 @@ int main(int argc, char** argv)
 					char* types[] = { "ingress_limit", "egress_limit", "combined_limit" };
 					char* postfixes[] = { "_ingress", "_egress", "_combined" };
 					char* chains[] =  { "ingress_quotas", "egress_quotas", "combined_quotas" };
-					char* applies_to = strdup("combined");
-					char* subnet_definition = strdup("");
 					int type_index;
 					for(type_index=0; type_index < 3; type_index++)
 					{
-						char* limit = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
-						if(limit != NULL)
-						{
-							char* type_id = dynamic_replace(ip, "/", "_");
-							type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);
-							
+						char* applies_to = strdup("combined");
+						char* subnet_definition = strdup("");
 
-							char* ip_test = strdup(""); 
-							if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
+						char* limit = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
+					
+						char* type_id = dynamic_replace(ip, "/", "_");
+						type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);
+						
+						/* 
+						 * need to do ip test even if limit is null, because ALL_OTHERS quotas should not apply when any of the three types of explicit limit is defined
+						 * and we therefore need to use this test to set mark indicating an explicit quota has been checked
+						 */
+						char* ip_test = strdup(""); 
+						if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
+						{
+							char* dst_test = dynamic_strcat(3, " --dst ", ip, " "); 
+							char* src_test = dynamic_strcat(3, " --src ", ip, " ");
+							
+							if(strcmp(types[type_index], "egress_limit") == 0)
 							{
-								char* dst_test = dynamic_strcat(3, " --dst ", ip, " "); 
-								char* src_test = dynamic_strcat(3, " --src ", ip, " ");
-								
+								ip_test=dcat_and_free(&ip_test, &src_test, 1, 0);
+							}
+							else if(strcmp(types[type_index], "ingress_limit") == 0)
+							{
+								ip_test=dcat_and_free(&ip_test, &dst_test, 1, 0);
+							}
+							else if(strcmp(types[type_index], "combined_limit") == 0)
+							{
+								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
+								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
+								char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
+								ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
+							}
+							run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
+							free(dst_test);
+							free(src_test);
+						}
+						else if( strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0 )
+						{
+							char* rule_end = strdup(" -m connmark --mark 0x0/0xF0000000 ");
+							ip_test=dcat_and_free(&ip_test, &rule_end, 1, 1);
+							if(strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
+							{
+								free(applies_to);
 								if(strcmp(types[type_index], "egress_limit") == 0)
 								{
-									ip_test=dcat_and_free(&ip_test, &src_test, 1, 0);
+									char* subnet_test = dynamic_strcat(3, " -s ", local_subnet, " ");
+									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
+									applies_to = strdup("individual_src");
 								}
 								else if(strcmp(types[type_index], "ingress_limit") == 0)
 								{
-									ip_test=dcat_and_free(&ip_test, &dst_test, 1, 0);
+									char* subnet_test = dynamic_strcat(3, " -d ", local_subnet, " ");
+									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
+									applies_to = strdup("individual_dst");
 								}
 								else if(strcmp(types[type_index], "combined_limit") == 0)
 								{
-									run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
-									run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
-									char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
-									ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
+									applies_to = strdup("individual_local");
 								}
-								run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
-								free(dst_test);
-								free(src_test);
-							}
-							else if( strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0 )
-							{
-								char* rule_end = strdup(" -m connmark --mark 0x0/0xF0000000 ");
-								ip_test=dcat_and_free(&ip_test, &rule_end, 1, 1);
-								if(strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
-								{
-									free(applies_to);
-									if(strcmp(types[type_index], "egress_limit") == 0)
-									{
-										char* subnet_test = dynamic_strcat(3, " -s ", local_subnet, " ");
-										ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
-										applies_to = strdup("individual_src");
-									}
-									else if(strcmp(types[type_index], "ingress_limit") == 0)
-									{
-										char* subnet_test = dynamic_strcat(3, " -d ", local_subnet, " ");
-										ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
-										applies_to = strdup("individual_dst");
-									}
-									else if(strcmp(types[type_index], "combined_limit") == 0)
-									{
-										applies_to = strdup("individual_local");
-									}
 									
-									char *subnet_option = strdup(" --subnet ");
-									subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 1);
-									subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
-								}
+								char *subnet_option = strdup(" --subnet ");
+								subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 1);
+								subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
 							}
+						}
 							
+						if(limit != NULL)
+						{
 							//insert rule
 							run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, offpeak, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
 							//restore from backup
@@ -317,12 +322,12 @@ int main(int argc, char** argv)
 							{
 								restore_backup_for_id(type_id, "/usr/data/quotas");
 							}
-							
-							
-							free(ip_test);
-							free(type_id);
 							free(limit);
 						}
+						free(ip_test);
+						free(applies_to);
+						free(subnet_definition);
+						free(type_id);
 					}
 				}
 				free(ip);
@@ -435,7 +440,6 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 
 	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", quota_file_name);
 	FILE* in_file = fopen(quota_file_path, "r");
-	//printf("quota_file_path = %s\n", quota_file_path);
 	
 	if(in_file != NULL)
 	{
@@ -468,8 +472,6 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 				next.ip = ipaddr.s_addr;
 				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
 				data_index++;
-
-				//printf("ip=%s, bw=%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
 			}
 			else
 			{
@@ -483,9 +485,7 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 				num_ips++;
 			}
 		}
-		//printf("num_ips = %ld\n", num_ips);
 		int result = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
-		//printf("done, result = %d\n", result);
 	}
 	free(quota_file_path);
 	free(quota_file_name);

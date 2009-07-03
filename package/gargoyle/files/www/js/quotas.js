@@ -10,7 +10,8 @@ function saveChanges()
 	//we need to set commands manually (and very carefully)
 	var commands = [];
 
-	//first we backup all current quota data to uci
+	//first clear old data and backup latest quota data
+	commands.push("if [ -d \"/usr/data/quotas/\" ] ; then rm -rf /usr/data/quotas/* ; fi ;");
 	commands.push("backup_quotas");
 	
 	// remove all quota sections that got deleted	
@@ -172,7 +173,7 @@ function getIpFromDocument(controlDocument)
 	{
 		ip = "ALL_OTHERS_INDIVIDUAL";
 	}
-	else if(getSelectedValue("applies_to_type", controlDocument) == "others_only")
+	else if(getSelectedValue("applies_to_type", controlDocument) == "only")
 	{
 		ip = controlDocument.getElementById("applies_to").value; 
 	}
@@ -198,7 +199,7 @@ function setDocumentIp(ip, controlDocument)
 	else
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
-	controlDocument.getElementById("applies_to").value = ip;
+		controlDocument.getElementById("applies_to").value = ip;
 	}
 }
 
@@ -343,19 +344,22 @@ function validateQuota(controlDocument, originalQuotaIp)
 			errors.push("Upload, download and combined bandwidth limits cannot all be unlimited");
 		}
 		var ip = getIpFromDocument(controlDocument);
-		if(ip != originalQuotaIp && allIps[ip] == 1 || (ip.match(/OTHER/) && (allIps["ALL_OTHERS_COMBINED"] == 1 || allIps["ALL_OTHERS_INDIVIDUAL"]))  )
+		if(ip != originalQuotaIp)
 		{
-			if(!ip.match(/ALL/))
-			{
-				errors.push("Duplicate IP -- only one quota per IP is allowed");
-			}
-			else if(ip.match(/OTHER/))
-			{
-				errors.push("You may have only one quota for hosts without explicit quotas");
-			}
-			else
-			{
-				errors.push("You may have only one quota that applies to entire network");
+			if(allIps[ip] == 1 || (ip.match(/OTHER/) && (allIps["ALL_OTHERS_COMBINED"] == 1 || allIps["ALL_OTHERS_INDIVIDUAL"]))  )
+			{	
+				if(!ip.match(/ALL/))
+				{
+					errors.push("Duplicate IP -- only one quota per IP is allowed");
+				}
+				else if(ip.match(/OTHER/))
+				{
+					errors.push("You may have only one quota for hosts without explicit quotas");
+				}
+				else
+				{
+					errors.push("You may have only one quota that applies to entire network");
+				}
 			}
 		}
 	}
