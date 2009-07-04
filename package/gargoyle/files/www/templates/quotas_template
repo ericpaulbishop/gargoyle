@@ -19,7 +19,7 @@
 		<label id="quota_reset_label" for='quota_reset'>Quota Resets:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id="quota_reset" onchange='setVisibility()' >
+		<select id="quota_reset" style='width:125px' onchange='setVisibility()' >
 			<option value="hour">Every Hour</option>
 			<option value="day">Every Day</option>
 			<option value="week">Every Week</option>
@@ -33,7 +33,7 @@
 		<label id="quota_day_label" for='quota_day'>Reset Day:</label>
 	</span>
 	<span class="rightcolumn">
-		<select id='quota_day'></select>
+		<select id='quota_day' style='width:125px'></select>
 	</span>
 </div>
 
@@ -42,7 +42,7 @@
 		<label id="quota_hour_label" for='quota_hour'>Reset Hour:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id='quota_hour'>
+		<select id='quota_hour' style='width:125px'>
 			<option value="0">12:00 AM</option>
 			<option value="3600">01:00 AM</option>
 			<option value="7200">02:00 AM</option>
@@ -71,18 +71,38 @@
 	</span>
 </div>
 
+<div id="quota_active_container">
+	<span class='leftcolumn'>
+		<label id="quota_active_label" for='quota_active'>Quota Is Active:</label>
+	</span>
+	<span class='rightcolumn'>
+		<select id='quota_active' style='width:125px' onchange='setVisibility()' >
+			<option value="always">Always</option>
+			<option value="except">All Hours Except</option>
+		</select>
+	</span>
+	<span id="offpeak_hours_container">
+		<input  type='text' id='offpeak_hours' onkeyup='proofreadHours(this)' size='20' /><br/>
+		<span class="rightcolumnonly" id="hours_example" style="padding-left:130px"><em>e.g. 02:00-04:00,11:35-13:25</em></span>
+	</span>
+</div>
+
 <div>
 	<span class='leftcolumn'>
 		<label id="max_up_label" for='max_up'>Max Upload:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id="max_up_type" onchange='setVisibility()'>
+		<select id="max_up_type" style='width:125px' onchange='setVisibility()'>
 			<option value="unlimited">Unlimited</option>
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_up_container">
-			<input  type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
-			<em>Megabytes</em>
+			<input  type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<select id="max_up_unit">
+				<option value="MB">MBytes</option>
+				<option value="GB">GBytes</option>
+				<option value="TB">TBytes</option>
+			</select>
 		</span>
 	</span>
 </div>
@@ -91,13 +111,18 @@
 		<label id="max_down_label" for='max_down'>Max Download:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id="max_down_type" onchange='setVisibility()'>
+		<select id="max_down_type" style='width:125px' onchange='setVisibility()'>
 			<option value="unlimited">Unlimited</option>
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_down_container">
-			<input  type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
-			<em>Megabytes</em>
+			<input  type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<select id="max_down_unit">
+				<option value="MB">MBytes</option>
+				<option value="GB">GBytes</option>
+				<option value="TB">TBytes</option>
+			</select>
+
 		</span>
 	</span>
 </div>
@@ -106,13 +131,18 @@
 		<label id="max_combined_label" for='max_combined'>Max Combined Up & Down:</label>
 	</span>
 	<span class='rightcolumn'>
-		<select id="max_combined_type" onchange='setVisibility()'>
+		<select id="max_combined_type" style='width:125px' onchange='setVisibility()'>
 			<option value="unlimited">Unlimited</option>
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_combined_container">
-			<input  type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='17' maxlength='15' />
-			<em>Megabytes</em>
+			<input  type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<select id="max_combined_unit">
+				<option value="MB">MBytes</option>
+				<option value="GB">GBytes</option>
+				<option value="TB">TBytes</option>
+			</select>
+
 		</span>
 	</span>
 </div>

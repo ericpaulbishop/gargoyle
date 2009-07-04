@@ -1496,6 +1496,57 @@ function validateHex(text)
 	return errorcode;
 }
 
+
+
+function validateHours(hoursStr)
+{
+	var commaSplit = hoursStr.match(/,/) ? hoursStr.split(/,/) : [ hoursStr ] ;
+	var valid = true;
+	for(commaIndex = 0; commaIndex < commaSplit.length && valid; commaIndex++)
+	{
+		var splitStr = commaSplit[commaIndex].split(/-/);
+		var nextValid = splitStr.length == 2;
+		if(nextValid)
+		{
+			nextValid = nextValid && splitStr[0].match(/^[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5][0-9])?[\t ]*$/)
+			nextValid = nextValid && splitStr[1].match(/^[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5][0-9])?[\t ]*$/)
+		}
+		valid = valid && nextValid;
+	}
+	return valid ? 0 : 1;
+}
+
+function validateDaysAndHours(daysAndHoursStr)
+{
+	var commaSplit = hoursStr.match(/,/) ? hoursStr.split(/,/) : [ hoursStr ] ;
+	var valid = true;
+	for(commaIndex = 0; commaIndex < commaSplit.length && valid; commaIndex++)
+	{
+		var splitStr = commaSplit[commaIndex].split(/-/);
+		var nextValid = splitStr.length == 2;
+		if(nextValid)
+		{
+			splitStr[0] = splitStr[0].toLowerCase();
+			splitStr[1] = splitStr[1].toLowerCase();
+			nextValid = nextValid && splitStr[0].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
+			nextValid = nextValid && splitStr[1].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
+		}
+		valid = valid && nextValid;
+	}
+	return valid ? 0 : 1;
+}
+
+function proofreadHours(input)
+{
+	proofreadText(input, validateHours, 0);
+}
+
+function proofreadDaysAndHours(input)
+{
+	proofreadText(input, validateDaysAndHours, 0);
+}
+
+
 function proofreadLengthRange(input,min,max)
 {
 	var vlr = function(text){return validateLengthRange(text,min,max);};

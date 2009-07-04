@@ -211,33 +211,33 @@ int main(int argc, char** argv)
 					char* offpeak_weekdays     = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekdays");
 					char* offpeak_weekly_ranges     = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekly_ranges");
 
-					if(offpeak_hours != NULL && offpeak_weekdays != NULL && offpeak_weekly_ranges != NULL)
+					if(offpeak_hours != NULL || offpeak_weekdays != NULL || offpeak_weekly_ranges != NULL)
 					{
-						char timerange_match[] = " -m timerange \"";
-						char hour_match[] = " --hours \"";
-						char weekday_match[] = " --weekdays \"";
-						char weekly_match[] = " --weekly_ranges \"";
-						char quote_end[] = "\" ";
-						dcat_and_free(&offpeak, (char**)&timerange_match,  1,0);
+						char *timerange_match = strdup(" -m timerange ");
+						char *hour_match = strdup(" --hours \"");
+						char *weekday_match = strdup(" --weekdays \"");
+						char *weekly_match = strdup(" --weekly_ranges \"");
+						char *quote_end = strdup("\" ");
+						dcat_and_free(&offpeak, &timerange_match,  1,1);
 						if(offpeak_hours != NULL && offpeak_weekly_ranges == NULL)
 						{
-							dcat_and_free(&offpeak, (char**)&hour_match, 1, 0);	
+							dcat_and_free(&offpeak, &hour_match, 1, 1);	
 							dcat_and_free(&offpeak, &offpeak_hours, 1, 1);	
-							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+							dcat_and_free(&offpeak, &quote_end, 1, 0);	
 						}
 						if(offpeak_weekdays != NULL && offpeak_weekly_ranges == NULL)
 						{
-							dcat_and_free(&offpeak, (char**)&weekday_match, 1, 0);	
+							dcat_and_free(&offpeak, &weekday_match, 1, 1);	
 							dcat_and_free(&offpeak, &offpeak_weekdays, 1, 1);
-							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+							dcat_and_free(&offpeak, &quote_end, 1, 0);	
 						}
 						if(offpeak_weekly_ranges != NULL)
 						{
-							dcat_and_free(&offpeak, (char**)&weekly_match, 1, 0);
+							dcat_and_free(&offpeak, &weekly_match, 1, 1);
 							dcat_and_free(&offpeak, &offpeak_weekly_ranges, 1, 1);
-							dcat_and_free(&offpeak, (char**)&quote_end, 1, 0);	
+							dcat_and_free(&offpeak, &quote_end, 1, 0);	
 						}
-
+						free(quote_end);
 					}
 					
 					char* types[] = { "ingress_limit", "egress_limit", "combined_limit" };
