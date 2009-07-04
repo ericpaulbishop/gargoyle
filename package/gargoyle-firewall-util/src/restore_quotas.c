@@ -213,7 +213,7 @@ int main(int argc, char** argv)
 
 					if(offpeak_hours != NULL || offpeak_weekdays != NULL || offpeak_weekly_ranges != NULL)
 					{
-						char *timerange_match = strdup(" -m timerange ");
+						char *timerange_match = strdup(" -m timerange ! ");
 						char *hour_match = strdup(" --hours \"");
 						char *weekday_match = strdup(" --weekdays \"");
 						char *weekly_match = strdup(" --weekly_ranges \"");
