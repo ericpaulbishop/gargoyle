@@ -6,84 +6,45 @@ function saveChanges()
 {
 	setControlsEnabled(false, true);
 	
-	//don't get commands from uci object -- since we have usage data stored in there	
-	//we need to set commands manually (and very carefully)
-	var commands = [];
-
-	//first clear old data and backup latest quota data
-	commands.push("if [ -d \"/usr/data/quotas/\" ] ; then rm -rf /usr/data/quotas/* ; fi ;");
-	commands.push("backup_quotas");
-	
-	// remove all quota sections that got deleted	
-	var origSections = uciOriginal.getAllSectionsOfType(pkg,"quota");
-	var newSections = uci.getAllSectionsOfType(pkg, "quota");
-	var sIndex;
-	for(sIndex=0; sIndex < origSections.length; sIndex++)
+	//remove old quotas
+	var preCommands = [];
+	var allOriginalQuotas = uciOriginal.getAllSectionsOfType(pkg, "quota");
+	while(allOriginalQuotas.length > 0)
 	{
-		if( uci.get(pkg, newSections[sIndex], "") == "")
-		{
-			commands.push("uci del " + pkg + "." + origSections[sIndex]);
-		}
+		var section = allOriginalQuotas.shift();
+		uciOriginal.removeSection(pkg, section);
+		preCommands.push("uci del " + pkg + "." + section);	
 	}
+	preCommands.push("uci commit");
 
-	//add new sections
-	for(sIndex=0; sIndex < newSections.length; sIndex++)
+	var allNewQuotas = uci.getAllSectionsOfType(pkg, "quota");
+	while(allNewQuotas.length > 0)
 	{
-		if( uciOriginal.get(pkg, origSections[sIndex], "") == "")
-		{
-			commands.push("uci set " + pkg + "." + newSections[sIndex] + "=quota");
-		}
-	}
-
-	//set variables within each section
-	for(sIndex=0; sIndex < newSections.length; sIndex++)
-	{
-		var s = newSections[sIndex];		
-		var getCommand = function (option)
-		{
-			var cmd = ""
-			var val = uci.get(pkg, s, option);
-			if(val == "")
-			{ 
-				cmd = "uci del " + pkg + "." + s + "." + option;
-			}
-			else
-			{ 
-				cmd = "uci set " + pkg + "." + s + "." + option + "=" + val;
-			}
-			return cmd;
-		}
-		//set ip, reset_interval, reset_time and limit variables no matter what
-		commands.push( getCommand("ip") );
-		commands.push( getCommand("reset_interval") );
-		commands.push( getCommand("reset_time") );
-		commands.push( getCommand("offpeak_hours") );
-
-		commands.push( getCommand("egress_limit") );
-		commands.push( getCommand("ingress_limit") );
-		commands.push( getCommand("combined_limit") );
-		
 		//if ip has changed, reset saved data
-		if( changedIps[ uci.get(pkg,s,"ip") ] == 1 )
+		var section = allNewQuotas.shift()
+		if( changedIps[ uci.get(pkg,section,"ip") ] == 1 )
 		{
-			commands.push( "uci set " + pkg + "." + s + ".ignore_backup_at_next_restore=1");
+			uci.set(pkg, section, "ignore_backup_at_next_restore", "1");
 		}
 	}
-	
+
+	//set enabled / disabled	
 	var quotaTable = document.getElementById('quota_table_container').firstChild;
 	var quotaTableData = getTableDataArray(quotaTable, true, false);
 	var qtIndex=0;
 	for(qtIndex=0; qtIndex < quotaTableData.length; qtIndex++)
 	{
 		var enabledCheck = quotaTableData[qtIndex][4];
-		commands.push("uci set " + pkg + "." + enabledCheck.id + ".enabled=" + (enabledCheck.checked ? "1" : "0") );
+		uci.set(pkg, enabledCheck.id, "enabled", (enabledCheck.checked ? "1" : "0") )
 	}
-	
-	commands.push("uci commit");	
-	commands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
-	commands.push("");
 
-	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var postCommands = [];
+	postCommands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
+	postCommands.push("if [ -d \"/usr/data/quotas/\" ] ; then rm -rf /usr/data/quotas/* ; fi ;");
+	postCommands.push("backup_quotas");
+	var commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n");
+
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 ;
 	var stateChangeFunction = function(req)
 	{
@@ -184,6 +145,7 @@ function getIpFromDocument(controlDocument)
 
 function setDocumentIp(ip, controlDocument)
 {
+	ip = ip== ""  ? "ALL" : ip;
 	controlDocument = controlDocument == null ? document : controlDocument;
 	controlDocument.getElementById("applies_to").value = "";
 	if(ip == "ALL")
@@ -196,7 +158,7 @@ function setDocumentIp(ip, controlDocument)
 	}
 	else if(ip == "ALL_OTHERS_INDIVIDUAL")
 	{
-		setSelectedValue("applies_to_type", "others_indivdual", controlDocument);
+		setSelectedValue("applies_to_type", "others_individual", controlDocument);
 	}
 	else
 	{
@@ -396,7 +358,6 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	var resetHour = getHourSeconds(offset);
 	var offpeakHours = srcUci.get(pkg, quotaSection, "offpeak_hours");
 
-	setSelectedValue("applies_to_type", ip=="" || ip=="ALL" ? "all" : ( ip=="ALL_OTHERS_COMBINED" ? "others" : "only"), controlDocument);
 	setDocumentIp(ip, controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
 	setSelectedValue("quota_active", offpeakHours == "" ? "always" : "except", controlDocument);
@@ -406,7 +367,6 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	setSelectedValue("max_down_type", downloadLimit == "" ? "unlimited" : "limited", controlDocument );
 	setSelectedValue("max_combined_type", combinedLimit == "" ? "unlimited" : "limited", controlDocument );
 
-	controlDocument.getElementById("applies_to").value = (ip == "" || ip == "ALL" ? "" : ip);
 	
 	setDocumentLimit(uploadLimit,   "max_up",       "max_up_unit", controlDocument);
 	setDocumentLimit(downloadLimit, "max_down",     "max_down_unit", controlDocument);

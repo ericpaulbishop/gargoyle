@@ -118,6 +118,7 @@ int main(void)
 						sscanf(limit, "%lf", &bw_limit);
 						sscanf(limit, "%lld", &bw_limit_64);
 						bw_percent = (bw_percent*100.0)/bw_limit;
+						bw_percent = bw_percent > 100.0 ? 100.0 : bw_percent;
 					
 						double* percent_list = get_string_map_element(ip_to_percents, next_ip);
 						if(percent_list == NULL)

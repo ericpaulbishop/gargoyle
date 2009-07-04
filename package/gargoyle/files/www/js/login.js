@@ -125,6 +125,7 @@ function getQuotaLines(usd, lim, pct)
 			var unit  = limit.replace(/^.* /, "");
 			var used  = parseBytes(usd[typeIndex], unit).replace(/ .*$/, "");
 			var perc   = truncateDecimal( pct[typeIndex] );
+			used = used > limit ? limit.replace(/ .*$/,"") : used;
 			lines[typeIndex] = perc + "% of " + name + " quota has been used (" + used + "/" + limit + ")";
 		}
 	}
