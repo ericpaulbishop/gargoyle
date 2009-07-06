@@ -94,5 +94,8 @@ string_util_static.o: string_util.c
 
 
 clean:
-	touch tmp.a tmp.o tmp.$(SHLIB_EXT) tmp~ .tmp.swp test_map test_string test_list_and_queue
-	rm *.a *.o *.$(SHLIB_EXT)* .*sw* *~ test_map test_string test_list_and_queue
+	rm -rf *.a *.o .*sw* *~ test_map test_string test_list_and_queue
+	if [ "$(SHLIB_EXT)" != "" ] ; then rm -rf *.$(SHLIB_EXT)* ; fi
+install:
+	cp *.h /usr/include
+	cp *.$(SHLIB_EXT)* /usr/lib

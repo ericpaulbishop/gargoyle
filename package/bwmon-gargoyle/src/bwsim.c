@@ -24,14 +24,12 @@
 
 
 #include "bwmon.h"
-#include "libiptc/libiptc.h"
 
 #define MINUTE	101
 #define HOUR	102
 #define DAY	103
 #define WEEK	104
 #define	MONTH	105
-
 
 
 
@@ -95,12 +93,13 @@ bw_monitor** initialize_monitors(bw_monitor** potential_monitors);
 void load_monitor_history_from_file(bw_monitor* monitor);
 FILE* open_monitor_backup_file(bw_monitor* monitor, const char* open_mode);
 
-int get_minutes_west(void);
 
 
 update_node get_next_update_time(bw_monitor** monitors, int monitor_index);
 time_t get_next_interval_end(time_t current_time, int end_type);
-void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* recent_iptables_snapshots, char** recent_iptables_names);
+//void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* recent_iptables_snapshots, char** recent_iptables_names);
+void update_monitor(bw_monitor* monitor, update_node update);
+
 void backup_monitor(bw_monitor* monitor, time_t current_time);
 
 void handle_output_request(bw_monitor** monitors);
@@ -111,42 +110,95 @@ void signal_handler(int sig);
 int output_requested = 0;
 int terminated = 0;
 
+int get_real_minutes_west(time_t now);
+
+
+static int global_timezone_ctl = 0; //UTC+0 )
+int get_minutes_west(void);
+int get_minutes_west(void)
+{
+	return global_timezone_ctl;
+}
+
+
+static time_t global_time_ctl = 1230768000 - (4*60*60); //Dec 31st 2009, 8pm
+time_t my_time(void*);
+time_t my_time(void* dummy)
+{
+	global_time_ctl = global_time_ctl + (5*60);
+	if(global_time_ctl == (1230768000 + (2*60*60)))  //Jan 1st 2009 at 2am GMT do shift
+	{
+		//shift minutes_west to Eastern DST, UTC-4
+		global_timezone_ctl = (60*4);
+	}
+	if(global_time_ctl == (1230768000 + (25*24*60*60) + (2*60*60)))  //Jan 25th 2009 at 2am GMTdo shift
+	{
+		//shift minutes_west to Eastern DST, UTC-4
+		global_timezone_ctl = -1* (60*8);
+	}
+
+	return global_time_ctl;
+}
+
+time_t my_mktime ( struct tm* timeptr );
+time_t my_mktime ( struct tm* timeptr )
+{
+	//printf("in my_mktime, converting year=%d, month=%d, day=%d, hour=%d, minute=%d\n", timeptr->tm_year, ((timeptr->tm_mon)+1), timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min);
+	time_t result =  (mktime(timeptr) + (get_minutes_west()*60)-(get_real_minutes_west(mktime(timeptr))*60));
+	//printf("my_mktime conversion = %ld\n", result);
+	return result;
+}
+
+
+struct tm * my_localtime ( const time_t* timer );
+struct tm * my_localtime ( const time_t* timer )
+{
+	//printf("in my_localtime converting %ld\n", *timer);
+	time_t adj = *timer -(get_minutes_west()*60)+(get_real_minutes_west(*timer)*60);
+	struct tm* result = localtime(&adj);
+	//printf("in my_localtime, convesrion: year=%d, month=%d, day=%d, hour=%d, minute=%d\n", result->tm_year, ((result->tm_mon)+1), result->tm_mday, result->tm_hour, result->tm_min);
+
+
+	return result;
+}
+
+
 int main( int argc, char** argv )
 {
-	char* config_file_name = strdup("/etc/bwmond.conf");
-	int run_in_foreground = 0;
+	//char* config_file_name = strdup("/etc/bwmond.conf");
+	char* config_file_name = strdup("./test_conf.txt");
+	int run_in_foreground = 1;
 
-	int c;
-	while((c = getopt(argc, argv, "c:C:fFuU")) != -1)
-	{	
-		switch(c)
-		{
-			case 'C':
-			case 'c':
-				free(config_file_name);
-				config_file_name = strdup(optarg);
-				break;
-			case 'F':
-			case 'f':
-				run_in_foreground = 1;
-				break;
-			case 'U':
-			case 'u':
-			default:
-				printf("USAGE: %s [OPTIONS] [MONITOR NAMES]\n", argv[0]);
-				printf("\t-C [MONITOR_CONFIG_FILE] specifies location of file containing monitor configuration information\n");
-				printf("\t-f forces program to run in foreground and not daemonize\n");
-				printf("\t-u print usage information and exit\n");
-				return 0;
-		}
-	}
 
 
 	output_requested = 0;
 	terminated = 0;
 
+	/*
 	bw_monitor** potential_monitors = load_bwmon_config(config_file_name);  
 	bw_monitor** monitors = initialize_monitors(potential_monitors);
+	*/
+
+	bw_monitor** monitors = load_bwmon_config(config_file_name);  
+	int mindex = 0;
+	for(mindex=0; monitors[mindex] != NULL; mindex++)
+	{
+		bw_monitor* monitor = monitors[mindex];
+		if(monitor->rules != NULL)
+		{
+			free(monitor->rules);
+		}
+		
+		monitor->rules = NULL;
+		monitor->num_rules = 0;
+		monitor->last_byte_count = 0;
+		monitor->history = initialize_history();
+		monitor->last_update = my_time(NULL);
+		monitor->last_accumulator_update = monitor->last_update;
+		monitor->last_backup = monitor->last_update;
+	}
+
+
 
 	if(monitors[0] == NULL)
 	{
@@ -158,7 +210,7 @@ int main( int argc, char** argv )
 
 
 
-
+	/*
 	if(run_in_foreground > 0)
 	{
 		// record pid to lockfile
@@ -184,9 +236,10 @@ int main( int argc, char** argv )
 	{
 		daemonize();
 	}
+	*/
 
 	//initialize reference time
-	time_t reference_time = time(NULL);
+	time_t reference_time = my_time(NULL);
 
 
 	
@@ -218,20 +271,23 @@ int main( int argc, char** argv )
 		push_priority_queue(update_queue, priority, monitor->name, next_update);
 		
 		//time_t next = next_update->update_time;
-		//struct tm* detailedTime = localtime(&next);
+		//struct tm* detailedTime = my_localtime(&next);
 		//printf( "scheduled update for %s at: %s", monitor->name, asctime(detailedTime));
 		//printf( "type = %d, backup = %d\n\n", next_update->update_type, next_update->backup);
 	}
 	
-
+	printf("here!\n");
 
 
 	//loop
-	time_t last_checked = time(NULL);
+	time_t last_checked = my_time(NULL);
 	long queue_test_counter = 0;
 	while(terminated == 0)
 	{
-		time_t current_time = time(NULL);
+		time_t current_time = my_time(NULL);
+		terminated = current_time > 1238544000 ? 1 : terminated; //end at april 1st 2009;
+		//terminated = current_time > 1231304400? 1 : terminated;  //end at january 7th 2009;
+
 		int current_minutes_west = get_minutes_west();
 		if(current_time != last_checked)
 		{
@@ -239,6 +295,8 @@ int main( int argc, char** argv )
 			priority_queue_node *check = peek_priority_queue_node(update_queue);
 			if(current_time >= ((update_node*)check->value)->update_time)
 			{
+				//printf("current_time = %ld\n", current_time);
+				/*
 				// we need to save iptables snapshots so we don't make extra work
 				// retrieving the same data every time
 				// don't bother doing anything fancy
@@ -248,6 +306,7 @@ int main( int argc, char** argv )
 				char* recent_iptables_names[25];
 				recent_iptables_snapshots[0] = NULL;
 				recent_iptables_names[0] = NULL;
+				*/
 
 				while(current_time >= ((update_node*)check->value)->update_time)
 				{
@@ -259,12 +318,11 @@ int main( int argc, char** argv )
 					next_update->update_time = current_time;
 					
 					
-
 					//do update
 					int monitor_index = next_update->monitor_index;
 					bw_monitor* monitor = monitors[ monitor_index ];
-					update_monitor(monitor, *next_update, recent_iptables_snapshots, recent_iptables_names);
-			
+					//update_monitor(monitor, *next_update, recent_iptables_snapshots, recent_iptables_names);
+					update_monitor(monitor, *next_update );
 					//printf("updating %s at %ld\n", monitor->name, current_time);	
 
 					//schedule next update for this monitor & return to queue
@@ -277,6 +335,7 @@ int main( int argc, char** argv )
 					check = peek_priority_queue_node(update_queue);
 				}
 
+				/*
 				//free iptables snapshots
 				int snapshot_index;
 				for(snapshot_index = 0; recent_iptables_names[snapshot_index] != NULL; snapshot_index++)
@@ -284,12 +343,10 @@ int main( int argc, char** argv )
 					free(recent_iptables_names[snapshot_index]);
 					iptc_free(&(recent_iptables_snapshots[snapshot_index]));
 				}
+				*/
 			}
 		}
 		
-		//sleep for 400 milliseconds, or until signal is caught
-		usleep(400*1000); 
-
 	
 
 		queue_test_counter = queue_test_counter + 400;
@@ -322,7 +379,7 @@ int main( int argc, char** argv )
 
 		
 		//if we just jumped more than 25 minutes (i.e. date/time was reset dramatically) , reset all times
-		time_t time_test2 = time(NULL);
+		time_t time_test2 = my_time(NULL);
 		if( time_test2 - current_time > 25*60 || time_test2 < current_time)
 		{
 			
@@ -501,12 +558,13 @@ int main( int argc, char** argv )
 			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			update_queue = new_update_queue;
 			//printf("\n\n\n");
+			//
 		}
 	}
 
 	// term signal received
 	// back up monitors that should be backed up (onces with backup_dir defined) before exiting
-	time_t current_time = time(NULL);
+	time_t current_time = my_time(NULL);
 	for(monitor_index=0; monitors[monitor_index] != NULL; monitor_index++)
 	{
 		bw_monitor* monitor = monitors[monitor_index];
@@ -678,9 +736,69 @@ void handle_output_request(bw_monitor** monitors)
 	}
 }
 
+void update_monitor(bw_monitor* monitor, update_node update)
+{
+	if(update.update_type > 0)
+	{
+		monitor->accumulator_count = monitor->accumulator_count + 500; //for simulaor, just add 500 at each update
+		monitor->last_accumulator_update = update.update_time;
+		if(update.update_type > 1) //do full update?
+		{
+			//update monitor history
+			history_node* new_node;
+			if(monitor->history->length < monitor->history_length)
+			{
+				new_node = (history_node*)malloc(sizeof(history_node));
+			}
+			else
+			{
+				new_node = pop_history(monitor->history);
+			}
+			
+			time_t interval_start = monitor->last_update;
+			time_t nominal_end = (monitor->interval_end > 0) ? get_next_interval_end( monitor->last_update, monitor->interval_end) : monitor->last_update + monitor->interval_length;
+			unsigned long nominal_length = (monitor->interval_end > 0) ? get_next_interval_end( nominal_end, monitor->interval_end) - nominal_end : monitor->interval_length;
+			time_t actual_end = update.update_time;
+			
+			//if current time is way ahead of where it should be in series, insert intermediate history nodes
+			while(actual_end > nominal_end+nominal_length)
+			{
+				new_node->bandwidth = -1;
+				push_history(monitor->history, new_node, interval_start, nominal_end);
 
+				nominal_end = (monitor->interval_end > 0) ? get_next_interval_end( nominal_end, monitor->interval_end) : nominal_end + monitor->interval_length;
+				if(monitor->history->length < monitor->history_length)
+				{
+					new_node = (history_node*)malloc(sizeof(history_node));
+				}
+				else
+				{
+					new_node = pop_history(monitor->history);
+				}
+			}
+			
+			new_node->bandwidth = monitor->accumulator_count;
+			push_history(monitor->history, new_node, interval_start, nominal_end);
+			
+			//set update_time to nominal_end so next is scheduled on time
+			update.update_time = nominal_end;
+			monitor->last_update = nominal_end;
+			monitor->accumulator_count = 0;
 
+			printf("HERE!!!!\n");
+			print_history(monitor->history);
+			printf("\n\n\n\n");
+		}
 
+	}
+	if(update.backup > 0)
+	{
+		backup_monitor(monitor, update.update_time);
+		monitor->last_backup = update.update_time;
+	}
+}
+
+/*
 void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* recent_iptables_snapshots, char** recent_iptables_names)
 {
 	//printf("updating monitor %s\n", monitor->name);
@@ -805,6 +923,7 @@ void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* rece
 	}
 	//printf("done updating monitor %s\n", monitor->name);
 }
+*/
 
 void backup_monitor(bw_monitor* monitor, time_t current_time)
 {
@@ -917,7 +1036,7 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 	}	
 	fclose(input);
 
-	time_t current_time = time(NULL);
+	time_t current_time = my_time(NULL);
 
 	//insert gaps in history as necessary & initialize next update time
 	//to proper value to synchronize with history
@@ -1123,19 +1242,19 @@ update_node get_next_update_time(bw_monitor** monitors, int monitor_index)
 time_t get_next_interval_end(time_t current_time, int end_type)
 {
 	time_t next_end;
-	struct tm* curr = localtime(&current_time);
+	struct tm* curr = my_localtime(&current_time);
 	if(end_type == MINUTE)
 	{
 		curr->tm_sec = 0;
 		curr->tm_min = curr->tm_min+1;
-		next_end = mktime(curr);
+		next_end = my_mktime(curr);
 	}
 	else if(end_type == HOUR)
 	{
 		curr->tm_sec  = 0;
 		curr->tm_min  = 0;
 		curr->tm_hour = curr->tm_hour+1;
-		next_end = mktime(curr);
+		next_end = my_mktime(curr);
 	}
 	else if(end_type == DAY)
 	{
@@ -1143,7 +1262,7 @@ time_t get_next_interval_end(time_t current_time, int end_type)
 		curr->tm_min  = 0;
 		curr->tm_hour = 0;
 		curr->tm_mday = curr->tm_mday+1;
-		next_end = mktime(curr);
+		next_end = my_mktime(curr);
 	}
 	else if(end_type == WEEK)
 	{
@@ -1151,15 +1270,15 @@ time_t get_next_interval_end(time_t current_time, int end_type)
 		curr->tm_min  = 0;
 		curr->tm_hour = 0;
 		curr->tm_mday = curr->tm_mday+1;
-		time_t tmp = mktime(curr);
-		curr = localtime(&tmp);
+		time_t tmp = my_mktime(curr);
+		curr = my_localtime(&tmp);
 		while(curr->tm_wday != 0)
 		{
 			curr->tm_mday=curr->tm_mday+1;
-			tmp = mktime(curr);
-			curr = localtime(&tmp);
+			tmp = my_mktime(curr);
+			curr = my_localtime(&tmp);
 		}
-		next_end = mktime(curr);
+		next_end = my_mktime(curr);
 	}
 	else if(end_type == MONTH)
 	{
@@ -1168,12 +1287,12 @@ time_t get_next_interval_end(time_t current_time, int end_type)
 		curr->tm_hour = 0;
 		curr->tm_mday = 1;
 		curr->tm_mon  = curr->tm_mon+1;
-		next_end = mktime(curr);
+		next_end = my_mktime(curr);
 	}
 	return next_end;
 }
 
-
+/*
 bw_monitor** initialize_monitors(bw_monitor** potential_monitors)
 {
 	int num_potential_monitors = 0;
@@ -1231,11 +1350,11 @@ bw_monitor** initialize_monitors(bw_monitor** potential_monitors)
 
 											struct ipt_counters *count = iptc_read_counter(monitor->chain, rule_num, &iptables_snapshot);
 											initial_count = initial_count + count->bcnt;
-											/*
-											printf("name = %s\n", t->u.user.name);
-											printf("data = %d\n", *(int *)t->data);
-											printf("count = %d\n", initial_count);
-											*/
+											
+											//printf("name = %s\n", t->u.user.name);
+											//printf("data = %d\n", *(int *)t->data);
+											//printf("count = %d\n", initial_count);
+											
 										}
 									}
 								}
@@ -1273,7 +1392,7 @@ bw_monitor** initialize_monitors(bw_monitor** potential_monitors)
 						monitor->num_rules = defined_rule_index;
 						monitor->last_byte_count = initial_count;
 						monitor->history = initialize_history();
-						monitor->last_update = time(NULL);
+						monitor->last_update = my_time(NULL);
 						monitor->last_accumulator_update = monitor->last_update;
 						monitor->last_backup = monitor->last_update;
 						
@@ -1291,7 +1410,7 @@ bw_monitor** initialize_monitors(bw_monitor** potential_monitors)
 	initialized_monitors[initialized_monitor_index] = NULL;
 	return initialized_monitors;	
 }
-
+*/
 
 
 
@@ -1653,10 +1772,10 @@ int* parse_comma_list(char* list)
 	return values;
 }
 
-
-int get_minutes_west(void)
+/*int get_minutes_west(void) */
+int get_real_minutes_west(time_t now)
 {
-	time_t now;
+
 	struct tm* utc_info;
 	struct tm* tz_info;
 	int utc_day;
@@ -1671,7 +1790,7 @@ int get_minutes_west(void)
 	struct timezone old_tz;
 	struct timezone new_tz;
 
-	time(&now);
+
 	utc_info = gmtime(&now);
 	utc_day = utc_info->tm_mday;
 	utc_hour = utc_info->tm_hour;
@@ -1687,3 +1806,4 @@ int get_minutes_west(void)
 	minuteswest = (24*60*utc_day + 60*utc_hour + utc_minute) - (24*60*tz_day + 60*tz_hour + tz_minute) ;
 	return minuteswest;
 }
+
