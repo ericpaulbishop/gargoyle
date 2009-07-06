@@ -121,22 +121,29 @@ int get_minutes_west(void)
 }
 
 
-static time_t global_time_ctl = 1230768000 - (4*60*60); //Dec 31st 2009, 8pm
-time_t my_time(void*);
-time_t my_time(void* dummy)
+static time_t global_time_ctl = 1230768000 + (30*24*60*60) - (4*60*60); //Jan 30th 2009, 8pm
+//static time_t global_time_ctl = 1230768000 - (4*60*60); //Dec 31st 2009, 8pm
+void my_tick(void)
 {
 	global_time_ctl = global_time_ctl + (5*60);
-	if(global_time_ctl == (1230768000 + (2*60*60)))  //Jan 1st 2009 at 2am GMT do shift
+	if(global_time_ctl == (1230768000 + (2*60*60)))  //Jan 1st 2009 at 2am GMT do TZ shift
 	{
 		//shift minutes_west to Eastern DST, UTC-4
 		global_timezone_ctl = (60*4);
 	}
-	if(global_time_ctl == (1230768000 + (25*24*60*60) + (2*60*60)))  //Jan 25th 2009 at 2am GMTdo shift
+	if(global_time_ctl == (1230768000 + (25*24*60*60) + (2*60*60)))  //Jan 25th 2009 at 2am GMT do TZ shift
 	{
 		//shift minutes_west to Eastern DST, UTC-4
 		global_timezone_ctl = -1* (60*8);
 	}
-
+	if(global_time_ctl == (1230768000 + (33*24*60*60) + (2*60*60)))  //Feb 2nd 2am GMT, do real shift by 35 hours
+	{
+		global_time_ctl = global_time_ctl + (35*60*60);
+	}
+}
+time_t my_time(void*);
+time_t my_time(void* dummy)
+{
 	return global_time_ctl;
 }
 
@@ -145,6 +152,7 @@ time_t my_mktime ( struct tm* timeptr )
 {
 	//printf("in my_mktime, converting year=%d, month=%d, day=%d, hour=%d, minute=%d\n", timeptr->tm_year, ((timeptr->tm_mon)+1), timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min);
 	time_t result =  (mktime(timeptr) + (get_minutes_west()*60)-(get_real_minutes_west(mktime(timeptr))*60));
+	//printf("real minutes west = %ld\n", get_real_minutes_west(mktime(timeptr)));
 	//printf("my_mktime conversion = %ld\n", result);
 	return result;
 }
@@ -270,12 +278,12 @@ int main( int argc, char** argv )
 		priority= next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
 		push_priority_queue(update_queue, priority, monitor->name, next_update);
 		
-		//time_t next = next_update->update_time;
-		//struct tm* detailedTime = my_localtime(&next);
-		//printf( "scheduled update for %s at: %s", monitor->name, asctime(detailedTime));
-		//printf( "type = %d, backup = %d\n\n", next_update->update_type, next_update->backup);
+		time_t next = next_update->update_time;
+		struct tm* detailedTime = my_localtime(&next);
+		printf( "scheduled update for %s at: %s", monitor->name, asctime(detailedTime));
+		printf( "type = %d, backup = %d\n\n", next_update->update_type, next_update->backup);
+		printf( "minutes_west = %d\n", get_minutes_west());
 	}
-	
 	printf("here!\n");
 
 
@@ -285,8 +293,9 @@ int main( int argc, char** argv )
 	while(terminated == 0)
 	{
 		time_t current_time = my_time(NULL);
-		terminated = current_time > 1238544000 ? 1 : terminated; //end at april 1st 2009;
+		//terminated = current_time > 1238544000 ? 1 : terminated; //end at march 1st 2009;
 		//terminated = current_time > 1231304400? 1 : terminated;  //end at january 7th 2009;
+		 terminated = current_time > (1230768000 + (50*24*60*60)) ? 1 : terminated;
 
 		int current_minutes_west = get_minutes_west();
 		if(current_time != last_checked)
@@ -377,13 +386,15 @@ int main( int argc, char** argv )
 			}
 		}
 
+		my_tick();
 		
 		//if we just jumped more than 25 minutes (i.e. date/time was reset dramatically) , reset all times
-		time_t time_test2 = my_time(NULL);
-		if( time_test2 - current_time > 25*60 || time_test2 < current_time)
+		time_t old_current_time = current_time;
+		current_time = my_time(NULL);
+		if( old_current_time - current_time > 25*60 || current_time - old_current_time > 25*60)
 		{
 			
-			long adjustment_seconds = time_test2 - current_time;
+			long adjustment_seconds = current_time - old_current_time;
 			reference_time = reference_time + adjustment_seconds;
 
 			priority_queue* new_update_queue = initialize_priority_queue();
@@ -392,27 +403,62 @@ int main( int argc, char** argv )
 				unsigned long priority;
 
 				priority_queue_node *p = shift_priority_queue_node(update_queue);
-
 				update_node* next_update = (update_node*)p->value;
-
 				bw_monitor* monitor = monitors[ next_update->monitor_index ];
-				monitor->last_update = monitor->last_update + adjustment_seconds;
-				monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
-				monitor->last_backup = monitor->last_backup + adjustment_seconds;
+
+				if(monitor->interval_end == 0 ) //handle case of fixed interval length
+				{
+					monitor->last_update = monitor->last_update + adjustment_seconds;
+					monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+					monitor->last_backup = monitor->last_backup + adjustment_seconds;
 				
-				bw_history* history = monitor->history;
-				history->oldest_interval_start = history->oldest_interval_start + adjustment_seconds;
-				history->oldest_interval_end   = history->oldest_interval_end + adjustment_seconds;
-				history->recent_interval_end   = history->recent_interval_end + adjustment_seconds;
-			
-				//next_update->update_time = next_update->update_time + adjustment_seconds;
+					bw_history* history = monitor->history;
+					history->oldest_interval_start = history->oldest_interval_start + adjustment_seconds;
+					history->oldest_interval_end   = history->oldest_interval_end + adjustment_seconds;
+					history->recent_interval_end   = history->recent_interval_end + adjustment_seconds;
+				
+				}
+				else //handle case of fixed interval end (MUCH harder)
+				{
+					if(monitor->history->first == NULL) //if nothing in the history, just update last update / last backup simply
+					{
+						monitor->last_update = monitor->last_update + adjustment_seconds;
+						monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+						monitor->last_backup = monitor->last_backup + adjustment_seconds;
+					}
+					else //the ugly case...
+					{
+						//find out when last update should have been given the new time scheme
+						time_t int_test1 = get_next_interval_end(0, monitor->interval_end);
+						time_t int_test2 = get_next_interval_end(int_test1, monitor->interval_end);
+						long interval_length = int_test2 - int_test1;
+
+						time_t new_next = get_next_interval_end(current_time, monitor->interval_end);
+						time_t new_previous = new_next - interval_length;
+						time_t old_previous = monitor->history->recent_interval_end;
+						long next_adjustment = new_previous - old_previous;
+
+						//if it's not when it was supposed to be, shift to make it so, otherwise do nothing
+						if(next_adjustment != 0)
+						{
+							monitor->last_update = monitor->last_update + next_adjustment;
+							monitor->last_accumulator_update = monitor->last_accumulator_update + next_adjustment;
+							monitor->last_backup = monitor->last_backup + next_adjustment;
+				
+							bw_history* history = monitor->history;
+							history->oldest_interval_start = history->oldest_interval_start + next_adjustment;
+							history->oldest_interval_end   = history->oldest_interval_end + next_adjustment;
+							history->recent_interval_end   = history->recent_interval_end + next_adjustment;
+						}
+					}
+				}
 				*next_update = get_next_update_time(monitors, next_update->monitor_index);
 				priority = next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
 				p->priority = priority;
 				push_priority_queue_node(new_update_queue, p);
 			}
 
-			long num_destroyed;
+			unsigned long num_destroyed;
 			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			update_queue = new_update_queue;
 		}
@@ -554,7 +600,7 @@ int main( int argc, char** argv )
 				push_priority_queue_node(new_update_queue, p);
 			}
 			
-			long num_destroyed;
+			unsigned long num_destroyed;
 			destroy_priority_queue(update_queue, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			update_queue = new_update_queue;
 			//printf("\n\n\n");
@@ -1038,10 +1084,12 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 
 	time_t current_time = my_time(NULL);
 
+	printf("load1\n");
 	//insert gaps in history as necessary & initialize next update time
 	//to proper value to synchronize with history
 	if(history->first != NULL)
 	{
+		printf("load2\n");
 		time_t last_update = history->recent_interval_end;
 
 		int increment;
@@ -1055,9 +1103,9 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 		{
 			increment = monitor->interval_length;
 		}
-		if(current_time - last_update > monitor->history_length * increment)
+		if(current_time - last_update > monitor->history_length * increment || current_time < oldest_start)
 		{
-			//don't actually save any of the loaded data to the monitor -- it's too old to be useful
+			//don't actually save any of the loaded data to the monitor -- it's too old / too new to be useful
 			//just free any history data we've allocated
 			while(history->length > 0)
 			{
@@ -1068,10 +1116,11 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 		}
 		else if(current_time < last_update)
 		{
+			printf("ignoring some...\n");
 			int increment;
 			if(monitor->interval_end > 0)
 			{
-				time_t time1 = get_next_interval_end(last_update, monitor->interval_end);
+				time_t time1 = get_next_interval_end(0, monitor->interval_end);
 				time_t time2 = get_next_interval_end(time1, monitor->interval_end);
 				increment = time2 - time1;
 			}
@@ -1104,12 +1153,16 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 				{
 					push_history(new_history, old_node, next_start, next_end);
 				}
-				else if(next_start < current_time)
+				else 
 				{
-					monitor->accumulator_count = old_node->bandwidth;
+					/* uncomment to over-report, instead of under-report
+					if(next_start < current_time)
+					{
+						monitor->accumulator_count = old_node->bandwidth;
+					}
+					*/
+					free(old_node);
 				}
-
-				free(old_node);
 				node_num++;
 			}
 			free(history);
@@ -1117,6 +1170,15 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			bw_history* old_history = monitor->history;
 			monitor->history = new_history;
 			free(old_history);
+			
+			monitor->last_update = new_history->recent_interval_end;
+			monitor->last_backup = my_time(NULL);
+
+			printf("loaded history:\n");
+			print_history(new_history);
+			printf("\n\n\n");
+
+			//exit(0);
 		}
 		else
 		{
@@ -1152,6 +1214,32 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			monitor->history = history;
 			free(old_history);
 		}
+	}
+
+	/* 
+	 * Deal with possibility of timezone shift 
+	 * This doesn't affect case where update is done every interval,
+	 * But where there is a fixed interval end, things need to line up
+	 * or everything gets out of whack.
+	 */
+	if(monitor->interval_end > 0 && monitor->history->first != NULL)
+	{
+		time_t oldest_start = monitor->history->oldest_interval_start;
+		time_t oldest_end = monitor->history->oldest_interval_end;
+		time_t expected_oldest_end = get_next_interval_end(oldest_start, monitor->interval_end);
+		if(expected_oldest_end != oldest_end)
+		{
+			long adj_seconds = (long)(expected_oldest_end - oldest_end);
+			printf("adj_seconds = %ld\n", adj_seconds); 
+			monitor->history->oldest_interval_start = monitor->history->oldest_interval_start + adj_seconds;
+			monitor->history->oldest_interval_end = monitor->history->oldest_interval_end + adj_seconds;
+			monitor->history->recent_interval_end = monitor->history->recent_interval_end + adj_seconds;
+			monitor->last_update = monitor->history->recent_interval_end;
+		}
+		printf("adjusted history:\n");
+		print_history(monitor->history);
+		printf("\n\n\n");
+		//exit(0);	
 	}
 }
 
