@@ -52,12 +52,11 @@ load_settings() {
 config_load ntpclient
 config_foreach load_settings ntpclient
 
-DEF_ROUTE=`route -n | grep '^0.0.0.0'`
 NTP_RUNNING=`ps  | grep $NTPC | grep -v grep`
 
 case "${ACTION:-ifup}" in
 	ifup)
-		[ -n "$DEF_ROUTE" -a -z "$NTP_RUNNING" ] && start_ntpclient 
+		[ -z "$NTP_RUNNING" ] && start_ntpclient 
 	;;
 	ifdown)
 		[ -n "$NTP_RUNNING" ] && stop_ntpclient 
