@@ -136,9 +136,9 @@ void my_tick(void)
 		//shift minutes_west to Eastern DST, UTC-4
 		global_timezone_ctl = -1* (60*8);
 	}
-	if(global_time_ctl == (1230768000 + (33*24*60*60) + (2*60*60)))  //Feb 2nd 2am GMT, do real shift by 35 hours
+	if(global_time_ctl == (1230768000 + (33*24*60*60) + (2*60*60)))  //Feb 2nd 2am GMT, do real shift by 1 hour
 	{
-		global_time_ctl = global_time_ctl + (35*60*60);
+		global_time_ctl = global_time_ctl + (60*60);
 	}
 }
 time_t my_time(void*);
@@ -394,7 +394,7 @@ int main( int argc, char** argv )
 		if( old_current_time - current_time > 25*60 || current_time - old_current_time > 25*60)
 		{
 			
-			long adjustment_seconds = current_time - old_current_time;
+			long adjustment_seconds = (long)(current_time - old_current_time);
 			reference_time = reference_time + adjustment_seconds;
 
 			priority_queue* new_update_queue = initialize_priority_queue();
@@ -409,7 +409,7 @@ int main( int argc, char** argv )
 				if(monitor->interval_end == 0 ) //handle case of fixed interval length
 				{
 					monitor->last_update = monitor->last_update + adjustment_seconds;
-					monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+					monitor->last_accumulator_update = monitor->last_accumulator_update > 0 ? monitor->last_accumulator_update + adjustment_seconds : 0;
 					monitor->last_backup = monitor->last_backup + adjustment_seconds;
 				
 					bw_history* history = monitor->history;
@@ -1235,11 +1235,36 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			monitor->history->oldest_interval_end = monitor->history->oldest_interval_end + adj_seconds;
 			monitor->history->recent_interval_end = monitor->history->recent_interval_end + adj_seconds;
 			monitor->last_update = monitor->history->recent_interval_end;
+		
+			if(monitor->history->recent_interval_end > current_time)
+			{
+				bw_history* new_history = initialize_history();
+				bw_history* old_history = monitor->history;
+				time_t next_start = old_history->oldest_interval_start;
+				while(old_history->length > 0)
+				{
+					history_node* old_node = pop_history(old_history);
+					time_t next_end = get_next_interval_end(next_start, monitor->interval_end);
+					if(next_end <= current_time)
+					{
+						push_history(new_history, old_node, next_start, next_end);
+					}
+					else if(old_node->bandwidth > 0)
+					{
+						monitor->accumulator_count = old_node->bandwidth;
+						free(old_node);
+					}
+					next_start = next_end;
+				}
+				printf("here\n");
+				monitor->history = new_history;
+				free(old_history);
+			}
 		}
 		printf("adjusted history:\n");
 		print_history(monitor->history);
 		printf("\n\n\n");
-		//exit(0);	
+		exit(0);	
 	}
 }
 

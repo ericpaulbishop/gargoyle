@@ -1092,11 +1092,34 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 		if(expected_oldest_end != oldest_end)
 		{
 			long adj_seconds = (long)(expected_oldest_end - oldest_end);
-			printf("adj_seconds = %ld\n", adj_seconds); 
 			monitor->history->oldest_interval_start = monitor->history->oldest_interval_start + adj_seconds;
 			monitor->history->oldest_interval_end = monitor->history->oldest_interval_end + adj_seconds;
 			monitor->history->recent_interval_end = monitor->history->recent_interval_end + adj_seconds;
 			monitor->last_update = monitor->history->recent_interval_end;
+		
+			if(monitor->history->recent_interval_end > current_time)
+			{
+				bw_history* new_history = initialize_history();
+				bw_history* old_history = monitor->history;
+				time_t next_start = old_history->oldest_interval_start;
+				while(old_history->length > 0)
+				{
+					history_node* old_node = pop_history(old_history);
+					time_t next_end = get_next_interval_end(next_start, monitor->interval_end);
+					if(next_end <= current_time)
+					{
+						push_history(new_history, old_node, next_start, next_end);
+					}
+					else if(old_node->bandwidth > 0)
+					{
+						monitor->accumulator_count = old_node->bandwidth;
+						free(old_node);
+					}
+					next_start = next_end;
+				}
+				monitor->history = new_history;
+				free(old_history);
+			}
 		}
 	}
 }
