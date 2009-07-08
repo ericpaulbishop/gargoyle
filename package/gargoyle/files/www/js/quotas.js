@@ -18,6 +18,7 @@ function saveChanges()
 	preCommands.push("uci commit");
 
 	var allNewQuotas = uci.getAllSectionsOfType(pkg, "quota");
+	var quotaUseVisibleCommand = "\nuci del gargoyle.status.quotause ; uci commit ;\n"
 	while(allNewQuotas.length > 0)
 	{
 		//if ip has changed, reset saved data
@@ -26,6 +27,7 @@ function saveChanges()
 		{
 			uci.set(pkg, section, "ignore_backup_at_next_restore", "1");
 		}
+		quotaUseVisibleCommand = "\nuci set gargoyle.status.quotause=\"225\" ; uci commit ;\n"
 	}
 
 	//set enabled / disabled	
@@ -42,7 +44,7 @@ function saveChanges()
 	postCommands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
 	postCommands.push("if [ -d \"/usr/data/quotas/\" ] ; then rm -rf /usr/data/quotas/* ; fi ;");
 	postCommands.push("backup_quotas");
-	var commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n");
+	var commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + quotaUseVisibleCommand + "\n" + postCommands.join("\n");
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 ;
