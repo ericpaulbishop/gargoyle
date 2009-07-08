@@ -13,14 +13,10 @@
 <script>
 <!--
 <?
+	echo "var dhcpEnabled = true;"
 	echo "var subnet=\"$subnet\";"
 	echo "var dhcpSection = getDhcpSection(uciOriginal);"
 	
-	if [ -h /etc/rc.d/*dnsmasq* ] ; then
-		echo "var dhcpEnabled = true;"
-	else
-		echo "var dhcpEnabled = false;"
-	fi
 
 	echo "var hostData = new Array();"
 	if [ -e /etc/hosts ]

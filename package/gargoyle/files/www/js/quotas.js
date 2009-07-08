@@ -65,7 +65,7 @@ function saveChanges()
 function resetData()
 {
 	//table columns: ip, percent upload used, percent download used, percent combined used, enabled, edit, remove
-	var quotaSections = uci.getAllSectionsOfType(pkg, "quota");
+	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
 	var quotaTableData = [];
 	var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
 	var areChecked = [];

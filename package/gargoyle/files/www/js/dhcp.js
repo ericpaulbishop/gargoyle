@@ -39,11 +39,11 @@ function saveChanges()
 		dhcpWillBeEnabled = true;
 		if(document.getElementById("dhcp_enabled").checked )
 		{
-			setEnabledCommand = "/etc/init.d/dnsmasq enable\n";
+			setEnabledCommand = "uci del dhcp.lan.ignore 2>/dev/null\nuci commit\n";
 		}
 		else
 		{
-			setEnabledCommand = "/etc/init.d/dnsmasq disable\n";
+			setEnabledCommand = "uci set dhcp.lan.ignore=1 2>/dev/null\nuci commit\n";
 			dhcpWillBeEnabled = false;
 		}
 	
@@ -97,7 +97,7 @@ function saveChanges()
 
 
 
-		var restartDhcpCommand = document.getElementById("dhcp_enabled").checked ? "\n/etc/init.d/dnsmasq restart ;\n" : "\n/etc/init.d/dnsmasq stop ;\n" ; 
+		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ;\n" ; 
 
 		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand + "\n" + firewallCommands.join("\n") ;
 
@@ -133,6 +133,7 @@ function createEditButton()
 
 function resetData()
 {
+	dhcpEnabled = uciOriginal.get("dhcp", "lan", "ignore") == "1" ? false : true;
 	var rowIndex=0;
 	for(rowIndex=0; rowIndex < staticIpTableData.length ; rowIndex++)
 	{
