@@ -25,7 +25,6 @@
 
 #include "bwmon.h"
 
-
 void signal_handler(int sig);
 
 // message queue is a global variable so
@@ -183,11 +182,18 @@ int main( int argc, char** argv )
 					sprintf(monitor_name, "%s", response_msg.msg_line);
 					monitor_name[ strlen(monitor_name) - 1] = '\0'; //get rid of newline
 				}
-				
+			
+				long interval_end;	
 				time_t oldest_start;
 				time_t oldest_end;
 				time_t recent_end;
 				long read;
+				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
+				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
+				{
+					sscanf(response_msg.msg_line, "%ld", &read);
+					interval_end = read;
+				}
 				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
@@ -252,14 +258,14 @@ int main( int argc, char** argv )
 					if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0 && history->length > 0)
 					{
 						printf("%s\n", monitor_name);
-						print_history(history);
+						print_history(history, interval_end);
 
 					}
 					
 					//free history
 					while(history->length > 0)
 					{
-						history_node* old_node = pop_history(history);
+						history_node* old_node = shift_history(history);
 						free(old_node);
 					}
 					free(history);

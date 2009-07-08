@@ -46,8 +46,7 @@
 #include <dlfcn.h>
 
 
-#include <erics_tools.h>
-
+#include "erics_tools.h"
 
 
 #define MSG_ID 12
@@ -56,7 +55,12 @@
 #define MAX_MSG_LINE 75
 #define PID_PATH	"/var/run/bwmond.pid"
 
-
+#define MINUTE	101
+#define HOUR	102
+#define DAY	103
+#define WEEK	104
+#define	MONTH	105
+#define FIXED_INTERVAL   -1
 
 typedef struct
 {
@@ -87,9 +91,10 @@ typedef struct
 
 bw_history* initialize_history(void);
 void push_history(bw_history* history, history_node* new_node, time_t interval_start, time_t interval_end);
-history_node* pop_history(bw_history* history);
+history_node* shift_history(bw_history* history);
 int get_interval_length(bw_history* history);
-void print_history(bw_history* history);
+time_t get_next_interval_end(time_t current_time, int end_type);
+void print_history(bw_history* history, int interval_end);
 int get_next_message(int queue, void* message_data, size_t message_size, long message_type, unsigned long max_wait_milliseconds);
 int send_next_message(int queue, void* message_data, size_t message_size, unsigned long max_wait_milliseconds);
 
@@ -128,7 +133,7 @@ void push_history(bw_history* history, history_node* new_node, time_t interval_s
 	
 }
 
-history_node* pop_history(bw_history* history)
+history_node* shift_history(bw_history* history)
 {
 	history_node* old_node = history->last;
 	if(history->length > 1)
@@ -177,7 +182,64 @@ int get_interval_length(bw_history* history)
 	return interval_length;
 }
 
-void print_history(bw_history* history)
+#ifndef BWSIM
+time_t get_next_interval_end(time_t current_time, int end_type)
+{
+	time_t next_end;
+	time_t ct = current_time;
+	struct tm* curr = localtime(&ct);
+	if(end_type == MINUTE)
+	{
+		curr->tm_sec = 0;
+		curr->tm_min = curr->tm_min+1;
+		next_end = mktime(curr);
+	}
+	else if(end_type == HOUR)
+	{
+		curr->tm_sec  = 0;
+		curr->tm_min  = 0;
+		curr->tm_hour = curr->tm_hour+1;
+		next_end = mktime(curr);
+	}
+	else if(end_type == DAY)
+	{
+		curr->tm_sec  = 0;
+		curr->tm_min  = 0;
+		curr->tm_hour = 0;
+		curr->tm_mday = curr->tm_mday+1;
+		next_end = mktime(curr);
+	}
+	else if(end_type == WEEK)
+	{
+		curr->tm_sec  = 0;
+		curr->tm_min  = 0;
+		curr->tm_hour = 0;
+		curr->tm_mday = curr->tm_mday+1;
+		time_t tmp = mktime(curr);
+		curr = localtime(&tmp);
+		while(curr->tm_wday != 0)
+		{
+			curr->tm_mday=curr->tm_mday+1;
+			tmp = mktime(curr);
+			curr = localtime(&tmp);
+		}
+		next_end = mktime(curr);
+	}
+	else if(end_type == MONTH)
+	{
+		curr->tm_sec  = 0;
+		curr->tm_min  = 0;
+		curr->tm_hour = 0;
+		curr->tm_mday = 1;
+		curr->tm_mon  = curr->tm_mon+1;
+		next_end = mktime(curr);
+	}
+	return next_end;
+}
+
+
+
+void print_history(bw_history* history, int interval_end)
 {
 	history_node* next_node = history->last;
 	if(next_node == NULL)
@@ -222,10 +284,14 @@ void print_history(bw_history* history)
 
 		next_node = next_node->previous;
 		t1 = t2;
-		t2 = t1+interval_length;
+		t2 = (interval_end == FIXED_INTERVAL) ? t2+interval_length : get_next_interval_end(t2, interval_end);
 	}
 	printf("\n\n\n");
 }
+#endif
+
+
+
 int get_next_message(int queue, void* message_data, size_t message_size, long message_type, unsigned long max_wait_milliseconds)
 {
 	int iteration = 0;
