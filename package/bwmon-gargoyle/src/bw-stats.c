@@ -161,15 +161,25 @@ int main( int argc, char** argv )
 		message_t response_msg;
 		sprintf(response_msg.msg_line,"initial");
 		int read_valid = 1;
-
 		while(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 		{
 			if(format == 'm')
 			{
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
-				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
+				int read_num = 0;
+				for(read_num = 0; read_num < 5 && read_valid >= 0 && strcmp(response_msg.msg_line, "END") != 0 ; read_num++)
 				{
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
+					if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0 && read_num != 1)
+					{
+						printf("%s", response_msg.msg_line);
+					}
+				}
+				int end_found = 0;
+				while(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0 && end_found == 0)
+				{
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 					printf("%s", response_msg.msg_line);
+					end_found = strstr(response_msg.msg_line, "\n") != NULL ? 1 : 0;
 				}
 			}
 			else
@@ -181,6 +191,7 @@ int main( int argc, char** argv )
 				{
 					sprintf(monitor_name, "%s", response_msg.msg_line);
 					monitor_name[ strlen(monitor_name) - 1] = '\0'; //get rid of newline
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				}
 			
 				long interval_end;	
@@ -188,25 +199,24 @@ int main( int argc, char** argv )
 				time_t oldest_end;
 				time_t recent_end;
 				long read;
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
 					interval_end = read;
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				}
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
 					oldest_start = (time_t)read;
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				}
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);
 					oldest_end = (time_t)read;
+					read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				}
-				read_valid = get_next_message(mq, (void*)&response_msg, MAX_MSG_LINE, RESPONSE_MSG_TYPE, 500);
 				if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0)
 				{
 					sscanf(response_msg.msg_line, "%ld", &read);

@@ -35,15 +35,14 @@ function saveChanges()
 	
 		setVariables(dhcpIds, dhcpVisIds, uci, dhcpPkgs, dhcpSections, dhcpOptions, dhcpFunctions, dhcpParams);
 
-		setEnabledCommand = "";
 		dhcpWillBeEnabled = true;
 		if(document.getElementById("dhcp_enabled").checked )
 		{
-			setEnabledCommand = "uci del dhcp.lan.ignore 2>/dev/null\nuci commit\n";
+			uci.remove("dhcp", "lan", "ignore");
 		}
 		else
 		{
-			setEnabledCommand = "uci set dhcp.lan.ignore=1 2>/dev/null\nuci commit\n";
+			uci.set("dhcp", "lan", "ignore", "1");
 			dhcpWillBeEnabled = false;
 		}
 	
@@ -99,7 +98,7 @@ function saveChanges()
 
 		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ;\n" ; 
 
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + setEnabledCommand + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand + "\n" + firewallCommands.join("\n") ;
+		commands = uci.getScriptCommands(uciOriginal) + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand + "\n" + firewallCommands.join("\n") ;
 
 		//document.getElementById("output").value = commands;
 
