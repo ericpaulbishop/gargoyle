@@ -881,26 +881,27 @@ function setGlobalVisibility()
 
 function setWanVisibility()
 {
-	wanIds=['wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'lan_gateway_container'];
-
-	notWifi= getSelectedValue('wan_protocol').match(/wireless/) ? 0 : 1;
-
-	dhcpVisability     = [0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0];
-	pppoeVisability    = [1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0];
-	staticVisability   = [0,0,0,0,0,0,  1,1,1,  notWifi,notWifi, 0];
-	disabledVisability = [0,0,0,0,0,0,  0,0,0,  0,0,             1];
+	var wanIds=["wan_dhcp_ip_container", "wan_dhcp_expires_container", 'wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'lan_gateway_container'];
 	
-	wanVisibilities= new Array();
+	var maxIdleIndex = 5;
+	var notWifi= getSelectedValue('wan_protocol').match(/wireless/) ? 0 : 1;
+
+	var dhcpVisability     = [1,1,  0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0];
+	var pppoeVisability    = [0,0,  1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0];
+	var staticVisability   = [0,0,  0,0,0,0,0,0,  1,1,1,  notWifi,notWifi, 0];
+	var disabledVisability = [0,0,  0,0,0,0,0,0,  0,0,0,  0,0,             1];
+	
+	var wanVisibilities= new Array();
 	wanVisibilities['dhcp'] = dhcpVisability;
 	wanVisibilities['pppoe'] = pppoeVisability;
 	wanVisibilities['static'] = staticVisability;
 	wanVisibilities['none'] = disabledVisability;
 	
-	selectedVisibility= wanVisibilities[ getSelectedValue("wan_protocol").replace(/_.*$/g, "") ];
+	var selectedVisibility= wanVisibilities[ getSelectedValue("wan_protocol").replace(/_.*$/g, "") ];
 	
-	selectedVisibility[3] = selectedVisibility[3] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'demand' ? 1 : 0;
-	selectedVisibility[4] = selectedVisibility[4] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
-	selectedVisibility[5] = selectedVisibility[5] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
+	selectedVisibility[maxIdleIndex] = selectedVisibility[maxIdleIndex] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'demand' ? 1 : 0;
+	selectedVisibility[maxIdleIndex+1] = selectedVisibility[maxIdleIndex+1] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
+	selectedVisibility[maxIdleIndex+2] = selectedVisibility[maxIdleIndex+2] ==1 && document.getElementById('wan_pppoe_reconnect_mode').value == 'keepalive' ? 1 : 0;
 
 	setVisibility(wanIds, selectedVisibility);
 }
@@ -1054,6 +1055,20 @@ function resetData()
 		removeOptionFromSelectElement("wifi_channel2", rc, document);
 	}
 
+	if(leaseStart != "")
+	{
+		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
+		var releaseDate = new Date();
+		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+		releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
+		var releaseStr = twod(releaseDate.getUTCMonth()+1) + "/" +  twod(releaseDate.getUTCDate()) + "/" + twod(releaseDate.getUTCFullYear()%100) + " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
+		setChildText("dhcp_expires", releaseStr);
+		setChildText("dhcp_ip", currentWanIp);
+	}
+	else
+	{
+		setElementEnabled(document.getElementById("dhcp_renew_button"), false);
+	}
 
 
 	var macElements = [ "bridge_wifi_mac", "wifi_mac" ];
@@ -1777,4 +1792,51 @@ function setTransmitPower(selectId, textId)
 		wifi_text.value   = txpow;
 		bridge_text.value = txpow;
 	}
+}
+
+function renewDhcpLease()
+{
+	var commands = [];
+	commands.push("killall udhcpc >/dev/null 2>&1 ");
+	commands.push("udhcpc -t 0 -i $(uci -P /var/state get network.wan.ifname) -b -p /var/run/$(uci -P /var/state get network.wan.ifname).pid -R >/dev/null 2>&1");
+	commands.push("sleep 1");
+	commands.push("echo \"var wi = \\\"\"$(uci -P /var/state get network.wan.ipaddr )\"\\\";\"");
+	commands.push("echo \"var ls = \\\"\"$(uci -P /var/state get network.wan.lease_acquired )\"\\\";\"");
+	commands.push("echo \"var ll = \\\"\"$(uci -P /var/state get network.wan.lease_lifetime )\"\\\";\"");
+
+	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	setControlsEnabled(false, true, "Renewing DHCP Lease");
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			var reqLines = req.responseText.split(/[\r\n]+/);
+			while(reqLines.length > 0)
+			{
+				var wi = "";
+				var ls = "";
+				var ll = "";
+				var line = reqLines.shift();
+				if(line.match(/^var/))
+				{
+					eval(line);
+					if(ll != "") { leaseLifetime = ll; }
+					if(ls != "") { leaseStart = ls; }
+					if(wi != "") { setChildText("dhcp_ip", wi); }
+				}
+			}
+			if(leaseLifetime != "")
+			{
+				var releaseDate = new Date();
+				var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+				releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
+				var releaseStr = twod(releaseDate.getUTCMonth()+1) + "/" +  twod(releaseDate.getUTCDate()) + "/" + twod(releaseDate.getUTCFullYear()%100) + " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
+				setChildText("dhcp_expires", releaseStr);
+
+			}
+
+			setControlsEnabled(true);
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }

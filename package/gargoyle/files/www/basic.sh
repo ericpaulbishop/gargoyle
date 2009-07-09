@@ -14,8 +14,7 @@
 <?
 	# determine if this board is a bcm94704, for which the uci wan macaddr variable must ALWAYS be set
 	PART="$(grep "nvram" /proc/mtd | awk -F: '{print $1}')"
-	if [ -n "$PART" ]
-	then
+	if [ -n "$PART" ] ; then
 		PREFIX=/dev/mtdblock
 		PART="${PART##mtd}"
 		[ -d /dev/mtdblock ] && PREFIX=/dev/mtdblock/ 
@@ -24,10 +23,8 @@
 		boardnum=$(strings $nvrampath | grep boardnum | awk 'BEGIN {FS="="}; {print $2}')
 		#echo "boardnum = $boardnum, boardtype = $boardtype"
 		isbcm94704='false'
-		if [ "$boardtype" = "0x0472" ] || [ "$boardtype" = "0x042f" ]
-		then
-			if [ "$boardnum" != "45" ]
-			then
+		if [ "$boardtype" = "0x0472" ] || [ "$boardtype" = "0x042f" ] ; then
+			if [ "$boardnum" != "45" ] ; then
 				isbcm94704='true'
 			fi
 		fi
@@ -54,7 +51,18 @@
 			echo "var wirelessDriver=\"\";"
 		fi
 	fi
+
+	lease_start=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_acquired | sed 's/^.*=//g')
+	lease_lifetime=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_lifetime | sed 's/^.*=//g')
+	echo "var leaseStart = \"$lease_start\";"
+	echo "var leaseLifetime = \"$lease_lifetime\";"
+	echo "var timezoneOffset = \""$(date +%z)"\";"
+	echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
+
 ?>
+timezoneOffset = timezoneOffset.replace(/^\-0/g, "-");
+timezoneOffset = timezoneOffset.replace(/^\+?0/g, "");
+var timezoneOffset = (parseInt(timezoneOffset)/100)*60*60;
 var policyOption="";
 if(wirelessDriver == "broadcom")
 {
@@ -65,6 +73,7 @@ else
 	policyOption="macpolicy";
 }
 var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
+
 
 //-->
 </script>
@@ -252,7 +261,22 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
 				<option value='none'>Disabled</option>
 			</select>
 		</div>
-
+		
+		<div id='wan_dhcp_ip_container'>
+			<label class='leftcolumn'>Current IP:</label>
+			<span class='rightcolumn' id='dhcp_ip'></span>
+		</div>
+		<div id='wan_dhcp_expires_container'>
+			<label class='leftcolumn'>Current Lease Expires:</label>
+			<span class='rightcolumn'>
+				<span id="dhcp_expires"></span>
+			</span>
+			
+			<div class='rightcolumnonly' style="margin-bottom:15px">
+				<input type='button' id="dhcp_renew_button" value="Renew Lease Now" class="default_button" onclick="renewDhcpLease()" />
+			</div>
+			
+		</div>
 
 		<div id='wan_pppoe_user_container' >
 			<label class='leftcolumn' for='wan_pppoe_user' id='wan_pppoe_user_label'>User Name:</label>
@@ -271,7 +295,7 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
 		</div>
 		<div id='wan_pppoe_max_idle_container' >
 			<label class='leftcolumn' for='wan_pppoe_max_idle' id='wan_pppoe_max_idle_label'>Max Idle Time:</label>
-			<div class='rightcolumn'>
+			<div class='rightcolumn' >
 				<input type='text' class='rightcolumn' id='wan_pppoe_max_idle' onkeyup='proofreadNumeric(this)' size='20' maxlength='4' />
 				<em>(minutes)</em>
 			</div>
