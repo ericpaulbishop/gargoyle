@@ -95,11 +95,16 @@ static uint64_t pow64(uint64_t base, uint64_t pow)
 	uint64_t val = 1;
 	if(pow > 0)
 	{
-		val = base*pow64(base, pow-1)
+		val = base*pow64(base, pow-1);
 	}
 	return val;
 }
-static uint64_t bandwidth_record_max = (pow64(2,62)) + (pow64(2,62)-1)
+static uint64_t get_bw_record_max(void) /* called by init to set global variable */
+{
+	return  (pow64(2,62)) + (pow64(2,62)-1);
+}
+static uint64_t bandwidth_record_max;
+
 static uint64_t add_up_to_max(uint64_t original, uint64_t add)
 {
 	return bandwidth_record_max-original < add ? original+add : bandwidth_record_max;
@@ -1020,7 +1025,7 @@ static int __init init(void)
 	{
 		printk("ipt_bandwidth: Can't register sockopts. Aborting\n");
 	}
-
+	bandwidth_record_max = get_bw_record_max();
 	id_map = initialize_string_map(0);
 
 	init_MUTEX(&userspace_lock); 
