@@ -84,6 +84,27 @@ static time_t input_backup_time = 0;
 
 
 
+
+/* 
+ * set max bandwidth to be max possible using 63 of the
+ * 64 bits in our record.  In some systems uint64_t is treated
+ * like signed, so to prevent errors, use only 63 bits
+ */
+static uint64_t pow64(uint64_t base, uint64_t pow)
+{
+	uint64_t val = 1;
+	if(pow > 0)
+	{
+		val = base*pow64(base, pow-1)
+	}
+	return val;
+}
+static uint64_t bandwidth_record_max = (pow64(2,62)) + (pow64(2,62)-1)
+static uint64_t add_up_to_max(uint64_t original, uint64_t add)
+{
+	return bandwidth_record_max-original < add ? original+add : bandwidth_record_max;
+}
+
 /*
  * Shamelessly yoinked from xt_time.c
  * "That is so amazingly amazing, I think I'd like to steal it." 
@@ -311,10 +332,10 @@ static int match(	const struct sk_buff *skb,
 			}
 			else
 			{
-				*(bws[0]) = *(bws[0]) + skb->len;
+				*(bws[0]) = add_up_to_max(*(bws[0]), (uint64_t)skb->len);
 			}
 		}
-		info->current_bandwidth = info->current_bandwidth + skb->len;
+		info->current_bandwidth = add_up_to_max(info->current_bandwidth, (uint64_t)skb->len);
 	}
 	else
 	{
@@ -371,7 +392,7 @@ static int match(	const struct sk_buff *skb,
 				}
 				else
 				{
-					*oldval = *oldval + skb->len;
+					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len);
 				}
 				bws[bw_ip_index] = oldval;
 			}
