@@ -334,7 +334,7 @@ int main( int argc, char** argv )
 				update_node* next_update = (update_node*)p->value;
 				bw_monitor* monitor = monitors[ next_update->monitor_index ];
 
-				if(monitor->interval_end == 0 ) //handle case of fixed interval length
+				if(monitor->interval_end == FIXED_INTERVAL  ) //handle case of fixed interval length
 				{
 					monitor->last_update = monitor->last_update + adjustment_seconds;
 					monitor->last_accumulator_update = monitor->last_accumulator_update > 0 ? monitor->last_accumulator_update + adjustment_seconds : 0;
@@ -1347,7 +1347,7 @@ bw_monitor** load_bwmon_config(char *filename)
 				monitor->table = NULL;
 				monitor->chain = NULL;
 				monitor->interval_length = -1;
-				monitor->interval_end = -1;
+				monitor->interval_end = FIXED_INTERVAL ;
 				monitor->history_length = -1;
 				monitor->num_marks = 0;
 				monitor->num_rules = 0;
@@ -1507,7 +1507,7 @@ bw_monitor** load_bwmon_config(char *filename)
 				if(	monitor->table != NULL &&
 					monitor->chain != NULL &&
 					monitor->history_length > 0 &&
-					(monitor->interval_length > 0 || monitor->interval_end > 0) &&
+					(monitor->interval_length > 0 || monitor->interval_end != FIXED_INTERVAL ) &&
 					(monitor->num_rules > 0 || monitor->num_marks > 0)
 				  	)
 				{
@@ -1633,7 +1633,7 @@ int* parse_comma_list(char* list)
 
 int get_minutes_west(void)
 {
-	time_t now;
+	time_t now = time(NULL);
 	return get_minutes_west_for_time(now);
 }
 

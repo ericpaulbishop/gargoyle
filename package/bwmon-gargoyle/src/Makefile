@@ -9,7 +9,7 @@ bw-stats: bw-stats.o
 bwmond: bwmond.o 
 	$(CC) $(LDFLAGS) -o $@ $^  $(LIBS)
 bwsim: bwsim.o
-	$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $^ -lericstools
 bw-stats.o: bw-stats.c
 	$(CC) $(CFLAGS) -c $^
 bwmond.o: bwmond.c
@@ -18,4 +18,4 @@ bwsim.o: bwsim.c
 	$(CC) $(CFLAGS) -c $^
 
 clean:
-	rm .*sw* *~ *.o bw-stats bwmond bwsim
+	rm -rf .*sw* *~ *.o bw-stats bwmond bwsim
