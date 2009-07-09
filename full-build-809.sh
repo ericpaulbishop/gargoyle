@@ -152,8 +152,9 @@ for target in $targets ; do
 				cp "bin/$i" "../images/$target/$newname"
 			fi
 		done
-		
-		if [ ! -e bin/*.trx ] && [ ! -e bin/*.bin ] && [ ! -e bin/*.lzma ] ; then
+	
+		bin_contents=$(ls bin/* 2>/dev/null)	
+		if [ -z "$bin_contents" ] ; then
 			exit
 		fi	       
 
