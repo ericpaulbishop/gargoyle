@@ -45,18 +45,21 @@ int main( int argc, char** argv )
 
 	char format = 'm';
 	int c;
-	while((c = getopt(argc, argv, "HhMmUu")) != -1)
+	while((c = getopt(argc, argv, "HhMmTtUu")) != -1)
 	{
 		switch(c)
 		{
 			case 'H':
 			case 'h':
-				format = 'h';
+				format = 'h'; //human readable
 				break;
 			case 'M':
 			case 'm':
-				format = 'm';
+				format = 'm'; //machine readable (most simplistic, minimizes output length)
 				break;
+			case 'T':
+			case 't':
+				format = 't'; //table of comma separated values, on each line: monitor_name,start,end,bandwidth
 			case 'U':
 			case 'u':
 			default:
@@ -149,7 +152,7 @@ int main( int argc, char** argv )
 			int monitor_index;
 			for(monitor_index = 0; monitor_names[monitor_index] != NULL; monitor_index++)
 			{
-				sprintf(req_msg.msg_line, monitor_names[monitor_index]);
+				sprintf(req_msg.msg_line, "%s", monitor_names[monitor_index]);
 				msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, IPC_NOWAIT);
 			}
 		}
@@ -240,7 +243,7 @@ int main( int argc, char** argv )
 							response_msg.msg_line[ strlen(response_msg.msg_line) - 1 ] = '\0';
 
 							int64_t bw_value;
-							sscanf(response_msg.msg_line, "%lld", &bw_value);
+							sscanf(response_msg.msg_line, "%lld", ((long long int*)(&bw_value)) );
 						
 							history_node* hnode = (history_node*)malloc(sizeof(history_node));
 							hnode->next = NULL;
@@ -267,9 +270,15 @@ int main( int argc, char** argv )
 
 					if(strcmp(response_msg.msg_line, "END") != 0 && read_valid >= 0 && history->length > 0)
 					{
-						printf("%s\n", monitor_name);
-						print_history(history, interval_end);
-
+						if(format == 'h')
+						{
+							printf("%s\n", monitor_name);
+							print_history(history, interval_end);
+						}
+						if(format == 't')
+						{
+							print_history_as_csv(history, interval_end, monitor_name);
+						}
 					}
 					
 					//free history

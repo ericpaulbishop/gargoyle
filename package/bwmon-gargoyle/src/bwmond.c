@@ -524,7 +524,7 @@ void handle_timezone_shift_for_monitor(bw_monitor* monitor, int old_minutes_west
 			//pop off & free nodes that are too old
 			while(new_history->length > monitor->history_length)
 			{
-				history_node* old_node = shift_history(new_history, monitor_interval_end);
+				history_node* old_node = shift_history(new_history, monitor->interval_end);
 				free(old_node);
 			}
 			next_start = next_end;
@@ -723,7 +723,7 @@ void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* rece
 			iptables_snapshot = iptc_init(monitor->table);
 			if(iptables_snapshot == NULL)
 			{
-				printf("ERROR, iptables snapshot could not be initialized\n error code = %s\n",iptc_strerror(errno));
+				printf("ERROR, iptables snapshot could not be initialized\n error code = %d\n",iptc_strerror(errno));
 				exit(0);
 			}
 			else
@@ -912,15 +912,15 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 		char convert_str[25];
 		if(bw_bits == 32)
 		{
-			sprintf(convert_str, "%d", bandwidth_32);
+			sprintf(convert_str, "%ld", (long int)bandwidth_32);
 		}
 		else
 		{
-			sprintf(convert_str, "%lld", bandwidth_64);
+			sprintf(convert_str, "%lld", (long long int)bandwidth_64);
 		}
 		
 		history_node* next_node = (history_node*)malloc(sizeof(history_node));
-		sscanf(convert_str, "%lld", &(next_node->bandwidth));
+		sscanf(convert_str, "%lld", (long long int*)(&(next_node->bandwidth)) );
 		next_node->next = NULL;
 		next_node->previous = NULL;
 		if(history->length == 0)
@@ -1658,10 +1658,6 @@ int get_minutes_west_for_time(time_t now)
 	int tz_hour;
 	int tz_minute;
 	int minuteswest;
-
-	struct timeval tv;
-	struct timezone old_tz;
-	struct timezone new_tz;
 
 
 	utc_info = gmtime(&now);

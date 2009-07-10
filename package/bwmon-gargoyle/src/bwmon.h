@@ -239,26 +239,35 @@ time_t get_next_interval_end(time_t current_time, int end_type)
 	return next_end;
 }
 
+void print_history_as_csv(bw_history* history, int interval_end, char* monitor_name)
+{
+	history_node* next_node = history->last;
+	time_t t1 = history->oldest_interval_start;
+	time_t t2 = history->oldest_interval_end;
+	int interval_length = interval_end == FIXED_INTERVAL ? -1 : get_interval_length(history);
+	
+	while(next_node != NULL)
+	{
+		printf("%s,%ld,%ld,%lld\n", monitor_name,t1,t2, (long long int)next_node->bandwidth); 
 
+		next_node = next_node->previous;
+		t1 = t2;
+		t2 = (interval_end == FIXED_INTERVAL) ? t2+interval_length : get_next_interval_end(t2, interval_end);
+	}
+}
 
 void print_history(bw_history* history, int interval_end)
 {
 	history_node* next_node = history->last;
-	if(next_node == NULL)
+	if(next_node == NULL )
 	{
 		printf("history is blank\n");
 	}
 
 	time_t t1 = history->oldest_interval_start;
 	time_t t2 = history->oldest_interval_end;
-	int interval_length = get_interval_length(history);
+	int interval_length = interval_end == FIXED_INTERVAL ? get_interval_length(history) : -1;
 
-	/*
-	printf("interval length = %d\n", interval_length);
-	printf("recent end = %d\n", history->recent_interval_end);
-	printf("old end = %d\n", history->oldest_interval_end);
-	printf("history length = %d\n", history->length);
-	*/
 
 	while(next_node != NULL)
 	{
@@ -271,7 +280,7 @@ void print_history(bw_history* history, int interval_end)
 		
 		int64_t b = next_node->bandwidth;
 		char byte_str[50];
-		sprintf(byte_str, "%lld.0 \n", b);
+		sprintf(byte_str, "%lld.0 \n", (long long int)b);
 		double kb;
 		sscanf(byte_str, "%lf\n", &kb);
 		kb=kb/1024.0;
