@@ -121,14 +121,14 @@ for target in $targets ; do
 	fi
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
-	if [ "verbosity" = "0" ] ; then
+	if [ "$verbosity" = "0" ] ; then
 		scripts/patch-kernel.sh . $targets_dir/$target/patches/ >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 2>&1
+			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 >/dev/null 2>&1
 			make menuconfig
-			sh $netfilter_patch_script . ../netfilter-match-modules 0 1 2>&1
+			sh $netfilter_patch_script . ../netfilter-match-modules 0 1 >/dev/null 2>&1
 		else
-			sh $netfilter_patch_script . ../netfilter-match-modules 2>&1
+			sh $netfilter_patch_script . ../netfilter-match-modules >/dev/null 2>&1
 		fi
 		make
 	else
