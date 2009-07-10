@@ -13,6 +13,7 @@ config global global
 config display display
 	option firewall			'Firewall'
 	option firewall_portforwarding	'Port Forwarding'
+	option firewall_connlimits	'Connection Limits'
 	option firewall_restriction	'Restrictions'
 	option firewall_quotas		'Quotas'
 	option firewall_qosupload	'QoS (Upload)'
@@ -42,6 +43,7 @@ config display display
 
 config scripts scripts
 	option firewall_portforwarding	'port_forwarding.sh'
+	option firewall_connlimits	'connlimits.sh'
 	option firewall_restriction	'restriction.sh'
 	option firewall_quotas		'quotas.sh'
 	option firewall_qosupload	'qos_upload.sh'
@@ -68,6 +70,7 @@ config scripts scripts
 
 config 300 firewall
 	option portforwarding	'100'
+	option connlimits	'115'
 	option restriction	'125'
 	option quotas		'175'
 	option qosupload	'200'
