@@ -91,7 +91,7 @@ typedef struct
 
 bw_history* initialize_history(void);
 void push_history(bw_history* history, history_node* new_node, time_t interval_start, time_t interval_end);
-history_node* shift_history(bw_history* history);
+history_node* shift_history(bw_history* history, int interval_end);
 int get_interval_length(bw_history* history);
 time_t get_next_interval_end(time_t current_time, int end_type);
 void print_history(bw_history* history, int interval_end);
@@ -133,13 +133,15 @@ void push_history(bw_history* history, history_node* new_node, time_t interval_s
 	
 }
 
-history_node* shift_history(bw_history* history)
+history_node* shift_history(bw_history* history, int interval_end)
 {
 	history_node* old_node = history->last;
 	if(history->length > 1)
 	{
 		history->oldest_interval_start = history->oldest_interval_end;
-		history->oldest_interval_end = history->oldest_interval_start+get_interval_length(history);
+		history->oldest_interval_end = interval_end == FIXED_INTERVAL ?	
+								history->oldest_interval_start+get_interval_length(history) :
+								get_next_interval_end(history->oldest_interval_start, interval_end);
 	}
 	else
 	{

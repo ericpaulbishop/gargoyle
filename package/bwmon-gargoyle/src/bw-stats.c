@@ -275,7 +275,7 @@ int main( int argc, char** argv )
 					//free history
 					while(history->length > 0)
 					{
-						history_node* old_node = shift_history(history);
+						history_node* old_node = shift_history(history, FIXED_INTERVAL);
 						free(old_node);
 					}
 					free(history);

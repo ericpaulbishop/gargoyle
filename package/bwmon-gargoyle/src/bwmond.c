@@ -488,7 +488,7 @@ void handle_timezone_shift_for_monitor(bw_monitor* monitor, int old_minutes_west
 		}
 		while(history->length > 0)
 		{
-			history_node* old_node = shift_history(history);						
+			history_node* old_node = shift_history(history, monitor->interval_end);						
 			if(next_end < current_time)
 			{
 				push_history(new_history, old_node, next_start, next_end);
@@ -524,7 +524,7 @@ void handle_timezone_shift_for_monitor(bw_monitor* monitor, int old_minutes_west
 			//pop off & free nodes that are too old
 			while(new_history->length > monitor->history_length)
 			{
-				history_node* old_node = shift_history(new_history);
+				history_node* old_node = shift_history(new_history, monitor_interval_end);
 				free(old_node);
 			}
 			next_start = next_end;
@@ -779,7 +779,7 @@ void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* rece
 			}
 			else
 			{
-				new_node = shift_history(monitor->history);
+				new_node = shift_history(monitor->history, monitor->interval_end);
 			}
 			
 			time_t interval_start = monitor->last_update;
@@ -800,7 +800,7 @@ void update_monitor(bw_monitor* monitor, update_node update, iptc_handle_t* rece
 				}
 				else
 				{
-					new_node = shift_history(monitor->history);
+					new_node = shift_history(monitor->history, monitor->interval_end);
 				}
 			}
 			
@@ -960,7 +960,7 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			//just free any history data we've allocated
 			while(history->length > 0)
 			{
-				history_node* old_node = shift_history(history);
+				history_node* old_node = shift_history(history, monitor->interval_end);
 				free(old_node);
 			}
 			free(history);
@@ -977,7 +977,7 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 
 			while(history->length > 0)
 			{
-				history_node* old_node = shift_history(history);
+				history_node* old_node = shift_history(history, monitor->interval_end);
 
 				if(next_end < current_time)
 				{
@@ -1022,7 +1022,7 @@ void load_monitor_history_from_file(bw_monitor* monitor)
 			//pop off & free nodes that are too old
 			while(history->length > monitor->history_length)
 			{
-				history_node* old_node = shift_history(history);
+				history_node* old_node = shift_history(history, monitor->interval_end);
 				free(old_node);
 			}
 
