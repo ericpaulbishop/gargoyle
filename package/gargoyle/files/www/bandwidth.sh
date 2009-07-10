@@ -84,17 +84,16 @@
 	<fieldset id="download_bandwidth_data" >
 		<legend class="sectionheader">Download Bandwidth Data</legend>
 		<div>
-			<div>
-				
-				<span style='text-decoration:underline'>Data is comma separated:</span>
-				<br/>
-				<em>[IP],[Direction],[Time Frame],[Interval Start],[Interval End],[Bytes Used]</em>
-				<br/>
-			</div>
-			<div>
+			
+			<span style='text-decoration:underline'>Data is comma separated:</span>
+			<br/>
+			<em>[IP],[Direction],[Time Frame],[Interval Start],[Interval End],[Bytes Used]</em>
+			<br/>
+		</div>
+		<div>
 			<center><input type='button' id='download_bw_button' class='bottom_button' value='Download Now' onclick='window.location="bandwidth.csv";' /></center>
-				
-			</div>
+			
+		</div>
 	</fieldset>
 </form>
 

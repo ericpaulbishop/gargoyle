@@ -83,8 +83,19 @@
 		<legend class="sectionheader">Recent Web Usage</legend>
 		<div id="webmon_table_container"></div>
 	</fieldset>
-
-
+	<fieldset id="download_web_usage_data" >
+		<legend class="sectionheader">Download Web Usage Data</legend>
+		<div>
+			<span style='text-decoration:underline'>Data is comma separated:</span>
+			<br/>
+			<em>[Time of Last Visit],[Local IP],[IP Visited],[Domain Visted]</em>
+			<br/>
+		</div>
+		<div>
+		<center><input type='button' id='download_bw_button' class='bottom_button' value='Download Now' onclick='window.location="webmon.csv";' /></center>
+			
+		</div>
+	</fieldset>
 </form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
