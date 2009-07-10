@@ -80,6 +80,22 @@
 		<div id="total_bandwidth_table_container">
 		</div>
 	</fieldset>
+
+	<fieldset id="download_bandwidth_data" >
+		<legend class="sectionheader">Download Bandwidth Data</legend>
+		<div>
+			<div>
+				
+				<span style='text-decoration:underline'>Data is comma separated:</span>
+				<br/>
+				<em>[IP],[Direction],[Time Frame],[Interval Start],[Interval End],[Bytes Used]</em>
+				<br/>
+			</div>
+			<div>
+			<center><input type='button' id='download_bw_button' class='bottom_button' value='Download Now' onclick='window.location="bandwidth.csv";' /></center>
+				
+			</div>
+	</fieldset>
 </form>
 
 

@@ -9,7 +9,7 @@ bin="httpd_gargoyle"
 run_dir="/var/run"
 pid_http="$run_dir/$bin-http.pid"
 pid_https="$run_dir/$bin-https.pid"
-cgi_pattern="cgi-bin/**|**.sh|**.cgi"
+cgi_pattern="cgi-bin/**|**.sh|**.cgi|**.csv"
 user="root"
 cert_file="/etc/$bin.pem"
 

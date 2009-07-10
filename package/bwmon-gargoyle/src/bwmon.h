@@ -244,11 +244,13 @@ void print_history_as_csv(bw_history* history, int interval_end, char* monitor_n
 	history_node* next_node = history->last;
 	time_t t1 = history->oldest_interval_start;
 	time_t t2 = history->oldest_interval_end;
-	int interval_length = interval_end == FIXED_INTERVAL ? -1 : get_interval_length(history);
+	int interval_length = interval_end == FIXED_INTERVAL ? get_interval_length(history) : -1;
 	
 	while(next_node != NULL)
 	{
-		printf("%s,%ld,%ld,%lld\n", monitor_name,t1,t2, (long long int)next_node->bandwidth); 
+		long long int bw = (long long int)next_node->bandwidth;
+		bw = bw < 0 ? 0 : bw;
+		printf("%s,%ld,%ld,%lld\n", monitor_name,t1,t2, bw); 
 
 		next_node = next_node->previous;
 		t1 = t2;
@@ -278,9 +280,10 @@ void print_history(bw_history* history, int interval_end)
 		char* end_time_str = strdup(asctime(detailed_time2));
 
 		
-		int64_t b = next_node->bandwidth;
+		long long int bw = (long long int)next_node->bandwidth;
+		bw = bw < 0 ? 0 : bw;
 		char byte_str[50];
-		sprintf(byte_str, "%lld.0 \n", (long long int)b);
+		sprintf(byte_str, "%lld.0 \n", bw);
 		double kb;
 		sscanf(byte_str, "%lf\n", &kb);
 		kb=kb/1024.0;
