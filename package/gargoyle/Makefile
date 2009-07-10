@@ -52,16 +52,15 @@ define Package/gargoyle/install
 	$(CP) ./files/* $(1)/
 	mkdir -p $(1)/www/data/
 
-
-	( if [ $(PKG_RELEASE) -le 5 ] ; then \
-		echo "$(PKG_VERSION) Beta $(PKG_RELEASE)" > $(1)/www/data/gargoyle_version.txt ; \
-	elif [ $(PKG_RELEASE) -le 9 ] ; then \
-		echo "$(PKG_VERSION) Release Candidate "`expr $(PKG_RELEASE) - 5` > $(1)/www/data/gargoyle_version.txt ; \
-	else \
-		echo "$(PKG_VERSION)" > $(1)/www/data/gargoyle_version.txt ; \
-	fi \
+	( \
+		if [ -n $(OFFICIAL_VERSION) ] ; then \
+			echo "$(OFFICIAL_VERSION)" > $(1)/www/data/gargoyle_version.txt ; \
+		else \
+			echo "Unknown, Built " $$(date) > $(1)/www/data/gargoyle_version.txt ; \
+		fi \
 	)
-	
+
+
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_header_footer $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_session_validator $(1)/usr/bin
