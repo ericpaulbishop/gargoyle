@@ -107,7 +107,7 @@ static uint64_t bandwidth_record_max;
 
 static uint64_t add_up_to_max(uint64_t original, uint64_t add)
 {
-	return bandwidth_record_max-original < add ? original+add : bandwidth_record_max;
+	return bandwidth_record_max-original < add ? bandwidth_record_max : original+add ;
 }
 
 /*
