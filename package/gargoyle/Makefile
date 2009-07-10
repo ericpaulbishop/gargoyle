@@ -1,6 +1,7 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
+
 PKG_NAME:=gargoyle
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=5
@@ -53,10 +54,10 @@ define Package/gargoyle/install
 	mkdir -p $(1)/www/data/
 
 	( \
-		if [ -n $(OFFICIAL_VERSION) ] ; then \
+		if [ -n "$(OFFICIAL_VERSION)" ] ; then \
 			echo "$(OFFICIAL_VERSION)" > $(1)/www/data/gargoyle_version.txt ; \
 		else \
-			echo "Unknown, Built " $$(date) > $(1)/www/data/gargoyle_version.txt ; \
+			echo Unknown Version, built `date -u` > $(1)/www/data/gargoyle_version.txt ; \
 		fi \
 	)
 
