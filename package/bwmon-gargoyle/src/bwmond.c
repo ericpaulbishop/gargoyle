@@ -100,7 +100,7 @@ void backup_monitor(bw_monitor* monitor, time_t current_time);
 
 void handle_output_request(bw_monitor** monitors);
 
-void daemonize(void);
+void daemonize(int background);
 void signal_handler(int sig);
 
 int output_requested = 0;
@@ -150,35 +150,10 @@ int main( int argc, char** argv )
 	}
 
 
+	//daemonize
+	int run_in_background = run_in_foreground == 0 ? 1 : 0;
+	daemonize( run_in_background );
 
-
-
-
-	if(run_in_foreground > 0)
-	{
-		// record pid to lockfile
-		int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
-		if(pid_file<0) // exit if we can't open file
-		{
-			exit(1);
-		}
-		if(lockf(pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
-		{
-			exit(1);
-		}
-		char pid_str[25];
-		sprintf(pid_str,"%d\n",getpid());
-		write(pid_file,pid_str,strlen(pid_str));
-
-		//set signal handlers
-		signal(SIGTERM,signal_handler);
-		signal(SIGINT, signal_handler);
-		signal(SIGUSR1,signal_handler);
-	}
-	else
-	{
-		daemonize();
-	}
 
 	//initialize reference time
 	time_t reference_time = time(NULL);
@@ -351,38 +326,69 @@ int main( int argc, char** argv )
 					if(monitor->history->first == NULL) //if nothing in the history, just update last update / last backup simply
 					{
 						monitor->last_update = monitor->last_update + adjustment_seconds;
-						monitor->last_accumulator_update = monitor->last_accumulator_update + adjustment_seconds;
+						monitor->last_accumulator_update > 0 ? monitor->last_accumulator_update + adjustment_seconds : 0;
 						monitor->last_backup = monitor->last_backup + adjustment_seconds;
 					}
-					else //the ugly case...
+					else //the UGLY case...
 					{
-						//find out when last update should have been given the new time scheme
-						time_t int_test1 = get_next_interval_end(0, monitor->interval_end);
-						time_t int_test2 = get_next_interval_end(int_test1, monitor->interval_end);
-						long interval_length = int_test2 - int_test1;
+						bw_history* history = monitor->history;
+						bw_history* new_history = initialize_history();
 
-						time_t new_next = get_next_interval_end(current_time, monitor->interval_end);
-						time_t new_previous = new_next - interval_length;
-						time_t old_previous = monitor->history->recent_interval_end;
-						long next_adjustment = new_previous - old_previous;
+						time_t next_start = history->oldest_interval_start + adjustment_seconds;
+						time_t next_end = get_next_interval_end(next_start, monitor->interval_end);
 
-						//if it's not when it was supposed to be, shift to make it so, otherwise do nothing
-						if(next_adjustment != 0)
+						monitor->last_update = next_start + adjustment_seconds;	
+						while(history->length > 0)
 						{
-							monitor->last_update = monitor->last_update + next_adjustment;
-							monitor->last_accumulator_update = monitor->last_accumulator_update + next_adjustment;
-							monitor->last_backup = monitor->last_backup + next_adjustment;
-				
-							bw_history* history = monitor->history;
-							history->oldest_interval_start = history->oldest_interval_start + next_adjustment;
-							history->recent_interval_end   = history->recent_interval_end + next_adjustment;
-
-							/* we calculated adjustment from most recent -- it's possible there was a DST shift 
-							 * somewhere in there.  This means we may need to recalculate for other end 
-							 */
-							history->oldest_interval_end = get_next_interval_end(history->oldest_interval_start, monitor->interval_end);
+							history_node* old_node = shift_history(history, monitor->interval_end);						
+							if(next_end < current_time)
+							{
+								//printf("Adjusting for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+								push_history(new_history, old_node, next_start, next_end);
+								monitor->last_update = next_end;
+							}
+							else 
+							{
+								if(next_start < current_time)
+								{
+									monitor->last_update = next_start;
+									monitor->accumulator_count = old_node->bandwidth > 0 ? old_node->bandwidth : 0;
+								}
+								free(old_node);
+							}
 						}
-					}
+						while(next_end < current_time)
+						{
+							//printf("Adding for %s, next_start=%d, next_end=%d\n", monitor->name, next_start, next_end);	
+							history_node* next_node = (history_node*)malloc(sizeof(history_node));
+							next_node->bandwidth = monitor->accumulator_count > 0 ? monitor->accumulator_count : -1;
+							push_history(new_history, next_node, next_start, next_end);
+							monitor->accumulator_count = 0;
+				
+							if(next_end > monitor->last_update)
+							{
+								monitor->last_update = next_end;
+							}
+
+							//pop off & free nodes that are too old
+							while(new_history->length > monitor->history_length)
+							{
+								history_node* old_node = shift_history(new_history, monitor->interval_end);
+								free(old_node);
+							}
+							next_start = next_end;
+							next_end = get_next_interval_end(next_end, monitor->interval_end);
+						}
+
+						free(history);
+						monitor->history = new_history;
+						if(monitor->accumulator_freq > 0)
+						{
+							monitor->last_accumulator_update = monitor->last_update;
+						}
+						monitor->last_backup = monitor->last_backup + adjustment_seconds;
+
+					} //end UGLY case
 				}
 				*next_update = get_next_update_time(monitors, next_update->monitor_index);
 				priority = next_update->update_time > reference_time ?  next_update->update_time - reference_time : 0;
@@ -540,37 +546,41 @@ void handle_timezone_shift_for_monitor(bw_monitor* monitor, int old_minutes_west
 	}
 }
 
-void daemonize(void)
+void daemonize(int background) //background variable is useful for debugging, causes program to run in foreground if 0
 {
-	//fork and end parent process
-	int i=fork();
-	if (i != 0)
-	{	
-		if(i < 0) //exit on fork error
-		{
-			exit(1);
-		}
-		else //this is parent, exit cleanly
-		{
-			exit(0);
-		}
-	}
-	
-	/********************************
-	* child continues as a daemon after parent exits
-	********************************/
-	// obtain a new process group & close all file descriptors 
-	setsid();
-	for(i=getdtablesize();i>=0;--i)
+
+	if(background != 0)
 	{
-		close(i);
+		//fork and end parent process
+		int i=fork();
+		if (i != 0)
+		{	
+			if(i < 0) //exit on fork error
+			{
+				exit(1);
+			}
+			else //this is parent, exit cleanly
+			{
+				exit(0);
+			}
+		}
+	
+		/********************************
+		* child continues as a daemon after parent exits
+		********************************/
+		// obtain a new process group & close all file descriptors 
+		setsid();
+		for(i=getdtablesize();i>=0;--i)
+		{
+			close(i);
+		}
+
+		// close standard i/o  
+        	close(STDOUT_FILENO);
+		close(STDIN_FILENO);
+		close(STDERR_FILENO);
 	}
 
-	// close standard i/o  
-        close(STDOUT_FILENO);
-        close(STDIN_FILENO);
-        close(STDERR_FILENO);
-	
 
 	// record pid to lockfile
 	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
@@ -592,6 +602,7 @@ void daemonize(void)
 	signal(SIGINT, signal_handler);
 	signal(SIGUSR1,signal_handler);
 }
+
 
 void signal_handler(int sig)
 {
