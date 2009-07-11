@@ -32,6 +32,8 @@
 
 #include <erics_tools.h>
 #include <uci.h>
+#define malloc safe_malloc
+
 
 #define MINIMAL_HEADER 1
 #define HEADER 2

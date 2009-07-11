@@ -44,6 +44,5 @@ void *safe_malloc(size_t size)
 		fprintf(stderr, "ERROR: MALLOC FAILURE!\n");
 		exit(1);
 	}
-
 	return val;
 }

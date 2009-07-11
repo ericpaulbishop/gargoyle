@@ -47,7 +47,7 @@
 
 
 #include "erics_tools.h"
-
+#define malloc safe_malloc
 
 #define MSG_ID 12
 #define REQUEST_MSG_TYPE 24

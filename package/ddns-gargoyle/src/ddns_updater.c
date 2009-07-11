@@ -24,6 +24,8 @@
 
 #include "erics_tools.h"
 #include "http_minimal_client.h"
+#define malloc safe_malloc
+
 
 #include <stdio.h>
 #include <string.h>

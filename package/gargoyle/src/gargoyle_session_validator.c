@@ -7,6 +7,7 @@
 #include <time.h>
 
 #include <erics_tools.h>
+#define malloc safe_malloc
 
 #include "sha256.h"
 

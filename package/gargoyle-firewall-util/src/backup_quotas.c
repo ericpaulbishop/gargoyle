@@ -27,6 +27,7 @@
 #include <erics_tools.h>
 #include <uci.h>
 #include <ipt_bwctl.h>
+#define malloc safe_malloc
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type);
 void  backup_quota(char* quota_id, char* quota_backup_dir);

@@ -20,9 +20,23 @@
 
 
 #include "ipt_bwctl.h"
+#define malloc safe_malloc
+
+
+
+
+static void *safe_malloc(size_t size)
+{
+	void* val = malloc(size);
+	if(val == NULL)
+	{
+		fprintf(stderr, "ERROR: MALLOC FAILURE!\n");
+		exit(1);
+	}
+	return val;
+}
 
 static int bandwidth_semaphore = -1;
-
 
 union semun 
 {

@@ -5,6 +5,7 @@
 #include <sys/types.h>
 
 #include <erics_tools.h>
+#define malloc safe_malloc
 
 char** get_shell_command_output_lines(char* command, unsigned long* num_lines);
 void free_split_pieces(char** split_pieces);

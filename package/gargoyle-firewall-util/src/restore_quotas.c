@@ -4,13 +4,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include <erics_tools.h>
-#include <uci.h>
-#include <ipt_bwctl.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include <erics_tools.h>
+#include <uci.h>
+#include <ipt_bwctl.h>
+#define malloc safe_malloc
 
 
 void restore_backup_for_id(char* id, char* quota_backup_dir);

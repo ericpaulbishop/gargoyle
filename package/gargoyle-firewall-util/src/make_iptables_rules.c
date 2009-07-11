@@ -29,6 +29,7 @@
 
 #include <erics_tools.h>
 #include <uci.h>
+#define malloc safe_malloc
 
 /* these are indices don't change! */
 #define MATCH_IP_INDEX 0

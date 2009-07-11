@@ -21,7 +21,10 @@
 
 #ifdef USE_ERICS_TOOLS
 #include "erics_tools.h"
+#define malloc safe_malloc
 #endif
+
+
 
 #include <stdio.h>
 #include <ctype.h>
