@@ -109,8 +109,12 @@ for target in $targets ; do
 	cp "$targets_dir/$target/.config" "$target-src"
 	
 
-	#enter build directory
+	#enter build directory and make sure we get rid of all those pesky .svn files, 
+	#and any crap left over from editing
 	cd "$target-src"
+	find . -name ".svn"  | xargs rm -rf
+	find . -name "*~"    | xargs rm -rf
+	find . -name ".*sw*" | xargs rm -rf
 	
 	#if version name specified, set gargoyle official version parameter in gargoyle package
 	if [ -n "$version_name" ] ; then
