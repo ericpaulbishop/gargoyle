@@ -239,4 +239,9 @@ extern char* dynamic_replace(char* template_str, char* old_str, char* new_str);
 extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators, unsigned long* read_length);
 extern unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigned long* read_length);
 
+/* safe malloc used by all others (actually aliased to malloc and used) */
+extern void *safe_malloc(size_t size);
+
+
+
 #endif /* ERICS_TOOLS_H */

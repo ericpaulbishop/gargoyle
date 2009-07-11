@@ -35,6 +35,7 @@
  */
 
 #include "erics_tools.h"
+#define malloc safe_malloc
 
 char* replace_prefix(char* original, char* old_prefix, char* new_prefix)
 {

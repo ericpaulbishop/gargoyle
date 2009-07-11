@@ -37,6 +37,8 @@ CFLAGS:=$(CFLAGS) -Os
 WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
 MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
 
+
+
 test_list_and_queue: test_list_and_queue.c libericstools.a
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 test_list_and_queue.o: test_list_and_queue.c
@@ -61,34 +63,22 @@ all: erics_tools
 erics_tools: libericstools.$(SHLIB_EXT) libericstools.a
 
 
-libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_util_static.o
+libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_util_static.o safe_malloc_static.o
 	if [ -e $@ ] ; then rm $@ ; fi
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 	
 
-libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o
+libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o safe_malloc_dyn.o
 	if [ -e libericstools.$(SHLIB_EXT) ] ; then rm libericstools.$(SHLIB_EXT)* ; fi
 	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
 	ln -s $(SHLIB_FILE) libericstools.$(SHLIB_EXT)
 
-list_dyn.o: list.c
-	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
-priority_queue_dyn.o: priority_queue.c
-	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
-tree_map_dyn.o: tree_map.c 
-	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
-string_util_dyn.o: string_util.c 
+
+%_dyn.o: %.c
 	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
 
-
-list_static.o: list.c
-	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
-priority_queue_static.o: priority_queue.c
-	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
-tree_map_static.o: tree_map.c 
-	$(CC) $(CFLAGS) $(WARNING_FLAGS) -pedantic -o $@ -c $^
-string_util_static.o: string_util.c 
+%_static.o: %.c
 	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
 
 

@@ -35,6 +35,7 @@
  */
 
 #include "erics_tools.h"
+#define malloc safe_malloc
 
 typedef struct id_map_node_struct
 {

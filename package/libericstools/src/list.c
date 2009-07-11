@@ -36,7 +36,7 @@
 
 
 #include "erics_tools.h"
-
+#define malloc safe_malloc
 
 list* initialize_list()
 {

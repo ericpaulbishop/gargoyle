@@ -35,6 +35,7 @@
  */
 
 #include "erics_tools.h"
+#define malloc safe_malloc
 
 /* internal utility structures/ functions */
 typedef struct stack_node_struct
