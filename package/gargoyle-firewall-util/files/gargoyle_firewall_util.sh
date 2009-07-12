@@ -209,20 +209,25 @@ insert_restriction_rules()
 	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
 	ingress_exits=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
 	if [ -n "$egress_exists" ] ; then
+		delete_chain_from_table filter egress_whitelist
 		delete_chain_from_table filter egress_restrictions
 	fi
 	if [ -n "$ingress_exists" ] ; then
+		delete_chain_from_table filter ingress_whitelist
 		delete_chain_from_table filter ingress_restrictions
 	fi
 	
 	iptables -t filter -N egress_restrictions	
 	iptables -t filter -N ingress_restrictions	
+	iptables -t filter -N egress_whitelist
+	iptables -t filter -N ingress_whitelist
 
 	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions	
-	iptables -t filter -I OUTPUT -o $wan_if -j egress_restrictions	
 	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions	
-	iptables -t filter -I INPUT -i $wan_if -j ingress_restrictions	
-	
+
+	iptables -t filter -I egress_restrictions  -j egress_whitelist
+	iptables -t filter -I ingress_restrictions -j ingress_whitelist
+			
 	
 	package_name="firewall"	
 	parse_rule_config()
@@ -232,7 +237,7 @@ insert_restriction_rules()
 		
 		config_get "enabled" "$section" "enabled"
 		if [ -z "$enabled" ] ; then enabled="1" ; fi
-		if [ "$enabled" = "1" ] ; then
+		if [ "$enabled" = "1" ] && ( [ "$section_type"  = "restriction_rule" ] || [ "$section_type" = "whitelist_rule" ] ) ; then
 			#convert app_proto && not_app_proto to connmark here
 			config_get "app_proto" "$section" "app_proto"
 			config_get "not_app_proto" "$section" "not_app_proto"
@@ -255,9 +260,19 @@ insert_restriction_rules()
 			config_get "is_ingress" "$section" "is_ingress"
 			if [ "$is_ingress" = "1" ] ; then
 				ingress=" -i "
-				chain="ingress_restrictions"
+				if [ "$section_type" = "restriction_rule"  ] ; then
+					chain="ingress_restrictions"
+				else
+					chain="ingress_whitelist"
+				fi
+			else
+				if [ "$section_type" = "restriction_rule"  ] ; then
+					chain="egress_restrictions"
+				else
+					chain="ingress_whitelist"	
+				fi				
 			fi
-		
+					
 			if [ "$section_type" = "whitelist_rule" ] ; then
 				target="ACCEPT"
 			fi
