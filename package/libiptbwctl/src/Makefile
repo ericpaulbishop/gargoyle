@@ -42,21 +42,21 @@ all: libiptbwctl
 libiptbwctl: libiptbwctl.$(SHLIB_EXT) libiptbwctl.a
 
 
-libiptbwctl.a: iptbwctl_static.o
+libiptbwctl.a: ipt_bwctl_static.o ipt_bwctl_safe_malloc_static.o
 	if [ -e $@ ] ; then rm $@ ; fi
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 	
 
-libiptbwctl.$(SHLIB_EXT) : iptbwctl_dyn.o 
+libiptbwctl.$(SHLIB_EXT) : ipt_bwctl_dyn.o ipt_bwctl_safe_malloc_dyn.o
 	if [ -e libiptbwctl.$(SHLIB_EXT) ] ; then rm libiptbwctl.$(SHLIB_EXT)* ; fi
 	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc 
 	ln -s $(SHLIB_FILE) libiptbwctl.$(SHLIB_EXT)
 
-iptbwctl_dyn.o: ipt_bwctl.c
+%_dyn.o: %.c
 	$(CC) $(CFLAGS) -fPIC $(WARNING_FLAGS) -o $@ -c $^
 
-iptbwctl_static.o: ipt_bwctl.c
+%_static.o: %.c
 	$(CC) $(CFLAGS) $(WARNING_FLAGS) -o $@ -c $^
 
 
@@ -64,6 +64,7 @@ iptbwctl_static.o: ipt_bwctl.c
 
 clean:
 	cd utils
-	rm -rf bw_get bw_set *.$(SHLIB_EXT)* *.a *.o *~ .*sw*
+	rm -rf bw_get bw_set *.a *.o *~ .*sw*
 	cd ..
-	rm -rf bw_get bw_set *.$(SHLIB_EXT)* *.a *.o *~ .*sw*
+	if [ -n "$(SHLIB_EXT)" ] ; then rm -rf *.$(SHLIB_EXT)* ; fi
+	rm -rf *.a *.o *~ .*sw*

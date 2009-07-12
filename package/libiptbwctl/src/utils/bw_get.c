@@ -20,7 +20,7 @@
 
 
 #include <ipt_bwctl.h>
-
+#define malloc ipt_bwctl_safe_malloc
 
 int main(int argc, char **argv)
 {

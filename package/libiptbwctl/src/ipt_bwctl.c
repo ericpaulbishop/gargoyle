@@ -20,21 +20,9 @@
 
 
 #include "ipt_bwctl.h"
-#define malloc safe_malloc
+#define malloc ipt_bwctl_safe_malloc
 
 
-
-
-static void *safe_malloc(size_t size)
-{
-	void* val = malloc(size);
-	if(val == NULL)
-	{
-		fprintf(stderr, "ERROR: MALLOC FAILURE!\n");
-		exit(1);
-	}
-	return val;
-}
 
 static int bandwidth_semaphore = -1;
 
@@ -47,16 +35,7 @@ union semun
 };
 
 
-static unsigned short get_sem_member_count(int sid)
-{
-        union semun semopts;
-        struct semid_ds mysemds;
 
-        semopts.buf = &mysemds;
-
-        /* Return number of members in the semaphore set */
-        return(semopts.buf->sem_nsems);
-}
 static int get_sem_val(int sid, int member)
 {
         int semval;
@@ -68,7 +47,7 @@ static int get_sem(int *sid, key_t key)
 {
         int cntr;
         union semun semopts;
-	int members = 2;
+	int members = 1;
 
 	
 	int success = ((*sid = semget(key, members, IPC_CREAT|IPC_EXCL|0777))== -1) ? 0 : 1;
