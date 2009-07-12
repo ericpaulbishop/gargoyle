@@ -91,7 +91,7 @@
 			<br/>
 		</div>
 		<div>
-			<center><input type='button' id='download_bw_button' class='bottom_button' value='Download Now' onclick='window.location="bandwidth.csv";' /></center>
+			<center><input type='button' id='download_data_button' class='big_button' value='Download Now' onclick='window.location="bandwidth.csv";' /></center>
 			
 		</div>
 	</fieldset>

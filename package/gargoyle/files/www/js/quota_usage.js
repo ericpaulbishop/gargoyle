@@ -42,7 +42,7 @@ function refreshTableData()
 	}
 	var columnNames = ["IP", "% Upload Used", "% Download Used", "% Combined Used" ];
 	
-	var quotaTable = createTable(columnNames, quotaTableData, "quota_table", false, false);
+	var quotaTable = createTable(columnNames, quotaTableData, "quota_usage_table", false, false);
 	var tableContainer = document.getElementById('quota_table_container');
 	if(tableContainer.firstChild != null)
 	{

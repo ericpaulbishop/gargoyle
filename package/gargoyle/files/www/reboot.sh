@@ -12,7 +12,7 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader">Reboot</legend>
-		<center><input type='button' value='Reboot Now' id="reboot_button" class="bottom_button" onclick='reboot()' /></center>
+		<center><input type='button' value='Reboot Now' id="reboot_button" class="big_button" onclick='reboot()' /></center>
 
 	</fieldset>
 </form>

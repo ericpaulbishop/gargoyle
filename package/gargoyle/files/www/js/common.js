@@ -722,6 +722,7 @@ function enableAssociatedField(checkbox, associatedId, defaultValue, controlDocu
 
 function setElementEnabled(element, enabled, defaultValue)
 {
+	
 	if(enabled)
 	{
 		element.readonly=false;
@@ -737,7 +738,8 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		if(element.type == "button")
 		{
-			element.className="default_button";
+			var activeClassName = element.className.replace(/_button.*$/, "_button");
+			element.className=activeClassName;
 		}
 	}
 	else
@@ -756,7 +758,8 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		if(element.type == "button")
 		{
-			element.className="default_button_disabled";
+			var activeClassName = element.className.replace(/_button.*$/, "_button");
+			element.className= activeClassName + "_disabled";
 		}
 	}
 }

@@ -262,6 +262,40 @@ input.default_button_disabled:hover
 	cursor: auto;
 }
 
+input.big_button
+{
+	text-align:center;
+	font-weight:bold;
+	width:200px;
+	height:25px;
+	background: #E8EDFF;
+	border: 1px solid black;
+	cursor: pointer;
+}
+input.big_button:hover
+{
+	background: #6b8aff;
+	color: #FFFFFF;
+}
+input.big_button_disabled
+{
+	text-align:center;
+	width:200px;
+	height:25px;
+	color: #808080;
+	background: #F0F0F0;
+	border: 1px solid #909090;
+	cursor: auto;
+}
+input.big_button_disabled:hover
+{
+	color: #808080;
+	background: #F0F0F0;
+	border: 1px solid #909090;
+	cursor: auto;
+}
+
+
 
 input.text_error
 {
@@ -302,8 +336,6 @@ input.bottom_button:hover
 	background: #6b8aff;
 	color: #FFFFFF;
 }
-
-
 
 #control_column_container
 {
@@ -948,6 +980,7 @@ td.quota_table_column_3
 }
 td.quota_table_column_4
 {
+	text-align:center;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
@@ -967,6 +1000,40 @@ td.quota_table_column_7
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
+td.quota_usage_table_column_1
+{
+	text-align:center;
+	padding-right:15px;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_usage_table_column_2
+{
+	text-align:right;
+	padding-right:15px;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_usage_table_column_3
+{
+	text-align:right;
+	padding-right:15px;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_usage_table_column_4
+{
+	text-align:right;
+	padding-right:15px;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
+
+
 
 td.lease_table_column_1
 {

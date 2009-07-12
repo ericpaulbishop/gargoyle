@@ -219,6 +219,7 @@ function resetData()
 		}
 		webmonUpdater = setInterval("updateMonitorTable()", 10000); //check for updates every 10 seconds
 	}
+	setElementEnabled(document.getElementById("download_data_button"), webmonEnabled);
 }
 
 function setIncludeExclude()
