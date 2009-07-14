@@ -1,12 +1,12 @@
-VERSION:=1.0.0 (Built $(shell date -u))
+GARGOYLE_VERSION:=1.0.0 (Built $(shell date -u))
 V=99
 
 ALL: all
 all:
-	sh full-build-809.sh ALL "$(VERSION)" "$(V)"
+	sh full-build-809.sh ALL "$(GARGOYLE_VERSION)" "$(V)"
 
 %: targets-8.09/%
-	sh full-build-809.sh $@ "$(VERSION)" "$(V)"
+	sh full-build-809.sh $@ "$(GARGOYLE_VERSION)" "$(V)"
 
 prepare:
 	if [ -d "../downloaded" ] ; then cp -r ../downloaded . ; fi

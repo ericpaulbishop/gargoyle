@@ -158,13 +158,13 @@ for target in $targets ; do
 			cp "bin/packages/Packages" ../built/$target
 		fi
 	fi
-
+	
 	#copy images to images/target directory
 	mkdir -p ../images/$target
 	image_files=$(ls bin 2>/dev/null)
 	for i in $image_files ; do
 		if [ ! -d "bin/$i" ] ; then
-			version_str=$(echo $gargoyle_version | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
+			version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
 			newname=$(echo "$i" | sed "s/openwrt/garoyle_$version_str/g")
 			cp "bin/$i" "../images/$target/$newname"
 		fi
