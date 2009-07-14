@@ -1,4 +1,4 @@
-VERSION:=1.0.0 Beta 5 (Built $(shell date -u))
+VERSION:=1.0.0 (Built $(shell date -u))
 V=99
 
 ALL: all
