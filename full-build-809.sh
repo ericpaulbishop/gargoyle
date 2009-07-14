@@ -165,7 +165,7 @@ for target in $targets ; do
 	for i in $image_files ; do
 		if [ ! -d "bin/$i" ] ; then
 			version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
-			newname=$(echo "$i" | sed "s/openwrt/garoyle_$version_str/g")
+			newname=$(echo "$i" | sed "s/openwrt/gargoyle_$version_str/g")
 			cp "bin/$i" "../images/$target/$newname"
 		fi
 	done
