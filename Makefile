@@ -11,6 +11,7 @@ all:
 prepare:
 	if [ -d "../downloaded" ] ; then cp -r ../downloaded . ; fi
 	if [ -d "../kamikaze-8.09-src" ] ; then cp -r ../kamikaze-8.09-src . ; fi
+	if [ -e "./kamikaze-8.09-src/dl" ] ; then rm -rf "./kamikaze-8.09-src/dl" ; fi
 
 cleanup:
 	find . -name ".svn" | xargs rm -rf
