@@ -60,6 +60,7 @@ int main( int argc, char** argv )
 			case 'T':
 			case 't':
 				format = 't'; //table of comma separated values, on each line: monitor_name,start,end,bandwidth
+				break;
 			case 'U':
 			case 'u':
 			default:
