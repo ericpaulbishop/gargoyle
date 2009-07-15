@@ -151,12 +151,13 @@ for target in $targets ; do
 	mkdir -p ../built/$target
 	if [ -d "bin/packages/" ] ; then
 		package_files=$(find bin -name "*.ipk")
+		index_files=$(find bin -name "Packa*")
 		for p in $package_files ; do
 			cp "$p" ../built/$target
 		done
-		if [ -e "bin/packages/Packages" ] ; then
-			cp "bin/packages/Packages" ../built/$target
-		fi
+		for i in $index_files ; do
+			cp "$i" ../built/$target
+		done
 	fi
 	
 	#copy images to images/target directory
