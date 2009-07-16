@@ -276,8 +276,8 @@ int main(int argc, char** argv)
 							}
 							else if(strcmp(types[type_index], "combined_limit") == 0)
 							{
-								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
-								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0xFF000000/0xFF000000 2>/dev/null"), 1);
+								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0xF000000/0xF000000 2>/dev/null"), 1);
+								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0xF000000/0xF000000 2>/dev/null"), 1);
 								char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
 								ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
 							}
@@ -325,6 +325,10 @@ int main(int argc, char** argv)
 								restore_backup_for_id(type_id, "/usr/data/quotas");
 							}
 							free(limit);
+						}
+						if(strcmp(types[type_index], "combined_limit") == 0)
+						{
+							run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ", chains[type_index], " -j CONNMARK --set-mark 0x0/0xF000000 2>/dev/null"), 1);
 						}
 						free(ip_test);
 						free(applies_to);
