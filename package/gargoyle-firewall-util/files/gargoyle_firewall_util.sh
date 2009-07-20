@@ -269,7 +269,7 @@ insert_restriction_rules()
 				if [ "$section_type" = "restriction_rule"  ] ; then
 					chain="egress_restrictions"
 				else
-					chain="ingress_whitelist"	
+					chain="egress_whitelist"	
 				fi				
 			fi
 					
