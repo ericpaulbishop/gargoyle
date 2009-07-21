@@ -328,12 +328,15 @@ static int match(	const struct sk_buff *skb,
 		}
 		if(ip_map != NULL)
 		{
-			bws[0] = (uint64_t*)get_long_map_element(ip_map, 0);
+			bws[0] = (uint64_t*)get_long_map_element(ip_map, 0); //if this is null and remains so due to kmalloc failure, that's ok (won't cause crash)
 			if(bws[0] == NULL)
 			{
 				bws[0] = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
-				*(bws[0]) = skb->len;
-				set_long_map_element(ip_map, (unsigned long)(*(bws[0])), (void*)(bws[0]) );
+				if(bws[0] != NULL) //check for kmalloc failure
+				{
+					*(bws[0]) = skb->len;
+					set_long_map_element(ip_map, (unsigned long)(*(bws[0])), (void*)(bws[0]) );
+				}
 			}
 			else
 			{
@@ -392,14 +395,17 @@ static int match(	const struct sk_buff *skb,
 				if(oldval == NULL)
 				{
 					oldval  = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
-					*oldval = skb->len;
-					set_long_map_element(ip_map, (unsigned long)bw_ip, (void*)oldval);
+					if(oldval != NULL) //check for kmalloc failure
+					{
+						*oldval = skb->len;
+						set_long_map_element(ip_map, (unsigned long)bw_ip, (void*)oldval);
+					}
 				}
 				else
 				{
 					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len);
 				}
-				bws[bw_ip_index] = oldval;
+				bws[bw_ip_index] = oldval; //this is fine, setting bws[bw_ip_index] to NULL on kmalloc failure won't crash anything
 			}
 		}
 	}
@@ -449,6 +455,13 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		input_buffer_index = 0;
 		input_buffer_length = *buffer_length;
 		input_buffer = (char*)kmalloc(input_buffer_length, GFP_ATOMIC);
+		if(input_buffer == NULL) // deal with kmalloc failure
+		{
+			input_buffer_lenth = 0;
+			input_buffer_index = 0;
+			up(&userspace_lock);
+			return 1;
+		}
 		
 		/* read id, and offset query index */
 		memcpy(input_id, query+4, BANDWIDTH_MAX_ID_LENGTH);
@@ -571,8 +584,11 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 					if(map_bw == NULL)
 					{
 						map_bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
-						*map_bw = *bw;
-						set_long_map_element(ip_map, (unsigned long)(*ip), map_bw);
+						if(map_bw != NULL) /* best we can do on kmalloc failure is just ignore value */
+						{
+							*map_bw = *bw;
+							set_long_map_element(ip_map, (unsigned long)(*ip), map_bw);
+						}
 					}
 					else
 					{
@@ -701,6 +717,14 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 			
 			output_buffer_length = (BANDWIDTH_ENTRY_LENGTH*ip_map->num_elements);
 			output_buffer = (unsigned char *)kmalloc(output_buffer_length, GFP_ATOMIC);
+			if(output_buffer == NULL) /* deal with kmalloc failure */
+			{
+				output_buffer_length = 0;
+				output_buffer_index = 0;
+				spin_lock_bh(&bandwidth_lock);
+				up(&userspace_lock);
+				return 1;
+			}
 			output_buffer_index = 0;
 			apply_to_every_long_map_value(ip_map, add_to_output_buffer);
 			output_buffer_index = 0;
@@ -845,6 +869,11 @@ static int checkentry(	const char *tablename,
 	if(info->ref_count == NULL) /* first instance, we're inserting rule */
 	{
 		info->ref_count = (unsigned long*)kmalloc(sizeof(unsigned long), GFP_ATOMIC);
+		if(info->ref_count == NULL) /* deal with kmalloc failure */
+		{
+			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+			return 0;
+		}
 		*(info->ref_count) = 1;
 		info->non_const_self = info;
 		
@@ -899,12 +928,36 @@ static int checkentry(	const char *tablename,
 		}
 	
 		imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
+		if(imp == NULL) /* handle kmalloc failure */
+		{
+			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+			spin_unlock_bh(&bandwidth_lock);
+			up(&userspace_lock);
+			return 0;
+
+		}
 		imp->ip_map = initialize_long_map();
+		if(imp->ip_map == NULL) /* handle kmalloc failure */
+		{
+			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+			spin_unlock_bh(&bandwidth_lock);
+			up(&userspace_lock);
+			return 0;
+
+		}
+
 		imp->info = info;
 		set_string_map_element(id_map, info->id, imp);
 		if(info->type == BANDWIDTH_COMBINED)
 		{
 			uint64_t *bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+			if(bw == NULL)
+			{
+				printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+				spin_unlock_bh(&bandwidth_lock);
+				up(&userspace_lock);
+				return 0;
+			}
 			*bw = info->current_bandwidth;
 			set_long_map_element(imp->ip_map, 0, bw);
 		}
@@ -1027,7 +1080,10 @@ static int __init init(void)
 	}
 	bandwidth_record_max = get_bw_record_max();
 	id_map = initialize_string_map(0);
-
+	if(id_map == NULL) /* deal with kmalloc failure */
+	{
+		return -1;
+	}
 	init_MUTEX(&userspace_lock); 
 
 	return ipt_register_match(&bandwidth_match);

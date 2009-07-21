@@ -191,11 +191,13 @@ void print_list(stack_node *l)
 string_map* initialize_string_map(unsigned char store_keys)
 {
 	string_map* map = (string_map*)malloc(sizeof(string_map));
-	map->store_keys = store_keys;
-	map->lm.root = NULL;
-	map->lm.num_elements = 0;
-	map->num_elements = map->lm.num_elements;
-	
+	if(map != NULL)
+	{
+		map->store_keys = store_keys;
+		map->lm.root = NULL;
+		map->lm.num_elements = 0;
+		map->num_elements = map->lm.num_elements;
+	}
 	return map;
 }
 
@@ -219,6 +221,10 @@ void* set_string_map_element(string_map* map, const char* key, void* value)
 	if(map->store_keys)
 	{
 		string_map_key_value* kv = (string_map_key_value*)malloc(sizeof(string_map_key_value));
+		if(kv == NULL) /* deal with malloc failure */
+		{
+			return NULL;
+		}
 		kv->key = strdup(key);
 		kv->value = value;
 		return_value = set_long_map_element(  &(map->lm), hashed_key, kv);
@@ -258,6 +264,10 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 {
 	char** str_keys;
 	str_keys = (char**)malloc((map->num_elements+1)*sizeof(char*));
+	if(str_keys == NULL) /* deal with kmalloc failure */
+	{
+		return NULL;
+	}
 	str_keys[0] = NULL;
 	*num_keys_returned = 0;
 	if(map->store_keys && map->num_elements > 0)
@@ -297,6 +307,11 @@ void** destroy_string_map(string_map* map, int destruction_type, unsigned long* 
 	{
 		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
 		long_map* destroy = (long_map*)malloc(sizeof(long_map));
+		if(destroy == NULL) /* gahh.... this is awful.  If malloc failure happens here there is no way around a memory leak (map won't get freed) */
+		{
+			return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
+			return return_values;
+		}
 		*destroy = map->lm;
 		return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
 		free(map);
@@ -314,9 +329,11 @@ void** destroy_string_map(string_map* map, int destruction_type, unsigned long* 
 long_map* initialize_long_map(void)
 {
 	long_map* map = (long_map*)malloc(sizeof(long_map));
-	map->root = NULL;
-	map->num_elements = 0;
-
+	if(map != NULL) /* test for malloc failure */
+	{
+		map->root = NULL;
+		map->num_elements = 0;
+	}
 	return map;
 }
 
@@ -400,6 +417,10 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 
 
 	long_map_node* new_node = (long_map_node*)malloc(sizeof(long_map_node));
+	if(new_node == NULL)
+	{
+		return NULL;
+	}
 	new_node->value = value;
 	new_node->key = key;
 	new_node->left = NULL;
