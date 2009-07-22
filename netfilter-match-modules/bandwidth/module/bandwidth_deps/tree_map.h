@@ -142,14 +142,15 @@ typedef struct stack_node_struct
 	struct stack_node_struct* previous;
 } stack_node;
 
-
-void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
-void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
-void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
-void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
-signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
-void rotate_right (long_map_node** parent);
-void rotate_left (long_map_node** parent);
+static void free_stack(stack_node* stack);
+static void** destroy_long_map_values(long_map* map, int destruction_type, unsigned long* num_destroyed);
+static void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
+static void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
+static void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
+static void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
+static signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
+static void rotate_right (long_map_node** parent);
+static void rotate_left (long_map_node** parent);
 
 /* internal for string map */
 typedef struct 
@@ -264,7 +265,7 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 {
 	char** str_keys;
 	str_keys = (char**)malloc((map->num_elements+1)*sizeof(char*));
-	if(str_keys == NULL) /* deal with kmalloc failure */
+	if(str_keys == NULL) /* deal with malloc failure */
 	{
 		return NULL;
 	}
@@ -275,7 +276,8 @@ char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 		unsigned long list_length;
 		void** long_values = get_sorted_long_map_values( &(map->lm),  &list_length);
 		unsigned long key_index;
-		for(key_index = 0; key_index < list_length; key_index++)
+		/*list_length will be 0 on malloc failure in get_sorted_long_map_values, so this code shouldn't seg fault if that happens */
+		for(key_index = 0; key_index < list_length; key_index++) 
 		{
 			str_keys[key_index] = strdup( ((string_map_key_value*)(long_values[key_index]))->key);
 			*num_keys_returned = *num_keys_returned + 1;
@@ -306,14 +308,7 @@ void** destroy_string_map(string_map* map, int destruction_type, unsigned long* 
 	if(map != NULL)
 	{
 		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
-		long_map* destroy = (long_map*)malloc(sizeof(long_map));
-		if(destroy == NULL) /* gahh.... this is awful.  If malloc failure happens here there is no way around a memory leak (map won't get freed) */
-		{
-			return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
-			return return_values;
-		}
-		*destroy = map->lm;
-		return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
+		return_values = destroy_long_map_values(map->lm, destruction_type, num_destroyed );
 		free(map);
 	}
 	return return_values;
@@ -438,6 +433,11 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 		parent_node = map->root;
 			
 		next_parent = (stack_node*)malloc(sizeof(stack_node));
+		if(next_parent == NULL) /* deal with malloc failure */
+		{
+			free(new_node);
+			return NULL; /* won't insert but won't seg fault */
+		}
 		next_parent->node_ptr =  &(map->root);
 		next_parent->previous = parent_list;
 		parent_list = next_parent;	
@@ -445,6 +445,13 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 		while( key != parent_node->key && (next_node = (key < parent_node->key ? parent_node->left : parent_node->right) )  != NULL)
 		{
 			next_parent = (stack_node*)malloc(sizeof(stack_node));
+			if(next_parent == NULL) /* deal with malloc failure */
+			{
+				/* free previous stack nodes to prevent memory leak */
+				free_stack(parent_list);
+				free(new_node);
+				return NULL;
+			}
 			next_parent->node_ptr = key < parent_node->key ? &(parent_node->left) : &(parent_node->right);
 			next_parent->previous = parent_list;
 			next_parent->previous->direction = key < parent_node->key ? -1 : 1;
@@ -489,12 +496,7 @@ void* set_long_map_element(long_map* map, unsigned long key, void* value)
 		}
 	}
 
-	while(parent_list != NULL)
-	{
-		previous_parent = parent_list;
-		parent_list = previous_parent->previous;
-		free(previous_parent);
-	}
+	free_stack(parent_list);
 
 	if(old_value_found == 0)
 	{
@@ -539,12 +541,22 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 		if(remove_node != NULL && key != remove_parent->key)
 		{
 			next_parent = (stack_node*)malloc(sizeof(stack_node));
+			if(next_parent == NULL) /* deal with malloc failure */
+			{
+				return NULL;
+			}
 			next_parent->node_ptr =  &(map->root);
 			next_parent->previous = parent_list;
 			parent_list = next_parent;	
 			while( key != remove_node->key && (next_node = (key < remove_node->key ? remove_node->left : remove_node->right))  != NULL)
 			{
 				next_parent = (stack_node*)malloc(sizeof(stack_node));
+				if(next_parent == NULL) /* deal with malloc failure */
+				{
+					/* free previous stack nodes to prevent memory leak */
+					free_stack(parent_list);
+					return NULL;
+				}
 				next_parent->node_ptr = key < remove_parent->key ? &(remove_parent->left) : &(remove_parent->right);
 				next_parent->previous = parent_list;
 				next_parent->previous->direction = key < remove_parent->key ? -1 : 1; 
@@ -578,7 +590,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				replacement->balance = remove_node->balance;
 
 				/* put pointer to replacement node into list for balance update */
-				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));;
+				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));
+				if(replacement_stack_node == NULL) /* deal with malloc failure */
+				{
+					/* free previous stack nodes to prevent memory leak */
+					free_stack(parent_list);
+					return NULL;
+				}
 				replacement_stack_node->previous = parent_list;
 				replacement_stack_node->direction = 1; /* replacement is from right */
 				if(remove_node == remove_parent) /* special case for root node */
@@ -596,6 +614,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 			{
 				/* put pointer to replacement node into list for balance update */
 				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));
+				if(replacement_stack_node == NULL) /* deal with malloc failure */
+				{
+					/* free previous stack nodes to prevent memory leak */
+					free_stack(parent_list);
+					return NULL;
+				}
+
 				replacement_stack_node->previous = parent_list;
 				replacement_stack_node->direction = 1; /* we always look for replacement on right */
 				if(remove_node == remove_parent) /* special case for root node */
@@ -616,6 +641,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				 * after we have identified the replacement
 				 */
 				replacement_stack_node = (stack_node*)malloc(sizeof(stack_node));
+				if(replacement_stack_node == NULL) /* deal with malloc failure */
+				{
+					/* free previous stack nodes to prevent memory leak */
+					free_stack(parent_list);
+					return NULL;
+				}
+
 				replacement_stack_node->previous = parent_list;
 				replacement_stack_node->direction = -1; /* we always look for replacement to left of this node */
 				parent_list = replacement_stack_node;
@@ -627,6 +659,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 				while((replacement_next = replacement->left)  != NULL)
 				{
 					next_parent = (stack_node*)malloc(sizeof(stack_node));
+					if(next_parent == NULL) /* deal with malloc failure */
+					{
+						/* free previous stack nodes to prevent memory leak */
+						free_stack(parent_list);
+						return NULL;
+					}
+
 					next_parent->node_ptr = &(replacement_parent->left);
 					next_parent->previous = parent_list;
 					next_parent->direction = -1; /* we always go left */
@@ -679,13 +718,7 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 		}
 	}
 
-
-	while(parent_list != NULL)
-	{
-		previous_parent = parent_list;
-		parent_list = previous_parent->previous;
-		free(previous_parent);
-	}
+	free_stack(parent_list);
 	
 	return value;
 }
@@ -695,7 +728,11 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned)
 {
 	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
-
+	if(key_list == NULL)
+	{
+		*num_keys_returned = 0;
+		return NULL;
+	}
 	unsigned long next_key_index = 0;
 	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
 	
@@ -708,7 +745,12 @@ unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_r
 void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned)
 {
 	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
-
+	if(value_list == NULL)
+	{
+		*num_keys_returned = 0;
+		return NULL;
+	}
+	
 	unsigned long next_value_index = 0;
 	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
 	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
@@ -719,7 +761,41 @@ void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_retur
 }
 
 
+
 void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_destroyed)
+{
+	void** return_values = destroy_long_map_values(map, destruction_type, num_destroyed);
+	free(map);
+	return return_values;
+}
+
+
+
+void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value))
+{
+	apply_to_every_long_map_node(map->root, apply_func);
+}
+void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value))
+{
+	apply_to_every_string_map_node( (map->lm).root, map->store_keys, apply_func);
+}
+
+
+/***************************************************
+ * internal utility function definitions
+ ***************************************************/
+static void free_stack(stack_node* stack)
+{
+	while(stack != NULL)
+	{
+		stack_node* prev_node = stack;
+		stack = prev_node->previous;
+		free(prev_node);
+	}
+
+}
+
+static void** destroy_long_map_values(long_map* map, int destruction_type, unsigned long* num_destroyed)
 {
 	void** return_values = NULL;
 	unsigned long return_index = 0;
@@ -729,7 +805,14 @@ void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_
 	if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 	{
 		return_values = (void**)malloc((map->num_elements+1)*sizeof(void*));
-		return_values[map->num_elements] = NULL;
+		if(return_values == NULL) /* deal with malloc failure */
+		{
+			destruction_type = DESTROY_MODE_IGNORE_VALUES; /* could cause memory leak, but there's no other way to be sure we won't seg fault */
+		}
+		else
+		{
+			return_values[map->num_elements] = NULL;
+		}
 	}
 	while(map->num_elements > 0)
 	{
@@ -746,27 +829,10 @@ void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_
 		return_index++;
 		*num_destroyed = *num_destroyed + 1;
 	}
-	free(map);
-
 	return return_values;
 }
 
-
-void apply_to_every_long_map_value(long_map* map, void (*apply_func)(unsigned long key, void* value))
-{
-	apply_to_every_long_map_node(map->root, apply_func);
-}
-void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* key, void* value))
-{
-	apply_to_every_string_map_node( (map->lm).root, map->store_keys, apply_func);
-}
-
-
-/***************************************************
- * internal utility function definitions
- ***************************************************/
-
-void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
+static void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
 {
 	if(node != NULL)
 	{
@@ -777,7 +843,7 @@ void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsign
 		apply_to_every_long_map_node(node->right, apply_func);
 	}
 }
-void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
+static void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
 {
 	if(node != NULL)
 	{
@@ -798,7 +864,7 @@ void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, 
 
 
 
-void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
+static void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
 {
 	if(node != NULL)
 	{
@@ -811,7 +877,7 @@ void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned
 	}
 }
 
-void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
+static void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
 {
 	if(node != NULL)
 	{
@@ -830,7 +896,7 @@ void get_sorted_node_values(long_map_node* node, void** value_list, unsigned lon
  * direction = -1 indicates left subtree updated, direction = 1 for right subtree
  * update_op = -1 indicates delete node, update_op = 1 for insert node
  */
-signed char rebalance (long_map_node** n, signed char direction, signed char update_op)
+static signed char rebalance (long_map_node** n, signed char direction, signed char update_op)
 {
 	/*
 	printf( "original: key = %ld, balance = %d, update_op=%d, direction=%d\n", (*n)->key, (*n)->balance, update_op, direction); 
@@ -927,7 +993,7 @@ signed char rebalance (long_map_node** n, signed char direction, signed char upd
 }
 
 
-void rotate_right (long_map_node** parent)
+static void rotate_right (long_map_node** parent)
 {
 	long_map_node* old_parent = *parent;
 	long_map_node* pivot = old_parent->left;
@@ -937,7 +1003,7 @@ void rotate_right (long_map_node** parent)
 	*parent = pivot;
 }
 
-void rotate_left (long_map_node** parent)
+static void rotate_left (long_map_node** parent)
 {
 	long_map_node* old_parent = *parent;
 	long_map_node* pivot = old_parent->right;
@@ -958,7 +1024,7 @@ void rotate_left (long_map_node** parent)
  * This code was derived from code found at:
  * http://www.cse.yorku.ca/~oz/hash.html
  ***************************************************************************/
-unsigned long sdbm_string_hash(const char *key)
+static unsigned long sdbm_string_hash(const char *key)
 {
 	unsigned long hashed_key = 0;
 
