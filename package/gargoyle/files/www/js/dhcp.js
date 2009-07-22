@@ -88,17 +88,13 @@ function saveChanges()
 				firewallCommands.push("uci del firewall.@defaults[0].block_statip_mismatches");
 			}
 			firewallCommands.push("uci commit");
-			firewallCommands.push("sh /usr/lib/gargoyle/restart_firewall.sh");
 		}
 
 
+		//need to restart firewall here because for add/remove of static ips, we need to restart bandwidth monitor, as well as for firewall commands above if we have any
+		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ; \nsh /usr/lib/gargoyle/restart_firewall.sh\n" ; 
 
-
-
-
-		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ;\n" ; 
-
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + restartDhcpCommand + "\n" + firewallCommands.join("\n") ;
+		commands = uci.getScriptCommands(uciOriginal) + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + "\n" + firewallCommands.join("\n") + "\n" + restartDhcpCommand ;
 
 		//document.getElementById("output").value = commands;
 
