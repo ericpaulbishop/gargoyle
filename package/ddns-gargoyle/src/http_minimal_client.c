@@ -357,8 +357,6 @@ http_response* retrieve_http(	url_data *url,
 
 char* create_http_request(url_data* url)
 {
-	printf("url path = \"%s\"\n", url->path);
-	printf("url path = \"%s\"\n", url->hostname);
 	char *req_str1 = dynamic_strcat(	8,
 					"GET ",	
 					url->path, 
@@ -369,7 +367,6 @@ char* create_http_request(url_data* url)
 					"Host: ", 
 					url->hostname
 					);
-	printf("req_str1=\n%s\n", req_str1);
 
 	char port_str[8];
 	if( (url->protocol == HTTP_PROTO && url->port != 80) || (url->protocol == HTTPS_PROTO && url->port != 443) )
