@@ -40,7 +40,7 @@
 #define BANDWIDTH_GT			  12
 #define BANDWIDTH_LT			  13
 #define BANDWIDTH_MONITOR		  14
-
+#define BANDWIDTH_CHECK			  15
 
 /* possible reset intervals */
 #define BANDWIDTH_MINUTE		  20
@@ -83,6 +83,8 @@ struct ipt_bandwidth_info
 	uint64_t current_bandwidth;
 	time_t next_reset;
 	time_t last_backup_time;
+
+
 
 	struct ipt_bandwidth_info* non_const_self;
 	unsigned long* ref_count;

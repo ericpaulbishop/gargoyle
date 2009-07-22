@@ -57,6 +57,7 @@ static struct option opts[] =
 	{ .name = "subnet", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_SUBNET },	
 	{ .name = "less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
 	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
+	{ .name = "check",	 	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK },
 	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
 	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_INTERVAL },
 	{ .name = "reset_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
@@ -157,7 +158,7 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0)
+			if(num_read > 0 && (*flags & BANDWIDTH_CMP) == 0)
 			{
 				info->cmp = BANDWIDTH_LT;
 				info->bandwidth_cutoff = read_64;
@@ -167,13 +168,21 @@ static int parse(	int c,
 			break;
 		case BANDWIDTH_GT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
-			if(num_read > 0)
+			if(num_read > 0  && (*flags & BANDWIDTH_CMP) == 0)
 			{
 				info->cmp = BANDWIDTH_GT;
 				info->bandwidth_cutoff = read_64;
 				valid_arg = 1;
 			}
 			c = BANDWIDTH_CMP; //only need one flag for less_than/greater_than
+			break;
+		case BANDWIDTH_CHECK:
+			if(  (*flags & BANDWIDTH_CMP) == 0 )
+			{
+				info->cmp = BANDWIDTH_CHECK;
+				valid_arg = 1;
+			}
+			c = BANDWIDTH_CMP;
 			break;
 		case BANDWIDTH_CURRENT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
@@ -262,94 +271,98 @@ static int parse(	int c,
 
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
-	/* determine current time in seconds since epoch, with offset for current timezone */
-	int minuteswest = get_minutes_west();
-	time_t now;
-	time(&now);
-	now = now - (minuteswest*60);
 	printf(" --id %s ", info->id);
-	if(info->local_subnet != 0)
+	if(info->cmp == BANDWIDTH_CHECK)
 	{
-		unsigned char* sub = (unsigned char*)(&(info->local_subnet));
-		int msk_bits=0;
-		int pow=0;
-		for(pow=0; pow<32; pow++)
+		printf("--check ");
+	}
+	else
+	{
+		/* determine current time in seconds since epoch, with offset for current timezone */
+		int minuteswest = get_minutes_west();
+		time_t now;
+		time(&now);
+		now = now - (minuteswest*60);
+		if(info->local_subnet != 0)
 		{
-			uint32_t test = get_pow(2, pow);
-			msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
+			unsigned char* sub = (unsigned char*)(&(info->local_subnet));
+			int msk_bits=0;
+			int pow=0;
+			for(pow=0; pow<32; pow++)
+			{
+				uint32_t test = get_pow(2, pow);
+				msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
+			}
+			printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
 		}
-		printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
-	}
-	if(info->type == BANDWIDTH_COMBINED)
-	{
-		printf("--type combined ");
-	}
-	if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
-	{
-		printf("--type individual_src ");
-	}
-	if(info->type == BANDWIDTH_INDIVIDUAL_DST)
-	{
-		printf("--type individual_dst ");
-	}
-	if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
-	{
-		printf("--type individual_local ");
-	}
-	if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
-	{
-		printf("--type individual_remote ");
-	}
-
-
-	if(info->cmp == BANDWIDTH_GT)
-	{
-		printf("--greater_than %lld ", info->bandwidth_cutoff);
-	}
-	if(info->cmp == BANDWIDTH_LT)
-	{
-		printf("--less_than %lld ", info->bandwidth_cutoff);
-	}
-	if (info->type == BANDWIDTH_COMBINED) /* too much data to print for multi types, have to use socket to get/set data */
-	{
-		if( info->reset_interval != BANDWIDTH_NEVER && info->next_reset != 0 && info->next_reset < now)
+		if(info->type == BANDWIDTH_COMBINED)
 		{
-			/* 
-			 * current bandwidth only gets reset when first packet after reset interval arrives, so output
-			 * zero if we're already past interval, but no packets have arrived 
-			 */
-			printf("--current_bandwidth 0 ");
+			printf("--type combined ");
 		}
-		else 
+		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
 		{
-			printf("--current_bandwidth %lld ", info->current_bandwidth);
+			printf("--type individual_src ");
 		}
+		if(info->type == BANDWIDTH_INDIVIDUAL_DST)
+		{
+			printf("--type individual_dst ");
+		}
+		if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
+		{
+			printf("--type individual_local ");
+		}
+		if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
+		{
+			printf("--type individual_remote ");
+		}
+		if(info->cmp == BANDWIDTH_GT)
+		{
+			printf("--greater_than %lld ", info->bandwidth_cutoff);
+		}
+		if(info->cmp == BANDWIDTH_LT)
+		{
+			printf("--less_than %lld ", info->bandwidth_cutoff);
+		}
+		if (info->type == BANDWIDTH_COMBINED) /* too much data to print for multi types, have to use socket to get/set data */
+		{
+			if( info->reset_interval != BANDWIDTH_NEVER && info->next_reset != 0 && info->next_reset < now)
+			{
+				/* 
+				 * current bandwidth only gets reset when first packet after reset interval arrives, so output
+				 * zero if we're already past interval, but no packets have arrived 
+				 */
+				printf("--current_bandwidth 0 ");
+			}
+			else 
+			{
+				printf("--current_bandwidth %lld ", info->current_bandwidth);
+			}
+		}
+		if(info->reset_interval == BANDWIDTH_MINUTE)
+		{
+			printf("--reset_interval minute ");
+		}
+		else if(info->reset_interval == BANDWIDTH_HOUR)
+		{
+			printf("--reset_interval hour ");
+		}
+		else if(info->reset_interval == BANDWIDTH_DAY)
+		{
+			printf("--reset_interval day ");
+		}
+		else if(info->reset_interval == BANDWIDTH_WEEK)
+		{
+			printf("--reset_interval week ");
+		}
+		else if(info->reset_interval == BANDWIDTH_MONTH)
+		{
+			printf("--reset_interval month ");
+		}
+		if(info->reset_time > 0)
+		{
+			printf("--reset_time %ld ", info->reset_time);
+		}	
 	}
-	if(info->reset_interval == BANDWIDTH_MINUTE)
-	{
-		printf("--reset_interval minute ");
-	}
-	else if(info->reset_interval == BANDWIDTH_HOUR)
-	{
-		printf("--reset_interval hour ");
-	}
-	else if(info->reset_interval == BANDWIDTH_DAY)
-	{
-		printf("--reset_interval day ");
-	}
-	else if(info->reset_interval == BANDWIDTH_WEEK)
-	{
-		printf("--reset_interval week ");
-	}
-	else if(info->reset_interval == BANDWIDTH_MONTH)
-	{
-		printf("--reset_interval month ");
-	}
-	if(info->reset_time > 0)
-	{
-		printf("--reset_time %ld ", info->reset_time);
-	}	
-
 }
 
 /* 

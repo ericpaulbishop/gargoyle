@@ -105,9 +105,16 @@ static uint64_t get_bw_record_max(void) /* called by init to set global variable
 }
 static uint64_t bandwidth_record_max;
 
-static uint64_t add_up_to_max(uint64_t original, uint64_t add)
+static uint64_t add_up_to_max(uint64_t original, uint64_t add, unsigned char is_check)
 {
-	return bandwidth_record_max-original < add ? bandwidth_record_max : original+add ;
+	if(is_check)
+	{
+		return original;
+	}
+	else
+	{
+		return bandwidth_record_max-original < add ? bandwidth_record_max : original+add ;
+	}
 }
 
 /*
@@ -278,14 +285,31 @@ static int match(	const struct sk_buff *skb,
 #endif
 			int *hotdrop)
 {
+	
+	
 	struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)matchinfo)->non_const_self;
+
 
 	struct timeval test_time;
 	time_t now;
 	int match_found;
 
-	/* want to get this within lock, intialize to NULL */
+	unsigned char is_check = info->cmp == BANDWIDTH_CHECK ? 1 : 0;
 	long_map* ip_map = NULL;
+	
+	spin_lock_bh(&bandwidth_lock);
+	
+	if(is_check)
+	{
+		info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+		if(imp == NULL)
+		{
+			spin_unlock_bh(&bandwidth_lock);
+			return 0;
+		}
+		info = imp->info;
+	}
+
 
 	do_gettimeofday(&test_time);
 	now = test_time.tv_sec;
@@ -295,7 +319,6 @@ static int match(	const struct sk_buff *skb,
 	{
 		if(info->next_reset < now)
 		{
-			spin_lock_bh(&bandwidth_lock);
 			if(info->next_reset < now) /* check again after waiting for lock */
 			{
 				//do reset
@@ -310,14 +333,12 @@ static int match(	const struct sk_buff *skb,
 					apply_to_every_long_map_value(ip_map, set_bandwidth_to_zero);
 				}
 			}
-			spin_unlock_bh(&bandwidth_lock);
 		}
 	}
 
 	uint64_t* bws[2] = {NULL, NULL};
 	if(info->type == BANDWIDTH_COMBINED)
 	{
-		spin_lock_bh(&bandwidth_lock);
 		if(ip_map == NULL)
 		{
 			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
@@ -340,10 +361,10 @@ static int match(	const struct sk_buff *skb,
 			}
 			else
 			{
-				*(bws[0]) = add_up_to_max(*(bws[0]), (uint64_t)skb->len);
+				*(bws[0]) = add_up_to_max(*(bws[0]), (uint64_t)skb->len, is_check);
 			}
 		}
-		info->current_bandwidth = add_up_to_max(info->current_bandwidth, (uint64_t)skb->len);
+		info->current_bandwidth = add_up_to_max(info->current_bandwidth, (uint64_t)skb->len, is_check);
 	}
 	else
 	{
@@ -377,7 +398,6 @@ static int match(	const struct sk_buff *skb,
 			}
 		}
 		
-		spin_lock_bh(&bandwidth_lock);
 		if(ip_map == NULL)
 		{
 			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
@@ -403,7 +423,7 @@ static int match(	const struct sk_buff *skb,
 				}
 				else
 				{
-					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len);
+					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
 				}
 				bws[bw_ip_index] = oldval; //this is fine, setting bws[bw_ip_index] to NULL on kmalloc failure won't crash anything
 			}
@@ -881,90 +901,91 @@ static int checkentry(	const char *tablename,
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
 		#endif
 
-		down(&userspace_lock);
-		spin_lock_bh(&bandwidth_lock);
-	
-	
-		info_map_pair  *imp = (info_map_pair*)get_string_map_element(id_map, info->id);
-		if(imp != NULL)
+		if(info->cmp != BANDWIDTH_CHECK)
 		{
-			printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
-			spin_unlock_bh(&bandwidth_lock);
-			up(&userspace_lock);
-			return 0;
-		}
-
-		if(info->reset_interval != BANDWIDTH_NEVER)
-		{
-			struct timeval test_time;
-			time_t now;
-			do_gettimeofday(&test_time);
-			now = test_time.tv_sec;
-			now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-
-			if(info->next_reset == 0)
+			down(&userspace_lock);
+			spin_lock_bh(&bandwidth_lock);
+		
+	
+			info_map_pair  *imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			if(imp != NULL)
 			{
-				info->next_reset = get_next_reset_time(info, now);
-				
-				/* 
-				 * if we specify last backup time, check that next reset is consistent, 
-				 * otherwise reset current_bandwidth to 0 
-				 * 
-				 * only applies to combined type -- otherwise we need to handle setting bandwidth
-				 * through userspace library
-				 */
-				if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
+				printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
+				spin_unlock_bh(&bandwidth_lock);
+				up(&userspace_lock);
+				return 0;
+			}
+
+			if(info->reset_interval != BANDWIDTH_NEVER)
+			{
+				struct timeval test_time;
+				time_t now;
+				do_gettimeofday(&test_time);
+				now = test_time.tv_sec;
+				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	
+				if(info->next_reset == 0)
 				{
-					time_t next_reset_of_last_backup;
-					time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
-					next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
-					if(next_reset_of_last_backup != info->next_reset)
+					info->next_reset = get_next_reset_time(info, now);
+					
+					/* 
+					 * if we specify last backup time, check that next reset is consistent, 
+					 * otherwise reset current_bandwidth to 0 
+					 * 
+					 * only applies to combined type -- otherwise we need to handle setting bandwidth
+					 * through userspace library
+					 */
+					if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
 					{
-						info->current_bandwidth = 0;
+						time_t next_reset_of_last_backup;
+						time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+						next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time);
+						if(next_reset_of_last_backup != info->next_reset)
+						{
+							info->current_bandwidth = 0;
+						}
+						info->last_backup_time = 0;
 					}
-					info->last_backup_time = 0;
 				}
 			}
-		}
 	
-		imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
-		if(imp == NULL) /* handle kmalloc failure */
-		{
-			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
-			spin_unlock_bh(&bandwidth_lock);
-			up(&userspace_lock);
-			return 0;
-
-		}
-		imp->ip_map = initialize_long_map();
-		if(imp->ip_map == NULL) /* handle kmalloc failure */
-		{
-			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
-			spin_unlock_bh(&bandwidth_lock);
-			up(&userspace_lock);
-			return 0;
-
-		}
-
-		imp->info = info;
-		set_string_map_element(id_map, info->id, imp);
-		if(info->type == BANDWIDTH_COMBINED)
-		{
-			uint64_t *bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
-			if(bw == NULL)
+			imp = (info_map_pair*)kmalloc( sizeof(info_map_pair), GFP_ATOMIC);
+			if(imp == NULL) /* handle kmalloc failure */
 			{
 				printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
 				spin_unlock_bh(&bandwidth_lock);
 				up(&userspace_lock);
 				return 0;
 			}
-			*bw = info->current_bandwidth;
-			set_long_map_element(imp->ip_map, 0, bw);
+			imp->ip_map = initialize_long_map();
+			if(imp->ip_map == NULL) /* handle kmalloc failure */
+			{
+				printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+				spin_unlock_bh(&bandwidth_lock);
+				up(&userspace_lock);
+				return 0;
+			}
+
+			imp->info = info;
+			set_string_map_element(id_map, info->id, imp);
+			if(info->type == BANDWIDTH_COMBINED)
+			{
+				uint64_t *bw = (uint64_t*)kmalloc(sizeof(uint64_t), GFP_ATOMIC);
+				if(bw == NULL)
+				{
+					printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return 0;
+				}
+				*bw = info->current_bandwidth;
+				set_long_map_element(imp->ip_map, 0, bw);
+			}
+
+
+			spin_unlock_bh(&bandwidth_lock);
+			up(&userspace_lock);
 		}
-
-
-		spin_unlock_bh(&bandwidth_lock);
-		up(&userspace_lock);
 	}
 	else
 	{
@@ -973,14 +994,19 @@ static int checkentry(	const char *tablename,
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
 		#endif
-		spin_lock_bh(&bandwidth_lock);
-		info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
-		if(imp != NULL)
+		
+		if(info->cmp != BANDWIDTH_CHECK)
 		{
-			imp->info = info;
+			down(&userspace_lock);
+			spin_lock_bh(&bandwidth_lock);
+			info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
+			if(imp != NULL)
+			{
+				imp->info = info;
+			}
+			spin_unlock_bh(&bandwidth_lock);
+			up(&userspace_lock);
 		}
-		spin_unlock_bh(&bandwidth_lock);
-
 	}
 	#ifdef BANDWIDTH_DEBUG
 		printk("checkentry complete\n");
