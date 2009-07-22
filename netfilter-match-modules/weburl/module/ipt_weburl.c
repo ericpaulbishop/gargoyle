@@ -118,12 +118,20 @@ int do_match_test(unsigned char match_type,  const char* reference, char* query)
 			if(compiled_map == NULL)
 			{
 				compiled_map = initialize_map(0);
+				if(compiled_map == NULL) /* test for malloc failure */
+				{
+					return 0;
+				}
 			}
 			r = (struct regexp*)get_map_element(compiled_map, reference);
 			if(r == NULL)
 			{
 				int rlen = strlen(reference);
 				r= regcomp((char*)reference, &rlen);
+				if(r == NULL) /* test for malloc failure */
+				{
+					return 0;
+				}
 				set_map_element(compiled_map, reference, (void*)r);
 			}
 			matches = regexec(r, query);
@@ -132,7 +140,6 @@ int do_match_test(unsigned char match_type,  const char* reference, char* query)
 			matches = (strstr(query, reference) != NULL) && strlen(query) == strlen(reference);
 			break;
 	}
-
 	return matches;
 }
 
@@ -245,7 +252,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 				int prefix_index;
 				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 				{
-					char* test_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+					char test_url[1250];
 					test_url[0] = '\0';
 					strcat(test_url, test_prefixes[prefix_index]);
 					strcat(test_url, host);
@@ -269,7 +276,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 					char* www_host = ((char*)host+4);
 					for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 					{
-						char* test_url = (char*)kmalloc(sizeof(char)*1250, GFP_ATOMIC);
+						char test_url[1250];
 						test_url[0] = '\0';
 						strcat(test_url, test_prefixes[prefix_index]);
 						strcat(test_url, www_host);

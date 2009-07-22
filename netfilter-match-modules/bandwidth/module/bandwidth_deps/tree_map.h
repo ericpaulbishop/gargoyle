@@ -158,7 +158,7 @@ typedef struct
 	char* key;
 	void* value;
 } string_map_key_value;
-unsigned long sdbm_string_hash(const char *key);
+static unsigned long sdbm_string_hash(const char *key);
 
 
 
@@ -308,7 +308,7 @@ void** destroy_string_map(string_map* map, int destruction_type, unsigned long* 
 	if(map != NULL)
 	{
 		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
-		return_values = destroy_long_map_values(map->lm, destruction_type, num_destroyed );
+		return_values = destroy_long_map_values(&(map->lm), destruction_type, num_destroyed );
 		free(map);
 	}
 	return return_values;
@@ -747,7 +747,7 @@ void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_retur
 	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
 	if(value_list == NULL)
 	{
-		*num_keys_returned = 0;
+		*num_values_returned = 0;
 		return NULL;
 	}
 	

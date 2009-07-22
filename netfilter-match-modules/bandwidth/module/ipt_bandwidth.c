@@ -457,7 +457,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		input_buffer = (char*)kmalloc(input_buffer_length, GFP_ATOMIC);
 		if(input_buffer == NULL) // deal with kmalloc failure
 		{
-			input_buffer_lenth = 0;
+			input_buffer_length = 0;
 			input_buffer_index = 0;
 			up(&userspace_lock);
 			return 1;
@@ -576,8 +576,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 					uint64_t *bw = (uint64_t*)(input_buffer + out_index + 4);
 					uint64_t *map_bw = (uint64_t*)get_long_map_element(ip_map, (unsigned long)(*ip) );
 				
-					unsigned char* char_ip_buf = (input_buffer + out_index);
 					#ifdef BANDWIDTH_DEBUG
+						unsigned char* char_ip_buf = (input_buffer + out_index);
 						printk("ipt_bandwidth: setting ip %u.%u.%u.%u bandwidth to %lld\n", (unsigned char)char_ip_buf[0], (unsigned char)char_ip_buf[1], (unsigned char)char_ip_buf[2], (unsigned char)char_ip_buf[3],  (long long int)(*bw));
 					#endif
 
