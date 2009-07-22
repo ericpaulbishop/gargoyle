@@ -176,6 +176,8 @@ char* dynamic_strcat(int num_strs, ...)
 			next_start = next_start+next_length;
 		}
 	}
+	va_end(strs);
+	
 	new_str[next_start] = '\0';
 	
 	return new_str;

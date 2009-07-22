@@ -19,6 +19,7 @@
 
 #include "http_minimal_client.h"
 
+
 #ifdef USE_ERICS_TOOLS
 #include "erics_tools.h"
 #define malloc safe_malloc
@@ -275,7 +276,7 @@ url_data* parse_url(char* url)
 		{
 			new_url->path = (char*)malloc(2*sizeof(char));
 			(new_url->path)[0] = '/';
-			(new_url->path)[0] = '/';
+			(new_url->path)[1] = '\0';
 		}
 		else
 		{
@@ -356,8 +357,10 @@ http_response* retrieve_http(	url_data *url,
 
 char* create_http_request(url_data* url)
 {
+	printf("url path = \"%s\"\n", url->path);
+	printf("url path = \"%s\"\n", url->hostname);
 	char *req_str1 = dynamic_strcat(	8,
-					"GET ", 
+					"GET ",	
 					url->path, 
 					" HTTP/1.0\r\n", 
 					"User-Agent: http_minimal_client 1.0\r\n", 
@@ -366,7 +369,8 @@ char* create_http_request(url_data* url)
 					"Host: ", 
 					url->hostname
 					);
-	
+	printf("req_str1=\n%s\n", req_str1);
+
 	char port_str[8];
 	if( (url->protocol == HTTP_PROTO && url->port != 80) || (url->protocol == HTTPS_PROTO && url->port != 443) )
 	{
@@ -417,12 +421,13 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 
 	char* http_data = NULL;
 	int read_buffer_size = 1024;
-	char* read_buffer = (char*)malloc(read_buffer_size*sizeof(char));
+	char* read_buffer = (char*)malloc((read_buffer_size+1)*sizeof(char));
 	int total_bytes_read = 0;
 	int bytes_read;
 
 
 	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
+	read_buffer[bytes_read] = '\0'; /* facilitates string processing */
 	while(bytes_read > 0)
 	{
 		int updated_header = 0;
@@ -492,6 +497,7 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 			total_bytes_read = total_bytes_read + bytes_read;
 		}
 		bytes_read=read_connection(connection_data, read_buffer, read_buffer_size);
+		read_buffer[bytes_read] = '\0'; /* facilitates string processing */
 	}
 	http_data[total_bytes_read] = '\0';
 	reply->length = total_bytes_read;
@@ -704,6 +710,8 @@ char* dynamic_strcat(int num_strs, ...)
 		}
 	}
 	new_str[next_start] = '\0';
+	
+	va_end(strs);
 	
 	return new_str;
 }
