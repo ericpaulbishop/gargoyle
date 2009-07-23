@@ -47,21 +47,22 @@ static unsigned long get_pow(unsigned long base, unsigned long pow);
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n");
+	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n  --check Check another bandwidth rule without incrementing it\n  --check-with-src-dst-swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
 }
 
 static struct option opts[] = 
 {
-	{ .name = "id", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_ID },	
-	{ .name = "type", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_TYPE },	
-	{ .name = "subnet", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_SUBNET },	
-	{ .name = "less_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
-	{ .name = "greater_than", 	.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
-	{ .name = "check",	 	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK },
-	{ .name = "current_bandwidth",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
-	{ .name = "reset_interval",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_INTERVAL },
-	{ .name = "reset_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
-	{ .name = "last_backup_time",	.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
+	{ .name = "id", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_ID },	
+	{ .name = "type", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_TYPE },	
+	{ .name = "subnet", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_SUBNET },	
+	{ .name = "less_than", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
+	{ .name = "greater_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
+	{ .name = "check",	 		.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_NOSWAP },
+	{ .name = "check_with_src_dst_swap",	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_SWAP },
+	{ .name = "current_bandwidth",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
+	{ .name = "reset_interval",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_INTERVAL },
+	{ .name = "reset_time",			.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
+	{ .name = "last_backup_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
 	{ .name = 0 }
 };
 
@@ -97,6 +98,7 @@ static int parse(	int c,
 		sprintf(info->id, "%lu", id_num);
 
 		info->type = BANDWIDTH_COMBINED;
+		info->check_type = BANDWIDTH_CHECK_NOSWAP;
 		info->local_subnet = 0;
 		info->local_subnet_mask = 0;
 		info->cmp = BANDWIDTH_MONITOR; /* don't test greater/less than, just monitor bandwidth */
@@ -151,8 +153,13 @@ static int parse(	int c,
 				valid_arg = 0;
 			}
 
+			if(valid_arg)
+			{
+				info->check_type = type;
+			}
 			c=0;
 			break;
+
 		case BANDWIDTH_SUBNET:
 			valid_arg =  parse_sub(optarg, &(info->local_subnet), &(info->local_subnet_mask));
 			break;
@@ -176,10 +183,20 @@ static int parse(	int c,
 			}
 			c = BANDWIDTH_CMP; //only need one flag for less_than/greater_than
 			break;
-		case BANDWIDTH_CHECK:
+		case BANDWIDTH_CHECK_NOSWAP:
 			if(  (*flags & BANDWIDTH_CMP) == 0 )
 			{
 				info->cmp = BANDWIDTH_CHECK;
+				info->check_type = BANDWIDTH_CHECK_NOSWAP;
+				valid_arg = 1;
+			}
+			c = BANDWIDTH_CMP;
+			break;
+		case BANDWIDTH_CHECK_SWAP:
+			if(  (*flags & BANDWIDTH_CMP) == 0 )
+			{
+				info->cmp = BANDWIDTH_CHECK;
+				info->check_type = BANDWIDTH_CHECK_SWAP;
 				valid_arg = 1;
 			}
 			c = BANDWIDTH_CMP;
@@ -271,30 +288,30 @@ static int parse(	int c,
 
 static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 {
-	printf(" --id %s ", info->id);
 	if(info->cmp == BANDWIDTH_CHECK)
 	{
-		printf("--check ");
+		if(info->check_type == BANDWIDTH_CHECK_NOSWAP)
+		{
+			printf("--check ");
+		}
+		else
+		{
+			printf("--check_with_src_dst_swap ");
+		}
+		info->type = info->check_type;
 	}
-	else
+	printf("--id %s ", info->id);
+
+
+
+	if(info->cmp != BANDWIDTH_CHECK)
 	{
 		/* determine current time in seconds since epoch, with offset for current timezone */
 		int minuteswest = get_minutes_west();
 		time_t now;
 		time(&now);
 		now = now - (minuteswest*60);
-		if(info->local_subnet != 0)
-		{
-			unsigned char* sub = (unsigned char*)(&(info->local_subnet));
-			int msk_bits=0;
-			int pow=0;
-			for(pow=0; pow<32; pow++)
-			{
-				uint32_t test = get_pow(2, pow);
-				msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
-			}
-			printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
-		}
+
 		if(info->type == BANDWIDTH_COMBINED)
 		{
 			printf("--type combined ");
@@ -314,6 +331,20 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 		if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
 		{
 			printf("--type individual_remote ");
+		}
+
+
+		if(info->local_subnet != 0)
+		{
+			unsigned char* sub = (unsigned char*)(&(info->local_subnet));
+			int msk_bits=0;
+			int pow=0;
+			for(pow=0; pow<32; pow++)
+			{
+				uint32_t test = get_pow(2, pow);
+				msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
+			}
+			printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
 		}
 		if(info->cmp == BANDWIDTH_GT)
 		{

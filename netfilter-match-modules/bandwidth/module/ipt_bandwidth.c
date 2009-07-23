@@ -294,13 +294,16 @@ static int match(	const struct sk_buff *skb,
 	time_t now;
 	int match_found;
 
+
 	unsigned char is_check = info->cmp == BANDWIDTH_CHECK ? 1 : 0;
+	unsigned char do_src_dst_swap = 0;
 	long_map* ip_map = NULL;
 	
 	spin_lock_bh(&bandwidth_lock);
 	
 	if(is_check)
 	{
+		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
 		info_map_pair* imp = (info_map_pair*)get_string_map_element(id_map, info->id);
 		if(imp == NULL)
 		{
@@ -375,11 +378,19 @@ static int match(	const struct sk_buff *skb,
 		{
 			//src ip
 			bw_ips[0] = iph->saddr;
+			if(do_src_dst_swap)
+			{
+				bw_ips[0] = iph->daddr;
+			}
 		}
 		else if (info->type == BANDWIDTH_INDIVIDUAL_DST)
 		{
 			//dst ip
 			bw_ips[0] = iph->daddr;
+			if(do_src_dst_swap)
+			{
+				bw_ips[0] = iph->saddr;
+			}
 		}
 		else if(info->type ==  BANDWIDTH_INDIVIDUAL_LOCAL ||  info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
 		{

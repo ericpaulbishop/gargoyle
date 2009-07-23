@@ -41,6 +41,8 @@
 #define BANDWIDTH_LT			  13
 #define BANDWIDTH_MONITOR		  14
 #define BANDWIDTH_CHECK			  15
+#define BANDWIDTH_CHECK_NOSWAP		  16
+#define BANDWIDTH_CHECK_SWAP		  17
 
 /* possible reset intervals */
 #define BANDWIDTH_MINUTE		  20
@@ -73,6 +75,7 @@ struct ipt_bandwidth_info
 {
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 	unsigned char type;
+	unsigned char check_type;
 	uint32_t local_subnet;
 	uint32_t local_subnet_mask;
 
