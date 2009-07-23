@@ -87,7 +87,6 @@ static int parse(	int c,
 	int num_read;
 	uint64_t read_64;
 	time_t read_time;
-	unsigned int read,A,B,C,D,mask;
 
 	/* set defaults first time we get here */
 	if(*flags == 0)
@@ -153,10 +152,6 @@ static int parse(	int c,
 				valid_arg = 0;
 			}
 
-			if(valid_arg)
-			{
-				info->check_type = type;
-			}
 			c=0;
 			break;
 
@@ -298,7 +293,6 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 		{
 			printf("--check_with_src_dst_swap ");
 		}
-		info->type = info->check_type;
 	}
 	printf("--id %s ", info->id);
 

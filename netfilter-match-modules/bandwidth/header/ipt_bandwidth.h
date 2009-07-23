@@ -35,29 +35,29 @@
 
 
 /* parameter defs that don't map to flag bits */
-#define BANDWIDTH_TYPE			  10
-#define BANDWIDTH_ID			  11
-#define BANDWIDTH_GT			  12
-#define BANDWIDTH_LT			  13
-#define BANDWIDTH_MONITOR		  14
-#define BANDWIDTH_CHECK			  15
-#define BANDWIDTH_CHECK_NOSWAP		  16
-#define BANDWIDTH_CHECK_SWAP		  17
+#define BANDWIDTH_TYPE			  70
+#define BANDWIDTH_ID			  71
+#define BANDWIDTH_GT			  72
+#define BANDWIDTH_LT			  73
+#define BANDWIDTH_MONITOR		  74
+#define BANDWIDTH_CHECK			  75
+#define BANDWIDTH_CHECK_NOSWAP		  76
+#define BANDWIDTH_CHECK_SWAP		  77
 
 /* possible reset intervals */
-#define BANDWIDTH_MINUTE		  20
-#define BANDWIDTH_HOUR			  21
-#define BANDWIDTH_DAY			  22
-#define BANDWIDTH_WEEK			  23
-#define BANDWIDTH_MONTH			  24
-#define BANDWIDTH_NEVER			  25
+#define BANDWIDTH_MINUTE		  80
+#define BANDWIDTH_HOUR			  81
+#define BANDWIDTH_DAY			  82
+#define BANDWIDTH_WEEK			  83
+#define BANDWIDTH_MONTH			  84
+#define BANDWIDTH_NEVER			  85
 
 /* possible monitoring types */
-#define BANDWIDTH_COMBINED 		  41
-#define BANDWIDTH_INDIVIDUAL_SRC	  42
-#define BANDWIDTH_INDIVIDUAL_DST 	  43
-#define BANDWIDTH_INDIVIDUAL_LOCAL	  44
-#define BANDWIDTH_INDIVIDUAL_REMOTE	  45
+#define BANDWIDTH_COMBINED 		  90
+#define BANDWIDTH_INDIVIDUAL_SRC	  91
+#define BANDWIDTH_INDIVIDUAL_DST 	  92
+#define BANDWIDTH_INDIVIDUAL_LOCAL	  93
+#define BANDWIDTH_INDIVIDUAL_REMOTE	  94
 
 /* socket id parameters (for userspace i/o) */
 #define BANDWIDTH_SET 			2048
