@@ -37,6 +37,9 @@
 #include "erics_tools.h"
 #define malloc safe_malloc
 
+
+
+
 char* replace_prefix(char* original, char* old_prefix, char* new_prefix)
 {
 	char* replaced = NULL;
@@ -142,6 +145,21 @@ void to_uppercase(char* str)
 	}
 }
 
+/* returns number freed */
+int free_null_terminated_string_array(char** strs)
+{
+	unsigned long str_index = 0;
+	if(strs != NULL)
+	{
+		for(str_index=0; strs[str_index] != NULL; str_index++)
+		{
+			free(strs[str_index]);
+		}
+		free(strs);
+	}
+	return str_index;
+}
+
 
 char* dynamic_strcat(int num_strs, ...)
 {
@@ -176,8 +194,6 @@ char* dynamic_strcat(int num_strs, ...)
 			next_start = next_start+next_length;
 		}
 	}
-	va_end(strs);
-	
 	new_str[next_start] = '\0';
 	
 	return new_str;

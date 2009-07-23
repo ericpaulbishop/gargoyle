@@ -45,13 +45,14 @@ typedef struct stack_node_struct
 	struct stack_node_struct* previous;
 } stack_node;
 
-void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
-void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
-void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
-void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
-signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
-void rotate_right (long_map_node** parent);
-void rotate_left (long_map_node** parent);
+static void** destroy_long_map_values(long_map* map, int destruction_type, unsigned long* num_destroyed);
+static void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value));
+static void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value));
+static void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth);
+static void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth);
+static signed char rebalance (long_map_node** n, signed char direction, signed char update_op);
+static void rotate_right (long_map_node** parent);
+static void rotate_left (long_map_node** parent);
 
 /* internal for string map */
 typedef struct 
@@ -59,9 +60,9 @@ typedef struct
 	char* key;
 	void* value;
 } string_map_key_value;
-unsigned long sdbm_string_hash(const char *key);
 
 
+static unsigned long sdbm_string_hash(const char *key);
 
 
 /***************************************************
@@ -192,14 +193,42 @@ void** get_string_map_values(string_map* map, unsigned long* num_values_returned
 
 void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed)
 {
-
 	void** return_values = NULL;
 	if(map != NULL)
 	{
-		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
-		long_map* destroy = (long_map*)malloc(sizeof(long_map));
-		*destroy = map->lm;
-		return_values = destroy_long_map(destroy, destruction_type, num_destroyed );
+		if(map->store_keys)
+		{
+			void** kvs = destroy_long_map_values( &(map->lm), DESTROY_MODE_RETURN_VALUES, num_destroyed );
+			unsigned long kv_index = 0;
+			for(kv_index=0; kv_index < *num_destroyed; kv_index++)
+			{
+				string_map_key_value* kv = (string_map_key_value*)kvs[kv_index];
+				void* value = kv->value;
+				
+				free(kv->key);
+				free(kv);
+				if(destruction_type == DESTROY_MODE_FREE_VALUES)
+				{
+					free(value);
+				}
+				if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+				{
+					kvs[kv_index] = value;
+				}
+			}
+			if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+			{
+				return_values = kvs;
+			}
+			else
+			{
+				free(kvs);
+			}
+		}
+		else
+		{
+			return_values = destroy_long_map_values( &(map->lm), destruction_type, num_destroyed );
+		}
 		free(map);
 	}
 	return return_values;
@@ -643,8 +672,37 @@ void apply_to_every_string_map_value(string_map* map, void (*apply_func)(char* k
 /***************************************************
  * internal utility function definitions
  ***************************************************/
+static void** destroy_long_map_values(long_map* map, int destruction_type, unsigned long* num_destroyed)
+{
+	void** return_values = NULL;
+	unsigned long return_index = 0;
 
-void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
+	*num_destroyed = 0;
+
+	if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+	{
+		return_values = (void**)malloc((map->num_elements+1)*sizeof(void*));
+		return_values[map->num_elements] = NULL;
+	}
+	while(map->num_elements > 0)
+	{
+		unsigned long smallest_key;
+		void* removed_value = remove_smallest_long_map_element(map, &smallest_key);
+		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+		{
+			return_values[return_index] = removed_value;
+		}
+		if(destruction_type == DESTROY_MODE_FREE_VALUES)
+		{
+			free(removed_value);
+		}
+		return_index++;
+		*num_destroyed = *num_destroyed + 1;
+	}
+	return return_values;
+}
+
+static void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsigned long key, void* value))
 {
 	if(node != NULL)
 	{
@@ -655,7 +713,7 @@ void apply_to_every_long_map_node(long_map_node* node, void (*apply_func)(unsign
 		apply_to_every_long_map_node(node->right, apply_func);
 	}
 }
-void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
+static void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, void (*apply_func)(char* key, void* value))
 {
 	if(node != NULL)
 	{
@@ -675,7 +733,7 @@ void apply_to_every_string_map_node(long_map_node* node, unsigned char has_key, 
 }
 
 
-void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
+static void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned long* next_key_index, int depth)
 {
 	if(node != NULL)
 	{
@@ -688,7 +746,7 @@ void get_sorted_node_keys(long_map_node* node, unsigned long* key_list, unsigned
 	}
 }
 
-void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
+static void get_sorted_node_values(long_map_node* node, void** value_list, unsigned long* next_value_index, int depth)
 {
 	if(node != NULL)
 	{
@@ -707,7 +765,7 @@ void get_sorted_node_values(long_map_node* node, void** value_list, unsigned lon
  * direction = -1 indicates left subtree updated, direction = 1 for right subtree
  * update_op = -1 indicates delete node, update_op = 1 for insert node
  */
-signed char rebalance (long_map_node** n, signed char direction, signed char update_op)
+static signed char rebalance (long_map_node** n, signed char direction, signed char update_op)
 {
 	/*
 	printf( "original: key = %ld, balance = %d, update_op=%d, direction=%d\n", (*n)->key, (*n)->balance, update_op, direction); 
@@ -804,7 +862,7 @@ signed char rebalance (long_map_node** n, signed char direction, signed char upd
 }
 
 
-void rotate_right (long_map_node** parent)
+static void rotate_right (long_map_node** parent)
 {
 	long_map_node* old_parent = *parent;
 	long_map_node* pivot = old_parent->left;
@@ -814,7 +872,7 @@ void rotate_right (long_map_node** parent)
 	*parent = pivot;
 }
 
-void rotate_left (long_map_node** parent)
+static void rotate_left (long_map_node** parent)
 {
 	long_map_node* old_parent = *parent;
 	long_map_node* pivot = old_parent->right;
@@ -835,7 +893,7 @@ void rotate_left (long_map_node** parent)
  * This code was derived from code found at:
  * http://www.cse.yorku.ca/~oz/hash.html
  ***************************************************************************/
-unsigned long sdbm_string_hash(const char *key)
+static unsigned long sdbm_string_hash(const char *key)
 {
 	unsigned long hashed_key = 0;
 

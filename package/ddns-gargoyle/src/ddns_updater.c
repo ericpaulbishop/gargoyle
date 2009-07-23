@@ -147,7 +147,11 @@ void daemonize(int background);
 void signal_handler(int sig);
 int create_path(const char *name, int mode);
 
-
+void free_service_configs(string_map* service_configs);
+void free_service_providers(string_map* service_providers);
+void free_service_config(ddns_service_config* config);
+void free_service_provider(ddns_service_provider* provider);
+void free_update_nodes(update_node** update_nodes, unsigned long num_nodes);
 
 int main(int argc, char** argv)
 {
@@ -219,6 +223,16 @@ int main(int argc, char** argv)
 				printf("\t-m for non-daemon mode display output in simple machine parsable format: a list of numbers, one for each service\n");
 				printf("\t\twhere 0=failure to update, 1= update not needed, 2=success\n");
 				printf("\t-u print usage and exit\n");
+				
+				free(config_file);
+				free(service_provider_file);
+				int sn_index=0;
+				for(sn_index=0; service_names[sn_index] != NULL ; sn_index++)
+				{
+					free(service_names[sn_index]);
+				}
+				free(service_names);
+				
 				return 0;
 		}
 	}
@@ -272,6 +286,8 @@ int main(int argc, char** argv)
 				// handle each service requested or all if none specified
 			}
 		}
+		free_service_configs(service_configs);
+		free_service_providers(service_providers);
 	}	
 	else
 	{	
@@ -286,9 +302,85 @@ int main(int argc, char** argv)
 		}
 	}
 
+	free(config_file);
+	free(service_provider_file);
+	int sn_index=0;
+	for(sn_index=0; service_names[sn_index] != NULL ; sn_index++)
+	{
+		free(service_names[sn_index]);
+	}
+	free(service_names);
 
 	return 0;
 }
+
+void free_service_configs(string_map* service_configs)
+{
+	unsigned long num_configs;
+	unsigned long config_index = 0;
+	ddns_service_config** sconfigs = (ddns_service_config**)destroy_string_map(service_configs, DESTROY_MODE_RETURN_VALUES, &num_configs);
+	printf("num configs = %ld\n", num_configs);
+	for(config_index = 0; config_index < num_configs; config_index++)
+	{
+		free_service_config(sconfigs[config_index]);
+	}
+	free(sconfigs);
+}
+void free_service_config(ddns_service_config* config)
+{
+	unsigned long num_keys;
+	destroy_string_map(config->variable_definitions, DESTROY_MODE_FREE_VALUES, &num_keys);
+	free_null_terminated_string_array(config->ip_url);
+	free(config->service_provider);
+	free(config->ip_interface);
+	free(config->name);
+	free(config);
+}
+
+void free_service_providers(string_map* service_providers)
+{
+	unsigned long num_providers;
+	unsigned long provider_index;
+	ddns_service_provider** sproviders = (ddns_service_provider**)destroy_string_map(service_providers, DESTROY_MODE_RETURN_VALUES, &num_providers);
+	for(provider_index = 0; provider_index < num_providers; provider_index++)
+	{
+		free_service_provider(sproviders[provider_index]);
+	}
+	free(sproviders);
+}
+void free_service_provider(ddns_service_provider* provider)
+{
+	free(provider->name);
+	free(provider->url_template);
+	free_null_terminated_string_array(provider->variables);
+	if(provider->success_regexp != NULL)
+	{
+		regfree(provider->success_regexp);
+		free(provider->success_regexp);
+	}
+	if(provider->failure_regexp != NULL)
+	{
+		regfree(provider->failure_regexp);
+		free(provider->success_regexp);
+	}
+	free(provider);
+}
+void free_update_nodes(update_node** update_nodes, unsigned long num_nodes)
+{
+	unsigned long node_index = 0;
+	for(node_index=0; node_index < num_nodes; node_index++)
+	{
+		update_node* u = update_nodes[node_index];
+		free(u->service_name);
+		free(u);
+	}
+	free(update_nodes);
+}
+
+
+
+
+
 
 
 void run_request(string_map *service_configs, string_map* service_providers, char **service_names, int force_update, char display_format, int verbose)
@@ -378,6 +470,12 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 		}
 	}
 	printf("\n");
+
+	if(all_found == 1)
+	{
+		free_null_terminated_string_array(service_names);
+	}
+
 }
 
 
@@ -601,7 +699,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 		
 		//schedule updates
 		update_node* next_update = (update_node*)malloc(sizeof(update_node));
-		next_update->service_name = service_config->name;
+		next_update->service_name = strdup(service_config->name);
 		next_update->next_time = current_time; //we at least perform checks right away, as daemon starts
 		if(perform_force_update)
 		{
@@ -685,53 +783,59 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				//determine local ip, loading from saved list if ip was obtained less than 3 seconds ago (in case of multiple simultaneous updates)
 				char *interface_name = service_config->ip_source == INTERFACE ? service_config->ip_interface : "internet";
 				char *local_ip = (char*)get_map_element(local_ips, interface_name);
-				int using_predefined_local_ip = local_ip == NULL ? 0 : 1;
+				int using_predefined_local_ip = (local_ip == NULL) ? 0 : 1;
 				if(using_predefined_local_ip == 1)
 				{
 					time_t* update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
-					using_predefined_local_ip = (current_time - *update_time) < 3 ? 1 : 0;
+					if(update_time != NULL)
+					{
+						using_predefined_local_ip = (current_time - *update_time) < 3 ? 1 : 0;
+					}
+					else
+					{
+						using_predefined_local_ip = 0;
+					}
 				}
 				if(using_predefined_local_ip == 0)
 				{
 					local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url);
 					if(local_ip != NULL)
 					{
-						time_t* update_time;
-						time_t *old_time = (time_t*)get_map_element(local_ips, interface_name);
-						if(old_time != NULL)
+						time_t *update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
+						if(update_time != NULL)
 						{
-							update_time = old_time;
+							*update_time = current_time;
 						}
 						else
 						{
 							update_time = (time_t*)malloc(sizeof(time_t));
+							*update_time = current_time;
+							set_map_element(local_ip_updates, interface_name, (void*)update_time);
 						}
-						*update_time = current_time;
-						set_map_element(local_ip_updates, interface_name, (void*)update_time);
 						char* old_element = (char*)set_map_element(local_ips, interface_name, (void*)local_ip);
-						if(old_element != NULL)
+						if(old_element != NULL )
 						{
 							free(old_element);
 						}
 					}
 				}
-				//printf("local ip = %s\n", local_ip);
 
 				//actually do update
-				int update_status = do_single_update(service_config, service_providers, remote_ip, local_ip, perform_force_update, 0);
-				//printf("update complete, result = %d\n", update_status);
+				int update_status = UPDATE_FAILED;
+				if(local_ip != NULL)
+				{
+					update_status = do_single_update(service_config, service_providers, remote_ip, local_ip, perform_force_update, 0);
+				}
 
 				//if this update was in response to a request, send
 				//result to message queue
 				if(check_rq != NULL)
 				{
-					//printf("sending result of update to queue...");
 					message_t resp_msg;
 					resp_msg.msg_type = RESPONSE_MSG_TYPE;
 					resp_msg.msg_line[0] = (char)update_status; //always a small number, should fit fine
 					sprintf(resp_msg.msg_line+1, "%s", service_config->name);
 					msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
-					//printf("updated\n");
 				}
 
 
@@ -887,7 +991,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 		
 			//printf("done scheduling output request\n");
 		}	
-		
 	}
 	
 	struct msqid_ds queue_data;
@@ -896,6 +999,22 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 	//remove pid file
 	unlink(PID_PATH);
+
+	//cleanup used memory (makes finding TRUE memory leaks with valgrind a lot easier)
+	unsigned long num_destroyed;
+	free_null_terminated_string_array(service_names);
+	destroy_string_map(local_ip_updates, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(local_ips, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(remote_ips, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+
+	unsigned long num_r;
+	unsigned long num_u;
+	update_node** rvalues = (update_node**)destroy_priority_queue(request_queue, DESTROY_MODE_RETURN_VALUES, &num_r);
+	update_node** uvalues = (update_node**)destroy_priority_queue(update_queue, DESTROY_MODE_RETURN_VALUES, &num_u);
+	free_update_nodes(rvalues, num_r);
+	free_update_nodes(uvalues, num_u);	
+
 
 }
 
@@ -947,7 +1066,10 @@ void daemonize(int background) //background variable is useful for debugging, ca
 	}
 	char pid_str[25];
 	sprintf(pid_str,"%d\n",getpid());
-	write(pid_file,pid_str,strlen(pid_str));
+	if( write(pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
+	{
+		exit(1);
+	}
 
 
 	//set signal handlers
@@ -1006,6 +1128,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 	int update_status = UPDATE_FAILED;
 
 	ddns_service_provider* def =(ddns_service_provider*)get_map_element(service_providers, service_config->service_provider);
+	printf("service provider in single update = %s\n", service_config->service_provider);
 	if(def != NULL) //should never be null since we check at program start, but double checking these things is often a good idea :-)
 	{
 		if(local_ip != NULL)
@@ -1203,6 +1326,7 @@ char* get_ip_from_url(char* url)
 		}
 		free_http_response(page);
 	}
+	printf("from url=%s\n", url);
 	return ip;
 }
 
@@ -1287,52 +1411,53 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 					{
 						int read = -1;
 						char whitespace_separators[] = {'\t', ' '};
-						if(safe_strcmp(variable[0], "enabled") == 0)
+						if(safe_strcmp(variable[0], "enabled") == 0 && variable[1] != NULL)
 						{
 							sscanf(variable[1], "%d", &service_enabled);
+							free(variable[1]);
 						}
-						else if(safe_strcmp(variable[0], "service_provider") == 0)
+						else if(safe_strcmp(variable[0], "service_provider") == 0 && variable[1] != NULL)
 						{
 							service_conf->service_provider = variable[1];
 						}
-						else if(safe_strcmp(variable[0], "check_interval") == 0)
+						else if(safe_strcmp(variable[0], "check_interval") == 0 && variable[1] != NULL)
 						{
 							if(sscanf(variable[1], "%d", &read) > 0)
 							{
 								service_conf->check_interval = read;
 							}
+							free(variable[1]);
 						}
-						else if(safe_strcmp(variable[0], "force_interval") == 0)
+						else if(safe_strcmp(variable[0], "force_interval") == 0 && variable[1] != NULL)
 						{
 							if(sscanf(variable[1], "%d", &read) > 0)
 							{
 								service_conf->force_interval = read;
 							}
+							free(variable[1]);
 						}
-						else if(safe_strcmp(variable[0], "ip_source") == 0)
+						else if(safe_strcmp(variable[0], "ip_source") == 0 && variable[1] != NULL)
 						{
-							if(variable[1] != NULL)
+							char* dup_var = strdup(variable[1]);
+							to_lowercase(dup_var);
+							if(safe_strcmp(dup_var, "internet") == 0)
 							{
-								char* dup_var = strdup(variable[1]);
-								to_lowercase(dup_var);
-								if(safe_strcmp(dup_var, "internet") == 0)
-								{
-									service_conf->ip_source = INTERNET;
-								}
-								if(safe_strcmp(dup_var, "interface") == 0)
-								{
-									service_conf->ip_source = INTERFACE;
-								}
-								free(dup_var);
+								service_conf->ip_source = INTERNET;
 							}
+							if(safe_strcmp(dup_var, "interface") == 0)
+							{
+								service_conf->ip_source = INTERFACE;
+							}
+							free(dup_var);
+							free(variable[1]);
 						}
-						else if(safe_strcmp(variable[0], "ip_url") == 0)
+						else if(safe_strcmp(variable[0], "ip_url") == 0  && variable[1] != NULL)
 						{
 							unsigned long num_pieces;
 							service_conf->ip_url =  split_on_separators(variable[1], whitespace_separators, 2, -1, 0, &num_pieces);
 							free(variable[1]);
 						}
-						else if(safe_strcmp(variable[0], "ip_interface") == 0)
+						else if(safe_strcmp(variable[0], "ip_interface") == 0  && variable[1] != NULL)
 						{
 							service_conf->ip_interface = variable[1];
 						}
@@ -1387,24 +1512,19 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 				}
 				else
 				{
-					free(service_conf->service_provider);
-					free(service_conf->ip_url);
-					free(service_conf->ip_interface);
-					
-					unsigned long num_keys;
-					char** keys = get_map_keys(service_conf->variable_definitions, &num_keys);
-					int key_index;
-					for(key_index = 0; keys[key_index] != NULL; key_index++)
-					{
-						char* element = (char*)remove_map_element(service_conf->variable_definitions, keys[key_index]);
-						free(element);
-					}
-					free(keys);
-					free(service_conf->variable_definitions);
-					free(service_conf);
+					free_service_config(service_conf);
 				}
 			}
 		}
+		if(variable[0] != NULL)
+		{
+			free(variable[0]);
+		}
+		if(variable[1] != NULL)
+		{
+			free(variable[1]);
+		}
+		free(variable);
 		fclose(service_configuration_file);
 	}
 	return service_confs;
@@ -1511,6 +1631,7 @@ string_map* load_service_providers(char* filename)
 								// so we don't have to worry about calling reg_free here -- just free the initial malloc above
 								free(regexp);
 							}
+							free(variable[1]);
 						}
 						else
 						{
@@ -1543,6 +1664,16 @@ string_map* load_service_providers(char* filename)
 				}
 			}
 		}
+		if(variable[0] != NULL)
+		{
+			free(variable[0]);
+		}
+		if(variable[1] != NULL)
+		{
+			free(variable[1]);
+		}
+		free(variable);
+
 		fclose(service_provider_file);
 	}
 	return service_providers;
@@ -1554,7 +1685,6 @@ string_map* load_service_providers(char* filename)
 //comments are allowed & marked by '#' BUT these must be at start of line -- comments halfway through line are not supported
 char** parse_variable_definition_line(char* line)
 {
-
 	char** variable_definition = (char**)malloc(2*sizeof(char*));
 	variable_definition[0] = NULL;
 	variable_definition[1] = NULL;
@@ -1573,13 +1703,13 @@ char** parse_variable_definition_line(char* line)
 			char** split_line = split_on_separators(trimmed_line, whitespace_separators, 2, 2, 1, &num_pieces);
 			if(split_line[0] != NULL)
 			{
-				variable_definition[0] = split_line[0];
+				variable_definition[0] = strdup(split_line[0]);
 				if(split_line[1] != NULL)
 				{
-					variable_definition[1] = split_line[1];
+					variable_definition[1] = strdup(split_line[1]);
 				}
 			}
-			free(split_line);
+			free_null_terminated_string_array(split_line);
 		}
 		free(trimmed_line);
 		free(line);  // we always call with dynamically allocated memory, and for convenience we free it here, so we don't have to do it elsewhere
@@ -1669,6 +1799,7 @@ int convert_to_regex(char* str, regex_t* p)
 			free(new);
 			new = NULL;
 		}
+		free(internal);
 	}
 	if(valid == 1)
 	{

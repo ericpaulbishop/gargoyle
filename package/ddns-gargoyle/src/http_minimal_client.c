@@ -769,14 +769,7 @@ void* initialize_connection_https(char* host, int port)
     			ssl = SSL_new(ctx);
 			SSL_set_fd(ssl, socket);
 			initialized = SSL_connect(ssl);
-			if(initialized >=0)
-			{
-				connection_data = (ssl_connection_data*)malloc(sizeof(ssl_connection_data));
-				connection_data->socket = socket;
-				connection_data->ctx = ctx;
-				connection_data->ssl = ssl;
-			}
-			else
+			if(initialized < 0)
 			{
 				close(socket);
 				SSL_free(ssl);

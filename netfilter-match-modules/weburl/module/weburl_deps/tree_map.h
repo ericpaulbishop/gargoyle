@@ -300,15 +300,44 @@ void** get_string_map_values(string_map* map, unsigned long* num_values_returned
 }
 
 
-
 void** destroy_string_map(string_map* map, int destruction_type, unsigned long* num_destroyed)
 {
-
 	void** return_values = NULL;
 	if(map != NULL)
 	{
-		/* to prevent long map structure from being freed twice, need to reallocate basic structure to send to destroy */
-		return_values = destroy_long_map_values(&(map->lm), destruction_type, num_destroyed );
+		if(map->store_keys)
+		{
+			void** kvs = destroy_long_map_values( &(map->lm), DESTROY_MODE_RETURN_VALUES, num_destroyed );
+			unsigned long kv_index = 0;
+			for(kv_index=0; kv_index < *num_destroyed; kv_index++)
+			{
+				string_map_key_value* kv = (string_map_key_value*)kvs[kv_index];
+				void* value = kv->value;
+				
+				free(kv->key);
+				free(kv);
+				if(destruction_type == DESTROY_MODE_FREE_VALUES)
+				{
+					free(value);
+				}
+				if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+				{
+					kvs[kv_index] = value;
+				}
+			}
+			if(destruction_type == DESTROY_MODE_RETURN_VALUES)
+			{
+				return_values = kvs;
+			}
+			else
+			{
+				free(kvs);
+			}
+		}
+		else
+		{
+			return_values = destroy_long_map_values( &(map->lm), destruction_type, num_destroyed );
+		}
 		free(map);
 	}
 	return return_values;
