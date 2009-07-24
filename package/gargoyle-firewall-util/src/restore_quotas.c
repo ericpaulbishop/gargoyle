@@ -330,11 +330,11 @@ int main(int argc, char** argv)
 							//insert redirect rule
 							if(strcmp(types[type_index], "ingress_limit") == 0)
 							{
-								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", id, "\" -j DNAT --to-destination ", lan_ip), 1);
+								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", type_id, "\" -j DNAT --to-destination ", lan_ip), 1);
 							}
 							else
 							{
-								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", id, "\" -j DNAT --to-destination ", lan_ip), 1);
+								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j DNAT --to-destination ", lan_ip), 1);
 							}
 
 
