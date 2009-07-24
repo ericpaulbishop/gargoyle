@@ -424,7 +424,7 @@ function parseProviderData()
 			while(providerLineIndex < providerData.length && line.match(/^[\t ]*service[\t ]+/) == null)
 			{
 				line = providerData[providerLineIndex];
-				if(line.match(/^[\t ]*variables[\t ]+/))
+				if(line.match(/^[\t ]*required_variables[\t ]+/))
 				{
 					variablePart = (line.match(/ariables[\t ]+(.*)$/))[1];
 					if(variablePart.match(/domain/)) //domain variable MUST exist to display properly
@@ -432,10 +432,20 @@ function parseProviderData()
 						provider["variables"]=variablePart.split(/[\t ]+/);
 					}
 				}
-				else if(line.match(/^[\t ]*variable_names[\t ]+/))
+				else if(line.match(/^[\t ]*optional_variables[\t ]+/))
+				{
+					variablePart = (line.match(/ariables[\t ]+(.*)$/))[1];
+					provider["optional_variables"]=variablePart.split(/[\t ]+/);
+				}
+				else if(line.match(/^[\t ]*required_variable_names[\t ]+/))
 				{
 					variablePart = (line.match(/ariable_names[\t ]+(.*)$/))[1];
 					provider["variable_names"] = variablePart.split(/,/);
+				}
+				else if(line.match(/^[\t ]*optional_variable_names[\t ]+/))
+				{
+					variablePart = (line.match(/ariable_names[\t ]+(.*)$/))[1];
+					provider["optional_variable_names"] = variablePart.split(/,/);
 				}
 				providerLineIndex++;
 			}
