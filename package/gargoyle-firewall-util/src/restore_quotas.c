@@ -31,13 +31,14 @@ int main(int argc, char** argv)
 {
 
 	char* wan_if = NULL;
+	char* lan_ip = NULL;
 	char* local_subnet = NULL;
 	char* death_mark = NULL;
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
 	
 	char c;
-	while((c = getopt(argc, argv, "W:w:l:L:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "W:w:s:S:l:L:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
 		switch(c)
 		{
@@ -47,6 +48,10 @@ int main(int argc, char** argv)
 				break;
 			case 'L':
 			case 'l':
+				lan_ip = strdup(optarg);
+				break;
+			case 'S':
+			case 's':
 				local_subnet = strdup(optarg);
 				break;
 			case 'D':
@@ -73,7 +78,7 @@ int main(int argc, char** argv)
 	delete_chain_from_table(quota_table, "ingress_quotas");
 	delete_chain_from_table(quota_table, "combined_quotas");
 	delete_chain_from_table(quota_table, "forward_quotas");
-
+	delete_chain_from_table("nat", "quota_redirects");
 
 	if(wan_if == NULL)
 	{
@@ -108,6 +113,9 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N egress_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N ingress_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N combined_quotas 2>/dev/null"), 1);
+		
+		run_shell_command("iptables -t nat -N quota_redirects 2>/dev/null", 0);
+		run_shell_command("iptables -t nat -I zone_lan_prerouting -j quota_redirects 2>/dev/null", 0);
 
 		char* no_death_mark_test = dynamic_strcat(3, " -m connmark --mark 0x0/", death_mask, " ");
 		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I INPUT  1 -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
@@ -316,8 +324,20 @@ int main(int argc, char** argv)
 							
 						if(limit != NULL)
 						{
-							//insert rule
+							//insert quota block rule
 							run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, offpeak, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
+
+							//insert redirect rule
+							if(strcmp(types[type_index], "ingress_limit") == 0)
+							{
+								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", id, "\" -j DNAT --to-destination ", lan_ip), 1);
+							}
+							else
+							{
+								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", id, "\" -j DNAT --to-destination ", lan_ip), 1);
+							}
+
+
 							//restore from backup
 							if(do_restore)
 							{
@@ -417,8 +437,6 @@ int main(int argc, char** argv)
 			}
 			free_null_terminated_string_array(cron_lines);
 		}
-
-
 	}
 
 	/* commit changes to uci, to remove ignore_backup_at_next_restore variables permanently */

@@ -47,7 +47,7 @@ static unsigned long get_pow(unsigned long base, unsigned long pow);
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n  --check Check another bandwidth rule without incrementing it\n  --check-with-src-dst-swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
+	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n  --check Check another bandwidth rule without incrementing it\n  --check_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
 }
 
 static struct option opts[] = 

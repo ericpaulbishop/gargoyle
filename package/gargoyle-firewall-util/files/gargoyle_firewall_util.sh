@@ -296,7 +296,7 @@ initialize_quotas()
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	
-	restore_quotas -w $wan_if -d $death_mark -m $death_mask -l "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+	restore_quotas -w $wan_if -l $lan_ip -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
 
 	#enable cron, but only restart cron if it is currently running
 	#since we initialize this before cron, this will
