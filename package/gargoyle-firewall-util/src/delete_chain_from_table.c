@@ -9,7 +9,6 @@
 
 char** get_shell_command_output_lines(char* command, unsigned long* num_lines);
 void free_split_pieces(char** split_pieces);
-void free_null_terminated_string_array(char** strings);
 
 int main(int argc, char **argv)
 {
@@ -92,14 +91,4 @@ char** get_shell_command_output_lines(char* command, unsigned long* num_lines)
 		fclose(shell_out);
 	}
 	return ret;
-}
-
-void free_null_terminated_string_array(char** strings)
-{
-	int index;
-	for(index = 0; strings[index] != NULL; index++)
-	{
-		free(strings[index]);
-	}
-	free(strings);
 }

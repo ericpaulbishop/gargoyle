@@ -22,7 +22,6 @@ void delete_chain_from_table(char* table, char* delete_chain);
 void run_shell_command(char* command, int free_command_str);
 char** get_shell_command_output_lines(char* command, unsigned long* num_lines, int free_command);
 void free_split_pieces(char** split_pieces);
-void free_null_terminated_string_array(char** strings);
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type);
 char* get_uci_option(struct uci_context* ctx,char* package_name, char* section_name, char* option_name);
@@ -582,17 +581,6 @@ char** get_shell_command_output_lines(char* command, unsigned long* num_lines, i
 	}
 	return ret;
 }
-
-void free_null_terminated_string_array(char** strings)
-{
-	int index;
-	for(index = 0; strings[index] != NULL; index++)
-	{
-		free(strings[index]);
-	}
-	free(strings);
-}
-
 
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type)
