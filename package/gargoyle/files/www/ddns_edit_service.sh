@@ -14,7 +14,7 @@
 	<div>
 		<div>
 			<label class='leftcolumn' for='ddns_provider' id='ddns_provider_label'>Service Provider:</label>
-			<span class='rightcolumn' id="ddns_provider" ></span>
+			<span class='rightcolumn' id="ddns_provider_text" ></span>
 		</div>
 	</div>
 
