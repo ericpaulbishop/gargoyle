@@ -15,7 +15,7 @@
 <?
 	
 	echo "providerData = new Array();"
-	cat /etc/ddns_providers.conf | awk '{print "providerData.push(\""$0"\");" ;}'
+	cat /etc/ddns_providers.conf | sed "s/\"/\'/g" | awk '{print "providerData.push(\""$0"\");" ;}'
 
 	updates=$(ls /var/last_ddns_updates 2>/dev/null )
 	echo "updateTimes = new Array();"

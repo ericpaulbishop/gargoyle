@@ -134,12 +134,10 @@ function resetData()
 		addOptionToSelectElement("ddns_provider", provider["name"], provider["name"]);
 	}
 	
-	setProvider();
-	document.getElementById("ddns_check").value = "";
-	document.getElementById("ddns_force").value = "";
+	setDocumentFromUci( new UCIContainer(), "", "", document);
 
 	
-	// setup table of existing providers
+	// setup table of existing domains configured for ddns
 	uci = uciOriginal.clone();
 	newSections = [];
 	updatedSections = [];
@@ -186,7 +184,6 @@ function resetData()
 		ddnsTableData[deIndex][2].checked = ddnsEnabledData[deIndex];
 	}
 
-
 }
 
 function addDdnsService()
@@ -221,13 +218,6 @@ function addDdnsService()
 		addTableRow(ddnsTable, newTableRow, true, false, removeServiceProviderCallback);
 
 		setDocumentFromUci( new UCIContainer(), "", "", document);
-
-		for(variableIndex=0; variableIndex < variables.length; variableIndex++)
-		{
-			document.getElementById(variables[variableIndex]).value = "";
-		}
-		document.getElementById("ddns_check").value = "";
-		document.getElementById("ddns_force").value = "";
 
 		newSections.push(sectionName);
 		updatedSections.push(sectionName);
@@ -281,7 +271,6 @@ function proofreadServiceProvider(controlDocument)
 		}
 	}
 
-
 	return errors;
 }
 
@@ -303,20 +292,20 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 		providerName = getSelectedValue("ddns_provider", controlDocument);
 	}
 
-	dstUci.removeSection("ddns_gargoyle", sectionName); 
-	dstUci.set("ddns_gargoyle", sectionName, "", "service");
-	dstUci.set("ddns_gargoyle", sectionName, "enabled", "1");
-	dstUci.set("ddns_gargoyle", sectionName, "service_provider", providerName);
-	dstUci.set("ddns_gargoyle", sectionName, "ip_source", "internet");
-	dstUci.set("ddns_gargoyle", sectionName, "force_interval", controlDocument.getElementById("ddns_force").value  );
-	dstUci.set("ddns_gargoyle", sectionName, "force_unit", "days");
-	dstUci.set("ddns_gargoyle", sectionName, "check_interval", controlDocument.getElementById("ddns_check").value );
-	dstUci.set("ddns_gargoyle", sectionName, "check_unit", "minutes");
+	dstUci.removeSection("ddns_gargoyle", section); 
+	dstUci.set("ddns_gargoyle", section, "", "service");
+	dstUci.set("ddns_gargoyle", section, "enabled", "1");
+	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
+	dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	dstUci.set("ddns_gargoyle", section, "force_interval", controlDocument.getElementById("ddns_force").value  );
+	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
+	dstUci.set("ddns_gargoyle", section, "check_interval", controlDocument.getElementById("ddns_check").value );
+	dstUci.set("ddns_gargoyle", section, "check_unit", "minutes");
 		
 	var provider = null;
 	for(providerIndex=0; providerIndex < serviceProviders.length && provider == null; providerIndex++)
 	{
-		provider = serviceProviders[providerIndex]["name"] == selected ? serviceProviders[providerIndex] : null;
+		provider = serviceProviders[providerIndex]["name"] == providerName ? serviceProviders[providerIndex] : null;
 	}
 	if(provider == null)
 	{
@@ -338,7 +327,7 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 		var value = allBooleanVariables[ el.id ] != 1 ? el.value : (el.checked ? "1" : "0");
 		if(value != "")
 		{
-			dstUci.set("ddns_gargoyle", sectionName, el.id, value);
+			dstUci.set("ddns_gargoyle", section, el.id, value);
 		}
 	}
 	for(variableIndex=0; variableIndex < optionalVariables.length; variableIndex++)
@@ -348,12 +337,12 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 		{
 			if(controlDocument.getElementById( el.id + "_enabled").checked)
 			{
-				dstUci.set("ddns_gargoyle", sectionName, el.id, el.value);
+				dstUci.set("ddns_gargoyle", section, el.id, el.value);
 			}
 		}
 		else
 		{
-			dstUci.set("ddns_gargoyle", sectionName, el.id, el.checked ? "1" : "0");
+			dstUci.set("ddns_gargoyle", section, el.id, el.checked ? "1" : "0");
 		}
 	}
 }
@@ -413,15 +402,15 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 			el.checked = srcUci.get(pkg, section, el.id) == "1" ? true : false;
 		}
 	}
+
 	var checkMinutes = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "check_unit") ) * srcUci.get("ddns_gargoyle", section, "check_interval"))/(60);
-	checkMinutes = (checkMinutes > 0) ? checkMinutes : 1;
+	checkMinutes = (checkMinutes > 0) ? checkMinutes : 15;
 	controlDocument.getElementById( "ddns_check" ).value = checkMinutes;
 
 
-	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", sectionName, "force_unit") ) * srcUci.get("ddns_gargoyle", sectionName, "force_interval"))/(24*60*60);
-	forceDays = (forceDays > 0) ? forceDays : 1;
+	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "force_unit") ) * srcUci.get("ddns_gargoyle", section, "force_interval"))/(24*60*60);
+	forceDays = (forceDays > 0) ? forceDays : 3;
 	controlDocument.getElementById( "ddns_force" ).value = forceDays;
-
 }
 
 function setProvider(controlDocument)
@@ -469,7 +458,7 @@ function setProvider(controlDocument)
 			label.appendChild( controlDocument.createTextNode(variableNames[variableIndex] + ":" ));
 			div.appendChild(label);
 			
-			var input;	
+			var input;
 			if(allBooleanVariables[ variables[variableIndex] ] != 1)
 			{
 				input = createInput("text", controlDocument);
@@ -493,15 +482,17 @@ function setProvider(controlDocument)
 			
 			var label = controlDocument.createElement("label");
 			label.className="leftcolumn";
-			label.id=variables[variableIndex] + "_label";
-			label.appendChild( controlDocument.createTextNode(variableNames[variableIndex] + ":" ));
+			label.id=optionalVariables[variableIndex] + "_label";
+			label.appendChild( controlDocument.createTextNode(optionalVariableNames[variableIndex] + ":" ));
 			div.appendChild(label);
-			if(allBooleanVariables[ variables[variableIndex] ] != 1)
+			if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 			{
 				var span = controlDocument.createElement("span");
 				span.className = "rightcolumn";
 				
 				var check = createInput("checkbox", controlDocument);
+				check.style.position="relative";
+				check.style.top="3px";
 				var text  = createInput("text", controlDocument);
 				check.id = optionalVariables[variableIndex] + "_enabled";
 				text.id  = optionalVariables[variableIndex];
@@ -518,7 +509,7 @@ function setProvider(controlDocument)
 			{
 				var input = createInput("checkbox", controlDocument);
 				input.className = "rightcolumn";
-				input.id = variables[variableIndex];
+				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
 			}
 			newElements.push(div);
@@ -596,6 +587,10 @@ function parseProviderData()
 			var provider = new Array();
 			var splitService = line.split(/ervice[\t ]+/);
 			provider["name"] = splitService[1];
+
+			provider["optional_variables"] = [];
+			provider["optional_variable_names"] = [];
+			provider["boolean_variables"] = [];
 
 			line = "";
 			providerLineIndex++;

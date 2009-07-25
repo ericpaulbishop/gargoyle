@@ -18,7 +18,7 @@
 		</div>
 	</div>
 
-	<div id="variable_container"></div>
+	<div id="ddns_variable_container"></div>
 		
 	<div>
 		<div>
