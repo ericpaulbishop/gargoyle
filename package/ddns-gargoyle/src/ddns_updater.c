@@ -774,6 +774,15 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 				//determine remote ip
 				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
+				if(test_domain == NULL) 
+				{
+					/* 
+					 * if domain not defined, e.g. we're updating OpenDNS and 
+					 * not typical dynamic dns service use service name as 
+					 * unique identifier for storing remote_ip
+					 */ 
+					test_domain = service_config->name;
+				}
 				char* remote_ip = get_map_element(remote_ips, test_domain);
 				if(remote_ip == NULL && perform_force_update == 0)
 				{
