@@ -442,7 +442,7 @@ function fullEscape(str)
 
 
 
-function setChildText(parentId, text, color)
+function setChildText(parentId, text, color, isBold, fontSize)
 {
 	parentElement = document.getElementById(parentId);
 	if(parentElement != null)
@@ -450,6 +450,15 @@ function setChildText(parentId, text, color)
 		if(color != null)
 		{
 			parentElement.style.color = color;
+		}
+		if(isBold != null)
+		{
+			parentElement.style.fontWeight = isBold ? "bold" : "normal";
+		}
+		if(fontSize != null)
+		{
+			parentElement.style.fontSize = fontSize;
+
 		}
 		if(parentElement.firstChild != null)
 		{

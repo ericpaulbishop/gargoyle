@@ -77,16 +77,21 @@ function setStatusAndQuotas()
 	{
 		ipQuotaName = connectedIp;
 	}
-	
+
+	var normalFont = ["black", false, "100%"];
+	var allUsedFont = ["red", true, "115%"];
 	if( quotaUsed[ ipQuotaName ] != null )
 	{
 		var ipQuotaUsed = quotaUsed[ ipQuotaName ];
 		var ipQuotaLimits = quotaLimits[ ipQuotaName ];
 		var ipQuotaPercents = quotaPercents[ ipQuotaName ];
 		var ipQuotaData = getQuotaLines(ipQuotaUsed, ipQuotaLimits, ipQuotaPercents);
-		if(ipQuotaData[0] != null) { setChildText("up_your_quota", ipQuotaData[0]); }
-		if(ipQuotaData[1] != null) { setChildText("down_your_quota", ipQuotaData[1]); }
-		if(ipQuotaData[2] != null) { setChildText("combined_your_quota", ipQuotaData[2]); }
+		var upFont = ipQuotaPercents[0] == 100.0 ? allUsedFont : normalFont;
+		var downFont = ipQuotaPercents[1] == 100.0 ? allUsedFont : normalFont;
+		var combinedFont = ipQuotaPercents[2] == 100.0 ? allUsedFont : normalFont;
+		if(ipQuotaData[0] != null) { setChildText("up_your_quota", ipQuotaData[0], upFont[0], upFont[1], upFont[2]);  }
+		if(ipQuotaData[1] != null) { setChildText("down_your_quota", ipQuotaData[1], downFont[0], downFont[1], downFont[2]);  }
+		if(ipQuotaData[2] != null) { setChildText("combined_your_quota", ipQuotaData[2], combinedFont[0], combinedFont[1], combinedFont[2]); }
 		document.getElementById("up_your_quota_container").style.display = ipQuotaData[0] == null ? "none" : "block";
 		document.getElementById("down_your_quota_container").style.display = ipQuotaData[1] == null ? "none" : "block";
 		document.getElementById("combined_your_quota_container").style.display = ipQuotaData[2] == null ? "none" : "block";
@@ -98,9 +103,12 @@ function setStatusAndQuotas()
 		var allQuotaLimits   = quotaLimits["ALL"];
 		var allQuotaPercents = quotaPercents["ALL"];
 		var allQuotaData     = getQuotaLines(allQuotaUsed, allQuotaLimits, allQuotaPercents);
-		if(allQuotaData[0] != null) { setChildText("up_all_quota", allQuotaData[0]); }
-		if(allQuotaData[1] != null) { setChildText("down_all_quota", allQuotaData[1]); }
-		if(allQuotaData[2] != null) { setChildText("combined_all_quota", allQuotaData[2]); }
+		var upFont = allQuotaPercents[0] == 100.0 ?  allUsedFont : normalFont;
+		var downFont = allQuotaPercents[1] == 100.0 ?  allUsedFont : normalFont;
+		var combinedFont = allQuotaPercents[2] == 100.0 ?  allUsedFont : normalFont;
+		if(allQuotaData[0] != null) { setChildText("up_all_quota", allQuotaData[0], upFont[0], upFont[1], upFont[2]); }
+		if(allQuotaData[1] != null) { setChildText("down_all_quota", allQuotaData[1],downFont[0], downFont[1], downFont[2]); }
+		if(allQuotaData[2] != null) { setChildText("combined_all_quota", allQuotaData[2], combinedFont[0], combinedFont[1], combinedFont[2]); }
 		document.getElementById("up_all_quota_container").style.display = allQuotaData[0] == null ? "none" : "block";
 		document.getElementById("down_all_quota_container").style.display = allQuotaData[1] == null ? "none" : "block";
 		document.getElementById("combined_all_quota_container").style.display = allQuotaData[2] == null ? "none" : "block";
