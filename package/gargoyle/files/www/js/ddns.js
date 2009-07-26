@@ -255,11 +255,6 @@ function proofreadServiceProvider(controlDocument)
 
 
 
-
-
-
-
-
 	var providerName;
 	if(controlDocument.getElementById("ddns_provider_text") != null)
 	{
@@ -487,6 +482,7 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 			{
 				el.value = srcUci.get(pkg, section, el.id);
 			}
+			setElementEnabled(el, check.checked, "");
 		}
 		else
 		{
@@ -615,6 +611,14 @@ function setProvider(controlDocument)
 		for(newElementIndex = 0; newElementIndex < newElements.length; newElementIndex++)
 		{
 			container.appendChild(newElements[newElementIndex]);
+		}
+
+		for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
+		{
+			if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
+			{
+				setElementEnabled( controlDocument.getElementById(optionalVariables[variableIndex]), controlDocument.getElementById(optionalVariables[variableIndex] + "_enabled").checked, "");
+			}
 		}
 	}
 	return provider;
@@ -866,12 +870,13 @@ function editServiceTableRow()
 				
 				saveButton.onclick = function()
 				{
-					errors = proofreadServiceProvider(editServiceWindow.document);
+					var newDomain = editServiceWindow.document.getElementById("domain") != null ?
+								editServiceWindow.document.getElementById("domain").value :
+								providerName;
+
+					var errors = proofreadServiceProvider(editServiceWindow.document);
 					if(errors.length == 1)
 					{
-						var newDomain = editServiceWindow.document.getElementById("domain") != null ?
-									editServiceWindow.document.getElementById("domain").value :
-									providerName;
 						
 						if(errors[0].match(/Duplicate/) && newDomain == selectedDomain)
 						{
@@ -885,10 +890,8 @@ function editServiceTableRow()
 					}
 					else
 					{
-						editServiceWindowRow.firstChild.firstChild.data = editServiceWindow.document.getElementById("domain").value;
+						editServiceWindowRow.firstChild.firstChild.data = newDomain;
 						setUciFromDocument(uci, "ddns_gargoyle", sectionName, editServiceWindow.document);
-
-
 						updatedSections.push(sectionName);
 						editServiceWindow.close();
 
