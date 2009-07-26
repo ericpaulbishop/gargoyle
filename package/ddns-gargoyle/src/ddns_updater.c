@@ -1160,6 +1160,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 			{
 				if(verbose > 0 ){ printf("update needed or force requested, performing actual update\n"); }
 				char* url_str = do_url_substitution(def, service_config, local_ip);
+				if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
 				http_response* page = get_url_str(url_str);
 				
 				if(page != NULL)
