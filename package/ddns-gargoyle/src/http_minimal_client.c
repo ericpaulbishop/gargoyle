@@ -518,6 +518,10 @@ int char_index(char* str, int ch)
 int tcp_connect(char* hostname, int port)
 {
 	struct hostent* host;
+	if(hostname == NULL)
+	{
+		return -1;
+	}
        	host = gethostbyname(hostname);
 	if(host == NULL)
 	{
