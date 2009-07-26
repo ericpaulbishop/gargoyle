@@ -317,6 +317,15 @@ block_static_ip_mismatches()
 	fi
 }
 
+force_router_dns()
+{
+	force_router_dns=$(uci get firewall.@defaults[0].force_router_dns 2> /dev/null)
+	if [ "$force_router_dns" = "1" ] ; then
+		iptables -t nat -I zone_lan_prerouting -p tcp --dport 53 -j REDIRECT
+		iptables -t nat -I zone_lan_prerouting -p udp --dport 53 -j REDIRECT
+	fi
+}
+
 initialize_firewall()
 {
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
@@ -327,6 +336,6 @@ initialize_firewall()
 	insert_restriction_rules
 	initialize_quotas
 	block_static_ip_mismatches
-
+	force_router_dns
 }
 

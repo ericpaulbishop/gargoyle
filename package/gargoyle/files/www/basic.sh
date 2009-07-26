@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "basic" -c "internal.css" -j "basic.js table.js" -i network wireless dhcp
+	gargoyle_header_footer -h -s "connection" -p "basic" -c "internal.css" -j "basic.js table.js" -i network wireless dhcp firewall
 ?>
 
 <script>
@@ -387,11 +387,18 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
 			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-	
-	
+		<div id="lan_force_dns_container">
+			<label class="leftcolumn" id='lan_force_dns_label' for='lan_force_dns'>Allow Alternate DNS:</label>
+			<select class='rightcolumn' id='lan_force_dns'>
+				<option value="allow">Allow Clients To Use Alternate DNS Servers</option>
+				<option value="force">Force Clients To Use Router DNS Servers</option>
+			</select>
+
+		</div>
+
 		<div id="lan_dns_container">
 			<span class="leftcolumn">
-				<label id='lan_use_dns_label' for='lan_use_dns'>Custom DNS:</label>
+				<label id='lan_use_dns_label' for='lan_use_dns'>Custom DNS Servers:</label>
 			</span>
 			<span class='rightcolumn'>
 				<input type='checkbox' id='lan_use_dns' onclick='setDnsEnabled(this)'/>&nbsp;&nbsp;

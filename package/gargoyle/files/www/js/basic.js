@@ -258,6 +258,14 @@ function saveChanges()
 				}	
 			}
 
+			//force clients to use router DNS?
+			var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
+			var forceDNS = getSelectedValue("lan_force_dns", document);
+			uciOriginal.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
+			uci.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
+			var fdCommand = forceDNS == "force" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci del firewall.@defaults[0].force_router_dns \n";
+			preCommands = preCommands + fdCommand;
+
 
 			//if current dhcp range is not in new subnet, or current dhcp range contains new router ip adjust it
 			var dhcpSection = getDhcpSection(uciOriginal);
@@ -1216,7 +1224,10 @@ function resetData()
 
 	networkParams = ['', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1'];
 
-	
+	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
+	var force = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1") ? "force" : "allow";
+	setSelectedValue("lan_force_dns", force, document);
+
 
 	
 
