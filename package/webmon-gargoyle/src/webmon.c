@@ -50,7 +50,7 @@
 
 #include <erics_tools.h>
 #define malloc safe_malloc
-
+#define strdup safe_strdup
 
 #define PID_PATH "/var/run/webmond.pid"
 #define DEFAULT_MAX_QUEUE_LENGTH 300

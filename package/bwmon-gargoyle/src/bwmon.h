@@ -48,6 +48,7 @@
 
 #include "erics_tools.h"
 #define malloc safe_malloc
+#define strdup safe_strdup
 
 #define MSG_ID 12
 #define REQUEST_MSG_TYPE 24

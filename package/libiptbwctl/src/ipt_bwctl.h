@@ -68,5 +68,6 @@ extern void unlock_bandwidth_semaphore_on_exit(void);
 /* sets kernel timezone minuteswest to match user timezone */
 extern void set_kernel_timezone(void);
 
-/* safe malloc function used to handle malloc errors cleanly */
+/* safe malloc & strdup functions used to handle malloc errors cleanly */
 extern void* ipt_bwctl_safe_malloc(size_t size);
+extern char* ipt_bwctl_safe_strdup(const char* str);

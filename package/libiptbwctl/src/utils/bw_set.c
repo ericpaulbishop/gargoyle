@@ -20,7 +20,7 @@
 
 #include <ipt_bwctl.h>
 #define malloc ipt_bwctl_safe_malloc
-
+#define strdup ipt_bwctl_safe_strdup
 
 static char* read_entire_file(FILE* in, int read_block_size);
 static char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long *pieces_read);

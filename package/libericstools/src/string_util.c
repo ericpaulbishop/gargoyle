@@ -36,6 +36,7 @@
 
 #include "erics_tools.h"
 #define malloc safe_malloc
+#define strdup safe_strdup
 
 
 
@@ -488,5 +489,24 @@ unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigne
 	return read_string;
 }
 
+char** get_shell_command_output_lines(char* command, unsigned long* num_lines)
+{
+	char** ret = NULL;
+	if(command != NULL && num_lines != NULL)
+	{
+		FILE* shell_out = popen(command, "r");
+		*num_lines = 0;
+		if(shell_out != NULL)
+		{
+			char linebreaks[] = { '\n', '\r' };
+			unsigned long read_length;
+			char* all_data = (char*)read_entire_file(shell_out, 2048, &read_length);
+			ret = split_on_separators(all_data, linebreaks, 2, -1, 0, num_lines);
+			free(all_data);
+			pclose(shell_out);
+		}
+	}
+	return ret;
+}
 
 

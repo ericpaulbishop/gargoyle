@@ -23,6 +23,7 @@
 #ifdef USE_ERICS_TOOLS
 #include "erics_tools.h"
 #define malloc safe_malloc
+#define strdup safe_strdup
 #endif
 
 

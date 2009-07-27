@@ -13,14 +13,13 @@
 #include <uci.h>
 #include <ipt_bwctl.h>
 #define malloc safe_malloc
-
+#define strdup safe_strdup
 
 void restore_backup_for_id(char* id, char* quota_backup_dir);
 
 
 void delete_chain_from_table(char* table, char* delete_chain);
 void run_shell_command(char* command, int free_command_str);
-char** get_shell_command_output_lines(char* command, unsigned long* num_lines, int free_command);
 void free_split_pieces(char** split_pieces);
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type);
@@ -579,27 +578,6 @@ void run_shell_command(char* command, int free_command_str)
 		free(command);
 	}
 }
-
-char** get_shell_command_output_lines(char* command, unsigned long* num_lines, int free_command)
-{
-	char** ret = NULL;
-	FILE* shell_out = popen(command, "r");
-	if(shell_out != NULL)
-	{
-		char linebreaks[] = { '\n', '\r' };
-		unsigned long read_length;
-		char* all_data = (char*)read_entire_file(shell_out, 2048, &read_length);
-		ret = split_on_separators(all_data, linebreaks, 2, -1, 0, num_lines);
-		free(all_data);
-		fclose(shell_out);
-	}
-	if(free_command)
-	{
-		free(command);
-	}
-	return ret;
-}
-
 
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type)
 {

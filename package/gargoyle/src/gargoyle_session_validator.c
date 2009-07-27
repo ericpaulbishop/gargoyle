@@ -8,6 +8,7 @@
 
 #include <erics_tools.h>
 #define malloc safe_malloc
+#define strdup safe_strdup
 
 #include "sha256.h"
 

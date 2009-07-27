@@ -6,8 +6,8 @@
 
 #include <erics_tools.h>
 #define malloc safe_malloc
+#define strdup safe_strdup
 
-char** get_shell_command_output_lines(char* command, unsigned long* num_lines);
 void free_split_pieces(char** split_pieces);
 
 int main(int argc, char **argv)
@@ -77,18 +77,3 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-char** get_shell_command_output_lines(char* command, unsigned long* num_lines)
-{
-	char** ret = NULL;
-	FILE* shell_out = popen(command, "r");
-	if(shell_out != NULL)
-	{
-		char linebreaks[] = { '\n', '\r' };
-		unsigned long read_length;
-		char* all_data = (char*)read_entire_file(shell_out, 2048, &read_length);
-		ret = split_on_separators(all_data, linebreaks, 2, -1, 0, num_lines);
-		free(all_data);
-		fclose(shell_out);
-	}
-	return ret;
-}
