@@ -1770,6 +1770,22 @@ string_map* load_service_providers(char* filename)
 				}
 				else
 				{
+					if( service_provider->url_template == NULL)
+					{
+						fprintf(stderr, "WARNING: couldn't load service provider %s (no url template)\n", service_provider->name);
+					}
+					else if( service_provider->required_variables == NULL)
+					{
+						fprintf(stderr, "WARNING: couldn't load service provider %s (no required variables)\n", service_provider->name);
+					}
+					else if( service_provider->success_regexp == NULL && service_provider->failure_regexp == NULL)
+					{
+						fprintf(stderr, "WARNING: couldn't load service provider %s (no regular expression)\n", service_provider->name);
+					}
+					else
+					{
+						fprintf(stderr, "WARNING: couldn't load service provider %s\n", service_provider->name);
+					}
 					free_service_provider(service_provider);
 				}
 			}
