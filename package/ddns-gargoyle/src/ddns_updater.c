@@ -83,6 +83,7 @@ typedef struct
 	char** optional_variable_defaults;
 	char** meta_variables;
 	string_map* meta_variable_defs;
+	string_map* meta_variables_to_cache;
 	regex_t* success_regexp;	// update considered success only if result matches this regex
 	regex_t* failure_regexp;	// update considered failure only if result matches this regex
 					//
@@ -102,6 +103,7 @@ typedef struct
 	char* ip_interface;			// name of an interface
 	
 	string_map* variable_definitions; 	// variable_id->variable_definition
+	string_map* cached_meta_variables;
 
 } ddns_service_config;
 
@@ -145,9 +147,9 @@ char* lookup_domain_ip(char* url_str);
 
 void run_request(string_map *service_configs, string_map *service_providers, char **service_names, int force_update, char display_format, int verbose);
 void run_request_through_daemon(char **service_names, int force_update, char display_format);
-void run_daemon(string_map *service_configs, string_map *service_providers, int force_update);
+void run_daemon(string_map *service_configs, string_map *service_providers, int force_update, char run_in_background);
 
-void daemonize(int background);
+void daemonize(char run_in_background);
 void signal_handler(int sig);
 int create_path(const char *name, int mode);
 
@@ -172,16 +174,16 @@ int main(int argc, char** argv)
 	
 	char* config_file = strdup("/etc/ddns_updater.conf");
 	char* service_provider_file = strdup("/etc/ddns_providers.conf");
-	int is_daemon = 0;
-	int force_update = 0;
-	int verbose = 0;
+	char is_daemon = 0;
+	char force_update = 0;
+	char verbose = 0;
 	char display_format = 'h';
 	char** service_names = (char**)malloc(sizeof(char*));
 	service_names[0] = NULL;
-
+	char run_in_background = 1;
 
 	int c;
-	while((c = getopt(argc, argv, "c:C:P:p:DdFfHhMmVvUu")) != -1)
+	while((c = getopt(argc, argv, "c:C:P:p:DdFfHhMmVvUuGg")) != -1)
 	{	
 		switch(c)
 		{
@@ -214,6 +216,10 @@ int main(int argc, char** argv)
 			case 'V':
 			case 'v':
 				verbose = 1;
+				break;
+			case 'G':
+			case 'g':
+				run_in_background = 0;
 				break;
 			case 'U':
 			case 'u':
@@ -282,7 +288,7 @@ int main(int argc, char** argv)
 			if(is_daemon)
 			{
 				//start update daemon
-				run_daemon(service_configs, service_providers, force_update);
+				run_daemon(service_configs, service_providers, force_update, run_in_background);
 			}
 			else
 			{
@@ -331,8 +337,9 @@ void free_service_configs(string_map* service_configs)
 }
 void free_service_config(ddns_service_config* config)
 {
-	unsigned long num_keys;
-	destroy_string_map(config->variable_definitions, DESTROY_MODE_FREE_VALUES, &num_keys);
+	unsigned long num_destroyed;
+	destroy_string_map(config->variable_definitions, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(config->cached_meta_variables, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	free_null_terminated_string_array(config->ip_url);
 	free(config->service_provider);
 	free(config->ip_interface);
@@ -361,6 +368,8 @@ void free_service_provider(ddns_service_provider* provider)
 	free_null_terminated_string_array(provider->optional_variable_defaults);
 	free_null_terminated_string_array(provider->meta_variables);
 	destroy_string_map(provider->meta_variable_defs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(provider->meta_variables_to_cache, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
 	if(provider->success_regexp != NULL)
 	{
 		regfree(provider->success_regexp);
@@ -632,11 +641,11 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 }
 
 
-void run_daemon(string_map *service_configs, string_map* service_providers, int force_update)
+void run_daemon(string_map *service_configs, string_map* service_providers, int force_update, char run_in_background)
 {
 
 
-	daemonize(1); //call with 0 instead of 1 to run in foreground
+	daemonize(run_in_background); //call with 0 for forground of 1 for background
 
 	//open message queue 
 	int mq = msgget(ftok(PID_PATH, MSG_ID), 0777 | IPC_CREAT );
@@ -940,8 +949,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 					{
 						message_t resp_msg;
 						resp_msg.msg_type = RESPONSE_MSG_TYPE;
+						memset(resp_msg.msg_line, '\0', MAX_MSG_LINE); 
 						resp_msg.msg_line[0] = UPDATE_OF_MULTIPLE_SERVICES_SCHEDULED;
 						*((unsigned long*)(resp_msg.msg_line + 1)) = num_configs;
+
 						msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
 					}
 					
@@ -1034,10 +1045,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 }
 
-void daemonize(int background) //background variable is useful for debugging, causes program to run in foreground if 0
+void daemonize(char run_in_background) //background variable is useful for debugging, causes program to run in foreground if 0
 {
 
-	if(background != 0)
+	if(run_in_background != 0)
 	{
 		//fork and end parent process
 		int i=fork();
@@ -1239,18 +1250,49 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 	{
 		for(var_index=0; (provider->meta_variables)[var_index] != NULL; var_index++)
 		{
-			char* meta_def = (char*)get_string_map_element(provider->meta_variable_defs, (provider->meta_variables)[var_index]);
-			if(meta_def != NULL)
+			char* var_name = (provider->meta_variables)[var_index];
+			char* meta_var = (char*)get_string_map_element(config->cached_meta_variables, var_name);
+			char* meta_def = (char*)get_string_map_element(provider->meta_variable_defs, var_name);
+			if(meta_var == NULL)
 			{
-				unsigned long num_lines;
-				char* meta_sub = do_line_substitution(meta_def, all_variables);
-				char** output = get_shell_command_output_lines(meta_sub, &num_lines);
-				if(num_lines > 0)
+				if(meta_def != NULL)
 				{
-					set_string_map_element(all_variables, (provider->meta_variables)[var_index], strdup(output[0]) );
+					unsigned long num_lines;
+					char* meta_sub = do_line_substitution(meta_def, all_variables);
+					char** output = get_shell_command_output_lines(meta_sub, &num_lines);
+					if(num_lines > 0)
+					{
+						meta_var = strdup(output[0]);
+					}
+					free_null_terminated_string_array(output);
+					free(meta_sub);
 				}
-				free_null_terminated_string_array(output);
-				free(meta_sub);
+			}
+			else
+			{
+				/* 
+				 * need to dynamically allocate meta_var 
+				 * (everything in all_variables gets freed after update) 
+				 */
+				char *tmp = strdup(meta_var);
+				meta_var = tmp;
+			}
+			if(meta_var != NULL)
+			{
+				set_string_map_element(all_variables, var_name, meta_var);
+				
+				// cache only specified meta-variables not already cached
+				if(	get_string_map_element(provider->meta_variables_to_cache, var_name ) != NULL && 
+					get_string_map_element(config->cached_meta_variables, var_name) == NULL
+					)
+				{
+					//since meta_var gets freed.. we need yet ANOTHER copy to cache
+					set_string_map_element(config->cached_meta_variables, var_name, strdup(meta_var));
+				}
+			}
+			else
+			{
+				set_string_map_element(all_variables, var_name, strdup(""));
 			}
 		}
 	}
@@ -1488,6 +1530,7 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 				service_conf->ip_url = NULL;
 				service_conf->ip_interface = NULL;
 				service_conf->variable_definitions = initialize_map(1); 	
+				service_conf->cached_meta_variables = initialize_string_map(0);
 				int service_enabled = 0;
 
 				free(variable[0]);
@@ -1688,7 +1731,7 @@ string_map* load_service_providers(char* filename)
 				service_provider->optional_variable_defaults = NULL;
 				service_provider->meta_variables = NULL;
 				service_provider->meta_variable_defs = initialize_string_map(0);
-
+				service_provider->meta_variables_to_cache = initialize_string_map(0);
 
 				free(variable[0]);
 				free(variable);
@@ -1731,6 +1774,21 @@ string_map* load_service_providers(char* filename)
 							service_provider->meta_variables =  split_on_separators(variable[1], whitespace_separators, 2, -1, 0, &num_pieces);
 							free(variable[1]);
 						}
+						else if(safe_strcmp(variable[0], "meta_variables_to_cache") == 0 && variable[1] != NULL)
+						{
+							unsigned long num_pieces;
+							char whitespace_separators[] = {'\t', ' '};
+							char** cache_list =  split_on_separators(variable[1], whitespace_separators, 2, -1, 0, &num_pieces);
+							int cache_index;
+							for(cache_index=0; cache_list[cache_index] != NULL; cache_index++)
+							{
+								char* dummy = strdup("1");
+								set_string_map_element(service_provider->meta_variables_to_cache, cache_list[cache_index], dummy);
+							}
+							free_null_terminated_string_array(cache_list);
+							free(variable[1]);
+						}
+
 						else if( (safe_strcmp(variable[0], "success_regexp") == 0 || safe_strcmp(variable[0], "failure_regexp") == 0 ) && variable[1] != NULL)
 						{
 							regex_t* regexp = (regex_t*)malloc(sizeof(regex_t));
