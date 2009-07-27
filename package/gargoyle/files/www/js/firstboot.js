@@ -7,7 +7,7 @@
  */
 
 
-function setPassword()
+function setInitialSettings()
 {
 	var p1 = document.getElementById("password1").value;
 	var p2 = document.getElementById("password2").value;
@@ -24,15 +24,18 @@ function setPassword()
 
 		setControlsEnabled(false, true);
 
-		var passwordCommands = "";
+		var saveCommands = "";
 		var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
-		passwordCommands = "(echo \"" + p1 + "\" ; sleep 1 ; echo \"" + p1 + "\") | passwd root \n";
-		passwordCommands = passwordCommands + "\n/etc/init.d/dropbear restart\n";
-		passwordCommands = passwordCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
-		passwordCommands = passwordCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
+		saveCommands = "(echo \"" + p1 + "\" ; sleep 1 ; echo \"" + p1 + "\") | passwd root \n";
+		saveCommands = saveCommands + "\nuci set system.@system[0].timezone=\'" + getSelectedValue("timezone") + "\'\n";
+		saveCommands = saveCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
+		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ 2>/dev/null\n";
+		saveCommands = saveCommands + "\n/etc/init.d/dropbear restart 2>/dev/null\n";
+		saveCommands = saveCommands + "\nACTION=ifup /etc/hotplug.d/iface/20-ntpclient >/dev/null 2>&1\n/usr/bin/set_kernel_timezone >/dev/null 2>&1\n";
+		saveCommands = saveCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
 
 		
-		var param = getParameterDefinition("commands", passwordCommands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var param = getParameterDefinition("commands", saveCommands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
 		{

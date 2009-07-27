@@ -8,40 +8,6 @@
 
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
-function parseTimezones(timezoneLines)
-{
-	timezoneList = [];
-	timezoneRegions = [];
-	timezoneDefinitions = [];
-	definitionTimezones = [];
-	for(lineIndex = 0; lineIndex < timezoneLines.length; lineIndex++)
-	{
-		line = timezoneLines[lineIndex];
-		if(!line.match(/^[\t ]*#/) && line.length > 0)
-		{
-			splitLine = line.split(/[\t]+/);
-			region = stripQuotes( splitLine.pop() );
-			definition = stripQuotes( splitLine.pop() );
-			timezone = stripQuotes( splitLine.pop() );
-			
-
-			timezoneList.push(timezone);
-			timezoneDefinitions[timezone] = definition;
-			definitionTimezones[definition] = timezone;
-			timezoneRegions[timezone] = region;
-		}
-	}
-	return [timezoneList, timezoneRegions, timezoneDefinitions, definitionTimezones];
-}
-function stripQuotes(str)
-{
-	if(str.match(/\".*\"/))
-	{
-		str = str.match(/^[^\"]*\"([^\"]*)\"/)[1];
-	}
-	return str;
-}
-
 
 
 function saveChanges()
