@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ddns-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+libmatrixssl-nothread +libericstools
+	DEPENDS:=+libmatrixssl-nothread +libericstools +sha1sum
 	TITLE:=Dynamic DNS daemon for use with Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
