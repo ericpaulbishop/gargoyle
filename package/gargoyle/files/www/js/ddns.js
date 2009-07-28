@@ -564,7 +564,6 @@ function setProvider(controlDocument)
 		for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
 		{
 			var div= controlDocument.createElement("div");
-			div.className="indent";
 			
 			var label = controlDocument.createElement("label");
 			label.className="leftcolumn";
