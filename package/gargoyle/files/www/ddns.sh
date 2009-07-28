@@ -40,7 +40,7 @@
 			</div>
 		</div>
 
-		<div id="ddns_variable_container">
+		<div class="indent" id="ddns_variable_container">
 			
 		</div>
 
