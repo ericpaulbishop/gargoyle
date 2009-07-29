@@ -42,39 +42,45 @@
 #include <netdb.h>
 
 
-
-
+#include <sys/errno.h>
+#include <sys/select.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #define UNKNOWN_PROTO 1
 #define HTTP_PROTO 2
 #define HTTPS_PROTO 3
+
+
+#define TIMEOUT_SECONDS 5
+
 
 static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 
 //general utility functions
 #ifndef USE_ERICS_TOOLS
-char* dynamic_strcat(int num_strs, ...);  //multi string concatenation function (uses dynamic memory allocation)
-void to_lowercase(char* str);
+static char* dynamic_strcat(int num_strs, ...);  //multi string concatenation function (uses dynamic memory allocation)
+static void to_lowercase(char* str);
 #endif
 
-int char_index(char* str, int chr);
-char* encode_base_64_str( char* original, int linesize );
-void encode_block_base64( unsigned char in[3], unsigned char out[4], int len );
-char* escape_chars_to_hex(char* str, char* chars_to_escape);
-int tcp_connect(char* hostname, int port);
+static int char_index(char* str, int chr);
+static char* encode_base_64_str( char* original, int linesize );
+static void encode_block_base64( unsigned char in[3], unsigned char out[4], int len );
+static char* escape_chars_to_hex(char* str, char* chars_to_escape);
+static int tcp_connect(char* hostname, int port);
 
 
 //http read/write functions
-void* initialize_connection_http(char* host, int port);
-int read_http(void* connection_data, char* read_buffer, int read_length);
-int write_http(void* connection_data, char* data, int data_length);
-void destroy_connection_http(void* connection_data);
+static void* initialize_connection_http(char* host, int port);
+static int read_http(void* connection_data, char* read_buffer, int read_length);
+static int write_http(void* connection_data, char* data, int data_length);
+static void destroy_connection_http(void* connection_data);
 
 //functions for actually performing http request
-char* create_http_request(url_data* url);
-http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int));
-http_response* retrieve_http(	url_data *url, 
+static char* create_http_request(url_data* url);
+static http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int));
+static http_response* retrieve_http(	url_data *url, 
 				void* (*initialize_connection)(char*, int), 
 				int (*read_connection)(void*, char*, int),
 				int (*write_connection)(void*, char*, int),
@@ -82,7 +88,9 @@ http_response* retrieve_http(	url_data *url,
 				);
 
 
-
+//alarm variable and signal handler for timeout
+static int alarm_socket = -1;
+void alarm_triggered(int sig); 
 
 
 // SSL definitions
@@ -95,7 +103,7 @@ http_response* retrieve_http(	url_data *url,
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"
 		typedef sslKeys_t SSL_CTX;
-		void SSL_CTX_free(SSL_CTX* ctx){ free(ctx); }
+		static void SSL_CTX_free(SSL_CTX* ctx){ free(ctx); }
 	#endif
 
 	typedef struct
@@ -105,10 +113,10 @@ http_response* retrieve_http(	url_data *url,
 		SSL_CTX* ctx;
 	} ssl_connection_data;
 
-	void* initialize_connection_https(char* host, int port);
-	int read_https(void* connection_data, char* read_buffer, int read_length);
-	int write_https(void* connection_data, char* data, int data_length);
-	void destroy_connection_https(void* connection_data);
+	static void* initialize_connection_https(char* host, int port);
+	static int read_https(void* connection_data, char* read_buffer, int read_length);
+	static int write_https(void* connection_data, char* data, int data_length);
+	static void destroy_connection_https(void* connection_data);
 
 #endif
 // end SSL definitions
@@ -320,17 +328,24 @@ void free_url(url_data* url)
  * Internal function definitions
  * ********************************************/
 
+void alarm_triggered(int sig)
+{
+	if(alarm_socket >= 0)
+	{
+		close(alarm_socket);
+		alarm_socket = -1;
+	}
+}
 
 
 
 
-
-http_response* retrieve_http(	url_data *url, 
-				void* (*initialize_connection)(char*, int), 
-				int (*read_connection)(void*, char*, int),
-				int (*write_connection)(void*, char*, int),
-				void (*destroy_connection)(void*)
-				)
+static http_response* retrieve_http(	url_data *url, 
+					void* (*initialize_connection)(char*, int), 
+					int (*read_connection)(void*, char*, int),
+					int (*write_connection)(void*, char*, int),
+					void (*destroy_connection)(void*)
+					)
 {
 	http_response *reply = NULL;
 
@@ -356,7 +371,7 @@ http_response* retrieve_http(	url_data *url,
 	return reply;
 }
 
-char* create_http_request(url_data* url)
+static char* create_http_request(url_data* url)
 {
 	char *req_str1 = dynamic_strcat(	8,
 					"GET ",	
@@ -409,7 +424,7 @@ char* create_http_request(url_data* url)
 	return req_str1;
 }
 
-http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int))
+static http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int))
 {
 	http_response *reply = (http_response*)malloc(sizeof(http_response));
 	reply->header = NULL;
@@ -517,7 +532,7 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 
 
 
-int char_index(char* str, int ch)
+static int char_index(char* str, int ch)
 {
 	char* result = strchr(str, ch);
 	int return_value = result == NULL ? -1 : (int)(result - str);
@@ -525,7 +540,7 @@ int char_index(char* str, int ch)
 }
 
 
-int tcp_connect(char* hostname, int port)
+static int tcp_connect(char* hostname, int port)
 {
 	struct hostent* host;
 	if(hostname == NULL)
@@ -551,21 +566,91 @@ int tcp_connect(char* hostname, int port)
 	address.sin_addr.s_addr = ((struct in_addr *)host->h_addr)->s_addr;
 	address.sin_port = htons(port); //htons is necessary -- it makes sure byte ordering is correct
 
-	int address_len;
-	address_len = sizeof(address);
-
-	int connection;
-	connection = connect(sockfd, (struct sockaddr *)&address, address_len);
-	if(connection < 0)
+	// Set non-blocking 
+	long arg = 0;
+	if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
 	{
+	       	close(sockfd);
 		return -1;
 	}
+	arg |= O_NONBLOCK; 
+  	if( fcntl(sockfd, F_SETFL, arg) < 0)
+	{
+	       	close(sockfd);
+		return -1;
+	}	
 	
+
+	int connection;
+	connection = connect(sockfd, (struct sockaddr *)&address, sizeof(address));
+	if(connection < 0)
+	{
+		if (errno == EINPROGRESS)
+		{ 
+			fd_set myset; 
+			struct timeval tv;
+			int valopt;
+			
+      			tv.tv_sec = TIMEOUT_SECONDS; 
+			tv.tv_usec = 0; 
+			FD_ZERO(&myset); 
+			FD_SET(sockfd, &myset); 
+			connection = select(sockfd+1, NULL, &myset, NULL, &tv); 
+			while(connection < 0 && errno != EINTR)
+			{
+				connection = select(sockfd+1, NULL, &myset, NULL, &tv); 
+			}
+			
+           		if (connection > 0)
+			{
+				// Socket selected for write 
+				socklen_t sock_len = sizeof(int); 
+				if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &sock_len) < 0)
+				{
+					close(sockfd);
+					return -1;
+				}
+				// Check the value returned... 
+				if (valopt) 
+				{
+					close(sockfd);
+                 			return -1;
+				}
+			}
+			else
+			{
+				close(sockfd);
+				return -1;
+			}
+		}
+		else
+		{
+			close(sockfd);
+			return -1;
+		}
+	
+	} 
+	
+
+	// Set to blocking mode again... 
+	if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
+	{
+		close(sockfd);
+		return -1;	
+	} 
+	arg &= (~O_NONBLOCK); 
+	if( fcntl(sockfd, F_SETFL, arg) < 0)
+	{
+		close(sockfd);
+		return -1;
+	}
+
+
 	return sockfd;
 }
 
 
-char* escape_chars_to_hex(char* str, char* chars_to_escape)
+static char* escape_chars_to_hex(char* str, char* chars_to_escape)
 {
 	
 	char* new_str = NULL;
@@ -616,7 +701,7 @@ char* escape_chars_to_hex(char* str, char* chars_to_escape)
 }
 
 
-char* encode_base_64_str( char* original, int linesize )
+static char* encode_base_64_str( char* original, int linesize )
 {
 	unsigned char in[3];
 	unsigned char out[4];
@@ -670,7 +755,7 @@ char* encode_base_64_str( char* original, int linesize )
 }
 
 //encode 3 8-bit binary bytes as 4 '6-bit' characters
-void encode_block_base64( unsigned char in[3], unsigned char out[4], int len )
+static void encode_block_base64( unsigned char in[3], unsigned char out[4], int len )
 {
     out[0] = cb64[ in[0] >> 2 ];
     out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
@@ -680,7 +765,7 @@ void encode_block_base64( unsigned char in[3], unsigned char out[4], int len )
 
 #ifndef USE_ERICS_TOOLS
 
-void to_lowercase(char* str)
+static void to_lowercase(char* str)
 {
 	int i;
 	for(i = 0; str[i] != '\0'; i++)
@@ -689,7 +774,7 @@ void to_lowercase(char* str)
 	}
 }
 
-char* dynamic_strcat(int num_strs, ...)
+static char* dynamic_strcat(int num_strs, ...)
 {
 	
 	va_list strs;
@@ -730,7 +815,7 @@ char* dynamic_strcat(int num_strs, ...)
 
 
 //returns data upon success, NULL on failure
-void* initialize_connection_http(char* host, int port)
+static void* initialize_connection_http(char* host, int port)
 {
 	int *socket = (int*)malloc(sizeof(int));
 	*socket	= tcp_connect(host, port);
@@ -744,18 +829,27 @@ void* initialize_connection_http(char* host, int port)
 		return NULL;
 	}
 }
-int read_http(void* connection_data, char* read_buffer, int read_length)
+static int read_http(void* connection_data, char* read_buffer, int read_length)
 {
 	int* socket = (int*)connection_data;
-	return read(*socket, read_buffer, read_length);
+	int bytes_read = -1;
+
+	alarm_socket = *socket;	
+	signal(SIGALRM, alarm_triggered );
+	alarm(TIMEOUT_SECONDS);
+	bytes_read = read(*socket, read_buffer, read_length);
+	alarm(0);
+
+	return bytes_read;
+
 }
-int write_http(void* connection_data, char* data, int data_length)
+static int write_http(void* connection_data, char* data, int data_length)
 {
 	int* socket = (int*)connection_data;
 	return write(*socket, data, data_length);
 }
 
-void destroy_connection_http(void* connection_data)
+static void destroy_connection_http(void* connection_data)
 {
 	if(connection_data != NULL)
 	{
@@ -766,7 +860,7 @@ void destroy_connection_http(void* connection_data)
 
 #ifdef HAVE_SSL
 
-void* initialize_connection_https(char* host, int port)
+static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
 	int socket = tcp_connect(host, port);
@@ -819,23 +913,37 @@ void* initialize_connection_https(char* host, int port)
 			close(socket);
 			SSL_free(ssl);
 			SSL_CTX_free(ctx);
+			#ifdef USE_MATRIXSSL
+				matrixSslClose();
+			#endif
+
 		}
 	}
 
+
 	return connection_data;
 }
-int read_https(void* connection_data, char* read_buffer, int read_length)
+static int read_https(void* connection_data, char* read_buffer, int read_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
-	return SSL_read(cd->ssl, read_buffer, read_length);
+	int bytes_read = -1;
+
+	alarm_socket = cd->socket;	
+	signal(SIGALRM, alarm_triggered );
+	alarm(TIMEOUT_SECONDS);
+	bytes_read = SSL_read(cd->ssl, read_buffer, read_length);
+	alarm(0);
+
+
+	return bytes_read;
 
 }
-int write_https(void* connection_data, char* data, int data_length)
+static int write_https(void* connection_data, char* data, int data_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	return SSL_write(cd->ssl, data, data_length);
 }
-void destroy_connection_https(void* connection_data)
+static void destroy_connection_https(void* connection_data)
 {
 	if(connection_data != NULL)
 	{
@@ -844,6 +952,9 @@ void destroy_connection_https(void* connection_data)
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
 		free(cd);
+		#ifdef USE_MATRIXSSL
+			matrixSslClose();
+		#endif
 	}
 }
 
