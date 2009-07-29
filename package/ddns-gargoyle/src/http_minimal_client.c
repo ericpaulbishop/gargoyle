@@ -424,6 +424,7 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 	int bytes_read;
 
 
+
 	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
 	bytes_read = bytes_read < 0 ? 0 : bytes_read;
 	read_buffer[bytes_read] = '\0'; /* facilitates string processing */
@@ -500,6 +501,10 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 		bytes_read=read_connection(connection_data, read_buffer, read_buffer_size);
 		bytes_read = bytes_read < 0 ? 0 : bytes_read;
 		read_buffer[bytes_read] = '\0'; /* facilitates string processing */
+	}
+	if(http_data == NULL)
+	{
+		http_data = (char*)malloc(sizeof(char));
 	}
 	http_data[total_bytes_read] = '\0';
 	reply->length = total_bytes_read;

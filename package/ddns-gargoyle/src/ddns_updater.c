@@ -536,6 +536,7 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 	{
 		message_t req_msg;
 		req_msg.msg_type = REQUEST_MSG_TYPE;
+		memset(req_msg.msg_line, '\0', MAX_MSG_LINE); 
 		req_msg.msg_line[0] = force_update == 1 ? 'f' : ' ';
 		sprintf(req_msg.msg_line + 1, "%s", UPDATE_ALL_REQUEST_STR);
 		msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
@@ -547,6 +548,7 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 		{
 			message_t req_msg;
 			req_msg.msg_type = REQUEST_MSG_TYPE;
+			memset(req_msg.msg_line, '\0', MAX_MSG_LINE); 
 			req_msg.msg_line[0] = force_update == 1 ? 'f' : ' ';
 			sprintf(req_msg.msg_line + 1, "%s", service_names[name_index]);
 			msgsnd(mq, (void *)&req_msg, MAX_MSG_LINE, 0);
@@ -638,6 +640,9 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 	}
 
 	printf("\n");
+	
+	unsigned long num_destroyed;
+	destroy_string_map(result_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 }
 
 
@@ -858,6 +863,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				{
 					message_t resp_msg;
 					resp_msg.msg_type = RESPONSE_MSG_TYPE;
+					memset(resp_msg.msg_line, '\0', MAX_MSG_LINE); 
 					resp_msg.msg_line[0] = (char)update_status; //always a small number, should fit fine
 					sprintf(resp_msg.msg_line+1, "%s", service_config->name);
 					msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
@@ -965,6 +971,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						{
 							priority_queue_node *p = remove_priority_queue_node_with_id(update_queue, service_config->name);
 							update_node* next_update = (update_node*)free_priority_queue_node(p);
+							if(next_update == NULL)
+							{
+								//BAD!!!
+								exit(1);
+							}
 							next_update->next_time = current_time;
 	
 							if(force_requested == 1)
@@ -977,6 +988,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						{
 							message_t resp_msg;
 							resp_msg.msg_type = RESPONSE_MSG_TYPE;
+							memset(resp_msg.msg_line, '\0', MAX_MSG_LINE); 
 							resp_msg.msg_line[0] = UPDATE_FAILED;
 							sprintf(resp_msg.msg_line+1, "%s", req_name);
 							msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
@@ -1008,6 +1020,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						//printf("service config %s is null\n", req_name);
 						message_t resp_msg;
 						resp_msg.msg_type = RESPONSE_MSG_TYPE;
+						memset(resp_msg.msg_line, '\0', MAX_MSG_LINE); 
 						resp_msg.msg_line[0] = UPDATE_FAILED;
 						sprintf(resp_msg.msg_line+1, "%s", req_name);
 						msgsnd(mq, (void *)&resp_msg, MAX_MSG_LINE, 0);
