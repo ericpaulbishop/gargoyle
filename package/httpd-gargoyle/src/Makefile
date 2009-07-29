@@ -9,25 +9,36 @@
 # not found, try commenting out this definition.
 CRYPT_LIB =    -lcrypt
 
-# CONFIGURE: If you want to compile in support for https, uncomment these
-# definitions.  You will need to have already built OpenSSL, available at
-# http://www.openssl.org/  Make sure the SSL_TREE definition points to the
-# tree with your OpenSSL installation - depending on how you installed it,
-# it may be in /usr/local instead of /usr/local/ssl.
 
-# OpenSSL
-#SSL_TREE =	/usr/local/ssl
-#SSL_DEFS =	-DUSE_SSL
-#SSL_INC =	-I${SSL_TREE}/include
-#SSL_LIBS =	-L${SSL_TREE}/lib -lssl -lcrypto
-#SSL_OBJS =
+#for ssl, uncomment the (one and only one) ssl library to link with
+#USE_MATRIXSSL:=1
+#USE_CYASSL:=1
+USE_OPENSSL:=1
 
-# MatrixSSL
-SSL_TREE =
-SSL_DEFS =	-DUSE_SSL -DHAVE_MATRIXSSL
-SSL_INC =
-SSL_LIBS =	-lmatrixssl
-SSL_OBJS =	matrixssl_helper.o
+
+ifeq ($(USE_CYASSL), 1)
+	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
+	SSL_LIBS:= -lcyassl -lm 
+	USE_MATRIXSSL=
+	USE_OPENSSL=
+endif
+ifeq ($(USE_MATRIXSSL), 1)
+	SSL_DEFS:= -DUSE_MATRIXSSL  -DHAVE_SSL 
+	SSL_LIBS:= -lmatrixssl
+	SSL_OBJ=matrixssl_helper.o
+	USE_CYASSL=
+	USE_OPENSSL=
+	
+endif
+ifeq ($(USE_OPENSSL), 1)
+	SSL_DEFS:= -DUSE_OPENSSL -DHAVE_SSL
+	SSL_LIBS:= -lcrypto -lssl
+	USE_MATRIXSSL=
+	USE_CYASSL=
+endif
+
+
+
 
 
 DESTDIR =
@@ -38,18 +49,19 @@ CC =		gcc
 CDEFS =		${SSL_DEFS} ${SSL_INC}
 OFLAGS =	-O
 CFLAGS =	${OFLAGS} ${CDEFS}
-#CFLAGS =	-g ${CDEFS}
 LDFLAGS =
-#LDFLAGS =	-g
 LDLIBS =	${SSL_LIBS} ${SYSV_LIBS} ${CRYPT_LIB}
 
 all:		httpd_gargoyle
 
-httpd_gargoyle:	httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJS}
-	${CC} ${CFLAGS} ${LDFLAGS} httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJS} ${LDLIBS} -o httpd_gargoyle
+httpd_gargoyle:	httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJ}
+	${CC} ${CFLAGS} ${LDFLAGS} httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJ} ${LDLIBS} -o httpd_gargoyle
+
+
 
 httpd_gargoyle.o:	httpd_gargoyle.c version.h port.h match.h tdate_parse.h mime_encodings.h mime_types.h
 	${CC} ${CFLAGS} -c httpd_gargoyle.c
+
 
 matrixssl_helper.o: matrixssl_helper.c
 	${CC} ${CFLAGS} -c matrixssl_helper.c

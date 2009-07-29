@@ -91,16 +91,19 @@
 # endif /* HAVE_LINUX_SENDFILE */
 #endif /* HAVE_SENDFILE */
 
-#ifdef USE_SSL
-# ifdef HAVE_OPENSSL
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-# else /* HAVE_OPENSSL */
-#  ifdef HAVE_MATRIXSSL
-#   include "matrixssl_helper.h"
-#  endif /* HAVE_MATRIXSSL */
-# endif /* HAVE_OPENSSL */
-#endif /* USE_SSL */
+#ifdef HAVE_SSL
+	#ifdef USE_OPENSSL
+		#include <openssl/ssl.h>
+		#include <openssl/err.h>
+	#endif
+	#ifdef USE_CYASSL
+		#include <openssl/ssl.h>
+		#include <openssl/err.h>
+	#endif
+	#ifdef USE_MATRIXSSL
+		#include "matrixssl_helper.h"
+	#endif 
+#endif
 
 extern char* crypt( const char* key, const char* setting );
 
@@ -149,14 +152,14 @@ typedef long long int64_t;
 #ifndef DEFAULT_HTTP_PORT
 #define DEFAULT_HTTP_PORT 80
 #endif /* DEFAULT_HTTP_PORT */
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 #ifndef DEFAULT_HTTPS_PORT
 #define DEFAULT_HTTPS_PORT 443
 #endif /* DEFAULT_HTTPS_PORT */
 #ifndef DEFAULT_CERTFILE
 #define DEFAULT_CERTFILE "httpd_gargoyle.pem"
 #endif /* DEFAULT_CERTFILE */
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 #ifndef DEFAULT_USER
 #define DEFAULT_USER "nobody"
 #endif /* DEFAULT_USER */
@@ -221,18 +224,20 @@ static char* p3p;
 static int max_age;
 static FILE* logfp;
 static int listen4_fd, listen6_fd;
-#ifdef USE_SSL
-static int do_ssl;
-static char* certfile;
-static char* cipher;
-#ifdef HAVE_OPENSSL
-static SSL_CTX* ssl_ctx;
-#else /* HAVE_OPENSSL */
- #ifdef HAVE_MATRIXSSL
-static sslKeys_t* keys;
- #endif /* HAVE_MATRIXSSL */
-#endif /* HAVE_OPENSSL */
-#endif /* USE_SSL */
+#ifdef HAVE_SSL
+	static int do_ssl;
+	static char* certfile;
+	static char* cipher;
+	#ifdef USE_OPENSSL
+		static SSL_CTX* ssl_ctx;
+	#endif
+	#ifdef USE_CYASSL
+		static SSL_CTX* ssl_ctx;
+	#endif
+	#ifdef USE_MATRIXSSL
+		static sslKeys_t* keys;
+	#endif
+#endif
 static char cwd[MAXPATHLEN];
 static int got_hup;
 
@@ -247,9 +252,9 @@ static int listen4s_fd, listen6s_fd;
 
 /* Request variables. */
 static int conn_fd;
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 static SSL* ssl;
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 static usockaddr client_addr;
 static char* request;
 static size_t request_size, request_len, request_idx;
@@ -330,6 +335,7 @@ static void handle_sighup( int sig );
 static void handle_sigchld( int sig );
 static void re_open_logfile( void );
 static void handle_read_timeout( int sig, int is_ssl );
+static void handle_read_timeout_sig(int sig);
 static void handle_write_timeout( int sig );
 static void lookup_hostname( usockaddr* usa4P, usockaddr* usa4sP, size_t sa4_len, int* gotv4P, usockaddr* usa6P, usockaddr* usa6sP, size_t sa6_len, int* gotv6P );
 static char* ntoa( usockaddr* usaP );
@@ -390,11 +396,11 @@ main( int argc, char** argv )
     logfile = (char*) 0;
     pidfile = (char*) 0;
     logfp = (FILE*) 0;
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     do_ssl = 0;
     certfile = DEFAULT_CERTFILE;
     cipher = (char*) 0;
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 
      /* added gargoyle variable defaults */
     defaultRealmName = NULL;
@@ -420,7 +426,7 @@ main( int argc, char** argv )
 	    }
 	else if ( strcmp( argv[argn], "-D" ) == 0 )
 	    debug = 1;
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 	else if ( strcmp( argv[argn], "-S" ) == 0 )
 	    do_ssl = 1;
 	else if ( strcmp( argv[argn], "-E" ) == 0 && argn + 1 < argc )
@@ -433,7 +439,7 @@ main( int argc, char** argv )
 	    ++argn;
 	    cipher = argv[argn];
 	    }
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 	else if ( strcmp( argv[argn], "-p" ) == 0 && argn + 1 < argc )
 	    {
 	    ++argn;
@@ -515,7 +521,7 @@ main( int argc, char** argv )
 		pageNotFoundFile = argv[argn];
 	}
 
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 	else if( strcmp( argv[argn], "-SP" ) == 0 && argn + 1 < argc )
 	{
 		++argn;
@@ -540,7 +546,7 @@ main( int argc, char** argv )
 
     if ( port == 0 )
 	{
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 	/* gargoyle addition */
 	if(sslPort != 0 && do_ssl)
 	{
@@ -552,9 +558,9 @@ main( int argc, char** argv )
 	    port = DEFAULT_HTTPS_PORT;
 	else
 	    port = DEFAULT_HTTP_PORT;
-#else /* USE_SSL */
+#else /* HAVE_SSL */
 	port = DEFAULT_HTTP_PORT;
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 	}
 
     /* If we're root and we're going to become another user, get the uid/gid
@@ -667,42 +673,75 @@ main( int argc, char** argv )
 	exit( 1 );
 	}
 
-#ifdef USE_SSL
-    if ( do_ssl )
+#ifdef HAVE_SSL
+	if ( do_ssl )
 	{
-# ifdef HAVE_OPENSSL
-	SSL_load_error_strings();
-	SSLeay_add_ssl_algorithms();
-	ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
-	if ( certfile[0] != '\0' )
-	    if ( SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
-		 SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
-		 SSL_CTX_check_private_key( ssl_ctx ) == 0 )
+	#ifdef USE_OPENSSL
+		SSL_load_error_strings();
+		SSLeay_add_ssl_algorithms();
+		ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
+		if ( certfile[0] != '\0' )
 		{
-		ERR_print_errors_fp( stderr );
-		exit( 1 );
+			if (	SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
+				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
+				SSL_CTX_check_private_key( ssl_ctx ) == 0 )
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
 		}
-	if ( cipher != (char*) 0 )
-	    {
-	    if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) == 0 )
+		if ( cipher != (char*) 0 )
 		{
-		ERR_print_errors_fp( stderr );
-		exit( 1 );
+			if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) == 0 )
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
 		}
-	    }
-# else /* HAVE_OPENSSL */
-#  ifdef HAVE_MATRIXSSL
-	matrixSslOpen();
-	if ( matrixSslReadKeys( &keys, certfile, certfile, NULL, NULL ) < 0 )
-	    {
-	    syslog( LOG_CRIT, "can't load certificate and/or private key\n");
-	    (void) fprintf( stderr, "%s: can't load certificate and/or private key\n", argv0 );
-	    exit( 1 );
-	    }
-#  endif /* HAVE_MATRIXSSL */
-# endif /* HAVE_OPENSSL */
+	#endif
+	#ifdef USE_CYASSL
+		SSL_METHOD* smethod = 0;
+		#if defined(CYASSL_DTLS)
+    			smethod  = DTLSv1_server_method();
+		#elif  !defined(NO_TLS)
+			smethod = TLSv1_server_method();
+		#else
+			smethod = SSLv3_server_method();
+		#endif
+		ssl_ctx = SSL_CTX_new(smethod);
+		if ( certfile[0] != '\0' )
+		{
+			if (	SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
+				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 
+				)
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
+		}
+		if ( cipher != (char*) 0 )
+		{
+			if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) == 0 )
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
+		}
+	#endif
+	#ifdef USE_MATRIXSSL
+		matrixSslOpen();
+		if ( matrixSslReadKeys( &keys, certfile, certfile, NULL, NULL ) < 0 )
+		{
+			syslog( LOG_CRIT, "can't load certificate and/or private key\n");
+			(void) fprintf( stderr, "%s: can't load certificate and/or private key\n", argv0 );
+			exit( 1 );
+		}
+	#endif
 	}
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
+
+
+
 
     if ( ! debug )
 	{
@@ -799,7 +838,7 @@ main( int argc, char** argv )
 	}
 
     /* Get current directory. */
-    (void) getcwd( cwd, sizeof(cwd) - 1 );
+    if( getcwd( cwd, sizeof(cwd) - 1 ) == NULL) { ; }
     if ( cwd[strlen( cwd ) - 1] != '/' )
 	(void) strcat( cwd, "/" );
 
@@ -964,7 +1003,7 @@ main( int argc, char** argv )
 
 
 	/* determine whether this is ssl connection */
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 	is_ssl= 0;
 	conn_port = port;
 	if( do_ssl)
@@ -984,10 +1023,10 @@ main( int argc, char** argv )
 			conn_port = sslPort;
 		}
 	}
-#else /* USE_SSL */
+#else /* HAVE_SSL */
 	is_ssl_connection = 0;
 	conn_port = port;
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 
 	/* Accept the new connection. */
 	sz = sizeof(usa);
@@ -1044,11 +1083,11 @@ static void
 usage( void )
     {
 	    /*add in gargoyle variables (at the end) here */
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-S use ssl, if no ssl port is specified all connections will be SSL ] [-E certfile] [-SP ssl port ] [-Y cipher] [-p port ] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file] [-PNF Page to load when 404 Not Found error occurs] \n", argv0 );
-#else /* USE_SSL */
+#else /* HAVE_SSL */
     (void) fprintf( stderr, "usage:  %s [-C configfile] [-D] [-p port] [-d dir] [-dd data_dir] [-c cgipat] [-u user] [-h hostname] [-r] [-v] [-l logfile] [-i pidfile] [-T charset] [-P P3P] [-M maxage] [-DRN default realm name ] [-DRP default realm password file] [-DPF default page file] [-PNF Page to load when 404 Not Found error occurs]  \n", argv0 );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
     exit( 1 );
     }
 
@@ -1210,7 +1249,7 @@ read_config( char* filename )
 
 
 	    /* end gargoyle variables */
-#ifdef USE_SSL
+#ifdef HAVE_SSL
 	    else if ( strcasecmp( name, "ssl" ) == 0 )
 		{
 		no_value_required( name, value );
@@ -1226,7 +1265,7 @@ read_config( char* filename )
 		value_required( name, value );
 		cipher = e_strdup( value );
 		}
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 	    else
 		{
 		(void) fprintf(
@@ -1348,9 +1387,9 @@ handle_request( int is_ssl, unsigned short conn_port )
 
     /* Set up the timeout for reading. */
 #ifdef HAVE_SIGSET
-    (void) sigset( SIGALRM, handle_read_timeout );
+    (void) sigset( SIGALRM, handle_read_timeout_sig );
 #else /* HAVE_SIGSET */
-    (void) signal( SIGALRM, handle_read_timeout );
+    (void) signal( SIGALRM, handle_read_timeout_sig );
 #endif /* HAVE_SIGSET */
     (void) alarm( READ_TIMEOUT );
 
@@ -1386,29 +1425,38 @@ handle_request( int is_ssl, unsigned short conn_port )
 	conn_fd, IPPROTO_TCP, TCP_NOPUSH, (void*) &r, sizeof(r) );
 #endif /* TCP_NOPUSH */
 
-#ifdef USE_SSL
-    if ( is_ssl )
+#ifdef HAVE_SSL
+	if ( is_ssl )
 	{
-# ifdef HAVE_OPENSSL
-	ssl = SSL_new( ssl_ctx );
-	SSL_set_fd( ssl, conn_fd );
-	if ( SSL_accept( ssl ) == 0 )
-	    {
-	    ERR_print_errors_fp( stderr );
-	    exit( 1 );
-	    }
-# else /* HAVE_OPENSSL */
-#  ifdef HAVE_MATRIXSSL
-	ssl = SSL_new(keys, SSL_FLAGS_SERVER);
-	SSL_set_fd( ssl, conn_fd );
-	if ( SSL_accept( ssl ) <= 0 )
-	    {
-	    perror( "SSL_accept" );
-	    }
-#  endif /* HAVE_MATRIXSSL */
-# endif /* HAVE_OPENSSL */
+		#ifdef USE_OPENSSL
+			ssl = SSL_new( ssl_ctx );
+			SSL_set_fd( ssl, conn_fd );
+			if ( SSL_accept( ssl ) == 0 )
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
+		#endif
+		#ifdef USE_CYASSL
+			ssl = SSL_new( ssl_ctx );
+			SSL_set_fd( ssl, conn_fd );
+			if ( SSL_accept( ssl ) == 0 )
+			{
+				ERR_print_errors_fp( stderr );
+				exit( 1 );
+			}
+		#endif
+
+		#ifdef USE_MATRIXSSL
+			ssl = SSL_new(keys, SSL_FLAGS_SERVER);
+			SSL_set_fd( ssl, conn_fd );
+			if ( SSL_accept( ssl ) <= 0 )
+			{
+				perror( "SSL_accept" );
+			}
+		#endif
 	}
-#endif /* USE_SSL */
+#endif 
 
     /* Read in the request. */
     start_request();
@@ -1631,9 +1679,9 @@ handle_request( int is_ssl, unsigned short conn_port )
 	got_one: ;
 	}
 
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     SSL_free( ssl );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
     }
 
 
@@ -1807,14 +1855,14 @@ do_file( int is_ssl, unsigned short conn_port )
 	{
 #ifdef HAVE_SENDFILE
 
-#ifndef USE_SSL
+#ifndef HAVE_SSL
 	(void) my_sendfile( fd, conn_fd, 0, sb.st_size );
-#else /* USE_SSL */
+#else /* HAVE_SSL */
 	if ( is_ssl )
 	    send_via_write( fd, sb.st_size, is_ssl );
 	else
 	    (void) my_sendfile( fd, conn_fd, 0, sb.st_size );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 
 #else /* HAVE_SENDFILE */
 
@@ -1937,7 +1985,7 @@ file_details( const char* dir, const char* name )
     strencode( encname, sizeof(encname), name );
     (void) snprintf(
 	buf, sizeof( buf ), "<A HREF=\"%s\">%-32.32s</A>    %15s %14lld\n",
-	encname, name, f_time, (int64_t) sb.st_size );
+	encname, name, f_time, (long long int) sb.st_size );
     return buf;
     }
 
@@ -2008,11 +2056,11 @@ do_cgi( int is_ssl, unsigned short conn_port )
     ** interposer process, depending on if we've read some of the data
     ** into our buffer.  We also have to do this for all SSL CGIs.
     */
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     if ( ( method == METHOD_POST && request_len > request_idx ) || is_ssl )
-#else /* USE_SSL */
+#else /* HAVE_SSL */
     if ( ( method == METHOD_POST && request_len > request_idx ) )
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 	{
 	int p[2];
 	int r;
@@ -2050,11 +2098,11 @@ do_cgi( int is_ssl, unsigned short conn_port )
 	parse_headers = 0;
     else
 	parse_headers = 1;
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     if ( parse_headers || is_ssl )
-#else /* USE_SSL */
+#else /* HAVE_SSL */
     if ( parse_headers )
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 	{
 	int p[2];
 	int r;
@@ -2107,7 +2155,7 @@ do_cgi( int is_ssl, unsigned short conn_port )
     closelog();
 
     /* Set priority. */
-    (void) nice( CGI_NICE );
+    if( nice( CGI_NICE ) < 0) { ; }
 
     /* Split the program into directory and binary, so we can chdir()
     ** to the program's own directory.  This isn't in the CGI 1.1
@@ -2120,7 +2168,7 @@ do_cgi( int is_ssl, unsigned short conn_port )
     else
 	{
 	*binary++ = '\0';
-	(void) chdir( directory );	/* ignore errors */
+	if(chdir( directory ) < 0) { ; }	/* ignore errors */
 	}
 
     /* Default behavior for SIGPIPE. */
@@ -2199,16 +2247,16 @@ post_post_garbage_hack( int is_ssl )
     {
     char buf[2];
 
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     if ( is_ssl )
 	/* We don't need to do this for SSL, since the garbage has
 	** already been read.  Probably.
 	*/
 	return;
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
 
     set_ndelay( conn_fd );
-    (void) read( conn_fd, buf, sizeof(buf) );
+    if( read( conn_fd, buf, sizeof(buf) ) < 0) { ; };
     clear_ndelay( conn_fd );
     }
 
@@ -2661,9 +2709,9 @@ send_error( int s, char* title, char* extra_header, char* text, int is_ssl )
 
     send_response(is_ssl);
 
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     SSL_free( ssl );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
     exit( 1 );
     }
 
@@ -2803,7 +2851,7 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
     if ( bytes >= 0 )
 	{
 	buflen = snprintf(
-	    buf, sizeof(buf), "Content-Length: %lld\015\012", (int64_t) bytes );
+	    buf, sizeof(buf), "Content-Length: %lld\015\012", (long long int) bytes );
 	add_to_response( buf, buflen );
 	}
     if ( p3p != (char*) 0 && p3p[0] != '\0' )
@@ -2948,28 +2996,28 @@ send_via_write( int fd, off_t size, int is_ssl )
 static ssize_t
 my_read( char* buf, size_t size, int is_ssl )
     {
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     if ( is_ssl )
 	return SSL_read( ssl, buf, size );
     else
 	return read( conn_fd, buf, size );
-#else /* USE_SSL */
+#else /* HAVE_SSL */
     return read( conn_fd, buf, size );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
     }
 
 
 static ssize_t
 my_write( char* buf, size_t size, int is_ssl )
     {
-#ifdef USE_SSL
+#ifdef HAVE_SSL
     if ( is_ssl )
 	return SSL_write( ssl, buf, size );
     else
 	return write( conn_fd, buf, size );
-#else /* USE_SSL */
+#else /* HAVE_SSL */
     return write( conn_fd, buf, size );
-#endif /* USE_SSL */
+#endif /* HAVE_SSL */
     }
 
 
@@ -3049,7 +3097,7 @@ make_log_entry( void )
     /* Format the bytes. */
     if ( bytes >= 0 )
 	(void) snprintf(
-	    bytes_str, sizeof(bytes_str), "%lld", (int64_t) bytes );
+	    bytes_str, sizeof(bytes_str), "%lld", (long long int) bytes );
     else
 	(void) strcpy( bytes_str, "-" );
     /* Format the time, forcing a numeric timezone (some log analyzers
@@ -3440,15 +3488,18 @@ re_open_logfile( void )
 	}
     }
 
+static void handle_read_timeout_sig(int sig)
+{
+	handle_read_timeout(0,0);
+}
 
-static void
-handle_read_timeout( int sig, int is_ssl )
-    {
+static void handle_read_timeout( int sig, int is_ssl )
+{
     syslog( LOG_INFO, "%.80s connection timed out reading", ntoa( &client_addr ) );
     send_error(
 	408, "Request Timeout", "",
 	"No request appeared within a reasonable time period.", is_ssl );
-    }
+}
 
 
 static void
