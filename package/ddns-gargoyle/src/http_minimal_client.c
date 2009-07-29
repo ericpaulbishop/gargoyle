@@ -100,6 +100,10 @@ void alarm_triggered(int sig);
 		#include <openssl/ssl.h>
 	#endif
 	
+	#ifdef USE_CYASSL
+		#include <openssl/ssl.h>
+	#endif
+	
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"
 		typedef sslKeys_t SSL_CTX;
@@ -884,6 +888,28 @@ static void* initialize_connection_https(char* host, int port)
 				SSL_CTX_free(ctx);
 			}
 			//would check cert here if we were doing it
+		#endif
+
+		#ifdef USE_CYASSL
+			SSL_METHOD*  method  = 0;
+			#if defined(CYASSL_DTLS)
+				method  = DTLSv1_client_method();
+			#elif  !defined(NO_TLS)
+				method  = TLSv1_client_method();
+			#else
+				method  = SSLv3_client_method();
+			#endif
+			ctx = SSL_CTX_new(method);
+			SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
+    			ssl = SSL_new(ctx);
+			SSL_set_fd(ssl, socket);
+			initialized = SSL_connect(ssl);
+			if(initialized < 0)
+			{
+				close(socket);
+				SSL_free(ssl);
+				SSL_CTX_free(ctx);
+			}
 		#endif
 
 		#ifdef USE_MATRIXSSL
