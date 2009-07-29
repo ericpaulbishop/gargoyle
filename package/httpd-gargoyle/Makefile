@@ -22,7 +22,7 @@ define Package/httpd-gargoyle
 	CATEGORY:=Network
 	TITLE:=A small web server for the Gargoyle Web Interface
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +libmatrixssl-nothread
+	DEPENDS:= +cyassl
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -48,10 +48,7 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
 		OFLAGS="$(TARGET_CFLAGS)" \
-		SSL_DEFS="-DUSE_SSL -DHAVE_MATRIXSSL" \
-		SSL_INC="$(TARGET_CPPFLAGS)" \
-		SSL_LIBS="$(TARGET_LDFLAGS) -lmatrixssl" \
-		SSL_OBJS="matrixssl_helper.o" \
+		USE_CYASSL="1" \
 		all
 
 
