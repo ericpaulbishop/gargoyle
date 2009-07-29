@@ -357,6 +357,7 @@ static int snprintf( char* str, size_t size, const char* format, ... );
 int
 main( int argc, char** argv )
     {
+
     int argn;
     struct passwd* pwd;
     uid_t uid = 32767;
@@ -715,7 +716,7 @@ main( int argc, char** argv )
 				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 
 				)
 			{
-				ERR_print_errors_fp( stderr );
+				syslog( LOG_CRIT, "can't load certificate and/or private key\n");
 				exit( 1 );
 			}
 		}
@@ -723,7 +724,7 @@ main( int argc, char** argv )
 		{
 			if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) == 0 )
 			{
-				ERR_print_errors_fp( stderr );
+				syslog( LOG_CRIT, "can't load certificate and/or private key\n");
 				exit( 1 );
 			}
 		}
@@ -1442,7 +1443,6 @@ handle_request( int is_ssl, unsigned short conn_port )
 			SSL_set_fd( ssl, conn_fd );
 			if ( SSL_accept( ssl ) == 0 )
 			{
-				ERR_print_errors_fp( stderr );
 				exit( 1 );
 			}
 		#endif
