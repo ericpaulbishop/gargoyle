@@ -44,6 +44,10 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/ctaocrypt
 	$(CP) $(PKG_BUILD_DIR)/ctaocrypt/include/*.h $(1)/usr/include/ctaocrypt
 	
+
+	$(INSTALL_DIR) $(1)/usr/include/openssl
+	if [ ! -e $(1)/usr/lib/openssl/ssl.h ] ; then cp -r $(PKG_BUILD_DIR)/include/openssl/* $(1)/usr/include/openssl/ ; fi
+	
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_BUILD_DIR)/src/.libs/libcyassl.{a,so*} $(1)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/src/libcyassl.la $(1)/usr/lib/

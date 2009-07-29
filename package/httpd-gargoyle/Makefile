@@ -22,7 +22,7 @@ define Package/httpd-gargoyle
 	CATEGORY:=Network
 	TITLE:=A small web server for the Gargoyle Web Interface
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +cyassl
+	DEPENDS:=+libcyassl
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
