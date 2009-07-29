@@ -425,6 +425,7 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 
 
 	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
+	bytes_read = bytes_read < 0 ? 0 : bytes_read;
 	read_buffer[bytes_read] = '\0'; /* facilitates string processing */
 	while(bytes_read > 0)
 	{
@@ -490,11 +491,14 @@ http_response* get_http_response(void* connection_data, int (*read_connection)(v
 			http_data = (char*)malloc((total_bytes_read + bytes_read+1)*sizeof(char));
 			memcpy(http_data, old_http_data, total_bytes_read);
 			memcpy(http_data+total_bytes_read, read_buffer, bytes_read);
-			free(old_http_data);
-			
+			if(old_http_data != NULL)
+			{
+				free(old_http_data);
+			}
 			total_bytes_read = total_bytes_read + bytes_read;
 		}
 		bytes_read=read_connection(connection_data, read_buffer, read_buffer_size);
+		bytes_read = bytes_read < 0 ? 0 : bytes_read;
 		read_buffer[bytes_read] = '\0'; /* facilitates string processing */
 	}
 	http_data[total_bytes_read] = '\0';
