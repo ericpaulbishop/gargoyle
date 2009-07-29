@@ -1024,7 +1024,7 @@ main( int argc, char** argv )
 		}
 	}
 #else /* HAVE_SSL */
-	is_ssl_connection = 0;
+	is_ssl = 0;
 	conn_port = port;
 #endif /* HAVE_SSL */
 

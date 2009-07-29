@@ -18,7 +18,7 @@ USE_OPENSSL:=1
 
 ifeq ($(USE_CYASSL), 1)
 	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
-	SSL_LIBS:= -lcyassl -lm 
+	SSL_LIBS:= -lcyassl -lm -lz 
 	USE_MATRIXSSL=
 	USE_OPENSSL=
 endif
@@ -55,7 +55,7 @@ LDLIBS =	${SSL_LIBS} ${SYSV_LIBS} ${CRYPT_LIB}
 all:		httpd_gargoyle
 
 httpd_gargoyle:	httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJ}
-	${CC} ${CFLAGS} ${LDFLAGS} httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJ} ${LDLIBS} -o httpd_gargoyle
+	${CC} ${CFLAGS} ${LDFLAGS} ${SSL_DEFS} httpd_gargoyle.o match.o tdate_parse.o ${SSL_OBJ} ${LDLIBS} -o httpd_gargoyle
 
 
 

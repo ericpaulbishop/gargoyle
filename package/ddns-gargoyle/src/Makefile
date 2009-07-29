@@ -25,7 +25,7 @@ ERICSTOOLS_DIR:=./ericstools
 
 ifeq ($(USE_CYASSL), 1)
 	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
-	LIBS:=$(LIBS) -lcyassl -lm 
+	LIBS:=$(LIBS) -lcyassl -lm -lz 
 	USE_MATRIXSSL=
 	USE_OPENSSL=
 endif
