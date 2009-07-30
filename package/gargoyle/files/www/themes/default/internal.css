@@ -6,6 +6,25 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+
+button *
+{
+border: none !important; 
+ }
+
+input,
+input *
+{
+outline: none !important; 
+ }
+
+button::-moz-focus-outer,
+::-moz-focus-inner
+{
+border:none!important;
+}
+
+
 a
 {
 	color:#211679;
@@ -13,6 +32,14 @@ a
 a:visited
 {
 	color:#a400b3;
+}
+a:active
+{
+	outline:none;
+}
+a:focus
+{
+	outline:none;
 }
 
 legend
@@ -199,7 +226,7 @@ tr.table_row_header_disabled
 tr.odd
 {
 	border:1px solid black;
-	background-color: #C6D2FF;
+	background-color: #dadaff;
 }
 tr.even
 {
@@ -210,7 +237,7 @@ tr.disabled_odd
 {
 	border:1px solid black;
 	color: #606060;
-	background-color: #F0F0F0;
+	background-color: #e1e1e1;
 }
 tr.disabled_even
 {
@@ -292,33 +319,41 @@ input.default_button_disabled:hover
 	cursor: auto;
 }
 
+
 input.big_button
 {
-	text-align:center;
 	width:187px;
 	height:45px;
 	background: url("images/big_button_normal.png") center top no-repeat;
 	border: none;
-	font-weight:bold;
-	font-size:115%;
-	margin:10px;
-	color:#000000;
 	cursor: pointer;
-
+	font-weight:bold;
+	font-size:16px;
+	color:#333333;
 }
 input.big_button:hover
 {
-	text-align:center;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_highlighted.png") center top no-repeat;
+	border: none;
+	cursor: pointer;
+	font-weight:bold;
+	font-size:16px;
+	color:#000000;
+}
+input.big_button:active
+{
 	width:187px;
 	height:45px;
 	background: url("images/big_button_pressed.png") center top no-repeat;
 	border: none;
-	font-weight:bold;
-	font-size:115%;
-	margin:10px;
-	color:#555555;
 	cursor: pointer;
+	font-weight:bold;
+	font-size:16px;
+	color:#555555;
 }
+
 input.big_button_disabled
 {
 	text-align:center;
@@ -327,7 +362,7 @@ input.big_button_disabled
 	background: url("images/big_button_disabled.png") center top no-repeat;
 	border: none;
 	font-weight:bold;
-	font-size:115%;
+	font-size:16px;
 	margin:10px;
 	color: #808080;
 	cursor: auto;
@@ -340,7 +375,7 @@ input.big_button_disabled:hover
 	background: url("images/big_button_disabled.png") center top no-repeat;
 	border: none;
 	font-weight:bold;
-	font-size:115%;
+	font-size:16px;
 	margin:10px;
 	color: #808080;
 	cursor: auto;
@@ -381,10 +416,21 @@ input.bottom_button
 	border: none;
 	cursor: pointer;
 	font-weight:bold;
-	font-size:115%;
-	color:#000000;
+	font-size:16px;
+	color:#333333;
 }
 input.bottom_button:hover
+{
+	width:187px;
+	height:45px;
+	background: url("images/big_button_highlighted.png") center top no-repeat;
+	border: none;
+	cursor: pointer;
+	font-weight:bold;
+	font-size:16px;
+	color:#000000;
+}
+input.bottom_button:active
 {
 	width:187px;
 	height:45px;
@@ -392,9 +438,10 @@ input.bottom_button:hover
 	border: none;
 	cursor: pointer;
 	font-weight:bold;
-	font-size:115%;
+	font-size:16px;
 	color:#555555;
 }
+
 
 #control_column_container
 {
