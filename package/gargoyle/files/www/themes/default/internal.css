@@ -248,7 +248,7 @@ input.default_button
 input.default_button:hover
 {
 	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #000000;
+	color: #555555;
 	border-top: 1px solid #737582;
 	border-left:  1px solid #737582;
 	border-right: 1px solid #FFFFFF;
@@ -258,7 +258,7 @@ input.default_button:hover
 input.default_button:active
 {
 	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #000000;
+	color: #555555;
 	border-top: 1px solid #737582;
 	border-left:  1px solid #737582;
 	border-right: 1px solid #FFFFFF;
@@ -302,6 +302,7 @@ input.big_button
 	font-weight:bold;
 	font-size:115%;
 	margin:10px;
+	color:#000000;
 	cursor: pointer;
 
 }
@@ -315,6 +316,7 @@ input.big_button:hover
 	font-weight:bold;
 	font-size:115%;
 	margin:10px;
+	color:#555555;
 	cursor: pointer;
 }
 input.big_button_disabled
@@ -380,6 +382,7 @@ input.bottom_button
 	cursor: pointer;
 	font-weight:bold;
 	font-size:115%;
+	color:#000000;
 }
 input.bottom_button:hover
 {
@@ -390,6 +393,7 @@ input.bottom_button:hover
 	cursor: pointer;
 	font-weight:bold;
 	font-size:115%;
+	color:#555555;
 }
 
 #control_column_container
