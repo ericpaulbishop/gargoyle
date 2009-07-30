@@ -236,29 +236,59 @@ td
 input.default_button
 {
 	text-align:center;
-	background: #E8EDFF;
-	border: 1px solid black;
+	background: url("images/default_button_gradient_normal.png") center top repeat-x;
+	border-bottom: 1px solid #737582;
+	border-right:  1px solid #737582;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
+	color: #000000;
+	margin: 5px;
 	cursor: pointer;
 }
 input.default_button:hover
 {
-	background: #6b8aff;
-	color: #FFFFFF;
+	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
+	color: #000000;
+	border-top: 1px solid #737582;
+	border-left:  1px solid #737582;
+	border-right: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
+	margin: 5px;
 }
+input.default_button:active
+{
+	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
+	color: #000000;
+	border-top: 1px solid #737582;
+	border-left:  1px solid #737582;
+	border-right: 1px solid #FFFFFF;
+	border-bottom: 1px solid #FFFFFF;
+	margin: 5px;
+}
+
+
 input.default_button_disabled
 {
 	text-align:center;
+	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
+	border-bottom: 1px solid #737582;
+	border-right:  1px solid #737582;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
 	color: #808080;
-	background: #F0F0F0;
-	border: 1px solid #909090;
+	margin: 5px;
 	cursor: auto;
 }
 input.default_button_disabled:hover
 {
 	text-align:center;
+	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
+	border-bottom: 1px solid #737582;
+	border-right:  1px solid #737582;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
 	color: #808080;
-	background: #F0F0F0;
-	border: 1px solid #909090;
+	margin: 5px;
 	cursor: auto;
 }
 
