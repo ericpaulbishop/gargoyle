@@ -295,33 +295,52 @@ input.default_button_disabled:hover
 input.big_button
 {
 	text-align:center;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_normal.png") center top no-repeat;
+	border: none;
 	font-weight:bold;
-	width:200px;
-	height:25px;
-	background: #E8EDFF;
-	border: 1px solid black;
+	font-size:115%;
+	margin:10px;
 	cursor: pointer;
+
 }
 input.big_button:hover
 {
-	background: #6b8aff;
-	color: #FFFFFF;
+	text-align:center;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_pressed.png") center top no-repeat;
+	border: none;
+	font-weight:bold;
+	font-size:115%;
+	margin:10px;
+	cursor: pointer;
 }
 input.big_button_disabled
 {
 	text-align:center;
-	width:200px;
-	height:25px;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_disabled.png") center top no-repeat;
+	border: none;
+	font-weight:bold;
+	font-size:115%;
+	margin:10px;
 	color: #808080;
-	background: #F0F0F0;
-	border: 1px solid #909090;
 	cursor: auto;
 }
 input.big_button_disabled:hover
 {
+	text-align:center;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_disabled.png") center top no-repeat;
+	border: none;
+	font-weight:bold;
+	font-size:115%;
+	margin:10px;
 	color: #808080;
-	background: #F0F0F0;
-	border: 1px solid #909090;
 	cursor: auto;
 }
 
@@ -354,17 +373,23 @@ select.select_disabled
 }
 input.bottom_button
 {
-	width:200px;
-	height:25px;
-	background: #E8EDFF;
-	border: 1px solid black;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_normal.png") center top no-repeat;
+	border: none;
 	cursor: pointer;
 	font-weight:bold;
+	font-size:115%;
 }
 input.bottom_button:hover
 {
-	background: #6b8aff;
-	color: #FFFFFF;
+	width:187px;
+	height:45px;
+	background: url("images/big_button_pressed.png") center top no-repeat;
+	border: none;
+	cursor: pointer;
+	font-weight:bold;
+	font-size:115%;
 }
 
 #control_column_container
