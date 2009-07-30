@@ -51,6 +51,7 @@ define Build/Compile
 		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
 		USE_CYASSL="1" \
+		USE_CYASSL_INCLUDE_DIR="1" \
 		all
 
 

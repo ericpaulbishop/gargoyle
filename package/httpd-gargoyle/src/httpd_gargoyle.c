@@ -97,8 +97,13 @@
 		#include <openssl/err.h>
 	#endif
 	#ifdef USE_CYASSL
-		#include <openssl/ssl.h>
-		#include <openssl/err.h>
+		#ifdef USE_CYASSL_INCLUDE_DIR
+			#include <cyassl/ssl.h>
+			#include <cyassl/err.h>
+		#else
+			#include <openssl/ssl.h>
+			#include <openssl/err.h>
+		#endif
 	#endif
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"
