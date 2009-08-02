@@ -45,6 +45,7 @@ function resetData()
 	setChildText("device_name", uciOriginal.get("system", systemSections[0], "hostname" ));
 	setChildText("gargoyle_version", gargoyleVersion);
 	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
+	setChildText("load_avg", loadAvg );
 
 	setChildText("uptime", uptimeDays + " days, " + uptimeHours + " hours, " + uptimeMinutes + " minutes");
 	setChildText("current_time", currentTime);

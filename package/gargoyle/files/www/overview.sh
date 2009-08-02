@@ -33,6 +33,9 @@
 	echo "var totalMemory=$total_mem;"
 	echo "var freeMemory=$free_mem;"
 
+	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
+	echo "var loadAvg=\"$load_avg\";"
+
 
 ?>
 //-->
@@ -54,6 +57,9 @@
 		<div>
 			<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
 		</div>
+ 		<div>
+ 			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)
+ 		</div>
 		<div class="internal_divider"></div>
 	</div>
 
