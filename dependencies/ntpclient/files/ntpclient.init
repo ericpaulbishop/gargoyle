@@ -18,7 +18,6 @@ start() {
 	touch /etc/crontabs/root
 	cat /etc/crontabs/root | grep -v "time_backup" > /tmp/new_cron
 	echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /tmp/new_cron
-	cat /tmp/new_cron
 	m1=$(md5sum /etc/crontabs/root)
 	m2=$(md5sum /tmp/new_cron)
 	if [ "$m1" = "$m2" ] ; then
@@ -29,9 +28,7 @@ start() {
 	
 
 	#start ntpclient
-	killall ntpclient
-	sleep 1	
-	killall -9 ntpclient
+	ps | grep "sbin.ntpclient" | grep -v "grep" | awk '{ print $1 }' | xargs -r kill -9
 	ACTION=ifup /etc/hotplug.d/iface/20-ntpclient
 
 	#restart cron if it is running
