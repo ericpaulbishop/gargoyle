@@ -47,7 +47,19 @@ static unsigned long get_pow(unsigned long base, unsigned long pow);
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"bandwidth options:\n  --id [unique identifier for querying bandwidth]\n  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n  --subnet [a.b.c.d/mask] (0 < mask < 32)\n  --greater_than [BYTES]\n  --less_than [BYTES]\n  --current_bandwidth [BYTES]\n  --reset_interval [minute|hour|day|week|month]\n  --reset_time [OFFSET IN SECONDS]\n  --last_backup_time [UTC SECONDS SINCE 1970]\n  --check Check another bandwidth rule without incrementing it\n  --check_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
+	printf("bandwidth options:\n");
+	printf("  --id [unique identifier for querying bandwidth]\n");
+	printf("  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n");
+	printf("  --subnet [a.b.c.d/mask] (0 < mask < 32)\n");
+	printf("  --greater_than [BYTES]\n");
+	printf("  --less_than [BYTES]\n");
+	printf("  --current_bandwidth [BYTES]\n");
+	printf("  --reset_interval [minute|hour|day|week|month]\n");
+	printf("  --reset_time [OFFSET IN SECONDS]\n");
+	printf("  --intervals_to_save [NUMBER OF PREVIOS INTERVALS TO STORE IN MEMORY]\n");
+	printf("  --last_backup_time [UTC SECONDS SINCE 1970]\n");
+	printf("  --check Check another bandwidth rule without incrementing it\n");
+	printf("  --check_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
 }
 
 static struct option opts[] = 
@@ -55,14 +67,15 @@ static struct option opts[] =
 	{ .name = "id", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_ID },	
 	{ .name = "type", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_TYPE },	
 	{ .name = "subnet", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_SUBNET },	
-	{ .name = "less_than", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
 	{ .name = "greater_than", 		.has_arg = 1, .flag = 0, .val = BANDWIDTH_GT },
-	{ .name = "check",	 		.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_NOSWAP },
-	{ .name = "check_with_src_dst_swap",	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_SWAP },
+	{ .name = "less_than", 			.has_arg = 1, .flag = 0, .val = BANDWIDTH_LT },	
 	{ .name = "current_bandwidth",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_CURRENT },	
 	{ .name = "reset_interval",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_INTERVAL },
 	{ .name = "reset_time",			.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
+	{ .name = "intervals_to_save",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_NUM_INTERVALS },
 	{ .name = "last_backup_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
+	{ .name = "check",	 		.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_NOSWAP },
+	{ .name = "check_with_src_dst_swap",	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_SWAP },
 	{ .name = 0 }
 };
 
@@ -102,10 +115,13 @@ static int parse(	int c,
 		info->local_subnet_mask = 0;
 		info->cmp = BANDWIDTH_MONITOR; /* don't test greater/less than, just monitor bandwidth */
 		info->current_bandwidth = 0;
+		info->reset_is_constant_interval = 0;
 		info->reset_interval = BANDWIDTH_NEVER;
 		info->reset_time=0;
 		info->last_backup_time = 0;
 		info->next_reset = 0;
+		
+		info->num_intervals_to_save=0;
 
 		info->non_const_self = NULL;
 		info->ref_count = NULL;
@@ -209,30 +225,47 @@ static int parse(	int c,
 			if(strcmp(argv[optind-1],"minute") ==0)
 			{
 				info->reset_interval = BANDWIDTH_MINUTE;
+				info->reset_is_constant_interval = 0;
 			}
 			else if(strcmp(argv[optind-1],"hour") ==0)
 			{
 				info->reset_interval = BANDWIDTH_HOUR;
+				info->reset_is_constant_interval = 0;
 			}
 			else if(strcmp(argv[optind-1],"day") ==0)
 			{
 				info->reset_interval = BANDWIDTH_DAY;
+				info->reset_is_constant_interval = 0;
 			}
 			else if(strcmp(argv[optind-1],"week") ==0)
 			{
 				info->reset_interval = BANDWIDTH_WEEK;
+				info->reset_is_constant_interval = 0;
 			}
 			else if(strcmp(argv[optind-1],"month") ==0)
 			{
 				info->reset_interval = BANDWIDTH_MONTH;
+				info->reset_is_constant_interval = 0;
 			}
 			else if(strcmp(argv[optind-1],"never") ==0)
 			{
 				info->reset_interval = BANDWIDTH_NEVER;
 			}
+			else if(sscanf(argv[optind-1], "%ld", &read_time) > 0)
+			{
+				info->reset_interval = read_time;
+				info->reset_is_constant_interval = 1;
+			}
 			else
 			{
 				valid_arg = 0;
+			}
+			break;
+		case BANDWIDTH_NUM_INTERVALS:
+			if( sscanf(argv[optind-1], "%ld", &num_read) > 0)
+			{
+				info->num_intervals_to_save = num_read;
+				valid_arg=1;
 			}
 			break;
 		case BANDWIDTH_RESET_TIME:
@@ -363,30 +396,41 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 				printf("--current_bandwidth %lld ", info->current_bandwidth);
 			}
 		}
-		if(info->reset_interval == BANDWIDTH_MINUTE)
+		if(info->reset_is_constant_interval)
 		{
-			printf("--reset_interval minute ");
+			printf("--reset_interval %ld ", info->reset_interval);
 		}
-		else if(info->reset_interval == BANDWIDTH_HOUR)
+		else
 		{
-			printf("--reset_interval hour ");
-		}
-		else if(info->reset_interval == BANDWIDTH_DAY)
-		{
-			printf("--reset_interval day ");
-		}
-		else if(info->reset_interval == BANDWIDTH_WEEK)
-		{
-			printf("--reset_interval week ");
-		}
-		else if(info->reset_interval == BANDWIDTH_MONTH)
-		{
-			printf("--reset_interval month ");
+			if(info->reset_interval == BANDWIDTH_MINUTE)
+			{
+				printf("--reset_interval minute ");
+			}
+			else if(info->reset_interval == BANDWIDTH_HOUR)
+			{
+				printf("--reset_interval hour ");
+			}
+			else if(info->reset_interval == BANDWIDTH_DAY)
+			{
+				printf("--reset_interval day ");
+			}
+			else if(info->reset_interval == BANDWIDTH_WEEK)
+			{
+				printf("--reset_interval week ");
+			}
+			else if(info->reset_interval == BANDWIDTH_MONTH)
+			{
+				printf("--reset_interval month ");
+			}
 		}
 		if(info->reset_time > 0)
 		{
 			printf("--reset_time %ld ", info->reset_time);
-		}	
+		}
+		if(info->num_intervals_to_save > 0)
+		{
+			printf("--intervals_to_save %ld ", info->num_intervals_to_save);
+		}
 	}
 }
 

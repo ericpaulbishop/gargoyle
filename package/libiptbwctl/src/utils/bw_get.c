@@ -23,21 +23,24 @@
 #define malloc ipt_bwctl_safe_malloc
 #define strdup ipt_bwctl_safe_strdup
 
+
 int main(int argc, char **argv)
 {
 	char *id = NULL;
-	FILE* out_file = NULL;;
+	char* out_file_path = NULL;;
+	FILE* out_file = NULL;
 	char *address = NULL;
 
 	unsigned long num_ips;
-	ip_bw *ip_buf;
+	void *ip_buf;
 	unsigned long out_index;
 	int query_succeeded;
-
+	int get_history = 0;
+	int machine_time = 0;
 
 	int c;
 	struct in_addr read_addr;
-	while((c = getopt(argc, argv, "i:I:a:A:f:F:uUhH")) != -1)
+	while((c = getopt(argc, argv, "i:I:a:A:f:F:hHmMuU")) != -1)
 	{	
 		switch(c)
 		{
@@ -72,17 +75,25 @@ int main(int argc, char **argv)
 				break;
 			case 'f':
 			case 'F':
-				out_file = fopen(optarg, "w");
+				out_file_path = strdup(optarg);
+				out_file = fopen(out_file_path, "w");
 				if(out_file == NULL)
 				{
 					fprintf(stderr, "ERROR: cannot open specified file for writing\n");
 					exit(0);
 				}
+				fclose (out_file);
+				break;
+			case 'h':
+			case 'H':
+				get_history = 1;
+				break;
+			case 'm':
+			case 'M':
+				machine_time = 1;
 				break;
 			case 'u':
 			case 'U':
-			case 'h':
-			case 'H':
 			default:
 				fprintf(stderr, "USAGE:\n\t%s -i [ID] -a [IP ADDRESS] -f [OUT_FILE_NAME]\n", argv[0]);
 				exit(0);
@@ -98,14 +109,30 @@ int main(int argc, char **argv)
 	
 	set_kernel_timezone();	
 	unlock_bandwidth_semaphore_on_exit();
-	if(address == NULL)
+	
+	if(get_history == 0)
 	{
-		query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 1000);
+		if(address == NULL)
+		{
+			query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, (ip_bw**)&ip_buf, 1000);
+		}
+		else
+		{
+			num_ips = 1;
+			query_succeeded = get_ip_bandwidth_usage_for_rule_id(id, address, (ip_bw**)&ip_buf, 1000);
+		}
 	}
 	else
 	{
-		num_ips = 1;
-		query_succeeded = get_ip_bandwidth_usage_for_rule_id(id, address, &ip_buf, 1000);
+		if(address == NULL)
+		{
+			query_succeeded = get_all_bandwidth_history_for_rule_id(id, &num_ips, (ip_bw_history**)&ip_buf, 1000);
+		}
+		else
+		{
+			num_ips = 1;
+			query_succeeded = get_ip_bandwidth_history_for_rule_id(id, address, (ip_bw_history**)&ip_buf, 1000);
+		}
 	}
 	if(!query_succeeded)
 	{
@@ -114,53 +141,38 @@ int main(int argc, char **argv)
 	}
 
 
-	if(out_file != NULL)
+	if(out_file_path != NULL)
 	{
-		time_t now;
-		time(&now);
-		fprintf(out_file, "%-15ld\n", now);
-	}
-
-
-	for(out_index=0; out_index < num_ips; out_index++)
-	{
-		ip_bw next = ip_buf[out_index];
-		if(  next.ip != 0 )
+		if(get_history == 0)
 		{
-			struct in_addr ipaddr;
-			ipaddr.s_addr = next.ip;
-			if(out_file == NULL)
-			{
-				printf("%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
-			}
-			else
-			{
-				fprintf(out_file, "%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
-
-			}
+			save_usage_to_file( (ip_bw*)ip_buf, num_ips, out_file_path);
 		}
 		else
 		{
-			if(out_file == NULL)
-			{
-				printf("%-15s\t%lld\n", "COMBINED", (long long int)next.bw);
-			}
-			else
-			{
-				fprintf(out_file, "%-15s\t%lld\n", "COMBINED", (long long int)next.bw);
-
-			}
+			save_history_to_file( (ip_bw_history*)ip_buf, num_ips, out_file_path);
+		}
+	}
+	else
+	{
+		if(get_history == 0)
+		{
+			print_usage(stdout, (ip_bw*)ip_buf, num_ips);
+		}
+		else
+		{
+			print_histories(stdout, (ip_bw_history*)ip_buf, num_ips, !machine_time );
 		}
 	}
 	if(num_ips == 0)
 	{
 		fprintf(stderr, "No data available for id \"%s\"\n", id);
 	}
-	if(out_file != NULL)
-	{
-		fclose(out_file);
-	}
 	printf("\n");
+
+	if(out_file_path != NULL)
+	{
+		free(out_file_path);
+	}
 
 	return 0;
 }

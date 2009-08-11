@@ -461,53 +461,12 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 	}
 
 	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", quota_file_name);
-	FILE* in_file = fopen(quota_file_path, "r");
-	
-	if(in_file != NULL)
+	unsigned long num_ips = 0;
+	time_t last_backup = 0;
+	ip_bw* loaded_backup_data = load_usage_from_file(quota_file_path, &num_ips, &last_backup);
+	if(loaded_backup_data != NULL)
 	{
-		unsigned long num_data_parts = 0;
-		char* file_data = read_entire_file(in_file, 4086, &num_data_parts);
-		fclose(in_file);
-		char whitespace[] =  {'\n', '\r', '\t', ' '};
-		char** data_parts = split_on_separators(file_data, whitespace, 4, -1, 0, &num_data_parts);
-		free(file_data);
-
-		time_t last_backup = 0;
-		unsigned long num_ips = (num_data_parts/2) + 1;
-       		ip_bw* buffer = (ip_bw*)malloc(BANDWIDTH_ENTRY_LENGTH*num_ips);
-		num_ips = 0;
-		unsigned long data_index = 0;
-		unsigned long buffer_index = 0;
-		while(data_index < num_data_parts)
-		{
-			ip_bw next;
-			struct in_addr ipaddr;
-			int valid = inet_aton(data_parts[data_index], &ipaddr);
-			if(!valid)
-			{
-				sscanf(data_parts[data_index], "%ld", &last_backup);
-			}
-			data_index++;
-
-			if(valid && data_index < num_data_parts)
-			{
-				next.ip = ipaddr.s_addr;
-				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
-				data_index++;
-			}
-			else
-			{
-				valid = 0;
-			}
-
-			if(valid)
-			{
-				buffer[buffer_index] = next;
-				buffer_index++;
-				num_ips++;
-			}
-		}
-		int result = set_bandwidth_usage_for_rule_id(id, num_ips, last_backup, buffer, 1000);
+		set_bandwidth_usage_for_rule_id(id, 1, num_ips, last_backup, loaded_backup_data, 5000);
 	}
 	free(quota_file_path);
 	free(quota_file_name);

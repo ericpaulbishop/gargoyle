@@ -145,25 +145,7 @@ void backup_quota(char* id, char* quota_backup_dir)
 	int query_succeeded = get_all_bandwidth_usage_for_rule_id(id, &num_ips, &ip_buf, 5000);
 	if(query_succeeded)
 	{
-		FILE* out_file = fopen(quota_file_path, "w");
-		if(out_file != NULL)
-		{
-			//dump backup time
-			time_t now;
-			time(&now);
-			fprintf(out_file, "%-15ld\n", now);
-			
-			//dump ips
-			int out_index=0;
-			for(out_index=0; out_index < num_ips; out_index++)
-			{
-				struct in_addr ipaddr;
-				ip_bw next = ip_buf[out_index];
-				ipaddr.s_addr = next.ip;
-				fprintf(out_file, "%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
-			}
-		}
-		fclose(out_file);
+		save_usage_to_file(ip_buf, num_ips, quota_file_path);
 		free(ip_buf);
 	}
 	free(quota_file_path);
