@@ -216,7 +216,7 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 	}
 
 	backwards_adjust_iam = iam;
-	if(iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER)
+	if( (iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER) || iam->info->cmp == BANDWIDTH_CHECK )
 	{
 		return;
 	}
@@ -393,7 +393,7 @@ static void shift_timezone_of_id(char* key, void* value)
 	#endif	
 
 	shift_timezone_iam = iam;
-	if(iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER)
+	if( (iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER) || iam->info->cmp == BANDWIDTH_CHECK )
 	{
 		return;
 	}
@@ -1037,7 +1037,7 @@ static int match(	const struct sk_buff *skb,
 	{
 		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
 		info_and_maps* check_iam = (info_and_maps*)get_string_map_element(id_map, info->id);
-		if(iam == NULL)
+		if(check_iam == NULL)
 		{
 			spin_unlock_bh(&bandwidth_lock);
 			return 0;

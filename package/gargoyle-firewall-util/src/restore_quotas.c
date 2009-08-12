@@ -30,24 +30,19 @@ int main(int argc, char** argv)
 {
 
 	char* wan_if = NULL;
-	char* lan_ip = NULL;
 	char* local_subnet = NULL;
 	char* death_mark = NULL;
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
 	
 	char c;
-	while((c = getopt(argc, argv, "W:w:s:S:l:L:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
 		switch(c)
 		{
 			case 'W':
 			case 'w':
 				wan_if = strdup(optarg);
-				break;
-			case 'L':
-			case 'l':
-				lan_ip = strdup(optarg);
 				break;
 			case 'S':
 			case 's':
@@ -329,11 +324,11 @@ int main(int argc, char** argv)
 							//insert redirect rule
 							if(strcmp(types[type_index], "ingress_limit") == 0)
 							{
-								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", type_id, "\" -j DNAT --to-destination ", lan_ip), 1);
+								run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", type_id, "\" -j REDIRECT "), 1);
 							}
 							else
 							{
-								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j DNAT --to-destination ", lan_ip), 1);
+								run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
 							}
 
 
