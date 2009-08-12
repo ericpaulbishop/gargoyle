@@ -216,6 +216,10 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 	}
 
 	backwards_adjust_iam = iam;
+	if(iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER)
+	{
+		return;
+	}
 	if(iam->ip_history_map != NULL)
 	{
 		apply_to_every_long_map_value(iam->ip_history_map, adjust_ip_for_backwards_time_shift);
@@ -389,6 +393,11 @@ static void shift_timezone_of_id(char* key, void* value)
 	#endif	
 
 	shift_timezone_iam = iam;
+	if(iam->info->reset_is_constant_interval == 0 && iam->info->reset_interval == BANDWIDTH_NEVER)
+	{
+		return;
+	}
+
 	if(iam->ip_history_map != NULL)
 	{
 		apply_to_every_long_map_value(iam->ip_history_map, shift_timezone_of_ip);
@@ -1135,7 +1144,7 @@ static int match(	const struct sk_buff *skb,
 		
 		if(ip_map == NULL)
 		{
-			info_and_maps* iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
