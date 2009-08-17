@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 	unsigned long out_index;
 	int query_succeeded;
 	int get_history = 0;
-	int machine_time = 0;
+	char output_type = 'h';
 
 	int c;
 	struct in_addr read_addr;
@@ -90,7 +90,11 @@ int main(int argc, char **argv)
 				break;
 			case 'm':
 			case 'M':
-				machine_time = 1;
+				output_type = 'm';
+				break;
+			case 't':
+			case 'T':
+				output_type = 't';
 				break;
 			case 'u':
 			case 'U':
@@ -160,7 +164,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			print_histories(stdout, (ip_bw_history*)ip_buf, num_ips, !machine_time );
+			print_histories(stdout, id, (ip_bw_history*)ip_buf, num_ips, output_type );
 		}
 	}
 	if(num_ips == 0)

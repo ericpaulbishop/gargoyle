@@ -106,7 +106,7 @@ extern ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, t
 extern ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips);
 
 extern void print_usage(FILE* out, ip_bw* usage, unsigned long num_ips);
-extern void print_histories(FILE* out, ip_bw_history* histories, unsigned long num_histories, unsigned char human_time);
+extern void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned long num_histories, char output_type);
 
 
 
