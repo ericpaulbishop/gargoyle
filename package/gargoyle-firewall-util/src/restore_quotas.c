@@ -336,8 +336,7 @@ int main(int argc, char** argv)
 							}
 							else
 							{
-								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp --src ", ip, " -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
-
+								run_shell_command(dynamic_strcat(5, "iptables -t nat -A quota_redirects -p tcp --src ", ip, " -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
 							}
 
 
