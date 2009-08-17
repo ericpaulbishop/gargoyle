@@ -167,6 +167,7 @@ int main(int argc, char** argv)
 			{
 				char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 				if(ip == NULL) { ip = strdup("ALL"); }
+				if(strlen(ip) == 0) { ip  = strdup("ALL"); }
 				if( (strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0) && (!process_other_quota)  )
 				{
 					other_quota_section_name = strdup(next_quota);
@@ -322,13 +323,21 @@ int main(int argc, char** argv)
 							run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, offpeak, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
 
 							//insert redirect rule
-							if(strcmp(types[type_index], "ingress_limit") == 0)
+							if( strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0 || strcmp(ip, "ALL") == 0)
 							{
-								run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", type_id, "\" -j REDIRECT "), 1);
+								if(strcmp(types[type_index], "ingress_limit") == 0)
+								{
+									run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check_with_src_dst_swap --id \"", type_id, "\" -j REDIRECT "), 1);
+								}
+								else
+								{
+									run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
+								}
 							}
 							else
 							{
-								run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects -p tcp -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
+								run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects -p tcp --src ", ip, " -m multiport --destination-port 80,443 -m bandwidth --check --id \"", type_id, "\" -j REDIRECT "), 1);
+
 							}
 
 
