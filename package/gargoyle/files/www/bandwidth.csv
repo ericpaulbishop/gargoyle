@@ -11,6 +11,6 @@
 	echo ""
 
 	cat /etc/crontabs/root | grep bw_get | sed 's/.*bw_get/bw_get/' | sed 's/\-f .*/-t/g' > /tmp/tmp.bw.sh
-	sh /tmp/tmp.bw.sh | sed 's/,COMBINED//g' | sed '/^$/d'
+	sh /tmp/tmp.bw.sh 2>/dev/null | sed 's/,COMBINED//g' | sed 's/\-/,/g'  | sed '/^$/d'
 	rm /tmp/tmp.bw.sh
 ?>

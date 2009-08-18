@@ -16,9 +16,9 @@ bw_restore()
 	backup_to_tmp="$2"
 
 	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
-		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw
+		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
 	elif [ -e "/tmp/data/bwmon/$bw_id.bw" ] ; then
-		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw
+		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw >/dev/null 2>&1
 	fi
 
 	if [ -e "$tmp_cron" ] ; then
@@ -53,6 +53,19 @@ start()
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
+	#mkdir -P doesn't work in busybox!  WTF??!
+ 	if [ ! -d /tmp/data/bwmon ] ; then 
+ 		rm -rf /tmp/data/bwmon 2>/dev/null
+ 		mkdir /tmp 2>/dev/null
+ 		mkdir /tmp/data 2>/dev/null
+ 		mkdir /tmp/data/bwmon 2>/dev/null
+ 	fi
+	if [ ! -d /usr/data/bwmon ] ; then 
+		rm -rf /usr/data/bwmon 2>/dev/null
+		mkdir /usr/ 2>/dev/null
+		mkdir /usr/data 2>/dev/null
+		mkdir /usr/data/bwmon 2>/dev/null
+	fi
 
 	delete_chain_from_table $download_table $download_chain
 	iptables -t $download_table -N $download_chain
@@ -174,7 +187,7 @@ stop()
 	touch /etc/crontabs/root
 
 	cat /etc/crontabs/root | grep bw_get | sed 's/.*bw_get/bw_get/g' > /tmp/bw_backup.tmp.sh
-	sh /tmp/bw_backup.tmp.sh
+	sh /tmp/bw_backup.tmp.sh >/dev/null 2>&1
 	rm /tmp/bw_backup.tmp.sh
 
 	cat /etc/crontabs/root | grep -v "bw_get"> "$tmp_cron"
@@ -186,5 +199,6 @@ stop()
 
 restart()
 {
+	stop ;
 	start ;
 }
