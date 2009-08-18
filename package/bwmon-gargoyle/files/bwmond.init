@@ -4,24 +4,56 @@ START=55
 include /lib/network
 include /usr/lib/gargoyle_firewall_util
 
+tmp_cron="/tmp/tmp.cron"
+download_table=filter
+download_chain=bw_ingress
+upload_table=mangle
+upload_chain=bw_egress
+
+bw_restore()
+{
+	bw_id="$1"
+	backup_to_tmp="$2"
+
+	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
+		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw
+	elif [ -e "/tmp/data/bwmon/$bw_id.bw" ] ; then
+		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw
+	fi
+
+	if [ -e "$tmp_cron" ] ; then
+		if [ "$backup_to_tmp" = "1" ] ; then
+			echo "0 0,4,8,12,16,20 * * * bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" " >> "$tmp_cron"
+		else
+			echo "0 0,4,8,12,16,20 * * * bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" " >> "$tmp_cron"
+		fi
+	fi
+}
+
+update_cron()
+{
+	old_md5=$(md5sum /etc/crontabs/root)
+	new_md5=$(md5sum "$tmp_cron")
+	if [ "$old_md5" = "$new_md5" ] ; then
+		rm "$tmp_cron"
+	else
+		mv "$tmp_cron" /etc/crontabs/root
+		cron_active=$(ps | grep "crond" | grep -v "grep" )
+		if [ -n "$cron_active" ] ; then
+			/etc/init.d/cron restart
+		fi
+	fi
+}
+
 
 start()
 {
 	bw_if=$(uci -P "/var/state" get network.wan.ifname)
-
-	if [ -e /var/run/bwmond.pid ] ; then
-		old_pid=$(cat /var/run/bwmond.pid)
-		kill $old_pid 2>&- >&-
-	fi
-
 	if [ -z "$bw_if" ] ; then
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
-	filter_insert_index=1
 
-	download_table=filter
-	download_chain=bw_ingress
 	delete_chain_from_table $download_table $download_chain
 	iptables -t $download_table -N $download_chain
 	iptables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
@@ -30,221 +62,59 @@ start()
 
 
 	
-	upload_table=mangle
-	upload_chain=bw_egress
 	delete_chain_from_table $upload_table $upload_chain
 	iptables -t $upload_table -N $upload_chain
 	iptables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
-	iptables -t $upload_table -A $upload_chain  #matches everything to monitor all upload bandwidth
 	
-	#initially write to RAM disk, which is MUCH faster than writing directly to flash
-	conf_file="/etc/bwmond.conf"
-	tmp_conf_file="/tmp/bwmond.conf" 
-	if [ -e "$tmp_conf_file" ] ; then
-		rm "$tmp_conf_file"
-	fi
-
-	# regular backups go in backup_dir
-	# 
-	# tmp_backup_dir is in /tmp which is RAM disk
-	# it has more space available but gets wiped when router reboots
-	# It is useful to have tmp_backup_dir so we can restore data when we
-	# are restarting firewall (though it's not available when router reboots)
-	backup_dir="/usr/data/bwmon"
-	tmp_backup_dir="/tmp/data/bwmon"
-	mkdir -p "$backup_dir"
-	mkdir -p "$tmp_backup_dir"
-
 	minute_s=60;
 	hour_s=$(($minute_s*60));
 	day_s=$(($hour_s*24));
 
 
+        m15_interval=2
+        m15_num_intervals=449
 
-	# 15m-download monitor (spans 15m, tmp backup only)
-	echo "monitor total-download-15m" >> "$tmp_conf_file"
-	echo "	interval_length 2" >> "$tmp_conf_file"
-	echo "	history_length 450" >> "$tmp_conf_file"
-	echo "	table $download_table" >> "$tmp_conf_file"
-	echo "	chain $download_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="total-download-15m"
+	h15_interval=$((2*$minute_s))
+	h15_num_intervals=449	        
+
+	d15_interval="hour"
+	d15_num_intervals=359
 	
-	# 15h-download monitor (spans 15 hours, backup only on program exit)
-	echo "monitor total-download-15h" >> "$tmp_conf_file"
-	echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-	echo "	history_length 450" >> "$tmp_conf_file"
-	echo "	table $download_table" >> "$tmp_conf_file"
-	echo "	chain $download_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-download-15h"
+	y_interval="day"
+	y_num_intervals=365
 
-	# 15d-download monitor (spans 15 days, backup daily)
-	echo "monitor total-download-15d" >> "$tmp_conf_file"
-	echo "	interval_end hour" >> "$tmp_conf_file"
-	echo "	history_length 360" >> "$tmp_conf_file"
-	echo "	table $download_table" >> "$tmp_conf_file"
-	echo "	chain $download_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "	backup_freq $day_s" >> $tmp_conf_file
-	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-download-15d"
-
-
-	# 1y-download monitor (spans 1year, backup daily)
-	echo "monitor total-download-1y" >> "$tmp_conf_file"
-	echo "	interval_end day" >> "$tmp_conf_file"
-	echo "	history_length 366" >> "$tmp_conf_file"
-	echo "	table $download_table" >> "$tmp_conf_file"
-	echo "	chain $download_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "	backup_freq $day_s" >> $tmp_conf_file
-	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-download-1y"
-
-
-	# 15m-upload monitor (spans 15m, tmp backup only)
-	echo "monitor total-upload-15m" >> "$tmp_conf_file"
-	echo "	interval_length 2" >> "$tmp_conf_file"
-	echo "	history_length 450" >> "$tmp_conf_file"
-	echo "	table $upload_table" >> "$tmp_conf_file"
-	echo "	chain $upload_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-upload-15m"
+	iptables -t $download_table -A $download_chain -m bandwidth --id "total-download-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
+	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total-upload-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
 	
-	# 15h-upload monitor (spans 15 hours, backup only on program exit)
-	echo "monitor total-upload-15h" >> "$tmp_conf_file"
-	echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-	echo "	history_length 450" >> "$tmp_conf_file"
-	echo "	table $upload_table" >> "$tmp_conf_file"
-	echo "	chain $upload_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-upload-15h"
 
-	# 15d-upload monitor (spans 15 days, backup daily)
-	echo "monitor total-upload-15d" >> "$tmp_conf_file"
-	echo "	interval_end hour" >> "$tmp_conf_file"
-	echo "	history_length 360" >> "$tmp_conf_file"
-	echo "	table $upload_table" >> "$tmp_conf_file"
-	echo "	chain $upload_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "	backup_freq $day_s" >> $tmp_conf_file
-	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-upload-15d"
-
-	# 1y-upload monitor (spans 1year, backup daily)
-	echo "monitor total-upload-1y" >> "$tmp_conf_file"
-	echo "	interval_end day" >> "$tmp_conf_file"
-	echo "	history_length 366" >> "$tmp_conf_file"
-	echo "	table $upload_table" >> "$tmp_conf_file"
-	echo "	chain $upload_chain" >> "$tmp_conf_file"
-	echo "	rule 1" >> "$tmp_conf_file" >> "$tmp_conf_file"
-	echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-	echo "	backup_freq $day_s" >> $tmp_conf_file
-	echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-	echo "" >> "$tmp_conf_file"
-	backup_file_match="$backup_file_match|total-upload-1y"
-
+	iptables -t $download_table -A $download_chain -m bandwidth --id "total-download-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
+	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total-upload-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
 	
-	bw_rule_num=2
+	iptables -t $download_table -A $download_chain -m bandwidth --id "total-download-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
+	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total-upload-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
+
+	iptables -t $download_table -A $download_chain -m bandwidth --id "total-download-1y" --reset_interval $y_interval --intervals_to_save $y_num_intervals
+	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total-upload-1y" --reset_interval $y_interval --intervals_to_save $y_num_intervals
+	
+	ids="total-download-15m total-upload-15m total-download-15h total-upload-15h total-download-15d total-upload-15d total-download-1y total-upload-1y"
+	
 	if [ -e /etc/ethers ] ; then
 		ethers=$(cat /etc/ethers | awk ' {print $2} ')
 		
 
 		#add config sections for all static ips
 		for static_ip in $ethers ; do
-			iptables -t $download_table -A $download_chain -d $static_ip
-			iptables -t $upload_table -A $upload_chain -s $static_ip
 
-			# 15m-download monitor (spans 15m, tmp backup only)
-			echo "monitor $static_ip-download-15m" >> "$tmp_conf_file"
-			echo "	interval_length 2" >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $download_table" >> "$tmp_conf_file"
-			echo "	chain $download_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-download-15m"
+			iptables -t $download_table -A $download_chain -d $static_ip -m bandwidth --id "$static_ip-download-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
+			iptables -t $upload_table -A $upload_chain -s $static_ip -m bandwidth --id "$static_ip-upload-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
 
+			iptables -t $download_table -A $download_chain -d $static_ip -m bandwidth --id "$static_ip-download-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
+			iptables -t $upload_table -A $upload_chain -s $static_ip -m bandwidth --id "$static_ip-upload-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
 
-			# 15h-download monitor (spans 15 hours, tmp backup only)
-			echo "monitor $static_ip-download-15h" >> "$tmp_conf_file"
-			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $download_table" >> "$tmp_conf_file"
-			echo "	chain $download_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-download-15h"
-			
-			# 15d-download monitor (spans 15 days, backup daily)
-			echo "monitor $static_ip-download-15d" >> "$tmp_conf_file"
-			echo "	interval_end hour" >> "$tmp_conf_file"
-			echo "	history_length 360" >> "$tmp_conf_file"
-			echo "	table $download_table" >> "$tmp_conf_file"
-			echo "	chain $download_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-			echo "	backup_freq $day_s" >> $tmp_conf_file
-			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-download-15d"
-
-
-			# 15m-upload monitor (spans 15m, tmp backup only)
-			echo "monitor $static_ip-upload-15m" >> "$tmp_conf_file"
-			echo "	interval_length 2" >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $upload_table" >> "$tmp_conf_file"
-			echo "	chain $upload_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-upload-15m"
-
-
-
-			# 15h-upload monitor (spans 15 hours, tmp backup only)
-			echo "monitor $static_ip-upload-15h" >> "$tmp_conf_file"
-			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $upload_table" >> "$tmp_conf_file"
-			echo "	chain $upload_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-upload-15h"
-
-			# 15d-upload monitor (spans 15 days, backup daily)
-			echo "monitor $static_ip-upload-15d" >> "$tmp_conf_file"
-			echo "	interval_end hour" >> "$tmp_conf_file"
-			echo "	history_length 360" >> "$tmp_conf_file"
-			echo "	table $upload_table" >> "$tmp_conf_file"
-			echo "	chain $upload_chain" >> "$tmp_conf_file"
-			echo "	rule $bw_rule_num" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-			echo "	backup_freq $day_s" >> $tmp_conf_file
-			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$static_ip-upload-15d"
-
-			bw_rule_num=$((bw_rule_num+1))
+			iptables -t $download_table -A $download_chain -d $static_ip -m bandwidth --id "$static_ip-download-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
+			iptables -t $upload_table -A $upload_chain -s $static_ip -m bandwidth --id "$static_ip-upload-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
+		
+			ids="$ids $static_ip-download-15m $static_ip-upload-15m $static_ip-download-15h $static_ip-upload-15h $static_ip-download-15d $static_ip-upload-15d"
 		done
 	fi
 
@@ -255,141 +125,62 @@ start()
 		qos_upload_chain="qos_egress"
 		qos_download_chain="qos_ingress"
 
-		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "qos-upload-"$2":"$3};}' )
-		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "qos-download-"$2":"$3};}' )
+		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "qos-upload-"$2":"$3"/"$4};}' )
+		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "qos-download-"$2":"$3"/"$4};}' )
 
 		for upload_info in $upload_data ; do
-			
 			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')
 			class=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $1; }')
 
-			# 15m-upload monitor (spans 15m, tmp backup only)
-			echo "monitor $class-15m" >> "$tmp_conf_file"
-			echo "	interval_length 2" >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"			
-			backup_file_match="$backup_file_match|$class-15m"
-			
-			# 15h-upload monitor (spans 15 hours, tmp backup only)
-			echo "monitor $class-15h" >> "$tmp_conf_file"
-			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$class-15h"
+			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "$class-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
+			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "$class-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
+			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "$class-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
 
-			# 15d-upload monitor (spans 15 days, backup daily)
-			echo "monitor $class-15d" >> "$tmp_conf_file"
-			echo "	interval_end hour" >> "$tmp_conf_file"
-			echo "	history_length 360" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_upload_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-			echo "	backup_freq $day_s" >> $tmp_conf_file
-			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$class-15d"
+			ids="$ids $class-15m $class-15h $class-15d"
 		done
 		
 		
 		for download_info in $download_data ; do
-			
 			mark=$(echo $download_info | awk ' BEGIN { FS=":";} { print $2; }')
 			class=$(echo $download_info | awk ' BEGIN { FS=":";} { print $1; }')
 			
-			# 15m-download monitor (spans 15m, tmp backup only)
-			echo "monitor $class-15m" >> "$tmp_conf_file"
-			echo "	interval_length 2" >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"		
-			backup_file_match="$backup_file_match|$class-15m"
+			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "$class-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
+			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "$class-15h" --reset_interval $h15_interval --intervals_to_save $h15_num_intervals
+			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "$class-15d" --reset_interval $d15_interval --intervals_to_save $d15_num_intervals
 
-			# 15h-upload monitor (spans 15 hours, tmp backup only)
-			echo "monitor $class-15h" >> "$tmp_conf_file"
-			echo "	interval_length " $((2*$minute_s)) >> "$tmp_conf_file"
-			echo "	history_length 450" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $tmp_backup_dir" >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$class-15h"
-
-			# 15d-upload monitor (spans 15 days, backup daily)
-			echo "monitor $class-15d" >> "$tmp_conf_file"
-			echo "	interval_end hour" >> "$tmp_conf_file"
-			echo "	history_length 360" >> "$tmp_conf_file"
-			echo "	table $qos_table" >> "$tmp_conf_file"
-			echo "	chain $qos_download_chain" >> "$tmp_conf_file"
-			echo "	mark $mark" >> "$tmp_conf_file" >> "$tmp_conf_file"
-			echo "	backup_dir $backup_dir" >> "$tmp_conf_file"
-			echo "	backup_freq $day_s" >> $tmp_conf_file
-			echo "	accumulator_freq " $((10*$minute_s)) >> "$tmp_conf_file"
-			echo "" >> "$tmp_conf_file"
-			backup_file_match="$backup_file_match|$class-15d"
+			ids="$ids $class-15m $class-15h $class-15d"
 		done
-
 	fi
 
+	touch /etc/crontabs/root
+	cat /etc/crontabs/root | grep -v "bw_get" > "$tmp_cron"
+	
 
-	#remove all old data files that no longer corrospond to active monitors
-	ls -d "$backup_dir"/* 2>/dev/null | egrep -v "$backup_file_match" | xargs -n1 -r rm -r
-	ls -d "$tmp_backup_dir"/* 2>/dev/null | egrep -v "$backup_file_match" | xargs -n1 -r rm -r
-
-	#only write to flash if conf_file has changed
-	if [ -e "$conf_file" ] ; then
-		old_md5=$(md5sum "$conf_file" | awk ' { print $1 ; }')
-		new_md5=$(md5sum "$tmp_conf_file" | awk ' { print $1 ; }')
-		if [ "$old_md5" = "$new_md5" ] ; then
-			rm  "$tmp_conf_file"
+	for i in $ids ; do
+		is_15m=$(echo "$i" | grep "15m")
+		is_15h=$(echo "$i" | grep "15h")
+		if [ -n "$is_15m" ] || [ -n "$is_15h" ] ; then
+			bw_restore "$i" 1
 		else
-			mv "$tmp_conf_file" "$conf_file"
+			bw_restore "$i" 0
 		fi
-	
-	else
-		mv "$tmp_conf_file" "$conf_file"
-	fi
+	done
 
-	#be absolutely sure old instance is done
-	#give it 2 more seconds to finish then nuke it
-	if [ -e /var/run/bwmond.pid ] ; then
-		sleep 2
-		if [ -e /var/run/bwmond.pid ] ; then
-			killall -9 bwmond  2>/dev/null
-			killall -9 bwstats 2>/dev/null
-			rm -rf /var/run/bwmond.pid
-		fi
-	fi
-	/usr/bin/bwmond -C $conf_file
-	
-
+	update_cron 
 }
 
 stop()
 {
-	if [ -e /var/run/bwmond.pid ] ; then
-		old_pid=$(cat /var/run/bwmond.pid)
-		kill $old_pid 2>&- >&-
-	fi
+	touch /etc/crontabs/root
 
-	download_table=filter
-	download_chain=bw_ingress
+	cat /etc/crontabs/root | grep bw_get | sed 's/.*bw_get/bw_get/g' > /tmp/bw_backup.tmp.sh
+	sh /tmp/bw_backup.tmp.sh
+	rm /tmp/bw_backup.tmp.sh
+
+	cat /etc/crontabs/root | grep -v "bw_get"> "$tmp_cron"
+	update_cron
+	
 	delete_chain_from_table $download_table $download_chain
-
-	upload_table=mangle
-	upload_chain=bw_egress
 	delete_chain_from_table $upload_table $upload_chain
 }
 

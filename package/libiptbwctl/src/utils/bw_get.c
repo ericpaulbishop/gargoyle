@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
 	int c;
 	struct in_addr read_addr;
-	while((c = getopt(argc, argv, "i:I:a:A:f:F:hHmMuU")) != -1)
+	while((c = getopt(argc, argv, "i:I:a:A:f:F:tThHmMuU")) != -1)
 	{	
 		switch(c)
 		{
@@ -169,7 +169,10 @@ int main(int argc, char **argv)
 	}
 	if(num_ips == 0)
 	{
-		fprintf(stderr, "No data available for id \"%s\"\n", id);
+	       	if(output_type != 't' && output_type != 'm')
+		{
+			fprintf(stderr, "No data available for id \"%s\"\n", id);
+		}
 	}
 	printf("\n");
 

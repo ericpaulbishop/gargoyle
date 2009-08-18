@@ -355,7 +355,7 @@ function parseMonitors(outputData)
 	{
 		if(dataLines[lineIndex].length > 0)
 		{
-			monitorName = dataLines[lineIndex];
+			monitorName = (dataLines[lineIndex].split(/[\t ]+/))[0];
 			lineIndex++; 
 			firstTimeStart = dataLines[lineIndex];
 			lineIndex++;
