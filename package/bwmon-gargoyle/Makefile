@@ -14,7 +14,6 @@ PKG_RELEASE:=1
 
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-PKG_INSTALL_DIR:=$(PKG_BUILD_DIR)/ipkg-install
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -30,6 +29,8 @@ define Package/bwmon-gargoyle/description
 	Bandwidth monitor for Gargoyle Web Interface
 endef
 
+define Build/Prepare
+endef
 
 define Build/Configure
 endef
@@ -40,16 +41,6 @@ endef
 define Package/bwmon-gargoyle/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/bwmond.init $(1)/etc/init.d/bwmon_gargoyle
-endef
-
-define Package/bwmon-gargoyle/postinst
-	IPKG_INSTROOT=$${IPKG_INSTROOT}/ sh $${IPKG_INSTROOT}/etc/rc.common $${IPKG_INSTROOT}/etc/init.d/bwmon_gargoyle enable
-	$${IPKG_INSTROOT}/etc/init.d/bwmon_gargoyle start 2>/dev/null
-endef
-
-define Package/httpd-gargoyle/prerm
-	$${IPKG_INSTROOT}/etc/init.d/bwmon_gargoyle stop 2>/dev/null
-	$${IPKG_INSTROOT}/etc/init.d/bwmon_gargoyle disable 2>/dev/null
 endef
 
 $(eval $(call BuildPackage,bwmon-gargoyle))
