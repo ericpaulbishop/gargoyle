@@ -1280,7 +1280,15 @@ static char add_ip_block(	uint32_t ip,
 			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
 			*current_output_index = *current_output_index + 8;
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->current_bandwidth;
+			uint64_t *bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
+			if(bw == NULL)
+			{
+				*( (uint64_t*)(output_buffer + *current_output_index) ) = 0;
+			}
+			else
+			{
+				*( (uint64_t*)(output_buffer + *current_output_index) ) = *bw;
+			}
 			*current_output_index = *current_output_index + 8;
 
 		}
@@ -1473,7 +1481,17 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 		{
 			kfree(output_ip_list);
 		}
-		output_ip_list = get_sorted_long_map_keys(iam->ip_map, &output_ip_list_length);
+		if(iam->info->type == BANDWIDTH_COMBINED)
+		{
+			output_ip_list_length = 1;
+			output_ip_list = (unsigned long*)kmalloc(sizeof(unsigned long), GFP_ATOMIC);
+			if(output_ip_list != NULL) { *output_ip_list = 0; }
+		}
+		else
+		{
+			output_ip_list = get_sorted_long_map_keys(iam->ip_map, &output_ip_list_length);
+		}
+		
 		if(output_ip_list == NULL)
 		{
 			return handle_get_failure(0, 1, 1, ERROR_UNKNOWN, user, buffer);
