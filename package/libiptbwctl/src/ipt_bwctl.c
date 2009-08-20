@@ -927,8 +927,20 @@ int save_history_to_file(ip_bw_history* data, unsigned long num_ips, char* out_f
 			fwrite( &is_constant, 1, 1, out_file);
 		}
 
+		unsigned char  bw_fits_in_32bits = 1;
+		uint32_t out_index=0;
+		for(out_index=0; out_index < num_ips && bw_fits_in_32bits; out_index++)
+		{
+			uint32_t node_index = 0;
+			ip_bw_history next = data[out_index];
+			for(node_index=0; node_index < next.num_nodes && bw_fits_in_32bits; node_index++)
+			{
+				uint64_t bw = (next.history_bws)[node_index];
+				bw_fits_in_32bits = bw_fits_in_32bits && (bw <  INT32_MAX);
+			}
+		}
+
 		//dump data for each ip
-		int out_index=0;
 		for(out_index=0; out_index < num_ips; out_index++)
 		{
 			ip_bw_history next = data[out_index];
@@ -938,9 +950,11 @@ int save_history_to_file(ip_bw_history* data, unsigned long num_ips, char* out_f
 			if(next.num_nodes == 0)
 			{
 				uint64_t dummy = 0;
+				unsigned char bw_bits = 32;
 				fwrite( &dummy, 8, 1, out_file);
 				fwrite( &dummy, 8, 1, out_file);
 				fwrite( &dummy, 8, 1, out_file);
+				fwrite( &bw_bits,  1, 1, out_file);
 			}
 			else
 			{
@@ -948,13 +962,31 @@ int save_history_to_file(ip_bw_history* data, unsigned long num_ips, char* out_f
 				uint64_t first_start = (uint64_t)next.first_start;
 				uint64_t first_end   = (uint64_t)next.first_end;
 				uint64_t last_end    = (uint64_t)next.last_end;
+				unsigned char  bw_bits = 32;
+				for(node_index=0; node_index < next.num_nodes && bw_bits == 32; node_index++)
+				{
+					uint64_t bw = (next.history_bws)[node_index];
+					bw_bits = bw_bits == 32 && (bw <  INT32_MAX) ? 32 : 64;
+				}
+
+				
 				fwrite( &first_start, 8, 1, out_file);
 				fwrite( &first_end,   8, 1, out_file);
 				fwrite( &last_end,    8, 1, out_file);
+				fwrite( &bw_bits,     1, 1, out_file);
 				for(node_index=0; node_index < next.num_nodes; node_index++)
 				{
-					uint64_t bw = (next.history_bws)[node_index];
-					fwrite( &bw, 8, 1, out_file);
+					if(bw_bits == 32)
+					{
+						uint32_t bw = (uint32_t)(next.history_bws)[node_index];
+						fwrite( &bw, 4, 1, out_file);
+
+					}
+					else
+					{
+						uint64_t bw = (next.history_bws)[node_index];
+						fwrite( &bw, 8, 1, out_file);
+					}
 				}
 			}
 		}
@@ -1056,12 +1088,14 @@ ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips
 			uint64_t first_start;	
 			uint64_t first_end;
 			uint64_t last_end;
+			unsigned char bw_bits;
 
 			fread(&ip, 4, 1, in_file);
 			fread(&num_nodes, 4, 1, in_file);
 			fread(&first_start, 8, 1, in_file);
 			fread(&first_end, 8, 1, in_file);
 			fread(&last_end, 8, 1, in_file);
+			fread(&bw_bits, 1, 1, in_file);
 
 			ip_bw_history next;
 			next.reset_interval       = (time_t)reset_interval;
@@ -1079,9 +1113,19 @@ ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips
 				uint32_t node_index = 0;
 				for(node_index=0; node_index < next.num_nodes; node_index++)
 				{
-					uint64_t nextbw = 0;
-					fread(&nextbw, 8, 1, in_file);
-					(next.history_bws)[node_index] = nextbw;
+					if(bw_bits == 32)
+					{
+						uint32_t nextbw = 0;
+						fread(&nextbw, 4, 1, in_file);
+						(next.history_bws)[node_index] = (uint64_t)nextbw;
+
+					}
+					else
+					{
+						uint64_t nextbw = 0;
+						fread(&nextbw, 8, 1, in_file);
+						(next.history_bws)[node_index] = nextbw;
+					}
 				}
 			}
 			data[ip_index] = next;
