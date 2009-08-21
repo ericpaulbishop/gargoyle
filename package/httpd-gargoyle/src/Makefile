@@ -17,7 +17,7 @@ USE_OPENSSL:=1
 
 ifeq ($(USE_CYASSL), 1)
 	SSL_DEFS:=-DUSE_CYASSL -DHAVE_SSL
-	SSL_LIBS:=-lcyassl -lm -lz
+	SSL_LIBS:=-lcyassl -lm
        	ifeq ($(USE_CYASSL_INCLUDE_DIR), 1)
 		SSL_DEFS:=$(SSL_DEFS) -DUSE_CYASSL_INCLUDE_DIR
 	endif

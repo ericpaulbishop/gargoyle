@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cyassl
-PKG_VERSION:=1.0.3
+PKG_VERSION:=1.0.6
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).zip
 PKG_SOURCE_URL:=http://www.yassl.com/
-PKG_MD5SUM:=e9e85a2d78cd535a049e4acce786e42d
+PKG_MD5SUM:=10d9d4f988388472765070097a255d4f
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -27,7 +27,6 @@ define Package/libcyassl
   SECTION:=libs
   SUBMENU:=SSL
   CATEGORY:=Libraries
-  DEPENDS:=+zlib
   TITLE+= (library)
 endef
 
@@ -38,7 +37,9 @@ endef
 TARGET_CFLAGS += $(FPIC)
 
 CONFIGURE_ARGS += \
-	--with-zlib="$(STAGING_DIR)/usr"
+	--without-zlib --enable-opensslExtra
+
+
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/ctaocrypt
@@ -47,6 +48,7 @@ define Build/InstallDev
 
 	$(INSTALL_DIR) $(1)/usr/include/cyassl
 	if [ ! -e $(1)/usr/include/cyassl/ssl.h ] ; then cp -r $(PKG_BUILD_DIR)/include/openssl/* $(1)/usr/include/cyassl/ ; fi
+	$(CP) $(PKG_BUILD_DIR)/include/*.h $(1)/usr/include
 	
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_BUILD_DIR)/src/.libs/libcyassl.{a,so*} $(1)/usr/lib/

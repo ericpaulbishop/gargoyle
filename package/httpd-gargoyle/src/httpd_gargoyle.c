@@ -104,6 +104,7 @@
 			#include <openssl/ssl.h>
 			#include <openssl/err.h>
 		#endif
+		#include <cyassl_error.h>
 	#endif
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"
@@ -342,7 +343,19 @@ static void re_open_logfile( void );
 static void handle_read_timeout( int sig, int is_ssl );
 static void handle_read_timeout_sig(int sig);
 static void handle_write_timeout( int sig );
-static void lookup_hostname( usockaddr* usa4P, usockaddr* usa4sP, size_t sa4_len, int* gotv4P, usockaddr* usa6P, usockaddr* usa6sP, size_t sa6_len, int* gotv6P );
+
+static void lookup_hostname(	usockaddr* usa4P, 
+				usockaddr* usa4sP, 
+				size_t sa4_len, 
+				int* gotv4P,
+			        int* gotv4sP,	
+				usockaddr* usa6P, 
+				usockaddr* usa6sP, 
+				size_t sa6_len, 
+				int* gotv6P,
+				int* gotv6sP
+				);
+
 static char* ntoa( usockaddr* usaP );
 static int sockaddr_check( usockaddr* usaP );
 static size_t sockaddr_len( usockaddr* usaP );
@@ -369,7 +382,7 @@ main( int argc, char** argv )
     gid_t gid = 32767;
     usockaddr host_addr4;
     usockaddr host_addr6;
-    int gotv4, gotv6;
+    int gotv4, gotv4s, gotv6, gotv6s;
     fd_set lfdset;
     int maxfd;
     usockaddr usa;
@@ -615,15 +628,15 @@ main( int argc, char** argv )
 
     /* Look up hostname. */
     lookup_hostname(
-	&host_addr4, &host_addr4s, sizeof(host_addr4), &gotv4,
-	&host_addr6, &host_addr4s, sizeof(host_addr6), &gotv6 );
+	&host_addr4, &host_addr4s, sizeof(host_addr4), &gotv4, &gotv4s,
+	&host_addr6, &host_addr4s, sizeof(host_addr6), &gotv6, &gotv6s );
 
     if ( hostname == (char*) 0 )
 	{
 	(void) gethostname( hostname_buf, sizeof(hostname_buf) );
 	hostname = hostname_buf;
 	}
-    if ( ! ( gotv4 || gotv6 ) )
+    if ( ! ( gotv4 || gotv4s || gotv6 || gotv6s ) )
 	{
 	syslog( LOG_CRIT, "can't find any valid address" );
 	(void) fprintf( stderr, "%s: can't find any valid address\n", argv0 );
@@ -634,45 +647,35 @@ main( int argc, char** argv )
     ** like some other systems, it has magical v6 sockets that also listen for
     ** v4, but in Linux if you bind a v4 socket first then the v6 bind fails.
     */
+
+    listen6_fd  = -1;
+    listen6s_fd = -1;
+    listen4_fd  = -1;
+    listen4s_fd = -1;
     if ( gotv6 )
     {
-	listen6_fd = initialize_listen_socket( &host_addr6 );
-	if(sslPort != 0)
-	{
-    		listen6s_fd = initialize_listen_socket( &host_addr6s );
-	}
-	else
-	{
-		listen6s_fd = -1;
-		
-	}
+	   //syslog(LOG_CRIT, "initializing 6\n" );
+	   listen6_fd = initialize_listen_socket( &host_addr6 );
     }
-    else
+    if( gotv6s )
     {
-	listen6_fd  = -1;
-	listen6s_fd = -1;
-    }
+	   //syslog(LOG_CRIT, "initializing 6s\n" );
+	   listen6s_fd = initialize_listen_socket( &host_addr6s );
+    }  
     if ( gotv4 )
     {
-	listen4_fd = initialize_listen_socket( &host_addr4 );
-	if(sslPort != 0)
-	{
-		listen4s_fd = initialize_listen_socket( &host_addr4s );
-	}
-	else
-	{
-		listen4s_fd = -1;
-	}
+	   //syslog(LOG_CRIT, "initializing 4\n" );
+	   listen4_fd = initialize_listen_socket( &host_addr4 );
     }
-    else
+    if( gotv4s )
     {
-	listen4_fd  = -1;
-	listen4s_fd = -1;
+	   //syslog(LOG_CRIT, "initializing 4s\n" );
+	   listen4s_fd = initialize_listen_socket( &host_addr4s );
     }
 
 
     /* If we didn't get any valid sockets, fail. */
-    if ( listen4_fd == -1 && listen6_fd == -1 )
+    if ( listen4_fd == -1 && listen6_fd == -1 && listen4s_fd == -1 && listen6s_fd == -1 )
 	{
 	syslog( LOG_CRIT, "can't bind to any address" );
 	(void) fprintf( stderr, "%s: can't bind to any address\n", argv0 );
@@ -690,7 +693,8 @@ main( int argc, char** argv )
 		{
 			if (	SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
 				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
-				SSL_CTX_check_private_key( ssl_ctx ) == 0 )
+				SSL_CTX_check_private_key( ssl_ctx ) == 0 
+				)
 			{
 				ERR_print_errors_fp( stderr );
 				exit( 1 );
@@ -706,19 +710,13 @@ main( int argc, char** argv )
 		}
 	#endif
 	#ifdef USE_CYASSL
-		SSL_METHOD* smethod = 0;
-		#if defined(CYASSL_DTLS)
-    			smethod  = DTLSv1_server_method();
-		#elif  !defined(NO_TLS)
-			smethod = TLSv1_server_method();
-		#else
-			smethod = SSLv3_server_method();
-		#endif
-		ssl_ctx = SSL_CTX_new(smethod);
+		ssl_ctx = SSL_CTX_new( SSLv3_server_method() );
+		SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_NONE, 0);
 		if ( certfile[0] != '\0' )
 		{
-			if (	SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 ||
-				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) == 0 
+			if (	SSL_CTX_use_certificate_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) != SSL_SUCCESS ||
+				SSL_CTX_use_PrivateKey_file( ssl_ctx, certfile, SSL_FILETYPE_PEM ) != SSL_SUCCESS 
+				//|| SSL_CTX_check_private_key( ssl_ctx ) != SSL_SUCCESS
 				)
 			{
 				syslog( LOG_CRIT, "can't load certificate and/or private key\n");
@@ -727,7 +725,7 @@ main( int argc, char** argv )
 		}
 		if ( cipher != (char*) 0 )
 		{
-			if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) == 0 )
+			if ( SSL_CTX_set_cipher_list( ssl_ctx, cipher ) <= 0 )
 			{
 				syslog( LOG_CRIT, "can't load certificate and/or private key\n");
 				exit( 1 );
@@ -1446,8 +1444,19 @@ handle_request( int is_ssl, unsigned short conn_port )
 		#ifdef USE_CYASSL
 			ssl = SSL_new( ssl_ctx );
 			SSL_set_fd( ssl, conn_fd );
-			if ( SSL_accept( ssl ) == 0 )
+			int accept_ret = SSL_accept( ssl );
+			if ( accept_ret <= 0 )
 			{
+				int e = SSL_get_error(ssl, accept_ret);
+				/* 
+				 * if SSL version mismatch it's not really a big deal, 
+				 * client will just try again with right version, 
+				 * so don't print an error in this case 
+				 */
+				if(e != VERSION_ERROR) 
+				{
+					syslog( LOG_CRIT, "error: can't initialize ssl connection, error = %d\n", e);
+				}
 				exit( 1 );
 			}
 		#endif
@@ -3519,11 +3528,13 @@ handle_write_timeout( int sig )
 static void lookup_hostname(	usockaddr* usa4P, 
 				usockaddr* usa4sP, 
 				size_t sa4_len, 
-				int* gotv4P, 
+				int* gotv4P,
+			        int* gotv4sP,	
 				usockaddr* usa6P, 
 				usockaddr* usa6sP, 
 				size_t sa6_len, 
-				int* gotv6P 
+				int* gotv6P,
+				int* gotv6sP
 				)
 {
 	int port_index;
@@ -3531,6 +3542,12 @@ static void lookup_hostname(	usockaddr* usa4P,
        	port_list[0] = port;
 	port_list[1] = sslPort;
 	port_list[2] = 0;
+
+	*gotv6P  = 0;
+	*gotv6sP = 0;
+	*gotv4P  = 0;
+	*gotv4sP = 0;
+
 
 #ifdef USE_IPV6
 
@@ -3581,11 +3598,7 @@ static void lookup_hostname(	usockaddr* usa4P,
 			}
 		}
 
-		if ( aiv6 == (struct addrinfo*) 0 )
-		{ 
-			*gotv6P = 0;
-		}
-    		else
+		if ( aiv6 != (struct addrinfo*) 0 )
 		{
 			if ( sa6_len < aiv6->ai_addrlen )
 			{
@@ -3606,23 +3619,20 @@ static void lookup_hostname(	usockaddr* usa4P,
 			}
 			if(port_index==0)
 			{
+				*gotv6P = 1;
 				(void) memset( usa6P, 0, sa6_len );
 				(void) memmove( usa6P, aiv6->ai_addr, aiv6->ai_addrlen );
 			}
 			else
 			{
+				*gotv6sP = 1;
 				(void) memset( usa6sP, 0, sa6_len );
 				(void) memmove( usa6sP, aiv6->ai_addr, aiv6->ai_addrlen );
 
 			}
-			*gotv6P = 1;
 		}
 
-		if ( aiv4 == (struct addrinfo*) 0 )
-		{
-			*gotv4P = 0;
-		}
-		else
+		if ( aiv4 != (struct addrinfo*) 0 )
 		{
 			if ( sa4_len < aiv4->ai_addrlen )
 			{
@@ -3643,11 +3653,13 @@ static void lookup_hostname(	usockaddr* usa4P,
 			}
 			if(port_index==0)
 			{
+				*gotv4P = 1;
 				(void) memset( usa4P, 0, sa4_len );
 				(void) memmove( usa4P, aiv4->ai_addr, aiv4->ai_addrlen );
 			}
 			else
 			{
+				*gotv4sP = 1;
 				(void) memset( usa4sP, 0, sa4_len );
 				(void) memmove( usa4sP, aiv4->ai_addr, aiv4->ai_addrlen );
 
@@ -3660,7 +3672,6 @@ static void lookup_hostname(	usockaddr* usa4P,
 
 #else /* USE_IPV6 */
 
-	*gotv6P = 0;
 	
 	for(port_index=0; port_list[port_index] != 0; port_index++)
 	{
@@ -3709,7 +3720,14 @@ static void lookup_hostname(	usockaddr* usa4P,
 			}
 		}
 		nextUsa->sa_in.sin_port = htons( port_list[port] );
-		*gotv4P = 1;
+		if(port_index==0)
+		{
+			*gotv4P = 1;
+		}
+		else
+		{
+			*gotv4sP = 1;
+		}
 	}
 #endif /* USE_IPV6 */
 }
