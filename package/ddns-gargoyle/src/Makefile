@@ -28,7 +28,7 @@ ifeq ($(USE_CYASSL), 1)
 	ifeq ($(USE_CYASSL_INCLUDE_DIR), 1)
 		SSL_DEFS:=$(SSL_DEFS) -DUSE_CYASSL_INCLUDE_DIR
 	endif
-	LIBS:=$(LIBS) -lcyassl -lm -lz 
+	LIBS:=$(LIBS) -lcyassl -lm
 	USE_MATRIXSSL=
 	USE_OPENSSL=
 endif

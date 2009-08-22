@@ -110,7 +110,15 @@ int main(int argc, char** argv)
 		while(node_list->length > 0)
 		{
 			uint64_t *next_bw = (uint64_t*)shift_list(node_list);
-			fwrite(next_bw, 8, 1, output);
+			if(bw_bits == 32)
+			{
+				uint32_t small_bw = (uint32_t) (*next_bw);
+				fwrite(&small_bw, 4, 1, output);
+			}
+			else
+			{
+				fwrite(next_bw, 8, 1, output);
+			}
 			free(next_bw);
 		}
 		fclose(output);

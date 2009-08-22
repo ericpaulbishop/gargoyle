@@ -15,13 +15,24 @@ bw_restore()
 	bw_id="$1"
 	backup_to_tmp="$2"
 
+	id_set=1
 	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
 		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
 	elif [ -e "/tmp/data/bwmon/$bw_id.bw" ] ; then
 		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	elif [ -e "/usr/data/bwmon/$bw_id" ] ; then
+		bw_convert "/usr/data/bwmon/$bw_id" "/usr/data/bwmon/$bw_id.bw"
+		rm "/usr/data/bwmon/$bw_id"
+		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	elif [ -e "/tmp/data/bwmon/$bw_id" ] ; then
+		bw_convert "/tmp/data/bwmon/$bw_id" "/usr/data/bwmon/$bw_id.bw"
+		rm "/tmp/data/bwmon/$bw_id"
+		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	else
+		id_set=0
 	fi
 
-	if [ -e "$tmp_cron" ] ; then
+	if [ -e "$tmp_cron" ] && [ "$id_set" != "0" ] ; then
 		if [ "$backup_to_tmp" = "1" ] ; then
 			echo "0 0,4,8,12,16,20 * * * bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" " >> "$tmp_cron"
 		else

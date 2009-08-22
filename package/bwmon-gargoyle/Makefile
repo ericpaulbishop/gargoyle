@@ -30,17 +30,27 @@ define Package/bwmon-gargoyle/description
 endef
 
 define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
+
 
 define Build/Configure
 endef
 
 define Build/Compile
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		$(TARGET_CONFIGURE_OPTS) \
+		STAGING_DIR="$(STAGING_DIR)" \
+		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" 
 endef
 
 define Package/bwmon-gargoyle/install
 	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) ./files/bwmond.init $(1)/etc/init.d/bwmon_gargoyle
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_convert $(1)/usr/bin/bw_convert
 endef
 
 $(eval $(call BuildPackage,bwmon-gargoyle))
