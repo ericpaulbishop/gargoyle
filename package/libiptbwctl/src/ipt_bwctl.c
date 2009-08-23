@@ -1016,22 +1016,24 @@ ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, time_t* 
        		data = (ip_bw*)malloc( (*num_ips) * sizeof(ip_bw) );
 		*num_ips = 0;
 		unsigned long data_index = 0;
-		while(data_index < num_data_parts)
+		unsigned long data_part_index = 0;
+		while(data_part_index < num_data_parts)
 		{
 			ip_bw next;
 			struct in_addr ipaddr;
-			int valid = inet_aton(data_parts[data_index], &ipaddr);
+			int valid = inet_aton(data_parts[data_part_index], &ipaddr);
 			if(!valid)
 			{
-				sscanf(data_parts[data_index], "%ld", last_backup);
+				sscanf(data_parts[data_part_index], "%ld", last_backup);
+				//printf("last_backup = %ld\n", *last_backup);
 			}
-			data_index++;
+			data_part_index++;
 
 			if(valid && data_index < num_data_parts)
 			{
 				next.ip = ipaddr.s_addr;
-				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
-				data_index++;
+				valid = sscanf(data_parts[data_part_index], "%lld", (long long int*)&(next.bw) );
+				data_part_index++;
 			}
 			else
 			{
@@ -1040,16 +1042,20 @@ ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, time_t* 
 
 			if(valid)
 			{
+				//printf("next.bw = %lld\n", next.bw);
+				//printf("next.ip = %d\n", next.ip);
 				data[data_index] = next;
 				data_index++;
 				*num_ips = *num_ips + 1;
 			}
 		}
+		
 		/* cleanup by freeing data_parts */
-		for(data_index = 0; data_index < num_data_parts; data_index++)
+		for(data_part_index = 0; data_part_index < num_data_parts; data_part_index++)
 		{
-			free(data_parts[data_index]);
+			free(data_parts[data_part_index]);
 		}
+		
 		free(data_parts);
 	}
 	return data;
