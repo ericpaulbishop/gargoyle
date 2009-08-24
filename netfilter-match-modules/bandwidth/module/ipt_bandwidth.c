@@ -1808,7 +1808,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			time_t next_end = get_next_reset_time(iam->info, next_start, next_start);
 			uint32_t node_index=0;
 			bw_history* history = NULL;
-			while(next_end < now)
+			while(next_start < now)
 			{
 				uint64_t next_bw = 0;
 				if(node_index < num_history_nodes)
@@ -1821,14 +1821,35 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 					initialize_map_entries_for_ip(iam, ip, next_bw);
 					history = get_long_map_element(iam->ip_history_map, (unsigned long)ip);
 				}
-				else
+				else if(next_end < now) /* if this is most recent node, don't do update since last node is current bandwidth */ 
 				{
-					update_history(history, next_start, next_end, iam->info);
+					int is_nonzero = update_history(history, next_start, next_end, iam->info);
 					(history->history_data)[ history->current_index ] = next_bw;
+					if(is_nonzero)
+					{
+						next_start = next_end;
+						next_end = get_next_reset_time(iam->info, next_start, next_start);
+					}
+					else
+					{
+						/* do history reset */
+						history->first_start = 0;
+						history->first_end = 0;
+						history->last_end = 0; 
+						history->num_nodes = 1;
+						history->non_zero_nodes = 1;
+						history->current_index = 0;
+						(history->history_data)[0] = 0;
+						
+						next_start = now;
+						next_end = get_next_reset_time(iam->info, now, next_start);
+					}
+				}
+				else /* if this is most recent node, we still need to update next_start so loop ends */
+				{
 					next_start = next_end;
 					next_end = get_next_reset_time(iam->info, next_start, next_start);
 				}
-				
 				node_index++;
 			}
 			while(node_index < num_history_nodes)
