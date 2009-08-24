@@ -624,10 +624,13 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 			printk("doing reset for case where no intervals are saved\n");
 		#endif
 
-		while(info->next_reset <= now)
+		if(info->next_reset <= now)
 		{
-			info->previous_reset = info->next_reset;
 			info->next_reset = get_next_reset_time(info, info->previous_reset, info->previous_reset);
+			if(info->next_reset <= now)
+			{
+				info->next_reset = get_next_reset_time(info, now, info->previous_reset);
+			}
 		}
 		apply_to_every_long_map_value(iam->ip_map, set_bandwidth_to_zero);
 	}
@@ -650,7 +653,15 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 		do_reset_ip_map = iam->ip_map;
 		clear_ip_map = iam->ip_map;
 		clear_ip_history_map = iam->ip_history_map;
-		while(info->next_reset <= now)
+		
+
+		/* 
+		 * at most update as many times as we have intervals to save -- prevents
+		 * rediculously long loop if interval length is 2 seconds and time was 
+		 * reset to 5 years in the future
+		 */
+		unsigned long num_updates = 0;
+		while(info->next_reset <= now && num_updates < info->num_intervals_to_save)
 		{
 			do_reset_delete_ips = initialize_long_map();
 			/* 
@@ -683,7 +694,7 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 				destroy_long_map(do_reset_delete_ips, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 				do_reset_delete_ips = NULL;
 			}
-
+			num_updates++;
 		}
 		do_reset_info = NULL;
 		do_reset_ip_map = NULL;
@@ -692,6 +703,33 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 
 		do_reset_interval_start = 0;
 		do_reset_interval_end = 0;
+
+		/* 
+		 * test if we've cycled past all existing data -- if so wipe all existing histories
+		 * and set previous reset time to now, and compute next reset time from
+		 * current time
+		 */
+		if(info->next_reset <= now)
+		{
+			while(iam->ip_map->num_elements > 0)
+			{
+				unsigned long key;
+				uint64_t* bw = remove_smallest_long_map_element(iam->ip_map, &key);
+				if(bw != NULL) { kfree(bw); }
+			}
+			while(iam->ip_history_map->num_elements > 0)
+			{
+				unsigned long key;
+				bw_history* h = remove_smallest_long_map_element(iam->ip_history_map, &key);
+				if(h != NULL)
+				{
+					kfree(h->history_data);
+					kfree(h);
+				}
+			}
+			info->previous_reset = now;
+			info->next_reset = get_next_reset_time(info, now, info->previous_reset);
+		}
 	}
 	info->current_bandwidth = 0;
 }
@@ -865,9 +903,35 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 		if(previous_reset > 0)
 		{
 			next_reset = previous_reset;
-			while(next_reset <= now)
+			if(next_reset <= now) /* check just to be sure, if this is not true VERY BAD THINGS will happen */
 			{
-				next_reset = next_reset + info->reset_interval;
+				unsigned long  whole_intervals = (now-next_reset)/info->reset_interval; /* integer gets rounded down */
+				next_reset = next_reset + (whole_intervals*info->reset_interval);
+				while(next_reset <= now)
+				{
+					next_reset = next_reset + info->reset_interval;
+				}
+			}
+		}
+		else if(info->reset_time > 0)
+		{
+			if(info->reset_time > now)
+			{
+				unsigned long whole_intervals = ((info->reset_time - now)/info->reset_interval) + 1; /* add one to make sure integer gets rounded UP (since we're subtracting) */
+				next_reset = info->reset_time - (whole_intervals*info->reset_interval);
+				while(next_reset <= now)
+				{
+					next_reset = next_reset + info->reset_interval;
+				}
+			}
+			else /* info->reset_time <= now */
+			{
+				unsigned long whole_intervals = (now-info->reset_time)/info->reset_interval; /* integer gets rounded down */
+				next_reset = next_reset + (whole_intervals*info->reset_interval);
+				while(next_reset <= now)
+				{
+					next_reset = next_reset + info->reset_interval;
+				}
 			}
 		}
 		else
@@ -1895,16 +1959,15 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				uint64_t *bw = remove_smallest_long_map_element(iam->ip_map, &key);
 				kfree(bw);
 			}
-
 		}
 	}
 
 	/* 
 	 * last_backup parameter is only relevant for case where we are not setting history
-	 * and when we aren't dealing with a constant interval length (since start time gets reset whenever using this, theres' no constant end)
+	 * and when we don't have a constant interval length or a specified reset_time (since in this case start time gets reset when rule is inserted and there is therefore no constant end)
 	 * If num_intervals_to_save =0 and is_constant_interval=0, check it.  If it's nonzero (0=ignore) and invalid, return.
 	 */
-	if(header.last_backup > 0 && iam->info->num_intervals_to_save == 0 && iam->info->reset_is_constant_interval == 0)
+	if(header.last_backup > 0 && iam->info->num_intervals_to_save == 0 && (iam->info->reset_is_constant_interval == 0 || iam->info->reset_time != 0) )
 	{
 		time_t adjusted_last_backup_time = header.last_backup - (60 * sys_tz.tz_minuteswest); 
 		time_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
