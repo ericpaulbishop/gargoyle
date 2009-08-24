@@ -589,6 +589,25 @@ static void set_bandwidth_to_zero(unsigned long key, void* value)
 	*((uint64_t*)value) = 0;
 }
 
+
+long_map* reset_histories_ip_map = NULL;
+static void reset_histories(unsigned long key, void* value)
+{
+	bw_history* bh = (bw_history*)value;
+	bh->first_start = 0;
+	bh->first_end = 0;
+	bh->last_end = 0; 
+	bh->num_nodes = 1;
+	bh->non_zero_nodes = 1;
+	bh->current_index = 0;
+	(bh->history_data)[0] = 0;
+	if(reset_histories_ip_map != NULL)
+	{
+		set_long_map_element(reset_histories_ip_map, key, bh->history_data);
+	}
+}
+
+
 static void handle_interval_reset(info_and_maps* iam, time_t now)
 {
 	#ifdef BANDWIDTH_DEBUG
@@ -711,22 +730,10 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 		 */
 		if(info->next_reset <= now)
 		{
-			while(iam->ip_map->num_elements > 0)
-			{
-				unsigned long key;
-				uint64_t* bw = remove_smallest_long_map_element(iam->ip_map, &key);
-				if(bw != NULL) { kfree(bw); }
-			}
-			while(iam->ip_history_map->num_elements > 0)
-			{
-				unsigned long key;
-				bw_history* h = remove_smallest_long_map_element(iam->ip_history_map, &key);
-				if(h != NULL)
-				{
-					kfree(h->history_data);
-					kfree(h);
-				}
-			}
+			reset_histories_ip_map = iam->ip_map;
+			apply_to_every_long_map_value(iam->ip_history_map, reset_histories);
+			reset_histories_ip_map = NULL;
+
 			info->previous_reset = now;
 			info->next_reset = get_next_reset_time(info, now, info->previous_reset);
 		}
