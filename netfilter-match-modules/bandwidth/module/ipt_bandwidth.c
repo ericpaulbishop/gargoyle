@@ -1845,10 +1845,9 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 						next_end = get_next_reset_time(iam->info, now, next_start);
 					}
 				}
-				else /* if this is most recent node, we still need to update next_start so loop ends */
+				else /* if this is most recent node, we still need to exit loop*/
 				{
-					next_start = next_end;
-					next_end = get_next_reset_time(iam->info, next_start, next_start);
+					break;
 				}
 				node_index++;
 			}
