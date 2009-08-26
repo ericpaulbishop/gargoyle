@@ -552,6 +552,7 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 		ref.firstChild.data = displayText;
 		command = command + "0\n";
 	}
+	command = command + "\nuci commit\n";
 
 	// we don't wait/notify user on completion so update seems instant
 	var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

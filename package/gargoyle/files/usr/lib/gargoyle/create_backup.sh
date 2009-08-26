@@ -5,6 +5,8 @@
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
 
+#make sure all settings have been written to file
+uci commit
 
 #force write of webmon & bwmon
 bwmon_enabled=$(ls /etc/rc.d/*bwmon* 2>/dev/null)

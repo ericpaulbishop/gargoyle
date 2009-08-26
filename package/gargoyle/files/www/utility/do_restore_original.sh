@@ -27,7 +27,6 @@
 	/etc/init.d/bwmon_gargoyle stop 2>/dev/null
 	/etc/init.d/webmon_gargoyle stop 2>/dev/null
 	
-	mv /etc/config/gargoyle /tmp/gargoyle.bak
 	rm -rf /etc/config/*
 	rm -rf /etc/rc.d/*
 	rm -rf /tmp/data/*
@@ -47,43 +46,6 @@
 	uci del httpd_gargoyle.server.default_realm_password_file 2>/dev/null
 	uci commit;
 
-
-	# set proper gargoyle visibility
-	cp /tmp/gargoyle.bak /etc/config/gargoyle
-	is_bridge=$(echo $(uci show wireless | grep wds) $(uci show wireless | grep client_bridge))
-	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
-	quotas_active=""
-	all_quotas=$(uci show firewall | grep "=quota$" | sed 's/=.*$//' | sed 's/^.*\.//')
-	for q in $all_quotas ; do
-		enabled=$(uci get firewall.$q.enabled)
-		active="1"
-		if [ "$enabled" = "0" ] ; then
-			active=""
-		fi
-		quotas_active="$quotas_active$active"
-	done
-	if [ -z "$is_bridge" ] ; then
-		uci set gargoyle.connection.dhcp=200 2>/dev/null
-		uci set gargoyle.firewall.portforwarding=100 2>/dev/null
-		uci set gargoyle.firewall.restriction=125 2>/dev/null
-		uci set gargoyle.firewall.quotas=175 2>/dev/null
-	else
-		uci del gargoyle.connection.dhcp 2>/dev/null
-		uci del gargoyle.firewall.portforwarding 2>/dev/null
-		uci del gargoyle.firewall.restriction 2>/dev/null
-		uci del gargoyle.firewall.quotas 2>/dev/null
-	fi
-	if [ -n "$qos_enabled" ] ; then
-		uci set gargoyle.status.qos=300 2>/dev/null
-	else
-		uci del gargoyle.status.qos 2>/dev/null
-	fi
-	if [ -n "$quotas_active" ] ; then
-		uci set gargoyle.status.quotause=225 2>/dev/null
-	else
-		uci del gargoyle.status.quotause 2>/dev/null
-	fi
-	uci commit
 
 
 

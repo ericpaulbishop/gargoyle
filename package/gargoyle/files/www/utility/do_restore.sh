@@ -21,7 +21,10 @@
 	mkdir -p /tmp/restore	
 	mv $FORM_restore_file /tmp/restore/restore.tar.gz
 	cd /tmp/restore
-	
+
+	#make sure all existing settings are saved to file
+	uci commit
+
 	# bwmon & webmon write everything when they shut down
 	# we therefore need to shut them down, otherwise
 	# all the new data gets over-written when we restart it
@@ -48,8 +51,38 @@
 	uci del httpd_gargoyle.server.default_realm_password_file 2>/dev/null
 	uci commit;
 
+	
 	# set proper gargoyle visibility
+	old_timeout=$(uci get "gargoyle.global.session_timeout")
+	old_rwp=$(uci get "gargoyle.global.require_web_password")
+	old_hd1=$(uci get "gargoyle.help.ddns_1")
+	old_hqu1=$(uci get "gargoyle.help.qos_up_1")
+	old_hqu2=$(uci get "gargoyle.help.qos_up_2")
+	old_hqd1=$(uci get "gargoyle.help.qos_down_1")
+	old_hqd2=$(uci get "gargoyle.help.qos_down_2")
 	cp /tmp/gargoyle.bak /etc/config/gargoyle
+	if [ -n "$old_timeout" ] ; then
+		uci set gargoyle.global.session_timeout=$old_timeout
+	fi
+	if [ -n "$old_rwp" ] ; then
+		uci set gargoyle.global.require_web_password=$old_rwp
+	fi
+	if [ -n "$old_hd1" ] ; then
+		uci set gargoyle.help.ddns_1=$old_hd1
+	fi
+	if [ -n "$old_hqu1" ] ; then
+		uci set gargoyle.help.qos_up_1=$old_hqu1
+	fi
+	if [ -n "$old_hqu2" ] ; then
+		uci set gargoyle.help.qos_up_2=$old_hqu2
+	fi
+	if [ -n "$old_hqd1" ] ; then
+		uci set gargoyle.help.qos_down_1=$old_hqd1
+	fi
+	if [ -n "$old_hqd2" ] ; then
+		uci set gargoyle.help.qos_down_2=$old_hqd2
+	fi
+	
 	is_bridge=$(echo $(uci show wireless | grep wds) $(uci show wireless | grep client_bridge))
 	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
 	quotas_active=""
