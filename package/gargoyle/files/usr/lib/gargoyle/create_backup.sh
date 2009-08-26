@@ -12,10 +12,10 @@ uci commit
 bwmon_enabled=$(ls /etc/rc.d/*bwmon* 2>/dev/null)
 webmon_enabled=$(ls /etc/rc.d/*webmon* 2>/dev/null)
 if [ -n "$bwmon_enabled" ] ; then
-	/etc/init.d/bwmon_gargoyle restart
+	/etc/init.d/bwmon_gargoyle stop
 fi
 if [ -n "$webmon_enabled" ] ; then
-	/etc/init.d/webmon_gargoyle restart
+	/etc/init.d/webmon_gargoyle stop
 fi
 
 #note, we DO NOT backup password, as we don't want to cause confusion/problems after restore
@@ -42,4 +42,12 @@ cd $garg_web_root
 if [ -e backup.tar.gz ] ; then rm backup.tar.gz ; fi
 ln -s /tmp/backup/backup.tar.gz
 chmod 777 backup.tar.gz
+
+if [ -n "$bwmon_enabled" ] ; then
+	/etc/init.d/bwmon_gargoyle start
+fi
+if [ -n "$webmon_enabled" ] ; then
+	/etc/init.d/webmon_gargoyle start
+fi
+
 

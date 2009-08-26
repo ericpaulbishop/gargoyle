@@ -28,7 +28,6 @@ int main(int argc, char **argv)
 {
 	char *id = NULL;
 	char* out_file_path = NULL;;
-	FILE* out_file = NULL;
 	char *address = NULL;
 
 	unsigned long num_ips;
@@ -76,13 +75,6 @@ int main(int argc, char **argv)
 			case 'f':
 			case 'F':
 				out_file_path = strdup(optarg);
-				out_file = fopen(out_file_path, "w");
-				if(out_file == NULL)
-				{
-					fprintf(stderr, "ERROR: cannot open specified file for writing\n");
-					exit(0);
-				}
-				fclose (out_file);
 				break;
 			case 'h':
 			case 'H':
@@ -140,7 +132,7 @@ int main(int argc, char **argv)
 	}
 	if(!query_succeeded)
 	{
-		fprintf(stderr, "ERROR: bandwidth module does not allow simultaneous queries.  Please try again.\n\n");
+		fprintf(stderr, "ERROR: Bandwidth query failed, make sure rule with specified id exists, and that you are performing only one query at a time.\n\n");
 		exit(0);
 	}
 

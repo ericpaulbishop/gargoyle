@@ -175,7 +175,7 @@ function updateTotalTable()
 	{
 		columnNames[0] = "Date";
 		var nextDate=new Date();
-		nextDate.setTime((dailyUploadData[1]*1000)-(3*60*60*1000)); //this is end time point so subtract a few  hours so it is evening on day we have bandwidth for
+		nextDate.setTime(dailyUploadData[1]*1000);
 		
 		for(dailyIndex=dailyUploadData[0].length-1; dailyIndex >=0; dailyIndex--)
 		{
@@ -192,7 +192,7 @@ function updateTotalTable()
 		columnNames[0] = "Month";
 		var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 		var nextDate=new Date();
-		nextDate.setTime((dailyUploadData[1]*1000)-(60*60*1000)); //this is end time point so subtract one hour so it is 11pm on day we have bandwidth for
+		nextDate.setTime(dailyUploadData[1]*1000);
 		var dailyIndex = dailyUploadData[0].length-1;
 		while( dailyIndex >= 0 )
 		{

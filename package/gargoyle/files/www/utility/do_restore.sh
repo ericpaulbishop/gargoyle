@@ -130,6 +130,14 @@
 
 	new_ip=$(uci get network.lan.ipaddr)
 
+	#overwrite old date, then restart ntpclient and then bwmon
+	#this makes sure that we don't restore crontab that tries
+	#to save bwmon save files when rules don't exist, wiping old bwmon data
+	date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
+	/etc/init.d/ntpclient restart 2>/dev/null
+	/etc/init.d/bwmon_gargoyle start 2>/dev/null
+
+
 	if [ -n "$error" ] ; then
 		echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
 	else

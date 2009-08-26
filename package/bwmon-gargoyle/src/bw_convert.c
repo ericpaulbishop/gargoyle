@@ -69,8 +69,8 @@ int main(int argc, char** argv)
 		fread(&recent_end, sizeof(time_t), 1, input);	
 		fread(&bw_bits, sizeof(unsigned char), 1, input);
 		
-		int64_t bandwidth_64;
-		int32_t bandwidth_32;
+		int64_t bandwidth_64 = 0;
+		int32_t bandwidth_32 = 0;
 		void* bw_pointer= bw_bits == 32 ? (void*)&bandwidth_32 : (void*)&bandwidth_64;
 		int read_size = bw_bits == 32 ? sizeof(int32_t) : sizeof(int64_t);
 		while( fread(bw_pointer, read_size, 1, input) > 0)
@@ -78,10 +78,12 @@ int main(int argc, char** argv)
 			uint64_t *next_bw = (uint64_t*)malloc(sizeof(uint64_t));
 			if(bw_bits == 64)
 			{
+				if(bandwidth_64 < 0) { bandwidth_64 = 0; }
 				*next_bw = *((uint64_t*)bw_pointer);
 			}
 			else
 			{
+				if(bandwidth_32 < 0) { bandwidth_32 = 0; }
 				*next_bw =  (uint64_t)  *((uint32_t*)bw_pointer);
 			}
 			push_list(node_list, next_bw);
