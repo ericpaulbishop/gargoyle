@@ -208,16 +208,17 @@ function updatePieCharts()
 	}
 }
 
-
 function parseMonitors(outputData)
 {
 	monitors = new Array();
 	dataLines = outputData.split("\n");
+	
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
 		if(dataLines[lineIndex].length > 0)
 		{
 			monitorName = dataLines[lineIndex];
+			monitorName = monitorName.replace(/[\t ]+.*$/, "");
 			lineIndex++; 
 			lineIndex++; //ignore first interval start
 			lineIndex++; //ignore first interval end

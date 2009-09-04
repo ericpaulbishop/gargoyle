@@ -14,9 +14,10 @@
 <!--
 <?
 	echo 'var monitorNames = new Array();'
-	if [ -e /etc/bwmond.conf ] ; then
-		cat /etc/bwmond.conf | awk ' { if($0 ~ /^monitor/){ print "monitorNames.push(\""$2"\");" ; }} '
-	fi
+	mnames=$(cat /etc/crontabs/root | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
+	for m in $mnames ; do 
+		echo "monitorNames.push(\"$m\");"
+	done
 ?>
 //-->
 </script>
