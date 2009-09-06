@@ -268,8 +268,6 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 					}
 					
 					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
-					
-					free(test_url);
 				}
 				if(!test && strstr(host, "www.") == host)
 				{
@@ -292,8 +290,6 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 						}
 					
 						/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
-					
-						free(test_url);
 					}
 				}
 				break;
