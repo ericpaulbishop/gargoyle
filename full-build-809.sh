@@ -118,15 +118,12 @@ for target in $targets ; do
 
 	
 	#copy gargoyle-specific packages to build directory
-	gargoyle_packages=$(ls package ; ls dependencies)
+	gargoyle_packages=$(ls package )
 	for gp in $gargoyle_packages ; do
-		if [ ! -d "$target-src/package/$gp" ] ; then
-			if [ -d "package/$gp" ] ; then
-				cp -r package/$gp $target-src/package
-			else
-				cp -r dependencies/$gp $target-src/package
-			fi
+		if [ -d "$target-src/package/$gp" ] ; then
+			rm -rf "$target-src/package/$gp" 
 		fi
+		cp -r "package/$gp" "$target-src/package"
 	done
 	
 	#if target is custom, checkout optional packages and copy all that don't 
