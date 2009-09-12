@@ -70,6 +70,28 @@ function resetData()
 		setChildText("wan_mask", currentWanMask);
 		setChildText("wan_mac", currentWanMac );
 		setChildText("wan_gateway", currentWanGateway );
+		
+		var wanDnsList = wanDns.split(/[\t ]+/);
+		if(wanDnsList.length > 0)
+		{
+			setChildText("wan_dns", wanDnsList.shift() );
+		}
+		while(wanDnsList.length > 0)
+		{
+			var brk = document.createElement("br");
+			var leftSpan = document.createElement("span");
+			var rightSpan = document.createElement("span");
+			leftSpan.className="leftcolumn";
+			leftSpan.appendChild( document.createTextNode("invisible") );
+			leftSpan.style.visibility="hidden";
+			rightSpan.className="rightcolumn";	
+			rightSpan.appendChild( document.createTextNode(wanDnsList.shift()) );
+			
+			document.getElementById("wan_dns_container").appendChild(brk);
+			document.getElementById("wan_dns_container").appendChild(leftSpan);
+			document.getElementById("wan_dns_container").appendChild(rightSpan);
+		}	
+		
 
 		setChildText("wireless_mode", wirelessMode);
 		if(wirelessModeId != "disabled")

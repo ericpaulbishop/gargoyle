@@ -32,10 +32,11 @@
 	free_mem=$(cat /proc/meminfo | grep "MemFree:" | awk ' { print $2 } ')
 	echo "var totalMemory=$total_mem;"
 	echo "var freeMemory=$free_mem;"
-
+	
 	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
 	echo "var loadAvg=\"$load_avg\";"
 
+	echo "var wanDns=\""$(uci -P /var/state get network.wan.dns 2>/dev/null)"\";"
 
 ?>
 //-->
@@ -124,6 +125,9 @@
 		</div>
 		<div>
 			<span class='leftcolumn'>WAN Gateway IP:</span><span id="wan_gateway" class='rightcolumn'></span>
+		</div>
+		<div id="wan_dns_container">
+			<span class='leftcolumn'>WAN DNS Server(s):</span><span id="wan_dns" class='rightcolumn'></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>
