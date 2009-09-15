@@ -85,13 +85,29 @@ function initializePlotsAndTable()
 		addOptionToSelectElement("plot2_type", "QoS Download Class", "qos-download");
 		addOptionToSelectElement("plot3_type", "QoS Download Class", "qos-download");
 	}
+	
+	
+	/* set defaults, then set loaded values.  That way if loaded
+	 * values are invalid we get the defaults */
+	var timeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "time_frame");
 	setSelectedValue("time_frame", "15m");
-	setSelectedValue("plot1_type", "total");
 	setSelectedValue("plot2_type", "none");
 	setSelectedValue("plot3_type", "none");
+	setSelectedValue("time_frame", timeFrame);
 
-
-
+	var plotIndex;
+	for(plotIndex=1; plotIndex <= 3; plotIndex++)
+	{
+		var plotTypeElement = "plot" + plotIndex + "_type";
+		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotTypeElement);
+		setSelectedValue(plotTypeElement, plotType);
+		if(plotType != "" && plotType != "none" && plotType != "total")
+		{
+			var plotIdElement = "plot" + plotIndex + "_id";
+			plotId = uciOriginal.get("gargoyle", "bandwidth_display", plotIdElement);
+			setSelectedValue(plotIdElement, plotId);
+		}
+	}
 
 
 
@@ -335,6 +351,34 @@ function resetPlots()
 		{
 			doUpdate();
 		}
+		
+		/* update plot variables via ajax, so they "stick" */
+		var command = "";
+		command = command + "uci set gargoyle.bandwidth_display=bandwidth_display\n";
+		command = command + "uci set gargoyle.bandwidth_display.time_frame=\"" + getSelectedValue("time_frame") + "\"\n";
+		var plotIndex;
+		for(plotIndex=1; plotIndex <= 3; plotIndex++)
+		{
+			var plotTypeElement = "plot" + plotIndex + "_type";
+			var plotType = getSelectedValue(plotTypeElement);
+			command = command + "uci set gargoyle.bandwidth_display." + plotTypeElement + "=\"" + plotType + "\"\n";
+			
+			var plotIdElement = "plot" + plotIndex + "_id";
+			if(plotType != "" && plotType != "none" && plotType != "total")
+			{
+				command = command + "uci set gargoyle.bandwidth_display." + plotIdElement + "=\"" + getSelectedValue(plotIdElement) + "\"\n";
+			}
+			else
+			{
+				command = command + "uci del gargoyle.bandwidth_display." + plotIdElement + "\n"
+			}
+		}
+		command = command + "uci commit\n";
+		
+		var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; }); 
+
 	}
 	else
 	{

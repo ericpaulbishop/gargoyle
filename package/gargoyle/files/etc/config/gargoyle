@@ -100,6 +100,12 @@ config 400 system
 
 config 500 logout
 
+config bandwidth_display bandwidth_display
+	option time_frame "15m"
+	option plot1_type "total"
+	option plot2_type "none"
+	option plot3_type "none"
+
 config help help
 	option ddns_1		1
 	option qos_up_1		1
