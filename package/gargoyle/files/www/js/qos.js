@@ -29,8 +29,8 @@ function saveChanges()
 		{
 			//delete qos distribution section
 			uci.remove("gargoyle", "status", "qos");
-			commands = commands + "\n/etc/init.d/qos_gargoyle stop \n /etc/init.d/qos_gargoyle disable \n ";
-		       	commands = commands + bwmonCleanCommand + " bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null) ;\n if [ -n \"$bwmon_enabled\" ] ;  then /etc/init.d/bwmon_gargoyle restart ; fi ; ";
+			commands = commands + "/etc/init.d/qos_gargoyle stop \n/etc/init.d/qos_gargoyle disable\n";
+		       	commands = commands + bwmonCleanCommand + " bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null) ;\nif [ -n \"$bwmon_enabled\" ] ;  then /etc/init.d/bwmon_gargoyle restart ; fi ; ";
 			qosEnabled = false;
 		}
 		else
@@ -38,7 +38,7 @@ function saveChanges()
 			commands = commands + restartFirewallCommand + bwmonCleanCommand;
 		}
 		uci.remove("qos_gargoyle", direction, "total_bandwidth");		
-		commands =  uci.getScriptCommands(uciOriginal);
+		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  commands;
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
 	{
