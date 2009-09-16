@@ -93,10 +93,8 @@ fi
 if [ ! -d "downloaded" ] ; then
 	mkdir "downloaded"
 fi
-if [ ! -e $openwrt_src_dir/dl ] ; then
-	ln -s $top_dir/downloaded $openwrt_src_dir/dl
-fi
-
+rm -rf $openwrt_src_dir/dl 
+ln -s $top_dir/downloaded $openwrt_src_dir/dl
 
 for target in $targets ; do
 
