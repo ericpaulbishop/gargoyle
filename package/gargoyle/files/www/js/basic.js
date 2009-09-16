@@ -528,11 +528,12 @@ function saveChanges()
 			       	
 				if(getSelectedValue("bridge_repeater") == "enabled")
 				{
+					var apSsid = document.getElementById("bridge_broadcast_ssid").value;
 					uci.set("wireless", "cfg3", "", "wifi-iface");
 					uci.set("wireless", "cfg3", "device", firstWirelessDevice);
 					uci.set("wireless", "cfg3", "network", "lan");
 					uci.set("wireless", "cfg3", "mode", "ap");
-					uci.set("wireless", "cfg3", "ssid", ssid);
+					uci.set("wireless", "cfg3", "ssid", apSsid);
 					uci.set("wireless", "cfg3", "encryption", encryption);
 					if(encryption != "none") { uci.set("wireless", "cfg3", "key", key); }
 					preCommands = preCommands + "\nuci set wireless.cfg3=wifi-iface\n";
@@ -802,8 +803,8 @@ function proofreadAll()
 	}
 	else
 	{
-		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_txpower', 'bridge_ssid', 'bridge_pass', 'bridge_wep'];
-		var functions = [vip, vnm, vip, vtp, vlr1,vlr8,vw];
+		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_txpower', 'bridge_ssid', 'bridge_pass', 'bridge_wep', 'bridge_broadcast_ssid'];
+		var functions = [vip, vnm, vip, vtp, vlr1,vlr8,vw,vlr1];
 		var returnCodes=[];
 		var visibilityIds=[];
 		var labelIds=[];
@@ -1034,6 +1035,25 @@ function setBridgeVisibility()
 		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
 		document.getElementById("bridge_fixed_encryption_container").style.display="none";
 		document.getElementById("bridge_fixed_channel_container").style.display="none";
+		
+		document.getElementById("bridge_broadcast_ssid_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" && getSelectedValue("bridge_repeater") =="enabled" ? "block" : "none";
+		if(document.getElementById("bridge_broadcast_ssid").value == "")
+		{
+			var ssid ="";
+			if(document.getElementById("bridge_ssid_container").style.display != "none")
+			{
+				ssid = document.getElementById("bridge_ssid").value;
+			}
+			else if(document.getElementById("bridge_custom_ssid_container").style.display != "none")
+			{
+				ssid = document.getElementById("bridge_custom_ssid").value;
+			}
+			else if(document.getElementById("bridge_list_ssid_container").style.display != "none")
+			{
+				ssid = scannedSsids[0][ parseInt(getSelectedValue("bridge_list_ssid")) ];
+			}
+			document.getElementById("bridge_broadcast_ssid").value = ssid;
+		}
 
 		setSsidVisibility("bridge_list_ssid");
 	}
@@ -1109,10 +1129,16 @@ function resetData()
 		setSelectedValue("bridge_mode", mode);
 		document.getElementById("bridge_ssid").value = uciOriginal.get("wireless", bridgeSection, "ssid");
 	
-		var repeaterEnabled = "disabled";
+		var repeaterSection = "";
 		var testSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
-		while(testSections.length > 0 && repeaterEnabled == "disabled") { repeaterEnabled = uciOriginal.get("wireless", testSections.shift(), "mode") == "ap" ? "enabled" : "disabled"; }
-		setSelectedValue("bridge_repeater", repeaterEnabled);
+		var testIndex=0;
+		for(testIndex=0; testIndex < testSections.length && mode != "wds" && repeaterSection == ""; testIndex++)
+		{
+			var s = testSections[testIndex];
+			repeaterSection = uciOriginal.get("wireless", s, "mode") == "ap" ? s : "";
+		}
+		setSelectedValue("bridge_repeater", (repeaterSection == "" ? "disabled" : "enabled") );
+		
 
 
 		var encryption = uciOriginal.get("wireless", bridgeSection, "encryption");
@@ -1120,7 +1146,7 @@ function resetData()
 		setSelectedValue("bridge_encryption", encryption);
 		document.getElementById("bridge_wep").value = encryption == "wep" ? uciOriginal.get("wireless", bridgeSection, "key") : "";
 		document.getElementById("bridge_pass").value = encryption != "wep" && encryption != "none" ? uciOriginal.get("wireless", bridgeSection, "key") : "";
-
+		document.getElementById("bridge_broadcast_ssid").value = repeaterSection == "" ? uciOriginal.get("wireless", bridgeSection, "ssid") : uciOriginal.get("wireless", repeaterSection, "ssid"); 
 
 
 		if(mode == "wds")
@@ -1147,7 +1173,6 @@ function resetData()
 					bridgeWdsTableData.push([ bssids[bIndex].toUpperCase() ]);
 				}
 			}
-
 		}
 	}
 	else

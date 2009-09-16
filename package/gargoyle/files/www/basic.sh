@@ -175,7 +175,10 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
 					<input style="float:left;"  type='button' class='default_button' id='bridge_scan_button' value='Scan' onclick='scanWifi("bridge_ssid")' />
 				</span>
 			</div>
-
+			<div id='bridge_broadcast_ssid_container'>
+				<label class='leftcolumn' for='bridge_broadcast_ssid' id='bridge_broadcast_ssid_label'>SSID to Broadcast:</label>
+				<input class="rightcolumn"  type='text' id='bridge_broadcast_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			</div>
 
 
 
