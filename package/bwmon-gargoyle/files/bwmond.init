@@ -4,6 +4,7 @@ START=55
 include /lib/network
 include /usr/lib/gargoyle_firewall_util
 
+backup_script="/tmp/do_bw_backup.sh"
 tmp_cron="/tmp/tmp.cron"
 download_table=filter
 download_chain=bw_ingress
@@ -31,9 +32,9 @@ bw_restore()
 
 	if [ -e "$tmp_cron" ] ; then
 		if [ "$backup_to_tmp" = "1" ] ; then
-			echo "0 0,4,8,12,16,20 * * * bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" " >> "$tmp_cron"
+			echo "bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" " >> "$backup_script"
 		else
-			echo "0 0,4,8,12,16,20 * * * bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" " >> "$tmp_cron"
+			echo "bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" " >> "$backup_script"
 		fi
 	fi
 }
@@ -175,6 +176,10 @@ start()
 
 	touch /etc/crontabs/root
 	cat /etc/crontabs/root | grep -v "bw_get" > "$tmp_cron"
+	echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
+	
+	echo "#!/bin/sh" > "$backup_script"
+	chmod 700 "$backup_script"
 	
 
 	for i in $ids ; do
@@ -194,11 +199,10 @@ stop()
 {
 	touch /etc/crontabs/root
 
-	cat /etc/crontabs/root | grep bw_get | sed 's/.*bw_get/bw_get/g' > /tmp/bw_backup.tmp.sh
-	sh /tmp/bw_backup.tmp.sh >/dev/null 2>&1
-	rm /tmp/bw_backup.tmp.sh
+	sh "$backup_script"
+	rm "$backup_script"
 
-	cat /etc/crontabs/root | grep -v "bw_get"> "$tmp_cron"
+	cat /etc/crontabs/root | grep -v "$backup_script"> "$tmp_cron"
 	update_cron
 	
 	delete_chain_from_table $download_table $download_chain
