@@ -1682,15 +1682,15 @@ int get_multiple_for_unit(char* unit)
 	{
 		return 60;
 	}
-	else if(safe_strcmp(unit, "hours"))
+	else if(safe_strcmp(unit, "hours") == 0)
 	{
 		return 60*60;
 	}
-	else if(safe_strcmp(unit, "days"))
+	else if(safe_strcmp(unit, "days") == 0)
 	{
 		return 24*60*60;
 	}
-	else if(safe_strcmp(unit, "weeks"))
+	else if(safe_strcmp(unit, "weeks") == 0)
 	{
 		return 7*24*60*60;
 	}
