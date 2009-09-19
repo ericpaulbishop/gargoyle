@@ -21,6 +21,8 @@ var dailyDownloadData = null;
 var updateUploadPlot = null;
 var updateDownloadPlot = null;
 
+var plotsInitializedToDefaults = false;
+
 function initializePlotsAndTable()
 {
 	// we are going to assume we know what graph types (i.e. time frames) are available for each
@@ -86,7 +88,7 @@ function initializePlotsAndTable()
 		addOptionToSelectElement("plot3_type", "QoS Download Class", "qos-download");
 	}
 	
-	
+
 	/* set defaults, then set loaded values.  That way if loaded
 	 * values are invalid we get the defaults */
 	var timeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "time_frame");
@@ -101,13 +103,8 @@ function initializePlotsAndTable()
 		var plotTypeElement = "plot" + plotIndex + "_type";
 		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotTypeElement);
 		setSelectedValue(plotTypeElement, plotType);
-		if(plotType != "" && plotType != "none" && plotType != "total")
-		{
-			var plotIdElement = "plot" + plotIndex + "_id";
-			plotId = uciOriginal.get("gargoyle", "bandwidth_display", plotIdElement);
-			setSelectedValue(plotIdElement, plotId);
-		}
 	}
+	plotsInitializedToDefaults = false;
 
 
 
@@ -344,7 +341,17 @@ function resetPlots()
 					downloadMonitors[plotNum-1] = "";
 					document.getElementById(idElementName).style.display="none";
 				}
+
+				if(!plotsInitializedToDefaults)
+				{
+					if(type != "" && type != "none" && type != "total")
+					{
+						var idValue = uciOriginal.get("gargoyle", "bandwidth_display", idElementName);
+						setSelectedValue(idElementName, idValue);
+					}
+				}
 			}
+			plotsInitializedToDefaults = true;
 		}	
 			
 		if(oldUploadMonitors != uploadMonitors.join("\n") || oldDownloadMonitors != downloadMonitors.join("\n") )
