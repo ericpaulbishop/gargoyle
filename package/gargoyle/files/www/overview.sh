@@ -36,7 +36,7 @@
 	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
 	echo "var loadAvg=\"$load_avg\";"
 
-	echo "var wanDns=\""$(uci -P /var/state get network.wan.dns 2>/dev/null)"\";"
+	echo "var wanDns=\""$(cat /tmp/resolv.conf.auto | grep nameserver | sed 's/nameserver //g')"\";"
 
 ?>
 //-->
