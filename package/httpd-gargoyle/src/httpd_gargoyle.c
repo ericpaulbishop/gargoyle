@@ -1694,9 +1694,13 @@ handle_request( int is_ssl, unsigned short conn_port )
 	}
 
 #ifdef HAVE_SSL
-    SSL_free( ssl );
-#endif /* HAVE_SSL */
+    if(is_ssl)
+    {
+    	SSL_free( ssl );
     }
+#endif /* HAVE_SSL */
+
+}
 
 
 static void
