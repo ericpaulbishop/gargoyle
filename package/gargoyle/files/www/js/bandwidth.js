@@ -348,6 +348,20 @@ function resetPlots()
 					{
 						var idValue = uciOriginal.get("gargoyle", "bandwidth_display", idElementName);
 						setSelectedValue(idElementName, idValue);
+						if(type == "qos-upload")
+						{
+							uploadMonitors[plotNum-1] = idValue + "-" + graphType;
+						}
+						if(type == "qos-download")
+						{
+							downloadMonitors[plotNum-1] = idValue + "-" + graphType;
+						}
+						if(type == "ip")
+						{
+							uploadMonitors[plotNum-1]   =  idValue + "-upload-" + graphType;
+							downloadMonitors[plotNum-1] =  idValue + "-download-" + graphType;
+						}
+
 					}
 				}
 			}
