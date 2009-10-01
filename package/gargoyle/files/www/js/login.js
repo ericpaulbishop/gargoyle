@@ -115,7 +115,7 @@ function setStatusAndQuotas()
 		document.getElementById("network_quota").style.display="block";
 	}
 
-	
+	document.getElementById("password").focus();	
 
 }
 
