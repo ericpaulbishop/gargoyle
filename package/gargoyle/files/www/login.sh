@@ -43,6 +43,18 @@ var passInvalid = false;
 	fi
 	echo "var connectedIp = \"$REMOTE_ADDR\";"
 	print_quotas
+
+	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
+	if [ "$dateformat" == "iso" ]; then
+		current_time=$(date "+%Y/%m/%d %H:%M %Z")
+	elif [ "$dateformat" == "australia" ]; then
+		current_time=$(date "+%d/%m/%y %H:%M %Z")
+	else
+		current_time=$(date "+%D %H:%M %Z")
+	fi
+	echo "var currentTime = \"$current_time\";"
+
+	
 ?>
 //-->
 </script>
@@ -58,6 +70,7 @@ var passInvalid = false;
 			</strong>
 		</p>
 	</span>
+
 	<div>
 		<label class="leftcolumn" for='password' id='password_label'>Enter Admin Password:</label>
 		<input class="rightcolumn" type='password' onchange="doLogin()"  onkeyup='proofreadLengthRange(this,1,999)' id='password' size='25' maxlength='35' />
@@ -74,6 +87,9 @@ var passInvalid = false;
 	<div class="nocolumn" id="combined_your_quota_container"><p id="combined_your_quota"></p></div>
 
 </fieldset>
+
+
+
 <fieldset id="network_quota" style="display:none">
 	<legend class="sectionheader">Entire Network Quota</legend>
 	<div class="nocolumn" id="up_all_quota_container"><p id="up_all_quota"></p></div>
@@ -82,6 +98,11 @@ var passInvalid = false;
 
 </fieldset>
 
+<fieldset id="current_time" style="display:block">
+	<legend class="sectionheader">Current Date & Time</legend>
+	<div class="nocolumn" id="current_time_date"></div>
+
+</fieldset>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

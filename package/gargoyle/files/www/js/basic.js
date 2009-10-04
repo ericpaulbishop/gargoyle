@@ -1089,7 +1089,28 @@ function resetData()
 		var releaseDate = new Date();
 		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
 		releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
-		var releaseStr = twod(releaseDate.getUTCMonth()+1) + "/" +  twod(releaseDate.getUTCDate()) + "/" + twod(releaseDate.getUTCFullYear()%100) + " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
+		
+		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
+		var releaseStr = "";
+		var y2 = twod(releaseDate.getUTCFullYear()%100)
+		var y4 = releaseDate.getUTCFullYear();
+		var m = twod(releaseDate.getUTCMonth()+1);
+		var d = twod(releaseDate.getUTCDate());
+		var h = " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
+		if(systemDateFormat == "iso")
+		{
+			releaseStr = y4 + "/" + m + "/" + d + h;
+		}
+		else if(systemDateFormat == "australia")
+		{
+			releaseStr = d + "/" + m + "/" + y2 + h;
+		}
+		else
+		{
+			releaseStr = m + "/" + d + "/" + y2 + h;
+		}
+
+		
 		setChildText("dhcp_expires", releaseStr);
 		setChildText("dhcp_ip", currentWanIp);
 	}

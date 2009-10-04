@@ -9,7 +9,6 @@
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
 
-
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -49,6 +48,17 @@ function saveChanges()
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
 		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
+
+		//update date format
+		var systemDateFormat = getSelectedValue("date_format"); 
+		uci.set("gargoyle", "global", "dateformat", getSelectedValue("date_format"));
+
+		//update command to output date
+		var formatStrings=[];
+		formatStrings["iso"] = "\"+%Y/%m/%d %H:%M %Z\"";
+		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
+		formatStrings["usa"] = "\"+%d/%m/%y %H:%M %Z\"";
+		var outputDateCommand = "date " + formatStrings[systemDateFormat];
 		
 		//copy old system section to new one with specific name
 		var systemCommands = [];
@@ -72,10 +82,11 @@ function saveChanges()
 			uci.removeSection("system", systemSections[0]);
 		}
 		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ\n";
-		var outputDateCommand = "date \"+%D %H:%M %Z\"";
+		
 
 
-		commands = commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+
+		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
 		//document.getElementById("output").value = commands;	
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -138,10 +149,11 @@ function resetData()
 
 	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 	var updateFrequency = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
+	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 	setSelectedValue("update_frequency", "43200"); //set default value
 	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
-
-
+	setSelectedValue("date_format", "usa"); //set default value for date
+	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
 
 
 	var ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
@@ -221,5 +233,4 @@ function updateServerList()
 		}
 	}	
 }
-
 

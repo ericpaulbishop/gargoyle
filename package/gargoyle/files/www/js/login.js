@@ -55,6 +55,8 @@ function doLogin()
 
 function setStatusAndQuotas()
 {
+	setChildText("current_time_date", currentTime);
+
 	if(sessionExpired)
 	{
 		setChildText("login_status", "Session Expired", "red");

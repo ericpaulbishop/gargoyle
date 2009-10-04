@@ -180,6 +180,7 @@ function updateTotalTable()
 		return;
 	}
 
+	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 	var selectedTotalTimeFrame=getSelectedValue("total_time_frame");
 	var displayUnits = getSelectedValue("total_table_units");
 	var totalTableData = new Array();
@@ -189,13 +190,26 @@ function updateTotalTable()
 		columnNames[0] = "Date";
 		var nextDate=new Date();
 		nextDate.setTime(dailyUploadData[1]*1000);
-		
 		for(dailyIndex=dailyUploadData[0].length-1; dailyIndex >=0; dailyIndex--)
 		{
 			dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
 			dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
 
-			totalTableData.push([ (nextDate.getMonth()+1)+ "/" +nextDate.getDate() + "/" + nextDate.getFullYear() , parseBytes(dailyUploadData[0][dailyIndex], displayUnits), parseBytes(dailyDownloadData[0][dailyIndex], displayUnits) ]);
+			var outputDate = "";
+			if(systemDateFormat == "iso")
+			{
+				outputDate = nextDate.getFullYear() + "/" + (nextDate.getMonth()+1) + "/" + nextDate.getDate();
+			}
+			else if(systemDateFormat == "australia")
+			{
+				outputDate = nextDate.getDate() + "/" + (nextDate.getMonth()+1) + "/" + nextDate.getFullYear();
+			}
+			else
+			{
+				outputDate = (nextDate.getMonth()+1) + "/" + nextDate.getDate() + "/" + nextDate.getFullYear();
+			}
+
+			totalTableData.push([ outputDate, parseBytes(dailyUploadData[0][dailyIndex], displayUnits), parseBytes(dailyDownloadData[0][dailyIndex], displayUnits) ]);
 			newTime = nextDate.getTime() - (24*60*60*1000);
 			nextDate.setTime(newTime);
 		}

@@ -7,7 +7,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js" -i network wireless qos_gargoyle system 
+	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js" -i network wireless qos_gargoyle system
 ?>
 
 <script>
@@ -25,8 +25,15 @@
 	gargoyle_version=$(cat data/gargoyle_version.txt)
 	echo "var gargoyleVersion=\"$gargoyle_version\""
 
-	current_time=$(date "+%D %H:%M %Z")
-	echo "var currentTime=\"$current_time\";"
+	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
+	if [ "$dateformat" == "iso" ]; then
+		current_time=$(date "+%Y/%m/%d %H:%M %Z")
+	elif [ "$dateformat" == "australia" ]; then
+		current_time=$(date "+%d/%m/%y %H:%M %Z")
+	else
+		current_time=$(date "+%D %H:%M %Z")
+	fi
+	echo "var currentTime = \"$current_time\";"
 
 	total_mem=$(cat /proc/meminfo | grep "MemTotal:" | awk ' { print $2 } ')
 	free_mem=$(cat /proc/meminfo | grep "MemFree:" | awk ' { print $2 } ')

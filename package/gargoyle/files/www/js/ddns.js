@@ -163,9 +163,14 @@ function resetData()
 			last_date.setTime(1000*updateTimes[section]);
 		}
 		
+		
+		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 		var seconds = last_date.getSeconds() < 10 ? "0" + last_date.getSeconds() : last_date.getSeconds();
 		var minutes = last_date.getMinutes() < 10 ? "0" + last_date.getMinutes() : last_date.getMinutes();
-		var lastUpdate = updateTimes[section] == null ? "Never" : (last_date.getMonth()*1+1*1) + "/" + last_date.getDate() + " " + last_date.getHours() + ":" + minutes + ":" + seconds;
+		var month = last_date.getMonth() + 1;
+		var day = last_date.getDate();
+		var month_day = systemDateFormat == "" || systemDateFormat == "usa" ? month + "/" + day : day + "/" + month;
+		var lastUpdate = updateTimes[section] == null ? "Never" : month_day + " " + last_date.getHours() + ":" + minutes + ":" + seconds;
 		
 
 		var enabledCheckbox = createEnabledCheckbox();
