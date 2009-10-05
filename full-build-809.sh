@@ -7,13 +7,13 @@ set_madwifi_from_13k()
 	rm -rf hostapd
 	rm -rf wpa_supplicant
 	if [ "$2" = "0" ] ; then
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi >/dev/null 2>&1
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd >/dev/null 2>&1
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant >/dev/null 2>&1
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi >/dev/null 2>&1
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd >/dev/null 2>&1
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant >/dev/null 2>&1
 	else
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd
-		svn checkout -r 13000 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd
+		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant
 	fi
 	find . -name ".svn" | xargs rm -rf
 	cd hostapd
@@ -64,7 +64,7 @@ verbosity=$3
 # set svn revision number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 8.09 branch
-rnum=16622
+rnum=17855
 
 
 #download openwrt source if we haven't already
