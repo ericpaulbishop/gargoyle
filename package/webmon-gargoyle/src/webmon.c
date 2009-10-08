@@ -108,7 +108,7 @@ int get_next_message(int queue, void* message_data, size_t message_size, long me
 void load_data(void);
 void save_data(void);
 
-char* strnstr(const char *s, const char *find, size_t slen);
+char* strnstr(char *s, const char *find, size_t slen);
 
 
 // Global variables
@@ -173,8 +173,8 @@ int main(int argc, char **argv)
 			case 'u':
 			default :
 				printf("USAGE: %s [OPTIONS]\n", argv[0]);
-				printf("\t-d run as daemon, indicates we want to start monitor daemon not dump monitor data");
-				printf("\t-f run daemon in foreground");
+				printf("\t-d run as daemon, indicates we want to start monitor daemon not dump monitor data\n");
+				printf("\t-f run daemon in foreground\n");
 				printf("\t-i [interface] the interface to monitor\n");
 				printf("\t-s [file] path of file to load from / save to\n");
 				printf("\t-o [file] only monitor ips listed in this file\n");
@@ -223,6 +223,7 @@ int main(int argc, char **argv)
 
 		//handle = pcap_open_live(interface, BUFSIZ, 1, 1000, errbuf);
 		handle = pcap_open_live(interface, BUFSIZ, 1, 250, errbuf);
+		//handle = pcap_open_live(interface, BUFSIZ, 0, 250, errbuf);
 		
 		if(handle == NULL)
 		{
@@ -265,6 +266,7 @@ int main(int argc, char **argv)
 			{
 				pid = -1;
 			}
+			free(pid_read.str);
 		}
 		int queue_exists = 0;
 		if(pid > 0)
@@ -310,6 +312,14 @@ int main(int argc, char **argv)
 			struct msqid_ds mq_data;
 			msgctl(mq, IPC_RMID, &mq_data);
 		}
+	}
+	if(interface != NULL)
+	{
+		free(interface);
+	}
+	if(save_path != NULL)
+	{
+		free(save_path);
 	}
 	
 	return 0;
@@ -421,8 +431,7 @@ void handle_output_request(void)
 	//read from queue 
 	message_t next_message;
 	next_message.msg_type = MSG_TYPE;
-	next_message.msg_line[0] = '\0';
-
+	memset(next_message.msg_line, '\0', MAX_MSG_LINE); 
 	if(mq >= 0)
 	{
 		queue_node* next_node = recent_websites->first;
@@ -468,22 +477,19 @@ void load_data(void)
 						add_next_entry(split[2], split[1], split[3]);
 						recent_websites->first->time = time;
 					}
-					else
-					{
-						time = 0;
-					}
 				}
-				if(time == 0)
+				for(length=0; split[length] != NULL ; length++)
 				{
-					for(length=0; split[length] != NULL ; length++)
-					{
-						free(split[length]);
-					}
+					free(split[length]);
 				}
 				free(split);
 			
 			
 				next = dynamic_read(in, newline_terminator, 2, &read_length);
+			}
+			if(next.str != NULL)
+			{
+				free(next.str);
 			}
 			fclose(in);
 		}
@@ -735,7 +741,7 @@ void add_next_entry(char* dst_ip, char* src_ip, char* domain)
 	printf("\n\n");
 	*/
 }
-char* strnstr(const char *s, const char *find, size_t slen)
+char* strnstr(char *s, const char *find, size_t slen)
 {
 	char c, sc;
 	size_t len;
