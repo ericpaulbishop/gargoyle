@@ -15,7 +15,7 @@
 # However, if vlan is active it can be problematic to take
 # the switch interface down, so just take down the sub-interfaces
 
-switch_if=$(uci show network | grep switch | sed "s/network\.//g" | sed "s/\=.*//g")
+switch_ifs=$(uci show network | grep switch | sed "s/network\.//g" | sed "s/\=.*//g")
 vlan_active=$(cat /proc/net/dev | grep "$switch_if\.")
 ifs=$(cat /proc/net/dev 2>/dev/null | awk 'BEGIN {FS = ":"}; $0 ~ /:/ { print $1 }')
 
@@ -23,7 +23,6 @@ webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle 2>/dev/null)
 dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
-
 
 #stop firewall,dnsmasq,qos,bwmon,webmon
 if [ -n "$webmon_enabled" ] ; then
@@ -68,8 +67,14 @@ fi
 
 /etc/init.d/network stop >/dev/null 2>&1 
 
+
 for i in $ifs ; do
-	is_switch=$(echo "$i" | egrep "$switch_if[^\.]*$")
+	is_switch=""
+	for s in $switch_ifs ; do
+		if [ "$s" = "$i" ] ; then
+			is_switch="1"
+		fi
+	done
 	if [ -z "$is_switch" ] || [ -z "$vlan_active" ] ; then
 		ifconfig $i down 2>/dev/null
 	fi
