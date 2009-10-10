@@ -477,10 +477,19 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		//if final mark matches perfectly with mask of 0xFF000000, jump to  (REJECT/ACCEPT) target
 		char final_match_str[12];
 		sprintf(final_match_str, "0x%lX", final_match);
-		char* final_proto = strstr(target_options, "tcp-reset") == NULL ? "" : " -p tcp ";
 		
-		push_list(all_rules, dynamic_strcat(7, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j ", target, target_options ));
+		//if we're rejecting, no target options are specified, and no proto is specified add two rules: one for tcp with tcp-reject, and one for everything else
+		if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 && safe_strcmp(proto, "both"))
+		{
+			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT --reject-with tcp-reset"));
+			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT"));
 
+		}
+		else
+		{
+			char* final_proto = strstr(target_options, "tcp-reset") == NULL ? "" : " -p tcp ";
+			push_list(all_rules, dynamic_strcat(7, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j ", target, target_options ));
+		}
 		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
 	}
@@ -490,11 +499,22 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		{	
 			if( dport_def == NULL && sport_def == NULL )
 			{
+				if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 )
+				{
+					push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT --reject-with tcp-reset"));
+				}
 				push_list(all_rules, dynamic_strcat(5, rule_prefix, single_check, " -j ",target, target_options ));
 			}
 			else
 			{
-				push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p tcp ", single_check, " -j ", target, target_options ));
+				if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 )
+				{
+					push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT --reject-with tcp-reset" ));
+				}
+				else
+				{
+					push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p tcp ", single_check, " -j ", target, target_options ));
+				}
 				push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p udp ", single_check, " -j ", target, target_options ));
 			}
 		}
