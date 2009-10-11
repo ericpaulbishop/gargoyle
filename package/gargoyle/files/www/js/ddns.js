@@ -157,21 +157,23 @@ function resetData()
 		domain = domain == "" ? uciOriginal.get("ddns_gargoyle", section, "service_provider") : domain;
 		domain = domain.length > 20 ? domain.substr(0,17) + "..." : domain;
 
-		var last_date = new Date();
+		var lastDate = new Date();
 		if(updateTimes[section] != null)
 		{
-			last_date.setTime(1000*updateTimes[section]);
+			lastDate.setTime(1000*updateTimes[section]);
 		}
 		
 		
 		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
-		var seconds = last_date.getSeconds() < 10 ? "0" + last_date.getSeconds() : last_date.getSeconds();
-		var minutes = last_date.getMinutes() < 10 ? "0" + last_date.getMinutes() : last_date.getMinutes();
-		var month = last_date.getMonth() + 1;
-		var day = last_date.getDate();
-		var month_day = systemDateFormat == "" || systemDateFormat == "usa" ? month + "/" + day : day + "/" + month;
-		var lastUpdate = updateTimes[section] == null ? "Never" : month_day + " " + last_date.getHours() + ":" + minutes + ":" + seconds;
-		
+		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+
+		var m = twod(lastDate.getMonth()+1);
+		var d = twod(lastDate.getDate());
+		var h = " " + lastDate.getHours() + ":" +  twod(lastDate.getMinutes())  + ":" + twod(lastDate.getSeconds());
+		var lastUpdate = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
+		lastUpdate =  updateTimes[section] == null ? "Never" : lastUpdate;
+
+
 
 		var enabledCheckbox = createEnabledCheckbox();
 		enabledCheckbox.checked = uciOriginal.get("ddns_gargoyle", section, "enabled") == "1" ? true : false;

@@ -195,18 +195,25 @@ function updateTotalTable()
 			dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
 			dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
 
+			var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+			var y2 = twod(nextDate.getFullYear()%100)
+			var y4 = nextDate.getFullYear();
+			var m = twod(nextDate.getMonth()+1);
+			var d = twod(nextDate.getDate());
+
+
 			var outputDate = "";
 			if(systemDateFormat == "iso")
 			{
-				outputDate = nextDate.getFullYear() + "/" + (nextDate.getMonth()+1) + "/" + nextDate.getDate();
+				outputDate = y4 + "/" + m + "/" + d;
 			}
 			else if(systemDateFormat == "australia")
 			{
-				outputDate = nextDate.getDate() + "/" + (nextDate.getMonth()+1) + "/" + nextDate.getFullYear();
+				outputDate = d + "/" + m + "/" + y2;
 			}
 			else
 			{
-				outputDate = (nextDate.getMonth()+1) + "/" + nextDate.getDate() + "/" + nextDate.getFullYear();
+				outputDate = m + "/" + d + "/" + y2;
 			}
 
 			totalTableData.push([ outputDate, parseBytes(dailyUploadData[0][dailyIndex], displayUnits), parseBytes(dailyDownloadData[0][dailyIndex], displayUnits) ]);

@@ -302,9 +302,16 @@ function updateMonitorTable()
 						loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
 						var lastVisitDate = new Date();
 						lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
-						var seconds = lastVisitDate.getSeconds() < 10 ? "0" + lastVisitDate.getSeconds() : lastVisitDate.getSeconds();
-						var minutes = lastVisitDate.getMinutes() < 10 ? "0" + lastVisitDate.getMinutes() : lastVisitDate.getMinutes();
-						var lastVisit = (1*1 + parseInt(lastVisitDate.getMonth())) + "/" + lastVisitDate.getDate() + " " + lastVisitDate.getHours() + ":" + minutes + ":" + seconds;
+					
+						var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
+						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+						var m = twod(lastVisitDate.getMonth()+1);
+						var d = twod(lastVisitDate.getDate());
+						var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
+						var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
+
+
+						
 						var ip = splitLine[1];	
 						var domain = splitLine[3];
 
