@@ -38,6 +38,24 @@ backup_quotas >/dev/null 2>&1
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
 
+#ugly, ugly hack... marvell switch in fon+ and fon2
+#won't come up properly if switch (which is necessary in dir300)
+#is present.  This hack should fix this.
+marv_switch=$(ls -d /sys/bus/mdio_bus/drivers/Marvell*/0:*)
+if [ -n "$marv_switch" ] ; then
+	rm -rf /lib/network/switch.sh
+	netinit_adj=$(cat /etc/init.d/network | grep "eth0")
+	if [ -z "$netinit_adj" ] ; then
+		cat /etc/init.d/network | grep -v eth0 | sed "s/\/sbin\/wifi up/\/sbin\/wifi up\n\tifconfig eth0 up/g" > /tmp/tmp.net.init
+		mv /tmp/tmp.net.init /etc/init.d/network
+		chmod 755 /etc/init.d/network
+	fi
+fi
+
+
+
+
+
 
 #make sure any atheros wireless interfaces are destroyed correctly
 #this didn't work for a while, but now that I've finally
