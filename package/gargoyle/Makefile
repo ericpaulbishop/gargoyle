@@ -81,8 +81,6 @@ define Package/gargoyle/postinst
 		rm $${IPKG_INSTROOT}/etc/hotplug.d/net/20-client_bridge 
 	fi
 	
-	#install new network config script
-	mv $${IPKG_INSTROOT}/lib/network/config.sh.tmp $${IPKG_INSTROOT}/lib/network/config.sh  2>/dev/null
 	
 	#if this is atheros device, set uci options that set fonera power led to on
 	#this may cause further weirdness with other atheros devices, but quite frankly, I don't give a shit
