@@ -1,0 +1,12 @@
+--- kamikaze-8.09-old/package/madwifi/files/lib/wifi/madwifi.sh	2009-10-12 13:33:42.000000000 -0400
++++ kamikaze-8.09-src/package/madwifi/files/lib/wifi/madwifi.sh	2009-10-12 13:34:08.000000000 -0400
+@@ -41,8 +41,7 @@
+ 		::);;
+ 		*) echo "$device: Invalid mode combination in config"; return 1;;
+ 	esac
+-
+-	config_set "$device" vifs "${sta:+$sta }${ap:+$ap }${adhoc:+$adhoc }${ahdemo:+$ahdemo }${wds:+$wds }${monitor:+$monitor}"
++	config_set "$device" vifs "${ap:+$ap }${adhoc:+$adhoc }${ahdemo:+$ahdemo }${sta:+$sta }${wds:+$wds }${monitor:+$monitor}"
+ }
+ 
+ 

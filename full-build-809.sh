@@ -1,49 +1,9 @@
-
-set_madwifi_from_13k()
-{
-	src_dir=$1
-	cd "$src_dir/package"
-	rm -rf madwifi
-	rm -rf hostapd
-	rm -rf wpa_supplicant
-	if [ "$2" = "0" ] ; then
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi >/dev/null 2>&1
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd >/dev/null 2>&1
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant >/dev/null 2>&1
-	else
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/madwifi
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/hostapd
-		svn checkout -r 13708 svn://svn.openwrt.org/openwrt/branches/8.09/package/wpa_supplicant
-	fi
-	find . -name ".svn" | xargs rm -rf
-	cd hostapd
-	cat Makefile | cat Makefile | grep -v libnl.a > newmk.tmp.tmp
-	mv newmk.tmp.tmp Makefile
-	cd files
-	cat default.config | sed "s/CONFIG_DRIVER_NL80211=y/#CONFIG_DRIVER_NL80211=y/g" > def.con.tmp
-	mv def.con.tmp default.config
-	cat mini.config | sed "s/CONFIG_DRIVER_NL80211=y/#CONFIG_DRIVER_NL80211=y/g" > mini.con.tmp
-	mv mini.con.tmp mini.config
-	
-	#to src_dir/package/hostapd
-	cd ..
-	#to src_dir/package
-	cd ..
-	#to src_dir
-	cd ..
-	# to root build dir
-	cd ..
-
-	
-}
-
 #working directories
 top_dir=$(pwd)
 openwrt_src_dir="$top_dir/kamikaze-8.09-src"
 targets_dir="$top_dir/targets-8.09"
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_809.sh"
 
-use_madwifi_from_13k="true"
 
 
 #parse parameters
@@ -85,9 +45,6 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	cd .. 
 fi
 
-if [ -n "$use_madwifi_from_13k" ] ; then
-	set_madwifi_from_13k "$openwrt_src_dir" $V
-fi
 
 #create common download directory if it doesn't exist
 if [ ! -d "downloaded" ] ; then
