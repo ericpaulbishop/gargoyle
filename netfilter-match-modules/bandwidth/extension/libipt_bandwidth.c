@@ -267,6 +267,7 @@ static int parse(	int c,
 				info->num_intervals_to_save = num_read;
 				valid_arg=1;
 			}
+			c=0;
 			break;
 		case BANDWIDTH_RESET_TIME:
 			num_read = sscanf(argv[optind-1], "%ld", &read_time);
