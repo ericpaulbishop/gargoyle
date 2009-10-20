@@ -15,7 +15,7 @@ bw_restore()
 {
 	bw_id="$1"
 	backup_to_tmp="$2"
-
+	
 	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
 		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
 	elif [ -e "/tmp/data/bwmon/$bw_id.bw" ] ; then
@@ -105,6 +105,20 @@ start()
 	y_interval="day"
 	y_num_intervals=365
 
+	bdist1_interval="minute"
+	bdist1_num_intervals=30
+
+	bdist2_interval="hour"
+	bdist2_num_intervals=24
+
+	bdist3_interval="day"
+	bdist3_num_intervals=31
+
+	bdist4_interval="month"
+	bdist4_num_intervals=12
+
+
+
 	iptables -t $download_table -A $download_chain -m bandwidth --id "total-download-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
 	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total-upload-15m" --reset_interval $m15_interval --intervals_to_save $m15_num_intervals
 	
@@ -120,6 +134,30 @@ start()
 	
 	ids="total-download-15m total-upload-15m total-download-15h total-upload-15h total-download-15d total-upload-15d total-download-1y total-upload-1y"
 	
+	#bandwidth distribution monitoring (lower resolution, but retain data for ALL IPs)
+	lan_mask=$(uci -p /tmp/state get network.lan.netmask 2>/dev/null)
+	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
+	if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
+		lan_subnet="$lan_ip/$lan_mask"
+		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist1-download-$bdist1_interval-$bdist1_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
+		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist1-upload-$bdist1_interval-$bdist1_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
+		ids="$ids bdist1-download-$bdist1_interval-$bdist1_num_intervals bdist1-upload-$bdist1_interval-$bdist1_num_intervals" 
+
+		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist2-download-$bdist2_interval-$bdist2_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
+		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist2-upload-$bdist2_interval-$bdist2_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
+		ids="$ids bdist2-download-$bdist2_interval-$bdist2_num_intervals bdist2-upload-$bdist2_interval-$bdist2_num_intervals" 
+	
+		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist3-download-$bdist3_interval-$bdist3_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
+		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist3-upload-$bdist3_interval-$bdist3_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
+		ids="$ids bdist3-download-$bdist3_interval-$bdist3_num_intervals bdist3-upload-$bdist3_interval-$bdist3_num_intervals" 
+
+		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist4-download-$bdist4_interval-$bdist4_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals
+		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist4-upload-$bdist4_interval-$bdist4_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals
+		ids="$ids bdist4-download-$bdist4_interval-$bdist4_num_intervals bdist4-upload-$bdist4_interval-$bdist4_num_intervals" 
+	fi
+
+
+
 	if [ -e /etc/ethers ] ; then
 		ethers=$(cat /etc/ethers | awk ' {print $2} ')
 		
@@ -185,7 +223,9 @@ start()
 	for i in $ids ; do
 		is_15m=$(echo "$i" | grep "15m")
 		is_15h=$(echo "$i" | grep "15h")
-		if [ -n "$is_15m" ] || [ -n "$is_15h" ] ; then
+		is_bdist1=$(echo "$i" | grep "bdist1")
+		is_bdist2=$(echo "$i" | grep "bdist2")
+		if [ -n "$is_15m" ] || [ -n "$is_15h" ] || [ -n "$is_bdist1" ] || [ -n "$is_bdist2" ]  ; then
 			bw_restore "$i" 1
 		else
 			bw_restore "$i" 0
