@@ -19,26 +19,22 @@ var resetColors = false;
 
 function initializePlotsAndTable()
 {
-	updateInProgress = true;
-	setSelectedValue("time_frame", bdistId);
 	updateInProgress = false;
-	
-
-	var initFunction = function()
-	{	
-		pieChart = document.getElementById("pie_chart");
-		if(pieChart != null)
-		{
-			doUpdate(); 
-		}
-		else
-		{
-			setTimeout("initFunction()", 50); 
-		} 
-	}
 	initFunction();
-
 	setInterval( 'doUpdate()', 2000);
+}
+
+function initFunction()
+{	
+	pieChart = document.getElementById("pie_chart");
+	if(pieChart != null)
+	{
+		doUpdate(); 
+	}
+	else
+	{
+		setTimeout("initFunction()", 50); 
+	} 
 }
 
 
@@ -62,18 +58,18 @@ function doUpdate()
 		var downloadName = "";
 		var uploadName = "";
 		var mIndex=0;
-		for(mIndex=0; mIndex < monitors.length; mIndex++)
+		for(mIndex=0; mIndex < monitorNames.length; mIndex++)
 		{
-			var m = monitors[mIndex];
+			var m = monitorNames[mIndex];
 			if(m.indexOf(bdistId) >= 0)
 			{
 				if(m.indexOf("upload") >= 0)
 				{
-					uploadName = m;
+					uploadName = "" + m;
 				}
 				if(m.indexOf("download") >= 0)
 				{
-					downloadName = m;
+					downloadName = "" + m;
 				}
 			}
 		}
@@ -81,8 +77,8 @@ function doUpdate()
 		//query monitor data
 
 
-		var monitorNames = downloadName + " " + uploadName;
-		var param = getParameterDefinition("monitor", monitorNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var queryNames = downloadName + " " + uploadName;
+		var param = getParameterDefinition("monitor", queryNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			var monitors=null;
@@ -101,7 +97,7 @@ function doUpdate()
 					var allIds = [];
 					for(dirIndex=0; dirIndex < parsed.length; dirIndex++)
 					{
-						var dirData = parsed[dir];
+						var dirData = parsed[dirIndex];
 						for (id in dirData)
 						{
 							var idPoints = dirData[id][0];
@@ -117,9 +113,10 @@ function doUpdate()
 						idList.push(id);
 					}
 
+
 					var currentIntervalIndex = getSelectedValue("time_interval");
 					var currentIntervalText = getSelectedText("time_interval");
-					removeAllOptionsFromSelectElement("time_interval")
+					removeAllOptionsFromSelectElement(document.getElementById("time_interval"));
 
 
 					timeFrameIntervalData = [];
@@ -133,7 +130,7 @@ function doUpdate()
 						var combinedData = [];
 						for(dirIndex=0; dirIndex < parsed.length; dirIndex++)
 						{
-							var dirData = parsed[dir];
+							var dirData = parsed[dirIndex];
 							var nextDirData = [];
 							var idIndex;
 							for(idIndex=0; idIndex < idList.length; idIndex++)
@@ -149,7 +146,7 @@ function doUpdate()
 										value = value==null? 0 : value;
 									}
 								}
-								nextDirData.push(value);
+								nextDirData.push(value+1);
 								combinedData[idIndex] = combinedData[idIndex] == null ? value : combinedData[idIndex] + value;
 							}
 							nextIntervalData.push(nextDirData);
@@ -186,7 +183,7 @@ function doUpdate()
 							nextDate.setMonth(nextDate.getMonth()-1);
 						}
 						addOptionToSelectElement("time_interval", intervalName, ""+intervalIndex);
-						nextIntervalStart = nextDate.valueOf()*1000;
+						nextIntervalStart = nextDate.valueOf()/1000;
 					}
 					if(currentIntervalIndex == null || currentIntervalIndex == 0)
 					{

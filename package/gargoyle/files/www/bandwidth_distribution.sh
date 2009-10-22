@@ -13,7 +13,7 @@
 <script>
 <!--
 <?
-	echo 'var monitorNames = new Array();'
+	echo 'monitorNames = new Array();'
 	mnames=$(cat /tmp/do_bw_backup.sh | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
 	for m in $mnames ; do 
 		echo "monitorNames.push(\"$m\");"
@@ -46,8 +46,7 @@
 		</div>
 	</fieldset>
 	
-	<div class="plot_header">Upload Bandwidth Usage:</div>
-	<div><embed id="upload_plot" style="margin-left:10px; width:525px; height:525px;" src="multi_pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
+	<div><embed id="pie_chart" style="margin-left:10px; width:525px; height:525px;" src="multi_pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
 	
 	
 </form>
