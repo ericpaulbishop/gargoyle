@@ -15,7 +15,7 @@ var initialized = false;
 //at each index, are 3 more arrays (combined, down, up) each of which is an array of values for that interval
 var timeFrameIntervalData = [];
 var idList = [];
-
+var resetColors = false;
 
 function initializePlotsAndTable()
 {
@@ -52,9 +52,6 @@ function getEmbeddedSvgPlotFunction(embeddedId)
 	return null;
 }
 
-
-
-
 function doUpdate()
 {
 	if(!updateInProgress && pieChart != null)
@@ -82,6 +79,8 @@ function doUpdate()
 		}
 
 		//query monitor data
+
+
 		var monitorNames = downloadName + " " + uploadName;
 		var param = getParameterDefinition("monitor", monitorNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -118,7 +117,14 @@ function doUpdate()
 						idList.push(id);
 					}
 
+					var currentIntervalIndex = getSelectedValue("time_interval");
+					var currentIntervalText = getSelectedText("time_interval");
+					removeAllOptionsFromSelectElement("time_interval")
+
+
 					timeFrameIntervalData = [];
+					var intervalNames = [];
+					var nextIntervalStart = latestTime;
 					var intervalIndex;
 					for (intervalIndex=0; intervalIndex < numIntervals; intervalIndex++)
 					{
@@ -150,20 +156,81 @@ function doUpdate()
 						}
 						nextIntervalData.unshift(combinedData);
 						timeFrameIntervalData.push(nextIntervalData);
+
+						
+						
+						var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+						var nextDate = new Date();
+						nextDate.setTime(nextIntervalStart*1000);
+						var intervalName = "";
+						if(uploadName.match("minute"))
+						{
+							intervalName = "" + twod(nextDate.getHours()) + ":" + twod(nextDate.getMinutes());
+							nextDate.setMinutes( nextDate.getMinutes()-1);
+							
+						}
+						else if(uploadName.match("hour"))
+						{
+							intervalName = "" + twod(nextDate.getHours()) + ":" + twod(nextDate.getMinutes());
+							nextDate.setHours(nextDate.getHours()-1);
+						}
+						else if(uploadName.match("day"))
+						{
+							intervalName = (monthNames[nextDate.getMonth()]).substr(0,3) + " " + nextDate.getDate();
+							nextDate.setDate(nextDate.getDate()-1);
+						}
+						else if(uploadName.match("month"))
+						{
+							intervalName = (monthNames[nextDate.getMonth()]).substr(0,3) + " " + nextDate.getDate();
+							nextDate.setMonth(nextDate.getMonth()-1);
+						}
+						addOptionToSelectElement("time_interval", intervalName, ""+intervalIndex);
+						nextIntervalStart = nextDate.valueOf()*1000;
 					}
-					
-					
-
-
-
-
+					if(currentIntervalIndex == null || currentIntervalIndex == 0)
+					{
+						setSelectedValue("time_interval", "0");
+					}	
+					else
+					{
+						setSelectedText("time_interval", currentIntervalText);
+					}
 				}
 				updateInProgress = false;
+				resetDisplayInterval();
 			}
 		}
 		runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
 	}
 }
+
+function resetTimeFrame()
+{
+	resetColors = true;
+	doUpdate();
+}
+
+
+
+function resetDisplayInterval()
+{
+	if(pieChart != null && (!updateInProgress) && timeFrameIntervalData.length > 0 )
+	{
+		var plotFunction = getEmbeddedSvgPlotFunction("pie_chart");
+		var intervalIndex = getSelectedValue("time_interval");
+		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
+		
+		var data = timeFrameIntervalData[intervalIndex];
+		plotFunction(idList, ["Combined", "Download", "Upload" ], idList, data, 0, 9, resetColors);
+		resetColors = false;
+	}
+}
+
+
+
+
+
 
 // data for current time frame
 // at each index, are 3 more arrays (combined, down, up) each of which is an array of values for that interval

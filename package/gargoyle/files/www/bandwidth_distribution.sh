@@ -32,7 +32,7 @@
 
 		<div>
 			<label for='time_frame' id='time_frame_label'>Distribution Time Frame:</label>
-			<select id="time_frame" onchange="resetPlots()">
+			<select id="time_frame" onchange="resetTimeFrame()">
 				<option value="bdist1">Minutes</option>
 				<option value="bdist2">Hours</option>
 				<option value="bdist3">Days</option>
@@ -42,7 +42,7 @@
 
 		<div>
 			<label for='time_interval' id='time_interval_label'>Distribution Interval:</label>
-			<select id="time_interval" onchange="resetPlots()"></select>
+			<select id="time_interval" onchange="resetDisplayInterval()"></select>
 		</div>
 	</fieldset>
 	

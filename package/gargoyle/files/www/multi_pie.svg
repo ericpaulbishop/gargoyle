@@ -146,11 +146,20 @@
 				orderedLabels.push( individualLabels[individualLabels.length-1] );
 			}
 			
+			var totalHeight = (bottom-top)+1;
+			var radius = Math.ceil(((right-left)+1)/4); //diameter should never be bigger than 1/2 width
+			if(numPies > 1)
+			{
+				vertRadius = Math.ceil( (((bottom-top)+1)/(2*numPies))*.85   );
+				radius = radius < vertRadius ? radius : vertRadius;
+			}
+			var buffer =  Math.floor((totalHeight-(radius*2*numPies))/(2*numPies));
+			var titleHeight = Math.ceil(buffer*.80);
+			var titleOffset = Math.ceil(buffer*.30);	
 
 			//first construct labels;
-			var totalHeight = (bottom-top)+1;
 			var labelX = .005*totalHeight;
-			var nextLabelY=25;
+			var nextLabelY=buffer-titleOffset;
 			var labelYIncrement=Math.floor(.07*totalHeight);
 			var labelBoxWidth=Math.floor(.03*totalHeight);
 			var regularStrokeWidth=Math.ceil(.0015*totalHeight);
@@ -207,15 +216,7 @@
 				nextLabelY = nextLabelY + labelYIncrement;
 			}
 
-			var radius = Math.ceil(((right-left)+1)/4); //diameter should never be bigger than 1/2 width
-			if(numPies > 1)
-			{
-				vertRadius = Math.ceil( (((bottom-top)+1)/(2*numPies))*.85   );
-				radius = radius < vertRadius ? radius : vertRadius;
-			}
-			var buffer =  Math.floor((totalHeight-(radius*2*numPies))/(2*numPies));
-			var titleHeight = Math.ceil(buffer*.80);
-			var titleOffset = Math.ceil(buffer*.30);
+
 
 			var centerPoints = [];
 			var pieChartPaths = [];
@@ -357,7 +358,7 @@
 			for(index=0; index < 3; index++)
 			{
 				var c = unselectedRgb[index];
-				c = Math.ceil(c*.75)
+				c = Math.ceil(c*.45)
 				selectedRgb[index] = c;
 			}
 			return selectedRgb;
