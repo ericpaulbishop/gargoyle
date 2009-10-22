@@ -21,6 +21,7 @@ config display display
 	option status			'Status'
 	option status_overview		'Overview'
 	option status_bandwidth		'Bandwidth Usage'
+	option status_bdist		'B/W Distribution'
 	option status_webmon		'Web Usage'
 	option status_quotause		'Quota Usage'
 	option status_qos		'QoS Distribution'
@@ -50,6 +51,7 @@ config scripts scripts
 	option firewall_qosdownload	'qos_download.sh'
 	option status_overview		'overview.sh'
 	option status_bandwidth		'bandwidth.sh'
+	option status_bdist		'bandwidth_distribution.sh'
 	option status_quotause		'quota_usage.sh'
 	option status_webmon		'webmon.sh'
 	option status_qos		'qos_distribution.sh'
@@ -79,6 +81,7 @@ config 300 firewall
 config 100 status
 	option overview		'100'
 	option bandwidth	'200'
+	option bdist		'220'
 	option webmon		'250'
 	option hosts		'400'
 	option connections	'500'

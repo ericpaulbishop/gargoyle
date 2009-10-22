@@ -243,7 +243,16 @@
 				var previousY = centerY + (-1*radius*Math.sin(radiansPlotted));
 				var data = orderedValues[pieIndex];
 				var dataSum = 0;
-				for(dataIndex=0; dataIndex < data.length; dataIndex++) { dataSum = data[dataIndex] + dataSum; }
+				for(dataIndex=0; dataIndex < data.length; dataIndex++) { dataSum = parseFloat(data[dataIndex]) + dataSum; }
+				if(dataSum == 0)
+				{
+					for(dataIndex=0; dataIndex < data.length; dataIndex++) { data[dataIndex] = 1; dataSum++; }
+				}
+				else
+				{
+					var firstData = data[0];
+				}
+				
 				for(dataIndex=0; dataIndex < data.length; dataIndex++)
 				{
 					var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);

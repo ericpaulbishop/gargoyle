@@ -146,7 +146,7 @@ function doUpdate()
 										value = value==null? 0 : value;
 									}
 								}
-								nextDirData.push(value+1);
+								nextDirData.push(value);
 								combinedData[idIndex] = combinedData[idIndex] == null ? value : combinedData[idIndex] + value;
 							}
 							nextIntervalData.push(nextDirData);
@@ -174,12 +174,12 @@ function doUpdate()
 						}
 						else if(uploadName.match("day"))
 						{
-							intervalName = (monthNames[nextDate.getMonth()]).substr(0,3) + " " + nextDate.getDate();
+							intervalName = monthNames[nextDate.getMonth()] + " " + nextDate.getDate();
 							nextDate.setDate(nextDate.getDate()-1);
 						}
 						else if(uploadName.match("month"))
 						{
-							intervalName = (monthNames[nextDate.getMonth()]).substr(0,3) + " " + nextDate.getDate();
+							intervalName = monthNames[nextDate.getMonth()] + " " + nextDate.getFullYear();
 							nextDate.setMonth(nextDate.getMonth()-1);
 						}
 						addOptionToSelectElement("time_interval", intervalName, ""+intervalIndex);
