@@ -142,7 +142,7 @@ function doUpdate()
 									var idPoints = dirData[id][0];
 									if(idPoints != null)
 									{
-										value = idPoints[idPoints.length-intervalIndex];
+										value = idPoints[idPoints.length-1-intervalIndex];
 										value = value==null? 0 : value;
 									}
 								}
@@ -159,7 +159,7 @@ function doUpdate()
 						var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
 						var nextDate = new Date();
-						nextDate.setTime(nextIntervalStart*1000);
+						nextDate.setTime((parseInt(nextIntervalStart)+1)*1000);
 						var intervalName = "";
 						if(uploadName.match("minute"))
 						{
