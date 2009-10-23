@@ -18,6 +18,10 @@
 	for m in $mnames ; do 
 		echo "monitorNames.push(\"$m\");"
 	done
+
+	tz_hundred_hours=$(date "+%z" | sed 's/^+0//' | sed 's/^-0/-/g')
+	tz_minutes=$((tz_hundred_hours*60/100))
+	echo "var tzMinutes = $tz_minutes;";
 ?>
 //-->
 </script>
@@ -65,5 +69,5 @@
 
 
 <?
-	gargoyle_header_footer -f -s "status" -p "bandwidth"  
+	gargoyle_header_footer -f -s "status" -p "bdist"  
 ?>

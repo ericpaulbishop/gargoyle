@@ -194,7 +194,7 @@
 				titleText.setAttribute("y", centerY-radius-titleOffset );
 				titleText.setAttribute("font-size", titleHeight + "px");
 				titleText.setAttribute("font-family", "serif");
-				titleText.setAttribute("font-weight", "bolder");
+				titleText.setAttribute("font-weight", "bold");
 				titleText.appendChild( svgDoc.createTextNode( pieNames[pieIndex] ));
 				titleText.setAttribute("id", "pie_title_" + pieIndex);
 				pieChartPaths.push(titleText);
@@ -283,7 +283,7 @@
 				{
 					baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";
 				}
-				var label = adjustLabelFunction(orderedLabels[labelIndex], idValues[labelIndex], pieTotals);
+				var labelStr = adjustLabelFunction(orderedLabels[labelIndex], idValues[labelIndex], pieTotals);
 				
 				var unselectedColor = unselectedColors[unselectedColors.length-1];
 				var selectedColor = selectedColors[selectedColors.length-1];
@@ -310,14 +310,15 @@
 				labelText.setAttribute("y", nextLabelY+(labelBoxWidth*.85) );
 				labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.70) + "px");
 				labelText.setAttribute("font-family", "serif");
-				labelText.appendChild( svgDoc.createTextNode( label ));
+				labelText.appendChild( svgDoc.createTextNode( labelStr ));
 				labelText.setAttribute("id", "label_" + labelIndex);
+				labelText.setAttribute("font-weight", "normal");
 
 
 				if(selectedId == labelIndex)
 				{
 					labelRect.setAttribute("stroke-width", 2*regularStrokeWidth);
-					labelText.setAttribute("font-weight", "bolder");
+					labelText.setAttribute("font-weight", "bold");
 					labelRect.setAttribute("fill", selectedColor);
 				}
 
@@ -364,11 +365,18 @@
 			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", selectedStroke);
 			svgDoc.getElementById("color_" + id).setAttribute("fill", selectedColors[id]);
 			var lab  = svgDoc.getElementById("label_" + id);
+
+			var oldText = lab.firstChild.data;
 			lab.setAttribute("font-weight", "bold");
-			lab.setAttribute("stroke", "black");
+			lab.removeChild (lab.firstChild);
+			lab.appendChild ( svgDoc.createTextNode(oldText) );
+
+
+			
+			var pieContainer = svgDoc.getElementById("pie_container");
+
 			
 			var pieIndex;
-			var pieContainer = svgDoc.getElementById("pie_container");
 			for(pieIndex=0; pieIndex< numPies; pieIndex++)
 			{
 				var slice = svgDoc.getElementById("slice_" + pieIndex + "_" + id);
@@ -392,12 +400,17 @@
 			if(id == selectedId) { selectedId = null; }
 			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", regularStroke);
 			svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColors[id]);
-			var lab  = svgDoc.getElementById("label_" + id);
-			lab.setAttribute("font-weight", "normal");
 
+			var lab  = svgDoc.getElementById("label_" + id);
+			var oldText = lab.firstChild.data;
+			lab.setAttribute("font-weight", "normal");
+			lab.removeChild (lab.firstChild);
+			lab.appendChild ( svgDoc.createTextNode(oldText) );
+
+			
+			var pieContainer = svgDoc.getElementById("pie_container");
 
 			var pieIndex;
-			var pieContainer = svgDoc.getElementById("pie_container");
 			for(pieIndex=0; pieIndex< numPies; pieIndex++)
 			{
 				var slice = svgDoc.getElementById("slice_" + pieIndex + "_" + id);

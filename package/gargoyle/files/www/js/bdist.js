@@ -118,10 +118,13 @@ function doUpdate()
 					var currentIntervalText = getSelectedText("time_interval");
 					removeAllOptionsFromSelectElement(document.getElementById("time_interval"));
 
+					var nextDate = new Date();
+					nextDate.setTime(latestTime*1000);
+					nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
+					var nextIntervalStart = nextDate.valueOf()/1000;
 
 					timeFrameIntervalData = [];
 					var intervalNames = [];
-					var nextIntervalStart = latestTime;
 					var intervalIndex;
 					for (intervalIndex=0; intervalIndex < numIntervals; intervalIndex++)
 					{
@@ -158,29 +161,29 @@ function doUpdate()
 						
 						var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-						var nextDate = new Date();
-						nextDate.setTime((parseInt(nextIntervalStart)+1)*1000);
+						
+						nextDate.setTime(parseInt(nextIntervalStart)*1000);
 						var intervalName = "";
 						if(uploadName.match("minute"))
 						{
-							intervalName = "" + twod(nextDate.getHours()) + ":" + twod(nextDate.getMinutes());
-							nextDate.setMinutes( nextDate.getMinutes()-1);
+							intervalName = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+							nextDate.setUTCMinutes( nextDate.getUTCMinutes()-1);
 							
 						}
 						else if(uploadName.match("hour"))
 						{
-							intervalName = "" + twod(nextDate.getHours()) + ":" + twod(nextDate.getMinutes());
-							nextDate.setHours(nextDate.getHours()-1);
+							intervalName = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+							nextDate.setUTCHours(nextDate.getUTCHours()-1);
 						}
 						else if(uploadName.match("day"))
 						{
-							intervalName = monthNames[nextDate.getMonth()] + " " + nextDate.getDate();
-							nextDate.setDate(nextDate.getDate()-1);
+							intervalName = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCDate();
+							nextDate.setUTCDate(nextDate.getUTCDate()-1);
 						}
 						else if(uploadName.match("month"))
 						{
-							intervalName = monthNames[nextDate.getMonth()] + " " + nextDate.getFullYear();
-							nextDate.setMonth(nextDate.getMonth()-1);
+							intervalName = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
+							nextDate.setUTCMonth(nextDate.getUTCMonth()-1);
 						}
 						addOptionToSelectElement("time_interval", intervalName, ""+intervalIndex);
 						nextIntervalStart = nextDate.valueOf()/1000;
