@@ -101,7 +101,7 @@ function doUpdate()
 						for (id in dirData)
 						{
 							var idPoints = dirData[id][0];
-							latestTime = dirData[id][1];
+							latestTime = parseInt(dirData[id][1]);
 							numIntervals = idPoints.length > numIntervals ? idPoints.length : numIntervals;
 							allIds[id] = 1;
 						}
@@ -146,7 +146,7 @@ function doUpdate()
 									if(idPoints != null)
 									{
 										value = idPoints[idPoints.length-1-intervalIndex];
-										value = value==null? 0 : value;
+										value = value==null? 0 : parseFloat(value);
 									}
 								}
 								nextDirData.push(value);
@@ -156,7 +156,7 @@ function doUpdate()
 						}
 						nextIntervalData.unshift(combinedData);
 						timeFrameIntervalData.push(nextIntervalData);
-
+						
 						
 						
 						var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
