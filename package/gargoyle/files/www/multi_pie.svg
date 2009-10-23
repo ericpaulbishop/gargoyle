@@ -33,7 +33,22 @@
 			svgDoc = evt.target.ownerDocument;
 		}
 
-		function setPieChartData(individualNames, pieNames, individualLabels, values, rankIndex, maxIndividualNames, recomputeColorsAndVisible)
+		function addPercentsToLabel(labelBase, pieValues, pieTotals)
+		{
+			var pcts = [];
+			var pieIndex;
+			for(pieIndex = 0; pieIndex < pieValues.length; pieIndex++)
+			{
+			pct = Math.floor((pieValues[pieIndex]*1000)/pieTotals[pieIndex])/10;
+				pctStr = "" + pct + "%";
+				pcts.push(pctStr);
+			}
+			var labelStr = labelBase + " ( " + pcts.join(" / ") + " )";
+			return labelStr;
+		}
+
+
+		function setPieChartData(individualNames, pieNames, individualLabels, values, rankIndex, maxIndividualNames, recomputeColorsAndVisible, adjustLabelFunction)
 		{
 
 			if(!initialized){ recomputeColorsAndVisible = true; }
@@ -156,67 +171,15 @@
 			var buffer =  Math.floor((totalHeight-(radius*2*numPies))/(2*numPies));
 			var titleHeight = Math.ceil(buffer*.80);
 			var titleOffset = Math.ceil(buffer*.30);	
-
-			//first construct labels;
-			var labelX = .005*totalHeight;
-			var nextLabelY=buffer-titleOffset;
-			var labelYIncrement=Math.floor(.07*totalHeight);
-			var labelBoxWidth=Math.floor(.03*totalHeight);
 			var regularStrokeWidth=Math.ceil(.0015*totalHeight);
-			var labelIndex;
-			var pieChartLabels = [];
-			for(labelIndex = 0; labelIndex < orderedLabels.length; labelIndex++)
-			{
-				var labelName = orderedNames[labelIndex] != null ? orderedNames[labelIndex] : "others" ;
-				var label = orderedLabels[labelIndex];
-				var unselectedColor = unselectedColors[unselectedColors.length-1];
-				var selectedColor = selectedColors[selectedColors.length-1];
-				if(labelName != "others")
-				{
-					unselectedColor = visibleIndividuals[labelName][0];
-					selectedColor = visibleIndividuals[labelName][1];
-				}
 
 
-				var labelRect = svgDoc.createElementNS(svgNs, "rect");
-				labelRect.setAttribute("x", labelX);
-				labelRect.setAttribute("y", nextLabelY);
-				labelRect.setAttribute("width", labelBoxWidth);
-				labelRect.setAttribute("height", labelBoxWidth);
-				labelRect.setAttribute("stroke", "black");
-				labelRect.setAttribute("stroke-width", regularStrokeWidth);
-				labelRect.setAttribute("id", "color_" + labelIndex);
-				labelRect.setAttribute("fill",  unselectedColor);
 
-
-				var labelText = svgDoc.createElementNS(svgNs, "text");
-				labelText.setAttribute("x", labelX+(labelBoxWidth*1.25));
-				labelText.setAttribute("y", nextLabelY+(labelBoxWidth*.85) );
-				labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.70) + "px");
-				labelText.setAttribute("font-family", "serif");
-				labelText.appendChild( svgDoc.createTextNode( label ));
-				labelText.setAttribute("id", "label_" + labelIndex);
-
-
-				if(selectedId == labelIndex)
-				{
-					labelRect.setAttribute("stroke-width", 2*regularStrokeWidth);
-					labelText.setAttribute("font-weight", "bolder");
-					labelRect.setAttribute("fill", selectedColor);
-				}
-
-
-				var labelGroup = svgDoc.createElementNS(svgNs, "g");
-				labelGroup.setAttribute("id", "group_" + labelIndex);
-				labelGroup.appendChild(labelRect);
-				labelGroup.appendChild(labelText);
-				labelGroup.onmouseover=piePieceSelected;
-				labelGroup.onmouseout=piePieceDeselected;
-				pieChartLabels.push(labelGroup);
-				nextLabelY = nextLabelY + labelYIncrement;
-			}
-
-
+			//construct pies
+			var idValues = [];
+			var pieTotals = [];
+			var idIndex;
+			for(idIndex=0; idIndex < orderedLabels.length; idIndex++){ idValues.push([]); }
 
 			var centerPoints = [];
 			var pieChartPaths = [];
@@ -248,13 +211,13 @@
 				{
 					for(dataIndex=0; dataIndex < data.length; dataIndex++) { data[dataIndex] = 1; dataSum++; }
 				}
-				else
-				{
-					var firstData = data[0];
-				}
 				
+				pieTotals.push(dataSum);
 				for(dataIndex=0; dataIndex < data.length; dataIndex++)
 				{
+					var idValueList= idValues[dataIndex];
+					idValueList.push( data[dataIndex] );
+					
 					if(data[dataIndex] != 0)
 					{
 						var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);
@@ -300,6 +263,73 @@
 						radiansPlotted = angle;	
 					}
 				}
+			}
+
+
+			//construct labels;
+			var labelX = .005*totalHeight;
+			var nextLabelY=buffer-titleOffset;
+			var labelYIncrement=Math.floor(.07*totalHeight);
+			var labelBoxWidth=Math.floor(.03*totalHeight);
+			var labelIndex;
+			var pieChartLabels = [];
+			for(labelIndex = 0; labelIndex < orderedLabels.length; labelIndex++)
+			{
+				var labelName = orderedNames[labelIndex] != null ? orderedNames[labelIndex] : "others" ;
+				
+				adjustLabelFunction = adjustLabelFunction == null ? addPercentsToLabel : adjustLabelFunction;
+				var baseLabel = orderedLabels[labelIndex];
+				if(baseLabel == null)
+				{
+					baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";
+				}
+				var label = adjustLabelFunction(orderedLabels[labelIndex], idValues[labelIndex], pieTotals);
+				
+				var unselectedColor = unselectedColors[unselectedColors.length-1];
+				var selectedColor = selectedColors[selectedColors.length-1];
+				if(labelName != "others")
+				{
+					unselectedColor = visibleIndividuals[labelName][0];
+					selectedColor = visibleIndividuals[labelName][1];
+				}
+
+
+				var labelRect = svgDoc.createElementNS(svgNs, "rect");
+				labelRect.setAttribute("x", labelX);
+				labelRect.setAttribute("y", nextLabelY);
+				labelRect.setAttribute("width", labelBoxWidth);
+				labelRect.setAttribute("height", labelBoxWidth);
+				labelRect.setAttribute("stroke", "black");
+				labelRect.setAttribute("stroke-width", regularStrokeWidth);
+				labelRect.setAttribute("id", "color_" + labelIndex);
+				labelRect.setAttribute("fill",  unselectedColor);
+
+
+				var labelText = svgDoc.createElementNS(svgNs, "text");
+				labelText.setAttribute("x", labelX+(labelBoxWidth*1.25));
+				labelText.setAttribute("y", nextLabelY+(labelBoxWidth*.85) );
+				labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.70) + "px");
+				labelText.setAttribute("font-family", "serif");
+				labelText.appendChild( svgDoc.createTextNode( label ));
+				labelText.setAttribute("id", "label_" + labelIndex);
+
+
+				if(selectedId == labelIndex)
+				{
+					labelRect.setAttribute("stroke-width", 2*regularStrokeWidth);
+					labelText.setAttribute("font-weight", "bolder");
+					labelRect.setAttribute("fill", selectedColor);
+				}
+
+
+				var labelGroup = svgDoc.createElementNS(svgNs, "g");
+				labelGroup.setAttribute("id", "group_" + labelIndex);
+				labelGroup.appendChild(labelRect);
+				labelGroup.appendChild(labelText);
+				labelGroup.onmouseover=piePieceSelected;
+				labelGroup.onmouseout=piePieceDeselected;
+				pieChartLabels.push(labelGroup);
+				nextLabelY = nextLabelY + labelYIncrement;
 			}
 
 
