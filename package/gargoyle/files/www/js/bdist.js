@@ -21,7 +21,7 @@ function initializePlotsAndTable()
 {
 	updateInProgress = false;
 	initFunction();
-	setInterval( 'doUpdate()', 2000);
+	setInterval( 'doUpdate()', 15000);
 }
 
 function initFunction()
@@ -234,6 +234,20 @@ function resetDisplayInterval()
 		
 		var pieNames = ["Total", "Down", "Up"];
 		var tableRows = [];
+
+		var pieIndex;
+		zeroPies = [];
+		for(pieIndex=0; pieIndex<pieNames.length; pieIndex++)
+		{
+			idIndex=0;
+			var pieIsZero = true;
+			for(idIndex=0; idIndex < idList.length; idIndex++)
+			{
+				pieIsZero = pieIsZero && data[pieIndex][idIndex] == 0;
+			}
+			zeroPies.push(pieIsZero);
+		}
+
 		for(idIndex=0; idIndex < sortedIdIndices.length; idIndex++)
 		{
 			var index = sortedIdIndices[idIndex]; 
@@ -242,6 +256,7 @@ function resetDisplayInterval()
 			
 			var tableRow = [id];
 			var pieIndex;
+			var allZero = true;
 			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
 			{
 				var value = parseBytes(data[pieIndex][index]);
@@ -250,7 +265,7 @@ function resetDisplayInterval()
 			}
 			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
 			{
-				var percent = data[pieIndex][index]*100/pieTotals[pieIndex];
+				var percent = zeroPies[pieIndex] ? 100/idList.length : data[pieIndex][index]*100/pieTotals[pieIndex];
 				var pctStr = "" + (parseInt(percent*10)/10) + "%";
 				tableRow.push(pctStr);
 			}
