@@ -75,8 +75,6 @@ function doUpdate()
 		}
 
 		//query monitor data
-
-
 		var queryNames = downloadName + " " + uploadName;
 		var param = getParameterDefinition("monitor", queryNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -217,13 +215,60 @@ function resetDisplayInterval()
 {
 	if(pieChart != null && (!updateInProgress) && timeFrameIntervalData.length > 0 )
 	{
+		updateInProgress = true;
+		//first, update pie chart
 		var plotFunction = getEmbeddedSvgPlotFunction("pie_chart");
 		var intervalIndex = getSelectedValue("time_interval");
 		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
 		
 		var data = timeFrameIntervalData[intervalIndex];
-		plotFunction(idList, ["Combined", "Download", "Upload" ], idList, data, 0, 9, resetColors);
+		var pieTotals = plotFunction(idList, ["Total", "Download", "Upload" ], idList, data, 0, 9, resetColors);
 		resetColors = false;
+
+		//then update table, sorting ids alphabetically so order is consistant
+		var sortedIdIndices = [];
+		var idIndex;
+		for(idIndex=0; idIndex < idList.length; idIndex++) { sortedIdIndices.push(idIndex) };
+		var idSort = function(a,b) { return idList[a] < idList[b] ? 1 : -1; }	
+		sortedIdIndices.sort( idSort );
+		
+		var pieNames = ["Total", "Down", "Up"];
+		var tableRows = [];
+		for(idIndex=0; idIndex < sortedIdIndices.length; idIndex++)
+		{
+			var index = sortedIdIndices[idIndex]; 
+			var id = idList[ index ];
+		
+			
+			var tableRow = [id];
+			var pieIndex;
+			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
+			{
+				var value = parseBytes(data[pieIndex][index]);
+				value = value.replace("ytes", "");
+				tableRow.push(value);
+			}
+			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
+			{
+				var percent = data[pieIndex][index]*100/pieTotals[pieIndex];
+				var pctStr = "" + (parseInt(percent*10)/10) + "%";
+				tableRow.push(pctStr);
+			}
+			tableRows.push(tableRow);
+		}
+		
+		var columnNames = ["Host"];
+		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex]); }
+		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex] + " %"); }
+	
+		var distTable=createTable(columnNames, tableRows, "bandwidth_distribution_table", false, false);
+		var tableContainer = document.getElementById('bandwidth_distribution_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(distTable);
+		updateInProgress = false;
 	}
 }
 

@@ -1249,10 +1249,61 @@ td.static_route_table_column_4
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-
 td.static_route_table_column_5
 {
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+
+td.bandwidth_distribution_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_2
+
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_3
+
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_4
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_5
+
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_6
+
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.bandwidth_distribution_table_column_7
+{
+	text-align:right;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+	border-right:1px solid black;
+
+}
+

@@ -30,13 +30,13 @@
 <form>
 
 	<fieldset>
-		<legend class="sectionheader">Bandwidth Display Options</legend>
+		<legend class="sectionheader">Bandwidth Distribution Display Options</legend>
 	
 
 
 		<div>
-			<label for='time_frame' id='time_frame_label'>Distribution Time Frame:</label>
-			<select id="time_frame" onchange="resetTimeFrame()">
+			<label class="leftcolumn" for='time_frame' id='time_frame_label'>Distribution Time Frame:</label>
+			<select class="rightcolumn" id="time_frame" onchange="resetTimeFrame()">
 				<option value="bdist1">Minutes</option>
 				<option value="bdist2">Hours</option>
 				<option value="bdist3">Days</option>
@@ -45,13 +45,17 @@
 		</div>
 
 		<div>
-			<label for='time_interval' id='time_interval_label'>Distribution Interval:</label>
-			<select id="time_interval" onchange="resetDisplayInterval()"></select>
+			<label class="leftcolumn" for='time_interval' id='time_interval_label'>Distribution Interval:</label>
+			<select class="rightcolumn" id="time_interval" onchange="resetDisplayInterval()"></select>
 		</div>
 	</fieldset>
 	
+	<div class="plot_header">Bandwidth Distribution:</div>
 	<div><embed id="pie_chart" style="margin-left:10px; width:525px; height:525px;" src="multi_pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	
+	<fieldset>
+		<legend class="sectionheader">Bandwidth Distribution Table</legend>
+		<div id="bandwidth_distribution_table_container"></div>	
+	</fieldset>
 	
 </form>
 

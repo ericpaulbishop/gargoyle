@@ -349,6 +349,8 @@
 				pieContainer.appendChild(pieChartPaths.shift());
 			}
 
+			//for convenience, return pie totals
+			return pieTotals;
 		}
 
 		function piePieceSelected()
