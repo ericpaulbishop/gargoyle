@@ -158,7 +158,14 @@
 				{
 					(orderedValues[pieIndex]).push( otherValueSums[pieIndex] );
 				}
-				orderedLabels.push( individualLabels[individualLabels.length-1] );
+				if(individualLabels.length > individualNames.length)
+				{
+					orderedLabels.push( individualLabels[individualNames.length + 1] );
+				}
+				else
+				{
+					orderedLabels.push( "Others");
+				}
 			}
 			
 			var totalHeight = (bottom-top)+1;
