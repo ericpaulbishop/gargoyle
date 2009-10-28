@@ -175,7 +175,7 @@ start()
 	fi
 
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "bw_get" > "$tmp_cron"
+	cat /etc/crontabs/root | grep -v "$backup_script" > "$tmp_cron"
 	echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 	
 	echo "#!/bin/sh" > "$backup_script"
