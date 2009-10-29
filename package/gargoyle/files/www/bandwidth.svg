@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="100%" height="100%"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" onload="init(evt)" viewBox="0 0 1600 1200">
 <!--
-	This program is copyright 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	This program is copyright 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
 	version 2.0 with a special clarification/exception that permits adapting the program to 
 	configure proprietary "back end" software provided that all modifications to the web interface
 	itself remain covered by the GPL. 
@@ -15,6 +15,7 @@
 	var rightCoor=1600;
 	var bottomCoor=1200;
 
+	var tzMinutes = 0;
 
 	function init(evt)
 	{
@@ -22,8 +23,13 @@
 	}
 
 
-	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastTimePoint)
+	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastTimePoint, tzm)
 	{
+		if(tzm != null)
+		{
+			tzMinutes = tzm;
+		}
+
 		maxPoint=0;
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
@@ -320,18 +326,19 @@
 			tickLabel = "";
 			tickDate = new Date();
 			tickDate.setTime(nextMajorTick*1000);
+			tickDate.setUTCMinutes( tickDate.getUTCMinutes()+tzMinutes )
 			monthAbbreviations=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 			if(timeUnit == "minute" || timeUnit == "hour")
 			{
-				tickLabel = tickDate.getHours() + ":" + (tickDate.getMinutes() >= 10 ? tickDate.getMinutes() : "0" + tickDate.getMinutes());
+				tickLabel = tickDate.getUTCHours() + ":" + (tickDate.getUTCMinutes() >= 10 ? tickDate.getUTCMinutes() : "0" + tickDate.getUTCMinutes());
 			}
 			else if(timeUnit == "day")
 			{
-				tickLabel = monthAbbreviations[ tickDate.getMonth() ] + ". " + tickDate.getDate();
+				tickLabel = monthAbbreviations[ tickDate.getUTCMonth() ] + " " + tickDate.getUTCDate();
 			}
 			else
 			{
-				tickLabel = monthAbbreviations[ tickDate.getMonth() ] + ". " + tickDate.getFullYear();
+				tickLabel = monthAbbreviations[ tickDate.getUTCMonth() ];
 			}
 			labelElement = svgDoc.getElementById("major-xtick-label" + tickNum);
 			labelElement.style.display = "block";
@@ -368,59 +375,60 @@
 		currentDate.setTime(currentTime*1000);
 		var nextTime = currentTime + 1;
 		nextDate.setTime(nextTime*1000);
+		nextDate.setUTCMinutes(nextDate.getUTCMinutes()+tzMinutes)
+		currentDate.setUTCMinutes(currentDate.getUTCMinutes()+tzMinutes)
 		if(unit == "minute")
 		{
-			nextDate.setSeconds(0);
+			nextDate.setUTCSeconds(0);
 			
-			incDate.setTime(nextDate.valueOf());
-			incDate.setMinutes( nextDate.getMinutes()+1);
-			increment =  Math.floor(multiple*(incDate.valueOf()-nextDate.valueOf()));
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCMinutes( nextDate.getUTCMinutes()+1);
 		}
 		else if(unit == "hour")
 		{
-			nextDate.setSeconds(0);
-			nextDate.setMinutes(0);
+			nextDate.setUTCSeconds(0);
+			nextDate.setUTCMinutes(0);
 			
-			incDate.setTime(nextDate.valueOf());
-			incDate.setHours(nextDate.getHours()+1);
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCHours(nextDate.getUTCHours()+1);
 		}
 		else if(unit == "day")
 		{
-			nextDate.setSeconds(0);
-			nextDate.setMinutes(0);
-			nextDate.setHours(0);
+			nextDate.setUTCSeconds(0);
+			nextDate.setUTCMinutes(0);
+			nextDate.setUTCHours(0);
 			
-			incDate.setTime(nextDate.valueOf());
-			incDate.setDate(nextDate.getDate()+1);
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCDate(nextDate.getUTCDate()+1);
 		}
 		else if(unit == "month")
 		{
-			nextDate.setSeconds(0);
-			nextDate.setMinutes(0);
-			nextDate.setHours(0);
-			nextDate.setDate(1);
+			nextDate.setUTCSeconds(0);
+			nextDate.setUTCMinutes(0);
+			nextDate.setUTCHours(0);
+			nextDate.setUTCDate(1);
 		
-			incDate.setTime(nextDate.valueOf());
-			incDate.setMonth(nextDate.getMonth()+1);
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCMonth(nextDate.getUTCMonth()+1);
 		}
 		else if (unit == "year")
 		{
-			nextDate.setSeconds(0);
-			nextDate.setMinutes(0);
-			nextDate.setHours(0);
-			nextDate.setDate(1);
-			nextDate.setMonth(0);
+			nextDate.setUTCSeconds(0);
+			nextDate.setUTCMinutes(0);
+			nextDate.setUTCHours(0);
+			nextDate.setUTCDate(1);
+			nextDate.setUTCMonth(0);
 			
-			incDate.setTime(nextDate.valueOf());
-			incDate.setFullYear(nextDate.getFullYear()+1);
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCFullYear(nextDate.getUTCFullYear()+1);
 		}
-		var increment =  multiple*(incDate.valueOf()-nextDate.valueOf());
-		while(nextDate.valueOf() <= currentDate.valueOf())
+		var increment =  multiple*(incDate.getTime()-nextDate.getTime());
+		while(nextDate.getTime() <= currentDate.getTime())
 		{
-			nextDate.setTime(nextDate.valueOf() + increment)
+			nextDate.setTime(nextDate.getTime() + increment)
 		}
-	
-		nextTime = Math.floor(nextDate.valueOf()/1000);
+		nextDate.setUTCMinutes( nextDate.getUTCMinutes()-tzMinutes)
+		nextTime = Math.floor(nextDate.getTime()/1000);
 		return nextTime;
 	}
 

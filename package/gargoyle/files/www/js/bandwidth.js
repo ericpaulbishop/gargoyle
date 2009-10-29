@@ -15,8 +15,6 @@ var downloadMonitors = null;
 var tableUploadMonitor = null;
 var tableDownloadMonitor = null;
 
-var updateInProgress;
-var graphType;
 
 var ipsWithData = [];
 var qosDownloadClasses  = [];
@@ -31,24 +29,21 @@ var updateTotalPlot = null;
 var updateUploadPlot = null;
 var updateDownloadPlot = null;
 
+var updateInProgress = false;
 var plotsInitializedToDefaults = false;
 
 
 
 function initializePlotsAndTable()
 {
-	// we are going to assume we know what graph types (i.e. time frames) are available for each
-	// type of monitor.  We might want to go back and make this configurable somehow later
-	// by parameterizing the init script but this gets complicated and ugly really fast
-	// so for now we assume all 4 types for total and 2 for the others (15h & 15d)
+	var plotTimeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "plot_time_frame");
+	var tableTimeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "table_time_frame");
+	setSelectedValue("plot_time_frame", plotTimeFrame);
+	setSelectedValue("table_time_frame", tableTimeFrame);
+	setSelectedValue("table_units", "mixed");
 	
-	addOptionToSelectElement("plot1_type", "IP", "ip");
-	addOptionToSelectElement("plot2_type", "IP", "ip");
-	addOptionToSelectElement("plot3_type", "IP", "ip");
-
 	var haveQosUpload = false;
 	var haveQosDownload = false;
-
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -82,31 +77,23 @@ function initializePlotsAndTable()
 			}
 		}
 	}
-	if(haveQosUpload)
+	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
+	var idIndex;
+	for(idIndex=0; idIndex < plotIdNames.length; idIndex++)
 	{
-		addOptionToSelectElement("plot1_type", "QoS Upload Class", "qos-upload");
-		addOptionToSelectElement("plot2_type", "QoS Upload Class", "qos-upload");
-		addOptionToSelectElement("plot3_type", "QoS Upload Class", "qos-upload");
-	}
-	if(haveQosDownload)
-	{
-		addOptionToSelectElement("plot1_type", "QoS Download Class", "qos-download");
-		addOptionToSelectElement("plot2_type", "QoS Download Class", "qos-download");
-		addOptionToSelectElement("plot3_type", "QoS Download Class", "qos-download");
-	}
-	
-
-	/* 
-	 * set defaults, then set loaded values.  That way if loaded
-	 * values are invalid we get the defaults
-	 */
-	var timeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "time_frame");
-	var plotIndex;
-	for(plotIndex=1; plotIndex <= 3; plotIndex++)
-	{
-		var plotTypeElement = "plot" + plotIndex + "_type";
-		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotTypeElement);
-		setSelectedValue(plotTypeElement, plotType);
+		var plotIdName = plotIdNames[idIndex];
+		if(haveQosUpload)
+		{	
+			addOptionToSelectElement(plotIdName, "QoS Upload Class", "qos-upload");
+		}
+		if(haveQosDownload)
+		{
+			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
+		}
+		addOptionToSelectElement(plotIdName, "IP", "ip");
+		
+		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
+		setSelectedValue(plotIdName, plotType);
 	}
 	plotsInitializedToDefaults = false;
 
@@ -178,7 +165,8 @@ function resetPlots()
 		uploadMonitors = [];
 		downloadMonitors = [];
 
-		var graphTimeFrameIndex = getSelectedValue("time_frame");
+		var graphTimeFrameIndex = getSelectedValue("plot_time_frame");
+		var tableTimeFrameIndex = getSelectedValue("table_time_frame");
 		var graphNonTotal = false;
 		var plotNum;
 		for(plotNum=1; plotNum<=3; plotNum++)
@@ -186,13 +174,14 @@ function resetPlots()
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			graphNonTotal = graphNonTotal || (t != "total" && t != "none");
 		}
-		for(plotNum=1; plotNum<=3; plotNum++)
+		for(plotNum=1; plotNum<=4; plotNum++)
 		{
-			var plotType = getSelectedValue("plot" + plotNum + "_type");
-			var plotIdName = "plot" + plotNum + "_id";
+			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
+			var plotIdVisName = plotNum < 4 ? plotIdName : plotIdName + "_container";
+			var plotTypeName = plotNum < 4 ? "plot" + plotNum + "_type" : "table_type";
+			var plotType = getSelectedValue(plotTypeName);
 			var plotId= getSelectedValue(plotIdName);
 			plotId = plotId == null ? "" : plotId;
-
 
 			if(plotType == "ip")
 			{
@@ -201,7 +190,7 @@ function resetPlots()
 					setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
 					setSelectedText(plotIdName, ipsWithData[0]);
 				}
-				document.getElementById(plotIdName).style.display="block";
+				document.getElementById(plotIdVisName).style.display="block";
 			}
 			else if(plotType == "qos-upload")
 			{
@@ -209,7 +198,7 @@ function resetPlots()
 				{
 					setAllowableSelections(plotIdName, qosUploadClasses, qosUploadNames);
 				}
-				document.getElementById(plotIdName).style.display="block";
+				document.getElementById(plotIdVisName).style.display="block";
 			}
 			else if(plotType == "qos-download")
 			{
@@ -217,11 +206,11 @@ function resetPlots()
 				{
 					setAllowableSelections(plotIdName, qosDownloadClasses, qosDownloadNames);
 				}
-				document.getElementById(plotIdName).style.display="block";
+				document.getElementById(plotIdVisName).style.display="block";
 			}
 			else
 			{
-				document.getElementById(plotIdName).style.display="none";
+				document.getElementById(plotIdVisName).style.display="none";
 			}
 
 			if(!plotsInitializedToDefaults)
@@ -233,9 +222,19 @@ function resetPlots()
 					plotId = idValue;
 				}
 			}
-
-			uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
-			downloadMonitors[plotNum-1] = getMonitorId(false, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
+			
+			if(plotNum != 4)
+			{
+				uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
+				downloadMonitors[plotNum-1] = getMonitorId(false, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
+			}
+			else
+			{
+				var lowRes = plotType == "total" && tableTimeFrameIndex == 3 ? false : true;
+				tableTimeFrameIndex =  lowRes ? tableTimeFrameIndex : 4;
+				tableUploadMonitor   = getMonitorId(true,  tableTimeFrameIndex, plotType, plotId, lowRes);
+				tableDownloadMonitor = getMonitorId(false, tableTimeFrameIndex, plotType, plotId, lowRes);
+			}
 		}
 		plotsInitializedToDefaults = true;
 		
@@ -248,7 +247,8 @@ function resetPlots()
 		/* update plot variables via ajax, so they "stick" */
 		var command = "";
 		command = command + "uci set gargoyle.bandwidth_display=bandwidth_display\n";
-		command = command + "uci set gargoyle.bandwidth_display.time_frame=\"" + getSelectedValue("time_frame") + "\"\n";
+		command = command + "uci set gargoyle.bandwidth_display.plot_time_frame=\"" + getSelectedValue("plot_time_frame") + "\"\n";
+		command = command + "uci set gargoyle.bandwidth_display.table_time_frame=\"" + getSelectedValue("table_time_frame") + "\"\n";
 		var plotIndex;
 		for(plotIndex=1; plotIndex <= 3; plotIndex++)
 		{
@@ -317,7 +317,7 @@ function doUpdate()
 	if(updateUploadPlot != null && updateDownloadPlot != null && updateTotalPlot != null)
 	{
 		updateInProgress = true;
-		var monitorNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ");
+		var monitorNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ") + " " + tableDownloadMonitor + " " + tableUploadMonitor ;
 		var param = getParameterDefinition("monitor", monitorNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
@@ -330,20 +330,36 @@ function doUpdate()
 					var uploadPointSets = [];
 					var downloadPointSets = [];
 					var totalPointSets = [];
-					var numIntervals = 0;
-					var intervalLength = 2;
-					var lastTimePoint = Math.floor( (new Date()).getTime()/1000 );
+					var tablePointSets = [];
+					var tableTotal = [];
+					var plotNumIntervals = 0;
+					var plotIntervalLength = 2;
+					var tableNumIntervals = 0;
+					var tableIntervalLength = 2;
+					var lastPlotTimePoint = Math.floor( (new Date()).getTime()/1000 );
+					var lastTableTimePoint = Math.floor( (new Date()).getTime()/1000 );
 					
-					for(monitorIndex=0; monitorIndex < uploadMonitors.length; monitorIndex++)
+					for(monitorIndex=0; monitorIndex < 4; monitorIndex++)
 					{
 						var ipsInitialized = false;
 						var dirIndex;
 						for(dirIndex = 0; dirIndex < 2; dirIndex++)
 						{
 							var dataLoaded = false;
-							var monitorList = dirIndex == 0 ? uploadMonitors : downloadMonitors;
-							var pointSets = dirIndex == 0 ? uploadPointSets : downloadPointSets;
-							var monitorName = monitorList[monitorIndex];
+							var pointSets;
+							var monitorName;
+							if(monitorIndex < 3)
+							{
+								var monitorList = dirIndex == 0 ? downloadMonitors : uploadMonitors;
+								pointSets = dirIndex == 0 ? downloadPointSets : uploadPointSets;
+								monitorName = monitorList[monitorIndex];
+							}
+							else
+							{
+								pointSets = tablePointSets;
+								monitorName = dirIndex == 0 ? tableDownloadMonitor : tableUploadMonitor;
+							}
+							monitorName = monitorName == null ? "" : monitorName;
 							
 							
 							var monitorData = monitorName == "" ? null : monitors[monitorName];
@@ -361,14 +377,22 @@ function doUpdate()
 								if(ipList.length > 0)
 								{
 									var splitName = monitorName.split("-");
-									numIntervals = splitName.pop();
-									intervalLength = splitName.pop();
+									if(monitorIndex < 3)
+									{
+										plotNumIntervals = splitName.pop();
+										plotIntervalLength = splitName.pop();
+									}
+									else
+									{
+										tableNumIntervals = splitName.pop();
+										tableIntervalLength = splitName.pop();
 
+									}
 
 									//select ip based on selected value in plot (or first available if none selected)
 									if(monitorName.match("bdist"))
 									{
-										var plotIdName = "plot" + (monitorIndex+1) + "_id";
+										var plotIdName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id" : "table_id";
 										ip = getSelectedValue(plotIdName);
 										ip = ip == null ? "" : ip;
 										ip = monitorData[ip] != null ? ip : ipList[0];
@@ -384,12 +408,26 @@ function doUpdate()
 								
 								
 									var points = monitorData[ip][0]
-									lastTimePoint = monitorData[ip][1];
-
+									if(monitorIndex < 3)
+									{
+										lastPlotTimePoint = monitorData[ip][1];
+									}
+									else
+									{
+										lastTableTimePoint = monitorData[ip][1];
+									}
 
 									//update total point set, assume differences in length
 									//indicate more/less points at BEGINNING, not end
-									var totalSet = totalPointSets[monitorIndex] == null ? [] : totalPointSets[monitorIndex];
+									var totalSet;
+									if(monitorIndex < 3)
+									{
+										totalSet = totalPointSets[monitorIndex] == null ? [] : totalPointSets[monitorIndex];
+									}
+									else
+									{
+										totalSet = tableTotal;
+									}
 									var updateIndex;
 									for(updateIndex=0; updateIndex < points.length; updateIndex++)
 									{
@@ -404,7 +442,10 @@ function doUpdate()
 											totalSet.push( points[pointIndex] );
 										}
 									}
-									totalPointSets[monitorIndex] = totalSet;
+									if(monitorIndex < 3)
+									{
+										totalPointSets[monitorIndex] = totalSet;
+									}
 									pointSets.push(points);
 									dataLoaded=true;
 								}
@@ -414,19 +455,22 @@ function doUpdate()
 								pointSets.push(null);
 							}
 						}
-						totalPointSets[monitorIndex] = totalPointSets[monitorIndex] == null ? null : (totalPointSets[monitorIndex]).reverse()
+						if(monitorIndex < 3)
+						{
+							totalPointSets[monitorIndex] = totalPointSets[monitorIndex] == null ? null : (totalPointSets[monitorIndex]).reverse()
+						}
+						else
+						{
+							tableTotal.reverse();
+							tablePointSets.unshift(tableTotal);
+						}
 					}
-					updateTotalPlot(totalPointSets, numIntervals, intervalLength, lastTimePoint );
-					updateDownloadPlot(downloadPointSets, numIntervals, intervalLength, lastTimePoint );
-					updateUploadPlot(uploadPointSets, numIntervals, intervalLength, lastTimePoint );
+					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
+					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
+					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
+
+					updateBandwidthTable(tablePointSets, tableIntervalLength, lastTableTimePoint);
 				}
-				
-				//get daily download/upload data for table if we haven't tried yet
-				//if we've tried and failed these will be set to "no_monitor"
-				//if(dailyDownloadData == null || dailyUploadData == null)
-				//{
-				//	loadTotalTableData();
-				//}
 				updateInProgress = false;
 			}
 		}
@@ -434,142 +478,72 @@ function doUpdate()
 	}
 }
 
-
-function loadTotalTableData()
+function twod(num)
 {
-	//setup table
-	var param = getParameterDefinition("monitor", "total-upload-1y  total-download-1y" )  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-
-	var stateChangeFunction = function(dailyReq)
-	{
-		var monitors=null;
-		if(dailyReq.readyState == 4)
-		{
-			if(!dailyReq.responseText.match(/ERROR/))
-			{
-				monitors = parseMonitors(dailyReq.responseText);
-				if(monitors["total-upload-1y"] != null)
-				{
-					document.getElementById("total_bandwidth_use").style.display="block";
-					
-					removeAllOptionsFromSelectElement(document.getElementById("total_time_frame"));
-					addOptionToSelectElement("total_time_frame", "Daily", "daily"); 
-					addOptionToSelectElement("total_time_frame", "Monthly", "monthly");
-					setSelectedValue("total_time_frame", "daily");
-					
-					removeAllOptionsFromSelectElement(document.getElementById("total_table_units"));
-					addOptionToSelectElement("total_table_units", "Auto (Mixed)", "mixed"); 
-					addOptionToSelectElement("total_table_units", "KBytes", "KBytes"); 
-					addOptionToSelectElement("total_table_units", "MBytes", "MBytes");
-					addOptionToSelectElement("total_table_units", "GBytes", "GBytes");
-					setSelectedValue("total_table_units", "mixed");
-
-
-				
-					dailyUploadData=monitors["total-upload-1y"];
-					dailyDownloadData=monitors["total-download-1y"];
-					updateTotalTable();
-				}
-				else
-				{
-					dailyUploadData = "no_monitor";
-					dailyDownloadData = "no_monitor";
-				}
-			}
-		}
-	}
-	runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
+	var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; 
+	return nstr; 
 }
 
-function updateTotalTable()
+
+function updateBandwidthTable(tablePointSets, interval, lastTableTimePoint)
 {
-	if(dailyUploadData == null || dailyUploadData == "no_monitor" || dailyDownloadData == null || dailyDownloadData == "no_monitor")
+	var rowData = [];
+	var rowIndex = 0;
+	var displayUnits = getSelectedValue("table_units");
+	var timePoint = lastTableTimePoint;
+	var nextDate = new Date();
+	nextDate.setTime(timePoint*1000);
+	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
+	var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
-		return;
-	}
-
-	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
-	var selectedTotalTimeFrame=getSelectedValue("total_time_frame");
-	var displayUnits = getSelectedValue("total_table_units");
-	var totalTableData = new Array();
-	var columnNames = ["", "Total Upload Bandwidth", "Total Download Bandwidth"];
-	if(selectedTotalTimeFrame == "daily")
-	{
-		columnNames[0] = "Date";
-		var nextDate=new Date();
-		nextDate.setTime(dailyUploadData[1]*1000);
-		for(dailyIndex=dailyUploadData[0].length-1; dailyIndex >=0; dailyIndex--)
+		var colIndex = 0;
+		var vals = [];
+		for(colIndex=0; colIndex < 3; colIndex++)
 		{
-			dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
-			dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
-
-			var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-			var y2 = twod(nextDate.getFullYear()%100)
-			var y4 = nextDate.getFullYear();
-			var m = twod(nextDate.getMonth()+1);
-			var d = twod(nextDate.getDate());
-
-
-			var outputDate = "";
-			if(systemDateFormat == "iso")
-			{
-				outputDate = y4 + "/" + m + "/" + d;
-			}
-			else if(systemDateFormat == "australia")
-			{
-				outputDate = d + "/" + m + "/" + y2;
-			}
-			else
-			{
-				outputDate = m + "/" + d + "/" + y2;
-			}
-
-			totalTableData.push([ outputDate, parseBytes(dailyUploadData[0][dailyIndex], displayUnits), parseBytes(dailyDownloadData[0][dailyIndex], displayUnits) ]);
-			newTime = nextDate.getTime() - (24*60*60*1000);
-			nextDate.setTime(newTime);
+			var points = tablePointSets[colIndex];
+			var val = points == null ? 0 : points[points.length-(1+rowIndex)];
+			val = val == null ? 0 : val;
+			vals.push(parseBytes(val, displayUnits));
 		}
-	}
-	else if(selectedTotalTimeFrame == "monthly")
-	{
-		columnNames[0] = "Month";
-		var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-		var nextDate=new Date();
-		nextDate.setTime(dailyUploadData[1]*1000);
-		var dailyIndex = dailyUploadData[0].length-1;
-		while( dailyIndex >= 0 )
+
+		var timeStr = "" + timeStr;
+		if(interval.match(/minute/))
 		{
-			//make sums floating points to deal with 64bit / 32bit conversion which can be an issue
-			dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
-			dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
-			monthUploadSum = dailyUploadData[0][dailyIndex];
-			monthDownloadSum = dailyDownloadData[0][dailyIndex];
-			month = nextDate.getMonth();
-			year = nextDate.getFullYear();
-			newTime = nextDate.getTime() - (24*60*60*1000);
-			nextDate.setTime(newTime);
-			dailyIndex--;
-			while(nextDate.getMonth() == month &&  dailyIndex >= 0)
-			{
-				dailyUploadData[0][dailyIndex] = dailyUploadData[0][dailyIndex] > 0 ? 1.0*dailyUploadData[0][dailyIndex] : 0.0;
-				dailyDownloadData[0][dailyIndex] = dailyDownloadData[0][dailyIndex] > 0 ? 1.0*dailyDownloadData[0][dailyIndex] : 0.0;
-
-				monthUploadSum = monthUploadSum + dailyUploadData[0][dailyIndex];
-				monthDownloadSum = monthDownloadSum + dailyDownloadData[0][dailyIndex];
-
-				newTime = nextDate.getTime() - (24*60*60*1000);
-				nextDate.setTime(newTime);
-				dailyIndex--;
-			}
-			totalTableData.push([ monthNames[month] + " " + year, parseBytes(monthUploadSum, displayUnits), parseBytes(monthDownloadSum, displayUnits) ]);
+			timeStr = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+			nextDate.setUTCMinutes( nextDate.getUTCMinutes()-1);
 		}
+		else if(interval.match(/hour/))
+		{
+			timeStr = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+			nextDate.setUTCHours( nextDate.getUTCHours()-1);
+		}
+		else if(interval.match(/day/))
+		{
+			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCDate();
+			nextDate.setUTCDate( nextDate.getUTCDate()-1);
+		}
+		else if(interval.match(/month/))
+		{
+			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
+			nextDate.setUTCMonth( nextDate.getUTCMonth()-1);
+		}
+		else if(parseInt(interval) != "NaN")
+		{
+			nextDate.setTime((timePoint-parseInt(interval))*1000)
+		}
+		vals.unshift(timeStr);
+		rowData.push(vals);
+		timePoint = nextDate.getTime()/1000;
 	}
-	totalTable=createTable(columnNames, totalTableData, "total_bandwidth_table", false, false);
-	tableContainer = document.getElementById('total_bandwidth_table_container');
+
+	var columnNames = ["Time", "Total", "Download", "Upload"];
+	var bwTable=createTable(columnNames , rowData, "bandwidth_table", false, false);
+	tableContainer = document.getElementById('bandwidth_table_container');
 	if(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	tableContainer.appendChild(totalTable);
+	tableContainer.appendChild(bwTable);
 }
-
 
