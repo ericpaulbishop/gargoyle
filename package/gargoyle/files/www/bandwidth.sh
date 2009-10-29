@@ -32,10 +32,10 @@
 		<div>
 			<label for='time_frame' id='time_frame_label'>Time Frame:</label>
 			<select id="time_frame" onchange="resetPlots()">
-				<option value="15m">15 Minutes</option>
-				<option value="15h">15 Hours</option>
-				<option value="15d">15 Days</option>
-				<option value="1y">1 Year</option>
+				<option value="1">15 Minutes</option>
+				<option value="2">24 Hours</option>
+				<option value="3">30 Days</option>
+				<option value="4">1 Year</option>
 			</select>
 		</div>
 
@@ -61,13 +61,16 @@
 		<br/>Traffic between local hosts is not reported.
 	</fieldset>
 	
-	<div class="plot_header">Upload Bandwidth Usage:</div>
-	<div><embed id="upload_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	
+
+	<div class="plot_header">Total Bandwidth Usage:</div>
+	<div><embed id="total_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>	
 	
 	<div class="plot_header">Download Bandwidth Usage:</div>
 	<div><embed id="download_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-
+	
+	<div class="plot_header">Upload Bandwidth Usage:</div>
+	<div><embed id="upload_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
+	
 	<fieldset id="total_bandwidth_use" style="display:none" >
 		<legend class="sectionheader">Total Bandwidth Usage</legend>
 		<div>

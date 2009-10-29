@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" onload="init(evt)">
+<svg width="100%" height="100%"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" onload="init(evt)" viewBox="0 0 1600 1200">
 <!--
 	This program is copyright 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
 	version 2.0 with a special clarification/exception that permits adapting the program to 
@@ -10,13 +10,19 @@
 -->
 	<script type="text/ecmascript"> <![CDATA[
 	var svgDoc;
+	var topCoor=1;
+	var leftCoor=1;
+	var rightCoor=1600;
+	var bottomCoor=1200;
+
+
 	function init(evt)
 	{
 		svgDoc = evt.target.ownerDocument;
 	}
 
 
-	function plotAll(graphType, pointSets, lastTimePoint)
+	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastTimePoint)
 	{
 		maxPoint=0;
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
@@ -30,69 +36,112 @@
 				}
 			}
 		}
-		
-		graphXMax = createXTicks(graphType, lastTimePoint);
-		graphYMax = createYTicks(graphType, maxPoint);
 
-		topCoor=1;
-		leftCoor=1;
-		rightCoor=leftCoor+graphXMax+1;
-		bottomCoor=topCoor+300;
+		
+
+
+		var graphRightCoor=Math.floor(rightCoor*85/100);
+		var graphBottomCoor=Math.floor(bottomCoor*85/100);
+		var graphHeight = (graphBottomCoor-topCoor)+1;
+
+		var borderEl = svgDoc.getElementById("graph-border");
+		borderEl.setAttribute("width", graphRightCoor);
+		borderEl.setAttribute("height", graphBottomCoor);
+		borderEl.setAttribute("stroke", "black");
+		borderEl.setAttribute("stroke-width", Math.ceil(.002*graphHeight) )
+
+
+		var intervalSeconds = getIntervalSeconds(intervalLength);
+		var xTickUnit = createXTicks(numDisplayIntervals, intervalSeconds, lastTimePoint, topCoor, graphBottomCoor, leftCoor, graphRightCoor)
+		var graphYMax = createYTicks(xTickUnit, intervalSeconds, maxPoint, leftCoor, graphRightCoor, topCoor, graphBottomCoor)
+
+		var pixelsPerInterval = graphRightCoor/(numDisplayIntervals-1);
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
 			if(pointSets[plotIndex] != null)
 			{
 				points= pointSets[plotIndex];
-				plotPoints= [ rightCoor-points.length + "," + bottomCoor ];
+				plotPoints= [ graphRightCoor-Math.floor(points.length*pixelsPerInterval) + "," + graphBottomCoor ];
 				var pointIndex;
 				for(pointIndex = 0; pointIndex < points.length; pointIndex++)
 				{
 					point= points[pointIndex] >= 0 ? points[pointIndex] : 0;
-					yDist= Math.floor(bottomCoor*point/graphYMax);
-					plotPoints.push( (rightCoor-(points.length-pointIndex)) + "," + (bottomCoor - yDist) );
+					yDist= Math.floor(graphBottomCoor*point/graphYMax);
+					plotPoints.push( graphRightCoor-Math.floor((points.length-(pointIndex+1))*pixelsPerInterval) + "," + (graphBottomCoor - yDist) );
 				}
-				plotPoints.push( rightCoor + "," + bottomCoor );
+				plotPoints.push( graphRightCoor + "," + graphBottomCoor );
 				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("points", plotPoints.join(" "));
+				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
 			}
 			else
 			{
 				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("points", "");
+
 			}
 		}
 	}
+	
+	function getIntervalSeconds(intervalLength)
+	{
+		var intervalSeconds = 60;
+		if(intervalLength == "second")
+		{
+			intervalSeconds = 1;
+		}
+		else if(intervalLength == "minute")
+		{
+			intervalSeconds = 60;
+		}
+		else if(intervalLength == "hour")
+		{
+			intervalSeconds = 60*60;
+		}
+		else if(intervalLength == "day")
+		{
+			intervalSeconds = 60*60*24;
+		}
+		else if(intervalLength == "month")
+		{
+			intervalSeconds = 60*60*24*28;
+		}
+		else
+		{
+			intervalSeconds = intervalLength;
+		}
+		return intervalSeconds;
+	}
 
 
-
-	function createYTicks(graphType, maxPoint)
+	function createYTicks(xTickUnit, intervalSeconds, maxPoint, graphLeft, graphRight, graphTop, graphBottom)
 	{
 		var timePoints;
-		var timeUnit;
+		var yTimeUnit;
 		var rateMultiple = 1024; //report in at least kilobytes
-		if(graphType == "15m") //bytes/s
+
+		rateMultiple = intervalSeconds*rateMultiple;
+			
+
+		if(xTickUnit == "minute")
 		{
-			rateMultiple = 2*rateMultiple;
-			timeUnit="s";
-			timePoints=(15*60)/2;
+			yTimeUnit="s"; //bytes/s
 		}
-		else if(graphType == "15h") //bytes/s
+		else if(xTickUnit == "hour") 
 		{
-			rateMultiple = 2*60*rateMultiple;
-			timeUnit="s";
-			timePoints=(15*60)/2;
+			yTimeUnit="s";  //bytes/s
 		}
-		else if(graphType == "15d") //bytes/hr
+		else if(xTickUnit == "day") 
 		{
-			rateMultiple = 1*rateMultiple;
-			timeUnit="hr";
-			timePoints=15*24;
+			rateMultiple=rateMultiple/(60*60);
+			yTimeUnit="hr"; //bytes/hr
 		}
-		else if(graphType == "1y") //bytes/day
+		else if(xTickUnit == "month") 
 		{
-			rateMultiple = 1*rateMultiple;
-			timeUnit="day";
-			timePoints=366;
+			rateMultiple=rateMultiple/(60*60*24);
+			yTimeUnit="day"; //bytes/day
 		}
+
 		maxRate = maxPoint/rateMultiple;
+
 		
 		maxLog = Math.floor(Math.log(maxRate)/Math.log(10));
 		maxLogMultiple = 1+Math.floor(maxRate/Math.pow(10, maxLog));
@@ -134,7 +183,7 @@
 			unit="TByte";
 			unitScaleFactor=Math.pow(10,9);
 		}
-		unit = unit + " / " + timeUnit;
+		unit = unit + " / " + yTimeUnit;
 
 
 		var tickSize;
@@ -153,12 +202,9 @@
 		
 		yMax = 	maxLogMultiple * Math.pow(10,maxLog);
 
-		
-		var leftIndex = 1;
-		var rightIndex = timePoints+leftIndex;
-		var bottomIndex = 300;
-		var topIndex = 0;
-		svgDoc.getElementById("y-unit-path").setAttribute("d", " M " + (rightIndex+60) + " " + (Math.floor(bottomIndex*.6)) + " L " + (rightIndex+60) + " " + 0);
+		var graphHeight = graphBottom-graphTop;
+		svgDoc.getElementById("y-unit-container").setAttribute("font-size", .07*graphHeight);
+		svgDoc.getElementById("y-unit-path").setAttribute("d", " M " + (graphRight+(.20*graphHeight) ) + " " + (Math.floor(.6*graphHeight)) + " L " + (graphRight+(.20*graphHeight)) + " " + 0);
 		svgDoc.getElementById("y-units").firstChild.data = ""; //safari shits itself if label doesn't change
 		svgDoc.getElementById("y-units").firstChild.data = unit;
 
@@ -167,18 +213,18 @@
 		tickPath = "";
 		while(nextTick < yMax)
 		{
-			yCoor= bottomIndex - Math.floor((bottomIndex-topIndex)*nextTick/yMax);
+			yCoor= graphBottom - Math.floor((graphBottom-graphTop)*nextTick/yMax);
 			if(nextTick != 0)
 			{
-				tickPath = tickPath + "M " + leftIndex + " " + yCoor + " L " + rightIndex + " " + yCoor + " ";
+				tickPath = tickPath + "M " + graphLeft + " " + yCoor + " L " + graphRight + " " + yCoor + " ";
 			}
 			
 			tickLabel = (nextTick/unitScaleFactor);
 			labelElement = svgDoc.getElementById("ytick-label" + tickNum);
 			labelElement.style.display = "block";
-			labelElement.setAttribute("x", rightIndex+5);
+			labelElement.setAttribute("x", graphRight+ (.02*graphHeight)   );
 			labelElement.setAttribute("y", yCoor);
-			
+			labelElement.setAttribute("font-size", (.05*graphHeight) + "px" )
 			labelElement.firstChild.data = ""; //safari shits itself if label doesn't change
 			labelElement.firstChild.data = tickLabel;
 
@@ -195,173 +241,91 @@
 		}
 
 		svgDoc.getElementById("yticks").setAttribute("d", tickPath);
+		svgDoc.getElementById("yticks").setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
 
 		return rateMultiple * maxLogMultiple * Math.pow(10,maxLog); //return raw value of max value on graph
 	}
 
-	function createXTicks(graphType, lastTimePoint)
+	function createXTicks(numDisplayIntervals, intervalSeconds, lastTime, graphTop, graphBottom, graphLeft, graphRight)
 	{
-		var leftIndex = 1;
-		var bottomIndex = 300;
-		var minorTickInterval;
-		var majorTickInterval;
-		var lastMajorTick;
-		var lastMinorTick;
-		var majorTickLabels = [];
-		if(graphType == "15m")
+		var minTotalIntervalLength = intervalSeconds*numDisplayIntervals;
+
+		var timeUnit = "minute";
+		var majorTickMultiple;
+		function getMajorTickMultiple( unitSeconds )
 		{
-			// 15 minutes at 2s intervals, 450 time points
-			timePoints = 15*60/2;
-			intervalLength = 2;
-			minorTickInterval = 60;
-			majorTickInterval = 3*minorTickInterval;
-
-			//major tick
-			lastTickTime = lastTimePoint;
-			lastTickDate = new Date();	
-			lastTickDate.setTime(lastTickTime*1000);
-			while(lastTickDate.getMinutes() % 3 > 0)
-			{
-				lastTickTime= lastTickTime-60;
-				lastTickDate.setTime(lastTickTime*1000);
-			}
-			lastTickDate.setSeconds(0);
-			lastMajorTick =  lastTickDate.valueOf()/1000;
-
-
-			//minor tick
-			lastTickDate.setTime(lastTimePoint*1000);
-			lastTickDate.setSeconds(0);
-			lastMinorTick = lastTickDate.valueOf()/1000;
+			var m=1;
+			while((m+1)*4*unitSeconds < minTotalIntervalLength) { m++; }
+			return m;
 		}
-		else if(graphType == "15h")
+		if( minTotalIntervalLength < 4*60*60 )
 		{
-			// 15 hours at 2m intervals, 450 time points
-			timePoints = 15*60/2;
-			intervalLength = 2*60;
-			minorTickInterval = 60*60;
-			majorTickInterval = 3*minorTickInterval;
-			
-			//major tick
-			lastTickTime = lastTimePoint;
-			lastTickDate = new Date();	
-			lastTickDate.setTime(lastTickTime*1000);
-			while(lastTickDate.getHours() % 3 > 0)
-			{
-				lastTickTime= lastTickTime-(60*60);
-				lastTickDate.setTime(lastTickTime*1000);
-			}
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastMajorTick =  lastTickDate.valueOf()/1000;
-
-			//minor tick
-			lastTickDate.setTime(lastTimePoint*1000);
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastMinorTick = lastTickDate.valueOf()/1000;
-
+			timeUnit="minute";
+			majorTickMultiple = getMajorTickMultiple(60);
 		}
-		else if(graphType == "15d")
+		else if( minTotalIntervalLength < 4*60*60*24)
 		{
-			//15 days at 1h intervals, 360 time points
-			timePoints = 15*24;
-			intervalLength = 60*60;
-			minorTickInterval = 24*60*60;
-			majorTickInterval = 7*minorTickInterval;
-
-			//major tick
-			lastTickTime = lastTimePoint;
-			lastTickDate = new Date();	
-			lastTickDate.setTime(lastTickTime*1000);
-			while(lastTickDate.getDay() > 0)
-			{
-				lastTickTime= lastTickTime-(24*60*60);
-				lastTickDate.setTime(lastTickTime*1000);
-			}
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastTickDate.setHours(0);
-			lastMajorTick = lastTickDate.valueOf()/1000;
-
-			//minor tick
-			lastTickDate.setTime(lastTimePoint*1000);
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastTickDate.setHours(0);
-			lastMinorTick = lastTickDate.valueOf()/1000;
+			timeUnit="hour";
+			majorTickMultiple = getMajorTickMultiple(60*60);
 		}
-		else //1y
+		else if( minTotalIntervalLength < 4*60*60*24*28)
 		{
-			//1 year at 1day intervals, 366 time points
-			timePoints = 366;
-			intervalLength = 24*60*60;
-
-			//major tick
-			lastTickTime = lastTimePoint;
-			lastTickDate = new Date();	
-			lastTickDate.setTime(lastTickTime*1000);
-			while(lastTickDate.getMonth() % 3 > 0)
-			{
-				lastTickDate = decrementMonth(lastTickDate);
-			}
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastTickDate.setHours(0);
-			lastTickDate.setDate(1);
-			lastMajorTick =  lastTickDate.valueOf()/1000;
-
-			lastTickDate.setTime(lastTimePoint*1000);
-			lastTickDate.setSeconds(0);
-			lastTickDate.setMinutes(0);
-			lastTickDate.setHours(0);
-			lastTickDate.setDate(1);
-			lastMinorTick = lastTickDate.valueOf()/1000;
+			timeUnit="day";
+			majorTickMultiple = getMajorTickMultiple(60*60*24);
+		}
+		else if( minTotalIntervalLength < 4*60*60*24*28*12)
+		{
+			timeUnit="month";
+			majorTickMultiple = getMajorTickMultiple(60*60*24*28);
 		}
 
 
-		startTimePoint = lastTimePoint - ((timePoints-1)*intervalLength);
-			
-		minorPathString= "";
-		while(lastMinorTick - startTimePoint >= 0)
+		var minorTickMultiple = (1/3);
+		if(majorTickMultiple == 2)
 		{
-			xCoor = leftIndex + Math.floor((timePoints*(lastMinorTick - startTimePoint))/(lastTimePoint - startTimePoint));
-			minorPathString= minorPathString + "M " + xCoor + " 1 L " + xCoor + " " + bottomIndex + " ";
-			if(graphType == "1y")
-			{
-				lastTickDate.setTime(lastMinorTick*1000);
-				lastTickDate.setSeconds(0);
-				lastTickDate.setMinutes(0);
-				lastTickDate.setHours(0);
-				lastTickDate.setDate(1);
-				lastTickDate = decrementMonth(lastTickDate);
-				lastMinorTick = lastTickDate.valueOf()/1000;
-			}
-			else
-			{
-				lastMinorTick = lastMinorTick - minorTickInterval;
-			}
+			minorTickMultiple = 1;
 		}
+		if(majorTickMultiple >= 3)
+		{
+			minorTickMultiple = Math.floor(majorTickMultiple/3); 
+		}
+
+
+		var graphHeight = graphBottom-graphTop;
+		var firstTime = lastTime-(numDisplayIntervals*intervalSeconds);
+		var nextMinorTick = getNextTick(timeUnit, minorTickMultiple, firstTime);
+		var minorPathString= "";
+		while( nextMinorTick < lastTime )
+		{
+			xCoor = graphLeft + Math.floor((graphRight-graphLeft)*(nextMinorTick - firstTime)/( lastTime-firstTime ));
+			minorPathString= minorPathString + "M " + xCoor + " " + graphTop + " L " + xCoor + " " + graphBottom + " ";
+			nextMinorTick = getNextTick(timeUnit, minorTickMultiple, nextMinorTick);
+		}
+		//alert(minorPathString);
 		svgDoc.getElementById("x-minor-ticks").setAttribute("d", minorPathString);
-
+		svgDoc.getElementById("x-minor-ticks").setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
+		
+		
+		
 
 		majorPathString= "";
 		tickNum = 1;
-		while(lastMajorTick - startTimePoint >= 0)
+		var nextMajorTick = getNextTick(timeUnit, majorTickMultiple, firstTime);
+		while(nextMajorTick < lastTime && tickNum <= 10)
 		{
-			xCoor = leftIndex + Math.floor((timePoints*(lastMajorTick - startTimePoint))/(lastTimePoint - startTimePoint));
-			majorPathString= majorPathString + "M " + xCoor + " " + bottomIndex + " L " + xCoor + " " + (bottomIndex+10) + " ";
+			xCoor = graphLeft + Math.floor((graphRight-graphLeft)*(nextMajorTick - firstTime)/(lastTime - firstTime));
+			majorPathString= majorPathString + "M " + xCoor + " " + (graphBottom+1) + " L " + xCoor + " " + (graphBottom+Math.floor(.02*(graphBottom-graphTop))) + " ";
 
 
 			tickLabel = "";
 			tickDate = new Date();
-			tickDate.setTime(lastMajorTick*1000);
+			tickDate.setTime(nextMajorTick*1000);
 			monthAbbreviations=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-			if(graphType == "15m" || graphType == "15h")
+			if(timeUnit == "minute" || timeUnit == "hour")
 			{
 				tickLabel = tickDate.getHours() + ":" + (tickDate.getMinutes() >= 10 ? tickDate.getMinutes() : "0" + tickDate.getMinutes());
 			}
-			else if(graphType == "15d")
+			else if(timeUnit == "day")
 			{
 				tickLabel = monthAbbreviations[ tickDate.getMonth() ] + ". " + tickDate.getDate();
 			}
@@ -372,32 +336,17 @@
 			labelElement = svgDoc.getElementById("major-xtick-label" + tickNum);
 			labelElement.style.display = "block";
 			labelElement.setAttribute("x", xCoor);
-			labelElement.setAttribute("y", 335);
+			labelElement.setAttribute("y", graphBottom + Math.ceil(.07*(graphBottom-graphTop))  );
+			labelElement.setAttribute("font-size", Math.ceil(.05*graphHeight) + "px" )
 			labelElement.firstChild.data = ""; //safari shits itself if label doesn't change
 			labelElement.firstChild.data = tickLabel;
+			
 
-
-			if(graphType == "1y")
-			{
-				lastTickDate.setTime(lastMajorTick*1000);
-				lastTickDate = decrementMonth(lastTickDate);
-				lastTickDate.setSeconds(0);
-				lastTickDate.setMinutes(0);
-				lastTickDate.setHours(0);
-				lastTickDate.setDate(1);
-				while(lastTickDate.getMonth() % 3 > 0)
-				{
-					lastTickDate = decrementMonth(lastTickDate);
-				}
-				lastMajorTick = lastTickDate.valueOf()/1000;
-			}
-			else
-			{
-				lastMajorTick = lastMajorTick - majorTickInterval;
-			}
+			var nt = getNextTick(timeUnit, majorTickMultiple, nextMajorTick);
+			nextMajorTick = nt;
 			tickNum++;
 		}
-		while(tickNum <= 5)
+		while(tickNum <= 10)
 		{
 			tickLabelId = "major-xtick-label" + tickNum;
 			svgDoc.getElementById(tickLabelId).style.display = "none";
@@ -405,32 +354,83 @@
 			tickNum++;
 		}
 		svgDoc.getElementById("x-major-ticks").setAttribute("d", majorPathString);
-		svgDoc.getElementById("graph-border").setAttribute("width", (timePoints));
+		svgDoc.getElementById("x-major-ticks").setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
+
 		
-		return timePoints;
+		return timeUnit;
 	}
 
-	function decrementMonth(date)
+	function getNextTick(unit, multiple, currentTime)
 	{
-		oldMonth=date.getMonth();
-		if(oldMonth > 0)
+		var currentDate = new Date();
+		var nextDate = new Date();
+		var incDate = new Date();
+		currentDate.setTime(currentTime*1000);
+		var nextTime = currentTime + 1;
+		nextDate.setTime(nextTime*1000);
+		if(unit == "minute")
 		{
-			date.setMonth(oldMonth-1);
+			nextDate.setSeconds(0);
+			
+			incDate.setTime(nextDate.valueOf());
+			incDate.setMinutes( nextDate.getMinutes()+1);
+			increment =  Math.floor(multiple*(incDate.valueOf()-nextDate.valueOf()));
 		}
-		else
+		else if(unit == "hour")
 		{
-			date.setMonth(11);
-			date.setFullYear(date.getFullYear()-1);
+			nextDate.setSeconds(0);
+			nextDate.setMinutes(0);
+			
+			incDate.setTime(nextDate.valueOf());
+			incDate.setHours(nextDate.getHours()+1);
 		}
-		return date;	
+		else if(unit == "day")
+		{
+			nextDate.setSeconds(0);
+			nextDate.setMinutes(0);
+			nextDate.setHours(0);
+			
+			incDate.setTime(nextDate.valueOf());
+			incDate.setDate(nextDate.getDate()+1);
+		}
+		else if(unit == "month")
+		{
+			nextDate.setSeconds(0);
+			nextDate.setMinutes(0);
+			nextDate.setHours(0);
+			nextDate.setDate(1);
+		
+			incDate.setTime(nextDate.valueOf());
+			incDate.setMonth(nextDate.getMonth()+1);
+		}
+		else if (unit == "year")
+		{
+			nextDate.setSeconds(0);
+			nextDate.setMinutes(0);
+			nextDate.setHours(0);
+			nextDate.setDate(1);
+			nextDate.setMonth(0);
+			
+			incDate.setTime(nextDate.valueOf());
+			incDate.setFullYear(nextDate.getFullYear()+1);
+		}
+		var increment =  multiple*(incDate.valueOf()-nextDate.valueOf());
+		while(nextDate.valueOf() <= currentDate.valueOf())
+		{
+			nextDate.setTime(nextDate.valueOf() + increment)
+		}
+	
+		nextTime = Math.floor(nextDate.valueOf()/1000);
+		return nextTime;
 	}
 
+	
 	]]></script>
 
 
 
 
-<rect id='graph-border' x='1' y='1' width='450' height='300' fill='none' stroke='black' stroke-width='1px' shape-rendering="crispEdges"  />	
+<rect id='graph-border' x='1' y='1' width='450' height='300' fill='none' stroke='white' stroke-width='1px' shape-rendering="crispEdges"  />	
 
 
 
@@ -441,6 +441,11 @@
 <text id="major-xtick-label3" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
 <text id="major-xtick-label4" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
 <text id="major-xtick-label5" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
+<text id="major-xtick-label6" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
+<text id="major-xtick-label7" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
+<text id="major-xtick-label8" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
+<text id="major-xtick-label9" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
+<text id="major-xtick-label10" text-anchor="middle" font-family="serif" font-size="14px" >.</text>
 
 
 <path id="yticks" stroke='gray' fill='none' stroke-width="1px" opacity="0.5" shape-rendering="crispEdges" />
@@ -454,7 +459,7 @@
 
 <path id="y-unit-path" d="M 0 300 L 0 150" opacity="0" />
 <use xlink:href="#y-unit-path" fill="none" opacity="0"  />
-<text font-family="serif" font-size="18px" ><textPath id="y-units" xlink:href="#y-unit-path" >.</textPath></text>
+<text font-family="serif" font-size="18px" id="y-unit-container" ><textPath id="y-units" xlink:href="#y-unit-path" >.</textPath></text>
 
 
 <polyline id="plot1" stroke-width="1px"  stroke='blue' fill="blue" opacity="0.75" fill-opacity="0.25"  />
