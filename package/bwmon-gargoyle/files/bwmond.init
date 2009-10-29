@@ -178,8 +178,8 @@ start()
 		qos_upload_chain="qos_egress"
 		qos_download_chain="qos_ingress"
 
-		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "qos-upload-"$2":"$3"/"$4};}' )
-		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "qos-download-"$2":"$3"/"$4};}' )
+		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "up-"$2":"$3"/"$4};}' )
+		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "down-"$2":"$3"/"$4};}' )
 
 		for upload_info in $upload_data ; do
 			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')

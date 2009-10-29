@@ -1,5 +1,5 @@
 /*
- * This program is copyright 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -10,16 +10,22 @@ var qosUploadMonitorIds;
 var qosDownloadMonitorIds;
 
 
-var uploadMonitors;
-var downloadMonitors;
+var uploadMonitors = null;
+var downloadMonitors = null;
+var tableUploadMonitor = null;
+var tableDownloadMonitor = null;
+
 var updateInProgress;
 var graphType;
 
 var ipsWithData = [];
-var qosDownloadIds  = [];
+var qosDownloadClasses  = [];
 var qosDownloadNames = [];
-var qosUploadIds  = [];
+var qosUploadClasses  = [];
 var qosUploadNames = [];
+
+var definedUploadClasses = [];
+var definedDownloadClasses = [];
 
 var updateTotalPlot = null;
 var updateUploadPlot = null;
@@ -42,33 +48,38 @@ function initializePlotsAndTable()
 
 	var haveQosUpload = false;
 	var haveQosDownload = false;
+
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
-		var isQosUpload = (monitorNames[monitorIndex]).match(/qos/) && (monitorNames[monitorIndex]).match(/upload/);
-		var isQosDownload = (monitorNames[monitorIndex]).match(/qos/) && (monitorNames[monitorIndex]).match(/download/);
-		haveQosUpload =   haveQosUpload   || isQosUpload;
-		haveQosDownload = haveQosDownload || isQosDownload;
-		
-		var getQosName = function(idStr)
+		var monId = monitorNames[monitorIndex];
+		if(monId.match(/qos/))
 		{
-			var splitId = idStr.split("-");
+			var isQosUpload = monId.match(/up/);
+			var isQosDownload = monId.match(/down/);
+			haveQosUpload =   haveQosUpload   || isQosUpload;
+			haveQosDownload = haveQosDownload || isQosDownload;
+		
+			var splitId = monId.split("-");
+			splitId.shift();
 			splitId.shift();
 			splitId.pop();
 			splitId.pop();
 			var qosClass = splitId.join("-");
-			var qosName = uciOriginal.get("qos_gargoyle", downClass, "name");
-			return  qosName == "" ? qosClass : qosName;
-		}	
-		if(isQosUpload)
-		{
-			qosUploadIds.push(monitorNames[monitorIndex]);
-			qosUploadNames.push(getQosName(monitorNames[monitorIndex]));
-		}
-		if(isQosDownload)
-		{
-			qosDownloadIds.push(monitorNames[monitorIndex]);
-			qosDownloadNames.push(getQosName(monitorNames[monitorIndex]));
+			var qosName = uciOriginal.get("qos_gargoyle", qosClass, "name");
+			
+			if(isQosUpload && definedUploadClasses[qosClass] == null)
+			{
+				qosUploadClasses.push(qosClass);
+				qosUploadNames.push(qosName);
+				definedUploadClasses[qosClass] = 1;
+			}
+			if(isQosDownload && definedDownloadClasses[qosClass] == null)
+			{
+				qosDownloadClasses.push(qosClass);
+				qosDownloadNames.push(qosName);
+				definedDownloadClasses[qosClass] = 1;
+			}
 		}
 	}
 	if(haveQosUpload)
@@ -85,8 +96,10 @@ function initializePlotsAndTable()
 	}
 	
 
-	/* set defaults, then set loaded values.  That way if loaded
-	 * values are invalid we get the defaults */
+	/* 
+	 * set defaults, then set loaded values.  That way if loaded
+	 * values are invalid we get the defaults
+	 */
 	var timeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "time_frame");
 	var plotIndex;
 	for(plotIndex=1; plotIndex <= 3; plotIndex++)
@@ -127,7 +140,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 	{
 		match1 = graphNonTotal ? "total" + graphTimeFrameIndex + "B" : "total" + graphTimeFrameIndex + "A";
 	}
-	else if(plotType == "qos")
+	else if(plotType.match(/qos/))
 	{
 		match1 = "qos" + graphTimeFrameIndex;
 		match2 = plotId;
@@ -142,7 +155,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 		for(nameIndex=0;nameIndex < monitorNames.length && selectedName == null; nameIndex++)
 		{
 			var name = monitorNames[nameIndex];
-			if(	((name.match("upload") && isUp) || (name.match("download") && !isUp)) &&
+			if(	((name.match("up") && isUp) || (name.match("down") && !isUp)) &&
 				(match1 == "" || name.match(match1)) &&
 				(match2 == "" || name.match(match2)) 
 			)
@@ -185,39 +198,24 @@ function resetPlots()
 			{
 				if(plotId.match(/^[0-9]+\./) == null)
 				{
-					removeAllOptionsFromSelectElement(document.getElementById(plotIdName));
-					var ipIndex=0;
-					for(ipIndex=0; ipIndex < ipsWithData.length; ipIndex++)
-					{
-						addOptionToSelectElement(plotIdName, ipsWithData[ipIndex], ipsWithData[ipIndex]);
-					}
+					setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
 					setSelectedText(plotIdName, ipsWithData[0]);
 				}
 				document.getElementById(plotIdName).style.display="block";
 			}
 			else if(plotType == "qos-upload")
 			{
-				if(selectedId.match(/^qos\-upload\-/) == null)
+				if(definedUploadClasses[plotId] == null)
 				{
-					removeAllOptionsFromSelectElement(document.getElementById(plotIdName));
-					var upIndex=0;
-					for(upIndex=0; upIndex < qosUploadIds.length; upIndex++)
-					{
-						addOptionToSelectElement(plotIdName, qosUploadIds[upIndex], qosUploadNames[upIndex]);
-					}
+					setAllowableSelections(plotIdName, qosUploadClasses, qosUploadNames);
 				}
 				document.getElementById(plotIdName).style.display="block";
 			}
 			else if(plotType == "qos-download")
 			{
-				if(selectedId.match(/^qos\-download\-/) == null)
+				if(definedDownloadClasses[plotId] == null)
 				{
-					removeAllOptionsFromSelectElement(document.getElementById(plotIdName));
-					var downIndex=0;
-					for(downIndex=0; downIndex < qosDownloadMonitorIds.length; downIndex++)
-					{
-						addOptionToSelectElement(plotIdName, qosUploadIds[upIndex], qosUploadNames[upIndex]);
-					}
+					setAllowableSelections(plotIdName, qosDownloadClasses, qosDownloadNames);
 				}
 				document.getElementById(plotIdName).style.display="block";
 			}
@@ -272,8 +270,7 @@ function resetPlots()
 		
 		var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
-		runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; }); 
-
+		runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 	}
 	else
 	{
