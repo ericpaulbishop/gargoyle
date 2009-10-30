@@ -12,7 +12,7 @@
 	echo ""
 
 	if [ -n "$FORM_monitor" ] ; then
-		#bw-stats -m $FORM_monitor
+		date -u "+%s"
 		for id in $FORM_monitor ; do
 			bw_get -i "$id" -h -m
 		done

@@ -288,6 +288,7 @@ function parseMonitors(outputData)
 {
 	var monitors = [ ];
 	var dataLines = outputData.split("\n");
+	var currentDate = parseInt(dataLines.shift());
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{

@@ -210,9 +210,9 @@ function updatePieCharts()
 
 function parseMonitors(outputData)
 {
-	monitors = new Array();
-	dataLines = outputData.split("\n");
-	
+	var monitors = new Array();
+	var dataLines = outputData.split("\n");
+	var currentDate = parseInt(dataLines.shift());	
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
 		if(dataLines[lineIndex].length > 0)
