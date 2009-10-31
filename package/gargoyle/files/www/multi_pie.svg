@@ -25,6 +25,7 @@
 		var otherIndividuals = [];
 		var unselectedColors = [];
 		var selectedColors = [];
+		var orderedNames = [];
 		var numVisible = 0;
 		var numPies = 0;
 		
@@ -107,7 +108,7 @@
 				initialized = true;
 			}
 
-			var orderedNames   = [];
+			orderedNames = [];
 			var orderedLabels  = [];
 			var orderedValues  = [];
 			var otherValueSums = [];
@@ -188,6 +189,24 @@
 			var idIndex;
 			for(idIndex=0; idIndex < orderedLabels.length; idIndex++){ idValues.push([]); }
 
+
+			//construct colorIndex=>orderedIndex hash, since we want to build
+			//pie in order of colors, not of decreasing percentage like labels
+			var colorIndexToOrderedIndex = [];
+			var colorIndex;
+			for(colorIndex=0; colorIndex < unselectedColors.length; colorIndex++)
+			{
+				var matchingId = 0;
+				var matchingIndex;
+				for(matchingIndex = 0; matchingIndex < unselectedColors.length; matchingIndex++)
+				{
+					var name = orderedNames[matchingIndex] != null ? orderedNames[matchingIndex] : "others";
+					var nameUnselectedColor = name == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[name][0];
+					matchingId = (nameUnselectedColor == unselectedColors[colorIndex]) ? matchingIndex : matchingId;
+				}
+				colorIndexToOrderedIndex.push(matchingId);
+			}
+
 			var centerPoints = [];
 			var pieChartPaths = [];
 			var pieIndex;
@@ -220,11 +239,15 @@
 				}
 				
 				pieTotals.push(dataSum);
-				for(dataIndex=0; dataIndex < data.length; dataIndex++)
+				for(colorIndex=0; colorIndex < colorIndexToOrderedIndex.length; colorIndex++)
 				{
+					var dataIndex = colorIndexToOrderedIndex[colorIndex];
 					var idValueList= idValues[dataIndex];
 					idValueList.push( data[dataIndex] );
-					
+					var sliceName = orderedNames[dataIndex] != null ? orderedNames[dataIndex] : "others" ;
+					var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
+					var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
+				
 					if(data[dataIndex] != 0)
 					{
 						var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);
@@ -252,14 +275,14 @@
 							newPath.setAttribute("cy", centerY);
 						}
 					
-						newPath.setAttribute("fill", unselectedColors[dataIndex]);
+						newPath.setAttribute("fill", unselectedColor);
 						newPath.setAttribute("stroke", "black");
 						newPath.setAttribute("stroke-width", regularStrokeWidth);
 						newPath.setAttribute("id", "slice_" + pieIndex + "_" + dataIndex);
 						if(selectedId == dataIndex)
 						{
 							newPath.setAttribute("stroke-width", 2*regularStrokeWidth);
-							newPath.setAttribute("fill", selectedColors[dataIndex]);
+							newPath.setAttribute("fill", selectedColor);
 						}
 					
 						newPath.onmouseover=piePieceSelected;
@@ -288,9 +311,9 @@
 				var baseLabel = orderedLabels[labelIndex];
 				if(baseLabel == null)
 				{
-					baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";
+					baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";	
 				}
-				var labelStr = adjustLabelFunction(orderedLabels[labelIndex], idValues[labelIndex], pieTotals);
+				var labelStr = adjustLabelFunction(baseLabel, idValues[labelIndex], pieTotals);
 				
 				var unselectedColor = unselectedColors[unselectedColors.length-1];
 				var selectedColor = selectedColors[selectedColors.length-1];
@@ -370,9 +393,12 @@
 			if(id == selectedId) { return; }
 			selectedId = id;
 
+			var sliceName = orderedNames[id] != null ? orderedNames[id] : "others" ;
+			var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
+			var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
 
 			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", selectedStroke);
-			svgDoc.getElementById("color_" + id).setAttribute("fill", selectedColors[id]);
+			svgDoc.getElementById("color_" + id).setAttribute("fill", selectedColor);
 			var lab  = svgDoc.getElementById("label_" + id);
 
 			var oldText = lab.firstChild.data;
@@ -392,7 +418,7 @@
 				if(slice != null)
 				{
 					slice.setAttribute("stroke-width", selectedStroke);
-					slice.setAttribute("fill", selectedColors[id]);
+					slice.setAttribute("fill", selectedColor);
 			
 					pieContainer.removeChild(slice);
 					pieContainer.appendChild(slice);
@@ -407,9 +433,13 @@
 			var selectedStroke = 2*regularStroke;
 
 			if(id == selectedId) { selectedId = null; }
-			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", regularStroke);
-			svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColors[id]);
+			var sliceName = orderedNames[id] != null ? orderedNames[id] : "others" ;
+			var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
+			var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
 
+			svgDoc.getElementById("color_" + id).setAttribute("stroke-width", regularStroke);
+			svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColor);
+			
 			var lab  = svgDoc.getElementById("label_" + id);
 			var oldText = lab.firstChild.data;
 			lab.setAttribute("font-weight", "normal");
@@ -426,7 +456,7 @@
 				if(slice != null)
 				{
 					slice.setAttribute("stroke-width", regularStroke);
-					slice.setAttribute("fill", unselectedColors[id]);
+					slice.setAttribute("fill", unselectedColor);
 			
 					pieContainer.removeChild(slice);
 					pieContainer.appendChild(slice);
