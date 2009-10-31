@@ -21,7 +21,7 @@ function initializePlotsAndTable()
 {
 	updateInProgress = false;
 	initFunction();
-	setInterval( 'doUpdate()', 15000);
+	setInterval( 'doUpdate()', 2000);
 }
 
 function initFunction()
@@ -114,7 +114,8 @@ function doUpdate()
 
 					var currentIntervalIndex = getSelectedValue("time_interval");
 					var currentIntervalText = getSelectedText("time_interval");
-					removeAllOptionsFromSelectElement(document.getElementById("time_interval"));
+					var timeIntervalValues = [];
+					var timeIntervalNames = [];
 
 					var nextDate = new Date();
 					nextDate.setTime(latestTime*1000);
@@ -183,9 +184,11 @@ function doUpdate()
 							intervalName = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
 							nextDate.setUTCMonth(nextDate.getUTCMonth()-1);
 						}
-						addOptionToSelectElement("time_interval", intervalName, ""+intervalIndex);
+						timeIntervalNames.push(intervalName);
+						timeIntervalValues.push(""+intervalIndex);
 						nextIntervalStart = nextDate.valueOf()/1000;
 					}
+					setAllowableSelections("time_interval", timeIntervalValues, timeIntervalNames);
 					if(currentIntervalIndex == null || currentIntervalIndex == 0)
 					{
 						setSelectedValue("time_interval", "0");

@@ -904,15 +904,29 @@ function setAllowableSelections(selectId, allowableValues, allowableNames, contr
 {
 	if(controlDocument == null) { controlDocument = document; }
 
-	if(allowableNames != null && allowableValues != null)
+	var selectElement = controlDocument.getElementById(selectId);
+	if(allowableNames != null && allowableValues != null && selectElement != null)
 	{
-		currentSelection=getSelectedValue(selectId, controlDocument);
-		removeAllOptionsFromSelectElement(controlDocument.getElementById(selectId));
-		for(addIndex=0; addIndex < allowableValues.length; addIndex++)
+
+		var doReplace = true;
+		if(allowableValues.length == selectElement.options.length)
 		{
-			addOptionToSelectElement(selectId, allowableNames[addIndex], allowableValues[addIndex], null, controlDocument);
+			doReplace = false;
+			for(optionIndex = 0; optionIndex < selectElement.options.length && (!doReplace); optionIndex++)
+			{
+				doReplace = doReplace || (selectElement.options[optionIndex].text != allowableNames[optionIndex]) || (selectElement.options[optionIndex].value != allowableValues[optionIndex]) ;
+			}
 		}
-		setSelectedValue(selectId, currentSelection, controlDocument); //restore original settings if still valid
+		if(doReplace)
+		{
+			currentSelection=getSelectedValue(selectId, controlDocument);
+			removeAllOptionsFromSelectElement(selectElement);
+			for(addIndex=0; addIndex < allowableValues.length; addIndex++)
+			{
+				addOptionToSelectElement(selectId, allowableNames[addIndex], allowableValues[addIndex], null, controlDocument);
+			}
+			setSelectedValue(selectId, currentSelection, controlDocument); //restore original settings if still valid
+		}
 	}
 }
 

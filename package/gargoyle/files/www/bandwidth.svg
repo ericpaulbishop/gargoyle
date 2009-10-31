@@ -292,7 +292,6 @@
 			
 			nextTick = nextTick + tickSize;
 			tickNum++;
-			
 		}
 		while(tickNum <= 7)
 		{
@@ -310,7 +309,6 @@
 	function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime, graphTop, graphBottom, graphLeft, graphRight)
 	{
 		var minTotalIntervalLength = intervalSeconds*numDisplayIntervals;
-
 		var timeUnit = "minute";
 		var majorTickMultiple;
 		function getMajorTickMultiple( unitSeconds )
