@@ -161,7 +161,7 @@
 				}
 				if(individualLabels.length > individualNames.length)
 				{
-					orderedLabels.push( individualLabels[individualNames.length + 1] );
+					orderedLabels.push( individualLabels[individualLabels.length-1] );
 				}
 				else
 				{
@@ -196,7 +196,7 @@
 			var colorIndex;
 			for(colorIndex=0; colorIndex < unselectedColors.length; colorIndex++)
 			{
-				var matchingId = 0;
+				var matchingId = unselectedColors.length+1;
 				var matchingIndex;
 				for(matchingIndex = 0; matchingIndex < unselectedColors.length; matchingIndex++)
 				{
@@ -243,54 +243,58 @@
 				{
 					var dataIndex = colorIndexToOrderedIndex[colorIndex];
 					var idValueList= idValues[dataIndex];
-					idValueList.push( data[dataIndex] );
-					var sliceName = orderedNames[dataIndex] != null ? orderedNames[dataIndex] : "others" ;
-					var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
-					var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
-				
-					if(data[dataIndex] != 0)
+					if(idValueList != null)
 					{
-						var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);
-						var x= centerX + (radius*Math.cos(angle));
-						var y= centerY + (-1*radius*Math.sin(angle));
-						var xDiff = x - previousX;
-						var yDiff = y - previousY;
-
-
-						var largeArc = angle-radiansPlotted > Math.PI ? 1 : 0;
-						var defaultPathData = "M " + centerX + "," + centerY + " L " + previousX + "," + previousY + " a" + radius + "," + radius + " 0 " + largeArc + ",0 " + xDiff + "," + yDiff + " z";
-
-
-
-						var newPath = svgDoc.createElementNS(svgNs, "path");
-						newPath.setAttribute("d", defaultPathData );
-						newPath.setAttribute("stroke-linejoin", "round");
+						idValueList.push( data[dataIndex] );
 					
-						//special case where we have one slice occupying the whole pie
-						if( data[dataIndex] == dataSum  )
+						var sliceName = orderedNames[dataIndex] != null ? orderedNames[dataIndex] : "others" ;
+						var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
+						var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
+				
+						if(data[dataIndex] != 0)
 						{
-							newPath = svgDoc.createElementNS(svgNs, "circle");
-							newPath.setAttribute("r", radius);
-							newPath.setAttribute("cx", centerX);
-							newPath.setAttribute("cy", centerY);
-						}
+							var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);
+							var x= centerX + (radius*Math.cos(angle));
+							var y= centerY + (-1*radius*Math.sin(angle));
+							var xDiff = x - previousX;
+							var yDiff = y - previousY;
+
+
+							var largeArc = angle-radiansPlotted > Math.PI ? 1 : 0;
+							var defaultPathData = "M " + centerX + "," + centerY + " L " + previousX + "," + previousY + " a" + radius + "," + radius + " 0 " + largeArc + ",0 " + xDiff + "," + yDiff + " z";
+
+
+
+							var newPath = svgDoc.createElementNS(svgNs, "path");
+							newPath.setAttribute("d", defaultPathData );
+							newPath.setAttribute("stroke-linejoin", "round");
 					
-						newPath.setAttribute("fill", unselectedColor);
-						newPath.setAttribute("stroke", "black");
-						newPath.setAttribute("stroke-width", regularStrokeWidth);
-						newPath.setAttribute("id", "slice_" + pieIndex + "_" + dataIndex);
-						if(selectedId == dataIndex)
-						{
-							newPath.setAttribute("stroke-width", 2*regularStrokeWidth);
-							newPath.setAttribute("fill", selectedColor);
-						}
+							//special case where we have one slice occupying the whole pie
+							if( data[dataIndex] == dataSum  )
+							{
+								newPath = svgDoc.createElementNS(svgNs, "circle");
+								newPath.setAttribute("r", radius);
+								newPath.setAttribute("cx", centerX);
+								newPath.setAttribute("cy", centerY);
+							}
 					
-						newPath.onmouseover=piePieceSelected;
-						newPath.onmouseout=piePieceDeselected;
-						pieChartPaths.push(newPath);
-						previousX = x;
-						previousY = y;
-						radiansPlotted = angle;	
+							newPath.setAttribute("fill", unselectedColor);
+							newPath.setAttribute("stroke", "black");
+							newPath.setAttribute("stroke-width", regularStrokeWidth);
+							newPath.setAttribute("id", "slice_" + pieIndex + "_" + dataIndex);
+							if(selectedId == dataIndex)
+							{
+								newPath.setAttribute("stroke-width", 2*regularStrokeWidth);
+								newPath.setAttribute("fill", selectedColor);
+							}
+					
+							newPath.onmouseover=piePieceSelected;
+							newPath.onmouseout=piePieceDeselected;
+							pieChartPaths.push(newPath);
+							previousX = x;
+							previousY = y;
+							radiansPlotted = angle;	
+						}
 					}
 				}
 			}
