@@ -288,7 +288,7 @@ function parseMonitors(outputData)
 {
 	var monitors = [ ];
 	var dataLines = outputData.split("\n");
-	var currentDate = parseInt(dataLines.shift());
+	var currentTime = parseInt(dataLines.shift());
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
@@ -306,7 +306,7 @@ function parseMonitors(outputData)
 			lineIndex++;
 			var points = dataLines[lineIndex].split(",");
 			monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
-			monitors[monitorId][monitorIp] = [points, lastTimePoint ];
+			monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
 		}
 	}
 	return monitors;
@@ -337,8 +337,10 @@ function doUpdate()
 					var plotIntervalLength = 2;
 					var tableNumIntervals = 0;
 					var tableIntervalLength = 2;
-					var lastPlotTimePoint = Math.floor( (new Date()).getTime()/1000 );
-					var lastTableTimePoint = Math.floor( (new Date()).getTime()/1000 );
+					var plotLastTimePoint = Math.floor( (new Date()).getTime()/1000 );
+					var plotCurrentTimePoint = plotLastTimePoint;
+					var tableLastTimePoint = plotLastTimePoint;
+					
 					
 					for(monitorIndex=0; monitorIndex < 4; monitorIndex++)
 					{
@@ -411,11 +413,12 @@ function doUpdate()
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
 									{
-										lastPlotTimePoint = monitorData[ip][1];
+										plotLastTimePoint = monitorData[ip][1];
+										plotCurrentTimePoint = monitorData[ip][2];
 									}
 									else
 									{
-										lastTableTimePoint = monitorData[ip][1];
+										tableLastTimePoint = monitorData[ip][1];
 									}
 
 									//update total point set, assume differences in length
@@ -466,11 +469,11 @@ function doUpdate()
 							tablePointSets.unshift(tableTotal);
 						}
 					}
-					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
-					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
-					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, lastPlotTimePoint, tzMinutes );
+					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
+					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
+					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
 
-					updateBandwidthTable(tablePointSets, tableIntervalLength, lastTableTimePoint);
+					updateBandwidthTable(tablePointSets, tableIntervalLength, tableLastTimePoint);
 				}
 				updateInProgress = false;
 			}
@@ -486,12 +489,12 @@ function twod(num)
 }
 
 
-function updateBandwidthTable(tablePointSets, interval, lastTableTimePoint)
+function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 {
 	var rowData = [];
 	var rowIndex = 0;
 	var displayUnits = getSelectedValue("table_units");
-	var timePoint = lastTableTimePoint;
+	var timePoint = tableLastTimePoint;
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );

@@ -22,33 +22,23 @@
 		svgDoc = evt.target.ownerDocument;
 	}
 
-
-	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastTimePoint, tzm)
+	//note: numDisplay intervals does NOT include last point, which is not a complete interval, so (max) number
+	//of points plotted is numDisplayIntervals+1
+	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalStart, lastTime, tzm)
 	{
+		numDisplayIntervals = parseInt(numDisplayIntervals);
+		lastIntervalStart = parseInt(lastIntervalStart);
+		lastTime = parseInt(lastTime);
 		if(tzm != null)
 		{
-			tzMinutes = tzm;
+			tzMinutes = parseInt(tzm);
 		}
-
-		maxPoint=0;
-		for(plotIndex=0; plotIndex < 3; plotIndex++)
-		{
-			if(pointSets[plotIndex] != null)
-			{
-				points=pointSets[plotIndex];
-				for(pointIndex=0; pointIndex < points.length; pointIndex++)
-				{
-					maxPoint = 1*points[pointIndex] > 1*maxPoint ? points[pointIndex] : maxPoint;
-				}
-			}
-		}
-
 		
-
 
 		var graphRightCoor=Math.floor(rightCoor*85/100);
 		var graphBottomCoor=Math.floor(bottomCoor*85/100);
 		var graphHeight = (graphBottomCoor-topCoor)+1;
+		var graphWidth = (graphRightCoor-leftCoor)+1;
 
 		var borderEl = svgDoc.getElementById("graph-border");
 		borderEl.setAttribute("width", graphRightCoor);
@@ -56,38 +46,104 @@
 		borderEl.setAttribute("stroke", "black");
 		borderEl.setAttribute("stroke-width", Math.ceil(.002*graphHeight) )
 
+		
+		var maxLastIntervalSeconds = getNextTick(intervalLength, 1, lastIntervalStart, 1) - lastIntervalStart;
+		var lastIntervalSeconds = lastTime-lastIntervalStart;
+		var intervalLengths = [ lastIntervalSeconds ];
+		var firstIntervalStart = lastIntervalStart;
 
-		var intervalSeconds = getIntervalSeconds(intervalLength);
-		var xTickUnit = createXTicks(numDisplayIntervals, intervalSeconds, lastTimePoint, topCoor, graphBottomCoor, leftCoor, graphRightCoor)
-		var graphYMax = createYTicks(xTickUnit, intervalSeconds, maxPoint, leftCoor, graphRightCoor, topCoor, graphBottomCoor)
-
-		var pixelsPerInterval = graphRightCoor/(numDisplayIntervals-1);
+		while(intervalLengths.length < numDisplayIntervals+1)
+		{
+			var previousTime = getNextTick(intervalLength, 1, firstIntervalStart, -1) ;
+			intervalLengths.unshift( firstIntervalStart - previousTime );
+			firstIntervalStart = previousTime;
+		}
+		
+		//convert everything into bytes/s and get max
+		//this solves problem of last interval being different length
+		//as well as problem when dealing with months -- they aren't all the same length!
+		var maxPoint=0;
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
 			if(pointSets[plotIndex] != null)
 			{
-				points= pointSets[plotIndex];
-				plotPoints= [ graphRightCoor-Math.floor(points.length*pixelsPerInterval) + "," + graphBottomCoor ];
-				var pointIndex;
-				for(pointIndex = 0; pointIndex < points.length; pointIndex++)
+				var points=pointSets[plotIndex];
+				for(pointIndex=points.length-1; pointIndex >= 0; pointIndex--)
 				{
-					point= points[pointIndex] >= 0 ? points[pointIndex] : 0;
-					yDist= Math.floor(graphBottomCoor*point/graphYMax);
-					plotPoints.push( graphRightCoor-Math.floor((points.length-(pointIndex+1))*pixelsPerInterval) + "," + (graphBottomCoor - yDist) );
+					var intervalIndex = intervalLengths.length-[points.length-pointIndex];
+					points[pointIndex] = parseFloat(points[pointIndex])/intervalLengths[intervalIndex];
+					maxPoint = points[pointIndex] > maxPoint ? points[pointIndex] : maxPoint;
 				}
-				plotPoints.push( graphRightCoor + "," + graphBottomCoor );
+				while(points.length < numDisplayIntervals+1) { points.unshift(0); }
+				pointSets[plotIndex] = points;
+			}
+		}
+
+		//now that we've normalized y data by actual interval lengths, shorten first interval to amount we want to display
+		var realFirstIntervalLength = intervalLengths[0];
+		var firstTime = realFirstIntervalLength > lastIntervalSeconds ? firstIntervalStart + lastIntervalSeconds : firstIntervalStart + Math.floor(lastIntervalSeconds*.95);
+		intervalLengths[0] = realFirstIntervalLength > lastIntervalSeconds ? realFirstIntervalLength - lastIntervalSeconds : realFirstIntervalLength -  Math.floor(lastIntervalSeconds*.95);
+
+		var minIntervalSeconds = getMinIntervalSeconds(intervalLength);
+		var xTickUnit = createXTicks(numDisplayIntervals, minIntervalSeconds, firstTime, lastTime, topCoor, graphBottomCoor, leftCoor, graphRightCoor)
+		var graphYMax = createYTicks(xTickUnit, maxPoint, leftCoor, graphRightCoor, topCoor, graphBottomCoor)
+
+
+		for(plotIndex=0; plotIndex < 3; plotIndex++)
+		{
+			if(pointSets[plotIndex] != null)
+			{
+				var points= pointSets[plotIndex];
+				var plotPoints = [ ];
+				var cumulativeTime = 0;
+				var intervalIndex;
+				for(intervalIndex=0; intervalIndex < intervalLengths.length; intervalIndex++)
+				{
+					
+					var nextY = points[intervalIndex];
+					var y = Math.floor(graphHeight*nextY/graphYMax);
+					if(intervalIndex == 0)
+					{
+						plotPoints.push( leftCoor + "," + graphBottomCoor );
+						plotPoints.push( leftCoor + "," + (graphBottomCoor - y) );
+						if(intervalLengths[0] > realFirstIntervalLength/2)
+						{
+							var midpointTime = (firstIntervalStart-firstTime) + (realFirstIntervalLength/2));
+							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
+							plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+						}
+						cumulativeTime = intervalLengths.length > 1 ? intervalLengths[0] + (intervalLengths[1]/2) : intervalLengths[0];
+					}
+					else if(intervalIndex == intervalLengths.length-1)
+					{
+						if(intervalLengths[intervalIndex] > maxLastIntervalSeconds/2)
+						{
+							var midpointTime = (lastIntervalStart-firstTime) + (maxLastIntervalSeconds/2);
+							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
+							plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+						}
+						plotPoints.push( graphRightCoor + "," + (graphBottomCoor - y) );
+						plotPoints.push( graphRightCoor + "," + graphBottomCoor );
+						plotPoints.push( leftCoor + "," + graphBottomCoor );
+					}
+					else
+					{
+						var x = Math.floor(graphWidth*(cumulativeTime/(lastTime-firstTime)));
+						plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+						cumulativeTime = cumulativeTime +  intervalLengths[intervalIndex]/2 + intervalLengths[intervalIndex+1]/2;
+					}
+				}
 				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("points", plotPoints.join(" "));
 				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
 			}
 			else
 			{
 				svgDoc.getElementById("plot" + (plotIndex+1)).setAttribute("points", "");
-
 			}
 		}
 	}
-	
-	function getIntervalSeconds(intervalLength)
+
+	function getMinIntervalSeconds(intervalLength)
 	{
 		var intervalSeconds = 60;
 		if(intervalLength == "second")
@@ -117,15 +173,14 @@
 		return intervalSeconds;
 	}
 
-
-	function createYTicks(xTickUnit, intervalSeconds, maxPoint, graphLeft, graphRight, graphTop, graphBottom)
+	//max point must be in bytes/s
+	function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, graphBottom)
 	{
 		var timePoints;
 		var yTimeUnit;
 		var rateMultiple = 1024; //report in at least kilobytes
 
-		rateMultiple = intervalSeconds*rateMultiple;
-			
+
 
 		if(xTickUnit == "minute")
 		{
@@ -252,7 +307,7 @@
 		return rateMultiple * maxLogMultiple * Math.pow(10,maxLog); //return raw value of max value on graph
 	}
 
-	function createXTicks(numDisplayIntervals, intervalSeconds, lastTime, graphTop, graphBottom, graphLeft, graphRight)
+	function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime, graphTop, graphBottom, graphLeft, graphRight)
 	{
 		var minTotalIntervalLength = intervalSeconds*numDisplayIntervals;
 
@@ -298,25 +353,22 @@
 
 
 		var graphHeight = graphBottom-graphTop;
-		var firstTime = lastTime-(numDisplayIntervals*intervalSeconds);
-		var nextMinorTick = getNextTick(timeUnit, minorTickMultiple, firstTime);
+		var nextMinorTick = getNextTick(timeUnit, minorTickMultiple, firstTime, 1);
 		var minorPathString= "";
 		while( nextMinorTick < lastTime )
 		{
 			xCoor = graphLeft + Math.floor((graphRight-graphLeft)*(nextMinorTick - firstTime)/( lastTime-firstTime ));
 			minorPathString= minorPathString + "M " + xCoor + " " + graphTop + " L " + xCoor + " " + graphBottom + " ";
-			nextMinorTick = getNextTick(timeUnit, minorTickMultiple, nextMinorTick);
+			nextMinorTick = getNextTick(timeUnit, minorTickMultiple, nextMinorTick, 1);
 		}
-		//alert(minorPathString);
 		svgDoc.getElementById("x-minor-ticks").setAttribute("d", minorPathString);
 		svgDoc.getElementById("x-minor-ticks").setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
-		
 		
 		
 
 		majorPathString= "";
 		tickNum = 1;
-		var nextMajorTick = getNextTick(timeUnit, majorTickMultiple, firstTime);
+		var nextMajorTick = getNextTick(timeUnit, majorTickMultiple, firstTime, 1);
 		while(nextMajorTick < lastTime && tickNum <= 10)
 		{
 			xCoor = graphLeft + Math.floor((graphRight-graphLeft)*(nextMajorTick - firstTime)/(lastTime - firstTime));
@@ -349,7 +401,7 @@
 			labelElement.firstChild.data = tickLabel;
 			
 
-			var nt = getNextTick(timeUnit, majorTickMultiple, nextMajorTick);
+			var nt = getNextTick(timeUnit, majorTickMultiple, nextMajorTick, 1);
 			nextMajorTick = nt;
 			tickNum++;
 		}
@@ -367,22 +419,30 @@
 		return timeUnit;
 	}
 
-	function getNextTick(unit, multiple, currentTime)
+	function getNextTick(unit, multiple, currentTime, incrementDirection)
 	{
+		//direction is either -1 or 1, -1 for previous tick, 1 for next tick
+		incrementDirection = incrementDirection != -1 ? 1 : -1;
+
 		var currentDate = new Date();
 		var nextDate = new Date();
 		var incDate = new Date();
 		currentDate.setTime(currentTime*1000);
-		var nextTime = currentTime + 1;
+		var nextTime = currentTime;
 		nextDate.setTime(nextTime*1000);
 		nextDate.setUTCMinutes(nextDate.getUTCMinutes()+tzMinutes)
 		currentDate.setUTCMinutes(currentDate.getUTCMinutes()+tzMinutes)
-		if(unit == "minute")
+		if(unit == "second")
+		{
+			incDate.setTime(nextDate.getTime());
+			incDate.setUTCSeconds( nextDate.getUTCSeconds() + 1*incrementDirection);
+		}
+		else if(unit == "minute")
 		{
 			nextDate.setUTCSeconds(0);
 			
 			incDate.setTime(nextDate.getTime());
-			incDate.setUTCMinutes( nextDate.getUTCMinutes()+1);
+			incDate.setUTCMinutes( nextDate.getUTCMinutes()+1*incrementDirection);
 		}
 		else if(unit == "hour")
 		{
@@ -390,7 +450,7 @@
 			nextDate.setUTCMinutes(0);
 			
 			incDate.setTime(nextDate.getTime());
-			incDate.setUTCHours(nextDate.getUTCHours()+1);
+			incDate.setUTCHours(nextDate.getUTCHours()+1*incrementDirection);
 		}
 		else if(unit == "day")
 		{
@@ -399,7 +459,7 @@
 			nextDate.setUTCHours(0);
 			
 			incDate.setTime(nextDate.getTime());
-			incDate.setUTCDate(nextDate.getUTCDate()+1);
+			incDate.setUTCDate(nextDate.getUTCDate()+1*incrementDirection);
 		}
 		else if(unit == "month")
 		{
@@ -409,7 +469,7 @@
 			nextDate.setUTCDate(1);
 		
 			incDate.setTime(nextDate.getTime());
-			incDate.setUTCMonth(nextDate.getUTCMonth()+1);
+			incDate.setUTCMonth(nextDate.getUTCMonth()+1*incrementDirection);
 		}
 		else if (unit == "year")
 		{
@@ -420,18 +480,32 @@
 			nextDate.setUTCMonth(0);
 			
 			incDate.setTime(nextDate.getTime());
-			incDate.setUTCFullYear(nextDate.getUTCFullYear()+1);
+			incDate.setUTCFullYear(nextDate.getUTCFullYear()+1*incrementDirection);
+		}
+		else if(parseInt(unit) != "NaN")
+		{
+			incDate.setTime( nextDate.getTime() + incrementDirection*(parseInt(unit)*1000))
 		}
 		var increment =  multiple*(incDate.getTime()-nextDate.getTime());
-		while(nextDate.getTime() <= currentDate.getTime())
+
+		var iter = 0;	
+		while(	(nextDate.getTime() <= currentDate.getTime() && incrementDirection > 0) ||
+			(nextDate.getTime() >= currentDate.getTime() && incrementDirection < 0)
+			)
 		{
 			nextDate.setTime(nextDate.getTime() + increment)
+			iter++;
+			if(iter > 50)
+			{
+				alert("BAD BAD BAD!!!!!\nunit = " + unit + "\ncurrentTime = " + currentTime + ", increment = " + increment)
+				return nextDate;
+
+			}
 		}
 		nextDate.setUTCMinutes( nextDate.getUTCMinutes()-tzMinutes)
 		nextTime = Math.floor(nextDate.getTime()/1000);
 		return nextTime;
 	}
-
 	
 	]]></script>
 
