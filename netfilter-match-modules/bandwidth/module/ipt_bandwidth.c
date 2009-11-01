@@ -907,20 +907,7 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 	}
 	else
 	{
-		if(previous_reset > 0)
-		{
-			next_reset = previous_reset;
-			if(next_reset <= now) /* check just to be sure, if this is not true VERY BAD THINGS will happen */
-			{
-				unsigned long  whole_intervals = (now-next_reset)/info->reset_interval; /* integer gets rounded down */
-				next_reset = next_reset + (whole_intervals*info->reset_interval);
-				while(next_reset <= now)
-				{
-					next_reset = next_reset + info->reset_interval;
-				}
-			}
-		}
-		else if(info->reset_time > 0)
+		if(info->reset_time > 0 && previous_reset > 0 && previous_reset <= now)
 		{
 			if(info->reset_time > now)
 			{
@@ -930,10 +917,24 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 				{
 					next_reset = next_reset + info->reset_interval;
 				}
+				
 			}
 			else /* info->reset_time <= now */
 			{
 				unsigned long whole_intervals = (now-info->reset_time)/info->reset_interval; /* integer gets rounded down */
+				next_reset = info->reset_time + (whole_intervals*info->reset_interval);
+				while(next_reset <= now)
+				{
+					next_reset = next_reset + info->reset_interval;
+				}
+			}
+		}
+		else if(previous_reset > 0)
+		{
+			next_reset = previous_reset;
+			if(next_reset <= now) /* check just to be sure, if this is not true VERY BAD THINGS will happen */
+			{
+				unsigned long  whole_intervals = (now-next_reset)/info->reset_interval; /* integer gets rounded down */
 				next_reset = next_reset + (whole_intervals*info->reset_interval);
 				while(next_reset <= now)
 				{
@@ -2087,10 +2088,7 @@ static int checkentry(	const char *tablename,
 				do_gettimeofday(&test_time);
 				now = test_time.tv_sec;
 				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-				if(info->previous_reset == 0)
-				{
-					info->previous_reset = now;
-				}	
+				info->previous_reset = now;
 				if(info->next_reset == 0)
 				{
 					info->next_reset = get_next_reset_time(info, now, now);
