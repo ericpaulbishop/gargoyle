@@ -909,6 +909,15 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 	{
 		if(info->reset_time > 0 && previous_reset > 0 && previous_reset <= now)
 		{
+			unsigned long adj_reset_time = info->reset_time;
+			unsigned long tz_secs = 60 * sys_tz.tz_minuteswest;
+			if(adj_reset_time < tz_secs)
+			{
+				unsigned long interval_multiple = 1+(tz_secs/info->reset_interval);
+				adj_reset_time = adj_reset_time + (interval_multiple*info->reset_interval);
+			}
+			adj_reset_time = adj_reset_time - tz_secs;
+			
 			if(info->reset_time > now)
 			{
 				unsigned long whole_intervals = ((info->reset_time - now)/info->reset_interval) + 1; /* add one to make sure integer gets rounded UP (since we're subtracting) */
