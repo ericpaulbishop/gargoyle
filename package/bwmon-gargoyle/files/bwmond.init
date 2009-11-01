@@ -80,7 +80,6 @@ start()
 	iptables -t $download_table -N $download_chain
 	iptables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
 	iptables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
-	iptables -t $download_table -A $download_chain  #matches everything to monitor all download bandwidth
 
 
 	
@@ -88,88 +87,85 @@ start()
 	iptables -t $upload_table -N $upload_chain
 	iptables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
 	
+
+	lan_mask=$(uci -p /tmp/state get network.lan.netmask 2>/dev/null)
+	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
+	lan_subnet="$lan_ip/$lan_mask"
+
+
 	minute_s=60;
 	hour_s=$(($minute_s*60));
 	day_s=$(($hour_s*24));
 
-
         total1_interval=2
         total1_num_intervals=449
+	total1_reset_time=2
 
-	total2_interval=$((3*$minute_s))
-	total2_num_intervals=480	        
+	total2_interval="minute"
+	total2_num_intervals=359
 
-	total3_interval="hour"
-	total3_num_intervals=719
+	total3_interval=$((3*$minute_s))
+	total3_num_intervals=479
+	total3_reset_time=$((3*$minute_s))
+
+	total4_interval=$((2*$hour_s))
+	total4_num_intervals=359
+	total4_reset_time=$((2*$hour_s))
 	
-	total4_interval="day"
-	total4_num_intervals=365
+	total5_interval="day"
+	total5_num_intervals=365
 
 	bdist1_interval="minute"
 	bdist1_num_intervals=15
 
-	bdist2_interval="hour"
+	bdist2_interval=$((15*$minute_s))
 	bdist2_num_intervals=24
+	bdist2_reset_time=$((15*$minute_s))
 
-	bdist3_interval="day"
-	bdist3_num_intervals=31
+	bdist3_interval="hour"
+	bdist3_num_intervals=24
 
-	bdist4_interval="month"
-	bdist4_num_intervals=12
+	bdist4_interval="day"
+	bdist4_num_intervals=31
+
+	bdist5_interval="month"
+	bdist5_num_intervals=12
 
 
+	mon_nums="1 2 3 4 5"
+	ids=""
+	for n in $mon_nums ; do
+		total_interval=$(eval "echo \$total"$n"_interval")
+		total_num_intervals=$(eval "echo \$total"$n"_num_intervals")
+		total_reset_time=$(eval "echo \$total"$n"_reset_time")
+		if [ -n "$total_reset_time" ] ; then total_reset_time="--reset_time $total_reset_time" ; fi
 
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total1A-download-$total1_interval-$total1_num_intervals" --reset_interval $total1_interval --intervals_to_save $total1_num_intervals
-	iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total1A-upload-$total1_interval-$total1_num_intervals" --reset_interval $total1_interval --intervals_to_save $total1_num_intervals	
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total1B-download-$bdist1_interval-$bdist1_num_intervals" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
-	iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total1B-upload-$bdist1_interval-$bdist1_num_intervals" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals	
-	ids="total1A-download-$total1_interval-$total1_num_intervals total1A-upload-$total1_interval-$total1_num_intervals" 
-	ids="$ids total1B-download-$bdist1_interval-$bdist1_num_intervals total1B-upload-$bdist1_interval-$bdist1_num_intervals" 
+		bdist_interval=$(eval "echo \$bdist"$n"_interval")
+		bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
+		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
+		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 
-	
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total2A-download-$total2_interval-$total2_num_intervals" --reset_interval $total2_interval --intervals_to_save $total2_num_intervals
-	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total2A-upload-$total2_interval-$total2_num_intervals" --reset_interval $total2_interval --intervals_to_save $total2_num_intervals
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total2B-download-$bdist2_interval-$bdist2_num_intervals" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
-	iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total2B-upload-$bdist2_interval-$bdist2_num_intervals" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals	
-	ids="$ids total2A-download-$total2_interval-$total2_num_intervals total2A-upload-$total2_interval-$total2_num_intervals" 
-	ids="$ids total2B-download-$bdist2_interval-$bdist2_num_intervals total2B-upload-$bdist2_interval-$bdist2_num_intervals" 
-	
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total3A-download-$total3_interval-$total3_num_intervals" --reset_interval $total3_interval --intervals_to_save $total3_num_intervals
-	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total3A-upload-$total3_interval-$total3_num_intervals" --reset_interval $total3_interval --intervals_to_save $total3_num_intervals
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total3B-download-$bdist3_interval-$bdist3_num_intervals" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
-	iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total3B-upload-$bdist3_interval-$bdist3_num_intervals" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals	
-	ids="$ids total3A-download-$total3_interval-$total3_num_intervals total3A-upload-$total3_interval-$total3_num_intervals" 
-	ids="$ids total3B-download-$bdist3_interval-$bdist3_num_intervals total3B-upload-$bdist3_interval-$bdist3_num_intervals" 
-	
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total4A-download-$total4_interval-$total4_num_intervals" --reset_interval $total4_interval --intervals_to_save $total4_num_intervals
-	iptables -t $upload_table -A $upload_chain -m bandwidth --id "total4A-upload-$total4_interval-$total4_num_intervals" --reset_interval $total4_interval --intervals_to_save $total4_num_intervals
-	iptables -t $download_table -A $download_chain -m bandwidth --id "total4B-download-$bdist4_interval-$bdist4_num_intervals" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals
-	iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total4B-upload-$bdist4_interval-$bdist4_num_intervals" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals	
-	ids="$ids total4A-download-$total4_interval-$total4_num_intervals total4A-upload-$total4_interval-$total4_num_intervals" 
-	ids="$ids total4B-download-$bdist4_interval-$bdist4_num_intervals total4B-upload-$bdist4_interval-$bdist4_num_intervals" 
+		
+		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"A-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+		iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total"$n"A-upload-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"B-download-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+		iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total"$n"B-upload-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 
-	
-	#bandwidth distribution monitoring (lower resolution, but retain data for ALL IPs)
-	lan_mask=$(uci -p /tmp/state get network.lan.netmask 2>/dev/null)
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
-	if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
-		lan_subnet="$lan_ip/$lan_mask"
-		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist1-download-$bdist1_interval-$bdist1_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
-		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist1-upload-$bdist1_interval-$bdist1_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
-		ids="$ids bdist1-download-$bdist1_interval-$bdist1_num_intervals bdist1-upload-$bdist1_interval-$bdist1_num_intervals" 
+		next_ids="total"$n"A-download-$total_interval-$total_num_intervals total"$n"A-upload-$total_interval-$total_num_intervals"
+		next_ids="$next_ids total"$n"B-download-$bdist_interval-$bdist_num_intervals total"$n"B-upload-$bdist_interval-$bdist_num_intervals" 
+		if [ -z "$ids" ] ; then
+			ids="$next_ids"
+		else
+			ids="$ids $next_ids"
+		fi
 
-		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist2-download-$bdist2_interval-$bdist2_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
-		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist2-upload-$bdist2_interval-$bdist2_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
-		ids="$ids bdist2-download-$bdist2_interval-$bdist2_num_intervals bdist2-upload-$bdist2_interval-$bdist2_num_intervals" 
-	
-		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist3-download-$bdist3_interval-$bdist3_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
-		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist3-upload-$bdist3_interval-$bdist3_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
-		ids="$ids bdist3-download-$bdist3_interval-$bdist3_num_intervals bdist3-upload-$bdist3_interval-$bdist3_num_intervals" 
+		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
+			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ids="$ids bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
+		fi
 
-		iptables -t $download_table -A $download_chain -m bandwidth --id "bdist4-download-$bdist4_interval-$bdist4_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals
-		iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist4-upload-$bdist4_interval-$bdist4_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist4_interval --intervals_to_save $bdist4_num_intervals
-		ids="$ids bdist4-download-$bdist4_interval-$bdist4_num_intervals bdist4-upload-$bdist4_interval-$bdist4_num_intervals" 
-	fi
+	done
 
 
 	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
@@ -184,22 +180,30 @@ start()
 		for upload_info in $upload_data ; do
 			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')
 			class=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $1; }')
+			for n in $mon_nums ; do
+				bdist_interval=$(eval "echo \$bdist"$n"_interval")
+				bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
+				bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
+				if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 
-			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "qos1-$class-$bdist1_interval-$bdist1_num_intervals" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
-			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "qos2-$class-$bdist2_interval-$bdist2_num_intervals" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
-			iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "qos3-$class-$bdist3_interval-$bdist3_num_intervals" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
-			ids="$ids qos1-$class-$bdist1_interval-$bdist1_num_intervals qos2-$class-$bdist2_interval-$bdist2_num_intervals qos3-$class-$bdist3_interval-$bdist3_num_intervals"
+				iptables -t $upload_table -A $upload_chain -m connmark --mark $mark -m bandwidth --id "qos"$n"-$class-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+				ids="$ids qos"$n"-$class-$bdist_interval-$bdist_num_intervals"
+			done
 		done
 		
 		
 		for download_info in $download_data ; do
 			mark=$(echo $download_info | awk ' BEGIN { FS=":";} { print $2; }')
 			class=$(echo $download_info | awk ' BEGIN { FS=":";} { print $1; }')
-			
-			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "qos1-$class-$bdist1_interval-$bdist1_num_intervals" --reset_interval $bdist1_interval --intervals_to_save $bdist1_num_intervals
-			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "qos2-$class-$bdist2_interval-$bdist2_num_intervals" --reset_interval $bdist2_interval --intervals_to_save $bdist2_num_intervals
-			iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "qos3-$class-$bdist3_interval-$bdist3_num_intervals" --reset_interval $bdist3_interval --intervals_to_save $bdist3_num_intervals
-			ids="$ids qos1-$class-$bdist1_interval-$bdist1_num_intervals qos2-$class-$bdist2_interval-$bdist2_num_intervals qos3-$class-$bdist3_interval-$bdist3_num_intervals"
+			for n in $mon_nums ; do
+				bdist_interval=$(eval "echo \$bdist"$n"_interval")
+				bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
+				bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
+				if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
+
+				iptables -t $download_table -A $download_chain -m connmark --mark $mark -m bandwidth --id "qos"$n"-$class-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+				ids="$ids qos"$n"-$class-$bdist_interval-$bdist_num_intervals"
+			done
 		done
 	fi
 
@@ -232,8 +236,8 @@ stop()
 {
 	touch /etc/crontabs/root
 
-	sh "$backup_script"
-	rm "$backup_script"
+	sh "$backup_script" 2>/dev/null
+	rm -rf "$backup_script"
 
 	cat /etc/crontabs/root | grep -v "$backup_script"> "$tmp_cron"
 	update_cron
