@@ -219,7 +219,7 @@ start()
 		is_total123=$(echo "$i" | egrep "total[123]")
 		is_bdist123=$(echo "$i" | egrep "bdist[123]")
 		is_qos123=$(echo "$i" | egrep "qos[123]")
-		if [ -n "$is_total123" ] || [ -n "$is_bdist123" ] [ -n "$is_qos123" ]  ; then
+		if [ -n "$is_total123" ] || [ -n "$is_bdist123" ] || [ -n "$is_qos123" ]  ; then
 			bw_restore "$i" 1
 		else
 			bw_restore "$i" 0
