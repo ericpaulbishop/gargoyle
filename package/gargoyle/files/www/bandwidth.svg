@@ -101,6 +101,7 @@
 				{
 					
 					var nextY = points[intervalIndex];
+					nextY = nextY == null ? points[intervalIndex-1] : nextY;
 					var y = Math.floor(graphHeight*nextY/graphYMax);
 					if(intervalIndex == 0)
 					{
@@ -110,7 +111,10 @@
 						{
 							var midpointTime = (firstIntervalStart-firstTime) + (realFirstIntervalLength/2);
 							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
-							plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+							if(x != "NaN")
+							{
+								plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+							}
 						}
 						cumulativeTime = intervalLengths.length > 1 ? intervalLengths[0] + (intervalLengths[1]/2) : intervalLengths[0];
 					}
