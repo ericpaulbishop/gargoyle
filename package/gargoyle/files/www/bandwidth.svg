@@ -102,39 +102,41 @@
 					
 					var nextY = points[intervalIndex];
 					nextY = nextY == null ? points[intervalIndex-1] : nextY;
-					var y = Math.floor(graphHeight*nextY/graphYMax);
+					var yOffset = Math.floor(graphHeight*nextY/graphYMax);
+					yOffset = yOffset == null || yOffset+"" == "NaN" ? 0 : yOffset;
+					yOffset = graphBottomCoor - yOffset;
+
 					if(intervalIndex == 0)
 					{
 						plotPoints.push( leftCoor + "," + graphBottomCoor );
-						plotPoints.push( leftCoor + "," + (graphBottomCoor - y) );
+						plotPoints.push( leftCoor + "," + yOffset );
 						if(intervalLengths[0] > realFirstIntervalLength/2)
 						{
 							var midpointTime = (firstIntervalStart-firstTime) + (realFirstIntervalLength/2);
 							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
 							if(x != "NaN")
 							{
-								plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+								plotPoints.push( (leftCoor + x) + "," + yOffset );
 							}
 						}
 						cumulativeTime = intervalLengths.length > 1 ? intervalLengths[0] + (intervalLengths[1]/2) : intervalLengths[0];
 					}
 					else if(intervalIndex == intervalLengths.length-1)
 					{
-						y = y== null || y == "NaN" ? 0 : y;
 						if(intervalLengths[intervalIndex] > maxLastIntervalSeconds/2)
 						{
 							var midpointTime = (lastIntervalStart-firstTime) + (maxLastIntervalSeconds/2);
 							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
-							plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+							plotPoints.push( (leftCoor + x) + "," + yOffset );
 						}
-						plotPoints.push( graphRightCoor + "," + (graphBottomCoor - y) );
+						plotPoints.push( graphRightCoor + "," + yOffset );
 						plotPoints.push( graphRightCoor + "," + graphBottomCoor );
 						plotPoints.push( leftCoor + "," + graphBottomCoor );
 					}
 					else
 					{
 						var x = Math.floor(graphWidth*(cumulativeTime/(lastTime-firstTime)));
-						plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
+						plotPoints.push( (leftCoor + x) + "," + yOffset );
 						cumulativeTime = cumulativeTime +  intervalLengths[intervalIndex]/2 + intervalLengths[intervalIndex+1]/2;
 					}
 				}
@@ -367,7 +369,6 @@
 		svgDoc.getElementById("x-minor-ticks").setAttribute("d", minorPathString);
 		svgDoc.getElementById("x-minor-ticks").setAttribute("stroke-width", Math.ceil(.003*graphHeight) );
 		
-		
 
 		majorPathString= "";
 		tickNum = 1;
@@ -434,6 +435,7 @@
 		nextDate.setUTCMinutes(nextDate.getUTCMinutes()+tzMinutes)
 		currentDate.setUTCMinutes(currentDate.getUTCMinutes()+tzMinutes)
 		var incFunction = null;
+		var multMatchFunction = null;
 		if(unit == "second")
 		{
 			incFunction = function(nextDate)
@@ -443,6 +445,7 @@
 				incDate.setUTCSeconds( nextDate.getUTCSeconds() + 1*incrementDirection);
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return (nextDate.getUTCSeconds() % multiple == 0) ? true : false; }
 		}
 		else if(unit == "minute")
 		{
@@ -454,6 +457,7 @@
 				incDate.setUTCMinutes( nextDate.getUTCMinutes()+1*incrementDirection);
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return ( Math.floor(nextDate.getTime()/(60*1000)) % multiple == 0) ? true : false; }
 		}
 		else if(unit == "hour")
 		{
@@ -466,6 +470,8 @@
 				incDate.setUTCHours(nextDate.getUTCHours()+1*incrementDirection);
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return ( Math.floor(nextDate.getTime()/(60*60*1000)) % multiple == 0) ? true : false; }
+
 		}
 		else if(unit == "day")
 		{
@@ -479,6 +485,7 @@
 				incDate.setUTCDate(nextDate.getUTCDate()+1*incrementDirection);
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return ( Math.floor(nextDate.getTime()/(24*60*60*1000)) % multiple == 0) ? true : false; }
 		}
 		else if(unit == "month")
 		{
@@ -493,7 +500,7 @@
 				incDate.setUTCMonth(nextDate.getUTCMonth()+1*incrementDirection);
 				return incDate;
 			}
-
+			multMatchFunction = function(nextDate,multiple){  return ((nextDate.getUTCMonth() + (12*parseInt(nextDate.getUTCFullYear()))) % multiple == 0) ? true : false; }
 		}
 		else if (unit == "year")
 		{
@@ -510,6 +517,7 @@
 				incDate.setUTCFullYear(nextDate.getUTCFullYear()+1*incrementDirection);
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return (nextDate.getUTCFullYear() % multiple == 0) ? true : false; }
 		}
 		else if(parseInt(unit) != "NaN")
 		{
@@ -519,6 +527,7 @@
 				incDate.setTime( nextDate.getTime() + incrementDirection*(parseInt(unit)*1000));
 				return incDate;
 			}
+			multMatchFunction = function(nextDate,multiple){ return ((nextDate.getTime()/(parseInt(unit)*1000)) % multiple == 0) ? true : false; }
 		}
 
 		//var increment =  multiple*(incDate.getTime()-nextDate.getTime());
@@ -537,7 +546,8 @@
 			{
 				var maxInc = Math.floor(multiple); //if multiple > 0, should always be an integer, but be sure
 				var incrementIndex;
-				for(incrementIndex=0;incrementIndex < maxInc; incrementIndex++)
+				nextDate = incFunction(nextDate);
+				for(incrementIndex=0;incrementIndex < maxInc && (!multMatchFunction(nextDate,multiple)); incrementIndex++)
 				{
 					nextDate = incFunction(nextDate);
 				}
