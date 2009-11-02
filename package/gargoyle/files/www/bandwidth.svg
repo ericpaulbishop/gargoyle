@@ -108,7 +108,7 @@
 						plotPoints.push( leftCoor + "," + (graphBottomCoor - y) );
 						if(intervalLengths[0] > realFirstIntervalLength/2)
 						{
-							var midpointTime = (firstIntervalStart-firstTime) + (realFirstIntervalLength/2));
+							var midpointTime = (firstIntervalStart-firstTime) + (realFirstIntervalLength/2);
 							var x = Math.floor(graphWidth*(midpointTime/(lastTime-firstTime)));
 							plotPoints.push( (leftCoor + x) + "," + (graphBottomCoor - y) );
 						}
@@ -397,7 +397,6 @@
 			labelElement.setAttribute("font-size", Math.ceil(.05*graphHeight) + "px" )
 			labelElement.firstChild.data = ""; //safari shits itself if label doesn't change
 			labelElement.firstChild.data = tickLabel;
-			
 
 			var nt = getNextTick(timeUnit, majorTickMultiple, nextMajorTick, 1);
 			nextMajorTick = nt;
@@ -424,40 +423,57 @@
 
 		var currentDate = new Date();
 		var nextDate = new Date();
-		var incDate = new Date();
 		currentDate.setTime(currentTime*1000);
 		var nextTime = currentTime;
 		nextDate.setTime(nextTime*1000);
 		nextDate.setUTCMinutes(nextDate.getUTCMinutes()+tzMinutes)
 		currentDate.setUTCMinutes(currentDate.getUTCMinutes()+tzMinutes)
+		var incFunction = null;
 		if(unit == "second")
 		{
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCSeconds( nextDate.getUTCSeconds() + 1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCSeconds( nextDate.getUTCSeconds() + 1*incrementDirection);
+				return incDate;
+			}
 		}
 		else if(unit == "minute")
 		{
 			nextDate.setUTCSeconds(0);
-			
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCMinutes( nextDate.getUTCMinutes()+1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCMinutes( nextDate.getUTCMinutes()+1*incrementDirection);
+				return incDate;
+			}
 		}
 		else if(unit == "hour")
 		{
 			nextDate.setUTCSeconds(0);
 			nextDate.setUTCMinutes(0);
-			
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCHours(nextDate.getUTCHours()+1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCHours(nextDate.getUTCHours()+1*incrementDirection);
+				return incDate;
+			}
 		}
 		else if(unit == "day")
 		{
 			nextDate.setUTCSeconds(0);
 			nextDate.setUTCMinutes(0);
 			nextDate.setUTCHours(0);
-			
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCDate(nextDate.getUTCDate()+1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCDate(nextDate.getUTCDate()+1*incrementDirection);
+				return incDate;
+			}
 		}
 		else if(unit == "month")
 		{
@@ -465,9 +481,14 @@
 			nextDate.setUTCMinutes(0);
 			nextDate.setUTCHours(0);
 			nextDate.setUTCDate(1);
-		
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCMonth(nextDate.getUTCMonth()+1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCMonth(nextDate.getUTCMonth()+1*incrementDirection);
+				return incDate;
+			}
+
 		}
 		else if (unit == "year")
 		{
@@ -477,27 +498,51 @@
 			nextDate.setUTCDate(1);
 			nextDate.setUTCMonth(0);
 			
-			incDate.setTime(nextDate.getTime());
-			incDate.setUTCFullYear(nextDate.getUTCFullYear()+1*incrementDirection);
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime(nextDate.getTime());
+				incDate.setUTCFullYear(nextDate.getUTCFullYear()+1*incrementDirection);
+				return incDate;
+			}
 		}
 		else if(parseInt(unit) != "NaN")
 		{
-			incDate.setTime( nextDate.getTime() + incrementDirection*(parseInt(unit)*1000))
+			incFunction = function(nextDate)
+			{
+				var incDate = new Date();
+				incDate.setTime( nextDate.getTime() + incrementDirection*(parseInt(unit)*1000));
+				return incDate;
+			}
 		}
-		var increment =  multiple*(incDate.getTime()-nextDate.getTime());
+
+		//var increment =  multiple*(incDate.getTime()-nextDate.getTime());
 
 		var iter = 0;	
 		while(	(nextDate.getTime() <= currentDate.getTime() && incrementDirection > 0) ||
 			(nextDate.getTime() >= currentDate.getTime() && incrementDirection < 0)
 			)
 		{
-			nextDate.setTime(nextDate.getTime() + increment)
+			if(multiple < 1)
+			{
+				var increment =  multiple*((incFunction(nextDate)).getTime()-nextDate.getTime());
+				nextDate.setTime(nextDate.getTime() + Math.floor(increment))
+			}
+			else
+			{
+				var maxInc = Math.floor(multiple); //if multiple > 0, should always be an integer, but be sure
+				var incrementIndex;
+				for(incrementIndex=0;incrementIndex < maxInc; incrementIndex++)
+				{
+					nextDate = incFunction(nextDate);
+				}
+			}
+			
 			iter++;
-			if(iter > 50)
+			if(iter > (50+multiple))
 			{
 				alert("BAD BAD BAD!!!!!\nunit = " + unit + "\ncurrentTime = " + currentTime + ", increment = " + increment)
 				return nextDate;
-
 			}
 		}
 		nextDate.setUTCMinutes( nextDate.getUTCMinutes()-tzMinutes)
