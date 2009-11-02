@@ -184,6 +184,25 @@ function doUpdate()
 							intervalName = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
 							nextDate.setUTCMonth(nextDate.getUTCMonth()-1);
 						}
+						else
+						{
+							var splitName = uploadName.split(/-/);
+							var numIntervals = splitName.pop();
+							var interval = splitName.pop();
+							if(parseInt(interval) >= 28*24*60*60)
+							{
+								intervalName = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+							}
+							else if(parseInt(interval) >= 24*60*60)
+							{
+								intervalName = monthNames[nextDate.getUTCMonth()] + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+							}
+							else
+							{
+								intervalName = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+							}
+							nextDate.setTime(nextDate.getTime()-(parseInt(interval)*1000));
+						}
 						timeIntervalNames.push(intervalName);
 						timeIntervalValues.push(""+intervalIndex);
 						nextIntervalStart = nextDate.valueOf()/1000;

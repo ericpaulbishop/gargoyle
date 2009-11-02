@@ -113,7 +113,6 @@ function setQosTimeframes()
 
 function updatePieCharts()
 {
-
 	if(!updateInProgress)
 	{
 		updateInProgress=true;

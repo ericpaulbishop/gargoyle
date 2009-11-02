@@ -38,9 +38,10 @@
 			<label class="leftcolumn" for='time_frame' id='time_frame_label'>Distribution Time Frame:</label>
 			<select class="rightcolumn" id="time_frame" onchange="resetTimeFrame()">
 				<option value="bdist1">Minutes</option>
-				<option value="bdist2">Hours</option>
-				<option value="bdist3">Days</option>
-				<option value="bdist4">Months</option>
+				<option value="bdist2">Quarter Hours</option>
+				<option value="bdist3">Hours</option>
+				<option value="bdist4">Days</option>
+				<option value="bdist5">Months</option>
 			</select>
 		</div>
 

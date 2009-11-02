@@ -34,9 +34,10 @@
 			<label for='plot_time_frame' id='time_frame_label'>Time Frame:</label>
 			<select id="plot_time_frame" onchange="resetPlots()">
 				<option value="1">15 Minutes</option>
-				<option value="2">24 Hours</option>
-				<option value="3">30 Days</option>
-				<option value="4">1 Year</option>
+				<option value="2"> 6 Hours</option>
+				<option value="3">24 Hours</option>
+				<option value="4">30 Days</option>
+				<option value="5"> 1 Year</option>
 			</select>
 		</div>
 
@@ -78,9 +79,10 @@
 			<label for='table_time_frame' class="narrowleftcolumn" id='table_time_frame_label'>Display Interval:</label>
 			<select id="table_time_frame" class="rightcolumn" onchange="resetPlots()">
 				<option value="1">Minutes</option>
-				<option value="2">Hours</option>
-				<option value="3">Days</option>
-				<option value="4">Months</option>
+				<option value="2">Quarter Hours</option>
+				<option value="3">Hours</option>
+				<option value="4">Days</option>
+				<option value="5">Months</option>
 			</select>
 		</div>
 		<div>

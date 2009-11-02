@@ -40,8 +40,8 @@
 			<label class="leftcolumn" for="upload_timeframe">Upload Time Frame:</label>
 			<select class="rightcolumn" id="upload_timeframe" onchange="setQosTimeframes()">
 				<option value="15m">15 Minutes</option>
-				<option value="15h">15 Hours</option>
-				<option value="15d">15 Days</option>
+				<option value="24h">24 Hours</option>
+				<option value="15d">30 Days</option>
 			</select>
 		</div>
 		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
@@ -53,8 +53,8 @@
 		<label class="leftcolumn" for="download_timeframe">Download Time Frame:</label>
 			<select class="rightcolumn" id="download_timeframe" onchange="setQosTimeframes()">
 				<option value="15m">15 Minutes</option>
-				<option value="15h">15 Hours</option>
-				<option value="15d">15 Days</option>
+				<option value="15h">24 Hours</option>
+				<option value="15d">30 Days</option>
 			</select>
 		</div>
 		<div><embed id="download_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>

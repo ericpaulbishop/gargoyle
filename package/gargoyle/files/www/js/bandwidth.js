@@ -230,8 +230,9 @@ function resetPlots()
 			}
 			else
 			{
-				var lowRes = plotType == "total" && tableTimeFrameIndex == 3 ? false : true;
-				tableTimeFrameIndex =  lowRes ? tableTimeFrameIndex : 4;
+				//for interval=days, display total, query high-res total 1 year monitor, otherwise the low res monitor
+				var lowRes = plotType == "total" && tableTimeFrameIndex == 4 ? false : true;
+				tableTimeFrameIndex =  lowRes ? tableTimeFrameIndex : 5;
 				tableUploadMonitor   = getMonitorId(true,  tableTimeFrameIndex, plotType, plotId, lowRes);
 				tableDownloadMonitor = getMonitorId(false, tableTimeFrameIndex, plotType, plotId, lowRes);
 			}
@@ -389,7 +390,6 @@ function doUpdate()
 									{
 										tableNumIntervals = splitName.pop();
 										tableIntervalLength = splitName.pop();
-
 									}
 
 									//select ip based on selected value in plot (or first available if none selected)
@@ -498,7 +498,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
-	var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
 		var colIndex = 0;
@@ -511,7 +511,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 			vals.push(parseBytes(val, displayUnits));
 		}
 
-		var timeStr = "" + timeStr;
+		var timeStr = "";
 		if(interval.match(/minute/))
 		{
 			timeStr = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
@@ -534,7 +534,19 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		}
 		else if(parseInt(interval) != "NaN")
 		{
-			nextDate.setTime((timePoint-parseInt(interval))*1000)
+			if(parseInt(interval) >= 28*24*60*60)
+			{
+				timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+			}
+			else if(parseInt(interval) >= 24*60*60)
+			{
+				timeStr = monthNames[nextDate.getUTCMonth()] + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+			}
+			else
+			{
+				timeStr = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+			}
+			nextDate.setTime(nextDate.getTime()-(parseInt(interval)*1000));
 		}
 		vals.unshift(timeStr);
 		rowData.push(vals);
