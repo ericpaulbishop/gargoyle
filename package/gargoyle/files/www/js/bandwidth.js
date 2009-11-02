@@ -235,6 +235,8 @@ function resetPlots()
 				tableTimeFrameIndex =  lowRes ? tableTimeFrameIndex : 5;
 				tableUploadMonitor   = getMonitorId(true,  tableTimeFrameIndex, plotType, plotId, lowRes);
 				tableDownloadMonitor = getMonitorId(false, tableTimeFrameIndex, plotType, plotId, lowRes);
+				tableUploadMonitor = tableUploadMonitor == null ? "" : tableUploadMonitor;
+				tableDownloadMonitor = tableDownloadMonitor == null ? "" : tableDownloadMonitor;
 			}
 		}
 		plotsInitializedToDefaults = true;
@@ -275,7 +277,7 @@ function resetPlots()
 	}
 	else
 	{
-		setTimeout( "resetPlots()", 100); //try again in 100 milliseconds
+		setTimeout( "resetPlots()", 25); //try again in 25 milliseconds
 		if(  updateTotalPlot == null || updateDownloadPlot == null ||  updateUploadPlot == null   )
 		{
 			updateTotalPlot = getEmbeddedSvgPlotFunction("total_plot");

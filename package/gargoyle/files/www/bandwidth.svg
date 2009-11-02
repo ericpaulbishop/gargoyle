@@ -120,6 +120,7 @@
 					}
 					else if(intervalIndex == intervalLengths.length-1)
 					{
+						y = y== null || y == "NaN" ? 0 : y;
 						if(intervalLengths[intervalIndex] > maxLastIntervalSeconds/2)
 						{
 							var midpointTime = (lastIntervalStart-firstTime) + (maxLastIntervalSeconds/2);
