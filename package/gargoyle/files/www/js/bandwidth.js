@@ -129,8 +129,15 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 	}
 	else if(plotType.match(/qos/))
 	{
-		match1 = "qos" + graphTimeFrameIndex;
-		match2 = plotId;
+		if( (isUp && plotType.match(/up/)) || ( (!isUp) && plotType.match(/down/)) )
+		{
+			match1 = "qos" + graphTimeFrameIndex;
+			match2 = plotId;
+		}
+		else
+		{
+			plotType = "none"; //forces us to return null
+		}
 	}
 	else if(plotType == "ip")
 	{
@@ -159,8 +166,10 @@ function resetPlots()
 {
 	if(!updateInProgress && updateUploadPlot != null && updateDownloadPlot != null)
 	{
-		var oldUploadMonitors = uploadMonitors.join("\n");
-		var oldDownloadMonitors = downloadMonitors.join("\n");
+		var oldTableDownloadMonitor = tableDownloadMonitor;
+		var oldTableUploadMonitor = tableUploadMonitor;
+		var oldDownloadMonitors = downloadMonitors.join("\n") + "\n";
+		var oldUploadMonitors = uploadMonitors.join("\n") ;
 
 		uploadMonitors = [];
 		downloadMonitors = [];
@@ -242,7 +251,7 @@ function resetPlots()
 		plotsInitializedToDefaults = true;
 		
 
-		if(oldUploadMonitors != uploadMonitors.join("\n") || oldDownloadMonitors != downloadMonitors.join("\n") )
+		if(oldUploadMonitors != uploadMonitors.join("\n") || oldDownloadMonitors != downloadMonitors.join("\n") || oldTableUploadMonitor != tableUploadMonitor || oldTableDownloadMonitor != tableDownloadMonitor )
 		{
 			doUpdate();
 		}
