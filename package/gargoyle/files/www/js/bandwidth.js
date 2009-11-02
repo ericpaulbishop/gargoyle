@@ -198,6 +198,7 @@ function resetPlots()
 				{
 					setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
 					setSelectedText(plotIdName, ipsWithData[0]);
+					plotId = ipsWithData[0];
 				}
 				document.getElementById(plotIdVisName).style.display="block";
 			}
@@ -206,6 +207,7 @@ function resetPlots()
 				if(definedUploadClasses[plotId] == null)
 				{
 					setAllowableSelections(plotIdName, qosUploadClasses, qosUploadNames);
+					plotId = qosUploadClasses[0]
 				}
 				document.getElementById(plotIdVisName).style.display="block";
 			}
@@ -214,6 +216,7 @@ function resetPlots()
 				if(definedDownloadClasses[plotId] == null)
 				{
 					setAllowableSelections(plotIdName, qosDownloadClasses, qosDownloadNames);
+					plotId = qosDownloadClasses[0];
 				}
 				document.getElementById(plotIdVisName).style.display="block";
 			}
@@ -236,6 +239,8 @@ function resetPlots()
 			{
 				uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
 				downloadMonitors[plotNum-1] = getMonitorId(false, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
+				uploadMonitors[plotNum-1] = uploadMonitors[plotNum-1] == null ? "" : uploadMonitors[plotNum-1];
+				downloadMonitors[plotNum-1] = downloadMonitors[plotNum-1] == null ? "" : downloadMonitors[plotNum-1];
 			}
 			else
 			{
