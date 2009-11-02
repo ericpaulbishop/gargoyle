@@ -37,11 +37,14 @@
 	<fieldset id="upload_container">
 		<legend class="sectionheader">QoS Upload Bandwidth Distribution</legend>
 		<div>
-			<label class="leftcolumn" for="upload_timeframe">Upload Time Frame:</label>
-			<select class="rightcolumn" id="upload_timeframe" onchange="setQosTimeframes()">
-				<option value="15m">15 Minutes</option>
-				<option value="24h">24 Hours</option>
-				<option value="15d">30 Days</option>
+			<label class="leftcolumn" for="up_timeframe">Upload Time Frame:</label>
+			<select class="rightcolumn" id="up_timeframe" onchange="setQosTimeframes()">
+				<option value="1">Minute</option>
+				<option value="2">Quarter Hour</option>
+				<option value="3">Hour</option>
+				<option value="4">Day</option>
+				<option value="5">Month</option>
+
 			</select>
 		</div>
 		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
@@ -50,11 +53,13 @@
 	<fieldset id="download_container">
 		<legend class="sectionheader">QoS Download Bandwidth Distribution</legend>
 		<div>
-		<label class="leftcolumn" for="download_timeframe">Download Time Frame:</label>
-			<select class="rightcolumn" id="download_timeframe" onchange="setQosTimeframes()">
-				<option value="15m">15 Minutes</option>
-				<option value="15h">24 Hours</option>
-				<option value="15d">30 Days</option>
+		<label class="leftcolumn" for="down_timeframe">Download Time Frame:</label>
+			<select class="rightcolumn" id="down_timeframe" onchange="setQosTimeframes()">
+				<option value="1">Minute</option>
+				<option value="2">Quarter Hour</option>
+				<option value="3">Hour</option>
+				<option value="4">Day</option>
+				<option value="5">Month</option>
 			</select>
 		</div>
 		<div><embed id="download_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>

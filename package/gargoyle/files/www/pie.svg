@@ -128,13 +128,23 @@
 				defaultPaths[ ""+dataIndex ] = defaultPathData;
 				*/
 
-
-				newPath = svgDoc.createElementNS(svgNs, "path");
-				newPath.setAttribute("d", defaultPathData );
+				var newPath;
+				if(data[dataIndex] == dataSum)
+				{
+					newPath = svgDoc.createElementNS(svgNs, "circle");
+					newPath.setAttribute("r", radius);
+					newPath.setAttribute("cx", centerX);
+					newPath.setAttribute("cy", centerY);
+				}
+				else
+				{
+					newPath = svgDoc.createElementNS(svgNs, "path");
+					newPath.setAttribute("d", defaultPathData );
+					newPath.setAttribute("stroke-linejoin", "round");
+				}
 				newPath.setAttribute("fill", unselectedColors[dataIndex]);
 				newPath.setAttribute("stroke", "black");
 				newPath.setAttribute("stroke-width", "1");
-				newPath.setAttribute("stroke-linejoin", "round");
 				newPath.setAttribute("id", "slice_" + dataIndex);
 				if(selectedId == dataIndex)
 				{
@@ -214,7 +224,7 @@
 			for(index=0; index < 3; index++)
 			{
 				var c = unselectedRgb[index];
-				c = c == 0 ? 0 : ( c > 35 ? c-35 : 1 );
+				c = Math.ceil(c*.45)
 				selectedRgb[index] = c;
 			}
 			return selectedRgb;

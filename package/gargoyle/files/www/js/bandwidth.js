@@ -319,8 +319,8 @@ function doUpdate()
 	if(updateUploadPlot != null && updateDownloadPlot != null && updateTotalPlot != null)
 	{
 		updateInProgress = true;
-		var monitorNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ") + " " + tableDownloadMonitor + " " + tableUploadMonitor ;
-		var param = getParameterDefinition("monitor", monitorNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var monitorQueryNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ") + " " + tableDownloadMonitor + " " + tableUploadMonitor ;
+		var param = getParameterDefinition("monitor", monitorQueryNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			var monitors=null;

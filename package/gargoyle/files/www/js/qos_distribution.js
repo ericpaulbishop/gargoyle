@@ -1,13 +1,15 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-var uploadClassIds;
-var downloadClassIds;
+var uploadClassIds = [];
+var downloadClassIds = [];
+var uploadClassNames = [];
+var downloadClassNames = [];
 
 var uploadUpdateInProgress = false;
 var downloadUpdateInProgress = false;
@@ -31,32 +33,42 @@ function getEmbeddedSvgSetFunction(embeddedId)
 function initializePieCharts()
 {
 	
-	uploadClassIds = new Array();
-	downloadClassIds = new Array();
+	uploadClassIds = [];
+	downloadClassIds = [];
+	uploadClassNames = [];
+	downloadClassNames = [];
 
-	upIdHash = [];
-	downIdHash = [];
+	var definedUploadClasses = [];
+	var definedDownloadClasses = [];
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
-		if(monitorNames[monitorIndex].match(/^qos\-upload\-/))
+		var monId = monitorNames[monitorIndex];
+		if(monId.match(/qos/))
 		{
+			var isQosUpload = monId.match(/up/);
+			var isQosDownload = monId.match(/down/);
+		
+			var splitId = monId.split("-");
+			splitId.shift();
+			splitId.shift();
+			splitId.pop();
+			splitId.pop();
+			var qosClass = splitId.join("-");
+			var qosName = uciOriginal.get("qos_gargoyle", qosClass, "name");
 			
-			classId=monitorNames[monitorIndex].match(/os\-upload\-(.*)-[^\-]+$/)[1];
-			upIdHash[classId] = 1;
+			if(isQosUpload && definedUploadClasses[qosClass] == null)
+			{
+				uploadClassIds.push(qosClass);
+				uploadClassNames.push(qosName);
+				definedUploadClasses[qosClass] = 1;
+			}
+			if(isQosDownload && definedDownloadClasses[qosClass] == null)
+			{
+				downloadClassIds.push(qosClass);
+				downloadClassNames.push(qosName);
+				definedDownloadClasses[qosClass] = 1;
+			}
 		}
-		else if(monitorNames[monitorIndex].match(/^qos\-download\-/))
-		{
-			classId=monitorNames[monitorIndex].match(/os\-download\-(.*)-[^\-]+$/)[1];
-			downIdHash[classId] = 1;
-		}
-	}
-	for(id in upIdHash)
-	{
-		uploadClassIds.push(id);
-	}
-	for(id in downIdHash)
-	{
-		downloadClassIds.push(id);
 	}
 
 	initializePies = function()
@@ -110,6 +122,45 @@ function setQosTimeframes()
 		}
 	}
 }
+function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal)
+{
+	var nameIndex;
+	var selectedName = null;
+	
+	var match1 = "";
+	var match2 = "";
+
+	if(plotType == "total")
+	{
+		match1 = graphNonTotal ? "total" + graphTimeFrameIndex + "B" : "total" + graphTimeFrameIndex + "A";
+	}
+	else if(plotType.match(/qos/))
+	{
+		match1 = "qos" + graphTimeFrameIndex;
+		match2 = plotId;
+	}
+	else if(plotType == "ip")
+	{
+		match1 = "bdist" + graphTimeFrameIndex;
+	}
+	
+	if(plotType != "none")
+	{
+		for(nameIndex=0;nameIndex < monitorNames.length && selectedName == null; nameIndex++)
+		{
+			var name = monitorNames[nameIndex];
+			if(	((name.match("up") && isUp) || (name.match("down") && !isUp)) &&
+				(match1 == "" || name.match(match1)) &&
+				(match2 == "" || name.match(match2)) 
+			)
+			{
+				selectedName = name;
+			}
+		}
+	}
+	return selectedName;
+}
+
 
 function updatePieCharts()
 {
@@ -117,19 +168,19 @@ function updatePieCharts()
 	{
 		updateInProgress=true;
 		
-		var directions = ["upload", "download" ];
-		var monitorNames = [];
+		var directions = ["up", "down" ];
+		var monitorQueryNames = [];
 		for(directionIndex = 0; directionIndex < directions.length; directionIndex++)
 		{
 			var direction = directions[directionIndex];
-			var classIdList = direction == "upload" ? uploadClassIds : downloadClassIds;
-			var timeFrame = getSelectedValue(direction + "_timeframe");
+			var classIdList = direction == "up" ? uploadClassIds : downloadClassIds;
+			var timeFrameIndex = parseInt(getSelectedValue(direction + "_timeframe"));
 			for(classIndex=0; classIndex < classIdList.length; classIndex++)
 			{
-				monitorNames.push("qos-" + direction + "-" + classIdList[classIndex] + "-" + timeFrame);
+				monitorQueryNames.push( getMonitorId((direction == "up" ? true : false), timeFrameIndex, "qos", classIdList[classIndex], true) );
 			}
 		}
-		var param = getParameterDefinition("monitor", monitorNames.join(" ")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var param = getParameterDefinition("monitor", monitorQueryNames.join(" ")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 
 		var stateChangeFunction = function(req)
@@ -137,7 +188,7 @@ function updatePieCharts()
 			if(req.readyState == 4)
 			{
 				var monitors = parseMonitors(req.responseText);
-				var directions = ["upload", "download" ];
+				var directions = ["up", "down" ];
 				var uploadClassData = [];
 				var uploadClassLabels = [];
 				var downloadClassData = [];
@@ -149,47 +200,50 @@ function updatePieCharts()
 					var totalSum = 0;
 					var classLabels = [];
 					var directionMonitorNames = [];
-					for(nameIndex=0; nameIndex < monitorNames.length; nameIndex++)
+					for(nameIndex=0; nameIndex < monitorQueryNames.length; nameIndex++)
 					{
-						if(monitorNames[nameIndex].indexOf("qos-" + direction) >= 0)
+						if(monitorQueryNames[nameIndex].match(direction))
 						{
-							var classSum = 1;
-							var monitor = monitors[ monitorNames[nameIndex] ];
+							var classSum = 0;
+							var monitor = monitors[ monitorQueryNames[nameIndex] ];
 							if( monitor != null)
 							{
-
 								var points = monitor[0];
-								for(pointIndex=0; pointIndex < points.length; pointIndex++)
-								{
-									classSum = (1*classSum) + (1*(points[pointIndex] >= 0 ? points[pointIndex] : 0));
-								}
-								classData.push(classSum);
-								directionMonitorNames.push( monitorNames[nameIndex] );
-								totalSum = totalSum + classSum;
+								classSum = parseInt(points[points.length-1]);
 							}
+							classData.push(classSum);
+							totalSum = totalSum + classSum;
 						}
 					}
-					totalSum = totalSum + classData.length;
-					for(nameIndex=0; nameIndex < directionMonitorNames.length; nameIndex++)
+					var sumIsZero = totalSum == 0 ? true : false;
+					if(sumIsZero)
 					{
-						var classSum = 1;
-						var monitor = monitors[ directionMonitorNames[nameIndex] ];
-						var classIdList = direction == "upload" ? uploadClassIds : downloadClassIds;
-						var className = uciOriginal.get("qos_gargoyle", classIdList[nameIndex], "name");
-						className = className == ""  ? classIdList[nameIndex] : className;
-						var percentage = "(" + truncateDecimal( 100*(classData[nameIndex]-1)/totalSum ) + "%)";
-						classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1)) + " " + percentage);
+						var classIndex; 
+						for(classIndex=0; classIndex < classData.length; classIndex++)
+						{
+							classData[classIndex] = 1;
+							totalSum++;
+						}
 					}
-					if(direction == "upload")
+					for(nameIndex=0; nameIndex < classData.length; nameIndex++)
 					{
-						uploadClassData = classData;
-						uploadClassLabels = classLabels;
+						var classNameList = direction.match("up") ? uploadClassNames : downloadClassNames;
+						className = classNameList[nameIndex];
+						if(sumIsZero)
+						{
+							var percentage = "(" + truncateDecimal( 100*(1/classData.length) ) + "%)";
+							classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1)) + " " + percentage);
+						}
+						else
+						{
+							var percentage = "(" + truncateDecimal( 100*(classData[nameIndex])/totalSum ) + "%)";
+							classLabels.push( className + " - " + parseBytes(classData[nameIndex]) + " " + percentage);
+						}
 					}
-					else
-					{
-						downloadClassData = classData;
-						downloadClassLabels = classLabels;
-					}
+					uploadClassData = direction.match("up") ? classData : uploadClassData;
+					uploadClassLabels = direction.match("up") ? classLabels : uploadClassLabels;
+					downloadClassData = direction.match("down") ? classData : downloadClassData;
+					downloadClassLabels = direction.match("down") ? classLabels : downloadClassLabels;
 				}
 				
 				if(uploadClassData.length > 0 && setUploadPie != null && uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") != "")
@@ -259,7 +313,7 @@ function parseBytes(bytes)
 function truncateDecimal(dec)
 {
 	result = "" + ((Math.ceil(dec*10))/10);
-		return result;
+	return result;
 }
 
 
