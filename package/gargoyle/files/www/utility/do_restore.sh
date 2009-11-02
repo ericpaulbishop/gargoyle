@@ -130,6 +130,30 @@
 
 	new_ip=$(uci get network.lan.ipaddr)
 
+	#remove obsolete bandwidth monitor data, and convert/rename anything relevant
+	rm -rf /tmp/data/bwmon/*15m
+	rm -rf /tmp/data/bwmon/*15h
+	rm -rf /usr/data/bwmon/*15d
+	rm -rf /tmp/data/bwmon/*15m.bw
+	rm -rf /tmp/data/bwmon/*15h.bw
+	rm -rf /usr/data/bwmon/*15d.bw
+
+	if [ -e /usr/data/bwmon/total-upload-1y ] ; then
+		bw_convert /usr/data/bwmon/total-upload-1y /usr/data/bwmon/total-upload-1y.bw
+		rm -rf /usr/data/bwmon/total-upload-1y 
+	fi
+	if [ -e /usr/data/bwmon/total-download-1y ] ; then
+		bw_convert /usr/data/bwmon/total-download-1y /usr/data/bwmon/total-download-1y.bw
+		rm -rf /usr/data/bwmon/total-download-1y 
+	fi
+	if [ -e /usr/data/bwmon/total-upload-1y.bw ] ; then
+		mv /usr/data/bwmon/total-upload-1y.bw /usr/data/bwmon/total5A-upload-day-365.bw
+	fi
+	if [ -e /usr/data/bwmon/total-download-1y.bw ] ; then
+		mv /usr/data/bwmon/total-download-1y.bw /usr/data/bwmon/total5A-download-day-365.bw
+	fi
+
+
 	#overwrite old date, then restart ntpclient and then bwmon
 	#this makes sure that we don't restore crontab that tries
 	#to save bwmon save files when rules don't exist, wiping old bwmon data

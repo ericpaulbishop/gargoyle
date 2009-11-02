@@ -216,13 +216,10 @@ start()
 	
 
 	for i in $ids ; do
-		is_total1=$(echo "$i" | grep "total1")
-		is_total2=$(echo "$i" | grep "total2")
-		is_bdist1=$(echo "$i" | grep "bdist1")
-		is_bdist2=$(echo "$i" | grep "bdist2")
-		is_qos1=$(echo "$i" | grep "qos1")
-		is_qos2=$(echo "$i" | grep "qos2")
-		if [ -n "$is_total1" ] || [ -n "$is_total2" ] || [ -n "$is_bdist1" ] || [ -n "$is_bdist2" ] || [ -n "$is_qos1" ] || [ -n "$is_qos2" ]  ; then
+		is_total123=$(echo "$i" | egrep "total[123]")
+		is_bdist123=$(echo "$i" | egrep "bdist[123]")
+		is_qos123=$(echo "$i" | egrep "qos[123]")
+		if [ -n "$is_total123" ] || [ -n "$is_bdist123" ] [ -n "$is_qos123" ]  ; then
 			bw_restore "$i" 1
 		else
 			bw_restore "$i" 0
