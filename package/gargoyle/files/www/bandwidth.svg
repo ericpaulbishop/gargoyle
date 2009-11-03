@@ -71,7 +71,7 @@
 				for(pointIndex=points.length-1; pointIndex >= 0; pointIndex--)
 				{
 					var intervalIndex = intervalLengths.length-[points.length-pointIndex];
-					points[pointIndex] = parseFloat(points[pointIndex])/intervalLengths[intervalIndex];
+					points[pointIndex] = (intervalLengths[intervalIndex] > 0 && ""+parseFloat(points[pointIndex]) != "NaN") ? parseFloat(points[pointIndex])/intervalLengths[intervalIndex] : 0;
 					maxPoint = points[pointIndex] > maxPoint ? points[pointIndex] : maxPoint;
 				}
 				while(points.length < numDisplayIntervals+1) { points.unshift(0); }
@@ -321,7 +321,7 @@
 		function getMajorTickMultiple( unitSeconds )
 		{
 			var m=1;
-			while((m+1)*4*unitSeconds < minTotalIntervalLength) { m++; }
+			while( minTotalIntervalLength/(m*unitSeconds) > 6 ) { m++; } 
 			return m;
 		}
 		if( minTotalIntervalLength < 4*60*60 )
