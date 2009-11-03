@@ -63,15 +63,15 @@
 		<br/>Traffic between local hosts is not reported.
 	</fieldset>
 	
-
-	<div class="plot_header">Total Bandwidth Usage:</div>
-	<div><embed id="total_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>	
-	
-	<div class="plot_header">Download Bandwidth Usage:</div>
-	<div><embed id="download_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	
-	<div class="plot_header">Upload Bandwidth Usage:</div>
-	<div><embed id="upload_plot" style="margin-left:10px; width:525px; height:400px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
+	<span style="display:block; width:240px; float:left; margin-left:10px; text-align:left; ">Download</span>
+	<span style="margin-left:25px; display:block; width:240px; float:left; text-align:left;">Upload</span>
+	<br/>
+	<embed id="download_plot" style="margin-left:10px; margin-right:10px; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>	
+	<embed id="upload_plot" style="margin-left:10px; margin-right:10px; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+	<br/>	
+	<span style="margin-left:50px;">Total</span>
+	<br/>
+	<embed id="total_plot" style="margin-left:50px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></center>
 	
 	<fieldset id="total_bandwidth_use">
 		<legend class="sectionheader">Bandwidth Usage Table</legend>
