@@ -1621,9 +1621,11 @@ function proofreadText(input, proofFunction, validReturnCode)
 
 
 
-function getEmbeddedSvgWindow(embeddedId)
+function getEmbeddedSvgWindow(embeddedId, controlDocument)
 {
-	var embedElement = document.getElementById( embeddedId );
+	if(controlDocument == null) { controlDocument = document; }
+
+	var embedElement = controlDocument.getElementById( embeddedId );
 	var windowElement = null;
 
 	try

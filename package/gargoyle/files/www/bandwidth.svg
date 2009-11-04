@@ -22,6 +22,10 @@
 	function init(evt)
 	{
 		svgDoc = evt.target.ownerDocument;
+		topCoor=1;                                                                                    
+		leftCoor=1;                                                                                   
+		rightCoor=800;                                                                                
+		bottomCoor=600;
 		
 		var graphRightCoor=Math.floor(rightCoor*85/100);
 		var graphBottomCoor=Math.floor(bottomCoor*85/100);
@@ -79,19 +83,21 @@
 		//this solves problem of last interval being different length
 		//as well as problem when dealing with months -- they aren't all the same length!
 		var maxPoint=0;
+		var adjPointSets = [];
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
 			if(pointSets[plotIndex] != null)
 			{
 				var points=pointSets[plotIndex];
+				var adjPoints = [];
 				for(pointIndex=points.length-1; pointIndex >= 0; pointIndex--)
 				{
 					var intervalIndex = intervalLengths.length-[points.length-pointIndex];
-					points[pointIndex] = (intervalLengths[intervalIndex] > 0 && ""+parseFloat(points[pointIndex]) != "NaN") ? parseFloat(points[pointIndex])/intervalLengths[intervalIndex] : 0;
-					maxPoint = points[pointIndex] > maxPoint ? points[pointIndex] : maxPoint;
+					adjPoints[pointIndex] = (intervalLengths[intervalIndex] > 0 && ""+parseFloat(points[pointIndex]) != "NaN") ? parseFloat(points[pointIndex])/intervalLengths[intervalIndex] : 0;
+					maxPoint = adjPoints[pointIndex] > maxPoint ? adjPoints[pointIndex] : maxPoint;
 				}
-				while(points.length < numDisplayIntervals+1) { points.unshift(0); }
-				pointSets[plotIndex] = points;
+				while(adjPoints.length < numDisplayIntervals+1) { adjPoints.unshift(0); }
+				adjPointSets[plotIndex] = adjPoints;
 			}
 		}
 
@@ -107,17 +113,17 @@
 
 		for(plotIndex=0; plotIndex < 3; plotIndex++)
 		{
-			if(pointSets[plotIndex] != null)
+			if(adjPointSets[plotIndex] != null)
 			{
-				var points= pointSets[plotIndex];
+				var adjPoints= adjPointSets[plotIndex];
 				var plotPoints = [ ];
 				var cumulativeTime = 0;
 				var intervalIndex;
 				for(intervalIndex=0; intervalIndex < intervalLengths.length; intervalIndex++)
 				{
 					
-					var nextY = points[intervalIndex];
-					nextY = nextY == null ? points[intervalIndex-1] : nextY;
+					var nextY = adjPoints[intervalIndex];
+					nextY = nextY == null ? adjPoints[intervalIndex-1] : nextY;
 					var yOffset = Math.floor(graphHeight*nextY/graphYMax);
 					yOffset = yOffset == null || yOffset+"" == "NaN" ? 0 : yOffset;
 					yOffset = graphBottomCoor - yOffset;

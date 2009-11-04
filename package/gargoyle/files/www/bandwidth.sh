@@ -63,16 +63,18 @@
 		<br/>Traffic between local hosts is not reported.
 	</fieldset>
 	
-	<span style="display:block; width:240px; float:left; margin-left:10px; text-align:left; ">Download</span>
-	<span style="margin-left:25px; display:block; width:240px; float:left; text-align:left;">Upload</span>
-	<br/>
-	<embed id="download_plot" style="margin-left:10px; margin-right:10px; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>	
-	<embed id="upload_plot" style="margin-left:10px; margin-right:10px; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
-	<br/>	
-	<span style="margin-left:50px;">Total</span>
-	<br/>
-	<embed id="total_plot" style="margin-left:50px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></center>
-	
+	<fieldset id="bandwidth_graphs">
+		<legend class="sectionheader">Bandwidth Graphs</legend>
+		<span style="margin-bottom:5px; margin-left:0px; display:block; width:240px; float:left; text-align:left; "><strong>Download</strong> (<em><a onclick='expand("Download")' href="#">expand</a></em>)</span>
+		<span style="margin-bottom:5px; margin-left:10px; display:block; width:240px; float:left; text-align:left;"><strong>Upload</strong> (<em><a onclick='expand("Upload")' href="#">expand</a></em>)</span>
+		<br/>
+		<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>	
+		<embed id="upload_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+		<br/>	
+		<span style="margin-bottom:5px; margin-left:0px;"><strong>Total</strong> (<em><a onclick='expand("Total")' href="#">expand</a></em>)</span>
+		<br/>
+		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></center>
+	</fieldset>
 	<fieldset id="total_bandwidth_use">
 		<legend class="sectionheader">Bandwidth Usage Table</legend>
 		<div>

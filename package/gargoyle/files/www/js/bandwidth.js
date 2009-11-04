@@ -32,6 +32,8 @@ var updateDownloadPlot = null;
 var updateInProgress = false;
 var plotsInitializedToDefaults = false;
 
+var expandedWindows = [];
+var expandedFunctions = [];
 
 
 function initializePlotsAndTable()
@@ -102,13 +104,15 @@ function initializePlotsAndTable()
 	downloadMonitors = ["","",""];
 	updateInProgress = false;
 	resetPlots();
-	setInterval( 'doUpdate()', 2000);
+	setInterval(doUpdate, 2000);
 }
 
 
-function getEmbeddedSvgPlotFunction(embeddedId)
+function getEmbeddedSvgPlotFunction(embeddedId, controlDocument)
 {
-	windowElement = getEmbeddedSvgWindow(embeddedId);
+	if(controlDocument == null) { controlDocument = document; }
+
+	windowElement = getEmbeddedSvgWindow(embeddedId, controlDocument);
 	if( windowElement != null)
 	{
 		return windowElement.plotAll;
@@ -291,7 +295,7 @@ function resetPlots()
 	}
 	else
 	{
-		setTimeout( "resetPlots()", 25); //try again in 25 milliseconds
+		setTimeout(resetPlots, 25); //try again in 25 milliseconds
 		if(  updateTotalPlot == null || updateDownloadPlot == null ||  updateUploadPlot == null   )
 		{
 			updateTotalPlot = getEmbeddedSvgPlotFunction("total_plot");
@@ -489,6 +493,25 @@ function doUpdate()
 					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
 					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
 
+					
+					if(expandedFunctions["Total"] != null)
+					{
+						var f = expandedFunctions["Total"] ;
+						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+					}			
+					if(expandedFunctions["Download"] != null)
+					{
+						var f = expandedFunctions["Download"] ;
+						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+					}
+					if(expandedFunctions["Upload"] != null)
+					{
+						var f = expandedFunctions["Upload"] ;
+						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+					}
+
+
+
 					updateBandwidthTable(tablePointSets, tableIntervalLength, tableLastTimePoint);
 				}
 				updateInProgress = false;
@@ -579,3 +602,57 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	tableContainer.appendChild(bwTable);
 }
 
+
+
+function expand(name)
+{
+	var expWindow = expandedWindows[name];
+	var xCoor = 0;
+	var yCoor = 0;
+	if(typeof(expWindow) != "undefined")
+	{
+		try { expWindow.close(); } catch(e){}
+		expWindow = null;
+	}
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+	expWindow= window.open("bandwidth_expand.sh", name + " Bandwidth Plot", "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expandedWindows[name] = expWindow;
+
+	var runOnWindowLoad = function(name)
+	{
+		var loaded = false;
+		var loadWin = expandedWindows[name];
+		if(loadWin.document != null)
+		{
+			if(loadWin.document.getElementById("bandwidth_plot") != null)
+			{
+				var plotTitle = loadWin.document.getElementById("plot_title");
+				if(plotTitle != null)
+				{
+					expandedFunctions[name] = getEmbeddedSvgPlotFunction("bandwidth_plot", loadWin.document);
+					if(expandedFunctions[name] != null)
+					{
+						plotTitle.appendChild(loadWin.document.createTextNode(name + " Bandwidth Usage"));
+						loaded = true;
+					}
+				}
+			}
+		}
+		if(!loaded)
+		{
+			var rerun=function(){ runOnWindowLoad(name); }
+			setTimeout(rerun,250);
+		}
+	}
+	runOnWindowLoad(name);
+}
