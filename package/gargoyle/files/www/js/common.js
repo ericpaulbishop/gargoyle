@@ -185,8 +185,8 @@ function runAjax(method, url, params, stateChangeFunction)
 			
 			req.open("POST", url, true);
 			req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			req.setRequestHeader("Content-length", params.length);
-			req.setRequestHeader("Connection", "close");
+			//req.setRequestHeader("Content-length", params.length);
+			//req.setRequestHeader("Connection", "close");
 			req.send(params);
 		}
 		else if(method == "GET")
