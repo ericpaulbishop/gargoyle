@@ -73,7 +73,7 @@
 		<br/>	
 		<span style="margin-bottom:5px; margin-left:0px;"><strong>Total</strong> (<em><a onclick='expand("Total")' href="#">expand</a></em>)</span>
 		<br/>
-		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></center>
+		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
 	</fieldset>
 	<fieldset id="total_bandwidth_use">
 		<legend class="sectionheader">Bandwidth Usage Table</legend>
