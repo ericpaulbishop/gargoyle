@@ -497,9 +497,25 @@ input.bottom_button:active
 	text-decoration:underline;
 	color:green;
 }
-
-
-
+.pseudo_link
+{
+	cursor:pointer;
+	color:blue;
+	text-decoration:underline;
+	font-style:italic;
+}
+.bandwidth_title_text
+{
+	font-family: verdana, arial, sans-serif;
+	margin-left:0px;
+	margin-bottom:5px;
+	display:block;
+	width:245px;
+	float:left;
+	text-align:left;
+	font-size:14px;
+	color:black;
+}
 
 .plot_header
 {

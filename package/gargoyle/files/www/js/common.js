@@ -195,6 +195,7 @@ function runAjax(method, url, params, stateChangeFunction)
 			req.send(null);
 		}
 	}
+	return req;
 }
 
 // The way we store keys is massively inefficient, but

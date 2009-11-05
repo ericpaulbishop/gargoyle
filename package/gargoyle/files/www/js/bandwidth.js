@@ -35,6 +35,17 @@ var plotsInitializedToDefaults = false;
 var expandedWindows = [];
 var expandedFunctions = [];
 
+var updateInterval = null;
+
+function stopInterval()
+{
+	if(updateInterval != null)
+	{
+		clearInterval(updateInterval);
+	}
+}
+window.onbeforeunload=stopInterval;
+
 
 function initializePlotsAndTable()
 {
@@ -104,7 +115,7 @@ function initializePlotsAndTable()
 	downloadMonitors = ["","",""];
 	updateInProgress = false;
 	resetPlots();
-	setInterval(doUpdate, 2000);
+	updateInterval = setInterval(doUpdate, 2000);
 }
 
 
@@ -168,8 +179,9 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 
 function resetPlots()
 {
-	if(!updateInProgress && updateUploadPlot != null && updateDownloadPlot != null)
+	if( (!updateInProgress) && updateTotalPlot != null && updateUploadPlot != null && updateDownloadPlot != null)
 	{
+		updateInProgress = true;
 		var oldTableDownloadMonitor = tableDownloadMonitor;
 		var oldTableUploadMonitor = tableUploadMonitor;
 		var oldDownloadMonitors = downloadMonitors.join("\n") + "\n";
@@ -259,7 +271,7 @@ function resetPlots()
 		}
 		plotsInitializedToDefaults = true;
 		
-
+		updateInProgress = false;
 		if(oldUploadMonitors != uploadMonitors.join("\n") || oldDownloadMonitors != downloadMonitors.join("\n") || oldTableUploadMonitor != tableUploadMonitor || oldTableDownloadMonitor != tableDownloadMonitor )
 		{
 			doUpdate();
@@ -308,8 +320,13 @@ function resetPlots()
 function parseMonitors(outputData)
 {
 	var monitors = [ ];
-	var dataLines = outputData.split("\n");
+	var dataLines = outputData.split(/[\r\n]+/);
 	var currentTime = parseInt(dataLines.shift());
+	if(""+currentTime == "NaN")
+	{
+		return monitors;
+	}
+
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
@@ -334,21 +351,27 @@ function parseMonitors(outputData)
 }
 
 
+var updateReq = null;
+var updateTimeoutId = null;
 function doUpdate()
 {
-	if(updateUploadPlot != null && updateDownloadPlot != null && updateTotalPlot != null)
+	if(!updateInProgress && updateUploadPlot != null && updateDownloadPlot != null && updateTotalPlot != null)
 	{
 		updateInProgress = true;
 		var monitorQueryNames = uploadMonitors.join(" ") + " " + downloadMonitors.join(" ") + " " + tableDownloadMonitor + " " + tableUploadMonitor ;
 		var param = getParameterDefinition("monitor", monitorQueryNames)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
-			var monitors=null;
 			if(req.readyState == 4)
 			{
-				if(!req.responseText.match(/ERROR/))
+				try{ clearTimeout(updateTimeoutId); }catch(e){}
+				updateReq = null;
+				
+				if(  req.responseText.length > 0 && (!req.responseText.match(/ERROR/)) )
 				{
+
 					var monitors = parseMonitors(req.responseText);
+					
 					var uploadPointSets = [];
 					var downloadPointSets = [];
 					var totalPointSets = [];
@@ -517,7 +540,12 @@ function doUpdate()
 				updateInProgress = false;
 			}
 		}
-		runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
+		var timeoutFun = function()
+		{
+			updateInProgress = false; 
+		}
+		updateReq = runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
+		updateTimeoutId = setTimeout(timeoutFun, 5000);
 	}
 }
 
@@ -643,6 +671,7 @@ function expand(name)
 					if(expandedFunctions[name] != null)
 					{
 						plotTitle.appendChild(loadWin.document.createTextNode(name + " Bandwidth Usage"));
+						loadWin.onbeforeunload=function(){ expandedFunctions[name] = null; expandedWindows[name] = null; }
 						loaded = true;
 					}
 				}

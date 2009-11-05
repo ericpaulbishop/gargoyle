@@ -46,6 +46,11 @@
 	//of points plotted is numDisplayIntervals+1
 	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalStart, lastTime, tzm)
 	{
+		topCoor=1;                                                                                    
+		leftCoor=1;                                                                                   
+		rightCoor=800;                                                                                
+		bottomCoor=600;
+		
 		numDisplayIntervals = parseInt(numDisplayIntervals);
 		lastIntervalStart = parseInt(lastIntervalStart);
 		lastTime = parseInt(lastTime);
