@@ -116,7 +116,7 @@
 		<div>
 			<span style='text-decoration:underline'>Data is comma separated:</span>
 			<br/>
-			<em>[IP],[Direction],[Time Frame],[Interval Start],[Interval End],[Bytes Used]</em>
+			<em>[Direction],[Interval Length],[Intervals Saved],[IP],[Interval Start],[Interval End],[Bytes Used]</em>
 			<br/>
 		</div>
 		<div>
