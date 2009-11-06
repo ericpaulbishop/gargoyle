@@ -15,10 +15,10 @@
 		var svgDoc;
 		var selectedId = null;
 
-		var top=1;
-		var left=1;
-		var bottom=1600;
-		var right=1600;
+		var topCoor=1;
+		var leftCoor=1;
+		var bottomCoor=1600;
+		var rightCoor=1600;
 
 		var initialized = false;
 		var visibleIndividuals = [];
@@ -40,7 +40,7 @@
 			var pieIndex;
 			for(pieIndex = 0; pieIndex < pieValues.length; pieIndex++)
 			{
-			pct = Math.floor((pieValues[pieIndex]*1000)/pieTotals[pieIndex])/10;
+				pct = Math.floor((parseFloat(pieValues[pieIndex])*1000)/pieTotals[pieIndex])/10;
 				pctStr = "" + pct + "%";
 				pcts.push(pctStr);
 			}
@@ -51,6 +51,9 @@
 
 		function setPieChartData(individualNames, pieNames, individualLabels, values, rankIndex, maxIndividualNames, recomputeColorsAndVisible, adjustLabelFunction)
 		{
+			rankIndex = parseInt(rankIndex);
+			maxIndividualNames = parseInt(maxIndividualNames);	
+
 
 			if(!initialized){ recomputeColorsAndVisible = true; }
 			
@@ -134,7 +137,7 @@
 					var valueIndex=0;
 					for(valueIndex=0; valueIndex < numPies; valueIndex++)
 					{
-						otherValueSums[valueIndex] = (otherValueSums[valueIndex] == null ? 0 : otherValueSums[valueIndex]) + values[valueIndex][nextNameIndex] ;
+						otherValueSums[valueIndex] = (otherValueSums[valueIndex] == null ? 0 : otherValueSums[valueIndex]) + parseFloat(values[valueIndex][nextNameIndex]) ;
 					}
 				}
 				else if(visibleIndividuals[nextName] != null  )
@@ -143,7 +146,7 @@
 					orderedLabels.push(nextLabel);
 					for(valueIndex=0; valueIndex < numPies; valueIndex++)
 					{
-						(orderedValues[valueIndex]).push( values[valueIndex][nextNameIndex] );
+						(orderedValues[valueIndex]).push( parseFloat(values[valueIndex][nextNameIndex]) );
 					}
 					if(visibleIndividuals[nextName] == null )
 					{
@@ -169,11 +172,11 @@
 				}
 			}
 			
-			var totalHeight = (bottom-top)+1;
-			var radius = Math.ceil(((right-left)+1)/4); //diameter should never be bigger than 1/2 width
+			var totalHeight = (bottomCoor-topCoor)+1;
+			var radius = Math.ceil(((rightCoor-leftCoor)+1)/4); //diameter should never be bigger than 1/2 width
 			if(numPies > 1)
 			{
-				vertRadius = Math.ceil( (((bottom-top)+1)/(2*numPies))*.85   );
+				vertRadius = Math.ceil( (((bottomCoor-topCoor)+1)/(2*numPies))*.85   );
 				radius = radius < vertRadius ? radius : vertRadius;
 			}
 			var buffer =  Math.floor((totalHeight-(radius*2*numPies))/(2*numPies));
@@ -212,7 +215,7 @@
 			var pieIndex;
 			for(pieIndex=0;pieIndex < numPies; pieIndex++)
 			{
-				var centerX = right-(radius+buffer);
+				var centerX = rightCoor-(radius+buffer);
 				var centerY = (radius+buffer) + (pieIndex*2*(radius+buffer));
 
 				var titleText = svgDoc.createElementNS(svgNs, "text");
@@ -224,7 +227,6 @@
 				titleText.appendChild( svgDoc.createTextNode( pieNames[pieIndex] ));
 				titleText.setAttribute("id", "pie_title_" + pieIndex);
 				pieChartPaths.push(titleText);
-
 
 
 				var radiansPlotted = 0;
@@ -251,9 +253,9 @@
 						var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
 						var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
 				
-						if(data[dataIndex] != 0)
+						if(parseFloat(data[dataIndex]) != 0)
 						{
-							var angle = radiansPlotted + ((2 * Math.PI * data[dataIndex])/dataSum);
+							var angle = radiansPlotted + ((2 * Math.PI * parseFloat(data[dataIndex]))/dataSum);
 							var x= centerX + (radius*Math.cos(angle));
 							var y= centerY + (-1*radius*Math.sin(angle));
 							var xDiff = x - previousX;
@@ -264,11 +266,11 @@
 							var defaultPathData = "M " + centerX + "," + centerY + " L " + previousX + "," + previousY + " a" + radius + "," + radius + " 0 " + largeArc + ",0 " + xDiff + "," + yDiff + " z";
 
 
-
 							var newPath = svgDoc.createElementNS(svgNs, "path");
 							newPath.setAttribute("d", defaultPathData );
 							newPath.setAttribute("stroke-linejoin", "round");
-					
+							
+							
 							//special case where we have one slice occupying the whole pie
 							if( data[dataIndex] == dataSum  )
 							{
@@ -390,7 +392,7 @@
 		function piePieceSelected()
 		{
 			id = this.id.match(/_([^_]*)$/)[1];
-			var totalHeight = (bottom-top)+1;
+			var totalHeight = (bottomCoor-topCoor)+1;
 			var regularStroke = Math.ceil(.0015*totalHeight);
 			var selectedStroke = 2*regularStroke;
 			
@@ -432,7 +434,7 @@
 		function piePieceDeselected()
 		{
 			id = this.id.match(/_([^_]*)$/)[1];
-			var totalHeight = (bottom-top)+1;
+			var totalHeight = (bottomCoor-topCoor)+1;
 			var regularStroke = Math.ceil(.0015*totalHeight);
 			var selectedStroke = 2*regularStroke;
 
