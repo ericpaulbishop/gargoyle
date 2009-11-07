@@ -1807,7 +1807,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			/* time_t last_end    = (time_t) *( (uint64_t*)(buffer + *buffer_index+24)); //not used */
 
 			#ifdef BANDWIDTH_DEBUG
-				printk("setting history with first start = %ld\n", first_start);
+				printk("setting history with first start = %ld, now = %ld\n", first_start, now);
 			#endif
 
 
@@ -1817,6 +1817,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			time_t next_start = first_start - (60 * sys_tz.tz_minuteswest);
 			time_t next_end = get_next_reset_time(iam->info, next_start, next_start);
 			uint32_t node_index=0;
+			uint32_t zero_count=0;
 			bw_history* history = NULL;
 			while(next_start < now)
 			{
@@ -1831,11 +1832,14 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 					initialize_map_entries_for_ip(iam, ip, next_bw);
 					history = get_long_map_element(iam->ip_history_map, (unsigned long)ip);
 				}
+				zero_count = next_bw == 0 ? zero_count+1 : 0;
+
+
 				else if(next_end < now) /* if this is most recent node, don't do update since last node is current bandwidth */ 
 				{
-					int is_nonzero = update_history(history, next_start, next_end, iam->info);
+					update_history(history, next_start, next_end, iam->info);
 					(history->history_data)[ history->current_index ] = next_bw;
-					if(is_nonzero)
+					if(zero_count < history->max_nodes +2)
 					{
 						next_start = next_end;
 						next_end = get_next_reset_time(iam->info, next_start, next_start);
