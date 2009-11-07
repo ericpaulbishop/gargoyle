@@ -103,6 +103,25 @@ int main(int argc, char** argv)
 	list* quota_sections = get_all_sections_of_type(ctx, "firewall", "quota");
 	if(quota_sections->length > 0)
 	{
+		/* load defined base ids */
+		string_map* defined_base_ids = initialize_string_map(0);
+		list* quota_section_buf = initialize_list();
+		while(quota_sections->length > 0)
+		{
+			char* next_quota = shift_list(quota_sections);
+			char* base_id = get_uci_option(ctx, "firewall", next_quota, "id");
+			if(base_id != NULL)
+			{
+				//D, for dummy place holder
+				set_string_map_element(defined_base_ids, base_id, strdup("D") );
+			}
+			push_list(quota_section_buf, next_quota);
+		}
+		unsigned long num_destroyed;
+		destroy_list(quota_sections, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+		quota_sections = quota_section_buf;
+		
+		/* initialize chains */
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N forward_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N egress_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N ingress_quotas 2>/dev/null"), 1);
@@ -135,6 +154,7 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
 
+		/* add rules */
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
 		char* other_quota_section_name = NULL;
 		unlock_bandwidth_semaphore_on_exit();
@@ -178,6 +198,45 @@ int main(int argc, char** argv)
 				}
 				else
 				{
+					/* compute proper base id for rule, adding variable to uci if necessary */
+					char* quota_base_id = get_uci_option(ctx, "firewall", next_quota, "id");
+					if(quota_base_id == NULL)
+					{
+						char id_breaks[] = { ',', ' ', '\t'};
+						unsigned long num_pieces;
+						char** split_ip = split_on_separators(ip, id_breaks, 3, -1, 0, &num_pieces);
+						char* first_ip = dynamic_replace(split_ip[0], "/", "_");
+						free_null_terminated_string_array(split_ip);
+						
+						quota_base_id = strdup(first_ip);
+						unsigned long next_postfix_count = 0;
+						while( get_string_map_element(defined_base_ids, quota_base_id) != NULL)
+						{
+							char next_postfix[20];
+							if(next_postfix_count > 25)
+							{
+								sprintf(next_postfix, "_%c", ('A' + next_postfix_count));
+							}
+							else
+							{
+								sprintf(next_postfix, "_Z%ld", (next_postfix_count - 25));
+							}
+							free(quota_base_id);
+							quota_base_id = dynamic_strcat(2, first_ip, next_postfix);
+						}
+						free(first_ip);
+
+						/* D for dummy place holder */
+						set_string_map_element(defined_base_ids, quota_base_id, strdup("D"));
+						
+						/* add id we've decided on to UCI */
+						char* var_set = dynamic_strcat(4, "firewall.", next_quota, ".id=", quota_base_id);
+						if (uci_lookup_ptr(ctx, &ptr, var_set, true) == UCI_OK)
+						{
+							uci_set(ctx, &ptr);
+						}
+					}
+
 					char* ignore_backup  = get_uci_option(ctx, "firewall", next_quota, "ignore_backup_at_next_restore");
 					int do_restore = 1;
 					if(ignore_backup != NULL)
@@ -195,6 +254,7 @@ int main(int argc, char** argv)
 						}
 					}
 					free(ignore_backup);
+					
 
 
 					char* reset_interval = get_uci_option(ctx, "firewall", next_quota, "reset_interval");
@@ -272,8 +332,7 @@ int main(int argc, char** argv)
 
 						char* limit = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
 					
-						char* type_id = dynamic_replace(ip, "/", "_");
-						type_id = dcat_and_free(&type_id, &(postfixes[type_index]), 1, 0);
+						char* type_id = dynamic_strcat(2, quota_base_id, postfixes[type_index] );
 						
 						/* 
 						 * need to do ip test even if limit is null, because ALL_OTHERS quotas should not apply when any of the three types of explicit limit is defined
@@ -424,6 +483,7 @@ int main(int argc, char** argv)
 						}
 					}
 					free(time_match_str);
+					free(quota_base_id);
 				}
 				free(ip);
 			}
@@ -522,17 +582,7 @@ int main(int argc, char** argv)
 
 void restore_backup_for_id(char* id, char* quota_backup_dir)
 {
-	char* quota_file_name;
-	if(strstr(id, "/") != NULL)
-	{
-		quota_file_name = dynamic_replace(id, "/", "_");
-	}
-	else
-	{
-		quota_file_name = strdup(id);
-	}
-
-	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", quota_file_name);
+	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", id);
 	unsigned long num_ips = 0;
 	time_t last_backup = 0;
 	ip_bw* loaded_backup_data = load_usage_from_file(quota_file_path, &num_ips, &last_backup);
@@ -541,11 +591,10 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 		set_bandwidth_usage_for_rule_id(id, 1, num_ips, last_backup, loaded_backup_data, 5000);
 	}
 	free(quota_file_path);
-	free(quota_file_name);
 }
 
 void delete_chain_from_table(char* table, char* delete_chain)
-{	
+{
 	char *command = dynamic_strcat(3, "iptables -t ", table, " -L --line-numbers 2>/dev/null");
 	unsigned long num_lines = 0;
 	char** table_dump = get_shell_command_output_lines(command, &num_lines );
