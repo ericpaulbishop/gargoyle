@@ -768,12 +768,13 @@ void* remove_long_map_element(long_map* map, unsigned long key)
 unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_returned)
 {
 	unsigned long* key_list = (unsigned long*)malloc((map->num_elements)*sizeof(unsigned long));
+	unsigned long next_key_index;
 	if(key_list == NULL)
 	{
 		*num_keys_returned = 0;
 		return NULL;
 	}
-	unsigned long next_key_index = 0;
+	next_key_index = 0;
 	get_sorted_node_keys(map->root, key_list, &next_key_index, 0);
 	
 	*num_keys_returned = map->num_elements;
@@ -785,13 +786,14 @@ unsigned long* get_sorted_long_map_keys(long_map* map, unsigned long* num_keys_r
 void** get_sorted_long_map_values(long_map* map, unsigned long* num_values_returned)
 {
 	void** value_list = (void**)malloc((map->num_elements+1)*sizeof(void*));
+	unsigned long next_value_index;
+
 	if(value_list == NULL)
 	{
 		*num_values_returned = 0;
 		return NULL;
 	}
-	
-	unsigned long next_value_index = 0;
+	next_value_index = 0;
 	get_sorted_node_values(map->root, value_list, &next_value_index, 0);
 	value_list[map->num_elements] = NULL; /* since we're dealing with pointers make list null terminated */
 

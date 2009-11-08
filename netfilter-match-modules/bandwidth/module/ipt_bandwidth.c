@@ -137,6 +137,10 @@ static time_t backwards_adjust_current_time = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
+	time_t next_end;
+	uint32_t new_num_nodes;
+	uint32_t node_start_index;
+
 
 	bw_history* history = (bw_history*)value;
 
@@ -146,11 +150,11 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	{
 		next_start = backwards_adjust_current_time;
 	}
-	time_t next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
+	next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
 
 
-	uint32_t new_num_nodes = 1; /* there's always at least one, since even when no updates have been performed we have current node */
-	uint32_t node_start_index = history->num_nodes == history->max_nodes ? (history->current_index+1) % history->max_nodes : 0;
+	new_num_nodes = 1; /* there's always at least one, since even when no updates have been performed we have current node */
+	node_start_index = history->num_nodes == history->max_nodes ? (history->current_index+1) % history->max_nodes : 0;
 	
 	history->current_index = node_start_index;
 	if(history->first_start < backwards_adjust_current_time)
@@ -264,6 +268,8 @@ static void shift_timezone_of_id(char* key, void* value);
 static void shift_timezone_of_ip(unsigned long key, void* value);
 static void shift_timezone_of_ip(unsigned long key, void* value)
 {
+	int node_shift;
+
 	#ifdef BANDWIDTH_DEBUG
 		unsigned long* ip = &key;
 		printk("shifting ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
@@ -318,7 +324,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 	}
 
 	/* if we want deletion of nodes to show up at beginning of history (vs right before shift) we need to shift all bws */
-	int node_shift = history->num_nodes - new_num_nodes;
+	node_shift = history->num_nodes - new_num_nodes;
 	if(node_shift > 0)
 	{
 		int adj_index = node_start_index;
@@ -569,13 +575,15 @@ static void clear_ips(unsigned long key, void* value)
 {
 	if(clear_ip_history_map != NULL && clear_ip_map != NULL)
 	{
+		bw_history* history;
+		
 		#ifdef BANDWIDTH_DEBUG
 			unsigned long* ip = &key;
 			printk("clearing ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
 		#endif
 
 		remove_long_map_element(clear_ip_map, key);
-		bw_history* history = (bw_history*)remove_long_map_element(clear_ip_history_map, key);
+		history = (bw_history*)remove_long_map_element(clear_ip_history_map, key);
 		if(history != NULL)
 		{
 			kfree(history->history_data);
@@ -610,6 +618,8 @@ static void reset_histories(unsigned long key, void* value)
 
 static void handle_interval_reset(info_and_maps* iam, time_t now)
 {
+	struct ipt_bandwidth_info* info;
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("now, handling interval reset\n");
 	#endif
@@ -636,7 +646,7 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 		return;
 	}
 
-	struct ipt_bandwidth_info* info = iam->info;
+	info = iam->info;
 	if(info->num_intervals_to_save == 0)
 	{
 		#ifdef BANDWIDTH_DEBUG
@@ -655,6 +665,7 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 	}
 	else
 	{
+		unsigned long num_updates;
 		#ifdef BANDWIDTH_DEBUG
 			printk("doing reset for case where at least one interval is saved\n");
 		#endif
@@ -679,7 +690,7 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 		 * rediculously long loop if interval length is 2 seconds and time was 
 		 * reset to 5 years in the future
 		 */
-		unsigned long num_updates = 0;
+		num_updates = 0;
 		while(info->next_reset <= now && num_updates < info->num_intervals_to_save)
 		{
 			do_reset_delete_ips = initialize_long_map();
@@ -871,8 +882,9 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 			int year_day;
 			int month;
 			long days_since_epoch = now/(60*60*24);
-			u_int16_t* month_start_days;	
-	
+			uint16_t* month_start_days;	
+			time_t alt_reset;
+
 			for (year_index = 0, year = DSE_FIRST; days_since_epoch_for_each_year_start[year_index] > days_since_epoch; year_index++)
 			{
 				year--;
@@ -890,7 +902,7 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 			
 			/* end majority of yoinkage */
 			
-			time_t alt_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month])*(60*60*24) + info->reset_time;
+			alt_reset = (days_since_epoch_for_each_year_start[year_index] + month_start_days[month])*(60*60*24) + info->reset_time;
 			if(alt_reset > now)
 			{
 				next_reset = alt_reset;
@@ -1004,12 +1016,13 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				bw_history *new_history = initialize_history(info->num_intervals_to_save);
 				if(new_history != NULL) /* check for kmalloc failure */
 				{
+					bw_history* old_history;
 					#ifdef BANDWIDTH_DEBUG
 						printk("  malloc succeeded, new history is non-null\n");
 					#endif
 
 					new_bw = (uint64_t*)(new_history->history_data + new_history->current_index);
-					bw_history* old_history = set_long_map_element(ip_history_map, ip, (void*)new_history);
+					old_history = set_long_map_element(ip_history_map, ip, (void*)new_history);
 					if(old_history != NULL)
 					{
 						#ifdef BANDWIDTH_DEBUG
@@ -1026,8 +1039,9 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 			if(new_bw != NULL) /* check for kmalloc failure */
 			{
+				uint64_t* old_bw;
 				*new_bw = initial_bandwidth;
-				uint64_t* old_bw = set_long_map_element(ip_map, ip, (void*)new_bw );
+			       	old_bw = set_long_map_element(ip_map, ip, (void*)new_bw );
 				if(old_bw != NULL)
 				{
 					free(old_bw);
@@ -1052,22 +1066,31 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	return new_bw;
 }
 
-
-static int match(	const struct sk_buff *skb,
-			const struct net_device *in,
-			const struct net_device *out,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-			const struct xt_match *match,
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
+	static bool 
+#else
+	static int
 #endif
-			const void *matchinfo,
-			int offset,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+match(		const struct sk_buff *skb,
+		const struct net_device *in,
+		const struct net_device *out,
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+			const struct xt_match *match,
+		#endif
+		const void *matchinfo,
+		int offset,
+		#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
 			unsigned int protoff,
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+		#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 			const void *hdr,
 			u_int16_t datalen,
-#endif
-			int *hotdrop)
+		#endif
+		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
+			bool *hotdrop
+		#else
+			int *hotdrop
+		#endif	
+			)
 {
 	struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)matchinfo)->non_const_self;
 	
@@ -1080,6 +1103,8 @@ static int match(	const struct sk_buff *skb,
 	unsigned char do_src_dst_swap = 0;
 	info_and_maps* iam = NULL;
 	long_map* ip_map = NULL;
+	
+	uint64_t* bws[2] = {NULL, NULL};
 
 	/* if we're currently setting this id, ignore new data until set is complete */
 	if(set_in_progress == 1)
@@ -1116,8 +1141,9 @@ static int match(	const struct sk_buff *skb,
 	
 	if(is_check)
 	{
+		info_and_maps* check_iam;
 		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
-		info_and_maps* check_iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+		check_iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 		if(check_iam == NULL)
 		{
 			spin_unlock_bh(&bandwidth_lock);
@@ -1148,7 +1174,6 @@ static int match(	const struct sk_buff *skb,
 		}
 	}
 
-	uint64_t* bws[2] = {NULL, NULL};
 	if(info->type == BANDWIDTH_COMBINED)
 	{
 		if(iam == NULL)
@@ -1342,6 +1367,8 @@ static char add_ip_block(	uint32_t ip,
 
 
 			uint32_t block_length = (2*4) + (3*8);
+			uint64_t *bw;
+
 			if(*current_output_index + block_length > output_buffer_length)
 			{
 				return ERROR_BUFFER_TOO_SHORT;
@@ -1361,7 +1388,7 @@ static char add_ip_block(	uint32_t ip,
 			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
 			*current_output_index = *current_output_index + 8;
 
-			uint64_t *bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
+			bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
 			if(bw == NULL)
 			{
 				*( (uint64_t*)(output_buffer + *current_output_index) ) = 0;
@@ -1376,6 +1403,10 @@ static char add_ip_block(	uint32_t ip,
 		else
 		{
 			uint32_t block_length = (2*4) + (3*8) + (8*history->num_nodes);
+			uint64_t last_reset;
+			uint32_t node_num;
+			uint32_t next_index;
+
 			if(*current_output_index + block_length > output_buffer_length)
 			{
 				return ERROR_BUFFER_TOO_SHORT;
@@ -1390,7 +1421,7 @@ static char add_ip_block(	uint32_t ip,
 			
 			
 			/* need to return times in regular UTC not the UTC - minutes west, which is useful for processing */
-			uint64_t last_reset = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
+			last_reset = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
 			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->first_start > 0 ? (uint64_t)history->first_start + (60 * sys_tz.tz_minuteswest) : last_reset;
 			#ifdef BANDWIDTH_DEBUG
 				printk("  dumping first start = %lld\n", *( (uint64_t*)(output_buffer + *current_output_index) )   );
@@ -1415,8 +1446,8 @@ static char add_ip_block(	uint32_t ip,
 
 
 
-			uint32_t node_num = 0;
-			uint32_t next_index = history->num_nodes == history->max_nodes ? history->current_index+1 : 0;
+			node_num = 0;
+			next_index = history->num_nodes == history->max_nodes ? history->current_index+1 : 0;
 			next_index = next_index >= history->max_nodes ? 0 : next_index;
 			for(node_num=0; node_num < history->num_nodes; node_num++)
 			{
@@ -1428,6 +1459,7 @@ static char add_ip_block(	uint32_t ip,
 	}
 	else
 	{
+		uint64_t *bw;
 		if(*current_output_index + 8 > output_buffer_length)
 		{
 			return ERROR_BUFFER_TOO_SHORT;
@@ -1437,7 +1469,7 @@ static char add_ip_block(	uint32_t ip,
 		*current_output_index = *current_output_index + 4;
 
 
-		uint64_t *bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
+		bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
 		if(bw == NULL)
 		{
 			*( (uint64_t*)(output_buffer + *current_output_index) ) = 0;
@@ -1500,6 +1532,19 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
 	struct timeval test_time;
+	char* buffer;
+	get_request query;
+	info_and_maps* iam;
+
+	unsigned char* error;
+	uint32_t* total_ips;
+	uint32_t* start_index;
+	uint32_t* num_ips_in_response;
+	uint64_t* reset_interval;
+	uint64_t* reset_time;
+	unsigned char* reset_is_constant_interval;
+	uint32_t  current_output_index;
+
 	do_gettimeofday(&test_time);
 	now = test_time.tv_sec;
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
@@ -1520,8 +1565,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	
 
 	/* copy the query from userspace to kernel space & parse */
-	char* buffer = kmalloc(*len, GFP_ATOMIC);
-	get_request query;
+	buffer = kmalloc(*len, GFP_ATOMIC);
 	if(buffer == NULL) /* check for malloc failure */
 	{
 		return handle_get_failure(0, 1, 0, ERROR_UNKNOWN, user, NULL);
@@ -1540,7 +1584,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	 */
 	spin_lock_bh(&bandwidth_lock);
 	
-	info_and_maps* iam = (info_and_maps*)get_string_map_element(id_map, query.id);
+	iam = (info_and_maps*)get_string_map_element(id_map, query.id);
 	
 	if(iam == NULL)
 	{
@@ -1633,19 +1677,19 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	 * 33 onward : list of 64 bit integers of length history_length
 	 *
 	 */
-	unsigned char* error = buffer;
-	uint32_t* total_ips = (uint32_t*)(buffer+1);
-	uint32_t* start_index = (uint32_t*)(buffer+5);
-	uint32_t* num_ips_in_response = (uint32_t*)(buffer+9);
-	uint64_t* reset_interval = (uint64_t*)(buffer+13);
-	uint64_t* reset_time = (uint64_t*)(buffer+21);
-	unsigned char* reset_is_constant_interval = (char*)(buffer+29);
+	error = buffer;
+	total_ips = (uint32_t*)(buffer+1);
+	start_index = (uint32_t*)(buffer+5);
+	num_ips_in_response = (uint32_t*)(buffer+9);
+	reset_interval = (uint64_t*)(buffer+13);
+	reset_time = (uint64_t*)(buffer+21);
+	reset_is_constant_interval = (char*)(buffer+29);
 
 	*reset_interval = (uint64_t)iam->info->reset_interval;
 	*reset_time = (uint64_t)iam->info->reset_time;
 	*reset_is_constant_interval = iam->info->reset_is_constant_interval;
 
-	uint32_t  current_output_index = 30;
+	current_output_index = 30;
 	if(query.ip != 0)
 	{
 		*error = add_ip_block(	query.ip, 
@@ -1805,6 +1849,12 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			time_t first_start = (time_t) *( (uint64_t*)(buffer + *buffer_index+8));
 			/* time_t first_end   = (time_t) *( (uint64_t*)(buffer + *buffer_index+16)); //not used */
 			/* time_t last_end    = (time_t) *( (uint64_t*)(buffer + *buffer_index+24)); //not used */
+			time_t next_start;
+			time_t next_end;
+			uint32_t node_index;
+			uint32_t zero_count;
+			bw_history* history;
+
 
 			#ifdef BANDWIDTH_DEBUG
 				printk("setting history with first start = %ld, now = %ld\n", first_start, now);
@@ -1814,11 +1864,11 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			*buffer_index = *buffer_index + (2*4) + (3*8);
 			
 			/* adjust for timezone */
-			time_t next_start = first_start - (60 * sys_tz.tz_minuteswest);
-			time_t next_end = get_next_reset_time(iam->info, next_start, next_start);
-			uint32_t node_index=0;
-			uint32_t zero_count=0;
-			bw_history* history = NULL;
+			next_start = first_start - (60 * sys_tz.tz_minuteswest);
+			next_end = get_next_reset_time(iam->info, next_start, next_start);
+			node_index=0;
+			zero_count=0;
+			history = NULL;
 			while(next_start < now)
 			{
 				uint64_t next_bw = 0;
@@ -1827,14 +1877,13 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 					next_bw = *( (uint64_t*)(buffer + *buffer_index));
 					*buffer_index = *buffer_index + 8;
 				}
+				zero_count = next_bw == 0 ? zero_count+1 : 0;
+				
 				if(node_index == 0 || history == NULL)
 				{
 					initialize_map_entries_for_ip(iam, ip, next_bw);
 					history = get_long_map_element(iam->ip_history_map, (unsigned long)ip);
 				}
-				zero_count = next_bw == 0 ? zero_count+1 : 0;
-
-
 				else if(next_end < now) /* if this is most recent node, don't do update since last node is current bandwidth */ 
 				{
 					update_history(history, next_start, next_end, iam->info);
@@ -1883,8 +1932,9 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 		}
 		else
 		{
+			uint64_t bw;
 			*buffer_index = *buffer_index + (2*4) + (3*8) + ((num_history_nodes-1)*8);
-			uint64_t bw = *( (uint64_t*)(buffer + *buffer_index));
+			bw = *( (uint64_t*)(buffer + *buffer_index));
 			initialize_map_entries_for_ip(iam, ip, bw); /* automatically frees existing values if they exist */
 			*buffer_index = *buffer_index + 8;
 			if(ip == 0)
@@ -1919,6 +1969,12 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
 	struct timeval test_time;
+	char* buffer;
+	set_header header;
+	info_and_maps* iam;
+	uint32_t buffer_index;
+	uint32_t next_ip_index;
+	
 	do_gettimeofday(&test_time);
 	now = test_time.tv_sec;
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
@@ -1938,8 +1994,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	down(&userspace_lock);
 	set_in_progress = 1;
 	
-	set_header header;
-	char* buffer = kmalloc(len, GFP_ATOMIC);
+	buffer = kmalloc(len, GFP_ATOMIC);
 	if(buffer == NULL) /* check for malloc failure */
 	{
 		return handle_set_failure(0, 1, 0, NULL);
@@ -1957,7 +2012,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	spin_lock_bh(&bandwidth_lock);
 	
 
-	info_and_maps* iam = (info_and_maps*)get_string_map_element(id_map, header.id);
+	iam = (info_and_maps*)get_string_map_element(id_map, header.id);
 	if(iam == NULL)
 	{
 		return handle_set_failure(0, 1, 1, buffer);
@@ -2023,8 +2078,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	 * iterate over each ip block in buffer, 
 	 * loading data into necessary kerenel-space data structures
 	*/
-	uint32_t buffer_index = (3*4) + 1 + 1 + 8 + BANDWIDTH_MAX_ID_LENGTH;
-	uint32_t next_ip_index = header.next_ip_index;
+	buffer_index = (3*4) + 1 + 1 + 8 + BANDWIDTH_MAX_ID_LENGTH;
+	next_ip_index = header.next_ip_index;
 	
 	while(next_ip_index < header.num_ips_in_buffer)
 	{
@@ -2045,7 +2100,12 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 
 
-static int checkentry(	const char *tablename,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+static bool
+#else
+static int
+#endif
+checkentry(	const char *tablename,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
 			const void *ip,
 			const struct xt_match *match,
@@ -2081,11 +2141,12 @@ static int checkentry(	const char *tablename,
 
 		if(info->cmp != BANDWIDTH_CHECK)
 		{
+			info_and_maps *iam;
 			down(&userspace_lock);
 			spin_lock_bh(&bandwidth_lock);
 		
 	
-			info_and_maps  *iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
 				printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
@@ -2174,9 +2235,10 @@ static int checkentry(	const char *tablename,
 		
 		if(info->cmp != BANDWIDTH_CHECK)
 		{
+			info_and_maps* iam;
 			down(&userspace_lock);
 			spin_lock_bh(&bandwidth_lock);
-			info_and_maps* iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
 				iam->info = info;
@@ -2215,10 +2277,11 @@ static void destroy(
 	
 	if(*(info->ref_count) == 0)
 	{
+		info_and_maps* iam;
 		down(&userspace_lock);
 		spin_lock_bh(&bandwidth_lock);
 		
-		info_and_maps* iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
+		iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
 		if(iam != NULL)
 		{
 			unsigned long num_destroyed;
