@@ -2399,7 +2399,7 @@ static void __exit fini(void)
 			/* info portion of iam gets taken care of automatically */
 		}
 	}
-	nf_unregister_sockopt(&ipt_bandwidth_sockopts) 
+	nf_unregister_sockopt(&ipt_bandwidth_sockopts);
 	ipt_unregister_match(&bandwidth_match);
 	spin_unlock_bh(&bandwidth_lock);
 	up(&userspace_lock);
