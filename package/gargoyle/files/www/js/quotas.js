@@ -208,12 +208,19 @@ function setVisibility(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "applies_to", "inline", controlDocument);
-	setInvisibleIfIdMatches("quota_active", ["always"], "offpeak_hours_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("quota_reset", ["hour", "day"], "quota_day_container", "block", controlDocument);
 	setInvisibleIfIdMatches("quota_reset", ["hour"], "quota_hour_container", "block", controlDocument);
 	setInvisibleIfIdMatches("max_up_type", ["unlimited"], "max_up_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_down_type", ["unlimited"], "max_down_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("max_combined_type", ["unlimited"], "max_combined_container", "inline", controlDocument);
+	
+	setInvisibleIfIdMatches("quota_active", ["always"], "quota_active_type", "inline", controlDocument);
+	setInvisibleIfIdMatches("quota_active", ["always"], "quota_active_controls_container", "block", controlDocument);
+	setInvisibleIfIdMatches("quota_active_type", ["days", "weekly_range"], "active_hours_container", "block", controlDocument);
+	setInvisibleIfIdMatches("quota_active_type", ["hours", "weekly_range"], "active_days_container", "block", controlDocument);
+	setInvisibleIfIdMatches("quota_active_type", ["hours", "days", "days_and_hours"], "active_weekly_container", "block", controlDocument);
+
+	
 
 
 	var qri=getSelectedValue("quota_reset", controlDocument);
@@ -358,13 +365,66 @@ function setDocumentFromUci(controlDocument, srcUci, ip)
 	offset = offset == "" ? 0 : parseInt(offset);
 	var resetDay = getDaySeconds(offset);
 	var resetHour = getHourSeconds(offset);
-	var offpeakHours = srcUci.get(pkg, quotaSection, "offpeak_hours");
 
 	setDocumentIp(ip, controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
-	setSelectedValue("quota_active", offpeakHours == "" ? "always" : "except", controlDocument);
-	controlDocument.getElementById("offpeak_hours").value = offpeakHours;
+
+
 	
+	var hours = srcUci.get(pkg, quotaSection, "offpeak_hours");
+	var days = srcUci.get(pkg, quotaSection, "offpeak_weekdays");
+	var weekly = srcUci.get(pkg, quotaSection, "offpeak_weekly_ranges");
+	var active = hours != "" || days != "" || weekly != "" ? "except" : "always";
+	if(active == "always")
+	{
+		hours = srcUci.get(pkg, quotaSection, "onpeak_hours");
+		days = srcUci.get(pkg, quotaSection, "onpeak_weekdays");
+		weekly = srcUci.get(pkg, quotaSection, "onpeak_weekly_ranges");
+		active = hours != "" || days != "" || weekly != "" ? "only" : "always";
+
+	}
+
+	var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+	var dayList = [];
+	if(days == "")
+	{
+		dayList = allDays;
+	}
+	else
+	{
+		dayList = days.split(/,/);
+	}
+	var dayIndex=0;
+	for(dayIndex = 0; dayIndex < allDays.length; dayIndex++)
+	{
+		var nextDay = allDays[dayIndex];
+		var dayFound = false;
+		var testIndex=0;
+		for(testIndex=0; testIndex < dayList.length && !dayFound; testIndex++)
+		{
+			dayFound = dayList[testIndex] == nextDay;
+		}
+		controlDocument.getElementById("quota_" + allDays[dayIndex]).checked = dayFound;
+	}
+
+	controlDocument.getElementById("active_hours_container").value = hours;
+	controlDocument.getElementById("active_weekly_container").value = weekly;
+
+
+	setSelectedValue("quota_active", active, controlDocument);
+	if(active != "always")
+	{
+		var activeTypes = [];
+		activeTypes["000"] = "hours";
+		activeTypes["100"] = "hours";
+		activeTypes["010"] = "days";
+		activeTypes["110"] = "days_and_hours";
+		var activeTypeId = (hours != "" ? "1" : "0") + (days != "" ? "1" : "0") + (weekly == "" ? "0" : "1");
+		var activeType = activeTypes[activeTypeId] != null ? activeTypes[activeTypeId] : "weekly_range";
+		setSelectedValue("quota_active_type", activeType, controlDocument);
+	}
+	
+
 	setSelectedValue("max_up_type", uploadLimit == "" ? "unlimited" : "limited", controlDocument );
 	setSelectedValue("max_down_type", downloadLimit == "" ? "unlimited" : "limited", controlDocument );
 	setSelectedValue("max_combined_type", combinedLimit == "" ? "unlimited" : "limited", controlDocument );
@@ -393,8 +453,8 @@ function setDocumentLimit(bytes, text_id, unit_select_id, controlDocument)
 		var pb = parseBytes(bytes);
 		var unit = "MB";
 		var multiple = 1024*1024;
-		if(pb.match(/GBytes/)) { unit = "GB"; multiple = 1024*1024*1024; }
-		if(pb.match(/TBytes/)) { unit = "TB"; multiple = 1024*1024*1024*1024; }
+		if(pb.match(/GBytes/)) { unit = "GB"; multiple = 1024*1024*1024; };
+		if(pb.match(/TBytes/)) { unit = "TB"; multiple = 1024*1024*1024*1024; };
 		setSelectedValue(unit_select_id, unit, controlDocument);
 		var adjustedVal = truncateDecimal(bytes/multiple);
 		textEl.value = adjustedVal;
@@ -452,10 +512,46 @@ function setUciFromDocument(controlDocument)
 		uci.remove(pkg, quotaSection, "reset_time");
 	}
 
-	var offpeakHours = getSelectedValue("quota_active", controlDocument) == "always" ? "" : controlDocument.getElementById("offpeak_hours").value;
-	if(offpeakHours != "")
+	
+	var hours = controlDocument.getElementById("active_hours_container").style.display != "none" ? controlDocument.getElementById("active_hours").value : "";
+	var weekly = controlDocument.getElementById("active_weekly_container").style.display != "none" ? controlDocument.getElementById("active_weekly").value : "";
+	var dayList = [];
+	if(controlDocument.getElementById("active_days_container").style.display != "none")
 	{
-		uci.set(pkg, quotaSection, "offpeak_hours", offpeakHours);
+		var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+		var dayIndex;
+		for(dayIndex=0; dayIndex < allDays.length; dayIndex++)
+		{
+			if( controlDocument.getElementById("quota_" + allDays[dayIndex]).checked )
+			{
+				dayList.push( allDays[dayIndex]);
+			}
+		}
+	}
+	var days = "" + dayList.join(",");
+	
+	
+	var active = getSelectedValue("quota_active", controlDocument);
+	var onoff = ["offpeak", "onpeak"];
+	var onoffIndex = 0;
+	for(onoffIndex=0; onoffIndex < onoff.length; onofIndex++)
+	{
+		var prefix = onoff[onoffIndex];
+		var updateFun = function(active,option,val)
+		{ 
+			if(active)
+			{
+				uci.set(pkg,quotaSection,option,val); 
+			}
+			else
+			{
+				uci.remove(pkg,quotaSection,option);
+			}
+		}
+		var prefixActive = (prefix == "offpeak" && active == "except") || (prefix == "onpeak" && active == "only");
+		updateFun(prefixActive, prefix + "_hours", hours);
+		updateFun(prefixActive, prefix + "_weekdays", days);
+		updateFun(prefixActive, prefix + "_weekly_ranges", weekly);
 	}
 }
 
