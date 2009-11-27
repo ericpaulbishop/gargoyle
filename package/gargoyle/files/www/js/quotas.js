@@ -1,5 +1,4 @@
 var pkg = "firewall";
-var allIps = [];
 var changedIps = [];
 
 function saveChanges()
@@ -69,18 +68,19 @@ function resetData()
 	var quotaTableData = [];
 	var checkElements = []; //because IE is a bitch and won't register that checkboxes are checked/unchecked unless they are part of document
 	var areChecked = [];
-	allIps = [];
 	changedIps = [];
 	for(sectionIndex = 0; sectionIndex < quotaSections.length; sectionIndex++)
 	{
 		var ip = uciOriginal.get(pkg, quotaSections[sectionIndex], "ip").toUpperCase();
+		var id = uciOriginal.get(pkg, quotaSections[sectionIndex], "id");
+		id = id == "" ? ip.replace(/[\/, ]/g, "_").substr(0,27);
+
 		var pctUp       = "N/A";
 		var pctDown     = "N/A";
 		var pctCombined = "N/A";
-		ip = ip.replace(/\//g, "_");
-		if(quotaPercents[ip] != null)
+		if(quotaPercents[id] != null)
 		{
-			var pcts = quotaPercents[ip];
+			var pcts = quotaPercents[id];
 			pctUp = pcts[0] >= 0 ? pcts[0] + "%" : pctUp;
 			pctDown = pcts[1] >= 0 ? pcts[1] + "%" : pctDown;
 			pctCombined = pcts[2] >= 0 ? pcts[2] + "%" : pctCombined;
@@ -95,9 +95,9 @@ function resetData()
 		checkElements.push(enabledCheck);
 		areChecked.push(enabled);
 
-		quotaTableData.push( [ ip.replace(/_/g, " "), pctUp, pctDown, pctCombined, enabledCheck, createEditButton(enabled) ] );
+		quotaTableData.push( [ (ip.length > 30 ? ip.substr(0,27)+"..." : ip), pctUp, pctDown, pctCombined, enabledCheck, createEditButton(enabled) ] );
 	
-		allIps[ip] = 1;
+
 	}
 
 	
@@ -185,7 +185,6 @@ function addNewQuota()
 		setUciFromDocument(document);
 
 		var ip = getIpFromDocument(document);
-		allIps[ip] = 1;
 		
 		var quotaSection = "quota_" + quotaNum;
 		var enabledCheck = createEnabledCheckbox(true);
@@ -296,6 +295,240 @@ function getHourSeconds(offset)
 {
 	return ( Math.floor((offset%(60*60*24))/(60*60)) * (60*60) );
 }
+
+
+
+function parsePaddedInt(intStr)
+{
+	intStr = intStr.replace(/[\t ]+/, "");
+	intStr = intStr.replace(/^0+/, "");
+	return parseInt(intStr);
+}
+
+function getIpInteger(ipStr)
+{
+	var ip = ipStr.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+	if(ip)
+	{
+		return (+parsePaddedInt(ip[1])<<24) + (+parsePaddedInt(ip[2])<<16) + (+parsePaddedInt(ip[3])<<8) + (+parsePaddedInt(ip[4]));
+	}
+	return null;
+}
+function getMaskInteger(maskSize)
+{
+	return -1<<(32-parsePaddedInt(maskSize))
+}
+function getIpMaskIntegers(ipStr)
+{
+	var ipInt = 0;
+	var ipMaskInt = getMaskInteger(32);
+	if(ipStr.match(/\//))
+	{
+		var split = ipStr.split(/\//);
+		ipInt = getIpInteger(split[0]);
+		ipMaskInt = (split[1]).match(/\./) ? getIpInteger(split[1]) : getMaskInteger(split[1]);
+		ipInt = ipInt & ipMaskInt;
+	}
+	else
+	{
+		ipInt = getIpInteger(ipStr);
+	}
+	return [ipInt, ipMaskInt];
+}
+
+function testIpOverlap(ipStr1, ipStr2)
+{
+	var parsed1 = getIpMaskIntegers(ipStr1);
+	var parsed2 = getIpMaskIntegers(ipStr2);
+	var minMask = parsed1[1] | parsed2[1];
+	return (parsed1[0] & minMask) == (parsed2[0] & minMask);
+}
+
+function timeVariablesToWeeklyRanges(hours, days, weekly, invert)
+{
+	var hours = hours == null ? "" : hours;
+	var days = days == null ? "" : days;
+	var weekly = weekly == null ? "" : weekly;
+	
+	var dayToIndex = [];
+	dayToIndex["SUN"] = 0;
+	dayToIndex["MON"] = 1;
+	dayToIndex["TUE"] = 2;
+	dayToIndex["WED"] = 3;
+	dayToIndex["THU"] = 4;
+	dayToIndex["FRI"] = 5;
+	dayToIndex["SAT"] = 6;
+
+
+	var splitRangesAtEnd = function(rangeList, max)
+	{
+		var startEndPairs = [];
+		var rangeIndex;
+		for(rangeIndex=0;rangeIndex < rangeList.length; rangeIndex=rangeIndex+2)
+		{
+			if(rangeList[rangeIndex+1] < rangeList[rangeIndex])
+			{
+				var oldEnd = rangeList[rangeIndex+1];
+				rangeList[rangeIndex+1] = max;
+				rangeList.push(0);
+				rangeList.push(oldEnd);
+			}
+			var s = rangeList[rangeIndex];
+			var e = rangeList[rangeIndex+1];
+			startEndPairs.push( [s,e] );
+		}
+		
+		//sort based on starts
+		var sortPairs = function(a,b){ return a[0] - b[0]; }
+		var sortedPairs = startEndPairs.sort(sortPairs);
+		var newRanges = [];
+		for(rangeIndex=0;rangeIndex < sortedPairs.length; rangeIndex++)
+		{
+			newRanges.push( sortedPairs[rangeIndex][0] );
+			newRanges.push( sortedPairs[rangeIndex][1] );
+		}
+		return newRanges;
+	}
+
+
+	var ranges = [];
+	if(hours == "" && days == "" && weekly == "")
+	{
+		ranges = [0, 7*24*60*60];
+		invert = false;
+	}
+	else if(weekly != "")
+	{
+		var parsePiece = function(piece)
+		{
+			var splitPiece = piece.split(/[:\t ]+/);
+			var dayName = (splitPiece[0]).substr(0,3).toUpperCase();
+			splitPiece[0] = dayToIndex[dayName] != null ? dayToIndex[dayName]*24*60*60 : 0;
+			splitPiece[1] = parsePaddedInt(splitPiece[1]) + "" != "NaN" ? parsePaddedInt(splitPiece[1])*60*60 : 0;
+			splitPiece[2] = parsePaddedInt(splitPiece[2]) + "" != "NaN" ? parsePaddedInt(splitPiece[2])*60 : 0;
+			splitPiece[3] = splitPiece[3] != null ? ( parsePaddedInt(splitPiece[3]) + "" != "NaN" ? parsePaddedInt(splitPiece[3]) : 0) : 0;
+			return splitPiece[0] + splitPiece[1] + splitPiece[2] + splitPiece[3];
+		}
+		var pairs = weekly.split(/[\t ]*,[\t ]*/);
+		var pairIndex;
+		for(pairIndex=0; pairIndex < pairs.length; pairIndex++)
+		{
+
+			var pieces = (pairs[pairIndex]).split(/[\t ]*\-[\t ]*/);
+			ranges.push(parsePiece(pieces[0]));
+			ranges.push(parsePiece(pieces[1]));
+		}
+		ranges = splitRangesAtEnd(ranges, 7*24*60*60);
+	}
+	else
+	{
+		var validDays= [1,1,1,1,1,1,1];
+		var hourRanges = [];
+		if(days != "")
+		{
+			validDays= [0,0,0,0,0,0,0];
+			var splitDays = days.split(/[\t ]*,[\t ]*/);
+			var dayIndex;
+			for(dayIndex=0; dayIndex < splitDays.length; dayIndex++)
+			{
+				var dayName = (splitDays[dayIndex]).substr(0,3).toUpperCase();
+				if(dayToIndex[dayName] != null)
+				{
+					validDays[ dayToIndex[dayName] ] = 1;
+				}
+			}
+		}
+		if(hours != "")
+		{
+			var parsePiece = function(piece)
+			{
+				var splitPiece = piece.split(/[:\t ]+/);
+				splitPiece[0] = parsePaddedInt(splitPiece[0]) + "" != "NaN" ? parsePaddedInt(splitPiece[0])*60*60 : 0;
+				splitPiece[1] = parsePaddedInt(splitPiece[1]) + "" != "NaN" ? parsePaddedInt(splitPiece[1])*60 : 0;
+				splitPiece[2] = splitPiece[2] != null ? ( parsePaddedInt(splitPiece[2]) + "" != "NaN" ? parsePaddedInt(splitPiece[2]) : 0) : 0;
+
+
+				return splitPiece[0] + splitPiece[1] + splitPiece[2]; 
+			}
+			var pairs = hours.split(/[\t ]*,[\t ]*/);
+			var pairIndex;
+			for(pairIndex=0; pairIndex < pairs.length; pairIndex++)
+			{
+				var pieces = (pairs[pairIndex]).split(/[\t ]*\-[\t ]*/);
+				hourRanges.push(parsePiece(pieces[0]));
+				hourRanges.push(parsePiece(pieces[1]));
+			}
+			hourRanges = splitRangesAtEnd(hourRanges, 24*60*60);
+		}
+		hourRanges = hourRanges.length == 0 ? [0,24*60*60] : hourRanges;
+
+		var dayIndex;
+		for(dayIndex=0; dayIndex < validDays.length; dayIndex++)
+		{
+			if(validDays[dayIndex] != 0)
+			{
+				var hourIndex;
+				for(hourIndex=0; hourIndex < hourRanges.length; hourIndex++)
+				{
+					ranges.push( (dayIndex*24*60*60) + hourRanges[hourIndex] )
+				}
+			}
+		}
+	}
+
+	if(invert)
+	{
+		if(ranges[0] == 0)
+		{
+			ranges.shift();
+		}
+		else
+		{
+			ranges.unshift(0);
+		}
+
+		if(ranges[ ranges.length-1 ] == 7*24*60*60)
+		{
+			ranges.pop();
+		}
+		else
+		{
+			ranges.push(7*24*60*60);
+		}
+	}
+	return ranges;
+}
+
+
+function rangesOverlap(h1, d1, w1, i1, h2, d2, w2, i2)
+{
+	var ranges1 = timeVariablesToWeeklyRanges(h1, d1, w1, i1);
+	var ranges2 = timeVariablesToWeeklyRanges(h2, d2, w2, i2);
+	
+	var r1Index = 0;
+	var r2Index = 0;
+	var overlapFound = false;
+	for(r1Index=0; r1Index < ranges1.length && (!overlapFound); r1Index=r1Index+2)
+	{
+		var r1Start = ranges1[r1Index];
+		var r1End   = ranges1[r1Index+1];
+		var r2Start = ranges2[r2Index];
+		var r2End   = ranges2[r2Index+1];
+		overlapFound = overlapFound || (r1End > r2Start && r1Start < r2End);
+
+		//alert(r1Start + "," + r1End + "," + r2Start + "," + r2End);	
+		while( (!overlapFound) && r2Start < r1Start)
+		{
+			r2Index = r2Index+2;
+			var r2Start = ranges2[r2Index];
+			var r2End   = ranges2[r2Index+1];
+			overlapFound = overlapFound || (r1End > r2Start && r1Start < r2End);
+		}
+	}
+	return overlapFound;
+}
+
+
 
 function validateQuota(controlDocument, originalQuotaIp)
 {
@@ -615,8 +848,6 @@ function removeQuotaCallback(table, row)
 {
 	var id = row.childNodes[4].firstChild.id;
 	uci.removeSection(pkg, id);
-	allIps[ row.childNodes[0].firstChild.data.replace(/ /g, "_") ] = null;
-
 	changedIps [ row.childNodes[0].firstChild.data.replace(/ /g, "_") ] = 1;
 }
 
