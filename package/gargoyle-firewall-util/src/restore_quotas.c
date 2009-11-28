@@ -292,30 +292,30 @@ int main(int argc, char** argv)
 						char* weekdays_var = is_off_peak ? offpeak_weekdays : onpeak_weekdays;
 						char* weekly_ranges_var = is_off_peak ? offpeak_weekly_ranges : onpeak_weekly_ranges;
 
-						char *timerange_match = strdup(" -m timerange ! ");
+						char *timerange_match = is_offpeak ? strdup(" -m timerange ! ") : strdup(" -m timerange ");
 						char *hour_match = strdup(" --hours \"");
 						char *weekday_match = strdup(" --weekdays \"");
 						char *weekly_match = strdup(" --weekly_ranges \"");
 						char *quote_end = strdup("\" ");
 
-						dcat_and_free(&time_match_str, &timerange_match,  1,1);
+						time_match_str = dcat_and_free(&time_match_str, &timerange_match,  1,1);
 						if(hours_var != NULL && weekly_ranges_var == NULL)
 						{
-							dcat_and_free(&time_match_str, &hour_match, 1, 1);	
-							dcat_and_free(&time_match_str, &hours_var, 1, 1);	
-							dcat_and_free(&time_match_str, &quote_end, 1, 0);	
+							time_match_str = dcat_and_free(&time_match_str, &hour_match, 1, 1);	
+							time_match_str = dcat_and_free(&time_match_str, &hours_var, 1, 1);	
+							time_match_str = dcat_and_free(&time_match_str, &quote_end, 1, 0);	
 						}
 						if(weekdays_var != NULL && weekly_ranges_var == NULL)
 						{
-							dcat_and_free(&time_match_str, &weekday_match, 1, 1);	
-							dcat_and_free(&time_match_str, &weekdays_var, 1, 1);
-							dcat_and_free(&time_match_str, &quote_end, 1, 0);	
+							time_match_str = dcat_and_free(&time_match_str, &weekday_match, 1, 1);	
+							time_match_str = dcat_and_free(&time_match_str, &weekdays_var, 1, 1);
+							time_match_str = dcat_and_free(&time_match_str, &quote_end, 1, 0);	
 						}
 						if(weekly_ranges_var != NULL)
 						{
-							dcat_and_free(&time_match_str, &weekly_match, 1, 1);
-							dcat_and_free(&time_match_str, &weekly_ranges_var, 1, 1);
-							dcat_and_free(&time_match_str, &quote_end, 1, 0);
+							time_match_str = dcat_and_free(&time_match_str, &weekly_match, 1, 1);
+							time_match_str = dcat_and_free(&time_match_str, &weekly_ranges_var, 1, 1);
+							time_match_str = dcat_and_free(&time_match_str, &quote_end, 1, 0);
 						}
 						free(quote_end);
 					}
