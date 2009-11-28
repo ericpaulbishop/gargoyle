@@ -136,7 +136,7 @@ function getIdFromIp(ip)
 
 	var quotaSections = uci.getAllSectionsOfType(pkg, "quota");
 
-	while(found == true)
+	while(found)
 	{
 		found = false;
 		var sectionIndex;
@@ -147,9 +147,10 @@ function getIdFromIp(ip)
 		if(found)
 		{
 			var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			var suffix = suffixCount < 26 ? "_" + letters.substr(suffix,1) : "_Z" + (suffixCount-25);
+			var suffix = suffixCount < 26 ? "_" + letters.substr(suffixCount,1) : "_Z" + (suffixCount-25);
 			id = idPrefix + suffix;
 		}
+		suffixCount++;
 	}
 	return id;
 
@@ -548,7 +549,8 @@ function timeVariablesToWeeklyRanges(hours, days, weekly, invert)
 			var pairIndex;
 			for(pairIndex=0; pairIndex < pairs.length; pairIndex++)
 			{
-				var pieces = (pairs[pairIndex]).split(/[\t ]*\-[\t ]*/);
+				var pair = (pairs[pairIndex]).replace(/^[\t ]*/, "").replace(/[\t ]*$/, "");
+				var pieces = pair.split(/[\t ]*\-[\t ]*/);
 				hourRanges.push(parsePiece(pieces[0]));
 				hourRanges.push(parsePiece(pieces[1]));
 			}
@@ -596,6 +598,7 @@ function timeVariablesToWeeklyRanges(hours, days, weekly, invert)
 
 function rangesOverlap(t1, t2)
 {
+	//alert("testing overlap for:\n" + t1.join(",") + "\n" + t2.join(",") );
 	var ranges1 = timeVariablesToWeeklyRanges(t1[0], t1[1], t1[2], t1[3]);
 	var ranges2 = timeVariablesToWeeklyRanges(t2[0], t2[1], t2[2], t2[3]);
 
@@ -610,13 +613,22 @@ function rangesOverlap(t1, t2)
 		var r2End   = ranges2[r2Index+1];
 		overlapFound = overlapFound || (r1End > r2Start && r1Start < r2End);
 
-		while( (!overlapFound) && r2Start < r1Start)
+		while( (!overlapFound) && r2Start < r1Start && r2Index < ranges2.length)
 		{
 			r2Index = r2Index+2;
-			var r2Start = ranges2[r2Index];
-			var r2End   = ranges2[r2Index+1];
-			overlapFound = overlapFound || (r1End > r2Start && r1Start < r2End);
+			if(r2Index < ranges2.length)
+			{
+				var r2Start = ranges2[r2Index];
+				var r2End   = ranges2[r2Index+1];
+				overlapFound = overlapFound || (r1End > r2Start && r1Start < r2End);
+			}
 		}
+		/*
+		if(overlapFound)
+		{
+			alert("overlapFound: r1=[" + r1Start + "," + r1End + "], r2=[" + r2Start + "," + r2End + "]");
+		}
+		*/
 	}
 	return overlapFound;
 }
@@ -631,7 +643,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	controlDocument = controlDocument == null ? document : controlDocument;
 	var inputIds = ["applies_to", "max_up", "max_down", "max_combined", "active_hours", "active_weekly"];
 	var labelIds = ["applies_to_label", "max_up_label", "max_down_label", "max_combined_label", "quota_active_label", "quota_active_label"];
-	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal, validateHours, validateWeeklyRanges];
+	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal, validateHours, validateWeeklyRange];
 	var validReturnCodes = [0,0,0,0,0,0];
 	var visibilityIds = ["applies_to", "max_up_container","max_down_container","max_combined_container", "active_hours_container", "active_weekly_container"];
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
