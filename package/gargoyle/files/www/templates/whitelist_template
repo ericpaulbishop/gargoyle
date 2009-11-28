@@ -53,7 +53,7 @@
 
 <div id="exception_days_and_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='exception_days_and_hours_active' id='exception_days_and_hours_active_label'>Days And Hours Active:</label>
-	<input type='text' id='exception_days_and_hours_active'  size='30' onkeyup='proofreadDaysAndHours(this)' />
+	<input type='text' id='exception_days_and_hours_active'  size='30' onkeyup='proofreadWeeklyRange(this)' />
 	<br/>
 	<div class="widerightcolumnonly">
 		<em>e.g. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00</em>

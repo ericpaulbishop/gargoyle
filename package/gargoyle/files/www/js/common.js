@@ -1544,9 +1544,9 @@ function validateHours(hoursStr)
 	return valid ? 0 : 1;
 }
 
-function validateDaysAndHours(daysAndHoursStr)
+function validateWeeklyRange(weeklyStr)
 {
-	var commaSplit = hoursStr.match(/,/) ? hoursStr.split(/,/) : [ hoursStr ] ;
+	var commaSplit = weeklyStr.match(/,/) ? weeklyStr.split(/,/) : [ weeklyStr ] ;
 	var valid = true;
 	for(commaIndex = 0; commaIndex < commaSplit.length && valid; commaIndex++)
 	{
@@ -1569,9 +1569,9 @@ function proofreadHours(input)
 	proofreadText(input, validateHours, 0);
 }
 
-function proofreadDaysAndHours(input)
+function proofreadWeeklyRange(input)
 {
-	proofreadText(input, validateDaysAndHours, 0);
+	proofreadText(input, validateWeeklyRange, 0);
 }
 
 

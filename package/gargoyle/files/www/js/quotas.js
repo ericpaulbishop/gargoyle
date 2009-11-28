@@ -248,10 +248,19 @@ function setVisibility(controlDocument)
 	
 	setInvisibleIfIdMatches("quota_active", ["always"], "quota_active_type", "inline", controlDocument);
 	setInvisibleIfIdMatches("quota_active", ["always"], "quota_active_controls_container", "block", controlDocument);
-	setInvisibleIfIdMatches("quota_active_type", ["days", "weekly_range"], "active_hours_container", "block", controlDocument);
-	setInvisibleIfIdMatches("quota_active_type", ["hours", "weekly_range"], "active_days_container", "block", controlDocument);
-	setInvisibleIfIdMatches("quota_active_type", ["hours", "days", "days_and_hours"], "active_weekly_container", "block", controlDocument);
-
+	if(getSelectedValue("quota_active", controlDocument) != "always")
+	{
+		setInvisibleIfIdMatches("quota_active_type", ["days", "weekly_range"], "active_hours_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active_type", ["hours", "weekly_range"], "active_days_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active_type", ["hours", "days", "days_and_hours"], "active_weekly_container", "block", controlDocument);
+	}
+	else
+	{
+		//individual control divs need to be set invisible as well as enclosing div, because this lets validation function know whether to test them
+		setInvisibleIfIdMatches("quota_active", ["active"], "active_hours_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active", ["active"], "active_days_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active", ["active"], "active_weekly_container", "block", controlDocument);
+	}
 	
 
 
@@ -333,6 +342,7 @@ function getHourSeconds(offset)
 
 function parsePaddedInt(intStr)
 {
+	intStr = intStr == null ? "" : intStr;
 	intStr = intStr.replace(/[\t ]+/, "");
 	intStr = intStr.replace(/^0+/, "");
 	return parseInt(intStr);
@@ -340,12 +350,13 @@ function parsePaddedInt(intStr)
 
 function getIpInteger(ipStr)
 {
+	intStr = intStr == null ? "" : intStr;
 	var ip = ipStr.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
 	if(ip)
 	{
 		return (+parsePaddedInt(ip[1])<<24) + (+parsePaddedInt(ip[2])<<16) + (+parsePaddedInt(ip[3])<<8) + (+parsePaddedInt(ip[4]));
 	}
-	return null;
+	return parseInt(""); //will return NaN
 }
 function getMaskInteger(maskSize)
 {
@@ -390,10 +401,17 @@ function testSingleIpOverlap(ipStr1, ipStr2)
 	}
 	else
 	{
-		var parsed1 = getIpMaskIntegers(ipStr1);
-		var parsed2 = getIpMaskIntegers(ipStr2);
-		var minMask = parsed1[1] | parsed2[1];
-		matches = (parsed1[0] & minMask) == (parsed2[0] & minMask);
+		if(validateIpRange(ipStr1) > 0 || validateIpRange(ipStr2) > 0)
+		{
+			matches = false;
+		}
+		else
+		{
+			var parsed1 = getIpMaskIntegers(ipStr1);
+			var parsed2 = getIpMaskIntegers(ipStr2);
+			var minMask = parsed1[1] | parsed2[1];
+			matches = (parsed1[0] & minMask) == (parsed2[0] & minMask);
+		}
 	}
 	return matches;
 }
@@ -581,7 +599,6 @@ function rangesOverlap(t1, t2)
 	var ranges1 = timeVariablesToWeeklyRanges(t1[0], t1[1], t1[2], t1[3]);
 	var ranges2 = timeVariablesToWeeklyRanges(t2[0], t2[1], t2[2], t2[3]);
 
-	
 	var r1Index = 0;
 	var r2Index = 0;
 	var overlapFound = false;
@@ -612,11 +629,11 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	originalQuotaIp = originalQuotaIp == null ? "none" : originalQuotaIp; //null is not the same as "" -- the latter gets interpretted as "ALL"
 
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var inputIds = ["applies_to", "max_up", "max_down", "max_combined", "offpeak_hours"];
-	var labelIds = ["applies_to_label", "max_up_label", "max_down_label", "max_combined_label", "quota_active_label"];
-	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal, validateHours];
-	var validReturnCodes = [0,0,0,0,0];
-	var visibilityIds = ["applies_to", "max_up_container","max_down_container","max_combined_container", "offpeak_hours_container"];
+	var inputIds = ["applies_to", "max_up", "max_down", "max_combined", "active_hours", "active_weekly"];
+	var labelIds = ["applies_to_label", "max_up_label", "max_down_label", "max_combined_label", "quota_active_label", "quota_active_label"];
+	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal, validateHours, validateWeeklyRanges];
+	var validReturnCodes = [0,0,0,0,0,0];
+	var visibilityIds = ["applies_to", "max_up_container","max_down_container","max_combined_container", "active_hours_container", "active_weekly_container"];
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
 
 	//also validate 1) up,down,total aren't all unlimited 2)any quota with overlapping ips doesn't have overlapping time ranges
@@ -632,7 +649,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	}
 	if(errors.length == 0)
 	{
-		var ip = getIpFromDocument(controlDocument);'
+		var ip = getIpFromDocument(controlDocument);
 		if(ip != originalQuotaIp)
 		{
 			var quotaSections = uci.getAllSectionsOfType(pkg, "quota");
@@ -649,15 +666,15 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 					{
 						//test time range overlap
 						var sectionTime = getTimeParametersFromDocument(controlDocument);
-						var testTime = getTimeParametersFromUci(uci, quotaSections[sectionIndex);
+						var testTime = getTimeParametersFromUci(uci, quotaSections[sectionIndex]);
 						sectionTime[3] = sectionTime[3] == "except" ? true : false;
 						testTime[3] = testTime[3] == "except" ? true : false;
-						overlapFound = rangesOverlap(sectionTime[0], sectionTime[1], sectionTime[2]
+						overlapFound = rangesOverlap(sectionTime, testTime);
 					}
 				}
 			}
 			
-			if(ovelapFound)
+			if(overlapFound)
 			{	
 				if(!ip.match(/ALL/))
 				{
@@ -684,7 +701,7 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 
 	var quotaSection = "";
 	var sections = srcUci.getAllSectionsOfType(pkg, "quota");
-	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
+	for(sectionIndex=0; sectionIndex < sections.length && quotaSection == ""; sectionIndex++)
 	{
 		if(srcUci.get(pkg, sections[sectionIndex], "id") == id )
 		{
@@ -692,7 +709,7 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 		}
 	}
 
-	var ip = srcUci.get(pkg, sections[sectionIndex], "ip");
+	var ip = srcUci.get(pkg, quotaSection, "ip");
 	ip = ip == "" ? "ALL" : ip;
 
 	var resetInterval = srcUci.get(pkg, quotaSection, "reset_interval");
@@ -736,8 +753,8 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 		controlDocument.getElementById("quota_" + allDays[dayIndex]).checked = dayFound;
 	}
 
-	controlDocument.getElementById("active_hours_container").value = timeParameters[0];
-	controlDocument.getElementById("active_weekly_container").value = timeParameters[2];
+	controlDocument.getElementById("active_hours").value = timeParameters[0];
+	controlDocument.getElementById("active_weekly").value = timeParameters[2];
 
 	var active = timeParameters[3];
 	setSelectedValue("quota_active", active, controlDocument);
@@ -748,7 +765,7 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 		activeTypes["100"] = "hours";
 		activeTypes["010"] = "days";
 		activeTypes["110"] = "days_and_hours";
-		var activeTypeId = (hours != "" ? "1" : "0") + (days != "" ? "1" : "0") + (weekly == "" ? "0" : "1");
+		var activeTypeId = (timeParameters[0] != "" ? "1" : "0") + (timeParameters[1] != "" ? "1" : "0") + (timeParameters[2] == "" ? "0" : "1");
 		var activeType = activeTypes[activeTypeId] != null ? activeTypes[activeTypeId] : "weekly_range";
 		setSelectedValue("quota_active_type", activeType, controlDocument);
 	}
@@ -795,7 +812,6 @@ function setUciFromDocument(controlDocument, id)
 	controlDocument = controlDocument == null ? document : controlDocument;
 	
 	var ip = getIpFromDocument(controlDocument);
-
 	id = id == null ? "" : id;
 	id = id == "" ? getIdFromIp(ip) : id;
 
@@ -819,7 +835,7 @@ function setUciFromDocument(controlDocument, id)
 	var oldIp = uci.get(pkg, quotaSection, "ip");
 	if(oldIp != ip)
 	{
-		changedIds[ip] = 1;
+		changedIds[id] = 1;
 	}
 
 	
@@ -850,7 +866,7 @@ function setUciFromDocument(controlDocument, id)
 	var active = timeParameters[3];
 	var onoff = ["offpeak", "onpeak"];
 	var onoffIndex = 0;
-	for(onoffIndex=0; onoffIndex < onoff.length; onofIndex++)
+	for(onoffIndex=0; onoffIndex < onoff.length; onoffIndex++)
 	{
 		var prefix = onoff[onoffIndex];
 		var updateFun = function(prefixActive,option,val)
@@ -1074,7 +1090,7 @@ function editQuota()
 							editRow.childNodes[1].firstChild.data = uci.get(pkg, editSection, "egress_limit") == "" ? "N/A" : "0%";
 							editRow.childNodes[2].firstChild.data = uci.get(pkg, editSection, "ingress_limit") == "" ? "N/A" : "0%";
 							editRow.childNodes[3].firstChild.data = uci.get(pkg, editSection, "combined_limit") == "" ? "N/A" : "0%";
-							editRow.childNodes[4].firstChild.id = editId;
+							editRow.childNodes[4].firstChild.id = newId;
 						}
 						else
 						{

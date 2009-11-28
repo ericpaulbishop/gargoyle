@@ -437,7 +437,7 @@ function validateRule(controlDocument, rulePrefix)
 	controlDocument = controlDocument == null ? document : controlDocument;
 	var inputIds = [rulePrefix + "hours_active", rulePrefix + "days_and_hours_active", rulePrefix + "remote_port", rulePrefix + "local_port"];
 	var labelIds = [rulePrefix + "hours_active_label", rulePrefix + "days_and_hours_active_label", rulePrefix + "remote_port_label", rulePrefix + "local_port_label"];
-	var functions = [validateHours, validateDaysAndHours, validateMultiplePorts, validateMultiplePorts];
+	var functions = [validateHours, validateWeeklyRange, validateMultiplePorts, validateMultiplePorts];
 	var validReturnCodes = [0,0,0,0];
 	var visibilityIds = [rulePrefix + "hours_active_container", rulePrefix + "days_and_hours_active_container", rulePrefix + "remote_port", rulePrefix + "local_port"];
 	if(controlDocument.getElementById(rulePrefix + "all_access").checked)
