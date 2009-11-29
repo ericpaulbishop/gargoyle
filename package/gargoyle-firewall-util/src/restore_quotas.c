@@ -292,7 +292,7 @@ int main(int argc, char** argv)
 						char* weekdays_var = is_off_peak ? offpeak_weekdays : onpeak_weekdays;
 						char* weekly_ranges_var = is_off_peak ? offpeak_weekly_ranges : onpeak_weekly_ranges;
 
-						char *timerange_match = is_offpeak ? strdup(" -m timerange ! ") : strdup(" -m timerange ");
+						char *timerange_match = is_off_peak ? strdup(" -m timerange ! ") : strdup(" -m timerange ");
 						char *hour_match = strdup(" --hours \"");
 						char *weekday_match = strdup(" --weekdays \"");
 						char *weekly_match = strdup(" --weekly_ranges \"");
