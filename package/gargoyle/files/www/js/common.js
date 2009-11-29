@@ -1373,6 +1373,54 @@ function validateMac(mac)
 	return errorCode;
 }
 
+function validateMultipleIps(ips)
+{
+	ips = ips.replace(/^[\t ]+/g, "");
+	ips = ips.replace(/[\t ]+$/g, "");
+	var splitIps = ips.split(/[\t ]*,[\t ]*/);
+	var valid = splitIps.length > 0 ? 0 : 1;
+	while(valid == 0 && splitIps.length > 0)
+	{
+		var nextIp = splitIps.pop();
+		if(nextIp.match(/-/))
+		{
+			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
+			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
+		}
+		else
+		{
+			valid = validateIpRange(nextIp);
+		}
+	}
+	return valid;
+}
+function validateMultipleIpsOrMacs(addresses)
+{
+	var addr = addresses.replace(/^[\t ]+/g, "");
+	addr = addr.replace(/[\t ]+$/g, "");
+	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
+	var valid = splitAddr.length > 0 ? 0 : 1;
+	while(valid == 0 && splitAddr.length > 0)
+	{
+		var nextAddr = splitAddr.pop();
+		if(nextAddr.match(/-/))
+		{
+			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
+			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
+		}
+		else if(nextAddr.match(/:/))
+		{
+			valid = validateMac(nextAddr);
+		}
+		else
+		{
+			valid = validateIpRange(nextAddr);
+		}
+	}
+	return valid;
+
+}
+
 function validateDecimal(num)
 {
 	var errorCode = num.match(/^[\d]*\.?[\d]+$/) != null || num.match(/^[\d]+\.?[\d]*$/) != null ? 0 : 1;
@@ -1596,6 +1644,15 @@ function proofreadMac(input)
 {
 	proofreadText(input, validateMac, 0);
 }
+function proofreadMultipleIps(input)
+{
+	proofreadText(input, validateMultipleIps, 0);
+}
+function proofreadMultipleIpsOrMacs(input)
+{
+	proofreadText(input, validateMultipleIpsOrMacs, 0);
+}
+
 function proofreadDecimal(input)
 {
 	proofreadText(input, validateDecimal, 0);
@@ -1713,4 +1770,44 @@ function stripQuotes(str)
 		str = str.match(/^[^\"]*\"([^\"]*)\"/)[1];
 	}
 	return str;
+}
+
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, alertOnError,tableWidth)
+{
+	
+	controlDocument = controlDocument == null ? document : controlDocument;
+	alertOnError = alertOnError == null ? true : alertOnError;
+
+	var newAddrs = controlDocument.getElementById(textId).value;
+	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
+	
+	if(valid == 0)
+	{
+		var tableContainer = controlDocument.getElementById(tableContainerId);
+		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
+		newAddrs = newAddrs.replace(/^[\t ]*/, "");
+		newAddrs = newAddrs.replace(/[\t ]*$/, "");
+		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
+		
+		while(addrs.length > 0)
+		{
+			addTableRow(table, [ addrs.shift() ], true, false);
+		}
+		
+		if(tableContainer.childNodes.length == 0)
+		{
+			tableContainer.appendChild(table);
+		}
+		controlDocument.getElementById(textId).value = "";
+		if(tableWidth != null)
+		{
+			table.style.width = "" + tableWidth + "px";
+		}
+	}
+	else if(alertOnError)
+	{
+		alert("ERROR: Invalid Address\n");
+	}
+
+	return valid == 0 ? true : false;
 }

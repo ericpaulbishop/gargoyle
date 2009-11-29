@@ -175,7 +175,16 @@ function getIpFromDocument(controlDocument)
 	}
 	else if(getSelectedValue("applies_to_type", controlDocument) == "only")
 	{
-		ip = controlDocument.getElementById("applies_to").value; 
+		
+		var table = controlDocument.getElementById("quota_ip_table_container").firstChild;
+		var ipData = table != null ? getTableDataArray(table, true, false) : [];
+		var ipList = [];
+		var rowIndex;
+		for(rowIndex=0; rowIndex < ipData.length; rowIndex++)
+		{
+			ipList.push( ipData[rowIndex][0] );
+		}
+		ip = ipList.join(",");
 	}
 	return ip;
 }
@@ -184,7 +193,7 @@ function setDocumentIp(ip, controlDocument)
 {
 	ip = ip== ""  ? "ALL" : ip;
 	controlDocument = controlDocument == null ? document : controlDocument;
-	controlDocument.getElementById("applies_to").value = "";
+	controlDocument.getElementById("add_ip").value = "";
 	if(ip == "ALL")
 	{
 		setSelectedValue("applies_to_type", "all", controlDocument);
@@ -200,13 +209,20 @@ function setDocumentIp(ip, controlDocument)
 	else
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
-		controlDocument.getElementById("applies_to").value = ip;
+		controlDocument.getElementById("add_ip").value = ip;
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, false,250);
+		if(!valid)
+		{
+			controlDocument.getElementById("add_ip").value = "";
+		}
 	}
 }
 
 
 function addNewQuota()
 {
+
+
 	var errors = validateQuota(document, "", "none");
 	if(errors.length > 0)
 	{
@@ -240,7 +256,7 @@ function addNewQuota()
 function setVisibility(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "applies_to", "inline", controlDocument);
+	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "quota_ip_container", "inline", controlDocument);
 	setInvisibleIfIdMatches("quota_reset", ["hour", "day"], "quota_day_container", "block", controlDocument);
 	setInvisibleIfIdMatches("quota_reset", ["hour"], "quota_hour_container", "block", controlDocument);
 	setInvisibleIfIdMatches("max_up_type", ["unlimited"], "max_up_container", "inline", controlDocument);
@@ -258,9 +274,9 @@ function setVisibility(controlDocument)
 	else
 	{
 		//individual control divs need to be set invisible as well as enclosing div, because this lets validation function know whether to test them
-		setInvisibleIfIdMatches("quota_active", ["active"], "active_hours_container", "block", controlDocument);
-		setInvisibleIfIdMatches("quota_active", ["active"], "active_days_container", "block", controlDocument);
-		setInvisibleIfIdMatches("quota_active", ["active"], "active_weekly_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active", ["always"], "active_hours_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active", ["always"], "active_days_container", "block", controlDocument);
+		setInvisibleIfIdMatches("quota_active", ["always"], "active_weekly_container", "block", controlDocument);
 	}
 	
 
@@ -395,7 +411,7 @@ function testSingleIpOverlap(ipStr1, ipStr2)
 	ipStr1 = adj(ipStr1);
 	ipStr2 = adj(ipStr2);
 
-	var matches;
+	var matches = false;
 	if(ipStr1 == ipStr2)
 	{
 		matches = true;
@@ -421,11 +437,11 @@ function testIpOverlap(ipStr1, ipStr2)
 {
 	ipStr1 = ipStr1.replace(/^[\t ]+/, "");
 	ipStr1 = ipStr1.replace(/[\t ]+$/, "");
-	ipStr2 = ipStr1.replace(/^[\t ]+/, "");
-	ipStr2 = ipStr1.replace(/[\t ]+$/, "");
+	ipStr2 = ipStr2.replace(/^[\t ]+/, "");
+	ipStr2 = ipStr2.replace(/[\t ]+$/, "");
 
 	var split1 = ipStr1.split(/[,\t ]+/);
-	var split2 = ipStr1.split(/[,\t ]+/);
+	var split2 = ipStr2.split(/[,\t ]+/);
 	var index1;
 	var overlapFound = false;
 	for(index1=0; index1 < split1.length && (!overlapFound); index1++)
@@ -641,14 +657,39 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	originalQuotaIp = originalQuotaIp == null ? "none" : originalQuotaIp; //null is not the same as "" -- the latter gets interpretted as "ALL"
 
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var inputIds = ["applies_to", "max_up", "max_down", "max_combined", "active_hours", "active_weekly"];
-	var labelIds = ["applies_to_label", "max_up_label", "max_down_label", "max_combined_label", "quota_active_label", "quota_active_label"];
-	var functions = [validateIP, validateDecimal, validateDecimal, validateDecimal, validateHours, validateWeeklyRange];
-	var validReturnCodes = [0,0,0,0,0,0];
-	var visibilityIds = ["applies_to", "max_up_container","max_down_container","max_combined_container", "active_hours_container", "active_weekly_container"];
+
+
+	var inputIds = ["max_up", "max_down", "max_combined", "active_hours", "active_weekly"];
+	var labelIds = ["max_up_label", "max_down_label", "max_combined_label", "quota_active_label", "quota_active_label"];
+	var functions = [validateDecimal, validateDecimal, validateDecimal, validateHours, validateWeeklyRange];
+	var validReturnCodes = [0,0,0,0,0];
+	var visibilityIds = ["max_up_container","max_down_container","max_combined_container", "active_hours_container", "active_weekly_container"];
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
 
-	//also validate 1) up,down,total aren't all unlimited 2)any quota with overlapping ips doesn't have overlapping time ranges
+	//add any ips in add_ip box, if it is visible and isn't empty
+	if(errors.length == 0 && getSelectedValue("applies_to_type", controlDocument) == "only" && controlDocument.getElementById("add_ip").value != "")
+	{
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, false,250);
+		if(!valid)
+		{
+			errors.push("\"" + controlDocument.getElementById("add_ip").value  + "\" is not a valid IP or IP range");
+		}
+	}
+
+	// check that ip is not empty (e.g. that we are matching based on IP(s) and no ips are defined)
+	// thw getIpFromDocument function will always return ALL in the case where uci had no ip originallly, 
+	// so we don't have to worry about empty ip meaning ALL vs null here
+	var ip = "";
+	if(errors.length == 0)
+	{
+		ip = getIpFromDocument(controlDocument);
+		if(ip == "")
+		{
+			errors.push("You must specify at least one valid IP or IP range");
+		}
+	}
+
+	//check that up,down,total aren't all unlimited 
 	if(errors.length == 0)
 	{
 		if( 	getSelectedValue("max_up_type", controlDocument) == "unlimited" && 
@@ -659,9 +700,10 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 			errors.push("Upload, download and combined bandwidth limits cannot all be unlimited");
 		}
 	}
+
+	//check that any quota with overlapping ips with this one doesn't have overlapping time ranges
 	if(errors.length == 0)
 	{
-		var ip = getIpFromDocument(controlDocument);
 		if(ip != originalQuotaIp)
 		{
 			var quotaSections = uci.getAllSectionsOfType(pkg, "quota");

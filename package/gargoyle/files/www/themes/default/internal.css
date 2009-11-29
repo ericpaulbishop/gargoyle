@@ -1079,6 +1079,21 @@ td.exception_table_column_4
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
+td.quota_ip_table_column_1
+{
+	text-align:left;
+	border-left:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_ip_table_column_2
+{
+	text-align:right;
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+
 
 
 td.quota_table_column_1
