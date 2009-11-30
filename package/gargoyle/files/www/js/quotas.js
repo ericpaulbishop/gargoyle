@@ -221,8 +221,6 @@ function setDocumentIp(ip, controlDocument)
 
 function addNewQuota()
 {
-
-
 	var errors = validateQuota(document, "", "none");
 	if(errors.length > 0)
 	{
@@ -379,22 +377,32 @@ function getMaskInteger(maskSize)
 {
 	return -1<<(32-parsePaddedInt(maskSize))
 }
-function getIpMaskIntegers(ipStr)
+
+function getIpRangeIntegers(ipStr)
 {
-	var ipInt = 0;
-	var ipMaskInt = getMaskInteger(32);
+	var startInt = 0;
+	var endInt = 0;
 	if(ipStr.match(/\//))
 	{
-		var split = ipStr.split(/\//);
-		ipInt = getIpInteger(split[0]);
-		ipMaskInt = (split[1]).match(/\./) ? getIpInteger(split[1]) : getMaskInteger(split[1]);
-		ipInt = ipInt & ipMaskInt;
+		var split = ipStr.split(/[\t ]*\/[\t ]*/);
+		var ipInt = getIpInteger(split[0]);
+		var ipMaskInt = (split[1]).match(/\./) ? getIpInteger(split[1]) : getMaskInteger(split[1]);
+		startInt = ipInt & ipMaskInt;
+		endInt = startInt | ( ~ipMaskInt );
+	}
+	else if(ipStr.match(/-/))
+	{
+		var split = ipStr.split(/[\t ]*-[\t ]*/);
+		startInt = getIpInteger(split[0]);
+		endInt = getIpInteger(split[1]);
 	}
 	else
 	{
-		ipInt = getIpInteger(ipStr);
+		startInt = getIpInteger(ipStr);
+		endInt = startInt;
 	}
-	return [ipInt, ipMaskInt];
+	return [startInt, endInt];
+
 }
 
 function testSingleIpOverlap(ipStr1, ipStr2)
@@ -418,16 +426,15 @@ function testSingleIpOverlap(ipStr1, ipStr2)
 	}
 	else
 	{
-		if(validateIpRange(ipStr1) > 0 || validateIpRange(ipStr2) > 0)
+		if(validateMultipleIps(ipStr1) > 0 || validateMultipleIps(ipStr2) > 0 || ipStr1.match(",") || ipStr2.match(",") )
 		{
 			matches = false;
 		}
 		else
 		{
-			var parsed1 = getIpMaskIntegers(ipStr1);
-			var parsed2 = getIpMaskIntegers(ipStr2);
-			var minMask = parsed1[1] | parsed2[1];
-			matches = (parsed1[0] & minMask) == (parsed2[0] & minMask);
+			var parsed1 = getIpRangeIntegers(ipStr1);
+			var parsed2 = getIpRangeIntegers(ipStr2);
+			matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
 		}
 	}
 	return matches;
