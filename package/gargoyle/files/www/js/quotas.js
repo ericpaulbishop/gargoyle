@@ -194,6 +194,15 @@ function setDocumentIp(ip, controlDocument)
 	ip = ip== ""  ? "ALL" : ip;
 	controlDocument = controlDocument == null ? document : controlDocument;
 	controlDocument.getElementById("add_ip").value = "";
+
+	/* clear ip table */
+	var tableContainer = controlDocument.getElementById("quota_ip_table_container");
+	while(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+
+
 	if(ip == "ALL")
 	{
 		setSelectedValue("applies_to_type", "all", controlDocument);
@@ -365,7 +374,7 @@ function parsePaddedInt(intStr)
 
 function getIpInteger(ipStr)
 {
-	intStr = intStr == null ? "" : intStr;
+	ipStr = ipStr == null ? "" : ipStr;
 	var ip = ipStr.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
 	if(ip)
 	{
@@ -392,7 +401,7 @@ function getIpRangeIntegers(ipStr)
 	}
 	else if(ipStr.match(/-/))
 	{
-		var split = ipStr.split(/[\t ]*-[\t ]*/);
+		var split = ipStr.split(/[\t ]*\-[\t ]*/);
 		startInt = getIpInteger(split[0]);
 		endInt = getIpInteger(split[1]);
 	}
