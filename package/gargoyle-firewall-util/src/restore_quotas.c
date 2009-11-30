@@ -190,6 +190,19 @@ int main(int argc, char** argv)
 				if(ip == NULL) { ip = strdup("ALL"); }
 				if(strlen(ip) == 0) { ip  = strdup("ALL"); }
 
+				/* remove spaces in ip range definitions */
+				while(strstr(ip, " -") != NULL)
+				{
+					char* tmp_ip = ip;
+					ip = dynamic_replace(ip, " -", "-");
+					free(tmp_ip);
+				}
+				while(strstr(ip, "- ") != NULL)
+				{
+					char* tmp_ip = ip;
+					ip = dynamic_replace(ip, "- ", "-");
+					free(tmp_ip);
+				}
 				
 				
 				if( (strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0) && (!process_other_quota)  )
@@ -341,10 +354,9 @@ int main(int argc, char** argv)
 						char* ip_test = strdup(""); 
 						if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
 						{
-
-							char* src_test = dynamic_strcat(3, " --src ", ip, " ");
-							char* dst_test = dynamic_strcat(3, " --dst ", ip, " "); 
-						
+							char* src_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --src ", ip, " ") : dynamic_strcat(3, " -m iprange --src-range ", ip, " ");
+							char* dst_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --dst ", ip, " ") : dynamic_strcat(3, " -m iprange --dst-range ", ip, " ");
+							
 							if(strstr(ip, ",") != NULL || strstr(ip, " ") != NULL || strstr(ip, "\t") != NULL )
 							{
 								char ip_breaks[] = { ',', ' ', '\t' };
@@ -354,8 +366,9 @@ int main(int argc, char** argv)
 								for(ip_index=0; ip_index < num_ips; ip_index++)
 								{
 									char *next_ip = ip_list[ip_index];
-									char *egress_test  = dynamic_strcat(3, " --src ", next_ip, " ");
-									char *ingress_test = dynamic_strcat(3, " --dst ", next_ip, " ");
+									char* egress_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --src ", ip, " ") : dynamic_strcat(3, " -m iprange --src-range ", ip, " ");
+									char* ingress_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --dst ", ip, " ") : dynamic_strcat(3, " -m iprange --dst-range ", ip, " ");
+
 									if(strcmp(types[type_index], "egress_limit") == 0)
 									{
 										run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
