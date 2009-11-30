@@ -20,7 +20,9 @@
 	done
 
 	tz_hundred_hours=$(date "+%z" | sed 's/^+0//' | sed 's/^-0/-/g')
-	tz_minutes=$((tz_hundred_hours*60/100))
+	tz_h=$(($tz_hundred_hours/100))
+	tz_m=$(($tz_hundred_hours-($tz_h*100)))
+	tz_minutes=$((($tz_h*60)+$tz_m))
 	echo "var tzMinutes = $tz_minutes;";
 ?>
 //-->
