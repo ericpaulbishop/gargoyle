@@ -368,7 +368,11 @@ function parsePaddedInt(intStr)
 {
 	intStr = intStr == null ? "" : intStr;
 	intStr = intStr.replace(/[\t ]+/, "");
-	intStr = intStr.replace(/^0+/, "");
+	while( (intStr.length > 1 && intStr.match(/^0/)) || (intStr.length > 2 && intStr.match(/^\-0/)) )
+	{
+		intStr = intStr.replace(/^0/, "");
+		intStr = intStr.replace(/^\-0/, "-");
+	}
 	return parseInt(intStr);
 }
 
