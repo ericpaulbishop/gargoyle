@@ -16,20 +16,21 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	newTable.appendChild(tableBody);
 	newTable.id=tableId;
 
-	row = controlDocument.createElement('tr');
+	var row = controlDocument.createElement('tr');
 	row.className='header_row';
 	tableBody.appendChild(row);
-		
-	for (columnIndex in columnNames)
+	
+	var columnIndex;
+	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
 	{
-		header = controlDocument.createElement('th');
-		headerContent = controlDocument.createTextNode(columnNames[columnIndex]);
+		var header = controlDocument.createElement('th');
+		headerContent = typeof(columnNames[columnIndex]) == 'string' ? controlDocument.createTextNode(columnNames[columnIndex]) : columnNames[columnIndex];
 		header.appendChild(headerContent);
 		row.appendChild(header);
 	}
 	if(rowsAreRemovable)
 	{
-		header = controlDocument.createElement('th');
+		var header = controlDocument.createElement('th');
 		headerContent = controlDocument.createTextNode('');
 		header.appendChild(headerContent);
 		row.appendChild(header);
@@ -38,7 +39,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	{
 		for(i=1; i<2; i++)
 		{
-			header = controlDocument.createElement('th');
+			var header = controlDocument.createElement('th');
 			headerContent = controlDocument.createTextNode('');
 			header.appendChild(headerContent);
 			row.appendChild(header);
