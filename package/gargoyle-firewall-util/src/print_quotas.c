@@ -197,9 +197,9 @@ int main(void)
 		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id_list[id_index]);
 		if(ip_to_bandwidth != NULL)
 		{
-			unsigned long num_ips;
+			unsigned long num_ips = 0;
 			unsigned long ip_index = 0;
-			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ids);
+			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ips);
 			printf("quota_ip_lists[\"%s\"] = ", id_list[id_index]);
 			sprintf(print_comma, "");
 			for(ip_index=0; ip_index < num_ips; ip_index++)
@@ -226,7 +226,7 @@ int main(void)
 		{
 			unsigned long num_ips;
 			unsigned long ip_index = 0;
-			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ids);
+			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ips);
 			for(ip_index=0; ip_index < num_ips; ip_index++)
 			{
 				char* next_ip = ip_list[ip_index];
