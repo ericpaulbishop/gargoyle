@@ -43,27 +43,49 @@ int main(void)
 	unlock_bandwidth_semaphore_on_exit();
 
 	/* for each ip have uint64_t[6], */
-	string_map *ip_to_bandwidth = initialize_string_map(1);
-	string_map *ip_to_percents = initialize_string_map(1);	
-	string_map *ip_to_limits =   initialize_string_map(1);
+	string_map *id_ip_to_bandwidth = initialize_string_map(1);
+	string_map *id_ip_to_percents = initialize_string_map(1);	
+	string_map *id_ip_to_limits =   initialize_string_map(1);
 	while(quota_sections->length > 0)
 	{
 		char* next_quota = shift_list(quota_sections);
 		
 
 		/* base id for quota is the ip associated with it*/
-		char *ip = get_uci_option(ctx, "firewall", next_quota, "ip");
-			
+		char *id = get_uci_option(ctx, "firewall", next_quota, "id");
+		char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");	
 		if(ip == NULL)
 		{
 			ip = strdup("ALL");
 		}
 		else if(strcmp(ip, "") == 0)
 		{
+			free(ip);
 			ip = strdup("ALL");
 		}
+		if(id == NULL)
+		{
+			id = strdup(ip);
+		}
+		else if(strcmp(id, "") == 0)
+		{
+			id = strdup(ip);
+		}
 
-			
+		string_map* ip_to_bandwidth = get_sring_map_element(id_ip_to_bandwidth, id);
+		ip_to_bandwidth = ip_to_bandwidth == NULL ? initialize_string_map(1) : ip_to_bandwidth;
+		set_string_map_element(id_ip_to_bandwidth, id, ip_to_bandwidth);
+
+		string_map* ip_to_percents = get_sring_map_element(id_ip_to_percents, id);
+		ip_to_percents = ip_to_percents == NULL ? initialize_string_map(1) : ip_to_percents;
+		set_string_map_element(id_ip_to_percents, id, ip_to_percents);
+
+		string_map* ip_to_limits = get_sring_map_element(id_ip_to_limits, id);
+		ip_to_limits = ip_to_limits == NULL ? initialize_string_map(1) : ip_to_limits;
+		set_string_map_element(id_ip_to_limits, id, ip_to_limits);
+
+
+
 		char* types[] = { "egress_limit", "ingress_limit", "combined_limit" };
 		char* postfixes[] = { "_egress", "_ingress", "_combined" };
 		
@@ -74,7 +96,7 @@ int main(void)
 			char* limit = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
 			if(limit != NULL)
 			{
-				char* type_id = dynamic_strcat(2, ip, postfixes[type_index]);
+				char* type_id = dynamic_strcat(2, id, postfixes[type_index]);
 				ip_bw* ip_buf;
 				unsigned long num_ips = 0;
 				int query_succeeded = get_all_bandwidth_usage_for_rule_id(type_id, &num_ips, &ip_buf, 5000);
@@ -95,6 +117,7 @@ int main(void)
 							addr.s_addr = next.ip;
 							next_ip = strdup(inet_ntoa(addr));
 						}
+						
 						
 						uint64_t *bw_list = get_string_map_element(ip_to_bandwidth,next_ip);
 						if(bw_list == NULL)
@@ -150,98 +173,107 @@ int main(void)
 
 			}
 		}
+		free(id);
 		free(ip);
 		free(next_quota);
 	}
 	
 
-	unsigned long num_ips;
-	char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ips);
-	printf("var quota_ip_list = [ ");
-	int print_comma = 0;
-	unsigned long ip_index;
-	for(ip_index=0; ip_index < num_ips; ip_index++)
+	unsigned long num_ids;
+	char** id_list = (char**)get_string_map_keys(id_ip_to_bandwidth, &num_ids);
+	printf("var quota_id_list = [ ");
+	char print_comma[10] = "";
+	unsigned long id_index;
+	for(id_index=0; id_index < num_ids; id_index++)
 	{
-		if(print_comma)
-		{
-			printf(", \"%s\"", ip_list[ip_index]);
-		}
-		else
-		{
-			print_comma = 1;
-			printf("\"%s\"", ip_list[ip_index]);
-		}
+		printf("%s\"%s\"", print_comma, id_list[id_index]);
+		sprintf(print_comma, ", ");
 	}
 	printf(" ];\n");
+
+	printf("var quota_ip_lists = [];\n");
+	for(id_index=0; id_index < num_ids; id_index++)
+	{
+		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id_list[id_index]);
+		if(ip_to_bandwidth != NULL)
+		{
+			unsigned long num_ips;
+			unsigned long ip_index = 0;
+			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ids);
+			printf("quota_ip_lists[\"%s\"] = ", id_list[id_index]);
+			sprintf(print_comma, "");
+			for(ip_index=0; ip_index < num_ips; ip_index++)
+			{
+				printf("%s\"%s\"", print_comma, ip_list[ip_index]);
+				sprintf(print_comma, ", ");
+			}
+			printf("];\n");
+			
+		}
+	}	
+
 	printf("var quotaUsed     = new Array();\n");
 	printf("var quotaLimits   = new Array();\n");
 	printf("var quotaPercents = new Array();\n");
-	for(ip_index=0; ip_index < num_ips; ip_index++)
+
+	for(id_index=0; id_index < num_ids; id_index++)
 	{
-		char* next_ip = ip_list[ip_index];
-		uint64_t* used   = (uint64_t*)get_string_map_element(ip_to_bandwidth, next_ip);
-		double* percents = (double*)get_string_map_element(ip_to_percents, next_ip);
-		uint64_t* limits = (uint64_t*)get_string_map_element(ip_to_limits, next_ip);
-
-		if(used != NULL)
+		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id_list[id_index]);
+		string_map* ip_to_percents = get_string_map_element(id_ip_to_percents, id_list[id_index]);
+		string_map* ip_to_limits = get_string_map_element(id_ip_to_limits, id_list[id_index]);
+		if(ip_to_bandwidth != NULL)
 		{
-			int type_index;
-			print_comma = 0;
-			printf("quotaUsed[ \"%s\" ] = [ ", next_ip);
-			for(type_index=0; type_index < 3; type_index++)
+			unsigned long num_ips;
+			unsigned long ip_index = 0;
+			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ids);
+			for(ip_index=0; ip_index < num_ips; ip_index++)
 			{
-				if(print_comma)
+				char* next_ip = ip_list[ip_index];
+				uint64_t* used   = (uint64_t*)get_string_map_element(ip_to_bandwidth, next_ip);
+				double* percents = (double*)get_string_map_element(ip_to_percents, next_ip);
+				uint64_t* limits = (uint64_t*)get_string_map_element(ip_to_limits, next_ip);
+
+				if(used != NULL)
 				{
-					printf(", ");
-				}
-				else
-				{
-					print_comma = 1;
-				}
-				if(!used[type_index])
-				{
-					printf("-1");
-				}
-				else
-				{
-					printf("%lld", (long long int)used[type_index+3]);
+					int type_index;
+					printf("quotaUsed[ \"%s\" ] = [];\n", next_id);
+					printf("quotaUsed[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
+					sprintf(print_comma, "");
+					for(type_index=0; type_index < 3; type_index++)
+					{
+						if(!used[type_index])
+						{
+							printf("%s-1", print_comma);
+						}
+						else
+						{
+							printf("%s%lld", print_comma, (long long int)used[type_index+3]);
+						}
+						sprintf(print_comma, ", ");
+					}
+					printf(" ];\n");
+
+					printf("quotaPercents[ \"%s\" ] = [];\n", next_id);
+					printf("quotaPercents[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
+					sprintf(print_comma, "");
+					for(type_index=0; type_index < 3; type_index++)
+					{
+						printf("%s%6.3lf", print_comma, percents[type_index]);
+						sprintf(print_comma, ", ");
+					}
+					printf(" ];\n");
+
+					printf("quotaLimits[ \"%s\" ] = [];\n", next_id);
+					printf("quotaLimits[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
+					sprintf(print_comma, "");
+					for(type_index=0; type_index < 3; type_index++)
+					{
+						printf("%s%lld", print_comma,limits[type_index]);
+						sprintf(print_comma, ", ");
+					}
+					printf(" ];\n");
 				}
 			}
-			printf(" ];\n");
-
-			print_comma = 0;
-			printf("quotaPercents[ \"%s\" ] = [ ", next_ip);
-			for(type_index=0; type_index < 3; type_index++)
-			{
-				if(print_comma)
-				{
-					printf(", ");
-				}
-				else
-				{
-					print_comma = 1;
-				}
-				printf("%6.3lf", percents[type_index]);
-			}
-			printf(" ];\n");
-
-			print_comma = 0;
-			printf("quotaLimits[ \"%s\" ] = [ ", next_ip);
-			for(type_index=0; type_index < 3; type_index++)
-			{
-				if(print_comma)
-				{
-					printf(", ");
-				}
-				else
-				{
-					print_comma = 1;
-				}
-				printf("%lld", limits[type_index]);
-			}
-			printf(" ];\n");
-
-
 		}
 	}
 
