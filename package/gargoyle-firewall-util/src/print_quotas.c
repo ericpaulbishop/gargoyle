@@ -86,8 +86,8 @@ int main(void)
 
 
 
-		char* types[] = { "egress_limit", "ingress_limit", "combined_limit" };
-		char* postfixes[] = { "_egress", "_ingress", "_combined" };
+		char* types[] = { "combined_limit", "ingress_limit", "egress_limit" };
+		char* postfixes[] = { "_combined", "_ingress", "_egress" };
 		
 		
 		int type_index;
@@ -181,7 +181,7 @@ int main(void)
 
 	unsigned long num_ids;
 	char** id_list = (char**)get_string_map_keys(id_ip_to_bandwidth, &num_ids);
-	printf("var quota_id_list = [ ");
+	printf("var quotaIdList = [ ");
 	char print_comma[10] = "";
 	unsigned long id_index;
 	for(id_index=0; id_index < num_ids; id_index++)
@@ -191,7 +191,7 @@ int main(void)
 	}
 	printf(" ];\n");
 
-	printf("var quota_ip_lists = [];\n");
+	printf("var quotaIpLists = [];\n");
 	for(id_index=0; id_index < num_ids; id_index++)
 	{
 		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id_list[id_index]);
@@ -200,7 +200,7 @@ int main(void)
 			unsigned long num_ips = 0;
 			unsigned long ip_index = 0;
 			char** ip_list = (char**)get_string_map_keys(ip_to_bandwidth, &num_ips);
-			printf("quota_ip_lists[\"%s\"] = ", id_list[id_index]);
+			printf("quotaIpLists[\"%s\"] = [ ", id_list[id_index]);
 			sprintf(print_comma, "");
 			for(ip_index=0; ip_index < num_ips; ip_index++)
 			{
