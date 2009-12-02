@@ -72,15 +72,15 @@ int main(void)
 			id = strdup(ip);
 		}
 
-		string_map* ip_to_bandwidth = get_sring_map_element(id_ip_to_bandwidth, id);
+		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id);
 		ip_to_bandwidth = ip_to_bandwidth == NULL ? initialize_string_map(1) : ip_to_bandwidth;
 		set_string_map_element(id_ip_to_bandwidth, id, ip_to_bandwidth);
 
-		string_map* ip_to_percents = get_sring_map_element(id_ip_to_percents, id);
+		string_map* ip_to_percents = get_string_map_element(id_ip_to_percents, id);
 		ip_to_percents = ip_to_percents == NULL ? initialize_string_map(1) : ip_to_percents;
 		set_string_map_element(id_ip_to_percents, id, ip_to_percents);
 
-		string_map* ip_to_limits = get_sring_map_element(id_ip_to_limits, id);
+		string_map* ip_to_limits = get_string_map_element(id_ip_to_limits, id);
 		ip_to_limits = ip_to_limits == NULL ? initialize_string_map(1) : ip_to_limits;
 		set_string_map_element(id_ip_to_limits, id, ip_to_limits);
 
@@ -218,9 +218,10 @@ int main(void)
 
 	for(id_index=0; id_index < num_ids; id_index++)
 	{
-		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id_list[id_index]);
-		string_map* ip_to_percents = get_string_map_element(id_ip_to_percents, id_list[id_index]);
-		string_map* ip_to_limits = get_string_map_element(id_ip_to_limits, id_list[id_index]);
+		char* next_id = id_list[id_index];
+		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, next_id);
+		string_map* ip_to_percents = get_string_map_element(id_ip_to_percents, next_id);
+		string_map* ip_to_limits = get_string_map_element(id_ip_to_limits, next_id);
 		if(ip_to_bandwidth != NULL)
 		{
 			unsigned long num_ips;
