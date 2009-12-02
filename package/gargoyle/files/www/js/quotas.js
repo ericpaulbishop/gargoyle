@@ -1,3 +1,10 @@
+/*
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL. 
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
 var pkg = "firewall";
 var changedIds = [];
 var rowCheckIndex = 3;
@@ -130,24 +137,6 @@ function resetData()
 	setVisibility(document);
 }
 
-function textListToSpanElement(textList, addCommas, controlDocument)
-{
-	addCommas = addCommas == null ? false : addCommas;
-	controlDocument = controlDocument == null ? document : controlDocument;
-
-	var spanEl = controlDocument.createElement("span");
-	var tlIndex;
-	for(tlIndex=0; tlIndex < textList.length ; tlIndex++)
-	{
-		if(tlIndex > 0)
-		{
-			spanEl.appendChild( controlDocument.createElement("br") );
-		}
-		
-		spanEl.appendChild(controlDocument.createTextNode(  textList[tlIndex] + (tlIndex < textList.length-1 && addCommas ? "," : "")  ));
-	}
-	return spanEl;
-}
 function ipToTableSpan(ip)
 {
 	var ipStr = ip;
@@ -159,7 +148,7 @@ function ipToTableSpan(ip)
 	{
 		ipStr = "Others (Combined)";
 	}
-	else if(ipStr == "ALL")
+	else if(ipStr == "ALL" || ipStr == "")
 	{
 		ipStr = "All";
 	}
@@ -192,7 +181,7 @@ function timeParamsToTableSpan(timeParameters)
 		}
 		textList.unshift( active == "only" ? "Only:" : "All Times Except:" );
 	}
-	return textListToSpanElement(textList, false);
+	return textListToSpanElement(textList, false, document);
 }
 function getLimitStrFromUci(srcUci, section)
 {

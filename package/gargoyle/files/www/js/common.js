@@ -1811,3 +1811,23 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 
 	return valid == 0 ? true : false;
 }
+
+function textListToSpanElement(textList, addCommas, controlDocument)
+{
+	addCommas = addCommas == null ? false : addCommas;
+	controlDocument = controlDocument == null ? document : controlDocument;
+
+	var spanEl = controlDocument.createElement("span");
+	var tlIndex;
+	for(tlIndex=0; tlIndex < textList.length ; tlIndex++)
+	{
+		if(tlIndex > 0)
+		{
+			spanEl.appendChild( controlDocument.createElement("br") );
+		}
+		
+		spanEl.appendChild(controlDocument.createTextNode(  textList[tlIndex] + (tlIndex < textList.length-1 && addCommas ? "," : "")  ));
+	}
+	return spanEl;
+}
+

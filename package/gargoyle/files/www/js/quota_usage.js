@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -8,43 +8,172 @@
 var pkg = "firewall";
 var updateInProgress = false;
 
+var allQuotaIds      = quotaIdList;
+var allQuotaIps      = quotaIpLists;
+var allQuotaUsed     = quotaUsed;
+var allQuotaLimits   = quotaLimits;
+var allQuotaPercents = quotaPercents;
+
+
+var idToSection = [];
+var idToIpStr = [];
+var idToTimeParams = [];
+
+
 function resetData()
 {
+	idToSection = [];
+	idToIpStr = [];
+	idToTimeParams = [];
+
+	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
+	var qIndex;
+	for(qIndex=0; qIndex < quotaSections.length; qIndex++)
+	{
+		var ip = getIpFromUci(uciOriginal, quotaSections[qIndex]);
+		var id = uciOriginal.get(pkg, quotaSections[qIndex], "id");
+		id = id == "" ? getIdFromIp(ip, uciOriginal);
+
+		idToSection[ id ] = quotaSections[qIndex];
+		idToIp[ id ] = ip;
+		idToTimeParameters[ id ] = getTimeParametersFromUci(uciOriginal, quotaSections[qIndex]);
+	}
+
 	refreshTableData();
 	setInterval("updateTableData()", 1500);
 }
+function getIpFromUci(srcUci, quotaSection)
+{
+	var ipStr = srcUci.get(pkg, quotaSection, "ip");
+	if(ipStr == "ALL_OTHERS_INDIVIDUAL")
+	{
+		ipStr="Others (Individual)";
+	}
+	else if(ipStr == "ALL_OTHERS_COMBINED")
+	{
+		ipStr = "Others (Combined)";
+	}
+	else if(ipStr == "ALL" || ipStr == "")
+	{
+		ipStr = "All";
+	}
+	return ipStr;
+}
+function getIdFromIp(ip, srcUci)
+{
+	id = ip == "" ? "ALL" : ip.replace(/[\t, ]+.*$/, "");
+	id = id.replace(/\//, "_");
+			
+	var idPrefix = id;
+	var found = true;
+	var suffixCount = 0;
+
+	var quotaSections = srcUci.getAllSectionsOfType(pkg, "quota");
+
+	while(found)
+	{
+		found = false;
+		var sectionIndex;
+		for(sectionIndex=0; sectionIndex < quotaSections.length && (!found); sectionIndex++)
+		{
+			found = found || srcUci.get(pkg, quotaSections[sectionIndex], "id") == id;
+		}
+		if(found)
+		{
+			var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			var suffix = suffixCount < 26 ? "_" + letters.substr(suffixCount,1) : "_Z" + (suffixCount-25);
+			id = idPrefix + suffix;
+		}
+		suffixCount++;
+	}
+	return id;
+
+}
+function getTimeParametersFromUci(srcUci, quotaSection)
+{
+	var hours = srcUci.get(pkg, quotaSection, "offpeak_hours");
+	var days = srcUci.get(pkg, quotaSection, "offpeak_weekdays");
+	var weekly = srcUci.get(pkg, quotaSection, "offpeak_weekly_ranges");
+	var active = hours != "" || days != "" || weekly != "" ? "except" : "always";
+	if(active == "always")
+	{
+		hours = srcUci.get(pkg, quotaSection, "onpeak_hours");
+		days = srcUci.get(pkg, quotaSection, "onpeak_weekdays");
+		weekly = srcUci.get(pkg, quotaSection, "onpeak_weekly_ranges");
+		active = hours != "" || days != "" || weekly != "" ? "only" : "always";
+
+	}
+	return [hours,days,weekly,active];
+}
+
+function timeParamsToTableSpan(timeParameters)
+{
+	var hours = timeParameters[0];
+       	var days = timeParameters[1];
+	var weekly = timeParameters[2];
+	var active = timeParameters[3];
+	
+		
+	var textList = [];
+	if(active == "always")
+	{
+		textList.unshift("Always");
+	}
+	else
+	{
+		if(weekly != "")
+		{
+			textList = weekly.match(",") ? weekly.split(/[\t ]*,[\t ]*/) : [ weekly ];
+		}
+		else
+		{
+			if(hours != ""){ textList = hours.match(",") ? hours.split(/[\t ]*,[\t ]*/) : [ hours ]; }
+			if(days  != ""){ textList.unshift(days); }
+		}
+		textList.unshift( active == "only" ? "Only:" : "All Times Except:" );
+	}
+	return textListToSpanElement(textList, false, document);
+}
+
 
 function refreshTableData()
 {
 	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
 	var quotaTableData = [];
-	var ipIndex;
-	for(ipIndex=0; ipIndex < allQuotaIps.length; ipIndex++)
+	var idIndex;
+	for(idIndex=0; idIndex < allQuotaIds.length; idIndex++)
 	{
-		var ip = allQuotaIps[ipIndex];
-		ip = ip.replace(/\//g, "_");
-		var up       = "N/A";
-		var down     = "N/A";
-		var combined = "N/A";
-		if(allQuotaPercents[ip] != null)
+		var ipIndex;
+		var id =  allQuotaIds[idIndex];
+		var quotaIpList = allQuotaIps[ id ];
+		var timeParameters = idToTimeParameters[ id ];
+		for(ipIndex=0; ipIndex < quotaIpList.length; ipIndex++)
 		{
-			var usds = allQuotaUsed[ip];
-			var lims = allQuotaLimits[ip];
-			var pcts = allQuotaPercents[ip];
+			var ip       = quotaIpList[ipIndex];
+			var up       = "N/A";
+			var down     = "N/A";
+			var total    = "N/A";
+			if(allQuotaPercents[id] != null)
+			{
+				if(allQuotaPercents[id][ip] != null)
+				{
+					var usds = allQuotaUsed[ip];
+					var lims = allQuotaLimits[ip];
+					var pcts = allQuotaPercents[ip];
 
-			var pkg = "firewall";
-
-			up = pcts[0] >= 0 ? pcts[0] + "%" : up;
-			down = pcts[1] >= 0 ? pcts[1] + "%" : down;
-			combined = pcts[2] >= 0 ? pcts[2] + "%" : combined;
+					total = pcts[0] >= 0 ? pcts[0] + "%" : total;
+					down = pcts[1] >= 0 ? pcts[1] + "%" : down;
+					up = pcts[2] >= 0 ? pcts[2] + "%" : up;
+				}
+			}
+			quotaTableData.push( [ textListToSpanElement(ip.split(/[\t ]*,[\t ]*/), true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
 		}
-		quotaTableData.push( [ ip.replace(/_/g, " "), up, down, combined ] );
 	}
-	var columnNames = ["IP", "% Upload Used", "% Download Used", "% Combined Used" ];
+	var columnNames = ["IP(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
 	
 	var quotaTable = createTable(columnNames, quotaTableData, "quota_usage_table", false, false);
 	var tableContainer = document.getElementById('quota_table_container');
-	if(tableContainer.firstChild != null)
+	while(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
@@ -70,6 +199,8 @@ function updateTableData()
 					next = text.pop();
 				}
 				eval(text.join("\n"));
+				allQuotaIds      = quotaIdList;
+				allQuotaIps      = quotaIpLists;
 				allQuotaUsed     = quotaUsed;
 				allQuotaLimits   = quotaLimits;
 				allQuotaPercents = quotaPercents;
