@@ -1378,14 +1378,23 @@ function validateMultipleIps(ips)
 	ips = ips.replace(/^[\t ]+/g, "");
 	ips = ips.replace(/[\t ]+$/g, "");
 	var splitIps = ips.split(/[\t ]*,[\t ]*/);
-	var valid = splitIps.length > 0 ? 0 : 1;
+	var valid = splitIps.length > 0 ? 0 : 1; //1= error, 0=true
 	while(valid == 0 && splitIps.length > 0)
 	{
 		var nextIp = splitIps.pop();
 		if(nextIp.match(/-/))
 		{
 			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
+			if( nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0)
+			{
+				var ipInt1 = getIpInteger(nextSplit[0]);
+				var ipInt2 = getIpInteger(nextSplit[1]);
+				valid = ipInt1 <= ipInt2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}		
 		}
 		else
 		{
@@ -1399,14 +1408,23 @@ function validateMultipleIpsOrMacs(addresses)
 	var addr = addresses.replace(/^[\t ]+/g, "");
 	addr = addr.replace(/[\t ]+$/g, "");
 	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
-	var valid = splitAddr.length > 0 ? 0 : 1;
+	var valid = splitAddr.length > 0 ? 0 : 1; //1= error, 0=true
 	while(valid == 0 && splitAddr.length > 0)
 	{
 		var nextAddr = splitAddr.pop();
 		if(nextAddr.match(/-/))
 		{
 			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
+			if( nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0)
+			{
+				var ipInt1 = getIpInt(nextSplit[0]);
+				var ipInt2 = getIpInt(nextSplit[1]);
+				valid = ipInt1 <= ipInt2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}		
 		}
 		else if(nextAddr.match(/:/))
 		{
@@ -1772,18 +1790,99 @@ function stripQuotes(str)
 	return str;
 }
 
-function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, alertOnError,tableWidth)
+function textListToSpanElement(textList, addCommas, controlDocument)
 {
-	
+	addCommas = addCommas == null ? false : addCommas;
+	controlDocument = controlDocument == null ? document : controlDocument;
+
+	var spanEl = controlDocument.createElement("span");
+	var tlIndex;
+	for(tlIndex=0; tlIndex < textList.length ; tlIndex++)
+	{
+		if(tlIndex > 0)
+		{
+			spanEl.appendChild( controlDocument.createElement("br") );
+		}
+		
+		spanEl.appendChild(controlDocument.createTextNode(  textList[tlIndex] + (tlIndex < textList.length-1 && addCommas ? "," : "")  ));
+	}
+	return spanEl;
+}
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+{
+	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
+	macsValid = macsValid == null ? true : false;
+	ipValidType = ipValidType == null ? 3 : ipValidType;
+	var ipValidFunction;
+	if(ipValidType == 0)
+	{
+		ipValidFunction = function(){ return 1; };
+	}
+	else if(ipValidType == 1)
+	{
+		ipValidFunction = validateIP;
+	}
+	else if(ipValidType == 2)
+	{
+		ipValidFunction = validateIpRange;
+	}
+	else
+	{
+		ipValidFunction = validateMultipleIps;
+	}
+
+	var allCurrentMacs = [];
+	var allCurrentIps = [];
+	var tableContainer = controlDocument.getElementById(tableContainerId);
+	if(tableContainer.firstChild != null)
+	{
+		var table = tableContainer.firstChild;
+		var data = getTableDataArray(table, true, false);
+		var rowIndex;
+		for(rowIndex=0; rowIndex < data.length; rowIndex++)
+		{
+			var addr = data[rowIndex][0];
+			if(validateMac(addr) == 0)
+			{
+				allCurrentMacs.push(addr);
+			}
+			else
+			{
+				allCurrentIps.push(addr);
+			}
+		}
+	}
+
 	controlDocument = controlDocument == null ? document : controlDocument;
 	alertOnError = alertOnError == null ? true : alertOnError;
 
 	var newAddrs = controlDocument.getElementById(textId).value;
-	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
-	
+	var splitAddrs = newAddrs.split(/[\t ]*,[\t ]*/);
+	var valid = splitAddrs.length > 0 ? 0 : 1; //1=error, 0=valid
+	var splitIndex;
+	for(splitIndex=0; splitIndex < splitAddrs.length && valid == 0; splitIndex++)
+	{
+		var addr = splitAddrs[splitIndex];
+		var macValid = (macsValid && validateMac(addr) == 0);
+		var ipValid = (ipValidFunction(addr) == 0);
+		if(macValid || ipValid)
+		{
+			var currAddrs = macValid ? allCurrentMacs : allCurrentIps;
+			valid = currAddrs.length == 0 || (!testAddrOverlap(addr, currAddrs.join(","))) ? 0 : 1;
+			if(valid == 0)
+			{
+				currAddrs.push(addr); //if we're adding multiple addrs and there's overlap, this will allow us to detect it
+			}
+		}
+		else 
+		{
+			valid = 1;
+		}
+	}
+
+
 	if(valid == 0)
 	{
-		var tableContainer = controlDocument.getElementById(tableContainerId);
 		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
 		newAddrs = newAddrs.replace(/^[\t ]*/, "");
 		newAddrs = newAddrs.replace(/[\t ]*$/, "");
@@ -1812,22 +1911,130 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 	return valid == 0 ? true : false;
 }
 
-function textListToSpanElement(textList, addCommas, controlDocument)
-{
-	addCommas = addCommas == null ? false : addCommas;
-	controlDocument = controlDocument == null ? document : controlDocument;
 
-	var spanEl = controlDocument.createElement("span");
-	var tlIndex;
-	for(tlIndex=0; tlIndex < textList.length ; tlIndex++)
+function parsePaddedInt(intStr)
+{
+	intStr = intStr == null ? "" : intStr;
+	intStr = intStr.replace(/[\t ]+/, "");
+	while( (intStr.length > 1 && intStr.match(/^0/)) || (intStr.length > 2 && intStr.match(/^\-0/)) )
 	{
-		if(tlIndex > 0)
-		{
-			spanEl.appendChild( controlDocument.createElement("br") );
-		}
-		
-		spanEl.appendChild(controlDocument.createTextNode(  textList[tlIndex] + (tlIndex < textList.length-1 && addCommas ? "," : "")  ));
+		intStr = intStr.replace(/^0/, "");
+		intStr = intStr.replace(/^\-0/, "-");
 	}
-	return spanEl;
+	return parseInt(intStr);
 }
+
+function getIpInteger(ipStr)
+{
+	ipStr = ipStr == null ? "" : ipStr;
+	var ip = ipStr.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+	if(ip)
+	{
+		return (+parsePaddedInt(ip[1])<<24) + (+parsePaddedInt(ip[2])<<16) + (+parsePaddedInt(ip[3])<<8) + (+parsePaddedInt(ip[4]));
+	}
+	return parseInt(""); //will return NaN
+}
+function getMaskInteger(maskSize)
+{
+	return -1<<(32-parsePaddedInt(maskSize))
+}
+
+function getIpRangeIntegers(ipStr)
+{
+	var startInt = 0;
+	var endInt = 0;
+	if(ipStr.match(/\//))
+	{
+		var split = ipStr.split(/[\t ]*\/[\t ]*/);
+		var ipInt = getIpInteger(split[0]);
+		var ipMaskInt = (split[1]).match(/\./) ? getIpInteger(split[1]) : getMaskInteger(split[1]);
+		startInt = ipInt & ipMaskInt;
+		endInt = startInt | ( ~ipMaskInt );
+	}
+	else if(ipStr.match(/-/))
+	{
+		var split = ipStr.split(/[\t ]*\-[\t ]*/);
+		startInt = getIpInteger(split[0]);
+		endInt = getIpInteger(split[1]);
+	}
+	else
+	{
+		startInt = getIpInteger(ipStr);
+		endInt = startInt;
+	}
+	return [startInt, endInt];
+
+}
+
+
+function testSingleAddrOverlap(addrStr1, addrStr2)
+{
+	/* 
+	 * this adjustment is useful in multiple places, particularly quotas
+	 * if you don't want these conversions, just validate quota BEFORE you
+	 * try calling this function
+	 */
+	var adj = function(addrStr)
+	{
+		addrStr = addrStr == "" ? "ALL" : addrStr.toUpperCase();	
+		if(addrStr == "ALL_OTHERS_COMBINED" || addrStr == "ALL_OTHERS_INDIVIDUAL")
+		{
+			addrStr = "ALL_OTHERS_COMBINED";
+		}
+		return addrStr;
+	}
+	addrStr1 = adj(addrStr1);
+	addrStr2 = adj(addrStr2);
+
+	var matches = false;
+	if(addrStr1 == addrStr2) //can test MAC addr equality as well as ALL/OTHER variables we use sometimes
+	{
+		matches = true;
+	}
+	else //assume we're dealing with an actual IP / IP subnet / IP Range
+	{
+		if(validateMultipleIps(addrStr1) > 0 || validateMultipleIps(addrStr2) > 0 || addrStr1.match(",") || addrStr2.match(",") )
+		{
+			matches = false;
+		}
+		else
+		{
+			var parsed1 = getIpRangeIntegers(addrStr1);
+			var parsed2 = getIpRangeIntegers(addrStr2);
+			matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
+		}
+	}
+	return matches;
+}
+
+function testAddrOverlap(addrStr1, addrStr2)
+{
+	addrStr1 = addrStr1.replace(/^[\t ]+/, "");
+	addrStr1 = addrStr1.replace(/[\t ]+$/, "");
+	addrStr2 = addrStr2.replace(/^[\t ]+/, "");
+	addrStr2 = addrStr2.replace(/[\t ]+$/, "");
+
+	var split1 = addrStr1.split(/[,\t ]+/);
+	var split2 = addrStr2.split(/[,\t ]+/);
+	var index1;
+	var overlapFound = false;
+	for(index1=0; index1 < split1.length && (!overlapFound); index1++)
+	{
+		var index2;
+		for(index2=0; index2 <split2.length && (!overlapFound); index2++)
+		{
+			overlapFound = overlapFound || testSingleAddrOverlap(split1[index1], split2[index2]);
+		}
+	}
+	return overlapFound;
+}
+
+//validateIP -- tests IP only, and that it's not a broadcast address
+//validateIpRange -- tests if it's a valid Ip or a valid Ip/netmask combination
+//validateMultipleIps -- tests whether we have a comma separated list of valid Ips or Ip/mask or Ip-Ip range definitions
+//validateMac -- test if arg is a valid MAC
+
+
+
+
 

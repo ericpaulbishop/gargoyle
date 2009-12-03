@@ -287,7 +287,7 @@ function setDocumentIp(ip, controlDocument)
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
 		controlDocument.getElementById("add_ip").value = ip;
-		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, false,250);
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false,250);
 		if(!valid)
 		{
 			controlDocument.getElementById("add_ip").value = "";
@@ -438,118 +438,6 @@ function getHourSeconds(offset)
 	return ( Math.floor((offset%(60*60*24))/(60*60)) * (60*60) );
 }
 
-
-
-function parsePaddedInt(intStr)
-{
-	intStr = intStr == null ? "" : intStr;
-	intStr = intStr.replace(/[\t ]+/, "");
-	while( (intStr.length > 1 && intStr.match(/^0/)) || (intStr.length > 2 && intStr.match(/^\-0/)) )
-	{
-		intStr = intStr.replace(/^0/, "");
-		intStr = intStr.replace(/^\-0/, "-");
-	}
-	return parseInt(intStr);
-}
-
-function getIpInteger(ipStr)
-{
-	ipStr = ipStr == null ? "" : ipStr;
-	var ip = ipStr.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
-	if(ip)
-	{
-		return (+parsePaddedInt(ip[1])<<24) + (+parsePaddedInt(ip[2])<<16) + (+parsePaddedInt(ip[3])<<8) + (+parsePaddedInt(ip[4]));
-	}
-	return parseInt(""); //will return NaN
-}
-function getMaskInteger(maskSize)
-{
-	return -1<<(32-parsePaddedInt(maskSize))
-}
-
-function getIpRangeIntegers(ipStr)
-{
-	var startInt = 0;
-	var endInt = 0;
-	if(ipStr.match(/\//))
-	{
-		var split = ipStr.split(/[\t ]*\/[\t ]*/);
-		var ipInt = getIpInteger(split[0]);
-		var ipMaskInt = (split[1]).match(/\./) ? getIpInteger(split[1]) : getMaskInteger(split[1]);
-		startInt = ipInt & ipMaskInt;
-		endInt = startInt | ( ~ipMaskInt );
-	}
-	else if(ipStr.match(/-/))
-	{
-		var split = ipStr.split(/[\t ]*\-[\t ]*/);
-		startInt = getIpInteger(split[0]);
-		endInt = getIpInteger(split[1]);
-	}
-	else
-	{
-		startInt = getIpInteger(ipStr);
-		endInt = startInt;
-	}
-	return [startInt, endInt];
-
-}
-
-function testSingleIpOverlap(ipStr1, ipStr2)
-{
-	var adj = function(ipStr)
-	{
-		ipStr = ipStr == "" ? "ALL" : ipStr;	
-		if(ipStr == "ALL_OTHERS_COMBINED" || ipStr == "ALL_OTHERS_INDIVIDUAL")
-		{
-			ipStr = "ALL_OTHERS_COMBINED";
-		}
-		return ipStr;
-	}
-	ipStr1 = adj(ipStr1);
-	ipStr2 = adj(ipStr2);
-
-	var matches = false;
-	if(ipStr1 == ipStr2)
-	{
-		matches = true;
-	}
-	else
-	{
-		if(validateMultipleIps(ipStr1) > 0 || validateMultipleIps(ipStr2) > 0 || ipStr1.match(",") || ipStr2.match(",") )
-		{
-			matches = false;
-		}
-		else
-		{
-			var parsed1 = getIpRangeIntegers(ipStr1);
-			var parsed2 = getIpRangeIntegers(ipStr2);
-			matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
-		}
-	}
-	return matches;
-}
-
-function testIpOverlap(ipStr1, ipStr2)
-{
-	ipStr1 = ipStr1.replace(/^[\t ]+/, "");
-	ipStr1 = ipStr1.replace(/[\t ]+$/, "");
-	ipStr2 = ipStr2.replace(/^[\t ]+/, "");
-	ipStr2 = ipStr2.replace(/[\t ]+$/, "");
-
-	var split1 = ipStr1.split(/[,\t ]+/);
-	var split2 = ipStr2.split(/[,\t ]+/);
-	var index1;
-	var overlapFound = false;
-	for(index1=0; index1 < split1.length && (!overlapFound); index1++)
-	{
-		var index2;
-		for(index2=0; index2 <split2.length && (!overlapFound); index2++)
-		{
-			overlapFound = overlapFound || testSingleIpOverlap(split1[index1], split2[index2]);
-		}
-	}
-	return overlapFound;
-}
 
 function timeVariablesToWeeklyRanges(hours, days, weekly, invert)
 {
@@ -765,7 +653,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	//add any ips in add_ip box, if it is visible and isn't empty
 	if(errors.length == 0 && getSelectedValue("applies_to_type", controlDocument) == "only" && controlDocument.getElementById("add_ip").value != "")
 	{
-		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, false,250);
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false,250);
 		if(!valid)
 		{
 			errors.push("\"" + controlDocument.getElementById("add_ip").value  + "\" is not a valid IP or IP range");
@@ -811,7 +699,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 				if(sectionId != originalQuotaId)
 				{
 					var sectionIp = uci.get(pkg, quotaSections[sectionIndex], "ip");
-					var ipOverlap = testIpOverlap(sectionIp, ip);
+					var ipOverlap = testAddrOverlap(sectionIp, ip);
 					if(ipOverlap)
 					{
 						//test time range overlap
