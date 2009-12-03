@@ -15,11 +15,6 @@
 <?
 	print_quotas
 ?>
-var allQuotaIps = quota_ip_list;
-var allQuotaUsed     = quotaUsed;
-var allQuotaLimits   = quotaLimits;
-var allQuotaPercents = quotaPercents;
-
 
 //-->
 </script>

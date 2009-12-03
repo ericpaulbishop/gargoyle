@@ -1128,11 +1128,6 @@ td.quota_table_column_5
 }
 td.quota_table_column_6
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
-}
-td.quota_table_column_7
-{
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
@@ -1148,7 +1143,7 @@ td.quota_usage_table_column_1
 }
 td.quota_usage_table_column_2
 {
-	text-align:right;
+	text-align:center;
 	padding-right:15px;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
@@ -1164,12 +1159,17 @@ td.quota_usage_table_column_4
 {
 	text-align:right;
 	padding-right:15px;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.quota_usage_table_column_5
+{
+	text-align:right;
+	padding-right:15px;
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-
-
 
 
 td.lease_table_column_1

@@ -8,11 +8,11 @@
 var pkg = "firewall";
 var updateInProgress = false;
 
-var allQuotaIds      = quotaIdList;
-var allQuotaIps      = quotaIpLists;
-var allQuotaUsed     = quotaUsed;
-var allQuotaLimits   = quotaLimits;
-var allQuotaPercents = quotaPercents;
+var allQuotaIds;
+var allQuotaIps;
+var allQuotaUsed;
+var allQuotaLimits;
+var allQuotaPercents;
 
 
 var idToSection = [];
@@ -22,6 +22,12 @@ var idToTimeParams = [];
 
 function resetData()
 {
+	allQuotaIds      = quotaIdList;
+	allQuotaIps      = quotaIpLists;
+	allQuotaUsed     = quotaUsed;
+	allQuotaLimits   = quotaLimits;
+	allQuotaPercents = quotaPercents;
+
 	idToSection = [];
 	idToIpStr = [];
 	idToTimeParams = [];
@@ -32,11 +38,11 @@ function resetData()
 	{
 		var ip = getIpFromUci(uciOriginal, quotaSections[qIndex]);
 		var id = uciOriginal.get(pkg, quotaSections[qIndex], "id");
-		id = id == "" ? getIdFromIp(ip, uciOriginal);
+		id = id == "" ? getIdFromIp(ip, uciOriginal) : id;
 
 		idToSection[ id ] = quotaSections[qIndex];
-		idToIp[ id ] = ip;
-		idToTimeParameters[ id ] = getTimeParametersFromUci(uciOriginal, quotaSections[qIndex]);
+		idToIpStr[ id ] = ip;
+		idToTimeParams[ id ] = getTimeParametersFromUci(uciOriginal, quotaSections[qIndex]);
 	}
 
 	refreshTableData();
@@ -146,7 +152,7 @@ function refreshTableData()
 		var ipIndex;
 		var id =  allQuotaIds[idIndex];
 		var quotaIpList = allQuotaIps[ id ];
-		var timeParameters = idToTimeParameters[ id ];
+		var timeParameters = idToTimeParams[ id ];
 		for(ipIndex=0; ipIndex < quotaIpList.length; ipIndex++)
 		{
 			var ip       = quotaIpList[ipIndex];
@@ -157,9 +163,9 @@ function refreshTableData()
 			{
 				if(allQuotaPercents[id][ip] != null)
 				{
-					var usds = allQuotaUsed[ip];
-					var lims = allQuotaLimits[ip];
-					var pcts = allQuotaPercents[ip];
+					var usds = allQuotaUsed[id][ip];
+					var lims = allQuotaLimits[id][ip];
+					var pcts = allQuotaPercents[id][ip];
 
 					total = pcts[0] >= 0 ? pcts[0] + "%" : total;
 					down = pcts[1] >= 0 ? pcts[1] + "%" : down;
