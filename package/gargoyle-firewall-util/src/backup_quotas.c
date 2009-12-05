@@ -61,15 +61,25 @@ int main(void)
 			//do backup
 			
 			/* base id for quota is the ip associated with it*/
-			char* backup_id = get_uci_option(ctx, "firewall", next_quota, "ip");
-			
+			char* backup_id = get_uci_option(ctx, "firewall", next_quota, "id");
+			char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");	
+			if(ip == NULL)
+			{
+				ip = strdup("ALL");
+			}
+			else if(strcmp(ip, "") == 0)
+			{
+				free(ip);
+				ip = strdup("ALL");
+			}
 			if(backup_id == NULL)
 			{
-				backup_id = strdup("ALL");
+				backup_id = strdup(ip);
 			}
 			else if(strcmp(backup_id, "") == 0)
 			{
-				backup_id = strdup("ALL");
+				free(backup_id);
+				backup_id = strdup(ip);
 			}
 
 			
@@ -91,6 +101,7 @@ int main(void)
 
 			}
 			free(backup_id);
+			free(ip);
 		}
 		free(next_quota);
 	}

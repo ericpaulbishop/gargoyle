@@ -1,4 +1,4 @@
-/*  backup_quotas --	Used to backup quota data from iptables rules that use the "bandwidth" module
+/*  print_quotas --	Used to print quota data from iptables rules that use the "bandwidth" module
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
@@ -44,8 +44,10 @@ int main(void)
 
 	/* for each ip have uint64_t[6], */
 	string_map *id_ip_to_bandwidth = initialize_string_map(1);
-	string_map *id_ip_to_percents = initialize_string_map(1);	
-	string_map *id_ip_to_limits =   initialize_string_map(1);
+	string_map *id_ip_to_percents  = initialize_string_map(1);	
+	string_map *id_ip_to_limits    = initialize_string_map(1);
+	list *id_to_time               = initialize_list();
+
 	while(quota_sections->length > 0)
 	{
 		char* next_quota = shift_list(quota_sections);
@@ -69,8 +71,13 @@ int main(void)
 		}
 		else if(strcmp(id, "") == 0)
 		{
+			free(id);
 			id = strdup(ip);
 		}
+
+
+
+
 
 		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, id);
 		ip_to_bandwidth = ip_to_bandwidth == NULL ? initialize_string_map(1) : ip_to_bandwidth;
@@ -84,7 +91,39 @@ int main(void)
 		ip_to_limits = ip_to_limits == NULL ? initialize_string_map(1) : ip_to_limits;
 		set_string_map_element(id_ip_to_limits, id, ip_to_limits);
 
-
+		char* offpeak_hours         = get_uci_option(ctx, "firewall", next_quota, "offpeak_hours");
+		char* offpeak_weekdays      = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekdays");
+		char* offpeak_weekly_ranges = get_uci_option(ctx, "firewall", next_quota, "offpeak_weekly_ranges");
+		char* onpeak_hours          = get_uci_option(ctx, "firewall", next_quota, "onpeak_hours");
+		char* onpeak_weekdays       = get_uci_option(ctx, "firewall", next_quota, "onpeak_weekdays");
+		char* onpeak_weekly_ranges  = get_uci_option(ctx, "firewall", next_quota, "onpeak_weekly_ranges");
+		if(offpeak_hours != NULL || offpeak_weekdays != NULL || offpeak_weekly_ranges != NULL || onpeak_hours != NULL || onpeak_weekdays != NULL || onpeak_weekly_ranges != NULL)
+		{
+			unsigned char is_off_peak = (offpeak_hours != NULL || offpeak_weekdays != NULL || offpeak_weekly_ranges != NULL) ? 1 : 0;
+			char* hours_var = is_off_peak ? offpeak_hours : onpeak_hours;
+			char* weekdays_var = is_off_peak ? offpeak_weekdays : onpeak_weekdays;
+			char* weekly_ranges_var = is_off_peak ? offpeak_weekly_ranges : onpeak_weekly_ranges;
+			char* active_var = is_off_peak ? strdup("except") : strdup("only");
+			
+			if(weekly_ranges_var != NULL)
+			{
+				if(hours_var    != NULL) { free(hours_var); hours_var=NULL; }
+				if(weekdays_var != NULL) { free(weekly_ranges_var); weekly_ranges_var=NULL; }
+			}
+			hours_var = hours_var == NULL ? strdup("") : hours_var;
+			weekdays_var = weekdays_var == NULL ? strdup("") : weekdays_var;
+			weekly_ranges_var = weekly_ranges_var == NULL ? strdup("") : weekly_ranges_var;
+			push_list(id_to_time, dynamic_strcat(11, "quotaTimes[\"", id, "\"] = [\"", hours_var, "\", \"", weekdays_var, "\", \"", weekly_ranges_var ,"\", \"", active_var, "\"];"));
+			
+			free(hours_var);
+			free(weekdays_var);
+			free(weekly_ranges_var);
+			free(active_var);
+		}
+		else
+		{
+			push_list(id_to_time, dynamic_strcat(3, "quotaTimes[\"", id, "\"] = [\"\", \"\", \"\", \"always\"];"));
+		}
 
 		char* types[] = { "combined_limit", "ingress_limit", "egress_limit" };
 		char* postfixes[] = { "_combined", "_ingress", "_egress" };
@@ -208,13 +247,20 @@ int main(void)
 				sprintf(print_comma, ", ");
 			}
 			printf("];\n");
-			
 		}
 	}	
 
+	printf("var quotaTime     = new Array();\n");
 	printf("var quotaUsed     = new Array();\n");
 	printf("var quotaLimits   = new Array();\n");
 	printf("var quotaPercents = new Array();\n");
+
+	char* next_time = shift_list(id_to_time);
+	while(next_time != NULL)
+	{
+		printf("%s\n", next_time);
+		next_time = shift_list(id_to_time);
+	}
 
 	for(id_index=0; id_index < num_ids; id_index++)
 	{
