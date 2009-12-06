@@ -1883,14 +1883,14 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 
 	if(valid == 0)
 	{
-		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
+		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false, null, null, controlDocument);
 		newAddrs = newAddrs.replace(/^[\t ]*/, "");
 		newAddrs = newAddrs.replace(/[\t ]*$/, "");
 		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
 		
 		while(addrs.length > 0)
 		{
-			addTableRow(table, [ addrs.shift() ], true, false);
+			addTableRow(table, [ addrs.shift() ], true, false, null, null, controlDocument);
 		}
 		
 		if(tableContainer.childNodes.length == 0)
