@@ -9,7 +9,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=httpd_gargoyle
-PKG_VERSION:=1.0.0
+PKG_VERSION:=$(GARGOYLE_VERSION)
+ifeq ($(GARGOYLE_VERSION),)
+     PKG_VERSION:=1.0.0
+endif
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/httpd-gargoyle

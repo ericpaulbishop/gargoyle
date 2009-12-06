@@ -3,7 +3,10 @@ include $(INCLUDE_DIR)/kernel.mk
 
 
 PKG_NAME:=gargoyle
-PKG_VERSION:=1.0.0
+PKG_VERSION:=$(GARGOYLE_VERSION)
+ifeq ($(GARGOYLE_VERSION),)
+     PKG_VERSION:=1.0.0
+endif
 PKG_RELEASE:=6
 
 ATH_DEPS=""

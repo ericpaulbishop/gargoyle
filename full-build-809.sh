@@ -19,7 +19,8 @@ if [ -n "$version_name" ] ; then
 fi
 verbosity=$3
 
-
+#get version that should be all numeric
+adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/[^\.0123456789]//g' )
 
 # set svn revision number to use 
 # you can set this to an alternate revision 
@@ -129,19 +130,19 @@ for target in $targets ; do
 			make menuconfig
 			sh $netfilter_patch_script . ../netfilter-match-modules 0 1 >/dev/null 2>&1
 		else
-			sh $netfilter_patch_script . ../netfilter-match-modules >/dev/null 2>&1
+			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
 		fi
-		make
+		make  GARGOYLE_VERSION="$adj_num_version"
 	else
 		scripts/patch-kernel.sh . $targets_dir/$target/patches/
 		if [ "$target" = "custom" ] ; then
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 
+			sh $netfilter_patch_script . ../netfilter-match-modules 1 0  
 			make menuconfig
-			sh $netfilter_patch_script . ../netfilter-match-modules 0 1 
+			sh $netfilter_patch_script . ../netfilter-match-modules 0 1  
 		else
-			sh $netfilter_patch_script . ../netfilter-match-modules 
+			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 
 		fi
-		make V=99
+		make V=99 GARGOYLE_VERSION="$adj_num_version"
 	fi
 
 	#copy packages to built/target directory
