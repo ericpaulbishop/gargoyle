@@ -250,7 +250,7 @@ int main(void)
 		}
 	}	
 
-	printf("var quotaTime     = new Array();\n");
+	printf("var quotaTimes    = new Array();\n");
 	printf("var quotaUsed     = new Array();\n");
 	printf("var quotaLimits   = new Array();\n");
 	printf("var quotaPercents = new Array();\n");
