@@ -130,17 +130,19 @@ function setStatusAndQuotas()
 
 function clearFieldset(fieldsetId)
 {
-	var fieldsetEl = document.getElementById("fieldsetId");
+	var fieldsetEl = document.getElementById(fieldsetId);
 	if(fieldsetEl != null)
 	{
-		var clearList = fieldsetEl.getChildNodes();
-		var clearIndex;
-		for(clearIndex=0; clearIndex < clearList.length; clearIndex++)
+		var sectionHeader = null;
+		while(fieldsetEl.firstChild != null)
 		{
-			if((clearList[clearIndex]).className != "sectionheader")
-			{
-				fielsetEl.removeChild(clearList[clearIndex]);
-			}
+			var rmEl = fieldsetEl.firstChild;
+			sectionHeader = rmEl.className == "sectionheader" ? rmEl : sectionHeader;
+			fieldsetEl.removeChild(rmEl);
+		}
+		if(sectionHeader != null)
+		{
+			fieldsetEl.appendChild(sectionHeader);
 		}
 	}
 }
