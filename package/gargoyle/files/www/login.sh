@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -80,28 +80,19 @@ var passInvalid = false;
 	</div>
 	
 </fieldset>
-<fieldset id="your_quota" style="display:none">
+<fieldset id="local_quotas" style="display:none">
 	<legend class="sectionheader">Your Quota</legend>
-	<div class="nocolumn" id="up_your_quota_container"><p id="up_your_quota"></p></div>
-	<div class="nocolumn" id="down_your_quota_container"><p id="down_your_quota"></p></div>
-	<div class="nocolumn" id="combined_your_quota_container"><p id="combined_your_quota"></p></div>
-
 </fieldset>
 
 
 
-<fieldset id="network_quota" style="display:none">
+<fieldset id="global_quotas" style="display:none">
 	<legend class="sectionheader">Entire Network Quota</legend>
-	<div class="nocolumn" id="up_all_quota_container"><p id="up_all_quota"></p></div>
-	<div class="nocolumn" id="down_all_quota_container"><p id="down_all_quota"></p></div>
-	<div class="nocolumn" id="combined_all_quota_container"><p id="combined_all_quota"></p></div>
-
 </fieldset>
 
 <fieldset id="current_time" style="display:block">
 	<legend class="sectionheader">Current Date & Time</legend>
 	<div class="nocolumn" id="current_time_date"></div>
-
 </fieldset>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->

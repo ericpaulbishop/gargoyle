@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -74,57 +74,144 @@ function setStatusAndQuotas()
 		setChildText("login_status", "", "black");
 	}
 
-	ipQuotaName = "ALL_OTHERS_COMBINED";
-	if( quotaUsed[ connectedIp ] != null)
+	var globalQuotas = [];
+	var localQuotas = [];
+	var otherQuotas = [];
+	var idIndex;
+	for(idIndex=0;idIndex < quotaIdList.length; idIndex++)
 	{
-		ipQuotaName = connectedIp;
+		var id=quotaIdList[idIndex];
+		var testIps = quotaIpLists[id];
+		if(testIps.length > 0)
+		{
+			if(testIps[0] == "ALL")
+			{
+				globalQuotas.push(id);
+			}
+			else if(testIps[0] == "ALL_OTHERS_COMBINED")
+			{
+				otherQuotas.push(id)
+			}
+			else if(testAddrOverlap(connectedIp, testIps.join(",")))
+			{
+				localQuotas.push(id);
+				localIpName = connectedIp;
+			}
+		}
 	}
+	localQuotas = localQuotas.length == 0 ? otherQuotas : localQuotas;
 
-	var normalFont = ["black", false, "100%"];
-	var allUsedFont = ["red", true, "115%"];
-	if( quotaUsed[ ipQuotaName ] != null )
+	var normalFontParams = ["black", false, "11px"];
+	var usedFontParams = ["red", true, "12px"];
+
+	var qTypes = [ localQuotas, globalQuotas ];
+	var qFieldsets = [ "local_quotas", "global_quotas" ];
+	var typeIndex;
+	for(typeIndex=0; typeIndex < qTypes.length; typeIndex++)
 	{
-		var ipQuotaUsed = quotaUsed[ ipQuotaName ];
-		var ipQuotaLimits = quotaLimits[ ipQuotaName ];
-		var ipQuotaPercents = quotaPercents[ ipQuotaName ];
-		var ipQuotaData = getQuotaLines(ipQuotaUsed, ipQuotaLimits, ipQuotaPercents);
-		var upFont = ipQuotaPercents[0] == 100.0 ? allUsedFont : normalFont;
-		var downFont = ipQuotaPercents[1] == 100.0 ? allUsedFont : normalFont;
-		var combinedFont = ipQuotaPercents[2] == 100.0 ? allUsedFont : normalFont;
-		if(ipQuotaData[0] != null) { setChildText("up_your_quota", ipQuotaData[0], upFont[0], upFont[1], upFont[2]);  }
-		if(ipQuotaData[1] != null) { setChildText("down_your_quota", ipQuotaData[1], downFont[0], downFont[1], downFont[2]);  }
-		if(ipQuotaData[2] != null) { setChildText("combined_your_quota", ipQuotaData[2], combinedFont[0], combinedFont[1], combinedFont[2]); }
-		document.getElementById("up_your_quota_container").style.display = ipQuotaData[0] == null ? "none" : "block";
-		document.getElementById("down_your_quota_container").style.display = ipQuotaData[1] == null ? "none" : "block";
-		document.getElementById("combined_your_quota_container").style.display = ipQuotaData[2] == null ? "none" : "block";
-		document.getElementById("your_quota").style.display="block";
-	}
-	if( quotaUsed["ALL"] != null )
-	{
-		var allQuotaUsed     = quotaUsed[ "ALL" ];
-		var allQuotaLimits   = quotaLimits["ALL"];
-		var allQuotaPercents = quotaPercents["ALL"];
-		var allQuotaData     = getQuotaLines(allQuotaUsed, allQuotaLimits, allQuotaPercents);
-		var upFont = allQuotaPercents[0] == 100.0 ?  allUsedFont : normalFont;
-		var downFont = allQuotaPercents[1] == 100.0 ?  allUsedFont : normalFont;
-		var combinedFont = allQuotaPercents[2] == 100.0 ?  allUsedFont : normalFont;
-		if(allQuotaData[0] != null) { setChildText("up_all_quota", allQuotaData[0], upFont[0], upFont[1], upFont[2]); }
-		if(allQuotaData[1] != null) { setChildText("down_all_quota", allQuotaData[1],downFont[0], downFont[1], downFont[2]); }
-		if(allQuotaData[2] != null) { setChildText("combined_all_quota", allQuotaData[2], combinedFont[0], combinedFont[1], combinedFont[2]); }
-		document.getElementById("up_all_quota_container").style.display = allQuotaData[0] == null ? "none" : "block";
-		document.getElementById("down_all_quota_container").style.display = allQuotaData[1] == null ? "none" : "block";
-		document.getElementById("combined_all_quota_container").style.display = allQuotaData[2] == null ? "none" : "block";
-		document.getElementById("network_quota").style.display="block";
-	}
+		var qIds = qTypes[typeIndex];
+		var qFieldset = qFieldsets[typeIndex];
+		var qIp = typeIndex == 0 ? connectedIp : "ALL";
 
-	document.getElementById("password").focus();	
-
+		clearFieldset(qFieldset);
+		if(qIds.length > 0)
+		{
+			var quotaIndex;
+			for(quotaIndex=0; quotaIndex < qIds.length; quotaIndex++)
+			{
+				var quotaNumber = qIds.length > 1 ? quotaIndex+1 : -1;
+				var div = createQuotaDiv(qIds[quotaIndex], qIp, quotaNumber, normalFontParams, usedFontParams);
+				document.getElementById(qFieldset).appendChild(div);
+			}
+		}
+		document.getElementById(qFieldset).style.display = qIds.length > 0 ? "block" :"none";
+	}
 }
 
-function getQuotaLines(usd, lim, pct)
+function clearFieldset(fieldsetId)
 {
-	names = ["upload", "download", "combined upload/download" ];
-	var lines = [null, null, null];
+	var fieldsetEl = document.getElementById("fieldsetId");
+	if(fieldsetEl != null)
+	{
+		var clearList = fieldsetEl.getChildNodes();
+		var clearIndex;
+		for(clearIndex=0; clearIndex < clearList.length; clearIndex++)
+		{
+			if((clearList[clearIndex]).className != "sectionheader")
+			{
+				fielsetEl.removeChild(clearList[clearIndex]);
+			}
+		}
+	}
+}
+
+function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, usedFontParams)
+{
+	var ip = "ALL_OTHERS_COMBINED";
+	var testIps = quotaIpLists[quotaId];
+	var ipIndex=0;
+	for(ipIndex=0; ipIndex < testIps.length; ipIndex++)
+	{
+		ip = testAddrOverlap(fieldsetIp, testIps[ipIndex]) ? testIps[ipIndex] : ip;
+	}
+
+
+	var usd = quotaUsed[quotaId][ip];
+	var pct = quotaPercents[quotaId][ip];
+	var lim = quotaLimits[quotaId][ip];
+
+	
+	var parentDiv = document.createElement("div");
+	if(quotaNumber > 0)
+	{
+		var nameSpan = document.createElement("span");
+		nameSpan.style.fontSize = usedFontParams[2];
+		nameSpan.style.display = "block";
+		nameSpan.style.fontStyle = "italic";
+		nameSpan.style.textDecoration = "underline";
+		nameSpan.appendChild( document.createTextNode("Quota" + quotaNumber + ":"));
+		parentDiv.appendChild(nameSpan);
+
+		var timeLines = timeParamsToLines(quotaTimes[quotaId]);
+		var timeSpan = document.createElement("span");
+		var timeActiveSpan = document.createElement("span");
+		var timeParamSpan = document.createElement("span");
+		
+		timeActiveSpan.appendChild(document.createTextNode("Active " + (quotaTimes[quotaId][3] == "only" ? "Only:" : "All Times Except:")));
+		timeActiveSpan.style.fontSize = normalFontParams[2];
+		timeActiveSpan.style.marginLeft="25px";
+		timeActiveSpan.style.display="block";
+		timeActiveSpan.style.width="150px";
+		timeActiveSpan.style.cssFloat="left";
+		timeActiveSpan.style.styleFloat="left";
+		
+		timeParamSpan.appendChild(document.createTextNode(timeLines.shift()));
+		timeParamSpan.style.fontSize = normalFontParams[2];
+		timeParamSpan.style.marginLeft = "25px";
+		timeParamSpan.style.display="inline";
+
+		timeSpan.appendChild(timeActiveSpan);
+		timeSpan.appendChild(timeParamSpan);
+		parentDiv.appendChild(timeSpan);
+
+		while(timeLines.length > 0)
+		{
+			var timeParamSpan = document.createElement("span");
+			timeParamSpan.appendChild(document.createTextNode(timeLines.shift()));
+			timeParamSpan.style.fontSize = normalFontParams[2];
+			timeParamSpan.style.marginLeft = "200px"; //25+150+25 = 175
+			timeParamSpan.style.display="block";
+			timeActiveSpan.style.clear="left";
+			timeActiveSpan.style.clear="left";
+			parentDiv.appendChild(timeParamSpan);
+		}
+
+
+
+
+	}
+
+	var names = ["total up+down", "download", "upload" ];
 	var typeIndex;
 	for(typeIndex=0; typeIndex < 3; typeIndex++)
 	{
@@ -136,9 +223,58 @@ function getQuotaLines(usd, lim, pct)
 			var used  = parseBytes(usd[typeIndex], unit).replace(/ .*$/, "");
 			var perc   = truncateDecimal( pct[typeIndex] );
 			used = usd[typeIndex] > lim[typeIndex] ? limit.replace(/ .*$/,"") : used;
-			lines[typeIndex] = perc + "% of " + name + " quota has been used (" + used + "/" + limit + ")";
+			var span = document.createElement("span");
+			var par = document.createElement("p");
+			if(quotaNumber > 0)
+			{
+				par.appendChild( document.createTextNode(perc + "% of " + name + " for Quota" + quotaNumber + " has been used (" + used + "/" + limit + ")"));
+			}
+			else
+			{
+				par.appendChild( document.createTextNode(perc + "% of " + name + " quota has been used (" + used + "/" + limit + ")"));
+			}
+			var fontParams = (pct[typeIndex] == 100) ? usedFontParams : normalFontParams;
+			par.style.color = fontParams[0];
+			par.style.fontWeight = fontParams[1] ? "bold" : "normal";
+			par.style.fontSize = fontParams[2];
+			span.appendChild(par);
+			span.style.display="block";
+			span.style.clear="left";
+			if(quotaNumber > 0)
+			{
+				span.style.marginLeft = quotaNumber > 0 ? "25px" : "0px";
+			}
+			parentDiv.appendChild(span);
 		}
 	}
-
-	return lines;
+	return parentDiv;
 }
+
+function timeParamsToLines(timeParameters)
+{
+	var hours = timeParameters[0];
+       	var days = timeParameters[1];
+	var weekly = timeParameters[2];
+	var active = timeParameters[3];
+	
+	
+	var textList = [];
+	if(active == "always")
+	{
+		textList.unshift("Always");
+	}
+	else
+	{
+		if(weekly != "")
+		{
+			textList = weekly.match(",") ? weekly.split(/[\t ]*,[\t ]*/) : [ weekly ];
+		}
+		else
+		{
+			if(hours != ""){ textList = hours.match(",") ? hours.split(/[\t ]*,[\t ]*/) : [ hours ]; }
+			if(days  != ""){ textList.unshift(days); }
+		}
+	}
+	return textList;
+}
+
