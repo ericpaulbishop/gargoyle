@@ -130,7 +130,7 @@ function getEmbeddedSvgPlotFunction(embeddedId, controlDocument)
 	}
 	return null;
 }
-function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal)
+function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 {
 	var nameIndex;
 	var selectedName = null;
@@ -138,9 +138,13 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 	var match1 = "";
 	var match2 = "";
 
+
+	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+
 	if(plotType == "total")
 	{
-		match1 = graphNonTotal ? "total" + graphTimeFrameIndex + "B" : "total" + graphTimeFrameIndex + "A";
+		match1 = graphLowRes ? "total" + graphTimeFrameIndex + "B" : "total" + graphTimeFrameIndex + "A";
 	}
 	else if(plotType.match(/qos/))
 	{
@@ -192,13 +196,15 @@ function resetPlots()
 
 		var graphTimeFrameIndex = getSelectedValue("plot_time_frame");
 		var tableTimeFrameIndex = getSelectedValue("table_time_frame");
-		var graphNonTotal = false;
+		var graphLowRes = false;
 		var plotNum;
 		for(plotNum=1; plotNum<=3; plotNum++)
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
-			graphNonTotal = graphNonTotal || (t != "total" && t != "none");
+			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && (!is15MHighRes));
 		}
+		alert("graphLowRes = " + graphLowRes);
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
 			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
@@ -253,8 +259,8 @@ function resetPlots()
 			
 			if(plotNum != 4)
 			{
-				uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
-				downloadMonitors[plotNum-1] = getMonitorId(false, graphTimeFrameIndex, plotType, plotId, graphNonTotal);
+				uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphLowRes);
+				downloadMonitors[plotNum-1] = getMonitorId(false, graphTimeFrameIndex, plotType, plotId, graphLowRes);
 				uploadMonitors[plotNum-1] = uploadMonitors[plotNum-1] == null ? "" : uploadMonitors[plotNum-1];
 				downloadMonitors[plotNum-1] = downloadMonitors[plotNum-1] == null ? "" : downloadMonitors[plotNum-1];
 			}
