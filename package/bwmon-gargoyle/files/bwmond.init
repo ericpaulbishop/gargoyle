@@ -32,9 +32,9 @@ bw_restore()
 
 	if [ -e "$tmp_cron" ] ; then
 		if [ "$backup_to_tmp" = "1" ] ; then
-			echo "bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" " >> "$backup_script"
+			echo "bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
 		else
-			echo "bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" " >> "$backup_script"
+			echo "bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
 		fi
 	fi
 }
@@ -115,6 +115,10 @@ start()
 	total5_interval="day"
 	total5_num_intervals=365
 
+	bdist0_interval=$total1_interval
+	bdist0_num_intervals=$total1_num_intervals
+	bdist0_reset_time=$total1_reset_time
+
 	bdist1_interval="minute"
 	bdist1_num_intervals=15
 
@@ -131,9 +135,26 @@ start()
 	bdist5_interval="month"
 	bdist5_num_intervals=12
 
-
-	mon_nums="1 2 3 4 5"
 	ids=""
+
+
+	#high_res_15m=$(uci get gargoyle.bandwidth_display.high_res_15m 2>/dev/null)
+	echo "high res 15m = $high_res_15m"
+	if [ "$high_res_15m" = "1" ] ; then
+		n=0
+		bdist_interval=$(eval "echo \$bdist"$n"_interval")
+		bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
+		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
+		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
+		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
+			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ids="bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
+		fi
+
+	fi
+	
+	mon_nums="1 2 3 4 5"
 	for n in $mon_nums ; do
 		total_interval=$(eval "echo \$total"$n"_interval")
 		total_num_intervals=$(eval "echo \$total"$n"_num_intervals")
@@ -167,7 +188,9 @@ start()
 
 	done
 
-
+	if [ "$high_res_15m" = "1" ] ; then
+		mon_nums="0 1 2 3 4 5"
+	fi
 	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 	if [ -n "$qos_enabled" ] && [ -e /etc/qos_class_marks ] ; then
 		qos_table="mangle"
@@ -217,8 +240,8 @@ start()
 
 	for i in $ids ; do
 		is_total123=$(echo "$i" | egrep "total[123]")
-		is_bdist123=$(echo "$i" | egrep "bdist[123]")
-		is_qos123=$(echo "$i" | egrep "qos[123]")
+		is_bdist123=$(echo "$i" | egrep "bdist[0123]")
+		is_qos123=$(echo "$i" | egrep "qos[0123]")
 		if [ -n "$is_total123" ] || [ -n "$is_bdist123" ] || [ -n "$is_qos123" ]  ; then
 			bw_restore "$i" 1
 		else
@@ -239,8 +262,8 @@ stop()
 	cat /etc/crontabs/root | grep -v "$backup_script"> "$tmp_cron"
 	update_cron
 	
-	delete_chain_from_table $download_table $download_chain
-	delete_chain_from_table $upload_table $upload_chain
+	delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
+	delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
 }
 
 restart()
