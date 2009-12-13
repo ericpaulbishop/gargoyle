@@ -138,8 +138,8 @@ start()
 	ids=""
 
 
-	#high_res_15m=$(uci get gargoyle.bandwidth_display.high_res_15m 2>/dev/null)
-	echo "high res 15m = $high_res_15m"
+	high_res_15m=$(uci get gargoyle.bandwidth_display.high_res_15m 2>/dev/null)
+	#echo "high res 15m = $high_res_15m"
 	if [ "$high_res_15m" = "1" ] ; then
 		n=0
 		bdist_interval=$(eval "echo \$bdist"$n"_interval")
@@ -151,7 +151,9 @@ start()
 			iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_local" --subnet "$lan_subnet" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ids="bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
-
+	else
+		rm -rf /tmp/data/bwmon/bdist0*
+		rm -rf /tmp/data/bwmon/qos0*
 	fi
 	
 	mon_nums="1 2 3 4 5"
