@@ -54,6 +54,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 		}
 	}
 
+	tableSanityCheck(newTable);
 	return newTable;
 }
 
@@ -127,6 +128,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	}
 	row.className = numRows % 2 == 0 ? 'even' : 'odd';
 
+	tableSanityCheck(table);
 }
 
 
@@ -244,7 +246,14 @@ function setRowClasses(table, enabled)
 		}		
 		rowIndex++;
 	}
+	tableSanityCheck(table);
 }
 
 
 
+function tableSanityCheck(table)
+{
+	// If there are no rows of data (just a header)
+	// then hide the whole thing until data is added
+	table.style.display = (table.rows.length < 2) ? "none" : "block";
+}
