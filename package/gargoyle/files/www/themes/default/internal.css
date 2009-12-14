@@ -363,7 +363,6 @@ input.big_button_disabled
 	border: none;
 	font-weight:bold;
 	font-size:16px;
-	margin:10px;
 	color: #808080;
 	cursor: auto;
 }
@@ -376,7 +375,6 @@ input.big_button_disabled:hover
 	border: none;
 	font-weight:bold;
 	font-size:16px;
-	margin:10px;
 	color: #808080;
 	cursor: auto;
 }
