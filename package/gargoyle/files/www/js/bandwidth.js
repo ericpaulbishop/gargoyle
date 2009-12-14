@@ -54,7 +54,9 @@ function initializePlotsAndTable()
 	setSelectedValue("plot_time_frame", plotTimeFrame);
 	setSelectedValue("table_time_frame", tableTimeFrame);
 	setSelectedValue("table_units", "mixed");
-	
+
+	document.getElementById("use_high_res_15m").checked = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1" ? true : false;
+
 	var haveQosUpload = false;
 	var haveQosDownload = false;
 	var monitorIndex;
@@ -204,7 +206,6 @@ function resetPlots()
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
 			graphLowRes = graphLowRes || (t != "total" && t != "none" && (!is15MHighRes));
 		}
-		alert("graphLowRes = " + graphLowRes);
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
 			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
@@ -220,9 +221,9 @@ function resetPlots()
 				{
 					setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
 					setSelectedText(plotIdName, ipsWithData[0]);
-					plotId = ipsWithData[0];
+					plotId = ipsWithData[0] == null ? "" : ipsWithData[0];
 				}
-				document.getElementById(plotIdVisName).style.display="block";
+				document.getElementById(plotIdVisName).style.display = "block";
 			}
 			else if(plotType == "qos-upload")
 			{
@@ -448,7 +449,8 @@ function doUpdate()
 										ip = getSelectedValue(plotIdName);
 										ip = ip == null ? "" : ip;
 										ip = monitorData[ip] != null ? ip : ipList[0];
-	
+										
+									
 										//if new ip list differs from allowable selections, update
 										setAllowableSelections(plotIdName, ipList, ipList);
 										ipsWithData = ipList;
@@ -457,7 +459,7 @@ function doUpdate()
 									{
 										ip = ipList[0];
 									}
-								
+									
 								
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
@@ -501,7 +503,30 @@ function doUpdate()
 									}
 									pointSets.push(points);
 									dataLoaded=true;
+
 								}
+								else if(monitorName.match("bdist") && monitorIndex < 3 )
+								{
+									//no ips defined
+									var plotTypeName = "plot" + (monitorIndex+1) + "_type" ;
+									var plotIdName =   "plot" + (monitorIndex+1) + "_id";
+									monitorList[monitorIndex] = "";
+									setSelectedValue(plotTypeName, "none");
+									document.getElementById(plotIdName).display = "none";
+
+
+								}
+							}
+							else if(monitorName.match("bdist") && monitorIndex < 3 )
+							{
+								//monitor data null because no ips have been seen
+								var plotTypeName = "plot" + (monitorIndex+1) + "_type" ;
+								var plotIdName =   "plot" + (monitorIndex+1) + "_id";
+								monitorList[monitorIndex] = ""
+								setSelectedValue(plotTypeName, "none");
+								document.getElementById(plotIdName).style.display = "none";
+
+
 							}
 							if(!dataLoaded)
 							{
@@ -690,4 +715,28 @@ function expand(name)
 		}
 	}
 	runOnWindowLoad(name);
+}
+
+function highResChanged()
+{
+	setControlsEnabled(false, true, "Resetting Graphs...");
+
+	var useHighRes15m = document.getElementById("use_high_res_15m").checked;
+	var commands = [];
+	commands.push("uci set gargoyle.bandwidth_display=bandwidth_display");
+	commands.push("uci set gargoyle.bandwidth_display.high_res_15m=" + (useHighRes15m ? "1" : "0"));
+	commands.push("uci commit");
+	commands.push("/etc/init.d/bwmon_gargoyle restart");
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			window.location = window.location;	
+			setControlsEnabled(true);
+		}
+	}	
+	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
 }

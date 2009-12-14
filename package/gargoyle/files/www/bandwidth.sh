@@ -60,6 +60,14 @@
 				<div><select id="plot3_id" onchange="resetPlots()"></select></div>
 			</div>
 		</div>
+		
+		<div>
+			<input type="checkbox" id="use_high_res_15m" onclick="highResChanged()">&nbsp;
+			<label id="use_high_res_15m_label" for="use_high_res_15m">Save High Resolution 15 Minute Timeframe Data For All Hosts</label>
+			<br/>
+			<em>Not recommended for routers with &lt; 32MB of RAM</em>
+		</div>
+
 		<br/>All bandwidth usage reported is via the WAN interface only.  
 		<br/>Traffic between local hosts is not reported.
 	</fieldset>
