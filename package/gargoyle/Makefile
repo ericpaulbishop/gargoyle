@@ -60,7 +60,7 @@ define Package/gargoyle/install
 		if [ -n "$(OFFICIAL_VERSION)" ] ; then \
 			echo "$(OFFICIAL_VERSION)" > $(1)/www/data/gargoyle_version.txt ; \
 		else \
-			echo Unknown Version, built `date -u` > $(1)/www/data/gargoyle_version.txt ; \
+			echo "$(PKG_VERSION)-custom (Built $(shell date -u))" > $(1)/www/data/gargoyle_version.txt ; \
 		fi \
 	)
 
