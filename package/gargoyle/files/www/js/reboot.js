@@ -74,6 +74,8 @@ function saveChanges()
 	}
 
 	var commands = [];
+	commands.push("mkdir -p /etc/crontabs");
+	commands.push("touch /etc/crontabs/root");
 	commands.push("cat /etc/crontabs/root | grep -v \"usr\\/lib\\/gargoyle\\/reboot.sh\" > /tmp/tmp.cron");
 	if(cronLine != "")
 	{
