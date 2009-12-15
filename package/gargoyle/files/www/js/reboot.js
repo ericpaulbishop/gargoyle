@@ -66,7 +66,7 @@ function saveChanges()
 		var weekday = rebootInterval == "week" ? day : "*";
 		var monthday = rebootInterval == "month" ? day : "*";
 
-		cronLine = "* " + hour + " " + monthday + " * " + weekday + " sh /usr/lib/gargoyle/reboot.sh"
+		cronLine = "0 " + hour + " " + monthday + " * " + weekday + " sh /usr/lib/gargoyle/reboot.sh"
 	}
 	else
 	{
