@@ -2036,5 +2036,28 @@ function testAddrOverlap(addrStr1, addrStr2)
 
 
 
+function setInvisibleIfIdMatches(selectId, invisibleOptionValues, associatedElementId, defaultDisplayMode, controlDocument )
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+	defaultDisplayMode = defaultDisplayMode == null ? "block" : defaultDisplayMode;
+	var visElement = controlDocument.getElementById(associatedElementId);
+	var matches = false;
+	var matchIndex=0;
+	if(visElement != null)
+	{
+		for (matchIndex=0; matchIndex < invisibleOptionValues.length; matchIndex++)
+		{
+			matches = getSelectedValue(selectId, controlDocument) == invisibleOptionValues[matchIndex] ? true : matches;
+		}
+		if(matches)
+		{
+			visElement.style.display = "none";
+		}
+		else
+		{
+			visElement.style.display = defaultDisplayMode;
+		}
+	}
+}
 
 
