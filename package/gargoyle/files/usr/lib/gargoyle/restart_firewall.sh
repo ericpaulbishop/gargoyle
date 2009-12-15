@@ -7,15 +7,10 @@
 miniupnpd_enabled=$(ls /etc/rc.d/*miniupnpd 2>/dev/null)
 bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
-if [ -n "$bwmon_enabled" ] ; then
-	/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
-fi
-if [ -n "$miniupnpd_enabled" ] ; then
-	/etc/init.d/miniupnpd stop >/dev/null 2>&1
-fi
-if [ -n "$qos_enabled" ] ; then 
-	/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
-fi
+
+/etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
+/etc/init.d/miniupnpd stop >/dev/null 2>&1
+/etc/init.d/qos_gargoyle stop >/dev/null 2>&1
 
 backup_quotas
 
