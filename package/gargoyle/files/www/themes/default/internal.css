@@ -196,6 +196,13 @@ fieldset label
 	font-family: monospace;
 	padding:5px;
 }
+.contributer
+{
+	font-size:115%;
+	font-weight:bold;
+	text-decoration:underline;
+}
+
 
 p
 {

@@ -9,16 +9,19 @@
 	gargoyle_header_footer -h -s "system" -p "about" -c "internal.css" -j ""
 ?>
 
-
 <fieldset>
 	<legend class="sectionheader">Credits</legend>
 	
-	<p>Gargoyle was created and implemented by Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>). </p>
+	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
 
-  	<p>Several very helpful suggestions regarding the web design and css implementation were made by Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>). </p>
+	<p><span class="contributer">Paul Bixel:</span> Implemented improved connection table, including display of QoS classes and Layer7</p>
+	
+	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
 
-	<p>Significant help in testing Gargoyle, particularly PPPoE functionality, was provided by FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>).</p>
+  	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> Provided several very helpful suggestions regarding the web design and css implementation of Gargoyle</p>
 
+	<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> Provided significant help in testing Gargoyle, particularly PPPoE functionality</p>
+	
 	<p>The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>	
 
 	<p>The Gargoyle interface is a front end for the excellent OpenWrt Kamikaze firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team (<a href="http://openwrt.org">openwrt.org</a>).</p>
