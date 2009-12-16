@@ -6,8 +6,26 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "connections" -c "internal.css" -j "conntrack.js table.js" -i firewall httpd_gargoyle
+	gargoyle_header_footer -h -s "status" -p "connections" -c "internal.css" -j "conntrack.js table.js" -i httpd_gargoyle firewall qos_gargoyle
 ?>
+
+<script>
+<!--
+<?
+	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
+	if [ -n "$qos_enabled" ] ; then
+		echo "var qosEnabled = true;"
+	else
+		echo "var qosEnabled = false;"
+	fi
+
+	echo "var qosMarkList = [];"
+	if [ -e /etc/qos_class_marks ] ; then
+		cat /etc/qos_class_marks | awk '{ print "qosMarkList.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' 
+	fi
+?>
+//-->
+</script>
 
 
 <form>

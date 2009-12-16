@@ -794,18 +794,21 @@ td.connection_table_column_2
 	text-align:left;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
+	width:15em;
 }
 td.connection_table_column_3
 {
 	text-align:left;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
+	width:10em;
 }
 td.connection_table_column_4
 {
 	text-align:left;
 	border-top:1px solid black;
 	border-bottom:1px solid black;
+	width:7em;
 }
 td.connection_table_column_5
 {
