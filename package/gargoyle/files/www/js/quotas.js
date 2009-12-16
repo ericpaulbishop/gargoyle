@@ -1003,7 +1003,14 @@ function setRowEnabled()
 function removeQuotaCallback(table, row)
 {
 	var id = row.childNodes[rowCheckIndex].firstChild.id;
-	uci.removeSection(pkg, id);
+	var sections = uci.getAllSectionsOfType(pkg, "quota");                                                               
+	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)                             
+	{                                                                                                                    
+		if(uci.get(pkg, sections[sectionIndex], "id") == id)
+		{
+			uci.removeSection(pkg, sections[sectionIndex]);
+		}
+	}
 	changedIds [ id ] = 1;
 }
 
