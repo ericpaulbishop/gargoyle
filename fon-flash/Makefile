@@ -25,8 +25,24 @@ CFLAGS  = -Wall  -I. -Os
 OBJS    = uip.o uip_arp.o timer.o clock-arch.o psock.o
 OS=$(shell uname)
 
+USEG4=
+HAVEG4=
+
+ifeq ($(OS),Darwin)
+    USEG4=yes
+    HAVEG4=$(shell g++-4.0 --version 2>/dev/null)
+endif
+ifeq ($(HAVEG4),)
+    USEG4=""
+endif
+ifeq ($(USEG4),yes)
+    CC=g++-4.0
+    LD=g++-4.0
+endif
+
 
 #CFLAGS += -D_DEBUG
+
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
