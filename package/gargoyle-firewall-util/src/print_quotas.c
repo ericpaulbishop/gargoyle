@@ -268,6 +268,12 @@ int main(void)
 		string_map* ip_to_bandwidth = get_string_map_element(id_ip_to_bandwidth, next_id);
 		string_map* ip_to_percents = get_string_map_element(id_ip_to_percents, next_id);
 		string_map* ip_to_limits = get_string_map_element(id_ip_to_limits, next_id);
+		
+		printf("quotaUsed[ \"%s\" ] = [];\n", next_id);
+		printf("quotaPercents[ \"%s\" ] = [];\n", next_id);
+		printf("quotaLimits[ \"%s\" ] = [];\n", next_id);
+		
+		
 		if(ip_to_bandwidth != NULL)
 		{
 			unsigned long num_ips;
@@ -283,7 +289,6 @@ int main(void)
 				if(used != NULL)
 				{
 					int type_index;
-					printf("quotaUsed[ \"%s\" ] = [];\n", next_id);
 					printf("quotaUsed[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
 					sprintf(print_comma, "");
 					for(type_index=0; type_index < 3; type_index++)
@@ -300,7 +305,6 @@ int main(void)
 					}
 					printf(" ];\n");
 
-					printf("quotaPercents[ \"%s\" ] = [];\n", next_id);
 					printf("quotaPercents[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
 					sprintf(print_comma, "");
 					for(type_index=0; type_index < 3; type_index++)
@@ -310,7 +314,6 @@ int main(void)
 					}
 					printf(" ];\n");
 
-					printf("quotaLimits[ \"%s\" ] = [];\n", next_id);
 					printf("quotaLimits[ \"%s\" ][ \"%s\" ] = [ ", next_id, next_ip);
 					sprintf(print_comma, "");
 					for(type_index=0; type_index < 3; type_index++)
