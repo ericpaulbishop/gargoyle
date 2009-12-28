@@ -1264,13 +1264,19 @@ match(		const struct sk_buff *skb,
 				uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
 				if(oldval == NULL)
 				{
-					oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len); /* may return NULL on malloc failure but that's ok */
+					if(!is_check)
+					{
+						/* may return NULL on malloc failure but that's ok */
+						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len); 
+					}
 				}
 				else
 				{
 					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
 				}
-				bws[bw_ip_index] = oldval; //this is fine, setting bws[bw_ip_index] to NULL on kmalloc failure won't crash anything
+				
+				/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
+				bws[bw_ip_index] = oldval;
 			}
 		}
 	}
