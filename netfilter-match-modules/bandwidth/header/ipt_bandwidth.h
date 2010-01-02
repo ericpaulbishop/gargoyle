@@ -67,7 +67,7 @@
 #define BANDWIDTH_GET 			2049
 
 /* max id length */
-#define BANDWIDTH_MAX_ID_LENGTH		  35
+#define BANDWIDTH_MAX_ID_LENGTH		  50
 
 /* 4 bytes for total number of entries, 100 entries of 12 bytes each, + 1 byte indicating whether all have been dumped */
 #define BANDWIDTH_QUERY_LENGTH		1205 
