@@ -19,6 +19,9 @@ ifeq ($(RANLIB),)
 endif
 
 
+CFLAGS:=$(CFLAGS) -Os
+WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
+MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
 
 OS=$(shell uname)
 ifeq ($(OS),Darwin)
@@ -26,6 +29,7 @@ ifeq ($(OS),Darwin)
   SHLIB_EXT=dylib
   SHLIB_FLAGS=-dylib
   SHLIB_FILE=libericstools.$(SHLIB_EXT).$(VERSION)
+  CFLAGS:=$(CFLAGS) -arch i386
 else
   LINK=$(CC)
   SHLIB_EXT=so
@@ -33,9 +37,6 @@ else
   SHLIB_FLAGS=-shared -Wl,-soname,$(SHLIB_FILE)
 endif
 
-CFLAGS:=$(CFLAGS) -Os
-WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
-MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
 
 
 
