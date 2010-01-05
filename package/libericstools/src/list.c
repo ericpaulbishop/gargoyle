@@ -218,11 +218,11 @@ void**  destroy_list(list* l, int destruction_type, unsigned long* num_values)
 		for(value_index=0; l->length > 0; value_index++)
 		{
 			void* value = shift_list(l);
-			if(DESTROY_MODE_RETURN_VALUES)
+			if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 			{
 				values[value_index] = value;
 			}
-			else if(DESTROY_MODE_FREE_VALUES)
+			else if(destruction_type == DESTROY_MODE_FREE_VALUES)
 			{
 				free(value);
 			}
