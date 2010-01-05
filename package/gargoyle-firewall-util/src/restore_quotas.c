@@ -15,8 +15,10 @@
 #define malloc safe_malloc
 #define strdup safe_strdup
 
-void restore_backup_for_id(char* id, char* quota_backup_dir);
-
+void restore_backup_for_id(char* id, char* quota_backup_dir, unsigned char is_individual_other, list* defined_ip_groups);
+uint32_t ip_to_host_int(char* ip_str);
+uint32_t* ip_range_to_host_ints(char* ip_str);
+list* filter_group_from_list(list** orig_ip_list, char* ip_group_str);
 
 void delete_chain_from_table(char* table, char* delete_chain);
 void run_shell_command(char* command, int free_command_str);
@@ -156,9 +158,11 @@ int main(int argc, char** argv)
 
 		/* add rules */
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
-		char* other_quota_section_name = NULL;
+		list* other_quota_section_names = initialize_list();
+		list* defined_ip_groups = initialize_list();
+
 		unlock_bandwidth_semaphore_on_exit();
-		while(quota_sections->length > 0 || other_quota_section_name != NULL)
+		while(quota_sections->length > 0 || other_quota_section_names->length > 0)
 		{
 			char* next_quota = NULL;
 			int process_other_quota = 0;
@@ -169,8 +173,7 @@ int main(int argc, char** argv)
 			else
 			{
 				process_other_quota = 1;
-				next_quota = other_quota_section_name;
-				other_quota_section_name = NULL;
+				next_quota = shift_list(other_quota_section_names);
 			}
 
 			char* quota_enabled_var  = get_uci_option(ctx, "firewall", next_quota, "enabled");
@@ -207,10 +210,17 @@ int main(int argc, char** argv)
 				
 				if( (strcmp(ip, "ALL_OTHERS_COMBINED") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0) && (!process_other_quota)  )
 				{
-					other_quota_section_name = strdup(next_quota);
+					push_list(other_quota_section_names, strdup(next_quota));
 				}
 				else
 				{
+					unsigned char is_individual_other =  strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0 ? 1 : 0;
+					if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
+					{
+						/* this is an explicitly defined ip or ip range, so save it for later, to deal with individual other overlap problem */
+						push_list(defined_ip_groups, strdup(ip));
+					}
+					
 					/* compute proper base id for rule, adding variable to uci if necessary */
 					char* quota_base_id = get_uci_option(ctx, "firewall", next_quota, "id");
 					if(quota_base_id == NULL)
@@ -354,6 +364,7 @@ int main(int argc, char** argv)
 						char* ip_test = strdup(""); 
 						if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
 						{
+
 							char* src_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --src ", ip, " ") : dynamic_strcat(3, " -m iprange --src-range ", ip, " ");
 							char* dst_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --dst ", ip, " ") : dynamic_strcat(3, " -m iprange --dst-range ", ip, " ");
 							
@@ -479,7 +490,7 @@ int main(int argc, char** argv)
 							//restore from backup
 							if(do_restore)
 							{
-								restore_backup_for_id(type_id, "/usr/data/quotas");
+								restore_backup_for_id(type_id, "/usr/data/quotas", is_individual_other, defined_ip_groups);
 							}
 							free(limit);
 						}
@@ -596,7 +607,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void restore_backup_for_id(char* id, char* quota_backup_dir)
+void restore_backup_for_id(char* id, char* quota_backup_dir, unsigned char is_individual_other, list* defined_ip_groups)
 {
 	char* quota_file_path = dynamic_strcat(3, quota_backup_dir, "/quota_", id);
 	unsigned long num_ips = 0;
@@ -604,10 +615,164 @@ void restore_backup_for_id(char* id, char* quota_backup_dir)
 	ip_bw* loaded_backup_data = load_usage_from_file(quota_file_path, &num_ips, &last_backup);
 	if(loaded_backup_data != NULL)
 	{
+		//printf("restoring quota... id=%s, is_individual_other=%d, num_defined_ip_groups=%d\n", id, is_individual_other, defined_ip_groups->length);
+		if(is_individual_other)
+		{
+			//filter out any ips in the "other" data, that have now been assigned quotas of their own.
+			list* ip_bw_list = initialize_list();
+			int ip_index;
+			for(ip_index=0; ip_index < num_ips; ip_index++)
+			{
+				ip_bw* ptr = loaded_backup_data + ip_index;
+				push_list(ip_bw_list, ptr);
+			}
+			
+			unsigned long num_groups = 0;
+			char** group_strs = (char**)get_list_values(defined_ip_groups, &num_groups);
+			unsigned long group_index;
+			
+			for(group_index = 0; group_index < num_groups; group_index++)
+			{
+				filter_group_from_list(&ip_bw_list, group_strs[group_index]);
+			}
+			
+			
+			//rebuild the backup data array from the filtered list
+			if(num_ips != ip_bw_list->length)
+			{
+				num_ips = ip_bw_list->length;
+				ip_bw* adj_backup = (ip_bw*)malloc( (1+ip_bw_list->length)*sizeof(ip_bw) );
+				while(ip_bw_list->length > 0)
+				{
+					ip_bw* next = pop_list(ip_bw_list);
+					adj_backup[ ip_bw_list->length ] = *next;
+				}
+				free(loaded_backup_data);
+				loaded_backup_data = adj_backup;
+			}
+			
+			destroy_list(ip_bw_list, DESTROY_MODE_IGNORE_VALUES, &num_groups);
+			free(group_strs); //don't want to destroy values, they're still contained in list, so just destroy container array
+		}
 		set_bandwidth_usage_for_rule_id(id, 1, num_ips, last_backup, loaded_backup_data, 5000);
 	}
 	free(quota_file_path);
 }
+
+list* filter_group_from_list(list** orig_ip_bw_list, char* ip_group_str)
+{
+	char* dyn_group_str = strdup(ip_group_str);
+
+	/* remove spaces in ip range definitions */
+	while(strstr(dyn_group_str, " -") != NULL)
+	{
+		char* tmp_group_str = dyn_group_str;
+		dyn_group_str = dynamic_replace(dyn_group_str, " -", "-");
+		free(tmp_group_str);
+	}
+	while(strstr(dyn_group_str, "- ") != NULL)
+	{
+		char* tmp_group_str = dyn_group_str;
+		dyn_group_str = dynamic_replace(dyn_group_str, "- ", "-");
+		free(tmp_group_str);
+	}
+	while(strstr(dyn_group_str, " -") != NULL)
+	{
+		char* tmp_group_str = dyn_group_str;
+		dyn_group_str = dynamic_replace(dyn_group_str, " /", "/");
+		free(tmp_group_str);
+	}
+	while(strstr(dyn_group_str, "- ") != NULL)
+	{
+		char* tmp_group_str = dyn_group_str;
+		dyn_group_str = dynamic_replace(dyn_group_str, "/ ", "/");
+		free(tmp_group_str);
+	}
+
+	char group_breaks[]= ",\t ";
+	unsigned long num_groups = 0;
+	char** split_group = split_on_separators(dyn_group_str, group_breaks, 3, -1, 0, &num_groups);
+	unsigned long group_index;
+	
+	for(group_index = 0; group_index < num_groups; group_index++)
+	{
+		uint32_t* range = ip_range_to_host_ints( split_group[group_index] );
+		list* new_ip_bw_list = initialize_list();
+		while((*orig_ip_bw_list)->length > 0)
+		{
+			ip_bw* next_ip_bw = shift_list(*orig_ip_bw_list);
+			uint32_t test_ip = ntohl(next_ip_bw->ip);
+			if(test_ip >= range[0] && test_ip <= range[1])
+			{
+				//overlap found! filter the ip by not adding it back!
+			}
+			else
+			{
+				push_list(new_ip_bw_list, next_ip_bw);
+			}
+		}
+		free(range);
+		unsigned long num_destroyed;
+		destroy_list(*orig_ip_bw_list, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+		*orig_ip_bw_list = new_ip_bw_list;
+	}
+	free_null_terminated_string_array(split_group);
+	free(dyn_group_str);
+
+	return *orig_ip_bw_list;
+
+}
+
+uint32_t* ip_range_to_host_ints(char* ip_str)
+{
+	uint32_t* ret_val = (uint32_t*)malloc(2*sizeof(uint32_t));
+	uint32_t start = 0;
+	uint32_t end = 0;
+	
+	
+	unsigned long num_pieces = 0;
+	char ip_breaks[] = "/-";
+	char** split_ip = split_on_separators(ip_str, ip_breaks, 2, -1, 0, &num_pieces);
+	start = ip_to_host_int(split_ip[0]);
+	if(strstr(ip_str, "/") != NULL)
+	{
+		uint32_t mask = -1;
+		if(strstr(split_ip[1], ".") != NULL)
+		{
+			mask = ip_to_host_int(split_ip[1]);
+		}
+		else
+		{
+			uint32_t mask_size;
+			sscanf(split_ip[1], "%d", &mask_size);
+			mask = mask << (32-mask_size);
+		}
+		start = start & mask;
+		end = start | ( ~mask );
+	}
+	else if(strstr(ip_str, "-") != NULL)
+	{
+		end = ip_to_host_int(split_ip[1]);
+	}
+	else
+	{
+		end = start;
+	}
+	free_null_terminated_string_array(split_ip);
+
+	ret_val[0] = start;
+	ret_val[1] = end;
+	return ret_val;
+}
+
+
+uint32_t ip_to_host_int(char* ip_str)
+{
+	struct in_addr inp;
+	inet_aton(ip_str, &inp);
+	return (uint32_t)ntohl(inp.s_addr);
+}
+
 
 void delete_chain_from_table(char* table, char* delete_chain)
 {
