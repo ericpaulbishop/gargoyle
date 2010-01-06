@@ -5,7 +5,7 @@
 	<span class='widerightcolumn'>
 		<select id="applies_to_type"  onchange='setVisibility()' >
 			<option value="all">Entire Local Network</option>
-			<option value="only">Only the following IP</option>
+			<option value="only">Only the following Host(s)</option>
 			<option value="others_individual">All Individual Hosts Without Explicit Quotas</option>
 			<option value="others_combined">All Hosts Without Explicit Quotas (Combined)</option>
 		</select>
