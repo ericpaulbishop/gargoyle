@@ -42,7 +42,7 @@
 
 
 /* max id length */
-#define BANDWIDTH_MAX_ID_LENGTH		  35
+#define BANDWIDTH_MAX_ID_LENGTH		  50
 
 /* pick something rather random... let's make it end in 666 to
  * freak out the crazy fundies out there ;-) */
