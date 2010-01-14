@@ -28,7 +28,7 @@
 	echo "var etherData = new Array();";
 	if [ -e /etc/ethers ]
 	then
-		cat /etc/ethers | awk ' $0 ~ /^[\t ]*[0-9]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};'
+		cat /etc/ethers | awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};'
 
 	fi
 
