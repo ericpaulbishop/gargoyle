@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
@@ -10,14 +10,14 @@
 
 function saveChanges()
 {
-	uci = uciOriginal.clone();	
+	uci = uciOriginal.clone();
 	commands = "";
 	errors = "";
 
 	restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
 	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
-	
+
 
 	disabled = document.getElementById("qos_enabled").checked == false;
 	if(disabled)
@@ -30,14 +30,14 @@ function saveChanges()
 			//delete qos distribution section
 			uci.remove("gargoyle", "status", "qos");
 			commands = commands + "/etc/init.d/qos_gargoyle stop \n/etc/init.d/qos_gargoyle disable\n";
-		       	commands = commands + bwmonCleanCommand + " bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null) ;\nif [ -n \"$bwmon_enabled\" ] ;  then /etc/init.d/bwmon_gargoyle restart ; fi ; ";
+			commands = commands + bwmonCleanCommand + " bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null) ;\nif [ -n \"$bwmon_enabled\" ] ;  then /etc/init.d/bwmon_gargoyle restart ; fi ; ";
 			qosEnabled = false;
 		}
 		else
 		{
 			commands = commands + restartFirewallCommand + bwmonCleanCommand;
 		}
-		uci.remove("qos_gargoyle", direction, "total_bandwidth");		
+		uci.remove("qos_gargoyle", direction, "total_bandwidth");
 		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  commands;
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
@@ -46,7 +46,7 @@ function saveChanges()
 	}
 	else
 	{
-		
+
 		qosEnabled = true;
 		preCommands = [];
 
@@ -74,7 +74,7 @@ function saveChanges()
 		}
 		preCommands.push("uci commit");
 
-	
+
 		uci.set("qos_gargoyle", direction, "total_bandwidth", document.getElementById("total_bandwidth").value);
 
 
@@ -91,21 +91,23 @@ function saveChanges()
 			classData[classIndex][1] = percent;
 			percentSum = percentSum + (1*percent);
 		}
-		
+
 		classIds = [];
 		for(classIndex = 0; classIndex < classData.length; classIndex++)
 		{
 			classId = direction.substr(0,1).toLowerCase() + "class_" + (classIndex+1);
 			className = classData[classIndex][0];
 			classIds[className] = classId;
-		
+
 			uci.set("qos_gargoyle", classId, "", directionClass);
 			uci.set("qos_gargoyle", classId, "name", className);
-			uci.set("qos_gargoyle", classId, "percent_bandwidth", Math.round(100*(classData[classIndex][1]/percentSum)) );	
-			
-			if(classData[classIndex][2] == "yes")
+			uci.set("qos_gargoyle", classId, "percent_bandwidth", Math.round(100*(classData[classIndex][1]/percentSum)) );
+
+			minBandwidth = classData[classIndex][2];
+			if(minBandwidth != "zero")
 			{
-				uci.set("qos_gargoyle", classId, "minimize_delay", "1");
+				minBandwidth = minBandwidth.substr(0,minBandwidth.length-7);
+				uci.set("qos_gargoyle", classId, "min_bandwidth", minBandwidth);
 			}
 			maxBandwidth = classData[classIndex][3];
 			if(maxBandwidth != "unlimited")
@@ -114,7 +116,7 @@ function saveChanges()
 				uci.set("qos_gargoyle", classId, "max_bandwidth", maxBandwidth);
 			}
 		}
-		uci.set("qos_gargoyle", direction, "default_class", classIds[getSelectedText("default_class")]); 
+		uci.set("qos_gargoyle", direction, "default_class", classIds[getSelectedText("default_class")]);
 
 		displayProtocolNames = ["HTTP","FTP","SSL","POP3","SMTP","Ident","NTP","VNC","IRC","Jabber","MSN Messenger","AIM","FastTrack","BitTorrent","Gnutella","eDonkey"];
 		protocolIds = ["http","ftp","ssl","pop3","smtp","ident","ntp","vnc","irc","jabber","msnmessenger","aim","fasttrack","bittorrent","gnutella","edonkey"];
@@ -122,7 +124,7 @@ function saveChanges()
 		for(protocolIndex = 0; protocolIndex < protocolIds.length; protocolIndex++)
 		{
 			protocolMap[ displayProtocolNames[protocolIndex]  ] = protocolIds[protocolIndex];
-		}	
+		}
 
 		ruleTable = document.getElementById('qos_rule_table_container').firstChild;
 		ruleData = getTableDataArray( ruleTable, true, true);
@@ -130,17 +132,18 @@ function saveChanges()
 		{
 			rulePriority = (ruleIndex+1)*100;
 			ruleId = direction + "_rule_" + rulePriority;
-				
+
 			classId = classIds[ ruleData[ruleIndex][1] ];
 			uci.set("qos_gargoyle", ruleId, "", directionRule);
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
-	
+
 			optionList = ["source", "srcport", "destination", "dstport", "min_pkt_size", "max_pkt_size", "proto"];
+
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
 			{
-				if(matchCriteria[criteriaIndex] != "")
+				if  (matchCriteria[criteriaIndex] != "")
 				{
 					value = matchCriteria[criteriaIndex];
 					value = optionList[criteriaIndex] == "proto" ? value.toLowerCase() : value;
@@ -185,52 +188,17 @@ function saveChanges()
 				//alert(req.responseText);
 			}
 		}
-	
+
 
 
 		//document.getElementById("output").value = commands;
-		
-		
+
+
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
-		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);	
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function resetData()
 {
@@ -238,7 +206,7 @@ function resetData()
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_1");
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_2");
 	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
-	
+
 
 	totalBandwidth = uciOriginal.get("qos_gargoyle", direction, "total_bandwidth");
 	totalBandwidth = totalBandwidth == "" ? -1 : totalBandwidth;
@@ -256,13 +224,13 @@ function resetData()
 
 
 	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
-	
+
 
 
 	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
 	removeAllOptionsFromSelectElement( document.getElementById("classification"));
 
-	classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimize Delay", "Maximum Bandwidth", ""];
+	classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimum Bandwidth", "Maximum Bandwidth", ""];
 	classTableData = new Array();
 	classNames = new Array();
 	totalPercent = 0;
@@ -270,18 +238,18 @@ function resetData()
 	for (classIndex=0; classIndex < classSections.length; classIndex++)
 	{
 		classSection = classSections[classIndex];
-		
-		
+
+
 		nextName = uciOriginal.get("qos_gargoyle", classSection, "name");
 		nextPercent = uciOriginal.get("qos_gargoyle", classSection, "percent_bandwidth");
 		nextMax = uciOriginal.get("qos_gargoyle", classSection, "max_bandwidth");
-		nextDelay = uciOriginal.get("qos_gargoyle", classSection, "minimize_delay");
-		
+		nextMin = uciOriginal.get("qos_gargoyle", classSection, "min_bandwidth");
+
 
 		nextName = nextName == "" ? classSection : nextName;
-		nextDelay = nextDelay == "1" ? "yes" : "no";
+		nextMin = nextMin != "" && nextMin > 0 ? nextMin + " kbit/s" : "zero";
 		nextMax = nextMax != "" && nextMax > 0 ? nextMax + " kbit/s" : "unlimited";
-		
+
 
 		addOptionToSelectElement("default_class", nextName, nextName, null);
 		addOptionToSelectElement("classification", nextName, nextName, null);
@@ -289,11 +257,11 @@ function resetData()
 
 		defaultClassName = uciOriginal.get("qos_gargoyle", direction, "default_class") == classSection ? nextName : defaultClassName;
 
-		classTableData.push( [nextName, nextPercent, nextDelay, nextMax, createClassTableEditButton()] );
+		classTableData.push( [nextName, nextPercent, nextMin, nextMax, createClassTableEditButton()] );
 		totalPercent = totalPercent + nextPercent;
 	}
 	setSelectedText("default_class", defaultClassName);
-	
+
 
 
 	for (classIndex=0; classIndex < classSections.length; classIndex++)
@@ -312,7 +280,7 @@ function resetData()
 	}
 	classTableContainer.appendChild(classTable);
 
-	
+
 
 	var ruleSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionRule);
 	ruleTableColumns = ["Match Criteria", "Classification", ""];
@@ -321,15 +289,15 @@ function resetData()
 	for(ruleIndex = 0; ruleIndex < ruleSections.length; ruleIndex++)
 	{
 		ruleSection = ruleSections[ruleIndex];
-		
+
 		rulePriority = uciOriginal.get("qos_gargoyle", ruleSection, "test_order");
 		rulePriority = rulePriority == "" ? 9999999 : rulePriority;
 		rulePriorities.push(rulePriority + "," + ruleIndex);
 
-		
-		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto"];
 
-		displayOptionList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $",  "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $"];
+		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto"];
+		displayOptionList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $"];
+
 		ruleText = "";
 		for (optionIndex = 0; optionIndex < optionList.length; optionIndex++)
 		{
@@ -350,10 +318,10 @@ function resetData()
 			{
 				substitution = displayOptionList[optionIndex];
 				substitution = substitution.replace(/\$/, optionValue);
-				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution; 
+				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
 			}
 		}
-		
+
 		if(uciOriginal.get("qos_gargoyle", ruleSection, "layer7") != "")
 		{
 			displayProtocolNames = ["HTTP","FTP","SSL","POP3","SMTP","Ident","NTP","VNC","IRC","Jabber","MSN Messenger","AIM","FastTrack","BitTorrent","Gnutella","eDonkey"];
@@ -372,9 +340,9 @@ function resetData()
 			p2p = uciOriginal.get("qos_gargoyle", ruleSection, "ipp2p");
 			p2p = p2p == "all" || p2p == "ipp2p" ? "Any P2P" : p2p;
 			app_protocol="Application Protocol: " + p2p;
- 			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
+			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
 		}
-		
+
 
 		classification = classNames[ uciOriginal.get("qos_gargoyle", ruleSection, "class") ];
 		ruleTableData.push( [ruleText, classification, createRuleTableEditButton()] );
@@ -401,18 +369,19 @@ function resetData()
 
 
 	setQosEnabled();
-}	
+}
 
 function setQosEnabled()
 {
 	enabled = document.getElementById("qos_enabled").checked;
-	controlIds = ["default_class", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol",       "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "minimize_delay", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
+	controlIds = ["default_class", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol",       "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "min_radio1", "min_radio2", "min_bandwidth", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
 
 	setElementEnabled( document.getElementById("total_bandwidth"), enabled, uciOriginal.get("qos_gargoyle", direction, "total_bandwidth") );
 	for(controlIndex = 0; controlIndex < controlIds.length; controlIndex++)
 	{
 		setElementEnabled( document.getElementById(controlIds[controlIndex]), enabled, "");
 	}
+
 	setRowClasses( document.getElementById('qos_rule_table_container').firstChild, enabled);
 	setRowClasses( document.getElementById('qos_class_table_container').firstChild, enabled);
 
@@ -420,7 +389,7 @@ function setQosEnabled()
 	{
 		defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 		document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
-	}	
+	}
 
 	resetRuleControls();
 	resetServiceClassControls(document);
@@ -437,9 +406,10 @@ function addClassificationRule()
 	}
 	else
 	{
-			
+
 		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol"];
-		displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Application Protocol: $"];
+		displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $","Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Application Protocol: $"];
+
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 		{
@@ -457,7 +427,7 @@ function addClassificationRule()
 			{
 				substitution = displayList[controlIndex];
 				substitution = substitution.replace(/\$/, controlValue);
-				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution; 
+				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
 			}
 		}
 		classification = document.getElementById("classification").options[document.getElementById("classification").selectedIndex].text;
@@ -501,7 +471,6 @@ function resetRuleControls()
 	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol"];
 	document.getElementById("classification").selectedIndex = document.getElementById("default_class").selectedIndex;
 
-
 	for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
 	{
 		checkbox =  document.getElementById( "use_" + ruleControlIds[ruleControlIndex]);
@@ -522,7 +491,7 @@ function addServiceClass()
 		newRowData = new Array();
 		newRowData.push( document.getElementById("class_name").value );
 		newRowData.push( document.getElementById("percent_bandwidth").value + "%" );
- 		newRowData.push( document.getElementById("minimize_delay").options[ document.getElementById("minimize_delay").selectedIndex ].value );
+		newRowData.push( document.getElementById("min_radio1").checked == true ? "zero" : document.getElementById("min_bandwidth").value + " kbit/s" );
 		newRowData.push( document.getElementById("max_radio1").checked == true ? "unlimited" : document.getElementById("max_bandwidth").value + " kbit/s" );
 		newRowData.push( createClassTableEditButton() );
 
@@ -582,9 +551,11 @@ function resetServiceClassControls(controlDocument)
 {
 	controlDocument.getElementById("class_name").value = "";
 	controlDocument.getElementById("percent_bandwidth").value = "";
-	
-	setSelectedText("minimize_delay", "no", controlDocument)
-	
+
+	controlDocument.getElementById("min_radio1").checked = true;
+	controlDocument.getElementById("min_radio2").checked = false;
+	enableAssociatedField(controlDocument.getElementById("min_radio2"), "min_bandwidth", "", controlDocument);
+
 	controlDocument.getElementById("max_radio1").checked = true;
 	controlDocument.getElementById("max_radio2").checked = false;
 	enableAssociatedField(controlDocument.getElementById("max_radio2"), "max_bandwidth", "", controlDocument);
@@ -652,7 +623,7 @@ function editRuleTableRow()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -668,7 +639,7 @@ function editRuleTableRow()
 	editRuleWindow = window.open("qos_edit_rule.sh", "test", "width=560,height=450,left=" + xCoor + ",top=" + yCoor );
 	try
 	{
-	
+
 		saveButton = editRuleWindow.document.createElement('input');
 		saveButton.type= 'button';
 		closeButton = editRuleWindow.document.createElement('input');
@@ -686,12 +657,12 @@ function editRuleTableRow()
 
 
 	editRuleWindowRow=this.parentNode.parentNode;
-	
+
 	// we cant run setup functions until edit window is done loading and there
 	// is no sleep function in javascript, so we implement a recursive solution using
 	// the setTimeout function which runs a specific function after waiting a specified
 	// amount of time
-	runOnRuleEditorLoaded = function () 
+	runOnRuleEditorLoaded = function ()
 	{
 		update_done=false;
 		if(editRuleWindow.document != null)
@@ -701,7 +672,7 @@ function editRuleTableRow()
 
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-				
+
 				//setup edit window controls
 				serviceClassOptions = document.getElementById("default_class").options;
 				for(classIndex = 0; classIndex < serviceClassOptions.length; classIndex++)
@@ -710,6 +681,7 @@ function editRuleTableRow()
 				}
 
 				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol"];
+
 				criteria = parseRuleMatchCriteria(editRuleWindowRow.firstChild.firstChild.data);
 				for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
 				{
@@ -736,16 +708,16 @@ function editRuleTableRow()
 				}
 				setSelectedText("classification", editRuleWindowRow.childNodes[1].firstChild.data, editRuleWindow.document);
 
-				
 
 
-				
+
+
 				//exit & save functions
 				closeButton.onclick = function()
 				{
 					editRuleWindow.close();
-				}	
-				
+				}
+
 				saveButton.onclick = function()
 				{
 					errors = proofreadClassificationRule(editRuleWindow.document);
@@ -757,7 +729,7 @@ function editRuleTableRow()
 					else
 					{
 						addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "app_protocol"];
-						displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes","Transport Protocol: $", "Application Protocol: $"];
+						displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $",  "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes","Transport Protocol: $", "Application Protocol: $"];
 						ruleText = ""
 						for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 						{
@@ -775,7 +747,7 @@ function editRuleTableRow()
 							{
 								substitution = displayList[controlIndex];
 								substitution = substitution.replace(/\$/, controlValue);
-								ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution; 
+								ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
 							}
 						}
 						classification = editRuleWindow.document.getElementById("classification").options[editRuleWindow.document.getElementById("classification").selectedIndex].text;
@@ -788,7 +760,7 @@ function editRuleTableRow()
 					}
 				}
 				editRuleWindow.moveTo(xCoor,yCoor);
-				editRuleWindow.focus();	
+				editRuleWindow.focus();
 				update_done = true;
 			}
 		}
@@ -797,7 +769,7 @@ function editRuleTableRow()
 			setTimeout( "runOnRuleEditorLoaded()", 250);
 		}
 	}
-	
+
 	runOnRuleEditorLoaded();
 
 
@@ -830,7 +802,7 @@ function editClassTableRow()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -863,7 +835,7 @@ function editClassTableRow()
 
 
 	editClassWindowRow=this.parentNode.parentNode;
-	runOnClassEditorLoaded = function () 
+	runOnClassEditorLoaded = function ()
 	{
 		update_done=false;
 		if(editClassWindow.document != null)
@@ -871,10 +843,10 @@ function editClassTableRow()
 			if(editClassWindow.document.getElementById("bottom_button_container") != null)
 			{
 
-				//editClassWindow.document.getElementById("tmp").appendChild( editClassWindow.document.createTextNode("TEST!!!")); 
+				//editClassWindow.document.getElementById("tmp").appendChild( editClassWindow.document.createTextNode("TEST!!!"));
 				editClassWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editClassWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-				
+
 				resetServiceClassControls(editClassWindow.document);
 
 				cells = editClassWindowRow.childNodes;
@@ -882,9 +854,16 @@ function editClassTableRow()
 
 				percent = cells[1].firstChild.data;
 				editClassWindow.document.getElementById("percent_bandwidth").value = percent.substr(0, percent.length-1);
-				
-				editClassWindow.document.getElementById("minimize_delay").selectedIndex = cells[2].firstChild.data == "yes" ? 0 : 1;
-				
+
+				if(cells[2].firstChild.data != "zero")
+				{
+					editClassWindow.document.getElementById("min_radio2").checked = true;
+					enableAssociatedField(editClassWindow.document.getElementById("min_radio2"), "min_bandwidth", "", editClassWindow.document);
+
+					minBandwidth = cells[2].firstChild.data;
+					editClassWindow.document.getElementById("min_bandwidth").value = minBandwidth.substr(0, minBandwidth.length-7);
+				}
+
 				if(cells[3].firstChild.data != "unlimited")
 				{
 					editClassWindow.document.getElementById("max_radio2").checked = true;
@@ -893,15 +872,15 @@ function editClassTableRow()
 					maxBandwidth = cells[3].firstChild.data;
 					editClassWindow.document.getElementById("max_bandwidth").value = maxBandwidth.substr(0, maxBandwidth.length-7);
 				}
-				
 
-				
+
+
 
 				closeButton.onclick = function()
 				{
 					editClassWindow.close();
-				}	
-				
+				}
+
 				saveButton.onclick = function()
 				{
 					errors = proofreadServiceClass(editClassWindow.document);
@@ -923,7 +902,7 @@ function editClassTableRow()
 						newClassName = editClassWindow.document.getElementById("class_name").value;
 						if(newClassName != oldClassName)
 						{
-							//swap class name in select elements for new name 
+							//swap class name in select elements for new name
 							selectIds = ["default_class", "classification"];
 							for(selectIndex = 0; selectIndex < selectIds.length; selectIndex++)
 							{
@@ -956,8 +935,9 @@ function editClassTableRow()
 						}
 						editClassWindowRow.childNodes[0].firstChild.data = editClassWindow.document.getElementById("class_name").value;
 						editClassWindowRow.childNodes[1].firstChild.data = editClassWindow.document.getElementById("percent_bandwidth").value + "%";
-						editClassWindowRow.childNodes[2].firstChild.data = editClassWindow.document.getElementById("minimize_delay").options[ editClassWindow.document.getElementById("minimize_delay").selectedIndex ].value;
+						editClassWindowRow.childNodes[2].firstChild.data = editClassWindow.document.getElementById("min_radio1").checked == true ? "zero" : editClassWindow.document.getElementById("min_bandwidth").value + " kbit/s";
 						editClassWindowRow.childNodes[3].firstChild.data = editClassWindow.document.getElementById("max_radio1").checked == true ? "unlimited" : editClassWindow.document.getElementById("max_bandwidth").value + " kbit/s";
+
 
 
 						editClassWindow.close();
@@ -965,7 +945,7 @@ function editClassTableRow()
 				}
 
 				editClassWindow.moveTo(xCoor,yCoor);
-				editClassWindow.focus();	
+				editClassWindow.focus();
 				update_done = true;
 			}
 		}
@@ -974,19 +954,19 @@ function editClassTableRow()
 			setTimeout( "runOnClassEditorLoaded()", 250);
 		}
 	}
-	
+
 	runOnClassEditorLoaded();
 
-	
+
 }
 
 function parseRuleMatchCriteria(matchText)
 {
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
-	
-	possibleCriteria = ["Source: (.*)", "Source Port: (.*)", "Destination: (.*)", "Destination Port: (.*)","Maximum Packet Length: (.*) bytes", "Minimum Packet Length: (.*) bytes",  "Transport Protocol: (.*)", "Application Protocol: (.*)"];
-	
+
+	possibleCriteria = ["Source: (.*)", "Source Port: (.*)", "Destination: (.*)", "Destination Port: (.*)", "Maximum Packet Length: (.*) bytes", "Minimum Packet Length: (.*) bytes",  "Transport Protocol: (.*)", "Application Protocol: (.*)"];
+
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{
 		criterionRegExp = new RegExp(possibleCriteria[possibleCriteriaIndex]);
@@ -994,7 +974,7 @@ function parseRuleMatchCriteria(matchText)
 		for(splitIndex = 0; splitIndex < splitText.length && (!found); splitIndex++)
 		{
 			test=splitText[splitIndex].match(criterionRegExp);
-			
+
 			if(test !=null)
 			{
 				found = true;
@@ -1006,6 +986,6 @@ function parseRuleMatchCriteria(matchText)
 			criteria.push("");
 		}
 	}
-	
+
 	return criteria;
 }
