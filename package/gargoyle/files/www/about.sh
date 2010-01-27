@@ -14,7 +14,7 @@
 	
 	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
 
-	<p><span class="contributer">Paul Bixel:</span> Implemented improved connection table, including display of QoS classes and Layer7</p>
+	<p><span class="contributer">Paul Bixel:</span> Implemented QoS minimum bandwidth and improved connection table, including display of QoS classes and Layer7</p>
 	
 	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
 
