@@ -1,16 +1,17 @@
 #!/bin/sh /etc/rc.common
-# 
+#
 # Copyright Eric Bishop, 2008
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 
 START=50
+EXTRA_COMMANDS=show
+EXTRA_HELP="	show	Show current Qos configuration (if active)"
 
 include /lib/network
 include /usr/lib/gargoyle_firewall_util
 
 config_file_name="qos_gargoyle"
-
 
 load_all_config_options()
 {
@@ -26,7 +27,7 @@ load_all_config_options()
 	# after we're done with it.  For reference
 	# the $1 variable is the name of the option
 	# and $2 is the name of the section
-	config_cb() 
+	config_cb()
 	{
 		if [ ."$2" = ."$section_id" ]; then
 			option_cb()
@@ -79,7 +80,7 @@ load_and_sort_all_config_sections()
 	local config_name="$1"
 	local section_type="$2"
 	local sort_variable="$3"
-	
+
 	all_config_sections=""
 	defined_option_cb()
 	{
@@ -107,7 +108,7 @@ load_and_sort_all_config_sections()
 
 	config_load "$config_name"
 
-	echo "$all_config_sections" | awk ' {for(i=1; i <= NF; i++){ print $i }}' | sort -n -t ":" | awk 'BEGIN {FS=":"}; {print $2}' 
+	echo "$all_config_sections" | awk ' {for(i=1; i <= NF; i++){ print $i }}' | sort -n -t ":" | awk 'BEGIN {FS=":"}; {print $2}'
 }
 
 
@@ -115,7 +116,7 @@ get_classname_mark()
 {
 	local class="$1"
 	local class_mark_list="$2"
-	echo "$class_mark_list" | awk -v class="$class" '{ for (i = 1; i <= NF; i++){  if($i~class":"){ gsub(class":",""); print $i } }}' 
+	echo "$class_mark_list" | awk -v class="$class" '{ for (i = 1; i <= NF; i++){  if($i~class":"){ gsub(class":",""); print $i } }}'
 }
 
 
@@ -125,8 +126,9 @@ apply_all_rules()
 	local class_mark_list="$2"
 	local chain="$3"
 	local table="$4"
-	local mark_mask="$5"
-
+	
+	local need_proto
+	local tmp_proto
 
 	# add filter rules
 	rule_list=$(load_and_sort_all_config_sections "$config_file_name" "$rule_type" "test_order")
@@ -136,9 +138,10 @@ apply_all_rules()
 		min_pkt_size=""
 		max_pkt_size=""
 		match_str=""
-		
+		need_proto=""
+
 		load_all_config_options "$config_file_name" "$rule"
-		
+
 		for option in $ALL_OPTION_VARIABLES ; do
 			option_value=$(eval echo \$$option)
 			case "$option" in
@@ -151,10 +154,12 @@ apply_all_rules()
 				srcport)
 					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
 					match_str="$match_str --sport $option_value"
+					need_proto="1"
 				;;
 				dstport)
 					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
 					match_str="$match_str --dport $option_value"
+					need_proto="1"
 
 				;;
 				layer7)
@@ -181,25 +186,41 @@ apply_all_rules()
 				;;
 			esac
 		done
-	
+
 
 		if [ -n "$min_pkt_size" ] || [ -n "$max_pkt_size" ] ; then
 			if [ -z "$min_pkt_size" ] ; then min_pkt_size=0 ; fi
 			if [ -z "$max_pkt_size" ] ; then max_pkt_size=$(($max_trans_unit*2)) ; fi
 			match_str="$match_str -m length --length $min_pkt_size:$max_pkt_size"
 		fi
-	
+
 		if [ -n "$class" ] ; then
 			if [ -n "$proto" ] || [ -n "$match_str" ] ; then
 				next_mark=$(get_classname_mark "$class" "$class_mark_list" )
-				if [ "$proto" = "tcp" ] || [ "$proto" = "both" ] || [ -z "$proto" ] ; then
-					iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p tcp $match_str -j CONNMARK --set-mark $next_mark
-					echo "iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p tcp $match_str -j CONNMARK --set-mark $next_mark"
-	
-				fi
-				if [ "$proto" = "udp" ] || [ "$proto" = "both" ] || [ -z "$proto" ] ; then
-					iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p udp $match_str -j CONNMARK --set-mark $next_mark
-					echo "iptables -t $table -A $chain -m connmark --mark 0/$mark_mask -p udp $match_str -j CONNMARK --set-mark $next_mark"
+
+				#We need to specify both udp and tcp if the user indicated a port
+				#and he did not indiate a protocal.
+				if [ -z "$proto" ] && [ -n "$need_proto" ] ; then
+
+					iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark
+					iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark
+					if [ -n "$dbg" ] ; then
+						echo "iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark"
+						echo "iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark"
+					fi
+
+				else
+
+				#Otherwise just specify what the user requested (or nothing)
+					if [ -n "$proto" ] ; then
+						tmp_proto="-p $proto"
+					else
+						tmp_proto=""
+					fi
+					iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark
+					if [ -n "$dbg" ] ; then
+						echo "iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark"
+					fi
 				fi
 			fi
 		fi
@@ -214,11 +235,11 @@ apply_all_rules()
 initialize_qos()
 {
 	#initialize layer7_marker if necessary
-	create_l7marker_chain	
+	create_l7marker_chain
 
 	#load global variables
 	load_all_config_options "$config_file_name" "global"
-	
+
 	#load qos_interface from global variables
 	if [ -z "$interface" ] ; then
 		#scan_interfaces
@@ -227,7 +248,7 @@ initialize_qos()
 	else
 		qos_interface="$interface"
 	fi
-	
+
 	#load mtu from global variables
 	if [ -z "$mtu" ] ; then
 		max_trans_unit=1500
@@ -252,6 +273,7 @@ initialize_qos()
 
 	insmod cls_fw >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
+	insmod sch_htb >&- 2>&-
 	insmod sch_sfq >&- 2>&-
 	insmod ipt_length >&- 2>&-
 	insmod imq numdevs=1 >&- 2>&-
@@ -263,21 +285,21 @@ initialize_qos()
 	insmod ipt_dscp >&- 2>&-
 	insmod ipt_DSCP >&- 2>&-
 	insmod sch_red >&- 2>&-
-	
-
 
 	# Remove existing queuing disciplines from all interfaces
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
 		tc qdisc del dev "$iface" root
 	done
+	for iface in $(tc qdisc show | grep htb | awk '{print $5}'); do
+		tc qdisc del dev "$iface" root
+	done
+
 
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
 
-
-
-	#load upload variables 
+	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
 	if [ -n "$total_bandwidth" ] ; then
 		total_upload_bandwidth="$total_bandwidth"
@@ -285,10 +307,9 @@ initialize_qos()
 		total_upload_bandwidth=-1
 	fi
 	upload_default_class="$default_class"
-		
-	
-	
-	#load download variables 
+
+
+	#load download variables
 	total_bandwidth=""
 	default_class=""
 	load_all_config_options "$config_file_name" "download"
@@ -298,399 +319,285 @@ initialize_qos()
 		total_download_bandwidth=-1
 	fi
 	download_default_class="$default_class"
-	
-	
+
+
 	#remove old mark file if it exists
 	qos_mark_file="/etc/qos_class_marks"
 	if [ -e "$qos_mark_file" ] ; then
 		rm "$qos_mark_file"
 	fi
 
-		
-	
-
-	
 	if [ $total_upload_bandwidth -ge 0 ] ; then
-		# Attach egress queuing discipline to QoS interface
-		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 10
-		
-	
-		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
-		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc sc rate ${total_upload_bandwidth}kbit ul rate ${total_upload_bandwidth}kbit	
-	
-	
-		# Calculate burst duration, d
-		# we will burst using 75% of total bandwidth, or fast enough to send 1 packet in 10ms, whichever is less
-		# multiply by 8 since mtu specified in bytes
-		# total bandwidth in kbit/s, and we want bit/ms, but this will be the same value
-		burst_speed=$(($total_upload_bandwidth*75/100))
-		burst_duration=$(( $max_trans_unit*8/$burst_speed ))
-		if [ $burst_duration -lt 10 ] ; then
-			burst_duration=10
-			burst_speed=$(( $max_trans_unit*8/$burst_duration ))
-		fi
-		
-	
-	
+
 		#load upload classes
 		upload_class_list=$(load_all_config_sections "$config_file_name" "upload_class")
 		for uclass_name in $upload_class_list ; do
 			percent_bandwidth=""
+			min_bandwidth=""
 			max_bandwidth=""
-			minimize_delay=""
-	
 			load_all_config_options "$config_file_name" "$uclass_name"
 			if [ -z "$percent_bandwidth" ] ; then
 				percent_bandwidth="0"
 			fi
+			if [ -z "$min_bandwidth" ] ; then
+				min_bandwidth="-1"
+			fi
 			if [ -z "$max_bandwidth" ] ; then
 				max_bandwidth="-1"
 			fi
-			if [ -z "$minimize_delay" ] ; then
-				minimize_delay="0"
-			fi
-			classdef="$percent_bandwidth $max_bandwidth $minimize_delay"
+			classdef="$percent_bandwidth $max_bandwidth $min_bandwidth"
 			eval $uclass_name=\"\$classdef\"  #"#comment quote here so formatting in editor isn't FUBAR
 		done
 
-	
-		#First, normalize the percentages
-		percent_sum=0;
-		for uclass_name in $upload_class_list; do
-			uclass_def=$(eval echo "\$$uclass_name");
-			percent_sum=$(( $percent_sum + $(echo $uclass_def | awk ' {print $1}' ) ))
-		done
-		
 
-		# we are going to add one more class for syn/ack packets and icmp,
-		# i.e. things that should be prioritized but don't want to force
-		# the user to bother with/configure themselves.  These packets will
-		# be given a high burst bandwidth to minimize delay but after the first
-		# packet they will have a low share of the bandwidth since there shouldn't be too many of them
+		# Attach egress queuing discipline to QoS interface, now with temperary default
+		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 10
+
+		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
 		#
-		# So we're going to allocate 3% of the bandwidth or 8kbit/s (whichever is greater) just for them.
-		hidden_class_bandwidth=0
-		if [ $(( 3*$total_upload_bandwidth/100 )) -lt 8 ];  then
-			hidden_class_bandwidth=8
-		else
-			hidden_class_bandwidth=$(( 3*$total_upload_bandwidth/100 ))
+		# A detailed explanation of how/why ls is being set is warranted here...
+		# This is being set to max bandwidth possible on a connection (right now that's about 1Gbit, we can increase later if necessary)
+		# Only ratio of child ls rates is important -- bounding is done by the ul parameter, since hfsc takes min of ls and ul
+		# This means we can just multiply percents by 10 in child nodes to get what ls curves for each should be
+		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the 
+		# child or any of the parent nodes
+		#
+		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
+		if [ -n "$dbg" ] ; then
+			echo "tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit"
 		fi
-		total_upload_bandwidth=$(($total_upload_bandwidth-$hidden_class_bandwidth))
-	
-	
-	
-	
-		
+
 		class_mark_list=""
 		upload_mask="0x007F"
 		upload_shift=0
-		next_class_index=10
+		next_class_index=2
 		next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
-		
+		def_upload_idx=$next_class_index
+		def_upload_class=$next_classid
+
 		for uclass_name in $upload_class_list ; do
-			
-			
-			class_mark_list="$class_mark_list$uclass_name:$next_classid/$upload_mask  "
+
+			class_mark_list="$class_mark_list$uclass_name:$next_classid "
+
 			uclass_def=$(eval echo "\$$uclass_name")
-			
-			#bandwidth for this class
-			m2=$((  $(echo $uclass_def | awk ' {print $1}' )*$total_upload_bandwidth/$percent_sum ))
-			
-			#should we do an initial burst for this class?
-			minimize_delay=$( echo $uclass_def | awk ' {print $3}' )
-			m1=0;
-			if [ "$minimize_delay" = "1" ] ; then
-				m1=$burst_speed
+
+			#% bandwidth at capacity for this class
+			m2=$((  10 * $(echo $uclass_def | awk ' {print $1}' ) ))
+
+			#is there an lower limit specified in kbps?
+			min_bandwidth=$( echo $uclass_def | awk ' {print $3}' )
+			ll_str=""
+			if [ "$min_bandwidth" -gt 0 ] ; then
+				max="$min_bandwidth"
+				ll_str=" rt m1 $((2*$max))kbit d 20ms m2 ${min_bandwidth}kbit"
 			fi
-			
-			#is there an upper limit specified?	
+
+			#is there an upper limit specified in kbps?
 			max_bandwidth=$( echo $uclass_def | awk ' {print $2}' )
 			ul_str=""
 			if [ "$max_bandwidth" -ge 0 ] ; then
-				if [ $m1 -ge $max_bandwidth ] ; then
-					ul_str=" ul m1 ${m1}kbit d ${burst_duration}ms m2 ${max_bandwidth}kbit"
-				else
-					ul_str=" ul m1 ${max_bandwidth}kbit d ${burst_duration}ms m2 ${max_bandwidth}kbit"
-				fi
-				if [ $max_bandwidth -le $m2 ] ; then
-					m2=$max_bandwidth
-				fi
+				ul_str=" ul m2 ${max_bandwidth}kbit"
 			fi
-		
-	
-			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str
+
+			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-			echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 
+			if [ -n "$dbg" ] ; then
+				echo "tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
+				echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
+			fi
+
+			if [ "$upload_default_class" = "$uclass_name" ] ; then
+				def_upload_idx=$next_class_index
+				def_upload_class=$next_classid
+			fi
 
 			next_class_index=$(($next_class_index+1))
 			next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
 		done
-	
-	
-		hidden_mark="$next_classid"
-		m1=$burst_speed
-		tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
-		tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-		tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-		echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
-	
+
+		#Go back and touch up the root qdisc to have the proper default class
+		tc qdisc change dev $qos_interface root handle 1:0 hfsc default $def_upload_idx
+		if [ -n "$dbg" ] ; then
+			echo "tc qdisc change dev $qos_interface root handle 1:0 hfsc default $def_upload_idx"
+		fi
+
 		# Set up egress chain
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
-	
-	
-		# if connmark is default, reset it to 0 (we may need to re-classify)
-		default_mark=$( get_classname_mark "$upload_default_class" "$class_mark_list" )
-		iptables -t mangle -A qos_egress -m connmark --mark $default_mark -j CONNMARK --set-mark 0/$upload_mask
 
-	
-	
-		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle" "$upload_mask"	
-	
-	
-	
-		# add rule to classify SYN/ACK packets, and ICMP into our special hidden class
-		# use MARK, not CONNMARK, so if we initialize a connection we won't keep it in this class
-		iptables -t mangle -A qos_egress -p tcp -m length --length :128 --tcp-flags SYN,RST,ACK ACK -j MARK --set-mark $hidden_mark
-		iptables -t mangle -A qos_egress -p icmp -j MARK --set-mark $hidden_mark
-		iptables -t mangle -A qos_egress -p ipv6-icmp -j MARK --set-mark $hidden_mark
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle" 
 
-		# restore mark from connmark
-		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --restore-mark --mask $upload_mask
+		#set default class mark if we haven't matched anything
+		iptables -t mangle -A qos_egress -m mark --mark 0x0 -j MARK --set-mark $def_upload_class
 
-		# mark everything not yet classified to have default class
-		# we use connmark here so bwmon doesn't pick it up, then reset it above (yes, another hack 'cuz I'm lazy)
-		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --set-mark $default_mark
-		iptables -t mangle -A qos_egress -m mark --mark 0x0/$upload_mask -j CONNMARK --restore-mark --mask $upload_mask
+		# save current mark to connmark
+		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
 
-
-		# Because I'm an idiot this qos script was initially implemented to set MARKs, not CONNMARKs
-		# Therefore bwmon is set up to recognize rules that set a MARK, not CONNMARK
-		# Instead of modifying bwmon to recognize CONNMARKs instead of MARKs  (probably the right way to do it), 
-		# let's just redundantly set marks, which will get monitored.
-		#
-		# I'm such a lazy bastard.
-		for mark_def in $class_mark_list ; do
-			mark_part=$(echo $mark_def | sed 's/^.*://g')
-			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
-			iptables -t mangle -A qos_egress -m connmark --mark $next_mark/$upload_mask -j MARK --set-mark $next_mark 
-			echo "iptables -t mangle -A qos_egress -m connmark --mark $next_mark/$upload_mask -j MARK --set-mark $next_mark"
-		done	
 
 
 		#save which mark is associated with which traffic class
 		for mark_def in $class_mark_list ; do
 			id_part=$(echo $mark_def | sed 's/:.*$//g')
-			mark_part=$(echo $mark_def | sed 's/^.*://g')
-			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
-			next_mask=$(echo $mark_part | sed 's/^.*\///g')
-			printf "upload $id_part %d $next_mask\n" $next_mark >> /tmp/tmp_qos_mark 
+			next_mark=$(echo $mark_def | sed 's/^.*://g')
+			printf "upload $id_part %d $upload_mask\n" $next_mark >> /tmp/tmp_qos_mark
 		done
-		
-		
-		#echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("upload	%s\n", $i); }} ' | sed 's/:/	/g' | sed 's/\//	/g' >> "$qos_mark_file"
+
 	fi
-
-
-
 
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
 		# Set up the InterMediate Queuing device (IMQ)
 		ip link set imq0 up
 
-
 		# Attach ingress queuing discipline to IMQ interface
 		tc qdisc add dev imq0 root handle 1:0 hfsc default 10
-	
-		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
-		tc class add dev imq0 parent 1:0 classid 1:1 hfsc sc rate ${total_download_bandwidth}kbit ul rate ${total_download_bandwidth}kbit
 
-		
-		
-		# Calculate burst duration, d
-		# we will burst using 75% of total bandwidth, or fast enough to send 1 packet in 10ms, whichever is less
-		# multiply by 8 since mtu specified in bytes
-		# total bandwidth in kbit/s, and we want bit/ms, but this will be the same value
-		burst_speed=$(($total_download_bandwidth*75/100))
-		burst_duration=$(( $max_trans_unit*8/$burst_speed ))
-		if [ $burst_duration -lt 10 ] ; then
-			burst_duration=10
-			burst_speed=$(( $max_trans_unit*8/$burst_duration ))
-		fi	
-	
+		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
+		#
+		# A detailed explanation of how/why ls is being set is warranted here...
+		# This is being set to max bandwidth possible on a connection (right now that's about 1Gbit, we can increase later if necessary)
+		# Only ratio of child ls rates is important -- bounding is done by the ul parameter, since hfsc takes min of ls and ul
+		# This means we can just multiply percents by 10 in child nodes to get what ls curves for each should be
+		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the 
+		# child or any of the parent nodes
+		#
+		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit
+		if [ -n "$dbg" ] ; then
+			echo "tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit"
+		fi
+
 		#load download classes
 		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
 		for dclass_name in $download_class_list ; do
 			percent_bandwidth=""
+			min_bandwidth=""
 			max_bandwidth=""
-			minimize_delay=""
-	
+
 			load_all_config_options "$config_file_name" "$dclass_name"
 			if [ -z "$percent_bandwidth" ] ; then
 				percent_bandwidth="0"
 			fi
+			if [ -z "$min_bandwidth" ] ; then
+				min_bandwidth="-1"
+			fi
 			if [ -z "$max_bandwidth" ] ; then
 				max_bandwidth="-1"
 			fi
-			if [ -z "$minimize_delay" ] ; then
-				minimize_delay="0"
-			fi
-			classdef="$percent_bandwidth $max_bandwidth $minimize_delay"
+			classdef="$percent_bandwidth $max_bandwidth $min_bandwidth"
 			eval $dclass_name=\"\$classdef\"  #"#comment quote here so formatting in editor isn't FUBAR
 		done
-
-	
-		#First, normalize the percentages
-		percent_sum=0;
-		for dclass_name in $download_class_list; do
-			dclass_def=$(eval echo "\$$dclass_name");
-			percent_sum=$(( $percent_sum + $(echo $dclass_def | awk ' {print $1}' ) ))
-		done
-		
-		# we are going to add one more class for syn/ack packets and icmp,
-		# i.e. things that should be prioritized but don't want to force
-		# the user to bother with/configure themselves.  These packets will
-		# be given a high burst bandwidth to minimize delay but after the first
-		# packet they will have a low share of the bandwidth since there shouldn't be too many of them
-		#
-		# So we're going to allocate 3% of the bandwidth or 8kbit/s (whichever is greater) just for them.
-		hidden_class_bandwidth=0
-		if [ $(( 3*$total_download_bandwidth/100 )) -lt 8 ];  then
-			hidden_class_bandwidth=8
-		else
-			hidden_class_bandwidth=$(( 3*$total_download_bandwidth/100 ))
-		fi
-		total_download_bandwidth=$(($total_download_bandwidth-$hidden_class_bandwidth))
-
 
 
 		class_mark_list=""
 		download_mask="0x7F00"
 		download_shift=8
-		next_class_index=10
+		next_class_index=2
 		next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
-		
+		def_download_idx=$next_class_index
+		def_download_class=$next_classid
+
 		for dclass_name in $download_class_list ; do
-			
-			
-			class_mark_list="$class_mark_list$dclass_name:$next_classid/$download_mask  "
+
+
+			class_mark_list="$class_mark_list$dclass_name:$next_classid  "
 			dclass_def=$(eval echo "\$$dclass_name")
-			
+
 			#bandwidth for this class
-			m2=$((  $(echo $dclass_def | awk ' {print $1}' )*$total_download_bandwidth/$percent_sum ))
-			
-			#should we do an initial burst for this class?
-			minimize_delay=$( echo $dclass_def | awk ' {print $3}' )
-			m1=0;
-			if [ "$minimize_delay" = "1" ] ; then
-				m1=$burst_speed
+			m2=$(( 10 * $(echo $dclass_def | awk ' {print $1}' ) ))
+
+			#is there a lower limit specified?
+			min_bandwidth=$( echo $dclass_def | awk ' {print $3}' )
+			ll_str=""
+			if [ "$min_bandwidth" -gt 0 ] ; then
+				max="$min_bandwidth"
+				ll_str=" rt m1 $((2*$max))kbit d 20ms m2 ${min_bandwidth}kbit"
 			fi
-			
-			#is there an upper limit specified?	
+
+			#is there an upper limit specified?
 			max_bandwidth=$( echo $dclass_def | awk ' {print $2}' )
 			ul_str=""
 			if [ "$max_bandwidth" -ge 0 ] ; then
-				if [ $m1 -ge $max_bandwidth ] ; then
-					ul_str=" ul m1 ${m1}kbit d ${burst_duration}ms m2 ${max_bandwidth}kbit"
-				else
-					ul_str=" ul m1 ${max_bandwidth}kbit d ${burst_duration}ms m2 ${max_bandwidth}kbit"
-				fi
-				if [ $max_bandwidth -le $m2 ] ; then
-					m2=$max_bandwidth
-				fi
+				ul_str=" ul m2 ${max_bandwidth}kbit"
 			fi
-		
-	
-			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${m2}kbit $ul_str	
-			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
+
+
+			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
+			tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+			#tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015 ecn
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-			echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
-	
+
+			if [ -n "$dbg" ] ; then
+				echo "tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
+				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015 ecn"
+				echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
+			fi
+
+			if [ "$download_default_class" = "$dclass_name" ] ; then
+				def_download_idx=$next_class_index
+				def_download_class=$next_classid
+			fi
+
 			next_class_index=$(($next_class_index+1))
 			next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
 		done
-		hidden_mark=$next_classid
-		m1=$burst_speed
-		tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc sc m1 ${m1}kbit d ${burst_duration}ms m2 ${hidden_class_bandwidth}kbit
-		tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015
-		tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-		echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
-	
-		
+
+		#Go back and touch up the root qdisc to have the proper default class
+		tc qdisc change dev imq0 root handle 1:0 hfsc default $def_download_idx
+		if [ -n "$dbg" ] ; then
+			echo "tc qdisc change dev imq0 root handle 1:0 hfsc default $def_download_idx"
+		fi
+
 		# Create ingress chain
 		iptables -t mangle -N qos_ingress
 
 		# Mark ingress in FORWARD and INPUT chains to make sure any DNAT (virt. server) is taken into account
-		# Mark ingress in FORWARD chain for LAN and send through the IMQ device
 		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
-
-		# Mark ingress in INPUT chain for this router and send through the IMQ device
 		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
-
-
-
-		# if connmark is default, reset it to 0 (we may need to re-classify)
-		default_mark=$( get_classname_mark "$download_default_class" "$class_mark_list" )
-		iptables -t mangle -A qos_ingress -m connmark --mark $default_mark -j CONNMARK --set-mark 0/$download_mask
-
 
 		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
-
-
-		# add rule to classify SYN/ACK packets, and ICMP into our special hidden class
-		iptables -t mangle -A qos_ingress -p tcp -m length --length :128 --tcp-flags SYN,RST,ACK ACK -j MARK --set-mark $hidden_mark
-		iptables -t mangle -A qos_ingress -p icmp -j MARK --set-mark $hidden_mark
-		iptables -t mangle -A qos_ingress -p ipv6-icmp -j MARK --set-mark $hidden_mark
-	
-
-		# restore mark from connmark
-		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --restore-mark --mask $download_mask
-
-		# mark everything not yet classified to have default class
-		# we use connmark here so bwmon doesn't pick it up, then reset it above (yes, another hack 'cuz I'm lazy)
-		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --set-mark $default_mark
-		iptables -t mangle -A qos_ingress -m mark --mark 0x0/$download_mask -j CONNMARK --restore-mark --mask $download_mask
-
-
-		# Because I'm an idiot this qos script was initially implemented to set MARKs, not CONNMARKs
-		# Therefore bwmon is set up to recognize rules that set a MARK, not CONNMARK
-		# Instead of modifying bwmon to recognize CONNMARKs instead of MARKs  (probably the right way to do it), 
-		# let's just redundantly set marks, which will get monitored.
-		#
-		# I'm such a lazy bastard.
-		for mark_def in $class_mark_list ; do
-			mark_part=$(echo $mark_def | sed 's/^.*://g')
-			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
-			iptables -t mangle -A qos_ingress -m connmark --mark $next_mark/$download_mask -j MARK --set-mark $next_mark 
-			echo "iptables -t mangle -A qos_ingress -m connmark --mark $next_mark/$download_mask -j MARK --set-mark $next_mark"
-		done	
-
 		#pass traffic through IMQ
-		iptables -t mangle -A qos_ingress -j IMQ --todev 0
+		iptables -t mangle -I qos_ingress -j IMQ --todev 0
+
 		
-	
+		#set default class mark if we haven't matched anything
+		iptables -t mangle -A qos_ingress -m mark --mark 0x0 -j MARK --set-mark $def_download_class
+
+		#save current mark to connmark
+		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
+
+
 		#save which mark is associated with which traffic class
 		for mark_def in $class_mark_list ; do
 			id_part=$(echo $mark_def | sed 's/:.*$//g')
-			mark_part=$(echo $mark_def | sed 's/^.*://g')
-			next_mark=$(echo $mark_part | sed 's/\/.*$//g')
-			next_mask=$(echo $mark_part | sed 's/^.*\///g')
-			printf "download $id_part %d $next_mask\n" $next_mark >> /tmp/tmp_qos_mark 
+			next_mark=$(echo $mark_def | sed 's/^.*://g')
+			printf "download $id_part %d $download_mask\n" $next_mark >> /tmp/tmp_qos_mark
 		done
-		
-		#echo "$class_mark_list" | awk ' { for(i=1; i <= NF; i++){ printf("download	%s\n", $i); }} ' | sed 's/:/	/g' | sed 's/\//	/g' >> "$qos_mark_file"
+
 	fi
 
 	if [ -e /tmp/tmp_qos_mark ] ; then
 		mv /tmp/tmp_qos_mark $qos_mark_file
 	fi
 
-	return 0	
-	
+	if [ -n "$dbg" ] ; then
+		iptables -t mangle -vnL
+
+		echo "Ingress configuration in imq0"
+		tc -s qdisc show dev imq0
+		tc -s class show dev imq0
+		tc -s filter show dev imq0
+
+		echo "Egress configuration on $qos_interface"
+		tc -s qdisc show dev $qos_interface
+		tc -s class show dev $qos_interface
+		tc -s filter show dev $qos_interface
+	fi
+
+	return 0
+
 }
 
 
@@ -709,6 +616,12 @@ start()
 	initialize_qos
 }
 
+restart()
+{
+	#dbg="1"
+	initialize_qos
+}
+
 stop()
 {
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
@@ -718,5 +631,34 @@ stop()
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
+}
+
+show()
+{
+	#load global variables
+	load_all_config_options "$config_file_name" "global"
+
+	#load qos_interface from global variables
+	if [ -z "$interface" ] ; then
+		#scan_interfaces
+		#config_get qos_interface $network ifname
+		qos_interface=$(uci -P "/var/state" get network.$network.ifname)
+	else
+		qos_interface="$interface"
+	fi
+
+	echo "Ingress configuration in imq0"
+	iptables -t mangle -vnL qos_ingress 2>/dev/null
+	tc -s qdisc show dev imq0
+	tc -s class show dev imq0
+	tc -s filter show dev imq0
+
+	echo "Egress configuration on $qos_interface"
+	iptables -t mangle -vnL qos_egress 2>/dev/null
+	tc -s qdisc show dev $qos_interface
+	tc -s class show dev $qos_interface
+	tc -s filter show dev $qos_interface
+
+	return 0
 }
 
