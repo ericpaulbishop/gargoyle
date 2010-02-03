@@ -253,6 +253,10 @@ function resetPlots()
 				if(plotType != "" && plotType != "none" && plotType != "total")
 				{
 					var idValue = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
+					if(idValue != "" && plotType == "ip")
+					{
+						setAllowableSelections(plotIdName, [idValue], [idValue]);
+					}
 					setSelectedValue(plotIdName, idValue);
 					plotId = idValue;
 				}
@@ -289,21 +293,20 @@ function resetPlots()
 		command = command + "uci set gargoyle.bandwidth_display=bandwidth_display\n";
 		command = command + "uci set gargoyle.bandwidth_display.plot_time_frame=\"" + getSelectedValue("plot_time_frame") + "\"\n";
 		command = command + "uci set gargoyle.bandwidth_display.table_time_frame=\"" + getSelectedValue("table_time_frame") + "\"\n";
-		var plotIndex;
-		for(plotIndex=1; plotIndex <= 3; plotIndex++)
+		for(plotNum=1; plotNum <= 4; plotNum++)
 		{
-			var plotTypeElement = "plot" + plotIndex + "_type";
-			var plotType = getSelectedValue(plotTypeElement);
-			command = command + "uci set gargoyle.bandwidth_display." + plotTypeElement + "=\"" + plotType + "\"\n";
+			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
+			var plotTypeName = plotNum < 4 ? "plot" + plotNum + "_type" : "table_type";
+
+			command = command + "uci set gargoyle.bandwidth_display." + plotTypeName + "=\"" + plotType + "\"\n";
 			
-			var plotIdElement = "plot" + plotIndex + "_id";
 			if(plotType != "" && plotType != "none" && plotType != "total")
 			{
-				command = command + "uci set gargoyle.bandwidth_display." + plotIdElement + "=\"" + getSelectedValue(plotIdElement) + "\"\n";
+				command = command + "uci set gargoyle.bandwidth_display." + plotIdName + "=\"" + getSelectedValue(plotIdName) + "\"\n";
 			}
 			else
 			{
-				command = command + "uci del gargoyle.bandwidth_display." + plotIdElement + "\n"
+				command = command + "uci del gargoyle.bandwidth_display." + plotIdName + "\n"
 			}
 		}
 		command = command + "uci commit\n";
