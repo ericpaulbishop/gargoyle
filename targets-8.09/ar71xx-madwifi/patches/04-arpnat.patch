@@ -1,3 +1,47 @@
+--- /dev/null	2010-01-22 03:35:49.594773849 -0500
++++ kamikaze-8.09-src/package/madwifi/files/etc/hotplug.d/net/20-client_bridge	2010-01-30 01:12:49.000000000 -0500
+@@ -0,0 +1,41 @@
++######################################################################
++# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
++# Copyright Eric Bishop, 2009,2010 eric@gargoyle-router.com 
++# Created for Gargoyle, www.gargoyle-router.com
++#
++#This is free software licensed under the terms of the GNU GPL v2.0
++# 
++# You must have the arpnat ebtables module for this to work
++######################################################################
++is_ath=$(echo $INTERFACE | grep ath)
++if [ -n "$is_ath" ] ; then
++	if [ "$ACTION" = "add" -o "$ACTION" = "register" ] ; then
++		sleep 2
++		managed=$(iwconfig $INTERFACE 2>/dev/null | grep "Mode:Managed")
++		if [ -n "$managed" ] ; then
++			sta_section=$(uci show wireless | grep "mode=sta$" | sed 's/\.mode=sta$//g' )			
++			if [ -n "$sta_section" ] ; then
++				client_bridge=$(uci get "$sta_section.client_bridge")
++				if [ "$client_bridge" = "1" ] ; then
++					ebtables -t nat -F PREROUTING
++					ebtables -t nat -F POSTROUTING
++					ebtables -t broute -F BROUTING
++					
++					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
++					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
++					ebtables -t broute -A BROUTING --in-interface  $INTERFACE --protocol 0x888e -j DROP
++					
++					mkdir -p /tmp/client_bridge
++					touch "/tmp/client_bridge/$INTERFACE"
++				fi
++			fi
++		fi
++	fi
++	if [ "$ACTION" = "remove" -o "$ACTION" = "register" ] ; then
++		if [ -e "/tmp/client_bridge/$INTERFACE" ] ; then
++			ebtables -t nat -F PREROUTING
++			ebtables -t nat -F POSTROUTING
++			ebtables -t broute -F BROUTING
++		fi			
++	fi
++fi
 --- /dev/null	2008-11-23 15:25:44.000000000 -0500
 +++ new-src/package/ebtables/patches/100-arpnat.patch	2009-03-17 12:06:50.000000000 -0400
 @@ -0,0 +1,212 @@
@@ -549,7 +593,7 @@
 ++		if (entry)
 ++		{
 ++                    //to me
-++		    if (inet_confirm_addr(in->br_port->br->dev, 0, entry->data.ip, RT_SCOPE_HOST))
+++		    if (inet_confirm_addr( __in_dev_get_rcu(in->br_port->br->dev),  0, entry->data.ip, RT_SCOPE_HOST))
 ++		    {
 ++			if (debug)
 ++			    printk("IP PKT TO ME: "STRMAC"["STRIP"] -> "STRMAC"[type: %d]\n",
@@ -596,7 +640,7 @@
 ++		update_arp_nat(&arpnat_table, arp_smac, *arp_sip);
 ++                spin_unlock_irqrestore(&arpnat_lock, flags);
 ++		/* do BR ip lookup */
-++		if (inet_confirm_addr(out->br_port->br->dev, 0, *arp_dip, RT_SCOPE_HOST))
+++		if (inet_confirm_addr( __in_dev_get_rcu(out->br_port->br->dev), 0, *arp_dip, RT_SCOPE_HOST))
 ++		{
 ++                    return info->target;
 ++		}
