@@ -14,7 +14,7 @@ function saveChanges()
 	commands = "";
 	errors = "";
 
-	restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
+       restartbwmon = "/etc/init.d/bwmon_gargoyle restart ;";
 	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
@@ -35,7 +35,7 @@ function saveChanges()
 		}
 		else
 		{
-			commands = commands + restartFirewallCommand + bwmonCleanCommand;
+			commands = commands + restartbwmon + bwmonCleanCommand;
 		}
 		uci.remove("qos_gargoyle", direction, "total_bandwidth");
 		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  commands;
@@ -167,7 +167,7 @@ function saveChanges()
 				}
 			}
 		}
-		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n/etc/init.d/qos_gargoyle enable ;\n" + restartFirewallCommand + bwmonCleanCommand;
+		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n/etc/init.d/qos_gargoyle enable ;\n" + restartbwmon + bwmonCleanCommand;
 	}
 
 	if(errors != "")
