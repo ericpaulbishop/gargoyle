@@ -14,31 +14,36 @@ function saveChanges()
 	commands = "";
 	errors = "";
 
-       restartbwmon = "/etc/init.d/bwmon_gargoyle restart ;";
+       stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
+       startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
 	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
 	disabled = document.getElementById("qos_enabled").checked == false;
+
+       //Is the user requesting disable of this direction of QoS?
 	if(disabled)
 	{
-		commands = ""
 		otherDirection = direction == "upload" ? "download" : "upload";
 		alternateBandwidth = uciOriginal.get("qos_gargoyle", otherDirection, "total_bandwidth");
+
+              //If this page was enabled before and the other was not then stop and disable QoS
 		if(qosEnabled && alternateBandwidth == "" )
 		{
 			//delete qos distribution section
 			uci.remove("gargoyle", "status", "qos");
-			commands = commands + "/etc/init.d/qos_gargoyle stop \n/etc/init.d/qos_gargoyle disable\n";
-			commands = commands + bwmonCleanCommand + " bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null) ;\nif [ -n \"$bwmon_enabled\" ] ;  then /etc/init.d/bwmon_gargoyle restart ; fi ; ";
+			commands = "/etc/init.d/qos_gargoyle stop\n/etc/init.d/qos_gargoyle disable\n";
 			qosEnabled = false;
 		}
 		else
+              //Otherwise just restart QOS.  This will delete this direction.
 		{
-			commands = commands + restartbwmon + bwmonCleanCommand;
+			commands = "/etc/init.d/qos_gargoyle start\n";
 		}
+
 		uci.remove("qos_gargoyle", direction, "total_bandwidth");
-		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  commands;
+		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  stopbwmon + commands + bwmonCleanCommand + startbwmon;
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
 	{
@@ -76,8 +81,6 @@ function saveChanges()
 
 
 		uci.set("qos_gargoyle", direction, "total_bandwidth", document.getElementById("total_bandwidth").value);
-
-
 
 		classTable = document.getElementById('qos_class_table_container').firstChild;
 		classData = getTableDataArray( classTable, true, false);
@@ -167,7 +170,8 @@ function saveChanges()
 				}
 			}
 		}
-		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n/etc/init.d/qos_gargoyle enable ;\n" + restartbwmon + bwmonCleanCommand;
+              commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
+		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" +stopbwmon + commands + bwmonCleanCommand + startbwmon;
 	}
 
 	if(errors != "")
