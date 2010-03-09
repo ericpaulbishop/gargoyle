@@ -397,14 +397,24 @@ initialize_qos()
 			ul_str=""
 			if [ "$max_bandwidth" -ge 0 ] ; then
 				ul_str=" ul m2 ${max_bandwidth}kbit"
+			else
+				max_bandwidth=1000
 			fi
 
+			#We setup red dqisc mostly based on the advice at http://www.opalsoft.net/qos/DS-26.htm with
+			#the exception that we increase the probability to 0.1 per http://www.icir.org/floyd/REDfunc.txt
+			#Also I crank the queue limit down because we have RAM limitations here amd I'm afraid.
+			#tbw is 25% of the maximum download bandwidth for the class and converted from bps to byte/sec.
+              	tbw=$(($max_bandwidth*$total_download_bandwidth*25/800));
+
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+			#tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
 				echo "tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
+				echo "tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1"
 				echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 			fi
 
@@ -520,17 +530,20 @@ initialize_qos()
 			ul_str=""
 			if [ "$max_bandwidth" -ge 0 ] ; then
 				ul_str=" ul m2 ${max_bandwidth}kbit"
+			else
+				max_bandwidth=1000
 			fi
 
+              	tbw=$(($max_bandwidth*$total_download_bandwidth*25/800));
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-			#tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015 ecn
+			#tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
+			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
 				echo "tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
-				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((40*$max_trans_unit)) min $((5*$max_trans_unit)) max $((20*$max_trans_unit)) avpkt $(($max_trans_unit*6/10)) burst 16 probability 0.015 ecn"
+				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1"
 				echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 			fi
 
@@ -618,7 +631,7 @@ start()
 
 restart()
 {
-	#dbg="1"
+	dbg="1"
 	initialize_qos
 }
 
