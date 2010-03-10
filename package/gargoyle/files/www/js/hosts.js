@@ -39,7 +39,7 @@ function resetVariables()
 	if(uciOriginal.get("dhcp", "lan", "ignore") != "1")
 	{
 		document.getElementById("dhcp_data").style.display="block";
-		var columnNames=["Host IP", "Host MAC", "Time Before Lease Expiration"];
+		var columnNames=["Hostname", "Host IP", "Host MAC", "Lease Expires"];
 		var table = createTable(columnNames, parseDhcp(dhcpLeaseLines), "lease_table", false, false);
 		var tableContainer = document.getElementById('lease_table_container');
 		if(tableContainer.firstChild != null)
@@ -68,7 +68,7 @@ function resetVariables()
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
-		var columnNames=["Host IP", "Host MAC"];
+		var columnNames=["Hostname", "Host IP", "Host MAC"];
 		var table = createTable(columnNames, parseWifi(arpHash, isBrcm, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
@@ -82,7 +82,7 @@ function resetVariables()
 		document.getElementById("wifi_data").style.display="none";
 	}
 	
-	var columnNames=["Host IP", "Host MAC", "Active TCP Cxns", "Recent TCP Cxns", "UDP Cxns"];
+	var columnNames=["Hostname", "Host IP", "Host MAC", "Active TCP Cxns", "Recent TCP Cxns", "UDP Cxns"];
 	var table = createTable(columnNames, parseConntrack(arpHash, currentWanIp, conntrackLines), "active_table", false, false);
 	var tableContainer = document.getElementById('active_table_container');
 	if(tableContainer.firstChild != null)
@@ -90,13 +90,19 @@ function resetVariables()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(table);
-
 	
+}
+
+function getHostname(ip)
+{
+	var hostname = ipToHostname[ip] == null ? "(unknown)" : ipToHostname[ip];
+	hostname = hostname.length < 25 ? hostname : hostname.substr(0,22)+"...";
+	return hostname;
 }
 
 function parseDhcp(leases)
 {
-	//Host IP, Host MAC, Time Before Expiration	
+	//HostName, Host IP, Host MAC, Time Before Expiration	
 	var dhcpTableData = [];
 	var lineIndex=0;
 	for(lineIndex=0; lineIndex < leases.length; lineIndex++)
@@ -106,6 +112,8 @@ function parseDhcp(leases)
 		var expTime = splitLease[0];
 		var mac = splitLease[1].toUpperCase();
 		var ip = splitLease[2];
+		
+		var hostname = getHostname(ip);			
 
 		var seconds = expTime - currentTime;
 		var expHours = Math.floor(seconds/(60*60));
@@ -116,7 +124,7 @@ function parseDhcp(leases)
 		}
 		var exp = expHours + "h " + expMinutes + "m";
 
-		dhcpTableData.push( [ip, mac, exp ] );
+		dhcpTableData.push( [hostname, ip, mac, exp ] );
 	}
 	return dhcpTableData;
 }
@@ -166,7 +174,8 @@ function parseWifi(arpHash, isBrcm, lines)
 		var splitLine = nextLine.split(/[\t ]+/);
 		var mac = isBrcm ? splitLine[1].toUpperCase() : splitLine[0].toUpperCase();
 		var ip = arpHash[ mac ] == null ? "unknown" : arpHash[ mac ] ;
-		wifiTableData.push( [ ip, mac ] );
+		var hostname = getHostname(ip);			
+		wifiTableData.push( [ hostname, ip, mac ] );
 	}
 	return wifiTableData;
 }
@@ -227,8 +236,8 @@ function parseConntrack(arpHash, currentWanIp, lines)
 		var tcpOpen   = protoHash[ ip + "-tcp-open" ] == null   ? 0 : protoHash[ ip + "-tcp-open" ];
 		var tcpClosed = protoHash[ ip + "-tcp-closed" ] == null  ? 0 : protoHash[ ip + "-tcp-closed" ];
 		var udp       = protoHash[ ip + "-udp" ] == null ? 0 : protoHash[ ip + "-udp" ];
-		activeTableData.push( [ ip, mac, ""+tcpOpen, ""+tcpClosed, ""+udp ] );
-	
+		var hostname  = getHostname(ip);			
+		activeTableData.push( [ hostname, ip, mac, ""+tcpOpen, ""+tcpClosed, ""+udp ] );
 	}
 	return activeTableData;
 }
