@@ -232,8 +232,8 @@ extern void to_uppercase(char* str);
 int free_null_terminated_string_array(char** strs);
 extern char* dynamic_strcat(int num_strs, ...);
 extern char* dcat_and_free(char** one, char** two, int free1, int free2);
-extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long* num_pieces);
-extern char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array);
+extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long* num_pieces); /*if max_pieces < 0, it is ignored */
+extern char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array); /*if max_parts < 0, it is ignored*/
 extern char* dynamic_replace(char* template_str, char* old_str, char* new_str);
 
 /* functions to dynamically read files */

@@ -41,11 +41,13 @@
 
 void define_package_vars(char** package_vars_to_load);
 void print_interface_vars(void);
+void print_hostname_map(void);
 void print_js_var(char* var, char* value);
 char* get_interface_mac(char* if_name);
 char* get_interface_ip(char* if_name);
 char* get_interface_netmask(char* if_name);
 char** load_interfaces_from_proc_file(char* filename);
+string_map* get_hostnames(void);
 char* get_option_value_string(struct uci_option* uopt);
 int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name);
 
@@ -55,7 +57,8 @@ int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_p
 int main(int argc, char **argv)
 {
 	int display_type = HEADER;
-	int display_interface_vars = 0;	
+	int display_interface_vars = 0;
+	int display_hostname_map = 1;
 	char* selected_page = "";
 	char* selected_section = "";
 	char* css_includes = "";
@@ -64,7 +67,7 @@ int main(int argc, char **argv)
 	char** package_variables_to_load = NULL;
 	int c;
 	
-	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:T:t:Ii")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:T:t:IiNnUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
 	{
 		switch(c)
 		{
@@ -103,6 +106,10 @@ int main(int argc, char **argv)
 			case 'I':
 			case 'i':
 				display_interface_vars = 1;
+				break;
+			case 'N':
+			case 'n':
+				display_hostname_map = 1;
 				break;
 			case 'U':
 			case 'u':
@@ -287,6 +294,10 @@ int main(int argc, char **argv)
 		if(display_interface_vars == 1)
 		{
 			print_interface_vars();
+		}
+		if(display_hostname_map == 1)
+		{
+			print_hostname_map();
 		}
 		define_package_vars(package_variables_to_load);
 		printf("\n\tsetBrowserTimeCookie();\n");
@@ -741,6 +752,35 @@ void print_interface_vars(void)
 	uci_free_context(state_ctx);
 }
 
+void print_hostname_map(void)
+{
+	string_map* ip_to_hostname = get_hostnames();
+	printf("\tvar ipToHostname = [];\n");
+	if(ip_to_hostname->num_elements == 0)
+	{
+		printf("\tvar ipsWithHostname = [];\n");
+	}
+	else
+	{
+		unsigned long num_ips;
+		char** ip_list = get_string_map_keys(ip_to_hostname, &num_ips);
+		char* ips_with_hostname_str = join_strs("\",\"", ip_list, -1, 0, 0);
+		int ip_index;
+		
+		printf("\tvar ipsWithHostname = [ \"%s\" ];\n", ips_with_hostname_str);
+		for(ip_index=0; ip_index < num_ips; ip_index++)
+		{
+			char* ip = ip_list[ip_index];
+			char* name = remove_string_map_element(ip_to_hostname, ip);
+			printf("\tipToHostname[ \"%s\" ] = \"%s\";\n", ip, name);
+			free(name);
+		}
+		free_null_terminated_string_array(ip_list);
+	}
+	unsigned long num_destroyed;
+	destroy_string_map(ip_to_hostname, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+}
+
 
 
 void print_js_var(char* var, char* value)
@@ -878,6 +918,60 @@ char** load_interfaces_from_proc_file(char* filename)
 
 	return interfaces;
 }
+
+string_map* get_hostnames(void)
+{
+	string_map* ip_to_hostname = initialize_string_map(1);
+
+	char* hostname_files[] = { "/tmp/dhcp.leases", "/etc/hosts", NULL };
+	int ip_indices[] = { 2, 0 };
+	int name_indices[] = { 3, 1 };
+	int file_index;
+	for(file_index = 0; hostname_files[file_index] != NULL; file_index++)
+	{
+		int ip_index = ip_indices[file_index];
+		int name_index = name_indices[file_index];
+		int min_line_pieces = ip_index > name_index ? ip_index+1 : name_index+1;
+
+		FILE* name_file = fopen(hostname_files[file_index], "r");
+		if(name_file != NULL)
+		{
+			char *line = NULL;
+			unsigned long read_len;
+			int sep = '\n';
+			do
+			{
+				sep = dyn_read_line(name_file, &line, &read_len);
+				unsigned long num_line_pieces;
+				char* whitespace_seps = "\t ";
+				char** line_pieces = split_on_separators(line, whitespace_seps, 2, -1, 0, &num_line_pieces);
+				free(line);
+				if(num_line_pieces >= min_line_pieces)
+				{
+					char *name = strdup(line_pieces[ name_index ]);
+					trim_flanking_whitespace(name);
+					if(name[0] != '*' && name[0] != '\0')
+					{
+						char* ip  = line_pieces[ ip_index ];
+						set_string_map_element(ip_to_hostname, ip, name);
+					}
+					else
+					{
+						free(name);
+					}
+				}
+				free_null_terminated_string_array(line_pieces);
+			}while(sep != EOF);
+			fclose(name_file);
+		}
+	}
+
+	return ip_to_hostname;
+
+
+
+}
+
 
 
 #ifdef UCI_OLD_VERSION //valid for uci version 0.3.3 for kamikaze 7.09
