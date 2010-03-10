@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 {
 	int display_type = HEADER;
 	int display_interface_vars = 0;
-	int display_hostname_map = 1;
+	int display_hostname_map = 0;
 	char* selected_page = "";
 	char* selected_section = "";
 	char* css_includes = "";
