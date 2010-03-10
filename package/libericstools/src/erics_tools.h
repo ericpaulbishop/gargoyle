@@ -238,6 +238,7 @@ extern char* dynamic_replace(char* template_str, char* old_str, char* new_str);
 
 /* functions to dynamically read files */
 extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators, unsigned long* read_length);
+extern int dyn_read_line(FILE* open_file, char** dest, unsigned long* read_len);
 extern unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigned long* read_length);
 
 /* run a command and get (dynamically allocated) output lines */

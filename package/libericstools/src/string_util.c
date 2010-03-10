@@ -455,6 +455,16 @@ dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators,
 	return ret_value;
 }
 
+/* convenience method for calling dynamic_read with end-of-line separators */
+int dyn_read_line(FILE* open_file, char** dest, unsigned long* read_len)
+{
+	char line_seps[] = "\r\n";
+	dyn_read_t read = dynamic_read(open_file, line_seps, 2, read_len);
+	*dest = read.str;
+	return read.terminator;
+}
+
+
 unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigned long *length)
 {
 	int max_read_size = read_block_size;
