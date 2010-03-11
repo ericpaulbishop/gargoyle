@@ -192,6 +192,7 @@ function getHostnameList(ipList)
 	{
 		var ip = ipList[ipIndex];
 		var host = ipToHostname[ip] == null ? ip : ipToHostname[ip];
+		host = host.length < 25 ? host : host.substr(0,22)+"...";
 		hostnameList.push(host);
 	}
 	return hostnameList;

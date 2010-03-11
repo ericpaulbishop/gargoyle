@@ -1,5 +1,5 @@
 /*
- * This program is copyright 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -47,6 +47,31 @@ function getEmbeddedSvgPlotFunction(embeddedId)
 	}
 	return null;
 }
+
+function getHostDisplay(ip)
+{
+	var hostDisplay = getSelectedValue("host_display");
+	var host = ip;
+	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	{
+		host = ipToHostname[ip];
+		host = host.length < 25 ? host : host.substr(0,22)+"...";
+	}
+	return host;
+}
+
+
+function getHostList(ipList)
+{
+	var hostList = [];
+	var ipIndex =0;
+	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
+	{
+		hostList.push( getHostDisplay(ipList[ipIndex]));
+	}
+	return hostList;
+}
+
 
 function doUpdate()
 {
@@ -233,6 +258,7 @@ function resetTimeFrame()
 
 
 
+
 function resetDisplayInterval()
 {
 	if(pieChart != null && (!updateInProgress) && timeFrameIntervalData.length > 0 )
@@ -244,7 +270,7 @@ function resetDisplayInterval()
 		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
 		
 		var data = timeFrameIntervalData[intervalIndex];
-		var pieTotals = plotFunction(idList, ["Total", "Download", "Upload" ], idList, data, 0, 9, resetColors);
+		var pieTotals = plotFunction(idList, ["Total", "Download", "Upload" ], getHostList(idList), data, 0, 9, resetColors);
 		resetColors = false;
 
 		//then update table, sorting ids alphabetically so order is consistant
@@ -276,7 +302,7 @@ function resetDisplayInterval()
 			var id = idList[ index ];
 		
 			
-			var tableRow = [id];
+			var tableRow = [getHostDisplay(id)];
 			var pieIndex;
 			var allZero = true;
 			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
