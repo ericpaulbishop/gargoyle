@@ -27,6 +27,18 @@ var currentTime;
 //-->
 </script>
 
+<fieldset>
+	<legend>Refresh Rate</legend>
+	<select id="refresh_rate">
+		<option value="2000">2 Seconds</option>
+		<option value="10000">10 Seconds</option>
+		<option value="30000">30 Seconds</option>
+		<option value="60000">60 Seconds</option>
+		<option value="never">Never</option>
+	</select>
+	<br/>
+	<p><em>This specifies how frequently data on this page is reloaded</em></p>
+</fieldset>
 <fieldset id="dhcp_data">
 	<legend class="sectionHeader">Current DHCP Leases</legend>
 	<div id="lease_table_container"></div>

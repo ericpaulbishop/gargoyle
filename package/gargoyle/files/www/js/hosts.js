@@ -7,12 +7,28 @@
  */
 
 var updateInProgress = false;
+var timeSinceUpdate = -5000;
 
 function resetData()
 {
+	setSelectedValue("refresh_rate", "10000");
 	resetVariables();
-	setInterval("reloadVariables()", 2000); 
+	setInterval(checkForRefresh, 500); 
 }
+
+function checkForRefresh()
+{
+	timeSinceUpdate = timeSinceUpdate + 500;
+	
+	var refreshRate = getSelectedValue("refresh_rate");
+	var refreshRate = refreshRate == "never" ? timeSinceUpdate+500 : refreshRate;
+	if(timeSinceUpdate < 0 || timeSinceUpdate >= refreshRate)
+	{
+		timeSinceUpdate = 0;
+		reloadVariables();
+	}
+}
+
 
 function reloadVariables()
 {
@@ -126,6 +142,7 @@ function parseDhcp(leases)
 
 		dhcpTableData.push( [hostname, ip, mac, exp ] );
 	}
+	sort2dStrArr(dhcpTableData, 1);
 	return dhcpTableData;
 }
 
@@ -159,6 +176,12 @@ function parseArp(arpLines, leaseLines)
 	return arpHash;
 }
 
+function sort2dStrArr(arr, testIndex)
+{
+	var str2dSort = function(a,b){  return a[testIndex] == b[testIndex] ? 0 : (a[testIndex] < b[testIndex] ? -1 : 1);  }
+	arr.sort(str2dSort);
+}
+
 function parseWifi(arpHash, isBrcm, lines)
 {
 	//Host IP, Host MAC
@@ -177,6 +200,7 @@ function parseWifi(arpHash, isBrcm, lines)
 		var hostname = getHostname(ip);			
 		wifiTableData.push( [ hostname, ip, mac ] );
 	}
+	sort2dStrArr(sortWifi, 1);
 	return wifiTableData;
 }
 
@@ -239,6 +263,7 @@ function parseConntrack(arpHash, currentWanIp, lines)
 		var hostname  = getHostname(ip);			
 		activeTableData.push( [ hostname, ip, mac, ""+tcpOpen, ""+tcpClosed, ""+udp ] );
 	}
+	sort2dStrArr(activeTableData, 1);
 	return activeTableData;
 }
 
