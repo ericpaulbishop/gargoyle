@@ -124,6 +124,7 @@ int main(int argc, char **argv)
 				printf("\t-j [JS FILES] List of additional javascript files necessary for page\n");
 				printf("\t-t [TITLE] Title of page\n");
 				printf("\t-i Include output of javascript variables that specify network interface ips and MAC addresses\n");
+				printf("\t-n Include output of javascript variables specifying association of ips with hostnames\n");
 				printf("\t-u print usage and exit\n");
 				return 0;
 		}
@@ -660,7 +661,7 @@ void print_interface_vars(void)
 		{
 			uci_lan_if=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifaddr") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
 		{
 			uci_lan_ip=get_option_value_string(uci_to_option(e));
 		}
@@ -965,6 +966,48 @@ string_map* get_hostnames(void)
 			fclose(name_file);
 		}
 	}
+
+	//make sure local ips get set to hostname
+	FILE* hostname_file = fopen("/proc/sys/kernel/hostname", "r");
+	if(hostname_file != NULL)
+	{
+		char *line = NULL;
+		unsigned long read_len;
+		dyn_read_line(hostname_file, &line, &read_len);
+		trim_flanking_whitespace(line);
+		if(strlen(line) > 0)
+		{
+			//load lan ip & wan ip from uci
+			struct uci_context *state_ctx = uci_alloc_context();
+			struct uci_package *p = NULL;
+			struct uci_element *e = NULL;
+			uci_add_history_path(state_ctx, state_ctx->savedir);
+		       	uci_set_savedir(state_ctx, "/var/state");
+			if(uci_load(state_ctx, "network", &p) == UCI_OK)
+			{
+				if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
+				{
+					char* uci_lan_ip=get_option_value_string(uci_to_option(e));
+					set_string_map_element(ip_to_hostname, uci_lan_ip, strdup(line));
+					free(uci_lan_ip);
+				}
+				if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
+				{
+					char* uci_wan_ip=get_option_value_string(uci_to_option(e));
+					set_string_map_element(ip_to_hostname, uci_wan_ip, strdup(line));
+					free(uci_wan_ip);
+				}
+			}
+			uci_free_context(state_ctx);
+			
+			//127.0.0.1 is always local, so add it unconditionally
+			set_string_map_element(ip_to_hostname, "127.0.0.1", strdup(line));
+
+		}
+		free(line);
+		fclose(hostname_file);
+	}
+
 
 	return ip_to_hostname;
 
