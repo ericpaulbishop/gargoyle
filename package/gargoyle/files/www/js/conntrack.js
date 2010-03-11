@@ -23,6 +23,7 @@ function initializeConnectionTable()
 	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
 	httpPort= uciOriginal.get("httpd_gargoyle", "server", "http_port");
 
+	setSelectedValue("host_display", "hostname");
 
 	remoteHttpsPort = "";
 	remoteHttpPort = "";
@@ -76,6 +77,18 @@ function checkForRefresh()
 	}
 }
 
+function getHostDisplay(ip)
+{
+	var hostDisplay = getSelectedValue("host_display");
+	var host = ip;
+	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	{
+		host = ipToHostname[ip];
+		host = host.length < 25 ? host : host.substr(0,22)+"...";
+	}
+	return host;
+}
+
 
 function updateConnectionTable()
 {
@@ -123,7 +136,7 @@ function updateConnectionTable()
 						{
 							var tableRow =	[	parseInt(uploadBytes) + parseInt(downloadBytes),
 										protocol, 
-										textListToSpanElement([srcIp + ":" + srcPort, dstIp + ":" + dstPort]), 
+										textListToSpanElement([ getHostDisplay(srcIp) + ":" + srcPort, getHostDisplay(dstIp) + ":" + dstPort]), 
 										textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 									];
 							if(qosEnabled)
