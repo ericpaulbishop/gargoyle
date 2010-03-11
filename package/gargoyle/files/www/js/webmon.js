@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -114,6 +114,7 @@ function saveChanges()
 				if(webmonEnabled)
 				{	
 					updateMonitorTable();
+
 				}
 				resetData();
 				//alert(req.responseText);
@@ -151,7 +152,8 @@ function clearHistory()
 			{
 				tableContainer.removeChild(tableContainer.firstChild);
 			}
-
+			
+			setElementEnabled(document.getElementById("host_display"), webmonEnabled);
 			if(webmonEnabled)
 			{	
 				updateMonitorTable();
@@ -168,6 +170,20 @@ function proofreadAll()
 	var validator = function(n){ return validateNumericRange(n,1,9999); };
 	return proofreadFields( ["num_records"], ["num_records_label"], [validator], [0], ["num_records_label"]);
 }
+
+
+function getHostDisplay(ip)
+{
+	var hostDisplay = getSelectedValue("host_display");
+	var host = ip;
+	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	{
+		host = ipToHostname[ip];
+		host = host.length < 25 ? host : host.substr(0,22)+"...";
+	}
+	return host;
+}
+
 
 function resetData()
 {
@@ -218,7 +234,9 @@ function resetData()
 			clearInterval(webmonUpdater);
 		}
 		webmonUpdater = setInterval("updateMonitorTable()", 10000); //check for updates every 10 seconds
+		
 	}
+	setElementEnabled(document.getElementById("host_display"), webmonEnabled);
 	setElementEnabled(document.getElementById("download_data_button"), webmonEnabled);
 }
 
@@ -312,7 +330,7 @@ function updateMonitorTable()
 
 
 						
-						var ip = splitLine[1];	
+						var host = getHostDisplay(splitLine[1]);	
 						var domain = splitLine[3];
 
 						var domainLink = document.createElement("a");
@@ -326,14 +344,14 @@ function updateMonitorTable()
 
 
 				
-						tableData.push([ip, lastVisit, domainLink]);
+						tableData.push([host, lastVisit, domainLink]);
 					}
 				}	
 				
 				//loadedData = loadedData && (webmonLines[webmonLines.length -1].match(/^Success/) != null);
 				if(loadedData)
 				{	
-					columnNames=['Local IP', 'Last Access Time', 'Website'];
+					columnNames=['Local Host', 'Last Access Time', 'Website'];
 					webmonTable = createTable(columnNames, tableData, "webmon_table", false, false);
 					tableContainer = document.getElementById('webmon_table_container');
 					if(tableContainer.firstChild != null)

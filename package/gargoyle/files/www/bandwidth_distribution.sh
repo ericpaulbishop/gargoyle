@@ -54,7 +54,7 @@
 
 		<div>
 			<label class="leftcolumn" for='host_display' id='time_interval_label'>Host Display:</label>
-			<select class="rightcolumn" id="host_display" onchange="doUpdate()">
+			<select class="rightcolumn" id="host_display" onchange="resetTimeFrame()">
 				<option value="hostname">Display Hostnames</option>
 				<option value="ip">Display Host IPs</option>
 			</select>
