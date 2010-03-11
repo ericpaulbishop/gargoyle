@@ -1,5 +1,5 @@
 /*
- * This program is copyright 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -105,7 +105,9 @@ function initializePlotsAndTable()
 		{
 			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
 		}
+		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
+
 		
 		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
 		setSelectedValue(plotIdName, plotType);
@@ -160,7 +162,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 			plotType = "none"; //forces us to return null
 		}
 	}
-	else if(plotType == "ip")
+	else if(plotType == "ip" || plotType == "hostname")
 	{
 		match1 = "bdist" + graphTimeFrameIndex;
 	}
@@ -182,6 +184,18 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	return selectedName;
 }
 
+function getHostnameList(ipList)
+{
+	var hostnameList = [];
+	var ipIndex =0;
+	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
+	{
+		var ip = ipList[ipIndex];
+		var host = ipToHostname[ip] == null ? ip : ipToHostname[ip];
+		hostnameList.push(host);
+	}
+	return hostnameList;
+}
 
 function resetPlots()
 {
@@ -215,12 +229,20 @@ function resetPlots()
 			var plotId= getSelectedValue(plotIdName);
 			plotId = plotId == null ? "" : plotId;
 
-			if(plotType == "ip")
+			if(plotType == "ip" || plotType == "hostname")
 			{
 				if(plotId.match(/^[0-9]+\./) == null)
 				{
-					setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
-					setSelectedText(plotIdName, ipsWithData[0]);
+					if(plotType == "hostname")
+					{
+						setAllowableSelections(plotIdName, ipsWithData, getHostnameList(ipsWithData));
+					}
+					else
+					{
+						setAllowableSelections(plotIdName, ipsWithData, ipsWithData);
+
+					}
+					setSelectedValue(plotIdName, ipsWithData[0]);
 					plotId = ipsWithData[0] == null ? "" : ipsWithData[0];
 				}
 				document.getElementById(plotIdVisName).style.display = "block";
@@ -253,7 +275,7 @@ function resetPlots()
 				if(plotType != "" && plotType != "none" && plotType != "total")
 				{
 					var idValue = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
-					if(idValue != "" && plotType == "ip")
+					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
 					{
 						setAllowableSelections(plotIdName, [idValue], [idValue]);
 					}
@@ -297,7 +319,7 @@ function resetPlots()
 		{
 			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
 			var plotTypeName = plotNum < 4 ? "plot" + plotNum + "_type" : "table_type";
-
+			var plotType = getSelectedValue(plotTypeName);
 			command = command + "uci set gargoyle.bandwidth_display." + plotTypeName + "=\"" + plotType + "\"\n";
 			
 			if(plotType != "" && plotType != "none" && plotType != "total")
@@ -306,7 +328,8 @@ function resetPlots()
 			}
 			else
 			{
-				command = command + "uci del gargoyle.bandwidth_display." + plotIdName + "\n"
+				command = command + "uci del gargoyle.bandwidth_display." + plotIdName + "\n";
+				command = command + "uci del gargoyle.bandwidth_display." + plotTypeName + "\n";
 			}
 		}
 		command = command + "uci commit\n";
@@ -448,14 +471,22 @@ function doUpdate()
 									//select ip based on selected value in plot (or first available if none selected)
 									if(monitorName.match("bdist"))
 									{
-										var plotIdName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id" : "table_id";
+										var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
+										var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 										ip = getSelectedValue(plotIdName);
 										ip = ip == null ? "" : ip;
 										ip = monitorData[ip] != null ? ip : ipList[0];
 										
 									
 										//if new ip list differs from allowable selections, update
-										setAllowableSelections(plotIdName, ipList, ipList);
+										if(getSelectedValue(plotTypeName) == "hostname")
+										{
+											setAllowableSelections(plotIdName, ipList, getHostnameList(ipList));
+										}
+										else
+										{
+											setAllowableSelections(plotIdName, ipList, ipList);
+										}
 										ipsWithData = ipList;
 									}
 									else
@@ -511,8 +542,8 @@ function doUpdate()
 								else if(monitorName.match("bdist") && monitorIndex < 3 )
 								{
 									//no ips defined
-									var plotTypeName = "plot" + (monitorIndex+1) + "_type" ;
-									var plotIdName =   "plot" + (monitorIndex+1) + "_id";
+									var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
+									var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 									monitorList[monitorIndex] = "";
 									setSelectedValue(plotTypeName, "none");
 									document.getElementById(plotIdName).display = "none";
@@ -523,8 +554,8 @@ function doUpdate()
 							else if(monitorName.match("bdist") && monitorIndex < 3 )
 							{
 								//monitor data null because no ips have been seen
-								var plotTypeName = "plot" + (monitorIndex+1) + "_type" ;
-								var plotIdName =   "plot" + (monitorIndex+1) + "_id";
+								var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
+								var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 								monitorList[monitorIndex] = ""
 								setSelectedValue(plotTypeName, "none");
 								document.getElementById(plotIdName).style.display = "none";
