@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -202,7 +202,7 @@ function refreshTableData()
 			quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
 		}
 	}
-	var columnNames = ["IP(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
+	var columnNames = ["Host(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
 	
 	var quotaTable = createTable(columnNames, quotaTableData, "quota_usage_table", false, false);
 	var tableContainer = document.getElementById('quota_table_container');
