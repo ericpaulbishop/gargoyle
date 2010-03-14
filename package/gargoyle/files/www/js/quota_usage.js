@@ -142,6 +142,31 @@ function timeParamsToTableSpan(timeParameters)
 }
 
 
+function getHostDisplay(ip)
+{
+	var hostDisplay = getSelectedValue("host_display");
+	var host = ip;
+	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	{
+		host = ipToHostname[ip];
+		host = host.length < 25 ? host : host.substr(0,22)+"...";
+	}
+	return host;
+}
+
+
+function getHostList(ipList)
+{
+	var hostList = [];
+	var ipIndex =0;
+	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
+	{
+		hostList.push( getHostDisplay(ipList[ipIndex]));
+	}
+	return hostList;
+}
+
+
 function refreshTableData()
 {
 	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
@@ -172,7 +197,9 @@ function refreshTableData()
 					up = pcts[2] >= 0 ? pcts[2] + "%" : up;
 				}
 			}
-			quotaTableData.push( [ textListToSpanElement(ip.split(/[\t ]*,[\t ]*/), true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
+			ipList = ip.split(/[\t ]*,[\t ]*/);
+			hostList = getHostList(ipList);
+			quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
 		}
 	}
 	var columnNames = ["IP(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];

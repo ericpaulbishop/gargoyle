@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-	gargoyle_header_footer -h -s "status" -p "quotause" -c "internal.css" -j "table.js quota_usage.js" gargoyle firewall
+	gargoyle_header_footer -h -s "status" -p "quotause" -c "internal.css" -j "table.js quota_usage.js" -n gargoyle firewall
 ?>
 
 
@@ -25,7 +25,10 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader">Bandwidth Quota Usage</legend>
-
+		<select id="host_display" >
+			<option value="hostname">Display Hostnames</option>
+			<option value="ip">Display Host IPs</option>
+		</select>
 
 		<div id="quota_table_container"></div>
 		
