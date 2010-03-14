@@ -200,7 +200,7 @@ function parseWifi(arpHash, isBrcm, lines)
 		var hostname = getHostname(ip);			
 		wifiTableData.push( [ hostname, ip, mac ] );
 	}
-	sort2dStrArr(sortWifi, 1);
+	sort2dStrArr(wifiTableData, 1);
 	return wifiTableData;
 }
 
