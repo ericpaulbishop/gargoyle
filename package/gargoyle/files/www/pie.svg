@@ -30,6 +30,12 @@
 
 		function setPieChartData(data, labels)
 		{
+			if(svgDoc == null)
+			{
+				return;
+			}
+
+
 			//first construct labels;
 			pieChartLabels = [];
 			labelX = 1;

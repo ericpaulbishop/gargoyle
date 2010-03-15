@@ -36,6 +36,7 @@
 
 		function addPercentsToLabel(labelBase, pieValues, pieTotals)
 		{
+			
 			var pcts = [];
 			var pieIndex;
 			for(pieIndex = 0; pieIndex < pieValues.length; pieIndex++)
@@ -51,6 +52,10 @@
 
 		function setPieChartData(individualNames, pieNames, individualLabels, values, rankIndex, maxIndividualNames, recomputeColorsAndVisible, adjustLabelFunction)
 		{
+			if(svgDoc == null)
+			{
+				return [];
+			}
 			rankIndex = parseInt(rankIndex);
 			maxIndividualNames = parseInt(maxIndividualNames);	
 

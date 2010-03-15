@@ -46,6 +46,10 @@
 	//of points plotted is numDisplayIntervals+1
 	function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalStart, lastTime, tzm)
 	{
+		if(svgDoc == null)
+		{
+			return;
+		}
 		topCoor=1;                                                                                    
 		leftCoor=1;                                                                                   
 		rightCoor=800;                                                                                

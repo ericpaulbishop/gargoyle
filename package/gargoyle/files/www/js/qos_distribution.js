@@ -71,25 +71,8 @@ function initializePieCharts()
 		}
 	}
 
-	initializePies = function()
-	{
-		if(setUploadPie == null)
-		{
-			setUploadPie = getEmbeddedSvgSetFunction("upload_pie");
-		}
-		if(setDownloadPie == null)
-		{
-			setDownloadPie = getEmbeddedSvgSetFunction("download_pie");	
-		}
-		if(setUploadPie == null || setDownloadPie == null)
-		{
-			setTimeout( "initializePies()", 100);
-		}
-	}
-	initializePies();
 
 
-	setQosTimeframes();
 
 	if(uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") == "")
 	{
@@ -99,8 +82,34 @@ function initializePieCharts()
 	{
 		document.getElementById("download_container").style.display="none";
 	}
+	
+	
+	setTimeout(initializePies, 150); //for some reason Opera 10.50 craps out if we try to load plot functions immediately
 	setInterval( 'updatePieCharts()', 2000);
 }
+
+function initializePies()
+{
+	if(setUploadPie == null)
+	{
+		setUploadPie = getEmbeddedSvgSetFunction("upload_pie");
+	}
+	if(setDownloadPie == null)
+	{
+		setDownloadPie = getEmbeddedSvgSetFunction("download_pie");	
+	}
+	if(setUploadPie == null || setDownloadPie == null)
+	{
+		setTimeout( "initializePies()", 100);
+	}
+	else
+	{
+		setQosTimeframes();
+
+	}
+}
+
+
 
 
 function setQosTimeframes()

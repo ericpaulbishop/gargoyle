@@ -118,7 +118,7 @@ function initializePlotsAndTable()
 	uploadMonitors = ["","",""];
 	downloadMonitors = ["","",""];
 	updateInProgress = false;
-	resetPlots();
+	setTimeout(resetPlots, 150); //for some reason Opera 10.50 craps out if we try to load plot functions immediately
 	updateInterval = setInterval(doUpdate, 2000);
 }
 
