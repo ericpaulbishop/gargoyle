@@ -1,6 +1,6 @@
-#!/usr/bin/haserl --upload-limit=4096 --upload-target=/tmp/ --upload-dir=/tmp/
+#!/usr/bin/haserl --upload-limit=8192 --upload-target=/tmp/ --upload-dir=/tmp/
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -40,11 +40,9 @@
 				<label id="upgrade_label" class='leftcolumn' for="upgrade_file">Select Firmware File:</label>
 				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
 			</div>
-			<div id="upgrade_file2_container" style="display:none" >
-				<label id="upgrade_label2" class='leftcolumn' for="upgrade_file2">Select Kernel (*.lzma) File:</label>
-				<input class='rightcolumn' type="file" id="upgrade_file2" name="upgrade_file2" />
-			</div>
+			<p><em><span id="upgrade_text"></span></em></p>
 			<input id='upgrade_hash' name="hash" type='hidden' value='' />
+			<input id='upgrade_arch' name="arch" type='hidden' value='' />
 		</form>
 	</div>
 	<div>

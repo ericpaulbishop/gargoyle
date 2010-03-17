@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -9,14 +9,9 @@
 
 function doUpgrade()
 {
-	if(!isRedboot && document.getElementById('upgrade_file').value.length == 0)
+	if(document.getElementById('upgrade_file').value.length == 0)
 	{
 		alert("ERROR: You must select a firmware file.");
-	}
-	else if(isRedboot && (document.getElementById('upgrade_file').value.length == 0 || document.getElementById('upgrade_file2').value.length == 0))
-	{
-		alert("ERROR: You must specify both firmware files.");
-
 	}
 	else
 	{
@@ -56,14 +51,6 @@ function failure()
 
 function setUpgradeFormat()
 {
-	if(isRedboot)
-	{
-		document.getElementById("upgrade_label").firstChild.data = "Select Root (squashfs/jffs) File:";
-		document.getElementById("upgrade_file2_container").style.display="block";
-	}
-	else
-	{
-		document.getElementById("upgrade_label").firstChild.data = "Select (*.trx) Firmware File:";
-	}
-
+	document.getElementById("upgrade_arch").value = isRedboot ? "atheros" : "brcm";
+	setChildText("upgrade_text", "Firmware should be a " + (isRedboot ? "combined.squashfs.img file" : ".bin or .trx file"));
 }
