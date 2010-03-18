@@ -30,7 +30,10 @@
 
 	cd /tmp/up/
 	echo "<script type=\"text/javascript\">top.uploaded();</script>"
-
-	/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
-
+	
+	if [ "$FORM_arch" = "brcm" ] ; then
+		mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>"; reboot
+	else
+		/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+	fi
 ?>
