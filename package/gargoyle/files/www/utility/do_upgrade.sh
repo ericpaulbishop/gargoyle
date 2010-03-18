@@ -31,10 +31,6 @@
 	cd /tmp/up/
 	echo "<script type=\"text/javascript\">top.uploaded();</script>"
 
-	cat /lib/upgrade/common.sh | sed 's/v "Rebooting system.*$/echo "<script type=\\\"text\/javascript\\\">top.upgraded();<\/script><\/body><\/html>"/g' >/lib/upgrade/tmp.com
-	mv /lib/upgrade/tmp.com /lib/upgrade/common.sh
+	/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
 
-
-
-	/sbin/sysupgrade -n /tmp/up/upgrade 2>&1 | grep "javascript"
 ?>
