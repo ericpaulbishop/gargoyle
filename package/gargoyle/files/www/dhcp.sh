@@ -32,7 +32,7 @@
 	echo "";
 	echo "var leaseData = new Array();";
 	if [ -e /tmp/dhcp.leases ] ; then
-		cat /tmp/dhcp.leases | awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$1"\",\""$2"\",\""$3"\"]);"};'
+		cat /tmp/dhcp.leases | awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};'
 	fi
 
 ?>

@@ -192,10 +192,10 @@ function resetData()
 	for(leaseIndex=0; leaseIndex < leaseData.length; leaseIndex++)
 	{
 		var lease = leaseData[leaseIndex];
-		hmVals.push( lease[2] + "," + (lease[0]).toUpper() );
-		hmText.push( (lease[2] == "" || lease[2] == "*" ? lease[1] : lease[2] ) + " (" + lease[0] + ")" );
+		hmVals.push( lease[2] + "," + (lease[0]).toUpperCase() );
+		hmText.push( (lease[2] == "" || lease[2] == "*" ? lease[1] : lease[2] ) + " (" + (lease[0]).toUpperCase() + ")" );
 	}
-	setAllowableSelections("static_from_connected", hmText, hmVals);
+	setAllowableSelections("static_from_connected", hmVals, hmText);
 	
 }
 function staticFromConnected()
