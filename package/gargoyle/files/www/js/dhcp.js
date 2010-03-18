@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -183,30 +183,47 @@ function resetData()
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
 	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
 	document.getElementById("block_mismatches").checked = blockMismatches;
+
+
+	//setup hostname/mac list
+	var hmVals = [ "none" ];
+	var hmText = [ "Select Hostname/MAC From Currently Connected Hosts" ];
+	var leaseIndex = 0;
+	for(leaseIndex=0; leaseIndex < leaseData.length; leaseIndex++)
+	{
+		var lease = leaseData[leaseIndex];
+		hmVals.push( lease[2] + "," + (lease[0]).toUpper() );
+		hmText.push( (lease[2] == "" || lease[2] == "*" ? lease[1] : lease[2] ) + " (" + lease[0] + ")" );
+	}
+	setAllowableSelections("static_from_connected", hmText, hmVals);
+	
 }
+function staticFromConnected()
+{
+	var selectedVal = getSelectedValue("static_from_connected");
+	if(selectedVal != "none")
+	{
+		var host = (selectedVal.split(/,/))[0];
+		var mac  = (selectedVal.split(/,/))[1];
+		document.getElementById("add_host").value = host;
+		document.getElementById("add_mac").value  = mac;
+		setSelectedValue("static_from_connected", "none");
+	}
+}
+
 
 function setEnabled(enabled)
 {
-	var disabled = (enabled != true);
-	ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
+	var ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
+	var idIndex;
 	for (idIndex in ids)
 	{
-		element = document.getElementById(ids[idIndex]);
-		element.disabled=disabled;
-		element.readonly=disabled;
-		element.style.color = disabled==true ? "#AAAAAA" : "#000000";
+		var element = document.getElementById(ids[idIndex]);
+		setElementEnabled(element, enabled, "");
 	}
-	if(enabled)
-	{
-		document.getElementById('add_button').className='default_button';
-	}
-	else
-	{
-		document.getElementById('add_button').className='default_button_disabled';
-	}
-	
+	setElementEnabled(document.getElementById("static_from_connected"), enabled, "none");
 
-	staticIpTable = document.getElementById('staticip_table_container').firstChild;
+	var staticIpTable = document.getElementById('staticip_table_container').firstChild;
 	setRowClasses(staticIpTable, enabled);
 	
 }

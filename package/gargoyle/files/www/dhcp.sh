@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -19,17 +19,20 @@
 	
 
 	echo "var hostData = new Array();"
-	if [ -e /etc/hosts ]
-	then
+	if [ -e /etc/hosts ] ; then
 		cat /etc/hosts | awk ' $0 ~ /^[\t ]*[0-9]/ {print "hostData.push([\""$1"\",\""$2"\"]);"};'
 	fi
 
 	echo "";
 	echo "var etherData = new Array();";
-	if [ -e /etc/ethers ]
-	then
+	if [ -e /etc/ethers ] ; then
 		cat /etc/ethers | awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};'
+	fi
 
+	echo "";
+	echo "var leaseData = new Array();";
+	if [ -e /tmp/dhcp.leases ] ; then
+		cat /tmp/dhcp.leases | awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$1"\",\""$2"\",\""$3"\"]);"};'
 	fi
 
 ?>
@@ -106,6 +109,11 @@ for (etherIndex in etherData)
 			<div id='staticip_add_container'>
 				<? cat templates/static_ip_template ?>
 			</div>
+			<div>
+				<select id="static_from_connected" onchange="staticFromConnected()" >
+					<option value="none">Select Hostname/MAC From Currently Connected Hosts</option>
+				</select>
+			</div>
 		</div>
 		
 		<div id='staticip_table_heading_container'>
@@ -114,9 +122,6 @@ for (etherIndex in etherData)
 		<div class='indent'>
 			<div id='staticip_table_container' class="bottom_gap"></div>
 		</div>
-
-
-		
 	</fieldset>
 
 	<div id="firefox3_bug_correct" style="display:none">
@@ -128,7 +133,6 @@ for (etherIndex in etherData)
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
 	</div>
-	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
 
 
