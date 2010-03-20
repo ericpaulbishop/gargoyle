@@ -52,5 +52,5 @@ function failure()
 function setUpgradeFormat()
 {
 	document.getElementById("upgrade_arch").value = isRedboot ? "atheros" : "brcm";
-	setChildText("upgrade_text", "Firmware should be a " + (isRedboot ? "combined.squashfs.img file" : ".bin or .trx file"));
+	setChildText("upgrade_text", "Firmware should be a " + (isRedboot ? "combined .img file" : ".bin or .trx file"));
 }

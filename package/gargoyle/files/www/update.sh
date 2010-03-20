@@ -40,7 +40,7 @@
 				<label id="upgrade_label" class='leftcolumn' for="upgrade_file">Select Firmware File:</label>
 				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
 			</div>
-			<p><em><span id="upgrade_text"></span></em></p>
+			<div><em><span id="upgrade_text" class="wideleftcolumn"></span></em></div>
 			<input id='upgrade_hash' name="hash" type='hidden' value='' />
 			<input id='upgrade_arch' name="arch" type='hidden' value='' />
 		</form>
