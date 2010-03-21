@@ -137,7 +137,7 @@ function resetData()
 		staticIpTableData[rowIndex] = rowData;
 	}
 	columnNames=['Hostname', 'MAC', 'IP', ''];
-	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false);
+	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, resetHostnameMacList );
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)
 	{
@@ -186,18 +186,44 @@ function resetData()
 
 
 	//setup hostname/mac list
+	resetHostnameMacList();
+}
+
+
+function resetHostnameMacList()
+{
+	var staticTable = document.getElementById("staticip_table_container").firstChild;
+	var staticTableData = staticTable == null ? [] : getTableDataArray(staticTable, true, false);
+	var staticMacs = [];
+	var staticIndex=0;
+	for(staticIndex=0; staticIndex < staticTableData.length; staticIndex++)
+	{
+		var mac = (staticTableData[staticIndex][1]).toUpperCase();
+		staticMacs[ mac ] = 1;
+	}
+
 	var hmVals = [ "none" ];
 	var hmText = [ "Select Hostname/MAC From Currently Connected Hosts" ];
 	var leaseIndex = 0;
 	for(leaseIndex=0; leaseIndex < leaseData.length; leaseIndex++)
 	{
 		var lease = leaseData[leaseIndex];
-		hmVals.push( lease[2] + "," + (lease[0]).toUpperCase() );
-		hmText.push( (lease[2] == "" || lease[2] == "*" ? lease[1] : lease[2] ) + " (" + (lease[0]).toUpperCase() + ")" );
+		var mac = (lease[0]).toUpperCase();
+		if( staticMacs[ mac ] == null )
+		{
+			hmVals.push( lease[2] + "," + mac );
+			hmText.push( (lease[2] == "" || lease[2] == "*" ? lease[1] : lease[2] ) + " (" + mac + ")" );
+		}
 	}
 	setAllowableSelections("static_from_connected", hmVals, hmText);
 	
+	var hmEnabled = hmText.length > 1 && document.getElementById('dhcp_enabled').checked ? true : false;
+	setElementEnabled(document.getElementById("static_from_connected"), hmEnabled, "none");
+
 }
+
+
+
 function staticFromConnected()
 {
 	var selectedVal = getSelectedValue("static_from_connected");
@@ -221,10 +247,12 @@ function setEnabled(enabled)
 		var element = document.getElementById(ids[idIndex]);
 		setElementEnabled(element, enabled, "");
 	}
-	setElementEnabled(document.getElementById("static_from_connected"), enabled, "none");
 
 	var staticIpTable = document.getElementById('staticip_table_container').firstChild;
 	setRowClasses(staticIpTable, enabled);
+	
+	resetHostnameMacList();
+
 	
 }
 
@@ -248,8 +276,8 @@ function addStatic()
 		}
 		values.push(createEditButton());
 		staticIpTable = document.getElementById('staticip_table_container').firstChild;
-		addTableRow(staticIpTable,values, true, false);
-
+		addTableRow(staticIpTable,values, true, false, resetHostnameMacList);
+		resetHostnameMacList();
 	}
 }
 
@@ -414,6 +442,9 @@ function editStatic()
 						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_ip").value;
 						
 						editStaticWindow.close();
+
+						resetHostnameMacList();
+
 					}
 				}
 				editStaticWindow.moveTo(xCoor,yCoor);
