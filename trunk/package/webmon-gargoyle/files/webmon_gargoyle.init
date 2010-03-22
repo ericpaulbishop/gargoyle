@@ -1,0 +1,50 @@
+#!/bin/sh /etc/rc.common
+START=85
+
+include /lib/network
+
+
+
+start()
+{
+	config_load webmon_gargoyle
+	config_get num_records webmon num_records
+	config_get save_path webmon save_path
+	config_get exclude_ip_file webmon exclude_ip_file
+	config_get include_ip_file webmon include_ip_file
+	
+	interface="br-lan"
+
+	#load save path, creating directory if necessary
+	if [ -z "$save_path" ] ; then
+		save_path=/usr/data/webmon.txt
+	fi
+	if [ ! -e "$save_path" ] ; then
+		mkdir -p "$save_path"
+		rmdir "$save_path"
+	fi
+
+	#start webmon	
+	if [ -n "$exclude_ip_file" ] && [ -n "$include_ip_file" ] ; then
+		/usr/sbin/webmon_gargoyle  -d -i $interface -x "$exclude_ip_file" -o "$include_ip_file" -s "$save_path"
+	fi	
+	if [ -n "$exclude_ip_file" ] && [ -z "$include_ip_file" ] ; then
+		/usr/sbin/webmon_gargoyle  -d -i $interface -x "$exclude_ip_file" -s "$save_path"
+	fi
+	if [ -z "$exclude_ip_file" ] && [ -n "$include_ip_file" ] ; then
+		/usr/sbin/webmon_gargoyle  -d -i $interface  -o "$include_ip_file" -s "$save_path"
+	fi
+	if [ -z "$exclude_ip_file" ] && [ -z "$include_ip_file" ] ; then
+		/usr/sbin/webmon_gargoyle  -d -i $interface   -s "$save_path"
+	fi
+}
+
+
+stop()
+{
+	if [ -e /var/run/webmon*.pid ] ; then
+		kill $(cat /var/run/webmon*.pid ) 2>/dev/null
+	fi
+}
+
+

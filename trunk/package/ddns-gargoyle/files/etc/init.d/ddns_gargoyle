@@ -1,0 +1,108 @@
+#!/bin/sh /etc/rc.common
+START=90
+EXTRA_COMMANDS=test_config
+EXTRA_HELP="	test_config	Ensure config is up to date and test whether we can perform update(s) successfully"
+
+
+include /lib/network
+
+# Converts uci config to one that can be parsed by the daemon.
+# Formats are very similar, but minor adjustments are necessary.
+convert_config()
+{
+	pkg_name="$1"
+
+	config_cb() 
+	{
+		echo "$1	$2"
+		option_cb()
+		{
+			handled=""
+			if [ "$1" = "ip_source" ] ; then
+				if [ "$2" = "network" ] ; then
+					echo "	$1	interface"
+					handled=1
+					
+				fi
+			fi
+			if [ "$1" = "ip_network" ] ; then
+				iface=$(uci -P "/var/state" get network.$2.ifname)
+				if [ -n "$iface" ] ; then
+					echo "	ip_interface	$iface"
+					handled=1
+				fi
+			fi
+			
+			if [ -z "$handled" ] ; then
+				echo "	$1	$2"
+			fi
+		}
+	}
+	config_load "$pkg_name"
+}
+get_service_names()
+{
+
+	pkg_name="$1"
+	ALL_SERVICE_NAMES=""
+	config_cb() 
+	{
+		if [ -z "$ALL_SERVICE_NAMES" ] ; then
+			ALL_SERVICE_NAMES=$2
+		else
+			ALL_SERVICE_NAMES="$ALL_SERVICE_NAMES $2"
+		fi
+	}
+	config_load $pkg_name
+}
+
+
+
+rebuild_if_necessary()
+{
+	rebuild_config="y"
+	if [ -e /etc/md5/ddns_gargoyle.md5 ] && [ -e /etc/config/ddns_gargoyle ] && [ -e /etc/ddns_gargoyle.conf ] ; then
+		old_md5=$(cat /etc/md5/ddns_gargoyle.md5)
+		current_md5=$(md5sum /etc/config/ddns_gargoyle | awk ' { print $1 ; } ' )
+		if [ "$old_md5" = "$current_md5" ] ; then
+			rebuild_config="n"
+		fi
+	fi
+
+	if [ "$rebuild_config" = "y" ] ; then
+		out_data=$(convert_config ddns_gargoyle)
+		echo "$out_data" > /etc/ddns_gargoyle.conf
+		mkdir -p /etc/md5
+		md5sum /etc/config/ddns_gargoyle | awk ' { print $1 ; }' > /etc/md5/ddns_gargoyle.md5
+	fi
+	echo $rebuild_config
+}
+
+
+start()
+{
+	rebuilt=$(rebuild_if_necessary)
+	/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf -d
+}
+
+
+stop()
+{
+	if [ -e /var/run/ddns_*.pid ] ; then
+		kill $(cat /var/run/ddns_*.pid ) 2>/dev/null
+	fi
+}
+
+test_config()
+{
+	rebuilt=$(rebuild_if_necessary)
+	
+	if [ "$rebuilt" = "y" ] ; then
+		stop
+	fi
+	
+	get_service_names ddns_gargoyle
+	echo "$ALL_SERVICE_NAMES"
+	/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf -m -f $ALL_SERVICE_NAMES
+}
+

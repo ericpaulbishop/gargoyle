@@ -1,0 +1,32 @@
+--- /dev/null	2010-02-05 09:32:33.624917934 -0500
++++ kamikaze-8.09-patched/target/linux/atheros/patches/969-engenius_reset_fix.patch	2010-03-12 14:07:18.000000000 -0500
+@@ -0,0 +1,29 @@
++--- files.orig/include/asm-mips/mach-atheros/ar5315/ar5315.h	2010-03-12 13:56:56.000000000 -0500
+++++ files.new/include/asm-mips/mach-atheros/ar5315/ar5315.h	2010-03-12 14:03:02.000000000 -0500
++@@ -355,6 +355,7 @@
++ #define AR5315_GPIO_INT_LVL_HIGH			2   /* High Level Triggered */
++ #define AR5315_GPIO_INT_LVL_EDGE			3   /* Edge Triggered */
++ 
+++#define AR5315_ALT_RESET_GPIO   0
++ #define AR5315_RESET_GPIO       5
++ #define AR5315_NUM_GPIO         22
++ 
++--- files.orig/arch/mips/atheros/ar5315/board.c	2010-03-12 13:55:45.000000000 -0500
+++++ files.new/arch/mips/atheros/ar5315/board.c	2010-03-12 14:01:28.000000000 -0500
++@@ -238,7 +238,7 @@
++ 	ar5315_led_data.num_leds = 0;
++ 	for(i = 1; i < 8; i++)
++ 	{
++-		if((i != AR5315_RESET_GPIO) && (i != bcfg->resetConfigGpio))
+++		if((i != AR5315_RESET_GPIO) && (i != AR5315_ALT_RESET_GPIO) && (i != bcfg->resetConfigGpio))
++ 		{
++ 			if(i == bcfg->sysLedGpio)
++ 			{
++@@ -286,6 +286,7 @@
++ 		/*
++ 		 * Cold reset does not work on the AR2315/6, use the GPIO reset bits a workaround.
++ 		 */
+++		gpio_direction_output(AR5315_ALT_RESET_GPIO, 0);
++ 		gpio_direction_output(AR5315_RESET_GPIO, 0);
++ 	}
++ }

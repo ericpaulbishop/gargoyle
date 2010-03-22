@@ -1,0 +1,64 @@
+#!/bin/sh /etc/rc.common
+START=95
+
+include /lib/miniupnpd
+
+boot() {
+	# On boot, there's a race condition with hotplug,
+	# therfore do nothing here
+	return
+}
+
+start() {
+	local extif
+	local intif
+	local extiface
+	local upload
+	local download
+	local logging
+	local secure
+
+	config_load "upnpd"
+	config_get extif    config external_iface
+	config_get intif    config internal_iface
+	config_get upload   config upload
+	config_get download config download
+	config_get_bool logging config log_output 0
+	config_get_bool secure config secure_mode 0
+
+	config_load "network"
+	config_get extiface ${extif:-wan} ifname
+	
+	if [ -n "$extiface" ]; then
+		upnp_firewall_start
+
+		local args="-i $extiface"
+
+		for iface in ${intif:-lan}; do
+			local ipaddr
+			config_get ipaddr "$iface" ipaddr
+			[ -n "$ipaddr" ] && append args "-a $ipaddr"
+		done
+
+		append args "-p 5000 -U"
+
+		[ -n "$upload" -a -n "$download" ] && \
+			append args "-B $(($download * 1024 * 8)) $(($upload * 1024 * 8))"
+
+		[ "$secure" -gt 0 ] && \
+			append args "-S"
+
+		if [ "$logging" = "1" ]; then
+			eval start-stop-daemon -S -x miniupnpd -- $args -d | logger -t miniupnpd &
+		else
+			eval start-stop-daemon -S -x miniupnpd -- $args 2>/dev/null
+		fi
+	else
+		logger -t "upnp daemon" "external interface not found, not starting"
+	fi
+}
+
+stop() {
+	start-stop-daemon -K -q -x miniupnpd -p /var/run/miniupnpd.pid
+	upnp_firewall_stop
+}

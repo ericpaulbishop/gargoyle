@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>fonflash.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Gargoyle Flash</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>fon-flash-gui</string>
+	<key>CFBundleGetInfoString</key>
+	<string>GargoyleFlash</string>
+	<key>CFBundleIconFile</key>
+	<string>fonflash.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.gargoyle-router.gargoyleflash</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>CFBundleName</key>
+	<string>GargoyleFlash</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+</dict>
+</plist>
