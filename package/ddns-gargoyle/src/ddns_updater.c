@@ -1322,6 +1322,10 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 			{
 				set_string_map_element(all_variables, var_name, strdup(""));
 			}
+			if( get_string_map_element(provider->unescaped_variables, var_name) == NULL)
+			{
+				set_string_map_element(escaped_variables, var_name, strdup("d"));
+			}
 		}
 	}
 
@@ -1333,6 +1337,7 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 	//free computed variables and return
 	unsigned long num_destroyed;
 	destroy_string_map(all_variables, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(escaped_variables, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
 	return url;
 }
