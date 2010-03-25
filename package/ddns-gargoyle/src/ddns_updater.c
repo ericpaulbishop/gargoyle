@@ -84,6 +84,7 @@ typedef struct
 	char** meta_variables;
 	string_map* meta_variable_defs;
 	string_map* meta_variables_to_cache;
+	string_map* unescaped_variables;
 	regex_t* success_regexp;	// update considered success only if result matches this regex
 	regex_t* failure_regexp;	// update considered failure only if result matches this regex
 					//
@@ -138,7 +139,8 @@ char* get_ip_from_url(char* url);
 char* get_interface_ip(char* if_name);
 
 char* do_url_substitution(ddns_service_provider* def, ddns_service_config* config, char* current_ip);
-char* do_line_substitution(char* line, string_map* variables);
+char* do_line_substitution(char* line, string_map* variables, string_map* escaped_variables);
+char *http_req_escape(char *unescaped);
 char *replace_str(char *s, char *old, char *new);
 
 
@@ -369,6 +371,7 @@ void free_service_provider(ddns_service_provider* provider)
 	free_null_terminated_string_array(provider->meta_variables);
 	destroy_string_map(provider->meta_variable_defs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(provider->meta_variables_to_cache, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(provider->unescaped_variables, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	if(provider->success_regexp != NULL)
 	{
@@ -1221,16 +1224,23 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 {
 	
 	string_map*  all_variables = initialize_string_map(1);
-	
+	string_map*  escaped_variables = initialize_string_map(0);
+
 	// load required variables 
 	int var_index=0;
 	for(var_index=0; (provider->required_variables)[var_index] != NULL; var_index++)
 	{
-		char* var_def = (char*)get_map_element(config->variable_definitions, (provider->required_variables)[var_index]);
+		char* var_name = (provider->required_variables)[var_index];
+		char* var_def = (char*)get_map_element(config->variable_definitions, var_name);
 		if(var_def != NULL)
 		{
-			set_string_map_element(all_variables, (provider->required_variables)[var_index], strdup(var_def) );
+			set_string_map_element(all_variables, var_name, strdup(var_def) );
 		}
+		if( get_string_map_element(provider->unescaped_variables, var_name) == NULL)
+		{
+			set_string_map_element(escaped_variables, var_name, strdup("d"));
+		}
+
 	}
 	
 	//load optional variables
@@ -1238,18 +1248,23 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 	{
 		for(var_index=0; (provider->optional_variables)[var_index] != NULL; var_index++)
 		{
-			char* var_def = (char*)get_string_map_element(config->variable_definitions, (provider->optional_variables)[var_index]);
+			char* var_name = (provider->optional_variables)[var_index];
+			char* var_def = (char*)get_string_map_element(config->variable_definitions, var_name);
 			if(var_def != NULL)
 			{
-				set_string_map_element(all_variables, (provider->optional_variables)[var_index], strdup(var_def) );
+				set_string_map_element(all_variables, var_name, strdup(var_def) );
 			}
 			else
 			{
 				var_def = (provider->optional_variable_defaults)[var_index];
 				if(var_def != NULL)
 				{
-					set_string_map_element(all_variables, (provider->optional_variables)[var_index], strdup(var_def) );
+					set_string_map_element(all_variables, var_name, strdup(var_def) );
 				}
+			}
+			if( get_string_map_element(provider->unescaped_variables, var_name) == NULL)
+			{
+				set_string_map_element(escaped_variables, var_name, strdup("d"));
 			}
 		}
 	}
@@ -1271,7 +1286,7 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 				if(meta_def != NULL)
 				{
 					unsigned long num_lines;
-					char* meta_sub = do_line_substitution(meta_def, all_variables);
+					char* meta_sub = do_line_substitution(meta_def, all_variables, NULL);
 					char** output = get_shell_command_output_lines(meta_sub, &num_lines);
 					if(num_lines > 0)
 					{
@@ -1312,7 +1327,7 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 
 	
 	//do substitution for url
-	char* url = do_line_substitution(provider->url_template, all_variables);
+	char* url = do_line_substitution(provider->url_template, all_variables, escaped_variables);
 	
 
 	//free computed variables and return
@@ -1322,7 +1337,7 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 	return url;
 }
 
-char* do_line_substitution(char* line, string_map* variables)
+char* do_line_substitution(char* line, string_map* variables, string_map* escaped_variables)
 {
 	unsigned long num_keys;
 	char** variable_names = (char**)get_string_map_keys(variables, &num_keys);
@@ -1337,7 +1352,22 @@ char* do_line_substitution(char* line, string_map* variables)
 		char* new_replaced;
 		if(var_def != NULL)
 		{
-			new_replaced = replace_str(replaced, replace_pattern, var_def);
+			unsigned char do_escape = 0;
+			if(escaped_variables != NULL)
+			{
+				do_escape = get_string_map_element(escaped_variables, variable_names[var_index]) == NULL ? 0 : 1;
+			}
+
+			if(do_escape == 1)
+			{
+				char* escaped_def = http_req_escape(var_def);
+				new_replaced = replace_str(replaced, replace_pattern, escaped_def);
+				free(escaped_def);
+			}
+			else
+			{
+				new_replaced = replace_str(replaced, replace_pattern, var_def);
+			}
 		}
 		else
 		{
@@ -1352,6 +1382,29 @@ char* do_line_substitution(char* line, string_map* variables)
 	return replaced;
 }
 
+
+
+char *http_req_escape(char *unescaped)
+{
+	//be sure to do '%' first, to avoid much craziness
+	char escape_chars[] = { '%', '#', '\t', ' ', '<', '>', '{', '}', '|', '\\', '^', '~', '[', ']', '`', ';', '/', '?', ':', '@', '=', '&', '$', '\0' };
+	char* escaped = strdup(unescaped);
+	int ec_index=0;
+
+	for(ec_index=0; escape_chars[ec_index] != '\0'; ec_index++)
+	{
+		char old[2];
+		char new[4];
+		char* new_escaped;
+		sprintf(old, "%c", escape_chars[ec_index]);
+		sprintf(new, "%%%.2x", escape_chars[ec_index]);
+		new_escaped = replace_str(escaped, old, new);
+		free(escaped);
+		escaped = new_escaped;
+	}
+
+	return escaped;
+}
 
 
 char *replace_str(char *s, char *old, char *new)
@@ -1745,6 +1798,7 @@ string_map* load_service_providers(char* filename)
 				service_provider->meta_variables = NULL;
 				service_provider->meta_variable_defs = initialize_string_map(0);
 				service_provider->meta_variables_to_cache = initialize_string_map(0);
+				service_provider->unescaped_variables = initialize_string_map(0);
 
 				free(variable[0]);
 				free(variable);
@@ -1801,7 +1855,20 @@ string_map* load_service_providers(char* filename)
 							free_null_terminated_string_array(cache_list);
 							free(variable[1]);
 						}
-
+						else if(safe_strcmp(variable[0], "unescaped_variables") == 0 && variable[1] != NULL)
+						{
+							unsigned long num_pieces;
+							char whitespace_separators[] = {'\t', ' '};
+							char** unescaped_list =  split_on_separators(variable[1], whitespace_separators, 2, -1, 0, &num_pieces);
+							int unescaped_index;
+							for(unescaped_index=0; unescaped_list[unescaped_index] != NULL; unescaped_index++)
+							{
+								char* dummy = strdup("1");
+								set_string_map_element(service_provider->unescaped_variables, unescaped_list[unescaped_index], dummy);
+							}
+							free_null_terminated_string_array(unescaped_list);
+							free(variable[1]);
+						}
 						else if( (safe_strcmp(variable[0], "success_regexp") == 0 || safe_strcmp(variable[0], "failure_regexp") == 0 ) && variable[1] != NULL)
 						{
 							regex_t* regexp = (regex_t*)malloc(sizeof(regex_t));
