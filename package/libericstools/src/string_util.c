@@ -375,33 +375,46 @@ char* join_strs(char* separator, char** parts, int max_parts, int free_parts, in
 	return joined;
 }
 
-
-char* dynamic_replace(char* template_str, char* old_str, char* new_str)
+char* dynamic_replace(char* template_str, char* old, char* new)
 {
-	char* replaced = NULL;
-	if(template_str != NULL && old_str != NULL && new_str != NULL && safe_strcmp(old_str, "") != 0)
+	char *ret;
+	int i, count = 0;
+	int newlen = strlen(new);
+	int oldlen = strlen(old);
+
+	char* s = strdup(template_str);
+	for (i = 0; s[i] != '\0'; i++)
 	{
-		char* template = strdup(template_str);
-		int old_strlen = strlen(old_str);
-		char* template_ptr = template;
-		char* next_ptr;
-		char* tmp;
-		replaced = strdup("");
-		while( (next_ptr = strstr(template_ptr, old_str)) != NULL)
+		if (strstr(&s[i], old) == &s[i])
 		{
-			tmp = replaced;
-			next_ptr[0] = '\0';
-			replaced = dynamic_strcat(3, replaced, template_ptr, new_str);
-			free(tmp);
-			template_ptr = next_ptr + old_strlen;
+			count++;
+			i += oldlen - 1;
 		}
-		tmp = replaced;
-		replaced = dynamic_strcat(2, replaced, template_ptr);
-		free(tmp);
-		free(template);
 	}
-	return replaced;
+	ret = malloc(i + 1 + count * (newlen - oldlen));
+
+	i = 0;
+	while (*s)
+	{
+		if (strstr(s, old) == s)
+		{
+			strcpy(&ret[i], new);
+			i += newlen;
+			s += oldlen;
+		}
+		else
+		{
+			ret[i++] = *s++;
+		}
+	}
+	ret[i] = '\0';
+	free(s);
+
+	return ret;
 }
+
+
+
 
 
 /* note: str element in return value is dynamically allocated, need to free */

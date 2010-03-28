@@ -1366,17 +1366,17 @@ char* do_line_substitution(char* line, string_map* variables, string_map* escape
 			if(do_escape == 1)
 			{
 				char* escaped_def = http_req_escape(var_def);
-				new_replaced = replace_str(replaced, replace_pattern, escaped_def);
+				new_replaced = dynamic_replace(replaced, replace_pattern, escaped_def);
 				free(escaped_def);
 			}
 			else
 			{
-				new_replaced = replace_str(replaced, replace_pattern, var_def);
+				new_replaced = dynamic_replace(replaced, replace_pattern, var_def);
 			}
 		}
 		else
 		{
-			new_replaced = replace_str(replaced, replace_pattern, "");
+			new_replaced = dynamic_replace(replaced, replace_pattern, "");
 		}
 		free(replace_pattern);
 		free(replaced);
@@ -1403,54 +1403,13 @@ char *http_req_escape(char *unescaped)
 		char* new_escaped;
 		sprintf(old, "%c", escape_chars[ec_index]);
 		sprintf(new, "%%%.2x", escape_chars[ec_index]);
-		new_escaped = replace_str(escaped, old, new);
+		new_escaped = dynamic_replace(escaped, old, new);
 		free(escaped);
 		escaped = new_escaped;
 	}
 
 	return escaped;
 }
-
-
-char *replace_str(char *s, char *old, char *new)
-{
-	char *ret;
-	int i, count = 0;
-	int newlen = strlen(new);
-	int oldlen = strlen(old);
-
-	char* dyn_s = strdup(s);
-	s = dyn_s;
-	for (i = 0; s[i] != '\0'; i++)
-	{
-		if (strstr(&s[i], old) == &s[i])
-		{
-			count++;
-			i += oldlen - 1;
-		}
-	}
-	ret = malloc(i + 1 + count * (newlen - oldlen));
-
-	i = 0;
-	while (*s)
-	{
-		if (strstr(s, old) == s)
-		{
-			strcpy(&ret[i], new);
-			i += newlen;
-			s += oldlen;
-		}
-		else
-		{
-			ret[i++] = *s++;
-		}
-	}
-	ret[i] = '\0';
-	free(dyn_s);
-
-	return ret;
-}
-
 
 
 
