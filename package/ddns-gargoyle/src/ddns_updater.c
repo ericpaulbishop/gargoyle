@@ -5,7 +5,7 @@
  * 			http://www.gargoyle-router.com
  * 		  
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -23,7 +23,7 @@
 
 
 #include "erics_tools.h"
-#include "http_minimal_client.h"
+#include "ewget.h"
 #define malloc safe_malloc
 #define strdup safe_strdup
 
@@ -1187,7 +1187,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 				if(verbose > 0 ){ printf("update needed or force requested, performing actual update\n"); }
 				char* url_str = do_url_substitution(def, service_config, local_ip);
 				if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
-				http_response* page = get_url_str(url_str);
+				http_response* page = get_url(url_str, NULL);
 				
 				if(page != NULL)
 				{
@@ -1458,7 +1458,7 @@ char* lookup_domain_ip(char* url_str)
 {
 	char* ip = NULL;
 
-	url_data* url = parse_url(url_str);
+	url_request* url = parse_url(url_str, NULL);
 	if(url !=  NULL);
 	{
 		struct hostent* host;
@@ -1467,7 +1467,7 @@ char* lookup_domain_ip(char* url_str)
 		{
 			ip = strdup((char*)inet_ntoa(*((struct in_addr *)host->h_addr)));
 		}
-		free_url(url);
+		free_url_request(url);
 	}
 	return ip;
 }
@@ -1507,7 +1507,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 char* get_ip_from_url(char* url)
 {
 	char* ip = NULL;
-	http_response* page = get_url_str(url);
+	http_response* page = get_url(url, NULL);
 	if(page != NULL)
 	{
 		if(page->data != NULL)
