@@ -1169,7 +1169,7 @@ int create_path(const char *name, int mode)
 int do_single_update(ddns_service_config *service_config, string_map *service_providers, char* remote_ip, char* local_ip, int force_update, int verbose)
 {
 	int update_status = UPDATE_FAILED;
-
+	
 	ddns_service_provider* def =(ddns_service_provider*)get_map_element(service_providers, service_config->service_provider);
 	if(def != NULL) //should never be null since we check at program start, but double checking these things is often a good idea :-)
 	{
