@@ -48,8 +48,8 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
 		STAGING_DIR="$(STAGING_DIR)" \
-		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
-		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
+		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
 		USE_CYASSL="1" \
 		USE_CYASSL_INCLUDE_DIR="1" \
 		USE_ERICSTOOLS="1" \
@@ -64,8 +64,9 @@ define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR)/ewget \
 		$(TARGET_CONFIGURE_OPTS) \
 		STAGING_DIR="$(STAGING_DIR)" \
-		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
-		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
+		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
+		USE_CYASSL="1" \
 		all
 endef
 
