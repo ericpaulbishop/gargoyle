@@ -642,7 +642,7 @@ void** destroy_long_map(long_map* map, int destruction_type, unsigned long* num_
 	}
 	while(map->num_elements > 0)
 	{
-		unsigned long smallest_key;
+		unsigned long smallest_key = 0;
 		void* removed_value = remove_smallest_long_map_element(map, &smallest_key);
 		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 		{
@@ -687,7 +687,7 @@ static void** destroy_long_map_values(long_map* map, int destruction_type, unsig
 	}
 	while(map->num_elements > 0)
 	{
-		unsigned long smallest_key;
+		unsigned long smallest_key = 0;
 		void* removed_value = remove_smallest_long_map_element(map, &smallest_key);
 		if(destruction_type == DESTROY_MODE_RETURN_VALUES)
 		{
