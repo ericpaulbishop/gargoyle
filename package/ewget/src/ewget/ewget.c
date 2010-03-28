@@ -7,7 +7,7 @@
 
 void print_usage_and_exit(char* pname);
 
-int main(int argc, char** argv)
+void main(int argc, char** argv)
 {
 	int c;
 	char* user_agent = NULL;
@@ -37,28 +37,36 @@ int main(int argc, char** argv)
 		http_response* r = get_url(argv[optind], user_agent);
 		if(r == NULL)
 		{
-			fprintf(stderr, "Could Not Fetch URL\n\n");
+			fprintf(stderr, "Could Not Fetch URL\n");
 		}
 		else if(r->data == NULL)
 		{
-			fprintf(stderr, "URL contains no data\n\n");
+			fprintf(stderr, "URL contains no data\n");
 		}
-		else
+		else if(strcmp(out_file, "-") == 0)
 		{
-			FILE* out = (strcmp(out_file, "-") == 0) ? stdout : fopen(out_file, "w");
+			printf("%s", r->data);
+		}
+		else 
+		{
+			FILE* out = fopen(out_file, "w");
 			if(out == NULL)
 			{
-				fprintf(stderr, "Could not write to specified file.\n\n");
+				fprintf(stderr, "Could not write to specified file.\n");
 			}
 			else
 			{
 				fprintf(out, "%s", r->data);
-				printf("\n");
 				fclose(out);
 			}
 		}
+		if(r != NULL)
+		{
+			free_http_response(r);
+		}
 	}
-	return 0;
+	printf("\n");
+	exit(0);
 }
 
 
