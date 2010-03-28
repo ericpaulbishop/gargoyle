@@ -50,7 +50,8 @@ endif
 
 LIBS:=
 SSL_DEFS:=
-SSL_OBJ:=
+SSL_OBJ_DYN:=
+SSL_OBJ_STATIC:=
 
 ifeq ($(USE_CYASSL), 1)
 	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
@@ -64,7 +65,8 @@ endif
 ifeq ($(USE_MATRIXSSL), 1)
 	SSL_DEFS:= -DUSE_MATRIXSSL  -DHAVE_SSL 
 	LIBS:=$(LIBS) -lmatrixssl
-	SSL_OBJ=matrixssl_helper.o
+	SSL_OBJ_DYN=matrixssl_helper_dyn.o
+	SSL_OBJ_STATIC=matrixssl_helper_static.o
 	USE_CYASSL=
 	USE_OPENSSL=
 	
@@ -86,13 +88,13 @@ all: libewget.a libewget.$(SHLIB_EXT)
 
 
 
-libewget.a: libewget_static.o
+libewget.a: libewget_static.o $(SSL_OBJ_STATIC)
 	if [ -e $@ ] ; then rm $@ ; fi
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 	
 
-libewget.$(SHLIB_EXT) : libewget_dyn.o
+libewget.$(SHLIB_EXT) : libewget_dyn.o $(SSL_OBJ_DYN)
 	if [ -e libewget.$(SHLIB_EXT) ] ; then rm libewget.$(SHLIB_EXT)* ; fi
 	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc $(LIBS)
 	ln -s $(SHLIB_FILE) libewget.$(SHLIB_EXT)
