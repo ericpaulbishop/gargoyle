@@ -87,7 +87,7 @@ static char* dynamic_strcat(int num_strs, ...);  /* multi string concatenation f
 static void to_lowercase(char* str);
 static char* dynamic_replace(char* template, char* old, char* new);
 #endif
-static char* http_unescape(char* escaped);
+static char* http_unescape(const char* escaped);
 
 
 
@@ -387,24 +387,42 @@ void free_url_request(url_request* url)
  **********************************************/
 
 
-static char *http_unescape(char *escaped)
+/* substitute [%00 - %ff] with related Glyph char */
+static char* http_unescape(const char* escaped)
 {
-	/* be sure to do '%' last, to avoid much craziness */
-	char escape_chars[] = { '#', '\t', ' ', '<', '>', '{', '}', '|', '\\', '^', '~', '[', ']', '`', ';', '/', '?', ':', '@', '=', '&', '$', '%', '\0' };
 	char* unescaped = strdup(escaped);
-	int ec_index=0;
+	char* s = (char*)escaped;
 
-	for(ec_index=0; escape_chars[ec_index] != '\0'; ec_index++)
-	{
-		char old[4];
-		char new[2];
-		char* new_unescaped;
-		sprintf(old, "%%%.2x", escape_chars[ec_index]);
-		sprintf(new, "%c", escape_chars[ec_index]);
-		new_unescaped = dynamic_replace(unescaped, old, new);
-		free(unescaped);
-		unescaped = new_unescaped;
+	char old[4];
+	char new[2];
+	char* new_unescaped;
+
+	while( *s != '\0')
+	{  
+		/* hex-encoded char found*/
+		if(*s == '%')
+		{
+		       	int new_char_num;
+			strncpy(old, s, 3);
+			old[3] = '\0';
+			sscanf(old+1, "%2X", &new_char_num);
+			if('%' != (char)new_char_num)
+			{
+				sprintf(new, "%c", (char)new_char_num);
+				new_unescaped = dynamic_replace(unescaped, old, new);
+				free(unescaped);
+				unescaped = new_unescaped;
+			}
+		}
+		s = *s == '%' ? s+3 : s+1;
 	}
+
+	/* be sure to do '%' LAST, otherwise everthing gets FUBAR */
+	sprintf(old, "%%%.2X", (int)'%');
+	sprintf(new, "%c", '%');
+	new_unescaped = dynamic_replace(unescaped, old, new);
+	free(unescaped);
+	unescaped = new_unescaped;
 
 	return unescaped;
 }
