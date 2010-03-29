@@ -347,7 +347,7 @@ function proofreadAll()
 	errors = proofreadFields(dhcpIds, labelIds, functions, returnCodes, visibilityIds);
 
 	//test that dhcp range is within subnet
-	if(errors.length == 0)
+	if(errors.length == 0 && document.getElementById("dhcp_enabled").checked)
 	{
 		var dhcpSection = getDhcpSection(uciOriginal);
 		var mask = uciOriginal.get("network", "lan", "netmask");
