@@ -879,15 +879,16 @@ static void encode_block_base64( unsigned char in[3], unsigned char out[4], int 
 
 #ifndef USE_ERICS_TOOLS
 
-static char *dynamic_replace(char *s, char *old, char *new)
+
+char* dynamic_replace(char* template_str, char* old, char* new)
 {
 	char *ret;
 	int i, count = 0;
 	int newlen = strlen(new);
 	int oldlen = strlen(old);
 
-	char* dyn_s = strdup(s);
-	s = dyn_s;
+	char* dyn_template = strdup(template_str);
+	char* s = dyn_template;
 	for (i = 0; s[i] != '\0'; i++)
 	{
 		if (strstr(&s[i], old) == &s[i])
@@ -913,10 +914,11 @@ static char *dynamic_replace(char *s, char *old, char *new)
 		}
 	}
 	ret[i] = '\0';
-	free(dyn_s);
+	free(dyn_template);
 
 	return ret;
 }
+
 
 static void to_lowercase(char* str)
 {

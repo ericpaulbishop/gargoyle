@@ -375,6 +375,7 @@ char* join_strs(char* separator, char** parts, int max_parts, int free_parts, in
 	return joined;
 }
 
+
 char* dynamic_replace(char* template_str, char* old, char* new)
 {
 	char *ret;
@@ -382,7 +383,8 @@ char* dynamic_replace(char* template_str, char* old, char* new)
 	int newlen = strlen(new);
 	int oldlen = strlen(old);
 
-	char* s = strdup(template_str);
+	char* dyn_template = strdup(template_str);
+	char* s = dyn_template;
 	for (i = 0; s[i] != '\0'; i++)
 	{
 		if (strstr(&s[i], old) == &s[i])
@@ -408,11 +410,10 @@ char* dynamic_replace(char* template_str, char* old, char* new)
 		}
 	}
 	ret[i] = '\0';
-	free(s);
+	free(dyn_template);
 
 	return ret;
 }
-
 
 
 
