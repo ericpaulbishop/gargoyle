@@ -7,7 +7,7 @@
 
 void print_usage_and_exit(char* pname);
 
-void main(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	int c;
 	char* user_agent = NULL;
@@ -67,6 +67,8 @@ void main(int argc, char** argv)
 	}
 	printf("\n");
 	exit(0);
+
+	return 0;
 }
 
 

@@ -1028,7 +1028,7 @@ static void* initialize_connection_https(char* host, int port)
 		SSL* ssl = NULL;
 		SSL_CTX *ctx = NULL;
 		#ifdef USE_OPENSSL
-			SSL_METHOD* meth;
+			const SSL_METHOD* meth;
 			SSL_library_init();
 			SSL_load_error_strings();
 			
