@@ -340,7 +340,7 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 function proofreadAll()
 {
 	dhcpIds = ['dhcp_start', 'dhcp_end', 'dhcp_lease'];
-	labelIds= ['dhcp_start_label', 'dhcp_end_label, dhcp_lease_label'];
+	labelIds= ['dhcp_start_label', 'dhcp_end_label', 'dhcp_lease_label'];
 	functions = [validateNumeric, validateNumeric, validateNumeric];
 	returnCodes = [0,0,0];
 	visibilityIds= dhcpIds;
