@@ -5,6 +5,7 @@
 #
 
 START=50
+
 EXTRA_COMMANDS=show
 EXTRA_HELP="	show	Show current Qos configuration (if active)"
 
@@ -12,6 +13,9 @@ include /lib/network
 include /usr/lib/gargoyle_firewall_util
 
 config_file_name="qos_gargoyle"
+upload_mask="0x007F"
+download_mask="0x7F00"
+qos_mark_file="/etc/qos_class_marks"
 
 load_all_config_options()
 {
@@ -126,7 +130,7 @@ apply_all_rules()
 	local class_mark_list="$2"
 	local chain="$3"
 	local table="$4"
-	
+
 	local need_proto
 	local tmp_proto
 
@@ -228,33 +232,41 @@ apply_all_rules()
 }
 
 
+update_markfile()
+{
 
+	#re-populate per the QoS setup.
+	if [ $total_upload_bandwidth -ge 0 ] ; then
+	
+     		upload_class_list=$(load_all_config_sections "$config_file_name" "upload_class")
+
+		next_class_index=2
+		for uclass_name in $upload_class_list ; do
+			printf "upload $uclass_name %d $upload_mask\n" $next_class_index >> $qos_mark_file
+ 			next_class_index=$(($next_class_index+1))
+		done
+	fi
+
+	if [ $total_download_bandwidth -ge 0 ] ; then
+
+     		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
+
+		next_class_index=2
+		for dclass_name in $download_class_list ; do
+			printf "download $dclass_name %d $download_mask\n" $next_class_index >> $qos_mark_file
+ 			next_class_index=$(($next_class_index+1))
+		done
+	fi
+
+}
 
 
 
 initialize_qos()
 {
+
 	#initialize layer7_marker if necessary
 	create_l7marker_chain
-
-	#load global variables
-	load_all_config_options "$config_file_name" "global"
-
-	#load qos_interface from global variables
-	if [ -z "$interface" ] ; then
-		#scan_interfaces
-		#config_get qos_interface $network ifname
-		qos_interface=$(uci -P "/var/state" get network.$network.ifname)
-	else
-		qos_interface="$interface"
-	fi
-
-	#load mtu from global variables
-	if [ -z "$mtu" ] ; then
-		max_trans_unit=1500
-	else
-		max_trans_unit="$mtu"
-	fi
 
 	# Now, load/insert necessary kernel modules
 	# The following packages are required for the modules:
@@ -286,18 +298,13 @@ initialize_qos()
 	insmod ipt_DSCP >&- 2>&-
 	insmod sch_red >&- 2>&-
 
-	# Remove existing queuing disciplines from all interfaces
-	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
-		tc qdisc del dev "$iface" root
-	done
-	for iface in $(tc qdisc show | grep htb | awk '{print $5}'); do
-		tc qdisc del dev "$iface" root
-	done
+	#load mtu from global variables
+	if [ -z "$mtu" ] ; then
+		max_trans_unit=1500
+	else
+		max_trans_unit="$mtu"
+	fi
 
-
-	# eliminate existing rules in mangle table
-	delete_chain_from_table "mangle" "qos_egress"
-	delete_chain_from_table "mangle" "qos_ingress"
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
@@ -307,25 +314,6 @@ initialize_qos()
 		total_upload_bandwidth=-1
 	fi
 	upload_default_class="$default_class"
-
-
-	#load download variables
-	total_bandwidth=""
-	default_class=""
-	load_all_config_options "$config_file_name" "download"
-	if [ -n "$total_bandwidth" ] ; then
-		total_download_bandwidth="$total_bandwidth"
-	else
-		total_download_bandwidth=-1
-	fi
-	download_default_class="$default_class"
-
-
-	#remove old mark file if it exists
-	qos_mark_file="/etc/qos_class_marks"
-	if [ -e "$qos_mark_file" ] ; then
-		rm "$qos_mark_file"
-	fi
 
 	if [ $total_upload_bandwidth -ge 0 ] ; then
 
@@ -359,7 +347,7 @@ initialize_qos()
 		# This is being set to max bandwidth possible on a connection (right now that's about 1Gbit, we can increase later if necessary)
 		# Only ratio of child ls rates is important -- bounding is done by the ul parameter, since hfsc takes min of ls and ul
 		# This means we can just multiply percents by 10 in child nodes to get what ls curves for each should be
-		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the 
+		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the
 		# child or any of the parent nodes
 		#
 		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
@@ -368,7 +356,6 @@ initialize_qos()
 		fi
 
 		class_mark_list=""
-		upload_mask="0x007F"
 		upload_shift=0
 		next_class_index=2
 		next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
@@ -398,23 +385,33 @@ initialize_qos()
 			if [ "$max_bandwidth" -ge 0 ] ; then
 				ul_str=" ul m2 ${max_bandwidth}kbit"
 			else
-				max_bandwidth=1000
+				max_bandwidth="$total_upload_bandwidth"
 			fi
 
 			#We setup red dqisc mostly based on the advice at http://www.opalsoft.net/qos/DS-26.htm with
 			#the exception that we increase the probability to 0.1 per http://www.icir.org/floyd/REDfunc.txt
-			#Also I crank the queue limit down because we have RAM limitations here amd I'm afraid.
-			#tbw is 25% of the maximum download bandwidth for the class and converted from bps to byte/sec.
-              	tbw=$(($max_bandwidth*$total_download_bandwidth*25/800));
+			#Also I crank the queue limit down because we have RAM limitations here and I'm afraid.
+                     #Finally, setup for 200ms propagation delay rather than 500ms,
+                     #
+			#tbw is the RED queue 'max' which is specified in bytes and computed from the maximum class upload 
+                     #bandwidth (max_bandwidth kbps) and a maximum propagation delay of 200ms in the queue.
+			tbw=$(($max_bandwidth*200/8));
+
+                     #To avoid parameter errors with RED queues we need to enforce the following two constraints.
+                     # min/avpkt >= 1, Since avpkt is fixed at 1000, min >= 1000 => tbw >= 3000
+                     # burst > min/avpkt, this one is never violated because burst is set to (2*min+max)/3000 => 5*tbw/9000
+			if [ "$tbw" -lt 3000 ] ; then
+				tbw=3000
+                     fi
 
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1
+			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
 				echo "tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
-				echo "tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1"
+				echo "tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))"
 				echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 			fi
 
@@ -437,7 +434,7 @@ initialize_qos()
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
 
-		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle" 
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
 
 		#set default class mark if we haven't matched anything
 		iptables -t mangle -A qos_egress -m mark --mark 0x0 -j MARK --set-mark $def_upload_class
@@ -445,17 +442,19 @@ initialize_qos()
 		# save current mark to connmark
 		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
 
-
-
-		#save which mark is associated with which traffic class
-		for mark_def in $class_mark_list ; do
-			id_part=$(echo $mark_def | sed 's/:.*$//g')
-			next_mark=$(echo $mark_def | sed 's/^.*://g')
-			printf "upload $id_part %d $upload_mask\n" $next_mark >> /tmp/tmp_qos_mark
-		done
-
 	fi
 
+
+	#load download variables
+	total_bandwidth=""
+	default_class=""
+	load_all_config_options "$config_file_name" "download"
+	if [ -n "$total_bandwidth" ] ; then
+		total_download_bandwidth="$total_bandwidth"
+	else
+		total_download_bandwidth=-1
+	fi
+	download_default_class="$default_class"
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
 		# Set up the InterMediate Queuing device (IMQ)
@@ -464,15 +463,6 @@ initialize_qos()
 		# Attach ingress queuing discipline to IMQ interface
 		tc qdisc add dev imq0 root handle 1:0 hfsc default 10
 
-		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
-		#
-		# A detailed explanation of how/why ls is being set is warranted here...
-		# This is being set to max bandwidth possible on a connection (right now that's about 1Gbit, we can increase later if necessary)
-		# Only ratio of child ls rates is important -- bounding is done by the ul parameter, since hfsc takes min of ls and ul
-		# This means we can just multiply percents by 10 in child nodes to get what ls curves for each should be
-		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the 
-		# child or any of the parent nodes
-		#
 		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit
 		if [ -n "$dbg" ] ; then
 			echo "tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit"
@@ -501,7 +491,6 @@ initialize_qos()
 
 
 		class_mark_list=""
-		download_mask="0x7F00"
 		download_shift=8
 		next_class_index=2
 		next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
@@ -531,19 +520,22 @@ initialize_qos()
 			if [ "$max_bandwidth" -ge 0 ] ; then
 				ul_str=" ul m2 ${max_bandwidth}kbit"
 			else
-				max_bandwidth=1000
+				max_bandwidth="$total_download_bandwidth"
 			fi
 
-              	tbw=$(($max_bandwidth*$total_download_bandwidth*25/800));
+			tbw=$(($max_bandwidth*200/8));
+			if [ "$tbw" -lt 3000 ] ; then
+				tbw=3000
+                     fi
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1
+			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
 				echo "tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
-				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((3*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst 19 probability 0.1"
+				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))"
 				echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
 			fi
 
@@ -574,26 +566,15 @@ initialize_qos()
 		#pass traffic through IMQ
 		iptables -t mangle -I qos_ingress -j IMQ --todev 0
 
-		
 		#set default class mark if we haven't matched anything
 		iptables -t mangle -A qos_ingress -m mark --mark 0x0 -j MARK --set-mark $def_download_class
 
 		#save current mark to connmark
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
 
-
-		#save which mark is associated with which traffic class
-		for mark_def in $class_mark_list ; do
-			id_part=$(echo $mark_def | sed 's/:.*$//g')
-			next_mark=$(echo $mark_def | sed 's/^.*://g')
-			printf "download $id_part %d $download_mask\n" $next_mark >> /tmp/tmp_qos_mark
-		done
-
 	fi
 
-	if [ -e /tmp/tmp_qos_mark ] ; then
-		mv /tmp/tmp_qos_mark $qos_mark_file
-	fi
+	update_markfile
 
 	if [ -n "$dbg" ] ; then
 		iptables -t mangle -vnL
@@ -614,27 +595,6 @@ initialize_qos()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-start()
-{
-	initialize_qos
-}
-
-restart()
-{
-	dbg="1"
-	initialize_qos
-}
-
 stop()
 {
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
@@ -644,6 +604,40 @@ stop()
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
+
+}
+
+
+start()
+{
+	stop
+
+	load_all_config_options "$config_file_name" "global"
+
+	#load qos_interface from global variables
+	if [ -z "$1" ] ; then
+	   if [ -z "$interface" ] ; then
+		qos_interface=$(uci -P "/var/state" get network.$network.ifname)
+	   else
+		qos_interface="$interface"
+	   fi
+	else
+	     qos_interface="$1"
+	fi
+
+	#remove old mark file if it exists
+	#New one will be built during QoS setup
+	if [ -e "$qos_mark_file" ] ; then
+		rm "$qos_mark_file"
+	fi
+
+      	initialize_qos
+}
+
+restart()
+{
+	dbg="1"
+	start "$1"
 }
 
 show()
@@ -660,18 +654,43 @@ show()
 		qos_interface="$interface"
 	fi
 
-	echo "Ingress configuration in imq0"
-	iptables -t mangle -vnL qos_ingress 2>/dev/null
-	tc -s qdisc show dev imq0
-	tc -s class show dev imq0
-	tc -s filter show dev imq0
-
 	echo "Egress configuration on $qos_interface"
 	iptables -t mangle -vnL qos_egress 2>/dev/null
 	tc -s qdisc show dev $qos_interface
 	tc -s class show dev $qos_interface
 	tc -s filter show dev $qos_interface
 
+	echo "Ingress configuration in imq0"
+	iptables -t mangle -vnL qos_ingress 2>/dev/null
+	tc -s qdisc show dev imq0
+	tc -s class show dev imq0
+	tc -s filter show dev imq0
+
 	return 0
 }
 
+
+boot()
+{
+	#boot() is called during the openwrt boot process but only if 
+	#qos_gargoyle was previously enabled.  The fact that we got here
+	#means it is enabled and we are booting.  The purpose now is 
+	#to create the mark file which is needed by the bwmon script 
+	#which executes later in the boot process.
+
+	total_bandwidth=-1
+	load_all_config_options "$config_file_name" "upload"
+	total_upload_bandwidth=$total_bandwidth
+
+	total_bandwidth=-1
+	load_all_config_options "$config_file_name" "download"
+	total_download_bandwidth="$total_bandwidth"
+
+	#remove old mark file if it exists
+	if [ -e "$qos_mark_file" ] ; then
+		rm "$qos_mark_file"
+	fi
+
+	#make a new one.
+	update_markfile
+}
