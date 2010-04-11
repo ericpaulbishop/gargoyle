@@ -253,7 +253,7 @@ update_markfile()
 
 		next_class_index=2
 		for dclass_name in $download_class_list ; do
-			printf "download $dclass_name %d $download_mask\n" $next_class_index >> $qos_mark_file
+			printf "download $dclass_name %d $download_mask\n" $(($next_class_index << 8)) >> $qos_mark_file
  			next_class_index=$(($next_class_index+1))
 		done
 	fi
