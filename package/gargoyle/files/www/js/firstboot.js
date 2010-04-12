@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -23,10 +23,11 @@ function setInitialSettings()
 	{
 
 		setControlsEnabled(false, true);
-
+		
 		var saveCommands = "";
 		var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
-		saveCommands = "(echo \"" + p1 + "\" ; sleep 1 ; echo \"" + p1 + "\") | passwd root \n";
+		var escapedPassword = p1.replace(/'/, "'\"'\"'");
+		saveCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
 		saveCommands = saveCommands + "\nuci set system.@system[0].timezone=\'" + getSelectedValue("timezone") + "\'\n";
 		saveCommands = saveCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
 		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ 2>/dev/null\n";

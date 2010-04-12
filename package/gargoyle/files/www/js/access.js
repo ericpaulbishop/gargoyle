@@ -108,7 +108,8 @@ function saveChanges()
 		newPassword = document.getElementById("password1").value; 
 		if(newPassword != "")
 		{
-			passwordCommands = "(echo \"" + newPassword + "\" ; sleep 1 ; echo \"" + newPassword + "\") | passwd root \n";
+			var escapedPassword = newPassword.replace(/'/, "'\"'\"'");
+			passwordCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
 			dropBearRestart = "/etc/init.d/dropbear restart\n"; 
 		}
 
