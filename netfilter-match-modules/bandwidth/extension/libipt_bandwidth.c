@@ -31,17 +31,38 @@
 #include <sys/time.h>
 #include <limits.h>
 
-//in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
-//we can use to check whether we need to deal with the new requirements
-//in pre-processor directives below
+/*
+ * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
+ * we can use to check whether we need to deal with the new requirements
+ * in pre-processor directives below
+ */
 #include <iptables.h>  
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>
+
+#ifdef _XTABLES_H
+	#define iptables_rule_match	xtables_rule_match
+	#define iptables_match		xtables_match
+	#define iptables_target		xtables_target
+	#define ipt_tryload		xt_tryload
+#endif
+
+/* 
+ * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
+ * also require the use of xtables_register_match
+ * 
+ * Version 1.4.0 uses register_match like previous versions
+ */
+#ifdef XTABLES_VERSION_CODE 
+	#define register_match          xtables_register_match
+#endif
+
+
 
 int get_minutes_west(void);
 void set_kernel_timezone(void);
 int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask);
 static unsigned long get_pow(unsigned long base, unsigned long pow);
-
+static void param_problem_exit_error(char* msg);
 
 
 /* Function which prints out usage message. */
@@ -97,7 +118,7 @@ static int parse(	int c,
 {
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)(*match)->data;
 	int valid_arg = 0;
-	int num_read;
+	long int num_read;
 	uint64_t read_64;
 	time_t read_time;
 
@@ -301,13 +322,13 @@ static int parse(	int c,
 		  )
 		{
 			valid_arg = 0;
-			exit_error(PARAMETER_PROBLEM, "Parameter for '--reset_time' is not in valid range");
+			param_problem_exit_error("Parameter for '--reset_time' is not in valid range");
 		}
 	}
 	if(info->type != BANDWIDTH_COMBINED && (*flags & BANDWIDTH_CURRENT) == BANDWIDTH_CURRENT)
 	{
-			valid_arg = 0;
-			exit_error(PARAMETER_PROBLEM, "You may only specify current bandwidth for combined type\n  Use user-space library for setting bandwidth for individual types");
+		valid_arg = 0;
+		param_problem_exit_error("You may only specify current bandwidth for combined type\n  Use user-space library for setting bandwidth for individual types");
 	}
 
 	return valid_arg;
@@ -430,7 +451,7 @@ static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
 		}
 		if(info->num_intervals_to_save > 0)
 		{
-			printf("--intervals_to_save %ld ", info->num_intervals_to_save);
+			printf("--intervals_to_save %d ", info->num_intervals_to_save);
 		}
 	}
 }
@@ -442,15 +463,15 @@ static void final_check(unsigned int flags)
 {
 	if (flags == 0)
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify at least one argument. ");
+		param_problem_exit_error("You must specify at least one argument. ");
 	}
 	if( (flags & BANDWIDTH_RESET_INTERVAL) == 0 && (flags & BANDWIDTH_RESET_TIME) != 0)
 	{
-		exit_error(PARAMETER_PROBLEM, "You may not specify '--reset_time' without '--reset_interval' ");
+		param_problem_exit_error("You may not specify '--reset_time' without '--reset_interval' ");
 	}
 	if( (flags & BANDWIDTH_REQUIRES_SUBNET) == BANDWIDTH_REQUIRES_SUBNET && (flags & BANDWIDTH_SUBNET) == 0 )
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify a local subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
+		param_problem_exit_error("You must specify a local subnet (--subnet a.b.c.d/mask) to match individual local/remote IPs ");
 	}
 
 	/* update timezone minutes_west in kernel to match userspace*/
@@ -506,6 +527,14 @@ void _init(void)
 	register_match(&bandwidth);
 }
 
+static void param_problem_exit_error(char* msg)
+{
+	#ifdef xtables_error
+		xtables_error(PARAMETER_PROBLEM, msg);
+	#else
+		exit_error(PARAMETER_PROBLEM, msg);
+	#endif
+}
 
 /* 
  * implement a simple function to get positive powers of positive integers so we don't have to mess with math.h 
@@ -524,8 +553,8 @@ int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask)
 
 	int valid = 0;
 	unsigned int A,B,C,D,E,F,G,H;
-	int read = sscanf(subnet_string, "%u.%u.%u.%u/%u.%u.%u.%u", &A, &B, &C, &D, &E, &F, &G, &H);
-	if(read >= 5)
+	int read_int = sscanf(subnet_string, "%u.%u.%u.%u/%u.%u.%u.%u", &A, &B, &C, &D, &E, &F, &G, &H);
+	if(read_int >= 5)
 	{
 		if( A <= 255 && B <= 255 && C <= 255 && D <= 255)
 		{
@@ -537,7 +566,7 @@ int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask)
 			*( sub + 2 ) = (unsigned char)C;
 			*( sub + 3 ) = (unsigned char)D;
 
-			if(read == 5)
+			if(read_int == 5)
 			{
 				unsigned int mask = E;
 				if(mask <= 32)
@@ -555,7 +584,7 @@ int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask)
 				}
 				valid = 1;
 			}
-			if(read == 8)
+			if(read_int == 8)
 			{
 				if( E <= 255 && F <= 255 && G <= 255 && H <= 255)
 				*( msk ) = (unsigned char)E;
