@@ -119,24 +119,26 @@ EOF
 
 	cat << 'EOF' >>nf-patch-build/linux-download-make
 include $(INCLUDE_DIR)/kernel-version.mk
-GENERIC_PLATFORM_DIR := $(TOPDIR)/target/linux/generic-$(KERNEL)
+KERNEL_NAME:=$(shell echo "$(KERNEL)" | sed 's/ /\./g' |  sed 's/\.$$//g' )
+KERNEL_PATCHVER_NAME:=$(shell echo "$(KERNEL_PATCHVER)" | sed 's/ /\./g' |  sed 's/\.$$//g' )
+
+GENERIC_PLATFORM_DIR := $(TOPDIR)/target/linux/generic-$(KERNEL_NAME)
 PLATFORM_DIR:=$(TOPDIR)/target/linux/$(BOARD)
-GENERIC_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/patches$(shell [ -d "$(GENERIC_PLATFORM_DIR)/patches-$(KERNEL_PATCHVER)" ] && printf -- "-$(KERNEL_PATCHVER)" || true )
-GENERIC_FILES_DIR := $(GENERIC_PLATFORM_DIR)/files$(shell [ -d "$(GENERIC_PLATFORM_DIR)/files-$(KERNEL_PATCHVER)" ] && printf -- "-$(KERNEL_PATCHVER)" || true )
-GENERIC_LINUX_CONFIG:=$(firstword $(wildcard $(GENERIC_PLATFORM_DIR)/config-$(KERNEL_PATCHVER) $(GENERIC_PLATFORM_DIR)/config-default))
-PATCH_DIR := $(PLATFORM_DIR)/patches$(shell [ -d "$(PLATFORM_DIR)/patches-$(KERNEL_PATCHVER)" ] && printf -- "-$(KERNEL_PATCHVER)" || true )
-FILES_DIR := $(PLATFORM_DIR)/files$(shell [ -d "$(PLATFORM_DIR)/files-$(KERNEL_PATCHVER)" ] && printf -- "-$(KERNEL_PATCHVER)" || true )
-LINUX_CONFIG:=$(firstword $(wildcard $(foreach subdir,$(PLATFORM_DIR) $(PLATFORM_SUBDIR),$(subdir)/config-$(KERNEL_PATCHVER) $(subdir)/config-default)) $(PLATFORM_DIR)/config-$(KERNEL_PATCHVER))
+GENERIC_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/patches$(shell [ -d "$(GENERIC_PLATFORM_DIR)/patches-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
+GENERIC_FILES_DIR := $(GENERIC_PLATFORM_DIR)/files$(shell [ -d "$(GENERIC_PLATFORM_DIR)/files-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
+GENERIC_LINUX_CONFIG:=$(firstword $(wildcard $(GENERIC_PLATFORM_DIR)/config-$(KERNEL_PATCHVER_NAME) $(GENERIC_PLATFORM_DIR)/config-default))
+PATCH_DIR := $(PLATFORM_DIR)/patches$(shell [ -d "$(PLATFORM_DIR)/patches-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
+FILES_DIR := $(PLATFORM_DIR)/files$(shell [ -d "$(PLATFORM_DIR)/files-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
+LINUX_CONFIG:=$(firstword $(wildcard $(foreach subdir,$(PLATFORM_DIR) $(PLATFORM_SUBDIR),$(subdir)/config-$(KERNEL_PATCHVER_NAME) $(subdir)/config-default)) $(PLATFORM_DIR)/config-$(KERNEL_PATCHVER_NAME))
 LINUX_DIR:=linux
 PKG_BUILD_DIR:=$(LINUX_DIR)
 TARGET_BUILD:=1
 LINUX_SOURCE:=linux-$(LINUX_VERSION).tar.bz2
 TESTING:=$(if $(findstring -rc,$(LINUX_VERSION)),/testing,)
-KERNEL_NAME:=$(shell echo "$(LINUX_VERSION)" | sed 's/\./ /g' | awk '{ print $$1"."$$2 }' )
+
 LINUX_SITE:=http://www.us.kernel.org/pub/linux/kernel/v$(KERNEL_NAME)$(TESTING) \
            http://www.kernel.org/pub/linux/kernel/v$(KERNEL_NAME)$(TESTING) \
            http://www.de.kernel.org/pub/linux/kernel/v$(KERNEL_NAME)$(TESTING)
-
 
 
 define filter_series
@@ -145,8 +147,6 @@ endef
 
 
 all:
-	echo "$(KERNEL)"
-	echo "$(KERNEL_NAME)"
 	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_MD5SUM) $(LINUX_SITE) ; fi ; 
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
 	tar xjf $(LINUX_SOURCE)
@@ -184,8 +184,8 @@ EOF
 	echo '	tar xjf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
 	echo '	rm *.bz2' >>nf-patch-build/iptables-download-make
 	echo '	mv iptables* iptables' >>nf-patch-build/iptables-download-make
-	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/iptables/patches/$(PKG_VERSION)' >>nf-patch-build/iptables-download-make
-	echo '	echo $(TOPDIR)/package/iptables/patches/$(PKG_VERSION) > iptables-patch-dir' >>nf-patch-build/iptables-download-make
+	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/iptables/patches/' >>nf-patch-build/iptables-download-make
+	echo '	echo $(TOPDIR)/package/iptables/patches/ > iptables-patch-dir' >>nf-patch-build/iptables-download-make
 fi
 
 cd nf-patch-build
