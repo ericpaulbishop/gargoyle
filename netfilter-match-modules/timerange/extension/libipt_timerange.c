@@ -28,12 +28,35 @@
 #include <time.h>
 #include <sys/time.h>
 
-//in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
-//we can use to check whether we need to deal with the new requirements
-//in pre-processor directives below
+
+/*
+ * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
+ * we can use to check whether we need to deal with the new requirements
+ * in pre-processor directives below
+ */
 #include <iptables.h>  
 #include <linux/netfilter_ipv4/ipt_timerange.h>
 
+#ifdef _XTABLES_H
+	#define iptables_rule_match	xtables_rule_match
+	#define iptables_match		xtables_match
+	#define iptables_target		xtables_target
+	#define ipt_tryload		xt_tryload
+#endif
+
+/* 
+ * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
+ * also require the use of xtables_register_match
+ * 
+ * Version 1.4.0 uses register_match like previous versions
+ */
+#ifdef XTABLES_VERSION_CODE 
+	#define register_match          xtables_register_match
+#endif
+
+/* utility functions necessary for module to work across multiple iptables versions */
+static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc);
+static void param_problem_exit_error(char* msg);
 
 
 long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range);
@@ -81,7 +104,7 @@ static int parse(	int c,
 	int valid_arg = 0;
 	if(*flags == 0)
 	{
-		check_inverse(optarg, &invert, &optind, 0);
+		my_check_inverse(optarg, &invert, &optind, 0);
 		info->invert = invert ? 1 : 0;
 	}
 
@@ -211,7 +234,7 @@ static void final_check(unsigned int flags)
 {
 	if(flags ==0)
 	{
-		exit_error(PARAMETER_PROBLEM, "Invalid arguments to time_range");
+		param_problem_exit_error("Invalid arguments to time_range");
 	}
 
 	/* update timezone minutes_west in kernel to match userspace*/
@@ -262,7 +285,41 @@ void _init(void)
 	register_match(&timerange);
 }
 
-
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc)
+{
+	if (option && strcmp(option, "!") == 0)
+	{
+		if (*invert)
+		{
+			param_problem_exit_error("Multiple `!' flags not allowed");
+		}
+		*invert = TRUE;
+		if (my_optind != NULL)
+		{
+			++*my_optind;
+			if (argc && *my_optind > argc)
+			{
+				param_problem_exit_error("no argument following `!'");
+			}
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+static void param_problem_exit_error(char* msg)
+{
+	#ifdef xtables_error
+		xtables_error(PARAMETER_PROBLEM, msg);
+	#else
+		exit_error(PARAMETER_PROBLEM, msg);
+	#endif
+}
 
 /* takes a string of days e.g. "Monday, Tuesday, Friday", and turns into an array of 7 longs
  * each 0 or 1, one for each weekday starting with sunday, e.g. [0,1,1,0,0,1,0] for our example 
@@ -591,7 +648,7 @@ void to_lowercase(char* str)
 }
 
 /*
- * line is the line to be parsed -- it is not modified in any way
+ * line_str is the line to be parsed -- it is not modified in any way
  * max_pieces indicates number of pieces to return, if negative this is determined dynamically
  * include_remainder_at_max indicates whether the last piece, when max pieces are reached, 
  * 	should be what it would normally be (0) or the entire remainder of the line (1)
@@ -602,11 +659,11 @@ void to_lowercase(char* str)
  * result is dynamically allocated, MUST be freed after call-- even if 
  * line is empty (you still get a valid char** pointer to to a NULL char*)
  */
-char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max)
+char** split_on_separators(char* line_str, char* separators, int num_separators, int max_pieces, int include_remainder_at_max)
 {
 	char** split;
 
-	if(line != NULL)
+	if(line_str != NULL)
 	{
 		int split_index;
 		int non_separator_found;
@@ -618,13 +675,13 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 			/* count number of separator characters in line -- this count + 1 is an upperbound on number of pieces */
 			int separator_count = 0;
 			int line_index;
-			for(line_index = 0; line[line_index] != '\0'; line_index++)
+			for(line_index = 0; line_str[line_index] != '\0'; line_index++)
 			{
 				int sep_index;
 				int found = 0;
 				for(sep_index =0; found == 0 && sep_index < num_separators; sep_index++)
 				{
-					found = separators[sep_index] == line[line_index] ? 1 : 0;
+					found = separators[sep_index] == line_str[line_index] ? 1 : 0;
 				}
 				separator_count = separator_count+ found;
 			}
@@ -635,7 +692,7 @@ char** split_on_separators(char* line, char* separators, int num_separators, int
 		split[split_index] = NULL;
 
 
-		dup_line = strdup(line);
+		dup_line = strdup(line_str);
 		start = dup_line;
 		non_separator_found = 0;
 		while(non_separator_found == 0)
@@ -729,10 +786,10 @@ char* trim_flanking_whitespace(char* str)
 	int num_whitespace_chars = 4;
 	
 	
-	int index = 0;
+	int str_index = 0;
 	int is_whitespace = 1;
 	int test;
-	while( (test = str[index]) != '\0' && is_whitespace == 1)
+	while( (test = str[str_index]) != '\0' && is_whitespace == 1)
 	{
 		int whitespace_index;
 		is_whitespace = 0;
@@ -740,31 +797,31 @@ char* trim_flanking_whitespace(char* str)
 		{
 			is_whitespace = test == whitespace[whitespace_index] ? 1 : 0;
 		}
-		index = is_whitespace == 1 ? index+1 : index;
+		str_index = is_whitespace == 1 ? str_index+1 : str_index;
 	}
-	new_start = index;
+	new_start = str_index;
 
 
-	index = strlen(str) - 1;
+	str_index = strlen(str) - 1;
 	is_whitespace = 1;
-	while( index >= new_start && is_whitespace == 1)
+	while( str_index >= new_start && is_whitespace == 1)
 	{
 		int whitespace_index;
 		is_whitespace = 0;
 		for(whitespace_index = 0; whitespace_index < num_whitespace_chars && is_whitespace == 0; whitespace_index++)
 		{
-			is_whitespace = str[index] == whitespace[whitespace_index] ? 1 : 0;
+			is_whitespace = str[str_index] == whitespace[whitespace_index] ? 1 : 0;
 		}
-		index = is_whitespace == 1 ? index-1 : index;
+		str_index = is_whitespace == 1 ? str_index-1 : str_index;
 	}
-	new_length = str[new_start] == '\0' ? 0 : index + 1 - new_start;
+	new_length = str[new_start] == '\0' ? 0 : str_index + 1 - new_start;
 	
 
 	if(new_start > 0)
 	{
-		for(index = 0; index < new_length; index++)
+		for(str_index = 0; str_index < new_length; str_index++)
 		{
-			str[index] = str[index+new_start];
+			str[str_index] = str[str_index+new_start];
 		}
 	}
 	str[new_length] = 0;
