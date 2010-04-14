@@ -3,7 +3,7 @@
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -26,13 +26,36 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-//in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
-//we can use to check whether we need to deal with the new requirements
-//in pre-processor directives below
+
+/*
+ * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
+ * we can use to check whether we need to deal with the new requirements
+ * in pre-processor directives below
+ */
 #include <iptables.h>  
 #include <linux/netfilter_ipv4/ipt_weburl.h>
 
+#ifdef _XTABLES_H
+	#define iptables_rule_match	xtables_rule_match
+	#define iptables_match		xtables_match
+	#define iptables_target		xtables_target
+	#define ipt_tryload		xt_tryload
+#endif
 
+/* 
+ * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
+ * also require the use of xtables_register_match
+ * 
+ * Version 1.4.0 uses register_match like previous versions
+ */
+#ifdef XTABLES_VERSION_CODE 
+	#define register_match          xtables_register_match
+#endif
+
+
+/* utility functions necessary for module to work across multiple iptables versions */
+static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc);
+static void param_problem_exit_error(char* msg);
 
 
 
@@ -84,7 +107,7 @@ static int parse(	int c,
 			info->match_type = c;
 
 			//test whether to invert rule
-			check_inverse(optarg, &invert, &optind, 0);
+			my_check_inverse(optarg, &invert, &optind, 0);
 			info->invert = invert ? 1 : 0;
 	
 			//test that test string is reasonable length, then to info
@@ -95,16 +118,18 @@ static int parse(	int c,
 			}
 			else if(testlen >= MAX_TEST_STR)
 			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
+				char err[100];
+				sprintf(err, "Parameter definition is too long, must be less than %d characters", MAX_TEST_STR);
+				param_problem_exit_error(err);
 			}
 			else
 			{
-				exit_error(PARAMETER_PROBLEM, "Parameter definition is incomplete");
+				param_problem_exit_error("Parameter definition is incomplete");
 			}
 
 			if(*flags % 10 == 1)
 			{
-				exit_error(PARAMETER_PROBLEM, "You may only specify one string/pattern to match");
+				param_problem_exit_error("You may only specify one string/pattern to match");
 			}
 			*flags = *flags + 1;
 			
@@ -116,7 +141,7 @@ static int parse(	int c,
 			info->match_part = c;
 			if(*flags >= 10)
 			{
-				exit_error(PARAMETER_PROBLEM, "You may specify at most one part of the url to match:\n\t--domain_only, --path_only or neither (to match full url)\n");
+				param_problem_exit_error("You may specify at most one part of the url to match:\n\t--domain_only, --path_only or neither (to match full url)\n");
 			}
 			*flags = *flags+10;
 			
@@ -173,7 +198,7 @@ static void final_check(unsigned int flags)
 {
 	if (flags %10 == 0)
 	{
-		exit_error(PARAMETER_PROBLEM, "You must specify '--contains' or '--contains_regex' or '--matches_exactly'");
+		param_problem_exit_error("You must specify '--contains' or '--contains_regex' or '--matches_exactly'");
 	}
 }
 
@@ -220,3 +245,42 @@ void _init(void)
 {
 	register_match(&weburl);
 }
+
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc)
+{
+	if (option && strcmp(option, "!") == 0)
+	{
+		if (*invert)
+		{
+			param_problem_exit_error("Multiple `!' flags not allowed");
+		}
+		*invert = TRUE;
+		if (my_optind != NULL)
+		{
+			++*my_optind;
+			if (argc && *my_optind > argc)
+			{
+				param_problem_exit_error("no argument following `!'");
+			}
+		}
+		return TRUE;
+	}
+	return FALSE;
+}
+static void param_problem_exit_error(char* msg)
+{
+	#ifdef xtables_error
+		xtables_error(PARAMETER_PROBLEM, msg);
+	#else
+		exit_error(PARAMETER_PROBLEM, msg);
+	#endif
+}
+
+
