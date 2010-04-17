@@ -17,6 +17,10 @@ upload_mask="0x007F"
 download_mask="0x7F00"
 qos_mark_file="/etc/qos_class_marks"
 
+#created while qos is being initialized so hotplug and init script don't
+#both try to initialize qos at the same time
+lock_file="/var/run/qos_updating"
+
 load_all_config_options()
 {
 	local config_name="$1"
@@ -235,6 +239,12 @@ apply_all_rules()
 update_markfile()
 {
 
+	#initialize mark file in /tmp first, and test md5sum
+	#this should speed things up and prevent writing to flash unnecessarily (since /tmp is ramdisk)
+
+	tmp_qos_mark_file="/tmp/qos_marks.tmp.tmp"
+	rm -rf "$tmp_qos_mark_file"
+
 	#re-populate per the QoS setup.
 	if [ $total_upload_bandwidth -ge 0 ] ; then
 	
@@ -242,7 +252,7 @@ update_markfile()
 
 		next_class_index=2
 		for uclass_name in $upload_class_list ; do
-			printf "upload $uclass_name %d $upload_mask\n" $next_class_index >> $qos_mark_file
+			printf "upload $uclass_name %d $upload_mask\n" $next_class_index >> "$tmp_qos_mark_file"
  			next_class_index=$(($next_class_index+1))
 		done
 	fi
@@ -253,9 +263,23 @@ update_markfile()
 
 		next_class_index=2
 		for dclass_name in $download_class_list ; do
-			printf "download $dclass_name %d $download_mask\n" $(($next_class_index << 8)) >> $qos_mark_file
+			printf "download $dclass_name %d $download_mask\n" $(($next_class_index << 8)) >> "$tmp_qos_mark_file"
  			next_class_index=$(($next_class_index+1))
 		done
+	fi
+
+	mark_files_match="0"
+	if [ -e "$qos_mark_file" ] ; then
+		new_md5=$(md5sum "$tmp_qos_mark_file" | awk '{ print $1 ; } ')
+		old_md5=$(md5sum "$qos_mark_file" | awk '{ print $1 ; } ')
+		if [ "$new_md5" = "$old_md5" ] ; then
+			mark_files_match="1"
+		fi
+	fi
+	if [ "$mark_files_match" = "0" ] ; then
+		mv "$tmp_qos_mark_file" "$qos_mark_file"
+	else
+		rm -rf "$tmp_qos_mark_file"
 	fi
 
 }
@@ -264,6 +288,12 @@ update_markfile()
 
 initialize_qos()
 {
+	if [ -e "$lock_file" ] ; then
+		return 1
+	else
+		touch "$lock_file"
+	fi
+
 
 	#initialize layer7_marker if necessary
 	create_l7marker_chain
@@ -590,6 +620,8 @@ initialize_qos()
 		tc -s filter show dev $qos_interface
 	fi
 
+	rm -rf "$lock_file"
+
 	return 0
 
 }
@@ -597,6 +629,10 @@ initialize_qos()
 
 stop()
 {
+	if [ -e "$lock_file" ] ; then
+		exit
+	fi
+
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
 		tc qdisc del dev "$iface" root
 	done
@@ -610,6 +646,16 @@ stop()
 
 start()
 {
+	#if already in process of being initialized, do not continue 
+	#until that is finished, and then exit cleanly, without
+	#doing anything further
+	if [ -e "$lock_file" ] ; then
+		while [ -e "$lock_file" ] ; do
+			sleep 1
+		done
+		exit
+	fi
+
 	stop
 
 	load_all_config_options "$config_file_name" "global"
@@ -636,6 +682,16 @@ start()
 
 restart()
 {
+	#if already in process of being initialized, do not continue 
+	#until that is finished, and then exit cleanly, without
+	#doing anything further
+	if [ -e "$lock_file" ] ; then
+		while [ -e "$lock_file" ] ; do
+			sleep 1
+		done
+		exit
+	fi
+
 	dbg="1"
 	start "$1"
 }
@@ -669,28 +725,3 @@ show()
 	return 0
 }
 
-
-boot()
-{
-	#boot() is called during the openwrt boot process but only if 
-	#qos_gargoyle was previously enabled.  The fact that we got here
-	#means it is enabled and we are booting.  The purpose now is 
-	#to create the mark file which is needed by the bwmon script 
-	#which executes later in the boot process.
-
-	total_bandwidth=-1
-	load_all_config_options "$config_file_name" "upload"
-	total_upload_bandwidth=$total_bandwidth
-
-	total_bandwidth=-1
-	load_all_config_options "$config_file_name" "download"
-	total_download_bandwidth="$total_bandwidth"
-
-	#remove old mark file if it exists
-	if [ -e "$qos_mark_file" ] ; then
-		rm "$qos_mark_file"
-	fi
-
-	#make a new one.
-	update_markfile
-}
