@@ -1,0 +1,88 @@
+#!/bin/sh /etc/rc.common
+START=95
+
+start() {
+	config_load "upnpd"
+	local extiface intiface upload download logging secure enabled
+
+	config_get extiface config external_iface
+	config_get intiface config internal_iface
+	config_get upload   config upload
+	config_get download config download
+	config_get_bool logging config log_output 0
+	config_get_bool secure config secure_mode 0
+	config_get_bool enabled config enabled 0 
+
+	include /lib/network
+	scan_interfaces
+
+	local ifname
+	config_get ifname ${extiface:-wan} ifname
+
+	if [ -n "$ifname" ]; then
+		local args="-i $ifname"
+		local iface
+
+		for iface in ${intiface:-lan}; do
+			local ipaddr
+			config_get ipaddr "$iface" ipaddr
+			[ -n "$ipaddr" ] && append args "-a $ipaddr"
+		done
+
+		append args "-p 5000 -U"
+
+		[ -n "$upload" -a -n "$download" ] && \
+			append args "-B $(($download * 1024 * 8)) $(($upload * 1024 * 8))"
+
+		[ "$secure" -gt 0 ] && \
+			append args "-S"
+
+		if [ "$logging" = "1" ]; then
+			[ "$enabled" -gt 0 ] && eval start-stop-daemon -S -x miniupnpd -- $args -d | logger -t miniupnpd &
+		else
+			[ "$enabled" -gt 0 ] && eval start-stop-daemon -S -x miniupnpd -- $args 2>/dev/null
+		fi
+
+		# start firewall
+		local zone
+		config_load firewall
+		config_get zone core "${extiface:-wan}_zone"
+		[ -n "$zone" ] && \
+			ACTION="add" ZONE="$zone" INTERFACE="${extiface:-wan}" DEVICE="$ifname" \
+				. /etc/hotplug.d/firewall/50-miniupnpd 
+	else
+		logger -t "upnp daemon" "external interface not found, not starting"
+	fi
+}
+
+clear_rule() {
+	local state="$1"
+	local ifname ipaddr
+
+	config_get ifname "$state" ifname
+	config_get ipaddr "$state" ipaddr
+
+	[ -n "$ifname" ] && [ -n "$ipaddr" ] && {
+		iptables -t nat -D prerouting_rule -i $ifname -d $ipaddr -j MINIUPNPD
+		iptables -t filter -D forwarding_rule -i $ifname ! -o $ifname -j MINIUPNPD
+		uci_revert_state upnpd "$state"
+		unset "CONFIG_${state}_ifname"
+		unset "CONFIG_${state}_ipaddr"
+	}
+}
+
+stop() {
+	start-stop-daemon -K -q -x miniupnpd -p /var/run/miniupnpd.pid
+	rm -f /var/run/miniupnpd.pid
+
+	logger -t "upnp" "removing firewall rules"
+
+	config_load upnpd
+	config_foreach clear_rule firewall
+
+	iptables -t nat -F MINIUPNPD 2>/dev/null
+	iptables -t nat -X MINIUPNPD 2>/dev/null
+	iptables -t filter -F MINIUPNPD 2>/dev/null
+	iptables -t filter -X MINIUPNPD 2>/dev/null
+}
+

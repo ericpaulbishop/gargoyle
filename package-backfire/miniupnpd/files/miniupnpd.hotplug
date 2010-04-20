@@ -1,0 +1,46 @@
+#!/bin/sh
+
+/etc/init.d/miniupnpd enabled && {
+
+	local state="${ZONE}_${INTERFACE}"
+	local extif initifs
+
+	config_load upnpd
+	config_get extif config external_iface
+
+	if [ "$ACTION" = "add" ] && [ "$INTERFACE" = "$extif" ]; then
+
+		local active
+		config_get active "$state" ifname
+
+		[ -z "$active" ] && {
+			local ipaddr
+			config_get ipaddr "$extif" ipaddr
+
+			logger -t "upnp" "adding $INTERFACE ($DEVICE - $ipaddr) to firewall"
+
+			iptables -t nat -N MINIUPNPD 2>/dev/null
+			iptables -t nat -A prerouting_rule -i $DEVICE -d $ipaddr -j MINIUPNPD
+			iptables -t filter -N MINIUPNPD 2>/dev/null
+			iptables -t filter -A forwarding_rule -i $DEVICE ! -o $DEVICE -j MINIUPNPD
+
+			uci_set_state upnpd "$state" "" "firewall"
+			uci_set_state upnpd "$state" ifname "$DEVICE"
+			uci_set_state upnpd "$state" ipaddr "$ipaddr"
+		}
+	
+	elif [ "$ACTION" = "remove" ] && [ "$INTERFACE" = "$extif" ]; then
+
+		local ifname ipaddr
+		config_get ifname "$state" ifname
+		config_get ipaddr "$state" ipaddr
+
+		[ -n "$ifname" ] && [ -n "$ipaddr" ] && {
+			logger -t "upnp" "removing $INTERFACE ($ifname - $ipaddr) from firewall"
+			iptables -t nat -D prerouting_rule -i $ifname -d $ipaddr -j MINIUPNPD
+			iptables -t filter -D forwarding_rule -i $DEVICE ! -o $DEVICE -j MINIUPNPD
+			uci_revert_state upnpd "$state"
+		}
+	fi
+}
+
