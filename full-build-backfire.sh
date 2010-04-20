@@ -75,31 +75,35 @@ for target in $targets ; do
 
 	
 	#copy gargoyle-specific packages to build directory
-	gargoyle_packages=$(ls package )
+	package_dir="package"
+	if [ -d "package-backfire" ] ; then
+		package_dir="package-backfire"
+	fi
+	gargoyle_packages=$(ls "$package_dir" )
 	for gp in $gargoyle_packages ; do
 		if [ -d "$target-src/package/$gp" ] ; then
 			rm -rf "$target-src/package/$gp" 
 		fi
-		cp -r "package/$gp" "$target-src/package"
+		cp -r "$package_dir/$gp" "$target-src/package"
 	done
 	
 	#if target is custom, checkout optional packages and copy all that don't 
 	#share names with gargoyle-specific packages to build directory
 	if [ "$target" = "custom" ] ; then
-		if [ ! -d packages_8.09 ] ; then
-			svn checkout $revision svn://svn.openwrt.org/openwrt/branches/packages_8.09
+		if [ ! -d packages ] ; then
+			svn checkout $revision svn://svn.openwrt.org/openwrt/packages
 			
-			cd packages_8.09
+			cd packages
 			find . -name ".svn" | xargs rm -rf
 			for gp in $gargoyle_packages ; do
 				find . -name "$gp" | xargs rm -rf
 			done
 			cd ..
 		fi
-		other_packages=$(ls packages_8.09)
+		other_packages=$(ls packages)
 		for other in $other_packages ; do
 			if [ ! -d "$target-src/package/$other" ] ; then
-				cp -r packages_8.09/$other $target-src/package
+				cp -r packages/$other $target-src/package
 			fi
 		done
 	fi
@@ -118,9 +122,9 @@ for target in $targets ; do
 	#if version name specified, set gargoyle official version parameter in gargoyle package
 	if [ -n "$version_name" ] ; then
 		echo "OFFICIAL_VERSION:=$version_name" > .ver
-		cat .ver package/gargoyle/Makefile >.vermake
+		cat .ver "$package_dir/gargoyle/Makefile" >.vermake
 		rm .ver
-		mv .vermake package/gargoyle/Makefile
+		mv .vermake "$package_dir/gargoyle/Makefile"
 	fi
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
