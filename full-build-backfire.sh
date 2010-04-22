@@ -2,6 +2,7 @@
 top_dir=$(pwd)
 openwrt_src_dir="$top_dir/backfire-src"
 targets_dir="$top_dir/targets-backfire"
+patches_dir="$top_dir/patches-generic-backfire"
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
 
 
@@ -24,7 +25,7 @@ adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/
 
 # set svn revision number to use 
 # you can set this to an alternate revision 
-# or empty to checkout latest 8.09 branch
+# or empty to checkout latest 
 #rnum=18801
 
 
@@ -129,7 +130,8 @@ for target in $targets ; do
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
-		scripts/patch-kernel.sh . $targets_dir/$target/patches/ >/dev/null 2>&1
+		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
+		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 >/dev/null 2>&1
 			make menuconfig
@@ -139,7 +141,8 @@ for target in $targets ; do
 		fi
 		make  GARGOYLE_VERSION="$adj_num_version"
 	else
-		scripts/patch-kernel.sh . $targets_dir/$target/patches/
+		scripts/patch-kernel.sh . "$patches_dir/" 
+		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0  
 			make menuconfig
