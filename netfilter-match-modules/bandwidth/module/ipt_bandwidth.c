@@ -4,7 +4,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009-2010 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -40,7 +40,6 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>
 
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	#define ipt_register_match      xt_register_match
 	#define ipt_unregister_match    xt_unregister_match
@@ -51,6 +50,11 @@
 #else
 	#define skb_network_header(skb) (skb)->nh.raw 
 #endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+	#include <linux/netfilter/x_tables.h>
+#endif
+
 
 /* #define BANDWIDTH_DEBUG 1 */
 

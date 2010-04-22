@@ -3,7 +3,7 @@
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -46,6 +46,11 @@
 #else
 	#define skb_network_header(skb) (skb)->nh.raw 
 #endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
+	#include <linux/netfilter/x_tables.h>
+#endif
+
 
 
 MODULE_LICENSE("GPL");
