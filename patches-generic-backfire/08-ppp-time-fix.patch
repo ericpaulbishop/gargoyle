@@ -1,0 +1,158 @@
+--- /dev/null	2010-04-05 10:10:20.794553735 -0400
++++ atheros-2.6-src/package/ppp/patches/510-better_compensate_time_change.patch	2010-04-22 14:55:22.000000000 -0400
+@@ -0,0 +1,155 @@
++--- ppp-2.4.4/pppd/main.c	2010-04-22 14:48:55.000000000 -0400
+++++ ppp-new/pppd/main.c	2010-04-22 14:49:53.000000000 -0400
++@@ -228,7 +228,7 @@
++ 
++ /* Prototypes for procedures local to this file. */
++ 
++-static void check_time(void);
+++static int get_reference_time(struct timeval *rel_time);
++ static void setup_signals __P((void));
++ static void create_pidfile __P((int pid));
++ static void create_linkpidfile __P((int pid));
++@@ -534,8 +534,7 @@
++ 	    info("Starting link");
++ 	}
++ 
++-	check_time();
++-	gettimeofday(&start_time, NULL);
+++	get_reference_time(&start_time);
++ 	script_unsetenv("CONNECT_TIME");
++ 	script_unsetenv("BYTES_SENT");
++ 	script_unsetenv("BYTES_RCVD");
++@@ -1225,7 +1224,7 @@
++ {
++     if (!get_ppp_stats(u, &old_link_stats))
++ 	return;
++-    gettimeofday(&start_time, NULL);
+++    get_reference_time(&start_time);
++ }
++ 
++ /*
++@@ -1239,7 +1238,7 @@
++     char numbuf[32];
++ 
++     if (!get_ppp_stats(u, &link_stats)
++-	|| gettimeofday(&now, NULL) < 0)
+++	|| get_reference_time(&now) < 0)
++ 	return;
++     link_connect_time = now.tv_sec - start_time.tv_sec;
++     link_stats_valid = 1;
++@@ -1267,35 +1266,55 @@
++ 
++ static struct callout *callout = NULL;	/* Callout list */
++ static struct timeval timenow;		/* Current time */
++-static long uptime_diff = 0;
++-static int uptime_diff_set = 0;
+++static struct timeval last_time;        /* last obtained ref time */
+++static struct timeval orig_time;        /* Original time for calculating usecs */
+++unsigned char orig_time_set = 0;        /* Whether orig_time is initialized */
++ 
++-static void check_time(void)
++-{
++-	long new_diff;
++-	struct timeval t;
++-	struct sysinfo i;
++-    struct callout *p;
++-	
++-	gettimeofday(&t, NULL);
++-	sysinfo(&i);
++-	new_diff = t.tv_sec - i.uptime;
++-	
++-	if (!uptime_diff_set) {
++-		uptime_diff = new_diff;
++-		uptime_diff_set = 1;
++-		return;
++-	}
++ 
++-	if ((new_diff - 5 > uptime_diff) || (new_diff + 5 < uptime_diff)) {
++-		/* system time has changed, update counters and timeouts */
++-		info("System time change detected.");
++-		start_time.tv_sec += new_diff - uptime_diff;
++-		
++-    	for (p = callout; p != NULL; p = p->c_next)
++-			p->c_time.tv_sec += new_diff - uptime_diff;
+++/*
+++ * get time value that is meaningless by itself, but
+++ * that will be incremented consistently, so we have
+++ * constant counter even if system date changes (so long
+++ * as system is not rebooted, in which case new pppd daemon
+++ * is started anyway).
+++ *
+++ * We do this by getting number of seconds of system uptime.
+++ * However, we don't have useconds assocated with system uptime,
+++ * which we need to initialize timeval struct, so we get usec
+++ * from actual current time.  Doing it this way means that we may
+++ * be off by some amount < 1 sec if system date changes, but that
+++ * isn't too much, and it only crops up in this edge case (which
+++ * admitedly, is the whole point of doing it this way).  But, 1sec
+++ * is much, much better than a couple decades, which can happen
+++ * if system is initialized to January 1970!
+++ */
+++int get_reference_time(struct timeval *ref_time)
+++{
+++	struct sysinfo si;
+++	long usec_diff;
+++	sysinfo(&si);
+++	if(orig_time_set == 0)
+++	{
+++		orig_time_set = 1;
+++		gettimeofday(&orig_time, NULL);
+++		last_time.tv_sec = 0;
+++		last_time.tv_usec = 0;
+++
+++	}
+++	gettimeofday(ref_time, NULL);
+++	usec_diff = ref_time->tv_usec - orig_time.tv_usec;
+++	ref_time->tv_usec = usec_diff >= 0 ? usec_diff : usec_diff + 1000000;
+++	ref_time->tv_sec = si.uptime;
+++
+++	if(ref_time->tv_sec == last_time.tv_sec && ref_time->tv_usec < last_time.tv_usec)
+++	{
+++		//date shift must have happened, just make sure returned value >= than last time
+++		ref_time->tv_usec = last_time.tv_usec;
++ 	}
++-	uptime_diff = new_diff;
+++	last_time.tv_sec  = ref_time->tv_sec;
+++	last_time.tv_usec = ref_time->tv_usec;
+++
+++	return 0;
++ }
++ 
++ /*
++@@ -1316,7 +1335,7 @@
++ 	fatal("Out of memory in timeout()!");
++     newp->c_arg = arg;
++     newp->c_func = func;
++-    gettimeofday(&timenow, NULL);
+++    get_reference_time(&timenow);
++     newp->c_time.tv_sec = timenow.tv_sec + secs;
++     newp->c_time.tv_usec = timenow.tv_usec + usecs;
++     if (newp->c_time.tv_usec >= 1000000) {
++@@ -1367,12 +1386,11 @@
++ {
++     struct callout *p;
++ 
++-	check_time();
++ 	
++     while (callout != NULL) {
++ 	p = callout;
++ 
++-	if (gettimeofday(&timenow, NULL) < 0)
+++	if (get_reference_time(&timenow) < 0)
++ 	    fatal("Failed to get time of day: %m");
++ 	if (!(p->c_time.tv_sec < timenow.tv_sec
++ 	      || (p->c_time.tv_sec == timenow.tv_sec
++@@ -1397,9 +1415,8 @@
++     if (callout == NULL)
++ 	return NULL;
++ 	
++-	check_time();
++ 
++-    gettimeofday(&timenow, NULL);
+++    get_reference_time(&timenow);
++     tvp->tv_sec = callout->c_time.tv_sec - timenow.tv_sec;
++     tvp->tv_usec = callout->c_time.tv_usec - timenow.tv_usec;
++     if (tvp->tv_usec < 0) {
