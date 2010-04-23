@@ -230,7 +230,11 @@ static struct iptables_match weburl =
 { 
 	.next		= NULL,
  	.name		= "weburl",
-	.version	= IPTABLES_VERSION,
+	#ifdef XTABLES_VERSION_CODE
+		.version = XTABLES_VERSION,
+	#else
+		.version = IPTABLES_VERSION,
+	#endif
 	.size		= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
 	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
 	.help		= &help,

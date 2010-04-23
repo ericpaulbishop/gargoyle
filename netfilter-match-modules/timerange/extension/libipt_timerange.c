@@ -269,7 +269,11 @@ static struct iptables_match timerange =
 { 
 	.next		= NULL,
  	.name		= "timerange",
-	.version	= IPTABLES_VERSION,
+	#ifdef XTABLES_VERSION_CODE
+		.version = XTABLES_VERSION, 
+	#else
+		.version = IPTABLES_VERSION,
+	#endif
 	.size		= IPT_ALIGN(sizeof(struct ipt_timerange_info)),
 	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_timerange_info)),
 	.help		= &help,

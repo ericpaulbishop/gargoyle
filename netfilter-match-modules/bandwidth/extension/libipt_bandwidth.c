@@ -511,7 +511,11 @@ static struct iptables_match bandwidth =
 { 
 	.next		= NULL,
  	.name		= "bandwidth",
-	.version	= IPTABLES_VERSION,
+	#ifdef XTABLES_VERSION_CODE
+		.version = XTABLES_VERSION, 
+	#else
+		.version = IPTABLES_VERSION,
+	#endif
 	.size		= IPT_ALIGN(sizeof(struct ipt_bandwidth_info)),
 	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_bandwidth_info)),
 	.help		= &help,
