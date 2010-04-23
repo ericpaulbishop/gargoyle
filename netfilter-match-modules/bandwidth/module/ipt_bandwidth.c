@@ -1070,33 +1070,43 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	return new_bw;
 }
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-	static bool 
-#else
-	static int
-#endif
-match(		const struct sk_buff *skb,
-		const struct net_device *in,
-		const struct net_device *out,
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-			const struct xt_match *match,
-		#endif
-		const void *matchinfo,
-		int offset,
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-			unsigned int protoff,
-		#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-			const void *hdr,
-			u_int16_t datalen,
-		#endif
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-			bool *hotdrop
-		#else
-			int *hotdrop
-		#endif	
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
+		static bool 
+	#else
+		static int
+	#endif
+	match(		const struct sk_buff *skb,
+			const struct net_device *in,
+			const struct net_device *out,
+			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+				const struct xt_match *match,
+			#endif
+			const void *matchinfo,
+			int offset,
+			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+				unsigned int protoff,
+			#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+				const void *hdr,
+				u_int16_t datalen,
+			#endif
+			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
+				bool *hotdrop
+			#else
+				int *hotdrop
+			#endif	
 			)
+#else
+	static bool match(const struct sk_buff *skb, const struct xt_match_param *par)
+#endif
 {
-	struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)matchinfo)->non_const_self;
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)matchinfo)->non_const_self;
+	#else
+		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
+	#endif
 	
 	struct timeval test_time;
 	time_t now;
@@ -2109,27 +2119,37 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 }
 
 
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-static bool
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
+	static bool
+	#else
+	static int
+	#endif
+	checkentry(	const char *tablename,
+	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
+				const void *ip,
+				const struct xt_match *match,
+	#else
+				const struct ipt_ip *ip,
+	#endif
+				void *matchinfo,
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
+		    		unsigned int matchsize,
+	#endif
+				unsigned int hook_mask
+				)
 #else
-static int
+	static bool checkentry(const struct xt_mtchk_param *par)
 #endif
-checkentry(	const char *tablename,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-			const void *ip,
-			const struct xt_match *match,
-#else
-			const struct ipt_ip *ip,
-#endif
-			void *matchinfo,
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-	    		unsigned int matchsize,
-#endif
-			unsigned int hook_mask
-			)
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+	#else
+		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
+	#endif
+
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("checkentry called\n");	
 	#endif
@@ -2267,14 +2287,21 @@ static void destroy(
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 			void* matchinfo,
 			unsigned int matchinfosize
-#else
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 			const struct xt_match *match,
 			void* matchinfo
+#else
+			const struct xt_mtdtor_param *par
 #endif
 		)
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
-	
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
+	#else
+		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
+
+	#endif
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("destroy called\n");
 	#endif
