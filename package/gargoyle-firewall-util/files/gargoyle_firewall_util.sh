@@ -11,7 +11,7 @@ death_mask=0x8000
 death_mark="$death_mask"
 
 
-wan_if=$(uci -P "/var/state" get network.wan.ifname) 
+wan_if=$(uci -P "/var/state" get network.wan.ifname)
 
 
 # parse remote_accept sections in firewall config and add necessary rules
@@ -53,7 +53,7 @@ insert_remote_accept_rules()
 
 
 
-# creates a chain that sets third byte of connmark to a value that denotes what l7 proto 
+# creates a chain that sets third byte of connmark to a value that denotes what l7 proto
 # is associated with connection. This only sets the connmark, it does not save it to mark
 create_l7marker_chain()
 {
@@ -75,17 +75,16 @@ create_l7marker_chain()
 	echo "l7 used = \"$all_used\""
 
 	if [ -n "$all_used" ] ; then
-		iptables -t mangle -N l7marker
-		iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
-		iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
-	
+		iptables -t mangle -N l7marker
+		iptables -t mangle -I PREROUTING  -i $wan_if -m connmark --mark 0x0/$app_proto_mask -j l7marker
+		iptables -t mangle -I POSTROUTING -o $wan_if -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
 		for proto in $all_prots ; do
 			proto_is_used=$(echo "$all_used" | grep "$proto")
 			if [ -n "$proto_is_used" ] ; then
 				app_proto_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
-				iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m layer7 --l7proto $proto -j CONNMARK --set-mark $app_proto_mark/$app_proto_mask
+				iptables -t mangle -A l7marker -m layer7 --l7proto $proto -j CONNMARK --set-mark $app_proto_mark/$app_proto_mask
 				echo "$proto	$app_proto_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
 				app_proto_num=$((app_proto_num + 1))
 			fi
@@ -94,10 +93,10 @@ create_l7marker_chain()
 		ipp2p_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
 		proto_is_used=$(echo "$all_used" | grep "ipp2p")
 		if [ -n "$proto_is_used" ] ; then
-			iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m ipp2p --ipp2p -j CONNMARK --set-mark $ipp2p_mark/$app_proto_mask
+			iptables -t mangle -A l7marker -m ipp2p --ipp2p -j CONNMARK --set-mark $ipp2p_mark/$app_proto_mask
 			echo "ipp2p	$ipp2p_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
 		fi
-	
+
 		copy_file="y"
 		if [ -e /etc/md5/layer7.md5 ] ; then
 			old_md5=$(cat /etc/md5/layer7.md5)
@@ -151,24 +150,24 @@ insert_pf_loopback_rules()
 				if [ -z "$loaded" ] && [ ! "$var" = "$src_dport" ] ; then
 					all_defined="0"
 				fi
-			done	
-			
+			done
+
 			if [ -z "$src_dport" ] ; then
 				src_dport=$dest_port
 			fi
-			
+
 			sdp_dash=$src_dport
 			sdp_colon=$(echo $sdp_dash | sed 's/\-/:/g')
 			dp_dash=$dest_port
 			dp_colon=$(echo $dp_dash | sed 's/\-/:/g')
-			
-			
-			
+
+
+
 			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ]  ; then
 				iptables -t nat    -A pf_loopback_A -p $proto --dport $sdp_colon -j DNAT --to-destination $dest_ip:$dp_dash
 				iptables -t filter -A pf_loopback_B -p $proto --dport $dp_colon -d $dest_ip -j ACCEPT
 				iptables -t nat    -A pf_loopback_C -p $proto --dport $dp_colon -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
-			fi	
+			fi
 		}
 
 		config_load "$config_name"
@@ -204,8 +203,8 @@ insert_dmz_rule()
 
 insert_restriction_rules()
 {
-	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
-	
+	if [ -z "$wan_if" ]  ; then return ; fi
+
 	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
 	ingress_exits=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
 	if [ -n "$egress_exists" ] ; then
@@ -216,25 +215,25 @@ insert_restriction_rules()
 		delete_chain_from_table filter ingress_whitelist
 		delete_chain_from_table filter ingress_restrictions
 	fi
-	
-	iptables -t filter -N egress_restrictions	
-	iptables -t filter -N ingress_restrictions	
+
+	iptables -t filter -N egress_restrictions
+	iptables -t filter -N ingress_restrictions
 	iptables -t filter -N egress_whitelist
 	iptables -t filter -N ingress_whitelist
 
-	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions	
-	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions	
+	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions
+	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions
 
 	iptables -t filter -I egress_restrictions  -j egress_whitelist
 	iptables -t filter -I ingress_restrictions -j ingress_whitelist
-			
-	
-	package_name="firewall"	
+
+
+	package_name="firewall"
 	parse_rule_config()
 	{
 		section=$1
 		section_type=$(uci get "$package_name"."$section")
-		
+
 		config_get "enabled" "$section" "enabled"
 		if [ -z "$enabled" ] ; then enabled="1" ; fi
 		if [ "$enabled" = "1" ] && ( [ "$section_type"  = "restriction_rule" ] || [ "$section_type" = "whitelist_rule" ] ) ; then
@@ -245,18 +244,18 @@ insert_restriction_rules()
 				app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $2 }')
 				app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $3 }')
 				uci set "$package_name"."$section".connmark="$app_proto_connmark/$app_proto_mask"
-			fi	
+			fi
 			if [ -n "$not_app_proto" ] ; then
 				not_app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $2 }')
 				not_app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $3 }')
 				uci set "$package_name"."$section".not_connmark="$not_app_proto_connmark/$not_app_proto_mask"
 			fi
-			
+
 			table="filter"
 			chain="egress_restrictions"
 			ingress=""
 			target="REJECT"
-			
+
 			config_get "is_ingress" "$section" "is_ingress"
 			if [ "$is_ingress" = "1" ] ; then
 				ingress=" -i "
@@ -269,18 +268,18 @@ insert_restriction_rules()
 				if [ "$section_type" = "restriction_rule"  ] ; then
 					chain="egress_restrictions"
 				else
-					chain="egress_whitelist"	
-				fi				
+					chain="egress_whitelist"
+				fi
 			fi
-					
+
 			if [ "$section_type" = "whitelist_rule" ] ; then
 				target="ACCEPT"
 			fi
-			
+
 			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress
 			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress -r
-				
-			uci del "$package_name"."$section".connmark 2>/dev/null	
+
+			uci del "$package_name"."$section".connmark 2>/dev/null
 			uci del "$package_name"."$section".not_connmark	 2>/dev/null
 		fi
 	}
@@ -295,8 +294,8 @@ initialize_quotas()
 {
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
-	
-	restore_quotas -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+
+	restore_quotas -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 
 	#enable cron, but only restart cron if it is currently running
 	#since we initialize this before cron, this will
