@@ -168,12 +168,13 @@ for target in $targets ; do
 	
 	#copy images to images/target directory
 	mkdir -p ../images/$target
-	image_files=$(ls bin 2>/dev/null)
+	arch=$(ls bin)
+	image_files=$(ls bin/$arch/ 2>/dev/null)
 	for i in $image_files ; do
-		if [ ! -d "bin/$i" ] ; then
+		if [ ! -d "bin/$arch/$i" ] ; then
 			version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
 			newname=$(echo "$i" | sed "s/openwrt/gargoyle_$version_str/g")
-			cp "bin/$i" "../images/$target/$newname"
+			cp "bin/$arch/$i" "../images/$target/$newname"
 		fi
 	done
 

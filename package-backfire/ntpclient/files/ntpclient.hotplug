@@ -16,7 +16,7 @@ check_server() {
 	config_get hostname $1 hostname
 	config_get port $1 port
 	[ -z "$hostname" ] && return
-	$NTPC -c 1 -p ${port:-123} -h $hostname > /dev/null && { SERVER=$hostname; PORT=${port:-123}; }
+	$NTPC -c 1 -p ${port:-123} -i 2 -h $hostname > /dev/null && { SERVER=$hostname; PORT=${port:-123}; }
 }
 
 set_drift() {
