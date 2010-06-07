@@ -77,9 +77,6 @@ for target in $targets ; do
 	
 	#copy gargoyle-specific packages to build directory
 	package_dir="package"
-	if [ -d "package-backfire" ] ; then
-		package_dir="package-backfire"
-	fi
 	gargoyle_packages=$(ls "$package_dir" )
 	for gp in $gargoyle_packages ; do
 		if [ -d "$target-src/package/$gp" ] ; then
