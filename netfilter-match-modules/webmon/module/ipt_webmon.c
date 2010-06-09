@@ -1,4 +1,4 @@
-/*  weburl --	A netfilter module to match URLs in HTTP requests 
+/*  webmon --	A netfilter module to match URLs in HTTP requests 
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
@@ -31,10 +31,10 @@
 #include <net/tcp.h>
 
 #include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_weburl.h>
+#include <linux/netfilter_ipv4/ipt_webmon.h>
 
-#include "weburl_deps/regexp.c"
-#include "weburl_deps/tree_map.h"
+#include "webmon_deps/regexp.c"
+#include "webmon_deps/tree_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	#define ipt_register_match      xt_register_match
@@ -55,7 +55,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
-MODULE_DESCRIPTION("Match URL in HTTP requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_DESCRIPTION("Monitor URL in HTTP Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
 string_map* compiled_map = NULL;
 
@@ -148,170 +148,88 @@ int do_match_test(unsigned char match_type,  const char* reference, char* query)
 	return matches;
 }
 
-int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
+void extract_url(const unsigned char* packet_data, int packet_length, char* extracted_url)
 {
-	int test = 0; 
 	
-	/* first test if we're dealing with a web page request */
-	if(strnicmp((char*)packet_data, "GET ", 4) == 0 || strnicmp(  (char*)packet_data, "POST ", 5) == 0 || strnicmp((char*)packet_data, "HEAD ", 5) == 0)
+	char path[625] = "";
+	char host[625] = "";
+	int path_start_index;
+	int path_end_index;
+	int last_header_index;
+	char last_two_buf[2];
+	int end_found;
+	char* host_match;
+	char* test_prefixes[6];
+
+	/* get path portion of URL */
+	path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
+	while( packet_data[path_start_index] == ' ')
 	{
-		/* printk("found a  web page request\n"); */
-		char path[625] = "";
-		char host[625] = "";
-		int path_start_index;
-		int path_end_index;
-		int last_header_index;
-		char last_two_buf[2];
-		int end_found;
-		char* host_match;
-		char* test_prefixes[6];
-	
-		/* get path portion of URL */
-		path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
-		while( packet_data[path_start_index] == ' ')
+		path_start_index++;
+	}
+	path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
+	if(path_end_index > 0) 
+	{
+		int path_length = path_end_index-path_start_index;
+		path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
+		memcpy(path, packet_data+path_start_index, path_length);
+		path[ path_length] = '\0';
+	}
+		
+	/* get header length */
+	last_header_index = 2;
+	memcpy(last_two_buf,(char*)packet_data, 2);
+	end_found = 0;
+	while(end_found == 0 && last_header_index < packet_length)
+	{
+		char next = (char)packet_data[last_header_index];
+		if(next == '\n')
 		{
-			path_start_index++;
+			end_found = last_two_buf[1] == '\n' || (last_two_buf[0] == '\n' && last_two_buf[1] == '\r') ? 1 : 0;
 		}
-		path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
-		if(path_end_index > 0) 
+		if(end_found == 0)
 		{
-			int path_length = path_end_index-path_start_index;
-			path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
-			memcpy(path, packet_data+path_start_index, path_length);
-			path[ path_length] = '\0';
+			last_two_buf[0] = last_two_buf[1];
+			last_two_buf[1] = next;
+			last_header_index++;
+		}
+	}
+		
+	/* get host portion of URL */
+	host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
+	if(host_match != NULL)
+	{
+		int host_end_index;
+		char* port_ptr;
+		host_match = host_match + 5; /* character after "Host:" */
+		while(host_match[0] == ' ')
+		{
+			host_match = host_match+1;
 		}
 		
-		/* get header length */
-		last_header_index = 2;
-		memcpy(last_two_buf,(char*)packet_data, 2);
-		end_found = 0;
-		while(end_found == 0 && last_header_index < packet_length)
+		host_end_index = 0;
+		while(	host_match[host_end_index] != '\n' && 
+			host_match[host_end_index] != '\r' && 
+			host_match[host_end_index] != ' ' && 
+			host_match[host_end_index] != ':' && 
+			((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
+			)
 		{
-			char next = (char)packet_data[last_header_index];
-			if(next == '\n')
-			{
-				end_found = last_two_buf[1] == '\n' || (last_two_buf[0] == '\n' && last_two_buf[1] == '\r') ? 1 : 0;
-			}
-			if(end_found == 0)
-			{
-				last_two_buf[0] = last_two_buf[1];
-				last_two_buf[1] = next;
-				last_header_index++;
-			}
+			host_end_index++;
 		}
+		memcpy(host, host_match, host_end_index);
+		host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
+		host[host_end_index] = '\0';
+
 		
-		/* get host portion of URL */
-		host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
-		if(host_match != NULL)
-		{
-			int host_end_index;
-			char* port_ptr;
-			host_match = host_match + 5; /* character after "Host:" */
-			while(host_match[0] == ' ')
-			{
-				host_match = host_match+1;
-			}
-			
-			host_end_index = 0;
-			while(	host_match[host_end_index] != '\n' && 
-				host_match[host_end_index] != '\r' && 
-				host_match[host_end_index] != ' ' && 
-				host_match[host_end_index] != ':' && 
-				((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
-				)
-			{
-				host_end_index++;
-			}
-			memcpy(host, host_match, host_end_index);
-			host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
-			host[host_end_index] = '\0';
-
-			
-		}
-	
-		/* printk("host = \"%s\", path =\"%s\"\n", host, path); */
-		
-
-		switch(info->match_part)
-		{
-			case WEBURL_DOMAIN_PART:
-				test = do_match_test(info->match_type, info->test_str, host);
-				if(!test && strstr(host, "www.") == host)
-				{
-					test = do_match_test(info->match_type, info->test_str, ((char*)host+4) );	
-				}
-				break;
-			case WEBURL_PATH_PART:
-				test = do_match_test(info->match_type, info->test_str, path);
-				if( !test && path[0] == '/' )
-				{
-					test = do_match_test(info->match_type, info->test_str, ((char*)path+1) );
-				}
-				break;
-			case WEBURL_ALL_PART:
-				test_prefixes[0] = "http://";
-				test_prefixes[1] = "";
-				test_prefixes[2] = NULL;
-
-				
-				int prefix_index;
-				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
-				{
-					char test_url[1250];
-					test_url[0] = '\0';
-					strcat(test_url, test_prefixes[prefix_index]);
-					strcat(test_url, host);
-					if(strcmp(path, "/") != 0)
-					{
-						strcat(test_url, path);
-					}
-					test = do_match_test(info->match_type, info->test_str, test_url);
-					if(!test && strcmp(path, "/") == 0)
-					{
-						strcat(test_url, path);
-						test = do_match_test(info->match_type, info->test_str, test_url);
-					}
-					
-					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
-				}
-				if(!test && strstr(host, "www.") == host)
-				{
-					char* www_host = ((char*)host+4);
-					for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
-					{
-						char test_url[1250];
-						test_url[0] = '\0';
-						strcat(test_url, test_prefixes[prefix_index]);
-						strcat(test_url, www_host);
-						if(strcmp(path, "/") != 0)
-						{
-							strcat(test_url, path);
-						}
-						test = do_match_test(info->match_type, info->test_str, test_url);
-						if(!test && strcmp(path, "/") == 0)
-						{
-							strcat(test_url, path);
-							test = do_match_test(info->match_type, info->test_str, test_url);
-						}
-					
-						/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
-					}
-				}
-				break;
-			
-		}		
-
-
-		/* 
-		 * If invert flag is set, return true if this IS a web request, but it didn't match 
-		 * Always return false for non-web requests
-		 */
-		test = info->invert ? !test : test;
+	}
+	strcat(extracted_url, host);
+	if(strcmp(path, "/") != 0)
+	{
+		strcat(extracted_url, path);
 	}
 
-	return test;
 }
-
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
@@ -344,13 +262,12 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 #endif
 {
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		const struct ipt_weburl_info *info = (const struct ipt_weburl_info*)matchinfo;
+		const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)matchinfo;
 	#else
-		const struct ipt_weburl_info *info = (const struct ipt_weburl_info*)(par->matchinfo);
+		const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)(par->matchinfo);
 	#endif
 
 	
-	int test = 0;
 	struct iphdr* iph;	
 
 	/* linearize skb if necessary */
@@ -384,7 +301,13 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 		/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
 		if(payload_length > 10)
 		{
-			test = http_match(info, payload, payload_length);
+			/* are we dealing with a web page request */
+			if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
+			{
+				char url[1250]
+				extract_url(payload, payload_length, url);
+				
+			}
 		}
 	}
 	
@@ -395,8 +318,8 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 	}
 
 
-	/* printk("returning %d from weburl\n\n\n", test); */
-	return test;
+	/* printk("returning %d from webmon\n\n\n", test); */
+	return 0;
 }
 
 
@@ -428,22 +351,22 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 }
 
 
-static struct ipt_match weburl_match = 
+static struct ipt_match webmon_match = 
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	{ NULL, NULL },
-	"weburl",
+	"webmon",
 	&match,
 	&checkentry,
 	NULL,
 	THIS_MODULE
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-	.name		= "weburl",
+	.name		= "webmon",
 	.match		= &match,
 	.family		= AF_INET,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-	.matchsize	= sizeof(struct ipt_weburl_info),
+	.matchsize	= sizeof(struct ipt_webmon_info),
 #endif
 	.checkentry	= &checkentry,
 	.me		= THIS_MODULE,
@@ -453,13 +376,13 @@ static struct ipt_match weburl_match =
 static int __init init(void)
 {
 	compiled_map = NULL;
-	return ipt_register_match(&weburl_match);
+	return ipt_register_match(&webmon_match);
 
 }
 
 static void __exit fini(void)
 {
-	ipt_unregister_match(&weburl_match);
+	ipt_unregister_match(&webmon_match);
 	if(compiled_map != NULL)
 	{
 		unsigned long num_destroyed;
