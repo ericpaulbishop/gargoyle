@@ -25,7 +25,7 @@ define Package/webmon-gargoyle
 	CATEGORY:=Network
 	TITLE:=A small program to monitor web usage
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +libpcap +libericstools
+	DEPENDS:= +iptables-mod-webmon +libpcap +libericstools
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
