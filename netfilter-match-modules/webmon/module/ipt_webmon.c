@@ -88,6 +88,9 @@ static string_map* domain_map = NULL;
 static queue* recent_domains  = NULL;
 static int max_queue_length   = 300;
 
+static spinlock_t webmon_lock = SPIN_LOCK_UNLOCKED;
+
+
 static void update_queue_node_time(queue_node* update_node, queue* full_queue)
 {
 	struct timeval t;
@@ -340,7 +343,16 @@ static void webmon_proc_stop(struct seq_file *seq, void *v)
 
 static int webmon_proc_show(struct seq_file *s, void *v)
 {
-	seq_printf(s, "testproc\n");
+	spin_lock_bh(&webmon_lock);
+
+	queue_node* next_node = recent_domains->last;
+	while(next_node != NULL)
+	{
+		seq_printf(out, "%ld\t"STRIP"\t%s\n", (unsigned long)next_node->time, IP2STR(next_node->src_ip), next_node->domain);
+		next_node = (queue_node*)next_node->previous;
+	}
+	spin_unlock_bh(&webmon_lock);
+
 	return 0;
 }
 
@@ -450,6 +462,7 @@ static struct file_operations webmon_proc_fops = {
 				extract_url(payload, payload_length, domain, path);
 				sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
 
+				spin_lock_bh(&webmon_lock);
 				if(get_string_map_element(domain_map, domain_key))
 				{
 					//update time
@@ -460,6 +473,7 @@ static struct file_operations webmon_proc_fops = {
 					//add
 					add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key );
 				}
+				spin_unlock_bh(&webmon_lock);
 				
 			}
 		}
@@ -544,20 +558,15 @@ static int __init init(void)
 	#endif
 
 	return ipt_register_match(&webmon_match);
-
-
-
 }
 
 static void __exit fini(void)
 {
-	ipt_unregister_match(&webmon_match);
 	unsigned long num_destroyed;
-
 	#ifdef CONFIG_PROC_FS
 		remove_proc_entry("webmon_recent_domains", NULL);
 	#endif
-
+	ipt_unregister_match(&webmon_match);
 	destroy_map(domain_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 }
 
