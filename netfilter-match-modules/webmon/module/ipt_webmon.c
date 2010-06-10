@@ -29,17 +29,22 @@
 #include <net/sock.h>
 #include <net/ip.h>
 #include <net/tcp.h>
+#include <linux/time.h>
 
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_webmon.h>
 
-#include "webmon_deps/regexp.c"
 #include "webmon_deps/tree_map.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 	#define ipt_register_match      xt_register_match
 	#define ipt_unregister_match    xt_unregister_match
 #endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
+	#include <linux/ktime.h>
+#endif
+
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
 	#include <linux/ip.h>
@@ -51,15 +56,124 @@
 	#include <linux/netfilter/x_tables.h>
 #endif
 
-
+#define STRIP "%d.%d.%d.%d"
+#define IP2STR(x) (x)>>24&0xff,(x)>>16&0xff,(x)>>8&0xff,(x)&0xff
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Monitor URL in HTTP Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
-string_map* compiled_map = NULL;
 
-int strnicmp(const char * cs,const char * ct,size_t count)
+
+typedef struct qn
+{
+	uint32_t src_ip;
+	char* value;
+	struct timeval time;
+	struct qn* next;
+	struct qn* previous;	
+} queue_node;
+
+typedef struct
+{
+	queue_node* first;
+	queue_node* last;
+	int length;
+} queue;
+
+static string_map* domain_map = NULL;
+static queue* recent_domains  = NULL;
+static int max_queue_length   = 300;
+
+static void update_queue_node_time(queue_node* update_node, queue* full_queue)
+{
+	struct timeval t;
+	do_gettimeofday(&t)
+	update_node->time = t;
+	
+	/* move to front of queue if not already at front of queue */
+	if(update_node->previous != NULL)
+	{
+		queue_node* p = update_node->previous;
+		queue_node* n = update_node->next;
+		p->next = n;
+		if(n != NULL)
+		{
+			n->previous = p;
+		}
+		else
+		{
+			full_queue->last = p;
+		}
+		update_node->previous = NULL;
+		update_node->next = full_queue->first;
+		full_queue->first->previous = update_node;
+		full_queue->first = update_node;
+	}
+}
+
+void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map* queue_index, char* queue_index_key )
+{
+
+	queue_node *new_node = (queue_node*)kmalloc(sizeof(queue_node), GFP_ATOMIC);
+	char* dyn_value = kstrdup(value);
+	struct timeval t;
+
+
+	if(new_node == NULL || dyn_value == NULL)
+	{
+		if(dyn_value) { kfree(dyn_value); }
+		if(new_node) { kfree(new_node); };
+
+		return;
+	}
+	set_map_element(queue_index, queue_index_key, (void*)new_node);
+
+
+	do_gettimeofday(&t)
+	new_node->time = t;
+	new_node->src_ip = src_ip;
+	new_node->value = dyn_value;
+	new_node->previous = NULL;
+	
+	new_node->next = full_queue->first;
+	if(full_queue->first != NULL)
+	{
+		full_queue->first->previous = new_node;
+	}
+	full_queue->first = new_node;
+	full_queue->last = (full_queue->last == NULL) ? new_node : full_queue->last ;
+	full_queue->length = full_queue->length + 1;
+
+	if( full_queue->length > max_queue_length )
+	{
+		queue_node *old_node = full_queue->last;
+		full_queue->last = old_node->previous;
+		full_queue->last->next = NULL;
+		full_queue->first = old_node->previous == NULL ? NULL : full_queue->first; /*shouldn't be needed, but just in case...*/
+		full_queue->length = full_queue->length - 1;
+		
+		sprintf(queue_index_key, STRIP"@%s", IP2STR(old_node->src_ip), old_node->value);
+		remove_map_element(queue_index, queue_index_key);
+
+		kfree(old_node->value);
+		kfree(old_node);
+	}
+
+	/*
+	queue_node* n = full_queue->first;
+	while(n != NULL)
+	{
+		printf("%ld\t%s\t%s\t%s\n", (unsigned long)n->time, n->src_ip, n->dst_ip, n->domain);
+		n = (queue_node*)n->next;
+	}
+	printf("\n\n");
+	*/
+}
+
+
+
+static int strnicmp(const char * cs,const char * ct,size_t count)
 {
 	register signed char __res = 0;
 
@@ -74,7 +188,7 @@ int strnicmp(const char * cs,const char * ct,size_t count)
 	return __res;
 }
 
-char *strnistr(const char *s, const char *find, size_t slen)
+static char *strnistr(const char *s, const char *find, size_t slen)
 {
 	char c, sc;
 	size_t len;
@@ -109,57 +223,19 @@ char *strnistr(const char *s, const char *find, size_t slen)
 }
 
 
-int do_match_test(unsigned char match_type,  const char* reference, char* query)
+static void extract_url(const unsigned char* packet_data, int packet_length, char* domain, char* path)
 {
-	int matches = 0;
-	struct regexp* r;
-	switch(match_type)
-	{
-		case WEBURL_CONTAINS_TYPE:
-			matches = (strstr(query, reference) != NULL);
-			break;
-		case WEBURL_REGEX_TYPE:
 
-			if(compiled_map == NULL)
-			{
-				compiled_map = initialize_map(0);
-				if(compiled_map == NULL) /* test for malloc failure */
-				{
-					return 0;
-				}
-			}
-			r = (struct regexp*)get_map_element(compiled_map, reference);
-			if(r == NULL)
-			{
-				int rlen = strlen(reference);
-				r= regcomp((char*)reference, &rlen);
-				if(r == NULL) /* test for malloc failure */
-				{
-					return 0;
-				}
-				set_map_element(compiled_map, reference, (void*)r);
-			}
-			matches = regexec(r, query);
-			break;
-		case WEBURL_EXACT_TYPE:
-			matches = (strstr(query, reference) != NULL) && strlen(query) == strlen(reference);
-			break;
-	}
-	return matches;
-}
-
-void extract_url(const unsigned char* packet_data, int packet_length, char* extracted_url)
-{
-	
-	char path[625] = "";
-	char host[625] = "";
 	int path_start_index;
 	int path_end_index;
 	int last_header_index;
 	char last_two_buf[2];
 	int end_found;
-	char* host_match;
-	char* test_prefixes[6];
+	char* domain_match;
+
+	sprintf(domain, "");
+	sprintf(path, "");
+
 
 	/* get path portion of URL */
 	path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
@@ -195,41 +271,43 @@ void extract_url(const unsigned char* packet_data, int packet_length, char* extr
 		}
 	}
 		
-	/* get host portion of URL */
-	host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
-	if(host_match != NULL)
+	/* get domain portion of URL */
+	domain_match = strnistr( (char*)packet_data, "Host:", last_header_index);
+	if(domain_match != NULL)
 	{
-		int host_end_index;
+		int domain_end_index;
 		char* port_ptr;
-		host_match = host_match + 5; /* character after "Host:" */
-		while(host_match[0] == ' ')
+		domain_match = domain_match + 5; /* character after "Host:" */
+		while(domain_match[0] == ' ')
 		{
-			host_match = host_match+1;
+			domain_match = domain_match+1;
 		}
 		
-		host_end_index = 0;
-		while(	host_match[host_end_index] != '\n' && 
-			host_match[host_end_index] != '\r' && 
-			host_match[host_end_index] != ' ' && 
-			host_match[host_end_index] != ':' && 
-			((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
+		domain_end_index = 0;
+		while(	domain_match[domain_end_index] != '\n' && 
+			domain_match[domain_end_index] != '\r' && 
+			domain_match[domain_end_index] != ' ' && 
+			domain_match[domain_end_index] != ':' && 
+			((char*)domain_match - (char*)packet_data)+domain_end_index < last_header_index 
 			)
 		{
-			host_end_index++;
+			domain_end_index++;
 		}
-		memcpy(host, host_match, host_end_index);
-		host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
-		host[host_end_index] = '\0';
+		memcpy(domain, domain_match, domain_end_index);
+		domain_end_index = domain_end_index < 625 ? domain_end_index : 624; /* prevent overflow */
+		domain[domain_end_index] = '\0';
 
-		
+		for(domain_end_index=0; domain[domain_end_index] != '\0'; domain_end_index++)
+		{
+			domain[domain_end_index] = (char)tolower(domain[domain_end_index]);
+		}
 	}
-	strcat(extracted_url, host);
-	if(strcmp(path, "/") != 0)
-	{
-		strcat(extracted_url, path);
-	}
-
 }
+
+
+
+
+
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
@@ -304,8 +382,23 @@ void extract_url(const unsigned char* packet_data, int packet_length, char* extr
 			/* are we dealing with a web page request */
 			if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
 			{
-				char url[1250]
-				extract_url(payload, payload_length, url);
+				char domain[650];
+				char path[650];
+				char domain_key[700];	
+
+				extract_url(payload, payload_length, domain, path);
+				sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
+
+				if(get_string_map_element(web_domains, domain_key))
+				{
+					//update time
+					update_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+				}
+				else
+				{
+					//add
+					add_next_entry(src_ip, domain, recent_domains, domain_map, domain_key );
+				}
 				
 			}
 		}
@@ -375,7 +468,11 @@ static struct ipt_match webmon_match =
 
 static int __init init(void)
 {
-	compiled_map = NULL;
+	recent_domains = (queue*)malloc(sizeof(queue));
+	recent_domains->first = NULL;
+	recent_domains->last = NULL;
+	recent_domains->length = 0;
+	domain_map = initialize_map(0);
 	return ipt_register_match(&webmon_match);
 
 }
@@ -383,11 +480,8 @@ static int __init init(void)
 static void __exit fini(void)
 {
 	ipt_unregister_match(&webmon_match);
-	if(compiled_map != NULL)
-	{
-		unsigned long num_destroyed;
-		destroy_map(compiled_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-	}
+	unsigned long num_destroyed;
+	destroy_map(domain_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 }
 
 module_init(init);
