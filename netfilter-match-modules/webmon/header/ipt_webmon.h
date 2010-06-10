@@ -42,8 +42,8 @@ struct ipt_webmon_info
 {
 	uint32_t max_domains;
 	uint32_t max_searches;
-	uint32_t exclude_ips[MAX_IPS];
-	struct webmon_ip_range exclude_ranges[MAX_IP_RANGES];
+	uint32_t exclude_ips[WEBMON_MAX_IPS];
+	struct ipt_webmon_ip_range exclude_ranges[WEBMON_MAX_IP_RANGES];
 	unsigned char exclude_type;
 
 };

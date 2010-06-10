@@ -88,7 +88,7 @@ static int max_queue_length   = 300;
 static void update_queue_node_time(queue_node* update_node, queue* full_queue)
 {
 	struct timeval t;
-	do_gettimeofday(&t)
+	do_gettimeofday(&t);
 	update_node->time = t;
 	
 	/* move to front of queue if not already at front of queue */
@@ -116,7 +116,7 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 {
 
 	queue_node *new_node = (queue_node*)kmalloc(sizeof(queue_node), GFP_ATOMIC);
-	char* dyn_value = kstrdup(value);
+	char* dyn_value = kernel_strdup(value);
 	struct timeval t;
 
 
@@ -130,7 +130,7 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 	set_map_element(queue_index, queue_index_key, (void*)new_node);
 
 
-	do_gettimeofday(&t)
+	do_gettimeofday(&t);
 	new_node->time = t;
 	new_node->src_ip = src_ip;
 	new_node->value = dyn_value;
@@ -173,7 +173,7 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 
 
 
-static int strnicmp(const char * cs,const char * ct,size_t count)
+int strnicmp(const char * cs,const char * ct,size_t count)
 {
 	register signed char __res = 0;
 
@@ -188,7 +188,7 @@ static int strnicmp(const char * cs,const char * ct,size_t count)
 	return __res;
 }
 
-static char *strnistr(const char *s, const char *find, size_t slen)
+char *strnistr(const char *s, const char *find, size_t slen)
 {
 	char c, sc;
 	size_t len;
@@ -233,8 +233,8 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	int end_found;
 	char* domain_match;
 
-	sprintf(domain, "");
-	sprintf(path, "");
+	domain[0] = '\0';
+	path[0] = '\0';
 
 
 	/* get path portion of URL */
@@ -276,7 +276,6 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	if(domain_match != NULL)
 	{
 		int domain_end_index;
-		char* port_ptr;
 		domain_match = domain_match + 5; /* character after "Host:" */
 		while(domain_match[0] == ' ')
 		{
@@ -389,15 +388,15 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 				extract_url(payload, payload_length, domain, path);
 				sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
 
-				if(get_string_map_element(web_domains, domain_key))
+				if(get_string_map_element(domain_map, domain_key))
 				{
 					//update time
-					update_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+					update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
 				}
 				else
 				{
 					//add
-					add_next_entry(src_ip, domain, recent_domains, domain_map, domain_key );
+					add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key );
 				}
 				
 			}
