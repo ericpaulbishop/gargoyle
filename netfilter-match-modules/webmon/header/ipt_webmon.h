@@ -1,9 +1,9 @@
-/*  weburl --	A netfilter module to match URLs in HTTP requests 
+/*  webmon --	A netfilter module to match URLs in HTTP requests 
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -22,24 +22,30 @@
 
 
 
-#ifndef _IPT_WEBURL_H
-#define _IPT_WEBURL_H
+#ifndef _IPT_WEBMON_H
+#define _IPT_WEBMON_H
 
 
-#define MAX_TEST_STR 1024
+#define WEBMON_MAX_IPS           256
+#define WEBMON_MAX_IP_RANGES      16
 
-#define WEBURL_CONTAINS_TYPE 1
-#define WEBURL_REGEX_TYPE 2
-#define WEBURL_EXACT_TYPE 3
-#define WEBURL_ALL_PART 4
-#define WEBURL_DOMAIN_PART 5
-#define WEBURL_PATH_PART 6
+#define WEBMON_EXCLUDE_SPECIFIED   1
+#define WEBMON_EXCLUDE_OTHERS      2
 
-struct ipt_weburl_info
+struct ipt_webmon_ip_range
 {
-	char test_str[MAX_TEST_STR];
-	unsigned char match_type;
-	unsigned char match_part;
-	unsigned char invert;
+	uint32_t start;
+	uint32_t end;
 };
-#endif /*_IPT_WEBURL_H*/
+
+struct ipt_webmon_info
+{
+	uint32_t max_domains;
+	uint32_t max_searches;
+	uint32_t exclude_ips[MAX_IPS];
+	struct webmon_ip_range exclude_ranges[MAX_IP_RANGES];
+	unsigned char exclude_type;
+
+};
+
+#endif /*_IPT_WEBMON_H*/
