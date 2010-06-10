@@ -30,6 +30,9 @@
 #include <net/ip.h>
 #include <net/tcp.h>
 #include <linux/time.h>
+#include <linux/spinlock.h>
+#include <linux/proc_fs.h>
+
 
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_webmon.h>
@@ -303,9 +306,68 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	}
 }
 
+#ifdef CONFIG_PROC_FS
+
+static void *webmon_proc_start(struct seq_file *seq, loff_t *loff_pos)
+{
+	static unsigned long counter = 0;
+
+	/* beginning a new sequence ? */	
+	if ( *loff_pos == 0 )
+	{	
+		/* yes => return a non null value to begin the sequence */
+		return &counter;
+	}
+	else
+	{
+		/* no => it's the end of the sequence, return end to stop reading */
+		*loff_pos = 0;
+		return NULL;
+	}
+}
+
+static void *webmon_proc_next(struct seq_file *seq, void *v, loff_t *pos)
+{
+	return NULL;
+}
 
 
+static void webmon_proc_stop(struct seq_file *seq, void *v)
+{
+	//don't need to do anything
+}
 
+
+static int webmon_proc_show(struct seq_file *s, void *v)
+{
+	seq_printf(s, "testproc\n");
+	return 0;
+}
+
+
+static struct seq_operations webmon_proc_sops = {
+	.start = webmon_proc_start,
+	.next  = webmon_proc_next,
+	.stop  = webmon_proc_stop,
+	.show  = webmon_proc_show
+};
+
+static int webmon_proc_open(struct inode *inode, struct file* file)
+{
+	return seq_open(file, &webmon_proc_sops);
+}
+
+
+static struct file_operations webmon_proc_fops = {
+	.owner   = THIS_MODULE,
+	.open    = webmon_proc_open,
+	.read    = seq_read,
+	.llseek  = seq_lseek,
+	.release = seq_release
+};
+
+
+#endif
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
@@ -472,7 +534,18 @@ static int __init init(void)
 	recent_domains->last = NULL;
 	recent_domains->length = 0;
 	domain_map = initialize_map(0);
+
+	#ifdef CONFIG_PROC_FS
+		struct proc_dir_entry *proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
+		if(proc_webmon_recent_domains)
+		{
+			proc_webmon_recent_domains->proc_fops = &webmon_proc_fops;
+		}
+	#endif
+
 	return ipt_register_match(&webmon_match);
+
+
 
 }
 
@@ -480,6 +553,11 @@ static void __exit fini(void)
 {
 	ipt_unregister_match(&webmon_match);
 	unsigned long num_destroyed;
+
+	#ifdef CONFIG_PROC_FS
+		remove_proc_entry("webmon_recent_domains", NULL);
+	#endif
+
 	destroy_map(domain_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 }
 
