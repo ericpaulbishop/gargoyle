@@ -60,7 +60,7 @@
 #endif
 
 #define STRIP "%d.%d.%d.%d"
-#define IP2STR(x) (x)>>24&0xff,(x)>>16&0xff,(x)>>8&0xff,(x)&0xff
+#define IP2STR(x)   (x)&0xff,(x)>>8&0xff,(x)>>16&0xff,(x)>>24&0xff /*assumes network byte order*/
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
