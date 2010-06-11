@@ -348,7 +348,7 @@ static int webmon_proc_show(struct seq_file *s, void *v)
 	queue_node* next_node = recent_domains->last;
 	while(next_node != NULL)
 	{
-		seq_printf(out, "%ld\t"STRIP"\t%s\n", (unsigned long)next_node->time, IP2STR(next_node->src_ip), next_node->domain);
+		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, IP2STR(next_node->src_ip), next_node->value);
 		next_node = (queue_node*)next_node->previous;
 	}
 	spin_unlock_bh(&webmon_lock);
