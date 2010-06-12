@@ -556,6 +556,8 @@ static struct file_operations webmon_proc_fops = {
 		}
 		*(info->ref_count) = 1;
 
+		spin_lock_bh(&webmon_lock);
+		
 		if(info->max_searches > max_search_queue_length)
 		{
 			max_search_queue_length = info->max_searches;
@@ -564,6 +566,13 @@ static struct file_operations webmon_proc_fops = {
 		{
 			max_domain_queue_length = info->max_domains;
 		}
+	
+		spin_unlock_bh(&webmon_lock);
+
+	}
+	else
+	{
+		*(info->ref_count) = *(info->ref_count) + 1;
 	}
 }
 
@@ -585,7 +594,6 @@ static void destroy(
 		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
 	#endif
 
-	
 	*(info->ref_count) = *(info->ref_count) - 1;
 	if(*(info->ref_count) == 0)
 	{
