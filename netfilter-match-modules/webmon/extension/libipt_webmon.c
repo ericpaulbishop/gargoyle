@@ -55,9 +55,10 @@
 
 
 /* utility functions necessary for module to work across multiple iptables versions */
-static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc);
 static void param_problem_exit_error(char* msg);
 
+
+void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info);
 
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 char* trim_flanking_whitespace(char* str);
@@ -72,6 +73,11 @@ static void help(void)
 
 static struct option opts[] = 
 {
+	{ .name = "exclude_ips",   .has_arg = 1, .flag = 0, .val = WEBMON_EXCLUDE },
+	{ .name = "include_ips",   .has_arg = 1, .flag = 0, .val = WEBMON_INCLUDE },
+	{ .name = "max_domains",   .has_arg = 1, .flag = 0, .val = WEBMON_MAXDOMAIN },
+	{ .name = "max_Searches",  .has_arg = 1, .flag = 0, .val = WEBMON_MAXSEARCH },
+
 	{ .name = 0 }
 };
 
@@ -92,9 +98,45 @@ static int parse(	int c,
 			)
 {
 	struct ipt_webmon_info *info = (struct ipt_webmon_info *)(*match)->data;
-	int valid_arg = 0;
-
-		
+	int valid_arg = 1;
+	
+	if(*flags == 0)
+	{
+		info->max_domains=300;
+		info->max_searches=300;
+		info->num_exclude_ips=0;
+		info->num_exclude_ranges=0;
+		info->exclude_type = WEBMON_EXCLUDE;
+	}
+	*flags = 1;
+	
+	switch (c)
+	{
+		case WEBMON_EXCLUDE:
+			parse_ips_and_macs(optarg, info);
+			info->exclude_type = WEBMON_EXCLUDE;
+			break;
+		case WEBMON_INCLUDE:
+			parse_ips_and_macs(optarg, info);
+			info->exclude_type = WEBMON_INCLUDE;
+			break;
+		case WEBMON_MAXSEARCH:
+			if( sscanf(argv[optind-1], "%ld", &(info->max_searches)) == 0)
+			{
+				info->max_searches = 300;
+				valid_arg = 0;
+			}
+			break;
+		case WEBMON_MAXDOMAIN:
+			if( sscanf(argv[optind-1], "%ld", &(info->max_domains)) == 0)
+			{
+				info->max_domains = 300;
+				valid_arg = 0;
+			}
+			break;
+		default:
+			valid_arg = 0;
+	}
 	return valid_arg;
 
 }
@@ -172,8 +214,7 @@ void _init(void)
 
 void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 {
-	unsigned long num_pieces;
-	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0, &num_pieces);
+	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 
 	info->num_exclude_ips=0;
 	info->num_exclude_ranges = 0;
@@ -184,7 +225,7 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 		char* next_str = addr_parts[ip_part_index];
 		if(strchr(next_str, '-') != NULL)
 		{
-			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
+			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1);
 			char* start = trim_flanking_whitespace(range_parts[0]);
 			char* end = trim_flanking_whitespace(range_parts[1]);
 			int start_ip[4];
@@ -203,7 +244,7 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 
 				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES)
 				{
-					(info->exclude_ip_ranges)[ info->num_exclude_ranges ] = r;
+					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
 					info->num_exclude_ranges = info->num_exclude_ranges + 1;
 				}
 			}
@@ -234,7 +275,6 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 	free(addr_parts);
 	
 }
-
 
 
 
