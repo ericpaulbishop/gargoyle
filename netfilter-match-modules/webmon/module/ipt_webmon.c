@@ -86,7 +86,8 @@ typedef struct
 
 static string_map* domain_map = NULL;
 static queue* recent_domains  = NULL;
-static int max_queue_length   = 300;
+static int max_domain_queue_length   = 5;
+static int max_search_queue_length   = 5;
 
 static spinlock_t webmon_lock = SPIN_LOCK_UNLOCKED;
 
@@ -118,7 +119,7 @@ static void update_queue_node_time(queue_node* update_node, queue* full_queue)
 	}
 }
 
-void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map* queue_index, char* queue_index_key )
+void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map* queue_index, char* queue_index_key, uint32_t max_queue_length )
 {
 
 	queue_node *new_node = (queue_node*)kmalloc(sizeof(queue_node), GFP_ATOMIC);
@@ -458,23 +459,45 @@ static struct file_operations webmon_proc_fops = {
 				char domain[650];
 				char path[650];
 				char domain_key[700];	
+				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
+				uint32_t ip_index;
 
-				extract_url(payload, payload_length, domain, path);
-				sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
+			
+				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
+				{
+					if( (info->exclude_ips)[ip_index] == iph->saddr )
+					{
+						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+					}
+				}
+				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
+				{
+					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					if( ntohl( r.start) >= ntohl(iph->saddr) && ntohl(r.end) <= ntohl(iph->saddr) )
+					{
+						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+					}
+				}
 
-				spin_lock_bh(&webmon_lock);
-				if(get_string_map_element(domain_map, domain_key))
+
+				if(save)
 				{
-					//update time
-					update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+					extract_url(payload, payload_length, domain, path);
+					sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
+
+					spin_lock_bh(&webmon_lock);
+					if(get_string_map_element(domain_map, domain_key))
+					{
+						//update time
+						update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+					}
+					else
+					{
+						//add
+						add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+					}
+					spin_unlock_bh(&webmon_lock);
 				}
-				else
-				{
-					//add
-					add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key );
-				}
-				spin_unlock_bh(&webmon_lock);
-				
 			}
 		}
 	}
@@ -515,9 +538,60 @@ static struct file_operations webmon_proc_fops = {
 	static bool checkentry(const struct xt_mtchk_param *par)
 #endif
 {
-	return 1;
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		struct ipt_webmon_info *info = (struct ipt_webmon_info*)matchinfo;
+	#else
+		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	#endif
+
+
+	
+	if(info->ref_count == NULL) /* first instance, we're inserting rule */
+	{
+		info->ref_count = (uint32_t*)kmalloc(sizeof(uint32_t), GFP_ATOMIC);
+		if(info->ref_count == NULL) /* deal with kmalloc failure */
+		{
+			printk("ipt_webmon: kmalloc failure in checkentry!\n");
+			return 0;
+		}
+		*(info->ref_count) = 1;
+
+		if(info->max_searches > max_search_queue_length)
+		{
+			max_search_queue_length = info->max_searches;
+		}
+		if(info->max_domains > max_domain_queue_length)
+		{
+			max_domain_queue_length = info->max_domains;
+		}
+	}
 }
 
+static void destroy(	
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
+			void* matchinfo,
+			unsigned int matchinfosize
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+			const struct xt_match *match,
+			void* matchinfo
+#else
+			const struct xt_mtdtor_param *par
+#endif
+		)
+{
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
+		struct ipt_webmon_info *info = (struct ipt_webmon_info*)matchinfo;
+	#else
+		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	#endif
+
+	
+	*(info->ref_count) = *(info->ref_count) - 1;
+	if(*(info->ref_count) == 0)
+	{
+		kfree(info->ref_count);
+	}
+}
 
 static struct ipt_match webmon_match = 
 {
