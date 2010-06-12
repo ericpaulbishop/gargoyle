@@ -54,6 +54,11 @@
 #endif
 
 
+#define STRIP "%d.%d.%d.%d"
+#define IP2STR(x)   (x)&0xff,(x)>>8&0xff,(x)>>16&0xff,(x)>>24&0xff /*assumes network byte order*/
+
+
+
 /* utility functions necessary for module to work across multiple iptables versions */
 static void param_problem_exit_error(char* msg);
 
@@ -145,10 +150,28 @@ static int parse(	int c,
 	
 static void print_webmon_args(	struct ipt_webmon_info* info )
 {
-	
+	printf("--max_domains %ld ", (unsigned long int)info->max_domains);
+	printf("--max_searches %ld ", (unsigned long int)info->max_searches);
+	if(info->num_exclude_ips > 0 || info->num_exclude_ranges > 0)
+	{
+		int ip_index = 0;
+		char comma[3] = "";
+		printf("--%s ", (info->exclude_type == WEBMON_EXCLUDE ? "exclude_ips" : "include_ips"));
+		for(ip_index=0; ip_index < info->num_exclude_ips; ip_index++)
+		{
+			printf("%s"STRIP, comma, IP2STR((info->exclude_ips)[ip_index]) );
+			sprintf(comma, ",");
+		}
+		for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
+		{
+			struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+			printf("%s"STRIP"-"STRIP, comma, IP2STR(r.start), IP2STR(r.end) );
+			sprintf(comma, ",");
+		}
+		printf(" ");
+	}
 }
 
-/* Final check; must have specified a test string with either --contains or --contains_regex. */
 static void final_check(unsigned int flags)
 {
 
