@@ -33,7 +33,6 @@
 #include <linux/spinlock.h>
 #include <linux/proc_fs.h>
 
-
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_webmon.h>
 
@@ -178,6 +177,18 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 	*/
 }
 
+void destroy_queue(queue* q)
+{	
+	queue_node *last_node = q->last;
+	while(last_node != NULL)
+	{
+		queue_node *previous_node = last_node->previous;
+		free(last_node->value);
+		free(last_node);
+		last_node = previous_node;
+	}
+	free(q);
+}
 
 
 int strnicmp(const char * cs,const char * ct,size_t count)
@@ -228,6 +239,140 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	}
       	return ((char *)s);
 }
+
+
+
+/*
+ * line is the line to be parsed -- it is not modified in any way
+ * max_pieces indicates number of pieces to return, if negative this is determined dynamically
+ * include_remainder_at_max indicates whether the last piece, when max pieces are reached, 
+ * 	should be what it would normally be (0) or the entire remainder of the line (1)
+ * 	if max_pieces < 0 this parameter is ignored
+ *
+ *
+ * returns all non-separator pieces in a line
+ * result is dynamically allocated, MUST be freed after call-- even if 
+ * line is empty (you still get a valid char** pointer to to a NULL char*)
+ */
+char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long *num_pieces)
+{
+	char** split;
+	
+	*num_pieces = 0;
+	if(line != NULL)
+	{
+		int split_index;
+		int non_separator_found;
+		char* dup_line;
+		char* start;
+
+		if(max_pieces < 0)
+		{
+			/* count number of separator characters in line -- this count + 1 is an upperbound on number of pieces */
+			int separator_count = 0;
+			int line_index;
+			for(line_index = 0; line[line_index] != '\0'; line_index++)
+			{
+				int sep_index;
+				int found = 0;
+				for(sep_index =0; found == 0 && sep_index < num_separators; sep_index++)
+				{
+					found = separators[sep_index] == line[line_index] ? 1 : 0;
+				}
+				separator_count = separator_count+ found;
+			}
+			max_pieces = separator_count + 1;
+		}
+		split = (char**)malloc((1+max_pieces)*sizeof(char*));
+		split_index = 0;
+		split[split_index] = NULL;
+
+
+		dup_line = strdup(line);
+		start = dup_line;
+		non_separator_found = 0;
+		while(non_separator_found == 0)
+		{
+			int matches = 0;
+			int sep_index;
+			for(sep_index =0; sep_index < num_separators; sep_index++)
+			{
+				matches = matches == 1 || separators[sep_index] == start[0] ? 1 : 0;
+			}
+			non_separator_found = matches==0 || start[0] == '\0' ? 1 : 0;
+			if(non_separator_found == 0)
+			{
+				start++;
+			}
+		}
+
+		while(start[0] != '\0' && split_index < max_pieces)
+		{
+			/* find first separator index */
+			int first_separator_index = 0;
+			int separator_found = 0;
+			while(	separator_found == 0 )
+			{
+				int sep_index;
+				for(sep_index =0; separator_found == 0 && sep_index < num_separators; sep_index++)
+				{
+					separator_found = separators[sep_index] == start[first_separator_index] || start[first_separator_index] == '\0' ? 1 : 0;
+				}
+				if(separator_found == 0)
+				{
+					first_separator_index++;
+				}
+			}
+			
+			/* copy next piece to split array */
+			if(first_separator_index > 0)
+			{
+				char* next_piece = NULL;
+				if(split_index +1 < max_pieces || include_remainder_at_max <= 0)
+				{
+					next_piece = (char*)malloc((first_separator_index+1)*sizeof(char));
+					memcpy(next_piece, start, first_separator_index);
+					next_piece[first_separator_index] = '\0';
+				}
+				else
+				{
+					next_piece = strdup(start);
+				}
+				split[split_index] = next_piece;
+				split[split_index+1] = NULL;
+				split_index++;
+			}
+
+
+			/* find next non-separator index, indicating start of next piece */
+			start = start+ first_separator_index;
+			non_separator_found = 0;
+			while(non_separator_found == 0)
+			{
+				int matches = 0;
+				int sep_index;
+				for(sep_index =0; sep_index < num_separators; sep_index++)
+				{
+					matches = matches == 1 || separators[sep_index] == start[0] ? 1 : 0;
+				}
+				non_separator_found = matches==0 || start[0] == '\0' ? 1 : 0;
+				if(non_separator_found == 0)
+				{
+					start++;
+				}
+			}
+		}
+		free(dup_line);
+		*num_pieces = split_index;
+	}
+	else
+	{
+		split = (char**)malloc((1)*sizeof(char*));
+		split[0] = NULL;
+	}
+	return split;
+}
+
 
 
 static void extract_url(const unsigned char* packet_data, int packet_length, char* domain, char* path)
@@ -383,6 +528,104 @@ static struct file_operations webmon_proc_fops = {
 #endif
 
 
+
+
+
+
+static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+{
+
+	char* buffer = kmalloc(len, GFP_ATOMIC);
+	if(buffer == NULL) /* check for malloc failure */
+	{
+		return 0;
+	}
+	copy_from_user(buffer, user, len);
+
+	if(len > 1 + sizeof(uint32_t)) 
+	{
+		unsigned char type = buffer[0];
+		uint32_t max_queue_length = *((uint32_t*)(buffer+1));
+		char* data = buffer+1+sizeof(uint32_t);
+		char newline_terminator[] = { '\n', '\r' };
+		char whitespace_chars[] = { '\t', ' ' };
+
+		spin_lock_bh(&webmon_lock);
+		if(type == WEBMON_DOMAIN )
+		{
+			unsigned long num_lines;
+			unsigned long line_index;
+			unsigned long num_destroyed;
+			char** lines = split_on_separators(data, newline_terminator, 2, -1, 0, &num_lines);
+			max_domain_queue_length = max_queue_length;
+
+			/* destroy and re-initialize queue and map */
+			destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+			destroy_queue(recent_domains);
+			recent_domains = (queue*)malloc(sizeof(queue));
+			recent_domains->first = NULL;
+			recent_domains->last = NULL;
+			recent_domains->length = 0;
+			domain_map = initialize_map(0);
+
+
+			for(line_index=0; line_index < num_lines; line_index++)
+			{
+				char* line = lines[line_index];
+				unsigned long num_pieces;
+				char** split = split_on_separators(line, whitespace_chars, 2, -1, 0, &num_pieces);
+			
+				//check that there are 4 pieces (time, src_ip, dst_ip, domain_name)
+				int length;
+				for(length=0; split[length] != NULL ; length++){}
+				if(length == 3)
+				{
+					time_t time;
+					int parsed_ip[4];
+					int valid_ip = sscanf(split[1], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
+					if(valid_ip == 4)
+					{
+						valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
+					}
+					if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
+					{
+						char* domain = split[2];
+						char domain_key[700];
+						uint32_t ip = parsed_ip[0] + (parsed_ip[1]<<8) + (parsed_ip[2]<<16) +  (parsed_ip[3]<<24) ;
+
+						sprintf(domain_key, STRIP"@%s", IP2STR(ip), domain);
+						add_queue_node(ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+						(recent_domains->first->time).tv_sec = time;
+
+					}
+				}
+				
+				for(length=0; split[length] != NULL ; length++)
+				{
+					free(split[length]);
+				}
+				free(split);
+				free(line);
+			}
+			free(lines);
+		}		
+		spin_unlock_bh(&webmon_lock);
+
+	}
+		
+	
+	return 1;
+}
+static struct nf_sockopt_ops ipt_webmon_sockopts = 
+{
+	.pf         = PF_INET,
+	.set_optmin = WEBMON_SET,
+	.set_optmax = WEBMON_SET+1,
+	.set        = ipt_webmon_set_ctl,
+};
+
+
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
 		static bool 
@@ -420,7 +663,7 @@ static struct file_operations webmon_proc_fops = {
 	#endif
 
 	
-	struct iphdr* iph;	
+	struct iphdr* iph;
 
 	/* linearize skb if necessary */
 	struct sk_buff *linear_skb;
@@ -609,7 +852,7 @@ static struct ipt_match webmon_match =
 	"webmon",
 	&match,
 	&checkentry,
-	NULL,
+	&destroy,
 	THIS_MODULE
 #endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
@@ -620,12 +863,15 @@ static struct ipt_match webmon_match =
 	.matchsize	= sizeof(struct ipt_webmon_info),
 #endif
 	.checkentry	= &checkentry,
+	.destroy	= &destroy,
 	.me		= THIS_MODULE,
 #endif
 };
 
 static int __init init(void)
 {
+	spin_lock_bh(&webmon_lock);
+
 	recent_domains = (queue*)malloc(sizeof(queue));
 	recent_domains->first = NULL;
 	recent_domains->last = NULL;
@@ -639,20 +885,40 @@ static int __init init(void)
 			proc_webmon_recent_domains->proc_fops = &webmon_proc_fops;
 		}
 	#endif
+	
+	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)
+	{
+		printk("ipt_webmon: Can't register sockopts. Aborting\n");
+		spin_unlock_bh(&webmon_lock);
+		return -1;
+	}
+	spin_unlock_bh(&webmon_lock);
 
 	return ipt_register_match(&webmon_match);
 }
 
 static void __exit fini(void)
 {
+
 	unsigned long num_destroyed;
+
+	spin_lock_bh(&webmon_lock);
+
+
 	#ifdef CONFIG_PROC_FS
 		remove_proc_entry("webmon_recent_domains", NULL);
 	#endif
+	nf_unregister_sockopt(&ipt_webmon_sockopts);
 	ipt_unregister_match(&webmon_match);
-	destroy_map(domain_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+	destroy_queue(recent_domains);
+
+	spin_unlock_bh(&webmon_lock);
+
+
 }
 
 module_init(init);
 module_exit(fini);
+
 

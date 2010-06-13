@@ -29,11 +29,17 @@
 #define WEBMON_MAX_IPS           256
 #define WEBMON_MAX_IP_RANGES      16
 
-#define WEBMON_EXCLUDE    1
-#define WEBMON_INCLUDE    2
+#define WEBMON_EXCLUDE             1
+#define WEBMON_INCLUDE             2
 
-#define WEBMON_MAXDOMAIN 4
-#define WEBMON_MAXSEARCH 8
+#define WEBMON_MAXDOMAIN           4
+#define WEBMON_MAXSEARCH           8
+
+#define WEBMON_DOMAIN             16
+#define WEBMON_SEARCH             32
+
+
+#define WEBMON_SET              3064
 
 struct ipt_webmon_ip_range
 {
