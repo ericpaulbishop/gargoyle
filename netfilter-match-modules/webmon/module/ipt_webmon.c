@@ -574,6 +574,7 @@ static struct file_operations webmon_proc_fops = {
 	{
 		*(info->ref_count) = *(info->ref_count) + 1;
 	}
+	return 1;
 }
 
 static void destroy(	

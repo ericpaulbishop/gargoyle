@@ -29,8 +29,11 @@
 #define WEBMON_MAX_IPS           256
 #define WEBMON_MAX_IP_RANGES      16
 
-#define WEBMON_EXCLUDE_SPECIFIED   1
-#define WEBMON_EXCLUDE_OTHERS      2
+#define WEBMON_EXCLUDE    1
+#define WEBMON_INCLUDE    2
+
+#define WEBMON_MAXDOMAIN 4
+#define WEBMON_MAXSEARCH 8
 
 struct ipt_webmon_ip_range
 {
@@ -47,6 +50,7 @@ struct ipt_webmon_info
 	uint32_t num_exclude_ips;
 	uint32_t num_exclude_ranges;
 	unsigned char exclude_type;
+	uint32_t* ref_count;
 
 };
 

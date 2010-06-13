@@ -81,8 +81,7 @@ static struct option opts[] =
 	{ .name = "exclude_ips",   .has_arg = 1, .flag = 0, .val = WEBMON_EXCLUDE },
 	{ .name = "include_ips",   .has_arg = 1, .flag = 0, .val = WEBMON_INCLUDE },
 	{ .name = "max_domains",   .has_arg = 1, .flag = 0, .val = WEBMON_MAXDOMAIN },
-	{ .name = "max_Searches",  .has_arg = 1, .flag = 0, .val = WEBMON_MAXSEARCH },
-
+	{ .name = "max_searches",  .has_arg = 1, .flag = 0, .val = WEBMON_MAXSEARCH },
 	{ .name = 0 }
 };
 
@@ -112,6 +111,7 @@ static int parse(	int c,
 		info->num_exclude_ips=0;
 		info->num_exclude_ranges=0;
 		info->exclude_type = WEBMON_EXCLUDE;
+		info->ref_count = NULL;
 	}
 	*flags = 1;
 	
