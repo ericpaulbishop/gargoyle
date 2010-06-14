@@ -492,7 +492,7 @@ static void webmon_proc_stop(struct seq_file *seq, void *v)
 }
 
 
-static int webmon_proc_show(struct seq_file *s, void *v)
+static int webmon_proc_domain_show(struct seq_file *s, void *v)
 {
 	spin_lock_bh(&webmon_lock);
 
@@ -507,23 +507,58 @@ static int webmon_proc_show(struct seq_file *s, void *v)
 	return 0;
 }
 
-
-static struct seq_operations webmon_proc_sops = {
-	.start = webmon_proc_start,
-	.next  = webmon_proc_next,
-	.stop  = webmon_proc_stop,
-	.show  = webmon_proc_show
-};
-
-static int webmon_proc_open(struct inode *inode, struct file* file)
+static int webmon_proc_search_show(struct seq_file *s, void *v)
 {
-	return seq_open(file, &webmon_proc_sops);
+	spin_lock_bh(&webmon_lock);
+
+	queue_node* next_node = recent_searches->last;
+	while(next_node != NULL)
+	{
+		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, IP2STR(next_node->src_ip), next_node->value);
+		next_node = (queue_node*)next_node->previous;
+	}
+	spin_unlock_bh(&webmon_lock);
+
+	return 0;
 }
 
 
-static struct file_operations webmon_proc_fops = {
+static struct seq_operations webmon_proc_domain_sops = {
+	.start = webmon_proc_start,
+	.next  = webmon_proc_next,
+	.stop  = webmon_proc_stop,
+	.show  = webmon_proc_domain_show
+};
+
+static struct seq_operations webmon_proc_search_sops = {
+	.start = webmon_proc_start,
+	.next  = webmon_proc_next,
+	.stop  = webmon_proc_stop,
+	.show  = webmon_proc_search_show
+};
+
+
+static int webmon_proc_domain_open(struct inode *inode, struct file* file)
+{
+	return seq_open(file, &webmon_proc_domain_sops);
+}
+static int webmon_proc_search_open(struct inode *inode, struct file* file)
+{
+	return seq_open(file, &webmon_proc_search_sops);
+}
+
+
+
+static struct file_operations webmon_proc_domain_fops = {
 	.owner   = THIS_MODULE,
-	.open    = webmon_proc_open,
+	.open    = webmon_proc_domain_open,
+	.read    = seq_read,
+	.llseek  = seq_lseek,
+	.release = seq_release
+};
+static struct file_operations webmon_proc_search_fops = {
+	.owner   = THIS_MODULE,
+	.open    = webmon_proc_search_open,
 	.read    = seq_read,
 	.llseek  = seq_lseek,
 	.release = seq_release
@@ -790,8 +825,8 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 						}
 						else if(strstr(domain, "baidu.") != NULL)
 						{
-							search_part = strstr(path, "?bs=");
-							search_part = search_part == NULL ? strstr(path, "&bs=") : search_part;
+							search_part = strstr(path, "?wd=");
+							search_part = search_part == NULL ? strstr(path, "&wd=") : search_part;
 							search_part = search_part == NULL ? search_part : search_part+4;
 						}
 						else if(strstr(domain, "search.") != NULL)
@@ -1047,9 +1082,14 @@ static int __init init(void)
 
 	#ifdef CONFIG_PROC_FS
 		struct proc_dir_entry *proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
+		struct proc_dir_entry *proc_webmon_recent_searches = create_proc_entry("webmon_recent_searches", 0, NULL);
 		if(proc_webmon_recent_domains)
 		{
-			proc_webmon_recent_domains->proc_fops = &webmon_proc_fops;
+			proc_webmon_recent_domains->proc_fops = &webmon_proc_domain_fops;
+		}
+		if(proc_webmon_recent_searches)
+		{
+			proc_webmon_recent_searches->proc_fops = &webmon_proc_search_fops;
 		}
 	#endif
 	
