@@ -20,21 +20,6 @@
 		echo "var webmonEnabled=false;"
 	fi
 
-	echo "var includeData=[];"
-	echo "var includeExists = false;"
-	include_file=$(uci get webmon_gargoyle.webmon.include_ip_file 2>/dev/null)
-	if [ -e "$include_file" ] ; then
-                cat "$include_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "includeData.push([\""$1"\"]);"};'
-		echo "includeExists = true;"
-        fi
-
-	echo "var excludeData=[];"
-	echo "var excludeExists = false;"
-	exclude_file=$(uci get webmon_gargoyle.webmon.exclude_ip_file 2>/dev/null)
-	if [ -e "$exclude_file" ] ; then
-                cat "$exclude_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "excludeData.push([\""$1"\"]);"};'
-		echo "excludeExists = true;"
-        fi
 ?>
 //-->
 </script>
@@ -86,19 +71,36 @@
 		</div>
 
 		<legend class="sectionheader">Recent Web Usage</legend>
-		<div id="webmon_table_container"></div>
+		<div id="webmon_domain_table_container"></div>
 	</fieldset>
+
+	<fieldset>
+		<legend class="sectionheader">Recent Web Searches</legend>
+		<div>
+			<select id="host_display" onchange="updateMonitorTable()">
+				<option value="hostname">Display Hostnames</option>
+				<option value="ip">Display Host IPs</option>
+			</select>
+		</div>
+
+		<div id="webmon_search_table_container"></div>
+	</fieldset>
+
+
 	<fieldset id="download_web_usage_data" >
 		<legend class="sectionheader">Download Web Usage Data</legend>
 		<div>
 			<span style='text-decoration:underline'>Data is comma separated:</span>
 			<br/>
-			<em>[Time of Last Visit],[Local IP],[IP Visited],[Domain Visted]</em>
+			<em>[Time of Last Visit],[Local IP],[Domain Visted/Search Request]</em>
 			<br/>
 		</div>
 		<div>
-		<center><input type='button' id='download_data_button' class='big_button' value='Download Now' onclick='window.location="webmon.csv";' /></center>
-			
+			<center>
+				<input type='button' id='download_data_button' class='big_button' value='Download Recently Visited Domains' onclick='window.location="webmon_domains.csv";' />
+				&nbsp;&nbsp;
+				<input type='button' id='download_data_button' class='big_button' value='Download Recent Search Requests' onclick='window.location="webmon_searches.csv";' />
+			</center>
 		</div>
 	</fieldset>
 </form>
