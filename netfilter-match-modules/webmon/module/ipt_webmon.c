@@ -85,6 +85,11 @@ typedef struct
 
 static string_map* domain_map = NULL;
 static queue* recent_domains  = NULL;
+
+static string_map* search_map = NULL;
+static queue* recent_searches = NULL;
+
+
 static int max_domain_queue_length   = 5;
 static int max_search_queue_length   = 5;
 
@@ -727,18 +732,172 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 				{
 					extract_url(payload, payload_length, domain, path);
 					sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
+					
+					if(strlen(domain) > 0)
+					{
+						char *search_part = NULL;
+						spin_lock_bh(&webmon_lock);
 
-					spin_lock_bh(&webmon_lock);
-					if(get_string_map_element(domain_map, domain_key))
-					{
-						//update time
-						update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+
+
+						if(get_string_map_element(domain_map, domain_key))
+						{
+							//update time
+							update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+						}
+						else
+						{
+							//add
+							add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+						}
+						
+						if(strstr(domain, "google.") != NULL)
+						{
+							search_part = strstr(path, "&q=");
+							search_part = search_part == NULL ? strstr(path, "#q=") : search_part;
+							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "bing.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "yahoo.") != NULL)
+						{
+							search_part = strstr(path, "?p=");
+							search_part = search_part == NULL ? strstr(path, "&p=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "lycos.") != NULL)
+						{
+							search_part = strstr(path, "&query=");
+							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+7;
+						}
+						else if(strstr(domain, "altavista.") != NULL)
+						{
+							search_part = strstr(path, "&q=");
+							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "duckduckgo.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "baidu.") != NULL)
+						{
+							search_part = strstr(path, "?bs=");
+							search_part = search_part == NULL ? strstr(path, "&bs=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+4;
+						}
+						else if(strstr(domain, "search.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "aol.") != NULL)
+						{
+							search_part = strstr(path, "&q=");
+							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "ask.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "yandex.") != NULL)
+						{
+							search_part = strstr(path, "?text=");
+							search_part = search_part == NULL ? strstr(path, "&text=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+6;
+						}
+						else if(strstr(domain, "naver.") != NULL)
+						{
+							search_part = strstr(path, "&query=");
+							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+7;
+						}
+						else if(strstr(domain, "daum.") != NULL)
+						{
+							search_part = strstr(path, "&q=");
+							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "cuil.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "cuil.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "kosmix.") != NULL)
+						{
+							search_part = strstr(path, "/topic/");
+							search_part = search_part == NULL ? search_part : search_part+7;
+						}
+						else if(strstr(domain, "yebol.") != NULL)
+						{
+							search_part = strstr(path, "?key=");
+							search_part = search_part == NULL ? strstr(path, "&key=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+5;
+						}
+						else if(strstr(domain, "sogou.") != NULL)
+						{
+							search_part = strstr(path, "&query=");
+							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+7;
+						}
+						else if(strstr(domain, "youdao.") != NULL)
+						{
+							search_part = strstr(path, "?q=");
+							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+							search_part = search_part == NULL ? search_part : search_part+3;
+						}
+						else if(strstr(domain, "metacrawler.") != NULL)
+						{
+							search_part = strstr(path, "/ws/results/Web/");
+							search_part = search_part == NULL ? search_part : search_part+16;
+						}
+						else if(strstr(domain, "webcrawler.") != NULL)
+						{
+							search_part = strstr(path, "/ws/results/Web/");
+							search_part = search_part == NULL ? search_part : search_part+16;
+						}
+
+						if(search_part != NULL)
+						{
+							int qpi;
+							char search_key[700];
+							for(qpi=0; search_part[qpi] != '\0' && search_part[qpi] != '&' && search_part[qpi] != '/'; qpi++);
+							search_part[qpi] = '\0';
+							sprintf(search_key, STRIP"@%s", IP2STR(iph->saddr), search_part);
+							if(get_string_map_element(search_map, search_key))
+							{
+								//update time
+								update_queue_node_time( (queue_node*)get_map_element(search_map, search_key), recent_searches );
+							}
+							else
+							{
+								//add
+								add_queue_node(iph->saddr, search_part, recent_searches, search_map, search_key, max_search_queue_length );
+							}
+						}
 					}
-					else
-					{
-						//add
-						add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
-					}
+					
+					
+					
 					spin_unlock_bh(&webmon_lock);
 				}
 			}
@@ -876,7 +1035,15 @@ static int __init init(void)
 	recent_domains->first = NULL;
 	recent_domains->last = NULL;
 	recent_domains->length = 0;
-	domain_map = initialize_map(0);
+	domain_map = initialize_string_map(0);
+
+	recent_searches = (queue*)malloc(sizeof(queue));
+	recent_searches->first = NULL;
+	recent_searches->last = NULL;
+	recent_searches->length = 0;
+	search_map = initialize_string_map(0);
+
+
 
 	#ifdef CONFIG_PROC_FS
 		struct proc_dir_entry *proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
@@ -911,7 +1078,9 @@ static void __exit fini(void)
 	nf_unregister_sockopt(&ipt_webmon_sockopts);
 	ipt_unregister_match(&webmon_match);
 	destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+	destroy_map(search_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_queue(recent_domains);
+	destroy_queue(recent_searches);
 
 	spin_unlock_bh(&webmon_lock);
 
