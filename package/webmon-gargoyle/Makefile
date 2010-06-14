@@ -23,21 +23,19 @@ define Package/webmon-gargoyle
 	SUBMENU:=Web
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=A small program to monitor web usage
+	TITLE:=Init scripts to setup and use iptables webmon module
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +iptables-mod-webmon +libpcap +libericstools
+	DEPENDS:= +iptables-mod-webmon
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
 
 define Package/webmon-gargoyle/description
-  A small web server for the Gargoyle Web Interface
+  Init scripts to setup and use iptables webmon module
 endef
 
 
 define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
 

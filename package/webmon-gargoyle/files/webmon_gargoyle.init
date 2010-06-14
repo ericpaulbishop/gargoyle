@@ -3,13 +3,7 @@ START=85
 
 include /lib/network
 
-config_load webmon_gargoyle
-config_get max_domains webmon max_domains
-config_get max_searches webmon max_searches
-config_get domain_save_path webmon domain_save_path
-config_get search_save_path webmon search_save_path
-config_get exclude_ips webmon exclude_ips
-config_get include_ips webmon include_ips
+
 
 backup_script="/tmp/do_webmon_backup.sh"
 tmp_cron="/tmp/tmp.cron"
@@ -31,6 +25,14 @@ update_cron()
 
 start()
 {
+	config_load webmon_gargoyle
+	config_get max_domains webmon max_domains
+	config_get max_searches webmon max_searches
+	config_get domain_save_path webmon domain_save_path
+	config_get search_save_path webmon search_save_path
+	config_get exclude_ips webmon exclude_ips
+	config_get include_ips webmon include_ips
+
 	wan_if=$(uci -P "/var/state" get network.wan.ifname)
 	if [ -n "$wan_if" ] ; then
 		
