@@ -610,10 +610,7 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 				recent_domains->length = 0;
 				domain_map = initialize_map(0);
 			
-				if(max_queue_length > max_domain_queue_length)
-				{
-					max_domain_queue_length = max_queue_length;
-				}
+				max_domain_queue_length = max_queue_length;
 			}
 			else if(type == WEBMON_SEARCH)
 			{
@@ -624,11 +621,8 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 				recent_searches->last = NULL;
 				recent_searches->length = 0;
 				search_map = initialize_map(0);
-				if(max_queue_length > max_search_queue_length)
-				{
-					max_search_queue_length = max_queue_length;
-				}
-
+				
+				max_search_queue_length = max_queue_length;
 			}
 
 
@@ -1025,14 +1019,8 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 
 		spin_lock_bh(&webmon_lock);
 		
-		if(info->max_searches > max_search_queue_length)
-		{
-			max_search_queue_length = info->max_searches;
-		}
-		if(info->max_domains > max_domain_queue_length)
-		{
-			max_domain_queue_length = info->max_domains;
-		}
+		max_search_queue_length = info->max_searches;
+		max_domain_queue_length = info->max_domains;
 	
 		spin_unlock_bh(&webmon_lock);
 
