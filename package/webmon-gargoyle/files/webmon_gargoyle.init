@@ -114,4 +114,11 @@ stop()
 	delete_chain_from_table filter web_monitor
 }
 
-
+restart()
+{
+	webmon_rules=$(( $(iptables -L web_monitor 2>/dev/null | wc -l)-2 )) 
+	if [ $webmon_rules -gt 0 ] ; then
+		stop
+	fi
+	start
+}
