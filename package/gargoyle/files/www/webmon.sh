@@ -63,21 +63,21 @@
 		</div>
 	</fieldset>
 	<fieldset>
+		<legend class="sectionheader">Recently Visied Sites</legend>
 		<div>
-			<select id="host_display" onchange="updateMonitorTable()">
+			<select id="domain_host_display" onchange="updateMonitorTable()">
 				<option value="hostname">Display Hostnames</option>
 				<option value="ip">Display Host IPs</option>
 			</select>
 		</div>
 
-		<legend class="sectionheader">Recent Web Usage</legend>
 		<div id="webmon_domain_table_container"></div>
 	</fieldset>
 
 	<fieldset>
 		<legend class="sectionheader">Recent Web Searches</legend>
 		<div>
-			<select id="host_display" onchange="updateMonitorTable()">
+			<select id="search_host_display" onchange="updateMonitorTable()">
 				<option value="hostname">Display Hostnames</option>
 				<option value="ip">Display Host IPs</option>
 			</select>
