@@ -61,11 +61,11 @@ function saveChanges()
 			var include_exclude_type = getSelectedValue("include_exclude");
 			if(include_exclude_type == "exclude" && ipList.length > 0)
 			{
-				uci.set("webmon_gargoyle", "webmon", "include_ips", ipList.join(","));
+				uci.set("webmon_gargoyle", "webmon", "exclude_ips", ipList.join(","));
 			}
 			else if(include_exclude_type == "include" && ipList.length > 0)
 			{
-				uci.set("webmon_gargoyle", "webmon", "exclude_ips", ipList.join(","));
+				uci.set("webmon_gargoyle", "webmon", "include_ips", ipList.join(","));
 			}
 			startStopCommand = "/etc/init.d/webmon_gargoyle restart\n";
 		}
