@@ -238,7 +238,8 @@ function resetData()
 	}
 	setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
 	setElementEnabled(document.getElementById("search_host_display"), webmonEnabled);
-	setElementEnabled(document.getElementById("download_data_button"), webmonEnabled);
+	setElementEnabled(document.getElementById("download_domain_button"), webmonEnabled);
+	setElementEnabled(document.getElementById("download_search_button"), webmonEnabled);
 }
 
 function setIncludeExclude()

@@ -63,7 +63,7 @@
 		</div>
 	</fieldset>
 	<fieldset>
-		<legend class="sectionheader">Recently Visied Sites</legend>
+		<legend class="sectionheader">Recently Visited Sites</legend>
 		<div>
 			<select id="domain_host_display" onchange="updateMonitorTable()">
 				<option value="hostname">Display Hostnames</option>
@@ -97,9 +97,9 @@
 		</div>
 		<div>
 			<center>
-				<input type='button' id='download_data_button' class='big_button' value='Visited Sites' onclick='window.location="webmon_domains.csv";' />
+				<input type='button' id='download_domain_button' class='big_button' value='Visited Sites' onclick='window.location="webmon_domains.csv";' />
 				&nbsp;&nbsp;
-				<input type='button' id='download_data_button' class='big_button' value='Search Requests' onclick='window.location="webmon_searches.csv";' />
+				<input type='button' id='download_search_button' class='big_button' value='Search Requests' onclick='window.location="webmon_searches.csv";' />
 			</center>
 		</div>
 	</fieldset>
