@@ -71,17 +71,18 @@ start()
 		if [ -n "$include_ips" ] && [ -z "$exclude_ips" ] ; then
 			webmon_params="$webmon_params --include_ips $include_ips"
 		fi
-		if [ -e "$search_save_path" ] ; then
-			webmon_params="$webmon_params --search_load_file '$search_save_path'"
+		
+		
+		if   [ -e "$search_save_path" ] && [ -e "$domain_save_path" ] ; then
+			iptables -t filter -I web_monitor -m webmon $webmon_params --search_load_file "$search_save_path" --domain_load_file "$domain_save_path"
+		elif [ -e "$search_save_path" ] ; then
+			iptables -t filter -I web_monitor -m webmon $webmon_params --search_load_file "$search_save_path" --clear_domain
+		elif [ -e "$domain_save_path" ] ; then
+			iptables -t filter -I web_monitor -m webmon $webmon_params --domain_load_file "$domain_save_path" --clear_search
 		else
-			webmon_params="$webmon_params --clear_search"
+			iptables -t filter -I web_monitor -m webmon $webmon_params --clear_domain --clear_search
 		fi
-		if [ -e "$domain_save_path" ] ; then
-			webmon_params="$webmon_params --domain_load_file '$domain_save_path'"
-		else
-			webmon_params="$webmon_params --clear_domain"
-		fi
-		iptables -t filter -I web_monitor -m webmon $webmon_params
+		
 
 		#create backup script in tmp (RAM disk) so I/O to flash isn't an issue
 		echo '#!/bin/sh' > "$backup_script"
