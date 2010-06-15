@@ -591,22 +591,45 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 		char whitespace_chars[] = { '\t', ' ' };
 
 		spin_lock_bh(&webmon_lock);
-		if(type == WEBMON_DOMAIN )
+		if(type == WEBMON_DOMAIN || type == WEBMON_SEARCH )
 		{
 			unsigned long num_lines;
 			unsigned long line_index;
 			unsigned long num_destroyed;
 			char** lines = split_on_separators(data, newline_terminator, 2, -1, 0, &num_lines);
-			max_domain_queue_length = max_queue_length;
+			
 
 			/* destroy and re-initialize queue and map */
-			destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-			destroy_queue(recent_domains);
-			recent_domains = (queue*)malloc(sizeof(queue));
-			recent_domains->first = NULL;
-			recent_domains->last = NULL;
-			recent_domains->length = 0;
-			domain_map = initialize_map(0);
+			if(type == WEBMON_DOMAIN )
+			{
+				destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+				destroy_queue(recent_domains);
+				recent_domains = (queue*)malloc(sizeof(queue));
+				recent_domains->first = NULL;
+				recent_domains->last = NULL;
+				recent_domains->length = 0;
+				domain_map = initialize_map(0);
+			
+				if(max_queue_length > max_domain_queue_length)
+				{
+					max_domain_queue_length = max_queue_length;
+				}
+			}
+			else if(type == WEBMON_SEARCH)
+			{
+				destroy_map(search_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+				destroy_queue(recent_searches);
+				recent_searches = (queue*)malloc(sizeof(queue));
+				recent_searches->first = NULL;
+				recent_searches->last = NULL;
+				recent_searches->length = 0;
+				search_map = initialize_map(0);
+				if(max_queue_length > max_search_queue_length)
+				{
+					max_search_queue_length = max_queue_length;
+				}
+
+			}
 
 
 			for(line_index=0; line_index < num_lines; line_index++)
@@ -615,7 +638,7 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 				unsigned long num_pieces;
 				char** split = split_on_separators(line, whitespace_chars, 2, -1, 0, &num_pieces);
 			
-				//check that there are 4 pieces (time, src_ip, dst_ip, domain_name)
+				//check that there are 3 pieces (time, src_ip, value)
 				int length;
 				for(length=0; split[length] != NULL ; length++){}
 				if(length == 3)
@@ -629,14 +652,21 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 					}
 					if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
 					{
-						char* domain = split[2];
-						char domain_key[700];
+						char* value = split[2];
+						char value_key[700];
 						uint32_t ip = parsed_ip[0] + (parsed_ip[1]<<8) + (parsed_ip[2]<<16) +  (parsed_ip[3]<<24) ;
 
-						sprintf(domain_key, STRIP"@%s", IP2STR(ip), domain);
-						add_queue_node(ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
-						(recent_domains->first->time).tv_sec = time;
-
+						sprintf(value_key, STRIP"@%s", IP2STR(ip), value);
+						if(type == WEBMON_DOMAIN)
+						{
+							add_queue_node(ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
+							(recent_domains->first->time).tv_sec = time;
+						}
+						else if(type == WEBMON_SEARCH)
+						{
+							add_queue_node(ip, value, recent_searches, search_map, value_key, max_search_queue_length );
+							(recent_searches->first->time).tv_sec = time;
+						}
 					}
 				}
 				
@@ -648,9 +678,9 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 				free(line);
 			}
 			free(lines);
-		}		
-		spin_unlock_bh(&webmon_lock);
+		}
 
+		spin_unlock_bh(&webmon_lock);
 	}
 		
 	
