@@ -34,8 +34,12 @@
 		</div>
 		<div class="indent">
 			<div>
-				<label class='leftcolumn' for='num_records' id='num_records_label'>Number of Pages to Save:</label>
-				<input type='text' class='rightcolumn' id='num_records' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
+				<label class='leftcolumn' for='num_domains' id='num_domains_label'>Number of Sites to Save:</label>
+				<input type='text' class='rightcolumn' id='num_domains' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
+			</div>
+			<div>
+				<label class='leftcolumn' for='num_searches' id='num_searches_label'>Number of Searches to Save:</label>
+				<input type='text' class='rightcolumn' id='num_searches' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
 			</div>
 			<div>
 				<select id="include_exclude" onchange="setIncludeExclude()">
