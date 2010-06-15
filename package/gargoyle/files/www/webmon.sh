@@ -97,9 +97,9 @@
 		</div>
 		<div>
 			<center>
-				<input type='button' id='download_data_button' class='big_button' value='Download Recently Visited Domains' onclick='window.location="webmon_domains.csv";' />
+				<input type='button' id='download_data_button' class='big_button' value='Visited Sites' onclick='window.location="webmon_domains.csv";' />
 				&nbsp;&nbsp;
-				<input type='button' id='download_data_button' class='big_button' value='Download Recent Search Requests' onclick='window.location="webmon_searches.csv";' />
+				<input type='button' id='download_data_button' class='big_button' value='Search Requests' onclick='window.location="webmon_searches.csv";' />
 			</center>
 		</div>
 	</fieldset>

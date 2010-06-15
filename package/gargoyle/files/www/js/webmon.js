@@ -128,10 +128,15 @@ function clearHistory()
 			setControlsEnabled(true);
 			updateInProgress = false;
 			
-			tableContainer = document.getElementById('webmon_table_container');
-			if(tableContainer.firstChild != null)
+			var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
+			var ci;
+			for(ci=0; ci < containerNames.length; ci++)
 			{
-				tableContainer.removeChild(tableContainer.firstChild);
+				tableContainer = document.getElementById(containerNames[ci]);
+				if(tableContainer.firstChild != null)
+				{
+					tableContainer.removeChild(tableContainer.firstChild);
+				}
 			}
 			
 			setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
@@ -209,11 +214,17 @@ function resetData()
 	setIncludeExclude();
 	setWebmonEnabled();
 
-	tableContainer = document.getElementById('webmon_table_container');
-	if(tableContainer.firstChild != null)
+	var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
+	var ci;
+	for(ci=0; ci < containerNames.length; ci++)
 	{
-		tableContainer.removeChild(tableContainer.firstChild);
+		tableContainer = document.getElementById(containerNames[ci]);
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
 	}
+
 
 	if(webmonEnabled)
 	{
@@ -306,13 +317,12 @@ function updateMonitorTable()
 				{
 					var domainData = [];
 					var searchData = [];
-					var wmIndex=0;
 					var type = "domains";
 					var hostDisplayType = getSelectedValue("domain_host_display");
+					
+					var wmIndex=0;
 					while(webmonLines[wmIndex] != "domains"){ wmIndex++; }
-					wmIndex++;
-
-					for(wmIndex=0; loadedData && webmonLines[wmIndex] !=  "webmon_done" && wmIndex <  webmonLines.length; wmIndex++)
+					for(wmIndex++; loadedData && webmonLines[wmIndex] !=  "webmon_done" && wmIndex <  webmonLines.length; wmIndex++)
 					{
 						if(webmonLines[wmIndex] == "searches")
 						{
@@ -340,7 +350,7 @@ function updateMonitorTable()
 							if(type == "domains")
 							{
 								var domainLink = document.createElement("a");
-								domainLink.setAttribute('href',"http://" + domain);
+								domainLink.setAttribute('href',"http://" + value);
 								var domainText = value;
 								if(domainText.length > 43)
 								{
@@ -372,7 +382,7 @@ function updateMonitorTable()
 					
 					var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
 					var ci;
-					for(ci=0; ci < containers.length; ci++)
+					for(ci=0; ci < containerNames.length; ci++)
 					{
 						tableContainer = document.getElementById(containerNames[ci]);
 						if(tableContainer.firstChild != null)

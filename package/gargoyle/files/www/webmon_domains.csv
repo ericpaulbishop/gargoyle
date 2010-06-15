@@ -10,5 +10,5 @@
 	echo "Content-type: application/octet-stream"
 	echo ""
 	
-	webmon_gargoyle | sed "s/\t/,/g"
+	cat /proc/webmon_recent_domains | sed "s/\t/,/g"
 ?>
