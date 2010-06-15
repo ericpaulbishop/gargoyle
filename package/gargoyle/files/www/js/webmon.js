@@ -303,7 +303,7 @@ function updateMonitorTable()
 	if(!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands="/usr/sbin/webmon_gargoyle";
+		var commands="echo domains ; cat /proc/webmon_recent_domains 2>/dev/null; echo searches ; cat /proc/webmon_recent_searches 2>/dev/null ; echo webmon_done";
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
@@ -314,37 +314,59 @@ function updateMonitorTable()
 				var loadedData = (webmonLines != null);
 				if(loadedData)
 				{
-					for(wmIndex=0; loadedData && webmonLines[wmIndex].match(/^Success/) == null && wmIndex <  webmonLines.length; wmIndex++)
+					var domainData = [];
+					var searchData = [];
+					var wmIndex=0;
+					var type = "domains";
+					while(webmonLines[wmIndex] != "domains"){ wmIndex++; }
+					wmIndex++;
+
+					for(wmIndex=0; loadedData && webmonLines[wmIndex] !=  "webmon_done" && wmIndex <  webmonLines.length; wmIndex++)
 					{
-						var splitLine = webmonLines[wmIndex].split(/[\t]+/);
-						loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
-						var lastVisitDate = new Date();
-						lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
-					
-						var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
-						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-						var m = twod(lastVisitDate.getMonth()+1);
-						var d = twod(lastVisitDate.getDate());
-						var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
-						var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
-
-
-						
-						var host = getHostDisplay(splitLine[1]);	
-						var domain = splitLine[3];
-
-						var domainLink = document.createElement("a");
-						domainLink.setAttribute('href',"http://" + domain);
-						var domainText = domain;
-						if(domainText.length > 43)
+						if(webmonLines[wmIndex] == "searches")
 						{
-							domainText = domainText.substr(0, 40) + "...";
+							type = "searches";
 						}
-						domainLink.appendChild( document.createTextNode(domainText) );
+						else
+						{
+							var splitLine = webmonLines[wmIndex].split(/[\t]+/);
+							loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
+							var lastVisitDate = new Date();
+							lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
+					
+							var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
+							var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+							var m = twod(lastVisitDate.getMonth()+1);
+							var d = twod(lastVisitDate.getDate());
+							var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
+							var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
 
 
-				
-						tableData.push([host, lastVisit, domainLink]);
+							var host = getHostDisplay(splitLine[1]);	
+							var value = splitLine[2];
+							
+							if(type == domains)
+							{
+								var domainLink = document.createElement("a");
+								domainLink.setAttribute('href',"http://" + domain);
+								var domainText = value;
+								if(domainText.length > 43)
+								{
+									domainText = domainText.substr(0, 40) + "...";
+								}
+								domainLink.appendChild( document.createTextNode(domainText) );
+								domainData.push([host, lastVisit, domainLink]);
+							}
+							else
+							{
+								var searchText =value.replace("+", " ");
+								if(searchText.length > 43)
+								{
+									searchText = searchText.substr(0, 40) + "...";
+								}
+								searchData.push([host, lastVisit, searchText]);
+							}
+						}
 					}
 				}	
 				
