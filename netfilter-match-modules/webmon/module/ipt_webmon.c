@@ -389,13 +389,26 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	char last_two_buf[2];
 	int end_found;
 	char* domain_match;
+	char* start_ptr;
 
 	domain[0] = '\0';
 	path[0] = '\0';
 
 
 	/* get path portion of URL */
-	path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
+	start_ptr = strnistr((char*)packet_data, " ", packet_length);
+	if(start_ptr == NULL)
+	{
+		return;
+	}
+
+	path_start_index = (int)(start_ptr - (char*)packet_data);
+	start_ptr = strnistr((char*)(packet_data+path_start_index), " ", packet_length-(path_start_index+2));
+	if(start_ptr == NULL)
+	{
+		return;
+	}
+
 	while( packet_data[path_start_index] == ' ')
 	{
 		path_start_index++;
@@ -407,6 +420,10 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 		path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
 		memcpy(path, packet_data+path_start_index, path_length);
 		path[ path_length] = '\0';
+	}
+	else
+	{
+		return;
 	}
 		
 	/* get header length */
@@ -449,8 +466,8 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 		{
 			domain_end_index++;
 		}
-		memcpy(domain, domain_match, domain_end_index);
 		domain_end_index = domain_end_index < 625 ? domain_end_index : 624; /* prevent overflow */
+		memcpy(domain, domain_match, domain_end_index);
 		domain[domain_end_index] = '\0';
 
 		for(domain_end_index=0; domain[domain_end_index] != '\0'; domain_end_index++)
@@ -934,14 +951,46 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							search_part = strstr(path, "/ws/results/Web/");
 							search_part = search_part == NULL ? search_part : search_part+16;
 						}
-
 						if(search_part != NULL)
 						{
 							int qpi;
 							char search_key[700];
+							queue_node *recent_node = recent_searches->first;
+
 							for(qpi=0; search_part[qpi] != '\0' && search_part[qpi] != '&' && search_part[qpi] != '/'; qpi++);
 							search_part[qpi] = '\0';
 							sprintf(search_key, STRIP"@%s", IP2STR(iph->saddr), search_part);
+							
+							
+							/* Often times search engines will initiate a search as you type it in, but these intermediate queries aren't the real search query
+							 * So, if the most recent query is a substring of the current one, discard it in favor of this one
+							 */
+							if(recent_node != NULL)
+							{
+								if(strstr(search_part, recent_node->value) == search_part && recent_node->src_ip == iph->saddr)
+								{
+									struct timeval t;
+									do_gettimeofday(&t);
+									if( (recent_node->time).tv_sec + 5 >= t.tv_sec )
+									{
+										char recent_key[700];
+
+										sprintf(recent_key, STRIP"@%s", IP2STR(recent_node->src_ip), recent_node->value);
+										remove_map_element(search_map, recent_key);
+
+										recent_searches->first = recent_node->next;
+										if(recent_searches->first != NULL)
+										{
+											recent_searches->first->previous = NULL;
+										}
+										free(recent_node->value);
+										free(recent_node);
+									}
+								}
+							}
+
+
+							
 							if(get_string_map_element(search_map, search_key))
 							{
 								//update time
