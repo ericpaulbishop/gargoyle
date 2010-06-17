@@ -954,13 +954,47 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 						
 						if(search_part != NULL)
 						{
-							int qpi;
+							int spi, si;
 							char search_key[700];
+							char search[650];
 							queue_node *recent_node = recent_searches->first;
-
-							for(qpi=0; search_part[qpi] != '\0' && search_part[qpi] != '&' && search_part[qpi] != '/'; qpi++);
-							search_part[qpi] = '\0';
-							sprintf(search_key, STRIP"@%s", IP2STR(iph->saddr), search_part);
+							
+							/*unescape, replacing whitespace with + */
+							si = 0;
+							for(spi=0; search_part[spi] != '\0' && search_part[spi] != '&' && search_part[spi] != '/'; spi++)
+							{
+								int parsed_hex = 0;
+								if( search_part[spi] == '%')
+								{
+									if(search_part[spi+1]  != '\0' && search_part[spi+1] != '&' && search_part[spi+1] != '/')
+									{
+										if(search_part[spi+2]  != '\0' && search_part[spi+2] != '&' && search_part[spi+2] != '/')
+										{
+											char enc[3];
+											int hex;
+											enc[0] = search_part[spi+1];
+											enc[1] = search_part[spi+2];
+											enc[2] = '\0';
+											if(sscanf(enc, "%x", &hex) > 0)
+											{
+												parsed_hex = 1;
+												search[si] = hex == ' ' || hex == '\t' || hex == '\r' || hex == '\n' ? '+' : (char)hex;
+												spi = spi+2;
+											}
+										}
+									}
+								}
+								if(parsed_hex == 0)
+								{
+									search[si] = search_part[spi];
+								}
+								si++;
+							}
+							search[si] = '\0';
+							
+							
+							
+							sprintf(search_key, STRIP"@%s", IP2STR(iph->saddr), search);
 							
 							
 							/* Often times search engines will initiate a search as you type it in, but these intermediate queries aren't the real search query
@@ -968,17 +1002,17 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							 */
 							if(recent_node != NULL)
 							{
-								if(strstr(search_part, recent_node->value) == search_part && recent_node->src_ip == iph->saddr)
+								if( (strstr(search, recent_node->value) == search || strstr(recent_node->value, search) == recent_node->value ) && recent_node->src_ip == iph->saddr)
 								{
 									struct timeval t;
 									do_gettimeofday(&t);
 									if( (recent_node->time).tv_sec + 5 >= t.tv_sec )
 									{
 										char recent_key[700];
-
+										
 										sprintf(recent_key, STRIP"@%s", IP2STR(recent_node->src_ip), recent_node->value);
 										remove_map_element(search_map, recent_key);
-
+										
 										recent_searches->first = recent_node->next;
 										if(recent_searches->first != NULL)
 										{
@@ -1000,12 +1034,11 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							else
 							{
 								//add
-								add_queue_node(iph->saddr, search_part, recent_searches, search_map, search_key, max_search_queue_length );
+								add_queue_node(iph->saddr, search, recent_searches, search_map, search_key, max_search_queue_length );
 							}
 						}
-						
 						spin_unlock_bh(&webmon_lock);
-					}					
+					}
 				}
 			}
 		}
