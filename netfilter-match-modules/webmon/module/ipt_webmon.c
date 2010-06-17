@@ -451,7 +451,7 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	{
 		int domain_end_index;
 		domain_match = domain_match + 5; /* character after "Host:" */
-		while(domain_match[0] == ' ')
+		while(domain_match[0] == ' ' && ( (char*)domain_match - (char*)packet_data) < last_header_index)
 		{
 			domain_match = domain_match+1;
 		}
@@ -807,6 +807,8 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 				if(save)
 				{
 					extract_url(payload, payload_length, domain, path);
+
+					
 					sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
 					
 					if(strlen(domain) > 0)
@@ -814,7 +816,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 						char *search_part = NULL;
 						spin_lock_bh(&webmon_lock);
 
-
+						
 
 						if(get_string_map_element(domain_map, domain_key))
 						{
@@ -827,7 +829,10 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
 						}
 						
-						if(strstr(domain, "google.") != NULL)
+							
+						/* printk("domain,path=\"%s\", \"%s\"\n", domain, path); */
+
+						if(strnistr(domain, "google.", 625) != NULL)
 						{
 							search_part = strstr(path, "&q=");
 							search_part = search_part == NULL ? strstr(path, "#q=") : search_part;
@@ -912,12 +917,6 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
 							search_part = search_part == NULL ? search_part : search_part+3;
 						}
-						else if(strstr(domain, "cuil.") != NULL)
-						{
-							search_part = strstr(path, "?q=");
-							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
-							search_part = search_part == NULL ? search_part : search_part+3;
-						}
 						else if(strstr(domain, "kosmix.") != NULL)
 						{
 							search_part = strstr(path, "/topic/");
@@ -951,6 +950,8 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							search_part = strstr(path, "/ws/results/Web/");
 							search_part = search_part == NULL ? search_part : search_part+16;
 						}
+
+						
 						if(search_part != NULL)
 						{
 							int qpi;
@@ -1002,11 +1003,9 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 								add_queue_node(iph->saddr, search_part, recent_searches, search_map, search_key, max_search_queue_length );
 							}
 						}
-					}
-					
-					
-					
-					spin_unlock_bh(&webmon_lock);
+						
+						spin_unlock_bh(&webmon_lock);
+					}					
 				}
 			}
 		}
