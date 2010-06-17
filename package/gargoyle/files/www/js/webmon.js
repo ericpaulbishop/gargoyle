@@ -364,7 +364,7 @@ function updateMonitorTable()
 							}
 							else
 							{
-								var searchText = unescape(value.replace(/\+/g, " "));
+								var searchText = value.replace(/\+/g, " ");
 								if(searchText.length > 43)
 								{
 									searchText = searchText.substr(0, 40) + "...";
