@@ -1,0 +1,22 @@
+#Gargoyle index file for Layer 7 patterns
+#
+#First word is the pattern name
+#Remaining words are the descriptive equivalent that the user sees.
+#
+http HTTP
+ftp FTP
+ssl SSL
+pop3 POP3
+smtp SMTP
+ident Ident
+ntp NTP
+vnc VNC
+irc IRC
+jabber Jabber
+msnmessenger MSN Messenger
+aim AIM
+fasttrack FastTrack
+bittorrent BitTorrent
+gnutella Gnutella
+edonkey eDonkey
+ipp2p Any P2P

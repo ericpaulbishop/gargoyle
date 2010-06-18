@@ -141,23 +141,7 @@
 		</select>
 		
 		<select class='rightcolumn' id="exception_app_protocol">
-			<option value='http'>HTTP</option>
-			<option value='ftp'>FTP</option>
-			<option value='ssl'>SSL</option>
-			<option value='pop3'>POP3</option>
-			<option value='smtp'>SMTP</option>
-			<option value='ident'>Ident</option>
-			<option value='ntp'>NTP</option>
-			<option value='vnc'>VNC</option>
-			<option value='irc'>IRC</option>
-			<option value='jabber'>Jabber</option>
-			<option value='msnmessenger'>MSN Messenger</option>
-			<option value='aim'>AIM</option>
-			<option value='fasttrack'>FastTrack</option>
-			<option value='bittorrent'>BitTorrent</option>
-			<option value='gnutella'>Gnutella</option>
-			<option value='edonkey'>eDonkey</option>
-			<option value='ipp2p'>Any P2P</option>
+		<L7OPTIONS>
 		</select>
 	</div>
 	<div>

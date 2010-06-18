@@ -73,23 +73,9 @@
 			<label id="app_protocol_label" for='app_protocol'>Application (Layer7) Protocol:</label>
 		</div>	
 		<select class='rightcolumn' id="app_protocol">
-			<option>HTTP</option>
-			<option>FTP</option>
-			<option>SSL</option>
-			<option>POP3</option>
-			<option>SMTP</option>
-			<option>Ident</option>
-			<option>NTP</option>
-			<option>VNC</option>
-			<option>IRC</option>
-			<option>Jabber</option>
-			<option>MSN Messenger</option>
-			<option>AIM</option>
-			<option>FastTrack</option>
-			<option>BitTorrent</option>
-			<option>Gnutella</option>
-			<option>eDonkey</option>
-			<option>Any P2P</option>
+		<?
+		sed -e '/^#/ d' -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
+		?>
 		</select>
 	</div>
 

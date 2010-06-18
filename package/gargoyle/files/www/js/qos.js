@@ -10,6 +10,8 @@
 
 function saveChanges()
 {
+
+
 	uci = uciOriginal.clone();
 	commands = "";
 	errors = "";
@@ -120,7 +122,7 @@ function saveChanges()
 			}
 		}
 		uci.set("qos_gargoyle", direction, "default_class", classIds[getSelectedText("default_class")]);
-
+/*
 		displayProtocolNames = ["HTTP","FTP","SSL","POP3","SMTP","Ident","NTP","VNC","IRC","Jabber","MSN Messenger","AIM","FastTrack","BitTorrent","Gnutella","eDonkey"];
 		protocolIds = ["http","ftp","ssl","pop3","smtp","ident","ntp","vnc","irc","jabber","msnmessenger","aim","fasttrack","bittorrent","gnutella","edonkey"];
 		protocolMap = [];
@@ -129,6 +131,7 @@ function saveChanges()
 			protocolMap[ displayProtocolNames[protocolIndex]  ] = protocolIds[protocolIndex];
 		}
 
+*/
 		ruleTable = document.getElementById('qos_rule_table_container').firstChild;
 		ruleData = getTableDataArray( ruleTable, true, true);
 		for(ruleIndex = 0; ruleIndex < ruleData.length; ruleIndex++)
@@ -141,7 +144,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto"];
+			optionList = ["source", "srcport", "destination", "dstport", "min_pkt_size", "max_pkt_size", "proto"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
@@ -155,10 +158,18 @@ function saveChanges()
 			}
 			if(matchCriteria[matchCriteria.length-1] != "")
 			{
+
+                            protocolMap.getL7ID = function (desc) {
+                                 for(key in this) {if (this[key] == desc) return key;}
+                            }
+
 				appProtocol = matchCriteria[matchCriteria.length-1];
-				if(protocolMap[appProtocol] != null)
+                            appProtocolName=protocolMap.getL7ID(appProtocol);
+
+				if(appProtocolName != null)
 				{
-					uci.set("qos_gargoyle", ruleId, "layer7", protocolMap[appProtocol]);
+					/* uci.set("qos_gargoyle", ruleId, "layer7", protocolMap[appProtocol]); */
+					uci.set("qos_gargoyle", ruleId, "layer7", appProtocolName);
 				}
 				else if(appProtocol == "Any P2P")
 				{
@@ -328,14 +339,15 @@ function resetData()
 
 		if(uciOriginal.get("qos_gargoyle", ruleSection, "layer7") != "")
 		{
-			displayProtocolNames = ["HTTP","FTP","SSL","POP3","SMTP","Ident","NTP","VNC","IRC","Jabber","MSN Messenger","AIM","FastTrack","BitTorrent","Gnutella","eDonkey"];
+
+/*			displayProtocolNames = ["HTTP","FTP","SSL","POP3","SMTP","Ident","NTP","VNC","IRC","Jabber","MSN Messenger","AIM","FastTrack","BitTorrent","Gnutella","eDonkey"];
 			protocolIds = ["http","ftp","ssl","pop3","smtp","ident","ntp","vnc","irc","jabber","msnmessenger","aim","fasttrack","bittorrent","gnutella","edonkey"];
 			protocolMap = [];
 			for(protocolIndex = 0; protocolIndex < protocolIds.length; protocolIndex++)
 			{
 				protocolMap[protocolIds[protocolIndex]] = displayProtocolNames[protocolIndex];
 			}
-
+*/                     
 			app_protocol="Application Protocol: " + protocolMap[uciOriginal.get("qos_gargoyle", ruleSection, "layer7")];
 			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
 		}
