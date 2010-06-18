@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009-2010 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -181,8 +181,15 @@ int main(void)
 						sscanf(bw_str, "%lf", &bw_percent);
 						sscanf(limit, "%lf", &bw_limit);
 						sscanf(limit, "%lld", &bw_limit_64);
-						bw_percent = (bw_percent*100.0)/bw_limit;
-						bw_percent = bw_percent > 100.0 ? 100.0 : bw_percent;
+						if(bw_limit > 0)
+						{
+							bw_percent = (bw_percent*100.0)/bw_limit;
+							bw_percent = bw_percent > 100.0 ? 100.0 : bw_percent;
+						}
+						else
+						{
+							bw_percent = 100.0;
+						}
 					
 						double* percent_list = get_string_map_element(ip_to_percents, next_ip);
 						if(percent_list == NULL)
