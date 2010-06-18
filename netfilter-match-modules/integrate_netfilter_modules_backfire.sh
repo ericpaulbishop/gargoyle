@@ -212,6 +212,10 @@ if [ "$patch_kernel" = 1 ] ; then
 	config_file=$(cat config-file)
 	patch_dir=$(cat patch-dir)
 	iptables_patch_dir=$(cat iptables-patch-dir)
+	
+	mkdir -p "$generic_patch_dir"
+	mkdir -p "$iptables_patch_dir"
+	mkdir -p "$patch_dir"
 fi
 
 for new_d in $new_module_dirs ; do
