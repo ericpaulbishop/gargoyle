@@ -3,20 +3,28 @@
 #First word is the pattern name
 #Remaining words are the descriptive equivalent that the user sees.
 #
-http HTTP
+aim AIM
+bittorrent BitTorrent
+dns DNS
+edonkey eDonkey
+fasttrack FastTrack
 ftp FTP
-ssl SSL
-pop3 POP3
-smtp SMTP
+gnutella Gnutella
+http HTTP
+httpaudio HTTP Audio
+httpvideo HTTP Video
 ident Ident
-ntp NTP
-vnc VNC
+imap IMAP E-Mail
+ipp2p Any P2P
 irc IRC
 jabber Jabber
 msnmessenger MSN Messenger
-aim AIM
-fasttrack FastTrack
-bittorrent BitTorrent
-gnutella Gnutella
-edonkey eDonkey
-ipp2p Any P2P
+ntp NTP
+pop3 POP3
+rtp VoIP Audio
+skypeout Skype to POTS
+skypetoskype Skype to Skype
+smtp SMTP E-Mail
+ssh SSH Secure Shell
+vnc VNC
+
