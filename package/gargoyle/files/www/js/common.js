@@ -525,6 +525,11 @@ function getWirelessMode(uciTest)
 	var p = cfg2mode != '' && cfg3mode != '' ? '+' : '';
 	var cfgMode= cfg3mode == 'ap' && cfg2mode != 'ap' ? cfg3mode + p + cfg2mode : cfg2mode + p + cfg3mode;
 
+	if(cfgMode == 'ap')
+	{
+		cfgMode = (uciTest.get("wireless", wifiCfg2, "wds") != "" || uciTest.get("wireless", wifiCfg3, "wds")) ? "ap+wds" : "ap";
+	}
+
 	var wirelessIsDisabled= uciTest.get("wireless", wifiDevice, "disabled") == "1" || cfg2mode == '';
 	
 	var wirelessMode= wirelessIsDisabled ? 'disabled' : cfgMode;
