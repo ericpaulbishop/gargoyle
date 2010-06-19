@@ -39,40 +39,33 @@ function saveChanges()
 	
 		var enabled = document.getElementById("webmon_enabled").checked ;
 		var enabledCommand = "/etc/init.d/webmon_gargoyle " + (enabled ? "enable" : "disable") + "\n";
-		var includeExcludeFileCommand = "";
 		var startStopCommand = "/etc/init.d/webmon_gargoyle stop";
 		uci = uciOriginal.clone();
 		if(enabled)
 		{	
-			uci.set("webmon_gargoyle", "webmon", "num_records", document.getElementById("num_records").value );
+			uci.set("webmon_gargoyle", "webmon", "max_domains",  document.getElementById("num_domains").value );
+			uci.set("webmon_gargoyle", "webmon", "max_searches", document.getElementById("num_searches").value );
 			
 			var ipTable = document.getElementById('ip_table_container').firstChild;
-			var ipList = getTableDataArray(ipTable, true, false);
-			var fileCommands = ["touch /tmp/webmon_ips.tmp", "rm /tmp/webmon_ips.tmp"];
-			for(ipIndex = 0; ipIndex < ipList.length; ipIndex++)
+			var ipArrayList = getTableDataArray(ipTable, true, false);
+			var ipList = [];
+			var ipi;
+			for(ipi = 0; ipi < ipArrayList.length; ipi++)
 			{
-				fileCommands.push( "echo \"" + ipList[ipIndex] + "\" >> /tmp/webmon_ips.tmp" );
+				ipList.push( (ipArrayList[ipi][0]).replace(/[\t ]+/,"") );
 			}
-			fileCommands.push( "mv /tmp/webmon_ips.tmp /etc/webmon_ips" );
 
 
+			uci.remove("webmon_gargoyle", "webmon", "include_ips");
+			uci.remove("webmon_gargoyle", "webmon", "exclude_ips");
 			var include_exclude_type = getSelectedValue("include_exclude");
-			if(include_exclude_type == "all")
+			if(include_exclude_type == "exclude" && ipList.length > 0)
 			{
-				uci.remove("webmon_gargoyle", "webmon", "include_ip_file");
-				uci.remove("webmon_gargoyle", "webmon", "exclude_ip_file");
+				uci.set("webmon_gargoyle", "webmon", "exclude_ips", ipList.join(","));
 			}
-			else if(include_exclude_type == "include")
+			else if(include_exclude_type == "include" && ipList.length > 0)
 			{
-				uci.remove("webmon_gargoyle", "webmon", "exclude_ip_file");
-				uci.set("webmon_gargoyle", "webmon", "include_ip_file", "/etc/webmon_ips");
-				includeExcludeFileCommand = fileCommands.join("\n") + "\n";
-			}
-			else if(include_exclude_type == "exclude")
-			{
-				uci.remove("webmon_gargoyle", "webmon", "include_ip_file");
-				uci.set("webmon_gargoyle", "webmon", "exclude_ip_file", "/etc/webmon_ips");
-				includeExcludeFileCommand = fileCommands.join("\n") + "\n";
+				uci.set("webmon_gargoyle", "webmon", "include_ips", ipList.join(","));
 			}
 			startStopCommand = "/etc/init.d/webmon_gargoyle restart\n";
 		}
@@ -81,7 +74,7 @@ function saveChanges()
 		
 
 		
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + enabledCommand + includeExcludeFileCommand + startStopCommand;
+		commands = uci.getScriptCommands(uciOriginal) + "\n" + enabledCommand  + startStopCommand;
 		//document.getElementById("output").value = commands;
 
 
@@ -96,25 +89,12 @@ function saveChanges()
 				var ipTable = document.getElementById('ip_table_container').firstChild;
 				
 				uciOriginal = uci.clone();
-				includeExists = false;
-				excludeExists = false;
-				if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ip_file") != "")
-				{
-					includeData=getTableDataArray(ipTable, true, false);
-					includeExists = true;
-				}
-				else if(uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ip_file") != "")
-				{
-					excludeData=getTableDataArray(ipTable, true, false);
-					excludeExists = true;
-				}
 
 				setControlsEnabled(true);
 				updateInProgress = false;
 				if(webmonEnabled)
 				{	
 					updateMonitorTable();
-
 				}
 				resetData();
 				//alert(req.responseText);
@@ -133,8 +113,9 @@ function clearHistory()
 	updateInProgress = true;
 	setControlsEnabled(false, true);
 
-	
-	var commands = "/etc/init.d/webmon_gargoyle stop\nrm -rf " + uciOriginal.get("webmon_gargoyle", "webmon", "save_path") + " 2>/dev/null";
+	var domainFile = uciOriginal.get("webmon_gargoyle", "webmon", "domain_save_path");
+	var searchFile = uciOriginal.get("webmon_gargoyle", "webmon", "search_save_path");
+	var commands = "/etc/init.d/webmon_gargoyle stop\nrm -rf " + domainFile + " 2>/dev/null ; rm -rf " + searchFile + " 2>/dev/null";
 	if(webmonEnabled)
 	{
 		commands = commands +  "\n/etc/init.d/webmon_gargoyle start";
@@ -147,13 +128,19 @@ function clearHistory()
 			setControlsEnabled(true);
 			updateInProgress = false;
 			
-			tableContainer = document.getElementById('webmon_table_container');
-			if(tableContainer.firstChild != null)
+			var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
+			var ci;
+			for(ci=0; ci < containerNames.length; ci++)
 			{
-				tableContainer.removeChild(tableContainer.firstChild);
+				tableContainer = document.getElementById(containerNames[ci]);
+				if(tableContainer.firstChild != null)
+				{
+					tableContainer.removeChild(tableContainer.firstChild);
+				}
 			}
 			
-			setElementEnabled(document.getElementById("host_display"), webmonEnabled);
+			setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
+			setElementEnabled(document.getElementById("search_host_display"), webmonEnabled);
 			if(webmonEnabled)
 			{	
 				updateMonitorTable();
@@ -168,15 +155,14 @@ function clearHistory()
 function proofreadAll()
 {
 	var validator = function(n){ return validateNumericRange(n,1,9999); };
-	return proofreadFields( ["num_records"], ["num_records_label"], [validator], [0], ["num_records_label"]);
+	return proofreadFields( ["num_domains", "num_searches"], ["num_domains_label", "num_searches_label"], [validator, validator], [0,0], ["num_domains_label", "num_searches_label"]);
 }
 
 
-function getHostDisplay(ip)
+function getHostDisplay(ip, hostDisplayType)
 {
-	var hostDisplay = getSelectedValue("host_display");
 	var host = ip;
-	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	if(hostDisplayType == "hostname" && ipToHostname[ip] != null)
 	{
 		host = ipToHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
@@ -189,27 +175,37 @@ function resetData()
 {
 	document.getElementById("webmon_enabled").checked = webmonEnabled;
 	
-	var numRecords = uciOriginal.get("webmon_gargoyle", "webmon", "num_records");
-	document.getElementById("num_records").value = numRecords == "" ? 300 : numRecords;
-	
-	var ipTableData = [];
-	if( (!includeExists) && (!excludeExists) )
+	var numDomains  = uciOriginal.get("webmon_gargoyle", "webmon", "max_domains");
+	var numSearches = uciOriginal.get("webmon_gargoyle", "webmon", "max_searches");
+	document.getElementById("num_domains").value  = numDomains == ""  ? 300 : numDomains;
+	document.getElementById("num_searches").value = numSearches == "" ? 300 : numSearches;
+
+	var ips = [];
+	if(uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ips") != "")
 	{
-		setSelectedValue("include_exclude", "all");
+		ips = (uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ips")).split(/,/);
+		setSelectedValue("include_exclude", "exclude");
 	}
-	else if(includeExists)
+	else if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ips") != "")
 	{
-		setSelectedValue("include_exclude", "include");
-		ipTableData = includeData;
+		ips = (uciOriginal.get("webmon_gargoyle", "webmon", "include_ips")).split(/,/);
+		setSelectedValue("include_exclude", "exclude");
 	}
 	else
 	{
-		setSelectedValue("include_exclude", "exclude");
-		ipTableData = excludeData;
+		setSelectedValue("include_exclude", "all");
 	}
-	
-	ipTable=createTable([""], ipTableData, "ip_table", true, false);
-	tableContainer = document.getElementById('ip_table_container');
+
+	var ipTableData = [];
+	var ipi;
+	for(ipi = 0; ipi < ips.length; ipi++)
+	{
+		ipTableData.push( [ ips.shift() ] );
+	}
+
+
+	var ipTable=createTable([""], ipTableData, "ip_table", true, false);
+	var tableContainer = document.getElementById('ip_table_container');
 	if(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
@@ -220,11 +216,17 @@ function resetData()
 	setIncludeExclude();
 	setWebmonEnabled();
 
-	tableContainer = document.getElementById('webmon_table_container');
-	if(tableContainer.firstChild != null)
+	var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
+	var ci;
+	for(ci=0; ci < containerNames.length; ci++)
 	{
-		tableContainer.removeChild(tableContainer.firstChild);
+		tableContainer = document.getElementById(containerNames[ci]);
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
 	}
+
 
 	if(webmonEnabled)
 	{
@@ -236,8 +238,10 @@ function resetData()
 		webmonUpdater = setInterval("updateMonitorTable()", 10000); //check for updates every 10 seconds
 		
 	}
-	setElementEnabled(document.getElementById("host_display"), webmonEnabled);
-	setElementEnabled(document.getElementById("download_data_button"), webmonEnabled);
+	setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
+	setElementEnabled(document.getElementById("search_host_display"), webmonEnabled);
+	setElementEnabled(document.getElementById("download_domain_button"), webmonEnabled);
+	setElementEnabled(document.getElementById("download_search_button"), webmonEnabled);
 }
 
 function setIncludeExclude()
@@ -248,7 +252,7 @@ function setIncludeExclude()
 function setWebmonEnabled()
 {
 	var enabled = document.getElementById("webmon_enabled").checked;
-	var ids=[ 'num_records', 'include_exclude', 'add_ip'];
+	var ids=[ 'num_domains', 'num_searches', 'include_exclude', 'add_ip'];
 	for (idIndex in ids)
 	{
 		element = document.getElementById(ids[idIndex]);
@@ -303,7 +307,7 @@ function updateMonitorTable()
 	if(!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands="/usr/sbin/webmon_gargoyle";
+		var commands="echo domains ; cat /proc/webmon_recent_domains 2>/dev/null; echo searches ; cat /proc/webmon_recent_searches 2>/dev/null ; echo webmon_done";
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
@@ -314,51 +318,82 @@ function updateMonitorTable()
 				var loadedData = (webmonLines != null);
 				if(loadedData)
 				{
-					for(wmIndex=0; loadedData && webmonLines[wmIndex].match(/^Success/) == null && wmIndex <  webmonLines.length; wmIndex++)
-					{
-						var splitLine = webmonLines[wmIndex].split(/[\t]+/);
-						loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
-						var lastVisitDate = new Date();
-						lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
+					var domainData = [];
+					var searchData = [];
+					var type = "domains";
+					var hostDisplayType = getSelectedValue("domain_host_display");
 					
-						var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
-						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-						var m = twod(lastVisitDate.getMonth()+1);
-						var d = twod(lastVisitDate.getDate());
-						var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
-						var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
-
-
-						
-						var host = getHostDisplay(splitLine[1]);	
-						var domain = splitLine[3];
-
-						var domainLink = document.createElement("a");
-						domainLink.setAttribute('href',"http://" + domain);
-						var domainText = domain;
-						if(domainText.length > 43)
+					var wmIndex=0;
+					while(webmonLines[wmIndex] != "domains" && wmIndex < webmonLines.length ){ wmIndex++; }
+					for(wmIndex++; loadedData && webmonLines[wmIndex] !=  "webmon_done" && wmIndex <  webmonLines.length; wmIndex++)
+					{
+						if(webmonLines[wmIndex] == "searches")
 						{
-							domainText = domainText.substr(0, 40) + "...";
+							type = "searches";
+							hostDisplayType = getSelectedValue("search_host_display");
 						}
-						domainLink.appendChild( document.createTextNode(domainText) );
+						else
+						{
+							var splitLine = webmonLines[wmIndex].split(/[\t]+/);
+							loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
+							var lastVisitDate = new Date();
+							lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
+					
+							var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
+							var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+							var m = twod(lastVisitDate.getMonth()+1);
+							var d = twod(lastVisitDate.getDate());
+							var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
+							var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
 
 
-				
-						tableData.push([host, lastVisit, domainLink]);
+							var host = getHostDisplay(splitLine[1], hostDisplayType);	
+							var value = splitLine[2];
+							
+							if(type == "domains")
+							{
+								var domainLink = document.createElement("a");
+								domainLink.setAttribute('href',"http://" + value);
+								var domainText = value;
+								if(domainText.length > 43)
+								{
+									domainText = domainText.substr(0, 40) + "...";
+								}
+								domainLink.appendChild( document.createTextNode(domainText) );
+								domainData.push([host, lastVisit, domainLink]);
+							}
+							else
+							{
+								var searchText = value.replace(/\+/g, " ");
+								if(searchText.length > 43)
+								{
+									searchText = searchText.substr(0, 40) + "...";
+								}
+								searchData.push([host, lastVisit, searchText]);
+							}
+						}
 					}
 				}	
 				
 				//loadedData = loadedData && (webmonLines[webmonLines.length -1].match(/^Success/) != null);
 				if(loadedData)
 				{	
-					columnNames=['Local Host', 'Last Access Time', 'Website'];
-					webmonTable = createTable(columnNames, tableData, "webmon_table", false, false);
-					tableContainer = document.getElementById('webmon_table_container');
-					if(tableContainer.firstChild != null)
+					var domainColumns=['Local Host', 'Last Access Time', 'Website'];
+					var searchColumns=['Local Host', 'Last Access Time', 'Search Text'];
+					var domainTable = createTable(domainColumns, domainData, "webmon_domain_table", false, false);
+					var searchTable = createTable(searchColumns, searchData, "webmon_search_table", false, false);
+					
+					var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
+					var ci;
+					for(ci=0; ci < containerNames.length; ci++)
 					{
-						tableContainer.removeChild(tableContainer.firstChild);
+						tableContainer = document.getElementById(containerNames[ci]);
+						if(tableContainer.firstChild != null)
+						{
+							tableContainer.removeChild(tableContainer.firstChild);
+						}
+						tableContainer.appendChild(  (containerNames[ci]).match(/domain/) != null ? domainTable : searchTable  );
 					}
-					tableContainer.appendChild(webmonTable);
 				}
 				updateInProgress = false;
 			}

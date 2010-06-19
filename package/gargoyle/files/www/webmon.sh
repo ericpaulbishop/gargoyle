@@ -20,21 +20,6 @@
 		echo "var webmonEnabled=false;"
 	fi
 
-	echo "var includeData=[];"
-	echo "var includeExists = false;"
-	include_file=$(uci get webmon_gargoyle.webmon.include_ip_file 2>/dev/null)
-	if [ -e "$include_file" ] ; then
-                cat "$include_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "includeData.push([\""$1"\"]);"};'
-		echo "includeExists = true;"
-        fi
-
-	echo "var excludeData=[];"
-	echo "var excludeExists = false;"
-	exclude_file=$(uci get webmon_gargoyle.webmon.exclude_ip_file 2>/dev/null)
-	if [ -e "$exclude_file" ] ; then
-                cat "$exclude_file" | awk ' $0 ~ /^[\t ]*[0-9]/ {print "excludeData.push([\""$1"\"]);"};'
-		echo "excludeExists = true;"
-        fi
 ?>
 //-->
 </script>
@@ -49,8 +34,12 @@
 		</div>
 		<div class="indent">
 			<div>
-				<label class='leftcolumn' for='num_records' id='num_records_label'>Number of Pages to Save:</label>
-				<input type='text' class='rightcolumn' id='num_records' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
+				<label class='leftcolumn' for='num_domains' id='num_domains_label'>Number of Sites to Save:</label>
+				<input type='text' class='rightcolumn' id='num_domains' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
+			</div>
+			<div>
+				<label class='leftcolumn' for='num_searches' id='num_searches_label'>Number of Searches to Save:</label>
+				<input type='text' class='rightcolumn' id='num_searches' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
 			</div>
 			<div>
 				<select id="include_exclude" onchange="setIncludeExclude()">
@@ -78,27 +67,44 @@
 		</div>
 	</fieldset>
 	<fieldset>
+		<legend class="sectionheader">Recently Visited Sites</legend>
 		<div>
-			<select id="host_display" onchange="updateMonitorTable()">
+			<select id="domain_host_display" onchange="updateMonitorTable()">
 				<option value="hostname">Display Hostnames</option>
 				<option value="ip">Display Host IPs</option>
 			</select>
 		</div>
 
-		<legend class="sectionheader">Recent Web Usage</legend>
-		<div id="webmon_table_container"></div>
+		<div id="webmon_domain_table_container"></div>
 	</fieldset>
+
+	<fieldset>
+		<legend class="sectionheader">Recent Web Searches</legend>
+		<div>
+			<select id="search_host_display" onchange="updateMonitorTable()">
+				<option value="hostname">Display Hostnames</option>
+				<option value="ip">Display Host IPs</option>
+			</select>
+		</div>
+
+		<div id="webmon_search_table_container"></div>
+	</fieldset>
+
+
 	<fieldset id="download_web_usage_data" >
 		<legend class="sectionheader">Download Web Usage Data</legend>
 		<div>
 			<span style='text-decoration:underline'>Data is comma separated:</span>
 			<br/>
-			<em>[Time of Last Visit],[Local IP],[IP Visited],[Domain Visted]</em>
+			<em>[Time of Last Visit],[Local IP],[Domain Visted/Search Request]</em>
 			<br/>
 		</div>
 		<div>
-		<center><input type='button' id='download_data_button' class='big_button' value='Download Now' onclick='window.location="webmon.csv";' /></center>
-			
+			<center>
+				<input type='button' id='download_domain_button' class='big_button' value='Visited Sites' onclick='window.location="webmon_domains.csv";' />
+				&nbsp;&nbsp;
+				<input type='button' id='download_search_button' class='big_button' value='Search Requests' onclick='window.location="webmon_searches.csv";' />
+			</center>
 		</div>
 	</fieldset>
 </form>

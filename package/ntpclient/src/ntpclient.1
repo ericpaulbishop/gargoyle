@@ -1,0 +1,100 @@
+.\" man page for Larry Doolittle's ntpclient
+.\" distributed under GPL
+.\" originally written by Walter Harms
+.TH ntpclient 3 "2005-28-07-05" "" "ntpclient"
+.SH NAME
+ntpclient \- client to get time from NTP server
+.SH SYNOPSIS
+.B ntpclient -h hostname [-c count] [-d] [-f frequency] [-g goodness]
+.in 14
+.B             [-i interval] [-l] [-p port] [-r] [-s]
+.SH DESCRIPTION
+.B ntpclient
+is an NTP (RFC-1305) client for unix-alike computers.
+Its functionality is a small subset of xntpd, but has the potential
+to function better within
+that limited scope.  Since it is much smaller than xntpd, it is
+also more relevant for embedded computers.
+.PP
+Without any argument (except -h) the program produces output
+similar to this:
+.sp
+.nf
+ day   second     elapsed    stall     skew  dispersion  freq
+36765 00180.386    1398.0     40.3  953773.9    793.5  -1240000
+36765 00780.382    1358.0     41.3  954329.0    915.5  -1240000
+36765 01380.381    1439.0     56.0  954871.3    915.5  -1240000
+.fi
+.sp
+The columns have the following meaning:
+.nf
+day, second: time of measurement, UTC, relative to NTP epoch (Jan 1, 1900)
+elapsed:     total time from query to response (microseconds)
+stall:       time the server reports that it sat on the request (microseconds)
+skew:        difference between local time and server time (microseconds)
+dispersion:  reported by server, see RFC-1305 (microseconds)
+freq:        local clock frequency adjustment (Linux only, ppm*65536)
+.fi
+.SS "Options"
+.TP
+.BI  -h " hostname"
+(mandatory) NTP server, against which to measure system time
+.TP
+.BI -c " count"
+top after count time measurements (default 0 means go forever)
+.TP
+.B  -d
+.br
+print diagnostics (feature can be disabled at compile time)
+.TP
+.BI  -g " goodness"
+causes ntpclient to stop after getting a result more accurate
+than goodness (microseconds, default 0 means go forever)
+.TP
+.BI  -i " interval"
+check time every interval seconds (default 600)
+.TP
+.BI -p " port"
+local NTP client UDP port (default 0 means "any available")
+.TP
+.BI  -q " min_delay"
+minimum packet delay for transaction (default 800 microseconds)
+.TP
+.B  -r
+.br
+replay analysis code based on stdin (feature can be disabled at compile time)
+.TP
+.BI -f " frequency"
+.br
+initialize the frequency offset (Linux only, requires root access)
+.TP
+.B -s
+.br
+simple clock set (implies -c 1)
+(requires root access)
+.TP
+.B  -l
+.br
+attempt to lock local clock to server using
+.BR adjtimex (2)
+(requires root access)
+.TP
+.B -t
+.br
+trust network and server, no RFC-4330 recommended cross-checks
+
+.SH AUTHOR
+ Larry Doolittle
+ ntpclient home page: http://doolittle.icarus.com/ntpclient/
+.SH COPYRIGHT
+ntpclient is Copyright 1997, 1999, 2000, 2003, 2006, 2007 Larry Doolittle, and
+may be freely copied and modified according to the terms of the GNU
+General Public License, version 2.  If you want to distribute ntpclient
+under other terms, contact me.  I might agree to some other arrangement,
+if you talk to me
+.I before
+you start violating GPL terms.
+
+.SH "SEE ALSO"
+.BR adjtimex (2),
+.BR www.ntp.org

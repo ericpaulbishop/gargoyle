@@ -1726,6 +1726,7 @@ function getBridgeSection(testUci)
 {
 	//all bridges will have either option wds=1, option mode=wds, or option client_bridge=1 in one of the wireless sections
 	//in the case of broadcom, the client_bridge=1 doesn't do anything, but we put it there for convenience anyway.
+	//however, if wds is in an AP section, it isn't a bridge
 
 	var allWirelessSections = uciOriginal.getAllSections("wireless");
 	var wanDef = uciOriginal.get("network", "wan", "");
@@ -1745,6 +1746,10 @@ function getBridgeSection(testUci)
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
 		}
+	}
+	if(bridgeSection != "")
+	{
+		bridgeSection = (testUci.get("wireless", bridgeSection, "mode").toLowerCase() == "ap") ? "" : bridgeSection;
 	}
 	return bridgeSection;
 }

@@ -98,13 +98,14 @@
 	#endif
 	#ifdef USE_CYASSL
 		#ifdef USE_CYASSL_INCLUDE_DIR
-			#include <cyassl/ssl.h>
-			#include <cyassl/err.h>
+			#include <cyassl/openssl/ssl.h>
+			#include <cyassl/openssl/err.h>
+			#include <cyassl/cyassl_error.h>
 		#else
 			#include <openssl/ssl.h>
 			#include <openssl/err.h>
+			#include <cyassl_error.h>
 		#endif
-		#include <cyassl_error.h>
 	#endif
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"

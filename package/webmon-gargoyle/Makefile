@@ -23,21 +23,19 @@ define Package/webmon-gargoyle
 	SUBMENU:=Web
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=A small program to monitor web usage
+	TITLE:=Init scripts to setup and use iptables webmon module
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +libpcap +libericstools
+	DEPENDS:= +iptables-mod-webmon
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
 
 define Package/webmon-gargoyle/description
-  A small web server for the Gargoyle Web Interface
+  Init scripts to setup and use iptables webmon module
 endef
 
 
 define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
 
@@ -45,13 +43,6 @@ define Build/Configure
 endef
 
 define Build/Compile
-	-$(MAKE) -C $(PKG_BUILD_DIR) clean
-	$(MAKE) -C $(PKG_BUILD_DIR) \
-		$(TARGET_CONFIGURE_OPTS) \
-		STAGING_DIR="$(STAGING_DIR)" \
-		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
-		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
-		all
 endef
 
 define Package/webmon-gargoyle/install
@@ -62,9 +53,6 @@ define Package/webmon-gargoyle/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/webmon_gargoyle.init $(1)/etc/init.d/webmon_gargoyle
 	
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/webmon $(1)/usr/sbin/webmon_gargoyle
-
 endef
 
 

@@ -1,0 +1,168 @@
+ntpclient is an NTP (RFC-1305, RFC-4330) client for unix-alike computers.
+Its functionality is a small subset of xntpd, but IMHO performs
+better (or at least has the potential to function better) within
+that limited scope.  Since it is much smaller than xntpd, it is
+also more relevant for embedded computers.
+
+ntpclient is Copyright 1997, 1999, 2000, 2003, 2006, 2007 Larry Doolittle,
+and may be freely copied and modified according to the terms of the GNU
+General Public License, version 2.  If you want to distribute ntpclient
+under other terms, contact me.  I might agree to some other arrangement,
+if you talk to me _before_ you start violating GPL terms.
+
+ntpclient home page: http://doolittle.icarus.com/ntpclient/
+
+To build on Linux, type "make".  Solaris and other Unix users will
+probably need to adjust the Makefile slightly.  It's not complex.
+For changing the system clock frequency, only the Linux adjtimex(2)
+interface is implemented at this time.  Non-Linux systems can only
+use ntpclient to measure time differences and set the system clock,
+by way of the POSIX 1003.1-2001 standard routines clock_gettime() and
+clock_settime().  Also see "Bugs", below.
+
+There are a few compile-time configurations possible, which require
+editing the Makefile.  Either do or don't define
+  ENABLE_DEBUG
+  ENABLE_REPLAY
+  USE_OBSOLETE_GETTIMEOFDAY
+  PRECISION_SIOCGSTAMP
+Try it first without changing the default: that will give you a full-
+featured ntpclient, that uses modern POSIX time functions, and works
+reasonably with any Linux kernel.  There are comments in ntpclient.c
+that you should read before experimenting with PRECISION_SIOCGSTAMP.
+
+Some older but otherwise (almost) serviceable Linux systems (e.g., Red Hat
+EL-3.0 and Ubuntu 4.10) have a totally broken POSIX clock_settime()
+implementation.  If you get "clock_settime: Invalid argument" when you
+run ntpclient -s, rebuild with -DUSE_OBSOLETE_GETTIMEOFDAY.  Linux systems
+that are even older won't even compile without that switch set.
+
+Usage: ntpclient [options]
+options:
+ -c count     stop after count time measurements (default 0 means go forever)
+ -d           print diagnostics (feature can be disabled at compile time)
+ -g goodness  causes ntpclient to stop after getting a result more accurate
+                   than goodness (microseconds, default 0 means go forever)
+ -h hostname  (mandatory) NTP server, against which to measure system time
+ -i interval  check time every interval seconds (default 600)
+ -l           attempt to lock local clock to server using adjtimex(2)
+ -p port      local NTP client UDP port (default 0 means "any available")
+ -q min_delay minimum packet delay for transaction (default 800 microseconds)
+ -r           replay analysis code based on stdin
+ -s           simple clock set (implies -c 1)
+ -t           trust network and server, no RFC-4330 recommended cross-checks
+
+Mortal users can use this program for monitoring, but not clock setting
+(with the -s or -l switches).  The -l switch is designed to be robust
+in any network environment, but has seen the most extensive testing in
+a low latency (less than 2 ms) Ethernet environment.  Users in other
+environments should study ntpclient's behavior, and be prepared to adjust
+internal tuning parameters.  A long description of how and why to use
+ntpclient is in the HOWTO file.  ntpclient always sends packets to the
+server's UDP port 123.
+
+One commonly needed tuning parameter for lock mode is min_delay, the
+shortest possible round-trip transaction time.  This can be set with the
+command line -q switch.  The historical default of 800 microseconds was
+good for local Ethernet hardware a few years ago.  If it is set too high,
+you will get a lot of "inconsistent" lines in the log file when time locking
+(-l switch).  The only true future-proof value is 0, but that will cause the
+local time to wander more than it should.  I use 200 on my workstation.
+
+The test.dat file has 200 lines of sample output.  Its first few lines,
+with the output column headers that are shown when the -d option is
+chosen, are:
+ day   second     elapsed    stall     skew  dispersion  freq
+36765 00180.386    1398.0     40.3  953773.9    793.5  -1240000
+36765 00780.382    1358.0     41.3  954329.0    915.5  -1240000
+36765 01380.381    1439.0     56.0  954871.3    915.5  -1240000
+
+day, second: time of measurement, UTC, relative to NTP epoch (Jan 1, 1900)
+elapsed:     total time from query to response (microseconds)
+stall:       time the server reports that it sat on the request (microseconds)
+skew:        difference between local time and server time (microseconds)
+dispersion:  reported by server, see RFC-1305 (microseconds)
+freq:        local clock frequency adjustment (Linux only, ppm*65536)
+
+A relatively new feature is a series of sanity checks on
+UDP packets received, generally as recommended by RFC-4330.  If it
+fails one of these tests, the line described above is replaced by
+36765 01380.381  rejected packet
+or, if ENABLE_DEBUG was selected at compile time, one of
+36765 01380.381  rejected packet: LI==3
+36765 01380.381  rejected packet: VN<3
+36765 01380.381  rejected packet: MODE!=3
+36765 01380.381  rejected packet: ORG!=sent
+36765 01380.381  rejected packet: XMT==0
+36765 01380.381  rejected packet: abs(DELAY)>65536
+36765 01380.381  rejected packet: abs(DISP)>65536
+36765 01380.381  rejected packet: STRATUM==0
+To see the actual values of the rejected packet, start ntpclient with the
+-d option; this will give a human-readable printout of every packet received,
+including the rejected ones.  To skip these checks, use the -t switch.
+
+test.dat is suitable for piping into ntpclient -r.  I have over 200000
+samples (lines) archived for study, that I don't include here.
+They are generally spaced 10 minutes apart, representing over three
+years of data logging (from a variety of machines, and not continuous,
+unfortunately).
+
+As a special, added bonus, I also include my adjtimex(1) program.
+See its man page and the HOWTO file for more information.
+
+envelope is a perl script that I have used for my lock studies.
+It's kind of a hack and not worth documenting here.
+
+Changes since the widely distributed ntpclient_2000_345 version:
+ -- new -g option (has had limited testing)
+ -- changed max frequency adjustment from 91 ppm to 150 ppm
+ -- fixed "inconsistent" bug in phaselock.c triggered by large freq errors
+ -- new files: HOWTO, adjtimex.c, adjtimex.1, rate.awk, log2date.pl
+ -- minor source code cleanups
+ -- source is now as 64-bit clean as practical; tested on Alpha
+ -- optional patches provided by Andy Warner, see andyw.patch
+ -- optional patches provided by Linksys, see linksys.patch
+ -- removed unreasonable 15020 day offset in date column (xntpd has this
+      offset, which turns days-since-1900-epoch into Modified Julian Day)
+
+Changes since the widely distributed ntpclient_2003_194 version:
+ -- default build is now -std=c99, but c89 sill works too
+ -- switch default compile from gettimeofday() to POSIX clock_gettime()
+ -- more sanity checking on the NTP reply packet, reference RFC-4330
+ -- fractional second printing in debug output changed to traditional decimal
+ -- new -f switch to set initial frequency
+ -- works to specify both -s and -l, will jump-set first and then phase lock
+ -- bug fix for select() error handling, thanks to Walter Harms
+ -- new man page, contributed by Walter Harms
+ -- most subroutines are now flagged static to the compiler
+ -- structural changes to the code, such as the new ntpclient.h file
+ -- dropped (mostly) obsolete patches from Linksys and Andy Warner
+
+Changes since ntpclient_2006_318:
+ -- adjustable min_delay parameter, used to be hard-coded 800 microseconds
+ -- remove useless listen() call, thanks to Alexander Indenbaum
+ -- fix length passed to recvfrom(), thanks to Alexander Indenbaum
+ -- tidy up 32-bit integer declarations, prodding from Brian McAllister
+ -- added rate2.awk, contributed by Lou Sortman
+ -- provide easy way to override 15 second MIN_INTERVAL at compile time
+ -- relax MIN_INTERVAL enforcement for one-shot use, thanks to Mihai Buha
+
+Bugs:
+ -- Doesn't understand the LI (Leap second Indicator) field of an NTP packet
+ -- Doesn't interact with adjtimex(2) status value
+ -- Can't query multiple servers
+ -- IPv4 only
+ -- Requires Linux-style select() semantics, where timeout value is modified
+ -- Always returns success (0)
+
+Adherence to RFC-4330 chapter 10, Best practices:
+ 1.  enforced, unless someone tinkers with the source code
+ 2.  no backoff, but no retry either; this isn't TCP
+ 3.  not in scope for the upstream source
+ 4.  not in scope for the upstream source
+ 5.  not in scope for the upstream source
+ 6.  supported
+ 7.  not supported
+ 8.  not supported (scary opportunity for DOS)
+
+       - Larry Doolittle  <larry@doolittle.boa.org>

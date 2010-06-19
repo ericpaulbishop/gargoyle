@@ -205,7 +205,7 @@ Index: b/package/madwifi/files/etc/hotplug.d/net/20-client_bridge
 ===================================================================
 --- a/package/madwifi/files/etc/hotplug.d/net/20-client_bridge	(revision 0)
 +++ b/package/madwifi/files/etc/hotplug.d/net/20-client_bridge	(revision 0)
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,45 @@
 +######################################################################
 +# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
 +# Copyright Eric Bishop, 2009 eric@gargoyle-router.com 
@@ -225,20 +225,14 @@ Index: b/package/madwifi/files/etc/hotplug.d/net/20-client_bridge
 +			if [ -n "$sta_section" ] ; then
 +				client_bridge=$(uci get "$sta_section.client_bridge")
 +				if [ "$client_bridge" = "1" ] ; then
++					
++					if_mac=$(ifconfig "$INTERFACE" | grep HWaddr | awk ' { print $5 } ' )	
++					ifconfig br-lan hw ether $if_mac
++					
 +					ebtables -t nat -F PREROUTING
 +					ebtables -t nat -F POSTROUTING
 +					ebtables -t broute -F BROUTING
 +				
-+					#bridge_ip=$(uci get network.lan.ipaddr)
-+					#if [ -n "$bridge_ip" ] ; then
-+					#	#always arpnat DHCP
-+					#	ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE  -p IPv4 --ip-protocol UDP --ip-destination-port 67:68 -j arpnat --arpnat-target ACCEPT
-+					#	ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE  -p IPv4 --ip-protocol UDP --ip-source-port      67:68 -j arpnat --arpnat-target ACCEPT
-+					#	
-+					#	#but in order to allow access to router from external network don't arpnat anything else destined for bridge device
-+					#	ebtables -t nat -A PREROUTING  -p IPv4 --ip-dst $bridge_ip -j redirect --redirect-target ACCEPT
-+					#fi
-+					
 +					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
 +					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
 +					ebtables -t broute -A BROUTING --in-interface  $INTERFACE --protocol 0x888e -j DROP
@@ -261,10 +255,10 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ===================================================================
 --- /dev/null	2010-05-13 10:11:58.394584532 -0400
 +++ b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch	2010-05-27 16:37:30.000000000 -0400
-@@ -0,0 +1,539 @@
+@@ -0,0 +1,674 @@
 +--- /dev/null	2010-05-13 10:11:58.394584532 -0400
-++++ linux-2.6.30.10/net/bridge/netfilter/ebt_arpnat.c	2010-05-27 14:43:32.000000000 -0400
-+@@ -0,0 +1,483 @@
+++++ linux-2.6.30.10/net/bridge/netfilter/ebt_arpnat.c	2010-06-03 14:31:53.000000000 -0400
++@@ -0,0 +1,618 @@
 ++/*
 ++ *  ebt_arpnat
 ++ *
@@ -273,7 +267,20 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++ *
 ++ *  November, 2005
 ++ *
+++ *	Rewritten by:
+++ *         Kestutis Barkauskas and Kestutis Kupciunas <gpl@ubnt.com>
+++ *
+++ *  June, 2010
+++ *
+++ *      Updated to work with more recent kernel versions (e.g., 2.6.30)
+++ *      Ditched entry expiration in favor of wiping entries with duplicate ips, when situation arises
+++ *      Fixed arpnat procfs (though both arpnat_cache and arpnat_info are both in root procfs directory now)
+++ *      
+++ *      Eric Bishop <eric@gargoyle-router.com>
 ++ */
+++
+++
+++
 ++
 ++#include <linux/netfilter/x_tables.h>
 ++#include <linux/netfilter_bridge/ebtables.h>
@@ -303,410 +310,523 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++#define MAC2STR(x) (x)[0],(x)[1],(x)[2],(x)[3],(x)[4],(x)[5]
 ++#define IP2STR(x) (x)>>24&0xff,(x)>>16&0xff,(x)>>8&0xff,(x)&0xff
 ++
-++#define FLUSHTIMEOUT (60*10) /* 10 minutes to expire */
 ++#define GIADDR_OFFSET (24)
 ++
-++#ifdef DEBUG
-++#define __STATIC
+++
+++
+++//#define ARPNAT_DEBUG 1
+++
+++
+++#ifdef ARPNAT_DEBUG
 ++static uint8_t debug = 1;
 ++#else
-++#define __STATIC static
 ++static uint8_t debug = 0;
 ++#endif
+++
+++
 ++
 ++#ifndef __packed
 ++#define __packed __attribute__((__packed__))
 ++#endif
 ++
-++struct arpnat_dat {
-++    uint32_t ip;
-++    uint32_t expires;
-++    uint8_t mac[ETH_ALEN];
+++struct arpnat_dat
+++{
+++	uint32_t ip;
+++	uint8_t mac[ETH_ALEN];
 ++} __packed;
 ++
-++struct mac2ip {
-++    struct hlist_node node;
-++    struct arpnat_dat data;
+++struct mac2ip
+++{
+++	struct hlist_node node;
+++	struct arpnat_dat data;
 ++};
 ++
 ++static HLIST_HEAD(arpnat_table);
 ++static spinlock_t arpnat_lock = SPIN_LOCK_UNLOCKED;
 ++static uint8_t bootpnat = 1;
-++static uint32_t expires = FLUSHTIMEOUT;
 ++
-++__STATIC struct mac2ip* find_mac_nat(struct hlist_head* head, const uint8_t* mac)
+++static struct mac2ip* find_mac_nat(struct hlist_head* head, const uint8_t* mac)
 ++{
-++    struct mac2ip* tpos;
-++    struct mac2ip* result = NULL;
-++    struct hlist_node* pos;
-++    struct hlist_node* n;
-++    hlist_for_each_entry_safe(tpos, pos, n, head, node)
-++    {
-++	if (memcmp(tpos->data.mac, mac, ETH_ALEN) == 0)
+++	struct mac2ip* tpos;
+++	struct mac2ip* result = NULL;
+++	struct hlist_node* pos;
+++	struct hlist_node* n;
+++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
 ++	{
-++            result = tpos;
-++	    break;
+++		if (memcmp(tpos->data.mac, mac, ETH_ALEN) == 0)
+++		{
+++			result = tpos;
+++			break;
+++		}
 ++	}
-++	if (tpos->data.expires < jiffies)
-++	{
-++	    hlist_del(pos);
-++	    kfree(tpos);
-++	}
-++    }
-++    return result;
+++	return result;
 ++}
 ++
-++__STATIC struct mac2ip* find_ip_nat(struct hlist_head* head, uint32_t ip)
+++static struct mac2ip* find_ip_nat(struct hlist_head* head, uint32_t ip)
 ++{
-++    struct mac2ip* tpos;
-++    struct mac2ip* result = NULL;
-++    struct hlist_node* pos;
-++    struct hlist_node* n;
+++	struct mac2ip* tpos;
+++	struct mac2ip* result = NULL;
+++	struct hlist_node* pos;
+++	struct hlist_node* n;
 ++
-++    hlist_for_each_entry_safe(tpos, pos, n, head, node)
-++    {
-++	if (tpos->data.ip == ip)
+++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
 ++	{
-++            result = tpos;
-++	    break;
+++		if (tpos->data.ip == ip)
+++		{
+++			result = tpos;
+++			break;
+++		}
 ++	}
-++	if (tpos->data.expires < jiffies)
-++	{
-++	    hlist_del(pos);
-++	    kfree(tpos);
-++	}
-++    }
-++    return result;
+++	return result;
 ++}
 ++
-++__STATIC void free_arp_nat(struct hlist_head* head)
+++
+++static void clear_ip_nat(struct hlist_head* head, uint32_t ip)
 ++{
-++    struct mac2ip* tpos;
-++    struct hlist_node* pos;
-++    struct hlist_node* n;
-++    hlist_for_each_entry_safe(tpos, pos, n, head, node)
-++    {
-++        hlist_del(pos);
-++	kfree(tpos);
-++    }
+++	struct mac2ip* tpos;
+++	struct hlist_node* pos;
+++	struct hlist_node* n;
+++
+++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	{
+++		if (tpos->data.ip == ip)
+++		{
+++			hlist_del(pos);
+++	   		kfree(tpos);
+++		}
+++	}
 ++}
 ++
-++__STATIC struct mac2ip* update_arp_nat(struct hlist_head* head, const uint8_t* mac, uint32_t ip)
+++static void free_arp_nat(struct hlist_head* head)
 ++{
-++    struct mac2ip* entry;
+++	struct mac2ip* tpos;
+++	struct hlist_node* pos;
+++	struct hlist_node* n;
+++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	{
+++		hlist_del(pos);
+++		kfree(tpos);
+++	}
+++}
 ++
-++    entry = find_mac_nat(head, mac);
-++    if (entry)
-++	goto done;
+++static struct mac2ip* update_arp_nat(struct hlist_head* head, const uint8_t* mac, uint32_t ip)
+++{
+++	struct mac2ip* entry;
 ++
-++    entry = kmalloc(sizeof(*entry), GFP_ATOMIC);
-++    if (!entry)
-++	return NULL;
-++    INIT_HLIST_NODE(&entry->node);
-++    hlist_add_head(&entry->node, head);
-++done:
-++    memcpy(entry->data.mac, mac, ETH_ALEN);
-++    entry->data.ip = ip;
-++    entry->data.expires = jiffies + expires * HZ;
-++
-++    return entry;
+++	entry = find_mac_nat(head, mac);
+++	if (!entry)
+++	{
+++		clear_ip_nat(head, ip); /* if entries with new ip exist, wipe them */ 
+++		entry = kmalloc(sizeof(*entry), GFP_ATOMIC);
+++		if (!entry)
+++		{
+++			return NULL;
+++		}
+++		INIT_HLIST_NODE(&entry->node);
+++		hlist_add_head(&entry->node, head);
+++		memcpy(entry->data.mac, mac, ETH_ALEN);
+++		entry->data.ip = ip;
+++	}
+++	else if(entry->data.ip != ip)
+++	{
+++		clear_ip_nat(head, ip); /* if entries with new ip exist, wipe them */ 
+++		entry->data.ip = ip;
+++	}
+++	return entry;
 ++}
 ++
 ++#ifdef CONFIG_PROC_FS
-++__STATIC int arpnat_cache_stat_get_info(char *buffer, char **start, off_t offset, int length)
+++
+++static void *arpnat_start(struct seq_file *seq, loff_t *loff_pos)
 ++{
-++    	int len = 0;
+++	static unsigned long counter = 0;
+++
+++	/* beginning a new sequence ? */	
+++	if ( *loff_pos == 0 )
+++	{	
+++		/* yes => return a non null value to begin the sequence */
+++		return &counter;
+++	}
+++	else
+++	{
+++		/* no => it's the end of the sequence, return end to stop reading */
+++		*loff_pos = 0;
+++		return NULL;
+++	}
+++}
+++
+++static void *arpnat_next(struct seq_file *seq, void *v, loff_t *pos)
+++{
+++	return NULL;
+++}
+++
+++
+++static void arpnat_stop(struct seq_file *seq, void *v)
+++{
+++	//don't need to do anything
+++}
+++
+++
+++static int arpnat_cache_show(struct seq_file *s, void *v)
+++{
 ++	struct mac2ip* tpos;
 ++	struct hlist_node* pos;
 ++	struct hlist_node* n;
 ++	unsigned long flags;
-++        uint32_t exp;
 ++
 ++	spin_lock_irqsave(&arpnat_lock, flags);
 ++	hlist_for_each_entry_safe(tpos, pos, n, &arpnat_table, node)
 ++	{
-++	    if (tpos->data.expires < jiffies)
-++	    {
-++		hlist_del(pos);
-++		kfree(tpos);
-++                continue;
-++	    }
-++	    exp = tpos->data.expires - jiffies;
-++	    len += sprintf(buffer + len, STRMAC" %8u.%02u "STRIP"\n", MAC2STR(tpos->data.mac), exp / HZ, exp % HZ, IP2STR(tpos->data.ip));
+++		seq_printf(s, STRMAC"\t"STRIP"\n", MAC2STR(tpos->data.mac), IP2STR(tpos->data.ip));
 ++	}
-++        spin_unlock_irqrestore(&arpnat_lock, flags);
-++	len -= offset;
-++	if (len > length)
-++		len = length;
-++	if (len < 0)
-++		len = 0;
-++	*start = buffer + offset;
-++  	return len;
-++}
+++	spin_unlock_irqrestore(&arpnat_lock, flags);
 ++
-++__STATIC int arpnat_write(struct file *file, const char *buffer,
-++			   unsigned long count, void *data)
+++	return 0;
+++}
+++static int arpnat_info_show(struct seq_file *s, void *v)
 ++{
-++    	/** arpnat entry expiration time in seconds
-++	 *  debug enabled/disabled
-++	 *  bootpnat enabled/disabled
-++	 **/
-++    	char buf[80];
-++	int d, b;
-++
-++    	if (copy_from_user(buf, buffer, count < sizeof(buf) ? count : sizeof(buf)))
-++		return -EFAULT;
-++        if (sscanf(buf, "%u %d %d", &expires, &d, &b) != 3)
-++		return -EINVAL;
-++	debug = d;
-++	bootpnat = b;
-++
-++  	return count;
+++	seq_printf(s, "Debug: %d\nBOOTPNAT: %d\n", debug, bootpnat);
+++	return 0;
 ++}
 ++
-++__STATIC int arpnat_get_info(char *buffer, char **start, off_t offset, int length)
+++
+++static struct seq_operations arpnat_cache_sops = {
+++	.start = arpnat_start,
+++	.next  = arpnat_next,
+++	.stop  = arpnat_stop,
+++	.show  = arpnat_cache_show
+++};
+++static struct seq_operations arpnat_info_sops = {
+++	.start = arpnat_start,
+++	.next  = arpnat_next,
+++	.stop  = arpnat_stop,
+++	.show  = arpnat_info_show
+++};
+++
+++static int arpnat_cache_open(struct inode *inode, struct file* file)
 ++{
-++    	int len = 0;
-++	len += sprintf(buffer + len, "ARPNAT Expiration: %u\nDebug: %d\nBOOTPNAT: %d\n", expires, debug, bootpnat);
-++	len -= offset;
-++	if (len > length)
-++		len = length;
-++	if (len < 0)
-++		len = 0;
-++	*start = buffer + offset;
-++  	return len;
+++	return seq_open(file, &arpnat_cache_sops);
 ++}
+++static int arpnat_info_open(struct inode *inode, struct file* file)
+++{
+++	return seq_open(file, &arpnat_info_sops);
+++}
+++
+++
+++static struct file_operations arpnat_cache_fops = {
+++	.owner   = THIS_MODULE,
+++	.open    = arpnat_cache_open,
+++	.read    = seq_read,
+++	.llseek  = seq_lseek,
+++	.release = seq_release
+++};
+++static struct file_operations arpnat_info_fops = {
+++	.owner   = THIS_MODULE,
+++	.open    = arpnat_info_open,
+++	.read    = seq_read,
+++	.llseek  = seq_lseek,
+++	.release = seq_release
+++};
+++
+++
+++
 ++#endif
 ++
-++/*
-++__STATIC int ebt_target_arpnat(struct sk_buff *pskb, unsigned int hooknr,
-++   const struct net_device *in, const struct net_device *out,
-++   const void *data, unsigned int datalen)
-++*/
+++
 ++static unsigned int ebt_target_arpnat(struct sk_buff *pskb, const struct xt_target_param *par)
 ++{
-++    const struct net_device *in  =  par->in;
-++    const struct net_device *out =  par->out;
+++	const struct net_device *in  =  par->in;
+++	const struct net_device *out =  par->out;
 ++
-++    struct ebt_nat_info *info = (struct ebt_nat_info *) par->targinfo;
+++	struct ebt_nat_info *info = (struct ebt_nat_info *) par->targinfo;
 ++
-++    struct arphdr *ah = NULL;
-++    struct arphdr _arph;
+++	struct arphdr *ah = NULL;
+++	struct arphdr _arph;
 ++
 ++
-++    //used for target only
-++    uint8_t* eth_smac = eth_hdr(pskb)->h_source;
-++    uint8_t* eth_dmac = eth_hdr(pskb)->h_dest;
-++    uint32_t* arp_sip = NULL;
-++    uint8_t* arp_smac = NULL;
-++    uint32_t* arp_dip = NULL;
-++    uint8_t* arp_dmac = NULL;
-++    struct mac2ip* entry = NULL;
-++    unsigned long flags;
+++	//used for target only
+++	uint8_t* eth_smac = eth_hdr(pskb)->h_source;
+++	uint8_t* eth_dmac = eth_hdr(pskb)->h_dest;
+++	uint32_t* arp_sip = NULL;
+++	uint8_t* arp_smac = NULL;
+++	uint32_t* arp_dip = NULL;
+++	uint8_t* arp_dmac = NULL;
+++	struct mac2ip* entry = NULL;
+++	unsigned long flags;
 ++
-++    if (eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_ARP))
-++    {
-++	ah = skb_header_pointer(pskb, 0, sizeof(_arph), &_arph);
-++	if (ah->ar_hln == ETH_ALEN && ah->ar_pro == htons(ETH_P_IP) &&
-++	    ah->ar_pln == 4)
+++	/* if it's an arp packet, initialize pointers to arp source/dest ip/mac addresses in skb */
+++	if (eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_ARP))
 ++	{
-++	    unsigned char *raw = skb_network_header(pskb);
-++	    arp_sip = (uint32_t*)(raw + sizeof(struct arphdr) + (arp_hdr(pskb)->ar_hln));
-++	    arp_smac = raw + sizeof(struct arphdr);
-++	    arp_dip = (uint32_t*)(raw + sizeof(struct arphdr) + (2*(arp_hdr(pskb)->ar_hln)) + arp_hdr(pskb)->ar_pln);
-++	    arp_dmac = raw + sizeof(struct arphdr) + arp_hdr(pskb)->ar_hln + arp_hdr(pskb)->ar_pln;
-++	}
-++	else
-++	{
-++            ah = NULL;
-++	}
-++    }
-++    if (in)
-++    {
-++	if (ah)
-++	{
-++	    spin_lock_irqsave(&arpnat_lock, flags);
-++	    entry = find_ip_nat(&arpnat_table, *arp_dip);
-++	    switch (ah->ar_op)
-++	    {
-++	    case __constant_htons(ARPOP_REPLY):
-++	    case __constant_htons(ARPOP_REQUEST):
-++		if (entry)
+++		if(debug)
 ++		{
-++		    uint32_t dip = *arp_dip;
-++		    uint32_t sip = inet_select_addr(in->br_port->br->dev, dip, RT_SCOPE_LINK);
-++		    if (! (eth_dmac[0] & 1))
-++		    {
-++			if (debug)
-++			    printk("IN ARPNAT: "STRMAC" -> "STRMAC"\n", MAC2STR(eth_dmac), MAC2STR(entry->data.mac));
-++			memcpy(arp_dmac, entry->data.mac, ETH_ALEN);
-++			memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
-++			(pskb)->pkt_type = (dip != sip) ? PACKET_OTHERHOST : (pskb)->pkt_type;
-++		    }
-++		    spin_unlock_irqrestore(&arpnat_lock, flags);
-++		    /*if (dip != sip)
-++		    {
-++                        if (debug)
-++			    printk("SEND ARP REQUEST: "STRIP" -> "STRIP"\n", IP2STR(sip), IP2STR(dip));
-++			arp_send(ARPOP_REQUEST, ETH_P_ARP, dip, &in->br_port->br->dev, sip, NULL, in->br_port->br->dev.dev_addr, NULL);
-++		    }*/
-++		    return info->target;
+++			printk("ARPNAT ARP DETECTED\n");
 ++		}
-++		break;
-++	    }
-++            spin_unlock_irqrestore(&arpnat_lock, flags);
-++	}                                                                     
-++	else if (eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_IP))
-++	{
-++	    struct iphdr *iph = ip_hdr(pskb);
-++	    struct udphdr *uh = NULL;
-++	    if (bootpnat && iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
-++	    {
-++		uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
-++		if (uh->dest == htonl(67))
+++		ah = skb_header_pointer(pskb, 0, sizeof(_arph), &_arph);
+++		if (ah->ar_hln == ETH_ALEN && ah->ar_pro == htons(ETH_P_IP) && ah->ar_pln == 4)
 ++		{
-++		    //do something illegal for BOOTP
-++		    uint32_t* giaddrp = (uint32_t*)(((uint8_t*)uh) + sizeof(*uh) + GIADDR_OFFSET);
-++		    uint8_t* mac = (uint8_t*)(giaddrp + 1);
-++		    uint32_t ihl = iph->ihl << 2;
-++		    uint32_t size = (pskb)->len - ihl;
-++                    uint32_t orig_daddr = iph->daddr;
-++
-++		    spin_lock_irqsave(&arpnat_lock, flags);
-++		    entry = find_mac_nat(&arpnat_table, mac);
-++		    if (entry)
-++			iph->daddr = entry->data.ip;
-++		    else
-++			iph->daddr = 0xffffffff;
-++		    spin_unlock_irqrestore(&arpnat_lock, flags);
-++                    if (debug)
-++			printk("IN BOOTPRELAY: "STRMAC"["STRIP"] -> "STRMAC"["STRIP"]\n",
-++			       MAC2STR(eth_dmac), IP2STR(orig_daddr), MAC2STR(mac), IP2STR(iph->daddr));
-++                    memcpy(eth_dmac, mac, ETH_ALEN);
-++		    *giaddrp = 0;
-++                    uh->dest = htonl(68);
-++                    iph->check = 0;
-++		    uh->check = 0;
-++                    iph->check = ip_fast_csum((uint8_t*)iph, iph->ihl);
-++		    (pskb)->csum = csum_partial((uint8_t*)iph + ihl, size, 0);
-++		    uh->check = csum_tcpudp_magic(iph->saddr, iph->daddr,
-++						  size, iph->protocol,
-++						  (pskb)->csum);
-++		    if (uh->check == 0)
-++			uh->check = 0xFFFF;
-++		    return info->target;
+++			unsigned char *raw = skb_network_header(pskb);
+++			arp_sip = (uint32_t*)(raw + sizeof(struct arphdr) + (arp_hdr(pskb)->ar_hln));
+++			arp_smac = raw + sizeof(struct arphdr);
+++			arp_dip = (uint32_t*)(raw + sizeof(struct arphdr) + (2*(arp_hdr(pskb)->ar_hln)) + arp_hdr(pskb)->ar_pln);
+++			arp_dmac = raw + sizeof(struct arphdr) + arp_hdr(pskb)->ar_hln + arp_hdr(pskb)->ar_pln;
 ++		}
 ++		else
-++                    goto HANDLE_IP_PKT;
-++	    }
-++	    else
-++	    {
-++	    HANDLE_IP_PKT:
-++		spin_lock_irqsave(&arpnat_lock, flags);
-++		entry = find_ip_nat(&arpnat_table, iph->daddr);
-++		if (entry)
 ++		{
-++                    //to me
-++		    if (inet_confirm_addr( __in_dev_get_rcu(in->br_port->br->dev),  0, entry->data.ip, RT_SCOPE_HOST))
-++		    {
-++			if (debug)
-++			    printk("IP PKT TO ME: "STRMAC"["STRIP"] -> "STRMAC"[type: %d]\n",
-++				   MAC2STR(eth_dmac), IP2STR(iph->daddr), MAC2STR(in->br_port->br->dev->dev_addr), (pskb)->pkt_type);
-++			memcpy(eth_dmac, in->br_port->br->dev->dev_addr, ETH_ALEN);
-++		    }
-++		    else
-++		    {
-++			if (debug)
-++			    printk("IP PKT TO OTHER: "STRMAC"["STRIP"] -> "STRMAC"[type: %d]\n",
-++				   MAC2STR(eth_dmac), IP2STR(iph->daddr), MAC2STR(entry->data.mac), (pskb)->pkt_type);
-++			memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
-++			(pskb)->pkt_type = PACKET_OTHERHOST;
-++		    }
-++		    spin_unlock_irqrestore(&arpnat_lock, flags);
-++		    return info->target;
+++			ah = NULL;
 ++		}
-++		spin_unlock_irqrestore(&arpnat_lock, flags);
-++	    }
 ++	}
-++	if (! (eth_dmac[0] & 1))
+++	
+++	if (in)
 ++	{
-++	    if (memcmp(in->br_port->br->dev->dev_addr, eth_dmac, ETH_ALEN) &&
-++		memcmp(in->dev_addr, eth_dmac, ETH_ALEN))
-++                return EBT_DROP;
-++	    spin_lock_irqsave(&arpnat_lock, flags);
-++	    entry = find_mac_nat(&arpnat_table, eth_dmac);
-++	    if (entry)
-++		memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
-++	    else
-++                memcpy(eth_dmac, in->br_port->br->dev->dev_addr, ETH_ALEN);
-++	    spin_unlock_irqrestore(&arpnat_lock, flags);
-++	}
-++    }
-++    else if (out)
-++    {
-++	if (ah)
-++	{
-++	    switch (ah->ar_op)
-++	    {
-++	    case __constant_htons(ARPOP_REQUEST):
-++	    case __constant_htons(ARPOP_REPLY):
-++                spin_lock_irqsave(&arpnat_lock, flags);
-++		update_arp_nat(&arpnat_table, arp_smac, *arp_sip);
-++                spin_unlock_irqrestore(&arpnat_lock, flags);
-++		/* do BR ip lookup */
-++		if (inet_confirm_addr( __in_dev_get_rcu(out->br_port->br->dev), 0, *arp_dip, RT_SCOPE_HOST))
+++		/* handle input packets */
+++		if(debug)
 ++		{
-++                    return info->target;
+++			printk("ARPNAT INBOUND DETECTED\n");
 ++		}
-++                //pskb = skb_unshare(pskb, GFP_ATOMIC);
-++		eth_smac = eth_hdr(pskb)->h_source;
-++		arp_smac = skb_network_header(pskb) + sizeof(struct arphdr);
-++                if (debug)
-++		    printk("OUT ARPNAT: "STRMAC" -> "STRMAC"\n", MAC2STR(eth_smac), MAC2STR(out->dev_addr));
-++		memcpy(arp_smac, out->dev_addr, ETH_ALEN);
+++
+++		if (ah)
+++		{
+++			if(debug)
+++			{
+++				printk("IN ARPNAT:\n");
+++				printk("          arp_smac="STRMAC", arp_dmac="STRMAC"\n", MAC2STR(arp_smac), MAC2STR(arp_dmac));
+++				printk("          arp_sip ="STRIP", arp_dip ="STRIP"\n", IP2STR(*arp_sip), IP2STR(*arp_dip));
+++				if(ah->ar_op == __constant_htons(ARPOP_REPLY))
+++				{
+++					printk("          arp_op=reply\n");
+++				}
+++				else if(ah->ar_op == __constant_htons(ARPOP_REQUEST))
+++				{
+++					printk("          arp_op=request\n");
+++				}
+++				else
+++				{
+++					printk("          arp_op=%d\n", ntohs(ah->ar_op));
+++				}
+++
+++			}
+++
+++
+++			if (inet_confirm_addr( __in_dev_get_rcu(in->br_port->br->dev) , 0, *arp_dip, RT_SCOPE_HOST))
+++			{
+++				if (debug)
+++				{
+++					printk("          TO US\n");
+++				}
+++				return info->target;
+++			}
+++
+++
+++			spin_lock_irqsave(&arpnat_lock, flags);
+++			entry = find_ip_nat(&arpnat_table, *arp_dip);
+++			switch (ah->ar_op)
+++			{
+++				case __constant_htons(ARPOP_REPLY):
+++	 			case __constant_htons(ARPOP_REQUEST):
+++				if (entry)
+++				{
+++					uint32_t dip = *arp_dip;
+++					uint32_t sip = inet_select_addr(in->br_port->br->dev, dip, RT_SCOPE_LINK);
+++					if (! (eth_dmac[0] & 1))
+++					{
+++						if (debug)
+++						{
+++							printk("          "STRMAC" -> "STRMAC"\n", MAC2STR(eth_dmac), MAC2STR(entry->data.mac));
+++						}
+++						memcpy(arp_dmac, entry->data.mac, ETH_ALEN);
+++						memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
+++						(pskb)->pkt_type = (dip != sip) ? PACKET_OTHERHOST : (pskb)->pkt_type;
+++					}
+++					spin_unlock_irqrestore(&arpnat_lock, flags);
+++					/*if (dip != sip)
+++					{
+++						if (debug)
+++							printk("SEND ARP REQUEST: "STRIP" -> "STRIP"\n", IP2STR(sip), IP2STR(dip));
+++						arp_send(ARPOP_REQUEST, ETH_P_ARP, dip, &in->br_port->br->dev, sip, NULL, in->br_port->br->dev.dev_addr, NULL);
+++					}*/
+++					return info->target;
+++				}
+++				break;
+++			}
+++			spin_unlock_irqrestore(&arpnat_lock, flags);
+++		}
+++		else if (eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_IP))
+++		{
+++			struct iphdr *iph = ip_hdr(pskb);
+++			struct udphdr *uh = NULL;
+++			if (bootpnat && iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			{
+++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
+++				if(uh->dest == htons(67) || uh->dest == htons(68) )
+++				{
+++					//do something illegal for BOOTP
+++					uint32_t* giaddrp = (uint32_t*)(((uint8_t*)uh) + sizeof(*uh) + GIADDR_OFFSET);
+++					uint8_t* mac = (uint8_t*)(giaddrp + 1);
+++					uint32_t ihl = iph->ihl << 2;
+++					uint32_t size = (pskb)->len - ihl;
+++					uint32_t orig_daddr = iph->daddr;
+++
+++					iph->daddr = 0xffffffff;
+++					if (debug)
+++					{
+++						printk("IN BOOTPRELAY: "STRMAC"["STRIP"] -> "STRMAC"["STRIP"]\n", MAC2STR(eth_dmac), IP2STR(orig_daddr), MAC2STR(mac), IP2STR(iph->daddr));
+++					}
+++					memcpy(eth_dmac, mac, ETH_ALEN);
+++					*giaddrp = 0;
+++					uh->dest = htons(68);
+++					iph->check = 0;
+++					uh->check = 0;
+++					iph->check = ip_fast_csum((uint8_t*)iph, iph->ihl);
+++					(pskb)->csum = csum_partial((uint8_t*)iph + ihl, size, 0);
+++					uh->check = csum_tcpudp_magic(iph->saddr, iph->daddr, size, iph->protocol, (pskb)->csum);
+++					
+++					if (uh->check == 0)
+++					{
+++						uh->check = 0xFFFF;
+++					}
+++					return info->target;
+++				}
+++				else
+++				{
+++					goto HANDLE_IP_PKT;
+++				}
+++			}	
+++			else
+++			{
+++				HANDLE_IP_PKT:
+++				spin_lock_irqsave(&arpnat_lock, flags);
+++				entry = find_ip_nat(&arpnat_table, iph->daddr);
+++				if (entry)
+++				{
+++					if (inet_confirm_addr( __in_dev_get_rcu(in->br_port->br->dev),  0, entry->data.ip, RT_SCOPE_HOST))
+++					{
+++						//to me
+++						if (debug)
+++						{
+++							printk("IP PKT TO ME: "STRMAC"["STRIP"] -> "STRMAC"[type: %d]\n", MAC2STR(eth_dmac), IP2STR(iph->daddr), MAC2STR(in->br_port->br->dev->dev_addr), (pskb)->pkt_type);
+++						}
+++						memcpy(eth_dmac, in->br_port->br->dev->dev_addr, ETH_ALEN);
+++					}
+++					else
+++					{
+++						if (debug)
+++						{
+++							printk("IP PKT TO OTHER: "STRMAC"["STRIP"] -> "STRMAC"[type: %d]\n", MAC2STR(eth_dmac), IP2STR(iph->daddr), MAC2STR(entry->data.mac), (pskb)->pkt_type);
+++						}
+++						memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
+++						(pskb)->pkt_type = PACKET_OTHERHOST;
+++					}
+++					spin_unlock_irqrestore(&arpnat_lock, flags);
+++					return info->target;
+++				}
+++				spin_unlock_irqrestore(&arpnat_lock, flags);
+++			}
+++		}
+++		
+++		if (! (eth_dmac[0] & 1))
+++		{
+++			if (memcmp(in->br_port->br->dev->dev_addr, eth_dmac, ETH_ALEN) && memcmp(in->dev_addr, eth_dmac, ETH_ALEN))
+++			{
+++				return EBT_DROP;
+++			}
+++			spin_lock_irqsave(&arpnat_lock, flags);
+++			entry = find_mac_nat(&arpnat_table, eth_dmac);
+++			if (entry)
+++			{
+++				memcpy(eth_dmac, entry->data.mac, ETH_ALEN);
+++			}
+++			else
+++			{
+++				memcpy(eth_dmac, in->br_port->br->dev->dev_addr, ETH_ALEN);
+++			}
+++			spin_unlock_irqrestore(&arpnat_lock, flags);
+++		}
+++	}
+++	else if (out)
+++	{
+++		/* handle outbound packets */
+++		if (ah)
+++		{
+++			switch (ah->ar_op)
+++			{
+++				case __constant_htons(ARPOP_REQUEST):
+++				case __constant_htons(ARPOP_REPLY):
+++
+++				
+++				/* do BR ip lookup */
+++				if(inet_confirm_addr( __in_dev_get_rcu(out->br_port->br->dev), 0, *arp_dip, RT_SCOPE_HOST))
+++				{
+++					return info->target;
+++				}
+++				if(!inet_confirm_addr( __in_dev_get_rcu(out->br_port->br->dev), 0, *arp_sip, RT_SCOPE_HOST))
+++				{
+++					spin_lock_irqsave(&arpnat_lock, flags);
+++					update_arp_nat(&arpnat_table, arp_smac, *arp_sip);
+++					spin_unlock_irqrestore(&arpnat_lock, flags);
+++				}
+++
+++				//pskb = skb_unshare(pskb, GFP_ATOMIC);
+++				eth_smac = eth_hdr(pskb)->h_source;
+++				arp_smac = skb_network_header(pskb) + sizeof(struct arphdr);
+++				if (debug)
+++				{
+++					printk("OUT ARPNAT: "STRMAC" -> "STRMAC"\n", MAC2STR(eth_smac), MAC2STR(out->dev_addr));
+++					printk("           arp_smac="STRMAC", arp_dmac="STRMAC"\n", MAC2STR(arp_smac), MAC2STR(arp_dmac));
+++					printk("           arp_sip ="STRIP", arp_dip ="STRIP"\n", IP2STR(*arp_sip), IP2STR(*arp_dip));
+++					if(ah->ar_op == __constant_htons(ARPOP_REPLY))
+++					{
+++						printk("           arp_op=reply\n");
+++					}
+++					else if(ah->ar_op == __constant_htons(ARPOP_REQUEST))
+++					{
+++						printk("           arp_op=request\n");
+++					}
+++					else
+++					{
+++						printk("           arp_op=%d\n", ntohs(ah->ar_op));
+++					}
+++				}
+++				memcpy(arp_smac, out->dev_addr, ETH_ALEN);
+++				memcpy(eth_smac, out->dev_addr, ETH_ALEN);
+++				return info->target;
+++				break;
+++			}
+++		}
+++		else if (bootpnat && eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_IP) && memcmp(out->br_port->br->dev->dev_addr, eth_smac, ETH_ALEN))
+++		{
+++			struct iphdr *iph = ip_hdr(pskb);
+++			struct udphdr *uh = NULL;
+++			if (iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			{
+++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
+++				if (uh->dest == htonl(67) || uh->dest == htons(68) )
+++				{
+++					//do something illegal for BOOTP
+++					uint32_t giaddr = inet_select_addr(out->br_port->br->dev, iph->daddr, RT_SCOPE_LINK);
+++					uint32_t* giaddrp = (uint32_t*)(((uint8_t*)uh) + sizeof(*uh) + GIADDR_OFFSET);
+++					uint32_t ihl = iph->ihl << 2;
+++					uint32_t size = (pskb)->len - ihl;
+++					if (debug)
+++					{
+++						printk("OUT BOOTPRELAY: "STRIP" -> "STRIP"\n", IP2STR(*giaddrp), IP2STR(giaddr));
+++					}
+++					*giaddrp = giaddr;
+++					uh->check = 0;
+++					(pskb)->csum = csum_partial((uint8_t*)iph + ihl, size, 0);
+++					uh->check = csum_tcpudp_magic(iph->saddr, iph->daddr, size, iph->protocol, (pskb)->csum);
+++					
+++					if (uh->check == 0)
+++					{
+++						uh->check = 0xFFFF;
+++					}
+++				}
+++			}
+++		}
 ++		memcpy(eth_smac, out->dev_addr, ETH_ALEN);
-++                return info->target;
-++		break;
-++	    }
 ++	}
-++	else if (bootpnat && eth_hdr(pskb)->h_proto == __constant_htons(ETH_P_IP) &&
-++		memcmp(out->br_port->br->dev->dev_addr, eth_smac, ETH_ALEN))
-++	{
-++	    struct iphdr *iph = ip_hdr(pskb);
-++	    struct udphdr *uh = NULL;
-++	    if (iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
-++	    {
-++		uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
-++		if (uh->dest == htonl(67))
-++		{
-++		    //do something illegal for BOOTP
-++		    uint32_t giaddr = inet_select_addr(out->br_port->br->dev, iph->daddr, RT_SCOPE_LINK);
-++		    uint32_t* giaddrp = (uint32_t*)(((uint8_t*)uh) + sizeof(*uh) + GIADDR_OFFSET);
-++		    uint32_t ihl = iph->ihl << 2;
-++		    uint32_t size = (pskb)->len - ihl;
-++                    if (debug)
-++			printk("OUT BOOTPRELAY: "STRIP" -> "STRIP"\n",
-++			       IP2STR(*giaddrp), IP2STR(giaddr));
-++		    *giaddrp = giaddr;
-++		    uh->check = 0;
-++		    (pskb)->csum = csum_partial((uint8_t*)iph + ihl, size, 0);
-++		    uh->check = csum_tcpudp_magic(iph->saddr, iph->daddr,
-++						    size, iph->protocol,
-++						    (pskb)->csum);
-++		    if (uh->check == 0)
-++			uh->check = 0xFFFF;
-++		}
-++	    }
-++	}
-++	memcpy(eth_smac, out->dev_addr, ETH_ALEN);
-++    }
-++    return info->target;
+++	return info->target;
 ++}
 ++
-++/*
-++static int ebt_target_nat_arpcheck(const char *tablename, unsigned int hookmask,
-++   const struct ebt_entry *e, void *data, unsigned int datalen)
-++*/
 ++static bool ebt_target_nat_arpcheck(const struct xt_tgchk_param *par)
 ++{
 ++	return true;
@@ -726,12 +846,19 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++
 ++static int __init init(void)
 ++{
-++//#ifdef CONFIG_PROC_FS
-++//    	struct proc_dir_entry *proc_arpnat = proc_net_create("arpnat", 0, arpnat_get_info);
-++//	if (proc_arpnat)
-++//                proc_arpnat->write_proc = arpnat_write;
-++//    	proc_net_create("arpnat_cache", 0, arpnat_cache_stat_get_info);
-++//#endif
+++#ifdef CONFIG_PROC_FS
+++	struct proc_dir_entry *proc_arpnat_info  = create_proc_entry("arpnat_info", 0, NULL);
+++	struct proc_dir_entry *proc_arpnat_cache = create_proc_entry("arpnat_cache", 0, NULL);
+++	if(proc_arpnat_info)
+++	{
+++		proc_arpnat_info->proc_fops = &arpnat_info_fops;
+++	}
+++	
+++	if(proc_arpnat_cache)
+++	{
+++		proc_arpnat_cache->proc_fops = &arpnat_cache_fops;
+++	}
+++#endif
 ++	return xt_register_target(&arpnat);
 ++}
 ++
@@ -739,15 +866,17 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++{
 ++	xt_unregister_target(&arpnat);
 ++	free_arp_nat(&arpnat_table);
-++//#ifdef CONFIG_PROC_FS
-++//    proc_net_remove("arpnat");
-++//    proc_net_remove("arpnat_cache");
-++//#endif
+++#ifdef CONFIG_PROC_FS
+++	remove_proc_entry("arpnat_info", NULL);
+++	remove_proc_entry("arpnat_cache", NULL);
+++#endif
 ++}
 ++
 ++module_init(init);
 ++module_exit(fini);
 ++MODULE_LICENSE("GPL");
+++
+++
 +--- linux-old/net/bridge/br_fdb.c	2009-09-15 13:46:05.000000000 -0400
 ++++ linux-2.6.30.7/net/bridge/br_fdb.c	2009-09-22 19:52:51.000000000 -0400
 +@@ -415,3 +415,5 @@

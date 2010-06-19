@@ -129,7 +129,7 @@ static void alarm_triggered(int sig);
 	
 	#ifdef USE_CYASSL
 		#ifdef USE_CYASSL_INCLUDE_DIR
-			#include <cyassl/ssl.h>
+			#include <cyassl/openssl/ssl.h>
 		#else
 			#include <openssl/ssl.h>
 		#endif

@@ -9,14 +9,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ntpclient
-PKG_VERSION:=2007_365
+PKG_VERSION:=2007_365_1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://doolittle.icarus.com/ntpclient/
-PKG_MD5SUM:=cb98711f11769cdd22fc592844cef414
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-2007
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -32,8 +28,12 @@ define Package/ntpclient/description
 	NTP client for setting system time from NTP servers.
 endef
 
-MAKE_FLAGS += \
-	all adjtimex
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
 
 define Package/ntpclient/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface

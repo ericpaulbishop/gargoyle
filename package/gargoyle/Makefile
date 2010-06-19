@@ -9,16 +9,16 @@ ifeq ($(GARGOYLE_VERSION),)
 endif
 PKG_RELEASE:=6
 
-ATH_DEPS=""
-LED_DEPS=""
-BRCM_DEPS=""
+ATH_DEPS=
+LED_DEPS=
+BRCM_DEPS=
 ifeq ($(BOARD),atheros)
-     ATH_DEPS="+wpa-supplicant +hostapd +ebtables +kmod-ebtables"
-     LED_DEPS="+gpioctl"
+     ATH_DEPS=+wpa-supplicant +hostapd +ebtables +kmod-ebtables
+     LED_DEPS=+gpioctl
 endif
 
 ifeq ($(BOARD),brcm-2.4)
-     BRCM_DEPS="+wl +bin2trx"
+     BRCM_DEPS=+wl +bin2trx
 endif
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
@@ -30,7 +30,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-dev +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
+	DEPENDS:=+uci +libuci +haserl +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +bridge $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
