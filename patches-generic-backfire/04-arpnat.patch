@@ -654,7 +654,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (bootpnat && iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (bootpnat && iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if(uh->dest == htons(67) || uh->dest == htons(68) )
@@ -796,10 +796,10 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
-++				if (uh->dest == htonl(67) || uh->dest == htons(68) )
+++				if (uh->dest == htons(67) || uh->dest == htons(68) )
 ++				{
 ++					//do something illegal for BOOTP
 ++					uint32_t giaddr = inet_select_addr(out->br_port->br->dev, iph->daddr, RT_SCOPE_LINK);
@@ -1331,7 +1331,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (bootpnat && iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (bootpnat && iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if(uh->dest == htons(67) || uh->dest == htons(68) )
@@ -1473,10 +1473,10 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (iph->protocol == htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
-++				if (uh->dest == htonl(67) || uh->dest == htons(68) )
+++				if (uh->dest == htons(67) || uh->dest == htons(68) )
 ++				{
 ++					//do something illegal for BOOTP
 ++					uint32_t giaddr = inet_select_addr(out->br_port->br->dev, iph->daddr, RT_SCOPE_LINK);
