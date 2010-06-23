@@ -197,8 +197,7 @@ function resetData()
 	}
 
 	var ipTableData = [];
-	var ipi;
-	for(ipi = 0; ipi < ips.length; ipi++)
+	while(ips.length > 0)
 	{
 		ipTableData.push( [ ips.shift() ] );
 	}
