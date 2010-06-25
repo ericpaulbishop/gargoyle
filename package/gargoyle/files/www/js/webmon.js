@@ -270,35 +270,6 @@ function setWebmonEnabled()
 	}
 }
 
-function addIp()
-{
-	ipStr=document.getElementById("add_ip").value;
-	if(validateIP(ipStr) != 0)
-	{
-		alert("ERROR: Specified IP is not valid.");
-	}
-	else
-	{
-		ipTable = document.getElementById('ip_table_container').firstChild;
-		ipData = getTableDataArray(ipTable, true, false);
-		inTable = false;
-		for(ipIndex = 0; ipIndex < ipData.length; ipIndex++)
-		{
-			var testIp = ipData[ipIndex];
-			inTable = inTable || (ipStr == testIp);
-		}
-		if(inTable)
-		{
-			alert("ERROR: Duplicate IP.");
-		}
-		else
-		{
-			addTableRow(ipTable, [ipStr], true, false, null, null );
-			document.getElementById("add_ip").value = "";
-		}
-	}
-}
-
 
 
 function updateMonitorTable()
