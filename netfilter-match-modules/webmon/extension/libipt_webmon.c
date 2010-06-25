@@ -63,12 +63,11 @@
 static void param_problem_exit_error(char* msg);
 
 
-void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info);
+void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info);
 
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 char* trim_flanking_whitespace(char* str);
 unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, unsigned long *length);
-uint32_t power(uint32_t base, uint32_t ex);
 
 #define DEFAULT_MAX      300
 
@@ -140,11 +139,11 @@ static int parse(	int c,
 	switch (c)
 	{
 		case WEBMON_EXCLUDE:
-			parse_ips_and_macs(optarg, info);
+			parse_ips_and_ranges(optarg, info);
 			info->exclude_type = WEBMON_EXCLUDE;
 			break;
 		case WEBMON_INCLUDE:
-			parse_ips_and_macs(optarg, info);
+			parse_ips_and_ranges(optarg, info);
 			info->exclude_type = WEBMON_INCLUDE;
 			break;
 		case WEBMON_MAXSEARCH:
@@ -339,19 +338,23 @@ void _init(void)
 #define FALSE 0
 #endif
 
-uint32_t power(uint32_t base, uint32_t ex)
+
+
+
+
+
+
+static void param_problem_exit_error(char* msg)
 {
-	uint32_t e;
-	uint32_t val=base;
-	for(e=1; e < ex; e++)
-	{
-		val=val*base;
-	}
-	return base;
+	#ifdef xtables_error
+		xtables_error(PARAMETER_PROBLEM, msg);
+	#else
+		exit_error(PARAMETER_PROBLEM, msg);
+	#endif
 }
 
 
-void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
+void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 {
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 
@@ -422,15 +425,22 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 					{
 						if(mask_bits >=0 && mask_bits <= 32)
 						{
-							uint32_t high_bit = 31;
+							uint32_t byte = 0;
 							mask = 0;
-							while(high_bit >= 0 && mask_bits > 0)
+							for(byte=0; byte < 4; byte++)
 							{
-								mask = mask + power(2, high_bit);
-								high_bit--;
-								mask_bits--;
+								unsigned char byte_bits = mask_bits > 8 ? 8 : mask_bits;
+								uint32_t byte_mask = 0;
+								mask_bits = mask_bits - byte_bits;
+								
+								while(byte_bits > 0)
+								{
+									byte_mask = byte_mask | (256 >> byte_bits);
+									byte_bits--;
+								}
+								mask = mask | ((uint32_t)byte_mask << (byte*8));
+								printf("mask = "STRIP"\n", IP2STR(mask));	
 							}
-							mask = htonl(mask);
 							mask_valid = 1;
 						}
 					}
@@ -474,16 +484,6 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 	}
 	free(addr_parts);
 	
-}
-
-
-static void param_problem_exit_error(char* msg)
-{
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
 }
 
 
