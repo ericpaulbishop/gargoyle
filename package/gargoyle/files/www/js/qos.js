@@ -10,6 +10,8 @@
 
 function saveChanges()
 {
+
+
 	uci = uciOriginal.clone();
 	commands = "";
 	errors = "";
@@ -154,19 +156,9 @@ function saveChanges()
 
 				appProtocol = matchCriteria[matchCriteria.length-1];
                             appProtocolName=protocolMap.getL7ID(appProtocol);
-
-				if(appProtocolName != null)
-				{
+				if(appProtocolName != null) {
 					uci.set("qos_gargoyle", ruleId, "layer7", appProtocolName);
-				}
-				else if(appProtocol == "Any P2P")
-				{
-					uci.set("qos_gargoyle", ruleId, "ipp2p", "all");
-				}
-				else
-				{
-					uci.set("qos_gargoyle", ruleId, "ipp2p", appProtocol);
-				}
+                            }
 			}
 		}
               commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
@@ -327,17 +319,10 @@ function resetData()
 
 		if(uciOriginal.get("qos_gargoyle", ruleSection, "layer7") != "")
 		{
+
 			app_protocol="Application Protocol: " + protocolMap[uciOriginal.get("qos_gargoyle", ruleSection, "layer7")];
 			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
 		}
-		else if(uciOriginal.get("qos_gargoyle", ruleSection, "ipp2p") != "")
-		{
-			p2p = uciOriginal.get("qos_gargoyle", ruleSection, "ipp2p");
-			p2p = p2p == "all" || p2p == "ipp2p" ? "Any P2P" : p2p;
-			app_protocol="Application Protocol: " + p2p;
-			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
-		}
-
 
 		classification = classNames[ uciOriginal.get("qos_gargoyle", ruleSection, "class") ];
 		ruleTableData.push( [ruleText, classification, createRuleTableEditButton()] );

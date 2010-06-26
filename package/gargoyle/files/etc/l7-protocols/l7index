@@ -15,16 +15,15 @@ httpaudio HTTP Audio
 httpvideo HTTP Video
 ident Ident
 imap IMAP E-Mail
-ipp2p Any P2P
 irc IRC
 jabber Jabber
 msnmessenger MSN Messenger
 ntp NTP
 pop3 POP3
-rtp VoIP Audio
-skypeout Skype to POTS
+skypeout Skype Out Calls
 skypetoskype Skype to Skype
 smtp SMTP E-Mail
 ssh SSH Secure Shell
+ssl SSL Secure Socket
 vnc VNC
-
+rtp VoIP Audio

@@ -188,19 +188,6 @@ apply_all_rules()
 						match_str="$match_str -m layer7 --l7proto $option_value"
 					fi
 				;;
-				ipp2p)
-					if [ "$option_value" = "ipp2p" ] || [ "$option_value" = "all" ] ; then
-						ipp2p_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "ipp2p" | awk '{ print $2 }')
-						ipp2p_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "ipp2p" | awk '{ print $3 }')
-						if [ -n "$ipp2p_connmark" ] ; then
-							match_str="$match_str -m connmark --mark $ipp2p_connmark/$ipp2p_mask "
-						else
-							match_str="$match_str -m ipp2p --ipp2p"
-						fi
-					else
-						match_str="$match_str -m ipp2p --$option_value"
-					fi
-				;;
 			esac
 		done
 
@@ -326,7 +313,6 @@ initialize_qos()
 	insmod ipt_length >&- 2>&-
 	insmod imq numdevs=1 >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
-	insmod ipt_ipp2p >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
 	insmod ipt_tos >&- 2>&-
 	insmod ipt_TOS >&- 2>&-

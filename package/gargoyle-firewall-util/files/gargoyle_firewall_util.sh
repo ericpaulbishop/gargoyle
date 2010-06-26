@@ -67,7 +67,7 @@ create_l7marker_chain()
 	all_prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
 	qos_active=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
 	if [ -n "$qos_active" ] ; then
-		qos_l7=$(echo $(uci show qos_gargoyle | grep "layer7=" | sed 's/^.*=//g') $( uci show qos_gargoyle | grep -o "ipp2p") )
+		qos_l7=$(echo $(uci show qos_gargoyle | grep "layer7=" | sed 's/^.*=//g') )
 	fi
 	fw_l7=$(echo $(uci show firewall | grep app_proto | sed 's/^.*=//g'))
 	all_used=$(echo $fw_l7 $qos_l7)
@@ -79,8 +79,6 @@ create_l7marker_chain()
 		iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 		iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
-	
-
 		for proto in $all_prots ; do
 			proto_is_used=$(echo "$all_used" | grep "$proto")
 			if [ -n "$proto_is_used" ] ; then
@@ -91,13 +89,6 @@ create_l7marker_chain()
 			fi
 		done
 
-		ipp2p_mark=$(printf "0x%X" $(($app_proto_num << $app_proto_shift)) )
-		proto_is_used=$(echo "$all_used" | grep "ipp2p")
-		if [ -n "$proto_is_used" ] ; then
-			iptables -t mangle -A l7marker -m connmark --mark 0x0/$app_proto_mask -m ipp2p --ipp2p -j CONNMARK --set-mark $ipp2p_mark/$app_proto_mask
-			echo "ipp2p	$ipp2p_mark	$app_proto_mask" >> /tmp/l7marker.marks.tmp
-		fi
-	
 		copy_file="y"
 		if [ -e /etc/md5/layer7.md5 ] ; then
 			old_md5=$(cat /etc/md5/layer7.md5)
