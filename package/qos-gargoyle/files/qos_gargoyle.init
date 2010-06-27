@@ -320,14 +320,6 @@ initialize_qos()
 	insmod ipt_DSCP >&- 2>&-
 	insmod sch_red >&- 2>&-
 
-	#load mtu from global variables
-	if [ -z "$mtu" ] ; then
-		max_trans_unit=1500
-	else
-		max_trans_unit="$mtu"
-	fi
-
-
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
 	if [ -n "$total_bandwidth" ] ; then
@@ -608,6 +600,22 @@ initialize_qos()
 
 }
 
+scan_interface()
+{
+       #Figuring out the WAN interface turns out to be tricky but fortunately 
+       #Eric has already took on the challenge so we can use his program gargoyle_header_footer
+       #to sus out the details
+
+       qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
+       wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+       max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
+       local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+
+	if [ -n "$dbg" ] ; then
+            echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit"
+	fi
+
+}
 
 stop()
 {
@@ -640,19 +648,10 @@ start()
 
 	load_all_config_options "$config_file_name" "global"
 
-	#load qos_interface from global variables
-	if [ -z "$1" ] ; then
-	   if [ -z "$interface" ] ; then
-		qos_interface=$(uci -P "/var/state" get network.$network.ifname)
-	   else
-		qos_interface="$interface"
-	   fi
-	else
-	     qos_interface="$1"
+       scan_interface
+	if [ -z "$max_trans_unit" ] ; then
+		max_trans_unit=1500
 	fi
-
-	local_ip=$(uci -P "/var/state" get network.lan.ipaddr)
-	wan_ip=$(uci -P "/var/state" get network.$network.ipaddr)
 
       	initialize_qos
 
@@ -672,13 +671,7 @@ show()
 	load_all_config_options "$config_file_name" "global"
 
 	#load qos_interface from global variables
-	if [ -z "$interface" ] ; then
-		#scan_interfaces
-		#config_get qos_interface $network ifname
-		qos_interface=$(uci -P "/var/state" get network.$network.ifname)
-	else
-		qos_interface="$interface"
-	fi
+	scan_interface
 
 	echo "Egress configuration on $qos_interface"
 	iptables -t mangle -vnL qos_egress 2>/dev/null
