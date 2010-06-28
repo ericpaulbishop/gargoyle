@@ -15,7 +15,7 @@
        var direction = "download";
        protocolMap = new Object;
 <?
-       sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap.\1="\2";/' /etc/l7-protocols/l7index
+       sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap\["\1"\]="\2";/' /etc/l7-protocols/l7index
 
 
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
