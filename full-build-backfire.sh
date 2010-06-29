@@ -26,7 +26,7 @@ adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/
 # set svn revision number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 
-#rnum=18801
+rnum=21970
 
 
 #download openwrt source if we haven't already
@@ -36,13 +36,13 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 		revision=" -r $rnum "
 	fi
 	echo "fetching backfire source"
-	svn checkout $revision svn://svn.openwrt.org/openwrt/tags/backfire_10.03/
-	if [ ! -d "backfire_10.03" ] ; then
+	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/backfire/
+	if [ ! -d "backfire" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
-	mv backfire_10.03 $openwrt_src_dir
-	cd $openwrt_src_dir
+	mv backfire "$openwrt_src_dir"
+	cd "$openwrt_src_dir"
 	find . -name ".svn" | xargs -r rm -rf
 	cd .. 
 fi
