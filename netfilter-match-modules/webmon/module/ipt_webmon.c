@@ -1038,11 +1038,11 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							 */
 							if(recent_node != NULL)
 							{
-								if( within_edit_distance(search, recent_node->value, 2) && recent_node->src_ip == iph->saddr)
+								if(recent_node->src_ip == iph->saddr)
 								{
 									struct timeval t;
 									do_gettimeofday(&t);
-									if( (recent_node->time).tv_sec + 5 >= t.tv_sec )
+									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
 									{
 										char recent_key[700];
 										
