@@ -5,7 +5,7 @@ ALL: all
 all:
 	sh full-build-backfire.sh ALL "$(GARGOYLE_VERSION)" "$(V)"
 
-%: targets-8.09/%
+%: targets-backfire/%
 	sh full-build-backfire.sh $@ "$(GARGOYLE_VERSION)" "$(V)"
 
 prepare:

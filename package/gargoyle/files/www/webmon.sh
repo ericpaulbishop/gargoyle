@@ -43,15 +43,17 @@
 			</div>
 			<div>
 				<select id="include_exclude" onchange="setIncludeExclude()">
-					<option value="all">Monitor All IP Addresses</option>
-					<option value="include">Monitor Only IP Addresses Below</option>
-					<option value="exclude">Exclude IP Addresses Below From Monitoring</option>
+					<option value="all">Monitor All Hosts</option>
+					<option value="include">Monitor Only Hosts Below</option>
+					<option value="exclude">Exclude Hosts Below From Monitoring</option>
 				</select>
 			</div>
-			<div class="indent" id="add_ip_container">
+			<div class='indent' id="add_ip_container">
 				<div>
-					<input type='text' id='add_ip' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
-					<input type="button" class="default_button" id="add_ip_button" value="Add IP To List" onclick="addIp()" />
+					<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' size='30' />
+					<input type="button" class="default_button" id="add_ip_button" value="Add" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" />
+					<br/>
+					<em>Specify IP or IP Range</em>
 				</div>
 				<div id="ip_table_container"></div>
 			</div>

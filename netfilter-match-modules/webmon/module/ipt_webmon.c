@@ -245,6 +245,42 @@ char *strnistr(const char *s, const char *find, size_t slen)
       	return ((char *)s);
 }
 
+/* NOTE: This is not quite real edit distance -- all differences are assumed to be in one contiguous block 
+ *       If differences are not in a contiguous block computed edit distance will be greater than real edit distance.
+ *       Edit distance computed here is an upper bound on real edit distance.
+ */
+int within_edit_distance(char *s1, char *s2, int max_edit)
+{
+	if(s1 == NULL || s2 == NULL)
+	{
+		return 0;
+	}
+
+	int edit1 = strlen(s1);
+	int edit2 = strlen(s2);
+	char* s1sp = s1;
+	char* s2sp = s2;
+	char* s1ep = s1 + (edit1-1);
+	char* s2ep = s2 + (edit2-1);
+	while(*s1sp != '\0' && *s2sp != '\0' && *s1sp == *s2sp)
+	{
+		s1sp++;
+		s2sp++;
+		edit1--;
+		edit2--;
+	}
+	
+	/* if either is zero we got to the end of one of the strings */
+	while(s1ep > s1sp && s2ep > s2sp && *s1ep == *s2ep)
+	{
+		s1ep--;
+		s2ep--;
+		edit1--;
+		edit2--;
+	}
+
+	return edit1 <= max_edit && edit2 <= max_edit ? 1 : 0;
+}
 
 
 /*
@@ -1002,11 +1038,11 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							 */
 							if(recent_node != NULL)
 							{
-								if( (strstr(search, recent_node->value) == search || strstr(recent_node->value, search) == recent_node->value ) && recent_node->src_ip == iph->saddr)
+								if(recent_node->src_ip == iph->saddr)
 								{
 									struct timeval t;
 									do_gettimeofday(&t);
-									if( (recent_node->time).tv_sec + 5 >= t.tv_sec )
+									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
 									{
 										char recent_key[700];
 										

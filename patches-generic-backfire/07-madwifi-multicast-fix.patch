@@ -1,0 +1,18 @@
+--- /dev/null	2010-05-13 10:11:58.394584532 -0400
++++ atheros-2.6-src/package/hostapd/patches/666-madwifi-fix-multicast.patch	2010-06-29 12:09:06.000000000 -0400
+@@ -0,0 +1,15 @@
++--- a/src/drivers/driver_madwifi.c	2010-06-29 12:01:51.000000000 -0400
+++++ b/src/drivers/driver_madwifi.c	2010-06-29 12:04:02.000000000 -0400
++@@ -463,9 +463,12 @@
++ 	if (addr == NULL) {
++ 		memset(wk.ik_macaddr, 0xff, IEEE80211_ADDR_LEN);
++ 		wk.ik_keyix = key_idx;
+++		
++ 		wk.ik_flags |= IEEE80211_KEY_DEFAULT;
++ 	} else if (!memcmp(addr, "\xff\xff\xff\xff\xff\xff", ETH_ALEN)) {
+++		wk.ik_keyix = key_idx;
++ 		wk.ik_flags |= IEEE80211_KEY_GROUP;
+++		
++ 		memcpy(wk.ik_macaddr, addr, IEEE80211_ADDR_LEN);
++ 	} else {
++ 		memcpy(wk.ik_macaddr, addr, IEEE80211_ADDR_LEN);

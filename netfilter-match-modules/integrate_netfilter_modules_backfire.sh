@@ -158,8 +158,10 @@ all:
 		$(CP) $(FILES_DIR)/* $(LINUX_DIR)/; \
 		find $(LINUX_DIR)/ -name \*.rej | xargs rm -f; \
 	fi
-	$(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_PATCH_DIR)
-	$(SCRIPT_DIR)/patch-kernel.sh linux $(PATCH_DIR)
+	if [ -d "$(GENERIC_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_PATCH_DIR) ; fi
+	if [ -d "$(PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(PATCH_DIR) ; fi
+	mkdir -p "$(GENERIC_PATCH_DIR)"
+	mkdir -p "$(PATCH_DIR)"
 	echo $(GENERIC_PATCH_DIR) > generic-patch-dir
 	echo $(GENERIC_LINUX_CONFIG) > generic-config-file
 	echo $(PATCH_DIR) > patch-dir

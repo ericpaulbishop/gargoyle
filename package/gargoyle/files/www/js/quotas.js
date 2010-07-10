@@ -26,15 +26,17 @@ function saveChanges()
 
 	var allNewQuotas = uci.getAllSectionsOfType(pkg, "quota");
 	var quotaUseVisibleCommand = "\nuci del gargoyle.status.quotause ; uci commit ;\n"
+	var idToNewSection = [];
 	while(allNewQuotas.length > 0)
 	{
 		//if ip has changed, reset saved data
 		var section = allNewQuotas.shift()
-		if( changedIds[ uci.get(pkg,section,"id") ] == 1 )
+		var newId = uci.get(pkg,section,"id");
+		idToNewSection[newId] = section;
+		if( changedIds[ newId ] == 1 )
 		{
 			uci.set(pkg, section, "ignore_backup_at_next_restore", "1");
 		}
-		quotaUseVisibleCommand = "\nuci set gargoyle.status.quotause=\"225\" ; uci commit ;\n"
 	}
 
 	//set enabled / disabled	
@@ -44,7 +46,15 @@ function saveChanges()
 	for(qtIndex=0; qtIndex < quotaTableData.length; qtIndex++)
 	{
 		var enabledCheck = quotaTableData[qtIndex][rowCheckIndex];
-		uci.set(pkg, enabledCheck.id, "enabled", (enabledCheck.checked ? "1" : "0") )
+		var enabledSection = idToNewSection[ enabledCheck.id ];
+		if(enabledSection != null)
+		{
+			uci.set(pkg, enabledSection, "enabled", (enabledCheck.checked ? "1" : "0") )
+			if(enabledCheck.checked)
+			{
+				quotaUseVisibleCommand = "\nuci set gargoyle.status.quotause=\"225\" ; uci commit ;\n"
+			}
+		}
 	}
 
 	var postCommands = [];

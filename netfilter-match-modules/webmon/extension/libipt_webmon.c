@@ -63,7 +63,7 @@
 static void param_problem_exit_error(char* msg);
 
 
-void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info);
+void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info);
 
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 char* trim_flanking_whitespace(char* str);
@@ -135,36 +135,38 @@ static int parse(	int c,
 {
 	struct ipt_webmon_info *info = (struct ipt_webmon_info *)(*match)->data;
 	int valid_arg = 1;
-	
+	long max;
 	switch (c)
 	{
 		case WEBMON_EXCLUDE:
-			parse_ips_and_macs(optarg, info);
+			parse_ips_and_ranges(optarg, info);
 			info->exclude_type = WEBMON_EXCLUDE;
 			break;
 		case WEBMON_INCLUDE:
-			parse_ips_and_macs(optarg, info);
+			parse_ips_and_ranges(optarg, info);
 			info->exclude_type = WEBMON_INCLUDE;
 			break;
 		case WEBMON_MAXSEARCH:
-			if( sscanf(argv[optind-1], "%ld", &(info->max_searches)) == 0)
+			if( sscanf(argv[optind-1], "%ld", &max) == 0)
 			{
 				info->max_searches = DEFAULT_MAX ;
 				valid_arg = 0;
 			}
 			else
 			{
+				info->max_searches = (uint32_t)max;
 				global_max_searches = info->max_searches;
 			}
 			break;
 		case WEBMON_MAXDOMAIN:
-			if( sscanf(argv[optind-1], "%ld", &(info->max_domains)) == 0)
+			if( sscanf(argv[optind-1], "%ld", &max) == 0)
 			{
 				info->max_domains = DEFAULT_MAX ;
 				valid_arg = 0;
 			}
 			else
 			{
+				info->max_domains = (uint32_t)max;
 				global_max_domains = info->max_domains;
 			}
 			break;
@@ -338,7 +340,21 @@ void _init(void)
 
 
 
-void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
+
+
+
+
+static void param_problem_exit_error(char* msg)
+{
+	#ifdef xtables_error
+		xtables_error(PARAMETER_PROBLEM, msg);
+	#else
+		exit_error(PARAMETER_PROBLEM, msg);
+	#endif
+}
+
+
+void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 {
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 
@@ -368,13 +384,81 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 				r.start = (uint32_t)sip.s_addr;
 				r.end   = (uint32_t)eip.s_addr;
 
-				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES)
+				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && ntohl(r.start) < ntohl(r.end) )
 				{
 					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
 					info->num_exclude_ranges = info->num_exclude_ranges + 1;
 				}
 			}
 
+			free(start);
+			free(end);	
+			free(range_parts);
+		}
+		else if(strchr(next_str, '/') != NULL)
+		{
+			char** range_parts = split_on_separators(next_str, "/", 1, 2, 1);
+			char* start = trim_flanking_whitespace(range_parts[0]);
+			char* end = trim_flanking_whitespace(range_parts[1]);
+			int base_ip[4];
+			int base_valid = sscanf(start, "%d.%d.%d.%d", base_ip, base_ip+1, base_ip+2, base_ip+3);
+			if(base_valid == 4)
+			{
+				int mask_valid = 0;
+				uint32_t mask;
+				if(strchr(end, '.') != NULL)
+				{
+					uint32_t mask_ip[4];
+					int mask_test = sscanf(end, "%d.%d.%d.%d", mask_ip, mask_ip+1, mask_ip+2, mask_ip+3);
+					if(mask_test == 4)
+					{
+						struct in_addr mask_add;
+						inet_pton(AF_INET, end, &mask_add);
+						mask = (uint32_t)mask_add.s_addr;
+						mask_valid = 1;
+					}
+				}
+				else
+				{
+					int mask_bits;
+					if( sscanf(end, "%d", &mask_bits) > 0)
+					{
+						if(mask_bits >=0 && mask_bits <= 32)
+						{
+							uint32_t byte = 0;
+							mask = 0;
+							for(byte=0; byte < 4; byte++)
+							{
+								unsigned char byte_bits = mask_bits > 8 ? 8 : mask_bits;
+								uint32_t byte_mask = 0;
+								mask_bits = mask_bits - byte_bits;
+								
+								while(byte_bits > 0)
+								{
+									byte_mask = byte_mask | (256 >> byte_bits);
+									byte_bits--;
+								}
+								mask = mask | ((uint32_t)byte_mask << (byte*8));
+								printf("mask = "STRIP"\n", IP2STR(mask));	
+							}
+							mask_valid = 1;
+						}
+					}
+				}
+				if(mask_valid)
+				{
+					struct ipt_webmon_ip_range r;
+					struct in_addr bip;
+					inet_pton(AF_INET, start, &bip);
+					r.start = ( ((uint32_t)bip.s_addr) & mask );
+					r.end   = ( ((uint32_t)bip.s_addr) | (~mask) );
+					if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES && ntohl(r.start) <= ntohl(r.end) )
+					{
+						(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
+						info->num_exclude_ranges = info->num_exclude_ranges + 1;
+					}
+				}
+			}
 			free(start);
 			free(end);	
 			free(range_parts);
@@ -400,17 +484,6 @@ void parse_ips_and_macs(char* addr_str, struct ipt_webmon_info *info)
 	}
 	free(addr_parts);
 	
-}
-
-
-
-static void param_problem_exit_error(char* msg)
-{
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
 }
 
 
