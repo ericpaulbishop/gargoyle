@@ -1050,10 +1050,12 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 										remove_map_element(search_map, recent_key);
 										
 										recent_searches->first = recent_node->next;
+										recent_searches->last = recent_searches->first == NULL ? NULL : recent_searches->last;
 										if(recent_searches->first != NULL)
 										{
 											recent_searches->first->previous = NULL;
 										}
+										recent_searches->length = recent_searches->length - 1 ;
 										free(recent_node->value);
 										free(recent_node);
 									}
