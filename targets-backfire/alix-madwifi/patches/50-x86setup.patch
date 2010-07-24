@@ -37,3 +37,14 @@
 +	/etc/init.d/x86setup disable
 +	rm -rf /etc/init.d/x86setup
 +}
+--- backfire-src/package/base-files/Makefile	2010-06-29 23:25:45.114195070 -0400
++++ alix-madwifi-src/package/base-files/Makefile	2010-07-24 16:49:01.934279633 -0400
+@@ -386,6 +386,8 @@
+ 				echo "$$$${conffile##$(1)}" >> $(1)/CONTROL/conffiles; \
+ 		fi \
+ 	done
++	chmod 755 $(1)/etc/init.d/*
++
+ endef
+ 
+ ifeq ($(CONFIG_EXTERNAL_TOOLCHAIN),)
