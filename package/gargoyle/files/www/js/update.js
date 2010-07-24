@@ -51,6 +51,6 @@ function failure()
 
 function setUpgradeFormat()
 {
-	document.getElementById("upgrade_arch").value = isRedboot ? "atheros" : "brcm";
-	setChildText("upgrade_text", "Firmware should be a " + (isRedboot ? "combined .img file" : ".bin or .trx file"));
+	document.getElementById("upgrade_arch").value = isBrcm ? "brcm" : "not_brcm";
+	setChildText("upgrade_text", "Firmware should be a " + (isBrcm ? ".bin or .trx file" : "combined .img file"));
 }

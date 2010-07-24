@@ -13,11 +13,11 @@
 <script>
 <!--
 <?
-	is_redboot=$(cat /proc/mtd | grep RedBoot)
-	if [ -n "$is_redboot" ] ; then
-		echo "var isRedboot=true;"
+	is_brcm=$(cat /proc/cpuinfo | grep Broadcom)
+	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ]; then
+		echo "var isBrcm=true;"
 	else
-		echo "var isRedboot=false;"
+		echo "var isBrcm=false;"
 	fi
 ?>
 //-->
