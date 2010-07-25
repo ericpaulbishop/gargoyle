@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=qos_gargoyle
+PKG_NAME:=qos-gargoyle
 PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
@@ -15,7 +15,7 @@ define Package/qos-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A set of QoS scripts designed for use with Gargoyle Web Interface
-	DEPENDS:=+tc +ip +kmod-sched +iptables-mod-filter +iptables-mod-ipopt  +iptables-mod-imq +gargoyle-firewall-util
+	DEPENDS:=+tc +ip +kmod-sched +iptables-mod-filter +iptables-mod-ipopt  +iptables-mod-imq +gargoyle-firewall-util +libncurses
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -24,12 +24,24 @@ define Package/qos-gargoyle/description
 endef
 
 define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
+
 
 define Build/Configure
 endef
 
 define Build/Compile
+	-$(MAKE) -C $(PKG_BUILD_DIR) clean
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		$(TARGET_CONFIGURE_OPTS) \
+		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
+		BUILD_DIR="$(BUILD_DIR)" \
+		all
+
+
 endef
 
 define Package/qos-gargoyle/install
@@ -40,6 +52,10 @@ define Package/qos-gargoyle/install
 	$(INSTALL_BIN) ./files/qos_gargoyle.init $(1)/etc/init.d/qos_gargoyle
 	$(INSTALL_BIN) ./files/qos_gargoyle.hotplug $(1)/etc/hotplug.d/iface/10-qos_gargoyle
 	$(INSTALL_DATA) ./files/qos_gargoyle.conf $(1)/etc/config/qos_gargoyle
+
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/qosmon $(1)/usr/sbin/qosmon
+
 endef
 
 define Package/qos-gargoyle/prerm

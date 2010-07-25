@@ -596,6 +596,28 @@ initialize_qos()
 
 	fi
 
+
+       #If both upload and download QoS are enabled then we can enable Gargoyle active QoS monitor
+	if [ $total_download_bandwidth -ge 0 ] ; then
+ 		if [ $total_upload_bandwidth -ge 0 ] ; then
+			if [ "$qos_monenabled" = "on" ] ; then
+
+				#Make a class to handle the outgoing ping requests from the router.
+				tc class add dev $qos_interface parent 1:1 classid 1:100 hfsc rt m1 30kbit d 20ms m2 10kbit
+				tc qdisc add dev $qos_interface parent 1:100 pfifo
+		      		tc filter add dev $qos_interface parent 1:0 prio 100 protocol ip handle 100 fw flowid 1:100
+				iptables -t mangle -A qos_egress -p icmp -s $wan_ip -j MARK --set-mark 100
+
+				#Ping responses to the router bypass QoS and go straight to the destination program.
+				iptables -t mangle -I qos_ingress_imq -p icmp -d $wan_ip -j RETURN
+
+                            #Start the monitor
+                   		qosmon -b 800 $wan_gwip $total_download_bandwidth 
+               	fi
+		fi
+	fi
+
+
 	update_markfile
 
 }
@@ -608,11 +630,12 @@ scan_interface()
 
        qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
        wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+       wan_gwip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
        max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
        local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 	if [ -n "$dbg" ] ; then
-            echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit"
+            echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit WAN_GW=$wan_gwip"
 	fi
 
 }
@@ -628,6 +651,9 @@ stop()
 		done
 		exit
 	fi
+
+       #Kill the qos monitor in case it is running
+       killall qosmon
 
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
 		tc qdisc del dev "$iface" root

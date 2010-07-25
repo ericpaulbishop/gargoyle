@@ -34,15 +34,14 @@
 
 		<div id='qos_enabled_container' class='nocolumn'>
 			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
-			<label id='qos_enabled_label' for='dhcp_enabled'>Enable Quality of Service (Download Direction)</label>
+			<label id='qos_enabled_label' for='qos_enabled'>Enable Quality of Service (Download Direction)</label>
 		</div>
 		<div class="indent">
 			<p>Quality of Service (QoS) provides a way to control how available bandwidth is allocated.  Connections are classified into
 			different &ldquo;service classes,&rdquo; each of which is allocated a share of the available bandwidth.  QoS should be applied
-			in cases where you want to divide available bandwidth equitably between competing requirements.  For example if you want
-			your vonage VoIP phone to work correctly while downloading videos.  Another case would be if you want your bit torrents
-			throttled back when you are web surfing.  Using QoS will involve compromising your maximum speed in order to get fairness so
-			you should only enable QoS when you are ready to accept the compromise.
+			in cases where you want to divide available bandwidth between competing requirements.  For example if you want
+			your VoIP phone to work correctly while downloading videos.  Another case would be if you want your bit torrents
+			throttled back when you are web surfing. 
 		  </p>
 		</div>
 		<div class="internal_divider"></div>
@@ -145,6 +144,7 @@
 				<select class='rightcolumn' id="transport_protocol"/>
 					<option value="TCP">TCP</option>
 					<option value="UDP">UDP</option>
+					<option value="ICMP">ICMP</option>
 				</select>
 			</div>
 			<div>
@@ -253,6 +253,72 @@
 		</div>
 	</fieldset>
 
+	<fieldset>
+
+		<legend class="sectionheader">QoS (Download) -- Active Congestion Control</legend>
+
+		<div id='qos_monitor_container' class='nocolumn'>
+			<input type='checkbox' id='qos_monenabled' onclick="setQosMonEnabled()" />
+			<label id='qos_monenabled_label' for='qos_monenabled'>Enable active congestions control (Download Direction)</label>
+		</div>
+
+		<div id="qos_down_3" class="indent">
+			<span id='qos_down_3_txt'>
+				<p>The congestion control observes your QoS performance and automatically adjusts your QoS downlink to maintain
+                               proper QoS performance.  The control automatically compensates for changes in your ISP's download speed
+                               and the demand from your network and results in optimum performance.
+
+				   To use this feature set your QoS downlink speed to the maximum speed your ISP can deliver you in the best of
+                               circumstances.  The control will maintain the downlink between 20% and 100% of this value as needed to 
+				   maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of our measured uplink speed. 
+                            </p>
+			</span>
+			<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
+
+		</div>
+
+		<div class="internal_divider"></div>
+
+              <div class="indent">
+              <table>
+              <tr><td><strong>Congestion Control Status</strong></td></tr>
+              <tr><td><span id='qstate'></span></td></tr>
+              <tr><td><span id='qllimit'></span></td></tr>
+              <tr><td><span id='qollimit'></span></td></tr>
+              <tr><td><span id='qload'></span></td></tr>
+              <tr><td><span id='qpinger'></span></td></tr>
+              <tr><td><span id='qpingtime'></span></td></tr>
+              <tr><td><span id='qpinglimit'></span></td></tr>
+              </table>
+              </div>
+
+		<div id="qos_down_4" class="indent">
+			<span id='qos_down_4_txt'>
+                            <table>
+              		<tr><td><strong>Status Help</strong></td></tr>
+                            <tr><td>CHECK</td><td>Check to see if the ping target will respond</td></tr>
+                            <tr><td>INIT</td><td>Estimate a ping limit</td></tr>
+                            <tr><td>WATCH</td><td>Congestion under active control.</td></tr>
+                            <tr><td>WAIT</td><td>No Congestion, control idle.<td></tr>
+                            <tr><td>FREE</td><td>No competing QoS goals, release limits.</td></tr>
+                            <tr><td>CHILL</td><td>Moving to WATCH, stablize with new limit.</td></tr>
+                            <tr><td>DISABLE</td><td>Controller is not enabled</td></tr>
+                            <tr><td>Link Limit</td><td>The download bandwidth limit currently enforce.</td></tr>
+                            <tr><td>Fair Link Limit</td><td>The apparent fair download bandwidth limit.</td></tr>
+                            <tr><td>Link Load</td><td>The current traffic in the downlink.</td></tr>
+                            <tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
+                            <tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
+                            <tr><td>Ping Limit</td><td>The point at which the controller will act to maintian fairness.</td></tr>
+				</table>
+			</span>
+			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4">Hide Text</a>
+
+		</div>
+
+
+	</fieldset>
+
+
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
@@ -265,6 +331,7 @@
 <script>
 <!--
 	resetData();
+	initializeqosmon();
 //-->
 </script>
 

@@ -84,6 +84,11 @@ function saveChanges()
 
 		uci.set("qos_gargoyle", direction, "total_bandwidth", document.getElementById("total_bandwidth").value);
 
+		if (direction == "download") {
+		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").value);
+         	}
+
+
 		classTable = document.getElementById('qos_class_table_container').firstChild;
 		classData = getTableDataArray( classTable, true, false);
 
@@ -206,6 +211,12 @@ function resetData()
 	totalBandwidth = uciOriginal.get("qos_gargoyle", direction, "total_bandwidth");
 	totalBandwidth = totalBandwidth == "" ? -1 : totalBandwidth;
 	document.getElementById("qos_enabled").checked = qosEnabled && totalBandwidth > 0;
+
+       if (direction == "download") {
+            var monenabled = uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
+            if (monenabled == null) {monenabled="no";}
+            document.getElementById("qos_monenabled").checked = monenabled;
+       }
 
 	defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
@@ -375,6 +386,10 @@ function setQosEnabled()
 	resetServiceClassControls(document);
 }
 
+function setQosMonEnabled()
+{
+	monenabled = document.getElementById("qos_monenabled").checked;
+}
 
 
 function addClassificationRule()
@@ -969,3 +984,53 @@ function parseRuleMatchCriteria(matchText)
 
 	return criteria;
 }
+
+/* qosmon congestion monitor status */
+
+var updateInProgress;
+function initializeqosmon()
+{
+	updateInProgress = false;
+	setInterval("updateqosmon()", 500);
+}
+
+
+function updateqosmon()
+{
+
+	if(!updateInProgress)
+	{
+		updateInProgress = true;
+		var commands="cat /tmp/qosmon.status"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var Lines = req.responseText.split("\n");
+                             
+                            if (Lines[0].substr(0,6) == "State:") {
+                              document.getElementById("qstate").innerHTML = Lines[0];
+   		                document.getElementById("qllimit").innerHTML = Lines[1];
+   		                document.getElementById("qollimit").innerHTML = Lines[2];
+   		                document.getElementById("qload").innerHTML = Lines[3];
+   		                document.getElementById("qpinger").innerHTML = Lines[4];
+   		                document.getElementById("qpingtime").innerHTML = Lines[5];
+   		                document.getElementById("qpinglimit").innerHTML = Lines[6];
+                            } else {
+
+                              if (Lines[0].substr(0,25) == "cat: can't open '/tmp/qos") {
+                                 document.getElementById("qstate").innerHTML = "State: Disabled*";
+   		                   document.getElementById("qpinger").innerHTML = "Ping: Off";
+                              }
+                            }
+
+				updateInProgress = false;
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
+
+
