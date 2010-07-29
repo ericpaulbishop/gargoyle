@@ -22,6 +22,12 @@ function saveChanges()
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
+       //Save the setting of the qos_monenable flag
+	if (direction == "download") {
+		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").checked);
+     	}
+
+
 	disabled = document.getElementById("qos_enabled").checked == false;
 
        //Is the user requesting disable of this direction of QoS?
@@ -83,11 +89,6 @@ function saveChanges()
 
 
 		uci.set("qos_gargoyle", direction, "total_bandwidth", document.getElementById("total_bandwidth").value);
-
-		if (direction == "download") {
-		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").value);
-         	}
-
 
 		classTable = document.getElementById('qos_class_table_container').firstChild;
 		classData = getTableDataArray( classTable, true, false);
@@ -212,16 +213,8 @@ function resetData()
 	totalBandwidth = totalBandwidth == "" ? -1 : totalBandwidth;
 	document.getElementById("qos_enabled").checked = qosEnabled && totalBandwidth > 0;
 
-       if (direction == "download") {
-            var monenabled = uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
-            if (monenabled == null) {monenabled="no";}
-            document.getElementById("qos_monenabled").checked = monenabled;
-       }
-
 	defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
-
-
 
 	directionClass = direction + "_class";
 	directionRule  = direction + "_rule";
@@ -356,10 +349,12 @@ function resetData()
 	}
 	ruleTableContainer.appendChild(ruleTable);
 
-
-
-
 	setQosEnabled();
+
+       if (direction == "download") { 
+           monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
+           if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
+       }
 }
 
 function setQosEnabled()
@@ -385,12 +380,6 @@ function setQosEnabled()
 	resetRuleControls();
 	resetServiceClassControls(document);
 }
-
-function setQosMonEnabled()
-{
-	monenabled = document.getElementById("qos_monenabled").checked;
-}
-
 
 function addClassificationRule()
 {

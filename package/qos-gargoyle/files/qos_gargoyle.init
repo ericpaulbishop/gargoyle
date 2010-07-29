@@ -600,7 +600,7 @@ initialize_qos()
        #If both upload and download QoS are enabled then we can enable Gargoyle active QoS monitor
 	if [ $total_download_bandwidth -ge 0 ] ; then
  		if [ $total_upload_bandwidth -ge 0 ] ; then
-			if [ "$qos_monenabled" = "on" ] ; then
+			if [ "$qos_monenabled" = "true" ] ; then
 
 				#Make a class to handle the outgoing ping requests from the router.
 				tc class add dev $qos_interface parent 1:1 classid 1:100 hfsc rt m1 30kbit d 20ms m2 10kbit
