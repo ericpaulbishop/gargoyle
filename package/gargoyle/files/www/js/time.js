@@ -44,7 +44,7 @@ function saveChanges()
 		}
 	
 		//update timezone and update frequency
-		var systemSections = uciOriginal.getAllSections("system");
+		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
 		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
 		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
