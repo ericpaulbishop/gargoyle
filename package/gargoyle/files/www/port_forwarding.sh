@@ -12,7 +12,8 @@
 <script>
 <!--
 <?
-	if [ -h /etc/rc.d/S95miniupnpd ] ; then
+	upnp_config_enabled=$(uci get upnpd.config.enabled)
+	if [ -h /etc/rc.d/S95miniupnpd ] && [ "$upnp_config_enabled" != "0" ] ; then
 		echo "var upnpdEnabled = true;"
 	else
 		echo "var upnpdEnabled = false;"

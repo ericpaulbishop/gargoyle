@@ -119,11 +119,13 @@ function saveChanges()
 		if(upnpdEnabled)
 		{
 			upnpStartCommands.push("/etc/init.d/miniupnpd enable");
+			uci.set("upnpd", "config", "enabled", "1");
 			uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
 			uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
 		}
 		else
 		{
+			uci.set("upnpd", "config", "enabled", "0");
 			upnpStartCommands.push("/etc/init.d/miniupnpd disable");
 		}
 	
