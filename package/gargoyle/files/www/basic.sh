@@ -57,7 +57,13 @@
 	echo "var leaseStart = \"$lease_start\";"
 	echo "var leaseLifetime = \"$lease_lifetime\";"
 	echo "var timezoneOffset = \""$(date +%z)"\";"
-	echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
+	timezone_is_utc=$(uci get system.@system[0].timezone | grep "^UTC" | sed 's/UTC//g')
+	if [ -n "$timezone_is_utc" ] ; then
+		echo "var timezoneName = \""$( echo "UTC-$timezone_is_utc" | sed 's/\-\-/+/g'  )"\";"
+
+	else
+		echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
+	fi
 
 ?>
 timezoneOffset = timezoneOffset.replace(/^\-0/g, "-");

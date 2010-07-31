@@ -52,8 +52,11 @@ var passInvalid = false;
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
+	timezone_is_utc=$(uci get system.@system[0].timezone | grep "^UTC" | sed 's/UTC//g')
+	if [ -n "$timezone_is_utc" ] ; then
+		current_time=$(echo $current_time | sed "s/UTC/UTC-$timezone_is_utc/g" | sed 's/\-\-/+/g')
+	fi
 	echo "var currentTime = \"$current_time\";"
-
 	
 ?>
 //-->
