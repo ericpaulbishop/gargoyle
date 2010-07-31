@@ -58,8 +58,15 @@ function saveChanges()
 		formatStrings["iso"] = "\"+%Y/%m/%d %H:%M %Z\"";
 		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
 		formatStrings["usa"] = "\"+%d/%m/%y %H:%M %Z\"";
-		var outputDateCommand = "date " + formatStrings[systemDateFormat];
-		
+		var outputDateCommand = "";
+		if(getSelectedValue("timezone").match(/UTC/))
+		{
+			outputDateCommand ="date " + formatStrings[systemDateFormat] + " | sed 's/UTC/UTC-" + getSelectedValue("timezone").replace(/UTC/, "") + "/g' | sed 's/\\-\\-/+/g'";
+		}
+		else
+		{
+			outputDateCommand ="date " + formatStrings[systemDateFormat];
+		}
 		//copy old system section to new one with specific name
 		var systemCommands = [];
 		uci.set("system", systemSections[0], "timezone", getSelectedValue("timezone"));
