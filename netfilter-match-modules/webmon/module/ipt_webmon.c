@@ -59,7 +59,6 @@
 #endif
 
 #define STRIP "%d.%d.%d.%d"
-#define IP2STR(x)   (x)&0xff,(x)>>8&0xff,(x)>>16&0xff,(x)>>24&0xff /*assumes network byte order*/
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
@@ -164,7 +163,7 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 		full_queue->first = old_node->previous == NULL ? NULL : full_queue->first; /*shouldn't be needed, but just in case...*/
 		full_queue->length = full_queue->length - 1;
 		
-		sprintf(queue_index_key, STRIP"@%s", IP2STR(old_node->src_ip), old_node->value);
+		sprintf(queue_index_key, STRIP"@%s", NIPQUAD(old_node->src_ip), old_node->value);
 		remove_map_element(queue_index, queue_index_key);
 
 		kfree(old_node->value);
@@ -552,7 +551,7 @@ static int webmon_proc_domain_show(struct seq_file *s, void *v)
 	queue_node* next_node = recent_domains->last;
 	while(next_node != NULL)
 	{
-		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, IP2STR(next_node->src_ip), next_node->value);
+		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
 		next_node = (queue_node*)next_node->previous;
 	}
 	spin_unlock_bh(&webmon_lock);
@@ -567,7 +566,7 @@ static int webmon_proc_search_show(struct seq_file *s, void *v)
 	queue_node* next_node = recent_searches->last;
 	while(next_node != NULL)
 	{
-		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, IP2STR(next_node->src_ip), next_node->value);
+		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
 		next_node = (queue_node*)next_node->previous;
 	}
 	spin_unlock_bh(&webmon_lock);
@@ -703,7 +702,7 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 						char value_key[700];
 						uint32_t ip = parsed_ip[0] + (parsed_ip[1]<<8) + (parsed_ip[2]<<16) +  (parsed_ip[3]<<24) ;
 
-						sprintf(value_key, STRIP"@%s", IP2STR(ip), value);
+						sprintf(value_key, STRIP"@%s", NIPQUAD(ip), value);
 						if(type == WEBMON_DOMAIN)
 						{
 							add_queue_node(ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
@@ -845,7 +844,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 					extract_url(payload, payload_length, domain, path);
 
 					
-					sprintf(domain_key, STRIP"@%s", IP2STR(iph->saddr), domain);
+					sprintf(domain_key, STRIP"@%s", NIPQUAD(iph->saddr), domain);
 					
 					if(strlen(domain) > 0)
 					{
@@ -1030,7 +1029,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							
 							
 							
-							sprintf(search_key, STRIP"@%s", IP2STR(iph->saddr), search);
+							sprintf(search_key, STRIP"@%s", NIPQUAD(iph->saddr), search);
 							
 							
 							/* Often times search engines will initiate a search as you type it in, but these intermediate queries aren't the real search query
@@ -1046,7 +1045,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 									{
 										char recent_key[700];
 										
-										sprintf(recent_key, STRIP"@%s", IP2STR(recent_node->src_ip), recent_node->value);
+										sprintf(recent_key, STRIP"@%s", NIPQUAD(recent_node->src_ip), recent_node->value);
 										remove_map_element(search_map, recent_key);
 										
 										recent_searches->first = recent_node->next;

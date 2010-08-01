@@ -55,7 +55,11 @@
 
 
 #define STRIP "%d.%d.%d.%d"
-#define IP2STR(x)   (x)&0xff,(x)>>8&0xff,(x)>>16&0xff,(x)>>24&0xff /*assumes network byte order*/
+#define NIPQUAD(addr) \
+	((unsigned char *)&addr)[0], \
+	((unsigned char *)&addr)[1], \
+	((unsigned char *)&addr)[2], \
+	((unsigned char *)&addr)[3]
 
 
 
@@ -202,13 +206,13 @@ static void print_webmon_args(	struct ipt_webmon_info* info )
 		printf("--%s ", (info->exclude_type == WEBMON_EXCLUDE ? "exclude_ips" : "include_ips"));
 		for(ip_index=0; ip_index < info->num_exclude_ips; ip_index++)
 		{
-			printf("%s"STRIP, comma, IP2STR((info->exclude_ips)[ip_index]) );
+			printf("%s"STRIP, comma, NIPQUAD((info->exclude_ips)[ip_index]) );
 			sprintf(comma, ",");
 		}
 		for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 		{
 			struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-			printf("%s"STRIP"-"STRIP, comma, IP2STR(r.start), IP2STR(r.end) );
+			printf("%s"STRIP"-"STRIP, comma, NIPQUAD(r.start), NIPQUAD(r.end) );
 			sprintf(comma, ",");
 		}
 		printf(" ");
@@ -439,7 +443,7 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 									byte_bits--;
 								}
 								mask = mask | ((uint32_t)byte_mask << (byte*8));
-								printf("mask = "STRIP"\n", IP2STR(mask));	
+								printf("mask = "STRIP"\n", NIPQUAD(mask));	
 							}
 							mask_valid = 1;
 						}
