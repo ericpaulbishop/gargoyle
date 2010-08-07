@@ -420,7 +420,7 @@ initialize_qos()
 
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
+			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
@@ -589,8 +589,11 @@ initialize_qos()
 		iptables -t mangle -N qos_ingress_imq
 		iptables -t mangle -A PREROUTING -i $qos_interface -j qos_ingress_imq
 
-		#Need two connmark restores because of the weird way the connmark restore with mask works.
-		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark
+		#Due to a CONNMARK restore issue in Linux v2.4 this statement is needed.
+		if [ -n "$(grep 'Linux version 2.4' /proc/version)" ] ; then
+			iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark
+		fi
+		
 		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark --mask $download_mask
 		iptables -t mangle -A qos_ingress_imq -j IMQ --todev 0
 
@@ -612,7 +615,7 @@ initialize_qos()
 				iptables -t mangle -I qos_ingress_imq -p icmp -d $wan_ip -j RETURN
 
                             #Start the monitor
-                   		qosmon -b 800 $wan_gwip $total_download_bandwidth 
+                   		qosmon -b 800 $wan_gwip $total_download_bandwidth 90
                	fi
 		fi
 	fi

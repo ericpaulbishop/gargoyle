@@ -66,10 +66,11 @@ struct sockaddr_in whereto;/* Who to ping */
 int datalen=64-8;	/* How much data */
 
 const char usage[] =
-"Usage:  qosmon [options] pingtime pingtarget bandwidth\n" 
+"Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
 "              bandwidth  - The maximum download speed the WAN link will support in kbps.\n"
+"              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
 "                     -b  - Run in the background\n";
 
@@ -96,13 +97,12 @@ int rawfltime;              //Trip time in milliseconds
 struct CLASS_STATS {
    int        ID;          //Class leaf ID
    __u64      bytes;       //Work bytes last query
-   __u32      packets;     //Packets since last query
    u_char     backlog;     //Number of packets waiting
    u_char     actflg;      //True when the class is considered active
    long int   cbw_flt;     //Class bandwidth subject to filter. (bps)
 };
 
-#define STATCNT 20
+#define STATCNT 30
 struct CLASS_STATS dnstats[STATCNT];
 struct CLASS_STATS *classptr;
 u_char classcnt;
@@ -111,13 +111,13 @@ u_char firstflg=1;       //First pass flag
 
 u_char DCA;              //Number of download classes active
 u_char pingon=0;         //Set to one when pinger becomes active.
-int    pinglimit;        //Maximum ping time to allow before reacting. 
+int    pinglimit=0;      //Maximum ping time to allow before reacting. 
 
 float BWTC;              //Time constant of the bandwidth filter
 int DBW_UL;              //This the absolute limit of the link passed in as a parameter.
 int dbw_ul;              //This is the last value of the limit sent to the kernel.
 int new_dbw_ul;          //The new link limit proposed by the state machine.
-int dbw_fil;             //Filtered total download load (bps).
+long int dbw_fil;        //Filtered total download load (bps).
 
 #define QMON_CHK   0
 #define QMON_INIT  1
@@ -221,7 +221,7 @@ void pinger(void)
 
 	if( i < 0 || i != cc )  {
 		if( i<0 )  perror("sendto");
-		printf("ping: wrote %s %d chars, ret=%d\n",
+		fprintf(stderr,"ping: wrote %s %d chars, ret=%d\n",
 			hostname, cc, i );
 		fflush(stdout);
 	}
@@ -372,54 +372,47 @@ int print_class(const struct sockaddr_nl *who,
     }  
  
     //Pickup some hfsc basic stats
-	if (tb[TCA_STATS]) {
+ 	if (tb[TCA_STATS]) {
 		struct tc_stats st;
-		struct tc_hfsc_stats *xst;
 
 		/* handle case where kernel returns more/less than we know about */
 		memset(&st, 0, sizeof(st));
 		memcpy(&st, RTA_DATA(tb[TCA_STATS]), MIN(RTA_PAYLOAD(tb[TCA_STATS]), sizeof(st)));
-
-        if (tb[TCA_XSTATS]) {
- 		    xst = RTA_DATA(tb[TCA_XSTATS]);
-            work = xst->work;
-        } 
-        else
-            work = st.bytes;
-
-        //Avoid a big jolt on the first pass.
-        if (firstflg) classptr->bytes = work;
-
-        //Update the filtered bandwidth based on what happened unless a rollover occured.
-        actflg=0;
-        if (work >= classptr->bytes) {
-           long int bw;
-
-           bw = (work - classptr->bytes)*8000/period;  //bps per second x 1000 here
-
-           //Convert back to bps as part of the filter calculation 
-	       classptr->cbw_flt=(bw-classptr->cbw_flt)*BWTC/1000+classptr->cbw_flt;
-
-           //A class is considered active if its BW exceeds 4000bps 
-           if ((leafid != -1) && (classptr->cbw_flt > 4000)) {DCA++;actflg=1;}
-		   if (leafid == -1) dbw_fil = classptr->cbw_flt;
-        }
-
-        classptr->bytes = work;
-        classptr->packets = st.packets;
-        classptr->backlog = st.qlen;
-        classptr->actflg = actflg;
-
-         //printf("ID %X Bytes: %lld, Packets: %ld, Backlog: %d      \n",leafid,st.bytes,(long int)st.packets, st.qlen);
-        //st.bytes;
-        //st.packets
-        //st.drops;
-	    //st.overlimit;
-        //st.qlen; - backlog in packets
-        //st.work;
-        //st.rtwork;        
-
+       	work = st.bytes;
+       	classptr->backlog = st.qlen;
+	} else {
+		errorflg=1;
+		return 0;
     }
+
+         
+	//Avoid a big jolt on the first pass.
+	if (firstflg) classptr->bytes = work;
+
+	//Update the filtered bandwidth based on what happened unless a rollover occured.
+    actflg=0;
+    if (work >= classptr->bytes) {
+		long int bw;
+		bw = (work - classptr->bytes)*8000/period;  //bps per second x 1000 here
+
+		//Convert back to bps as part of the filter calculation 
+		classptr->cbw_flt=(bw-classptr->cbw_flt)*BWTC/1000+classptr->cbw_flt;
+
+		//A class is considered active if its BW exceeds 4000bps 
+		if ((leafid != -1) && (classptr->cbw_flt > 4000)) {DCA++;actflg=1;}
+
+		//Calculate the total link load by adding up all the classes.
+		if (leafid == -1) {
+        	dbw_fil = 0;
+		} else {
+			dbw_fil += classptr->cbw_flt;
+        } 
+
+	}
+
+	classptr->bytes = work;
+	classptr->actflg = actflg;
+
     classptr++;
     classcnt++;
 	return 0;
@@ -492,13 +485,13 @@ int tc_class_modify(__u32 rate)
 
     //We are only going to modify the upper limit rate of the parent class.
 	if (get_tc_classid(&handle, "1:1")) {
-         printf("invalid class ID");
+         fprintf(stderr,"invalid class ID");
          return 1;
     }
     req.t.tcm_handle = handle;
 
 	if (get_tc_classid(&handle, "1:0")) {
-        printf("invalid parent ID");
+        fprintf(stderr,"invalid parent ID");
         return 1;
     }
 	req.t.tcm_parent = handle;
@@ -614,7 +607,9 @@ static void daemonize( void )
     /* Redirect standard files to /dev/null */
     freopen( "/dev/null", "r", stdin);
     freopen( "/dev/null", "w", stdout);
-    freopen( "/dev/null", "w", stderr);
+ 
+	/* Except stderr which we want to see */
+    freopen( "/tmp/qosmon.error", "w", stderr);
 
     /* Tell the parent process that we are A-okay */
     kill( parent, SIGUSR1 );
@@ -638,7 +633,7 @@ void update_status( FILE* fd )
                else dbw = dbw_fil; 
 
         //Update the status file.
-        rewind(fd);
+		rewind(fd);
         fprintf(fd,"State: %s\n",statename[qstate]);
         fprintf(fd,"Link limit: %d (kbps)\n",dbw_ul/1000);
         fprintf(fd,"Fair Link limit: %d (kbps)\n",new_dbw_ul/1000);
@@ -651,19 +646,23 @@ void update_status( FILE* fd )
 
         fprintf(fd,"Filtered ping: %d (ms)\n",fil_triptime/1000);
         fprintf(fd,"Ping time limit: %d (ms)\n",pinglimit/1000);
+        fprintf(fd,"Classes Active: %u\n",DCA);
 
         while ((i++<STATCNT) && (cptr->ID != 0)) {
-            fprintf(fd,"ID %4X, Active %2u, Backlog %u, BW bps (filtered): %.2f     \n",
+            fprintf(fd,"ID %4X, Active %u, Backlog %u, BW bps (filtered): %d\n",
     	          (short unsigned) cptr->ID,
-    	          (short unsigned) cptr->actflg,
-    	          (long int) cptr->backlog,
-   	 	          (float) cptr->cbw_flt);
+    	          cptr->actflg,
+    	          cptr->backlog,
+   	 	          cptr->cbw_flt);
+
 			cptr++;
         }
 
-       if (DEAMON) return;
+		fflush(fd);
 
 #ifndef ONLYBG
+       if (DEAMON) return;
+
        //Home the cursor
        mvprintw(0,0,"");
        printw("\nqosmon status\n");
@@ -681,10 +680,10 @@ void update_status( FILE* fd )
        printw("Defined classes for imq0\n"); 
        cptr=dnstats;
        while ((i++<STATCNT) && (cptr->ID != 0)) {
-	        printw("ID %4X, Active %2u, Backlog %u, BW (filtered kbps): %6d\n",
+	        printw("ID %4X, Active %c, Backlog %c, BW (filtered kbps): %6d\n",
     	          (short unsigned) cptr->ID,
-    	          (short unsigned) cptr->actflg,
-    	          (long int) cptr->backlog,
+    	          cptr->actflg,
+    	          cptr->backlog,
    	 	          (int) cptr->cbw_flt/1000);
             cptr++;
         }
@@ -715,7 +714,7 @@ int main(int argc, char *argv[])
 		}
 		argc--, av++;
 	}
-	if(argc != 3)  {
+	if ((argc < 3) || (argc >4))  {
 		printf(usage);
 		exit(1);
 	}
@@ -747,7 +746,7 @@ int main(int argc, char *argv[])
 			bcopy(hp->h_addr, (caddr_t)&to->sin_addr, hp->h_length);
 			hostname = hp->h_name;
 		} else {
-			printf("%s: unknown host %s\n", argv[1], av[1]);
+			fprintf(stderr, "%s: unknown host %s\n", argv[1], av[1]);
 			exit(1);
 		}
 	}
@@ -758,6 +757,12 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Invalid download bandwidth '%s'\n", av[2]);
 		exit(1);        
     }
+
+    //The fourth optional parameter is the pinglimit in ms.
+	if (argc == 4) {
+    	pinglimit = atoi( av[3] )*1000;
+    }
+
 
 	ident = getpid() & 0xFFFF;
 
@@ -777,6 +782,22 @@ int main(int argc, char *argv[])
     //Class bandwidth filter time constants  
     BWTC= (period*1000. / (7500. + period));
 
+    //Check that we have access to tc functions.
+	tc_core_init();
+	if (rtnl_open(&rth, 0) < 0) {
+		fprintf(stderr, "Cannot open rtnetlink\n");
+		exit(1);
+	}
+
+	//Make sure the imq0 device is present and that we can scan it.
+   	classptr=dnstats;
+   	errorflg=0;       
+   	class_list("imq0");
+	if (errorflg) {
+		fprintf(stderr, "Cannot scan ingress device imq0\n");
+		exit(1);
+	}
+
     //Create the status file
     statusfd = fopen("/tmp/qosmon.status","w");
     if (statusfd < 0) {
@@ -784,12 +805,6 @@ int main(int argc, char *argv[])
        exit(EXIT_FAILURE);
     }
 
-    //Check that we have access to tc functions.
-	tc_core_init();
-	if (rtnl_open(&rth, 0) < 0) {
-		fprintf(stderr, "Cannot open rtnetlink\n");
-		exit(1);
-	}
 
     //If running in the background fork()
     if (DEAMON) {
@@ -836,6 +851,10 @@ int main(int argc, char *argv[])
 		FD_ZERO(&fdmask);
 		FD_SET(s , &fdmask);
 
+	    //This variable will be set in pr_pack() if we get a pong that matched
+	    //our ping, but in case we don't get we initialize to the period.
+	    rawfltime=period;
+
         //Send the next ping
 		if (pingon) pinger();
 		
@@ -843,10 +862,6 @@ int main(int argc, char *argv[])
 		timeout.tv_sec = 0;
 		timeout.tv_usec = period*1000;
 	
-	    //This variable will be set in pr_pack() if we get a pong that matched
-	    //our ping, but in case we don't get we initialize to the period.
-	    rawfltime=period;
-	    
 	    //Need a loop here to clean out any old pongs that show up.
 		while  ( select(32, &fdmask, 0, 0, &timeout) == 1 ) {
 		
@@ -859,21 +874,21 @@ int main(int argc, char *argv[])
               pr_pack( packet, cc, &from );      
 		}
 
-   
-        //Gather new statistics
-        classptr=dnstats;
-        cc=classcnt;
-        classcnt=0;
-        errorflg=0;       
-        class_list("imq0");
 
-        //If there was an error or the number of classes changed then reset everything
-        if (errorflg || (!firstflg && (cc !=classcnt))) {
-           firstflg=1;
-           pingon=0;
-           qstate=QMON_CHK; 
-           continue;
-        }
+       	//Gather new statistics
+       	classptr=dnstats;
+       	cc=classcnt;
+       	classcnt=0;
+       	errorflg=0;       
+       	class_list("imq0");
+
+       	//If there was an error or the number of classes changed then reset everything
+       	if (errorflg || (!firstflg && (cc !=classcnt))) {
+      		firstflg=1;
+       		pingon=0;
+       		qstate=QMON_CHK; 
+       		continue;
+      	}
 
         //Update the filtered ping response time based on what happened.
         //If we do not get a packet back then no change in the filtered value.
@@ -889,9 +904,17 @@ int main(int argc, char *argv[])
 
                     //If we get two pings go ahead and lower the link speed.
                     if (nreceived >= 2) {
-						tc_class_modify(DBW_UL/8);
-                        nreceived=0;
-                        qstate=QMON_INIT;
+
+						if (pinglimit) {
+							new_dbw_ul= DBW_UL * .9;
+                        	dbw_ul=0;  //Forces an update in QMON_WATCH
+							fil_triptime = rawfltime*1000;
+							qstate=QMON_WATCH;
+						} else {
+							tc_class_modify(DBW_UL/8);
+                       		nreceived=0;
+                       		qstate=QMON_INIT;
+						}
                     } 
                     break; 
 
@@ -903,7 +926,7 @@ int main(int argc, char *argv[])
                     //Wait for seconds then re-initialize the filter.
                     if (nreceived < (7000/period)+1) fil_triptime = rawfltime*1000;
 
-                    //After 7 seconds we have measured our ping response entitlement.
+                    //After 12 seconds we have measured our ping response entitlement.
                     //Move on to the watch state. 
 					if (nreceived > (12000/period)+1) {
                         qstate=QMON_WATCH;
@@ -912,6 +935,7 @@ int main(int argc, char *argv[])
 
                         //For simplicity just use a multiple on the measure ping time.
 						pinglimit = fil_triptime*2.5;
+						if (pinglimit < 35) pinglimit=35;
                     }
 					break;
 

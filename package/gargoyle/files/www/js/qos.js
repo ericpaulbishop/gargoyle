@@ -141,7 +141,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "min_pkt_size", "max_pkt_size", "proto"];
+			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
