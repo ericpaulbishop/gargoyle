@@ -180,26 +180,26 @@ int main(int argc, char** argv)
 		unsigned long mark_band = 2;
 		int upload_shift = 0;
 		int download_shift = 8;
-		while(up_speeds.num_elements > 0)
+		while(up_speeds->num_elements > 0)
 		{
 			unsigned long mark = mark_band << upload_shift;
 			char mark_str[10];
 			unsigned long smallest_speed;
 			char* next_up_speed = remove_smallest_long_map_element(up_speeds, &smallest_speed);
 			sprintf(mark_str, "%ld", mark);
-			set_long_map_element(upload_qos_marks, next_up_speed, strdup(mark_str));
+			set_string_map_element(upload_qos_marks, next_up_speed, strdup(mark_str));
 			free(next_up_speed);
 			mark_band++;
 		}
 		mark_band = 2;
-		while(down_speeds.num_elements > 0)
+		while(down_speeds->num_elements > 0)
 		{
 			unsigned long mark = mark_band << download_shift;
 			char mark_str[10];
 			unsigned long smallest_speed;
 			char* next_down_speed = remove_smallest_long_map_element(down_speeds, &smallest_speed);
 			sprintf(mark_str, "%ld", mark);
-			set_long_map_element(download_qos_marks, next_down_speed, strdup(mark_str)); 
+			set_string_map_element(download_qos_marks, next_down_speed, strdup(mark_str)); 
 			free(next_down_speed);
 			mark_band++;
 		}
