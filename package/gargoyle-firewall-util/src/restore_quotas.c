@@ -276,8 +276,8 @@ int main(int argc, char** argv)
 				char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 				char* exceeded_up_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_up_speed");
 				char* exceeded_down_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_down_speed");
-				
-
+				if(exceeded_up_speed_str == NULL) { exceeded_up_speed_str = strdup(" "); }
+				if(exceeded_down_speed_str == NULL) { exceeded_down_speed_str = strdup(" "); }
 
 
 				if(ip == NULL) { ip = strdup("ALL"); }
@@ -630,6 +630,8 @@ int main(int argc, char** argv)
 					free(quota_base_id);
 				}
 				free(ip);
+				free(exceeded_up_speed_str);
+				free(exceeded_down_speed_str);
 			}
 			free(next_quota);
 
