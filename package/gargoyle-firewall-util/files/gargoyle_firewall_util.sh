@@ -413,8 +413,7 @@ initialiaze_quota_qos()
 			cur_band=$(($cur_band+1))
 		done
 		
-		iptables -t mangle -I INPUT   -i $wan_if -j IMQ --todev 0
-		iptables -t mangle -I FORWARD -i $wan_if -j IMQ --todev 0
+		iptables -t mangle -I ingress_quotas -i $wan_if -j IMQ --todev 0
 		
 		#tc -s qdisc show dev $wan_if
 		#tc -s qdisc show dev imq0
