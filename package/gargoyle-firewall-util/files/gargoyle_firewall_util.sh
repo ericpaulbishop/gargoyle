@@ -286,8 +286,18 @@ initialize_quotas()
 {
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 	
+	#restore_quotas does the hard work of building quota chains & rebuilding crontab file to do backups
 	restore_quotas -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+	
+	# this initializes qos functions ONLY if we have quotas that
+	# have up and down speeds defined for when quota is exceeded
+	if [ -z "$full_qos_enabled" ] ; then
+		initialiaze_quota_qos
+	fi
+
+
 
 	#enable cron, but only restart cron if it is currently running
 	#since we initialize this before cron, this will
@@ -299,6 +309,123 @@ initialize_quotas()
 	fi
 
 }
+
+load_all_config_sections()
+{
+	local config_name="$1"
+	local section_type="$2"
+
+	all_config_sections=""
+	section_order=""
+	config_cb()
+	{
+		if [ -n "$2" ] || [ -n "$1" ] ; then
+			if [ -n "$section_type" ] ; then
+				if [ "$1" = "$section_type" ] ; then
+					all_config_sections="$all_config_sections $2"
+				fi
+			else
+				all_config_sections="$all_config_sections $2"
+			fi
+		fi
+	}
+
+	config_load "$config_name"
+	echo "$all_config_sections"
+
+}
+
+initialiaze_quota_qos()
+{
+
+	#speeds should be in kbyte/sec, units should NOT be present in config file (unit processing should be done by front-end)
+	quota_sections=$(load_all_config_sections "firewall" "quota")
+	upload_speeds=""
+	download_speeds=""
+	config_load "firewall"
+	for q in $quota_sections ; do
+		config_get "exceeded_up_speed" $q "exceeded_up_speed"
+		config_get "exceeded_down_speed" $q "exceeded_down_speed"
+		if [ -n "$exceeded_up_speed" ] && [ -n "$exceeded_down_speed" ] ; then
+			if [ $exceeded_up_speed -gt 0 ] && [ $exceeded_down_speed -gt 0 ] ; then
+				upload_speeds="$exceeded_up_speed $upload_speeds"
+				download_speeds="$exceeded_down_speed $download_speeds"
+			fi
+		fi
+	done
+	
+	#echo "upload_speeds = $upload_speeds"
+	
+	unique_up=$( printf "%d\n" $upload_speeds 2>/dev/null | sort -u -n)  
+	unique_down=$( printf "%d\n" $download_speeds 2>/dev/null | sort -u -n)  
+	
+	#echo "unique_up = $unique_up"
+	
+	num_up_bands=1
+	num_down_bands=1
+	if [ -n "$upload_speeds" ] ; then
+		num_up_bands=$((1 + $(printf "%d\n" $upload_speeds 2>/dev/null | sort -u -n |  wc -l) ))
+	fi
+	if [ -n "$download_speeds" ] ; then
+		num_down_bands=$((1 + $(printf "%d\n" $download_speeds 2>/dev/null | sort -u -n |  wc -l) ))
+	fi
+	
+	#echo "num_up_bands=$num_up_bands"
+	#echo "num_down_bands=$num_down_bands"
+	
+	wan_if=$(uci -P "/var/state" get network.wan.ifname)
+
+	if [ -n "$wan_if" ] && [ $num_up_bands -gt 1 ] && [ $num_down_bands -gt 1 ] ; then
+		insmod sch_prio  >/dev/null 2>&1
+		insmod sch_tbf   >/dev/null 2>&1
+		insmod cls_fw    >/dev/null 2>&1
+	
+		ifconfig imq0 down  >/dev/null 2>&1
+		ifconfig imq1 down  >/dev/null 2>&1
+		rmmod  imq          >/dev/null 2>&1
+		insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >/dev/null 2>&1
+		ip link set imq0 up
+
+
+		#egress/upload
+		tc qdisc del dev $wan_if root >/dev/null 2>&1
+		tc qdisc add dev $wan_if handle 1:0 root prio bands $num_up_bands priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		cur_band=2
+		upload_shift=0
+		for rate_kb in $unique_up ; do
+			kbit=$(echo $((rate_kb*8))kbit)
+			mark=$(($cur_band << $upload_shift))
+			tc filter add dev $wan_if parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
+			tc qdisc  add dev $wan_if parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
+			cur_band=$(($cur_band+1))
+		done
+
+		#ingress/download
+		tc qdisc del dev imq0 root >/dev/null 2>&1
+		tc qdisc add dev imq0 handle 1:0 root prio bands $num_down_bands priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		cur_band=2
+		download_shift=8
+		for rate_kb in $unique_down ; do
+			kbit=$(echo $((rate_kb*8))kbit)
+			mark=$(($cur_band << $download_shift))
+			tc filter add dev imq0 parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
+			tc qdisc  add dev imq0 parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
+			cur_band=$(($cur_band+1))
+		done
+		
+		iptables -t mangle -I INPUT   -i $wan_if -j IMQ --todev 0
+		iptables -t mangle -I FORWARD -i $wan_if -j IMQ --todev 0
+		
+		#tc -s qdisc show dev $wan_if
+		#tc -s qdisc show dev imq0
+	fi
+
+}
+
+
+
+
+
 
 block_static_ip_mismatches()
 {
