@@ -36,6 +36,12 @@
 #define malloc safe_malloc
 #define strdup safe_strdup
 
+#define INGRESS_INDEX  0
+#define EGRESS_INDEX   1
+#define COMBINED_INDEX 2
+
+
+
 void restore_backup_for_id(char* id, char* quota_backup_dir, unsigned char is_individual_other, list* defined_ip_groups);
 uint32_t ip_to_host_int(char* ip_str);
 uint32_t* ip_range_to_host_ints(char* ip_str);
@@ -158,11 +164,11 @@ int main(int argc, char** argv)
 				{
 					if(up > 0 && down > 0)
 					{
-						//D, for dummy place holder
 						char* oldval = set_long_map_element(up_speeds, up, strdup(exceeded_up_speed_str) );
 						if(oldval != NULL) { free(oldval); }
 						oldval = set_long_map_element(down_speeds, down, strdup(exceeded_down_speed_str) );
 						if(oldval != NULL) { free(oldval); }
+						
 					}
 				}
 			}
@@ -199,7 +205,7 @@ int main(int argc, char** argv)
 			unsigned long smallest_speed;
 			char* next_down_speed = remove_smallest_long_map_element(down_speeds, &smallest_speed);
 			sprintf(mark_str, "%ld", mark);
-			set_string_map_element(download_qos_marks, next_down_speed, strdup(mark_str)); 
+			set_string_map_element(download_qos_marks, next_down_speed, strdup(mark_str));
 			free(next_down_speed);
 			mark_band++;
 		}
@@ -436,6 +442,7 @@ int main(int argc, char** argv)
 					char* types[] = { "ingress_limit", "egress_limit", "combined_limit" };
 					char* postfixes[] = { "_ingress", "_egress", "_combined" };
 					char* chains[] =  { "ingress_quotas", "egress_quotas", "combined_quotas" };
+					
 					int type_index;
 					for(type_index=0; type_index < 3; type_index++)
 					{
@@ -447,6 +454,10 @@ int main(int argc, char** argv)
 					
 						char* type_id = dynamic_strcat(2, quota_base_id, postfixes[type_index] );
 						
+						char* up_qos_mark = get_string_map_element(upload_qos_marks, exceeded_up_speed_str);
+						char* down_qos_mark = get_string_map_element(download_qos_marks, exceeded_down_speed_str);
+						
+
 						/* 
 						 * need to do ip test even if limit is null, because ALL_OTHERS quotas should not apply when any of the three types of explicit limit is defined
 						 * and we therefore need to use this test to set mark indicating an explicit quota has been checked
@@ -539,16 +550,42 @@ int main(int argc, char** argv)
 								subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
 							}
 						}
-							
+						
+
+
+						if(up_qos_mark != NULL && down_qos_mark != NULL)
+						{
+							char* set_egress_mark = dynamic_strcat(2, " -j MARK --set-mark ", up_qos_mark);
+							char* set_ingress_mark = dynamic_strcat(2, " -j MARK --set-mark ", down_qos_mark);
+							if(type_index == EGRESS_INDEX || type_index == INGRESS_INDEX)
+							{
+								int other_type_index= type_index == EGRESS_INDEX ? INGRESS_INDEX : EGRESS_INDEX;
+								char* other_limit = get_uci_option(ctx, "firewall", next_quota, types[other_type_index]);
+								if(other_limit != NULL)
+								{
+									char* other_type_id = dynamic_strcat(2, quota_base_id, postfixes[other_type_index] );
+									if(type_index == EGRESS_INDEX)
+									{
+ 										run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --check_with_src_dst_swap ", set_egress_mark), 1);  
+									}
+									else
+									{
+										run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --check_with_src_dst_swap  ", set_ingress_mark), 1); 
+									}
+									free(other_type_id);
+								}
+								free(other_limit);
+							}
+							free(set_egress_mark);
+							free(set_ingress_mark);
+						}
+						
 						if(limit != NULL)
 						{
-							char* up_qos_mark = get_string_map_element(upload_qos_marks, exceeded_up_speed_str);
-							char* down_qos_mark = get_string_map_element(download_qos_marks, exceeded_down_speed_str);
 							if(up_qos_mark != NULL && down_qos_mark != NULL)
 							{
 								char* set_egress_mark = dynamic_strcat(2, " -j MARK --set-mark ", up_qos_mark);
-								char* set_ingress_mark = dynamic_strcat(2, " -j MARK --set-mark ", down_qos_mark);
-
+								char* set_ingress_mark = dynamic_strcat(2, " -j MARK --set-mark ", down_qos_mark);	
 								if(strcmp(types[type_index], "egress_limit") == 0)
 								{
 									run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_egress_mark), 1);
