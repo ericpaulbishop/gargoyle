@@ -873,7 +873,10 @@ function setUciFromDocument(controlDocument, id)
 	var oldIp = uci.get(pkg, quotaSection, "ip");
 	if(oldIp != ip)
 	{
-		changedIds[id] = 1;
+		if(!testAddrOverlap(oldIp, ip))
+		{
+			changedIds[id] = 1;
+		}
 	}
 
 	
@@ -1149,10 +1152,12 @@ function editQuota()
 
 						if(newIp != editIp)
 						{
-							changedIds[editId] = 1;
 							var newId = getIdFromIp(newIp);
 							uci.set(pkg, editSection, "id", newId);
-							changedIds[newId] = 1;
+							if(!testAddrOverlap(newIp, editIp))
+							{
+								changedIds[newId] = 1;
+							}
 							
 							
 							setElementAtColumn(ipToTableSpan(newIp), 0);
