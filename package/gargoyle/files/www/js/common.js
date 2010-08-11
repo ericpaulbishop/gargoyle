@@ -704,19 +704,18 @@ function parseBytes(bytes, units)
 	return parsed;
 }
 
-function parseKbitsPerSecond(kbits, units)
+function parseKbytesPerSecond(kbytes, units)
 {
 	var parsed;
-	var bytes = Math.round((kbits*1024/8));
 	units = units != "bytes/s" && units != "KBytes/s" && units != "MBytes/s" ? "mixed" : units;
 	
-	if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes/s")
+	if( (units == "mixed" && kbytes > 1024) || units == "MBytes/s")
 	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes/s";
+		parsed = truncateDecimal(kbytes/(1024)) + " MBytes/s";
 	}
 	else
 	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes/s";
+		parsed = kbytes + " KBytes/s";
 	}
 	return parsed;
 }

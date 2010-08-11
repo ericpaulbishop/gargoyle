@@ -113,7 +113,7 @@ function resetData()
 	}
 
 	
-	columnNames=["IP(s)", "Active", textListToSpanElement(["Limits","(Total/Down/Up)"], false), "Enabled" "", "" ];
+	columnNames=["IP(s)", "Active", textListToSpanElement(["Limits","(Total/Down/Up)"], false), "Enabled", "" ];
 	
 	quotaTable = createTable(columnNames, quotaTableData, "quota_table", true, false, removeQuotaCallback);
 	tableContainer = document.getElementById('quota_table_container');
@@ -824,20 +824,20 @@ function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 		textEl.value = adjustedVal;
 	}
 }
-function setDocumentSpeed(kbits, textId, unitSelectId, controlDocument)
+function setDocumentSpeed(kbytes, textId, unitSelectId, controlDocument)
 {
 	var defaultUnit = "KBytes/s";
 	var textEl = controlDocument.getElementById(textId);
 	setSelectedValue(unitSelectId, defaultUnit, controlDocument);
 	
-	kbits = kbits == "" ? 0 : parseInt(kbits);
-	if(kbits <= 0)
+	kbytes = kbytes == "" ? 0 : parseInt(kbytes);
+	if(kbytes <= 0)
 	{
 		textEl.value = "0";
 	}
 	else
 	{
-		var pb = parseKbitsPerSecond(kbits);
+		var pb = parseKbytesPerSecond(kbytes);
 		var splitParsed = pb.split(/[\t ]+/);
 		textEl.value = splitParsed[0];
 		setSelectedValue(unitSelectId, splitParsed[1], controlDocument);
@@ -991,12 +991,12 @@ function getDocumentLimit(textId, unlimitedSelectId, unitSelectId, controlDocume
 
 function getDocumentSpeed(containerId, textId, unitSelectId, controlDocument)
 {
-	var ret "";
+	var ret = "";
 	if(document.getElementById(containerId).style.display != "none")
 	{
 		var unit = getSelectedValue(unitSelectId, controlDocument);
-		if(unit == "MBytes/s") { multiple = 1024*8; }
-		if(unit == "KBytes/s") { multiple = 8; }
+		if(unit == "MBytes/s") { multiple = 1024; }
+		if(unit == "KBytes/s") { multiple = 1; }
 		var kbits = Math.round(multiple * parseFloat(controlDocument.getElementById(textId).value));
 		ret = "" + kbits;
 	}
