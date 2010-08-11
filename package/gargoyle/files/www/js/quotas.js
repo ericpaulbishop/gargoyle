@@ -96,18 +96,7 @@ function resetData()
 			uci.set(pkg, quotaSections[sectionIndex], "id", id);
 		}
 
-		/*
-		var pctUp       = "N/A";
-		var pctDown     = "N/A";
-		var pctCombined = "N/A";
-		if(quotaPercents[id] != null)
-		{
-			var pcts = quotaPercents[id];
-			pctUp = pcts[0] >= 0 ? pcts[0] + "%" : pctUp;
-			pctDown = pcts[1] >= 0 ? pcts[1] + "%" : pctDown;
-			pctCombined = pcts[2] >= 0 ? pcts[2] + "%" : pctCombined;
-		}
-		*/		
+
 		
 		var timeParameters = getTimeParametersFromUci(uci, quotaSections[sectionIndex]);
 		var limitStr = getLimitStrFromUci(uci, quotaSections[sectionIndex]);
@@ -125,7 +114,7 @@ function resetData()
 
 	
 	//columnNames=["IP", "% Upload Used", "% Download Used", "% Combined Used", "", "" ];
-	columnNames=["IP(s)", "Active", textListToSpanElement(["Limits","(Total/Down/Up)"], false), "", "" ];
+	columnNames=["IP(s)", "Active", textListToSpanElement(["Limits","(Total/Down/Up)"], false), "Enabled" "", "" ];
 	
 	quotaTable = createTable(columnNames, quotaTableData, "quota_table", true, false, removeQuotaCallback);
 	tableContainer = document.getElementById('quota_table_container');
@@ -327,13 +316,6 @@ function addNewQuota()
 		var tableContainer = document.getElementById("quota_table_container");
 		var table = tableContainer.firstChild;
 		
-		/*
-		var down = uci.get(pkg, "quota_" + quotaNum, "ingress_limit") == "" ? "N/A" : "0"; 
-		var up = uci.get(pkg, "quota_" + quotaNum, "egress_limit") == "" ? "N/A" : "0"; 
-		var combined = uci.get(pkg, "quota_" + quotaNum, "combined_limit") == "" ? "N/A" : "0"; 
-		var ip = getIpFromDocument(document);
-		addTableRow(table, [ipToTableSpan(ip), up, down, combined, enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);	
-		*/
 		
 		var ip = getIpFromDocument(document);
 		var timeParameters = getTimeParametersFromUci(uci, "quota_" + quotaNum);
@@ -1128,45 +1110,9 @@ function editQuota()
 							uci.set(pkg, editSection, "id", newId);
 							changedIds[newId] = 1;
 							
-							/*
-							editRow.childNodes[0].firstChild.data = ipToTableSpan(newIp);
-							editRow.childNodes[1].firstChild.data = uci.get(pkg, editSection, "egress_limit") == "" ? "N/A" : "0%";
-							editRow.childNodes[2].firstChild.data = uci.get(pkg, editSection, "ingress_limit") == "" ? "N/A" : "0%";
-							editRow.childNodes[3].firstChild.data = uci.get(pkg, editSection, "combined_limit") == "" ? "N/A" : "0%";
-							editRow.childNodes[4].firstChild.id = newId;
-							*/
 							
 							setElementAtColumn(ipToTableSpan(newIp), 0);
 							editRow.childNodes[rowCheckIndex].firstChild.id = newId;
-						}
-						else
-						{
-							/*
-							var adjustPercent = function(usedOptionIndex, newMaxStr)
-							{
-								var oldUsedQ = quotaUsed[newIp];
-								var newPercent = "0";
-								if(oldUsedQ != null)
-								{
-									var oldUsed = oldUsedQ[usedOptionIndex];
-									oldUsed = oldUsed == "" ? 0 : parseInt(oldUsed);
-									var limit = parseFloat(newMaxStr)*1024.0*1024.0;
-									newPercent =  Math.round((oldUsed*100*1000)/(limit))/1000 ;
-								}
-								return newPercent + "%";
-							}
-
-							var upMax   = editQuotaWindow.document.getElementById("max_up").value;
-							var downMax = editQuotaWindow.document.getElementById("max_down").value;
-							var combinedMax = editQuotaWindow.document.getElementById("max_combined").value;
-							var useUpMax = getSelectedValue("max_up_type", editQuotaWindow.document) != "unlimited";
-							var useDownMax = getSelectedValue("max_down_type", editQuotaWindow.document) != "unlimited";
-							var useCombinedMax = getSelectedValue("max_combined_type", editQuotaWindow.document) != "unlimited";
-							
-							editRow.childNodes[1].firstChild.data = useUpMax   ? adjustPercent(0, upMax) : "N/A";
-							editRow.childNodes[2].firstChild.data = useDownMax   ? adjustPercent(1, downMax) : "N/A";
-							editRow.childNodes[3].firstChild.data = useCombinedMax  ? adjustPercent(2, combinedMax) : "N/A";
-							*/
 						}
 						setElementAtColumn(timeParamsToTableSpan(getTimeParametersFromUci(uci, editSection)), 1);
 						editRow.childNodes[2].firstChild.data =getLimitStrFromUci(uci, editSection);
