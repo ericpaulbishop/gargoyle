@@ -791,27 +791,49 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	setSelectedValue("quota_hour", resetHour + "", controlDocument);
 }
 
-function setDocumentLimit(bytes, text_id, unit_select_id, controlDocument)
+function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 {
 	bytes = bytes == "" ? 0 : parseInt(bytes);
-	var textEl = controlDocument.getElementById(text_id);
+	var textEl = controlDocument.getElementById(textId);
+	var defaultUnit = "MB";
+	var defaultMultiple = 1024*1024;
 	if(bytes <= 0)
 	{
-		setSelectedValue(unit_select_id, "MB", controlDocument);
+		setSelectedValue(unitSelectId, defaultUnit, controlDocument);
 		textEl.value = "0";
 	}
 	else
 	{
 		var pb = parseBytes(bytes);
-		var unit = "MB";
-		var multiple = 1024*1024;
+		var unit = defaultUnit;
+		var multiple = defaultMultiple;
 		if(pb.match(/GBytes/)) { unit = "GB"; multiple = 1024*1024*1024; };
 		if(pb.match(/TBytes/)) { unit = "TB"; multiple = 1024*1024*1024*1024; };
-		setSelectedValue(unit_select_id, unit, controlDocument);
+		setSelectedValue(unitSelectId, unit, controlDocument);
 		var adjustedVal = truncateDecimal(bytes/multiple);
 		textEl.value = adjustedVal;
 	}
 }
+function setDocumentSpeed(kbits, textId, unitSelectId, controlDocument)
+{
+	var defaultUnit = "kbytes";
+	var textEl = controlDocument.getElementById(textId);
+	setSelectedValue(unitSelectId, defaultUnit, controlDocument);
+	
+	kbits = kbits == "" ? 0 : parseInt(kbits);
+	if(kbits <= 0)
+	{
+		textEl.value = "0";
+	}
+	else
+	{
+		var pb = parseKbitsPerSecond(kbits);
+		var splitParsed = pb.split(/[\t ]+/);
+		textEl.value = splitParsed[0];
+		setSelectedValue(unitSelectId, splitParsed[1], controlDocument);
+	}
+}
+
 
 function setUciFromDocument(controlDocument, id)
 {
