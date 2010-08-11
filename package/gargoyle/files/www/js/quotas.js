@@ -992,7 +992,7 @@ function getDocumentLimit(textId, unlimitedSelectId, unitSelectId, controlDocume
 function getDocumentSpeed(containerId, textId, unitSelectId, controlDocument)
 {
 	var ret = "";
-	if(document.getElementById(containerId).style.display != "none")
+	if(controlDocument.getElementById(containerId).style.display != "none")
 	{
 		var unit = getSelectedValue(unitSelectId, controlDocument);
 		if(unit == "MBytes/s") { multiple = 1024; }
