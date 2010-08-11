@@ -287,16 +287,18 @@ initialize_quotas()
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
-	
-	#restore_quotas does the hard work of building quota chains & rebuilding crontab file to do backups
-	restore_quotas -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
-	
+
+	# restore_quotas does the hard work of building quota chains & rebuilding crontab file to do backups
+	#
 	# this initializes qos functions ONLY if we have quotas that
 	# have up and down speeds defined for when quota is exceeded
+	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
+		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
 		initialiaze_quota_qos
-	fi
-
+	else
+		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+	fi	
 
 
 	#enable cron, but only restart cron if it is currently running

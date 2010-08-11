@@ -64,8 +64,10 @@ int main(int argc, char** argv)
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
 	
+	unsigned char full_qos_active = 0;
+
 	char c;
-	while((c = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
 		switch(c)
 		{
@@ -89,7 +91,10 @@ int main(int argc, char** argv)
 			case 'c':
 				crontab_line = strdup(optarg);
 				break;
-
+			case 'Q':
+			case 'q':
+				full_qos_active = 1;
+				break;
 		}
 	}
 
@@ -280,8 +285,13 @@ int main(int argc, char** argv)
 			if(enabled)
 			{
 				char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");
-				char* exceeded_up_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_up_speed");
-				char* exceeded_down_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_down_speed");
+				char* exceeded_up_speed_str = NULL;
+				char* exceeded_down_speed_str = NULL;
+				if(!full_qos_active) /* without defined up/down speeds we always set hard cutoff, which is what we want when full qos is active */
+				{
+					exceeded_up_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_up_speed");
+					exceeded_down_speed_str = get_uci_option(ctx, "firewall", next_quota, "exceeded_down_speed");
+				}
 				if(exceeded_up_speed_str == NULL) { exceeded_up_speed_str = strdup(" "); }
 				if(exceeded_down_speed_str == NULL) { exceeded_down_speed_str = strdup(" "); }
 
