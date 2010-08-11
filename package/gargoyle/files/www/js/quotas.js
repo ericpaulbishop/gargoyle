@@ -113,7 +113,6 @@ function resetData()
 	}
 
 	
-	//columnNames=["IP", "% Upload Used", "% Download Used", "% Combined Used", "", "" ];
 	columnNames=["IP(s)", "Active", textListToSpanElement(["Limits","(Total/Down/Up)"], false), "Enabled" "", "" ];
 	
 	quotaTable = createTable(columnNames, quotaTableData, "quota_table", true, false, removeQuotaCallback);
@@ -354,7 +353,7 @@ function setVisibility(controlDocument)
 		setInvisibleIfIdMatches("quota_active", ["always"], "active_weekly_container", "block", controlDocument);
 	}
 	
-
+	setInvisibleIfIdMatches("quota_exceeded", ["hard_cutoff"], "quota_only_qos_container", "block", controlDocument);
 
 	var qri=getSelectedValue("quota_reset", controlDocument);
 	if(qri == "month")
@@ -722,11 +721,15 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	var uploadLimit = srcUci.get(pkg, quotaSection, "egress_limit");
 	var downloadLimit = srcUci.get(pkg, quotaSection, "ingress_limit");
 	var combinedLimit = srcUci.get(pkg, quotaSection, "combined_limit");
+
 	resetInterval = resetInterval == "" || resetInterval == "minute" ? "day" : resetInterval;
 	var offset = srcUci.get(pkg, quotaSection, "reset_time");
 	offset = offset == "" ? 0 : parseInt(offset);
 	var resetDay = getDaySeconds(offset);
 	var resetHour = getHourSeconds(offset);
+
+	var exceededUpSpeed = srcUci.get(pkg, quotaSection, "exceeded_up_speed");
+	var exceededDownSpeed = srcUci.get(pkg, quotaSection, "exceeded_down_speed");
 
 	setDocumentIp(ip, controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
@@ -786,6 +789,13 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	setDocumentLimit(downloadLimit, "max_down",     "max_down_unit", controlDocument);
 	setDocumentLimit(combinedLimit, "max_combined", "max_combined_unit", controlDocument);
 
+	setAllowableSelections("quota_exceeded", (fullQosEnabled ? ["hard_cutoff"] : ["hard_cutoff", "throttle"]), (fullQosEnabled ? ["Shut Down All Internet Access"] : ["Shut Down All Internet Access", "Throttle Bandwidth"]), controlDocument);
+	setSelectedValue("quota_exceeded", exceededUpSpeed != "" && exceededDownSpeed != "" && (!fullQosEnabled) ? "throttle" : "hard_cutoff", controlDocument);
+	setDocumentSpeed(exceededUpSpeed, "quota_qos_up",   "quota_qos_up_unit", controlDocument);
+	setDocumentSpeed(exceededDownSpeed, "quota_qos_down", "quota_qos_down_unit", controlDocument);
+
+	
+
 	setVisibility(controlDocument);
 	setSelectedValue("quota_day", resetDay + "", controlDocument);
 	setSelectedValue("quota_hour", resetHour + "", controlDocument);
@@ -816,7 +826,7 @@ function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 }
 function setDocumentSpeed(kbits, textId, unitSelectId, controlDocument)
 {
-	var defaultUnit = "kbytes";
+	var defaultUnit = "KBytes/s";
 	var textEl = controlDocument.getElementById(textId);
 	setSelectedValue(unitSelectId, defaultUnit, controlDocument);
 	
@@ -870,6 +880,10 @@ function setUciFromDocument(controlDocument, id)
 	uci.set(pkg, quotaSection, "ingress_limit",  getDocumentLimit("max_down", "max_down_type", "max_down_unit", controlDocument)  );
 	uci.set(pkg, quotaSection, "egress_limit",   getDocumentLimit("max_up", "max_up_type", "max_up_unit", controlDocument) );
 	uci.set(pkg, quotaSection, "combined_limit", getDocumentLimit("max_combined", "max_combined_type", "max_combined_unit", controlDocument) );
+
+	uci.set(pkg, quotaSection, "exceeded_up_speed", getDocumentSpeed("quota_only_qos_container", "quota_qos_up", "quota_qos_up_unit", controlDocument) );
+	uci.set(pkg, quotaSection, "exceeded_down_speed", getDocumentSpeed("quota_only_qos_container", "quota_qos_down", "quota_qos_down_unit", controlDocument) );
+
 	uci.set(pkg, quotaSection, "reset_interval", getSelectedValue("quota_reset", controlDocument));
 	uci.set(pkg, quotaSection, "ip", ip);
 	uci.set(pkg, quotaSection, "id", id);
@@ -959,18 +973,32 @@ function getTimeParametersFromUci(srcUci, quotaSection)
 
 
 /* returns a number if there is a limit "" if no limit defined */
-function getDocumentLimit(text_id, unlimited_select_id, unit_select_id, controlDocument)
+function getDocumentLimit(textId, unlimitedSelectId, unitSelectId, controlDocument)
 {
 	var ret = "";
-	if(getSelectedValue(unlimited_select_id, controlDocument) != "unlimited")
+	if(getSelectedValue(unlimitedSelectId, controlDocument) != "unlimited")
 	{
-		var unit = getSelectedValue(unit_select_id, controlDocument);
+		var unit = getSelectedValue(unitSelectId, controlDocument);
 		var multiple = 1024*1024;
 		if(unit == "MB") { multiple = 1024*1024; }
 		if(unit == "GB") { multiple = 1024*1024*1024; }
 		if(unit == "TB") { multiple = 1024*1024*1024*1024; }
-		var bytes = Math.round(multiple * parseFloat(controlDocument.getElementById(text_id).value));
+		var bytes = Math.round(multiple * parseFloat(controlDocument.getElementById(textId).value));
 		ret =  "" + bytes;
+	}
+	return ret;
+}
+
+function getDocumentSpeed(containerId, textId, unitSelectId, controlDocument)
+{
+	var ret "";
+	if(document.getElementById(containerId).style.display != "none")
+	{
+		var unit = getSelectedValue(unitSelectId, controlDocument);
+		if(unit == "MBytes/s") { multiple = 1024*8; }
+		if(unit == "KBytes/s") { multiple = 8; }
+		var kbits = Math.round(multiple * parseFloat(controlDocument.getElementById(textId).value));
+		ret = "" + kbits;
 	}
 	return ret;
 }
@@ -1067,12 +1095,6 @@ function editQuota()
 	var editRow=this.parentNode.parentNode;
 	var editId          = editRow.childNodes[rowCheckIndex].firstChild.id;
 	
-	/*
-	var editUpPrc       = editRow.childNodes[1].firstChild.data.replace(/%/g, "");
-	var editDownPrc     = editRow.childNodes[2].firstChild.data.replace(/%/g, "");
-	var editCombinedPrc = editRow.childNodes[3].firstChild.data.replace(/%/g, "");
-	*/
-
 	var editIp;
 
 	var editSection = "";

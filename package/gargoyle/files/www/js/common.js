@@ -707,20 +707,16 @@ function parseBytes(bytes, units)
 function parseKbitsPerSecond(kbits, units)
 {
 	var parsed;
-	var bytes = Math.floor((kbits*1000/8));
+	var bytes = Math.round((kbits*1024/8));
 	units = units != "bytes/s" && units != "KBytes/s" && units != "MBytes/s" ? "mixed" : units;
 	
 	if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes/s")
 	{
 		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes/s";
 	}
-	else if( (units == "mixed" && bytes > 1024*1024*1024) || units == "KBytes/s")
-	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes/s";
-	}
 	else
 	{
-		parsed = bytes + " bytes/s";
+		parsed = truncateDecimal(bytes/(1024)) + " KBytes/s";
 	}
 	return parsed;
 }

@@ -14,6 +14,12 @@
 <script>
 <!--
 <?
+	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
+		echo "var fullQosEnabled = true;"
+	else
+		echo "var fullQosEnabled = false;"
+	fi
+
 	print_quotas
 ?>
 	var uci = uciOriginal.clone();

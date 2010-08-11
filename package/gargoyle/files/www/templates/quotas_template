@@ -189,23 +189,21 @@
 		</select>
 	</span>
 </div>
-<div id="quota_qos_up_container">
+<div id="quota_only_qos_container">
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
 		<label style="float:left;width:100px;">Upload Limit: </label>
 		<input  type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
 		<select id="quota_qos_up_unit">
-			<option value="bytes">bytes/s</option>
-			<option value="kbytes">KBytes/s</option>
-			<option value="mbytes">MBytes/s</option>
+			<option value="KBytes/s">KBytes/s</option>
+			<option value="MBytes/s">MBytes/s</option>
 		</select>
 	</span>
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
 		<label style="float:left;width:100px;">Download Limit: </label>
 		<input  type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
 		<select id="quota_qos_down_unit">
-			<option value="bytes">bytes/s</option>
-			<option value="kbytes">KBytes/s</option>
-			<option value="mbytes">MBytes/s</option>
+			<option value="KBytes/s">KBytes/s</option>
+			<option value="MBytes/s">MBytes/s</option>
 		</select>
 	</span>
 </div>
