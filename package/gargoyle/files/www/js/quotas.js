@@ -87,6 +87,10 @@ function resetData()
 {
 	//initialize qos mark lists, if full qos is active
 	var qmIndex=0;
+	upQosClasses = [];
+	upQosMarks = [];
+	downQosClasses = [];
+	downQosMarks = [];
 	for(qmIndex=0; qmIndex < qosMarkList.length; qmIndex++)
 	{
 		if(qosMarkList[qmIndex][0] == "upload")

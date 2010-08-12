@@ -8,6 +8,20 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 	gargoyle_header_footer -m  -c "internal.css" -j "quotas.js table.js"
 ?>
+
+<script>
+<!--
+<?
+	if [ -h /etc/rc.d/S50qos_gargoyle ] && [ -e /etc/qos_class_marks ]  ; then
+		echo "var fullQosEnabled = true;"
+	else
+		echo "var fullQosEnabled = false;"
+	fi
+
+?>
+//-->
+</script>
+
 <fieldset id="edit_container">
 	<legend class="sectionheader">Edit Quota</legend>
 
