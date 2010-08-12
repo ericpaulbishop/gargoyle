@@ -466,7 +466,11 @@ int main(int argc, char** argv)
 						
 						char* up_qos_mark = get_string_map_element(upload_qos_marks, exceeded_up_speed_str);
 						char* down_qos_mark = get_string_map_element(download_qos_marks, exceeded_down_speed_str);
-						
+						if(full_qos_active)
+						{
+							up_qos_mark   = get_uci_option(ctx, "firewall", next_quota, "exceeded_up_class_mark");
+							down_qos_mark = get_uci_option(ctx, "firewall", next_quota, "exceeded_down_class_mark");
+						}	
 
 						/* 
 						 * need to do ip test even if limit is null, because ALL_OTHERS quotas should not apply when any of the three types of explicit limit is defined
@@ -657,6 +661,7 @@ int main(int argc, char** argv)
 								restore_backup_for_id(type_id, "/usr/data/quotas", is_individual_other, defined_ip_groups);
 							}
 							free(limit);
+
 						}
 						if(strstr(ip_test, "connmark") != NULL)
 						{
@@ -668,6 +673,11 @@ int main(int argc, char** argv)
 						free(applies_to);
 						free(subnet_definition);
 						free(type_id);
+						if(full_qos_active)
+						{
+							free(up_qos_mark);
+							free(down_qos_mark);
+						}
 						if(ip_egress_tests != NULL)
 						{
 							free_null_terminated_string_array(ip_egress_tests);
