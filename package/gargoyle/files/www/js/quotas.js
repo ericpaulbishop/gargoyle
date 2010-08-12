@@ -9,6 +9,11 @@ var pkg = "firewall";
 var changedIds = [];
 var rowCheckIndex = 3;
 
+var downQosClasses = [];
+var downQosMarks = [];
+var upQosClasses = [];
+var upQosMarks = [];
+
 function saveChanges()
 {
 	setControlsEnabled(false, true);
@@ -80,6 +85,22 @@ function saveChanges()
 
 function resetData()
 {
+	//initialize qos mark lists, if full qos is active
+	var qmIndex=0;
+	for(qmIndex=0; qmIndex < qosMarkList.length; qmIndex++)
+	{
+		if(qosMarkList[qmIndex][0] == "upload")
+		{
+			upQosClasses.push(qosMarkList[qmIndex][1]);
+			upQosMarks.push(qosMarkList[qmIndex][2]);
+		}
+		else
+		{
+			downQosClasses.push(qosMarkList[qmIndex][1]);
+			downQosMarks.push(qosMarkList[qmIndex][2]);
+		}
+	}
+
 	//table columns: ip, percent upload used, percent download used, percent combined used, enabled, edit, remove
 	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
 	var quotaTableData = [];
@@ -354,6 +375,16 @@ function setVisibility(controlDocument)
 	}
 	
 	setInvisibleIfIdMatches("quota_exceeded", ["hard_cutoff"], "quota_only_qos_container", "block", controlDocument);
+	setInvisibleIfIdMatches("quota_exceeded", ["hard_cutoff"], "quota_full_qos_container", "block", controlDocument);
+	if(fullQosEnabled)
+	{
+		controlDocument.getElementById("quota_only_qos_container").style.display = "none";
+	}
+	else
+	{
+		controlDocument.getElementById("quota_full_qos_container").style.display = "none";
+	}
+
 
 	var qri=getSelectedValue("quota_reset", controlDocument);
 	if(qri == "month")
@@ -730,6 +761,9 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 
 	var exceededUpSpeed = srcUci.get(pkg, quotaSection, "exceeded_up_speed");
 	var exceededDownSpeed = srcUci.get(pkg, quotaSection, "exceeded_down_speed");
+	var upMark = srcUci.get(pkg, quotaSection, "exceeded_up_class_mark");
+	var downMark = srcUci.get(pkg, quotaSection, "exceeded_down_class_mark");
+
 
 	setDocumentIp(ip, controlDocument);
 	setSelectedValue("quota_reset", resetInterval, controlDocument);
@@ -789,8 +823,9 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	setDocumentLimit(downloadLimit, "max_down",     "max_down_unit", controlDocument);
 	setDocumentLimit(combinedLimit, "max_combined", "max_combined_unit", controlDocument);
 
-	setAllowableSelections("quota_exceeded", (fullQosEnabled ? ["hard_cutoff"] : ["hard_cutoff", "throttle"]), (fullQosEnabled ? ["Shut Down All Internet Access"] : ["Shut Down All Internet Access", "Throttle Bandwidth"]), controlDocument);
-	setSelectedValue("quota_exceeded", exceededUpSpeed != "" && exceededDownSpeed != "" && (!fullQosEnabled) ? "throttle" : "hard_cutoff", controlDocument);
+	//setAllowableSelections("quota_exceeded", (fullQosEnabled ? ["hard_cutoff"] : ["hard_cutoff", "throttle"]), (fullQosEnabled ? ["Shut Down All Internet Access"] : ["Shut Down All Internet Access", "Throttle Bandwidth"]), controlDocument);
+	var exceededType = (exceededUpSpeed != "" && exceededDownSpeed != "") || (upMark != "" && downMark != "") ? "throttle" : "hard_cutoff";
+	setSelectedValue("quota_exceeded", exceededType, controlDocument);
 	setDocumentSpeed(exceededUpSpeed, "quota_qos_up",   "quota_qos_up_unit", controlDocument);
 	setDocumentSpeed(exceededDownSpeed, "quota_qos_down", "quota_qos_down_unit", controlDocument);
 
@@ -799,6 +834,17 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	setVisibility(controlDocument);
 	setSelectedValue("quota_day", resetDay + "", controlDocument);
 	setSelectedValue("quota_hour", resetHour + "", controlDocument);
+
+	if(fullQosEnabled)
+	{
+		setAllowableSelections("quota_full_qos_up_class", upQosClasses, upQosMarks, controlDocument);
+		setAllowableSelections("quota_full_qos_down_class", downQosClasses, downQosMarks, controlDocument);
+		if(upMark != "" && downMark != "")
+		{
+			setSelectedValue("quota_full_qos_up_class", upMark, controlDocument);
+			setSelectedValue("quota_full_qos_down_class", downMark, controlDocument);
+		}
+	}
 }
 
 function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
@@ -886,6 +932,10 @@ function setUciFromDocument(controlDocument, id)
 
 	uci.set(pkg, quotaSection, "exceeded_up_speed", getDocumentSpeed("quota_only_qos_container", "quota_qos_up", "quota_qos_up_unit", controlDocument) );
 	uci.set(pkg, quotaSection, "exceeded_down_speed", getDocumentSpeed("quota_only_qos_container", "quota_qos_down", "quota_qos_down_unit", controlDocument) );
+
+	uci.set(pkg, quotaSection, "exceeded_up_class_mark", getDocumentMark("quota_full_qos_container", "quota_full_qos_up_class", controlDocument) );
+	uci.set(pkg, quotaSection, "exceeded_down_class_mark", getDocumentMark("quota_full_qos_container", "quota_full_qos_down_class", controlDocument) );
+
 
 	uci.set(pkg, quotaSection, "reset_interval", getSelectedValue("quota_reset", controlDocument));
 	uci.set(pkg, quotaSection, "ip", ip);
@@ -1005,6 +1055,17 @@ function getDocumentSpeed(containerId, textId, unitSelectId, controlDocument)
 	}
 	return ret;
 }
+
+function getDocumentMark(containerId, selectId, controlDocument)
+{
+	var ret = "";
+	if(controlDocument.getElementById(containerId).style.display != "none")
+	{
+		ret = getSelectedValue(selectId, controlDocument);
+	}
+	return ret;
+}
+
 
 function createEnabledCheckbox(enabled)
 {

@@ -207,4 +207,13 @@
 		</select>
 	</span>
 </div>
-
+<div id="quota_full_qos_container">
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
+		<label style="float:left;width:100px;">Upload Class: </label>
+		<select id="quota_full_qos_up_class"></select>
+	</span>
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
+		<label style="float:left;width:100px;">Download Class: </label>
+		<select id="quota_full_qos_down_class"></select>
+	</span>
+</div>

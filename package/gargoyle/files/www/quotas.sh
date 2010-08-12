@@ -14,8 +14,10 @@
 <script>
 <!--
 <?
-	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
+	echo "var qosMarkList = [];"
+	if [ -h /etc/rc.d/S50qos_gargoyle ] && [ -e /etc/qos_class_marks ]  ; then
 		echo "var fullQosEnabled = true;"
+		cat /etc/qos_class_marks | awk '{ print "qosMarkList.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' 
 	else
 		echo "var fullQosEnabled = false;"
 	fi
