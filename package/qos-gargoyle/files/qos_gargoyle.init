@@ -311,7 +311,7 @@ initialize_qos()
 	insmod sch_htb >&- 2>&-
 	insmod sch_sfq >&- 2>&-
 	insmod ipt_length >&- 2>&-
-	insmod imq numdevs=1 >&- 2>&-
+	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
 	insmod ipt_tos >&- 2>&-
@@ -579,21 +579,18 @@ initialize_qos()
 		#Now the rest of the user entered rules.
 		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
+		#make sure all packets get sent through IMQ
+		iptables -t mangle -A qos_ingress_imq -j IMQ --todev 0
+
+		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
+		iptables -t mangle -A qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask
+		iptables -t mangle -A qos_ingress -m mark ! --mark 0x0 -j RETURN
+
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
 
 		#save current mark to connmark
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
-
-		#pass traffic through IMQ
-		iptables -t mangle -N qos_ingress_imq
-		iptables -t mangle -A PREROUTING -i $qos_interface -j qos_ingress_imq
-
-		#Need two connmark restores because of the weird way the connmark restore with mask works.
-		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark
-		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark --mask $download_mask
-		iptables -t mangle -A qos_ingress_imq -j IMQ --todev 0
-
 	fi
 
 	update_markfile
