@@ -576,15 +576,15 @@ initialize_qos()
 		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
 		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
 
-		#Now the rest of the user entered rules.
-		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
-
 		#make sure all packets get sent through IMQ
 		iptables -t mangle -A qos_ingress_imq -j IMQ --todev 0
 
 		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
 		iptables -t mangle -A qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask
 		iptables -t mangle -A qos_ingress -m mark ! --mark 0x0 -j RETURN
+
+		#Now the rest of the user entered rules.
+		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
