@@ -93,14 +93,17 @@ function resetData()
 	downQosMarks = [];
 	for(qmIndex=0; qmIndex < qosMarkList.length; qmIndex++)
 	{
+		var className = qosMarkList[qmIndex][1];
+		var classDisplay = uciOriginal.get("qos_gargoyle", className, "name");
+		className = classDisplay == "" ? className : classDisplay;
 		if(qosMarkList[qmIndex][0] == "upload")
 		{
-			upQosClasses.push(qosMarkList[qmIndex][1]);
+			upQosClasses.push(className);
 			upQosMarks.push(qosMarkList[qmIndex][2]);
 		}
 		else
 		{
-			downQosClasses.push(qosMarkList[qmIndex][1]);
+			downQosClasses.push(className);
 			downQosMarks.push(qosMarkList[qmIndex][2]);
 		}
 	}
@@ -828,7 +831,7 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 	setDocumentLimit(combinedLimit, "max_combined", "max_combined_unit", controlDocument);
 
 	//setAllowableSelections("quota_exceeded", (fullQosEnabled ? ["hard_cutoff"] : ["hard_cutoff", "throttle"]), (fullQosEnabled ? ["Shut Down All Internet Access"] : ["Shut Down All Internet Access", "Throttle Bandwidth"]), controlDocument);
-	var exceededType = (exceededUpSpeed != "" && exceededDownSpeed != "") || (upMark != "" && downMark != "") ? "throttle" : "hard_cutoff";
+	var exceededType = (exceededUpSpeed != "" && exceededDownSpeed != "" && (!fullQosEnabled)) || (upMark != "" && downMark != "" && fullQosEnabled) ? "throttle" : "hard_cutoff";
 	setSelectedValue("quota_exceeded", exceededType, controlDocument);
 	setDocumentSpeed(exceededUpSpeed, "quota_qos_up",   "quota_qos_up_unit", controlDocument);
 	setDocumentSpeed(exceededDownSpeed, "quota_qos_down", "quota_qos_down_unit", controlDocument);
@@ -841,8 +844,8 @@ function setDocumentFromUci(controlDocument, srcUci, id)
 
 	if(fullQosEnabled)
 	{
-		setAllowableSelections("quota_full_qos_up_class", upQosClasses, upQosMarks, controlDocument);
-		setAllowableSelections("quota_full_qos_down_class", downQosClasses, downQosMarks, controlDocument);
+		setAllowableSelections("quota_full_qos_up_class", upQosMarks, upQosClasses, controlDocument);
+		setAllowableSelections("quota_full_qos_down_class", downQosMarks, downQosClasses, controlDocument);
 		if(upMark != "" && downMark != "")
 		{
 			setSelectedValue("quota_full_qos_up_class", upMark, controlDocument);
