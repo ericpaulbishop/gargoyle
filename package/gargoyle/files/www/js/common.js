@@ -703,6 +703,23 @@ function parseBytes(bytes, units)
 	
 	return parsed;
 }
+
+function parseKbytesPerSecond(kbytes, units)
+{
+	var parsed;
+	units = units != "bytes/s" && units != "KBytes/s" && units != "MBytes/s" ? "mixed" : units;
+	
+	if( (units == "mixed" && kbytes > 1024) || units == "MBytes/s")
+	{
+		parsed = truncateDecimal(kbytes/(1024)) + " MBytes/s";
+	}
+	else
+	{
+		parsed = kbytes + " KBytes/s";
+	}
+	return parsed;
+}
+
 function truncateDecimal(dec)
 {
 	result = "" + ((Math.floor(dec*1000))/1000);

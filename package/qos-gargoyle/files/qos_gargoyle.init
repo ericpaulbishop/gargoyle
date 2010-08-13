@@ -305,13 +305,15 @@ initialize_qos()
 	# iptables-mod-imq
 	# kmod-ipt-filter
 	# iptables-mod-filter
+	
+	rmmod  imq >&- 2>&-
+	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
 
 	insmod cls_fw >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
 	insmod sch_htb >&- 2>&-
 	insmod sch_sfq >&- 2>&-
 	insmod ipt_length >&- 2>&-
-	insmod imq numdevs=1 >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
 	insmod ipt_tos >&- 2>&-
@@ -319,6 +321,8 @@ initialize_qos()
 	insmod ipt_dscp >&- 2>&-
 	insmod ipt_DSCP >&- 2>&-
 	insmod sch_red >&- 2>&-
+
+
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
@@ -454,7 +458,13 @@ initialize_qos()
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_egress -j MARK --set-mark $def_upload_class
 
-		# save current mark to connmark
+
+		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
+		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j RETURN
+		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $upload_mask
+
+
+		# save current mark to connmark at end of chain
 		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
 
 	fi
@@ -541,7 +551,7 @@ initialize_qos()
 			tbw=$(($max_bandwidth*200/8));
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
-                     fi
+			fi
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
@@ -582,18 +592,15 @@ initialize_qos()
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
 
-		#save current mark to connmark
+		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
+		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j RETURN
+		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask
+
+		#make sure all packets get sent through IMQ
+		iptables -t mangle -I qos_ingress -j IMQ --todev 0
+
+		#save current mark to connmark at end of chain
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
-
-		#pass traffic through IMQ
-		iptables -t mangle -N qos_ingress_imq
-		iptables -t mangle -A PREROUTING -i $qos_interface -j qos_ingress_imq
-
-		#Need two connmark restores because of the weird way the connmark restore with mask works.
-		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark
-		iptables -t mangle -A qos_ingress_imq -j CONNMARK --restore-mark --mask $download_mask
-		iptables -t mangle -A qos_ingress_imq -j IMQ --todev 0
-
 	fi
 
 	update_markfile
@@ -602,17 +609,17 @@ initialize_qos()
 
 scan_interface()
 {
-       #Figuring out the WAN interface turns out to be tricky but fortunately 
-       #Eric has already took on the challenge so we can use his program gargoyle_header_footer
-       #to sus out the details
+	#Figuring out the WAN interface turns out to be tricky but fortunately 
+	#Eric has already took on the challenge so we can use his program gargoyle_header_footer
+	#to sus out the details
 
-       qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
-       wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-       max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
-       local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+	qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
+	wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+	max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
+	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 	if [ -n "$dbg" ] ; then
-            echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit"
+		echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit"
 	fi
 
 }
@@ -629,14 +636,13 @@ stop()
 		exit
 	fi
 
-	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
-		tc qdisc del dev "$iface" root
+	for iface in $(tc qdisc show | awk '{print $5}' | sort -u ); do
+		tc qdisc del dev "$iface" root >/dev/null 2>&1
 	done
 
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
-	delete_chain_from_table "mangle" "qos_ingress_imq"
 
 }
 

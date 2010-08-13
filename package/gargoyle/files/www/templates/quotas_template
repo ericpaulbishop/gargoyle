@@ -178,3 +178,42 @@
 		<span class="widerightcolumnonly" id="weekly_example" style="margin-top:0px;padding-top:0px;"><em>e.g. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00</em></span>
 	</span>
 </div>
+<div id="quota_exceeded_container">
+	<span class='narrowleftcolumn'>                             
+		<label id="quota_exceeded_label" for='quota_active'>When Exceeded:</label>
+	</span>
+	<span class='widerightcolumn'>
+		<select id='quota_exceeded' onchange='setVisibility()' >
+			<option value="hard_cutoff">Shut Down All Internet Access</option>
+			<option value="throttle">Throttle Bandwidth</option>
+		</select>
+	</span>
+</div>
+<div id="quota_only_qos_container">
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
+		<label style="float:left;width:100px;">Upload Limit: </label>
+		<input  type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+		<select id="quota_qos_up_unit">
+			<option value="KBytes/s">KBytes/s</option>
+			<option value="MBytes/s">MBytes/s</option>
+		</select>
+	</span>
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
+		<label style="float:left;width:100px;">Download Limit: </label>
+		<input  type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+		<select id="quota_qos_down_unit">
+			<option value="KBytes/s">KBytes/s</option>
+			<option value="MBytes/s">MBytes/s</option>
+		</select>
+	</span>
+</div>
+<div id="quota_full_qos_container">
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
+		<label style="float:left;width:100px;">Upload Class: </label>
+		<select id="quota_full_qos_up_class"></select>
+	</span>
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
+		<label style="float:left;width:100px;">Download Class: </label>
+		<select id="quota_full_qos_down_class"></select>
+	</span>
+</div>
