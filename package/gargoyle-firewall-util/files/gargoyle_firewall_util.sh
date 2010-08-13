@@ -298,6 +298,7 @@ initialize_quotas()
 		initialiaze_quota_qos
 	else
 		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+		cleanup_old_quota_qos
 	fi	
 
 
@@ -337,8 +338,18 @@ load_all_config_sections()
 
 }
 
+
+cleanup_old_quota_qos()
+{
+	for iface in $(tc qdisc show | grep prio | awk '{print $5}'); do
+		tc qdisc del dev "$iface" root
+	done
+}
+
+
 initialiaze_quota_qos()
 {
+	cleanup_old_quota_qos
 
 	#speeds should be in kbyte/sec, units should NOT be present in config file (unit processing should be done by front-end)
 	quota_sections=$(load_all_config_sections "firewall" "quota")
