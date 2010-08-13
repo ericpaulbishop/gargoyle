@@ -16,21 +16,21 @@ function saveChanges()
 	commands = "";
 	errors = "";
 
-       stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
-       startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
+	stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
+	startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
 	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
 	disabled = document.getElementById("qos_enabled").checked == false;
 
-       //Is the user requesting disable of this direction of QoS?
+	//Is the user requesting disable of this direction of QoS?
 	if(disabled)
 	{
 		otherDirection = direction == "upload" ? "download" : "upload";
 		alternateBandwidth = uciOriginal.get("qos_gargoyle", otherDirection, "total_bandwidth");
 
-              //If this page was enabled before and the other was not then stop and disable QoS
+		//If this page was enabled before and the other was not then stop and disable QoS
 		if(qosEnabled && alternateBandwidth == "" )
 		{
 			//delete qos distribution section
@@ -38,8 +38,7 @@ function saveChanges()
 			commands = "/etc/init.d/qos_gargoyle stop\n/etc/init.d/qos_gargoyle disable\n";
 			qosEnabled = false;
 		}
-		else
-              //Otherwise just restart QOS.  This will delete this direction.
+		else //Otherwise just restart QOS.  This will delete this direction.
 		{
 			commands = "/etc/init.d/qos_gargoyle start\n";
 		}
@@ -161,7 +160,7 @@ function saveChanges()
                             }
 			}
 		}
-              commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
+		commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
 		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" +stopbwmon + commands + bwmonCleanCommand + startbwmon;
 	}
 

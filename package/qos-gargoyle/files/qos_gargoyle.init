@@ -631,7 +631,7 @@ stop()
 		exit
 	fi
 
-	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
+	for iface in $(tc qdisc show | awk '{print $5}' | sort -u ); do
 		tc qdisc del dev "$iface" root
 	done
 
