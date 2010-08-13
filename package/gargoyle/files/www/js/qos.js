@@ -25,6 +25,12 @@ function saveChanges()
        //Save the setting of the qos_monenable flag
 	if (direction == "download") {
 		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").checked);
+
+		if (document.getElementById("use_ptarget_ip").checked == true) {
+			uci.set("qos_gargoyle", direction, "ptarget_ip", document.getElementById("ptarget_ip").value);
+		} else {
+			uci.remove("qos_gargoyle", direction, "ptarget_ip");
+		}
      	}
 
 
@@ -206,6 +212,12 @@ function resetData()
 	//set description visibility
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_1");
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_2");
+
+	if (direction == "download") {
+		initializeDescriptionVisibility(uciOriginal, "qos_down_3");
+		initializeDescriptionVisibility(uciOriginal, "qos_down_4");
+	}
+	
 	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
 
 
@@ -354,6 +366,19 @@ function resetData()
        if (direction == "download") { 
            monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
            if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
+
+           ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
+           if (ptarget_ip == "") {
+                document.getElementById("use_ptarget_ip").checked = false;
+		  setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+
+           } else {
+                document.getElementById("use_ptarget_ip").checked = true;
+                document.getElementById("ptarget_ip").value=ptarget_ip;
+		  setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+
+           }
+
        }
 }
 
@@ -1007,6 +1032,7 @@ function updateqosmon()
    		                document.getElementById("qpinger").innerHTML = Lines[4];
    		                document.getElementById("qpingtime").innerHTML = Lines[5];
    		                document.getElementById("qpinglimit").innerHTML = Lines[6];
+   		                document.getElementById("qactivecnt").innerHTML = Lines[7];
                             } else {
 
                               if (Lines[0].substr(0,25) == "cat: can't open '/tmp/qos") {

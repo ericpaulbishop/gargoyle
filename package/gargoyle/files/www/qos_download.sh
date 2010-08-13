@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "firewall" -p "qosdownload" -c "internal.css" -j "qos.js table.js" qos_gargoyle gargoyle
+	gargoyle_header_footer -h -s "firewall" -p "qosdownload" -c "internal.css" -j "qos.js table.js" -i qos_gargoyle
 ?>
 
 
@@ -262,21 +262,28 @@
 			<label id='qos_monenabled_label' for='qos_monenabled'>Enable active congestions control (Download Direction)</label>
 		</div>
 
-		<div id="qos_down_3" class="indent">
-			<span id='qos_down_3_txt'>
-				<p>The congestion control observes your QoS performance and automatically adjusts your QoS downlink to maintain
-                               proper QoS performance.  The control automatically compensates for changes in your ISP's download speed
-                               and the demand from your network and results in optimum performance.
-
-				   To use this feature set your QoS downlink speed to the maximum speed your ISP can deliver you in the best of
-                               circumstances.  The control will maintain the downlink between 20% and 100% of this value as needed to 
-				   maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of our measured uplink speed. 
-                            </p>
+		<div>
+			<span class='indent'>
+				<input type='checkbox' id='use_ptarget_ip' onclick='enableAssociatedField(this, "ptarget_ip", currentWanGateway)'/>&nbsp;&nbsp;
+				<label for='ptarget_ip' id='ptarget_ip_label'>Use non-standard ping target:</label>
+				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' /> 
 			</span>
-			<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
-
 		</div>
 
+		<div id="qos_down_3" class="indent">
+		<span id='qos_down_3_txt'>
+			<p>The congestion control observes your download activiy and automatically adjusts your download limit to maintain
+                     proper QoS performance.  The control automatically compensates for changes in your ISP's download speed
+                     and the demand from your network and results in optimum performance.
+
+			To use this feature set your QoS downlink speed to the maximum speed your ISP can deliver you in the best of
+                     circumstances.  The control will maintain the downlink between 20% and 100% of this value as needed to 
+			maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of our measured uplink speed. 
+                     </p>
+		</span>
+		<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
+
+		</div>
 		<div class="internal_divider"></div>
 
               <div class="indent">
@@ -289,9 +296,9 @@
               <tr><td><span id='qpinger'></span></td></tr>
               <tr><td><span id='qpingtime'></span></td></tr>
               <tr><td><span id='qpinglimit'></span></td></tr>
+              <tr><td><span id='qactivecnt'></span></td></tr>
               </table>
               </div>
-
 
 		<div id="qos_down_4" class="indent">
 			<span id='qos_down_4_txt'>
@@ -310,6 +317,7 @@
                             <tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
                             <tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
                             <tr><td>Ping Limit</td><td>The point at which the controller will act to maintian fairness.</td></tr>
+                            <tr><td>Active Classes</td><td>The number of active download classes.</td></tr>
 				</table>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4">Hide Text</a>

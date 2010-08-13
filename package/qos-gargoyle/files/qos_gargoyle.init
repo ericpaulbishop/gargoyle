@@ -194,7 +194,7 @@ apply_all_rules()
 
 		if [ -n "$min_pkt_size" ] || [ -n "$max_pkt_size" ] ; then
 			if [ -z "$min_pkt_size" ] ; then min_pkt_size=0 ; fi
-			if [ -z "$max_pkt_size" ] ; then max_pkt_size=$(($max_trans_unit*2)) ; fi
+			if [ -z "$max_pkt_size" ] ; then max_pkt_size=1500 ; fi
 			match_str="$match_str -m length --length $min_pkt_size:$max_pkt_size"
 		fi
 
@@ -419,7 +419,6 @@ initialize_qos()
                      fi
 
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			#tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
 			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
@@ -544,7 +543,6 @@ initialize_qos()
                      fi
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			#tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
 			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
@@ -614,8 +612,13 @@ initialize_qos()
 				#Ping responses to the router bypass QoS and go straight to the destination program.
 				iptables -t mangle -I qos_ingress_imq -p icmp -d $wan_ip -j RETURN
 
+				#if the user specified a ping target then use that otherwise use the gateway.
+				if [ -z "$ptarget_ip" ] ; then
+				       ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
+				fi
+
                             #Start the monitor
-                   		qosmon -b 800 $wan_gwip $total_download_bandwidth 90
+                   		qosmon -b 800 $ptarget_ip $total_download_bandwidth 90
                	fi
 		fi
 	fi
@@ -633,13 +636,8 @@ scan_interface()
 
        qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
        wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-       wan_gwip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
-       max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
+       #max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
        local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-
-	if [ -n "$dbg" ] ; then
-            echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit WAN_GW=$wan_gwip"
-	fi
 
 }
 
