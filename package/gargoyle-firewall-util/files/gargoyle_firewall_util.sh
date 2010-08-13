@@ -341,8 +341,8 @@ load_all_config_sections()
 
 cleanup_old_quota_qos()
 {
-	for iface in $(tc qdisc show | awk '{print $5}' | sort -u); do
-		tc qdisc del dev "$iface" root
+	for iface in $(tc qdisc show | awk '{print $5}' | sort -u ); do
+		tc qdisc del dev "$iface" root >/dev/null 2>&1
 	done
 }
 
