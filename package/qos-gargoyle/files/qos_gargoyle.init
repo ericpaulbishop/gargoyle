@@ -448,6 +448,10 @@ initialize_qos()
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
 
+		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
+		iptables -t mangle -A qos_egress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $upload_mask
+		iptables -t mangle -A qos_egress -m mark ! --mark 0x0 -j RETURN
+
 		#Next the user entered rules.
 		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
 
