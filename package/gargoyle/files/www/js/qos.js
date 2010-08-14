@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
@@ -13,23 +13,26 @@ function saveChanges()
 
 
 	uci = uciOriginal.clone();
-	commands = "";
-	errors = "";
+	var commands = "";
+	var errors = "";
 
-	stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
-	startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
-	bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
-	bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
+	var stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
+	var startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
+	var bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
+	var bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
-	disabled = document.getElementById("qos_enabled").checked == false;
+	var disabled = document.getElementById("qos_enabled").checked == false;
+
+	var otherDirection = direction == "upload" ? "download" : "upload";
+	var alternateBandwidth = uciOriginal.get("qos_gargoyle", otherDirection, "total_bandwidth");
+
+	var fullQosWillBeEnabled = ( (!disabled) || alternateBandwidth != "");
+	var switchingFullQosEnabled = (fullQosWillBeEnabled != qosEnabled);
 
 	//Is the user requesting disable of this direction of QoS?
 	if(disabled)
 	{
-		otherDirection = direction == "upload" ? "download" : "upload";
-		alternateBandwidth = uciOriginal.get("qos_gargoyle", otherDirection, "total_bandwidth");
-
 		//If this page was enabled before and the other was not then stop and disable QoS
 		if(qosEnabled && alternateBandwidth == "" )
 		{
@@ -44,7 +47,14 @@ function saveChanges()
 		}
 
 		uci.remove("qos_gargoyle", direction, "total_bandwidth");
-		commands =  uci.getScriptCommands(uciOriginal) + "\n" +  stopbwmon + commands + bwmonCleanCommand + startbwmon;
+		if(switchingFullQosEnabled &&  qosQuotasExist())
+		{
+			commands =  uci.getScriptCommands(uciOriginal) + "\n" + commands + "sh /usr/lib/gargoyle/restart_firewall.sh ;\n";
+		}
+		else
+		{
+			commands =  uci.getScriptCommands(uciOriginal) + "\n" +  stopbwmon + commands + bwmonCleanCommand + startbwmon;
+		}
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
 	{
@@ -160,8 +170,16 @@ function saveChanges()
                             }
 			}
 		}
-		commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
-		commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" +stopbwmon + commands + bwmonCleanCommand + startbwmon;
+		if(switchingFullQosEnabled &&  qosQuotasExist())
+		{
+			commands = "\n/etc/init.d/qos_gargoyle enable ;\n";
+			commands =  preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + commands + "sh /usr/lib/gargoyle/restart_firewall.sh ;\n";
+		}
+		else
+		{
+			commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
+			commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" +stopbwmon + commands + bwmonCleanCommand + startbwmon;
+		}
 	}
 
 	if(errors != "")
@@ -179,14 +197,8 @@ function saveChanges()
 				uciOriginal = uci.clone();
 				resetData();
 				setControlsEnabled(true);
-				//alert(req.responseText);
 			}
 		}
-
-
-
-		//document.getElementById("output").value = commands;
-
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
@@ -349,6 +361,25 @@ function resetData()
 
 	setQosEnabled();
 }
+
+
+function qosQuotasExist()
+{
+	var quotaSections = uciOriginal.getAllSectionsOfType("firewall", "quota");
+	var qsi;
+	var found = false;
+	for(qsi=0; qsi < quotaSections.length && (!found); qsi++)
+	{
+		var testVals = [ "exceeded_up_speed", "exceeded_down_speed", "exceeded_up_class_mark", "exceeded_down_class_mark" ];
+		while(testVals.length > 0 && (!found) )
+		{
+			found = found || (uciOriginal.get("firewall", quotaSections[qsi], testVals.shift()) != "");
+		}
+	}
+	return found;
+}
+
+
 
 function setQosEnabled()
 {
