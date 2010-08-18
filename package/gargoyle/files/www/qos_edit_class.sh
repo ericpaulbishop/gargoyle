@@ -23,36 +23,41 @@
 		</span>
 	</div>
 	
+
 	<div class='nocolumn'>Bandwidth Minimum:</div>
 	<div class='indent'>
-		<div class='leftcolumn'>
+	<div class='nocolumn'>
 			<input type='radio' name="min_radio" id='min_radio1' onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
-			<label for='mib_radio1'>No Bandwidth Minimum</label>
-		</div>	
+			<label for='min_radio1'>No Bandwidth Minimum</label>
+		</div>
 		<div>
-			<div class='leftcolumn'>
+			<span class='leftcolumn'>
 				<input type='radio' name="min_radio" id="min_radio2" onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
 				<label id="min_bandwidth_label" for='min_radio2'>Bandwidth Minimum:</label>
-			</div>
-			<input class="rightcolumn" type='text' id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' /> 
-			<em>kbit/s</em>
-		</div>	
+			</span>
+			<span class='rightcolumn'>
+				<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+				<em>kbit/s</em>
+			</span>
+		</div>
 	</div>
 
 	<div class='nocolumn'>Bandwidth Maximum:</div>
 	<div class='indent'>
-		<div class='leftcolumn'>
+		<div class='nocolumn'>
 			<input type='radio' name="max_radio" id='max_radio1' onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
 			<label for='max_radio1'>No Bandwidth Maximum</label>
-		</div>	
+		</div>
 		<div>
-			<div class='leftcolumn'>
+			<span class='leftcolumn'>
 				<input type='radio' name="max_radio" id="max_radio2" onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
 				<label id="max_bandwidth_label" for='max_radio2'>Bandwidth Maximum:</label>
-			</div>
-			<input class="rightcolumn" type='text' id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' /> 
-			<em>kbit/s</em>
-		</div>	
+			</span>
+			<span class='rightcolumn'>
+				<input type='text' class="rightcolumn" id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+				<em>kbit/s</em>
+			</span>
+		</div>
 	</div>
 
 
