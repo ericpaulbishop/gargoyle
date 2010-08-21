@@ -10,7 +10,7 @@
 	echo "Content-type: text/plain"
 	echo ""
 	
-	scan_atheros()
+	scan_madwifi()
 	{
 		aths=$(iwconfig 2>/dev/null | grep -o "^ath..")
 		scanif=""
@@ -67,11 +67,22 @@
 		fi
 	}
 
+	scan_mac80211()
+	{
+		iw phy phy0 interface add tmpsta type managed
+		ifconfig tmpsta hw ether 00:11:22:33:55:77
+		ifconfig tmpsta up
+		iwlist tmpsta scanning
+		ifconfig tmpsta down
+		iw dev tmpsta del
+	}
+
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then
 		scan_brcm
-	fi
-	if [ -e "/lib/wifi/madwifi.sh" ] ; then
-		scan_atheros
+	elif [ -e "/lib/wifi/mac80211.sh" ] ; then
+		scan_mac80211
+	elif [ -e "/lib/wifi/madwifi.sh" ] ; then
+		scan_madwifi
 	fi
 
 ?>
