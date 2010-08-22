@@ -1756,7 +1756,7 @@ function parseWifiScan(rawScanOutput)
 	{
 		var vals=[];
 		var lineIndex;
-		for(lineIndex=0; lineIndex < cellLines.length && val==null; lineIndex++)
+		for(lineIndex=0; lineIndex < cellLines.length; lineIndex++)
 		{
 			var line = cellLines[lineIndex];
 			var idIndex = line.indexOf(id);
