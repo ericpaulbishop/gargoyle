@@ -52,7 +52,7 @@ function saveChanges()
 			{
 				uci.set("wireless", firstWirelessDevice, "hwmode", "11ng");
 				uci.set("wireless", firstWirelessDevice, "htmode", "HT20");
-				uci set("wireless", firstWirelessDevice, "ht_capab", "SHORT-GI-40 DSSS_CCK-40");
+				uci.set("wireless", firstWirelessDevice, "ht_capab", "SHORT-GI-40 DSSS_CCK-40");
 			}
 		}
 		
