@@ -44,12 +44,12 @@
 
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var wirelessDriver=\"broadcom\";"
+	elif [ -e /lib/wifi/mac80211.sh ] ; then
+		echo "var wirelessDriver=\"mac80211\";"
+	elif [ -e /lib/wifi/madwifi.sh ] ; then
+		echo "var wirelessDriver=\"atheros\";"
 	else
-		if [ -e /lib/wifi/madwifi.sh ] ; then
-			echo "var wirelessDriver=\"atheros\";"
-		else
-			echo "var wirelessDriver=\"\";"
-		fi
+		echo "var wirelessDriver=\"\";"
 	fi
 
 	lease_start=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_acquired | sed 's/^.*=//g')

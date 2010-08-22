@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -37,34 +37,31 @@ function saveChanges()
 		}
 
 		var preCommands = "";	
-		var allWirelessSections = uci.getAllSections("wireless");
 		var allWifiDeviceSections = uci.getAllSectionsOfType("wireless", "wifi-device");
 		var firstWirelessDevice = allWifiDeviceSections[0];
 		
 		if(firstWirelessDevice == null)
 		{
-			while(allWirelessSections.length > 0)
-			{
-				var sectionName = allWirelessSections.shift();
-				preCommands = preCommands + "uci del wireless." + sectionName + "\n";
-				uci.removeSection("wireless", sectionName);
-				uciCompare.removeSection("wireless", sectionName);
-			}
-			preCommands = preCommands + "uci commit\n";
-
-			firstWirelessDevice = wirelessDriver == "broadcom" ? "wl0" : "wifi0";
+			firstWirelessDevice = wirelessDriver == "broadcom" ? "wl0" : ( wirelessDriver == "atheros" ? "wifi0" : "radio0");
 			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + "=wifi-device\n";
 			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + ".type=" + wirelessDriver + "\n";
 			preCommands = preCommands + "uci commit\n";
 			uci.set("wireless", firstWirelessDevice, "", "wifi-device");
 			uci.set("wireless", firstWirelessDevice, "type", wirelessDriver);
+			if(wirelessDriver == "mac80211")
+			{
+				uci.set("wireless", firstWirelessDevice, "hwmode", "11ng");
+				uci.set("wireless", firstWirelessDevice, "htmode", "HT20");
+				uci set("wireless", firstWirelessDevice, "ht_capab", "SHORT-GI-40 DSSS_CCK-40");
+			}
 		}
 		
 		//clear all old wifi-iface sections
 		var wifiDelIndex=0;
-		for(wifiDelIndex=0; wifiDelIndex < allWirelessSections.length; wifiDelIndex++)
+		var allWirelessInterfaceSections = uci.getAllSectionsOfType("wireless", "wifi-iface");
+		for(wifiDelIndex=0; wifiDelIndex < allWirelessInterfaceSections.length; wifiDelIndex++)
 		{
-			var delSection = allWirelessSections[wifiDelIndex];
+			var delSection = allWirelessInterfaceSections[wifiDelIndex];
 			if(uci.get("wireless", delSection, "") == "wifi-iface")
 			{
 				uci.removeSection("wireless", delSection);
@@ -97,8 +94,19 @@ function saveChanges()
 				uci.remove('network', 'wan', 'type');
 				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
-					uci.remove('network', 'wan', 'ifname');
-					uci.set('network', 'wan', 'type', 'bridge');
+					if(wirelessDriver != "mac80211")
+					{
+						uci.remove('network', 'wan', 'ifname');
+						uci.set('network', 'wan', 'type', 'bridge');
+					}
+					else if(getSelectedValue('wifi_mode') == "ap+sta")
+					{
+						uci.set('network', 'wan', 'ifname', "wlan1");
+					}
+					else
+					{
+						uci.set('network', 'wan', 'ifname', "wlan0");
+					}
 				}
 				else if(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )
 				{
@@ -227,6 +235,7 @@ function saveChanges()
 			var macList = getTableDataArray(macTable, true, false);
 			var policy = getSelectedValue("mac_filter_policy");			
 			var macListStr = macList.join(" ");
+			var allWirelessSections = uci.getAllSections("wireless");
 			if(wirelessDriver == "broadcom")
 			{
 				if( (!macFilterEnabled) || macListStr == '')
@@ -240,7 +249,7 @@ function saveChanges()
 					uci.set("wireless", firstWirelessDevice, "maclist", macListStr);
 				}
 			}
-			else if(wirelessDriver == "atheros")
+			else 
 			{
 				for(wsecIndex=0; wsecIndex < allWirelessSections.length; wsecIndex++)
 				{
@@ -255,7 +264,7 @@ function saveChanges()
 						uci.set("wireless", allWirelessSections[wsecIndex], policyOption, policy);
 						uci.set("wireless", allWirelessSections[wsecIndex], "maclist", macListStr);
 					}
-				}	
+				}
 			}
 
 			//force clients to use router DNS?
@@ -1237,7 +1246,7 @@ function resetData()
 	var wp = uciOriginal.get("network", "wan", "proto");
 	var wanUciIf= uciOriginal.get('network', 'wan', 'ifname');
 	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
-	var wanIsWifi = wanUciIf == '' && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
+	var wanIsWifi = (wanUciIf == '' || (wanUciIf.match("wlan") != null && wirelessDriver == "mac80211")) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none") { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
 	setSelectedValue("wan_protocol", wp);
@@ -1405,10 +1414,10 @@ function resetData()
 		macListStr = uciOriginal.get("wireless", firstWirelessDevice, "maclist");
 		setSelectedValue("mac_filter_enabled", ( (policy == "allow" || policy == "deny" || policy == "1" || policy == "2" ) && macListStr != "") ? 'enabled' : 'disabled');
 	}
-	else if(wirelessDriver == "atheros")
+	else 
 	{
 		/*
-		Atheros has definitions in interface sections, broadcom in wifi-device section.
+		Atheros & MAC80211 have definitions in interface sections, broadcom in wifi-device section.
 		To keep consistency we apply first atheros mac filter defined (if any) to all sections
 		
 		Granted, this means you can not use the enhanced atheros functionality of specifying mac
@@ -1500,7 +1509,7 @@ function resetData()
 					setSelectedValue("wifi_mode", "ap+wds");
 				}
 			}
-			else //atheros
+			else //atheros or mac80211
 			{
 				if(uciOriginal.get("wireless", allWirelessSections[sectionIndex], "wds") == "1")
 				{
