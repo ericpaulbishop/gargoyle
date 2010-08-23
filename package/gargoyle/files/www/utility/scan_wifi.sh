@@ -5,7 +5,6 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 
 	echo "Content-type: text/plain"
 	echo ""
@@ -69,12 +68,25 @@
 
 	scan_mac80211()
 	{
-		iw phy phy0 interface add tmpsta type managed
-		ifconfig tmpsta hw ether 00:11:22:33:55:77
-		ifconfig tmpsta up
-		iwlist tmpsta scanning
-		ifconfig tmpsta down
-		iw dev tmpsta del
+		cur_ifs=$(iwconfig 2>/dev/null | grep "^wlan" | awk ' { print $1 }')
+		cur_sta=""
+		for i in $cur_ifs ; do
+			is_sta=$(iwconfig $i | grep "Managed")
+			if [ -n "$is_sta" ] ; then
+				cur_sta="$i"
+			fi
+		done
+		
+		if [ -n "$cur_sta" ] ; then
+			iwlist $cur_sta scanning
+		else		
+			iw phy phy0 interface add tmpsta type managed
+			ifconfig tmpsta hw ether 00:11:22:33:55:77
+			ifconfig tmpsta up
+			iwlist tmpsta scanning
+			ifconfig tmpsta down
+			iw dev tmpsta del
+		fi
 	}
 
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then
