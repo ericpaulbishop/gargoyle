@@ -201,56 +201,6 @@ Index: b/package/ebtables/patches/100-arpnat.patch
 +-
 ++#define EBT_ARPNAT_TARGET "arpnat"
 + #endif
-Index: b/package/madwifi/files/etc/hotplug.d/net/20-client_bridge
-===================================================================
---- a/package/madwifi/files/etc/hotplug.d/net/20-client_bridge	(revision 0)
-+++ b/package/madwifi/files/etc/hotplug.d/net/20-client_bridge	(revision 0)
-@@ -0,0 +1,45 @@
-+######################################################################
-+# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
-+# Copyright Eric Bishop, 2009 eric@gargoyle-router.com 
-+# Created for Gargoyle, www.gargoyle-router.com
-+#
-+#This is free software licensed under the terms of the GNU GPL v2.0
-+# 
-+# You must have the arpnat ebtables module for this to work
-+######################################################################
-+is_ath=$(echo $INTERFACE | grep ath)
-+if [ -n "$is_ath" ] ; then
-+	if [ "$ACTION" = "add" -o "$ACTION" = "register" ] ; then
-+		sleep 2
-+		managed=$(iwconfig $INTERFACE 2>/dev/null | grep "Mode:Managed")
-+		if [ -n "$managed" ] ; then
-+			sta_section=$(uci show wireless | grep "mode=sta$" | sed 's/\.mode=sta$//g' )			
-+			if [ -n "$sta_section" ] ; then
-+				client_bridge=$(uci get "$sta_section.client_bridge")
-+				if [ "$client_bridge" = "1" ] ; then
-+					
-+					if_mac=$(ifconfig "$INTERFACE" | grep HWaddr | awk ' { print $5 } ' )	
-+					ifconfig br-lan hw ether $if_mac
-+					
-+					ebtables -t nat -F PREROUTING
-+					ebtables -t nat -F POSTROUTING
-+					ebtables -t broute -F BROUTING
-+				
-+					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
-+					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
-+					ebtables -t broute -A BROUTING --in-interface  $INTERFACE --protocol 0x888e -j DROP
-+					
-+					mkdir -p /tmp/client_bridge
-+					touch "/tmp/client_bridge/$INTERFACE"
-+				fi
-+			fi
-+		fi
-+	fi
-+	if [ "$ACTION" = "remove" -o "$ACTION" = "register" ] ; then
-+		if [ -e "/tmp/client_bridge/$INTERFACE" ] ; then
-+			ebtables -t nat -F PREROUTING
-+			ebtables -t nat -F POSTROUTING
-+			ebtables -t broute -F BROUTING
-+		fi			
-+	fi
-+fi
 Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ===================================================================
 --- /dev/null	2010-05-13 10:11:58.394584532 -0400
@@ -1607,3 +1557,62 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 + EXPORT_SYMBOL(register_inetaddr_notifier);
 + EXPORT_SYMBOL(unregister_inetaddr_notifier);
 ++EXPORT_SYMBOL(inet_confirm_addr);
+--- /dev/null	2010-07-26 08:21:34.944841324 -0400
++++ b/package/ebtables/files/20-client_bridge	2010-08-23 12:15:21.511090970 -0400
+@@ -0,0 +1,45 @@
++######################################################################
++# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
++# Copyright Eric Bishop, 2009 eric@gargoyle-router.com 
++# Created for Gargoyle, www.gargoyle-router.com
++#
++#This is free software licensed under the terms of the GNU GPL v2.0
++# 
++# You must have the arpnat ebtables module for this to work
++######################################################################
++is_wifi_if=$(echo $INTERFACE | grep -e ath -e wlan)
++if [ -n "$is_wifi_if" ] ; then
++	if [ "$ACTION" = "add" -o "$ACTION" = "register" ] ; then
++		sleep 2
++		managed=$(iwconfig $INTERFACE 2>/dev/null | grep "Mode:Managed")
++		if [ -n "$managed" ] ; then
++			sta_section=$(uci show wireless | grep "mode=sta$" | sed 's/\.mode=sta$//g' )			
++			if [ -n "$sta_section" ] ; then
++				client_bridge=$(uci get "$sta_section.client_bridge")
++				if [ "$client_bridge" = "1" ] ; then
++					
++					if_mac=$(ifconfig "$INTERFACE" | grep HWaddr | awk ' { print $5 } ' )	
++					ifconfig br-lan hw ether $if_mac
++					
++					ebtables -t nat -F PREROUTING
++					ebtables -t nat -F POSTROUTING
++					ebtables -t broute -F BROUTING
++				
++					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
++					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
++					ebtables -t broute -A BROUTING --in-interface  $INTERFACE --protocol 0x888e -j DROP
++					
++					mkdir -p /tmp/client_bridge
++					touch "/tmp/client_bridge/$INTERFACE"
++				fi
++			fi
++		fi
++	fi
++	if [ "$ACTION" = "remove" -o "$ACTION" = "register" ] ; then
++		if [ -e "/tmp/client_bridge/$INTERFACE" ] ; then
++			ebtables -t nat -F PREROUTING
++			ebtables -t nat -F POSTROUTING
++			ebtables -t broute -F BROUTING
++		fi			
++	fi
++fi
+--- a/package/ebtables/Makefile	2010-08-21 10:31:08.811823682 -0400
++++ b/package/ebtables/Makefile	2010-08-23 12:20:41.701090715 -0400
+@@ -57,6 +57,8 @@
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/extensions/*.so $(1)/usr/lib/ebtables/
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ebtables $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/hotplug.d/net/
++	$(INSTALL_BIN) ./files/20-client_bridge $(1)/etc/hotplug.d/net/20-client_bridge
+ endef
+ 
+ define Package/ebtables-utils/install
