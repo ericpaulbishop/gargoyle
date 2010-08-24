@@ -65,6 +65,7 @@
 		<select class='rightcolumn' id="transport_protocol"/>
 			<option value="TCP">TCP</option>
 			<option value="UDP">UDP</option>
+			<option value="ICMP">ICMP</option>
 		</select>
 	</div>
 	<div>
