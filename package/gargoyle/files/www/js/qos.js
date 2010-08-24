@@ -370,12 +370,12 @@ function resetData()
            ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
            if (ptarget_ip == "") {
                 document.getElementById("use_ptarget_ip").checked = false;
-		  setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+		setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
 
            } else {
                 document.getElementById("use_ptarget_ip").checked = true;
                 document.getElementById("ptarget_ip").value=ptarget_ip;
-		  setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+		setElementEnabled(document.getElementById("ptarget_ip"), true, "")
 
            }
 
@@ -400,6 +400,15 @@ function setQosEnabled()
 	{
 		defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 		document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
+	}
+
+
+	if (direction == "download")
+	{
+	setElementEnabled( document.getElementById("qos_monenabled"), enabled, "");
+	qmenabled = (enabled && document.getElementById("qos_monenabled").checked);
+	setElementEnabled( document.getElementById("use_ptarget_ip"), qmenabled,"");
+	setElementEnabled( document.getElementById("ptarget_ip"), qmenabled &&	document.getElementById("use_ptarget_ip").checked,document.getElementById("ptarget_ip").value);
 	}
 
 	resetRuleControls();

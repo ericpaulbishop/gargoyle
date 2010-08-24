@@ -258,7 +258,7 @@
 		<legend class="sectionheader">QoS (Download) -- Active Congestion Control</legend>
 
 		<div id='qos_monitor_container' class='nocolumn'>
-			<input type='checkbox' id='qos_monenabled'" />
+			<input type='checkbox' id='qos_monenabled' onclick="setQosEnabled()"/>
 			<label id='qos_monenabled_label' for='qos_monenabled'>Enable active congestions control (Download Direction)</label>
 		</div>
 
