@@ -62,15 +62,15 @@
 
 		<div id="qos_up_1" class="indent">
 			<span id='qos_up_1_txt'>
-				<p> Specifying your total bandwidth correctly is crucial to making QoS work.  You should enter the minimum bandwith your ISP
-				provides you ignoring "Speedboosting" or other advertised peak values which change in ways that QoS cannot compensate for.
-				Entering a number which is too low will result in a connection which is slower then necessary.  Entering a number which is
-				too high will	result in QoS not meeting its class requirements.  Since some ISPs don't provide you a guaranteed minimum
-				bandwith it may take some experimentation to arrive at a number.  One approach is to start with a number which is half of what you
-				think it should be and then test your link under full load and make sure everything works.  Then increase it in steps, testing as
-				you go until QoS starts to break down.  You also may see that after your testing QoS works for a while and then stops working.
-				This may be because your ISP is getting overloaded due to demands from their other customers so they are no longer
-				delivering to you the bandwidth they did during your testing.  The solution, lower this number.
+				<p> Specifying your bandwidth correctly is crucial to making QoS work. You should enter the minimum bandwith your ISP
+				provides you ignoring "Speedboosting" or other advertised peak values.  Entering a number which is too low will result 
+                            in an uplink which is slower then necessary.  Entering a number which is too high will result in QoS not meeting its 
+                            class requirements.  Since most ISPs don't provide you a guaranteed minimum bandwidth and in fact the bandwidth you
+                            actually recieve can vary throughout the day it may take some experimentation to arrive at a number which represents
+				the minimum you recieve.  
+
+				The upload bandwidth provided by ISP's tends to be more stable than download bandwidth so entering a number of
+				95% of your peak or "advertisted" value may work acceptably.
 
 				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
 
@@ -145,6 +145,7 @@
 				<select class='rightcolumn' id="transport_protocol"/>
 					<option value="TCP">TCP</option>
 					<option value="UDP">UDP</option>
+					<option value="ICMP">ICMP</option>
 				</select>
 			</div>
 			<div>

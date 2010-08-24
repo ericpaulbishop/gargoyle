@@ -22,8 +22,19 @@ function saveChanges()
 	var bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
-	var disabled = document.getElementById("qos_enabled").checked == false;
+       //Save the setting of the qos_monenable flag
+	if (direction == "download") {
+		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").checked);
 
+		if (document.getElementById("use_ptarget_ip").checked == true) {
+			uci.set("qos_gargoyle", direction, "ptarget_ip", document.getElementById("ptarget_ip").value);
+		} else {
+			uci.remove("qos_gargoyle", direction, "ptarget_ip");
+		}
+     	}
+
+
+	var disabled = document.getElementById("qos_enabled").checked == false;
 	var otherDirection = direction == "upload" ? "download" : "upload";
 	var alternateBandwidth = uciOriginal.get("qos_gargoyle", otherDirection, "total_bandwidth");
 
@@ -144,7 +155,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "min_pkt_size", "max_pkt_size", "proto"];
+			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
@@ -211,6 +222,12 @@ function resetData()
 	//set description visibility
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_1");
 	initializeDescriptionVisibility(uciOriginal, "qos_" + (direction == "upload" ? "up" : "down") + "_2");
+
+	if (direction == "download") {
+		initializeDescriptionVisibility(uciOriginal, "qos_down_3");
+		initializeDescriptionVisibility(uciOriginal, "qos_down_4");
+	}
+	
 	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
 
 
@@ -220,8 +237,6 @@ function resetData()
 
 	defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
-
-
 
 	directionClass = direction + "_class";
 	directionRule  = direction + "_rule";
@@ -356,10 +371,25 @@ function resetData()
 	}
 	ruleTableContainer.appendChild(ruleTable);
 
-
-
-
 	setQosEnabled();
+
+       if (direction == "download") { 
+           monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
+           if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
+
+           ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
+           if (ptarget_ip == "") {
+                document.getElementById("use_ptarget_ip").checked = false;
+		setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+
+           } else {
+                document.getElementById("use_ptarget_ip").checked = true;
+                document.getElementById("ptarget_ip").value=ptarget_ip;
+		setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+
+           }
+
+       }
 }
 
 
@@ -401,11 +431,18 @@ function setQosEnabled()
 		document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
 	}
 
+
+	if (direction == "download")
+	{
+	setElementEnabled( document.getElementById("qos_monenabled"), enabled, "");
+	qmenabled = (enabled && document.getElementById("qos_monenabled").checked);
+	setElementEnabled( document.getElementById("use_ptarget_ip"), qmenabled,"");
+	setElementEnabled( document.getElementById("ptarget_ip"), qmenabled &&	document.getElementById("use_ptarget_ip").checked,document.getElementById("ptarget_ip").value);
+	}
+
 	resetRuleControls();
 	resetServiceClassControls(document);
 }
-
-
 
 function addClassificationRule()
 {
@@ -999,3 +1036,54 @@ function parseRuleMatchCriteria(matchText)
 
 	return criteria;
 }
+
+/* qosmon congestion monitor status */
+
+var updateInProgress;
+function initializeqosmon()
+{
+	updateInProgress = false;
+	setInterval("updateqosmon()", 500);
+}
+
+
+function updateqosmon()
+{
+
+	if(!updateInProgress)
+	{
+		updateInProgress = true;
+		var commands="cat /tmp/qosmon.status"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var Lines = req.responseText.split("\n");
+                             
+                            if (Lines[0].substr(0,6) == "State:") {
+                              document.getElementById("qstate").innerHTML = Lines[0];
+   		                document.getElementById("qllimit").innerHTML = Lines[1];
+   		                document.getElementById("qollimit").innerHTML = Lines[2];
+   		                document.getElementById("qload").innerHTML = Lines[3];
+   		                document.getElementById("qpinger").innerHTML = Lines[4];
+   		                document.getElementById("qpingtime").innerHTML = Lines[5];
+   		                document.getElementById("qpinglimit").innerHTML = Lines[6];
+   		                document.getElementById("qactivecnt").innerHTML = Lines[7];
+                            } else {
+
+                              if (Lines[0].substr(0,25) == "cat: can't open '/tmp/qos") {
+                                 document.getElementById("qstate").innerHTML = "State: Disabled*";
+   		                   document.getElementById("qpinger").innerHTML = "Ping: Off";
+                              }
+                            }
+
+				updateInProgress = false;
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
+
+

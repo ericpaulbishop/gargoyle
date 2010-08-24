@@ -194,7 +194,7 @@ apply_all_rules()
 
 		if [ -n "$min_pkt_size" ] || [ -n "$max_pkt_size" ] ; then
 			if [ -z "$min_pkt_size" ] ; then min_pkt_size=0 ; fi
-			if [ -z "$max_pkt_size" ] ; then max_pkt_size=$(($max_trans_unit*2)) ; fi
+			if [ -z "$max_pkt_size" ] ; then max_pkt_size=1500 ; fi
 			match_str="$match_str -m length --length $min_pkt_size:$max_pkt_size"
 		fi
 
@@ -423,8 +423,7 @@ initialize_qos()
                      fi
 
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			#tc qdisc add dev $qos_interface parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
-			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
+			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
 			if [ -n "$dbg" ] ; then
@@ -480,6 +479,11 @@ initialize_qos()
 		total_download_bandwidth=-1
 	fi
 	download_default_class="$default_class"
+
+	#Only if both upload and download QoS are enabled can we enable Gargoyle active QoS monitor
+	if [ $total_download_bandwidth -eq 0 ] || [ $total_upload_bandwidth -eq 0 ] ; then
+		qos_monenabled = "false" ;
+	fi
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
 		# Set up the InterMediate Queuing device (IMQ)
@@ -554,7 +558,6 @@ initialize_qos()
 			fi
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			#tc qdisc add dev imq0 parent 1:$next_class_index sfq quantum $max_trans_unit perturb 10
 			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 
@@ -603,6 +606,34 @@ initialize_qos()
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
 	fi
 
+	#Enable Gargoyle active QoS monitor
+	if [ "$qos_monenabled" = "true" ] ; then
+
+		#if the user specified a ping target then use that otherwise use the gateway.
+		if [ -z "$ptarget_ip" ] ; then
+		       ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
+		fi
+
+		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
+		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
+
+		#Make a class to handle the outgoing ping requests from the router.
+		#tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt m2 30kbit
+		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 84 dmax 10ms rate 2kbit
+		tc qdisc add dev $qos_interface parent 1:127 pfifo
+      		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
+
+		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
+		iptables -t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127
+
+		#Start the monitor
+      		qosmon -b 800 $ptarget_ip $total_download_bandwidth 85
+		if [ -n "$dbg" ] ; then
+			echo "qosmon -b 800 $ptarget_ip $total_download_bandwidth 85"
+		fi
+
+	fi
+
 	update_markfile
 
 }
@@ -613,14 +644,9 @@ scan_interface()
 	#Eric has already took on the challenge so we can use his program gargoyle_header_footer
 	#to sus out the details
 
-	qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
-	wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-	max_trans_unit=$(ifconfig $qos_interface | sed -n 's/.*MTU:\([0-9]*\).*/\1/p')
-	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-
-	if [ -n "$dbg" ] ; then
-		echo "qos_interface=$qos_interface LAN_IP=$local_ip WAN_IP=$wan_ip MTU=$max_trans_unit"
-	fi
+       qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
+       wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+       local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 }
 
@@ -636,8 +662,13 @@ stop()
 		exit
 	fi
 
-	for iface in $(tc qdisc show | awk '{print $5}' | sort -u ); do
-		tc qdisc del dev "$iface" root >/dev/null 2>&1
+	scan_interface
+
+	#Kill the qos monitor in case it is running
+	killall qosmon 2>/dev/null
+
+	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
+		tc qdisc del dev "$iface" root
 	done
 
 	# eliminate existing rules in mangle table
@@ -653,11 +684,6 @@ start()
 	touch "$lock_file"
 
 	load_all_config_options "$config_file_name" "global"
-
-       scan_interface
-	if [ -z "$max_trans_unit" ] ; then
-		max_trans_unit=1500
-	fi
 
       	initialize_qos
 
@@ -695,7 +721,7 @@ show()
 
 boot()
 {
-       #Do nothing during init.  Start is called by hotplug.
+	#Do nothing during init.  Start is called by hotplug.
 	return
 }
 
