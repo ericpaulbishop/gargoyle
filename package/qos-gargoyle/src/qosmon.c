@@ -946,15 +946,17 @@ int main(int argc, char *argv[])
             case QMON_WATCH:
 					pingon=1;
 
-                    //Ping times too long then ramp down at 5%/sec 
+                    //Ping times too long then ramp down at 3%/sec 
+					//Repond in this direction quickly to restore performance fast.
                     if (fil_triptime > pinglimit) {
-                       new_dbw_ul = new_dbw_ul * (1.0 - .05*period/1000);
+                       new_dbw_ul = new_dbw_ul * (1.0 - .03*period/1000);
 					   if (new_dbw_ul < DBW_UL*.2) new_dbw_ul=DBW_UL*.2;
                     }
 
-                    //Ping times acceptable then ramp up at 1%/sec 
+                    //Ping times acceptable then ramp up at .5%/sec 
+					//Try to creep up on the limit to avoid oscillation.
                     if (fil_triptime < 0.7 * pinglimit) {
-                       new_dbw_ul = new_dbw_ul * (1.0 + .01*period/1000);
+                       new_dbw_ul = new_dbw_ul * (1.0 + .005*period/1000);
 					   if (new_dbw_ul > DBW_UL*.9) new_dbw_ul=DBW_UL*.9;
 
                     }
