@@ -6,11 +6,10 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-
 	echo "Content-type: text/plain"
 	echo ""
 	
-	scan_atheros()
+	scan_madwifi()
 	{
 		aths=$(iwconfig 2>/dev/null | grep -o "^ath..")
 		scanif=""
@@ -67,11 +66,35 @@
 		fi
 	}
 
+	scan_mac80211()
+	{
+		cur_ifs=$(iwconfig 2>/dev/null | grep "^wlan" | awk ' { print $1 }')
+		cur_sta=""
+		for i in $cur_ifs ; do
+			is_sta=$(iwconfig $i | grep "Managed" | grep -v "Not.Associated")
+			if [ -n "$is_sta" ] ; then
+				cur_sta="$i"
+			fi
+		done
+		
+		if [ -n "$cur_sta" ] ; then
+			iwlist $cur_sta scanning
+		else		
+			iw phy phy0 interface add tmpsta type managed
+			ifconfig tmpsta hw ether 00:11:22:33:55:77
+			ifconfig tmpsta up
+			iwlist tmpsta scanning
+			ifconfig tmpsta down
+			iw dev tmpsta del
+		fi
+	}
+
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then
 		scan_brcm
-	fi
-	if [ -e "/lib/wifi/madwifi.sh" ] ; then
-		scan_atheros
+	elif [ -e "/lib/wifi/mac80211.sh" ] ; then
+		scan_mac80211
+	elif [ -e "/lib/wifi/madwifi.sh" ] ; then
+		scan_madwifi
 	fi
 
 ?>

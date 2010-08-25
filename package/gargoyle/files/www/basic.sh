@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -44,13 +44,29 @@
 
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var wirelessDriver=\"broadcom\";"
-	else
-		if [ -e /lib/wifi/madwifi.sh ] ; then
-			echo "var wirelessDriver=\"atheros\";"
-		else
-			echo "var wirelessDriver=\"\";"
+	elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
+		echo "var wirelessDriver=\"mac80211\";"
+		echo 'var mac80211Channels = [];'
+		
+		#use iw to get available channels
+		cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
+		if [ -n "$cur_if" ] ; then
+			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+		else		
+			iw phy phy0 interface add tmpmon type monitor
+			ifconfig tmpmon up
+			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+			ifconfig tmpmon down
+			iw dev tmpmon del
 		fi
+
+	elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
+		echo "var wirelessDriver=\"atheros\";"
+	else
+		echo "var wirelessDriver=\"\";"
 	fi
+
+
 
 	lease_start=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_acquired | sed 's/^.*=//g')
 	lease_lifetime=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_lifetime | sed 's/^.*=//g')
@@ -78,7 +94,8 @@ else
 {
 	policyOption="macpolicy";
 }
-var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
+
+var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211" ? 20 : 18);
 
 
 //-->
