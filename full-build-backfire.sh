@@ -107,7 +107,7 @@ for target in $targets ; do
 	fi
 
 	#copy this target configuration to build directory
-	cp "$targets_dir/$target/.config" "$target-src"
+	cp "$targets_dir/$target/profiles/default/config" "$target-src"
 	
 
 	#enter build directory and make sure we get rid of all those pesky .svn files, 
@@ -176,10 +176,43 @@ for target in $targets ; do
 	done
 
 	#if we didn't build anything, die horribly
-	bin_contents=$(ls bin/* 2>/dev/null)	
-	if [ -z "$bin_contents" ] ; then
+	if [ -z "$image_files" ] ; then
 		exit
-	fi	       
+	fi
+
+	other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^default$" )
+	for p in $other_profiles ; do
+
+		#copy profile config and rebuild
+		cp $targets_dir/$target/profiles/$p/config .config
+		if [ "$verbosity" = "0" ] ; then
+			make  GARGOYLE_VERSION="$adj_num_version"
+		else
+			make V=99 GARGOYLE_VERSION="$adj_num_version"
+		fi
+
+
+		#if we didn't build anything, die horribly
+		image_files=$(ls bin/$arch/ 2>/dev/null)	
+		if [ -z "$image_files" ] ; then
+			exit
+		fi
+
+		#copy relevant images for which this profile applies
+		profile_images=$(cat $targets_dir/$target/profiles/$p/profile_images 2>/dev/null)
+		for pi in $profile_images ; do
+			candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
+			for c in $candidates ; do
+				if [ ! -d "bin/$arch/$c" ] ; then
+					version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
+					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$version_str/g")
+					cp "bin/$arch/$c" "../images/$target/$newname"
+				fi
+			done
+		done
+	done
+
+       
 
 	#cd back to parent directory for next target (if there is one)
 	cd ..
