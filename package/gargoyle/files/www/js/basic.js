@@ -1077,12 +1077,18 @@ function resetData()
 		//no auto for brcm
 		removeChannels.push("auto");
 	}
-	else
+	else if(wirelessDriver == "atheros")
 	{
 		//atheros can't handle channels 12-14
 		removeChannels.push("12");
 		removeChannels.push("13");
 		removeChannels.push("14");
+	}
+	else if(wirelessDriver == "mac80211")
+	{
+		setAllowableSelections("bridge_channel", mac80211Channels, mac80211Channels, document);
+		setAllowableSelections("wifi_channel1", mac80211Channels, mac80211Channels, document);
+		setAllowableSelections("wifi_channel2", mac80211Channels, mac80211Channels, document);
 	}
 	while(removeChannels.length > 0)
 	{
@@ -1211,7 +1217,7 @@ function resetData()
 		setSelectedValue("bridge_mode", "client_bridge");
 		setSelectedValue("bridge_repeater", "enabled");
 		document.getElementById("bridge_ssid").value = "Gargoyle";
-		setSelectedValue("bridge_channel", wirelessDriver=="broadcom" ? "5" : "auto");
+		setSelectedValue("bridge_channel", wirelessDriver=="atheros"  ? "auto" : "5");
 		setSelectedValue("bridge_encryption", "none");
 	}
 	var bridgeWdsMacTable=createTable([""], bridgeWdsTableData, "bridge_wds_mac_table", true, false);
@@ -1382,7 +1388,7 @@ function resetData()
 	}
 	wirelessSections=[firstWirelessDevice, firstWirelessDevice, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
 	wirelessOptions=['channel', 'channel', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
-	wirelessParams=[wirelessDriver=="broadcom" ? '5' : "auto", wirelessDriver=="broadcom" ? '5' : "auto", 'Gargoyle', 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
+	wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", 'Gargoyle', 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
 	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
