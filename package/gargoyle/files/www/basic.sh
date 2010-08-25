@@ -94,7 +94,8 @@ else
 {
 	policyOption="macpolicy";
 }
-var txPowerMax= wirelessDriver == "broadcom" ? 31 : 18;
+
+var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211" ? 20 : 18);
 
 
 //-->
