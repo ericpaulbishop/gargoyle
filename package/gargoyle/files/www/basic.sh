@@ -44,7 +44,7 @@
 
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var wirelessDriver=\"broadcom\";"
-	elif [ -e /lib/wifi/mac80211.sh ] ; then
+	elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 		echo "var wirelessDriver=\"mac80211\";"
 		echo 'var mac80211Channels = [];'
 		
@@ -60,7 +60,7 @@
 			iw dev tmpmon del
 		fi
 
-	elif [ -e /lib/wifi/madwifi.sh ] ; then
+	elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 		echo "var wirelessDriver=\"atheros\";"
 	else
 		echo "var wirelessDriver=\"\";"
