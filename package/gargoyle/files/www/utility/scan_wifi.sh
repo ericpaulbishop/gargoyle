@@ -5,7 +5,7 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-
+	eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 	echo "Content-type: text/plain"
 	echo ""
 	
@@ -71,7 +71,7 @@
 		cur_ifs=$(iwconfig 2>/dev/null | grep "^wlan" | awk ' { print $1 }')
 		cur_sta=""
 		for i in $cur_ifs ; do
-			is_sta=$(iwconfig $i | grep "Managed")
+			is_sta=$(iwconfig $i | grep "Managed" | grep -v "Not.Associated")
 			if [ -n "$is_sta" ] ; then
 				cur_sta="$i"
 			fi
