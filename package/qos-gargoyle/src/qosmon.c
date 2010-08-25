@@ -42,7 +42,9 @@
 #include <signal.h>
 #include <netinet/ip_icmp.h>
 
-#include <ncurses.h>
+#ifndef ONLYBG
+	#include <ncurses.h>
+#endif
 
 #define MAXPACKET	100	/* max packet size */
 #define BACKGROUND	3	/* Detact and run in the background */
