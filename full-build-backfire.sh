@@ -107,7 +107,7 @@ for target in $targets ; do
 	fi
 
 	#copy this target configuration to build directory
-	cp "$targets_dir/$target/profiles/default/config" "$target-src"
+	cp "$targets_dir/$target/profiles/default/config" "$target-src/.config"
 	
 
 	#enter build directory and make sure we get rid of all those pesky .svn files, 
