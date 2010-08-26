@@ -152,7 +152,8 @@ for target in $targets ; do
 
 	#copy packages to built/target directory
 	mkdir -p ../built/$target
-	if [ -d "bin/packages/" ] ; then
+	arch=$(ls bin)
+	if [ -d "bin/$arch/packages/" ] ; then
 		package_files=$(find bin -name "*.ipk")
 		index_files=$(find bin -name "Packa*")
 		for p in $package_files ; do
@@ -216,17 +217,5 @@ for target in $targets ; do
 
 	#cd back to parent directory for next target (if there is one)
 	cd ..
-done
-
-#extract all target SDKs into parent directory if they exist
-for target in $targets ; do
-	sdk_bzip=$(ls images/$target/*Open*SDK*.bz2 2>/dev/null)
-	if [ -n "$sdk_bzip" ] ; then
-		rm -rf "$target-sdk" *Open*SDK*
-		cp "$sdk_bzip" "./$target-sdk.tar.bz2"
-		tar xjf "$target-sdk.tar.bz2"
-		rm "$target-sdk.tar.bz2"
-		mv *Open*SDK* "$target-sdk"
-	fi
 done
 
