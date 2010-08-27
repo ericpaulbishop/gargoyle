@@ -82,18 +82,19 @@ fi
 
 /etc/init.d/network stop >/dev/null 2>&1 
 
-
-for i in $ifs ; do
-	is_switch=""
-	for s in $switch_ifs ; do
-		if [ "$s" = "$i" ] ; then
-			is_switch="1"
+if [ -e /lib/wifi/broadcom.sh ] ; then
+	for i in $ifs ; do
+		is_switch=""
+		for s in $switch_ifs ; do
+			if [ "$s" = "$i" ] ; then
+				is_switch="1"
+			fi
+		done
+		if [ -z "$is_switch" ] || [ -z "$vlan_active" ] ; then
+			ifconfig $i down 2>/dev/null
 		fi
 	done
-	if [ -z "$is_switch" ] || [ -z "$vlan_active" ] ; then
-		ifconfig $i down 2>/dev/null
-	fi
-done
+fi
 
 /etc/init.d/network start >/dev/null 2>&1 
 
