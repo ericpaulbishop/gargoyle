@@ -3,10 +3,10 @@ V=99
 
 ALL: all
 all:
-	sh full-build-backfire.sh ALL "$(GARGOYLE_VERSION)" "$(V)"
+	sh full-build.sh ALL "$(GARGOYLE_VERSION)" "$(V)"
 
-%: targets-backfire/%
-	sh full-build-backfire.sh $@ "$(GARGOYLE_VERSION)" "$(V)"
+%: targets/%
+	sh full-build.sh $@ "$(GARGOYLE_VERSION)" "$(V)"
 
 prepare:
 	if [ -d "../downloaded" ] ; then cp -r ../downloaded . ; fi
