@@ -188,6 +188,9 @@ apply_all_rules()
 						match_str="$match_str -m layer7 --l7proto $option_value"
 					fi
 				;;
+				connbytes)
+					match_str="$match_str -m connbytes --connbytes $(($option_value*1048576)): --connbytes-dir both --connbytes-mode bytes"
+				;;
 			esac
 		done
 

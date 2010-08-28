@@ -147,6 +147,16 @@
 					<option value="ICMP">ICMP</option>
 				</select>
 			</div>
+
+			<div>
+				<div class='leftcolumn'>
+					<input type='checkbox'  id='use_connbytes' onclick='enableAssociatedField(this,"connbytes", "")'  />
+					<label id="connbytes_label" for='connbytes'>Connection bytes reach:</label>
+				</div>
+				<input class='rightcolumn' type='text' id='connbytes' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='7' />
+				<em>MBytes</em>
+			</div>
+
 			<div>
 				<div class='leftcolumn'>
 					<input type='checkbox'  id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />
@@ -158,8 +168,6 @@
 				?>
 				</select>
 			</div>
-
-
 
 			<div>
 				<label class='leftcolumn' id="classification_label" for='class_name' >Set Service Class To:</label>
@@ -286,7 +294,7 @@
 
 			To use this feature set your QoS downlink speed to the maximum speed your ISP can deliver you in the best of
                      circumstances.  The control will maintain the downlink between 20% and 100% of this value as needed to 
-			maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of our measured uplink speed. 
+			maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of your measured uplink speed. 
                      </p>
 		</span>
 		<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>

@@ -148,6 +148,16 @@
 					<option value="ICMP">ICMP</option>
 				</select>
 			</div>
+
+			<div>
+				<div class='leftcolumn'>
+					<input type='checkbox'  id='use_connbytes' onclick='enableAssociatedField(this,"connbytes", "")'  />
+					<label id="connbytes_label" for='connbytes'>Connection bytes reach:</label>
+				</div>
+				<input class='rightcolumn' type='text' id='connbytes' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='7' />
+				<em>MBytes</em>
+			</div>
+
 			<div>
 				<div class='leftcolumn'>
 					<input type='checkbox'  id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />

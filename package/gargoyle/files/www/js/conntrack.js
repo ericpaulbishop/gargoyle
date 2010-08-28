@@ -117,27 +117,47 @@ function updateConnectionTable()
 						var srcPort = (line.match(/sport=([^ \t]*)[\t ]+/))[1];
 						var dstIp   = (line.match(/dst=([^ \t]*)[\t ]+/))[1];
 						var dstPort = (line.match(/dport=([^ \t]*)[\t ]+/))[1];
-						var uploadBytes = (line.match(/bytes=([^ \t]*)[\t ]+/))[1];
-						var downloadBytes = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
+						var bytes = (line.match(/bytes=([^ \t]*)[\t ]+/))[1];
 						var connmark    = line.match(/mark=/) ? parseInt((line.match(/mark=([^ \t]*)[\t ]+/))[1]) : "";
 						var l7proto = line.match(/l7proto=/) ? (line.match(/l7proto=([^ \t]*)[\t ]+/))[1] : "";
-
-
+						var srcIp2   = (line.match(/src=([^ \t]*)[\t ]+.*src=([^ \t]*)[\t ]+/))[2];
+						var srcPort2 = (line.match(/sport=([^ \t]*)[\t ]+.*sport=([^ \t]*)[\t ]+/))[2];
+						var dstIp2   = (line.match(/dst=([^ \t]*)[\t ]+.*dst=([^ \t]*)[\t ]+/))[2];
+						var dstPort2 = (line.match(/dport=([^ \t]*)[\t ]+.*dport=([^ \t]*)[\t ]+/))[2];
+						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
 						
+						var i = currentLanIp.lastIndexOf('.')
 
-						//filter web connections to and from the router
-						if(	(srcPort == httpPort || srcPort == httpsPort || srcPort==remoteHttpPort || srcPort == remoteHttpsPort) && (srcIp == currentLanIp || srcIp == currentWanIp) ||
-							(dstPort == httpPort || dstPort == httpsPort || dstPort==remoteHttpPort || dstPort == remoteHttpsPort)  && (dstIp == currentLanIp || dstIp == currentWanIp)
-						)
+						//filter connections to and from the router
+						if (srcIp.substr(0,i) == dstIp.substr(0,i))
 						{
 							//filter out
 						}
 						else
 						{
-							var tableRow =	[	parseInt(uploadBytes) + parseInt(downloadBytes),
-										protocol, 
-										textListToSpanElement([ getHostDisplay(srcIp) + ":" + srcPort, getHostDisplay(dstIp) + ":" + dstPort]), 
-										textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
+
+						//Connections are weird in that they list src/dest while we are interested in upload/download.
+						//Based on the location of the router WanIP in the connection record we can determine traffic direction
+							if (dstIp2 == currentWanIp) {
+								downloadBytes = bytes2;
+								uploadBytes = bytes;
+								localIp = srcIp;
+								localPort = srcPort;
+								WanIp = srcIp2;
+								WanPort = srcPort2;
+							} else {
+								downloadBytes = bytes;
+								uploadBytes = bytes2;
+								localIp = srcIp2;
+								localPort = srcPort2;
+								WanIp = dstIp2;
+								WanPort = dstPort2;
+							}
+
+							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
+									protocol, 
+									textListToSpanElement([ getHostDisplay(WanIp) + ":" + WanPort, getHostDisplay(localIp) + ":" + localPort]), 
+									textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 									];
 							if(qosEnabled)
 							{
@@ -168,7 +188,7 @@ function updateConnectionTable()
 				}
 
 
-				var columnNames= ['Proto', 'Src/Dest', 'Bytes Up/Down' ]; 
+				var columnNames= ['Proto', 'WAN Host/LAN Host', 'Bytes Up/Down' ]; 
 				if(qosEnabled) { columnNames.push("Qos Up/Down"); };
 				columnNames.push("L7 Proto");
 				
