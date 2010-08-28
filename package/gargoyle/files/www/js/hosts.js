@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -85,7 +85,7 @@ function resetVariables()
 	{
 		document.getElementById("wifi_data").style.display="block";
 		var columnNames=["Hostname", "Host IP", "Host MAC"];
-		var table = createTable(columnNames, parseWifi(arpHash, isBrcm, wifiLines), "wifi_table", false, false);
+		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
 		{
@@ -182,12 +182,14 @@ function sort2dStrArr(arr, testIndex)
 	arr.sort(str2dSort);
 }
 
-function parseWifi(arpHash, isBrcm, lines)
+function parseWifi(arpHash, wirelessDriver, lines)
 {
+	if(wirelessDriver == "" || lines.length == 0) { return []; }
+
 	//Host IP, Host MAC
 	var wifiTableData = [];
 	var lineIndex = 0;
-	if(!isBrcm)
+	if(wirelessDriver == "atheros")
 	{
 		lines.shift();
 	}
@@ -195,9 +197,9 @@ function parseWifi(arpHash, isBrcm, lines)
 	{
 		var nextLine = lines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = isBrcm ? splitLine[1].toUpperCase() : splitLine[0].toUpperCase();
+		var mac = wirelessDriver == "broadcom" ? splitLine[1].toUpperCase() : splitLine[0].toUpperCase();
 		var ip = arpHash[ mac ] == null ? "unknown" : arpHash[ mac ] ;
-		var hostname = getHostname(ip);			
+		var hostname = getHostname(ip);
 		wifiTableData.push( [ hostname, ip, mac ] );
 	}
 	sort2dStrArr(wifiTableData, 1);
