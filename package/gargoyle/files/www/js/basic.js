@@ -94,19 +94,8 @@ function saveChanges()
 				uci.remove('network', 'wan', 'type');
 				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
-					if(wirelessDriver != "mac80211")
-					{
-						uci.remove('network', 'wan', 'ifname');
-						uci.set('network', 'wan', 'type', 'bridge');
-					}
-					else if(getSelectedValue('wifi_mode') == "ap+sta")
-					{
-						uci.set('network', 'wan', 'ifname', "wlan1");
-					}
-					else
-					{
-						uci.set('network', 'wan', 'ifname', "wlan0");
-					}
+					uci.remove('network', 'wan', 'ifname');
+					uci.set('network', 'wan', 'type', 'bridge');
 				}
 				else if(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )
 				{
@@ -1251,8 +1240,9 @@ function resetData()
 	//set wan proto && wan/wifi/bridge variables
 	var wp = uciOriginal.get("network", "wan", "proto");
 	var wanUciIf= uciOriginal.get('network', 'wan', 'ifname');
+	var wanType = uciOriginal.get('network', 'wan', 'type');
 	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
-	var wanIsWifi = (wanUciIf == '' || (wanUciIf.match("wlan") != null && wirelessDriver == "mac80211")) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
+	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none") { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
 	setSelectedValue("wan_protocol", wp);
