@@ -62,7 +62,7 @@
 
 		<div id="connection_table_container"></div>
 		<div style="width:375px">
-			<p>Connections to the router web interface have been filtered out of this table to make it more easily readable.</p>
+			<p>Connections between local hosts and the router are not displayed.</p>
 		</div>
 	</fieldset>
 </form>

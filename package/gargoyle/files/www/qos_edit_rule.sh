@@ -70,6 +70,14 @@
 	</div>
 	<div>
 		<div class='leftcolumn'>
+			<input type='checkbox'  id='use_connbytes' onclick='enableAssociatedField(this,"connbytes", "")'  />
+			<label id="connbytes_label" for='connbytes'>Connection bytes reach:</label>
+		</div>
+		<input class='rightcolumn' type='text' id='connbytes' onkeyup='proofreadNumeric(this)' size='17' maxlength='7' />
+		<em>MB</em>
+	</div>
+	<div>
+		<div class='leftcolumn'>
 			<input type='checkbox'  id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />
 			<label id="app_protocol_label" for='app_protocol'>Application (Layer7) Protocol:</label>
 		</div>	
@@ -80,8 +88,6 @@
 		</select>
 	</div>
 
-
-			
 	<div>	
 		<label class='leftcolumn' id="classification_label" for='class_name' >Set Service Class To:</label>
 		<select class='rightcolumn' id="classification">
