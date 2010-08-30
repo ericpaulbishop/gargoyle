@@ -168,13 +168,27 @@ for target in $targets ; do
 	mkdir -p ../images/$target
 	arch=$(ls bin)
 	image_files=$(ls bin/$arch/ 2>/dev/null)
-	for i in $image_files ; do
-		if [ ! -d "bin/$arch/$i" ] ; then
-			version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
-			newname=$(echo "$i" | sed "s/openwrt/gargoyle_$version_str/g")
-			cp "bin/$arch/$i" "../images/$target/$newname"
-		fi
-	done
+	if [ ! -e $targets_dir/$target/profiles/default/profile_images  ]  ; then 
+		for i in $image_files ; do
+			if [ ! -d "bin/$arch/$i" ] ; then
+				version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
+				newname=$(echo "$i" | sed "s/openwrt/gargoyle_$version_str/g")
+				cp "bin/$arch/$i" "../images/$target/$newname"
+			fi
+		done
+	else
+		profile_images=$(cat $targets_dir/$target/profiles/default/profile_images 2>/dev/null)
+		for pi in $profile_images ; do
+			candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
+			for c in $candidates ; do
+				if [ ! -d "bin/$arch/$c" ] ; then
+					version_str=$(echo "$gargoyle_version" | tr 'A-Z' 'a-z' | sed 's/ *(.*$//g' | sed 's/ /_/g')
+					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$version_str/g")
+					cp "bin/$arch/$c" "../images/$target/$newname"
+				fi
+			done
+		done
+	fi
 
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
