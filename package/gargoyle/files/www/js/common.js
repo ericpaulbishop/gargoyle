@@ -1768,11 +1768,12 @@ function getBridgeSection(testUci)
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
 		}
+		if(bridgeSection != "")
+		{
+			bridgeSection = (testUci.get("wireless", bridgeSection, "mode").toLowerCase() == "ap") ? "" : bridgeSection;
+		}
 	}
-	if(bridgeSection != "")
-	{
-		bridgeSection = (testUci.get("wireless", bridgeSection, "mode").toLowerCase() == "ap") ? "" : bridgeSection;
-	}
+
 	return bridgeSection;
 }
 
