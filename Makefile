@@ -6,6 +6,9 @@ ALL: all
 all:
 	( \
 		targets=`ls targets | sed 's/custom//g' ` ;\
+		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+			rm -rf backfire-src ;\
+		fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
 				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" ;\
@@ -17,6 +20,9 @@ all:
 
 %: targets/%
 	( \
+		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+			rm -rf backfire-src ;\
+		fi ;\
 		if [ ! -d "$@-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
 			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" ;\
 		else \
