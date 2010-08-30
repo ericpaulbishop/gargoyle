@@ -1,0 +1,7 @@
+-ubnt-rspro-squashfs-
+-ubnt-rs-squashfs-
+-vmlinux.bin
+-vmlinux.elf
+-vmlinux.gz
+-vmlinux.lzma
+-root.squashfs
