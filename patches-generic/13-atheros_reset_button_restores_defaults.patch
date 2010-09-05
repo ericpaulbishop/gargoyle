@@ -1,0 +1,18 @@
+--- backfire-src/target/linux/atheros/base-files/etc/config/system	2010-08-30 08:27:35.022020772 -0400
++++ atheros-2.6-src/target/linux/atheros/base-files/etc/config/system	2010-09-05 16:28:10.735646389 -0400
+@@ -5,13 +5,7 @@
+ config button
+ 	option button	reset
+ 	option action	released
+-	option handler	"logger reboot"
++	option handler	"logger restore defaults ; /usr/lib/gargoyle/restore.sh "/etc/original_backup/backup.tar.gz" "1" ; reboot ;"
+ 	option min		0
+-	option max		4
+-
+-config button
+-	option button	reset
+-	option action	released
+-	option handler	"logger factory default"
+-	option min		5
+ 	option max		30
++
