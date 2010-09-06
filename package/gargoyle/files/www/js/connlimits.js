@@ -35,7 +35,7 @@ function saveChanges()
 		addParameterCommands("/proc/sys/net/ipv4/ip_conntrack_max", "net.ipv4.ip_conntrack_max", maxConnections);
 		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_max", "net.ipv4.netfilter.ip_conntrack_max", maxConnections);
 		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established", "net.ipv4.netfilter.ip_conntrack_tcp_timeout_established", tcpTimeout);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream", "net.ipv4.netfilter.ip_conntrack_udp_timout_stream", udpTimeout);
+		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream", "net.ipv4.netfilter.ip_conntrack_udp_timeout_stream", udpTimeout);
 		commands.push("mv /tmp/sysctl.conf.tmp.1 /etc/sysctl.conf");	
 
 		var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
