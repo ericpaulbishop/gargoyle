@@ -19,11 +19,18 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xh
 echo '<html xmlns="http://www.w3.org/1999/xhtml">'
 echo '<body>'
 
+if [ -e /tmp/restore_lock_file ] ; then
+	echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
+	echo "</body></html>"
+	exit
+fi
+touch /tmp/restore_lock_file
 
 #test that restore file is valid
 if [ ! -e "$restore_file" ] ; then
 	echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
 	echo "</body></html>"
+	rm -rf /tmp/restore_lock_file
 	exit
 else
 	tar xzf "$restore_file" -O >/dev/null 2>error
@@ -31,9 +38,13 @@ else
 	if [ -n "$error" ] ; then
 		echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
 		echo "</body></html>"
+		rm -rf /tmp/restore_lock_file
 		exit
 	fi
 fi
+
+
+
 
 if [ -e /tmp/restore ] ; then
 	rm -rf /tmp/restore
@@ -188,7 +199,8 @@ date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
 /etc/init.d/bwmon_gargoyle start 2>/dev/null
 /etc/init.d/cron start 2>/dev/null
 
-
+sleep 10
+rm -rf /tmp/restore_lock_file
 if [ -n "$error" ] ; then
 	echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
 else
