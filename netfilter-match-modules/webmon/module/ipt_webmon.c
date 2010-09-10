@@ -1250,6 +1250,7 @@ static void __exit fini(void)
 
 	#ifdef CONFIG_PROC_FS
 		remove_proc_entry("webmon_recent_domains", NULL);
+		remove_proc_entry("webmon_recent_searches", NULL);
 	#endif
 	nf_unregister_sockopt(&ipt_webmon_sockopts);
 	ipt_unregister_match(&webmon_match);
