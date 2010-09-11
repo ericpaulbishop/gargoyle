@@ -90,7 +90,7 @@ timezoneOffset = timezoneOffset.replace(/^\-0/g, "-");
 timezoneOffset = timezoneOffset.replace(/^\+?0/g, "");
 var timezoneOffset = (parseInt(timezoneOffset)/100)*60*60;
 var policyOption="";
-if(wirelessDriver == "broadcom")
+if(wirelessDriver == "broadcom" || wirelessDriver == "mac80211")
 {
 	policyOption="macfilter";
 }
