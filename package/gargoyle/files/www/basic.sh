@@ -66,10 +66,14 @@
 		echo "var wirelessDriver=\"\";"
 	fi
 
-
-
-	lease_start=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_acquired | sed 's/^.*=//g')
-	lease_lifetime=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_lifetime | sed 's/^.*=//g')
+	cur_date_seconds=$(date +%s)
+	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')
+	lease_start_uptime=$(uci -P /var/state get network.wan.lease_acquired_uptime 2>/dev/null)
+	lease_start=$(uci -P /var/state get network.wan.lease_acquired 2>/dev/null )
+	lease_lifetime=$(uci -P /var/state get network.wan.lease_lifetime 2>/dev/null)
+	echo "var currentDateSeconds = \"$cur_date_seconds\";"
+	echo "var uptime = \"$uptime\";"
+	echo "var leaseStartUptime = \"$lease_start_uptime\";"
 	echo "var leaseStart = \"$lease_start\";"
 	echo "var leaseLifetime = \"$lease_lifetime\";"
 	echo "var timezoneOffset = \""$(date +%z)"\";"

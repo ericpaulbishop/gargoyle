@@ -1092,8 +1092,15 @@ function resetData()
 		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
 		var releaseDate = new Date();
 		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-		releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
-		
+		if(leaseStartUptime != "")
+		{
+			var remainingLeaseSeconds = parseInt(leaseLifetime) - (parseInt(uptime)-parseInt(leaseStartUptime));
+			releaseDate.setTime( (parseInt(currentDateSeconds)+remainingLeaseSeconds)*1000 );
+		}
+		else
+		{
+			releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
+		}
 		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 		var releaseStr = "";
 		var y2 = twod(releaseDate.getUTCFullYear()%100)
@@ -1858,6 +1865,7 @@ function setTransmitPower(selectId, textId)
 
 function renewDhcpLease()
 {
+	//we don't have to worry about date/lease time mismatch here (corrected for by lease_acquired_uptime variable, in patched udhcpcd script), since date should already be set by now
 	var commands = [];
 	commands.push("killall udhcpc >/dev/null 2>&1 ");
 	commands.push("udhcpc -t 0 -i $(uci -P /var/state get network.wan.ifname) -b -p /var/run/$(uci -P /var/state get network.wan.ifname).pid -R >/dev/null 2>&1");
