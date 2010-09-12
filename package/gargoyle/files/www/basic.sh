@@ -469,7 +469,17 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 				<em><span id="wifi_dbm">dBm</span></em>
 			</span>
 		</div>
-	
+		
+		<div id='wifi_channel_width_container'>
+			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_channel_width'>
+					<option value='HT20'>20MHz</option>
+					<option value='HT40+'>40MHz</option>
+				</select>
+			</span>
+		</div>
+
 
 		<div id="mac_enabled_container">
 			<label class="leftcolumn" for='mac_filter_enabled'>Wireless MAC Filter:</label>

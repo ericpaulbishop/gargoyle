@@ -1086,7 +1086,7 @@ function resetData()
 		removeOptionFromSelectElement("wifi_channel1", rc, document);
 		removeOptionFromSelectElement("wifi_channel2", rc, document);
 	}
-
+	
 	if(leaseStart != "")
 	{
 		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
@@ -1353,6 +1353,20 @@ function resetData()
 	var allWirelessSections = uciOriginal.getAllSections("wireless");
 	var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
 	var firstWirelessDevice = allWifiDeviceSections[0];
+
+	var htmode = uciOriginal.get("wireless", firstWirelessDevice, "htmode");
+	if(wirelessDriver == "mac80211" && (htmode == "HT20" || htmode == "HT40+" || htmode == "HT40-"))
+	{
+		document.getElementById("wifi_channel_width_container").style.display="block";
+		htmode == htmode == "HT40-" ? "HT40+" : htmode;
+		setSelectedValue("wifi_channel_width", htmode);
+	}
+	else
+	{
+		document.getElementById("wifi_channel_width").style.display="none";
+	}
+
+
 
 	wifiCfg2="";
 	wifiCfg3="";
