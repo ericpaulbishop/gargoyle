@@ -14,10 +14,16 @@
 <!--
 <?
 	is_brcm=$(cat /proc/cpuinfo | grep Broadcom)
-	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ]; then
-		echo "var isBrcm=true;"
+	is_atheros=$(cat /proc/cpuinfo | grep "system type" | grep "Atheros AR[1-6]")
+	is_ar71xx=$(cat /proc/cpuinfo  | grep "system type" | grep "Atheros AR[7-9]")
+	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ] ; then
+		echo "var platform=\"broadcom\";"
+	elif [ -n "$is_atheros" ] ; then
+		echo "var platform=\"atheros\";"
+	elif [ -n "$is_ar71xx" ] ; then
+		echo "var platform=\"ar71xx\";"
 	else
-		echo "var isBrcm=false;"
+		echo "var platform=\"x86\";"
 	fi
 ?>
 //-->

@@ -51,6 +51,17 @@ function failure()
 
 function setUpgradeFormat()
 {
-	document.getElementById("upgrade_arch").value = isBrcm ? "brcm" : "not_brcm";
-	setChildText("upgrade_text", "Firmware should be a " + (isBrcm ? ".bin or .trx file" : "combined .img file"));
+	document.getElementById("upgrade_arch").value = (platform == "broadcom") ? "brcm" : "not_brcm";
+	if(platform == "broadcom")
+	{
+		setChildText("upgrade_text", "Firmware should be a .bin or .trx file");
+	}
+	else if(platform == "ar71xx")
+	{
+		setChildText("upgrade_text", "Firmware should be a sysupgrade.bin file");
+	}
+	else
+	{
+		setChildText("upgrade_text", "Firmware should be a combined .img file");
+	}
 }
