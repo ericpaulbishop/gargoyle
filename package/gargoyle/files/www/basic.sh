@@ -51,11 +51,11 @@
 		#use iw to get available channels
 		cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
 		if [ -n "$cur_if" ] ; then
-			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
 		else		
 			iw phy phy0 interface add tmpmon type monitor
 			ifconfig tmpmon up
-			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
 			ifconfig tmpmon down
 			iw dev tmpmon del
 		fi
