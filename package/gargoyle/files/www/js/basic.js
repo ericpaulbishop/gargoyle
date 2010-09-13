@@ -182,7 +182,10 @@ function saveChanges()
 					}
 					else
 					{
-						uci.set("wireless", section1, "bssid", wdsList.join(" ").toLowerCase());
+						if(wirelessDriver == "atheros")
+						{
+							uci.set("wireless", section1, "bssid", wdsList.join(" ").toLowerCase());
+						}
 						uci.set("wireless", section1, "wds", "1");
 					}
 				}
@@ -589,31 +592,35 @@ function saveChanges()
 					}
 				
 				}
-				else //atheros driver
+				else //atheros & mac80211 driver
 				{
-					uci.set("wireless", "cfg2", "", "wifi-iface");
-					uci.set("wireless", "cfg2", "device", firstWirelessDevice);
-					uci.set("wireless", "cfg2", "network", "lan");
-					uci.set("wireless", "cfg2", "mode", "ap");
-					uci.set("wireless", "cfg2", "wds", "1");
-					uci.set("wireless", "cfg2", "ssid", ssid);
-					uci.set("wireless", "cfg2", "bssid", wdsList.join(" ").toLowerCase() );
-					uci.set("wireless", "cfg2", "encryption", encryption);
-					if(encryption != "none") { uci.set("wireless", "cfg2", "key", key); }
-					preCommands = preCommands + "\nuci set wireless.cfg2=wifi-iface\n";
+					var cfg = "cfg2";
+					if(wirelessDriver == "atheros")
+					{
+						uci.set("wireless", cfg, "", "wifi-iface");
+						uci.set("wireless", cfg, "device", firstWirelessDevice);
+						uci.set("wireless", cfg, "network", "lan");
+						uci.set("wireless", cfg, "mode", "ap");
+						uci.set("wireless", cfg, "wds", "1");
+						uci.set("wireless", cfg, "ssid", ssid);
+						uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() );
+						uci.set("wireless", cfg, "encryption", encryption);
+						if(encryption != "none") { uci.set("wireless", cfg, "key", key); }
+						preCommands = preCommands + "\nuci set wireless." + cfg + "=wifi-iface\n";
+						cfg = "cfg3";
+					}
 
 
-					uci.set("wireless", "cfg3", "", "wifi-iface");
-					uci.set("wireless", "cfg3", "device", firstWirelessDevice);
-					uci.set("wireless", "cfg3", "network", "lan");
-					uci.set("wireless", "cfg3", "mode", "sta");
-					uci.set("wireless", "cfg3", "wds", "1");
-					uci.set("wireless", "cfg3", "ssid", ssid);
-					uci.set("wireless", "cfg3", "bssid", wdsList.join(" ").toLowerCase() );
-					uci.set("wireless", "cfg3", "encryption", encryption);
-					if(encryption != "none") { uci.set("wireless", "cfg3", "key", key); }
-					preCommands = preCommands + "\nuci set wireless.cfg3=wifi-iface\n";
-
+					uci.set("wireless", cfg, "", "wifi-iface");
+					uci.set("wireless", cfg, "device", firstWirelessDevice);
+					uci.set("wireless", cfg, "network", "lan");
+					uci.set("wireless", cfg, "mode", "sta");
+					uci.set("wireless", cfg, "wds", "1");
+					uci.set("wireless", cfg, "ssid", ssid);
+					uci.set("wireless", cfg, "encryption", encryption);
+					if(wirelessDriver == "atheros"){  uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() ); }
+					if(encryption != "none")       {  uci.set("wireless", cfg, "key", key); }
+					preCommands = preCommands + "\nuci set wireless." + cfg + "=wifi-iface\n";
 				}
 
 			}
@@ -772,7 +779,7 @@ function proofreadAll()
 	var testWds = function(tableContainerId, selectId, wdsValue)
 	{
 		var error = null;
-		if( getSelectedValue(selectId) == wdsValue )
+		if( getSelectedValue(selectId) == wdsValue && wirelessDriver != "mac80211" )
 		{
 			var wdsData = getTableDataArray(document.getElementById(tableContainerId).firstChild);
 			error = wdsData.length > 0 ? null : "You must specify at least one MAC address in order to enable WDS";
@@ -986,12 +993,14 @@ function setWifiVisibility()
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
 	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
+	var b = wirelessDriver == "mac80211" ? 0 : 1;
+
 	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
 	wifiVisibilities['ap']       = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 1,1,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
 	wifiVisibilities['sta']      = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['ap+sta']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['adhoc']    = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
@@ -1040,8 +1049,8 @@ function setBridgeVisibility()
 		//alert("fixed_display=" + document.getElementById("bridge_fixed_encryption_container").style.display + "brenc = " + brenc);
 
 		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" ? "block" : "none";
-		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
-		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" ? "block" : "none";
+		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
+		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
 		document.getElementById("bridge_fixed_encryption_container").style.display="none";
 		document.getElementById("bridge_fixed_channel_container").style.display="none";
 		
@@ -1141,18 +1150,9 @@ function resetData()
 		setElementEnabled(document.getElementById("dhcp_renew_button"), false);
 	}
 
-
-	var macElements = [ "bridge_wifi_mac", "wifi_mac" ];
-	var meIndex;
-	for(meIndex = 0; meIndex < macElements.length; meIndex++)
-	{
-		var me = document.getElementById(macElements[meIndex]);
-		if(me.firstChild != null)
-		{
-			me.removeChild(me.firstChild);
-		}
-		me.appendChild( document.createTextNode(currentWirelessMac) );
-	}
+	
+	setChildText("bridge_wifi_mac", currentWirelessMac, null, null, null);
+	setChildText("wifi_mac", currentWirelessMac, null, null, null);
 
 
 	var confIsBridge = isBridge(uciOriginal);
@@ -1207,7 +1207,7 @@ function resetData()
 					}
 				}
 			}
-			else
+			else if(wirelessDriver == "atheros")
 			{
 				var bssids = uciOriginal.get("wireless", bridgeSection, "bssid").split(/[\t ]+/);
 				var bIndex;
@@ -1539,7 +1539,7 @@ function resetData()
 					setSelectedValue("wifi_mode", "ap+wds");
 				}
 			}
-			else //atheros or mac80211
+			else if(wirelessDriver == "atheros")
 			{
 				if(uciOriginal.get("wireless", allWirelessSections[sectionIndex], "wds") == "1")
 				{
