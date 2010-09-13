@@ -81,6 +81,11 @@ function saveChanges()
 		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_gateway").checked )
 		{
+			if(document.getElementById("wifi_channel_width_container").style.display == "block")
+			{
+				uci.set("wireless",  firstWirelessDevice, "htmode", getSelectedValue("wifi_channel_width"));
+			}
+
 			currentLanIp = document.getElementById("lan_ip").value;
 			if(getSelectedValue('wan_protocol') == 'none')
 			{
@@ -467,6 +472,12 @@ function saveChanges()
 			{
 				uci.set('network', 'lan', 'ifname', defaultLanIf);
 			}
+
+			if(document.getElementById("bridge_channel_width_container").style.display == "block")
+			{
+				uci.set("wireless",  firstWirelessDevice, "htmode", getSelectedValue("bridge_channel_width"));
+			}
+
 
 			currentLanIp = document.getElementById("bridge_ip").value;
 			//compute configuration  for bridge
@@ -1360,10 +1371,12 @@ function resetData()
 		document.getElementById("wifi_channel_width_container").style.display="block";
 		htmode == htmode == "HT40-" ? "HT40+" : htmode;
 		setSelectedValue("wifi_channel_width", htmode);
+		setSelectedValue("bridge_channel_width", htmode);
 	}
 	else
 	{
 		document.getElementById("wifi_channel_width").style.display="none";
+		document.getElementById("bridge_channel_width").style.display="none";
 	}
 
 
@@ -1850,6 +1863,12 @@ function parseWifiScan(rawScanOutput)
 
 
 	return sortedParsed;
+}
+
+function setChannelWidth(selectCtl)
+{
+	setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
+	setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
 }
 
 function setTransmitPower(selectId, textId)

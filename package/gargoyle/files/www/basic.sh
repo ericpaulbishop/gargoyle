@@ -184,7 +184,15 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 					<em><span id="bridge_dbm">dBm</span></em>
 				</span>
 			</div>
-
+			<div id='bridge_channel_width_container'>
+				<label class='leftcolumn' for='bridge_channel_width' id='bridge_channel_width_label'>Channel Width:</label>
+				<span class='rightcolumn'>
+				<select id='bridge_channel_width' onchange='setChannelWidth(this)'>
+						<option value='HT20'>20MHz</option>
+						<option value='HT40+'>40MHz</option>
+					</select>
+				</span>
+			</div>
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
 				<span class="rightcolumn">
@@ -473,7 +481,7 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 		<div id='wifi_channel_width_container'>
 			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
 			<span class='rightcolumn'>
-				<select id='wifi_channel_width'>
+				<select id='wifi_channel_width' onchange='setChannelWidth(this)'>
 					<option value='HT20'>20MHz</option>
 					<option value='HT40+'>40MHz</option>
 				</select>
