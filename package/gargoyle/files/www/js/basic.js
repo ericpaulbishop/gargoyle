@@ -958,6 +958,7 @@ function setWifiVisibility()
 
 	var wifiIds=[	'internal_divider1', 
 	    		'wifi_txpower_container',
+			'wifi_channel_width_container',
 	    		'mac_enabled_container', 
 			'mac_filter_container', 
 			
@@ -987,6 +988,7 @@ function setWifiVisibility()
 			'wifi_wep2_container'
 			];
 
+	var cw = wirelessDriver == "mac80211" ? 1 : 0;
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
@@ -999,12 +1001,12 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,    0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,cw,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,cw,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,     0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1368,15 +1370,14 @@ function resetData()
 	var htmode = uciOriginal.get("wireless", firstWirelessDevice, "htmode");
 	if(wirelessDriver == "mac80211" && (htmode == "HT20" || htmode == "HT40+" || htmode == "HT40-"))
 	{
-		document.getElementById("wifi_channel_width_container").style.display="block";
+		document.getElementById("bridge_channel_width_container").style.display="block";
 		htmode == htmode == "HT40-" ? "HT40+" : htmode;
 		setSelectedValue("wifi_channel_width", htmode);
 		setSelectedValue("bridge_channel_width", htmode);
 	}
 	else
 	{
-		document.getElementById("wifi_channel_width").style.display="none";
-		document.getElementById("bridge_channel_width").style.display="none";
+		document.getElementById("bridge_channel_width_container").style.display="none";
 	}
 
 
