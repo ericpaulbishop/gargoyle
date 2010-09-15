@@ -1,0 +1,36 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+START=60
+STOP=60
+
+NFS_D=/var/lib/nfs
+LOCK_D=/var/lib/nfs/sm
+
+start() {
+	grep -q /proc/fs/nfsd /proc/mounts || \
+		mount -t nfsd nfsd /proc/fs/nfsd
+	mkdir -p $NFS_D
+	mkdir -p $LOCK_D
+	touch $NFS_D/rmtab
+
+        sysctl -w fs.nfs.nlm_tcpport=32777 fs.nfs.nlm_udpport=32777 > /dev/null
+	/usr/sbin/rpc.statd -p 32778 -o 32779
+	/usr/sbin/exportfs -r
+	/usr/sbin/rpc.nfsd
+	/usr/sbin/rpc.mountd -p 32780
+}
+
+stop() {
+	killall rpc.mountd 2> /dev/null
+	rpc.nfsd 0 2> /dev/null
+	/usr/sbin/exportfs -au
+	killall rpc.statd 2> /dev/null
+	grep -q /proc/fs/nfsd /proc/mounts && \
+		umount /proc/fs/nfsd
+}
+
+reload() {
+	/usr/sbin/exportfs -r
+}
+

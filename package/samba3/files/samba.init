@@ -1,0 +1,72 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2008-2010 OpenWrt.org
+
+. /etc/functions.sh
+
+START=60
+
+
+smb_header() {
+	local name
+	local workgroup
+	local description
+	local homes
+
+	config_get name $1 name
+	config_get workgroup $1 workgroup
+	config_get description $1 description
+	config_get homes $1 homes
+
+	[ -z "$name" ] && name=openwrt
+	[ -z "$workgroup" ] && workgroup=openwrt
+	[ -z "$description" ] && description=openwrt
+
+	cp /etc/samba/smb.conf.template /tmp/smb.conf
+	[ -L /etc/samba/smb.conf ] || ln -nsf /tmp/smb.conf /etc/samba/smb.conf
+	sed -i "s/|NAME|/$name/g" /tmp/smb.conf
+	sed -i "s/|WORKGROUP|/$workgroup/g" /tmp/smb.conf
+	sed -i "s/|DESCRIPTION|/$description/g" /tmp/smb.conf
+	[ "$homes" == "1" ] && {
+		echo -e "\n[homes]\n\tcomment = Home Directories\n\tbrowseable = no\n\tread only = no\n\tcreate mode = 0750" >> /tmp/smb.conf
+	}
+}
+
+smb_add_share() {
+	local name
+	local path
+	local users
+	local read_only
+	local guest_ok
+	local create_mask
+	local dir_mask
+
+	config_get name $1 name
+	config_get path $1 path
+	config_get users $1 users
+	config_get read_only $1 read_only
+	config_get guest_ok $1 guest_ok
+	config_get create_mask $1 create_mask
+	config_get dir_mask $1 dir_mask
+
+	[ -z "$name" -o -z "$path" ] && return
+
+	echo -e "\n[$name]\n\tpath = $path" >> /tmp/smb.conf
+	[ -n "$users" ] && echo -e "\tvalid users = $users" >> /tmp/smb.conf
+	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /tmp/smb.conf
+	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /tmp/smb.conf
+	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /tmp/smb.conf
+	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /tmp/smb.conf
+}
+
+start() {
+	config_load samba
+	config_foreach smb_header samba
+	config_foreach smb_add_share sambashare
+	smbd -D
+	nmbd -D
+}
+
+stop() {
+	killall smbd
+	killall nmbd
+}

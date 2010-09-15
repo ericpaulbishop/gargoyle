@@ -1,0 +1,16 @@
+[global]
+	netbios name = |NAME| 
+	workgroup = |WORKGROUP|
+	server string = |DESCRIPTION|
+	syslog = 10
+	encrypt passwords = true
+	passdb backend = smbpasswd
+	obey pam restrictions = yes
+	socket options = TCP_NODELAY
+	unix charset = ISO-8859-1
+	preferred master = yes
+	os level = 20
+	security = share
+	guest account = nobody
+	invalid users = root
+	smb passwd file = /etc/samba/smbpasswd

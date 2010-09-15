@@ -1,0 +1,37 @@
+diff -urN nfs-utils-1.1.5/utils/mountd/cache.c nfs-utils-1.1.5.new/utils/mountd/cache.c
+--- nfs-utils-1.1.5/utils/mountd/cache.c	2009-03-05 12:42:56.000000000 +0100
++++ nfs-utils-1.1.5.new/utils/mountd/cache.c	2009-04-07 16:11:09.000000000 +0200
+@@ -142,6 +142,7 @@
+ 	pw = getpwuid(uid);
+ 	if (!pw)
+ 		rv = -1;
++#ifndef __UCLIBC__
+ 	else {
+ 		rv = getgrouplist(pw->pw_name, pw->pw_gid, groups, &ngroups);
+ 		if (rv == -1 && ngroups >= 100) {
+@@ -153,6 +154,7 @@
+ 						  groups, &ngroups);
+ 		}
+ 	}
++#endif /* __UCLIBC__ */
+ 	qword_printint(f, uid);
+ 	qword_printint(f, time(0)+30*60);
+ 	if (rv >= 0) {
+diff -burN nfs-utils-1.1.5/support/nfs/svc_socket.c nfs-utils-1.1.5.p/support/nfs/svc_socket.c
+--- nfs-utils-1.1.5/support/nfs/svc_socket.c	2009-03-05 12:42:56.000000000 +0100
++++ nfs-utils-1.1.5.p/support/nfs/svc_socket.c	2009-04-07 17:33:07.307458029 +0200
+@@ -66,9 +66,13 @@
+ 
+   memset (&addr, 0, sizeof (addr));
+   addr.sin_family = AF_INET;
+-
++#ifndef __UCLIBC__ /* neither getrpcbynumber() nor getrpcbynumber_r() is SuSv3 */
+   ret = getrpcbynumber_r (number, &rpcbuf, rpcdata, sizeof rpcdata,
+ 			  &rpcp);
++#else
++  rpcp = getrpcbynumber (number);
++  ret = 0;
++#endif
+   if (ret == 0 && rpcp != NULL)
+     {
+       /* First try name.  */
