@@ -51,11 +51,11 @@
 		#use iw to get available channels
 		cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
 		if [ -n "$cur_if" ] ; then
-			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
 		else		
 			iw phy phy0 interface add tmpmon type monitor
 			ifconfig tmpmon up
-			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\")+\"\");" ; } '
+			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
 			ifconfig tmpmon down
 			iw dev tmpmon del
 		fi
@@ -66,10 +66,14 @@
 		echo "var wirelessDriver=\"\";"
 	fi
 
-
-
-	lease_start=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_acquired | sed 's/^.*=//g')
-	lease_lifetime=$(uci -P /var/state show network.wan 2>/dev/null | grep lease_lifetime | sed 's/^.*=//g')
+	cur_date_seconds=$(date +%s)
+	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')
+	lease_start_uptime=$(uci -P /var/state get network.wan.lease_acquired_uptime 2>/dev/null)
+	lease_start=$(uci -P /var/state get network.wan.lease_acquired 2>/dev/null )
+	lease_lifetime=$(uci -P /var/state get network.wan.lease_lifetime 2>/dev/null)
+	echo "var currentDateSeconds = \"$cur_date_seconds\";"
+	echo "var uptime = \"$uptime\";"
+	echo "var leaseStartUptime = \"$lease_start_uptime\";"
 	echo "var leaseStart = \"$lease_start\";"
 	echo "var leaseLifetime = \"$lease_lifetime\";"
 	echo "var timezoneOffset = \""$(date +%z)"\";"
@@ -86,7 +90,7 @@ timezoneOffset = timezoneOffset.replace(/^\-0/g, "-");
 timezoneOffset = timezoneOffset.replace(/^\+?0/g, "");
 var timezoneOffset = (parseInt(timezoneOffset)/100)*60*60;
 var policyOption="";
-if(wirelessDriver == "broadcom")
+if(wirelessDriver == "broadcom" || wirelessDriver == "mac80211")
 {
 	policyOption="macfilter";
 }
@@ -180,7 +184,15 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 					<em><span id="bridge_dbm">dBm</span></em>
 				</span>
 			</div>
-
+			<div id='bridge_channel_width_container'>
+				<label class='leftcolumn' for='bridge_channel_width' id='bridge_channel_width_label'>Channel Width:</label>
+				<span class='rightcolumn'>
+				<select id='bridge_channel_width' onchange='setChannelWidth(this)'>
+						<option value='HT20'>20MHz</option>
+						<option value='HT40+'>40MHz</option>
+					</select>
+				</span>
+			</div>
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
 				<span class="rightcolumn">
@@ -465,7 +477,17 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 				<em><span id="wifi_dbm">dBm</span></em>
 			</span>
 		</div>
-	
+		
+		<div id='wifi_channel_width_container'>
+			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_channel_width' onchange='setChannelWidth(this)'>
+					<option value='HT20'>20MHz</option>
+					<option value='HT40+'>40MHz</option>
+				</select>
+			</span>
+		</div>
+
 
 		<div id="mac_enabled_container">
 			<label class="leftcolumn" for='mac_filter_enabled'>Wireless MAC Filter:</label>

@@ -700,8 +700,8 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 					{
 						char* value = split[2];
 						char value_key[700];
-						uint32_t ip = parsed_ip[0] + (parsed_ip[1]<<8) + (parsed_ip[2]<<16) +  (parsed_ip[3]<<24) ;
-
+						uint32_t ip = (parsed_ip[0]<<24) + (parsed_ip[1]<<16) + (parsed_ip[2]<<8) +  (parsed_ip[3]) ;
+						ip = htonl(ip);
 						sprintf(value_key, STRIP"@%s", NIPQUAD(ip), value);
 						if(type == WEBMON_DOMAIN)
 						{
@@ -1250,6 +1250,7 @@ static void __exit fini(void)
 
 	#ifdef CONFIG_PROC_FS
 		remove_proc_entry("webmon_recent_domains", NULL);
+		remove_proc_entry("webmon_recent_searches", NULL);
 	#endif
 	nf_unregister_sockopt(&ipt_webmon_sockopts);
 	ipt_unregister_match(&webmon_match);

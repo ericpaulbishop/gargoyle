@@ -146,7 +146,7 @@ function resetData()
 		addOptionToSelectElement("timezone", timezone, timezoneDefinitions[timezone]);
 	}
 
-	var systemSections = uciOriginal.getAllSections("system");
+	var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 	var currentTimezone = uciOriginal.get("system", systemSections[0], "timezone");
 	currentTimezone = currentTimezone == "UTC" ? "UTC0" : currentTimezone;
 	setSelectedValue("timezone", previousTimezoneDefinition); //set default value

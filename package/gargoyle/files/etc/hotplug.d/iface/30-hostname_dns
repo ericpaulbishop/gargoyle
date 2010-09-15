@@ -1,0 +1,29 @@
+#!/bin/sh
+
+
+if [ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] ; then 
+	echo "here"
+	inc=0;
+	if_ip=$(uci -P /var/state get network.$INTERFACE.ipaddr)
+	while [ -z "$if_ip" ] && [ $inc -lt 20 ] ; do
+		sleep 2
+		inc=$(($inc+2))
+		if_ip=$(uci -P /var/state get network.$INTERFACE.ipaddr)
+	done
+	hostname=$(uci get system.@system[0].hostname)
+	if [ -n "$if_ip" ] && [ -n "$hostname" ] ; then
+		hostname=$(echo "$hostname" | sed 's/[^0-9a-zA-Z]/_/g' )
+		entry_exists=$(cat /etc/hosts | sed 's/\t/    /g' | grep " $hostname\$" | grep "$if_ip")
+		if [ -z "$entry_exists" ] ; then
+			cat /etc/hosts | sed 's/\t/    /g' | grep -v " $hostname\$" > /tmp/new.hosts.tmp
+			echo "$if_ip    $hostname" >> /tmp/new.hosts.tmp
+			mv /tmp/new.hosts.tmp /etc/hosts
+			dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
+			if [ -n "$dnsmasq_enabled" ] ; then
+				/etc/init.d/dnsmasq restart
+			fi
+		fi	
+	fi
+fi
+
+

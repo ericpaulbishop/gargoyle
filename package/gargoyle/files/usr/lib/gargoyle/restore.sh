@@ -188,8 +188,13 @@ fi
 
 if [ "$restore_password" != "1" ] ; then
 	cp /tmp/passwd  /etc/passwd 
+elif [ "$restore_file" = "/etc/original_backup/backup.tar.gz" ] ; then
+	uci set gargoyle.global.is_first_boot=1
+	uci commit	
 fi
+
 rm /tmp/passwd
+
 
 #overwrite old date, then restart ntpclient and then bwmon
 #this makes sure that we don't restore crontab that tries
