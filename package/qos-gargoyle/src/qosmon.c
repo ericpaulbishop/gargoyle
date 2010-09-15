@@ -957,7 +957,8 @@ int main(int argc, char *argv[])
 
                     //Ping times acceptable then ramp up at .5%/sec 
 					//Try to creep up on the limit to avoid oscillation.
-                    if (fil_triptime < 0.7 * pinglimit) {
+					//Only increase the download bw if the link load indicates its needed.
+                    if ((fil_triptime < 0.7 * pinglimit) && (dbw_fil > new_dbw_ul * .9)) {
                        new_dbw_ul = new_dbw_ul * (1.0 + .005*period/1000);
 					   if (new_dbw_ul > DBW_UL*.9) new_dbw_ul=DBW_UL*.9;
 
