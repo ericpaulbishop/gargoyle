@@ -581,12 +581,13 @@ void print_interface_vars(void)
 	
 	int have_switched_eths=0;
 	int interface_index; 
+	unsigned long num_destroyed;
 	for(interface_index=0; interfaces[interface_index] != NULL && have_switched_eths == 0; interface_index++)
 	{
 		have_switched_eths = strstr(interfaces[interface_index], "eth") != NULL && strstr(interfaces[interface_index], ".") != NULL ? 1 : 0;
 	}
 
-	list* eths = initialize_list()	
+	list* eths = initialize_list();	
 	for(interface_index=0; interfaces[interface_index] != NULL; interface_index++)
 	{
 		if(	strstr(interfaces[interface_index], "eth") != NULL && 
@@ -598,13 +599,14 @@ void print_interface_vars(void)
 		free(interfaces[interface_index]);
 	}
 	free(interfaces);
+	destroy_list(eths, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 
-	if(eths.length > 1)
+	if(eths->length > 1)
 	{
 		default_wan_if = (char*)pop_list(eths);
 	}
-	while(eths.length > 0)
+	while(eths->length > 0)
 	{
 		if(default_lan_if == NULL)
 		{
