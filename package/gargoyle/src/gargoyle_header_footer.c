@@ -585,25 +585,38 @@ void print_interface_vars(void)
 	{
 		have_switched_eths = strstr(interfaces[interface_index], "eth") != NULL && strstr(interfaces[interface_index], ".") != NULL ? 1 : 0;
 	}
-	
+
+	list* eths = initialize_list()	
 	for(interface_index=0; interfaces[interface_index] != NULL; interface_index++)
 	{
 		if(	strstr(interfaces[interface_index], "eth") != NULL && 
 			(strstr(interfaces[interface_index], ".") != NULL || have_switched_eths == 0)
 		  )
 		{
-			if(default_lan_if == NULL)
-			{
-				default_lan_if = strdup(interfaces[interface_index]);
-			}
-			else if(default_wan_if == NULL)
-			{
-				default_wan_if = strdup(interfaces[interface_index]);
-			}
+			push_list(eths, strdup(interfaces[interface_index]));
 		}
 		free(interfaces[interface_index]);
 	}
 	free(interfaces);
+
+
+	if(eths.length > 1)
+	{
+		default_wan_if = (char*)pop_list(eths);
+	}
+	while(eths.length > 0)
+	{
+		if(default_lan_if == NULL)
+		{
+			default_lan_if = (char*)shift_list(eths);
+		}
+		else
+		{
+			char* tmp = default_lan_if;
+			default_lan_if = dynamic_strcat(3, tmp, " ", (char*)shift_list(eths));
+			free(tmp);
+		}
+	}
 
 	//if we have switched eths but default_wan_if is not defined,
 	//then we probably have just disabled it.  We wouldn't have an eth0.0
@@ -644,6 +657,7 @@ void print_interface_vars(void)
        	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
+		char* switch_dev = NULL;
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
 		{
 			uci_wan_dev=get_option_value_string(uci_to_option(e));
@@ -669,7 +683,36 @@ void print_interface_vars(void)
 		{
 			uci_lan_mask=get_option_value_string(uci_to_option(e));
 		}
-
+		
+		//if default wan if is set to a switch device, then we have it backwards, and the wan should be the lan
+		//this is a problem for, e.g. routerstation pro where eth1 is the switch
+		uci_foreach_element( &p->sections, e)
+		{
+			struct uci_section *section = uci_to_section(e);
+			if(strstr(section->type, "switch") != NULL)
+			{
+				struct uci_element *e2;
+				uci_foreach_element(&section->options, e2) 
+				{
+					if(strcmp(e2->name,"device")==0)
+					{
+						switch_dev = get_option_value_string(uci_to_option(e2));
+					}
+				}
+			}
+		}
+		if(switch_dev != NULL)
+		{
+			if(strcmp(switch_dev, default_wan_if) == 0)
+			{
+				//wan is set to a switch, so swap default lan & wan if
+				char* tmp = default_wan_if;
+				default_wan_if = default_lan_if;
+				default_lan_if = tmp;
+			}
+			free(switch_dev);
+		}
+		
 	}
 	if(uci_load(state_ctx, "wireless", &p) == UCI_OK)
 	{
