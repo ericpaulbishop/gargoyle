@@ -192,7 +192,7 @@
 
 		<div id="qos_up_2" class="indent">
 			<span id='qos_up_2_txt'>
-				<p>Each service class is specified by three parameters: percent bandwidth at capacity, maximum bandwidth and maximum bandwidth.</p>
+				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
 
 				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class of
 				connection when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
@@ -201,7 +201,7 @@
 
 				<p><em>Minimum bandwidth</em> specifies the minimum service this class will be allocated when the link is at capacity.
 				For certain applications like VoIP or online gaming it is convienient to specify a minimum service rather than a percentage.
-				QoS will satisfiy the minimum service of all classes first before allocating the remaining service to other waiting classes.
+				QoS will satisfy the minimum service of all classes first before allocating the remaining service to other waiting classes.
 				</p>
 
 				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  Even if unused bandwidth

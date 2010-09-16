@@ -24,7 +24,7 @@
 	
 	<p>The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>	
 
-	<p>The Gargoyle interface is a front end for the excellent OpenWrt Kamikaze firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team (<a href="http://openwrt.org">openwrt.org</a>).</p>
+	<p>The Gargoyle interface is a front end for the excellent OpenWrt firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team (<a href="http://openwrt.org">openwrt.org</a>).</p>
 
 </fieldset>
 
