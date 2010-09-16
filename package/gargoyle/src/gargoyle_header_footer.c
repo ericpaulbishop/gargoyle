@@ -599,8 +599,6 @@ void print_interface_vars(void)
 		free(interfaces[interface_index]);
 	}
 	free(interfaces);
-	destroy_list(eths, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-
 
 	if(eths->length > 1)
 	{
@@ -619,6 +617,7 @@ void print_interface_vars(void)
 			free(tmp);
 		}
 	}
+	destroy_list(eths, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	//if we have switched eths but default_wan_if is not defined,
 	//then we probably have just disabled it.  We wouldn't have an eth0.0
@@ -703,7 +702,7 @@ void print_interface_vars(void)
 				}
 			}
 		}
-		if(switch_dev != NULL)
+		if(switch_dev != NULL && default_wan_if != NULL)
 		{
 			if(strcmp(switch_dev, default_wan_if) == 0)
 			{
