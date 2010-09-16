@@ -8,6 +8,11 @@ NFS_D=/var/lib/nfs
 LOCK_D=/var/lib/nfs/sm
 
 start() {
+	portmap_running=$(ps | grep "portmap" | grep -v "grep")
+	if [ -z "$portmap_running" ] ; then
+		/etc/init.d/portmap start
+	fi
+	
 	grep -q /proc/fs/nfsd /proc/mounts || \
 		mount -t nfsd nfsd /proc/fs/nfsd
 	mkdir -p $NFS_D
