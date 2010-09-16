@@ -492,7 +492,7 @@ function proofreadClassificationRule(controlDocument)
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
 	alwaysValid = function(text){return 0;};
-	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, alwaysValid, validateCBSize ];
+	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize ,alwaysValid ];
 	labelIds = new Array();
 	returnCodes = new Array();
 	toggledMatchCriteria = 0;
