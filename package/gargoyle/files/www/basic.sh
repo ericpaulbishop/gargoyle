@@ -172,6 +172,28 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 					<option value='disabled'>Repeater Disabled</option>
 				</select>
 			</div>
+
+			<div id='bridge_hwmode_container'>
+				<label class='leftcolumn' for='bridge_hwmode' id='bridge_hwmode_label'>Operation Mode:</label>
+				<span class='rightcolumn'>
+					<select id='bridge_hwmode' onchange='setHwMode(this)'>
+						<option value='11ng'>N+G+B</option>
+						<option value='11g'>G+B</option>
+						<option value='11b'>B Only</option>
+						<option value='auto'>Auto</option>
+					</select>
+				</span>
+			</div>
+			<div id='bridge_channel_width_container'>
+				<label class='leftcolumn' for='bridge_channel_width' id='bridge_channel_width_label'>Channel Width:</label>
+				<span class='rightcolumn'>
+				<select id='bridge_channel_width' onchange='setChannelWidth(this)'>
+						<option value='HT20'>20MHz</option>
+						<option value='HT40+'>40MHz</option>
+					</select>
+				</span>
+			</div>
+
 			<div id='bridge_txpower_container'>
 				<label class='leftcolumn' for='bridge_txpower_max' id='bridge_txpower_label'>Transmit Power:</label>
 				<span class='rightcolumn'>
@@ -182,15 +204,6 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 					&nbsp;
 					<input type='text' id='bridge_txpower'  onkeyup='proofreadNumericRange(this,0,txPowerMax)' size='10' />
 					<em><span id="bridge_dbm">dBm</span></em>
-				</span>
-			</div>
-			<div id='bridge_channel_width_container'>
-				<label class='leftcolumn' for='bridge_channel_width' id='bridge_channel_width_label'>Channel Width:</label>
-				<span class='rightcolumn'>
-				<select id='bridge_channel_width' onchange='setChannelWidth(this)'>
-						<option value='HT20'>20MHz</option>
-						<option value='HT40+'>40MHz</option>
-					</select>
 				</span>
 			</div>
 			<div id='bridge_list_ssid_container'>
@@ -465,6 +478,29 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 			</select>
 		</div>
 
+		<div id='wifi_hwmode_container'>
+			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'>Operation Mode:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_hwmode' onchange='setHwMode(this)'>
+					<option value='11ng'>N+G+B</option>
+					<option value='11g'>G+B</option>
+					<option value='11b'>B Only</option>
+					<option value='auto'>Auto</option>
+				</select>
+			</span>
+		</div>
+
+
+		<div id='wifi_channel_width_container'>
+			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_channel_width' onchange='setChannelWidth(this)'>
+					<option value='HT20'>20MHz</option>
+					<option value='HT40+'>40MHz</option>
+				</select>
+			</span>
+		</div>
+
 		<div id='wifi_txpower_container'>
 			<label class='leftcolumn' for='wifi_txpower_max' id='wifi_txpower_label'>Transmit Power:</label>
 			<span class='rightcolumn'>
@@ -478,15 +514,6 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 			</span>
 		</div>
 		
-		<div id='wifi_channel_width_container'>
-			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
-			<span class='rightcolumn'>
-				<select id='wifi_channel_width' onchange='setChannelWidth(this)'>
-					<option value='HT20'>20MHz</option>
-					<option value='HT40+'>40MHz</option>
-				</select>
-			</span>
-		</div>
 
 
 		<div id="mac_enabled_container">
