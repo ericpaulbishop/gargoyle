@@ -84,6 +84,10 @@ function saveChanges()
 			if(document.getElementById("wifi_channel_width_container").style.display == "block")
 			{
 				uci.set("wireless",  firstWirelessDevice, "htmode", getSelectedValue("wifi_channel_width"));
+			}	
+			if(document.getElementById("wifi_hwmode_container").style.display == "block")
+			{
+				uci.set("wireless",  firstWirelessDevice, "hwmode", getSelectedValue("wifi_hwmode"));
 			}
 
 			currentLanIp = document.getElementById("lan_ip").value;
@@ -957,8 +961,9 @@ function setWifiVisibility()
 	
 
 	var wifiIds=[	'internal_divider1', 
-	    		'wifi_txpower_container',
+			'wifi_hwmode_container',
 			'wifi_channel_width_container',
+	    		'wifi_txpower_container',
 	    		'mac_enabled_container', 
 			'mac_filter_container', 
 			
@@ -988,25 +993,25 @@ function setWifiVisibility()
 			'wifi_wep2_container'
 			];
 
-	var cw = wirelessDriver == "mac80211" ? 1 : 0;
+	var m8 = wirelessDriver == "mac80211" ? 1 : 0;
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
 	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
-	var b = wirelessDriver == "mac80211" ? 0 : 1;
+	var b = m8 == 1 ? 0 : 1;
 
 	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,cw,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,cw,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,cw,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,     0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1380,6 +1385,18 @@ function resetData()
 		document.getElementById("bridge_channel_width_container").style.display="none";
 	}
 
+
+	var hwmode = uciOriginal.get("wireless", firstWirelessDevice, "hwmode");
+	if(wirelessDriver == "mac80211" )
+	{
+		hwmode = hwmode == "" ? "11g" : "";
+                setSelectedValue("wifi_hwmode", hwmode);
+		setSelectedValue("bridge_hwmode", hwmode);
+	}
+	else
+	{
+		document.getElementById("bridge_hwmode_container").style.display = "none";
+	}
 
 
 	wifiCfg2="";
@@ -1870,6 +1887,11 @@ function setChannelWidth(selectCtl)
 {
 	setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
 	setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
+}
+function setHwMode(selectCtl)
+{
+	setSelectedValue("wifi_hwmode", getSelectedValue(selectCtl.id));
+	setSelectedValue("bridge_hwmode", getSelectedValue(selectCtl.id));
 }
 
 function setTransmitPower(selectId, textId)

@@ -81,7 +81,7 @@
 			<em>WARNING: The use of UPnP makes your system vulnerable to certain forms of attack, and is therefore
 			a security risk.  However, UPnP is (unfortunately) necessary for some Microsoft applications including MSN messenger and
 			the risk is relatively small.  Nevertheless, because of this security issue, UPnP is disabled by default.
-			It is recommended that you enable UpnP only if you are sure you need it.</em>
+			It is recommended that you enable UPnP only if you are sure you need it.</em>
 		</div>
 
 
