@@ -624,7 +624,11 @@ void print_interface_vars(void)
 	//active if eth0.1 were not potentially available (it would just be eth0)
 	if(have_switched_eths == 1 && default_wan_if == NULL)
 	{
-		default_wan_if = "eth0.1";
+		int lan_num = 0;
+		char wan_num_str[5];
+		sscanf(default_lan_if, "eth0.%d", &lan_num);
+		sprintf(wan_num_str, "%d", (lan_num+1));
+		default_wan_if = dynamic_strcat(2, "eth0.", wan_num_str);
 	}
 
 
