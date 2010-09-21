@@ -1,0 +1,91 @@
+#!/bin/sh /etc/rc.common
+
+START=56
+
+update_sharetype()
+{
+	section="$1"
+	config_get path $1 path
+	if [ "$path" = "$cur_mount" ] ; then
+		shared=1		
+	fi
+}
+clear_invalid()
+{
+	section="$1"
+	echo "section=$section"
+	config_get path $1 path
+	found=0;
+	for m in $mounted ; do
+		if [ "$path" = "$m" ] ; then found=1 ; fi
+	done
+	if [ "$found" = "0" ] ; then
+		invalid="$invalid $section"
+		uci_remove $cur_config $section
+	fi
+}
+
+
+start()
+{
+	rm -rf /tmp/mounted_usb_storage.tab
+	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
+	mounted=""
+	for devid in $drives ; do
+		id=$(echo $devid | sed 's/^.*://g')
+		d=$(echo $devid | sed 's/:.*$//g')
+		dev=$(echo $d | sed 's/[0-9]*$//g')
+		type=$(fdisk -l "$dev" | grep "^$d" | awk ' { print $NF }'  )  
+		err="";
+		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
+			mkdir -p "/tmp/usb_mount/$id"
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+			err=$(mount -t vfat "$d" "/tmp/usb_mount/$id")
+		elif  [ "$type" = "Linux" ] ; then
+			mkdir -p "/tmp/usb_mount/$id"
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+			err="tmp"
+			ext_num=4
+			while [ -n "$err" ] && [ $ext_num -ge 2 ] ; do
+				type="ext$ext_num"
+				err=$(mount -t $type "$d" "/tmp/usb_mount/$id" 2>&1)
+				ext_num=$(($ext_num-1))
+			done
+		fi
+		if [ -n "$err" ] ; then
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+		else
+			share_type=""
+			cur_mount="/tmp/usb_mount/$id"
+			
+			shared=0
+			config_load "samba"
+			config_foreach update_sharetype "sambashare"
+			if [ "$shared" = "1" ] ; then share_type="S" ; fi
+			
+			shared=0
+			config_load "nfsd"
+			config_foreach update_sharetype "nfsshare"
+			if [ "$shared" = "1" ] ; then share_type="N$share_type" ; fi
+			if [ -z "$share_type" ] ; then share_type="-" ; fi
+					
+			echo "$d	/tmp/usb_mount/$id	$share_type" >/tmp/mounted_usb_storage.tab	
+			mounted="$mounted /tmp/usb_mount/$id"
+		fi	
+	done
+	
+	cur_config="samba"
+	config_load "$cur_config"
+	config_foreach clear_invalid "sambashare"
+	uci commit
+	
+	cur_config="nfsd"
+	config_load "$cur_config"
+	config_foreach clear_invalid "nfsshare"
+	uci commit
+}
+
+stop()
+{
+	echo "stopping"
+}
