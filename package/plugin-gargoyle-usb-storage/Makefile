@@ -23,8 +23,14 @@ include $(INCLUDE_DIR)/package.mk
 define Package/plugin-gargoyle-usb-storage
 	SECTION:=admin
 	CATEGORY:=Administration
+	SUBMENU:=Gargoyle Web Interface
 	TITLE:=USB Storage Support for Gargoyle
-	DEPENDS:=+samba3 +nfs-kernel-server +gargoyle
+	DEPENDS:=+samba3 +nfs-kernel-server +nfs-kernel-server-utils +gargoyle  +fdisk +blkid +dosfsck +dosfslabel 
+	DEPENDS+=+e2fsprogs +mkdosfs +kmod-usb-storage +kmod-usb-storage-extras +kmod-usb-uhci +kmod-usb-ohci 
+	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext2 +kmod-fs-ext3 +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat 
+	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
+	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 
+	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8 +uuidgen
 	MAINTAINER:=Eric Bishop
 endef
 
