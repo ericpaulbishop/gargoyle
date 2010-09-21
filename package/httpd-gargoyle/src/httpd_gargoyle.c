@@ -752,7 +752,7 @@ main( int argc, char** argv )
 	{
 	/* Make ourselves a daemon. */
 #ifdef HAVE_DAEMON
-	if ( daemon( 1, 1 ) < 0 )
+	if ( daemon( 1, 0 ) < 0 )
 	    {
 	    syslog( LOG_CRIT, "daemon - %m" );
 	    perror( "daemon" );
@@ -762,6 +762,9 @@ main( int argc, char** argv )
 	switch ( fork() )
 	    {
 	    case 0:
+	    fclose(stdin);
+	    fclose(stdout);
+	    fclose(stderr);
 	    break;
 	    case -1:
 	    syslog( LOG_CRIT, "fork - %m" );
