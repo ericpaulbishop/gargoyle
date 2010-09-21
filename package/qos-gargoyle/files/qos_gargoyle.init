@@ -308,7 +308,7 @@ initialize_qos()
 	# iptables-mod-imq
 	# kmod-ipt-filter
 	# iptables-mod-filter
-	
+
 	rmmod  imq >&- 2>&-
 	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
 
@@ -621,7 +621,6 @@ initialize_qos()
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
 
 		#Make a class to handle the outgoing ping requests from the router.
-		#tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt m2 30kbit
 		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 84 dmax 10ms rate 2kbit
 		tc qdisc add dev $qos_interface parent 1:127 pfifo
       		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
@@ -631,9 +630,6 @@ initialize_qos()
 
 		#Start the monitor
       		qosmon -b 800 $ptarget_ip $total_download_bandwidth 85
-		if [ -n "$dbg" ] ; then
-			echo "qosmon -b 800 $ptarget_ip $total_download_bandwidth 85"
-		fi
 
 	fi
 
@@ -683,6 +679,22 @@ stop()
 
 start()
 {
+
+	#This script is called by a hotplug event.  If the WAN comes
+	#up fast we could end up trying to run qos_gargoyle while the
+	#boot is still in progress which causes issues in low memory
+	#routers.  To avoid this we check to see if rcS is still running 
+	#or not.  If it is we wait until it completes or 30 seconds.
+	cnt=0
+	while ps | grep '[//]rcS S boot' >/dev/null
+		do
+			sleep 2
+			cnt=`expr $cnt + 1`
+			if [ $cnt -ge 15 ] ; then
+				break;
+			fi
+		done
+
 	stop
 	touch "$lock_file"
 
