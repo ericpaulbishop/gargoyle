@@ -5,6 +5,7 @@
 
 START=60
 
+found_sambashare="0"
 
 smb_header() {
 	local name
@@ -56,17 +57,21 @@ smb_add_share() {
 	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /tmp/smb.conf
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /tmp/smb.conf
 	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /tmp/smb.conf
+	
+	found_sambashare="1"
 }
 
 start() {
 	config_load samba
 	config_foreach smb_header samba
 	config_foreach smb_add_share sambashare
-	smbd -D
-	nmbd -D
+	if [ "$found_sambashare" = "1" ] ; then
+		smbd -D
+		nmbd -D
+	fi
 }
 
 stop() {
-	killall smbd
-	killall nmbd
+	killall smbd >/dev/null 2>&1
+	killall nmbd >/dev/null 2>&1
 }
