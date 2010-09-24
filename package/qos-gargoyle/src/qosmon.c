@@ -137,6 +137,7 @@ u_short last_errorflg=0;
 
 FILE *statusfd;          //Filestream for updating our status to.              
 char sigterm=0;          //Set when we get a signal to terminal   
+int sel_err=0;           //Last error code returned by select
 
 #define DAEMON_NAME "qosmon"
 #define EXIT_SUCCESS 0
@@ -149,7 +150,7 @@ char sigterm=0;          //Set when we get a signal to terminal
  */
 void finish(int parm)
 {
-    sigterm=1;
+    sigterm=parm;
 }
 
 /*
@@ -228,13 +229,6 @@ void pinger(void)
 
     /* cc = sendto(s, msg, len, flags, to, tolen) */
     i = sendto( s, outpack, cc, 0, (const struct sockaddr *)  &whereto, sizeof(whereto) );
-
-    if( i < 0 || i != cc )  {
-        if( i<0 )  perror("sendto");
-        fprintf(stderr,"ping: wrote %s %d chars, ret=%d\n",
-            hostname, cc, i );
-        fflush(stdout);
-    }
     
 }
 
@@ -574,7 +568,8 @@ void update_status( FILE* fd )
     fprintf(fd,"Ping time limit: %d (ms)\n",pinglimit/1000);
     fprintf(fd,"Classes Active: %u\n",DCA);
 
-    fprintf(fd,"Errors: (mismatches,errors,last err): %u, %u, %u\n", cnt_mismatch, cnt_errorflg, last_errorflg); 
+    fprintf(fd,"Errors: (mismatch,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
+	
 
     while ((i++<STATCNT) && (cptr->ID != 0)) {
         fprintf(fd,"ID %4X, Active %u, Backlog %u, BW bps (filtered): %d\n",
@@ -606,7 +601,7 @@ void update_status( FILE* fd )
 		dbw_ul/1000,new_dbw_ul/1000,dbw/1000);
 
     printw("Defined classes for imq0\n"); 
-    printw("Errors: (mismatches,errors,last err): %u, %u, %u\n", cnt_mismatch, cnt_errorflg, last_errorflg); 
+    printw("Errors: (mismatches,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
     cptr=dnstats;
     while ((i++<STATCNT) && (cptr->ID != 0)) {
         printw("ID %4x, Active %c, Backlog %c, BW (filtered kbps): %6d\n",
@@ -700,11 +695,6 @@ int main(int argc, char *argv[])
         exit(10);
     }
 
-    if ((s = socket(AF_INET, SOCK_RAW, proto->p_proto)) < 0) {
-        perror("ping: socket");
-        exit(5);
-    }
-
     // where alpha = Sample_Period / (TC + Sample_Period)
     alpha = (period*1000. / (3000. + period)); 
 
@@ -727,50 +717,88 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //Create the status file
-    statusfd = fopen("/tmp/qosmon.status","w");
-    if (statusfd < 0) {
-       fprintf(stderr, "unable to open status file /tmp/qosmon.status\n");
-       exit(EXIT_FAILURE);
-    }
-
-
     //If running in the background fork()
     if (DEAMON) {
 
-        /* Initialize the logging interface */
-        openlog( DAEMON_NAME, LOG_PID, LOG_LOCAL5 );
-        syslog( LOG_INFO, "starting" );
+        /* Ignore most signals in background */  
+        signal( SIGINT,  SIG_IGN );
+        signal( SIGQUIT, SIG_IGN );
+        signal( SIGCHLD, SIG_IGN );
+        signal( SIGALRM, SIG_IGN );
+        signal( SIGUSR1, SIG_IGN );
+        signal( SIGUSR2, SIG_IGN );
+        signal( SIGHUP,  SIG_IGN );
+        signal( SIGTSTP, SIG_IGN );
+        signal( SIGPIPE, (__sighandler_t) finish );
+        signal( SIGSEGV, (__sighandler_t) finish );
+        signal( SIGILL, (__sighandler_t) finish );
+        signal( SIGFPE, (__sighandler_t) finish );
+        signal( SIGSYS, (__sighandler_t) finish );
+        signal( SIGURG, (__sighandler_t) finish );
+        signal( SIGTTIN, (__sighandler_t) finish );
+        signal( SIGTTOU, (__sighandler_t) finish );
 
     	//daemonize();
-		if ( daemon( 0, 0 ) < 0 )
+        if ( daemon( 0, 1) < 0 )
 	   	{
-	    syslog( LOG_CRIT, "daemon - %m" );
-	    perror( "daemon" );
-	    exit( 1 );
+            fprintf(stderr,"deamon() failed with %i\n",errno);
+            exit( 1 );
 	    }
 
+        /* Initialize the logging interface */
+        openlog( DAEMON_NAME, LOG_PID, LOG_LOCAL5 );
+    }
+
+    //SIGTERM is what we expect to kill us.
+    signal( SIGTERM, (__sighandler_t) finish );
+
+    //Create the status file and ping socket
+    //These are called here because the above daemon() call closes
+    //open files.
+    statusfd = fopen("/tmp/qosmon.status","w");
+    s = socket(AF_INET, SOCK_RAW, proto->p_proto);
+
+
+    //Check that things opened correctly.
+    if (DEAMON) {
+        if (statusfd == NULL) {
+            syslog( LOG_CRIT, "Cannot open /tmp/qosmon.status - %i",errno );
+            exit(EXIT_FAILURE);
+        }
+  
+        if (s < 0) {
+            syslog( LOG_CRIT, "Cannot open ping socket - %i",errno );
+            exit(EXIT_FAILURE);
+        }
+
+        syslog(LOG_INFO, "starting socketfd = %i, statusfd = %i",s,fileno(statusfd));
     }
 
 #ifndef ONLYBG
     else {
+        if (statusfd == NULL) {
+	        fprintf(stderr, "Cannot open /tmp/qosmon.status - %i",errno );
+            exit(EXIT_FAILURE);
+        }
+  
+        if (s < 0) {
+	        fprintf( stderr, "Cannot open ping socket - %i",errno );
+            exit(EXIT_FAILURE);
+        }
 
-    //Ctrl-C terminates       
-    signal( SIGINT, (__sighandler_t) finish );
+        //Ctrl-C terminates       
+        signal( SIGINT, (__sighandler_t) finish );
 
-    //Close terminal terminates       
-    signal( SIGHUP, (__sighandler_t) finish );
+        //Close terminal terminates       
+        signal( SIGHUP, (__sighandler_t) finish );
 
-    setlinebuf( stdout );
+        setlinebuf( stdout );
 
-    //Bring up ncurses
-    initscr();
+        //Bring up ncurses
+        initscr();
 
     }
 #endif
-
-    //Kill Terminates
-    signal( SIGTERM, (__sighandler_t) finish );
 
     //Clear all initial stats.
     memset((void *)&dnstats,0,sizeof(dnstats));
@@ -800,7 +828,7 @@ int main(int argc, char *argv[])
         timeout.tv_usec = period*1000;
     
         //Need a loop here to clean out any old pongs that show up.
-        while  ( select(32, &fdmask, 0, 0, &timeout) == 1 ) {
+        while  ( (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout)) == 1 ) {
         
               //If we got here than data is waiting. try to read the whole packet
               if ( (cc=recvfrom(s,packet,len,0,(struct sockaddr *) &from, &fromlen)) < 0) {
@@ -811,6 +839,8 @@ int main(int argc, char *argv[])
               pr_pack( packet, cc, &from );      
         }
 
+        //If select returns anything other than 1 or 0 then die.
+        if (sel_err) break;
 
         //Gather new statistics
         classptr=dnstats;
@@ -961,7 +991,7 @@ int main(int argc, char *argv[])
 
     //Write a message in the system log
     if (DEAMON) {
-      syslog( LOG_NOTICE, "terminated" );
+      syslog( LOG_NOTICE, "terminated sigterm=%i, sel_err=%i", sigterm, sel_err );
       closelog();
     } 
 
