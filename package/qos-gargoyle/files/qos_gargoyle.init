@@ -684,11 +684,11 @@ start()
 	#up fast we could end up trying to run qos_gargoyle while the
 	#boot is still in progress which causes issues in low memory
 	#routers.  To avoid this we check to see if rcS is still running 
-	#or not.  If it is we wait until it completes or 30 seconds.
+	#or not.  If it is we wait until it completes or 60 seconds.
 	cnt=0
 	while ps | grep '[//]rcS S boot' >/dev/null
 		do
-			sleep 2
+			sleep 4
 			cnt=`expr $cnt + 1`
 			if [ $cnt -ge 15 ] ; then
 				break;
@@ -700,7 +700,7 @@ start()
 
 	load_all_config_options "$config_file_name" "global"
 
-      	initialize_qos
+    initialize_qos
 
 	rm -rf "$lock_file"
 
