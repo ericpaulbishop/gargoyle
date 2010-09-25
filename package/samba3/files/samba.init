@@ -46,17 +46,21 @@ smb_add_share() {
 	config_get users $1 users
 	config_get read_only $1 read_only
 	config_get guest_ok $1 guest_ok
+	config_get public $1 public
+	config_get browseable $1 browseable
 	config_get create_mask $1 create_mask
 	config_get dir_mask $1 dir_mask
 
 	[ -z "$name" -o -z "$path" ] && return
 
 	echo -e "\n[$name]\n\tpath = $path" >> /tmp/smb.conf
-	[ -n "$users" ] && echo -e "\tvalid users = $users" >> /tmp/smb.conf
-	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /tmp/smb.conf
-	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /tmp/smb.conf
+	[ -n "$users" ]       && echo -e "\tvalid users = $users" >> /tmp/smb.conf
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /tmp/smb.conf
-	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /tmp/smb.conf
+	[ -n "$dir_mask" ]    && echo -e "\tdirectory mask = $dir_mask" >> /tmp/smb.conf
+	[ -n "$read_only" ]   && echo -e "\tread only = $read_only" >> /tmp/smb.conf
+	[ -n "$guest_ok" ]    && echo -e "\tguest ok = $guest_ok" >> /tmp/smb.conf
+	[ -n "$public" ]      && echo -e "\tpublic = $public" >> /tmp/smb.conf
+	[ -n "$browseable" ]  && echo -e "\tbrowseable = $browseable" >> /tmp/smb.conf
 	
 	found_sambashare="1"
 }
