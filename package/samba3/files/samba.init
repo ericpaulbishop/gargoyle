@@ -18,9 +18,11 @@ smb_header() {
 	config_get description $1 description
 	config_get homes $1 homes
 
-	[ -z "$name" ] && name=openwrt
-	[ -z "$workgroup" ] && workgroup=openwrt
-	[ -z "$description" ] && description=openwrt
+	default_name=$(uname -n)
+
+	[ -z "$name" ] && name="$default_name"
+	[ -z "$workgroup" ] && workgroup="$default_name"
+	[ -z "$description" ] && description="$default_name"
 
 	cp /etc/samba/smb.conf.template /tmp/smb.conf
 	[ -L /etc/samba/smb.conf ] || ln -nsf /tmp/smb.conf /etc/samba/smb.conf

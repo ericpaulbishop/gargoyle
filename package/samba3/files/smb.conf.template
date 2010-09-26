@@ -9,6 +9,8 @@
 	socket options = TCP_NODELAY
 	unix charset = ISO-8859-1
 	preferred master = yes
+	local master = yes
+	domain master = yes
 	os level = 20
 	security = user
 	null passwords = yes
