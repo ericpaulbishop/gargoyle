@@ -6,11 +6,8 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-
-
 function saveChanges()
 {
-
 
 	uci = uciOriginal.clone();
 	var commands = "";
@@ -31,7 +28,7 @@ function saveChanges()
 		} else {
 			uci.remove("qos_gargoyle", direction, "ptarget_ip");
 		}
-     	}
+    }
 
 
 	var disabled = document.getElementById("qos_enabled").checked == false;
@@ -104,8 +101,8 @@ function saveChanges()
 
 		uci.set("qos_gargoyle", direction, "total_bandwidth", document.getElementById("total_bandwidth").value);
 
-		classTable = document.getElementById('qos_class_table_container').firstChild;
-		classData = getTableDataArray( classTable, true, false);
+		HTMLclassTable = document.getElementById('qos_class_table_container').firstChild;
+		classData = getTableDataArray( HTMLclassTable, true, false);
 
 		//normalize bandwidth percentages
 		percentSum = 0;
@@ -126,7 +123,9 @@ function saveChanges()
 
 			uci.set("qos_gargoyle", classId, "", directionClass);
 			uci.set("qos_gargoyle", classId, "name", className);
-			uci.set("qos_gargoyle", classId, "percent_bandwidth", Math.round(100*(classData[classIndex][1]/percentSum)) );
+            percent =  Math.round(100*(classData[classIndex][1]/percentSum));
+            if (percent < 1) percent=1; 
+			uci.set("qos_gargoyle", classId, "percent_bandwidth", percent );
 
 			minBandwidth = classData[classIndex][2];
 			if(minBandwidth != "zero")
@@ -170,15 +169,15 @@ function saveChanges()
 			if(matchCriteria[matchCriteria.length-1] != "")
 			{
 
-                            protocolMap.getL7ID = function (desc) {
-                                 for(key in this) {if (this[key] == desc) return key;}
-                            }
+                protocolMap.getL7ID = function (desc) {
+                    for(key in this) {if (this[key] == desc) return key;}
+                }
 
-				appProtocol = matchCriteria[matchCriteria.length-1];
-                            appProtocolName=protocolMap.getL7ID(appProtocol);
-				if(appProtocolName != null) {
-					uci.set("qos_gargoyle", ruleId, "layer7", appProtocolName);
-                            }
+			    appProtocol = matchCriteria[matchCriteria.length-1];
+                appProtocolName=protocolMap.getL7ID(appProtocol);
+			    if(appProtocolName != null) {
+				    uci.set("qos_gargoyle", ruleId, "layer7", appProtocolName);
+                }
 			}
 		}
 		if(switchingFullQosEnabled &&  qosQuotasExist())
@@ -199,6 +198,12 @@ function saveChanges()
 	}
 	else if(commands.length > 0)
 	{
+        //Turn off any update function
+        if (timerid != null) {
+           clearInterval(timerid);
+           timerid = null;
+        }
+
 		setControlsEnabled(false, true);
 
 		var stateChangeFunction = function(req)
@@ -212,9 +217,113 @@ function saveChanges()
 		}
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
+}
+
+var classTable;
+var dynamic_update;
+var timerid=null;
+
+function classinfo()
+{
+    this.Name = null;
+    this.Percent = null;
+    this.MinBW = null;
+    this.MaxBW = null;
+	this.bytes = null;
+	this.classno = null;
+	this.leaf = null;
+	this.bps = NaN;
+}
+
+function init_classtable()
+{
+	directionClass = direction + "_class";
+	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
+
+	totalPercent = 0;
+	defaultClassName = "";
+
+    classTable = new Array();
+
+	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
+	removeAllOptionsFromSelectElement( document.getElementById("classification"));
+	defaultClassName = "";
+
+	for (classIndex=0; classIndex < classSections.length; classIndex++)
+	{
+		classSection = classSections[classIndex];
+
+        classRow = new classinfo();
+		classRow.Name = uciOriginal.get("qos_gargoyle", classSection, "name");
+		classRow.Percent = uciOriginal.get("qos_gargoyle", classSection, "percent_bandwidth");
+		classRow.MaxBW = uciOriginal.get("qos_gargoyle", classSection, "max_bandwidth");
+		classRow.MinBW = uciOriginal.get("qos_gargoyle", classSection, "min_bandwidth");
+
+		classRow.Name = classRow.Name == "" ? classSection : classRow.Name;
+		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW + " kbit/s" : "zero";
+		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxNW + " kbit/s" : "unlimited";
+        classTable[classIndex] = classRow;
+
+
+		addOptionToSelectElement("default_class", classRow.Name, classRow.Name, null);
+		addOptionToSelectElement("classification",classRow.Name, classRow.Name, null);
+		defaultClassName = uciOriginal.get("qos_gargoyle", direction, "default_class") == classSection ? classRow.Name : defaultClassName;
+	}
+
+	setSelectedText("default_class", defaultClassName);
+
+}
+
+function update_classtable()
+{
+
+	directionClass = direction + "_class";
+	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
+
+    classData=null;
+	table = document.getElementById('qos_class_table_container').firstChild;
+	if (table != null) {
+          classData = getTableDataArray( table, true, false);
+          if (classData.length != classTable.length) {
+                  dynamic_update = false;
+                  return;
+          }
+    }
+    
+	classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimum Bandwidth", "Maximum Bandwidth", "Load (kbps)",""];
+	classTableData = new Array();
+	totalPercent = 0;
+	for (classIndex=0; classIndex < classTable.length; classIndex++)
+	{
+
+		classSection = classSections[classIndex];
+        classRow = classTable[classIndex];
+
+        bpsn = classRow.bps/1000;
+		if (isNaN(bpsn)) {bps = '*'} else if (bpsn < 1) { bps = bpsn.toFixed(1)+'';} else { bps = bpsn.toFixed(0) + ''};
+        while (bps.length < 4) {bps = " " + bps;}
+
+		classTableData.push([classRow.Name, classRow.Percent, classRow.MinBW, classRow.MaxBW, bps, createClassTableEditButton()] );
+		totalPercent = totalPercent + classRow.Percent;
+	}
+
+	for (classIndex=0; classIndex < classSections.length; classIndex++)
+	{
+		classTableDataRow = classTableData[classIndex];
+		classTableDataRow[1] = totalPercent == 100 ? Math.round(100 * (classTableDataRow[1]/totalPercent)) + "%" : classTableDataRow[1] + "%";
+	}
+
+	HTMLclassTable=createTable(classTableColumns, classTableData, "qos_class_table", true, false, removeServiceClassCallback);
+
+	classTableContainer = document.getElementById('qos_class_table_container');
+	if(classTableContainer.firstChild != null)
+	{
+		classTableContainer.removeChild(classTableContainer.firstChild);
+	}
+	classTableContainer.appendChild(HTMLclassTable);
+
 }
 
 function resetData()
@@ -238,70 +347,9 @@ function resetData()
 	defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
 
-	directionClass = direction + "_class";
 	directionRule  = direction + "_rule";
-
-
-
-
-	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
-
-
-
-	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
-	removeAllOptionsFromSelectElement( document.getElementById("classification"));
-
-	classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimum Bandwidth", "Maximum Bandwidth", ""];
-	classTableData = new Array();
-	classNames = new Array();
-	totalPercent = 0;
-	defaultClassName = "";
-	for (classIndex=0; classIndex < classSections.length; classIndex++)
-	{
-		classSection = classSections[classIndex];
-
-
-		nextName = uciOriginal.get("qos_gargoyle", classSection, "name");
-		nextPercent = uciOriginal.get("qos_gargoyle", classSection, "percent_bandwidth");
-		nextMax = uciOriginal.get("qos_gargoyle", classSection, "max_bandwidth");
-		nextMin = uciOriginal.get("qos_gargoyle", classSection, "min_bandwidth");
-
-
-		nextName = nextName == "" ? classSection : nextName;
-		nextMin = nextMin != "" && nextMin > 0 ? nextMin + " kbit/s" : "zero";
-		nextMax = nextMax != "" && nextMax > 0 ? nextMax + " kbit/s" : "unlimited";
-
-
-		addOptionToSelectElement("default_class", nextName, nextName, null);
-		addOptionToSelectElement("classification", nextName, nextName, null);
-		classNames[classSection] = nextName;
-
-		defaultClassName = uciOriginal.get("qos_gargoyle", direction, "default_class") == classSection ? nextName : defaultClassName;
-
-		classTableData.push( [nextName, nextPercent, nextMin, nextMax, createClassTableEditButton()] );
-		totalPercent = totalPercent + nextPercent;
-	}
-	setSelectedText("default_class", defaultClassName);
-
-
-
-	for (classIndex=0; classIndex < classSections.length; classIndex++)
-	{
-		classTableDataRow = classTableData[classIndex];
-		classTableDataRow[1] = totalPercent == 100 ? Math.round(100 * (classTableDataRow[1]/totalPercent)) + "%" : classTableDataRow[1] + "%";
-	}
-
-	classTable=createTable(classTableColumns, classTableData, "qos_class_table", true, false, removeServiceClassCallback);
-
-
-	classTableContainer = document.getElementById('qos_class_table_container');
-	if(classTableContainer.firstChild != null)
-	{
-		classTableContainer.removeChild(classTableContainer.firstChild);
-	}
-	classTableContainer.appendChild(classTable);
-
-
+    init_classtable();
+    update_classtable();
 
 	var ruleSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionRule);
 	ruleTableColumns = ["Match Criteria", "Classification", ""];
@@ -350,8 +398,9 @@ function resetData()
 			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
 		}
 
-		classification = classNames[ uciOriginal.get("qos_gargoyle", ruleSection, "class") ];
-		ruleTableData.push( [ruleText, classification, createRuleTableEditButton()] );
+		classification = uciOriginal.get("qos_gargoyle", ruleSection, "class");
+        idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1; 
+		ruleTableData.push( [ruleText, classTable[idx].Name, createRuleTableEditButton()] );
 	}
 
 	//sort rules
@@ -373,23 +422,38 @@ function resetData()
 
 	setQosEnabled();
 
-       if (direction == "download") { 
-           monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
-           if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
+    if (direction == "download") { 
+        monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
+        if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
 
-           ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
-           if (ptarget_ip == "") {
-                document.getElementById("use_ptarget_ip").checked = false;
-		setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+        ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
+        if (ptarget_ip == "") {
+            document.getElementById("use_ptarget_ip").checked = false;
+		    setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+        } else {
+            document.getElementById("use_ptarget_ip").checked = true;
+            document.getElementById("ptarget_ip").value=ptarget_ip;
+		    setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+        }
+    }
 
-           } else {
-                document.getElementById("use_ptarget_ip").checked = true;
-                document.getElementById("ptarget_ip").value=ptarget_ip;
-		setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+    //Startup the dynamic screen updates.
+    updateInProgress = false;
+    dynamic_update = true;
+    updatetc();
 
-           }
+    if (direction == "download") {
+       if (uciOriginal.get("qos_gargoyle", direction, "qos_monenabled") == "true") {
+           timerid=setInterval("updateqosmon()", 1000);
+       } else {
+           //Run updateqosmon once to clear away any old data.
+           setTimeout("updateqosmon()", 1000);
+       } 
+    } 
 
-       }
+    //The default screen updater.
+    if (timerid == null) timerid=setInterval("updatetc()", 1000);
+
 }
 
 
@@ -492,7 +556,7 @@ function proofreadClassificationRule(controlDocument)
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
 	alwaysValid = function(text){return 0;};
-	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize ,alwaysValid ];
+	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid ];
 	labelIds = new Array();
 	returnCodes = new Array();
 	toggledMatchCriteria = 0;
@@ -536,11 +600,15 @@ function addServiceClass()
 	}
 	else
 	{
+
+        dynamic_update=false;
+
 		newRowData = new Array();
 		newRowData.push( document.getElementById("class_name").value );
 		newRowData.push( document.getElementById("percent_bandwidth").value + "%" );
 		newRowData.push( document.getElementById("min_radio1").checked == true ? "zero" : document.getElementById("min_bandwidth").value + " kbit/s" );
 		newRowData.push( document.getElementById("max_radio1").checked == true ? "unlimited" : document.getElementById("max_bandwidth").value + " kbit/s" );
+		newRowData.push( "*" );
 		newRowData.push( createClassTableEditButton() );
 
 		//select element refers to main document, but this is fine since thats where these controls are
@@ -550,21 +618,7 @@ function addServiceClass()
 		classTable = document.getElementById('qos_class_table_container').firstChild;
 		addTableRow(classTable,newRowData,true,false,removeServiceClassCallback);
 
-
-		//see if were adding a class that matches existing rules (i.e. that was previously deleted) and change color back to black from red if so
-		ruleTable = document.getElementById('qos_rule_table_container').firstChild
-		ruleTableData = getTableDataArray(ruleTable, true,true);
-		for(ruleIndex = 0; ruleIndex < ruleTableData.length; ruleIndex++)
-		{
-			if(ruleTableData[ruleIndex][1] == document.getElementById("class_name").value)
-			{
-				ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[0].style.color = "black";
-				ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[1].style.color = "black";
-			}
-		}
-
 		resetServiceClassControls(document);
-
 
 	}
 }
@@ -1038,20 +1092,63 @@ function parseRuleMatchCriteria(matchText)
 	return criteria;
 }
 
+
 /* qosmon congestion monitor status */
-
 var updateInProgress;
-function initializeqosmon()
-{
-	updateInProgress = false;
-	setInterval("updateqosmon()", 500);
-}
 
+function updatetc()
+{
+
+	if ((!updateInProgress) && (dynamic_update == true))
+	{
+		updateInProgress = true;
+
+		var command="tc -s class show dev ";
+
+		if (direction == "download") {
+		 	commands = commands + "imq0";
+		} else {
+		 	commands = commands + currentWanIf;
+		}
+
+		var commands="tc -s class show dev imq0"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var Lines = req.responseText.match(/hfsc\s1:[0-9]+.+leaf.+\n.+Sent\s[0-9]+/g);
+
+				if (Lines != null) { 
+					for(i = 0; i < Lines.length; i++) {
+	
+						var lastbytes;
+                        lastbytes = classTable[i].bytes;
+                        classTable[i].bytes=Lines[i].match(/Sent\s([0-9]+)/)[1];
+						classTable[i].classno=Lines[i].match(/hfsc\s1:([0-9]+)/)[1];
+						classTable[i].leaf=Lines[i].match(/leaf\s([0-9a-f]*)/)[1];
+
+                        if (lastbytes != null) {
+                            classTable[i].bps= (parseInt(classTable[i].bytes)-parseInt(lastbytes)) * 8000 / 500;
+                        } else {
+                            classTable[i].bps=NaN;
+                        }
+                    }
+                }
+
+                update_classtable();
+                updateInProgress = false;
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
 
 function updateqosmon()
 {
 
-	if(!updateInProgress)
+	if (!updateInProgress)
 	{
 		updateInProgress = true;
 		var commands="cat /tmp/qosmon.status"
@@ -1063,22 +1160,35 @@ function updateqosmon()
 			{
 				var Lines = req.responseText.split("\n");
                              
-                            if (Lines[0].substr(0,6) == "State:") {
-                              document.getElementById("qstate").innerHTML = Lines[0];
-   		                document.getElementById("qllimit").innerHTML = Lines[1];
-   		                document.getElementById("qollimit").innerHTML = Lines[2];
-   		                document.getElementById("qload").innerHTML = Lines[3];
-   		                document.getElementById("qpinger").innerHTML = Lines[4];
-   		                document.getElementById("qpingtime").innerHTML = Lines[5];
-   		                document.getElementById("qpinglimit").innerHTML = Lines[6];
-   		                document.getElementById("qactivecnt").innerHTML = Lines[7];
-                            } else {
+                if (Lines[0].substr(0,6) == "State:") {
+                    document.getElementById("qstate").innerHTML = Lines[0];
+                    document.getElementById("qllimit").innerHTML = Lines[1];
+                    document.getElementById("qollimit").innerHTML = Lines[2];
+                    document.getElementById("qload").innerHTML = Lines[3];
+                    document.getElementById("qpinger").innerHTML = Lines[4];
+                    document.getElementById("qpingtime").innerHTML = Lines[5];
+                    document.getElementById("qpinglimit").innerHTML = Lines[6];
+                    document.getElementById("qactivecnt").innerHTML = Lines[7];
+                    Lines = req.responseText.match(/ID\s[0-9A-E][0-9A-F]+.*/g);
 
-                              if (Lines[0].substr(0,25) == "cat: can't open '/tmp/qos") {
-                                 document.getElementById("qstate").innerHTML = "State: Disabled*";
-   		                   document.getElementById("qpinger").innerHTML = "Ping: Off";
-                              }
-                            }
+                    if (Lines.length == classTable.length) {
+
+                        for (i=0;i<Lines.length;i++) {
+
+						    if (classTable[i].leaf.toUpperCase() == Lines[i].match(/ID\s([0-9A-E][0-9A-F]+)/)[1]) {
+							    classTable[i].bps = parseInt(Lines[i].match(/ID\s[0-9A-E][0-9A-F]+.*:\s([0-9]+)/)[1]);
+						    } 
+                        }
+
+                        if (dynamic_update == true) update_classtable();	
+				    } 
+
+                } else {
+                    if (Lines[0].substr(0,25) == "cat: can't open '/tmp/qos") {
+                        document.getElementById("qstate").innerHTML = "State: Disabled*";
+                        document.getElementById("qpinger").innerHTML = "Ping: Off";
+                    }
+                }
 
 				updateInProgress = false;
 			}
@@ -1086,5 +1196,6 @@ function updateqosmon()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
+
 
 

@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "firewall" -p "qosupload" -c "internal.css" -j "qos.js table.js" qos_gargoyle firewall gargoyle
+	gargoyle_header_footer -h -s "firewall" -p "qosupload" -c "internal.css" -j "qos.js table.js" qos_gargoyle firewall gargoyle -i qos_gargoyle
 ?>
 
 
@@ -194,14 +194,14 @@
 			<span id='qos_up_2_txt'>
 				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
 
-				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class of
-				connection when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
+				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class
+				when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
 				The percentages can be configured to equal more (or less) than 100, but when the settings are applied the percentages will be adjusted
 				proportionally so that they add to 100.</p>
 
 				<p><em>Minimum bandwidth</em> specifies the minimum service this class will be allocated when the link is at capacity.
-				For certain applications like VoIP or online gaming it is convienient to specify a minimum service rather than a percentage.
-				QoS will satisfy the minimum service of all classes first before allocating the remaining service to other waiting classes.
+				For certain applications like VoIP or online gaming it is better to specify a minimum service in bps rather than a percentage.
+				QoS will satisfiy the minimum service of all classes first before allocating the remaining service to other waiting classes.
 				</p>
 
 				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  Even if unused bandwidth

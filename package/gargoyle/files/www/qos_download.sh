@@ -191,14 +191,14 @@
 			<span id='qos_down_2_txt'>
 				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
 
-				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class of
-				connection when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
+				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class
+				when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
 				The percentages can be configured to equal more (or less) than 100, but when the settings are applied the percentages will be adjusted
 				proportionally so that they add to 100.</p>
 
 				<p><em>Minimum bandwidth</em> specifies the minimum service this class will be allocated when the link is at capacity.
-				For certain applications like VoIP or online gaming it is convienient to specify a minimum service rather than a percentage.
-				QoS will satisfy the minimum service of all classes first before allocating the remaining service to other waiting classes.
+				For certain applications like VoIP or online gaming it is better to specify a minimum service in bps rather than a percentage.
+				QoS will satisfiy the minimum service of all classes first before allocating the remaining service to other waiting classes.
 				</p>
 
 				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  Even if unused bandwidth
@@ -325,7 +325,7 @@
                             <tr><td>WATCH</td><td>Congestion under active control.</td></tr>
                             <tr><td>WAIT</td><td>No Congestion, control idle.<td></tr>
                             <tr><td>FREE</td><td>No competing QoS goals, release limits.</td></tr>
-                            <tr><td>CHILL</td><td>Moving to WATCH, stabilize with new limit.</td></tr>
+                            <tr><td>CHILL</td><td>Moving to WATCH, stablize with new limit.</td></tr>
                             <tr><td>DISABLE</td><td>Controller is not enabled</td></tr>
                             <tr><td>Link Limit</td><td>The download bandwidth limit currently enforce.</td></tr>
                             <tr><td>Fair Link Limit</td><td>The apparent fair download bandwidth limit.</td></tr>
@@ -333,7 +333,7 @@
                             <tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
                             <tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
                             <tr><td>Ping Limit</td><td>The point at which the controller will act to maintian fairness.</td></tr>
-                            <tr><td>Active Classes</td><td>The number of active download classes.</td></tr>
+                            <tr><td>Active Classes</td><td>Number of download classes with load over 4kbps.</td></tr>
 				</table>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4">Hide Text</a>
@@ -356,7 +356,6 @@
 <script>
 <!--
 	resetData();
-	initializeqosmon();
 //-->
 </script>
 
