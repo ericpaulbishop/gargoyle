@@ -296,36 +296,15 @@ initialize_qos()
 
 	# Now, load/insert necessary kernel modules
 	# The following packages are required for the modules:
-	# kmod-sched
-	# kmod-ipt-conntrack
-	# iptables-mod-conntrack
-	# kmod-ipt-ipopt
-	# iptables-mod-ipopt
-	# kmod-ipt-extra
-	# iptables-mod-extra
-	# ip
-	# kmod-ipt-imq
-	# iptables-mod-imq
-	# kmod-ipt-filter
-	# iptables-mod-filter
-
 	rmmod  imq >&- 2>&-
 	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
 
 	insmod cls_fw >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
-	insmod sch_htb >&- 2>&-
-	insmod sch_sfq >&- 2>&-
+	insmod sch_red >&- 2>&-
 	insmod ipt_length >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
-	insmod ipt_tos >&- 2>&-
-	insmod ipt_TOS >&- 2>&-
-	insmod ipt_dscp >&- 2>&-
-	insmod ipt_DSCP >&- 2>&-
-	insmod sch_red >&- 2>&-
-
-
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
