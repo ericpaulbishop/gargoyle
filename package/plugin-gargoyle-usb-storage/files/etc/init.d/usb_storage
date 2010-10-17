@@ -73,7 +73,7 @@ start()
 			if [ -z "$share_size" ] ; then share_size="-" ; fi
 			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
 
-			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab	
+			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
 			mounted="$mounted /tmp/usb_mount/$id"
 		fi
 	done
