@@ -69,20 +69,24 @@ start()
 			if [ "$shared" = "1" ] ; then share_type="N$share_type" ; fi
 			if [ -z "$share_type" ] ; then share_type="-" ; fi
 					
-			echo "$d	/tmp/usb_mount/$id	$share_type" >/tmp/mounted_usb_storage.tab	
+			share_size=$(df  | grep "$d" | awk '{ print $2 }')
+			if [ -z "$share_size" ] ; then share_size="-" ; fi
+			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
+
+			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab	
 			mounted="$mounted /tmp/usb_mount/$id"
-		fi	
+		fi
 	done
 	
-	cur_config="samba"
-	config_load "$cur_config"
-	config_foreach clear_invalid "sambashare"
-	uci commit
+	#cur_config="samba"
+	#config_load "$cur_config"
+	#config_foreach clear_invalid "sambashare"
+	#uci commit
 	
-	cur_config="nfsd"
-	config_load "$cur_config"
-	config_foreach clear_invalid "nfsshare"
-	uci commit
+	#cur_config="nfsd"
+	#config_load "$cur_config"
+	#config_foreach clear_invalid "nfsshare"
+	#uci commit
 }
 
 stop()
