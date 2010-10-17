@@ -1103,7 +1103,7 @@ function updatetc()
 	{
 		updateInProgress = true;
 
-		var command="tc -s class show dev ";
+		var commands="tc -s class show dev ";
 
 		if (direction == "download") {
 		 	commands = commands + "imq0";
@@ -1111,14 +1111,15 @@ function updatetc()
 		 	commands = commands + currentWanIf;
 		}
 
-		var commands="tc -s class show dev imq0"
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
 			{
-				var Lines = req.responseText.match(/hfsc\s1:[0-9]+.+leaf.+\n.+Sent\s[0-9]+/g);
+				/*Only match leaf classes and class with 2 digit class numbers since on the upload side class 1:127 is only for qosmon*/
+				var Lines = req.responseText.match(/hfsc\s1:[0-9]{1,2}\s.+leaf.+\n.+Sent\s[0-9]+/g);
+
 
 				if (Lines != null) { 
 					for(i = 0; i < Lines.length; i++) {
@@ -1130,7 +1131,7 @@ function updatetc()
 						classTable[i].leaf=Lines[i].match(/leaf\s([0-9a-f]*)/)[1];
 
                         if (lastbytes != null) {
-                            classTable[i].bps= (parseInt(classTable[i].bytes)-parseInt(lastbytes)) * 8000 / 500;
+                            classTable[i].bps= (parseInt(classTable[i].bytes)-parseInt(lastbytes))*8;
                         } else {
                             classTable[i].bps=NaN;
                         }
