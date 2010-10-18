@@ -5,7 +5,7 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "firewall" -p "quotas" -c "internal.css" -j "table.js usb_storage.js" gargoyle nfsd samba
 
 ?>
@@ -16,11 +16,10 @@
 	echo "var driveSizes = [];"
 	
 	echo "var storageDrives = [];"
-	cat /etc/mounted_usb_storage.tab 2>/dev/null | awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\"",\""$4"\"]);" }' 
+	cat /tmp/mounted_usb_storage.tab 2>/dev/null | awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' 
 
 	echo "var physicalDrives = [];"
 
-	
 ?>
 //-->
 </script>
@@ -138,49 +137,8 @@
 </script>
 
 
-			</div>
-			<div id="main_bottom"></div>
-		</div>
-		<div id="nav_external_container">
-			<div id="nav_top"></div>
-			<div id="nav_internal_container1">
-				<div id="nav_internal_container2">
-					<div class="nav_internal_end1"></div>
-					<div class="nav_unselected_divider_end1"></div>
-					<div class="nav_unselected_end1">
-						<a href="http://10.10.1.1/overview.sh">Status</a>
-					</div>
-					<div class="nav_unselected_divider"></div>
-					<div class="nav_unselected">
-						<a href="http://10.10.1.1/basic.sh">Connection</a>
-					</div>
-					<div class="nav_selected_divider1"></div>
-					<div class="nav_selected">
-						<div class="nav_selected_container">
-							<div class="selected_header">Firewall</div>
-							<div id="submenu_container">
-								<div class="submenu_selected">Port Forwarding</div>
-								<a href="http://10.10.1.1/restriction.sh">Restrictions</a>
-								<a href="http://10.10.1.1/quotas.sh">Quotas</a>
-								<a href="http://10.10.1.1/qos_upload.sh">QoS (Upload)</a>
-								<a href="http://10.10.1.1/qos_download.sh">QoS (Download)</a>
-							</div>
-						</div>
-					</div>
-					<div class="nav_selected_divider2"></div>
-					<div class="nav_unselected">
-						<a href="http://10.10.1.1/access.sh">System</a>
-					</div>
-					<div class="nav_unselected_divider"></div>
-					<div class="nav_unselected">
-						<a href="http://10.10.1.1/about.sh">About</a>
-					</div>
-					<div class="nav_unselected_divider_end2"></div>
-					<div class="nav_internal_end2"></div>
-				</div>
-			</div>
-			<div id="nav_bottom"></div>
-		</div>
-	</div>
-	<div id="outer_footer"></div>
-</body></html>
+<?
+	gargoyle_header_footer -f -s "firewall" -p "usb_storage"
+?>
+
+
