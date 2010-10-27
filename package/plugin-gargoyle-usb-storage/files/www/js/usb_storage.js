@@ -196,9 +196,10 @@ function createEditButton()
 	return editButton;
 }
 
-function removeShareCallback()
+function removeShareCallback(table, row)
 {
-
+	var editName=row.childNodes[0].firstChild.data;
+	nameToMountPoint[editName] = null;
 }
 
 function editShare()
