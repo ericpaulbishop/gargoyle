@@ -443,9 +443,10 @@ function fullEscape(str)
 
 
 
-function setChildText(parentId, text, color, isBold, fontSize)
+function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 {
-	parentElement = document.getElementById(parentId);
+	controlDocument = controlDocument == null ? document : controlDocument;
+	parentElement = controlDocument.getElementById(parentId);
 	if(parentElement != null)
 	{
 		if(color != null)
@@ -465,7 +466,7 @@ function setChildText(parentId, text, color, isBold, fontSize)
 		{
 			parentElement.removeChild(parentElement.firstChild);
 		}
-		parentElement.appendChild(document.createTextNode(text));
+		parentElement.appendChild(controlDocument.createTextNode(text));
 	}
 }
 

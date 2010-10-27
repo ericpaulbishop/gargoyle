@@ -1,4 +1,7 @@
 
+var nameToMountPoint = [];
+var mountPointToDrive = [];
+
 function resetData()
 {
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
@@ -20,7 +23,7 @@ function resetData()
 		document.getElementById("share_disk_text").style.display = "none";
 		document.getElementById("share_disk").style.display = "block";
 
-		var mountPointToDrive = [];
+		mountPointToDrive = []; //global
 		var mountPointToFs = [];
 		var mountPointToDriveSize = [];
 		var driveIndex = 0;
@@ -32,6 +35,7 @@ function resetData()
 
 		}
 		
+		nameToMountPoint = []; //global
 		var mountedDrives = [];
 		var mountPointToDriveData = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
@@ -46,7 +50,7 @@ function resetData()
 				{
 					mountedDrives[ mountPointToDrive[share] ] = 1;
 					
-					//device->[mountpoint, name, filesystem, size, sharetype, access]
+					//device->[name, filesystem, size, sharetype, access]
 					var driveData = mountPointToDriveData[share] == null ? ["", "", "", "", "", createEditButton()] : mountPointToDriveData[share];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
 					driveData[1] = mountPointToFs[share];
@@ -55,7 +59,7 @@ function resetData()
 					driveData[4] = uciOriginal.get(config, shareList[shareIndex], "read_only");
 					driveData[4] = driveData[5] == "1" || driveData[5] == "yes" ? "Read Only" : "Read/Write";
 
-
+					nameToMountPoint[ driveData[0] ] = share;
 
 					if(config == "samba")
 					{
@@ -153,7 +157,7 @@ function resetData()
 				mountTableData.push( mountPointToDriveData[ storageDrives[driveIndex][1] ] );
 			}
 		}
-		mountTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], mountTableData, "mount_table", true, false, function(){ return 1; });
+		mountTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], mountTableData, "mount_table", true, false, removeQuotaCallback);
 		tableContainer = document.getElementById('sharing_mount_table_container');
 		if(tableContainer.firstChild != null)
 		{
@@ -184,10 +188,118 @@ function createEditButton()
 	editButton = createInput("button");
 	editButton.value = "Edit";
 	editButton.className="default_button";
-	//editButton.onclick = editQuota;
+	editButton.onclick = editShare;
 	
 	editButton.className = "default_button"  ;
 	editButton.disabled  = false ;
 
 	return editButton;
+}
+
+function removeShareCallback()
+{
+
+}
+
+function editShare()
+{
+	if( typeof(editShareWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editShareWindow.close();
+		}
+		catch(e){}
+	}
+
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+
+	editShareWindow = window.open("usb_share_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	
+	var saveButton = createInput("button", editShareWindow.document);
+	var closeButton = createInput("button", editShareWindow.document);
+	saveButton.value = "Close and Apply Changes";
+	saveButton.className = "default_button";
+	closeButton.value = "Close and Discard Changes";
+	closeButton.className = "default_button";
+
+	var editRow=this.parentNode.parentNode;
+	var editName=editRow.childNodes[0].firstChild.data;
+	var editMount=nameToMountPoint[editName];
+	var editDrive=mountPointToDrive[editMount];
+	
+	var editType=editRow.childNodes[3].firstChild.data;
+	var editAccess = editRow.childNodes[4].firstChild.data;
+
+	var runOnEditorLoaded = function () 
+	{
+		var updateDone=false;
+		if(editShareWindow.document != null)
+		{
+			if(editShareWindow.document.getElementById("bottom_button_container") != null)
+			{
+				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
+				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+				
+				//don't need set/load from UCI, since all data is in row text itself
+				//load data from row text here
+				//device->[name, filesystem, size, sharetype, access]
+				editShareWindow.document.getElementById("share_disk").style.display = "none";
+				editShareWindow.document.getElementById("share_disk_text").style.display = "block";
+				setChildText("share_disk_text", editDrive, null, null, null, editShareWindow.document);
+				editShareWindow.document.getElementById("share_name").value = editName;
+				setSelectedText("share_type", editType, editShareWindow.document);
+				setSelectedText("share_access", editAccess, editShareWindow.document);
+
+
+				closeButton.onclick = function()
+				{
+					editShareWindow.close();
+				}
+				saveButton.onclick = function()
+				{
+					var errors = [];
+					var shareName = editShareWindow.document.getElementById("share_name").value;
+					if(shareName == "")
+					{
+						errors.push("Invalid Share Name");
+					}
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\nCould not update share.");
+					}
+					else
+					{
+						//set data
+						editRow.childNodes[0].firstChild.data = shareName; 
+						editRow.childNodes[3].firstChild.data = getSelectedText("share_type", editShareWindow.document);
+						editRow.childNodes[4].firstChild.data = getSelectedText("share_access", editShareWindow.document);
+						editShareWindow.close();
+					}
+				}
+				editShareWindow.moveTo(xCoor,yCoor);
+				editShareWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout(runOnEditorLoaded, 250);
+		}
+	}
+	runOnEditorLoaded();
 }

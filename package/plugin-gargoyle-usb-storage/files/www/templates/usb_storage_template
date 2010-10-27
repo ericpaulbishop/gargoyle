@@ -8,7 +8,7 @@
 	<select class="rightcolumn" id="share_type">
 		<option value="samba">CIFS</option>
 		<option value="nfs">NFS</option>
-		<option value="samba+nfs">CIFS &amp; NFS</option>
+		<option value="samba+nfs">CIFS+NFS</option>
 	</select>
 	<br/>
 </div>
@@ -18,9 +18,9 @@
 </div>
 <div id="share_access_container">
 	<label class="leftcolumn" id="share_access_label" for="share_access">Access Type:</label>
-	<select class="rightcolumn" id="share_type">
+	<select class="rightcolumn" id="share_access">
 		<option value="ro">Read Only</option>
-		<option value="rw">Read &amp; Write</option>
+		<option value="rw">Read/Write</option>
 	</select>
 </div>
 
