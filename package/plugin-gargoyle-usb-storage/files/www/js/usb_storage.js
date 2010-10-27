@@ -1,6 +1,174 @@
+/*	
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL. 
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
 
 var nameToMountPoint = [];
 var mountPointToDrive = [];
+
+
+function saveChanges()
+{
+	//validate samba user/pass if samba isn't set to anonymous access
+	var sambaAuth  = getSelectedValue("cifs_policy");
+	var sambaUser  = document.getElementById("cifs_user").value;
+	var sambaPass  = document.getElementById("cifs_pass").value;
+	var sambaGroup = document.getElementById("cifs_workgroup").value;
+	var errors = [];
+	if(sambaGroup == "")
+	{
+		errors.push("Invalid CIFS Workgroup");
+	}
+	if(sambaAuth == "user" && (sambaUser == ""))
+	{
+		errors.push("Invalid CIFS User");
+	}
+	if(sambaAuth == "user" && (sambaPass == ""))
+	{
+		errors.push("Invalid CIFS Password");
+	}
+	if(errors.length > 0)
+	{
+		alert( errors.join("\n") + "\n\nCould not save settings" );
+		return;
+	}
+
+
+	setControlsEnabled(false, true);
+	
+	//remove old quotas
+	var preCommands = [];
+	var sharePkg = ["samba", "samba", "nfsd"];
+	var shareCfg = ["sambashare", "sambauser", "nfsshare"];
+	while(sharePkg.length > 0)
+	{
+		pkg = sharePkg.shift();
+		cfg = shareCfg.shift();
+		var allOriginalConfigSections = uciOriginal.getAllSectionsOfType(pkg, cfg);
+		while(allOriginalConfigSections.length > 0)
+		{
+			var section = allOriginalConfigSections.shift();
+			uciOriginal.removeSection(pkg, section);
+			preCommands.push("uci del " + pkg + "." + section);	
+		}
+	}
+	preCommands.push("uci commit");
+
+	
+	
+	var uci = uciOriginal.clone();
+	if(sambaAuth == "user")
+	{
+		preCommands.push("uci set samba.sambauser=sambauser");
+		uci.set("samba", "sambauser", "", "sambauser");
+		uci.set("samba", "sambauser", "username", sambaUser);
+		uci.set("samba", "sambauser", "password", sambaPass);
+	}
+	preCommands.push("uci set samba.@samba[0].workgroup='" + sambaGroup + "'" );
+	
+	var nfsAuth    = getSelectedValue("nfs_policy");
+	var nfsIps = [];
+	if(nfsAuth == "ip")
+	{
+		var nfsIpTable = document.getElementById("nfs_ip_table");
+		if(nfsIpTable != null)
+		{
+			var nfsIpData = getTableDataArray(nfsIpTable, true, false);
+			while(nfsIpData.length > 0)
+			{
+				var row = nfsIpData.shift();
+				nfsIps.push(row[0]);
+			}
+		}
+		if(nfsIps.length == 0)
+		{
+			setSelectedValue("nfs_policy", "share");
+			document.getElementById("nfs_ip_container").style.display = "none";
+		}
+	}
+
+	var shareTableData = getTableDataArray(document.getElementById("share_table"), true, false);
+	var shIndex=0;
+	for(shIndex=0; shIndex<shareTableData.length-1; shIndex++)
+	{
+		var share       = shareTableData[shIndex];
+		var shareName   = shareTableData[0];
+		var shareMount  = nameToMountPoint[shareName];
+		var shareType   = shareTableData[3];
+		var shareAccess = shareTableData[4];
+		
+
+		var shareId = share + "_" + shareName;
+		if(shareType.match(/CIFS/))
+		{
+			var pkg = "samba";
+			var cfg = "sambashare";
+			preCommands.push("uci set " + pkg + "." + shareId + "=" + cfg + "\n");
+			uci.set(pkg, shareId, "", cfg);
+			uci.set(pkg, shareId, "name", shareName);
+			uci.set(pkg, shareId, "path", shareMount);
+			uci.set(pkg, shareId, "read_only", (shareAccess == "Read Only" ? "yes" : "no"));
+			uci.set(pkg, shareId, "create_mask", "777");
+			uci.set(pkg, shareId, "dir_mask", "777");
+			uci.set(pkg, shareId, "browseable", "yes");
+			if(sambaAuth == "user")
+			{
+				uci.set(pkg, shareId, "guest_ok", "no");
+				uci.set(pkg, shareId, "users", sambaUser);
+			}
+			else
+			{
+				uci.set(pkg, shareId, "guest_ok", "yes");
+			}
+			
+		}
+		if(shareType.match(/NFS/))
+		{
+			var pkg = "nfs";
+			var cfg = "nfsshare";
+			preCommands.push("uci set " + pkg + "." + shareId + "=" + cfg + "\n");
+			uci.set(pkg, shareId, "", cfg);
+			uci.set(pkg, shareId, "name", shareName);
+			uci.set(pkg, shareId, "path", shareMount);
+			uci.set(pkg, shareId, "read_only", (shareAccess == "Read Only" ? "1" : "0"));
+			uci.set(pkg, shareId, "sync", "1");
+			uci.set(pkg, shareId, "insecure", "1");
+			uci.set(pkg, shareId, "subtree_check", "0");
+			if(nfsIps.length > 0)
+			{
+				uci.set(pkg, shareId, "allowed_hosts", nfsIps.join(","));
+			}
+			else
+			{
+				uci.set(pkg, shareId, "allowed_hosts", "*");
+			}
+
+		}
+	}
+	preCommands.push("uci commit");
+
+	var postCommands = [];
+	postCommands.push("/etc/init.d/samba restart");
+	postCommands.push("/etc/init.d/nfsd restart");
+	
+	var commands = preCommands.join("\n") + "\n" +  uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			uciOriginal = uci.clone();
+			setControlsEnabled(true);
+		}
+	}
+
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+}
+
 
 function resetData()
 {
@@ -145,7 +313,7 @@ function resetData()
 
 		//create current share table
 		//name, file system, size, type, access, [edit], [remove]
-		var mountTableData = [];
+		var shareTableData = [];
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
 			if( mountPointToDriveData[ storageDrives[driveIndex][1] ] != null )
@@ -154,16 +322,16 @@ function resetData()
 				mountType = mountType.replace(/samba/, "CIFS");
 				mountType = mountType.replace(/nfsd/, "NFS");
 				(mountPointToDriveData[ storageDrives[driveIndex][1] ])[3] = mountType;
-				mountTableData.push( mountPointToDriveData[ storageDrives[driveIndex][1] ] );
+				shareTableData.push( mountPointToDriveData[ storageDrives[driveIndex][1] ] );
 			}
 		}
-		mountTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], mountTableData, "mount_table", true, false, removeQuotaCallback);
-		tableContainer = document.getElementById('sharing_mount_table_container');
-		if(tableContainer.firstChild != null)
+		var shareTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], shareTableData, "share_table", true, false, removeQuotaCallback);
+		var tableContainer = document.getElementById('sharing_mount_table_container');
+		if(shareContainer.firstChild != null)
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
-		tableContainer.appendChild(mountTable);
+		tableContainer.appendChild(shareTable);
 		
 
 	}
