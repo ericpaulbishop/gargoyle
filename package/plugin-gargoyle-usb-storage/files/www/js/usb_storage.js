@@ -16,6 +16,10 @@ function resetData()
 		setSelectedValue("cifs_policy", "share", document);
 		setSelectedValue("nfs_policy",  "share", document);
 
+		//full document, not edit, so share_disk option is select, not text
+		document.getElementById("share_disk_text").style.display = "none";
+		document.getElementById("share_disk").style.display = "block";
+
 		var mountPointToDrive = [];
 		var mountPointToFs = [];
 		var mountPointToDriveSize = [];

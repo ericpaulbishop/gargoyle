@@ -73,33 +73,7 @@
 		<span class="nocolumn" style="text-decoration:underline;">Add Shared Disk:</span>
 	</div>
 	<div id="sharing_add_controls_container" class="indent">
-		<div id="share_disk_container">
-			<label class="leftcolumn" id="share_disk_label" for="share_disk">Select Disk:</label>
-			<select class="rightcolumn" id="share_disk"></select>
-		</div>
-		<div id="select_share_type_container">
-			<label class="leftcolumn" id="share_type_label" for="share_type">Share Type:</label>
-			<select class="rightcolumn" id="share_type">
-				<option value="samba">CIFS</option>
-				<option value="nfs">NFS</option>
-				<option value="samba+nfs">CIFS &amp; NFS</option>
-			</select>
-			<br/>
-		</div>
-		<div id="share_name_container">
-			<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
-			<input type="text" class="rightcolumn" id="share_name" />
-		</div>
-		<div id="share_access_container">
-			<label class="leftcolumn" id="share_access_label" for="share_access">Access Type:</label>
-			<select class="rightcolumn" id="share_type">
-				<option value="ro">Read Only</option>
-				<option value="rw">Read &amp; Write</option>
-			</select>
-		</div>
-		<div>
-			<input type="button" class="default_button" value="Add Shared Disk" />
-		</div>
+		<? cat templates/usb_storage_template ?>
 	</div>
 	<div class="internal_divider"></div>
 	<div id="sharing_current_heading_container">
