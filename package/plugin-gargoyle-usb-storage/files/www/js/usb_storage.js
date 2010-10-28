@@ -104,8 +104,6 @@ function saveChanges()
 		var shareAccess = share[4];
 		
 
-		alert("shareName = " + shareName + ", shareType = " + shareType);
-
 		var shareId = shIndex + "_" + shareName;
 		if(shareType.match(/CIFS/))
 		{
@@ -160,7 +158,6 @@ function saveChanges()
 	postCommands.push("/etc/init.d/nfsd restart");
 	
 	var commands = preCommands.join("\n") + "\n" +  uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
-	alert(commands);
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
