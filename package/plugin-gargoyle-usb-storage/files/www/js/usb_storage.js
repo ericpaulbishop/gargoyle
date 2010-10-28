@@ -59,7 +59,6 @@ function saveChanges()
 			preCommands.push("uci del " + pkg + "." + section);	
 		}
 	}
-	preCommands.push("uci commit");
 
 	
 	
@@ -96,16 +95,18 @@ function saveChanges()
 
 	var shareTableData = getTableDataArray(document.getElementById("share_table"), true, false);
 	var shIndex=0;
-	for(shIndex=0; shIndex<shareTableData.length-1; shIndex++)
+	for(shIndex=0; shIndex<shareTableData.length; shIndex++)
 	{
 		var share       = shareTableData[shIndex];
-		var shareName   = shareTableData[0];
+		var shareName   = share[0];
 		var shareMount  = nameToMountPoint[shareName];
-		var shareType   = shareTableData[3];
-		var shareAccess = shareTableData[4];
+		var shareType   = share[3];
+		var shareAccess = share[4];
 		
 
-		var shareId = share + "_" + shareName;
+		alert("shareName = " + shareName + ", shareType = " + shareType);
+
+		var shareId = shIndex + "_" + shareName;
 		if(shareType.match(/CIFS/))
 		{
 			var pkg = "samba";
@@ -131,7 +132,7 @@ function saveChanges()
 		}
 		if(shareType.match(/NFS/))
 		{
-			var pkg = "nfs";
+			var pkg = "nfsd";
 			var cfg = "nfsshare";
 			preCommands.push("uci set " + pkg + "." + shareId + "=" + cfg + "\n");
 			uci.set(pkg, shareId, "", cfg);
@@ -159,6 +160,8 @@ function saveChanges()
 	postCommands.push("/etc/init.d/nfsd restart");
 	
 	var commands = preCommands.join("\n") + "\n" +  uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
+	alert(commands);
+
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -204,7 +207,7 @@ function resetData()
 			mountPointToDrive[ storageDrives[driveIndex][1] ]      = storageDrives[driveIndex][0];
 			driveToMountPoint[ storageDrives[driveIndex][0] ]      = storageDrives[driveIndex][1];
 			mountPointToFs[ storageDrives[driveIndex][1] ]         = storageDrives[driveIndex][2];
-			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = storageDrives[driveIndex][3];
+			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][3] ).replace(/ytes/, "");
 		}
 		
 
@@ -227,7 +230,7 @@ function resetData()
 					var driveData = mountPointToDriveData[share] == null ? ["", "", "", "", "", createEditButton()] : mountPointToDriveData[share];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
 					driveData[1] = mountPointToFs[share];
-					driveData[2] = parseBytes( mountPointToDriveSize[share] ).replace(/ytes/, "");
+					driveData[2] = mountPointToDriveSize[share];
 					driveData[3] = driveData[3].length > 0 ? driveData[3] + "+" + config : config;
 					driveData[4] = uciOriginal.get(config, shareList[shareIndex], "read_only");
 					driveData[4] = driveData[5] == "1" || driveData[5] == "yes" ? "Read Only" : "Read/Write";
@@ -433,7 +436,7 @@ function editShare()
 	}
 
 
-	editShareWindow = window.open("usb_share_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
 	
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
