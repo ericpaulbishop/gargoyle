@@ -233,7 +233,7 @@ function resetData()
 					driveData[2] = mountPointToDriveSize[share];
 					driveData[3] = driveData[3].length > 0 ? driveData[3] + "+" + config : config;
 					driveData[4] = uciOriginal.get(config, shareList[shareIndex], "read_only");
-					driveData[4] = driveData[5] == "1" || driveData[5] == "yes" ? "Read Only" : "Read/Write";
+					driveData[4] = driveData[4] == "1" || driveData[4] == "yes" ? "Read Only" : "Read/Write";
 
 					nameToMountPoint[ driveData[0] ] = share;
 
