@@ -369,8 +369,6 @@ function addNewShare()
 		document.getElementById("sharing_add_heading_container").style.display  = "none";
 		document.getElementById("sharing_add_controls_container").style.display = "none";
 	}
-		
-	
 }
 
 
