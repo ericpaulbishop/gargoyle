@@ -39,7 +39,7 @@ function saveChanges()
 
 	setControlsEnabled(false, true);
 	
-	//remove old quotas
+	//remove old shares 
 	var preCommands = [];
 	var sharePkg = ["samba", "samba", "nfsd"];
 	var shareCfg = ["sambashare", "sambauser", "nfsshare"];
@@ -325,9 +325,9 @@ function resetData()
 				shareTableData.push( mountPointToDriveData[ storageDrives[driveIndex][1] ] );
 			}
 		}
-		var shareTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], shareTableData, "share_table", true, false, removeQuotaCallback);
+		var shareTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
-		if(shareContainer.firstChild != null)
+		if(tableContainer.firstChild != null)
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
