@@ -176,8 +176,6 @@ function saveChanges()
 function resetData()
 {
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("unmount").style.display = storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("format").style.display = physicalDrives.length > 0 ? "block" : "none";
 	document.getElementById("no_disks").style.display = physicalDrives.length == 0 & storageDrives.length == 0 ? "block" : "none";
 
 	if(storageDrives.length > 0)
@@ -360,7 +358,7 @@ function addNewShare()
 	var access = getSelectedText("share_access");
 	var type = getSelectedText("share_type");
 	
-	var table = getElementById("share_table");
+	var table = document.getElementById("share_table");
 	addTableRow(table, [name, fs, size, type, access, createEditButton() ], true, false, removeShareCallback);
 	nameToMountPoint[name] = mountPoint;
 
