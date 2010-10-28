@@ -6,8 +6,12 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-var nameToMountPoint = [];
+var driveToMountPoint = [];
 var mountPointToDrive = [];
+var mountPointToFs = [];
+var mountPointToDriveSize = [];
+var nameToMountPoint = [];
+
 
 
 function saveChanges()
@@ -166,7 +170,6 @@ function saveChanges()
 	}
 
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-
 }
 
 
@@ -190,22 +193,26 @@ function resetData()
 		//full document, not edit, so share_disk option is select, not text
 		document.getElementById("share_disk_text").style.display = "none";
 		document.getElementById("share_disk").style.display = "block";
-
-		mountPointToDrive = []; //global
-		var mountPointToFs = [];
-		var mountPointToDriveSize = [];
+		
+		//globals
+		driveToMountPoint = [];
+		mountPointToDrive = []; 
+		mountPointToFs = [];
+		mountPointToDriveSize = [];
+		
 		var driveIndex = 0;
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
-			mountPointToDrive[ storageDrives[driveIndex][1] ] = storageDrives[driveIndex][0];
-			mountPointToFs[ storageDrives[driveIndex][1] ]    = storageDrives[driveIndex][2];
-			mountPointToDriveSize[ storageDrives[driveIndex][1] ]    = storageDrives[driveIndex][3];
-
+			mountPointToDrive[ storageDrives[driveIndex][1] ]      = storageDrives[driveIndex][0];
+			driveToMountPoint[ storageDrives[driveIndex][0] ]      = storageDrives[driveIndex][1];
+			mountPointToFs[ storageDrives[driveIndex][1] ]         = storageDrives[driveIndex][2];
+			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = storageDrives[driveIndex][3];
 		}
 		
-		nameToMountPoint = []; //global
-		var mountedDrives = [];
+
+		nameToMountPoint = []; //another global
 		var mountPointToDriveData = [];
+		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
 		var getMounted = function(shareList, config)
@@ -332,17 +339,42 @@ function resetData()
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(shareTable);
-		
-
 	}
 
-	//format settings
-	//if(physicalDrives.length > 0)
-	//{
-	//
-	//}
 
 }
+
+
+function addNewShare()
+{
+	var name = document.getElementById("share_name").value;
+	if(name.length == "")
+	{
+		alert("Error: Invalid Share Name\n\nCould not add shared drive");
+		return;
+	}
+	var drive = getSelectedValue("share_disk");
+	var mountPoint = driveToMountPoint[drive];
+	var fs = mountPointToFs[mountPoint];
+	var size = mountPointToDriveSize[mountPoint];
+	var access = getSelectedText("share_access");
+	var type = getSelectedText("share_type");
+	
+	var table = getElementById("share_table");
+	addTableRow(table, [name, fs, size, type, access, createEditButton() ], true, false, removeShareCallback);
+	nameToMountPoint[name] = mountPoint;
+
+	//remove the drive we just used from the available list
+	removeOptionFromSelectElement("share_disk", drive);
+	if(document.getElementById("share_disk").options.length == 0)
+	{
+		document.getElementById("sharing_add_heading_container").style.display  = "none";
+		document.getElementById("sharing_add_controls_container").style.display = "none";
+	}
+		
+	
+}
+
 
 function setPolicyVisibility()
 {
@@ -367,6 +399,14 @@ function createEditButton()
 function removeShareCallback(table, row)
 {
 	var editName=row.childNodes[0].firstChild.data;
+
+	var oldMountPoint = nameToMountPoint[editName];
+	var oldDrive = mountPointToDrive[oldMountPoint];
+	addOptionToSelectElement("share_disk", oldDrive, oldDrive);
+	document.getElementById("sharing_add_heading_container").style.display  = "block";
+	document.getElementById("sharing_add_controls_container").style.display = "block";
+
+	
 	nameToMountPoint[editName] = null;
 }
 

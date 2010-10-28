@@ -74,6 +74,9 @@
 	</div>
 	<div id="sharing_add_controls_container" class="indent">
 		<? cat templates/usb_storage_template ?>
+		<div>
+			<input type="button" id="add_share_button" class="default_button" value="Add Shared Disk" onclick="addNewShare()" />
+		</div>
 	</div>
 	<div class="internal_divider"></div>
 	<div id="sharing_current_heading_container">
@@ -83,23 +86,16 @@
 	</div>
 </fieldset>
 
-<fieldset id="unmount">
-	<legend class="sectionheader">Unmount</legend>
-</fieldset>
-
-<fieldset id="format">
-	<legend class="sectionheader">Format A Disk</legend>
-</fieldset>
-
 <fieldset id="no_disks" style="display:none;">
 	<legend class="sectionheader">Shared Disks</legend>
 	No USB disks connected.
 </fieldset>
 
+<div id="bottom_button_container">
+	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+</div>
 
-
-
-</form>
 
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
