@@ -1,0 +1,17 @@
+--- tcp_wrappers_7.6/scaffold.c.old	2009-05-25 13:41:07.000000000 +0200
++++ tcp_wrappers_7.6/scaffold.c	2009-05-25 13:42:22.000000000 +0200
+@@ -20,13 +20,12 @@
+ #include <syslog.h>
+ #include <setjmp.h>
+ #include <string.h>
++#include <stdlib.h>
+ 
+ #ifndef INADDR_NONE
+ #define	INADDR_NONE	(-1)		/* XXX should be 0xffffffff */
+ #endif
+ 
+-extern char *malloc();
+-
+ /* Application-specific. */
+ 
+ #include "tcpd.h"
