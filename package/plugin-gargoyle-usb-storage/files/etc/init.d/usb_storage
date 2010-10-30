@@ -76,5 +76,11 @@ start()
 
 stop()
 {
-	echo "stopping"
+	if [ -e /tmp/mounted_usb_storage.tab ] ; then
+		old_mounts=$(cat /tmp/mounted_usb_storage.tab | awk ' { print $2 ; } ' )
+		for m in $old_mounts ; do
+			umount "$m" 2>/dev/null
+		done
+		rm -rf /tmp/mounted_usb_storage.tab	
+	fi
 }
