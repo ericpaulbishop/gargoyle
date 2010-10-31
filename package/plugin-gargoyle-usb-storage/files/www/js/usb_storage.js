@@ -176,7 +176,8 @@ function saveChanges()
 function resetData()
 {
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("no_disks").style.display = physicalDrives.length == 0 & storageDrives.length == 0 ? "block" : "none";
+	document.getElementById("bottom_button_container").style.display =  storageDrives.length > 0 ? "block" : "none";
+	document.getElementById("no_disks").style.display =  storageDrives.length == 0 ? "block" : "none";
 
 	if(storageDrives.length > 0)
 	{
