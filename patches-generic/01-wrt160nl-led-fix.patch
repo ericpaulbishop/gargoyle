@@ -1,0 +1,24 @@
+--- ../backfire-src/target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-28 18:10:20.693607074 -0400
++++ target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-31 17:53:08.538209005 -0400
+@@ -10,7 +10,21 @@
+ wrt160nl_fixtrx() {
+ 	mtd -o 32 fixtrx firmware
+ }
++wrt160nl_set_wlan_led() {
++	uci batch <<EOF
++set system.wlan_led=led
++set system.wlan_led.name='WLAN'
++set system.wlan_led.sysfs='wrt160nl:blue:wlan'
++set system.wlan_led.trigger='netdev'
++set system.wlan_led.dev='wlan0'
++set system.wlan_led.mode='link tx rx'
++
++commit system
++EOF
++}
++
+ 
+ if [ "${board}" == "wrt160nl" ]; then
+ 	wrt160nl_fixtrx
++	wrt160nl_set_wlan_led
+ fi
