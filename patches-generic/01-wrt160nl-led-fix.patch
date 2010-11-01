@@ -1,5 +1,5 @@
---- ../backfire-src/target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-28 18:10:20.693607074 -0400
-+++ target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-31 17:53:08.538209005 -0400
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-28 18:10:20.693607074 -0400
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/wrt160nl	2010-10-31 17:53:08.538209005 -0400
 @@ -10,7 +10,21 @@
  wrt160nl_fixtrx() {
  	mtd -o 32 fixtrx firmware
