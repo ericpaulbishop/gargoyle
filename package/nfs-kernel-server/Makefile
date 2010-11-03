@@ -22,7 +22,7 @@ define Package/nfs-kernel-server/Default
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=Filesystem
-  DEPENDS:=+libwrap +libblkid +libuuid +mountd +mount-utils
+  DEPENDS:=+libwrap +libblkid +libuuid 
   URL:=http://nfs.sourceforge.net/
 endef
 

@@ -30,7 +30,7 @@ define Package/plugin-gargoyle-usb-storage
 	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext2 +kmod-fs-ext3 +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat 
 	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
 	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 
-	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8 +uuidgen +disktype
+	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8 +uuidgen +disktype +mount-utils
 	MAINTAINER:=Eric Bishop
 endef
 
