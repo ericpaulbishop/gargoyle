@@ -9,9 +9,9 @@ if [ "$ACTION" = "add" ] || [ "$ACTION" = "remove" ] ; then
 		timeout=$(($timeout - 1))
 	done
 	if [ ! -e /tmp/usb_restart.lock ] ; then
-		touch /tmp/usb_restart.lock	
-		
-		if [ "$ACTION" = "add" ] ; then sleep 3; fi
+		touch /tmp/usb_restart.lock
+	
+		sleep 3
 		
 		/etc/init.d/usb_storage restart
 		rm -rf /tmp/usb_restart.lock
