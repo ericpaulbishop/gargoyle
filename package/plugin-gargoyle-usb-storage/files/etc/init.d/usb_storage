@@ -12,7 +12,37 @@ update_sharetype()
 }
 
 
+usb_lock()
+{
+	timeout=15
+	got_lock=0
+	while [ -e /tmp/usb_restart.lock ] && [ $timeout -gt 0 ] ; do
+		sleep 1
+		timeout=$(($timeout - 1))
+	done
+	if [ ! -e /tmp/usb_restart.lock ] ; then
+		touch /tmp/usb_restart.lock
+		got_lock=1
+	fi
+	echo "$got_lock"
+}
+
+usb_unlock()
+{
+	rm -rf /tmp/usb_restart.lock
+}
+
+
 start()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_start
+		usb_unlock
+	fi	
+}
+
+do_start()
 {
 	gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
 	if [ -z "$gdisplay" ] ; then
@@ -21,9 +51,10 @@ start()
 		uci set gargoyle.system.usb_storage='350'
 		uci commit
 	fi
-	
+
 	rm -rf /tmp/mounted_usb_storage.tab
 	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
+	
 	mounted=""
 	for devid in $drives ; do
 		id=$(echo $devid | sed 's/^.*://g')
@@ -51,7 +82,7 @@ start()
 		else
 			share_type=""
 			cur_mount="/tmp/usb_mount/$id"
-			
+		
 			shared=0
 			config_load "samba"
 			config_foreach update_sharetype "sambashare"
@@ -71,10 +102,29 @@ start()
 			mounted="$mounted /tmp/usb_mount/$id"
 		fi
 	done
-	
 }
 
 stop()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		usb_unlock
+	fi
+}
+
+restart()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		do_start
+		usb_unlock
+	fi
+}
+
+
+do_stop()
 {
 	if [ -e /tmp/mounted_usb_storage.tab ] ; then
 		old_mounts=$(cat /tmp/mounted_usb_storage.tab | awk ' { print $2 ; } ' )
