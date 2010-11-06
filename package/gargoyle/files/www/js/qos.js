@@ -70,7 +70,6 @@ function saveChanges()
 	}
 	else
 	{
-
 		qosEnabled = true;
 		preCommands = [];
 
@@ -227,10 +226,10 @@ var timerid=null;
 
 function classinfo()
 {
-    this.Name = null;
-    this.Percent = null;
-    this.MinBW = null;
-    this.MaxBW = null;
+	this.Name = null;
+	this.Percent = null;
+	this.MinBW = null;
+	this.MaxBW = null;
 	this.bytes = null;
 	this.classno = null;
 	this.leaf = null;
@@ -245,7 +244,7 @@ function init_classtable()
 	totalPercent = 0;
 	defaultClassName = "";
 
-    classTable = new Array();
+	classTable = new Array();
 
 	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
 	removeAllOptionsFromSelectElement( document.getElementById("classification"));
@@ -255,7 +254,7 @@ function init_classtable()
 	{
 		classSection = classSections[classIndex];
 
-        classRow = new classinfo();
+		classRow = new classinfo();
 		classRow.Name = uciOriginal.get("qos_gargoyle", classSection, "name");
 		classRow.Percent = uciOriginal.get("qos_gargoyle", classSection, "percent_bandwidth");
 		classRow.MaxBW = uciOriginal.get("qos_gargoyle", classSection, "max_bandwidth");
@@ -263,8 +262,8 @@ function init_classtable()
 
 		classRow.Name = classRow.Name == "" ? classSection : classRow.Name;
 		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW + " kbit/s" : "zero";
-		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxNW + " kbit/s" : "unlimited";
-        classTable[classIndex] = classRow;
+		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW + " kbit/s" : "unlimited";
+		classTable[classIndex] = classRow;
 
 
 		addOptionToSelectElement("default_class", classRow.Name, classRow.Name, null);
@@ -278,33 +277,43 @@ function init_classtable()
 
 function update_classtable()
 {
-
 	directionClass = direction + "_class";
 	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
 
-    classData=null;
+	classData=null;
 	table = document.getElementById('qos_class_table_container').firstChild;
-	if (table != null) {
-          classData = getTableDataArray( table, true, false);
-          if (classData.length != classTable.length) {
-                  dynamic_update = false;
-                  return;
-          }
-    }
-    
+	if (table != null)
+	{
+		classData = getTableDataArray( table, true, false);
+		if (classData.length != classTable.length)
+		{
+			dynamic_update = false;
+			return;
+		}
+	}
+	
 	classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimum Bandwidth", "Maximum Bandwidth", "Load (kbps)",""];
 	classTableData = new Array();
 	totalPercent = 0;
 	for (classIndex=0; classIndex < classTable.length; classIndex++)
 	{
-
 		classSection = classSections[classIndex];
-        classRow = classTable[classIndex];
+		classRow = classTable[classIndex];
 
-        bpsn = classRow.bps/1000;
-		if (isNaN(bpsn)) {bps = '*'} else if (bpsn < 1) { bps = bpsn.toFixed(1)+'';} else { bps = bpsn.toFixed(0) + ''};
-        while (bps.length < 4) {bps = " " + bps;}
-
+		bpsn = classRow.bps/1000;
+		if (isNaN(bpsn))
+		{
+			bps = '*'
+		}
+		else if (bpsn < 1)
+		{
+			bps = bpsn.toFixed(1)+'';
+		} 
+		else
+		{
+			bps = bpsn.toFixed(0) + '';
+		}
+		while (bps.length < 4) { bps = " " + bps; }
 		classTableData.push([classRow.Name, classRow.Percent, classRow.MinBW, classRow.MaxBW, bps, createClassTableEditButton()] );
 		totalPercent = totalPercent + classRow.Percent;
 	}
@@ -348,8 +357,8 @@ function resetData()
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
 
 	directionRule  = direction + "_rule";
-    init_classtable();
-    update_classtable();
+	init_classtable();
+	update_classtable();
 
 	var ruleSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionRule);
 	ruleTableColumns = ["Match Criteria", "Classification", ""];
@@ -399,7 +408,7 @@ function resetData()
 		}
 
 		classification = uciOriginal.get("qos_gargoyle", ruleSection, "class");
-        idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1; 
+		idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1; 
 		ruleTableData.push( [ruleText, classTable[idx].Name, createRuleTableEditButton()] );
 	}
 
@@ -422,37 +431,45 @@ function resetData()
 
 	setQosEnabled();
 
-    if (direction == "download") { 
-        monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
-        if (monenabled == "true") document.getElementById("qos_monenabled").checked = true;
+	if (direction == "download")
+	{
+		monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
+		if (monenabled == "true") { document.getElementById("qos_monenabled").checked = true; }
 
-        ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
-        if (ptarget_ip == "") {
-            document.getElementById("use_ptarget_ip").checked = false;
-		    setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
-        } else {
-            document.getElementById("use_ptarget_ip").checked = true;
-            document.getElementById("ptarget_ip").value=ptarget_ip;
-		    setElementEnabled(document.getElementById("ptarget_ip"), true, "")
-        }
-    }
+		ptarget_ip = uciOriginal.get("qos_gargoyle", direction, "ptarget_ip");
+		if (ptarget_ip == "")
+		{
+			document.getElementById("use_ptarget_ip").checked = false;
+			setElementEnabled(document.getElementById("ptarget_ip"), false, currentWanGateway)
+		}
+		else
+		{
+			document.getElementById("use_ptarget_ip").checked = true;
+			document.getElementById("ptarget_ip").value=ptarget_ip;
+			setElementEnabled(document.getElementById("ptarget_ip"), true, "")
+		}
+	}
 
-    //Startup the dynamic screen updates.
-    updateInProgress = false;
-    dynamic_update = true;
-    updatetc();
+	//Startup the dynamic screen updates.
+	updateInProgress = false;
+	dynamic_update = true;
+	updatetc();
 
-    if (direction == "download") {
-       if (uciOriginal.get("qos_gargoyle", direction, "qos_monenabled") == "true") {
-           timerid=setInterval("updateqosmon()", 1000);
-       } else {
-           //Run updateqosmon once to clear away any old data.
-           setTimeout("updateqosmon()", 1000);
-       } 
-    } 
+	if (direction == "download")
+	{
+		if (uciOriginal.get("qos_gargoyle", direction, "qos_monenabled") == "true")
+		{
+			timerid=setInterval("updateqosmon()", 1000);
+		}
+		else
+		{
+			//Run updateqosmon once to clear away any old data.
+			setTimeout("updateqosmon()", 1000);
+		} 
+	}
 
-    //The default screen updater.
-    if (timerid == null) timerid=setInterval("updatetc()", 1000);
+	//The default screen updater.
+	if (timerid == null) { timerid=setInterval("updatetc()", 1000); }
 
 }
 
