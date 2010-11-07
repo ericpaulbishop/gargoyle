@@ -20,7 +20,7 @@ add_export_line()
 	
 	if [ -n "$name" ] || [ -n "$path" ] ; then
 		
-		if [ "$read_only" = "1" ] ; then read_only="rw" ; else read_only="ro" ; fi
+		if [ "$read_only" = "1" ] ; then read_only="ro" ; else read_only="rw" ; fi
 		if [ "$sync" = "0" ] ; then sync="async" ; else sync="sync" ; fi
 		if [ "$secure" = "0" ] ; then secure="insecure" ; else secure="secure" ; fi
 		if [ "$subtree_check" = "0" ] ; then subtree_check="no_subtree_check" ; else subtree_check="subtree_check" ; fi

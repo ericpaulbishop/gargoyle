@@ -55,6 +55,9 @@ do_start()
 	rm -rf /tmp/mounted_usb_storage.tab
 	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
 	
+	echo "$drives" >/tmp/drives_found.txt
+	date >>/tmp/drives_found.txt
+	
 	mounted=""
 	for devid in $drives ; do
 		id=$(echo $devid | sed 's/^.*://g')
@@ -64,10 +67,12 @@ do_start()
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
+			chmod 777 "/tmp/usb_mount/$id"
 			umount "/tmp/usb_mount/$id" 2>/dev/null
 			err=$(mount -t vfat "$d" "/tmp/usb_mount/$id")
 		elif  [ -n "$type" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
+			chmod 777 "/tmp/usb_mount/$id"
 			umount "/tmp/usb_mount/$id" 2>/dev/null
 			err="tmp"
 			ext_num=4
