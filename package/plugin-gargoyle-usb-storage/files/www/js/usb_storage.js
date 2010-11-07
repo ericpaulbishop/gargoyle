@@ -114,8 +114,8 @@ function saveChanges()
 			uci.set(pkg, shareId, "name", shareName);
 			uci.set(pkg, shareId, "path", shareMount);
 			uci.set(pkg, shareId, "read_only", (shareAccess == "Read Only" ? "yes" : "no"));
-			uci.set(pkg, shareId, "create_mask", "777");
-			uci.set(pkg, shareId, "dir_mask", "777");
+			uci.set(pkg, shareId, "create_mask", "0777");
+			uci.set(pkg, shareId, "dir_mask", "0777");
 			uci.set(pkg, shareId, "browseable", "yes");
 			if(sambaAuth == "user")
 			{
