@@ -1,0 +1,141 @@
+#!/bin/sh /etc/rc.common
+
+START=56
+
+update_sharetype()
+{
+	section="$1"
+	config_get path $1 path
+	if [ "$path" = "$cur_mount" ] ; then
+		shared=1		
+	fi
+}
+
+
+usb_lock()
+{
+	timeout=15
+	got_lock=0
+	while [ -e /tmp/usb_restart.lock ] && [ $timeout -gt 0 ] ; do
+		sleep 1
+		timeout=$(($timeout - 1))
+	done
+	if [ ! -e /tmp/usb_restart.lock ] ; then
+		touch /tmp/usb_restart.lock
+		got_lock=1
+	fi
+	echo "$got_lock"
+}
+
+usb_unlock()
+{
+	rm -rf /tmp/usb_restart.lock
+}
+
+
+start()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_start
+		usb_unlock
+	fi	
+}
+
+do_start()
+{
+	gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
+	if [ -z "$gdisplay" ] ; then
+		uci set gargoyle.display.system_usb_storage='USB Storage'
+		uci set gargoyle.scripts.system_usb_storage='usb_storage.sh'
+		uci set gargoyle.system.usb_storage='350'
+		uci commit
+	fi
+
+	rm -rf /tmp/mounted_usb_storage.tab
+	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
+	
+	echo "$drives" >/tmp/drives_found.txt
+	date >>/tmp/drives_found.txt
+	
+	mounted=""
+	for devid in $drives ; do
+		id=$(echo $devid | sed 's/^.*://g')
+		d=$(echo $devid | sed 's/:.*$//g')
+		dev=$(echo $d | sed 's/[0-9]*$//g')
+		type=$(disktype "$d" | egrep -o "Ext.|FAT..") 
+		err="";
+		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
+			mkdir -p "/tmp/usb_mount/$id"
+			chmod 777 "/tmp/usb_mount/$id"
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+			err=$(mount -t vfat "$d" "/tmp/usb_mount/$id")
+		elif  [ -n "$type" ] ; then
+			mkdir -p "/tmp/usb_mount/$id"
+			chmod 777 "/tmp/usb_mount/$id"
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+			err="tmp"
+			ext_num=4
+			while [ -n "$err" ] && [ $ext_num -ge 2 ] ; do
+				type="ext$ext_num"
+				err=$(mount -t $type "$d" "/tmp/usb_mount/$id" 2>&1)
+				ext_num=$(($ext_num-1))
+			done
+		fi
+		if [ -n "$err" ] ; then
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+		else
+			share_type=""
+			cur_mount="/tmp/usb_mount/$id"
+		
+			shared=0
+			config_load "samba"
+			config_foreach update_sharetype "sambashare"
+			if [ "$shared" = "1" ] ; then share_type="S" ; fi
+			
+			shared=0
+			config_load "nfsd"
+			config_foreach update_sharetype "nfsshare"
+			if [ "$shared" = "1" ] ; then share_type="N$share_type" ; fi
+			if [ -z "$share_type" ] ; then share_type="-" ; fi
+					
+			share_size=$(df  | grep "$d" | awk '{ print $2 }')
+			if [ -z "$share_size" ] ; then share_size="-" ; fi
+			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
+
+			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
+			mounted="$mounted /tmp/usb_mount/$id"
+		fi
+	done
+}
+
+stop()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		usb_unlock
+	fi
+}
+
+restart()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		do_start
+		usb_unlock
+	fi
+}
+
+
+do_stop()
+{
+	if [ -e /tmp/mounted_usb_storage.tab ] ; then
+		old_mounts=$(cat /tmp/mounted_usb_storage.tab | awk ' { print $2 ; } ' )
+		for m in $old_mounts ; do
+			umount "$m" 2>/dev/null
+		done
+		rm -rf /tmp/mounted_usb_storage.tab	
+	fi
+}

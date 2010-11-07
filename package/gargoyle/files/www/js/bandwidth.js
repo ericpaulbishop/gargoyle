@@ -46,11 +46,53 @@ function stopInterval()
 }
 window.onbeforeunload=stopInterval;
 
+function trim(str)
+{
+	if ( !str )
+	{
+		return str;
+	}
+	// TODO is this the best way to trim strings in JS?
+	return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+}
+
+function BandwidthCookieContainer()
+{
+	this.prefix = "gargoyle.bandwidth_display.";
+	
+	this.set = function(key, value)
+	{
+		var expires = new Date( new Date().getTime() + ( 86400 * 100 * 1000 /*100 days in mills*/) );
+		document.cookie = this.prefix + key + "=" + escape(value) + ";expires=" + expires.toUTCString();
+	}
+
+	this.remove = function(key)
+	{
+		var gone = new Date( 0 );
+		document.cookie = this.prefix + key + ";expires=" + gone.toUTCString();
+	}
+
+	this.get = function(key, defvalue)
+	{
+		var cookiearray = document.cookie.split( ';' );
+		for( var i=0; i < cookiearray.length; i++ )
+		{
+			var cookie = cookiearray[i].split('=');
+			if ( trim(cookie[0]) == this.prefix + key )
+			{
+				return trim(cookie[1]);
+			}
+		}
+		return defvalue;
+	}
+}
+bandwidthSettings = new BandwidthCookieContainer();
+
 
 function initializePlotsAndTable()
 {
-	var plotTimeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "plot_time_frame");
-	var tableTimeFrame = uciOriginal.get("gargoyle", "bandwidth_display", "table_time_frame");
+	var plotTimeFrame = bandwidthSettings.get("plot_time_frame", "1");
+	var tableTimeFrame = bandwidthSettings.get("table_time_frame", "1");
 	setSelectedValue("plot_time_frame", plotTimeFrame);
 	setSelectedValue("table_time_frame", tableTimeFrame);
 	setSelectedValue("table_units", "mixed");
@@ -108,8 +150,7 @@ function initializePlotsAndTable()
 		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
 
-		
-		var plotType = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
+		var plotType = bandwidthSettings.get(plotIdName, "none");
 		setSelectedValue(plotIdName, plotType);
 	}
 	plotsInitializedToDefaults = false;
@@ -275,7 +316,7 @@ function resetPlots()
 			{
 				if(plotType != "" && plotType != "none" && plotType != "total")
 				{
-					var idValue = uciOriginal.get("gargoyle", "bandwidth_display", plotIdName);
+					var idValue = bandwidthSettings.get(plotIdName, "none");
 					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
 					{
 						setAllowableSelections(plotIdName, [idValue], [idValue]);
@@ -310,34 +351,27 @@ function resetPlots()
 		{
 			doUpdate();
 		}
-		
-		/* update plot variables via ajax, so they "stick" */
-		var command = "";
-		command = command + "uci set gargoyle.bandwidth_display=bandwidth_display\n";
-		command = command + "uci set gargoyle.bandwidth_display.plot_time_frame=\"" + getSelectedValue("plot_time_frame") + "\"\n";
-		command = command + "uci set gargoyle.bandwidth_display.table_time_frame=\"" + getSelectedValue("table_time_frame") + "\"\n";
+
+		bandwidthSettings.set('plot_time_frame', getSelectedValue("plot_time_frame"));
+		bandwidthSettings.set('table_time_frame', getSelectedValue("table_time_frame"));
+
 		for(plotNum=1; plotNum <= 4; plotNum++)
 		{
 			var plotIdName = plotNum < 4 ? "plot" + plotNum + "_id" : "table_id";
 			var plotTypeName = plotNum < 4 ? "plot" + plotNum + "_type" : "table_type";
 			var plotType = getSelectedValue(plotTypeName);
-			command = command + "uci set gargoyle.bandwidth_display." + plotTypeName + "=\"" + plotType + "\"\n";
-			
+			bandwidthSettings.set(plotTypeName, plotType);
+
 			if(plotType != "" && plotType != "none" && plotType != "total")
 			{
-				command = command + "uci set gargoyle.bandwidth_display." + plotIdName + "=\"" + getSelectedValue(plotIdName) + "\"\n";
+				bandwidthSettings.set(plotIdName, getSelectedValue(plotIdName));
 			}
 			else
 			{
-				command = command + "uci del gargoyle.bandwidth_display." + plotIdName + "\n";
-				command = command + "uci del gargoyle.bandwidth_display." + plotTypeName + "\n";
+				bandwidthSettings.remove(plotIdName);
+				bandwidthSettings.remove(plotTypeName);
 			}
 		}
-		command = command + "uci commit\n";
-		
-		var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-
-		runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 	}
 	else
 	{

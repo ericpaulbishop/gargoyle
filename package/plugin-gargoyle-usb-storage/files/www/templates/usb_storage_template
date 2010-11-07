@@ -1,0 +1,26 @@
+<div id="share_disk_container">
+	<label class="leftcolumn" id="share_disk_label" for="share_disk">Disk:</label>
+	<select class="rightcolumn" id="share_disk"></select>
+	<span class="rightcolumn" id="share_disk_text"></span>
+</div>
+<div id="select_share_type_container">
+	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type:</label>
+	<select class="rightcolumn" id="share_type">
+		<option value="samba">CIFS</option>
+		<option value="nfs">NFS</option>
+		<option value="samba+nfs">CIFS+NFS</option>
+	</select>
+	<br/>
+</div>
+<div id="share_name_container">
+	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
+	<input type="text" class="rightcolumn" id="share_name" />
+</div>
+<div id="share_access_container">
+	<label class="leftcolumn" id="share_access_label" for="share_access">Access Type:</label>
+	<select class="rightcolumn" id="share_access">
+		<option value="ro">Read Only</option>
+		<option value="rw">Read/Write</option>
+	</select>
+</div>
+

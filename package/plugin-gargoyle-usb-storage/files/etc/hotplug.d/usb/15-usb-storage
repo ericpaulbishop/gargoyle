@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ "$ACTION" = "add" ] || [ "$ACTION" = "remove" ] ; then
+	if [ "$ACTION" = "add" ] ; then sleep 3; fi
+	/etc/init.d/usb_storage restart
+fi
