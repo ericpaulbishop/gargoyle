@@ -6,7 +6,7 @@
 	encrypt passwords = true
 	passdb backend = smbpasswd
 	obey pam restrictions = yes
-	socket options = TCP_NODELAY
+	socket options = TCP_NODELAY SO_KEEPALIVE IPTOS_LOWDELAY
 	unix charset = ISO-8859-1
 	preferred master = yes
 	local master = yes
