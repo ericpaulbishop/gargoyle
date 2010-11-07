@@ -1,6 +1,5 @@
 BINDIR = /usr/sbin
 TCDIR:=$(BUILD_DIR)/iproute2*
-LDLIBS += -lm
 
 #The ncurses library only needed if we remove the ONLYBG switch
 #below.  Mostly for debug

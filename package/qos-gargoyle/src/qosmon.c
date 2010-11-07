@@ -143,6 +143,36 @@ int sel_err=0;           //Last error code returned by select
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
+/* In a world were size is everything we can avoid linking to libm
+   if we can come up with replacements for rint() and ceil().  This will
+   save around 64k of RAM.
+
+   rint() is used in tc_util.c in five places.  By code inspection I can see that
+   the parameter x will always be less than or equal to LONG_MAX so the following
+   simplified rint() will work for us.
+*/
+double rint(double x)
+{
+   long i;
+   if (x > LONG_MAX) i = LONG_MAX; else i = x+.5;
+   return i;
+}
+
+/*  ceil() is used in q_hfsc.c in three places.  There I can see that x is always
+    positive and less than LONG_MAX.  This leads to a much simplified routine.
+*/
+double ceil(double x)
+{
+   long i;
+
+   if (x > LONG_MAX) x = LONG_MAX;
+   i = x;
+   if ((double)i != x) i++;
+   return i;
+}
+
+
+
 /*
  *          F I N I S H
  *
@@ -544,7 +574,7 @@ void update_status( FILE* fd )
 {
 
     struct CLASS_STATS *cptr=dnstats;
-    u_char i=0;
+    u_char i;
     char nstr[10];
     int dbw;
 
@@ -571,6 +601,7 @@ void update_status( FILE* fd )
     fprintf(fd,"Errors: (mismatch,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
 	
 
+    i=0;
     while ((i++<STATCNT) && (cptr->ID != 0)) {
         fprintf(fd,"ID %4X, Active %u, Backlog %u, BW bps (filtered): %d\n",
               (short unsigned) cptr->ID,
@@ -603,8 +634,9 @@ void update_status( FILE* fd )
     printw("Defined classes for imq0\n"); 
     printw("Errors: (mismatches,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
     cptr=dnstats;
+    i=0; 
     while ((i++<STATCNT) && (cptr->ID != 0)) {
-        printw("ID %4x, Active %c, Backlog %c, BW (filtered kbps): %6d\n",
+        printw("ID %4X, Active %u, Backlog %u, BW (filtered kbps): %d\n",
               (short unsigned) cptr->ID,
               cptr->actflg,
               cptr->backlog,
@@ -739,7 +771,7 @@ int main(int argc, char *argv[])
         signal( SIGTTOU, (__sighandler_t) finish );
 
     	//daemonize();
-        if ( daemon( 0, 1) < 0 )
+        if ( daemon( 0, 0) < 0 )
 	   	{
             fprintf(stderr,"deamon() failed with %i\n",errno);
             exit( 1 );
