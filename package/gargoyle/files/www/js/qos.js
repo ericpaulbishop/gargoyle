@@ -19,16 +19,20 @@ function saveChanges()
 	var bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
 
-       //Save the setting of the qos_monenable flag
-	if (direction == "download") {
+	//Save the setting of the qos_monenable flag
+	if (direction == "download")
+	{
 		uci.set("qos_gargoyle", direction, "qos_monenabled", document.getElementById("qos_monenabled").checked);
 
-		if (document.getElementById("use_ptarget_ip").checked == true) {
+		if (document.getElementById("use_ptarget_ip").checked == true)
+		{
 			uci.set("qos_gargoyle", direction, "ptarget_ip", document.getElementById("ptarget_ip").value);
-		} else {
+		}
+		else
+		{
 			uci.remove("qos_gargoyle", direction, "ptarget_ip");
 		}
-    }
+	}
 
 
 	var disabled = document.getElementById("qos_enabled").checked == false;
@@ -123,7 +127,8 @@ function saveChanges()
 			uci.set("qos_gargoyle", classId, "", directionClass);
 			uci.set("qos_gargoyle", classId, "name", className);
 			percent =  Math.round(100*(classData[classIndex][1]/percentSum));
-			if (percent < 1) percent=1; { uci.set("qos_gargoyle", classId, "percent_bandwidth", percent ); }
+			if (percent < 1) { percent=1; }
+			uci.set("qos_gargoyle", classId, "percent_bandwidth", percent );
 
 			minBandwidth = classData[classIndex][2];
 			if(minBandwidth != "zero")
@@ -196,14 +201,14 @@ function saveChanges()
 	}
 	else if(commands.length > 0)
 	{
-        //Turn off any update function
-        if (timerid != null) {
-           clearInterval(timerid);
-           timerid = null;
-        }
+		//Turn off any update function
+		if (timerid != null)
+		{
+			clearInterval(timerid);
+			timerid = null;
+		}
 
 		setControlsEnabled(false, true);
-
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
