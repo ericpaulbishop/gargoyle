@@ -152,7 +152,11 @@ function saveChanges()
 			rulePriority = (ruleIndex+1)*100;
 			ruleId = direction + "_rule_" + rulePriority;
 
-			classId = classIds[ ruleData[ruleIndex][1] ];
+			if (ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[0].style.color=="red")
+               classId = classIds[getSelectedText("default_class")];
+            else 
+               classId = classIds[ ruleData[ruleIndex][1] ];
+
 			uci.set("qos_gargoyle", ruleId, "", directionRule);
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
@@ -726,6 +730,9 @@ function removeServiceClassCallback(table, row)
 	}
 	else
 	{
+        /*Disable the classtable updates until after the next save */
+		dynamic_update=false;
+
 		removedClassName = row.childNodes[0].firstChild.data;
 		removeOptionFromSelectElement("default_class", removedClassName);
 		removeOptionFromSelectElement("classification", removedClassName);
