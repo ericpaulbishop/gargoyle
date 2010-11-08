@@ -7,7 +7,7 @@
  * 		  	The original mini_httpd was created by Jef Poscanzer
  * 		  	http://www.acme.com/software/mini_httpd/
  *
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -711,7 +711,7 @@ main( int argc, char** argv )
 		}
 	#endif
 	#ifdef USE_CYASSL
-		ssl_ctx = SSL_CTX_new( SSLv3_server_method() );
+		ssl_ctx = SSL_CTX_new( TLSv1_server_method() );
 		SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_NONE, 0);
 		if ( certfile[0] != '\0' )
 		{
