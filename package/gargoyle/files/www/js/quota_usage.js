@@ -241,7 +241,7 @@ function updateTableData()
 				updateInProgress = false;
 			}
 		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }	
