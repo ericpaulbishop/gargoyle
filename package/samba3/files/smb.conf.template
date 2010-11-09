@@ -7,7 +7,7 @@
 	passdb backend = smbpasswd
 	obey pam restrictions = yes
 	socket options = TCP_NODELAY SO_KEEPALIVE IPTOS_LOWDELAY
-	unix charset = ISO-8859-1
+	unix charset = UTF-8
 	preferred master = yes
 	local master = yes
 	domain master = yes
