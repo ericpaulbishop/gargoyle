@@ -232,9 +232,10 @@ insert_restriction_rules()
 			#convert app_proto && not_app_proto to connmark here
 			config_get "app_proto" "$section" "app_proto"
 			config_get "not_app_proto" "$section" "not_app_proto"
+			
 			if [ -n "$app_proto" ] ; then
-				app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $2 }')
-				app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$app_proto" | awk '{ print $3 }')
+				app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep $app_proto | awk '{ print $2 ; }' )
+				app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep $app_proto | awk '{ print $3 ;  }' )
 				uci set "$package_name"."$section".connmark="$app_proto_connmark/$app_proto_mask"
 			fi	
 			if [ -n "$not_app_proto" ] ; then
