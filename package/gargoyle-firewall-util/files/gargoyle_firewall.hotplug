@@ -22,6 +22,8 @@ config_foreach load_zones zone
 [ ifup = "$ACTION" ] && {
 	for z in $ZONE; do 
 		if [ "$z" = "wan" ] ; then
+			insert_restriction_rules
+			initialize_quotas
 			insert_pf_loopback_rules
 		fi
 	done

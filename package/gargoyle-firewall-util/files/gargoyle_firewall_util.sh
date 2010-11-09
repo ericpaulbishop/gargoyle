@@ -1,4 +1,4 @@
-# Copyright Eric Bishop, 2008,2009
+# Copyright Eric Bishop, 2008-2010
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 . /etc/functions.sh
@@ -197,6 +197,9 @@ insert_restriction_rules()
 {
 	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
 	
+	if [ -e /tmp/restriction_init.lock ] ; then return ; fi
+	touch /tmp/restriction_init.lock
+
 	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
 	ingress_exits=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
 	if [ -n "$egress_exists" ] ; then
@@ -280,11 +283,18 @@ insert_restriction_rules()
 	config_load "$package_name"
 	config_foreach parse_rule_config "whitelist_rule"
 	config_foreach parse_rule_config "restriction_rule"
+	
+	rm -rf /tmp/restriction_init.lock
 }
 
 
 initialize_quotas()
 {
+	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
+	
+	if [  -e /tmp/quota_init.lock ] ; then return ; fi
+	touch /tmp/quota_init.lock
+	
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
@@ -312,6 +322,7 @@ initialize_quotas()
 		/etc/init.d/cron restart
 	fi
 
+	rm -rf /tmp/quota_init.lock
 }
 
 load_all_config_sections()
@@ -387,7 +398,6 @@ initialiaze_quota_qos()
 	#echo "num_up_bands=$num_up_bands"
 	#echo "num_down_bands=$num_down_bands"
 	
-	wan_if=$(uci -P "/var/state" get network.wan.ifname)
 
 	if [ -n "$wan_if" ] && [ $num_up_bands -gt 1 ] && [ $num_down_bands -gt 1 ] ; then
 		insmod sch_prio  >/dev/null 2>&1
