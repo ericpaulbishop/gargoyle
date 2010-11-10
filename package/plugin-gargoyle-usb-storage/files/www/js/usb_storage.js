@@ -309,6 +309,7 @@ function resetData()
 
 			setAllowableSelections("share_disk", unmountedList, unmountedList);
 			document.getElementById("share_name").value = getSelectedValue("share_disk", document).replace(/^.*\//, "");
+			setNfsPath();
 		}
 		else
 		{
@@ -402,9 +403,10 @@ function removeShareCallback(table, row)
 	addOptionToSelectElement("share_disk", oldDrive, oldDrive);
 	document.getElementById("sharing_add_heading_container").style.display  = "block";
 	document.getElementById("sharing_add_controls_container").style.display = "block";
-
+	
 	
 	nameToMountPoint[editName] = null;
+	setNfsPath();
 }
 
 function editShare()
@@ -458,6 +460,8 @@ function editShare()
 		{
 			if(editShareWindow.document.getElementById("bottom_button_container") != null)
 			{
+				updateDone = true;
+				
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 				
@@ -470,8 +474,9 @@ function editShare()
 				editShareWindow.document.getElementById("share_name").value = editName;
 				setSelectedText("share_type", editType, editShareWindow.document);
 				setSelectedText("share_access", editAccess, editShareWindow.document);
+				setNfsPath(editShareWindow.document);
 
-
+				
 				closeButton.onclick = function()
 				{
 					editShareWindow.close();
@@ -499,7 +504,6 @@ function editShare()
 				}
 				editShareWindow.moveTo(xCoor,yCoor);
 				editShareWindow.focus();
-				updateDone = true;
 			}
 		}
 		if(!updateDone)
@@ -508,4 +512,22 @@ function editShare()
 		}
 	}
 	runOnEditorLoaded();
+}
+
+function setNfsPath(controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+	var shareType = getSelectedText("share_type", controlDocument);
+	if(shareType.match(/NFS/))
+	{
+
+		var name=controlDocument.getElementById("share_name").value;
+		var ip = uciOriginal.get("network", "lan", "ipaddr");
+		controlDocument.getElementById("nfs_path_container").style.display = "block";
+		setChildText("nfs_path", ip + ":/nfs/" + name, null, null, null, controlDocument);
+	}
+	else
+	{
+		controlDocument.getElementById("nfs_path_container").style.display = "none";
+	}
 }

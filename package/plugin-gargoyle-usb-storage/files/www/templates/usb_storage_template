@@ -5,16 +5,12 @@
 </div>
 <div id="select_share_type_container">
 	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type:</label>
-	<select class="rightcolumn" id="share_type">
+	<select class="rightcolumn" id="share_type" onchange="setNfsPath(this.ownerDocument)">
 		<option value="samba">CIFS</option>
 		<option value="nfs">NFS</option>
 		<option value="samba+nfs">CIFS+NFS</option>
 	</select>
 	<br/>
-</div>
-<div id="share_name_container">
-	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
-	<input type="text" class="rightcolumn" id="share_name" />
 </div>
 <div id="share_access_container">
 	<label class="leftcolumn" id="share_access_label" for="share_access">Access Type:</label>
@@ -23,4 +19,11 @@
 		<option value="rw">Read/Write</option>
 	</select>
 </div>
-
+<div id="share_name_container">
+	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
+	<input type="text" class="rightcolumn" id="share_name" onkeyup="setNfsPath(this.ownerDocument)" />
+</div>
+<div id="nfs_path_container">
+	<label class="leftcolumn" id="nfs_path_label" for="nfs_path">NFS Path:</label>
+	<span class="rightcolumn" id="nfs_path"></span>
+</div>
