@@ -69,7 +69,7 @@ do_start()
 			mkdir -p "/tmp/usb_mount/$id"
 			chmod 777 "/tmp/usb_mount/$id"
 			umount "/tmp/usb_mount/$id" 2>/dev/null
-			err=$(mount -t vfat "$d" "/tmp/usb_mount/$id")
+			err=$(mount -t vfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id")
 		elif  [ -n "$type" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
 			chmod 777 "/tmp/usb_mount/$id"
@@ -78,7 +78,7 @@ do_start()
 			ext_num=4
 			while [ -n "$err" ] && [ $ext_num -ge 2 ] ; do
 				type="ext$ext_num"
-				err=$(mount -t $type "$d" "/tmp/usb_mount/$id" 2>&1)
+				err=$(mount -t $type -o noatime "$d" "/tmp/usb_mount/$id" 2>&1)
 				ext_num=$(($ext_num-1))
 			done
 		fi
