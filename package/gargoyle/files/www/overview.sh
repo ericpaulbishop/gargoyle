@@ -47,8 +47,12 @@
 	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
 	echo "var loadAvg=\"$load_avg\";"
 
-	concnt=$(wc -l /proc/net/ip_conntrack | awk '{print $1 }')
+	concnt=$(grep conntrack /proc/slabinfo | awk '{print $2 }')
+	consize=$(grep conntrack /proc/slabinfo | awk '{print $3 }')
+	conbytes=$(grep conntrack /proc/slabinfo | awk '{print $4 }')
 	echo "var concnt=\"$concnt\";"
+	echo "var conbytes=\"$conbytes\";"
+	echo "var consize=\"$consize\";"
 
 	echo "var wanDns=\""$(cat /tmp/resolv.conf.auto | grep nameserver | sed 's/nameserver //g')"\";"
 
@@ -72,12 +76,12 @@
 		<div>
 			<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
 		</div>
+		<div>
+			<span class='leftcolumn'>Connection table:</span><span id="concnt" class='rightcolumn'></span>
+		</div>
  		<div>
  			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)
  		</div>
-		<div>
-			<span class='leftcolumn'>Total Connections:</span><span id="concnt" class='rightcolumn'></span>
-		</div>
 		<div class="internal_divider"></div>
 	</div>
 
