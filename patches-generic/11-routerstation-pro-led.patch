@@ -1,0 +1,27 @@
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/routerstation-pro	(wersja 0)
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/routerstation-pro	(wersja 0)
+@@ -0,0 +1,24 @@
++#!/bin/sh
++#
++# Copyright (C) 2010 OpenWrt.org
++#
++
++. /lib/ar71xx.sh
++
++board=$(ar71xx_board_name)
++
++rspro_set_wlan_led() {
++	uci batch <<EOF
++set system.@led[0]=led
++set system.@led[0].name=WLAN
++set system.@led[0].sysfs=ubnt:green:rf
++set system.@led[0].dev=wlan0
++set system.@led[0].trigger=netdev
++set system.@led[0].mode="link rx tx"
++commit system
++EOF
++}
++
++if [ "${board}" == "routerstation-pro" ]; then
++	rspro_set_wlan_led
++fi
