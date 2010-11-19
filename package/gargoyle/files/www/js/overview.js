@@ -46,7 +46,7 @@ function resetData()
 	setChildText("gargoyle_version", gargoyleVersion);
 	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
 	setChildText("load_avg", loadAvg );
-	setChildText("concnt", Math.round(consize*conbytes/10000)/100+" MB, "+concnt + " active, " + conbytes + " bytes each.");
+	setChildText("connections", curConn + "/" + maxConn );
 
 	setChildText("uptime", uptimeDays + " days, " + uptimeHours + " hours, " + uptimeMinutes + " minutes");
 	setChildText("current_time", currentTime);

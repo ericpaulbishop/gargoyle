@@ -47,12 +47,17 @@
 	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
 	echo "var loadAvg=\"$load_avg\";"
 
-	concnt=$(grep conntrack /proc/slabinfo | awk '{print $2 }')
-	consize=$(grep conntrack /proc/slabinfo | awk '{print $3 }')
-	conbytes=$(grep conntrack /proc/slabinfo | awk '{print $4 }')
-	echo "var concnt=\"$concnt\";"
-	echo "var conbytes=\"$conbytes\";"
-	echo "var consize=\"$consize\";"
+	curconn=$(cat /proc/net/ip_conntrack | wc -l)
+	maxconn=$(cat /proc/sys/net/ipv4/ip_conntrack_max 2>/dev/null)
+	if [ -z "$maxconn" ] ; then
+		maxconn=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_max 2>/dev/null )
+	fi
+	if [ -z "$maxconn" ] ; then
+		maxconn="4096"
+	fi
+	echo "var curConn=\"$curconn\";"
+	echo "var maxConn=\"$maxconn\";"
+
 
 	echo "var wanDns=\""$(cat /tmp/resolv.conf.auto | grep nameserver | sed 's/nameserver //g')"\";"
 
@@ -77,7 +82,7 @@
 			<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
 		</div>
 		<div>
-			<span class='leftcolumn'>Connection table:</span><span id="concnt" class='rightcolumn'></span>
+			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
  		<div>
  			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)
