@@ -34,7 +34,7 @@
 
 		<div id='qos_enabled_container' class='nocolumn'>
 			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
-			<label id='qos_enabled_label' for='dhcp_enabled'>Enable Quality of Service (Upload Direction)</label>
+			<label id='qos_enabled_label' for='qos_enabled'>Enable Quality of Service (Upload Direction)</label>
 		</div>
 		<div class="indent">
 			<p>Quality of Service (QoS) provides a way to control how available bandwidth is allocated.  Connections are classified into
