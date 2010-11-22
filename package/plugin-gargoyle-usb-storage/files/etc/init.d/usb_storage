@@ -63,13 +63,18 @@ do_start()
 		id=$(echo $devid | sed 's/^.*://g')
 		d=$(echo $devid | sed 's/:.*$//g')
 		dev=$(echo $d | sed 's/[0-9]*$//g')
-		type=$(disktype "$d" | egrep -o "Ext.|FAT..") 
+		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS") 
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
 			chmod 777 "/tmp/usb_mount/$id"
 			umount "/tmp/usb_mount/$id" 2>/dev/null
 			err=$(mount -t vfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id")
+		elif [ "$type" = "NTFS" ] ; then
+			mkdir -p "/tmp/usb_mount/$id"
+			chmod 777 "/tmp/usb_mount/$id"
+			umount "/tmp/usb_mount/$id" 2>/dev/null
+			err=$(ntfs-3g "$d" "/tmp/usb_mount/$id")
 		elif  [ -n "$type" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
 			chmod 777 "/tmp/usb_mount/$id"
