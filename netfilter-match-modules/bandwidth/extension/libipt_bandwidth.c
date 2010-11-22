@@ -336,7 +336,7 @@ static int parse(	int c,
 
 
 
-static void print_bandwidth_args(	struct ipt_bandwidth_info* info )
+static void print_bandwidth_args( struct ipt_bandwidth_info* info )
 {
 	if(info->cmp == BANDWIDTH_CHECK)
 	{

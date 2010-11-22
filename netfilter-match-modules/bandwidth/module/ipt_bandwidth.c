@@ -1352,7 +1352,7 @@ static char add_ip_block(	uint32_t ip,
 			uint32_t buffer_length 
 			);
 static void parse_get_request(unsigned char* request_buffer, get_request* parsed_request);
-static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, int error_code, unsigned char* out_buffer, unsigned char* free_buffer );
+static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, unsigned char error_code, unsigned char* out_buffer, unsigned char* free_buffer );
 
 
 /* 
@@ -1509,7 +1509,7 @@ static char add_ip_block(	uint32_t ip,
  * convenience method for cleaning crap up after failed malloc or other 
  * error that we can't recover  from in get function
  */
-static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, int error_code, unsigned char* out_buffer, unsigned char* free_buffer )
+static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, unsigned char error_code, unsigned char* out_buffer, unsigned char* free_buffer )
 {
 	copy_to_user(out_buffer, &error_code, 1);
 	if( free_buffer != NULL ) { kfree(free_buffer); }
