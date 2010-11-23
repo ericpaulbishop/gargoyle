@@ -12,12 +12,12 @@
 +
 +rspro_set_wlan_led() {
 +	uci batch <<EOF
-+set system.@led[0]=led
-+set system.@led[0].name=WLAN
-+set system.@led[0].sysfs=ubnt:green:rf
-+set system.@led[0].dev=wlan0
-+set system.@led[0].trigger=netdev
-+set system.@led[0].mode="link rx tx"
++set system.wlan_led=led
++set system.wlan_led.name=WLAN
++set system.wlan_led.sysfs=ubnt:green:rf
++set system.wlan_led.dev=wlan0
++set system.wlan_led.trigger=netdev
++set system.wlan_led.mode="link rx tx"
 +commit system
 +EOF
 +}
