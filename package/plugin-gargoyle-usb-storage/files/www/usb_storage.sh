@@ -31,7 +31,7 @@
 	
 	<div id="cifs_workgroup_container">
 		<label id="cifs_workgroup_label" class="leftcolumn" for="cifs_workgroup">CIFS Workgroup:</label>
-		<input id="cifs_workgroup" class="rightcolumn" type=text" size='30'/>
+		<input id="cifs_workgroup" class="rightcolumn" type="text" size='30'/>
 	</div>
 
 	
@@ -44,11 +44,11 @@
 	</div>
 	<div class="rightcolumnonly" id="cifs_user_container">
 		<label id="cifs_user_label" for="cifs_user" style="float:left;width:100px;">User:</label>
-		<input id="cifs_user" type=text" />
+		<input id="cifs_user" type="text" />
 	</div>
 	<div class="rightcolumnonly" style="margin-bottom:20px;" id="cifs_pass_container">
 		<label id="cifs_pass_label" for="cifs_pass" style="float:left;width:100px;">Password:</label>
-		<input id="cifs_pass" type=text" />
+		<input id="cifs_pass" type="text" />
 	</div>
 	<div id="nfs_policy_container">
 		<label id="nfs_policy_label" class="leftcolumn">NFS Access Policy:</label>
