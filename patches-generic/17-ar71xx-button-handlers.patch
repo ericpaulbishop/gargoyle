@@ -1,6 +1,6 @@
---- /dev/null	2010-11-24 23:45:48.644474123 -0500
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	2010-11-28 03:14:31.958727875 -0500
-@@ -0,0 +1,26 @@
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	
+@@ -0,0 +1,45 @@
 +#!/bin/sh
 +#
 +# Copyright (C) 2010 OpenWrt.org
@@ -10,6 +10,7 @@
 +
 +is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-WR")
 +is_wrt160nl=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WRT160NL")
++is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
 +
 +
 +if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] then
@@ -24,6 +25,24 @@
 +set system.reboot_button.action='released'
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
++commit system
++EOF	
++fi
++
++if [ -n "$is_ubntrspro" ] then
++	uci batch <<EOF
++set system.reboot_button=button
++set system.reboot_button.button='BTN_0'
++set system.reboot_button.action='released'
++set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
++set system.reboot_button.min='3'
++set system.reboot_button.max='13'
++set system.reset_button=button
++set system.reset_button.button='BTN_0'
++set system.reset_button.action='released'
++set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
++set system.reset_button.min='13'
++set system.reset_button.max='33'
 +commit system
 +EOF	
 +fi
