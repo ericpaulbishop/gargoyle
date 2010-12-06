@@ -94,9 +94,9 @@ function resetData()
 		var str = routingData.shift();
 		var rLine = str.split(/[\t ]+/);
 		var r = [];
-		var iface = "";
-		iface= rLine[7] == wanIface ? "WAN" : iface;
-		iface= rLine[7] == lanIface ? "LAN" : iface;
+		var iface = rLine[7];
+		iface= rLine[7] == wanIface ? iface+ " (WAN)" : iface;
+		iface= rLine[7] == lanIface ? iface + " (LAN)" : iface;
 		if(iface != "")
 		{
 			mask = (rLine[0] == "default" && rLine[2] == "0.0.0.0") ? "" : "/" + rLine[2];
@@ -110,7 +110,7 @@ function resetData()
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var activeRouteTable = createTable(["Destination", "Interface", "Gateway", "Metric"], activeRouteTableData, "active_route_table", false, false);	
+	var activeRouteTable = createTable(["Destination", "Interface(Network)", "Gateway", "Metric"], activeRouteTableData, "active_route_table", false, false);	
 	tableContainer.appendChild( activeRouteTable );
 
 

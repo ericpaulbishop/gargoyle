@@ -467,6 +467,17 @@ force_router_dns()
 	fi
 }
 
+add_adsl_modem_routes()
+{
+	wan_proto=$(uci get network.wan.proto)
+	if [ "$wan_proto" = "pppoe" ] ; then
+		ifwan=$(uci get network.wan.ifname)
+		iptables -A postrouting_rule -t nat -o $ifwan -j MASQUERADE
+		iptables -A forwarding_rule -o $ifwan -j ACCEPT
+		/etc/ppp/ip-up.d/modemaccess.sh firewall $ifwan
+	fi
+}
+
 initialize_firewall()
 {
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
@@ -478,5 +489,6 @@ initialize_firewall()
 	initialize_quotas
 	block_static_ip_mismatches
 	force_router_dns
+	add_adsl_modem_routes
 }
 

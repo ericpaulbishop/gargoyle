@@ -53,6 +53,7 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface/
 	$(INSTALL_DIR) $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/init.d/
+	$(INSTALL_DIR) $(1)/etc/ppp/ip-up.d/
 	
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/make_iptables_rules $(1)/usr/bin/make_iptables_rules
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/delete_chain_from_table $(1)/usr/bin/delete_chain_from_table
@@ -64,6 +65,7 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_BIN) ./files/gargoyle_additions.firewall $(1)/usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall 
 	$(INSTALL_BIN) ./files/gargoyle_firewall.hotplug $(1)/etc/hotplug.d/iface/21-gargoyle_firewall
 	$(INSTALL_BIN) ./files/set_kernel_timezone.init $(1)/etc/init.d/set_kernel_timezone
+	$(INSTALL_BIN) ./files/modemaccess.pppoe $(1)/etc/ppp/ip-up.d/modemaccess.sh 
 endef
 
 

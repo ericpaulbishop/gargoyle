@@ -1,7 +1,7 @@
 				<table>
 					<tr class='table_row_add_header'>
 						<th><label id='add_dest_label' for='add_host'>Destination/Mask</label></th>
-						<th><label id='add_iface_label' for='add_mac'>Interface</label></th>
+						<th><label id='add_iface_label' for='add_mac'>Network</label></th>
 						<th><label id='add_gateway_label' for='add_ip'>Gateway</label></th>
 						<th></th>
 					</tr>
