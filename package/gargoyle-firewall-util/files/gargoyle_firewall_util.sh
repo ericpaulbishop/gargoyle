@@ -11,8 +11,8 @@ death_mask=0x8000
 death_mark="$death_mask"
 
 
-wan_if=$(uci -P "/var/state" get network.wan.ifname) 
-
+local wan_if
+wan_proto=$(uci get network.wan.proto)
 
 # parse remote_accept sections in firewall config and add necessary rules
 insert_remote_accept_rules()
@@ -113,10 +113,11 @@ insert_pf_loopback_rules()
 	config_name="firewall"
 	section_type="redirect"
 
-	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
+	#wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 
-	if [ -n "$wan_ip" ] && [ -n "$lan_mask" ] ; then
+	#if [ -n "$wan_ip" ] && [ -n "$lan_mask" ] ; then
+	if [ -n "$lan_mask" ] ; then
 		delete_chain_from_table "nat"    "pf_loopback_A"
 		delete_chain_from_table "filter" "pf_loopback_B"
 		delete_chain_from_table "nat"    "pf_loopback_C"
@@ -126,7 +127,7 @@ insert_pf_loopback_rules()
 		iptables -t filter -N "pf_loopback_B"
 		iptables -t nat    -N "pf_loopback_C"
 
-		iptables -t nat    -I zone_lan_prerouting -d $wan_ip -j pf_loopback_A
+		#iptables -t nat    -I zone_lan_prerouting -d $wan_ip -j pf_loopback_A
 		iptables -t filter -I zone_lan_forward               -j pf_loopback_B
 		iptables -t nat    -I postrouting_rule -o br-lan     -j pf_loopback_C
 
@@ -164,6 +165,7 @@ insert_pf_loopback_rules()
 
 		config_load "$config_name"
 		config_foreach add_pf_loopback "$section_type"
+
 	fi
 }
 
@@ -446,10 +448,6 @@ initialiaze_quota_qos()
 }
 
 
-
-
-
-
 block_static_ip_mismatches()
 {
 	block_mismatches=$(uci get firewall.@defaults[0].block_static_ip_mismatches 2> /dev/null)
@@ -469,26 +467,29 @@ force_router_dns()
 
 add_adsl_modem_routes()
 {
-	wan_proto=$(uci get network.wan.proto)
 	if [ "$wan_proto" = "pppoe" ] ; then
-		ifwan=$(uci get network.wan.ifname)
-		iptables -A postrouting_rule -t nat -o $ifwan -j MASQUERADE
-		iptables -A forwarding_rule -o $ifwan -j ACCEPT
-		/etc/ppp/ip-up.d/modemaccess.sh firewall $ifwan
+		wan_if="pppoe-wan"
+		ifppp=$(uci get network.wan.ifname)
+		iptables -A postrouting_rule -t nat -o $ifppp -j MASQUERADE
+		iptables -A forwarding_rule -o $ifppp -j ACCEPT
+		/etc/ppp/ip-up.d/modemaccess.sh firewall $ifppp
+	else
+		wan_if=$(uci -P "/var/state" get network.wan.ifname) 
 	fi
+
 }
 
 initialize_firewall()
 {
+	add_adsl_modem_routes
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
 	insert_remote_accept_rules
 	insert_pf_loopback_rules
 	insert_dmz_rule
-	create_l7marker_chain
 	insert_restriction_rules
 	initialize_quotas
+	create_l7marker_chain
 	block_static_ip_mismatches
 	force_router_dns
-	add_adsl_modem_routes
 }
 

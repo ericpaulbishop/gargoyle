@@ -54,12 +54,16 @@ update_cron()
 	fi
 }
 
-
 start()
 {
 	bw_if=$(uci -P "/var/state" get network.wan.ifname)
 	if [ -z "$bw_if" ] ; then
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
+	else
+		wan_proto=$(uci get network.wan.proto)
+		if [ "$wan_proto" = "pppoe" ] ; then
+			bw_if="pppoe-wan"
+		fi
 	fi
 
 	#mkdir -P doesn't work in busybox!  WTF??!
