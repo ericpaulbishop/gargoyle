@@ -16,7 +16,7 @@
 	echo "var dhcpEnabled = true;"
 	echo "var subnet=\"$subnet\";"
 	echo "var dhcpSection = getDhcpSection(uciOriginal);"
-	
+	echo "var bcastip=\"$(ifconfig | awk '/^br-lan/{s=$1;getline;print $3}' | cut -b7-)\";"
 
 	echo "var hostData = new Array();"
 	if [ -e /etc/hosts ] ; then

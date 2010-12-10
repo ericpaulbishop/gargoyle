@@ -580,10 +580,14 @@ td.static_ip_table_column_4
 td.static_ip_table_column_5
 {
 	border-top:1px solid black;
-	border-right:1px solid black;
 	border-bottom:1px solid black;
 }
-
+td.static_ip_table_column_6
+{
+        border-top:1px solid black;
+        border-right:1px solid black;
+        border-bottom:1px solid black;
+}
 
 
 
