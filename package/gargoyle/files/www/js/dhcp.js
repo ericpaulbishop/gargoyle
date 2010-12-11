@@ -146,8 +146,7 @@ function wakeHost() {
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 
-	showConfirm = "\nMagic packets was send.";
-        alert(showConfirm);
+        alert("Wakeup request sent");
 
 }
 
