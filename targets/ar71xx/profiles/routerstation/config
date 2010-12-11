@@ -110,7 +110,7 @@ CONFIG_TARGET_ar71xx=y
 # CONFIG_TARGET_ar71xx_DIR825B1 is not set
 # CONFIG_TARGET_ar71xx_WRT160NL is not set
 # CONFIG_TARGET_ar71xx_WRT400N is not set
-CONFIG_TARGET_ar71xx_WNDR3700=y
+# CONFIG_TARGET_ar71xx_WNDR3700 in not set
 # CONFIG_TARGET_ar71xx_MZKW04NU is not set
 # CONFIG_TARGET_ar71xx_MZKW300NH is not set
 # CONFIG_TARGET_ar71xx_TLWR741NDV1 is not set
@@ -125,7 +125,7 @@ CONFIG_TARGET_ar71xx_WNDR3700=y
 # CONFIG_TARGET_ar71xx_TEW652BRP is not set
 # CONFIG_TARGET_ar71xx_UBNTRS is not set
 # CONFIG_TARGET_ar71xx_UBNTRSPRO is not set
-# CONFIG_TARGET_ar71xx_UBNT is not set
+CONFIG_TARGET_ar71xx_UBNT=y
 # CONFIG_TARGET_kirkwood_Default is not set
 # CONFIG_TARGET_avr32_Default is not set
 # CONFIG_TARGET_octeon_generic is not set
