@@ -616,21 +616,15 @@ initialize_qos()
 
 }
 
-map_interface()
+scan_interface()
 {
-	#Figuring out the WAN interface turns out to be tricky.
-	qos_interface=$(uci -P "/var/state" get network.wan.ifname)
-	if [ -z "$qos_interface" ] ; then
-		qos_interface_if=$(uci -P "/var/state" get network.lan.ifname)	
-	else
-		wan_proto=$(uci get network.wan.proto)
-		if [ "$wan_proto" = "pppoe" ] ; then
-			qos_interface_if="pppoe-wan"
-		fi
-	fi
+	#Figuring out the WAN interface turns out to be tricky but fortunately 
+	#Eric has already took on the challenge so we can use his program gargoyle_header_footer
+	#to sus out the details
 
-    wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-    local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+       qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
+       wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+       local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 }
 
@@ -646,7 +640,7 @@ stop()
 		exit
 	fi
 
-	map_interface
+	scan_interface
 
 	#Kill the qos monitor in case it is running
 	killall qosmon 2>/dev/null
@@ -703,7 +697,7 @@ show()
 	load_all_config_options "$config_file_name" "global"
 
 	#load qos_interface from global variables
-	map_interface
+	scan_interface
 
 	echo "Egress configuration on $qos_interface"
 	iptables -t mangle -vnL qos_egress 2>/dev/null
