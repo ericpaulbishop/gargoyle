@@ -2295,7 +2295,7 @@ cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 	/* If we're not parsing headers, write out the default status line
 	** and proceed to the echo phase.
 	*/
-	char http_head[] = "HTTP/1.0 200 OK\015\012";
+	char http_head[] = "HTTP/1.1 200 OK\015\012";
 	(void) my_write( http_head, sizeof(http_head), is_ssl );
 	}
     else
@@ -2834,7 +2834,6 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
     char timebuf[100];
     char buf[10000];
     int buflen;
-    int s100;
     const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
 
     status = s;
@@ -2849,12 +2848,8 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
     (void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
     buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
     add_to_response( buf, buflen );
-    s100 = status / 100;
-    if ( s100 != 2 && s100 != 3 )
-	{
-	buflen = snprintf( buf, sizeof(buf), "Cache-Control: no-cache,no-store\015\012" );
-	add_to_response( buf, buflen );
-	}
+    buflen = snprintf( buf, sizeof(buf), "Cache-Control: no-cache,no-store\015\012" );
+    add_to_response( buf, buflen );
     if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
 	{
 	buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
@@ -3328,7 +3323,7 @@ figure_mime( char* name, char* me, size_t me_size )
     size_t ext_len, me_len;
     int i, top, bot, mid;
     int r;
-    const char* default_type = "text/plain; charset=%s";
+    const char* default_type = "application/octet-stream ";
     const char* type;
 
     /* Peel off encoding extensions until there aren't any more. */
