@@ -11,7 +11,25 @@ death_mask=0x8000
 death_mark="$death_mask"
 
 
-wan_if=$(uci -P "/var/state" get network.wan.ifname) 
+wan_if=""
+
+define_wan_if()
+{
+	
+	wan_def=$(uci get network.wan)
+	if [ -n "$wan_def" ] && [ -z "$wan_if" ] ; then
+		wait_sec=45
+		while [ -z "$wan_if" ] && [ $wait_sec -gt 0 ] ; do
+			wan_up=$(uci -P /var/state get network.wan.up 2>/dev/null)
+			if [ "$wan_up" = "1" ] ; then
+				wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+			else
+				sleep 1
+				wait_sec=$(($wait_sec - 1))
+			fi
+		done
+	fi
+}
 
 
 # parse remote_accept sections in firewall config and add necessary rules
@@ -112,7 +130,9 @@ insert_pf_loopback_rules()
 {
 	config_name="firewall"
 	section_type="redirect"
-
+	
+	define_wan_if #need to be sure this goes through ok so we get wan_ip
+	if [ -z "$wan_if" ]  ; then return ; fi        
 	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 
@@ -195,6 +215,7 @@ insert_dmz_rule()
 
 insert_restriction_rules()
 {
+	define_wan_if
 	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
 	
 	if [ -e /tmp/restriction_init.lock ] ; then return ; fi
@@ -290,6 +311,7 @@ insert_restriction_rules()
 
 initialize_quotas()
 {
+	define_wan_if
 	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
 	
 	if [  -e /tmp/quota_init.lock ] ; then return ; fi
@@ -471,10 +493,10 @@ add_adsl_modem_routes()
 {
 	wan_proto=$(uci get network.wan.proto)
 	if [ "$wan_proto" = "pppoe" ] ; then
-		ifwan=$(uci get network.wan.ifname)
-		iptables -A postrouting_rule -t nat -o $ifwan -j MASQUERADE
-		iptables -A forwarding_rule -o $ifwan -j ACCEPT
-		/etc/ppp/ip-up.d/modemaccess.sh firewall $ifwan
+		wan_dev=$(uci get network.wan.ifname) #not really the interface, but the device
+		iptables -A postrouting_rule -t nat -o $wan_dev -j MASQUERADE
+		iptables -A forwarding_rule -o $wan_dev -j ACCEPT
+		/etc/ppp/ip-up.d/modemaccess.sh firewall $wan_dev
 	fi
 }
 
