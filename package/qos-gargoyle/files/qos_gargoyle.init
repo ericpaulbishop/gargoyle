@@ -616,15 +616,26 @@ initialize_qos()
 
 }
 
-scan_interface()
+define_interface()
 {
-	#Figuring out the WAN interface turns out to be tricky but fortunately 
-	#Eric has already took on the challenge so we can use his program gargoyle_header_footer
-	#to sus out the details
-
-       qos_interface=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanIf.*"\(.*\)".*/\1/p')
-       wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-       local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+	qos_interface=$(uci get qos_gargoyle.global.interface)
+	if [ -z "$qos_interface" ] ; then
+		qos_network=$(uci get qos_gargoyle.global.network)
+		if [ -z "$qos_network" ] ; then qos_network=wan ; fi
+		wait_sec=45
+		while [ -z "$qos_interface" ] && [ $wait_sec -gt 0 ] ; do
+			qos_up=$(uci -P /var/state get network.$qos_network.up 2>/dev/null)
+			if [ "$qos_up" = "1" ] ; then
+				qos_interface=$(uci -P /var/state get network.$qos_network.ifname 2>/dev/null)
+			else
+				sleep 1
+				wait_sec=$(($wait_sec - 1))
+			fi
+		done
+	fi	
+	
+	wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 }
 
@@ -640,7 +651,7 @@ stop()
 		exit
 	fi
 
-	scan_interface
+	define_interface
 
 	#Kill the qos monitor in case it is running
 	killall qosmon 2>/dev/null
@@ -677,9 +688,13 @@ start()
 	stop
 	touch "$lock_file"
 
-	load_all_config_options "$config_file_name" "global"
+	#load qos_interface from global variables
+	define_interface
+	if [ -n "$qos_interface" ] ; then
 
-    initialize_qos
+		load_all_config_options "$config_file_name" "global"
+		initialize_qos
+	fi
 
 	rm -rf "$lock_file"
 
@@ -697,7 +712,7 @@ show()
 	load_all_config_options "$config_file_name" "global"
 
 	#load qos_interface from global variables
-	scan_interface
+	define_interface
 
 	echo "Egress configuration on $qos_interface"
 	iptables -t mangle -vnL qos_egress 2>/dev/null
