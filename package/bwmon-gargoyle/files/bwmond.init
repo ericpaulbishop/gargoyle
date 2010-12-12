@@ -57,7 +57,8 @@ update_cron()
 
 start()
 {
-	bw_if=$(uci -P "/var/state" get network.wan.ifname)
+	define_wan_if
+	bw_if="$wan_if"
 	if [ -z "$bw_if" ] ; then
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
