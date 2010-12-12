@@ -81,13 +81,7 @@ function saveChanges()
 		var bridgeEnabledCommands = "";
 		if( document.getElementById("global_gateway").checked )
 		{
-			if(document.getElementById("wifi_channel_width_container").style.display == "block")
-			{
-				var topChannel = mac80211Channels[ mac80211Channels.length-1 ];
-				var channelWidth =  getSelectedValue("wifi_channel_width");
-				channelWidth = (uci.get("wireless", firstWirelessDevice, "channel") == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
-				uci.set("wireless",  firstWirelessDevice, "htmode", channelWidth);
-			}	
+
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
 				uci.set("wireless",  firstWirelessDevice, "hwmode", getSelectedValue("wifi_hwmode"));
@@ -409,6 +403,15 @@ function saveChanges()
 				var chan = document.getElementById("wifi_fixed_channel2_container").style.display != "none" ?  document.getElementById("wifi_fixed_channel2").firstChild.data : getSelectedValue("wifi_channel2");
 				uci.set("wireless", firstWirelessDevice, "channel", chan);
 			
+				if(document.getElementById("wifi_channel_width_container").style.display == "block" )
+				{
+					var topChannel = mac80211Channels[ mac80211Channels.length-1 ];
+					var channelWidth =  getSelectedValue("wifi_channel_width");
+					channelWidth = (chan == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
+					uci.set("wireless",  firstWirelessDevice, "htmode", channelWidth);
+				}
+
+
 				if(getSelectedValue("wifi_max_txpower") == "max")
 				{
 					uci.remove("wireless", firstWirelessDevice, "txpower")
@@ -483,11 +486,6 @@ function saveChanges()
 				uci.set('network', 'lan', 'ifname', defaultLanIf);
 			}
 
-			if(document.getElementById("bridge_channel_width_container").style.display == "block")
-			{
-				uci.set("wireless",  firstWirelessDevice, "htmode", getSelectedValue("bridge_channel_width"));
-			}
-
 
 			currentLanIp = document.getElementById("bridge_ip").value;
 			//compute configuration  for bridge
@@ -499,7 +497,6 @@ function saveChanges()
 			uci.set("network", "lan", "netmask", document.getElementById("bridge_mask").value);
 			uci.set("network", "lan", "gateway", document.getElementById("bridge_gateway").value);
 			uci.set("network", "lan", "dns",     document.getElementById("bridge_gateway").value);
-			uci.set("wireless", firstWirelessDevice, "channel", getSelectedValue("bridge_channel"));
 		
 			var ssid ="";
 			var encryption = "";
@@ -519,8 +516,18 @@ function saveChanges()
 				encryption  = scannedSsids[1][ parseInt(getSelectedValue("bridge_list_ssid")) ];
 			}
 			var key = encryption == "none" ? "" : ( encryption == "wep" ? document.getElementById("bridge_wep").value : document.getElementById("bridge_pass").value );
+			
 			var chan = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
 			uci.set("wireless", firstWirelessDevice, "channel", chan);
+
+			if(document.getElementById("bridge_channel_width_container").style.display == "block")
+			{
+				var topChannel = mac80211Channels[ mac80211Channels.length-1 ];
+				var channelWidth =  getSelectedValue("bridge_channel_width");
+				channelWidth = (chan == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
+				uci.set("wireless",  firstWirelessDevice, "htmode", channelWidth);
+			}
+
 
 			if(getSelectedValue("bridge_max_txpower") == "max")
 			{
