@@ -83,7 +83,10 @@ function saveChanges()
 		{
 			if(document.getElementById("wifi_channel_width_container").style.display == "block")
 			{
-				uci.set("wireless",  firstWirelessDevice, "htmode", getSelectedValue("wifi_channel_width"));
+				var topChannel = mac80211Channels[ mac80211Channels.length-1 ];
+				var channelWidth =  getSelectedValue("wifi_channel_width");
+				channelWidth = (uci.get("wireless", firstWirelessDevice, "channel") == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
+				uci.set("wireless",  firstWirelessDevice, "htmode", channelWidth);
 			}	
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
