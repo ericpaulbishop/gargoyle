@@ -46,7 +46,6 @@ function failure()
 {
 	setControlsEnabled(true);
 	alert("An error has occurred: Your router can not be upgraded.\n");
-
 }
 
 function setUpgradeFormat()

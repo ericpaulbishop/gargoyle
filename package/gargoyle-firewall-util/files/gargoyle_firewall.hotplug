@@ -4,6 +4,10 @@ unset ZONE
 config_get ifname $INTERFACE ifname
 [ "$ifname" == "lo" ] && exit 0
 
+firewall_loaded=$(uci -P /var/state get firewall.core.loaded)
+[ ! "$firewall_loaded" = "1" ] && exit 0
+
+
 load_zones() {
 	local name
 	local network
