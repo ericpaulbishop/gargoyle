@@ -26,8 +26,17 @@ config_foreach load_zones zone
 [ ifup = "$ACTION" ] && {
 	for z in $ZONE; do 
 		if [ "$z" = "wan" ] ; then
-			insert_restriction_rules
-			initialize_quotas
+			quota_sections=$(load_all_config_sections "firewall" "quota")
+			speeds=""
+			config_load "firewall"
+			for q in $quota_sections ; do
+				config_get "exceeded_up_speed" $q "exceeded_up_speed"
+				config_get "exceeded_down_speed" $q "exceeded_down_speed"
+				speeds="$exceeded_up_speed$exceeded_down_speed$speeds"
+			done
+			if [ -n "$speeds" ] ; then
+				initialize_quotas
+			fi
 			insert_pf_loopback_rules
 		fi
 	done
