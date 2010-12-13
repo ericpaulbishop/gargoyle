@@ -35,6 +35,10 @@ config_foreach load_zones zone
 				speeds="$exceeded_up_speed$exceeded_down_speed$speeds"
 			done
 			if [ -n "$speeds" ] ; then
+				quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
+				if [ -n "$quota_chains_exist" ] ; then
+					backup_quotas
+				fi
 				initialize_quotas
 			fi
 			insert_pf_loopback_rules
