@@ -42,6 +42,11 @@ config_foreach load_zones zone
 				initialize_quotas
 			fi
 			insert_pf_loopback_rules
+			
+			bw_enabled=$(ls /etc/rc.d/*bwmon_gargoyle* 2>/dev/null)
+			if [ -n "$bw_enabled" ]; then
+				/etc/init.d/bwmon_gargoyle restart
+			fi
 		fi
 	done
 }

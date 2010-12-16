@@ -18,7 +18,7 @@ define_wan_if()
 	
 	wan_def=$(uci get network.wan)
 	if [ -n "$wan_def" ] && [ -z "$wan_if" ] ; then
-		wait_sec=45
+		wait_sec=10
 		while [ -z "$wan_if" ] && [ $wait_sec -gt 0 ] ; do
 			wan_up=$(uci -P /var/state get network.wan.up 2>/dev/null)
 			if [ "$wan_up" = "1" ] ; then

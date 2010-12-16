@@ -622,7 +622,7 @@ define_interface()
 	if [ -z "$qos_interface" ] ; then
 		qos_network=$(uci get qos_gargoyle.global.network)
 		if [ -z "$qos_network" ] ; then qos_network=wan ; fi
-		wait_sec=45
+		wait_sec=10
 		while [ -z "$qos_interface" ] && [ $wait_sec -gt 0 ] ; do
 			qos_up=$(uci -P /var/state get network.$qos_network.up 2>/dev/null)
 			if [ "$qos_up" = "1" ] ; then
@@ -641,13 +641,8 @@ define_interface()
 
 stop()
 {
-	#if already in process of being initialized, do not continue
-	#until that is finished, and then exit cleanly, without
-	#doing anything further
+	#if already in process of being initialized, exit cleanly
 	if [ -e "$lock_file" ] ; then
-		while [ -e "$lock_file" ] ; do
-			sleep 1
-		done
 		exit
 	fi
 
@@ -686,6 +681,12 @@ start()
 		done
 
 	stop
+	
+	#if already in process of being initialized, exit cleanly
+	if [ -e "$lock_file" ] ; then
+		exit
+	fi
+
 	touch "$lock_file"
 
 	#load qos_interface from global variables
