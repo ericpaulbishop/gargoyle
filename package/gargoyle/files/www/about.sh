@@ -16,7 +16,7 @@
 
 	<p><span class="contributer">Paul Bixel:</span>Implemented Active Congestion Control, as well as many other improvements to QoS</p>
 
-	<p><span class="contributer">Artur Wronowsky:</span> Implemented wake-on-lan functionality along with several minor improvements/fxes</p>
+	<p><span class="contributer">Artur Wronowski:</span> Implemented wake-on-lan functionality along with several minor improvements/fxes</p>
 
 	<p><span class="contributer">Cezary Jackiewicz:</span> Translated Gargoyle into Polish in addition to contributing several minor code fixes and correcting several typos</p>
 
