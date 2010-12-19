@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008, 2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -14,9 +14,15 @@
 	
 	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
 
-	<p><span class="contributer">Paul Bixel:</span> Implemented QoS minimum bandwidth and improved connection table, including display of QoS classes and Layer7</p>
-	
+	<p><span class="contributer">Paul Bixel:</span>Implemented Active Congestion Control, as well as many other improvements to QoS</p>
+
+	<p><span class="contributer">Artur Wronowsky:</span> Implemented wake-on-lan functionality along with several minor improvements/fxes</p>
+
+	<p><span class="contributer">Cezary Jackiewicz:</span> Translated Gargoyle into Polish in addition to contributing several minor code fixes and correcting several typos</p>
+
 	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
+
+	<p><span class="contributer">Igor Fedorenko:</span> Implemented inclusion of latest git commit in default version label</p>
 
   	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> Provided several very helpful suggestions regarding the web design and css implementation of Gargoyle</p>
 
