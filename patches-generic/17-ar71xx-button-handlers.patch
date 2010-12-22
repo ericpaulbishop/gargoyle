@@ -13,7 +13,7 @@
 +is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
 +
 +
-+if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] then
++if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] ; then
 +	uci batch <<EOF
 +set system.reset_button=button
 +set system.reset_button.button='BTN_0'
@@ -26,10 +26,10 @@
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
 +commit system
-+EOF	
++EOF
 +fi
 +
-+if [ -n "$is_ubntrspro" ] then
++if [ -n "$is_ubntrspro" ] ; then
 +	uci batch <<EOF
 +set system.reboot_button=button
 +set system.reboot_button.button='BTN_0'
@@ -44,5 +44,5 @@
 +set system.reset_button.min='13'
 +set system.reset_button.max='33'
 +commit system
-+EOF	
++EOF
 +fi
