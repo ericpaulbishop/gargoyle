@@ -11,10 +11,6 @@ download_chain=bw_ingress
 upload_table=mangle
 upload_chain=bw_egress
 
-start_lockfile=/tmp/bwmon_start_lock.tmp
-stop_lockfile=/tmp/bwmon_stop_lock.tmp
-is_restart=false
-
 bw_restore()
 {
 	bw_id="$1"
@@ -61,22 +57,10 @@ update_cron()
 
 start()
 {
-	if [ "$is_restart" = "false" ] ; then
-		if [ -e "$lockfile" ] ; then
-			exit
-		fi
-		touch $lockfile
-	fi
 
-	wan_exists=$(uci get network.wan)
-	if [ -n "$wan_exists" ] ; then
-		define_wan_if
-		bw_if="$wan_if"
-		if [ -z "$bw_if" ] ; then
-		       	rm -rf $lockfile
-			exit
-		fi
-	else
+	define_wan_if
+	bw_if="$wan_if"
+	if [ -z "$bw_if" ] ; then
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
@@ -115,8 +99,8 @@ start()
 	hour_s=$(($minute_s*60));
 	day_s=$(($hour_s*24));
 
-        total1_interval=2
-        total1_num_intervals=449
+	total1_interval=2
+	total1_num_intervals=449
 	total1_reset_time=2
 
 	total2_interval="minute"
@@ -270,21 +254,10 @@ start()
 	done
 
 	update_cron 
-
-	if [ "$is_restart" = "false" ] ; then
-		rm -rf $lockfile
-	fi
 }
 
 stop()
 {
-	if [ "$is_restart" = "false" ] ; then
-		if [ -e "$lockfile" ] ; then
-			exit
-		fi
-		touch $lockfile
-	fi
-
 	touch /etc/crontabs/root
 
 	sh "$backup_script" 2>/dev/null
@@ -295,22 +268,16 @@ stop()
 	
 	delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
 	delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
-
-	if [ "$is_restart" = "false" ] ; then
-		rm -rf $lockfile
-	fi
 }
 
 restart()
 {
-	if [ -e "$lockfile" ] ; then
-		exit
-	fi
-	touch $lockfile
-	is_restart="true"
+	stop
+	start
+}
 
-	stop ;
-	start ;
-
-	rm -rf $lockfile
+boot()
+{
+	#Do nothing during init.  Start is called by hotplug.
+	return
 }

@@ -101,17 +101,19 @@ fi
 
 #restart everything
 /etc/init.d/firewall start >/dev/null 2>&1
+	
+#Below will be restarted when the network starts.
+#if [ -n "$qos_enabled" ] ; then
+#	/etc/init.d/qos_gargoyle start
+#fi
+#if [ -n "$bwmon_enabled" ] ; then
+#	/etc/init.d/bwmon_gargoyle start
+#fi
+
 if [ -n "$miniupnpd_enabled" ] ; then
 	/etc/init.d/miniupnpd start
 fi
-	
 
-if [ -n "$qos_enabled" ] ; then
-	/etc/init.d/qos_gargoyle start
-fi
-if [ -n "$bwmon_enabled" ] ; then
-	/etc/init.d/bwmon_gargoyle start
-fi
 if [ -n "$dnsmasq_enabled" ] ; then
 	/etc/init.d/dnsmasq start >/dev/null 2>&1 
 fi

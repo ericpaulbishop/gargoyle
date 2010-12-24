@@ -1,53 +1,35 @@
-. /lib/firewall/uci_firewall.sh
-. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
-unset ZONE
-config_get ifname $INTERFACE ifname
-[ "$ifname" == "lo" ] && exit 0
+if [ "$INTERFACE" = "wan" ]; then
 
-firewall_loaded=$(uci -P /var/state get firewall.core.loaded)
-[ ! "$firewall_loaded" = "1" ] && exit 0
+	. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 
+	if [ "$ACTION" = "ifup" ]; then
 
-load_zones() {
-	local name
-	local network
-	config_get name $1 name
-	config_get network $1 network
-	[ -z "$network" ] && network=$name 
-	for n in $network; do
-		[ "$n" = "$INTERFACE" ] && ZONE="$ZONE $name"
-	done
-}
+		#When we are booting we want to make sure that the firewall core loads before we install
+		#these device and IP specific rules.  We need the chains loaded by the core.
+		wait_sec=45
+		while [ -z "$(uci -P /var/state get firewall.core.loaded 2>/dev/null)" ] && [ $wait_sec -gt 0 ] ; do
+			sleep 1
+			wait_sec=$(($wait_sec - 1))
+		done
 
-config_foreach load_zones zone
+		#Bring up the parts of the firewall that depend on device name and WAN IP address.
+		ifup_firewall
 
-[ -z "$ZONE" ] && exit 0
-
-[ ifup = "$ACTION" ] && {
-	for z in $ZONE; do 
-		if [ "$z" = "wan" ] ; then
-			quota_sections=$(load_all_config_sections "firewall" "quota")
-			speeds=""
-			config_load "firewall"
-			for q in $quota_sections ; do
-				config_get "exceeded_up_speed" $q "exceeded_up_speed"
-				config_get "exceeded_down_speed" $q "exceeded_down_speed"
-				speeds="$exceeded_up_speed$exceeded_down_speed$speeds"
-			done
-			if [ -n "$speeds" ] ; then
-				quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
-				if [ -n "$quota_chains_exist" ] ; then
-					backup_quotas
-				fi
-				initialize_quotas
-			fi
-			insert_pf_loopback_rules
-			
-			bw_enabled=$(ls /etc/rc.d/*bwmon_gargoyle* 2>/dev/null)
-			if [ -n "$bw_enabled" ]; then
-				/etc/init.d/bwmon_gargoyle restart
-			fi
+		#Start up the bandwidth monitor which depends on the device name
+		if [ -h /etc/rc.d/S55bwmon_gargoyle ] ; then
+      			/etc/init.d/bwmon_gargoyle start
 		fi
-	done
-}
+	fi
+
+	if [ "$ACTION" = "ifdown" ]; then
+
+		quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
+		if [ -n "$quota_chains_exist" ] ; then
+			backup_quotas
+		fi
+
+	fi
+
+fi
+
 

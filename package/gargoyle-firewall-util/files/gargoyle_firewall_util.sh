@@ -15,19 +15,23 @@ wan_if=""
 
 define_wan_if()
 {
+	if  [ -z $wan_if ] ;  then
 	
-	wan_def=$(uci get network.wan)
-	if [ -n "$wan_def" ] && [ -z "$wan_if" ] ; then
-		wait_sec=10
-		while [ -z "$wan_if" ] && [ $wait_sec -gt 0 ] ; do
-			wan_up=$(uci -P /var/state get network.wan.up 2>/dev/null)
-			if [ "$wan_up" = "1" ] ; then
-				wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-			else
-				sleep 1
-				wait_sec=$(($wait_sec - 1))
-			fi
+		#Wait for up to 15 seconds for the wan interface to indicate it is up.
+		wait_sec=15
+		while [ -z $(uci -P /var/state get network.wan.up 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do
+			sleep 1
+			wait_sec=$(($wait_sec - 1))
 		done
+
+		#The interface name will depend on if pppoe is used or not.  If pppoe is used then 
+		#the name we are looking for is in network.wan.ifname.  If there is nothing there
+		#use the device named by network.wan.device
+
+		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		if [ -z $wan_if ] ; then
+			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
+		fi
 	fi
 }
 
@@ -131,16 +135,17 @@ insert_pf_loopback_rules()
 	config_name="firewall"
 	section_type="redirect"
 	
-	define_wan_if #need to be sure this goes through ok so we get wan_ip
+	#Need to always delete the old chains first.
+	delete_chain_from_table "nat"    "pf_loopback_A"
+	delete_chain_from_table "filter" "pf_loopback_B"
+	delete_chain_from_table "nat"    "pf_loopback_C"
+
+	define_wan_if
 	if [ -z "$wan_if" ]  ; then return ; fi        
 	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 
 	if [ -n "$wan_ip" ] && [ -n "$lan_mask" ] ; then
-		delete_chain_from_table "nat"    "pf_loopback_A"
-		delete_chain_from_table "filter" "pf_loopback_B"
-		delete_chain_from_table "nat"    "pf_loopback_C"
-
 
 		iptables -t nat    -N "pf_loopback_A"
 		iptables -t filter -N "pf_loopback_B"
@@ -221,8 +226,9 @@ insert_restriction_rules()
 	if [ -e /tmp/restriction_init.lock ] ; then return ; fi
 	touch /tmp/restriction_init.lock
 
-	egress_exits=$(iptables -t filter -L egress_restrictions 2>/dev/null)
-	ingress_exits=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
+	egress_exists=$(iptables -t filter -L egress_restrictions 2>/dev/null)
+	ingress_exists=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
+
 	if [ -n "$egress_exists" ] ; then
 		delete_chain_from_table filter egress_whitelist
 		delete_chain_from_table filter egress_restrictions
@@ -504,13 +510,17 @@ initialize_firewall()
 {
 	iptables -I zone_lan_forward -i br-lan -o br-lan -j ACCEPT
 	insert_remote_accept_rules
-	insert_pf_loopback_rules
 	insert_dmz_rule
 	create_l7marker_chain
-	insert_restriction_rules
-	initialize_quotas
 	block_static_ip_mismatches
 	force_router_dns
 	add_adsl_modem_routes
+}
+
+ifup_firewall()
+{
+	insert_restriction_rules
+	initialize_quotas
+	insert_pf_loopback_rules
 }
 

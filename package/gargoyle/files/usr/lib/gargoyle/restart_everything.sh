@@ -49,14 +49,18 @@ webmon_enabled=$(ls /etc/rc.d/*webmon* 2>/dev/null)
 /etc/init.d/cron start >/dev/null 2>&1
 /etc/init.d/httpd_gargoyle start >/dev/null 2>&1
 /etc/init.d/dropbear start >/dev/null 2>&1
-if [ -n "$qos_enabled" ] ; then
-	/etc/init.d/qos_gargoyle start
-fi
+
+#Below started by hotplug when the network restarts.
+#if [ -n "$qos_enabled" ] ; then
+#	/etc/init.d/qos_gargoyle start
+#fi
+#if [ -n "$bwmon_enabled" ] ; then
+#	/etc/init.d/bwmon_gargoyle start
+#fi
+
+
 if [ -n "$upnp_enabled" ] ; then
 	/etc/init.d/miniupnpd start
-fi
-if [ -n "$bwmon_enabled" ] ; then
-	/etc/init.d/bwmon_gargoyle start
 fi
 if [ -n "$ddns_enabled" ] ; then
 	/etc/init.d/ddns_gargoyle start
