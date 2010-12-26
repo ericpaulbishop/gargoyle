@@ -55,6 +55,14 @@ insert_remote_accept_rules()
 			if [ -z "$remote_port"  ] ; then
 				remote_port="$local_port"
 			fi
+
+			#Discourage brute force attacks on ssh from the WAN.
+			#Only 3 connections times 10 password attempts each are allowed in a 120 second window per source IP address.
+			if [ "$local_port" = 22 ] ; then
+				iptables -t filter -A "input_$zone" -p "$proto" --dport 22 -m recent --set --name SSH_CHECK
+				iptables -t filter -A "input_$zone" -m recent --update --seconds 120 --hitcount 4 --name SSH_CHECK -j DROP
+			fi
+
 			if [ "$remote_port" != "$local_port" ] ; then
 				#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
 				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
@@ -64,6 +72,7 @@ insert_remote_accept_rules()
 				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
 				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
 			fi
+
 			echo iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
 		fi
 	}
