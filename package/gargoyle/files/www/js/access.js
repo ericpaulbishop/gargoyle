@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -68,11 +68,29 @@ function saveChanges()
 			addAccept( document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value);
 		}
 		
+		//recreate dropbear config section if anonymous-- anonymous uci section can cause problems saving
+		var newLocalSshPort =  document.getElementById("local_ssh_port").value;
+		var remoteAttempts =  document.getElementById("remote_ssh_attempts").disabled ? "" : getSelectedValue("remote_ssh_attempts");
+		var uciPreCommands = [];
+		if(dropbearSections[0] != "global")
+		{
+			for(s=0; s < dropbearSections.length; s++)
+			{
+				uciPreCommands.push("uci del dropbear.@dropbear[0]" );
+			}
+			uciPreCommands.push("uci set dropbear.global=dropbear");
+			uciPreCommands.push("uci set dropbear.global.PasswordAuth='on'");
+			uciPreCommands.push("uci set dropbear.global.Port=" + newLocalSshPort);
+			if(remoteAttempts != "") { uciPreCommands.push("uci set dropbear.global.max_remote_attempts='" + remoteAttempts + "'" ); }
+			uciPreCommands.push("uci commit");
+		}
+		else
+		{
+			//update dropbear uci configuration
+			uci.set("dropbear", "global", "Port", newLocalSshPort);
+			if(remoteAttempts != "") { uci.set("dropbear", "global", "max_remote_attempts",  remoteAttempts ); }
 
-
-
-		//update dropbear and httpd_gargoyle uci configuration
-		uci.set("dropbear", dropbearSections[0], "Port", document.getElementById("local_ssh_port").value);
+		}
 		dropbearRestart = oldLocalSshPort == document.getElementById("local_ssh_port").value ? "" : "/etc/init.d/dropbear restart\n"; //only restart dropbear if we need to
 
 
@@ -116,7 +134,7 @@ function saveChanges()
 		
 		
 		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
-		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
+		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uciPreCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
 		//document.getElementById("output").value = commands;
 
 
@@ -232,7 +250,7 @@ function resetData()
 
 
 	if(localProtocol == "https" ||  localProtocol == "both")
-	{	
+	{
 		document.getElementById("local_https_port").value = httpsPort;	
 	}
 	if(localProtocol == "http" || localProtocol == "both")
@@ -243,8 +261,11 @@ function resetData()
 
 
 
-	dropbearSections = uciOriginal.getAllSections("dropbear"); 
-	sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
+	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+	var sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
+	var connectionAttempts=uciOriginal.get("dropbear", dropbearSections[0], "max_remote_attempts");
+	connectionAttempts = connectionAttempts == "" ? 10 : connectionAttempts;
+	setSelectedValue("remote_ssh_attempts", connectionAttempts);
 	document.getElementById("local_ssh_port").value = sshPort;
 
 
@@ -407,9 +428,13 @@ function updateVisibility()
 		vis.push( document.getElementById(ids[idIndex]).value != "" ? true : false );
 	}
 	setVisibility(visIds, vis);
-
+		
+	var dropbearSections = uciOriginal.getAllSections("dropbear");
+	var defaultConnectionAttempts=uciOriginal.get("dropbear", dropbearSections[0], "max_remote_attempts");
+	defaultConnectionAttempts = defaultConnectionAttempts == "" ? 10 : defaultConnectionAttempts;
 
 	enableAssociatedField( document.getElementById("remote_ssh_enabled"), "remote_ssh_port", document.getElementById("local_ssh_port").value);
+	enableAssociatedField( document.getElementById("remote_ssh_enabled"), "remote_ssh_attempts", defaultConnectionAttempts);
 }
 
 function setSelectElementOptions(selectId, enabledOptionValues, possibleOptionValueToTextHash)

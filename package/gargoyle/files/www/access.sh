@@ -90,7 +90,17 @@
 			<label class='leftcolumn' for='remote_ssh_port' id='remote_ssh_port_label'>Remote SSH Port:</label>
 			<input type='text' class='rightcolumn' id='remote_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 		</div>
-
+		<div class='indent' id='remote_ssh_attempts_container'>
+			<label class='leftcolumn' for='remote_ssh_attempts' id='remote_ssh_attempts_label'>Max Remote Login Attempts:</label>
+			<select class='rightcolumn' id='remote_ssh_attempts'>
+				<option value="1">1 Attempt Every Five Minutes</option>
+				<option value="3">3 Attempts Every Five Minutes</option>
+				<option value="5">5 Attempts Every Five Minutes</option>
+				<option value="10">10 Attempts Every Five Minutes</option>
+				<option value="15">15 Attempts Every Five Minutes</option>
+				<option value="unlimited">Unlimited Attempts</option>
+			</select>
+		</div>
 	</fieldset>
 
 	<fieldset>
