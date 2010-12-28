@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,47 @@
 +#!/bin/sh
 +#
 +# Copyright (C) 2010 OpenWrt.org
@@ -20,11 +20,13 @@
 +set system.reset_button.action='released'
 +set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
 +set system.reset_button.min='3'
++set system.reset_button.max='10'
 +set system.reboot_button=button
 +set system.reboot_button.button='BTN_1'
 +set system.reboot_button.action='released'
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
++set system.reboot_button.max='10'
 +commit system
 +EOF
 +fi
