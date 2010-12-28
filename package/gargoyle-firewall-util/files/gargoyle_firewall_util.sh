@@ -42,6 +42,15 @@ insert_remote_accept_rules()
 	local config_name="firewall"
 	local section_type="remote_accept"
 
+	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts)
+	ssh_port=$(uci get dropbear.@dropbear[0].Port)
+	if [ "$ssh_max_attempts" = "unlimited" ] ; then
+		ssh_max_attempts=""
+	else
+		ssh_max_attempts=$(( $ssh_max_attempts + 1 ))
+	fi
+
+
 	#add rules for remote_accepts
 	parse_remote_accept_config()
 	{
@@ -58,9 +67,10 @@ insert_remote_accept_rules()
 
 			#Discourage brute force attacks on ssh from the WAN.
 			#Only 3 connections times 10 password attempts each are allowed in a 120 second window per source IP address.
-			if [ "$local_port" = 22 ] ; then
-				iptables -t filter -A "input_$zone" -p "$proto" --dport 22 -m recent --set --name SSH_CHECK
-				iptables -t filter -A "input_$zone" -m recent --update --seconds 120 --hitcount 4 --name SSH_CHECK -j DROP
+			
+			if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] ; then
+				iptables -t filter -A "input_$zone" -p "$proto" --dport $ssh_port -m recent --set --name SSH_CHECK
+				iptables -t filter -A "input_$zone" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
 			fi
 
 			if [ "$remote_port" != "$local_port" ] ; then
