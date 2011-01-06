@@ -19,6 +19,10 @@ backup_quotas
 
 /etc/init.d/firewall stop >/dev/null 2>&1
 /etc/init.d/firewall start >/dev/null 2>&1
+
+. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
+ifup_firewall
+
 if [ -n "$qos_enabled" ] ; then
 	/etc/init.d/qos_gargoyle start
 fi
