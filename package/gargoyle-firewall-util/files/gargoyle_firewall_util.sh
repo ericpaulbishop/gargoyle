@@ -42,14 +42,13 @@ insert_remote_accept_rules()
 	local config_name="firewall"
 	local section_type="remote_accept"
 
-	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts)
+	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts) 2> /dev/nul
 	ssh_port=$(uci get dropbear.@dropbear[0].Port)
-	if [ "$ssh_max_attempts" = "unlimited" ] ; then
+	if [ -z "$ssh_max_attempts"] || [ "$ssh_max_attempts" = "unlimited" ] ; then
 		ssh_max_attempts=""
 	else
 		ssh_max_attempts=$(( $ssh_max_attempts + 1 ))
 	fi
-
 
 	#add rules for remote_accepts
 	parse_remote_accept_config()
@@ -65,9 +64,8 @@ insert_remote_accept_rules()
 				remote_port="$local_port"
 			fi
 
-			#Discourage brute force attacks on ssh from the WAN.
-			#Only 3 connections times 10 password attempts each are allowed in a 120 second window per source IP address.
-			
+			#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
+			#Each attempt gets a maximum of 10 password tries by dropbear.
 			if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] ; then
 				iptables -t filter -A "input_$zone" -p "$proto" --dport $ssh_port -m recent --set --name SSH_CHECK
 				iptables -t filter -A "input_$zone" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
@@ -83,7 +81,6 @@ insert_remote_accept_rules()
 				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
 			fi
 
-			echo iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
 		fi
 	}
 	config_load "$config_name"
@@ -112,8 +109,6 @@ create_l7marker_chain()
 	fi
 	fw_l7=$(echo $(uci show firewall | grep app_proto | sed 's/^.*=//g'))
 	all_used=$(echo $fw_l7 $qos_l7)
-
-	echo "l7 used = \"$all_used\""
 
 	if [ -n "$all_used" ] ; then
 		iptables -t mangle -N l7marker
