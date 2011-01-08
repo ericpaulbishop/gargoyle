@@ -600,7 +600,8 @@ initialize_qos()
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
 
 		#Make a class to handle the outgoing ping requests from the router.
-		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 84 dmax 10ms rate 2kbit
+		#These pings are 84 bytes each in the queue, allowing a maximum rate of 200ms we get 2.6kbps
+		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 84 dmax 10ms rate 3kbit
 		tc qdisc add dev $qos_interface parent 1:127 pfifo
       		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
 

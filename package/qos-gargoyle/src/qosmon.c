@@ -20,6 +20,7 @@
  *
 */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -54,7 +55,7 @@
 #endif
 
 u_char  packet[MAXPACKET];
-int i, pingflags, options;
+int pingflags, options;
 
 #define DEAMON (pingflags & BACKGROUND)
 
@@ -79,12 +80,9 @@ const char usage[] =
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
 
-int npackets;
-int preload = 0;        /* number of packets to "preload" */
-int ntransmitted = 0;   /* sequence # for outbound packets = #sent */
-int ident;
-
-int nreceived = 0;      /* # of packets we got back */
+uint16_t ntransmitted = 0;   /* sequence # for outbound packets = #sent */
+uint16_t ident;
+uint16_t nreceived = 0;      /* # of packets we got back */
 
 // For our digital filters we use Y = Y(-1) + alpha * (X - Y(-1))
 // where alpha = Sample_Period / (TC + Sample_Period)
@@ -191,10 +189,10 @@ void finish(int parm)
  */
 int in_cksum(u_short *addr, int len)
 {
-    register int nleft = len;
-    register u_short *w = addr;
-    register u_short answer;
-    register int sum = 0;
+    int nleft = len;
+    u_short *w = addr;
+    u_short answer;
+    int sum = 0;
 
     /*
      *  Our algorithm is simple, using a 32 bit accumulator (sum),
@@ -236,15 +234,15 @@ int in_cksum(u_short *addr, int len)
 void pinger(void)
 {
     static u_char outpack[MAXPACKET];
-    register struct icmp *icp = (struct icmp *) outpack;
+    struct icmp *icp = (struct icmp *) outpack;
     int i, cc;
-    register struct timeval *tp = (struct timeval *) &outpack[8];
-    register u_char *datap = &outpack[8+sizeof(struct timeval)];
+    struct timeval *tp = (struct timeval *) &outpack[8];
+    u_char *datap = &outpack[8+sizeof(struct timeval)];
 
     icp->icmp_type = ICMP_ECHO;
     icp->icmp_code = 0;
     icp->icmp_cksum = 0;
-    icp->icmp_seq = ntransmitted++;
+    icp->icmp_seq = ++ntransmitted;
     icp->icmp_id = ident;       /* ID */
 
     cc = datalen+8;         /* skips ICMP portion */
@@ -287,15 +285,14 @@ void tvsub(register struct timeval *out, register struct timeval *in)
  * which arrive ('tis only fair).  This permits multiple copies of this
  * program to be run without having intermingled output (or statistics!).
  */
-int pr_pack( void *buf, int cc, struct sockaddr_in *from )
+char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 {
     struct ip *ip;
-    register struct icmp *icp;
-    register long *lp = (long *) packet;
-    register int i;
+    struct icmp *icp;
+    long *lp = (long *) packet;
     struct timeval tv;
     struct timeval *tp;
-    int hlen, triptime;
+    int hlen,triptime;
     struct in_addr tip;
 
     from->sin_addr.s_addr = ntohl( from->sin_addr.s_addr );
@@ -317,6 +314,11 @@ int pr_pack( void *buf, int cc, struct sockaddr_in *from )
     if( icp->icmp_id != ident )
         return 0;           /* 'Twas not our ECHO */
 
+    nreceived++;
+
+    //If it was not the packet we are looking for return now.
+    if (icp->icmp_seq != ntransmitted) return 0;
+    
     tp = (struct timeval *)&icp->icmp_data[0];
     tvsub( &tv, tp );
     triptime = tv.tv_sec*1000+(tv.tv_usec/1000);
@@ -325,14 +327,11 @@ int pr_pack( void *buf, int cc, struct sockaddr_in *from )
     //Check for some possible errors first.
     if (triptime > period) triptime = period; 
 
-    //If this was not the most recent one we sent then we
-    //will use the timeout as the triptime.
-    if (icp->icmp_seq == ntransmitted-1) rawfltime=triptime;
+    //If this was the most recent one we sent then update the rawfltime.
+    rawfltime=triptime;
 
-    nreceived++;
-    
-    //If this was the packet we most previously sent then return 1.
-    return (icp->icmp_seq == ntransmitted-1);
+    //return 1 if we got a valid time.
+    return 1;
 
 }
 
@@ -630,6 +629,8 @@ void update_status( FILE* fd )
 		DCA,pinglimit/1000,statename[qstate]);
     printw("Link Limit=%6d, Fair Limit=%6d, Current Load=%6d (kbps)\n", 
 		dbw_ul/1000,new_dbw_ul/1000,dbw/1000);
+    printw("pings sent=%d, pings received=%d\n", 
+		ntransmitted,nreceived);
 
     printw("Defined classes for imq0\n"); 
     printw("Errors: (mismatches,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
@@ -862,12 +863,12 @@ int main(int argc, char *argv[])
         //Need a loop here to clean out any old pongs that show up.
         while  ( (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout)) == 1 ) {
         
-              //If we got here than data is waiting. try to read the whole packet
+              //If we got here then data is waiting. try to read the whole packet
               if ( (cc=recvfrom(s,packet,len,0,(struct sockaddr *) &from, &fromlen)) < 0) {
                   continue;
               }
               
-              //OK there is a whole packet, get it. 
+              //OK there is a whole packet, get it and record the triptime. 
               pr_pack( packet, cc, &from );      
         }
 
@@ -894,7 +895,7 @@ int main(int argc, char *argv[])
         }
 
         //Update the filtered ping response time based on what happened.
-        //If we do not get a packet back then no change in the filtered value.
+        //If we are not pinging then no change in the filtered value.
         if (pingon) 
            fil_triptime = ((rawfltime*1000 - fil_triptime)*alpha)/1000 + fil_triptime;
 
@@ -959,7 +960,7 @@ int main(int argc, char *argv[])
                 //Ping times acceptable then ramp up at .5%/sec 
                 //Try to creep up on the limit to avoid oscillation.
                 //Only increase the download bw if the link load indicates its needed.
-                if ((fil_triptime < 0.7 * pinglimit) && (dbw_fil > new_dbw_ul * .9)) {
+                if ((fil_triptime < 0.7 * pinglimit) && (dbw_fil > new_dbw_ul * .95)) {
                    new_dbw_ul = new_dbw_ul * (1.0 + .005*period/1000);
                    if (new_dbw_ul > DBW_UL*.9) new_dbw_ul=DBW_UL*.9;
                 }
@@ -967,7 +968,7 @@ int main(int argc, char *argv[])
                 //Modify parent download limit as needed.
                 if (abs(dbw_ul-new_dbw_ul) > 0.01*DBW_UL) tc_class_modify(new_dbw_ul);
 
-                if ((dbw_fil < 0.25 * new_dbw_ul) || (DCA == 1) )qstate=QMON_WAIT;
+                if ((dbw_fil < 0.25 * new_dbw_ul) || (DCA <= 1) )qstate=QMON_WAIT;
                 break;
                     
             // In the wait state we have a nearly idle link or only one class active.
