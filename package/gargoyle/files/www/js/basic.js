@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -37,22 +37,20 @@ function saveChanges()
 		}
 
 		var preCommands = "";	
-		var allWifiDeviceSections = uci.getAllSectionsOfType("wireless", "wifi-device");
-		var firstWirelessDevice = allWifiDeviceSections[0];
 		
-		if(firstWirelessDevice == null)
+		if(wifiDevG == "" && wirelessDriver != "")
 		{
-			firstWirelessDevice = wirelessDriver == "broadcom" ? "wl0" : ( wirelessDriver == "atheros" ? "wifi0" : "radio0");
-			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + "=wifi-device\n";
-			preCommands = preCommands + "uci set wireless." + firstWirelessDevice + ".type=" + wirelessDriver + "\n";
+			wifiDevG = wirelessDriver == "broadcom" ? "wl0" : ( wirelessDriver == "atheros" ? "wifi0" : "radio0");
+			preCommands = preCommands + "uci set wireless." + wifiDevG + "=wifi-device\n";
+			preCommands = preCommands + "uci set wireless." + wifiDevG + ".type=" + wirelessDriver + "\n";
 			preCommands = preCommands + "uci commit\n";
-			uci.set("wireless", firstWirelessDevice, "", "wifi-device");
-			uci.set("wireless", firstWirelessDevice, "type", wirelessDriver);
+			uci.set("wireless", wifiDevG, "", "wifi-device");
+			uci.set("wireless", wifiDevG, "type", wirelessDriver);
 			if(wirelessDriver == "mac80211")
 			{
-				uci.set("wireless", firstWirelessDevice, "hwmode", "11ng");
-				uci.set("wireless", firstWirelessDevice, "htmode", "HT20");
-				uci.set("wireless", firstWirelessDevice, "ht_capab", "SHORT-GI-40 DSSS_CCK-40");
+				uci.set("wireless", wifiDevG, "hwmode", "11ng");
+				uci.set("wireless", wifiDevG, "htmode", "HT20");
+				uci.set("wireless", wifiDevG, "ht_capab", "SHORT-GI-40 DSSS_CCK-40");
 			}
 		}
 		
@@ -73,7 +71,8 @@ function saveChanges()
 		
 		
 		//always remove this option, if wireless is set to disabled merely delete all interface sections
-		uci.remove('wireless', firstWirelessDevice, 'disabled'); 
+		if(wifiDevG != "") { uci.remove('wireless', wifiDevG, 'disabled'); }
+		if(wifiDevA != "") { uci.remove('wireless', wifiDevA, 'disabled'); }
 
 
 		currentLanIp = "";
@@ -84,7 +83,9 @@ function saveChanges()
 
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
-				uci.set("wireless",  firstWirelessDevice, "hwmode", getSelectedValue("wifi_hwmode"));
+				var hwgmode = getSelectedValue("wifi_hwmode");
+				hwgmode = hwgmode == "dual" ? "11ng" : hwgmode;
+				uci.set("wireless",  wifiDevG, "hwmode", hwgmode);
 			}
 
 			currentLanIp = document.getElementById("lan_ip").value;
@@ -980,6 +981,7 @@ function setWifiVisibility()
 			'wifi_ssid1_container',
 			'wifi_channel1_container',
 			'wifi_fixed_channel1_container',
+			'wifi_channel1a_container',
 			'wifi_hidden_container', 
 			'wifi_isolate_container', 
 			'wifi_encryption1_container', 
@@ -1004,6 +1006,7 @@ function setWifiVisibility()
 			];
 
 	var m8 = wirelessDriver == "mac80211" ? 1 : 0;
+	var db = m8 && getSelectedValue("wifi_hwmode") == "dual";
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
@@ -1016,12 +1019,12 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,m8,m8,1,1,mf,   1,1,0,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,     0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,m8,m8,1,1,mf,   1,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,m8,m8,1,1,mf,   1,1,0,0,1,1,1,p1,w1,r1,r1,  b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,m8,m8,1,1,mf,   1,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,m8,m8,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1097,6 +1100,7 @@ function setBridgeVisibility()
 
 function resetData()
 {
+
 	var removeChannels = [];
 	if(wirelessDriver == "broadcom")
 	{
@@ -1112,9 +1116,13 @@ function resetData()
 	}
 	else if(wirelessDriver == "mac80211")
 	{
-		setAllowableSelections("bridge_channel", mac80211Channels, mac80211Channels, document);
-		setAllowableSelections("wifi_channel1", mac80211Channels, mac80211Channels, document);
-		setAllowableSelections("wifi_channel2", mac80211Channels, mac80211Channels, document);
+		setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
+		setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
+		setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
+		if(mac80211Channels["A"] != null)
+		{
+			setAllowableSelections("wifi_channel1a",  mac80211Channels["A"], mac80211Channels["A"], document);
+		}
 	}
 	while(removeChannels.length > 0)
 	{
@@ -1378,11 +1386,25 @@ function resetData()
 
 	
 	//now load wireless variables
-	var allWirelessSections = uciOriginal.getAllSections("wireless");
-	var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
-	var firstWirelessDevice = allWifiDeviceSections[0];
+	var allWirelessSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 
-	var htmode = uciOriginal.get("wireless", firstWirelessDevice, "htmode");
+	// generic variables
+	apcfg = "";
+	ap2cfg = "";
+	othercfg = "";
+	var seci=0;
+	for(seci=0;seci < allWirelessSections.length; seci++)
+	{
+		var sec = allWirelessSections[seci];
+		var secmode = uciOriginal.get("wireless", sec, "mode");
+		var secdev  = uciOriginal.get("wireless", sec, "device") 
+		apcfg    = secmode == "ap" && secdev != wifiDevA ? sec : apcfg;
+		ap2cfg   = secmode == "ap" && secdev == wifiDevA ? sec : ap2cfg;
+		othercfg = secmode != "ap" && secmode != "wds"   ? sec : othercfg
+	}
+
+	//wireless N variables
+	var htmode = uciOriginal.get("wireless", wifiDevG, "htmode");
 	if(wirelessDriver == "mac80211" && (htmode == "HT20" || htmode == "HT40+" || htmode == "HT40-"))
 	{
 		document.getElementById("bridge_channel_width_container").style.display="block";
@@ -1395,11 +1417,17 @@ function resetData()
 		document.getElementById("bridge_channel_width_container").style.display="none";
 	}
 
-
-	var hwmode = uciOriginal.get("wireless", firstWirelessDevice, "hwmode");
+	var hwmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 	if(wirelessDriver == "mac80211" )
 	{
 		hwmode = hwmode == "" ? "11g" : "";
+		if(dualBandWireless)
+		{
+			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
+			setAllowableSelections( "bridge_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
+			hwmode = (ap2cfg != "" || (apcfg == "" && ap2cfg == "")) ? "dual" : hwmode;
+		}
+		alert("setting hwmode to " + hwmode);
                 setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", hwmode);
 	}
@@ -1409,28 +1437,8 @@ function resetData()
 	}
 
 
-	wifiCfg2="";
-	wifiCfg3="";
-	if(allWirelessSections.length >= 2)
-	{
-		wifiCfg2 = allWirelessSections[1];
-	}
-	if(allWirelessSections.length >= 3)
-	{
-		wifiCfg3 = allWirelessSections[2];
-	}
-	cfg2mode=uciOriginal.get("wireless", wifiCfg2, "mode");
-	cfg3mode=uciOriginal.get("wireless", wifiCfg3, "mode");
-	apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
-	othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
-	if(uciOriginal.get("wireless", othercfg, "mode") == "wds")
-	{
-		othercfg = '';
-	}
-
-
-
-
+	
+	
 	wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_ssid1', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 	wirelessPkgs= new Array();
 	var wIndex;
@@ -1438,13 +1446,13 @@ function resetData()
 	{
 		wirelessPkgs.push('wireless');
 	}
-	wirelessSections=[firstWirelessDevice, firstWirelessDevice, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
+	wirelessSections=[wifiDevG, wifiDevG, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
 	wirelessOptions=['channel', 'channel', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
 	wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", 'Gargoyle', 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
 	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
-	var txpower = uciOriginal.get("wireless", firstWirelessDevice, "txpower");
+	var txpower = uciOriginal.get("wireless", wifiDevG, "txpower");
 	var max = txpower== "" ? "max" : "custom";
 	var dbm = "(0 - " + txPowerMax + "dBm)";
 	setSelectedValue("wifi_max_txpower", max);	 
@@ -1454,9 +1462,14 @@ function resetData()
 	document.getElementById("wifi_dbm").firstChild.data = dbm;
 
 	
-	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
-	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
-	setSelectedValue('bridge_channel', uciOriginal.get("wireless", firstWirelessDevice, "channel"));
+	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", wifiDevG, "channel"));
+	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", wifiDevG, "channel"));
+	setSelectedValue('bridge_channel', uciOriginal.get("wireless", wifiDevG, "channel"));
+	//dual band channel
+	if(ap2cfg != "")
+	{
+		setSelectedValue('wifi_channel1a', uciOriginal.get("wireless", wifiDevA, "channel"));
+	}
 
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
@@ -1468,8 +1481,8 @@ function resetData()
 	var policy = '';
 	if(wirelessDriver == "broadcom")
 	{
-		policy = uciOriginal.get("wireless", firstWirelessDevice, policyOption);
-		macListStr = uciOriginal.get("wireless", firstWirelessDevice, "maclist");
+		policy = uciOriginal.get("wireless", wifiDevG, policyOption);
+		macListStr = uciOriginal.get("wireless", wifiDevG, "maclist");
 		setSelectedValue("mac_filter_enabled", ( (policy == "allow" || policy == "deny" || policy == "1" || policy == "2" ) && macListStr != "") ? 'enabled' : 'disabled');
 	}
 	else 
@@ -1900,8 +1913,10 @@ function setChannelWidth(selectCtl)
 }
 function setHwMode(selectCtl)
 {
-	setSelectedValue("wifi_hwmode", getSelectedValue(selectCtl.id));
-	setSelectedValue("bridge_hwmode", getSelectedValue(selectCtl.id));
+	var hwmode = getSelectedValue(selectCtl.id)
+	setSelectedValue("wifi_hwmode", hwmode);
+	setSelectedValue("bridge_hwmode", hwmode);
+	document.getElementById("wifi_channel1a_container").style.display = hwmode == "dual" ? "block" : "none";
 }
 
 function setTransmitPower(selectId, textId)

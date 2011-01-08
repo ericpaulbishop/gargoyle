@@ -36,28 +36,65 @@
 	brctl showmacs br-lan | grep "yes" | awk ' { print "allLanMacs.push(\"" $2 "\");" } '
 
 
-	echo "var allWifi = new Array();"
-	all_wif=$(iwconfig 2>/dev/null | egrep  "^[^\t ]" | awk ' { print $1 } ')
-	for wif in $all_wif ; do
-		echo "allWifi.push(\"$wif\");"
-	done
+
+	echo "var wifiDevG=uciWireless;"
+	echo "var wifiDevA=\"\";"
 
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var wirelessDriver=\"broadcom\";"
 	elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 		echo "var wirelessDriver=\"mac80211\";"
 		echo 'var mac80211Channels = [];'
+		echo "var nextCh=[];"
 		
-		#use iw to get available channels
-		cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
-		if [ -n "$cur_if" ] ; then
-			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-		else		
-			iw phy phy0 interface add tmpmon type monitor
-			ifconfig tmpmon up
-			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "mac80211Channels.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-			ifconfig tmpmon down
-			iw dev tmpmon del
+		#test for dual band
+		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
+			echo "var dualBandWireless=true;"
+			radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
+			rnum=0;
+			for r in $radios ; do
+				echo "nextCh = [];"
+				mode=$(uci get wireless.$r.hwmode)
+				[ "$mode" = "11na" ] &&  mode="11an"
+				if [ "$mode" = "11an" ] ; then
+					chId="A"
+					echo "var wifiDevA=\"$r\";"
+				else
+					mode="11bgn"
+					chId="G"
+					echo "var wifiDevG=\"$r\";"
+				fi
+
+
+				cur_if=$(iwconfig 2>/dev/null | grep "wlan" | grep "$mode" | awk ' { print $1 }' | head -n 1)
+				if [ -n "$cur_if" ] ; then
+					iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
+				else		
+					iw phy phy$rnum interface add tmpmon type monitor
+					ifconfig tmpmon up
+					iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
+					ifconfig tmpmon down
+					iw dev tmpmon del
+				fi
+				rnum=$(( $rnum+1 ))
+				echo "mac80211Channels[\"$chId\"] = nextCh ;"
+			done
+
+		else
+			echo "var dualBandWireless=false;"
+			#use iw to get available channels
+			cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
+			if [ -n "$cur_if" ] ; then
+				iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
+			else		
+				iw phy phy0 interface add tmpmon type monitor
+				ifconfig tmpmon up
+				iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
+				ifconfig tmpmon down
+				iw dev tmpmon del
+			fi
+			echo "mac80211Channels[\"G\"] = nextCh ;"
+
 		fi
 
 	elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
@@ -647,6 +684,13 @@ var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211
 			<label class='leftcolumn' for='wifi_fixed_channel1' id='wifi_fixed_channel1_label'>Wireless Channel:</label>
 			<span class='rightcolumn' id='wifi_fixed_channel1'>&nbsp;</span>
 		</div>
+
+		<div id='wifi_channel1a_container' class='indent'>
+			<label class='leftcolumn' for='wifi_channel1a' id='wifi_channel1_label'>Wireless Channel (5GHz):</label>
+			<select class='rightcolumn' id='wifi_channel1a'  ></select>
+		</div>
+
+
 
 		<div id='wifi_encryption1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption1' id='wifi_encryption1_label'>Encryption:</label>

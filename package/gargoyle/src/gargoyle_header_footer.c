@@ -726,7 +726,10 @@ void print_interface_vars(void)
 			struct uci_section *section = uci_to_section(e);
 			if(strstr(section->type, "wifi-device") != NULL)
 			{
-				uci_wireless=strdup(section->e.name);
+				if(uci_wireless == NULL)
+				{
+					uci_wireless=strdup(section->e.name);
+				}
 			}
 		}
 	}
