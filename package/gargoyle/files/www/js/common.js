@@ -507,33 +507,37 @@ function getDhcpSection(uciData)
 
 function getWirelessMode(uciTest)
 {
-	var wifiSections = uciTest.getAllSections("wireless");
 	var deviceSections = uciTest.getAllSectionsOfType("wireless", "wifi-device");
-	var wifiDevice = deviceSections[0];
-
-	var wifiCfg2="";
-	var wifiCfg3="";
-	if(wifiSections.length >= 2)
+	var validDevices = [];
+	var di;
+	for(di=0; di < deviceSections.length; di++)
 	{
-		wifiCfg2 = wifiSections[1];
-	}
-	if(wifiSections.length >= 3)
-	{
-		wifiCfg3 = wifiSections[2];
-	}
-	var cfg2mode=uciTest.get("wireless", wifiCfg2, "mode");
-	var cfg3mode=uciTest.get("wireless", wifiCfg3, "mode");
-	var p = cfg2mode != '' && cfg3mode != '' ? '+' : '';
-	var cfgMode= cfg3mode == 'ap' && cfg2mode != 'ap' ? cfg3mode + p + cfg2mode : cfg2mode + p + cfg3mode;
-
-	if(cfgMode == 'ap')
-	{
-		cfgMode = (uciTest.get("wireless", wifiCfg2, "wds") != "" || uciTest.get("wireless", wifiCfg3, "wds")) ? "ap+wds" : "ap";
+		var disabled = uciTest.get("wireless", deviceSections[di], "disabled");
+		if(disabled == "0" || disabled == "")
+		{
+			validDevices[ deviceSections[di] ] = 1
+		}
 	}
 
-	var wirelessIsDisabled= uciTest.get("wireless", wifiDevice, "disabled") == "1" || cfg2mode == '';
+	var ap = '';
+	var other = '';
+	var ifSections =  uciTest.getAllSectionsOfType("wireless", "wifi-iface");
+	var ifi;
+	for(ifi=0; ifi < ifSections.length; ifi++)
+	{
+		var dev  = uciTest.get("wireless", ifSections[ifi], "device");
+		if( validDevices[ dev ]  == 1)
+		{
+			var mode = uciTest.get("wireless", ifSections[ifi], "mode");
+			ap    = mode == "ap" ? mode : ap;
+			other = mode == "ap" ? (uciTest.get("wireless",  ifSections[ifi], "wds") ? "wds" : other) : mode;
+		}
+	}
+
 	
-	var wirelessMode= wirelessIsDisabled ? 'disabled' : cfgMode;
+	var p = ap != '' && other != '' ? '+' : '';
+	var wirelessMode = ap + p + other;
+	var wirelessMode= wirelessMode == '' ? 'disabled' : wirelessMode;
 	return wirelessMode;
 }
 
