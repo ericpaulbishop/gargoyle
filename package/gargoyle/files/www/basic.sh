@@ -42,10 +42,13 @@
 
 	if [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var wirelessDriver=\"broadcom\";"
+		echo "var wifiN = false;"
 	elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 		echo "var wirelessDriver=\"mac80211\";"
 		echo 'var mac80211Channels = [];'
 		echo "var nextCh=[];"
+		ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev.null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
+		if [ -n "$ncapab" ] ; then echo "var wifiN = true ;" ; else echo "var wifiN = false ;" ; fi
 		
 		#test for dual band
 		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
@@ -99,8 +102,10 @@
 
 	elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 		echo "var wirelessDriver=\"atheros\";"
+		echo "var wifiN = false;"
 	else
 		echo "var wirelessDriver=\"\";"
+		echo "var wifiN = false;"
 	fi
 
 	cur_date_seconds=$(date +%s)
