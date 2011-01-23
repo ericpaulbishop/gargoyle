@@ -604,7 +604,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (bootpnat && iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (bootpnat && (unsigned char)iph->protocol == (unsigned char)IPPROTO_UDP && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if(uh->dest == htons(67) || uh->dest == htons(68) )
@@ -746,7 +746,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if ( (unsigned char)iph->protocol == (unsigned char)IPPROTO_UDP && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if (uh->dest == htons(67) || uh->dest == htons(68) )
@@ -1281,7 +1281,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (bootpnat && iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if (bootpnat && (unsigned char)iph->protocol == (unsigned char)IPPROTO_UDP && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if(uh->dest == htons(67) || uh->dest == htons(68) )
@@ -1423,7 +1423,7 @@ Index: b/target/linux/generic-2.6/patches-2.6.30/701-arpnat.patch
 ++		{
 ++			struct iphdr *iph = ip_hdr(pskb);
 ++			struct udphdr *uh = NULL;
-++			if (iph->protocol == (unsigned char)htons(IPPROTO_UDP) && !(iph->frag_off & htons(IP_OFFSET)))
+++			if ( (unsigned char)iph->protocol == (unsigned char)IPPROTO_UDP && !(iph->frag_off & htons(IP_OFFSET)))
 ++			{
 ++				uh = (struct udphdr*)((u_int32_t *)iph + iph->ihl);
 ++				if (uh->dest == htons(67) || uh->dest == htons(68) )
