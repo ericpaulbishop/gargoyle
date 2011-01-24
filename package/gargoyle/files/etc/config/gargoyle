@@ -32,6 +32,7 @@ config display display
 	option connection_dhcp		'DHCP'
 	option connection_basic		'Basic'
 	option connection_routing	'Routing'
+	option connection_wol		'Wake on LAN'
 	option system			'System'
 	option system_access		'Router Access'
 	option system_ident		'Identification'
@@ -61,6 +62,7 @@ config scripts scripts
 	option connection_basic		'basic.sh'
 	option connection_dhcp		'dhcp.sh'
 	option connection_routing	'routing.sh'
+	option connection_wol		'wol.sh'
 	option system_access		'access.sh'
 	option system_ident		'identification.sh'
 	option system_time		'time.sh'
@@ -91,6 +93,7 @@ config 200 connection
 	option dhcp	'200'
 	option dyndns	'300'
 	option routing	'400'
+	option wol	'500'
 
 config 400 system
 	option access	'100'

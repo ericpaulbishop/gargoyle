@@ -126,30 +126,6 @@ function createEditButton()
 	return editButton;
 }
 
-function createWakeUpButton()
-{
-        var WakeUpButton = createInput("button");
-        WakeUpButton.value = "WakeUp";
-        WakeUpButton.className="default_button";
-        WakeUpButton.onclick = wakeHost;
-        return WakeUpButton;
-}
-
-function wakeHost() {
-
-	getRow=this.parentNode.parentNode;
-
-	var mac = getRow.childNodes[1].firstChild.data;
-	var wakeHostCommand = [ "wol -i " + bcastip+" "+ mac ];
-
-	commands = wakeHostCommand.join("\n");
-	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
-
-        alert("Wakeup request sent");
-
-}
-
 function resetData()
 {
 	dhcpEnabled = uciOriginal.get("dhcp", "lan", "ignore") == "1" ? false : true;
@@ -157,7 +133,6 @@ function resetData()
 	for(rowIndex=0; rowIndex < staticIpTableData.length ; rowIndex++)
 	{
 		var rowData = staticIpTableData[rowIndex];
-		rowData.push(createWakeUpButton());
 		rowData.push(createEditButton());
 		staticIpTableData[rowIndex] = rowData;
 	}
@@ -299,7 +274,6 @@ function addStatic()
 			values.push(v);
 			document.getElementById(ids[idIndex]).value = "";
 		}
-		values.push(createWakeUpButton());
 		values.push(createEditButton());
 		staticIpTable = document.getElementById('staticip_table_container').firstChild;
 		addTableRow(staticIpTable,values, true, false, resetHostnameMacList);

@@ -1,6 +1,4 @@
 
-
-
 function initWolTable()
 {
 	var dataList = [];
@@ -85,7 +83,7 @@ function wakeHost() {
 
 	getRow=this.parentNode.parentNode;
 
-	var mac = getRow.childNodes[1].firstChild.data;
+	var mac = getRow.childNodes[2].firstChild.data;
 	var wakeHostCommand = [ "wol -i " + bcastIp + " " + mac ];
 
 	commands = wakeHostCommand.join("\n");
