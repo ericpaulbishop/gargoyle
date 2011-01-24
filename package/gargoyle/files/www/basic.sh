@@ -143,6 +143,8 @@ else
 
 var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211" ? 20 : 18);
 
+//not perfect, but it this will do for now since only mac80211 drivers are ath9k and b43
+var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ; 
 
 //-->
 </script>

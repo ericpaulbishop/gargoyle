@@ -561,7 +561,7 @@ function saveChanges()
 				if(encryption != "none") { uci.set("wireless", "cfg2", "key", key); }
 				preCommands = preCommands + "\nuci set wireless.cfg2=wifi-iface\n";
 			       	
-				if(getSelectedValue("bridge_repeater") == "enabled")
+				if(getSelectedValue("bridge_repeater") == "enabled" && document.getElementById("bridge_repeater_container").style.display != "none")
 				{
 					var apSsid = document.getElementById("bridge_broadcast_ssid").value;
 					uci.set("wireless", "cfg3", "", "wifi-iface");
@@ -878,13 +878,14 @@ function setGlobalVisibility()
 		selectedVisibility=wirelessWanVisibility;
 
 		currentMode=getSelectedValue('wifi_mode');
-		setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'Client+AP']);
-	       	if(currentMode.match(/ap/))
+		if(!isb43)
 		{
-			setSelectedValue("wifi_mode", 'ap+sta');
+			setAllowableSelections('wifi_mode', ['sta', 'ap+sta'], ['Client', 'Client+AP']);
+			setSelectedValue("wifi_mode", currentMode.match(/ap/) ? "ap+sta" : "sta");
 		}
 		else
 		{
+			setAllowableSelections('wifi_mode', ['sta'], ['Client']);
 			setSelectedValue("wifi_mode", 'sta');
 		}
 	}
@@ -1076,7 +1077,7 @@ function setBridgeVisibility()
 		document.getElementById("bridge_wep_container").style.display  = brenc.match(/wep/) || brenc.match(/WEP/) ? "block" : "none";
 		//alert("fixed_display=" + document.getElementById("bridge_fixed_encryption_container").style.display + "brenc = " + brenc);
 
-		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" ? "block" : "none";
+		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" && (!isb43) ? "block" : "none";
 		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
 		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
 		document.getElementById("bridge_fixed_encryption_container").style.display="none";
