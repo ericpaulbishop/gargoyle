@@ -19,7 +19,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo "var wirelessDriver=\"mac80211\";"
 	ap=$( iwconfig 2>/dev/null | grep "Mode:Master" | awk ' { print $1 ; } ' | head -n 1 )
 	if [ -n "$ap" ] ; then
-		iw $ap station dump | grep "^Station" | awk ' { print "wifiLines.push(\""$2"\");" ; } '
+		iw $ap station dump | awk ' /^Station/ { printf "wifiLines.push(\""$2" " ;} /signal/ {printf ""$2" "} /bitrate/ {print ""$3"\");"}'
 	fi
 elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 	echo "var wirelessDriver=\"atheros\";"

@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -84,7 +84,7 @@ function resetVariables()
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
-		var columnNames=["Hostname", "Host IP", "Host MAC"];
+		var columnNames=["Hostname", "Host IP", "Host MAC", "Bitrate", "Signal" ];
 		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
@@ -196,11 +196,34 @@ function parseWifi(arpHash, wirelessDriver, lines)
 	for(lineIndex=0; lineIndex < lines.length; lineIndex++)
 	{
 		var nextLine = lines[lineIndex];
-		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = wirelessDriver == "broadcom" ? splitLine[1].toUpperCase() : splitLine[0].toUpperCase();
-		var ip = arpHash[ mac ] == null ? "unknown" : arpHash[ mac ] ;
+		var whost = nextLine.split(/[\t ]+/);
+
+		//bcm=1, madwifi=2, mac80211=3 
+		var macBitSig =	[
+				[whost[1], "0", "0"], 
+		    		[whost[0], whost[3], whost[5]], 
+				[whost[0], whost[2], whost[1]] 
+				];
+		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] ); 
+		mbs[0] = (mbs[0]).toUpperCase();
+	
+		var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; } 
+
+		var sig = parseInt(mbs[2]);
+		var color = sig < -80  ? "#AA0000" : "";
+		color = sig >= -80 && sig < -70 ? "#AA" + toHexTwo(170*((sig+80)/10.0)) + "00" : color;
+		color = sig >= -70 && sig < -60 ? "#" + toHexTwo(170-(170*(sig+70)/10.0)) + "AA00" : color;
+		color = sig >= -60 ? "#00AA00" : color;
+		var sigSpan = document.createElement("span");
+		sigSpan.appendChild(document.createTextNode(""+mbs[2]));
+		sigSpan.style.color = color;
+		mbs[2] = sigSpan;
+
+		
+
+		var ip = arpHash[ mbs[0] ] == null ? "unknown" : arpHash[ mbs[0] ] ;
 		var hostname = getHostname(ip);
-		wifiTableData.push( [ hostname, ip, mac ] );
+		wifiTableData.push( [ hostname, ip, mbs[0], mbs[1], mbs[2] ] );
 	}
 	sort2dStrArr(wifiTableData, 1);
 	return wifiTableData;
