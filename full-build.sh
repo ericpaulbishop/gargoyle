@@ -58,6 +58,17 @@ ln -s $top_dir/downloaded $openwrt_src_dir/dl
 
 for target in $targets ; do
 
+	#if user tries to build brcm-2.4 warn them that this has been removed in favor of brcm47xx and build that instead
+	if [ "$target" = "brcm-2.4" ] || [ "$target" = "brcm" ] ; then
+		echo ""
+		echo ""	
+		echo "*************************************************************************"
+		echo "  WARNING: brcm-2.4 target has been deprecated in favor of newer brcm47xx"
+		echo "           Setting target to brcm47xx"
+		echo "*************************************************************************"
+		target="brcm47xx"
+	fi
+
 	echo ""
 	echo ""	
 	echo "**************************************************************"

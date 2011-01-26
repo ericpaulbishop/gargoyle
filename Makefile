@@ -18,6 +18,20 @@ all:
 		done ;\
 	)
 
+brcm:brcm-2.4
+brcm-2.4: 
+	( \
+		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+			rm -rf backfire-src ;\
+		fi ;\
+		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" ;\
+		else \
+			sh rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" ;\
+		fi ;\
+	)
+
+
 %: targets/%
 	( \
 		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
