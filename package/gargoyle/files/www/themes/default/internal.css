@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -1231,7 +1231,17 @@ td.wifi_table_column_3
 	border-top:1px solid black;
 	border-bottom:1px solid black;
 }
-
+td.wifi_table_column_4
+{
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.wifi_table_column_5
+{
+	border-right:1px solid black;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
 
 td.active_table_column_1
 {
