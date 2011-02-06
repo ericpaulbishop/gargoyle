@@ -16,7 +16,7 @@
 +	for eth in $eths ; do
 +		if [ $if_num -gt 0 ] && [ $if_num = $wan_if_num ] ; then
 +			uci set network.wan="interface"
-+			uci set network.wan.iname="$eth"
++			uci set network.wan.ifname="$eth"
 +			uci set network.wan.proto="dhcp"
 +		else
 +			if [ $if_num = 0 ] ; then

@@ -26,7 +26,6 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	var msg  = document.getElementById("wait_msg");
 	if (!enabled)
 	{
-
 		var totalHeight="100%";
 		var totalWidth="100%";
 		if(document.body.parentNode.scrollHeight)
