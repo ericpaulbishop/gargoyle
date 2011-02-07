@@ -1,0 +1,949 @@
+--- /dev/null	2011-01-19 17:47:02.897520003 -0500
++++ b/target/linux/brcm47xx/patches-2.6.32/966-sflash.patch	2011-02-06 22:21:38.397337003 -0500
+@@ -0,0 +1,946 @@
++--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Kconfig	2010-12-09 16:29:45.000000000 -0500
+++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Kconfig	2011-01-31 17:37:49.487857999 -0500
++@@ -3,6 +3,10 @@
++ menu "Self-contained MTD device drivers"
++ 	depends on MTD!=n
++ 
+++config MTD_SFLASH
+++	bool "Broadcom Chipcommon Serial Flash support"
+++	default y
+++
++ config MTD_PMC551
++ 	tristate "Ramix PMC551 PCI Mezzanine RAM card support"
++ 	depends on PCI
++--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Makefile	2010-12-09 16:29:45.000000000 -0500
+++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Makefile	2011-01-31 17:33:36.687858001 -0500
++@@ -2,6 +2,7 @@
++ # linux/drivers/devices/Makefile
++ #
++ 
+++obj-y   += sflash.o
++ obj-$(CONFIG_MTD_DOC2000)	+= doc2000.o
++ obj-$(CONFIG_MTD_DOC2001)	+= doc2001.o
++ obj-$(CONFIG_MTD_DOC2001PLUS)	+= doc2001plus.o
++--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/sflash.c	1969-12-31 19:00:00.000000000 -0500
+++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/sflash.c	2011-02-02 14:29:42.878199010 -0500
++@@ -0,0 +1,777 @@
+++/*
+++ * Broadcom SiliconBackplane chipcommon serial flash interface
+++ *
+++ * Copyright 2007, Broadcom Corporation
+++ * All Rights Reserved.
+++ * 
+++ * THIS SOFTWARE IS OFFERED "AS IS", AND BROADCOM GRANTS NO WARRANTIES OF ANY
+++ * KIND, EXPRESS OR IMPLIED, BY STATUTE, COMMUNICATION OR OTHERWISE. BROADCOM
+++ * SPECIFICALLY DISCLAIMS ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+++ * FOR A SPECIFIC PURPOSE OR NONINFRINGEMENT CONCERNING THIS SOFTWARE.
+++ *
+++ */
+++
+++#include <linux/module.h>
+++#include <linux/slab.h>
+++#include <linux/ioport.h>
+++#include <linux/mtd/compatmac.h>
+++#include <linux/mtd/mtd.h>
+++#include <linux/mtd/partitions.h>
+++#include <linux/errno.h>
+++#include <linux/pci.h>
+++#include <linux/delay.h>
+++#include <asm/io.h>
+++#include <linux/ssb/ssb.h>
+++#include <linux/ssb/ssb_embedded.h>
+++#include <linux/jiffies.h>
+++#include <linux/sched.h>
+++
+++#define BCM4712_CHIP_ID         0x4712          /* 4712 chipcommon chipid */
+++
+++/* flashcontrol action+opcodes for ST flashes */
+++#define SFLASH_ST_CSA           0x1000          /* Keep chip select asserted */
+++
+++#ifndef MIN
+++#define MIN(a, b)               (((a) < (b))?(a):(b))
+++#endif /* MIN */
+++
+++void osl_delay(uint usec);
+++/*
+++ *  * Spin at most 'us' microseconds while 'exp' is true.
+++ *   * Caller should explicitly test 'exp' when this completes
+++ *    * and take appropriate error action if 'exp' is still true.
+++ *     */
+++#define SPINWAIT(exp, us) { \
+++        uint countdown = (us) + 9; \
+++        while ((exp) && (countdown >= 10)) {\
+++                osl_delay(10); \
+++                countdown -= 10; \
+++        } \
+++}
+++
+++/* Write len bytes starting at offset into buf. Returns number of bytes
+++ * written. Caller should poll for completion.
+++ */
+++#define	ST_RETRIES	3
+++
+++#define	GET_BYTE(ptr)	(*(u8 *)((u32)(ptr) ^ 7))
+++
+++extern struct ssb_bus ssb_bcm47xx;
+++#ifdef CONFIG_MTD_PARTITIONS
+++extern struct mtd_partition * init_mtd_partitions(struct mtd_info *mtd, size_t size);
+++#endif
+++
+++struct sflash_mtd {
+++	struct semaphore lock;
+++	struct mtd_info mtd;
+++	struct mtd_erase_region_info region;
+++};
+++
+++struct sflash {
+++   u32 blocksize;      /* Block size */
+++   u32 numblocks;      /* Number of blocks */
+++   u32 type;      /* Type */
+++   u32 size;     /* Total size in bytes */
+++};
+++
+++static struct sflash wnr3500l_sflash;
+++
+++/* Private global state */
+++static struct sflash_mtd sflash;
+++
+++#define  OSL_UNCACHED(va)  ((void *)KSEG1ADDR(va))
+++#define  OSL_CACHED(va)    ((void *)KSEG0ADDR(va))
+++
+++typedef unsigned long long int uintptr;
+++
+++/* Issue a serial flash command */
+++static inline void sflash_cmd(u32 opcode)
+++{
+++	chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHCTL, SSB_CHIPCO_FLASHCTL_START | opcode);
+++	while ((chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHCTL) & SSB_CHIPCO_FLASHCTL_BUSY));
+++}
+++
+++int sflash_read(u32 offset, u32 len, unsigned char *buf)
+++{
+++	u8 *from, *to;
+++	int cnt, i;
+++
+++	if (!len)
+++		return 0;
+++
+++	if ((offset + len) > wnr3500l_sflash.size)
+++		return -22;
+++
+++	if ((len >= 4) && (offset & 3))
+++		cnt = 4 - (offset & 3);
+++	else if ((len >= 4) && ((uintptr)buf & 3))
+++		cnt = 4 - ((uintptr)buf & 3);
+++	else
+++		cnt = len;
+++
+++	/*
+++	if (ssb_bcm47xx.chipco.dev->id.revision == 12)
+++		from = (u8 *)OSL_UNCACHED(SSB_FLASH2 + offset);
+++	else
+++		from = (u8 *)OSL_CACHED(SSB_FLASH2 + offset);
+++	*/
+++	/*printk("doing sflash_read, len=%d\n", len); */
+++
+++
+++	from = (u8 *)OSL_UNCACHED(SSB_FLASH2 + offset);
+++	to = (u8 *)buf;
+++
+++	if (cnt < 4) {
+++		for (i = 0; i < cnt; i ++) {
+++			/* Cannot use R_REG because in bigendian that will
+++			 * xor the address and we don't want that here.
+++			 */
+++			*to = *from;
+++			from ++;
+++			to ++;
+++		}
+++		return cnt;
+++	}
+++
+++	while (cnt >= 4) {
+++		*(u32 *)to = *(u32 *)from;
+++		from += 4;
+++		to += 4;
+++		cnt -= 4;
+++	}
+++
+++	return (len - cnt);
+++}
+++
+++/* Poll for command completion. Returns zero when complete. */
+++int sflash_poll(u32 offset)
+++{
+++	u32 val;
+++
+++	if (offset >= wnr3500l_sflash.size)
+++		return -22;
+++
+++	switch (wnr3500l_sflash.type) {
+++	case SSB_CHIPCO_FLASHT_STSER:
+++		/* Check for ST Write In Progress bit */
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_RDSR);
+++		val = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA) & SSB_CHIPCO_FLASHSTA_ST_WIP;
+++		return val;
+++	case SSB_CHIPCO_FLASHT_ATSER:
+++		/* Check for Atmel Ready bit */
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_STATUS);
+++		val = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA) & SSB_CHIPCO_FLASHSTA_AT_READY;
+++		return !val;
+++	}
+++
+++	return 0;
+++}
+++
+++void osl_delay(uint usec)
+++{
+++	uint d;
+++
+++	while (usec > 0) {
+++		d = MIN(usec, 1000);
+++		udelay(d);
+++		usec -= d;
+++	}
+++}
+++
+++int sflash_write(u32 offset, u32 length, const unsigned char *buffer)
+++{
+++	struct sflash *sfl;
+++	u32 off = offset, len = length;
+++	const u8 *buf = buffer;
+++	u8 data;
+++	int ret = 0, ntry = 0;
+++	bool is4712b0;
+++	u32 page, byte, mask;
+++
+++	if (!len)
+++		return 0;
+++
+++	sfl = &wnr3500l_sflash;
+++	if ((off + len) > sfl->size)
+++		return -22;
+++
+++	switch (sfl->type) {
+++	case SSB_CHIPCO_FLASHT_STSER:
+++		is4712b0 = (ssb_bcm47xx.chip_id == BCM4712_CHIP_ID) && (ssb_bcm47xx.chipco.dev->id.revision == 3);
+++		/* Enable writes */
+++
+++retry:
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_WREN);
+++		off = offset;
+++		len = length;
+++		buf = buffer;
+++		ntry++;
+++		if (is4712b0) {
+++			mask = 1 << 14;
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, off);
+++			data = GET_BYTE(buf);
+++			buf++;
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA, data);
+++			/* Set chip select */
+++			chipco_set32(&ssb_bcm47xx.chipco, SSB_CHIPCO_GPIOOUT, mask);
+++			/* Issue a page program with the first byte */
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_PP);
+++			ret = 1;
+++			off++;
+++			len--;
+++			while (len > 0) {
+++				if ((off & 255) == 0) {
+++					/* Page boundary, drop cs and return */
+++					chipco_mask32(&ssb_bcm47xx.chipco, SSB_CHIPCO_GPIOOUT, ~mask);
+++					osl_delay(1);
+++					if (!sflash_poll(off)) {
+++						/* Flash rejected command */
+++						if (ntry <= ST_RETRIES)
+++							goto retry;
+++						else
+++							return -11;
+++					}
+++					return ret;
+++				} else {
+++					/* Write single byte */
+++					data = GET_BYTE(buf);
+++					buf++;
+++					sflash_cmd(data);
+++				}
+++				ret++;
+++				off++;
+++				len--;
+++			}
+++			/* All done, drop cs */
+++			chipco_mask32(&ssb_bcm47xx.chipco, SSB_CHIPCO_GPIOOUT, ~mask);
+++			osl_delay(1);
+++			if (!sflash_poll(off)) {
+++				/* Flash rejected command */
+++				if (ntry <= ST_RETRIES)
+++					goto retry;
+++				else
+++					return -12;
+++			}
+++		} else if (ssb_bcm47xx.chipco.dev->id.revision >= 20) {
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, off);
+++			data = GET_BYTE(buf);
+++			buf++;
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA, data);
+++			/* Issue a page program with CSA bit set */
+++			sflash_cmd(SFLASH_ST_CSA | SSB_CHIPCO_FLASHCTL_ST_PP);
+++			ret = 1;
+++			off++;
+++			len--;
+++			while (len > 0) {
+++				if ((off & 255) == 0) {
+++					/* Page boundary, poll droping cs and return */
+++					chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHCTL, 0);
+++					osl_delay(1);
+++					if (sflash_poll(off) == 0) {
+++						/* Flash rejected command */
+++						if (ntry <= ST_RETRIES)
+++							goto retry;
+++						else
+++							return -11;
+++					}
+++					return ret;
+++				} else {
+++					/* Write single byte */
+++					data = GET_BYTE(buf);
+++					buf++;
+++					sflash_cmd(SFLASH_ST_CSA | data);
+++				}
+++				ret++;
+++				off++;
+++				len--;
+++			}
+++			/* All done, drop cs & poll */
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHCTL, 0);
+++			osl_delay(1);
+++			if (sflash_poll(off) == 0) {
+++				/* Flash rejected command */
+++				if (ntry <= ST_RETRIES)
+++					goto retry;
+++				else
+++					return -12;
+++			}
+++		} else {
+++			ret = 1;
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, off);
+++			data = GET_BYTE(buf);
+++			buf++;
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA, data);
+++			/* Page program */
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_PP);
+++		}
+++		break;
+++	case SSB_CHIPCO_FLASHT_ATSER:
+++		mask = sfl->blocksize - 1;
+++		page = (off & ~mask) << 1;
+++		byte = off & mask;
+++		/* Read main memory page into buffer 1 */
+++		if (byte || (len < sfl->blocksize)) {
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, page);
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_BUF1_LOAD);
+++			/* 250 us for AT45DB321B */
+++			SPINWAIT(sflash_poll(off), 1000);
+++		}
+++		/* Write into buffer 1 */
+++		for (ret = 0; (ret < (int)len) && (byte < sfl->blocksize); ret++) {
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, byte++);
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA, *buf++);
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_BUF1_WRITE);
+++		}
+++		/* Write buffer 1 into main memory page */
+++		chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, page);
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_BUF1_PROGRAM);
+++		break;
+++	}
+++
+++	return ret;
+++}
+++
+++/* Erase a region. Returns number of bytes scheduled for erasure.
+++ * Caller should poll for completion.
+++ */
+++int sflash_erase(uint offset)
+++{
+++	struct sflash *sfl;
+++
+++	sfl = &wnr3500l_sflash;
+++	if (offset >= sfl->size)
+++		return -22;
+++
+++	switch (sfl->type) {
+++		case SSB_CHIPCO_FLASHT_STSER:
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_WREN);
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, offset);
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_SE);
+++			return sfl->blocksize;
+++		case SSB_CHIPCO_FLASHT_ATSER:
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, offset << 1);
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_PAGE_ERASE);
+++			return sfl->blocksize;
+++	}
+++
+++	return 0;
+++}
+++
+++/*
+++ * writes the appropriate range of flash, a NULL buf simply erases
+++ * the region of flash
+++ */
+++int sflash_commit(uint offset, uint len, const u8 *buf)
+++{
+++	struct sflash *sfl;
+++	u8 *block = NULL, *cur_ptr, *blk_ptr;
+++	uint blocksize = 0, mask, cur_offset, cur_length, cur_retlen, remainder;
+++	uint blk_offset, blk_len, copied;
+++	int bytes, ret = 0;
+++
+++	/* Check address range */
+++	if (len <= 0)
+++		return 0;
+++
+++	sfl = &wnr3500l_sflash;
+++	if ((offset + len) > sfl->size)
+++		return -1;
+++
+++	blocksize = sfl->blocksize;
+++	mask = blocksize - 1;
+++
+++	/* Allocate a block of mem */
+++	if (!(block = kmalloc(blocksize, GFP_ATOMIC)))
+++		return -1;
+++
+++	while (len) {
+++		/* Align offset */
+++		cur_offset = offset & ~mask;
+++		cur_length = blocksize;
+++		cur_ptr = block;
+++
+++		remainder = blocksize - (offset & mask);
+++		if (len < remainder)
+++			cur_retlen = len;
+++		else
+++			cur_retlen = remainder;
+++
+++		/* buf == NULL means erase only */
+++		if (buf) {
+++			/* Copy existing data into holding block if necessary */
+++			if ((offset & mask) || (len < blocksize)) {
+++				blk_offset = cur_offset;
+++				blk_len = cur_length;
+++				blk_ptr = cur_ptr;
+++
+++				/* Copy entire block */
+++				while (blk_len) {
+++					copied = sflash_read(blk_offset, blk_len, blk_ptr);
+++					blk_offset += copied;
+++					blk_len -= copied;
+++					blk_ptr += copied;
+++				}
+++			}
+++
+++			/* Copy input data into holding block */
+++			memcpy(cur_ptr + (offset & mask), buf, cur_retlen);
+++		}
+++
+++		/* Erase block */
+++		if ((ret = sflash_erase((uint) cur_offset)) < 0)
+++			goto done;
+++		while (sflash_poll((uint) cur_offset));
+++
+++		/* buf == NULL means erase only */
+++		if (!buf) {
+++			offset += cur_retlen;
+++			len -= cur_retlen;
+++			continue;
+++		}
+++
+++		/* Write holding block */
+++		while (cur_length > 0) {
+++			if ((bytes = sflash_write((uint) cur_offset, (uint) cur_length, (u8 *) cur_ptr)) < 0) {
+++				ret = bytes;
+++				goto done;
+++			}
+++			while (sflash_poll((uint) cur_offset));
+++			cur_offset += bytes;
+++			cur_length -= bytes;
+++			cur_ptr += bytes;
+++		}
+++
+++		offset += cur_retlen;
+++		len -= cur_retlen;
+++		buf += cur_retlen;
+++	}
+++
+++	ret = len;
+++done:
+++	if (block)
+++		kfree(block);
+++	return ret;
+++}
+++
+++static int sflash_mtd_poll(u32 offset, int timeout)
+++{
+++	int now = jiffies;
+++	int ret = 0;
+++
+++	for (;;) {
+++		if (!sflash_poll(offset)) {
+++			ret = 0;
+++			break;
+++		}
+++		if (time_after((unsigned long)jiffies, (unsigned long)(now + timeout))) {
+++			printk(KERN_ERR "%s(): timeout\n", __func__);
+++			ret = -ETIMEDOUT;
+++			break;
+++		}
+++		udelay(1);
+++	}
+++
+++	return ret;
+++}
+++
+++static int
+++sflash_mtd_read(struct mtd_info *mtd, loff_t from, size_t len, size_t *retlen, u_char *buf)
+++{
+++	struct sflash_mtd *sflash = (struct sflash_mtd *) mtd->priv;
+++	int bytes, ret = 0;
+++
+++	if (retlen)
+++		*retlen = 0;
+++
+++	/* Check address range */
+++	if (!len)
+++		return 0;
+++	if ((from + len) > mtd->size)
+++		return -EINVAL;
+++
+++	down(&sflash->lock);
+++
+++	while (len) {
+++		if ((bytes = sflash_read((u32) from, len, buf)) < 0) {
+++			ret = bytes;
+++			break;
+++		}
+++		from += (loff_t) bytes;
+++		len -= bytes;
+++		buf += bytes;
+++		if (retlen)
+++			*retlen += bytes;
+++	}
+++
+++	up(&sflash->lock);
+++
+++	return ret;
+++}
+++
+++static int
+++sflash_mtd_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen, const u_char *buf)
+++{
+++	struct sflash_mtd *sflash = (struct sflash_mtd *) mtd->priv;
+++	int bytes, ret = 0;
+++
+++	if (retlen)
+++		*retlen = 0;
+++
+++	/* Check address range */
+++	if (!len)
+++		return 0;
+++	if ((to + len) > mtd->size)
+++		return -EINVAL;
+++
+++	down(&sflash->lock);
+++
+++	while (len) {
+++		if ((bytes = sflash_write((u32) to, len, buf)) < 0) {
+++			ret = bytes;
+++			break;
+++		}
+++		if ((ret = sflash_mtd_poll((u32) to, HZ / 10)))
+++			break;
+++		to += (loff_t) bytes;
+++		len -= bytes;
+++		buf += bytes;
+++		if (retlen)
+++			*retlen += bytes;
+++	}
+++
+++	up(&sflash->lock);
+++
+++	return ret;
+++}
+++
+++static int
+++sflash_mtd_erase(struct mtd_info *mtd, struct erase_info *erase)
+++{
+++	struct sflash_mtd *sflash = (struct sflash_mtd *) mtd->priv;
+++	int i, j, ret = 0;
+++	u32 addr, len;
+++
+++	/* Check address range */
+++	if (!erase->len)
+++		return 0;
+++	if ((erase->addr + erase->len) > mtd->size)
+++		return -EINVAL;
+++
+++	addr = erase->addr;
+++	len = erase->len;
+++
+++	down(&sflash->lock);
+++
+++	/* Ensure that requested region is aligned */
+++	for (i = 0; i < mtd->numeraseregions; i++) {
+++		for (j = 0; j < mtd->eraseregions[i].numblocks; j++) {
+++			if (addr == mtd->eraseregions[i].offset + mtd->eraseregions[i].erasesize * j && len >= mtd->eraseregions[i].erasesize) {
+++				if ((ret = sflash_erase(addr)) < 0)
+++					break;
+++				if ((ret = sflash_mtd_poll(addr, 10 * HZ)))
+++					break;
+++				addr += mtd->eraseregions[i].erasesize;
+++				len -= mtd->eraseregions[i].erasesize;
+++			}
+++		}
+++		if (ret)
+++			break;
+++	}
+++
+++	up(&sflash->lock);
+++
+++	/* Set erase status */
+++	if (ret)
+++		erase->state = MTD_ERASE_FAILED;
+++	else 
+++		erase->state = MTD_ERASE_DONE;
+++
+++	/* Call erase callback */
+++	if (erase->callback)
+++		erase->callback(erase);
+++
+++	return ret;
+++}
+++
+++u32 sflash_init(void)
+++{
+++	u32 id, id2;
+++
+++	memset(&wnr3500l_sflash, 0, sizeof(wnr3500l_sflash));
+++
+++	wnr3500l_sflash.type = ssb_bcm47xx.chipco.capabilities & SSB_CHIPCO_CAP_FLASHT;
+++
+++	switch (wnr3500l_sflash.type) {
+++		case SSB_CHIPCO_FLASHT_STSER:
+++		/* Probe for ST chips */
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_DP);
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_RSIG);
+++		id = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA);
+++		switch (id) {
+++			case 0x11:
+++			/* ST M25P20 2 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 4;
+++			break;
+++		case 0x12:
+++			/* ST M25P40 4 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 8;
+++			break;
+++		case 0x13:
+++			/* ST M25P80 8 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 16;
+++			break;
+++		case 0x14:
+++			/* ST M25P16 16 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 32;
+++			break;
+++		case 0x15:
+++			/* ST M25P32 32 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 64;
+++			break;
+++		case 0x16:
+++			/* ST M25P64 64 Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 64 * 1024;
+++			wnr3500l_sflash.numblocks = 128;
+++			break;
+++		case 0xbf:
+++			chipco_write32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHADDR, 0x1);
+++			sflash_cmd(SSB_CHIPCO_FLASHCTL_ST_RSIG);
+++			id2 = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA);
+++			if (id2 == 0x44) {
+++				/* SST M25VF80 4 Mbit Serial Flash */
+++				wnr3500l_sflash.blocksize = 64 * 1024;
+++				wnr3500l_sflash.numblocks = 8;
+++			}
+++			break;
+++		}
+++		break;
+++
+++		case SSB_CHIPCO_FLASHT_ATSER:
+++		/* Probe for Atmel chips */
+++		sflash_cmd(SSB_CHIPCO_FLASHCTL_AT_STATUS);
+++		id = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA) & 0x3C;
+++		switch (id) {
+++			case 0xc:
+++			/* Atmel AT45DB011 1Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 256;
+++			wnr3500l_sflash.numblocks = 512;
+++			break;
+++			case 0x14:
+++			/* Atmel AT45DB021 2Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 256;
+++			wnr3500l_sflash.numblocks = 1024;
+++			break;
+++			case 0x1c:
+++			/* Atmel AT45DB041 4Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 256;
+++			wnr3500l_sflash.numblocks = 2048;
+++			break;
+++			case 0x24:
+++			/* Atmel AT45DB081 8Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 256;
+++			wnr3500l_sflash.numblocks = 4096;
+++			break;
+++			case 0x2c:
+++			/* Atmel AT45DB161 16Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 512;
+++			wnr3500l_sflash.numblocks = 4096;
+++			break;
+++			case 0x34:
+++			/* Atmel AT45DB321 32Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 512;
+++			wnr3500l_sflash.numblocks = 8192;
+++			break;
+++			case 0x3c:
+++			/* Atmel AT45DB642 64Mbit Serial Flash */
+++			wnr3500l_sflash.blocksize = 1024;
+++			wnr3500l_sflash.numblocks = 8192;
+++			break;
+++		}
+++		break;
+++	}
+++
+++	wnr3500l_sflash.size = wnr3500l_sflash.blocksize * wnr3500l_sflash.numblocks;
+++	return wnr3500l_sflash.size;
+++}
+++	
+++int __init sflash_mtd_init(void)
+++{
+++	int ret = 0;
+++	u32 i;
+++#ifdef CONFIG_MTD_PARTITIONS
+++	struct mtd_partition *parts;
+++#endif
+++
+++	memset(&sflash, 0, sizeof(struct sflash_mtd));
+++	init_MUTEX(&sflash.lock);
+++
+++	if (ssb_bcm47xx.mmio == NULL) {
+++		printk(KERN_ERR "sflash: error mapping registers\n");
+++		ret = -EIO;
+++		goto fail;
+++	}
+++
+++	/* Initialize serial flash access */
+++	if (0 == sflash_init()) {
+++		printk(KERN_ERR "%s(): found no supported devices\n", __func__);
+++		ret = -ENODEV;
+++		goto fail;
+++	}
+++	
+++	printk("in sflash init, id.revision = %d\n", ssb_bcm47xx.chipco.dev->id.revision);
+++
+++	/* Setup region info */
+++	sflash.region.offset = 0;
+++	sflash.region.erasesize = wnr3500l_sflash.blocksize;
+++	sflash.region.numblocks = wnr3500l_sflash.numblocks;
+++	if (sflash.region.erasesize > sflash.mtd.erasesize)
+++		sflash.mtd.erasesize = sflash.region.erasesize;
+++	sflash.mtd.size = wnr3500l_sflash.size;
+++	sflash.mtd.numeraseregions = 1;
+++
+++	/* Register with MTD */
+++	sflash.mtd.name = "sflash";
+++	sflash.mtd.type = MTD_NORFLASH;
+++	sflash.mtd.flags = MTD_CAP_NORFLASH;
+++	sflash.mtd.eraseregions = &sflash.region;
+++	sflash.mtd.erase = sflash_mtd_erase;
+++	sflash.mtd.read = sflash_mtd_read;
+++	sflash.mtd.write = sflash_mtd_write;
+++	sflash.mtd.writesize = 1;
+++	sflash.mtd.priv = &sflash;
+++   sflash.mtd.owner = THIS_MODULE;
+++
+++#ifdef CONFIG_MTD_PARTITIONS
+++	parts = init_mtd_partitions(&sflash.mtd, sflash.mtd.size);
+++	for (i = 0; parts[i].name; i++);
+++	ret = add_mtd_partitions(&sflash.mtd, parts, i);
+++#else
+++	ret = add_mtd_device(&sflash.mtd);
+++#endif
+++	if (ret) {
+++		printk(KERN_ERR "sflash: add_mtd failed\n");
+++		goto fail;
+++	}
+++
+++	return 0;
+++
+++ fail:
+++	return ret;
+++}
+++
+++void __exit sflash_mtd_exit(void)
+++{
+++#ifdef CONFIG_MTD_PARTITIONS
+++	del_mtd_partitions(&sflash.mtd);
+++#else
+++	del_mtd_device(&sflash.mtd);
+++#endif
+++}
+++
+++module_init(sflash_mtd_init);
+++module_exit(sflash_mtd_exit);
++--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/maps/bcm47xx-flash.c	2011-02-06 20:19:58.787337000 -0500
+++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/maps/bcm47xx-flash.c	2011-02-01 23:37:11.972247024 -0500
++@@ -53,6 +53,9 @@
++ #endif
++ #include <asm/io.h>
++ 
+++#include <linux/jffs2.h>
+++#include <linux/magic.h>
+++#include "../../../fs/squashfs/squashfs_fs.h"
++ 
++ #define TRX_MAGIC	0x30524448	/* "HDR0" */
++ #define TRX_VERSION	1
++@@ -103,6 +106,8 @@
++ 	phys: WINDOW_ADDR,
++ };
++ 
+++static int using_sflash;
+++
++ #ifdef CONFIG_MTD_PARTITIONS
++ 
++ static struct mtd_partition bcm47xx_parts[] = {
++@@ -273,8 +278,24 @@
++ 	if (mtd->read(mtd, part->offset, sizeof(buf), &len, buf) || len != sizeof(buf))
++ 		return 0;
++ 
++-	/* Move the fs outside of the trx */
++-	part->size = 0;
+++	/*
+++	if (using_sflash && ( *((__u32 *) buf) == SQUASHFS_MAGIC) ) 
+++	{
+++		printk("%s: Filesystem type: squashfs\n", mtd->name);
+++
+++		// Update the squashfs partition size based on the superblock info
+++		part->size = sb->bytes_used;
+++		len = part->offset + part->size;
+++		len +=  (mtd->erasesize - 1);
+++		len &= ~(mtd->erasesize - 1);
+++		part->size = len - part->offset;
+++	}
+++	else
+++	{
+++	*/
+++		part->size = 0;
+++	/*}*/
+++
++ 
++ 	if (trx.len != part->offset + part->size - off) {
++ 		/* Update the trx offsets and length */
++@@ -355,10 +376,65 @@
++ 	find_root(mtd,size,&bcm47xx_parts[2]);
++ 	bcm47xx_parts[2].size = size - bcm47xx_parts[2].offset - bcm47xx_parts[3].size;
++ 
+++	/*
+++	if(using_sflash)
+++	{
+++		bcm47xx_parts[2].size = bcm47xx_parts[2].size - 0xB0000;
+++	}
+++	*/
+++
++ 	return bcm47xx_parts;
++ }
++ #endif
++ 
+++
+++int test_sflash(void)
+++{
+++	int found = 0;
+++#ifdef CONFIG_SSB
+++	u32 type, id, id2;
+++       	type = ssb_bcm47xx.chipco.capabilities & SSB_CHIPCO_CAP_FLASHT;
+++	switch(type)
+++	{
+++		case SSB_CHIPCO_FLASHT_STSER:
+++		id = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA);
+++		switch(id)
+++		{
+++			case 0x11:
+++			case 0x12:
+++			case 0x13:
+++			case 0x14:
+++			case 0x15:
+++			case 0x16:
+++				found = 1;
+++				break;
+++			case 0xbf:
+++				id2 = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA);
+++				found = (id2 == 0x44) ? 1 : 0;
+++				break;
+++		}
+++		break;
+++		case SSB_CHIPCO_FLASHT_ATSER:
+++		id = chipco_read32(&ssb_bcm47xx.chipco, SSB_CHIPCO_FLASHDATA) & 0x3C;
+++		switch (id)
+++		{
+++			case 0xc:
+++			case 0x14:
+++			case 0x1c:
+++			case 0x24:
+++			case 0x2c:
+++			case 0x34:
+++			case 0x3c:
+++				found = 1;
+++				break;
+++		}
+++		break;
+++	}
+++
+++#endif
+++	return found;
+++}
+++
++ int __init init_bcm47xx_map(void)
++ {
++ #ifdef CONFIG_SSB
++@@ -372,6 +448,9 @@
++ #endif
++ 
++ #ifdef CONFIG_SSB
+++	using_sflash = test_sflash();
+++
+++
++ 	u32 window = mcore->flash_window;
++ 	u32 window_size = mcore->flash_window_size;
++ 
++@@ -385,6 +464,18 @@
++ 	bcm47xx_map.virt = ioremap_nocache(WINDOW_ADDR, WINDOW_SIZE);
++ #endif
++ 
+++	if (using_sflash && ssb_bcm47xx.chipco.dev != NULL) 
+++	{
+++		u32 fltype;
+++		fltype = ssb_bcm47xx.chipco.capabilities & SSB_CHIPCO_CAP_FLASHT;
+++   		if (fltype != SSB_CHIPCO_FLASHT_PARA)
+++		{
+++			printk("pflash: found no supported devices\n");
+++			ret = -ENODEV;
+++			goto fail;
+++		}
+++	}
+++
++ 	if (!bcm47xx_map.virt) {
++ 		printk("Failed to ioremap\n");
++ 		return -EIO;
