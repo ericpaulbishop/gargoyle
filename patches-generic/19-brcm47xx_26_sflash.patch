@@ -1,8 +1,8 @@
 --- /dev/null	2011-01-19 17:47:02.897520003 -0500
 +++ b/target/linux/brcm47xx/patches-2.6.32/966-sflash.patch	2011-02-06 22:21:38.397337003 -0500
 @@ -0,0 +1,946 @@
-+--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Kconfig	2010-12-09 16:29:45.000000000 -0500
-++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Kconfig	2011-01-31 17:37:49.487857999 -0500
++--- a/drivers/mtd/devices/Kconfig	2010-12-09 16:29:45.000000000 -0500
+++++ b/drivers/mtd/devices/Kconfig	2011-01-31 17:37:49.487857999 -0500
 +@@ -3,6 +3,10 @@
 + menu "Self-contained MTD device drivers"
 + 	depends on MTD!=n
@@ -14,8 +14,8 @@
 + config MTD_PMC551
 + 	tristate "Ramix PMC551 PCI Mezzanine RAM card support"
 + 	depends on PCI
-+--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Makefile	2010-12-09 16:29:45.000000000 -0500
-++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/Makefile	2011-01-31 17:33:36.687858001 -0500
++--- a/drivers/mtd/devices/Makefile	2010-12-09 16:29:45.000000000 -0500
+++++ b/drivers/mtd/devices/Makefile	2011-01-31 17:33:36.687858001 -0500
 +@@ -2,6 +2,7 @@
 + # linux/drivers/devices/Makefile
 + #
@@ -24,8 +24,8 @@
 + obj-$(CONFIG_MTD_DOC2000)	+= doc2000.o
 + obj-$(CONFIG_MTD_DOC2001)	+= doc2001.o
 + obj-$(CONFIG_MTD_DOC2001PLUS)	+= doc2001plus.o
-+--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/sflash.c	1969-12-31 19:00:00.000000000 -0500
-++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/devices/sflash.c	2011-02-02 14:29:42.878199010 -0500
++--- a/drivers/mtd/devices/sflash.c	1969-12-31 19:00:00.000000000 -0500
+++++ b/drivers/mtd/devices/sflash.c	2011-02-02 14:29:42.878199010 -0500
 +@@ -0,0 +1,777 @@
 ++/*
 ++ * Broadcom SiliconBackplane chipcommon serial flash interface
@@ -804,8 +804,8 @@
 ++
 ++module_init(sflash_mtd_init);
 ++module_exit(sflash_mtd_exit);
-+--- /home/eric/gargoyle/gargoyle/brcm47xx-src/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/maps/bcm47xx-flash.c	2011-02-06 20:19:58.787337000 -0500
-++++ /home/eric/gargoyle/gargoyle/brcm47xx-src-old3/build_dir/linux-brcm47xx/linux-2.6.32.27/drivers/mtd/maps/bcm47xx-flash.c	2011-02-01 23:37:11.972247024 -0500
++--- a/drivers/mtd/maps/bcm47xx-flash.c	2011-02-06 20:19:58.787337000 -0500
+++++ b/drivers/mtd/maps/bcm47xx-flash.c	2011-02-01 23:37:11.972247024 -0500
 +@@ -53,6 +53,9 @@
 + #endif
 + #include <asm/io.h>
