@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] ; then 
+	
+	#wait for basic initialization to complete
+	sleep 30
+	
+	#script automatically fails if file already exists	
+	/usr/lib/gargoyle/cache_basic_vars.sh 
+fi
+
+

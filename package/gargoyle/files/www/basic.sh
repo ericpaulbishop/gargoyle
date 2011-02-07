@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -12,101 +12,9 @@
 <script>
 <!--
 <?
-	# determine if this board is a bcm94704, for which the uci wan macaddr variable must ALWAYS be set
-	PART="$(grep "nvram" /proc/mtd | awk -F: '{print $1}')"
-	if [ -n "$PART" ] ; then
-		PREFIX=/dev/mtdblock
-		PART="${PART##mtd}"
-		[ -d /dev/mtdblock ] && PREFIX=/dev/mtdblock/ 
-		nvrampath="${PART:+$PREFIX$PART}"
-		boardtype=$(strings $nvrampath | grep boardtype | awk 'BEGIN {FS="="}; {print $2}')
-		boardnum=$(strings $nvrampath | grep boardnum | awk 'BEGIN {FS="="}; {print $2}')
-		#echo "boardnum = $boardnum, boardtype = $boardtype"
-		isbcm94704='false'
-		if [ "$boardtype" = "0x0472" ] || [ "$boardtype" = "0x042f" ] ; then
-			if [ "$boardnum" != "45" ] ; then
-				isbcm94704='true'
-			fi
-		fi
-	else
-		isbcm94704='false'
-	fi
-	echo "var isBcm94704 = $isbcm94704;"
-	echo "var allLanMacs = [];"
-	brctl showmacs br-lan | grep "yes" | awk ' { print "allLanMacs.push(\"" $2 "\");" } '
-
-
-
-	echo "var wifiDevG=uciWireless;"
-	echo "var wifiDevA=\"\";"
-
-	if [ -e /lib/wifi/broadcom.sh ] ; then
-		echo "var wirelessDriver=\"broadcom\";"
-		echo "var wifiN = false;"
-	elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
-		echo "var wirelessDriver=\"mac80211\";"
-		echo 'var mac80211Channels = [];'
-		echo "var nextCh=[];"
-		ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev.null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
-		if [ -n "$ncapab" ] ; then echo "var wifiN = true ;" ; else echo "var wifiN = false ;" ; fi
-		
-		#test for dual band
-		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
-			echo "var dualBandWireless=true;"
-			radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
-			rnum=0;
-			for r in $radios ; do
-				echo "nextCh = [];"
-				mode=$(uci get wireless.$r.hwmode)
-				[ "$mode" = "11na" ] &&  mode="11an"
-				if [ "$mode" = "11an" ] ; then
-					chId="A"
-					echo "var wifiDevA=\"$r\";"
-				else
-					mode="11bgn"
-					chId="G"
-					echo "var wifiDevG=\"$r\";"
-				fi
-
-
-				cur_if=$(iwconfig 2>/dev/null | grep "wlan" | grep "$mode" | awk ' { print $1 }' | head -n 1)
-				if [ -n "$cur_if" ] ; then
-					iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-				else		
-					iw phy phy$rnum interface add tmpmon type monitor
-					ifconfig tmpmon up
-					iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-					ifconfig tmpmon down
-					iw dev tmpmon del
-				fi
-				rnum=$(( $rnum+1 ))
-				echo "mac80211Channels[\"$chId\"] = nextCh ;"
-			done
-
-		else
-			echo "var dualBandWireless=false;"
-			#use iw to get available channels
-			cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
-			if [ -n "$cur_if" ] ; then
-				iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-			else		
-				iw phy phy0 interface add tmpmon type monitor
-				ifconfig tmpmon up
-				iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } '
-				ifconfig tmpmon down
-				iw dev tmpmon del
-			fi
-			echo "mac80211Channels[\"G\"] = nextCh ;"
-
-		fi
-
-	elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
-		echo "var wirelessDriver=\"atheros\";"
-		echo "var wifiN = false;"
-	else
-		echo "var wirelessDriver=\"\";"
-		echo "var wifiN = false;"
-	fi
+	#script dies if cache file exists and wifi driver defined
+	/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null
+	cat "/var/cached_basic_vars" 2>/dev/null
 
 	cur_date_seconds=$(date +%s)
 	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')
