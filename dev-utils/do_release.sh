@@ -15,12 +15,13 @@ ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMod
 cd images
 image_dirs=$(ls)
 for i in $image_dirs ; do
-	echo $i
+	if [ "$i" != "brcm-2.4" ] ; then
+		echo $i
 	
-	$scp_pub $i/* $user@gargoyle-router.com:gargoyle_site/downloads/images/$i/
-	$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/backfire/$i"
-	$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/backfire/$i/
-
+		$scp_pub $i/* $user@gargoyle-router.com:gargoyle_site/downloads/images/$i/
+		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/backfire/$i"
+		$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/backfire/$i/
+	fi
 done
 
 #upload latest code
