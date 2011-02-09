@@ -72,6 +72,8 @@ static struct semaphore userspace_lock;
 
 static string_map* id_map = NULL;
 
+static unsigned long iter = 0;
+
 typedef struct info_and_maps_struct
 {
 	struct ipt_bandwidth_info* info;
@@ -1130,10 +1132,13 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		}
 	}
 	
-	
-	struct timespec t1, t2, t3, t4, t5, t6, t7, t8, t9;
-
-	t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = current_kernel_time();
+	unsigned long ns[20];
+	int ni = 0;
+	for(ni=0; ni < 20 ; ni++)
+	{
+		ns[i] = 0;
+	}
+	ns[0] = (current_kernel_time()).tv_nsec;
 
 
 	
@@ -1154,7 +1159,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	check_for_backwards_time_shift(now);
 
 
-	t2 = current_kernel_time();
+	ns[1] = (current_kernel_time()).tv_nsec;
 
 	spin_lock_bh(&bandwidth_lock);
 	
@@ -1171,7 +1176,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
-	t3 = current_kernel_time();
+	ns[2] = (current_kernel_time()).tv_nsec;
+
 
 
 	if(info->reset_interval != BANDWIDTH_NEVER)
@@ -1193,7 +1199,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 		}
 	}
-	t4 = current_kernel_time();
+	ns[3] = (current_kernel_time()).tv_nsec;
 
 	if(info->type == BANDWIDTH_COMBINED)
 	{
@@ -1231,7 +1237,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	else
 	{
-		t5 = current_kernel_time();
+		ns[4] = (current_kernel_time()).tv_nsec;
 		int bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
@@ -1278,7 +1284,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				ip_map = iam->ip_map;
 			}	
 		}
-		t6 = current_kernel_time();
+		ns[5] = (current_kernel_time()).tv_nsec;
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
@@ -1302,10 +1308,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				bws[bw_ip_index] = oldval;
 			}
 		}
-		t7 = current_kernel_time();
+		ns[6] = (current_kernel_time()).tv_nsec;
 	}
 
-	t8 = current_kernel_time();
+	ns[7] = (current_kernel_time()).tv_nsec;
 
 	match_found = 0;
 	if(info->cmp == BANDWIDTH_GT)
@@ -1320,22 +1326,21 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
 		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
 	}
+	
+	
+	iter++;
 	spin_unlock_bh(&bandwidth_lock);
 
-	t9 = current_kernel_time();
+	ns[8] = (current_kernel_time()).tv_nsec;
 
-
-	printk("t1 = %10lds %10ldns \n", t1.tv_sec, t1.tv_nsec);
-	printk("t2 = %10lds %10ldns \n", t2.tv_sec, t2.tv_nsec);
-	printk("t3 = %10lds %10ldns \n", t3.tv_sec, t3.tv_nsec);
-	printk("t4 = %10lds %10ldns \n", t4.tv_sec, t4.tv_nsec);
-	printk("t5 = %10lds %10ldns \n", t5.tv_sec, t5.tv_nsec);
-	printk("t6 = %10lds %10ldns \n", t6.tv_sec, t6.tv_nsec);
-	printk("t7 = %10lds %10ldns \n", t7.tv_sec, t7.tv_nsec);
-	printk("t8 = %10lds %10ldns \n", t8.tv_sec, t8.tv_nsec);
-	printk("t9 = %10lds %10ldns \n", t9.tv_sec, t9.tv_nsec);
-	printk("\n\n");
-	
+	if(iter % 100 == 0)
+	{
+		for(ni=0; ni < 9; ni ++)
+		{
+			printk("t%d = %10ldns \n", (ni+1), ns[ni]);
+		}
+		printk("\n\n");
+	}
 	
 	
 
