@@ -28,6 +28,7 @@
 #include <linux/interrupt.h>
 #include <asm/uaccess.h>
 
+#include <linux/time.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) 
 #include <linux/semaphore.h> 
@@ -1130,6 +1131,9 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	
 	
+	struct timespec t1, t2, t3, t4, t5, t6, t7, t8, t9;
+
+	t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = current_kernel_time();
 
 
 	
@@ -1150,6 +1154,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	check_for_backwards_time_shift(now);
 
 
+	t2 = current_kernel_time();
 
 	spin_lock_bh(&bandwidth_lock);
 	
@@ -1166,6 +1171,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
+	t3 = current_kernel_time();
 
 
 	if(info->reset_interval != BANDWIDTH_NEVER)
@@ -1187,6 +1193,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 		}
 	}
+	t4 = current_kernel_time();
 
 	if(info->type == BANDWIDTH_COMBINED)
 	{
@@ -1224,6 +1231,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	else
 	{
+		t5 = current_kernel_time();
 		int bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
@@ -1270,6 +1278,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				ip_map = iam->ip_map;
 			}	
 		}
+		t6 = current_kernel_time();
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
@@ -1293,7 +1302,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				bws[bw_ip_index] = oldval;
 			}
 		}
+		t7 = current_kernel_time();
 	}
+
+	t8 = current_kernel_time();
 
 	match_found = 0;
 	if(info->cmp == BANDWIDTH_GT)
@@ -1309,6 +1321,24 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
 	}
 	spin_unlock_bh(&bandwidth_lock);
+
+	t9 = current_kernel_time();
+
+
+	printk("t1 = %10lds %10ldns \n", t1.tv_sec, t1.tv_nsec);
+	printk("t2 = %10lds %10ldns \n", t2.tv_sec, t2.tv_nsec);
+	printk("t3 = %10lds %10ldns \n", t3.tv_sec, t3.tv_nsec);
+	printk("t4 = %10lds %10ldns \n", t4.tv_sec, t4.tv_nsec);
+	printk("t5 = %10lds %10ldns \n", t5.tv_sec, t5.tv_nsec);
+	printk("t6 = %10lds %10ldns \n", t6.tv_sec, t6.tv_nsec);
+	printk("t7 = %10lds %10ldns \n", t7.tv_sec, t7.tv_nsec);
+	printk("t8 = %10lds %10ldns \n", t8.tv_sec, t8.tv_nsec);
+	printk("t9 = %10lds %10ldns \n", t9.tv_sec, t9.tv_nsec);
+	printk("\n\n");
+	
+	
+	
+
 
 	return match_found;
 }
