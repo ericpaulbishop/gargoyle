@@ -1111,7 +1111,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	#endif
 	
-	struct timeval test_time;
+	struct timespec test_time;
 	time_t now;
 	int match_found;
 
@@ -1144,9 +1144,11 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	 * number crunching so we shouldn't 
 	 * already be locked.
 	 */
-	do_gettimeofday(&test_time);
+	test_time=current_kernel_time();
 	now = test_time.tv_sec;
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	
+	
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
 
@@ -1560,7 +1562,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 {
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
-	struct timeval test_time;
+	struct timespec test_time;
 	char* buffer;
 	get_request query;
 	info_and_maps* iam;
@@ -1574,7 +1576,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
 
-	do_gettimeofday(&test_time);
+	test_time = current_kernel_time(); 
 	now = test_time.tv_sec;
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
@@ -1997,14 +1999,14 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 {
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
-	struct timeval test_time;
+	struct timespec test_time;
 	char* buffer;
 	set_header header;
 	info_and_maps* iam;
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
 	
-	do_gettimeofday(&test_time);
+	test_time=current_kernel_time();
 	now = test_time.tv_sec;
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
@@ -2198,9 +2200,9 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
-				struct timeval test_time;
+				struct timespec test_time;
 				time_t now;
-				do_gettimeofday(&test_time);
+				test_time=current_kernel_time();
 				now = test_time.tv_sec;
 				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 				info->previous_reset = now;
