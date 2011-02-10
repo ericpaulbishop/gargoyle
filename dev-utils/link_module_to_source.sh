@@ -24,18 +24,18 @@ extension=$(ls -d $src_dir/build*/lin*/iptables*/exten*/*$module_name.c 2>/dev/n
 
 if [ -n "$module" ] ; then
 	rm -rf "$module"
-	ln -s $current_dir/$module_name/module/ipt_$module_name.c "$module"
+	ln -s $current_dir/netfilter-match-modules/$module_name/module/ipt_$module_name.c "$module"
 fi
 if [ -n "$deps" ] ; then
 	rm -rf "$deps"
-	ln -s "$current_dir/$module_name/module/$module_name"_deps "$deps"
+	ln -s "$current_dir/netfilter-match-modules/$module_name/module/$module_name"_deps "$deps"
 fi
 if [ -n "$header" ] ; then
 	rm -rf "$header"
-	ln -s $current_dir/$module_name/header/ipt_$module_name.h "$header"
+	ln -s $current_dir/netfilter-match-modules/$module_name/header/ipt_$module_name.h "$header"
 fi
 if [ -n "$extension" ] ; then
 	rm -rf "$extension"
-	ln -s $current_dir/$module_name/extension/libipt_$module_name.c "$extension"
+	ln -s $current_dir/netfilter-match-modules/$module_name/extension/libipt_$module_name.c "$extension"
 fi
 

@@ -1136,9 +1136,9 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	int ni = 0;
 	for(ni=0; ni < 20 ; ni++)
 	{
-		ns[i] = 0;
+		ns[ni] = 0;
 	}
-	ns[0] = (current_kernel_time()).tv_nsec;
+	ns[0] = jiffies;
 
 
 	
@@ -1159,7 +1159,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	check_for_backwards_time_shift(now);
 
 
-	ns[1] = (current_kernel_time()).tv_nsec;
+	ns[1] = jiffies;
 
 	spin_lock_bh(&bandwidth_lock);
 	
@@ -1176,7 +1176,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
-	ns[2] = (current_kernel_time()).tv_nsec;
+	ns[2] = jiffies;
 
 
 
@@ -1199,7 +1199,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 		}
 	}
-	ns[3] = (current_kernel_time()).tv_nsec;
+	ns[3] = jiffies;
 
 	if(info->type == BANDWIDTH_COMBINED)
 	{
@@ -1237,7 +1237,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	else
 	{
-		ns[4] = (current_kernel_time()).tv_nsec;
+		ns[4] = jiffies;
 		int bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
@@ -1284,7 +1284,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				ip_map = iam->ip_map;
 			}	
 		}
-		ns[5] = (current_kernel_time()).tv_nsec;
+		ns[5] = jiffies;
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
@@ -1308,10 +1308,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				bws[bw_ip_index] = oldval;
 			}
 		}
-		ns[6] = (current_kernel_time()).tv_nsec;
+		ns[6] = jiffies;
 	}
 
-	ns[7] = (current_kernel_time()).tv_nsec;
+	ns[7] = jiffies;
 
 	match_found = 0;
 	if(info->cmp == BANDWIDTH_GT)
@@ -1331,7 +1331,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	iter++;
 	spin_unlock_bh(&bandwidth_lock);
 
-	ns[8] = (current_kernel_time()).tv_nsec;
+	ns[8] = jiffies;
 
 	if(iter % 100 == 0)
 	{
