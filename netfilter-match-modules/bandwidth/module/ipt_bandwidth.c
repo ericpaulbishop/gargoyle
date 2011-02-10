@@ -1132,14 +1132,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		}
 	}
 	
-	unsigned long ns[20];
-	int ni = 0;
-	for(ni=0; ni < 20 ; ni++)
-	{
-		ns[ni] = 0;
-	}
-	ns[0] = jiffies;
-
 
 	
 
@@ -1159,15 +1151,13 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	check_for_backwards_time_shift(now);
 
 
-	ns[1] = jiffies;
-
 	spin_lock_bh(&bandwidth_lock);
 	
 	if(is_check)
 	{
 		info_and_maps* check_iam;
 		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
-		check_iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+		check_iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 		if(check_iam == NULL)
 		{
 			spin_unlock_bh(&bandwidth_lock);
@@ -1176,7 +1166,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
-	ns[2] = jiffies;
 
 
 
@@ -1185,7 +1174,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		if(info->next_reset < now)
 		{
 			//do reset
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL) /* should never be null, but let's be sure */
 			{
 				handle_interval_reset(iam, now);
@@ -1199,13 +1188,12 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 		}
 	}
-	ns[3] = jiffies;
 
 	if(info->type == BANDWIDTH_COMBINED)
 	{
 		if(iam == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
@@ -1237,7 +1225,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	else
 	{
-		ns[4] = jiffies;
 		int bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
@@ -1278,13 +1265,12 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		
 		if(ip_map == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
 			}	
 		}
-		ns[5] = jiffies;
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
@@ -1308,10 +1294,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				bws[bw_ip_index] = oldval;
 			}
 		}
-		ns[6] = jiffies;
 	}
 
-	ns[7] = jiffies;
 
 	match_found = 0;
 	if(info->cmp == BANDWIDTH_GT)
@@ -1331,17 +1315,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	iter++;
 	spin_unlock_bh(&bandwidth_lock);
 
-	ns[8] = jiffies;
 
-	if(iter % 100 == 0)
-	{
-		for(ni=0; ni < 9; ni ++)
-		{
-			printk("t%d = %10ldns \n", (ni+1), ns[ni]);
-		}
-		printk("\n\n");
-	}
-	
 	
 
 
@@ -2199,6 +2173,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		}
 		*(info->ref_count) = 1;
 		info->non_const_self = info;
+		info->id_hash = sdbm_string_hash(info->id);
+
 		
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
