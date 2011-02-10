@@ -2173,7 +2173,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		}
 		*(info->ref_count) = 1;
 		info->non_const_self = info;
-		info->id_hash = sdbm_string_hash(info->id);
+		info->hashed_id = sdbm_string_hash(info->id);
 
 		
 		#ifdef BANDWIDTH_DEBUG

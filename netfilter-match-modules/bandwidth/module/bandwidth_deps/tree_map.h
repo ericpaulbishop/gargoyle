@@ -209,7 +209,7 @@ void* get_string_map_element(string_map* map, const char* key)
 	return get_string_map_element_with_hashed_key(map, hashed_key);
 }
 
-void* get_string_map_element_with_hashed_key(string_map* map, unsigned long hashed_key);
+void* get_string_map_element_with_hashed_key(string_map* map, unsigned long hashed_key)
 {
 	void* return_value =  get_long_map_element( &(map->lm), hashed_key);
 	if(return_value != NULL && map->store_keys)
