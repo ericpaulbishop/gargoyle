@@ -1147,7 +1147,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	/*test_time=current_kernel_time();
 	now = test_time.tv_sec;
 	*/
-	now = xtime.tv_sec;
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	
 	
@@ -1581,7 +1581,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	test_time = current_kernel_time(); 
 	now = test_time.tv_sec;
 	*/
-	now = xtime.tv_sec;
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
@@ -2013,7 +2013,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	test_time=current_kernel_time();
 	now = test_time.tv_sec;
 	*/
-	now = xtime.tv_sec;
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
@@ -2212,7 +2212,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				test_time=current_kernel_time();
 				now = test_time.tv_sec;
 				*/
-				now = xtime.tv_sec;
+				now = get_seconds();
 				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 				info->previous_reset = now;
 				if(info->next_reset == 0)
