@@ -189,7 +189,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 	if(plotType == "total")
 	{
-		match1 = graphLowRes ? "total" + graphTimeFrameIndex + "B" : "total" + graphTimeFrameIndex + "A";
+		match1 = graphLowRes ? "bdist" + graphTimeFrameIndex : "total" + graphTimeFrameIndex;
 	}
 	else if(plotType.match(/qos/))
 	{
@@ -476,18 +476,23 @@ function doUpdate()
 							}
 							monitorName = monitorName == null ? "" : monitorName;
 							
-							
+							var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
+							var selectedPlotType = getSelectedValue(plotTypeName);
 							var monitorData = monitorName == "" ? null : monitors[monitorName];
 							if(monitorData != null)
 							{
 								var selectedIp = "";
-								
+
+
 								//get list of available ips
 								var ipList = [];
 								var ip;
 								for (ip in monitorData)
 								{
-									ipList.push(ip);
+									if( (selectedPlotType == "total" && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									{
+										ipList.push(ip);
+									}
 								}
 								if(ipList.length > 0)
 								{
@@ -504,9 +509,8 @@ function doUpdate()
 									}
 
 									//select ip based on selected value in plot (or first available if none selected)
-									if(monitorName.match("bdist"))
+									if(monitorName.match("bdist") && selectedPlotType != "total")
 									{
-										var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
 										var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 										ip = getSelectedValue(plotIdName);
 										ip = ip == null ? "" : ip;
@@ -514,7 +518,7 @@ function doUpdate()
 										
 									
 										//if new ip list differs from allowable selections, update
-										if(getSelectedValue(plotTypeName) == "hostname")
+										if(selectedPlotType == "hostname")
 										{
 											setAllowableSelections(plotIdName, ipList, getHostnameList(ipList));
 										}
@@ -586,10 +590,9 @@ function doUpdate()
 
 								}
 							}
-							else if(monitorName.match("bdist") && monitorIndex < 3 )
+							else if(monitorName.match("bdist") && seletedPlotType != "total" && monitorIndex < 3 )
 							{
 								//monitor data null because no ips have been seen
-								var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
 								var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 								monitorList[monitorIndex] = ""
 								setSelectedValue(plotTypeName, "none");
