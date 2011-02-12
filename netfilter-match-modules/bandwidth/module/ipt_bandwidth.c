@@ -72,7 +72,6 @@ static struct semaphore userspace_lock;
 
 static string_map* id_map = NULL;
 
-static unsigned long iter = 0;
 
 typedef struct info_and_maps_struct
 {
@@ -1280,18 +1279,25 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			uint32_t bw_ip = bw_ips[bw_ip_index];
 			if(bw_ip != 0)
 			{
-				uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
+				uint64_t* oldval          = get_long_map_element(ip_map, (unsigned long)bw_ip);
+				uint64_t* combined_oldval = get_long_map_element(ip_map, 0);
+
 				if(oldval == NULL)
 				{
 					if(!is_check)
 					{
 						/* may return NULL on malloc failure but that's ok */
-						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len); 
+						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len);
+						if(combined_oldval == NULL)
+						{
+							combined_oldval = initialize_map_entries_for_ip(iam, 0, (uint64_t)skb->len);
+						}
 					}
 				}
 				else
 				{
-					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
+					*oldval          = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
+					*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
 				}
 				
 				/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
@@ -1316,7 +1322,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	
 	
-	iter++;
 	spin_unlock_bh(&bandwidth_lock);
 
 
