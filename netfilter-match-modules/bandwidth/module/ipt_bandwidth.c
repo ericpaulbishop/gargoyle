@@ -1274,30 +1274,35 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				ip_map = iam->ip_map;
 			}	
 		}
+		if(!is_check)
+		{
+			uint64_t* combined_oldval = get_long_map_element(ip_map, 0);
+			if(combined_oldval == NULL)
+			{
+				combined_oldval = initialize_map_entries_for_ip(iam, 0, (uint64_t)skb->len);
+			}
+			else
+			{
+				*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
+			}
+		}
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
 			uint32_t bw_ip = bw_ips[bw_ip_index];
 			if(bw_ip != 0)
 			{
-				uint64_t* oldval          = get_long_map_element(ip_map, (unsigned long)bw_ip);
-				uint64_t* combined_oldval = get_long_map_element(ip_map, 0);
-
+				uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
 				if(oldval == NULL)
 				{
 					if(!is_check)
 					{
 						/* may return NULL on malloc failure but that's ok */
 						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len);
-						if(combined_oldval == NULL)
-						{
-							combined_oldval = initialize_map_entries_for_ip(iam, 0, (uint64_t)skb->len);
-						}
 					}
 				}
 				else
 				{
-					*oldval          = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
-					*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
+					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
 				}
 				
 				/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
