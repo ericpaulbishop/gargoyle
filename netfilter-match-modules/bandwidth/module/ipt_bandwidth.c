@@ -28,6 +28,7 @@
 #include <linux/interrupt.h>
 #include <asm/uaccess.h>
 
+#include <linux/time.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) 
 #include <linux/semaphore.h> 
@@ -70,6 +71,7 @@ static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
 static struct semaphore userspace_lock;
 
 static string_map* id_map = NULL;
+
 
 typedef struct info_and_maps_struct
 {
@@ -1108,7 +1110,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	#endif
 	
-	struct timeval test_time;
+	struct timespec test_time;
 	time_t now;
 	int match_found;
 
@@ -1129,8 +1131,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		}
 	}
 	
-	
-
 
 	
 
@@ -1143,12 +1143,15 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	 * number crunching so we shouldn't 
 	 * already be locked.
 	 */
-	do_gettimeofday(&test_time);
+	/*test_time=current_kernel_time();
 	now = test_time.tv_sec;
+	*/
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	
+	
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
-
 
 
 	spin_lock_bh(&bandwidth_lock);
@@ -1157,7 +1160,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	{
 		info_and_maps* check_iam;
 		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
-		check_iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+		check_iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 		if(check_iam == NULL)
 		{
 			spin_unlock_bh(&bandwidth_lock);
@@ -1168,12 +1171,13 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 
 
 
+
 	if(info->reset_interval != BANDWIDTH_NEVER)
 	{
 		if(info->next_reset < now)
 		{
 			//do reset
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL) /* should never be null, but let's be sure */
 			{
 				handle_interval_reset(iam, now);
@@ -1192,7 +1196,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	{
 		if(iam == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
@@ -1264,11 +1268,23 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		
 		if(ip_map == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
 			}	
+		}
+		if(!is_check)
+		{
+			uint64_t* combined_oldval = get_long_map_element(ip_map, 0);
+			if(combined_oldval == NULL)
+			{
+				combined_oldval = initialize_map_entries_for_ip(iam, 0, (uint64_t)skb->len);
+			}
+			else
+			{
+				*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
+			}
 		}
 		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
 		{
@@ -1281,7 +1297,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 					if(!is_check)
 					{
 						/* may return NULL on malloc failure but that's ok */
-						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len); 
+						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len);
 					}
 				}
 				else
@@ -1294,6 +1310,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 		}
 	}
+
 
 	match_found = 0;
 	if(info->cmp == BANDWIDTH_GT)
@@ -1308,7 +1325,13 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
 		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
 	}
+	
+	
 	spin_unlock_bh(&bandwidth_lock);
+
+
+	
+
 
 	return match_found;
 }
@@ -1551,7 +1574,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 {
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
-	struct timeval test_time;
+	struct timespec test_time;
 	char* buffer;
 	get_request query;
 	info_and_maps* iam;
@@ -1564,9 +1587,11 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	uint64_t* reset_time;
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
-
-	do_gettimeofday(&test_time);
+	/*
+	test_time = current_kernel_time(); 
 	now = test_time.tv_sec;
+	*/
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
@@ -1988,15 +2013,17 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 {
 	/* check for timezone shift & adjust if necessary */
 	time_t now;
-	struct timeval test_time;
+	struct timespec test_time;
 	char* buffer;
 	set_header header;
 	info_and_maps* iam;
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
-	
-	do_gettimeofday(&test_time);
+	/*
+	test_time=current_kernel_time();
 	now = test_time.tv_sec;
+	*/
+	now = get_seconds();
 	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
@@ -2164,6 +2191,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		}
 		*(info->ref_count) = 1;
 		info->non_const_self = info;
+		info->hashed_id = sdbm_string_hash(info->id);
+
 		
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
@@ -2187,10 +2216,13 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
-				struct timeval test_time;
+				struct timespec test_time;
 				time_t now;
-				do_gettimeofday(&test_time);
+				/*
+				test_time=current_kernel_time();
 				now = test_time.tv_sec;
+				*/
+				now = get_seconds();
 				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 				info->previous_reset = now;
 				if(info->next_reset == 0)

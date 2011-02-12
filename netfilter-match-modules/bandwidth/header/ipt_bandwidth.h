@@ -95,7 +95,10 @@ struct ipt_bandwidth_info
 	uint32_t num_intervals_to_save;
 
 
+	unsigned long hashed_id;
 	struct ipt_bandwidth_info* non_const_self;
 	unsigned long* ref_count;
+
+
 };
 #endif /*_IPT_BANDWIDTH_H*/

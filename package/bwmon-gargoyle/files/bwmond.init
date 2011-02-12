@@ -171,13 +171,10 @@ start()
 		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 
 		
-		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"A-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-		iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total"$n"A-upload-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"B-download-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-		iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total"$n"B-upload-$bdist_interval-$bdist_num_intervals" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+		iptables -t $upload_table -A $upload_chain  -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
 
-		next_ids="total"$n"A-download-$total_interval-$total_num_intervals total"$n"A-upload-$total_interval-$total_num_intervals"
-		next_ids="$next_ids total"$n"B-download-$bdist_interval-$bdist_num_intervals total"$n"B-upload-$bdist_interval-$bdist_num_intervals" 
+		next_ids="total"$n"-download-$total_interval-$total_num_intervals total"$n"-upload-$total_interval-$total_num_intervals"
 		if [ -z "$ids" ] ; then
 			ids="$next_ids"
 		else
