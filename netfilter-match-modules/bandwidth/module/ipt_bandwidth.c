@@ -180,8 +180,10 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		/*oldest index in old history -- we iterate forward through old history using this index */
 		next_old_index = old_history->num_nodes == old_history->max_nodes ? (old_history->current_index+1) % old_history->max_nodes : 0;
 
+
 		/* if first time point is after current time, just completely re-initialize history, otherwise set first time point to old first time point */
 		(new_history->history_data)[ new_history->current_index ] = old_next_start < backwards_adjust_current_time ? (old_history->history_data)[next_old_index] : 0;
+		backwards_adjust_iam->info->previous_reset                = old_next_start < backwards_adjust_current_time ? old_next_start : backwards_adjust_current_time;
 
 
 		/* iterate through old history, rebuilding in new history*/
@@ -194,9 +196,14 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 				next_old_index++;
 				(new_history->history_data)[ new_history->current_index ] =  (old_history->history_data)[next_old_index];
 			}
+			backwards_adjust_iam->info->previous_reset = old_next_start; /*update previous_reset variable in bw_info as we iterate */
 			old_next_start = old_next_end;
 		}
+
+		/* update next_reset variable from previous_reset variable which we've already set */
+		backwards_adjust_iam->info->next_reset = get_next_reset_time(backwards_adjust_iam->info, backwards_adjust_iam->info->previous_reset, backwards_adjust_iam->info->previous_reset); 
 		
+
 		/* set old_history to be new_history */	
 		kfree(old_history->history_data);
 		old_history->history_data   = new_history->history_data;
