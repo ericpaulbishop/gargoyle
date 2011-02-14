@@ -173,9 +173,9 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 * last time the current time was set to the interval to which we just jumped back
 		 */
 
-		bw_history* new_history = initialize_history(history->max_nodes);
+		bw_history* new_history = initialize_history(old_history->max_nodes);
 		uint32_t next_old_index, next_new_index;
-		time_t old_next_start =  history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : history->first_start; /* first time point in old history */
+		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : old_history->first_start; /* first time point in old history */
 
 		/*oldest index in old history -- we iterate forward through old history using this index */
 		next_old_index = old_history->num_nodes == old_history->max_nodes ? (old_history->current_index+1) % old_history->max_nodes : 0;
