@@ -143,14 +143,84 @@ static time_t backwards_adjust_current_time = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
+	/*
 	time_t next_end;
 	uint32_t new_num_nodes;
 	uint32_t node_start_index;
 
 
-	bw_history* history = (bw_history*)value;
+		typedef struct history_struct
+		{
+			time_t first_start;
+			time_t first_end;
+			time_t last_end; // also beginning of current time frame 
+			uint32_t max_nodes;
+			uint32_t num_nodes;
+			uint32_t non_zero_nodes;
+			uint32_t current_index;
+			uint64_t* history_data;
+		} bw_history;	 
+	 */
+	bw_history* old_history = (bw_history*)value;
+	if(old_history->last_end < backwards_adjust_current_time)
+	{
+		return;
+	}
+	else
+	{
+		/* 
+		 * reconstruct new history without newest nodes, to represent data as it was 
+		 * last time the current time was set to the interval to which we just jumped back
+		 */
+
+		bw_history* new_history = initialize_history(history->max_nodes);
+		uint32_t next_old_index, next_new_index;
+		time_t old_next_start =  history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : history->first_start; /* first time point in old history */
+
+		/*oldest index in old history -- we iterate forward through old history using this index */
+		next_old_index = old_history->num_nodes == old_history->max_nodes ? (old_history->current_index+1) % old_history->max_nodes : 0;
+
+		/* if first time point is after current time, just completely re-initialize history, otherwise set first time point to old first time point */
+		(new_history->history_data)[ new_history->current_index ] = old_next_start < backwards_adjust_current_time ? (old_history->history_data)[next_old_index] : 0;
 
 
+		/* iterate through old history, rebuilding in new history*/
+		while( old_next_start < backwards_adjust_current_time )
+		{
+			time_t old_next_end = get_next_reset_time(backwards_adjust_iam->info, old_next_start, old_next_start); /* 2nd param = last reset, 3rd param = current time */
+			if(  old_next_end < backwards_adjust_current_time)
+			{
+				update_history(new_history, old_next_start, old_next_end, backwards_adjust_iam->info);
+				next_old_index++;
+				(new_history->history_data)[ new_history->current_index ] =  (old_history->history_data)[next_old_index];
+			}
+			old_next_start = old_next_end;
+		}
+		
+		/* set old_history to be new_history */	
+		kfree(old_history->history_data);
+		old_history->history_data   = new_history->history_data;
+		old_history->first_start    = new_history->first_start;
+		old_history->first_end      = new_history->first_end;
+		old_history->last_end       = new_history->last_end;
+		old_history->num_nodes      = new_history->num_nodes;
+		old_history->non_zero_nodes = new_history->non_zero_nodes;
+		old_history->current_index  = new_history->current_index;
+		set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(old_history->history_data + old_history->current_index) );
+
+
+		/* 
+		 * free new history  (which was just temporary) 
+		 * note that we don't need to free history_data from new_history
+		 * we freed the history_data from old history, and set that to the history_data from new_history
+		 * so, this cleanup has already been handled
+		 */
+		kfree(new_history);
+
+	}
+
+
+	/*
 	time_t next_start = history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : history->first_start;
 	if(next_start > backwards_adjust_current_time)
 	{
@@ -159,7 +229,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
 
 
-	new_num_nodes = 1; /* there's always at least one, since even when no updates have been performed we have current node */
+	new_num_nodes = 1; // there's always at least one, since even when no updates have been performed we have current node 
 	node_start_index = history->num_nodes == history->max_nodes ? (history->current_index+1) % history->max_nodes : 0;
 	
 	history->current_index = node_start_index;
@@ -199,7 +269,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	backwards_adjust_iam->info->previous_reset = next_start;
 	backwards_adjust_iam->info->next_reset = next_end;
 
-	/* zero positions that don't contain data */
+	// zero positions that don't contain data 
 	if(history->num_nodes < history->max_nodes)
 	{
 		uint32_t zero_index = (history->current_index + 1) % history->max_nodes;
@@ -209,9 +279,11 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			zero_index = (zero_index + 1) % history->max_nodes;
 		}
 	}
-
-	/* set value in ip_map to current index in history */
+	
+	
+	// set value in ip_map to current index in history 
 	set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(history->history_data + history->current_index) );
+	*/
 }
 static void adjust_id_for_backwards_time_shift(char* key, void* value)
 {
