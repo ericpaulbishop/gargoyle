@@ -143,24 +143,7 @@ static time_t backwards_adjust_current_time = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
-	/*
-	time_t next_end;
-	uint32_t new_num_nodes;
-	uint32_t node_start_index;
 
-
-		typedef struct history_struct
-		{
-			time_t first_start;
-			time_t first_end;
-			time_t last_end; // also beginning of current time frame 
-			uint32_t max_nodes;
-			uint32_t num_nodes;
-			uint32_t non_zero_nodes;
-			uint32_t current_index;
-			uint64_t* history_data;
-		} bw_history;	 
-	 */
 	bw_history* old_history = (bw_history*)value;
 	if(old_history->last_end < backwards_adjust_current_time)
 	{
@@ -172,15 +155,16 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 * reconstruct new history without newest nodes, to represent data as it was 
 		 * last time the current time was set to the interval to which we just jumped back
 		 */
-
+		uint32_t next_old_index;
+		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : old_history->first_start; /* first time point in old history */
 		bw_history* new_history = initialize_history(old_history->max_nodes);
 		if(new_history == NULL)
 		{
 			printk("ipt_bandwidth: warning, kmalloc failure!\n");
 			return;
 		}
-		uint32_t next_old_index;
-		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : old_history->first_start; /* first time point in old history */
+
+
 
 		/*oldest index in old history -- we iterate forward through old history using this index */
 		next_old_index = old_history->num_nodes == old_history->max_nodes ? (old_history->current_index+1) % old_history->max_nodes : 0;
@@ -230,72 +214,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		kfree(new_history);
 
 	}
-
-
-	/*
-	time_t next_start = history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : history->first_start;
-	if(next_start > backwards_adjust_current_time)
-	{
-		next_start = backwards_adjust_current_time;
-	}
-	next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
-
-
-	new_num_nodes = 1; // there's always at least one, since even when no updates have been performed we have current node 
-	node_start_index = history->num_nodes == history->max_nodes ? (history->current_index+1) % history->max_nodes : 0;
-	
-	history->current_index = node_start_index;
-	if(history->first_start < backwards_adjust_current_time)
-	{
-		(history->history_data)[history->current_index] = 0;
-	}
-	history->first_start = 0;
-	history->first_end = 0;
-	history->last_end = 0;
-	while(next_end < backwards_adjust_current_time && new_num_nodes < history->num_nodes)
-	{		
-		if(history->first_start == 0 && history->first_end == 0)
-		{
-			history->first_start = next_start;
-			history->first_end = next_end;
-		}
-		history->last_end = next_end;
-		backwards_adjust_iam->info->previous_reset = next_start;
-		
-		
-		history->current_index = (history->current_index+1) % history->max_nodes;
-		new_num_nodes++;
-
-		next_start = next_end;
-		next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
-	}
-
-	history->num_nodes = new_num_nodes;
-	while(next_end < backwards_adjust_current_time)
-	{
-		update_history(history, next_start, next_end, backwards_adjust_iam->info);
-		backwards_adjust_iam->info->previous_reset = next_start;
-		next_start = next_end;
-		next_end = get_next_reset_time(backwards_adjust_iam->info, next_start, next_start);
-	}
-	backwards_adjust_iam->info->previous_reset = next_start;
-	backwards_adjust_iam->info->next_reset = next_end;
-
-	// zero positions that don't contain data 
-	if(history->num_nodes < history->max_nodes)
-	{
-		uint32_t zero_index = (history->current_index + 1) % history->max_nodes;
-		while(zero_index != node_start_index)
-		{
-			(history->history_data)[zero_index] = 0;
-			zero_index = (zero_index + 1) % history->max_nodes;
-		}
-	}
-	
-	
-	// set value in ip_map to current index in history 
-	set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(history->history_data + history->current_index) );
-	*/
 }
 static void adjust_id_for_backwards_time_shift(char* key, void* value)
 {
