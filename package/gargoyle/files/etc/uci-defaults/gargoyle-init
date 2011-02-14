@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Remove rdate and set hostname to Gargoyle
+uci del system.@rdate[0]                      2>/dev/null
+uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
+uci commit                                    2>/dev/null
+echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+
+
+# remove init scripts of things that should not be active by default
+/etc/init.d/miniupnpd disable       2>/dev/null
+/etc/init.d/qos_gargoyle disable    2>/dev/null
+/etc/init.d/webmon_gargoyle disable 2>/dev/null
+
+# ensure ntpclient is active
+chmod 755 /etc/hotplug.d/iface/20-ntpclient 2>/dev/null
+
+
