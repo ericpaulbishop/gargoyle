@@ -174,6 +174,11 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 */
 
 		bw_history* new_history = initialize_history(old_history->max_nodes);
+		if(new_history == NULL)
+		{
+			printk("ipt_bandwidth: warning, kmalloc failure!\n");
+			return;
+		}
 		uint32_t next_old_index;
 		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : old_history->first_start; /* first time point in old history */
 
