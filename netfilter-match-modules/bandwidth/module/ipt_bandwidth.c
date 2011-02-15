@@ -448,41 +448,44 @@ static void shift_timezone_of_id(char* key, void* value)
 }
 static void check_for_timezone_shift(time_t now)
 {
-	if(now - last_local_mw_update > 0)
+	if(now != last_local_mw_update )
 	{
-		local_minutes_west = sys_tz.tz_minuteswest;
-		local_seconds_west = 60*local_minutes_west;
-		last_local_mw_update = now;
-
-
-		if(local_minutes_west != old_minutes_west)
+		spin_lock_bh(&bandwidth_lock);
+		if(now != last_local_mw_update ) /* make sure nothing changed while waiting for lock */
 		{
-			#ifdef BANDWIDTH_DEBUG
-				printk("timezone shift detected, shifting...\n");
-			#endif	
+			local_minutes_west = sys_tz.tz_minuteswest;
+			local_seconds_west = 60*local_minutes_west;
+			last_local_mw_update = now;
 
 
-			down(&userspace_lock);
-			spin_lock_bh(&bandwidth_lock);
+			if(local_minutes_west != old_minutes_west)
+			{
+				#ifdef BANDWIDTH_DEBUG
+					printk("timezone shift detected, shifting...\n");
+				#endif	
+
+
+				down(&userspace_lock);
 	
 
-			shift_timezone_current_time = now;
-			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
-			old_minutes_west = local_minutes_west;
+				shift_timezone_current_time = now;
+				apply_to_every_string_map_value(id_map, shift_timezone_of_id);
+				old_minutes_west = local_minutes_west;
 	
 
-			/*
-			 * make sure timezone shift doesn't inadvertantly 
-			 * trigger backwards shift since
-			 * we've already dealt with the problem 
-			 */
-			backwards_check = now; 
+				/*
+				 * make sure timezone shift doesn't inadvertantly 
+				 * trigger backwards shift since
+				 * we've already dealt with the problem 
+				 */
+				backwards_check = now; 
+	
+	
 
-
-
-			spin_unlock_bh(&bandwidth_lock);
-			up(&userspace_lock);
+				up(&userspace_lock);
+			}
 		}
+		spin_unlock_bh(&bandwidth_lock);
 	}
 }
 
