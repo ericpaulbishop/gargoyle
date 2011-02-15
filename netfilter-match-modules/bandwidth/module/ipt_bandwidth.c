@@ -1184,10 +1184,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
-	/*
-	spin_unlock_bh(&bandwidth_lock);
-	return 0;
-	*/
+
 
 
 	if(info->reset_interval != BANDWIDTH_NEVER)
@@ -1195,7 +1192,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		if(info->next_reset < now)
 		{
 			//do reset
-			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
 			if(iam != NULL) /* should never be null, but let's be sure */
 			{
 				handle_interval_reset(iam, now);
@@ -1214,7 +1212,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	{
 		if(iam == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
@@ -1286,7 +1285,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		
 		if(ip_map == NULL)
 		{
-			iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
 			if(iam != NULL)
 			{
 				ip_map = iam->ip_map;
@@ -2198,7 +2198,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		*(info->ref_count) = 1;
 		info->non_const_self = info;
 		info->hashed_id = sdbm_string_hash(info->id);
-
+		info->iam = NULL;
 		
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
@@ -2281,6 +2281,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 			iam->info = info;
 			set_string_map_element(id_map, info->id, iam);
+			info->iam = (void*)iam;
 
 
 			spin_unlock_bh(&bandwidth_lock);

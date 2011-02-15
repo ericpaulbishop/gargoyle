@@ -96,6 +96,7 @@ struct ipt_bandwidth_info
 
 
 	unsigned long hashed_id;
+	void* iam;
 	struct ipt_bandwidth_info* non_const_self;
 	unsigned long* ref_count;
 
