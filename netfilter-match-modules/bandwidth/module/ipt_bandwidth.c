@@ -448,45 +448,42 @@ static void shift_timezone_of_id(char* key, void* value)
 }
 static void check_for_timezone_shift(time_t now)
 {
-	if(now != last_local_mw_update )
+	spin_lock_bh(&bandwidth_lock);
+	if(now != last_local_mw_update ) /* make sure nothing changed while waiting for lock */
 	{
-		spin_lock_bh(&bandwidth_lock);
-		if(now != last_local_mw_update ) /* make sure nothing changed while waiting for lock */
+		local_minutes_west = sys_tz.tz_minuteswest;
+		local_seconds_west = 60*local_minutes_west;
+		last_local_mw_update = now;
+
+
+		if(local_minutes_west != old_minutes_west)
 		{
-			local_minutes_west = sys_tz.tz_minuteswest;
-			local_seconds_west = 60*local_minutes_west;
-			last_local_mw_update = now;
+			#ifdef BANDWIDTH_DEBUG
+				printk("timezone shift detected, shifting...\n");
+			#endif	
 
 
-			if(local_minutes_west != old_minutes_west)
-			{
-				#ifdef BANDWIDTH_DEBUG
-					printk("timezone shift detected, shifting...\n");
-				#endif	
+			down(&userspace_lock);
 
 
-				down(&userspace_lock);
-	
+			shift_timezone_current_time = now;
+			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
+			old_minutes_west = local_minutes_west;
 
-				shift_timezone_current_time = now;
-				apply_to_every_string_map_value(id_map, shift_timezone_of_id);
-				old_minutes_west = local_minutes_west;
-	
 
-				/*
-				 * make sure timezone shift doesn't inadvertantly 
-				 * trigger backwards shift since
-				 * we've already dealt with the problem 
-				 */
-				backwards_check = now; 
-	
-	
+			/*
+			 * make sure timezone shift doesn't inadvertantly 
+			 * trigger backwards shift since
+			 * we've already dealt with the problem 
+			 */
+			backwards_check = now; 
 
-				up(&userspace_lock);
-			}
+
+
+			up(&userspace_lock);
 		}
-		spin_unlock_bh(&bandwidth_lock);
 	}
+	spin_unlock_bh(&bandwidth_lock);
 }
 
 
@@ -1164,10 +1161,11 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
 	
 
-	
-	check_for_timezone_shift(now);
-	check_for_backwards_time_shift(now);
-
+	if(now != last_local_mw_update )
+	{
+		check_for_timezone_shift(now);
+		check_for_backwards_time_shift(now);
+	}
 
 	spin_lock_bh(&bandwidth_lock);
 	
@@ -1245,7 +1243,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	}
 	else
 	{
-		int bw_ip_index;
+		uint32_t bw_ip, bw_ip_index;
 		uint32_t bw_ips[2] = {0, 0};
 		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
 		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
@@ -1304,44 +1302,46 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
 			}
 		}
-		for(bw_ip_index=0; bw_ip_index < 2 && ip_map != NULL; bw_ip_index++)
+		bw_ip_index = bw_ips[0] == 0 ? 1 : 0;
+		bw_ip = bw_ips[bw_ip_index];
+		if(bw_ip != 0 && ip_map != NULL)
 		{
-			uint32_t bw_ip = bw_ips[bw_ip_index];
-			if(bw_ip != 0)
+			uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
+			if(oldval == NULL)
 			{
-				uint64_t* oldval = get_long_map_element(ip_map, (unsigned long)bw_ip);
-				if(oldval == NULL)
+				if(!is_check)
 				{
-					if(!is_check)
-					{
-						/* may return NULL on malloc failure but that's ok */
-						oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len);
-					}
+					/* may return NULL on malloc failure but that's ok */
+					oldval = initialize_map_entries_for_ip(iam, (unsigned long)bw_ip, (uint64_t)skb->len);
 				}
-				else
-				{
-					*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
-				}
-				
-				/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
-				bws[bw_ip_index] = oldval;
 			}
+			else
+			{
+				*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
+			}
+			
+			/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
+			bws[bw_ip_index] = oldval;
 		}
+		
 	}
 
 
 	match_found = 0;
-	if(info->cmp == BANDWIDTH_GT)
+	if(info->cmp != BANDWIDTH_MONITOR)
 	{
-		match_found = bws[0] != NULL ? ( *(bws[0]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
-		match_found = bws[1] != NULL ? ( *(bws[1]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
-		match_found = info->current_bandwidth > info->bandwidth_cutoff ? 1 : match_found;
-	}
-	else if(info->cmp == BANDWIDTH_LT)
-	{
-		match_found = bws[0] != NULL ? ( *(bws[0]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
-		match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
-		match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
+		if(info->cmp == BANDWIDTH_GT)
+		{
+			match_found = bws[0] != NULL ? ( *(bws[0]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = bws[1] != NULL ? ( *(bws[1]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = info->current_bandwidth > info->bandwidth_cutoff ? 1 : match_found;
+		}
+		else if(info->cmp == BANDWIDTH_LT)
+		{
+			match_found = bws[0] != NULL ? ( *(bws[0]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
+		}
 	}
 	
 	
