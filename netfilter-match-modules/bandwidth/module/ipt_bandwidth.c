@@ -770,6 +770,7 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 			info->next_reset = get_next_reset_time(info, now, info->previous_reset);
 		}
 	}
+	info->combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
 	info->current_bandwidth = 0;
 }
 
@@ -1068,6 +1069,11 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 					free(old_bw);
 				}
 
+				if(ip == 0)
+				{
+					info->combined_bw = new_bw;
+				}
+
 				#ifdef BANDWIDTH_DEBUG
 					uint64_t *test = (uint64_t*)get_long_map_element(ip_map, ip);
 					if(test == NULL)
@@ -1219,17 +1225,14 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		}
 		if(ip_map != NULL) /* if this ip_map != NULL iam can never be NULL, so we don't need to check this */
 		{
-			bws[0] = (uint64_t*)get_long_map_element(ip_map, 0); /* if this is null and remains so due to kmalloc failure, that's ok (won't cause crash) */
-			if(bws[0] == NULL)
+			
+			if(info->combined_bw == NULL)
 			{
-				uint64_t* new_bw = initialize_map_entries_for_ip(iam, 0, skb->len);
-				if(new_bw != NULL)
-				{
-					bws[0] =  new_bw;
-				}
+				bws[0] = initialize_map_entries_for_ip(iam, 0, skb->len);
 			}
 			else
 			{
+				bws[0] = info->combined_bw;
 				*(bws[0]) = add_up_to_max(*(bws[0]), (uint64_t)skb->len, is_check);
 			}
 		}
@@ -1292,7 +1295,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		}
 		if(!is_check)
 		{
-			uint64_t* combined_oldval = get_long_map_element(ip_map, 0);
+			uint64_t* combined_oldval = info->combined_bw;
 			if(combined_oldval == NULL)
 			{
 				combined_oldval = initialize_map_entries_for_ip(iam, 0, (uint64_t)skb->len);
@@ -2199,7 +2202,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		info->non_const_self = info;
 		info->hashed_id = sdbm_string_hash(info->id);
 		info->iam = NULL;
-		
+		info->combined_bw = NULL;
+
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
 		#endif
