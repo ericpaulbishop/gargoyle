@@ -64,7 +64,14 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match bandwidth used, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
-extern struct timezone sys_tz; /* ouch */
+/* 
+ * WARNING: accessing the sys_tz variable takes FOREVER, and kills performance 
+ * keep a local variable that gets updated from the extern variable 
+ */
+extern struct timezone sys_tz; 
+static int local_minutes_west;
+static int local_seconds_west;
+static time_t last_local_mw_update;
 
 
 static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
@@ -285,7 +292,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 
 
 	bw_history* history = (bw_history*)value;
-	uint32_t timezone_adj = (old_minutes_west-sys_tz.tz_minuteswest)*60;
+	uint32_t timezone_adj = (old_minutes_west-local_minutes_west)*60;
 	time_t next_start = history->first_start == 0 ? shift_timezone_iam->info->previous_reset + timezone_adj : history->first_start + timezone_adj;
 	time_t next_end = get_next_reset_time(shift_timezone_iam->info, next_start, next_start);
 	#ifdef BANDWIDTH_DEBUG
@@ -418,7 +425,7 @@ static void shift_timezone_of_id(char* key, void* value)
 	}
 	else
 	{
-		iam->info->previous_reset = iam->info->previous_reset + ((old_minutes_west - sys_tz.tz_minuteswest )*60);
+		iam->info->previous_reset = iam->info->previous_reset + ((old_minutes_west - local_minutes_west )*60);
 		if(iam->info->previous_reset > shift_timezone_current_time)
 		{
 			iam->info->next_reset = get_next_reset_time(iam->info, shift_timezone_current_time, shift_timezone_current_time);
@@ -441,36 +448,42 @@ static void shift_timezone_of_id(char* key, void* value)
 }
 static void check_for_timezone_shift(time_t now)
 {
-
-	if(sys_tz.tz_minuteswest != old_minutes_west)
+	if(now - last_local_mw_update > 0)
 	{
-		#ifdef BANDWIDTH_DEBUG
-			printk("timezone shift detected, shifting...\n");
-		#endif	
+		local_minutes_west = sys_tz.tz_minuteswest;
+		local_seconds_west = 60*local_minutes_west;
+		last_local_mw_update = now;
 
 
-		down(&userspace_lock);
-		spin_lock_bh(&bandwidth_lock);
+		if(local_minutes_west != old_minutes_west)
+		{
+			#ifdef BANDWIDTH_DEBUG
+				printk("timezone shift detected, shifting...\n");
+			#endif	
 
 
-		shift_timezone_current_time = now;
-		apply_to_every_string_map_value(id_map, shift_timezone_of_id);
-		old_minutes_west = sys_tz.tz_minuteswest;
+			down(&userspace_lock);
+			spin_lock_bh(&bandwidth_lock);
 	
 
-		/*
-		 * make sure timezone shift doesn't inadvertantly 
-		 * trigger backwards shift since
-		 * we've already dealt with the problem 
-		 */
-		backwards_check = now; 
+			shift_timezone_current_time = now;
+			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
+			old_minutes_west = local_minutes_west;
+	
+
+			/*
+			 * make sure timezone shift doesn't inadvertantly 
+			 * trigger backwards shift since
+			 * we've already dealt with the problem 
+			 */
+			backwards_check = now; 
 
 
 
-		spin_unlock_bh(&bandwidth_lock);
-		up(&userspace_lock);
+			spin_unlock_bh(&bandwidth_lock);
+			up(&userspace_lock);
+		}
 	}
-	
 }
 
 
@@ -930,7 +943,7 @@ static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, t
 		if(info->reset_time > 0 && previous_reset > 0 && previous_reset <= now)
 		{
 			unsigned long adj_reset_time = info->reset_time;
-			unsigned long tz_secs = 60 * sys_tz.tz_minuteswest;
+			unsigned long tz_secs = 60 * local_minutes_west;
 			if(adj_reset_time < tz_secs)
 			{
 				unsigned long interval_multiple = 1+(tz_secs/info->reset_interval);
@@ -1145,8 +1158,9 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	 * already be locked.
 	 */
 	now = get_seconds();
-	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	now = now -  local_seconds_west;  /* Adjust for local timezone */
 	
+
 	
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
@@ -1167,7 +1181,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		info = check_iam->info;
 	}
 
-
+	/*
+	spin_unlock_bh(&bandwidth_lock);
+	return 0;
+	*/
 
 
 	if(info->reset_interval != BANDWIDTH_NEVER)
@@ -1420,13 +1437,13 @@ static char add_ip_block(	uint32_t ip,
 			*( (uint32_t*)(output_buffer + *current_output_index) ) = 1;
 			*current_output_index = *current_output_index + 4;
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * local_minutes_west);
 			*current_output_index = *current_output_index + 8;
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * local_minutes_west);
 			*current_output_index = *current_output_index + 8;
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = (uint64_t)iam->info->previous_reset + (60 * local_minutes_west);
 			*current_output_index = *current_output_index + 8;
 
 			bw = (uint64_t*)get_long_map_element(iam->ip_map, ip);
@@ -1462,8 +1479,8 @@ static char add_ip_block(	uint32_t ip,
 			
 			
 			/* need to return times in regular UTC not the UTC - minutes west, which is useful for processing */
-			last_reset = (uint64_t)iam->info->previous_reset + (60 * sys_tz.tz_minuteswest);
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->first_start > 0 ? (uint64_t)history->first_start + (60 * sys_tz.tz_minuteswest) : last_reset;
+			last_reset = (uint64_t)iam->info->previous_reset + (60 * local_minutes_west);
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->first_start > 0 ? (uint64_t)history->first_start + (60 * local_minutes_west) : last_reset;
 			#ifdef BANDWIDTH_DEBUG
 				printk("  dumping first start = %lld\n", *( (uint64_t*)(output_buffer + *current_output_index) )   );
 			#endif
@@ -1471,7 +1488,7 @@ static char add_ip_block(	uint32_t ip,
 
 
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->first_end > 0 ?   (uint64_t)history->first_end + (60 * sys_tz.tz_minuteswest) : last_reset;
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->first_end > 0 ?   (uint64_t)history->first_end + (60 * local_minutes_west) : last_reset;
 			#ifdef BANDWIDTH_DEBUG
 				printk("  dumping first end   = %lld\n", *( (uint64_t*)(output_buffer + *current_output_index) )   );
 			#endif
@@ -1479,7 +1496,7 @@ static char add_ip_block(	uint32_t ip,
 
 
 
-			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->last_end > 0 ?    (uint64_t)history->last_end + (60 * sys_tz.tz_minuteswest) : last_reset;
+			*( (uint64_t*)(output_buffer + *current_output_index) ) = history->last_end > 0 ?    (uint64_t)history->last_end + (60 * local_minutes_west) : last_reset;
 			#ifdef BANDWIDTH_DEBUG
 				printk("  dumping last end    = %lld\n", *( (uint64_t*)(output_buffer + *current_output_index) )   );
 			#endif
@@ -1584,7 +1601,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
 	time_t now = get_seconds();
-	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
 	
@@ -1901,7 +1918,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			*buffer_index = *buffer_index + (2*4) + (3*8);
 			
 			/* adjust for timezone */
-			next_start = first_start - (60 * sys_tz.tz_minuteswest);
+			next_start = first_start - (60 * local_minutes_west);
 			next_end = get_next_reset_time(iam->info, next_start, next_start);
 			node_index=0;
 			zero_count=0;
@@ -2010,7 +2027,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
 	time_t now = get_seconds();
-	now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+	now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
 
@@ -2098,7 +2115,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	 */
 	if(header.last_backup > 0 && iam->info->num_intervals_to_save == 0 && (iam->info->reset_is_constant_interval == 0 || iam->info->reset_time != 0) )
 	{
-		time_t adjusted_last_backup_time = header.last_backup - (60 * sys_tz.tz_minuteswest); 
+		time_t adjusted_last_backup_time = header.last_backup - (60 * local_minutes_west); 
 		time_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
 		if(next_reset_of_last_backup != iam->info->next_reset)
 		{
@@ -2203,7 +2220,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
 				time_t now = get_seconds();
-				now = now -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
+				now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 				info->previous_reset = now;
 				if(info->next_reset == 0)
 				{
@@ -2218,7 +2235,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 					 */
 					if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
 					{
-						time_t adjusted_last_backup_time = info->last_backup_time - (60 * sys_tz.tz_minuteswest); 
+						time_t adjusted_last_backup_time = info->last_backup_time - (60 * local_minutes_west); 
 						time_t next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time, adjusted_last_backup_time);
 						if(next_reset_of_last_backup != info->next_reset)
 						{
@@ -2417,7 +2434,11 @@ static int __init init(void)
 		printk("ipt_bandwidth: Can't register sockopts. Aborting\n");
 	}
 	bandwidth_record_max = get_bw_record_max();
-	old_minutes_west = sys_tz.tz_minuteswest;
+	local_minutes_west = old_minutes_west = sys_tz.tz_minuteswest;
+	local_seconds_west = local_minutes_west*60;
+	last_local_mw_update = get_seconds();
+
+
 
 	id_map = initialize_string_map(0);
 	if(id_map == NULL) /* deal with kmalloc failure */
