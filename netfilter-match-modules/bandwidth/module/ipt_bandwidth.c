@@ -1295,7 +1295,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				ip_map = iam->ip_map;
 			}	
 		}
-		if(!is_check)
+		if(!is_check && info->cmp == BANDWIDTH_MONITOR)
 		{
 			uint64_t* combined_oldval = info->combined_bw;
 			if(combined_oldval == NULL)
