@@ -150,7 +150,6 @@ static time_t backwards_adjust_current_time = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
-
 	bw_history* old_history = (bw_history*)value;
 	if(old_history->last_end < backwards_adjust_current_time)
 	{
@@ -794,6 +793,9 @@ static uint64_t get_bw_record_max(void) /* called by init to set global variable
 }
 static uint64_t bandwidth_record_max;
 
+
+#define ADD_UP_TO_MAX(original,add,is_check) (bandwidth_record_max - original > add && is_check== 0) ? original+add : (is_check ? original : bandwidth_record_max);
+
 static uint64_t add_up_to_max(uint64_t original, uint64_t add, unsigned char is_check)
 {
 	if(is_check)
@@ -1233,7 +1235,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			else
 			{
 				bws[0] = info->combined_bw;
-				*(bws[0]) = add_up_to_max(*(bws[0]), (uint64_t)skb->len, is_check);
+				*(bws[0]) = ADD_UP_TO_MAX(*(bws[0]), (uint64_t)skb->len, is_check);
 			}
 		}
 		else
@@ -1242,7 +1244,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				printk("error: ip_map is null in match!\n");
 			#endif
 		}
-		info->current_bandwidth = add_up_to_max(info->current_bandwidth, (uint64_t)skb->len, is_check);
+		info->current_bandwidth = ADD_UP_TO_MAX(info->current_bandwidth, (uint64_t)skb->len, is_check);
 	}
 	else
 	{
@@ -1302,7 +1304,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 			else
 			{
-				*combined_oldval = add_up_to_max(*combined_oldval, (uint64_t)skb->len, is_check);
+				*combined_oldval = ADD_UP_TO_MAX(*combined_oldval, (uint64_t)skb->len, is_check);
 			}
 		}
 		bw_ip_index = bw_ips[0] == 0 ? 1 : 0;
@@ -1320,7 +1322,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 			}
 			else
 			{
-				*oldval = add_up_to_max(*oldval, (uint64_t)skb->len, is_check);
+				*oldval = ADD_UP_TO_MAX(*oldval, (uint64_t)skb->len, is_check);
 			}
 			
 			/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
