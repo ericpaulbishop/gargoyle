@@ -19,6 +19,7 @@ if [ -n "$version_name" ] ; then
 	gargoyle_version="$version_name"
 fi
 verbosity=$3
+custom_template=$4
 
 #get version that should be all numeric
 adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/[^\.0123456789]//g' )
@@ -96,6 +97,10 @@ for target in $targets ; do
 		cp -r "$package_dir/$gp" "$target-src/package"
 	done
 	
+	#copy this target configuration to build directory
+	cp "$targets_dir/$target/profiles/default/config" "$target-src/.config"
+
+
 	#if target is custom, checkout optional packages and copy all that don't 
 	#share names with gargoyle-specific packages to build directory
 	if [ "$target" = "custom" ] ; then
@@ -115,10 +120,14 @@ for target in $targets ; do
 				cp -r packages/$other $target-src/package
 			fi
 		done
+
+		if [ -n "$custom_template" ] ; then
+			if [ -e "$targets_dir/$custom_template/profiles/default/config" ] ; then
+				cp "$targets_dir/$custom_template/profiles/default/config" "$target-src/.config"
+			fi
+		fi
 	fi
 
-	#copy this target configuration to build directory
-	cp "$targets_dir/$target/profiles/default/config" "$target-src/.config"
 	
 
 	#enter build directory and make sure we get rid of all those pesky .svn files, 

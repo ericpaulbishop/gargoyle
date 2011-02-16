@@ -1,6 +1,7 @@
 GARGOYLE_VERSION:=1.3.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log -1 --pretty=format:%h`"))
 V=99
 FULL_BUILD=false
+CUSTOM_TEMPLATE=ar71xx
 
 ALL: all
 all:
@@ -11,7 +12,7 @@ all:
 		fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" ;\
+				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" ;\
 			else \
 				sh rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" ;\
 			fi ;\
@@ -25,7 +26,7 @@ brcm-2.4:
 			rm -rf backfire-src ;\
 		fi ;\
 		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" ;\
+			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" ;\
 		else \
 			sh rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" ;\
 		fi ;\
@@ -38,7 +39,7 @@ brcm-2.4:
 			rm -rf backfire-src ;\
 		fi ;\
 		if [ ! -d "$@-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" ;\
+			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" ;\
 		else \
 			sh rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" ;\
 		fi ;\
