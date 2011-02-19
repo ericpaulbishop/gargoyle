@@ -1107,6 +1107,33 @@ function setBridgeVisibility()
 	setGlobalVisibility();
 }
 
+function localdate(ldate)
+{
+	var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
+	var ldateStr = "";
+	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
+	var y2 = twod(ldate.getUTCFullYear()%100)
+	var y4 = ldate.getUTCFullYear();
+	var m = twod(ldate.getUTCMonth()+1);
+	var d = twod(ldate.getUTCDate());
+	var h = " " + twod(ldate.getUTCHours()) + ":" + twod(ldate.getUTCMinutes()) + " " + timezoneName;
+	if(systemDateFormat == "iso")
+	{
+		ldateStr = y4 + "/" + m + "/" + d + h;
+	}
+	else if(systemDateFormat == "australia")
+	{
+		ldateStr = d + "/" + m + "/" + y2 + h;
+	}
+	else
+	{
+		ldateStr = m + "/" + d + "/" + y2 + h;
+	}
+
+	return ldateStr;
+}		
+
+
 function resetData()
 {
 
@@ -1146,37 +1173,10 @@ function resetData()
 		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
 		var releaseDate = new Date();
 		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-		if(leaseStartUptime != "")
-		{
-			var remainingLeaseSeconds = parseInt(leaseLifetime) - (parseInt(uptime)-parseInt(leaseStartUptime));
-			releaseDate.setTime( (parseInt(currentDateSeconds)+remainingLeaseSeconds)*1000 );
-		}
-		else
-		{
-			releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
-		}
-		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
-		var releaseStr = "";
-		var y2 = twod(releaseDate.getUTCFullYear()%100)
-		var y4 = releaseDate.getUTCFullYear();
-		var m = twod(releaseDate.getUTCMonth()+1);
-		var d = twod(releaseDate.getUTCDate());
-		var h = " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
-		if(systemDateFormat == "iso")
-		{
-			releaseStr = y4 + "/" + m + "/" + d + h;
-		}
-		else if(systemDateFormat == "australia")
-		{
-			releaseStr = d + "/" + m + "/" + y2 + h;
-		}
-		else
-		{
-			releaseStr = m + "/" + d + "/" + y2 + h;
-		}
+			releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000)) );
 
 		
-		setChildText("dhcp_expires", releaseStr);
+		setChildText("dhcp_expires", localdate(releaseDate));
 		setChildText("dhcp_ip", currentWanIp);
 	}
 	else
@@ -1954,11 +1954,19 @@ function setTransmitPower(selectId, textId)
 
 function renewDhcpLease()
 {
-	//we don't have to worry about date/lease time mismatch here (corrected for by lease_acquired_uptime variable, in patched udhcpcd script), since date should already be set by now
+       //To aquire an new DHCP lease we send the SIGUSR1 signal to udhcpc.  Then we wait up to 20 seconds for the lease_aquired time to change.
+       //This indicates we have a new lease.  Otherwise we just timeout and show the old data.
+       //This technique relies on udhcpc already working against the correct WAN interface so we do not need to figure that out here.
+       // 
+       //we don't have to worry about date/lease time mismatch here (corrected for by lease_acquired_uptime variable, in patched udhcpcd script), since date should already be set by now
 	var commands = [];
-	commands.push("killall udhcpc >/dev/null 2>&1 ");
-	commands.push("udhcpc -t 0 -i $(uci -P /var/state get network.wan.ifname) -b -p /var/run/$(uci -P /var/state get network.wan.ifname).pid -R >/dev/null 2>&1");
+	commands.push("ls=$(uci -P /var/state get network.wan.lease_acquired)");
+	commands.push("killall -SIGUSR1 udhcpc");
+	commands.push("wait_sec=20");
+	commands.push("while [ $ls -eq $(uci -P /var/state get network.wan.lease_acquired 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do");
 	commands.push("sleep 1");
+	commands.push("wait_sec=$(($wait_sec - 1))");
+	commands.push("done");
 	commands.push("echo \"var wi = \\\"\"$(uci -P /var/state get network.wan.ipaddr )\"\\\";\"");
 	commands.push("echo \"var ls = \\\"\"$(uci -P /var/state get network.wan.lease_acquired )\"\\\";\"");
 	commands.push("echo \"var ll = \\\"\"$(uci -P /var/state get network.wan.lease_lifetime )\"\\\";\"");
@@ -1987,10 +1995,8 @@ function renewDhcpLease()
 			if(leaseLifetime != "")
 			{
 				var releaseDate = new Date();
-				var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-				releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) - (timezoneOffset*1000)) );
-				var releaseStr = twod(releaseDate.getUTCMonth()+1) + "/" +  twod(releaseDate.getUTCDate()) + "/" + twod(releaseDate.getUTCFullYear()%100) + " " + twod(releaseDate.getUTCHours()) + ":" + twod(releaseDate.getUTCMinutes()) + " " + timezoneName;
-				setChildText("dhcp_expires", releaseStr);
+				releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000)) );
+				setChildText("dhcp_expires", localdate(releaseDate));
 
 			}
 

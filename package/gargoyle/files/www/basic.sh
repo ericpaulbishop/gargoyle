@@ -36,9 +36,8 @@
 	fi
 
 ?>
-timezoneOffset = timezoneOffset.replace(/^\-0/g, "-");
-timezoneOffset = timezoneOffset.replace(/^\+?0/g, "");
-var timezoneOffset = (parseInt(timezoneOffset)/100)*60*60;
+var timezoneOffset = (parseInt(timezoneOffset.substr(0,3),10)*60+parseInt(timezoneOffset.substr(3,2),10))*60;
+
 var policyOption="";
 if(wirelessDriver == "broadcom" || wirelessDriver == "mac80211")
 {
