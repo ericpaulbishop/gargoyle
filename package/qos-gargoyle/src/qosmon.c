@@ -708,12 +708,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    //The third parameter is the maximum download speed in bps.
-    dbw_ul = DBW_UL = atoi( av[2] )*1000;
-    if ((DBW_UL < 100000) || (DBW_UL > 50000000)) {
+    //The third parameter is the maximum download speed in kbps.
+    DBW_UL = atoi( av[2] );
+    if ((DBW_UL < 100) || (DBW_UL >= INT_MAX/1000)) {
         fprintf(stderr, "Invalid download bandwidth '%s'\n", av[2]);
         exit(1);        
     }
+
+    //Convert kbps to bps.
+    dbw_ul = DBW_UL = DBW_UL*1000;
 
     //The fourth optional parameter is the pinglimit in ms.
     if (argc == 4) {
