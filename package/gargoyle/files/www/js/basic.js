@@ -1429,7 +1429,7 @@ function resetData()
 	var hwmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 	if(wifiN)
 	{
-		hwmode = hwmode == "" ? "11g" : "";
+		hwmode = hwmode == "" ? "11g" : hwmode;
 		if(dualBandWireless)
 		{
 			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
