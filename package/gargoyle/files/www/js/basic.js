@@ -426,7 +426,7 @@ function saveChanges()
 					uci.set("wireless", wifiDevA, "channel", getSelectedValue("wifi_channel1a"));
 
 					//ssid of 5GHz AP will be same, but with _5GHz appended
-					uci.set("wireless", ap2cfg, "ssid", uci.get("wireless", apcfg, "ssid") + "_5GHz");
+					uci.set("wireless", ap2cfg, "ssid", document.getElementById("wifi_ssid1a").value );
 					dup_sec_options("wireless", apcfg, ap2cfg, ['hidden', 'isolate', 'encryption', 'key', 'server', 'port'])
 				}
 			}
@@ -987,7 +987,11 @@ function setWifiVisibility()
 	    		'mac_enabled_container', 
 			'mac_filter_container', 
 			
+
+
+
 			'wifi_ssid1_container',
+			'wifi_ssid1a_container',
 			'wifi_channel1_container',
 			'wifi_fixed_channel1_container',
 			'wifi_channel1a_container',
@@ -1028,10 +1032,10 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,wn,1,1,mf,   1,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,wn,1,1,mf,   1,1,0,0,1,1,1,p1,w1,r1,r1,  b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,wn,1,1,mf,   1,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap']       = [1,wn,wn,1,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,wn,wn,1,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,wn,wn,1,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['adhoc']    = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
 	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
@@ -1477,6 +1481,7 @@ function resetData()
 	if(ap2cfg != "")
 	{
 		setSelectedValue('wifi_channel1a', uciOriginal.get("wireless", wifiDevA, "channel"));
+		setSelectedValue('wifi_ssid1a', uciOriginal.get("wireless", wifiDevA, "ssid"));
 	}
 
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
@@ -1925,6 +1930,11 @@ function setHwMode(selectCtl)
 	setSelectedValue("wifi_hwmode", hwmode);
 	setSelectedValue("bridge_hwmode", hwmode);
 	document.getElementById("wifi_channel1a_container").style.display = hwmode == "dual" ? "block" : "none";
+	document.getElementById("wifi_ssid1a_container").style.display = hwmode == "dual" ? "block" : "none";
+
+	setChildText("wifi_ssid1_label", (hwmode == "dual" ? "AP 2.4Ghz SSID:" : "Access Point SSID:") );
+	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + "_5GHz" :  document.getElementById("wifi_ssid1a").value;
+
 }
 
 function setTransmitPower(selectId, textId)
