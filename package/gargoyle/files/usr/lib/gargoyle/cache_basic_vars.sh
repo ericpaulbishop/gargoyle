@@ -57,11 +57,11 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 			[ "$mode" = "11na" ] &&  mode="11an"
 			if [ "$mode" = "11an" ] ; then
 				chId="A"
-				echo "var wifiDevA=\"$r\";" >> "$out_file"
+				echo "wifiDevA=\"$r\";" >> "$out_file"
 			else
 				mode="11bgn"
 				chId="G"
-				echo "var wifiDevG=\"$r\";" >> "$out_file"
+				echo "wifiDevG=\"$r\";" >> "$out_file"
 			fi
 
 

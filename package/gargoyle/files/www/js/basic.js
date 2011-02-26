@@ -263,8 +263,8 @@ function saveChanges()
 			uci.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
 			var fdCommand = forceDNS == "force" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci del firewall.@defaults[0].force_router_dns \n";
 			preCommands = preCommands + fdCommand;
-
-
+			
+			
 			//if current dhcp range is not in new subnet, or current dhcp range contains new router ip adjust it
 			var dhcpSection = getDhcpSection(uciOriginal);
 			var newMask = document.getElementById("lan_mask").value;
@@ -291,15 +291,17 @@ function saveChanges()
 				uci.set("dhcp", dhcpSection, "start", newStart);
 				uci.set("dhcp", dhcpSection, "limit", (newEnd+1-newStart) );
 			}
-
-
-
-
+			
+			
+			
+			
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
 			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2'];
 			
 			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key'];
-		
+			
+			
+			
 			var sv=  setVariableFromValue;
 			var svm= setVariableFromModifiedValue;
 			var svcat= setVariableFromConcatenation;
@@ -321,9 +323,9 @@ function saveChanges()
 			var isolateParams = [ifIsolateChecked,f,'1'];
 		
 			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f];
-
-		
-		
+			
+			
+			
 			pppoeReconnectVisibilityIds = ['wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container'];
 			multipleVisibilityIds= [pppoeReconnectVisibilityIds];
 			wirelessSections=[apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg ];
@@ -705,7 +707,9 @@ function saveChanges()
 		{
 			restartNetworkCommand = "\nsh /usr/lib/gargoyle/reboot.sh ;\n";
 		}
-		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand;
+		var regenerateCacheCommand = "\nrm -rf /tmp/cached_basic_vars ;\n/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null\n";
+
+		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand + regenerateCacheCommand;
 
 				
 		//document.getElementById("output").value = commands;
@@ -1036,8 +1040,8 @@ function setWifiVisibility()
 	wifiVisibilities['ap+wds']   = [1,wn,wn,1,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
 	wifiVisibilities['sta']      = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['ap+sta']   = [1,wn,wn,1,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,0,      0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['adhoc']    = [1,wn,wn,1,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,      0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1046,6 +1050,9 @@ function setWifiVisibility()
 	{
 		setSsidVisibility("wifi_list_ssid2");
 	}
+
+	setChildText("wifi_ssid1_label", (db ? "AP 2.4Ghz SSID:" : "Access Point SSID:") );
+
 }
 
 function setBridgeVisibility()
@@ -1481,7 +1488,7 @@ function resetData()
 	if(ap2cfg != "")
 	{
 		setSelectedValue('wifi_channel1a', uciOriginal.get("wireless", wifiDevA, "channel"));
-		setSelectedValue('wifi_ssid1a', uciOriginal.get("wireless", wifiDevA, "ssid"));
+		document.getElementById('wifi_ssid1a').value = uciOriginal.get("wireless", ap2cfg, "ssid");
 	}
 
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
