@@ -261,8 +261,8 @@ static void check_for_backwards_time_shift(time_t now)
 		down(&userspace_lock);
 		spin_lock_bh(&bandwidth_lock);
 
-
-		backwards_adjust_current_time = now;
+		/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
+		backwards_adjust_current_time = now - local_seconds_west; 		
 		apply_to_every_string_map_value(id_map, adjust_id_for_backwards_time_shift);
 
 
@@ -463,8 +463,8 @@ static void check_for_timezone_shift(time_t now)
 
 			down(&userspace_lock);
 
-
-			shift_timezone_current_time = now;
+			/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
+			shift_timezone_current_time = now - local_seconds_west;
 			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
 			old_minutes_west = local_minutes_west;
 
