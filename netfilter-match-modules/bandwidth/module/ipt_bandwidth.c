@@ -1608,9 +1608,9 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
 	time_t now = get_seconds();
-	now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
+	now = now -  local_seconds_west;  /* Adjust for local timezone */
 	
 
 	down(&userspace_lock);
@@ -2034,9 +2034,9 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
 	time_t now = get_seconds();
-	now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 	check_for_timezone_shift(now);
 	check_for_backwards_time_shift(now);
+	now = now -  local_seconds_west;  /* Adjust for local timezone */
 
 
 	/* just return right away if user buffer is too short to contain even the header */
