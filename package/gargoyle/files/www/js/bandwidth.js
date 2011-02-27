@@ -590,7 +590,7 @@ function doUpdate()
 
 								}
 							}
-							else if(monitorName.match("bdist") && seletedPlotType != "total" && monitorIndex < 3 )
+							else if(monitorName.match("bdist") && selectedPlotType != "total" && monitorIndex < 3 )
 							{
 								//monitor data null because no ips have been seen
 								var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";

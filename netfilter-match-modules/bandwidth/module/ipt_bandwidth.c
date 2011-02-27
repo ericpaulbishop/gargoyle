@@ -454,7 +454,6 @@ static void check_for_timezone_shift(time_t now)
 		local_seconds_west = 60*local_minutes_west;
 		last_local_mw_update = now;
 
-
 		if(local_minutes_west != old_minutes_west)
 		{
 			#ifdef BANDWIDTH_DEBUG
@@ -1166,7 +1165,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	 * already be locked.
 	 */
 	now = get_seconds();
-	now = now -  local_seconds_west;  /* Adjust for local timezone */
 	
 
 	if(now != last_local_mw_update )
@@ -1174,6 +1172,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 		check_for_timezone_shift(now);
 		check_for_backwards_time_shift(now);
 	}
+	now = now -  local_seconds_west;  /* Adjust for local timezone */
 
 	spin_lock_bh(&bandwidth_lock);
 	
