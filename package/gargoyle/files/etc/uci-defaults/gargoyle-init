@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Set hostname to Gargoyle
+# Remove rdate and set hostname to Gargoyle
+uci del system.@rdate[0]                      2>/dev/null
 uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
 uci commit                                    2>/dev/null
 echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null

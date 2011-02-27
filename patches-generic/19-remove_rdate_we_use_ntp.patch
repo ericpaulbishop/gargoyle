@@ -1,18 +1,3 @@
---- backfire-src/package/base-files/files/etc/config/system	2011-02-21 07:43:04.000000000 -0500
-+++ atheros-2.6-src/package/base-files/files/etc/config/system	2011-02-24 06:56:57.000000000 -0500
-@@ -2,11 +2,4 @@
- 	option hostname	OpenWrt
- 	option timezone	UTC
- 
--config rdate
--	list server ac-ntp0.net.cmu.edu
--	list server ptbtime1.ptb.de
--	list server ac-ntp1.net.cmu.edu
--	list server ntp.xs4all.nl
--	list server ptbtime2.ptb.de
--	list server cudns.cit.cornell.edu
--	list server ptbtime3.ptb.de
-+
 --- backfire-src/package/base-files/files/etc/hotplug.d/iface/40-rdate	2011-02-21 07:43:04.000000000 -0500
 +++ /dev/null	2011-02-09 06:59:17.813314905 -0500
 @@ -1,46 +0,0 @@
