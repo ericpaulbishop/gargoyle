@@ -574,6 +574,12 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' id='wifi_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		</div>
 
+		<div id='wifi_ssid1a_container'>
+			<label class='leftcolumn' for='wifi_ssid1a' id='wifi_ssid1a_label'>AP 5GHz SSID:</label>
+			<input type='text' id='wifi_ssid1a'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		</div>
+
+
 		<div id='wifi_channel1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel1' id='wifi_channel1_label'>Wireless Channel:</label>
 			<select class='rightcolumn' id='wifi_channel1' onchange='setChannel(this)' >
