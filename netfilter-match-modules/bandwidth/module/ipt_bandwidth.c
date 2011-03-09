@@ -255,22 +255,22 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 }
 static void check_for_backwards_time_shift(time_t now)
 {
+	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
+		printk("ipt_bandwidth: backwards time shift detected, adjusting\n\n");
+
 		/* adjust */
 		down(&userspace_lock);
-		spin_lock_bh(&bandwidth_lock);
-
+		
 		/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
 		backwards_adjust_current_time = now - local_seconds_west; 		
 		apply_to_every_string_map_value(id_map, adjust_id_for_backwards_time_shift);
-
-
-		spin_unlock_bh(&bandwidth_lock);
 		up(&userspace_lock);
 
 	}
 	backwards_check = now;
+	spin_unlock_bh(&bandwidth_lock);
 }
 
 
@@ -456,6 +456,9 @@ static void check_for_timezone_shift(time_t now)
 
 		if(local_minutes_west != old_minutes_west)
 		{
+			int adj_minutes = old_minutes_west-local_minutes_west;
+			adj_minutes = adj_minutes < 0 ? adj_minutes*-1 : adj_minutes;	
+			
 			#ifdef BANDWIDTH_DEBUG
 				printk("timezone shift detected, shifting...\n");
 			#endif	
@@ -463,9 +466,24 @@ static void check_for_timezone_shift(time_t now)
 
 			down(&userspace_lock);
 
-			/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
-			shift_timezone_current_time = now - local_seconds_west;
-			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
+			/*
+			 * only shift everything if difference >= 2 hours, indicating that this probably isn't a DST related shift.  In the case of DST, just
+			 * pretend everything is normal, and either insert an empty hour or cram 1hr+normal interval length worth of data into a single time point
+			 * Note that this means if you're measuring things per second, you're going to get a REALLY whacky time point with a rediculous amount of
+			 * throughput around the DST shift!  Not sure if there's a good way to avoid this...
+			 */
+			if(adj_minutes >= 120 )
+			{
+				/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
+				shift_timezone_current_time = now - local_seconds_west;
+				apply_to_every_string_map_value(id_map, shift_timezone_of_id);
+
+				printk("ipt_bandwidth:timezone shift detected, adjusting\n");
+			}
+			else
+			{
+				printk("ipt_bandwidth:DST shift detected, ignoring\n");
+			}
 			old_minutes_west = local_minutes_west;
 
 
@@ -2446,8 +2464,6 @@ static int __init init(void)
 	local_minutes_west = old_minutes_west = sys_tz.tz_minuteswest;
 	local_seconds_west = local_minutes_west*60;
 	last_local_mw_update = get_seconds();
-
-
 
 	id_map = initialize_string_map(0);
 	if(id_map == NULL) /* deal with kmalloc failure */
