@@ -139,6 +139,7 @@ static uint64_t add_up_to_max(uint64_t original, uint64_t add, unsigned char is_
 
 static inline int is_leap(unsigned int y);
 static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, time_t previous_reset);
+static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, time_t current_next_reset);
 
 static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long ip, uint64_t initial_bandwidth);
 
@@ -277,13 +278,10 @@ static void check_for_backwards_time_shift(time_t now)
 
 static int old_minutes_west;
 static time_t shift_timezone_current_time;
+static time_t shift_timezone_info_previous_reset;
 static info_and_maps* shift_timezone_iam = NULL;
-static void shift_timezone_of_id(char* key, void* value);
-static void shift_timezone_of_ip(unsigned long key, void* value);
 static void shift_timezone_of_ip(unsigned long key, void* value)
 {
-	int node_shift;
-
 	#ifdef BANDWIDTH_DEBUG
 		unsigned long* ip = &key;
 		printk("shifting ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
@@ -292,8 +290,6 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 
 	bw_history* history = (bw_history*)value;
 	uint32_t timezone_adj = (old_minutes_west-local_minutes_west)*60;
-	time_t next_start = history->first_start == 0 ? shift_timezone_iam->info->previous_reset + timezone_adj : history->first_start + timezone_adj;
-	time_t next_end = get_next_reset_time(shift_timezone_iam->info, next_start, next_start);
 	#ifdef BANDWIDTH_DEBUG
 		printk("  before jump:\n");
 		printk("    current time = %ld\n",  shift_timezone_current_time);
@@ -305,86 +301,47 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 		printk("\n");
 	#endif
 
-	
-	
-
-	uint32_t new_num_nodes = 1;  /* always have at least current node, even when no updates have been performed */
-	uint32_t node_start_index = history->num_nodes == history->max_nodes ? (history->current_index+1) % history->max_nodes : 0;
-	
-	history->first_start = 0;
-	history->first_end = 0;
-	history->last_end = 0;
-	history->current_index = node_start_index;
-	while(next_end < shift_timezone_current_time && new_num_nodes < history->num_nodes)
+	/*if we're resetting on a constant interval, we can just adjust -- no need to worry about relationship to constant boundaries, e.g. end of day */
+	if(shift_timezone_iam->info->reset_is_constant_interval)
 	{
-		#ifdef BANDWIDTH_DEBUG
-			printk("    next_start    = %ld\n", next_start);
-		#endif
-		
-		if(history->first_start == 0 && history->first_end == 0)
-		{
-			history->first_start = next_start;
-			history->first_end = next_end;
-		}
-		history->last_end = next_end;
-		shift_timezone_iam->info->previous_reset = next_start;
-		
-		
-		history->current_index = (history->current_index+1) % history->max_nodes;
-		new_num_nodes++;
-
-		next_start = next_end;
-		next_end = get_next_reset_time(shift_timezone_iam->info, next_start, next_start);
+		history->first_start = history->first_start + timezone_adj;
+		history->first_end = history->first_end + timezone_adj;
+		history->last_end = history->last_end + timezone_adj;
 	}
-
-	/* if we want deletion of nodes to show up at beginning of history (vs right before shift) we need to shift all bws */
-	node_shift = history->num_nodes - new_num_nodes;
-	if(node_shift > 0)
+	else
 	{
-		int adj_index = node_start_index;
-		uint64_t tmp_bw = (history->history_data)[ (adj_index+node_shift)% history->max_nodes ];
-		int node_num;
-		for(node_num=0; node_num < history->num_nodes; node_num++)
+		/* given time after shift, calculate next and previous reset times */
+		time_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
+		time_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
+
+		/* next reset will be the newly computed next_reset. */
+		int node_index=history->num_nodes - 1;
+		shift_timezone_iam->info->next_reset = next_reset;
+		if(node_index > 0)
 		{
-			(history->history_data)[adj_index] = tmp_bw;
-			tmp_bw = (history->history_data)[ (adj_index+node_shift)% history->max_nodes ];
-			adj_index = (adj_index+1) % history->max_nodes;
+			/* based on new, shifted time, iterate back over all nodes in history */
+			shift_timezone_iam->info->previous_reset = previous_reset ;
+			history->last_end = previous_reset;
+
+			while(node_index > 1)
+			{
+				previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, previous_reset);
+			}
+			history->first_end = previous_reset;
+			
+			previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, previous_reset);
+			history->first_start = previous_reset > history->first_start + timezone_adj ? previous_reset : history->first_start + timezone_adj;
+		}
+		else
+		{
+			/*
+			 * history hasn't really been initialized -- there's only one, current time point.
+			 * we only know what's in the current accumulator in info. Just adjust previous reset time and make sure it's valid 
+			 */
+			shift_timezone_iam->info->previous_reset = previous_reset > shift_timezone_info_previous_reset + timezone_adj ? previous_reset : shift_timezone_info_previous_reset + timezone_adj;
 		}
 	}
 
-
-	history->num_nodes = new_num_nodes;
-	while(next_end < shift_timezone_current_time)
-	{
-		/* 
-		 * if we do update_history here, we insert history nodes right before timezone shift,
-		 * if we increment first_start, we insert history nodes at beginning of history 
-		 */
-		//update_history(history, next_start, next_end, shift_timezone_iam->info);
-		history->first_start = history->first_end;
-		history->first_end = get_next_reset_time(shift_timezone_iam->info, history->first_start, history->first_start);
-
-
-		shift_timezone_iam->info->previous_reset = next_start;
-		next_start = next_end;
-		next_end = get_next_reset_time(shift_timezone_iam->info, next_start, next_start);
-	}
-	shift_timezone_iam->info->previous_reset = next_start;
-	shift_timezone_iam->info->next_reset = next_end;
-
-	/* zero positions that don't contain data */
-	if(history->num_nodes < history->max_nodes)
-	{
-		uint32_t zero_index = (history->current_index + 1) % history->max_nodes;
-		while(zero_index != node_start_index)
-		{
-			(history->history_data)[zero_index] = 0;
-			zero_index = (zero_index + 1) % history->max_nodes;
-		}
-	}
-
-	/* set value in ip_map to current index in history */
-	set_long_map_element(shift_timezone_iam->ip_map, key, (void*)(history->history_data + history->current_index) );
 
 	#ifdef BANDWIDTH_DEBUG
 		printk("\n");
@@ -420,6 +377,7 @@ static void shift_timezone_of_id(char* key, void* value)
 
 	if(iam->ip_history_map != NULL)
 	{
+		shift_timezone_info_previous_reset = iam->info->previous_reset;
 		apply_to_every_long_map_value(iam->ip_history_map, shift_timezone_of_ip);
 	}
 	else
@@ -442,8 +400,6 @@ static void shift_timezone_of_id(char* key, void* value)
 
 	}
 	shift_timezone_iam = NULL;
-	
-	
 }
 static void check_for_timezone_shift(time_t now)
 {
@@ -869,6 +825,33 @@ static inline int is_leap(unsigned int y)
 
 /* end of code  yoinked from xt_time */
 
+
+static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, time_t current_next_reset)
+{
+	time_t previous_reset = current_next_reset;
+	if(info->reset_is_constant_interval == 0)
+	{
+		/* skip backwards in halves of interval after next, until  */
+		time_t next = get_next_reset_time(info, current_next_reset, 0);
+		time_t half_interval = (next-current_next_reset)/2;
+		time_t half_count, tmp;
+		half_interval = half_interval == 0 ? 1 : half_interval; /* must be at least one second, otherwise we loop forever*/
+	
+		half_count = 1;
+		tmp = get_next_reset_time(info, (current_next_reset-(half_count*half_interval)),0);
+		while(tmp >= current_next_reset)
+		{
+			previous_reset = tmp;
+			half_count++;
+			tmp = get_next_reset_time(info, (current_next_reset-(half_count*half_interval)),0);
+		}
+	}
+	else
+	{
+		previous_reset = current_next_reset - info->reset_interval;
+	}
+	return previous_reset;
+}
 
 
 static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, time_t previous_reset)
