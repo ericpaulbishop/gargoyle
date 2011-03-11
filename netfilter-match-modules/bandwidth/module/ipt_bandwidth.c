@@ -148,6 +148,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 
 static time_t backwards_check = 0;
 static time_t backwards_adjust_current_time = 0;
+static time_t backwards_adjust_info_previous_reset = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
@@ -163,7 +164,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 * last time the current time was set to the interval to which we just jumped back
 		 */
 		uint32_t next_old_index;
-		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_iam->info->previous_reset : old_history->first_start; /* first time point in old history */
+		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_info_previous_reset : old_history->first_start; /* first time point in old history */
 		bw_history* new_history = initialize_history(old_history->max_nodes);
 		if(new_history == NULL)
 		{
@@ -241,6 +242,7 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 	}
 	if(iam->ip_history_map != NULL)
 	{
+		backwards_adjust_info_previous_reset = iam->info->previous_reset;
 		apply_to_every_long_map_value(iam->ip_history_map, adjust_ip_for_backwards_time_shift);
 	}
 	else
