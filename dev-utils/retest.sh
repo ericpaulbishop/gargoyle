@@ -13,7 +13,12 @@ cd build*/linux*/linux-2.6*/net/ipv4/netfilter
 find . -name "*.*o*" | xargs rm -rf
 cd ../../../../../..
 
+rm -rf bin
 make V=99
+
+if [ ! -d bin ] ; then
+	exit;
+fi
 
 my_in=/tmp/my_in
 my_out=/tmp/my_out
