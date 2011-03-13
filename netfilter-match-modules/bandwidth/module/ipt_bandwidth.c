@@ -153,10 +153,12 @@ static time_t backwards_adjust_ips_zeroed = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 static int back_middle=0;
 
-
+/*
 static char print_out_buf[25000];
 static void print_to_buf(char* outdat);
 static void reset_buf(void);
+static void do_print_buf(void);
+
 static void print_to_buf(char* outdat)
 {
 	int buf_len = strlen(print_out_buf);
@@ -167,15 +169,30 @@ static void reset_buf(void)
 	print_out_buf[0] = '\n';
 	print_out_buf[1] = '\0';
 }
-
-
+static void do_print_buf(void)
+{
+	char* start = print_out_buf;
+	char* next = strchr(start, '\n');
+	while(next != NULL)
+	{
+		*next = '\0';
+		printk("%s\n", start);
+		start = next+1;
+		next = strchr(start, '\n');
+	}
+	printk("%s\n", start);
+	
+	reset_buf();
+}
+*/
 
 static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
 	bw_history* old_history = (bw_history*)value;
-	char tmp[200];
-	sprintf(tmp, "TEST0, id=%s, key=%ld, ended_in_middle=%d", backwards_adjust_iam->info->id, key, back_middle);
-	print_to_buf(tmp);
+	
+	//char tmp[200];
+	//sprintf(tmp, "TEST0, id=%s, key=%ld, ended_in_middle=%d", backwards_adjust_iam->info->id, key, back_middle);
+	//print_to_buf(tmp);
 
 	back_middle = 1;
 	if(old_history->num_nodes == 1)
@@ -201,7 +218,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	}
 	else
 	{
-		print_to_buf("TEST1");
+		//print_to_buf("TEST1");
 
 		
 		/* 
@@ -217,7 +234,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			return;
 		}
 
-		print_to_buf("TEST2");
+		//print_to_buf("TEST2");
 		
 
 
@@ -229,7 +246,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		(new_history->history_data)[ new_history->current_index ] = old_next_start < backwards_adjust_current_time ? (old_history->history_data)[next_old_index] : 0;
 		backwards_adjust_iam->info->previous_reset                = old_next_start < backwards_adjust_current_time ? old_next_start : backwards_adjust_current_time;
 
-		print_to_buf("TEST3");
+		//print_to_buf("TEST3");
 
 		/* iterate through old history, rebuilding in new history*/
 		while( old_next_start < backwards_adjust_current_time )
@@ -244,12 +261,12 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			backwards_adjust_iam->info->previous_reset = old_next_start; /*update previous_reset variable in bw_info as we iterate */
 			old_next_start = old_next_end;
 		}
-		print_to_buf("TEST4");
+		//print_to_buf("TEST4");
 
 		/* update next_reset variable from previous_reset variable which we've already set */
 		backwards_adjust_iam->info->next_reset = get_next_reset_time(backwards_adjust_iam->info, backwards_adjust_iam->info->previous_reset, backwards_adjust_iam->info->previous_reset); 
 		
-		print_to_buf("TEST5");
+		//print_to_buf("TEST5");
 
 		/* set old_history to be new_history */	
 		kfree(old_history->history_data);
@@ -263,7 +280,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(old_history->history_data + old_history->current_index) );
 
 
-		print_to_buf("TEST6");
+		//print_to_buf("TEST6");
 		
 		/* 
 		 * free new history  (which was just temporary) 
@@ -273,7 +290,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 */
 		kfree(new_history);
 		
-		print_to_buf("TEST7\n");
+		//print_to_buf("TEST7\n");
 		back_middle = 0;
 	}
 }
@@ -316,7 +333,7 @@ static void check_for_backwards_time_shift(time_t now)
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
-		reset_buf();
+		//reset_buf();
 		printk("ipt_bandwidth: backwards time shift detected, adjusting\n\n");
 
 		/* adjust */
@@ -327,7 +344,7 @@ static void check_for_backwards_time_shift(time_t now)
 		apply_to_every_string_map_value(id_map, adjust_id_for_backwards_time_shift);
 		up(&userspace_lock);
 
-		printk("done shifting, output: %s\n\n", print_out_buf);
+		//printk("done shifting, output: %s\n\n", print_out_buf);
 
 	}
 	backwards_check = now;
@@ -374,6 +391,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 		time_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
 		time_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
 
+		
 		/* next reset will be the newly computed next_reset. */
 		int node_index=history->num_nodes - 1;
 		shift_timezone_iam->info->next_reset = next_reset;
@@ -386,6 +404,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 			while(node_index > 1)
 			{
 				previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, previous_reset);
+				node_index--;
 			}
 			history->first_end = previous_reset;
 			
@@ -899,7 +918,7 @@ static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, t
 	
 		half_count = 1;
 		tmp = get_next_reset_time(info, (current_next_reset-(half_count*half_interval)),0);
-		while(tmp >= current_next_reset)
+		while(previous_reset >= current_next_reset)
 		{
 			previous_reset = tmp;
 			half_count++;
