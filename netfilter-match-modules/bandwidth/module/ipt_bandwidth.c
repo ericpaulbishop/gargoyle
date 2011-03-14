@@ -524,15 +524,6 @@ static void check_for_timezone_shift(time_t now)
 			old_minutes_west = local_minutes_west;
 
 
-			/*
-			 * make sure timezone shift doesn't inadvertantly 
-			 * trigger backwards shift since
-			 * we've already dealt with the problem 
-			 */
-			backwards_check = now; 
-
-
-
 			up(&userspace_lock);
 		}
 	}
