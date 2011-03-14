@@ -150,7 +150,6 @@ static time_t backwards_adjust_current_time = 0;
 static time_t backwards_adjust_info_previous_reset = 0;
 static time_t backwards_adjust_ips_zeroed = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
-static int back_middle=0;
 
 /*
 static char print_out_buf[25000];
@@ -189,7 +188,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
 	bw_history* old_history = (bw_history*)value;
 	
-	back_middle = 1;
 	if(old_history->num_nodes == 1)
 	{
 		if(backwards_adjust_info_previous_reset > backwards_adjust_current_time)
@@ -203,12 +201,10 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 				backwards_adjust_ips_zeroed = 1;
 			}
 		}
-		back_middle = 0;
 		return;
 	}
 	else if(old_history->last_end < backwards_adjust_current_time)
 	{
-		back_middle = 0;
 		return;
 	}
 	else
@@ -280,7 +276,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 */
 		kfree(new_history);
 		
-		back_middle = 0;
 	}
 }
 static void adjust_id_for_backwards_time_shift(char* key, void* value)
