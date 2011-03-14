@@ -267,7 +267,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		old_history->non_zero_nodes = new_history->non_zero_nodes;
 		old_history->current_index  = new_history->current_index;
 		set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(old_history->history_data + old_history->current_index) );
-		if(key == 0 && backwards_adjust_iam->info->combined_bw != NULL)
+		if(key == 0)
 		{
 			backwards_adjust_iam->info->combined_bw = (uint64_t*)(old_history->history_data + old_history->current_index);
 		}
@@ -2133,7 +2133,11 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		return handle_set_failure(0, 1, 1, buffer);
 	}
 
-
+	/* 
+	 * during set unconditionally set combined_bw to NULL 
+	 * if combined data (ip=0) exists after set exits cleanly, we will restore it
+	 */
+	iam->info->combined_bw = NULL;
 
 	//if zero_unset_ips == 1 && next_ip_index == 0
 	//then clear data for all ips for this id
@@ -2165,7 +2169,6 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				kfree(bw);
 			}
 		}
-		iam->info->combined_bw = NULL;
 	}
 
 	/* 
@@ -2179,7 +2182,6 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		time_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
 		if(next_reset_of_last_backup != iam->info->next_reset)
 		{
-			iam->info->combined_bw = NULL;
 			return handle_set_failure(0, 1, 1, buffer);
 		}
 	}
@@ -2200,21 +2202,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 	if (next_ip_index == header.total_ips)
 	{
-		/* 
-		 * we need to handle info->combined_bw -- if it is null
-		 * and we defined a 0 ip, for type != BANDWIDTH_COMBINED
-		 * we need to set it properly.  If it's not null and
-		 * there is no 0 ip, we need to set it to null
-		 */
-		uint64_t* set_combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
-		if(set_combined_bw != NULL)
-		{
-			iam->info->combined_bw = set_combined_bw;
-		}
-		else
-		{
-			iam->info->combined_bw = NULL;
-		}
+		/* set combined_bw */
+		iam->info->combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
 		set_in_progress = 0;
 	}
 
