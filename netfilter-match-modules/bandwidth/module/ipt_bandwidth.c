@@ -2202,10 +2202,11 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 	if (next_ip_index == header.total_ips)
 	{
-		/* set combined_bw */
-		iam->info->combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
 		set_in_progress = 0;
 	}
+
+	/* set combined_bw */
+	iam->info->combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
 
 	kfree(buffer);
 	spin_unlock_bh(&bandwidth_lock);
