@@ -4,7 +4,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2009-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009-2011 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -135,7 +135,6 @@ static void handle_interval_reset(info_and_maps* iam, time_t now);
 
 static uint64_t pow64(uint64_t base, uint64_t pow);
 static uint64_t get_bw_record_max(void); /* called by init to set global variable */
-static uint64_t add_up_to_max(uint64_t original, uint64_t add, unsigned char is_check);
 
 static inline int is_leap(unsigned int y);
 static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, time_t previous_reset);
@@ -197,7 +196,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	back_middle = 1;
 	if(old_history->num_nodes == 1)
 	{
-		if(backwards_adjust_info_previous_reset < backwards_adjust_current_time)
+		if(backwards_adjust_info_previous_reset > backwards_adjust_current_time)
 		{
 			if(backwards_adjust_ips_zeroed == 0)
 			{
@@ -237,8 +236,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		//print_to_buf("TEST2");
 		
 
-
-		/*oldest index in old history -- we iterate forward through old history using this index */
+		/* oldest index in old history -- we iterate forward through old history using this index */
 		next_old_index = old_history->num_nodes == old_history->max_nodes ? (old_history->current_index+1) % old_history->max_nodes : 0;
 
 
@@ -266,6 +264,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		/* update next_reset variable from previous_reset variable which we've already set */
 		backwards_adjust_iam->info->next_reset = get_next_reset_time(backwards_adjust_iam->info, backwards_adjust_iam->info->previous_reset, backwards_adjust_iam->info->previous_reset); 
 		
+
 		//print_to_buf("TEST5");
 
 		/* set old_history to be new_history */	
@@ -278,8 +277,11 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		old_history->non_zero_nodes = new_history->non_zero_nodes;
 		old_history->current_index  = new_history->current_index;
 		set_long_map_element(backwards_adjust_iam->ip_map, key, (void*)(old_history->history_data + old_history->current_index) );
-
-
+		if(key == 0 && backwards_adjust_iam->info->combined_bw != NULL)
+		{
+			backwards_adjust_iam->info->combined_bw = (uint64_t*)(old_history->history_data + old_history->current_index);
+		}
+		
 		//print_to_buf("TEST6");
 		
 		/* 
@@ -789,6 +791,11 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 				/* only clear ips if this is the last iteration of this update */
 				if(info->next_reset >= now)
 				{
+					/* 
+					 * no need to reset iam->info->combined_bw if it gets deleted here.
+					 * below, at end of function it will get set to NULL if it gets wiped
+					 */
+
 					apply_to_every_long_map_value(do_reset_delete_ips, clear_ips);
 				}
 
@@ -848,17 +855,6 @@ static uint64_t bandwidth_record_max;
 
 #define ADD_UP_TO_MAX(original,add,is_check) (bandwidth_record_max - original > add && is_check== 0) ? original+add : (is_check ? original : bandwidth_record_max);
 
-static uint64_t add_up_to_max(uint64_t original, uint64_t add, unsigned char is_check)
-{
-	if(is_check)
-	{
-		return original;
-	}
-	else
-	{
-		return bandwidth_record_max-original < add ? bandwidth_record_max : original+add ;
-	}
-}
 
 /*
  * Shamelessly yoinked from xt_time.c
@@ -2163,6 +2159,8 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		return handle_set_failure(0, 1, 1, buffer);
 	}
 
+
+
 	//if zero_unset_ips == 1 && next_ip_index == 0
 	//then clear data for all ips for this id
 	if(header.zero_unset_ips && header.next_ip_index == 0)
@@ -2193,6 +2191,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 				kfree(bw);
 			}
 		}
+		iam->info->combined_bw = NULL;
 	}
 
 	/* 
@@ -2206,6 +2205,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 		time_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
 		if(next_reset_of_last_backup != iam->info->next_reset)
 		{
+			iam->info->combined_bw = NULL;
 			return handle_set_failure(0, 1, 1, buffer);
 		}
 	}
@@ -2226,6 +2226,21 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 
 	if (next_ip_index == header.total_ips)
 	{
+		/* 
+		 * we need to handle info->combined_bw -- if it is null
+		 * and we defined a 0 ip, for type != BANDWIDTH_COMBINED
+		 * we need to set it properly.  If it's not null and
+		 * there is no 0 ip, we need to set it to null
+		 */
+		uint64_t* set_combined_bw = (uint64_t*)get_long_map_element(iam->ip_map, 0);
+		if(set_combined_bw != NULL)
+		{
+			iam->info->combined_bw = set_combined_bw;
+		}
+		else
+		{
+			iam->info->combined_bw = NULL;
+		}
 		set_in_progress = 0;
 	}
 
