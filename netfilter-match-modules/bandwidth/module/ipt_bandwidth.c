@@ -189,10 +189,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 {
 	bw_history* old_history = (bw_history*)value;
 	
-	//char tmp[200];
-	//sprintf(tmp, "TEST0, id=%s, key=%ld, ended_in_middle=%d", backwards_adjust_iam->info->id, key, back_middle);
-	//print_to_buf(tmp);
-
 	back_middle = 1;
 	if(old_history->num_nodes == 1)
 	{
@@ -217,8 +213,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 	}
 	else
 	{
-		//print_to_buf("TEST1");
-
 		
 		/* 
 		 * reconstruct new history without newest nodes, to represent data as it was 
@@ -233,7 +227,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			return;
 		}
 
-		//print_to_buf("TEST2");
 		
 
 		/* oldest index in old history -- we iterate forward through old history using this index */
@@ -244,7 +237,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		(new_history->history_data)[ new_history->current_index ] = old_next_start < backwards_adjust_current_time ? (old_history->history_data)[next_old_index] : 0;
 		backwards_adjust_iam->info->previous_reset                = old_next_start < backwards_adjust_current_time ? old_next_start : backwards_adjust_current_time;
 
-		//print_to_buf("TEST3");
 
 		/* iterate through old history, rebuilding in new history*/
 		while( old_next_start < backwards_adjust_current_time )
@@ -259,13 +251,11 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			backwards_adjust_iam->info->previous_reset = old_next_start; /*update previous_reset variable in bw_info as we iterate */
 			old_next_start = old_next_end;
 		}
-		//print_to_buf("TEST4");
 
 		/* update next_reset variable from previous_reset variable which we've already set */
 		backwards_adjust_iam->info->next_reset = get_next_reset_time(backwards_adjust_iam->info, backwards_adjust_iam->info->previous_reset, backwards_adjust_iam->info->previous_reset); 
 		
 
-		//print_to_buf("TEST5");
 
 		/* set old_history to be new_history */	
 		kfree(old_history->history_data);
@@ -282,8 +272,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 			backwards_adjust_iam->info->combined_bw = (uint64_t*)(old_history->history_data + old_history->current_index);
 		}
 		
-		//print_to_buf("TEST6");
-		
 		/* 
 		 * free new history  (which was just temporary) 
 		 * note that we don't need to free history_data from new_history
@@ -292,7 +280,6 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		 */
 		kfree(new_history);
 		
-		//print_to_buf("TEST7\n");
 		back_middle = 0;
 	}
 }
@@ -335,7 +322,6 @@ static void check_for_backwards_time_shift(time_t now)
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
-		//reset_buf();
 		printk("ipt_bandwidth: backwards time shift detected, adjusting\n\n");
 
 		/* adjust */
@@ -345,9 +331,6 @@ static void check_for_backwards_time_shift(time_t now)
 		backwards_adjust_current_time = now - local_seconds_west; 		
 		apply_to_every_string_map_value(id_map, adjust_id_for_backwards_time_shift);
 		up(&userspace_lock);
-
-		//printk("done shifting, output: %s\n\n", print_out_buf);
-
 	}
 	backwards_check = now;
 	spin_unlock_bh(&bandwidth_lock);
