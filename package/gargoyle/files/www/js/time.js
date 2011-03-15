@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -88,12 +88,13 @@ function saveChanges()
 			uciOriginal.removeSection("system", systemSections[0]);
 			uci.removeSection("system", systemSections[0]);
 		}
-		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ\n";
+		var setTimezoneCommand = "/usr/lib/gargoyle/set_time_zone.sh \"$(uci get system.@system[0].timezone)\" \n";
 		
 
 
 
 		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+		
 		//document.getElementById("output").value = commands;	
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
