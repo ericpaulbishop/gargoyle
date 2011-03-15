@@ -346,7 +346,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 
 
 	bw_history* history = (bw_history*)value;
-	uint32_t timezone_adj = (old_minutes_west-local_minutes_west)*60;
+	int32_t timezone_adj = (old_minutes_west-local_minutes_west)*60;
 	#ifdef BANDWIDTH_DEBUG
 		printk("  before jump:\n");
 		printk("    current time = %ld\n",  shift_timezone_current_time);
@@ -357,24 +357,29 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 		printk("    next_end     = %ld\n", next_end);
 		printk("\n");
 	#endif
+	
+	/* given time after shift, calculate next and previous reset times */
+	time_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
+	time_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
+	shift_timezone_iam->info->next_reset = next_reset;
 
 	/*if we're resetting on a constant interval, we can just adjust -- no need to worry about relationship to constant boundaries, e.g. end of day */
 	if(shift_timezone_iam->info->reset_is_constant_interval)
 	{
-		history->first_start = history->first_start + timezone_adj;
-		history->first_end = history->first_end + timezone_adj;
-		history->last_end = history->last_end + timezone_adj;
+		shift_timezone_iam->info->previous_reset = previous_reset;
+		if(history->num_nodes > 1)
+		{
+			history->first_start = history->first_start + timezone_adj;
+			history->first_end = history->first_end + timezone_adj;
+			history->last_end = history->last_end + timezone_adj;
+		}
 	}
 	else
 	{
-		/* given time after shift, calculate next and previous reset times */
-		time_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
-		time_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
 
 		
 		/* next reset will be the newly computed next_reset. */
 		int node_index=history->num_nodes - 1;
-		shift_timezone_iam->info->next_reset = next_reset;
 		if(node_index > 0)
 		{
 			/* based on new, shifted time, iterate back over all nodes in history */
