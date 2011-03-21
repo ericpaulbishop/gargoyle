@@ -1102,7 +1102,9 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 				uint64_t* old_bw;
 				*new_bw = initial_bandwidth;
 			       	old_bw = set_long_map_element(ip_map, ip, (void*)new_bw );
-				if(old_bw != NULL)
+				
+				/* only free old_bw if num_intervals_to_save is zero -- otherwise it already got freed above when we wiped the old history */
+				if(old_bw != NULL && info->num_intervals_to_save == 0)
 				{
 					free(old_bw);
 				}
@@ -2402,6 +2404,7 @@ static void destroy(
 		down(&userspace_lock);
 		spin_lock_bh(&bandwidth_lock);
 		
+		info->combined_bw = NULL;
 		iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
 		if(iam != NULL)
 		{
