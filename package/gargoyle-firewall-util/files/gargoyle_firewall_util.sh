@@ -44,7 +44,7 @@ insert_remote_accept_rules()
 
 	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts) 2> /dev/nul
 	ssh_port=$(uci get dropbear.@dropbear[0].Port)
-	if [ -z "$ssh_max_attempts"] || [ "$ssh_max_attempts" = "unlimited" ] ; then
+	if [ -z "$ssh_max_attempts" ] || [ "$ssh_max_attempts" = "unlimited" ] ; then
 		ssh_max_attempts=""
 	else
 		ssh_max_attempts=$(( $ssh_max_attempts + 1 ))
