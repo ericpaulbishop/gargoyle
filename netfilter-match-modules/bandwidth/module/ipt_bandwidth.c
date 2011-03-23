@@ -2405,8 +2405,8 @@ static void destroy(
 		spin_lock_bh(&bandwidth_lock);
 		
 		info->combined_bw = NULL;
-		iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
-		if(iam != NULL)
+		iam = info->iam;
+		if(iam != NULL) /* iam will be NULL in case where info is a check -- here we do NOT want to free histories etc. */
 		{
 			unsigned long num_destroyed;
 			if(iam->ip_map != NULL && iam->ip_history_map != NULL)
