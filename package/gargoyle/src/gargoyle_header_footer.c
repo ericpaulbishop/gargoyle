@@ -45,9 +45,12 @@ void define_package_vars(char** package_vars_to_load);
 void print_interface_vars(void);
 void print_hostname_map(void);
 void print_js_var(char* var, char* value);
+void print_js_list_var(char* var, list** value);
 char* get_interface_mac(char* if_name);
 char* get_interface_ip(char* if_name);
 char* get_interface_netmask(char* if_name);
+int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac);
+void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac);
 char** load_interfaces_from_proc_file(char* filename);
 string_map* get_hostnames(void);
 char* get_option_value_string(struct uci_option* uopt);
@@ -578,12 +581,13 @@ void print_interface_vars(void)
 	struct uci_element *e = NULL;
 
 	
-	char** wireless_ifs = load_interfaces_from_proc_file("/proc/net/wireless");
-	for(wif_index = 0; wireless_ifs[wif_index] != NULL; wif_index++)
+	char** wireless_if_arr = load_interfaces_from_proc_file("/proc/net/wireless");
+	int wif_index;
+	for(wif_index = 0; wireless_if_arr[wif_index] != NULL; wif_index++)
 	{
-		push_list(wireless_ifs, strdup(wireless_ifs[wif_index]))
+		push_list(wireless_ifs, (void*)strdup(wireless_if_arr[wif_index]));
 	}
-	free_null_terminated_string_array(wireless_ifs);
+	free_null_terminated_string_array(wireless_if_arr);
 
 	
 	if(uci_load(ctx, "wireless", &p) == UCI_OK)
@@ -595,7 +599,7 @@ void print_interface_vars(void)
 			{
 				if(uci_wireless == NULL)
 				{
-					push_list(wireless_uci, strdup(section->e.name) );
+					push_list(wireless_uci, (void*)strdup(section->e.name) );
 				}
 			}
 		}
@@ -665,9 +669,9 @@ void print_interface_vars(void)
 		{
 			default_wan_mac = strdup(uci_wan_mac);
 		}
-		if(default_wan_mac == NULL && uci_lan_mac != NULL)
+		if(default_wan_mac == NULL && current_lan_mac != NULL)
 		{
-			default_wan_mac = strdup(uci_lan_mac);
+			default_wan_mac = strdup(current_lan_mac);
 		}
 		if(default_wan_mac == NULL)
 		{
@@ -696,15 +700,15 @@ void print_interface_vars(void)
 			wireless_mac = (char*)malloc(20);
 			if(wireless_if_num < 10)
 			{
-				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_ifnum);
+				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_if_num);
 			}
 			else
 			{
-				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_ifnum);
+				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_if_num);
 			}
 		}
-		push_list(wireless_macs, wireless_mac);
-		push_list(tmp_list, wireless_if);
+		push_list(wireless_macs, (void*)wireless_mac);
+		push_list(tmp_list, (void*)wireless_if);
 		wireless_if_num++;
 	}
 	unsigned long num_destroyed;
@@ -715,7 +719,7 @@ void print_interface_vars(void)
 
 
 	print_js_list_var("wirelessIfs", &wireless_ifs);
-	print_js_list_var("uciWirelessDevs", &wirless_uci);
+	print_js_list_var("uciWirelessDevs", &wireless_uci);
 	print_js_list_var("currentWirelessMacs", &wireless_macs);
 
 
@@ -934,7 +938,7 @@ int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if,
 			unsigned line_pieces = 0;
 			char** split_line;
 			trim_flanking_whitespace(file_lines[line_index]);
-			split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0 &line_pieces);
+			split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0, &line_pieces);
 			if(line_pieces >1)
 			{
 				if(safe_strcmp(split_line[0], "default_lan_if") == 0)
