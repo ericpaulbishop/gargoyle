@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -38,6 +38,8 @@
 #define MINIMAL_HEADER 1
 #define HEADER 2
 #define FOOTER 3
+
+#define DEFAULT_IF_FILE "/etc/gargoyle_default_ifs"
 
 void define_package_vars(char** package_vars_to_load);
 void print_interface_vars(void);
@@ -513,8 +515,7 @@ void define_package_vars(char** package_vars_to_load)
 		
 		for(package_index=0; package_vars_to_load[package_index] != NULL; package_index++)
 		{
-			struct uci_context *ctx;
-			ctx = uci_alloc_context();
+			struct uci_context *ctx = uci_alloc_context();
 			struct uci_package *p = NULL;
 			struct uci_element *e = NULL;
 			if(uci_load(ctx, package_vars_to_load[package_index], &p) == UCI_OK)
@@ -538,147 +539,105 @@ void define_package_vars(char** package_vars_to_load)
 				
 				}
 			}
+			uci_free_context(ctx);
 		}
 	}	
 }
 
 void print_interface_vars(void)
 {
-	// load default interface names from /proc/net/dev
-	// and wireless names from /proc/net/wireless
-	//
-	// this is wicked trashy (highly non-portable)
-	// but 1) it works, 2) deals with the problem 
-	// of managing switched interfaces and 3) deals with
-	// the problem of determining wifi interfaces
-
-	//load wireless interface name
-	char* wireless_if = NULL;
-	char** wireless_ifs = load_interfaces_from_proc_file("/proc/net/wireless");
-	if(wireless_ifs[0] != NULL)
-	{
-		wireless_if = strdup(wireless_ifs[0]);
-	}
-	int wif_index = 0;
-	for(wif_index = 0; wireless_ifs[wif_index] != NULL; wif_index++)
-	{
-		free(wireless_ifs[wif_index]);
-	}
-	free(wireless_ifs);
 
 
+	list* wireless_ifs  = initialize_list();
+	list* wireless_uci = initialize_list();
 
-	
 	char* default_lan_if  = NULL;
 	char* default_wan_if  = NULL;
+	char* default_wan_mac = NULL;
+	int   loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
 
-	// load lan & wan interface names
-	// because we want DEFAULT interfaces, we can't load from config
-	// by default lan interface is first eth* interface and wan is second
-	// If exceptions to this are found, they should be hard-coded in here
-	// to correct issues.
-	char** interfaces = load_interfaces_from_proc_file("/proc/net/dev");
 	
-	int have_switched_eths=0;
-	int interface_index; 
-	unsigned long num_destroyed;
-	for(interface_index=0; interfaces[interface_index] != NULL && have_switched_eths == 0; interface_index++)
-	{
-		have_switched_eths = strstr(interfaces[interface_index], "eth") != NULL && strstr(interfaces[interface_index], ".") != NULL ? 1 : 0;
-	}
-
-	list* eths = initialize_list();	
-	for(interface_index=0; interfaces[interface_index] != NULL; interface_index++)
-	{
-		if(	strstr(interfaces[interface_index], "eth") != NULL && 
-			(strstr(interfaces[interface_index], ".") != NULL || have_switched_eths == 0)
-		  )
-		{
-			push_list(eths, strdup(interfaces[interface_index]));
-		}
-		free(interfaces[interface_index]);
-	}
-	free(interfaces);
-
-	if(eths->length > 1)
-	{
-		default_wan_if = (char*)pop_list(eths);
-	}
-	while(eths->length > 0)
-	{
-		if(default_lan_if == NULL)
-		{
-			default_lan_if = (char*)shift_list(eths);
-		}
-		else
-		{
-			char* tmp = default_lan_if;
-			default_lan_if = dynamic_strcat(3, tmp, " ", (char*)shift_list(eths));
-			free(tmp);
-		}
-	}
-	destroy_list(eths, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-
-	//if we have switched eths but default_wan_if is not defined,
-	//then we probably have just disabled it.  We wouldn't have an eth0.0
-	//active if eth0.1 were not potentially available (it would just be eth0)
-	if(have_switched_eths == 1 && default_wan_if == NULL)
-	{
-		int lan_num = 0;
-		char wan_num_str[5];
-		sscanf(default_lan_if, "eth0.%d", &lan_num);
-		sprintf(wan_num_str, "%d", (lan_num+1));
-		default_wan_if = dynamic_strcat(2, "eth0.", wan_num_str);
-	}
-
-
-	/*
-	 * Load UCI interface variables
-	*/
 	char* uci_wan_mac     = NULL;
 	char* uci_wan_if      = NULL;
 	char* uci_wan_dev     = NULL;
-	char* uci_wan_gateway = NULL;
 	char* uci_lan_if      = NULL;
+	char* uci_lan_dev     = NULL;
+	char* uci_lan_bridge  = NULL;
+
+	char* uci_wan_gateway = NULL;
 	char* uci_lan_ip      = NULL;
 	char* uci_lan_mask    = NULL;
 	char* uci_wireless    = NULL;
 
-	struct uci_context *ctx;
-	ctx = uci_alloc_context();
+
+
+
+	struct uci_context *ctx = uci_alloc_context();
+	struct uci_context *state_ctx = uci_alloc_context();
 	struct uci_package *p = NULL;
 	struct uci_element *e = NULL;
+
+	
+	char** wireless_ifs = load_interfaces_from_proc_file("/proc/net/wireless");
+	for(wif_index = 0; wireless_ifs[wif_index] != NULL; wif_index++)
+	{
+		push_list(wireless_ifs, strdup(wireless_ifs[wif_index]))
+	}
+	free_null_terminated_string_array(wireless_ifs);
+
+	
+	if(uci_load(ctx, "wireless", &p) == UCI_OK)
+	{
+		uci_foreach_element( &p->sections, e)
+		{
+			struct uci_section *section = uci_to_section(e);
+			if(strstr(section->type, "wifi-device") != NULL)
+			{
+				if(uci_wireless == NULL)
+				{
+					push_list(wireless_uci, strdup(section->e.name) );
+				}
+			}
+		}
+	}
+
 	if(uci_load(ctx, "network", &p) == UCI_OK)
 	{
 		if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
+		if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		{
+			uci_wan_if = get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		{
+			uci_lan_if = get_option_value_string(uci_to_option(e));
+		}
 	}
 
 
-	struct uci_context *state_ctx = uci_alloc_context();
+
 	uci_add_history_path(state_ctx, state_ctx->savedir);
        	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
-		char* switch_dev = NULL;
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
 		{
 			uci_wan_dev=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "device") == UCI_OK)
 		{
-			uci_wan_if=get_option_value_string(uci_to_option(e));
+			uci_lan_dev=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		{
+			uci_lan_bridge=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
 		{
 			uci_wan_gateway=get_option_value_string(uci_to_option(e));
-		}
-
-		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
-		{
-			uci_lan_if=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
 		{
@@ -688,101 +647,76 @@ void print_interface_vars(void)
 		{
 			uci_lan_mask=get_option_value_string(uci_to_option(e));
 		}
-		
-		//if default wan if is set to a switch device, then we have it backwards, and the wan should be the lan
-		//this is a problem for, e.g. routerstation pro where eth1 is the switch
-		uci_foreach_element( &p->sections, e)
-		{
-			struct uci_section *section = uci_to_section(e);
-			if(strstr(section->type, "switch") != NULL)
-			{
-				struct uci_element *e2;
-				uci_foreach_element(&section->options, e2) 
-				{
-					if(strcmp(e2->name,"device")==0)
-					{
-						switch_dev = get_option_value_string(uci_to_option(e2));
-					}
-				}
-			}
-		}
-		if(switch_dev != NULL && default_wan_if != NULL)
-		{
-			if(strcmp(switch_dev, default_wan_if) == 0)
-			{
-				//wan is set to a switch, so swap default lan & wan if
-				char* tmp = default_wan_if;
-				default_wan_if = default_lan_if;
-				default_lan_if = tmp;
-			}
-			free(switch_dev);
-		}
-		
-	}
-	if(uci_load(state_ctx, "wireless", &p) == UCI_OK)
-	{
-		uci_foreach_element( &p->sections, e)
-		{
-			struct uci_section *section = uci_to_section(e);
-			if(strstr(section->type, "wifi-device") != NULL)
-			{
-				if(uci_wireless == NULL)
-				{
-					uci_wireless=strdup(section->e.name);
-				}
-			}
-		}
 	}
 
 
-
-	//if multiple interfaces in bridge, uci_lan_if will contain multiple ifs, 
-	//which get_interface_mac wouldn't be able to handle
-	//thus we need to lookup br-lan instead of uci_lan_if
-	char* current_lan_mac = get_interface_mac("br-lan");
-	char* current_lan_ip = uci_lan_ip != NULL ? uci_lan_ip : get_interface_ip("br-lan");
-	char* current_lan_mask = uci_lan_mask != NULL ? uci_lan_mask : get_interface_netmask("br-lan");
-
-	char* current_wan_mac = get_interface_mac(uci_wan_dev);
-	char* current_wan_ip = get_interface_ip(uci_wan_if);
-	char* current_wan_mask = get_interface_netmask(uci_wan_if);
-	char* current_wireless_mac = get_interface_mac(wireless_if);
-	if(current_wireless_mac == NULL)
+	char* current_lan_bridge = uci_lan_bridge != NULL ? strdup(uci_lan_bridge) : strdup("br-lan");
+	char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(uci_lan_dev);
+	char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(uci_wan_dev);
+	char* current_wan_mac = get_interface_mac(current_wan_if);
+	char* current_lan_mac = get_interface_mac(current_lan_bridge);
+	
+	if(loaded_default_ifs == 0)
 	{
-		current_wireless_mac = get_interface_mac(uci_wireless);
-	}
-
-	char* default_wan_mac = NULL;
-	if(default_wan_if != NULL && uci_wan_mac == NULL)
-	{
-		default_wan_mac = get_interface_mac(default_wan_if);
+		default_lan_if = strdup(current_lan_if);
+		default_wan_if = strdup(current_wan_if);
+		default_wan_mac = strdup(current_wan_mac);
+		if(default_wan_mac == NULL && uci_wan_mac == NULL)
+		{
+			default_wan_mac = strdup(uci_wan_mac);
+		}
+		if(default_wan_mac == NULL && uci_lan_mac != NULL)
+		{
+			default_wan_mac = strdup(uci_lan_mac);
+		}
 		if(default_wan_mac == NULL)
 		{
-			default_wan_mac = strdup("00:11:22:33:44:55");
+			default_wan_mac = "00:11:22:33:44:55";
 		}
+		save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
 	}
-	else if(default_wan_if == NULL)
+
+
+	char* current_lan_ip = uci_lan_ip != NULL ? strdup(uci_lan_ip) : get_interface_ip(current_lan_bridge);
+	char* current_lan_mask = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge);
+
+	char* current_wan_ip = get_interface_ip(current_wan_if);
+	char* current_wan_mask = get_interface_netmask(current_wan_if);
+
+
+	list* tmp_list = initialize_list();
+	list* wireless_macs = initialize_list();
+	int wireless_if_num = 1;
+	while(wireless_ifs->length > 0)
 	{
-		default_wan_mac = strdup("00:11:22:33:44:55");
+		char* wireless_if = (char*)shift_list(wireless_ifs);
+		char* wireless_mac = get_interface_mac(wireless_if);
+		if(wireless_mac == NULL)
+		{
+			wireless_mac = (char*)malloc(20);
+			if(wireless_if_num < 10)
+			{
+				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_ifnum);
+			}
+			else
+			{
+				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_ifnum);
+			}
+		}
+		push_list(wireless_macs, wireless_mac);
+		push_list(tmp_list, wireless_if);
+		wireless_if_num++;
 	}
-	else if(uci_wan_mac != NULL)
-	{
-		//determine lan_mac + 1
-		char* inc_mac = strdup(current_lan_mac);
-		int end;
-		sscanf(inc_mac+15, "%X", &end);
-		end = (end+1) % 0x100;
-		sprintf(inc_mac+15, "%.2X", end);
-		default_wan_mac = inc_mac;
-	}
+	unsigned long num_destroyed;
+	destroy_list(wireless_ifs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	wireless_ifs = tmp_list;
 
 
 
 
-
-	print_js_var("wirelessIf", wireless_if);
-	print_js_var("uciWireless", uci_wireless);
-	print_js_var("currentWirelessMac", current_wireless_mac);
+	print_js_list_var("wirelessIfs", &wireless_ifs);
+	print_js_list_var("uciWirelessDevs", &wirless_uci);
+	print_js_list_var("currentWirelessMacs", &wireless_macs);
 
 
 	print_js_var("defaultLanIf", default_lan_if);
@@ -802,7 +736,28 @@ void print_interface_vars(void)
 
 	uci_free_context(ctx);
 	uci_free_context(state_ctx);
+
+	/* there are an assload of other variables to free... but, eh, fuck it, this thing doesn't run as a daemon 
+	 *
+	 * variables are defined/coped with strdups, so we won't get any double-free errors if we do decide to implement
+	 * code to free them at a later time
+	 */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void print_hostname_map(void)
 {
@@ -834,6 +789,31 @@ void print_hostname_map(void)
 }
 
 
+void print_js_list_var(char* var, list** value)
+{
+	int first = 1;
+	printf("\tvar %s = [ ", var);
+	if(value != NULL)
+	{
+		if(*value != NULL)
+		{
+			list* tmp = initialize_list();
+			list* vals = *value;
+			unsigned long num_destroyed;
+			while(vals->length > 0)
+			{
+				char* val = (char*)shift_list(vals);
+				printf("%s \"%s\"", first==0 ? "," : "", val);
+				first = 0;
+				push_list(tmp, val);
+			}
+			destroy_list(vals, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			*value = tmp;
+		}
+	}
+	printf(" ];\n");
+
+}
 
 void print_js_var(char* var, char* value)
 {
@@ -914,6 +894,71 @@ char* get_interface_netmask(char* if_name)
 	}
 	return mask;
 
+}
+
+void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac)
+{
+	FILE *interface_file = fopen(DEFAULT_IF_FILE, "w");
+	if(interface_file != NULL)
+	{
+		fprintf(interface_file, "default_lan_if\t%s\n", default_lan_if);
+		fprintf(interface_file, "default_wan_if\t%s\n", default_wan_if);
+		fprintf(interface_file, "default_wan_mac\t%s\n", default_wan_mac);
+		fclose(interface_file);
+	}
+
+}
+
+int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac)
+{
+	FILE *interface_file = fopen(DEFAULT_IF_FILE, "r");
+	char newline_terminator[]= {'\n', '\r'};
+	char spaces[] = {' ', '\t'};
+	
+	*default_lan_if = NULL;
+	*default_wan_if = NULL;
+
+
+	if(interface_file != NULL)
+	{
+		unsigned long read_length;
+		char* file_data = read_entire_file(interface_file, 100, &read_length);
+		unsigned long num_lines;
+		char** file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_lines);
+		fclose(interface_file);
+		free(file_data);
+
+		int line_index=0;
+		for(line_index=0; line_index < num_lines; line_index++)
+		{
+			unsigned line_pieces = 0;
+			char** split_line;
+			trim_flanking_whitespace(file_lines[line_index]);
+			split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0 &line_pieces);
+			if(line_pieces >1)
+			{
+				if(safe_strcmp(split_line[0], "default_lan_if") == 0)
+				{
+					*default_lan_if = join_strs(" ", split_line+1, -1, 0, 0);
+				}
+				if(safe_strcmp(split_line[0], "default_wan_if") == 0)
+				{
+					*default_wan_if = join_strs(" ", split_line+1, -1, 0, 0);
+				}
+				if(safe_strcmp(split_line[0], "default_wan_mac") == 0)
+				{
+					*default_wan_mac = join_strs(" ", split_line+1, -1, 0, 0);
+				}
+
+
+			}
+			free_null_terminated_string_array(split_line);
+		}
+		free_null_terminated_string_array(file_lines);
+
+	}
+
+	return *default_lan_if != NULL || *default_wan_if != NULL ? 1 : 0;
 }
 
 char** load_interfaces_from_proc_file(char* filename)
