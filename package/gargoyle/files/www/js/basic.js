@@ -1183,9 +1183,8 @@ function resetData()
 	{
 		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
 		var releaseDate = new Date();
-		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-			releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000)) );
-
+		var leaseStartSeconds = (parseInt(currentDateSeconds) - parseInt(uptime)) + parseInt(leaseStart);
+		releaseDate.setTime( (leaseStartSeconds*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000) );
 		
 		setChildText("dhcp_expires", localdate(releaseDate));
 		setChildText("dhcp_ip", currentWanIp);
@@ -1991,9 +1990,11 @@ function renewDhcpLease()
 	commands.push("sleep 1");
 	commands.push("wait_sec=$(($wait_sec - 1))");
 	commands.push("done");
-	commands.push("echo \"var wi = \\\"\"$(uci -P /var/state get network.wan.ipaddr )\"\\\";\"");
-	commands.push("echo \"var ls = \\\"\"$(uci -P /var/state get network.wan.lease_acquired )\"\\\";\"");
-	commands.push("echo \"var ll = \\\"\"$(uci -P /var/state get network.wan.lease_lifetime )\"\\\";\"");
+	commands.push("echo \"var cd = \\\"\"$(date +%s)\"\\\";\"");
+	commands.push("echo \"var up  = \\\"\"$(cat /proc/uptime | sed 's/\\..*$//g' | sed 's/ .*$//g')\"\\\";\"");
+	commands.push("echo \"var wi  = \\\"\"$(uci -P /var/state get network.wan.ipaddr )\"\\\";\"");
+	commands.push("echo \"var ls  = \\\"\"$(uci -P /var/state get network.wan.lease_acquired )\"\\\";\"");
+	commands.push("echo \"var ll  = \\\"\"$(uci -P /var/state get network.wan.lease_lifetime )\"\\\";\"");
 
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	setControlsEnabled(false, true, "Renewing DHCP Lease");
@@ -2002,8 +2003,11 @@ function renewDhcpLease()
 		if(req.readyState == 4)
 		{
 			var reqLines = req.responseText.split(/[\r\n]+/);
+			leaseLifetime = -1;
 			while(reqLines.length > 0)
 			{
+				var cd = "";
+				var up = "";
 				var wi = "";
 				var ls = "";
 				var ll = "";
@@ -2011,17 +2015,19 @@ function renewDhcpLease()
 				if(line.match(/^var/))
 				{
 					eval(line);
-					if(ll != "") { leaseLifetime = ll; }
-					if(ls != "") { leaseStart = ls; }
+					if(cd != "") { currentDateSeconds = parseInt(cd); }
+					if(up != "") { uptime = parseInt(up);  }
+					if(ll != "") { leaseLifetime = parseInt(ll); }
+					if(ls != "") { leaseStart = parseInt(ls); }
 					if(wi != "") { setChildText("dhcp_ip", wi); }
 				}
 			}
-			if(leaseLifetime != "")
+			if(leaseLifetime > 0)
 			{
 				var releaseDate = new Date();
-				releaseDate.setTime( ((parseInt(leaseStart)*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000)) );
+				var leaseStartSeconds = (currentDateSeconds - uptime) + leaseStart;
+				releaseDate.setTime( (leaseStartSeconds*1000) + (leaseLifetime*1000) + (timezoneOffset*1000) );
 				setChildText("dhcp_expires", localdate(releaseDate));
-
 			}
 
 			setControlsEnabled(true);
@@ -2029,3 +2035,4 @@ function renewDhcpLease()
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
+

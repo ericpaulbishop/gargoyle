@@ -18,15 +18,13 @@
 
 	cur_date_seconds=$(date +%s)
 	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')
-	lease_start_uptime=$(uci -P /var/state get network.wan.lease_acquired_uptime 2>/dev/null)
-	lease_start=$(uci -P /var/state get network.wan.lease_acquired 2>/dev/null )
+	lease_start=$(uci -P /var/state get network.wan.lease_acquired 2>/dev/null)
 	lease_lifetime=$(uci -P /var/state get network.wan.lease_lifetime 2>/dev/null)
 	echo "var currentDateSeconds = \"$cur_date_seconds\";"
 	echo "var uptime = \"$uptime\";"
-	echo "var leaseStartUptime = \"$lease_start_uptime\";"
 	echo "var leaseStart = \"$lease_start\";"
 	echo "var leaseLifetime = \"$lease_lifetime\";"
-	echo "var timezoneOffset = \""$(date +%z)"\";"
+	echo "var timezoneOffStr = \""$(date +%z)"\";"
 	timezone_is_utc=$(uci get system.@system[0].timezone | grep "^UTC" | sed 's/UTC//g')
 	if [ -n "$timezone_is_utc" ] ; then
 		echo "var timezoneName = \""$( echo "UTC-$timezone_is_utc" | sed 's/\-\-/+/g'  )"\";"
@@ -36,7 +34,7 @@
 	fi
 
 ?>
-var timezoneOffset = (parseInt(timezoneOffset.substr(0,3),10)*60+parseInt(timezoneOffset.substr(3,2),10))*60;
+var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
 var policyOption="";
 if(wirelessDriver == "broadcom" || wirelessDriver == "mac80211")

@@ -33,7 +33,7 @@ brctl showmacs br-lan | grep "yes" | awk ' { print "allLanMacs.push(\"" $2 "\");
 
 
 
-echo "var wifiDevG=uciWireless;" >> "$out_file"
+echo "var wifiDevG=uciWirelessDevs.length > 0 ? uciWirelessDevs[0] : \"\";" >> "$out_file"
 echo "var wifiDevA=\"\";" >> "$out_file"
 
 if [ -e /lib/wifi/broadcom.sh ] ; then
