@@ -121,9 +121,9 @@ function saveChanges()
 			}
 			else if(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )
 			{
-				//just in case wirelessIf doesn not exist, remove variable first
+				//just in case wirelessIf does not exist, remove variable first
 				uci.remove('network', 'lan', 'ifname');
-				uci.set('network', 'lan', 'ifname', wirelessIf);
+				uci.set('network', 'lan', 'ifname', wirelessIfs.length > 0 ? wirelessIfs[0] : "");
 			}
 			else 
 			{
@@ -1196,8 +1196,8 @@ function resetData()
 	}
 
 	
-	setChildText("bridge_wifi_mac", currentWirelessMac, null, null, null);
-	setChildText("wifi_mac", currentWirelessMac, null, null, null);
+	setChildText("bridge_wifi_mac",  currentWirelessMacs[0], null, null, null);
+	setChildText("wifi_mac", currentWirelessMacs[0], null, null, null);
 
 
 	var confIsBridge = isBridge(uciOriginal);
@@ -1282,7 +1282,14 @@ function resetData()
 
 
 	//reset default wan mac if isBcm94704 is true
-	if(isBcm94704 && uciOriginal.get("network", "wan", "ifname") != wirelessIf && uciOriginal.get("network", "wan", "macaddr") != "")
+	var wanIsWireless = false;
+	var wifIndex=0;
+	for(wifIndex=0; wifIndex < wirelessIfs.length; wifIndex++)
+	{
+		wanIsWireless = uciOriginal.get("network", "wan", "ifname") == wirelessIfs[wifIndex];
+	}
+	
+	if(isBcm94704 && (!wanIsWireless) && uciOriginal.get("network", "wan", "macaddr") != "")
 	{
 		var currentMac = uciOriginal.get("network", "wan", "macaddr").toUpperCase();
 		var currentStart = currentMac.substr(0, 15);

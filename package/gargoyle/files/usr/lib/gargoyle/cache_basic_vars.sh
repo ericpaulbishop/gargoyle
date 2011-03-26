@@ -103,3 +103,10 @@ else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
 	echo "var wifiN = false;" >> "$out_file"
 fi
+
+# cache default interfaces if we haven't already
+# this script is run on first boot by hotplug, so
+# this will make sure the defaults get cached right
+# away
+gargoyle_header_footer -i >/dev/null 2>&1
+
