@@ -566,11 +566,14 @@ void print_interface_vars(void)
 	char* uci_lan_if      = NULL;
 	char* uci_lan_dev     = NULL;
 	char* uci_lan_bridge  = NULL;
+	char* uci_wan_bridge  = NULL;
+	char* uci_wan_type    = NULL;
 
 	char* uci_wan_gateway = NULL;
 	char* uci_lan_ip      = NULL;
 	char* uci_lan_mask    = NULL;
-	char* uci_wireless    = NULL;
+	char* uci_wan_ip      = NULL;
+	char* uci_wan_mask    = NULL;
 
 
 
@@ -597,10 +600,7 @@ void print_interface_vars(void)
 			struct uci_section *section = uci_to_section(e);
 			if(strstr(section->type, "wifi-device") != NULL)
 			{
-				if(uci_wireless == NULL)
-				{
-					push_list(wireless_uci, (void*)strdup(section->e.name) );
-				}
+				push_list(wireless_uci, (void*)strdup(section->e.name) );
 			}
 		}
 	}
@@ -614,6 +614,10 @@ void print_interface_vars(void)
 		if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
 		{
 			uci_wan_if = get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "network", "wan", "type") == UCI_OK)
+		{
+			uci_wan_type = get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
 		{
@@ -639,6 +643,10 @@ void print_interface_vars(void)
 		{
 			uci_lan_bridge=get_option_value_string(uci_to_option(e));
 		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		{
+			uci_wan_bridge=get_option_value_string(uci_to_option(e));
+		}
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
 		{
 			uci_wan_gateway=get_option_value_string(uci_to_option(e));
@@ -651,21 +659,39 @@ void print_interface_vars(void)
 		{
 			uci_lan_mask=get_option_value_string(uci_to_option(e));
 		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
+		{
+			uci_wan_ip=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
+		{
+			uci_wan_mask=get_option_value_string(uci_to_option(e));
+		}
+
 	}
 
 
 	char* current_lan_bridge = uci_lan_bridge != NULL ? strdup(uci_lan_bridge) : strdup("br-lan");
 	char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(uci_lan_dev);
 	char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(uci_wan_dev);
+	if(safe_strcmp(uci_wan_type, "bridge") == 0 && (uci_wan_if == NULL || safe_strcmp(uci_wan_if, "") == 0))
+	{
+		current_wan_if = (uci_wan_bridge != NULL && strcmp(uci_wan_bridge, "") != 0) ? strdup(uci_wan_bridge) : strdup("br-wan");
+	}
 	char* current_wan_mac = get_interface_mac(current_wan_if);
 	char* current_lan_mac = get_interface_mac(current_lan_bridge);
-	
+
 	if(loaded_default_ifs == 0)
 	{
 		default_lan_if = strdup(current_lan_if);
 		default_wan_if = strdup(current_wan_if);
 		default_wan_mac = strdup(current_wan_mac);
-		if(default_wan_mac == NULL && uci_wan_mac == NULL)
+
+		if(default_wan_if == NULL)
+		{
+			default_wan_if = strdup(current_lan_if);
+		}
+		if(default_wan_mac == NULL && uci_wan_mac != NULL)
 		{
 			default_wan_mac = strdup(uci_wan_mac);
 		}
@@ -680,12 +706,14 @@ void print_interface_vars(void)
 		save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
 	}
 
+	
 
-	char* current_lan_ip = uci_lan_ip != NULL ? strdup(uci_lan_ip) : get_interface_ip(current_lan_bridge);
+
+	char* current_lan_ip   = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : get_interface_ip(current_lan_bridge);
 	char* current_lan_mask = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge);
 
-	char* current_wan_ip = get_interface_ip(current_wan_if);
-	char* current_wan_mask = get_interface_netmask(current_wan_if);
+	char* current_wan_ip   = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : get_interface_ip(current_wan_if);
+	char* current_wan_mask = uci_wan_mask != NULL ? strdup(uci_wan_mask) : get_interface_netmask(current_wan_if);
 
 
 	list* tmp_list = initialize_list();
@@ -732,7 +760,7 @@ void print_interface_vars(void)
 
 	print_js_var("defaultWanIf", default_wan_if);
 	print_js_var("defaultWanMac", default_wan_mac);
-	print_js_var("currentWanIf", uci_wan_if);
+	print_js_var("currentWanIf", current_wan_if);
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
@@ -743,7 +771,7 @@ void print_interface_vars(void)
 
 	/* there are an assload of other variables to free... but, eh, fuck it, this thing doesn't run as a daemon 
 	 *
-	 * variables are defined/coped with strdups, so we won't get any double-free errors if we do decide to implement
+	 * variables are defined/copied with strdups, so we won't get any double-free errors if we do decide to implement
 	 * code to free them at a later time
 	 */
 }
