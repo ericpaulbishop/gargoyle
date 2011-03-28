@@ -49,11 +49,15 @@ void *safe_malloc(size_t size)
 
 char* safe_strdup(const char* str)
 {
-	char* new_str = strdup(str);
-	if(new_str == NULL)
+	char* new_str = NULL;
+	if(str != NULL)
 	{
-		fprintf(stderr, "ERROR: MALLOC FAILURE!\n");
-		exit(1);
+		new_str = strdup(str);
+		if(new_str == NULL)
+		{
+			fprintf(stderr, "ERROR: MALLOC FAILURE!\n");
+			exit(1);
+		}
 	}
 	return new_str;
 }

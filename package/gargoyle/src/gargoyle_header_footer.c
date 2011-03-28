@@ -683,11 +683,11 @@ void print_interface_vars(void)
 
 	if(loaded_default_ifs == 0)
 	{
-		default_lan_if = strdup(current_lan_if);
-		default_wan_if = strdup(current_wan_if);
-		default_wan_mac = strdup(current_wan_mac);
+		default_lan_if = current_lan_if != NULL ? strdup(current_lan_if) : NULL;
+		default_wan_if = current_wan_if != NULL ? strdup(current_wan_if) : NULL;
+		default_wan_mac = current_wan_mac != NULL ? strdup(current_wan_mac) : NULL;
 
-		if(default_wan_if == NULL)
+		if(default_wan_if == NULL && current_lan_if != NULL)
 		{
 			default_wan_if = strdup(current_lan_if);
 		}
@@ -701,7 +701,7 @@ void print_interface_vars(void)
 		}
 		if(default_wan_mac == NULL)
 		{
-			default_wan_mac = "00:11:22:33:44:55";
+			default_wan_mac = strdup("00:11:22:33:44:55");
 		}
 		save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
 	}
