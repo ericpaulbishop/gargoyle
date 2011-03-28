@@ -1,6 +1,6 @@
-#!/usr/bin/haserl --upload-limit=8192 --upload-dir=/tmp/
+#!/usr/bin/haserl --upload-limit=1048576 --upload-dir=/tmp/
 <?
-	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -19,7 +19,19 @@
 	
 
 	cd /tmp/up/
-	echo "<script type=\"text/javascript\">top.uploaded();</script>"
-	
-	/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+	if [ -e /usr/bin/bin2trx ] ; then
+		/usr/bin/bin2trx /tmp/up/upgrade >/tmp/up/trxtest 2>&1
+		trx_test=$(cat /tmp/up/trxtest)
+		if [ -n "$trx_test" ] ; then
+			echo "<script type=\"text/javascript\">top.failure();</script>"
+			echo "</body></html>"
+			exit
+		else
+			echo "<script type=\"text/javascript\">top.uploaded();</script>"
+			mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; reboot
+		fi
+	else
+		echo "<script type=\"text/javascript\">top.uploaded();</script>"
+		/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+	fi
 ?>
