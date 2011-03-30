@@ -240,7 +240,7 @@ function saveChanges()
 			}
 			else 
 			{
-				for(wsecIndex=0; wsecIndex < allWirelessInterfaceSections .length; wsecIndex++)
+				for(wsecIndex=0; wsecIndex < allWirelessInterfaceSections.length; wsecIndex++)
 				{
 					var sectionType = uci.get("wireless", allWirelessInterfaceSections [wsecIndex], "");
 					if( (!macFilterEnabled) || macListStr == '' || sectionType != "wifi-iface")

@@ -137,7 +137,7 @@ function resetData()
 				else
 				{
 					setChildText("wireless_otherssid_label", "SSID Joined By Client:");
-					if(currentWirelessMac != ""){ setChildText("wan_mac", currentWirelessMac); }
+					if(currentWirelessMacs.length > 0){ setChildText("wan_mac", currentWirelessMacs[0]); }
 				}
 				setChildText("wireless_otherssid", otherssid);
 			}
