@@ -473,6 +473,12 @@ static void check_for_timezone_shift(time_t now)
 		local_minutes_west = sys_tz.tz_minuteswest;
 		local_seconds_west = 60*local_minutes_west;
 		last_local_mw_update = now;
+		if(local_seconds_west > last_local_mw_update)
+		{
+			/* we can't let adjusted time be < 0 -- pretend timezone is still UTC */
+			local_minutes_west = 0;
+			local_seconds_west = 0;
+		}
 
 		if(local_minutes_west != old_minutes_west)
 		{
@@ -2495,6 +2501,12 @@ static int __init init(void)
 	local_minutes_west = old_minutes_west = sys_tz.tz_minuteswest;
 	local_seconds_west = local_minutes_west*60;
 	last_local_mw_update = get_seconds();
+	if(local_seconds_west > last_local_mw_update)
+	{
+		/* we can't let adjusted time be < 0 -- pretend timezone is still UTC */
+		local_minutes_west = 0;
+		local_seconds_west = 0;
+	}
 
 	id_map = initialize_string_map(0);
 	if(id_map == NULL) /* deal with kmalloc failure */
