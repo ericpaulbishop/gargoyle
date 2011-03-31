@@ -22,7 +22,6 @@ if [ "$INTERFACE" = "wan" ]; then
 	fi
 
 	if [ "$ACTION" = "ifdown" ]; then
-
 		quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
 		if [ -n "$quota_chains_exist" ] ; then
 			backup_quotas
@@ -31,5 +30,14 @@ if [ "$INTERFACE" = "wan" ]; then
 	fi
 
 fi
-
-
+if [ "$INTERFACE" = "lan" ]; then
+	wan_exists=$(uci get network.wan 2>/dev/null)
+	if [ -z "$wan_exists" ] ; then
+		if [ "$ACTION" = "ifup" ]; then
+			/etc/init.d/bwmon_gargoyle restart
+		fi
+		if [ "$ACTION" = "ifdown" ]; then
+			/etc/init.d/bwmon_gargoyle stop
+		fi 
+	fi
+fi
