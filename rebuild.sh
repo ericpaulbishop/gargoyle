@@ -1,6 +1,5 @@
 #working directories
 top_dir=$(pwd)
-openwrt_src_dir="$top_dir/backfire-src"
 targets_dir="$top_dir/targets"
 patches_dir="$top_dir/patches-generic"
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"

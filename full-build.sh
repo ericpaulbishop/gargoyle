@@ -1,6 +1,5 @@
 #working directories
 top_dir=$(pwd)
-openwrt_src_dir="$top_dir/backfire-src"
 targets_dir="$top_dir/targets"
 patches_dir="$top_dir/patches-generic"
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
@@ -24,11 +23,18 @@ custom_template=$4
 #get version that should be all numeric
 adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/[^\.0123456789]//g' )
 
+#create common download directory if it doesn't exist
+if [ ! -d "downloaded" ] ; then
+	mkdir "downloaded"
+fi
+
 # set svn revision number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 
+branch_name="backfire"
 rnum=26536
 
+openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
 
 #download openwrt source if we haven't already
 if [ ! -d "$openwrt_src_dir" ] ; then
@@ -37,22 +43,18 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 		revision=" -r $rnum "
 	fi
 	echo "fetching backfire source"
-	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/backfire/
+	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
 	if [ ! -d "backfire" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
-	mv backfire "$openwrt_src_dir"
-	cd "$openwrt_src_dir"
+	cd "$branch_name"
 	find . -name ".svn" | xargs -r rm -rf
 	cd .. 
+	mv "$branch_name" "$openwrt_src_dir"
 fi
 
 
-#create common download directory if it doesn't exist
-if [ ! -d "downloaded" ] ; then
-	mkdir "downloaded"
-fi
 rm -rf $openwrt_src_dir/dl 
 ln -s $top_dir/downloaded $openwrt_src_dir/dl
 
