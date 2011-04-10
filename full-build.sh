@@ -27,7 +27,7 @@ adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/
 # set svn revision number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 
-rnum=26252
+rnum=26536
 
 
 #download openwrt source if we haven't already
