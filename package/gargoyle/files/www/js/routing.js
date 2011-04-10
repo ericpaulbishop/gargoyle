@@ -32,7 +32,7 @@ function saveChanges()
 		var dest = destParts[0];
 		var netmask = destParts[1];
 		var iface = row[1];
-		var gateway = row[2];
+		var gateway = (row[2] == "*") ? "0.0.0.0" : gateway;
 		var routeId = "route" + (routeIndex+1);
 		uci.set("network", routeId, "", "route");
 		uci.set("network", routeId, "target", dest);
@@ -123,7 +123,8 @@ function resetData()
 		var mask    = uciOriginal.get("network", section, "netmask");		
 		var iface   = uciOriginal.get("network", section, "interface");	
 		var gateway = uciOriginal.get("network", section, "gateway");
-		
+		gateway = gateway == "0.0.0.0" ? "*" : gateway ;
+
 		dest = mask == "" ? dest : dest + "/" + mask;
 		staticRouteTableData.push( [ dest, iface, gateway, createEditButton() ] );			
 	}
@@ -163,15 +164,25 @@ function addStaticRoute()
 		var dest = destData[1] == "" ? destData[0] : destData[0] + "/" + destData[1];
 		var iface = getSelectedValue("add_iface");
 		var gateway  = document.getElementById("add_gateway").value;
+		gateway = gateway == "0.0.0.0" ? "*" : gateway;
 		
 		var row = [dest, iface, gateway, createEditButton() ];
 		var staticRouteTable = document.getElementById('static_route_table_container').firstChild;
 		addTableRow(staticRouteTable,row, true, false);
 		document.getElementById("add_dest").value = "";
 		document.getElementById("add_gateway").value = "";
-
 	}
 }
+
+function validateGatewayIp(ip)
+{
+	return (validateIP(ip) == 0 || ip == "0.0.0.0" || ip == "*") ? 0 : 1 ;
+}
+function proofreadGatewayIp(input)
+{
+	proofreadText(input, validateGatewayIp, 0);
+}
+
 
 function proofreadStaticRoute(controlDocument)
 {
@@ -179,7 +190,7 @@ function proofreadStaticRoute(controlDocument)
 	
 	addIds=['add_dest', 'add_gateway'];
 	labelIds= ['add_dest_label', 'add_gateway_label'];
-	functions = [validateIpRange, validateIP];
+	functions = [validateIpRange, validateGatewayIp];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
 	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
@@ -281,10 +292,12 @@ function editStaticRoute()
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 			
 				//set edit values
+				var oldgw = editRow.childNodes[2].firstChild.data;
+				oldgw = oldgw == "*" ? "0.0.0.0" : "*";
 				editStaticWindow.document.getElementById("add_dest").value = editRow.childNodes[0].firstChild.data;
 				setSelectedValue("add_iface", editRow.childNodes[1].firstChild.data, editStaticWindow.document);
-				editStaticWindow.document.getElementById("add_gateway").value   = editRow.childNodes[2].firstChild.data;
-				editStaticWindow.document.getElementById("add_button").style.display="none";				
+				editStaticWindow.document.getElementById("add_gateway").value = oldgw;
+				editStaticWindow.document.getElementById("add_button").style.display="none";
 				closeButton.onclick = function()
 				{
 					editStaticWindow.close();
@@ -300,10 +313,12 @@ function editStaticRoute()
 					else
 					{
 						//update document with new data
+						var newgw = editStaticWindow.document.getElementById("add_gateway").value;
+						newgw = newgw == "0.0.0.0" ? "*" : newgw;
 						var adjDest = parseDest( editStaticWindow.document.getElementById("add_dest").value );
 						editRow.childNodes[0].firstChild.data = adjDest[1] == "" ? adjDest[0] : adjDest[0] + "/" + adjDest[1];
 						editRow.childNodes[1].firstChild.data = getSelectedValue("add_iface", editStaticWindow.document);
-						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_gateway").value;
+						editRow.childNodes[2].firstChild.data = newgw;
 						
 						editStaticWindow.close();
 					}
