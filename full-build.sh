@@ -156,7 +156,7 @@ for target in $targets ; do
 		else
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
 		fi
-		make  GARGOYLE_VERSION="$adj_num_version"
+		make -j 4 GARGOYLE_VERSION="$adj_num_version"
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
@@ -167,7 +167,7 @@ for target in $targets ; do
 		else
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 
 		fi
-		make V=99 GARGOYLE_VERSION="$adj_num_version"
+		make -j 4 V=99 GARGOYLE_VERSION="$adj_num_version"
 	fi
 
 	#copy packages to built/target directory
@@ -221,9 +221,9 @@ for target in $targets ; do
 		#copy profile config and rebuild
 		cp $targets_dir/$target/profiles/$p/config .config
 		if [ "$verbosity" = "0" ] ; then
-			make  GARGOYLE_VERSION="$adj_num_version"
+			make -j 4  GARGOYLE_VERSION="$adj_num_version"
 		else
-			make V=99 GARGOYLE_VERSION="$adj_num_version"
+			make -j 4 V=99 GARGOYLE_VERSION="$adj_num_version"
 		fi
 
 
