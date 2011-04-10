@@ -12,7 +12,7 @@
 <script>
 <!--
 <?
-	upnp_config_enabled=$(uci get upnpd.config.enabled)
+	upnp_config_enabled=$(uci get upnpd.config.enable_upnp)
 	if [ -h /etc/rc.d/S95miniupnpd ] && [ "$upnp_config_enabled" != "0" ] ; then
 		echo "var upnpdEnabled = true;"
 	else
@@ -72,13 +72,13 @@
 
 	
 	<fieldset>
-		<legend class="sectionheader">UPnP</legend>
+		<legend class="sectionheader">UPnP / NAT-PMP</legend>
 		<div id='upnp_enabled_container'>
 			<input type='checkbox' id='upnp_enabled' onclick="setUpnpEnabled()" />
-			<label id='upnp_enabled_label' for='upnp_enabled'>UPnP Enabled</label>
+			<label id='upnp_enabled_label' for='upnp_enabled'>UPnP &amp; NAT-PMP Enabled</label>
 		</div>
 		<div class='indent'>
-			<em>WARNING: The use of UPnP makes your system vulnerable to certain forms of attack, and is therefore
+			<em>WARNING: The use of UPnP / NAT-PMP makes your system vulnerable to certain forms of attack, and is therefore
 			a security risk.  However, UPnP is (unfortunately) necessary for some Microsoft applications including MSN messenger and
 			the risk is relatively small.  Nevertheless, because of this security issue, UPnP is disabled by default.
 			It is recommended that you enable UPnP only if you are sure you need it.</em>

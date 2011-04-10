@@ -119,21 +119,20 @@ function saveChanges()
 		if(upnpdEnabled)
 		{
 			upnpStartCommands.push("/etc/init.d/miniupnpd enable");
-			uci.set("upnpd", "config", "enabled", "1");
+			uci.set("upnpd", "config", "enable_upnp", "1");
+			uci.set("upnpd", "config", "enable_natpmp", "1");
 			uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
 			uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
 		}
 		else
 		{
-			uci.set("upnpd", "config", "enabled", "0");
+			uci.set("upnpd", "config", "enable_upnp", "0");
+			uci.set("upnpd", "config", "enable_natpmp", "0");
 			upnpStartCommands.push("/etc/init.d/miniupnpd disable");
 		}
 	
 
 		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + upnpStartCommands.join("\n") + "\n" + restartFirewallCommand;
-		//document.getElementById("output").value = commands;
-			
-
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
@@ -143,7 +142,6 @@ function saveChanges()
 				uciOriginal = uci.clone();
 				resetData();
 				setControlsEnabled(true);
-				//alert(req.responseText);
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
