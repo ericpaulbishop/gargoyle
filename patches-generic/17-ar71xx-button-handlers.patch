@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,48 @@
 +#!/bin/sh
 +#
 +# Copyright (C) 2010 OpenWrt.org
@@ -10,10 +10,11 @@
 +
 +is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-WR")
 +is_wrt160nl=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WRT160NL")
++is_netgear=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WNDR3700")
 +is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
 +
 +
-+if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] ; then
++if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] || [ -n "$is_netgear" ] ; then
 +	uci batch <<EOF
 +set system.reset_button=button
 +set system.reset_button.button='BTN_0'
