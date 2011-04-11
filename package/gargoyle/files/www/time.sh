@@ -1,13 +1,14 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" ntpclient system gargoyle 
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
+	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" ntpclient system gargoyle
 ?>
+
 <script>
 <!--
 <?
@@ -16,7 +17,6 @@
 		cat ./data/timezones.txt | sed 's/\"/\\\"/g' | awk '{print "timezoneLines.push(\""$0"\");"}'
 	fi
 	echo "var timezoneData = parseTimezones(timezoneLines);"
-
 	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
 	if [ "$dateformat" == "iso" ]; then
 		current_time=$(date "+%Y/%m/%d %H:%M %Z")
@@ -34,16 +34,15 @@
 //-->
 </script>
 
-
 <form>
 	<fieldset>
 		<legend class="sectionheader">Time</legend>
-	
+
 		<div>
 			<label id='current_time_label' for='timezone'>Current Date &amp; Time:&nbsp;&nbsp;&nbsp;&nbsp;</label>
 			<span id="current_time"></span>
 		</div>
-				
+
 		<div class="internal_divider"></div>
 
 		<div>
@@ -52,7 +51,7 @@
 		<div class="indent">
 			<div><select class='nocolumn' id='timezone' onchange="timezoneChanged()"></select></div>
 		</div>
-		
+
 		<div>
 			<label class='nocolumn' id='timezone_label' for='timezone'>Date Format:</label>
 		</div>
@@ -71,7 +70,7 @@
 		</div>
 		<div class="indent">
 			<div>
-				<select class='nocolumn' id='update_frequency' >
+				<select class='nocolumn' id='update_frequency'>
 					<option value="3600">Every Hour</option>
 					<option value="7200">Every 2 Hours</option>
 					<option value="14400">Every 4 Hours</option>
@@ -82,8 +81,6 @@
 			</div>
 		</div>
 
-
-		
 		<div>
 			<label class='leftcolumn' id='region_label' for='region'>NTP Servers:</label>
 			<div class="indent">
@@ -107,6 +104,7 @@
 			</div>
 		</div>
 	</fieldset>
+
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
@@ -116,14 +114,12 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
 	resetData();
 //-->
 </script>
 
-
 <?
-	gargoyle_header_footer -f -s "system" -p "time"  
+	gargoyle_header_footer -f -s "system" -p "time"
 ?>
