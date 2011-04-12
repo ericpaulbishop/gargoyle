@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Backfire (unknown)
-# Sat Jan 22 19:36:40 2011
+# Tue Apr 12 08:45:32 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -225,6 +225,7 @@ CONFIG_TARGET_ROOTFS_SQUASHFS=y
 #
 # CONFIG_DISPLAY_SUPPORT is not set
 CONFIG_BUILD_PATENTED=y
+# CONFIG_BUILD_NLS is not set
 CONFIG_LARGEFILE=y
 CONFIG_SHADOW_PASSWORDS=y
 # CONFIG_CLEAN_IPKG is not set
@@ -252,7 +253,6 @@ CONFIG_IPV6=y
 # CONFIG_USE_STRIP is not set
 CONFIG_USE_SSTRIP=y
 # CONFIG_STRIP_KERNEL_EXPORTS is not set
-# CONFIG_USE_MKLIBS is not set
 # CONFIG_DEVEL is not set
 # CONFIG_BROKEN is not set
 CONFIG_DOWNLOAD_FOLDER=""
@@ -1066,10 +1066,14 @@ CONFIG_PACKAGE_wireless-tools=y
 #
 CONFIG_PACKAGE_libcyassl=y
 # CONFIG_PACKAGE_libopenssl is not set
+# CONFIG_PACKAGE_libblobmsg-json is not set
 CONFIG_PACKAGE_libericstools=y
 # CONFIG_PACKAGE_libevent is not set
+CONFIG_PACKAGE_libip4tc=y
+CONFIG_PACKAGE_libip6tc=y
 CONFIG_PACKAGE_libiptc=y
 # CONFIG_PACKAGE_libiw is not set
+# CONFIG_PACKAGE_libjson is not set
 # CONFIG_PACKAGE_libltdl is not set
 # CONFIG_PACKAGE_liblua is not set
 # CONFIG_PACKAGE_libmatrixssl-nothread is not set
@@ -1078,6 +1082,7 @@ CONFIG_PACKAGE_libiptc=y
 CONFIG_PACKAGE_libnl-tiny=y
 # CONFIG_PACKAGE_libpcap is not set
 # CONFIG_PACKAGE_libreadline is not set
+# CONFIG_PACKAGE_libubox is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
 # CONFIG_PACKAGE_libwrap is not set
@@ -1093,6 +1098,11 @@ CONFIG_PACKAGE_libxtables=y
 # Filesystem
 #
 # CONFIG_PACKAGE_nfs-kernel-server is not set
+
+#
+# Firewall
+#
+CONFIG_PACKAGE_miniupnpd=y
 
 #
 # Time Synchronization
@@ -1126,6 +1136,7 @@ CONFIG_PACKAGE_iptables-mod-conntrack=y
 CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
 # CONFIG_PACKAGE_iptables-mod-extra is not set
 CONFIG_PACKAGE_iptables-mod-filter=y
+# CONFIG_PACKAGE_iptables-mod-hashlimit is not set
 CONFIG_PACKAGE_iptables-mod-imq=y
 CONFIG_PACKAGE_iptables-mod-ipopt=y
 CONFIG_PACKAGE_iptables-mod-iprange=y
@@ -1140,7 +1151,6 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptables-utils is not set
 CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libiptbwctl=y
-CONFIG_PACKAGE_miniupnpd=y
 # CONFIG_PACKAGE_portmap is not set
 CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
@@ -1150,6 +1160,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_pppstats is not set
 # CONFIG_PACKAGE_pptp is not set
 CONFIG_PACKAGE_qos-gargoyle=y
+# CONFIG_PACKAGE_relayd is not set
 # CONFIG_PACKAGE_samba3 is not set
 CONFIG_PACKAGE_tc=y
 # CONFIG_PACKAGE_uhttpd is not set
@@ -1161,6 +1172,8 @@ CONFIG_PACKAGE_wol=y
 # CONFIG_PACKAGE_wpa-supplicant is not set
 # CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
 # CONFIG_WPA_RFKILL_SUPPORT is not set
+# CONFIG_DRIVER_WEXT_SUPPORT is not set
+# CONFIG_DRIVER_11N_SUPPORT is not set
 # CONFIG_PACKAGE_wpa-supplicant-mini is not set
 # CONFIG_PACKAGE_wpad is not set
 CONFIG_PACKAGE_wpad-mini=y
@@ -1281,6 +1294,7 @@ CONFIG_PACKAGE_kmod-ipt-conntrack=y
 CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
 # CONFIG_PACKAGE_kmod-ipt-extra is not set
 CONFIG_PACKAGE_kmod-ipt-filter=y
+# CONFIG_PACKAGE_kmod-ipt-hashlimit is not set
 CONFIG_PACKAGE_kmod-ipt-imq=y
 CONFIG_PACKAGE_kmod-ipt-ipopt=y
 CONFIG_PACKAGE_kmod-ipt-iprange=y
@@ -1307,6 +1321,7 @@ CONFIG_PACKAGE_kmod-ipt-weburl=y
 # CONFIG_PACKAGE_kmod-e1000 is not set
 # CONFIG_PACKAGE_kmod-gigaset is not set
 # CONFIG_PACKAGE_kmod-hfcmulti is not set
+# CONFIG_PACKAGE_kmod-ifb is not set
 # CONFIG_PACKAGE_kmod-libphy is not set
 # CONFIG_PACKAGE_kmod-macvlan is not set
 # CONFIG_PACKAGE_kmod-siit is not set
@@ -1423,6 +1438,8 @@ CONFIG_PACKAGE_kmod-textsearch=y
 # CONFIG_PACKAGE_kmod-ath is not set
 # CONFIG_PACKAGE_kmod-ath5k is not set
 # CONFIG_PACKAGE_kmod-ath9k is not set
+# CONFIG_PACKAGE_kmod-ath9k-common is not set
+# CONFIG_PACKAGE_kmod-ath9k-htc is not set
 CONFIG_PACKAGE_kmod-b43=y
 
 #
@@ -1447,6 +1464,10 @@ CONFIG_PACKAGE_kmod-cfg80211=y
 # CONFIG_PACKAGE_kmod-hostap-cs is not set
 # CONFIG_PACKAGE_kmod-hostap-pci is not set
 # CONFIG_PACKAGE_kmod-hostap-plx is not set
+# CONFIG_PACKAGE_kmod-iwl-legacy is not set
+# CONFIG_PACKAGE_kmod-iwl3945 is not set
+# CONFIG_PACKAGE_kmod-iwl4965 is not set
+# CONFIG_PACKAGE_kmod-iwlagn is not set
 # CONFIG_PACKAGE_kmod-lib80211 is not set
 # CONFIG_PACKAGE_kmod-libertas-sd is not set
 # CONFIG_PACKAGE_kmod-libertas-usb is not set
