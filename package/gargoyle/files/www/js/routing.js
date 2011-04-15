@@ -2,14 +2,7 @@ var toggleReload = false;
 
 function saveChanges()
 {
-	if(wirelessDriver == "broadcom")
-	{
-		setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
-	}
-	else
-	{
-		setControlsEnabled(false, true, "Please Wait While Settings Are Applied And Device Is Restarted");
-	}
+	setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
 	
 	var removeCommands = [];
 	var oldSections = uciOriginal.getAllSectionsOfType("network", "route");
@@ -28,10 +21,10 @@ function saveChanges()
 	for(routeIndex=0; routeIndex < staticRouteData.length; routeIndex++)
 	{
 		var row = staticRouteData[routeIndex];
-		var destParts = parseDest(row[0]);
-		var dest = destParts[0];
+		var destParts = parseDest(row[0]); //converts "default" properly
+		var dest    = destParts[0];
 		var netmask = destParts[1];
-		var iface = row[1];
+		var iface   = row[1];
 		var gateway = (row[2] == "*") ? "0.0.0.0" : gateway;
 		var routeId = "route" + (routeIndex+1);
 		uci.set("network", routeId, "", "route");
@@ -126,6 +119,7 @@ function resetData()
 		gateway = gateway == "0.0.0.0" ? "*" : gateway ;
 
 		dest = mask == "" ? dest : dest + "/" + mask;
+		dest = dest == "0.0.0.0" || dest == "0.0.0.0/0.0.0.0" ? "default" : dest
 		staticRouteTableData.push( [ dest, iface, gateway, createEditButton() ] );			
 	}
 	
@@ -165,7 +159,8 @@ function addStaticRoute()
 		var iface = getSelectedValue("add_iface");
 		var gateway  = document.getElementById("add_gateway").value;
 		gateway = gateway == "0.0.0.0" ? "*" : gateway;
-		
+		dest = dest == "0.0.0.0/0.0.0.0" ? "default" : dest;
+
 		var row = [dest, iface, gateway, createEditButton() ];
 		var staticRouteTable = document.getElementById('static_route_table_container').firstChild;
 		addTableRow(staticRouteTable,row, true, false);
@@ -182,7 +177,14 @@ function proofreadGatewayIp(input)
 {
 	proofreadText(input, validateGatewayIp, 0);
 }
-
+function validateRouteIp(ip)
+{
+	return (validateIpRange(ip) == 0 || ip == "0.0.0.0" || ip == "0.0.0.0/0.0.0.0" || ip == "0.0.0.0/0" || ip == "default") ? 0 : 1 ;
+}
+function proofreadRouteIp(input)
+{
+	proofreadText(input, validateRouteIp, 0);
+}
 
 function proofreadStaticRoute(controlDocument)
 {
@@ -190,7 +192,7 @@ function proofreadStaticRoute(controlDocument)
 	
 	addIds=['add_dest', 'add_gateway'];
 	labelIds= ['add_dest_label', 'add_gateway_label'];
-	functions = [validateIpRange, validateGatewayIp];
+	functions = [validateRouteIp, validateGatewayIp];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
 	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
@@ -199,6 +201,10 @@ function proofreadStaticRoute(controlDocument)
 function parseDest(origDest)
 {
 	var dest = origDest;
+	if( dest.toLowerCase() == "default" || dest == "0.0.0.0" ||dest == "0.0.0.0/0" || dest == "0.0.0.0/0.0.0.0")
+	{
+		dest = "0.0.0.0/0.0.0.0"
+	}
 	var mask = "";
 	if(dest.match(/\//))
 	{
@@ -292,11 +298,13 @@ function editStaticRoute()
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 			
 				//set edit values
-				var oldgw = editRow.childNodes[2].firstChild.data;
-				oldgw = oldgw == "*" ? "0.0.0.0" : "*";
-				editStaticWindow.document.getElementById("add_dest").value = editRow.childNodes[0].firstChild.data;
+				var oldDst = editRow.childNodes[0].firstChild.data;
+				var oldGw  = editRow.childNodes[2].firstChild.data;
+				oldGw  = oldGw  == "*" ? "0.0.0.0" : oldGw;
+				oldDst = oldDst == "default" ? "0.0.0.0/0.0.0.0" : oldDst;
+				editStaticWindow.document.getElementById("add_dest").value = oldDst;
 				setSelectedValue("add_iface", editRow.childNodes[1].firstChild.data, editStaticWindow.document);
-				editStaticWindow.document.getElementById("add_gateway").value = oldgw;
+				editStaticWindow.document.getElementById("add_gateway").value = oldGw;
 				editStaticWindow.document.getElementById("add_button").style.display="none";
 				closeButton.onclick = function()
 				{
@@ -313,12 +321,14 @@ function editStaticRoute()
 					else
 					{
 						//update document with new data
-						var newgw = editStaticWindow.document.getElementById("add_gateway").value;
-						newgw = newgw == "0.0.0.0" ? "*" : newgw;
-						var adjDest = parseDest( editStaticWindow.document.getElementById("add_dest").value );
-						editRow.childNodes[0].firstChild.data = adjDest[1] == "" ? adjDest[0] : adjDest[0] + "/" + adjDest[1];
+						var newGw = editStaticWindow.document.getElementById("add_gateway").value;
+						newGw = newGw == "0.0.0.0" ? "*" : newGw;
+						var adjDst = parseDest( editStaticWindow.document.getElementById("add_dest").value );
+						var newDst = adjDst[1] == "" ? adjDst[0] : adjDst[0] + "/" + adjDst[1];
+						newDst = newDst == "0.0.0.0/0.0.0.0" ? "default" : newDst;
+						editRow.childNodes[0].firstChild.data = newDst;
 						editRow.childNodes[1].firstChild.data = getSelectedValue("add_iface", editStaticWindow.document);
-						editRow.childNodes[2].firstChild.data = newgw;
+						editRow.childNodes[2].firstChild.data = newGw;
 						
 						editStaticWindow.close();
 					}
