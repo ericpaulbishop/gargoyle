@@ -25,7 +25,7 @@ function saveChanges()
 		var dest    = destParts[0];
 		var netmask = destParts[1];
 		var iface   = row[1];
-		var gateway = (row[2] == "*") ? "0.0.0.0" : gateway;
+		var gateway = (row[2] == "*") ? "0.0.0.0" : row[2];
 		var routeId = "route" + (routeIndex+1);
 		uci.set("network", routeId, "", "route");
 		uci.set("network", routeId, "target", dest);
