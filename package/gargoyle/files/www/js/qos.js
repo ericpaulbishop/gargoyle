@@ -1173,7 +1173,7 @@ function updatetc()
 		}
 		else
 		{
-			commands = commands + currentWanIf;
+			commands = commands + currentWanName;
 		}
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
