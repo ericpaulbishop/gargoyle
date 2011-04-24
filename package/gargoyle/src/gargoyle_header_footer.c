@@ -559,6 +559,20 @@ void print_interface_vars(void)
 	char* default_wan_mac = NULL;
 	int   loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
 
+	/*
+	 * A few notes on "if" vs "dev" vs "bridge" variable names:
+	 * When doing load "if" is the ifname variable loaded from the /etc/config/network file,
+	 * while "dev" is the "device" loaded from /var/state/network, and "bridge" is the
+	 * "ifname" from /var/state/network.  
+	 *
+	 * "Bridge" is labeled that way because if the interface
+	 * is a bridge, this will be the only place the name of the bridge interface shows up, the
+	 * other variables will just have the names of the interfaces within the bridge.
+	 *
+	 * Note also that "bridge" interface variables will contain the pppoe device name if we're using pppoe.
+	 * Therefore we print these out in addition to the interface list as javascript variables labeled 
+	 * currentLanName and currentWanName
+	 */
 	
 	char* uci_wan_mac     = NULL;
 	char* uci_wan_if      = NULL;
@@ -753,6 +767,7 @@ void print_interface_vars(void)
 
 	print_js_var("defaultLanIf", default_lan_if);
 	print_js_var("currentLanIf", uci_lan_if);
+	print_js_var("currentLanName", uci_lan_bridge);
 	print_js_var("currentLanMac", current_lan_mac);
 	print_js_var("currentLanIp", current_lan_ip);
 	print_js_var("currentLanMask", current_lan_mask);
@@ -761,6 +776,7 @@ void print_interface_vars(void)
 	print_js_var("defaultWanIf", default_wan_if);
 	print_js_var("defaultWanMac", default_wan_mac);
 	print_js_var("currentWanIf", current_wan_if);
+	print_js_var("currentWanName", uci_wan_bridge);
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
