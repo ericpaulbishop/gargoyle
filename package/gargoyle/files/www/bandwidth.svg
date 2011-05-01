@@ -9,6 +9,7 @@
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
 	<script type="text/ecmascript"> <![CDATA[
+	var svgNs = "http://www.w3.org/2000/svg"
 	var svgDoc;
 	var topCoor=1;
 	var leftCoor=1;
@@ -38,7 +39,7 @@
 			scaleFraction = inh/bottomCoor;
 		}
 		var minDisplay = Math.ceil(1/scaleFraction);
-		minStrokeWidth = Math.ceil(.003*graphHeight);
+		minStrokeWidth = Math.ceil(.005*graphHeight);
 		minStrokeWidth = minStrokeWidth < minDisplay ? minDisplay : minStrokeWidth;
 	}
 
@@ -110,10 +111,13 @@
 			}
 		}
 
+		
+
 		//now that we've normalized y data by actual interval lengths, shorten first interval to amount we want to display
 		var realFirstIntervalLength = intervalLengths[0];
 		var firstTime = realFirstIntervalLength > lastIntervalSeconds ? firstIntervalStart + lastIntervalSeconds : firstIntervalStart + Math.floor(lastIntervalSeconds*.95);
 		intervalLengths[0] = realFirstIntervalLength > lastIntervalSeconds ? realFirstIntervalLength - lastIntervalSeconds : realFirstIntervalLength -  Math.floor(lastIntervalSeconds*.95);
+
 
 		var minIntervalSeconds = getMinIntervalSeconds(intervalLength);
 		var xTickUnit = createXTicks(numDisplayIntervals, minIntervalSeconds, firstTime, lastTime, topCoor, graphBottomCoor, leftCoor, graphRightCoor)
@@ -304,8 +308,12 @@
 		var graphHeight = graphBottom-graphTop;
 		svgDoc.getElementById("y-unit-container").setAttribute("font-size", .07*graphHeight);
 		svgDoc.getElementById("y-unit-path").setAttribute("d", " M " + (graphRight+(.20*graphHeight) ) + " " + (Math.floor(.6*graphHeight)) + " L " + (graphRight+(.20*graphHeight)) + " " + 0);
-		svgDoc.getElementById("y-units").firstChild.data = ""; //safari shits itself if label doesn't change
-		svgDoc.getElementById("y-units").firstChild.data = unit;
+	
+		yUnitEl = svgDoc.getElementById("y-units")
+		yUnitEl.firstChild.data = " "
+		yUnitEl.firstChild.data = unit
+				
+
 
 		nextTick=0;
 		tickNum=1;
@@ -630,7 +638,7 @@
 
 <path id="y-unit-path" d="M 0 300 L 0 150" opacity="0" />
 <use xlink:href="#y-unit-path" fill="none" opacity="0"  />
-<text font-family="serif" font-size="18px" id="y-unit-container" ><textPath id="y-units" xlink:href="#y-unit-path" >.</textPath></text>
+<text font-family="serif" font-size="18px" id="y-unit-container"><textPath id="y-units" xlink:href="#y-unit-path" >MByte / day</textPath></text>
 
 
 <polyline id="plot1" stroke-width="1px"  stroke='blue' fill="blue" opacity="0.75" fill-opacity="0.25"  />
