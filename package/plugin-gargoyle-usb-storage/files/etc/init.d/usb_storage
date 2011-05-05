@@ -87,6 +87,8 @@ do_start()
 				err=$(mount -t $type -o noatime "$d" "/tmp/usb_mount/$id" 2>&1)
 				ext_num=$(($ext_num-1))
 			done
+		else
+			err="unmountable"
 		fi
 		if [ -n "$err" ] ; then
 			umount "/tmp/usb_mount/$id" 2>/dev/null
