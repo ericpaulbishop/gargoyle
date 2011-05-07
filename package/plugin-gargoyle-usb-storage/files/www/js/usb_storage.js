@@ -18,7 +18,6 @@ var mountPointToFs = [];
 var mountPointToDriveSize = [];
 var nameToMountPath = [];  
 
-var mountedShareSpecificity = [];
 
 function saveChanges()
 {
@@ -214,8 +213,7 @@ function resetData()
 			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][3] ).replace(/ytes/, "");
 		}
 		
-		mountedShareSpecificity = []; //global
-		nameToMountPath = [];         //global
+		nameToMountPath = [];   //global
 		var mountPointToDriveData = [];
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
