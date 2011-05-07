@@ -35,13 +35,11 @@ start()
 	if [ "$got_lock" = "1" ] ; then
 		do_start
 		usb_unlock
-	fi	
+	fi
 }
 
 do_start()
 {
-	date >>/tmp/usb_storage_do_start
-
 	gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
 	if [ -z "$gdisplay" ] ; then
 		uci set gargoyle.display.system_usb_storage='USB Storage'

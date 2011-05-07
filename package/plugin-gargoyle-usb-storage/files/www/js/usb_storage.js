@@ -497,7 +497,7 @@ function editShare()
 				editShareWindow.document.getElementById("share_name").value = editName;
 				setSelectedText("share_type", editType, editShareWindow.document);
 				setSelectedText("share_access", editAccess, editShareWindow.document);
-				setSelectedValue("share_specificity", (editMountPath.match(/^dev_/) ? "dev" : "blkid"), editShareWindow.document);
+				setSelectedValue("share_specificity", (editMountPath.replace(/^.*\//g, "").match(/^dev_/) ? "dev" : "blkid"), editShareWindow.document);
 				setNfsPath(editShareWindow.document);
 
 				
