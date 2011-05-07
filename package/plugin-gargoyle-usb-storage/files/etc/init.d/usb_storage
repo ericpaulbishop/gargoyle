@@ -62,12 +62,13 @@ do_start()
 	for devid in $drives ; do
 		id=$(echo $devid | sed 's/^.*://g')
 		d=$(echo $devid | sed 's/:.*$//g')
+		did=$(echo "$d" | sed 's/^.*\///g')
 		already_mounted=$(df | awk '{ print $1 ; }' | grep "^$d\$")
 		if [ -z "$id" ] || [ -z "$d" ] || [ -n "$already_mounted" ] ; then
 			continue
 		fi
 		
-		
+		rm -rf "/tmp/usb_mount/$did"
 		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS") 
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
@@ -116,6 +117,9 @@ do_start()
 			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
 
 			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
+		
+			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/$did"
+
 			mounted="$mounted /tmp/usb_mount/$id"
 		fi
 	done
