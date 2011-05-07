@@ -118,7 +118,7 @@ do_start()
 
 			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
 		
-			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/$did"
+			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
 
 			mounted="$mounted /tmp/usb_mount/$id"
 		fi

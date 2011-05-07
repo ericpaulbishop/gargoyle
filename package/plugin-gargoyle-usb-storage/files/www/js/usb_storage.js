@@ -1,18 +1,24 @@
 /*	
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+/* 
+ * mountPoint refers to the blkid mount point 
+ * mountPath may refer to either blkid mount point
+ * or symlink to dev_[devid], wherever share is 
+ * actually mounted
+ */
 var driveToMountPoint = [];
 var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
-var nameToMountPoint = [];
+var nameToMountPath = [];  
 
-
+var mountedShareSpecificity = [];
 
 function saveChanges()
 {
@@ -99,7 +105,7 @@ function saveChanges()
 	{
 		var share       = shareTableData[shIndex];
 		var shareName   = share[0];
-		var shareMount  = nameToMountPoint[shareName];
+		var shareMount  = nameToMountPath[shareName];
 		var shareType   = share[3];
 		var shareAccess = share[4];
 		
@@ -208,8 +214,8 @@ function resetData()
 			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][3] ).replace(/ytes/, "");
 		}
 		
-
-		nameToMountPoint = []; //another global
+		mountedShareSpecificity = []; //global
+		nameToMountPath = [];         //global
 		var mountPointToDriveData = [];
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
@@ -220,20 +226,23 @@ function resetData()
 			for(shareIndex=0; shareIndex < shareList.length; shareIndex++)
 			{
 				var share = uciOriginal.get(config, shareList[shareIndex], "path");
-				if( mountPointToDrive[share] != null )
+				var shareMountPoint = mountPathToMountPoint(share) ;
+				shareMountPoint = shareMountPoint == null ? "" : shareMountPoint;
+				var shareDrive = mountPointToDrive[shareMountPoint];
+				if( shareDrive != null )
 				{
-					mountedDrives[ mountPointToDrive[share] ] = 1;
+					mountedDrives[ shareDrive ] = 1;
 					
 					//device->[name, filesystem, size, sharetype, access]
-					var driveData = mountPointToDriveData[share] == null ? ["", "", "", "", "", createEditButton()] : mountPointToDriveData[share];
+					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton()] : mountPointToDriveData[shareMountPoint];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
-					driveData[1] = mountPointToFs[share];
-					driveData[2] = mountPointToDriveSize[share];
+					driveData[1] = mountPointToFs[shareMountPoint];
+					driveData[2] = mountPointToDriveSize[shareMountPoint];
 					driveData[3] = driveData[3].length > 0 ? driveData[3] + "+" + config : config;
 					driveData[4] = uciOriginal.get(config, shareList[shareIndex], "read_only");
 					driveData[4] = driveData[4] == "1" || driveData[4] == "yes" ? "Read Only" : "Read/Write";
 
-					nameToMountPoint[ driveData[0] ] = share;
+					nameToMountPath[ driveData[0] ] = share;
 
 					if(config == "samba")
 					{
@@ -291,7 +300,7 @@ function resetData()
 							}
 						}
 					}
-					mountPointToDriveData[share] = driveData;
+					mountPointToDriveData[shareMountPoint] = driveData;
 				}
 			}
 		}
@@ -344,6 +353,18 @@ function resetData()
 
 }
 
+function mountPathToMountPoint(mountPath)
+{
+	mountPath = mountPath == null ? "" : mountPath;
+	var mountPoint = mountPath.replace(/^.*\//g, "").match(/dev_/) ? driveToMountPoint[ "/dev/" + mountPath.replace(/^.*\//g, "").substr(4) ] : mountPath;
+	mountPoint = mountPoint == null ? "" : mountPoint;
+	return mountPoint;
+
+}
+function driveToDevMountPath(drive)
+{
+	return drive.replace(/^.*\//, "/tmp/usb_mount/dev_");
+}
 
 function addNewShare()
 {
@@ -359,10 +380,11 @@ function addNewShare()
 	var size = mountPointToDriveSize[mountPoint];
 	var access = getSelectedText("share_access");
 	var type = getSelectedText("share_type");
-	
+	var specificity = getSelectedValue("share_specificity");
+
 	var table = document.getElementById("share_table");
 	addTableRow(table, [name, fs, size, type, access, createEditButton() ], true, false, removeShareCallback);
-	nameToMountPoint[name] = mountPoint;
+	nameToMountPath[name] = specificity == "blkid" ? mountPoint : driveToDevMountPath(drive);
 
 	//remove the drive we just used from the available list
 	removeOptionFromSelectElement("share_disk", drive);
@@ -398,14 +420,14 @@ function removeShareCallback(table, row)
 {
 	var editName=row.childNodes[0].firstChild.data;
 
-	var oldMountPoint = nameToMountPoint[editName];
+	var oldMountPoint = mountPathToMountPoint(nameToMountPath[editName]);
 	var oldDrive = mountPointToDrive[oldMountPoint];
 	addOptionToSelectElement("share_disk", oldDrive, oldDrive);
 	document.getElementById("sharing_add_heading_container").style.display  = "block";
 	document.getElementById("sharing_add_controls_container").style.display = "block";
 	
 	
-	nameToMountPoint[editName] = null;
+	nameToMountPath[editName] = null;
 	setNfsPath();
 }
 
@@ -447,8 +469,9 @@ function editShare()
 
 	var editRow=this.parentNode.parentNode;
 	var editName=editRow.childNodes[0].firstChild.data;
-	var editMount=nameToMountPoint[editName];
-	var editDrive=mountPointToDrive[editMount];
+	var editMountPath=nameToMountPath[editName];
+	var editMountPoint=mountPathToMountPoint(editMountPath);
+	var editDrive=mountPointToDrive[editMountPoint];
 	
 	var editType=editRow.childNodes[3].firstChild.data;
 	var editAccess = editRow.childNodes[4].firstChild.data;
@@ -474,6 +497,7 @@ function editShare()
 				editShareWindow.document.getElementById("share_name").value = editName;
 				setSelectedText("share_type", editType, editShareWindow.document);
 				setSelectedText("share_access", editAccess, editShareWindow.document);
+				setSelectedValue("share_specificity", (editMountPath.match(/^dev_/) ? "dev" : "blkid"), editShareWindow.document);
 				setNfsPath(editShareWindow.document);
 
 				
@@ -496,7 +520,10 @@ function editShare()
 					else
 					{
 						//set data
-						editRow.childNodes[0].firstChild.data = shareName; 
+						nameToMountPath[editName] = null;
+						nameToMountPath[shareName] = getSelectedValue("share_specificity", editShareWindow.document) == "blkid" ? editMountPoint : driveToDevMountPath(editDrive);
+
+						editRow.childNodes[0].firstChild.data = shareName;
 						editRow.childNodes[3].firstChild.data = getSelectedText("share_type", editShareWindow.document);
 						editRow.childNodes[4].firstChild.data = getSelectedText("share_access", editShareWindow.document);
 						editShareWindow.close();
