@@ -61,9 +61,13 @@ do_start()
 	mounted=""
 	for devid in $drives ; do
 		id=$(echo $devid | sed 's/^.*://g')
-		[ -z $id ] && continue
 		d=$(echo $devid | sed 's/:.*$//g')
-		dev=$(echo $d | sed 's/[0-9]*$//g')
+		already_mounted=$(df | awk '{ print $1 ; }' | grep "^$d\$")
+		if [ -z "$id" ] || [ -z "$d" ] || [ -n "$already_mounted" ] ; then
+			continue
+		fi
+		
+		
 		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS") 
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
