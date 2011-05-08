@@ -16,10 +16,6 @@ usb_lock()
 {
 	timeout=15
 	got_lock=0
-	while [ -e /tmp/usb_restart.lock ] && [ $timeout -gt 0 ] ; do
-		sleep 1
-		timeout=$(($timeout - 1))
-	done
 	if [ ! -e /tmp/usb_restart.lock ] ; then
 		touch /tmp/usb_restart.lock
 		got_lock=1
@@ -39,7 +35,7 @@ start()
 	if [ "$got_lock" = "1" ] ; then
 		do_start
 		usb_unlock
-	fi	
+	fi
 }
 
 do_start()
@@ -52,7 +48,6 @@ do_start()
 		uci commit
 	fi
 
-	rm -rf /tmp/mounted_usb_storage.tab
 	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
 	
 	echo "$drives" >/tmp/drives_found.txt
@@ -63,7 +58,13 @@ do_start()
 		id=$(echo $devid | sed 's/^.*://g')
 		[ -z $id ] && continue
 		d=$(echo $devid | sed 's/:.*$//g')
-		dev=$(echo $d | sed 's/[0-9]*$//g')
+		did=$(echo "$d" | sed 's/^.*\///g')
+		already_mounted=$(df | awk '{ print $1 ; }' | grep "^$d\$")
+		if [ -z "$id" ] || [ -z "$d" ] || [ -n "$already_mounted" ] ; then
+			continue
+		fi
+		
+		rm -rf "/tmp/usb_mount/$did"
 		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS") 
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
@@ -87,6 +88,8 @@ do_start()
 				err=$(mount -t $type -o noatime "$d" "/tmp/usb_mount/$id" 2>&1)
 				ext_num=$(($ext_num-1))
 			done
+		else
+			err="unmountable"
 		fi
 		if [ -n "$err" ] ; then
 			umount "/tmp/usb_mount/$id" 2>/dev/null
@@ -110,6 +113,9 @@ do_start()
 			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
 
 			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
+		
+			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
+
 			mounted="$mounted /tmp/usb_mount/$id"
 		fi
 	done

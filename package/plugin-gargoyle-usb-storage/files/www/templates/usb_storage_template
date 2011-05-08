@@ -19,6 +19,13 @@
 		<option value="rw">Read/Write</option>
 	</select>
 </div>
+<div id="share_specificity_container">
+	<label class="leftcolumn" id="share_name_label" for="share_specificity">Settings Apply To:</label>
+	<select class="rightcolumn" id="share_specificity">
+		<option value="dev">The Same Partition On Any USB Drive</option>
+		<option value="blkid">Only This Specific Drive</option>
+	</select>
+</div>
 <div id="share_name_container">
 	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
 	<input type="text" class="rightcolumn" id="share_name" onkeyup="setNfsPath(this.ownerDocument)" />
