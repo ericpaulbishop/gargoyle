@@ -243,7 +243,6 @@ function classinfo()
 	this.MinBW = null;
 	this.MaxBW = null;
 	this.bytes = null;
-	this.classno = null;
 	this.leaf = null;
 	this.bps = NaN;
 }
@@ -259,8 +258,7 @@ function init_classtable()
 	var totalPercent = 0;
 	var defaultClassName = "";
 
-
-	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
+        removeAllOptionsFromSelectElement( document.getElementById("default_class"));
 	removeAllOptionsFromSelectElement( document.getElementById("classification"));
 
 	var classIndex=0;
@@ -268,6 +266,8 @@ function init_classtable()
 	{
 		totalPercent = totalPercent + parseInt(uciOriginal.get("qos_gargoyle", classSections[classIndex], "percent_bandwidth"));
 	}
+
+        //This array setup such that classIndex+1 = the classno (ie dclass_x, where x=classno) 
 	for (classIndex=0; classIndex < classSections.length; classIndex++)
 	{
 		var classSection = classSections[classIndex];
@@ -347,18 +347,28 @@ function update_classtable()
 	}
 	
 	var tableRows=table.firstChild;
-	for (classIndex=0; classIndex < classTable.length; classIndex++)
-	{
-		var rowData = classTable[classIndex];
-		var row = tableRows.childNodes[classIndex+1];
-		var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, bpsToKbpsString(rowData.bps) ];
-		var cellIndex=0;
-		for (cellIndex=0; cellIndex < newDataList.length; cellIndex++)
-		{
-			row.childNodes[cellIndex].firstChild.data = newDataList[ cellIndex ];
-		}
-	}
+        var rowIndex;
+        for (rowIndex=1; rowIndex <= classTable.length; rowIndex++) {
+	     var row = tableRows.childNodes[rowIndex];
 
+             //Search for the matching class
+             for (classIndex=0; classIndex < classTable.length; classIndex++)
+             {
+ 		var rowData = classTable[classIndex];
+                var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, bpsToKbpsString(rowData.bps) ];
+
+                //If found then update the data
+                if (rowData.Name == row.childNodes[0].firstChild.data) {
+		     var cellIndex=0;
+		     for (cellIndex=0; cellIndex < newDataList.length; cellIndex++)
+		     {
+			row.childNodes[cellIndex].firstChild.data = newDataList[ cellIndex ];
+		     }
+                 break;
+                }
+            }
+
+        }
 
 }
 
@@ -1155,7 +1165,6 @@ function parseRuleMatchCriteria(matchText)
 	return criteria;
 }
 
-
 /* qosmon congestion monitor status */
 var updateInProgress = false;
 
@@ -1173,7 +1182,7 @@ function updatetc()
 		}
 		else
 		{
-			commands = commands + currentWanName;
+			commands = commands + currentWanIf;
 		}
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -1189,20 +1198,25 @@ function updatetc()
 				{
 					for(i = 0; i < lines.length; i++)
 					{
-						var lastbytes;
-						lastbytes = classTable[i].bytes;
-						classTable[i].bytes=lines[i].match(/Sent\s([0-9]+)/)[1];
-						classTable[i].classno=lines[i].match(/hfsc\s1:([0-9]+)/)[1];
-						classTable[i].leaf=lines[i].match(/leaf\s([0-9a-f]*)/)[1];
+                                        //Here the minor number of the qdisc ID is equal to class number+1 or index+2  
+					var idx=parseInt(lines[i].match(/hfsc\s1:([0-9]+)/)[1])-2;
+					var lastbytes;
+
+					if (idx < classTable.length) {
+						lastbytes = classTable[idx].bytes;
+						classTable[idx].bytes=lines[i].match(/Sent\s([0-9]+)/)[1];
+						classTable[idx].leaf=lines[i].match(/leaf\s([0-9a-f]*)/)[1];
 
 						if (lastbytes != null)
 						{
-							classTable[i].bps= (parseInt(classTable[i].bytes)-parseInt(lastbytes))*8;
+						     classTable[idx].bps= (parseInt(classTable[idx].bytes)-parseInt(lastbytes))*8;
 						}
 						else
 						{
-							classTable[i].bps=NaN;
+						     classTable[idx].bps=NaN;
 						}
+
+					}
 					}
 				}
 
@@ -1241,18 +1255,27 @@ function updateqosmon()
 					document.getElementById("qactivecnt").innerHTML = lines[7];
 					lines = req.responseText.match(/ID\s[0-9A-E][0-9A-F]+.*/g);
 
-					if (lines.length == classTable.length)
+					for (i=0; i<lines.length; i++)
 					{
-						for (i=0;i<lines.length;i++)
-						{
-							if (classTable[i].leaf.toUpperCase() == lines[i].match(/ID\s([0-9A-E][0-9A-F]+)/)[1])
-							{
-								classTable[i].bps = parseInt(lines[i].match(/ID\s[0-9A-E][0-9A-F]+.*:\s([0-9]+)/)[1]);
-							} 
-						}
+                         
+					var leafID = lines[i].match(/ID\s([0-9A-E][0-9A-F]+)/)[1];
+					var j;
 
-						if (dynamic_update == true) { update_classtable(); }
+					for (j=0; j < classTable.length; j++)
+					{
+					    if ((classTable[j].leaf != null) && (classTable[j].leaf.toUpperCase() == leafID)) break;
 					}
+
+					if (j < classTable.length)
+					{
+					    classTable[j].bps = parseInt(lines[i].match(/ID\s[0-9A-E][0-9A-F]+.*:\s([0-9]+)/)[1]);
+					} 
+
+
+	     			}
+
+     				if (dynamic_update == true) { update_classtable(); }
+
 				}
 				else
 				{
