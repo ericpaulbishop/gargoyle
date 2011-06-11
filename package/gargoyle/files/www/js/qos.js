@@ -1182,7 +1182,11 @@ function updatetc()
 		}
 		else
 		{
-			commands = commands + currentWanIf;
+			/* 
+			 * NOTE: This NEEDS to be "currentWanName" variable NOT "currentWanIf" Variable!!! 
+			 * If this doesn't work the problem is in gargoyle_header_footer utility, not here
+			 */
+			commands = commands + currentWanName;
 		}
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
