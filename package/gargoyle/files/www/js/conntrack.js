@@ -96,7 +96,7 @@ function updateConnectionTable()
 	if(!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands="cat /proc/net/ip_conntrack"
+		var commands="cat /proc/net/nf_conntrack"
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
@@ -112,7 +112,7 @@ function updateConnectionTable()
 					var line = conntrackLines[conntrackIndex];
 					try
 					{
-						var protocol= (line.split(/[\t ]+/))[0];
+						var protocol= (line.split(/[\t ]+/))[2];
 						var srcIp   = (line.match(/src=([^ \t]*)[\t ]+/))[1];
 						var srcPort = (line.match(/sport=([^ \t]*)[\t ]+/))[1];
 						var dstIp   = (line.match(/dst=([^ \t]*)[\t ]+/))[1];
