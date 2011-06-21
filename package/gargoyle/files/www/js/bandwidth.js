@@ -439,7 +439,6 @@ function doUpdate()
 				{
 
 					var monitors = parseMonitors(req.responseText);
-					
 					var uploadPointSets = [];
 					var downloadPointSets = [];
 					var totalPointSets = [];
@@ -489,7 +488,7 @@ function doUpdate()
 								var ip;
 								for (ip in monitorData)
 								{
-									if( (selectedPlotType == "total" && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									if( ((selectedPlotType == "total" || selectedPlotType.match("qos")) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
 									{
 										ipList.push(ip);
 									}
