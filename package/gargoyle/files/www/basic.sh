@@ -142,7 +142,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<span class='rightcolumn'>
 				<select id='bridge_channel_width' onchange='setChannelWidth(this)'>
 						<option value='HT20'>20MHz</option>
-						<option value='HT40+'>40MHz</option>
+						<option value='HT40+'>40MHz (2nd chan. above)</option>
+						<option value='HT40-'>40Mhz (2nd chan. below)</option>
 					</select>
 				</span>
 			</div>
@@ -493,7 +494,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width' onchange='setChannelWidth(this)'>
 					<option value='HT20'>20MHz</option>
-					<option value='HT40+'>40MHz</option>
+					<option value='HT40+'>40MHz (2nd chan. above)</option>
+					<option value='HT40-'>40MHz (2nd chan. below)</option>
 				</select>
 			</span>
 		</div>
