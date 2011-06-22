@@ -1932,6 +1932,33 @@ function setChannelWidth(selectCtl)
 {
 	setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
 	setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
+
+	setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
+	setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
+	setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
+	var removeChannels = [];
+	if (getSelectedValue(selectCtl.id)=='HT40+')
+	{
+		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-1 ]);
+		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-2 ]);
+		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-3 ]);
+		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-4 ]);
+	}
+	if (getSelectedValue(selectCtl.id)=='HT40-')
+	{
+		removeChannels.push('1');
+		removeChannels.push('2');
+		removeChannels.push('3');
+		removeChannels.push('4');
+	}
+	while(removeChannels.length > 0)
+	{
+		var rc = removeChannels.shift();
+		removeOptionFromSelectElement("bridge_channel", rc, document);
+		removeOptionFromSelectElement("wifi_channel1", rc, document);
+		removeOptionFromSelectElement("wifi_channel2", rc, document);
+	}
+
 }
 function setHwMode(selectCtl)
 {
