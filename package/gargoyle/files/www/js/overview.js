@@ -92,7 +92,11 @@ function resetData()
 			document.getElementById("wan_dns_container").appendChild(leftSpan);
 			document.getElementById("wan_dns_container").appendChild(rightSpan);
 		}	
-		
+
+		if(uciOriginal.get("network", "wan", "proto") != "3g")
+		{
+			document.getElementById("wan_3g_container").style.display = "none";
+		}
 
 		setChildText("wireless_mode", wirelessMode);
 		if(wirelessModeId != "disabled")

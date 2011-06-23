@@ -56,6 +56,7 @@ do_start()
 	mounted=""
 	for devid in $drives ; do
 		id=$(echo $devid | sed 's/^.*://g')
+		[ -z $id ] && continue
 		d=$(echo $devid | sed 's/:.*$//g')
 		did=$(echo "$d" | sed 's/^.*\///g')
 		already_mounted=$(df | awk '{ print $1 ; }' | grep "^$d\$")

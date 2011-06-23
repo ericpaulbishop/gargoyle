@@ -1,0 +1,11 @@
+--- a/package/comgt/files/3g.sh	(wersja 26680)
++++ b/package/comgt/files/3g.sh	(kopia robocza)
+@@ -105,6 +90,8 @@
+ 	esac
+ 	set_3g_led 1 0 0
+ 
++	gcom -d "$device" -s /etc/gcom/getstrength.gcom > /tmp/strength.txt
++
+ 	config_set "$config" "connect" "${apn:+USE_APN=$apn }/usr/sbin/chat -t5 -v -E -f $chat"
+ 	start_pppd "$config" \
+ 		noaccomp \

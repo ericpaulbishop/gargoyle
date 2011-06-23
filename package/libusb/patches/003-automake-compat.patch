@@ -1,0 +1,10 @@
+--- a/configure.in
++++ b/configure.in
+@@ -149,6 +149,7 @@ if test "x$enable_debug" = "xyes"; then
+ fi
+ 
+ # Checks for programs.
++AC_PROG_CXX
+ AC_LANG_CPLUSPLUS
+ AC_PROG_CC
+ AM_PROG_CC_C_O
