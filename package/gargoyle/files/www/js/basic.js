@@ -1988,9 +1988,9 @@ function setChannelWidth(selectCtl)
 	var h40 = (chw == 'HT40+' || chw == 'HT40-')
 	var hplus = chw =='HT40+';
 	var rIndex = 1;
-	for(rIndex=1; rIndex <= 4 && h40; rindex++)
+	for(rIndex=1; rIndex <= 4 && h40; rIndex++)
 	{
-		removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex : rIndex)
+		removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex] : rIndex)
 	}
 	while(removeChannels.length > 0)
 	{
