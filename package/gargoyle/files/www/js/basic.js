@@ -2012,10 +2012,10 @@ function setChannelWidth(selectCtl)
 		{
 			var aChan = mac80211Channels["A"][chanIndex];
 			switch (getSelectedValue(selectCtl.id)) {
-			case 'HT40-':
+			case 'HT40+':
 				if (aChan==36 || aChan==44 || aChan==52 || aChan==60) { AChannels.push(aChan); }
 				break;
-			case 'HT40+':
+			case 'HT40-':
 				if (aChan==40 || aChan==48 || aChan==56 || aChan==64) { AChannels.push(aChan); }
 				break;
 			default:
