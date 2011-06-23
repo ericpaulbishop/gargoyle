@@ -398,9 +398,7 @@ function saveChanges()
 			
 				if(document.getElementById("wifi_channel_width_container").style.display == "block" )
 				{
-					var topChannel = mac80211Channels["G"][ (mac80211Channels["G"]).length-1 ];
 					var channelWidth =  getSelectedValue("wifi_channel_width");
-					channelWidth = (chan == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
 					uci.set("wireless",  wifiDevG, "htmode", channelWidth);
 				}
 
@@ -533,9 +531,7 @@ function saveChanges()
 
 			if(document.getElementById("bridge_channel_width_container").style.display == "block")
 			{
-				var topChannel = mac80211Channels["G"][ (mac80211Channels["G"]).length-1 ];
 				var channelWidth =  getSelectedValue("bridge_channel_width");
-				channelWidth = (chan == topChannel && channelWidth == "HT40+") ? "HT40-" : channelWidth;
 				uci.set("wireless",  wifiDevG, "htmode", channelWidth);
 			}
 
@@ -1434,9 +1430,9 @@ function resetData()
 	if( wifiN )
 	{
 		document.getElementById("bridge_channel_width_container").style.display="block";
-		htmode == htmode == "HT40-" ? "HT40+" : htmode;
 		setSelectedValue("wifi_channel_width", htmode);
 		setSelectedValue("bridge_channel_width", htmode);
+		setChannelWidth(document.getElementById("wifi_channel_width"));
 	}
 	else
 	{
