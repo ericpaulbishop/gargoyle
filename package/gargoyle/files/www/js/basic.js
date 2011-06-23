@@ -1933,24 +1933,20 @@ function setChannelWidth(selectCtl)
 	setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
 	setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
 
+	
 	setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
 	setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
 	setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
 	var removeChannels = [];
-	if (getSelectedValue(selectCtl.id)=='HT40+')
+	var rIndex = 1;
+	var chw =  getSelectedValue(selectCtl.id)
+	var h40 = (chw == 'HT40+' || chw == 'HT40-')
+	var hplus = chw =='HT40+';
+	for(rIndex=1; rIndex <= 4 && h40; rindex++)
 	{
-		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-1 ]);
-		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-2 ]);
-		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-3 ]);
-		removeChannels.push(mac80211Channels["G"][ mac80211Channels["G"].length-4 ]);
+		removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex : rIndex)
 	}
-	if (getSelectedValue(selectCtl.id)=='HT40-')
-	{
-		removeChannels.push('1');
-		removeChannels.push('2');
-		removeChannels.push('3');
-		removeChannels.push('4');
-	}
+	
 	while(removeChannels.length > 0)
 	{
 		var rc = removeChannels.shift();
@@ -1959,24 +1955,20 @@ function setChannelWidth(selectCtl)
 		removeOptionFromSelectElement("wifi_channel2", rc, document);
 	}
 	
-	if(mac80211Channels["A"] != null)
+	if(mac80211Channels["A"] != null && h40)
 	{
-		var AChannels = [];
-		for(var chanIndex=0; chanIndex < (mac80211Channels["A"]).length; chanIndex++)
+		var validAPlus  = [36, 44, 52, 60]
+		var validAMinus = [40, 48, 56, 64]
+
+		var aChannels  = []
+		var origAChan  = mac80211Channels["A"]
+		var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
+		for(var chanIndex=0; chanIndex < origAChan; chanIndex++)
 		{
-			var aChan = mac80211Channels["A"][chanIndex];
-			switch (getSelectedValue(selectCtl.id)) {
-			case 'HT40+':
-				if (aChan==36 || aChan==44 || aChan==52 || aChan==60) { AChannels.push(aChan); }
-				break;
-			case 'HT40-':
-				if (aChan==40 || aChan==48 || aChan==56 || aChan==64) { AChannels.push(aChan); }
-				break;
-			default:
-				AChannels.push(aChan);
-			}
+			var ch = origAChan[chanIndex]
+			if (validTest[ch] == 1) { aChannels.push(ch); }
 		}
-		setAllowableSelections("wifi_channel1a",  AChannels, AChannels, document);
+		setAllowableSelections("wifi_channel1a",  aChannels, aChannels, document);
 	}
 }
 
