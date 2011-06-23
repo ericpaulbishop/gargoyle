@@ -2092,7 +2092,7 @@ function setInvisibleIfIdMatches(selectId, invisibleOptionValues, associatedElem
 	}
 }
 
-var arrToHash(arr)
+function arrToHash(arr)
 {
 	var h = []
 	var i

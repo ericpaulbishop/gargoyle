@@ -1938,15 +1938,14 @@ function setChannelWidth(selectCtl)
 	setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
 	setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
 	var removeChannels = [];
-	var rIndex = 1;
 	var chw =  getSelectedValue(selectCtl.id)
 	var h40 = (chw == 'HT40+' || chw == 'HT40-')
 	var hplus = chw =='HT40+';
+	var rIndex = 1;
 	for(rIndex=1; rIndex <= 4 && h40; rindex++)
 	{
 		removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex : rIndex)
 	}
-	
 	while(removeChannels.length > 0)
 	{
 		var rc = removeChannels.shift();
