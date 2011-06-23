@@ -1954,18 +1954,21 @@ function setChannelWidth(selectCtl)
 		removeOptionFromSelectElement("wifi_channel2", rc, document);
 	}
 	
-	if(mac80211Channels["A"] != null && h40)
+	if(mac80211Channels["A"] != null)
 	{
-		var validAPlus  = [36, 44, 52, 60]
-		var validAMinus = [40, 48, 56, 64]
-
-		var aChannels  = []
 		var origAChan  = mac80211Channels["A"]
-		var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
-		for(var chanIndex=0; chanIndex < origAChan; chanIndex++)
+		var aChannels  = origAChan
+		if(h40)
 		{
-			var ch = origAChan[chanIndex]
-			if (validTest[ch] == 1) { aChannels.push(ch); }
+			aChannels  = []
+			var validAPlus  = [36, 44, 52, 60]
+			var validAMinus = [40, 48, 56, 64]
+			var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
+			for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
+			{
+				var ch = origAChan[chanIndex]
+				if (validTest[ch] == 1) { aChannels.push(ch); }
+			}
 		}
 		setAllowableSelections("wifi_channel1a",  aChannels, aChannels, document);
 	}
