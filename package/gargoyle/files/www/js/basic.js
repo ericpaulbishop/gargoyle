@@ -2004,8 +2004,28 @@ function setChannelWidth(selectCtl)
 		removeOptionFromSelectElement("wifi_channel1", rc, document);
 		removeOptionFromSelectElement("wifi_channel2", rc, document);
 	}
-
+	
+	if(mac80211Channels["A"] != null)
+	{
+		var AChannels = [];
+		for(var chanIndex=0; chanIndex < (mac80211Channels["A"]).length; chanIndex++)
+		{
+			var aChan = mac80211Channels["A"][chanIndex];
+			switch (getSelectedValue(selectCtl.id)) {
+			case 'HT40-':
+				if (aChan==36 || aChan==44 || aChan==52 || aChan==60) { AChannels.push(aChan); }
+				break;
+			case 'HT40+':
+				if (aChan==40 || aChan==48 || aChan==56 || aChan==64) { AChannels.push(aChan); }
+				break;
+			default:
+				aChannels.push(aChan);
+			}
+		}
+		setAllowableSelections("wifi_channel1a",  AChannels, AChannels, document);
+	}
 }
+
 function setHwMode(selectCtl)
 {
 	var hwmode = getSelectedValue(selectCtl.id)
