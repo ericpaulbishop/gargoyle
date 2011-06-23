@@ -1973,7 +1973,7 @@ function setChannelWidth(selectCtl)
 				if (aChan==40 || aChan==48 || aChan==56 || aChan==64) { AChannels.push(aChan); }
 				break;
 			default:
-				aChannels.push(aChan);
+				AChannels.push(aChan);
 			}
 		}
 		setAllowableSelections("wifi_channel1a",  AChannels, AChannels, document);
