@@ -1,5 +1,41 @@
 #!/bin/sh
 
+print_mac80211_channels_for_wifi_dev()
+{
+	wifi_dev="$1"
+	dev_num="$2"
+	out="$3"
+	
+	echo "nextCh     = [];" >> "$out"
+	echo "nextChFreq = [];" >> "$out"
+	echo "nextChPwr  = [];" >> "$out"
+	mode=$(uci get wireless.$wifi_dev.hwmode)
+	[ "$mode" = "11na" ] &&  mode="11an"
+	if [ "$mode" = "11an" ] ; then
+		chId="A"
+		echo "wifiDevA=\"$wifi_dev\";" >> "$out"
+	else
+		mode="11bgn"
+		chId="G"
+		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
+	fi
+	
+	# we are about to screen-scrape iw output, which the tool specifically says we should NOT do
+	# however, as far as I can tell there is no other way to get max txpower for each channel
+	# so... here it goes.
+	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
+	iw "phy$dev_num" info 2>&1 | grep MHz | grep -v "disabled" | sed -e 's/[\t ]*\*[\t ]*//g' | sed -e 's/\[//g' | sed -e 's/\]//g' | sed -e 's/[()]//g' | sed -e 's/\..*$//g' | \
+		awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+
+	
+	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
+	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
+	echo "mac80211ChPwrs[\"$chId\"]   = nextChPwr ;"  >> "$out"
+
+}
+
+
+
 out_file="/var/cached_basic_vars"
 if [ -e "$out_file" ] ; then
 	noDriver=$(cat "$out_file" | grep "wirelessDriver=..;" 2>/dev/null)
@@ -40,8 +76,13 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";" >> "$out_file"
 	echo "var wifiN = false;" >> "$out_file"
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
-	echo "var wirelessDriver=\"mac80211\";" >> "$out_file"
+	echo 'var wirelessDriver=\"mac80211\";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
+	echo 'var mac80211ChFreqs = [];' >> "$out_file"
+	echo 'var mac80211ChPwrs = [];' >> "$out_file"
+
+
+
 	echo "var nextCh=[];" >> "$out_file"
 	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev.null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
 	if [ -n "$ncapab" ] ; then echo "var wifiN = true ;"  >> "$out_file"; else echo "var wifiN = false ;"  >> "$out_file" ; fi
@@ -49,52 +90,17 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	#test for dual band
 	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
-		radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
-		rnum=0;
-		for r in $radios ; do
-			echo "nextCh = [];" >> "$out_file"
-			mode=$(uci get wireless.$r.hwmode)
-			[ "$mode" = "11na" ] &&  mode="11an"
-			if [ "$mode" = "11an" ] ; then
-				chId="A"
-				echo "wifiDevA=\"$r\";" >> "$out_file"
-			else
-				mode="11bgn"
-				chId="G"
-				echo "wifiDevG=\"$r\";" >> "$out_file"
-			fi
-
-
-			cur_if=$(iwconfig 2>/dev/null | grep "wlan" | grep "$mode" | awk ' { print $1 }' | head -n 1)
-			if [ -n "$cur_if" ] ; then
-				iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } ' >> "$out_file"
-			else		
-				iw phy phy$rnum interface add tmpmon type monitor
-				ifconfig tmpmon up
-				iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } ' >> "$out_file"
-				ifconfig tmpmon down
-				iw dev tmpmon del
-			fi
-			rnum=$(( $rnum+1 ))
-			echo "mac80211Channels[\"$chId\"] = nextCh ;" >> "$out_file"
-		done
-
 	else
 		echo "var dualBandWireless=false;" >> "$out_file"
-		#use iw to get available channels
-		cur_if=$(iwconfig 2>/dev/null | grep "wlan" | awk ' { print $1 }' | head -n 1)
-		if [ -n "$cur_if" ] ; then
-			iwlist $cur_if channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } ' >> "$out_file"
-		else		
-			iw phy phy0 interface add tmpmon type monitor
-			ifconfig tmpmon up
-			iwlist tmpmon channel |  grep -v "total;" | awk '{print $2 ; }' | egrep "^[0-9]+$" | awk ' { print "nextCh.push(parseInt(\"" $0 "\", 10)+\"\");" ; } ' >> "$out_file"
-			ifconfig tmpmon down
-			iw dev tmpmon del
-		fi
-		echo "mac80211Channels[\"G\"] = nextCh ;" >> "$out_file"
-
 	fi
+	
+	radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
+	rnum=0;
+	for r in $radios ; do
+		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file"
+		rnum=$(( $rnum+1 ))
+	done
+
 
 elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 	echo "var wirelessDriver=\"atheros\";" >> "$out_file"
