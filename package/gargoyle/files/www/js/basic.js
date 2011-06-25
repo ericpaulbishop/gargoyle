@@ -985,7 +985,7 @@ function setWifiVisibility()
 		setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], ['None', 'WPA2 PSK', 'WPA PSK', 'WEP']);
 	}
 		
-	if(wifiN && wifiMode.match(/ap/) && dualBandWireless))
+	if(wifiN && wifiMode.match(/ap/) && dualBandWireless)
 	{
 		setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
 	}
