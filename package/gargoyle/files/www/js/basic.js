@@ -1497,6 +1497,7 @@ function resetData()
 	setSelectedValue("wifi_max_txpower", selMaxG);	 
 	if(selMaxG == "custom") { document.getElementById("wifi_txpower").value = txpowerG; }
 	updateTxPower("wifi_max_txpower", "wifi_txpower", "G");
+	
 	if(wifiDevA != "")
 	{
 		var txpowerA = uciOriginal.get("wireless", wifiDevA, "txpower");
@@ -2027,7 +2028,7 @@ function getMaxTxPower(band)
 	{
 		var ch = getSelectedValue( band == "A" ? "wifi_channel1a" : "wifi_channel1");
 		var p = mac80211ChPwrs[band][ch];
-		chMaxPower = p == null ? chMaxPower : p;
+		chMaxPwr = p == null ? chMaxPwr : p;
 	}
 	return chMaxPwr
 }
@@ -2054,7 +2055,7 @@ function updateTxPower(selectId, textId, band)
 		setElementEnabled(txt, !atMax, "" + chMaxPwr);
 		txt.value = atMax  || dbm > chMaxPwr ? "" + chMaxPwr : "" + dbm;
 		lab.firstChild.data = "(0 - " + chMaxPwr + "dBm)";
-		lab.style.color = atMax ? "black" : "gray";
+		lab.style.color = atMax ? "gray" : "black";
 	}
 }
 
