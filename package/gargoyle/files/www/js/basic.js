@@ -815,7 +815,7 @@ function proofreadAll()
 	var errors = [];
 	if(document.getElementById("global_gateway").checked)
 	{
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpowera' 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
+		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpowera', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
 	
 		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw];
 	
@@ -1039,7 +1039,7 @@ function setWifiVisibility()
 	wifiVisibilities['sta']      = [1,wn,wn,1,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['ap+sta']   = [1,wn,wn,1,db,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
 	wifiVisibilities['adhoc']    = [1,wn,wn,1,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0        0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1495,14 +1495,14 @@ function resetData()
 	var txpowerG = uciOriginal.get("wireless", wifiDevG, "txpower");
 	var selMaxG = txpowerG== "" ? "max" : "custom";
 	setSelectedValue("wifi_max_txpower", selMaxG);	 
-	if(max == "custom") { document.getElementById("wifi_txpower").value = txpowerG; }
+	if(selMaxG == "custom") { document.getElementById("wifi_txpower").value = txpowerG; }
 	updateTxPower("wifi_max_txpower", "wifi_txpower", "G");
 	if(wifiDevA != "")
 	{
 		var txpowerA = uciOriginal.get("wireless", wifiDevA, "txpower");
 		var selMaxA = txpowerA== "" ? "max" : "custom";
 		setSelectedValue("wifi_max_txpower", selMaxA);
-		if(max == "custom") { document.getElementById("wifi_txpower").value = txpowerA; }
+		if(selMaxA == "custom") { document.getElementById("wifi_txpower").value = txpowerA; }
 		updateTxPower("wifi_max_txpowera", "wifi_txpowera", "A");
 	}
 
@@ -2037,7 +2037,7 @@ function updateTxPower(selectId, textId, band)
 	
 	var max = getSelectedValue(selectId);
 	var atMax = max == "max";
-	var dbm = document.getElementById("textId").value
+	var dbm = document.getElementById(textId).value
 	
 	var updateIds = []
 	updateIds["G"] = [["wifi_max_txpower", "wifi_txpower", "wifi_dbm"], ["bridge_max_txpower", "bridge_txpower", "wifi_dbm"]]
