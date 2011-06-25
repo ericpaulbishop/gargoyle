@@ -33,7 +33,7 @@
  
  config_get ifname "$1" device
 +if [ -z "$ifname" ] || [ "$ifname" = "br-$1" ] ; then ifname="none" ; fi
- for dev in $ifname; do
+ for dev in ${ifname:-$1}; do
  	setup_interface "$dev" "$1"
  done
 --- backfire-src/package/base-files/files/etc/init.d/network	2010-08-25 21:30:09.729363604 -0400
