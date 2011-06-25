@@ -984,8 +984,15 @@ function setWifiVisibility()
 		document.getElementById("wifi_ssid2_label").firstChild.data = "SSID to Join:";
 		setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], ['None', 'WPA2 PSK', 'WPA PSK', 'WEP']);
 	}
-	
-	
+		
+	if(wifiN && wifiMode.match(/ap/) && dualBandWireless))
+	{
+		setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
+	}
+	else
+	{
+		setAllowableSelections( "wifi_hwmode", [ '11ng', '11g', '11b' ], ['N+G+B', 'G+B', 'B' ] );
+	}
 
 	var wifiIds=[	'internal_divider1', 
 			'wifi_hwmode_container',
@@ -1027,7 +1034,7 @@ function setWifiVisibility()
 			];
 
 	var wn = wifiN ? 1 : 0;
-	var db = wn && getSelectedValue("wifi_hwmode") == "dual";
+	var db = wn && getSelectedValue("wifi_hwmode") == "dual" ? 1 : 0;
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
@@ -1455,11 +1462,11 @@ function resetData()
 		if(dualBandWireless)
 		{
 			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
-			setAllowableSelections( "bridge_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
+			setAllowableSelections( "bridge_hwmode", [ '11ng', '11g', '11b' ], ['N+G+B', 'G+B', 'B' ] );
 			hwmode = (ap2cfg != "" || (apcfg == "" && ap2cfg == "")) ? "dual" : hwmode;
 		}
-                setSelectedValue("wifi_hwmode", hwmode);
-		setSelectedValue("bridge_hwmode", hwmode);
+		setSelectedValue("wifi_hwmode", hwmode);
+		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
 	}
 	else
 	{
@@ -2009,7 +2016,10 @@ function setHwMode(selectCtl)
 {
 	var hwmode = getSelectedValue(selectCtl.id)
 	setSelectedValue("wifi_hwmode", hwmode);
-	setSelectedValue("bridge_hwmode", hwmode);
+	if(hwmode != "dual")
+	{
+		setSelectedValue("bridge_hwmode", hwmode);
+	}
 	document.getElementById("wifi_txpowera_container").style.display = hwmode == "dual" ? "block" : "none";
 	document.getElementById("wifi_channel1a_container").style.display = hwmode == "dual" ? "block" : "none";
 	document.getElementById("wifi_ssid1a_container").style.display = hwmode == "dual" ? "block" : "none";
