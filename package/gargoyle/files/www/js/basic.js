@@ -402,14 +402,18 @@ function saveChanges()
 					uci.set("wireless",  wifiDevG, "htmode", channelWidth);
 				}
 
-				if(getSelectedValue("wifi_max_txpower") == "max")
+				var txPowerSet = function(sel_id, txt_id, dev)
 				{
-					uci.remove("wireless", wifiDevG, "txpower")
+					if(getSelectedValue(sel_id) == "max")
+					{
+						uci.remove("wireless", dev, "txpower")
+					}
+					else
+					{
+						uci.set("wireless", dev, "txpower", document.getElementById(txt_id).value);
+					}
 				}
-				else
-				{
-					uci.set("wireless", wifiDevG, "txpower", document.getElementById("wifi_txpower").value);
-				}
+				txPowerSet("wifi_max_txpower", "wifi_txpower", wifiDevG)
 
 				//handle dual band configuration
 				if(ap2cfg != "")
@@ -422,8 +426,10 @@ function saveChanges()
 							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
 						}
 					}
-					dup_sec_options("wireless", wifiDevG, wifiDevA, ["txpower", "htmode"]);
+					dup_sec_options("wireless", wifiDevG, wifiDevA, ["htmode"]);
 					uci.set("wireless", wifiDevA, "channel", getSelectedValue("wifi_channel1a"));
+					txPowerSet("wifi_max_txpowera", "wifi_txpowera", wifiDevA)
+
 
 					//ssid of 5GHz AP will be same, but with _5GHz appended
 					uci.set("wireless", ap2cfg, "ssid", document.getElementById("wifi_ssid1a").value );
