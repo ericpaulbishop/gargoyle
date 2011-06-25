@@ -1498,19 +1498,20 @@ function resetData()
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
 
-	var txpowerG = uciOriginal.get("wireless", wifiDevG, "txpower");
-	var selMaxG = txpowerG== "" ? "max" : "custom";
-	setSelectedValue("wifi_max_txpower", selMaxG);	 
-	if(selMaxG == "custom") { document.getElementById("wifi_txpower").value = txpowerG; }
-	updateTxPower("wifi_max_txpower", "wifi_txpower", "G");
-	
+
+
+	var initTxPwr = function(sel_id, txt_id, dev, band)
+	{
+		var txpwr = uciOriginal.get("wireless", dev, "txpower");
+		var selMax = txpwr == "" ? "max" : "custom"
+		setSelectedValue(sel_id, selMax)
+		if(selMax == "custom") { document.getElementById(txt_id).value = txpwr; }
+		updateTxPower(sel_id, txt_id, band)	
+	}
+	initTxPwr("wifi_max_txpower", "wifi_txpower", wifiDevG, "G")
 	if(wifiDevA != "")
 	{
-		var txpowerA = uciOriginal.get("wireless", wifiDevA, "txpower");
-		var selMaxA = txpowerA== "" ? "max" : "custom";
-		setSelectedValue("wifi_max_txpower", selMaxA);
-		if(selMaxA == "custom") { document.getElementById("wifi_txpower").value = txpowerA; }
-		updateTxPower("wifi_max_txpowera", "wifi_txpowera", "A");
+		initTxPwr("wifi_max_txpowera", "wifi_txpowera", wifiDevA, "A")
 	}
 
 	
