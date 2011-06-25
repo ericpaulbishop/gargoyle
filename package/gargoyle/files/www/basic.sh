@@ -147,12 +147,12 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<div id='bridge_txpower_container'>
 				<label class='leftcolumn' for='bridge_txpower_max' id='bridge_txpower_label'>Transmit Power:</label>
 				<span class='rightcolumn'>
-					<select id='bridge_max_txpower' onchange='setTransmitPower("bridge_max_txpower","bridge_txpower")'>
+					<select id='bridge_max_txpower' onchange='updateTxPower("bridge_max_txpower","bridge_txpower", "G")'>
 						<option value='max'>Max</option>
 						<option value='custom'>Custom</option>
 					</select>
 					&nbsp;
-					<input type='text' id='bridge_txpower'  onkeyup='proofreadNumericRange(this,0,txPowerMax)' size='10' />
+					<input type='text' id='bridge_txpower'  onkeyup='proofreadNumericRange(this,0,getMaxTxPower("G"))' size='10' />
 					<em><span id="bridge_dbm">dBm</span></em>
 				</span>
 			</div>
@@ -453,18 +453,29 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 
 		<div id='wifi_txpower_container'>
-			<label class='leftcolumn' for='wifi_txpower_max' id='wifi_txpower_label'>Transmit Power:</label>
+			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'>Transmit Power:</label>
 			<span class='rightcolumn'>
-				<select id='wifi_max_txpower' onchange='setTransmitPower("wifi_max_txpower","wifi_txpower")'>
+				<select id='wifi_max_txpower' onchange='updateTxPower("wifi_max_txpower","wifi_txpower", "G")'>
 					<option value='max'>Max</option>
 					<option value='custom'>Custom</option>
 				</select>
 				&nbsp;
-				<input type='text' id='wifi_txpower' onkeyup='proofreadNumericRange(this,0,txPowerMax)' size='10' />
+				<input type='text' id='wifi_txpower' onkeyup='proofreadNumericRange(this,0,getMaxTxPower("G"))' size='10' />
 				<em><span id="wifi_dbm">dBm</span></em>
 			</span>
 		</div>
-		
+		<div id='wifi_txpowera_container'>
+			<label class='leftcolumn' for='wifi_max_txpowera' id='wifi_txpowera_label'>5GHz Transmit Power:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_max_txpowera' onchange='updateTxPower("wifi_max_txpowera","wifi_txpowera", "A")'>
+					<option value='max'>Max</option>
+					<option value='custom'>Custom</option>
+				</select>
+				&nbsp;
+				<input type='text' id='wifi_txpowera' onkeyup='proofreadNumericRange(this,0,getMaxTxPower("A"));' size='10' />
+				<em><span id="wifia_dbm">dBm</span></em>
+			</span>
+		</div>
 
 
 		<div id="mac_enabled_container">
@@ -607,7 +618,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wifi_channel1a_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel1a' id='wifi_channel1_label'>Wireless Channel (5GHz):</label>
-			<select class='rightcolumn' id='wifi_channel1a'  ></select>
+			<select class='rightcolumn' id='wifi_channel1a' onchange='setChannel(this)' ></select>
 		</div>
 
 
