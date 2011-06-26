@@ -566,7 +566,7 @@
 				incDate.setTime( nextDate.getTime() + incrementDirection*(parseInt(unit)*1000));
 				return incDate;
 			}
-			multMatchFunction = function(nextDate,multiple){ return ((nextDate.getTime()/(parseInt(unit)*1000)) % multiple == 0) ? true : false; }
+			multMatchFunction = function(nextDate,multiple){ return true; }
 		}
 
 		//var increment =  multiple*(incDate.getTime()-nextDate.getTime());

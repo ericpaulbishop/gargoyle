@@ -76,7 +76,7 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";" >> "$out_file"
 	echo "var wifiN = false;" >> "$out_file"
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
-	echo 'var wirelessDriver=\"mac80211\";' >> "$out_file"
+	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
 	echo 'var mac80211ChFreqs = [];' >> "$out_file"
 	echo 'var mac80211ChPwrs = [];' >> "$out_file"
