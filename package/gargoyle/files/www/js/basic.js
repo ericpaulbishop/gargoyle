@@ -2059,6 +2059,13 @@ function setChannelWidth(selectCtl)
 
 function setHwMode(selectCtl)
 {
+	if(	document.getElementById("wifi_hwmode_container").style.display == "none"  && 
+		document.getElementById("bridge_hwmode_container").style.display == "none" 
+		)
+	{
+		//setting of hwmode not allowd, nothing here applies
+		return;
+	}
 	var hwmode = getSelectedValue(selectCtl.id)
 	setSelectedValue("wifi_hwmode", hwmode);
 	if(hwmode != "dual")
@@ -2080,6 +2087,20 @@ function setHwMode(selectCtl)
 			setChannel(document.getElementById("wifi_channel1a"))
 		}
 	}
+	var displayWidth = (hwmode == "11ng" || hwmode == "dual")
+	if(!displayWidth)
+	{
+		setSelectedValue("wifi_channel_width", "HT20");
+		setChannelWidth(document.getElementById("wifi_channel_width"))
+		
+	}
+	var widthContainers = ["wifi_channel_width_container", "bridge_channel_width_container" ];
+	var wci;
+	for(wci=0 ; wci < widthContainers.length; wci++)
+	{
+		var container = document.getElementById( widthContainers[wci] );
+		container.style.display = displayWidth ? "block" : "none";
+	}
 }
 
 
@@ -2089,7 +2110,8 @@ function getMaxTxPower(band)
 	if(wirelessDriver == "mac80211")
 	{
 		var ch = getSelectedValue( band == "A" ? "wifi_channel1a" : "wifi_channel1");
-		var p = mac80211ChPwrs[band][ch];
+		var b = mac80211ChPwrs[band];
+		var p = b == null ? null : b[ch];	
 		chMaxPwr = p == null ? chMaxPwr : p;
 	}
 	return chMaxPwr
