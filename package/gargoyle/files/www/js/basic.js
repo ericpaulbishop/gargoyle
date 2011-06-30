@@ -2042,8 +2042,8 @@ function setChannelWidth(selectCtl)
 		if(h40)
 		{
 			aChannels  = []
-			var validAPlus  = [36, 44, 52, 60]
-			var validAMinus = [40, 48, 56, 64]
+			var validAPlus  = [36, 44, 52, 60, 149, 157]
+			var validAMinus = [40, 48, 56, 64, 153, 161]
 			var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
 			for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
 			{
