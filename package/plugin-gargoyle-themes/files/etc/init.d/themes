@@ -5,12 +5,11 @@ START=49
 start()
 {
 	gdisplay=$(uci get gargoyle.display.system_themes 2>/dev/null)
-	if [ -z "$gdisplay" ] ; then
+	num_themes=$(ls -l /www/themes | wc -l)
+	if [ -z "$gdisplay" ] && [ "$num_themes" > 1 ] ; then
 		uci set gargoyle.display.system_themes='Themes'
 		uci set gargoyle.scripts.system_themes='themes.sh'
 		uci set gargoyle.system.themes='311'
 		uci commit
-		mv /www/themes/default /www/themes/Gargoyle
-		ln -s /www/themes/Gargoyle /www/themes/default
 	fi
 }

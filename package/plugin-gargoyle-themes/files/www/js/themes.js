@@ -1,20 +1,11 @@
 /*
- *     Copyright (c) 2011 Cezary Jackiewicz <cezary@eko.one.pl>
+ * Copyright (c) 2011 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>  
+ * and is distributed under the terms of the GNU GPL 
+ * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL. 
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
  *
- *     This program is free software; you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation; either version 2 of the License, or
- *     (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with this program; if not, write to the Free Software
- *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- *     MA 02110-1301, USA.
  */
 
 function createUseButton()
@@ -33,7 +24,7 @@ function resetData()
 
 	for (idx=0; idx < themes.length; idx++)
 	{
-		var current = (themes.indexOf(currentTheme) == idx)?"*":"";
+		var current = (themes.indexOf(uciOriginal.get("gargoyle", "global", "theme")) == idx)?"*":"";
 		TableData.push([ themes[idx], current, createUseButton() ]);
 	}
 
@@ -52,8 +43,8 @@ function useTheme(row, action)
 	var theme = row.firstChild.firstChild.data;
 
 	var cmd = [];
-	cmd.push("rm /www/themes/default");
-	cmd.push("ln -s /www/themes/\"" + theme + "\" /www/themes/default");
+	cmd.push("uci set gargoyle.global.theme=\"" + theme + "\"");
+	cmd.push("uci commit");
 	cmd.push("sleep 1");
 
 	commands = cmd.join("\n");
