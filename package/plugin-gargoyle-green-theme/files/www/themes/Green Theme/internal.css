@@ -535,9 +535,9 @@ input.bottom_button:active
 .plot_header
 {
 	font-family: verdana, arial, sans-serif;
-	font-size:18px;
+	font-size:14px;
 	font-weight:bold;
-	color:#888AB8;
+	color:#6C8A3F;
 	margin-left:20px;
 	margin-top:10px;
 	margin-bottom:10px;
