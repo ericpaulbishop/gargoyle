@@ -90,7 +90,7 @@ body
 {
 	margin: 30px auto 0;
 	width:900px;
-	height:100px;
+	height:80px;
 	background: #6c8a3f;
 	z-index:700;
 	border-left: 1px dashed #ddd;
@@ -106,7 +106,7 @@ body
 
 #garg_title
 {
-	padding: 30px 0 0 5px;
+	padding: 30px 0 0 30px;
 	font-family:sans-serif;
 	font-size:25px;
 	width: 835px;
@@ -128,7 +128,7 @@ body
 
 #garg_host
 {
-	padding: 35px 5px 0 0;
+	padding: 15px 5px 0 0;
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 	color: #FFFFFF;
