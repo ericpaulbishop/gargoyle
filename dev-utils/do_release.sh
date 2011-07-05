@@ -10,6 +10,12 @@ fi
 scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 
+if [ ! -d "images" ] ; then
+	echo "ERROR: images directory does not exist"
+	echo "Aborting Update"
+	exit;
+fi
+
 cd images
 rm -rf src custom
 
