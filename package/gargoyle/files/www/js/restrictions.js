@@ -1,6 +1,5 @@
 var pkg = "firewall";
 
-
 function saveChanges()
 {
 	setControlsEnabled(false, true);
@@ -140,7 +139,15 @@ function addNewRule(ruleType, rulePrefix)
 		var tableContainer = document.getElementById(rulePrefix + 'table_container');
 		var table = tableContainer.firstChild;
 		var tableData = getTableDataArray(table);
-		var newId = rulePrefix + (tableData.length+1);
+		
+		var newIndex = tableData.length+1;
+		var newId = rulePrefix + "" + newIndex;
+		while( uci.get(pkg, newId, "") != "" )
+		{
+			newIndex++;
+			newId = rulePrefix + "" + newIndex;
+		}
+		
 		setUciFromDocument(document, newId, ruleType, rulePrefix);
 
 		var description = uci.get(pkg, newId, "description");
