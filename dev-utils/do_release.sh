@@ -64,6 +64,7 @@ for i in $image_dirs ; do
 		echo $i
 	
 		$scp_pub $i/* $user@gargoyle-router.com:gargoyle_site/downloads/images/$i/
+		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$major_version/$i"
 		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$major_version/$i"
 		$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/gargoyle-$major_version/$i/
 	fi
