@@ -10,11 +10,24 @@ fi
 scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 
-
-#upload images and packages
-#package dir will be current or next stable version branch
 cd images
 rm -rf src custom
+
+#make sure we can clone latest source to upload
+mkdir src
+cd src
+git clone git://gargoyle-router.com/gargoyle.git
+if [ ! -d "gargoyle" ] ; then
+	echo "ERROR: Cannot clone source tree from: git://gargoyle-router.com/gargoyle.git"
+	echo "Aborting Update"
+	echo ""
+	exit;
+fi
+cd ..
+
+
+#prepare for upload by determining current version and stable version branch
+#package dir will be current or next stable version branch
 version=$(find . -name "gargoyle_*"  | egrep -o "[0-9]+\.[0-9]+\.[0-9]+" | head -n 1)
 major_version="1.0"
 if [ -n "$version" ] ; then
@@ -29,17 +42,6 @@ if [ -n "$version" ] ; then
 	fi
 fi
 
-#make sure we can clone latest source
-mkdir src
-cd src
-git clone git://gargoyle-router.com/gargoyle.git
-if [ ! -d "gargoyle" ] ; then
-	echo "ERROR: Cannot clone source tree from: git://gargoyle-router.com/gargoyle.git"
-	echo "Aborting Update"
-	echo ""
-	exit;
-fi
-cd ..
 
 #give user a chance to cancel
 echo "Updating for version = $version"
