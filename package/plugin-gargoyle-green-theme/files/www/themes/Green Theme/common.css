@@ -93,10 +93,7 @@ body
 	height:80px;
 	background: #6c8a3f;
 	z-index:700;
-	border-left: 1px dashed #ddd;
-	border-right: 1px dashed #ddd;
-	border-top: 1px dashed #ddd;
-	border-bottom: 2px dotted #ddd;
+	border: 1px solid #006600;
 }
 
 #inner_logo
@@ -141,8 +138,8 @@ body
 	width: 900px;
 	background: #FFFFFF;
 	overflow:hidden;
-	border-left: 1px dashed #ddd;
-	border-right: 1px dashed #ddd;
+	border-left: 1px solid #006600;
+	border-right: 1px solid #006600;
 #	border-bottom: 1px dashed #ddd;
 	position: relative;
 }
@@ -153,9 +150,9 @@ body
 	background: #FFFFFF;
 	height: 20px;
 	width: 900px;
-	border-bottom: 1px dashed #ddd;
-	border-left: 1px dashed #ddd;
-	border-right: 1px dashed #ddd;	
+	border-bottom: 1px solid #006600;
+	border-left: 1px solid #006600;
+	border-right: 1px solid #006600;
 }
 
 #nav_external_container
