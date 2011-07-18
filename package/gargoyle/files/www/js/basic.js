@@ -492,6 +492,14 @@ function saveChanges()
 		}
 		else
 		{
+			if(document.getElementById("bridge_hwmode_container").style.display == "block")
+			{
+				var hwgmode = getSelectedValue("bridge_hwmode");
+				dualBandSelected = hwgmode == "dual" ? true : false;
+				hwgmode = hwgmode == "dual" ? "11ng" : hwgmode;
+				uci.set("wireless",  wifiDevG, "hwmode", hwgmode);
+			}
+
 			if( document.getElementById("bridge_wan_port_to_lan_container").style.display != "none" && getSelectedValue('bridge_wan_port_to_lan') == "bridge" )
 			{
 				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
