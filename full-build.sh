@@ -32,7 +32,7 @@ fi
 # you can set this to an alternate revision 
 # or empty to checkout latest 
 branch_name="backfire"
-rnum=27685
+rnum=27897
 
 openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
 
