@@ -298,6 +298,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char** mark_def = get_map_element(rule_def, "mark");
 	int mark_is_negated = mark_def == NULL ? 1 : 0;
 	mark_def = mark_def == NULL ? get_map_element(rule_def, "not_mark") : mark_def;
+	mark_is_negated = mark_def == NULL ? 0 : mark_is_negated;
 	/* we can't do single negation with mark match, so always add seperate multi-match if mark is negated */
 	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " -m mark ", " --mark ", mark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&mark_is_negated);
@@ -308,6 +309,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char** connmark_def = get_map_element(rule_def, "connmark");
 	int connmark_is_negated = connmark_def == NULL ? 1 : 0;
 	connmark_def = connmark_def == NULL ? get_map_element(rule_def, "not_connmark") : connmark_def;
+	connmark_is_negated = connmark_def == NULL ? 0 : connmark_is_negated;
 	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " -m connmark ", " --mark ", connmark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&connmark_is_negated);
 	push_list(final_mask_list, (void*)&connmark_is_multi);
@@ -321,12 +323,14 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	 * addresses are a bit tricky, since we need to handle 3 different kinds of matches: ips, ip ranges and macs
 	 */
 	char*** src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
-	int src_is_negated = src_def == NULL ? 1 : 0;
-	src_def = src_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_addr" : "not_local_addr")) : src_def;
+	char*** not_src_def = get_map_element(rule_def, (is_ingress ? "not_remote_addr" : "not_local_addr"));
+	int src_is_negated = src_def == NULL  && not_src_def != NULL ? 1 : 0;
+	src_def = src_is_negated == 1 ? not_src_def : src_def;
 
 	char*** dst_def = get_map_element(rule_def, (is_ingress ? "local_addr"  : "remote_addr"));
-	int dst_is_negated = dst_def == NULL ? 1 : 0;
-	dst_def = dst_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_addr" : "not_remote_addr")) : dst_def;
+	char*** not_dst_def = get_map_element(rule_def, (is_ingress ? "not_local_addr"  : "not_remote_addr"));
+	int dst_is_negated = dst_def == NULL && not_dst_def != NULL ? 1 : 0;
+	dst_def = dst_is_negated == 1 ? not_dst_def : dst_def;
 
 	char*** addr_defs[2] = { src_def, dst_def };
 	int addr_negated[2] = { src_is_negated, dst_is_negated };
@@ -334,6 +338,8 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char* addr_prefix2[2][3] = { {"", " --src-range ", "" }, { "", " --dst-range ", NULL } };
 
 	int addr_index = 0;
+	int is_true = 1;
+	int is_false = 0;
 	for(addr_index = 0; addr_index < 2; addr_index++)
 	{
 		char*** addrs = addr_defs[addr_index];
@@ -351,6 +357,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			}
 			int is_multi = total_rules > 1 ? 1 : 0;
 			int is_negated = addr_negated[addr_index];
+			//printf("is negated = %d for addr_index = %d\n", is_negated, addr_index);
 
 			for(test_list_index=0; test_list_index < 3; test_list_index++)
 			{
@@ -364,9 +371,9 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				}
 			}
 			
-			push_list(initial_mask_list, (void*)&is_negated);
-			push_list(final_mask_list, (void*)&is_multi);
-			mask_byte_index++;	
+			push_list(initial_mask_list, (void*)(addr_negated + addr_index));
+			push_list(final_mask_list, (void*)(is_multi == 1 ? &is_true : &is_false) );
+			mask_byte_index++;
 		}
 	}
 
@@ -375,6 +382,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char** sport_def = get_map_element(rule_def, (is_ingress ? "remote_port" : "local_port"));
 	int sport_is_negated = sport_def == NULL ? 1 : 0;
 	sport_def = sport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_port" : "not_local_port")) : sport_def;
+	sport_is_negated = sport_def == NULL ? 0 : sport_is_negated;
 	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&sport_is_negated);
 	push_list(final_mask_list, (void*)&sport_is_multi);
@@ -384,10 +392,11 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char** dport_def = get_map_element(rule_def, (is_ingress ? "local_port"  : "remote_port"));
 	int dport_is_negated = dport_def == NULL ? 1 : 0;
 	dport_def = dport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_port" : "not_remote_port")) : dport_def;
+	dport_is_negated = dport_def == NULL ? 0 : dport_is_negated;
 	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " --dport ", "", dport_is_negated, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&dport_is_negated);
 	push_list(final_mask_list, (void*)&dport_is_multi);
-	mask_byte_index++;	
+	mask_byte_index++;
 
 	list* all_rules = initialize_list();
 
@@ -444,12 +453,13 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				int* is_negation = (int*)shift_list(initial_mask_list);
 				if(*is_negation == 1 && next_mask_index != url_mask_byte_index )
 				{
+					//printf("nonzero byte index for main mark = %d\n", next_mask_index);
 					initial_main_mark = initial_main_mark + next_mark_bit;
 				}
 			}
 			/* else it's last single_check mark which is never initialized to one */
-		
 		}
+
 
 		if(initial_main_mark > 0)
 		{
