@@ -1012,6 +1012,7 @@ static void destroy_connection_http(void* connection_data)
 	if(connection_data != NULL)
 	{
 		int* socket = (int*)connection_data;
+		close(socket);
 		free(socket);
 	}
 }
