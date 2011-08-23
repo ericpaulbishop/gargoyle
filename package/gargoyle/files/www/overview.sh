@@ -159,7 +159,7 @@
 			<span class='leftcolumn'>Signal Strength:</span><span id="wan_3g" class='rightcolumn'>
 <?
 	if [ -e /tmp/strength.txt ]; then
-		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {printf "%d%%, %ddBm\n", C*100/31, C*2-113}' /tmp/strength.txt
+		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "(no data)"} else {printf "%d%%, %ddBm\n", C*100/31, C*2-113}}' /tmp/strength.txt
 	fi
 ?>
 			</span>
