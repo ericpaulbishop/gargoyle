@@ -54,7 +54,7 @@
 
 		<div>
 			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Total (Download) Bandwidth:</label>
-			<input class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
 			<em>kbit/s</em>
 
 		</div>
