@@ -1,0 +1,362 @@
+/*
+ * This program is copyright © 2010 Artur Wronowski and is distributed under the terms of the GNU GPL 
+ * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL. 
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
+
+
+html
+{
+	background: #292929;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	height: 100%;
+}
+
+body
+{
+	background: 
+	-moz-linear-gradient(
+		center bottom,
+		#292929 90%,
+		#191919 100%
+	);
+	background: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.90, #292929),
+		color-stop(1, #191919)
+	);
+	background-repeat: no-repeat;
+	font: 12px sans-serif;
+	color: #CCC;
+	line-height:1.3em;
+	padding:0px;
+	margin:0px;
+	border:0px;
+	height:100%;
+	
+}
+
+#darken
+{
+	top:0px;
+	width:100%;
+	height:100px;
+	overflow:hidden;
+	min-height: 100%;
+	display:none;
+	background:#789;
+	position:absolute;
+	z-index:2000;
+	opacity: .5;
+	MozOpacity:0.5;
+	filter: alpha(opacity=50);
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+}
+
+#wait_msg
+{
+	display:none;
+	background: #333;
+	z-index:3000;
+	position:fixed;
+	width:300px;
+	border:1px solid #789;
+	height:100px; 
+}
+
+#wait_icon
+{
+	left:115px;
+	top:50px;
+	position:absolute;
+	display:block;
+}
+
+#wait_txt
+{
+	left:10px;
+	top:20px;
+	width:280px;
+	position:relative;
+	display:block;
+	text-align:center;
+	font-size:14px;
+	font-weight:bold;
+	padding-bottom:20px;
+}
+
+.select_free
+{
+	display:none;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	filter:mask();
+	width:2000px;
+	height:3500px;
+}
+
+
+#outer_logo
+{
+	margin: 0px auto 15px;
+	width:900px;
+	height:85px;
+	z-index:700;
+	background-color: #474747;
+	background: 
+	-moz-linear-gradient(
+    	center bottom,
+    	#373737 0%,
+    	#575757 100%
+	);
+	background: -webkit-gradient(
+    	linear,
+    	left bottom,
+    	left top,
+    	color-stop(0, #373737),
+    	color-stop(1, #575757)
+	);
+	-moz-border-radius: 0px 0px 20px 0px;
+	-webkit-border-radius: 0px 0px 20px 0px;
+	border-radius: 0px 0px 20px 0px;
+	-moz-box-shadow: 10px 10px 10px #111;
+	-webkit-box-shadow: 10px 10px 10px #111;
+	box-shadow: 10px 10px 10px #111;
+}
+
+#inner_logo
+{
+
+}
+
+#garg_title
+{
+	padding-top: 25px;
+	text-align: center;
+	font-family:sans-serif;
+	font-size:40px;
+	width: 100%;
+	font-weight: bold;
+	color:#789;
+	float: left;
+	text-shadow: 3px 3px 3px #222;
+}
+#garg_desc
+{
+	padding: 0 0 0 5px;
+	font-family:verdana, arial, sans-serif;
+	font-style:italic;
+	font-size:9px;
+	color:#E0E0E0;
+	float: left;
+	width: 100%;
+	display: none;
+}
+
+#garg_host
+{
+	padding-top:  60px;
+	text-align: center;
+	width: 100%;
+	font-family:verdana, arial, sans-serif;
+	font-size:10px;
+	color: #E0E0E0;	
+}
+
+#outer_container
+{
+	
+	margin:0 auto 20px auto;
+	width: 900px;
+	overflow:hidden;
+	position: relative;
+	-moz-border-radius: 20px 0px 20px 0px;
+	-webkit-border-radius: 20px 0px 20px 0px;
+	border-radius: 20px 0px 20px 0px;
+	background: #474747;
+	background: 
+	-moz-linear-gradient(
+		center bottom,
+		#373737 0%,
+		#575757 100%
+	);
+	background: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, #373737),
+		color-stop(1, #474747)
+	);
+	-moz-box-shadow: 10px 10px 10px #111;
+	-webkit-box-shadow: 10px 10px 10px #111;
+	box-shadow: 10px 10px 10px #111;
+}
+
+#outer_footer
+{
+height:1px;
+}
+
+#nav_external_container
+{
+	
+	width: 175px;
+	float: right; 
+	height: 100%;
+	margin: 10px 10px 15px 0;
+	-moz-border-radius: 10px 0px 10px 0px;
+	-webkit-border-radius: 10px 0px 10px 0px;
+	border-radius: 10px 0px 10px 0px;
+	background: #333;
+	-moz-box-shadow: 5px 5px 5px #111;
+	-webkit-box-shadow: 5px 5px 5px #111;
+	box-shadow: 5px 5px 5px #111;
+	
+}
+
+#nav_top{}
+#nav_internal_container1{}
+
+#nav_internal_container2
+{
+	font-family: verdana, arial, sans-serif;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	
+	
+}
+
+#nav_internal_container2 a
+{
+	text-decoration: none;
+	padding: 2px 10px 2px 10px;
+	display: block;
+	color: #7ad;
+}
+
+#nav_internal_container2 a:visited{}
+
+#nav_internal_container2 a:hover
+{
+	cursor:pointer;
+	color:#ccc;
+	padding:1px 11px 3px 9px;
+}
+
+
+#nav_unselected_divider_end1 a
+{
+	font-weight: bold;
+}
+
+.nav_selected_end1
+{
+	padding: 0px;
+}
+
+.nav_selected_container_end1{}
+
+.nav_unselected_end1
+{
+	padding: 0px;	
+	font-weight: bold;
+}
+
+
+.nav_unselected a
+{
+	padding: 0px;
+	font-weight: bold;		
+}
+
+.nav_selected
+{
+	padding: 0;	
+}
+.nav_selected_container{}
+
+.selected_header
+{
+	padding: 2px 10px 2px 9px;
+	font-weight: bolder;
+	color: #FFF;
+	text-shadow: 3px 3px 3px #111;
+}
+.selected_single_header
+{
+	padding: 15px;
+	font-weight:bolder;
+}
+
+#submenu_container
+{
+	font-size:12px;	
+}
+
+#submenu_container a
+{
+	font-size:12px;
+}
+
+.submenu_selected
+{
+	margin: 1px 0 1px 11px;
+	width:151px;
+	padding: 3px 5px 3px 9px;
+	display: block;
+	color: #CCC;
+	text-shadow: 2px 2px 2px #111;
+	background-color:#474747;
+	-moz-border-radius: 10px 0px 0px 10px;
+	-webkit-border-radius: 10px 0px 0px 10px;
+	border-radius: 10px 0px 0px 10px;
+	-moz-box-shadow: inset 3px 3px 3px #111;
+	-webkit-box-shadow: inset 3px 3px 3px #111;
+	box-shadow: inset 2px 2px 2px #111;
+}
+
+
+#submenu_container a
+{
+	display: block;
+	padding: 2px 0 2px 20px;
+	color: #789;
+	text-decoration: none;
+}
+
+#submenu_container a:hover
+{
+	cursor:pointer;
+	color:#bbb;
+	padding:1px 1px 3px 19px;
+}
+
+.nav_selected_divider1{}
+.nav_selected_divider2{}
+.nav_selected_divider_end2{}
+.nav_unselected_divider{}
+.nav_unselected_divider_end2{}
+
+#main_external_container
+{	
+	-moz-border-radius: 10px 0px 10px 0px;
+	-webkit-border-radius: 10px 0px 10px 0px;
+	border-radius: 10px 0px 10px 0px;
+	margin: 0px 0px 0px 0px;
+	width: 705px;
+	float: right; 
+	padding: 0;
+	height: 100%;
+}
+
+#main_top{}
+#main_bottom{}
+#main_internal_container{}
