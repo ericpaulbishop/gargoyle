@@ -1,0 +1,52 @@
+
+---
+ usb.h.in |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+--- a/usb.h.in
++++ b/usb.h.in
+@@ -66,14 +66,14 @@
+ struct usb_descriptor_header {
+ 	u_int8_t  bLength;
+ 	u_int8_t  bDescriptorType;
+-};
++} __attribute__ ((packed));
+ 
+ /* String descriptor */
+ struct usb_string_descriptor {
+ 	u_int8_t  bLength;
+ 	u_int8_t  bDescriptorType;
+ 	u_int16_t wData[1];
+-};
++} __attribute__ ((packed));
+ 
+ /* HID descriptor */
+ struct usb_hid_descriptor {
+@@ -85,7 +85,7 @@
+ 	/* u_int8_t  bReportDescriptorType; */
+ 	/* u_int16_t wDescriptorLength; */
+ 	/* ... */
+-};
++} __attribute__ ((packed));
+ 
+ /* Endpoint descriptor */
+ #define USB_MAXENDPOINTS	32
+@@ -172,7 +172,7 @@
+ 	u_int8_t  iProduct;
+ 	u_int8_t  iSerialNumber;
+ 	u_int8_t  bNumConfigurations;
+-};
++} __attribute__ ((packed));
+ 
+ struct usb_ctrl_setup {
+ 	u_int8_t  bRequestType;
+@@ -180,7 +180,7 @@
+ 	u_int16_t wValue;
+ 	u_int16_t wIndex;
+ 	u_int16_t wLength;
+-};
++} __attribute__ ((packed));
+ 
+ /*
+  * Standard requests
+
