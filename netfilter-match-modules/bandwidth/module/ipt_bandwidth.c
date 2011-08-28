@@ -341,7 +341,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 {
 	#ifdef BANDWIDTH_DEBUG
 		unsigned long* ip = &key;
-		printk("shifting ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
+		printk("shifting ip = %u.%u.%u.%u\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
 	#endif
 
 
@@ -353,8 +353,6 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 		printk("    first_start  = %ld\n", history->first_start);
 		printk("    first_end    = %ld\n", history->first_end);
 		printk("    last_end     = %ld\n", history->last_end);
-		printk("    next_start   = %ld\n", next_start);
-		printk("    next_end     = %ld\n", next_end);
 		printk("\n");
 	#endif
 	
@@ -420,6 +418,7 @@ static void shift_timezone_of_ip(unsigned long key, void* value)
 static void shift_timezone_of_id(char* key, void* value)
 {
 	info_and_maps* iam = (info_and_maps*)value;
+	int history_found = 0;
 	if(iam == NULL)
 	{
 		return;
@@ -441,10 +440,14 @@ static void shift_timezone_of_id(char* key, void* value)
 
 	if(iam->ip_history_map != NULL)
 	{
-		shift_timezone_info_previous_reset = iam->info->previous_reset;
-		apply_to_every_long_map_value(iam->ip_history_map, shift_timezone_of_ip);
+		if(iam->ip_history_map->num_elements > 0)
+		{
+			history_found = 1;
+			shift_timezone_info_previous_reset = iam->info->previous_reset;
+			apply_to_every_long_map_value(iam->ip_history_map, shift_timezone_of_ip);
+		}
 	}
-	else
+	if(history_found == 0)
 	{
 		iam->info->previous_reset = iam->info->previous_reset + ((old_minutes_west - local_minutes_west )*60);
 		if(iam->info->previous_reset > shift_timezone_current_time)
@@ -461,10 +464,10 @@ static void shift_timezone_of_id(char* key, void* value)
 				iam->info->next_reset = get_next_reset_time(iam->info, iam->info->previous_reset, iam->info->previous_reset);
 			}
 		}
-
 	}
 	shift_timezone_iam = NULL;
 }
+
 static void check_for_timezone_shift(time_t now)
 {
 	spin_lock_bh(&bandwidth_lock);
@@ -485,15 +488,12 @@ static void check_for_timezone_shift(time_t now)
 			int adj_minutes = old_minutes_west-local_minutes_west;
 			adj_minutes = adj_minutes < 0 ? adj_minutes*-1 : adj_minutes;	
 			
-			#ifdef BANDWIDTH_DEBUG
-				printk("timezone shift detected, shifting...\n");
-			#endif	
-
-
 			down(&userspace_lock);
 
+			printk("ipt_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
+			printk("               old minutes west=%d, new minutes west=%d\n", old_minutes_west, local_minutes_west);
+			
 			/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
-			printk("ipt_bandwidth: timezone shift detected, adjusting\n");
 			shift_timezone_current_time = now - local_seconds_west;
 			apply_to_every_string_map_value(id_map, shift_timezone_of_id);
 
@@ -620,7 +620,7 @@ static void clear_ips(unsigned long key, void* value)
 		
 		#ifdef BANDWIDTH_DEBUG
 			unsigned long* ip = &key;
-			printk("clearing ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
+			printk("clearing ip = %u.%u.%u.%u\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
 		#endif
 
 		remove_long_map_element(clear_ip_map, key);
@@ -1459,7 +1459,7 @@ static char add_ip_block(	uint32_t ip,
 {
 	#ifdef BANDWIDTH_DEBUG
 		uint32_t *ipp = &ip;
-		printk("doing output for ip = %d.%d.%d.%d\n", *((unsigned char*)ipp), *(((unsigned char*)ipp)+1), *(((unsigned char*)ipp)+2), *(((unsigned char*)ipp)+3) );
+		printk("doing output for ip = %u.%u.%u.%u\n", *((unsigned char*)ipp), *(((unsigned char*)ipp)+1), *(((unsigned char*)ipp)+2), *(((unsigned char*)ipp)+3) );
 	#endif
 
 	if(full_history_requested)
@@ -1630,7 +1630,7 @@ static void parse_get_request(unsigned char* request_buffer, get_request* parsed
 	(parsed_request->id)[BANDWIDTH_MAX_ID_LENGTH-1] = '\0'; /* make sure id is null terminated no matter what */
 	
 	#ifdef BANDWIDTH_DEBUG
-		printk("ip = %d.%d.%d.%d\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
+		printk("ip = %u.%u.%u.%u\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
 		printk("next ip index = %d\n", *next_ip_index);
 		printk("return_history = %d\n", *return_history);
 	#endif
@@ -1943,7 +1943,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			
 	#ifdef BANDWIDTH_DEBUG
 		uint32_t* ipp = &ip;
-		printk("doing set for ip = %d.%d.%d.%d\n", *((unsigned char*)ipp), *(((unsigned char*)ipp)+1), *(((unsigned char*)ipp)+2), *(((unsigned char*)ipp)+3) );
+		printk("doing set for ip = %u.%u.%u.%u\n", *((unsigned char*)ipp), *(((unsigned char*)ipp)+1), *(((unsigned char*)ipp)+2), *(((unsigned char*)ipp)+3) );
 		printk("ip index = %d\n", *buffer_index);
 	#endif
 
