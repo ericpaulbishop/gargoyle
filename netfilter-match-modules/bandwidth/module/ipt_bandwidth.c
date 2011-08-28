@@ -120,7 +120,7 @@ static void check_for_backwards_time_shift(time_t now);
 
 static void shift_timezone_of_ip(unsigned long key, void* value);
 static void shift_timezone_of_id(char* key, void* value);
-static void check_for_timezone_shift(time_t now);
+static void check_for_timezone_shift(time_t now, int already_locked);
 
 
 
@@ -468,9 +468,10 @@ static void shift_timezone_of_id(char* key, void* value)
 	shift_timezone_iam = NULL;
 }
 
-static void check_for_timezone_shift(time_t now)
+static void check_for_timezone_shift(time_t now, int already_locked)
 {
-	spin_lock_bh(&bandwidth_lock);
+	
+	if(already_locked == 0) { spin_lock_bh(&bandwidth_lock); }
 	if(now != last_local_mw_update ) /* make sure nothing changed while waiting for lock */
 	{
 		local_minutes_west = sys_tz.tz_minuteswest;
@@ -488,7 +489,7 @@ static void check_for_timezone_shift(time_t now)
 			int adj_minutes = old_minutes_west-local_minutes_west;
 			adj_minutes = adj_minutes < 0 ? adj_minutes*-1 : adj_minutes;	
 			
-			down(&userspace_lock);
+			if(already_locked == 0) { down(&userspace_lock); }
 
 			printk("ipt_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
 			printk("               old minutes west=%d, new minutes west=%d\n", old_minutes_west, local_minutes_west);
@@ -500,10 +501,10 @@ static void check_for_timezone_shift(time_t now)
 			old_minutes_west = local_minutes_west;
 
 
-			up(&userspace_lock);
+			if(already_locked == 0) { up(&userspace_lock); }
 		}
 	}
-	spin_unlock_bh(&bandwidth_lock);
+	if(already_locked == 0) { spin_unlock_bh(&bandwidth_lock); }
 }
 
 
@@ -1214,7 +1215,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 
 	if(now != last_local_mw_update )
 	{
-		check_for_timezone_shift(now);
+		check_for_timezone_shift(now, 0);
 		check_for_backwards_time_shift(now);
 	}
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
@@ -1653,7 +1654,7 @@ static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
 	time_t now = get_seconds();
-	check_for_timezone_shift(now);
+	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
 	
@@ -2079,7 +2080,7 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
 	time_t now = get_seconds();
-	check_for_timezone_shift(now);
+	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
 
@@ -2282,6 +2283,12 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
 				time_t now = get_seconds();
+				if(now != last_local_mw_update )
+				{
+					check_for_timezone_shift(now, 1);
+				}
+				
+				
 				now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 				info->previous_reset = now;
 				if(info->next_reset == 0)
