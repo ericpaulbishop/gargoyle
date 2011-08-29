@@ -405,7 +405,7 @@ function UCIContainer()
 			var newValue = this.values[key];
 			if(oldValue != newValue && (newValue != null && newValue !=''))
 			{
-				commandArray.push( "uci set " + key + "=\'" + newValue + "\'" );
+				commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
 			}
 		}
 
