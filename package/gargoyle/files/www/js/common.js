@@ -405,7 +405,18 @@ function UCIContainer()
 			var newValue = this.values[key];
 			if(oldValue != newValue && (newValue != null && newValue !=''))
 			{
-				commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+				
+					
+				try
+				{
+					newValue = "" + newValue + ""
+					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+				}
+				catch(e)
+				{
+					alert("bad key = " + key + "\n" + "bad value= " + newValue);
+				}
+					
 			}
 		}
 
