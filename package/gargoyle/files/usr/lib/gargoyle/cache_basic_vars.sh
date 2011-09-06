@@ -24,10 +24,8 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "phy$dev_num" info 2>&1 | grep MHz | grep -v "disabled" | sed -e 's/[\t ]*\*[\t ]*//g' | sed -e 's/\[//g' | sed -e 's/\]//g' | sed -e 's/[()]//g' | sed -e 's/\..*$//g' | \
-		awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "phy${dev_num}" info 2>&1 | sed -e '/MHz/!d; /disabled/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
-	
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
 	echo "mac80211ChPwrs[\"$chId\"]   = nextChPwr ;"  >> "$out"
