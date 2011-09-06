@@ -39,15 +39,15 @@
 	fi
 	echo "var currentTime = \"$current_time\";"
 
-	total_mem=$(cat /proc/meminfo | grep "MemTotal:" | awk ' { print $2 } ')
-	free_mem=$(cat /proc/meminfo | grep "MemFree:" | awk ' { print $2 } ')
+	total_mem="$(sed -e '/MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	free_mem="$(sed -e '/MemFree: /!d; s#MemFree: *##; s# kB##g' /proc/meminfo)"
 	echo "var totalMemory=$total_mem;"
 	echo "var freeMemory=$free_mem;"
 	
-	load_avg=$(cat /proc/loadavg | awk '{print $1 " / " $2 " / " $3}')
+	load_avg="$(awk '{print $1 " / " $2 " / " $3}' /proc/loadavg)"
 	echo "var loadAvg=\"$load_avg\";"
 
-	curconn=$(cat /proc/net/ip_conntrack | wc -l)
+	curconn="$(wc -l < /proc/net/ip_conntrack)"
 	maxconn=$(cat /proc/sys/net/ipv4/ip_conntrack_max 2>/dev/null)
 	if [ -z "$maxconn" ] ; then
 		maxconn=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_max 2>/dev/null )
@@ -59,7 +59,7 @@
 	echo "var maxConn=\"$maxconn\";"
 
 
-	echo "var wanDns=\""$(cat /tmp/resolv.conf.auto | grep nameserver | sed 's/nameserver //g')"\";"
+	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto)"\";"
 
 ?>
 //-->
