@@ -84,7 +84,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 
 
 	echo "var nextCh=[];" >> "$out_file"
-	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev.null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
+	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev/null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
 	if [ -n "$ncapab" ] ; then echo "var wifiN = true ;"  >> "$out_file"; else echo "var wifiN = false ;"  >> "$out_file" ; fi
 	
 	#test for dual band
