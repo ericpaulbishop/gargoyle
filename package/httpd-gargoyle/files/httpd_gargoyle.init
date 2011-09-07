@@ -19,20 +19,22 @@ start()
 	# kill httpd if for some reason it hasn't been disabled
 	# postinst should have stopped and disabled it, but let's be doubly sure
 	rc_httpd=$(ls /etc/rc.d/*httpd 2>/dev/null)
-	if [ -n "rc_httpd" ] ; then
+	if [ -n "$rc_httpd" ] ; then
 		/etc/init.d/httpd stop 2>/dev/null
 		/etc/init.d/httpd disable 2>/dev/null
 	fi
 
 	# Generate /etc/httpd_gargoyle.password from root password
-	pass_str=$(cat /etc/passwd | awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' 2>/dev/null )
+	pass_str=$(awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' /etc/passwd 2>/dev/null )
 	tmp_path="/tmp/httpd_gargoyle.password" 
 	real_path="/etc/httpd_gargoyle.password" 
 	echo "admin:$pass_str" >  "$tmp_path"
 	echo "root:$pass_str"  >> "$tmp_path"
 	if [ -e "$real_path" ] ; then
-		old_md5=$(md5sum "$real_path" | awk ' { print $1 ; }')
-		new_md5=$(md5sum "$tmp_path" | awk ' { print $1 ; }')
+		old_md5=$(md5sum "$real_path")
+		old_md5=${old_md5% *}
+		new_md5=$(md5sum "$tmp_path")
+		new_md5=${new_md5% *}
 		if [ "$old_md5" = "$new_md5" ] ; then
 			rm "$tmp_path" 2>/dev/null
 		else
@@ -105,12 +107,12 @@ start()
 
 stop()
 {
-	if [ -f $pid_http ] ; then
-		kill $(cat $pid_http) 2>/dev/null
+	if [ -f "$pid_http" ] ; then
+		kill "$(cat $pid_http)" 2>/dev/null
 	fi
 
-	if [ -f $pid_https ] ; then
-		kill $(cat $pid_https) 2>/dev/null
+	if [ -f "$pid_https" ] ; then
+		kill "$(cat $pid_https)" 2>/dev/null
 	fi
 }
 
