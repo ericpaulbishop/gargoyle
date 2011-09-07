@@ -24,10 +24,8 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "phy$dev_num" info 2>&1 | grep MHz | grep -v "disabled" | sed -e 's/[\t ]*\*[\t ]*//g' | sed -e 's/\[//g' | sed -e 's/\]//g' | sed -e 's/[()]//g' | sed -e 's/\..*$//g' | \
-		awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "phy${dev_num}" info 2>&1 | sed -e '/MHz/!d; /disabled/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
-	
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
 	echo "mac80211ChPwrs[\"$chId\"]   = nextChPwr ;"  >> "$out"
@@ -38,21 +36,22 @@ print_mac80211_channels_for_wifi_dev()
 
 out_file="/var/cached_basic_vars"
 if [ -e "$out_file" ] ; then
-	noDriver=$(cat "$out_file" | grep "wirelessDriver=..;" 2>/dev/null)
+	noDriver="$(grep "wirelessDriver=..;" "$out_file" 2>/dev/null)"
 	echo "no driver = $noDriver"
-	if [ -z "$noDriver" ] ; then exit ; else rm -rf "$out_file" ; fi
+	if [ -z "$noDriver" ] ; then exit ; else rm -f "$out_file" ; fi
 fi
 touch "$out_file"
 
 # determine if this board is a bcm94704, for which the uci wan macaddr variable must ALWAYS be set
-PART="$(grep "nvram" /proc/mtd | awk -F: '{print $1}')"
+PART="$(grep 'nvram' /proc/mtd)"
+PART="${PART%%:*}"
 if [ -n "$PART" ] ; then
 	PREFIX=/dev/mtdblock
 	PART="${PART##mtd}"
 	[ -d /dev/mtdblock ] && PREFIX=/dev/mtdblock/ 
 	nvrampath="${PART:+$PREFIX$PART}"
-	boardtype=$(strings $nvrampath | grep boardtype | awk 'BEGIN {FS="="}; {print $2}')
-	boardnum=$(strings $nvrampath | grep boardnum | awk 'BEGIN {FS="="}; {print $2}')
+	boardtype="$(strings "${nvrampath}" | sed -e '/boardtype/!d; s#boardtype=##g')"
+	boardnum="$(strings "${nvrampath}" | sed -e '/boardnum/!d; s#boardnum=##g')"
 	#echo "boardnum = $boardnum, boardtype = $boardtype"
 	isbcm94704='false'
 	if [ "$boardtype" = "0x0472" ] || [ "$boardtype" = "0x042f" ] ; then
@@ -84,7 +83,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 
 
 	echo "var nextCh=[];" >> "$out_file"
-	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev.null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
+	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev/null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
 	if [ -n "$ncapab" ] ; then echo "var wifiN = true ;"  >> "$out_file"; else echo "var wifiN = false ;"  >> "$out_file" ; fi
 	
 	#test for dual band
@@ -95,6 +94,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	fi
 	
 	radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
+	radios="$(uci show wireless | sed -e '/wifi-device/!d; s/^.*\.//g; s/=.*$//g')"
 	rnum=0;
 	for r in $radios ; do
 		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file"
