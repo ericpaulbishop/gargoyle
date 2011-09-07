@@ -50,8 +50,8 @@ if [ -n "$PART" ] ; then
 	PART="${PART##mtd}"
 	[ -d /dev/mtdblock ] && PREFIX=/dev/mtdblock/ 
 	nvrampath="${PART:+$PREFIX$PART}"
-	boardtype="$(strings /dev/mtdblock4 | sed -e '/boardtype/!d; s#boardtype=##g')"
-	boardnum="$(strings /dev/mtdblock4 | sed -e '/boardnum/!d; s#boardnum=##g')"
+	boardtype="$(strings "${nvrampath}" | sed -e '/boardtype/!d; s#boardtype=##g')"
+	boardnum="$(strings "${nvrampath}" | sed -e '/boardnum/!d; s#boardnum=##g')"
 	#echo "boardnum = $boardnum, boardtype = $boardtype"
 	isbcm94704='false'
 	if [ "$boardtype" = "0x0472" ] || [ "$boardtype" = "0x042f" ] ; then
