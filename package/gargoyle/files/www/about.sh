@@ -20,7 +20,7 @@
 
 	<p><span class="contributer">Cezary Jackiewicz:</span> Translated Gargoyle into Polish in addition to contributing several minor code fixes and correcting several typos</p>
 
-	<p><span class="contributer">Piotr Karbowski (<a href="https://github.com/slashbeast">github.com/slashbeast</a>):</span> Numerous bugfixes and performance improvements</p>
+	<p><span class="contributer">Piotr Karbowski (<a href="https://github.com/slashbeast">github.com/slashbeast</a>):</span> Implemented numerous bugfixes and performance improvements</p>
 
 	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
 
