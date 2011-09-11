@@ -39,8 +39,11 @@
 	fi
 	echo "var currentTime = \"$current_time\";"
 
-	total_mem="$(sed -e '/MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
-	free_mem="$(sed -e '/MemFree: /!d; s#MemFree: *##; s# kB##g' /proc/meminfo)"
+	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	buffers_mem="$(sed -e '/^Buffers: /!d; s#Buffers: *##; s# kB##g' /proc/meminfo)"
+	cached_mem="$(sed -e '/^Cached: /!d; s#Cached: *##; s# kB##g' /proc/meminfo)"
+	free_mem="$(sed -e '/^MemFree: /!d; s#MemFree: *##; s# kB##g' /proc/meminfo)"
+	free_mem="$(( ${free_mem} + ${buffers_mem} + ${cached_mem} ))"
 	echo "var totalMemory=$total_mem;"
 	echo "var freeMemory=$free_mem;"
 	
