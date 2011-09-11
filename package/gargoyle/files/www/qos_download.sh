@@ -150,11 +150,11 @@
 
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_connbytes' onclick='enableAssociatedField(this,"connbytes", "")'  />
-					<label id="connbytes_label" for='connbytes'>Connection bytes reach:</label>
+					<input type='checkbox'  id='use_connbytes_kb' onclick='enableAssociatedField(this,"connbytes_kb", "")'  />
+					<label id="connbytes_kb_label" for='connbytes_kb'>Connection bytes reach:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='connbytes' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='7' />
-				<em>MBytes</em>
+				<input class='rightcolumn' type='text' id='connbytes_kb' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='28' />
+				<em>kBytes</em>
 			</div>
 
 			<div>

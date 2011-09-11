@@ -165,7 +165,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes"];
+			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes_kb"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
@@ -411,8 +411,8 @@ function resetData()
 		rulePriorities.push(rulePriority + "," + ruleIndex);
 
 
-		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes"];
-		displayOptionList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ MBytes"];
+		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes_kb"];
+		displayOptionList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ kBytes"];
 
 		ruleText = "";
 		for (optionIndex = 0; optionIndex < optionList.length; optionIndex++)
@@ -532,7 +532,7 @@ function qosQuotasExist()
 function setQosEnabled()
 {
 	enabled = document.getElementById("qos_enabled").checked;
-	controlIds = ["default_class", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes", "app_protocol", "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_connbytes", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "min_radio1", "min_radio2", "min_bandwidth", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
+	controlIds = ["default_class", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_connbytes_kb", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "min_radio1", "min_radio2", "min_bandwidth", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
 
 	setElementEnabled( document.getElementById("total_bandwidth"), enabled, uciOriginal.get("qos_gargoyle", direction, "total_bandwidth") );
 	for(controlIndex = 0; controlIndex < controlIds.length; controlIndex++)
@@ -572,8 +572,8 @@ function addClassificationRule()
 	else
 	{
 
-		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes", "app_protocol"];
-		displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $","Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ MBytes", "Application Protocol: $"];
+		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+		displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $","Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ kBytes", "Application Protocol: $"];
 
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
@@ -606,7 +606,7 @@ function addClassificationRule()
 
 function proofreadClassificationRule(controlDocument)
 {
-	addRuleIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes", "app_protocol"];
+	addRuleIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
 	alwaysValid = function(text){return 0;};
@@ -634,7 +634,7 @@ function proofreadClassificationRule(controlDocument)
 
 function resetRuleControls()
 {
-	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol","connbytes", "app_protocol"];
+	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol","connbytes_kb", "app_protocol"];
 	document.getElementById("classification").selectedIndex = document.getElementById("default_class").selectedIndex;
 
 	for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
@@ -846,7 +846,7 @@ function editRuleTableRow()
 					addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, editRuleWindow.document);
 				}
 
-				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes", "app_protocol"];
+				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
 
 				criteria = parseRuleMatchCriteria(editRuleWindowRow.firstChild.firstChild.data);
 				for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
@@ -894,8 +894,8 @@ function editRuleTableRow()
 					}
 					else
 					{
-						addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes", "app_protocol"];
-						displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $",  "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes","Transport Protocol: $", "Connection bytes: $ MBytes", "Application Protocol: $"];
+						addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+						displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $",  "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes","Transport Protocol: $", "Connection bytes: $ kBytes", "Application Protocol: $"];
 						ruleText = ""
 						for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 						{
@@ -1140,7 +1140,7 @@ function parseRuleMatchCriteria(matchText)
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
 
-	possibleCriteria = ["Source: (.*)", "Source Port: (.*)", "Destination: (.*)", "Destination Port: (.*)", "Maximum Packet Length: (.*) bytes", "Minimum Packet Length: (.*) bytes",  "Transport Protocol: (.*)", "Connection bytes: (.*) MBytes", "Application Protocol: (.*)"];
+	possibleCriteria = ["Source: (.*)", "Source Port: (.*)", "Destination: (.*)", "Destination Port: (.*)", "Maximum Packet Length: (.*) bytes", "Minimum Packet Length: (.*) bytes",  "Transport Protocol: (.*)", "Connection bytes: (.*) kBytes", "Application Protocol: (.*)"];
 
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{
