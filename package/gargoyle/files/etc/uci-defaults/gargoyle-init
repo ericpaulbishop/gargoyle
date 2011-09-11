@@ -16,3 +16,9 @@ echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
 chmod 755 /etc/hotplug.d/iface/20-ntpclient 2>/dev/null
 
 
+#create original backup
+sh /usr/lib/gargoyle/create_backup.sh
+mkdir /etc/original_backup
+cp /tmp/backup/backup.tar.gz /etc/original_backup/backup.tar.gz
+
+
