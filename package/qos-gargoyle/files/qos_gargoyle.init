@@ -47,8 +47,8 @@ load_all_config_options()
 		fi
 	}
 
-
 	config_load "$config_name"
+
 	for var in $ALL_OPTION_VARIABLES
 	do
 		config_get "$var" "$section_id" "$var"
@@ -150,6 +150,7 @@ apply_all_rules()
 		load_all_config_options "$config_file_name" "$rule"
 
 		for option in $ALL_OPTION_VARIABLES ; do
+
 			option_value=$(eval echo \$$option)
 			case "$option" in
 				source)
@@ -188,8 +189,8 @@ apply_all_rules()
 						match_str="$match_str -m layer7 --l7proto $option_value"
 					fi
 				;;
-				connbytes)
-					match_str="$match_str -m connbytes --connbytes $(($option_value*1048576)): --connbytes-dir both --connbytes-mode bytes"
+				connbytes_kb)
+					match_str="$match_str -m connbytes --connbytes $(($option_value*1024)): --connbytes-dir both --connbytes-mode bytes"
 				;;
 			esac
 		done
