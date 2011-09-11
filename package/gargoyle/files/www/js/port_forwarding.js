@@ -687,7 +687,7 @@ function editForward(isSingle, triggerElement)
 						//update document with new data
 						
 						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_app").value;
-						editRow.childNodes[1].firstChild.data = getSelectedText( "add" + r + "_prot", editForwardWindow.document );
+						editRow.childNodes[1].firstChild.data = getSelectedValue( "add" + r + "_prot", editForwardWindow.document );
 						if(isSingle)
 						{
 							editRow.childNodes[2].firstChild.data = editForwardWindow.document.getElementById("add_fp").value;
