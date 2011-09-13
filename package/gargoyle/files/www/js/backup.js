@@ -18,7 +18,7 @@ function getBackup()
 		if(req.readyState == 4)
 		{
 			setControlsEnabled(true);
-			window.location="backup.tar.gz"
+			window.location="/dump_backup_tarball.sh"
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);

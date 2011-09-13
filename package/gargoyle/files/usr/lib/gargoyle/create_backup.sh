@@ -37,10 +37,6 @@ garg_web_root=$(uci get gargoyle.global.web_root)
 if [ -z "$garg_web_root" ] ; then
 	garg_web_root = "/www"
 fi
-cd $garg_web_root
-if [ -e backup.tar.gz ] ; then rm backup.tar.gz ; fi
-ln -s /tmp/backup/backup.tar.gz
-chmod 777 backup.tar.gz
 
 if [ -n "$bwmon_enabled" ] ; then
 	/etc/init.d/bwmon_gargoyle start
