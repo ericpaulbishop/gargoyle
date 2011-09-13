@@ -1397,13 +1397,17 @@ function resetData()
 	//initialize dns table
 	var origDns = uciOriginal.get("network", "lan", "dns").split(/[\t ]+/);
 	var routerIp = uciOriginal.get("network", "lan", "ipaddr");
+	var routerGateway = uciOriginal.get("network", "lan", "gateway");
 	var dIndex = 0;
 	var dnsTableData = [];
 	for(dIndex=0; dIndex < origDns.length; dIndex++)
 	{
-		if(origDns[dIndex] != routerIp && validateIP(origDns[dIndex]) == 0)
+		var dip = origDns[dIndex] 
+		var isRouterIp = !confIsBridge && dip == routerIp
+		var isBridgeGw =   confIsBridge && dip == routerGateway
+		if(  (!isRouterIp) && (!isBridgeGw) && validateIP(dip) == 0)
 		{
-			dnsTableData.push([origDns[dIndex]]);
+			dnsTableData.push([dip]);
 		}
 	}
 	
