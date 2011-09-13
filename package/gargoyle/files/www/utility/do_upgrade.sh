@@ -28,10 +28,22 @@
 			exit
 		else
 			echo "<script type=\"text/javascript\">top.uploaded();</script>"
+			#make sure output buffer gets flushed by writing lots of whitespace to output
+			inc=1
+			while [ $inc -lt 500 ] ; do
+				echo "     "
+				inc=$(($inc + 1))
+			done
 			mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; reboot
 		fi
 	else
 		echo "<script type=\"text/javascript\">top.uploaded();</script>"
+		#make sure output buffer gets flushed by writing lots of whitespace to output
+		inc=1
+		while [ $inc -lt 500 ] ; do
+			echo "     "
+			inc=$(($inc + 1))
+		done
 		/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
 	fi
 ?>

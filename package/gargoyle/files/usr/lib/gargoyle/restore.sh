@@ -149,6 +149,14 @@ if [ -n "$quotas_active" ] ; then
 else
 	uci del gargoyle.status.quotause 2>/dev/null
 fi
+
+for qos_gargoyle_connbytes_rule in $(uci show qos_gargoyle | sed "/^qos_gargoyle\..*\.connbytes=[0-9]*$/!d; s#=.*##g"); do
+	connbytes_value="$(uci get ${qos_gargoyle_connbytes_rule})"
+	connbytes_kb_value="$(( ${connbytes_value} * 1024 ))"
+	uci set ${qos_gargoyle_connbytes_rule}_kb=${connbytes_kb_value}
+	uci del ${qos_gargoyle_connbytes_rule}
+done; unset qos_gargoyle_connbytes_rule
+
 uci commit
 
 #deal with firewall include file path being swapped

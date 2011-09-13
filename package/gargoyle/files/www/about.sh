@@ -14,11 +14,13 @@
 	
 	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
 
-	<p><span class="contributer">Paul Bixel:</span>Implemented Active Congestion Control, as well as many other improvements to QoS</p>
+	<p><span class="contributer">Paul Bixel:</span> Implemented Active Congestion Control, as well as many other improvements to QoS</p>
 
 	<p><span class="contributer">Artur Wronowski (<a href="http://openwrt.pl">openwrt.pl</a>):</span> Implemented wake-on-lan functionality along with several minor improvements/fxes</p>
 
 	<p><span class="contributer">Cezary Jackiewicz:</span> Translated Gargoyle into Polish in addition to contributing several minor code fixes and correcting several typos</p>
+
+	<p><span class="contributer">Piotr Karbowski (<a href="https://github.com/slashbeast">github.com/slashbeast</a>):</span> Implemented numerous bugfixes and performance improvements</p>
 
 	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
 
