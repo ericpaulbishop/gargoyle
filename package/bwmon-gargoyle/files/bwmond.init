@@ -42,7 +42,9 @@ bw_restore()
 update_cron()
 {
 	old_md5=$(md5sum /etc/crontabs/root)
+	old_md5=${old_md5% *}
 	new_md5=$(md5sum "$tmp_cron")
+	new_md5=${new_md5% *}
 	if [ "$old_md5" = "$new_md5" ] ; then
 		rm "$tmp_cron"
 	else
@@ -192,8 +194,8 @@ start()
 		qos_upload_chain="qos_egress"
 		qos_download_chain="qos_ingress"
 
-		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "up-"$2":"$3"/"$4};}' )
-		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "down-"$2":"$3"/"$4};}' )
+		upload_data=$(awk ' { if($1 == "upload"){print "up-"$2":"$3"/"$4};}' /etc/qos_class_marks )
+		download_data=$(awk ' { if($1 == "download"){print "down-"$2":"$3"/"$4};}' /etc/qos_class_marks )
 
 		for upload_info in $upload_data ; do
 			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')
@@ -226,7 +228,7 @@ start()
 	fi
 
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "$backup_script" > "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 	
 	echo "#!/bin/sh" > "$backup_script"
@@ -254,7 +256,7 @@ stop()
 	sh "$backup_script" 2>/dev/null
 	rm -rf "$backup_script"
 
-	cat /etc/crontabs/root | grep -v "$backup_script"> "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	update_cron
 	
 	delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
