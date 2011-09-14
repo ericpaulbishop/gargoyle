@@ -47,8 +47,7 @@ update_cron()
 		rm "$tmp_cron"
 	else
 		mv "$tmp_cron" /etc/crontabs/root
-		cron_active=$(ps | grep "crond" | grep -v "grep" )
-		if [ -n "$cron_active" ] ; then
+		if pidof crond > /dev/null 2>&1; then
 			/etc/init.d/cron restart
 		fi
 	fi
@@ -64,18 +63,13 @@ start()
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
-	#mkdir -P doesn't work in busybox!  WTF??!
- 	if [ ! -d /tmp/data/bwmon ] ; then 
- 		rm -rf /tmp/data/bwmon 2>/dev/null
- 		mkdir /tmp 2>/dev/null
- 		mkdir /tmp/data 2>/dev/null
- 		mkdir /tmp/data/bwmon 2>/dev/null
+	if [ ! -d /tmp/data/bwmon ] ; then
+		rm -rf /tmp/data/bwmon
+		mkdir -p /tmp/data/bwmon
  	fi
 	if [ ! -d /usr/data/bwmon ] ; then 
-		rm -rf /usr/data/bwmon 2>/dev/null
-		mkdir /usr/ 2>/dev/null
-		mkdir /usr/data 2>/dev/null
-		mkdir /usr/data/bwmon 2>/dev/null
+		rm -rf /usr/data/bwmon
+		mkdir -p /usr/data/bwmon
 	fi
 
 	delete_chain_from_table $download_table $download_chain
@@ -95,9 +89,9 @@ start()
 	lan_subnet="$lan_ip/$lan_mask"
 
 
-	minute_s=60;
-	hour_s=$(($minute_s*60));
-	day_s=$(($hour_s*24));
+	minute_s=60
+	hour_s=3600
+	day_s=86400
 
 	total1_interval=2
 	total1_num_intervals=449
