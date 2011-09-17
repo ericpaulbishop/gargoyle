@@ -17,7 +17,6 @@
 <?
 	echo "var themes = new Array();"
 	ls /www/themes | awk '{print "themes.push(\""$0"\");" ;}'
-	ls -ld /www/themes/default | awk -F/ '/->/{print "var currentTheme=\""$NF"\";"}'
 ?>
 //-->
 </script>
