@@ -7,6 +7,7 @@ ifeq ($(GARGOYLE_VERSION),)
 endif
 PKG_RELEASE:=1
 
+#find . -type d -exec rmdir -p {}  \; 2>/dev/null
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -41,5 +42,30 @@ define Package/plugin-gargoyle-dark-one-theme/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
 endef
+
+define Package/plugin-gargoyle-dark-one-theme/postinst
+	( \
+		if [ -z "$${IPKG_INSTROOT}" ] ; then \
+			/etc/init.d/gargoyle_themes restart \
+		fi \
+	)
+endef
+define Package/plugin-gargoyle-dark-one-theme/postrm
+	( \
+		if [ -z "$${IPKG_INSTROOT}" ] ; then \
+			IFS=$$(echo -en "\n\b") \
+			for d in `find /www/themes/ -type d` ; do \
+				if [ -d "$$d" ] ; then \
+					contents=$$(ls "$$d") \
+					if [ -z "$$contents" ] ; then \
+						rmdir -p "$$d" 2>/dev/null \
+					fi \
+				fi \
+			done \
+			/etc/init.d/gargoyle_themes restart \
+		fi \
+	)
+endef
+
 
 $(eval $(call BuildPackage,plugin-gargoyle-dark-one-theme))

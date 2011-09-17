@@ -4,7 +4,7 @@ START=49
 
 start()
 {
-	gdisplay=$(uci get gargoyle.display.system_themes 2>/dev/null)
+	gdisplay=$(uci get gargoyle.system.themes 2>/dev/null)
 	webroot=$(uci get gargoyle.global.web_root 2>/dev/null)
 	webroot=${webroot:-/www}
 
@@ -15,6 +15,10 @@ start()
 		uci set gargoyle.display.system_themes='Themes'
 		uci set gargoyle.scripts.system_themes='themes.sh'
 		uci set gargoyle.system.themes='311'
+		uci commit gargoyle
+	fi
+	if [ -n "${gdisplay}" ] && [ "${num_themes}" = 1 ] ; then
+		uci del gargoyle.system.themes
 		uci commit gargoyle
 	fi
 }
