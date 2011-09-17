@@ -10,5 +10,5 @@
 	echo "Content-type: application/octet-stream"
 	echo ""
 	
-	cat /proc/webmon_recent_searches | sed "s/\t/,/g"
+	sed "s/\t/,/g" /proc/webmon_recent_searches
 ?>
