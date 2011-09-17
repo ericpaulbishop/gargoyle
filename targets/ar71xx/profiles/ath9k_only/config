@@ -193,9 +193,9 @@ CONFIG_DEFAULT_kmod-input-polldev=y
 CONFIG_DEFAULT_kmod-ipt-nathelper=y
 CONFIG_DEFAULT_kmod-leds-gpio=y
 CONFIG_DEFAULT_kmod-madwifi=y
-CONFIG_DEFAULT_kmod-usb-core=y
-CONFIG_DEFAULT_kmod-usb-ohci=y
-CONFIG_DEFAULT_kmod-usb2=y
+# CONFIG_DEFAULT_kmod-usb-core is not set
+# CONFIG_DEFAULT_kmod-usb-ohci is not set
+# CONFIG_DEFAULT_kmod-usb2 is not set
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
 CONFIG_DEFAULT_mtd=y
@@ -211,10 +211,10 @@ CONFIG_DEFAULT_vsc7395-ucode-ap83=y
 CONFIG_DEFAULT_vsc7395-ucode-pb44=y
 CONFIG_DEFAULT_wpad-mini=y
 CONFIG_LINUX_2_6=y
-CONFIG_AUDIO_SUPPORT=y
+#CONFIG_AUDIO_SUPPORT is not set
 CONFIG_GPIO_SUPPORT=y
 CONFIG_PCI_SUPPORT=y
-CONFIG_USB_SUPPORT=y
+#CONFIG_USB_SUPPORT is not set
 CONFIG_BIG_ENDIAN=y
 CONFIG_USES_SQUASHFS=y
 CONFIG_USES_JFFS2=y
@@ -1455,14 +1455,14 @@ CONFIG_PACKAGE_kmod-textsearch=y
 #
 # USB Support
 #
-CONFIG_PACKAGE_kmod-usb-core=y
+# CONFIG_PACKAGE_kmod-usb-core is not set
 # CONFIG_PACKAGE_kmod-usb-acm is not set
 # CONFIG_PACKAGE_kmod-usb-atm is not set
 # CONFIG_PACKAGE_kmod-usb-audio is not set
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
 # CONFIG_PACKAGE_kmod-usb-hid is not set
 # CONFIG_PACKAGE_kmod-usb-net is not set
-CONFIG_PACKAGE_kmod-usb-ohci=y
+# CONFIG_PACKAGE_kmod-usb-ohci is not set
 # CONFIG_PACKAGE_kmod-usb-phidget is not set
 # CONFIG_PACKAGE_kmod-usb-printer is not set
 # CONFIG_PACKAGE_kmod-usb-serial is not set
@@ -1471,7 +1471,7 @@ CONFIG_PACKAGE_kmod-usb-ohci=y
 # CONFIG_PACKAGE_kmod-usb-uhci is not set
 # CONFIG_PACKAGE_kmod-usb-video is not set
 # CONFIG_PACKAGE_kmod-usb-yealink is not set
-CONFIG_PACKAGE_kmod-usb2=y
+# CONFIG_PACKAGE_kmod-usb2 is not set
 
 #
 # Video Support
