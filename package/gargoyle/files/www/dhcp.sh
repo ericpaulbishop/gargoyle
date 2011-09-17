@@ -19,19 +19,19 @@
 
 	echo "var hostData = new Array();"
 	if [ -e /etc/hosts ] ; then
-		cat /etc/hosts | awk ' $0 ~ /^[\t ]*[0-9]/ {print "hostData.push([\""$1"\",\""$2"\"]);"};'
+		awk ' $0 ~ /^[\t ]*[0-9]/ {print "hostData.push([\""$1"\",\""$2"\"]);"};' /etc/hosts
 	fi
 
 	echo "";
 	echo "var etherData = new Array();";
 	if [ -e /etc/ethers ] ; then
-		cat /etc/ethers | awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};'
+		awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};' /etc/ethers
 	fi
 
 	echo "";
 	echo "var leaseData = new Array();";
 	if [ -e /tmp/dhcp.leases ] ; then
-		cat /tmp/dhcp.leases | awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};'
+		awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};' /tmp/dhcp.leases
 	fi
 
 ?>
