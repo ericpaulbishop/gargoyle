@@ -13,7 +13,7 @@
 <?
 	echo "var cronLine = \"\";"
 	if [ -e /etc/crontabs/root ] ; then
-		cat /etc/crontabs/root | awk ' $0 ~ /usr\/lib\/gargoyle\/reboot.sh/ {print "cronLine=\""$0"\";"};'
+		awk ' $0 ~ /usr\/lib\/gargoyle\/reboot.sh/ {print "cronLine=\""$0"\";"};' /etc/crontabs/root
 	fi
 ?>
 </script>

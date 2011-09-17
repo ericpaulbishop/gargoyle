@@ -20,7 +20,7 @@ var arpLines;
 	sh /usr/lib/gargoyle/define_host_vars.sh
 	echo "var etherData = new Array();";
 	if [ -e /etc/ethers ] ; then
-		cat /etc/ethers | awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};'
+		awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};' /etc/ethers
 	fi
 	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr 2>/dev/null)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
