@@ -21,7 +21,7 @@
 
 	echo "var qosMarkList = [];"
 	if [ -e /etc/qos_class_marks ] ; then
-		cat /etc/qos_class_marks | awk '{ print "qosMarkList.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' 
+		awk '{ print "qosMarkList.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' /etc/qos_class_marks
 	fi
 ?>
 //-->
