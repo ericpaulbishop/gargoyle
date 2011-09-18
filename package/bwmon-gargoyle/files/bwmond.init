@@ -42,13 +42,14 @@ bw_restore()
 update_cron()
 {
 	old_md5=$(md5sum /etc/crontabs/root)
+	old_md5=${old_md5% *}
 	new_md5=$(md5sum "$tmp_cron")
+	new_md5=${new_md5% *}
 	if [ "$old_md5" = "$new_md5" ] ; then
 		rm "$tmp_cron"
 	else
 		mv "$tmp_cron" /etc/crontabs/root
-		cron_active=$(ps | grep "crond" | grep -v "grep" )
-		if [ -n "$cron_active" ] ; then
+		if pidof crond > /dev/null 2>&1; then
 			/etc/init.d/cron restart
 		fi
 	fi
@@ -64,18 +65,13 @@ start()
 		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
 	fi
 
-	#mkdir -P doesn't work in busybox!  WTF??!
- 	if [ ! -d /tmp/data/bwmon ] ; then 
- 		rm -rf /tmp/data/bwmon 2>/dev/null
- 		mkdir /tmp 2>/dev/null
- 		mkdir /tmp/data 2>/dev/null
- 		mkdir /tmp/data/bwmon 2>/dev/null
+	if [ ! -d /tmp/data/bwmon ] ; then
+		rm -rf /tmp/data/bwmon
+		mkdir -p /tmp/data/bwmon
  	fi
 	if [ ! -d /usr/data/bwmon ] ; then 
-		rm -rf /usr/data/bwmon 2>/dev/null
-		mkdir /usr/ 2>/dev/null
-		mkdir /usr/data 2>/dev/null
-		mkdir /usr/data/bwmon 2>/dev/null
+		rm -rf /usr/data/bwmon
+		mkdir -p /usr/data/bwmon
 	fi
 
 	delete_chain_from_table $download_table $download_chain
@@ -95,9 +91,9 @@ start()
 	lan_subnet="$lan_ip/$lan_mask"
 
 
-	minute_s=60;
-	hour_s=$(($minute_s*60));
-	day_s=$(($hour_s*24));
+	minute_s=60
+	hour_s=3600
+	day_s=86400
 
 	total1_interval=2
 	total1_num_intervals=449
@@ -198,8 +194,8 @@ start()
 		qos_upload_chain="qos_egress"
 		qos_download_chain="qos_ingress"
 
-		upload_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "upload"){print "up-"$2":"$3"/"$4};}' )
-		download_data=$(cat /etc/qos_class_marks | awk ' { if($1 == "download"){print "down-"$2":"$3"/"$4};}' )
+		upload_data=$(awk ' { if($1 == "upload"){print "up-"$2":"$3"/"$4};}' /etc/qos_class_marks )
+		download_data=$(awk ' { if($1 == "download"){print "down-"$2":"$3"/"$4};}' /etc/qos_class_marks )
 
 		for upload_info in $upload_data ; do
 			mark=$(echo $upload_info | awk ' BEGIN { FS=":";} { print $2; }')
@@ -232,7 +228,7 @@ start()
 	fi
 
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "$backup_script" > "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 	
 	echo "#!/bin/sh" > "$backup_script"
@@ -260,7 +256,7 @@ stop()
 	sh "$backup_script" 2>/dev/null
 	rm -rf "$backup_script"
 
-	cat /etc/crontabs/root | grep -v "$backup_script"> "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	update_cron
 	
 	delete_chain_from_table $download_table $download_chain >/dev/null 2>&1

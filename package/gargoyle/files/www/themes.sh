@@ -16,7 +16,8 @@
 <!--
 <?
 	echo "var themes = new Array();"
-	ls /www/themes | awk '{print "themes.push(\""$0"\");" ;}'
+	webroot="$(uci get gargoyle.global.web_root 2>/dev/null)"
+	for theme in "${webroot:-/www}/themes"/*; do printf 'themes.push("%s");\n' "${theme##*/}"; done
 ?>
 //-->
 </script>
