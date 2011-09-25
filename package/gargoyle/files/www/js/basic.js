@@ -103,9 +103,10 @@ function saveChanges()
 					uci.remove('network', 'wan', 'ifname');
 					uci.set('network', 'wan', 'type', 'bridge');
 				}
-				else if(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )
+				else if( singleEthernetIsWan() )
 				{
 					uci.set('network', 'wan', 'ifname', defaultLanIf);
+					
 				}
 				else
 				{
@@ -119,7 +120,7 @@ function saveChanges()
 			{
 				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
 			}
-			else if(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )
+			else if( singleEthernetIsWan() )
 			{
 				//just in case wirelessIf does not exist, remove variable first
 				uci.remove('network', 'lan', 'ifname');
@@ -881,17 +882,8 @@ function proofreadAll()
 
 function setGlobalVisibility()
 {
-	//deal with possibility of wireless routed WAN 
-	globalIds=['wan_via_single_port_container', 'wan_port_to_lan_container'];
-	wirelessWanVisibility       = defaultWanIf != '' ? [0,1] : [0,0];
-	defaultVisibility           = defaultWanIf != '' ? [0,0] : [1,0];
-
-
-	selectedVisibility=defaultVisibility;
 	if( getSelectedValue("wan_protocol").match(/wireless/) )
 	{
-		selectedVisibility=wirelessWanVisibility;
-
 		currentMode=getSelectedValue('wifi_mode');
 		if(!isb43)
 		{
@@ -919,21 +911,10 @@ function setGlobalVisibility()
 	}
 
 
-	if(defaultWanIf == '' && (!(getSelectedValue('wan_via_single_port')=="wan" && document.getElementById('wan_via_single_port_container').style.display != "none" )))
-	{
-		if(!getSelectedValue("wan_protocol").match(/wireless/) )
-		{
-			setSelectedValue("wan_protocol", 'none' );
-		}
-		setAllowableSelections('wan_protocol', ['dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wireless)', 'Static (Wireless)', 'Disabled']);
-	}
-	else
-	{
-		setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wired)', 'PPPoE (Wired)', 'Static IP (Wired)', 'DHCP (Wireless)', 'Static IP (Wireless)','Disabled']);
-	}
+	setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wired)', 'PPPoE (Wired)', 'Static IP (Wired)', 'DHCP (Wireless)', 'Static IP (Wireless)','Disabled']);
+	
 
-
-	setVisibility(globalIds, selectedVisibility);
+	setVisibility( [ 'wan_port_to_lan_container' ], (getSelectedValue("wan_protocol").match(/wireless/) && (!singleEthernetPort())) ? [1] : [0] )
 	
 	
 	setWanVisibility();
@@ -1092,7 +1073,7 @@ function setBridgeVisibility()
 		}
 	}
 
-	if(defaultWanIf == '')
+	if(singleEthernetPort())
 	{
 		document.getElementById("bridge_wan_port_to_lan_container").style.display = "none";
 	}
@@ -1335,7 +1316,6 @@ function resetData()
 	if(wp != "none") { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
 	setSelectedValue("wan_protocol", wp);
 
-	setSelectedValue('wan_via_single_port', (wanUciIf == defaultLanIf && defaultWanIf == '') ? "wan" : "lan");
 	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
 	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
 	setSelectedValue('wan_port_to_lan', wanToLanStatus);
@@ -2172,3 +2152,12 @@ function renewDhcpLease()
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
 
+function singleEthernetIsWan()
+{
+	return singleEthernetPort() && document.getElementById("global_gateway").checked && getSelectedValue("wan_protocol").match(/wired/) 
+}
+
+function singleEthernetPort()
+{
+	return defaultWanIf == "" || defaultWanIf == defaultLanIf;
+}

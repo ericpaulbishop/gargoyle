@@ -332,17 +332,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 
 
-		<div id='wan_via_single_port_container' >
-			<span class='leftcolumn'>
-				<label id='wan_via_single_port_label' for='wan_via_single_port'>Ethernet Port Connects to:</label>
-			</span>
-			<span class='rightcolumn'>
-				<select id='wan_via_single_port' onchange='setGlobalVisibility()'>
-					<option value='lan'>LAN</option>
-					<option value='wan'>WAN</option>
-				</select>
-			</span>
-		</div>
 		<div id='wan_port_to_lan_container' >
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
