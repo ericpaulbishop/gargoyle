@@ -441,6 +441,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
+
 		<div id='wifi_txpower_container'>
 			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'>Transmit Power:</label>
 			<span class='rightcolumn'>
@@ -453,15 +454,27 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<em><span id="wifi_dbm">dBm</span></em>
 			</span>
 		</div>
-		<div id='wifi_txpowera_container'>
-			<label class='leftcolumn' for='wifi_max_txpowera' id='wifi_txpowera_label'>5GHz Transmit Power:</label>
+
+		<div id='wifi_channel_width_5ghz_container'>
+			<label class='leftcolumn' for='wifi_channel_width_5ghz' id='wifi_channel_width_label'>5GHz Channel Width:</label>
 			<span class='rightcolumn'>
-				<select id='wifi_max_txpowera' onchange='updateTxPower("wifi_max_txpowera","wifi_txpowera", "A")'>
+				<select id='wifi_channel_width_5ghz' onchange='setChannelWidth(this)'>
+					<option value='HT20'>20MHz</option>
+					<option value='HT40+'>40MHz (2nd chan. above)</option>
+					<option value='HT40-'>40MHz (2nd chan. below)</option>
+				</select>
+			</span>
+		</div>
+
+		<div id='wifi_txpower_5ghz_container'>
+			<label class='leftcolumn' for='wifi_max_txpower_5ghz' id='wifi_txpower_5ghz_label'>5GHz Transmit Power:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_max_txpower_5ghz' onchange='updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")'>
 					<option value='max'>Max</option>
 					<option value='custom'>Custom</option>
 				</select>
 				&nbsp;
-				<input type='text' id='wifi_txpowera' onkeyup='proofreadNumericRange(this,0,getMaxTxPower("A"));' size='10' />
+				<input type='text' id='wifi_txpower_5ghz' onkeyup='proofreadNumericRange(this,0,getMaxTxPower("A"));' size='10' />
 				<em><span id="wifia_dbm">dBm</span></em>
 			</span>
 		</div>
