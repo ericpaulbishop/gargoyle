@@ -985,10 +985,14 @@ function setWifiVisibility()
 
 	var wifiIds=[	'internal_divider1', 
 			'wifi_hwmode_container',
+
 			'wifi_channel_width_container',
 	    		'wifi_txpower_container',
+			
+			'wifi_channel_width_5ghz_container',
 			'wifi_txpower_5ghz_container',
-	    		'mac_enabled_container', 
+	    		
+			'mac_enabled_container', 
 			'mac_filter_container', 
 			
 
@@ -1036,12 +1040,12 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,wn,1,db,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,wn,1,db,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,wn,wn,1,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,wn,1,db,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,wn,wn,1,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,wn,wn,1,db,db,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,wn,wn,1,db,db,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,wn,wn,1,db,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,wn,wn,1,db,db,1,mf,   1,db,1,0,db,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,1,0,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,wn,wn,1,db,db,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,1,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1087,7 +1091,6 @@ function setBridgeVisibility()
 		var brenc = document.getElementById("bridge_fixed_encryption_container").style.display == "none" ? getSelectedValue("bridge_encryption") : document.getElementById("bridge_fixed_encryption").firstChild.data;
 		document.getElementById("bridge_pass_container").style.display = brenc.match(/psk/) || brenc.match(/WPA/) ? "block" : "none";
 		document.getElementById("bridge_wep_container").style.display  = brenc.match(/wep/) || brenc.match(/WEP/) ? "block" : "none";
-		//alert("fixed_display=" + document.getElementById("bridge_fixed_encryption_container").style.display + "brenc = " + brenc);
 
 		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" && (!isb43) ? "block" : "none";
 		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
@@ -1439,7 +1442,9 @@ function resetData()
 		document.getElementById("bridge_channel_width_container").style.display="block";
 		setSelectedValue("wifi_channel_width", htmode);
 		setSelectedValue("bridge_channel_width", htmode);
-		setChannelWidth(document.getElementById("wifi_channel_width"));
+		setChannelWidth(document.getElementById("wifi_channel_width"), "G");
+		setChannelWidth(document.getElementById("wifi_channel_width_5ghz"), "A");
+
 	}
 	else
 	{
@@ -1764,7 +1769,6 @@ function scanWifi(ssidField)
 	{
 		if(req.readyState == 4)
 		{
-			//alert("response = \n" + req.responseText)
 			scannedSsids = parseWifiScan(req.responseText);	
 			if(scannedSsids[0].length > 0)
 			{
@@ -1952,36 +1956,36 @@ function parseWifiScan(rawScanOutput)
 	return sortedParsed;
 }
 
-function setChannelWidth(selectCtl)
+function setChannelWidth(selectCtl, band)
 {
-	setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
-	setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
-
-	
-	setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
-	setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
-	setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
-	var removeChannels = [];
 	var chw =  getSelectedValue(selectCtl.id)
-	var h40 = (chw == 'HT40+' || chw == 'HT40-')
 	var hplus = chw =='HT40+';
-	var rIndex = 1;
-	for(rIndex=1; rIndex <= 4 && h40; rIndex++)
+	var h40 = (chw == 'HT40+' || chw == 'HT40-')
+	if(band == "G")
 	{
-		removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex] : rIndex)
-	}
-	while(removeChannels.length > 0)
-	{
-		var rc = removeChannels.shift();
-		removeOptionFromSelectElement("bridge_channel", rc, document);
-		removeOptionFromSelectElement("wifi_channel1", rc, document);
-		removeOptionFromSelectElement("wifi_channel2", rc, document);
-	}
-	updateTxPower("wifi_max_txpower", "wifi_txpower", "G");	
+		setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
+		setSelectedValue("bridge_channel_width", getSelectedValue(selectCtl.id));
+
 	
-
-
-	if(mac80211Channels["A"] != null)
+		setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
+		setAllowableSelections("wifi_channel1",  mac80211Channels["G"], mac80211Channels["G"], document);
+		setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
+		var removeChannels = [];
+		var rIndex = 1;
+		for(rIndex=1; rIndex <= 4 && h40; rIndex++)
+		{
+			removeChannels.push( hplus ? mac80211Channels["G"][ mac80211Channels["G"].length-rIndex] : rIndex)
+		}
+		while(removeChannels.length > 0)
+		{
+			var rc = removeChannels.shift();
+			removeOptionFromSelectElement("bridge_channel", rc, document);
+			removeOptionFromSelectElement("wifi_channel1", rc, document);
+			removeOptionFromSelectElement("wifi_channel2", rc, document);
+		}
+		updateTxPower("wifi_max_txpower", "wifi_txpower", "G");	
+	}
+	else if(band == "A" && mac80211Channels["A"] != null)
 	{
 		var origAChan  = mac80211Channels["A"]
 		var aChannels  = origAChan
@@ -2000,7 +2004,6 @@ function setChannelWidth(selectCtl)
 		setAllowableSelections("wifi_channel1a",  aChannels, aChannels, document);
 		updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")
 	}
-
 }
 
 function setHwMode(selectCtl)
@@ -2018,6 +2021,7 @@ function setHwMode(selectCtl)
 	{
 		setSelectedValue("bridge_hwmode", hwmode);
 	}
+	document.getElementById("wifi_channel_width_container").style.marginTop = hwmode == "dual" ? "20px" : "5px";
 	document.getElementById("wifi_txpower_5ghz_container").style.display = hwmode == "dual" ? "block" : "none";
 	document.getElementById("wifi_channel1a_container").style.display = hwmode == "dual" ? "block" : "none";
 	document.getElementById("wifi_ssid1a_container").style.display = hwmode == "dual" ? "block" : "none";
@@ -2039,14 +2043,13 @@ function setHwMode(selectCtl)
 	if(!displayWidth)
 	{
 		setSelectedValue("wifi_channel_width", "HT20");
-		setChannelWidth(document.getElementById("wifi_channel_width"))
+		setChannelWidth(document.getElementById("wifi_channel_width"), "G")
 	}
 	var widthContainers = ["wifi_channel_width_container", "wifi_channel_width_5ghz_container", "bridge_channel_width_container" ];
 	var wci;
 	for(wci=0 ; wci < widthContainers.length; wci++)
 	{
 		var container = document.getElementById( widthContainers[wci] );
-		alert("container_id = " + container.id + ", hwmode = " + hwmode)
 		container.style.display = displayWidth && ((!container.id.match("5ghz")) || hwmode == "dual") ? "block" : "none";
 	}
 }
@@ -2074,7 +2077,7 @@ function updateTxPower(selectId, textId, band)
 	
 	var updateIds = []
 	updateIds["G"] = [["wifi_max_txpower", "wifi_txpower", "wifi_dbm"], ["bridge_max_txpower", "bridge_txpower", "wifi_dbm"]]
-	updateIds["A"] = [["wifi_max_txpower_5ghz", "wifi_txpower_5ghz", "wifia_dbm"]]
+	updateIds["A"] = [["wifi_max_txpower_5ghz", "wifi_txpower_5ghz", "wifi_dbm_5ghz"]]
 	var bandUpdateIds = updateIds[band];
 	var idIndex=0;
 	for(idIndex=0; idIndex < bandUpdateIds.length; idIndex++)
