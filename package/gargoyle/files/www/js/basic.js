@@ -427,7 +427,7 @@ function saveChanges()
 							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
 						}
 					}
-					dup_sec_options("wireless", wifiDevG, wifiDevA, ["htmode"]);
+					uci.set("wireless", wifiDevA, "htmode",  getSelectedValue("wifi_channel_width_5ghz");
 					uci.set("wireless", wifiDevA, "channel", getSelectedValue("wifi_channel1a"));
 					txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
 
