@@ -553,6 +553,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wifi_fixed_channel2' id='wifi_fixed_channel2_label'>Wireless Channel:</label>
 			<span class='rightcolumn' id='wifi_fixed_channel2'>&nbsp;</span>
 		</div>
+		<div id='wifi_channel2_5ghz_container' class='indent'>
+			<label class='leftcolumn' for='wifi_channel2_5ghz' id='wifi_channel2_5ghz_label'>Wireless Channel:</label>
+			<select class='rightcolumn' id='wifi_channel2_5ghz' onchange='setChannel(this)' ></select>
+		</div>
 
 		<div id='wifi_encryption2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
@@ -618,9 +622,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<span class='rightcolumn' id='wifi_fixed_channel1'>&nbsp;</span>
 		</div>
 
-		<div id='wifi_channel1a_container' class='indent'>
-			<label class='leftcolumn' for='wifi_channel1a' id='wifi_channel1_label'>Wireless Channel (5GHz):</label>
-			<select class='rightcolumn' id='wifi_channel1a' onchange='setChannel(this)' ></select>
+		<div id='wifi_channel1_5ghz_container' class='indent'>
+			<label class='leftcolumn' for='wifi_channel1_5ghz' id='wifi_channel1_5ghz_label'>Wireless Channel (5GHz):</label>
+			<select class='rightcolumn' id='wifi_channel1_5ghz' onchange='setChannel(this)' ></select>
 		</div>
 
 
