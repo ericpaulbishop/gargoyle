@@ -68,25 +68,45 @@
 
 	scan_mac80211()
 	{
-		cur_ifs=$(iwconfig 2>/dev/null | grep "^wlan" | awk ' { print $1 }')
-		cur_sta=""
-		for i in $cur_ifs ; do
-			is_sta=$(iwconfig $i | grep "Managed" | grep -v "Not.Associated")
-			if [ -n "$is_sta" ] ; then
-				cur_sta="$i"
-			fi
-		done
 		
-		if [ -n "$cur_sta" ] ; then
-			iwlist $cur_sta scanning
-		else		
-			iw phy phy0 interface add tmpsta type managed
-			ifconfig tmpsta hw ether 00:11:22:33:55:77
-			ifconfig tmpsta up
-			iwlist tmpsta scanning
-			ifconfig tmpsta down
-			iw dev tmpsta del
+		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))")
+		test_ifs="$g_sta"
+		if [ -z "$g_sta" ] ; then
+			test_ifs="phy0"
 		fi
+		
+		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
+			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an")
+			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
+			g_phy="phy0"
+			a_phy="phy1"
+			if [ -z "$phy0_is_g" ] ; then
+				g_phy="phy1"
+				a_phy="phy0"	
+			fi
+			if [ -z "$g_sta" ] ; then
+				test_ifs="$g_phy"
+			fi
+			if [ -z "$a_sta" ] ; then
+				test_ifs="$test_ifs $a_sta"
+			else
+				test_ifs="$test_ifs $a_phy"
+			fi
+		fi
+			
+		for if in $test_ifs ; do
+			if [ "$if" = "phy0" ] || [ "$if" = "phy1" ] ; then
+				iw phy $if interface add tmpsta type managed
+				ifconfig tmpsta hw ether 00:11:22:33:55:77
+				ifconfig tmpsta up
+				iwlist tmpsta scanning
+				ifconfig tmpsta down
+				iw dev tmpsta del	
+			else
+				iwlist $if scanning
+			fi
+		done			
+		
 	}
 
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then
