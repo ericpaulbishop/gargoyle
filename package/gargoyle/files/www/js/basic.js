@@ -427,7 +427,7 @@ function saveChanges()
 							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
 						}
 					}
-					uci.set("wireless", wifiDevA, "htmode",  getSelectedValue("wifi_channel_width_5ghz");
+					uci.set("wireless", wifiDevA, "htmode",  getSelectedValue("wifi_channel_width_5ghz"));
 					uci.set("wireless", wifiDevA, "channel", getSelectedValue("wifi_channel1_5ghz"));
 					txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
 
@@ -979,7 +979,7 @@ function setWifiVisibility()
 	var mnames = ['N+G+B', 'G+B', 'B']
 	if(wifiN && dualBandWireless )
 	{
-		if((wifiMode.match(/ap/) || wifiMode.match(/disabled/))
+		if(wifiMode.match(/ap/) || wifiMode.match(/disabled/))
 		{
 			modes.unshift("dual")
 			mnames.unshift("Dual Band")
@@ -1076,7 +1076,6 @@ function setWifiVisibility()
 
 function setBridgeVisibility()
 {
-
 	showIds = document.getElementById("global_gateway").checked ? ["wan_fieldset", "lan_fieldset", "wifi_fieldset"] : ["bridge_fieldset"];
 	hideIds = document.getElementById("global_gateway").checked ? ["bridge_fieldset"] : ["wan_fieldset", "lan_fieldset", "wifi_fieldset"];
 	var allIds = [hideIds, showIds];
@@ -2060,9 +2059,13 @@ function setHwMode(selectCtl)
 	}
 	var containers = [
 
-				"wifi_txpower_5ghz_container", 
+				"wifi_txpower_5ghz_container",
+
+				"wifi_channel1_container",
+				"wifi_channel2_container",
+
 				"wifi_channel1_5ghz_container",
-				"wifi_channel2_5ghz",
+				"wifi_channel2_5ghz_container",
 				"wifi_ssid1a_container",
 				"wifi_channel_width_5ghz_container",
 				
@@ -2080,8 +2083,12 @@ function setHwMode(selectCtl)
 	{
 		var container = document.getElementById( containers[ci] );
 		var isA = container.id.match("5ghz") || container.id.match(/a_/)
+		var ap_only = container.id.match(/1_/) || container.id.match(/1a_/) 
+		var cli_only = container.id.match(/2_/) || container.id.match(/2a_/) 
 		var notA = !isA;
-		var vis = displayWidth && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
+		var wimode = getSelectedValue("wifi_mode")
+		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
+		var vis = displayWidth && (!cli_ap_mismatch) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
 		container.style.display = vis ? "block" : "none";
 	}
 }
