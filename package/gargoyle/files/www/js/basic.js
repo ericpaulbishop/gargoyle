@@ -986,8 +986,8 @@ function setWifiVisibility()
 		}
 		else
 		{
-			modes.unshift("11na")
-			mnames.unshift("N+A")
+			modes.splice(1,0,"11na")
+			mnames.splice(1,0,"N+A")
 		}
 	}
 	setAllowableSelections( "wifi_hwmode", modes, mnames );
@@ -2036,11 +2036,21 @@ function setHwMode(selectCtl)
 	{
 		setSelectedValue("bridge_hwmode", hwmode);
 	}
-	document.getElementById("wifi_channel_width_container").style.marginTop = hwmode == "dual" ? "20px" : "5px";
 	
+
+	document.getElementById("wifi_channel_width_container").style.marginTop      = hwmode == "dual" ? "20px" :  "5px";
+	document.getElementById("wifi_channel_width_5ghz_container").style.marginTop = hwmode == "11na" ?  "5px" : "20px";
+	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = hwmode == "11na" ?  "5px" : "20px";
+
+
+	setChildText("wifi_txpower_5ghz_label", (hwmode == "11na" ? "Transmit Power" : "5GHz Transmit Power"));
+	setChildText("wifi_channel_width_5ghz_label", (hwmode == "11na" ? "Channel Width:" : "5GHz Channel Width:"));
 	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz Transmit Power" : "Transmit Power"));
-	setChildText("wifi_ssid1_label", (hwmode == "dual" ? "AP 2.4GHz SSID:" : "Access Point SSID:"));
 	setChildText("wifi_channel_width_label", (hwmode == "dual" ? "2.4GHz Channel Width:" : "Channel Width:"));
+	setChildText("wifi_ssid1_label", (hwmode == "dual" ? "AP 2.4GHz SSID:" : "Access Point SSID:"));
+
+
+
 
 	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + "_5GHz" :  document.getElementById("wifi_ssid1a").value;
 	if(wirelessDriver == "mac80211")
@@ -2060,32 +2070,25 @@ function setHwMode(selectCtl)
 	var containers = [
 
 				"wifi_txpower_5ghz_container",
-
 				"wifi_channel1_container",
 				"wifi_channel2_container",
-
 				"wifi_channel1_5ghz_container",
 				"wifi_channel2_5ghz_container",
 				"wifi_ssid1a_container",
 				"wifi_channel_width_5ghz_container",
-				
-				
 				"wifi_txpower_container",
 				"wifi_channel_width_container",
 				"bridge_channel_width_container" 
 				];
-	
-	
-	
 	
 	var ci;
 	for(ci=0 ; ci < containers.length; ci++)
 	{
 		var container = document.getElementById( containers[ci] );
 		var isA = container.id.match("5ghz") || container.id.match(/a_/)
+		var notA = !isA;
 		var ap_only = container.id.match(/1_/) || container.id.match(/1a_/) 
 		var cli_only = container.id.match(/2_/) || container.id.match(/2a_/) 
-		var notA = !isA;
 		var wimode = getSelectedValue("wifi_mode")
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
 		var vis = displayWidth && (!cli_ap_mismatch) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
