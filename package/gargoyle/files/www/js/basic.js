@@ -1030,6 +1030,7 @@ function setWifiVisibility()
 			'wifi_channel2_container', 
 			'wifi_fixed_channel2_container',
 			'wifi_channel2_5ghz_container',
+			'wifi_client_freq_container',
 			'wifi_encryption2_container',
 			'wifi_fixed_encryption2_container',
 			'wifi_pass2_container', 
@@ -1054,12 +1055,12 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,g,0,sa,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,g,0,sa,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,g,0,sa,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,g,0,sa,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,g,0,sa,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
 	
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -2027,7 +2028,7 @@ function setHwMode(selectCtl)
 		document.getElementById("bridge_hwmode_container").style.display == "none" 
 		)
 	{
-		//setting of hwmode not allowd, nothing here applies
+		//setting of hwmode not allowed, nothing here applies
 		return;
 	}
 	var hwmode = getSelectedValue(selectCtl.id)
@@ -2082,6 +2083,7 @@ function setHwMode(selectCtl)
 				];
 	
 	var ci;
+	var wimode = getSelectedValue("wifi_mode")
 	for(ci=0 ; ci < containers.length; ci++)
 	{
 		var container = document.getElementById( containers[ci] );
@@ -2089,11 +2091,20 @@ function setHwMode(selectCtl)
 		var notA = !isA;
 		var ap_only = container.id.match(/1_/) || container.id.match(/1a_/) 
 		var cli_only = container.id.match(/2_/) || container.id.match(/2a_/) 
-		var wimode = getSelectedValue("wifi_mode")
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
 		var vis = displayWidth && (!cli_ap_mismatch) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
 		container.style.display = vis ? "block" : "none";
 	}
+	document.getElementById("wifi_client_freq_container").style.display = (wimode == "ap+sta" && hwmode == "dual") ? "block" : "none";
+	if(wimode == "ap+sta" && hwmode == "dual")
+	{
+		var cfreq = getSelectedValue("wifi_client_freq")
+		document.getElementById("wifi_channel2_container").style.display = cfreq == "2.4" ? "block" : "none"
+		document.getElementById("wifi_channel2_5ghz_container").style.display = cfreq == "5" ? "block" : "none"
+	}
+	
+	
+	
 }
 
 

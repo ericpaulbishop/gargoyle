@@ -529,6 +529,16 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input style="float:left;" type='button' class="default_button" id='wifi_scan_button' value='Scan' onclick='scanWifi("wifi_ssid2")' />
 			</span>
 		</div>
+		
+		<div id='wifi_client_freq_container' class='indent'>
+			<label class='leftcolumn' for='wifi_client_freq' id='wifi_client_freq_label'>Wireless Frequency:</label>
+			<select class='rightcolumn' id='wifi_client_freq' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
+				<option value="2.4">2.4 Ghz</option>
+				<option value="5">5 Ghz</option>
+			</select>
+		</div>
+
+
 		<div id='wifi_channel2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel2' id='wifi_channel2_label'>Wireless Channel:</label>
 			<select class='rightcolumn' id='wifi_channel2' onchange='setChannel(this)' >
@@ -557,6 +567,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wifi_channel2_5ghz' id='wifi_channel2_5ghz_label'>Wireless Channel:</label>
 			<select class='rightcolumn' id='wifi_channel2_5ghz' onchange='setChannel(this)' ></select>
 		</div>
+
+
 
 		<div id='wifi_encryption2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
