@@ -984,11 +984,8 @@ function setWifiVisibility()
 			modes.unshift("dual")
 			mnames.unshift("Dual Band")
 		}
-		else
-		{
-			modes.splice(1,0,"11na")
-			mnames.splice(1,0,"N+A")
-		}
+		modes.push("11na")
+		mnames.push("N+A")
 	}
 	setAllowableSelections( "wifi_hwmode", modes, mnames );
 	
@@ -2044,11 +2041,15 @@ function setHwMode(selectCtl)
 	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = hwmode == "11na" ?  "5px" : "20px";
 
 
-	setChildText("wifi_txpower_5ghz_label", (hwmode == "11na" ? "Transmit Power" : "5GHz Transmit Power"));
+	setChildText("wifi_ssid1a_label", (hwmode == "11na" ? "Access Point SSID:" : "AP 5GHz SSID:"));
+	setChildText("wifi_channel1_5ghz_label", (hwmode == "11na" ? "Wireless Channel:" : "Wireless Channel (5GHz):"));
+	setChildText("wifi_txpower_5ghz_label", (hwmode == "11na" ? "Transmit Power:" : "5GHz Transmit Power:"));
 	setChildText("wifi_channel_width_5ghz_label", (hwmode == "11na" ? "Channel Width:" : "5GHz Channel Width:"));
-	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz Transmit Power" : "Transmit Power"));
+	
+	setChildText("wifi_ssid1_label", (hwmode == "dual" ?  "AP 2.4GHz SSID:" : "Access Point SSID:"));
+	setChildText("wifi_channel1_label", (hwmode == "dual" ? "Wireless Channel (2.4GHz):" : "Wireless Channel:"));
+	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz Transmit Power:" : "Transmit Power:"));
 	setChildText("wifi_channel_width_label", (hwmode == "dual" ? "2.4GHz Channel Width:" : "Channel Width:"));
-	setChildText("wifi_ssid1_label", (hwmode == "dual" ? "AP 2.4GHz SSID:" : "Access Point SSID:"));
 
 
 
@@ -2069,7 +2070,8 @@ function setHwMode(selectCtl)
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G")
 	}
 	var containers = [
-
+				"wifi_ssid1a_container",
+				"wifi_ssid1_container",
 				"wifi_txpower_5ghz_container",
 				"wifi_channel1_container",
 				"wifi_channel2_container",
