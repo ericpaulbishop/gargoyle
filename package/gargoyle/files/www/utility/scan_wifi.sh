@@ -88,9 +88,9 @@
 				test_ifs="$g_phy"
 			fi
 			if [ -z "$a_sta" ] ; then
-				test_ifs="$test_ifs $a_sta"
-			else
 				test_ifs="$test_ifs $a_phy"
+			else
+				test_ifs="$test_ifs $a_sta"
 			fi
 		fi
 			
