@@ -1885,7 +1885,7 @@ function setSsidVisibility(selectId)
 			{
 				modes.splice( 1,0,"11na")
 				mnames.splice(1,0,"N+A")
-				if(isAp):
+				if(isAp)
 				{
 					modes.unshift("dual")
 					mnames.unshift("Dual Band")
@@ -1929,7 +1929,7 @@ function setSsidVisibility(selectId)
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
 		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         isAp,0,    wp,ww,bp,bw] );
 	}
-	setHwMode(document.getElementById("wifi_hwmode")
+	setHwMode(document.getElementById("wifi_hwmode"))
 
 }
 
