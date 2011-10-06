@@ -169,7 +169,7 @@ function addPortfRule()
 	else
 	{
 		values = new Array();
-		ids = ['add_app', 'add_prot', 'add_fp', 'add_ip', 'add_dp'];
+		ids = ['add_desc', 'add_prot', 'add_fp', 'add_ip', 'add_dp'];
 		for (idIndex in ids)
 		{
 			element = document.getElementById(ids[idIndex]);
@@ -238,7 +238,7 @@ function addPortfRangeRule()
 	else
 	{
 		values = new Array();
-		ids = ['addr_app', 'addr_prot', 'addr_sp', 'addr_ep', 'addr_ip'];
+		ids = ['addr_desc', 'addr_prot', 'addr_sp', 'addr_ep', 'addr_ip'];
 		for (idIndex in ids)
 		{
 			element = document.getElementById(ids[idIndex]);
@@ -485,7 +485,7 @@ function resetData()
 	}
 
 
-	columnNames = ['Application', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled', '']
+	columnNames = ['Description', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled', '']
 	portfTable=createTable(columnNames, singlePortTableData, "portf_table", true, false);
 	table1Container = document.getElementById('portf_table_container');
 	
@@ -499,7 +499,7 @@ function resetData()
 	
 	
 
-	columnNames = ['Application', 'Protocol', 'Start Port', 'End Port', 'To IP', 'Enabled', '']
+	columnNames = ['Description', 'Protocol', 'Start Port', 'End Port', 'To IP', 'Enabled', '']
 	portfrangeTable=createTable(columnNames, portRangeTableData, "portf_range_table", true, false);
 	table2Container = document.getElementById('portfrange_table_container');
 	if(document.getElementById('portfrange_table_container').firstChild != null)
@@ -523,7 +523,7 @@ function resetData()
 
 
 
-	clearIds = ['add_app', 'add_fp', 'add_ip', 'add_dp', 'addr_app', 'addr_sp', 'addr_ep', 'addr_ip'];
+	clearIds = ['add_desc', 'add_fp', 'add_ip', 'add_dp', 'addr_desc', 'addr_sp', 'addr_ep', 'addr_ip'];
 	for(clearIndex = 0; clearIndex < clearIds.length; clearIndex++)
 	{
 		document.getElementById(clearIds[clearIndex]).value = '';
@@ -647,7 +647,7 @@ function editForward(isSingle, triggerElement)
 				//set edit values
 				var r= isSingle ? "" : "r";
 				editForwardWindow.document.getElementById("add" + r + "_button").style.display="none";
-				editForwardWindow.document.getElementById("add" + r + "_app").value = editRow.childNodes[0].firstChild.data;
+				editForwardWindow.document.getElementById("add" + r + "_desc").value = editRow.childNodes[0].firstChild.data;
 				setSelectedText("add" + r + "_prot", editRow.childNodes[1].firstChild.data, editForwardWindow.document);
 				if(isSingle)
 				{
@@ -686,7 +686,7 @@ function editForward(isSingle, triggerElement)
 					{
 						//update document with new data
 						
-						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_app").value;
+						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_desc").value;
 						editRow.childNodes[1].firstChild.data = getSelectedValue( "add" + r + "_prot", editForwardWindow.document );
 						if(isSingle)
 						{
