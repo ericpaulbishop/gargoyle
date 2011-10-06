@@ -21,7 +21,7 @@
 "UTC+00:00 Gambia, Liberia, Morocco"						"UTC0"					"africa"
 "UTC+00:00 England"								"GMT0BST,M3.5.0/2,M10.5.0/2"		"europe"
 "UTC+01:00 Tunisia"								"UTC-1"					"africa"
-"UTC+01:00 France, Germany, Italy"						"CET-1CEST,M3.5.0/2,M10.5.0/3"		"europe"
+"UTC+01:00 France, Germany, Poland, Italy"					"CET-1CEST,M3.5.0/2,M10.5.0/3"		"europe"
 "UTC+02:00 South Africa"							"UTC-2"					"africa"
 "UTC+02:00 Greece, Ukraine, Romania, Turkey"					"STD-2DST,M3.5.0/2,M10.5.0/2"		"europe"
 "UTC+03:00 Iraq, Jordan, Kuwait"						"UTC-3"					"asia"
