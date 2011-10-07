@@ -530,9 +530,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 		
-		<div id='wifi_client_freq_container' class='indent'>
-			<label class='leftcolumn' for='wifi_client_freq' id='wifi_client_freq_label'>Wireless Frequency:</label>
-			<select class='rightcolumn' id='wifi_client_freq' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
+		<div id='wifi_client_band_container' class='indent'>
+			<label class='leftcolumn' for='wifi_client_band' id='wifi_client_band_label'>Wireless Band:</label>
+			<select class='rightcolumn' id='wifi_client_band' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
 				<option value="2.4">2.4 Ghz</option>
 				<option value="5">5 Ghz</option>
 			</select>

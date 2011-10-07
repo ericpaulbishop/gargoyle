@@ -1028,7 +1028,7 @@ function setWifiVisibility()
 			'wifi_channel2_container', 
 			'wifi_fixed_channel2_container',
 			'wifi_channel2_5ghz_container',
-			'wifi_client_freq_container',
+			'wifi_client_band_container',
 			'wifi_encryption2_container',
 			'wifi_fixed_encryption2_container',
 			'wifi_pass2_container', 
@@ -2167,12 +2167,13 @@ function setHwMode(selectCtl)
 		var vis = displayWidth && (!cli_ap_mismatch) && (!hide_in_favor_of_fixed_channel) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
 		container.style.display = vis ? "block" : "none";
 	}
-	document.getElementById("wifi_client_freq_container").style.display = (wimode == "ap+sta" && hwmode == "dual") ? "block" : "none";
+	document.getElementById("wifi_client_band_container").style.display = (wimode == "ap+sta" && hwmode == "dual") ? "block" : "none";
 	if(wimode == "ap+sta" && hwmode == "dual")
 	{
-		var cfreq = getSelectedValue("wifi_client_freq")
-		document.getElementById("wifi_channel2_container").style.display = cfreq == "2.4" ? "block" : "none"
-		document.getElementById("wifi_channel2_5ghz_container").style.display = cfreq == "5" ? "block" : "none"
+		var cband = getSelectedValue("wifi_client_band")
+		document.getElementById("wifi_client_band").style.display = (!fixedChannels) ? "block" : "none"
+		document.getElementById("wifi_channel2_container").style.display      = cband == "2.4" && (!fixedChannels) ? "block" : "none"
+		document.getElementById("wifi_channel2_5ghz_container").style.display = cband == "5"   && (!fixedChannels) ? "block" : "none"
 	}
 	
 	
