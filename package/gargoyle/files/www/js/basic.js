@@ -2159,14 +2159,16 @@ function setHwMode(selectCtl)
 	for(ci=0 ; ci < containers.length; ci++)
 	{
 		var container = document.getElementById( containers[ci] );
-		var isA = container.id.match("5ghz") || container.id.match(/a_/)
+		var cid = container.id
+		var isA = cid.match("5ghz") || cid.match(/a_/)
 		var notA = !isA;
 		var cBand = isA ? "A" : "G";
-		var ap_only = container.id.match(/1_/) || container.id.match(/1a_/) 
-		var cli_only = container.id.match(/2_/) || container.id.match(/2a_/) 
+		var ap_only = cid.match(/1_/) || cid.match(/1a_/) 
+		var cli_only = cid.match(/2_/) || cid.match(/2a_/) 
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
-		var hide_in_favor_of_fixed_channel = fixedChannels && (container.id.match(/channel/) && (!container.id.match(/channel_width/))) && ((!wimode.match(/ap/)) || fixedChannelBand == cBand);
-		var vis = displayWidth && (!cli_ap_mismatch) && (!hide_in_favor_of_fixed_channel) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
+		var hide_in_favor_of_fixed_channel = fixedChannels && (cid.match(/channel/) && (!cid.match(/channel_width/))) && ((!wimode.match(/ap/)) || fixedChannelBand == cBand);
+		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container"
+		var vis = (displayWidth || displayWithoutWidth) && (!cli_ap_mismatch) && (!hide_in_favor_of_fixed_channel) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
 		container.style.display = vis ? "block" : "none";
 	}
 	document.getElementById("wifi_client_band_container").style.display = (wimode == "ap+sta" && hwmode == "dual") ? "block" : "none";
