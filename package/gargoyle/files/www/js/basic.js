@@ -1890,9 +1890,14 @@ function setSsidVisibility(selectId)
 				modes.unshift("dual")
 				mnames.unshift("Dual Band")
 			}
+			var curBand = getSelectedValue("wifi_hwmode")
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
+			if(band == "A" && curBand != "dual" && curBand != "11na")
+			{
+				setSelectedValue("wifi_hwmode", "dual");
+			}
 			
-			
+
 			setSelectedValue("wifi_encryption2", enc);
 			setSelectedValue("bridge_encryption", enc);
 			var enc = getSelectedText("wifi_encryption2");
