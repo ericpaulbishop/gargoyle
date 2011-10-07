@@ -1799,7 +1799,15 @@ function scanWifi(ssidField)
 					var qual = scannedSsids[3][ssidIndex];
 
 					enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
-					ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal)");
+					if(wifiN && dualBandWireless)
+					{
+						var ghz = scannedSsids[4][ssidIndex] == "A" ? "5GHz" : "2.4GHz";
+						ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal, " + ghz +  ")");
+					}
+					else
+					{
+						ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal)");
+					}
 					ssidValue.push(ssidIndex + "");
 				}
 				ssidDisplay.push( "Other" );
@@ -1876,25 +1884,14 @@ function setSsidVisibility(selectId)
 			{
 				modes  = [ '11na' ];
 				mnames = [ 'N+A'  ];
-				if(isAp)
-				{
-					modes.unshift("dual")
-					mnames.unshift("Dual Band")
-				}
 			}
-			else if(wifiN && dualBandWireless )
+			if(wifiN && dualBandWireless && isAp )
 			{
-				modes.splice( 1,0,"11na")
-				mnames.splice(1,0,"N+A")
-				if(isAp)
-				{
-					modes.unshift("dual")
-					mnames.unshift("Dual Band")
-				}
+				modes.unshift("dual")
+				mnames.unshift("Dual Band")
 			}
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
 			
-
 			
 			setSelectedValue("wifi_encryption2", enc);
 			setSelectedValue("bridge_encryption", enc);
@@ -2171,7 +2168,7 @@ function setHwMode(selectCtl)
 	if(wimode == "ap+sta" && hwmode == "dual")
 	{
 		var cband = getSelectedValue("wifi_client_band")
-		document.getElementById("wifi_client_band").style.display = (!fixedChannels) ? "block" : "none"
+		document.getElementById("wifi_client_band_container").style.display   = (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_container").style.display      = cband == "2.4" && (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_5ghz_container").style.display = cband == "5"   && (!fixedChannels) ? "block" : "none"
 	}
