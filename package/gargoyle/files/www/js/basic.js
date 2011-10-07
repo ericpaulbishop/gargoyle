@@ -1869,6 +1869,7 @@ function setSsidVisibility(selectId)
 			var chan = scannedSsids[2][scannedIndex];
 			var band = scannedSsids[4][scannedIndex];
 
+
 			var modes = ['11ng',  '11g', '11b']
 			var mnames = ['N+G+B', 'G+B', 'B']
 			if(band == "A")
@@ -1892,7 +1893,7 @@ function setSsidVisibility(selectId)
 				}
 			}
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
-
+			
 
 			
 			setSelectedValue("wifi_encryption2", enc);
@@ -1901,9 +1902,10 @@ function setSsidVisibility(selectId)
 			setChildText("wifi_fixed_encryption2", enc);
 			setChildText("bridge_fixed_encryption", enc);
 			
-			var chanEl1 = "wifi_channel1" + (freq == "A" ? "_5ghz" : "")
-			var chanEl2 = "wifi_channel2" + (freq == "A" ? "_5ghz" : "")
-			setSelectedValue(ehanEl1, chan);
+			
+			var chanEl1 = "wifi_channel1" + (band == "A" ? "_5ghz" : "")
+			var chanEl2 = "wifi_channel2" + (band == "A" ? "_5ghz" : "")
+			setSelectedValue(chanEl1, chan);
 			setSelectedValue(chanEl2, chan);
 			setSelectedValue("bridge_channel", chan);
 
@@ -1935,7 +1937,7 @@ function setSsidVisibility(selectId)
 
 function parseWifiScan(rawScanOutput)
 {
-	var parsed = [ [],[],[],[] ];
+	var parsed = [ [],[],[],[],[] ];
 	var cells = rawScanOutput.split(/Cell/);
 	cells.shift(); //get rid of anything before first AP data
 	
@@ -2018,8 +2020,7 @@ function parseWifiScan(rawScanOutput)
 		var pIndex;
 		for(pIndex=0; pIndex < 5; pIndex++){ sortedParsed[pIndex].push( parsed[pIndex][i] ); }
 	}
-
-
+	
 	return sortedParsed;
 }
 
@@ -2145,14 +2146,14 @@ function setHwMode(selectCtl)
 	var fixedChannelBand = "";
 	if(fixedChannels)
 	{
-		fixedChannels = getSelectedValue("wifi_list_ssid2") != "custom"
+		var ssidIndex = getSelectedValue("wifi_list_ssid2") 
+		fixedChannels = ssidIndex != "custom"
 		if(fixedChannels)
 		{
-			fixedChannelBand = scannedSsids[4][ getSelectedValue(selectId) ];
+			fixedChannelBand = scannedSsids[4][ parseInt(ssidIndex) ];
 		}
 	}
 	
-		
 	for(ci=0 ; ci < containers.length; ci++)
 	{
 		var container = document.getElementById( containers[ci] );
