@@ -2144,7 +2144,7 @@ function setHwMode(selectCtl)
 	
 	var ci;
 	var wimode = getSelectedValue("wifi_mode")
-	var fixedChannels = scannedSsids[0].length > 0;
+	var fixedChannels = scannedSsids[0].length > 0 && wimode.match(/sta/);
 	var fixedChannelBand = "";
 	if(fixedChannels)
 	{
