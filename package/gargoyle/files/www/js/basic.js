@@ -1487,6 +1487,14 @@ function resetData()
 		ap2cfg   = secmode == "ap" && secdev == wifiDevA ? sec : ap2cfg;
 		othercfg = secmode != "ap" && secmode != "wds"   ? sec : othercfg
 	}
+	var apcfgBand = apcfg != "" || ap2cfg != "" ? "G" : ""
+	if(apcfg == "" && ap2cfg != "")
+	{
+		apcfg = ap2cfg
+		ap2cfg = ""
+		apcfgBand = "A"
+	}
+	
 
 	//wireless N variables
 	var htmode = uciOriginal.get("wireless", wifiDevG, "htmode");
@@ -1504,15 +1512,16 @@ function resetData()
 		document.getElementById("bridge_channel_width_container").style.display="none";
 	}
 
-	var hwmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 	if(wifiN)
 	{
+		var hwmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 		hwmode = hwmode == "" ? "11g" : hwmode;
 		if(dualBandWireless)
 		{
-			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11g', '11b' ], ['Dual Band', 'N+G+B', 'G+B', 'B' ] );
-			setAllowableSelections( "bridge_hwmode", [ '11ng', '11g', '11b' ], ['N+G+B', 'G+B', 'B' ] );
-			hwmode = (ap2cfg != "" || (apcfg == "" && ap2cfg == "")) ? "dual" : hwmode;
+			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11na', '11g', '11b' ], ['Dual Band', 'N+G+B', 'N+A', 'G+B', 'B' ] );
+			setAllowableSelections( "bridge_hwmode", [ '11ng', '11na', '11g', '11b' ], ['N+G+B', 'N+A', 'G+B', 'B' ] );
+			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "")) ? "dual" : hwmode;
+			hwmode = ap2cfg == "" && apcfg != "" && apcfgBand == "A" ? "11na" : hwmode;
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
@@ -1569,6 +1578,10 @@ function resetData()
 	{
 		initTxPwr("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA, "A")
 	}
+
+
+
+
 
 	
 	setSelectedValue("mac_filter_enabled", 'disabled');
@@ -1690,7 +1703,6 @@ function resetData()
 				}
 			}
 		}
-			
 	}
 	var wifiWdsMacTable=createTable([""], wifiWdsData, "wifi_wds_mac_table", true, false);
 	var wifiWdsTableContainer = document.getElementById('wifi_wds_mac_table_container');
