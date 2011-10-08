@@ -149,6 +149,7 @@ function saveChanges()
 			
 			if(currentModes.match(/ap/))
 			{
+				
 				if(wifiGSelected)
 				{
 					apcfg = 'ap_g';
@@ -160,13 +161,20 @@ function saveChanges()
 				}
 				if(wifiASelected)
 				{
-					//if dual band set ap2cfg
-					ap2cfg='ap_a';
-					uci.set("wireless", ap2cfg, "", "wifi-iface");
-					uci.set("wireless", ap2cfg, "device", wifiDevA);
-					uci.set('wireless', ap2cfg, 'mode', 'ap');
-					uci.set('wireless', ap2cfg, 'network', 'lan');
-					preCommands = preCommands + "uci set wireless." + ap2cfg + "='wifi-iface' \n"
+					apacfg='ap_a';
+					uci.set("wireless", apacfg, "", "wifi-iface");
+					uci.set("wireless", apacfg, "device", wifiDevA);
+					uci.set('wireless', apacfg, 'mode', 'ap');
+					uci.set('wireless', apacfg, 'network', 'lan');
+					preCommands = preCommands + "uci set wireless." + apacfg + "='wifi-iface' \n"
+					if(dualBandSelected)
+					{
+						ap2cfg = apacfg
+					}
+					else
+					{
+						apcfg = apacfg
+					}
 				}
 				if(currentModes == "ap+wds") //non-ap sections for ap+wds
 				{
@@ -202,8 +210,9 @@ function saveChanges()
 					}
 					else
 					{
-						var wdsCfgs = wirelessDriver == "atheros" || wifiGSelected ? [apcfg] : [ap2cfg]
-						// if dual band look at new control and set wdsCfgs from this
+						var wdsCfgs = [ apcfg ] 
+						//TODO: if dual band look at new control and set wdsCfgs from this if both are selected
+						
 						var wci;
 						for(wci=0; wci < wdsCfgs.length ; wci++)
 						{
@@ -326,10 +335,9 @@ function saveChanges()
 			}
 			
 			
-			
-			
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2'];
+			wifiSsidId = wifiGSelected ? "wifi_ssid1" : "wifi_ssid1a";
+			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifiSsidId, 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2'];
 			
 			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key'];
 			
@@ -455,10 +463,6 @@ function saveChanges()
 				}
 
 	
-
-
-
-
 				//handle dual band configuration
 				if(ap2cfg != "")
 				{
@@ -470,17 +474,12 @@ function saveChanges()
 							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
 						}
 					}
-					uci.set("wireless", wifiDevA, "htmode",  getSelectedValue("wifi_channel_width_5ghz"));
-					uci.set("wireless", wifiDevA, "channel", getSelectedValue("wifi_channel1_5ghz"));
-					txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
-
-
 					uci.set("wireless", ap2cfg, "ssid", document.getElementById("wifi_ssid1a").value );
 					dup_sec_options("wireless", apcfg, ap2cfg, ['hidden', 'isolate', 'encryption', 'key', 'server', 'port'])
 				}
 			}
-		
-
+			
+			
 			//if wan protocol is 'none' do not set it
 			if(getSelectedValue('wan_protocol') == 'none')
 			{
