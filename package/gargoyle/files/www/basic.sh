@@ -157,7 +157,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 
 			<div id='bridge_channel_width_5ghz_container'>
-				<label class='leftcolumn' for='bridge_channel_width_5ghz' id='bridge_channel_width_5ghz_label'>5GHz Channel Width:</label>
+				<label class='leftcolumn' for='bridge_channel_width_5ghz' id='bridge_channel_width_5ghz_label'>Channel Width:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_channel_width_5ghz' onchange='setChannelWidth(this, "A")'>
 						<option value='HT20'>20MHz</option>
@@ -167,7 +167,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 			<div id='bridge_txpower_5ghz_container'>
-				<label class='leftcolumn' for='bridge_max_txpower_5ghz' id='bridge_txpower_5ghz_label'>5GHz Transmit Power:</label>
+				<label class='leftcolumn' for='bridge_max_txpower_5ghz' id='bridge_txpower_5ghz_label'>Transmit Power:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_max_txpower_5ghz' onchange='updateTxPower("bridge_max_txpower_5ghz","bridge_txpower_5ghz", "A")'>
 						<option value='max'>Max</option>

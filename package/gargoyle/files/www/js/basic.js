@@ -1223,15 +1223,16 @@ function resetData()
 		setAllowableSelections("wifi_channel2",  mac80211Channels["G"], mac80211Channels["G"], document);
 		if(mac80211Channels["A"] != null)
 		{
-			setAllowableSelections("wifi_channel1_5ghz",  mac80211Channels["A"], mac80211Channels["A"], document);
+			setAllowableSelections("wifi_channel1_5ghz",   mac80211Channels["A"], mac80211Channels["A"], document);
+			setAllowableSelections("bridge_channel_5ghz",  mac80211Channels["A"], mac80211Channels["A"], document);
 		}
 	}
 	while(removeChannels.length > 0)
 	{
 		var rc = removeChannels.shift();
 		removeOptionFromSelectElement("bridge_channel", rc, document);
-		removeOptionFromSelectElement("wifi_channel1", rc, document);
-		removeOptionFromSelectElement("wifi_channel2", rc, document);
+		removeOptionFromSelectElement("wifi_channel1",  rc, document);
+		removeOptionFromSelectElement("wifi_channel2",  rc, document);
 	}
 	
 	if(leaseStart != "")
@@ -1504,12 +1505,16 @@ function resetData()
 	{
 		var htGMode = uciOriginal.get("wireless", wifiDevG, "htmode");
 		var htAMode = uciOriginal.get("wireless", wifiDevA, "htmode");
-		document.getElementById("bridge_channel_width_container").style.display="block";
+		
 		setSelectedValue("wifi_channel_width", htGMode);
 		setSelectedValue("wifi_channel_width_5ghz", htAMode);
+	
 		setSelectedValue("bridge_channel_width", htGMode);
+		setSelectedValue("bridge_channel_width_5ghz", htAMode);
+	
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G");
 		setChannelWidth(document.getElementById("wifi_channel_width_5ghz"), "A");
+		document.getElementById("bridge_channel_width_container").style.display="block";
 	}
 	else
 	{
@@ -1566,7 +1571,7 @@ function resetData()
 		var selMax = txpwr == "" ? "max" : "custom"
 		setSelectedValue(sel_id, selMax)
 		if(selMax == "custom") { document.getElementById(txt_id).value = txpwr; }
-		updateTxPower(sel_id, txt_id, band)	
+		updateTxPower(sel_id, txt_id, band)
 	}
 	initTxPwr("wifi_max_txpower", "wifi_txpower", wifiDevG, "G")
 	if(wifiDevA != "")
@@ -1721,6 +1726,7 @@ function setChannel(selectElement)
 	{
 		setSelectedValue("wifi_channel1_5ghz",  selectedValue);
 		setSelectedValue("wifi_channel2_5ghz",  selectedValue);
+		setSelectedValue("bridge_channel_5ghz", selectedValue);
 		updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")
 	}
 	else
@@ -2122,6 +2128,7 @@ function setChannelWidth(selectCtl, band)
 		}
 		setAllowableSelections("wifi_channel1_5ghz",  aChannels, aChannels, document);
 		setAllowableSelections("wifi_channel2_5ghz",  aChannels, aChannels, document);
+		setAllowableSelections("bridge_channel_5ghz", aChannels, aChannels, document);
 		updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")
 	}
 }
@@ -2306,8 +2313,8 @@ function updateTxPower(selectId, textId, band)
 	var dbm = document.getElementById(textId).value
 	
 	var updateIds = []
-	updateIds["G"] = [["wifi_max_txpower", "wifi_txpower", "wifi_dbm"], ["bridge_max_txpower", "bridge_txpower", "wifi_dbm"]]
-	updateIds["A"] = [["wifi_max_txpower_5ghz", "wifi_txpower_5ghz", "wifi_dbm_5ghz"]]
+	updateIds["G"] = [["wifi_max_txpower", "wifi_txpower", "wifi_dbm"], ["bridge_max_txpower", "bridge_txpower", "bridge_dbm"]]
+	updateIds["A"] = [["wifi_max_txpower_5ghz", "wifi_txpower_5ghz", "wifi_dbm_5ghz"], ["bridge_max_txpower_5ghz", "bridge_txpower_5ghz", "bridge_dbm_5ghz"]]
 	var bandUpdateIds = updateIds[band];
 	var idIndex=0;
 	for(idIndex=0; idIndex < bandUpdateIds.length; idIndex++)
