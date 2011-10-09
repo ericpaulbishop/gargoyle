@@ -2235,23 +2235,29 @@ function setHwMode(selectCtl)
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G")
 	}
 	var containers = [
+				"wifi_channel_width_container",
+				"wifi_txpower_container",
+				"wifi_channel_width_5ghz_container",
+				"wifi_txpower_5ghz_container",
 				"wifi_ssid1a_container",
 				"wifi_ssid1_container",
-				"wifi_txpower_5ghz_container",
 				"wifi_channel1_container",
 				"wifi_channel2_container",
 				"wifi_channel1_5ghz_container",
 				"wifi_channel2_5ghz_container",
-				"wifi_ssid1a_container",
-				"wifi_txpower_container",
-				"wifi_channel_width_5ghz_container",
-				"wifi_channel_width_container",
-				"bridge_channel_width_container" 
+				
+				"bridge_channel_width_container",
+				"bridge_channel_width_5ghz_container",
+				"bridge_txpower_container",
+				"bridge_txpower_5ghz_container",
+				"bridge_channel_container",
+				"bridge_channel_5ghz_container",
+
 				];
 	
 	var ci;
 	var wimode = getSelectedValue("wifi_mode")
-	var fixedChannels = scannedSsids[0].length > 0 && wimode.match(/sta/);
+	var fixedChannels = scannedSsids[0].length > 0 && (wimode.match(/sta/) || document.getElementById("global_bridge").checked)
 	var fixedChannelBand = "";
 	if(fixedChannels)
 	{
@@ -2274,7 +2280,7 @@ function setHwMode(selectCtl)
 		var cli_only = cid.match(/2_/) || cid.match(/2a_/) 
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
 		var hide_in_favor_of_fixed_channel = fixedChannels && (cid.match(/channel/) && (!cid.match(/channel_width/))) && ((!wimode.match(/ap/)) || fixedChannelBand == cBand);
-		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container"
+		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container" || cid == "bridge_txpower_container" || cid == 'bridge_channel_container'
 		var vis = (displayWidth || displayWithoutWidth) && (!cli_ap_mismatch) && (!hide_in_favor_of_fixed_channel) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
 		container.style.display = vis ? "block" : "none";
 	}
