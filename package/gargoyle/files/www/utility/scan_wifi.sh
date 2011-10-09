@@ -69,14 +69,14 @@
 	scan_mac80211()
 	{
 		
-		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))")
+		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" | grep "Managed" )
 		test_ifs="$g_sta"
 		if [ -z "$g_sta" ] ; then
 			test_ifs="phy0"
 		fi
 		
 		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
-			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an")
+			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an" | grep "Managed")
 			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
 			g_phy="phy0"
 			a_phy="phy1"
