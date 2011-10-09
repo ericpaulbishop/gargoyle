@@ -113,7 +113,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 		<div class="indent">
-
 			<div id='bridge_repeater_container'>
 				<label class='leftcolumn' for='bridge_repeater' id='bridge_repeater_label'>Repeater:</label>
 				<select class='rightcolumn' id='bridge_repeater' onchange='setBridgeVisibility()'>
@@ -156,6 +155,32 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<em><span id="bridge_dbm">dBm</span></em>
 				</span>
 			</div>
+
+			<div id='bridge_channel_width_5ghz_container'>
+				<label class='leftcolumn' for='bridge_channel_width_5ghz' id='bridge_channel_width_5ghz_label'>5GHz Channel Width:</label>
+				<span class='rightcolumn'>
+					<select id='bridge_channel_width_5ghz' onchange='setChannelWidth(this, "A")'>
+						<option value='HT20'>20MHz</option>
+						<option value='HT40+'>40MHz (2nd chan. above)</option>
+						<option value='HT40-'>40MHz (2nd chan. below)</option>
+					</select>
+				</span>
+			</div>
+			<div id='bridge_txpower_5ghz_container'>
+				<label class='leftcolumn' for='bridge_max_txpower_5ghz' id='bridge_txpower_5ghz_label'>5GHz Transmit Power:</label>
+				<span class='rightcolumn'>
+					<select id='bridge_max_txpower_5ghz' onchange='updateTxPower("bridge_max_txpower_5ghz","bridge_txpower_5ghz", "A")'>
+						<option value='max'>Max</option>
+						<option value='custom'>Custom</option>
+					</select>
+					&nbsp;
+					<input type='text' id='bridge_txpower_5ghz' onkeyup='proofreadNumericRange(this,0,getMaxTxPower("A"));' size='10' />
+					<em><span id="bridge_dbm_5ghz">dBm</span></em>
+				</span>
+			</div>
+
+
+
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
 				<span class="rightcolumn">
@@ -200,6 +225,14 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<option value='14'>14</option>
 				</select>
 			</div>
+
+			<div id='bridge_channel_5ghz_container'>
+				<label class='leftcolumn' for='wifi_channel_5ghz' id='wifi_channel_5ghz_label'>Wireless Channel:</label>
+				<select class='rightcolumn' id='wifi_channel_5ghz' onchange='setChannel(this)' ></select>
+			</div>
+
+
+
 			<div id='bridge_fixed_channel_container'>
 				<label class='leftcolumn' for='bridge_fixed_channel' id='bridge_fixed_channel_label'>Wireless Channel:</label>
 				<span class='rightcolumn' id='bridge_fixed_channel'>&nbsp;</span>
