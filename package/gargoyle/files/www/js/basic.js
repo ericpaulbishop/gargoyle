@@ -1476,15 +1476,17 @@ function resetData()
 	var apcfg = "";
 	var ap2cfg = "";
 	var othercfg = "";
+	var otherdev = "";
 	var seci=0;
 	for(seci=0;seci < allWirelessSections.length; seci++)
 	{
 		var sec = allWirelessSections[seci];
 		var secmode = uciOriginal.get("wireless", sec, "mode");
 		var secdev  = uciOriginal.get("wireless", sec, "device") 
-		apcfg    = secmode == "ap" && secdev != wifiDevA ? sec : apcfg;
-		ap2cfg   = secmode == "ap" && secdev == wifiDevA ? sec : ap2cfg;
-		othercfg = secmode != "ap" && secmode != "wds"   ? sec : othercfg
+		apcfg     = secmode == "ap" && secdev != wifiDevA ? sec : apcfg;
+		ap2cfg    = secmode == "ap" && secdev == wifiDevA ? sec : ap2cfg;
+		othercfg  = secmode != "ap" && secmode != "wds"   ? sec : othercfg
+		otherdev  = secmode != "ap" && secmode != "wds"   ? secdev : otherdev
 	}
 	var apgcfg = apcfg;
 	var apacfg = ap2cfg;
@@ -1523,8 +1525,8 @@ function resetData()
 		{
 			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11na', '11g', '11b' ], ['Dual Band', 'N+G+B', 'N+A', 'G+B', 'B' ] );
 			setAllowableSelections( "bridge_hwmode", [ '11ng', '11na', '11g', '11b' ], ['N+G+B', 'N+A', 'G+B', 'B' ] );
-			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") ? "dual" : hwmode ;
-			hwmode = ap2cfg == "" && apcfg != "" && apcfgBand == "A" ? "11na" : hwmode ;
+			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") || (apcfgBand == "A" && otherdev == wifiDevG) || (apcfgBand == "G" && otherdev == wifiDevA) ? "dual" : hwmode ;
+			hwmode = apgcfg == "" && (apacfg != "" || otherdev == wifiDevA) ? "11na" : hwmode ;
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
