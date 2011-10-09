@@ -1510,7 +1510,6 @@ function resetData()
 		setSelectedValue("bridge_channel_width", htGMode);
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G");
 		setChannelWidth(document.getElementById("wifi_channel_width_5ghz"), "A");
-
 	}
 	else
 	{
@@ -1530,6 +1529,10 @@ function resetData()
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
+		if(hwmode == "dual" && otherdev != "" )
+		{
+			setSelectedValue("wifi_client_band", (otherdev == wifiDevA ? "5" : "2.4") )
+		}
 	}
 	else
 	{
