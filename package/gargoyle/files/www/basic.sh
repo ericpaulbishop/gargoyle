@@ -227,8 +227,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 
 			<div id='bridge_channel_5ghz_container'>
-				<label class='leftcolumn' for='wifi_channel_5ghz' id='wifi_channel_5ghz_label'>Wireless Channel:</label>
-				<select class='rightcolumn' id='wifi_channel_5ghz' onchange='setChannel(this)' ></select>
+				<label class='leftcolumn' for='bridge_channel_5ghz' id='bridge_channel_5ghz_label'>Wireless Channel:</label>
+				<select class='rightcolumn' id='bridge_channel_5ghz' onchange='setChannel(this)' ></select>
 			</div>
 
 
