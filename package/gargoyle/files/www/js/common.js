@@ -1143,6 +1143,7 @@ function setVariables(inputIds, visibilityIds, uci, pkgs, sections, options, set
 	}
 }
 
+
 function loadSelectedValueFromVariable(params)
 {
 	var elementId    = params[0];

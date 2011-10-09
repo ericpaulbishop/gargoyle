@@ -1474,9 +1474,9 @@ function resetData()
 	var allWirelessSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 
 	// generic variables
-	apcfg = "";
-	ap2cfg = "";
-	othercfg = "";
+	var apcfg = "";
+	var ap2cfg = "";
+	var othercfg = "";
 	var seci=0;
 	for(seci=0;seci < allWirelessSections.length; seci++)
 	{
@@ -1487,8 +1487,10 @@ function resetData()
 		ap2cfg   = secmode == "ap" && secdev == wifiDevA ? sec : ap2cfg;
 		othercfg = secmode != "ap" && secmode != "wds"   ? sec : othercfg
 	}
+	var apgcfg = apcfg;
+	var apacfg = ap2cfg;
 	var apcfgBand = apcfg != "" || ap2cfg != "" ? "G" : ""
-	if(apcfg == "" && ap2cfg != "")
+	if(apgcfg == "" && apacfg != "")
 	{
 		apcfg = ap2cfg
 		ap2cfg = ""
@@ -1520,7 +1522,7 @@ function resetData()
 		{
 			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11na', '11g', '11b' ], ['Dual Band', 'N+G+B', 'N+A', 'G+B', 'B' ] );
 			setAllowableSelections( "bridge_hwmode", [ '11ng', '11na', '11g', '11b' ], ['N+G+B', 'N+A', 'G+B', 'B' ] );
-			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "")) ? "dual" : hwmode;
+			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") ? "dual" : hwmode;
 			hwmode = ap2cfg == "" && apcfg != "" && apcfgBand == "A" ? "11na" : hwmode;
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
@@ -1533,38 +1535,25 @@ function resetData()
 
 
 	
+
 	
-	wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_ssid1', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
-	wirelessPkgs= new Array();
+	var wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_channel1_5ghz', 'wifi_channel2_5ghz', 'wifi_ssid1', 'wifi_ssid1a', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+	var wirelessPkgs= new Array();
 	var wIndex;
 	for(wIndex=0; wIndex < wirelessIds.length; wIndex++)
 	{
 		wirelessPkgs.push('wireless');
 	}
-	wirelessSections=[wifiDevG, wifiDevG, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
-	wirelessOptions=['channel', 'channel', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
-	wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", 'Gargoyle', 'none', '', '', '', '', 'OpenWrt', 'none', '',''];
-	wirelessFunctions=[lsv,lsv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
+	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apgcfg, apacfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
+	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
+	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', 'Gargoyle_5GHz', 'none', '', '', '', '', 'ExistingWireless', 'none', '',''];
+	var wirelessFunctions=[lsv,lsv,lsv,lsv,lv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
-
-
-
 	
-	setSelectedValue('wifi_channel1', uciOriginal.get("wireless", wifiDevG, "channel"));
-	setSelectedValue('wifi_channel2', uciOriginal.get("wireless", wifiDevG, "channel"));
-	setSelectedValue('bridge_channel', uciOriginal.get("wireless", wifiDevG, "channel"));
-	//dual band channel
-	if(ap2cfg != "")
-	{
-		setSelectedValue('wifi_channel1_5ghz', uciOriginal.get("wireless", wifiDevA, "channel"));
-		document.getElementById('wifi_ssid1a').value = uciOriginal.get("wireless", ap2cfg, "ssid");
-	}
-
+	
+	
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
-
-
-
 	var initTxPwr = function(sel_id, txt_id, dev, band)
 	{
 		var txpwr = uciOriginal.get("wireless", dev, "txpower");
@@ -1578,6 +1567,7 @@ function resetData()
 	{
 		initTxPwr("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA, "A")
 	}
+	setSelectedValue('bridge_channel', uciOriginal.get("wireless", wifiDevG, "channel"));
 
 
 
