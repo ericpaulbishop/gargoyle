@@ -84,9 +84,8 @@ function saveChanges()
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
 				var hwMode = getSelectedValue("wifi_hwmode");
-				var hwGMode = hwMode == "dual" ? "11ng" : hwMode;
+				var hwGMode = hwMode == "dual" || hwmode == "11na" ? "11ng" : hwMode;
 				uci.set("wireless",  wifiDevG, "hwmode", hwGMode);
-				
 				wifiASelected = hwMode == "dual" || hwMode == "11na";
 				wifiGSelected = hwMode != "11na";
 				dualBandSelected = hwMode == "dual";
@@ -229,6 +228,7 @@ function saveChanges()
 			if( (currentModes.match(/\+/) || ( ! currentModes.match(/ap/)) ) && currentModes != "disabled" && currentModes != "ap+wds")
 			{
 				var otherCfgDev = wifiDevG
+				var wimode = getSelectedValue("wifi_mode")
 				var fixedChannels = scannedSsids[0].length > 0 && wimode.match(/sta/);
 				if(fixedChannels)
 				{
