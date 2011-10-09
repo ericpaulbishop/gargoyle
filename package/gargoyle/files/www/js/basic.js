@@ -457,9 +457,8 @@ function saveChanges()
 				if(wifiASelected)
 				{
 					uci.set("wireless", wifiDevA, "channel", channels["A"]);
-					uci.set("wireless",  wifiDevG, "htmode", getSelectedValue("wifi_channel_width_5ghz") );
-					txPowerSet("wifi_max_txpower", "wifi_txpower_5ghz", wifiDevG)
-
+					uci.set("wireless",  wifiDevA, "htmode", getSelectedValue("wifi_channel_width_5ghz") );
+					txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
 				}
 
 	
@@ -1499,12 +1498,14 @@ function resetData()
 	
 
 	//wireless N variables
-	var htmode = uciOriginal.get("wireless", wifiDevG, "htmode");
 	if( wifiN )
 	{
+		var htGMode = uciOriginal.get("wireless", wifiDevG, "htmode");
+		var htAMode = uciOriginal.get("wireless", wifiDevA, "htmode");
 		document.getElementById("bridge_channel_width_container").style.display="block";
-		setSelectedValue("wifi_channel_width", htmode);
-		setSelectedValue("bridge_channel_width", htmode);
+		setSelectedValue("wifi_channel_width", htGMode);
+		setSelectedValue("wifi_channel_width_5ghz", htAMode);
+		setSelectedValue("bridge_channel_width", htGMode);
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G");
 		setChannelWidth(document.getElementById("wifi_channel_width_5ghz"), "A");
 
@@ -1522,8 +1523,8 @@ function resetData()
 		{
 			setAllowableSelections( "wifi_hwmode", [ 'dual', '11ng', '11na', '11g', '11b' ], ['Dual Band', 'N+G+B', 'N+A', 'G+B', 'B' ] );
 			setAllowableSelections( "bridge_hwmode", [ '11ng', '11na', '11g', '11b' ], ['N+G+B', 'N+A', 'G+B', 'B' ] );
-			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") ? "dual" : hwmode;
-			hwmode = ap2cfg == "" && apcfg != "" && apcfgBand == "A" ? "11na" : hwmode;
+			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") ? "dual" : hwmode ;
+			hwmode = ap2cfg == "" && apcfg != "" && apcfgBand == "A" ? "11na" : hwmode ;
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
