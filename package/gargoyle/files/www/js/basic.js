@@ -2209,15 +2209,13 @@ function setHwMode(selectCtl)
 		return;
 	}
 	var hwmode = getSelectedValue(selectCtl.id)
+	hwmode = hwmode == "dual" && document.getElementById("global_bridge").checked ? "11ng" : hwmode
 	if(selectCtl.id == "bridge_hwmode" && getSelectedValue("wifi_hwmode") != "dual")
 	{
 		setSelectedValue("wifi_hwmode", hwmode);
 	}
-	if(hwmode != "dual")
-	{
-		setSelectedValue("bridge_hwmode", hwmode);
-	}
-	
+	setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode)
+
 
 	document.getElementById("wifi_channel_width_container").style.marginTop      = hwmode == "dual" ? "20px" :  "5px";
 	document.getElementById("wifi_channel_width_5ghz_container").style.marginTop = hwmode == "11na" ?  "5px" : "20px";
@@ -2236,7 +2234,6 @@ function setHwMode(selectCtl)
 
 
 
-
 	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + "_5GHz" :  document.getElementById("wifi_ssid1a").value;
 	if(wirelessDriver == "mac80211")
 	{
@@ -2252,6 +2249,7 @@ function setHwMode(selectCtl)
 		setSelectedValue("wifi_channel_width", "HT20");
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G")
 	}
+	
 	var containers = [
 				"wifi_channel_width_container",
 				"wifi_txpower_container",
