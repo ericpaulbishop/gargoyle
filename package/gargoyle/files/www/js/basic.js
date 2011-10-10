@@ -1171,6 +1171,7 @@ function setBridgeVisibility()
 
 		setSsidVisibility("bridge_list_ssid");
 	}
+	setHwMode(document.getElementById("bridge_hwmode"))
 	setGlobalVisibility();
 }
 
@@ -1920,6 +1921,7 @@ function setSsidVisibility(selectId)
 			'bridge_pass_container',
 			'bridge_wep_container'
 			];
+
 	var isAp = getSelectedValue("wifi_mode").match(/ap/) ? 1 : 0;
 	if(scannedSsids[0].length > 0)
 	{
@@ -1947,6 +1949,7 @@ function setSsidVisibility(selectId)
 			}
 			var curBand = getSelectedValue("wifi_hwmode")
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
+			setAllowableSelections( "bridge_hwmode", modes, mnames );
 			if(band == "A" && curBand != "dual" && curBand != "11na")
 			{
 				setSelectedValue("wifi_hwmode", "dual");
@@ -1960,14 +1963,16 @@ function setSsidVisibility(selectId)
 			setChildText("bridge_fixed_encryption", enc);
 			
 			
-			var chanEl1 = "wifi_channel1" + (band == "A" ? "_5ghz" : "")
-			var chanEl2 = "wifi_channel2" + (band == "A" ? "_5ghz" : "")
+			var chanEl1 = "wifi_channel1"  + (band == "A" ? "_5ghz" : "")
+			var chanEl2 = "wifi_channel2"  + (band == "A" ? "_5ghz" : "")
+			var chanElB = "bridge_channel" + (band == "A" ? "_5ghz" : "")
+
 			setSelectedValue(chanEl1, chan);
 			setSelectedValue(chanEl2, chan);
-			setSelectedValue("bridge_channel", chan);
+			setSelectedValue(chanElB, chan);
 
-			setChildText("wifi_fixed_channel1", chan);
-			setChildText("wifi_fixed_channel2", chan);
+			setChildText("wifi_fixed_channel1",  chan);
+			setChildText("wifi_fixed_channel2",  chan);
 			setChildText("bridge_fixed_channel", chan);
 		}
 		var be = getSelectedValue('bridge_encryption');
