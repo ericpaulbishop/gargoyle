@@ -115,7 +115,7 @@ function saveChanges()
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
 				var hwMode = getSelectedValue("wifi_hwmode");
-				var hwGMode = hwMode == "dual" || hwmode == "11na" ? "11ng" : hwMode;
+				var hwGMode = hwMode == "dual" || hwMode == "11na" ? "11ng" : hwMode;
 				uci.set("wireless",  wifiDevG, "hwmode", hwGMode);
 				wifiASelected = hwMode == "dual" || hwMode == "11na";
 				wifiGSelected = hwMode != "11na";
