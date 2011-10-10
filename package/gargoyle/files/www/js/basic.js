@@ -73,6 +73,37 @@ function saveChanges()
 		if(wifiDevA != "") { uci.remove('wireless', wifiDevA, 'disabled'); }
 
 
+		var txPowerSet = function(sel_id, txt_id, dev)
+		{
+			if(getSelectedValue(sel_id) == "max")
+			{
+				uci.remove("wireless", dev, "txpower")
+			}
+			else
+			{
+				uci.set("wireless", dev, "txpower", document.getElementById(txt_id).value);
+			}
+		}
+		var channels = getSelectedWifiChannels()
+		if(channels["G"] != "")
+		{
+			uci.set("wireless", wifiDevG, "channel", channels["G"]);
+			if( document.getElementById("wifi_channel_width_container").style.display == "block" || document.getElementById("bridge_channel_width_container").style.display == "block" )
+			{
+				uci.set("wireless", wifiDevG, "htmode",  getSelectedValue("wifi_channel_width") );
+			}
+			txPowerSet("wifi_max_txpower", "wifi_txpower", wifiDevG)
+		}
+		if(channels["A"] != "")
+		{
+			uci.set("wireless", wifiDevA, "channel", channels["A"]);
+			uci.set("wireless", wifiDevA, "htmode",  getSelectedValue("wifi_channel_width_5ghz") );
+			txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
+		}
+
+
+
+
 		currentLanIp = "";
 		var adjustIpCommands = ""
 		var bridgeEnabledCommands = "";
@@ -436,32 +467,6 @@ function saveChanges()
 
 
 
-				var txPowerSet = function(sel_id, txt_id, dev)
-				{
-					if(getSelectedValue(sel_id) == "max")
-					{
-						uci.remove("wireless", dev, "txpower")
-					}
-					else
-					{
-						uci.set("wireless", dev, "txpower", document.getElementById(txt_id).value);
-					}
-				}
-				var channels = getSelectedWifiChannels()
-				if(wifiGSelected)
-				{
-					uci.set("wireless", wifiDevG, "channel", channels["G"]);
-					uci.set("wireless",  wifiDevG, "htmode", getSelectedValue("wifi_channel_width") );
-					txPowerSet("wifi_max_txpower", "wifi_txpower", wifiDevG)
-				}
-				if(wifiASelected)
-				{
-					uci.set("wireless", wifiDevA, "channel", channels["A"]);
-					uci.set("wireless",  wifiDevA, "htmode", getSelectedValue("wifi_channel_width_5ghz") );
-					txPowerSet("wifi_max_txpower_5ghz", "wifi_txpower_5ghz", wifiDevA)
-				}
-
-	
 				//handle dual band configuration
 				if(ap2cfg != "")
 				{
@@ -533,12 +538,15 @@ function saveChanges()
 		}
 		else
 		{
+			var bridgeDev = wifiDevG;
 			if(document.getElementById("bridge_hwmode_container").style.display == "block")
 			{
-				var hwgmode = getSelectedValue("bridge_hwmode");
-				dualBandSelected = hwgmode == "dual" ? true : false;
-				hwgmode = hwgmode == "dual" ? "11ng" : hwgmode;
-				uci.set("wireless",  wifiDevG, "hwmode", hwgmode);
+				var hwMode = getSelectedValue("bridge_hwmode");
+				bridgeDev = hwMode == "11na" ? wifiDevA : wifiDevG
+				if(bridgeDevG == bridgeDev)
+				{
+					uci.set("wireless",  wifiDevG, "hwmode", hwMode);
+				}
 			}
 
 			if( document.getElementById("bridge_wan_port_to_lan_container").style.display != "none" && getSelectedValue('bridge_wan_port_to_lan') == "bridge" )
@@ -581,31 +589,15 @@ function saveChanges()
 			}
 			var key = encryption == "none" ? "" : ( encryption == "wep" ? document.getElementById("bridge_wep").value : document.getElementById("bridge_pass").value );
 			
-			var chan = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
-			uci.set("wireless", wifiDevG, "channel", chan);
-
-			if(document.getElementById("bridge_channel_width_container").style.display == "block")
-			{
-				var channelWidth =  getSelectedValue("bridge_channel_width");
-				uci.set("wireless",  wifiDevG, "htmode", channelWidth);
-			}
 
 
-			if(getSelectedValue("bridge_max_txpower") == "max")
-			{
-				uci.remove("wireless", wifiDevG, "txpower")
-			}
-			else
-			{
-				uci.set("wireless", wifiDevG, "txpower", document.getElementById("bridge_txpower").value);
-			}
 
 
 			if( getSelectedValue("bridge_mode") == "client_bridge")
 			{
 				//client bridge
 				uci.set("wireless", "cfg2", "", "wifi-iface");
-				uci.set("wireless", "cfg2", "device", wifiDevG);
+				uci.set("wireless", "cfg2", "device", bridgeDev);
 				uci.set("wireless", "cfg2", "network", "lan");
 				uci.set("wireless", "cfg2", "mode", "sta");
 				uci.set("wireless", "cfg2", "client_bridge", "1");
@@ -618,7 +610,7 @@ function saveChanges()
 				{
 					var apSsid = document.getElementById("bridge_broadcast_ssid").value;
 					uci.set("wireless", "cfg3", "", "wifi-iface");
-					uci.set("wireless", "cfg3", "device", wifiDevG);
+					uci.set("wireless", "cfg3", "device", bridgeDev);
 					uci.set("wireless", "cfg3", "network", "lan");
 					uci.set("wireless", "cfg3", "mode", "ap");
 					uci.set("wireless", "cfg3", "ssid", apSsid);
@@ -644,7 +636,7 @@ function saveChanges()
 				if(wirelessDriver == "broadcom")
 				{
 					uci.set("wireless", "cfg2", "", "wifi-iface");
-					uci.set("wireless", "cfg2", "device", wifiDevG);
+					uci.set("wireless", "cfg2", "device", bridgeDev);
 					uci.set("wireless", "cfg2", "network", "lan");
 					uci.set("wireless", "cfg2", "mode", "ap");
 					uci.set("wireless", "cfg2", "ssid", ssid);
@@ -657,7 +649,7 @@ function saveChanges()
 						var sectionIndex=wIndex + 3;
 						var section = "cfg" + sectionIndex;
 						uci.set("wireless", section, "", "wifi-iface");
-						uci.set("wireless", section, "device", wifiDevG);
+						uci.set("wireless", section, "device", bridgeDev);
 						uci.set("wireless", section, "network", "lan");
 						uci.set("wireless", section, "mode", "wds");
 						uci.set("wireless", section, "ssid", ssid);
@@ -674,7 +666,7 @@ function saveChanges()
 					if(wirelessDriver == "atheros")
 					{
 						uci.set("wireless", cfg, "", "wifi-iface");
-						uci.set("wireless", cfg, "device", wifiDevG);
+						uci.set("wireless", cfg, "device", bridgeDev);
 						uci.set("wireless", cfg, "network", "lan");
 						uci.set("wireless", cfg, "mode", "ap");
 						uci.set("wireless", cfg, "wds", "1");
@@ -688,7 +680,7 @@ function saveChanges()
 
 
 					uci.set("wireless", cfg, "", "wifi-iface");
-					uci.set("wireless", cfg, "device", wifiDevG);
+					uci.set("wireless", cfg, "device", bridgeDev);
 					uci.set("wireless", cfg, "network", "lan");
 					uci.set("wireless", cfg, "mode", "sta");
 					uci.set("wireless", cfg, "wds", "1");
@@ -1321,7 +1313,6 @@ function resetData()
 	}
 	else
 	{
-		
 		setSelectedValue("bridge_mode", "client_bridge");
 		setSelectedValue("bridge_repeater", "enabled");
 		document.getElementById("bridge_ssid").value = "Gargoyle";
@@ -2183,6 +2174,25 @@ function getSelectedWifiChannels()
 			{
 				channels[ "A" ] = getSelectedValue("wifi_channel1_5ghz")
 			}
+		}
+	}
+	else
+	{
+		if( document.getElementById("bridge_hwmode_container").style.display == "block")
+		{
+			var hwmode = getSelectedValue("bridge_hwmode")
+			if(hwmode == '11na')
+			{
+				channels["A"] = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel_5ghz");
+			}
+			else
+			{
+				channels["G"] = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
+			}
+		}
+		else
+		{
+			channels["G"] = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel");
 		}
 	}
 	return channels ; 
