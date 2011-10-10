@@ -539,11 +539,11 @@ function saveChanges()
 		else
 		{
 			var bridgeDev = wifiDevG;
-			if(document.getElementById("bridge_hwmode_container").style.display == "block")
+			if(document.getElementById("bridge_hwmode_container").style.display != "none")
 			{
 				var hwMode = getSelectedValue("bridge_hwmode");
 				bridgeDev = hwMode == "11na" ? wifiDevA : wifiDevG
-				if(bridgeDevG == bridgeDev)
+				if(wifiDevG == bridgeDev)
 				{
 					uci.set("wireless",  wifiDevG, "hwmode", hwMode);
 				}
