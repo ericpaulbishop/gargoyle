@@ -1913,7 +1913,7 @@ function setSsidVisibility(selectId)
 			'bridge_wep_container'
 			];
 
-	var isAp = getSelectedValue("wifi_mode").match(/ap/) ? 1 : 0;
+	var isAp = getSelectedValue("wifi_mode").match(/ap/) && document.getElementById("global_gateway").checked ? 1 : 0;
 	if(scannedSsids[0].length > 0)
 	{
 		var ic = getSelectedValue(selectId) == "custom" ? 1 : 0;
