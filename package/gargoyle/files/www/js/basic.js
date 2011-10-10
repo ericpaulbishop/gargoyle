@@ -1525,7 +1525,8 @@ function resetData()
 			hwmode = apgcfg == "" && (apacfg != "" || otherdev == wifiDevA) ? "11na" : hwmode ;
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
-		setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11ng" : hwmode);
+		setSelectedValue("bridge_hwmode", (hwmode == "dual" ? "11ng" : hwmode));
+		alert("hwmode = " + hwmode)
 		if(hwmode == "dual" && otherdev != "" )
 		{
 			setSelectedValue("wifi_client_band", (otherdev == wifiDevA ? "5" : "2.4") )
@@ -2209,7 +2210,10 @@ function setHwMode(selectCtl)
 		return;
 	}
 	var hwmode = getSelectedValue(selectCtl.id)
-	setSelectedValue("wifi_hwmode", hwmode);
+	if(selectCtl.id == "bridge_hwmode" && getSelectedValue("wifi_hwmode") != "dual")
+	{
+		setSelectedValue("wifi_hwmode", hwmode);
+	}
 	if(hwmode != "dual")
 	{
 		setSelectedValue("bridge_hwmode", hwmode);
