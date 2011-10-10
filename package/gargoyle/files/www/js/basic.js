@@ -2153,7 +2153,7 @@ function getSelectedWifiChannels()
 		fixedChannels = fixedChannels && (ssidIndex != "custom")
 		if(fixedChannels)
 		{
-			var fixedChannel = scannedSsids[3][ parseInt(ssidIndex) ]
+			var fixedChannel = scannedSsids[2][ parseInt(ssidIndex) ]
 			var fixedBand    = scannedSsids[4][ parseInt(ssidIndex) ]
 			channels[ fixedBand ] = fixedChannel
 			if(dualBandSelected)
