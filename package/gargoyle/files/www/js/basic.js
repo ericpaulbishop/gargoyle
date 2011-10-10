@@ -1526,7 +1526,6 @@ function resetData()
 		}
 		setSelectedValue("wifi_hwmode", hwmode);
 		setSelectedValue("bridge_hwmode", (hwmode == "dual" ? "11ng" : hwmode));
-		alert("hwmode = " + hwmode)
 		if(hwmode == "dual" && otherdev != "" )
 		{
 			setSelectedValue("wifi_client_band", (otherdev == wifiDevA ? "5" : "2.4") )
