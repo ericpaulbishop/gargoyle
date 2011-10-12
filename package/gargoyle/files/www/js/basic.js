@@ -1916,15 +1916,18 @@ function setSsidVisibility(selectId)
 	var isAp = getSelectedValue("wifi_mode").match(/ap/) && document.getElementById("global_gateway").checked ? 1 : 0;
 	if(scannedSsids[0].length > 0)
 	{
-		var ic = getSelectedValue(selectId) == "custom" ? 1 : 0;
+		var scannedIndex = getSelectedValue(selectId);
+		setSelectedValue("bridge_list_ssid", scannedIndex)
+		setSelectedValue("wifi_list_ssid2", scannedIndex)
+		
+		var ic = scannedIndex == "custom" ? 1 : 0;
 		var inc = ic == 0 ? 1 : 0;
 		if(inc)
 		{
-			var scannedIndex = parseInt(getSelectedValue(selectId));
+			scannedIndex = parseInt(scannedIndex)
 			var enc  = scannedSsids[1][scannedIndex];
 			var chan = scannedSsids[2][scannedIndex];
 			var band = scannedSsids[4][scannedIndex];
-
 
 			var modes = ['11ng',  '11g', '11b']
 			var mnames = ['N+G+B', 'G+B', 'B']
