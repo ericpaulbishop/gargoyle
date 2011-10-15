@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <? 
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -68,15 +68,17 @@
 
 	scan_mac80211()
 	{
-		
-		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" | grep -v "Master" | grep -v "Monitor" )
+		radio_disabled1=$(uci get wireless.@wifi-device[0].disabled 2>/dev/null)	
+		radio_disabled2=$(uci get wireless.@wifi-device[1].disabled 2>/dev/null)	
+		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
 		test_ifs="$g_sta"
-		if [ -z "$g_sta" ] ; then
+		if [ -z "$g_sta" ] || [ "$radio_disabled1" = "1" ] || [ "$radio_disabled2" = "1" ]  ; then
+			g_sta=""
 			test_ifs="phy0"
 		fi
 		
 		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
-			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an" | grep -v "Master" | grep -v "Monitor")
+			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
 			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
 			g_phy="phy0"
 			a_phy="phy1"
@@ -87,7 +89,7 @@
 			if [ -z "$g_sta" ] ; then
 				test_ifs="$g_phy"
 			fi
-			if [ -z "$a_sta" ] ; then
+			if [ -z "$a_sta" ] || [ "$radio_disabled1" = "1" ] || [ "$radio_disabled2" = "1" ] ; then
 				test_ifs="$test_ifs $a_phy"
 			else
 				test_ifs="$test_ifs $a_sta"
