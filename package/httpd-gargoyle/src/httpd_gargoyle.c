@@ -629,8 +629,8 @@ main( int argc, char** argv )
 
     /* Look up hostname. */
     lookup_hostname(
-	&host_addr4, &host_addr4s, sizeof(host_addr4), &gotv4, &gotv4s,
-	&host_addr6, &host_addr4s, sizeof(host_addr6), &gotv6, &gotv6s );
+	&host_addr4, &host_addr4s, sizeof(struct sockaddr_in),  &gotv4, &gotv4s,
+	&host_addr6, &host_addr6s, sizeof(struct sockaddr_in6), &gotv6, &gotv6s );
 
     if ( hostname == (char*) 0 )
 	{
@@ -648,6 +648,8 @@ main( int argc, char** argv )
     ** like some other systems, it has magical v6 sockets that also listen for
     ** v4, but in Linux if you bind a v4 socket first then the v6 bind fails.
     */
+
+
 
     listen6_fd  = -1;
     listen6s_fd = -1;
@@ -1337,9 +1339,16 @@ initialize_listen_socket( usockaddr* usaP )
     listen_fd = socket( usaP->sa.sa_family, SOCK_STREAM, 0 );
     if ( listen_fd < 0 )
 	{
-	syslog( LOG_CRIT, "socket %.80s - %m", ntoa( usaP ) );
-	perror( "socket" );
-	return -1;
+		if( usaP->sa.sa_family == AF_INET6 && (errno == ENOPROTOOPT || errno == EPROTONOSUPPORT || errno == ESOCKTNOSUPPORT || EPFNOSUPPORT || EAFNOSUPPORT ))
+		{
+			/* IPV6 not compiled into kernel, no big deal, don't print errors */
+		}
+		else
+		{
+			syslog( LOG_CRIT, "socket %.80s - %m", ntoa( usaP ) );
+			perror( "socket" );
+		}
+		return -1;
 	}
 
     (void) fcntl( listen_fd, F_SETFD, 1 );
