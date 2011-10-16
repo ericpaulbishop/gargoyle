@@ -2883,6 +2883,33 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
     (void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
     buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
     add_to_response( buf, buflen );
+    
+    /*
+    if ( max_age >= 0 )
+	{
+	time_t expires = now + max_age;
+	(void) strftime(
+	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &expires ) );
+	buflen = snprintf( buf, sizeof(buf),
+	    "Expires: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	}
+    */
+
+    /* never cache */
+    buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
+    add_to_response( buf, buflen );
+
+    if ( mod != (time_t) -1 )
+	{
+	(void) strftime(
+	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
+	buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	}
+
+
+
     if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
 	{
 	buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
@@ -2909,31 +2936,9 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
 	buflen = snprintf( buf, sizeof(buf), "P3P: %s\015\012", p3p );
 	add_to_response( buf, buflen );
 	}
-    if ( mod != (time_t) -1 )
-	{
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
-	buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
-	add_to_response( buf, buflen );
-	}
-    /*
-    if ( max_age >= 0 )
-	{
-	time_t expires = now + max_age;
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &expires ) );
-	buflen = snprintf( buf, sizeof(buf),
-	    "Expires: %s\015\012", timebuf );
-	add_to_response( buf, buflen );
-	}
-    */
-
-    /* never cache */
-    buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
-    add_to_response( buf, buflen );
 
     /* end of headers */
-    buflen = snprintf( buf, sizeof(buf), "\015\012\015\012" );
+    buflen = snprintf( buf, sizeof(buf), "\015\012" );
     add_to_response( buf, buflen );
     }
 
