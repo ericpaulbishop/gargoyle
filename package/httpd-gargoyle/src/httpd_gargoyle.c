@@ -2323,9 +2323,6 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		char* title;
 		char* cp;
 	
-		int found_date_header = 0;
-		int found_expires_header = 0;
-		int found_server_header = 0;
 	
 		/* Slurp in all headers. */
 		headers_size = 0;
@@ -2355,6 +2352,8 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		{
 			return;
 		}
+
+
 		/* Figure out the status. */
 		status = 200;
 		if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 && cp < br && ( cp == headers || *(cp-1) == '\012' ) )
@@ -2383,9 +2382,30 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			case 503: title = "Service Temporarily Overloaded"; break;
 			default: title = "Something"; break;
 			}
-		(void) snprintf(
-			buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
+		(void) snprintf( buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
 		(void) my_write( buf, strlen( buf ), is_ssl );
+		if(strstr(headers, "Server:") == NULL)
+		{
+			char line[200];
+			sprintf(line, "Server: %s\015\012", SERVER_SOFTWARE );
+			(void) my_write(line, strlen(line), is_ssl );
+		}
+		if(strstr(headers, "Date:") == NULL)
+		{
+			char line[200];
+			char timebuf[100];
+			time_t now = time( (time_t*) 0 );
+			(void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
+			sprintf(line, "Date: %s\015\012", timebuf);
+			(void) my_write(line, strlen(line), is_ssl );
+
+		}
+		if(strstr(headers, "Expires:") != NULL)
+		{
+			char line[] = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			(void) my_write(line, strlen(line), is_ssl );
+		}
+
 	
 		/* Write the saved headers. */
 		(void) my_write( headers, headers_len, is_ssl );
