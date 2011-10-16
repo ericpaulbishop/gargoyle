@@ -2395,14 +2395,15 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			char line[200];
 			char timebuf[100];
 			time_t now = time( (time_t*) 0 );
+			const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
 			(void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
 			sprintf(line, "Date: %s\015\012", timebuf);
 			(void) my_write(line, strlen(line), is_ssl );
 
 		}
-		if(strstr(headers, "Expires:") != NULL)
+		if(strstr(headers, "Expires:") == NULL)
 		{
-			char line[] = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			const char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
 			(void) my_write(line, strlen(line), is_ssl );
 		}
 
