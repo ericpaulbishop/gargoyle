@@ -4,7 +4,11 @@
 # in order to share common code.
 
 service_enabled() {
-	# Check if service is enabled to startup while  booting.
+	# Check if service is enabled to startup while booting.
+	# Exit status:
+	# 	0 - init script is enabled.
+	#	1 - init script is disabled.
+	#	2 - init script does not exist.
 	# Example:
 	#	#!/bin/sh
 	#	. /usr/lib/gargoyle/libgargoylehelper.sh
@@ -21,6 +25,7 @@ service_enabled() {
 			return 1
 		fi
 	else
-		return 1
+		echo "Error: There is no such init script like '$1'." >&2
+		return 2
 	fi
 }
