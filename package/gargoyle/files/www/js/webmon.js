@@ -189,7 +189,7 @@ function resetData()
 	else if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ips") != "")
 	{
 		ips = (uciOriginal.get("webmon_gargoyle", "webmon", "include_ips")).split(/,/);
-		setSelectedValue("include_exclude", "exclude");
+		setSelectedValue("include_exclude", "include");
 	}
 	else
 	{
