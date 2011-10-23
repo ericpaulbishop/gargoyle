@@ -41,15 +41,19 @@ start()
 			domain_save_path=/usr/data/webmon_domains.txt
 		fi
 		if [ ! -e "$domain_save_path" ] ; then
-			mkdir -p "$domain_save_path"
-			rmdir "$domain_save_path"
+			domain_save_dir=$(echo "$domain_save_path" | sed 's/[^\/]*$//g' )
+			if [ ! -e "$domain_save_dir" ] ; then
+				mkdir -p "$domain_save_dir"
+			fi
 		fi
 		if [ -z "$search_save_path" ] ; then
 			search_save_path=/usr/data/webmon_searches.txt
 		fi
 		if [ ! -e "$search_save_path" ] ; then
-			mkdir -p "$search_save_path"
-			rmdir "$search_save_path"
+			search_save_dir=$(echo "$search_save_path" | sed 's/[^\/]*$//g' )
+			if [ ! -e "$search_save_dir" ] ; then
+				mkdir -p "$search_save_dir"
+			fi
 		fi
 	
 		#remove existing rules
