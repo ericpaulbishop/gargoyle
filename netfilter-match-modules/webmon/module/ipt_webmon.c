@@ -728,7 +728,7 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 			}
 		}
 	}
-	kfree(buffer)
+	kfree(buffer);
 	spin_unlock_bh(&webmon_lock);
 		
 	
