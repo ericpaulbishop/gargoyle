@@ -2,7 +2,10 @@
 top_dir=$(pwd)
 targets_dir="$top_dir/targets"
 patches_dir="$top_dir/patches-generic"
+
+#script for building netfilter patches
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
+
 
 
 
@@ -18,6 +21,41 @@ if [ -n "$version_name" ] ; then
 	gargoyle_version="$version_name"
 fi
 verbosity=$3
+
+js_compress=$4
+if [ -z "$js_compress" ] ; then
+	js_compress="true"
+fi
+
+
+#compress javascript
+if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
+	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
+	if [ "$uglify_test" != 'var abc=1' ] ; then
+		js_compress="false"
+		echo ""
+		echo "**************************************************************************"
+		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
+		echo "**************************************************************************"
+		echo ""
+	else	
+		js_compress="true"
+		rm -rf "$compress_js_dir"
+		cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
+		cd "$compress_js_dir"
+		jsfiles=*.js
+		for jsf in $jsfiles ; do
+			uglifyjs "$jsf" > "$jsf.cmp"
+			mv "$jsf.cmp" "$jsf"
+		done
+		cd "$top_dir"
+	fi
+fi
+
+
+
+
+
 
 #get version that should be all numeric
 adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/[^\.0123456789]//g' )
@@ -59,6 +97,12 @@ for target in $targets ; do
 			cp -r "$package_dir/$gp" "$target-src/package"
 		done
 	
+		#copy compressed javascript to build directory
+		if [ "$js_compress" = "true" ] ; then
+			rm -rf "$target-src/package/gargoyle/files/www/js"
+			cp -r  "$compress_js_dir" "$target-src/package/gargoyle/files/www/js"
+		fi
+
 
 		#copy this target configuration to build directory
 		cp "$targets_dir/$target/profiles/default/config" "$target-src/.config"

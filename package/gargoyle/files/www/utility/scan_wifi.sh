@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <? 
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -68,25 +68,47 @@
 
 	scan_mac80211()
 	{
-		cur_ifs=$(iwconfig 2>/dev/null | grep "^wlan" | awk ' { print $1 }')
-		cur_sta=""
-		for i in $cur_ifs ; do
-			is_sta=$(iwconfig $i | grep "Managed" | grep -v "Not.Associated")
-			if [ -n "$is_sta" ] ; then
-				cur_sta="$i"
-			fi
-		done
-		
-		if [ -n "$cur_sta" ] ; then
-			iwlist $cur_sta scanning
-		else		
-			iw phy phy0 interface add tmpsta type managed
-			ifconfig tmpsta hw ether 00:11:22:33:55:77
-			ifconfig tmpsta up
-			iwlist tmpsta scanning
-			ifconfig tmpsta down
-			iw dev tmpsta del
+		radio_disabled1=$(uci get wireless.@wifi-device[0].disabled 2>/dev/null)	
+		radio_disabled2=$(uci get wireless.@wifi-device[1].disabled 2>/dev/null)	
+		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
+		test_ifs="$g_sta"
+		if [ -z "$g_sta" ] || [ "$radio_disabled1" = "1" ] || [ "$radio_disabled2" = "1" ]  ; then
+			g_sta=""
+			test_ifs="phy0"
 		fi
+		
+		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
+			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
+			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
+			g_phy="phy0"
+			a_phy="phy1"
+			if [ -z "$phy0_is_g" ] ; then
+				g_phy="phy1"
+				a_phy="phy0"	
+			fi
+			if [ -z "$g_sta" ] ; then
+				test_ifs="$g_phy"
+			fi
+			if [ -z "$a_sta" ] || [ "$radio_disabled1" = "1" ] || [ "$radio_disabled2" = "1" ] ; then
+				test_ifs="$test_ifs $a_phy"
+			else
+				test_ifs="$test_ifs $a_sta"
+			fi
+		fi
+			
+		for if in $test_ifs ; do
+			if [ "$if" = "phy0" ] || [ "$if" = "phy1" ] ; then
+				iw phy $if interface add tmpsta type managed
+				ifconfig tmpsta hw ether 00:11:22:33:55:77
+				ifconfig tmpsta up
+				iwlist tmpsta scanning
+				ifconfig tmpsta down
+				iw dev tmpsta del	
+			else
+				iwlist $if scanning
+			fi
+		done			
+		
 	}
 
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then

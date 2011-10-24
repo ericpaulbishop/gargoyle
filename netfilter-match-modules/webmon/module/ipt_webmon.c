@@ -3,7 +3,7 @@
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -632,6 +632,7 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 	{
 		return 0;
 	}
+	spin_lock_bh(&webmon_lock);
 	copy_from_user(buffer, user, len);
 
 	if(len > 1 + sizeof(uint32_t)) 
@@ -642,13 +643,9 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 		char newline_terminator[] = { '\n', '\r' };
 		char whitespace_chars[] = { '\t', ' ' };
 
-		spin_lock_bh(&webmon_lock);
 		if(type == WEBMON_DOMAIN || type == WEBMON_SEARCH )
 		{
-			unsigned long num_lines;
-			unsigned long line_index;
 			unsigned long num_destroyed;
-			char** lines = split_on_separators(data, newline_terminator, 2, -1, 0, &num_lines);
 			
 
 			/* destroy and re-initialize queue and map */
@@ -676,58 +673,63 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 				
 				max_search_queue_length = max_queue_length;
 			}
-
-
-			for(line_index=0; line_index < num_lines; line_index++)
-			{
-				char* line = lines[line_index];
-				unsigned long num_pieces;
-				char** split = split_on_separators(line, whitespace_chars, 2, -1, 0, &num_pieces);
 			
-				//check that there are 3 pieces (time, src_ip, value)
-				int length;
-				for(length=0; split[length] != NULL ; length++){}
-				if(length == 3)
+			if(data[0] != '\0')
+			{
+				unsigned long num_lines;
+				unsigned long line_index;
+				char** lines = split_on_separators(data, newline_terminator, 2, -1, 0, &num_lines);
+				for(line_index=0; line_index < num_lines; line_index++)
 				{
-					time_t time;
-					int parsed_ip[4];
-					int valid_ip = sscanf(split[1], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
-					if(valid_ip == 4)
-					{
-						valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
-					}
-					if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
-					{
-						char* value = split[2];
-						char value_key[700];
-						uint32_t ip = (parsed_ip[0]<<24) + (parsed_ip[1]<<16) + (parsed_ip[2]<<8) +  (parsed_ip[3]) ;
-						ip = htonl(ip);
-						sprintf(value_key, STRIP"@%s", NIPQUAD(ip), value);
-						if(type == WEBMON_DOMAIN)
-						{
-							add_queue_node(ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
-							(recent_domains->first->time).tv_sec = time;
-						}
-						else if(type == WEBMON_SEARCH)
-						{
-							add_queue_node(ip, value, recent_searches, search_map, value_key, max_search_queue_length );
-							(recent_searches->first->time).tv_sec = time;
-						}
-					}
-				}
+					char* line = lines[line_index];
+					unsigned long num_pieces;
+					char** split = split_on_separators(line, whitespace_chars, 2, -1, 0, &num_pieces);
 				
-				for(length=0; split[length] != NULL ; length++)
-				{
-					free(split[length]);
+					//check that there are 3 pieces (time, src_ip, value)
+					int length;
+					for(length=0; split[length] != NULL ; length++){}
+					if(length == 3)
+					{
+						time_t time;
+						int parsed_ip[4];
+						int valid_ip = sscanf(split[1], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
+						if(valid_ip == 4)
+						{
+							valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
+						}
+						if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
+						{
+							char* value = split[2];
+							char value_key[700];
+							uint32_t ip = (parsed_ip[0]<<24) + (parsed_ip[1]<<16) + (parsed_ip[2]<<8) +  (parsed_ip[3]) ;
+							ip = htonl(ip);
+							sprintf(value_key, STRIP"@%s", NIPQUAD(ip), value);
+							if(type == WEBMON_DOMAIN)
+							{
+								add_queue_node(ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
+								(recent_domains->first->time).tv_sec = time;
+							}
+							else if(type == WEBMON_SEARCH)
+							{
+								add_queue_node(ip, value, recent_searches, search_map, value_key, max_search_queue_length );
+								(recent_searches->first->time).tv_sec = time;
+							}
+						}
+					}
+					
+					for(length=0; split[length] != NULL ; length++)
+					{
+						free(split[length]);
+					}
+					free(split);
+					free(line);
 				}
-				free(split);
-				free(line);
+				free(lines);
 			}
-			free(lines);
 		}
-
-		spin_unlock_bh(&webmon_lock);
 	}
+	kfree(buffer);
+	spin_unlock_bh(&webmon_lock);
 		
 	
 	return 1;
@@ -1124,7 +1126,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 	#endif
 
 
-	
+	spin_lock_bh(&webmon_lock);
 	if(info->ref_count == NULL) /* first instance, we're inserting rule */
 	{
 		info->ref_count = (uint32_t*)kmalloc(sizeof(uint32_t), GFP_ATOMIC);
@@ -1135,18 +1137,18 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 		}
 		*(info->ref_count) = 1;
 
-		spin_lock_bh(&webmon_lock);
 		
 		max_search_queue_length = info->max_searches;
 		max_domain_queue_length = info->max_domains;
 	
-		spin_unlock_bh(&webmon_lock);
 
 	}
 	else
 	{
 		*(info->ref_count) = *(info->ref_count) + 1;
 	}
+	spin_unlock_bh(&webmon_lock);
+	
 	return 1;
 }
 
@@ -1168,11 +1170,14 @@ static void destroy(
 		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
 	#endif
 
+	spin_lock_bh(&webmon_lock);
 	*(info->ref_count) = *(info->ref_count) - 1;
 	if(*(info->ref_count) == 0)
 	{
 		kfree(info->ref_count);
 	}
+	spin_unlock_bh(&webmon_lock);
+
 }
 
 static struct ipt_match webmon_match = 

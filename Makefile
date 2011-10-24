@@ -2,19 +2,18 @@ GARGOYLE_VERSION:=1.5.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log
 V=99
 FULL_BUILD=false
 CUSTOM_TEMPLATE=ar71xx
+JS_COMPRESS=true
+
 
 ALL: all
 all:
 	( \
 		targets=`ls targets | sed 's/custom//g' ` ;\
-		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			rm -rf backfire-src ;\
-		fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" ;\
+				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
 			else \
-				sh rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" ;\
+				sh rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 			fi ;\
 		done ;\
 	)
@@ -22,26 +21,20 @@ all:
 brcm:brcm-2.4
 brcm-2.4: 
 	( \
-		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			rm -rf backfire-src ;\
-		fi ;\
 		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" ;\
+			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
 		else \
-			sh rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" ;\
+			sh rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 		fi ;\
 	)
 
 
 %: targets/%
 	( \
-		if [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			rm -rf backfire-src ;\
-		fi ;\
 		if [ ! -d "$@-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" ;\
+			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" ;\
 		else \
-			sh rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" ;\
+			sh rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 		fi ;\
 	)
 
