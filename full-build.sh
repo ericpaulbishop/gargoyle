@@ -13,7 +13,7 @@ branch_name="backfire"
 # set svn revision number to use 
 # you can set this to an alternate revision 
 # or empty to checkout latest 
-rnum=28459
+rnum=28536
 
 
 
