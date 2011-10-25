@@ -1,5 +1,39 @@
 #!/bin/bash
 
+git_branch()
+{
+	local g="$(git rev-parse --git-dir 2>/dev/null)"
+	if [ -n "$g" ]; then
+		local r
+		local b
+		if [ -d "$g/../.dotest" ] ; then
+			r="|AM/REBASE"
+			b="$(git symbolic-ref HEAD 2>/dev/null)"
+		elif [ -f "$g/.dotest-merge/interactive" ] ; then
+			r="|REBASE-i"
+			b="$(cat $g/.dotest-merge/head-name)"
+		elif [ -d "$g/.dotest-merge" ] ; then
+			r="|REBASE-m"
+			b="$(cat $g/.dotest-merge/head-name)"
+		elif [ -f "$g/MERGE_HEAD" ] ; then
+			r="|MERGING"
+			b="$(git symbolic-ref HEAD 2>/dev/null)"
+		else
+			if [ -f $g/BISECT_LOG ] ; then
+				r="|BISECTING"
+			fi
+			if [ ! b="$(git symbolic-ref HEAD 2>/dev/null)" ] ; then
+				b="$(cut -c1-7 $g/HEAD)..."
+			fi
+		fi
+		if [ -n "$1" ] ; then
+			printf "$1" "${b##refs/heads/}$r"
+		else
+			printf "%s" "${b##refs/heads/}$r"
+		fi
+	fi
+}
+
 
 user=$1
 if [ -z "$user" ] ; then
@@ -20,11 +54,15 @@ cd images
 rm -rf src custom
 
 #make sure we can clone latest source to upload
+gargoyle_checkout_branchname=$( git_branch )
+if [ -z  "$gargoyle_checkout_branchname" ] ; then
+	gargoyle_checkout_branchname="master"
+fi
 mkdir src
 cd src
 git clone git://gargoyle-router.com/gargoyle.git
 cd gargoyle
-git checkout 1.4
+git checkout "$gargoyle_checkout_branchname"
 cd ..
 if [ ! -d "gargoyle" ] ; then
 	echo "ERROR: Cannot clone source tree from: git://gargoyle-router.com/gargoyle.git"
@@ -53,6 +91,7 @@ fi
 
 
 #give user a chance to cancel
+echo "Updateing for gargoyle branch = $gargoyle_checkout_branchname"
 echo "Updating for version = $version"
 echo "Upcoming major version (for package naming) = $major_version"
 echo ""
