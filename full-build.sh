@@ -76,6 +76,7 @@ if [ ! -d "downloaded" ] ; then
 	mkdir "downloaded"
 fi
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 # set svn revision number to use 
 # you can set this to an alternate revision 
@@ -85,6 +86,9 @@ rnum=28292
 
 =======
 >>>>>>> gargoyle/master
+=======
+
+>>>>>>> gargoyle/3g
 openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
 
 #download openwrt source if we haven't already
