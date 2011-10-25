@@ -1,3 +1,52 @@
+#!/bin/bash
+
+create_gargoyle_banner()
+{
+	target="$1"
+	profile="$2"
+	date="$3"
+	gargoyle_version="$4"
+	gargoyle_commit="$5"
+	openwrt_branch="$6"
+	openwrt_revision="$7"
+	
+	banner_file_path="$8"
+
+	openwrt_branch_str="OpenWrt $openwrt_branch branch"
+	if [ "$openwrt_branch" = "trunk" ] ; then
+		openwrt_branch_str="OpenWrt trunk"
+	fi
+
+	top_line=$(printf "| %-26s| %-32s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
+	middle_line=$(printf "| %-26s| %-32s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	bottom_line=$(printf "| %-26s| %-32s|" "Built $date" "Target  $target/$profile")
+
+	cat << 'EOF' >"$banner_file_path"
+---------------------------------------------------------------
+|          _____                             _                |
+|         |  __ \                           | |               |
+|         | |  \/ __ _ _ __ __ _  ___  _   _| | ___           |
+|         | | __ / _` | '__/ _` |/ _ \| | | | |/ _ \          |
+|         | |_\ \ (_| | | | (_| | (_) | |_| | |  __/          |
+|          \____/\__,_|_|  \__, |\___/ \__, |_|\___|          |
+|                           __/ |       __/ |                 |
+|                          |___/       |___/                  |
+|                                                             |
+|-------------------------------------------------------------|
+EOF
+	echo "$top_line"    >> "$banner_file_path"
+	echo "$middle_line" >> "$banner_file_path"
+	echo "$bottom_line" >> "$banner_file_path"
+	echo '---------------------------------------------------------------' >> "$banner_file_path"
+
+
+}
+
+#create_gargoyle_banner "ar71xx" "ath9k_only" "Oct 25, 2011" "1.4.3" "a56732" "backfire" "26932" "banner_tmp.txt"
+#cat banner_tmp.txt
+#exit;
+
+
 #working directories
 top_dir=$(pwd)
 targets_dir="$top_dir/targets"
@@ -14,7 +63,6 @@ branch_name="backfire"
 # you can set this to an alternate revision 
 # or empty to checkout latest 
 rnum=28536
-
 
 
 
