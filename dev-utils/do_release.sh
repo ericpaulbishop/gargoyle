@@ -23,6 +23,9 @@ rm -rf src custom
 mkdir src
 cd src
 git clone git://gargoyle-router.com/gargoyle.git
+cd gargoyle
+git checkout 1.4
+cd ..
 if [ ! -d "gargoyle" ] ; then
 	echo "ERROR: Cannot clone source tree from: git://gargoyle-router.com/gargoyle.git"
 	echo "Aborting Update"

@@ -2,7 +2,19 @@
 top_dir=$(pwd)
 targets_dir="$top_dir/targets"
 patches_dir="$top_dir/patches-generic"
+compress_js_dir="$top_dir/compressed_javascript"
+
+#script for building netfilter patches
 netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
+
+#openwrt branch
+branch_name="backfire"
+
+# set svn revision number to use 
+# you can set this to an alternate revision 
+# or empty to checkout latest 
+rnum=28536
+
 
 
 
@@ -19,6 +31,42 @@ if [ -n "$version_name" ] ; then
 fi
 verbosity=$3
 custom_template=$4
+js_compress=$5
+if [ -z "$js_compress" ] ; then
+	js_compress="true"
+fi
+
+
+
+
+#compress javascript
+if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
+	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
+	if [ "$uglify_test" != 'var abc=1' ] ; then
+		js_compress="false"
+		echo ""
+		echo "**************************************************************************"
+		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
+		echo "**************************************************************************"
+		echo ""
+	else
+		js_compress="true"
+		rm -rf "$compress_js_dir"
+		cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
+		cd "$compress_js_dir"
+		jsfiles=*.js
+		for jsf in $jsfiles ; do
+			uglifyjs "$jsf" > "$jsf.cmp"
+			mv "$jsf.cmp" "$jsf"
+		done
+		cd "$top_dir"
+	fi
+fi
+
+
+
+
+
 
 #get version that should be all numeric
 adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/[^\.0123456789]//g' )
@@ -27,6 +75,7 @@ adj_num_version=$(echo "$version_name" | sed 's/X/0/g' | sed 's/x/0/g' | sed 's/
 if [ ! -d "downloaded" ] ; then
 	mkdir "downloaded"
 fi
+<<<<<<< HEAD
 
 # set svn revision number to use 
 # you can set this to an alternate revision 
@@ -34,6 +83,8 @@ fi
 branch_name="backfire"
 rnum=28292
 
+=======
+>>>>>>> gargoyle/master
 openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
 
 #download openwrt source if we haven't already
@@ -42,9 +93,10 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	if [ -n "$rnum" ] ; then
 		revision=" -r $rnum "
 	fi
-	echo "fetching backfire source"
+	echo "fetching openwrt source"
+	rm -rf "$branch_name"
 	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
-	if [ ! -d "backfire" ] ; then
+	if [ ! -d "$branch_name" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
@@ -98,6 +150,12 @@ for target in $targets ; do
 		fi
 		cp -r "$package_dir/$gp" "$target-src/package"
 	done
+
+	#copy compressed javascript to build directory
+	if [ "$js_compress" = "true" ] ; then
+		rm -rf "$target-src/package/gargoyle/files/www/js"
+		cp -r  "$compress_js_dir" "$target-src/package/gargoyle/files/www/js"
+	fi
 	
 	#copy this target configuration to build directory
 	cp "$targets_dir/$target/profiles/default/config" "$target-src/.config"

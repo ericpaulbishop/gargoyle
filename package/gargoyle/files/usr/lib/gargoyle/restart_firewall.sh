@@ -4,12 +4,11 @@
 # itself remain covered by the GPL. 
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-miniupnpd_enabled=$(ls /etc/rc.d/*miniupnpd 2>/dev/null)
-bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
-qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
-webmon_enabled=$(/etc/rc.d/*webmon_gargoyle 2>/dev/null)
+. /usr/lib/gargoyle/libgargoylehelper.sh
 
-
+# Work in progress note:
+# Can we stop them only if present in rc.d (enabled to autostart)? 
+# Should speedup things if some servers aren't enabled.
 /etc/init.d/webmon_gargoyle stop >/dev/null 2>&1
 /etc/init.d/bwmon_gargoyle stop >/dev/null 2>&1
 /etc/init.d/miniupnpd stop >/dev/null 2>&1
@@ -23,16 +22,8 @@ backup_quotas
 . /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 ifup_firewall
 
-if [ -n "$qos_enabled" ] ; then
-	/etc/init.d/qos_gargoyle start
-fi
-if [ -n "$miniupnpd_enabled" ] ; then
-	/etc/init.d/miniupnpd start
-fi
-if [ -n "$bwmon_enabled" ] ; then
-	/etc/init.d/bwmon_gargoyle start
-fi
-if [ -n "$webmon_enabled" ] ; then
-	/etc/init.d/webmon_gargoyle start
-fi
+service_enabled qos_gargoyle	&& /etc/init.d/qos_gargoyle start
+service_enabled miniupnpd	&& /etc/init.d/miniupnpd start
+service_enabled bwmon_gargoyle	&& /etc/init.d/bwmon_gargoyle start
+service_enabled webmon_gargoyle	&& /etc/init.d/webmon_gargoyle start
 

@@ -849,10 +849,12 @@ function getSelectedText(selectId, controlDocument)
 }
 function setSelectedValue(selectId, selection, controlDocument)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
+	var controlDocument = controlDocument == null ? document : controlDocument;
 	
-	selectElement = controlDocument.getElementById(selectId);
-	selectionFound = false;
+	var selectElement = controlDocument.getElementById(selectId);
+	if(selectElement == null){ alert("ERROR: " + selectId + " does not exist"); }
+
+	var selectionFound = false;
 	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
 	{
 		selectionFound = (selectElement.options[optionIndex].value == selection);
@@ -1142,6 +1144,7 @@ function setVariables(inputIds, visibilityIds, uci, pkgs, sections, options, set
 		}
 	}
 }
+
 
 function loadSelectedValueFromVariable(params)
 {
