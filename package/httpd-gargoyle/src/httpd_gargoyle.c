@@ -7,7 +7,7 @@
  * 		  	The original mini_httpd was created by Jef Poscanzer
  * 		  	http://www.acme.com/software/mini_httpd/
  *
- *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -629,8 +629,8 @@ main( int argc, char** argv )
 
     /* Look up hostname. */
     lookup_hostname(
-	&host_addr4, &host_addr4s, sizeof(host_addr4), &gotv4, &gotv4s,
-	&host_addr6, &host_addr4s, sizeof(host_addr6), &gotv6, &gotv6s );
+	&host_addr4, &host_addr4s, sizeof(struct sockaddr_in),  &gotv4, &gotv4s,
+	&host_addr6, &host_addr6s, sizeof(struct sockaddr_in6), &gotv6, &gotv6s );
 
     if ( hostname == (char*) 0 )
 	{
@@ -648,6 +648,8 @@ main( int argc, char** argv )
     ** like some other systems, it has magical v6 sockets that also listen for
     ** v4, but in Linux if you bind a v4 socket first then the v6 bind fails.
     */
+
+
 
     listen6_fd  = -1;
     listen6s_fd = -1;
@@ -1337,9 +1339,16 @@ initialize_listen_socket( usockaddr* usaP )
     listen_fd = socket( usaP->sa.sa_family, SOCK_STREAM, 0 );
     if ( listen_fd < 0 )
 	{
-	syslog( LOG_CRIT, "socket %.80s - %m", ntoa( usaP ) );
-	perror( "socket" );
-	return -1;
+		if( usaP->sa.sa_family == AF_INET6 && (errno == ENOPROTOOPT || errno == EPROTONOSUPPORT || errno == ESOCKTNOSUPPORT || EPFNOSUPPORT || EAFNOSUPPORT ))
+		{
+			/* IPV6 not compiled into kernel, no big deal, don't print errors */
+		}
+		else
+		{
+			syslog( LOG_CRIT, "socket %.80s - %m", ntoa( usaP ) );
+			perror( "socket" );
+		}
+		return -1;
 	}
 
     (void) fcntl( listen_fd, F_SETFD, 1 );
@@ -2284,129 +2293,155 @@ post_post_garbage_hack( int is_ssl )
 
 
 /* This routine is used for parsed-header CGIs and for all SSL CGIs. */
-static void
-cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
-    {
-    ssize_t r, r2;
-    char buf[1024];
-
-    if ( ! parse_headers )
+static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
+{
+	ssize_t r, r2;
+	char buf[1024];
+	
+	if ( ! parse_headers )
 	{
-	/* If we're not parsing headers, write out the default status line
-	** and proceed to the echo phase.
-	*/
-	char http_head[] = "HTTP/1.1 200 OK\015\012";
-	(void) my_write( http_head, sizeof(http_head), is_ssl );
+		/* If we're not parsing headers, write out the default status line
+		 * and proceed to the echo phase.
+		 */
+		char http_head[] = "HTTP/1.0 200 OK\015\012";
+		(void) my_write( http_head, sizeof(http_head), is_ssl );
 	}
-    else
+	else
 	{
-	/* Header parsing.  The idea here is that the CGI can return special
-	** headers such as "Status:" and "Location:" which change the return
-	** status of the response.  Since the return status has to be the very
-	** first line written out, we have to accumulate all the headers
-	** and check for the special ones before writing the status.  Then
-	** we write out the saved headers and proceed to echo the rest of
-	** the response.
-	*/
-	size_t headers_size, headers_len;
-	char* headers;
-	char* br;
-	int status;
-	char* title;
-	char* cp;
+		/* Header parsing.  The idea here is that the CGI can return special
+		 * headers such as "Status:" and "Location:" which change the return
+		 * status of the response.  Since the return status has to be the very
+		 * first line written out, we have to accumulate all the headers
+		 * and check for the special ones before writing the status.  Then
+		 * we write out the saved headers and proceed to echo the rest of
+		 * the response.
+		 */
+		size_t headers_size, headers_len;
+		char* headers;
+		char* br;
+		int status;
+		char* title;
+		char* cp;
+	
+	
+		/* Slurp in all headers. */
+		headers_size = 0;
+		add_to_buf( &headers, &headers_size, &headers_len, (char*) 0, 0 );
+		for (;;)
+		{
+			r = read( rfd, buf, sizeof(buf) );
+			if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
+			{
+				sleep( 1 );
+				continue;
+			}
+			if ( r <= 0 )
+			{
+				br = &(headers[headers_len]);
+				break;
+			}
+			add_to_buf( &headers, &headers_size, &headers_len, buf, r );
+			if ( ( br = strstr( headers, "\015\012\015\012" ) ) != (char*) 0 || ( br = strstr( headers, "\012\012" ) ) != (char*) 0 )
+			{
+				break;
+			}
+		}
+	
+		/* If there were no headers, bail. */
+		if ( headers[0] == '\0' )
+		{
+			return;
+		}
 
-	/* Slurp in all headers. */
-	headers_size = 0;
-	add_to_buf( &headers, &headers_size, &headers_len, (char*) 0, 0 );
+
+		/* Figure out the status. */
+		status = 200;
+		if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 && cp < br && ( cp == headers || *(cp-1) == '\012' ) )
+		{
+			cp += 7;
+			cp += strspn( cp, " \t" );
+			status = atoi( cp );
+		}
+		if ( ( cp = strstr( headers, "Location:" ) ) != (char*) 0 && cp < br && ( cp == headers || *(cp-1) == '\012' ) )
+		{
+			status = 302;
+		}
+		/* Write the status line. */
+		switch ( status )
+			{
+			case 200: title = "OK"; break;
+			case 302: title = "Found"; break;
+			case 304: title = "Not Modified"; break;
+			case 400: title = "Bad Request"; break;
+			case 401: title = "Unauthorized"; break;
+			case 403: title = "Forbidden"; break;
+			case 404: title = "Not Found"; break;
+			case 408: title = "Request Timeout"; break;
+			case 500: title = "Internal Error"; break;
+			case 501: title = "Not Implemented"; break;
+			case 503: title = "Service Temporarily Overloaded"; break;
+			default: title = "Something"; break;
+			}
+		(void) snprintf( buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
+		(void) my_write( buf, strlen( buf ), is_ssl );
+		if(strstr(headers, "Server:") == NULL)
+		{
+			char line[200];
+			sprintf(line, "Server: %s\015\012", SERVER_SOFTWARE );
+			(void) my_write(line, strlen(line), is_ssl );
+		}
+		if(strstr(headers, "Date:") == NULL)
+		{
+			char line[200];
+			char timebuf[100];
+			time_t now = time( (time_t*) 0 );
+			const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
+			(void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
+			sprintf(line, "Date: %s\015\012", timebuf);
+			(void) my_write(line, strlen(line), is_ssl );
+
+		}
+		if(strstr(headers, "Expires:") == NULL)
+		{
+			const char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			(void) my_write(line, strlen(line), is_ssl );
+		}
+
+	
+		/* Write the saved headers. */
+		(void) my_write( headers, headers_len, is_ssl );
+		
+	}
+	
+	/* Echo the rest of the output. */
 	for (;;)
-	    {
-	    r = read( rfd, buf, sizeof(buf) );
-	    if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
-		{
-		sleep( 1 );
-		continue;
-		}
-	    if ( r <= 0 )
-		{
-		br = &(headers[headers_len]);
-		break;
-		}
-	    add_to_buf( &headers, &headers_size, &headers_len, buf, r );
-	    if ( ( br = strstr( headers, "\015\012\015\012" ) ) != (char*) 0 ||
-		 ( br = strstr( headers, "\012\012" ) ) != (char*) 0 )
-		break;
-	    }
-
-	/* If there were no headers, bail. */
-	if ( headers[0] == '\0' )
-	    return;
-
-	/* Figure out the status. */
-	status = 200;
-	if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 &&
-	     cp < br &&
-	     ( cp == headers || *(cp-1) == '\012' ) )
-	    {
-	    cp += 7;
-	    cp += strspn( cp, " \t" );
-	    status = atoi( cp );
-	    }
-	if ( ( cp = strstr( headers, "Location:" ) ) != (char*) 0 &&
-	     cp < br &&
-	     ( cp == headers || *(cp-1) == '\012' ) )
-	    status = 302;
-
-	/* Write the status line. */
-	switch ( status )
-	    {
-	    case 200: title = "OK"; break;
-	    case 302: title = "Found"; break;
-	    case 304: title = "Not Modified"; break;
-	    case 400: title = "Bad Request"; break;
-	    case 401: title = "Unauthorized"; break;
-	    case 403: title = "Forbidden"; break;
-	    case 404: title = "Not Found"; break;
-	    case 408: title = "Request Timeout"; break;
-	    case 500: title = "Internal Error"; break;
-	    case 501: title = "Not Implemented"; break;
-	    case 503: title = "Service Temporarily Overloaded"; break;
-	    default: title = "Something"; break;
-	    }
-	(void) snprintf(
-	    buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
-	(void) my_write( buf, strlen( buf ), is_ssl );
-
-	/* Write the saved headers. */
-	(void) my_write( headers, headers_len, is_ssl );
-	}
-
-    /* Echo the rest of the output. */
-    for (;;)
 	{
-	r = read( rfd, buf, sizeof(buf) );
-	if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
-	    {
-	    sleep( 1 );
-	    continue;
-	    }
-	if ( r <= 0 )
-	    goto done;
-	for (;;)
-	    {
-	    r2 = my_write( buf, r, is_ssl );
-	    if ( r2 < 0 && ( errno == EINTR || errno == EAGAIN ) )
+		r = read( rfd, buf, sizeof(buf) );
+		if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
 		{
-		sleep( 1 );
-		continue;
+			sleep( 1 );
+			continue;
 		}
-	    if ( r2 != r )
-		goto done;
-	    break;
-	    }
+		if ( r <= 0 )
+		{
+			goto done;
+		}
+		for (;;)
+		{
+			r2 = my_write( buf, r, is_ssl );
+			if ( r2 < 0 && ( errno == EINTR || errno == EAGAIN ) )
+			{
+			sleep( 1 );
+			continue;
+			}
+			if ( r2 != r )
+			goto done;
+			break;
+		}
 	}
-    done:
-    shutdown( conn_fd, SHUT_WR );
-    }
+	done:
+	shutdown( conn_fd, SHUT_WR );
+}
 
 
 /* Set up CGI argument vector.  We don't have to worry about freeing
@@ -2830,7 +2865,7 @@ send_error_tail( void )
 static void
 add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b, time_t mod )
     {
-    time_t now, expires;
+    time_t now;
     char timebuf[100];
     char buf[10000];
     int buflen;
@@ -2848,8 +2883,33 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
     (void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
     buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
     add_to_response( buf, buflen );
-    buflen = snprintf( buf, sizeof(buf), "Cache-Control: no-cache,no-store\015\012" );
+    
+    /*
+    if ( max_age >= 0 )
+	{
+	time_t expires = now + max_age;
+	(void) strftime(
+	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &expires ) );
+	buflen = snprintf( buf, sizeof(buf),
+	    "Expires: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	}
+    */
+
+    /* never cache */
+    buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
     add_to_response( buf, buflen );
+
+    if ( mod != (time_t) -1 )
+	{
+	(void) strftime(
+	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
+	buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	}
+
+
+
     if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
 	{
 	buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
@@ -2876,23 +2936,9 @@ add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b
 	buflen = snprintf( buf, sizeof(buf), "P3P: %s\015\012", p3p );
 	add_to_response( buf, buflen );
 	}
-    if ( max_age >= 0 )
-	{
-	expires = now + max_age;
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &expires ) );
-	buflen = snprintf( buf, sizeof(buf),
-	    "Cache-Control: max-age=%d\015\012Expires: %s\015\012", max_age, timebuf );
-	add_to_response( buf, buflen );
-	}
-    if ( mod != (time_t) -1 )
-	{
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
-	buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
-	add_to_response( buf, buflen );
-	}
-    buflen = snprintf( buf, sizeof(buf), "Connection: close\015\012\015\012" );
+
+    /* end of headers */
+    buflen = snprintf( buf, sizeof(buf), "\015\012" );
     add_to_response( buf, buflen );
     }
 

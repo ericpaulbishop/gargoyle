@@ -15,11 +15,11 @@ wan_if=""
 
 define_wan_if()
 {
-	if  [ -z $wan_if ] ;  then
+	if  [ -z "$wan_if" ] ;  then
 	
 		#Wait for up to 15 seconds for the wan interface to indicate it is up.
 		wait_sec=15
-		while [ -z $(uci -P /var/state get network.wan.up 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do
+		while [ -z "$(uci -P /var/state get network.wan.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
 			sleep 1
 			wait_sec=$(($wait_sec - 1))
 		done
@@ -29,7 +29,7 @@ define_wan_if()
 		#use the device named by network.wan.device
 
 		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-		if [ -z $wan_if ] ; then
+		if [ -z "$wan_if" ] ; then
 			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
 		fi
 	fi
@@ -42,7 +42,7 @@ insert_remote_accept_rules()
 	local config_name="firewall"
 	local section_type="remote_accept"
 
-	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts) 2> /dev/nul
+	ssh_max_attempts=$(uci get dropbear.@dropbear[0].max_remote_attempts 2>/dev/null)
 	ssh_port=$(uci get dropbear.@dropbear[0].Port)
 	if [ -z "$ssh_max_attempts" ] || [ "$ssh_max_attempts" = "unlimited" ] ; then
 		ssh_max_attempts=""
@@ -105,10 +105,10 @@ create_l7marker_chain()
 	all_prots=$(ls /etc/l7-protocols/* | sed 's/^.*\///' | sed 's/\.pat$//' )
 	qos_active=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
 	if [ -n "$qos_active" ] ; then
-		qos_l7=$(echo $(uci show qos_gargoyle | grep "layer7=" | sed 's/^.*=//g') )
+		qos_l7=$(uci show qos_gargoyle | sed '/layer7=/!d; s/^.*=//g')
 	fi
-	fw_l7=$(echo $(uci show firewall | grep app_proto | sed 's/^.*=//g'))
-	all_used=$(echo $fw_l7 $qos_l7)
+	fw_l7=$(uci show firewall | sed '/app_proto/!d; s/^.*=//g')
+	all_used="$fw_l7 $qos_l7"
 
 	if [ -n "$all_used" ] ; then
 		iptables -t mangle -N l7marker
