@@ -1,6 +1,6 @@
 				<table>
 					<tr class='table_row_add_header'>
-						<th><label id='addr_desc_label' for='addr_desc'>Description</label><br><em>(optional)</em></th>
+						<th><label id='addr_desc_label' for='addr_host'>Description</label><br><em>(optional)</em></th>
 						<th><label id='addr_prot_label' for='addr_prot'>Protocol</label></th>
 						<th><label id='addr_sp_label' for='addr_sp'>Start Port</label></th>
 						<th><label id='addr_ep_label' for='addr_ep'>End Port</label></th>

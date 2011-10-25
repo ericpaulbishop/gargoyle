@@ -1,6 +1,6 @@
 				<table>
 					<tr class='table_row_add_header'>
-						<th><label id='add_desc_label' for='add_desc'>Description</label><br><em>(optional)</em></th>
+						<th><label id='add_desc_label' for='add_host'>Description</label><br><em>(optional)</em></th>
 						<th><label id='add_prot_label' for='add_prot'>Protocol</label></th>
 						<th><label id='add_fp_label' for='add_fp'>From Port</label></th>
 						<th><label id='add_ip_label' for='add_ip'>To IP</label></th>
