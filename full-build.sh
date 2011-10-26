@@ -23,7 +23,7 @@ set_constant_variables()
 	#even though build can take several hours
 	build_date=$(date +"%B %d, %Y")
 
-	gargoyle_git_revision="git log -1 --pretty=format:%h"
+	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
 
 }
 set_version_variables()
@@ -63,6 +63,7 @@ get_target_from_config()
 
 create_gargoyle_banner()
 {
+	echo "BUILDING BANNER"
 	local target="$1"
 	local profile="$2"
 	local date="$3"
@@ -101,10 +102,6 @@ EOF
 
 
 }
-
-#create_gargoyle_banner "ar71xx" "ath9k_only" "Oct 25, 2011" "1.4.3" "a56732" "backfire" "26932" "banner_tmp.txt"
-#cat banner_tmp.txt
-#exit;
 
 
 #initialize constants
