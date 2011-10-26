@@ -1,25 +1,46 @@
 #!/bin/bash
 
+set_constant_variables()
+{
+	#working directories
+	top_dir=$(pwd)
+	targets_dir="$top_dir/targets"
+	patches_dir="$top_dir/patches-generic"
+	compress_js_dir="$top_dir/compressed_javascript"
+
+	#script for building netfilter patches
+	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
+
+	#openwrt branch
+	branch_name="backfire"
+
+	# set svn revision number to use 
+	# you can set this to an alternate revision 
+	# or empty to checkout latest 
+	rnum=28536
+
+}
+
+
 create_gargoyle_banner()
 {
-	target="$1"
-	profile="$2"
-	date="$3"
-	gargoyle_version="$4"
-	gargoyle_commit="$5"
-	openwrt_branch="$6"
-	openwrt_revision="$7"
-	
-	banner_file_path="$8"
+	local target="$1"
+	local profile="$2"
+	local date="$3"
+	local gargoyle_version="$4"
+	local gargoyle_commit="$5"
+	local openwrt_branch="$6"
+	local openwrt_revision="$7"
+	local banner_file_path="$8"
 
-	openwrt_branch_str="OpenWrt $openwrt_branch branch"
+	local openwrt_branch_str="OpenWrt $openwrt_branch branch"
 	if [ "$openwrt_branch" = "trunk" ] ; then
 		openwrt_branch_str="OpenWrt trunk"
 	fi
 
-	top_line=$(printf "| %-26s| %-32s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
-	middle_line=$(printf "| %-26s| %-32s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
-	bottom_line=$(printf "| %-26s| %-32s|" "Built $date" "Target  $target/$profile")
+	local top_line=$(printf "| %-26s| %-32s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
+	local middle_line=$(printf "| %-26s| %-32s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	local bottom_line=$(printf "| %-26s| %-32s|" "Built $date" "Target  $target/$profile")
 
 	cat << 'EOF' >"$banner_file_path"
 ---------------------------------------------------------------
@@ -47,23 +68,8 @@ EOF
 #exit;
 
 
-#working directories
-top_dir=$(pwd)
-targets_dir="$top_dir/targets"
-patches_dir="$top_dir/patches-generic"
-compress_js_dir="$top_dir/compressed_javascript"
-
-#script for building netfilter patches
-netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
-
-#openwrt branch
-branch_name="backfire"
-
-# set svn revision number to use 
-# you can set this to an alternate revision 
-# or empty to checkout latest 
-rnum=28536
-
+#initialize constants
+set_constant_variables
 
 
 #parse parameters
@@ -254,6 +260,8 @@ for target in $targets ; do
 		else
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
 		fi
+
+
 		make -j 4 GARGOYLE_VERSION="$adj_num_version"
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
