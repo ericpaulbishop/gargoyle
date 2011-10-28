@@ -13,10 +13,6 @@
 <script>
 <!--
 <?
-	#script dies if cache file exists and wifi driver defined
-	/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null
-	cat "/var/cached_basic_vars" 2>/dev/null
-
 
 	uptime=$(cat /proc/uptime)
 	echo "uptime = \"$uptime\";"
