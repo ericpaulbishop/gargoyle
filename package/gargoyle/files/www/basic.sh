@@ -356,7 +356,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 		<div id='wan_static_mask_container' >
-			<label class='leftcolumn' for='wan_static_mask' id='wan_static_ip_label'>Subnet Mask:</label>
+			<label class='leftcolumn' for='wan_static_mask' id='wan_static_mask_label'>Subnet Mask:</label>
 			<input type='text' class='rightcolumn' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
 		<div id='wan_static_gateway_container' >
