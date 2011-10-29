@@ -3,7 +3,7 @@
 @@ -1,4 +1,5 @@
 -src/gz packages http://downloads.openwrt.org/backfire/10.03.1-rc6/$S/packages
 +src/gz packages http://downloads.openwrt.org/backfire/10.03.1-rc5/$S/packages
-+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.4/$S
++src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.6/$S
  dest root /
  dest ram /tmp
  lists_dir ext /var/opkg-lists

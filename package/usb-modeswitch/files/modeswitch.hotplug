@@ -120,7 +120,20 @@ if [ "$ACTION" = add ]; then
 		# If a candidate is remaining, start usb-modeswitch
 		[ -n "$configs" ] && {
 			log "$DEVICENAME: Selecting ${configs%% *} for mode switching"
-			$modeswitch -c "${configs%% *}"
+			# ugly workaround, but working for all hw we got for testing
+			switching_done=0
+			switching_tries=0
+			local usb_dir="/sys/$DEVPATH"       
+			[ -f "$usb_dir/idVendor" ] || usb_dir="${usb_dir%/*}"
+			while [ $switching_done -lt 1 -a $switching_tries -le 6 ]; do
+				$modeswitch -I -D -n -s 30 -c "${configs%% *}"
+				if [ $(sanitize "$usb_dir/idProduct") -eq $uPid ]; then
+					log "switching seemingly failed"
+				else
+					switching_done=1
+				fi
+				switching_tries=$(( $switching_tries + 1 ))
+			done
 		}
 	}
 fi
