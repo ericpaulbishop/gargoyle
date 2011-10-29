@@ -99,57 +99,78 @@ function resetData()
 		{
 			var allWirelessSections = uciOriginal.getAllSections("wireless");
 			var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
-			var firstWirelessDevice = allWifiDeviceSections[0];
-
-			wifiCfg2="";
-			wifiCfg3="";
-			if(allWirelessSections.length >= 2)
+			
+			
+			var apSsids = []
+			var otherSsid = ""
+			var otherIsSta = false;
+			var wsecIndex;
+			for(wsecIndex=0; wsecIndex < allWirelessSections.length ; wsecIndex++)
 			{
-				wifiCfg2 = allWirelessSections[1];
-			}
-			if(allWirelessSections.length >= 3)
-			{
-				wifiCfg3 = allWirelessSections[2];
-			}
-			cfg2mode=uciOriginal.get("wireless", wifiCfg2, "mode");
-			cfg3mode=uciOriginal.get("wireless", wifiCfg3, "mode");
-			apcfg=  cfg2mode== 'ap' ? wifiCfg2 : (cfg3mode=='ap' ? wifiCfg3 : '' );
-			othercfg= apcfg== wifiCfg3 || apcfg== '' ? wifiCfg2 : wifiCfg3;
-			apssid=uciOriginal.get("wireless", apcfg, "ssid");
-			otherssid=uciOriginal.get("wireless", othercfg, "ssid");
-
-
-			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "" );
-			if(apssid != '')
-			{
-				setChildText("wireless_apssid", apssid);
-			}
-			else
-			{
-				document.getElementById("wireless_apssid_div").style.display="none";
-			}
-			if(othercfg != '' && otherssid != '' && uciOriginal.get("wireless", othercfg, "mode") != "wds")
-			{
-				if(cfg2mode != 'sta' && cfg3mode !='sta')
+				var sec = allWirelessSections[wsecIndex]
+				var secSsid = uciOriginal.get("wireless", sec, "ssid")
+				var secMode = uciOriginal.get("wireless", sec, "mode")
+				if(secMode == "ap")
 				{
-					setChildText("wireless_otherssid_label", "SSID:");
-				}
+					var dev=uciOriginal.get("wireless", wifiSection, "device");
+					var devBand = "G";
+					if(dev != "")
+					{
+						if(uciOriginal.get("wireless", dev, "hwMode") == "11na")
+						{
+							devBand = "A";
+						}
+					}
+					apSsids[devBand] = secSsid				}
 				else
 				{
-					setChildText("wireless_otherssid_label", "SSID Joined By Client:");
-					if(currentWirelessMacs.length > 0){ setChildText("wan_mac", currentWirelessMacs[0]); }
+					otherIsSsid = secMode == "sta"
+					otherSsid   = secSsid;
 				}
-				setChildText("wireless_otherssid", otherssid);
+			}
+
+			// AP SSIDs
+			if(apSsids["G"] == null && apSsids["A"] == null)
+			{
+				document.getElementById("wireless_apssid_div").style.display="none";
+				document.getElementById("wireless_apssid_5ghz_div").style.display="none";
+			}
+			else if(apSsids["G"] != null && apSsids["A"] != null)
+			{
+				document.getElementById("wireless_apssid_div").style.display="block";
+				document.getElementById("wireless_apssid_5ghz_div").style.display="block";
+				setChildText("wireless_apssid_label", "2.4 GHz Access Point SSID:");
+				setChildText("wireless_apssid", apSsids["G"])
+				setChildText("wireless_apssid_5ghz", apSsids["5"])
+	
 			}
 			else
+			{
+				document.getElementById("wireless_apssid_div").style.display="block";
+				document.getElementById("wireless_apssid_5ghz_div").style.display="none";
+				setChildText("wireless_apssid_label", "Access Point SSID:");
+				setChildText("wireless_apssid", (apSsids["G"] == null ? apSsids["A"] : apSsids["G"]))
+			}
+			
+			// Wireless Client / Other SSID
+			if(otherSsid == null)
 			{
 				document.getElementById("wireless_otherssid_div").style.display="none";
 			}
+			else
+			{
+				setChildText("wireless_otherssid", otherssid);
+				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : "SSID Joined by Client:"))
+				if(currentWirelessMacs.length > 0 && otherIsSta){ setChildText("wan_mac", currentWirelessMacs[0]); }
+			}
+			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "" );
+
 		}
 		else
 		{
 			document.getElementById("wireless_mac_div").style.display="none";
 			document.getElementById("wireless_apssid_div").style.display="none";
+			document.getElementById("wireless_apssid_5ghz_div").style.display="none";
 			document.getElementById("wireless_otherssid_div").style.display="none";
 		}
 	}
@@ -171,3 +192,8 @@ function resetData()
 	setChildText("qos_download", qosDownloadStatus);
 }
 
+
+function getSsids()
+{
+		
+}

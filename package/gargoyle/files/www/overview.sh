@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -13,6 +13,7 @@
 <script>
 <!--
 <?
+
 	uptime=$(cat /proc/uptime)
 	echo "uptime = \"$uptime\";"
 
@@ -171,6 +172,9 @@
 		</div>
 		<div id="wireless_apssid_div">
 			<span class='leftcolumn' id="wireless_apssid_label">Access Point SSID:</span><span id="wireless_apssid" class='rightcolumn'></span>
+		</div>
+		<div id="wireless_apssid_5ghz_div">
+			<span class='leftcolumn' id="wireless_apssid_5ghz_label">5GHz Access Point SSID:</span><span id="wireless_apssid_5ghz" class='rightcolumn'></span>
 		</div>
 		<div id="wireless_otherssid_div">
 			<span class='leftcolumn' id="wireless_otherssid_label">SSID Joined By Client:</span><span id="wireless_otherssid" class='rightcolumn'></span>
