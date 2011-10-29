@@ -11,9 +11,9 @@ all:
 		targets=`ls targets | sed 's/custom//g' ` ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				sh full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
+				bash full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
 			else \
-				sh rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
+				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 			fi ;\
 		done ;\
 	)
@@ -22,9 +22,9 @@ brcm:brcm-2.4
 brcm-2.4: 
 	( \
 		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
+			bash full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
 		else \
-			sh rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
+			bash rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 		fi ;\
 	)
 
@@ -32,9 +32,9 @@ brcm-2.4:
 %: targets/%
 	( \
 		if [ ! -d "$@-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			sh full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" ;\
+			bash full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" ;\
 		else \
-			sh rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
+			bash rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
 		fi ;\
 	)
 
