@@ -12,6 +12,10 @@
 <script>
 <!--
 <?
+	echo "var apns = new Array();"
+	if [ -e ./data/apn.csv ] ; then
+		sort ./data/apn.csv | awk -F[\;] '{print "apns.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);"}'
+	fi
 	#script dies if cache file exists and wifi driver defined
 	/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null
 	cat "/var/cached_basic_vars" 2>/dev/null
@@ -292,6 +296,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wired'>Static IP (Wired)</option>
 				<option value='dhcp_wireless'>DHCP (Wireless)</option>
 				<option value='static_wireless'>Static IP (Wireless)</option>
+				<option value='3g'>3G (GSM)</option>
 				<option value='none'>Disabled</option>
 			</select>
 		</div>
@@ -364,7 +369,59 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
+		<div id='wan_3g_service_container'>
+			<label class='leftcolumn' for='wan_3g_service'>Service:</label>
+			<select class='rightcolumn' id='wan_3g_service'>
+				<option value='cdma'>CDMA/EV-DO</option>
+				<option value='umts'>UMTS</option>
+			</select>
+		</div>
+		<div id='wan_3g_device_container' >
+			<label class='leftcolumn' for='wan_3g_device' id='wan_3g_device_label'>Device:</label>
+			<input type='text' class='rightcolumn' id='wan_3g_device'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+		</div>
+		<div id='wan_3g_pincode_container' >
+			<label class='leftcolumn' for='wan_3g_pincode' id='wan_3g_pincode_label'>Pincode:</label>
+			<input type='text' class='rightcolumn' id='wan_3g_pincode'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<em>(optional)</em>
+		</div>
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> gargoyle/3g
+		<div id='wan_3g_isp_container'>
+			<label class='leftcolumn' for='wan_3g_isp'>Mobile ISP:</label>
+			<select class='rightcolumn' id='wan_3g_isp' onchange='updateApnDetails()'>
+			<option value='custom'>Custom</option>
+<?
+	if [ -e ./data/apn.csv ] ; then
+		sort ./data/apn.csv | awk -F[\;] '{print "<option value=\""$1"\">"$1"</option>"}'
+	fi
+?>
+			</select>
+		</div>
+
+		<div id='wan_3g_apn_container' >
+			<label class='leftcolumn' for='wan_3g_apn' id='wan_3g_apn_label'>APN:</label>
+			<input type='text' class='rightcolumn' id='wan_3g_apn'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+		</div>
+		<div id='wan_3g_user_container' >
+			<label class='leftcolumn' for='wan_3g_user' id='wan_3g_user_label'>User Name:</label>
+			<input type='text' class='rightcolumn' id='wan_3g_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<em>(optional)</em>
+		</div>
+		<div id='wan_3g_pass_container' >
+			<label class='leftcolumn' for='wan_3g_pass' id='wan_3g_pass_label'>Password:</label>
+			<input type='text' class='rightcolumn' id='wan_3g_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
+			<em>(optional)</em>
+		</div>
+
+<<<<<<< HEAD
+=======
+>>>>>>> gargoyle/master
+=======
+>>>>>>> gargoyle/3g
 		<div id='wan_port_to_lan_container' >
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
