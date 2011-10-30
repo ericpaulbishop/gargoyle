@@ -283,8 +283,11 @@ for target in $targets ; do
 		if [ -z "$image_files" ] ; then
 			exit
 		fi
-
-		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^default$" )
+	
+		other_profiles=""
+		if [ "$target" != "custom" ] ; then
+			other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
+		fi
 		for p in $other_profiles ; do
 		
 			profile_name="$p"

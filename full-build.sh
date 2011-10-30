@@ -373,7 +373,7 @@ for target in $targets ; do
 		exit
 	fi
 
-	other_profiles = ""
+	other_profiles=""
 	if [ "$target" != "custom" ] ; then
 		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
 	fi
