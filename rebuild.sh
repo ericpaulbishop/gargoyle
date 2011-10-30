@@ -7,13 +7,10 @@ set_constant_variables()
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
-
+	
 	#script for building netfilter patches
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
-
-	#openwrt branch
-	branch_name="backfire"
-
+	
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
 	build_date=$(date +"%B %d, %Y")
@@ -67,6 +64,10 @@ create_gargoyle_banner()
 	local openwrt_branch="$6"
 	local openwrt_revision="$7"
 	local banner_file_path="$8"
+
+
+
+
 
 	local openwrt_branch_str="OpenWrt $openwrt_branch branch"
 	if [ "$openwrt_branch" = "trunk" ] ; then
@@ -209,6 +210,10 @@ for target in $targets ; do
 		#copy this target configuration to build directory
 		cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
 
+		profile_name="$default_profile"
+		if [ "$target" = "custom" ] ; then
+			profile_name="custom"
+		fi
 
 		#enter build directory and make sure we get rid of all those pesky .svn files, 
 		#and any crap left over from editing
@@ -216,6 +221,10 @@ for target in $targets ; do
 		find . -name ".svn"  | xargs rm -rf
 		find . -name "*~"    | xargs rm -rf
 		find . -name ".*sw*" | xargs rm -rf
+		
+		branch_name=$(cat "OPENWRT_BRANCH")
+		rnum=$(cat "OPENWRT_REVISION")
+
 	
 		#if version name specified, set gargoyle official version parameter in gargoyle package
 		echo "OFFICIAL_VERSION:=$full_gargoyle_version" > .ver
@@ -224,6 +233,8 @@ for target in $targets ; do
 		mv .vermake "$package_dir/gargoyle/Makefile"
 
 		#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
+		openwrt_target=$(get_target_from_config "./.config")
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
 			make -j 4  GARGOYLE_VERSION="$numeric_gargoyle_version"
 		else
@@ -275,9 +286,16 @@ for target in $targets ; do
 
 		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^default$" )
 		for p in $other_profiles ; do
-	
+		
+			profile_name="$p"
+
 			#copy profile config and rebuild
 			cp $targets_dir/$target/profiles/$p/config .config
+
+			openwrt_target=$(get_target_from_config "./.config")
+			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+
+
 			if [ "$verbosity" = "0" ] ; then
 				make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
 			else
