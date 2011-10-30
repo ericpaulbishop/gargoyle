@@ -72,6 +72,7 @@ create_gargoyle_banner()
 	local openwrt_branch="$6"
 	local openwrt_revision="$7"
 	local banner_file_path="$8"
+	local revision_save_dir="$9"
 
 	local openwrt_branch_str="OpenWrt $openwrt_branch branch"
 	if [ "$openwrt_branch" = "trunk" ] ; then
@@ -100,6 +101,9 @@ EOF
 	echo "$bottom_line" >> "$banner_file_path"
 	echo '---------------------------------------------------------------' >> "$banner_file_path"
 
+	#save openwrt variables for rebuild
+	echo "$openwrt_revision" > "$revision_save_dir/OPENWRT_REVISION"
+	echo "$openwrt_branch"  > "$revision_save_dir/OPENWRT_BRANCH"
 
 }
 
@@ -319,7 +323,7 @@ for target in $targets ; do
 		fi
 	
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner"
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	else
@@ -334,7 +338,7 @@ for target in $targets ; do
 		fi
 
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner"
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	fi
@@ -382,7 +386,7 @@ for target in $targets ; do
 		exit
 	fi
 
-	other_profiles = ""
+	other_profiles=""
 	if [ "$target" != "custom" ] ; then
 		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
 	fi
@@ -394,7 +398,7 @@ for target in $targets ; do
 		cp $targets_dir/$target/profiles/$p/config .config
 		
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner"
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		
 		if [ "$verbosity" = "0" ] ; then
