@@ -101,22 +101,21 @@ function resetData()
 		setChildText("wireless_mode", wirelessMode);
 		if(wirelessModeId != "disabled")
 		{
-			var allWirelessSections = uciOriginal.getAllSections("wireless");
-			var allWifiDeviceSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
+			var allWifiIfaceSections  = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 			
 			
 			var apSsids = []
-			var otherSsid = ""
+			var otherSsid = null
 			var otherIsSta = false;
 			var wsecIndex;
-			for(wsecIndex=0; wsecIndex < allWirelessSections.length ; wsecIndex++)
+			for(wsecIndex=0; wsecIndex < allWifiIfaceSections.length ; wsecIndex++)
 			{
-				var sec = allWirelessSections[wsecIndex]
+				var sec = allWifiIfaceSections[wsecIndex]
 				var secSsid = uciOriginal.get("wireless", sec, "ssid")
 				var secMode = uciOriginal.get("wireless", sec, "mode")
 				if(secMode == "ap")
 				{
-					var dev=uciOriginal.get("wireless", wifiSection, "device");
+					var dev=uciOriginal.get("wireless", sec, "device");
 					var devBand = "G";
 					if(dev != "")
 					{
@@ -125,14 +124,17 @@ function resetData()
 							devBand = "A";
 						}
 					}
-					apSsids[devBand] = secSsid				}
+					apSsids[devBand] = secSsid
+				}
 				else
 				{
 					otherIsSsid = secMode == "sta"
 					otherSsid   = secSsid;
 				}
 			}
-
+			
+			
+			
 			// AP SSIDs
 			if(apSsids["G"] == null && apSsids["A"] == null)
 			{
@@ -163,7 +165,7 @@ function resetData()
 			}
 			else
 			{
-				setChildText("wireless_otherssid", otherssid);
+				setChildText("wireless_otherssid", otherSsid);
 				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : "SSID Joined by Client:"))
 				if(currentWirelessMacs.length > 0 && otherIsSta){ setChildText("wan_mac", currentWirelessMacs[0]); }
 			}
