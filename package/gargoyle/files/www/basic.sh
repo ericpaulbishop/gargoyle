@@ -37,6 +37,12 @@
 		echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
 	fi
 
+	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
+	if [ -z "$has_usb_tty" ] ; then
+		echo "hasUSB = false;"
+	fi	
+
+
 ?>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
