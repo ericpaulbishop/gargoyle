@@ -119,7 +119,7 @@ function resetData()
 					var devBand = "G";
 					if(dev != "")
 					{
-						if(uciOriginal.get("wireless", dev, "hwMode") == "11na")
+						if(uciOriginal.get("wireless", dev, "hwmode") == "11na")
 						{
 							devBand = "A";
 						}
@@ -147,7 +147,7 @@ function resetData()
 				document.getElementById("wireless_apssid_5ghz_div").style.display="block";
 				setChildText("wireless_apssid_label", "2.4 GHz Access Point SSID:");
 				setChildText("wireless_apssid", apSsids["G"])
-				setChildText("wireless_apssid_5ghz", apSsids["5"])
+				setChildText("wireless_apssid_5ghz", apSsids["A"])
 	
 			}
 			else
