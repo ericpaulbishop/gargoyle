@@ -10,13 +10,16 @@ update_dnsmasq_conf()
 	end_line=$(grep -n "END BONJOUR PRINTER CONFIGURATION" $dnsfile | sed 's/:.*$//g')
 	lines=$(wc -l $dnsfile | awk '{print $1 }')
 
-	
 	rm -rf /tmp/dns.new.tmp
-	if [ $start_line -gt 1 ] ; then 
-		head -n $(($start_line-1))  $dnsfile             >/tmp/dns.new.tmp
-	fi
-	if [ $end_line -lt $lines ] ; then
-		tail -n $(( $lines - $end_line ))  $dnsfile     >>/tmp/dns.new.tmp
+	if [ -n "$start_line" ] ; then
+		if [ $start_line -gt 1 ] ; then 
+			head -n $(($start_line-1))  $dnsfile            >>/tmp/dns.new.tmp
+		fi
+		if [ $end_line -lt $lines ] ; then
+			tail -n $(( $lines - $end_line ))  $dnsfile     >>/tmp/dns.new.tmp
+		fi
+	else
+		cat "$dnsfile"                                          >>/tmp/dns.new.tmp
 	fi
 
 	echo '###### BEGIN BONJOUR PRINTER CONFIGURATION #####' >>/tmp/dns.new.tmp
@@ -25,8 +28,6 @@ update_dnsmasq_conf()
 	
 	original_md5=$(md5sum "$dnsfile" | sed 's/[\t ].*$//g')
 	new_md5=$(md5sum "/tmp/dns.new.tmp" | sed 's/[\t ].*$//g')
-	echo "original = $original_md5"
-	echo "new_md5  = $new_md5"
 	if [ "$original_md5" != "$new_md5" ] ; then
 		mv /tmp/dns.new.tmp "$dnsfile"
 		/etc/init.d/dnsmasq restart
@@ -35,7 +36,20 @@ update_dnsmasq_conf()
 	fi
 }
 
+
+
 if [ "$ACTION" = "add" ] ||  [ "$ACTION" = "remove" ] ; then
+
+	count=5
+	while [ ! -e /proc/bus/usb/devices ] && [ $count -gt 0 ] ; do
+		sleep 1
+		count=$(( $count - 1 ))
+	done 
+	if [ ! -e /proc/bus/usb/devices ] ; then
+		exit
+	fi
+	
+	
 	
 	usb_devices_file="/proc/bus/usb/devices"
 	usb_dev_drivers=$(egrep "^I:" $usb_devices_file | sed 's/^.*Driver=//g' | sed 's/[\t ].*$//')
