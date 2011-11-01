@@ -402,7 +402,7 @@ static char* http_unescape(const char* escaped)
 		/* hex-encoded char found*/
 		if(*s == '%')
 		{
-		       	int new_char_num;
+		       	unsigned int new_char_num;
 			strncpy(old, s, 3);
 			old[3] = '\0';
 			sscanf(old+1, "%2X", &new_char_num);
@@ -1012,7 +1012,7 @@ static void destroy_connection_http(void* connection_data)
 	if(connection_data != NULL)
 	{
 		int* socket = (int*)connection_data;
-		close(socket);
+		close(*socket);
 		free(socket);
 	}
 }
