@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -35,7 +35,9 @@ function saveChanges()
 		gargLogoHostname.replaceChild( document.createTextNode("Device Name: " + hostname), gargLogoHostname.firstChild );
 
 		
-		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n";
+		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n" + (havePrinterScript ? "\nsh /usr/lib/gargoyle/configure_printer.sh\n" : "")
+		
+		
 		//document.getElementById("output").value = commands;
 
 
