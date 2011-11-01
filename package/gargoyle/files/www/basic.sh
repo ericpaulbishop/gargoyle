@@ -392,10 +392,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<em>(optional)</em>
 		</div>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> gargoyle/3g
 		<div id='wan_3g_isp_container'>
 			<label class='leftcolumn' for='wan_3g_isp'>Mobile ISP:</label>
 			<select class='rightcolumn' id='wan_3g_isp' onchange='updateApnDetails()'>
@@ -423,11 +419,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<em>(optional)</em>
 		</div>
 
-<<<<<<< HEAD
-=======
->>>>>>> gargoyle/master
-=======
->>>>>>> gargoyle/3g
 		<div id='wan_port_to_lan_container' >
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>

@@ -141,21 +141,11 @@ function saveChanges()
 				else if( singleEthernetIsWan() )
 				{
 					uci.set('network', 'wan', 'ifname', defaultLanIf);
-<<<<<<< HEAD
-					
-<<<<<<< HEAD
-=======
->>>>>>> gargoyle/3g
 				}
 				else if(getSelectedValue("wan_protocol").match(/3g/))
 				{
 					uci.remove('network', 'wan', 'ifname');
 					uci.set('network', 'wan', 'auto', '1');
-<<<<<<< HEAD
-=======
->>>>>>> gargoyle/master
-=======
->>>>>>> gargoyle/3g
 				}
 				else
 				{
@@ -381,17 +371,8 @@ function saveChanges()
 			
 			
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
-<<<<<<< HEAD
-<<<<<<< HEAD
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_ssid1', 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_user', 'wan_3g_pass', 'wan_3g_apn', 'wan_3g_pincode', 'wan_3g_service', 'wan_3g_isp'];
-=======
-			wifiSsidId = wifiGSelected ? "wifi_ssid1" : "wifi_ssid1a";
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifiSsidId, 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2'];
->>>>>>> gargoyle/master
-=======
 			wifiSsidId = wifiGSelected ? "wifi_ssid1" : "wifi_ssid1a";
 			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifiSsidId, 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_user', 'wan_3g_pass', 'wan_3g_apn', 'wan_3g_pincode', 'wan_3g_service', 'wan_3g_isp'];
->>>>>>> gargoyle/3g
 			
 			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key', 'device', 'username', 'password', 'apn', 'pincode', 'service', 'mobile_isp'];
 			
@@ -885,15 +866,7 @@ function proofreadAll()
 	var errors = [];
 	if(document.getElementById("global_gateway").checked)
 	{
-<<<<<<< HEAD
-<<<<<<< HEAD
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpowera', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
-=======
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2'];
->>>>>>> gargoyle/master
-=======
 		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
->>>>>>> gargoyle/3g
 	
 		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw, vlr1, vlr1];
 	
@@ -974,10 +947,6 @@ function setGlobalVisibility()
 	}
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> gargoyle/3g
 	if (hasUSB == false) {
 		setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wired)', 'PPPoE (Wired)', 'Static IP (Wired)', 'DHCP (Wireless)', 'Static IP (Wireless)','Disabled']);
 	}
@@ -988,15 +957,6 @@ function setGlobalVisibility()
 	
 
 	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/))  && (!singleEthernetPort())) ? [1] : [0] )
-<<<<<<< HEAD
-=======
-	setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', 'none'], ['DHCP (Wired)', 'PPPoE (Wired)', 'Static IP (Wired)', 'DHCP (Wireless)', 'Static IP (Wireless)','Disabled']);
-	
-
-	setVisibility( [ 'wan_port_to_lan_container' ], (getSelectedValue("wan_protocol").match(/wireless/) && (!singleEthernetPort())) ? [1] : [0] )
->>>>>>> gargoyle/master
-=======
->>>>>>> gargoyle/3g
 	
 	
 	setWanVisibility();
