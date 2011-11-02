@@ -59,19 +59,24 @@ usb_devices_file="/proc/bus/usb/devices"
 usb_dev_drivers=$(egrep "^I:" $usb_devices_file | sed 's/^.*Driver=//g' | sed 's/[\t ].*$//')
 
 usb_dev_index=1
-p910nd_enabled=$(uci get p910nd.@p910nd[0].enabled)
+p910nd_enabled=$(uci get p910nd.@p910nd[0].enabled 2>/dev/null)
+p910nd_printer_name=$(uci get p910nd.@p910nd[0].printer_name 2>/dev/null)
+
 for dev_driver in $usb_dev_drivers ; do
 	if [ "$dev_driver" = "usblp" ] ; then
 		usb_dev_line=$(grep Product  $usb_devices_file | head -n $usb_dev_index | tail -n 1)
 		usb_dev_name=$(echo $usb_dev_line | sed 's/^.*=//g')
 
-		if [ "$p910nd_enabled" != "1" ] ; then
-			uci set p910nd.@p910nd[0].enabled=1
+
+		if [ "$p910nd_enabled" != "1" ] || [ "$p910nd_printer_name" != "$usb_dev_name"  ] ; then
+			uci set p910nd.@p910nd[0].enabled="1"
+			uci set p910nd.@p910nd[0].printer_name="$usb_dev_name"
 			uci commit
 			/etc/init.d/p910nd enable
 			/etc/init.d/p910nd stop >/dev/null 2>&1
 			/etc/init.d/p910nd start
 		fi
+		
 
 		domain=$(uci get dhcp.@dnsmasq[0].domain)
 		hostname=$(uci get system.@system[0].hostname)
@@ -100,6 +105,7 @@ done
 
 if [ "$p910nd_enabled" != "0" ] ; then
 	uci set p910nd.@p910nd[0].enabled=0
+	uci set p910nd.@p910nd[0].printer_name=""
 	uci commit
 	/etc/init.d/p910nd stop
 fi
