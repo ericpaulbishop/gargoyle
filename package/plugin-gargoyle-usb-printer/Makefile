@@ -51,4 +51,21 @@ define Package/plugin-gargoyle-usb-printer/install
 	$(CP) ./files/* $(1)/
 endef
 
+define Package/plugin-gargoyle-usb-printer/postinst
+	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+		uci set gargoyle.display.system_printers="USB Printer"
+		uci set gargoyle.scripts.system_printers="printers.sh"
+		uci set gargoyle.system.printers="360"
+		uci commit
+	fi
+endef
+define Package/plugin-gargoyle-usb-printer/postrm
+	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+		uci del gargoyle.display.system_printers
+		uci del gargoyle.scripts.system_printers
+		uci del gargoyle.system.printers
+		uci commit
+	fi
+endef
+
 $(eval $(call BuildPackage,plugin-gargoyle-usb-printer))
