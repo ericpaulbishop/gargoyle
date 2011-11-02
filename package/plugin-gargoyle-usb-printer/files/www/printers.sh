@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "ident" -c "internal.css" -j "identification.js" 
+	gargoyle_header_footer -h -s "system" -p "printers" -c "internal.css"
 ?>
 
 <script>
@@ -22,8 +22,6 @@
 	setChildText( "router_ip",  routerIp  )
 
 </script>
-
-
 
 	<fieldset>
 		<legend class="sectionheader">Attached USB Printers</legend>
@@ -41,5 +39,5 @@
 	</fieldset>
 
 <?
-	gargoyle_header_footer -f -s "system" -p "ident"
+	gargoyle_header_footer -f -s "system" -p "printers"
 ?>
