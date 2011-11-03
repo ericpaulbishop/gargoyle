@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ "$ACTION" = "add" ] ||  [ "$ACTION" = "remove" ] ; then
+	sh /usr/lib/gargoyle/configure_printer.sh
+fi
+

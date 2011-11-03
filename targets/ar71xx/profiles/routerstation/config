@@ -1462,7 +1462,7 @@ CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-net is not set
 CONFIG_PACKAGE_kmod-usb-ohci=y
 # CONFIG_PACKAGE_kmod-usb-phidget is not set
-# CONFIG_PACKAGE_kmod-usb-printer is not set
+CONFIG_PACKAGE_kmod-usb-printer=y 
 CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-airprime is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
@@ -1670,3 +1670,5 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 #
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
+CONFIG_PACKAGE_p910nd=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
