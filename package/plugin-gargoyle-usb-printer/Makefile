@@ -1,0 +1,71 @@
+#
+# Copyright (C) 2006 OpenWrt.org
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+#
+# $Id: Makefile 9349 2007-10-18 18:46:37Z blogic $
+
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=plugin_gargoyle_usb_printer
+PKG_VERSION:=$(GARGOYLE_VERSION)
+ifeq ($(GARGOYLE_VERSION),)
+     PKG_VERSION:=1.0.0
+endif
+PKG_RELEASE:=1
+
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+
+include $(INCLUDE_DIR)/package.mk
+
+define Package/plugin-gargoyle-usb-printer
+	SECTION:=admin
+	CATEGORY:=Administration
+	SUBMENU:=Gargoyle Web Interface
+	TITLE:=USB Printer Support for Gargoyle
+	DEPENDS+=+kmod-usb-printer +p910nd
+	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
+	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 
+	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8
+	MAINTAINER:=Eric Bishop
+endef
+
+define Package/plugin-gargoyle-usb-printer/description
+	USB Printer Support for Gargoyle
+endef
+
+define Build/Prepare
+endef
+
+
+define Build/Configure
+endef
+
+define Build/Compile
+endef
+
+define Package/plugin-gargoyle-usb-printer/install
+	$(INSTALL_DIR) $(1)
+	$(CP) ./files/* $(1)/
+endef
+
+define Package/plugin-gargoyle-usb-printer/postinst
+	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+		uci set gargoyle.display.system_printers="USB Printer"
+		uci set gargoyle.scripts.system_printers="printers.sh"
+		uci set gargoyle.system.printers="360"
+		uci commit
+	fi
+endef
+define Package/plugin-gargoyle-usb-printer/postrm
+	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+		uci del gargoyle.display.system_printers
+		uci del gargoyle.scripts.system_printers
+		uci del gargoyle.system.printers
+		uci commit
+	fi
+endef
+
+$(eval $(call BuildPackage,plugin-gargoyle-usb-printer))

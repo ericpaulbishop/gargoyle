@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_printers="USB Printer"
+uci set gargoyle.scripts.system_printers="printers.sh"
+uci set gargoyle.system.printers="360"
+uci commit

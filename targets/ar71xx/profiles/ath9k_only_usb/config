@@ -205,10 +205,6 @@ CONFIG_DEFAULT_ppp-mod-pppoe=y
 CONFIG_DEFAULT_swconfig=y
 CONFIG_DEFAULT_uci=y
 CONFIG_DEFAULT_udevtrigger=y
-CONFIG_DEFAULT_vsc7385-ucode-ap83=y
-CONFIG_DEFAULT_vsc7385-ucode-pb44=y
-CONFIG_DEFAULT_vsc7395-ucode-ap83=y
-CONFIG_DEFAULT_vsc7395-ucode-pb44=y
 CONFIG_DEFAULT_wpad-mini=y
 CONFIG_LINUX_2_6=y
 CONFIG_AUDIO_SUPPORT=y
@@ -1430,7 +1426,7 @@ CONFIG_PACKAGE_kmod-input-gpio-buttons=y
 CONFIG_PACKAGE_kmod-input-polldev=y
 CONFIG_PACKAGE_kmod-leds-gpio=y
 # CONFIG_PACKAGE_kmod-leds-rb750 is not set
-# CONFIG_PACKAGE_kmod-leds-wndr3700-usb is not set
+CONFIG_PACKAGE_kmod-leds-wndr3700-usb=y
 # CONFIG_PACKAGE_kmod-ledtrig-morse is not set
 # CONFIG_PACKAGE_kmod-ledtrig-netdev is not set
 # CONFIG_PACKAGE_kmod-mmc is not set
@@ -1469,7 +1465,7 @@ CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-net is not set
 CONFIG_PACKAGE_kmod-usb-ohci=y
 # CONFIG_PACKAGE_kmod-usb-phidget is not set
-# CONFIG_PACKAGE_kmod-usb-printer is not set
+CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-airprime is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
@@ -1670,3 +1666,5 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 #
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
+CONFIG_PACKAGE_p910nd=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
