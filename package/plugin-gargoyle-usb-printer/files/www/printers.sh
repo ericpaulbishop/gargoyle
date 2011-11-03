@@ -11,22 +11,25 @@
 
 <script>
 <?
-	printer_id=$(uci get p910nd.@p910nd[0].printer_name)
-	ipaddr=$(uci get network.lan.ipaddr)
+	printer_id=$(uci get p910nd.@p910nd[0].printer_name 2>/dev/null)
+	ipaddr=$(uci get network.lan.ipaddr 2>/dev/null)
 	echo "var printerId=\"$printer_id\";"
 	echo "var routerIp=\"$ipaddr\";"
 ?>
-	document.getElementById("no_printer_div").style.display = printerId == "" ? "block" : ""
-	document.getElementById("printer_found_div").style.display = printerId == "" ? "" : "block"
-	setChildText( "printer_id", printerId )
-	setChildText( "router_ip",  routerIp  )
+	window.onload = function()
+	{
+		document.getElementById("no_printer_div").style.display = printerId == "" ? "block" : "none"
+		document.getElementById("printer_found_div").style.display = printerId == "" ? "none" : "block"
+		setChildText( "printer_id", printerId )
+		setChildText( "router_ip",  routerIp  )
+	}
 
 </script>
 
 	<fieldset>
 		<legend class="sectionheader">Attached USB Printers</legend>
-		<div id="no_printers">
-			<p><em>No USB Printers are currently attached to the router.</em></p>
+		<div id="no_printer_div">
+			<p><em>No USB printers are currently attached to the router.</em></p>
 		</div>
 		<div id="printer_found_div">
 
