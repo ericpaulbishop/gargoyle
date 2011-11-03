@@ -1,8 +1,7 @@
 --- a/package/opkg/files/opkg.conf	2011-07-05 12:21:07.058893966 -0400
 +++ b/package/opkg/files/opkg.conf	2011-07-05 12:59:45.805329997 -0400
 @@ -1,4 +1,5 @@
--src/gz packages http://downloads.openwrt.org/backfire/10.03.1-rc6/$S/packages
-+src/gz packages http://downloads.openwrt.org/backfire/10.03.1-rc5/$S/packages
+ src/gz packages http://downloads.openwrt.org/backfire/10.03.1-rc6/$S/packages
 +src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.6/$S
  dest root /
  dest ram /tmp
