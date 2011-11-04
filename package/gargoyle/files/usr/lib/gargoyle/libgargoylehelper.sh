@@ -18,7 +18,7 @@ service_enabled() {
 
 	if [ -f "/etc/init.d/$1" ]; then
 		# Get number of the first START= from initscript.
-		start_num="$(sed -r '1,/RE/{/^START=[0-9]+$/!d;}; s#START=##g' "/etc/init.d/$1")"
+		start_num="$(sed -r '/^START=[0-9]+$/!d; s#START=##g' "/etc/init.d/$1")"
 		if [ -s "/etc/rc.d/S${start_num}$1" ]; then
 			return 0
 		else
