@@ -5,7 +5,7 @@
  * 			http://www.gargoyle-router.com
  * 		  
  *
- *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -32,6 +32,7 @@
 #include <stdlib.h>
 
 #include <unistd.h>
+#include <syslog.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
@@ -655,6 +656,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 	daemonize(run_in_background); //call with 0 for forground of 1 for background
 
+	//enable logging to syslog
+	openlog("ddns_gargoyle", LOG_NDELAY|LOG_PID, LOG_DAEMON );
+
+
 	//open message queue 
 	int mq = msgget(ftok(PID_PATH, MSG_ID), 0777 | IPC_CREAT );
 	if(mq < 0)
@@ -786,10 +791,21 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				ddns_service_config* service_config = get_map_element(service_configs, next_update->service_name);
 				int perform_force_update = current_time - next_update->last_full_update >= service_config->force_interval ? 1 : 0;
 			
+				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
+				char* update_description = test_domain == NULL ? dynamic_strcat(3, "\tservice provider=", service_config->service_provider, "\n") : dynamic_strcat(4, "service provider=", service_config->service_provider, "\n\tdomain=", test_domain);
+				if(perform_force_update)
+				{
+					syslog(LOG_INFO, "Checking whether update needed:\n%s", update_description);
+				}
+				else
+				{
+					syslog(LOG_INFO, "Forcing update:\n%s", update_description);
+				}
+				free(update_description);
+
 				//printf("updating %s , forcing = %d\n", service_config->name, perform_force_update);	
 
 				//determine remote ip
-				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
 				if(test_domain == NULL) 
 				{
 					/* 
@@ -852,6 +868,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						}
 					}
 				}
+				if(local_ip != NULL) { syslog(LOG_INFO, "\tlocal IP  = %s\n", local_ip);  }
+				if(remote_ip != NULL){ syslog(LOG_INFO, "\tremote IP = %s\n", remote_ip); }
+
+
 
 				//actually do update
 				int update_status = UPDATE_FAILED;
@@ -859,6 +879,10 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				{
 					update_status = do_single_update(service_config, service_providers, remote_ip, local_ip, perform_force_update, 0);
 				}
+				if(update_status == UPDATE_FAILED)     {  syslog(LOG_INFO, "\tUpdate failed\n\n"); }
+				if(update_status == UPDATE_NOT_NEEDED) {  syslog(LOG_INFO, "\tUpdate not needed, IPs match\n\n"); }
+				if(update_status == UPDATE_SUCCESSFUL) {  syslog(LOG_INFO, "\tUpdate successful\n\n"); }
+
 
 				//if this update was in response to a request, send
 				//result to message queue
@@ -1039,6 +1063,8 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	struct msqid_ds queue_data;
 	msgctl(mq, IPC_RMID, &queue_data);
 
+	//close system log
+	closelog();
 
 	//remove pid file
 	unlink(PID_PATH);
