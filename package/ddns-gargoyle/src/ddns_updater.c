@@ -792,18 +792,19 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				int perform_force_update = current_time - next_update->last_full_update >= service_config->force_interval ? 1 : 0;
 			
 				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
-				char* update_description = test_domain == NULL ? dynamic_strcat(3, "\tservice provider=", service_config->service_provider, "\n") : dynamic_strcat(4, "service provider=", service_config->service_provider, "\n\tdomain=", test_domain);
 				if(perform_force_update)
 				{
-					syslog(LOG_INFO, "Checking whether update needed:\n%s", update_description);
+					syslog(LOG_INFO, "Checking whether update needed:");
 				}
 				else
 				{
-					syslog(LOG_INFO, "Forcing update:\n%s", update_description);
+					syslog(LOG_INFO, "Forcing update:");
 				}
-				free(update_description);
-
-				//printf("updating %s , forcing = %d\n", service_config->name, perform_force_update);	
+				syslog(LOG_INFO, "\tservice provider=%s", service_config->service_provider);
+				if(test_domain != NULL)
+				{
+					syslog(LOG_INFO, "\tdomain=%s", test_domain);
+				}
 
 				//determine remote ip
 				if(test_domain == NULL) 
@@ -827,7 +828,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						}
 					}
 				}
-				//printf("remote ip = %s\n", remote_ip);
 	
 				//determine local ip, loading from saved list if ip was obtained less than 3 seconds ago (in case of multiple simultaneous updates)
 				char *interface_name = service_config->ip_source == INTERFACE ? service_config->ip_interface : "internet";
@@ -868,8 +868,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						}
 					}
 				}
-				if(local_ip != NULL) { syslog(LOG_INFO, "\tlocal IP  = %s\n", local_ip);  }
-				if(remote_ip != NULL){ syslog(LOG_INFO, "\tremote IP = %s\n", remote_ip); }
+				if(local_ip != NULL) { syslog(LOG_INFO, "\tlocal IP  = %s", local_ip);       }
+				if(local_ip == NULL) { syslog(LOG_INFO, "\tlocal IP cannot be determined");  }
+				
+				if(remote_ip != NULL){ syslog(LOG_INFO, "\tremote IP = %s\n", remote_ip);     }
+				if(remote_ip == NULL){ syslog(LOG_INFO, "\tremote IP cannot be determined");  }
 
 
 
