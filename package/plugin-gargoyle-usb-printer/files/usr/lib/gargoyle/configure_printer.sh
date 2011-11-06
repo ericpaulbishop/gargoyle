@@ -55,59 +55,48 @@ if [ ! -e /proc/bus/usb/devices ] ; then
 fi
 
 
-usb_devices_file="/proc/bus/usb/devices"
-usb_dev_drivers=$(egrep "^I:" $usb_devices_file | sed 's/^.*Driver=//g' | sed 's/[\t ].*$//')
+usb_device_lines=$(  echo $(cat "/proc/bus/usb/devices" | sed 's/^$/@@@@@/g') | sed 's/@@@@@/\n/g')
+printer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*Product=//g' | sed 's/ .:.*$//g'| head -n1)
 
-usb_dev_index=1
 p910nd_enabled=$(uci get p910nd.@p910nd[0].enabled 2>/dev/null)
 p910nd_printer_name=$(uci get p910nd.@p910nd[0].printer_name 2>/dev/null)
 
-for dev_driver in $usb_dev_drivers ; do
-	if [ "$dev_driver" = "usblp" ] ; then
-		usb_dev_line=$(grep Product  $usb_devices_file | head -n $usb_dev_index | tail -n 1)
-		usb_dev_name=$(echo $usb_dev_line | sed 's/^.*=//g')
-
-
-		if [ "$p910nd_enabled" != "1" ] || [ "$p910nd_printer_name" != "$usb_dev_name"  ] ; then
-			uci set p910nd.@p910nd[0].enabled="1"
-			uci set p910nd.@p910nd[0].printer_name="$usb_dev_name"
-			uci commit
-			/etc/init.d/p910nd enable
-			/etc/init.d/p910nd stop >/dev/null 2>&1
-			/etc/init.d/p910nd start
-		fi
+if [ -n "$printer" ] ; then
 		
-
-		domain=$(uci get dhcp.@dnsmasq[0].domain)
-		hostname=$(uci get system.@system[0].hostname)
-		revip=$(uci get network.lan.ipaddr | sed 's/\./ /g' | awk ' { print "0."$3"."$2"."$1 ; }')
-		dnsmasqConfLines=""
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=b._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=db._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=r._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=dr._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=lb._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_services._dns-sd._udp.$domain,_pdl-datastream._tcp.$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_pdl-datastream._tcp.$domain,$hostname._pdl-datastream._tcp.$domain\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nsrv-host=Gargoyle._pdl-datastream._tcp.$domain,$hostname.$domain,9100\n")
-		dnsmasqConfLines=$(printf "${dnsmasqConfLines}\ntxt-record=$hostname._pdl-datastream._tcp.$domain,ty=$usb_dev_name,product=($usb_dev_name),usb_MDL=$usb_dev_name,txtvers=1,qtotal=1,priority=20\n")
-
-
-		update_dnsmasq_conf "/etc/dnsmasq.conf" "$dnsmasqConfLines"
-
-		#after we've found a printer we're done -- for now, only one printer at a time
-		rm -rf /tmp/printer_hotplug_lock
-		exit;
-
+	if [ "$p910nd_enabled" != "1" ] || [ "$p910nd_printer_name" != "$printer"  ] ; then
+		uci set p910nd.@p910nd[0].enabled="1"
+		uci set p910nd.@p910nd[0].printer_name="$printer"
+		uci commit
+		/etc/init.d/p910nd enable
+		/etc/init.d/p910nd stop >/dev/null 2>&1
+		/etc/init.d/p910nd start
 	fi
-	usb_dev_index=$(( $usb_dev_index + 1 ))
-done
+	
 
-if [ "$p910nd_enabled" != "0" ] ; then
+	domain=$(uci get dhcp.@dnsmasq[0].domain)
+	hostname=$(uci get system.@system[0].hostname)
+	revip=$(uci get network.lan.ipaddr | sed 's/\./ /g' | awk ' { print "0."$3"."$2"."$1 ; }')
+	dnsmasqConfLines=""
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=b._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=db._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=r._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=dr._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=lb._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_services._dns-sd._udp.$domain,_pdl-datastream._tcp.$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_pdl-datastream._tcp.$domain,$hostname._pdl-datastream._tcp.$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nsrv-host=Gargoyle._pdl-datastream._tcp.$domain,$hostname.$domain,9100\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\ntxt-record=$hostname._pdl-datastream._tcp.$domain,ty=$printer,product=($printer),usb_MDL=$printer,txtvers=1,qtotal=1,priority=20\n")
+
+
+	update_dnsmasq_conf "/etc/dnsmasq.conf" "$dnsmasqConfLines"
+
+	#after we've found a printer we're done -- for now, only one printer at a time
+elif [ "$p910nd_enabled" != "0" ] ; then
 	uci set p910nd.@p910nd[0].enabled=0
 	uci set p910nd.@p910nd[0].printer_name=""
 	uci commit
-	/etc/init.d/p910nd stop
+	/etc/init.d/p910nd stop >/dev/null 2>&1
 fi
+
 rm -rf /tmp/printer_hotplug_lock
 
