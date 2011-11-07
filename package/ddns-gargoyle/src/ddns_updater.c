@@ -794,11 +794,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
 				if(perform_force_update)
 				{
-					syslog(LOG_INFO, "Checking whether update needed:");
+					syslog(LOG_INFO, "Forcing update:");
 				}
 				else
 				{
-					syslog(LOG_INFO, "Forcing update:");
+					syslog(LOG_INFO, "Checking whether update needed:");
 				}
 				syslog(LOG_INFO, "\tservice provider=%s", service_config->service_provider);
 				if(test_domain != NULL)
