@@ -2841,7 +2841,8 @@ static void send_redirect(char* extra_header, char* hostname, char* new_location
 	int extra_length = 0;
 	char extra_header_buf[5000];
 	const char *sep = new_location[0] == '/' ? "" : "/";
-	if(extra_header == NULL)
+	extra_header = extra_header == NULL ? "" : extra_header;
+	if(strcmp(extra_header, "") == 0)
 	{
 		sprintf(extra_header_buf, "Location: %s%s%s", hostname, sep, new_location);
 	}
