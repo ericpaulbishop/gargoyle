@@ -315,6 +315,7 @@ static void auth_check( char* dirname, int is_ssl);
 static void send_authenticate( char* realm, int is_ssl );
 static char* virtual_file( char* file );
 static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl );
+static void send_redirect( int s, char* extra_header, char* hostname, char* new_location, int is_ssl);
 static void send_error_body( int s, char* title, char* text );
 static int send_error_file( char* filename );
 static void send_error_tail( void );
@@ -2454,6 +2455,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			sprintf(line, "Server: %s\015\012", SERVER_SOFTWARE );
 			(void) my_write(line, strlen(line), is_ssl );
 		}
+
 		if(strstr(headers, "Date:") == NULL)
 		{
 			char line[200];
@@ -2463,9 +2465,14 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			(void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
 			sprintf(line, "Date: %s\015\012", timebuf);
 			(void) my_write(line, strlen(line), is_ssl );
-
+			if(strstr(headers, "Expires:") == NULL)
+			{
+				sprintf(line, "Expires: %s\015\012", timebuf);
+				(void) my_write(line, strlen(line), is_ssl );
+			}
+			
 		}
-		if(strstr(headers, "Expires:") == NULL)
+		else if(strstr(headers, "Expires:") == NULL)
 		{
 			char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
 			(void) my_write(line, strlen(line), is_ssl );
@@ -2842,9 +2849,32 @@ static char* virtual_file( char* file )
 	return vfile;
 }
 
+static void send_redirect( int s, char* extra_header, char* hostname, char* new_location, int is_ssl)
+{
+	int extra_length = 0;
+	char extra_header_buf[5000];
+	const char *sep = new_location[0] == '/' ? "" : "/";
+	if(extra_header == NULL)
+	{
+		sprintf(extra_header_buf, "Location: %s%s%s", hostname, sep, new_location);
+	}
+	else
+	{
+		sprintf(extra_header_buf, "%s\r\nLocation: %s%s%s", extra_header, hostname, sep, new_location);
+	}
+	add_headers(301, "Moved Permanently", extra_header_buf, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
+	send_error_body( s, "Moved Permanently", "Moved Permanently" );
+	send_error_tail();
+	send_response(is_ssl);
 
-static void
-send_error( int s, char* title, char* extra_header, char* text, int is_ssl )
+#ifdef HAVE_SSL
+	SSL_free( ssl );
+#endif /* HAVE_SSL */
+	exit( 1 );
+
+}
+
+static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl )
 {
 	add_headers(s, title, extra_header, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
 	send_error_body( s, title, text );
@@ -2962,22 +2992,17 @@ static void add_headers( int s, char* title, char* extra_header, char* me, char*
 	buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
 	add_to_response( buf, buflen );
 	
-
 	/* never cache */
+	buflen = snprintf( buf, sizeof(buf), "Expires: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	
+
 	if ( mod != (time_t) -1 )
 	{
 		(void) strftime(timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
 		buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
 		add_to_response( buf, buflen );
-		buflen = snprintf( buf, sizeof(buf), "Expires: %s\015\012", timebuf );
-		add_to_response( buf, buflen );
 	}
-	else
-	{
-		buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
-		add_to_response( buf, buflen );
-	}
-
 	if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
 	{
 		buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
