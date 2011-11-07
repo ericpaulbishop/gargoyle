@@ -544,6 +544,7 @@ main( int argc, char** argv )
 	}
 	else if( strcmp( argv[argn], "-ADL") == 0 && argn + 1 < argc )
 	{
+		++argn;
 		if(strcmp(argv[argn], "1") == 0 || strcmp(argv[argn], "true") == 0 || strcmp(argv[argn], "TRUE") == 0 || strcmp(argv[argn], "yes") == 0 || strcmp(argv[argn], "YES") == 0 )
 		{
 			allowDirectoryListing = 1;
