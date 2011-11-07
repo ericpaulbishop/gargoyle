@@ -253,8 +253,9 @@ static char* defaultRealmName;
 static char* defaultRealmPasswordFile;
 static char* defaultPageFile;
 static char* pageNotFoundFile;
+static unsigned char allowDirectoryListing;
 static unsigned short sslPort; 
-static int listen4s_fd, listen6s_fd;  
+static int listen4s_fd, listen6s_fd;
 /* end gargoyle variables */
 
 /* Request variables. */
@@ -310,7 +311,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl );
 static char** make_argp( void );
 static char** make_envp( int is_sl, unsigned short port );
 static char* build_env( char* fmt, char* arg );
-static void auth_check( char* dirname, int is_ssl );
+static void auth_check( char* dirname, int is_ssl, unsigned char is_directory );
 static void send_authenticate( char* realm, int is_ssl );
 static char* virtual_file( char* file );
 static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl );
@@ -427,6 +428,7 @@ main( int argc, char** argv )
     defaultRealmPasswordFile = NULL;
     defaultPageFile = NULL;
     pageNotFoundFile = NULL;
+    allowDirectoryListing = 1;
     sslPort = 0;
     /* end added gargoyle defaults */
 
@@ -540,6 +542,17 @@ main( int argc, char** argv )
 		++argn;
 		pageNotFoundFile = argv[argn];
 	}
+	else if( strcmp( argv[argn], "-ADL") == 0 && argn + 1 < argc )
+	{
+		if(strcmp(argv[argn], "1") == 0 || strcmp(argv[argn], "true") == 0 || strcmp(argv[argn], "TRUE") == 0 || strcmp(argv[argn], "yes") == 0 || strcmp(argv[argn], "YES") == 0 )
+		{
+			allowDirectoryListing = 1;
+		}
+		else
+		{
+			allowDirectoryListing = 0;
+		}
+	}	
 
 #ifdef HAVE_SSL
 	else if( strcmp( argv[argn], "-SP" ) == 0 && argn + 1 < argc )
@@ -1255,6 +1268,20 @@ read_config( char* filename )
 		value_required( name, value );
 		pageNotFoundFile = e_strdup( value );
 	    	}
+	    else if( strcasecmp( name, "allow_directory_listing" ) == 0 )
+	  	{
+			value_required( name, value );
+			if(strcmp(value, "1") == 0 || strcmp(value, "true") == 0 || strcmp(value, "TRUE") == 0 || strcmp(value, "yes") == 0 || strcmp(value, "YES") == 0 )
+			{
+				allowDirectoryListing = 1;
+			}
+			else
+			{
+				allowDirectoryListing = 0;
+			}
+	    	}
+     
+
 
 
 
@@ -1794,209 +1821,184 @@ get_pathinfo( void )
     }
 
 
-static void
-do_file( int is_ssl, unsigned short conn_port )
-    {
-    char buf[10000];
-    char mime_encodings[500];
-    const char* mime_type;
-    char fixed_mime_type[500];
-    char* cp;
-    int fd;
+static void do_file( int is_ssl, unsigned short conn_port )
+{
+	char buf[10000];
+	char mime_encodings[500];
+	const char* mime_type;
+	char fixed_mime_type[500];
+	char* cp;
+	int fd;
 
-    /* Check authorization for this directory. */
-    (void) strncpy( buf, file, sizeof(buf) );
-    cp = strrchr( buf, '/' );
-    if ( cp == (char*) 0 )
-	(void) strcpy( buf, "." );
-    else
-	*cp = '\0';
-    auth_check( buf, is_ssl );
-
-    /* Check if the filename is the AUTH_FILE itself - that's verboten. */
-    if ( strcmp( file, AUTH_FILE ) == 0 ||
-	 ( strcmp( &(file[strlen(file) - sizeof(AUTH_FILE) + 1]), AUTH_FILE ) == 0 &&
-	   file[strlen(file) - sizeof(AUTH_FILE)] == '/' ) )
+	/* Check authorization for this directory. */
+	(void) strncpy( buf, file, sizeof(buf) );
+	cp = strrchr( buf, '/' );
+	if ( cp == (char*) 0 )
 	{
-	syslog(
-	    LOG_NOTICE, "%.80s URL \"%.80s\" tried to retrieve an auth file",
-	    ntoa( &client_addr ), path );
-	send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+		(void) strcpy( buf, "." );
 	}
-
-    /* gargoyle addition -- filename shouldn't be default password file either */
-    if(defaultRealmName != NULL && defaultRealmPasswordFile != NULL)
-    {
-	if (	strcmp( file, defaultRealmPasswordFile ) == 0 ||
-		strcmp(	&(file[strlen(file) - sizeof(defaultRealmPasswordFile) + 1]), defaultRealmPasswordFile ) == 0 &&
-		file[strlen(file) - sizeof(defaultRealmPasswordFile)] == '/' 
-	)
+	else
 	{
-		syslog(	LOG_NOTICE,
-			"%.80s URL \"%.80s\" tried to retrieve an auth file",
-			ntoa( &client_addr ), path 
-			);
+		*cp = '\0';
+	}
+	auth_check( buf, is_ssl, 0 );
+
+	/* Check if the filename is the AUTH_FILE itself - that's verboten. */
+	if ( strcmp( file, AUTH_FILE ) == 0 || ( strcmp( &(file[strlen(file) - sizeof(AUTH_FILE) + 1]), AUTH_FILE ) == 0 && file[strlen(file) - sizeof(AUTH_FILE)] == '/' ) )
+	{
+		syslog( LOG_NOTICE, "%.80s URL \"%.80s\" tried to retrieve an auth file", ntoa( &client_addr ), path );
 		send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
 	}
-	
-    }
-    /* End gargoyle addition */
 
-
-    /* Referer check. */
-    check_referer(is_ssl);
-
-    /* Is it CGI? */
-    if ( cgi_pattern != (char*) 0 && match( cgi_pattern, file ) )
+	/* gargoyle addition -- filename shouldn't be default password file either */
+	if(defaultRealmName != NULL && defaultRealmPasswordFile != NULL)
 	{
-	do_cgi(is_ssl, conn_port);
-	return;
+		if (	strcmp( file, defaultRealmPasswordFile ) == 0 || strcmp( &(file[strlen(file) - sizeof(defaultRealmPasswordFile) + 1]), defaultRealmPasswordFile ) == 0 && file[strlen(file) - sizeof(defaultRealmPasswordFile)] == '/' )
+		{
+			syslog(	LOG_NOTICE, "%.80s URL \"%.80s\" tried to retrieve an auth file", ntoa( &client_addr ), path );
+			send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+		}
 	}
-    else if ( pathinfo != (char*) 0 )
-	send_error( 404, "Not Found", "", "File not found.", is_ssl );
+	/* End gargoyle addition */
 
-    fd = open( file, O_RDONLY );
-    if ( fd < 0 )
+
+	/* Referer check. */
+	check_referer(is_ssl);
+
+	/* Is it CGI? */
+	if ( cgi_pattern != (char*) 0 && match( cgi_pattern, file ) )
 	{
-	syslog(
-	    LOG_INFO, "%.80s File \"%.80s\" is protected",
-	    ntoa( &client_addr ), path );
-	send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+		do_cgi(is_ssl, conn_port);
+		return;
 	}
-    mime_type = figure_mime( file, mime_encodings, sizeof(mime_encodings) );
-    (void) snprintf(
-	fixed_mime_type, sizeof(fixed_mime_type), mime_type, charset );
-    if ( if_modified_since != (time_t) -1 &&
-	 if_modified_since >= sb.st_mtime )
+	else if ( pathinfo != (char*) 0 )
 	{
-	add_headers(
-	    304, "Not Modified", "", mime_encodings, fixed_mime_type,
-	    (off_t) -1, sb.st_mtime );
+		send_error( 404, "Not Found", "", "File not found.", is_ssl );
+	}
+
+	fd = open( file, O_RDONLY );
+	if ( fd < 0 )
+	{
+		syslog( LOG_INFO, "%.80s File \"%.80s\" is protected", ntoa( &client_addr ), path );
+		send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+	}
+	mime_type = figure_mime( file, mime_encodings, sizeof(mime_encodings) );
+	(void) snprintf( fixed_mime_type, sizeof(fixed_mime_type), mime_type, charset );
+	if ( if_modified_since != (time_t) -1 && if_modified_since >= sb.st_mtime )
+	{
+		add_headers(304, "Not Modified", "", mime_encodings, fixed_mime_type, (off_t) -1, sb.st_mtime );
+		send_response(is_ssl);
+		return;
+	}
+	add_headers(200, "Ok", "", mime_encodings, fixed_mime_type, sb.st_size, sb.st_mtime );
 	send_response(is_ssl);
-	return;
+	if ( method == METHOD_HEAD )
+	{
+		return;
 	}
-    add_headers(
-	200, "Ok", "", mime_encodings, fixed_mime_type, sb.st_size,
-	sb.st_mtime );
-    send_response(is_ssl);
-    if ( method == METHOD_HEAD )
-	return;
 
-    if ( sb.st_size > 0 )	/* ignore zero-length files */
+	if ( sb.st_size > 0 )	/* ignore zero-length files */
 	{
 #ifdef HAVE_SENDFILE
 
 #ifndef HAVE_SSL
-	(void) my_sendfile( fd, conn_fd, 0, sb.st_size );
+		(void) my_sendfile( fd, conn_fd, 0, sb.st_size );
 #else /* HAVE_SSL */
-	if ( is_ssl )
-	    send_via_write( fd, sb.st_size, is_ssl );
-	else
-	    (void) my_sendfile( fd, conn_fd, 0, sb.st_size );
+		if ( is_ssl )
+		{
+			send_via_write( fd, sb.st_size, is_ssl );
+		}
+		else
+		{
+			(void) my_sendfile( fd, conn_fd, 0, sb.st_size );
+		}
 #endif /* HAVE_SSL */
 
 #else /* HAVE_SENDFILE */
-
-   	send_via_write( fd, sb.st_size, is_ssl );
+		send_via_write( fd, sb.st_size, is_ssl );
 
 #endif /* HAVE_SENDFILE */
 	}
 
-    (void) close( fd );
-    }
+	(void) close( fd );
+}
 
 
-static void
-do_dir( int is_ssl )
-    {
-    char buf[10000];
-    size_t buflen;
-    char* contents;
-    size_t contents_size, contents_len;
+static void do_dir( int is_ssl )
+{
+	char buf[10000];
+	size_t buflen;
+	char* contents;
+	size_t contents_size, contents_len;
 #ifdef HAVE_SCANDIR
-    int n, i;
-    struct dirent **dl;
-    char* name_info;
+	int n, i;
+	struct dirent **dl;
+	char* name_info;
 #else /* HAVE_SCANDIR */
-    char command[10000];
-    FILE* fp;
+	char command[10000];
+	FILE* fp;
 #endif /* HAVE_SCANDIR */
 
-    if ( pathinfo != (char*) 0 )
-	send_error( 404, "Not Found", "", "File not found.", is_ssl );
+	if ( pathinfo != (char*) 0 ) { send_error( 404, "Not Found", "", "File not found.", is_ssl ); }
 
-    /* Check authorization for this directory. */
-    auth_check( file, is_ssl );
+	/* Check authorization for this directory. */
+	auth_check( file, is_ssl, 1 );
 
-    /* Referer check. */
-    check_referer(is_ssl);
+	/* Referer check. */
+	check_referer(is_ssl);
 
 #ifdef HAVE_SCANDIR
-    n = scandir( file, &dl, NULL, alphasort );
-    if ( n < 0 )
+	n = scandir( file, &dl, NULL, alphasort );
+	if ( n < 0 )
 	{
-	syslog(
-	    LOG_INFO, "%.80s Directory \"%.80s\" is protected",
-	    ntoa( &client_addr ), path );
-	send_error( 403, "Forbidden", "", "Directory is protected.", is_ssl );
+		syslog( LOG_INFO, "%.80s Directory \"%.80s\" is protected", ntoa( &client_addr ), path );
+		send_error( 403, "Forbidden", "", "Directory is protected.", is_ssl );
 	}
 #endif /* HAVE_SCANDIR */
 
-    contents_size = 0;
-    buflen = snprintf( buf, sizeof(buf), "\
-<HTML>\n\
-<HEAD><TITLE>Index of %s</TITLE></HEAD>\n\
-<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
-<H4>Index of %s</H4>\n\
-<PRE>\n",
-	file, file );
-    add_to_buf( &contents, &contents_size, &contents_len, buf, buflen );
+	contents_size = 0;
+	buflen = snprintf( buf, sizeof(buf), "<HTML>\n<HEAD><TITLE>Index of %s</TITLE></HEAD>\n<BODY BGCOLOR=\"#99cc99\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n<H4>Index of %s</H4>\n<PRE>\n", file, file );
+	add_to_buf( &contents, &contents_size, &contents_len, buf, buflen );
 
 #ifdef HAVE_SCANDIR
 
-    for ( i = 0; i < n; ++i )
+	for ( i = 0; i < n; ++i )
 	{
-	name_info = file_details( file, dl[i]->d_name );
-	add_to_buf(
-	    &contents, &contents_size, &contents_len, name_info,
-	    strlen( name_info ) );
+		name_info = file_details( file, dl[i]->d_name );
+		add_to_buf( &contents, &contents_size, &contents_len, name_info, strlen( name_info ) );
 	}
 
 #else /* HAVE_SCANDIR */
-    /* Magic HTML ls command! */
-    if ( strchr( file, '\'' ) == (char*) 0 )
+	/* Magic HTML ls command! */
+	if ( strchr( file, '\'' ) == (char*) 0 )
 	{
-	(void) snprintf(
-	    command, sizeof(command),
-	    "ls -lgF '%s' | tail +2 | sed -e 's/^\\([^ ][^ ]*\\)\\(  *[^ ][^ ]*  *[^ ][^ ]*  *[^ ][^ ]*\\)\\(  *[^ ][^ ]*\\)  *\\([^ ][^ ]*  *[^ ][^ ]*  *[^ ][^ ]*\\)  *\\(.*\\)$/\\1 \\3  \\4  |\\5/' -e '/ -> /!s,|\\([^*]*\\)$,|<A HREF=\"\\1\">\\1</A>,' -e '/ -> /!s,|\\(.*\\)\\([*]\\)$,|<A HREF=\"\\1\">\\1</A>\\2,' -e '/ -> /s,|\\([^@]*\\)\\(@* -> \\),|<A HREF=\"\\1\">\\1</A>\\2,' -e 's/|//'",
-	    file );
-	fp = popen( command, "r" );
-	for (;;)
-	    {
-	    size_t r;
-	    r = fread( buf, 1, sizeof(buf), fp );
-	    if ( r == 0 )
-		break;
-	    add_to_buf( &contents, &contents_size, &contents_len, buf, r );
-	    }
-	(void) pclose( fp );
+		(void) snprintf(
+			command, sizeof(command),
+			"ls -lgF '%s' | tail +2 | sed -e 's/^\\([^ ][^ ]*\\)\\(  *[^ ][^ ]*  *[^ ][^ ]*  *[^ ][^ ]*\\)\\(  *[^ ][^ ]*\\)  *\\([^ ][^ ]*  *[^ ][^ ]*  *[^ ][^ ]*\\)  *\\(.*\\)$/\\1 \\3  \\4  |\\5/' -e '/ -> /!s,|\\([^*]*\\)$,|<A HREF=\"\\1\">\\1</A>,' -e '/ -> /!s,|\\(.*\\)\\([*]\\)$,|<A HREF=\"\\1\">\\1</A>\\2,' -e '/ -> /s,|\\([^@]*\\)\\(@* -> \\),|<A HREF=\"\\1\">\\1</A>\\2,' -e 's/|//'",
+			file );
+		fp = popen( command, "r" );
+		for (;;)
+		{
+			size_t r;
+			r = fread( buf, 1, sizeof(buf), fp );
+			if ( r == 0 )
+			break;
+			add_to_buf( &contents, &contents_size, &contents_len, buf, r );
+		}
+		(void) pclose( fp );
 	}
 #endif /* HAVE_SCANDIR */
 
-    buflen = snprintf( buf, sizeof(buf), "\
-</PRE>\n\
-<HR>\n\
-<ADDRESS><A HREF=\"%s\">%s</A></ADDRESS>\n\
-</BODY>\n\
-</HTML>\n",
-	SERVER_URL, SERVER_SOFTWARE );
-    add_to_buf( &contents, &contents_size, &contents_len, buf, buflen );
+	buflen = snprintf( buf, sizeof(buf), "</PRE>\n<HR>\n<ADDRESS><A HREF=\"%s\">%s</A></ADDRESS>\n</BODY>\n</HTML>\n", SERVER_URL, SERVER_SOFTWARE );
+	add_to_buf( &contents, &contents_size, &contents_len, buf, buflen );
 
-    add_headers( 200, "Ok", "", "", "text/html; charset=%s", contents_len, sb.st_mtime );
-    if ( method != METHOD_HEAD )
-	add_to_response( contents, contents_len );
-    send_response(is_ssl);
-    }
+	add_headers( 200, "Ok", "", "", "text/html; charset=%s", contents_len, sb.st_mtime );
+	if ( method != METHOD_HEAD )
+	{
+		add_to_response( contents, contents_len );
+	}
+	send_response(is_ssl);
+}
 
 
 #ifdef HAVE_SCANDIR
@@ -2403,7 +2405,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		}
 		if(strstr(headers, "Expires:") == NULL)
 		{
-			const char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
 			(void) my_write(line, strlen(line), is_ssl );
 		}
 
@@ -2595,219 +2597,239 @@ build_env( char* fmt, char* arg )
 
 
 /* this whole auth_check function has been heavily modified for the gargoyle additions */
-static void auth_check( char* dirname, int is_ssl )
+static void auth_check( char* dirname, int is_ssl, unsigned char is_directory )
 {
-    char authpath[10000];
-    char realmName[500];
-    struct stat sb;
-    char authinfo[500];
-    char* authpass;
-    char* colon;
-    static char line[10000];
-    int l;
-    FILE* fp;
-    char* cryp;
+	char authpath[10000];
+	char realmName[500];
+	struct stat sb;
+	char authinfo[500];
+	char* authpass;
+	char* colon;
+	static char line[10000];
+	int l;
+	FILE* fp;
+	char* cryp;
 
-    
-    /* Construct auth filename. */
-    if ( dirname[strlen(dirname) - 1] == '/' )
-	(void) snprintf( authpath, sizeof(authpath), "%s%s", dirname, AUTH_FILE );
-    else
-	(void) snprintf( authpath, sizeof(authpath), "%s/%s", dirname, AUTH_FILE );
-
-    /* Does this directory have an auth file? */
-    if ( stat( authpath, &sb ) < 0 )
-    {
-	/* is there a default realm ? */
-	if(defaultRealmName == NULL || defaultRealmPasswordFile == NULL)
+	if(is_directory == 1 && allowDirectoryListing == 0)
 	{
-		/* Nope, let the request go through. */
+		send_authenticate( dirname, is_ssl );
 		return;
+	}
+	
+	/* Construct auth filename. */
+	if ( dirname[strlen(dirname) - 1] == '/' )
+	{
+		(void) snprintf( authpath, sizeof(authpath), "%s%s", dirname, AUTH_FILE );
 	}
 	else
 	{
-		/* Use default realm info */
-		snprintf( authpath, sizeof(authpath), "%s", defaultRealmPasswordFile);
-	}
-    }
-
-    /* If auth file is default realm password file, realm should be the default realm,
-     *  otherwise it should be the directory name */
-    if(strcmp(authpath, defaultRealmPasswordFile) == 0)
-    {
-	snprintf( realmName, sizeof(realmName), "%s", defaultRealmName);
-    }
-    else
-    {
-	snprintf( realmName, sizeof(realmName), "%s", dirname);
-    }
-
-
-    /* Does this request contain authorization info? */
-    if ( authorization == (char*) 0 )
-	/* Nope, return a 401 Unauthorized. */
-	send_authenticate( realmName, is_ssl );
-
-    /* Basic authorization info? */
-    if ( strncmp( authorization, "Basic ", 6 ) != 0 )
-	send_authenticate( realmName, is_ssl );
-
-    /* Decode it. */
-    l = b64_decode(
-	&(authorization[6]), (unsigned char*) authinfo, sizeof(authinfo) - 1 );
-    authinfo[l] = '\0';
-    /* Split into user and password. */
-    authpass = strchr( authinfo, ':' );
-    if ( authpass == (char*) 0 )
-	/* No colon?  Bogus auth info. */
-	send_authenticate( realmName, is_ssl );
-    *authpass++ = '\0';
-    /* If there are more f:ields, cut them off. */
-    colon = strchr( authpass, ':' );
-    if ( colon != (char*) 0 )
-	*colon = '\0';
-
-    /* Open the password file. */
-    fp = fopen( authpath, "r" );
-    if ( fp == (FILE*) 0 )
-	{
-	/* The file exists but we can't open it?  Disallow access. */
-	syslog(
-	    LOG_ERR, "%.80s auth file %.80s could not be opened - %m",
-	    ntoa( &client_addr ), authpath );
-	send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+		(void) snprintf( authpath, sizeof(authpath), "%s/%s", dirname, AUTH_FILE );
 	}
 
-    /* Read it. */
-    while ( fgets( line, sizeof(line), fp ) != (char*) 0 )
+	/* Does this directory have an auth file? */
+	if ( stat( authpath, &sb ) < 0 )
 	{
-	/* Nuke newline. */
-	l = strlen( line );
-	if ( line[l - 1] == '\n' )
-	    line[l - 1] = '\0';
-	/* Split into user and encrypted password. */
-	cryp = strchr( line, ':' );
-	if ( cryp == (char*) 0 )
-	    continue;
-	*cryp++ = '\0';
-	/* Is this the right user? */
-	if ( strcmp( line, authinfo ) == 0 )
-	    {
-	    /* Yes. */
-	    (void) fclose( fp );
-	    /* So is the password right? */
-	    if ( strcmp( crypt( authpass, cryp ), cryp ) == 0 )
+		/* is there a default realm ? */
+		if(defaultRealmName == NULL || defaultRealmPasswordFile == NULL)
 		{
-		/* Ok! */
-		remoteuser = line;
-		return;
+			/* Nope, let the request go through. */
+			return;
 		}
-	    else
-		/* No. */
-		send_authenticate( realmName, is_ssl );
-	    }
+		else
+		{
+			/* Use default realm info */
+			snprintf( authpath, sizeof(authpath), "%s", defaultRealmPasswordFile);
+		}
 	}
 
-    /* Didn't find that user.  Access denied. */
-    (void) fclose( fp );
-    send_authenticate( realmName, is_ssl );
+	/* If auth file is default realm password file, realm should be the default realm,
+	 *  otherwise it should be the directory name */
+	if(strcmp(authpath, defaultRealmPasswordFile) == 0)
+	{
+		snprintf( realmName, sizeof(realmName), "%s", defaultRealmName);
+	}
+	else
+	{
+		snprintf( realmName, sizeof(realmName), "%s", dirname);
+	}
+
+
+	/* Does this request contain authorization info? */
+	if ( authorization == (char*) 0 )
+	{
+		/* Nope, return a 401 Unauthorized. */
+		send_authenticate( realmName, is_ssl );
+	}
+
+	/* Basic authorization info? */
+	if ( strncmp( authorization, "Basic ", 6 ) != 0 )
+	{
+		send_authenticate( realmName, is_ssl );
+	}
+
+	/* Decode it. */
+	l = b64_decode(
+	&(authorization[6]), (unsigned char*) authinfo, sizeof(authinfo) - 1 );
+	authinfo[l] = '\0';
+	/* Split into user and password. */
+	authpass = strchr( authinfo, ':' );
+	if ( authpass == (char*) 0 )
+	{
+		/* No colon?  Bogus auth info. */
+		send_authenticate( realmName, is_ssl );
+	}
+	*authpass++ = '\0';
+	/* If there are more f:ields, cut them off. */
+	colon = strchr( authpass, ':' );
+	if ( colon != (char*) 0 )
+	{
+		*colon = '\0';
+	}
+
+	/* Open the password file. */
+	fp = fopen( authpath, "r" );
+	if ( fp == (FILE*) 0 )
+	{
+		/* The file exists but we can't open it?  Disallow access. */
+		syslog(LOG_ERR, "%.80s auth file %.80s could not be opened - %m", ntoa( &client_addr ), authpath );
+		send_error( 403, "Forbidden", "", "File is protected.", is_ssl );
+	}
+
+	/* Read it. */
+	while ( fgets( line, sizeof(line), fp ) != (char*) 0 )
+	{
+		/* Nuke newline. */
+		l = strlen( line );
+		if ( line[l - 1] == '\n' )
+		{
+			line[l - 1] = '\0';
+		}
+	
+		/* Split into user and encrypted password. */
+		cryp = strchr( line, ':' );
+		if ( cryp == (char*) 0 )
+		{
+			continue;
+		}
+		*cryp++ = '\0';
+		
+		/* Is this the right user? */
+		if ( strcmp( line, authinfo ) == 0 )
+		{
+			/* Yes. */
+			(void) fclose( fp );
+			
+			/* So is the password right? */
+			if ( strcmp( crypt( authpass, cryp ), cryp ) == 0 )
+			{
+				/* Ok! */
+				remoteuser = line;
+				return;
+			}
+			else
+			{
+				/* No. */
+				send_authenticate( realmName, is_ssl );
+			}
+		}
+	}
+
+	/* Didn't find that user.  Access denied. */
+	(void) fclose( fp );
+	send_authenticate( realmName, is_ssl );
 }
 /* end of function modified by gargoyle */
 
 
 
-static void
-send_authenticate( char* realm, int is_ssl )
-    {
-    char header[10000];
-
-    (void) snprintf(
-	header, sizeof(header), "WWW-Authenticate: Basic realm=\"%s\"", realm );
-    send_error( 401, "Unauthorized", header, "Authorization required.", is_ssl );
-    }
+static void send_authenticate( char* realm, int is_ssl )
+{
+	char header[10000];
+	(void) snprintf(header, sizeof(header), "WWW-Authenticate: Basic realm=\"%s\"", realm );
+	send_error( 401, "Unauthorized", header, "Authorization required.", is_ssl );
+}
 
 
-static char*
-virtual_file( char* file )
-    {
-    char* cp;
-    static char vfile[10000];
+static char* virtual_file( char* file )
+{
+	char* cp;
+	static char vfile[10000];
 
-    /* Use the request's hostname, or fall back on the IP address. */
-    if ( host != (char*) 0 )
-	req_hostname = host;
-    else
+	/* Use the request's hostname, or fall back on the IP address. */
+	if ( host != (char*) 0 )
 	{
-	usockaddr usa;
-	int sz = sizeof(usa);
-	if ( getsockname( conn_fd, &usa.sa, &sz ) < 0 )
-	    req_hostname = "UNKNOWN_HOST";
-	else
-	    req_hostname = ntoa( &usa );
+		req_hostname = host;
 	}
-    /* Pound it to lower case. */
-    for ( cp = req_hostname; *cp != '\0'; ++cp )
-	if ( isupper( *cp ) )
-	    *cp = tolower( *cp );
-    (void) snprintf( vfile, sizeof(vfile), "%s/%s", req_hostname, file );
-    return vfile;
-    }
+	else
+	{
+		usockaddr usa;
+		int sz = sizeof(usa);
+		if ( getsockname( conn_fd, &usa.sa, &sz ) < 0 )
+		{
+			req_hostname = "UNKNOWN_HOST";
+		}
+		else
+		{
+			req_hostname = ntoa( &usa );
+		}
+	}
+	/* Pound it to lower case. */
+	for ( cp = req_hostname; *cp != '\0'; ++cp )
+	{
+		if ( isupper( *cp ) )
+		{
+			*cp = tolower( *cp );
+		}
+	}
+	(void) snprintf( vfile, sizeof(vfile), "%s/%s", req_hostname, file );
+	return vfile;
+}
 
 
 static void
 send_error( int s, char* title, char* extra_header, char* text, int is_ssl )
-    {
-    add_headers(
-	s, title, extra_header, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
-
-    send_error_body( s, title, text );
-
-    send_error_tail();
-
-    send_response(is_ssl);
+{
+	add_headers(s, title, extra_header, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
+	send_error_body( s, title, text );
+	send_error_tail();
+	send_response(is_ssl);
 
 #ifdef HAVE_SSL
-    SSL_free( ssl );
+	SSL_free( ssl );
 #endif /* HAVE_SSL */
-    exit( 1 );
-    }
+	exit( 1 );
+}
 
 
-static void
-send_error_body( int s, char* title, char* text)
-    {
-    char filename[1000];
-    char buf[10000];
-    int buflen;
+static void send_error_body( int s, char* title, char* text)
+{
+	char filename[1000];
+	char buf[10000];
+	int buflen;
 
-    if ( vhost && req_hostname != (char*) 0 )
+	if ( vhost && req_hostname != (char*) 0 )
 	{
-	/* Try virtual-host custom error page. */
-	(void) snprintf(
-	    filename, sizeof(filename), "%s/%s/err%d.html",
-	    req_hostname, ERR_DIR, s );
-	if ( send_error_file( filename ) )
-	    return;
+		/* Try virtual-host custom error page. */
+		(void) snprintf(filename, sizeof(filename), "%s/%s/err%d.html",req_hostname, ERR_DIR, s );
+		if ( send_error_file( filename ) )
+		{
+			return;
+		}
 	}
 
-    /* Try server-wide custom error page. */
-    (void) snprintf(
-	filename, sizeof(filename), "%s/err%d.html", ERR_DIR, s );
-    if ( send_error_file( filename ) )
-	return;
+	/* Try server-wide custom error page. */
+	(void) snprintf( filename, sizeof(filename), "%s/err%d.html", ERR_DIR, s );
+	if ( send_error_file( filename ) )
+	{
+		return;
+	}
 
-    /* Send built-in error page. */
-    buflen = snprintf(
-	buf, sizeof(buf), "\
-<HTML>\n\
-<HEAD><TITLE>%d %s</TITLE></HEAD>\n\
-<BODY BGCOLOR=\"#cc9999\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n\
-<H4>%d %s</H4>\n",
-	s, title, s, title );
-    add_to_response( buf, buflen );
-    buflen = snprintf( buf, sizeof(buf), "%s\n", text );
-    add_to_response( buf, buflen );
-    }
+	/* Send built-in error page. */
+	buflen = snprintf(buf, sizeof(buf), "<HTML>\n<HEAD><TITLE>%d %s</TITLE></HEAD>\n<BODY BGCOLOR=\"#cc9999\" TEXT=\"#000000\" LINK=\"#2020ff\" VLINK=\"#4040cc\">\n<H4>%d %s</H4>\n",	s, title, s, title );
+	add_to_response( buf, buflen );
+	buflen = snprintf( buf, sizeof(buf), "%s\n", text );
+	add_to_response( buf, buflen );
+}
 
 
 static int
@@ -2862,85 +2884,73 @@ send_error_tail( void )
     }
 
 
-static void
-add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b, time_t mod )
-    {
-    time_t now;
-    char timebuf[100];
-    char buf[10000];
-    int buflen;
-    const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
+static void add_headers( int s, char* title, char* extra_header, char* me, char* mt, off_t b, time_t mod )
+{
+	time_t now;
+	char timebuf[100];
+	char buf[10000];
+	int buflen;
+	const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
 
-    status = s;
-    bytes = b;
-    make_log_entry();
-    start_response();
-    buflen = snprintf( buf, sizeof(buf), "%s %d %s\015\012", protocol, status, title );
-    add_to_response( buf, buflen );
-    buflen = snprintf( buf, sizeof(buf), "Server: %s\015\012", SERVER_SOFTWARE );
-    add_to_response( buf, buflen );
-    now = time( (time_t*) 0 );
-    (void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
-    buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
-    add_to_response( buf, buflen );
-    
-    /*
-    if ( max_age >= 0 )
-	{
-	time_t expires = now + max_age;
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &expires ) );
-	buflen = snprintf( buf, sizeof(buf),
-	    "Expires: %s\015\012", timebuf );
+	status = s;
+	bytes = b;
+	make_log_entry();
+	start_response();
+	buflen = snprintf( buf, sizeof(buf), "%s %d %s\015\012", protocol, status, title );
 	add_to_response( buf, buflen );
+	buflen = snprintf( buf, sizeof(buf), "Server: %s\015\012", SERVER_SOFTWARE );
+	add_to_response( buf, buflen );
+	now = time( (time_t*) 0 );
+	(void) strftime( timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &now ) );
+	buflen = snprintf( buf, sizeof(buf), "Date: %s\015\012", timebuf );
+	add_to_response( buf, buflen );
+	
+
+	/* never cache */
+	if ( mod != (time_t) -1 )
+	{
+		(void) strftime(timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
+		buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
+		add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "Expires: %s\015\012", timebuf );
+		add_to_response( buf, buflen );
 	}
-    */
-
-    /* never cache */
-    buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
-    add_to_response( buf, buflen );
-
-    if ( mod != (time_t) -1 )
+	else
 	{
-	(void) strftime(
-	    timebuf, sizeof(timebuf), rfc1123_fmt, gmtime( &mod ) );
-	buflen = snprintf( buf, sizeof(buf), "Last-Modified: %s\015\012", timebuf );
-	add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012", timebuf );
+		add_to_response( buf, buflen );
 	}
 
-
-
-    if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
+	if ( extra_header != (char*) 0 && extra_header[0] != '\0' )
 	{
-	buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
-	add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "%s\015\012", extra_header );
+		add_to_response( buf, buflen );
 	}
-    if ( me != (char*) 0 && me[0] != '\0' )
+	if ( me != (char*) 0 && me[0] != '\0' )
 	{
-	buflen = snprintf( buf, sizeof(buf), "Content-Encoding: %s\015\012", me );
-	add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "Content-Encoding: %s\015\012", me );
+		add_to_response( buf, buflen );
 	}
-    if ( mt != (char*) 0 && mt[0] != '\0' )
+	if ( mt != (char*) 0 && mt[0] != '\0' )
 	{
-	buflen = snprintf( buf, sizeof(buf), "Content-Type: %s\015\012", mt );
-	add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "Content-Type: %s\015\012", mt );
+		add_to_response( buf, buflen );
 	}
-    if ( bytes >= 0 )
+	if ( bytes >= 0 )
 	{
-	buflen = snprintf(
-	    buf, sizeof(buf), "Content-Length: %lld\015\012", (long long int) bytes );
-	add_to_response( buf, buflen );
+		buflen = snprintf(buf, sizeof(buf), "Content-Length: %lld\015\012", (long long int) bytes );
+		add_to_response( buf, buflen );
 	}
-    if ( p3p != (char*) 0 && p3p[0] != '\0' )
+	if ( p3p != (char*) 0 && p3p[0] != '\0' )
 	{
-	buflen = snprintf( buf, sizeof(buf), "P3P: %s\015\012", p3p );
-	add_to_response( buf, buflen );
+		buflen = snprintf( buf, sizeof(buf), "P3P: %s\015\012", p3p );
+		add_to_response( buf, buflen );
 	}
 
-    /* end of headers */
-    buflen = snprintf( buf, sizeof(buf), "\015\012" );
-    add_to_response( buf, buflen );
-    }
+	/* end of headers */
+	buflen = snprintf( buf, sizeof(buf), "\015\012" );
+	add_to_response( buf, buflen );
+}
 
 
 static void
