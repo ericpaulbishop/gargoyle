@@ -315,7 +315,7 @@ static void auth_check( char* dirname, int is_ssl);
 static void send_authenticate( char* realm, int is_ssl );
 static char* virtual_file( char* file );
 static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl );
-static void send_redirect( int s, char* extra_header, char* hostname, char* new_location, int is_ssl);
+static void send_redirect( char* extra_header, char* hostname, char* new_location, int is_ssl);
 static void send_error_body( int s, char* title, char* text );
 static int send_error_file( char* filename );
 static void send_error_tail( void );
@@ -1681,25 +1681,28 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 		fclose(f);
 		*/
 
-		if(pageNotFoundFile != NULL)
+		if(pageNotFoundFile != NULL && host != NULL)
 		{
 			/*
 			f = fopen("/tmp/test2.tmp", "w");
 			fprintf(f, "not found occured, have pageNotFoundFile = %s\n", pageNotFoundFile);
 			fclose(f);
 			*/
-
+			/*
 			file=pageNotFoundFile;
 			r = stat( file, &sb );
 			if ( r < 0 )
 			{
 				r = get_pathinfo();
 			}
+			*/
+			send_redirect("", host, pageNotFoundFile, is_ssl);
 		}
-		if(r < 0)
+		else
 		{
 			send_error( 404, "Not Found", "", "File not found.", is_ssl );
 		}
+		
 	}
 
 
@@ -1763,29 +1766,13 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 			/* Nope, no index file, so it's an actual directory request. */
 			if(allowDirectoryListing == 0)
 			{
-				int r = -1;
-				if(pageNotFoundFile != NULL)
+				if(pageNotFoundFile != NULL && host != NULL)
 				{
-					file=pageNotFoundFile;
-					r = stat( file, &sb );
-					if ( r < 0 )
-					{
-						r = get_pathinfo();
-					}
-				}
-				if(r < 0)
-				{
-					send_error( 404, "Not Found", "", "File not found.", is_ssl );
+					send_redirect("", host, pageNotFoundFile, is_ssl);
 				}
 				else
 				{
-					file_len = strlen( file );
-					while ( file[file_len - 1] == '/' )
-					{
-						file[file_len - 1] = '\0';
-						--file_len;
-					}
-					do_file(is_ssl, conn_port);
+					send_error( 404, "Not Found", "", "File not found.", is_ssl );
 				}
 			}
 			else
@@ -2849,7 +2836,7 @@ static char* virtual_file( char* file )
 	return vfile;
 }
 
-static void send_redirect( int s, char* extra_header, char* hostname, char* new_location, int is_ssl)
+static void send_redirect(char* extra_header, char* hostname, char* new_location, int is_ssl)
 {
 	int extra_length = 0;
 	char extra_header_buf[5000];
@@ -2863,7 +2850,7 @@ static void send_redirect( int s, char* extra_header, char* hostname, char* new_
 		sprintf(extra_header_buf, "%s\r\nLocation: %s%s%s", extra_header, hostname, sep, new_location);
 	}
 	add_headers(301, "Moved Permanently", extra_header_buf, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
-	send_error_body( s, "Moved Permanently", "Moved Permanently" );
+	send_error_body(301, "Moved Permanently", "Moved Permanently" );
 	send_error_tail();
 	send_response(is_ssl);
 
