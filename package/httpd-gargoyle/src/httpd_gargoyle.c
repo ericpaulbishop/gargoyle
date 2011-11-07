@@ -311,7 +311,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl );
 static char** make_argp( void );
 static char** make_envp( int is_sl, unsigned short port );
 static char* build_env( char* fmt, char* arg );
-static void auth_check( char* dirname, int is_ssl, unsigned char is_directory );
+static void auth_check( char* dirname, int is_ssl);
 static void send_authenticate( char* realm, int is_ssl );
 static char* virtual_file( char* file );
 static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl );
@@ -1419,54 +1419,51 @@ initialize_listen_socket( usockaddr* usaP )
 /* This runs in a child process, and exits when done, so cleanup is
  * not needed.
 */
-static void
-handle_request( int is_ssl, unsigned short conn_port )
-    {
-    char* method_str;
-    char* line;
-    char* cp;
-    int r, file_len, i;
-    const char* index_names[] = {
-	"index.html", "index.htm", "index.xhtml", "index.xht", "Default.htm",
-	"index.cgi" };
+static void handle_request( int is_ssl, unsigned short conn_port )
+{
+	char* method_str;
+	char* line;
+	char* cp;
+	int r, file_len, i;
+	const char* index_names[] = {"index.html", "index.htm", "index.xhtml", "index.xht", "Default.htm", "index.cgi" };
 
-    /* Set up the timeout for reading. */
+	/* Set up the timeout for reading. */
 #ifdef HAVE_SIGSET
-    (void) sigset( SIGALRM, handle_read_timeout_sig );
+	(void) sigset( SIGALRM, handle_read_timeout_sig );
 #else /* HAVE_SIGSET */
-    (void) signal( SIGALRM, handle_read_timeout_sig );
+	(void) signal( SIGALRM, handle_read_timeout_sig );
 #endif /* HAVE_SIGSET */
-    (void) alarm( READ_TIMEOUT );
+	(void) alarm( READ_TIMEOUT );
 
-    /* Initialize the request variables. */
-    remoteuser = (char*) 0;
-    method = METHOD_UNKNOWN;
-    path = (char*) 0;
-    file = (char*) 0;
-    pathinfo = (char*) 0;
-    query = "";
-    protocol = (char*) 0;
-    status = 0;
-    bytes = -1;
-    req_hostname = (char*) 0;
+	/* Initialize the request variables. */
+	remoteuser = (char*) 0;
+	method = METHOD_UNKNOWN;
+	path = (char*) 0;
+	file = (char*) 0;
+	pathinfo = (char*) 0;
+	query = "";
+	protocol = (char*) 0;
+	status = 0;
+	bytes = -1;
+	req_hostname = (char*) 0;
 
-    authorization = (char*) 0;
-    content_type = (char*) 0;
-    content_length = -1;
-    cookie = (char*) 0;
-    host = (char*) 0;
-    if_modified_since = (time_t) -1;
-    referer = "";
-    useragent = "";
+	authorization = (char*) 0;
+	content_type = (char*) 0;
+	content_length = -1;
+	cookie = (char*) 0;
+	host = (char*) 0;
+	if_modified_since = (time_t) -1;
+	referer = "";
+	useragent = "";
 
 #ifdef TCP_NOPUSH
-    /* Set the TCP_NOPUSH socket option, to try and avoid the 0.2 second
-    ** delay between sending the headers and sending the data.  A better
-    ** solution is writev() (as used in thttpd), or send the headers with
-    ** send(MSG_MORE) (only available in Linux so far).
-    */
-    r = 1;
-    (void) setsockopt(
+	/* Set the TCP_NOPUSH socket option, to try and avoid the 0.2 second
+	** delay between sending the headers and sending the data.  A better
+	** solution is writev() (as used in thttpd), or send the headers with
+	** send(MSG_MORE) (only available in Linux so far).
+	*/
+	r = 1;
+	(void) setsockopt(
 	conn_fd, IPPROTO_TCP, TCP_NOPUSH, (void*) &r, sizeof(r) );
 #endif /* TCP_NOPUSH */
 
@@ -1513,232 +1510,296 @@ handle_request( int is_ssl, unsigned short conn_port )
 	}
 #endif 
 
-    /* Read in the request. */
-    start_request();
-    for (;;)
+	/* Read in the request. */
+	start_request();
+	for (;;)
 	{
-	char buf[10000];
-	int r = my_read( buf, sizeof(buf), is_ssl );
-	if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
-	    continue;
-	if ( r <= 0 )
-	    break;
-	(void) alarm( READ_TIMEOUT );
-	add_to_request( buf, r );
-	if ( strstr( request, "\015\012\015\012" ) != (char*) 0 ||
-	     strstr( request, "\012\012" ) != (char*) 0 )
-	    break;
+		char buf[10000];
+		int r = my_read( buf, sizeof(buf), is_ssl );
+		if ( r < 0 && ( errno == EINTR || errno == EAGAIN ) )
+		{
+			continue;
+		}
+		if ( r <= 0 )
+		{
+			break;
+		}
+		(void) alarm( READ_TIMEOUT );
+		add_to_request( buf, r );
+		if ( strstr( request, "\015\012\015\012" ) != (char*) 0 || strstr( request, "\012\012" ) != (char*) 0 )
+		{
+			break;
+		}
 	}
 
-    /* Parse the first line of the request. */
-    method_str = get_request_line();
-    if ( method_str == (char*) 0 )
-	send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
-    path = strpbrk( method_str, " \t\012\015" );
-    if ( path == (char*) 0 )
-	send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
-    *path++ = '\0';
-    path += strspn( path, " \t\012\015" );
-    protocol = strpbrk( path, " \t\012\015" );
-    if ( protocol == (char*) 0 )
-	send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
-    *protocol++ = '\0';
-    protocol += strspn( protocol, " \t\012\015" );
-    query = strchr( path, '?' );
-    if ( query == (char*) 0 )
-	query = "";
-    else
-	*query++ = '\0';
-
-    /* Parse the rest of the request headers. */
-    while ( ( line = get_request_line() ) != (char*) 0 )
+	/* Parse the first line of the request. */
+	method_str = get_request_line();
+	if ( method_str == (char*) 0 )
 	{
-	if ( line[0] == '\0' )
-	    break;
-	else if ( strncasecmp( line, "Authorization:", 14 ) == 0 )
-	    {
-	    cp = &line[14];
-	    cp += strspn( cp, " \t" );
-	    authorization = cp;
-	    }
-	else if ( strncasecmp( line, "Content-Length:", 15 ) == 0 )
-	    {
-	    cp = &line[15];
-	    cp += strspn( cp, " \t" );
-	    content_length = atol( cp );
-	    }
-	else if ( strncasecmp( line, "Content-Type:", 13 ) == 0 )
-	    {
-	    cp = &line[13];
-	    cp += strspn( cp, " \t" );
-	    content_type = cp;
-	    }
-	else if ( strncasecmp( line, "Cookie:", 7 ) == 0 )
-	    {
-	    cp = &line[7];
-	    cp += strspn( cp, " \t" );
-	    cookie = cp;
-	    }
-	else if ( strncasecmp( line, "Host:", 5 ) == 0 )
-	    {
-	    cp = &line[5];
-	    cp += strspn( cp, " \t" );
-	    host = cp;
-	    if ( strchr( host, '/' ) != (char*) 0 || host[0] == '.' )
 		send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
-	    }
-	else if ( strncasecmp( line, "If-Modified-Since:", 18 ) == 0 )
-	    {
-	    cp = &line[18];
-	    cp += strspn( cp, " \t" );
-	    if_modified_since = tdate_parse( cp );
-	    }
-	else if ( strncasecmp( line, "Referer:", 8 ) == 0 )
-	    {
-	    cp = &line[8];
-	    cp += strspn( cp, " \t" );
-	    referer = cp;
-	    }
-	else if ( strncasecmp( line, "User-Agent:", 11 ) == 0 )
-	    {
-	    cp = &line[11];
-	    cp += strspn( cp, " \t" );
-	    useragent = cp;
-	    }
+	}
+	path = strpbrk( method_str, " \t\012\015" );
+	if ( path == (char*) 0 )
+	{
+		send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
+	}
+	*path++ = '\0';
+	path += strspn( path, " \t\012\015" );
+	protocol = strpbrk( path, " \t\012\015" );
+	if ( protocol == (char*) 0 )
+	{
+		send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
+	}
+	*protocol++ = '\0';
+	protocol += strspn( protocol, " \t\012\015" );
+	query = strchr( path, '?' );
+	if ( query == (char*) 0 )
+	{
+		query = "";
+	}
+	else
+	{
+		*query++ = '\0';
 	}
 
-    if ( strcasecmp( method_str, get_method_str( METHOD_GET ) ) == 0 )
-	method = METHOD_GET;
-    else if ( strcasecmp( method_str, get_method_str( METHOD_HEAD ) ) == 0 )
-	method = METHOD_HEAD;
-    else if ( strcasecmp( method_str, get_method_str( METHOD_POST ) ) == 0 )
-	method = METHOD_POST;
-    else
-	send_error( 501, "Not Implemented", "", "That method is not implemented.", is_ssl );
+	/* Parse the rest of the request headers. */
+	while ( ( line = get_request_line() ) != (char*) 0 )
+	{
+		if ( line[0] == '\0' )
+		{
+			break;
+		}
+		else if ( strncasecmp( line, "Authorization:", 14 ) == 0 )
+		{
+			cp = &line[14];
+			cp += strspn( cp, " \t" );
+			authorization = cp;
+		}
+		else if ( strncasecmp( line, "Content-Length:", 15 ) == 0 )
+		{
+			cp = &line[15];
+			cp += strspn( cp, " \t" );
+			content_length = atol( cp );
+		}
+		else if ( strncasecmp( line, "Content-Type:", 13 ) == 0 )
+		{
+			cp = &line[13];
+			cp += strspn( cp, " \t" );
+			content_type = cp;
+		}
+		else if ( strncasecmp( line, "Cookie:", 7 ) == 0 )
+		{
+			cp = &line[7];
+			cp += strspn( cp, " \t" );
+			cookie = cp;
+		}
+		else if ( strncasecmp( line, "Host:", 5 ) == 0 )
+		{
+			cp = &line[5];
+			cp += strspn( cp, " \t" );
+			host = cp;
+			if ( strchr( host, '/' ) != (char*) 0 || host[0] == '.' )
+			{
+				send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
+			}
+		}
+		else if ( strncasecmp( line, "If-Modified-Since:", 18 ) == 0 )
+		{
+			cp = &line[18];
+			cp += strspn( cp, " \t" );
+			if_modified_since = tdate_parse( cp );
+		}
+		else if ( strncasecmp( line, "Referer:", 8 ) == 0 )
+		{
+			cp = &line[8];
+			cp += strspn( cp, " \t" );
+			referer = cp;
+		}
+		else if ( strncasecmp( line, "User-Agent:", 11 ) == 0 )
+		{
+			cp = &line[11];
+			cp += strspn( cp, " \t" );
+			useragent = cp;
+		}
+	}
 
-    strdecode( path, path );
-    if ( path[0] != '/' )
-	send_error( 400, "Bad Request", "", "Bad filename.", is_ssl );
-    file = &(path[1]);
-    de_dotdot( file );
-    if ( file[0] == '\0' )
-	file = "./";
-    if ( file[0] == '/' ||
-	 ( file[0] == '.' && file[1] == '.' &&
-	   ( file[2] == '\0' || file[2] == '/' ) ) )
-	send_error( 400, "Bad Request", "", "Illegal filename.", is_ssl );
-    if ( vhost )
-	file = virtual_file( file );
+	if ( strcasecmp( method_str, get_method_str( METHOD_GET ) ) == 0 )
+	{
+		method = METHOD_GET;
+	}
+	else if ( strcasecmp( method_str, get_method_str( METHOD_HEAD ) ) == 0 )
+	{
+		method = METHOD_HEAD;
+	}
+	else if ( strcasecmp( method_str, get_method_str( METHOD_POST ) ) == 0 )
+	{
+		method = METHOD_POST;
+	}
+	else
+	{
+		send_error( 501, "Not Implemented", "", "That method is not implemented.", is_ssl );
+	}
+	strdecode( path, path );
+	if ( path[0] != '/' )
+	{
+		send_error( 400, "Bad Request", "", "Bad filename.", is_ssl );
+	}
+	file = &(path[1]);
+	de_dotdot( file );
+	if ( file[0] == '\0' )
+	{
+		file = "./";
+	}
+	if ( file[0] == '/' || ( file[0] == '.' && file[1] == '.' && (file[2] == '\0' || file[2] == '/') ) )
+	{
+		send_error( 400, "Bad Request", "", "Illegal filename.", is_ssl );
+	}
+	if ( vhost )
+	{
+		file = virtual_file( file );
+	}
 
-    /* Set up the timeout for writing. */
+	/* Set up the timeout for writing. */
 #ifdef HAVE_SIGSET
-    (void) sigset( SIGALRM, handle_write_timeout );
+	(void) sigset( SIGALRM, handle_write_timeout );
 #else /* HAVE_SIGSET */
-    (void) signal( SIGALRM, handle_write_timeout );
+	(void) signal( SIGALRM, handle_write_timeout );
 #endif /* HAVE_SIGSET */
-    (void) alarm( WRITE_TIMEOUT );
+	(void) alarm( WRITE_TIMEOUT );
 
-    r = stat( file, &sb );
-    if ( r < 0 )
-    {
-	r = get_pathinfo();
-    }
-    if ( r < 0 )
-    {
-	/*
-	FILE* f = fopen("/tmp/test1.tmp", "w");
-	fprintf(f, "not found occured, file=%s\n", file);
-	fclose(f);
-	*/
-
-	if(pageNotFoundFile != NULL)
+	r = stat( file, &sb );
+	if ( r < 0 )
+	{
+		r = get_pathinfo();
+	}
+	if ( r < 0 )
 	{
 		/*
-		f = fopen("/tmp/test2.tmp", "w");
-		fprintf(f, "not found occured, have pageNotFoundFile = %s\n", pageNotFoundFile);
+		FILE* f = fopen("/tmp/test1.tmp", "w");
+		fprintf(f, "not found occured, file=%s\n", file);
 		fclose(f);
 		*/
 
-		file=pageNotFoundFile;
-		r = stat( file, &sb );
-		if ( r < 0 )
+		if(pageNotFoundFile != NULL)
 		{
-			r = get_pathinfo();
+			/*
+			f = fopen("/tmp/test2.tmp", "w");
+			fprintf(f, "not found occured, have pageNotFoundFile = %s\n", pageNotFoundFile);
+			fclose(f);
+			*/
+
+			file=pageNotFoundFile;
+			r = stat( file, &sb );
+			if ( r < 0 )
+			{
+				r = get_pathinfo();
+			}
+		}
+		if(r < 0)
+		{
+			send_error( 404, "Not Found", "", "File not found.", is_ssl );
 		}
 	}
-	if(r < 0)
-	{
-		send_error( 404, "Not Found", "", "File not found.", is_ssl );
-	}
-    }
 
 
-    file_len = strlen( file );
-    if ( ! S_ISDIR( sb.st_mode ) )
+	file_len = strlen( file );
+	if ( ! S_ISDIR( sb.st_mode ) )
 	{
-	/* Not a directory. */
-	while ( file[file_len - 1] == '/' )
-	    {
-	    file[file_len - 1] = '\0';
-	    --file_len;
-	    }
-	do_file(is_ssl, conn_port);
-	}
-    else
-	{
-	char idx[10000];
-
-	/* The filename is a directory.  Is it missing the trailing slash? */
-	if ( file[file_len - 1] != '/' && pathinfo == (char*) 0 )
-	    {
-	    char location[10000];
-	    if ( query[0] != '\0' )
-		(void) snprintf(
-		    location, sizeof(location), "Location: %s/?%s", path,
-		    query );
-	    else
-		(void) snprintf(
-		    location, sizeof(location), "Location: %s/", path );
-	    send_error( 302, "Found", location, "Directories must end with a slash.", is_ssl );
-	    }
-
-	/* Check for an index file.  */
-	/* This section has been modified to accomodate defaultPageFile variable for gargoyle*/
-	if(defaultPageFile != NULL)
-	{
-		(void) snprintf( idx, sizeof(idx), "%s%s", file, defaultPageFile );
-		if ( stat( idx, &sb ) >= 0 )
+		/* Not a directory. */
+		while ( file[file_len - 1] == '/' )
 		{
-			file = idx;
-			do_file(is_ssl, conn_port);
-			goto got_one;
+			file[file_len - 1] = '\0';
+			--file_len;
 		}
+		do_file(is_ssl, conn_port);
 	}
-	for ( i = 0; i < sizeof(index_names) / sizeof(char*); ++i )
+	else
 	{
-		(void) snprintf( idx, sizeof(idx), "%s%s", file, index_names[i] );
-		if ( stat( idx, &sb ) >= 0 )
+		char idx[10000];
+		unsigned char found_index = 0;
+		/* The filename is a directory.  Is it missing the trailing slash? */
+		if ( file[file_len - 1] != '/' && pathinfo == (char*) 0 )
 		{
-			file = idx;
-			do_file(is_ssl, conn_port);
-			goto got_one;
+			char location[10000];
+			if ( query[0] != '\0' )
+			{
+				(void) snprintf(location, sizeof(location), "Location: %s/?%s", path, query );
+			}
+			else
+			{
+				(void) snprintf( location, sizeof(location), "Location: %s/", path );
+				send_error( 302, "Found", location, "Directories must end with a slash.", is_ssl );
+			}
 		}
-	}
-	/* end gargoyle modifications */
+
+		/* Check for an index file.  */
+		/* This section has been modified to accomodate defaultPageFile variable for gargoyle*/
+		if(defaultPageFile != NULL)
+		{
+			(void) snprintf( idx, sizeof(idx), "%s%s", file, defaultPageFile );
+			if ( stat( idx, &sb ) >= 0 )
+			{
+				file = idx;
+				do_file(is_ssl, conn_port);
+				found_index = 1;
+			}
+		}
+		for ( i = 0; i < (sizeof(index_names) / sizeof(char*)) && found_index == 0; ++i )
+		{
+			(void) snprintf( idx, sizeof(idx), "%s%s", file, index_names[i] );
+			if ( stat( idx, &sb ) >= 0 )
+			{
+				file = idx;
+				do_file(is_ssl, conn_port);
+				found_index = 1;
+			}
+		}
 
 
 
-	/* Nope, no index file, so it's an actual directory request. */
-	do_dir(is_ssl);
-
-	got_one: ;
+		if(found_index == 0)
+		{
+			/* Nope, no index file, so it's an actual directory request. */
+			if(allowDirectoryListing == 0)
+			{
+				int r = -1;
+				if(pageNotFoundFile != NULL)
+				{
+					file=pageNotFoundFile;
+					r = stat( file, &sb );
+					if ( r < 0 )
+					{
+						r = get_pathinfo();
+					}
+				}
+				if(r < 0)
+				{
+					send_error( 404, "Not Found", "", "File not found.", is_ssl );
+				}
+				else
+				{
+					file_len = strlen( file );
+					while ( file[file_len - 1] == '/' )
+					{
+						file[file_len - 1] = '\0';
+						--file_len;
+					}
+					do_file(is_ssl, conn_port);
+				}
+			}
+			else
+			{
+				do_dir(is_ssl);
+			}
+		}
+		/* end gargoyle modifications */
 	}
 
 #ifdef HAVE_SSL
-    if(is_ssl)
-    {
-    	SSL_free( ssl );
-    }
+	if(is_ssl)
+	{
+		SSL_free( ssl );
+	}
 #endif /* HAVE_SSL */
 
 }
@@ -1842,7 +1903,7 @@ static void do_file( int is_ssl, unsigned short conn_port )
 	{
 		*cp = '\0';
 	}
-	auth_check( buf, is_ssl, 0 );
+	auth_check( buf, is_ssl);
 
 	/* Check if the filename is the AUTH_FILE itself - that's verboten. */
 	if ( strcmp( file, AUTH_FILE ) == 0 || ( strcmp( &(file[strlen(file) - sizeof(AUTH_FILE) + 1]), AUTH_FILE ) == 0 && file[strlen(file) - sizeof(AUTH_FILE)] == '/' ) )
@@ -1943,7 +2004,7 @@ static void do_dir( int is_ssl )
 	if ( pathinfo != (char*) 0 ) { send_error( 404, "Not Found", "", "File not found.", is_ssl ); }
 
 	/* Check authorization for this directory. */
-	auth_check( file, is_ssl, 1 );
+	auth_check( file, is_ssl );
 
 	/* Referer check. */
 	check_referer(is_ssl);
@@ -2598,7 +2659,7 @@ build_env( char* fmt, char* arg )
 
 
 /* this whole auth_check function has been heavily modified for the gargoyle additions */
-static void auth_check( char* dirname, int is_ssl, unsigned char is_directory )
+static void auth_check( char* dirname, int is_ssl )
 {
 	char authpath[10000];
 	char realmName[500];
@@ -2611,11 +2672,6 @@ static void auth_check( char* dirname, int is_ssl, unsigned char is_directory )
 	FILE* fp;
 	char* cryp;
 
-	if(is_directory == 1 && allowDirectoryListing == 0)
-	{
-		send_authenticate( dirname, is_ssl );
-		return;
-	}
 	
 	/* Construct auth filename. */
 	if ( dirname[strlen(dirname) - 1] == '/' )
