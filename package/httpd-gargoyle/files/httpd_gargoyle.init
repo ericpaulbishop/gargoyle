@@ -78,9 +78,9 @@ start()
 	## start with both ssl and non-ssl ports
 	if [ "$web_protocol" = "both" ] ; then
 		if [ -n "$no_password" ] ; then
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file" -PNF "$page_not_found_file" 2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -ADL 0 -DPF "$default_page_file" -PNF "$page_not_found_file" 2>/dev/null
 		else
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -S -E "$cert_file" -SP $https_port -i "$pid_https" -ADL 0 -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi	
 	fi
 
@@ -88,19 +88,19 @@ start()
 	## start with ssl
 	if [ "$web_protocol" = "https" ] ; then
 		if [ -n "$no_password" ] ; then
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -ADL 0 -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
 		else
-			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
+			$bin -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$https_port" -S -E "$cert_file" -i "$pid_https" -ADL 0 -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi
 	fi
 
 	## start without ssl
 	if [ "$web_protocol" = "http" ]  ; then
 		if [ -n "$no_password" ] ; then
-			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -ADL 0 -DPF "$default_page_file" -PNF "$page_not_found_file"  2>/dev/null
 
 		else
-			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
+			$bin  -c "$cgi_pattern" -d "$web_root" -u "$user" -p "$http_port" -i "$pid_http" -ADL 0 -DPF "$default_page_file" -DRN "$default_realm_name" -DRP "$default_realm_password_file" -PNF "$page_not_found_file"  2>/dev/null
 		fi
 	fi
 }	
