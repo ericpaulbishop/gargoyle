@@ -2841,14 +2841,15 @@ static void send_redirect(char* extra_header, char* hostname, char* new_location
 	int extra_length = 0;
 	char extra_header_buf[5000];
 	const char *sep = new_location[0] == '/' ? "" : "/";
+	const char *proto = is_ssl == 1 ? "https://" : "http://";
 	extra_header = extra_header == NULL ? "" : extra_header;
 	if(strcmp(extra_header, "") == 0)
 	{
-		sprintf(extra_header_buf, "Location: %s%s%s", hostname, sep, new_location);
+		sprintf(extra_header_buf, "Location: %s%s%s%s", proto, hostname, sep, new_location);
 	}
 	else
 	{
-		sprintf(extra_header_buf, "%s\r\nLocation: %s%s%s", extra_header, hostname, sep, new_location);
+		sprintf(extra_header_buf, "%s\r\nLocation: %s%s%s%s", extra_header, proto, hostname, sep, new_location);
 	}
 	add_headers(301, "Moved Permanently", extra_header_buf, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
 	send_error_body(301, "Moved Permanently", "Moved Permanently" );
