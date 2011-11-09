@@ -127,7 +127,7 @@ if [ "$ACTION" = add ]; then
 			[ -f "$usb_dir/idVendor" ] || usb_dir="${usb_dir%/*}"
 			while [ $switching_done -lt 1 -a $switching_tries -le 6 ]; do
 				$modeswitch -I -D -n -s 30 -c "${configs%% *}"
-				if [ $(sanitize "$usb_dir/idProduct") -eq $uPid ]; then
+				if [ $(sanitize "$usb_dir/idProduct") = $uPid ]; then
 					log "switching seemingly failed"
 				else
 					switching_done=1
