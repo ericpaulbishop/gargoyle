@@ -1,7 +1,7 @@
 #!/bin/sh
 
 delete_chain_from_table nat tor
-enabled=$( uci get tor.global.enables 2>/dev/null )
+enabled=$( uci get tor.global.enabled 2>/dev/null )
 if [ "$enabled" = "0" ] ; then
 	exit
 fi

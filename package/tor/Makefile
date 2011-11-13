@@ -63,11 +63,12 @@ MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS)"
 
 define Package/tor/install
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/tor $(1)/usr/sbin/ $(1)/etc/config
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_DIR) $(1)/etc/tor
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DIR)  $(1)/usr/sbin
+	$(INSTALL_DIR)  $(1)/etc/init.d
+	$(INSTALL_DIR)  $(1)/etc/tor
+	$(INSTALL_DIR)  $(1)/etc/uci-defaults
+	$(INSTALL_DIR)  $(1)/etc/config 
+	$(INSTALL_BIN)  $(PKG_INSTALL_DIR)/usr/bin/tor $(1)/usr/sbin/tor
 	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/tor/torrc.sample $(1)/etc/tor/torrc
 	$(INSTALL_BIN)  ./files/tor.init        $(1)/etc/init.d/tor
 	$(INSTALL_BIN)  ./files/tor.firewall    $(1)/etc/tor.firewall
