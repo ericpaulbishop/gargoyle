@@ -1,0 +1,29 @@
+#!/bin/sh
+
+delete_chain_from_table nat tor
+enabled=$( uci get tor.global.enables 2>/dev/null )
+if [ "$enabled" = "0" ] ; then
+	exit
+fi
+
+dns_port=$( uci get tor.global.dns_port 2>/dev/null )
+trans_port=$( uci get tor.global.trans_port 2>/dev/null )
+zone=$( uci get tor.global.zone 2>/dev/null )
+if [ -z "$zone" ] ; then 
+	zone="lan"
+fi
+zone_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null )
+zone_mask=$(uci -P /var/state get network.$zone.netmask 2>/dev/null )
+
+#don't redirect local addresses
+iptables -t nat -N tor
+if [ -n "$zone_ip" ] && [ -n "$zone_mask" ] ; then
+	iptables -t nat -A tor -d $zone_ip/$zone_mask -j RETURN
+elif [ -n "$zone_ip" ] ; then
+	iptables -t nat -A tor -d $zone_ip -j RETURN
+fi
+
+iptables -t nat -A tor -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
+iptables -t nat -A tor -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
+iptables -t nat -I zone_${zone}_prerouting -j tor
+

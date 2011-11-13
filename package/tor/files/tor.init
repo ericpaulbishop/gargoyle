@@ -9,8 +9,14 @@ PID_F=$RUN_D/$BIN.pid
 RUN_USER=root
 RUN_GROUP=root
 OPTIONS=" --User $RUN_USER  --ClientOnly 1 --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
+BOOT="0"
 
 
+boot()
+{
+	BOOT="1"
+	start
+}
 
 start()
 {
@@ -18,6 +24,7 @@ start()
 	if [ "$enabled" = "0" ] ; then
 		exit
 	fi
+
 
         [ -d $VAR_D ] || ( mkdir -m 0700 -p $VAR_D && chown $RUN_USER:$RUN_GROUP $VAR_D )
 	[ -d $RUN_D ] || mkdir -p $RUN_D
@@ -41,18 +48,22 @@ start()
 	fi
 
 
-
 	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port "
-	listen_ip=$(uci -P /var/state/network get network.$zone.ipaddr 2>/dev/null)
+	listen_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null)
 	if [ -n "$listen_ip" ] ; then
 		OPTIONS="$OPTIONS --TransListenAddress '$listen_ip' --DNSListenAddress '$listen_ip' "
 	fi
-
 	
+
 	eval $BIN $OPTIONS
+	if [ "$BOOT" = "0" ] ; then
+		sh /etc/tor.firewall
+	fi	
 }
 
-stop() {
+stop()
+{
 	[ -f $PID_F ] && kill $(cat $PID_F)
+	delete_chain_from_table nat tor
 }
 
