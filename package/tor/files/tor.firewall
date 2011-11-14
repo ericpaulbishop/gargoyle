@@ -9,6 +9,7 @@ fi
 dns_port=$( uci get tor.global.dns_port 2>/dev/null )
 trans_port=$( uci get tor.global.trans_port 2>/dev/null )
 zone=$( uci get tor.global.zone 2>/dev/null )
+block_unsupported_proto=$( uci get tor.global.block_unsupported_proto 2>/dev/null )
 if [ -z "$zone" ] ; then 
 	zone="lan"
 fi
@@ -23,7 +24,13 @@ elif [ -n "$zone_ip" ] ; then
 	iptables -t nat -A tor -d $zone_ip -j RETURN
 fi
 
+#rules to redirect to tor transparent proxy
 iptables -t nat -A tor -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
 iptables -t nat -A tor -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
+if [ "$block_unsupported_proto" = "1" ] ; then
+	iptables -t nat -A tor -j DROP
+fi
+
+# jump to tor chain at start of zone prerouting chain
 iptables -t nat -I zone_${zone}_prerouting -j tor
 
