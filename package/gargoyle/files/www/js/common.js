@@ -26,19 +26,8 @@ window.onresize = function onresize()
 // which should get called first
 function addLoadFunction(func)
 {
-	var oldonload = window.onload;
-	if (typeof window.onload != 'function')
-	{
-		window.onload = func;
-	}
-	else
-	{
-		window.onload = function()
-		{
-			oldonload();
-			func();
-		}
-	}
+	var old_load = window.onload;
+	window.onload = (typeof window.onload != 'function') ? func : function() { old_load() ; func() ; }
 }
 
 
