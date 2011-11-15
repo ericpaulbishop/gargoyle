@@ -6,16 +6,41 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "tor" -c "internal.css"
+	gargoyle_header_footer -h -s "connection" -p "tor" -c "internal.css" -j "tor.js" tor
 ?>
 
 
 	<fieldset>
-		<legend class="sectionheader">Tor Anonymization</legend>
+		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
-		
+		<div id='tor_enabled_container'>
+		<label  class='leftcolumn' for='tor_enabled' id='tor_enabled_label' onchange='setVisibility()' >Tor Client:</label>
+			<select class='rightcolumn' id="tor_enabled">
+				<option value="1">Enabled</option>
+				<option value="0">Disabled</option>
+			</select>
+		</div>
+		<div id='tor_other_proto_container'>
+			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>
+			<select class='rightcolumn' id="tor_other_proto">
+				<option value="0">Ignore</option>
+				<option value="1">Block</option>
+			</select>
+		</div>
+
+
+		<div id="bottom_button_container">
+			<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
+			<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+		</div>
 	
 	</fieldset>
+
+<script>
+	resetData();
+</script>
+
+
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "tor"
