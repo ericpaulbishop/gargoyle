@@ -43,6 +43,6 @@ function resetData()
 
 function setVisibility()
 {
-	document.getElementById("tor_other_proto").style.display = getSelectedValue("tor_enabled") == "1" ? "1" : "0"
+	document.getElementById("tor_other_proto_container").style.display = getSelectedValue("tor_enabled") == "1" ? "block" : "none"
 }
 

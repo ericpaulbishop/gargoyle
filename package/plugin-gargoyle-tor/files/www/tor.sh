@@ -14,8 +14,8 @@
 		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
 		<div id='tor_enabled_container'>
-		<label  class='leftcolumn' for='tor_enabled' id='tor_enabled_label' onchange='setVisibility()' >Tor Client:</label>
-			<select class='rightcolumn' id="tor_enabled">
+		<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
+			<select class='rightcolumn' id="tor_enabled" onchange='setVisibility()' >
 				<option value="1">Enabled</option>
 				<option value="0">Disabled</option>
 			</select>
@@ -28,13 +28,15 @@
 			</select>
 		</div>
 
-
-		<div id="bottom_button_container">
-			<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-			<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
-		</div>
 	
 	</fieldset>
+
+	<div id="bottom_button_container">
+		<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
+		<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+	</div>
+
+
 
 <script>
 	resetData();
