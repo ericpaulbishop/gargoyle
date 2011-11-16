@@ -1,3 +1,4 @@
+#!/usr/bin/haserl
 <?
 	echo "Content-Type: text/plain"
 	echo ""
@@ -12,12 +13,12 @@
 	# Check that mac in arp entry for ip matches either a valid dhcp lease or a static IP definition
 	# Otherwise someone could connect with a static IP and turn Tor off/on for other people, causing problems
 	connect_ip="$REMOTE_ADDR"
-	num_arp_entries=$(arp | grep "$connect_ip" | wc -l)
+	num_arp_entries=$(cat /proc/net/arp 2>/dev/null | grep "$connect_ip" | wc -l)
 	if [ "$num_arp_entries" != "1" ] || [ -z "$connect_ip" ] ; then
 		echo "bad_ip"
 		exit
 	fi
-	connect_mac=$(arp | grep "$connect_ip" | awk '{ print $4 }')
+	connect_mac=$(cat /proc/net/arp 2>/dev/null | grep "$connect_ip" | awk '{ print $4 }')
 	valid_dhcp=$(grep "$mac.*$connect_ip" /var/dhcp.leases 2>/dev/null)
 	valid_static=$(grep "$mac.*$connect_ip" /etc/ethers 2>/dev/null)
 	if [ -z "$valid_dhcp" ] && [ -z "$valid_static" ] ; then
