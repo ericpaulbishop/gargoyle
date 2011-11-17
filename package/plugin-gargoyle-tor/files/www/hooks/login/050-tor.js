@@ -2,8 +2,9 @@ function setTorData()
 {
 	if(torEnabled == "2")
 	{
+		document.getElementById("tor_fields").style.display="block";
+
 		torIsActive = torIsActive == "" ? false: true;
-		document.getElementById("tor_fields").style.display="none";
 		setChildText("tor_status", (torIsActive ? "Enabled" : "Disabled"), (torIsActive ? "#27c650" : "#949494"), torIsActive)
 		document.getElementById("set_tor_button").value = torIsActive ? "Disable Tor For Your IP" : "Enable Tor For Your IP";
 	}
@@ -41,7 +42,7 @@ function updateTorStatus()
 				alert("Tor Successfully Enabled for your IP")
 				torIsActive = true;
 			}
-			setTorStatus()
+			setTorData()
 			setControlsEnabled(true)
 		}
 	}
