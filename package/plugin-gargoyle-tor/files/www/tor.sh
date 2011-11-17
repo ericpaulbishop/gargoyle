@@ -16,7 +16,8 @@
 		<div id='tor_enabled_container'>
 		<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
 			<select class='rightcolumn' id="tor_enabled" onchange='setVisibility()' >
-				<option value="1">Enabled</option>
+				<option value="2">Enabled, Toggled By Each Host</option>
+				<option value="1">Enabled For All Hosts</option>
 				<option value="0">Disabled</option>
 			</select>
 		</div>

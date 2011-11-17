@@ -34,7 +34,9 @@ function saveChanges()
 
 function resetData()
 {
-	var torEnabled = uciOriginal.get("tor", "global", "enabled") == "1" ? "1" : "0"
+	var en = uciOriginal.get("tor", "global", "enabled") 
+	var torEnabled = uciOriginal.get("tor", "global", "enabled")
+	torEnabled = (torEnabled != "1" && torEnabled != "2") ? "0" : torEnabled
 	var blockOtherProtos = uciOriginal.get("tor", "global", "block_unsupported_proto") == "1" ? "1" : "0"
 	setSelectedValue("tor_enabled", torEnabled)
 	setSelectedValue("tor_other_proto", blockOtherProtos)
@@ -43,6 +45,6 @@ function resetData()
 
 function setVisibility()
 {
-	document.getElementById("tor_other_proto_container").style.display = getSelectedValue("tor_enabled") == "1" ? "block" : "none"
+	document.getElementById("tor_other_proto_container").style.display = getSelectedValue("tor_enabled") == "0" ? "none" : "block"
 }
 
