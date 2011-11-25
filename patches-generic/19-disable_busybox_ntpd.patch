@@ -1,0 +1,67 @@
+--- backfire-a/package/busybox/config/networking/Config.in	2011-11-24 22:56:18.282899713 -0500
++++ backfire-b/package/busybox/config/networking/Config.in	2011-11-24 23:02:46.208719453 -0500
+@@ -669,13 +669,13 @@
+ 
+ config BUSYBOX_CONFIG_NTPD
+ 	bool "ntpd"
+-	default y
++	default n
+ 	help
+ 	  The NTP client/server daemon.
+ 
+ config BUSYBOX_CONFIG_FEATURE_NTPD_SERVER
+ 	bool "Make ntpd usable as a NTP server"
+-	default y
++	default n
+ 	depends on BUSYBOX_CONFIG_NTPD
+ 	help
+ 	  Make ntpd usable as a NTP server. If you disable this option
+--- backfire-a/package/base-files/files/etc/init.d/sysntpd	2011-11-24 22:56:18.070896537 -0500
++++ /dev/null	2011-11-12 00:03:15.040641120 -0500
+@@ -1,35 +0,0 @@
+-#!/bin/sh /etc/rc.common
+-# Copyright (C) 2011 OpenWrt.org
+-
+-START=98
+-
+-BIN=/usr/sbin/ntpd
+-PID=/var/run/sysntpd.pid
+-
+-start() {
+-	[ -x $BIN ] || exit 0
+-
+-	local peers
+-
+-	getpeers() {
+-		config_get peers "$1" server
+-	}
+-
+-	config_load system
+-	config_foreach getpeers timeserver
+-
+-	if [ -n "$peers" ]; then
+-		local peer
+-		local args="-n"
+-		for peer in $peers; do
+-			append args "-p $peer"
+-		done
+-
+-		start-stop-daemon -x $BIN -m -p $PID -b -S -- $args
+-	fi
+-}
+-
+-stop() {
+-	service_kill ${BIN##*/} $PID
+-	rm -f $PID
+-}
+--- backfire-a/package/base-files/files/etc/config/system	2011-11-24 22:56:18.070896537 -0500
++++ backfire-b/package/base-files/files/etc/config/system	2011-11-24 22:58:31.500895963 -0500
+@@ -2,8 +2,3 @@
+ 	option hostname	OpenWrt
+ 	option timezone	UTC
+ 
+-config timeserver ntp
+-	list server	0.openwrt.pool.ntp.org
+-	list server	1.openwrt.pool.ntp.org
+-	list server	2.openwrt.pool.ntp.org
+-	list server	3.openwrt.pool.ntp.org

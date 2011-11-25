@@ -1,0 +1,8 @@
+#!/bin/sh
+
+uci set gargoyle.display.connection_tor="Tor"
+uci set gargoyle.scripts.connection_tor="tor.sh"
+uci set gargoyle.connection.tor="250"
+uci commit
+
+

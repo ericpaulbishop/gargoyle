@@ -1,0 +1,60 @@
+#!/bin/sh
+
+delete_chain_from_table nat    tor
+delete_chain_from_table filter tor
+enabled=$( uci get tor.global.enabled 2>/dev/null )
+enabled_ip_file=$( uci get tor.global.enabled_ip_file 2>/dev/null)
+if [ "$enabled" = "0" ] ; then
+	exit
+fi
+if [ -n "$enabled_ip_file" ] ; then
+	touch "$enabled_ip_file" 
+fi
+
+if [ "$enabled" = "2" ] ; then
+	ipset --destroy tor_active_ips >/dev/null 2>&1
+	ipset --create  tor_active_ips iphash
+	for ip in $(cat $enabled_ip_file) ; do ipset --add tor_active_ips $ip ; done
+fi
+
+
+dns_port=$( uci get tor.global.dns_port 2>/dev/null )
+trans_port=$( uci get tor.global.trans_port 2>/dev/null )
+zone=$( uci get tor.global.zone 2>/dev/null )
+block_unsupported_proto=$( uci get tor.global.block_unsupported_proto 2>/dev/null )
+if [ -z "$zone" ] ; then 
+	zone="lan"
+fi
+zone_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null )
+zone_mask=$(uci -P /var/state get network.$zone.netmask 2>/dev/null )
+
+#don't redirect local addresses
+iptables -t nat    -N tor
+iptables -t filter -N tor
+if [ -n "$zone_ip" ] && [ -n "$zone_mask" ] ; then
+	iptables -t nat    -A tor -d $zone_ip/$zone_mask -j RETURN
+	iptables -t filter -A tor -d $zone_ip/$zone_mask -j RETURN
+elif [ -n "$zone_ip" ] ; then
+	iptables -t nat    -A tor -d $zone_ip -j RETURN
+	iptables -t filter -A tor -d $zone_ip -j RETURN
+fi
+
+#rules to redirect to tor transparent proxy
+iptables -t nat -A tor -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
+iptables -t nat -A tor -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
+
+# jump to tor chain at start of zone prerouting chain if enabled for this IP
+test_tor_active=""
+if  [ "$enabled" = "2" ] ; then
+	test_tor_active=" -m set --match-set tor_active_ips src "
+fi
+iptables -t nat -I zone_${zone}_prerouting $test_tor_active -j tor
+
+if [ "$block_unsupported_proto" = "1" ] ; then
+	iptables -t filter -A tor -p tcp ! --dport 53 -j RETURN 
+	iptables -t filter -A tor -p udp   --dport 53 -j RETURN
+	iptables -t filter -A tor -j REJECT
+	iptables -I zone_${zone}_forward $test_tor_active -j tor
+fi
+
+

@@ -1,0 +1,69 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+START=50
+
+BIN=tor
+VAR_D=/etc/$BIN/var
+RUN_D=/var/run
+PID_F=$RUN_D/$BIN.pid
+RUN_USER=root
+RUN_GROUP=root
+OPTIONS=" --User $RUN_USER  --ClientOnly 1 --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
+BOOT="0"
+
+
+boot()
+{
+	BOOT="1"
+	start
+}
+
+start()
+{
+	enabled=$(uci get tor.global.enabled)
+	if [ "$enabled" = "0" ] ; then
+		exit
+	fi
+
+
+        [ -d $VAR_D ] || ( mkdir -m 0700 -p $VAR_D && chown $RUN_USER:$RUN_GROUP $VAR_D )
+	[ -d $RUN_D ] || mkdir -p $RUN_D
+	[ -f $PID_F ] || ( touch $PID_F && chown $RUN_USER:$RUN_GROUP $PID_F )
+	
+	zone=$( uci get tor.global.zone                 2>/dev/null)
+	trans_port=$( uci get tor.global.trans_port     2>/dev/null)
+	dns_port=$( uci get tor.global.dns_port         2>/dev/null)
+	control_port=$( uci get tor.global.control_port 2>/dev/null)
+	if [ -z "$zone" ] ; then
+		zone="lan"
+	fi
+	if [ -z "$trans_port" ] ; then
+		trans_port=9040
+	fi
+	if [ -z "$dns_port" ] ; then
+		dns_port=9053
+	fi
+	if [ -z "$control_port" ] ; then
+		control_port=9051
+	fi
+
+
+	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port "
+	listen_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null)
+	if [ -n "$listen_ip" ] ; then
+		OPTIONS="$OPTIONS --TransListenAddress '$listen_ip' --DNSListenAddress '$listen_ip' "
+	fi
+	
+
+	eval $BIN $OPTIONS
+	if [ "$BOOT" = "0" ] ; then
+		sh /etc/tor.firewall
+	fi	
+}
+
+stop()
+{
+	[ -f $PID_F ] && kill $(cat $PID_F)
+	delete_chain_from_table nat tor
+}
+
