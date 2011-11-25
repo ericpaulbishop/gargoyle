@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -22,7 +22,19 @@
 		fi
 		exit
 	fi
-	gargoyle_header_footer -h  -c "internal.css" -j "login.js"
+
+	web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
+	
+	js="login.js"
+	if [ -d "$web_root/hooks/login" ] ; then
+		sh_hooks=$(ls "$web_root/hooks/login/"*.sh | sort )
+		js_hooks=$(ls "$web_root/hooks/login" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/login/\"\$1  }")
+		js_hooks=$(echo $js_hooks)
+		js="$js $js_hooks"
+	fi
+
+
+	gargoyle_header_footer -h  -c "internal.css" -j "$js"
 ?>
 
 
@@ -98,7 +110,11 @@ var passInvalid = false;
 	<div class="nocolumn" id="current_time_date"></div>
 </fieldset>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<?
+	for h in $sh_hooks ; do
+		haserl $h
+	done
+?>
 
 <script>
 <!--

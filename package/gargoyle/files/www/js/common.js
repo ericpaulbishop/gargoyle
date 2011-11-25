@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+
+
 window.onresize = function onresize()
 {
 	//in case this gets called while initializing page, you may get error if element isnt defined,
@@ -17,6 +19,15 @@ window.onresize = function onresize()
 		}
 	}
 	catch(e){}
+}
+
+// should be called by hooks
+// main page code can just use regular resetData() function
+// which should get called first
+function addLoadFunction(func)
+{
+	var old_load = window.onload;
+	window.onload = (typeof window.onload != 'function') ? func : function() { old_load() ; func() ; }
 }
 
 

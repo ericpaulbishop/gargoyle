@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Backfire (unknown)
-# Mon Sep  5 14:03:16 2011
+# Thu Nov 10 18:13:58 2011
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -185,6 +185,7 @@ CONFIG_DEFAULT_dropbear=y
 CONFIG_DEFAULT_firewall=y
 CONFIG_DEFAULT_hotplug2=y
 CONFIG_DEFAULT_iptables=y
+CONFIG_DEFAULT_kmod-ath9k=y
 CONFIG_DEFAULT_kmod-button-hotplug=y
 CONFIG_DEFAULT_kmod-input-core=y
 CONFIG_DEFAULT_kmod-input-gpio-buttons=y
@@ -203,6 +204,7 @@ CONFIG_DEFAULT_ppp-mod-pppoe=y
 CONFIG_DEFAULT_swconfig=y
 CONFIG_DEFAULT_uci=y
 CONFIG_DEFAULT_udevtrigger=y
+CONFIG_DEFAULT_wpad-mini=y
 CONFIG_LINUX_2_6=y
 CONFIG_AUDIO_SUPPORT=y
 CONFIG_GPIO_SUPPORT=y
@@ -1092,10 +1094,20 @@ CONFIG_PACKAGE_libuuid=y
 # SSL
 #
 CONFIG_PACKAGE_libcyassl=y
-# CONFIG_PACKAGE_libopenssl is not set
+CONFIG_PACKAGE_libopenssl=y
+
+#
+# Configuration
+#
+# CONFIG_OPENSSL_ENGINE is not set
 # CONFIG_PACKAGE_libblobmsg-json is not set
 CONFIG_PACKAGE_libericstools=y
 CONFIG_PACKAGE_libevent=y
+CONFIG_PACKAGE_libevent2=y
+# CONFIG_PACKAGE_libevent2-core is not set
+# CONFIG_PACKAGE_libevent2-extra is not set
+# CONFIG_PACKAGE_libevent2-openssl is not set
+# CONFIG_PACKAGE_libevent2-pthreads is not set
 CONFIG_PACKAGE_libip4tc=y
 CONFIG_PACKAGE_libip6tc=y
 CONFIG_PACKAGE_libiptc=y
@@ -1116,7 +1128,7 @@ CONFIG_PACKAGE_libusb=y
 CONFIG_PACKAGE_libwrap=y
 CONFIG_PACKAGE_libxtables=y
 # CONFIG_PACKAGE_linux-atm is not set
-# CONFIG_PACKAGE_zlib is not set
+CONFIG_PACKAGE_zlib=y
 
 #
 # Network
@@ -1149,7 +1161,6 @@ CONFIG_PACKAGE_httpd-gargoyle=y
 CONFIG_PACKAGE_webmon-gargoyle=y
 # CONFIG_PACKAGE_arptables is not set
 CONFIG_PACKAGE_bwmon-gargoyle=y
-CONFIG_PACKAGE_chat=y
 CONFIG_PACKAGE_crda=y
 CONFIG_PACKAGE_ddns-gargoyle=y
 CONFIG_PACKAGE_ebtables=y
@@ -1162,7 +1173,7 @@ CONFIG_PACKAGE_hostapd-mini=y
 # CONFIG_PACKAGE_hostapd-utils is not set
 # CONFIG_PACKAGE_ifenslave is not set
 CONFIG_PACKAGE_ip=y
-# CONFIG_PACKAGE_ipset is not set
+CONFIG_PACKAGE_ipset=y
 CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_iptables-mod-bandwidth=y
 CONFIG_PACKAGE_iptables-mod-conntrack=y
@@ -1174,7 +1185,7 @@ CONFIG_PACKAGE_iptables-mod-imq=y
 CONFIG_PACKAGE_iptables-mod-ipopt=y
 CONFIG_PACKAGE_iptables-mod-iprange=y
 # CONFIG_PACKAGE_iptables-mod-ipsec is not set
-# CONFIG_PACKAGE_iptables-mod-ipset is not set
+CONFIG_PACKAGE_iptables-mod-ipset=y
 CONFIG_PACKAGE_iptables-mod-nat=y
 CONFIG_PACKAGE_iptables-mod-nat-extra=y
 CONFIG_PACKAGE_iptables-mod-timerange=y
@@ -1184,8 +1195,10 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptables-utils is not set
 CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libiptbwctl=y
+CONFIG_PACKAGE_p910nd=y
 CONFIG_PACKAGE_portmap=y
 CONFIG_PACKAGE_ppp=y
+CONFIG_PACKAGE_chat=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
 CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_ppp-mod-radius is not set
@@ -1197,6 +1210,8 @@ CONFIG_PACKAGE_qos-gargoyle=y
 CONFIG_PACKAGE_samba3=y
 # CONFIG_SAMBA3_DEBUG is not set
 CONFIG_PACKAGE_tc=y
+CONFIG_PACKAGE_tor=y
+# CONFIG_PACKAGE_tor-geoip is not set
 # CONFIG_PACKAGE_uhttpd is not set
 CONFIG_PACKAGE_vsc7385-ucode-ap83=y
 CONFIG_PACKAGE_vsc7385-ucode-pb44=y
@@ -1337,7 +1352,7 @@ CONFIG_PACKAGE_kmod-ipt-imq=y
 CONFIG_PACKAGE_kmod-ipt-ipopt=y
 CONFIG_PACKAGE_kmod-ipt-iprange=y
 # CONFIG_PACKAGE_kmod-ipt-ipsec is not set
-# CONFIG_PACKAGE_kmod-ipt-ipset is not set
+CONFIG_PACKAGE_kmod-ipt-ipset=y
 CONFIG_PACKAGE_kmod-ipt-nat=y
 CONFIG_PACKAGE_kmod-ipt-nat-extra=y
 CONFIG_PACKAGE_kmod-ipt-nathelper=y
@@ -1462,7 +1477,7 @@ CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-net is not set
 CONFIG_PACKAGE_kmod-usb-ohci=y
 # CONFIG_PACKAGE_kmod-usb-phidget is not set
-CONFIG_PACKAGE_kmod-usb-printer=y 
+CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-airprime is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
@@ -1591,6 +1606,8 @@ CONFIG_PACKAGE_plugin-gargoyle-dark-one-theme=m
 CONFIG_PACKAGE_plugin-gargoyle-green-theme=m
 CONFIG_PACKAGE_plugin-gargoyle-light-theme=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
+CONFIG_PACKAGE_plugin-gargoyle-tor=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
 CONFIG_PACKAGE_plugin-gargoyle-xeye-theme=m
 
@@ -1670,5 +1687,3 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 #
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
-CONFIG_PACKAGE_p910nd=y
-CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y

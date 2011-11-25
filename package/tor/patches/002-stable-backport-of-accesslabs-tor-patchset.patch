@@ -1,0 +1,629 @@
+--- /dev/null	2011-10-27 15:57:42.115929600 -0400
++++ b/src/common/gzutil.c	2011-11-10 15:53:44.598011400 -0500
+@@ -0,0 +1,410 @@
++/* Copyright (c) 2003, Roger Dingledine
++ * Copyright (c) 2004-2006, Roger Dingledine, Nick Mathewson.
++ * Copyright (c) 2007-2011, The Tor Project, Inc. */
++/* See LICENSE for licensing information */
++
++/**
++ * \file gzutil.c
++ * \brief Common functions for gzipped files.
++ **/
++
++#include "orconfig.h"
++#include "util.h"
++#include "gzutil.h"
++#include "torlog.h"
++#undef log
++#include "torint.h"
++#include "container.h"
++
++#ifdef MS_WINDOWS
++#include <io.h>
++#endif
++
++#include <stdlib.h>
++#include <stdio.h>
++
++#ifdef HAVE_ERRNO_H
++#include <errno.h>
++#endif
++#ifdef HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++#ifdef HAVE_SYS_STAT_H
++#include <sys/stat.h>
++#endif
++#ifdef HAVE_SYS_FCNTL_H
++#include <sys/fcntl.h>
++#endif
++#ifdef HAVE_FCNTL_H
++#include <fcntl.h>
++#endif
++
++#include <zlib.h>
++
++
++/** Write <b>count</b> bytes from <b>buf</b> to <b>fd</b>.
++ * Return the number of bytes written, or -1
++ * on error.  Only use if fd is a blocking fd.  */
++ssize_t
++gzwrite_all(gzFile gzf, const char *buf, size_t count)
++{
++  size_t written = 0;
++  ssize_t result;
++  tor_assert(count < SSIZE_T_MAX);
++
++  while (written != count) {
++    result = gzwrite(gzf, buf+written, count-written);
++    if (result<0)
++      return -1;
++    written += result;
++  }
++  return (ssize_t)count;
++}
++
++/** Read from <b>fd</b> to <b>buf</b>, until we get <b>count</b> bytes
++ * or reach the end of the file. 
++ * Return the number of bytes read, or -1 on error. Only use
++ * if fd is a blocking fd. */
++ssize_t
++gzread_all(gzFile gzf, char *buf, size_t count)
++{
++  size_t numread = 0;
++  ssize_t result;
++
++  if (count > SIZE_T_CEILING || count > SSIZE_T_MAX)
++    return -1;
++
++  while (numread != count) {
++    result = gzread(gzf, buf+numread, count-numread);
++    if (result<0)
++      return -1;
++    else if (result == 0)
++      break;
++    numread += result;
++  }
++  return (ssize_t)numread;
++}
++
++/** Represents a file that we're writing to, with support for atomic commit:
++ * we can write into a temporary file, and either remove the file on
++ * failure, or replace the original file on success. */
++struct open_file_t {
++  char *tempname; /**< Name of the temporary file. */
++  char *filename; /**< Name of the original file. */
++  unsigned rename_on_close:1; /**< Are we using the temporary file or not? */
++  unsigned binary:1; /**< Did we open in binary mode? */
++  int fd; /**< fd for the open file. */
++  gzFile gzf; /**< gzip wrapper for <b>fb</b>. */
++};
++
++/** Try to start writing to the file in <b>fname</b>, passing the flags
++ * <b>open_flags</b> to the open() syscall, creating the file (if needed) with
++ * access value <b>mode</b>.  We open a new temporary file in the same
++ * directory, and either replace the original or remove the temporary file
++ * when we're done.
++ *
++ * Return the gzip descriptor for the newly opened file, and store working data in
++ * *<b>data_out</b>.  The caller should not close the descriptor manually:
++ * instead, call finish_writing_to_file() or abort_writing_to_file().
++ * Returns -1 on failure.
++ *
++ * NOTE: Appending is not supported, the flags O_CREAT and O_TRUNC are treated
++ * as true and the flag O_EXCL is treated as false.
++ */
++gzFile
++gzstart_writing_to_file(const char *fname, int open_flags, int mode,
++                      open_file_t **data_out)
++{
++  size_t tempname_len = strlen(fname)+16;
++  open_file_t *new_file = tor_malloc_zero(sizeof(open_file_t));
++  const char *open_name;
++
++  tor_assert(fname);
++  tor_assert(data_out);
++#if (O_BINARY != 0 && O_TEXT != 0)
++  tor_assert((open_flags & (O_BINARY|O_TEXT)) != 0);
++#endif
++  new_file->fd = -1;
++  tor_assert(tempname_len > strlen(fname)); /*check for overflow*/
++  new_file->filename = tor_strdup(fname);
++  open_name = new_file->tempname = tor_malloc(tempname_len);
++  if (tor_snprintf(new_file->tempname, tempname_len, "%s.tmp", fname)<0) {
++    log_warn(LD_GENERAL, "Failed to generate filename");
++    goto err;
++  }
++  /* We always replace an existing temporary file if there is one. */
++  open_flags |= O_CREAT|O_TRUNC;
++  open_flags &= ~O_EXCL;
++  new_file->rename_on_close = 1;
++  if (open_flags & O_BINARY)
++    new_file->binary = 1;
++
++  new_file->fd = open(open_name, open_flags, mode);
++  if (new_file->fd < 0) {
++    log_warn(LD_FS, "Couldn't open \"%s\" (%s) for writing: %s",
++        open_name, fname, strerror(errno));
++    goto err;
++  }
++
++  /* Delete the original file before writing - to save storage space 
++   * on smaller devices */
++  if (unlink(fname)) {
++    log_warn(LD_FS,"Error removing the original file \"%s\": %s. Optimistically proceeding.", fname,
++             strerror(errno));
++  }
++
++  /* Open the gzip descriptor */
++  new_file->gzf = gzdopen (new_file->fd, "wb");
++  if (!new_file->gzf) {
++    log_warn(LD_FS,"Error opening gzipped file \"%s\": %s", open_name,
++             strerror(errno));
++    goto err;
++  }
++
++  *data_out = new_file;
++
++  return new_file->gzf;
++
++ err:
++  if (new_file->fd >= 0)
++    close(new_file->fd);
++  *data_out = NULL;
++  tor_free(new_file->filename);
++  tor_free(new_file->tempname);
++  tor_free(new_file);
++  return NULL;
++}
++
++/** Helper function: close and free the underlying file and memory in
++ * <b>file_data</b>.  If we were writing into a temporary file, then delete
++ * that file (if abort_write is true) or replaces the target file with
++ * the temporary file (if abort_write is false). */
++static int
++gzfinish_writing_to_file_impl(open_file_t *file_data, int abort_write)
++{
++  int r = 0;
++  tor_assert(file_data && file_data->filename);
++  if (gzclose(file_data->gzf)!=Z_OK) {
++    log_warn(LD_FS, "Error closing \"%s\": %s", file_data->filename,
++               strerror(errno));
++    abort_write = r = -1;
++  }
++
++  if (file_data->rename_on_close) {
++    tor_assert(file_data->tempname && file_data->filename);
++    if (abort_write) {
++      unlink(file_data->tempname);
++    } else {
++      tor_assert(strcmp(file_data->filename, file_data->tempname));
++      if (rename(file_data->tempname, file_data->filename)) {
++        log_warn(LD_FS, "Error renaming \"%s\": %s", file_data->filename,
++                 strerror(errno));
++        r = -1;
++      }
++    }
++  }
++
++  tor_free(file_data->filename);
++  tor_free(file_data->tempname);
++  tor_free(file_data);
++
++  return r;
++}
++
++/** Finish writing to <b>file_data</b>: close the file handle, free memory as
++ * needed, and if using a temporary file, replace the original file with
++ * the temporary file. */
++int
++gzfinish_writing_to_file(open_file_t *file_data)
++{
++  return gzfinish_writing_to_file_impl(file_data, 0);
++}
++
++/** Finish writing to <b>file_data</b>: close the file handle, free memory as
++ * needed, and if using a temporary file, delete it. */
++int
++gzabort_writing_to_file(open_file_t *file_data)
++{
++  return gzfinish_writing_to_file_impl(file_data, 1);
++}
++
++/** Helper: given a set of flags as passed to open(2), open the file
++ * <b>fname</b> and write all the sized_chunk_t structs in <b>chunks</b> to
++ * the file.  Do so as atomically as possible e.g. by opening temp files and
++ * renaming. */
++static int
++gzwrite_chunks_to_file_impl(const char *fname, const smartlist_t *chunks,
++                          int open_flags)
++{
++  open_file_t *file = NULL;
++  ssize_t result;
++  gzFile gzf = gzstart_writing_to_file(fname, open_flags, 0600, &file);
++  if (gzf==NULL)
++    return -1;
++  SMARTLIST_FOREACH(chunks, sized_chunk_t *, chunk,
++  {
++    result = gzwrite_all(gzf, chunk->bytes, chunk->len);
++    if (result < 0) {
++      log_warn(LD_FS, "Error writing to \"%s\": %s", fname,
++          strerror(errno));
++      goto err;
++    }
++    tor_assert((size_t)result == chunk->len);
++  });
++
++  return gzfinish_writing_to_file(file);
++ err:
++  gzabort_writing_to_file(file);
++  return -1;
++}
++
++/** Given a smartlist of sized_chunk_t, write them atomically to a file
++ * <b>fname</b>, overwriting or creating the file as necessary. */
++int
++gzwrite_chunks_to_file(const char *fname, const smartlist_t *chunks)
++{
++  int flags = OPEN_FLAGS_REPLACE|O_BINARY;
++  return gzwrite_chunks_to_file_impl(fname, chunks, flags);
++}
++
++/** Read the uncompressed contents of <b>filename</b> into a newly
++ * allocated string; return the string on success or NULL on failure.
++ *
++ * If <b>stat_out</b> is provided, store the result of stat()ing the
++ * file into <b>stat_out</b>, but replace the st_size with the size
++ * of uncompressed data.
++ *
++ * If <b>flags</b> &amp; RFTS_BIN, open the file in binary mode.
++ * If <b>flags</b> &amp; RFTS_IGNORE_MISSING, don't warn if the file
++ * doesn't exist.
++ */
++/*
++ * This function <em>may</em> return an erroneous result if the file
++ * is modified while it is running, but must not crash or overflow.
++ * Right now, the error case occurs when the file length grows between
++ * the call to stat and the call to read_all: the resulting string will
++ * be truncated.
++ */
++char *
++gzread_file_to_str(const char *filename, int flags, struct stat *stat_out)
++{
++  int fd; /* router file */
++  struct stat statbuf;
++  char *string;
++  ssize_t r;
++  int bin = flags & RFTS_BIN;
++
++  tor_assert(filename);
++
++  fd = open(filename,O_RDONLY|(bin?O_BINARY:O_TEXT),0);
++  if (fd<0) {
++    int severity = LOG_WARN;
++    int save_errno = errno;
++    if (errno == ENOENT && (flags & RFTS_IGNORE_MISSING))
++      severity = LOG_INFO;
++    log_fn(severity, LD_FS,"Could not open \"%s\": %s ",filename,
++           strerror(errno));
++    errno = save_errno;
++    return NULL;
++  }
++
++  if (fstat(fd, &statbuf)<0) {
++    int save_errno = errno;
++    close(fd);
++    log_warn(LD_FS,"Could not fstat \"%s\".",filename);
++    errno = save_errno;
++    return NULL;
++  }
++
++  if ((uint64_t)(statbuf.st_size)+1 >= SIZE_T_CEILING)
++    return NULL;
++
++  /* Read the last 4 bytes of the file for the uncompressed size of data */
++  lseek(fd, -4, SEEK_END);
++  statbuf.st_size = 0;
++  unsigned char sizebyte, offset;
++  for (offset=0; offset<=24; offset+=8) {
++    if (read(fd, &sizebyte, 1)!=1) {
++      log_warn(LD_FS,"Can't read the size of uncompressed data in file %s: %s", filename, strerror(errno));
++      close(fd);
++      return NULL;
++    }
++    statbuf.st_size += sizebyte<<offset;
++  }
++
++  lseek(fd, 0, SEEK_SET);
++  gzFile gzf = gzdopen (fd, "rb");
++  if (!gzf) {
++    log_warn(LD_FS,"Error opening gzipped file \"%s\": %s", filename,
++             strerror(errno));
++  }
++
++  string = tor_malloc((size_t)(statbuf.st_size+1));
++
++  r = gzread_all(gzf,string,(size_t)statbuf.st_size);
++  if (r<0) {
++    int save_errno = errno;
++    log_warn(LD_FS,"Error reading from file \"%s\": %s", filename,
++             strerror(errno));
++    tor_free(string);
++    gzclose(gzf);
++    errno = save_errno;
++    return NULL;
++  }
++  string[r] = '\0'; /* NUL-terminate the result. */
++
++#ifdef MS_WINDOWS
++  if (!bin && strchr(string, '\r')) {
++    log_debug(LD_FS, "We didn't convert CRLF to LF as well as we hoped "
++              "when reading %s. Coping.",
++              filename);
++    tor_strstrip(string, "\r");
++    r = strlen(string);
++  }
++  if (!bin) {
++    statbuf.st_size = (size_t) r;
++  } else
++#endif
++    if (r != statbuf.st_size) {
++      /* Unless we're using text mode on win32, we'd better have an exact
++       * match for size. */
++      int save_errno = errno;
++      log_warn(LD_FS,"Could read only %d of %ld bytes of file \"%s\".",
++               (int)r, (long)statbuf.st_size,filename);
++      tor_free(string);
++      gzclose(gzf);
++      errno = save_errno;
++      return NULL;
++    }
++  gzclose(gzf);
++  if (stat_out) {
++    memcpy(stat_out, &statbuf, sizeof(struct stat));
++  }
++
++  return string;
++}
++
++/** Emulate memory mapping for <b>filename</b> by loading contents
++ * of a compressed file. */
++tor_mmap_t *
++gzmmap_file(const char *filename)
++{
++  struct stat st;
++  char *res = gzread_file_to_str(filename, RFTS_BIN|RFTS_IGNORE_MISSING, &st);
++  tor_mmap_t *handle;
++  if (! res)
++    return NULL;
++  handle = tor_malloc_zero(sizeof(tor_mmap_t));
++  handle->data = res;
++  handle->size = st.st_size;
++  return handle;
++}
++void
++gzmunmap_file(tor_mmap_t *handle)
++{
++  char *d = (char*)handle->data;
++  tor_free(d);
++  memset(handle, 0, sizeof(tor_mmap_t));
++  tor_free(handle);
++}
++
+--- /dev/null	2011-10-27 15:57:42.115929600 -0400
++++ b/src/common/gzutil.h	2011-11-10 15:53:08.933299874 -0500
+@@ -0,0 +1,38 @@
++/* Copyright (c) 2003-2004, Roger Dingledine
++ * Copyright (c) 2004-2006, Roger Dingledine, Nick Mathewson.
++ * Copyright (c) 2007-2011, The Tor Project, Inc. */
++/* See LICENSE for licensing information */
++
++/**
++ * \file gzutil.h
++ * \brief Headers for gzutil.c
++ **/
++
++#ifndef _TOR_GZUTIL_H
++#define _TOR_GZUTIL_H
++
++#include "orconfig.h"
++#include "torint.h"
++#include "compat.h"
++#include "di_ops.h"
++#include "util.h"
++#include <stdio.h>
++#include <stdlib.h>
++
++#ifndef O_BINARY
++#define O_BINARY 0
++#endif
++#ifndef O_TEXT
++#define O_TEXT 0
++#endif
++
++int gzwrite_chunks_to_file(const char *fname, const struct smartlist_t *chunks);
++
++char *gzread_file_to_str(const char *filename, int flags, struct stat *stat_out)
++  ATTR_MALLOC;
++
++tor_mmap_t * gzmmap_file(const char *filename);
++void gzmunmap_file(tor_mmap_t *handle);
++
++#endif
++
+--- a/src/common/Makefile.am	2011-10-26 20:21:12.000000000 -0400
++++ b/src/common/Makefile.am	2011-11-10 15:52:45.876839874 -0500
+@@ -12,11 +12,11 @@
+ endif
+ 
+ libor_a_SOURCES = address.c log.c util.c compat.c container.c mempool.c \
+-	memarea.c di_ops.c procmon.c util_codedigest.c $(libor_extra_source)
++	memarea.c di_ops.c procmon.c gzutil.c util_codedigest.c $(libor_extra_source)
+ libor_crypto_a_SOURCES = crypto.c aes.c tortls.c torgzip.c
+ libor_event_a_SOURCES = compat_libevent.c
+ 
+-noinst_HEADERS = address.h torlog.h crypto.h util.h compat.h aes.h torint.h tortls.h strlcpy.c strlcat.c torgzip.h container.h ht.h mempool.h memarea.h ciphers.inc compat_libevent.h tortls_states.h di_ops.h procmon.h
++noinst_HEADERS = address.h torlog.h crypto.h util.h compat.h aes.h torint.h tortls.h strlcpy.c strlcat.c torgzip.h container.h ht.h mempool.h memarea.h ciphers.inc compat_libevent.h tortls_states.h gzutil.h di_ops.h procmon.h
+ 
+ common_sha1.i: $(libor_SOURCES) $(libor_crypto_a_SOURCES) $(noinst_HEADERS)
+ 	if test "@SHA1SUM@" != none; then \
+--- a/src/common/Makefile.in	2011-10-26 20:22:25.000000000 -0400
++++ b/src/common/Makefile.in	2011-11-10 15:51:37.495475524 -0500
+@@ -61,14 +61,14 @@
+ libor_a_AR = $(AR) $(ARFLAGS)
+ libor_a_LIBADD =
+ am__libor_a_SOURCES_DIST = address.c log.c util.c compat.c container.c \
+-	mempool.c memarea.c di_ops.c procmon.c util_codedigest.c \
++	mempool.c memarea.c di_ops.c procmon.c gzutil.c util_codedigest.c \
+ 	OpenBSD_malloc_Linux.c
+ @USE_OPENBSD_MALLOC_TRUE@am__objects_1 =  \
+ @USE_OPENBSD_MALLOC_TRUE@	OpenBSD_malloc_Linux.$(OBJEXT)
+ am_libor_a_OBJECTS = address.$(OBJEXT) log.$(OBJEXT) util.$(OBJEXT) \
+ 	compat.$(OBJEXT) container.$(OBJEXT) mempool.$(OBJEXT) \
+ 	memarea.$(OBJEXT) di_ops.$(OBJEXT) procmon.$(OBJEXT) \
+-	util_codedigest.$(OBJEXT) $(am__objects_1)
++	gzutil.$(OBJEXT) util_codedigest.$(OBJEXT) $(am__objects_1)
+ libor_a_OBJECTS = $(am_libor_a_OBJECTS)
+ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+ depcomp = $(SHELL) $(top_srcdir)/depcomp
+@@ -211,11 +211,11 @@
+ #CFLAGS  = -Wall -Wpointer-arith -O2
+ @USE_OPENBSD_MALLOC_TRUE@libor_extra_source = OpenBSD_malloc_Linux.c
+ libor_a_SOURCES = address.c log.c util.c compat.c container.c mempool.c \
+-	memarea.c di_ops.c procmon.c util_codedigest.c $(libor_extra_source)
++	memarea.c di_ops.c procmon.c gzutil.c util_codedigest.c $(libor_extra_source)
+ 
+ libor_crypto_a_SOURCES = crypto.c aes.c tortls.c torgzip.c
+ libor_event_a_SOURCES = compat_libevent.c
+-noinst_HEADERS = address.h torlog.h crypto.h util.h compat.h aes.h torint.h tortls.h strlcpy.c strlcat.c torgzip.h container.h ht.h mempool.h memarea.h ciphers.inc compat_libevent.h tortls_states.h di_ops.h procmon.h
++noinst_HEADERS = address.h torlog.h crypto.h util.h compat.h aes.h torint.h tortls.h strlcpy.c strlcat.c torgzip.h container.h ht.h mempool.h memarea.h ciphers.inc compat_libevent.h tortls_states.h gzutil.h di_ops.h procmon.h
+ all: all-am
+ 
+ .SUFFIXES:
+@@ -287,6 +287,7 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/torgzip.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tortls.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gzutil.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util_codedigest.Po@am__quote@
+ 
+ .c.o:
+--- a/src/or/routerlist.c	2011-10-26 20:21:12.000000000 -0400
++++ b/src/or/routerlist.c	2011-11-10 16:13:46.894064036 -0500
+@@ -32,6 +32,8 @@
+ #include "routerlist.h"
+ #include "routerparse.h"
+ 
++#include "../common/gzutil.h"
++
+ // #define DEBUG_ROUTERLIST
+ 
+ /****************************************************************************/
+@@ -590,11 +592,8 @@
+ static int
+ router_should_rebuild_store(desc_store_t *store)
+ {
+-  if (store->store_len > (1<<16))
+-    return (store->journal_len > store->store_len / 2 ||
+-            store->bytes_dropped > store->store_len / 2);
+-  else
+-    return store->journal_len > (1<<15);
++  return (store->journal_len > (1<<20) ||
++            store->bytes_dropped > store->store_len / 4);
+ }
+ 
+ /** Return the desc_store_t in <b>rl</b> that should be used to store
+@@ -656,7 +655,7 @@
+ router_rebuild_store(int flags, desc_store_t *store)
+ {
+   smartlist_t *chunk_list = NULL;
+-  char *fname = NULL, *fname_tmp = NULL;
++  char *fname = NULL;
+   int r = -1;
+   off_t offset = 0;
+   smartlist_t *signed_descriptors = NULL;
+@@ -686,8 +685,7 @@
+ 
+   log_info(LD_DIR, "Rebuilding %s cache", store->description);
+ 
+-  fname = get_datadir_fname(store->fname_base);
+-  fname_tmp = get_datadir_fname_suffix(store->fname_base, ".tmp");
++  fname = get_datadir_fname_suffix(store->fname_base, ".gz");
+ 
+   chunk_list = smartlist_create();
+ 
+@@ -732,24 +730,19 @@
+       smartlist_add(chunk_list, c);
+     });
+ 
+-  if (write_chunks_to_file(fname_tmp, chunk_list, 1)<0) {
++  if (gzwrite_chunks_to_file(fname, chunk_list)<0) {
+     log_warn(LD_FS, "Error writing router store to disk.");
+     goto done;
+   }
+ 
+   /* Our mmap is now invalid. */
+   if (store->mmap) {
+-    tor_munmap_file(store->mmap);
++    gzmunmap_file(store->mmap);
+     store->mmap = NULL;
+   }
+ 
+-  if (replace_file(fname_tmp, fname)<0) {
+-    log_warn(LD_FS, "Error replacing old router store: %s", strerror(errno));
+-    goto done;
+-  }
+-
+   errno = 0;
+-  store->mmap = tor_mmap_file(fname);
++  store->mmap = gzmmap_file(fname);
+   if (! store->mmap) {
+     if (errno == ERANGE) {
+       /* empty store.*/
+@@ -793,7 +786,6 @@
+  done:
+   smartlist_free(signed_descriptors);
+   tor_free(fname);
+-  tor_free(fname_tmp);
+   if (chunk_list) {
+     SMARTLIST_FOREACH(chunk_list, sized_chunk_t *, c, tor_free(c));
+     smartlist_free(chunk_list);
+@@ -815,20 +807,20 @@
+   time_t now = time(NULL);
+   store->journal_len = store->store_len = 0;
+ 
+-  fname = get_datadir_fname(store->fname_base);
++  fname = get_datadir_fname_suffix(store->fname_base, ".gz");
+   if (store->fname_alt_base)
+-    altname = get_datadir_fname(store->fname_alt_base);
++    altname = get_datadir_fname_suffix(store->fname_alt_base, ".gz");
+ 
+   if (store->mmap) /* get rid of it first */
+-    tor_munmap_file(store->mmap);
++    gzmunmap_file(store->mmap);
+   store->mmap = NULL;
+ 
+-  store->mmap = tor_mmap_file(fname);
++  store->mmap = gzmmap_file(fname);
+   if (!store->mmap && altname && file_status(altname) == FN_FILE) {
+     read_from_old_location = 1;
+     log_notice(LD_DIR, "Couldn't read %s; trying to load routers from old "
+                "location %s.", fname, altname);
+-    if ((store->mmap = tor_mmap_file(altname)))
++    if ((store->mmap = gzmmap_file(altname)))
+       read_from_old_location = 1;
+   }
+   if (altname && !read_from_old_location) {
+@@ -2741,9 +2733,9 @@
+   smartlist_free(rl->routers);
+   smartlist_free(rl->old_routers);
+   if (routerlist->desc_store.mmap)
+-    tor_munmap_file(routerlist->desc_store.mmap);
++    gzmunmap_file(routerlist->desc_store.mmap);
+   if (routerlist->extrainfo_store.mmap)
+-    tor_munmap_file(routerlist->extrainfo_store.mmap);
++    gzmunmap_file(routerlist->extrainfo_store.mmap);
+   tor_free(rl);
+ 
+   router_dir_info_changed();
