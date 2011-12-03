@@ -102,6 +102,7 @@ var passInvalid = false;
 
 <script>
 <!--
+	document.getElementById('password').focus();
 	setStatusAndQuotas();
 //-->
 </script>
