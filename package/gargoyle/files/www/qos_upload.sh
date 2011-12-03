@@ -36,49 +36,30 @@
 			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
 			<label id='qos_enabled_label' for='qos_enabled'>Enable Quality of Service (Upload Direction)</label>
 		</div>
+
 		<div class="indent">
 			<p>Quality of Service (QoS) provides a way to control how available bandwidth is allocated.  Connections are classified into
 			different &ldquo;service classes,&rdquo; each of which is allocated a share of the available bandwidth.  QoS should be applied
-			in cases where you want to divide available bandwidth equitably between competing requirements.  For example if you want
-			your vonage VoIP phone to work correctly while downloading videos.  Another case would be if you want your bit torrents
-			throttled back when you are web surfing.  Using QoS will involve compromising your maximum speed in order to get fairness so
-			you should only enable QoS when you are ready to accept the compromise.
-		  </p>
+			in cases where you want to divide available bandwidth between competing requirements.  For example if you want
+			your VoIP phone to work correctly while downloading videos.  Another case would be if you want your bit torrents
+			throttled back when you are web surfing.</p>
 		</div>
 		<div class="internal_divider"></div>
 
 		<div id='qos_rule_table_container' class="bottom_gap"></div>
 		<div>
-			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Default Service Class:</label>
+			<label class="leftcolumn" id="default_class_label" for="default_class">Default Service Class:</label>
 			<select class="rightcolumn" id="default_class"></select>
-		</div>
-
-		<div>
-			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Total (Upload) Bandwidth:</label>
-			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-			<em>kbit/s</em>
-
 		</div>
 
 		<div id="qos_up_1" class="indent">
 			<span id='qos_up_1_txt'>
-				<p> Specifying your bandwidth correctly is crucial to making QoS work. You should enter the minimum bandwith your ISP
-				provides you ignoring "Speedboosting" or other advertised peak values.  Entering a number which is too low will result 
-                            in an uplink which is slower then necessary.  Entering a number which is too high will result in QoS not meeting its 
-                            class requirements.  Since most ISPs don't provide you a guaranteed minimum bandwidth and in fact the bandwidth you
-                            actually recieve can vary throughout the day it may take some experimentation to arrive at a number which represents
-				the minimum you recieve.  
-
-				The upload bandwidth provided by ISP's tends to be more stable than download bandwidth so entering a number of
-				95% of your peak or "advertisted" value may work acceptably.
-
-				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
-
-				<p>The default service class specifies how packets that do not match any rule should be classified.</p>
-
 				<p>Packets are tested against the rules in the order specified -- rules toward the top have priority.
 				As soon as a packet matches a rule it is classified, and the rest of the rules are ignored.  The order of
 				the rules can be altered using the arrow controls.</p>
+
+				<p>The <em>Default Service Class</em> specifies how packets that do not match any rule should be classified.</p>
+
 			</span>
 			<a onclick='setDescriptionVisibility("qos_up_1")'  id="qos_up_1_ref" href="#qos_up_1">Hide Text</a>
 		</div>
@@ -190,6 +171,13 @@
 		<legend class="sectionheader">QoS (Upload) -- Service Classes</legend>
 		<div id='qos_class_table_container' class="bottom_gap"></div>
 
+		<div>
+			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Total (Upload) Bandwidth:</label>
+			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+			<em>kbit/s</em>
+
+		</div>
+
 		<div id="qos_up_2" class="indent">
 			<span id='qos_up_2_txt'>
 				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
@@ -204,8 +192,13 @@
 				QoS will satisfiy the minimum service of all classes first before allocating the remaining service to other waiting classes.
 				</p>
 
-				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  Even if unused bandwidth
-				is available, this service class will never be permitted to use more than this amount of bandwidth.</p>
+				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  
+				Even if unused bandwidth iavailable, this service class will never be permitted to use more than this amount of bandwidth.</p>
+
+				<p><em>Total Upload Bandwidth</em> should be set to around 95% of your available upload bandwidth.  
+				Entering a number which is too high will result in QoS not meeting its class requirements.  
+				Entering a number which is too low will needlessly penalize your upload speed.
+				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_up_2")'  id="qos_up_2_ref" href="#qos_up_2">Hide Text</a>
 		</div>

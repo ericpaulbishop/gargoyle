@@ -114,8 +114,4 @@ config bandwidth_display bandwidth_display
 
 config help help
 	option ddns_1		1
-	option qos_up_1		1
-	option qos_up_2		1
-	option qos_down_1	1
-	option qos_down_2	1
 

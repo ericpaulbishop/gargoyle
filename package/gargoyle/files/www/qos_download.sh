@@ -48,36 +48,18 @@
 
 		<div id='qos_rule_table_container' class="bottom_gap"></div>
 		<div>
-			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Default Service Class:</label>
+			<label class="leftcolumn" id="default_class_label" for="default_class">Default Service Class:</label>
 			<select class="rightcolumn" id="default_class"></select>
-		</div>
-
-		<div>
-			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Total (Download) Bandwidth:</label>
-			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-			<em>kbit/s</em>
-
 		</div>
 
 		<div id="qos_down_1" class="indent">
 			<span id='qos_down_1_txt'>
-				<p> Specifying your total bandwidth correctly is crucial to making QoS work.  You should enter the minimum bandwith your ISP
-				provides you ignoring "Speedboosting" or other advertised peak values which change in ways that QoS cannot compensate for.
-				Entering a number which is too low will result in a connection which is slower then necessary.  Entering a number which is
-				too high will	result in QoS not meeting its class requirements.  Since some ISPs don't provide you a guaranteed minimum
-				bandwith it may take some experimentation to arrive at a number.  One approach is to start with a number which is half of what you
-				think it should be and then test your link under full load and make sure everything works.  Then increase it in steps, testing as
-				you go until QoS starts to break down.  You also may see that after your testing QoS works for a while and then stops working.
-				This may be because your ISP is getting overloaded due to demands from their other customers so they are no longer
-				delivering to you the bandwidth they did during your testing.  The solution, lower this number.
-
-				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
-
-				<p>The default service class specifies how packets that do not match any rule should be classified.</p>
-
 				<p>Packets are tested against the rules in the order specified -- rules toward the top have priority.
 				As soon as a packet matches a rule it is classified, and the rest of the rules are ignored.  The order of
 				the rules can be altered using the arrow controls.</p>
+
+				<p>The <em>Default Service Class</em> specifies how packets that do not match any rule should be classified.</p>
+
 			</span>
 			<a onclick='setDescriptionVisibility("qos_down_1")'  id="qos_down_1_ref" href="#qos_down_1">Hide Text</a>
 		</div>
@@ -187,6 +169,13 @@
 		<legend class="sectionheader">QoS (Download) -- Service Classes</legend>
 		<div id='qos_class_table_container' class="bottom_gap"></div>
 
+		<div>
+			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth">Total Download Bandwidth:</label>
+			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+			<em>kbit/s</em>
+
+		</div>
+
 		<div id="qos_down_2" class="indent">
 			<span id='qos_down_2_txt'>
 				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
@@ -203,7 +192,22 @@
 
 				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  Even if unused bandwidth
 				is available, this service class will never be permitted to use more than this amount of bandwidth.</p>
+
+				<p> Specifying <em>Total Download Bandwidth</em> correctly is crucial to making QoS work.  What you enter in this field depends on if you are
+				using the active congestion controller (ACC) or not.  If you are using ACC then put the maximum bandwidth your ISP provides you in the
+				bandwidth field.  If you are not using ACC then things get more complicated.  What is needed in this case is around 80% of the minimum bandwidth your
+				ISP will provide.  Since most ISPs don't provide a guaranteed minimum	bandwith it will take some experimentation to arrive at a number.  
+				One approach is to start with a number which is half of what you think it should be and then test your link under full load and make sure everything works.  
+				Then increase it in steps, testing as you go until QoS starts to break down.  You also may see that after your testing QoS 
+				works for a while and then stops working.  This may be because your ISP is getting overloaded due to demands from their other 
+				customers so they are no longer delivering to you the bandwidth they did during your testing.  The solution, lower this number.
+				Entering a number which is too high will result in QoS not meeting its class requirements.  Entering a number which is too low
+				will needlessly penalize your download speed.
+
+				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
 			</span>
+
+
 			<a onclick='setDescriptionVisibility("qos_down_2")'  id="qos_down_2_ref" href="#qos_down_2">Hide Text</a>
 
 		</div>
@@ -286,16 +290,32 @@
 			</span>
 		</div>
 
+		<div>
+			<span class='indent'>
+				<input type='checkbox' id='use_auto_pinglimit' onclick='enableAssociatedField(this, "pinglimit", 85)'/>&nbsp;&nbsp;
+				<label for='pinglimit' id='pinglimit_label'>Use custom ping limit:</label>
+				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' /> 
+			</span>
+		</div>
+
 		<div id="qos_down_3" class="indent">
 		<span id='qos_down_3_txt'>
-			<p>The congestion control observes your download activiy and automatically adjusts your download limit to maintain
-                     proper QoS performance.  The control automatically compensates for changes in your ISP's download speed
-                     and the demand from your network and results in optimum performance.
+			<p>The active congestion control (ACC) observes your download activity and automatically adjusts your download link limit to maintain
+			proper QoS performance.  ACC automatically compensates for changes in your ISP's download speed
+			and the demand from your network adjusting the link speed to the highest speed possible which will maintian proper
+			QoS function.  The effective range of this control is between 20% and 100% of the total download bandwidth you
+			entered above.</p>
 
-			To use this feature set your QoS downlink speed to the maximum speed your ISP can deliver you in the best of
-                     circumstances.  The control will maintain the downlink between 20% and 100% of this value as needed to 
-			maintain the QoS goals.  You must also enable your upload QoS and set it to 95% of your measured uplink speed. 
-                     </p>
+			<p>While ACC does not adjust your upload link speed you must enable and properly configure your upload QoS for it to function properly.</p>
+
+			<p><em>Ping Target-</em> The segment of network between your router and the ping target is where congestion is controlled.  By monitoring
+			the round trip ping times to the target congestion is detected.  By default ACC uses your WAN gateway as the ping target.  If you know 
+			that congestion on your link will occur in a different segment then you can enter an alternate ping target.</p>
+
+			<p><em>Ping Limit-</em> Round trip ping times are compared against the ping limit.  ACC controls the link limit to maintain ping times
+			under this limit.  By default ACC automatically determines the ping limit by using the link speeds you entered and measured normal ping time.  				You can see the results of this computation in the status section below.  If you feel the automatic ping limit computation is not correct or 
+			you would like to try a different limit you can manually enter your own custom limit.</p>
+
 		</span>
 		<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
 

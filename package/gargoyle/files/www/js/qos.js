@@ -32,6 +32,15 @@ function saveChanges()
 		{
 			uci.remove("qos_gargoyle", direction, "ptarget_ip");
 		}
+
+		if (document.getElementById("use_auto_pinglimit").checked == true)
+		{
+			uci.set("qos_gargoyle", direction, "pinglimit", document.getElementById("pinglimit").value);
+		}
+		else
+		{
+			uci.remove("qos_gargoyle", direction, "pinglimit");
+		}
 	}
 
 
@@ -467,7 +476,6 @@ function resetData()
 	}
 	ruleTableContainer.appendChild(ruleTable);
 
-	setQosEnabled();
 	if (direction == "download")
 	{
 		monenabled= uciOriginal.get("qos_gargoyle", direction, "qos_monenabled");
@@ -485,7 +493,23 @@ function resetData()
 			document.getElementById("ptarget_ip").value=ptarget_ip;
 			setElementEnabled(document.getElementById("ptarget_ip"), true, "")
 		}
+
+		pinglimit = uciOriginal.get("qos_gargoyle", direction, "pinglimit");
+		if (pinglimit == "")
+		{
+			document.getElementById("use_auto_pinglimit").checked = false;
+			setElementEnabled(document.getElementById("pinglimit"), false, "Auto")
+		}
+		else
+		{
+			document.getElementById("use_auto_pinglimit").checked = true;
+			document.getElementById("pinglimit").value=pinglimit;
+			setElementEnabled(document.getElementById("pinglimit"), true, "")
+		}
+
 	}
+
+	setQosEnabled();
 
 	//Startup the dynamic screen updates.
 	updateInProgress = false;
@@ -555,7 +579,9 @@ function setQosEnabled()
 	setElementEnabled( document.getElementById("qos_monenabled"), enabled, "");
 	qmenabled = (enabled && document.getElementById("qos_monenabled").checked);
 	setElementEnabled( document.getElementById("use_ptarget_ip"), qmenabled,"");
-	setElementEnabled( document.getElementById("ptarget_ip"), qmenabled &&	document.getElementById("use_ptarget_ip").checked,document.getElementById("ptarget_ip").value);
+	setElementEnabled( document.getElementById("ptarget_ip"), qmenabled && document.getElementById("use_ptarget_ip").checked,document.getElementById("ptarget_ip").value);
+	setElementEnabled( document.getElementById("use_auto_pinglimit"), qmenabled,"");
+	setElementEnabled( document.getElementById("pinglimit"), qmenabled && document.getElementById("use_auto_pinglimit").checked,document.getElementById("pinglimit").value);
 	}
 
 	resetRuleControls();
