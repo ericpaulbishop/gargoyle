@@ -28,7 +28,64 @@
 #include <errno.h>
 #include <stdint.h>
 
-#undef BIG_ENDIAN_HOST
+
+
+
+/* Endian detection yoinked from busybox */
+
+#if defined(__digital__) && defined(__unix__)
+# include <sex.h>
+# define __BIG_ENDIAN__ (BYTE_ORDER == BIG_ENDIAN)
+# define __BYTE_ORDER BYTE_ORDER
+#elif defined __FreeBSD__
+char *strchrnul(const char *s, int c);
+# include <sys/resource.h>	/* rlimit */
+# include <machine/endian.h>
+# define bswap_64 __bswap64
+# define bswap_32 __bswap32
+# define bswap_16 __bswap16
+# define __BIG_ENDIAN__ (_BYTE_ORDER == _BIG_ENDIAN)
+#elif !defined __APPLE__
+# include <byteswap.h>
+# include <endian.h>
+#endif
+
+#if defined(__BIG_ENDIAN__) && __BIG_ENDIAN__
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif __BYTE_ORDER == __BIG_ENDIAN
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#else
+# error "Can't determine endiannes"
+#endif
+
+#if defined(__dietlibc__)
+static ALWAYS_INLINE char* strchrnul(const char *s, char c)
+{
+	while (*s && *s != c) ++s;
+	return (char*)s;
+}
+#endif
+
+/* End of busybox endian code */
+
+
+/* use busybox endian variables to define BIG_ENDIAN_HOST, which is used by sha1sum code */
+
+#if BB_BIG_ENDIAN
+	#define BIG_ENDIAN_HOST
+#else
+	#undef BIG_ENDIAN_HOST
+#endif
+
+
+
+
+
 typedef uint32_t u32;
 
 /****************
