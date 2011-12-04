@@ -1,0 +1,14 @@
+#!/bin/sh /etc/rc.common
+
+START=49
+
+start()
+{
+	gdisplay=$(uci get gargoyle.display.system_plugins 2>/dev/null)
+	if [ -z "$gdisplay" ] ; then
+		uci set gargoyle.display.system_plugins='Plugins'
+		uci set gargoyle.scripts.system_plugins='plugins.sh'
+		uci set gargoyle.system.plugins='312'
+		uci commit
+	fi
+}
