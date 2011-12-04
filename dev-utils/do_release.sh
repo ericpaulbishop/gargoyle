@@ -91,7 +91,7 @@ fi
 
 
 #give user a chance to cancel
-echo "Updateing for gargoyle branch = $gargoyle_checkout_branchname"
+echo "Updating for gargoyle branch = $gargoyle_checkout_branchname"
 echo "Updating for version = $version"
 echo "Upcoming major version (for package naming) = $major_version"
 echo ""
