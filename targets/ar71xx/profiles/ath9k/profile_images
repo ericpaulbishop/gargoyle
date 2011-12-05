@@ -6,6 +6,8 @@
 -ap83-squashfs-sysupgrade.bin
 -dir-600-a1-squashfs-
 -dir-615-c1-squashfs-
+-tl-mr3420-v1-squashfs-
+-tl-wr740n-v1-squashfs-
 -tl-wr741nd-v1-squashfs-
 -tl-wr841nd-v3-squashfs-
 -tl-wr841nd-v5-squashfs-

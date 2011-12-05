@@ -22,7 +22,7 @@ git_branch()
 			if [ -f $g/BISECT_LOG ] ; then
 				r="|BISECTING"
 			fi
-			if [ ! b="$(git symbolic-ref HEAD 2>/dev/null)" ] ; then
+			if  ! b="$(git symbolic-ref HEAD 2>/dev/null)"  ; then
 				b="$(cut -c1-7 $g/HEAD)..."
 			fi
 		fi
@@ -91,7 +91,7 @@ fi
 
 
 #give user a chance to cancel
-echo "Updateing for gargoyle branch = $gargoyle_checkout_branchname"
+echo "Updating for gargoyle branch = $gargoyle_checkout_branchname"
 echo "Updating for version = $version"
 echo "Upcoming major version (for package naming) = $major_version"
 echo ""

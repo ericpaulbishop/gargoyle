@@ -47,8 +47,9 @@
 #include <ncurses.h>
 #endif
 
-#define MAXPACKET   100 /* max packet size */
-#define BACKGROUND  3   /* Detact and run in the background */
+#define MAXPACKET   100   /* max packet size */
+#define BACKGROUND  3     /* Detact and run in the background */
+#define ADDENTITLEMENT 4
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN  64
@@ -75,7 +76,8 @@ const char usage[] =
 "              bandwidth  - The maximum download speed the WAN link will support in kbps.\n"
 "              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
-"                     -b  - Run in the background\n";
+"                     -b  - Run in the background\n"
+"                     -a  - Add entitlement to pinglimt\n";
 
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
@@ -111,7 +113,7 @@ u_char firstflg=1;       //First pass flag
 
 u_char DCA;              //Number of download classes active
 u_char pingon=0;         //Set to one when pinger becomes active.
-int    pinglimit=0;      //Maximum ping time to allow before reacting. 
+int    pinglimit=0;      //Maximum ping time to allow before reacting in microseconds. 
 
 float BWTC;              //Time constant of the bandwidth filter
 int DBW_UL;              //This the absolute limit of the link passed in as a parameter.
@@ -668,6 +670,9 @@ int main(int argc, char *argv[])
                 pingflags |= BACKGROUND;
                 break;
 
+            case 'a':
+                pingflags |= ADDENTITLEMENT;
+                break;
         }
         argc--, av++;
     }
@@ -718,7 +723,7 @@ int main(int argc, char *argv[])
     //Convert kbps to bps.
     dbw_ul = DBW_UL = DBW_UL*1000;
 
-    //The fourth optional parameter is the pinglimit in ms.
+    //The fourth optional parameter is the ping limit in ms.
     if (argc == 4) {
         pinglimit = atoi( av[3] )*1000;
     }
@@ -912,10 +917,11 @@ int main(int argc, char *argv[])
                 //If we get two pings go ahead and lower the link speed.
                 if (nreceived >= 2) {
 
-                    //If the pinglimit was entered on the command line go
-                    //directly to the WATCH state otherwise automatically
-                    //determine an appropriate ping limit.
-                    if (pinglimit) {
+                    //If the pinglimit was entered on the command line 
+                    //without the add flag then go directly to the 
+                    //WATCH state otherwise automatically determine an appropriate 
+                    //ping limit.
+                    if ((pinglimit) && !(pingflags & ADDENTITLEMENT)) {
                         dbw_ul=0;  //Forces an update in QMON_WATCH
                         fil_triptime = rawfltime*1000;
                         qstate=QMON_WATCH;
@@ -931,7 +937,9 @@ int main(int argc, char *argv[])
             // link.  We do this by making pings and using the filter response after
             // throttling all traffic in the link.
             case QMON_INIT:
-                //Wait for seconds then re-initialize the filter.
+                //Filter starts at seven seconds and runs until 12 seconds.
+                //For the first seven seconds we initialize the filter to the last ping time we saw.
+                //After the seventh second we start filtering.
                 if (nreceived < (7000/period)+1) fil_triptime = rawfltime*1000;
 
                 //After 12 seconds we have measured our ping response entitlement.
@@ -940,9 +948,20 @@ int main(int argc, char *argv[])
                     qstate=QMON_WATCH;
                     dbw_ul=0;  //Forces an update in QMON_WATCH
 
-                    //For simplicity just use a multiple on the measure ping time.
-                    pinglimit = fil_triptime*2.5;
-                    if (pinglimit < 35) pinglimit=35;
+                    //If the user specified no limit then the ping limit computed from what was
+                    //entered on the command line.
+                    if (pingflags & ADDENTITLEMENT) {
+                        //Add what the user specified to the 110% of the measure ping time.
+                        pinglimit += (fil_triptime*1.1);
+                    } else {
+                        //Use 250% of measure ping time.  This works OK in my system but I have no
+                        //evidence that it will work in other systems.
+                        pinglimit = fil_triptime*2.5;
+                    }
+
+                    //Sanity Checks
+                    if (pinglimit < 10000) pinglimit=10000;
+                    if (pinglimit > 500000) pinglimit=500000;
                 }
                 break;
 

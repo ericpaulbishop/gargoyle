@@ -610,7 +610,18 @@ initialize_qos()
 		iptables -t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127
 
 		#Start the monitor
-      		qosmon -b 800 $ptarget_ip $total_download_bandwidth 85
+		if [ -n "$pinglimit" ] ; then
+      			qosmon -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
+		else
+			#In auto mode we calculate transmission delay based on our bandwidth and then ask qosmon
+			#to add this value to its measured ping entitlement to form the final ping limit.
+			pinglimit=$((1500*10*2/3/$total_download_bandwidth+1500*10/$total_upload_bandwidth+2))
+			if [ -n "$dbg" ] ; then
+				echo "qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit"
+			fi
+
+      			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
+		fi
 
 	fi
 
