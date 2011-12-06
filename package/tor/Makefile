@@ -5,6 +5,118 @@
 # See /LICENSE for more information.
 #
 
+######################################################################################
+# This Makefile downloads and builds Tor software covered by the following license:
+#
+# https://gitweb.torproject.org/tor.git/blob/HEAD:/LICENSE
+#
+#===============================================================================
+#Tor is distributed under this license:
+#
+#Copyright (c) 2001-2004, Roger Dingledine
+#Copyright (c) 2004-2006, Roger Dingledine, Nick Mathewson
+#Copyright (c) 2007-2011, The Tor Project, Inc.
+#
+#Redistribution and use in source and binary forms, with or without
+#modification, are permitted provided that the following conditions are
+#met:
+#
+#    * Redistributions of source code must retain the above copyright
+#notice, this list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above
+#copyright notice, this list of conditions and the following disclaimer
+#in the documentation and/or other materials provided with the
+#distribution.
+#
+#    * Neither the names of the copyright owners nor the names of its
+#contributors may be used to endorse or promote products derived from
+#this software without specific prior written permission.
+#
+#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+#OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+#SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+#LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+#THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#===============================================================================
+#src/common/strlcat.c and src/common/strlcpy.c by Todd C. Miller are licensed
+#under the following license:
+#
+# * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+# * All rights reserved.
+# *
+# * Redistribution and use in source and binary forms, with or without
+# * modification, are permitted provided that the following conditions
+# * are met:
+# * 1. Redistributions of source code must retain the above copyright
+# *    notice, this list of conditions and the following disclaimer.
+# * 2. Redistributions in binary form must reproduce the above copyright
+# *    notice, this list of conditions and the following disclaimer in the
+# *    documentation and/or other materials provided with the distribution.
+# * 3. The name of the author may not be used to endorse or promote products
+# *    derived from this software without specific prior written permission.
+# *
+# * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
+# * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+# * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
+# * THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+#===============================================================================
+#src/config/geoip is licensed under the following license:
+#
+#OPEN DATA LICENSE (GeoLite Country and GeoLite City databases)
+#
+#Copyright (c) 2008 MaxMind, Inc.  All Rights Reserved.
+#
+#All advertising materials and documentation mentioning features or use of
+#this database must display the following acknowledgment:
+#"This product includes GeoLite data created by MaxMind, available from
+#http://maxmind.com/"
+#
+#Redistribution and use with or without modification, are permitted provided
+#that the following conditions are met:
+#1. Redistributions must retain the above copyright notice, this list of
+#conditions and the following disclaimer in the documentation and/or other
+#materials provided with the distribution.
+#2. All advertising materials and documentation mentioning features or use of
+#this database must display the following acknowledgement:
+#"This product includes GeoLite data created by MaxMind, available from
+#http://maxmind.com/"
+#3. "MaxMind" may not be used to endorse or promote products derived from this
+#database without specific prior written permission.
+#
+#THIS DATABASE IS PROVIDED BY MAXMIND, INC ``AS IS'' AND ANY
+#EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#DISCLAIMED. IN NO EVENT SHALL MAXMIND BE LIABLE FOR ANY
+#DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+#(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+#LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+#ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+#(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+#DATABASE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#===============================================================================
+#If you got Tor as a static binary with OpenSSL included, then you should know:
+# "This product includes software developed by the OpenSSL Project
+# for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+#===============================================================================
+#
+#
+#
+#######################################################################################
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tor
