@@ -1500,15 +1500,12 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			is_first_lookup=1;
 			next_url = get_next_url_and_rotate(urls);
 			strcpy(first_url, next_url);
-			while(ip == NULL && strcmp(first_url, next_url) != 0 || is_first_lookup == 1)
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
 				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next);
+				if(ip == NULL) { next = get_next_url_and_rotate(urls); }
 				is_first_lookup = 0;
-				if(ip == NULL)
-				{
-					syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  next);
-					next = get_next_url_and_rotate(urls);
-				}
 			}
 		}
 		if(ip == NULL)
@@ -1516,15 +1513,12 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			is_first_lookup=1;
 			next_url = get_next_url_and_rotate(default_ip_lookup_urls);
 			strcpy(first_url, next_url);
-			while(ip == NULL && strcmp(first_url, next_url) != 0 || is_first_lookup == 1)
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
 				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next);
+				if(ip == NULL) { next = get_next_url_and_rotate(default_ip_lookup_urls); }
 				is_first_lookup = 0;
-				if(ip == NULL)
-				{
-					syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  next);
-					next = get_next_url_and_rotate(default_ip_lookup_urls);
-				}
 			}
 		}
 
