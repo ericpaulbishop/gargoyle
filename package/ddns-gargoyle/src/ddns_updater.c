@@ -1472,7 +1472,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 		char** urls = (char**)check_parameter;
 		
 		//this should probably be loaded from a file -- implement this later
-		char default_urls[][100] = {"http://checkip.dyndns.org", "http://checkip.org", "http://www.whatismyip.com/automation/n09230945.asp" "http://myip.dk/", "http://www.ipchicken.com/", "\0"};
+		char default_urls[][100] = {"http://checkip.dyndns.org", "http://checkip.org", "http://automation.whatismyip.com/n09230945.asp" "http://myip.dk/", "http://www.ipchicken.com/", "\0"};
 
 		int url_index;
 		if(urls != NULL)
@@ -1480,11 +1480,13 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			for(url_index=0; urls[url_index] != NULL && ip == NULL; url_index++)
 			{
 				ip = get_ip_from_url(urls[url_index]);
+				if(ip == NULL) { syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  default_urls[url_index]); }
 			}
 		}
 		for(url_index=0; default_urls[url_index][0] != '\0' && ip == NULL; url_index++)
 		{
 			ip = get_ip_from_url(default_urls[url_index]);
+			if(ip == NULL) { syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  default_urls[url_index]); }
 		}
 	}
 	
