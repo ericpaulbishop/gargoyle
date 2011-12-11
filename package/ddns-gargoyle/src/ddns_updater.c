@@ -77,14 +77,32 @@
 
 #define MAX_LOOKUP_URL_LENGTH	100
 
+
 char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
-							"http://checkip.dyndns.org", 
+							"http://whatismyip.org",
+							"http://checkmyip.com",
+							"http://www.ipchicken.com",
+							"http://www.tracemyip.org",
+							"http://cmyip.com",
+							"http://checkip.dyndns.org",
 							"http://checkip.org", 
 							"http://automation.whatismyip.com/n09230945.asp",
-							"http://myip.dk/",
-							"http://www.ipchicken.com/",
+							"http://myip.dk",
+							"http://www.ip-address.org",
+							"http://my-ip-address.com",
+							"http://www.selfseo.com/what_is_my_ip.php",
+							"http://aruljohn.com",
+							"http://www.lawrencegoetz.com/programs/ipinfo/",
+							"http://myipinfo.net",
+							"http://www.ip-1.com/",
+							"http://www.myipnumber.com",
+							"http://www.dslreports.com/whois",
 							"\0"
 							};
+
+
+
+
 char** default_ip_lookup_urls = NULL;
 
 
