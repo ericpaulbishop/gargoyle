@@ -306,7 +306,7 @@ initialize_qos()
 		#For a PPPoE WAN link we have MAC Header=14 & PPPoE=8 plus I read 
               #that an addition ATM=8 is added by the modem"
 		overhead="stab linklayer atm overhead 30 mtu 1492 tsize 128 "
-	else
+	#else
 		#For ethernet we have Interframe Gap=12, Preamble=7, Start byte=1, CRC=4
 		#but this all depends on what the user entered bandwidth means.
 		#I don't think it includes this overhead to I am not going to add it here.
