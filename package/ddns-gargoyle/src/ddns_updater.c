@@ -1503,8 +1503,8 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
 				ip = get_ip_from_url(next_url);
-				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next);
-				if(ip == NULL) { next = get_next_url_and_rotate(urls); }
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
 				is_first_lookup = 0;
 			}
 		}
@@ -1516,8 +1516,8 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
 				ip = get_ip_from_url(next_url);
-				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next);
-				if(ip == NULL) { next = get_next_url_and_rotate(default_ip_lookup_urls); }
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls); }
 				is_first_lookup = 0;
 			}
 		}
@@ -1554,7 +1554,7 @@ void free_default_ip_lookup_urls(void)
 
 
 
-char* get_next_url_and_rotate(char urls[][MAX_LOOKUP_URL_LENGTH])
+char* get_next_url_and_rotate(char **urls)
 {
 	char next[MAX_LOOKUP_URL_LENGTH];
 	int url_index;
