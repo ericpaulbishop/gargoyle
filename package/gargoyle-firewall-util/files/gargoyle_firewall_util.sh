@@ -115,6 +115,7 @@ create_l7marker_chain()
 		iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 		iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 
+		touch /tmp/l7marker.marks.tmp
 		for proto in $all_prots ; do
 			proto_is_used=$(echo "$all_used" | grep "$proto")
 			if [ -n "$proto_is_used" ] ; then
