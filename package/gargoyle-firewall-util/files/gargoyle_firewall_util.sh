@@ -110,7 +110,7 @@ create_l7marker_chain()
 	fw_l7=$(uci show firewall | sed '/app_proto/!d; s/^.*=//g')
 	all_used="$fw_l7 $qos_l7"
 
-	if [ -n "$all_used" ] ; then
+	if [ "$all_used" != " " ] ; then
 		iptables -t mangle -N l7marker
 		iptables -t mangle -I PREROUTING  -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
 		iptables -t mangle -I POSTROUTING -m connbytes --connbytes 0:20 --connbytes-dir both --connbytes-mode packets -m connmark --mark 0x0/$app_proto_mask -j l7marker
