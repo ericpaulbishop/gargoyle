@@ -1,0 +1,43 @@
+From 3c19b7f294fbd01a1b1dae8200e2744c2851b2c3 Mon Sep 17 00:00:00 2001
+From: Piotr Karbowski <piotr.karbowski@gmail.com>
+Date: Wed, 14 Dec 2011 20:00:05 +0100
+Subject: [PATCH] Backport of 'image: increase squashfs block size - visibly
+ reduces image size in many cases', Openwrt changeset 29519.
+
+---
+ include/image.mk |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/include/image.mk b/include/image.mk
+index ba217f5..26d644f 100644
+--- a/include/image.mk
++++ b/include/image.mk
+@@ -17,12 +17,14 @@ KDIR=$(KERNEL_BUILD_DIR)
+ 
+ IMG_PREFIX:=openwrt-$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
+ 
++SQUASHFS_BLOCKSIZE := 256k
++
+ ifneq ($(CONFIG_BIG_ENDIAN),)
+   JFFS2OPTS     :=  --pad --big-endian --squash -v
+-  SQUASHFS_OPTS :=  -be
++  SQUASHFS_OPTS :=  -be -b $(SQUASHFS_BLOCKSIZE)
+ else
+   JFFS2OPTS     :=  --pad --little-endian --squash -v
+-  SQUASHFS_OPTS :=  -le
++  SQUASHFS_OPTS :=  -le -b $(SQUASHFS_BLOCKSIZE)
+ endif
+ 
+ ifneq ($(CONFIG_LINUX_2_4)$(CONFIG_LINUX_2_6_25),)
+@@ -33,7 +35,7 @@ ifneq ($(USE_SQUASHFS3),)
+   MKSQUASHFS_CMD := $(STAGING_DIR_HOST)/bin/mksquashfs-lzma
+ else
+   MKSQUASHFS_CMD := $(STAGING_DIR_HOST)/bin/mksquashfs4
+-  SQUASHFS_OPTS  := -comp lzma -processors 1
++  SQUASHFS_OPTS  := -comp lzma -processors 1 -b $(SQUASHFS_BLOCKSIZE)
+ endif
+ 
+ JFFS2_BLOCKSIZE ?= 64k 128k
+-- 
+1.7.8
+
