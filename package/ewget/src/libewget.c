@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -117,6 +117,7 @@ static http_response* retrieve_http(	url_request *url,
 
 /* alarm variable and signal handler for timeout */
 static int alarm_socket = -1;
+static int alarm_socket_closed=0;
 static void alarm_triggered(int sig); 
 
 
@@ -437,6 +438,7 @@ static void alarm_triggered(int sig)
 	{
 		close(alarm_socket);
 		alarm_socket = -1;
+		alarm_socket_closed = 1;
 	}
 }
 
@@ -657,6 +659,8 @@ static int tcp_connect(char* hostname, int port)
 	struct sockaddr_in address;
 	long arg = 0;
 	int connection;
+
+
 
 	if(hostname == NULL)
 	{
@@ -976,7 +980,15 @@ char* dynamic_strcat(int num_strs, ...)
 static void* initialize_connection_http(char* host, int port)
 {
 	int *socket = (int*)malloc(sizeof(int));
+	
+	/*
+	* as soon as we open, or attempt to open a connection
+	* indicate that the latest connection has not had
+	* a timeout/close triggered on it
+	*/
+	alarm_socket_closed = 0;
 	*socket	= tcp_connect(host, port);
+
 	if(*socket >= 0)
 	{	
 		return socket;
@@ -987,6 +999,7 @@ static void* initialize_connection_http(char* host, int port)
 		return NULL;
 	}
 }
+
 static int read_http(void* connection_data, char* read_buffer, int read_length)
 {
 	int* socket = (int*)connection_data;
@@ -1012,8 +1025,12 @@ static void destroy_connection_http(void* connection_data)
 	if(connection_data != NULL)
 	{
 		int* socket = (int*)connection_data;
-		close(*socket);
+		if(alarm_socket_closed == 0)
+		{
+			close(*socket);
+		}
 		free(socket);
+		alarm_socket_closed = 0;
 	}
 }
 
@@ -1022,7 +1039,16 @@ static void destroy_connection_http(void* connection_data)
 static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
-	int socket = tcp_connect(host, port);
+	int socket;
+
+	/*
+	* as soon as we open, or attempt to open a connection
+	* indicate that the latest connection has not had
+	* a timeout/close triggered on it
+	*/
+	alarm_socket_closed = 0;
+	socket = tcp_connect(host, port);
+
 	if(socket >= 0)
 	{
 		int initialized = -1;
@@ -1131,7 +1157,12 @@ static void destroy_connection_https(void* connection_data)
 	if(connection_data != NULL)
 	{
 		ssl_connection_data *cd = (ssl_connection_data*)connection_data;
-		close(cd->socket);
+		if(alarm_socket_closed == 0)
+		{
+			close(cd->socket);
+		}
+		alarm_socket_closed = 0;
+		
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
 		free(cd);

@@ -212,10 +212,6 @@ apply_all_rules()
 
 					iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark
 					iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark
-					if [ -n "$dbg" ] ; then
-						echo "iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark"
-						echo "iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark"
-					fi
 
 				else
 
@@ -228,9 +224,6 @@ apply_all_rules()
 					fi
 
 					iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark
-					if [ -n "$dbg" ] ; then
-						echo "iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark"
-					fi
 				fi
 
 			fi
@@ -251,7 +244,7 @@ update_markfile()
 	#re-populate per the QoS setup.
 	if [ $total_upload_bandwidth -ge 0 ] ; then
 
-     		upload_class_list=$(load_all_config_sections "$config_file_name" "upload_class")
+		upload_class_list=$(load_all_config_sections "$config_file_name" "upload_class")
 
 		next_class_index=2
 		for uclass_name in $upload_class_list ; do
@@ -262,7 +255,7 @@ update_markfile()
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
 
-     		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
+		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
 
 		next_class_index=2
 		for dclass_name in $download_class_list ; do
@@ -306,6 +299,19 @@ initialize_qos()
 	insmod ipt_length >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
+
+	#Set the atm parameters if pppoe is being used.
+	wan_proto=$(uci get network.wan.proto 2>/dev/null)
+	if [ "$wan_proto" = "pppoe" ] ; then
+		#For a PPPoE WAN link we have MAC Header=14 & PPPoE=8 plus I read 
+              #that an addition ATM=8 is added by the modem"
+		overhead="stab linklayer atm overhead 30 mtu 1492 tsize 128 "
+	#else
+		#For ethernet we have Interframe Gap=12, Preamble=7, Start byte=1, CRC=4
+		#but this all depends on what the user entered bandwidth means.
+		#I don't think it includes this overhead to I am not going to add it here.
+		#overhead="stab linklayer ethernet overhead 23 mpu 64"
+	fi
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
@@ -352,9 +358,6 @@ initialize_qos()
 		# child or any of the parent nodes
 		#
 		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
-		if [ -n "$dbg" ] ; then
-			echo "tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit"
-		fi
 
 		class_mark_list=""
 		upload_shift=0
@@ -392,28 +395,24 @@ initialize_qos()
 			#We setup red dqisc mostly based on the advice at http://www.opalsoft.net/qos/DS-26.htm with
 			#the exception that we increase the probability to 0.1 per http://www.icir.org/floyd/REDfunc.txt
 			#Also I crank the queue limit down because we have RAM limitations here and I'm afraid.
-                     #Finally, setup for 200ms propagation delay rather than 500ms,
-                     #
+			#Finally, setup for 200ms propagation delay rather than 500ms,
+
 			#tbw is the RED queue 'max' which is specified in bytes and computed from the maximum class upload
-                     #bandwidth (max_bandwidth kbps) and a maximum propagation delay of 200ms in the queue.
+			#bandwidth (max_bandwidth kbps) and a maximum propagation delay of 200ms in the queue.
 			tbw=$(($max_bandwidth*200/8));
 
-                     #To avoid parameter errors with RED queues we need to enforce the following two constraints.
-                     # min/avpkt >= 1, Since avpkt is fixed at 1000, min >= 1000 => tbw >= 3000
-                     # burst > min/avpkt, this one is never violated because burst is set to (2*min+max)/3000 => 5*tbw/9000
+			#To avoid parameter errors with RED queues we need to enforce the following two constraints.
+			# min/avpkt >= 1, Since avpkt is fixed at 1000, min >= 1000 => tbw >= 3000
+			# burst > min/avpkt, this one is never violated because burst is set to (2*min+max)/3000 => 5*tbw/9000
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
-                     fi
+			fi
 
+			$echo_on
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-
-			if [ -n "$dbg" ] ; then
-				echo "tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
-				echo "tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))"
-				echo "tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
-			fi
+			$echo_off
 
 			if [ "$upload_default_class" = "$uclass_name" ] ; then
 				def_upload_idx=$next_class_index
@@ -424,30 +423,29 @@ initialize_qos()
 			next_classid=$(printf "0x%X" $(($next_class_index << $upload_shift)) )
 		done
 
+		$echo_on
+
 		#Go back and touch up the root qdisc to have the proper default class
-		tc qdisc change dev $qos_interface root handle 1:0 hfsc default $def_upload_idx
-		if [ -n "$dbg" ] ; then
-			echo "tc qdisc change dev $qos_interface root handle 1:0 hfsc default $def_upload_idx"
-		fi
+		tc qdisc change dev $qos_interface $overhead root handle 1:0 hfsc default $def_upload_idx
 
 		# Set up egress chain
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
 
-		#Next the user entered rules.
-		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
-
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_egress -j MARK --set-mark $def_upload_class
-
 
 		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
 		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j RETURN
 		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $upload_mask
 
-
 		# save current mark to connmark at end of chain
 		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
+
+		$echo_off
+
+		#Next the user entered rules.
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
 
 	fi
 
@@ -476,9 +474,6 @@ initialize_qos()
 		tc qdisc add dev imq0 root handle 1:0 hfsc default 10
 
 		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit
-		if [ -n "$dbg" ] ; then
-			echo "tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit"
-		fi
 
 		#load download classes
 		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
@@ -540,15 +535,11 @@ initialize_qos()
 				tbw=3000
 			fi
 
+			$echo_on
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-
-			if [ -n "$dbg" ] ; then
-				echo "tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str"
-				echo "tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))"
-				echo "tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index"
-			fi
+			$echo_off
 
 			if [ "$download_default_class" = "$dclass_name" ] ; then
 				def_download_idx=$next_class_index
@@ -559,11 +550,10 @@ initialize_qos()
 			next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
 		done
 
+		$echo_on
+
 		#Go back and touch up the root qdisc to have the proper default class
-		tc qdisc change dev imq0 root handle 1:0 hfsc default $def_download_idx
-		if [ -n "$dbg" ] ; then
-			echo "tc qdisc change dev imq0 root handle 1:0 hfsc default $def_download_idx"
-		fi
+		tc qdisc change dev imq0 $overhead root handle 1:0 hfsc default $def_download_idx
 
 		# Create ingress chain
 		iptables -t mangle -N qos_ingress
@@ -571,9 +561,6 @@ initialize_qos()
 		# Mark ingress in FORWARD and INPUT chains to make sure any DNAT (virt. server) is taken into account
 		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
 		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
-
-		#Now the rest of the user entered rules.
-		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
@@ -587,42 +574,47 @@ initialize_qos()
 
 		#save current mark to connmark at end of chain
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
+
+		$echo_off
+
+		#Now the rest of the user entered rules.
+		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
+
 	fi
 
 	#Enable Gargoyle active QoS monitor
 	if [ "$qos_monenabled" = "true" ] ; then
+
+		$echo_on
 
 		#if the user specified a ping target then use that otherwise use the gateway.
 		if [ -z "$ptarget_ip" ] ; then
 		       ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
 		fi
 
-		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
+		#Ping responses for the ping target never go to the IMQ device.
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
 
 		#Make a class to handle the outgoing ping requests from the router.
-		#These pings are 84 bytes each in the queue, allowing a maximum rate of 200ms we get 2.6kbps
-		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 84 dmax 10ms rate 3kbit
+		#These pings 84 bytes each for ethernet plus 22 more for PPPoE connections, allowing a maximum rate of 200ms we get 2.6kbps
+		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 106 dmax 10ms rate 4kbit
 		tc qdisc add dev $qos_interface parent 1:127 pfifo
-      		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
+      	tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
 
 		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
 		iptables -t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127
 
 		#Start the monitor
 		if [ -n "$pinglimit" ] ; then
-      			qosmon -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
+			qosmon -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
 		else
 			#In auto mode we calculate transmission delay based on our bandwidth and then ask qosmon
 			#to add this value to its measured ping entitlement to form the final ping limit.
 			pinglimit=$((1500*10*2/3/$total_download_bandwidth+1500*10/$total_upload_bandwidth+2))
-			if [ -n "$dbg" ] ; then
-				echo "qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit"
-			fi
-
-      			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
+			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
 		fi
 
+		$echo_off
 	fi
 
 	update_markfile
@@ -713,7 +705,8 @@ start()
 
 restart()
 {
-	dbg="1"
+	echo_on="set -x"
+	echo_off="set +x"
 	start "$1"
 }
 

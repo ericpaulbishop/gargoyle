@@ -11,6 +11,7 @@ var serviceProviders;
 var uci;
 var newSections;
 var updatedSections;
+var resettingAfterFailedUpdate = false;
 
 function saveChanges()
 {
@@ -53,6 +54,8 @@ function saveChanges()
 
 function saveChangesPart2(response)
 {
+	resettingAfterFailedUpdate=false;
+
 	responseLines=response.split(/[\r\n]+/);
 	names=responseLines[0].split(/[\t ]+/);
 	success=responseLines[1].split(/[\t ]+/);
@@ -72,6 +75,11 @@ function saveChangesPart2(response)
 			{
 				if(failedName == newSections[newIndex])
 				{
+					resettingAfterFailedUpdate=true;
+					// set parameters in form to that of failed section, so they can
+					// be edited/corrected
+					setDocumentFromUci(uci, "ddns_gargoyle", failedName, document);
+
 					found = true;
 					failedDomain = uci.get("ddns_gargoyle", failedName, "domain");
 					failedDomain = failedDomain == "" ? uci.get("ddns_gargoyle", failedName, "service_provider") : failedDomain;
@@ -134,15 +142,20 @@ function resetData()
 
 
 	// setup providers in add section
-	removeAllOptionsFromSelectElement(document.getElementById("ddns_provider"));
+	var providerNames = [];
+	var providerIndex;
 	for(providerIndex=0; providerIndex < serviceProviders.length; providerIndex++)
 	{
-		var provider = serviceProviders[providerIndex];
-		addOptionToSelectElement("ddns_provider", provider["name"], provider["name"]);
+		providerNames.push( serviceProviders[providerIndex]["name"] );
 	}
-	
-	setDocumentFromUci( new UCIContainer(), "", "", document);
+	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
 
+
+	if(!resettingAfterFailedUpdate)
+	{
+		setDocumentFromUci( new UCIContainer(), "", "", document);
+	}
+	resettingAfterFailedUpdate = false;
 	
 	// setup table of existing domains configured for ddns
 	

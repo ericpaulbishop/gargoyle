@@ -53,6 +53,18 @@ function doLogin()
 	}
 }
 
+function checkKey(e)
+{
+	var keycode = 0;
+
+	if ( window.event )
+		keycode = window.event.keyCode;
+	else if ( e )
+		keycode = e.which;
+	if ( keycode == 13 )
+		doLogin();
+}
+
 function setStatusAndQuotas()
 {
 	setChildText("current_time_date", currentTime);
@@ -279,4 +291,5 @@ function timeParamsToLines(timeParameters)
 	}
 	return textList;
 }
+
 

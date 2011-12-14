@@ -75,6 +75,37 @@
 #define MAX_MSG_LINE 		250
 
 
+#define MAX_LOOKUP_URL_LENGTH	100
+
+
+char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
+							"http://whatismyip.org",
+							"http://checkmyip.com",
+							"http://www.ipchicken.com",
+							"http://www.tracemyip.org",
+							"http://cmyip.com",
+							"http://checkip.dyndns.org",
+							"http://checkip.org", 
+							"http://automation.whatismyip.com/n09230945.asp",
+							"http://myip.dk",
+							"http://www.ip-address.org",
+							"http://my-ip-address.com",
+							"http://www.selfseo.com/what_is_my_ip.php",
+							"http://aruljohn.com",
+							"http://www.lawrencegoetz.com/programs/ipinfo/",
+							"http://myipinfo.net",
+							"http://www.ip-1.com/",
+							"http://www.myipnumber.com",
+							"http://www.dslreports.com/whois",
+							"\0"
+							};
+
+
+
+
+char** default_ip_lookup_urls = NULL;
+
+
 typedef struct
 {
 	char* name;
@@ -136,6 +167,9 @@ int convert_to_regex(char* str, regex_t* p);
 int get_multiple_for_unit(char* unit);
 
 char* get_local_ip(int ip_source, void* check_parameter);
+char* get_next_url_and_rotate(char **urls);
+void  initialize_default_ip_lookup_urls(void);
+void  free_default_ip_lookup_urls(void);
 char* get_ip_from_url(char* url);
 char* get_interface_ip(char* if_name);
 
@@ -301,6 +335,7 @@ int main(int argc, char** argv)
 		}
 		free_service_configs(service_configs);
 		free_service_providers(service_providers);
+		free_default_ip_lookup_urls();
 	}	
 	else
 	{	
@@ -1471,27 +1506,89 @@ char* get_local_ip(int ip_source, void* check_parameter)
 	{
 		char** urls = (char**)check_parameter;
 		
-		//this should probably be loaded from a file -- implement this later
-		char default_urls[][100] = {"http://checkip.dyndns.org", "http://checkip.org", "http://automation.whatismyip.com/n09230945.asp" "http://myip.dk/", "http://www.ipchicken.com/", "\0"};
+		char* next_url;
+		char  first_url[MAX_LOOKUP_URL_LENGTH];
+		int   is_first_lookup;
+		initialize_default_ip_lookup_urls();
+		
+		
 
-		int url_index;
 		if(urls != NULL)
 		{
-			for(url_index=0; urls[url_index] != NULL && ip == NULL; url_index++)
+			is_first_lookup=1;
+			next_url = get_next_url_and_rotate(urls);
+			strcpy(first_url, next_url);
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
-				ip = get_ip_from_url(urls[url_index]);
-				if(ip == NULL) { syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  default_urls[url_index]); }
+				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
+				is_first_lookup = 0;
 			}
 		}
-		for(url_index=0; default_urls[url_index][0] != '\0' && ip == NULL; url_index++)
+		if(ip == NULL)
 		{
-			ip = get_ip_from_url(default_urls[url_index]);
-			if(ip == NULL) { syslog(LOG_INFO, "\t\tCould not determine local ip from url: %s\n",  default_urls[url_index]); }
+			is_first_lookup=1;
+			next_url = get_next_url_and_rotate(default_ip_lookup_urls);
+			strcpy(first_url, next_url);
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
+			{
+				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls); }
+				is_first_lookup = 0;
+			}
 		}
+
 	}
 	
 	return ip;
 }
+
+void  initialize_default_ip_lookup_urls(void)
+{
+	if(default_ip_lookup_urls == NULL)
+	{
+		int num_urls;
+		int url_index;
+		for(num_urls=0; default_ip_lookup_url_data[num_urls][0] != '\0'; num_urls++){}
+		default_ip_lookup_urls = (char**)malloc( (num_urls+2)*sizeof(char*) );
+		for(url_index=0; url_index < num_urls+1; url_index++)
+		{
+			default_ip_lookup_urls[url_index] = (char*)malloc( MAX_LOOKUP_URL_LENGTH );
+			strcpy(default_ip_lookup_urls[url_index], default_ip_lookup_url_data[url_index]);
+		}
+		default_ip_lookup_urls[url_index] = NULL;
+	}
+}
+
+void free_default_ip_lookup_urls(void)
+{
+	if(default_ip_lookup_urls != NULL)
+	{
+		free_null_terminated_string_array(default_ip_lookup_urls);
+	}
+}
+
+
+
+char* get_next_url_and_rotate(char **urls)
+{
+	char next[MAX_LOOKUP_URL_LENGTH];
+	int url_index;
+
+
+	strcpy(next, urls[0]);
+	for(url_index=0; urls[url_index+1][0] != '\0' ; url_index++)
+	{
+		strcpy(urls[url_index], urls[url_index+1]);
+	}
+	strcpy(urls[url_index], next);
+	
+
+	return urls[url_index];
+}
+
 
 
 char* get_ip_from_url(char* url)
