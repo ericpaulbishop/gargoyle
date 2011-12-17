@@ -5,6 +5,7 @@ config_get wan_proto "wan" "proto"
 
 if [ "$INTERFACE" = "wan" ] && [ "$ACTION" = "ifup" ] 
 then
+	sleep 5
 	/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf
 fi
 
