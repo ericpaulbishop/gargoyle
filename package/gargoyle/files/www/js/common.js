@@ -256,7 +256,7 @@ function UCIContainer()
 			if (this.listOptions[ next_key ] != null)
 			{
 				var set = this.values[next_key];
-				while(set.length > 0 && (!preserveExistingValues))
+				while(set.length > 0 && (!preserveExistingListValues))
 				{
 					set.pop();
 				}
