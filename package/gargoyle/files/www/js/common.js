@@ -243,8 +243,9 @@ function UCIContainer()
 			this.values[list_key] = [];
 		}
 	}
-	this.set = function(pkg, section, option, value)
+	this.set = function(pkg, section, option, value, preserveExistingListValues)
 	{
+		preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
 		var next_key = pkg + "\." + section;
 	       	if(option != null && option != "" )
 		{
@@ -255,6 +256,10 @@ function UCIContainer()
 			if (this.listOptions[ next_key ] != null)
 			{
 				var set = this.values[next_key];
+				while(set.length > 0 && (!preserveExistingValues))
+				{
+					set.pop();
+				}
 				if( value instanceof Array )
 				{
 					var vi;
@@ -267,6 +272,7 @@ function UCIContainer()
 				{
 					set.push(value);
 				}
+				this.values[next_key] = set;
 			}
 			else
 			{
@@ -432,7 +438,7 @@ function UCIContainer()
 					//should never get here -- if problems put debugging code here
 				}
 			}
-			copy.set(splitKey[1], splitKey[2], splitKey[3], this.values[key]);
+			copy.set(splitKey[1], splitKey[2], splitKey[3], this.values[key], true);
 		}
 		return copy;
 	}

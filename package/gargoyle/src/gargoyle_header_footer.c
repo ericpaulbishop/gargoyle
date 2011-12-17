@@ -440,14 +440,18 @@ int main(int argc, char **argv)
 						}
 						else
 						{
+							char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+							char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 							if(strcmp(bin_root, ".") == 0)
 							{
-  								printf("\t\t\t\t\t\t\t\t<a href=\"/%s\">%s</a>\n", page_script, page_display);
+  								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
 							}
   							else
 							{
-  								printf("\t\t\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, page_script, page_display);
+  								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
 							}
+							free(bin_slash);
+							free(page_slash);
 						}
 						free(lookup);
 					}
@@ -488,14 +492,21 @@ int main(int argc, char **argv)
 					}
 				}
 
-				if(strcmp( bin_root, "." ) == 0)
+
+				char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+				char* script_slash = page_script[0] == '/' ? strdup("") : strdup("/");
+				if(strcmp(bin_root, ".") == 0)
 				{
-					printf("\t\t\t\t\t\t<a href=\"/%s\">%s</a>\n", next_section_script, section_display);
+					printf("\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", script_slash, next_section_script, section_display);
 				}
-				else
+  				else
 				{
-					printf("\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, next_section_script, section_display);
+					printf("\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
 				}
+				free(bin_slash);
+				free(script_slash);
+
+
 				printf("\t\t\t\t\t</div>\n");
 				prev_section_selected=0;
 			}
@@ -552,7 +563,32 @@ void define_package_vars(char** package_vars_to_load)
 					struct uci_element *e2;
 					uci_foreach_element(&section->options, e2) 	
 					{
-						printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\");\n",package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uci_to_option(e2)));
+						struct uci_option* uopt = uci_to_option(e2);
+						if(uopt->type == UCI_TYPE_STRING)
+						{
+							printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\");\n", package_vars_to_load[package_index], section->e.name, uopt->name, get_option_value_string(uopt));
+						}
+						else if(uopt->type == UCI_TYPE_LIST)
+						{
+							printf("\tuciOriginal.createListOption('%s', '%s', '%s', true);\n", package_vars_to_load[package_index], section->e.name, uopt->name);
+							struct uci_element* e;
+							uci_foreach_element(&uopt->v.list, e)
+							{
+								char* list_str = strdup(e->name);
+								char* tmp = list_str;
+								list_str = dynamic_replace(list_str, "\\", "\\\\");
+								free(tmp);
+								tmp = list_str;
+								list_str = dynamic_replace(list_str, "\"", "\\\"");
+								free(tmp);
+
+								/* when last parameter of set is true, value gets appended to list instead of replacing it */
+								printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\", true);\n", package_vars_to_load[package_index], section->e.name, uopt->name, list_str);
+									
+								free(list_str);
+							}
+
+						}
 					}
 				
 				}
