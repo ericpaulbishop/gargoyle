@@ -440,7 +440,14 @@ int main(int argc, char **argv)
 						}
 						else
 						{
-							printf("\t\t\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, page_script, page_display);
+							if(strcmp(bin_root, ".") == 0)
+							{
+  								printf("\t\t\t\t\t\t\t\t<a href=\"/%s\">%s</a>\n", page_script, page_display);
+							}
+  							else
+							{
+  								printf("\t\t\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, page_script, page_display);
+							}
 						}
 						free(lookup);
 					}
@@ -480,7 +487,15 @@ int main(int argc, char **argv)
 						next_section_script = get_option_value_string(uci_to_option(e));
 					}
 				}
-				printf("\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, next_section_script, section_display);
+
+				if(strcmp( bin_root, "." ) == 0)
+				{
+					printf("\t\t\t\t\t\t<a href=\"/%s\">%s</a>\n", next_section_script, section_display);
+				}
+				else
+				{
+					printf("\t\t\t\t\t\t<a href=\"/%s/%s\">%s</a>\n", bin_root, next_section_script, section_display);
+				}
 				printf("\t\t\t\t\t</div>\n");
 				prev_section_selected=0;
 			}

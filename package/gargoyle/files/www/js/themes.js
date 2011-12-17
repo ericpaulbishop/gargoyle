@@ -21,10 +21,12 @@ function resetData()
 {
 	var columnNames = ['Theme', '', ''];
 	var TableData = new Array();
+	var theme = uciOriginal.get("gargoyle", "global", "theme");
+	var current = "";
 
 	for (idx=0; idx < themes.length; idx++)
 	{
-		var current = (themes.indexOf(uciOriginal.get("gargoyle", "global", "theme")) == idx)?"*":"";
+		current = (themes[idx] == theme) ? "*" : "";
 		TableData.push([ themes[idx], current, createUseButton() ]);
 	}
 

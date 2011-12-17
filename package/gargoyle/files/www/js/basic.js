@@ -2311,7 +2311,7 @@ function setHwMode(selectCtl)
 				"bridge_txpower_container",
 				"bridge_txpower_5ghz_container",
 				"bridge_channel_container",
-				"bridge_channel_5ghz_container",
+				"bridge_channel_5ghz_container"
 
 				];
 	
