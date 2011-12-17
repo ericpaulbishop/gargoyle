@@ -219,7 +219,30 @@ function UCIContainer()
 {
 	this.keys = new Array();
 	this.values = new Array();
+	this.listOptions = new Array();
 
+
+	this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
+	{
+		destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
+		var  list_key = pkg + "\." + section + "\." + option;
+		if( this.listOptions[ list_key ] != null )
+		{
+			return;
+		}
+
+		this.listOptions[ list_key ] = 1;
+		if( this.values[list_key] != null )
+		{
+			var old = this.values[list_key];
+			this.values[list_key] = (!destroy_existing_nonlist) && old != null ? [old] : [] ; 
+		}
+		else
+		{
+			this.keys.push(list_key);
+			this.values[list_key] = [];
+		}
+	}
 	this.set = function(pkg, section, option, value)
 	{
 		var next_key = pkg + "\." + section;
@@ -229,7 +252,26 @@ function UCIContainer()
 		}
 		if(this.values[next_key] != null)
 		{
-			this.values[next_key] = value;
+			if (this.listOptions[ next_key ] != null)
+			{
+				var set = this.values[next_key];
+				if( value instanceof Array )
+				{
+					var vi;
+					for(vi=0; vi<value.length; vi++)
+					{
+						set.push( value[vi] );
+					}
+				}
+				else
+				{
+					set.push(value);
+				}
+			}
+			else
+			{
+				this.values[next_key] = value;
+			}
 		}
 		else
 		{
@@ -258,14 +300,15 @@ function UCIContainer()
 			this.removeSection(pkg, removeSections[rmIndex]);
 		}
 	}
-	this.getAllOptionsInSection = function(pkg, section)
+	this.getAllOptionsInSection = function(pkg, section, includeLists)
 	{
+		includeLists = includeLists == null ? false : includeLists;
 		var matches = new Array();
 		for (keyIndex in this.keys)
 		{
 			var key = this.keys[keyIndex];
 			var test = pkg + "." + section;
-			if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) )
+			if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) && (includeLists || this.listOptions[key] == null) )
 			{
 				var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
 				matches.push(option);
@@ -312,7 +355,12 @@ function UCIContainer()
 		{
 			removeKey = removeKey + "\." + option;
 		}
-		var value = this.values[removeKey] == null ? '' : this.values[removeKey] ;
+		if( this.listOptions[ removeKey ] != null )
+		{
+			this.listOptions[ removeKey ] = null;
+		}
+
+		var value = this.values[removeKey];
 		if(value != null)
 		{
 			this.values[removeKey] = null;
@@ -323,6 +371,10 @@ function UCIContainer()
 				if(nextKey != removeKey){ newKeys.push(nextKey); }
 			}
 			this.keys = newKeys;
+		}
+		else
+		{
+			value = ''
 		}
 		return value;
 	}
@@ -362,6 +414,11 @@ function UCIContainer()
 		for(keyIndex = 0; keyIndex < this.keys.length; keyIndex++)
 		{
 			var key = this.keys[keyIndex];
+			if( this.listOptions[ key ] != null )
+			{
+				copy.listOptions[ key ] = 1;
+			}
+
 			var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
 			if(splitKey == null)
 			{
@@ -387,7 +444,14 @@ function UCIContainer()
 		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
 		{
 			var key = this.keys[keyIndex]
-			str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+			if(this.values[key] instanceof Array )
+			{
+				str=str+ "\n" + key + " = \"" + this.values[key].join(",") + "\"";
+			}
+			else
+			{
+				str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+			}
 		}
 		return str;
 	}
@@ -403,7 +467,12 @@ function UCIContainer()
 			var key = oldSettings.keys[keyIndex];
 			var oldValue = oldSettings.values[key];
 			var newValue = this.values[key];
-			if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
+
+			if( (oldValue instanceof Array) || (newValue instanceof Array) )
+			{
+				commandArray.push( "uci del " + key);
+			}
+			else if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
 			{
 				commandArray.push( "uci del " + key);
 			}
@@ -414,21 +483,38 @@ function UCIContainer()
 			var key = this.keys[keyIndex];
 			var oldValue = oldSettings.values[key];
 			var newValue = this.values[key];
-			if(oldValue != newValue && (newValue != null && newValue !=''))
+			try
 			{
-				
-					
-				try
+
+				if( (oldValue instanceof Array) || (newValue instanceof Array) )
 				{
+					if(newValue instanceof Array)
+					{
+						var vi;
+						for(vi=0; vi< newValue.length ; vi++)
+						{
+							var nv = "" + newValue[vi] + "";
+							commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+						}
+					}
+					else
+					{
+						newValue = "" + newValue + ""
+						commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+					}
+				}
+				else if(oldValue != newValue && (newValue != null && newValue !=''))
+				{		
 					newValue = "" + newValue + ""
 					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
 				}
-				catch(e)
-				{
-					alert("bad key = " + key + "\n" + "bad value= " + newValue);
-				}
-					
 			}
+			catch(e)
+			{
+				alert("bad key = " + key + "\n");
+			}
+					
+			
 		}
 
 		commandArray.push("uci commit");
