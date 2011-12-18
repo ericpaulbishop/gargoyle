@@ -1476,25 +1476,23 @@ function resetData()
 	}
 	setSelectedValue("lan_dns_source", dnsType);
 	document.getElementById("lan_dns_custom_container").style.display = dnsType == "custom" ? block : "none";
-	if(dnsType == "custom")
+	
+	var lanDnsTable=createTable([""], (dnsType == "custom" ? dnsTableData : []), "lan_dns_table", true, false);
+	var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
+	if(lanDnsTableContainer.firstChild != null)
 	{
-		var lanDnsTable=createTable([""], dnsTableData, "lan_dns_table", true, false);
-		var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
-		if(lanDnsTableContainer.firstChild != null)
-		{
-			lanDnsTableContainer.removeChild(lanDnsTableContainer.firstChild);
-		}
-		lanDnsTableContainer.appendChild(lanDnsTable);
-
-		var bridgeDnsTable = createTable([""], dnsTableData, "bridge_dns_table", true, false);
-		var bridgeDnsTableContainer = document.getElementById('bridge_dns_table_container');
-		if(bridgeDnsTableContainer.firstChild != null)
-		{
-			bridgeDnsTableContainer.removeChild(bridgeDnsTableContainer.firstChild);
-		}
-		bridgeDnsTableContainer.appendChild(bridgeDnsTable);
-
+		lanDnsTableContainer.removeChild(lanDnsTableContainer.firstChild);
 	}
+	lanDnsTableContainer.appendChild(lanDnsTable);
+
+	var bridgeDnsTable = createTable([""], (dnsType == "custom" ? dnsTableData : []), "bridge_dns_table", true, false);
+	var bridgeDnsTableContainer = document.getElementById('bridge_dns_table_container');
+	if(bridgeDnsTableContainer.firstChild != null)
+	{
+		bridgeDnsTableContainer.removeChild(bridgeDnsTableContainer.firstChild);
+	}
+	bridgeDnsTableContainer.appendChild(bridgeDnsTable);
+
 	
 	
 	//now load wireless variables
@@ -1841,21 +1839,11 @@ function addTextToSingleColumnTable(textId, tableContainerId, validator, preproc
 	}
 }
 
-function setDnsEnabled(useDnsCheck)
+function setDnsSource(selectEl)
 {
-	var enabled = useDnsCheck.checked;
-
-
-	document.getElementById("bridge_use_dns").checked = enabled;
-	setElementEnabled(document.getElementById("add_bridge_dns"), enabled, "");
-	setElementEnabled(document.getElementById("add_bridge_dns_button"), enabled, "");
-	document.getElementById("bridge_dns_table_container").style.display = enabled ? "block" : "none";
-
-	
-	document.getElementById("lan_use_dns").checked = enabled;
-	setElementEnabled(document.getElementById("add_lan_dns"), enabled, "");
-	setElementEnabled(document.getElementById("add_lan_dns_button"), enabled, "");
-	document.getElementById("lan_dns_table_container").style.display = enabled ? "block" : "none";
+	var dnsSrc = getSelectedValue(selectEl.id);
+	document.getElementById("lan_dns_custom_container").style.display = dnsSrc == "custom" ? "block" : "none";
+	//document.getElementById("bridge_dns_table_container").style.display = enabled ? "block" : "none";
 }
 
 function addDns(section)
@@ -1865,7 +1853,6 @@ function addDns(section)
 	addTextToSingleColumnTable(textId, "lan_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP"); 
 	if(addIp != "" && document.getElementById(textId).value == "")
 	{
-
 		document.getElementById(textId).value = addIp;
 		addTextToSingleColumnTable("add_" + section + "_dns", "bridge_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP"); 
 	}
