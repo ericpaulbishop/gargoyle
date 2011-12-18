@@ -469,10 +469,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<label id='lan_use_dns_label' for='lan_use_dns'>DNS Servers:</label>
 			</span>
 			<select class='rightcolumn' id="dns_source"> 
-				<option value="isp">Use Default DNS Servers specified by ISP</option>
+				<option value="isp">Use Default DNS Servers Specified by ISP</option>
 				<option value="opendns">Use OpenDNS Servers</option>
 				<option value="google">Use Google DNS Servers</option>
-				<option value="custom">Use Custom Servers</option>
+				<option value="custom">Use Custom DNS Servers</option>
 			</select>
 		</div>
 		<div id="lan_dns_custom_container">
