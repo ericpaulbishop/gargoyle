@@ -88,7 +88,7 @@ var passInvalid = false;
 
 	<div>
 		<label class="leftcolumn" for='password' id='password_label'>Enter Admin Password:</label>
-		<input class="rightcolumn" type='password' onchange="doLogin()"  onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' />
+		<input class="rightcolumn" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' />
 	</div>
 	<div>
 		<span class="leftcolumn"><input class="default_button" type="button" value="Login" onclick="doLogin()" /></span>
