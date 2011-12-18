@@ -464,27 +464,38 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id="lan_force_dns_container">
-			<label class="leftcolumn" id='lan_force_dns_label' for='lan_force_dns'>Allow Alternate DNS:</label>
-			<select class='rightcolumn' id='lan_force_dns'>
-				<option value="allow">Allow Clients To Use Alternate DNS Servers</option>
-				<option value="force">Force Clients To Use Router DNS Servers</option>
-			</select>
-
-		</div>
-
 		<div id="lan_dns_container">
 			<span class="leftcolumn">
-				<label id='lan_use_dns_label' for='lan_use_dns'>Custom DNS Servers:</label>
+				<label id='lan_use_dns_label' for='lan_use_dns'>DNS Servers:</label>
 			</span>
-			<span class='rightcolumn'>
-				<input type='checkbox' id='lan_use_dns' onclick='setDnsEnabled(this)'/>&nbsp;&nbsp;
+			<select class='rightcolumn' id="dns_source"> 
+				<option value="isp">Use Default DNS Servers specified by ISP</option>
+				<option value="opendns">Use OpenDNS Servers</option>
+				<option value="google">Use Google DNS Servers</option>
+				<option value="custom">Use Custom Servers</option>
+			</select>
+		</div>
+		<div id="lan_dns_custom_container">
+
+			<span class='rightcolumnonly'>
 				<input type='text' id='add_lan_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 				<input type="button" class="default_button" id="add_lan_dns_button" value="Add" onclick='addDns("lan")' />
 			</span>
+			<span style="clear:both"></span>
 			<div class="rightcolumnonly"><div id="lan_dns_table_container"></div></div>
 		</div>
+		<div id="lan_dns_options_container">
+			<span class='rightcolumnonly'>
+				<input type='checkbox' id='lan_dns_use_altroot' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+				<label for="lan_dns_use_altroot" id="lan_dns_use_altroot" style="vertical-align:middle">&nbsp;&nbsp;Enable <a href="http://www.dot-bit.org">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> Resolution</label>
 
+			</span>
+			<span style="clear:both;"></span>
+			<span class='rightcolumnonly'>
+				<input type='checkbox' id='lan_dns_force' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+				<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;Force Use of Router DNS Servers</span>
+			</span>
+		</div>
 
 	</fieldset>
 
