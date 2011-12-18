@@ -464,15 +464,15 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id="lan_dns_container">
+		<div id="lan_dns_source_container">
 			<span class="leftcolumn">
-				<label id='lan_use_dns_label' for='lan_use_dns'>DNS Servers:</label>
+				<label id='lan_dns_source_label' for='lan_dns_source'>DNS Servers:</label>
 			</span>
-			<select class='rightcolumn' id="dns_source"> 
-				<option value="isp">Use Default DNS Servers Specified by ISP</option>
-				<option value="opendns">Use OpenDNS Servers</option>
-				<option value="google">Use Google DNS Servers</option>
-				<option value="custom">Use Custom DNS Servers</option>
+			<select class='rightcolumn' id="lan_dns_source"> 
+				<option value="isp">Default DNS Servers Specified by ISP</option>
+				<option value="opendns">OpenDNS Servers</option>
+				<option value="google">Google DNS Servers</option>
+				<option value="custom">Custom DNS Servers</option>
 			</select>
 		</div>
 		<div id="lan_dns_custom_container">
@@ -486,14 +486,14 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 		<div id="lan_dns_options_container">
 			<span class='rightcolumnonly'>
-				<input type='checkbox' id='lan_dns_use_altroot' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-				<label for="lan_dns_use_altroot" id="lan_dns_use_altroot" style="vertical-align:middle">&nbsp;&nbsp;Enable <a href="http://www.dot-bit.org">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> Resolution</label>
+				<input type='checkbox' id='lan_dns_altroot' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+				<label for="lan_dns_altroot" id="lan_dns_altroot_label" style="vertical-align:middle">&nbsp;&nbsp;Allow <a href="http://www.dot-bit.org">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> Resolution</label>
 
 			</span>
 			<span style="clear:both;"></span>
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='lan_dns_force' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-				<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;Force Use of Router DNS Servers</span>
+				<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;Force Clients To Use Router DNS Servers</span>
 			</span>
 		</div>
 

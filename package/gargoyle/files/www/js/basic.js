@@ -10,6 +10,13 @@ var scannedSsids = [[],[],[],[],[]];
 var toggleReload = false;
 var currentLanIp;
 
+var googleDns = ["8.8.8.8", "8.8.4.4" ];
+var openDns = ["208.67.222.222", "208.67.220.220" ];
+
+var ncDns = [ "178.32.31.41", "78.47.86.43" ]
+var onDns = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
+
+
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -1404,8 +1411,10 @@ function resetData()
 	networkParams = ['', '', pppoeDemandParams, pppoeReconnectParams, pppoeIntervalParams, '10.1.1.10', '255.255.255.0', '127.0.0.1', useMacTest, defaultWanMac, useMtuTest, 1500, '192.168.1.1', '255.255.255.0', '192.168.1.1', '/dev/ttyUSB0', '', '', 'internet', '', 'umts', 'custom', 'custom'];
 
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
-	var force = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1") ? "force" : "allow";
-	setSelectedValue("lan_force_dns", force, document);
+	
+	
+	document.getElementById("lan_dns_force").checked = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1");
+	document.getElementById("lan_dns_altroot").checked = (uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server") instanceof Array);
 
 
 	
@@ -1434,7 +1443,7 @@ function resetData()
 	reconnect_mode=(keepalive != '' || demand == '') ? 'keepalive' : 'demand';
 	document.getElementById("wan_pppoe_reconnect_mode").value = reconnect_mode;
 	
-	//initialize dns table
+	//initialize dns
 	var origDns = uciOriginal.get("network", "lan", "dns").split(/[\t ]+/);
 	var routerIp = uciOriginal.get("network", "lan", "ipaddr");
 	var routerGateway = uciOriginal.get("network", "lan", "gateway");
@@ -1450,29 +1459,43 @@ function resetData()
 			dnsTableData.push([dip]);
 		}
 	}
+
+	var dnsType="custom";
+	if(dnsTableData.length == 0)
+	{
+		dnsType = "isp";
+	}
+	else if( dnsTableData.join(",") == openDns.join(",") || dnsTableData.join(",") == openDns.reverse().join(",") )
+	{
+		dnsType = "opendns";
+	}
+
+	else if( dnsTableData.join(",") == googleDns.join(",") || dnsTableData.join(",") == googleDns.reverse().join(",") )
+	{
+		dnsType = "google";
+	}
+	setSelectedValue("lan_dns_source", dnsType);
+	document.getElementById("lan_dns_custom_container").style.display = dnsType == "custom" ? block : "none";
+	if(dnsType == "custom")
+	{
+		var lanDnsTable=createTable([""], dnsTableData, "lan_dns_table", true, false);
+		var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
+		if(lanDnsTableContainer.firstChild != null)
+		{
+			lanDnsTableContainer.removeChild(lanDnsTableContainer.firstChild);
+		}
+		lanDnsTableContainer.appendChild(lanDnsTable);
+
+		var bridgeDnsTable = createTable([""], dnsTableData, "bridge_dns_table", true, false);
+		var bridgeDnsTableContainer = document.getElementById('bridge_dns_table_container');
+		if(bridgeDnsTableContainer.firstChild != null)
+		{
+			bridgeDnsTableContainer.removeChild(bridgeDnsTableContainer.firstChild);
+		}
+		bridgeDnsTableContainer.appendChild(bridgeDnsTable);
+
+	}
 	
-	var lanDnsTable=createTable([""], dnsTableData, "lan_dns_table", true, false);
-	var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
-	if(lanDnsTableContainer.firstChild != null)
-	{
-		lanDnsTableContainer.removeChild(lanDnsTableContainer.firstChild);
-	}
-	lanDnsTableContainer.appendChild(lanDnsTable);
-
-	var bridgeDnsTable = createTable([""], dnsTableData, "bridge_dns_table", true, false);
-	var bridgeDnsTableContainer = document.getElementById('bridge_dns_table_container');
-	if(bridgeDnsTableContainer.firstChild != null)
-	{
-		bridgeDnsTableContainer.removeChild(bridgeDnsTableContainer.firstChild);
-	}
-	bridgeDnsTableContainer.appendChild(bridgeDnsTable);
-
-
-	document.getElementById("lan_use_dns").checked = dnsTableData.length > 0 ? true : false;
-	setDnsEnabled(document.getElementById("lan_use_dns")); //bridge check gets set automatically
-
-
-
 	
 	//now load wireless variables
 	var allWirelessSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
