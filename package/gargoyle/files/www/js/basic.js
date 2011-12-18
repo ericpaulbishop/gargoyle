@@ -13,8 +13,11 @@ var currentLanIp;
 var googleDns = ["8.8.8.8", "8.8.4.4" ];
 var openDns = ["208.67.222.222", "208.67.220.220" ];
 
-var ncDns = [ "178.32.31.41", "78.47.86.43" ]
-var onDns = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
+var ncDns  = [ "178.32.31.41", "78.47.86.43" ]
+var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
+var ncTlds = [ ".bit" ];
+var onTlds = [ ".bbs", ".free", ".fur", ".geek", ".gopher", ".indy", ".ing", ".null", ".oss", ".micro" ];
+
 
 
 function saveChanges()
@@ -247,7 +250,7 @@ function saveChanges()
 							uci.set("wireless", section, "encryption", encryption);
 							if(encryption != "none") { uci.set("wireless", section, "key", key); }
 							preCommands = preCommands + "\nuci set wireless." + section + "=wifi-iface\n";
-						}	
+						}
 					}
 					else
 					{
@@ -340,13 +343,25 @@ function saveChanges()
 				}
 			}
 
+			//use altroot?
+			var useAltRoot = document.getElementById("lan_dns_altroot").checked;
+			uci.remove("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server");
+			if(useAltRoot)
+			{
+				var dnsmasqSection = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift()
+				uci.createListOption("dhcp", dnsmasqSection, "server", true);
+				uci.set("dhcp", dnsmasqSection, "server", getAltServerDefs())
+			}
+
+
+
 			//force clients to use router DNS?
 			var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
-			var forceDNS = getSelectedValue("lan_force_dns", document);
+			var forceDNS = document.getElementById("lan_dns_force").checked;
 			uciOriginal.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
 			uci.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
 			var fdCommand = forceDNS == "force" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci del firewall.@defaults[0].force_router_dns \n";
-			preCommands = preCommands + fdCommand;
+			preCommands = preCommands + fdCommand ;
 			
 			
 			//if current dhcp range is not in new subnet, or current dhcp range contains new router ip adjust it
@@ -731,12 +746,24 @@ function saveChanges()
 		var lanGateway = uci.get("network", "lan", "gateway");
 		lanGateway = lanGateway == "" ? uci.get("network", "lan", "ipaddr") : lanGateway;
 		var dns = lanGateway;
-		if(document.getElementById("lan_use_dns").checked)
+		var dnsSource = getSelectedValue("lan_dns_source");
+		if(dnsSource != "isp")
 		{
-			var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
 			var dnsList = [];
-			var dnsIndex=0;
-			for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++) { dnsList.push(dnsData[dnsIndex][0]); }
+			if(dnsSource == "google")
+			{
+				dnsList = googleDns;
+			}
+			else if(dnsSource == "opendns")
+			{
+				dnsList = openDns;
+			}
+			else //custom
+			{
+				var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
+				var dnsIndex=0;
+				for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++) { dnsList.push(dnsData[dnsIndex][0]); }
+			}
 			dns = dnsList.length > 0 ? dnsList.join(" ") : dns;
 			
 			//if a wan is active and we have custom DNS settings, propagate to the wan too
@@ -2478,4 +2505,26 @@ function singleEthernetIsWan()
 function singleEthernetPort()
 {
 	return defaultWanIf == "" || defaultWanIf == defaultLanIf;
+}
+
+function getAltServerDefs()
+{
+	var defs = [];
+	function addDefsForAlt(tlds, dns)
+	{
+		var ti;
+		for(ti=0; ti< tlds.length; ti++)
+		{
+			var t=tlds[ti];
+			var di;
+			for(di=0; di< dns.length; di++)
+			{
+				defs.push( "/" + t + "/" + dns[di] );
+			}
+		}
+	}
+	addDefsForAlt(ncTlds, ncDns);
+       	addDefsForAlt(onTlds, onDns);
+
+	return defs;
 }
