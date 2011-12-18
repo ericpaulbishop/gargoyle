@@ -80,21 +80,13 @@ if [ -n "$aths" ] ; then
 fi
 
 
-/etc/init.d/network stop >/dev/null 2>&1 
+/etc/init.d/network stop >/dev/null 2>&1
 
-if [ -e /lib/wifi/broadcom.sh ] ; then
-	for i in $ifs ; do
-		is_switch=""
-		for s in $switch_ifs ; do
-			if [ "$s" = "$i" ] ; then
-				is_switch="1"
-			fi
-		done
-		if [ -z "$is_switch" ] || [ -z "$vlan_active" ] ; then
-			ifconfig $i down 2>/dev/null
-		fi
-	done
-fi
+# make SURE all interfaces are down
+ifdown -a >/dev/null 2>&1
+wifi down >/dev/null 2>&1
+sleep 1
+
 
 /etc/init.d/network start >/dev/null 2>&1 
 
