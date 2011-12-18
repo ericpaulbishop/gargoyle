@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tor
-PKG_VERSION:=0.2.2.34
-PKG_RELEASE:=2
+PKG_VERSION:=0.2.2.35
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=0f1bbb8e086ea2aba41ff7f898fcf3bd
+PKG_MD5SUM:=dcecf699c4b929319d5f1ce0358d4835
 
 PKG_INSTALL:=1
 
