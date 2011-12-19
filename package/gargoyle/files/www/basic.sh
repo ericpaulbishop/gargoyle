@@ -101,18 +101,25 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='bridge'>Bridge To LAN</option>
 			</select>
 		</div>
-		
-		<div id="bridge_dns_container">
+	
+		<div id="bridge_dns_source_container">
 			<span class="leftcolumn">
-				<label id='bridge_use_dns_label' for='bridge_use_dns'>Custom DNS:</label>
+				<label id='bridge_dns_source_label' for='bridge_dns_source'>DNS Servers:</label>
 			</span>
-			<span class='rightcolumn'>
-				<input type='checkbox' id='bridge_use_dns' onclick='setDnsEnabled(this)'/>&nbsp;&nbsp; 
+			<select class='rightcolumn' id="bridge_dns_source" onchange="setDnsSource(this)"> 
+				<option value="gateway">Use Gateway As DNS Server</option>
+				<option value="custom">Custom DNS Server(s)</option>
+			</select>
+		</div>
+		<div id="bridge_dns_custom_container">
+
+			<span class='rightcolumnonly'>
 				<input type='text' id='add_bridge_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 				<input type="button" class="default_button" id="add_bridge_dns_button" value="Add" onclick='addDns("bridge")' />
 			</span>
+			<span style="clear:both"></span>
 			<div class="rightcolumnonly"><div id="bridge_dns_table_container"></div></div>
-		</div>
+		</div>	
 
 		<div class='internal_divider'></div>
 		
