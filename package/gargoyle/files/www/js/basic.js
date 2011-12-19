@@ -747,14 +747,15 @@ function saveChanges()
 		lanGateway = lanGateway == "" ? uci.get("network", "lan", "ipaddr") : lanGateway;
 		var dns = lanGateway;
 		var dnsSource = getSelectedValue("lan_dns_source");
+		var notBridge = document.getElementById("global_gateway").checked 
 		if(dnsSource != "isp")
 		{
 			var dnsList = [];
-			if(dnsSource == "google")
+			if(dnsSource == "google" && notBridge )
 			{
 				dnsList = googleDns;
 			}
-			else if(dnsSource == "opendns")
+			else if(dnsSource == "opendns" && notBridge )
 			{
 				dnsList = openDns;
 			}
@@ -767,7 +768,7 @@ function saveChanges()
 			dns = dnsList.length > 0 ? dnsList.join(" ") : dns;
 			
 			//if a wan is active and we have custom DNS settings, propagate to the wan too
-			if( document.getElementById("global_gateway").checked && uci.get("network", "wan", "") != "" && dns != lanGateway)
+			if( notBridge && uci.get("network", "wan", "") != "" && dns != lanGateway)
 			{
 				uci.set("network", "wan", "dns", dns);
 			}
