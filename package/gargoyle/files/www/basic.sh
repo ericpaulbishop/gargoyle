@@ -112,7 +112,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 		<div id="bridge_dns_custom_container">
-
 			<span class='rightcolumnonly'>
 				<input type='text' id='add_bridge_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 				<input type="button" class="default_button" id="add_bridge_dns_button" value="Add" onclick='addDns("bridge")' />

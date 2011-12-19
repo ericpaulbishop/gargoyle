@@ -1440,9 +1440,6 @@ function resetData()
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
 	
 	
-	document.getElementById("lan_dns_force").checked = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1");
-	document.getElementById("lan_dns_altroot").checked = (uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server") instanceof Array);
-
 
 	
 
@@ -1471,6 +1468,10 @@ function resetData()
 	document.getElementById("wan_pppoe_reconnect_mode").value = reconnect_mode;
 	
 	//initialize dns
+	document.getElementById("lan_dns_force").checked = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1");
+	document.getElementById("lan_dns_altroot").checked = (uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server") instanceof Array);
+
+
 	var origDns = uciOriginal.get("network", "lan", "dns").split(/[\t ]+/);
 	var routerIp = uciOriginal.get("network", "lan", "ipaddr");
 	var routerGateway = uciOriginal.get("network", "lan", "gateway");
@@ -1502,8 +1503,9 @@ function resetData()
 		dnsType = "google";
 	}
 	setSelectedValue("lan_dns_source", dnsType);
-	document.getElementById("lan_dns_custom_container").style.display = dnsType == "custom" ? block : "none";
-	
+	setDnsSource(document.getElementById("lan_dns_source"))
+
+
 	var lanDnsTable=createTable([""], (dnsType == "custom" ? dnsTableData : []), "lan_dns_table", true, false);
 	var lanDnsTableContainer = document.getElementById('lan_dns_table_container');
 	if(lanDnsTableContainer.firstChild != null)
@@ -1869,8 +1871,14 @@ function addTextToSingleColumnTable(textId, tableContainerId, validator, preproc
 function setDnsSource(selectEl)
 {
 	var dnsSrc = getSelectedValue(selectEl.id);
-	document.getElementById("lan_dns_custom_container").style.display = dnsSrc == "custom" ? "block" : "none";
-	//document.getElementById("bridge_dns_table_container").style.display = enabled ? "block" : "none";
+	var bridgeSrc = dnsSrc == "custom" ? "custom" : "gateway";
+	var lanSrc = dnsSrc == "gateway" ? "isp" : dnsSrc;
+	setSelectedValue("lan_dns_source", lanSrc);
+	setSelectedValue("bridge_dns_source", bridgeSrc);
+	document.getElementById("lan_dns_custom_container").style.display    = dnsSrc == "custom" ? "block" : "none";
+	document.getElementById("bridge_dns_custom_container").style.display = dnsSrc == "custom" ? "block" : "none";
+	
+
 }
 
 function addDns(section)
