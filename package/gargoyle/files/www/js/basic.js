@@ -357,7 +357,7 @@ function saveChanges()
 
 			//force clients to use router DNS?
 			var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
-			var forceDNS = document.getElementById("lan_dns_force").checked;
+			var forceDNS = document.getElementById("lan_dns_force").checked ? "force" : "";
 			uciOriginal.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
 			uci.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS == "force" ? "1" : "")
 			var fdCommand = forceDNS == "force" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci del firewall.@defaults[0].force_router_dns \n";
