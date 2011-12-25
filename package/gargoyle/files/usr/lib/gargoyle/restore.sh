@@ -161,6 +161,13 @@ uci commit
 #if tor is around, make sure there is an entry in rc.d -- disabling should be done by uci config
 if [ -e /etc/init.d/tor ] ; then 
 	/etc/init.d/tor enable 
+	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	if [ "$total_mem" -gt 32000 ] ; then
+		uci set gargoyle.display.connection_tor="Tor"
+		uci set gargoyle.scripts.connection_tor="tor.sh"
+		uci set gargoyle.connection.tor="250"
+		uci commit
+	fi
 fi
 
 
