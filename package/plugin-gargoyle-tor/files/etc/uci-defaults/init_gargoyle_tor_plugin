@@ -1,8 +1,14 @@
 #!/bin/sh
 
-uci set gargoyle.display.connection_tor="Tor"
-uci set gargoyle.scripts.connection_tor="tor.sh"
-uci set gargoyle.connection.tor="250"
-uci commit
+# Tor only seems to work on routers with 64MB+ memory, only enable if available memory > 32MB
+total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+if [ "$total_mem" -gt 32000 ] ; then
+	uci set gargoyle.display.connection_tor="Tor"
+	uci set gargoyle.scripts.connection_tor="tor.sh"
+	uci set gargoyle.connection.tor="250"
+	uci commit
+fi
+
+
 
 

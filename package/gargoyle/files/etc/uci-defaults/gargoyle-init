@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Save Gargoyle version to UCI
+gargoyle_version=$(cat /www/data/gargoyle_version.txt)
+uci set gargoyle.global.version="$gargoyle_version"
+uci commit
+
 # Set hostname to Gargoyle
 uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
 uci commit                                    2>/dev/null

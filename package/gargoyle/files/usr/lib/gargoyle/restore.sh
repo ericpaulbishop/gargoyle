@@ -65,7 +65,6 @@ uci commit
 
 mv /etc/config/gargoyle /tmp/gargoyle.bak
 cp /etc/passwd /tmp/passwd
-rm -rf /etc/config/*
 rm -rf /etc/rc.d/*
 rm -rf /tmp/data/*
 rm -rf /usr/data/*
@@ -158,6 +157,19 @@ for qos_gargoyle_connbytes_rule in $(uci show qos_gargoyle | sed "/^qos_gargoyle
 done; unset qos_gargoyle_connbytes_rule
 
 uci commit
+
+#if tor is around, make sure there is an entry in rc.d -- disabling should be done by uci config
+if [ -e /etc/init.d/tor ] ; then 
+	/etc/init.d/tor enable 
+	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	if [ "$total_mem" -gt 32000 ] ; then
+		uci set gargoyle.display.connection_tor="Tor"
+		uci set gargoyle.scripts.connection_tor="tor.sh"
+		uci set gargoyle.connection.tor="250"
+		uci commit
+	fi
+fi
+
 
 #deal with firewall include file path being swapped
 cat /etc/config/firewall | sed 's/\/etc\/parse_remote_accept\.firewall/\/usr\/lib\/gargoyle_firewall_util\/gargoyle_additions\.firewall/g' >/etc/config/firewall.tmp
