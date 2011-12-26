@@ -64,7 +64,7 @@ do_start()
 		fi
 		
 		rm -rf "/tmp/usb_mount/$did"
-		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS") 
+		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
 		err="";
 		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
@@ -76,6 +76,9 @@ do_start()
 			chmod 777 "/tmp/usb_mount/$id"
 			umount "/tmp/usb_mount/$id" 2>/dev/null
 			err=$(ntfs-3g "$d" "/tmp/usb_mount/$id")
+		elif  [ "$type" = "Linux swap" ] ; then
+			err="swap"
+			swapon "$d"
 		elif  [ -n "$type" ] ; then
 			mkdir -p "/tmp/usb_mount/$id"
 			chmod 777 "/tmp/usb_mount/$id"
@@ -90,9 +93,10 @@ do_start()
 		else
 			err="unmountable"
 		fi
-		if [ -n "$err" ] ; then
+
+		if [ -n "$err" ] && [ "$err" != "swap" ] ; then
 			umount "/tmp/usb_mount/$id" 2>/dev/null
-		else
+		elif [ -n "$err" ] ; then
 			share_type=""
 			cur_mount="/tmp/usb_mount/$id"
 		
