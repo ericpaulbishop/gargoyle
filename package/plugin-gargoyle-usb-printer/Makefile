@@ -25,10 +25,7 @@ define Package/plugin-gargoyle-usb-printer
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=USB Printer Support for Gargoyle
-	DEPENDS+=+kmod-usb-printer +p910nd
-	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
-	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 
-	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8
+	DEPENDS:=+kmod-usb-printer +p910nd
 	MAINTAINER:=Eric Bishop
 endef
 
