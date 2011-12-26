@@ -223,10 +223,11 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					gargoyle_version[ri] = "-";
+					gargoyle_version[ri] = '-';
 				}
+				printf("NEXT=%c\n", gargoyle_version[ri]);
 			}
-			gargoyle_version[ri] = "\0";
+			gargoyle_version[ri] = '\0';
 			free(raw_version);
 		}
 
