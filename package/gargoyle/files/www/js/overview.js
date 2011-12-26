@@ -48,12 +48,12 @@ function resetData()
 	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
 	if(swapMemory > 0)
 	{
-		document.getElementById("swap").style.display = "block";
+		document.getElementById("swap_container").style.display = "block";
 		setChildText("swap", "" + swapUsed + "MB / " + swapMemory + "MB (" + percentSwapUsed + "%)" );
 	}
 	else
 	{
-		document.getElementById("swap").style.display = "none";
+		document.getElementById("swap_container").style.display = "none";
 	}
 	setChildText("load_avg", loadAvg );
 	setChildText("connections", curConn + "/" + maxConn );

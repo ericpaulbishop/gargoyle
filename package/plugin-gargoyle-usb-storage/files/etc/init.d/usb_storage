@@ -151,6 +151,6 @@ do_stop()
 		for m in $old_mounts ; do
 			umount "$m" 2>/dev/null
 		done
-		rm -rf /tmp/mounted_usb_storage.tab	
+		rm -rf /tmp/mounted_usb_storage.tab
 	fi
 }
