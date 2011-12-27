@@ -20,8 +20,9 @@ function resetData()
 	var ramMemory=Math.floor((totalMemory)*10/1024)/10;
 	var ramUsed=Math.floor((totalMemory-freeMemory)*10/1024)/10;
 
-
-	
+	var percentSwapUsed = Math.floor((totalSwap-freeSwap)*100*10/(totalSwap))/10;
+	var swapMemory=Math.floor((totalSwap)*10/1024)/10;
+	var swapUsed=Math.floor((totalSwap-freeSwap)*10/1024)/10;
 
 
 	wirelessModes= [];
@@ -45,6 +46,15 @@ function resetData()
 	setChildText("device_name", uciOriginal.get("system", systemSections[0], "hostname" ));
 	setChildText("gargoyle_version", gargoyleVersion);
 	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
+	if(swapMemory > 0)
+	{
+		document.getElementById("swap_container").style.display = "block";
+		setChildText("swap", "" + swapUsed + "MB / " + swapMemory + "MB (" + percentSwapUsed + "%)" );
+	}
+	else
+	{
+		document.getElementById("swap_container").style.display = "none";
+	}
 	setChildText("load_avg", loadAvg );
 	setChildText("connections", curConn + "/" + maxConn );
 

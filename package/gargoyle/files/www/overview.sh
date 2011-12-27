@@ -45,8 +45,18 @@
 	cached_mem="$(sed -e '/^Cached: /!d; s#Cached: *##; s# kB##g' /proc/meminfo)"
 	free_mem="$(sed -e '/^MemFree: /!d; s#MemFree: *##; s# kB##g' /proc/meminfo)"
 	free_mem="$(( ${free_mem} + ${buffers_mem} + ${cached_mem} ))"
-	echo "var totalMemory=$total_mem;"
-	echo "var freeMemory=$free_mem;"
+	echo "var totalMemory=parseInt($total_mem);"
+	echo "var freeMemory=parseInt($free_mem);"
+
+
+	total_swap="$(sed -e '/^SwapTotal: /!d; s#SwapTotal: *##; s# kB##g' /proc/meminfo)"
+	cached_swap="$(sed -e '/^SwapCached: /!d; s#SwapCached: *##; s# kB##g' /proc/meminfo)"
+	free_swap="$(sed -e '/^SwapFree: /!d; s#SwapFree: *##; s# kB##g' /proc/meminfo)"
+	free_swap="$(( ${free_swap} + ${cached_swap} ))"
+	echo "var totalSwap=parseInt($total_swap);"
+	echo "var freeSwap=parseInt($free_swap);"
+
+
 	
 	load_avg="$(awk '{print $1 " / " $2 " / " $3}' /proc/loadavg)"
 	echo "var loadAvg=\"$load_avg\";"
@@ -85,6 +95,10 @@
 		<div>
 			<span class='leftcolumn'>Memory Usage:</span><span id="memory" class='rightcolumn'></span>
 		</div>
+		<div id="swap_container">
+			<span class='leftcolumn'>Swap Memory Usage:</span><span id="swap" class='rightcolumn'></span>
+		</div>
+
 		<div>
 			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
