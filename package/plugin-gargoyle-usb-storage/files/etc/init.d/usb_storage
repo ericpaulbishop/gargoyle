@@ -153,4 +153,16 @@ do_stop()
 		done
 		rm -rf /tmp/mounted_usb_storage.tab
 	fi
+
+	#unmount swap
+	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
+	for devid in $drives ; do
+		d=$(echo $devid | sed 's/:.*$//g')
+		if [ -n "$d" ] ; then
+			type=$(disktype "$d" | egrep -o "Linux swap") 
+			if [ -n "$type" ] ; then
+				swapoff "$d" >/dev/null 2>&1
+			fi
+		fi
+	done
 }
