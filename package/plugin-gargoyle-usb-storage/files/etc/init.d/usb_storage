@@ -12,6 +12,11 @@ update_sharetype()
 }
 
 
+is_mounted() {
+	# Exit with 0 if is mounted, else $1
+	awk -v devpath="$1" '$1 == devpath {f=1; exit} END {exit !f}' /proc/mounts
+}
+
 usb_lock()
 {
 	timeout=15
@@ -48,55 +53,63 @@ do_start()
 		uci commit
 	fi
 
-	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
+	drives="$(blkid | sed -r 's#"##g; s#:[[:blank:]]+UUID=#:#g')"
 	
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
 	
-	mounted=""
-	for devid in $drives ; do
-		id=$(echo $devid | sed 's/^.*://g')
-		d=$(echo $devid | sed 's/:.*$//g')
-		did=$(echo "$d" | sed 's/^.*\///g')
-		already_mounted=$(df | awk '{ print $1 ; }' | grep "^$d\$")
-		if [ -z "$id" ] || [ -z "$d" ] || [ -n "$already_mounted" ] ; then
+	unset mounted
+
+	for devid in $drives; do
+		id=$(echo "$devid" | cut -f 2 -d ':')
+		d=$(echo "$devid" | cut -f 1 -d ':')
+		did="${d##*/}"
+
+		if [ -z "$id" ] || [ -z "$d" ] || is_mounted "$d"; then
 			continue
 		fi
 		
-		rm -rf "/tmp/usb_mount/$did"
-		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
-		err="";
-		if [ "$type" = "FAT32" ] || [ "$type" = "FAT16" ] ; then
-			mkdir -p "/tmp/usb_mount/$id"
-			chmod 777 "/tmp/usb_mount/$id"
-			umount "/tmp/usb_mount/$id" 2>/dev/null
-			err=$(mount -t vfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id")
-		elif [ "$type" = "NTFS" ] ; then
-			mkdir -p "/tmp/usb_mount/$id"
-			chmod 777 "/tmp/usb_mount/$id"
-			umount "/tmp/usb_mount/$id" 2>/dev/null
-			err=$(ntfs-3g "$d" "/tmp/usb_mount/$id")
-		elif  [ "$type" = "Linux swap" ] ; then
-			err="swap"
-			swapon "$d"
-		elif  [ -n "$type" ] ; then
-			mkdir -p "/tmp/usb_mount/$id"
-			chmod 777 "/tmp/usb_mount/$id"
-			umount "/tmp/usb_mount/$id" 2>/dev/null
-			err="tmp"
-			ext_num=4
-			while [ -n "$err" ] && [ $ext_num -ge 2 ] ; do
-				type="ext$ext_num"
-				err=$(mount -t $type -o noatime "$d" "/tmp/usb_mount/$id" 2>&1)
-				ext_num=$(($ext_num-1))
-			done
-		else
-			err="unmountable"
-		fi
+		rmdir "/tmp/usb_mount/$did" > /dev/null 2>&1
 
-		if [ -n "$err" ] && [ "$err" != "swap" ] ; then
-			umount "/tmp/usb_mount/$id" 2>/dev/null
-		elif [ -z "$err" ] ; then
+		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
+
+		unset err
+
+		case "${type}" in
+			'FAT32'|'FAT16')
+				mkdir -p "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount -t vfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2>/dev/null
+			;;
+			'NTFS')
+				mkdir -p "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				ntfs-3g "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
+			;;
+			'Linux swap')
+				swapon "$d"
+			;;
+			'Ext4')
+				mkdir -p "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount -t ext4 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+			;;
+			'Ext3')
+				mkdir -p "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount -t ext3 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+			;;
+			'Ext2')
+				mkdir -p "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount -t ext2 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+			;;
+			*)
+				err="unmountable"
+			;;
+		esac
+
+		if [ -z "$err" ] ; then
 			share_type=""
 			cur_mount="/tmp/usb_mount/$id"
 		
@@ -113,7 +126,7 @@ do_start()
 					
 			share_size=$(df  | grep "$d" | awk '{ print $2 }')
 			if [ -z "$share_size" ] ; then share_size="-" ; fi
-			if [ -n "$share_size" ] ; then share_size=$(($share_size*1024)) ; fi
+			if [ -n "$share_size" ] && [ "${share_size}" != '-' ]; then share_size=$(($share_size*1024)) ; fi
 
 			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
 		
@@ -143,26 +156,29 @@ restart()
 	fi
 }
 
+do_swapoff() {
+	# Umount swap.
+	# We will care only about /dev/sd*. We will not affect zram users (/dev/zram0 etc).
+	while read swap_device_path _; do
+		case "${swap_device_path}" in
+			'/dev/sd'*)
+				swapoff "${swap_device_path}"
+			;;
+		esac
+	done < /proc/swaps
+}
 
 do_stop()
 {
-	if [ -e /tmp/mounted_usb_storage.tab ] ; then
-		old_mounts=$(cat /tmp/mounted_usb_storage.tab | awk ' { print $2 ; } ' )
-		for m in $old_mounts ; do
-			umount "$m" 2>/dev/null
-		done
-		rm -rf /tmp/mounted_usb_storage.tab
-	fi
+	if [ -f '/tmp/mounted_usb_storage.tab' ];  then
+		while read device_path mountpoint_path _; do
+			umount "${mountpoint_path}"
+			# Cleanup mountpoint and symlink.
+			rmdir "${mountpoint_path}"
+			rm "/tmp/usb_mount/dev_${device_path##*/}"
+		done < /tmp/mounted_usb_storage.tab
 
-	#unmount swap
-	drives=$(blkid | sed 's/:.*UUID=\"/:/g' | sed 's/\".*$//g')
-	for devid in $drives ; do
-		d=$(echo $devid | sed 's/:.*$//g')
-		if [ -n "$d" ] ; then
-			type=$(disktype "$d" | egrep -o "Linux swap") 
-			if [ -n "$type" ] ; then
-				swapoff "$d" >/dev/null 2>&1
-			fi
-		fi
-	done
+		rm /tmp/mounted_usb_storage.tab
+	fi
+	do_swapoff
 }
