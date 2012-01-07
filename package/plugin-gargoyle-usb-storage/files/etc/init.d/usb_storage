@@ -89,15 +89,20 @@ do_start()
 			'Linux swap')
 				swapon "$d"
 			;;
-			'Ext4')
+			'Ext4'|'Ext3')
+				# disktype misdetect ext4 as ext3. Try mount as ext3 first then fallback to ext4.
+				# in some circumstances ext3 may be mounted as ext4 but if you write anything to it
+				# the filesystem will be no longer compatible with ext3.
 				mkdir -p "/tmp/usb_mount/$id"
-				umount "/tmp/usb_mount/$id" 2>/dev/null
-				mount -t ext4 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
-			;;
-			'Ext3')
-				mkdir -p "/tmp/usb_mount/$id"
-				umount "/tmp/usb_mount/$id" 2>/dev/null
-				mount -t ext3 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+				umount "/tmp/usb_mount/$id" 2>/dev/null					
+				if mount -t ext3 -o noatime "$d" "/tmp/usb_mount/$id"; then
+					type='ext3'
+				elif mount -t ext4 -o noatime "$d" "/tmp/usb_mount/$id"; then
+					type='ext4'
+				else
+					# Something went wrong.
+					umount "/tmp/usb_mount/$id"
+				fi
 			;;
 			'Ext2')
 				mkdir -p "/tmp/usb_mount/$id"
