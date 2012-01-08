@@ -1,0 +1,37 @@
+--- disktype-a/linux.c	2012-01-08 13:45:36.191155343 -0500
++++ disktype-b/linux.c	2012-01-08 13:56:14.937008438 -0500
+@@ -31,6 +31,17 @@
+  * ext2/ext3 file system
+  */
+ 
++
++#define EXT_SUPER_MAGIC                    0xEF53
++
++#define EXT4_FEATURE_INCOMPAT_64BIT        0x0080
++#define EXT4_FEATURE_INCOMPAT_EXTENTS      0x0040
++#define EXT4_FEATURE_INCOMPAT_FLEX_BG      0x0200
++
++#define EXT3_FEATURE_INCOMPAT_RECOVER      0x0004
++#define EXT3_FEATURE_INCOMPAT_JOURNAL_DEV  0x0008
++
++
+ void detect_ext23(SECTION *section, int level)
+ {
+   unsigned char *buf;
+@@ -41,10 +52,13 @@
+   if (get_buffer(section, 1024, 1024, (void **)&buf) < 1024)
+     return;
+ 
+-  if (get_le_short(buf + 56) == 0xEF53) {
+-    if (get_le_long(buf + 96) & 0x0008)       /* JOURNAL_DEV flag */
++  if (get_le_short(buf + 56) == EXT_SUPER_MAGIC)
++  {
++    if( (get_le_long(buf + 96) & EXT4_FEATURE_INCOMPAT_64BIT) || (get_le_long(buf + 96) &  EXT4_FEATURE_INCOMPAT_EXTENTS) ||  (get_le_long(buf + 96) &  EXT4_FEATURE_INCOMPAT_FLEX_BG) )
++       print_line(level, "Ext4 file system");
++    else if (get_le_long(buf + 96) & EXT3_FEATURE_INCOMPAT_JOURNAL_DEV )       /* JOURNAL_DEV flag */
+       print_line(level, "Ext3 external journal");
+-    else if (get_le_long(buf + 92) & 0x0004)  /* HAS_JOURNAL flag */
++    else if (get_le_long(buf + 92) & EXT3_FEATURE_INCOMPAT_RECOVER)  /* HAS_JOURNAL flag */
+       print_line(level, "Ext3 file system");
+     else
+       print_line(level, "Ext2 file system");
