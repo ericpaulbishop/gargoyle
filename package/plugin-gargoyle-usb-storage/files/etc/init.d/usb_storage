@@ -53,7 +53,7 @@ do_start()
 		uci commit
 	fi
 
-	drives="$(blkid | sed -r 's#"##g; s#:[[:blank:]]+UUID=#:#g')"
+	drives="$(blkid | sed -r 's#^/dev/(.+):.+UUID="([^"]+).+"#/dev/\1:\2#g')"
 	
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
