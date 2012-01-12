@@ -8,7 +8,7 @@ RUN_D=/var/run
 PID_F=$RUN_D/$BIN.pid
 RUN_USER=root
 RUN_GROUP=root
-OPTIONS=" --User $RUN_USER  --ClientOnly 1 --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
+OPTIONS=" --User $RUN_USER  --ClientOnly 1 --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 --VirtualAddrNetwork 10.192.0.0/10 --AutomapHostsOnResolve 1"
 BOOT="0"
 
 
