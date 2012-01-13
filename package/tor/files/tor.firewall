@@ -40,8 +40,9 @@ elif [ -n "$zone_ip" ] ; then
 fi
 
 #rules to redirect to tor transparent proxy
+iptables -t nat -I tor -p tcp   --dport 53 -j REDIRECT --to-ports $dns_port
+iptables -t nat -I tor -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
 iptables -t nat -A tor -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
-iptables -t nat -A tor -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
 
 # jump to tor chain at start of zone prerouting chain if enabled for this IP
 test_tor_active=""
