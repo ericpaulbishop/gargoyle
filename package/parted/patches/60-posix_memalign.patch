@@ -1,0 +1,46 @@
+--- part-a/libparted/arch/linux.c	2012-01-23 20:49:02.504634956 -0500
++++ part-b/libparted/arch/linux.c	2012-01-23 20:49:39.813201769 -0500
+@@ -41,6 +41,10 @@
+ #include <libdevmapper.h>
+ #endif
+ 
++#include <stdlib.h>
++#include <malloc.h>
++
++
+ #include "blkpg.h"
+ 
+ #if ENABLE_NLS
+@@ -263,6 +267,32 @@
+ static char* _device_get_part_path (PedDevice* dev, int num);
+ static int _partition_is_mounted_by_path (const char* path);
+ 
++
++
++
++static int posix_memalign(void **memptr, size_t alignment, size_t size)
++{
++	if ((alignment % sizeof(void *)) != 0)
++	{
++		return EINVAL; 
++	}
++
++	*memptr = memalign(alignment, size);
++ 
++	/* The spec for posix_memalign requires that alignment be a power
++	  of 2.   Memalign checks for that case, and returns NULL on failure. */
++	if (*memptr == NULL)
++	{
++		/* posix_memalign must return an appropriate error code */
++		return EINVAL;
++	}
++	return 0;
++}
++
++
++
++
++
+ static int
+ _is_ide_major (int major)
+ {

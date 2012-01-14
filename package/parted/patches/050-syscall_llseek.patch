@@ -1,0 +1,26 @@
+diff -Naur parted-1.8.8-orig/libparted/arch/linux.c parted-1.8.8/libparted/arch/linux.c
+--- parted-1.8.8-orig/libparted/arch/linux.c	2008-07-30 17:17:57.000000000 +0200
++++ parted-1.8.8/libparted/arch/linux.c	2008-07-30 17:23:03.000000000 +0200
+@@ -29,7 +29,7 @@
+ #include <fcntl.h>
+ #include <libgen.h>
+ #include <stdio.h>
+-#include <syscall.h>
++#include <sys/syscall.h>
+ #include <unistd.h>
+ #include <dirent.h>
+ #include <sys/ioctl.h>
+@@ -1361,12 +1361,7 @@
+ 
+ #if SIZEOF_OFF_T < 8
+ 
+-static _syscall5(int,_llseek,
+-                 unsigned int, fd,
+-                 unsigned long, offset_high,
+-                 unsigned long, offset_low,
+-                 loff_t*, result,
+-                 unsigned int, origin)
++#define _llseek(fd, offset_high, offset_low, result, origin) syscall(SYS__llseek, fd, offset_high, offset_low, result, origin)
+ 
+ loff_t
+ llseek (unsigned int fd, loff_t offset, unsigned int whence)
