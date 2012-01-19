@@ -1409,7 +1409,6 @@ CONFIG_PACKAGE_kmod-pppoe=y
 # CONFIG_PACKAGE_kmod-pppol2tp is not set
 CONFIG_PACKAGE_kmod-sched=y
 # CONFIG_PACKAGE_kmod-sit is not set
-# CONFIG_PACKAGE_kmod-tun is not set
 # CONFIG_PACKAGE_kmod-wprobe is not set
 
 #
@@ -1690,3 +1689,8 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
 CONFIG_PACKAGE_plugin-gargoyle-plugins=m
+CONFIG_PACKAGE_openvpn=y
+CONFIG_PACKAGE_openvpn_complzo=y
+CONFIG_PACKAGE_openvpn-easy-rsa=y
+CONFIG_PACKAGE_kmod-tun=y
+CONFIG_PACKAGE_liblzo=y
