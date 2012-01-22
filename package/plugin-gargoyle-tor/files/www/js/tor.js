@@ -45,7 +45,7 @@ function saveChanges()
 		if(torEnabledType != "0")
 		{
 			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
-			uci.set('tor', 'global', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden__mask").value))
+			uci.set('tor', 'global', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
 			if(torEnabledType != "3")
 			{
 				uci.set('tor', 'global', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
