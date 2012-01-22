@@ -14,14 +14,19 @@
 		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
 		<div id='tor_enabled_container'>
-		<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
+			<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
 			<select class='rightcolumn' id="tor_enabled" onchange='setTorVisibility()' >
 				<option value="2">Enabled, Toggled By Each Host</option>
 				<option value="1">Enabled For All Hosts</option>
 				<option value="3">Hidden Service Access Only</option>
 				<option value="0">Disabled</option>
 			</select>
+			<br/>
+			<em><span class="farrightcolumnonly" id="mode_description"></span></em>
+			<br/>
 		</div>
+
+
 
 		<div id='tor_other_proto_container'>
 			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>

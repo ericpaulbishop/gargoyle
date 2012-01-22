@@ -144,5 +144,14 @@ function setTorVisibility()
 	var enabledType =  getSelectedValue("tor_enabled")
 	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], enabledType == "0" ? [0,0] : [1,1] )
 	setVisibility( [ "tor_other_proto_container" ], (enabledType == "0" || enabledType == "3") ? [0] : [1] )
+
+	var modeDescriptions = []
+	modeDescriptions["0"] = ""
+	modeDescriptions["1"] = "All traffic will be anonymized"
+	modeDescriptions["2"] = "Users can choose whether traffic will be anonymized"
+	modeDescriptions["3"] = "Tor hidden services can be accessed, but no other traffic is anonymized"
+
+	setChildText("mode_description", modeDescriptions[enabledType])
+
 }
 
