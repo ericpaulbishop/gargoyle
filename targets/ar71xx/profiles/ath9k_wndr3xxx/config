@@ -1613,7 +1613,7 @@ CONFIG_PACKAGE_uuidgen=y
 # CONFIG_PACKAGE_cfdisk is not set
 CONFIG_PACKAGE_fdisk=y
 # CONFIG_PACKAGE_sfdisk is not set
-# CONFIG_PACKAGE_swap-utils is not set
+CONFIG_PACKAGE_swap-utils=y
 # CONFIG_PACKAGE_bin2trx is not set
 # CONFIG_PACKAGE_comgt is not set
 # CONFIG_PACKAGE_dropbearconvert is not set
