@@ -2,6 +2,7 @@
 
 START=56
 
+
 update_sharetype()
 {
 	section="$1"
@@ -12,7 +13,8 @@ update_sharetype()
 }
 
 
-is_mounted() {
+is_mounted()
+{
 	# Exit with 0 if is mounted, else $1
 	awk -v devpath="$1" '$1 == devpath {f=1; exit} END {exit !f}' /proc/mounts
 }
@@ -69,12 +71,12 @@ do_start()
 			continue
 		fi
 		
-		rmdir "/tmp/usb_mount/$did" > /dev/null 2>&1
+		rmdir "/tmp/usb_mount/$did" >/dev/null 2>&1
 
 		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
 
 		unset err
-
+		
 		case "${type}" in
 			'FAT32'|'FAT16')
 				mkdir -p "/tmp/usb_mount/$id"
@@ -87,7 +89,7 @@ do_start()
 				ntfs-3g "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
 			;;
 			'Linux swap')
-				swapon "$d"
+				swapon "$d" >/dev/null 2>&1
 			;;
 			'Ext4')
 				mkdir -p "/tmp/usb_mount/$id"
@@ -109,7 +111,7 @@ do_start()
 			;;
 		esac
 
-		if [ -z "$err" ] ; then
+		if [ -z "$err" ] && [ "$type" != "Linux swap" ] ; then
 			share_type=""
 			cur_mount="/tmp/usb_mount/$id"
 		
@@ -156,7 +158,8 @@ restart()
 	fi
 }
 
-do_swapoff() {
+do_swapoff()
+{
 	# Umount swap.
 	# We will care only about /dev/sd*. We will not affect zram users (/dev/zram0 etc).
 	while read swap_device_path _; do
@@ -172,10 +175,12 @@ do_stop()
 {
 	if [ -f '/tmp/mounted_usb_storage.tab' ];  then
 		while read device_path mountpoint_path _; do
-			umount "${mountpoint_path}"
 			# Cleanup mountpoint and symlink.
-			rmdir "${mountpoint_path}"
-			rm "/tmp/usb_mount/dev_${device_path##*/}"
+			if [ -d "${mountpoint_path}" ] ; then
+				umount "${mountpoint_path}" >/dev/null 2>&1
+				rmdir "${mountpoint_path}"
+			fi
+			rm -rf "/tmp/usb_mount/dev_${device_path##*/}"
 		done < /tmp/mounted_usb_storage.tab
 
 		rm /tmp/mounted_usb_storage.tab
