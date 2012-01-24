@@ -23,6 +23,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/parted
   SECTION:=utils
   CATEGORY:=Utilities
+  SUBMENU:=disc
   TITLE:=parted Partition editor
   URL:=http://www.gnu.org/software/parted/index.shtml
 endef
