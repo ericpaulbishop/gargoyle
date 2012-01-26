@@ -84,17 +84,33 @@
 	</div>
 	<div id="sharing_mount_table_container">
 	</div>
+
+	<br/><br/>
+	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+
+
 </fieldset>
+
+<fieldset>
+	<legend class="sectionheader">Unmount</legend>
+	<div>
+		<span class="leftcolumn"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
+		<br/>
+		<span class="leftcolumn"><em>USB Disks should be unmounted before removal from the router</em></span>
+	</div>
+</fieldset>
+
+
+
+
 
 <fieldset id="no_disks" style="display:none;">
 	<legend class="sectionheader">Shared Disks</legend>
 	No USB disks connected.
 </fieldset>
 
-<div id="bottom_button_container">
-	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
-</div>
+
 
 
 

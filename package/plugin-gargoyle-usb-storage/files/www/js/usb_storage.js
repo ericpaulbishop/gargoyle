@@ -556,3 +556,26 @@ function setNfsPath(controlDocument)
 		controlDocument.getElementById("nfs_path_container").style.display = "none";
 	}
 }
+
+
+function unmountAllUsb()
+{
+	setControlsEnabled(false, true, "Unmounting Disks");
+
+	
+	var commands = "/etc/init.d/usb_storage stop ; "
+
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			//reload page
+			window.location=window.location
+			setControlsEnabled(true);
+		}
+	}
+
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+}
