@@ -31,8 +31,8 @@
 	for d in $drives ; do 
 		mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") 
 		if [ -z "$mounted" ] ; then 
-			size=$(fdisk -s "$d")
-			echo "drivesWithNoMounts.push(\"$d\", \"$size\");"
+			size=$(( 1024 * $(fdisk -s "$d") ))
+			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
 		fi  
 	done
 	
@@ -141,11 +141,11 @@
 	</div>
 	<div id="swap_percent_container">
 		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
-		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
+		<span  class="rightcolumn"><input id="swap_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
 	</div>
 	<div id="storage_percent_container">
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
-		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
+		<span  class="rightcolumn"><input id="storage_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
 	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>

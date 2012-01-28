@@ -379,33 +379,47 @@ function resetData()
 
 }
 
-function updateFormatPercentages(ctrlid)
+function updateFormatPercentages(ctrlId)
 {
-	if(ctrlid == null)
+	if(ctrlId == null)
 	{
 		ctrlId="swap_percent";
 	}
-	var otherCtrlId  = ctrlid == "swap_percent" ? "storage_percent" : "swap_percent"
-	var sizeId       = ctrlid == "swap_percent" ? "swap_size"       : "storage_size"
-	var otherSizeId  = ctrlid == "swap_percent" ? "storage_size"    : "swap_size"
+	var otherCtrlId  = ctrlId == "swap_percent" ? "storage_percent" : "swap_percent"
+	var sizeId       = ctrlId == "swap_percent" ? "swap_size"       : "storage_size"
+	var otherSizeId  = ctrlId == "swap_percent" ? "storage_size"    : "swap_size"
 	
 				
 	var driveId = getSelectedValue("format_disk_select")
 	if(driveId != null)
 	{
-		var percent1 = parseFloat(document.getElementById(ctrlId))
-		if(percent1 <= 100)
-		{	
-			var percent2 = 100 - percent1;
-			var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
-
-			var size1 = (percent1 * size)/100;
-			var size2 = size - size1
-			
+		try
+		{
+			var percent1 = parseFloat(document.getElementById(ctrlId).value)
+			if( percent1 != "NaN" && percent1 <= 100 && percent1 >= 0)
+			{	
+				document.getElementById(ctrlId).style.color = "black"
+				var percent2 = 100 - percent1;
+				var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
+	
+				var size1 = (percent1 * size)/100;
+				var size2 = size - size1;
+	
+				document.getElementById(otherCtrlId).value = "" + percent2
+				setChildText(sizeId, "(" + parseBytes(size1) + ")");
+				setChildText(otherSizeId, "(" + parseBytes(size2) + ")");
+			}
+			else
+			{
+				document.getElementById(ctrlId).style.color = "red"
+			}
+		}
+		catch(e)
+		{
+			document.getElementById(ctrlId).style.color = "red"
 		}
 	}
-
-
+	
 }
 
 
