@@ -20,6 +20,8 @@
 
 	echo "var physicalDrives = [];"
 
+	#note that drivesWithNoMounts, refers to drives 
+	# with no mounts on the OS, not lack of network mounts
 	echo "var drivesWithNoMounts = [];"
 	
 	#ugly one-liner
@@ -139,11 +141,11 @@
 	</div>
 	<div id="swap_percent_container">
 		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
-		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>&nbsp;&nbsp;<em><span id="swap_size"></span></em>
+		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
 	</div>
 	<div id="storage_percent_container">
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
-		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>&nbsp;&nbsp;<em><span id="storage_size"></span></em>
+		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
 	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
