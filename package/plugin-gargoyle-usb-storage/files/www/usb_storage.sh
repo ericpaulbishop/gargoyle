@@ -133,6 +133,11 @@
 		<em><span class="nocolumn"><p>No attached, unmounted drives detected.</p><p>You must unmount drives before attempting to format them.</p></span></em>
 	</div>
 
+	<div id="format_warning">
+		<em><span class="nocolumn">WARNING: Formatting a disk will permanently wipe out all contents of that disk.<p>Disk will be formatted for storage with EXT4 filesystem<br/>EXT4 may not be readable if USB drive is removed and attached to a Windows/Mac computer</p></span></em>
+	</div>
+
+
 	<div id="format_disk_select_container">
 		<label id="format_disk_select_label" class="leftcolumn">Disk to format:</label>
 		<select class="rightcolumn" id="format_disk_select" ></select>

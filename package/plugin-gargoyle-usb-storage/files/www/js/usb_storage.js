@@ -373,7 +373,7 @@ function resetData()
 	document.getElementById("swap_percent").value  = "25";
 	document.getElementById("storage_percent").value = "75";
 	var vis = (drivesWithNoMounts.length > 0);
-	setVisibility( ["no_unmounted_drives", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container"],  [ (!vis), vis, vis, vis, vis ] )
+	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container"],  [ (!vis), vis, vis, vis, vis, vis ] )
 	updateFormatPercentages()
 
 
