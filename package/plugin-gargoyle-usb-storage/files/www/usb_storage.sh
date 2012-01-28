@@ -29,7 +29,8 @@
 	for d in $drives ; do 
 		mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") 
 		if [ -z "$mounted" ] ; then 
-			echo "drivesWithNoMounts.push(\"$d\");" 
+			size=$(fdisk -s "$d")
+			echo "drivesWithNoMounts.push(\"$d\", \"$size\");"
 		fi  
 	done
 	
@@ -38,6 +39,13 @@
 ?>
 //-->
 </script>
+
+
+
+<fieldset id="no_disks" style="display:none;">
+	<legend class="sectionheader">Shared Disks</legend>
+	No mounted USB disks detected
+</fieldset>
 
 
 
@@ -115,14 +123,32 @@
 	</div>
 </fieldset>
 
+<fieldset id="disk_format">
+	<legend class="sectionheader">Format Disk</legend>
+	<div id="format_disk_select_container">
+		<label id="format_disk_select_label" class="leftcolumn">Disk to format:</label>
+		<select class="rightcolumn" id="format_disk_select" ></select>
+		<br/>
+		<span id="format_warning" class="right_column_only"></span>
+	</div>
+	<div id="swap_percent_container">
+		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
+		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>
+	</div>
+	<div id="storage_percent_container">
+		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
+		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>
+	</div>
+	<div>
+		<span class="leftcolumn" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
+	</div>
 
 
 
-
-<fieldset id="no_disks" style="display:none;">
-	<legend class="sectionheader">Shared Disks</legend>
-	No USB disks connected.
 </fieldset>
+
+
+
 
 
 
