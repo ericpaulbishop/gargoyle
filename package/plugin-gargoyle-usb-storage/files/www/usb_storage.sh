@@ -20,6 +20,21 @@
 
 	echo "var physicalDrives = [];"
 
+	echo "var drivesWithNoMounts = [];"
+	
+	#ugly one-liner
+	#unmounted_drives=$( drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) ; for d in $drives ; do mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") ; if [ -z "$mounted" ] ; then echo "$d" ; fi  ; done )
+	
+	drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) 
+	for d in $drives ; do 
+		mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") 
+		if [ -z "$mounted" ] ; then 
+			echo "drivesWithNoMounts.push(\"$d\");" 
+		fi  
+	done
+	
+
+
 ?>
 //-->
 </script>
