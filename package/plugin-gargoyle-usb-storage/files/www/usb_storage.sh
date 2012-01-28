@@ -92,14 +92,11 @@
 
 </fieldset>
 
-<fieldset>
+<fieldset id="disk_unmount">
 	<legend class="sectionheader">Unmount</legend>
 	<div>
-		<span class="leftcolumn"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
-		<br/>
-		<span class="leftcolumn"><em>USB Disks should be unmounted before removal from the router</em></span>
-		<br/>
-		<span class="leftcolumn"><em>USB Disks still connected will be automatically remounted after next router reboot</em></span>
+		<span class="leftcolumn"  style="margin-bottom:60px"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
+		<span class="rightcolumn"><em>USB Disks should be unmounted before removal from the router. USB Disks still connected will be automatically remounted after next router reboot.</em></span>
 	</div>
 </fieldset>
 
