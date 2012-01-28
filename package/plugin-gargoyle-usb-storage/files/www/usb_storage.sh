@@ -44,7 +44,7 @@
 
 <fieldset id="no_disks" style="display:none;">
 	<legend class="sectionheader">Shared Disks</legend>
-	No mounted USB disks detected
+	<em><span class="nocolumn">No mounted USB disks detected</span></em>
 </fieldset>
 
 
@@ -108,7 +108,8 @@
 	<div id="sharing_mount_table_container">
 	</div>
 
-	<br/><br/>
+	<div class="internal_divider"></div>
+
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 
@@ -118,13 +119,18 @@
 <fieldset id="disk_unmount">
 	<legend class="sectionheader">Unmount</legend>
 	<div>
-		<span class="leftcolumn"  style="margin-bottom:60px"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
+		<span class="leftcolumn"  style="margin-bottom:60px;margin-left:0px;"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
 		<span class="rightcolumn"><em>USB Disks should be unmounted before removal from the router. USB Disks still connected will be automatically remounted after next router reboot.</em></span>
 	</div>
 </fieldset>
 
 <fieldset id="disk_format">
 	<legend class="sectionheader">Format Disk</legend>
+
+	<div id="no_unmounted_drives">
+		<em><span class="nocolumn"><p>No attached, unmounted drives detected.</p><p>You must unmount drives before attempting to format them.</p></span></em>
+	</div>
+
 	<div id="format_disk_select_container">
 		<label id="format_disk_select_label" class="leftcolumn">Disk to format:</label>
 		<select class="rightcolumn" id="format_disk_select" ></select>
@@ -133,16 +139,15 @@
 	</div>
 	<div id="swap_percent_container">
 		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
-		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>
+		<span  class="rightcolumn"><input id="swap_percent" type="text"  /></span>&nbsp;&nbsp;<em><span id="swap_size"></span></em>
 	</div>
 	<div id="storage_percent_container">
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
-		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>
+		<span  class="rightcolumn"><input id="storage_percent" type="text"  /></span>&nbsp;&nbsp;<em><span id="storage_size"></span></em>
 	</div>
-	<div>
-		<span class="leftcolumn" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
+	<div id="usb_format_button_container">
+		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>
-
 
 
 </fieldset>
