@@ -180,9 +180,12 @@ function saveChanges()
 
 function resetData()
 {
+	document.getElementById("no_disks").style.display =  storageDrives.length == 0 ?   "block" : "none";
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("bottom_button_container").style.display =  storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("no_disks").style.display =  storageDrives.length == 0 ? "block" : "none";
+	document.getElementById("disk_unmount").style.display = storageDrives.length > 0 ? "block" : "none";
+	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none"
+
+
 
 	if(storageDrives.length > 0)
 	{
@@ -348,8 +351,77 @@ function resetData()
 		tableContainer.appendChild(shareTable);
 	}
 
+	// format setttings
+	//
+	// note that 'drivesWithNoMounts', refers to drives not mounted on the OS,
+	// not lack of network shared/mounts which is what the other variables
+	// refer to.  This can be confusing, so I'm putting this comment here
+
+	
+	if(drivesWithNoMounts.length > 0)
+	{
+		var dindex;
+		var driveIds  = [];
+		var driveText = [];
+		for(dindex=0; dindex< drivesWithNoMounts.length ; dindex++)
+		{
+			driveIds.push( "" + dindex);
+			driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+		}
+		setAllowableSelections("format_disk_select", driveIds, driveText);
+	}
+	document.getElementById("swap_percent").value  = "25";
+	document.getElementById("storage_percent").value = "75";
+	var vis = (drivesWithNoMounts.length > 0);
+	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container"],  [ (!vis), vis, vis, vis, vis, vis ] )
+	updateFormatPercentages()
+
 
 }
+
+function updateFormatPercentages(ctrlId)
+{
+	if(ctrlId == null)
+	{
+		ctrlId="swap_percent";
+	}
+	var otherCtrlId  = ctrlId == "swap_percent" ? "storage_percent" : "swap_percent"
+	var sizeId       = ctrlId == "swap_percent" ? "swap_size"       : "storage_size"
+	var otherSizeId  = ctrlId == "swap_percent" ? "storage_size"    : "swap_size"
+	
+				
+	var driveId = getSelectedValue("format_disk_select")
+	if(driveId != null)
+	{
+		try
+		{
+			var percent1 = parseFloat(document.getElementById(ctrlId).value)
+			if( percent1 != "NaN" && percent1 <= 100 && percent1 >= 0)
+			{	
+				document.getElementById(ctrlId).style.color = "black"
+				var percent2 = 100 - percent1;
+				var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
+	
+				var size1 = (percent1 * size)/100;
+				var size2 = size - size1;
+	
+				document.getElementById(otherCtrlId).value = "" + percent2
+				setChildText(sizeId, "(" + parseBytes(size1) + ")");
+				setChildText(otherSizeId, "(" + parseBytes(size2) + ")");
+			}
+			else
+			{
+				document.getElementById(ctrlId).style.color = "red"
+			}
+		}
+		catch(e)
+		{
+			document.getElementById(ctrlId).style.color = "red"
+		}
+	}
+	
+}
+
 
 function mountPathToMountPoint(mountPath)
 {
@@ -555,4 +627,27 @@ function setNfsPath(controlDocument)
 	{
 		controlDocument.getElementById("nfs_path_container").style.display = "none";
 	}
+}
+
+
+function unmountAllUsb()
+{
+	setControlsEnabled(false, true, "Unmounting Disks");
+
+	
+	var commands = "/etc/init.d/usb_storage stop ; "
+
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			//reload page
+			window.location=window.location
+			setControlsEnabled(true);
+		}
+	}
+
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
 }

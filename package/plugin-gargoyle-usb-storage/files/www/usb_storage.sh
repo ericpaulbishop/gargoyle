@@ -20,9 +20,34 @@
 
 	echo "var physicalDrives = [];"
 
+	#note that drivesWithNoMounts, refers to drives 
+	# with no mounts on the OS, not lack of network mounts
+	echo "var drivesWithNoMounts = [];"
+	
+	#ugly one-liner
+	#unmounted_drives=$( drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) ; for d in $drives ; do mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") ; if [ -z "$mounted" ] ; then echo "$d" ; fi  ; done )
+	
+	drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) 
+	for d in $drives ; do 
+		mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") 
+		if [ -z "$mounted" ] ; then 
+			size=$(( 1024 * $(fdisk -s "$d") ))
+			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
+		fi  
+	done
+	
+
+
 ?>
 //-->
 </script>
+
+
+
+<fieldset id="no_disks" style="display:none;">
+	<legend class="sectionheader">Shared Disks</legend>
+	<em><span class="nocolumn">No mounted USB disks detected</span></em>
+</fieldset>
 
 
 
@@ -84,17 +109,60 @@
 	</div>
 	<div id="sharing_mount_table_container">
 	</div>
-</fieldset>
 
-<fieldset id="no_disks" style="display:none;">
-	<legend class="sectionheader">Shared Disks</legend>
-	No USB disks connected.
-</fieldset>
+	<div class="internal_divider"></div>
 
-<div id="bottom_button_container">
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
-</div>
+
+
+</fieldset>
+
+<fieldset id="disk_unmount">
+	<legend class="sectionheader">Unmount</legend>
+	<div>
+		<span class="leftcolumn"  style="margin-bottom:60px;margin-left:0px;"><input type='button' value="Unmount All USB Disks" id="unmount_usb_button" class="default_button" onclick="unmountAllUsb()"></span>
+		<span class="rightcolumn"><em>USB Disks should be unmounted before removal from the router. USB Disks still connected will be automatically remounted after next router reboot.</em></span>
+	</div>
+</fieldset>
+
+<fieldset id="disk_format">
+	<legend class="sectionheader">Format Disk</legend>
+
+	<div id="no_unmounted_drives">
+		<em><span class="nocolumn"><p>No attached, unmounted drives detected.</p><p>You must unmount drives before attempting to format them.</p></span></em>
+	</div>
+
+	<div id="format_warning">
+		<em><span class="nocolumn">WARNING: Formatting a disk will permanently wipe out all contents of that disk.<p>Disk will be formatted for storage with EXT4 filesystem<br/>EXT4 may not be readable if USB drive is removed and attached to a Windows/Mac computer</p></span></em>
+	</div>
+
+
+	<div id="format_disk_select_container">
+		<label id="format_disk_select_label" class="leftcolumn">Disk to format:</label>
+		<select class="rightcolumn" id="format_disk_select" ></select>
+		<br/>
+		<span id="format_warning" class="right_column_only"></span>
+	</div>
+	<div id="swap_percent_container">
+		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
+		<span  class="rightcolumn"><input id="swap_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
+	</div>
+	<div id="storage_percent_container">
+		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
+		<span  class="rightcolumn"><input id="storage_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
+	</div>
+	<div id="usb_format_button_container">
+		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
+	</div>
+
+
+</fieldset>
+
+
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -14,13 +14,20 @@
 		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
 		<div id='tor_enabled_container'>
-		<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
-			<select class='rightcolumn' id="tor_enabled" onchange='setVisibility()' >
+			<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
+			<select class='rightcolumn' id="tor_enabled" onchange='setTorVisibility()' >
 				<option value="2">Enabled, Toggled By Each Host</option>
 				<option value="1">Enabled For All Hosts</option>
+				<option value="3">Hidden Service Access Only</option>
 				<option value="0">Disabled</option>
 			</select>
+			<br/>
+			<em><span class="farrightcolumnonly" id="mode_description"></span></em>
+			<br/>
 		</div>
+
+
+
 		<div id='tor_other_proto_container'>
 			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>
 			<select class='rightcolumn' id="tor_other_proto">
@@ -28,6 +35,16 @@
 				<option value="1">Block</option>
 			</select>
 		</div>
+
+		<div id='tor_hidden_subnet_container'>
+			<label  class='wideleftcolumn' for='tor_hidden_subnet' id='tor_hidden_subnet_label'>Tor Hidden Service Subnet:</label>
+			<input type="text" class="rightcolumn" id='tor_hidden_subnet' onkeyup='proofreadIp(this)' />
+		</div>
+		<div id='tor_hidden_mask_container'>
+			<label  class='wideleftcolumn' for='tor_hidden_mask' id='tor_hidden_mask_label'>Tor Hidden Service Subnet Mask:</label>
+			<input type="text" class="rightcolumn" id='tor_hidden_mask' onkeyup='proofreadMask(this)'/>
+		</div>
+
 
 	
 	</fieldset>
