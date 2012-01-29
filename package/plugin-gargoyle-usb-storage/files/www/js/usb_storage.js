@@ -381,6 +381,9 @@ function resetData()
 
 function updateFormatPercentages(ctrlId)
 {
+	var valid = false;
+
+
 	if(ctrlId == null)
 	{
 		ctrlId="swap_percent";
@@ -397,7 +400,7 @@ function updateFormatPercentages(ctrlId)
 		{
 			var percent1 = parseFloat(document.getElementById(ctrlId).value)
 			if( percent1 != "NaN" && percent1 <= 100 && percent1 >= 0)
-			{	
+			{
 				document.getElementById(ctrlId).style.color = "black"
 				var percent2 = 100 - percent1;
 				var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
@@ -408,6 +411,7 @@ function updateFormatPercentages(ctrlId)
 				document.getElementById(otherCtrlId).value = "" + percent2
 				setChildText(sizeId, "(" + parseBytes(size1) + ")");
 				setChildText(otherSizeId, "(" + parseBytes(size2) + ")");
+				valid=true
 			}
 			else
 			{
@@ -419,7 +423,7 @@ function updateFormatPercentages(ctrlId)
 			document.getElementById(ctrlId).style.color = "red"
 		}
 	}
-	
+	return valid
 }
 
 
@@ -649,5 +653,82 @@ function unmountAllUsb()
 	}
 
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+function formatDiskRequested()
+{
+
+	if( !updateFormatPercentages("swap_percent") )
+	{
+		alert("ERROR: Invalid Allocation Percentages Specified");
+		return;
+	}
+
+
+	var driveId = getSelectedValue("format_disk_select")
+	var pass = prompt("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", "")
+	if(pass != null) //if null don't bother with error message -- user pressed cancel
+	{
+		setControlsEnabled(false, true, "Verifying Password...");
+
+		var commands = "POST_password=\"" + pass + "\" haserl /www/utility/get_password_cookie.sh | tail -n 1"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var result = req.responseText.split("\n")[0]
+				if(result.match(/^invalid/))
+				{
+					alert("ERROR: Invalid Password")
+					setControlsEnabled(true)
+				}
+				else
+				{
+
+					doDiskFormat()
+				}
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
+
+function doDiskFormat()
+{
+	var driveId        = getSelectedValue("format_disk_select")
+	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
+	
+	//format shell script requires percent as an integer, round as necessary
+	if(swapPercent >0 && swapPercent <1)
+	{
+		swapPercent = 1
+	}
+	if(swapPercent >99 && swapPercent < 100)
+	{
+		swapPerent = 99
+	}
+	swapPercent=Math.round(swapPercent)
+
+	if(confirm("Password Accepted.\n\nThis is your LAST CHANCE to cancel.  Press 'OK' only if you are SURE you want to format " + driveId))
+	{
+	
+		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
+	
+	
+		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"ext4\" ; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				alert("Formatting Complete.");
+				window.location=window.location
+				setControlsEnabled(true)
+			}
+		}
+	}
 
 }
+
+
