@@ -665,7 +665,8 @@ function formatDiskRequested()
 	}
 
 
-	var driveId = getSelectedValue("format_disk_select")
+	var driveId = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ]
+
 	var pass = prompt("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", "")
 	if(pass != null) //if null don't bother with error message -- user pressed cancel
 	{
@@ -685,7 +686,6 @@ function formatDiskRequested()
 				}
 				else
 				{
-
 					doDiskFormat()
 				}
 			}
@@ -696,7 +696,7 @@ function formatDiskRequested()
 
 function doDiskFormat()
 {
-	var driveId        = getSelectedValue("format_disk_select")
+	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ]
 	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
 	
 	//format shell script requires percent as an integer, round as necessary
@@ -727,6 +727,10 @@ function doDiskFormat()
 				setControlsEnabled(true)
 			}
 		}
+	}
+	else
+	{
+		setControlsEnabled(true)
 	}
 
 }

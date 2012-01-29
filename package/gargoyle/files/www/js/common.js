@@ -2217,3 +2217,102 @@ function arrToHash(arr)
 	return h
 }
 
+
+
+
+
+function confirmPassword(confirmText, validatedFunc, invalidFunc)
+{
+	confirmText = confirmText == null ? "Confirm Password:" : confirmText;
+	if( typeof(confirmWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			confirmWindow.close();
+		}
+		catch(e){}
+	}
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+	var wlocation = "password_confirm.sh";
+	confirmWindow = window.open(wlocation, "Confirm Password", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	
+	var okButton = createInput("button", confirmWindow.document);
+	var cancelButton = createInput("button", confirmWindow.document);
+	
+	okButton.value         = "OK";
+	okButton.className     = "default_button";
+	cancelButton.value     = "Cancel";
+	cancelButton.className = "default_button";
+
+
+
+	runOnEditorLoaded = function () 
+	{
+		updateDone=false;
+		if(confirmWindow.document != null)
+		{
+			if(confirmWindow.document.getElementById("bottom_button_container") != null)
+			{
+				confirmWindow.document.getElementById("bottom_button_container").appendChild(okButton);
+				confirmWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
+				setChildText("confirm_text", confirmText, null, null, null, confirmWindow.document);
+			
+				cancelButton.onclick = function()
+				{
+					confirmWindow.close();
+				}
+				okButton.onclick = function()
+				{
+					setControlsEnabled(false, true, "Verifying Password...");
+	
+					var commands = "POST_password=\"" + pass + "\" haserl /www/utility/get_password_cookie.sh | tail -n 1"
+					var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+					var stateChangeFunction = function(req)
+					{
+						if(req.readyState == 4)
+						{
+							confirmWindow.close();
+							var result = req.responseText.split("\n")[0]
+							if(result.match(/^invalid/))
+							{
+								validateFunc.call(null);
+							}
+							else
+							{
+								invalidFunc.call(null);
+							}
+						}
+					}
+					runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+				}
+				confirmWindow.moveTo(xCoor,yCoor);
+				confirmWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout( "runOnEditorLoaded()", 250);
+		}
+	}
+	runOnEditorLoaded();
+}
+
+
+
+
+
+
