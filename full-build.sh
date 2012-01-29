@@ -133,13 +133,14 @@ fi
 #compress javascript
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
 	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
-	if [ "$uglify_test" != 'var abc=1' ] ; then
+	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
 		js_compress="false"
 		echo ""
 		echo "**************************************************************************"
 		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
 		echo "**************************************************************************"
 		echo ""
+		echo "uglify_test = '$uglify_test'"
 	else
 		js_compress="true"
 		rm -rf "$compress_js_dir"
