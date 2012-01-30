@@ -2277,7 +2277,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 				{
 					setControlsEnabled(false, true, "Verifying Password...");
 	
-					var commands = "POST_password=\"" + pass + "\" haserl /www/utility/get_password_cookie.sh | tail -n 1"
+					var commands = "gargoyle_session_validator -p \"" + confirmWindow.document.getElementById("password").value + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
 					var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 					var stateChangeFunction = function(req)
 					{
@@ -2285,13 +2285,13 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 						{
 							confirmWindow.close();
 							var result = req.responseText.split("\n")[0]
-							if(result.match(/^invalid/))
+							if(result.match(/^echo \"invalid\"/))
 							{
-								validateFunc.call(null);
+								invalidFunc.call(null);
 							}
 							else
 							{
-								invalidFunc.call(null);
+								validatedFunc.call(null);
 							}
 						}
 					}

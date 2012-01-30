@@ -665,6 +665,15 @@ function formatDiskRequested()
 	}
 
 
+	var a = function(){ alert("good"); setControlsEnabled(true); }
+	var b = function(){ alert("bad"); setControlsEnabled(true);  }
+	
+	confirmPassword("Enter your password:", a, b)
+
+	return;
+
+
+
 	var driveId = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ]
 
 	var pass = prompt("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", "")
