@@ -140,7 +140,6 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
 		echo "**************************************************************************"
 		echo ""
-		echo "uglify_test = '$uglify_test'"
 	else
 		js_compress="true"
 		rm -rf "$compress_js_dir"
