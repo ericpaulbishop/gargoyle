@@ -17,7 +17,7 @@ set_constant_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=29933
+	rnum=29961
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -140,7 +140,6 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
 		echo "**************************************************************************"
 		echo ""
-		echo "uglify_test = '$uglify_test'"
 	else
 		js_compress="true"
 		rm -rf "$compress_js_dir"

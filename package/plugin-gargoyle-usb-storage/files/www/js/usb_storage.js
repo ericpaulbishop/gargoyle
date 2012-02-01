@@ -664,39 +664,17 @@ function formatDiskRequested()
 		return;
 	}
 
+	var validFunc   = doDiskFormat;
+	var invalidFunc = function(){ alert("ERROR: Invalid Password"); }
 
-	var driveId = getSelectedValue("format_disk_select")
-	var pass = prompt("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", "")
-	if(pass != null) //if null don't bother with error message -- user pressed cancel
-	{
-		setControlsEnabled(false, true, "Verifying Password...");
+	var driveId = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
+	confirmPassword("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", validFunc, invalidFunc);
 
-		var commands = "POST_password=\"" + pass + "\" haserl /www/utility/get_password_cookie.sh | tail -n 1"
-		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-		var stateChangeFunction = function(req)
-		{
-			if(req.readyState == 4)
-			{
-				var result = req.responseText.split("\n")[0]
-				if(result.match(/^invalid/))
-				{
-					alert("ERROR: Invalid Password")
-					setControlsEnabled(true)
-				}
-				else
-				{
-
-					doDiskFormat()
-				}
-			}
-		}
-		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-	}
 }
 
 function doDiskFormat()
 {
-	var driveId        = getSelectedValue("format_disk_select")
+	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
 	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
 	
 	//format shell script requires percent as an integer, round as necessary
@@ -716,7 +694,7 @@ function doDiskFormat()
 		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
 	
 	
-		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"ext4\" ; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
+		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" ; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
@@ -727,6 +705,12 @@ function doDiskFormat()
 				setControlsEnabled(true)
 			}
 		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+	}
+	else
+	{
+		setControlsEnabled(true)
 	}
 
 }
