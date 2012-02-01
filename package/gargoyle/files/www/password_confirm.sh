@@ -8,17 +8,20 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 	gargoyle_header_footer -m  -c "internal.css"
 ?>
+<fieldset>
+	<legend class="sectionheader">Confirm Password</legend>
 
-<div>
-	<span class="nocolumn" id="confirm_text"></span>
-</div>
-<br/><br/>
-<div>
-	<span class="nocolumn"><input type="password" id="password" /></span>
-</div>
-<br/><br/>
-<div id="bottom_button_container"></div>
+	<div style="clear:both;display:block">
+		<span class="nocolumn" id="confirm_text"></span>
+	</div>
 
+	<div id="spacer_div" style="display:block; margin:8px;">&nbsp;</div>
+
+	<div style="clear:both">
+		<span class="nocolumn"><input type="password" id="password" /></span>
+	</div>
+	<div id="bottom_button_container"></div>
+</fieldset>
 
 </body>
 </html>

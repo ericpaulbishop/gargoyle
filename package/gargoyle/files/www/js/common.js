@@ -575,11 +575,23 @@ function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 			parentElement.style.fontSize = fontSize;
 
 		}
-		if(parentElement.firstChild != null)
+		while(parentElement.firstChild != null)
 		{
 			parentElement.removeChild(parentElement.firstChild);
 		}
-		parentElement.appendChild(controlDocument.createTextNode(text));
+
+		text = text == null ? "" : text;
+		var textParts = text.split("\n");
+		while(textParts.length > 0)
+		{
+			var txt = textParts.shift()
+			parentElement.appendChild(controlDocument.createTextNode(txt));
+			if(textParts.length > 0)
+			{
+				parentElement.appendChild(controlDocument.createElement('br'));
+
+			}
+		}
 	}
 }
 
@@ -2246,7 +2258,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 		yCoor = window.top + 225;
 	}
 	var wlocation = "password_confirm.sh";
-	confirmWindow = window.open(wlocation, "Confirm Password", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	confirmWindow = window.open(wlocation, "Confirm Password", "width=560,height=210,left=" + xCoor + ",top=" + yCoor );
 	
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
