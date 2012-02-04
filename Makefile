@@ -18,7 +18,7 @@ all:
 		done ;\
 	)
 
-brcm:brcm-2.4
+brcm: brcm-2.4
 brcm-2.4: 
 	( \
 		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
@@ -47,3 +47,10 @@ cleanup:
 	find . -name ".svn" | xargs rm -rf
 	find . -name "*~" | xargs rm -rf
 	find . -name ".*sw*" | xargs rm -rf
+
+# If you run this, you will need to start all over with compiling.
+distclean: cleanup
+	rm -rf ./*-src
+	rm -rf ./built
+	rm -rf ./images
+	rm -rf ./downloaded
