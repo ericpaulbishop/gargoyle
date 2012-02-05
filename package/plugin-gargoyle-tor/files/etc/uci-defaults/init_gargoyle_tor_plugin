@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #if this isn't a new installation, or if we preserved settings, just exit
-is_first_boot=$(uci get is_first_boot 2>/dev/null)
+is_first_boot=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
 if [ "$is_first_boot" != "1" ] ; then
 	exit
 fi
