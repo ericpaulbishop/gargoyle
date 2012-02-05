@@ -34,25 +34,38 @@
 	<legend class="sectionheader">Upgrade Firmware</legend>
 	<div>
 		<div>
-			<p>Upgrading your firmware will completely erase your current configuration.
+			<p>By default upgrading your firmware will completely erase your current configuration.
 		      	It is <em>strongly</em> recommended that you <a href="backup.sh">back up</a> your current 
 			configuration before performing an upgrade.</p>
+
+			<p>You can attempt to preserve your old settings by ticking <em>Attempt to Preserve Settings</em> below. Be
+			aware that this can potentially lead to problems if the new version is significantly newer than the old version, 
+			but for small, incremental differences this will likely work. It is always best to keep a backup just in case.
 		</div>
 		
 		<div class="internal_divider"></div>
 
 		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+
 			<div id="upgrade_file1_container">
 				<label id="upgrade_label" class='leftcolumn' for="upgrade_file">Select Firmware File:</label>
 				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
+				<br/>
+				<em><span id="upgrade_text" class="rightcolumnonly"></span></em>
 			</div>
-			<div><em><span id="upgrade_text" class="wideleftcolumn"></span></em></div>
+			<div id="upgrade_preserve_container">
+				<span class="rightcolumnonly">
+					<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
+					<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle">Attempt to Preserve Settings</label>
+				</span>
+			</div>
+
 			<input id='upgrade_hash' name="hash" type='hidden' value='' />
 			<input id='upgrade_arch' name="arch" type='hidden' value='' />
 		</form>
 	</div>
 	<div>
-		<span class='leftcolumn'><input id="upgrade_button" type='button' class="default_button" value="Upgrade Now" onclick="doUpgrade()"/></span>
+		<input id="upgrade_button" type='button' class="default_button" value="Upgrade Now" onclick="doUpgrade()" style="margin-left:0px;"/>
 	</div>
 
 	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe> 
