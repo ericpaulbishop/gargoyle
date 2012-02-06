@@ -33,12 +33,12 @@ while [ "$num_partitions" -gt 0 ] ; do
 done
 
 if [ "$percent_swap" = "100" ] ; then
-	printf "n\np\n1\n\n\nt\n1\n82\nw\n" | fdisk "$disk" >/dev/null 2>&1
+	printf "n\np\n1\n\n\nt\n82\nw\n" | fdisk "$disk" >/dev/null 2>&1
 	sleep 10
 	swapoff "$disk"1 >/dev/null 2>&1
 	mkswap "$disk"1
 elif [ "$percent_swap" = "0" ] ; then
-	printf "n\np\n1\n\n\nt\n1\n83\nw\n" | fdisk "$disk" >/dev/null 2>&1
+	printf "n\np\n1\n\n\nt\n83\nw\n" | fdisk "$disk" >/dev/null 2>&1
 	sleep 10
 	mkfs.ext$ext_version "$disk"1
 else
