@@ -39,6 +39,22 @@ for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" 
 done
 uci commit
 
+#set sysupgrade.conf
+cat << EOF >/etc/sysupgrade.conf
+/etc/passwd
+/etc/config
+/etc/rc.d
+/etc/TZ
+/etc/firewall.user
+/etc/ethers
+/etc/hosts
+/etc/webmon_ips
+/etc/crontabs
+/etc/dropbear
+/tmp/data
+/usr/data
+EOF
+
 
 #create original backup
 sh /usr/lib/gargoyle/create_backup.sh

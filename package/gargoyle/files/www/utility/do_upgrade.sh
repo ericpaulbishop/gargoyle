@@ -17,7 +17,7 @@
 	mkdir -p /tmp/up	
 	mv $FORM_upgrade_file /tmp/up/upgrade
 	
-
+	
 	cd /tmp/up/
 	if [ -e /usr/bin/bin2trx ] ; then
 		/usr/bin/bin2trx /tmp/up/upgrade >/tmp/up/trxtest 2>&1
@@ -44,6 +44,12 @@
 			echo "     "
 			inc=$(($inc + 1))
 		done
-		/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+
+		#if attempting to preserve settings, don't pass -n
+		if [ "$FORM_upgrade_preserve" = "on" ] ; then
+			/sbin/sysupgrade    /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+		else
+			/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
+		fi
 	fi
 ?>
