@@ -29,6 +29,7 @@ start()
 		exit
 	fi
 
+	mkdir -p /var/tor/keys
 
         [ -d $VAR_D ] || ( mkdir -m 0700 -p $VAR_D && chown $RUN_USER:$RUN_GROUP $VAR_D )
 	[ -d $RUN_D ] || mkdir -p $RUN_D

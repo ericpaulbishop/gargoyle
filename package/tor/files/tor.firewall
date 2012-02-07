@@ -94,6 +94,6 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 	relay_zone=$(uci get tor.relay.zone)
 	relay_port=$(uci get tor.relay.relay_port)
 	iptables -t filter -N tor_relay
-	iptables -t filter -I input_${relay_zone} -p tcp --dport $relay_port -j ACCEPT
+	iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
 	iptables -t filter -I input_${relay_zone} -j tor_relay
 fi
