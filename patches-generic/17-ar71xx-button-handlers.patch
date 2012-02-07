@@ -8,7 +8,7 @@
 +
 +. /lib/ar71xx.sh
 +
-+is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-WR")
++is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM]R")
 +is_wrt160nl=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WRT160NL")
 +is_netgear=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WNDR3700")
 +is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
