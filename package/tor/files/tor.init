@@ -68,7 +68,7 @@ start()
 	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 	client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
 	if [ -n "$client_listen_ip" ] ; then
-		OPTIONS="$OPTIONS --TransListenAddress '$listen_ip' --DNSListenAddress '$listen_ip' "
+		OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
 	fi
 
 
@@ -94,11 +94,11 @@ start()
 			if [ "$relay_enabled" = "1" ] ; then
 				relay_options=" --BridgeRelay 1 $relay_options "
 			fi
-			$BIN $OPTIONS $relay_options  --RelayBandwidthRate "$max_bw_rate_kb KB" --RelayBandwidthBurst "$max_bw_burst_kb KB" --MaxAdvertisedBandwidth "$max_bw_rate_kb KB" --Exitpolicy 'reject *:*'
+			eval "$BIN $OPTIONS $relay_options  --RelayBandwidthRate '$max_bw_rate_kb KB' --RelayBandwidthBurst '$max_bw_burst_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*'"
 		fi
 	fi
 	if [ -z "$relay_options" ] ; then
-		$BIN $OPTIONS --ClientOnly 1
+		eval "$BIN $OPTIONS --ClientOnly 1"
 	fi
 
 
@@ -111,6 +111,7 @@ stop()
 {
 	[ -f $PID_F ] && kill -9 $(cat $PID_F)
 	delete_chain_from_table nat tor
+	rm -rf "$PID_F"
 }
 
 restart()
