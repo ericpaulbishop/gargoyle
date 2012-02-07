@@ -2258,7 +2258,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 		yCoor = window.top + 225;
 	}
 	var wlocation = "password_confirm.sh";
-	confirmWindow = window.open(wlocation, "Confirm Password", "width=560,height=210,left=" + xCoor + ",top=" + yCoor );
+	confirmWindow = window.open(wlocation, "password", "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
 	
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
@@ -2267,7 +2267,6 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	okButton.className     = "default_button";
 	cancelButton.value     = "Cancel";
 	cancelButton.className = "default_button";
-
 
 
 	runOnEditorLoaded = function () 
