@@ -10,8 +10,7 @@ RUN_USER=root
 RUN_GROUP=root
 BOOT="0"
 
-OPTIONS=" --User $RUN_USER  --ClientOnly 1 --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
-
+OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
 
 boot()
 {
@@ -22,7 +21,11 @@ boot()
 start()
 {
 	enabled=$(uci get tor.global.enabled)
-	if [ "$enabled" = "0" ] ; then
+	client_enabled=$(uci get tor.client.client_mode)
+	relay_enabled=$(uci get tor.relay.relay_mode)
+	
+
+	if [ "$enabled" = "0" ] || [ "$client_enabled$relay_enabled" = "00" ] ; then
 		exit
 	fi
 
@@ -31,7 +34,7 @@ start()
 	[ -d $RUN_D ] || mkdir -p $RUN_D
 	[ -f $PID_F ] || ( touch $PID_F && chown $RUN_USER:$RUN_GROUP $PID_F )
 	
-	zone=$( uci get tor.global.zone                                         2>/dev/null)
+	client_zone=$( uci get tor.client.zone                                         2>/dev/null)
 	trans_port=$( uci get tor.global.trans_port                             2>/dev/null)
 	dns_port=$( uci get tor.global.dns_port                                 2>/dev/null)
 	control_port=$( uci get tor.global.control_port                         2>/dev/null)
@@ -49,8 +52,8 @@ start()
 
 
 
-	if [ -z "$zone" ] ; then
-		zone="lan"
+	if [ -z "$client_zone" ] ; then
+		client_zone="lan"
 	fi
 	if [ -z "$trans_port" ] ; then
 		trans_port=9040
@@ -61,16 +64,44 @@ start()
 	if [ -z "$control_port" ] ; then
 		control_port=9051
 	fi
-
-
-	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1"
-	listen_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null)
-	if [ -n "$listen_ip" ] ; then
+	
+	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+	client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
+	if [ -n "$client_listen_ip" ] ; then
 		OPTIONS="$OPTIONS --TransListenAddress '$listen_ip' --DNSListenAddress '$listen_ip' "
 	fi
-	
 
-	eval $BIN $OPTIONS
+
+	relay_options=""
+	if [ "$relay_enabled" != "0" ] && [ -n "$relay_enabled" ] ; then
+		
+		relay_port=$(uci get tor.relay.relay_port)
+		max_bw_rate_kb=$(uci get tor.relay.max_bw_rate_kb)
+		max_bw_burst_kb=$(uci get tor.relay.max_bw_burst_kb)
+		relay_zone=$(uci get tor.relay.zone)
+		
+		#Wait for up to 5 seconds for the relay_if to indicate it is up.
+		wait_sec=5
+		while [ -z "$(uci -P /var/state get network.$relay_zone.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
+			sleep 1
+			wait_sec=$(($wait_sec - 1))
+		done
+		relay_ip=$( uci -P /var/state get network.$relay_zone.ipaddr 2>/dev/null ) 
+		
+		
+		if [ -n "$relay_ip" ] ; then
+			relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
+			if [ "$relay_enabled" = "1" ] ; then
+				relay_options=" --BridgeRelay 1 $relay_options "
+			fi
+			$BIN $OPTIONS $relay_options  --RelayBandwidthRate "$max_bw_rate_kb KB" --RelayBandwidthBurst "$max_bw_burst_kb KB" --MaxAdvertisedBandwidth "$max_bw_rate_kb KB" --Exitpolicy 'reject *:*'
+		fi
+	fi
+	if [ -z "$relay_options" ] ; then
+		$BIN $OPTIONS --ClientOnly 1
+	fi
+
+
 	if [ "$BOOT" = "0" ] ; then
 		sh /etc/tor.firewall
 	fi	
