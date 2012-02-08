@@ -10,7 +10,7 @@ RUN_USER=root
 RUN_GROUP=root
 BOOT="0"
 
-OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --Log 'warn syslog' --SocksPort 0 "
+OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --SocksPort 0 "
 
 boot()
 {
@@ -35,12 +35,13 @@ start()
 	[ -d $RUN_D ] || mkdir -p $RUN_D
 	[ -f $PID_F ] || ( touch $PID_F && chown $RUN_USER:$RUN_GROUP $PID_F )
 	
-	client_zone=$( uci get tor.client.zone                                         2>/dev/null)
+	client_zone=$( uci get tor.client.zone                                  2>/dev/null)
 	trans_port=$( uci get tor.global.trans_port                             2>/dev/null)
 	dns_port=$( uci get tor.global.dns_port                                 2>/dev/null)
 	control_port=$( uci get tor.global.control_port                         2>/dev/null)
-	hidden_service_subnet=$( uci get tor.global.hidden_service_subnet       2>/dev/null )
-	hidden_service_mask_bits=$( uci get tor.global.hidden_service_mask_bits 2>/dev/null )
+	hidden_service_subnet=$( uci get tor.global.hidden_service_subnet       2>/dev/null)
+	hidden_service_mask_bits=$( uci get tor.global.hidden_service_mask_bits 2>/dev/null)
+	loglevel=$( uci get tor.global.loglevel                                 2>/dev/null)
 	if [ -z "$hidden_service_subnet" ] || [ -z "$hidden_service_mask_bits" ] ; then
 		hidden_service_subnet="10.192.0.0"
 		hidden_service_mask_bits="12"
@@ -66,7 +67,7 @@ start()
 		control_port=9051
 	fi
 	
-	OPTIONS="$OPTIONS --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 	client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
 	if [ -n "$client_listen_ip" ] ; then
 		OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
