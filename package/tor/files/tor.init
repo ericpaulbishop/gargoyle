@@ -81,6 +81,8 @@ start()
 		max_bw_rate_kb=$(uci get tor.relay.max_bw_rate_kb)
 		max_bw_burst_kb=$(uci get tor.relay.max_bw_burst_kb)
 		relay_zone=$(uci get tor.relay.zone)
+		relay_nickname=$( uci get tor.relay.relay_nickname )
+		relay_contact=$( uci get tor.relay.relay_contact )
 		
 		#Wait for up to 5 seconds for the relay_if to indicate it is up.
 		wait_sec=5
@@ -96,6 +98,13 @@ start()
 			if [ "$relay_enabled" = "1" ] ; then
 				relay_options=" --BridgeRelay 1 $relay_options "
 			fi
+			if [ "$relay_nickname" ] ; then
+				relay_options=" $relay_options --Nickname '$relay_nickname' "
+			fi
+			if [ "$relay_contact" ] ; then
+				relay_options=" $relay_options --ContactInfo '$relay_contact' "
+			fi
+
 			eval "$BIN $OPTIONS $relay_options  --RelayBandwidthRate '$max_bw_rate_kb KB' --RelayBandwidthBurst '$max_bw_burst_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*'"
 		fi
 	fi
