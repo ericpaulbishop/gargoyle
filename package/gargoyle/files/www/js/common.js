@@ -1608,7 +1608,7 @@ function validateNumeric(num)
 
 function validatePort(port)
 {
-	return validateNumericRange(val, 1, 65535)
+	return validateNumericRange(port, 1, 65535)
 }
 
 function validateNumericRange(num, min, max)

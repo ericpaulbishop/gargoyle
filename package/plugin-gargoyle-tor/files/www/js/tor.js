@@ -41,7 +41,7 @@ function saveChanges()
 		setControlsEnabled(false, true);
 		var uci = uciOriginal.clone();
 		var torClientMode = getSelectedValue("tor_client_mode")
-		var torRelayMode  = getSelectecValue("tor_relay_mode")
+		var torRelayMode  = getSelectedValue("tor_relay_mode")
 		uci.set('tor', 'global', 'enabled', (torClientMode=="0" && tor_relay_mode == "0" ? "0" : "1") )
 		uci.set('tor', 'client', 'client_mode', torClientMode)
 		uci.set('tor', 'relay',  'relay_mode',  torRelayMode)
