@@ -51,8 +51,8 @@
 		<div id='tor_relay_mode_container'>
 			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Relay:</label>
 			<select class='rightcolumn' id="tor_relay_mode" onchange='setTorVisibility()' >
-				<option value="2">Enabled, Configured As A Bridge</option>
-				<option value="1">Enabled, Configured As a Relay</option>
+				<option value="1">Enabled, Configured As A Bridge</option>
+				<option value="2">Enabled, Configured As a Relay</option>
 				<option value="0">Disabled</option>
 			</select>
 			<br/>

@@ -165,6 +165,7 @@ function resetData()
 
 
 	//relay
+	setSelectedValue("tor_relay_mode", torRelayMode)
 	var rvars = [
 			["relay_port",     "tor_relay_port"], 
 			["max_bw_rate_kb", "tor_relay_max_bw"],
