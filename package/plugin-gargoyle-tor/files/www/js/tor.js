@@ -41,8 +41,10 @@ function saveChanges()
 		setControlsEnabled(false, true);
 		var uci = uciOriginal.clone();
 		var torClientMode = getSelectedValue("tor_client_mode")
-		uci.set('tor', 'global', 'enabled', (torClientMode=="0" ? "0" : "1") )
+		var torRelayMode  = getSelectecValue("tor_relay_mode")
+		uci.set('tor', 'global', 'enabled', (torClientMode=="0" && tor_relay_mode == "0" ? "0" : "1") )
 		uci.set('tor', 'client', 'client_mode', torClientMode)
+		uci set('tor', 'relay',  'relay_mode',  torRelayMode)
 		if(torClientMode != "0")
 		{
 			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
@@ -50,6 +52,22 @@ function saveChanges()
 			if(torClientMode != "3")
 			{
 				uci.set('tor', 'client', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
+			}
+		}
+		if(torRelayMode != "0")
+		{
+			var rvars = [
+				["relay_port",     "tor_relay_port"], 
+				["max_bw_rate_kb", "tor_relay_max_bw"],
+				["relay_nickname", "tor_relay_nickname"],
+				["relay_contact",  "tor_relay_contact"]
+			];
+			var rvIndex=0
+			for(rvIndex=0; rvIndex < rvars.length; rvIndex++)
+			{
+				var setVal =  document.getElementById(  rvars[rvIndex][1] ).value
+				setVal.replace(/[\r\n]+/, "") //make sure contact data contains no newlines
+				uci.set('tor', 'relay', rvars[rvIndex][0], setVal )
 			}
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
@@ -71,8 +89,8 @@ function saveChanges()
 
 function proofreadAll()
 {
-	var inputIds    = ["tor_hidden_subnet", "tor_hidden_mask"]
-	var functions   = [ validateIP, validateNetMask]
+	var inputIds    = ["tor_hidden_subnet", "tor_hidden_mask", 'tor_relay_port', 'tor_relay_max_bw' ]
+	var functions   = [ validateIP, validateNetMask, validatePort, validateNumeric ]
 	var labelIds    = []
 	var returnCodes = []
 	var visIds      = []
@@ -121,8 +139,13 @@ function resetData()
 	var en = uciOriginal.get("tor", "global", "enabled")
 	var torEnabled    = uciOriginal.get("tor", "global", "enabled")
 	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_mode")
+	var torRelayMode  = torEnabled == "0" ? "0" : uciOriginal.get("tor", "relay", "relay_mode")
 	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
-	var blockOtherProtos = uciOriginal.get("tor", "global", "block_unsupported_proto") == "1" ? "1" : "0"
+	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2") ? "0" : torRelayMode
+	
+	
+	//client / global
+	var blockOtherProtos = uciOriginal.get("tor", "client", "block_unsupported_proto") == "1" ? "1" : "0"
 	setSelectedValue("tor_client_mode", torClientMode)
 	setSelectedValue("tor_other_proto", blockOtherProtos)
 
@@ -138,14 +161,32 @@ function resetData()
 	document.getElementById("tor_hidden_subnet").value = hiddenSubnet
 	document.getElementById("tor_hidden_mask").value = hiddenMask
 
+
+	//relay
+	var rvars = [
+			["relay_port",     "tor_relay_port"], 
+			["max_bw_rate_kb", "tor_relay_max_bw"],
+			["relay_nickname", "tor_relay_nickname"],
+			["relay_contact",  "tor_relay_contact"]
+			];
+	var rvIndex=0
+	for(rvIndex=0; rvIndex < rvars.length; rvIndex++)
+	{
+
+		var val = uciOriginal.get("tor", "relay", rvars[rvIndex][0])
+		document.getElementById(  rvars[rvIndex][1] ).value = val
+	}
+
+
 	setTorVisibility()
 }
 
 function setTorVisibility()
 {
-	var enabledType =  getSelectedValue("tor_client_mode")
-	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], enabledType == "0" ? [0,0] : [1,1] )
-	setVisibility( [ "tor_other_proto_container" ], (enabledType == "0" || enabledType == "3") ? [0] : [1] )
+	//client visibility
+	var clientMode =  getSelectedValue("tor_client_mode")
+	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], clientMode == "0" ? [0,0] : [1,1] )
+	setVisibility( [ "tor_other_proto_container" ], (clientMode == "0" || clientMode == "3") ? [0] : [1] )
 
 	var modeDescriptions = []
 	modeDescriptions["0"] = ""
@@ -153,7 +194,12 @@ function setTorVisibility()
 	modeDescriptions["2"] = "Users can choose whether traffic will be anonymized"
 	modeDescriptions["3"] = "Tor hidden services can be accessed, but no other traffic is anonymized"
 
-	setChildText("mode_description", modeDescriptions[enabledType])
+	setChildText("mode_description", modeDescriptions[clientMode])
+
+
+	//relay visibility
+	var relayMode = getSelectedValue("tor_relay_mode")
+	setVisibility( ["tor_relay_port", "tor_relay_max_bw", "tor_relay_nickname", "tor_relay_contact"], (relayMode == "1" || relayMode == "2" ) ? [1,1,1,1] : [0,0,0,0])
 
 }
 

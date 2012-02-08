@@ -60,6 +60,10 @@
 			<br/>
 		</div>
 		
+		<div id='tor_relay_port_container'>
+			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Relay Port:</label>
+			<input type="text" class="rightcolumn" id='tor_relay_port' onkeyup='proofreadPort(this)' />
+		</div>
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Banwidth:</label>
@@ -68,8 +72,8 @@
 		</div>
 
 		<div id='tor_relay_nickname_container'>
-			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname:</label>
-			<input type="text" class="rightcolumn" id='tor_relay_nickname' onkeyup='proofreadLength(this,1,9999)' />
+		<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname (optional):</label>
+			<input type="text" class="rightcolumn" id='tor_relay_nickname' />
 		</div>
 
 		<div id='tor_relay_contact_container'>
