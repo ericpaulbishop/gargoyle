@@ -60,22 +60,23 @@
 			<br/>
 		</div>
 		
+
+		<div id='tor_relay_max_bw_container'>
+			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Banwidth:</label>
+			<input type="text" class="rightcolumn" id='tor_relay_max_bw' onkeyup='proofreadNumeric(this)' />
+			<em>&nbsp;&nbsp;KBytes/s</em>
+		</div>
+
 		<div id='tor_relay_nickname_container'>
 			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname:</label>
 			<input type="text" class="rightcolumn" id='tor_relay_nickname' onkeyup='proofreadLength(this,1,9999)' />
 		</div>
 
 		<div id='tor_relay_contact_container'>
-		<label  class='wideleftcolumn' for='tor_relay_contact' id='tor_relay_contact_label'>Contact email / PGP PubKey (optional):</label>
+			<label  class='wideleftcolumn' for='tor_relay_contact' id='tor_relay_contact_label'>Contact email / PGP PubKey (optional):</label>
 			<textarea class="rightcolumn" id='tor_relay_contact' ></textarea>
 		</div>
 
-
-		<div id='tor_relay_max_bw_container'>
-			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Bandandwidth:</label>
-			<input type="text" class="rightcolumn" id='tor_relay_max_bw' onkeyup='proofreadNumeric(this)' />
-			<em>&nbsp;&nbsp;KBytes/s</em>
-		</div>
 
 	
 	</fieldset>
