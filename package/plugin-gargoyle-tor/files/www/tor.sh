@@ -48,9 +48,9 @@
 	<fieldset>
 		<legend class="sectionheader">Tor Relay</legend>
 		
-		<div id='tor_client_mode_container'>
+		<div id='tor_relay_mode_container'>
 			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Relay:</label>
-			<select class='rightcolumn' id="tor_client_mode" onchange='setTorVisibility()' >
+			<select class='rightcolumn' id="tor_relay_mode" onchange='setTorVisibility()' >
 				<option value="2">Enabled, Configured As A Bridge</option>
 				<option value="1">Enabled, Configured As a Relay</option>
 				<option value="0">Disabled</option>
@@ -62,17 +62,16 @@
 		
 		<div id='tor_relay_port_container'>
 			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Relay Port:</label>
-			<input type="text" class="rightcolumn" id='tor_relay_port' onkeyup='proofreadPort(this)' />
+			<input type="text" class="rightcolumn" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' />
 		</div>
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Banwidth:</label>
-			<input type="text" class="rightcolumn" id='tor_relay_max_bw' onkeyup='proofreadNumeric(this)' />
-			<em>&nbsp;&nbsp;KBytes/s</em>
+			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;KBytes/s</em></span>
 		</div>
 
 		<div id='tor_relay_nickname_container'>
-		<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname (optional):</label>
+			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname (optional):</label>
 			<input type="text" class="rightcolumn" id='tor_relay_nickname' />
 		</div>
 

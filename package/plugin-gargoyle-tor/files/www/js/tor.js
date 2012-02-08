@@ -44,7 +44,7 @@ function saveChanges()
 		var torRelayMode  = getSelectecValue("tor_relay_mode")
 		uci.set('tor', 'global', 'enabled', (torClientMode=="0" && tor_relay_mode == "0" ? "0" : "1") )
 		uci.set('tor', 'client', 'client_mode', torClientMode)
-		uci set('tor', 'relay',  'relay_mode',  torRelayMode)
+		uci.set('tor', 'relay',  'relay_mode',  torRelayMode)
 		if(torClientMode != "0")
 		{
 			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
@@ -69,6 +69,8 @@ function saveChanges()
 				setVal.replace(/[\r\n]+/, "") //make sure contact data contains no newlines
 				uci.set('tor', 'relay', rvars[rvIndex][0], setVal )
 			}
+			uci.set('tor', 'relay', 'max_bw_burst_kb', parseInt(document.getElementById('max_bw_rate_kb'))*2 )
+
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -199,7 +201,7 @@ function setTorVisibility()
 
 	//relay visibility
 	var relayMode = getSelectedValue("tor_relay_mode")
-	setVisibility( ["tor_relay_port", "tor_relay_max_bw", "tor_relay_nickname", "tor_relay_contact"], (relayMode == "1" || relayMode == "2" ) ? [1,1,1,1] : [0,0,0,0])
+	setVisibility( ["tor_relay_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container"], (relayMode == "1" || relayMode == "2" ) ? [1,1,1,1] : [0,0,0,0])
 
 }
 
