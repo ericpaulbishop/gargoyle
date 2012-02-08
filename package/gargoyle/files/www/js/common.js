@@ -2230,9 +2230,6 @@ function arrToHash(arr)
 }
 
 
-
-
-
 function confirmPassword(confirmText, validatedFunc, invalidFunc)
 {
 	confirmText = confirmText == null ? "Confirm Password:" : confirmText;

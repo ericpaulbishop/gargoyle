@@ -120,7 +120,7 @@ function resetData()
 {
 	var en = uciOriginal.get("tor", "global", "enabled")
 	var torEnabled    = uciOriginal.get("tor", "global", "enabled")
-	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_enabled")
+	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_mode")
 	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
 	var blockOtherProtos = uciOriginal.get("tor", "global", "block_unsupported_proto") == "1" ? "1" : "0"
 	setSelectedValue("tor_client_mode", torClientMode)

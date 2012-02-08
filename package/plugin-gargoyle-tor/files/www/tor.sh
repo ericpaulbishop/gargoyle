@@ -26,8 +26,6 @@
 			<br/>
 		</div>
 
-
-
 		<div id='tor_other_proto_container'>
 			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>
 			<select class='rightcolumn' id="tor_other_proto">
@@ -44,10 +42,46 @@
 			<label  class='wideleftcolumn' for='tor_hidden_mask' id='tor_hidden_mask_label'>Tor Hidden Service Subnet Mask:</label>
 			<input type="text" class="rightcolumn" id='tor_hidden_mask' onkeyup='proofreadMask(this)'/>
 		</div>
+	
+	</fieldset>
 
+	<fieldset>
+		<legend class="sectionheader">Tor Relay</legend>
+		
+		<div id='tor_client_mode_container'>
+			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Relay:</label>
+			<select class='rightcolumn' id="tor_client_mode" onchange='setTorVisibility()' >
+				<option value="2">Enabled, Configured As A Bridge</option>
+				<option value="1">Enabled, Configured As a Relay</option>
+				<option value="0">Disabled</option>
+			</select>
+			<br/>
+			<em><span class="farrightcolumnonly" id="mode_description"></span></em>
+			<br/>
+		</div>
+		
+		<div id='tor_relay_nickname_container'>
+			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname:</label>
+			<input type="text" class="rightcolumn" id='tor_relay_nickname' onkeyup='proofreadLength(this,1,9999)' />
+		</div>
+
+		<div id='tor_relay_contact_container'>
+		<label  class='wideleftcolumn' for='tor_relay_contact' id='tor_relay_contact_label'>Contact email / PGP PubKey (optional):</label>
+			<textarea class="rightcolumn" id='tor_relay_contact' ></textarea>
+		</div>
+
+
+		<div id='tor_relay_max_bw_container'>
+			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Bandandwidth:</label>
+			<input type="text" class="rightcolumn" id='tor_relay_max_bw' onkeyup='proofreadNumeric(this)' />
+			<em>&nbsp;&nbsp;KBytes/s</em>
+		</div>
 
 	
 	</fieldset>
+
+
+
 
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
