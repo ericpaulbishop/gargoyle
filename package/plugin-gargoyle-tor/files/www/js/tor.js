@@ -40,15 +40,16 @@ function saveChanges()
 	{
 		setControlsEnabled(false, true);
 		var uci = uciOriginal.clone();
-		var torEnabledType = getSelectedValue("tor_enabled")
-		uci.set('tor', 'global', 'enabled', torEnabledType)
-		if(torEnabledType != "0")
+		var torClientMode = getSelectedValue("tor_client_mode")
+		uci.set('tor', 'global', 'enabled', (torClientMode=="0" ? "0" : "1") )
+		uci.set('tor', 'client', 'client_mode', torClientMode)
+		if(torClientMode != "0")
 		{
 			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
 			uci.set('tor', 'global', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
-			if(torEnabledType != "3")
+			if(torClientMode != "3")
 			{
-				uci.set('tor', 'global', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
+				uci.set('tor', 'client', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
 			}
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
@@ -117,11 +118,12 @@ function maskToBits(mask)
 
 function resetData()
 {
-	var en = uciOriginal.get("tor", "global", "enabled") 
-	var torEnabled = uciOriginal.get("tor", "global", "enabled")
-	torEnabled = (torEnabled != "1" && torEnabled != "2" && torEnabled != "3") ? "0" : torEnabled
+	var en = uciOriginal.get("tor", "global", "enabled")
+	var torEnabled    = uciOriginal.get("tor", "global", "enabled")
+	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_enabled")
+	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
 	var blockOtherProtos = uciOriginal.get("tor", "global", "block_unsupported_proto") == "1" ? "1" : "0"
-	setSelectedValue("tor_enabled", torEnabled)
+	setSelectedValue("tor_client_mode", torClientMode)
 	setSelectedValue("tor_other_proto", blockOtherProtos)
 
 	var hiddenSubnet = uciOriginal.get("tor", "global", "hidden_service_subnet")
@@ -141,7 +143,7 @@ function resetData()
 
 function setTorVisibility()
 {
-	var enabledType =  getSelectedValue("tor_enabled")
+	var enabledType =  getSelectedValue("tor_client_mode")
 	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], enabledType == "0" ? [0,0] : [1,1] )
 	setVisibility( [ "tor_other_proto_container" ], (enabledType == "0" || enabledType == "3") ? [0] : [1] )
 

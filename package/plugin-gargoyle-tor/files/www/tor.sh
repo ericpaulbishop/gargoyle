@@ -13,9 +13,9 @@
 	<fieldset>
 		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
-		<div id='tor_enabled_container'>
-			<label  class='wideleftcolumn' for='tor_enabled' id='tor_enabled_label' >Tor Client:</label>
-			<select class='rightcolumn' id="tor_enabled" onchange='setTorVisibility()' >
+		<div id='tor_client_mode_container'>
+			<label  class='wideleftcolumn' for='tor_client_mode' id='tor_client_mode_label' >Tor Client:</label>
+			<select class='rightcolumn' id="tor_client_mode" onchange='setTorVisibility()' >
 				<option value="2">Enabled, Toggled By Each Host</option>
 				<option value="1">Enabled For All Hosts</option>
 				<option value="3">Hidden Service Access Only</option>

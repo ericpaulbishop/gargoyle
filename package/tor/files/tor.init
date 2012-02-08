@@ -49,11 +49,11 @@ start()
 		uci set tor.global.hidden_service_mask_bits="$hidden_service_mask_bits"
 		uci commit
 	fi
-
-
-
-
-
+	
+	
+	
+	
+	
 	if [ -z "$client_zone" ] ; then
 		client_zone="lan"
 	fi
