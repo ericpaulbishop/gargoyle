@@ -180,7 +180,7 @@
 
 		<div id="qos_up_2" class="indent">
 			<span id='qos_up_2_txt'>
-				<p>Each service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
+				<p>Each upload service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.</p>
 
 				<p><em>Percent bandwidth at capacity</em> is the percentage of the total available bandwidth that should be allocated to this class
 				when all available bandwidth is being used.  If unused bandwidth is available, more can (and will) be allocated.
@@ -195,10 +195,12 @@
 				<p><em>Maximum bandwidth</em> specifies an absolute maximum amount of bandwidth this class will be allocated in kbit/s.  
 				Even if unused bandwidth iavailable, this service class will never be permitted to use more than this amount of bandwidth.</p>
 
-				<p><em>Total Upload Bandwidth</em> should be set to around 95% of your available upload bandwidth.  
+				<p><em>Total Upload Bandwidth</em> should be set to around 98% of your available upload bandwidth.  
 				Entering a number which is too high will result in QoS not meeting its class requirements.  
 				Entering a number which is too low will needlessly penalize your upload speed.
-				Note that bandwidth is specified in kilobit/s.  There are 8 kilobits per kilobyte.</p>
+				If you are using a PPPoE connection check your modem's web page and use your uplink line speed as your upload bandwidth.  
+				Other types of connections should use a speed test program (with QoS off) to determine available upload bandwidth.
+				Note that bandwidth is specified in kbps.  There are 8 kilobits per kilobyte.</p>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_up_2")'  id="qos_up_2_ref" href="#qos_up_2">Hide Text</a>
 		</div>

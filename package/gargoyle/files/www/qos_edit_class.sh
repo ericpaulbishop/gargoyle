@@ -23,7 +23,6 @@
 		</span>
 	</div>
 	
-
 	<div class='nocolumn'>Bandwidth Minimum:</div>
 	<div class='indent'>
 	<div class='nocolumn'>
@@ -42,6 +41,7 @@
 		</div>
 	</div>
 
+	<br>
 	<div class='nocolumn'>Bandwidth Maximum:</div>
 	<div class='indent'>
 		<div class='nocolumn'>
@@ -61,11 +61,26 @@
 	</div>
 
 
+	<div id='rttdiv'>
+	<br>
+	<div class='nocolumn'>Minimize Round Trip Times (RTT):</div>
+	<div class='indent'>
+		<div class='nocolumn'>
+			<input type='radio' name="rtt_radio" id='rtt_radio1'/>
+			<label for='max_radio1'>Minimize RTT (ping times) when active</label>
+		</div>
+		<div>
+			<span class='leftcolumn'>
+				<input type='radio' name="rtt_radio" id="rtt_radio2" />
+				<label for='max_radio2'>Optimize WAN utilization</label>
+			</span>
+		</div>
+	</div></div>
+
+
 
 </fieldset>
 <div id="bottom_button_container"></div>
-
-
 <?
 	echo '</body>'
 	echo '</html>'
