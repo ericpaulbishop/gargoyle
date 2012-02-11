@@ -406,9 +406,8 @@ initialize_qos()
 			fi
 
 			#tbw is the Delay x Bandwidth product in bytes per second.  We do not actually know the packet
-			#delay so we make an estimate of 200ms here and hope for the best.  Experimentation shows that
-			#we only 1/5 of the delay bandwidth product to maintain good utilization.
-			tbw=$(($max_bandwidth*200/8/5));
+			#delay so we make an estimate of 150ms here and hope for the best.  
+			tbw=$(($max_bandwidth*150/8));
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
 			fi
@@ -416,11 +415,12 @@ initialize_qos()
 			#Information on the esfq qdisc is a little hard to come by.  I used http://fatooh.org/esfq-2.6/current/README and
 			#studied the source code.  ESQF includes the hash 'ctnatchg' key which allows us to hash on the local IP address.
 			#The means that when traffic from two or more local IP addresses end up in the same class the qdisc will share 
-			#bandwidth equally between them.
+			#bandwidth equally between them.  Upload packets tend to be much smaller in size.  We will use 500 bytes as an average
+			#here.
 			$echo_on
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev $qos_interface parent 1:$next_class_index esfq limit $(($tbw/1000)) $esfq_depth divisor 8 hash ctnatchg  
-			#tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
+			tc qdisc add dev $qos_interface parent 1:$next_class_index esfq limit $(($tbw/500)) $esfq_depth divisor 8 hash ctnatchg  
+			#tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 500 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			$echo_off
 
@@ -526,7 +526,7 @@ initialize_qos()
 			m2=$(( 10 * $(echo $dclass_def | awk ' {print $1}' ) ))
 
 			#The Gargoyle ACC switches from optimum WAN utilization mode to minimum RTT mode
-			#when it detects a download class has become active that includes a two part service curve.
+			#when it detects a class has become active that includes a two part service curve.
 			#So to trigger this behaviour we create two parts curves when minRTT is set. 
             
 			minRTT=$( echo $dclass_def | awk ' {print $4}' )
@@ -556,9 +556,9 @@ initialize_qos()
 				max_bandwidth="$total_download_bandwidth"
 			fi
 
-			tbw=$(($max_bandwidth*200/8/5));
-			if [ "$tbw" -lt 3000 ] ; then
-				tbw=3000
+			tbw=$(($max_bandwidth*150/8));
+			if [ "$tbw" -lt 5000 ] ; then
+				tbw=5000
 			fi
 
 			$echo_on
