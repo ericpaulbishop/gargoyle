@@ -117,6 +117,7 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 	fi
 
 	if [ -n "$relay_if" ] ; then
+
 		iptables -t filter -A tor_relay_down_bw -p tcp --dport $relay_port -m bandwidth --id "tor-relay-down" --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
 		iptables -t mangle -A tor_relay_up_bw   -p tcp --sport $relay_port -m bandwidth --id "tor-relay-up"   --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
 
