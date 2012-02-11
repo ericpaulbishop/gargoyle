@@ -3,6 +3,8 @@
 delete_chain_from_table nat    tor_client
 delete_chain_from_table filter tor_client
 delete_chain_from_table filter tor_relay
+delete_chain_from_table filter tor_relay_down_bw
+delete_chain_from_table mangle tor_relay_up_bw
 
 enabled=$( uci get tor.global.enabled 2>/dev/null )
 client_mode=$( uci get tor.client.client_mode 2>/dev/null )
@@ -96,4 +98,31 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 	iptables -t filter -N tor_relay
 	iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
 	iptables -t filter -I input_${relay_zone} -j tor_relay
+
+
+	iptables -t filter -N tor_relay_down_bw
+	iptables -t mangle -N tor_relay_up_bw
+
+	reset_interval=$((60*15))
+	num_intervals=$((24*15))
+	
+	wait_sec=5
+	while [ -z "$(uci -P /var/state get network.$relay_zone.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
+		sleep 1
+		wait_sec=$(($wait_sec - 1))
+	done
+	relay_if=$(uci -P /var/state get network.$relay_zone.ifname 2>/dev/null)
+	if [ -z "$wan_if" ] ; then
+		relay_if=$(uci -P /var/state get network.$relay_zone.device 2>/dev/null)
+	fi
+
+	if [ -n "$relay_if" ] ; then
+		iptables -t filter -A tor_relay_down_bw -p tcp --dport $relay_port -m bandwidth --id "tor-relay-down" --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
+		iptables -t mangle -A tor_relay_up_bw   -p tcp --sport $relay_port -m bandwidth --id "tor-relay-up"   --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
+
+		iptables -t filter -I INPUT        -i $relay_if -j tor_relay_down_bw
+		iptables -t filter -I FORWARD      -i $relay_if -j tor_relay_down_bw
+		iptables -t mangle -A POSTROUTING  -o $relay_if -j tor_relay_up_bw
+	fi
+
 fi
