@@ -96,8 +96,13 @@ fi
 if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 	relay_zone=$(uci get tor.relay.zone)
 	relay_port=$(uci get tor.relay.relay_port)
+	obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
+
 	iptables -t filter -N tor_relay
 	iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
+	if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
+		iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
+	fi
 	iptables -t filter -I input_${relay_zone} -j tor_relay
 
 
@@ -120,12 +125,57 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 	
 
 	if [ -n "$relay_if" ] ; then
-		iptables -t filter -A tor_relay_down_bw -p tcp --dport $relay_port -m bandwidth --id "tor-relay-down" --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
-		iptables -t mangle -A tor_relay_up_bw   -p tcp --sport $relay_port -m bandwidth --id "tor-relay-up"   --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
 
-		iptables -t filter -I INPUT        -i $relay_if -j tor_relay_down_bw
-		iptables -t filter -I FORWARD      -i $relay_if -j tor_relay_down_bw
-		iptables -t mangle -A POSTROUTING  -o $relay_if -j tor_relay_up_bw
+
+		# add tor bandwidth monitoring rules
+
+		minute_s=60
+		hour_s=3600
+		day_s=86400
+	
+		total1_interval=2
+		total1_num_intervals=449
+		total1_reset_time=2
+	
+		total2_interval="minute"
+		total2_num_intervals=359
+	
+		total3_interval=$((3*$minute_s))
+		total3_num_intervals=479
+		total3_reset_time=$((3*$minute_s))
+	
+		total4_interval=$((2*$hour_s))
+		total4_num_intervals=359
+		total4_reset_time=$((2*$hour_s))
+		
+		total5_interval="day"
+		total5_num_intervals=365
+
+
+
+		mon_nums="1 2 3 4 5"
+		for n in $mon_nums ; do
+			total_interval=$(eval "echo \$total"$n"_interval")
+			total_num_intervals=$(eval "echo \$total"$n"_num_intervals")
+			total_reset_time=$(eval "echo \$total"$n"_reset_time")
+			if [ -n "$total_reset_time" ] ; then total_reset_time="--reset_time $total_reset_time" ; fi
+
+			iptables -t filter -A tor_relay_down_bw  -m bandwidth --id "tor"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+			iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor"$n"-upload-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+
+		done
+
+		iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $relay_port -j tor_relay_down_bw
+		iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $relay_port -j tor_relay_down_bw
+		iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $relay_port -j tor_relay_up_bw
+		iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
+		
+		if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
+			iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $obfsproxy_port -j tor_relay_down_bw
+			iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $obfsproxy_port -j tor_relay_down_bw	
+			iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $obfsproxy_port -j tor_relay_up_bw
+			iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
+		fi
 	fi
 
 fi
