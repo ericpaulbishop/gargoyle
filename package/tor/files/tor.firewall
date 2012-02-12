@@ -6,6 +6,7 @@ delete_chain_from_table filter tor_relay
 delete_chain_from_table filter tor_relay_down_bw
 delete_chain_from_table mangle tor_relay_up_bw
 
+
 enabled=$( uci get tor.global.enabled 2>/dev/null )
 client_mode=$( uci get tor.client.client_mode 2>/dev/null )
 relay_mode=$( uci get tor.relay.relay_mode 2>/dev/null )
@@ -13,7 +14,7 @@ relay_mode=$( uci get tor.relay.relay_mode 2>/dev/null )
 if [ "$enabled" != "0" ] && [ "$client_mode" != "0" ] ; then
 	
 
-	enabled_ip_file=$( uci get tor.global.enabled_ip_file 2>/dev/null)
+	enabled_ip_file=$( uci get tor.client.enabled_ip_file 2>/dev/null)
 	dns_port=$( uci get tor.global.dns_port 2>/dev/null )
 	trans_port=$( uci get tor.global.trans_port 2>/dev/null )
 	zone=$( uci get tor.client.zone 2>/dev/null )
@@ -111,13 +112,14 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 		sleep 1
 		wait_sec=$(($wait_sec - 1))
 	done
+
 	relay_if=$(uci -P /var/state get network.$relay_zone.ifname 2>/dev/null)
-	if [ -z "$wan_if" ] ; then
+	if [ -z "$relay_if" ] ; then
 		relay_if=$(uci -P /var/state get network.$relay_zone.device 2>/dev/null)
 	fi
+	
 
 	if [ -n "$relay_if" ] ; then
-
 		iptables -t filter -A tor_relay_down_bw -p tcp --dport $relay_port -m bandwidth --id "tor-relay-down" --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
 		iptables -t mangle -A tor_relay_up_bw   -p tcp --sport $relay_port -m bandwidth --id "tor-relay-up"   --reset_interval "$reset_interval" --intervals_to_save "$num_intervals"
 

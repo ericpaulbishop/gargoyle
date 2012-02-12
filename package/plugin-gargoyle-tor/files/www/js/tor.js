@@ -42,6 +42,7 @@ function saveChanges()
 		var uci = uciOriginal.clone();
 		var torClientMode = getSelectedValue("tor_client_mode")
 		var torRelayMode  = getSelectedValue("tor_relay_mode")
+		torRelayMode = torRelayMode == "3" ? "1" : torRelayMode
 		uci.set('tor', 'global', 'enabled', (torClientMode=="0" && torRelayMode == "0" ? "0" : "1") )
 		uci.set('tor', 'client', 'client_mode', torClientMode)
 		uci.set('tor', 'relay',  'relay_mode',  torRelayMode)
@@ -58,18 +59,27 @@ function saveChanges()
 		{
 			var rvars = [
 				["relay_port",     "tor_relay_port"], 
+				["obfsproxy_port", "tor_obfsproxy_port"],
 				["max_bw_rate_kb", "tor_relay_max_bw"],
+				["relay_contact",  "tor_relay_contact"],
 				["relay_nickname", "tor_relay_nickname"],
-				["relay_contact",  "tor_relay_contact"]
+
 			];
 			var rvIndex=0
 			for(rvIndex=0; rvIndex < rvars.length; rvIndex++)
 			{
-				var setVal =  document.getElementById(  rvars[rvIndex][1] ).value
+				var setEl  = document.getElementById(  rvars[rvIndex][1] )
+				var setVal = document.getElementById(  rvars[rvIndex][1] ).value
 				setVal.replace(/[\r\n]+/, "") //make sure contact data contains no newlines
 				uci.set('tor', 'relay', rvars[rvIndex][0], setVal )
 			}
-			uci.set('tor', 'relay', 'max_bw_burst_kb', parseInt(document.getElementById('max_bw_rate_kb'))*2 )
+			if( !getSelectedText("tor_relay_mode").match(/proxy/) )
+			{
+				uci.set('tor', 'relay', 'obfsproxy_port', "0")
+			}
+
+			uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
+			alert( uci.get('tor', 'relay', 'max_bw_burst_kb') )
 
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
@@ -142,8 +152,12 @@ function resetData()
 	var torEnabled    = uciOriginal.get("tor", "global", "enabled")
 	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_mode")
 	var torRelayMode  = torEnabled == "0" ? "0" : uciOriginal.get("tor", "relay", "relay_mode")
+	var opPort = uciOriginal.get("tor", "relay", "obfsproxy_port")
+
 	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
-	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2") ? "0" : torRelayMode
+	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2" ) ? "0" : torRelayMode
+	torRelayMode  = torRelayMode == "1" && opPort != "0" && opPort != "" ? "3" : "1"
+
 	
 	
 	//client / global
@@ -168,6 +182,7 @@ function resetData()
 	setSelectedValue("tor_relay_mode", torRelayMode)
 	var rvars = [
 			["relay_port",     "tor_relay_port"], 
+			["obfsproxy_port", "tor_obfsproxy_port"],
 			["max_bw_rate_kb", "tor_relay_max_bw"],
 			["relay_nickname", "tor_relay_nickname"],
 			["relay_contact",  "tor_relay_contact"]
@@ -177,9 +192,9 @@ function resetData()
 	{
 
 		var val = uciOriginal.get("tor", "relay", rvars[rvIndex][0])
+		val = (val == "" && (rvars[rvIndex][0]).match(/obfsproxy/)) ? "0" : val
 		document.getElementById(  rvars[rvIndex][1] ).value = val
 	}
-
 
 	setTorVisibility()
 }
@@ -202,7 +217,8 @@ function setTorVisibility()
 
 	//relay visibility
 	var relayMode = getSelectedValue("tor_relay_mode")
-	setVisibility( ["tor_relay_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container"], (relayMode == "1" || relayMode == "2" ) ? [1,1,1,1] : [0,0,0,0])
+	var op        = relayMode == "3" ? 1 : 0
+	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,1,1] : [0,0,0,0,0])
 
 }
 

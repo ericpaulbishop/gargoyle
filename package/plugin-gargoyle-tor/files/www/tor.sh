@@ -51,8 +51,9 @@
 		<div id='tor_relay_mode_container'>
 			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Relay:</label>
 			<select class='rightcolumn' id="tor_relay_mode" onchange='setTorVisibility()' >
-				<option value="1">Enabled, Configured As A Bridge</option>
-				<option value="2">Enabled, Configured As a Relay</option>
+				<option value="1">Enabled As A Bridge</option>
+				<option value="3">Enabled As A Bridge With Obfsproxy</option>
+				<option value="2">Enabled As a Relay</option>
 				<option value="0">Disabled</option>
 			</select>
 			<br/>
@@ -64,6 +65,12 @@
 			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Relay Port:</label>
 			<input type="text" class="rightcolumn" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' />
 		</div>
+
+		<div id='tor_obfsproxy_port_container'>
+			<label  class='wideleftcolumn' for='tor_obfsproxy_port' id='tor_obfsproxy_port_label'>Obfsproxy Port:</label>
+			<input type="text" class="rightcolumn" id='tor_obfsproxy_port' size='9' onkeyup='proofreadPort(this)' />
+		</div>
+
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Banwidth:</label>
