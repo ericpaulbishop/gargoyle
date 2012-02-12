@@ -168,13 +168,11 @@ if [ "$enabled" != "0" ] && [ "$relay_mode" != "0" ] ; then
 		iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $relay_port -j tor_relay_down_bw
 		iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $relay_port -j tor_relay_down_bw
 		iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $relay_port -j tor_relay_up_bw
-		iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
 		
 		if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
 			iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $obfsproxy_port -j tor_relay_down_bw
 			iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $obfsproxy_port -j tor_relay_down_bw	
 			iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $obfsproxy_port -j tor_relay_up_bw
-			iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
 		fi
 	fi
 
