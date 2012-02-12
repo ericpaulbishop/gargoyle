@@ -79,7 +79,6 @@ function saveChanges()
 			}
 
 			uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
-			alert( uci.get('tor', 'relay', 'max_bw_burst_kb') )
 
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
