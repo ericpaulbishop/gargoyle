@@ -142,15 +142,19 @@ function saveChanges()
 			minBandwidth = classData[classIndex][2];
 			if(minBandwidth != "zero")
 			{
-				minBandwidth = minBandwidth.substr(0,minBandwidth.length-7);
 				uci.set("qos_gargoyle", classId, "min_bandwidth", minBandwidth);
 			}
 			maxBandwidth = classData[classIndex][3];
-			if(maxBandwidth != "unlimited")
+			if(maxBandwidth != "nolimit")
 			{
-				maxBandwidth = maxBandwidth.substr(0,maxBandwidth.length-7);
 				uci.set("qos_gargoyle", classId, "max_bandwidth", maxBandwidth);
 			}
+
+			if (classData[classIndex][4] == "Yes") 
+			{
+				uci.set("qos_gargoyle",classId,"minRTT","Yes");
+			}
+
 		}
 		uci.set("qos_gargoyle", direction, "default_class", classIds[getSelectedText("default_class")]);
 
@@ -251,6 +255,7 @@ function classinfo()
 	this.Percent = null;
 	this.MinBW = null;
 	this.MaxBW = null;
+	this.MinRTT = null;
 	this.bytes = null;
 	this.leaf = null;
 	this.bps = NaN;
@@ -267,7 +272,7 @@ function init_classtable()
 	var totalPercent = 0;
 	var defaultClassName = "";
 
-        removeAllOptionsFromSelectElement( document.getElementById("default_class"));
+	removeAllOptionsFromSelectElement( document.getElementById("default_class"));
 	removeAllOptionsFromSelectElement( document.getElementById("classification"));
 
 	var classIndex=0;
@@ -286,16 +291,16 @@ function init_classtable()
 		classRow.Percent = uciOriginal.get("qos_gargoyle", classSection, "percent_bandwidth");
 		classRow.MaxBW = uciOriginal.get("qos_gargoyle", classSection, "max_bandwidth");
 		classRow.MinBW = uciOriginal.get("qos_gargoyle", classSection, "min_bandwidth");
-
+		classRow.MinRTT = uciOriginal.get("qos_gargoyle", classSection, "minRTT");
 
 		classRow.Name = classRow.Name == "" ? classSection : classRow.Name;
 		classRow.Percent = Math.round((parseInt(classRow.Percent)*100)/totalPercent);
-		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW + " kbit/s" : "zero";
-		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW + " kbit/s" : "unlimited";
+		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW : "zero";
+		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW : "nolimit";
+		classRow.MinRTT = classRow.MinRTT == "Yes" ? classRow.MinRTT : "";
 
-		
 		classTable.push(classRow);
-		classTableData.push([classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)] );
+		classTableData.push([classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, classRow.MinRTT, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)] );
 
 
 		addOptionToSelectElement("default_class", classRow.Name, classRow.Name, null);
@@ -303,8 +308,10 @@ function init_classtable()
 		defaultClassName = uciOriginal.get("qos_gargoyle", direction, "default_class") == classSection ? classRow.Name : defaultClassName;
 	}
 
+	var MinRTT="";
+	if (direction == "download") {MinRTT = "Min RTT";}
 
-	var classTableColumns = ["Service Class Name", "Percent Bandwidth At Capacity", "Minimum Bandwidth", "Maximum Bandwidth", "Load (kbps)",""];
+	var classTableColumns = ["Service Class Name", "Percent BW", "Min BW (kbps)", "Max BW (kbps)", MinRTT, "Load (kbps)"];
 	var HTMLclassTable=createTable(classTableColumns, classTableData, "qos_class_table", true, false, removeServiceClassCallback);
 	var classTableContainer = document.getElementById('qos_class_table_container');
 	if(classTableContainer.firstChild != null)
@@ -364,7 +371,7 @@ function update_classtable()
              for (classIndex=0; classIndex < classTable.length; classIndex++)
              {
  		var rowData = classTable[classIndex];
-                var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, bpsToKbpsString(rowData.bps) ];
+                var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, rowData.MinRTT, bpsToKbpsString(rowData.bps) ];
 
                 //If found then update the data
                 if (rowData.Name == row.childNodes[0].firstChild.data) {
@@ -525,12 +532,12 @@ function resetData()
 		else
 		{
 			//Run updateqosmon once to clear away any old data.
-			setTimeout("updateqosmon()", 1000);
+			setTimeout("updateqosmon()", 100);
 		} 
 	}
 
 	//The default screen updater.
-	if (timerid == null) { timerid=setInterval("updatetc()", 1000); }
+	if (timerid == null) { timerid=setInterval("updatetc()", 2500); }
 
 }
 
@@ -577,6 +584,9 @@ function setQosEnabled()
 	if (direction == "download")
 	{
 	setElementEnabled( document.getElementById("qos_monenabled"), enabled, "");
+	setElementEnabled( document.getElementById("rtt_radio1"), enabled, "");
+	setElementEnabled( document.getElementById("rtt_radio2"), enabled, "");
+
 	qmenabled = (enabled && document.getElementById("qos_monenabled").checked);
 	setElementEnabled( document.getElementById("use_ptarget_ip"), qmenabled,"");
 	setElementEnabled( document.getElementById("ptarget_ip"), qmenabled && document.getElementById("use_ptarget_ip").checked,document.getElementById("ptarget_ip").value);
@@ -685,8 +695,15 @@ function addServiceClass()
 		classRow = new classinfo();
 		classRow.Name    = document.getElementById("class_name").value;
 		classRow.Percent = document.getElementById("percent_bandwidth").value + "%";
-		classRow.MaxBW   = document.getElementById("min_radio1").checked == true ? "zero" : document.getElementById("min_bandwidth").value + " kbit/s";
-		classRow.MinBW   = document.getElementById("max_radio1").checked == true ? "unlimited" : document.getElementById("max_bandwidth").value + " kbit/s";
+		classRow.MaxBW   = document.getElementById("min_radio1").checked == true ? "zero" : document.getElementById("min_bandwidth").value;
+		classRow.MinBW   = document.getElementById("max_radio1").checked == true ? "nolimit" : document.getElementById("max_bandwidth").value;
+
+		if (direction == "download") {
+			classRow.MinRTT  = document.getElementById("rtt_radio1").checked == true ? "Yes" : "";
+		} else {
+			classRow.MinRTT  = "";
+		}
+
 		classTable.push(classRow);
 
 
@@ -695,6 +712,7 @@ function addServiceClass()
 		newRowData.push( classRow.Percent );
 		newRowData.push( classRow.MaxBW );
 		newRowData.push( classRow.MinBW );
+		newRowData.push( classRow.MinRTT );
 		newRowData.push( "*" );
 		newRowData.push( createClassTableEditButton(classTable.length-1) );
 
@@ -748,6 +766,11 @@ function resetServiceClassControls(controlDocument)
 	controlDocument.getElementById("max_radio1").checked = true;
 	controlDocument.getElementById("max_radio2").checked = false;
 	enableAssociatedField(controlDocument.getElementById("max_radio2"), "max_bandwidth", "", controlDocument);
+
+	if (direction == 'download') {
+		controlDocument.getElementById("rtt_radio1").checked = false;
+		controlDocument.getElementById("rtt_radio2").checked = true;
+	}
 }
 
 
@@ -1020,11 +1043,11 @@ function editClassTableRow()
 		saveButton = editClassWindow.createElement('<input type="button" />');
 		closeButton = editClassWindow.createElement('<input type="button" />');
 	}
+
 	saveButton.value = "Close and Apply Changes";
 	saveButton.className = "default_button";
 	closeButton.value = "Close and Discard Changes";
 	closeButton.className = "default_button";
-
 
 	editClassWindowRow=this.parentNode.parentNode;
 	runOnClassEditorLoaded = function ()
@@ -1036,7 +1059,19 @@ function editClassTableRow()
 			{
 				updateInProgress = true;
 
-				//editClassWindow.document.getElementById("tmp").appendChild( editClassWindow.document.createTextNode("TEST!!!"));
+				if (direction == "upload") {editClassWindow.document.getElementById('rttdiv').style.display = 'none';}
+
+				/* Watch the window in case the user just closes without using one of the buttons. 
+				   in which case we must re-enable the class bandwidth updater */
+				var timer = setInterval(function() {   
+				    if(editClassWindow.closed) {  
+				        clearInterval(timer);  
+				        updateInProgress = false; 
+					 dynamic_update=true; 
+				    }  
+				}, 700);  
+
+
 				editClassWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editClassWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 
@@ -1054,23 +1089,29 @@ function editClassTableRow()
 					enableAssociatedField(editClassWindow.document.getElementById("min_radio2"), "min_bandwidth", "", editClassWindow.document);
 
 					minBandwidth = cells[2].firstChild.data;
-					editClassWindow.document.getElementById("min_bandwidth").value = minBandwidth.substr(0, minBandwidth.length-7);
+					editClassWindow.document.getElementById("min_bandwidth").value = minBandwidth;
 				}
 
-				if(cells[3].firstChild.data != "unlimited")
+				if(cells[3].firstChild.data != "nolimit")
 				{
 					editClassWindow.document.getElementById("max_radio2").checked = true;
 					enableAssociatedField(editClassWindow.document.getElementById("max_radio2"), "max_bandwidth", "", editClassWindow.document);
 
 					maxBandwidth = cells[3].firstChild.data;
-					editClassWindow.document.getElementById("max_bandwidth").value = maxBandwidth.substr(0, maxBandwidth.length-7);
+					editClassWindow.document.getElementById("max_bandwidth").value = maxBandwidth;
 				}
 
 
+				if (cells[4].firstChild.data == "Yes") {
+					editClassWindow.document.getElementById("rtt_radio1").checked = true;
+				} else {
+					editClassWindow.document.getElementById("rtt_radio2").checked = true;
+				}
 
 
 				closeButton.onclick = function()
 				{
+					clearInterval(timer);  
 					editClassWindow.close();
 				}
 
@@ -1127,22 +1168,21 @@ function editClassTableRow()
 							}
 						}
 						
-						
-						
-						var rowData = classTable[ editClassWindowRow.childNodes[5].firstChild.id ];
+						var rowData = classTable[ editClassWindowRow.childNodes[6].firstChild.id ];
 						rowData.Name    = editClassWindow.document.getElementById("class_name").value ;
 						rowData.Percent = editClassWindow.document.getElementById("percent_bandwidth").value ;
-						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? "zero" : editClassWindow.document.getElementById("min_bandwidth").value + " kbit/s";
-
-						rowData.MaxBW   = editClassWindow.document.getElementById("max_radio1").checked == true ? "unlimited" : editClassWindow.document.getElementById("max_bandwidth").value + " kbit/s";
-
+						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? "zero" : editClassWindow.document.getElementById("min_bandwidth").value;
+						rowData.MaxBW   = editClassWindow.document.getElementById("max_radio1").checked == true ? "nolimit" : editClassWindow.document.getElementById("max_bandwidth").value;
+						rowData.MinRTT  = editClassWindow.document.getElementById("rtt_radio1").checked == true ? "Yes" : "";
 
 						editClassWindowRow.childNodes[0].firstChild.data = rowData.Name;
 						editClassWindowRow.childNodes[1].firstChild.data = rowData.Percent + "%";
 						editClassWindowRow.childNodes[2].firstChild.data = rowData.MinBW;
 						editClassWindowRow.childNodes[3].firstChild.data = rowData.MaxBW;
+						editClassWindowRow.childNodes[4].firstChild.data = rowData.MinRTT;
 
 						updateInProgress = false;
+						clearInterval(timer);  
 						editClassWindow.close();
 					}
 				}
@@ -1193,6 +1233,7 @@ function parseRuleMatchCriteria(matchText)
 
 /* qosmon congestion monitor status */
 var updateInProgress = false;
+var lasttime;
 
 function updatetc()
 {
@@ -1223,6 +1264,9 @@ function updatetc()
 			{
 				/*Only match leaf classes and class with 2 digit class numbers since on the upload side class 1:127 is only for qosmon*/
 				var lines = req.responseText.match(/hfsc\s1:[0-9]{1,2}\s.+leaf.+\n.+Sent\s[0-9]+/g);
+				var d=new Date();
+				var timediff=d.getTime()-lasttime;
+				lasttime=d.getTime();
 
 				if (lines != null)
 				{
@@ -1239,7 +1283,7 @@ function updatetc()
 
 						if (lastbytes != null)
 						{
-						     classTable[idx].bps= (parseInt(classTable[idx].bytes)-parseInt(lastbytes))*8;
+						     classTable[idx].bps= (parseInt(classTable[idx].bytes)-parseInt(lastbytes))*8000/timediff;
 						}
 						else
 						{
@@ -1249,6 +1293,7 @@ function updatetc()
 					}
 					}
 				}
+
 
 				update_classtable();
 				updateInProgress = false;

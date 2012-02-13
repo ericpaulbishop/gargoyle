@@ -711,6 +711,12 @@ td.qos_class_table_column_6
 td.qos_class_table_column_7
 {
 	text-align:center;
+	border-top:1px solid black;
+	border-bottom:1px solid black;
+}
+td.qos_class_table_column_8
+{
+	text-align:center;
 	border-right:1px solid black;
 	border-top:1px solid black;
 	border-bottom:1px solid black;

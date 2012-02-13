@@ -1,0 +1,11 @@
+--- backfire-a/package/busybox/config/procps/Config.in	2011-11-24 22:56:18.282899713 -0500
++++ backfire-b/package/busybox/config/procps/Config.in	2012-02-08 21:47:40.022239544 -0500
+@@ -92,7 +92,7 @@
+ 
+ config BUSYBOX_CONFIG_FEATURE_PS_WIDE
+ 	bool "Enable wide output option (-w)"
+-	default n
++	default y
+ 	depends on BUSYBOX_CONFIG_PS
+ 	help
+ 	  Support argument 'w' for wide output.

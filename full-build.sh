@@ -17,7 +17,7 @@ set_constant_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=29685
+	rnum=30338
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -133,7 +133,7 @@ fi
 #compress javascript
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
 	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
-	if [ "$uglify_test" != 'var abc=1' ] ; then
+	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
 		js_compress="false"
 		echo ""
 		echo "**************************************************************************"

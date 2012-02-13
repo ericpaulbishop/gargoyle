@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tor
-PKG_VERSION:=0.2.2.35
-PKG_RELEASE:=1
+PKG_VERSION:=0.2.3.11-alpha
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=dcecf699c4b929319d5f1ce0358d4835
+PKG_MD5SUM:=917f2952f464371727641320292c9a9e
 
 PKG_INSTALL:=1
 
@@ -179,13 +179,15 @@ define Package/tor/install
 	$(INSTALL_DIR)  $(1)/etc/init.d
 	$(INSTALL_DIR)  $(1)/etc/tor
 	$(INSTALL_DIR)  $(1)/etc/uci-defaults
-	$(INSTALL_DIR)  $(1)/etc/config 
+	$(INSTALL_DIR)  $(1)/etc/config
+	$(INSTALL_DIR)  $(1)/etc/l7-protocols
 	$(INSTALL_BIN)  $(PKG_INSTALL_DIR)/usr/bin/tor $(1)/usr/sbin/tor
 	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/tor/torrc.sample $(1)/etc/tor/torrc
 	$(INSTALL_BIN)  ./files/tor.init        $(1)/etc/init.d/tor
 	$(INSTALL_BIN)  ./files/tor.firewall    $(1)/etc/tor.firewall
 	$(INSTALL_BIN)  ./files/tor.ucidefaults $(1)/etc/uci-defaults/tor.ucidefaults
 	$(INSTALL_CONF) ./files/tor.config      $(1)/etc/config/tor
+	$(INSTALL_CONF) ./files/oniondns.pat    $(1)/etc/l7-protocols/oniondns.pat
 endef
 define Package/tor/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 

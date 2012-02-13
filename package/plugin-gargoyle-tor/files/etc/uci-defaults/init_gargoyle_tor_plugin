@@ -1,5 +1,13 @@
 #!/bin/sh
 
+#if this isn't a new installation, or if we preserved settings, just exit
+is_first_boot=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
+if [ "$is_first_boot" != "1" ] ; then
+	exit
+fi
+
+
+
 # Tor only seems to work on routers with 64MB+ memory, only enable if available memory > 32MB
 real_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
 swap_mem="$(sed -e '/^SwapTotal: /!d; s#SwapTotal: *##; s# kB##g' /proc/meminfo)"

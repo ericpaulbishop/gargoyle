@@ -21,7 +21,6 @@ function initializePlotsAndTable()
 {
 	updateInProgress = false;
 	initFunction();
-	setInterval( 'doUpdate()', 2000);
 }
 
 function initFunction()
@@ -30,10 +29,11 @@ function initFunction()
 	if(pieChart != null)
 	{
 		doUpdate(); 
+		setInterval( doUpdate, 2000);
 	}
 	else
 	{
-		setTimeout("initFunction()", 50); 
+		setTimeout(initFunction, 50); 
 	} 
 }
 
@@ -261,11 +261,11 @@ function resetTimeFrame()
 
 function resetDisplayInterval()
 {
-	if(pieChart != null && (!updateInProgress) && timeFrameIntervalData.length > 0 )
+	var plotFunction = getEmbeddedSvgPlotFunction("pie_chart");
+	if(plotFunction != null && pieChart != null && (!updateInProgress) && timeFrameIntervalData.length > 0 )
 	{
 		updateInProgress = true;
 		//first, update pie chart
-		var plotFunction = getEmbeddedSvgPlotFunction("pie_chart");
 		var intervalIndex = getSelectedValue("time_interval");
 		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
 		

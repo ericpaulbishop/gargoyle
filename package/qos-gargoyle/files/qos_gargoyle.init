@@ -292,10 +292,12 @@ initialize_qos()
 	# The following packages are required for the modules:
 	rmmod  imq >&- 2>&-
 	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
+	ip link set dev imq0 mtu 1500
 
 	insmod cls_fw >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
-	insmod sch_red >&- 2>&-
+	#insmod sch_red >&- 2>&-
+	insmod sch_esfq >&- 2>&-
 	insmod ipt_length >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
 	insmod ipt_layer7 >&- 2>&-
@@ -303,15 +305,25 @@ initialize_qos()
 	#Set the atm parameters if pppoe is being used.
 	wan_proto=$(uci get network.wan.proto 2>/dev/null)
 	if [ "$wan_proto" = "pppoe" ] ; then
-		#For a PPPoE WAN link we have MAC Header=14 & PPPoE=8 plus I read 
-              #that an addition ATM=8 is added by the modem"
+		#On my PPPoE WAN link I see the following overhead
+		#MAC Header=14 & PPPoE=8 plus I read that an addition ATM=8 is added by the modem"
 		overhead="stab linklayer atm overhead 30 mtu 1492 tsize 128 "
 	#else
-		#For ethernet we have Interframe Gap=12, Preamble=7, Start byte=1, CRC=4
-		#but this all depends on what the user entered bandwidth means.
-		#I don't think it includes this overhead to I am not going to add it here.
-		#overhead="stab linklayer ethernet overhead 23 mpu 64"
+		#Even for the ethernet cases I do not think the qdisc sees the MAC Header
+		#but for now leave this out.
+		#overhead="stab linklayer ethernet overhead 14 mpu 64"
 	fi
+
+	#On low memory routers we need to take it easy on how big the queue can get.
+	#When depth is limited to 32 maximum bandwidth through any class will be around 11Mbps.
+	#Otherwise it will be around 350Mbps.
+	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	if [ "$total_mem" -lt 16000 ] ; then
+		esfq_depth="depth 32";
+	else
+		esfq_depth="depth 128";
+	fi
+
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
@@ -346,6 +358,7 @@ initialize_qos()
 
 
 		# Attach egress queuing discipline to QoS interface, now with temperary default
+		$echo_on
 		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 10
 
 		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
@@ -358,6 +371,7 @@ initialize_qos()
 		# child or any of the parent nodes
 		#
 		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
+		$echo_off
 
 		class_mark_list=""
 		upload_shift=0
@@ -375,12 +389,11 @@ initialize_qos()
 			#% bandwidth at capacity for this class
 			m2=$((  10 * $(echo $uclass_def | awk ' {print $1}' ) ))
 
-			#is there an lower limit specified in kbps?
+			#is there a minimum bandwidth specified in kbps?
 			min_bandwidth=$( echo $uclass_def | awk ' {print $3}' )
 			ll_str=""
 			if [ "$min_bandwidth" -gt 0 ] ; then
-				max="$min_bandwidth"
-				ll_str=" rt m1 $((2*$max))kbit d 20ms m2 ${min_bandwidth}kbit"
+				ll_str=" rt m1 $((2*$min_bandwidth))kbit d 20ms m2 ${min_bandwidth}kbit"
 			fi
 
 			#is there an upper limit specified in kbps?
@@ -392,25 +405,22 @@ initialize_qos()
 				max_bandwidth="$total_upload_bandwidth"
 			fi
 
-			#We setup red dqisc mostly based on the advice at http://www.opalsoft.net/qos/DS-26.htm with
-			#the exception that we increase the probability to 0.1 per http://www.icir.org/floyd/REDfunc.txt
-			#Also I crank the queue limit down because we have RAM limitations here and I'm afraid.
-			#Finally, setup for 200ms propagation delay rather than 500ms,
-
-			#tbw is the RED queue 'max' which is specified in bytes and computed from the maximum class upload
-			#bandwidth (max_bandwidth kbps) and a maximum propagation delay of 200ms in the queue.
-			tbw=$(($max_bandwidth*200/8));
-
-			#To avoid parameter errors with RED queues we need to enforce the following two constraints.
-			# min/avpkt >= 1, Since avpkt is fixed at 1000, min >= 1000 => tbw >= 3000
-			# burst > min/avpkt, this one is never violated because burst is set to (2*min+max)/3000 => 5*tbw/9000
+			#tbw is the Delay x Bandwidth product in bytes per second.  We do not actually know the packet
+			#delay so we make an estimate of 150ms here and hope for the best.  
+			tbw=$(($max_bandwidth*150/8));
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
 			fi
 
+			#Information on the esfq qdisc is a little hard to come by.  I used http://fatooh.org/esfq-2.6/current/README and
+			#studied the source code.  ESQF includes the hash 'ctnatchg' key which allows us to hash on the local IP address.
+			#The means that when traffic from two or more local IP addresses end up in the same class the qdisc will share 
+			#bandwidth equally between them.  Upload packets tend to be much smaller in size.  We will use 500 bytes as an average
+			#here.
 			$echo_on
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
+			tc qdisc add dev $qos_interface parent 1:$next_class_index esfq limit $(($tbw/500)) $esfq_depth divisor 8 hash ctnatchg  
+			#tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 500 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			$echo_off
 
@@ -481,6 +491,7 @@ initialize_qos()
 			percent_bandwidth=""
 			min_bandwidth=""
 			max_bandwidth=""
+			minRTT=""
 
 			load_all_config_options "$config_file_name" "$dclass_name"
 			if [ -z "$percent_bandwidth" ] ; then
@@ -492,7 +503,8 @@ initialize_qos()
 			if [ -z "$max_bandwidth" ] ; then
 				max_bandwidth="-1"
 			fi
-			classdef="$percent_bandwidth $max_bandwidth $min_bandwidth"
+            
+			classdef="$percent_bandwidth $max_bandwidth $min_bandwidth $minRTT"
 			eval $dclass_name=\"\$classdef\"  #"#comment quote here so formatting in editor isn't FUBAR
 		done
 
@@ -513,12 +525,26 @@ initialize_qos()
 			#bandwidth for this class
 			m2=$(( 10 * $(echo $dclass_def | awk ' {print $1}' ) ))
 
-			#is there a lower limit specified?
+			#The Gargoyle ACC switches from optimum WAN utilization mode to minimum RTT mode
+			#when it detects a class has become active that includes a two part service curve.
+			#So to trigger this behaviour we create two parts curves when minRTT is set. 
+            
+			minRTT=$( echo $dclass_def | awk ' {print $4}' )
+			if [ "$minRTT" == "Yes" ] ; then
+				ll_str=" ls m1 ${m2}Mbit d 20ms m2 ${m2}Mbit"
+			else
+				ll_str=" ls m2 ${m2}Mbit"
+			fi
+
+			#is there a minimum bandwidth specified?
 			min_bandwidth=$( echo $dclass_def | awk ' {print $3}' )
-			ll_str=""
+			rt_str=""
 			if [ "$min_bandwidth" -gt 0 ] ; then
-				max="$min_bandwidth"
-				ll_str=" rt m1 $((2*$max))kbit d 20ms m2 ${min_bandwidth}kbit"
+				if [ "$minRTT" == "Yes" ] ; then
+					rt_str=" rt m1 $((2*$min_bandwidth))kbit d 20ms m2 ${min_bandwidth}kbit"
+				else
+					rt_str=" rt m2 ${min_bandwidth}kbit"
+				fi
 			fi
 
 			#is there an upper limit specified?
@@ -530,14 +556,15 @@ initialize_qos()
 				max_bandwidth="$total_download_bandwidth"
 			fi
 
-			tbw=$(($max_bandwidth*200/8));
-			if [ "$tbw" -lt 3000 ] ; then
-				tbw=3000
+			tbw=$(($max_bandwidth*150/8));
+			if [ "$tbw" -lt 5000 ] ; then
+				tbw=5000
 			fi
 
 			$echo_on
-			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
+			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
+			tc qdisc add dev imq0 parent 1:$next_class_index esfq limit $(($tbw/1000)) $esfq_depth divisor 8 hash ctnatchg  
+			#tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			$echo_off
 
@@ -599,7 +626,7 @@ initialize_qos()
 		#These pings 84 bytes each for ethernet plus 22 more for PPPoE connections, allowing a maximum rate of 200ms we get 2.6kbps
 		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 106 dmax 10ms rate 4kbit
 		tc qdisc add dev $qos_interface parent 1:127 pfifo
-      	tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
+		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
 
 		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
 		iptables -t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127
@@ -660,6 +687,8 @@ stop()
 	#Kill the qos monitor in case it is running
 	killall qosmon 2>/dev/null
 
+
+	$echo_on
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
 		tc qdisc del dev "$iface" root
 	done
@@ -667,6 +696,7 @@ stop()
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
+	$echo_off
 
 }
 
