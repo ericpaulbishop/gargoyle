@@ -21,11 +21,11 @@ boot()
 start()
 {
 	enabled=$(uci get tor.global.enabled)
-	client_enabled=$(uci get tor.client.client_mode)
-	relay_enabled=$(uci get tor.relay.relay_mode)
+	client_mode=$(uci get tor.client.client_mode)
+	relay_mode=$(uci get tor.relay.relay_mode)
 	
 
-	if [ "$enabled" = "0" ] || [ "$client_enabled$relay_enabled" = "00" ] ; then
+	if [ "$enabled" = "0" ] || [ "$client_mode$relay_mode" = "00" ] ; then
 		exit
 	fi
 
@@ -75,7 +75,7 @@ start()
 
 
 	relay_options=""
-	if [ "$relay_enabled" != "0" ] && [ -n "$relay_enabled" ] ; then
+	if [ "$relay_mode" != "0" ] && [ -n "$relay_mode" ] ; then
 		
 		relay_port=$(uci get tor.relay.relay_port)
 		max_bw_rate_kb=$(uci get tor.relay.max_bw_rate_kb)
@@ -87,17 +87,19 @@ start()
 		relay_ip=0.0.0.0
 				
 		relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
-		if [ "$relay_enabled" = "1" ] ; then
+		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
-				relay_options=" --ServerTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy obfs2 --dest=$relay_ip:$relay_port server 0.0.0.0:$obfsproxy_port' "
+				#obfsproxy dies on second, not first sighup even though it doesn't daemonize so this won't die after script finishes
+				obfsproxy obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port 2>&1 | logger &
 			fi
-		fi
-		if [ -n "$relay_nickname" ]  && [ "$relay_mode" = "2" ] ; then
-			relay_options=" $relay_options --Nickname '$relay_nickname' "
-		fi
-		if [ -n "$relay_contact" ] && [ "$relay_mode" = "2" ] ; then
-			relay_options=" $relay_options --ContactInfo '$relay_contact' "
+		else
+			if [ -n "$relay_nickname" ] ; then
+				relay_options=" $relay_options --Nickname '$relay_nickname' "
+			fi
+			if [ -n "$relay_contact" ]  ; then
+				relay_options=" $relay_options --ContactInfo '$relay_contact' "
+			fi
 		fi
 			
 
