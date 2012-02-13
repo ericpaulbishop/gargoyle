@@ -90,7 +90,7 @@ start()
 		if [ "$relay_enabled" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
-				relay_options=" --ClientTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy obfs2 --dest=$relay_ip:$relay_port server 0.0.0.0:$obfsproxy_port' "
+				relay_options=" --ServerTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy obfs2 --dest=$relay_ip:$relay_port server 0.0.0.0:$obfsproxy_port' "
 			fi
 		fi
 		if [ -n "$relay_nickname" ]  && [ "$relay_mode" = "2" ] ; then
