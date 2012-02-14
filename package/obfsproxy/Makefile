@@ -31,6 +31,7 @@ define Build/Prepare
 	rmdir  $(PKG_BUILD_DIR)
 	git clone https://git.torproject.org/obfsproxy.git $(PKG_BUILD_DIR)
 	cd $(PKG_BUILD_DIR) && git checkout $(LAST_COMMIT_FOR_VERSION) && rm -rf ./.git
+	$(Build/Patch)
 endef
 
 

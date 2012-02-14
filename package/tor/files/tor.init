@@ -6,6 +6,7 @@ BIN=tor
 VAR_D=/etc/$BIN/var
 RUN_D=/var/run
 PID_F=$RUN_D/$BIN.pid
+OPID_F=$RUN_D/obfsproxy.pid
 RUN_USER=root
 RUN_GROUP=root
 BOOT="0"
@@ -90,8 +91,7 @@ start()
 		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
-				#obfsproxy dies on second, not first sighup even though it doesn't daemonize so this won't die after script finishes
-				obfsproxy obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port 2>&1 | logger &
+				obfsproxy --daemonize_with_pid=$OPID_F obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port
 			fi
 		else
 			if [ -n "$relay_nickname" ] ; then
@@ -118,8 +118,14 @@ start()
 stop()
 {
 	[ -f $PID_F ] && kill -9 $(cat $PID_F)
-	killall obfsproxy 2>/dev/null
-	delete_chain_from_table nat tor
+	[ -f $OPID_F ] && kill -9 $(cat $OPID_F)
+	
+	delete_chain_from_table nat tor_client
+	delete_chain_from_table filter tor_client
+	delete_chain_from_table filter tor_relay
+	delete_chain_from_table filter tor_relay_down_bw
+	delete_chain_from_table mangle tor_relay_up_bw
+	
 	rm -rf "$PID_F"
 }
 
