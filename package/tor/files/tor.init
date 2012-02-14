@@ -91,7 +91,7 @@ start()
 		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
-				obfsproxy --daemonize_with_pid=$OPID_F obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port
+				obfsproxy --no-log --daemonize_with_pid=$OPID_F obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port
 			fi
 		else
 			if [ -n "$relay_nickname" ] ; then

@@ -35,7 +35,7 @@ index 0d690b7..a516114 100644
 +	{	
 +		if(i < 0) //exit on fork error
 +		{
-+		exit(1);
++			exit(1);
 +		}
 +		else //this is parent, exit cleanly
 +		{
@@ -54,9 +54,9 @@ index 0d690b7..a516114 100644
 +	}
 +
 +	// close standard i/o  
-+       	close(STDOUT_FILENO);
-+	close(STDIN_FILENO);
-+	close(STDERR_FILENO);
++	freopen( "/dev/null", "r", stdin);
++	freopen( "/dev/null", "w", stdout);
++	freopen( "/dev/null", "w", stderr);
 +
 +
 +	// record pid to lockfile, if pid is specified
