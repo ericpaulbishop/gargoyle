@@ -1,26 +1,29 @@
+diff --git a/src/main.c b/src/main.c
+index 0d690b7..a516114 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -31,6 +31,14 @@
+@@ -31,6 +31,15 @@
  #include <event2/event.h>
  #include <event2/dns.h>
  
 +
++#ifdef HAVE_UNISTD_H 
 +
-+#include <syslog.h>
 +#include <unistd.h>
++#include <syslog.h>
 +#include <fcntl.h>
 +
-+
++#endif
 +
  static struct event_base *the_event_base;
  static struct event *sig_int;
  static struct event *sig_term;
-@@ -41,6 +49,68 @@ static int is_external_proxy=1;
+@@ -41,6 +50,68 @@ static int is_external_proxy=1;
  /* Whether to scrub connection addresses -- on by default */
  int safe_logging=1;
  
 +
-+
++#ifdef HAVE_UNISTD_H 
 +void daemonize(char* pid_path);
 +
 +void daemonize(char* pid_path)
@@ -78,45 +81,34 @@
 +
 +}
 +
-+
++#endif
 +
 +
  /**
     Prints the obfsproxy usage instructions then exits.
  */
-@@ -55,6 +125,8 @@ usage(void)
+@@ -55,6 +126,11 @@ usage(void)
    for (i=0;i<n_supported_protocols;i++)
      fprintf(stderr,"[%s] ", supported_protocols[i]->name);
    fprintf(stderr, "\n* obfsproxy_args:\n"
++#ifdef HAVE_UNISTD_H 
++
 +          "--daemonize - run as a daemon\n"
 +	  "--daemonize_with_pid=<file> - run as a daemon, saving process id to <file>\n"
++#endif
            "--log-file=<file> ~ set logfile\n"
            "--log-min-severity=warn|notice|info|debug ~ "
            "set minimum logging severity (default: notice)\n"
-@@ -144,6 +216,7 @@ handle_obfsproxy_args(const char *const *argv)
-   int logsev_set=0;
-   int i=1;
- 
-+
-   while (argv[i] &&
-          !strncmp(argv[i],"--",2)) {
-     if (!strncmp(argv[i], "--log-file=", 11)) {
-@@ -175,6 +248,10 @@ handle_obfsproxy_args(const char *const *argv)
+@@ -175,6 +251,12 @@ handle_obfsproxy_args(const char *const *argv)
        safe_logging=0;
      } else if (!strncmp(argv[i], "--managed", 10)) {
        is_external_proxy=0;
++#ifdef HAVE_UNISTD_H 
 +    } else if (!strncmp(argv[i], "--daemonize_with_pid=", 21)) {
 +      daemonize( (char *)argv[i]+21 );
 +    } else if (!strncmp(argv[i], "--daemonize", 12)) {
 +      daemonize(NULL);
++#endif
      } else {
        log_error("Unrecognizable obfsproxy argument '%s'", argv[i]);
      }
-@@ -195,7 +272,6 @@ handle_obfsproxy_args(const char *const *argv)
- 
-   return i;
- }
--
- /** Libevent callback: Log heartbeat message once every hour. */
- static void
- heartbeat_cb(evutil_socket_t fd, short what, void *arg)
