@@ -1,5 +1,5 @@
 diff --git a/src/main.c b/src/main.c
-index 0d690b7..a663520 100644
+index 0d690b7..8f28d4e 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -31,6 +31,15 @@
@@ -25,7 +25,7 @@ index 0d690b7..a663520 100644
 +
 +#ifdef HAVE_UNISTD_H 
 +int is_daemon;
-+char* daemon_pid;
++char daemon_pid[257];
 +int daemon_pid_file;
 +
 +void daemonize(char* pid_path);
@@ -62,7 +62,7 @@ index 0d690b7..a663520 100644
 +  freopen( "/dev/null", "w", stderr);
 +
 +  // record pid to lockfile, if pid is specified
-+  if(pid_path != NULL)
++  if(pid_path[0] != '\0')
 +  {
 +    daemon_pid_file= open(pid_path,O_RDWR|O_CREAT,0644);
 +    if(daemon_pid_file<0) // exit if we can't open file
@@ -107,46 +107,54 @@ index 0d690b7..a663520 100644
  
 +#ifdef HAVE_UNISTD_H 
 +  is_daemon = 0;
-+  daemon_pid = NULL;
++  daemon_pid[0] = '\0';
 +#endif
 +
 +
    while (argv[i] &&
           !strncmp(argv[i],"--",2)) {
      if (!strncmp(argv[i], "--log-file=", 11)) {
-@@ -175,6 +259,13 @@ handle_obfsproxy_args(const char *const *argv)
+@@ -175,6 +259,22 @@ handle_obfsproxy_args(const char *const *argv)
        safe_logging=0;
      } else if (!strncmp(argv[i], "--managed", 10)) {
        is_external_proxy=0;
 +#ifdef HAVE_UNISTD_H 
 +    } else if (!strncmp(argv[i], "--daemonize_with_pid=", 21)) {
++      const char* dparg= (char *)argv[i]+21;
++      int dplen = strlen(dparg);
++      if(dplen <=256)
++      {
++        strcpy(daemon_pid, dparg);
++      }
++      else
++      {
++        printf("Error: pid filename is too long, should be <= 256 characters.");
++      }
 +      is_daemon = 1;
-+      daemon_pid= strdup( (char *)argv[i]+21 );
 +    } else if (!strncmp(argv[i], "--daemonize", 12)) {
 +      is_daemon = 1;
 +#endif
      } else {
        log_error("Unrecognizable obfsproxy argument '%s'", argv[i]);
      }
-@@ -279,6 +370,17 @@ obfsproxy_cleanup()
+@@ -279,6 +379,16 @@ obfsproxy_cleanup()
    cleanup_crypto();
    status_connections_cleanup();
    close_obfsproxy_logfile();
 +
 +#ifdef HAVE_UNISTD_H 
-+  if(is_daemon == 1 && daemon_pid != NULL)
++  if(is_daemon == 1 && daemon_pid[0] != '\0')
 +  {
 +    lockf(daemon_pid_file,F_ULOCK,0);
 +    close(daemon_pid_file);
 +    unlink(daemon_pid);
-+    free(daemon_pid);
 +  }
 +#endif
 +
  }
  
  
-@@ -290,6 +392,13 @@ obfs_main(int argc, const char *const *argv)
+@@ -290,6 +400,13 @@ obfs_main(int argc, const char *const *argv)
  
    /* Handle optional obfsproxy arguments. */
    begin = argv + handle_obfsproxy_args(argv);
