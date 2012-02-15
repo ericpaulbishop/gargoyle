@@ -48,8 +48,8 @@ function saveChanges()
 		uci.set('tor', 'relay',  'relay_mode',  torRelayMode)
 		if(torClientMode != "0")
 		{
-			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
-			uci.set('tor', 'global', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
+			uci.set('tor', 'client', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
+			uci.set('tor', 'client', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
 			if(torClientMode != "3")
 			{
 				uci.set('tor', 'client', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
@@ -159,13 +159,13 @@ function resetData()
 
 	
 	
-	//client / global
+	//client 
 	var blockOtherProtos = uciOriginal.get("tor", "client", "block_unsupported_proto") == "1" ? "1" : "0"
 	setSelectedValue("tor_client_mode", torClientMode)
 	setSelectedValue("tor_other_proto", blockOtherProtos)
 
-	var hiddenSubnet = uciOriginal.get("tor", "global", "hidden_service_subnet")
-	var hiddenBits   = uciOriginal.get("tor", "global", "hidden_service_mask_bits")
+	var hiddenSubnet = uciOriginal.get("tor", "client", "hidden_service_subnet")
+	var hiddenBits   = uciOriginal.get("tor", "client", "hidden_service_mask_bits")
 	if(hiddenSubnet == "")
 	{
 		hiddenSubnet = "10.192.0.0"

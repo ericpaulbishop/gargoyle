@@ -26,6 +26,27 @@
 			<br/>
 		</div>
 
+		<div id='tor_client_connect_container'>
+			<label  class='wideleftcolumn' for='tor_client_connect' id='tor_client_mode_label' >Connect Via:</label>
+			<select class='rightcolumn' id="tor_client_connect" onchange='setTorVisibility()' >
+			<option value="relay">Tor Relay (recommended)</option>
+				<option value="bridge">Tor Bridge</option>
+				<option value="obfsproxy">Tor Bridge with Obfsproxy</option>
+			</select>
+		</div>
+		<div class="indent">
+			<div id='tor_client_bridge_ip_container'>
+				<label  class='wideleftcolumn' for='tor_client_bridge_ip' id='tor_client_bridge_ip_label'>Bridge IP:</label>
+				<input type="text" class="rightcolumn" id='tor_client_bridge_ip' onkeyup='proofreadIp(this)'/>
+			</div>
+			<div id='tor_client_bridge_port_container'>
+				<label  class='wideleftcolumn' for='tor_client_bridge_port' id='tor_client_bridge_port_label'>Bridge Port:</label>
+				<input type="text" class="rightcolumn" id='tor_client_bridge_port' onkeyup='proofreadPort(this)'/>
+			</div>
+		</div>
+
+
+
 		<div id='tor_other_proto_container'>
 			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>
 			<select class='rightcolumn' id="tor_other_proto">
@@ -46,10 +67,10 @@
 	</fieldset>
 
 	<fieldset>
-		<legend class="sectionheader">Tor Relay</legend>
+		<legend class="sectionheader">Tor Anonymization Server</legend>
 		
 		<div id='tor_relay_mode_container'>
-			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Relay:</label>
+			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Server:</label>
 			<select class='rightcolumn' id="tor_relay_mode" onchange='setTorVisibility()' >
 				<option value="1">Enabled As A Bridge</option>
 				<option value="3">Enabled As A Bridge With Obfsproxy</option>
@@ -62,7 +83,7 @@
 		</div>
 		
 		<div id='tor_relay_port_container'>
-			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Relay Port:</label>
+			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Bridge/Relay Port:</label>
 			<input type="text" class="rightcolumn" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' />
 		</div>
 
