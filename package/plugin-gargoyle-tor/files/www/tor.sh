@@ -29,7 +29,7 @@
 		<div id='tor_client_connect_container'>
 			<label  class='wideleftcolumn' for='tor_client_connect' id='tor_client_mode_label' >Connect Via:</label>
 			<select class='rightcolumn' id="tor_client_connect" onchange='setTorVisibility()' >
-			<option value="relay">Tor Relay (recommended)</option>
+				<option value="relay">Tor Relay (recommended)</option>
 				<option value="bridge">Tor Bridge</option>
 				<option value="obfsproxy">Tor Bridge with Obfsproxy</option>
 			</select>
