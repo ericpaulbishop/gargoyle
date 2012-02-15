@@ -69,11 +69,24 @@ start()
 	fi
 	
 	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --TransPort $trans_port --DNSPort $dns_port --ControlPort $control_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
-	client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
-	if [ -n "$client_listen_ip" ] ; then
-		OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
-	fi
+	if [ -n "$client_mode" ] && [ "$client_mode" != "0" ] ; then
+		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
+		
+		use_bridge_ip=$(uci get tor.client.use_bridge_ip 2>/dev/null)
+		use_bridge_port=$(uci get tor.client.use_bridge_port 2>/dev/null)
+		use_bridge_opbfsproxy=$(uci get tor.client.use_bridge_obfsproxy 2>/dev/null)
 
+		if [ -n "$client_listen_ip" ] ; then
+			OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
+		fi
+		if [ -n "$use_bridge_ip" ] && [ -n "$use_bridge_port" ] ; then
+			if [ "$use_bridge_obfsproxy" = "1" ] ; then
+				OPTIONS="$OPTIONS --UseBridges 1 --Bridge 'obfs2 $use_bridge_ip:$use_bridge_port' --ClientTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy --managed' "
+			else
+				OPTIONS="$OPTIONS --UseBridges 1 --Bridge '$use_bridge_ip:$use_bridge_port' "
+			fi
+		fi
+	fi
 
 	relay_options=""
 	if [ "$relay_mode" != "0" ] && [ -n "$relay_mode" ] ; then
