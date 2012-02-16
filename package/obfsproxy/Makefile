@@ -18,13 +18,20 @@ define Package/obfsproxy
 	SECTION:=net
 	CATEGORY:=Network
 	DEPENDS:=+libevent2 +libopenssl +libpthread +librt
-	PKG_SOURCE_URL:=https://git.torproject.org/obfsproxy.git
-	PKG_SOURCE_PROTO:=git
-	PKG_SOURCE_VERSION:=a58146de85899f73a2c8b9abe3b8de8b6cb25dc8
+	URL:=https://www.torproject.org/projects/obfsproxy-instructions.html
 endef
 
 define Package/obfsproxy/Default/description
 	Tor obfsproxy Plugin
+endef
+
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	rmdir  $(PKG_BUILD_DIR)
+	git clone https://git.torproject.org/obfsproxy.git $(PKG_BUILD_DIR)
+	cd $(PKG_BUILD_DIR) && git checkout $(LAST_COMMIT_FOR_VERSION) && rm -rf ./.git
+	$(Build/Patch)
 endef
 
 
