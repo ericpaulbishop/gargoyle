@@ -115,9 +115,6 @@ start()
 		fi
 		
 		relay_options=" $relay_options --RelayBandwidthRate '$max_bw_rate_kb KB' --RelayBandwidthBurst '$max_bw_burst_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*' "
-
-
-		eval "$BIN $OPTIONS $relay_options  --RelayBandwidthRate '$max_bw_rate_kb KB' --RelayBandwidthBurst '$max_bw_burst_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*' "
 	else
 		relay_options=" --ClientOnly 1"
 	fi
