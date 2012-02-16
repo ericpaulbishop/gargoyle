@@ -15,23 +15,23 @@ if [ "$enabled" != "0" ] && [ "$client_mode" != "0" ] ; then
 	
 
 	enabled_ip_file=$( uci get tor.client.enabled_ip_file 2>/dev/null)
-	dns_port=$( uci get tor.global.dns_port 2>/dev/null )
-	trans_port=$( uci get tor.global.trans_port 2>/dev/null )
+	dns_port=$( uci get tor.client.dns_port 2>/dev/null )
+	trans_port=$( uci get tor.client.trans_port 2>/dev/null )
 	zone=$( uci get tor.client.zone 2>/dev/null )
-	block_unsupported_proto=$( uci get tor.global.block_unsupported_proto 2>/dev/null )
+	block_unsupported_proto=$( uci get tor.client.block_unsupported_proto 2>/dev/null )
 	if [ -z "$zone" ] ; then 
 		zone="lan"
 	fi
 	zone_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null )
 	zone_mask=$(uci -P /var/state get network.$zone.netmask 2>/dev/null )
 	
-	hidden_service_subnet=$( uci get tor.global.hidden_service_subnet 2>/dev/null )
-	hidden_service_mask_bits=$( uci get tor.global.hidden_service_mask_bits 2>/dev/null )
+	hidden_service_subnet=$( uci get tor.client.hidden_service_subnet 2>/dev/null )
+	hidden_service_mask_bits=$( uci get tor.client.hidden_service_mask_bits 2>/dev/null )
 	if [ -z "$hidden_service_subnet" ] || [ -z "$hidden_service_mask_bits" ] ; then
 		hidden_service_subnet="10.192.0.0"
 		hidden_service_mask_bits="12"
-		uci set tor.global.hidden_service_subnet="$hidden_service_subnet"
-		uci set tor.global.hidden_service_mask_bits="$hidden_service_mask_bits"
+		uci set tor.client.hidden_service_subnet="$hidden_service_subnet"
+		uci set tor.client.hidden_service_mask_bits="$hidden_service_mask_bits"
 		uci commit
 	fi
 
