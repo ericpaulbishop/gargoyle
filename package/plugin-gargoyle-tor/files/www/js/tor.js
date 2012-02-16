@@ -175,7 +175,7 @@ function resetData()
 
 	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
 	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2" ) ? "0" : torRelayMode
-	torRelayMode  = torRelayMode == "1" && opPort != "0" && opPort != "" ? "3" : "1"
+	torRelayMode  = torRelayMode == "1" && opPort != "0" && opPort != "" ? "3" : torRelayMode
 
 	
 	
@@ -249,7 +249,7 @@ function setTorVisibility()
 	//relay visibility
 	var relayMode = getSelectedValue("tor_relay_mode")
 	var op        = relayMode == "3" ? 1 : 0
-	var r         = relayMode == "1" ? 1 : 0
+	var r         = relayMode == "2" ? 1 : 0
 	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,r,r] : [0,0,0,0,0])
 	
 	if(op==1)
