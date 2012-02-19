@@ -2537,3 +2537,36 @@ function getAltServerDefs()
 
 	return defs;
 }
+
+function set3GDevice(device)
+{
+	document.getElementById("wan_3g_device").value = device;
+}
+
+function scan3GDevice(field)
+{
+	setControlsEnabled(false, true, "Scanning For Mobile Devices");
+	var param = getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			var scannedDevices = [];
+			scannedDevices = req.responseText.split(/\n/);
+			scannedDevices.pop();
+			if(scannedDevices.length > 0)
+			{
+				setAllowableSelections(field, scannedDevices, scannedDevices);
+				document.getElementById("wan_3g_device").style.display = "none";
+				document.getElementById("wan_3g_list_device").style.display = "block";
+			}
+			else
+			{
+				alert("No devices found");
+			}
+			setControlsEnabled(true);
+		}
+	}
+	runAjax("POST", "utility/scan_3gdevices.sh", param, stateChangeFunction);
+}
