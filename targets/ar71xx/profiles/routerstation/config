@@ -1471,7 +1471,7 @@ CONFIG_PACKAGE_kmod-textsearch=y
 # USB Support
 #
 CONFIG_PACKAGE_kmod-usb-core=y
-# CONFIG_PACKAGE_kmod-usb-acm is not set
+CONFIG_PACKAGE_kmod-usb-acm=y
 # CONFIG_PACKAGE_kmod-usb-atm is not set
 # CONFIG_PACKAGE_kmod-usb-audio is not set
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
