@@ -314,10 +314,9 @@ initialize()
 		
 	
 		for i in $ids ; do
-			is_total123=$(echo "$i" | egrep "total[123]")
-			is_bdist123=$(echo "$i" | egrep "bdist[0123]")
-			is_qos123=$(echo "$i" | egrep "qos[0123]")
-			if [ -n "$is_total123" ] || [ -n "$is_bdist123" ] || [ -n "$is_qos123" ]  ; then
+			is_hr123=$(echo "$i" | egrep "\-hr\-[123]")
+			is_lr123=$(echo "$i" | egrep "\-lr\-[123]")
+			if [ -n "$is_hr123" ] || [ -n "$is_lr123" ]   ; then
 				bw_restore "$i" 1
 			else
 				bw_restore "$i" 0
