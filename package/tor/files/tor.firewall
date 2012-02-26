@@ -343,7 +343,12 @@ shutdown()
 }
 
 
-shutdown
-initialize
+RUN_MODE="$1"
 
+if [ -z "$RUN_MODE" ] || [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
+	shutdown
+	initialize
+elif [ "$RUN_MODE" = "stop" ] ; then
+	shutdown
+fi
 

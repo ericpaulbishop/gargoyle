@@ -136,12 +136,8 @@ stop()
 {
 	[ -f $PID_F ] && kill $(cat $PID_F)
 	[ -f $OPID_F ] && kill   $(cat $OPID_F)
-	
-	delete_chain_from_table nat tor_client
-	delete_chain_from_table filter tor_client
-	delete_chain_from_table filter tor_relay
-	delete_chain_from_table filter tor_relay_down_bw
-	delete_chain_from_table mangle tor_relay_up_bw
+
+	sh /etc/tor.firewall stop
 	
 	count=25
 	while [ $count -gt 0 ] && [ -f $PID_F ] ; do
@@ -153,8 +149,6 @@ stop()
 		[ -f $PID_F ]  && kill -9  $(cat $PID_F)
 		[ -f $OPID_F ] && kill -9  $(cat $OPID_F)
 	fi
-
-
 }
 
 restart()
