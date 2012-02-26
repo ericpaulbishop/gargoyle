@@ -228,9 +228,8 @@ initialize()
 		
 				
 				for p in $trans_port $dns_port ; do
-					iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-					iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-					iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
+					iptables -t filter -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
+					iptables -t mangle -A OUTPUT  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
 				done
 				
 			
@@ -296,9 +295,8 @@ initialize()
 			oport=""
 			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
 			for p in $relay_port $oport ; do
-				iptables -t filter -I INPUT        -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-				iptables -t filter -I FORWARD      -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-				iptables -t mangle -A POSTROUTING  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
+				iptables -t filter -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
+				iptables -t mangle -A OUTPUT  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
 			done
 	
 		fi
