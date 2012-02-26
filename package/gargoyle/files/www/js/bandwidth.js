@@ -103,7 +103,8 @@ function initializePlotsAndTable()
 
 	var haveQosUpload = false;
 	var haveQosDownload = false;
-	var haveTor = false;
+	var haveTorClient = false;
+	var haveTorRelay = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -136,7 +137,8 @@ function initializePlotsAndTable()
 				definedDownloadClasses[qosClass] = 1;
 			}
 		}
-		haveTor = monId.match(/tor/) ? true : haveTor;
+		haveTorClient = monId.match(/tor\-client/) ? true : haveTorClient;
+		haveTorRelay = monId.match(/tor\-relay/)  ? true : haveTorRelay;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -144,17 +146,22 @@ function initializePlotsAndTable()
 	{
 		var plotIdName = plotIdNames[idIndex];
 		if(haveQosUpload)
-		{	
+		{
 			addOptionToSelectElement(plotIdName, "QoS Upload Class", "qos-upload");
 		}
 		if(haveQosDownload)
 		{
 			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
 		}
-		if(haveTor)
+		if(haveTorClient)
 		{
-			addOptionToSelectElement(plotIdName, "Tor", "tor");
+			addOptionToSelectElement(plotIdName, "Tor Client", "tor-client");
 		}
+		if(haveTorRelay)
+		{
+			addOptionToSelectElement(plotIdName, "Tor Relay", "tor-relay");
+		}
+
 		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
 
@@ -214,9 +221,13 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 			plotType = "none"; //forces us to return null
 		}
 	}
-	else if(plotType.match(/tor/))
+	else if(plotType.match(/tor\-client/))
 	{
-		match1 = graphLowRes ? "tor-lr" + graphTimeFrameIndex : "tor-hr" + graphTimeFrameIndex;
+		match1 = graphLowRes ? "tor-client-lr" + graphTimeFrameIndex : "tor-client-hr" + graphTimeFrameIndex;
+	}
+	else if(plotType.match(/tor\-relay/))
+	{
+		match1 = graphLowRes ? "tor-relay-lr" + graphTimeFrameIndex : "tor-relay-hr" + graphTimeFrameIndex;
 	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
@@ -276,7 +287,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor-relay" && t != "tor-client" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
