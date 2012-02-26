@@ -300,7 +300,7 @@ function resetDisplayInterval()
 		{
 			var index = sortedIdIndices[idIndex]; 
 			var id = idList[ index ];
-		
+			id =  id == currentWanIp ? currentLanId : id ;	
 			
 			var tableRow = [getHostDisplay(id)];
 			var pieIndex;
