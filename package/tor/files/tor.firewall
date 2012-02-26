@@ -5,7 +5,9 @@
 # constants for tor bandwidth monitoring rules
 
 backup_script_dir="/tmp/bw_backup"
-backup_script="$backup_dir/do_tor_bw_backup.sh"
+backup_script="$backup_script_dir/do_tor_bw_backup.sh"
+tmp_cron="/tmp/tmp.tor.cron"
+
 
 minute_s=60
 hour_s=3600
@@ -221,7 +223,7 @@ initialize()
 					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-client-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-client-$res$n-download-$interval-$num_intervals tor-client-$res$n-upload-$interval-$num_intervals"
-					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" else bw_ids="$bw_ids $next_ids" fi
+					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 				done
 		
 				
@@ -241,7 +243,7 @@ initialize()
 	
 	
 	
-	if [ "$enabled" != "0"  && "$relay_mode" != "0" ] ; then
+	if [ "$enabled" != "0" ]  && [ "$relay_mode" != "0" ] ; then
 		relay_zone=$(uci get tor.relay.zone)
 		relay_port=$(uci get tor.relay.relay_port)
 		obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
@@ -286,7 +288,7 @@ initialize()
 					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-relay-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-relay-$res$n-download-$interval-$num_intervals tor-relay-$res$n-upload-$interval-$num_intervals"
-					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" else bw_ids="$bw_ids $next_ids" fi
+					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 				done
 	
 			done
@@ -308,7 +310,7 @@ initialize()
 		grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 		echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 		
-		mkdir -p "$backup_dir"
+		mkdir -p "$backup_script_dir"
 		echo "#!/bin/sh" > "$backup_script"
 		chmod 700 "$backup_script"
 		
