@@ -106,10 +106,10 @@ clear_chains()
 	delete_chain_from_table filter tor_client
 	delete_chain_from_table filter tor_relay
 	
-	delete_chain_from_table filter tor_client_down_bw
+	delete_chain_from_table mangle tor_client_down_bw
 	delete_chain_from_table mangle tor_client_up_bw
 	
-	delete_chain_from_table filter tor_relay_down_bw
+	delete_chain_from_table mangle tor_relay_down_bw
 	delete_chain_from_table mangle tor_relay_up_bw
 
 }
@@ -206,6 +206,8 @@ initialize()
 	
 	
 		#monitor client bandwidth
+		iptables -t mangle -N tor_relay_down_bw
+		iptables -t mangle -N tor_relay_up_bw
 		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
 		if [ -z "$relay_if" ] ; then
 			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
@@ -219,7 +221,7 @@ initialize()
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
 					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
 	
-					iptables -t filter -A tor_relay_down_bw  -m bandwidth --id "tor-client-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_relay_down_bw  -m bandwidth --id "tor-client-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-client-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-client-$res$n-download-$interval-$num_intervals tor-client-$res$n-upload-$interval-$num_intervals"
@@ -228,8 +230,8 @@ initialize()
 		
 				
 				for p in $trans_port $dns_port ; do
-					iptables -t filter -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-					iptables -t mangle -A OUTPUT  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
+					iptables -t mangle -I INPUT   -i $wan_if -p tcp --dport $p -j tor_relay_down_bw
+					iptables -t mangle -A OUTPUT  -o $wan_if -p tcp --sport $p -j tor_relay_up_bw
 				done
 				
 			
@@ -255,7 +257,7 @@ initialize()
 		iptables -t filter -I input_${relay_zone} -j tor_relay
 	
 	
-		iptables -t filter -N tor_relay_down_bw
+		iptables -t mangle -N tor_relay_down_bw
 		iptables -t mangle -N tor_relay_up_bw
 	
 		reset_interval=$((60*15))
@@ -283,7 +285,7 @@ initialize()
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
 					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
 	
-					iptables -t filter -A tor_relay_down_bw  -m bandwidth --id "tor-relay-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_relay_down_bw  -m bandwidth --id "tor-relay-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-relay-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-relay-$res$n-download-$interval-$num_intervals tor-relay-$res$n-upload-$interval-$num_intervals"
@@ -295,7 +297,7 @@ initialize()
 			oport=""
 			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
 			for p in $relay_port $oport ; do
-				iptables -t filter -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
+				iptables -t mangle -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
 				iptables -t mangle -A OUTPUT  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
 			done
 	
