@@ -1,6 +1,6 @@
 function setTorData()
 {
-	if(torEnabled == "2")
+	if(torEnabled == "1" && torClientMode == "2")
 	{
 		document.getElementById("tor_fields").style.display="block";
 

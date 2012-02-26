@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tor
-PKG_VERSION:=0.2.3.11-alpha
+PKG_VERSION:=0.2.3.12-alpha
 PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=917f2952f464371727641320292c9a9e
+PKG_MD5SUM:=16dc8b7567662750e33f35afbbc6f089
 
 PKG_INSTALL:=1
 
@@ -149,7 +149,7 @@ endef
 define Package/tor
 $(call Package/tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
+  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
 define Package/tor-geoip
