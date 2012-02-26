@@ -130,10 +130,76 @@ function proofreadAll()
 	}
 
 	var errors = proofreadFields(inputIds, labelIds, functions, returnCodes, visIds);
-	if( document.getElementById("tor_obfsproxy_port").value ==  document.getElementById("tor_relay_port").value && getSelectedValue("tor_relay_mode") != "0")
+	
+
+	if(getSelectedValue("tor_relay_mode") != "0" )
 	{
-		errors.push("Bridge Server Obfsproxy Port Cannot Be The Same As Bridge/Relay Port");
+		var relayPort = document.getElementById("tor_relay_port").value ;
+		var obfsPort  = document.getElementById("tor_obfsproxy_port_container").display != "none" ? document.getElementById("tor_obfsproxy_port").value : "";
+	
+
+		var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+		var sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
+
+		var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
+		var httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
+
+
+
+		var remoteHttpsPort = "";
+		var remoteHttpPort  = "";
+		var remoteSshPort = "";
+		var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+		var acceptIndex=0;
+		for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
+		{
+			var section = remoteAcceptSections[acceptIndex];
+			var localPort = uciOriginal.get("firewall", section, "local_port");
+			var remotePort = uciOriginal.get("firewall", section, "remote_port");
+			var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+			var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+			if((zone == "wan" || zone == "") && (proto == "tcp" || proto == ""))
+			{
+				remotePort = remotePort == "" ? localPort : remotePort;
+				if(localPort == httpsPort)
+				{
+					remoteHttpsPort = remotePort;
+				}
+				else if(localPort == httpPort)
+				{
+					remoteHttpPort = remotePort;
+				}
+				else if(localPort == sshPort)
+				{
+					remoteSshPort = remotePort;
+				}
+			}
+		}
+
+		var relayType = getSelectedValue("tor_relay_mode") == "1" ? "Relay" : "Bridge";
+		if(relayPort == obfsPort)
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Bridge/Relay Port");
+		}
+		if(relayPort == httpPort || relayPort == httpsPort || relayPort == remoteHttpPort || relayPort == remoteHttpsPort)
+		{
+			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router Web Server Port");
+		}
+		if(obfsPort == httpPort || obfsPort == httpsPort || obfsPort == remoteHttpPort || obfsPort == remoteHttpsPort)
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router Web Server Port");
+		}
+		if(relayPort == sshPort || relayPort == remoteSshPort )
+		{
+			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router SSH Port");
+		}
+		if(obfsPort == sshPort || obfsPort == remoteSshPort )
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router SSH Port");
+		}
+
 	}
+
 	return errors;
 }
 
@@ -177,7 +243,6 @@ function resetData()
 	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2" ) ? "0" : torRelayMode
 	torRelayMode  = torRelayMode == "1" && opPort != "0" && opPort != "" ? "3" : torRelayMode
 
-	
 	
 	//client 
 	var blockOtherProtos = uciOriginal.get("tor", "client", "block_unsupported_proto") == "1" ? "1" : "0"
