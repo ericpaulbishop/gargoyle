@@ -108,6 +108,9 @@
 			<textarea class="rightcolumn" id='tor_relay_contact' ></textarea>
 		</div>
 
+		<div id='tor_relay_status_link_container'>
+			<span class='nocolum'>Within 1-2 hours of activating your relay, it should be visible <a href="http://torstatus.blutmagie.de/">in the global list</a></span>
+		</div>
 
 	
 	</fieldset>

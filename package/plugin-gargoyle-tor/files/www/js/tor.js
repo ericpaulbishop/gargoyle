@@ -197,7 +197,6 @@ function proofreadAll()
 		{
 			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router SSH Port");
 		}
-
 	}
 
 	return errors;
@@ -315,7 +314,7 @@ function setTorVisibility()
 	var relayMode = getSelectedValue("tor_relay_mode")
 	var op        = relayMode == "3" ? 1 : 0
 	var r         = relayMode == "2" ? 1 : 0
-	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,r,r] : [0,0,0,0,0])
+	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container", "tor_relay_status_link_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,r,r,r] : [0,0,0,0,0,0])
 	
 	if(op==1)
 	{
