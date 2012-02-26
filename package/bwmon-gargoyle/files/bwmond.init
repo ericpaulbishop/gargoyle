@@ -4,7 +4,8 @@ START=55
 include /lib/network
 include /usr/lib/gargoyle_firewall_util
 
-backup_script="/tmp/do_bw_backup.sh"
+backup_script_dir="/tmp/bw_backup"
+backup_script="$backup_dir/do_bw_backup.sh"
 tmp_cron="/tmp/tmp.cron"
 download_table=filter
 download_chain=bw_ingress
@@ -231,6 +232,7 @@ start()
 	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 	
+	mkdir -p "$backup_dir"
 	echo "#!/bin/sh" > "$backup_script"
 	chmod 700 "$backup_script"
 	
