@@ -581,7 +581,7 @@ function doUpdate()
 										ip = ipList[0];
 									}
 									
-								
+									ip = ip == null ? "" : getRealIp(ip);
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
 									{
