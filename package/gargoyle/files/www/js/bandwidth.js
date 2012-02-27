@@ -1,5 +1,5 @@
 /*
- * This program is copyright 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -103,8 +103,7 @@ function initializePlotsAndTable()
 
 	var haveQosUpload = false;
 	var haveQosDownload = false;
-	var haveTorClient = false;
-	var haveTorRelay = false;
+	var haveTor = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -137,8 +136,7 @@ function initializePlotsAndTable()
 				definedDownloadClasses[qosClass] = 1;
 			}
 		}
-		haveTorClient = monId.match(/tor\-client/) ? true : haveTorClient;
-		haveTorRelay = monId.match(/tor\-relay/)  ? true : haveTorRelay;
+		haveTorClient = monId.match(/tor/) ? true : haveTor;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -153,13 +151,9 @@ function initializePlotsAndTable()
 		{
 			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
 		}
-		if(haveTorClient)
+		if(haveTor)
 		{
-			addOptionToSelectElement(plotIdName, "Tor Client", "tor-client");
-		}
-		if(haveTorRelay)
-		{
-			addOptionToSelectElement(plotIdName, "Tor Relay", "tor-relay");
+			addOptionToSelectElement(plotIdName, "Tor", "tor");
 		}
 
 		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
@@ -223,13 +217,9 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 			plotType = "none"; //forces us to return null
 		}
 	}
-	else if(plotType.match(/tor\-client/))
+	else if(plotType.match(/tor/))
 	{
-		match1 = graphLowRes ? "tor-client-lr" + graphTimeFrameIndex : "tor-client-hr" + graphTimeFrameIndex;
-	}
-	else if(plotType.match(/tor\-relay/))
-	{
-		match1 = graphLowRes ? "tor-relay-lr" + graphTimeFrameIndex : "tor-relay-hr" + graphTimeFrameIndex;
+		match1 = graphLowRes ? "tor-lr" + graphTimeFrameIndex : "tor-hr" + graphTimeFrameIndex;
 	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
@@ -289,7 +279,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor-relay" && t != "tor-client" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
