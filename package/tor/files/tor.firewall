@@ -268,7 +268,7 @@ initialize()
 		
 			# create rules to backup bandwidth data 
 			touch /etc/crontabs/root
-			grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/create_tor_ipset > "$tmp_cron"
+			grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_tor_ipset > "$tmp_cron"
 			echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
 			echo "* * * * * /usr/sbin/update_tor_ipset" >> "$tmp_cron"
 
@@ -303,7 +303,7 @@ shutdown()
 		rm -rf "$backup_script"
 	fi
 
-	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/create_tor_ipset > "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_tor_ipset > "$tmp_cron"
 	update_cron
 
 	clear_chains
