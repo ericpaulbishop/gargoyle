@@ -203,7 +203,9 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 
 	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
-	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+
+
 
 	if(plotType == "total")
 	{
