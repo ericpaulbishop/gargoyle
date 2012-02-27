@@ -206,13 +206,13 @@ initialize()
 	
 	
 		#monitor client bandwidth
-		iptables -t mangle -N tor_relay_down_bw
-		iptables -t mangle -N tor_relay_up_bw
-		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		iptables -t mangle -N tor_client_down_bw
+		iptables -t mangle -N tor_client_up_bw
+		lan_if=$(uci -P /var/state get network.lan.ifname 2>/dev/null)
 		if [ -z "$relay_if" ] ; then
-			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
+			lan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
 		fi
-		if [ -n "$wan_if" ] ; then
+		if [ -n "$lan_if" ] ; then
 			for n in $mon_nums ; do
 				
 				for res in "hr" "lr" ; do
@@ -221,22 +221,31 @@ initialize()
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
 					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
 	
-					iptables -t mangle -A tor_relay_down_bw  -m bandwidth --id "tor-client-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
-					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-client-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_client_down_bw  -m bandwidth --id "tor-client-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_client_up_bw    -m bandwidth --id "tor-client-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-client-$res$n-download-$interval-$num_intervals tor-client-$res$n-upload-$interval-$num_intervals"
 					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 				done
 		
 				
-				for p in $trans_port $dns_port ; do
-					iptables -t mangle -I INPUT   -i $wan_if -p tcp --dport $p -j tor_relay_down_bw
-					iptables -t mangle -A OUTPUT  -o $wan_if -p tcp --sport $p -j tor_relay_up_bw
-				done
 				
 			
 			done
-		
+			
+			for p in $trans_port $dns_port ; do
+				protos="tcp"
+				if [ "$p" = "$dns_port" ] ; then
+					protos="tcp udp"
+				fi
+				for proto in $protos ; do
+					iptables -t mangle -I INPUT   -p $proto --dport $p -j tor_client_up_bw
+					iptables -t mangle -A OUTPUT  -p $proto --sport $p -j tor_client_down_bw
+				done
+
+			done
+
+
 		fi
 	
 	fi
