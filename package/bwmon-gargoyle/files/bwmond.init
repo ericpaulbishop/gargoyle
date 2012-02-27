@@ -146,8 +146,8 @@ start()
 		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
 		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
-			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $download_table -A $download_chain ! -d  255.255.255.255/0.0.0.255 -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $upload_table   -A $upload_chain   ! -d  255.255.255.255/0.0.0.255 -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ids="bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 	else
@@ -179,8 +179,8 @@ start()
 		fi
 
 		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
-			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			iptables -t $upload_table -A $upload_chain -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $download_table -A $download_chain ! -d  255.255.255.255/0.0.0.255 -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			iptables -t $upload_table   -A $upload_chain   ! -d  255.255.255.255/0.0.0.255 -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ids="$ids bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 
