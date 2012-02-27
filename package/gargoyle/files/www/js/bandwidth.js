@@ -424,6 +424,7 @@ function parseMonitors(outputData)
 		return monitors;
 	}
 
+
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
@@ -431,7 +432,6 @@ function parseMonitors(outputData)
 		{
 			var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
 			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
-
 			lineIndex++; 
 			var firstTimeStart = dataLines[lineIndex];
 			lineIndex++;

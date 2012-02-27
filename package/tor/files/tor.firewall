@@ -55,6 +55,7 @@ bw_ids=""
 
 
 
+
 bw_restore()
 {
 	bw_id="$1"
@@ -106,11 +107,8 @@ clear_chains()
 	delete_chain_from_table filter tor_client
 	delete_chain_from_table filter tor_relay
 	
-	delete_chain_from_table mangle tor_client_down_bw
-	delete_chain_from_table mangle tor_client_up_bw
-	
-	delete_chain_from_table mangle tor_relay_down_bw
-	delete_chain_from_table mangle tor_relay_up_bw
+	delete_chain_from_table mangle tor_down_bw
+	delete_chain_from_table mangle tor_up_bw
 
 }
 
@@ -203,53 +201,8 @@ initialize()
 			fi
 		fi
 		iptables -t nat -I zone_${zone}_prerouting $test_tor_active -j tor_client
-	
-	
-		#monitor client bandwidth
-		iptables -t mangle -N tor_client_down_bw
-		iptables -t mangle -N tor_client_up_bw
-		lan_if=$(uci -P /var/state get network.lan.ifname 2>/dev/null)
-		if [ -z "$relay_if" ] ; then
-			lan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
-		fi
-		if [ -n "$lan_if" ] ; then
-			for n in $mon_nums ; do
-				
-				for res in "hr" "lr" ; do
-					interval=$(eval "echo \$$res"$n"_interval")
-					num_intervals=$(eval "echo \$$res"$n"_num_intervals")
-					reset_time=$(eval "echo \$$res"$n"_reset_time")
-					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
-	
-					iptables -t mangle -A tor_client_down_bw  -m bandwidth --id "tor-client-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
-					iptables -t mangle -A tor_client_up_bw    -m bandwidth --id "tor-client-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
-					
-					next_ids="tor-client-$res$n-download-$interval-$num_intervals tor-client-$res$n-upload-$interval-$num_intervals"
-					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
-				done
 		
-				
-				
-			
-			done
-			
-			for p in $trans_port $dns_port ; do
-				protos="tcp"
-				if [ "$p" = "$dns_port" ] ; then
-					protos="tcp udp"
-				fi
-				for proto in $protos ; do
-					iptables -t mangle -I INPUT   -p $proto --dport $p -j tor_client_up_bw
-					iptables -t mangle -A OUTPUT  -p $proto --sport $p -j tor_client_down_bw
-				done
-
-			done
-
-
-		fi
-	
 	fi
-	
 	
 	
 	
@@ -264,29 +217,19 @@ initialize()
 			iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
 		fi
 		iptables -t filter -I input_${relay_zone} -j tor_relay
+	fi
 	
-	
-		iptables -t mangle -N tor_relay_down_bw
-		iptables -t mangle -N tor_relay_up_bw
-	
-		reset_interval=$((60*15))
-		num_intervals=$((24*15))
-		
-		wait_sec=5
-		while [ -z "$(uci -P /var/state get network.$relay_zone.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
-			sleep 1
-			wait_sec=$(($wait_sec - 1))
-		done
-	
-	
-		# monitor relay bandwidth
-		relay_if=$(uci -P /var/state get network.$relay_zone.ifname 2>/dev/null)
-		if [ -z "$relay_if" ] ; then
-			relay_if=$(uci -P /var/state get network.$relay_zone.device 2>/dev/null)
+	if [ "$enabled" != "0" ]  && [ "$relay_mode$client_mode" != "00" ] ; then
+
+		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		if [ -z "$wan_if" ] ; then
+			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
 		fi
-		
-		if [ -n "$relay_if" ] ; then
-	
+		if [ -n "$wan_if" ] ; then
+			
+			# create tor bandwidth monitor rules
+			iptables -t mangle -N tor_down_bw
+			iptables -t mangle -N tor_up_bw
 			for n in $mon_nums ; do
 				for res in "hr" "lr" ; do
 					interval=$(eval "echo \$$res"$n"_interval")
@@ -294,47 +237,60 @@ initialize()
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
 					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
 	
-					iptables -t mangle -A tor_relay_down_bw  -m bandwidth --id "tor-relay-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
-					iptables -t mangle -A tor_relay_up_bw    -m bandwidth --id "tor-relay-$res$n-upload-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_down_bw  -m bandwidth --id "tor-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A tor_up_bw    -m bandwidth --id "tor-$res$n-upload-$interval-$num_intervals"   --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 					next_ids="tor-relay-$res$n-download-$interval-$num_intervals tor-relay-$res$n-upload-$interval-$num_intervals"
 					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 				done
-	
 			done
-	
+			iptables -t mangle -A tor_down_bw -j CONNMARK --set-mark 0x0/0xF0000000
+			iptables -t mangle -A tor_up_bw   -j CONNMARK --set-mark 0x0/0xF0000000
+
+
+			# create rules to match tor traffic, and jump to tor bandwidth chain
+			relay_port=$(uci get tor.relay.relay_port)
+			obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
 			oport=""
+			rport=""
+			if [ "$relay_mode" != "0" ] ; then rport="$relay_port" ; fi
 			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
-			for p in $relay_port $oport ; do
-				iptables -t mangle -I INPUT   -i $relay_if -p tcp --dport $p -j tor_relay_down_bw
-				iptables -t mangle -A OUTPUT  -o $relay_if -p tcp --sport $p -j tor_relay_up_bw
+			
+			for p in $rport $oport ; do
+				iptables -t mangle -A INPUT   -i $wan_if -p tcp --dport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
+				iptables -t mangle -A OUTPUT  -o $wan_if -p tcp --sport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
 			done
+			iptables -t mangle -A INPUT  -i $wan_if -m set --match-set tor_relays src -j CONNMARK --set-mark 0xF0000000/0xF0000000
+			iptables -t mangle -A OUTPUT -o $wan_if -m set --match-set tor_relays dst -j CONNMARK --set-mark 0xF0000000/0xF0000000
+			iptables -t mangle -A INPUT  -m connmark --mark 0xF0000000/0xF0000000 -j  tor_down_bw
+			iptables -t mangle -A OUTPUT -m connmark --mark 0xF0000000/0xF0000000 -j  tor_up_bw
+
+		
+			# create rules to backup bandwidth data 
+			touch /etc/crontabs/root
+			grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/create_tor_ipset > "$tmp_cron"
+			echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
+			echo "* * * * * /usr/sbin/update_tor_ipset" >> "$tmp_cron"
+
+		
+			mkdir -p "$backup_script_dir"
+			echo "#!/bin/sh" > "$backup_script"
+			chmod 700 "$backup_script"
+		
 	
+			for i in $bw_ids ; do
+				is_hr123=$(echo "$i" | egrep "\-hr\-[123]")
+				is_lr123=$(echo "$i" | egrep "\-lr\-[123]")
+				if [ -n "$is_hr123" ] || [ -n "$is_lr123" ]   ; then
+					bw_restore "$i" 1
+				else
+					bw_restore "$i" 0
+				fi
+			done
+		
+			update_cron
+
 		fi
-	fi
-	
-	
-	if [ -n "$bw_ids" ] ; then
-		touch /etc/crontabs/root
-		grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
-		echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
-		
-		mkdir -p "$backup_script_dir"
-		echo "#!/bin/sh" > "$backup_script"
-		chmod 700 "$backup_script"
-		
-	
-		for i in $bw_ids ; do
-			is_hr123=$(echo "$i" | egrep "\-hr\-[123]")
-			is_lr123=$(echo "$i" | egrep "\-lr\-[123]")
-			if [ -n "$is_hr123" ] || [ -n "$is_lr123" ]   ; then
-				bw_restore "$i" 1
-			else
-				bw_restore "$i" 0
-			fi
-		done
-	
-		update_cron 
 	fi
 }
 
@@ -347,7 +303,7 @@ shutdown()
 		rm -rf "$backup_script"
 	fi
 
-	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/create_tor_ipset > "$tmp_cron"
 	update_cron
 
 	clear_chains
