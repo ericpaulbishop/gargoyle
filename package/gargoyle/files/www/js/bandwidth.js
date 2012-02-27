@@ -418,7 +418,7 @@ function parseMonitors(outputData)
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
-		if(dataLines[lineIndex].length > 0)
+		if(dataLines[lineIndex] != null && dataLines[lineIndex].length > 0)
 		{
 			var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
 			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
@@ -429,9 +429,15 @@ function parseMonitors(outputData)
 			lineIndex++; 
 			var lastTimePoint = dataLines[lineIndex];
 			lineIndex++;
-			var points = dataLines[lineIndex].split(",");
-			monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
-			monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+			if(dataLines[lineIndex] != null)
+			{
+				if(dataLines[lineIndex].match(/,/))
+				{
+					var points = dataLines[lineIndex].split(",");
+					monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
+					monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+				}
+			}
 		}
 	}
 	return monitors;
