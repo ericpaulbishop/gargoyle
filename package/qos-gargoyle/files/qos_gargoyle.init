@@ -442,6 +442,11 @@ initialize_qos()
 		iptables -t mangle -N qos_egress
 		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
 
+		#Next the user entered rules.
+		$echo_off
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
+		$echo_on
+
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_egress -j MARK --set-mark $def_upload_class
 
@@ -453,9 +458,6 @@ initialize_qos()
 		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
 
 		$echo_off
-
-		#Next the user entered rules.
-		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
 
 	fi
 
@@ -589,6 +591,11 @@ initialize_qos()
 		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
 		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
 
+		#Now the rest of the user entered rules.
+		$echo_off
+		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
+		$echo_on
+
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
 
@@ -603,9 +610,6 @@ initialize_qos()
 		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
 
 		$echo_off
-
-		#Now the rest of the user entered rules.
-		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 
 	fi
 
