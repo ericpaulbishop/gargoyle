@@ -136,7 +136,7 @@ function initializePlotsAndTable()
 				definedDownloadClasses[qosClass] = 1;
 			}
 		}
-		haveTorClient = monId.match(/tor/) ? true : haveTor;
+		haveTor = monId.match(/tor/) ? true : haveTor;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
