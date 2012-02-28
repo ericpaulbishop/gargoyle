@@ -93,7 +93,7 @@ function saveChanges()
 				uci.set('tor', 'relay', 'obfsproxy_port', "0")
 			}
 
-			uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
+			//uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
 
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
