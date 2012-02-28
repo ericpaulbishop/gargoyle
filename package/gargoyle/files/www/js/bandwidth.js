@@ -428,14 +428,15 @@ function parseMonitors(outputData)
 			var firstTimeEnd = dataLines[lineIndex];
 			lineIndex++; 
 			var lastTimePoint = dataLines[lineIndex];
-			lineIndex++;
-			if(dataLines[lineIndex] != null)
+			if(dataLines[lineIndex+1] != null)
 			{
-				if(dataLines[lineIndex].match(/,/))
+				lineIndex++;
+				if(dataLines[lineIndex].match(/,/) || dataLines[lineIndex].match(/^[0-9]+$/))
 				{
 					var points = dataLines[lineIndex].split(",");
 					monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
 					monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+					found = 1
 				}
 			}
 		}
