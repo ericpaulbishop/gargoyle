@@ -227,9 +227,33 @@ initialize()
 		fi
 		if [ -n "$wan_if" ] ; then
 			
-			# create tor bandwidth monitor rules
+			# create tor bandwidth monitor chains
 			iptables -t mangle -N tor_down_bw
 			iptables -t mangle -N tor_up_bw
+
+			# first, test if traffic is tor, otherwise return
+			# traffic is tor if it's to/from the router itself AND
+			# either to the ORPort/obfsproxy port OR to/from an IP that is a known relay
+			# an ipset of known relays, "tor_relays" is built by the /usr/sbin/tor_ipset command
+			/usr/sbin/update_tor_ipset
+			relay_port=$(uci get tor.relay.relay_port)
+			obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
+			oport=""
+			rport=""
+			if [ "$relay_mode" != "0" ] ; then rport="$relay_port" ; fi
+			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
+
+			for p in $rport $oport ; do
+				iptables -t mangle -A tor_down_bw -p tcp --dport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
+				iptables -t mangle -A tor_up_bw   -p tcp --sport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
+			done
+			iptables -t mangle -A tor_down_bw -m set --match-set tor_relays src -j CONNMARK --set-mark 0xF0000000/0xF0000000
+			iptables -t mangle -A tor_up_bw   -m set --match-set tor_relays dst -j CONNMARK --set-mark 0xF0000000/0xF0000000
+			iptables -t mangle -A tor_down_bw -m connmark ! --mark 0xF0000000/0xF0000000 -j RETURN
+			iptables -t mangle -A tor_up_bw   -m connmark ! --mark 0xF0000000/0xF0000000 -j RETURN
+
+
+			# add monitoring rules
 			for n in $mon_nums ; do
 				for res in "hr" "lr" ; do
 					interval=$(eval "echo \$$res"$n"_interval")
@@ -244,29 +268,19 @@ initialize()
 					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 				done
 			done
+
+
+			#clear connmark we set
 			iptables -t mangle -A tor_down_bw -j CONNMARK --set-mark 0x0/0xF0000000
 			iptables -t mangle -A tor_up_bw   -j CONNMARK --set-mark 0x0/0xF0000000
 
 
-			# create rules to match tor traffic, and jump to tor bandwidth chain
-			relay_port=$(uci get tor.relay.relay_port)
-			obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
-			oport=""
-			rport=""
-			if [ "$relay_mode" != "0" ] ; then rport="$relay_port" ; fi
-			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
-			
-			for p in $rport $oport ; do
-				iptables -t mangle -A INPUT   -i $wan_if -p tcp --dport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
-				iptables -t mangle -A OUTPUT  -o $wan_if -p tcp --sport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			done
-			iptables -t mangle -A INPUT  -i $wan_if -m set --match-set tor_relays src -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			iptables -t mangle -A OUTPUT -o $wan_if -m set --match-set tor_relays dst -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			iptables -t mangle -A INPUT  -m connmark --mark 0xF0000000/0xF0000000 -j  tor_down_bw
-			iptables -t mangle -A OUTPUT -m connmark --mark 0xF0000000/0xF0000000 -j  tor_up_bw
+			# create rules to jump to tor bandwidth chain
+			iptables -t mangle -A INPUT   -i $wan_if -p tcp -j tor_down_bw
+			iptables -t mangle -A OUTPUT  -o $wan_if -p tcp -j tor_up_bw
 
 		
-			# create rules to backup bandwidth data 
+			# enable backups of bandwidth data & rebuilding tor_relays ipset
 			touch /etc/crontabs/root
 			grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_tor_ipset > "$tmp_cron"
 			echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
