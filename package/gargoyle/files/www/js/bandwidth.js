@@ -420,23 +420,26 @@ function parseMonitors(outputData)
 	{
 		if(dataLines[lineIndex] != null && dataLines[lineIndex].length > 0)
 		{
-			var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
-			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
-			lineIndex++; 
-			var firstTimeStart = dataLines[lineIndex];
-			lineIndex++;
-			var firstTimeEnd = dataLines[lineIndex];
-			lineIndex++; 
-			var lastTimePoint = dataLines[lineIndex];
-			if(dataLines[lineIndex+1] != null)
+			if(dataLines[lineIndex].match(/ /))
 			{
+				var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
+				var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
+				lineIndex++; 
+				var firstTimeStart = dataLines[lineIndex];
 				lineIndex++;
-				if(dataLines[lineIndex].match(/,/) || dataLines[lineIndex].match(/^[0-9]+$/))
+				var firstTimeEnd = dataLines[lineIndex];
+				lineIndex++; 
+				var lastTimePoint = dataLines[lineIndex];
+				if(dataLines[lineIndex+1] != null)
 				{
-					var points = dataLines[lineIndex].split(",");
-					monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
-					monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
-					found = 1
+					if(dataLines[lineIndex+1].match(/,/) || dataLines[lineIndex+1].match(/^[0-9]+$/))
+					{
+						lineIndex++;
+						var points = dataLines[lineIndex].split(",");
+						monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
+						monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+						found = 1
+					}
 				}
 			}
 		}
