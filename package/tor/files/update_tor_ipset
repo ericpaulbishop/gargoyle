@@ -1,6 +1,9 @@
 #!/bin/sh
 
-cache_file="/var/tor/cached-microdesc-consensus"
+cache_file="/var/tor/cached-consensus"
+if [ ! -f "$cache_file" ] ; then
+	cache_file="/var/tor/cached-microdesc-consensus"
+fi
 
 ipset --create  tor_relays iphash >/dev/null 2>&1
 old_md5sum=""
