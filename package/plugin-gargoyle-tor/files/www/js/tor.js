@@ -93,6 +93,10 @@ function saveChanges()
 				uci.set('tor', 'relay', 'obfsproxy_port', "0")
 			}
 
+			var publish = torRelayMode == "2" || getSelectedValue("tor_relay_publish") == "1" ? "1" : "0" ;
+			uci.set('tor', 'relay', 'publish', publish);
+
+
 			//uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
 
 		}
@@ -288,6 +292,7 @@ function resetData()
 		val = (val == "" && (rvars[rvIndex][0]).match(/obfsproxy/)) ? "0" : val
 		document.getElementById(  rvars[rvIndex][1] ).value = val
 	}
+	setSelectedValue("tor_relay_publish", uciOriginal.get("tor", "relay", "publish"));
 
 	setTorVisibility()
 }
@@ -312,9 +317,10 @@ function setTorVisibility()
 
 	//relay visibility
 	var relayMode = getSelectedValue("tor_relay_mode")
-	var op        = relayMode == "3" ? 1 : 0
-	var r         = relayMode == "2" ? 1 : 0
-	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container", "tor_relay_nickname_container", "tor_relay_contact_container", "tor_relay_status_link_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,r,r,r] : [0,0,0,0,0,0])
+	var op        = relayMode == "3"                     ? 1 : 0
+	var r         = relayMode == "2"                     ? 1 : 0
+	var b         = relayMode == "1" || relayMode == "3" ? 1 : 0 
+	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container",'tor_relay_publish_container', "tor_relay_nickname_container", "tor_relay_contact_container", "tor_relay_status_link_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,b,r,r,r] : [0,0,0,0,0,0,0])
 	
 	if(op==1)
 	{

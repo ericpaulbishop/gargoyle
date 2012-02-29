@@ -98,6 +98,15 @@
 			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;KBytes/s</em></span>
 		</div>
 
+		<div id='tor_relay_publish_container'>
+			<label  class='wideleftcolumn' for='tor_relay_publish' id='tor_relay_publish_label'>Publish Bridge in Public Database:</label>
+			<select class="rightcolumn" id="tor_relay_publish">
+				<option value="1">Publish Bridge Info</option>
+				<option value="0">Do Not Publish Bridge Info</option>
+			</select>
+		</div>
+
+
 		<div id='tor_relay_nickname_container'>
 			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname (optional):</label>
 			<input type="text" class="rightcolumn" id='tor_relay_nickname' />
