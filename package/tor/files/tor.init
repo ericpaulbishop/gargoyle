@@ -98,7 +98,8 @@ start()
 		relay_nickname=$( uci get tor.relay.relay_nickname )
 		relay_contact=$( uci get tor.relay.relay_contact )
 		obfsproxy_port=$( uci get tor.relay.obfsproxy_port )
-		
+		publish=$(uci get tor.relay.publish )
+
 		relay_ip=0.0.0.0
 				
 		relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
@@ -117,6 +118,9 @@ start()
 		fi
 		if [ -n "$max_bw_burst_kb" ] ; then
 			relay_options=" $relay_options --RelayBandwidthBurst '$max_bw_burst_kb KB' "
+		fi
+		if [ -n "$publish" ] ; then
+			relay_options=" $relay_options --PublishServerDescriptor $publish "
 		fi
 		
 		relay_options=" $relay_options --RelayBandwidthRate '$max_bw_rate_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*' "
