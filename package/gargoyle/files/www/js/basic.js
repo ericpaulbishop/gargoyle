@@ -1232,6 +1232,10 @@ function localdate(ldate)
 	{
 		ldateStr = d + "/" + m + "/" + y2 + h;
 	}
+	else if(systemDateFormat == "russia")
+	{
+		ldateStr = d + "." + m + "." + y2 + h;
+	}
 	else
 	{
 		ldateStr = m + "/" + d + "/" + y2 + h;

@@ -61,6 +61,8 @@ var passInvalid = false;
 		current_time=$(date "+%Y/%m/%d %H:%M %Z")
 	elif [ "$dateformat" == "australia" ]; then
 		current_time=$(date "+%d/%m/%y %H:%M %Z")
+	elif [ "$dateformat" == "russia" ]; then
+		current_time=$(date "+%d.%m.%Y %H:%M %Z")
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
