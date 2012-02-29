@@ -56,6 +56,7 @@ function saveChanges()
 		//update command to output date
 		var formatStrings=[];
 		formatStrings["iso"] = "\"+%Y/%m/%d %H:%M %Z\"";
+		formatStrings["iso8601"] = "\"+%Y-%m-%d %H:%M %Z\"";
 		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
 		formatStrings["usa"] = "\"+%d/%m/%y %H:%M %Z\"";
 		var outputDateCommand = "";

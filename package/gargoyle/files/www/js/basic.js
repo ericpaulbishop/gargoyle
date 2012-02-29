@@ -1228,6 +1228,10 @@ function localdate(ldate)
 	{
 		ldateStr = y4 + "/" + m + "/" + d + h;
 	}
+	else if(systemDateFormat == "iso8601")
+	{
+		ldateStr = y4 + "-" + m + "-" + d + h;
+	}
 	else if(systemDateFormat == "australia")
 	{
 		ldateStr = d + "/" + m + "/" + y2 + h;
