@@ -23,7 +23,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/bwmon-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+iptables +libericstools +gargoyle-firewall-util
+	DEPENDS:=+iptables +libericstools +gargoyle-firewall-util +ipset +iptables-mod-ipset +kmod-ipt-ipset 
 	TITLE:=Bandwidth monitor for Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef

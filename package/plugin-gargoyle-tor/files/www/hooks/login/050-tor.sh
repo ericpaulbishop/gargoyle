@@ -3,9 +3,11 @@
 <script>
 <?
 	tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
+	tor_client_mode=$(uci get tor.client.client_mode 2>/dev/null)
 	tor_is_active=$(ipset --test tor_active_ips "$REMOTE_ADDR" 2>/dev/null | grep -v NOT)
 
 	echo "var torEnabled = \"$tor_enabled\";"
+	echo "var torClientMode = \"$tor_client_mode\";"
 	echo "var torIsActive = \"$tor_is_active\";"
 ?>
 </script>

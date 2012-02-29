@@ -1168,80 +1168,92 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 	for(history_index=0; history_index < num_histories; history_index++)
 	{
 		ip_bw_history history = histories[history_index];
-		char *ip_str = NULL;
-		time_t *times = NULL;
-		if(history.ip != 0)
-		{
-			struct in_addr ipaddr;
-			ipaddr.s_addr = history.ip;
-			ip_str = strdup(inet_ntoa(ipaddr));
-		}
-		else
-		{
-			ip_str = strdup("COMBINED");
-		}
 		
-		
-		if(output_type == 'm' || output_type == 'h')
+		int history_initialized = 1;
+		if( history.first_start == 0 && history.first_end == 0 && history.last_end == 0)
 		{
-			fprintf(out, "%s %-15s\n", id, ip_str);
+			history_initialized = 0;
 		}
 
-		if(output_type == 'm')
+		if(history_initialized)
 		{
-			printf("%ld\n", history.first_start);
-			printf("%ld\n", history.first_end);
-			printf("%ld\n", history.last_end);
-		}
-		else
-		{
-			times = get_interval_starts_for_history(history);
-		}
+			char *ip_str = NULL;
+			time_t *times = NULL;
 
-		int hindex = 0;
-		for(hindex=0; hindex < history.num_nodes; hindex++)
-		{
-			uint64_t bw = (history.history_bws)[hindex];
+
+			if(history.ip != 0)
+			{
+				struct in_addr ipaddr;
+				ipaddr.s_addr = history.ip;
+				ip_str = strdup(inet_ntoa(ipaddr));
+			}
+			else
+			{
+				ip_str = strdup("COMBINED");
+			}
+		
+		
+			if(output_type == 'm' || output_type == 'h')
+			{
+				fprintf(out, "%s %-15s\n", id, ip_str);
+			}
+
 			if(output_type == 'm')
 			{
-				if(hindex != 0) { printf(","); };
-				printf("%lld", (unsigned long long int)bw);
+				printf("%ld\n", history.first_start);
+				printf("%ld\n", history.first_end);
+				printf("%ld\n", history.last_end);
 			}
-			else if(times != NULL)
+			else
 			{
-				time_t start = times[hindex];
-				time_t end = hindex+1 < history.num_nodes ? times[hindex+1] : 0 ;
+				times = get_interval_starts_for_history(history);
+			}
 
-				char* start_str = strdup(asctime(localtime(&start)));
-				char* end_str = end == 0 ? strdup("(Now)") : strdup(asctime(localtime(&end)));
-				char* nl = strchr(start_str, '\n');
-				if(nl != NULL)
+			int hindex = 0;
+			for(hindex=0; hindex < history.num_nodes; hindex++)
+			{
+				uint64_t bw = (history.history_bws)[hindex];
+				if(output_type == 'm')
 				{
-					*nl = '\0';
+					if(hindex != 0) { printf(","); };
+					printf("%lld", (unsigned long long int)bw);
 				}
-				nl = strchr(end_str, '\n');
-				if(nl != NULL)
+				else if(times != NULL)
 				{
-					*nl = '\0';
-				}
-
-				if(output_type == 'h')
-				{
-					fprintf(out, "%lld\t%s\t%s\n", (unsigned long long int)bw, start_str, end_str);
-				}
-				else
-				{
-					fprintf(out, "%s,%s,%ld,%ld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
-				}
+					time_t start = times[hindex];
+					time_t end = hindex+1 < history.num_nodes ? times[hindex+1] : 0 ;
+	
+					char* start_str = strdup(asctime(localtime(&start)));
+					char* end_str = end == 0 ? strdup("(Now)") : strdup(asctime(localtime(&end)));
+					char* nl = strchr(start_str, '\n');
+					if(nl != NULL)
+					{
+						*nl = '\0';
+					}
+					nl = strchr(end_str, '\n');
+					if(nl != NULL)
+					{
+						*nl = '\0';
+					}
+	
+					if(output_type == 'h')
+					{
+						fprintf(out, "%lld\t%s\t%s\n", (unsigned long long int)bw, start_str, end_str);
+					}
+					else
+					{
+						fprintf(out, "%s,%s,%ld,%ld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
+					}
 				
 	
-				free(start_str);
-				free(end_str);
+					free(start_str);
+					free(end_str);
+				}
 			}
+			fprintf(out, "\n");
+			if(times != NULL) { free(times); };
+			if(ip_str != NULL) { free(ip_str); };
 		}
-		fprintf(out, "\n");
-		if(times != NULL) { free(times); };
-		if(ip_str != NULL) { free(ip_str); };
 	}
 }
 

@@ -1606,6 +1606,11 @@ function validateNumeric(num)
 	return errorCode;
 }
 
+function validatePort(port)
+{
+	return validateNumericRange(port, 1, 65535)
+}
+
 function validateNumericRange(num, min, max)
 {
 	var errorCode = num.match(/^[\d]+$/) == null ? 1 : 0;
@@ -1838,6 +1843,11 @@ function proofreadNumericRange(input, min, max)
 {
 	proofreadText(input, function(text){return validateNumericRange(text,min,max)}, 0);
 }
+function proofreadPort(input)
+{
+	proofreadText(input, validatePort, 0);
+}
+
 function proofreadPortOrPortRange(input)
 {
 	proofreadText(input, validatePortOrPortRange, 0);
@@ -2228,9 +2238,6 @@ function arrToHash(arr)
 	for(i=0; i < arr.length; i++) { h[ arr[i] ] = 1; }
 	return h
 }
-
-
-
 
 
 function confirmPassword(confirmText, validatedFunc, invalidFunc)

@@ -834,7 +834,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
 					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-					if( ntohl( r.start) >= ntohl(iph->saddr) && ntohl(r.end) <= ntohl(iph->saddr) )
+					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}

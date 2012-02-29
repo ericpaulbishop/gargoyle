@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "bdist" -c "internal.css" -j "table.js bdist.js" -n gargoyle
+	gargoyle_header_footer -h -s "status" -p "bdist" -c "internal.css" -j "table.js bdist.js" -n -i gargoyle
 ?>
 
 
@@ -14,7 +14,7 @@
 <!--
 <?
 	echo 'monitorNames = new Array();'
-	mnames=$(cat /tmp/do_bw_backup.sh | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
+	mnames=$(cat /tmp/bw_backup/do_bw_backup.sh | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
 	for m in $mnames ; do 
 		echo "monitorNames.push(\"$m\");"
 	done

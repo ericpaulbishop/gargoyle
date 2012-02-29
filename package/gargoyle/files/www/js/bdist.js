@@ -163,6 +163,7 @@ function doUpdate()
 							for(idIndex=0; idIndex < idList.length; idIndex++)
 							{
 								var id = idList[idIndex];
+								id =  id == currentWanIp ? currentLanIp : id ;	
 								var value = 0;
 								if(dirData[id] != null)
 								{
@@ -300,7 +301,7 @@ function resetDisplayInterval()
 		{
 			var index = sortedIdIndices[idIndex]; 
 			var id = idList[ index ];
-		
+			id =  id == currentWanIp ? currentLanIp : id ;	
 			
 			var tableRow = [getHostDisplay(id)];
 			var pieIndex;

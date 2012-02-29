@@ -34,6 +34,11 @@
 				echo "     "
 				inc=$(($inc + 1))
 			done
+			
+			#tor eats up memory like crazy and can make an upgrade crash, kill it if it exists
+			if [ -e /etc/init.d/tor ] ; then
+				/etc/init.d/tor stop >/dev/null 2>&1
+			fi
 			mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; reboot
 		fi
 	else
@@ -44,6 +49,11 @@
 			echo "     "
 			inc=$(($inc + 1))
 		done
+
+		#tor eats up memory like crazy and can make an upgrade crash, kill it if it exists
+		if [ -e /etc/init.d/tor ] ; then
+			/etc/init.d/tor stop >/dev/null 2>&1
+		fi
 
 		#if attempting to preserve settings, don't pass -n
 		if [ "$FORM_upgrade_preserve" = "on" ] ; then
