@@ -185,6 +185,7 @@ function resetData()
 		var h = " " + lastDate.getHours() + ":" +  twod(lastDate.getMinutes())  + ":" + twod(lastDate.getSeconds());
 		var lastUpdate = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
 		lastUpdate = systemDateFormat == "russia" ? d + "." + m + h : lastUpdate;
+		lastUpdate = systemDateFormat == "iso8601" ? m + "-" + d + h : lastUpdate;
 		lastUpdate =  updateTimes[section] == null ? "Never" : lastUpdate;
 
 
