@@ -151,6 +151,14 @@ initialize()
 		iptables -t nat    -N tor_client
 		iptables -t filter -N tor_client
 	
+
+		if [ "$client_mode" = "3" ] || [ "$client_mode" = "2" ] ; then
+			iptables -t nat -A tor_client -p udp --dport 53  -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
+			iptables -t nat -A tor_client -p tcp --dport 53  -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
+			iptables -t nat -A tor_client -p tcp ! --dport 53 -d $hidden_service_subnet/$hidden_service_mask_bits  -j REDIRECT --to-ports $trans_port 
+		fi
+
+		test_tor_active=""
 		if [ "$client_mode" = "2" ] ; then
 		
 			if [ -n "$enabled_ip_file" ] ; then
@@ -160,17 +168,15 @@ initialize()
 			ipset --destroy tor_active_ips >/dev/null 2>&1
 			ipset --create  tor_active_ips iphash
 			for ip in $(cat $enabled_ip_file) ; do ipset --add tor_active_ips $ip ; done
+			
+			iptables -t nat -A tor_client -m set ! --match-set tor_active_ips src -j RETURN
+			test_tor_active=" -m set --match-set tor_active_ips src "
 		fi
 	
 	
 	
-		if [ "$client_mode" = "3" ] ; then
-			iptables -t nat -A tor_client -p udp --dport 53 -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
-			iptables -t nat -A tor_client -p tcp --dport 53 -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
-			iptables -t nat -A tor_client -p tcp ! --dport 53 -d $hidden_service_subnet/$hidden_service_mask_bits  -j REDIRECT --to-ports $trans_port 
+		if [ "$client_mode" = "1" ] || [ "$client_mode" = "2" ] ; then
 	
-		else
-		
 			# dns rules
 			iptables -t nat -A tor_client -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
 			iptables -t nat -A tor_client -p tcp   --dport 53 -j REDIRECT --to-ports $dns_port
@@ -187,20 +193,15 @@ initialize()
 			# redirect to tor transparent proxy
 			iptables -t nat -A tor_client -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
 		
-			# jump to tor_client chain at start of zone prerouting chain if enabled for this IP
-			test_tor_active=""
-			if  [ "$client_mode" = "2" ] ; then
-				test_tor_active=" -m set --match-set tor_active_ips src "
-			fi
-		
+			# block udp/icmp if requested
 			if [ "$block_unsupported_proto" = "1" ] ; then
-				iptables -t filter -A tor_client -p tcp ! --dport 53 -j RETURN 
-				iptables -t filter -A tor_client -p udp   --dport 53 -j RETURN
+				iptables -t filter -A tor_client -p tcp            -j RETURN 
+				iptables -t filter -A tor_client -p udp --dport 53 -j RETURN
 				iptables -t filter -A tor_client -j REJECT
 				iptables -t filter -I zone_${zone}_forward $test_tor_active -j tor_client
 			fi
 		fi
-		iptables -t nat -I zone_${zone}_prerouting $test_tor_active -j tor_client
+		iptables -t nat -I zone_${zone}_prerouting -j tor_client
 		
 	fi
 	
