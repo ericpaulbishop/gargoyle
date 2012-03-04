@@ -40,16 +40,65 @@ function saveChanges()
 	{
 		setControlsEnabled(false, true);
 		var uci = uciOriginal.clone();
-		var torEnabledType = getSelectedValue("tor_enabled")
-		uci.set('tor', 'global', 'enabled', torEnabledType)
-		if(torEnabledType != "0")
+		var torClientMode = getSelectedValue("tor_client_mode")
+		var torClientConnect = getSelectedValue("tor_client_connect")
+		var torRelayMode  = getSelectedValue("tor_relay_mode")
+		
+		torRelayMode = torRelayMode == "3" ? "1" : torRelayMode
+		uci.set('tor', 'global', 'enabled', (torClientMode=="0" && torRelayMode == "0" ? "0" : "1") )
+		uci.set('tor', 'client', 'client_mode', torClientMode)
+		uci.set('tor', 'relay',  'relay_mode',  torRelayMode)
+		if(torClientMode != "0")
 		{
-			uci.set('tor', 'global', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
-			uci.set('tor', 'global', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
-			if(torEnabledType != "3")
+			uci.set('tor', 'client', 'hidden_service_subnet',    document.getElementById("tor_hidden_subnet").value)
+			uci.set('tor', 'client', 'hidden_service_mask_bits', maskToBits(document.getElementById("tor_hidden_mask").value))
+			if(torClientMode != "3")
 			{
-				uci.set('tor', 'global', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
+				uci.set('tor', 'client', 'block_unsupported_proto',  getSelectedValue("tor_other_proto"))
 			}
+			if(torClientConnect != "relay")
+			{
+				uci.set('tor', 'client', 'use_bridge_ip', document.getElementById("tor_client_bridge_ip").value)
+				uci.set('tor', 'client', 'use_bridge_port', document.getElementById("tor_client_bridge_port").value)
+				uci.set('tor', 'client', 'use_bridge_obfsproxy', torClientConnect == "obfsproxy" ? "1" : "0")
+			}
+			else
+			{
+				uci.remove('tor', 'client', 'use_bridge_ip');
+				uci.remove('tor', 'client', 'use_bridge_port');
+				uci.remove('tor', 'client', 'use_bridge_obfsproxy');
+			}
+
+		}
+		if(torRelayMode != "0")
+		{
+			var rvars = [
+				["relay_port",     "tor_relay_port"], 
+				["obfsproxy_port", "tor_obfsproxy_port"],
+				["max_bw_rate_kb", "tor_relay_max_bw"],
+				["relay_contact",  "tor_relay_contact"],
+				["relay_nickname", "tor_relay_nickname"],
+
+			];
+			var rvIndex=0
+			for(rvIndex=0; rvIndex < rvars.length; rvIndex++)
+			{
+				var setEl  = document.getElementById(  rvars[rvIndex][1] )
+				var setVal = document.getElementById(  rvars[rvIndex][1] ).value
+				setVal.replace(/[\r\n]+/, "") //make sure contact data contains no newlines
+				uci.set('tor', 'relay', rvars[rvIndex][0], setVal )
+			}
+			if( !getSelectedText("tor_relay_mode").match(/proxy/) )
+			{
+				uci.set('tor', 'relay', 'obfsproxy_port', "0")
+			}
+
+			var publish = torRelayMode == "2" || getSelectedValue("tor_relay_publish") == "1" ? "1" : "0" ;
+			uci.set('tor', 'relay', 'publish', publish);
+
+
+			//uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
+
 		}
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -70,8 +119,8 @@ function saveChanges()
 
 function proofreadAll()
 {
-	var inputIds    = ["tor_hidden_subnet", "tor_hidden_mask"]
-	var functions   = [ validateIP, validateNetMask]
+	var inputIds    = ["tor_client_bridge_ip", "tor_client_bridge_port", "tor_hidden_subnet", "tor_hidden_mask", 'tor_relay_port', 'tor_relay_max_bw' ]
+	var functions   = [ validateIP, validatePort, validateIP, validateNetMask, validatePort, validateNumeric ]
 	var labelIds    = []
 	var returnCodes = []
 	var visIds      = []
@@ -84,7 +133,77 @@ function proofreadAll()
 		visIds.push( id + "_container")
 	}
 
-	return proofreadFields(inputIds, labelIds, functions, returnCodes, visIds);
+	var errors = proofreadFields(inputIds, labelIds, functions, returnCodes, visIds);
+	
+
+	if(getSelectedValue("tor_relay_mode") != "0" )
+	{
+		var relayPort = document.getElementById("tor_relay_port").value ;
+		var obfsPort  = document.getElementById("tor_obfsproxy_port_container").display != "none" ? document.getElementById("tor_obfsproxy_port").value : "";
+	
+
+		var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+		var sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
+
+		var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
+		var httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
+
+
+
+		var remoteHttpsPort = "";
+		var remoteHttpPort  = "";
+		var remoteSshPort = "";
+		var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+		var acceptIndex=0;
+		for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
+		{
+			var section = remoteAcceptSections[acceptIndex];
+			var localPort = uciOriginal.get("firewall", section, "local_port");
+			var remotePort = uciOriginal.get("firewall", section, "remote_port");
+			var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+			var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+			if((zone == "wan" || zone == "") && (proto == "tcp" || proto == ""))
+			{
+				remotePort = remotePort == "" ? localPort : remotePort;
+				if(localPort == httpsPort)
+				{
+					remoteHttpsPort = remotePort;
+				}
+				else if(localPort == httpPort)
+				{
+					remoteHttpPort = remotePort;
+				}
+				else if(localPort == sshPort)
+				{
+					remoteSshPort = remotePort;
+				}
+			}
+		}
+
+		var relayType = getSelectedValue("tor_relay_mode") == "1" ? "Relay" : "Bridge";
+		if(relayPort == obfsPort)
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Bridge/Relay Port");
+		}
+		if(relayPort == httpPort || relayPort == httpsPort || relayPort == remoteHttpPort || relayPort == remoteHttpsPort)
+		{
+			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router Web Server Port");
+		}
+		if(obfsPort == httpPort || obfsPort == httpsPort || obfsPort == remoteHttpPort || obfsPort == remoteHttpsPort)
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router Web Server Port");
+		}
+		if(relayPort == sshPort || relayPort == remoteSshPort )
+		{
+			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router SSH Port");
+		}
+		if(obfsPort == sshPort || obfsPort == remoteSshPort )
+		{
+			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router SSH Port");
+		}
+	}
+
+	return errors;
 }
 
 function bitsToMask(bits)
@@ -117,15 +236,31 @@ function maskToBits(mask)
 
 function resetData()
 {
-	var en = uciOriginal.get("tor", "global", "enabled") 
-	var torEnabled = uciOriginal.get("tor", "global", "enabled")
-	torEnabled = (torEnabled != "1" && torEnabled != "2" && torEnabled != "3") ? "0" : torEnabled
-	var blockOtherProtos = uciOriginal.get("tor", "global", "block_unsupported_proto") == "1" ? "1" : "0"
-	setSelectedValue("tor_enabled", torEnabled)
+	var en = uciOriginal.get("tor", "global", "enabled")
+	var torEnabled    = uciOriginal.get("tor", "global", "enabled")
+	var torClientMode = torEnabled == "0" ? "0" : uciOriginal.get("tor", "client", "client_mode")
+	var torRelayMode  = torEnabled == "0" ? "0" : uciOriginal.get("tor", "relay", "relay_mode")
+	var opPort = uciOriginal.get("tor", "relay", "obfsproxy_port")
+
+	torClientMode = (torClientMode != "1" && torClientMode != "2" && torClientMode != "3") ? "0" : torClientMode
+	torRelayMode  = (torRelayMode != "1" && torRelayMode != "2" ) ? "0" : torRelayMode
+	torRelayMode  = torRelayMode == "1" && opPort != "0" && opPort != "" ? "3" : torRelayMode
+
+	
+	//client 
+	var blockOtherProtos = uciOriginal.get("tor", "client", "block_unsupported_proto") == "1" ? "1" : "0"
+	var bridgeIp = uciOriginal.get("tor", "client", "use_bridge_ip")
+	var bridgePort = uciOriginal.get("tor", "client", "use_bridge_port")
+	var bridgeIsOp = uciOriginal.get("tor", "client", "use_bridge_obfsproxy") == "1" ? true : false;
+	var clientConnect = bridgeIp != "" && bridgePort != "" ? "bridge" : "relay"
+	clientConnect = clientConnect == "bridge" && bridgeIsOp ? "obfsproxy" : clientConnect
+
+	setSelectedValue("tor_client_mode", torClientMode)
+	setSelectedValue("tor_client_connect", clientConnect)
 	setSelectedValue("tor_other_proto", blockOtherProtos)
 
-	var hiddenSubnet = uciOriginal.get("tor", "global", "hidden_service_subnet")
-	var hiddenBits   = uciOriginal.get("tor", "global", "hidden_service_mask_bits")
+	var hiddenSubnet = uciOriginal.get("tor", "client", "hidden_service_subnet")
+	var hiddenBits   = uciOriginal.get("tor", "client", "hidden_service_mask_bits")
 	if(hiddenSubnet == "")
 	{
 		hiddenSubnet = "10.192.0.0"
@@ -133,17 +268,43 @@ function resetData()
 	}
 	var hiddenMask   = bitsToMask(hiddenBits)
 
-	document.getElementById("tor_hidden_subnet").value = hiddenSubnet
-	document.getElementById("tor_hidden_mask").value = hiddenMask
+	
+	document.getElementById("tor_client_bridge_ip").value    = bridgeIp
+	document.getElementById("tor_client_bridge_port").value  = bridgePort
+	document.getElementById("tor_hidden_subnet").value       = hiddenSubnet
+	document.getElementById("tor_hidden_mask").value         = hiddenMask
+
+
+	//relay
+	setSelectedValue("tor_relay_mode", torRelayMode)
+	var rvars = [
+			["relay_port",     "tor_relay_port"], 
+			["obfsproxy_port", "tor_obfsproxy_port"],
+			["max_bw_rate_kb", "tor_relay_max_bw"],
+			["relay_nickname", "tor_relay_nickname"],
+			["relay_contact",  "tor_relay_contact"]
+			];
+	var rvIndex=0
+	for(rvIndex=0; rvIndex < rvars.length; rvIndex++)
+	{
+
+		var val = uciOriginal.get("tor", "relay", rvars[rvIndex][0])
+		val = (val == "" && (rvars[rvIndex][0]).match(/obfsproxy/)) ? "0" : val
+		document.getElementById(  rvars[rvIndex][1] ).value = val
+	}
+	setSelectedValue("tor_relay_publish", uciOriginal.get("tor", "relay", "publish"));
 
 	setTorVisibility()
 }
 
 function setTorVisibility()
 {
-	var enabledType =  getSelectedValue("tor_enabled")
-	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], enabledType == "0" ? [0,0] : [1,1] )
-	setVisibility( [ "tor_other_proto_container" ], (enabledType == "0" || enabledType == "3") ? [0] : [1] )
+	//client visibility
+	var clientMode =  getSelectedValue("tor_client_mode")
+	setVisibility( [ "tor_client_connect_container" ], clientMode == "0" ? [0] : [1] )
+	setVisibility( [ "tor_client_bridge_ip_container", "tor_client_bridge_port_container"], (clientMode =="0" || getSelectedValue("tor_client_connect") == "relay") ? [0,0] : [1,1])
+	setVisibility( [ "tor_other_proto_container" ], (clientMode == "0" || clientMode == "3") ? [0] : [1] )
+	setVisibility( [ "tor_hidden_subnet_container", "tor_hidden_mask_container" ], clientMode == "0" ? [0,0] : [1,1] )
 
 	var modeDescriptions = []
 	modeDescriptions["0"] = ""
@@ -151,7 +312,24 @@ function setTorVisibility()
 	modeDescriptions["2"] = "Users can choose whether traffic will be anonymized"
 	modeDescriptions["3"] = "Tor hidden services can be accessed, but no other traffic is anonymized"
 
-	setChildText("mode_description", modeDescriptions[enabledType])
+	setChildText("mode_description", modeDescriptions[clientMode])
+
+
+	//relay visibility
+	var relayMode = getSelectedValue("tor_relay_mode")
+	var op        = relayMode == "3"                     ? 1 : 0
+	var r         = relayMode == "2"                     ? 1 : 0
+	var b         = relayMode == "1" || relayMode == "3" ? 1 : 0 
+	setVisibility( ["tor_relay_port_container", "tor_obfsproxy_port_container", "tor_relay_max_bw_container",'tor_relay_publish_container', "tor_relay_nickname_container", "tor_relay_contact_container", "tor_relay_status_link_container"], (relayMode == "1" || relayMode == "2" || relayMode == "3" ) ? [1,op,1,b,r,r,r] : [0,0,0,0,0,0,0])
+	
+	if(op==1)
+	{
+		var opel = document.getElementById("tor_obfsproxy_port")
+		if(opel.value == "0")
+		{
+			opel.value = "9091"
+		}
+	}
 
 }
 

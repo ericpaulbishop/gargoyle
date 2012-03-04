@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tor
-PKG_VERSION:=0.2.3.11-alpha
+PKG_VERSION:=0.2.3.12-alpha
 PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=917f2952f464371727641320292c9a9e
+PKG_MD5SUM:=16dc8b7567662750e33f35afbbc6f089
 
 PKG_INSTALL:=1
 
@@ -149,7 +149,7 @@ endef
 define Package/tor
 $(call Package/tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
+  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
 define Package/tor-geoip
@@ -181,13 +181,15 @@ define Package/tor/install
 	$(INSTALL_DIR)  $(1)/etc/uci-defaults
 	$(INSTALL_DIR)  $(1)/etc/config
 	$(INSTALL_DIR)  $(1)/etc/l7-protocols
-	$(INSTALL_BIN)  $(PKG_INSTALL_DIR)/usr/bin/tor $(1)/usr/sbin/tor
-	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/tor/torrc.sample $(1)/etc/tor/torrc
-	$(INSTALL_BIN)  ./files/tor.init        $(1)/etc/init.d/tor
-	$(INSTALL_BIN)  ./files/tor.firewall    $(1)/etc/tor.firewall
-	$(INSTALL_BIN)  ./files/tor.ucidefaults $(1)/etc/uci-defaults/tor.ucidefaults
-	$(INSTALL_CONF) ./files/tor.config      $(1)/etc/config/tor
-	$(INSTALL_CONF) ./files/oniondns.pat    $(1)/etc/l7-protocols/oniondns.pat
+	$(INSTALL_BIN)  $(PKG_INSTALL_DIR)/usr/bin/tor           $(1)/usr/sbin/tor
+	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/tor/torrc.sample  $(1)/etc/tor/torrc
+	$(INSTALL_BIN)  ./files/tor.init                         $(1)/etc/init.d/tor
+	$(INSTALL_BIN)  ./files/tor.firewall                     $(1)/etc/tor.firewall
+	$(INSTALL_BIN)  ./files/tor.ucidefaults                  $(1)/etc/uci-defaults/tor.ucidefaults
+	$(INSTALL_BIN)  ./files/update_tor_ipset                 $(1)/usr/sbin/update_tor_ipset
+
+	$(INSTALL_CONF) ./files/tor.config                       $(1)/etc/config/tor
+	$(INSTALL_CONF) ./files/oniondns.pat                     $(1)/etc/l7-protocols/oniondns.pat
 endef
 define Package/tor/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 

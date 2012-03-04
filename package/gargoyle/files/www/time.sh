@@ -20,8 +20,12 @@
 	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
 	if [ "$dateformat" == "iso" ]; then
 		current_time=$(date "+%Y/%m/%d %H:%M %Z")
+	elif [ "$dateformat" == "iso8601" ]; then
+		current_time=$(date "+%Y-%m-%d %H:%M %Z")
 	elif [ "$dateformat" == "australia" ]; then
 		current_time=$(date "+%d/%m/%y %H:%M %Z")
+	elif [ "$dateformat" == "russia" ]; then
+		current_time=$(date "+%d.%m.%Y %H:%M %Z")
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
@@ -60,8 +64,10 @@
 			<div>
 				<select class='nocolumn' id='date_format'>
 					<option value="usa">mm/dd/yy</option>
+					<option value="russia">dd.mm.yyyy</option>
 					<option value="australia">dd/mm/yy</option>
 					<option value="iso">yyyy/mm/dd</option>
+					<option value="iso8601">yyyy-mm-dd</option>
 				</select>
 			</div>
 		</div>

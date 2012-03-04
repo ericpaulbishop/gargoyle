@@ -1161,7 +1161,7 @@ CONFIG_PACKAGE_hostapd=y
 # CONFIG_PACKAGE_hostapd-utils is not set
 # CONFIG_PACKAGE_ifenslave is not set
 CONFIG_PACKAGE_ip=y
-# CONFIG_PACKAGE_ipset is not set
+CONFIG_PACKAGE_ipset=y
 CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_iptables-mod-bandwidth=y
 CONFIG_PACKAGE_iptables-mod-conntrack=y
@@ -1173,7 +1173,7 @@ CONFIG_PACKAGE_iptables-mod-imq=y
 CONFIG_PACKAGE_iptables-mod-ipopt=y
 CONFIG_PACKAGE_iptables-mod-iprange=y
 # CONFIG_PACKAGE_iptables-mod-ipsec is not set
-# CONFIG_PACKAGE_iptables-mod-ipset is not set
+CONFIG_PACKAGE_iptables-mod-ipset=y
 CONFIG_PACKAGE_iptables-mod-nat=y
 CONFIG_PACKAGE_iptables-mod-nat-extra=y
 CONFIG_PACKAGE_iptables-mod-timerange=y
@@ -1318,7 +1318,7 @@ CONFIG_PACKAGE_kmod-ipt-imq=y
 CONFIG_PACKAGE_kmod-ipt-ipopt=y
 CONFIG_PACKAGE_kmod-ipt-iprange=y
 # CONFIG_PACKAGE_kmod-ipt-ipsec is not set
-# CONFIG_PACKAGE_kmod-ipt-ipset is not set
+CONFIG_PACKAGE_kmod-ipt-ipset=y
 CONFIG_PACKAGE_kmod-ipt-nat=y
 CONFIG_PACKAGE_kmod-ipt-nat-extra=y
 CONFIG_PACKAGE_kmod-ipt-nathelper=y

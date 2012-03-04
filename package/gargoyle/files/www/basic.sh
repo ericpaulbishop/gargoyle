@@ -390,7 +390,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 		<div id='wan_3g_device_container' >
 			<label class='leftcolumn' for='wan_3g_device' id='wan_3g_device_label'>Device:</label>
-			<input type='text' class='rightcolumn' id='wan_3g_device'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<span class='rightcolumn'>
+				<select style="display:none;float:left;width:180px;max-width:180px" id="wan_3g_list_device" onchange='set3GDevice(this.value)' ></select>
+				<input style="float:left;" type='text' class='rightcolumn' id='wan_3g_device'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+				<input style="float:left;" type='button' class="default_button" id='wan_3g_scan_button' value='Scan' onclick='scan3GDevice("wan_3g_list_device")' />
+			</span>
 		</div>
 		<div id='wan_3g_pincode_container' >
 			<label class='leftcolumn' for='wan_3g_pincode' id='wan_3g_pincode_label'>Pincode:</label>

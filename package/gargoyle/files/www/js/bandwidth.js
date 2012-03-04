@@ -1,5 +1,5 @@
 /*
- * This program is copyright 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -45,6 +45,8 @@ function stopInterval()
 	}
 }
 window.onbeforeunload=stopInterval;
+
+
 
 function trim(str)
 {
@@ -101,6 +103,7 @@ function initializePlotsAndTable()
 
 	var haveQosUpload = false;
 	var haveQosDownload = false;
+	var haveTor = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -133,6 +136,7 @@ function initializePlotsAndTable()
 				definedDownloadClasses[qosClass] = 1;
 			}
 		}
+		haveTor = monId.match(/tor/) ? true : haveTor;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -140,15 +144,21 @@ function initializePlotsAndTable()
 	{
 		var plotIdName = plotIdNames[idIndex];
 		if(haveQosUpload)
-		{	
+		{
 			addOptionToSelectElement(plotIdName, "QoS Upload Class", "qos-upload");
 		}
 		if(haveQosDownload)
 		{
 			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
 		}
+		if(haveTor)
+		{
+			addOptionToSelectElement(plotIdName, "Tor", "tor");
+		}
+
 		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
+
 
 		var plotType = bandwidthSettings.get(plotIdName, "none");
 		setSelectedValue(plotIdName, plotType);
@@ -175,6 +185,8 @@ function getEmbeddedSvgPlotFunction(embeddedId, controlDocument)
 	}
 	return null;
 }
+
+
 function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 {
 	var nameIndex;
@@ -185,7 +197,9 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 
 	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
-	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+
+
 
 	if(plotType == "total")
 	{
@@ -202,6 +216,10 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 		{
 			plotType = "none"; //forces us to return null
 		}
+	}
+	else if(plotType.match(/tor/))
+	{
+		match1 = graphLowRes ? "tor-lr" + graphTimeFrameIndex : "tor-hr" + graphTimeFrameIndex;
 	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
@@ -224,6 +242,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	}
 	return selectedName;
 }
+
 
 function getHostnameList(ipList)
 {
@@ -260,7 +279,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
@@ -314,7 +333,7 @@ function resetPlots()
 
 			if(!plotsInitializedToDefaults)
 			{
-				if(plotType != "" && plotType != "none" && plotType != "total")
+				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" )
 				{
 					var idValue = bandwidthSettings.get(plotIdName, "none");
 					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
@@ -395,27 +414,57 @@ function parseMonitors(outputData)
 		return monitors;
 	}
 
+
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
-		if(dataLines[lineIndex].length > 0)
+		if(dataLines[lineIndex] != null && dataLines[lineIndex].length > 0)
 		{
-			var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
-			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
-
-			lineIndex++; 
-			var firstTimeStart = dataLines[lineIndex];
-			lineIndex++;
-			var firstTimeEnd = dataLines[lineIndex];
-			lineIndex++; 
-			var lastTimePoint = dataLines[lineIndex];
-			lineIndex++;
-			var points = dataLines[lineIndex].split(",");
-			monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
-			monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+			if(dataLines[lineIndex].match(/ /))
+			{
+				var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
+				var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
+				lineIndex++; 
+				var firstTimeStart = dataLines[lineIndex];
+				lineIndex++;
+				var firstTimeEnd = dataLines[lineIndex];
+				lineIndex++; 
+				var lastTimePoint = dataLines[lineIndex];
+				if(dataLines[lineIndex+1] != null)
+				{
+					if(dataLines[lineIndex+1].match(/,/) || dataLines[lineIndex+1].match(/^[0-9]+$/))
+					{
+						lineIndex++;
+						var points = dataLines[lineIndex].split(",");
+						monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
+						monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+						found = 1
+					}
+				}
+			}
 		}
 	}
 	return monitors;
+}
+
+function getDisplayIp(realIp)
+{
+	var dip = realIp
+	if(dip != null && currentWanIp != null && currentLanIp != null && dip != "")
+	{
+		dip = dip == currentWanIp ? currentLanIp : dip;
+	}
+	return dip
+}
+function getRealIp(displayIp)
+{
+	var rip = displayIp
+	if(rip != null && currentWanIp != null && currentLanIp != null && rip != "")
+	{
+		rip = rip == currentLanIp ? currentWanIp : rip;
+	}
+	return rip
+
 }
 
 
@@ -488,9 +537,9 @@ function doUpdate()
 								var ip;
 								for (ip in monitorData)
 								{
-									if( ((selectedPlotType == "total" || selectedPlotType.match("qos")) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor")) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
 									{
-										ipList.push(ip);
+										ipList.push(getDisplayIp(ip));
 									}
 								}
 								if(ipList.length > 0)
@@ -512,7 +561,9 @@ function doUpdate()
 									{
 										var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 										ip = getSelectedValue(plotIdName);
-										ip = ip == null ? "" : ip;
+										ip = ip == null ? "" : getRealIp(ip);
+										
+										
 										ip = monitorData[ip] != null ? ip : ipList[0];
 										
 									
@@ -532,7 +583,7 @@ function doUpdate()
 										ip = ipList[0];
 									}
 									
-								
+									ip = ip == null ? "" : getRealIp(ip);
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
 									{

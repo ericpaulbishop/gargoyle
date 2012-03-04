@@ -29,8 +29,12 @@
 	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
 	if [ "$dateformat" == "iso" ]; then
 		current_time=$(date "+%Y/%m/%d %H:%M %Z")
+	elif [ "$dateformat" == "iso8601" ]; then
+		current_time=$(date "+%Y-%m-%d %H:%M %Z")
 	elif [ "$dateformat" == "australia" ]; then
 		current_time=$(date "+%d/%m/%y %H:%M %Z")
+	elif [ "$dateformat" == "russia" ]; then
+		current_time=$(date "+%d.%m.%Y %H:%M %Z")
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi

@@ -4,8 +4,9 @@
 	echo ""
 
 	tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
+	tor_client_mode=$(uci get tor.client.client_mode 2>/dev/null)
 	tor_ip_file=$(uci get tor.global.enabled_ip_file 2>/dev/null)
-	if [ "$tor_enabled" != "2" ] || [ -z "$tor_ip_file" ] ; then
+	if [ "$tor_enabled" != "1" ] || [ "$tor_client_mode" != "2" ] || [ -z "$tor_ip_file" ] ; then
 		echo "tor_per_ip_disabled"
 		exit
 	fi

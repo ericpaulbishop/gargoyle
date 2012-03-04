@@ -1,0 +1,38 @@
+diff -uNr tor-0.2.3.11-alpha/src/or/config.c tor-0.2.3.11-alpha-persistent_keys_in_etc/src/or/config.c
+--- tor-0.2.3.11-alpha/src/or/config.c	2012-01-21 22:07:29.000000000 -0500
++++ tor-0.2.3.11-alpha-persistent_keys_in_etc/src/or/config.c	2012-02-07 12:25:57.114490463 -0500
+@@ -1455,17 +1455,15 @@
+   if (server_mode(options)) {
+     if (!old_options) {
+       if (options->DynamicDHGroups) {
+-        char *fname = get_datadir_fname2("keys", "dynamic_dh_params");
++        char *fname = "/etc/tor/var/dynamic_dh_params";
+         crypto_set_tls_dh_prime(fname);
+-        tor_free(fname);
+       } else {
+         crypto_set_tls_dh_prime(NULL);
+       }
+     } else {
+       if (options->DynamicDHGroups && !old_options->DynamicDHGroups) {
+-        char *fname = get_datadir_fname2("keys", "dynamic_dh_params");
++        char *fname = "/etc/tor/var/dynamic_dh_params";
+         crypto_set_tls_dh_prime(fname);
+-        tor_free(fname);
+       } else if (!options->DynamicDHGroups && old_options->DynamicDHGroups) {
+         crypto_set_tls_dh_prime(NULL);
+       }
+diff -uNr tor-0.2.3.11-alpha/src/or/router.c tor-0.2.3.11-alpha-persistent_keys_in_etc/src/or/router.c
+--- tor-0.2.3.11-alpha/src/or/router.c	2012-01-21 22:07:30.000000000 -0500
++++ tor-0.2.3.11-alpha-persistent_keys_in_etc/src/or/router.c	2012-02-07 12:25:26.247201903 -0500
+@@ -576,10 +576,9 @@
+   }
+ 
+   /* 1b. Read identity key. Make it if none is found. */
+-  keydir = get_datadir_fname2("keys", "secret_id_key");
++  keydir = "/etc/tor/var/secret_id_key";
+   log_info(LD_GENERAL,"Reading/making identity key \"%s\"...",keydir);
+   prkey = init_key_from_file(keydir, 1, LOG_ERR);
+-  tor_free(keydir);
+   if (!prkey) return -1;
+   set_server_identity_key(prkey);
+ 

@@ -3,12 +3,27 @@
 # Save Gargoyle version to UCI
 gargoyle_version=$(cat /www/data/gargoyle_version.txt)
 uci set gargoyle.global.version="$gargoyle_version"
-uci commit
 
 # Set hostname to Gargoyle
 uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
-uci commit                                    2>/dev/null
 echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+
+# disable logging for cron -- it tends to clutter up logs, and it logs all jobs at "error" level, which is wrong
+uci set system.@system[0].cronloglevel=9
+
+# Allow resolution of NameCoin and OpenNIC domains by default
+uci add_list dhcp.@dnsmasq[0].server="/.bit/178.32.31.41"
+uci add_list dhcp.@dnsmasq[0].server="/.bit/78.47.86.43"
+for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" "/.gopher/" "/.indy/" "/.ing/" "/.null/" "/.oss/" "/.micro/" ; do
+	for ip in "66.244.95.20" "95.211.32.162" "95.142.171.235" ; do
+		uci add_list dhcp.@dnsmasq[0].server="$tld$ip"
+	done
+done
+
+
+#save changes to uci
+uci commit
+
 
 
 # remove init scripts of things that should not be active by default
@@ -29,15 +44,6 @@ fi
 
 
 
-# Allow resolution of NameCoin and OpenNIC domains by default
-uci add_list dhcp.@dnsmasq[0].server="/.bit/178.32.31.41"
-uci add_list dhcp.@dnsmasq[0].server="/.bit/78.47.86.43"
-for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" "/.gopher/" "/.indy/" "/.ing/" "/.null/" "/.oss/" "/.micro/" ; do
-	for ip in "66.244.95.20" "95.211.32.162" "95.142.171.235" ; do
-		uci add_list dhcp.@dnsmasq[0].server="$tld$ip"
-	done
-done
-uci commit
 
 #set sysupgrade.conf
 cat << EOF >/etc/sysupgrade.conf
@@ -53,7 +59,10 @@ cat << EOF >/etc/sysupgrade.conf
 /etc/dropbear
 /tmp/data
 /usr/data
+/etc/tor
 EOF
+
+
 
 
 #create original backup

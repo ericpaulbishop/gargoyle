@@ -1,0 +1,23 @@
+#!/bin/sh
+
+cache_file="/var/tor/cached-consensus"
+if [ ! -f "$cache_file" ] ; then
+	cache_file="/var/tor/cached-microdesc-consensus"
+fi
+
+ipset --create  tor_relays iphash >/dev/null 2>&1
+old_md5sum=""
+if [ -f /tmp/tor/consensus-md5 ] ; then
+	old_md5sum=$(cat  /tmp/tor/consensus-md5 )
+fi
+if [ -f "$cache_file" ] ; then
+	new_md5sum=$(md5sum "$cache_file" | awk ' { print $1 ; } ' )
+	if [ "$old_md5sum" != "$new_md5sum" ] ; then 
+		tor_ips=$(cat "$cache_file" | grep "^r " | awk ' { print $(NF-2) } ' | sort | uniq)
+		ipset -F tor_relays
+		for tip in $tor_ips ; do
+			ipset --add tor_relays $tip
+		done
+		echo "$new_md5sum" > /tmp/tor/consensus-md5
+	fi
+fi
