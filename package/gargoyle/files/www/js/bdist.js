@@ -297,6 +297,7 @@ function resetDisplayInterval()
 			zeroPies.push(pieIsZero);
 		}
 
+		var sum = [0,0,0];
 		for(idIndex=0; idIndex < sortedIdIndices.length; idIndex++)
 		{
 			var index = sortedIdIndices[idIndex]; 
@@ -311,6 +312,7 @@ function resetDisplayInterval()
 				var value = parseBytes(data[pieIndex][index]);
 				value = value.replace("ytes", "");
 				tableRow.push(value);
+				sum[pieIndex] = sum[pieIndex] + data[pieIndex][index];
 			}
 			for(pieIndex=0;pieIndex < pieNames.length; pieIndex++)
 			{
@@ -320,6 +322,7 @@ function resetDisplayInterval()
 			}
 			tableRows.push(tableRow);
 		}
+		tableRows.push(["Sum",parseBytes(sum[0]),parseBytes(sum[1]),parseBytes(sum[2]),"","",""]);
 		
 		var columnNames = ["Host"];
 		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex]); }
