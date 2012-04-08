@@ -670,6 +670,21 @@ td.portf_range_table_column_8
 	border:1px solid black;
 }
 
+td.upnp_table_column_1
+{
+	text-align:left;
+	border:1px solid black;
+}
+td.upnp_table_column_2
+{
+	text-align:center;
+	border:1px solid black;
+}
+td.upnp_table_column_3
+{
+	text-align:right;
+	border:1px solid black;
+}
 
 td.qos_class_table_column_1
 {
