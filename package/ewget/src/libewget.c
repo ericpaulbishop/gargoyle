@@ -302,16 +302,18 @@ url_request* parse_url(char* url, char* user_agent)
 		 * this will be included directly in GET request
 		 * this dynamicaly allocates memory , remember to free url at end
 		 */
-		url = escape_chars_to_hex(remainder, escape_chars);
-		remainder = url;
-		
 		port_begin = char_index(remainder, ':');
-		if(port_begin >= 0 && port_begin < path_begin)
+		
+		
+		
+		if(port_begin >= 0 && port_begin < path_begin )
 		{
-			new_url->hostname = (char*)malloc((port_begin+1)*sizeof(char));
-			memcpy(new_url->hostname, remainder, port_begin);
-			(new_url->hostname)[port_begin] = '\0';
-			
+			char* raw_host = (char*)malloc((port_begin+1)*sizeof(char));
+			memcpy(raw_host, remainder, port_begin);
+			raw_host[port_begin] = '\0';
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			free(raw_host);
+
 			if(path_begin-port_begin-1 <= 5)
 			{
 				int read;
@@ -330,11 +332,17 @@ url_request* parse_url(char* url, char* user_agent)
 		}
 		else
 		{
-			new_url->hostname = (char*)malloc((path_begin+1)*sizeof(char));
-			memcpy(new_url->hostname, remainder, path_begin);
-			(new_url->hostname)[path_begin] = '\0';
+			char* raw_host = (char*)malloc((path_begin+1)*sizeof(char));
+			memcpy(raw_host, remainder, path_begin);
+			raw_host[path_begin] = '\0';
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			free(raw_host);
 		}
+		
 		remainder = remainder + path_begin;
+		url = escape_chars_to_hex(remainder, escape_chars);
+		remainder = url;
+		
 		
 		if(remainder[0] != '/')
 		{
@@ -348,6 +356,7 @@ url_request* parse_url(char* url, char* user_agent)
 			new_url->path = strdup(remainder);
 		}
 		free(url); /* free memory allocated from escaping characters */
+	
 	}
 	return new_url;
 }
