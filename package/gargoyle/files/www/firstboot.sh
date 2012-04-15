@@ -63,8 +63,7 @@ for(tzIndex = 0; tzIndex < timezoneList.length; tzIndex++)
 	addOptionToSelectElement("timezone", timezone, timezoneDefinitions[timezone]);
 }
 
-var systemSections = uciOriginal.getAllSections("system");
-var currentTimezone = uciOriginal.get("system", systemSections[0], "timezone");
+var currentTimezone = uciOriginal.get("system", "system", "timezone");
 currentTimezone = currentTimezone == "UTC" ? "UTC0" : currentTimezone;
 setSelectedValue("timezone", currentTimezone); //set value from config
 
