@@ -72,7 +72,12 @@ rm -rf /etc/crontabs/*
 rm -rf /etc/ethers
 echo "127.0.0.1 localhost." > /etc/hosts  #overwrites old file
 
-tar xzf "$restore_file" -C / 2>error
+have_overlay=$(df | grep "overlay$" 2>/dev/null)
+if [ -n "$have_overlay" ] ; then
+	tar xzf "$restore_file" -C /overlay 2>/error
+else
+	tar xzf "$restore_file" -C / 2>error
+fi
 error=$(cat error)
 
 # make sure http settings are correct for cookie-based auth
