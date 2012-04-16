@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright ï¿½ 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -1238,7 +1238,7 @@ function localdate(ldate)
 	}
 	else if(systemDateFormat == "russia")
 	{
-		ldateStr = d + "." + m + "." + y2 + h;
+		ldateStr = d + "." + m + "." + y4 + h;
 	}
 	else
 	{
