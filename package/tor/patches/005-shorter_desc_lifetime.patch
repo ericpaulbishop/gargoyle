@@ -5,7 +5,7 @@
  /** By default, we remove any microdescriptors that have gone at least this
   * long without appearing in a current consensus. */
 -#define TOLERATE_MICRODESC_AGE (7*24*60*60)
-+#define TOLERATE_MICRODESC_AGE (3*24*60*60)
++#define TOLERATE_MICRODESC_AGE (3*60*60)
  
  /** Remove all microdescriptors from <b>cache</b> that haven't been listed for
   * a long time.  Does not rebuild the cache on disk.  If <b>cutoff</b> is
@@ -16,13 +16,13 @@
  /** How old do we allow a router to get before removing it
   * from the router list? In seconds. */
 -#define ROUTER_MAX_AGE (60*60*48)
-+#define ROUTER_MAX_AGE (60*60*24)
++#define ROUTER_MAX_AGE (3*60*60)
  /** How old can a router get before we (as a server) will no longer
   * consider it live? In seconds. */
  #define ROUTER_MAX_AGE_TO_PUBLISH (60*60*20)
  /** How old do we let a saved descriptor get before force-removing it? */
 -#define OLD_ROUTER_DESC_MAX_AGE (60*60*24*5)
-+#define OLD_ROUTER_DESC_MAX_AGE (60*60*24)
++#define OLD_ROUTER_DESC_MAX_AGE (3*60*60)
  
  /** Possible rules for generating circuit IDs on an OR connection. */
  typedef enum {
