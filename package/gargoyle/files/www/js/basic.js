@@ -2566,6 +2566,7 @@ function scan3GDevice(field)
 			if(scannedDevices.length > 0)
 			{
 				setAllowableSelections(field, scannedDevices, scannedDevices);
+				set3GDevice(getSelectedValue("wan_3g_list_device"));
 				document.getElementById("wan_3g_device").style.display = "none";
 				document.getElementById("wan_3g_list_device").style.display = "block";
 			}
