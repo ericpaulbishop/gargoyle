@@ -155,6 +155,7 @@ function savePartTwo()
 			else if(saveCount == maxSaveWait)
 			{
 				alert("WARNING: Tor is active, but may be having problems connecting -- check your connection")
+				setControlsEnabled(true)
 			}
 			else
 			{
