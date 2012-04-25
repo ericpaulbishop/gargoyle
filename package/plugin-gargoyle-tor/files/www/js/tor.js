@@ -144,7 +144,7 @@ function savePartTwo()
 			for(i=0; i < lines.length; i++)
 			{
 				line = lines[i]
-				done = line.match(/PROGRESS=100/) ? true : false
+				done = line.match(/PROGRESS=100/) ? true : done
 			}
 			
 			saveCount++
