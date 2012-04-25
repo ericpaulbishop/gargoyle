@@ -6,6 +6,10 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+// save timeout variables
+var maxSaveWait=90
+var saveCount=0
+
 
 // initialize conversion constants
 var mask2bits = []
@@ -107,14 +111,61 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
-				uciOriginal = uci.clone();
-				resetData();
-				setControlsEnabled(true);
+				var torClientMode = getSelectedValue("tor_client_mode")
+				var torRelayMode  = getSelectedValue("tor_relay_mode")
+				uciOriginal = uci.clone()
+				resetData()
+				if(torClientMode == "0" && torRelayMode == "0" )
+				{
+					setControlsEnabled(true)
+				}
+				else
+				{
+					saveCount=0
+					savePartTwo()
+				}
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
+
+function savePartTwo()
+{
+	var statusCommand = "printf  \"Authenticate \\\"\\\"\\nGETINFO status/bootstrap-phase\\nGETINFO status/reachability-succeeded/or\\n\" | nc 127.0.0.1 9051 | grep status"
+	var param = getParameterDefinition("commands", statusCommand) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""))
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			var done = false
+			var lines = req.responseText.split(/[\r\n]+/)
+			var i;
+			for(i=0; i < lines.length; i++)
+			{
+				line = lines[i]
+				done = line.match(/PROGRESS=100/) ? true : done
+			}
+			
+			saveCount++
+			if(done)
+			{
+				setControlsEnabled(true)
+			}
+			else if(saveCount == maxSaveWait)
+			{
+				alert("WARNING: Tor is active, but may be having problems connecting -- check your connection")
+				setControlsEnabled(true)
+			}
+			else
+			{
+				setTimeout(savePartTwo, 1000)
+			}
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction)
+}
+
 
 
 function proofreadAll()
@@ -218,7 +269,6 @@ function bitsToMask(bits)
 		quads.push( "" + bits2mask[ next ] )
 	}
 	return quads.join(".")
-
 }
 
 function maskToBits(mask)
@@ -230,7 +280,6 @@ function maskToBits(mask)
 		bits = bits + mask2bits[ parseInt(maskQuads[quadi]) ]
 	}
 	return bits
-
 }
 
 
