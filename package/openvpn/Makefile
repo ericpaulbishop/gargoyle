@@ -85,14 +85,13 @@ define Package/openvpn/install
 endef
 
 define Package/openvpn-easy-rsa/install
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(CP) $(PKG_BUILD_DIR)/easy-rsa/2.0/{build-*,clean-all,inherit-inter,list-crl,pkitool,revoke-full,sign-req,whichopensslcnf} $(1)/usr/sbin/
-	$(INSTALL_DIR) $(1)/etc/easy-rsa
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/easy-rsa/2.0/openssl.cnf $(1)/etc/easy-rsa/openssl.cnf
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/easy-rsa/2.0/vars $(1)/etc/easy-rsa/vars
-	$(INSTALL_DIR) $(1)/etc/easy-rsa/keys
-	$(INSTALL_DATA) files/easy-rsa.index $(1)/etc/easy-rsa/keys/index.txt
-	$(INSTALL_DATA) files/easy-rsa.serial $(1)/etc/easy-rsa/keys/serial
+	$(INSTALL_DIR)                                                                                                              $(1)/usr/lib/easy-rsa
+	$(CP) $(PKG_BUILD_DIR)/easy-rsa/2.0/{build-*,clean-all,inherit-inter,list-crl,pkitool,revoke-full,sign-req,whichopensslcnf} $(1)/usr/lib/easy-rsa
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/easy-rsa/2.0/openssl.cnf                                                                   $(1)/usr/lib/easy-rsa/openssl.cnf
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/easy-rsa/2.0/vars                                                                          $(1)/usr/lib/easy-rsa/vars
+	$(INSTALL_DIR)                                                                                                              $(1)/usr/lib/easy-rsa/keys
+	$(INSTALL_DATA) files/easy-rsa.index                                                                                        $(1)/usr/lib/easy-rsa/keys/index.txt
+	$(INSTALL_DATA) files/easy-rsa.serial                                                                                       $(1)/usr/lib/easy-rsa/keys/serial
 endef
 
 $(eval $(call BuildPackage,openvpn))
