@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [ -e /tmp/tor.check ] ; then
+	exit
+fi
+
+touch /tmp/tor.check
+
 cache_file="/var/tor/cached-consensus"
 if [ ! -f "$cache_file" ] ; then
 	cache_file="/var/tor/cached-microdesc-consensus"
@@ -21,3 +27,20 @@ if [ -f "$cache_file" ] ; then
 		echo "$new_md5sum" > /tmp/tor/consensus-md5
 	fi
 fi
+
+
+tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
+tor_client=$( uci get tor.client.client_mode 2>/dev/null)
+tor_relay=$(  uci get tor.relay.relay_mode 2>/dev/null)
+
+
+if [ $tor_enabled == "1" ] && [ "$tor_client$tor_relay" != "00" ] ; then
+	found_process=$(ps | grep "tor\.pid")
+	if [ -z "$found_process" ] ; then
+		logger "Tor seems to have died unexpectedly, restarting"
+		/etc/init.d/tor restart
+	fi
+fi
+
+rm -rf /tmp/tor.check
+

@@ -63,6 +63,12 @@ uci commit
 /etc/init.d/webmon_gargoyle stop 2>/dev/null
 /etc/init.d/cron stop 2>/dev/null
 
+# tor eats up memory, stop it before proceeding
+if [ -e /etc/init.d/tor ] ; then
+	/etc/init.d/tor stop 2>/dev/null
+fi
+
+
 mv /etc/config/gargoyle /tmp/gargoyle.bak
 cp /etc/passwd /tmp/passwd
 rm -rf /etc/rc.d/*
@@ -72,8 +78,16 @@ rm -rf /etc/crontabs/*
 rm -rf /etc/ethers
 echo "127.0.0.1 localhost." > /etc/hosts  #overwrites old file
 
-tar xzf "$restore_file" -C / 2>error
+have_overlay=$(df | grep "overlay$" 2>/dev/null)
+if [ -n "$have_overlay" ] ; then
+	mkdir -p /tmp/restore/data
+	tar xzf "$restore_file" -C /tmp/restore/data  2>/error
+	cp -r /tmp/restore/data/* /
+else
+	tar xzf "$restore_file" -C / 2>error
+fi
 error=$(cat error)
+
 
 # make sure http settings are correct for cookie-based auth
 uci set httpd_gargoyle.server.default_page_file="overview.sh" 2>/dev/null
@@ -116,6 +130,12 @@ if [ -n "$old_hqd2" ] ; then
 fi
 	
 is_bridge=$(echo $(uci show wireless | grep wds) $(uci show wireless | grep client_bridge))
+have_ap=$(echo $(uci show wireless | grep "mode.*ap"))
+if [ -n "$have_ap" ] ; then
+	is_bridge=""
+fi
+
+
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
 quotas_active=""
 all_quotas=$(uci show firewall | grep "=quota$" | sed 's/=.*$//' | sed 's/^.*\.//')
@@ -220,11 +240,8 @@ rm /tmp/passwd
 #this makes sure that we don't restore crontab that tries
 #to save bwmon save files when rules don't exist, wiping old bwmon data
 date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
-/etc/init.d/ntpclient restart 2>/dev/null
-/etc/init.d/bwmon_gargoyle start 2>/dev/null
-/etc/init.d/cron start 2>/dev/null
 
-sleep 10
+sleep 3
 rm -rf /tmp/restore_lock_file
 if [ -n "$error" ] ; then
 	echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
@@ -233,3 +250,7 @@ else
 fi
 
 echo "</body></html>"
+
+
+# reboot should be handled by calling function, not this script
+

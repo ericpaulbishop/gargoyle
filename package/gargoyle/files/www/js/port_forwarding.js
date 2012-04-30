@@ -554,10 +554,6 @@ function resetData()
 	}
 	setDmzEnabled();
 
-	
-
-
-	
 
 	//upnp
 	document.getElementById("upnp_enabled").checked = upnpdEnabled;
@@ -565,12 +561,40 @@ function resetData()
 	downElement = document.getElementById("upnp_down");
 	
 	upElement.value = uciOriginal.get("upnpd", "config", "upload");
-	upElement.value = upElement.value == '' ? 512 : upElement.value;
+	upElement.value = upElement.value == '' ? 10000 : upElement.value;
 	
 	downElement.value = uciOriginal.get("upnpd", "config", "download");
-	downElement.value = downElement.value == '' ? 1024 : downElement.value;
+	downElement.value = downElement.value == '' ? 10000 : downElement.value;
 
 	setUpnpEnabled();
+	initializeDescriptionVisibility(uciOriginal, "upnp_help");
+	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
+
+
+	if (upnpdEnabled) {
+		update_upnp();
+		timerid=setInterval("update_upnp()", 10000);
+	} else {
+		clearInterval(timerid);
+		timerid = null;
+
+		var tableData = new Array();
+		var tableRow =['***','***********','***** '];
+		tableData.push(tableRow);
+
+		var columnNames= ['Proto', 'LAN Host', 'Port' ]; 
+		var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
+		var tableContainer = document.getElementById('upnp_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(upnpTable);
+
+
+	}
+
+
 	
 }
 
@@ -716,3 +740,61 @@ function editForward(isSingle, triggerElement)
 	runOnEditorLoaded();
 }
 
+var updateInProgress=false;
+var timerid=null;
+
+function update_upnp()
+{
+	if (!updateInProgress)
+	{
+		updateInProgress = true;
+		var commands="iptables -nL MINIUPNPD | grep ACCEPT"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var lines = req.responseText.split("\n");
+				var tableData = new Array();
+				var i;
+				var upnpcnt=0;
+
+				if (lines != null)
+				{
+					for(i = 0; i < lines.length; i++)
+					{
+						var upnd = lines[i].split(/\s+/);
+						if (typeof(upnd[6]) != "undefined") {
+						var tableRow =[upnd[1],upnd[4],upnd[6].substr(4)];
+						tableData.push(tableRow);
+						upnpcnt = upnpcnt+1;
+						}
+					}
+
+				}
+
+				//Always display at least on blank line
+				if (upnpcnt == 0 ) {
+					var tableRow =['***','***********','***** '];
+					tableData.push(tableRow);
+				}
+
+				var columnNames= ['Proto', 'LAN Host', 'Port' ]; 
+				
+				var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
+				var tableContainer = document.getElementById('upnp_table_container');
+				if(tableContainer.firstChild != null)
+				{
+					tableContainer.removeChild(tableContainer.firstChild);
+				}
+				tableContainer.appendChild(upnpTable);
+
+
+				updateInProgress = false;
+			}
+		}
+
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}

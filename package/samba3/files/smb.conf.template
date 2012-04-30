@@ -15,7 +15,7 @@
 	security = user
 	null passwords = yes
 	map to guest = Bad User
-	guest account = nobody
+	guest account = root
 	invalid users = root
 	smb passwd file = /etc/samba/smbpasswd
 	

@@ -77,6 +77,7 @@
 
 #define MAX_LOOKUP_URL_LENGTH	100
 
+int daemon_pid_file;
 
 char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://whatismyip.org",
@@ -209,6 +210,7 @@ int main(int argc, char** argv)
 	// -u print usage and exit
 	// [SERVICE NAMES]
 	
+	daemon_pid_file = -1;
 	char* config_file = strdup("/etc/ddns_updater.conf");
 	char* service_provider_file = strdup("/etc/ddns_providers.conf");
 	char is_daemon = 0;
@@ -1105,7 +1107,17 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	closelog();
 
 	//remove pid file
+	if(daemon_pid_file >= 0)
+	{
+		// unlocked variable unused, but we get compilation warnings if we don't store return value
+		int unlocked = -1;
+		unlocked = lockf(daemon_pid_file,F_ULOCK,0);
+		unlocked++; //dummy, prevents compilation warnings
+
+		close(daemon_pid_file);
+	}
 	unlink(PID_PATH);
+
 
 	//cleanup used memory (makes finding TRUE memory leaks with valgrind a lot easier)
 	unsigned long num_destroyed;
@@ -1131,6 +1143,7 @@ void daemonize(char run_in_background) //background variable is useful for debug
 	if(run_in_background != 0)
 	{
 		//fork and end parent process
+		FILE* reopened;
 		int i=fork();
 		if (i != 0)
 		{	
@@ -1154,26 +1167,30 @@ void daemonize(char run_in_background) //background variable is useful for debug
 			close(i);
 		}
 
-		// close standard i/o  
-        	close(STDOUT_FILENO);
-		close(STDIN_FILENO);
-		close(STDERR_FILENO);
+		// close standard i/o 
+		//
+		// reopened file handle doesn't do anything, 
+		// but we get compilation warnings if we don't store/use return values
+		reopened = freopen( "/dev/null", "r", stdin);
+		reopened = freopen( "/dev/null", "w", stdout);
+		reopened = freopen( "/dev/null", "w", stderr);
+		if(reopened){ i++; } //dummy, prevents compilation warnings
 	}
 
 
 	// record pid to lockfile
-	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
-	if(pid_file<0) // exit if we can't open file
+	daemon_pid_file = open(PID_PATH,O_RDWR|O_CREAT,0644);
+	if(daemon_pid_file<0) // exit if we can't open file
 	{
 		exit(1);
 	}
-	if(lockf(pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
+	if(lockf(daemon_pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
 	{
 		exit(1);
 	}
 	char pid_str[25];
 	sprintf(pid_str,"%d\n",getpid());
-	if( write(pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
+	if( write(daemon_pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
 	{
 		exit(1);
 	}
