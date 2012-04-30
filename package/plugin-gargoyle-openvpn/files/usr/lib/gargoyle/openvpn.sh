@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# apt-get update
+# apt-get install aptitude
+# aptitude install -y openvpn
 
 # global config directory
 OPENVPN_DIR="/etc/openvpn"
@@ -92,7 +95,7 @@ export KEY_EMAIL='$name@$randomDomain.com'
 export KEY_CN='$name'
 export KEY_NAME='$name'
 EOF
-	source ./vars
+	. ./vars
 	./clean-all
 	./build-dh
 	./pkitool --initca
@@ -152,8 +155,8 @@ createClientConf()
 	openvpn_client_local_subnet_ip="$3"
 	openvpn_client_local_subnet_mask="$4"
 
-	openvpn_port=$(   awk ' $1 ~ /port/      { print $2 } /etc/openvpn/server.conf ')
-	openvpn_netmask=$(awk ' $1 ~ /ifconfig/  { print $3 } /etc/openvpn/server.conf ')
+	openvpn_port=$(   awk ' $1 ~ /port/      { print $2 } ' /etc/openvpn/server.conf )
+	openvpn_netmask=$(awk ' $1 ~ /ifconfig/  { print $3 } ' /etc/openvpn/server.conf )
 
 
 
@@ -186,7 +189,7 @@ export KEY_EMAIL='$openvpn_client_name@$randomDomain.com'
 export KEY_CN='$openvpn_client_name'
 export KEY_NAME='$openvpn_client_name'
 EOF
-	source ./vars
+	. ./vars
 	./clean-all
 	cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" ./keys/
 
@@ -194,7 +197,7 @@ EOF
 	./pkitool "$openvpn_client_name"
 
 	cp keys/$openvpn_client_name.crt "$OPENVPN_DIR"
-	mkdir -p "$OPENVPN_DIR/client_conf/$name"
+	mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_name"
 	cp "keys/$openvpn_client_name.crt" "keys/$openvpn_client_name.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/client_conf/$openvpn_client_name"
 
 
@@ -243,7 +246,7 @@ EOF
 updateRoutes()
 {
 	
-	openvpn_server_internal_ip=$(awk ' $1 ~ /ifconfig/  { print $2 } /etc/openvpn/server.conf ')
+	openvpn_server_internal_ip=$(awk ' $1 ~ /ifconfig/  { print $2 } ' /etc/openvpn/server.conf )
 
 
 	# Change "Internal Field Separator" (IFS variable)
@@ -307,8 +310,5 @@ generateTestConfiguration()
 
 }
 
-# apt-get update
-# apt-get install aptitude
-# aptitude install -y openvpn
-#
+
 # generateTestConfiguration
