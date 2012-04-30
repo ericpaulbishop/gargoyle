@@ -16,7 +16,7 @@
 	echo "var driveSizes = [];"
 	
 	echo "var storageDrives = [];"
-	cat /tmp/mounted_usb_storage.tab 2>/dev/null | awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' 
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
 	echo "var physicalDrives = [];"
 
@@ -27,10 +27,9 @@
 	#ugly one-liner
 	#unmounted_drives=$( drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) ; for d in $drives ; do mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") ; if [ -z "$mounted" ] ; then echo "$d" ; fi  ; done )
 	
-	drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) 
-	for d in $drives ; do 
-		mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") 
-		if [ -z "$mounted" ] ; then 
+	drives="$(awk  -F':' '$1 ~ /^\/dev\// { sub(/[0-9]+$/, "", $1); arr[$1]; } END { for (x in arr) { print x; } }' /tmp/drives_found.txt)"
+	for d in ${drives}; do
+		if awk -v devpath="^${d}[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
 			size=$(( 1024 * $(fdisk -s "$d") ))
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
 		fi  
