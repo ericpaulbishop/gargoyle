@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright � 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL. 
@@ -107,21 +107,21 @@
 		<div id="upnp_help" class="indent">
 		<span id='upnp_help_txt'>
 
-		<p>UPnP (Univeral Plug and Play) and NAT-PMP (NAT Port Mapping Protocol) are both protocols which allows devices and applications on the 
+		<p>UPnP (Universal Plug and Play) and NAT-PMP (NAT Port Mapping Protocol) are both protocols which allows devices and applications on your 
 		LAN to automatically configure your router with the port forwards needed for proper operation.  If a device supports either protocol
-		it is not necessary to create manual port forward rules at the top of this page as they will automatically be created by the device.</p>
+		it is not necessary to create manual port forward rules (see the top of this page) as they will automatically be created by the device.</p>
 
 		<p>When enabled Gargoyle shows a table of automatically created port forwards so you can see which devices have requested forwards and
-		ensure that this feature is working properly.  This service may not work correctly in network configurations containing two more 
-		routers (double NAT).  If you see a single row with '***' in it it means there are no port forwards registered.</p>
+		verify that this feature is working properly.  This service may not work correctly in network configurations containing two or more 
+		routers (double NAT).  If you see a single row with '***' it means there are no port forwards registered.</p>
 
-		<p>As part of the protocal the LAN device and request the speed of the WAN connection from the router.  Two fields are provided to configure
-		the response to such quiries. Client applications can use this information to optimise their performance.  But is important to note that 
+		<p>As part of the protocol the LAN device can request the speed of the WAN connection from the router.  Two fields are provided to configure
+		the response to such queries. Client applications can use this information to optimize their performance.  But is important to note that 
 		the router does not do anything to limit speeds based on this data.  It is only reported to the requester.  If zero is entered for either 
-		value the speed of the interface is reported, usually 100MB or 1GB depending on the routers interface speed.</p>
+		value the speed of the interface is reported, usually 100MB or 1GB depending on the router’s interface speed.</p>
 
-		<p>There is some contraversy about the security of this service and it does require additional RAM to run which may be important on memory
-		constrainted routers, so by default is left off.</p>
+		<p>There is some controversy about the security of this service and it does require additional RAM to run which may be important on memory
+		constrained routers, so by default this feature is off.</p>
 
 		</span>
 		<a id="upnp_help_ref" onclick='setDescriptionVisibility("upnp_help")'  href="#upnp_help">Hide Text</a>
