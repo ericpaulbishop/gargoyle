@@ -224,8 +224,8 @@ EOF
 	#update info about assigned ip/subnet
 	if [ -n "$openvpn_client_internal_ip" ] ; then
 		echo "ifconfig-push $openvpn_client_internal_ip $openvpn_netmask"                                                                      > "$OPENVPN_DIR/ccd/$openvpn_client_name"
-		if [ -n "$subnet_ip" ] && [ -n "$subnet_mask" ] ; then
-			echo "iroute $subnet_ip $subnet_mask"                                                                                         >> "$OPENVPN_DIR/ccd/$openvpn_client_name"
+		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
+			echo "iroute $openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask"                                               >> "$OPENVPN_DIR/ccd/$openvpn_client_name"
 
 			# save routes -- we need to update all route lines 
 			# once all client ccd files are in place on the server
