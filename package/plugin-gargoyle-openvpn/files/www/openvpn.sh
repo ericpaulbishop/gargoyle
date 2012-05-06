@@ -101,28 +101,36 @@
 			<option value='vpn_traffic'>Only Traffic Destined for Hosts Behind VPN</option>
 		</select>
 	</div>
+	
+	<div class="internal_divider"></div>
 
-
+	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 
 </fieldset>
 
 <fieldset id="openvpn_allowed_client_fieldset">
 	<legend class="sectionheader">OpenVPN Server: Allowed Clients</legend>
+	
+
+	<span id="openvpn_allowed_client_table_label"><p>Currently Configured Clients:</p></span>
+	
+	<div id="openvpn_allowed_client_table_container"></div>
+	
+	<div><em>After generating client configuration, click download to obtain zip file containg necessary credentials, and place in your client&lsquo;s OpenVPN configuration folder</em></div>
+	
+	<div class='internal_divider'></div>
+	
 	<span id="add_ddns_label"><p>Configure A New Client / Set of Credentials :</p></span>
 		
 	<div class="indent">
 		<? cat /www/templates/openvpn_allowed_client_template ?>
 	
-		<div>
-			<input type="button" id="openvpn_allowed_client_add_button" class="default_button" value="Add Client" onclick="addClient()" />
-		</div>
 	</div>
-	
-	<div class='internal_divider'></div>
 
-	<span id="openvpn_allowed_client_table_label"><p>Currently Configured Clients:</p></span>
-	
-	<div id="openvpn_allowed_client_table_container"></div>
+	<input type="button" id="openvpn_allowed_client_add_button" class="bottom_button" value="Add Client" onclick="addClient()" />
+
+
 
 </fieldset>
 
