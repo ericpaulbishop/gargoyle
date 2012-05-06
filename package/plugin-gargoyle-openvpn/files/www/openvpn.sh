@@ -19,10 +19,10 @@
 			<option value='server'>OpenVPN Server</option>
 		</select>
 	</div>
-</fielset>
+</fieldset>
 
 <fieldset id="openvpn_server_fieldset">
-	<legend class="sectionheader">OpenVPN Server</legend>
+	<legend class="sectionheader">OpenVPN Server: Configuration</legend>
 	
 	<!--
 	# server internal vpn ip
@@ -30,9 +30,10 @@
 	# protocol (tcp/udp)
 	# port
 	# cipher
-	# force client traffic through vpn [move to client config section]
 	# allow communication between clients
 	# allow clients to access router subnet
+	# allow one set of credentials for multiple hosts
+	# force client traffic through vpn 
 	-->
 	
 	<div id='openvpn_server_ip_container'>
@@ -45,19 +46,21 @@
 		<input type='text' class='rightcolumn' name='openvpn_server_mask' id='openvpn_server_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 	</div>
 	
-	<div id= "openvpn_server_protocol_container">
-		<label class='leftcolumn' for='openvpn_server_protocol' id='openvpn_server_protocol_label'>OpenVPN Protocol:</label>
-		<select class='rightcolumn' id='openvpn_server_protocol'>
-			<option value='a128'>UDP</option>
-			<option value='a256'>TCP</option>
-		</select>
-	</div>	
-	<div id='openvpn_server_port_container' class='indent'>
+	<div id='openvpn_server_port_container'>
 		<label class='leftcolumn' for='openvpn_server_port' id='openvpn_port_label'>OpenVPN Port:</label>
 		<input type='text' id='openvpn_server_port'  size='20' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
 	</div>
 
-		<div id= "openvpn_server_cipher_container">
+
+	<div id= "openvpn_server_protocol_container">
+		<label class='leftcolumn' for='openvpn_server_protocol' id='openvpn_server_protocol_label'>OpenVPN Protocol:</label>
+		<select class='rightcolumn' id='openvpn_server_protocol'>
+			<option value='udp'>UDP</option>
+			<option value='tcp'>TCP</option>
+		</select>
+	</div>	
+
+	<div id= "openvpn_server_cipher_container">
 		<label class='leftcolumn' for='openvpn_server_cipher' id='openvpn_server_cipher_label'>OpenVPN Cipher:</label>
 		<select class='rightcolumn' id='openvpn_server_cipher'>
 			<option value='b128'>Blowfish 128bit</option>
@@ -91,15 +94,43 @@
 		</select>
 	</div>
 
+	<div id= "openvpn_server_force_client_traffic_container">
+		<label class='leftcolumn' for='openvpn_server_force_client_traffic' id='openvpn_server_force_client_traffic_label'>Clients Use VPN For:</label>
+		<select class='rightcolumn' id='openvpn_server_force_client_traffic'>
+			<option value='all_traffic'>All Client Traffic</option>
+			<option value='vpn_traffic'>Only Traffic Destined for Hosts Behind VPN</option>
+		</select>
+	</div>
 
 
 
-</fielset>
+</fieldset>
+
+<fieldset id="openvpn_allowed_client_fieldset">
+	<legend class="sectionheader">OpenVPN Server: Allowed Clients</legend>
+	<span id="add_ddns_label"><p>Configure A New Client / Set of Credentials :</p></span>
+		
+	<div class="indent">
+		<? cat /www/templates/openvpn_allowed_client_template ?>
+	
+		<div>
+			<input type="button" id="openvpn_allowed_client_add_button" class="default_button" value="Add Client" onclick="addClient()" />
+		</div>
+	</div>
+	
+	<div class='internal_divider'></div>
+
+	<span id="openvpn_allowed_client_table_label"><p>Currently Configured Clients:</p></span>
+	
+	<div id="openvpn_allowed_client_table_container"></div>
+
+</fieldset>
+
 
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
 	
-</fielset>
+</fieldset>
 
 
 

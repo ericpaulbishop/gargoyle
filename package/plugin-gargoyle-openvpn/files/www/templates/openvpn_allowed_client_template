@@ -1,0 +1,32 @@
+<div id='openvpn_allowed_client_ip_container'>
+	<label class='leftcolumn' for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'>Client Name:</label>
+	<input type='text' class='rightcolumn' ip='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip' size='20' maxlength='15' />
+</div>
+
+<div id="openvpn_allowed_client_remote_container">
+	<label class="leftcolumn" id='openvpn_allowed_client_remote_label' for='openvpn_allowed_client_remote'>Client Should Connect To:</label>
+	<select class='rightcolumn' id="openvpn_allowed_client_remote"></select>
+</div>
+<div id="openvpn_allowed_client_remote_custom_container">
+	<span class='rightcolumnonly'>
+		<input type='text' id='openvpn_allowed_client_remote_custom' size='20' maxlength='17' />
+	</span>
+	<span style="clear:both"></span>
+</div>
+
+<div id="openvpn_allowed_client_have_subnet_container">
+	<label class="leftcolumn" id='openvpn_allowed_client_have_subnet_label' for='openvpn_allowed_client_have_subnet'>Subnet Behind Client:</label>
+	<select class='rightcolumn' id="openvpn_allowed_client_have_subnet">
+		<option value="false">No Subnet Defined</option>
+		<option value="true">Route The Subnet Below</option>
+	</select>
+</div>
+<div id="openvpn_allowed_client_subnet_container">
+	<span class='rightcolumnonly'>
+		<input type='text' id='openvpn_allowed_client_subnet' size='20' maxlength='17' />
+	</span>
+	<span style="clear:both"></span>
+</div>
+
+
+
