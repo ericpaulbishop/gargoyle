@@ -45,6 +45,11 @@ function proofreadAll()
 
 function resetData()
 {
+	var serverEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled") 
+	var clientEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled")
+	serverEnabled = serverEnabled == "true" || serverEnabled == "1" ? true : false;
+	clientEnabled = clientEnabled == "true" || clientEnabled == "1" ? true : false;
+
 
 }
 
