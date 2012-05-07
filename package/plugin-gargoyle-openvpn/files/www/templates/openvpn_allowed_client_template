@@ -1,5 +1,10 @@
+<div id='openvpn_allowed_client_name_container'>
+	<label class='leftcolumn' for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'>OpenVPN Client Name:</label>
+	<input type='text' class='rightcolumn' name='openvpn_allowed_client_name' id='openvpn_allowed_client_name' size='20' maxlength='15' />
+</div>
+
 <div id='openvpn_allowed_client_ip_container'>
-	<label class='leftcolumn' for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'>Client Name:</label>
+	<label class='leftcolumn' for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'>OpenVPN Client Internal IP:</label>
 	<input type='text' class='rightcolumn' ip='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip' size='20' maxlength='15' />
 </div>
 
