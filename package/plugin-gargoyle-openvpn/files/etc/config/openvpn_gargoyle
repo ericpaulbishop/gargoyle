@@ -1,0 +1,34 @@
+
+config 'server' 'server'
+	option	'enabled'			'false'
+	option	'internal_ip'			'10.8.0.1'
+	option	'internal_mask'			'255.255.255.0'
+	option	'port'				'1194'
+	option	'proto'				'udp'
+	option	'cipher'			'BF-CBC'
+	option	'keysize'			'128'
+	option	'client_to_client'		'false'
+	option	'lan_access'			'false'
+	option	'duplicate_cn'			'false'
+	option	'redirect_gateway'		'true'
+
+
+
+## client info, appears in server configuration
+#config 'allowed_client' 'client_1'
+#	option	'id'		'client_1'
+#	option	'name'		'My First Client'
+#	option	'remote'	'myhost.chickenkiller.com'
+#	option	'ip'		'10.8.0.2'
+#	option	'subnet'	'192.168.3.1/255.255.255.0'
+#
+
+config 'client' 'client'
+	option	'enabled'	'false'
+	option	'proto'		'udp'
+	option	'remote'	'myhost.chickenkiller.com'
+	option	'topology'	'subnet'
+	option	'ca'		'/etc/openvpn/ca.crt'
+	option	'cert'		'/etc/openvpn/client.crt'
+	option	'key'		'/etc/openvpn/client.key'
+	
