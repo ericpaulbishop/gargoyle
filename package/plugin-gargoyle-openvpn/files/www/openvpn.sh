@@ -13,7 +13,7 @@
 	<legend class="sectionheader">OpenVPN Configuration</legend>
 	<div id= "openvpn_config_container">
 		<label class='leftcolumn' for='openvpn_config' id='openvpn_config_label'>OpenVPN Configuration:</label>
-		<select class='rightcolumn' id='openvpn_config' onchange='setOpenVpnVisibility()'>
+		<select class='rightcolumn' id='openvpn_config' onchange='setOpenvpnVisibility()'>
 			<option value='disabled'>OpenVPN Disabled</option>
 			<option value='client'>OpenVPN Client</option>
 			<option value='server'>OpenVPN Server</option>
@@ -63,10 +63,10 @@
 	<div id= "openvpn_server_cipher_container">
 		<label class='leftcolumn' for='openvpn_server_cipher' id='openvpn_server_cipher_label'>OpenVPN Cipher:</label>
 		<select class='rightcolumn' id='openvpn_server_cipher'>
-			<option value='b128'>Blowfish 128bit</option>
-			<option value='b256'>Blowfish 256bit</option>
-			<option value='a128'>AES 128bit</option>
-			<option value='a256'>AES 256bit</option>
+			<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
+			<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
+			<option value='AES-128-CBC'>AES-CBC 128bit</option>
+			<option value='AES-256-CBC'>AES-CBC 256bit</option>
 		</select>
 	</div>
 
@@ -86,19 +86,19 @@
 		</select>
 	</div>
 	
-	<div id= "openvpn_server_subnet_access_container">
-		<label class='leftcolumn' for='openvpn_server_subnet_access' id='openvpn_server_subnet_access_label'>Credential Re-Use:</label>
-		<select class='rightcolumn' id='openvpn_server_subnet_access'>
+	<div id= "openvpn_server_duplicate_cn_container">
+		<label class='leftcolumn' for='openvpn_server_duplicate_cn' id='openvpn_server_duplicate_cn_label'>Credential Re-Use:</label>
+		<select class='rightcolumn' id='openvpn_server_duplicate_cn'>
 			<option value='false'>Credentials Are Specific to Each Client</option>
 			<option value='true'>Credentials Can Be Used By Multiple Clients</option>
 		</select>
 	</div>
 
-	<div id= "openvpn_server_force_client_traffic_container">
-		<label class='leftcolumn' for='openvpn_server_force_client_traffic' id='openvpn_server_force_client_traffic_label'>Clients Use VPN For:</label>
-		<select class='rightcolumn' id='openvpn_server_force_client_traffic'>
-			<option value='all_traffic'>All Client Traffic</option>
-			<option value='vpn_traffic'>Only Traffic Destined for Hosts Behind VPN</option>
+	<div id= "openvpn_server_redirect_gateway_container">
+		<label class='leftcolumn' for='openvpn_server_redirect_gateway' id='openvpn_server_redirect_gateway_label'>Clients Use VPN For:</label>
+		<select class='rightcolumn' id='openvpn_server_redirect_gateway'>
+			<option value='true'>All Client Traffic</option>
+			<option value='false'>Only Traffic Destined for Hosts Behind VPN</option>
 		</select>
 	</div>
 	

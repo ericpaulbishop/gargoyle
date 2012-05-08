@@ -11,7 +11,7 @@ config 'server' 'server'
 	option	'lan_access'			'false'
 	option	'duplicate_cn'			'false'
 	option	'redirect_gateway'		'true'
-
+	option  'subnet_access'			'false'
 
 
 ## client info, appears in server configuration
@@ -28,6 +28,8 @@ config 'client' 'client'
 	option	'proto'		'udp'
 	option	'remote'	'myhost.chickenkiller.com'
 	option	'topology'	'subnet'
+	option	'cipher'	'BF-CBC'
+	option	'keysize'	'128'
 	option	'ca'		'/etc/openvpn/ca.crt'
 	option	'cert'		'/etc/openvpn/client.crt'
 	option	'key'		'/etc/openvpn/client.key'
