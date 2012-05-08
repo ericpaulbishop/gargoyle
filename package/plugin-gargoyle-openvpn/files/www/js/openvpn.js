@@ -51,9 +51,9 @@ function resetData()
 	clientEnabled = clientEnabled == "true" || clientEnabled == "1" ? true : false;
 	
 	var openvpnMode = "disabled"
-	openvpnMode = serverEnabled ? "server" : openVpnMode
-	openvpnMode = clientEnabled ? "client" : openVpnMode
-	setSelectedValue("openvpn_config", openVpnMode)
+	openvpnMode = serverEnabled ? "server" : openvpnMode
+	openvpnMode = clientEnabled ? "client" : openvpnMode
+	setSelectedValue("openvpn_config", openvpnMode)
 
 	
 	getServerVarWithDefault = function(variable, defaultDef) {
@@ -85,10 +85,12 @@ function resetData()
 
 
 
+	setRemoteNames("openvpn_allowed_client_remote", document)
+
 	setOpenvpnVisibility()
 }
 
-function setOpenvpnVisibility
+function setOpenvpnVisibility()
 {
 	openvpnMode = getSelectedValue("openvpn_config");
 	
@@ -104,5 +106,29 @@ function setAllowedClientVisibility( controlDocument )
 	controlDocument.getElementById("openvpn_allowed_client_remote_custom_container").style.display = getSelectedValue("openvpn_allowed_client_remote", controlDocument) == "custom" ? "block" : "none";
 
 	controlDocument.getElementById("openvpn_allowed_client_subnet_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? "block" : "none";
+}
+
+
+function setRemoteNames( selectId, controlDocument)
+{
+	var names = []
+	var values = []
+	
+	var definedDdns = uciOriginal.getAllSectionsOfType("ddns_gargoyle", "service")
+	var ddi
+	for(ddi=0; ddi < definedDdns.length; ddi++)
+	{
+		var enabled = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "enabled")
+		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain")
+		if(enabled != "0" && domain != "")
+		{
+			names.push("Dynamic DNS: " + domain)
+			values.push(domain)
+		}
+	}
+	names.push("WAN IP: " + currentWanIp, "Other (specfied below)")
+	values.push(currentWanIp, "custom")
+	
+	setAllowableSelections(selectId, values, names, controlDocument)
 }
 
