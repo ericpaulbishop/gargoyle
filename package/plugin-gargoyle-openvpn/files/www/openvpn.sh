@@ -88,7 +88,7 @@
 	
 	<div id= "openvpn_server_duplicate_cn_container">
 		<label class='leftcolumn' for='openvpn_server_duplicate_cn' id='openvpn_server_duplicate_cn_label'>Credential Re-Use:</label>
-		<select class='rightcolumn' id='openvpn_server_duplicate_cn'>
+		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='setOpenvpnVisibility()'>
 			<option value='false'>Credentials Are Specific to Each Client</option>
 			<option value='true'>Credentials Can Be Used By Multiple Clients</option>
 		</select>

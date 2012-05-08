@@ -94,10 +94,18 @@ function setOpenvpnVisibility()
 {
 	openvpnMode = getSelectedValue("openvpn_config");
 	
-	document.getElementById("openvpn_server_fieldset").style.display         = openvpnMode == "server" ? "block" : "none";
-	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none";
-	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none";
+	document.getElementById("openvpn_server_fieldset").style.display         = openvpnMode == "server" ? "block" : "none"
+	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none"
+	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none"
 	
+
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+	document.getElementById("openvpn_allowed_client_ip_container").style.display          = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_have_subnet_container").style.display = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_subnet_container").style.display      = dupeCn ? "none" : "block"
+
+
 	setAllowedClientVisibility(document);
 }
 
@@ -126,7 +134,7 @@ function setRemoteNames( selectId, controlDocument)
 			values.push(domain)
 		}
 	}
-	names.push("WAN IP: " + currentWanIp, "Other (specfied below)")
+	names.push("WAN IP: " + currentWanIp, "Other IP or Domain (specfied below)")
 	values.push(currentWanIp, "custom")
 	
 	setAllowableSelections(selectId, values, names, controlDocument)
