@@ -94,8 +94,25 @@ function resetData()
 		var ip     = uciOriginal.get("openvpn_gargoyle", id, "ip")
 		var subnet = uciOriginal.get("openvpn_gargoyle", id, "subnet")
 
-		push
+		var ipElementContainer = document.createElement("span")
+		ipElementContainer.appendChild( document.createTextNode("---") )
+		ipElementContainer.appendChild( document.createTextNode(ip) )
+		if(subnet != "")
+		{
+			ipElementContainer.appendChild( document.createElement("br") )
+			ipElementContainer.appendChild( document.createTextNode(subnet) )
+		}
+		ipElementContainer.id = id
 		
+
+		var editButton;
+		var detailsButton;
+		var downloadButton;
+		var disableButton;
+		var removeButton;
+
+		rowData.push(name)
+		rowData.push(ipElementContainer)
 		
 	}
 
