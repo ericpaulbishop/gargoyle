@@ -132,7 +132,7 @@ function resetData()
 	tableContainer.appendChild(acTable);
 
 
-	setRemoteNames("openvpn_allowed_client_remote", document)
+	setRemoteNames(document)
 
 	setOpenvpnVisibility()
 }
@@ -207,26 +207,100 @@ function setAllowedClientVisibility( controlDocument )
 }
 
 
-function setRemoteNames( selectId, controlDocument)
+function setRemoteNames( controlDocument, selectedRemote)
 {
+	var selectId = "openvpn_allowed_client_remote";
+	selectedRemote = selectedRemote == null ? "" : selectedRemote;
+
 	var names = []
 	var values = []
 	
 	var definedDdns = uciOriginal.getAllSectionsOfType("ddns_gargoyle", "service")
 	var ddi
+	var selectedFound = false
 	for(ddi=0; ddi < definedDdns.length; ddi++)
 	{
 		var enabled = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "enabled")
 		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain")
-		if(enabled != "0" && domain != "")
+		if( (enabled != "0" && enabled != "false") && domain != "")
 		{
 			names.push("Dynamic DNS: " + domain)
 			values.push(domain)
+			selectedFound = selectedRemote == domain ? true : selectedFound
 		}
 	}
 	names.push("WAN IP: " + currentWanIp, "Other IP or Domain (specfied below)")
 	values.push(currentWanIp, "custom")
 	
 	setAllowableSelections(selectId, values, names, controlDocument)
+	var chosen = selectedRemote == "" ? values[0] : selectedRemote
+	chosen = (!selectedFound) && selectedRemote != "" ? "custom" : selectedRemote
+	setSelectedValue(selectId, chosen, controlDocument)
+	if(chosen == "custom")
+	{
+		controlDocument.getElementById("openvpn_allowed_client_custom_remote").value = chosen
+	}
+
 }
+
+
+function setAcDocumentFromUci(controlDocument, srcUci, id, duplicateCn, serverInternalIp)
+{
+
+	controlDocument.getElementById("openvpn_allowed_client_name").value = srcUci.get("openvpn_gargoyle", id, "name")
+
+	var ip = surcUci.get("openvpn_gargoyle", id, "ip")
+	if(ip == "")
+	{
+		var ipParts = serverInternalIp.split(/\./)
+		var lastIpPart = ipParts.pop()
+		lastIpPart = lastIpPart == "1" ? 2 : 1;
+
+		var candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
+		var definedIps = getDefinedAcIps(srcUci, true).push(serverInternalIp);
+		while(lastIpPart < 255 && definedIps[candidateDefaultIp] == 1)
+		{
+			lastIpPart++
+			candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
+		}
+		ip = candidateDefaultIp
+	}
+	controlDocument.getElementById("openvpn_allowed_client_ip").value = ip
+	
+	setRemoteNames(controlDocument, srcUci.get("openvpn_gargoyle", id, "remote"))
+
+
+	
+}
+
+function getDefinedAcIps(srcUci, retHash)
+{
+	var ips = []
+	var allowedClients = srcUci.getAllSectionsOfType("openvpn_gargoyle", "allowed_client")
+	var aci;
+	for(aci=0; aci < allowedClients.length; aci++)
+	{
+		var enabled = srcUci.get("openvpn_gargoyle", allowedClients[aci], "enabled")
+		var ip = srcUci.get("openvpn_gargoyle", allowedClients[aci], "ip")
+		if(ip != "" && (enabled != "0" && enabled != "false"))
+		{
+			if(retHash)
+			{
+				ips[ip] = 1;
+			}
+			else
+			{
+				ips.push(ip)
+			}
+		}
+	}
+	return ips;
+}
+
+function setAcUciFromDocument(controlDocument, id)
+{
+
+}
+
+
 
