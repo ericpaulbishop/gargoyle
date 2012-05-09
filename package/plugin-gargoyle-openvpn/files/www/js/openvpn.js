@@ -89,37 +89,77 @@ function resetData()
 	for(aci=0; aci < allowedClients.length; aci++)
 	{
 		var rowData = []
-		var id     = allowedClients[aci]
-		var name   = uciOriginal.get("openvpn_gargoyle", id, "name")
-		var ip     = uciOriginal.get("openvpn_gargoyle", id, "ip")
-		var subnet = uciOriginal.get("openvpn_gargoyle", id, "subnet")
+		var id      = allowedClients[aci]
+		var name    = uciOriginal.get("openvpn_gargoyle", id, "name")
+		var ip      = uciOriginal.get("openvpn_gargoyle", id, "ip")
+		var subnet  = uciOriginal.get("openvpn_gargoyle", id, "subnet")
+		var enabled = uciOriginal.get("openvpn_gargoyle", id, "subnet")
 
 		var ipElementContainer = document.createElement("span")
-		ipElementContainer.appendChild( document.createTextNode("---") )
-		ipElementContainer.appendChild( document.createTextNode(ip) )
-		if(subnet != "")
-		{
-			ipElementContainer.appendChild( document.createElement("br") )
-			ipElementContainer.appendChild( document.createTextNode(subnet) )
-		}
+		var naContainer = document.createElement("span")
+		var ipContainer = document.createElement("span")
+		naContainer.appendChild( document.createTextNode("---") )
+		ipContainer.appendChild( document.createTextNode(ip) )
+		ipContainer.appendChild( document.createElement("br") )
+		ipContainer.appendChild( document.createTextNode(subnet) )
+		ipElementContainer.appendChild(naContainer)
+		ipElementContainer.appendChild(ipContainer)
 		ipElementContainer.id = id
 		
 
-		var editButton;
-		var detailsButton;
-		var downloadButton;
-		var disableButton;
-		var removeButton;
 
-		rowData.push(name)
+		rowData.push(name + "\n ")
 		rowData.push(ipElementContainer)
 		
+		var controls = createAllowedClientControls()
+		while(controls.length > 0)
+		{
+			rowData.push( controls.shift() )
+		}
+
+		enabled = enabled != "false" && enabled != "0" ? true : false;
+		rowData[2].checked = enabled
+		
+		acTableData.push(rowData)
 	}
+
+	var acTable = createTable([ "Client Name", "Internal IP\n(LAN Subnet)", "Enabled", "", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
+	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
+	while(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer.appendChild(acTable);
 
 
 	setRemoteNames("openvpn_allowed_client_remote", document)
 
 	setOpenvpnVisibility()
+}
+
+
+function createAllowedClientControls()
+{
+
+	var dummyFunc = function dummy() { return "" }
+
+	var enabledCheck = createInput("checkbox")
+	enabledCheck.onclick = dummyFunc;
+	var downloadButton = createButton("Download", "default_button", dummyFunc)
+	var editButton     = createButton("Edit",     "default_button", dummyFunc)
+
+	
+	return [enabledCheck, downloadButton, editButton]
+
+}
+
+function createButton(text, cssClass, actionFunction)
+{
+	var button = createInput("button")
+	button.value = text
+	button.className=cssClass
+	button.onclick = actionFunction
+	return button;
 }
 
 function setOpenvpnVisibility()
@@ -136,6 +176,24 @@ function setOpenvpnVisibility()
 	document.getElementById("openvpn_allowed_client_ip_container").style.display          = dupeCn ? "none" : "block"
 	document.getElementById("openvpn_allowed_client_have_subnet_container").style.display = dupeCn ? "none" : "block"
 	document.getElementById("openvpn_allowed_client_subnet_container").style.display      = dupeCn ? "none" : "block"
+
+
+	var allowedTable = document.getElementById("openvpn_allowed_client_table");
+	if(allowedTable != null)
+	{
+		var rows = allowedTable.rows;
+		var ri;
+		for(ri =1; ri < rows.length ; ri++)
+		{
+			var ipElementContainer = rows[ri].childNodes[1].firstChild;
+			var ipChildIndex;
+			for(ipChildIndex=0; ipChildIndex < ipElementContainer.childNodes.length ; ipChildIndex++)
+			{
+				ipElementContainer.childNodes[ipChildIndex].style.display = (ipChildIndex == 0 && dupeCn) || (ipChildIndex > 0 && (!dupeCn)) ? "inline" : "none"
+			}
+		}
+	}
+
 
 
 	setAllowedClientVisibility(document);

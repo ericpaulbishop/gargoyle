@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
+	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
 ?>
 
 <fieldset id="openvpn_config_fieldset">
@@ -102,10 +102,8 @@
 		</select>
 	</div>
 	
-	<div class="internal_divider"></div>
 
-	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+
 
 </fieldset>
 
@@ -121,15 +119,12 @@
 	
 	<div class='internal_divider'></div>
 	
-	<span id="add_ddns_label"><p>Configure A New Client / Set of Credentials :</p></span>
+	<span id="openvpn_allowed_client_add_label"><p>Configure A New Client / Set of Credentials :</p></span>
 		
 	<div class="indent">
 		<? cat /www/templates/openvpn_allowed_client_template ?>
 	
 	</div>
-
-	<input type="button" id="openvpn_allowed_client_add_button" class="bottom_button" value="Add Client" onclick="addClient()" />
-
 
 
 </fieldset>
@@ -140,8 +135,10 @@
 	
 </fieldset>
 
-
-
+<div id="bottom_button_container">
+	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+</div>
 
 <script>
 	resetData()

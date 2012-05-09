@@ -24,8 +24,24 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
 	{
 		var header = controlDocument.createElement('th');
+		if( typeof(columnNames[columnIndex]) == 'string' )
+		{
+			var splitText = (columnNames[columnIndex]).split(/\n/)
+			while(splitText.length > 0)
+			{
+				var next = splitText.shift()
+				header.appendChild(  controlDocument.createTextNode(next)  )
+				if(splitText.length >0)
+				{
+					header.appendChild( controlDocument.createElement('br')  )
+				}
+			}
+		}
+		else
+		{
+			header.appendChild( columnNames[columnIndex] )
+		}
 		headerContent = typeof(columnNames[columnIndex]) == 'string' ? controlDocument.createTextNode(columnNames[columnIndex]) : columnNames[columnIndex];
-		header.appendChild(headerContent);
 		row.appendChild(header);
 	}
 	if(rowsAreRemovable)
@@ -82,7 +98,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 			while(splitText.length > 0)
 			{
 				var next = splitText.shift()
-				cell.appendChild(  controlDocument.createTextNode(rowData[cellIndex-1])  )
+				cell.appendChild(  controlDocument.createTextNode(next)  )
 				if(splitText.length >0)
 				{
 					cell.appendChild( controlDocument.createElement('br')  )
