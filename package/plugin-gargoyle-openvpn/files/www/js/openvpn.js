@@ -123,7 +123,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ "Client Name", "Internal IP\n(LAN Subnet)", "Enabled", "", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
+	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
