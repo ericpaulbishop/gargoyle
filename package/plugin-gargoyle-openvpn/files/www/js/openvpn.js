@@ -175,7 +175,8 @@ function setOpenvpnVisibility()
 	dupeCn= dupeCn == "true" || dupeCn == "1"
 	document.getElementById("openvpn_allowed_client_ip_container").style.display          = dupeCn ? "none" : "block"
 	document.getElementById("openvpn_allowed_client_have_subnet_container").style.display = dupeCn ? "none" : "block"
-	document.getElementById("openvpn_allowed_client_subnet_container").style.display      = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = dupeCn ? "none" : "block"
 
 
 	var allowedTable = document.getElementById("openvpn_allowed_client_table");
@@ -201,9 +202,10 @@ function setOpenvpnVisibility()
 
 function setAllowedClientVisibility( controlDocument )
 {
-	controlDocument.getElementById("openvpn_allowed_client_remote_custom_container").style.display = getSelectedValue("openvpn_allowed_client_remote", controlDocument) == "custom" ? "block" : "none";
+	controlDocument.getElementById("openvpn_allowed_client_remote_custom_container").style.display  = getSelectedValue("openvpn_allowed_client_remote", controlDocument) == "custom" ? "block" : "none";
 
-	controlDocument.getElementById("openvpn_allowed_client_subnet_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? "block" : "none";
+	controlDocument.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? "block" : "none";
+	controlDocument.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? "block" : "none";
 }
 
 

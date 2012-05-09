@@ -26,9 +26,15 @@
 		<option value="true">Route The Subnet Below</option>
 	</select>
 </div>
-<div id="openvpn_allowed_client_subnet_container">
-	<span class='widerightcolumnonly'>
-		<input type='text' id='openvpn_allowed_client_subnet' size='30' maxlength='30' />
+<div id="openvpn_allowed_client_subnet_ip_container">
+	<span class="widerightcolumnonly">
+		<input type='text' class="rightcolumn" id='openvpn_allowed_client_subnet_ip' size='20' maxlength='15' />&nbsp;<em>Subnet IP</em>
+	</span>
+	<span style="clear:both"></span>
+</div>
+<div id="openvpn_allowed_client_subnet_mask_container">
+	<span class="widerightcolumnonly">
+		<input type='text' class="rightcolumn"  id='openvpn_allowed_client_subnet_mask' size='20' maxlength='15' />&nbsp;<em>Subnet Mask</em>
 	</span>
 	<span style="clear:both"></span>
 </div>
