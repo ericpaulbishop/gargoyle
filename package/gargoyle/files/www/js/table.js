@@ -78,8 +78,16 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cell = controlDocument.createElement('td');
 		if(typeof(rowData[cellIndex-1]) == 'string')
 		{
-			cellContent = controlDocument.createTextNode(rowData[cellIndex-1]);
-			cell.appendChild(cellContent);
+			var splitText = (rowData[cellIndex-1]).split(/\n/)
+			while(splitText.length > 0)
+			{
+				var next = splitText.shift()
+				cell.appendChild(  controlDocument.createTextNode(rowData[cellIndex-1])  )
+				if(splitText.length >0)
+				{
+					cell.appendChild( controlDocument.createElement('br')  )
+				}
+			}
 		}
 		else
 		{
@@ -100,8 +108,6 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cell.appendChild(cellContent);
 		row.appendChild(cell);
 		cellIndex++;
-
-
 	}
 	if(rowsAreMovable)
 	{

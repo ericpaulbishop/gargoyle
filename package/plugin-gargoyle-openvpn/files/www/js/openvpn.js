@@ -83,6 +83,21 @@ function resetData()
 	setSelectedValue("openvpn_server_duplicate_cn", getServerVarWithDefault("duplicate_cn", "false"))
 	setSelectedValue("openvpn_server_redirect_gateway", getServerVarWithDefault("redirect_gateway", "true"))
 
+	var acTableData = []
+	var allowedClients = uciOriginal.getAllSectionsOfType("openvpn_gargoyle", "allowed_client")
+	var aci;
+	for(aci=0; aci < allowedClients.length; aci++)
+	{
+		var rowData = []
+		var id     = allowedClients[aci]
+		var name   = uciOriginal.get("openvpn_gargoyle", id, "name")
+		var ip     = uciOriginal.get("openvpn_gargoyle", id, "ip")
+		var subnet = uciOriginal.get("openvpn_gargoyle", id, "subnet")
+
+		push
+		
+		
+	}
 
 
 	setRemoteNames("openvpn_allowed_client_remote", document)
