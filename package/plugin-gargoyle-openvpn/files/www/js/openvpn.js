@@ -504,15 +504,20 @@ function editAc()
 					{
 						var name       = editAcWindow.document.getElementById("openvpn_allowed_client_name").value
 						var ip         = editAcWindow.document.getElementById("openvpn_allowed_client_ip").value
-						var subnetIp   = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_ip").value
-						var subnetMask = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_mask").value
-
+						var subnetIp   = ""
+						var subnetMask = ""
+						if( getSelectedValue("openvpn_allowed_client_have_subnet", editAcWindow.document) == "true")
+						{
+							subnetIp   = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_ip").value
+							subnetMask = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_mask").value
+						}
+						var subnet = subnet_ip != "" && subnet_mask != "" ? subnet_ip + "/" + subnet_mask : ""
 
 
 						setAcUciFromDocument(editAcWindow.document, editId)
 						
-						editRow.firstChild.removeChild(editRow.firstChild.firstChild)
-						editRow.firstChild.appendChild(document.createTextNode( name );
+						editRow.childNodes[0].removeChild(editRow.firstChild.firstChild)
+						editRow.childNodes[0].appendChild(document.createTextNode( name );
 
 						var ipElementContainer = document.createElement("span")
 						var naContainer = document.createElement("span")
@@ -525,6 +530,8 @@ function editAc()
 						ipElementContainer.appendChild(ipContainer)
 						ipElementContainer.id = editId
 
+						editRow.childNodes[1].firstChild.removeChild( editRow.childNodes[1].firstChild.firstChild )
+						editRow.childNodes[1].firstChild.appendChild( ipElementContainer )
 
 						editAcWindow.close();
 					}
