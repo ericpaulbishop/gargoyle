@@ -365,7 +365,6 @@ function getDefinedAcIds(retHash)
 		}
 	}
 	return ids;
-
 }
 
 
@@ -405,5 +404,79 @@ function setAcUciFromDocument(controlDocument, id)
 	}
 }
 
+
+function editAc()
+{
+	if( typeof(editAcWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editAcWindow.close();
+		}
+		catch(e){}
+	}
+
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+
+	editAcWindow = window.open("openvpn_allowed_client_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	
+	var saveButton = createInput("button", editAcWindow.document);
+	var closeButton = createInput("button", editAcWindow.document);
+	saveButton.value = "Close and Apply Changes";
+	saveButton.className = "default_button";
+	closeButton.value = "Close and Discard Changes";
+	closeButton.className = "default_button";
+
+	var editRow=this.parentNode.parentNode;
+	var editId = editRow.childNodes[1].firstChild.id;
+	
+
+	var runOnEditorLoaded = function () 
+	{
+		var updateDone=false;
+		if(editAcWindow.document != null)
+		{
+			if(editAcWindow.document.getElementById("bottom_button_container") != null)
+			{
+				editAcWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
+				editAcWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+				setDocumentFromUci(editAcWindow.document, uci, editId);
+
+				closeButton.onclick = function()
+				{
+					editAcWindow.close();
+				}
+				saveButton.onclick = function()
+				{
+					
+				
+				}
+				editAcWindow.moveTo(xCoor,yCoor);
+				editAcWindow.focus();
+				updateDone = true;
+				
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout(runOnEditorLoaded, 250);
+		}
+	}
+	runOnEditorLoaded();
+}
 
 
