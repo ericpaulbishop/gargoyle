@@ -319,7 +319,37 @@ function getDefinedAcIps(srcUci, retHash)
 
 function setAcUciFromDocument(controlDocument, id)
 {
+	var name = controlDocument.getElementById("openvpn_gargoyle_allowed_client_name").value;
+	
+	var ipContainer = controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip_container")
+	var ip = controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip").value
+	ip = ipContainer.style.display == "none" ? "" : ip
+	
+	var remote = getSelectedValue("openvpn_gargoyle_allowed_client_remote", controlDocument)
+	remote = remote == "custom" ? controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip").value : remote
+	
+	var haveSubnet = getSelectedValue("openvpn_gargoyle_allowed_client_have_subnet", controlDocument) == "true" ? true : false
+	haveSubnet     = ipContainer.style.display == "none" ? false : haveSubnet
+	var subnetIp   = controlDocument.getElementById("openvpn_gargoyle_allowed_client_subnet_ip").value
+	var subnetMask = controlDocument.getElementById("openvpn_gargoyle_allowed_client_subnet_mask").value
 
+	var pkg = "openvpn_gargoyle"
+	uci.set(pkg, id, "", "allowed_client")
+	uci.set(pkg, id, "name", name)
+	if(ip != "")
+	{
+		uci.set(pkg, id, "ip", ip)
+	}
+	else
+	{
+		uci.remove(pkg, id, "ip")
+	}
+	uci.set(pkg, id, "remote", remote)
+	if(haveSubnet)
+	{
+		uci.set(pkg, id, "subnet_ip",   subnet_ip)
+		uci.set(pkg, id, "subnet_mask", subnet_mask)
+	}
 }
 
 

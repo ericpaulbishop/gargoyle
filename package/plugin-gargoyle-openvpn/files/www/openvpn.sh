@@ -9,6 +9,14 @@
 	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
 ?>
 
+
+
+<script>
+	var uci = uciOriginal.clone();
+</script>
+
+
+
 <fieldset id="openvpn_config_fieldset">
 	<legend class="sectionheader">OpenVPN Configuration</legend>
 	<div id= "openvpn_config_container">
