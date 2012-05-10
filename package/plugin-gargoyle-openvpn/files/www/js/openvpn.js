@@ -152,7 +152,7 @@ function createAllowedClientControls()
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = dummyFunc;
 	var downloadButton = createButton("Download", "default_button", dummyFunc)
-	var editButton     = createButton("Edit",     "default_button", dummyFunc)
+	var editButton     = createButton("Edit",     "default_button", editAc)
 
 	
 	return [enabledCheck, downloadButton, editButton]
@@ -252,7 +252,7 @@ function setRemoteNames( controlDocument, selectedRemote)
 	setSelectedValue(selectId, chosen, controlDocument)
 	if(chosen == "custom")
 	{
-		controlDocument.getElementById("openvpn_allowed_client_custom_remote").value = chosen
+		controlDocument.getElementById("openvpn_allowed_client_remote_custom").value = selectedRemote
 	}
 }
 
@@ -444,6 +444,10 @@ function editAc()
 	var editRow=this.parentNode.parentNode;
 	var editId = editRow.childNodes[1].firstChild.id;
 	
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+	var serverInternalIp = document.getElementById("openvpn_server_ip").value 
+
 
 	var runOnEditorLoaded = function () 
 	{
@@ -454,7 +458,9 @@ function editAc()
 			{
 				editAcWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editAcWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-				setDocumentFromUci(editAcWindow.document, uci, editId);
+				
+				setAcDocumentFromUci(editAcWindow.document, uci, editId, dupeCn, serverInternalIp)
+
 
 				closeButton.onclick = function()
 				{
@@ -463,7 +469,7 @@ function editAc()
 				saveButton.onclick = function()
 				{
 					
-				
+					
 				}
 				editAcWindow.moveTo(xCoor,yCoor);
 				editAcWindow.focus();
