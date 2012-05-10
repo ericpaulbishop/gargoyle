@@ -369,6 +369,7 @@ function getDefinedAcIds(retHash)
 
 
 
+
 function setAcUciFromDocument(controlDocument, id)
 {
 	var name = controlDocument.getElementById("openvpn_gargoyle_allowed_client_name").value;
@@ -404,6 +405,31 @@ function setAcUciFromDocument(controlDocument, id)
 	}
 }
 
+function validateAc(controlDocument, internalServerIp, internalServerMask)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+	
+	var validateHaveText = function(txt) {  return txt.length > 0 ? 0 : 1 }
+
+	var prefix = "openvpn_gargoyle_allowed_client_"
+	var inputIds = [ prefix + "name", prefix + "ip", prefix + "remote_custom", prefix + "subnet_ip", prefix + "subnet_mask" ]
+	var labelIds = [ prefix + "name_label", prefix + "ip_label", prefix + "remote_label",  prefix + "have_subnet_label", prefix + "have_subnet_label" ]
+	var functions = [ validateHaveText, validateIP, validateHaveText, validateIP, validateNetMask  ];
+	var validReturnCodes = [0,0,0,0,0]
+	var visibilityIds = [  prefix + "name_container", prefix + "ip_container", prefix + "remote_custom_container", prefix + "subnet_ip_container", prefix + "subnet_mask_container" ]
+
+	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
+	if(errors.length == 0 && controlDocument.getElementById(prefix + "ip_container").style.display != "none")
+	{
+		var ip = controlDocument.getElementById(prefix + "ip").value
+		if( !rangeInSubnet(internalServerMask, internalServerIp, ip, ip)
+		{
+			errors.push("Specified Client Internal IP " + ip + " is not in OpenVPN Subnet")
+		}
+	}
+	return errors;
+
+}
 
 function editAc()
 {
@@ -446,7 +472,8 @@ function editAc()
 	
 	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
 	dupeCn= dupeCn == "true" || dupeCn == "1"
-	var serverInternalIp = document.getElementById("openvpn_server_ip").value 
+	var serverInternalIp   = document.getElementById("openvpn_server_ip").value 
+	var serverInternalMask = document.getElementById("openvpn_server_mask").value 
 
 
 	var runOnEditorLoaded = function () 
@@ -468,7 +495,40 @@ function editAc()
 				}
 				saveButton.onclick = function()
 				{
-					
+					var errors = validateAc(editAcWindow.document, serverInternalIp, serverInternalMask);
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\nCould not add quota.");
+					}
+					else
+					{
+						var name       = editAcWindow.document.getElementById("openvpn_allowed_client_name").value
+						var ip         = editAcWindow.document.getElementById("openvpn_allowed_client_ip").value
+						var subnetIp   = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_ip").value
+						var subnetMask = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_mask").value
+
+
+
+						setAcUciFromDocument(editAcWindow.document, editId)
+						
+						editRow.firstChild.removeChild(editRow.firstChild.firstChild)
+						editRow.firstChild.appendChild(document.createTextNode( name );
+
+						var ipElementContainer = document.createElement("span")
+						var naContainer = document.createElement("span")
+						var ipContainer = document.createElement("span")
+						naContainer.appendChild( document.createTextNode("---") )
+						ipContainer.appendChild( document.createTextNode(ip) )
+						ipContainer.appendChild( document.createElement("br") )
+						ipContainer.appendChild( document.createTextNode(subnet) )
+						ipElementContainer.appendChild(naContainer)
+						ipElementContainer.appendChild(ipContainer)
+						ipElementContainer.id = editId
+
+
+						editAcWindow.close();
+					}
+
 					
 				}
 				editAcWindow.moveTo(xCoor,yCoor);
