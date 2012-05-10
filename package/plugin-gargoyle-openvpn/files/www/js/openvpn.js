@@ -95,7 +95,7 @@ function resetData()
 		var subnet_ip   = uciOriginal.get("openvpn_gargoyle", id, "subnet_ip")
 		var subnet_mask = uciOriginal.get("openvpn_gargoyle", id, "subnet_mask")
 		var enabled     = uciOriginal.get("openvpn_gargoyle", id, "enabled")
-		var subnet = subnet_ip != "" && subnet_mask != "" ? subnet_ip + "/" + subnet_mask
+		var subnet = subnet_ip != "" && subnet_mask != "" ? subnet_ip + "/" + subnet_mask : ""
 
 		var ipElementContainer = document.createElement("span")
 		var naContainer = document.createElement("span")
@@ -134,7 +134,11 @@ function resetData()
 	tableContainer.appendChild(acTable);
 
 
-	setRemoteNames(document)
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+
+	setAcDocumentFromUci(document, new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
+
 
 	setOpenvpnVisibility()
 }
@@ -250,24 +254,47 @@ function setRemoteNames( controlDocument, selectedRemote)
 	{
 		controlDocument.getElementById("openvpn_allowed_client_custom_remote").value = chosen
 	}
-
 }
 
 
 function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInternalIp)
 {
+	var name = srcUci.get("openvpn_gargoyle", id, "name")
+	
+	if( srcUci.get("openvpn_gargoyle", id, "remote") == "" )
+	{
+		var allIdList = getDefinedAcIds(false)
+		var allIdHash = getDefinedAcIds(true)
+		var clientCount = allIdList.length +1
+		name = "Client" + clientCount
+		id = "client" + clientCount
+		while(allIdHash[id] == 1)
+		{
+			clientCount++
+			name = "Client" + clientCount
+			id = "client" + clientCount
+		}
+		controlDocument.getElementById("openvpn_allowed_client_default_id").value = id
+	}
+	else
+	{
+		controlDocument.getElementById("openvpn_allowed_client_initial_id").value = id
+	}
 
-	controlDocument.getElementById("openvpn_allowed_client_name").value = srcUci.get("openvpn_gargoyle", id, "name")
+	controlDocument.getElementById("openvpn_allowed_client_name").value = name
+	
 
-	var ip = surcUci.get("openvpn_gargoyle", id, "ip")
+	var ip = srcUci.get("openvpn_gargoyle", id, "ip")
 	if(ip == "")
 	{
 		var ipParts = serverInternalIp.split(/\./)
 		var lastIpPart = ipParts.pop()
 		lastIpPart = lastIpPart == "1" ? 2 : 1;
+		
 
 		var candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
-		var definedIps = getDefinedAcIps(srcUci, true).push(serverInternalIp);
+		var definedIps = getDefinedAcIps(true);
+		definedIps[serverInternalIp] = 1
 		while(lastIpPart < 255 && definedIps[candidateDefaultIp] == 1)
 		{
 			lastIpPart++
@@ -288,21 +315,20 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 	controlDocument.getElementById("openvpn_allowed_client_subnet_ip").value = subnetIp
 	controlDocument.getElementById("openvpn_allowed_client_subnet_mask").value = subnetMask
 
+
+
 	initializeAllowedClientVisibility(controlDocument, dupeCn)
-
-
 }
 
-function getDefinedAcIps(srcUci, retHash)
+function getDefinedAcIps(retHash)
 {
 	var ips = []
-	var allowedClients = srcUci.getAllSectionsOfType("openvpn_gargoyle", "allowed_client")
+	var allowedClients = getDefinedAcIds(false)
 	var aci;
 	for(aci=0; aci < allowedClients.length; aci++)
 	{
-		var enabled = srcUci.get("openvpn_gargoyle", allowedClients[aci], "enabled")
-		var ip = srcUci.get("openvpn_gargoyle", allowedClients[aci], "ip")
-		if(ip != "" && (enabled != "0" && enabled != "false"))
+		var ip = uci.get("openvpn_gargoyle", allowedClients[aci], "ip")
+		if(ip != "")
 		{
 			if(retHash)
 			{
@@ -316,6 +342,33 @@ function getDefinedAcIps(srcUci, retHash)
 	}
 	return ips;
 }
+
+function getDefinedAcIds(retHash)
+{
+	var ids = []
+	var allowedClients = uci.getAllSectionsOfType("openvpn_gargoyle", "allowed_client")
+	var aci;
+	for(aci=0; aci < allowedClients.length; aci++)
+	{
+		var id = allowedClients[aci]
+		var enabled = uci.get("openvpn_gargoyle", id, "enabled")
+		if(enabled != "0" && enabled != "false")
+		{
+			if(retHash)
+			{
+				ids[id] = 1;
+			}
+			else
+			{
+				ids.push(id)
+			}
+		}
+	}
+	return ids;
+
+}
+
+
 
 function setAcUciFromDocument(controlDocument, id)
 {

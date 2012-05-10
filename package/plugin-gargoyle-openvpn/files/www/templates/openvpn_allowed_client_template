@@ -39,5 +39,8 @@
 	<span style="clear:both"></span>
 </div>
 
+<input style="display:none" id="openvpn_allowed_client_initial_id" />
+<input style="display:none" id="openvpn_allowed_client_default_id" />
+
 
 
