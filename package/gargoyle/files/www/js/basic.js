@@ -1781,6 +1781,7 @@ function resetData()
 	proofreadAll();
 	setBridgeVisibility();
 
+	showApn();
 	updateApnDetails();
 }
 
@@ -2578,4 +2579,21 @@ function scan3GDevice(field)
 		}
 	}
 	runAjax("POST", "utility/scan_3gdevices.sh", param, stateChangeFunction);
+}
+
+function updateService()
+{
+	setSelectedValue("wan_3g_isp", "custom");
+	updateApnDetails();
+	document.getElementById("wan_3g_user").value="";
+	document.getElementById("wan_3g_pass").value="";
+
+	showApn();
+	/* fake apn to bypass check */
+	document.getElementById("wan_3g_apn").value = getSelectedValue("wan_3g_service") == "umts" ? "" : "internet";
+}
+
+function showApn()
+{
+	document.getElementById("wan_3g_apn_container").style.display = getSelectedValue("wan_3g_service") == "umts" ? "block" : "none";
 }

@@ -383,7 +383,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wan_3g_service_container'>
 			<label class='leftcolumn' for='wan_3g_service'>Service:</label>
-			<select class='rightcolumn' id='wan_3g_service'>
+			<select class='rightcolumn' id='wan_3g_service' onchange="updateService()">
 				<option value='cdma'>CDMA/EV-DO</option>
 				<option value='umts'>UMTS</option>
 			</select>
