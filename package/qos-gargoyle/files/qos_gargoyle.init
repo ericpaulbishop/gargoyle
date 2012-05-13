@@ -290,13 +290,14 @@ initialize_qos()
 
 	# Now, load/insert necessary kernel modules
 	# The following packages are required for the modules:
+	rmmod  ipt_ecn >&- 2>&-
+	rmmod  ipt_ECN >&- 2>&-
 	rmmod  imq >&- 2>&-
 	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
 	ip link set dev imq0 mtu 1500
 
 	insmod cls_fw >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
-	#insmod sch_red >&- 2>&-
 	insmod sch_esfq >&- 2>&-
 	insmod ipt_length >&- 2>&-
 	insmod ipt_IMQ >&- 2>&-
@@ -420,7 +421,6 @@ initialize_qos()
 			$echo_on
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			tc qdisc add dev $qos_interface parent 1:$next_class_index esfq limit $(($tbw/500)) $esfq_depth divisor 8 hash ctnatchg  
-			#tc qdisc add dev $qos_interface parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 500 burst $((5*$tbw/9000)) probability 0.05 bandwidth $(($max_bandwidth))
 			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			$echo_off
 
@@ -566,7 +566,6 @@ initialize_qos()
 			$echo_on
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
 			tc qdisc add dev imq0 parent 1:$next_class_index esfq limit $(($tbw/1000)) $esfq_depth divisor 8 hash ctnatchg  
-			#tc qdisc add dev imq0 parent 1:$next_class_index red limit $((5*$tbw)) min $(($tbw/3)) max $(($tbw)) avpkt 1000 burst $((5*$tbw/9000)) probability 0.1 bandwidth $(($max_bandwidth))
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			$echo_off
 
