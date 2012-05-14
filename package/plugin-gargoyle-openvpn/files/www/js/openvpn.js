@@ -92,10 +92,10 @@ function resetData()
 		var id          = allowedClients[aci]
 		var name        = uciOriginal.get("openvpn_gargoyle", id, "name")
 		var ip          = uciOriginal.get("openvpn_gargoyle", id, "ip")
-		var subnet_ip   = uciOriginal.get("openvpn_gargoyle", id, "subnet_ip")
-		var subnet_mask = uciOriginal.get("openvpn_gargoyle", id, "subnet_mask")
+		var subnetIp   = uciOriginal.get("openvpn_gargoyle", id, "subnet_ip")
+		var subnetMask = uciOriginal.get("openvpn_gargoyle", id, "subnet_mask")
 		var enabled     = uciOriginal.get("openvpn_gargoyle", id, "enabled")
-		var subnet = subnet_ip != "" && subnet_mask != "" ? subnet_ip + "/" + subnet_mask : ""
+		var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
 
 		var ipElementContainer = document.createElement("span")
 		var naContainer = document.createElement("span")
@@ -372,19 +372,19 @@ function getDefinedAcIds(retHash)
 
 function setAcUciFromDocument(controlDocument, id)
 {
-	var name = controlDocument.getElementById("openvpn_gargoyle_allowed_client_name").value;
+	var name = controlDocument.getElementById("openvpn_allowed_client_name").value;
 	
-	var ipContainer = controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip_container")
-	var ip = controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip").value
+	var ipContainer = controlDocument.getElementById("openvpn_allowed_client_ip_container")
+	var ip = controlDocument.getElementById("openvpn_allowed_client_ip").value
 	ip = ipContainer.style.display == "none" ? "" : ip
 	
-	var remote = getSelectedValue("openvpn_gargoyle_allowed_client_remote", controlDocument)
-	remote = remote == "custom" ? controlDocument.getElementById("openvpn_gargoyle_allowed_client_ip").value : remote
+	var remote = getSelectedValue("openvpn_allowed_client_remote", controlDocument)
+	remote = remote == "custom" ? controlDocument.getElementById("openvpn_allowed_client_ip").value : remote
 	
-	var haveSubnet = getSelectedValue("openvpn_gargoyle_allowed_client_have_subnet", controlDocument) == "true" ? true : false
+	var haveSubnet = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? true : false
 	haveSubnet     = ipContainer.style.display == "none" ? false : haveSubnet
-	var subnetIp   = controlDocument.getElementById("openvpn_gargoyle_allowed_client_subnet_ip").value
-	var subnetMask = controlDocument.getElementById("openvpn_gargoyle_allowed_client_subnet_mask").value
+	var subnetIp   = controlDocument.getElementById("openvpn_allowed_client_subnet_ip").value
+	var subnetMask = controlDocument.getElementById("openvpn_allowed_client_subnet_mask").value
 
 	var pkg = "openvpn_gargoyle"
 	uci.set(pkg, id, "", "allowed_client")
@@ -400,10 +400,36 @@ function setAcUciFromDocument(controlDocument, id)
 	uci.set(pkg, id, "remote", remote)
 	if(haveSubnet)
 	{
-		uci.set(pkg, id, "subnet_ip",   subnet_ip)
-		uci.set(pkg, id, "subnet_mask", subnet_mask)
+		uci.set(pkg, id, "subnet_ip",   subnetIp)
+		uci.set(pkg, id, "subnet_mask", subnetMask)
 	}
 }
+
+function getNumericIp(ip)
+{
+	var i = ip.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
+	if(i)
+	{
+        	return (+i[1]<<24) + (+i[2]<<16) + (+i[3]<<8) + (+i[4])
+	}
+	return null
+}
+
+function getNumericMask(mask)
+{
+	if(mask.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/))
+	{
+		return getNumericIp(mask)
+	}
+	else
+	{
+		return -1<<(32-mask)
+	}
+}
+
+
+
+
 
 function validateAc(controlDocument, internalServerIp, internalServerMask)
 {
@@ -411,7 +437,7 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 	
 	var validateHaveText = function(txt) {  return txt.length > 0 ? 0 : 1 }
 
-	var prefix = "openvpn_gargoyle_allowed_client_"
+	var prefix = "openvpn_allowed_client_"
 	var inputIds = [ prefix + "name", prefix + "ip", prefix + "remote_custom", prefix + "subnet_ip", prefix + "subnet_mask" ]
 	var labelIds = [ prefix + "name_label", prefix + "ip_label", prefix + "remote_label",  prefix + "have_subnet_label", prefix + "have_subnet_label" ]
 	var functions = [ validateHaveText, validateIP, validateHaveText, validateIP, validateNetMask  ];
@@ -421,8 +447,10 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
 	if(errors.length == 0 && controlDocument.getElementById(prefix + "ip_container").style.display != "none")
 	{
-		var ip = controlDocument.getElementById(prefix + "ip").value
-		if( !rangeInSubnet(internalServerMask, internalServerIp, ip, ip)
+		var testIp  = getNumericIp(controlDocument.getElementById(prefix + "ip").value)
+		var vpnIp   = getNumericIp(internalServerIp)
+		var vpnMask = getNumericMask(internalServerMask)
+		if( ( testIp & vpnMask ) != ( vpnIp & vpnMask ) )
 		{
 			errors.push("Specified Client Internal IP " + ip + " is not in OpenVPN Subnet")
 		}
@@ -511,13 +539,17 @@ function editAc()
 							subnetIp   = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_ip").value
 							subnetMask = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_mask").value
 						}
-						var subnet = subnet_ip != "" && subnet_mask != "" ? subnet_ip + "/" + subnet_mask : ""
+						var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
 
 
 						setAcUciFromDocument(editAcWindow.document, editId)
-						
-						editRow.childNodes[0].removeChild(editRow.firstChild.firstChild)
-						editRow.childNodes[0].appendChild(document.createTextNode( name );
+					
+						while( editRow.childNodes[0].firstChild != null)
+						{
+							editRow.childNodes[0].removeChild( editRow.childNodes[0].firstChild )
+						}
+						editRow.childNodes[0].appendChild(document.createTextNode(name))
+
 
 						var ipElementContainer = document.createElement("span")
 						var naContainer = document.createElement("span")
@@ -530,8 +562,13 @@ function editAc()
 						ipElementContainer.appendChild(ipContainer)
 						ipElementContainer.id = editId
 
-						editRow.childNodes[1].firstChild.removeChild( editRow.childNodes[1].firstChild.firstChild )
-						editRow.childNodes[1].firstChild.appendChild( ipElementContainer )
+						while( editRow.childNodes[1].firstChild != null)
+						{
+							editRow.childNodes[1].removeChild( editRow.childNodes[1].firstChild )
+						}
+						
+						editRow.childNodes[1].appendChild( ipElementContainer )
+						setOpenvpnVisibility()
 
 						editAcWindow.close();
 					}
