@@ -125,7 +125,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "Credentials\n& Config Files", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
+	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "Credentials\n& Config Files", ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
@@ -461,6 +461,12 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 
 }
 
+function removeAcCallback(table, row)
+{
+	var id = row.childNodes[2].firstChild.id;
+	uci.removeSection("openvpn_gargoyle", id);
+}
+
 function addAc()
 {
 	var errors = validateAc(document, document.getElementById("openvpn_server_ip").value , document.getElementById("openvpn_server_mask").value );
@@ -515,7 +521,7 @@ function addAc()
 			rowData.push( controls.shift() )
 		}
 		rowData[2].checked = true
-		addTableRow(acTable, rowData, true, false, null);
+		addTableRow(acTable, rowData, true, false, removeAcCallback);
 	
 		var dupeCn = getSelectedValue("openvpn_server_duplicate_cn")
 		dupeCn= dupeCn == "true" || dupeCn == "1"
