@@ -125,7 +125,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
+	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "Credentials\n& Config Files", ""], acTableData, "openvpn_allowed_client_table", true, false, null)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
@@ -461,6 +461,71 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 
 }
 
+function addAc()
+{
+	var errors = validateAc(document, document.getElementById("openvpn_server_ip").value , document.getElementById("openvpn_server_mask").value );
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\nCould not add client configuration.");
+	}
+	else
+	{
+		var name       = document.getElementById("openvpn_allowed_client_name").value
+		var ip         = document.getElementById("openvpn_allowed_client_ip").value
+		var subnetIp   = ""
+		var subnetMask = ""
+		if( getSelectedValue("openvpn_allowed_client_have_subnet", document) == "true")
+		{
+			subnetIp   = document.getElementById("openvpn_allowed_client_subnet_ip").value
+			subnetMask = document.getElementById("openvpn_allowed_client_subnet_mask").value
+		}
+		var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
+	
+		var id = name.replace(/[\t\r\n ]+/g, "_").toLowerCase().replace(/[^a-z0-9_-]/g, "");
+		var idCount = 1;
+		var testId = id
+		while(uci.get("openvpn_gargoyle", testId) != "")
+		{
+			testId = id + "_" + idCount
+			idCount++
+		}
+		id = testId
+
+		setAcUciFromDocument(document, id)
+
+
+		var ipElementContainer = document.createElement("span")
+		var naContainer = document.createElement("span")
+		var ipContainer = document.createElement("span")
+		naContainer.appendChild( document.createTextNode("---") )
+		ipContainer.appendChild( document.createTextNode(ip) )
+		ipContainer.appendChild( document.createElement("br") )
+		ipContainer.appendChild( document.createTextNode(subnet) )
+		ipElementContainer.appendChild(naContainer)
+		ipElementContainer.appendChild(ipContainer)
+		ipElementContainer.id = id
+
+		var acTable = document.getElementById("openvpn_allowed_client_table");
+
+
+		var rowData = [ name, ipElementContainer ]
+		var controls = createAllowedClientControls()
+		while(controls.length > 0)
+		{
+			rowData.push( controls.shift() )
+		}
+		rowData[2].checked = true
+		addTableRow(acTable, rowData, true, false, null);
+	
+		var dupeCn = getSelectedValue("openvpn_server_duplicate_cn")
+		dupeCn= dupeCn == "true" || dupeCn == "1"
+		setAcDocumentFromUci(document, new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
+		
+		setOpenvpnVisibility()
+	}
+
+}
+
 function editAc()
 {
 	if( typeof(editAcWindow) != "undefined" )
@@ -528,7 +593,7 @@ function editAc()
 					var errors = validateAc(editAcWindow.document, serverInternalIp, serverInternalMask);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not add quota.");
+						alert(errors.join("\n") + "\nCould not update client configuration.");
 					}
 					else
 					{

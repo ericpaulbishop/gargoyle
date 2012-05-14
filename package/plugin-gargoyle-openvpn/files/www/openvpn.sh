@@ -131,7 +131,9 @@
 		
 	<div class="indent">
 		<? cat /www/templates/openvpn_allowed_client_template ?>
-	
+		<div>
+			<input type='button' id='openvpn_allowed_client_add' value='Add' class='default_button' onclick='addAc()' />
+		</div>
 	</div>
 
 
