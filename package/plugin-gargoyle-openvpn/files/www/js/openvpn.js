@@ -215,7 +215,9 @@ function setAllowedClientVisibility( controlDocument )
 {
 	var selectedVis = document.getElementById("openvpn_allowed_client_remote_container").style.display == "none" ? "none" : "block"
 	controlDocument.getElementById("openvpn_allowed_client_remote_custom_container").style.display  = getSelectedValue("openvpn_allowed_client_remote", controlDocument) == "custom" ? selectedVis : "none";
+	
 
+	var selectedVis = document.getElementById("openvpn_allowed_client_have_subnet_container").style.display == "none" ? "none" : "block"
 	controlDocument.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? selectedVis : "none";
 	controlDocument.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? selectedVis : "none";
 }
