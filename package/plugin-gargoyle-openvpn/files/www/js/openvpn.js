@@ -17,6 +17,8 @@ function saveChanges()
 	}
 	else
 	{
+		
+
 		setControlsEnabled(false, true);
 		var uci = uciOriginal.clone();
 		var commands = "";
@@ -37,7 +39,15 @@ function saveChanges()
 
 function proofreadAll()
 {
-	var errors = []
+	
+
+	var prefix = "openvpn_server_"
+	var inputIds = [ prefix + "ip", prefix + "mask", prefix + "port" ]
+	var labelIds = [ prefix + "ip_label", prefix + "mask_label", prefix + "port_label" ]
+	var functions = [ validateIP, validateNetMask, validatePort  ];
+	var validReturnCodes = [0,0,0]
+
+	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
 	return errors;
 }
 
@@ -154,9 +164,7 @@ function createAllowedClientControls()
 	var downloadButton = createButton("Download", "default_button", dummyFunc)
 	var editButton     = createButton("Edit",     "default_button", editAc)
 
-	
 	return [enabledCheck, downloadButton, editButton]
-
 }
 
 function createButton(text, cssClass, actionFunction)
