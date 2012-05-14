@@ -17,10 +17,50 @@ function saveChanges()
 	}
 	else
 	{
-		
-
 		setControlsEnabled(false, true);
-		var uci = uciOriginal.clone();
+		
+		var openvpnConfig = getSelectedValue("openvpn_config")
+		if(openvpnConfig == "disabled")
+		{
+			uci.set("openvpn_gargoyle", "server", "enabled", "false")
+			uci.set("openvpn_gargoyle", "client", "enabled", "false")
+		}
+		if(openVpnConfig == "server")
+		{
+			uci.set("openvpn_gargoyle", "server", "enabled", "true")
+			uci.set("openvpn_gargoyle", "client", "enabled", "false")
+
+			var prefix = "openvpn_server_"
+			uci.set("openvpn_gargoyle", "server", "internal_ip", document.getElementById(prefix + "ip").value)
+			uci.set("openvpn_gargoyle", "server", "internal_mask", document.getElementById(prefix + "mask").value)
+			uci.set("openvpn_gargoyle", "server", "port", document.getElementById(prefix + "port").value)
+			uci.set("openvpn_gargoyle", "server", "proto", getSelectedValue(prefix + "protocol"))
+			uci.set("openvpn_gargoyle", "server", "client_to_client", getSelectedValue(prefix + "client_to_ciient"))
+			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "lan_access"))
+			uci.set("openvpn_gargoyle", "server", "duplicate_cn", getSelectedValue(prefix + "duplicate_cn"))
+			uci.set("openvpn_gargoyle", "server", "redirect_gateway", getSelectedValue(prefix + "redirect_gateway"))
+			
+			var cipher = getSelectedValue(prefix + "cipher")
+			if(cipher.match(/:/))
+			{
+				var cipherParts = cipher.split(/:/)
+				cipher = cipherParts[0]
+				var keysize = cipherParts[1]
+				uci.set("openvpn_gargoyle", "server", "keysize", keysize)
+			}
+			else
+			{
+				uci.remove("openvpn_gargoyle", "server", "keysize")
+			}
+			uci.set("openvpn_gargoyle", "server", "cipher", cipher);
+		}
+		if(openVpnConfig == "client")
+		{
+			uci.set("openvpn_gargoyle", "server", "enabled", "false")
+			uci.set("openvpn_gargoyle", "client", "enabled", "true")
+
+		}
+
 		var commands = "";
 		
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
