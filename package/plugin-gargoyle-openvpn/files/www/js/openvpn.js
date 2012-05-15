@@ -63,8 +63,6 @@ function saveChanges()
 
 		var commands = uci.getScriptCommands(uciOriginal);
 
-		alert(commands)
-		
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	
 		var stateChangeFunction = function(req)
