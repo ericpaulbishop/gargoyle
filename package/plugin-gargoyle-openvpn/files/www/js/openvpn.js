@@ -25,7 +25,7 @@ function saveChanges()
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
 		}
-		if(openVpnConfig == "server")
+		if(openvpnConfig == "server")
 		{
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
@@ -35,8 +35,8 @@ function saveChanges()
 			uci.set("openvpn_gargoyle", "server", "internal_mask", document.getElementById(prefix + "mask").value)
 			uci.set("openvpn_gargoyle", "server", "port", document.getElementById(prefix + "port").value)
 			uci.set("openvpn_gargoyle", "server", "proto", getSelectedValue(prefix + "protocol"))
-			uci.set("openvpn_gargoyle", "server", "client_to_client", getSelectedValue(prefix + "client_to_ciient"))
-			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "lan_access"))
+			uci.set("openvpn_gargoyle", "server", "client_to_client", getSelectedValue(prefix + "client_to_client"))
+			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "subnet_access"))
 			uci.set("openvpn_gargoyle", "server", "duplicate_cn", getSelectedValue(prefix + "duplicate_cn"))
 			uci.set("openvpn_gargoyle", "server", "redirect_gateway", getSelectedValue(prefix + "redirect_gateway"))
 			
@@ -54,14 +54,16 @@ function saveChanges()
 			}
 			uci.set("openvpn_gargoyle", "server", "cipher", cipher);
 		}
-		if(openVpnConfig == "client")
+		if(openvpnConfig == "client")
 		{
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "true")
 
 		}
 
-		var commands = "";
+		var commands = uci.getScriptCommands(uciOriginal);
+
+		alert(commands)
 		
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	
@@ -69,6 +71,7 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
+				uci = uciOriginal.clone()
 				setControlsEnabled(true)
 			}
 		}
@@ -96,7 +99,7 @@ function proofreadAll()
 function resetData()
 {
 	var serverEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled") 
-	var clientEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled")
+	var clientEnabled = uciOriginal.get("openvpn_gargoyle", "client", "enabled")
 	serverEnabled = serverEnabled == "true" || serverEnabled == "1" ? true : false;
 	clientEnabled = clientEnabled == "true" || clientEnabled == "1" ? true : false;
 	
@@ -293,6 +296,7 @@ function setRemoteNames( controlDocument, selectedRemote)
 			selectedFound = selectedRemote == domain ? true : selectedFound
 		}
 	}
+	selectedFound = (selectedRemote == currentWanIp) || selectedFound
 	names.push("WAN IP: " + currentWanIp, "Other IP or Domain (specfied below)")
 	values.push(currentWanIp, "custom")
 	
@@ -429,7 +433,7 @@ function setAcUciFromDocument(controlDocument, id)
 	ip = ipContainer.style.display == "none" ? "" : ip
 	
 	var remote = getSelectedValue("openvpn_allowed_client_remote", controlDocument)
-	remote = remote == "custom" ? controlDocument.getElementById("openvpn_allowed_client_ip").value : remote
+	remote = remote == "custom" ? controlDocument.getElementById("openvpn_allowed_client_remote_custom").value : remote
 	
 	var haveSubnet = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? true : false
 	haveSubnet     = ipContainer.style.display == "none" ? false : haveSubnet
