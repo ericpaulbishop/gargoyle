@@ -38,7 +38,7 @@ if [ -z "$EASY_RSA_PATH" ] ; then
 fi
 
 
-randomString()
+random_string()
 {
 	if [ ! -n "$1" ];
 		then LEN=15
@@ -49,6 +49,38 @@ randomString()
 }
 
 
+load_def()
+{
+	passed_var_def="$1"
+	vpn_var="$2"
+	default="$3"
+
+	result=""
+	if [ -z "$passed_var_def" ] ; then passed_var_def=$default ; fi
+	if [ "$passed_var_def" = "true" ] || [ "$passed_var_def" = "1" ] ; then result="$vpn_var" ; fi
+	
+	
+	printf "$result"
+
+}
+
+copy_if_diff()
+{
+	new_file="$1"
+	old_file="$2"
+
+	if   [ ! -f "$new_file" ] ; then
+		return
+	elif [ ! -f "$old_file" ] ; then
+		cp "$new_file" "$old_file"
+	else
+		old_md5=$(md5sum "$old_file" | cut -f 1 -d " ")
+		new_md5=$(md5sum "$new_file" | cut -f 1 -d " ")
+		if [ "$old_md5" != "$new_md5" ] ; then
+			cp "$new_file" "$old_file"
+		fi	
+	fi
+}
 
 createServerConf()
 {
@@ -61,19 +93,48 @@ createServerConf()
 	openvpn_server_local_subnet_ip="$4"
 	openvpn_server_local_subnet_mask="$5"
 
+	#optional, but with defaults
+	openvpn_protocol="$6"
+	if [ -z "$openvpn_protocol" ] ; then openvpn_protocol="udp" ; fi
+	if [ "$openvpn_protocol" = "tcp" ] ; then openvpn_protocol="tcp-server" ; fi
+
+	openvpn_cipher="$7"
+	if [ -z "$openvpn_cipher" ] ; then openvpn_cipher="BF-CBC" ; fi
+	openvpn_keysize="$8"
+	if [ -z "$openvpn_keysize" ] && [ "$openvpn_cipher" = "BF-CBC" ] ; then openvpn_keysize="128" ; fi
+	if [ -n "$openvpn_keysize" ] ; then openvpn_keysize="keysize               $openvpn_keysize" ; fi
+
+
+	openvpn_client_to_client=$(load_def "$9" "client-to-client" "false")
+	openvpn_duplicate_cn=$(load_def "${10}" "duplicate-cn" "false")
+	openvpn_redirect_gateway=$(load_def "${11}" "push \"redirect-gateway def1\"" "true")
+
+	openvpn_regenerate_cert="${12}"
+
+	if [ ! -f "$OPENVPN_DIR/ca.crt" ]  || [ ! -f "$OPENVPN_DIR/dh1024.pem" ] || [ ! -f "$OPENVPN_DIR/server.crt" ] || [ ! -f "$OPENVPN_DIR/server.key" ] ; then
+		openvpn_regenerate_cert="true"
+	fi
+
+
 	mkdir -p "$OPENVPN_DIR/client_conf"
 	mkdir -p "$OPENVPN_DIR/ccd"
+	mkdir -p "$OPENVPN_DIR/route_data"
+	
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
 
 
-	randomDir=$(randomString)
-	mkdir -p /tmp/ovpn-client-$randomDir
-	cd /tmp/ovpn-client-$randomDir
-	cp -r "$EASY_RSA_PATH/"* .
-	mkdir keys
 
-	name=$( randomString 15 )
-	randomDomain=$( randomString 15 )
-	cat << 'EOF' >vars
+	if [ "$openvpn_regenerate_cert" = "true" ] || [ "$openvpn_regenerate_cert" = "1" ] ; then
+
+		cd "$random_dir"
+		cp -r "$EASY_RSA_PATH/"* .
+		mkdir keys
+
+		name=$( random_string 15 )
+		random_domain=$( random_string 15 )
+		cat << 'EOF' >vars
 export EASY_RSA="`pwd`"
 export OPENSSL="openssl"
 export PKCS11TOOL="pkcs11-tool"
@@ -90,30 +151,39 @@ export KEY_ORG="UnknownOrg"
 export KEY_OU="UnknownOrgUnit"
 EOF
 cat << EOF >>vars
-export KEY_EMAIL='$name@$randomDomain.com'
-export KEY_EMAIL='$name@$randomDomain.com'
+export KEY_EMAIL='$name@$random_domain.com'
+export KEY_EMAIL='$name@$random_domain.com'
 export KEY_CN='$name'
 export KEY_NAME='$name'
 EOF
-	. ./vars
-	./clean-all
-	./build-dh
-	./pkitool --initca
-	./pkitool --server server
-	cp keys/server.crt keys/server.key keys/ca.crt keys/ca.key keys/dh1024.pem "$OPENVPN_DIR"/
+		. ./vars
+		./clean-all
+		./build-dh
+		./pkitool --initca
+		./pkitool --server server
+		cp keys/server.crt keys/server.key keys/ca.crt keys/ca.key keys/dh1024.pem "$OPENVPN_DIR"/
+	fi
 
+	touch "$OPENVPN_DIR/server.conf"
+	touch "$OPENVPN_DIR/route_data/server"
+	touch "$random_dir/route_data_server"
 
 	# server config
-	cat << EOF >"$OPENVPN_DIR/server.conf"
+	cat << EOF >"$random_dir/server.conf"
 mode                  server
 port                  $openvpn_port
+proto                 $openvpn_protocol
 tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
-client-to-client
+$openvpn_client_to_client
+$openvpn_duplicate_cn
 
-proto                 tcp-server
+
+cipher                $openvpn_cipher
+$openvpn_keysize
+
 dev         	      tun
 keepalive   	      25 180
 status       	      $OPENVPN_DIR/current_status.log
@@ -129,45 +199,75 @@ key		      $OPENVPN_DIR/server.key
 persist-key
 persist-tun
 comp-lzo
+
+push "route-gateway $openvpn_server_internal_ip"
+$openvpn_redirect_gateway
+
 EOF
 	if [ -n "$openvpn_server_local_subnet_ip" ] && [ -n "$openvpn_server_local_subnet_mask" ] ; then
 		# save routes -- we need to update all route lines 
 		# once all client ccd files are in place on the server
-		echo "$openvpn_server_local_subnet_ip $openvpn_server_local_subnet_mask $openvpn_server_internal_ip" >> "$OPENVPN_DIR/route_data"
+		echo "$openvpn_server_local_subnet_ip $openvpn_server_local_subnet_mask $openvpn_server_internal_ip" > "$random_dir/route_data_server"
 	fi
+
+	copy_if_diff "$random_dir/server.conf"        "$OPENVPN_DIR/server.conf"
+	copy_if_diff "$random_dir/route_data_server"  "$OPENVPN_DIR/route_data/server"
 
 
 	cd /tmp
-	rm -rf /tmp/ovpn-client-$randomDir
+	rm -rf "$random_dir"
 
 }
 
 
 
-createClientConf()
+createAllowedClientConf()
 {
 
 	#required
-	openvpn_client_name="$1"
+	openvpn_client_id="$1"
+	openvpn_client_remote="$2"
 
 	#optional
-	openvpn_client_internal_ip="$2"
-	openvpn_client_local_subnet_ip="$3"
-	openvpn_client_local_subnet_mask="$4"
+	openvpn_client_internal_ip="$3"
+	openvpn_client_local_subnet_ip="$4"
+	openvpn_client_local_subnet_mask="$5"
 
-	openvpn_port=$(   awk ' $1 ~ /port/      { print $2 } ' /etc/openvpn/server.conf )
-	openvpn_netmask=$(awk ' $1 ~ /ifconfig/  { print $3 } ' /etc/openvpn/server.conf )
+	#load from server config
+	openvpn_protocol=$( awk ' $1 ~ /proto/     { print $2 } ' /etc/openvpn/server.conf )
+	openvpn_port=$(     awk ' $1 ~ /port/      { print $2 } ' /etc/openvpn/server.conf )
+	openvpn_netmask=$(  awk ' $1 ~ /ifconfig/  { print $3 } ' /etc/openvpn/server.conf )
+	if [ "$openvpn_proto" = "tcp-server" ] ; then
+		openvpn_proto="tcp-client"
+	fi
+
+	openvpn_regenerate_cert="$6"
+
+
+	client_conf_dir="$OPENVPN_DIR/client_conf/$openvpn_client_id"
+	if [ ! -f "$client_conf_dir/$openvpn_client_id.crt" ]  || [ ! -f "$client_conf_dir/$openvpn_client_id.key" ] || [ ! -f "$client_conf_dir/ca.crt" ]  ; then
+		openvpn_regenerate_cert="true"
+	fi
+
+
+	mkdir -p "$OPENVPN_DIR/client_conf"
+	mkdir -p "$OPENVPN_DIR/ccd"
+	mkdir -p "$OPENVPN_DIR/route_data"
+	
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
 
 
 
-	randomDir=$(randomString)
-	mkdir -p /tmp/ovpn-client-$randomDir
-	cd /tmp/ovpn-client-$randomDir
-	cp -r "$EASY_RSA_PATH/"* .
-	mkdir keys
+	if [ "$openvpn_regenerate_cert" = "true" ] || [ "$openvpn_regenerate_cert" = "1" ] ; then
 
-	randomDomain=$( randomString 15 )
-	cat << 'EOF' >vars
+		cd "$random_dir"
+		cp -r "$EASY_RSA_PATH/"* .
+		mkdir keys
+
+		random_domain=$( random_string 15 )
+		cat << 'EOF' >vars
 export EASY_RSA="`pwd`"
 export OPENSSL="openssl"
 export PKCS11TOOL="pkcs11-tool"
@@ -183,30 +283,37 @@ export KEY_CITY="UnknownCity"
 export KEY_ORG="UnknownOrg"
 export KEY_OU="UnknownOrgUnit"
 EOF
-cat << EOF >>vars
-export KEY_EMAIL='$openvpn_client_name@$randomDomain.com'
-export KEY_EMAIL='$openvpn_client_name@$randomDomain.com'
-export KEY_CN='$openvpn_client_name'
-export KEY_NAME='$openvpn_client_name'
+		cat << EOF >>vars
+export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
+export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
+export KEY_CN='$openvpn_client_id'
+export KEY_NAME='$openvpn_client_id'
 EOF
-	. ./vars
-	./clean-all
-	cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" ./keys/
+		. ./vars
+		./clean-all
+		cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" ./keys/
 
 	
-	./pkitool "$openvpn_client_name"
+		./pkitool "$openvpn_client_id"
 
-	cp keys/$openvpn_client_name.crt "$OPENVPN_DIR"
-	mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_name"
-	cp "keys/$openvpn_client_name.crt" "keys/$openvpn_client_name.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/client_conf/$openvpn_client_name"
+		cp keys/$openvpn_client_id.crt "$OPENVPN_DIR"
+		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
+		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$client_conf_dir/"
+	fi
+
+	touch "$random_dir/route_data_${openvpn_client_id}"
+	touch "$random_dir/ccd_${openvpn_client_id}"
+
+	touch "$OPENVPN_DIR/route_data/${openvpn_client_id}"
+	touch "$OPENVPN_DIR/ccd/${openvpn_client_id}"
 
 
-	cat << EOF >"$OPENVPN_DIR/client_conf/$openvpn_client_name/$openvpn_client_name.conf"
+	cat << EOF >"$random_dir/$openvpn_client_id.conf"
 
 client
-remote		[CHANGE_ME_TO_SERVER_IP] $openvpn_port
+remote		$openvpn_client_remote $openvpn_port
 dev             tun
-proto           tcp-client
+proto           $openvpn_protocol
 status          $OPENVPN_DIR/current_status.log
 resolv-retry    infinite
 ns-cert-type	server
@@ -214,8 +321,8 @@ topology        subnet
 verb            5
 
 ca              $OPENVPN_DIR/ca.crt
-cert            $OPENVPN_DIR/$openvpn_client_name.crt
-key             $OPENVPN_DIR/$openvpn_client_name.key
+cert            $OPENVPN_DIR/$openvpn_client_id.crt
+key             $OPENVPN_DIR/$openvpn_client_id.key
 
 nobind
 persist-key
@@ -226,20 +333,23 @@ EOF
 
 	#update info about assigned ip/subnet
 	if [ -n "$openvpn_client_internal_ip" ] ; then
-		echo "ifconfig-push $openvpn_client_internal_ip $openvpn_netmask"                                                                      > "$OPENVPN_DIR/ccd/$openvpn_client_name"
+		echo "ifconfig-push $openvpn_client_internal_ip $openvpn_netmask"                                                                      > "$random_dir/ccd_${openvpn_client_id}"
 		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
-			echo "iroute $openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask"                                               >> "$OPENVPN_DIR/ccd/$openvpn_client_name"
+			echo "iroute $openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask"                                               >> "$random_dir/ccd_${openvpn_client_id}"
 
 			# save routes -- we need to update all route lines 
 			# once all client ccd files are in place on the server
-			echo "$openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask $openvpn_client_internal_ip \"$openvpn_client_name\"" >> "$OPENVPN_DIR/route_data"
+			echo "$openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask $openvpn_client_internal_ip \"$openvpn_client_id\"" >> "$random_dir/route_data_${openvpn_client_id}"
 		fi
 	fi
+	
+	copy_if_diff "$random_dir/$openvpn_client_id.conf"          "$client_conf_dir/$openvpn_client_id.conf"
+	copy_if_diff "$random_dir/ccd_${openvpn_client_id}"         "$OPENVPN_DIR/ccd/${openvpn_client_id}"
+	copy_if_diff "$random_dir/route_data_${openvpn_client_id}"  "$OPENVPN_DIR/route_data/${openvpn_client_id}"
 
 
 	cd /tmp
-	rm -rf /tmp/ovpn-client-$randomDir
-
+	rm -rf "$random_dir"
 }
 
 
@@ -263,7 +373,7 @@ updateRoutes()
 	
 
 	# set updated route data
-	route_lines=$(cat "$OPENVPN_DIR/route_data")
+	route_lines=$(cat "$OPENVPN_DIR/route_data/*")
 	for route_line in $route_lines ; do
 		line_parts=$(  echo "$route_line" | awk '{ print NF }')
 		subnet_ip=$(   echo "$route_line" | awk '{ print $1 }')
