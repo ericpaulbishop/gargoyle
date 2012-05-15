@@ -80,8 +80,6 @@ function saveChanges()
 
 function proofreadAll()
 {
-	
-
 	var prefix = "openvpn_server_"
 	var inputIds = [ prefix + "ip", prefix + "mask", prefix + "port" ]
 	var labelIds = [ prefix + "ip_label", prefix + "mask_label", prefix + "port_label" ]
@@ -513,7 +511,7 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 
 function removeAcCallback(table, row)
 {
-	var id = row.childNodes[2].firstChild.id;
+	var id = row.childNodes[1].firstChild.id;
 	uci.removeSection("openvpn_gargoyle", id);
 }
 
