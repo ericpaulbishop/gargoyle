@@ -82,7 +82,7 @@ copy_if_diff()
 	fi
 }
 
-createServerConf()
+create_server_conf()
 {
 	#required
 	openvpn_server_internal_ip="$1"
@@ -221,7 +221,7 @@ EOF
 
 
 
-createAllowedClientConf()
+create_allowed_client_conf()
 {
 
 	#required
@@ -353,7 +353,7 @@ EOF
 }
 
 
-updateRoutes()
+update_routes()
 {
 	openvpn_server_internal_ip=$(awk ' $1 ~ /ifconfig/  { print $2 } ' /etc/openvpn/server.conf )
 
@@ -368,7 +368,7 @@ updateRoutes()
 	random_dir_num=$(random_string)
 	random_dir="/tmp/ovpn-client-${random_dir_num}"
 	mkdir -p "$random_dir"
-	cp -r "$OPENVPN_DIR/ccd/"* "$random_dir"/
+	cp -r "$OPENVPN_DIR/ccd" "$random_dir"/
 	cp -r "$OPENVPN_DIR/server.conf" "$random_dir"/
 	
 	
@@ -380,7 +380,7 @@ updateRoutes()
 	
 	
 	# set updated route data
-	route_lines=$(cat "$OPENVPN_DIR/route_data/*")
+	route_lines=$( cat "$OPENVPN_DIR/route_data/"* )
 	for route_line in $route_lines ; do
 		line_parts=$(  echo "$route_line" | awk '{ print NF }')
 		subnet_ip=$(   echo "$route_line" | awk '{ print $1 }')
@@ -421,11 +421,11 @@ updateRoutes()
 }
 
 
-generateTestConfiguration()
+generate_test_configuration()
 {
 
 	# server
-	createServerConf	10.8.0.1           \
+	create_server_conf	10.8.0.1           \
 				255.255.255.0      \
 				7099               \
 				192.168.15.0       \
@@ -441,14 +441,20 @@ generateTestConfiguration()
 
 
 	# clients
-	createAllowedClientConf client1 "[YOUR_SERVER_IP]" 10.8.0.2
-	createAllowedClientConf client2 "[YOUR_SERVER_IP]" 10.8.0.3 192.168.16.0 255.255.255.0
-	createAllowedClientConf client3 "[YOUR_SERVER_IP]" 10.8.0.4 192.168.17.0 255.255.255.0
+	create_allowed_client_conf client1 "[YOUR_SERVER_IP]" 10.8.0.2
+	create_allowed_client_conf client2 "[YOUR_SERVER_IP]" 10.8.0.3 192.168.16.0 255.255.255.0
+	create_allowed_client_conf client3 "[YOUR_SERVER_IP]" 10.8.0.4 192.168.17.0 255.255.255.0
 
 	# update routes
-	updateRoutes 
+	update_routes 
 
 }
+
+regenerate_server_and_allowed_clients_from_uci()
+{
+		
+}
+
 
 
 # generateTestConfiguration
