@@ -355,7 +355,6 @@ EOF
 
 updateRoutes()
 {
-	
 	openvpn_server_internal_ip=$(awk ' $1 ~ /ifconfig/  { print $2 } ' /etc/openvpn/server.conf )
 
 
@@ -365,13 +364,21 @@ updateRoutes()
 	IFS_LINEBREAK="$(printf '\n\r')"
 	IFS="$IFS_LINEBREAK"
 	
+	
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
+	cp -r "$OPENVPN_DIR/ccd/"* "$random_dir"/
+	cp -r "$OPENVPN_DIR/server.conf" "$random_dir"/
+	
+	
 	# clear out old route data
-	for client_ccd_file in "$OPENVPN_DIR/ccd/"* ; do
+	for client_ccd_file in "$random_dir/ccd/"* ; do
 		sed -i '/^push .*route/d' "$client_ccd_file"
 	done
-	sed -i '/^route /d' "$OPENVPN_DIR/server.conf"
+	sed -i '/^route /d' "$random_dir/server.conf"
 	
-
+	
 	# set updated route data
 	route_lines=$(cat "$OPENVPN_DIR/route_data/*")
 	for route_line in $route_lines ; do
@@ -383,21 +390,32 @@ updateRoutes()
 		if [ $line_parts -gt 3 ] ; then
 			# routes for client subnet
 			config_name=$( echo "$route_line" | sed 's/\"$//g' | sed 's/^.*\"//g')
-			for client_ccd_file in "$OPENVPN_DIR/ccd/"* ; do
-				if [ "$OPENVPN_DIR/ccd/$config_name" != "$client_ccd_file" ] ; then
+			for client_ccd_file in "$random_dir/ccd/"* ; do
+				if [ "$random_dir/ccd/$config_name" != "$client_ccd_file" ] ; then
 					echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file" 
 				fi
 			done
-			echo "route $subnet_ip $subnet_mask $openvpn_ip" >> "$OPENVPN_DIR/server.conf"
+			echo "route $subnet_ip $subnet_mask $openvpn_ip" >> "$random_dir/server.conf"
 
 		else
 			# routes for server subnet
-			for client_ccd_file in "$OPENVPN_DIR/ccd/"* ; do
+			for client_ccd_file in "$random_dir/ccd/"* ; do
 				echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file" 
 			done
 		fi
 	done
 
+	cd "$random_dir/ccd/"
+	for client_ccd_file in * ; do
+		copy_if_diff "$client_ccd_file" "$OPENVPN_DIR/ccd/$client_ccd_file"
+	done
+	cd "$random_dir"
+	copy_if_diff "server.conf" "$OPENVPN_DIR/server.conf"
+
+	cd /tmp
+	rm -rf "$random_dir"
+	
+	
 	# change IFS back now that we're done
 	IFS="$IFS_ORIG"
 }
@@ -407,13 +425,25 @@ generateTestConfiguration()
 {
 
 	# server
-	createServerConf 10.8.0.1 255.255.255.0 7099 192.168.15.0 255.255.255.0
+	createServerConf	10.8.0.1           \
+				255.255.255.0      \
+				7099               \
+				192.168.15.0       \
+				255.255.255.0      \
+				"tcp"              \
+				"BF-CBC"           \
+				"128"              \
+				"true"             \
+				"false"            \
+				"true"             \
+				"false"
+
 
 
 	# clients
-	createClientConf client1 10.8.0.2
-	createClientConf client2 10.8.0.3 192.168.16.0 255.255.255.0
-	createClientConf client3 10.8.0.4 192.168.17.0 255.255.255.0
+	createAllowedClientConf client1 "[YOUR_SERVER_IP]" 10.8.0.2
+	createAllowedClientConf client2 "[YOUR_SERVER_IP]" 10.8.0.3 192.168.16.0 255.255.255.0
+	createAllowedClientConf client3 "[YOUR_SERVER_IP]" 10.8.0.4 192.168.17.0 255.255.255.0
 
 	# update routes
 	updateRoutes 
