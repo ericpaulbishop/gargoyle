@@ -10,6 +10,7 @@ OPENVPN_DIR="/etc/openvpn"
 # init script
 OPENVPN_INIT_SCRIPT="/etc/init.d/openvpn"
 
+server_regenerate_credentials="false"
 
 ##################################################
 # detect path for EASY RSA automatically
@@ -111,10 +112,11 @@ create_server_conf()
 
 	openvpn_regenerate_cert="${12}"
 
+
 	if [ ! -f "$OPENVPN_DIR/ca.crt" ]  || [ ! -f "$OPENVPN_DIR/dh1024.pem" ] || [ ! -f "$OPENVPN_DIR/server.crt" ] || [ ! -f "$OPENVPN_DIR/server.key" ] ; then
 		openvpn_regenerate_cert="true"
 	fi
-
+	server_regenerate_credentials="$openvpn_regenerate_cert"
 
 	mkdir -p "$OPENVPN_DIR/client_conf"
 	mkdir -p "$OPENVPN_DIR/ccd"
@@ -249,6 +251,10 @@ create_allowed_client_conf()
 		openvpn_regenerate_cert="true"
 	fi
 
+	#if we regenerated server credentials, force regeneration of client credentials too
+	if [ "$server_regenerate_credentials" = "true" ] || [ "$server_regenerate_credentials" = "1" ] ; then
+		openvpn_regenerate_cert="true"
+	fi
 
 	mkdir -p "$OPENVPN_DIR/client_conf"
 	mkdir -p "$OPENVPN_DIR/ccd"
@@ -450,9 +456,52 @@ generate_test_configuration()
 
 }
 
+regenerate_allowed_client_from_uci()
+{
+	section="$1"
+	ac_vars="id remote ip subnet_ip subnet_mask regenerate_credentials"
+	for var in $ac_vars ; do
+		config_get "$var" "$section" "$var"
+	done
+	create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask"
+}
+
 regenerate_server_and_allowed_clients_from_uci()
 {
-		
+	. /etc/functions.sh
+	config_load "$openvpn_gargoyle"
+	
+	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials"
+	for var in $ac_vars ; do
+		config_get "$var" "server" "$var"
+	done
+
+	server_subnet_ip=""
+	server_subnet_mask=""
+	if [ "$subnet_access" = "true" ] || [ "$subnet_access" = "1" ] ; then
+		server_subnet_ip=$(   uci -p /var/state get network.lan.ipaddr  2>/dev/null )
+		server_subnet_mask=$( uci -p /var/state get network.lan.netmask 2>/dev/null )
+	fi
+
+	create_server_conf	"$internal_ip"             \
+				"$internal_mask"           \
+				"$port"                    \
+				"$server_subnet_ip"        \
+				"$server_subnet_mask"      \
+				"$proto"                   \
+				"$cipher"                  \
+				"$keysize"                 \
+				"$client_to_client"        \
+				"$duplicate_cn"            \
+				"$redirect_gateway"        \
+				"$regenerate_credentials"
+
+
+	server_regenerate_credentials="$regenerate_credentials"
+	config_foreach regenerate_allowed_client_from_uci "allowed_client"
+
+	update_routes
+
 }
 
 
