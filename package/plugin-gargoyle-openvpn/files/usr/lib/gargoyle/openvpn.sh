@@ -303,11 +303,9 @@ EOF
 	
 		./pkitool "$openvpn_client_id"
 
-		if [ "$client_enabled" = "true" ] || [ "$client_enabled" = "1" ] ; then
-			cp keys/$openvpn_client_id.crt "$OPENVPN_DIR"
-		fi
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$client_conf_dir/"
+		
 	fi
 
 	
@@ -315,17 +313,17 @@ EOF
 	
 	
 	if [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
-		if [ ! -f "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
-			cp "$OPENVPN_DIR/client_conf/$openvpn_client_id/$openvpn_client_id.crt" "$OPENVPN_DIR/$openvpn_client_id.crt"
+		if [ ! -e "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
+			ln -s "$OPENVPN_DIR/client_conf/$openvpn_client_id/$openvpn_client_id.crt" "$OPENVPN_DIR/$openvpn_client_id.crt"
 		fi
 		touch "$OPENVPN_DIR/route_data_${openvpn_client_id}"
 		touch "$random_dir/route_data_${openvpn_client_id}"
 
 	else
-		if [ -f "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
+		if [ -e "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
 			rm "$OPENVPN_DIR/$openvpn_client_id.crt"
 		fi
-		if [ -f "$OPENVPN_DIR/route_data/${openvpn_client_id}" ] ; then
+		if [ -e "$OPENVPN_DIR/route_data/${openvpn_client_id}" ] ; then
 			rm "$OPENVPN_DIR/route_data/${openvpn_client_id}" 
 		fi
 	fi
@@ -333,7 +331,6 @@ EOF
 		
 
 	touch "$random_dir/ccd_${openvpn_client_id}"
-
 	touch "$OPENVPN_DIR/ccd/${openvpn_client_id}"
 
 
