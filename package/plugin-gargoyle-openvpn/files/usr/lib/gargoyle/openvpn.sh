@@ -1,8 +1,6 @@
 #!/bin/sh
 
-# apt-get update
-# apt-get install aptitude
-# aptitude install -y openvpn
+
 
 # global config directory
 OPENVPN_DIR="/etc/openvpn"
@@ -242,9 +240,12 @@ create_allowed_client_conf()
 	if [ "$openvpn_proto" = "tcp-server" ] ; then
 		openvpn_proto="tcp-client"
 	fi
-
+	
 	openvpn_regenerate_cert="$6"
-
+	client_enabled="$7"
+	if [ -z "$client_enabled" ] ; then
+		client_enabled="true"
+	fi
 
 	client_conf_dir="$OPENVPN_DIR/client_conf/$openvpn_client_id"
 	if [ ! -f "$client_conf_dir/$openvpn_client_id.crt" ]  || [ ! -f "$client_conf_dir/$openvpn_client_id.key" ] || [ ! -f "$client_conf_dir/ca.crt" ]  ; then
@@ -302,15 +303,37 @@ EOF
 	
 		./pkitool "$openvpn_client_id"
 
-		cp keys/$openvpn_client_id.crt "$OPENVPN_DIR"
+		if [ "$client_enabled" = "true" ] || [ "$client_enabled" = "1" ] ; then
+			cp keys/$openvpn_client_id.crt "$OPENVPN_DIR"
+		fi
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$client_conf_dir/"
 	fi
 
-	touch "$random_dir/route_data_${openvpn_client_id}"
+	
+	
+	
+	
+	if [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+		if [ ! -f "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
+			cp "$OPENVPN_DIR/client_conf/$openvpn_client_id/$openvpn_client_id.crt" "$OPENVPN_DIR/$openvpn_client_id.crt"
+		fi
+		touch "$OPENVPN_DIR/route_data_${openvpn_client_id}"
+		touch "$random_dir/route_data_${openvpn_client_id}"
+
+	else
+		if [ -f "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
+			rm "$OPENVPN_DIR/$openvpn_client_id.crt"
+		fi
+		if [ -f "$OPENVPN_DIR/route_data/${openvpn_client_id}" ] ; then
+			rm "$OPENVPN_DIR/route_data/${openvpn_client_id}" 
+		fi
+	fi
+
+		
+
 	touch "$random_dir/ccd_${openvpn_client_id}"
 
-	touch "$OPENVPN_DIR/route_data/${openvpn_client_id}"
 	touch "$OPENVPN_DIR/ccd/${openvpn_client_id}"
 
 
@@ -345,14 +368,17 @@ EOF
 
 			# save routes -- we need to update all route lines 
 			# once all client ccd files are in place on the server
-			echo "$openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask $openvpn_client_internal_ip \"$openvpn_client_id\"" >> "$random_dir/route_data_${openvpn_client_id}"
+			if  [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+				echo "$openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask $openvpn_client_internal_ip \"$openvpn_client_id\"" > "$random_dir/route_data_${openvpn_client_id}"
+			fi
 		fi
 	fi
 	
 	copy_if_diff "$random_dir/$openvpn_client_id.conf"          "$client_conf_dir/$openvpn_client_id.conf"
 	copy_if_diff "$random_dir/ccd_${openvpn_client_id}"         "$OPENVPN_DIR/ccd/${openvpn_client_id}"
-	copy_if_diff "$random_dir/route_data_${openvpn_client_id}"  "$OPENVPN_DIR/route_data/${openvpn_client_id}"
-
+	if  [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+		copy_if_diff "$random_dir/route_data_${openvpn_client_id}"  "$OPENVPN_DIR/route_data/${openvpn_client_id}"
+	fi
 
 	cd /tmp
 	rm -rf "$random_dir"
@@ -447,9 +473,9 @@ generate_test_configuration()
 
 
 	# clients
-	create_allowed_client_conf client1 "[YOUR_SERVER_IP]" 10.8.0.2
-	create_allowed_client_conf client2 "[YOUR_SERVER_IP]" 10.8.0.3 192.168.16.0 255.255.255.0
-	create_allowed_client_conf client3 "[YOUR_SERVER_IP]" 10.8.0.4 192.168.17.0 255.255.255.0
+	create_allowed_client_conf "client1" "[YOUR_SERVER_IP]" "10.8.0.2" "" "" "false" "true"
+	create_allowed_client_conf "client2" "[YOUR_SERVER_IP]" "10.8.0.3" "192.168.16.0" "255.255.255.0" "false" "true"
+	create_allowed_client_conf "client3" "[YOUR_SERVER_IP]" "10.8.0.4" "192.168.17.0" "255.255.255.0" "false" "true"
 
 	# update routes
 	update_routes 
@@ -459,12 +485,15 @@ generate_test_configuration()
 regenerate_allowed_client_from_uci()
 {
 	section="$1"
-	ac_vars="id remote ip subnet_ip subnet_mask regenerate_credentials"
+	ac_vars="id remote ip subnet_ip subnet_mask regenerate_credentials enabled"
 	for var in $ac_vars ; do
 		config_get "$var" "$section" "$var"
 	done
-	create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask"
+	if [ "enabled" = "true" ] || [ "enabled" = "1" ] ; then
+		create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask" "false" "$enabled"
+	fi
 }
+
 
 regenerate_server_and_allowed_clients_from_uci()
 {
@@ -501,10 +530,27 @@ regenerate_server_and_allowed_clients_from_uci()
 	server_regenerate_credentials="$regenerate_credentials"
 	config_foreach regenerate_allowed_client_from_uci "allowed_client"
 
+	for current_client in "$OPENVPN_DIR/client_conf/"* ; do
+		if [ -d "$current_client" ] ; then
+			current_client=$(echo $current_client | sed 's/^.*\///g')
+			client_def=$(uci get openvpn_gargoyle.${current_client} 2>/dev/null)
+			if [ "$client_def" != "allowed_client" ] ; then
+				rm -rf "$OPENVPN_DIR/client_conf/$current_client"
+				rm -rf "$OPENVPN_DIR/$current_client.crt"
+				rm -rf "$OPENVPN_DIR/route_data/$current_client"
+				rm -rf "$OPENVPN_DIR/ccd/$current_client"
+			fi
+		fi
+	done
+	
+
 	update_routes
 
 }
 
 
+# apt-get update
+# apt-get install aptitude
+# aptitude install -y openvpn
+# generate_test_configuration
 
-# generateTestConfiguration
