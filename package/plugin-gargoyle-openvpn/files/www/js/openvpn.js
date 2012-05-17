@@ -61,7 +61,7 @@ function saveChanges()
 
 		}
 
-		var commands = uci.getScriptCommands(uciOriginal);
+		var commands = uci.getScriptCommands(uciOriginal) + "\n. /usr/lib/gargoyle/openvpn.sh ; regenerate_server_and_allowed_clients_from_uci ;\n"
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	
@@ -438,6 +438,7 @@ function setAcUciFromDocument(controlDocument, id)
 
 	var pkg = "openvpn_gargoyle"
 	uci.set(pkg, id, "", "allowed_client")
+	uci.set(pkg, id, "id", id)
 	uci.set(pkg, id, "name", name)
 	if(ip != "")
 	{

@@ -469,12 +469,13 @@ regenerate_allowed_client_from_uci()
 regenerate_server_and_allowed_clients_from_uci()
 {
 	. /etc/functions.sh
-	config_load "$openvpn_gargoyle"
+	config_load "openvpn_gargoyle"
 	
 	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials"
-	for var in $ac_vars ; do
+	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
+
 
 	server_subnet_ip=""
 	server_subnet_mask=""
