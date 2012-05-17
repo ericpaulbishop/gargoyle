@@ -449,6 +449,14 @@ update_routes()
 	IFS="$IFS_ORIG"
 }
 
+remove_allowed_client()
+{
+	client_id="$1"
+	rm -rf "$OPENVPN_DIR/client_conf/$current_client"
+	rm -rf "$OPENVPN_DIR/$current_client.crt"
+	rm -rf "$OPENVPN_DIR/route_data/$current_client"
+	rm -rf "$OPENVPN_DIR/ccd/$current_client"
+}
 
 generate_test_configuration()
 {
@@ -532,10 +540,7 @@ regenerate_server_and_allowed_clients_from_uci()
 			current_client=$(echo $current_client | sed 's/^.*\///g')
 			client_def=$(uci get openvpn_gargoyle.${current_client} 2>/dev/null)
 			if [ "$client_def" != "allowed_client" ] ; then
-				rm -rf "$OPENVPN_DIR/client_conf/$current_client"
-				rm -rf "$OPENVPN_DIR/$current_client.crt"
-				rm -rf "$OPENVPN_DIR/route_data/$current_client"
-				rm -rf "$OPENVPN_DIR/ccd/$current_client"
+				remove_allowed_client "$current_client"
 			fi
 		fi
 	done
