@@ -29,3 +29,9 @@ service_enabled() {
 		return 2
 	fi
 }
+
+service_start_if_enabled() {
+	if service_enabled "$1"; then
+		"/etc/init.d/$1" start
+	fi
+}
