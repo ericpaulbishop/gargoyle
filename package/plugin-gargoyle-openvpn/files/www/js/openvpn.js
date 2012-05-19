@@ -20,13 +20,19 @@ function saveChanges()
 		setControlsEnabled(false, true);
 		
 		var openvpnConfig = getSelectedValue("openvpn_config")
+		uci.set("openvpn", "custom_config", "", "openvpn")
+
 		if(openvpnConfig == "disabled")
 		{
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
+			uci.set("openvpn", "custom_config", "enable", "0")
 		}
 		if(openvpnConfig == "server")
 		{
+			uci.set("openvpn", "custom_config", "enable", "1")
+			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
+
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
 
@@ -58,10 +64,18 @@ function saveChanges()
 		{
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "true")
-
 		}
 
+
 		var commands = uci.getScriptCommands(uciOriginal) + "\n. /usr/lib/gargoyle/openvpn.sh ; regenerate_server_and_allowed_clients_from_uci ;\n"
+		
+		// if anything in server section or client section has changed, restart openvpn server
+		// otherwise we're just adding client certs to a server and restart shouldn't be needed
+		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle\.client\./))
+		{
+			commands = commands + "/etc/init.d/openvpn restart"
+		}
+
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	
