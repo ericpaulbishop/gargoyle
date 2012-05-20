@@ -103,6 +103,18 @@ function saveChanges()
 			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "subnet_access"))
 			uci.set("openvpn_gargoyle", "server", "duplicate_cn", getSelectedValue(prefix + "duplicate_cn"))
 			uci.set("openvpn_gargoyle", "server", "redirect_gateway", getSelectedValue(prefix + "redirect_gateway"))
+			if( getSelectedValue(prefix + "subnet_access") == "true")
+			{
+				uci.set("openvpn_gargoyle", "server", "subnet_ip",   adjustSubnetIp(currentLanIp, currentLanMask) )
+				uci.set("openvpn_gargoyle", "server", "subnet_mask", currentLanMask )
+			}
+			else
+			{
+				uci.remove("openvpn_gargoyle", "server", "subnet_ip")
+				uci.remove("openvpn_gargoyle", "server", "subnet_mask")
+			}
+			
+
 			
 			var cipher = getSelectedValue(prefix + "cipher")
 			if(cipher.match(/:/))
@@ -557,8 +569,14 @@ function getNumericMask(mask)
 		return -1<<(32-mask)
 	}
 }
-
-
+function numericIpToStr(numIp)
+{
+	return ( (numIp>>>24) +'.' + (numIp>>16 & 255) + '.' + (numIp>>8 & 255) + '.' + (numIp & 255) );
+}
+function adjustSubnetIp(ip, mask)
+{
+	return numericIpToStr( getNumericIp(ip) & getNumericMask(mask) )
+}
 
 
 
@@ -586,6 +604,14 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 			errors.push("Specified Client Internal IP " + ip + " is not in OpenVPN Subnet")
 		}
 	}
+	if(errors.length == 0 && controlDocument.getElementById(prefix + "subnet_ip_container").style.display != "none")
+	{
+		var subnetIpEl   = controlDocument.getElementById(prefix + "subnet_ip")
+		var subnetMaskEl = controlDocument.getElementById(prefix + "subnet_mask")
+		subnetIpEl.value = adjustSubnetIp(subnetIpEl.value, subnetMaskEl.value)
+	}
+
+
 	return errors;
 
 }

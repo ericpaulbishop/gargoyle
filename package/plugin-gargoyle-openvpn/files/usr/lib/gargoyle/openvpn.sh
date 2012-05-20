@@ -505,24 +505,18 @@ regenerate_server_and_allowed_clients_from_uci()
 	. /etc/functions.sh
 	config_load "openvpn_gargoyle"
 	
-	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials"
+	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask"
 	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
 
 
-	server_subnet_ip=""
-	server_subnet_mask=""
-	if [ "$subnet_access" = "true" ] || [ "$subnet_access" = "1" ] ; then
-		server_subnet_ip=$(   uci -p /var/state get network.lan.ipaddr  2>/dev/null )
-		server_subnet_mask=$( uci -p /var/state get network.lan.netmask 2>/dev/null )
-	fi
 
 	create_server_conf	"$internal_ip"             \
 				"$internal_mask"           \
 				"$port"                    \
-				"$server_subnet_ip"        \
-				"$server_subnet_mask"      \
+				"$subnet_ip"               \
+				"$subnet_mask"             \
 				"$proto"                   \
 				"$cipher"                  \
 				"$keysize"                 \
