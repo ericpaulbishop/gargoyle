@@ -22,25 +22,83 @@ function saveChanges()
 		var openvpnConfig = getSelectedValue("openvpn_config")
 		uci.set("openvpn", "custom_config", "", "openvpn")
 
+		configureFirewall = function(enabled,isServer,vpnPort,vpnProto)
+		{
+			if(enabled)
+			{
+				uci.set("network", "vpn", "",             "interface")
+				uci.set("network", "vpn", "ifname",       "tun0")
+				uci.set("network", "vpn", "proto",        "none")
+				uci.set("network", "vpn", "defaultroute", "0")
+				uci.set("network", "vpn", "peerdns",      "0")
+
+				uci.set("firewall", "vpn_zone", "",        "zone")
+				uci.set("firewall", "vpn_zone", "name",    "vpn")
+				uci.set("firewall", "vpn_zone", "network", "vpn")
+				uci.set("firewall", "vpn_zone", "input",   "ACCEPT")
+				uci.set("firewall", "vpn_zone", "output",  "ACCEPT")
+				uci.set("firewall", "vpn_zone", "forward", "ACCEPT")
+				uci.set("firewall", "vpn_zone", "mtu_fix", "1")
+				uci.set("firewall", "vpn_zone", "masq",    "1")
+
+				uci.set("firewall", "vpn_lan_forwarding", "",     "forwarding")
+				uci.set("firewall", "vpn_lan_forwarding", "src",  "lan")
+				uci.set("firewall", "vpn_lan_forwarding", "dest", "vpn")
+
+
+				if(isServer)
+				{
+					uci.set("firewall", "ra_openvpn", "",            "remote_accept")
+					uci.set("firewall", "ra_openvpn", "zone",        "wan")
+					uci.set("firewall", "ra_openvpn", "local_port",  vpnPort)
+					uci.set("firewall", "ra_openvpn", "remote_port", vpnPort)
+					uci.set("firewall", "ra_openvpn", "proto",       vpnProto)
+					
+
+					uci.set("firewall", "vpn_wan_forwarding", "",     "forwarding")
+					uci.set("firewall", "vpn_wan_forwarding", "src",  "vpn")
+					uci.set("firewall", "vpn_wan_forwarding", "dest", "wan")
+				}
+				else
+				{
+					removeSection("firewall", "vpn_wan_forwarding")
+				}
+			}
+			else
+			{
+				uci.removeSection("network",  "vpn")
+				uci.removeSection("firewall", "vpn_zone")
+				uci.removeSection("firewall", "vpn_lan_forwarding")
+				uci.removeSection("firewall", "vpn_wan_forwarding")
+			}
+		}
+
+
 		if(openvpnConfig == "disabled")
 		{
+			configureFirewall(false,false)
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
 			uci.set("openvpn", "custom_config", "enable", "0")
 		}
 		if(openvpnConfig == "server")
 		{
+			var prefix   = "openvpn_server_"
+			var vpnPort  = document.getElementById(prefix + "port").value
+			var vpnProto = getSelectedValue(prefix + "protocol")
+			configureFirewall(true,true,vpnPort,vpnProto)
+
+
 			uci.set("openvpn", "custom_config", "enable", "1")
 			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
 
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
 
-			var prefix = "openvpn_server_"
 			uci.set("openvpn_gargoyle", "server", "internal_ip", document.getElementById(prefix + "ip").value)
 			uci.set("openvpn_gargoyle", "server", "internal_mask", document.getElementById(prefix + "mask").value)
-			uci.set("openvpn_gargoyle", "server", "port", document.getElementById(prefix + "port").value)
-			uci.set("openvpn_gargoyle", "server", "proto", getSelectedValue(prefix + "protocol"))
+			uci.set("openvpn_gargoyle", "server", "port", vpnPort)
+			uci.set("openvpn_gargoyle", "server", "proto", vpnProto)
 			uci.set("openvpn_gargoyle", "server", "client_to_client", getSelectedValue(prefix + "client_to_client"))
 			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "subnet_access"))
 			uci.set("openvpn_gargoyle", "server", "duplicate_cn", getSelectedValue(prefix + "duplicate_cn"))
@@ -62,6 +120,7 @@ function saveChanges()
 		}
 		if(openvpnConfig == "client")
 		{
+			configureFirewall(true,false)
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "true")
 		}
@@ -69,7 +128,14 @@ function saveChanges()
 
 		var commands = uci.getScriptCommands(uciOriginal) + "\n. /usr/lib/gargoyle/openvpn.sh ; regenerate_server_and_allowed_clients_from_uci ;\n"
 		
-		// if anything in server section or client section has changed, restart openvpn server
+		
+		// If we need to restart firewall, do that before restarting openvpn
+		if(commands.match(/uci.*firewall\.vpn_zone\./) || commands.match(/uci.*firewall\.vpn_lan_forwarding\./) || commands.match(/uci.*firewall\.vpn_wan_forwarding\./) || commands.match(/uci.*firewall\.ra_openvpn\./))
+		{
+			commands = commands + "\n/usr/lib/gargoyle/restart_firewall.sh ;\n"
+		}
+
+		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
 		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle\.client\./))
 		{
