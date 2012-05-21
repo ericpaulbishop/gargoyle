@@ -113,6 +113,28 @@ function saveChanges()
 				uci.remove("openvpn_gargoyle", "server", "subnet_ip")
 				uci.remove("openvpn_gargoyle", "server", "subnet_mask")
 			}
+			if( getSelectedValue(prefix + "duplicate_cn") == "true" )
+			{
+				var vpnIp   = document.getElementById(prefix + "ip").value
+				var vpnMask = document.getElementById(prefix + "mask").value
+				var numericVpnIp = getNumericIp(vpnIp)
+				var minIp = getNumericIp(vpnIp) & getNumericMask(vpnMask)
+				var maxIp = ( ~getNumericMask(vpnMask) ) | minIp
+				var pool="";
+				if(numericVpnIp - minIp < maxIp-numericVpnIp)
+				{
+					pool = "" + numericIpToStr(numericVpnIp+1) + " " + numericIpToStr(maxIp-1) + " " + vpnMask
+				}
+				else
+				{
+					pool = "" + numericIpToStr(minIp+1) + " " + numericIpToStr(numericVpnIp-1) + " " + vpnMask
+				}
+				uci.set("openvpn_gargoyle", "server", "pool", pool)
+			}
+			else
+			{
+				uci.remove("openvpn_gargoyle", "server", "pool")
+			}
 			
 
 			
@@ -800,8 +822,6 @@ function editAc()
 
 						editAcWindow.close();
 					}
-
-					
 				}
 				editAcWindow.moveTo(xCoor,yCoor);
 				editAcWindow.focus();

@@ -106,10 +106,13 @@ create_server_conf()
 
 	openvpn_client_to_client=$(load_def "$9" "client-to-client" "false")
 	openvpn_duplicate_cn=$(load_def "${10}" "duplicate-cn" "false")
-	openvpn_redirect_gateway=$(load_def "${11}" "push \"redirect-gateway def1\"" "true")
+	openvpn_pool="${11}"
+	openvpn_redirect_gateway=$(load_def "${12}" "push \"redirect-gateway def1\"" "true")
+	openvpn_regenerate_cert="${13}"
 
-	openvpn_regenerate_cert="${12}"
-
+	if [ -n "$openvpn_pool" ] ; then
+		openvpn_pool="ifconfig-pool $openvpn_pool"
+	fi
 
 	if [ ! -f "$OPENVPN_DIR/ca.crt" ]  || [ ! -f "$OPENVPN_DIR/dh1024.pem" ] || [ ! -f "$OPENVPN_DIR/server.crt" ] || [ ! -f "$OPENVPN_DIR/server.key" ] ; then
 		openvpn_regenerate_cert="true"
@@ -178,8 +181,9 @@ ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
 $openvpn_client_to_client
-$openvpn_duplicate_cn
 
+$openvpn_duplicate_cn
+$openvpn_pool
 
 cipher                $openvpn_cipher
 $openvpn_keysize
@@ -472,6 +476,7 @@ generate_test_configuration()
 				"128"              \
 				"true"             \
 				"false"            \
+				""                 \
 				"true"             \
 				"false"
 
@@ -505,7 +510,7 @@ regenerate_server_and_allowed_clients_from_uci()
 	. /etc/functions.sh
 	config_load "openvpn_gargoyle"
 	
-	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask"
+	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"
 	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
@@ -522,6 +527,7 @@ regenerate_server_and_allowed_clients_from_uci()
 				"$keysize"                 \
 				"$client_to_client"        \
 				"$duplicate_cn"            \
+				"$pool"                    \
 				"$redirect_gateway"        \
 				"$regenerate_credentials"
 
