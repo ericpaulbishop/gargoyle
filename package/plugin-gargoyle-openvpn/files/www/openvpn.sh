@@ -142,12 +142,64 @@
 
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
+
+	<div>
+		<input type="radio" id="openvpn_client_config_manual" name="client_config_mode">Configure Client Manually</input>
+		<br/>
+		<input type="radio" id="openvpn_client_config_upload" name="client_config_mode">Upload Client Configuration File(s)</input>
+	</div>
 	
+	
+	<div id="openvpn_client_file_controls" class="indent">
+		
+		<div id="openvpn_client_file_type_container">
+			<label id="openvpn_client_file_type_label" class="leftcolumn">Upload Format:</label>
+			<select id="openvpn_client_file_type" class="rightcolumn">
+				<option value="zip">Single Zip File</option>
+				<option value="multi" >Individual Configuration Files</option>
+			</select>
+		</div>
+		<div id="openvpn_client_zip_file_container">
+			<label id="openvpn_client_zip_file" class='leftcolumn' for="openvpn_client_zip_file">Zip File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_zip_file" name="openvpn_client_zip_file" />
+		</div>
+		<div id="openvpn_client_ca_file_container">
+			<label id="openvpn_client_ca_file" class='leftcolumn' for="openvpn_client_ca_file">CA File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_ca_file" name="openvpn_client_ca_file" />
+		</div>
+		<div id="openvpn_client_cert_file_container">
+			<label id="openvpn_client_cert_file" class='leftcolumn' for="openvpn_client_cert_file">Client Certificate File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_cert_file" name="openvpn_client_cert_file" />
+		</div>
+		<div id="openvpn_client_key_file_container">
+			<label id="openvpn_client_key_file" class='leftcolumn' for="openvpn_client_key_file">Client Key File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_key_file" name="openvpn_client_key_file" />
+		</div>
+		<div id="openvpn_client_conf_file_container">
+			<label id="openvpn_client_conf_file" class='leftcolumn' for="openvpn_client_conf_file">OpenVPN Config File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" />
+		</div>
+	</div>
+	
+	
+	<div id="openvpn_client_manual_controls" class="indent">
+
+	</div>
+	
+	
+	<div>
+		<input type='button' id='openvpn_client_add' value='Add' class='default_button' onclick='addClientConf()' />
+	</div>
+
+
+
+
 </fieldset>
 
 <div id="bottom_button_container">
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+
 </div>
 
 <script>
