@@ -1,7 +1,6 @@
 #!/bin/sh
 
 
-
 # constants for tor bandwidth monitoring rules
 
 backup_script_dir="/tmp/bw_backup"
@@ -327,7 +326,12 @@ shutdown()
 
 RUN_MODE="$1"
 
-if [ -z "$RUN_MODE" ] || [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
+
+if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] ; then
+	RUN_MODE="restart"
+fi
+
+if [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
 	shutdown
 	initialize
 elif [ "$RUN_MODE" = "stop" ] ; then
