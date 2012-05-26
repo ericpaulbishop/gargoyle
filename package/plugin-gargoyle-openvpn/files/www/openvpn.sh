@@ -144,9 +144,9 @@
 	<legend class="sectionheader">OpenVPN Client</legend>
 
 	<div>
-		<input type="radio" id="openvpn_client_config_manual" name="client_config_mode">Configure Client Manually</input>
+		<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" >Upload Client Configuration File(s)</input>
 		<br/>
-		<input type="radio" id="openvpn_client_config_upload" name="client_config_mode">Upload Client Configuration File(s)</input>
+		<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" >Configure Client Manually</input>
 	</div>
 	
 	
@@ -154,7 +154,7 @@
 		
 		<div id="openvpn_client_file_type_container">
 			<label id="openvpn_client_file_type_label" class="leftcolumn">Upload Format:</label>
-			<select id="openvpn_client_file_type" class="rightcolumn">
+			<select id="openvpn_client_file_type" class="rightcolumn" onchange="setClientVisibility(document)">
 				<option value="zip">Single Zip File</option>
 				<option value="multi" >Individual Configuration Files</option>
 			</select>
@@ -162,6 +162,11 @@
 		<div id="openvpn_client_zip_file_container">
 			<label id="openvpn_client_zip_file" class='leftcolumn' for="openvpn_client_zip_file">Zip File:</label>
 			<input class='rightcolumn' type="file" id="openvpn_client_zip_file" name="openvpn_client_zip_file" />
+		</div>
+		
+		<div id="openvpn_client_conf_file_container">
+			<label id="openvpn_client_conf_file" class='leftcolumn' for="openvpn_client_conf_file">OpenVPN Config File:</label>
+			<input class='rightcolumn' type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" />
 		</div>
 		<div id="openvpn_client_ca_file_container">
 			<label id="openvpn_client_ca_file" class='leftcolumn' for="openvpn_client_ca_file">CA Certificate File:</label>
@@ -174,10 +179,6 @@
 		<div id="openvpn_client_key_file_container">
 			<label id="openvpn_client_key_file" class='leftcolumn' for="openvpn_client_key_file">Client Key File:</label>
 			<input class='rightcolumn' type="file" id="openvpn_client_key_file" name="openvpn_client_key_file" />
-		</div>
-		<div id="openvpn_client_conf_file_container">
-			<label id="openvpn_client_conf_file" class='leftcolumn' for="openvpn_client_conf_file">OpenVPN Config File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" />
 		</div>
 	</div>
 	
@@ -200,7 +201,7 @@
 		<div id='openvpn_client_cipher_container'>
 			<div id= "openvpn_client_cipher_container">
 			<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
-			<select class='rightcolumn' id='openvpn_client_cipher'>
+			<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document)" >
 				<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
 				<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
 				<option value='AES-128-CBC'>AES-CBC 128bit</option>
@@ -211,13 +212,13 @@
 		</div>
 		<div id='openvpn_client_cipher_other_container'>
 			<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other">&nbsp;<em>Cipher</em></span>
-			<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other">&nbsp;<em>Key Size</em></span>
+			<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other">&nbsp;<em>Key Size (optional)</em></span>
 		</div>
 		
 		<div id="openvpn_client_conf_text_container">
 			<label for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
 			<br/>
-			<span class="leftcolumnonly"><em>Configureation below is updated automatically from parameters specified above</em></span>
+			<span class="leftcolumnonly"><em>Configuration below is updated automatically from parameters specified above</em></span>
 			<br/>
 			<textarea id='openvpn_client_conf_text' style="width:100%;height:200px;"></textarea>
 
@@ -245,11 +246,9 @@
 	<div>
 		<input type='button' id='openvpn_client_add' value='Add' class='default_button' onclick='addClientConf()' />
 	</div>
-
-
-
-
 </fieldset>
+
+
 
 <div id="bottom_button_container">
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />

@@ -1438,11 +1438,15 @@ function loadValueFromMultipleVariables(params)
 
 }
 
-function setVisibility(ids, visibility, defaultDisplays)
+function setVisibility(ids, visibility, defaultDisplays, controlDocument)
 {
+	if(controlDocument == null)
+	{
+		controlDocument = document;
+	}
 	for (index in ids)
 	{
-		element = document.getElementById(ids[index]);
+		element = controlDocument.getElementById(ids[index]);
 		if(visibility[index] == 0)
 		{
 			element.style.display = "none";

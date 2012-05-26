@@ -357,9 +357,8 @@ function setOpenvpnVisibility()
 			}
 		}
 	}
-
-
 	initializeAllowedClientVisibility(document, dupeCn);
+	setClientVisibility(document)
 }
 
 function initializeAllowedClientVisibility(controlDocument, dupeCn)
@@ -383,6 +382,24 @@ function setAllowedClientVisibility( controlDocument )
 	controlDocument.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? selectedVis : "none";
 }
 
+function setClientVisibility(controlDocument)
+{
+	var upCheckEl  = controlDocument.getElementById("openvpn_client_config_upload");
+	var manCheckEl = controlDocument.getElementById("openvpn_client_config_manual");
+	if( (!upCheckEl.checked) && (!manCheckEl.checked) )
+	{
+		upCheckEl.checked = true;
+	}
+	var boolToInt = function(b) { return b ? 1 : 0 ; }
+	
+
+	var single = getSelectedValue("openvpn_client_file_type", controlDocument) == "zip" ? 1 : 0;
+	var multi  = single == 1 ? 0 : 1;
+	controlDocument.getElementById("openvpn_client_cipher_other_container").style.display = getSelectedValue("openvpn_client_cipher", controlDocument) == "other" ? "block" : "none"
+	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container"], [single, multi, multi, multi, multi], ["block", "block", "block", "block", "block"], controlDocument)
+	setVisibility( ["openvpn_client_file_controls", "openvpn_client_manual_controls"], [ boolToInt(upCheckEl.checked), boolToInt(manCheckEl.checked) ], ["block","block"], controlDocument)
+	
+}
 
 function setRemoteNames( controlDocument, selectedRemote)
 {
