@@ -988,7 +988,7 @@ int main(int argc, char *argv[])
                 //After the seventh second we start filtering.
                 if (nreceived < (10000/period)+1) fil_triptime = rawfltime*1000;
 
-                //After 12 seconds we have measured our ping response entitlement.
+                //After 15 seconds we have measured our ping response entitlement.
                 //Move on to the active state. 
                 if (nreceived > (15000/period)+1) {
                     qstate=QMON_ACTIVE;
@@ -1000,8 +1000,8 @@ int main(int argc, char *argv[])
                         //Add what the user specified to the 110% of the measure ping time.
                         pinglimit += (fil_triptime*1.1);
                     } else {
-                        //Use 250% of measure ping time.  This works OK in my system but I have no
-                        //evidence that it will work in other systems.
+                        //Without the '-a' flag we just suse 250% of measure ping time.  
+                        //This works OK in my system but I have no evidence that it will work in other systems.
                         pinglimit = fil_triptime*2.5;
                     }
 
@@ -1011,9 +1011,9 @@ int main(int argc, char *argv[])
                 }
                 break;
 
-            // In the ACTIVE state we observe ping times as long as the
+            // In the ACTIVE & REALTIME states we observe ping times as long as the
             // link remains active.  While we are observing we adjust the 
-            // link upper limit speed to maintain a reasonable ping.
+            // link upper limit speed to maintain the specified pinglimit.
             // If the amount of data we are recieving dies down we enter the WAIT state
             case QMON_ACTIVE:
             case QMON_REALTIME:
@@ -1034,17 +1034,28 @@ int main(int argc, char *argv[])
                 //This should be the case and often the queue is much longer than needed (bufferbloat).  
                 //When not in realtime mode we can allow this buffer to fill but we don't want it to overflow 
                 //because it will then drop packets which will cause our QoS to breakdown.  So we want it to fill
-                //just enough promote full link utilization.
+                //just enough to promote full link utilization.
 
                 //The classical optimum queue size would be equal to the bandwidth * RTT and the 
                 //additional time it will take our ping to pass through such a queue turns out to be the RTT. 
                 //But Barman et all, Globecomm2004 indicates that only 20-30% of this is really needed.  
-					
-                //We therefore assume a RTT of 150ms as an average and take 50% of that so the additional
-				//ping time we allow will be 75ms.
+                //
+                //When we measured an RTT above that was to the ISPs gateway so we do not really know what the average 
+                //RTT time to IPs on the internet.  And since not all hosts respond the same anyway I doubt there
+                //is consistant RTT that we could use.
+				//	
+                //So the statedgy I will use for the ACTIVE mode limit will be to double the ping limit we have for realtime
+                //mode but not less than an additional 75ms.  I hope that this will work well for even satallite links which 
+                //can have RTT that approach 1 second or more.
+                //
+                //My thinking on the 75ms is that an RTT of 150ms as an average to most sites on the internet seems pretty
+                //fast to me and taking 1/2 of that leads to a minimum we should allow.  In ACTIVE mode the goal is only 
+                //to prevent the ISPs buffer from overflowing and since I think most ISPs have buffers at least this large.
+                // 
+                //Links with longer RTTs will need even more and this allows that.
 
                 if (RTDCA == 0) {
-                    pinglimit2 = 75000;
+                    if (pinglimit < 75000) pinglimit2=75000; else pinglimit2=pinglimit;
                     qstate=QMON_ACTIVE;
                 } else {
                     pinglimit2 = 0;
@@ -1060,6 +1071,7 @@ int main(int argc, char *argv[])
                     else
                         new_dbw_ul = new_dbw_ul * (1.0 - .005*period/1000);
 
+                    //Dynamic range is 1/.15 or 6.67 : 1.  
                     if (new_dbw_ul < DBW_UL*.15) new_dbw_ul=DBW_UL*.15;
                 }
 
@@ -1074,8 +1086,8 @@ int main(int argc, char *argv[])
                 //Modify parent download limit as needed.
                 if (abs(dbw_ul-new_dbw_ul) > 0.01*DBW_UL) tc_class_modify(new_dbw_ul);
 
-                //When the downlink below 25% utilization we turn off the pinger.
-                if (dbw_fil < 0.25 * new_dbw_ul) qstate=QMON_IDLE;
+                //When the downlink falls below 10% utilization we turn off the pinger.
+                if (dbw_fil < 0.1 * DBW_UL) qstate=QMON_IDLE;
                 break;
                     
             // In the wait state we have a nearly idle link.
@@ -1083,7 +1095,10 @@ int main(int argc, char *argv[])
             // ping is disabled.
             case QMON_IDLE:
                 pingon=0;
-                if (dbw_fil > 0.3 * new_dbw_ul) qstate=QMON_ACTIVE;
+
+                //This limit should be the same as the dynamic range or we could get stuck
+                //in the IDLE state. 
+                if (dbw_fil > 0.15 * DBW_UL) qstate=QMON_ACTIVE;
                 break;
                       
         }
