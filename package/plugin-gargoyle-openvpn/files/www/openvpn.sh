@@ -143,109 +143,115 @@
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
 
-	<div>
-		<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" >Upload Client Configuration File(s)</input>
-		<br/>
-		<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" >Configure Client Manually</input>
-	</div>
+	<form id='client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_client_add.sh" target="client_add_target">
+		<div>
+			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" >Upload Client Configuration File(s)</input>
+			<br/>
+			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" >Configure Client Manually</input>
+		</div>
 	
 	
-	<div id="openvpn_client_file_controls" class="indent">
+		<div id="openvpn_client_file_controls" class="indent">
+			
+			<div id="openvpn_client_file_type_container">
+				<label id="openvpn_client_file_type_label" class="leftcolumn">Upload Format:</label>
+				<select id="openvpn_client_file_type" class="rightcolumn" onchange="setClientVisibility(document)">
+					<option value="zip">Single Zip File</option>
+					<option value="multi" >Individual Configuration Files</option>
+				</select>
+			</div>
+			<div id="openvpn_client_zip_file_container">
+				<label id="openvpn_client_zip_file" class='leftcolumn' for="openvpn_client_zip_file">Zip File:</label>
+				<input class='rightcolumn' type="file" id="openvpn_client_zip_file" name="openvpn_client_zip_file" />
+			</div>
+			
+			<div id="openvpn_client_conf_file_container">
+				<label id="openvpn_client_conf_file" class='leftcolumn' for="openvpn_client_conf_file">OpenVPN Config File:</label>
+				<input class='rightcolumn' type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" />
+			</div>
+			<div id="openvpn_client_ca_file_container">
+				<label id="openvpn_client_ca_file" class='leftcolumn' for="openvpn_client_ca_file">CA Certificate File:</label>
+				<input class='rightcolumn' type="file" id="openvpn_client_ca_file" name="openvpn_client_ca_file" />
+			</div>
+			<div id="openvpn_client_cert_file_container">
+				<label id="openvpn_client_cert_file" class='leftcolumn' for="openvpn_client_cert_file">Client Certificate File:</label>
+				<input class='rightcolumn' type="file" id="openvpn_client_cert_file" name="openvpn_client_cert_file" />
+			</div>
+			<div id="openvpn_client_key_file_container">
+				<label id="openvpn_client_key_file" class='leftcolumn' for="openvpn_client_key_file">Client Key File:</label>
+				<input class='rightcolumn' type="file" id="openvpn_client_key_file" name="openvpn_client_key_file" />
+			</div>
+		</div>
+	
+	
+		<div id="openvpn_client_manual_controls" class="indent">
+
+			<div id='openvpn_client_remote_container'>
+				<label class='leftcolumn' for='openvpn_client_remote' id='openvpn_client_remote_label'>OpenVPN Server Address:</label>
+				<input type='text' class='rightcolumn' name='openvpn_client_remote' id='openvpn_client_remote' size='30' />
+			</div>
+	
+			<div id='openvpn_client_protocol_container'>
+				<label class='leftcolumn' for='openvpn_client_protocol' id='openvpn_client_protocol_label'>OpenVPN Protocol:</label>
+				<select class='rightcolumn' id='openvpn_client_protocol'>
+					<option value='udp'>UDP</option>
+					<option value='tcp'>TCP</option>
+				</select>
+			</div>
+	
+			<div id='openvpn_client_cipher_container'>
+				<div id= "openvpn_client_cipher_container">
+				<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
+				<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document)" >
+					<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
+					<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
+					<option value='AES-128-CBC'>AES-CBC 128bit</option>
+					<option value='AES-256-CBC'>AES-CBC 256bit</option>
+					<option value='other'>Other</option>
+	
+				</select>
+			</div>
+			<div id='openvpn_client_cipher_other_container'>
+				<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other">&nbsp;<em>Cipher</em></span>
+				<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other">&nbsp;<em>Key Size (optional)</em></span>
+			</div>
+			
+			<div id="openvpn_client_conf_text_container">
+				<br/>
+				<label class="leftcolumn" for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
+				<br/>
+				<span class="leftcolumnonly" style="margin-left:5px;"><em>Configuration below is updated automatically from parameters specified above</em></span>
+				<br/>
+				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+
+			</div>
 		
-		<div id="openvpn_client_file_type_container">
-			<label id="openvpn_client_file_type_label" class="leftcolumn">Upload Format:</label>
-			<select id="openvpn_client_file_type" class="rightcolumn" onchange="setClientVisibility(document)">
-				<option value="zip">Single Zip File</option>
-				<option value="multi" >Individual Configuration Files</option>
-			</select>
-		</div>
-		<div id="openvpn_client_zip_file_container">
-			<label id="openvpn_client_zip_file" class='leftcolumn' for="openvpn_client_zip_file">Zip File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_zip_file" name="openvpn_client_zip_file" />
-		</div>
-		
-		<div id="openvpn_client_conf_file_container">
-			<label id="openvpn_client_conf_file" class='leftcolumn' for="openvpn_client_conf_file">OpenVPN Config File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" />
-		</div>
-		<div id="openvpn_client_ca_file_container">
-			<label id="openvpn_client_ca_file" class='leftcolumn' for="openvpn_client_ca_file">CA Certificate File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_ca_file" name="openvpn_client_ca_file" />
-		</div>
-		<div id="openvpn_client_cert_file_container">
-			<label id="openvpn_client_cert_file" class='leftcolumn' for="openvpn_client_cert_file">Client Certificate File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_cert_file" name="openvpn_client_cert_file" />
-		</div>
-		<div id="openvpn_client_key_file_container">
-			<label id="openvpn_client_key_file" class='leftcolumn' for="openvpn_client_key_file">Client Key File:</label>
-			<input class='rightcolumn' type="file" id="openvpn_client_key_file" name="openvpn_client_key_file" />
-		</div>
-	</div>
-	
-	
-	<div id="openvpn_client_manual_controls" class="indent">
-
-		<div id='openvpn_client_remote_container'>
-			<label class='leftcolumn' for='openvpn_client_remote' id='openvpn_client_remote_label'>OpenVPN Server Address:</label>
-			<input type='text' class='rightcolumn' name='openvpn_client_remote' id='openvpn_client_remote' size='30' />
-		</div>
-
-		<div id='openvpn_client_protocol_container'>
-			<label class='leftcolumn' for='openvpn_client_protocol' id='openvpn_client_protocol_label'>OpenVPN Protocol:</label>
-			<select class='rightcolumn' id='openvpn_client_protocol'>
-				<option value='udp'>UDP</option>
-				<option value='tcp'>TCP</option>
-			</select>
-		</div>
-
-		<div id='openvpn_client_cipher_container'>
-			<div id= "openvpn_client_cipher_container">
-			<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
-			<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document)" >
-				<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
-				<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
-				<option value='AES-128-CBC'>AES-CBC 128bit</option>
-				<option value='AES-256-CBC'>AES-CBC 256bit</option>
-				<option value='other'>Other</option>
-
-			</select>
-		</div>
-		<div id='openvpn_client_cipher_other_container'>
-			<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other">&nbsp;<em>Cipher</em></span>
-			<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other">&nbsp;<em>Key Size (optional)</em></span>
+			<div id="openvpn_client_ca_text_container">
+				<label class="leftcolumn" for='openvpn_client_ca_text' class="leftcolumnonly" id='openvpn_client_ca_text_label'>CA Certificate:</label>
+				<br/>
+				<textarea id='openvpn_client_ca_text' name='openvpn_client_ca_text'style="margin-left:5px;width:95%;height:200px;"></textarea>
+			</div>
+			<div id="openvpn_client_cert_text_container">
+				<label class="leftcolumn" for='openvpn_client_cert_text' class="leftcolumnonly" id='openvpn_client_cert_text_label'>Client Certificate:</label>
+				<br/>
+				<textarea id='openvpn_client_cert_text' name='openvpn_client_cert_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+			</div>
+			<div id="openvpn_client_key_text_container">
+				<label class="leftcolumn" for='openvpn_client_key_text' class="leftcolumnonly" id='openvpn_client_key_text_label'>Client Key:</label>
+				<br/>
+				<textarea id='openvpn_client_key_text' name='openvpn_client_key_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+			</div>
 		</div>
 		
-		<div id="openvpn_client_conf_text_container">
-			<label for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
-			<br/>
-			<span class="leftcolumnonly"><em>Configuration below is updated automatically from parameters specified above</em></span>
-			<br/>
-			<textarea id='openvpn_client_conf_text' style="width:100%;height:200px;"></textarea>
-
-		</div>
-		
-		<div id="openvpn_client_ca_text_container">
-			<label for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>CA Certificate:</label>
-			<br/>
-			<textarea id='openvpn_client_conf_text' style="width:100%;height:200px;"></textarea>
-		</div>
-		<div id="openvpn_client_cert_text_container">
-			<label for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>Client Certificate:</label>
-			<br/>
-			<textarea id='openvpn_client_conf_text' style="width:100%;height:200px;"></textarea>
-		</div>
-		<div id="openvpn_client_key_text_container">
-			<label for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>Client Key:</label>
-			<br/>
-			<textarea id='openvpn_client_conf_text' style="width:100%;height:200px;"></textarea>
-		</div>
-
-	</div>
 	
-	
-	<div>
-		<input type='button' id='openvpn_client_add' value='Add' class='default_button' onclick='addClientConf()' />
-	</div>
+		<div>
+			<input type='button' id='openvpn_client_add' value='Add' class='default_button' onclick='addClientConf()' />
+		</div>
+	</form>
+
+	<iframe id="client_add_target" name="client_add_target" src="#" style="display:none"></iframe> 
+
+
 </fieldset>
 
 
