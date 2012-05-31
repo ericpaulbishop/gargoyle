@@ -304,8 +304,8 @@ function resetData()
 
 
 	//client
-	var upCheckEl  = controlDocument.getElementById("openvpn_client_config_upload");
-	var manCheckEl = controlDocument.getElementById("openvpn_client_config_manual");
+	var upCheckEl  = document.getElementById("openvpn_client_config_upload");
+	var manCheckEl = document.getElementById("openvpn_client_config_manual");
 	if(curClientConf.length >0 && curClientCa.length >0 && curClientCert.length >0 && curClientKey.length >0)
 	{
 		manCheckEl.checked = true;
@@ -332,11 +332,11 @@ function resetData()
 function updateClientControlsFromConfigText()
 {
 	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
-	var remote = null;
-	var port   = null;
-	var proto  = null;
-	var cipher = null;
-	var key    = null;
+	var remote  = null;
+	var port    = null;
+	var proto   = null;
+	var cipher  = null;
+	var keysize = null;
 	while(configLines.length >0)
 	{
 		var line = configLines.shift();
@@ -358,9 +358,9 @@ function updateClientControlsFromConfigText()
 		{
 			cipher = lineParts[1] != null ? lineParts[1] : cipher;
 		}
-		else if(lineParts[0].toLowerCase() == "key")
+		else if(lineParts[0].toLowerCase() == "keysize")
 		{
-			key = lineParts[1] != null ? lineParts[1] : key;
+			keysize = lineParts[1] != null ? lineParts[1] : keysize;
 		}
 	}
 	if(remote != null)
@@ -373,13 +373,13 @@ function updateClientControlsFromConfigText()
 	}
 	if(proto != null)
 	{
-		setSelectedValue("openvpn_client_port", proto)
+		setSelectedValue("openvpn_client_protocol", proto)
 	}
 	if(cipher != null)
 	{
-		if(cipher == "BF-CBC" && (key == "128" || key == "256" || key == null))
+		if(cipher == "BF-CBC" && (keysize == "128" || keysize == "256" || keysize == null))
 		{
-			key = key == null ? "128" : key
+			keysize = keysize == null ? "128" : keysize
 			setSelectedValue("openvpn_client_cipher", cipher + ":" + key)
 		}
 		else if(cipher == "AES-128-CBC" || cipher == "AES-256-CBC")
@@ -390,7 +390,7 @@ function updateClientControlsFromConfigText()
 		{
 			setSelectedValue("openvpn_client_cipher", "other")
 			document.getElementById("openvpn_client_cipher_other").value = cipher
-			document.getElementById("openvpn_client_key_other").value = key == null ? "" : key
+			document.getElementById("openvpn_client_key_other").value = keysize == null ? "" : keysize
 		}
 	}
 

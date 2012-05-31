@@ -20,11 +20,11 @@ fi
 
 client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
 echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = [];"
-if [ -n "$client_id" ] && [ -d "/etc/openvpn/client_conf/$client_id" ] ; then
-	awk '{print "curClientConf.push(\""$0"\");"};' "/etc/openvpn/client_conf/$client_id/$client_id.conf" 2>/dev/null
-	awk '{print "curClientCa.push(\""$0"\");"};'   "/etc/openvpn/client_conf/$client_id/ca.crt"          2>/dev/null
-	awk '{print "curClientCert.push(\""$0"\");"};' "/etc/openvpn/client_conf/$client_id/$client_id.crt"  2>/dev/null
-	awk '{print "curClientKey.push(\""$0"\");"};'  "/etc/openvpn/client_conf/$client_id/$client_id.key"  2>/dev/null
+if [ -n "$client_id" ]  && [ -f "/etc/openvpn/$client_id.conf" ] && [ -f "/etc/openvpn/ca.crt" ]  && [ -f "/etc/openvpn/$client_id.crt" ]  && [ -f "/etc/openvpn/$client_id.key" ] ; then
+	awk '{print "curClientConf.push(\""$0"\");"};' "/etc/openvpn/$client_id.conf" 2>/dev/null
+	awk '{print "curClientCa.push(\""$0"\");"};'   "/etc/openvpn/ca.crt"          2>/dev/null
+	awk '{print "curClientCert.push(\""$0"\");"};' "/etc/openvpn/$client_id.crt"  2>/dev/null
+	awk '{print "curClientKey.push(\""$0"\");"};'  "/etc/openvpn/$client_id.key"  2>/dev/null
 fi
 
 
@@ -208,7 +208,12 @@ fi
 				<label class='leftcolumn' for='openvpn_client_remote' id='openvpn_client_remote_label'>OpenVPN Server Address:</label>
 				<input type='text' class='rightcolumn' name='openvpn_client_remote' id='openvpn_client_remote' size='30' />
 			</div>
-	
+			
+			<div id='openvpn_client_port_container'>
+				<label class='leftcolumn' for='openvpn_client_port' id='openvpn_client_port_label'>OpenVPN Server Port:</label>
+				<input type='text' class='rightcolumn' name='openvpn_client_port' id='openvpn_client_port' size='30' />
+			</div>
+
 			<div id='openvpn_client_protocol_container'>
 				<label class='leftcolumn' for='openvpn_client_protocol' id='openvpn_client_protocol_label'>OpenVPN Protocol:</label>
 				<select class='rightcolumn' id='openvpn_client_protocol'>
