@@ -303,9 +303,98 @@ function resetData()
 	setAcDocumentFromUci(document, new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
 
 
+	//client
+	var upCheckEl  = controlDocument.getElementById("openvpn_client_config_upload");
+	var manCheckEl = controlDocument.getElementById("openvpn_client_config_manual");
+	if(curClientConf.length >0 && curClientCa.length >0 && curClientCert.length >0 && curClientKey.length >0)
+	{
+		manCheckEl.checked = true;
+		upCheckEl.checked  = false;
+		
+		document.getElementById("openvpn_client_conf_text").value = curClientConf.join("\n");
+		document.getElementById("openvpn_client_ca_text").value   = curClientCa.join("\n");
+		document.getElementById("openvpn_client_cert_text").value = curClientCert.join("\n");
+		document.getElementById("openvpn_client_key_text").value  = curClientKey.join("\n");
+		
+		updateClientControlsFromConfigText()
+			
+	}
+	else
+	{
+		upCheckEl.checked  = true;
+		manCheckEl.checked = false;
+	}
+
+
 	setOpenvpnVisibility()
 }
 
+function updateClientControlsFromConfigText()
+{
+	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
+	var remote = null;
+	var port   = null;
+	var proto  = null;
+	var cipher = null;
+	var key    = null;
+	while(configLines.length >0)
+	{
+		var line = configLines.shift();
+		var lineParts = line.replace(/^[\t ]+/, "").split(/[\t ]+/);
+		
+		if(lineParts[0].toLowerCase() == "remote")
+		{
+			remote = lineParts[1] != null ? lineParts[1] : remote;
+			port   = lineParts[2] != null ? lineParts[2] : port;
+		}
+		else if(lineParts[0].toLowerCase() == "proto")
+		{
+			if(lineParts[1] != null)
+			{
+				proto = lineParts[1] == "udp" ? "udp" : "tcp"
+			}
+		}
+		else if(lineParts[0].toLowerCase() == "cipher")
+		{
+			cipher = lineParts[1] != null ? lineParts[1] : cipher;
+		}
+		else if(lineParts[0].toLowerCase() == "key")
+		{
+			key = lineParts[1] != null ? lineParts[1] : key;
+		}
+	}
+	if(remote != null)
+	{
+		document.getElementById("openvpn_client_remote").value = remote;
+	}
+	if(port != null)
+	{
+		document.getElementById("openvpn_client_port").value = port;
+	}
+	if(proto != null)
+	{
+		setSelectedValue("openvpn_client_port", proto)
+	}
+	if(cipher != null)
+	{
+		if(cipher == "BF-CBC" && (key == "128" || key == "256" || key == null))
+		{
+			key = key == null ? "128" : key
+			setSelectedValue("openvpn_client_cipher", cipher + ":" + key)
+		}
+		else if(cipher == "AES-128-CBC" || cipher == "AES-256-CBC")
+		{
+			setSelectedValue("openvpn_client_cipher", cipher)
+		}
+		else
+		{
+			setSelectedValue("openvpn_client_cipher", "other")
+			document.getElementById("openvpn_client_cipher_other").value = cipher
+			document.getElementById("openvpn_client_key_other").value = key == null ? "" : key
+		}
+	}
+
+}
 
 function createAllowedClientControls()
 {
