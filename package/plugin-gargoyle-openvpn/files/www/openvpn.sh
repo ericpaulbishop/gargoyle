@@ -9,9 +9,27 @@
 	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
 ?>
 
-
-
 <script>
+<?
+
+if [ -e /etc/openvpn/dh1024.pem ] ; then
+	echo "var haveDh = true;"
+else
+	echo "var haveDh = false;"
+fi
+
+client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
+echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = [];"
+if [ -n "$client_id" ] && [ -d "/etc/openvpn/client_conf/$client_id" ] ; then
+	awk '{print "curClientConf.push(\""$0"\");"};' "/etc/openvpn/client_conf/$client_id/$client_id.conf" 2>/dev/null
+	awk '{print "curClientCa.push(\""$0"\");"};'   "/etc/openvpn/client_conf/$client_id/ca.crt"          2>/dev/null
+	awk '{print "curClientCert.push(\""$0"\");"};' "/etc/openvpn/client_conf/$client_id/$client_id.crt"  2>/dev/null
+	awk '{print "curClientKey.push(\""$0"\");"};'  "/etc/openvpn/client_conf/$client_id/$client_id.key"  2>/dev/null
+fi
+
+
+?>
+
 	var uci = uciOriginal.clone();
 </script>
 
@@ -145,9 +163,9 @@
 
 	<form id='client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_client_add.sh" target="client_add_target">
 		<div>
-			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" >Upload Client Configuration File(s)</input>
+			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" /> Upload Client Configuration File(s)
 			<br/>
-			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" >Configure Client Manually</input>
+			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" /> Configure Client Manually
 		</div>
 	
 	
@@ -200,7 +218,6 @@
 			</div>
 	
 			<div id='openvpn_client_cipher_container'>
-				<div id= "openvpn_client_cipher_container">
 				<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
 				<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document)" >
 					<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
@@ -212,13 +229,13 @@
 				</select>
 			</div>
 			<div id='openvpn_client_cipher_other_container'>
-				<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other">&nbsp;<em>Cipher</em></span>
-				<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other">&nbsp;<em>Key Size (optional)</em></span>
+				<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other" />&nbsp;<em>Cipher</em></span>
+				<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other" />&nbsp;<em>Key Size (optional)</em></span>
 			</div>
 			
 			<div id="openvpn_client_conf_text_container">
 				<br/>
-				<label class="leftcolumn" for='openvpn_client_conf_text' class="leftcolumnonly" id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
+				<label class="leftcolumn" for='openvpn_client_conf_text' id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
 				<br/>
 				<span class="leftcolumnonly" style="margin-left:5px;"><em>Configuration below is updated automatically from parameters specified above</em></span>
 				<br/>
@@ -227,26 +244,21 @@
 			</div>
 		
 			<div id="openvpn_client_ca_text_container">
-				<label class="leftcolumn" for='openvpn_client_ca_text' class="leftcolumnonly" id='openvpn_client_ca_text_label'>CA Certificate:</label>
+				<label class="leftcolumn" for='openvpn_client_ca_text'  id='openvpn_client_ca_text_label'>CA Certificate:</label>
 				<br/>
-				<textarea id='openvpn_client_ca_text' name='openvpn_client_ca_text'style="margin-left:5px;width:95%;height:200px;"></textarea>
+				<textarea id='openvpn_client_ca_text' name='openvpn_client_ca_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
 			<div id="openvpn_client_cert_text_container">
-				<label class="leftcolumn" for='openvpn_client_cert_text' class="leftcolumnonly" id='openvpn_client_cert_text_label'>Client Certificate:</label>
+				<label class="leftcolumn" for='openvpn_client_cert_text' id='openvpn_client_cert_text_label'>Client Certificate:</label>
 				<br/>
 				<textarea id='openvpn_client_cert_text' name='openvpn_client_cert_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
 			<div id="openvpn_client_key_text_container">
-				<label class="leftcolumn" for='openvpn_client_key_text' class="leftcolumnonly" id='openvpn_client_key_text_label'>Client Key:</label>
+				<label class="leftcolumn" for='openvpn_client_key_text' id='openvpn_client_key_text_label'>Client Key:</label>
 				<br/>
 				<textarea id='openvpn_client_key_text' name='openvpn_client_key_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
-		</div>
-		
-	
-		<div>
-			<input type='button' id='openvpn_client_add' value='Add' class='default_button' onclick='addClientConf()' />
-		</div>
+		</div>	
 	</form>
 
 	<iframe id="client_add_target" name="client_add_target" src="#" style="display:none"></iframe> 
