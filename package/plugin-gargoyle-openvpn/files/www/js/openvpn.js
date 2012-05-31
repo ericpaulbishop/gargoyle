@@ -393,8 +393,19 @@ function updateClientControlsFromConfigText()
 			document.getElementById("openvpn_client_key_other").value = keysize == null ? "" : keysize
 		}
 	}
+}
+
+function updateClientConfigTextFromControls()
+{
+	var remote = document.geteElementById("openvpn_client_remote").value;
+	var port   = document.getElementById("openvpn_client_port").value;
+	var proto  = getSelectedValue("openvpn_client_protocol");
+	var cipher = getSelectedValue("openvpn_client_cipher");
+	var keysize = "";
+
 
 }
+
 
 function createAllowedClientControls()
 {
