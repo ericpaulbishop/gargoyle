@@ -401,8 +401,66 @@ function updateClientConfigTextFromControls()
 	var port   = document.getElementById("openvpn_client_port").value;
 	var proto  = getSelectedValue("openvpn_client_protocol");
 	var cipher = getSelectedValue("openvpn_client_cipher");
-	var keysize = "";
 
+	
+	var cipherParts = cipher.split(/:/);
+	cipher = cipherParts[0];
+	var keysize = cipherParts[1] == null ? "" : cipherParts[1];
+	if(cipher == "other")
+	{
+		cipher  = document.getElementById("openvpn_client_cipher_other").value;
+	       	keysize = document.getElementById("openvpn_client_cipher_other").value;
+	}
+
+	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
+	var newLines = [];
+	var foundVars = [];
+	var defaultCipher = cipher == "Blowfish-CBC" && keysize == "128" ? true : false;
+	while(configLines.length >0)
+	{
+		var line = configLines.shift();
+		var lineParts = line.replace(/^[\t ]+/, "").split(/[\t ]+/);
+		if(lineParts[0].toLowerCase() == "remote")
+		{
+			line = "remote " + remote + " " + port
+			foundVars["remote"] = 1
+		}
+		else if(lineParts[0].toLowerCase() == "proto")
+		{
+			line = "proto " + (proto == "udp" ? "udp" : "tcp-client")
+			foundVars["proto"] = 1
+		}
+		else if(lineParts[0].toLowerCase() == "cipher")
+		{
+			line = "cipher " + cipher
+			foundVars["cipher"] = 1
+		}
+		else if(lineParts[0].toLowerCase() == "keysize")
+		{
+			line = keysize == "" ? "" : "keysize " + keysize
+			foundVars["keysize"] = 1
+		}
+		newLines.push(line)
+	}
+
+	if(foundVars["keysize"] == null && keysize != "" && (!(defaultCipher && foundVars["cipher"] == null)) )
+	{
+		newLines.unshift("keysize " + keysize )
+	}
+	if(foundVars["cipher"] == null && (!defaultCipher) )
+	{
+		newLines.unshift("cipher " + cipher);
+	}
+	if(foundVars["proto"] == null)
+	{
+		newLines.unshift("proto " + (proto == "udp" ? "udp" : "tcp-client"))
+	}
+	if(foundVars["remote"] == null)
+	{
+		newLines.unshift("remote " + remote + " " + port)
+	}
+
+	document.getElementById("openvpn_client_conf_text").value = newLines.join("\n");
 
 }
 
