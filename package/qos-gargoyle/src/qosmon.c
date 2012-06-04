@@ -70,7 +70,7 @@ struct sockaddr_in whereto;/* Who to ping */
 int datalen=64-8;   /* How much data */
 
 const char usage[] =
-"Gargoyle active congestion controller version 2\n\n"
+"Gargoyle active congestion controller version 2.2\n\n"
 "Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
@@ -78,7 +78,7 @@ const char usage[] =
 "              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
 "                     -b  - Run in the background\n"
-"                     -a  - Add entitlement to pinglimt\n";
+"                     -a  - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n";
 
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
@@ -707,6 +707,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in *to = &whereto;
     int on = 1;
     struct protoent *proto;
+    float err,plimit;
 
 
     argc--, av++;
@@ -783,7 +784,8 @@ int main(int argc, char *argv[])
     }
 
     // where alpha = Sample_Period / (TC + Sample_Period)
-    alpha = (period*1000. / (3000. + period)); 
+    // TC needs to be not less than 3 times the sample period
+    alpha = (period*1000. / (period*4 + period)); 
 
     //Class bandwidth filter time constants  
     BWTC= (period*1000. / (7500. + period));
@@ -965,12 +967,13 @@ int main(int argc, char *argv[])
 
                     //If the pinglimit was entered on the command line 
                     //without the add flag then go directly to the 
-                    //ACTIVE state otherwise automatically determine an appropriate 
+                    //IDLE state otherwise automatically determine an appropriate 
                     //ping limit.
                     if ((pinglimit) && !(pingflags & ADDENTITLEMENT)) {
-                        dbw_ul=0;  //Forces an update in QMON_ACTIVE
+                        dbw_ul=0;                     //Forces an update
+                        tc_class_modify(new_dbw_ul); 
                         fil_triptime = rawfltime*1000;
-                        qstate=QMON_ACTIVE;
+                        qstate=QMON_IDLE;
                      } else {
                         tc_class_modify(1000);  //Unload the link for the measurement.
                         nreceived=0;
@@ -991,8 +994,8 @@ int main(int argc, char *argv[])
                 //After 15 seconds we have measured our ping response entitlement.
                 //Move on to the active state. 
                 if (nreceived > (15000/period)+1) {
-                    qstate=QMON_ACTIVE;
-                    dbw_ul=0;  //Forces an update in QMON_ACTIVE
+                    qstate=QMON_IDLE;
+                    tc_class_modify(new_dbw_ul);  //Restore reasonable bandwidth
 
                     //If the user specified no limit then the ping limit computed from what was
                     //entered on the command line.
@@ -1000,7 +1003,7 @@ int main(int argc, char *argv[])
                         //Add what the user specified to the 110% of the measure ping time.
                         pinglimit += (fil_triptime*1.1);
                     } else {
-                        //Without the '-a' flag we just suse 250% of measure ping time.  
+                        //Without the '-a' flag we just use 250% of measure ping time.  
                         //This works OK in my system but I have no evidence that it will work in other systems.
                         pinglimit = fil_triptime*2.5;
                     }
@@ -1010,6 +1013,16 @@ int main(int argc, char *argv[])
                     if (pinglimit > 500000) pinglimit=500000;
                 }
                 break;
+
+            // In the wait state we have a nearly idle link.
+            // In these cases it is not necessary to monitor delay times so the active
+            // ping is disabled.
+            case QMON_IDLE:
+                pingon=0;
+
+                //This limit should be the same as the dynamic range or we could get stuck
+                //in the IDLE state. 
+                if (dbw_fil < 0.15 * DBW_UL) break;
 
             // In the ACTIVE & REALTIME states we observe ping times as long as the
             // link remains active.  While we are observing we adjust the 
@@ -1041,65 +1054,101 @@ int main(int argc, char *argv[])
                 //But Barman et all, Globecomm2004 indicates that only 20-30% of this is really needed.  
                 //
                 //When we measured an RTT above that was to the ISPs gateway so we do not really know what the average 
-                //RTT time to IPs on the internet.  And since not all hosts respond the same anyway I doubt there
+                //RTT time to other IPs on the internet.  And since not all hosts respond the same anyway I doubt there
                 //is consistant RTT that we could use.
 				//	
-                //So the statedgy I will use for the ACTIVE mode limit will be to double the ping limit we have for realtime
-                //mode but not less than an additional 75ms.  I hope that this will work well for even satallite links which 
-                //can have RTT that approach 1 second or more.
+                //For ACTIVE mode on a 925kbps/450kbps link I measure the following 
+                //relationship between ping limit and throughput with large packets downloading.
+                //
+                //Ping Limit   Throughput   Percent
+                // 612ms       918kbps      100 
+                // 525ms       915kbps      99.6
+                // 437ms       898kbps      97.8
+                // 350ms       875kbps      95.3 
+                // 262ms       862kbps      93.8 
+                //  81ms       870kbps      94.7
+                //  60ms       680kbps      69.8
+                //  50ms       630kbps      68.6
+                //  40ms       490kbps      53.3      
+                //
+                //The 1500 byte packet time is 1500*10/925kbps download and 1500*10/425kbps upload for a total
+                //RTT of around 48ms.  Idle ping times on this link are around 35ms.
+                //
+                //These results indicate that on my link not much is gained by increasing beyond 81ms.  This is pretty much
+                //the MINRTT mode computed with the -a switch.  Still other links may be different so I suspect that
+                //switching to active mode will benefit some people.
+                //
+                //The statedgy I will use for the ACTIVE mode limit will be an additional 2.5x the ping limit over what we 
+                //have for realtime mode but not less than an additional 2.5*75ms.  I hope that this will work well for 
+                //even satallite links which can have RTT that approach 1 second or more.
                 //
                 //My thinking on the 75ms is that an RTT of 150ms as an average to most sites on the internet seems pretty
                 //fast to me and taking 1/2 of that leads to a minimum we should allow.  In ACTIVE mode the goal is only 
-                //to prevent the ISPs buffer from overflowing and since I think most ISPs have buffers at least this large.
+                //to prevent the ISPs buffer from overflowing, I think (hope) most ISPs have buffers at least this large.
                 // 
                 //Links with longer RTTs will need even more and this allows that.
 
-                if (RTDCA == 0) {
-                    if (pinglimit < 75000) pinglimit2=75000; else pinglimit2=pinglimit;
+                if ((RTDCA == 0) && (pingflags & ADDENTITLEMENT)) {
+                    if (pinglimit < 75000) pinglimit2=2.5*75000; else pinglimit2=2.5*pinglimit;
                     qstate=QMON_ACTIVE;
                 } else {
                     pinglimit2 = 0;
                     qstate=QMON_REALTIME;
                 }
 
-                //Ping times too long then ramp down link limit.
-                if (fil_triptime > pinglimit+pinglimit2) {
-
-                	//In realtime mode ramp down at 2%/sec otherwise at 0.5%/sec 
-                    if (qstate == QMON_REALTIME)
-                        new_dbw_ul = new_dbw_ul * (1.0 - .02*period/1000);
-                    else
-                        new_dbw_ul = new_dbw_ul * (1.0 - .005*period/1000);
-
-                    //Dynamic range is 1/.15 or 6.67 : 1.  
-                    if (new_dbw_ul < DBW_UL*.15) new_dbw_ul=DBW_UL*.15;
-                }
-
-                //Ping times acceptable then ramp up at .5%/sec 
-                //Try to creep up on the limit to avoid oscillation.
-                //Only increase the download bw if the link load indicates its needed.
-                if ((fil_triptime < 0.7 * (pinglimit + pinglimit2)) && (dbw_fil > new_dbw_ul * .95)) {
-                   new_dbw_ul = new_dbw_ul * (1.0 + .005*period/1000);
-                   if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
-                }
-
-                //Modify parent download limit as needed.
-                if (abs(dbw_ul-new_dbw_ul) > 0.01*DBW_UL) tc_class_modify(new_dbw_ul);
-
                 //When the downlink falls below 10% utilization we turn off the pinger.
                 if (dbw_fil < 0.1 * DBW_UL) qstate=QMON_IDLE;
+
+                //Compute the ping error
+                plimit = (pinglimit+pinglimit2);
+                err = fil_triptime - plimit;
+
+                //Negative error means we might be able to increase the link limit.
+                if (err < 0) {
+
+                   //Do not increase the bandwidth until we reach 95% of the current setting.
+                   if  (dbw_fil < new_dbw_ul * 0.95) break;
+
+                   //Clamp the error
+                   if (err < -2*plimit) err=-2*plimit;
+
+                   //In realtime mode ramp up .2%/sec otherwise at 0.1%/sec 
+                   if (qstate == QMON_REALTIME)
+                        err = .002*err;
+                   else
+                        err = .001*err;
+
+                   //Increase slowly (0.2%/sec).  err is negative here.  
+                   new_dbw_ul = new_dbw_ul * (1.0 - (err/pinglimit)*period/1000);
+                   if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
+                } else {
+
+                   if (err > 2*plimit) err=2*plimit;
+
+                   //In realtime mode ramp down fast at 1.5%/sec otherwise at 0.2%/sec 
+                   if (qstate == QMON_REALTIME) {
+
+                        //When switching modes be agressive in reducing the speed in
+                        //MINRTT mode.
+                        if (pingflags & ADDENTITLEMENT) { 
+                             err = .015*err;
+                        } else {
+                             err = .002*err;
+                        }
+                   } 
+                   else
+                        err = .001*err;
+
+                   new_dbw_ul = new_dbw_ul * (1.0 - (err/pinglimit)*period/1000);
+
+                   //Dynamic range is 1/.15 or 6.67 : 1.  
+                   if (new_dbw_ul < DBW_UL*.15) new_dbw_ul=DBW_UL*.15;
+                }   
+
+                //Modify parent download limit as needed.
+                tc_class_modify(new_dbw_ul);
                 break;
                     
-            // In the wait state we have a nearly idle link.
-            // In these cases it is not necessary to monitor delay times so the active
-            // ping is disabled.
-            case QMON_IDLE:
-                pingon=0;
-
-                //This limit should be the same as the dynamic range or we could get stuck
-                //in the IDLE state. 
-                if (dbw_fil > 0.15 * DBW_UL) qstate=QMON_ACTIVE;
-                break;
                       
         }
 
