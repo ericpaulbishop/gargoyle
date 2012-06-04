@@ -397,7 +397,7 @@ function updateClientControlsFromConfigText()
 
 function updateClientConfigTextFromControls()
 {
-	var remote = document.geteElementById("openvpn_client_remote").value;
+	var remote = document.getElementById("openvpn_client_remote").value;
 	var port   = document.getElementById("openvpn_client_port").value;
 	var proto  = getSelectedValue("openvpn_client_protocol");
 	var cipher = getSelectedValue("openvpn_client_cipher");
@@ -427,7 +427,7 @@ function updateClientConfigTextFromControls()
 		}
 		else if(lineParts[0].toLowerCase() == "proto")
 		{
-			line = "proto " + (proto == "udp" ? "udp" : "tcp-client")
+			line = "proto " + (proto == "tcp" ? "tcp-client" : "udp" )
 			foundVars["proto"] = 1
 		}
 		else if(lineParts[0].toLowerCase() == "cipher")
@@ -453,7 +453,7 @@ function updateClientConfigTextFromControls()
 	}
 	if(foundVars["proto"] == null)
 	{
-		newLines.unshift("proto " + (proto == "udp" ? "udp" : "tcp-client"))
+		newLines.unshift("proto " + (proto == "tcp" ? "tcp-client" : "udp" ))
 	}
 	if(foundVars["remote"] == null)
 	{

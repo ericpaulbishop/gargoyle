@@ -206,17 +206,17 @@ fi
 
 			<div id='openvpn_client_remote_container'>
 				<label class='leftcolumn' for='openvpn_client_remote' id='openvpn_client_remote_label'>OpenVPN Server Address:</label>
-				<input type='text' class='rightcolumn' name='openvpn_client_remote' id='openvpn_client_remote' size='30' />
+				<input type='text' class='rightcolumn' name='openvpn_client_remote' onkeyup="updateClientConfigTextFromControls()" id='openvpn_client_remote' size='30' />
 			</div>
 			
 			<div id='openvpn_client_port_container'>
 				<label class='leftcolumn' for='openvpn_client_port' id='openvpn_client_port_label'>OpenVPN Server Port:</label>
-				<input type='text' class='rightcolumn' name='openvpn_client_port' id='openvpn_client_port' size='30' />
+				<input type='text' class='rightcolumn' name='openvpn_client_port' onkeyup="updateClientConfigTextFromControls()" id='openvpn_client_port' size='30' />
 			</div>
 
 			<div id='openvpn_client_protocol_container'>
 				<label class='leftcolumn' for='openvpn_client_protocol' id='openvpn_client_protocol_label'>OpenVPN Protocol:</label>
-				<select class='rightcolumn' id='openvpn_client_protocol'>
+				<select class='rightcolumn' onchange="updateClientConfigTextFromControls()" id='openvpn_client_protocol'>
 					<option value='udp'>UDP</option>
 					<option value='tcp'>TCP</option>
 				</select>
@@ -224,7 +224,7 @@ fi
 	
 			<div id='openvpn_client_cipher_container'>
 				<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
-				<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document)" >
+				<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document);updateClientConfigTextFromControls();" >
 					<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
 					<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
 					<option value='AES-128-CBC'>AES-CBC 128bit</option>
@@ -234,8 +234,8 @@ fi
 				</select>
 			</div>
 			<div id='openvpn_client_cipher_other_container'>
-				<span class="rightcolumnonly"><input type='text' id="openvpn_client_cipher_other" />&nbsp;<em>Cipher</em></span>
-				<span class="rightcolumnonly"><input type='text' id="openvpn_client_key_other" />&nbsp;<em>Key Size (optional)</em></span>
+				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em>Cipher</em></span>
+				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em>Key Size (optional)</em></span>
 			</div>
 			
 			<div id="openvpn_client_conf_text_container">
@@ -244,24 +244,24 @@ fi
 				<br/>
 				<span class="leftcolumnonly" style="margin-left:5px;"><em>Configuration below is updated automatically from parameters specified above</em></span>
 				<br/>
-				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 
 			</div>
 		
 			<div id="openvpn_client_ca_text_container">
 				<label class="leftcolumn" for='openvpn_client_ca_text'  id='openvpn_client_ca_text_label'>CA Certificate:</label>
 				<br/>
-				<textarea id='openvpn_client_ca_text' name='openvpn_client_ca_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+				<textarea id='openvpn_client_ca_text' name='openvpn_client_ca_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
 			<div id="openvpn_client_cert_text_container">
 				<label class="leftcolumn" for='openvpn_client_cert_text' id='openvpn_client_cert_text_label'>Client Certificate:</label>
 				<br/>
-				<textarea id='openvpn_client_cert_text' name='openvpn_client_cert_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+				<textarea id='openvpn_client_cert_text' name='openvpn_client_cert_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
 			<div id="openvpn_client_key_text_container">
 				<label class="leftcolumn" for='openvpn_client_key_text' id='openvpn_client_key_text_label'>Client Key:</label>
 				<br/>
-				<textarea id='openvpn_client_key_text' name='openvpn_client_key_text' style="margin-left:5px;width:95%;height:200px;"></textarea>
+				<textarea id='openvpn_client_key_text' name='openvpn_client_key_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
 		</div>	
 	</form>
