@@ -492,12 +492,9 @@ function updateClientConfigTextFromControls()
 
 function createAllowedClientControls()
 {
-
-	var dummyFunc = function dummy() { return "" }
-
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = dummyFunc;
-	var downloadButton = createButton("Download", "default_button", dummyFunc)
+	var downloadButton = createButton("Download", "default_button", downloadAc)
 	var editButton     = createButton("Edit",     "default_button", editAc)
 
 	return [enabledCheck, downloadButton, editButton]
@@ -908,6 +905,15 @@ function addAc()
 	}
 
 }
+
+
+function downloadAc()
+{
+	var downloadId = editRow.childNodes[1].firstChild.id;
+	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId
+}
+
+
 
 function editAc()
 {
