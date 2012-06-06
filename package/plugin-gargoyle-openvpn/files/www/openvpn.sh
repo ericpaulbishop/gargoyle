@@ -161,7 +161,7 @@ fi
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
 
-	<form id='client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_upload_client.sh" target="client_add_target">
+	<form id='openvpn_client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_upload_client.sh" target="client_add_target">
 		<div>
 			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" /> Upload Client Configuration File(s)
 			<br/>
@@ -263,7 +263,9 @@ fi
 				<br/>
 				<textarea id='openvpn_client_key_text' name='openvpn_client_key_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
-		</div>	
+		</div>
+		<input style="display:none" type="hidden" id="openvpn_client_commands" name="commands"></input>
+		<input style="display:none" type="hidden" id="openvpn_client_hash" name="hash"></input>
 	</form>
 
 	<iframe id="client_add_target" name="client_add_target" src="#" style="display:none"></iframe> 

@@ -6,6 +6,9 @@ eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_US
 echo "Content-type: text/html"
 echo ""
 
+echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
+echo '<html xmlns="http://www.w3.org/1999/xhtml">'
+echo '<body>'
 
 mkdir -p /tmp/vpn_client_upload_tmp
 cd /tmp/vpn_client_upload_tmp
@@ -13,7 +16,7 @@ cd /tmp/vpn_client_upload_tmp
 client_name=$(uci get openvpn_gargoyle.client.id 2>/dev/null)
 if [ -z "$client_name" ] ; then
 	client_name_rand=$(</dev/urandom tr -dc a-z | head -c 12)
-	client_name="grouter_cilent_$client_name_rand"
+	client_name="grouter_client_$client_name_rand"
 fi
 
 if [ -e "$FORM_openvpn_client_zip_file" ] ; then
@@ -70,6 +73,7 @@ if [ -e grouter_client.conf ] ; then
 
 	mv * /etc/openvpn/
 
+	#run constant uci commands
 	uci set openvpn_gargoyle.server.enabled="false"                        >/dev/null 2>&1
 	uci set openvpn_gargoyle.client.enabled="true"                         >/dev/null 2>&1
 	uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
@@ -77,13 +81,22 @@ if [ -e grouter_client.conf ] ; then
 	uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
 	uci commit
 
-	/etc/init.d/openvpn restart
-
+	#run other commands passed to script (includes firewall config and openvpn restart)
+	if [ -n "$FORM_commands" ] ; then	
+		tmp_file="/tmp/tmp.sh"
+		printf "%s" "$FORM_commands" > $tmp_file
+		sh $tmp_file
+		if [ -e $tmp_file ] ; then
+			rm $tmp_file
+		fi
+	fi
 	echo "Success"
 else
 	#ERROR
 	echo "Error"
 fi
+echo "<script type=\"text/javascript\">top.clientSaved();</script>"
+echo "</body></html>"
 
 cd /tmp
 rm -rf /tmp/vpn_client_upload_tmp

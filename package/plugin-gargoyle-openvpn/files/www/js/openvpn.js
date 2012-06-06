@@ -89,6 +89,7 @@ function saveChanges()
 				if(!doSave)
 				{
 					setControlsEnabled(true);
+					return;
 				}
 			}
 
@@ -164,8 +165,6 @@ function saveChanges()
 		if(openvpnConfig == "client")
 		{
 			configureFirewall(true,false)
-			uci.set("openvpn_gargoyle", "server", "enabled", "false")
-			uci.set("openvpn_gargoyle", "client", "enabled", "true")
 		}
 
 
@@ -185,25 +184,38 @@ function saveChanges()
 			commands = commands + "/etc/init.d/openvpn restart"
 		}
 
-
-		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	
-		var stateChangeFunction = function(req)
+		if(openvpnConfig != "client")
 		{
-			if(req.readyState == 4)
+			var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		
+			var stateChangeFunction = function(req)
 			{
-				if(openvpnConfig == "server")
+				if(req.readyState == 4)
 				{
-					haveDh = true;
+					if(openvpnConfig == "server")
+					{
+						haveDh = true;
+					}
+					uci = uciOriginal.clone()
+					setControlsEnabled(true)
 				}
-				uci = uciOriginal.clone()
-				setControlsEnabled(true)
 			}
+			runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 		}
-		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-	}
+		else
+		{
+			document.getElementById("openvpn_client_commands").value = commands;
+			document.getElementById("openvpn_client_hash").value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
+			document.getElementById("openvpn_client_form").submit();
+		}
 }
 
+function clientSaved()
+{
+	uci = uciOriginal.clone()
+	setControlsEnabled(true)
+
+}
 
 function proofreadAll()
 {
