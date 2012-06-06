@@ -161,7 +161,7 @@ fi
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
 
-	<form id='client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_client_add.sh" target="client_add_target">
+	<form id='client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_upload_client.sh" target="client_add_target">
 		<div>
 			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" /> Upload Client Configuration File(s)
 			<br/>
