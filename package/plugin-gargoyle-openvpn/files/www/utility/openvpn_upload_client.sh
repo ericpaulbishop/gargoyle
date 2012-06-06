@@ -77,6 +77,8 @@ if [ -e grouter_client.conf ] ; then
 	uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
 	uci commit
 
+	/etc/init.d/openvpn restart
+
 	echo "Success"
 else
 	#ERROR
