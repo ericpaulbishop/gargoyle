@@ -909,7 +909,8 @@ function addAc()
 
 function downloadAc()
 {
-	var downloadId = editRow.childNodes[1].firstChild.id;
+	var downloadRow=this.parentNode.parentNode;
+	var downloadId = downloadRow.childNodes[1].firstChild.id;
 	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId
 }
 
