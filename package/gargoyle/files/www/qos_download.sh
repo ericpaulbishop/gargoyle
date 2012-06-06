@@ -339,11 +339,10 @@
 			that congestion on your link will occur in a different segment then you can enter an alternate ping target.</p>
 
 			<p><em>Ping Limit-</em> Round trip ping times are compared against the ping limit.  ACC controls the link limit to maintain ping times
-			under this limit.  Two ping limits are used depending on if a realtime class is active or not. When not in realtime mode the ACC
-			relaxes the ping limit slightly in order to increase throughput.  By default ACC automatically determines the proper ping limits by using 
-			the link speeds you entered and measured normal ping time.  You can see the results of this computation in the status section below.  
-			If you would like to try a different limit you can manually enter your own custom ping limit in this field.  ACC will then use your
-			limit as a realtime limit and relax your limit by 75ms when realtime classes are not active.</p>
+			under limits.  In Auto mode, two ping limits are used depending on if a MINRTT class is active or not.  When no MINRTT mode is active the ACC
+			relaxes the ping limit in order to increase throughput.  In auto mode the ACC automatically determines the proper ping limits by using 
+			the link speeds you entered and measured ping time.  If you would like to try a different limit you can manually enter your own 
+                        custom ping limit in this field.  ACC will then use your limit as a realtime limit and always remain in MINRTT mode.</p>
 
 		</span>
 		<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
