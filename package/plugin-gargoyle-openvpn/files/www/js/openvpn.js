@@ -208,6 +208,7 @@ function saveChanges()
 			document.getElementById("openvpn_client_hash").value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById("openvpn_client_form").submit();
 		}
+	}
 }
 
 function clientSaved()
@@ -493,7 +494,6 @@ function updateClientConfigTextFromControls()
 function createAllowedClientControls()
 {
 	var enabledCheck = createInput("checkbox")
-	enabledCheck.onclick = dummyFunc;
 	var downloadButton = createButton("Download", "default_button", downloadAc)
 	var editButton     = createButton("Edit",     "default_button", editAc)
 
