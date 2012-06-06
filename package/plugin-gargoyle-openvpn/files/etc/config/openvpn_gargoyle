@@ -25,12 +25,5 @@ config 'server' 'server'
 
 config 'client' 'client'
 	option	'enabled'	'false'
-	option	'proto'		'udp'
-	option	'remote'	'myhost.chickenkiller.com'
-	option	'topology'	'subnet'
-	option	'cipher'	'BF-CBC'
-	option	'keysize'	'128'
-	option	'ca'		'/etc/openvpn/ca.crt'
-	option	'cert'		'/etc/openvpn/client.crt'
-	option	'key'		'/etc/openvpn/client.key'
-	
+	#option 'id'		'grouter_client_123456543210'
+
