@@ -10,7 +10,25 @@ mkdir -p /tmp/vpn_client_upload_tmp
 cd /tmp/vpn_client_upload_tmp
 
 if [ -e "$FORM_openvpn_client_zip_file" ] ; then
-	unzip "$FORM_openvpn_client_zip_file" 
+	
+	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
+	if [ -n "$is_targz" ] ; then
+		tar xzf "$FORM_openvpn_client_zip_file"
+	else
+		unzip "$FORM_openvpn_client_zip_file"
+	fi
+
+	OLD_IFS="$IFS"
+	IFS=$(printf "\n\r")
+	files=$(find .)
+	for f in $files ; do
+		if [ ! -d "$f" ] ; then mv "$f" . ; fi
+	done
+	for f in $files ; do
+		if [ -d "$f" ] && [ "$f" != "." ] ; then rm -rf "$f" ; fi
+	done
+
+
 	conf_file=$(grep -l "^[\t ]*ca\|^[\t ]*cert" * 2>/dev/null | head -n 1)
 	mv "$conf_file" grouter_client.conf
 	sed 's/ca.*\//ca    \/etc\/openvpn\//g'   grouter_client.conf
