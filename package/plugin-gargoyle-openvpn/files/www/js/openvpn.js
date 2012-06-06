@@ -61,7 +61,7 @@ function saveChanges()
 				}
 				else
 				{
-					removeSection("firewall", "vpn_wan_forwarding")
+					uci.removeSection("firewall", "vpn_wan_forwarding")
 				}
 			}
 			else
@@ -83,6 +83,15 @@ function saveChanges()
 		}
 		if(openvpnConfig == "server")
 		{
+			if(!haveDh)
+			{
+				var doSave = confirm("This is the first time you have configured an OpenVPN Server.\n\nIt will take 5-10 minutes to generate the necessary cryptographic parameters.  This is a one-time wait -- updates after this one will be fast.\n\nProceed?\n")
+				if(!doSave)
+				{
+					setControlsEnabled(true);
+				}
+			}
+
 			var prefix   = "openvpn_server_"
 			var vpnPort  = document.getElementById(prefix + "port").value
 			var vpnProto = getSelectedValue(prefix + "protocol")
@@ -183,6 +192,10 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
+				if(openvpnConfig == "server")
+				{
+					haveDh = true;
+				}
 				uci = uciOriginal.clone()
 				setControlsEnabled(true)
 			}
