@@ -15,15 +15,7 @@
 # However, if vlan is active it can be problematic to take
 # the switch interface down, so just take down the sub-interfaces
 
-switch_ifs=$(uci show network | grep switch | sed "s/network\.//g" | sed "s/\=.*//g")
-vlan_active=$(cat /proc/net/dev | grep "$switch_if\.")
-ifs=$(cat /proc/net/dev 2>/dev/null | awk 'BEGIN {FS = ":"}; $0 ~ /:/ { print $1 }')
-
-webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle 2>/dev/null)
-dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
-bwmon_enabled=$(ls /etc/rc.d/*bwmon_gargoyle 2>/dev/null)
-qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
-miniupnpd_enabled=$(ls /etc/rc.d/*miniupnpd 2>/dev/null)
+. /usr/lib/gargoyle/libgargoylehelper.sh
 
 backup_quotas >/dev/null 2>&1
 
@@ -58,7 +50,7 @@ fi
 #this didn't work for a while, but now that I've finally
 #gotten around to fixing it, the default seems to work too
 #include this here just to BE SURE
-aths=$(ifconfig | sed 's/://g' | grep "^ath" | awk ' { print $1 }' )
+aths=$(ifconfig | awk '$1 ~ /^ath/ { gsub(":", "", $1); print $1; }')
 if [ -n "$aths" ] ; then
 	killall wpa_supplicant 2>/dev/null
 	killall hostapd 2>/dev/null
@@ -102,16 +94,9 @@ sleep 1
 #	/etc/init.d/bwmon_gargoyle start
 #fi
 
-if [ -n "$miniupnpd_enabled" ] ; then
-	/etc/init.d/miniupnpd start
-fi
-
-if [ -n "$dnsmasq_enabled" ] ; then
-	/etc/init.d/dnsmasq start >/dev/null 2>&1 
-fi
-if [ -n "$webmon_enabled" ] ; then
-	/etc/init.d/webmon_gargoyle start >/dev/null 2>&1
-fi
+service_start_if_enabled miniupnpd
+service_start_if_enabled dnsmasq
+service_start_if_enabled webmon_gargoyle
 
 lan_gateway=$(uci -P /var/state get network.lan.gateway)
 wan_gateway=$(uci -P /var/state get network.wan.gateway)
