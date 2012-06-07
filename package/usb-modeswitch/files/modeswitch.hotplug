@@ -125,7 +125,7 @@ if [ "$ACTION" = add ]; then
 			switching_tries=0
 			local usb_dir="/sys/$DEVPATH"       
 			[ -f "$usb_dir/idVendor" ] || usb_dir="${usb_dir%/*}"
-			while [ $switching_done -lt 1 -a $switching_tries -le 6 ]; do
+			while [ $switching_done -lt 1 -a $switching_tries -le 20 ]; do
 				$modeswitch -v $uVid -p $uPid -I -D -n -s 30 -c "${configs%% *}"
 				if [ $(sanitize "$usb_dir/idProduct") = $uPid ]; then
 					log "switching seemingly failed"
@@ -133,6 +133,7 @@ if [ "$ACTION" = add ]; then
 					switching_done=1
 				fi
 				switching_tries=$(( $switching_tries + 1 ))
+				sleep 1
 			done
 		}
 	}
