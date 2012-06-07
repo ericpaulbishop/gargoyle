@@ -10,8 +10,10 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xh
 echo '<html xmlns="http://www.w3.org/1999/xhtml">'
 echo '<body>'
 
-mkdir -p /tmp/vpn_client_upload_tmp
-cd /tmp/vpn_client_upload_tmp
+dir_rand=$(</dev/urandom tr -dc a-z | head -c 12)
+tmp_dir="/tmp/vpn_client_upload_$dir_rand"
+mkdir -p "$tmp_dir"
+cd "$tmp_dir"
 
 client_name=$(uci get openvpn_gargoyle.client.id 2>/dev/null)
 if [ -z "$client_name" ] ; then
@@ -23,9 +25,9 @@ if [ -e "$FORM_openvpn_client_zip_file" ] ; then
 	
 	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
 	if [ -n "$is_targz" ] ; then
-		tar xzf "$FORM_openvpn_client_zip_file"
+		tar xzf "$FORM_openvpn_client_zip_file" >/dev/null 2>&1
 	else
-		unzip "$FORM_openvpn_client_zip_file"
+		unzip   "$FORM_openvpn_client_zip_file" >/dev/null 2>&1
 	fi
 
 	OLD_IFS="$IFS"
@@ -65,7 +67,7 @@ elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_te
 	printf "$FORM_openvpn_client_key_text"  > "$client_name.key"	
 fi
 
-if [ -e grouter_client.conf ] ; then
+if [ -e "$client_name.conf" ] ; then
 	
 	sed -i 's/ca.*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'  "$client_name.conf"
 	sed -i 's/cert.*$/cert  \/etc\/openvpn\/'"$client_name.crt"'/g'     "$client_name.conf"
@@ -83,24 +85,21 @@ if [ -e grouter_client.conf ] ; then
 
 	#run other commands passed to script (includes firewall config and openvpn restart)
 	if [ -n "$FORM_commands" ] ; then	
-		tmp_file="/tmp/tmp.sh"
+		tmp_file="$tmp_dir/tmp.sh"
 		printf "%s" "$FORM_commands" > $tmp_file
 		sh $tmp_file
-		if [ -e $tmp_file ] ; then
-			rm $tmp_file
-		fi
 	fi
-	echo "Success"
+	printf "\n<p>\nSuccess\n</p>\n"
 else
 	#ERROR
-	echo "Error"
+	printf "\n<p>\nError\n</p>\n"
+
 fi
 echo "<script type=\"text/javascript\">top.clientSaved();</script>"
 echo "</body></html>"
 
 cd /tmp
-rm -rf /tmp/vpn_client_upload_tmp
-
+rm -rf "$tmp_dir"
 
 
 
