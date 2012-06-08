@@ -1,7 +1,7 @@
 #!/usr/bin/haserl --upload-limit=1048576 --upload-dir=/tmp/
 <?
 
-eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
+eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 
 echo "Content-type: text/html"
 echo ""
@@ -21,8 +21,8 @@ if [ -z "$client_name" ] ; then
 	client_name="grouter_client_$client_name_rand"
 fi
 
-if [ -e "$FORM_openvpn_client_zip_file" ] ; then
-	
+if [ -s "$FORM_openvpn_client_zip_file" ] ; then
+
 	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
 	if [ -n "$is_targz" ] ; then
 		tar xzf "$FORM_openvpn_client_zip_file" >/dev/null 2>&1
@@ -52,7 +52,7 @@ if [ -e "$FORM_openvpn_client_zip_file" ] ; then
 	mv "$cert_file" "$client_name.crt"
 	mv "$key_file"  "$client_name.key"
 
-elif [ -e "$FORM_openvpn_client_conf_file" ] && [ -e "$FORM_openvpn_client_ca_file" ] && [ -e "$FORM_openvpn_client_cert_file" ] && [ -e "$FORM_openvpn_client_key_file" ] ; then 
+elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_file" ] && [ -s "$FORM_openvpn_client_cert_file" ] && [ -s "$FORM_openvpn_client_key_file" ] ; then 
 	
 	mv "$FORM_openvpn_client_conf_file" "$client_name.conf"
 	mv "$FORM_openvpn_client_ca_file"   "${client_name}_ca.crt"
