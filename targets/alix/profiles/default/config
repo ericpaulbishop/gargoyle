@@ -1723,3 +1723,4 @@ CONFIG_PACKAGE_openvpn-easy-rsa=y
 CONFIG_PACKAGE_kmod-tun=y
 CONFIG_PACKAGE_liblzo=y
 CONFIG_PACKAGE_zip=y
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
