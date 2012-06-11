@@ -494,6 +494,7 @@ function updateClientConfigTextFromControls()
 function createAllowedClientControls()
 {
 	var enabledCheck = createInput("checkbox")
+	enabledCheck.onclick = toggleAcEnabled;
 	var downloadButton = createButton("Download", "default_button", downloadAc)
 	var editButton     = createButton("Edit",     "default_button", editAc)
 
@@ -835,6 +836,16 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 
 }
 
+
+function toggleAcEnabled()
+{
+	var toggleRow=this.parentNode.parentNode;
+	var toggleId = editRow.childNodes[1].firstChild.id;
+
+	uci.set("openvpn_gargoyle", id, "enabled", (this.checked? "true" : "false"));
+}
+
+
 function removeAcCallback(table, row)
 {
 	var id = row.childNodes[1].firstChild.id;
@@ -872,6 +883,7 @@ function addAc()
 		id = testId
 
 		setAcUciFromDocument(document, id)
+		uci.set("openvpn_gargoyle", id, "enabled", "true")
 
 
 		var ipElementContainer = document.createElement("span")
