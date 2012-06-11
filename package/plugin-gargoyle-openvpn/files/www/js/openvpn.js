@@ -220,25 +220,37 @@ function clientSaved()
 
 function proofreadAll()
 {
-	var prefix = "openvpn_server_"
-	var inputIds = [ prefix + "ip", prefix + "mask", prefix + "port" ]
-	var labelIds = [ prefix + "ip_label", prefix + "mask_label", prefix + "port_label" ]
-	var functions = [ validateIP, validateNetMask, validatePort  ];
-	var validReturnCodes = [0,0,0]
-
-	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
-	
-	if(errors.length == 0)
+	errors = [];
+	if(getSelectedValue("openvpn_config") == "server")
 	{
-		var serverPort  = document.getElementById(prefix + "port").value
-		var serverProto = getSelectedValue(prefix + "proto", document)
-		var serverPortConflict = checkForPortConflict(serverPort, serverProto)
-		if(serverPortConflict != "")
+		var prefix = "openvpn_server_"
+		var inputIds = [ prefix + "ip", prefix + "mask", prefix + "port" ]
+		var labelIds = [ prefix + "ip_label", prefix + "mask_label", prefix + "port_label" ]
+		var functions = [ validateIP, validateNetMask, validatePort  ];
+		var validReturnCodes = [0,0,0]
+
+		var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
+	
+		if(errors.length == 0)
 		{
-			errors.push("OpenVPN server port conflicts with " + serverPortConflict)
+			var serverPort  = document.getElementById(prefix + "port").value
+			var serverProto = getSelectedValue(prefix + "proto", document)
+			var serverPortConflict = checkForPortConflict(serverPort, serverProto)
+			if(serverPortConflict != "")
+			{
+				errors.push("OpenVPN server port conflicts with " + serverPortConflict)
+			}
 		}
 	}
-	
+	if(getSelectedValue("openvpn_config") == "client")
+	{
+		if(document.getElementById("openvpn_client_manual_controls").style.display != "none" )
+		{
+			var clientRemote = document.getElementById("openvpn_client_remote").value
+			var clientPort   = document.getElementById("openvpn_client_port").value
+			var clientConf   = document.getElementById("openvpn_client_conf_text").value
+		}
+	}
 	return errors;
 }
 
