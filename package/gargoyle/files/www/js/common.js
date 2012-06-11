@@ -2335,6 +2335,78 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 
 
 
+function getUsedPorts()
+{
+	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+	var sshPort   = uciOriginal.get("dropbear", dropbearSections[0], "Port")
+	var httpPort  = uciOriginal.get("httpd_gargoyle", "server", "http_port")
+	var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port")
+
+	var portDefs=[]
+	portDefs.push( [ sshPort, "tcp", "SSH" ] )
+	if(httpPort != "")
+	{
+		portDefs.push( [ httpPort, "tcp", "Web Server" ] )
+	}
+	if(httpsPort != "")
+	{
+		portDefs.push( [ httpsPort, "tcp", "Web Server" ] )
+	}
+
+
+
+	var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+	var acceptIndex;
+	for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
+	{
+		var section = remoteAcceptSections[acceptIndex];
+		var localPort = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+		if(zone == "wan" || zone == "")
+		{
+			var defIndex;
+			var found = false;
+			remotePort = remotePort == "" ? localPort : remotePort;
+			for(defIndex=0; defIndex<portDefs.length ; defIndex++)
+			{
+				if(defIndex[0] == localPort && defIndex[1] == proto)
+				{
+					found=true;
+					if(localport != remotePort)
+					{
+						portDefs.push( [ remotePort, defIndex[1] ] )
+					}
+				}
+			}
+			if(!found)
+			{
+				portDefs.push((remotePort, proto, "Other Application" ])
+			}
+		}
+	}
+
+	var redirectSections = uciOriginal.getAllSectionsOfType("firewall", "redirect")
+	var redirectIndex;
+	for(redirectIndex=0; redirectIndex < redirectSections.length; redirectIndex++)
+	{
+		var section    = remoteAcceptSections[acceptIndex];
+		var localPort  = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto      = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var srcZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
+		var dstZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
+		var port       = uciOriginal.get("firewall", section, "src_dport")
+		var ip         = uciOriginal.get("firewall", section, dest_ip);
+
+		portDefs.push([remotePort, proto, "Forwarded to " + ip ])
+	}
+	return portDefs;
+
+}
+
+
 
 
 

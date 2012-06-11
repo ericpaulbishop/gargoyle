@@ -226,6 +226,8 @@ function proofreadAll()
 	var functions = [ validateIP, validateNetMask, validatePort  ];
 	var validReturnCodes = [0,0,0]
 
+	
+
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
 	return errors;
 }
