@@ -2343,14 +2343,14 @@ function getUsedPorts()
 	var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port")
 
 	var portDefs=[]
-	portDefs.push( [ sshPort, "tcp", "SSH" ] )
+	portDefs.push( [ sshPort, "tcp", "SSH port" ] )
 	if(httpPort != "")
 	{
-		portDefs.push( [ httpPort, "tcp", "Web Server" ] )
+		portDefs.push( [ httpPort, "tcp", "web server port" ] )
 	}
 	if(httpsPort != "")
 	{
-		portDefs.push( [ httpsPort, "tcp", "Web Server" ] )
+		portDefs.push( [ httpsPort, "tcp", "web server port" ] )
 	}
 
 
@@ -2371,19 +2371,37 @@ function getUsedPorts()
 			remotePort = remotePort == "" ? localPort : remotePort;
 			for(defIndex=0; defIndex<portDefs.length ; defIndex++)
 			{
-				if(defIndex[0] == localPort && defIndex[1] == proto)
+				if(defIndex[0] == localPort && (defIndex[1] == proto || proto == "" || proto="tcpudp"))
 				{
 					found=true;
 					if(localport != remotePort)
 					{
-						portDefs.push( [ remotePort, defIndex[1] ] )
+						if(proto == "" || proto == "tcpudp")
+						{	
+							portDefs.push([remotePort, "tcp", defIndex[2] ])
+							portDefs.push([remotePort, "udp", defIndex[2] ])
+						}
+						else
+						{
+							portDefs.push([remotePort, proto, defIndex[2] ])
+						}
 					}
 				}
 			}
+			/*
 			if(!found)
 			{
-				portDefs.push((remotePort, proto, "Other Application" ])
+				if(proto == "" || proto == "tcpudp")
+				{	
+					portDefs.push([remotePort, "tcp", "Other Application" ])
+					portDefs.push([remotePort, "udp", "Other Application" ])
+				}
+				else
+				{
+					portDefs.push([remotePort, proto, "Other Application" ])
+				}
 			}
+			*/
 		}
 	}
 
@@ -2400,13 +2418,42 @@ function getUsedPorts()
 		var port       = uciOriginal.get("firewall", section, "src_dport")
 		var ip         = uciOriginal.get("firewall", section, dest_ip);
 
-		portDefs.push([remotePort, proto, "Forwarded to " + ip ])
+		portDefs.push([remotePort, proto, "port forwarded to " + ip ])
 	}
 	return portDefs;
 
 }
 
-
+function checkForPortConflict(port, proto)
+{
+	var usedPorts = getUsedPorts();
+	var portIndex;
+	var portConflict = ""
+	for(portIndex=0; portIndex < usedPorts.length && portConflict == ""; portIndex++)
+	{
+		var portDef = usedPorts[portIndex];
+		if(proto == portDef[1])
+		{
+			var portStr = portDef[0]
+			if(portStr.match(/\-/)
+			{
+				var splitPort = portStr.split(/\-/)
+				if(serverPort >= splitPort[0] && serverPort <= splitPort[1])
+				{
+					portConflict = portDef[2]
+				}
+			}
+			else 
+			{
+				if(serverPort == splitPort[0])
+				{
+					portConflict = portDef[2]
+				}
+			}
+		}
+	}
+	return portConflict;
+}
 
 
 

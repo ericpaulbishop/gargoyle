@@ -226,9 +226,19 @@ function proofreadAll()
 	var functions = [ validateIP, validateNetMask, validatePort  ];
 	var validReturnCodes = [0,0,0]
 
-	
-
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
+	
+	if(errors.length == 0)
+	{
+		var serverPort  = document.getElementById(prefix + "port").value
+		var serverProto = getSelectedValue(prefix + "proto", document)
+		var serverPortConflict = checkForPortConflict(serverPort, serverProto)
+		if(serverPortConflict != "")
+		{
+			errors.push("OpenVPN server port conflicts with " + serverPortConflict)
+		}
+	}
+	
 	return errors;
 }
 
