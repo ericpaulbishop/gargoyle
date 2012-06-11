@@ -431,6 +431,7 @@ function updateClientControlsFromConfigText()
 			document.getElementById("openvpn_client_key_other").value = keysize == null ? "" : keysize
 		}
 	}
+	proofreadPort(document.getElementById("openvpn_client_port"))
 }
 
 function updateClientConfigTextFromControls()

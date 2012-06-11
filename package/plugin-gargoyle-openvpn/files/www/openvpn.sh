@@ -74,7 +74,7 @@ fi
 	
 	<div id='openvpn_server_port_container'>
 		<label class='leftcolumn' for='openvpn_server_port' id='openvpn_port_label'>OpenVPN Port:</label>
-		<input type='text' id='openvpn_server_port'  size='20' maxlength='5' onkeyup='proofreadNumeric(this)'/><br/>
+		<input type='text' id='openvpn_server_port'  size='20' maxlength='5' onkeyup='proofreadPort(this)'/><br/>
 	</div>
 
 
@@ -211,7 +211,7 @@ fi
 			
 			<div id='openvpn_client_port_container'>
 				<label class='leftcolumn' for='openvpn_client_port' id='openvpn_client_port_label'>OpenVPN Server Port:</label>
-				<input type='text' class='rightcolumn' name='openvpn_client_port' onkeyup="updateClientConfigTextFromControls()" id='openvpn_client_port' size='30' />
+				<input type='text' class='rightcolumn' name='openvpn_client_port' onkeyup="updateClientConfigTextFromControls();proofreadPort(this);" id='openvpn_client_port' size='30' />
 			</div>
 
 			<div id='openvpn_client_protocol_container'>
