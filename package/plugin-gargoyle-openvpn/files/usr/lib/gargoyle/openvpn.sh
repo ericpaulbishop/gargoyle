@@ -414,7 +414,7 @@ update_routes()
 	
 	
 	# clear out old route data
-	for client_ccd_file in "$random_dir/ccd/"* ; do
+	for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
 		sed -i '/^push .*route/d' "$client_ccd_file"
 	done
 	sed -i '/^route /d' "$random_dir/server.conf"
@@ -431,7 +431,7 @@ update_routes()
 		if [ $line_parts -gt 3 ] ; then
 			# routes for client subnet
 			config_name=$( echo "$route_line" | sed 's/\"$//g' | sed 's/^.*\"//g')
-			for client_ccd_file in "$random_dir/ccd/"* ; do
+			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
 				if [ "$random_dir/ccd/$config_name" != "$client_ccd_file" ] ; then
 					echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file" 
 				fi
@@ -440,14 +440,14 @@ update_routes()
 
 		else
 			# routes for server subnet
-			for client_ccd_file in "$random_dir/ccd/"* ; do
+			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
 				echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file" 
 			done
 		fi
 	done
 
 	cd "$random_dir/ccd/"
-	for client_ccd_file in * ; do
+	for client_ccd_file in $(ls 2>/dev/null) ; do
 		copy_if_diff "$client_ccd_file" "$OPENVPN_DIR/ccd/$client_ccd_file"
 	done
 	cd "$random_dir"
@@ -507,7 +507,7 @@ regenerate_allowed_client_from_uci()
 	for var in $ac_vars ; do
 		config_get "$var" "$section" "$var"
 	done
-	if [ "enabled" = "true" ] || [ "enabled" = "1" ] ; then
+	if [ "$enabled" != "false" ] || [ "$enabled" != "0" ] ; then
 		create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask" "false" "$enabled"
 	fi
 }
