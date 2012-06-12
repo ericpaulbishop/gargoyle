@@ -3,6 +3,8 @@
 
 eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 
+
+
 echo "Content-type: text/html"
 echo ""
 
@@ -48,14 +50,15 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	ca_file=$(  egrep "^[\t ]*ca[\t ]+"   $conf_file | sed 's/^.*\///g')
 	cert_file=$(egrep "^[\t ]*cert[\t ]+" $conf_file | sed 's/^.*\///g')
 	key_file=$( egrep "^[\t ]*key[\t ]+"  $conf_file | sed 's/^.*\///g')
-	
-	if   [ -f "$ca_file" ] ; then
+
+
+	if   [ ! -f "$ca_file" ] ; then
 		error="Could not find CA file"
-	elif [ -f "$cert_file" ] ; then
+	elif [ ! -f "$cert_file" ] ; then
 		error="Could not find certificate file"
-	elif [ -f "$key_file" ] ; then
+	elif [ ! -f "$key_file" ] ; then
 		error="Could not find key File"
-	elif [ -f "$conf_file" ] ; then
+	elif [ ! -f "$conf_file" ] ; then
 		error="Could not find config file"
 	else
 		mv "$conf_file" "${client_name}.conf"
@@ -63,6 +66,7 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 		mv "$cert_file" "${client_name}.crt"
 		mv "$key_file"  "${client_name}.key"
 	fi
+
 	rm "$FORM_openvpn_client_zip_file" 
 
 elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_file" ] && [ -s "$FORM_openvpn_client_cert_file" ] && [ -s "$FORM_openvpn_client_key_file" ] ; then 
@@ -78,7 +82,9 @@ elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_te
 	printf "$FORM_openvpn_client_ca_text"   > "${client_name}_ca.crt"
 	printf "$FORM_openvpn_client_cert_text" > "${client_name}.crt"
 	printf "$FORM_openvpn_client_key_text"  > "${client_name}.key"	
+
 fi
+
 
 if [ ! -f "${client_name}.conf" ] ; then
 	error="Could not find config file"
@@ -114,7 +120,7 @@ if [ -z "$error" ] ; then
 			sh $tmp_file
 		fi
 
-		wait_secs=15
+		wait_secs=25
 		have_tun_if=$(ifconfig 2>/dev/null | grep "^tun")
 		while [ -z "$have_tune_if" ] && [ "$wait_secs" -gt 0 ] ; do
 			sleep 1
@@ -122,11 +128,12 @@ if [ -z "$error" ] ; then
 			wait_secs=$(( $wait_secs - 1 ))
 		done
 		
-		if [ -z "$have_tun_if" ] ; then 
+		if [ -z "$have_tun_if" ] ; then
 			error="Parameters saved but OpenVPN failed to connect. Re-check your configuration."
 		fi
 	fi
 fi
+
 
 result="$error"
 if [ -z "$error" ] ; then
