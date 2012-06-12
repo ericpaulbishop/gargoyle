@@ -21,6 +21,8 @@ if [ -z "$client_name" ] ; then
 	client_name="grouter_client_$client_name_rand"
 fi
 
+error=""
+
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
@@ -47,54 +49,89 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	cert_file=$(egrep "^[\t ]*cert[\t ]+" $conf_file | sed 's/^.*\///g')
 	key_file=$( egrep "^[\t ]*key[\t ]+"  $conf_file | sed 's/^.*\///g')
 	
-	mv "$conf_file" "$client_name.conf"
-	mv "$ca_file"   "${client_name}_ca.crt"
-	mv "$cert_file" "$client_name.crt"
-	mv "$key_file"  "$client_name.key"
+	if   [ -f "$ca_file" ] ; then
+		error="Could not find CA file"
+	elif [ -f "$cert_file" ] ; then
+		error="Could not find certificate file"
+	elif [ -f "$key_file" ] ; then
+		error="Could not find key File"
+	elif [ -f "$conf_file" ] ; then
+		error="Could not find config file"
+	else
+		mv "$conf_file" "${client_name}.conf"
+		mv "$ca_file"   "${client_name}_ca.crt"
+		mv "$cert_file" "${client_name}.crt"
+		mv "$key_file"  "${client_name}.key"
+	fi
 
 elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_file" ] && [ -s "$FORM_openvpn_client_cert_file" ] && [ -s "$FORM_openvpn_client_key_file" ] ; then 
 	
-	mv "$FORM_openvpn_client_conf_file" "$client_name.conf"
+	mv "$FORM_openvpn_client_conf_file" "${client_name}.conf"
 	mv "$FORM_openvpn_client_ca_file"   "${client_name}_ca.crt"
-	mv "$FORM_openvpn_client_cert_file" "$client_name.crt"
-	mv "$FORM_openvpn_client_key_file"  "$client_name.key"
+	mv "$FORM_openvpn_client_cert_file" "${client_name}.crt"
+	mv "$FORM_openvpn_client_key_file"  "${client_name}.key"
 	
 elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_text" ] && [ -n "$FORM_openvpn_client_cert_text" ] && [ -n "$FORM_openvpn_client_key_text" ] ; then
 
-	printf "$FORM_openvpn_client_conf_text" > "$client_name.conf"
+	printf "$FORM_openvpn_client_conf_text" > "${client_name}.conf"
 	printf "$FORM_openvpn_client_ca_text"   > "${client_name}_ca.crt"
-	printf "$FORM_openvpn_client_cert_text" > "$client_name.crt"
-	printf "$FORM_openvpn_client_key_text"  > "$client_name.key"	
+	printf "$FORM_openvpn_client_cert_text" > "${client_name}.crt"
+	printf "$FORM_openvpn_client_key_text"  > "${client_name}.key"	
 fi
 
-if [ -e "$client_name.conf" ] ; then
+if [ ! -f "${client_name}.conf" ] ; then
+	error="Could not find config file"
+fi
+
+if [ -z "$error" ] ; then
 	
-	sed -i 's/ca.*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'  "$client_name.conf"
-	sed -i 's/cert.*$/cert  \/etc\/openvpn\/'"$client_name.crt"'/g'     "$client_name.conf"
-	sed -i 's/key.*$/key   \/etc\/openvpn\/'"$client_name.key"'/g'      "$client_name.conf"
+	sed -i 's/ca.*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'    "${client_name}.conf"
+	sed -i 's/cert.*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
+	sed -i 's/key.*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
 
-	mv * /etc/openvpn/
-
-	#run constant uci commands
-	uci set openvpn_gargoyle.server.enabled="false"                        >/dev/null 2>&1
-	uci set openvpn_gargoyle.client.enabled="true"                         >/dev/null 2>&1
-	uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
-	uci set openvpn.custom_config.config="/etc/openvpn/$client_name.conf"  >/dev/null 2>&1
-	uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
-	uci commit
-
-	#run other commands passed to script (includes firewall config and openvpn restart)
-	if [ -n "$FORM_commands" ] ; then	
-		tmp_file="$tmp_dir/tmp.sh"
-		printf "%s" "$FORM_commands" > $tmp_file
-		sh $tmp_file
+	#proofreading
+	use_tap=$(egrep  "^[\t ]*dev[\t ]+tap" "${client_name}.conf")
+	if [ -n "$use_tap" ] ; then
+		error="Gargoyle does not support TAP OpenVPN configurations"
 	fi
-	printf "\n<p>\nSuccess\n</p>\n"
-else
-	#ERROR
-	printf "\n<p>\nError\n</p>\n"
 
+	if [ -z "$error" ] ; then
+		mv * /etc/openvpn/
+
+		#run constant uci commands
+		uci set openvpn_gargoyle.server.enabled="false"                        >/dev/null 2>&1
+		uci set openvpn_gargoyle.client.enabled="true"                         >/dev/null 2>&1
+		uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
+		uci set openvpn.custom_config.config="/etc/openvpn/$client_name.conf"  >/dev/null 2>&1
+		uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
+		uci commit
+
+		#run other commands passed to script (includes firewall config and openvpn restart)
+		if [ -n "$FORM_commands" ] ; then	
+			tmp_file="$tmp_dir/tmp.sh"
+			printf "%s" "$FORM_commands" > $tmp_file
+			sh $tmp_file
+		fi
+
+		wait_secs=15
+		have_tun_if=$(ifconfig 2>/dev/null | grep "^tun")
+		while [ -z "$have_tune_if" ] && [ "$wait_secs" -gt 0 ] ; do
+			sleep 1
+			have_tun_if=$(ifconfig 2>/dev/null | grep "^tun")
+			wait_secs=$(( $wait_secs - 1 ))
+		done
+		
+		if [ -z "$have_tun_if" ] 
+			error="Parameters saved but OpenVPN failed to connect. Re-check your configuration."
+		fi
+	fi
 fi
+if [ -n "$error" ] ; then
+	printf "\n<p>\nERROR: $error\n</p>\n"
+else
+	printf "\n<p>\nSuccess\n</p>\n"
+fi
+
 echo "<script type=\"text/javascript\">top.clientSaved();</script>"
 echo "</body></html>"
 
