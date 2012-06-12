@@ -127,13 +127,13 @@ if [ -z "$error" ] ; then
 		fi
 	fi
 fi
-if [ -n "$error" ] ; then
-	printf "\n<p>\nERROR: $error\n</p>\n"
-else
-	printf "\n<p>\nSuccess\n</p>\n"
+
+result="$error"
+if [ -z "$error" ] ; then
+	result="Success"
 fi
 
-echo "<script type=\"text/javascript\">top.clientSaved();</script>"
+echo "<script type=\"text/javascript\">top.clientSaved(\"$result\");</script>"
 echo "</body></html>"
 
 cd /tmp

@@ -211,11 +211,18 @@ function saveChanges()
 	}
 }
 
-function clientSaved()
+function clientSaved(result)
 {
-	uci = uciOriginal.clone()
+	if(result != "Success")
+	{
+		alert("ERROR: " + result)
+	}
+	else
+	{
+		uci = uciOriginal.clone()
+		window.location=window.location
+	}
 	setControlsEnabled(true)
-
 }
 
 function proofreadAll()
