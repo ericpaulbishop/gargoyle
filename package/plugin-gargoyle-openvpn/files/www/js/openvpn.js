@@ -234,7 +234,7 @@ function proofreadAll()
 		if(errors.length == 0)
 		{
 			var serverPort  = document.getElementById(prefix + "port").value
-			var serverProto = getSelectedValue(prefix + "proto", document)
+			var serverProto = getSelectedValue(prefix + "protocol", document)
 			var serverPortConflict = checkForPortConflict(serverPort, serverProto)
 			if(serverPortConflict != "")
 			{
