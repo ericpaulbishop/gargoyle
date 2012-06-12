@@ -122,7 +122,7 @@ if [ -z "$error" ] ; then
 			wait_secs=$(( $wait_secs - 1 ))
 		done
 		
-		if [ -z "$have_tun_if" ] 
+		if [ -z "$have_tun_if" ] ; then 
 			error="Parameters saved but OpenVPN failed to connect. Re-check your configuration."
 		fi
 	fi
