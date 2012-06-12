@@ -2371,7 +2371,7 @@ function getUsedPorts()
 			remotePort = remotePort == "" ? localPort : remotePort;
 			for(defIndex=0; defIndex<portDefs.length ; defIndex++)
 			{
-				if(defIndex[0] == localPort && (defIndex[1] == proto || proto == "" || proto="tcpudp"))
+				if(defIndex[0] == localPort && (defIndex[1] == proto || proto == "" || proto == "tcpudp"))
 				{
 					found=true;
 					if(localport != remotePort)
