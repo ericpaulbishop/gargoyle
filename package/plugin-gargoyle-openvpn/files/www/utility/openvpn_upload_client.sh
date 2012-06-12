@@ -43,9 +43,9 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 
 	conf_file=$(grep -l "^[\t ]*ca\|^[\t ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  grep "^[\t ]*ca[\t ]*"   $conf_file | sed 's/^.*\///g')
-	cert_file=$(grep "^[\t ]*cert[\t ]*" $conf_file | sed 's/^.*\///g')
-	key_file=$( grep "^[\t ]*key[\t ]*"  $conf_file | sed 's/^.*\///g')
+	ca_file=$(  egrep "^[\t ]*ca[\t ]+"   $conf_file | sed 's/^.*\///g')
+	cert_file=$(egrep "^[\t ]*cert[\t ]+" $conf_file | sed 's/^.*\///g')
+	key_file=$( egrep "^[\t ]*key[\t ]+"  $conf_file | sed 's/^.*\///g')
 	
 	mv "$conf_file" "$client_name.conf"
 	mv "$ca_file"   "${client_name}_ca.crt"
