@@ -2435,7 +2435,7 @@ function checkForPortConflict(port, proto)
 		if(proto == portDef[1])
 		{
 			var portStr = portDef[0]
-			if(portStr.match(/\-/)
+			if(portStr.match(/\-/))
 			{
 				var splitPort = portStr.split(/\-/)
 				if(serverPort >= splitPort[0] && serverPort <= splitPort[1])
