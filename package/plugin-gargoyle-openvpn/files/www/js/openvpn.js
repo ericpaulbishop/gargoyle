@@ -249,6 +249,18 @@ function proofreadAll()
 			var clientRemote = document.getElementById("openvpn_client_remote").value
 			var clientPort   = document.getElementById("openvpn_client_port").value
 			var clientConf   = document.getElementById("openvpn_client_conf_text").value
+			if(clientRemote == "")
+			{
+				errors.push("Server address is not defined")
+			}
+			if(clientPort < 1 || clientPort > 65535)
+			{
+				errors.push("OpenVPN Port must be between 1-65535")
+			}
+			if(clientConf.match(/^[\t ]*dev[\t ]+tap.*$/i))
+			{
+				errors.push("Gargoyle does not support TAP OpenVPN configurations.");
+			}
 		}
 	}
 	return errors;
