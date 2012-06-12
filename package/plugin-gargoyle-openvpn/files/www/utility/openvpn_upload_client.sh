@@ -63,6 +63,7 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 		mv "$cert_file" "${client_name}.crt"
 		mv "$key_file"  "${client_name}.key"
 	fi
+	rm "$FORM_openvpn_client_zip_file" 
 
 elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_file" ] && [ -s "$FORM_openvpn_client_cert_file" ] && [ -s "$FORM_openvpn_client_key_file" ] ; then 
 	

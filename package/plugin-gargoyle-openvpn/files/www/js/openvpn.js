@@ -259,7 +259,7 @@ function proofreadAll()
 			}
 			if(clientConf.match(/^[\t ]*dev[\t ]+tap.*$/i))
 			{
-				errors.push("Gargoyle does not support TAP OpenVPN configurations.");
+				errors.push("Gargoyle does not support TAP OpenVPN configurations");
 			}
 		}
 	}
