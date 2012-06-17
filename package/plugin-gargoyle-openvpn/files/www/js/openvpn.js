@@ -182,7 +182,7 @@ function saveChanges()
 
 		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
-		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle\.client\./))
+		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client")
 		{
 			commands = commands + "/etc/init.d/openvpn restart"
 		}
