@@ -168,8 +168,11 @@ function saveChanges()
 		}
 
 
-		var commands = uci.getScriptCommands(uciOriginal) + "\n. /usr/lib/gargoyle/openvpn.sh ; regenerate_server_and_allowed_clients_from_uci ;\n"
-		
+		var commands = uci.getScriptCommands(uciOriginal) + "\n" ;
+	       	if(openvpnConfig == "server")
+		{
+			commands = commands + "\n. /usr/lib/gargoyle/openvpn.sh ; regenerate_server_and_allowed_clients_from_uci ;\n"
+		}
 		
 		// If we need to restart firewall, do that before restarting openvpn
 		if(commands.match(/uci.*firewall\.vpn_zone\./) || commands.match(/uci.*firewall\.vpn_lan_forwarding\./) || commands.match(/uci.*firewall\.vpn_wan_forwarding\./) || commands.match(/uci.*firewall\.ra_openvpn\./))
