@@ -47,9 +47,9 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 
 	conf_file=$(grep -l "^[\t ]*ca\|^[\t ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  egrep "^[\t ]*ca[\t ]+"   $conf_file | sed 's/^.*\///g')
-	cert_file=$(egrep "^[\t ]*cert[\t ]+" $conf_file | sed 's/^.*\///g')
-	key_file=$( egrep "^[\t ]*key[\t ]+"  $conf_file | sed 's/^.*\///g')
+	ca_file=$(  egrep "^[\t ]*ca[\t ]+"   "$conf_file" | sed 's/^.*\///g')
+	cert_file=$(egrep "^[\t ]*cert[\t ]+" "$conf_file" | sed 's/^.*\///g')
+	key_file=$( egrep "^[\t ]*key[\t ]+"  "$conf_file" | sed 's/^.*\///g')
 
 
 	if   [ ! -f "$ca_file" ] ; then
@@ -61,27 +61,31 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	elif [ ! -f "$conf_file" ] ; then
 		error="Could not find config file"
 	else
-		mv "$conf_file" "${client_name}.conf"
-		mv "$ca_file"   "${client_name}_ca.crt"
-		mv "$cert_file" "${client_name}.crt"
-		mv "$key_file"  "${client_name}.key"
+		cat "$conf_file" | tr -d "\r" > "${client_name}.conf"
+		cat "$ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
+		cat "$cert_file" | tr -d "\r" > "${client_name}.crt"
+		cat "$key_file"  | tr -d "\r" > "${client_name}.key"
+
+		rm  "$conf_file" "$ca_file" "$cert_file" "$key_file"
 	fi
 
 	rm "$FORM_openvpn_client_zip_file" 
 
 elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_file" ] && [ -s "$FORM_openvpn_client_cert_file" ] && [ -s "$FORM_openvpn_client_key_file" ] ; then 
 	
-	mv "$FORM_openvpn_client_conf_file" "${client_name}.conf"
-	mv "$FORM_openvpn_client_ca_file"   "${client_name}_ca.crt"
-	mv "$FORM_openvpn_client_cert_file" "${client_name}.crt"
-	mv "$FORM_openvpn_client_key_file"  "${client_name}.key"
+	cat "$FORM_openvpn_client_conf_file" | tr -d "\r" > "${client_name}.conf"
+	cat "$FORM_openvpn_client_ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
+	cat "$FORM_openvpn_client_cert_file" | tr -d "\r" > "${client_name}.crt"
+	cat "$FORM_openvpn_client_key_file"  | tr -d "\r" > "${client_name}.key"
+
+	rm  "$FORM_openvpn_client_conf_file" "$FORM_openvpn_client_ca_file" "$FORM_openvpn_client_cert_file" "$FORM_openvpn_client_key_file"
 	
 elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_text" ] && [ -n "$FORM_openvpn_client_cert_text" ] && [ -n "$FORM_openvpn_client_key_text" ] ; then
 
-	printf "$FORM_openvpn_client_conf_text" > "${client_name}.conf"
-	printf "$FORM_openvpn_client_ca_text"   > "${client_name}_ca.crt"
-	printf "$FORM_openvpn_client_cert_text" > "${client_name}.crt"
-	printf "$FORM_openvpn_client_key_text"  > "${client_name}.key"	
+	printf "$FORM_openvpn_client_conf_text" | tr -d "\r" > "${client_name}.conf"
+	printf "$FORM_openvpn_client_ca_text"   | tr -d "\r" > "${client_name}_ca.crt"
+	printf "$FORM_openvpn_client_cert_text" | tr -d "\r" > "${client_name}.crt"
+	printf "$FORM_openvpn_client_key_text"  | tr -d "\r" > "${client_name}.key"
 
 fi
 
@@ -116,8 +120,8 @@ if [ -z "$error" ] ; then
 		#run other commands passed to script (includes firewall config and openvpn restart)
 		if [ -n "$FORM_commands" ] ; then	
 			tmp_file="$tmp_dir/tmp.sh"
-			printf "%s" "$FORM_commands" > $tmp_file
-			sh $tmp_file
+			printf "%s" "$FORM_commands" | tr -d "\r" > "$tmp_file"
+			sh "$tmp_file"
 		fi
 
 		wait_secs=25
