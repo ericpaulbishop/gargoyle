@@ -1,0 +1,29 @@
+
+config 'server' 'server'
+	option	'enabled'			'false'
+	option	'internal_ip'			'10.8.0.1'
+	option	'internal_mask'			'255.255.255.0'
+	option	'port'				'1194'
+	option	'proto'				'udp'
+	option	'cipher'			'BF-CBC'
+	option	'keysize'			'128'
+	option	'client_to_client'		'false'
+	option	'duplicate_cn'			'false'
+	option	'redirect_gateway'		'true'
+	option  'subnet_access'			'false'
+
+
+## client info, appears in server configuration
+#config 'allowed_client' 'client_1'
+#	option	'id'		'client_1'
+#	option	'name'		'My First Client'
+#	option	'remote'	'myhost.chickenkiller.com'
+#	option	'ip'		'10.8.0.2'
+#	option	'subnet_ip'	'192.168.3.0'
+#	option  'subnet_mask'	'255.255.255.0'
+#
+
+config 'client' 'client'
+	option	'enabled'	'false'
+	#option 'id'		'grouter_client_123456543210'
+

@@ -19,7 +19,7 @@ if [ "$total_mem" -gt 32000 ] ; then
 	uci set gargoyle.connection.tor="250"
 else
 	uci set tor.global.enabled="0"
-	uci del gargoyle.connection.tor="250" >/dev/null 2>&1
+	uci del gargoyle.connection.tor >/dev/null 2>&1
 fi
 uci commit
 
