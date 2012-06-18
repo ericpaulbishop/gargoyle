@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-openvpn
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=OpenVPN Support for Gargoyle
-	DEPENDS:=+gargoyle +openvpn +openvpn-easy-rsa
+	DEPENDS:=+gargoyle +openvpn +openvpn-easy-rsa +zip
 	MAINTAINER:=Eric Bishop
 endef
 
