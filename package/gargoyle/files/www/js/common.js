@@ -1438,11 +1438,15 @@ function loadValueFromMultipleVariables(params)
 
 }
 
-function setVisibility(ids, visibility, defaultDisplays)
+function setVisibility(ids, visibility, defaultDisplays, controlDocument)
 {
+	if(controlDocument == null)
+	{
+		controlDocument = document;
+	}
 	for (index in ids)
 	{
-		element = document.getElementById(ids[index]);
+		element = controlDocument.getElementById(ids[index]);
 		if(visibility[index] == 0)
 		{
 			element.style.display = "none";
@@ -2331,6 +2335,125 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 
 
 
+function getUsedPorts()
+{
+	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+	var sshPort   = uciOriginal.get("dropbear", dropbearSections[0], "Port")
+	var httpPort  = uciOriginal.get("httpd_gargoyle", "server", "http_port")
+	var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port")
+
+	var portDefs=[]
+	portDefs.push( [ sshPort, "tcp", "SSH port" ] )
+	if(httpPort != "")
+	{
+		portDefs.push( [ httpPort, "tcp", "web server port" ] )
+	}
+	if(httpsPort != "")
+	{
+		portDefs.push( [ httpsPort, "tcp", "web server port" ] )
+	}
+
+
+
+	var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+	var acceptIndex;
+	for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
+	{
+		var section = remoteAcceptSections[acceptIndex];
+		var localPort = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+		if(zone == "wan" || zone == "")
+		{
+			var defIndex;
+			var found = false;
+			remotePort = remotePort == "" ? localPort : remotePort;
+			for(defIndex=0; defIndex<portDefs.length ; defIndex++)
+			{
+				if(defIndex[0] == localPort && (defIndex[1] == proto || proto == "" || proto == "tcpudp"))
+				{
+					found=true;
+					if(localport != remotePort)
+					{
+						if(proto == "" || proto == "tcpudp")
+						{	
+							portDefs.push([remotePort, "tcp", defIndex[2] ])
+							portDefs.push([remotePort, "udp", defIndex[2] ])
+						}
+						else
+						{
+							portDefs.push([remotePort, proto, defIndex[2] ])
+						}
+					}
+				}
+			}
+			/*
+			if(!found)
+			{
+				if(proto == "" || proto == "tcpudp")
+				{	
+					portDefs.push([remotePort, "tcp", "Other Application" ])
+					portDefs.push([remotePort, "udp", "Other Application" ])
+				}
+				else
+				{
+					portDefs.push([remotePort, proto, "Other Application" ])
+				}
+			}
+			*/
+		}
+	}
+
+	var redirectSections = uciOriginal.getAllSectionsOfType("firewall", "redirect")
+	var redirectIndex;
+	for(redirectIndex=0; redirectIndex < redirectSections.length; redirectIndex++)
+	{
+		var section    = remoteAcceptSections[acceptIndex];
+		var localPort  = uciOriginal.get("firewall", section, "local_port");
+		var remotePort = uciOriginal.get("firewall", section, "remote_port");
+		var proto      = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var srcZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
+		var dstZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
+		var port       = uciOriginal.get("firewall", section, "src_dport")
+		var ip         = uciOriginal.get("firewall", section, dest_ip);
+
+		portDefs.push([remotePort, proto, "port forwarded to " + ip ])
+	}
+	return portDefs;
+
+}
+
+function checkForPortConflict(port, proto)
+{
+	var usedPorts = getUsedPorts();
+	var portIndex;
+	var portConflict = ""
+	for(portIndex=0; portIndex < usedPorts.length && portConflict == ""; portIndex++)
+	{
+		var portDef = usedPorts[portIndex];
+		if(proto == portDef[1])
+		{
+			var portStr = portDef[0]
+			if(portStr.match(/\-/))
+			{
+				var splitPort = portStr.split(/\-/)
+				if(serverPort >= splitPort[0] && serverPort <= splitPort[1])
+				{
+					portConflict = portDef[2]
+				}
+			}
+			else 
+			{
+				if(serverPort == splitPort[0])
+				{
+					portConflict = portDef[2]
+				}
+			}
+		}
+	}
+	return portConflict;
+}
 
 
 
