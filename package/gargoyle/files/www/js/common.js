@@ -2438,14 +2438,14 @@ function checkForPortConflict(port, proto)
 			if(portStr.match(/\-/))
 			{
 				var splitPort = portStr.split(/\-/)
-				if(serverPort >= splitPort[0] && serverPort <= splitPort[1])
+				if(port >= splitPort[0] && port <= splitPort[1])
 				{
 					portConflict = portDef[2]
 				}
 			}
 			else 
 			{
-				if(serverPort == splitPort[0])
+				if(port == splitPort[0])
 				{
 					portConflict = portDef[2]
 				}
