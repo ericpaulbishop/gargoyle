@@ -2445,7 +2445,7 @@ function checkForPortConflict(port, proto)
 			}
 			else 
 			{
-				if(port == splitPort[0])
+				if(port == portStr)
 				{
 					portConflict = portDef[2]
 				}
