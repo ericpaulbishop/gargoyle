@@ -10,7 +10,7 @@
 	echo "Content-type: application/octet-stream"
 	echo ""
 
-	cat /tmp/do_bw_backup.sh | grep bw_get | sed 's/.*bw_get/bw_get/' | sed 's/\-f .*/-t/g' > /tmp/tmp.bw.sh
+	cat /tmp/bw_backup/do_bw_backup.sh | grep bw_get | sed 's/.*bw_get/bw_get/' | sed 's/\-f .*/-t/g' > /tmp/tmp.bw.sh
 	sh  /tmp/tmp.bw.sh | sed 's/^[^\-]*\-//g' |  sed 's/\-/,/g'
 	rm  /tmp/tmp.bw.sh
 ?>
