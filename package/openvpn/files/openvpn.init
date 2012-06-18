@@ -63,6 +63,21 @@ start_service() {
 	config_get_bool enable "$s" enable 0
 	[ "$enable" == 0 ] && return 0
 
+	#make sure we have dirs, in particular for status file
+	if [ ! -d /etc/openvpn ] ; then
+		mkdir -p /etc/openvpn 
+	fi
+	if [ ! -d /var/openvpn ] ; then
+		mkdir -p /var/openvpn
+		touch /var/openvpn/current_status
+		if [ ! -h /etc/openvpn/current_status ] ; then
+			rm -rf /etc/openvpn/current_status
+			ln -s  /var/openvpn/current_status /etc/openvpn/current_status 
+		fi
+	fi
+
+
+
 	PID="/var/run/openvpn-$s.pid"
 	ARGS=""
 

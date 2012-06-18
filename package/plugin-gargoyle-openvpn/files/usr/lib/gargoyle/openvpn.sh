@@ -83,16 +83,16 @@ copy_if_diff()
 
 create_server_conf()
 {
-	#required
+	#required vars
 	openvpn_server_internal_ip="$1"
 	openvpn_netmask="$2"
 	openvpn_port="$3"
 	
-	#optional
+	#optional vars
 	openvpn_server_local_subnet_ip="$4"
 	openvpn_server_local_subnet_mask="$5"
 
-	#optional, but with defaults
+	#optional vars, but with defaults
 	openvpn_protocol="$6"
 	if [ -z "$openvpn_protocol" ] ; then openvpn_protocol="udp" ; fi
 	if [ "$openvpn_protocol" = "tcp" ] ; then openvpn_protocol="tcp-server" ; fi
@@ -119,16 +119,24 @@ create_server_conf()
 	fi
 	server_regenerate_credentials="$openvpn_regenerate_cert"
 
+	#make necessary directories
 	mkdir -p "$OPENVPN_DIR/client_conf"
 	mkdir -p "$OPENVPN_DIR/ccd"
 	mkdir -p "$OPENVPN_DIR/route_data"
-	
+
+	mkdir -p /var/openvpn
+	touch /var/openvpn/current_status
+	if [ ! -h /etc/openvpn/current_status ] ; then
+		rm -rf /etc/openvpn/current_status
+		ln -s  /var/openvpn/current_status /etc/openvpn/current_status 
+	fi
+
 	random_dir_num=$(random_string)
 	random_dir="/tmp/ovpn-client-${random_dir_num}"
 	mkdir -p "$random_dir"
 
 
-
+	#generate dh1024.pem if necessary
 	if [ "$openvpn_regenerate_cert" = "true" ] || [ "$openvpn_regenerate_cert" = "1" ] ; then
 
 		cd "$random_dir"
@@ -190,7 +198,7 @@ $openvpn_keysize
 
 dev         	      tun
 keepalive   	      25 180
-status       	      $OPENVPN_DIR/current_status.log
+status       	      /var/openvpn/current_status
 verb         	      5
 
 
@@ -346,16 +354,16 @@ EOF
 	cat << EOF >"$random_dir/$openvpn_client_id.conf"
 
 client
-remote		$openvpn_client_remote $openvpn_port
+remote	        $openvpn_client_remote $openvpn_port
 dev             tun
 proto           $openvpn_protocol
-status          $OPENVPN_DIR/current_status.log
+status          /var/openvpn/current_status
 resolv-retry    infinite
-ns-cert-type	server
+ns-cert-type    server
 topology        subnet
 verb            5
 
-cipher                $openvpn_cipher
+cipher          $openvpn_cipher
 $openvpn_keysize
 
 ca              $OPENVPN_DIR/ca.crt
