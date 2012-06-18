@@ -74,7 +74,7 @@ fi
 	</div>
 	
 	<div id='openvpn_server_port_container'>
-		<label class='leftcolumn' for='openvpn_server_port' id='openvpn_port_label'>OpenVPN Port:</label>
+		<label class='leftcolumn' for='openvpn_server_port' id='openvpn_server_port_label'>OpenVPN Port:</label>
 		<input type='text' id='openvpn_server_port'  size='20' maxlength='5' onkeyup='proofreadPort(this)'/><br/>
 	</div>
 
