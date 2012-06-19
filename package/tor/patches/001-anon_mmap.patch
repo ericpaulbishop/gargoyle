@@ -1,6 +1,6 @@
-diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/common/util.c
---- tor-0.2.3.11-alpha/src/common/util.c	2012-01-21 22:07:29.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/common/util.c	2012-02-02 10:03:32.582607426 -0500
+diff -uNr tor-0.2.3.16-alpha/src/common/util.c tor-0.2.3.16-alpha-anonmmap/src/common/util.c
+--- tor-0.2.3.16-alpha/src/common/util.c	2012-06-05 11:51:37.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/common/util.c	2012-06-09 14:28:32.786400324 -0400
 @@ -73,6 +73,9 @@
  #ifdef HAVE_SYS_FCNTL_H
  #include <sys/fcntl.h>
@@ -11,7 +11,7 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
  #ifdef HAVE_TIME_H
  #include <time.h>
  #endif
-@@ -1934,9 +1937,7 @@
+@@ -1994,9 +1997,7 @@
   * we can write into a temporary file, and either remove the file on
   * failure, or replace the original file on success. */
  struct open_file_t {
@@ -21,7 +21,7 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
    unsigned binary:1; /**< Did we open in binary mode? */
    int fd; /**< fd for the open file. */
    FILE *stdio_file; /**< stdio wrapper for <b>fd</b>. */
-@@ -1975,18 +1976,15 @@
+@@ -2035,18 +2036,15 @@
  #endif
    new_file->fd = -1;
    new_file->filename = tor_strdup(fname);
@@ -43,7 +43,7 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
    }
    if (open_flags & O_BINARY)
      new_file->binary = 1;
-@@ -2014,7 +2012,6 @@
+@@ -2074,7 +2072,6 @@
      close(new_file->fd);
    *data_out = NULL;
    tor_free(new_file->filename);
@@ -51,7 +51,7 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
    tor_free(new_file);
    return -1;
  }
-@@ -2074,22 +2071,7 @@
+@@ -2134,22 +2131,7 @@
      abort_write = r = -1;
    }
  
@@ -74,7 +74,7 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
    tor_free(file_data);
  
    return r;
-@@ -4182,3 +4164,166 @@
+@@ -4424,3 +4406,166 @@
    }
  }
  
@@ -241,10 +241,10 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.c tor-0.2.3.11-alpha-anonmmap/src/c
 +  close(fd);
 +  return 0;
 +}
-diff -uNr tor-0.2.3.11-alpha/src/common/util.h tor-0.2.3.11-alpha-anonmmap/src/common/util.h
---- tor-0.2.3.11-alpha/src/common/util.h	2012-01-16 21:09:17.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/common/util.h	2012-02-02 10:03:32.582607426 -0500
-@@ -353,6 +353,12 @@
+diff -uNr tor-0.2.3.16-alpha/src/common/util.h tor-0.2.3.16-alpha-anonmmap/src/common/util.h
+--- tor-0.2.3.16-alpha/src/common/util.h	2012-06-05 11:51:37.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/common/util.h	2012-06-09 14:28:32.786400324 -0400
+@@ -365,6 +365,12 @@
  struct smartlist_t *tor_listdir(const char *dirname);
  int path_is_relative(const char *filename);
  
@@ -257,18 +257,18 @@ diff -uNr tor-0.2.3.11-alpha/src/common/util.h tor-0.2.3.11-alpha-anonmmap/src/c
  /* Process helpers */
  void start_daemon(void);
  void finish_daemon(const char *desired_cwd);
-diff -uNr tor-0.2.3.11-alpha/src/or/control.c tor-0.2.3.11-alpha-anonmmap/src/or/control.c
---- tor-0.2.3.11-alpha/src/or/control.c	2012-01-21 22:07:29.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/control.c	2012-02-02 10:03:32.582607426 -0500
-@@ -33,6 +33,7 @@
+diff -uNr tor-0.2.3.16-alpha/src/or/control.c tor-0.2.3.16-alpha-anonmmap/src/or/control.c
+--- tor-0.2.3.16-alpha/src/or/control.c	2012-06-05 11:51:37.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/control.c	2012-06-09 14:28:32.794400326 -0400
+@@ -34,6 +34,7 @@
  #include "router.h"
  #include "routerlist.h"
  #include "routerparse.h"
 +#include "microdesc.h"
  
- #ifndef MS_WINDOWS
+ #ifndef _WIN32
  #include <pwd.h>
-@@ -1627,8 +1628,8 @@
+@@ -1673,8 +1674,8 @@
      const microdesc_t *md = NULL;
      if (node) md = node->md;
      if (md) {
@@ -279,7 +279,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/control.c tor-0.2.3.11-alpha-anonmmap/src/or
      }
    } else if (!strcmpstart(question, "md/name/")) {
      /* XXX023 Setting 'warn_if_unnamed' here is a bit silly -- the
-@@ -1638,8 +1639,8 @@
+@@ -1684,8 +1685,8 @@
      const microdesc_t *md = NULL;
      if (node) md = node->md;
      if (md) {
@@ -290,10 +290,10 @@ diff -uNr tor-0.2.3.11-alpha/src/or/control.c tor-0.2.3.11-alpha-anonmmap/src/or
      }
    } else if (!strcmpstart(question, "desc-annotations/id/")) {
      ri = router_get_by_hexdigest(question+
-diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/or/microdesc.c
---- tor-0.2.3.11-alpha/src/or/microdesc.c	2012-01-21 22:07:29.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/microdesc.c	2012-02-02 11:20:31.832613045 -0500
-@@ -64,6 +64,16 @@
+diff -uNr tor-0.2.3.16-alpha/src/or/microdesc.c tor-0.2.3.16-alpha-anonmmap/src/or/microdesc.c
+--- tor-0.2.3.16-alpha/src/or/microdesc.c	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/microdesc.c	2012-06-09 14:32:35.158408624 -0400
+@@ -65,6 +65,16 @@
               _microdesc_hash, _microdesc_eq, 0.6,
               malloc, realloc, free);
  
@@ -310,7 +310,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
  /** Write the body of <b>md</b> into <b>f</b>, with appropriate annotations.
   * On success, return the total number of bytes written, and set
   * *<b>annotation_len_out</b> to the number of bytes written as
-@@ -86,8 +96,7 @@
+@@ -92,8 +102,7 @@
      *annotation_len_out = 0;
    }
  
@@ -320,7 +320,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
    if (written != md->bodylen) {
      log_warn(LD_DIR,
               "Couldn't dump microdescriptor (wrote %lu out of %lu): %s",
-@@ -109,6 +118,9 @@
+@@ -115,6 +124,9 @@
  {
    if (PREDICT_UNLIKELY(the_microdesc_cache==NULL)) {
      microdesc_cache_t *cache = tor_malloc_zero(sizeof(microdesc_cache_t));
@@ -330,7 +330,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      HT_INIT(microdesc_map, &cache->map);
      cache->cache_fname = get_datadir_fname("cached-microdescs");
      cache->journal_fname = get_datadir_fname("cached-microdescs.new");
-@@ -209,6 +221,7 @@
+@@ -215,6 +227,7 @@
    added = smartlist_new();
    SMARTLIST_FOREACH_BEGIN(descriptors, microdesc_t *, md) {
      microdesc_t *md2;
@@ -338,16 +338,17 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      md2 = HT_FIND(microdesc_map, &cache->map, md);
      if (md2) {
        /* We already had this one. */
-@@ -223,16 +236,27 @@
+@@ -229,6 +242,7 @@
      /* Okay, it's a new one. */
      if (f) {
        size_t annotation_len;
 +      /* Write it to the file */
        size = dump_microdescriptor(f, md, &annotation_len);
        if (size < 0) {
-         /* XXX handle errors from dump_microdescriptor() */
-         /* log?  return -1?  die?  coredump the universe? */
-         continue;
+         /* we already warned in dump_microdescriptor; */
+@@ -236,10 +250,20 @@
+         smartlist_clear(added);
+         return added;
        }
 -      md->saved_location = SAVED_IN_JOURNAL;
 +      md->off = cache->journal_len + annotation_len;
@@ -369,7 +370,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      }
  
      md->no_save = no_save;
-@@ -271,9 +295,8 @@
+@@ -278,9 +302,8 @@
      microdesc_free(md);
    }
    HT_CLEAR(microdesc_map, &cache->map);
@@ -381,7 +382,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
    }
    cache->total_len_seen = 0;
    cache->n_seen = 0;
-@@ -285,36 +308,25 @@
+@@ -292,36 +315,25 @@
  int
  microdesc_cache_reload(microdesc_cache_t *cache)
  {
@@ -427,7 +428,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
    }
    log_notice(LD_DIR, "Reloaded microdescriptor cache.  Found %d descriptors.",
               total);
-@@ -420,7 +432,6 @@
+@@ -427,7 +439,6 @@
    log_info(LD_DIR, "Rebuilding the microdescriptor cache...");
  
    orig_size = (int)(cache->cache_content ? cache->cache_content->size : 0);
@@ -435,7 +436,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
  
    f = start_writing_to_stdio_file(cache->cache_fname,
                                    OPEN_FLAGS_REPLACE|O_BINARY,
-@@ -452,14 +463,12 @@
+@@ -459,14 +470,12 @@
      smartlist_add(wrote, md);
    }
  
@@ -453,7 +454,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      log_err(LD_DIR, "Couldn't map file that we just wrote to %s!",
              cache->cache_fname);
      smartlist_free(wrote);
-@@ -467,21 +476,21 @@
+@@ -474,21 +483,21 @@
    }
    SMARTLIST_FOREACH_BEGIN(wrote, microdesc_t *, md) {
      tor_assert(md->saved_location == SAVED_IN_CACHE);
@@ -479,7 +480,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      }
    } SMARTLIST_FOREACH_END(md);
  
-@@ -491,7 +500,7 @@
+@@ -498,7 +507,7 @@
    cache->journal_len = 0;
    cache->bytes_dropped = 0;
  
@@ -488,7 +489,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
    log_info(LD_DIR, "Done rebuilding microdesc cache. "
             "Saved %d bytes; %d still used.",
             orig_size-new_size, new_size);
-@@ -587,6 +596,7 @@
+@@ -594,6 +603,7 @@
      microdesc_cache_clear(the_microdesc_cache);
      tor_free(the_microdesc_cache->cache_fname);
      tor_free(the_microdesc_cache->journal_fname);
@@ -496,9 +497,9 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.c tor-0.2.3.11-alpha-anonmmap/src/
      tor_free(the_microdesc_cache);
    }
  }
-diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.h tor-0.2.3.11-alpha-anonmmap/src/or/microdesc.h
---- tor-0.2.3.11-alpha/src/or/microdesc.h	2012-01-10 20:26:59.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/microdesc.h	2012-02-02 10:03:32.584677361 -0500
+diff -uNr tor-0.2.3.16-alpha/src/or/microdesc.h tor-0.2.3.16-alpha-anonmmap/src/or/microdesc.h
+--- tor-0.2.3.16-alpha/src/or/microdesc.h	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/microdesc.h	2012-06-09 14:28:32.794400326 -0400
 @@ -14,6 +14,8 @@
  
  microdesc_cache_t *get_microdesc_cache(void);
@@ -508,10 +509,10 @@ diff -uNr tor-0.2.3.11-alpha/src/or/microdesc.h tor-0.2.3.11-alpha-anonmmap/src/
  void microdesc_check_counts(void);
  
  smartlist_t *microdescs_add_to_cache(microdesc_cache_t *cache,
-diff -uNr tor-0.2.3.11-alpha/src/or/or.h tor-0.2.3.11-alpha-anonmmap/src/or/or.h
---- tor-0.2.3.11-alpha/src/or/or.h	2012-01-22 19:34:05.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/or.h	2012-02-02 12:04:32.257574042 -0500
-@@ -1628,16 +1628,14 @@
+diff -uNr tor-0.2.3.16-alpha/src/or/or.h tor-0.2.3.16-alpha-anonmmap/src/or/or.h
+--- tor-0.2.3.16-alpha/src/or/or.h	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/or.h	2012-06-09 14:28:32.798400326 -0400
+@@ -1633,16 +1633,14 @@
    /** The descriptor isn't stored on disk at all: the copy in memory is
     * canonical; the saved_offset field is meaningless. */
    SAVED_NOWHERE=0,
@@ -533,7 +534,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/or.h tor-0.2.3.11-alpha-anonmmap/src/or/or.h
    SAVED_IN_JOURNAL
  } saved_location_t;
  
-@@ -1691,8 +1689,8 @@
+@@ -1696,8 +1694,8 @@
    download_status_t ei_dl_status;
    /** Where is the descriptor saved? */
    saved_location_t saved_location;
@@ -544,7 +545,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/or.h tor-0.2.3.11-alpha-anonmmap/src/or/or.h
    off_t saved_offset;
    /** What position is this descriptor within routerlist->routers or
     * routerlist->old_routers? -1 for none. */
-@@ -1944,9 +1942,13 @@
+@@ -1949,9 +1947,13 @@
    unsigned int held_by_nodes;
  
    /** If saved_location == SAVED_IN_CACHE, this field holds the offset of the
@@ -559,10 +560,10 @@ diff -uNr tor-0.2.3.11-alpha/src/or/or.h tor-0.2.3.11-alpha-anonmmap/src/or/or.h
    /* The string containing the microdesc. */
  
    /** A pointer to the encoded body of the microdescriptor.  If the
-diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src/or/routerlist.c
---- tor-0.2.3.11-alpha/src/or/routerlist.c	2012-01-21 22:07:30.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/routerlist.c	2012-02-02 11:31:55.744580094 -0500
-@@ -615,8 +615,9 @@
+diff -uNr tor-0.2.3.16-alpha/src/or/routerlist.c tor-0.2.3.16-alpha-anonmmap/src/or/routerlist.c
+--- tor-0.2.3.16-alpha/src/or/routerlist.c	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/routerlist.c	2012-06-09 14:28:32.802400324 -0400
+@@ -618,8 +618,9 @@
  }
  
  /** Add the signed_descriptor_t in <b>desc</b> to the router
@@ -574,7 +575,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
  static int
  signed_desc_append_to_journal(signed_descriptor_t *desc,
                                desc_store_t *store)
-@@ -630,10 +631,18 @@
+@@ -633,10 +634,18 @@
      tor_free(fname);
      return -1;
    }
@@ -595,7 +596,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    store->journal_len += len;
  
    return 0;
-@@ -662,7 +671,7 @@
+@@ -665,7 +674,7 @@
  router_rebuild_store(int flags, desc_store_t *store)
  {
    smartlist_t *chunk_list = NULL;
@@ -604,7 +605,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    int r = -1;
    off_t offset = 0;
    smartlist_t *signed_descriptors = NULL;
-@@ -693,7 +702,6 @@
+@@ -696,7 +705,6 @@
    log_info(LD_DIR, "Rebuilding %s cache", store->description);
  
    fname = get_datadir_fname(store->fname_base);
@@ -612,7 +613,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
  
    chunk_list = smartlist_new();
  
-@@ -738,25 +746,19 @@
+@@ -741,25 +749,19 @@
        smartlist_add(chunk_list, c);
      });
  
@@ -642,7 +643,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
      if (errno == ERANGE) {
        /* empty store.*/
        if (total_expected_len) {
-@@ -799,7 +801,6 @@
+@@ -802,7 +804,6 @@
   done:
    smartlist_free(signed_descriptors);
    tor_free(fname);
@@ -650,7 +651,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    if (chunk_list) {
      SMARTLIST_FOREACH(chunk_list, sized_chunk_t *, c, tor_free(c));
      smartlist_free(chunk_list);
-@@ -814,10 +815,11 @@
+@@ -817,10 +818,11 @@
  static int
  router_reload_router_list_impl(desc_store_t *store)
  {
@@ -664,7 +665,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    time_t now = time(NULL);
    store->journal_len = store->store_len = 0;
  
-@@ -825,60 +827,56 @@
+@@ -828,60 +830,56 @@
    if (store->fname_alt_base)
      altname = get_datadir_fname(store->fname_alt_base);
  
@@ -752,7 +753,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
      /* Always clear the journal on startup.*/
      router_rebuild_store(RRS_FORCE, store);
    } else if (!extrainfo) {
-@@ -2668,6 +2666,13 @@
+@@ -2671,6 +2669,13 @@
  
      routerlist->desc_store.description = "router descriptors";
      routerlist->extrainfo_store.description = "extra-info documents";
@@ -766,7 +767,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    }
    return routerlist;
  }
-@@ -2764,10 +2769,14 @@
+@@ -2767,10 +2772,14 @@
                      signed_descriptor_free(sd));
    smartlist_free(rl->routers);
    smartlist_free(rl->old_routers);
@@ -785,10 +786,10 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerlist.c tor-0.2.3.11-alpha-anonmmap/src
    tor_free(rl);
  
    router_dir_info_changed();
-diff -uNr tor-0.2.3.11-alpha/src/or/routerparse.c tor-0.2.3.11-alpha-anonmmap/src/or/routerparse.c
---- tor-0.2.3.11-alpha/src/or/routerparse.c	2012-01-21 22:07:30.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/or/routerparse.c	2012-02-02 10:03:32.591521550 -0500
-@@ -4365,18 +4365,19 @@
+diff -uNr tor-0.2.3.16-alpha/src/or/routerparse.c tor-0.2.3.16-alpha-anonmmap/src/or/routerparse.c
+--- tor-0.2.3.16-alpha/src/or/routerparse.c	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/or/routerparse.c	2012-06-09 14:28:32.806400322 -0400
+@@ -4387,18 +4387,19 @@
      }
  
      md = tor_malloc_zero(sizeof(microdesc_t));
@@ -817,7 +818,7 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerparse.c tor-0.2.3.11-alpha-anonmmap/sr
  
      if ((tok = find_opt_by_keyword(tokens, A_LAST_LISTED))) {
        if (parse_iso_time(tok->args[0], &md->last_listed)) {
-@@ -4411,7 +4412,7 @@
+@@ -4433,7 +4434,7 @@
        md->exit_policy = parse_short_policy(tok->args[0]);
      }
  
@@ -826,9 +827,9 @@ diff -uNr tor-0.2.3.11-alpha/src/or/routerparse.c tor-0.2.3.11-alpha-anonmmap/sr
  
      smartlist_add(result, md);
  
-diff -uNr tor-0.2.3.11-alpha/src/test/test_microdesc.c tor-0.2.3.11-alpha-anonmmap/src/test/test_microdesc.c
---- tor-0.2.3.11-alpha/src/test/test_microdesc.c	2012-01-21 22:07:30.000000000 -0500
-+++ tor-0.2.3.11-alpha-anonmmap/src/test/test_microdesc.c	2012-02-02 10:32:42.453593433 -0500
+diff -uNr tor-0.2.3.16-alpha/src/test/test_microdesc.c tor-0.2.3.16-alpha-anonmmap/src/test/test_microdesc.c
+--- tor-0.2.3.16-alpha/src/test/test_microdesc.c	2012-06-05 11:51:38.000000000 -0400
++++ tor-0.2.3.16-alpha-anonmmap/src/test/test_microdesc.c	2012-06-09 14:28:32.806400322 -0400
 @@ -55,6 +55,7 @@
    time_t time1, time2, time3;
    char *fn = NULL, *s = NULL;
