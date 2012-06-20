@@ -14,7 +14,7 @@
 </div>
 <div id="openvpn_allowed_client_remote_custom_container">
 	<span class='widerightcolumnonly'>
-		<input type='text' id='openvpn_allowed_client_remote_custom' size='30' maxlength='17' />
+		<input type='text' id='openvpn_allowed_client_remote_custom' size='30' />
 	</span>
 	<span style="clear:both"></span>
 </div>
