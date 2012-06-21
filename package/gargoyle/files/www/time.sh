@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" ntpclient system gargoyle 
+	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" system gargoyle 
 ?>
 <script>
 <!--
@@ -72,24 +72,7 @@
 			</div>
 		</div>
 
-		<div>
-			<label class='nocolumn' id='timezone_label' for='timezone'>Update Frequency:</label>
-		</div>
-		<div class="indent">
-			<div>
-				<select class='nocolumn' id='update_frequency' >
-					<option value="3600">Every Hour</option>
-					<option value="7200">Every 2 Hours</option>
-					<option value="14400">Every 4 Hours</option>
-					<option value="28800">Every 8 Hours</option>
-					<option value="43200">Every 12 Hours</option>
-					<option value="86400">Every 24 Hours</option>
-				</select>
-			</div>
-		</div>
-
-
-		
+			
 		<div>
 			<label class='leftcolumn' id='region_label' for='region'>NTP Servers:</label>
 			<div class="indent">

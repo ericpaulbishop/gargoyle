@@ -31,9 +31,6 @@ uci commit
 /etc/init.d/qos_gargoyle disable    2>/dev/null
 /etc/init.d/webmon_gargoyle disable 2>/dev/null
 
-# ensure ntpclient is active
-chmod 755 /etc/hotplug.d/iface/20-ntpclient 2>/dev/null
-
 #make sure date isn't set to 1970, which may cause issues with timezones that cause time to go back before unix epoch,  set to Jan 1st 2001
 curdate=$(date -u +%s)
 if [ $curdate -lt 978307200 ] ; then

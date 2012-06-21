@@ -21,33 +21,22 @@ function saveChanges()
 	{
 		setControlsEnabled(false, true);
 		
-		sectionDeleteCommands = [];
-		ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
-		for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
-		{
-			sectionDeleteCommands.push("uci del ntpclient." + ntpServerSections[sectionIndex]);
-			uciOriginal.removeSection("ntpclient", ntpServerSections[sectionIndex]);
-		}
-		sectionDeleteCommands.push("uci commit");
-
-		uci = uciOriginal.clone();	
+		uci = uciOriginal.clone();
+		var newServers = [];
 		for(sectionIndex=0; sectionIndex < 3; sectionIndex++)
 		{
-			serverName = document.getElementById("server" + (sectionIndex+1)).value;
-			if(serverName != "")
+			var server = document.getElementById("server" + (sectionIndex+1)).value;
+			if(server != "")
 			{
-				sectionName = "cfg" + (sectionIndex+1);
-				uci.set("ntpclient", sectionName, "", "ntpserver");
-				uci.set("ntpclient", sectionName, "port", "123");
-				uci.set("ntpclient", sectionName, "hostname", document.getElementById("server" + (sectionIndex+1)).value);
+				newServers.push(server);
 			}
 		}
+		uci.createListOption("system", "ntp", "server", true)
+		uci.set("system", "ntp", "server", newServers, false)
 	
-		//update timezone and update frequency
+		//update timezone
 		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
-		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
 
 		//update date format
 		var systemDateFormat = getSelectedValue("date_format"); 
@@ -95,7 +84,7 @@ function saveChanges()
 
 
 
-		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
 		//document.getElementById("output").value = commands;	
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -156,25 +145,22 @@ function resetData()
 	previousTimezoneDefinition = currentTimezone;
 
 
-	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-	var updateFrequency = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
 	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
-	setSelectedValue("update_frequency", "43200"); //set default value
-	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
 	setSelectedValue("date_format", "usa"); //set default value for date
 	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
 
 
-	var ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
-	var tzServers = [];
-	for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
+	var tzServers = uciOriginal.getAllSectionsOfType("system", "ntp", "server");
+	var tzServers = tzServers == null || tzServers == "" ? [] : tzServers
+	while(tzServers.length > 3)
 	{
-		server = uciOriginal.get("ntpclient", ntpServerSections[sectionIndex], "hostname");
-		if(server != "" && sectionIndex < 3)
-		{
-			tzServers.push(server );
-			document.getElementById("server" + (1+sectionIndex)).value = server;
-		}
+		tzServers.pop();
+	}
+
+	var sectionIndex;
+	for(sectionIndex=0 ; sectionIndex < tzServers.length ; sectionIndex++)
+	{
+		document.getElementById("server" + (1+sectionIndex)).value = tzServers[sectionIndex];
 	}
 
 	currentRegion = "custom";

@@ -32,7 +32,7 @@ function setInitialSettings()
 		saveCommands = saveCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
 		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ 2>/dev/null\n";
 		saveCommands = saveCommands + "\n/etc/init.d/dropbear restart 2>/dev/null\n";
-		saveCommands = saveCommands + "\nACTION=ifup /etc/hotplug.d/iface/20-ntpclient >/dev/null 2>&1\n/usr/bin/set_kernel_timezone >/dev/null 2>&1\n";
+		saveCommands = saveCommands + "\n/etc/init.d/sysntpd restart >/dev/null 2>&1\n/usr/bin/set_kernel_timezone >/dev/null 2>&1\n";
 		saveCommands = saveCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
 
 		

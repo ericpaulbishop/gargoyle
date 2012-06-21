@@ -30,7 +30,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl +ntpclient +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +bridge +wol $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
+	DEPENDS:=+uci +libuci +haserl +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +bridge +wol $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -72,10 +72,7 @@ endef
 
 
 define Package/gargoyle/postinst
-	#initialize ntpclient
-	if [ -e $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient ] ; then
-		chmod 755 $${IPKG_INSTROOT}/etc/hotplug.d/iface/20-ntpclient 2>/dev/null
-	fi
+
 	cat $${IPKG_INSTROOT}/etc/config/system | sed -r 's/timezone.*UTC/timezone \"GMT0BST\,M3\.5\.0\/2,M10\.5\.0\/2\"/' > $${IPKG_INSTROOT}/etc/config/system.tmp
 	mv $${IPKG_INSTROOT}/etc/config/system.tmp $${IPKG_INSTROOT}/etc/config/system
 
@@ -106,7 +103,7 @@ define Package/gargoyle/postinst
 
 		#restart web server and run ntp client update
 		/etc/init.d/httpd_gargoyle restart 2>/dev/null
-		ACTION=ifup /etc/hotplug.d/iface/20-ntpclient
+		/etc/init.d/sysntpd restart 2>/dev/null
 	fi
 endef
 
