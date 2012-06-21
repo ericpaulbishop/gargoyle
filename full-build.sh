@@ -168,7 +168,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			cd "$compress_js_dir"
 			jsfiles=*.js
 			for jsf in $jsfiles ; do	
-				"$node_bin" "$uglify_bin" "$jsf" > "$jsf.cmp"
+				"$node_bin" "$uglifyjs_bin" "$jsf" > "$jsf.cmp"
 				mv "$jsf.cmp" "$jsf"
 			done
 		else
