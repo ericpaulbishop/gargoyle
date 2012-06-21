@@ -1143,7 +1143,7 @@ CONFIG_PACKAGE_miniupnpd=y
 #
 # Time Synchronization
 #
-CONFIG_PACKAGE_ntpclient=y
+# CONFIG_PACKAGE_ntpclient is not set
 
 #
 # Web
