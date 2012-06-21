@@ -1,0 +1,33 @@
+#!/bin/sh /etc/rc.common
+
+START=25
+
+boot()
+{
+	#set backup date if it exists
+	#this makes sure we're in the same ballpark
+	#as the correct time (e.g. probably right year,maybe right day/hour)
+	if [ -e "/usr/data/time_backup" ] ; then
+		date -u -s $(cat /usr/data/time_backup) >/dev/null 2>&1
+	fi
+
+	#set cron to periodically backup date
+	touch /etc/crontabs/root
+	cat /etc/crontabs/root | grep -v "time_backup" > /tmp/new_cron
+	echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /tmp/new_cron
+	m1=$(md5sum /etc/crontabs/root)
+	m2=$(md5sum /tmp/new_cron)
+	if [ "$m1" = "$m2" ] ; then
+		rm /tmp/new_cron
+	else
+		mv /tmp/new_cron /etc/crontabs/root
+	fi
+	/etc/init.d/cron enable
+}
+
+start()
+{
+	boot
+	/etc/init.d/cron restart
+}
+
