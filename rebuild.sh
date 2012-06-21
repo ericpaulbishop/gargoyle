@@ -3,7 +3,9 @@
 set_constant_variables()
 {
 	#working directories
-	top_dir=$(pwd)
+	scriptpath="$(readlink -f "$0")"
+	top_dir="${scriptpath%/${0##*/}}"
+
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
@@ -99,6 +101,10 @@ EOF
 
 
 
+if [ -z "${BASH_VERSION}" ] || [ "${BASH_VERSION:0:1}" -lt '4' ]; then
+	echo 'Build script was designed to work with bash in version 4 (at least). Exiting...'
+	exit 1
+fi
 
 
 
@@ -124,15 +130,54 @@ fi
 
 #compress javascript
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
+
 	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
 	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
-		js_compress="false"
-		echo ""
-		echo "**************************************************************************"
-		echo "**  WARNING: Cannot compress javascript -- uglifyjs is not installed!   **"
-		echo "**************************************************************************"
-		echo ""
-	else	
+		
+		node_bin="$top_dir/node/node"
+		uglifyjs_bin="$top_dir/UglifyJS/bin/uglifyjs"
+		if [ ! -e "$node_bin" ] && [ ! -e "$uglifyjs_bin" ] ; then
+			echo ""
+			echo "**************************************************************************"
+			echo "**  uglifyjs is not installed globally, attempting to build it          **"
+			echo "**************************************************************************"
+			echo ""
+
+			#node
+			git clone git://github.com/joyent/node.git
+			cd node
+			git checkout v0.7.12
+			./configure 
+			make
+			cd "$top_dir"
+
+
+			#uglifyjs
+			git clone git://github.com/mishoo/UglifyJS.git
+			cd UglifyJS/bin
+			git checkout v1.3.1
+			cd "$top_dir"
+		fi
+		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
+		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
+			js_compress="true"
+			rm -rf "$compress_js_dir"
+			cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
+			cd "$compress_js_dir"
+			jsfiles=*.js
+			for jsf in $jsfiles ; do	
+				"$node_bin" "$uglifyjs_bin" "$jsf" > "$jsf.cmp"
+				mv "$jsf.cmp" "$jsf"
+			done
+		else
+			js_compress="false"
+			echo ""
+			echo "**************************************************************************"
+			echo "**  WARNING: Cannot compress javascript -- uglifyjs could not be built  **"
+			echo "**************************************************************************"
+			echo ""
+		fi
+	else
 		js_compress="true"
 		rm -rf "$compress_js_dir"
 		cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
@@ -142,9 +187,10 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			uglifyjs "$jsf" > "$jsf.cmp"
 			mv "$jsf.cmp" "$jsf"
 		done
-		cd "$top_dir"
 	fi
+	cd "$top_dir"
 fi
+
 
 
 
