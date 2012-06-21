@@ -1,9 +1,11 @@
 #!/bin/bash
 
+
 set_constant_variables()
 {
 	#working directories
-	top_dir=$(pwd)
+	scriptpath="$(readlink -f "$0")"
+	top_dir="${scriptpath%/${0##*/}}"
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
@@ -106,6 +108,12 @@ EOF
 	echo "$openwrt_branch"  > "$revision_save_dir/OPENWRT_BRANCH"
 
 }
+
+
+if [ -z "${BASH_VERSION}" ] || [ "${BASH_VERSION:0:1}" -lt '4' ]; then
+	echo 'Build script was designed to work with bash in version 4 (at least). Exiting...'
+	exit 1
+fi
 
 
 #initialize constants
