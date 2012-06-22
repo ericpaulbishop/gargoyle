@@ -487,11 +487,10 @@ function UCIContainer()
 				{
 					var sortedOld = oldValue.sort()
 					var sortedNew = newValue.sort()
-					while(matches && sortedOld.length >0 && sortedNew.length >0)
+					var sortedIndex;
+					for(sortedIndex=0; matches && sortedIndex <sortedOld.length; sortedIndex++)
 					{
-						var nextOld = sortedOld.shift()
-						var nextNew = sortedNew.shift()
-						matches = nextOld == nextNew ? true : false
+						matches = sortedOld[sortedIndex] == sortedNew[sortedIndex] ? true : false
 					}
 				}
 				if(matches)
@@ -551,6 +550,7 @@ function UCIContainer()
 		}
 
 		commandArray.push("uci commit");
+
 		return commandArray.join("\n");
 	}
 }
