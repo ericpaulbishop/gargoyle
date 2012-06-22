@@ -84,7 +84,7 @@ function saveChanges()
 
 
 
-		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
 		//document.getElementById("output").value = commands;	
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -150,7 +150,7 @@ function resetData()
 	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
 
 
-	var tzServers = uciOriginal.getAllSectionsOfType("system", "ntp", "server");
+	var tzServers = uciOriginal.get("system", "ntp", "server");
 	var tzServers = tzServers == null || tzServers == "" ? [] : tzServers
 	while(tzServers.length > 3)
 	{
@@ -172,7 +172,11 @@ function resetData()
 		{
 			validRegion = false;
 			nextRegion = tzServers[serverIndex].match(/[0-9]+\.([^\.]+)\.pool\.ntp\.org/);
-			if(nextRegion)
+			if(nextRegion == null && tzServers[serverIndex].match(/[0-9]+\.pool\.ntp\.org/)  )
+			{
+				nextRegion = ["", "global"]
+			}
+			if(nextRegion != null)
 			{
 				if(nextRegion[1] == testRegion || testRegion == "")
 				{
@@ -215,7 +219,7 @@ function timezoneChanged()
 
 function updateServerList()
 {
-	region=getSelectedValue("region");
+	var region=getSelectedValue("region");
 	for(serverIndex=1; serverIndex <= 3; serverIndex++)
 	{
 		if(region == "custom")
@@ -224,7 +228,8 @@ function updateServerList()
 		}
 		else
 		{
-			setElementEnabled( document.getElementById("server" + serverIndex), false, (3-serverIndex) + "." + region + ".pool.ntp.org");	
+			var regionServer = ((3-serverIndex) + "." + region + ".pool.ntp.org").replace(/\.global\./, ".")
+			setElementEnabled( document.getElementById("server" + serverIndex), false, regionServer);	
 		}
 	}	
 }

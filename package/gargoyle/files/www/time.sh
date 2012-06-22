@@ -78,6 +78,7 @@
 			<div class="indent">
 				<div>
 					<select class='leftcolumn' id='region' onchange='updateServerList()'>
+						<option value="global">Global</option>
 						<option value="us">United States</option>
 						<option value="north-america">North America</option>
 						<option value="south-america">South America</option>
