@@ -467,6 +467,8 @@ function UCIContainer()
 	{
 		var commandArray = new Array();
 		
+		var listsWithoutUpdates = [];
+
 		var keyIndex=0;	
 		for(keyIndex=0; keyIndex < oldSettings.keys.length; keyIndex++)
 		{
@@ -474,9 +476,33 @@ function UCIContainer()
 			var oldValue = oldSettings.values[key];
 			var newValue = this.values[key];
 
-			if( (oldValue instanceof Array) || (newValue instanceof Array) )
+			if( (oldValue instanceof Array && !(newValue instanceof Array)) || (newValue instanceof Array   && !(oldValue instanceof Array))  ) 
 			{
 				commandArray.push( "uci del " + key);
+			}
+			else if (oldValue instanceof Array && newValue instanceof Array)
+			{
+				var matches = oldValue.length == newValue.length;
+				if(matches)
+				{
+					var sortedOld = oldValue.sort()
+					var sortedNew = newValue.sort()
+					while(matches && sortedOld.length >0 && sortedNew.length >0)
+					{
+						var nextOld = sortedOld.shift()
+						var nextNew = sortedNew.shift()
+						matches = nextOld == nextNew ? true : false
+					}
+				}
+				if(matches)
+				{
+					listsWithoutUpdates[key] = 1
+				}
+				else
+				{
+					commandArray.push( "uci del " + key);
+				}
+
 			}
 			else if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
 			{
@@ -496,11 +522,14 @@ function UCIContainer()
 				{
 					if(newValue instanceof Array)
 					{
-						var vi;
-						for(vi=0; vi< newValue.length ; vi++)
+						if(listsWithoutUpdates[key] == null)
 						{
-							var nv = "" + newValue[vi] + "";
-							commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+							var vi;
+							for(vi=0; vi< newValue.length ; vi++)
+							{
+								var nv = "" + newValue[vi] + "";
+								commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+							}
 						}
 					}
 					else
@@ -519,8 +548,6 @@ function UCIContainer()
 			{
 				alert("bad key = " + key + "\n");
 			}
-					
-			
 		}
 
 		commandArray.push("uci commit");
