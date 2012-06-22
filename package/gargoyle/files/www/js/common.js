@@ -282,7 +282,27 @@ function UCIContainer()
 		else
 		{
 			this.keys.push(next_key);
-			this.values[next_key] = value;
+			if (this.listOptions[ next_key ] != null)
+			{
+				var set = [];
+				if(value instanceof Array)
+				{
+					var setIndex;
+					for(setIndex=0;setIndex < value.length; setIndex++)
+					{
+						set.push( value[setIndex] )
+					}
+				}
+				else
+				{
+					set = [ value ]
+				}
+				this.values[next_key] = set
+			}
+			else
+			{
+				this.values[next_key] = value;
+			}
 		}
 	}
 
@@ -420,6 +440,7 @@ function UCIContainer()
 		for(keyIndex = 0; keyIndex < this.keys.length; keyIndex++)
 		{
 			var key = this.keys[keyIndex];
+			var val = this.values[key]
 			if( this.listOptions[ key ] != null )
 			{
 				copy.listOptions[ key ] = 1;
@@ -438,7 +459,7 @@ function UCIContainer()
 					//should never get here -- if problems put debugging code here
 				}
 			}
-			copy.set(splitKey[1], splitKey[2], splitKey[3], this.values[key], true);
+			copy.set(splitKey[1], splitKey[2], splitKey[3], val, true);
 		}
 		return copy;
 	}
@@ -550,7 +571,7 @@ function UCIContainer()
 		}
 
 		commandArray.push("uci commit");
-
+		
 		return commandArray.join("\n");
 	}
 }

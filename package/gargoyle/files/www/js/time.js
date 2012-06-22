@@ -33,7 +33,7 @@ function saveChanges()
 		}
 		uci.createListOption("system", "ntp", "server", true)
 		uci.set("system", "ntp", "server", newServers, false)
-	
+		
 		//update timezone
 		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
