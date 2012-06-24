@@ -199,7 +199,8 @@ function saveChanges()
 					{
 						haveDh = true;
 					}
-					uci = uciOriginal.clone()
+					uciOriginal = uci.clone()
+					resetData()
 					setControlsEnabled(true)
 				}
 			}
@@ -352,7 +353,7 @@ function resetData()
 		rowData.push(name + "\n ")
 		rowData.push(ipElementContainer)
 		
-		var controls = createAllowedClientControls()
+		var controls = createAllowedClientControls(true)
 		while(controls.length > 0)
 		{
 			rowData.push( controls.shift() )
@@ -542,22 +543,24 @@ function updateClientConfigTextFromControls()
 }
 
 
-function createAllowedClientControls()
+function createAllowedClientControls(haveDownload)
 {
+
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButton = createButton("Download", "default_button", downloadAc)
-	var editButton     = createButton("Edit",     "default_button", editAc)
+	var downloadButton = haveDownload ? createButton("Download", "default_button", downloadAc, false) : createButton("Download", "default_button_disabled", function(){ return; }, true ) ;
+	var editButton     = createButton("Edit",     "default_button", editAc, false)
 
 	return [enabledCheck, downloadButton, editButton]
 }
 
-function createButton(text, cssClass, actionFunction)
+function createButton(text, cssClass, actionFunction, disabled)
 {
 	var button = createInput("button")
 	button.value = text
 	button.className=cssClass
 	button.onclick = actionFunction
+	button.disabled = disabled
 	return button;
 }
 
@@ -952,7 +955,7 @@ function addAc()
 
 
 		var rowData = [ name, ipElementContainer ]
-		var controls = createAllowedClientControls()
+		var controls = createAllowedClientControls(false)
 		while(controls.length > 0)
 		{
 			rowData.push( controls.shift() )
