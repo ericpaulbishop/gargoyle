@@ -27,7 +27,8 @@ if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc
 	awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
 fi
 
-
+ 	echo "var tunIp=\""$(ifconfig tun0 2>/dev/null | awk ' { if ( $0 ~ /inet addr:/) { gsub(/^.*:/, "", $2) ; print $2 } }')"\";"
+	echo "var openvpnProc=\""$(ps | grep openvpn | grep -v grep | awk ' { printf $1 }')"\";"
 
 ?>
 
@@ -46,23 +47,18 @@ fi
 			<option value='server'>OpenVPN Server</option>
 		</select>
 	</div>
+
+	<div id='openvpn_config_status_container' style="display:none" >
+		<span class='leftcolumn'>OpenVPN Status:</span>
+		<span class='rightcolumn' id='openvpn_config_status'></span>
+	</div>
+
+
 </fieldset>
 
 <fieldset id="openvpn_server_fieldset">
 	<legend class="sectionheader">OpenVPN Server: Configuration</legend>
-	
-	<!--
-	# server internal vpn ip
-	# openvpn netmask
-	# protocol (tcp/udp)
-	# port
-	# cipher
-	# allow communication between clients
-	# allow clients to access router subnet
-	# allow one set of credentials for multiple hosts
-	# force client traffic through vpn 
-	-->
-	
+		
 	<div id='openvpn_server_ip_container'>
 		<label class='leftcolumn' for='openvpn_server_ip' id='openvpn_server_ip_label'>OpenVPN Internal IP:</label>
 		<input type='text' class='rightcolumn' name='openvpn_server_ip' id='openvpn_server_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />

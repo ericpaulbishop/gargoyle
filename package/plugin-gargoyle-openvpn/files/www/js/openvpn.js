@@ -295,6 +295,22 @@ function resetData()
 	openvpnMode = clientEnabled ? "client" : openvpnMode
 	setSelectedValue("openvpn_config", openvpnMode)
 
+	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none" : "block"
+	if(openvpnMode != "disabled")
+	{
+		if(tunIp != "" && openvpnProc != "")
+		{
+			setChildText("openvpn_config_status", "Running, Connected, IP: " + tunIp, "#008800", true, null, document)
+		}
+		else if(openvpnProc != "")
+		{
+			setChildText("openvpn_config_status", "Running, Not Connected", "#880000", true, null, document)
+		}
+		else
+		{
+			setChildText("openvpn_config_status", "Not Running", "#880000", true, null, document)
+		}
+	}
 	
 	getServerVarWithDefault = function(variable, defaultDef) {
 		var def = uciOriginal.get("openvpn_gargoyle", "server", variable)
