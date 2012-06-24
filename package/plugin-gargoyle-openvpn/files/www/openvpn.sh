@@ -29,6 +29,17 @@ fi
 
  	echo "var tunIp=\""$(ifconfig tun0 2>/dev/null | awk ' { if ( $0 ~ /inet addr:/) { gsub(/^.*:/, "", $2) ; print $2 } }')"\";"
 	echo "var openvpnProc=\""$(ps | grep openvpn | grep -v grep | awk ' { printf $1 }')"\";"
+	
+	tab=$(printf "\t")
+	config_file=$(uci get openvpn.custom_config.config 2>/dev/null)
+	remote_ping=""
+	if [ -f "$config_file" ] ; then
+		remote=$(egrep "^[$tab ]*remote[$tab ]" "$config_file" | awk ' { print $2 }')
+		if [ -n "$remote" ] ;then
+			remote_ping=$(ping -c 1 -W 2 www.google.com 2>/dev/null | grep "0% packet loss")	
+		fi
+	fi
+	echo "var remotePing=\"$remote_ping\";"
 
 ?>
 

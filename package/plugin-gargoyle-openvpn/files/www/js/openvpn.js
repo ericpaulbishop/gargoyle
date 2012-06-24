@@ -298,7 +298,7 @@ function resetData()
 	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none" : "block"
 	if(openvpnMode != "disabled")
 	{
-		if(tunIp != "" && openvpnProc != "")
+		if( tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnMode == "server") )
 		{
 			setChildText("openvpn_config_status", "Running, Connected, IP: " + tunIp, "#008800", true, null, document)
 		}
