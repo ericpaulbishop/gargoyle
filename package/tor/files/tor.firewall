@@ -117,6 +117,12 @@ initialize()
 	enabled=$( uci get tor.global.enabled 2>/dev/null )
 	client_mode=$( uci get tor.client.client_mode 2>/dev/null )
 	relay_mode=$( uci get tor.relay.relay_mode 2>/dev/null )
+	mem_disabled=$( uci get tor.global.disabled_due_to_memory 2>/dev/null )
+	if  [ "$mem_disabled" = "1" ] ; then
+		sleep 3
+		enabled=$( uci get tor.global.enabled 2>/dev/null )
+	fi
+	
 	if [ -z "$enabled" ] ; then
 		enabled = "0"
 	fi

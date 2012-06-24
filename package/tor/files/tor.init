@@ -1,6 +1,6 @@
 #!/bin/sh /etc/rc.common
 # Copyright (C) 2006 OpenWrt.org
-START=50
+START=75
 
 BIN=tor
 VAR_D=/etc/$BIN/var
@@ -16,6 +16,10 @@ OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '
 boot()
 {
 	BOOT="1"
+	mem_disabled=$(uci get tor.global.disabled_due_to_memory 2>/dev/null)
+	if [ "$mem_disabled" = "1" ] ; then
+		sleep 3
+	fi
 	start
 }
 
@@ -26,7 +30,6 @@ start()
 	control_port=$( uci get tor.global.control_port  2>/dev/null)
 	client_mode=$(uci get tor.client.client_mode     2>/dev/null)
 	relay_mode=$(uci get tor.relay.relay_mode        2>/dev/null)
-	
 
 	if [ "$enabled" = "0" ] || [ "$client_mode$relay_mode" = "00" ] ; then
 		exit
