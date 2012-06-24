@@ -195,13 +195,7 @@ function saveChanges()
 			{
 				if(req.readyState == 4)
 				{
-					if(openvpnConfig == "server")
-					{
-						haveDh = true;
-					}
-					uciOriginal = uci.clone()
-					resetData()
-					setControlsEnabled(true)
+					window.location=window.location
 				}
 			}
 			runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
