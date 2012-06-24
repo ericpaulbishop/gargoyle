@@ -24,6 +24,7 @@ if [ -z "$client_name" ] ; then
 fi
 
 error=""
+tab=$(printf "\t")
 
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
@@ -46,10 +47,10 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	IFS="$OLD_IFS"
 
 
-	conf_file=$(grep -l "^[\t ]*ca\|^[\t ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  egrep "^[\t ]*ca[\t ]+"   "$conf_file" | sed 's/^.*\///g')
-	cert_file=$(egrep "^[\t ]*cert[\t ]+" "$conf_file" | sed 's/^.*\///g')
-	key_file=$( egrep "^[\t ]*key[\t ]+"  "$conf_file" | sed 's/^.*\///g')
+	conf_file=$(grep -l "^[$tab ]*ca\|^[$tab ]*cert" * 2>/dev/null | head -n 1)
+	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"   "$conf_file" | sed 's/^.*\///g')
+	cert_file=$(egrep "^[$tab ]*cert[$tab ]+" "$conf_file" | sed 's/^.*\///g')
+	key_file=$( egrep "^[$tab ]*key[$tab ]+"  "$conf_file" | sed 's/^.*\///g')
 
 
 	if   [ ! -f "$ca_file" ] ; then
@@ -96,12 +97,12 @@ fi
 
 if [ -z "$error" ] ; then
 	
-	sed -i 's/^[\t ]*ca.*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'    "${client_name}.conf"
-	sed -i 's/^[\t ]*cert.*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
-	sed -i 's/^[\t ]*key.*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
+	sed -i 's/^[\t ]*ca[\t ].*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'    "${client_name}.conf"
+	sed -i 's/^[\t ]*cert[\t ].*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
+	sed -i 's/^[\t ]*key[\t ].*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
 
 	#proofreading
-	use_tap=$(egrep  "^[\t ]*dev[\t ]+tap" "${client_name}.conf")
+	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")
 	if [ -n "$use_tap" ] ; then
 		error="Gargoyle does not support TAP OpenVPN configurations"
 	fi

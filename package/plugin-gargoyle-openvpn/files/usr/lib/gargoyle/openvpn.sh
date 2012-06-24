@@ -196,16 +196,16 @@ $openvpn_pool
 cipher                $openvpn_cipher
 $openvpn_keysize
 
-dev         	      tun
-keepalive   	      25 180
-status       	      /var/openvpn/current_status
-verb         	      5
+dev                   tun
+keepalive             25 180
+status                /var/openvpn/current_status
+verb                  5
 
 
 ca                    $OPENVPN_DIR/ca.crt
-dh		      $OPENVPN_DIR/dh1024.pem
-cert		      $OPENVPN_DIR/server.crt
-key		      $OPENVPN_DIR/server.key
+dh                    $OPENVPN_DIR/dh1024.pem
+cert                  $OPENVPN_DIR/server.crt
+key                   $OPENVPN_DIR/server.key
 
 
 persist-key
@@ -354,7 +354,7 @@ EOF
 	cat << EOF >"$random_dir/$openvpn_client_id.conf"
 
 client
-remote	        $openvpn_client_remote $openvpn_port
+remote          $openvpn_client_remote $openvpn_port
 dev             tun
 proto           $openvpn_protocol
 status          /var/openvpn/current_status
