@@ -184,7 +184,7 @@ function saveChanges()
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
 		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client")
 		{
-			commands = commands + "/etc/init.d/openvpn restart"
+			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}
 
 		if(openvpnConfig != "client")
