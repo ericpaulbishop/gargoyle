@@ -2462,9 +2462,9 @@ function getUsedPorts()
 		var remotePort = uciOriginal.get("firewall", section, "remote_port");
 		var proto      = uciOriginal.get("firewall", section, "proto").toLowerCase();
 		var srcZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
-		var dstZone    = uciOriginal.get("firewall", section, "src").toLowerCase();
+		var dstZone    = uciOriginal.get("firewall", section, "dest").toLowerCase();
 		var port       = uciOriginal.get("firewall", section, "src_dport")
-		var ip         = uciOriginal.get("firewall", section, dest_ip);
+		var ip         = uciOriginal.get("firewall", section, "dest_ip");
 
 		portDefs.push([remotePort, proto, "port forwarded to " + ip ])
 	}
