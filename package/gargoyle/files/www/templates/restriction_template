@@ -1,6 +1,6 @@
 <div>
 	<label class='narrowleftcolumn' for='rule_name' id='rule_name_label'>Rule Description:</label>
-	<input type='text' class='rightcolumn' id='rule_name'  size='30' /> 
+	<input type='text' class='rightcolumn' id='rule_name'  size='30' />
 </div>
 <div>
 	<label class='narrowleftcolumn' for='rule_applies_to' id='rule_applies_to_label'>Rule Applies To:</label>
@@ -17,7 +17,7 @@
 		<input type="button" class="default_button" id="rule_add_applies_to_addr" value="Add" onclick='addAddressesToTable(document,"rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)' />
 	</div>
 	<div class="widerightcolumnonly">
-		<em>Specify an IP, IP range or MAC addresss</em>
+		<em>Specify an IP, IP range or MAC address</em>
 	</div>
 </div>
 <div>
@@ -38,11 +38,10 @@
 	<input type='checkbox' id='rule_thu' /><label for="rule_thu">Thu</label>
 	<input type='checkbox' id='rule_fri' /><label for="rule_fri">Fri</label>
 	<input type='checkbox' id='rule_sat' /><label for="rule_sat">Sat</label>
-</div>	
+</div>
 <div id="rule_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='rule_hours_active' id='rule_hours_active_label'>Hours Active:</label>
 	<input type='text' id='rule_hours_active' size='30' onkeyup='proofreadHours(this)' />
-
 	<br/>
 	<div class="widerightcolumnonly">
 		<em>e.g. 00:30-13:15, 14:00-15:00</em>
@@ -94,7 +93,7 @@
 			<option value="except">Block All Except</option>
 		</select>
 		<span class='rightcolumn' >
-			<input  type='text' id='rule_remote_port' onkeyup='proofreadMultiplePorts(this)'  size='20'  />	
+			<input  type='text' id='rule_remote_port' onkeyup='proofreadMultiplePorts(this)'  size='20'  />
 		</span>
 	</div>
 	<div>
@@ -106,12 +105,11 @@
 			<option value="only">Block Only</option>
 			<option value="except">Block All Except</option>
 		</select>
-		<span>	
-			<input class='rightcolumn'  type='text' id='rule_local_port' onkeyup='proofreadMultiplePorts(this)' size='20' />	
+		<span>
+			<input class='rightcolumn'  type='text' id='rule_local_port' onkeyup='proofreadMultiplePorts(this)' size='20' />
 		</span>
 	</div>
 
-	
 
 	<div>
 		<span class='narrowleftcolumn'>
@@ -145,7 +143,7 @@
 			<option value="all">Block All</option>
 			<option value="only">Block Only</option>
 			<option value="except">Block All Except</option>
-		</select>	
+		</select>
 	</div>
 	<div id="rule_url_match_list">
 		<div id="rule_url_match_table_container"></div>
@@ -153,7 +151,7 @@
 			<select id="rule_url_match_type">
 				<option value="url_exact">Full URL matches exactly:</option>
 				<option value="url_contains">Full URL contains:</option>
-				<option value="url_regex">full URL matches Regex:</option>
+				<option value="url_regex">Full URL matches Regex:</option>
 				<option value="url_domain_exact">Domain matches exactly:</option>
 				<option value="url_domain_contains">Domain contains:</option>
 				<option value="url_domain_regex">Domain matches Regex:</option>
@@ -163,5 +161,3 @@
 		</div>
 	</div>
 </div>
-
-
