@@ -8,7 +8,15 @@ OPENVPN_DIR="/etc/openvpn"
 # init script
 OPENVPN_INIT_SCRIPT="/etc/init.d/openvpn"
 
+# Assume time values are this many bits
+# This is needed for setting expiration of certs to max
+TIME_BITS=32
+
+
+
 server_regenerate_credentials="false"
+
+
 
 ##################################################
 # detect path for EASY RSA automatically
@@ -35,6 +43,16 @@ if [ -z "$EASY_RSA_PATH" ] ; then
 	echo "ERROR: could not find easy-rsa library, exiting"
 	exit
 fi
+
+EXPIRATION_MAX=99999
+if [ "$TIME_BITS" -lt 64 ] ; then
+	#handle 2038 bug the best we can
+	year=$(date +%Y)
+	year_day=$(date +%j)
+	EXPIRATION_MAX=$(( (365*(2038-$year)) - $year_day  ))
+fi
+
+
 
 
 random_string()
@@ -153,8 +171,6 @@ export GREP="grep"
 export KEY_CONFIG=`$EASY_RSA/whichopensslcnf $EASY_RSA`
 export KEY_DIR="$EASY_RSA/keys"
 export KEY_SIZE=1024
-export CA_EXPIRE=99999
-export KEY_EXPIRE=99999
 export KEY_COUNTRY="??"
 export KEY_PROVINCE="UnknownProvince"
 export KEY_CITY="UnknownCity"
@@ -162,6 +178,8 @@ export KEY_ORG="UnknownOrg"
 export KEY_OU="UnknownOrgUnit"
 EOF
 cat << EOF >>vars
+export CA_EXPIRE=$EXPIRATION_MAX
+export KEY_EXPIRE=$EXPIRATION_MAX
 export KEY_EMAIL='$name@$random_domain.com'
 export KEY_EMAIL='$name@$random_domain.com'
 export KEY_CN='$name'
@@ -299,8 +317,6 @@ export GREP="grep"
 export KEY_CONFIG=`$EASY_RSA/whichopensslcnf $EASY_RSA`
 export KEY_DIR="$EASY_RSA/keys"
 export KEY_SIZE=1024
-export CA_EXPIRE=99999
-export KEY_EXPIRE=99999
 export KEY_COUNTRY="??"
 export KEY_PROVINCE="UnknownProvince"
 export KEY_CITY="UnknownCity"
@@ -308,6 +324,8 @@ export KEY_ORG="UnknownOrg"
 export KEY_OU="UnknownOrgUnit"
 EOF
 		cat << EOF >>vars
+export CA_EXPIRE=$EXPIRATION_MAX
+export KEY_EXPIRE=$EXPIRATION_MAX
 export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
 export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
 export KEY_CN='$openvpn_client_id'
