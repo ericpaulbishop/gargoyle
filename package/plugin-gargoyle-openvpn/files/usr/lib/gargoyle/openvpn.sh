@@ -357,7 +357,7 @@ client
 remote          $openvpn_client_remote $openvpn_port
 dev             tun
 proto           $openvpn_protocol
-status          /var/openvpn/current_status
+status          current_status
 resolv-retry    infinite
 ns-cert-type    server
 topology        subnet
@@ -366,9 +366,9 @@ verb            5
 cipher          $openvpn_cipher
 $openvpn_keysize
 
-ca              $OPENVPN_DIR/ca.crt
-cert            $OPENVPN_DIR/$openvpn_client_id.crt
-key             $OPENVPN_DIR/$openvpn_client_id.key
+ca              ca.crt
+cert            $openvpn_client_id.crt
+key             $openvpn_client_id.key
 
 nobind
 persist-key

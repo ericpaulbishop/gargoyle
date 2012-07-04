@@ -100,6 +100,7 @@ if [ -z "$error" ] ; then
 	sed -i 's/^[\t ]*ca[\t ].*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'    "${client_name}.conf"
 	sed -i 's/^[\t ]*cert[\t ].*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
 	sed -i 's/^[\t ]*key[\t ].*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
+	sed -i 's/^[\t ]*status[\t ].*$/status  \/var\/openvpn\/current_status/g'         "${client_name}.conf"
 
 	#proofreading
 	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")
