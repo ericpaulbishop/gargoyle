@@ -48,10 +48,10 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 
 	conf_file=$(grep -l "^[$tab ]*ca\|^[$tab ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"   "$conf_file" | sed 's/^.*\///g')
-	cert_file=$(egrep "^[$tab ]*cert[$tab ]+" "$conf_file" | sed 's/^.*\///g')
-	key_file=$( egrep "^[$tab ]*key[$tab ]+"  "$conf_file" | sed 's/^.*\///g')
-
+	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"        "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
+	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"      "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
+	key_file=$( egrep "^[$tab ]*key[$tab ]+"       "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
+	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
 
 	if   [ ! -f "$ca_file" ] ; then
 		error="Could not find CA file"
@@ -66,8 +66,12 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 		cat "$ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
 		cat "$cert_file" | tr -d "\r" > "${client_name}.crt"
 		cat "$key_file"  | tr -d "\r" > "${client_name}.key"
-
 		rm  "$conf_file" "$ca_file" "$cert_file" "$key_file"
+		if [ -f "$ta_file" ] ; then
+			cat "$ta_file" | tr -d "\r" > "${client_name}_ta.key"
+			rm "$ta_file"
+		fi	
+
 	fi
 
 	rm "$FORM_openvpn_client_zip_file" 
@@ -101,6 +105,9 @@ if [ -z "$error" ] ; then
 	sed -i 's/^[\t ]*cert[\t ].*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
 	sed -i 's/^[\t ]*key[\t ].*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
 	sed -i 's/^[\t ]*status[\t ].*$/status  \/var\/openvpn\/current_status/g'         "${client_name}.conf"
+	if [ -f "${client_name}_ta.key" ]  ; then
+		sed -i 's/^[\t ]*tls\-auth[\t ].*$/tls-auth    \/etc\/openvpn\/'"${client_name}_ta.key"'/g'    "${client_name}.conf"
+	fi
 
 	#proofreading
 	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")

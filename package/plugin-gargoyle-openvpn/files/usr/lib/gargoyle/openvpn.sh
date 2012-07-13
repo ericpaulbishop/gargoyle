@@ -132,7 +132,7 @@ create_server_conf()
 		openvpn_pool="ifconfig-pool $openvpn_pool"
 	fi
 
-	if [ ! -f "$OPENVPN_DIR/ca.crt" ]  || [ ! -f "$OPENVPN_DIR/dh1024.pem" ] || [ ! -f "$OPENVPN_DIR/server.crt" ] || [ ! -f "$OPENVPN_DIR/server.key" ] ; then
+	if [ ! -f "$OPENVPN_DIR/ca.crt" ]  || [ ! -f "$OPENVPN_DIR/dh1024.pem" ] || [ ! -f "$OPENVPN_DIR/server.crt" ] || [ ! -f "$OPENVPN_DIR/server.key" ] || [ ! -f "$OPENVPN_DIR/ta.key" ] ; then
 		openvpn_regenerate_cert="true"
 	fi
 	server_regenerate_credentials="$openvpn_regenerate_cert"
@@ -190,12 +190,14 @@ EOF
 		./build-dh
 		./pkitool --initca
 		./pkitool --server server
-		cp keys/server.crt keys/server.key keys/ca.crt keys/ca.key keys/dh1024.pem "$OPENVPN_DIR"/
+		openvpn --genkey --secret ta.key
+		cp keys/server.crt keys/server.key keys/ca.crt keys/ca.key keys/dh1024.pem ta.key "$OPENVPN_DIR"/
 	fi
 
 	touch "$OPENVPN_DIR/server.conf"
 	touch "$OPENVPN_DIR/route_data/server"
 	touch "$random_dir/route_data_server"
+
 
 	# server config
 	cat << EOF >"$random_dir/server.conf"
@@ -220,11 +222,11 @@ status                /var/openvpn/current_status
 verb                  5
 
 
-ca                    $OPENVPN_DIR/ca.crt
 dh                    $OPENVPN_DIR/dh1024.pem
+ca                    $OPENVPN_DIR/ca.crt
 cert                  $OPENVPN_DIR/server.crt
 key                   $OPENVPN_DIR/server.key
-
+tls-auth              $OPENVPN_DIR/ta.key
 
 persist-key
 persist-tun
@@ -339,7 +341,7 @@ EOF
 		./pkitool "$openvpn_client_id"
 
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
-		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$client_conf_dir/"
+		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/ta.key" "$client_conf_dir/"
 		
 	fi
 
@@ -347,7 +349,7 @@ EOF
 	
 	
 	
-	if [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+	if [ "$client_enabled" != "false" ] && [ "$client_enabled" != "0" ] ; then
 		if [ ! -e "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
 			ln -s "$OPENVPN_DIR/client_conf/$openvpn_client_id/$openvpn_client_id.crt" "$OPENVPN_DIR/$openvpn_client_id.crt"
 		fi
@@ -387,6 +389,7 @@ $openvpn_keysize
 ca              ca.crt
 cert            $openvpn_client_id.crt
 key             $openvpn_client_id.key
+tls-auth        ta.key
 
 nobind
 persist-key
