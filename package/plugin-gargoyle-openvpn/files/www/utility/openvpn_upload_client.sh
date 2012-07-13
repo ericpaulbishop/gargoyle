@@ -82,15 +82,22 @@ elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_fi
 	cat "$FORM_openvpn_client_ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
 	cat "$FORM_openvpn_client_cert_file" | tr -d "\r" > "${client_name}.crt"
 	cat "$FORM_openvpn_client_key_file"  | tr -d "\r" > "${client_name}.key"
-
 	rm  "$FORM_openvpn_client_conf_file" "$FORM_openvpn_client_ca_file" "$FORM_openvpn_client_cert_file" "$FORM_openvpn_client_key_file"
-	
+	if [ -s "$FORM_openvpn_client_ta_key_file" ] ; then
+		cat "$FORM_openvpn_client_key_file"  | tr -d "\r" > "${client_name}_ta.key"
+		rm  "$FORM_openvpn_client_ta_key_file"
+	fi
+
+
 elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_text" ] && [ -n "$FORM_openvpn_client_cert_text" ] && [ -n "$FORM_openvpn_client_key_text" ] ; then
 
 	printf "$FORM_openvpn_client_conf_text" | tr -d "\r" > "${client_name}.conf"
 	printf "$FORM_openvpn_client_ca_text"   | tr -d "\r" > "${client_name}_ca.crt"
 	printf "$FORM_openvpn_client_cert_text" | tr -d "\r" > "${client_name}.crt"
 	printf "$FORM_openvpn_client_key_text"  | tr -d "\r" > "${client_name}.key"
+	if [ -n "$FORM_openvpn_client_ta_key_text" ] ; then
+		printf "$FORM_openvpn_client_key_text"  | tr -d "\r" > "${client_name}_ta.key"
+	fi
 
 fi
 
