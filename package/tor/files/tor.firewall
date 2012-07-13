@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -f /tmp/tor.firewall.running ] ; then
+	exit
+fi
+touch /tmp/tor.firewall.running
+
 
 # constants for tor bandwidth monitoring rules
 
@@ -343,4 +348,6 @@ if [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
 elif [ "$RUN_MODE" = "stop" ] ; then
 	shutdown
 fi
+
+rm /tmp/tor.firewall.running
 
