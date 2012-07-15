@@ -211,8 +211,8 @@ fi
 				<input class='rightcolumn' type="file" id="openvpn_client_key_file" name="openvpn_client_key_file" />
 			</div>
 			<div id="openvpn_client_ta_key_file_container">
-				<label id="openvpn_client_ta_key_file" class='leftcolumn' for="openvpn_client_use_ta_key_file">TLS-Auth Key File:</label>
-				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_file' name='use_ta_key_file' onclick='enableAssociatedField(this, "openvpn_client_ta_key_file", true)'  >&nbsp;&nbsp;
+				<label id="openvpn_client_ta_key_file_label" class='leftcolumn' for="openvpn_client_use_ta_key_file">TLS-Auth Key File:</label>
+				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_file' name='use_ta_key_file' onclick='enableAssociatedField(this, "openvpn_client_ta_key_file", "")'  >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_file_label' for='openvpn_client_use_ta_key_file'>Use TLS-Auth Key</label>
 				<br/>
 				<input class='rightcolumnonly' type="file" id="openvpn_client_ta_key_file" name="openvpn_client_ta_key_file" />
@@ -283,8 +283,8 @@ fi
 			</div>
 
 			<div id="openvpn_client_ta_key_text_container">
-				<label id="openvpn_client_ta_key_text" class='leftcolumn' for="openvpn_client_use_ta_key_text">TLS-Auth Key:</label>
-				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", true)' >&nbsp;&nbsp;
+				<label id="openvpn_client_ta_key_text_label" class='leftcolumn' for="openvpn_client_use_ta_key_text">TLS-Auth Key:</label>
+				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "")' >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'>Use TLS-Auth Key</label>
 				<br/>
 				<textarea class='rightcolumnonly' id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text" style="margin-left:5px;width:95%;height:200px;"></textarea>
