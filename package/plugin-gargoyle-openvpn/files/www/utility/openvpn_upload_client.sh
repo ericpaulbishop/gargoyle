@@ -48,10 +48,11 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 
 	conf_file=$(grep -l "^[$tab ]*ca\|^[$tab ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"        "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
-	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"      "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
-	key_file=$( egrep "^[$tab ]*key[$tab ]+"       "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
-	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]+$//g' | sed 's/^.*[\t ]+//g' )
+	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"        "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"      "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	key_file=$( egrep "^[$tab ]*key[$tab ]+"       "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+
 
 	if   [ ! -f "$ca_file" ] ; then
 		error="Could not find CA file"
