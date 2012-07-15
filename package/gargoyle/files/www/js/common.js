@@ -938,16 +938,16 @@ function setElementEnabled(element, enabled, defaultValue)
 	{
 		element.readonly=false;
 		element.disabled=false;
-		if(element.type == "text")
+		if(element.type == "text" || element.type == "textarea")
 		{
 			element.style.color="#000000";
 			element.className="" ;
 		}
-		if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
+		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
 			element.className="";
 		}
-		if(element.type == "button")
+		else if(element.type == "button")
 		{
 			var activeClassName = element.className.replace(/_button.*$/, "_button");
 			element.className=activeClassName;
@@ -956,21 +956,25 @@ function setElementEnabled(element, enabled, defaultValue)
 	else
 	{
 		element.disabled=true;
-		if(element.type == "text")
+		if(element.type == "text" || element.type == "textarea")
 		{
 			element.value=defaultValue;
 			element.style.color="#AAAAAA";
 			element.className="text_disabled";
 		}
-		if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
+		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
 			setSelectedValue(element.id, defaultValue, element.ownerDocument);
 			element.className="select_disabled";
 		}
-		if(element.type == "button")
+		else if(element.type == "button")
 		{
 			var activeClassName = element.className.replace(/_button.*$/, "_button");
 			element.className= activeClassName + "_disabled";
+		}
+		else if(element.type == "file")
+		{
+			element.value=defaultValue;
 		}
 	}
 }
