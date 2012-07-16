@@ -292,6 +292,7 @@ fi
 
 
 		</div>
+		<input style="display:none" type="hidden" id="net_mismatch_action" name="net_mismatch_action" value="query"></input>
 		<input style="display:none" type="hidden" id="openvpn_client_commands" name="commands"></input>
 		<input style="display:none" type="hidden" id="openvpn_client_hash" name="hash"></input>
 	</form>

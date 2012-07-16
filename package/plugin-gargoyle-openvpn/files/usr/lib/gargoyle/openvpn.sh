@@ -343,6 +343,11 @@ EOF
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/ta.key" "$client_conf_dir/"
 		
+		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
+			echo "ipaddr    $openvpn_client_local_subnet_ip"  >'network'
+			echo "netmask   $openvpn_client_local_subnet_ip" >>'network'
+			mv network "$client_conf_dir/network"
+		fi
 	fi
 
 	

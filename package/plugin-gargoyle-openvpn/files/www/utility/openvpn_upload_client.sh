@@ -12,6 +12,36 @@ echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xh
 echo '<html xmlns="http://www.w3.org/1999/xhtml">'
 echo '<body>'
 
+
+ip_to_int()
+{
+	ip=$1
+	ip_parts=$(echo $ip | sed 's/\./ /g')
+	mult=256*256*256;
+	count=0
+	for p in $ip_parts ; do
+		count=$(( $count + ($mult*p) ))
+		mult=$(( $mult/256 ))
+	done
+	echo $count
+}
+int_to_ip()
+{
+	int=$1
+	ip=""
+	for m in $((256*256*256)) $((256*256)) 256 1 ; do
+		next=$(( $int/$m ))
+		int=$(( $int - ($next*$m) ))
+		if [ -z "$ip" ] ; then
+			ip="$next"
+		else
+			ip="$ip.$next"
+		fi
+	done
+	echo $ip
+}
+
+restart_network=0
 dir_rand=$(</dev/urandom tr -dc a-z | head -c 12)
 tmp_dir="/tmp/vpn_client_upload_$dir_rand"
 mkdir -p "$tmp_dir"
@@ -52,6 +82,43 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"      "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
 	key_file=$( egrep "^[$tab ]*key[$tab ]+"       "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
 	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+
+	if [ -s network ] ; then
+		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' a)
+		expected_mask=$(awk ' $0 ~ /netmask/ { print $NF }' a)
+		if [ -n "$expected_ip" ] && [ -n "$expected_mask" ] ; then
+			cur_ip=$(uci get network.lan.ipaddr)
+			cur_mask=$(uci get network.lan.netmask)
+			cur_ip_int=$(ip_to_int $cur_ip)
+			cur_mask_int=$(ip_to_int $cur_mask)
+			cur_sub_ip_int=$($cur_ip_int & $cur_mask_int)
+			cur_sub_ip=$(int_to_ip $cur_sub_ip_int)
+
+
+			exp_ip_int=$(ip_to_int $expected_ip)
+			exp_mask_int=$(ip_to_int $expected_mask)
+			cur_test=$( $cur_mask_int & $cur_ip_int )
+			exp_test=$( $exp_mask_int & $exp_ip_int )
+			if [ "$cur_test" != "$exp_test" ] ; then
+				
+				new_ip_int=$(($exp_ip_int+1))
+				new_ip=$(int_to_ip $new_ip_int)
+				if [ "$FORM_net_mismatch_action" = "query" ] ; then
+					echo "<script type=\"text/javascript\">top.clientNetMismatchQuery(\"$expected_ip/$expected_mask\",\"$cur_sub_ip/$cur_mask\", \"$new_ip\" );</script>"
+					echo "</body></html>"
+					cd /tmp
+					rm -rf "$tmp_dir"
+					exit
+				elif [ "$FORM_net_mismatch_action" = "change" ] ; then
+					uci set network.lan.ipaddr="$new_ip"
+					uci set network.lan.netmask="$expected_mask"
+					uci commit
+					restart_network=1
+				fi
+				#do nothing if net_mismatch_action is "keep"
+			fi
+		fi
+	fi
 
 	if   [ ! -f "$ca_file" ] ; then
 		error="Could not find CA file"
@@ -138,6 +205,10 @@ if [ -z "$error" ] ; then
 			tmp_file="$tmp_dir/tmp.sh"
 			printf "%s" "$FORM_commands" | tr -d "\r" > "$tmp_file"
 			sh "$tmp_file"
+			if [ "$restart_network" = "1" ] ; then
+				sh /usr/lib/gargoyle/update_router_ip.sh
+				sh /usr/lib/gargoyle/restart_network.sh
+			fi
 		fi
 
 		wait_secs=25
