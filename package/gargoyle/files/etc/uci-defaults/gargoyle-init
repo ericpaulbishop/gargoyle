@@ -4,21 +4,42 @@
 gargoyle_version=$(cat /www/data/gargoyle_version.txt)
 uci set gargoyle.global.version="$gargoyle_version"
 
-# Set hostname to Gargoyle
-uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
-echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
+if [ "$settings_not_preserved" == "1" ] ; then
 
-# disable logging for cron -- it tends to clutter up logs, and it logs all jobs at "error" level, which is wrong
-uci set system.@system[0].cronloglevel=9
+	# Set hostname to Gargoyle
+	uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
+	echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
 
-# Allow resolution of NameCoin and OpenNIC domains by default
-uci add_list dhcp.@dnsmasq[0].server="/.bit/178.32.31.41"
-uci add_list dhcp.@dnsmasq[0].server="/.bit/78.47.86.43"
-for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" "/.gopher/" "/.indy/" "/.ing/" "/.null/" "/.oss/" "/.micro/" ; do
-	for ip in "66.244.95.20" "95.211.32.162" "95.142.171.235" ; do
-		uci add_list dhcp.@dnsmasq[0].server="$tld$ip"
+	# disable logging for cron -- it tends to clutter up logs, and it logs all jobs at "error" level, which is wrong
+	uci set system.@system[0].cronloglevel=9
+
+	# Allow resolution of NameCoin and OpenNIC domains by default
+	uci add_list dhcp.@dnsmasq[0].server="/.bit/178.32.31.41"
+	uci add_list dhcp.@dnsmasq[0].server="/.bit/78.47.86.43"
+	for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" "/.gopher/" "/.indy/" "/.ing/" "/.null/" "/.oss/" "/.micro/" ; do
+		for ip in "66.244.95.20" "95.211.32.162" "95.142.171.235" ; do
+			uci add_list dhcp.@dnsmasq[0].server="$tld$ip"
+		done
 	done
-done
+
+	# remove init scripts of things that should not be active by default
+	/etc/init.d/miniupnpd disable       2>/dev/null
+	/etc/init.d/qos_gargoyle disable    2>/dev/null
+	/etc/init.d/webmon_gargoyle disable 2>/dev/null
+
+
+fi
+
+# add new busybox ntp system section if necessary
+ntp_section=$(uci get system.ntp 2>/dev/null)
+if [ "$ntp_section" != "timeserver" ] ; then
+	uci del system.ntp 2>/dev/null
+	uci set system.ntp="timeserver"                 2>/dev/null
+	uci add_list system.ntp.server="0.pool.ntp.org" 2>/dev/null
+	uci add_list system.ntp.server="1.pool.ntp.org" 2>/dev/null
+	uci add_list system.ntp.server="2.pool.ntp.org" 2>/dev/null
+fi
 
 
 #save changes to uci
@@ -26,10 +47,6 @@ uci commit
 
 
 
-# remove init scripts of things that should not be active by default
-/etc/init.d/miniupnpd disable       2>/dev/null
-/etc/init.d/qos_gargoyle disable    2>/dev/null
-/etc/init.d/webmon_gargoyle disable 2>/dev/null
 
 #make sure date isn't set to 1970, which may cause issues with timezones that cause time to go back before unix epoch,  set to Jan 1st 2001
 curdate=$(date -u +%s)
