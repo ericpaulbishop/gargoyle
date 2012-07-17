@@ -171,7 +171,7 @@ CONFIGURE_VARS += \
 
 # pass CFLAGS again to override -O2 set by configure
 MAKE_FLAGS += \
-	CFLAGS="$(TARGET_CFLAGS)"
+	CFLAGS="$(TARGET_CFLAGS) -fPIC "
 
 define Package/tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
