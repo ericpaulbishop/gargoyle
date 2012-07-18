@@ -84,8 +84,9 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
 
 	if [ -s network ] ; then
-		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' a)
-		expected_mask=$(awk ' $0 ~ /netmask/ { print $NF }' a)
+		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' network)
+		expected_mask=$(awk ' $0 ~ /netmask/ { print $NF }' network)
+		
 		if [ -n "$expected_ip" ] && [ -n "$expected_mask" ] ; then
 			cur_ip=$(uci get network.lan.ipaddr)
 			cur_mask=$(uci get network.lan.netmask)
@@ -93,12 +94,13 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 			cur_mask_int=$(ip_to_int $cur_mask)
 			cur_sub_ip_int=$($cur_ip_int & $cur_mask_int)
 			cur_sub_ip=$(int_to_ip $cur_sub_ip_int)
-
+			
+			
 
 			exp_ip_int=$(ip_to_int $expected_ip)
 			exp_mask_int=$(ip_to_int $expected_mask)
-			cur_test=$( $cur_mask_int & $cur_ip_int )
-			exp_test=$( $exp_mask_int & $exp_ip_int )
+			cur_test=$(( $cur_mask_int & $cur_ip_int ))
+			exp_test=$(( $exp_mask_int & $exp_ip_int ))
 			if [ "$cur_test" != "$exp_test" ] ; then
 				
 				new_ip_int=$(($exp_ip_int+1))

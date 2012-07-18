@@ -231,7 +231,7 @@ function clientNetMismatchQuery(expected, current, newIp)
 		}
 	}
 	query("Client Subnet Mismatch", "The OpenVPN expects your router to have a subnet of " + expected + "but your router is configured with a subnet of " + current + ".  Do you want to...", 
-		[ "Switch Router to expected subnet, with IP " + newIP, "Keep Current Subnet and Continue", "Cancel"], continueFun );
+		[ "Switch Router to expected subnet, with IP " + newIp, "Keep Current Subnet and Continue", "Cancel"], continueFun );
 
 }
 
@@ -1176,7 +1176,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-	var wlocation = "query_text.sh";
+	var wlocation = "/query.sh";
 	queryWindow = window.open(wlocation, queryHeader, "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
 	
 
