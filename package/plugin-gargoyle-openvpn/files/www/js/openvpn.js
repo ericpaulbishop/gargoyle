@@ -219,7 +219,7 @@ function clientNetMismatchQuery(expected, current, newIp)
 		}
 		else
 		{
-			if(result.match(/Change/))
+			if(result.match(/Switch/))
 			{
 				document.getElementById("net_mismatch_action").value = "change"
 			}
