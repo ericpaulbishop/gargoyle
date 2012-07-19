@@ -6,6 +6,7 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var newRouterIp=""
 
 function saveChanges()
 {
@@ -212,7 +213,7 @@ function saveChanges()
 function clientNetMismatchQuery(expected, current, newIp)
 {
 	var continueFun = function(result)
-	{ 
+	{
 		if(result.match(/Cancel/))
 		{
 			window.location=window.location
@@ -222,6 +223,7 @@ function clientNetMismatchQuery(expected, current, newIp)
 			if(result.match(/Switch/))
 			{
 				document.getElementById("net_mismatch_action").value = "change"
+				newRouterIp = newIp
 			}
 			if(result.match(/Keep/))
 			{
@@ -249,7 +251,12 @@ function clientSaved(result)
 	else
 	{
 		uci = uciOriginal.clone()
-		window.location=window.location
+		newLocation = window.location
+		if(newRouterIp != "")
+		{
+			newLocation = newLocation.replace(currentLanIp, newRouterIp)
+		}
+		window.location=newLocation
 	}
 	document.getElementById("net_mismatch_action").value = "query"
 
