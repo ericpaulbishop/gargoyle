@@ -1,0 +1,4 @@
+function resetData()
+{
+	alert("test");
+}
