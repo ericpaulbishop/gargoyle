@@ -92,7 +92,7 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 			cur_mask=$(uci get network.lan.netmask)
 			cur_ip_int=$(ip_to_int $cur_ip)
 			cur_mask_int=$(ip_to_int $cur_mask)
-			cur_sub_ip_int=$($cur_ip_int & $cur_mask_int)
+			cur_sub_ip_int=$(($cur_ip_int & $cur_mask_int))
 			cur_sub_ip=$(int_to_ip $cur_sub_ip_int)
 			
 			
