@@ -303,7 +303,6 @@ fi
 </fieldset>
 
 
-
 <div id="bottom_button_container">
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>

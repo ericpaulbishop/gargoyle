@@ -1155,64 +1155,46 @@ function editAc()
 
 function query(queryHeader, queryText, buttonNameList, continueFunction )
 {
-	if( typeof(queryWindow) != "undefined" )
-	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			queryWindow.close();
-		}
-		catch(e){}
-	}
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-	var wlocation = "/query.sh";
-	queryWindow = window.open(wlocation, queryHeader, "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
+	document.getElementById("wait_icon").style.display="none"
+	document.getElementById("wait_txt").style.display="none"
+
+	wmOldTxt    = document.getElementById("wait_txt").style == "none" ? false : true;
+	wmOldBack   = document.getElementById("wait_msg").style.background
+	wmOldWidth  = document.getElementById("wait_msg").style.width;
+	wmOldHeight = document.getElementById("wait_msg").style.height
+	wmOldTop    = document.getElementById("wait_msg").style.top
+	document.getElementById("wait_msg").style.background="white"
+	document.getElementById("wait_msg").style.width="585px"
+	document.getElementById("wait_msg").style.height="500px"
+	setControlsEnabled(false,false)
+	document.getElementById("wait_msg").style.top="20px"
+
+	queryFieldset = document.createElement("fieldset");
+	queryFieldset.innerHTML='<legend class="sectionheader" id="query_header">' + queryHeader + '</legend><div style="clear:both;display:block"><span class="nocolumn" id="query_text">' + queryText + '</span></div><div id="spacer_div" style="display:block; mrgin:8px;">&nbsp;</div><div id="query_button_container"></div>'
 	
-
-
-
-	runOnEditorLoaded = function() 
+	document.getElementById("wait_msg").appendChild(queryFieldset)
+	
+	var buttonList = [];
+	var bIndex;
+	for(bIndex=0; bIndex < buttonNameList.length ; bIndex++)
 	{
-		updateDone=false;
-		if(queryWindow.document != null)
+		b           = createInput("button", document);
+		b.value     = buttonNameList[bIndex];
+		b.className = "default_button"
+		b.onclick   = function()
 		{
-			if(queryWindow.document.getElementById("bottom_button_container") != null)
-			{
-				setChildText("query_header", queryHeader, null, null, null, queryWindow.document);
-				setChildText("query_text", queryText, null, null, null, queryWindow.document);
-
-				var buttonList = [];
-				var bIndex;
-				for(bIndex=0; bIndex < buttonNameList.length ; bIndex++)
-				{
-					b           = createInput("button", queryWindow.document);
-					b.value     = buttonNameList[bIndex];
-					b.className = "default_button"
-					b.onclick   = function(btn){ queryWindow.close() ; continueFunction(btn.value) ; }
-				       	queryWindow.document.getElementById("buttom_button_container").appendChild(b);
-				}
-
-				queryWindow.moveTo(xCoor,yCoor);
-				queryWindow.focus();
-				updateDone = true;
-			}
+			document.getElementById("wait_msg").removeChild(queryFieldset)
+			document.getElementById("wait_msg").style.background=wmOldBack
+			document.getElementById("wait_msg").style.width=wmOldWidth
+			document.getElementById("wait_msg").style.height=wmOldHeight
+			document.getElementById("wait_msg").style.top=wmOldTop
+			document.getElementById("wait_icon").style.display="block"
+			document.getElementById("wait_txt").style.display="block"
+			setControlsEnabled(false,wmOldTxt)
+			continueFunction(this.value)
 		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
+		document.getElementById("query_button_container").appendChild(b);
+		document.getElementById("query_button_container").appendChild( document.createElement("br") )
 	}
-	runOnEditorLoaded();
 }
 
