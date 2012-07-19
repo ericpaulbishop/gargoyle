@@ -42,6 +42,9 @@ int_to_ip()
 }
 
 restart_network=0
+old_replace_ip=""
+new_replace_ip=""
+
 dir_rand=$(</dev/urandom tr -dc a-z | head -c 12)
 tmp_dir="/tmp/vpn_client_upload_$dir_rand"
 mkdir -p "$tmp_dir"
@@ -112,10 +115,16 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 					rm -rf "$tmp_dir"
 					exit
 				elif [ "$FORM_net_mismatch_action" = "change" ] ; then
+					old_dns=$(uci get network.lan.dns)
+					if [ "$old_dns" = "$cur_ip" ] ; then
+						uci set network.lan.dns="$new_ip"
+					fi
 					uci set network.lan.ipaddr="$new_ip"
 					uci set network.lan.netmask="$expected_mask"
 					uci commit
 					restart_network=1
+					old_replace_ip="$cur_ip"
+					new_replace_ip="$new_ip"
 				fi
 				#do nothing if net_mismatch_action is "keep"
 			fi
@@ -207,8 +216,8 @@ if [ -z "$error" ] ; then
 			tmp_file="$tmp_dir/tmp.sh"
 			printf "%s" "$FORM_commands" | tr -d "\r" > "$tmp_file"
 			sh "$tmp_file"
-			if [ "$restart_network" = "1" ] ; then
-				sh /usr/lib/gargoyle/update_router_ip.sh
+			if [ "$restart_network" = "1" ]  && [ -n "$old_replace_ip" ] && [ -n "$new_replace_ip" ] ; then
+				sh /usr/lib/gargoyle/update_router_ip.sh "$old_replace_ip" "$new_replace_ip"
 				sh /usr/lib/gargoyle/restart_network.sh
 			fi
 		fi
