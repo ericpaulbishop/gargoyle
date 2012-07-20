@@ -78,6 +78,7 @@ function saveChanges()
 		if(openvpnConfig == "disabled")
 		{
 			configureFirewall(false,false)
+			uci.remove("gargoyle", "status", "openvpn_connections")
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
 			uci.set("openvpn", "custom_config", "enable", "0")
@@ -100,6 +101,7 @@ function saveChanges()
 			configureFirewall(true,true,vpnPort,vpnProto)
 
 
+			uci.set("gargoyle", "status", "openvpn_connections", "500")
 			uci.set("openvpn", "custom_config", "enable", "1")
 			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
 
@@ -166,6 +168,7 @@ function saveChanges()
 		if(openvpnConfig == "client")
 		{
 			configureFirewall(true,false)
+			uci.remove("gargoyle", "status", "openvpn_connections")
 		}
 
 
