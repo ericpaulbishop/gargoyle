@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "openvpn_server_status" -c "internal.css" -j "openvpn_server_status.js table.js" openvpn_gargoyle
+	gargoyle_header_footer -h -s "status" -p "openvpn_connections" -c "internal.css" -j "openvpn_connections.js table.js" openvpn_gargoyle
 ?>
 
 <script>
@@ -26,7 +26,7 @@ fi
 
 <fieldset>
 	<legend>Connected OpenVPN Clients</legend>
-	<div id="openvpn_server_status_table_container"></div>
+	<div id="openvpn_connection_table_container"></div>
 </fieldset>
 
 <script>
@@ -35,5 +35,5 @@ fi
 
 
 <?
-	gargoyle_header_footer -f -s "status" -p "openvpn_server_status"
+	gargoyle_header_footer -f -s "status" -p "openvpn_connections"
 ?>

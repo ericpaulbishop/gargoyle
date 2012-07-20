@@ -24,14 +24,23 @@ function updateTableFromData(statusData)
 		clientData.push( [ clientName, lineParts[1].replace(/:.*$/, ""), lineParts[4]] )
 	}
 
-	var clientTable = createTable([ "Client Name", "Connected From", "Connected Since" ], clientData, "openvpn_server_status_table", false, false)
+	var clientTable = createTable([ "Client Name", "Connected From", "Connected Since" ], clientData, "openvpn_connection_table", false, false)
 	
-	var tableContainer = document.getElementById("openvpn_server_status_table_container");
+	var tableContainer = document.getElementById("openvpn_connection_table_container");
 	while(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild( tableContainer.firstChild)
 	}
-	tableContainer.appendChild(clientTable);
+	if(clientData.length > 0)
+	{
+		tableContainer.appendChild(clientTable);
+	}
+	else
+	{
+		var emptyDiv = document.createElement("div");
+		emptyDiv.innerHTML = "<span style=\"text-align:center\"><em>No Clients Connected</em></span>";
+		tableContainer.appendChild(emptyDiv);
+	}
 
 }
 
