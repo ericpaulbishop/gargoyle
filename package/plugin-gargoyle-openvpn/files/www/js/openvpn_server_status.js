@@ -1,6 +1,7 @@
 function resetData()
 {
 	updateTableFromData(statusFileLines)
+	setInterval(doUpdate, 15*1000);
 }
 
 function updateTableFromData(statusData)
@@ -33,3 +34,17 @@ function updateTableFromData(statusData)
 	tableContainer.appendChild(clientTable);
 
 }
+
+function doUpdate()
+{
+	var param = getParameterDefinition("commands", "cat /etc/openvpn/current_status")  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			var data=req.responseText.split(/[\r\n]+/);
+			updateTableFromData(data)
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}	
