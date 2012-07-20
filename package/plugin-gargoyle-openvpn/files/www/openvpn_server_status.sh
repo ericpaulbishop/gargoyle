@@ -25,7 +25,8 @@ fi
 
 
 <fieldset>
-	<p>placeholder</p>
+	<legend>Connected OpenVPN Clients</legend>
+	<div id="openvpn_server_status_table_container"></div>
 </fieldset>
 
 <script>
