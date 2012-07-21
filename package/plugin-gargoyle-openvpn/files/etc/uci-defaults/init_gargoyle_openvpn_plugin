@@ -4,8 +4,8 @@ uci set gargoyle.display.connection_openvpn="OpenVPN"
 uci set gargoyle.scripts.connection_openvpn="openvpn.sh"
 uci set gargoyle.connection.openvpn="225"
 
-uci set gargoyle.scripts.status_openvpn_connections="openvpn.sh"
-uci set gargoyle.display.status_openvpn_connections="OpenVPN Connections"
+uci set gargoyle.scripts.status_openvpn_connections="openvpn_connections.sh"
+uci set gargoyle.display.status_openvpn_connections="OpenVPN Status"
 
 
 uci commit
