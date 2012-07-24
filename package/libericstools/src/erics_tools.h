@@ -71,6 +71,40 @@ typedef struct
 
 }string_map;
 
+typedef struct raw_tree_map_node
+{
+	
+	void* key;
+	void* value;
+	size_t key_length;
+
+	signed char balance; 
+	struct raw_tree_map_node* left;
+	struct raw_tree_map_node* right;
+} raw_map_node;
+
+typedef struct 
+{
+	raw_map_node* root;
+	unsigned long num_elements;
+
+}raw_map;
+
+
+/* raw map functions */
+extern raw_map* initialize_raw_map(void);
+extern void* get_raw_map_element(raw_map* map, void* key, size_t key_length);
+extern void* get_smallest_raw_map_element(raw_map* map, void** smallest_key, size_t* smallest_key_length);
+extern void* get_largest_raw_map_element(raw_map* map, void** largest_key, size_t* largest_key_length);
+extern void* remove_smallest_raw_map_element(raw_map* map, void** smallest_key, size_t* smallest_key_length);
+extern void* remove_largest_raw_map_element(raw_map* map, void** largest_key, size_t* largest_key_length);
+extern void* set_raw_map_element(raw_map* map, void* key, size_t key_length, void* value);
+extern void* remove_raw_map_element(raw_map* map, void* key, size_t key_length);
+extern void** get_sorted_raw_map_keys(raw_map* map, size_t** key_lengths, unsigned long* num_keys_returned);
+extern void** get_sorted_raw_map_values(raw_map* map, unsigned long* num_values_returned);
+extern void** destroy_raw_map(raw_map* map, int destruction_type, unsigned long* num_destroyed);
+extern void apply_to_every_raw_map_value(raw_map* map, void (*apply_func)(void* key, size_t key_length, void* value));
+
 
 
 /* long map functions */

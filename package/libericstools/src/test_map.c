@@ -40,10 +40,14 @@
 #include "erics_tools.h"
 #include <time.h>
 
+void get_raw_max_depth(raw_map_node* n, unsigned long* max_depth, unsigned long current_depth);
+void get_raw_min_depth(raw_map_node* n, unsigned long* min_depth, unsigned long current_depth);
+void print_raw_map(raw_map_node* n, int depth);
 
-void get_max_depth(long_map_node* n, unsigned long* max_depth, unsigned long current_depth);
-void get_min_depth(long_map_node* n, unsigned long* min_depth, unsigned long current_depth);
-void print_map(long_map_node* n, int depth);
+
+void get_long_max_depth(long_map_node* n, unsigned long* max_depth, unsigned long current_depth);
+void get_long_min_depth(long_map_node* n, unsigned long* min_depth, unsigned long current_depth);
+void print_long_map(long_map_node* n, int depth);
 
 int main (void)
 {
@@ -86,8 +90,8 @@ int main (void)
 
 		unsigned long right_depth = 0;
 		unsigned long left_depth = 0;
-		get_max_depth(lm->root->left, &left_depth, 0);
-		get_max_depth(lm->root->right, &right_depth, 0);
+		get_long_max_depth(lm->root->left, &left_depth, 0);
+		get_long_max_depth(lm->root->right, &right_depth, 0);
 
 		unsigned long original_size = lm->num_elements;
 		printf("insertion complete\n");
@@ -116,8 +120,8 @@ int main (void)
 			}
 			right_depth = 0;
 			left_depth = 0;
-			get_max_depth(lm->root->left, &left_depth, 0);
-			get_max_depth(lm->root->right, &right_depth, 0);
+			get_long_max_depth(lm->root->left, &left_depth, 0);
+			get_long_max_depth(lm->root->right, &right_depth, 0);
 	
 			printf("removal complete\n");
 			printf("after removal, tree size = %ld \n", lm->num_elements);
@@ -168,6 +172,8 @@ int main (void)
 	}
 
 
+
+
 	printf("LONG MAP TESTING COMPLETE.  TESTING STRING MAP (WITH KEY STORAGE) \n\n");
 
 
@@ -201,8 +207,8 @@ int main (void)
 
 		unsigned long right_depth = 0;
 		unsigned long left_depth = 0;
-		get_max_depth(sm->lm.root->left, &left_depth, 0);
-		get_max_depth(sm->lm.root->right, &right_depth, 0);
+		get_long_max_depth(sm->lm.root->left, &left_depth, 0);
+		get_long_max_depth(sm->lm.root->right, &right_depth, 0);
 		
 
 		unsigned long original_size = sm->num_elements;
@@ -234,8 +240,8 @@ int main (void)
 			}
 			right_depth = 0;
 			left_depth = 0;
-			get_max_depth(sm->lm.root->left, &left_depth, 0);
-			get_max_depth(sm->lm.root->right, &right_depth, 0);
+			get_long_max_depth(sm->lm.root->left, &left_depth, 0);
+			get_long_max_depth(sm->lm.root->right, &right_depth, 0);
 
 			printf("removal complete\n");
 			printf("after removal, tree size = %ld \n", sm->num_elements);
@@ -294,11 +300,145 @@ int main (void)
 	}
 
 
+
+
+
+	printf("STRING MAP TESTING COMPLETE.  TESTING RAW MAP (WITH STRINGS) \n\n");
+
+
+
+	printf("initializing map....\n");
+	raw_map* rm = initialize_raw_map();
+	printf("initialized!\n\n");
+
+
+	repeat = 0;
+	for(repeat =0; repeat < num_repeats; repeat++)
+	{
+
+		printf("randomly inserting %ld integer strings randomly selected (not in order) between 0 and %ld\n", num_insertions, max_insertion);
+
+		
+		unsigned long i;
+		unsigned long  dupes = 0;
+		for(i=0; i<num_insertions; i++)
+		{
+			unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
+			char* new_str = (char*)malloc(40*sizeof(char));
+			sprintf(new_str, "%ld", r);
+			size_t key_len = strlen(new_str);
+			void* old;
+			if( (old = set_raw_map_element(rm, (void*)new_str, key_len, strdup("a"))) != NULL )
+			{
+				dupes++;
+			}
+			free(new_str);
+		}
+
+		unsigned long right_depth = 0;
+		unsigned long left_depth = 0;
+		get_raw_max_depth(rm->root->left, &left_depth, 0);
+		get_raw_max_depth(rm->root->right, &right_depth, 0);
+		
+
+		unsigned long original_size = rm->num_elements;
+		printf("insertion complete\n");
+		printf("after insertion, tree size = %ld \n", original_size);
+		printf("(note this may be less than %ld because the same numbers can be selected for insertion more than once, replacing the original node)\n", num_insertions); 
+		printf("dupes = %ld\n", dupes);	
+		printf("depth of left branch = %ld, depth of right branch = %ld\n\n", left_depth, right_depth);
+
+		printf("num_repeats = %d, repeat num = %d\n", num_repeats, repeat);
+
+		if(repeat+1 < num_repeats)
+		{
+			printf("randomly selecting %ld numbers between 0 and %ld to remove from tree.\n", num_insertions, max_insertion);
+			printf("note that these keys will not necessarily be present in tree -- the selection process is entirely random.\n");
+	
+			int j;
+			int found = 0;
+			for(j=0; j < num_insertions; j++)
+			{
+				unsigned long r = (unsigned long)(max_insertion*((double)rand()/(double)RAND_MAX));
+				char* new_str = (char*)malloc(40*sizeof(char));
+				size_t key_len = strlen(new_str);
+				void* old;
+				if( (old = remove_raw_map_element(rm, (void*)new_str, key_len)) != NULL)
+				{
+					found++;
+				}
+				free(new_str);
+			}
+			right_depth = 0;
+			left_depth = 0;
+			get_raw_max_depth(rm->root->left, &left_depth, 0);
+			get_raw_max_depth(rm->root->right, &right_depth, 0);
+
+			printf("removal complete\n");
+			printf("after removal, tree size = %ld \n", rm->num_elements);
+			printf("depth of left branch = %ld, depth of right branch = %ld\n", left_depth, right_depth);
+			if(original_size - found == rm->num_elements)
+			{
+				printf("size consistent with number of nodes successfully removed\n\n");
+			}
+			else
+			{
+				printf("SIZE IS BAD -- IS NOT CONSISTENT WITH NUMBER OF NODES REMOVED !!!!\n\n");
+			}
+
+			printf("removing remaining nodes in tree in random order\n");
+			unsigned long length = rm->num_elements;
+			size_t* key_lengths = NULL;
+			void** keys = get_sorted_raw_map_keys(rm, &key_lengths, &length);
+			while(rm->root != NULL && rm->num_elements > 0)
+			{
+				unsigned long r = (unsigned long)(length*((double)rand()/(double)RAND_MAX));
+				if( remove_raw_map_element(rm, keys[r], key_lengths[r]) != NULL)
+				{
+					found++;
+					if(original_size - found != rm->num_elements)
+					{
+						printf("SIZE IS BAD!!!!\n");
+					}
+				}
+			}
+			
+			int k;
+			for(k=0; k<length; k++)
+			{
+				free(keys[k]);
+			}
+			free(keys);
+
+			printf("done removing remaining nodes\n");
+			printf("tree size is now %ld, and root is %s\n\n", rm->num_elements, rm->root == NULL ? "null" : "not null");
+
+			printf("repeating insertion/deletion\n\n");
+		}
+		else
+		{
+			
+			unsigned long num_destroyed;
+			printf("destroying map...\n");
+			void** values = destroy_raw_map(rm, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
+			printf("map destroyed.\n");
+			int v=0;
+			for(v=0; values[v] != NULL; v++){  }
+			free(values);
+			printf("number of values returned after map destruction = %d\n", v);
+			
+
+		
+		}
+	}
+
+
 	
 	
 	return(0);
 }
-void get_max_depth(long_map_node* n, unsigned long* max_depth, unsigned long current_depth)
+
+void get_raw_max_depth(raw_map_node* n, unsigned long* max_depth, unsigned long current_depth)
 {
 	if(n == NULL)
 	{
@@ -308,11 +448,11 @@ void get_max_depth(long_map_node* n, unsigned long* max_depth, unsigned long cur
 	else
 	{
 		*max_depth = current_depth+1 > *max_depth ? current_depth+1 : *max_depth;
-		get_max_depth(n->left, max_depth, current_depth+1);
-		get_max_depth(n->right, max_depth, current_depth+1);
+		get_raw_max_depth(n->left, max_depth, current_depth+1);
+		get_raw_max_depth(n->right, max_depth, current_depth+1);
 	}
 }
-void get_min_depth(long_map_node* n, unsigned long* min_depth, unsigned long current_depth)
+void get_raw_min_depth(raw_map_node* n, unsigned long* min_depth, unsigned long current_depth)
 {
 	if(n == NULL)
 	{
@@ -325,13 +465,64 @@ void get_min_depth(long_map_node* n, unsigned long* min_depth, unsigned long cur
 	else
 	{
 		
-		get_min_depth(n->left, min_depth, current_depth+1);
-		get_min_depth(n->right, min_depth, current_depth+1);
+		get_raw_min_depth(n->left, min_depth, current_depth+1);
+		get_raw_min_depth(n->right, min_depth, current_depth+1);
 	}
 }
 
 
-void print_map(long_map_node* n, int depth)
+void print_raw_map(raw_map_node* n, int depth)
+{
+	if(n == NULL)
+	{
+		return;
+	}
+	int i;
+	for(i=0; i < depth; i++){ printf("\t");}
+	printf("%s (%d)\n", (char*)n->key, n->balance);
+	for(i=0; i < depth; i++){ printf("\t");}
+	printf("left:\n");
+	print_raw_map(n->left, depth+1);
+	for(i=0; i < depth; i++){ printf("\t");}
+	printf("right:\n");
+	print_raw_map(n->right, depth+1);
+}
+
+
+void get_long_max_depth(long_map_node* n, unsigned long* max_depth, unsigned long current_depth)
+{
+	if(n == NULL)
+	{
+		*max_depth = current_depth > *max_depth ? current_depth : *max_depth;
+		return;
+	}
+	else
+	{
+		*max_depth = current_depth+1 > *max_depth ? current_depth+1 : *max_depth;
+		get_long_max_depth(n->left, max_depth, current_depth+1);
+		get_long_max_depth(n->right, max_depth, current_depth+1);
+	}
+}
+void get_long_min_depth(long_map_node* n, unsigned long* min_depth, unsigned long current_depth)
+{
+	if(n == NULL)
+	{
+		return;
+	}
+	else if(n->left == NULL && n->right == NULL)
+	{
+		*min_depth = current_depth < *min_depth ? current_depth : *min_depth;
+	}
+	else
+	{
+		
+		get_long_min_depth(n->left, min_depth, current_depth+1);
+		get_long_min_depth(n->right, min_depth, current_depth+1);
+	}
+}
+
+
+void print_long_map(long_map_node* n, int depth)
 {
 	if(n == NULL)
 	{
@@ -342,9 +533,9 @@ void print_map(long_map_node* n, int depth)
 	printf("%ld (%d)\n", n->key, n->balance);
 	for(i=0; i < depth; i++){ printf("\t");}
 	printf("left:\n");
-	print_map(n->left, depth+1);
+	print_long_map(n->left, depth+1);
 	for(i=0; i < depth; i++){ printf("\t");}
 	printf("right:\n");
-	print_map(n->right, depth+1);
+	print_long_map(n->right, depth+1);
 }
 
