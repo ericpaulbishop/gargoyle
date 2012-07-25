@@ -90,7 +90,7 @@ static int parse(	int c,
 	switch (c)
 	{
 		case SET_ID:
-			strcpy(info->id, argv[optind-1], MAX_ID_LENGTH);
+			memcpy(info->id, argv[optind-1], MAX_ID_LENGTH);
 			(info->id)[MAX_ID_LENGTH-1] = '\0';
 			if(strlen(info->id) > 0)
 			{
@@ -100,7 +100,7 @@ static int parse(	int c,
 			}
 			break;
 		case GROUP_ID:
-			strcpy(info->group, argv[optind-1], MAX_GROUP_LENGTH);
+			memcpy(info->group, argv[optind-1], MAX_GROUP_LENGTH);
 			(info->group)[MAX_GROUP_LENGTH-1] = '\0';
 			if(strlen(info->group) > 0)
 			{
