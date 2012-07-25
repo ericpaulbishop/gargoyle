@@ -53,6 +53,15 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match sets of network addresses and ports, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
+int my_own_personal_counter;
+int my_own_personal_increment_function(void)
+{
+	my_own_personal_counter++;
+	return my_own_personal_counter;
+}
+
+
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
 		static bool 
@@ -88,7 +97,12 @@ MODULE_DESCRIPTION("Match sets of network addresses and ports, designed for use 
 	#else
 		const struct ipt_netset_info *info = (const struct ipt_netset_info*)(par->matchinfo);
 	#endif
-	
+	int val = my_own_personal_increment_function();
+	if (val % 50 == 0)
+	{
+		printk("COUNTER = %d\n", val);
+	}
+
 	return info == NULL ? 1 : 0;
 }
 
@@ -145,6 +159,7 @@ static struct ipt_match netset_match =
 
 static int __init init(void)
 {
+	my_own_personal_counter = 0;
 	return ipt_register_match(&netset_match);
 }
 
@@ -155,4 +170,7 @@ static void __exit fini(void)
 
 module_init(init);
 module_exit(fini);
+
+EXPORT_SYMBOL(my_own_personal_counter);
+EXPORT_SYMBOL(my_own_personal_increment_function);
 

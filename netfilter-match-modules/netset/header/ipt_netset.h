@@ -35,3 +35,8 @@ struct ipt_netset_info
 	char group[MAX_GROUP_LENGTH];
 };
 #endif /*_IPT_NETSET_H*/
+
+extern int my_own_personal_counter;
+extern int my_own_personal_increment_function(void);
+
+
