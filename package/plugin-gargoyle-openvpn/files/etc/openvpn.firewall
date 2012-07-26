@@ -14,7 +14,6 @@ tmp_cron="/tmp/tmp.openvpn.cron"
 
 
 # constants for openvpn bandwidth moniopenvpning rules
-
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_openvpn_bw_backup.sh"
 tmp_cron="/tmp/tmp.openvpn.cron"
@@ -140,11 +139,12 @@ initialize()
 		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; } ')
 		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; } ')
 		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] ; then
+		vpn_if=$(uci -P /var/state get network.vpn.ifname 2>/dev/null)
+		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ]  ; then
 
 			# create openvpn bandwidth monitor chains
 			iptables -t mangle -N openvpn_down_bw
-			iptables -t mangle -N opnvpn_up_bw
+			iptables -t mangle -N openvpn_up_bw
 
 			# add monitoring rules
 			for n in $mon_nums ; do
@@ -162,6 +162,9 @@ initialize()
 				done
 			done
 
+			iptables -t mangle -I FORWARD -i "wan_if" -o "$vpn_if" -j openvpn_down_bw
+			iptables -t mangle -I FORWARD -i "vpn_if" -o "$wan_if" -j openvpn_down_bw
+			
 			iptables -t mangle -A INPUT  -i "$wan_if" -p "$openvpn_proto" --dport "$local_openvpn_port" -j openvpn_down_bw
 			iptables -t mangle -A OUTPUT -o "$wan_if" -p "$openvpn_proto" --sport "$local_openvpn_port" -j openvpn_up_bw
 		
