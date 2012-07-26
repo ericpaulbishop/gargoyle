@@ -418,10 +418,15 @@ EOF
 	fi
 	
 	copy_if_diff "$random_dir/$openvpn_client_id.conf"          "$client_conf_dir/$openvpn_client_id.conf"
+	if [ ! -h "$client_conf_dir/$openvpn_client_id.ovpn" ] ; then
+		ln -s "$client_conf_dir/$openvpn_client_id.conf" "$client_conf_dir/$openvpn_client_id.ovpn"	
+	fi
 	copy_if_diff "$random_dir/ccd_${openvpn_client_id}"         "$OPENVPN_DIR/ccd/${openvpn_client_id}"
 	if  [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
 		copy_if_diff "$random_dir/route_data_${openvpn_client_id}"  "$OPENVPN_DIR/route_data/${openvpn_client_id}"
 	fi
+	
+	
 
 	cd /tmp
 	rm -rf "$random_dir"
