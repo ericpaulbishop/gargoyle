@@ -1167,7 +1167,7 @@ CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_iptables-mod-bandwidth=y
 CONFIG_PACKAGE_iptables-mod-conntrack=y
 CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
-# CONFIG_PACKAGE_iptables-mod-extra is not set
+CONFIG_PACKAGE_iptables-mod-extra=y
 CONFIG_PACKAGE_iptables-mod-filter=y
 # CONFIG_PACKAGE_iptables-mod-hashlimit is not set
 CONFIG_PACKAGE_iptables-mod-imq=y
@@ -1329,7 +1329,7 @@ CONFIG_PACKAGE_kmod-ipt-core=y
 CONFIG_PACKAGE_kmod-ipt-bandwidth=y
 CONFIG_PACKAGE_kmod-ipt-conntrack=y
 CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
-# CONFIG_PACKAGE_kmod-ipt-extra is not set
+CONFIG_PACKAGE_kmod-ipt-extra=y
 CONFIG_PACKAGE_kmod-ipt-filter=y
 # CONFIG_PACKAGE_kmod-ipt-hashlimit is not set
 CONFIG_PACKAGE_kmod-ipt-imq=y
@@ -1340,7 +1340,7 @@ CONFIG_PACKAGE_kmod-ipt-ipset=y
 CONFIG_PACKAGE_kmod-ipt-nat=y
 CONFIG_PACKAGE_kmod-ipt-nat-extra=y
 CONFIG_PACKAGE_kmod-ipt-nathelper=y
-# CONFIG_PACKAGE_kmod-ipt-nathelper-extra is not set
+CONFIG_PACKAGE_kmod-ipt-nathelper-extra=y
 # CONFIG_PACKAGE_kmod-ipt-queue is not set
 CONFIG_PACKAGE_kmod-ipt-timerange=y
 # CONFIG_PACKAGE_kmod-ipt-ulog is not set
