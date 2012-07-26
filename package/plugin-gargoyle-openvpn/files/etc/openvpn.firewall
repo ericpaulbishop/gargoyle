@@ -162,8 +162,8 @@ initialize()
 				done
 			done
 
-			iptables -t mangle -I FORWARD -i "wan_if" -o "$vpn_if" -j openvpn_down_bw
-			iptables -t mangle -I FORWARD -i "vpn_if" -o "$wan_if" -j openvpn_down_bw
+			iptables -t mangle -I FORWARD -i "$wan_if" -o "$vpn_if" -j openvpn_down_bw
+			iptables -t mangle -I FORWARD -i "$vpn_if" -o "$wan_if" -j openvpn_up_bw
 			
 			iptables -t mangle -A INPUT  -i "$wan_if" -p "$openvpn_proto" --dport "$local_openvpn_port" -j openvpn_down_bw
 			iptables -t mangle -A OUTPUT -o "$wan_if" -p "$openvpn_proto" --sport "$local_openvpn_port" -j openvpn_up_bw
