@@ -55,6 +55,8 @@ define Package/plugin-gargoyle-openvpn/postinst
 		uci set gargoyle.display.connection_openvpn="OpenVPN"
 		uci set gargoyle.scripts.connection_openvpn="openvpn.sh"
 		uci set gargoyle.connection.openvpn="260"
+		uci set gargoyle.scripts.status_openvpn_connections="openvpn_connections.sh"
+		uci set gargoyle.display.status_openvpn_connections="OpenVPN Status"
 		uci commit
 	fi
 endef
@@ -63,6 +65,8 @@ define Package/plugin-gargoyle-openvpn/postrm
 		uci del gargoyle.display.connection_openvpn
 		uci del gargoyle.scripts.connection_openvpn
 		uci del gargoyle.connection.openvpn
+		uci del gargoyle.scripts.status_openvpn_connections
+		uci del gargoyle.display.status_openvpn_connections
 		uci commit
 	fi
 endef
