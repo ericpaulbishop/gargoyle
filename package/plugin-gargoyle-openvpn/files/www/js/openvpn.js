@@ -928,7 +928,7 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 		var vpnMask = getNumericMask(internalServerMask)
 		if( ( testIp & vpnMask ) != ( vpnIp & vpnMask ) )
 		{
-			errors.push("Specified Client Internal IP " + ip + " is not in OpenVPN Subnet")
+			errors.push("Specified Client Internal IP " + controlDocument.getElementById(prefix + "ip").value + " is not in OpenVPN Subnet")
 		}
 	}
 	if(errors.length == 0 && controlDocument.getElementById(prefix + "subnet_ip_container").style.display != "none")
