@@ -284,12 +284,12 @@
 
 			<div id="openvpn_client_ta_key_text_container">
 				<label id="openvpn_client_ta_key_text_label" class='leftcolumn' for="openvpn_client_use_ta_key_text">TLS-Auth Key:</label>
-				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1")' >&nbsp;&nbsp;
+				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1");updateClientConfigTextFromControls()' >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'>Use TLS-Auth Key</label>
 				<br/>
 				<span class="leftcolumn">TLS-Auth Direction:</span>
 				<span class="rightcolumn">
-					<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction">
+					<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction" onchange="updateClientConfigTextFromControls()">
 						<option value="1">1 (Client)</option>
 						<option value="omitted">Omitted (Symmetric)</option>
 					</select>

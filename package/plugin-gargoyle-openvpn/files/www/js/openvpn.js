@@ -505,7 +505,7 @@ function updateClientControlsFromConfigText()
 		}
 		else if(lineParts[0].toLowerCase() == "tls-auth")
 		{
-			taDirection = lineParts[2] != null ? lineParts[1] : "";
+			taDirection = lineParts[2] != null ? lineParts[2] : "";
 		}
 
 	}
