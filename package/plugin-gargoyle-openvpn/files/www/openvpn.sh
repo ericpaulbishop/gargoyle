@@ -12,23 +12,23 @@
 <script>
 <?
 
-if [ -e /etc/openvpn/dh1024.pem ] ; then
-	echo "var haveDh = true;"
-else
-	echo "var haveDh = false;"
-fi
-
-client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
-echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = [];"
-if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc/openvpn/${client_id}_ca.crt" ] && [ -f "/etc/openvpn/${client_id}.crt" ] && [ -f "/etc/openvpn/${client_id}.key" ] ; then
-	awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
-	awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
-	awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
-	awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
-	if [ -f "/etc/openvpn/${client_id}_ta.key" ] ; then
-		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientTaKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}_ta.key"      2>/dev/null
+	if [ -e /etc/openvpn/dh1024.pem ] ; then
+		echo "var haveDh = true;"
+	else
+		echo "var haveDh = false;"
 	fi
-fi
+	
+	client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
+	echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = [];"
+	if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc/openvpn/${client_id}_ca.crt" ] && [ -f "/etc/openvpn/${client_id}.crt" ] && [ -f "/etc/openvpn/${client_id}.key" ] ; then
+		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
+		if [ -f "/etc/openvpn/${client_id}_ta.key" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientTaKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}_ta.key"      2>/dev/null
+		fi
+	fi
 
  	echo "var tunIp=\""$(ifconfig tun0 2>/dev/null | awk ' { if ( $0 ~ /inet addr:/) { gsub(/^.*:/, "", $2) ; print $2 } }')"\";"
 	echo "var openvpnProc=\""$(ps | grep openvpn | grep -v grep | awk ' { printf $1 }')"\";"
@@ -284,8 +284,13 @@ fi
 
 			<div id="openvpn_client_ta_key_text_container">
 				<label id="openvpn_client_ta_key_text_label" class='leftcolumn' for="openvpn_client_use_ta_key_text">TLS-Auth Key:</label>
-				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "")' >&nbsp;&nbsp;
+				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "")' >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'>Use TLS-Auth Key</label>
+				<br/>
+				<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction">
+					<option value="1">1 (Client)</option>
+					<option value="omitted">Omitted (Symmetric)</option>
+				</select>&nbsp;&nbsp; TLS-Auth Direction
 				<br/>
 				<textarea class='rightcolumnonly' id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text" style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>

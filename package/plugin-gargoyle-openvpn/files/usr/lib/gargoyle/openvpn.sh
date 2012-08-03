@@ -54,7 +54,6 @@ fi
 
 
 
-
 random_string()
 {
 	if [ ! -n "$1" ];
@@ -226,7 +225,7 @@ dh                    $OPENVPN_DIR/dh1024.pem
 ca                    $OPENVPN_DIR/ca.crt
 cert                  $OPENVPN_DIR/server.crt
 key                   $OPENVPN_DIR/server.key
-tls-auth              $OPENVPN_DIR/ta.key
+tls-auth              $OPENVPN_DIR/ta.key 0
 
 persist-key
 persist-tun
@@ -394,7 +393,7 @@ $openvpn_keysize
 ca              ca.crt
 cert            $openvpn_client_id.crt
 key             $openvpn_client_id.key
-tls-auth        ta.key
+tls-auth        ta.key 1
 
 nobind
 persist-key
