@@ -163,11 +163,11 @@ int main (int argc, char **argv)
 			//if we don't know browser time, don't set cookie expiration (in the browser -- server timeout still implemented), otherwise set it
 			if(browser_time == 0)
 			{
-				printf("echo \"Set-Cookie:hash=%s; path=/\"; echo \"Set-Cookie:exp=%s; path=/\"; ", new_hash, new_exp);
+				printf("echo \"Set-Cookie:hash=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Path=/;\"; ", new_hash, new_exp);
 			}
 			else
 			{
-				printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+				printf("echo \"Set-Cookie:hash=%s; Expires=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Expires=%s; Path=/;\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
 			}
 
 			free(new_hash);
