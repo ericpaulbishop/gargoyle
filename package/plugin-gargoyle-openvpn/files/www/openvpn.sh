@@ -287,10 +287,13 @@
 				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1")' >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'>Use TLS-Auth Key</label>
 				<br/>
-				<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction">
-					<option value="1">1 (Client)</option>
-					<option value="omitted">Omitted (Symmetric)</option>
-				</select>&nbsp;&nbsp; TLS-Auth Direction
+				<span class="leftcolumn">TLS-Auth Direction:</span>
+				<span class="rightcolumn">
+					<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction">
+						<option value="1">1 (Client)</option>
+						<option value="omitted">Omitted (Symmetric)</option>
+					</select>
+				</span>
 				<br/>
 				<textarea class='rightcolumnonly' id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text" style="margin-left:5px;width:95%;height:200px;"></textarea>
 			</div>
