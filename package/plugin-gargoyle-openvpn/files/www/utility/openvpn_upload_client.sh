@@ -59,6 +59,7 @@ fi
 error=""
 tab=$(printf "\t")
 
+ta_direction=""
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
@@ -81,10 +82,12 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 
 	conf_file=$(grep -l "^[$tab ]*ca\|^[$tab ]*cert" * 2>/dev/null | head -n 1)
-	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"        "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
-	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"      "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
-	key_file=$( egrep "^[$tab ]*key[$tab ]+"       "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
-	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	ca_file=$(  egrep "^[$tab ]*ca[$tab ]+"             "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	cert_file=$(egrep "^[$tab ]*cert[$tab ]+"           "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	key_file=$( egrep "^[$tab ]*key[$tab ]+"            "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
+	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+"      "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $2 } ' | sed 's/^.*\///g' )
+	ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
+
 
 	if [ -s network ] ; then
 		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' network)
@@ -162,6 +165,7 @@ elif [ -s "$FORM_openvpn_client_conf_file" ] && [ -s "$FORM_openvpn_client_ca_fi
 	cat "$FORM_openvpn_client_key_file"  | tr -d "\r" > "${client_name}.key"
 	rm  "$FORM_openvpn_client_conf_file" "$FORM_openvpn_client_ca_file" "$FORM_openvpn_client_cert_file" "$FORM_openvpn_client_key_file"
 	if [ -s "$FORM_openvpn_client_ta_key_file" ] ; then
+		ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "${client_name}.conf" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
 		cat "$FORM_openvpn_client_ta_key_file"  | tr -d "\r" > "${client_name}_ta.key"
 		rm  "$FORM_openvpn_client_ta_key_file"
 	fi
@@ -174,11 +178,19 @@ elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_te
 	printf "$FORM_openvpn_client_cert_text" | tr -d "\r" > "${client_name}.crt"
 	printf "$FORM_openvpn_client_key_text"  | tr -d "\r" > "${client_name}.key"
 	if [ -n "$FORM_openvpn_client_ta_key_text" ] ; then
+		ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "${client_name}.conf" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
 		printf "$FORM_openvpn_client_ta_key_text"  | tr -d "\r" > "${client_name}_ta.key"
 	fi
 
 fi
 
+
+#For client config, ta_direction can be 1 (client) or omitted, but never 0 (server) or anything else
+if [ "$ta_direction" != "1" ] ; then
+	ta_direction=""
+else
+	ta_direction=" 1"
+fi
 
 if [ ! -f "${client_name}.conf" ] ; then
 	error="Could not find config file"
@@ -191,7 +203,7 @@ if [ -z "$error" ] ; then
 	sed -i 's/^[\t ]*key[\t ].*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
 	sed -i 's/^[\t ]*status[\t ].*$/status  \/var\/openvpn\/current_status/g'         "${client_name}.conf"
 	if [ -f "${client_name}_ta.key" ]  ; then
-		sed -i 's/^[\t ]*tls\-auth[\t ].*$/tls-auth    \/etc\/openvpn\/'"${client_name}_ta.key"'/g'    "${client_name}.conf"
+		sed -i 's/^[\t ]*tls\-auth[\t ].*$/tls-auth    \/etc\/openvpn\/'"${client_name}_ta.key${ta_direction}"'/g'    "${client_name}.conf"
 	fi
 
 	#proofreading

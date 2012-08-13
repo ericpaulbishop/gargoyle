@@ -458,11 +458,15 @@ function resetData()
 function updateClientControlsFromConfigText()
 {
 	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
-	var remote  = null;
-	var port    = null;
-	var proto   = null;
-	var cipher  = null;
-	var keysize = null;
+	var remote       = null;
+	var port         = null;
+	var proto        = null;
+	var cipher       = null;
+	var keysize      = null;
+	var taDirection = null;
+
+	var portFrom = "undefined";
+
 	while(configLines.length >0)
 	{
 		var line = configLines.shift();
@@ -472,6 +476,17 @@ function updateClientControlsFromConfigText()
 		{
 			remote = lineParts[1] != null ? lineParts[1] : remote;
 			port   = lineParts[2] != null ? lineParts[2] : port;
+			portFrom = (lineParts[2] != null) ? "remote" : portFrom;
+		}
+		else if (lineParts[0].toLowerCase() == "rport" && portFrom != "remote")
+		{
+			port   = lineParts[1] != null ? lineParts[2] : port;
+			portFrom = (lineParts[1] != null) ? "rport" : portFrom;
+		}
+		else if (lineParts[0].toLowerCase() == "port" && portFrom != "remote" && portFrom != "rport")
+		{
+			port   = lineParts[1] != null ? lineParts[2] : port;
+			portFrom = (lineParts[1] != null) ? "port" : portFrom;
 		}
 		else if(lineParts[0].toLowerCase() == "proto")
 		{
@@ -488,6 +503,11 @@ function updateClientControlsFromConfigText()
 		{
 			keysize = lineParts[1] != null ? lineParts[1] : keysize;
 		}
+		else if(lineParts[0].toLowerCase() == "tls-auth")
+		{
+			taDirection = lineParts[2] != null ? lineParts[2] : "";
+		}
+
 	}
 	if(remote != null)
 	{
@@ -519,16 +539,25 @@ function updateClientControlsFromConfigText()
 			document.getElementById("openvpn_client_key_other").value = keysize == null ? "" : keysize
 		}
 	}
+	if(taDirection != null)
+	{
+		taDirection = taDirection == "1" ? "1" : "omitted"
+		setSelectedValue("openvpn_client_ta_direction", taDirection )
+		var taCheck = document.getElementById('openvpn_client_use_ta_key_text')
+		taCheck.checked = true
+		enableAssociatedField(taCheck, "openvpn_client_ta_key_text", "")
+		enableAssociatedField(taCheck, "openvpn_client_ta_direction", "1")
+	}
 	proofreadPort(document.getElementById("openvpn_client_port"))
 }
 
 function updateClientConfigTextFromControls()
 {
-	var remote = document.getElementById("openvpn_client_remote").value;
-	var port   = document.getElementById("openvpn_client_port").value;
-	var proto  = getSelectedValue("openvpn_client_protocol");
-	var cipher = getSelectedValue("openvpn_client_cipher");
-
+	var remote      = document.getElementById("openvpn_client_remote").value;
+	var port        = document.getElementById("openvpn_client_port").value;
+	var proto       = getSelectedValue("openvpn_client_protocol");
+	var cipher      = getSelectedValue("openvpn_client_cipher");
+	var taDirection = getSelectedValue("openvpn_client_ta_direction") == "1" ? " 1" : ""
 	
 	var cipherParts = cipher.split(/:/);
 	cipher = cipherParts[0];
@@ -567,6 +596,24 @@ function updateClientConfigTextFromControls()
 			line = keysize == "" ? "" : "keysize " + keysize
 			foundVars["keysize"] = 1
 		}
+		else if(lineParts[0].toLowerCase() == "rport" || lineParts[0].toLowerCase() == "port" )
+		{
+			//specify port in remote line instead of with these directives, so get rid of these lines
+			line = ""
+		}
+		else if(lineParts[0].toLowerCase() == "tls-auth")
+		{
+			if( document.getElementById("openvpn_client_use_ta_key_text").checked )
+			{
+				lineParts[1] = lineParts[1] == null ? "ta.key" : lineParts[1]
+				line = lineParts[0] + " " + lineParts[1] + taDirection
+				foundVars["tls-auth"] = 1
+			}
+			else
+			{
+				line = ""
+			}
+		}
 		newLines.push(line)
 	}
 
@@ -585,6 +632,10 @@ function updateClientConfigTextFromControls()
 	if(foundVars["remote"] == null)
 	{
 		newLines.unshift("remote " + remote + " " + port)
+	}
+	if(foundVars["tls-auth"] == null && document.getElementById("openvpn_client_use_ta_key_text").checked)
+	{
+		newLines.unshift("tls-auth ta.key" + taDirection)
 	}
 
 	document.getElementById("openvpn_client_conf_text").value = newLines.join("\n");
@@ -680,6 +731,7 @@ function setClientVisibility(controlDocument)
 	var textTaCheck = document.getElementById("openvpn_client_use_ta_key_text");
 	enableAssociatedField(fileTaCheck, "openvpn_client_ta_key_file", "")
 	enableAssociatedField(textTaCheck, "openvpn_client_ta_key_text", "")
+	enableAssociatedField(textTaCheck, "openvpn_client_ta_direction", "1")
 
 	var single = getSelectedValue("openvpn_client_file_type", controlDocument) == "zip" ? 1 : 0;
 	var multi  = single == 1 ? 0 : 1;
