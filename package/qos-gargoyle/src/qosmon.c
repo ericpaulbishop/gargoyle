@@ -55,6 +55,18 @@
 #define MAXHOSTNAMELEN  64
 #endif
 
+//The number of arguments needed for two of our kernel calls changed
+//in iproute2 after v2.6.29 (not sure when).  We will use the new define
+//RTNL_FAMILY_MAX to tell us that we are linking against a version of iproute2 
+//after then and define dump_filter and talk accordingly.
+#ifdef RTNL_FAMILY_MAX
+#define dump_filter(a,b,c) rtnl_dump_filter(a,b,c)
+#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e)
+#else
+#define dump_filter(a,b,c) rtnl_dump_filter(a,b,c,NULL,NULL)
+#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e,NULL,NULL)
+#endif
+
 u_char  packet[MAXPACKET];
 int pingflags, options;
 
@@ -521,7 +533,7 @@ int class_list(char *d)
         return 1;
     }
 
-    if (rtnl_dump_filter(&rth, print_class, stdout, NULL, NULL) < 0) {
+    if (dump_filter(&rth, print_class, stdout) < 0) {
         fprintf(stderr, "Dump terminated\n");
         return 1;
     }
@@ -604,7 +616,7 @@ int tc_class_modify(__u32 rate)
     }
 
 
-    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if (talk(&rth, &req.n, 0, 0, NULL) < 0)
         return 2;
 
     return 0;
