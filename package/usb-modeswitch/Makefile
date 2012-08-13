@@ -9,11 +9,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=usb-modeswitch
 PKG_VERSION:=1.2.3
-PKG_RELEASE:=3
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://www.draisberghof.de/usb_modeswitch
-PKG_MD5SUM:=9b29e8b0d93d7604a9e5efc4696d37a3
+PKG_MD5SUM:=dbd4ce7966d7b4a5a0604a8280f7164d
 
 include $(INCLUDE_DIR)/package.mk
 
