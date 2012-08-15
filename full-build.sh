@@ -11,7 +11,7 @@ set_constant_variables()
 	compress_js_dir="$top_dir/compressed_javascript"
 
 	#script for building netfilter patches
-	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
+	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 
 	#openwrt branch
 	branch_name="Attitude Adjustment"
