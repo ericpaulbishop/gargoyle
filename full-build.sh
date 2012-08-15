@@ -14,12 +14,13 @@ set_constant_variables()
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
 
 	#openwrt branch
-	branch_name="backfire"
+	branch_name="Attitude Adjustment"
+	branch_is_trunk="1"
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=32561
+	rnum=33200
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -221,7 +222,11 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	fi
 	echo "fetching openwrt source"
 	rm -rf "$branch_name"
-	svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
+	if [ "$branch_is_trunk" = "1" ] 
+		svn checkout $revision svn://svn.openwrt.org/openwrt/trunk "$branch_name"
+	else
+		svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
+	fi
 	if [ ! -d "$branch_name" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
