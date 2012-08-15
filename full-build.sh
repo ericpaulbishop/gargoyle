@@ -222,7 +222,7 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	fi
 	echo "fetching openwrt source"
 	rm -rf "$branch_name"
-	if [ "$branch_is_trunk" = "1" ] 
+	if [ "$branch_is_trunk" = "1" ] ; then 
 		svn checkout $revision svn://svn.openwrt.org/openwrt/trunk "$branch_name"
 	else
 		svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
@@ -351,7 +351,7 @@ for target in $targets ; do
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
-		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
+		#scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 >/dev/null 2>&1
@@ -360,13 +360,15 @@ for target in $targets ; do
 		else
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
 		fi
+
+		exit
 	
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	else
-		scripts/patch-kernel.sh . "$patches_dir/" 
+		#scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0  
@@ -375,6 +377,8 @@ for target in $targets ; do
 		else
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 
 		fi
+
+		exit
 
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
