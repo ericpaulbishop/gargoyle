@@ -154,8 +154,8 @@ all:
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
 	rm -rf linux linux-$(LINUX_VERSION)
 	tar xjf $(LINUX_SOURCE)
-	rm $(LINUX_SOURCE)
-	mv linux-$(LINIX_VERSION) linux
+	if [  ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then mv $(LINUX_SOURCE) "$(DL_DIR)/" ; else rm $(LINUX_SOURCE) ; fi
+	mv linux-$(LINUX_VERSION) linux
 	rm -rf $(PKG_BUILD_DIR)/patches; mkdir -p $(PKG_BUILD_DIR)/patches 
 	if [ -d $(GENERIC_FILES_DIR) ]; then $(CP) $(GENERIC_FILES_DIR)/* $(LINUX_DIR)/; fi 
 	if [ -d $(FILES_DIR) ]; then \
@@ -198,7 +198,6 @@ fi
 
 cd nf-patch-build
 
-exit
 
 ####################################################################################################
 ##### Build Patches  ###############################################################################
