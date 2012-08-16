@@ -122,10 +122,10 @@ include $(INCLUDE_DIR)/kernel-version.mk
 KERNEL_NAME:=$(shell echo "$(KERNEL)" | sed 's/ /\./g' |  sed 's/\.$$//g' )
 KERNEL_PATCHVER_NAME:=$(shell echo "$(KERNEL_PATCHVER)" | sed 's/ /\./g' |  sed 's/\.$$//g' )
 
-GENERIC_PLATFORM_DIR := $(TOPDIR)/target/linux/generic-$(KERNEL_NAME)
+GENERIC_PLATFORM_DIR := $(TOPDIR)/target/linux/generic
 PLATFORM_DIR:=$(TOPDIR)/target/linux/$(BOARD)
-GENERIC_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/patches$(shell [ -d "$(GENERIC_PLATFORM_DIR)/patches-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
-GENERIC_FILES_DIR := $(GENERIC_PLATFORM_DIR)/files$(shell [ -d "$(GENERIC_PLATFORM_DIR)/files-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
+GENERIC_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/patches-$(KERNEL_NAME)
+GENERIC_FILES_DIR := $(GENERIC_PLATFORM_DIR)/files
 GENERIC_LINUX_CONFIG:=$(firstword $(wildcard $(GENERIC_PLATFORM_DIR)/config-$(KERNEL_PATCHVER_NAME) $(GENERIC_PLATFORM_DIR)/config-default))
 PATCH_DIR := $(PLATFORM_DIR)/patches$(shell [ -d "$(PLATFORM_DIR)/patches-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
 FILES_DIR := $(PLATFORM_DIR)/files$(shell [ -d "$(PLATFORM_DIR)/files-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
@@ -152,9 +152,10 @@ endef
 all:
 	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_MD5SUM) $(LINUX_SITE) ; fi ; 
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
+	rm -rf linux linux-$(LINUX_VERSION)
 	tar xjf $(LINUX_SOURCE)
-	rm *.bz2
-	mv linux* linux
+	rm $(LINUX_SOURCE)
+	mv linux-$(LINIX_VERSION) linux
 	rm -rf $(PKG_BUILD_DIR)/patches; mkdir -p $(PKG_BUILD_DIR)/patches 
 	if [ -d $(GENERIC_FILES_DIR) ]; then $(CP) $(GENERIC_FILES_DIR)/* $(LINUX_DIR)/; fi 
 	if [ -d $(FILES_DIR) ]; then \
