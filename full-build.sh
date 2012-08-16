@@ -239,7 +239,7 @@ fi
 
 
 rm -rf $openwrt_src_dir/dl 
-ln -s $top_dir/downloaded $openwrt_src_dir/dl
+ln -s "$top_dir/downloaded" "$openwrt_src_dir/dl"
 
 
 for target in $targets ; do
