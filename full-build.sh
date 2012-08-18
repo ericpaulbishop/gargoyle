@@ -307,7 +307,7 @@ for target in $targets ; do
 
 
 	#copy this target configuration to build directory
-	cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
+	#cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
 
 
 	#if target is custom, checkout optional packages and copy all that don't 
@@ -361,7 +361,6 @@ for target in $targets ; do
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
 		fi
 
-		exit
 	
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
@@ -378,13 +377,13 @@ for target in $targets ; do
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 
 		fi
 
-		exit
 
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	fi
+	exit
 
 	#copy packages to built/target directory
 	mkdir -p ../built/$target

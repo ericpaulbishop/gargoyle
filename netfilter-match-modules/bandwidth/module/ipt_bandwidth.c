@@ -30,31 +30,16 @@
 
 #include <linux/time.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26) 
 #include <linux/semaphore.h> 
-#else 
-#include <asm/semaphore.h> 
-#endif 
 
 
 #include "bandwidth_deps/tree_map.h"
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_bandwidth.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-	#define ipt_register_match      xt_register_match
-	#define ipt_unregister_match    xt_unregister_match
-#endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
-	#include <linux/ip.h>
-#else
-	#define skb_network_header(skb) (skb)->nh.raw 
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
-	#include <linux/netfilter/x_tables.h>
-#endif
+#include <linux/ip.h>
+#include <linux/netfilter/x_tables.h>
 
 
 /* #define BANDWIDTH_DEBUG 1 */
@@ -74,8 +59,8 @@ static int local_seconds_west;
 static time_t last_local_mw_update;
 
 
-static spinlock_t bandwidth_lock = SPIN_LOCK_UNLOCKED;
-static struct semaphore userspace_lock;
+static spinlock_t bandwidth_lock = __SPIN_LOCK_UNLOCKED(bandwidth_lock);
+DEFINE_SEMAPHORE(userspace_lock);
 
 static string_map* id_map = NULL;
 
@@ -1141,42 +1126,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 }
 
 
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-		static bool 
-	#else
-		static int
-	#endif
-	match(		const struct sk_buff *skb,
-			const struct net_device *in,
-			const struct net_device *out,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const struct xt_match *match,
-			#endif
-			const void *matchinfo,
-			int offset,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				unsigned int protoff,
-			#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-				const void *hdr,
-				u_int16_t datalen,
-			#endif
-			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-				bool *hotdrop
-			#else
-				int *hotdrop
-			#endif	
-			)
-#else
-	static bool match(const struct sk_buff *skb, const struct xt_match_param *par)
-#endif
+static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)matchinfo)->non_const_self;
-	#else
-		struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
-	#endif
+
+	struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	
 	time_t now;
 	int match_found;
@@ -2211,35 +2164,12 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 }
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-	static bool
-	#else
-	static int
-	#endif
-	checkentry(	const char *tablename,
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const void *ip,
-				const struct xt_match *match,
-	#else
-				const struct ipt_ip *ip,
-	#endif
-				void *matchinfo,
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-		    		unsigned int matchsize,
-	#endif
-				unsigned int hook_mask
-				)
-#else
-	static bool checkentry(const struct xt_mtchk_param *par)
-#endif
+
+static int checkentry(const struct xt_mtchk_param *par)
 {
 
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
-	#else
-		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
-	#endif
+
+	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
 
 
 	#ifdef BANDWIDTH_DEBUG
@@ -2382,24 +2312,10 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	return 1;
 }
 
-static void destroy(	
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-			void* matchinfo,
-			unsigned int matchinfosize
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-			const struct xt_match *match,
-			void* matchinfo
-#else
-			const struct xt_mtdtor_param *par
-#endif
-		)
+static void destroy(const struct xt_mtdtor_param *par)
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)matchinfo;
-	#else
-		struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
 
-	#endif
+	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
 
 	#ifdef BANDWIDTH_DEBUG
 		printk("destroy called\n");
@@ -2473,28 +2389,15 @@ static struct nf_sockopt_ops ipt_bandwidth_sockopts =
 };
 
 
-
-static struct ipt_match bandwidth_match = 
+static struct xt_match bandwidth_match __read_mostly = 
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	{ NULL, NULL },
-	"bandwidth",
-	&match,
-	&checkentry,
-	&destroy,
-	THIS_MODULE
-#endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 	.name		= "bandwidth",
 	.match		= &match,
 	.family		= AF_INET,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
 	.matchsize	= sizeof(struct ipt_bandwidth_info),
-#endif
 	.checkentry	= &checkentry,
 	.destroy	= &destroy,
 	.me		= THIS_MODULE,
-#endif
 };
 
 static int __init init(void)
@@ -2520,9 +2423,9 @@ static int __init init(void)
 	{
 		return -1;
 	}
-	init_MUTEX(&userspace_lock); 
 
-	return ipt_register_match(&bandwidth_match);
+
+	return xt_register_match(&bandwidth_match);
 }
 
 static void __exit fini(void)
@@ -2545,7 +2448,7 @@ static void __exit fini(void)
 		}
 	}
 	nf_unregister_sockopt(&ipt_bandwidth_sockopts);
-	ipt_unregister_match(&bandwidth_match);
+	xt_unregister_match(&bandwidth_match);
 	spin_unlock_bh(&bandwidth_lock);
 	up(&userspace_lock);
 
