@@ -261,6 +261,7 @@ for new_d in $new_module_dirs ; do
 	
 		#copy files for iptables extension
 		cp -r $new_d/extension/* iptables.new/extensions
+		cp -r $new_d/header/*    iptables.new/include/linux/netfilter_ipv4/
 
 		#create test file, which is used by iptables Makefile
 		echo "#!/bin/sh" > "iptables.new/extensions/.$lower_name-test"
@@ -328,9 +329,10 @@ if [ "$patch_kernel" = 1 ] ; then
 	#build iptables patch file
 	rm -f ../package/iptables/patches/650-custom_netfilter_match_modules.patch 2>/dev/null
 	cd iptables.new
-	test_files=$(find extensions)
+	extension_files=$(find extensions)
+	include_files=$(find include/linux/netfilter_ipv4)
 	cd ..
-	for t in $test_files ; do
+	for t in $extension_files $include_files ; do
 		if [ ! -d "iptables.new/$t" ] ; then
 			if [ -e "iptables.orig/$t" ] ; then
 				diff -u "iptables.orig/$t" "iptables.new/$t" >>$iptables_patch_dir/650-custom_netfilter_match_modules.patch
