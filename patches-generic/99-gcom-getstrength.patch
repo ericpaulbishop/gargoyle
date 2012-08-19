@@ -1,6 +1,60 @@
---- a/package/comgt/files/3g.sh	(wersja 26680)
-+++ b/package/comgt/files/3g.sh	(kopia robocza)
-@@ -105,6 +90,8 @@
+--- a/package/comgt.orig/files/3g.sh	2012-08-19 20:56:10.086819126 +0200
++++ b/package/comgt/files/3g.sh	2012-08-19 20:42:42.000000000 +0200
+@@ -74,23 +74,41 @@
+ 	case "$service" in
+ 		cdma|evdo) chat="/etc/chatscripts/evdo.chat";;
+ 	*)
++		chat="/etc/chatscripts/3g.chat"
+ 		cardinfo=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom)
+-		if echo "$cardinfo" | grep Novatel; then
++		if echo "$cardinfo" | grep -q Novatel; then
+ 			case "$service" in
+ 				umts_only) CODE=2;;
+ 				gprs_only) CODE=1;;
+ 				*) CODE=0;;
+ 			esac
+ 			mode="AT\$NWRAT=${CODE},2"
+-		elif echo "$cardinfo" | grep Option; then
++		elif echo "$cardinfo" | grep -q Option; then
+ 			case "$service" in
+ 				umts_only) CODE=1;;
+ 				gprs_only) CODE=0;;
+ 				*) CODE=3;;
+ 			esac
+ 			mode="AT_OPSYS=${CODE}"
++		elif echo "$cardinfo" | grep -q huawei; then
++			case "$service" in
++				umts_only) CODE="14,2";;
++				gprs_only) CODE="13,1";;
++				umts_pref) CODE="2,2";;
++				gprs_pref) CODE="2,1";;
++				*) CODE="2,2";;
++			esac
++			mode="AT^SYSCFG=${CODE},3FFFFFFF,2,4"
++		elif echo "$cardinfo" | grep -q ZTE; then
++			case "$service" in
++				umts_only) CODE="2,0,0";;
++				gprs_only) CODE="1,0,0";;
++				umts_pref) CODE="0,0,2";;
++				gprs_pref) CODE="0,0,1";;
++				*) CODE="0,0,0";;
++			esac
++			mode="AT+ZSNT=${CODE}"
+ 		fi
+-		# Don't assume Option to be default as it breaks with Huawei Cards/Sticks
+ 
+ 		test -z "$pincode" || {
+ 			PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
+@@ -99,12 +117,17 @@
+ 				return 1
+ 			}
+ 		}
++
+ 		test -z "$mode" || {
++			logger -t "$config(3g)" "Trying set $service ($mode)"
+ 			MODE="$mode" gcom -d "$device" -s /etc/gcom/setmode.gcom
+ 		}
++		;;
  	esac
  	set_3g_led 1 0 0
  

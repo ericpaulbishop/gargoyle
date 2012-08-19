@@ -2593,5 +2593,5 @@ function updateService()
 
 function showApn()
 {
-	document.getElementById("wan_3g_apn_container").style.display = getSelectedValue("wan_3g_service") == "umts" && getSelectedValue("wan_protocol") == "3g" ? "block" : "none";
+	document.getElementById("wan_3g_apn_container").style.display = getSelectedValue("wan_3g_service") != "cdma" && getSelectedValue("wan_protocol") == "3g" ? "block" : "none";
 }
