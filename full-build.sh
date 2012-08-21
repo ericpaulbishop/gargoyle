@@ -307,7 +307,7 @@ for target in $targets ; do
 
 
 	#copy this target configuration to build directory
-	#cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
+	cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
 
 
 	#if target is custom, checkout optional packages and copy all that don't 
