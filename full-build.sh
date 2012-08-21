@@ -20,7 +20,7 @@ set_constant_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=33200
+	rnum=33213
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -237,8 +237,8 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	mv "$branch_name" "$openwrt_src_dir"
 fi
 
-
-rm -rf $openwrt_src_dir/dl 
+mkdir "$top_dir/downloaded"
+rm -rf "$openwrt_src_dir/dl" 
 ln -s "$top_dir/downloaded" "$openwrt_src_dir/dl"
 
 
