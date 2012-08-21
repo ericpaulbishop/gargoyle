@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Mon Aug 20 20:29:33 2012
+# Tue Aug 21 00:43:17 2012
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1478,14 +1478,13 @@ CONFIG_PACKAGE_libuci=y
 #
 # CONFIG_PACKAGE_arptables is not set
 # CONFIG_PACKAGE_conntrack-tools is not set
-CONFIG_PACKAGE_ebtables=y
-# CONFIG_PACKAGE_ebtables-utils is not set
+# CONFIG_PACKAGE_ebtables is not set
 # CONFIG_PACKAGE_fwknop is not set
 # CONFIG_PACKAGE_fwknopd is not set
 # CONFIG_PACKAGE_ipkungfu is not set
 CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_iptables-mod-bandwidth=y
-CONFIG_PACKAGE_iptables-mod-chaos=y
+# CONFIG_PACKAGE_iptables-mod-chaos is not set
 # CONFIG_PACKAGE_iptables-mod-condition is not set
 CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
 # CONFIG_PACKAGE_iptables-mod-delude is not set
@@ -1496,7 +1495,7 @@ CONFIG_PACKAGE_iptables-mod-ipopt=y
 # CONFIG_PACKAGE_iptables-mod-ipp2p is not set
 CONFIG_PACKAGE_iptables-mod-iprange=y
 # CONFIG_PACKAGE_iptables-mod-ipsec is not set
-CONFIG_PACKAGE_iptables-mod-ipset=y
+# CONFIG_PACKAGE_iptables-mod-ipset is not set
 # CONFIG_PACKAGE_iptables-mod-led is not set
 CONFIG_PACKAGE_iptables-mod-nat-extra=y
 # CONFIG_PACKAGE_iptables-mod-rawnat is not set
@@ -1845,7 +1844,7 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_bing is not set
 # CONFIG_PACKAGE_bmon is not set
 # CONFIG_PACKAGE_bwm is not set
-CONFIG_PACKAGE_bwmon-gargoyle=y
+# CONFIG_PACKAGE_bwmon-gargoyle is not set
 # CONFIG_PACKAGE_bwping is not set
 # CONFIG_PACKAGE_cdp-tools is not set
 # CONFIG_PACKAGE_chat is not set
@@ -1882,7 +1881,7 @@ CONFIG_PACKAGE_gargoyle-firewall-util=y
 # CONFIG_PACKAGE_ipcad is not set
 # CONFIG_PACKAGE_iperf is not set
 # CONFIG_PACKAGE_iperf-mt is not set
-CONFIG_PACKAGE_ipset=y
+# CONFIG_PACKAGE_ipset is not set
 # CONFIG_PACKAGE_iptraf is not set
 # CONFIG_PACKAGE_iputils-arping is not set
 # CONFIG_PACKAGE_iputils-clockdiff is not set
@@ -2235,20 +2234,17 @@ CONFIG_PACKAGE_kmod-nls-base=y
 # Netfilter Extensions
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
-CONFIG_PACKAGE_kmod-ebtables=y
-# CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
-# CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
-# CONFIG_PACKAGE_kmod-ebtables-watchers is not set
+# CONFIG_PACKAGE_kmod-ebtables is not set
 # CONFIG_PACKAGE_kmod-ip6tables is not set
 CONFIG_PACKAGE_kmod-ipt-core=y
 CONFIG_PACKAGE_kmod-ipt-bandwidth=y
-CONFIG_PACKAGE_kmod-ipt-chaos=y
-CONFIG_PACKAGE_kmod-ipt-compat-xtables=y
+# CONFIG_PACKAGE_kmod-ipt-chaos is not set
+# CONFIG_PACKAGE_kmod-ipt-compat-xtables is not set
 # CONFIG_PACKAGE_kmod-ipt-condition is not set
 CONFIG_PACKAGE_kmod-ipt-conntrack=y
 CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
 # CONFIG_PACKAGE_kmod-ipt-debug is not set
-CONFIG_PACKAGE_kmod-ipt-delude=y
+# CONFIG_PACKAGE_kmod-ipt-delude is not set
 CONFIG_PACKAGE_kmod-ipt-extra=y
 CONFIG_PACKAGE_kmod-ipt-filter=y
 # CONFIG_PACKAGE_kmod-ipt-hashlimit is not set
@@ -2256,16 +2252,16 @@ CONFIG_PACKAGE_kmod-ipt-ipopt=y
 # CONFIG_PACKAGE_kmod-ipt-ipp2p is not set
 CONFIG_PACKAGE_kmod-ipt-iprange=y
 # CONFIG_PACKAGE_kmod-ipt-ipsec is not set
-CONFIG_PACKAGE_kmod-ipt-ipset=y
+# CONFIG_PACKAGE_kmod-ipt-ipset is not set
 # CONFIG_PACKAGE_kmod-ipt-led is not set
 CONFIG_PACKAGE_kmod-ipt-nat=y
 CONFIG_PACKAGE_kmod-ipt-nat-extra=y
-CONFIG_PACKAGE_kmod-ipt-nathelper=y
+# CONFIG_PACKAGE_kmod-ipt-nathelper is not set
 # CONFIG_PACKAGE_kmod-ipt-nathelper-extra is not set
 # CONFIG_PACKAGE_kmod-ipt-queue is not set
 # CONFIG_PACKAGE_kmod-ipt-rawnat is not set
 # CONFIG_PACKAGE_kmod-ipt-rawpost is not set
-CONFIG_PACKAGE_kmod-ipt-tarpit=y
+# CONFIG_PACKAGE_kmod-ipt-tarpit is not set
 # CONFIG_PACKAGE_kmod-ipt-tee is not set
 CONFIG_PACKAGE_kmod-ipt-timerange=y
 # CONFIG_PACKAGE_kmod-ipt-tproxy is not set
