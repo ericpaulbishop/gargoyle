@@ -351,7 +351,7 @@ for target in $targets ; do
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
-		#scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
+		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 >/dev/null 2>&1
@@ -367,7 +367,7 @@ for target in $targets ; do
 
 		make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	else
-		#scripts/patch-kernel.sh . "$patches_dir/" 
+		scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
 		if [ "$target" = "custom" ] ; then
 			sh $netfilter_patch_script . ../netfilter-match-modules 1 0  

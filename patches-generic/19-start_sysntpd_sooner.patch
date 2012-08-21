@@ -27,7 +27,7 @@
  PID=/var/run/sysntpd.pid
 --- backfire-a/package/base-files/files/etc/config/system	2011-11-24 22:56:18.070896537 -0500
 +++ backfire-b/package/base-files/files/etc/config/system	2012-06-22 07:56:11.184659234 -0400
-@@ -3,7 +3,6 @@
+@@ -3,8 +3,7 @@
  	option timezone	UTC
  
  config timeserver ntp
@@ -35,6 +35,8 @@
 -	list server	1.openwrt.pool.ntp.org
 -	list server	2.openwrt.pool.ntp.org
 -	list server	3.openwrt.pool.ntp.org
+-	option enable_server 0
 +	list server	0.pool.ntp.org
 +	list server	1.pool.ntp.org
 +	list server	2.pool.ntp.org
++	option enable_server 1
