@@ -205,10 +205,10 @@ int main (int argc, char **argv)
 	return 0;
 }
 
-char* get_root_hash(void)
+char* get_root_hash_from_file(const char* file)
 {
 	int found = 0;
-	FILE *pw = fopen("/etc/passwd", "r");
+	FILE *pw = fopen(file, "r");
 	char* root_hash = NULL;
 
 	if(pw != NULL)
@@ -234,9 +234,20 @@ char* get_root_hash(void)
 		}
 		fclose(pw);
 	}
-	return root_hash;
+	return root_hash
+
+
 }
 
+char* get_root_hash(void)
+{
+	char* root_hash = get_root_hash_from_file("/etc/shadow");
+	if(root_hash == NULL)
+	{
+		root_hash = get_root_hash_from_file("/etc/passwd");
+	}
+	return root_hash;
+}
 
 char* get_cookie_time(time_t t)
 {
