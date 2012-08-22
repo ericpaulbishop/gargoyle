@@ -729,7 +729,7 @@ void print_interface_vars(void)
 
 
 
-	uci_add_history_path(state_ctx, state_ctx->savedir);
+	uci_add_delta_path(state_ctx, state_ctx->savedir);
        	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
@@ -1213,7 +1213,7 @@ string_map* get_hostnames(void)
 			struct uci_context *state_ctx = uci_alloc_context();
 			struct uci_package *p = NULL;
 			struct uci_element *e = NULL;
-			uci_add_history_path(state_ctx, state_ctx->savedir);
+			uci_add_delta_path(state_ctx, state_ctx->savedir);
 		       	uci_set_savedir(state_ctx, "/var/state");
 			if(uci_load(state_ctx, "network", &p) == UCI_OK)
 			{
