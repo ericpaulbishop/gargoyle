@@ -234,7 +234,7 @@ char* get_root_hash_from_file(const char* file)
 		}
 		fclose(pw);
 	}
-	return root_hash
+	return root_hash;
 
 
 }
