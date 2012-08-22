@@ -16,6 +16,8 @@ set_constant_variables()
 	#openwrt branch
 	branch_name="Attitude Adjustment"
 	branch_is_trunk="1"
+	branch_packages_path="packages"
+
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
@@ -208,11 +210,20 @@ fi
 
 
 #create common download directory if it doesn't exist
-if [ ! -d "downloaded" ] ; then
-	mkdir "downloaded"
+if [ ! -d "$top_dir/downloaded" ] ; then
+	mkdir "$top_dir/downloaded"
 fi
 
-openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
+openwrt_src_dir="$top_dir/downloaded/$branch_name"
+openwrt_package_dir="$top_dir/downloaded/$branch_name-packages"
+if [ -n "$rnum" ] ; then
+	openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
+	openwrt_package_dir="$top_dir/downloaded/$branch_name-packages-$rnum"
+else
+	rm -rf "$openwrt_src_dir"
+	rm -rf "$openwrt_package_dir"
+fi
+	
 
 #download openwrt source if we haven't already
 if [ ! -d "$openwrt_src_dir" ] ; then
@@ -313,20 +324,25 @@ for target in $targets ; do
 	#if target is custom, checkout optional packages and copy all that don't 
 	#share names with gargoyle-specific packages to build directory
 	if [ "$target" = "custom" ] ; then
-		if [ ! -d packages ] ; then
-			svn checkout $revision svn://svn.openwrt.org/openwrt/packages
+		if [ ! -d "$openwrt_package_dir" ] ; then
 			
-			cd packages
+			if [ "$branch_is_trunk" = "1" ] ; then 
+				svn checkout $revision svn://svn.openwrt.org/openwrt/packages "$openwrt_package_dir" 
+			else
+				svn checkout $revision "svn://svn.openwrt.org/openwrt/$branch_packages_path" "$openwrt_package_dir" 
+			fi
+			
+			cd "$openwrt_package_dir"
 			find . -name ".svn" | xargs rm -rf
 			for gp in $gargoyle_packages ; do
 				find . -name "$gp" | xargs rm -rf
 			done
-			cd ..
+			cd "$top_dir"
 		fi
-		other_packages=$(ls packages)
+		other_packages=$(ls "$openwrt_package_dir" )
 		for other in $other_packages ; do
 			if [ ! -d "$target-src/package/$other" ] ; then
-				cp -r packages/$other $target-src/package
+				cp -r "$openwrt_package_dir/$other" $target-src/package
 			fi
 		done
 	fi
