@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Tue Aug 21 01:44:49 2012
+# Tue Aug 21 23:16:37 2012
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -446,7 +446,7 @@ CONFIG_SHADOW_PASSWORDS=y
 #
 # Kernel build options
 #
-CONFIG_KERNEL_DEBUG_FS=y
+# CONFIG_KERNEL_DEBUG_FS is not set
 # CONFIG_KERNEL_PROFILING is not set
 # CONFIG_KERNEL_KALLSYMS is not set
 # CONFIG_KERNEL_FTRACE is not set
@@ -541,7 +541,7 @@ CONFIG_FEATURE_drawing-backend_libX11=y
 CONFIG_PACKAGE_base-files=y
 # CONFIG_PACKAGE_block-mount is not set
 CONFIG_EXTROOT_SETTLETIME=20
-# CONFIG_PACKAGE_bridge is not set
+CONFIG_PACKAGE_bridge=y
 CONFIG_PACKAGE_busybox=y
 # CONFIG_BUSYBOX_CONFIG_NOMMU is not set
 # CONFIG_CONFIG_BUSYBOX_CONFIG_FEATURE_SH_IS_HUSH is not set
@@ -1118,9 +1118,7 @@ CONFIG_BUSYBOX_CONFIG_FEATURE_PREFER_IPV4_ADDRESS=y
 CONFIG_BUSYBOX_CONFIG_VERBOSE_RESOLUTION_ERRORS=y
 # CONFIG_BUSYBOX_CONFIG_ARP is not set
 CONFIG_BUSYBOX_CONFIG_ARPING=y
-CONFIG_BUSYBOX_CONFIG_BRCTL=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_BRCTL_FANCY=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_BRCTL_SHOW=y
+# CONFIG_BUSYBOX_CONFIG_BRCTL is not set
 # CONFIG_BUSYBOX_CONFIG_DNSD is not set
 # CONFIG_BUSYBOX_CONFIG_ETHER_WAKE is not set
 # CONFIG_BUSYBOX_CONFIG_FAKEIDENTD is not set
@@ -1149,7 +1147,7 @@ CONFIG_BUSYBOX_CONFIG_NSLOOKUP=y
 CONFIG_BUSYBOX_CONFIG_NTPD=y
 CONFIG_BUSYBOX_CONFIG_FEATURE_NTPD_SERVER=y
 # CONFIG_BUSYBOX_CONFIG_PSCAN is not set
-CONFIG_BUSYBOX_CONFIG_ROUTE=y
+# CONFIG_BUSYBOX_CONFIG_ROUTE is not set
 # CONFIG_BUSYBOX_CONFIG_SLATTACH is not set
 # CONFIG_BUSYBOX_CONFIG_TCPSVD is not set
 CONFIG_BUSYBOX_CONFIG_TELNET=y
@@ -1309,7 +1307,7 @@ CONFIG_PACKAGE_libgcc=y
 # CONFIG_PACKAGE_librt is not set
 # CONFIG_PACKAGE_libstdcpp is not set
 # CONFIG_PACKAGE_mksh is not set
-CONFIG_PACKAGE_mtd=y
+# CONFIG_PACKAGE_mtd is not set
 CONFIG_PACKAGE_netifd=y
 # CONFIG_PACKAGE_nvram is not set
 # CONFIG_PACKAGE_om-watchdog is not set
@@ -1511,7 +1509,7 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_knockd is not set
 # CONFIG_PACKAGE_linuxigd is not set
 # CONFIG_PACKAGE_miniupnpc is not set
-# CONFIG_PACKAGE_miniupnpd is not set
+CONFIG_PACKAGE_miniupnpd=y
 # CONFIG_PACKAGE_natpmp is not set
 # CONFIG_PACKAGE_nufw is not set
 # CONFIG_PACKAGE_nufw-modules is not set
@@ -1628,7 +1626,7 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_bmx6 is not set
 # CONFIG_PACKAGE_bmxd is not set
 # CONFIG_PACKAGE_igmpproxy is not set
-# CONFIG_PACKAGE_ip is not set
+CONFIG_PACKAGE_ip=y
 # CONFIG_PACKAGE_lldpd is not set
 # CONFIG_PACKAGE_net-tools-route is not set
 # CONFIG_PACKAGE_olsrd is not set
@@ -1776,8 +1774,8 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 #
 # Web
 #
-# CONFIG_PACKAGE_httpd-gargoyle is not set
-# CONFIG_PACKAGE_webmon-gargoyle is not set
+CONFIG_PACKAGE_httpd-gargoyle=y
+CONFIG_PACKAGE_webmon-gargoyle=y
 
 #
 # Web Servers/Proxies
@@ -1844,7 +1842,7 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_bing is not set
 # CONFIG_PACKAGE_bmon is not set
 # CONFIG_PACKAGE_bwm is not set
-# CONFIG_PACKAGE_bwmon-gargoyle is not set
+CONFIG_PACKAGE_bwmon-gargoyle=y
 # CONFIG_PACKAGE_bwping is not set
 # CONFIG_PACKAGE_cdp-tools is not set
 # CONFIG_PACKAGE_chat is not set
@@ -1947,7 +1945,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_ppp-multilink is not set
 # CONFIG_PACKAGE_pppdump is not set
 # CONFIG_PACKAGE_pppstats is not set
-# CONFIG_PACKAGE_qos-gargoyle is not set
+CONFIG_PACKAGE_qos-gargoyle=y
 # CONFIG_PACKAGE_raddump is not set
 # CONFIG_PACKAGE_radsecproxy is not set
 # CONFIG_PACKAGE_rrs is not set
@@ -1972,7 +1970,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_stund is not set
 # CONFIG_PACKAGE_stunnel is not set
 # CONFIG_PACKAGE_synce-dccm is not set
-# CONFIG_PACKAGE_tc is not set
+CONFIG_PACKAGE_tc=y
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
 # CONFIG_PACKAGE_tcptraceroute is not set
@@ -2001,7 +1999,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_wget-matrixssl is not set
 # CONFIG_PACKAGE_whob is not set
 # CONFIG_PACKAGE_wing is not set
-# CONFIG_PACKAGE_wol is not set
+CONFIG_PACKAGE_wol=y
 # CONFIG_PACKAGE_wpa-cli is not set
 # CONFIG_PACKAGE_wpa-supplicant is not set
 # CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
@@ -2353,9 +2351,9 @@ CONFIG_PACKAGE_kmod-pppoe=y
 # CONFIG_PACKAGE_kmod-pppol2tp is not set
 CONFIG_PACKAGE_kmod-pppox=y
 # CONFIG_PACKAGE_kmod-pptp is not set
-# CONFIG_PACKAGE_kmod-sched is not set
+CONFIG_PACKAGE_kmod-sched=y
 # CONFIG_PACKAGE_kmod-sched-connmark is not set
-# CONFIG_PACKAGE_kmod-sched-core is not set
+CONFIG_PACKAGE_kmod-sched-core=y
 # CONFIG_PACKAGE_kmod-sched-esfq is not set
 # CONFIG_PACKAGE_kmod-sctp is not set
 # CONFIG_PACKAGE_kmod-sit is not set
@@ -2559,7 +2557,7 @@ CONFIG_PACKAGE_ubusd=y
 #
 # Gargoyle Web Interface
 #
-# CONFIG_PACKAGE_gargoyle is not set
+CONFIG_PACKAGE_gargoyle=y
 # CONFIG_PACKAGE_plugin-gargoyle-dark-one-theme is not set
 # CONFIG_PACKAGE_plugin-gargoyle-green-theme is not set
 # CONFIG_PACKAGE_plugin-gargoyle-light-theme is not set
@@ -2740,7 +2738,7 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_gnuplot is not set
 # CONFIG_PACKAGE_gpioctl is not set
 # CONFIG_PACKAGE_gzip is not set
-# CONFIG_PACKAGE_haserl is not set
+CONFIG_PACKAGE_haserl=y
 # CONFIG_PACKAGE_heyu is not set
 # CONFIG_PACKAGE_hplip is not set
 # CONFIG_PACKAGE_huaweiaktbbo is not set
