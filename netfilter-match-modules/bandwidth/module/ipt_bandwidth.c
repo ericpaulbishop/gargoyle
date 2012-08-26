@@ -2214,6 +2214,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 		master_info->next_reset                 = info->next_reset;
 		master_info->previous_reset             = info->previous_reset;
 		master_info->last_backup_time           = info->last_backup_time;
+		master_info->num_intervals_to_save      = info->num_intervals_to_save;
 		
 		master_info->hashed_id                  = info->hashed_id;
 		master_info->iam                        = info->iam;
