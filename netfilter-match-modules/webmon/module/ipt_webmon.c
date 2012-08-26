@@ -1087,7 +1087,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 	}
 	spin_unlock_bh(&webmon_lock);
 	
-	return 1;
+	return 0;
 }
 
 static void destroy( const struct xt_mtdtor_param *par )
