@@ -2162,12 +2162,6 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	up(&userspace_lock);
 	return 0;
 }
-
-static void debug_keys(char* key, void* value)
-{
-	printk("key = %s\n", key);
-}
-
 static int checkentry(const struct xt_mtchk_param *par)
 {
 
@@ -2234,18 +2228,11 @@ static int checkentry(const struct xt_mtchk_param *par)
 			spin_lock_bh(&bandwidth_lock);
 			
 
-			if(id_map == NULL)
-			{
-				printk("id map is NULL... this isn't good!\n");
-			}
-			printk("hashed id = %lu\n", info->hashed_id);
 	
 			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
 				printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
-				printf("\tiam id = %s\n", iam->info->id);
-				//apply_to_every_long_map_value(id_map, debug_keys);
 				spin_unlock_bh(&bandwidth_lock);
 				up(&userspace_lock);
 				return 0;
@@ -2321,7 +2308,6 @@ static int checkentry(const struct xt_mtchk_param *par)
 
 			iam->info = master_info;
 			set_string_map_element(id_map, info->id, iam);
-			printk("setting id_map entry for %s\n", info->id);
 
 			info->iam = (void*)iam;
 			master_info->iam = (void*)iam;
