@@ -317,7 +317,7 @@
 + 	rtnl_register(PF_INET, RTM_GETADDR, NULL, inet_dump_ifaddr, NULL);
 + }
 +-
-++EXPORT_SYMBOL(inet_confirm_addr)
+++EXPORT_SYMBOL(inet_confirm_addr);
 +--- /dev/null	2012-08-18 22:23:01.258815424 -0400
 ++++ linux-3.3.8/net/bridge/netfilter/ebt_arpnat.c	2012-08-30 07:37:48.220576042 -0400
 +@@ -0,0 +1,626 @@
