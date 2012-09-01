@@ -293,7 +293,7 @@ initialize_qos()
 	rmmod  ipt_ecn >&- 2>&-
 	rmmod  ipt_ECN >&- 2>&-
 	rmmod  imq >&- 2>&-
-	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
+	insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >&- 2>&-
 	ip link set dev imq0 mtu 1500
 
 	insmod cls_fw >&- 2>&-
