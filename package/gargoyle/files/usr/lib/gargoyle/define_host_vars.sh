@@ -40,7 +40,7 @@ else
 fi
 
 echo "conntrackLines = new Array();"
-cat /proc/net/ip_conntrack | awk '{print "conntrackLines.push(\""$0"\");"}'
+cat /proc/net/nf_conntrack | awk '{print "conntrackLines.push(\""$0"\");"}'
 
 echo "arpLines = new Array();"
 cat /proc/net/arp | awk '{print "arpLines.push(\""$0"\");"}'
