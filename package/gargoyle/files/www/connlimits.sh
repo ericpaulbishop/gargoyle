@@ -11,27 +11,16 @@
 
 <script>
 <?
-	max1=$(cat /proc/sys/net/ipv4/ip_conntrack_max 2>/dev/null )
-	max2=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_max 2>/dev/null )
-	if [ -z "$max1" ] ; then
-		max1="$max2"
-	fi
-	if [ -z "$max2" ] ; then
-		max2="$max1"
-	fi
+	max=$(cat /proc/sys/net/netfilter/nf_conntrack_max 2>/dev/null )
 	
-	if [ -n "$max1" ] && [ -n "$max2" ] ; then
-		if [ $max1 -gt $max2 ] ; then
-			echo "var maxConnections = $max1;";
-		else
-			echo "var maxConnections = $max2;";
-		fi
+	if [ -n "$max" ] ; then
+		echo "var maxConnections = $max;";
 	else
 		echo "var maxConnections = 4096;";
 	fi
 	
-	tcp=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established 2>/dev/null)
-	udp=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream 2>/dev/null)
+	tcp=$(cat /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established 2>/dev/null)
+	udp=$(cat /proc/sys/net/netfilter/nf_conntrack_udp_timeout_stream 2>/dev/null)
 	if [ -z "$tcp" ] ; then tcp=180 ; fi
 	if [ -z "$udp" ] ; then udp=180 ; fi
 	echo "var tcpTimeout = $tcp;"
