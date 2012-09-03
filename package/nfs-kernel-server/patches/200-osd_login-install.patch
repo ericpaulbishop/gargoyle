@@ -1,0 +1,10 @@
+--- a/utils/osd_login/Makefile.in
++++ b/utils/osd_login/Makefile.in
+@@ -426,6 +426,7 @@ uninstall-am:
+ all-local: $(OSD_LOGIN_FILES)
+ 
+ install-data-hook:
++	mkdir -p $(DESTDIR)/sbin
+ 	$(INSTALL) --mode 755 osd_login $(DESTDIR)/sbin/osd_login
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
