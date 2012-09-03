@@ -1,0 +1,13 @@
+K 9
+copyright
+V 30
+Copyright (C) 2006 OpenWrt.org
+K 7
+licence
+V 5
+GPLv2
+K 13
+svn:eol-style
+V 6
+native
+END
