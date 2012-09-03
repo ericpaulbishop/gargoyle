@@ -2162,9 +2162,6 @@ static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t
 	up(&userspace_lock);
 	return 0;
 }
-
-
-
 static int checkentry(const struct xt_mtchk_param *par)
 {
 
@@ -2172,23 +2169,52 @@ static int checkentry(const struct xt_mtchk_param *par)
 	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
 
 
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("checkentry called\n");	
 	#endif
 	
+
+
+
+
 	if(info->ref_count == NULL) /* first instance, we're inserting rule */
 	{
+		struct ipt_bandwidth_info *master_info = (struct ipt_bandwidth_info*)kmalloc(sizeof(struct ipt_bandwidth_info), GFP_ATOMIC);
 		info->ref_count = (unsigned long*)kmalloc(sizeof(unsigned long), GFP_ATOMIC);
+
 		if(info->ref_count == NULL) /* deal with kmalloc failure */
 		{
 			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
 			return 0;
 		}
 		*(info->ref_count) = 1;
-		info->non_const_self = info;
+		info->non_const_self = master_info;
 		info->hashed_id = sdbm_string_hash(info->id);
 		info->iam = NULL;
 		info->combined_bw = NULL;
+
+		memcpy(master_info->id, info->id, BANDWIDTH_MAX_ID_LENGTH);
+		master_info->type                       = info->type;
+		master_info->check_type                 = info->check_type;
+		master_info->local_subnet               = info->local_subnet;
+		master_info->local_subnet_mask          = info->local_subnet_mask;
+		master_info->cmp                        = info->cmp;
+		master_info->reset_is_constant_interval = info->reset_is_constant_interval;
+		master_info->reset_interval             = info->reset_interval;
+		master_info->reset_time                 = info->reset_time;
+		master_info->bandwidth_cutoff           = info->bandwidth_cutoff;
+		master_info->current_bandwidth          = info->current_bandwidth;
+		master_info->next_reset                 = info->next_reset;
+		master_info->previous_reset             = info->previous_reset;
+		master_info->last_backup_time           = info->last_backup_time;
+		master_info->num_intervals_to_save      = info->num_intervals_to_save;
+		
+		master_info->hashed_id                  = info->hashed_id;
+		master_info->iam                        = info->iam;
+		master_info->combined_bw                = info->combined_bw;
+		master_info->non_const_self             = info->non_const_self;
+		master_info->ref_count                  = info->ref_count;
 
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
@@ -2197,9 +2223,11 @@ static int checkentry(const struct xt_mtchk_param *par)
 		if(info->cmp != BANDWIDTH_CHECK)
 		{
 			info_and_maps *iam;
+		
 			down(&userspace_lock);
 			spin_lock_bh(&bandwidth_lock);
-		
+			
+
 	
 			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
@@ -2221,10 +2249,11 @@ static int checkentry(const struct xt_mtchk_param *par)
 				
 				now = now -  (60 * local_minutes_west);  /* Adjust for local timezone */
 				info->previous_reset = now;
+				master_info->previous_reset = now;
 				if(info->next_reset == 0)
 				{
 					info->next_reset = get_next_reset_time(info, now, now);
-					
+					master_info->next_reset = info->next_reset;
 					/* 
 					 * if we specify last backup time, check that next reset is consistent, 
 					 * otherwise reset current_bandwidth to 0 
@@ -2239,8 +2268,10 @@ static int checkentry(const struct xt_mtchk_param *par)
 						if(next_reset_of_last_backup != info->next_reset)
 						{
 							info->current_bandwidth = 0;
+							master_info->current_bandwidth = 0;
 						}
 						info->last_backup_time = 0;
+						master_info->last_backup_time = 0;
 					}
 				}
 			}
@@ -2275,23 +2306,30 @@ static int checkentry(const struct xt_mtchk_param *par)
 			}
 
 
-			iam->info = info;
+			iam->info = master_info;
 			set_string_map_element(id_map, info->id, iam);
+
 			info->iam = (void*)iam;
+			master_info->iam = (void*)iam;
 
 
 			spin_unlock_bh(&bandwidth_lock);
 			up(&userspace_lock);
 		}
 	}
+	
 	else
 	{
-		info->non_const_self = info;
+		/* info->non_const_self = info; */
+
+
 		*(info->ref_count) = *(info->ref_count) + 1;
 		#ifdef BANDWIDTH_DEBUG
 			printk("   after increment, ref count = %ld\n", *(info->ref_count) );
 		#endif
 		
+
+		/*
 		if(info->cmp != BANDWIDTH_CHECK)
 		{
 			info_and_maps* iam;
@@ -2305,11 +2343,13 @@ static int checkentry(const struct xt_mtchk_param *par)
 			spin_unlock_bh(&bandwidth_lock);
 			up(&userspace_lock);
 		}
+		*/
 	}
+	
 	#ifdef BANDWIDTH_DEBUG
 		printk("checkentry complete\n");
 	#endif
-	return 1;
+	return 0;
 }
 
 static void destroy(const struct xt_mtdtor_param *par)
@@ -2367,6 +2407,7 @@ static void destroy(const struct xt_mtdtor_param *par)
 			/* info portion of iam gets taken care of automatically */
 		}	
 		kfree(info->ref_count);
+		kfree(info->non_const_self);
 
 		spin_unlock_bh(&bandwidth_lock);
 		up(&userspace_lock);
@@ -2421,6 +2462,7 @@ static int __init init(void)
 	id_map = initialize_string_map(0);
 	if(id_map == NULL) /* deal with kmalloc failure */
 	{
+		printk("id map is null, returning -1\n");
 		return -1;
 	}
 

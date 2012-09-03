@@ -362,7 +362,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 
 static int checkentry(const struct xt_mtchk_param *par)
 {
-	return 1;
+	return 0;
 }
 
 
