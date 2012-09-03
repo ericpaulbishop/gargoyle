@@ -1328,12 +1328,12 @@ function updateqosmon()
 					document.getElementById("qpingtime").innerHTML = lines[5];
 					document.getElementById("qpinglimit").innerHTML = lines[6];
 					document.getElementById("qactivecnt").innerHTML = lines[7];
-					lines = req.responseText.match(/ID\s[0-9A-E][0-9A-F]+.*/g);
+					lines = req.responseText.match(/ID\s+[0-9A-F]+.*/g);
 
 					for (i=0; i<lines.length; i++)
 					{
                          
-					var leafID = lines[i].match(/ID\s([0-9A-E][0-9A-F]+)/)[1];
+					var leafID = lines[i].match(/ID\s+([0-9A-F]+)/)[1];
 					var j;
 
 					for (j=0; j < classTable.length; j++)
@@ -1343,7 +1343,7 @@ function updateqosmon()
 
 					if (j < classTable.length)
 					{
-					    classTable[j].bps = parseInt(lines[i].match(/ID\s[0-9A-E][0-9A-F]+.*:\s([0-9]+)/)[1]);
+					    classTable[j].bps = parseInt(lines[i].match(/ID\s+[0-9A-F]+.*:\s([0-9]+)/)[1]);
 					} 
 
 

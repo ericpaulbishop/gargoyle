@@ -290,18 +290,14 @@ initialize_qos()
 
 	# Now, load/insert necessary kernel modules
 	# The following packages are required for the modules:
-	rmmod  ipt_ecn >&- 2>&-
-	rmmod  ipt_ECN >&- 2>&-
 	rmmod  imq >&- 2>&-
-	insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >&- 2>&-
+	insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >&- 2>&-
 	ip link set dev imq0 mtu 1500
 
 	insmod cls_fw >&- 2>&-
+	insmod cls_flow >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
-	insmod sch_esfq >&- 2>&-
-	insmod ipt_length >&- 2>&-
-	insmod ipt_IMQ >&- 2>&-
-	insmod ipt_layer7 >&- 2>&-
+	insmod sch_sfq >&- 2>&-
 
 	#Set the atm parameters if pppoe is being used.
 	wan_proto=$(uci get network.wan.proto 2>/dev/null)
@@ -315,16 +311,15 @@ initialize_qos()
 		#overhead="stab linklayer ethernet overhead 14 mpu 64"
 	fi
 
-	#On low memory routers we need to take it easy on how big the queue can get.
+	#On low memory routers we need to take it easy on how big the queues can get.
 	#When depth is limited to 32 maximum bandwidth through any class will be around 11Mbps.
 	#Otherwise it will be around 350Mbps.
 	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
 	if [ "$total_mem" -lt 16000 ] ; then
-		esfq_depth="depth 32";
+		sfq_depth="depth 32";
 	else
-		esfq_depth="depth 128";
+		sfq_depth="";
 	fi
-
 
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
@@ -333,6 +328,7 @@ initialize_qos()
 	else
 		total_upload_bandwidth=-1
 	fi
+	
 	upload_default_class="$default_class"
 
 	if [ $total_upload_bandwidth -ge 0 ] ; then
@@ -360,7 +356,7 @@ initialize_qos()
 
 		# Attach egress queuing discipline to QoS interface, now with temperary default
 		$echo_on
-		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 10
+		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 1
 
 		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
 		#
@@ -407,21 +403,27 @@ initialize_qos()
 			fi
 
 			#tbw is the Delay x Bandwidth product in bytes per second.  We do not actually know the packet
-			#delay so we make an estimate of 150ms here and hope for the best.  
+			#delay so we make an estimate of 150ms here and hope for the best.  max_bandwidth is in kbps
+			#we multiply 150ms by 1000 below so the units work out.			
 			tbw=$(($max_bandwidth*150/8));
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
 			fi
 
-			#Information on the esfq qdisc is a little hard to come by.  I used http://fatooh.org/esfq-2.6/current/README and
-			#studied the source code.  ESQF includes the hash 'ctnatchg' key which allows us to hash on the local IP address.
-			#The means that when traffic from two or more local IP addresses end up in the same class the qdisc will share 
-			#bandwidth equally between them.  Upload packets tend to be much smaller in size.  We will use 500 bytes as an average
-			#here.
+			#We will use the SFQ qdisc with flow classifier.  The limit on the depth of our qdisc depends on the upper limit
+			#of the bandwidth allocated to this class.  To impliment per IP sharing of the class we use the flow classifier
+			#and the 'nfct-src' on the upload side and 'dst' on the download side.  I found a nice man page here
+			#https://arndtroide.homelinux.org/cgi-bin/man/man2html?tc-sfq+8
 			$echo_on
+			
+			#Add the leaf class
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			tc qdisc add dev $qos_interface parent 1:$next_class_index esfq limit $(($tbw/500)) $esfq_depth divisor 8 hash ctnatchg  
-			tc filter add dev $qos_interface parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+			#Add the qdisc to the leaf class, assuming average packet at 500 bytes.
+			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/500)) $sfq_depth divisor 256  
+			#Add a filter to the root class to direct packets to this leaf class according to the conntrack mark
+			tc filter add dev $qos_interface parent 1:0 protocol ip handle $next_classid fw flowid 1:$next_class_index
+			#Add a filter to the leaf class to define flows as being the source IP address.
+			tc filter add dev $qos_interface parent $next_class_index: handle 1 flow divisor 256 map key nfct-src and 0xff
 			$echo_off
 
 			if [ "$upload_default_class" = "$uclass_name" ] ; then
@@ -483,7 +485,7 @@ initialize_qos()
 		ip link set imq0 up
 
 		# Attach ingress queuing discipline to IMQ interface
-		tc qdisc add dev imq0 root handle 1:0 hfsc default 10
+		tc qdisc add dev imq0 root handle 1:0 hfsc default 1
 
 		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit
 
@@ -565,8 +567,10 @@ initialize_qos()
 
 			$echo_on
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
-			tc qdisc add dev imq0 parent 1:$next_class_index esfq limit $(($tbw/1000)) $esfq_depth divisor 8 hash ctnatchg  
+			#Assume average download packet size is 1000 bytes.
+			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/1000)) $sfq_depth divisor 256  
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 256 map key dst and 0xff
 			$echo_off
 
 			if [ "$download_default_class" = "$dclass_name" ] ; then
@@ -613,7 +617,7 @@ initialize_qos()
 	fi
 
 	#Enable Gargoyle active QoS monitor
-	if [ "$qos_monenabled" = "true" ] ; then
+	if [ $total_upload_bandwidth -ge 0 ] && [ $total_download_bandwidth -ge 0 ] && [ "$qos_monenabled" = "true" ] ; then
 
 		$echo_on
 
@@ -762,6 +766,8 @@ show()
 	tc -s qdisc show dev imq0
 	tc -s class show dev imq0
 	tc -s filter show dev imq0
+	tc -s filter show dev imq0 parent 2:
+	
 
 }
 
