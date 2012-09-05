@@ -12,7 +12,6 @@
 	enable core files = no
 	guest account = root
 	guest ok = yes
-	invalid users = root
 	local master = yes
 	load printers = no
 	map to guest = Bad User

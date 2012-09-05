@@ -66,6 +66,8 @@ smb_add_share() {
 	local guest_ok
 	local create_mask
 	local dir_mask
+	local public
+	local browseable
 
 	config_get name $1 name
 	config_get path $1 path
@@ -87,8 +89,8 @@ smb_add_share() {
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /var/etc/smb.conf
 	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /var/etc/smb.conf
 
-	[ -n "$public" ]      && echo -e "\tpublic = $public" >> /tmp/smb.conf
-	[ -n "$browseable" ]  && echo -e "\tbrowseable = $browseable" >> /tmp/smb.conf
+	[ -n "$public" ]      && echo -e "\tpublic = $public" >> /var/etc/smb.conf
+	[ -n "$browseable" ]  && echo -e "\tbrowseable = $browseable" >> /var/etc/smb.conf
 
 	found_sambashare="1"
 }
@@ -124,7 +126,7 @@ smb_add_user()
 		done
 		echo "$username:*:$user_num:$samba_group:$username:/var:/bin/false" >>/etc/passwd
 	fi
-	smbpasswd "$username" "$password"
+	printf "$password\n$password\n" | smbpasswd -a -s "$username"
 }
 
 
