@@ -84,27 +84,27 @@ create_gargoyle_banner()
 		openwrt_branch_str="OpenWrt trunk"
 	fi
 
-	local top_line=$(printf "| %-26s| %-32s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
-	local middle_line=$(printf "| %-26s| %-32s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
-	local bottom_line=$(printf "| %-26s| %-32s|" "Built $date" "Target  $target/$profile")
+	local top_line=$(printf "| %-26s| %-35s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
+	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	local bottom_line=$(printf "| %-26s| %-35s|" "Built $date" "Target  $target/$profile")
 
 	cat << 'EOF' >"$banner_file_path"
----------------------------------------------------------------
-|          _____                             _                |
-|         |  __ \                           | |               |
-|         | |  \/ __ _ _ __ __ _  ___  _   _| | ___           |
-|         | | __ / _` | '__/ _` |/ _ \| | | | |/ _ \          |
-|         | |_\ \ (_| | | | (_| | (_) | |_| | |  __/          |
-|          \____/\__,_|_|  \__, |\___/ \__, |_|\___|          |
-|                           __/ |       __/ |                 |
-|                          |___/       |___/                  |
-|                                                             |
-|-------------------------------------------------------------|
+------------------------------------------------------------------
+|          _____                             _                   |
+|         |  __ \                           | |                  |
+|         | |  \/ __ _ _ __ __ _  ___  _   _| | ___              |
+|         | | __ / _` | '__/ _` |/ _ \| | | | |/ _ \             |
+|         | |_\ \ (_| | | | (_| | (_) | |_| | |  __/             |
+|          \____/\__,_|_|  \__, |\___/ \__, |_|\___|             |
+|                           __/ |       __/ |                    |
+|                          |___/       |___/                     |
+|                                                                |
+|----------------------------------------------------------------|
 EOF
 	echo "$top_line"    >> "$banner_file_path"
 	echo "$middle_line" >> "$banner_file_path"
 	echo "$bottom_line" >> "$banner_file_path"
-	echo '---------------------------------------------------------------' >> "$banner_file_path"
+	echo '------------------------------------------------------------------' >> "$banner_file_path"
 
 	#save openwrt variables for rebuild
 	echo "$openwrt_revision" > "$revision_save_dir/OPENWRT_REVISION"
