@@ -181,7 +181,7 @@ function saveChanges()
 		// If we need to restart firewall, do that before restarting openvpn
 		if(commands.match(/uci.*firewall\.vpn_zone\./) || commands.match(/uci.*firewall\.vpn_lan_forwarding\./) || commands.match(/uci.*firewall\.vpn_wan_forwarding\./) || commands.match(/uci.*firewall\.ra_openvpn\./))
 		{
-			commands = commands + "\n/usr/lib/gargoyle/restart_firewall.sh ;\n"
+			commands = commands + "\n/usr/lib/gargoyle/restart_network.sh ;\n"
 		}
 
 		// if anything in server section or client section has changed, restart openvpn
