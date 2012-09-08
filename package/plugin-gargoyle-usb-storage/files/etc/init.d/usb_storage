@@ -80,11 +80,13 @@ do_start()
 		case "${type}" in
 			'FAT32'|'FAT16')
 				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				mount -t vfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2>/dev/null
 			;;
 			'NTFS')
 				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				ntfs-3g "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
 			;;
@@ -93,16 +95,19 @@ do_start()
 			;;
 			'Ext4')
 				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				mount -t ext4 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
 			;;
 			'Ext3')
 				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				mount -t ext3 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
 			;;
 			'Ext2')
 				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				mount -t ext2 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
 			;;
