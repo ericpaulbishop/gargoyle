@@ -22,3 +22,8 @@
 -ubnt-nano-m-squashfs-
 -ubnt-rocket-m-squashfs-
 -wrt400n-squashfs-
+-vmlinux.bin
+-vmlinux.elf
+-vmlinux.gz
+-vmlinux.lzma
+-root.squashfs
