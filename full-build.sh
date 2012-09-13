@@ -323,7 +323,7 @@ for target in $targets ; do
 
 	#if target is custom, checkout optional packages and copy all that don't 
 	#share names with gargoyle-specific packages to build directory
-	if [ "$target" = "custom"  && 1 = 2] ; then
+	if [ "$target" = "custom" ] ; then
 		if [ ! -d "$openwrt_package_dir" ] ; then
 			
 			if [ "$branch_is_trunk" = "1" ] ; then 
@@ -399,7 +399,6 @@ for target in $targets ; do
 
 		make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	fi
-	exit
 
 	#copy packages to built/target directory
 	mkdir -p ../built/$target
