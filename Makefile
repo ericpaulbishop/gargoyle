@@ -21,13 +21,12 @@ all:
 
 %:
 	( \
-		target=`echo $@ | sed 's/\..*$$//'`  \	
-		profile=`echo $@ | sed 's^.*\.//'` \
-		have_profile=`echo $@ | grep "\."` \
-		if [ -z "$$have_profile" ] ; then profile="" ; fi \
-		if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi \
-		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi \
-		\
+		target=`echo $@  | sed 's/\..*$$//'` ; \
+		profile=`echo $@ | sed 's/^.*\.//'`  ; \
+		have_profile=`echo $@ | grep "\."`  ; \
+		if [ -z "$$have_profile" ] ; then profile="" ; fi ; \
+		if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
+		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
 		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
 			bash full-build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
 		else \
