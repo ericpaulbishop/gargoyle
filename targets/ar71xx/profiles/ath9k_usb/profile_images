@@ -13,6 +13,8 @@
 -wndr3700-squashfs
 -wndr3700v2-squashfs
 -wndr3800-squashfs
+-wndrmac-squashfs
+-wndrmacv2-squashfs
 -hornet-ub-squashfs
 -alfa-nx-squashfs
 -alfa-ap96-kernel
@@ -21,3 +23,6 @@
 -ja76pf2-kernel
 -ja76pf2-rootfs-squashfs
 -ja76pf2-squashfs
+-tew-637gru-squashfs
+-tew-673gru-squashfs
+-rw2458n-squashfs-
