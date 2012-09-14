@@ -255,7 +255,6 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	mv "$branch_name" "$openwrt_src_dir"
 fi
 
-mkdir "$top_dir/downloaded"
 rm -rf "$openwrt_src_dir/dl" 
 ln -s "$top_dir/downloaded" "$openwrt_src_dir/dl"
 
