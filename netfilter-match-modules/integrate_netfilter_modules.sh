@@ -72,11 +72,15 @@ fi
 
 #make paths absolute
 exec_dir=$(pwd);
-openwrt_buildroot_dir="$exec_dir/$openwrt_buildroot_dir"
-module_dir="$exec_dir/$module_dir"
+cd "$openwrt_buildroot_dir"
+openwrt_buildroot_dir=$(pwd)
+cd "$exec_dir"
+cd "$module_dir"
+module_dir=$(pwd)
+cd "$exec_dir"
 
-cd $openwrt_buildroot_dir
 
+cd "$openwrt_buildroot_dir"
 mkdir -p nf-patch-build
 rm -rf nf-patch-build/* 2>/dev/null #should be nothing there, should fail with error (which just gets dumped to /dev/null), but let's be sure
 
@@ -232,6 +236,7 @@ for new_d in $new_module_dirs ; do
 	new_name=$(cat $new_d/name 2>/dev/null)
 	upper_name=$(echo "$new_name" | tr "[:lower:]" "[:upper:]")
 	lower_name=$(echo "$new_name" | tr "[:upper:]" "[:lower:]")
+	
 	echo "found $upper_name module, patching..."
 	
 	if [ "$patch_kernel" = 1 ] ; then		
