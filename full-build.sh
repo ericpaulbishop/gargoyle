@@ -9,9 +9,14 @@ set_constant_variables()
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
-
+	
 	#script for building netfilter patches
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
+
+
+}
+set_version_variables()
+{
 
 	#openwrt branch
 	branch_name="Attitude Adjustment"
@@ -30,9 +35,7 @@ set_constant_variables()
 
 	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
 
-}
-set_version_variables()
-{
+
 	# Full display version in gargoyle web interface
 	full_gargoyle_version="$1"
 	if [ -z "$full_gargoyle_version" ] ; then
@@ -121,7 +124,7 @@ fi
 
 #initialize constants
 set_constant_variables
-
+cd "$top_dir"
 
 #parse parameters
 targets=$1
@@ -134,6 +137,8 @@ set_version_variables "$2"
 verbosity=$3
 custom_template=$4
 js_compress=$5
+specified_profile=$6
+
 if [ -z "$js_compress" ] ; then
 	js_compress="true"
 fi
@@ -143,6 +148,8 @@ fi
 
 #compress javascript
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
+
+	cd "$top_dir"
 
 	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
 	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
@@ -244,7 +251,7 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	fi
 	cd "$branch_name"
 	find . -name ".svn" | xargs -r rm -rf
-	cd .. 
+	cd "$top_dir" 
 	mv "$branch_name" "$openwrt_src_dir"
 fi
 
@@ -299,8 +306,11 @@ for target in $targets ; do
 		cp -r  "$compress_js_dir" "$target-src/package/gargoyle/files/www/js"
 	fi
 
-
+	# specify default build profile	
 	default_profile="default"
+	if [ -n "$specified_profile" ] ; then
+		default_profile="$specified_profile" 
+	fi
 	profile_target_dir="$target"
 	if [ "$target" = "custom" ] && [ -n "$custom_template" ] ; then
 		profile_target_dir="$custom_template"
@@ -314,6 +324,10 @@ for target in $targets ; do
 				default_profile=$(echo "$profile_dir" | sed 's/^.*\///g' | sed 's/^.*\\//g')
 			fi
 		done
+	fi
+	profile_name="$default_profile"
+	if [ "$target" = "custom" ] ; then
+		profile_name="custom"
 	fi
 
 
@@ -347,10 +361,7 @@ for target in $targets ; do
 		done
 	fi
 
-	profile_name="$default_profile"
-	if [ "$target" = "custom" ] ; then
-		profile_name="custom"
-	fi
+
 
 	#enter build directory and make sure we get rid of all those pesky .svn files, 
 	#and any crap left over from editing
@@ -370,11 +381,11 @@ for target in $targets ; do
 		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 0 >/dev/null 2>&1
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 0 >/dev/null 2>&1
 			make menuconfig
-			sh $netfilter_patch_script . ../netfilter-match-modules 0 1 >/dev/null 2>&1
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 0 1 >/dev/null 2>&1
 		else
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 >/dev/null 2>&1
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 1 >/dev/null 2>&1
 		fi
 
 	
@@ -386,11 +397,11 @@ for target in $targets ; do
 		scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
 		if [ "$target" = "custom" ] ; then
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 0  
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 0  
 			make menuconfig
-			sh $netfilter_patch_script . ../netfilter-match-modules 0 1  
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 0 1  
 		else
-			sh $netfilter_patch_script . ../netfilter-match-modules 1 1 
+			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 1 
 		fi
 
 
@@ -401,28 +412,28 @@ for target in $targets ; do
 	fi
 
 	#copy packages to built/target directory
-	mkdir -p ../built/$target
+	mkdir -p "$top_dir/built/$target"
 	arch=$(ls bin)
 	if [ -d "bin/$arch/packages/" ] ; then
 		package_files=$(find bin -name "*.ipk")
 		index_files=$(find bin -name "Packa*")
 		for p in $package_files ; do
-			cp "$p" ../built/$target
+			cp "$p" "$top_dir/built/$target"
 		done
 		for i in $index_files ; do
-			cp "$i" ../built/$target
+			cp "$i" "$top_dir/built/$target"
 		done
 	fi
 	
 	#copy images to images/target directory
-	mkdir -p ../images/$target
+	mkdir -p "$top_dir/images/$target"
 	arch=$(ls bin)
 	image_files=$(ls bin/$arch/ 2>/dev/null)
 	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 		for i in $image_files ; do
 			if [ ! -d "bin/$arch/$i" ] ; then
 				newname=$(echo "$i" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-				cp "bin/$arch/$i" "../images/$target/$newname"
+				cp "bin/$arch/$i" "$top_dir/images/$target/$newname"
 			fi
 		done
 	else
@@ -432,7 +443,7 @@ for target in $targets ; do
 			for c in $candidates ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-					cp "bin/$arch/$c" "../images/$target/$newname"
+					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
 				fi
 			done
 		done
@@ -444,7 +455,7 @@ for target in $targets ; do
 	fi
 
 	other_profiles=""
-	if [ "$target" != "custom" ] ; then
+	if [ "$target" != "custom" ] && [ -z "$specified_profile" ] ; then
 		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
 	fi
 	for p in $other_profiles ; do
@@ -478,7 +489,7 @@ for target in $targets ; do
 			for c in $candidates ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-					cp "bin/$arch/$c" "../images/$target/$newname"
+					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
 				fi
 			done
 		done
@@ -487,6 +498,6 @@ for target in $targets ; do
        
 
 	#cd back to parent directory for next target (if there is one)
-	cd ..
+	cd "$top_dir"
 done
 

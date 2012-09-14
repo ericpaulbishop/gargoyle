@@ -9,9 +9,9 @@ set_constant_variables()
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
-	
+
 	#script for building netfilter patches
-	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules_backfire.sh"
+	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 	
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -66,39 +66,40 @@ create_gargoyle_banner()
 	local openwrt_branch="$6"
 	local openwrt_revision="$7"
 	local banner_file_path="$8"
-
-
-
-
+	local revision_save_dir="$9"
 
 	local openwrt_branch_str="OpenWrt $openwrt_branch branch"
 	if [ "$openwrt_branch" = "trunk" ] ; then
 		openwrt_branch_str="OpenWrt trunk"
 	fi
 
-	local top_line=$(printf "| %-26s| %-32s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
-	local middle_line=$(printf "| %-26s| %-32s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
-	local bottom_line=$(printf "| %-26s| %-32s|" "Built $date" "Target  $target/$profile")
+	local top_line=$(printf "| %-26s| %-35s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
+	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	local bottom_line=$(printf "| %-26s| %-35s|" "Built $date" "Target  $target/$profile")
 
 	cat << 'EOF' >"$banner_file_path"
----------------------------------------------------------------
-|          _____                             _                |
-|         |  __ \                           | |               |
-|         | |  \/ __ _ _ __ __ _  ___  _   _| | ___           |
-|         | | __ / _` | '__/ _` |/ _ \| | | | |/ _ \          |
-|         | |_\ \ (_| | | | (_| | (_) | |_| | |  __/          |
-|          \____/\__,_|_|  \__, |\___/ \__, |_|\___|          |
-|                           __/ |       __/ |                 |
-|                          |___/       |___/                  |
-|                                                             |
-|-------------------------------------------------------------|
+------------------------------------------------------------------
+|          _____                             _                   |
+|         |  __ \                           | |                  |
+|         | |  \/ __ _ _ __ __ _  ___  _   _| | ___              |
+|         | | __ / _` | '__/ _` |/ _ \| | | | |/ _ \             |
+|         | |_\ \ (_| | | | (_| | (_) | |_| | |  __/             |
+|          \____/\__,_|_|  \__, |\___/ \__, |_|\___|             |
+|                           __/ |       __/ |                    |
+|                          |___/       |___/                     |
+|                                                                |
+|----------------------------------------------------------------|
 EOF
 	echo "$top_line"    >> "$banner_file_path"
 	echo "$middle_line" >> "$banner_file_path"
 	echo "$bottom_line" >> "$banner_file_path"
-	echo '---------------------------------------------------------------' >> "$banner_file_path"
-}
+	echo '------------------------------------------------------------------' >> "$banner_file_path"
 
+	#save openwrt variables for rebuild
+	echo "$openwrt_revision" > "$revision_save_dir/OPENWRT_REVISION"
+	echo "$openwrt_branch"  > "$revision_save_dir/OPENWRT_BRANCH"
+
+}
 
 
 if [ -z "${BASH_VERSION}" ] || [ "${BASH_VERSION:0:1}" -lt '4' ]; then
