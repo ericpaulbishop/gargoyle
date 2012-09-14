@@ -1,8 +1,6 @@
 -combined.squashfs.img
+-squashfs.bin
 -root.squashfs
 -vmlinux.lzma
 -vmlinux.gz
 -vmlinux.elf
--ubnt2-pico2-squashfs.bin
--ubnt2-squashfs.bin
--ubnt5-squashfs.bin
