@@ -418,7 +418,7 @@ for target in $targets ; do
 	mkdir -p ../images/$target
 	arch=$(ls bin)
 	image_files=$(ls bin/$arch/ 2>/dev/null)
-	if [ ! -e $targets_dir/$target/profiles/default/profile_images  ]  ; then 
+	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 		for i in $image_files ; do
 			if [ ! -d "bin/$arch/$i" ] ; then
 				newname=$(echo "$i" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
@@ -426,7 +426,7 @@ for target in $targets ; do
 			fi
 		done
 	else
-		profile_images=$(cat $targets_dir/$target/profiles/default/profile_images 2>/dev/null)
+		profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
 			candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
 			for c in $candidates ; do
