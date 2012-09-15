@@ -20,10 +20,39 @@ set_constant_variables()
 	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
 
 }
+
+
+set_constant_variables()
+{
+	#working directories
+	scriptpath="$(readlink -f "$0")"
+	top_dir="${scriptpath%/${0##*/}}"
+	targets_dir="$top_dir/targets"
+	patches_dir="$top_dir/patches-generic"
+	compress_js_dir="$top_dir/compressed_javascript"
+	
+	#script for building netfilter patches
+	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
+
+
+	#cores / build threads
+	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
+	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+}
+
 set_version_variables()
 {
+	#set date here, so it's guaranteed the same for all images
+	#even though build can take several hours
+	build_date=$(date +"%B %d, %Y")
+
+	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
+
 	# Full display version in gargoyle web interface
-	full_gargoyle_version="$1"
+	if [ -z "$full_gargoyle_version" ] ; then
+		full_gargoyle_version="$1"
+	fi
 	if [ -z "$full_gargoyle_version" ] ; then
 		full_gargoyle_version="Unknown"
 	fi
@@ -102,6 +131,12 @@ EOF
 }
 
 
+
+######################################################################################################
+## Begin Main Body of Build Script                                                                  ##
+######################################################################################################
+
+
 if [ -z "${BASH_VERSION}" ] || [ "${BASH_VERSION:0:1}" -lt '4' ]; then
 	echo 'Build script was designed to work with bash in version 4 (at least). Exiting...'
 	exit 1
@@ -109,28 +144,32 @@ fi
 
 
 
-
 #initialize constants
 set_constant_variables
-
+cd "$top_dir"
 
 #parse parameters
-targets=$1
+targets="$1"
+full_gargoyle_version="$2"
+verbosity="$3"
+js_compress="$4"
+specified_profile="$5"
+
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
 	targets=$(ls $targets_dir | sed 's/custom//g' 2>/dev/null)
 fi
-
-set_version_variables "$2"
-
-verbosity=$3
-js_compress=$4
 if [ -z "$js_compress" ] ; then
 	js_compress="true"
 fi
+set_version_variables "$full_gargoyle_version"
+
+
 
 
 #compress javascript
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
+
+	cd "$top_dir"
 
 	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
 	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
@@ -195,32 +234,24 @@ fi
 
 
 
+
 for target in $targets ; do
 
-	#if user tries to build brcm-2.4 warn them that this has been removed in favor of brcm47xx and build that instead
-	#if user tries to build brcm-2.4 warn them that this has been removed in favor of brcm47xx and build that instead
-	if [ "$target" = "brcm-2.4" ] || [ "$target" = "brcm" ] ; then
-		echo ""
-		echo ""	
-		echo "*************************************************************************"
-		echo "  WARNING: brcm-2.4 target has been deprecated in favor of newer brcm47xx"
-		echo "           Setting target to brcm47xx"
-		echo "*************************************************************************"
-		target="brcm47xx"
-	fi
-
 	if [ -d "$target-src" ] ; then
-		echo ""
-		echo ""	
-		echo "**************************************************************"
-		echo "        Gargoyle is now rebuilding target: $target"
-		echo "**************************************************************"
-		echo ""
-		echo ""
 
-		#remove old packages and images
-		rm -rf "built/$target"
-		rm -rf "images/$target"
+		#remove old build files
+		rm -rf "$target-src"
+		if [ -z "$specified_profile" ] ; then
+			rm -rf "$top_dir/built/$target"
+			rm -rf "$top_dir/images/$target"
+		else
+			profile_images=$(cat "$targets_dir/$target/profiles/$specified_profile/profile_images" 2>/dev/null)
+			mkdir -p "$top_dir/images/$target/"
+			for pi in $profile_images ; do
+				rm -rf "$top_dir/images/$target/"*"$pi"*
+			done
+		fi
+
 	
 		#copy gargoyle-specific packages to build directory
 		package_dir="package"
@@ -238,7 +269,11 @@ for target in $targets ; do
 			cp -r  "$compress_js_dir" "$target-src/package/gargoyle/files/www/js"
 		fi
 
+		# specify default build profile	
 		default_profile="default"
+		if [ -n "$specified_profile" ] ; then
+			default_profile="$specified_profile" 
+		fi
 		profile_target_dir="$target"
 		if [ "$target" = "custom" ] && [ -n "$custom_template" ] ; then
 			profile_target_dir="$custom_template"
@@ -253,18 +288,27 @@ for target in $targets ; do
 				fi
 			done
 		fi
-	
-		#copy this target configuration to build directory
-		cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
-
 		profile_name="$default_profile"
 		if [ "$target" = "custom" ] ; then
 			profile_name="custom"
 		fi
 
+		echo ""
+		echo ""	
+		echo "**************************************************************************"
+		echo "        Gargoyle is now rebuilding target: $target / $profile_name"
+		echo "**************************************************************************"
+		echo ""
+		echo ""
+
+	
+		#copy this target configuration to build directory
+		cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
+
+
 		#enter build directory and make sure we get rid of all those pesky .svn files, 
 		#and any crap left over from editing
-		cd "$target-src"
+		cd "$top_dir/$target-src"
 		find . -name ".svn"  | xargs rm -rf
 		find . -name "*~"    | xargs rm -rf
 		find . -name ".*sw*" | xargs rm -rf
@@ -283,44 +327,44 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
-			make -j 4  GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version"
 		else
-			make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 		fi
 
 		#copy packages to built/target directory
-		mkdir -p ../built/$target
+		mkdir -p "$top_dir/built/$target"
 		arch=$(ls bin)
 		if [ -d "bin/$arch/packages/" ] ; then
 			package_files=$(find bin -name "*.ipk")
 			index_files=$(find bin -name "Packa*")
 			for p in $package_files ; do
-				cp "$p" ../built/$target
+				cp "$p" "$top_dir/built/$target"
 			done
 			for i in $index_files ; do
-				cp "$i" ../built/$target
+				cp "$i" "$top_dir/built/$target"
 			done
 		fi
 	
 		#copy images to images/target directory
-		mkdir -p ../images/$target
+		mkdir -p "$top_dir/images/$target"
 		arch=$(ls bin)
 		image_files=$(ls bin/$arch/ 2>/dev/null)
-		if [ ! -e $targets_dir/$target/profiles/default/profile_images  ]  ; then 
+		if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 			for i in $image_files ; do
 				if [ ! -d "bin/$arch/$i" ] ; then
 					newname=$(echo "$i" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-					cp "bin/$arch/$i" "../images/$target/$newname"
+					cp "bin/$arch/$i" "$top_dir/images/$target/$newname"
 				fi
 			done
 		else
-			profile_images=$(cat $targets_dir/$target/profiles/default/profile_images 2>/dev/null)
+			profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 			for pi in $profile_images ; do
 				candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
 				for c in $candidates ; do
 					if [ ! -d "bin/$arch/$c" ] ; then
 						newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-						cp "bin/$arch/$c" "../images/$target/$newname"
+						cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
 					fi
 				done
 			done
@@ -332,29 +376,38 @@ for target in $targets ; do
 		fi
 	
 		other_profiles=""
-		if [ "$target" != "custom" ] ; then
-			other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
+		if [ "$target" != "custom" ] && [ -z "$specified_profile" ] ; then
+			other_profiles=$(ls "$targets_dir/$target/profiles" | grep -v "^$default_profile$" )
 		fi
 		for p in $other_profiles ; do
 		
 			profile_name="$p"
 
 			#copy profile config and rebuild
-			cp $targets_dir/$target/profiles/$p/config .config
+			cp "$targets_dir/$target/profiles/$p/config" .config
 
 			openwrt_target=$(get_target_from_config "./.config")
 			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
+			echo ""
+			echo ""	
+			echo "**************************************************************************"
+			echo "        Gargoyle is now rebuilding target: $target / $p"
+			echo "**************************************************************************"
+			echo ""
+			echo ""
+
+
 
 			if [ "$verbosity" = "0" ] ; then
-				make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
+				make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version"
 			else
-				make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+				make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 			fi
 
 
 			#if we didn't build anything, die horribly
-			image_files=$(ls bin/$arch/ 2>/dev/null)	
+			image_files=$(ls "bin/$arch/" 2>/dev/null)	
 			if [ -z "$image_files" ] ; then
 				exit
 			fi
@@ -362,11 +415,11 @@ for target in $targets ; do
 			#copy relevant images for which this profile applies
 			profile_images=$(cat $targets_dir/$target/profiles/$p/profile_images 2>/dev/null)
 			for pi in $profile_images ; do
-				candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
+				candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
 				for c in $candidates ; do
 					if [ ! -d "bin/$arch/$c" ] ; then
 						newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-						cp "bin/$arch/$c" "../images/$target/$newname"
+						cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
 					fi
 				done
 			done
@@ -374,7 +427,7 @@ for target in $targets ; do
 
       
 		#cd back to parent directory for next target (if there is one)
-		cd ..
+		cd "$top_dir"
 	fi
 done
 

@@ -123,6 +123,12 @@ EOF
 }
 
 
+
+######################################################################################################
+## Begin Main Body of Build Script                                                                  ##
+######################################################################################################
+
+
 if [ -z "${BASH_VERSION}" ] || [ "${BASH_VERSION:0:1}" -lt '4' ]; then
 	echo 'Build script was designed to work with bash in version 4 (at least). Exiting...'
 	exit 1
@@ -338,7 +344,7 @@ for target in $targets ; do
 
 
 	#copy this target configuration to build directory
-	cp "$targets_dir/$target/profiles/$default_profile/config" "$target-src/.config"
+	cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
 
 
 	#if target is custom, checkout optional packages and copy all that don't 
@@ -371,7 +377,7 @@ for target in $targets ; do
 
 	#enter build directory and make sure we get rid of all those pesky .svn files, 
 	#and any crap left over from editing
-	cd "$target-src"
+	cd "$top_dir/$target-src"
 	find . -name ".svn"  | xargs rm -rf
 	find . -name "*~"    | xargs rm -rf
 	find . -name ".*sw*" | xargs rm -rf
@@ -462,14 +468,14 @@ for target in $targets ; do
 
 	other_profiles=""
 	if [ "$target" != "custom" ] && [ -z "$specified_profile" ] ; then
-		other_profiles=$(ls $targets_dir/$target/profiles | grep -v "^$default_profile$" )
+		other_profiles=$(ls "$targets_dir/$target/profiles" | grep -v "^$default_profile$" )
 	fi
 	for p in $other_profiles ; do
 
 		profile_name="$p"
 
 		#copy profile config and rebuild
-		cp $targets_dir/$target/profiles/$p/config .config
+		cp "$targets_dir/$target/profiles/$p/config" .config
 		
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
