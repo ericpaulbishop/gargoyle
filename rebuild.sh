@@ -240,7 +240,6 @@ for target in $targets ; do
 	if [ -d "$target-src" ] ; then
 
 		#remove old build files
-		rm -rf "$target-src"
 		if [ -z "$specified_profile" ] ; then
 			rm -rf "$top_dir/built/$target"
 			rm -rf "$top_dir/images/$target"
