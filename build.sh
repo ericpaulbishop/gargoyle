@@ -499,15 +499,15 @@ for target in $targets ; do
 
 
 		#if we didn't build anything, die horribly
-		image_files=$(ls bin/$arch/ 2>/dev/null)	
+		image_files=$(ls "bin/$arch/" 2>/dev/null)	
 		if [ -z "$image_files" ] ; then
 			exit
 		fi
 
 		#copy relevant images for which this profile applies
-		profile_images=$(cat $targets_dir/$target/profiles/$p/profile_images 2>/dev/null)
+		profile_images=$(cat "$targets_dir/$target/profiles/$p/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
-			candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
+			candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
 			for c in $candidates ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")

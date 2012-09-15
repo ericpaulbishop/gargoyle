@@ -11,7 +11,7 @@ all:
 		targets=`ls targets | sed 's/custom//g' ` ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" "";\
+				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" "";\
 			else \
 				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "";\
 			fi ;\
@@ -28,7 +28,7 @@ all:
 		if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
 		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
 		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			bash full-build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
+			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
 		else \
 			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile"; \
 		fi ; \
