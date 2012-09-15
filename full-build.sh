@@ -14,7 +14,12 @@ set_constant_variables()
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 
 
+	#cores / build threads
+	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
+	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
 }
+
 set_version_variables()
 {
 
@@ -37,7 +42,9 @@ set_version_variables()
 
 
 	# Full display version in gargoyle web interface
-	full_gargoyle_version="$1"
+	if [ -z "$full_gargoyle_version" ] ; then
+		full_gargoyle_version="$1"
+	fi
 	if [ -z "$full_gargoyle_version" ] ; then
 		full_gargoyle_version="Unknown"
 	fi
@@ -127,21 +134,20 @@ set_constant_variables
 cd "$top_dir"
 
 #parse parameters
-targets=$1
+targets="$1"
+full_gargoyle_version="$2"
+verbosity="$3"
+custom_template="$4"
+js_compress="$5"
+specified_profile="$6"
+
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
 	targets=$(ls $targets_dir | sed 's/custom//g' 2>/dev/null)
 fi
-
-set_version_variables "$2"
-
-verbosity=$3
-custom_template=$4
-js_compress=$5
-specified_profile=$6
-
 if [ -z "$js_compress" ] ; then
 	js_compress="true"
 fi
+set_version_variables "$full_gargoyle_version"
 
 
 
@@ -261,29 +267,20 @@ ln -s "$top_dir/downloaded" "$openwrt_src_dir/dl"
 
 for target in $targets ; do
 
-	#if user tries to build brcm-2.4 warn them that this has been removed in favor of brcm47xx and build that instead
-	if [ "$target" = "brcm-2.4" ] || [ "$target" = "brcm" ] ; then
-		echo ""
-		echo ""	
-		echo "*************************************************************************"
-		echo "  WARNING: brcm-2.4 target has been deprecated in favor of newer brcm47xx"
-		echo "           Setting target to brcm47xx"
-		echo "*************************************************************************"
-		target="brcm47xx"
-	fi
-
-	echo ""
-	echo ""	
-	echo "**************************************************************"
-	echo "        Gargoyle is now building target: $target"
-	echo "**************************************************************"
-	echo ""
-	echo ""
 
 	#remove old build files
 	rm -rf "$target-src"
-	rm -rf "built/$target"
-	rm -rf "images/$target"
+	if [ -z "$specified_profile" ] ; then
+		rm -rf "$top_dir/built/$target"
+		rm -rf "$top_dir/images/$target"
+	else
+		profile_images=$(cat "$targets_dir/$target/profiles/$specified_profile/profile_images" 2>/dev/null)
+		mkdir -p "$top_dir/images/$target/"
+		for pi in $profile_images ; do
+			rm -rf "$top_dir/images/$target/"*"$pi"*
+		done
+	fi
+
 
 	#copy source to new, target build directory
 	cp -r "$openwrt_src_dir" "$target-src"
@@ -328,6 +325,16 @@ for target in $targets ; do
 	if [ "$target" = "custom" ] ; then
 		profile_name="custom"
 	fi
+
+	echo ""
+	echo ""	
+	echo "**************************************************************************"
+	echo "        Gargoyle is now building target: $target / $profile_name"
+	echo "**************************************************************************"
+	echo ""
+	echo ""
+
+
 
 
 	#copy this target configuration to build directory
@@ -391,7 +398,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j 4 GARGOYLE_VERSION="$numeric_gargoyle_version"
+		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version"
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
@@ -407,7 +414,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 	fi
 
 	#copy packages to built/target directory
@@ -468,10 +475,20 @@ for target in $targets ; do
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
 		
+		echo ""
+		echo ""	
+		echo "**************************************************************************"
+		echo "        Gargoyle is now building target: $target / $p"
+		echo "**************************************************************************"
+		echo ""
+		echo ""
+
+
+
 		if [ "$verbosity" = "0" ] ; then
-			make -j 4  GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version"
 		else
-			make -j 4 V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
 		fi
 
 
