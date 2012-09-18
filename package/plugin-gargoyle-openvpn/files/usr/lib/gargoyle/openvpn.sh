@@ -218,7 +218,7 @@ $openvpn_keysize
 dev                   tun
 keepalive             25 180
 status                /var/openvpn/current_status
-verb                  5
+verb                  3
 
 
 dh                    $OPENVPN_DIR/dh1024.pem
@@ -385,7 +385,7 @@ status          current_status
 resolv-retry    infinite
 ns-cert-type    server
 topology        subnet
-verb            5
+verb            3
 
 cipher          $openvpn_cipher
 $openvpn_keysize

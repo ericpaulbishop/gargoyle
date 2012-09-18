@@ -34,24 +34,12 @@
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_timerange.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-	#include <linux/ktime.h>
-#endif
+#include <linux/ktime.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-	#define ipt_register_match      xt_register_match
-	#define ipt_unregister_match    xt_unregister_match
-#endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
-	#include <linux/ip.h>
-#else
-	#define skb_network_header(skb) (skb)->nh.raw 
-#endif
+#include <linux/ip.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
-	#include <linux/netfilter/x_tables.h>
-#endif
+#include <linux/netfilter/x_tables.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
@@ -61,41 +49,9 @@ MODULE_DESCRIPTION("Match time ranges, designed for use with Gargoyle web interf
 extern struct timezone sys_tz;
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-		static bool 
-	#else
-		static int
-	#endif
-	match(		const struct sk_buff *skb,
-			const struct net_device *in,
-			const struct net_device *out,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const struct xt_match *match,
-			#endif
-			const void *matchinfo,
-			int offset,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				unsigned int protoff,
-			#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-				const void *hdr,
-				u_int16_t datalen,
-			#endif
-			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-				bool *hotdrop
-			#else
-				int *hotdrop
-			#endif	
-			)
-#else
-	static bool match(const struct sk_buff *skb, const struct xt_match_param *par)
-#endif
+static bool match(const struct sk_buff *skb, const struct xt_action_param *par)
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		const struct ipt_timerange_info *info =	(const struct ipt_timerange_info*)matchinfo;
-	#else
-		const struct ipt_timerange_info *info = (const struct ipt_timerange_info*)(par->matchinfo);
-	#endif
+	const struct ipt_timerange_info *info = (const struct ipt_timerange_info*)(par->matchinfo);
 
 	
 	time_t stamp_time;
@@ -155,64 +111,30 @@ extern struct timezone sys_tz;
 }
 
 
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-	static bool
-	#else
-	static int
-	#endif
-	checkentry(	const char *tablename,
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const void *ip,
-				const struct xt_match *match,
-	#else
-				const struct ipt_ip *ip,
-	#endif
-				void *matchinfo,
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-		    		unsigned int matchsize,
-	#endif
-				unsigned int hook_mask
-				)
-#else
-	static bool checkentry(const struct xt_mtchk_param *par)
-#endif
+static int checkentry(const struct xt_mtchk_param *par)
 {
-	return 1;
+	return 0;
 }
 
 
-static struct ipt_match timerange_match = 
+static struct xt_match timerange_match  __read_mostly = 
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	{ NULL, NULL },
-	"timerange",
-	&match,
-	&checkentry,
-	NULL,
-	THIS_MODULE
-#endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
 	.name		= "timerange",
 	.match		= &match,
 	.family		= AF_INET,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
 	.matchsize	= sizeof(struct ipt_timerange_info),
-#endif
 	.checkentry	= &checkentry,
 	.me		= THIS_MODULE,
-#endif
 };
 
 static int __init init(void)
 {
-	return ipt_register_match(&timerange_match);
+	return xt_register_match(&timerange_match);
 }
 
 static void __exit fini(void)
 {
-	ipt_unregister_match(&timerange_match);
+	xt_unregister_match(&timerange_match);
 }
 
 module_init(init);

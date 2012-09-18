@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2011 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=portmap
 PKG_VERSION:=6.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tgz
 PKG_SOURCE_URL:=http://neil.brown.name/portmap/
@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/portmap
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=+libwrap
+  DEPENDS:=+libwrap $(LIBRPC_DEPENDS)
   TITLE:=The RPC Portmapper
   URL:=http://neil.brown.name/portmap/
 endef
@@ -35,7 +35,7 @@ endef
 MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS) -DHOSTS_ACCESS -DFACILITY=LOG_DAEMON -DIGNORE_SIGCHLD" \
 	RPCUSER="nobody" \
-	WRAP_LIB="$(TARGET_LDFLAGS) -lwrap" \
+	LDLIBS="$(TARGET_LDFLAGS) -lwrap $(LIBRPC)" \
 	all
 
 define Package/portmap/install

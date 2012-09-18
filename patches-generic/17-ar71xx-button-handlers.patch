@@ -18,18 +18,18 @@
 +
 +if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] || [ -n "$is_netgear" ] || [ -n "$is_buffalo_wzr" ] || [ -n "$is_dlink" ] ; then
 +	uci batch <<EOF
-+set system.reset_button=button
-+set system.reset_button.button='BTN_0'
-+set system.reset_button.action='released'
-+set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
-+set system.reset_button.min='3'
-+set system.reset_button.max='90'
 +set system.reboot_button=button
-+set system.reboot_button.button='BTN_1'
++set system.reboot_button.button='wps'
 +set system.reboot_button.action='released'
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
 +set system.reboot_button.max='90'
++set system.reset_button=button
++set system.reset_button.button='reset'
++set system.reset_button.action='released'
++set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
++set system.reset_button.min='3'
++set system.reset_button.max='90'
 +commit system
 +EOF
 +fi
@@ -37,13 +37,13 @@
 +if [ -n "$is_ubntrspro" ] ; then
 +	uci batch <<EOF
 +set system.reboot_button=button
-+set system.reboot_button.button='BTN_0'
++set system.reboot_button.button='wps'
 +set system.reboot_button.action='released'
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
 +set system.reboot_button.max='13'
 +set system.reset_button=button
-+set system.reset_button.button='BTN_0'
++set system.reset_button.button='reset'
 +set system.reset_button.action='released'
 +set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
 +set system.reset_button.min='13'

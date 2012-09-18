@@ -49,6 +49,7 @@ void print_js_list_var(char* var, list** value);
 char* get_interface_mac(char* if_name);
 char* get_interface_ip(char* if_name);
 char* get_interface_netmask(char* if_name);
+char* get_interface_gateway(char* if_name);
 int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac);
 void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac);
 char** load_interfaces_from_proc_file(char* filename);
@@ -177,7 +178,7 @@ int main(int argc, char **argv)
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
 		{
 			theme_root=get_option_value_string(uci_to_option(e));
-			if(theme_root[0] != "/")
+			if(theme_root[0] != '/')
 			{
 				char* tmp = theme_root;
 				theme_root = dynamic_strcat(2, "/", theme_root);
@@ -191,7 +192,7 @@ int main(int argc, char **argv)
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "js_root") == UCI_OK)
 		{
 			js_root=get_option_value_string(uci_to_option(e));
-			if(js_root[0] != "/")
+			if(js_root[0] != '/')
 			{
 				char* tmp = js_root;
 				js_root = dynamic_strcat(2, "/", js_root);
@@ -729,7 +730,7 @@ void print_interface_vars(void)
 
 
 
-	uci_add_history_path(state_ctx, state_ctx->savedir);
+	uci_add_delta_path(state_ctx, state_ctx->savedir);
        	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
@@ -811,11 +812,13 @@ void print_interface_vars(void)
 	
 
 
-	char* current_lan_ip   = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : get_interface_ip(current_lan_bridge);
-	char* current_lan_mask = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge);
+	char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : get_interface_ip(current_lan_bridge);
+	char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge);
 
-	char* current_wan_ip   = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : get_interface_ip(current_wan_if);
-	char* current_wan_mask = uci_wan_mask != NULL ? strdup(uci_wan_mask) : get_interface_netmask(current_wan_if);
+	char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : get_interface_ip(current_wan_if);
+	char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : get_interface_netmask(current_wan_if);
+
+	char* current_wan_gateway = uci_wan_gateway != NULL ? strdup(uci_wan_gateway) : get_interface_gateway(current_wan_if);
 
 
 	list* tmp_list = initialize_list();
@@ -868,7 +871,7 @@ void print_interface_vars(void)
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
-	print_js_var("currentWanGateway", uci_wan_gateway);
+	print_js_var("currentWanGateway", current_wan_gateway);
 
 	uci_free_context(ctx);
 	uci_free_context(state_ctx);
@@ -988,6 +991,56 @@ char* get_interface_mac(char* if_name)
 	return mac;
 }
 
+char* get_interface_gateway(char* if_name)
+{
+	char* gateway = NULL;
+	if(if_name != NULL)
+	{
+
+		FILE* route_file = fopen("/proc/net/route", "r");
+		if(route_file != NULL)
+		{
+			char newline_terminator[]= {'\n', '\r'};
+			char spaces[] = {' ', '\t'};
+			unsigned long read_length;
+			unsigned long num_lines;
+			int line_index;
+	
+			char* route_data = read_entire_file(route_file, 100, &read_length);
+			char** route_lines = split_on_separators(route_data, newline_terminator, 2, -1, 0, &num_lines);
+			fclose(route_file);
+			free(route_data);
+		
+			for(line_index=0; line_index < num_lines && gateway == NULL; line_index++)
+			{
+				unsigned long line_pieces = 0;
+				char** split_line;
+				trim_flanking_whitespace(route_lines[line_index]);
+				split_line = split_on_separators(route_lines[line_index], spaces, 2, -1, 0, &line_pieces);
+				if(line_pieces >=4)
+				{
+					if(strcmp(split_line[0], if_name) == 0)
+					{
+						unsigned int flags = 0;
+						if( sscanf(split_line[3], "%u", &flags) > 0)
+						{
+							if((flags | 2) != 0)
+							{
+								unsigned int ip[4];
+								sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3); 
+								gateway = (char*)malloc(20);
+								sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+							}
+						}
+					}
+				}
+				free_null_terminated_string_array(split_line);
+			}
+			free_null_terminated_string_array(route_lines);
+		}
+	}
+	return gateway;
+}
 
 char* get_interface_ip(char* if_name)
 {
@@ -1067,7 +1120,7 @@ int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if,
 		int line_index=0;
 		for(line_index=0; line_index < num_lines; line_index++)
 		{
-			unsigned line_pieces = 0;
+			unsigned long line_pieces = 0;
 			char** split_line;
 			trim_flanking_whitespace(file_lines[line_index]);
 			split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0, &line_pieces);
@@ -1213,7 +1266,7 @@ string_map* get_hostnames(void)
 			struct uci_context *state_ctx = uci_alloc_context();
 			struct uci_package *p = NULL;
 			struct uci_element *e = NULL;
-			uci_add_history_path(state_ctx, state_ctx->savedir);
+			uci_add_delta_path(state_ctx, state_ctx->savedir);
 		       	uci_set_savedir(state_ctx, "/var/state");
 			if(uci_load(state_ctx, "network", &p) == UCI_OK)
 			{

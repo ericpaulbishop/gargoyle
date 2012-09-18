@@ -1,0 +1,6 @@
+-combined.squashfs.img
+-squashfs.bin
+-root.squashfs
+-vmlinux.lzma
+-vmlinux.gz
+-vmlinux.elf

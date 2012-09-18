@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2011 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,15 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libevent
-PKG_VERSION:=1.4.13
+PKG_VERSION:=1.4.14b
 PKG_RELEASE:=2
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)-stable
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-stable.tar.gz
 PKG_SOURCE_URL:=http://www.monkey.org/~provos/
-PKG_MD5SUM:=0b3ea18c634072d12b3c1ee734263664
+PKG_MD5SUM:=a00e037e4d3f9e4fe9893e8a2d27918c
 
-PKG_FIXUP:=libtool
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 
@@ -26,6 +26,7 @@ define Package/libevent
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=Event notification library
+  DEPENDS:=+librt
   URL:=http://www.monkey.org/~provos/libevent/
 endef
 
@@ -43,8 +44,6 @@ endef
 
 TARGET_CFLAGS += $(FPIC)
 
-Hooks/InstallDev/Post += libtool_fixup_libdir
-
 CONFIGURE_ARGS += \
 	--enable-shared \
 	--enable-static \
@@ -53,16 +52,15 @@ MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS)" \
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/include
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libevent.{la,a,so} $(1)/usr/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libevent-1.4.so* $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/include/libevent
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/libevent/
+	$(INSTALL_DIR) $(1)/usr/lib/libevent
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.{a,so} $(1)/usr/lib/libevent/
 endef
 
 define Package/libevent/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libevent-1.4.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so.* $(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,libevent))

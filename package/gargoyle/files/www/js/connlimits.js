@@ -32,10 +32,9 @@ function saveChanges()
 			commands.push("echo \"" + parameterId + "=" + parameterValue + "\" >> /tmp/sysctl.conf.tmp.2");
 			commands.push("mv /tmp/sysctl.conf.tmp.2 /tmp/sysctl.conf.tmp.1");
 		}
-		addParameterCommands("/proc/sys/net/ipv4/ip_conntrack_max", "net.ipv4.ip_conntrack_max", maxConnections);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_max", "net.ipv4.netfilter.ip_conntrack_max", maxConnections);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established", "net.ipv4.netfilter.ip_conntrack_tcp_timeout_established", tcpTimeout);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream", "net.ipv4.netfilter.ip_conntrack_udp_timeout_stream", udpTimeout);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_max", "net.netfilter.nf_conntrack_max", maxConnections);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established", "net.netfilter.nf_conntrack_tcp_timeout_established", tcpTimeout);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_udp_timeout_stream", "net.netfilter.nf_conntrack_udp_timeout_stream", udpTimeout);
 		commands.push("mv /tmp/sysctl.conf.tmp.1 /etc/sysctl.conf");	
 
 		var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

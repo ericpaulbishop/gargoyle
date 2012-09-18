@@ -11,37 +11,30 @@ all:
 		targets=`ls targets | sed 's/custom//g' ` ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash full-build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
+				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" "";\
 			else \
-				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
+				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "";\
 			fi ;\
 		done ;\
 	)
 
-brcm: brcm-2.4
-brcm-2.4: 
+
+%:
 	( \
-		if [ ! -d "brcm47xx-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			bash full-build.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "" "$(JS_COMPRESS)" ;\
-		else \
-			bash rebuild.sh "brcm-2.4" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
-		fi ;\
+		if [ "$@" != "ALL" ] && [ "$@" != "all" ] ; then \
+			target=`echo $@  | sed 's/\..*$$//'` ; \
+			profile=`echo $@ | sed 's/^.*\.//'`  ; \
+			have_profile=`echo $@ | grep "\."`  ; \
+			if [ -z "$$have_profile" ] ; then profile="" ; fi ; \
+			if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
+			if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
+			if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+				bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
+			else \
+				bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile"; \
+			fi ; \
+		fi ; \
 	)
-
-
-%: targets/%
-	( \
-		if [ ! -d "$@-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			bash full-build.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" ;\
-		else \
-			bash rebuild.sh "$@" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" ;\
-		fi ;\
-	)
-
-prepare:
-	if [ -d "../downloaded" ] ; then cp -r ../downloaded . ; fi
-	if [ -d "../backfire-src" ] ; then cp -r ../backfire-src . ; fi
-	if [ -e "./backfire-src/dl" ] ; then rm -rf "./backfire-src/dl" ; fi
 
 cleanup:
 	find . -name ".svn" | xargs rm -rf

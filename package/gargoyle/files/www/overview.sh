@@ -65,11 +65,8 @@
 	load_avg="$(awk '{print $1 " / " $2 " / " $3}' /proc/loadavg)"
 	echo "var loadAvg=\"$load_avg\";"
 
-	curconn="$(wc -l < /proc/net/ip_conntrack)"
-	maxconn=$(cat /proc/sys/net/ipv4/ip_conntrack_max 2>/dev/null)
-	if [ -z "$maxconn" ] ; then
-		maxconn=$(cat /proc/sys/net/ipv4/netfilter/ip_conntrack_max 2>/dev/null )
-	fi
+	curconn="$(wc -l < /proc/net/nf_conntrack)"
+	maxconn=$(cat /proc/sys/net/netfilter/nf_conntrack_max 2>/dev/null)
 	if [ -z "$maxconn" ] ; then
 		maxconn="4096"
 	fi

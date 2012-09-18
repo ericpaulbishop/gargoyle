@@ -71,6 +71,7 @@ fi
 
 mv /etc/config/gargoyle /tmp/gargoyle.bak
 cp /etc/passwd /tmp/passwd
+cp /etc/shadow /tmp/shadow
 rm -rf /etc/rc.d/*
 rm -rf /tmp/data/*
 rm -rf /usr/data/*
@@ -228,12 +229,14 @@ fi
 
 if [ "$restore_password" != "1" ] ; then
 	cp /tmp/passwd  /etc/passwd 
+	cp /tmp/shadow  /etc/shadow
 elif [ "$restore_file" = "/etc/original_backup/backup.tar.gz" ] ; then
 	uci set gargoyle.global.is_first_boot=1
 	uci commit	
 fi
 
-rm /tmp/passwd
+rm -rf /tmp/passwd
+rm -rf /tmp/shadow
 
 
 #overwrite old date, then restart ntpclient and then bwmon
