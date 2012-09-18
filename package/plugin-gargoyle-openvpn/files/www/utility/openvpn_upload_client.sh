@@ -213,7 +213,10 @@ if [ -z "$error" ] ; then
 	fi
 
 	if [ -z "$error" ] ; then
-		mv * /etc/openvpn/
+		mv "${client_name}.conf" "${client_name}_ca.crt" "${client_name}.crt" "${client_name}.key"  /etc/openvpn/
+		if [ -e "${client_name}_ta.key" ]  ; then
+			mv "${client_name}_ta.key"  /etc/openvpn/
+		fi
 
 		#run constant uci commands
 		uci set openvpn_gargoyle.server.enabled="false"                        >/dev/null 2>&1
