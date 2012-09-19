@@ -1,6 +1,35 @@
---- a/package/comgt/files/3g.sh	2012-08-21 03:18:14.107230090 -0400
-+++ b/package/comgt/files/3g.sh	2012-08-21 03:19:44.988639567 -0400
-@@ -77,6 +77,8 @@
+--- a/package/comgt/files/3g.sh
++++ b/package/comgt/files/3g.sh
+@@ -56,9 +56,20 @@
+ 				case "$service" in
+ 					umts_only) CODE="14,2";;
+ 					gprs_only) CODE="13,1";;
++					umts_pref) CODE="2,2";;
++					gprs_pref) CODE="2,1";;
+ 					*) CODE="2,2";;
+ 				esac
+ 				export MODE="AT^SYSCFG=${CODE},3FFFFFFF,2,4"
++			elif echo "$cardinfo" | grep -q ZTE; then
++				case "$service" in
++					umts_only) CODE="2,0,0";;
++					gprs_only) CODE="1,0,0";;
++					umts_pref) CODE="0,0,2";;
++					gprs_pref) CODE="0,0,1";;
++					*) CODE="0,0,0";;
++				esac
++				export mode="AT+ZSNT=${CODE}"
+ 			fi
+ 
+ 			if [ -n "$pincode" ]; then
+@@ -68,6 +79,7 @@
+ 					return 1
+ 				}
+ 			fi
++			[ "$service" = "umts" ] && MODE=""
+ 			[ -n "$MODE" ] && gcom -d "$device" -s /etc/gcom/setmode.gcom
+ 
+ 			# wait for carrier to avoid firmware stability bugs
+@@ -77,6 +89,8 @@
  		;;
  	esac
  

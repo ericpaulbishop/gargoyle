@@ -9,13 +9,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libusb
 PKG_VERSION:=0.1.12
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@SF/libusb
 PKG_MD5SUM:=caf182cbc7565dac0fd72155919672e6
-PKG_FIXUP:=libtool
+PKG_FIXUP:=autoreconf
 
+include $(INCLUDE_DIR)/uclibc++.mk
 include $(INCLUDE_DIR)/package.mk
 
 PKG_INSTALL=1
@@ -25,6 +26,14 @@ define Package/libusb
   CATEGORY:=Libraries
   TITLE:=A library for accessing Linux USB devices
   URL:=http://libusb.sourceforge.net/
+endef
+
+define Package/libusbpp
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=A C++ library for accessing Linux USB devices
+  URL:=http://libusb.sourceforge.net/
+  DEPENDS:=$(CXX_DEPENDS) +libusb
 endef
 
 define Build/Configure
@@ -64,8 +73,18 @@ endef
 define Package/libusb/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) \
-		$(PKG_INSTALL_DIR)/usr/lib/libusb*.so* \
+		$(PKG_INSTALL_DIR)/usr/lib/libusb.so* \
+		$(PKG_INSTALL_DIR)/usr/lib/libusb-*.so* \
+		$(1)/usr/lib/
+endef
+
+define Package/libusbpp/install
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) \
+		$(PKG_INSTALL_DIR)/usr/lib/libusbpp.so* \
+		$(PKG_INSTALL_DIR)/usr/lib/libusbpp-*.so* \
 		$(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,libusb))
+$(eval $(call BuildPackage,libusbpp))
