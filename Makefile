@@ -5,7 +5,7 @@ CUSTOM_TEMPLATE=ar71xx
 JS_COMPRESS=true
 
 
-ALL: all
+ALL:
 all:
 	( \
 		targets=`ls targets | sed 's/custom//g' ` ;\
@@ -19,31 +19,31 @@ all:
 	)
 
 
-%:
-	( \
-		if [ "$@" != "ALL" ] && [ "$@" != "all" ] ; then \
-			target=`echo $@  | sed 's/\..*$$//'` ; \
-			profile=`echo $@ | sed 's/^.*\.//'`  ; \
-			have_profile=`echo $@ | grep "\."`  ; \
-			if [ -z "$$have_profile" ] ; then profile="" ; fi ; \
-			if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
-			if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
-			if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
-			else \
-				bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile"; \
-			fi ; \
-		fi ; \
-	)
+distclean: cleanup
+	rm -rf ./*-src
+	rm -rf ./built
+	rm -rf ./images
+	rm -rf ./downloaded
 
 cleanup:
 	find . -name ".svn" | xargs rm -rf
 	find . -name "*~" | xargs rm -rf
 	find . -name ".*sw*" | xargs rm -rf
 
-# If you run this, you will need to start all over with compiling.
-distclean: cleanup
-	rm -rf ./*-src
-	rm -rf ./built
-	rm -rf ./images
-	rm -rf ./downloaded
+
+
+%:
+	( \
+		target=`echo $@  | sed 's/\..*$$//'` ; \
+		profile=`echo $@ | sed 's/^.*\.//'`  ; \
+		have_profile=`echo $@ | grep "\."`  ; \
+		if [ -z "$$have_profile" ] ; then profile="" ; fi ; \
+		if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
+		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
+		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
+			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" ; \
+		else \
+			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile"; \
+		fi ; \
+	)
+
