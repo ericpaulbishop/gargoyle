@@ -237,7 +237,6 @@ my $targetOrder =
 	"alix"=> 
 		[ 
 		"combined.jffs2.128k.img",
-		"combined-jffs2-128k.img"
 		]
 };
 
