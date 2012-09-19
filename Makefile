@@ -6,7 +6,6 @@ JS_COMPRESS=true
 
 
 ALL:
-all:
 	( \
 		targets=`ls targets | sed 's/custom//g' ` ;\
 		for t in $$targets ; do \
