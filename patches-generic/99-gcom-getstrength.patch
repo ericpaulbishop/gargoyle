@@ -1,105 +1,11 @@
---- comgt.orig/files/3g.sh	2012-08-21 19:09:43.636880453 +0200
-+++ comgt/files/3g.sh	2012-08-21 18:26:56.000000000 +0200
-@@ -39,7 +39,7 @@
- setup_interface_3g() {
- 	local iface="$1"
- 	local config="$2"
--	local chat="/etc/chatscripts/3g.chat"
-+	local chat
- 
- 	local device
- 	config_get device "$config" device
-@@ -71,40 +71,65 @@
- 	set_3g_led 1 0 1
- 
- 	# figure out hardware specific commands for the card
-+
-+	[ -n "$pincode" ] && {
-+		PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
-+			echo "$config(3g): Failed to set the PIN code."
-+			set_3g_led 0 0 0
-+			return 1
-+		}
-+	}
-+
- 	case "$service" in
- 		cdma|evdo) chat="/etc/chatscripts/evdo.chat";;
--	*)
--		cardinfo=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom)
--		if echo "$cardinfo" | grep Novatel; then
--			case "$service" in
--				umts_only) CODE=2;;
--				gprs_only) CODE=1;;
--				*) CODE=0;;
--			esac
--			mode="AT\$NWRAT=${CODE},2"
--		elif echo "$cardinfo" | grep Option; then
--			case "$service" in
--				umts_only) CODE=1;;
--				gprs_only) CODE=0;;
--				*) CODE=3;;
--			esac
--			mode="AT_OPSYS=${CODE}"
--		fi
--		# Don't assume Option to be default as it breaks with Huawei Cards/Sticks
--
--		test -z "$pincode" || {
--			PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
--				echo "$config(3g): Failed to set the PIN code."
--				set_3g_led 0 0 0
--				return 1
-+		umts) chat="/etc/chatscripts/3g.chat";;
-+		*)
-+			chat="/etc/chatscripts/3g.chat"
-+			cardinfo=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom)
-+			if echo "$cardinfo" | grep -q Novatel; then
-+				case "$service" in
-+					umts_only) CODE=2;;
-+					gprs_only) CODE=1;;
-+					*) CODE=0;;
-+				esac
-+				mode="AT\$NWRAT=${CODE},2"
-+			elif echo "$cardinfo" | grep -q Option; then
-+				case "$service" in
-+					umts_only) CODE=1;;
-+					gprs_only) CODE=0;;
-+					*) CODE=3;;
-+				esac
-+				mode="AT_OPSYS=${CODE}"
-+			elif echo "$cardinfo" | grep -q huawei; then
-+				case "$service" in
-+					umts_only) CODE="14,2";;
-+					gprs_only) CODE="13,1";;
-+					umts_pref) CODE="2,2";;
-+					gprs_pref) CODE="2,1";;
-+					*) CODE="2,2";;
-+				esac
-+				mode="AT^SYSCFG=${CODE},3FFFFFFF,2,4"
-+			elif echo "$cardinfo" | grep -q ZTE; then
-+				case "$service" in
-+					umts_only) CODE="2,0,0";;
-+					gprs_only) CODE="1,0,0";;
-+					umts_pref) CODE="0,0,2";;
-+					gprs_pref) CODE="0,0,1";;
-+					*) CODE="0,0,0";;
-+				esac
-+				mode="AT+ZSNT=${CODE}"
-+			fi
-+
-+			[ -n "$mode" ] && {
-+				logger -t "$config(3g)" "Trying set $service ($mode)"
-+				MODE="$mode" gcom -d "$device" -s /etc/gcom/setmode.gcom
- 			}
--		}
--		test -z "$mode" || {
--			MODE="$mode" gcom -d "$device" -s /etc/gcom/setmode.gcom
--		}
-+		;;
+--- a/package/comgt/files/3g.sh	2012-08-21 03:18:14.107230090 -0400
++++ b/package/comgt/files/3g.sh	2012-08-21 03:19:44.988639567 -0400
+@@ -77,6 +77,8 @@
+ 		;;
  	esac
- 	set_3g_led 1 0 0
  
 +	gcom -d "$device" -s /etc/gcom/getstrength.gcom > /tmp/strength.txt
 +
- 	config_set "$config" "connect" "${apn:+USE_APN=$apn }/usr/sbin/chat -t5 -v -E -f $chat"
- 	start_pppd "$config" \
+ 	connect="${apn:+USE_APN=$apn }/usr/sbin/chat -t5 -v -E -f $chat"
+ 	ppp_generic_setup "$interface" \
  		noaccomp \

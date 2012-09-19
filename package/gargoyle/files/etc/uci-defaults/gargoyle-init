@@ -62,6 +62,7 @@ fi
 #set sysupgrade.conf
 cat << EOF >/etc/sysupgrade.conf
 /etc/passwd
+/etc/shadow
 /etc/config
 /etc/rc.d
 /etc/TZ

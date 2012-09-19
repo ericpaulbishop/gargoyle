@@ -1022,7 +1022,7 @@ int main(int argc, char *argv[])
 
                     //Sanity Checks
                     if (pinglimit < 10000) pinglimit=10000;
-                    if (pinglimit > 500000) pinglimit=500000;
+                    if (pinglimit > 800000) pinglimit=800000;
                 }
                 break;
 
@@ -1090,8 +1090,8 @@ int main(int argc, char *argv[])
                 //the MINRTT mode computed with the -a switch.  Still other links may be different so I suspect that
                 //switching to active mode will benefit some people.
                 //
-                //The statedgy I will use for the ACTIVE mode limit will be an additional 2.5x the ping limit over what we 
-                //have for realtime mode but not less than an additional 2.5*75ms.  I hope that this will work well for 
+                //The statedgy I will use for the ACTIVE mode limit will be an additional 2x the ping limit over what we 
+                //have for realtime mode but not less than an additional 2*75ms.  I hope that this will work well for 
                 //even satallite links which can have RTT that approach 1 second or more.
                 //
                 //My thinking on the 75ms is that an RTT of 150ms as an average to most sites on the internet seems pretty
@@ -1101,7 +1101,7 @@ int main(int argc, char *argv[])
                 //Links with longer RTTs will need even more and this allows that.
 
                 if ((RTDCA == 0) && (pingflags & ADDENTITLEMENT)) {
-                    if (pinglimit < 75000) pinglimit2=2.5*75000; else pinglimit2=2.5*pinglimit;
+                    if (pinglimit < 75000) pinglimit2=2*75000; else pinglimit2=2*pinglimit;
                     qstate=QMON_ACTIVE;
                 } else {
                     pinglimit2 = 0;

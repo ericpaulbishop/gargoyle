@@ -478,7 +478,7 @@ initialiaze_quota_qos()
 		ifconfig imq0 down  >/dev/null 2>&1
 		ifconfig imq1 down  >/dev/null 2>&1
 		rmmod  imq          >/dev/null 2>&1
-		insmod imq numdevs=1 hook_chains="INPUT FORWARD" hook_tables="mangle mangle" >/dev/null 2>&1
+		insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
 		ip link set imq0 up
 
 

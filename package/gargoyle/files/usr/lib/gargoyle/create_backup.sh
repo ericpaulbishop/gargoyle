@@ -18,7 +18,7 @@ if [ -n "$webmon_enabled" ] ; then
 	/etc/init.d/webmon_gargoyle stop
 fi
 
-backup_locations='/etc/passwd /etc/config /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/hosts /etc/webmon_ips /etc/crontabs /etc/dropbear  /tmp/data /usr/data '
+backup_locations='/etc/passwd /etc/shadow /etc/config /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/hosts /etc/webmon_ips /etc/crontabs /etc/dropbear  /tmp/data /usr/data '
 existing_locations=""
 for bl in $backup_locations ; do
 	if [ -e "$bl" ] ; then

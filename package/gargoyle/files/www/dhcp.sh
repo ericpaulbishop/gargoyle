@@ -47,7 +47,7 @@ var staticIpTableData = new Array();
 for (etherIndex in etherData)
 {
 	ether=etherData[etherIndex];
-	mac=ether[0].toLowerCase();
+	mac=ether[0].toUpperCase();
 	ip=ether[1];
 	host= ipHostHash[ip] == null ? '-' : ipHostHash[ip];
 	staticIpTableData.push([host, mac, ip]);

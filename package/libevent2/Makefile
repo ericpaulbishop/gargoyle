@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 OpenWrt.org
+# Copyright (C) 2011-2012 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,16 +8,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libevent2
-PKG_VERSION:=2.0.15
+PKG_VERSION:=2.0.19
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/libevent-$(PKG_VERSION)-stable
 PKG_SOURCE:=libevent-$(PKG_VERSION)-stable.tar.gz
 PKG_SOURCE_URL:=http://www.monkey.org/~provos/ \
 	@SF/levent
-PKG_MD5SUM:=2643abe7ba242df15c08b2cc14ec8759
+PKG_MD5SUM:=91111579769f46055b0a438f5cc59572
 
-PKG_FIXUP:=libtool
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 
@@ -28,6 +28,7 @@ define Package/libevent2/Default
   CATEGORY:=Libraries
   TITLE:=Event notification
   URL:=http://www.monkey.org/~provos/libevent/
+  DEPENDS:=+USE_EGLIBC:librt
 endef
 
 define Package/libevent2/Default/description
@@ -81,7 +82,7 @@ endef
 define Package/libevent2-openssl
   $(call Package/libevent2/Default)
   TITLE+= OpenSSL library (version 2.0)
-  DEPENDS:=+libopenssl
+  DEPENDS+=+libopenssl
 endef
 
 define Package/libevent2-openssl/description
@@ -94,7 +95,7 @@ endef
 define Package/libevent2-pthreads
   $(call Package/libevent2/Default)
   TITLE+= Pthreads library (version 2.0)
-  DEPENDS:=+libpthread
+  DEPENDS+=+libpthread
 endef
 
 define Package/libevent2-pthreads/description

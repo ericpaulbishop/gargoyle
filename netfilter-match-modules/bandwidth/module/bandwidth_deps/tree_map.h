@@ -206,12 +206,15 @@ string_map* initialize_string_map(unsigned char store_keys)
 void* get_string_map_element(string_map* map, const char* key)
 {
 	unsigned long hashed_key = sdbm_string_hash(key);
+
 	return get_string_map_element_with_hashed_key(map, hashed_key);
 }
 
 void* get_string_map_element_with_hashed_key(string_map* map, unsigned long hashed_key)
 {
-	void* return_value =  get_long_map_element( &(map->lm), hashed_key);
+	void* return_value;
+	/* printk("doing lookup for key = %lu\n", hashed_key); */
+	return_value =  get_long_map_element( &(map->lm), hashed_key);
 	if(return_value != NULL && map->store_keys)
 	{
 		string_map_key_value* r = (string_map_key_value*)return_value;
