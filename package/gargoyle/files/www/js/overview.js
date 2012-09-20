@@ -43,6 +43,7 @@ function resetData()
 
 
 	var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
+	setChildText("device_model", model);
 	setChildText("device_name", uciOriginal.get("system", systemSections[0], "hostname" ));
 	setChildText("gargoyle_version", gargoyleVersion);
 	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
