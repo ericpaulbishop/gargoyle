@@ -75,6 +75,11 @@
 
 
 	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto)"\";"
+	if [ -e /tmp/sysinfo/model ]; then
+		echo "var model=\""$(cat /tmp/sysinfo/model)"\";"
+	else
+		echo "var model=\"Unknown\";"
+	fi
 
 ?>
 //-->
@@ -84,6 +89,9 @@
 	<legend class="sectionheader">Status</legend>
 
 	<div id="device_container">	
+		<div>
+			<span class='leftcolumn'>Model:</span><span id="device_model" class='rightcolumn'></span>
+		</div>
 		<div>
 			<span class='leftcolumn'>Device Name:</span><span id="device_name" class='rightcolumn'></span>
 		</div>
