@@ -73,6 +73,11 @@
 	echo "var curConn=\"$curconn\";"
 	echo "var maxConn=\"$maxconn\";"
 
+	if [ -e /tmp/sysinfo/model ]; then
+		echo "var model=\""$(cat /tmp/sysinfo/model)"\";"
+	else
+		echo "var model=\"Unknown\";"
+	fi
 
 	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq)"\";"
 
