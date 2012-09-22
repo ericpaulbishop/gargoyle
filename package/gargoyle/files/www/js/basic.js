@@ -771,9 +771,14 @@ function saveChanges()
 			if( notBridge && uci.get("network", "wan", "") != "" && dns != lanGateway)
 			{
 				uci.set("network", "wan", "dns", dns);
+				uci.set("network", "wan", "peerdns", "0")
 			}
 		}
-		uci.set("network", "lan", "dns", dns);
+		else if( notBridge && uci.get("network", "wan", "") != "")
+		{
+			uci.remove("network", "wan", "peerdns")
+		}
+		uci.set("network", "lan", "dns", dns)
 		
 
 

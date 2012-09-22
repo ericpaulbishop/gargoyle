@@ -74,12 +74,7 @@
 	echo "var maxConn=\"$maxconn\";"
 
 
-	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto)"\";"
-	if [ -e /tmp/sysinfo/model ]; then
-		echo "var model=\""$(cat /tmp/sysinfo/model)"\";"
-	else
-		echo "var model=\"Unknown\";"
-	fi
+	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq)"\";"
 
 ?>
 //-->
@@ -90,13 +85,13 @@
 
 	<div id="device_container">	
 		<div>
-			<span class='leftcolumn'>Model:</span><span id="device_model" class='rightcolumn'></span>
-		</div>
-		<div>
 			<span class='leftcolumn'>Device Name:</span><span id="device_name" class='rightcolumn'></span>
 		</div>
 		<div>
 			<span class='leftcolumn'>Gargoyle Version:</span><span id="gargoyle_version" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>Model:</span><span id="device_model" class='rightcolumn'></span>
 		</div>
 		<div>
 			<span class='leftcolumn'>Device Configuration:</span><span id="device_config" class='rightcolumn'></span>
