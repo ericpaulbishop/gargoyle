@@ -2130,3 +2130,4 @@ CONFIG_PACKAGE_uuidgen=y
 # CONFIG_PACKAGE_libiwinfo-lua is not set
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
+CONFIG_PACKAGE_vsftpd=y

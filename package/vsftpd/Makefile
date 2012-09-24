@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=vsftpd
-PKG_VERSION:=3.0.0
+PKG_VERSION:=3.0.2
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://security.appspot.com/downloads/
-PKG_MD5SUM:=ad9fa952558c2c5b0426ccaccff0f972
+PKG_MD5SUM:=8b00c749719089401315bd3c44dddbb2
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -24,10 +24,11 @@ define Package/vsftpd
   TITLE:=A fast and secure FTP server
   URL:=http://vsftpd.beasts.org/
   MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
+  DEPENDS:=+gargoyle
 endef
 
 define Package/vsftpd/conffiles
-/etc/vsftpd.conf
+/etc/vsftpd.conf.template
 endef
 
 define Build/Compile
@@ -42,9 +43,11 @@ define Package/vsftpd/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/sbin/
 	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_CONF) ./files/$(PKG_NAME).conf $(1)/etc/$(PKG_NAME).conf
+	$(INSTALL_CONF) ./files/$(PKG_NAME).conf.template $(1)/etc/
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/$(PKG_NAME).init $(1)/etc/init.d/$(PKG_NAME)
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./files/$(PKG_NAME).config $(1)/etc/config/$(PKG_NAME)
 endef
 
 $(eval $(call BuildPackage,vsftpd))

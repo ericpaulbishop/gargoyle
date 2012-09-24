@@ -1,13 +1,105 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2006-2011 OpenWrt.org
 
 START=50
 
-start() {
-	mkdir -m 0755 -p /var/run/vsftpd
-	service_start /usr/sbin/vsftpd
+vsftpd_basedir="/tmp/vsftpd"
+vsftpd_conf="$vsftpd_basedir/vsftpd.conf"
+
+update_user()
+{
+	config_get username $1 username
+	config_get password $1 password
+	config_get write $1 write "no"
+	config_get root $1 root "/tmp/usb_mount"
+
+	mkdir -p "$root"
+	chmod 777 "$root"
+	echo "$username" >> $vsftpd_basedir/userlist
+
+	group=$(cat /etc/group | grep "^$username:x:" | sed 's/.*:x://g' | sed 's/://g')
+	if [ -z "$group" ] ; then
+		group=1000
+		tst=$(grep ":$group:" /etc/group)
+		while [ -n "$tst" ] ; do
+			group=$(($group+1))
+			tst=$(grep ":$group:" /etc/group)
+		done
+		echo "$username:x:$group:" >> /etc/group
+	fi
+
+	user_line=$(grep "^$username:" /etc/passwd)
+	if [ -z "$user_line" ] ; then
+		user_num="$group"
+		tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
+		while [ -n "$tst" ] ; do
+			user_num=$((user_num+1))
+			tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
+		done
+		echo "$username:x:$user_num:$group:ftp_user:$root:/bin/false" >> /etc/passwd
+
+		(echo "$password" ; sleep 1 ; echo "$password") | passwd "$username"
+	else
+		echo "WARNING: user $username already exists and this is not the FTP user. Refusal to change its configuration."
+	fi
+
+	if [ "x$write" = "xyes" ]; then
+		echo "write_enable=yes" > $vsftpd_basedir/users/"$username"
+	else
+		echo "write_enable=no" > $vsftpd_basedir/users/"$username"
+	fi
+}
+
+anonymous()
+{
+	config_get anonymous $1 anonymous "no"
+	config_get anonymous_write $1 anonymous_write "no"
+	config_get anonymous_root $1 anonymous_root "/tmp/usb_mount"
+
+	if [ "x$anonymous" = "xyes" ]; then
+		mkdir -p "$anonymous_root"
+		chmod 777 "$anonymous_root"
+
+		echo "anonymous" >> $vsftpd_basedir/userlist
+		echo "ftp" >> $vsftpd_basedir/userlist
+
+		sed -i '/^ftp:*/d' /etc/passwd
+		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
+
+		if [ "x$anonymous_write" = "xyes" ]; then
+			echo "write_enable=yes" > $vsftpd_basedir/users/ftp
+		else
+			echo "write_enable=no" > $vsftpd_basedir/users/ftp
+		fi
+	else
+		echo "anonymous_enable=no" >> $vsftpd_conf
+	fi
+}
+
+create_config()
+{
+	mkdir -p /tmp/vsftpd
+	sed -i '/:ftp_user:/d' /etc/passwd
+
+	cat /etc/vsftpd.conf.template > $vsftpd_conf
+	mkdir -p $vsftpd_basedir/users/
+	rm $vsftpd_basedir/users/* 2>/dev/null
+	rm $vsftpd_basedir/userlist 2>/dev/null
+	touch $vsftpd_basedir/userlist
+}
+
+start()
+{
+	create_config
+	config_load "vsftpd"
+	config_foreach anonymous "vsftpd"
+	config_foreach update_user "user"
+
+	[ -d /var/run/vsftpd ] || mkdir -p /var/run/vsftpd
+	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
+
+	/usr/sbin/vsftpd $vsftpd_conf
 }
 
 stop() {
-	service_stop /usr/sbin/vsftpd
+	killall vsftpd
 }
