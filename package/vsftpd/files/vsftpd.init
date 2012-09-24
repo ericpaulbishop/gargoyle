@@ -38,11 +38,9 @@ update_user()
 		echo "$username:x:$user_num:$group:ftp_user:$root:/bin/false" >> /etc/passwd
 
 		(echo "$password" ; sleep 1 ; echo "$password") | passwd "$username"
-	else
-		echo "WARNING: user $username already exists and this is not the FTP user. Refusal to change its configuration."
 	fi
 
-	if [ "x$write" = "xyes" ]; then
+	if [ "$write" = "yes" ]; then
 		echo "write_enable=yes" > $vsftpd_basedir/users/"$username"
 	else
 		echo "write_enable=no" > $vsftpd_basedir/users/"$username"
@@ -55,7 +53,7 @@ anonymous()
 	config_get anonymous_write $1 anonymous_write "no"
 	config_get anonymous_root $1 anonymous_root "/tmp/usb_mount"
 
-	if [ "x$anonymous" = "xyes" ]; then
+	if [ "$anonymous" = "yes" ]; then
 		mkdir -p "$anonymous_root"
 		chmod 777 "$anonymous_root"
 
@@ -65,7 +63,7 @@ anonymous()
 		sed -i '/^ftp:*/d' /etc/passwd
 		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
 
-		if [ "x$anonymous_write" = "xyes" ]; then
+		if [ "$anonymous_write" = "yes" ]; then
 			echo "write_enable=yes" > $vsftpd_basedir/users/ftp
 		else
 			echo "write_enable=no" > $vsftpd_basedir/users/ftp
