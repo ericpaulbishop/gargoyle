@@ -1420,7 +1420,7 @@ CONFIG_PACKAGE_librpc=y
 CONFIG_PACKAGE_libubox=y
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-# CONFIG_PACKAGE_libusb is not set
+CONFIG_PACKAGE_libusb=y
 CONFIG_PACKAGE_libuuid=y
 CONFIG_PACKAGE_libwrap=y
 # CONFIG_PACKAGE_linux-atm is not set
@@ -1512,7 +1512,7 @@ CONFIG_PACKAGE_webmon-gargoyle=y
 # CONFIG_PACKAGE_uhttpd is not set
 # CONFIG_PACKAGE_uhttpd_debug is not set
 CONFIG_PACKAGE_bwmon-gargoyle=y
-# CONFIG_PACKAGE_chat is not set
+CONFIG_PACKAGE_chat=y
 # CONFIG_PACKAGE_crda is not set
 CONFIG_PACKAGE_ddns-gargoyle=y
 CONFIG_PACKAGE_ewget=y
@@ -1938,7 +1938,7 @@ CONFIG_PACKAGE_kmod-wdt-geode=y
 #
 # USB Support
 #
-# CONFIG_PACKAGE_kmod-usb-acm is not set
+CONFIG_PACKAGE_kmod-usb-acm=y
 # CONFIG_PACKAGE_kmod-usb-atm is not set
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
 CONFIG_PACKAGE_kmod-usb-core=y
@@ -1946,7 +1946,7 @@ CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-net is not set
 CONFIG_PACKAGE_kmod-usb-ohci=y
 CONFIG_PACKAGE_kmod-usb-printer=y
-# CONFIG_PACKAGE_kmod-usb-serial is not set
+CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-sierrawireless-directip is not set
 CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
@@ -2136,7 +2136,7 @@ CONFIG_PACKAGE_swap-utils=y
 # CONFIG_PACKAGE_wipefs is not set
 # CONFIG_PACKAGE_bin2trx is not set
 # CONFIG_PACKAGE_cal is not set
-# CONFIG_PACKAGE_comgt is not set
+CONFIG_PACKAGE_comgt=y
 # CONFIG_PACKAGE_dmesg is not set
 # CONFIG_PACKAGE_dropbearconvert is not set
 # CONFIG_PACKAGE_fconfig is not set
@@ -2171,7 +2171,8 @@ CONFIG_PACKAGE_openssl-util=y
 CONFIG_PACKAGE_sha1sum=y
 # CONFIG_PACKAGE_spidev-test is not set
 # CONFIG_PACKAGE_uboot-envtools is not set
-# CONFIG_PACKAGE_usb-modeswitch is not set
+CONFIG_PACKAGE_usb-modeswitch=y
+CONFIG_PACKAGE_usb-modeswitch-data=y
 # CONFIG_PACKAGE_usbreset is not set
 # CONFIG_PACKAGE_uuidd is not set
 CONFIG_PACKAGE_uuidgen=y
