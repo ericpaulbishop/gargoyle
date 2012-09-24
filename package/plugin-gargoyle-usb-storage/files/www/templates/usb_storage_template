@@ -4,12 +4,15 @@
 	<span class="rightcolumn" id="share_disk_text"></span>
 </div>
 <div id="select_share_type_container">
-	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type:</label>
-	<select class="rightcolumn" id="share_type" onchange="setNfsPath(this.ownerDocument)">
-		<option value="samba">CIFS</option>
-		<option value="nfs">NFS</option>
-		<option value="samba+nfs">CIFS+NFS</option>
-	</select>
+	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type(s):</label>
+	<span class='rightcolumn'>
+		<input type='checkbox' id='share_type_cifs' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+		<label for="share_type_cifs" style="vertical-align:middle">CIFS</label>&nbsp;
+		<input type='checkbox' id='share_type_ftp' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+		<label for="share_type_ftp" style="vertical-align:middle">FTP</label>&nbsp;
+		<input type='checkbox' id='share_type_nfs' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+		<label for="share_type_nfs" style="vertical-align:middle">NFS</label>
+	</span>
 	<br/>
 </div>
 <div id="share_access_container">
@@ -30,7 +33,12 @@
 	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
 	<input type="text" class="rightcolumn" id="share_name" onkeyup="setNfsPath(this.ownerDocument)" />
 </div>
+<div id="ftp_path_container">
+	<label class="leftcolumn" id="ftp_path_label" for="ftp_path">NFS Path:</label>
+	<span class="rightcolumn" id="ftp_path"></span>
+</div>
 <div id="nfs_path_container">
 	<label class="leftcolumn" id="nfs_path_label" for="nfs_path">NFS Path:</label>
 	<span class="rightcolumn" id="nfs_path"></span>
 </div>
+

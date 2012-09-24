@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL. 
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "usb_storage" -c "internal.css" -j "table.js usb_storage.js" gargoyle network nfsd samba
+	gargoyle_header_footer -h -s "system" -p "usb_storage" -c "internal.css" -j "table.js usb_storage.js" gargoyle network nfsd samba vsftpd
 
 ?>
 
@@ -60,7 +60,7 @@
 
 	
 	<div id="cifs_policy_container">
-		<label id="cifs_policy_label" class="leftcolumn">CIFS Access Policy:</label>
+		<label id="cifs_policy_label" class="leftcolumn">CIFS and FTP Access Policy:</label>
 		<select class="rightcolumn" id="cifs_policy" onchange="setPolicyVisibility()">
 			<option value="share">Allow Anonymous Access</option>
 			<option value="user">Require User &amp; Password</option>
