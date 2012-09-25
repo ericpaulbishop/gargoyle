@@ -1,12 +1,12 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "wol" -c "internal.css" -j "wol.js table.js" -i -n dhcp wireless
+	gargoyle_header_footer -h -s "status" -p "wol" -c "internal.css" -j "wol.js table.js" gargoyle -i -n dhcp wireless
 ?>
 
 <script>
@@ -32,10 +32,25 @@ var arpLines;
 </script>
 
 <fieldset id="wol_data">
-	<legend class="sectionHeader">Wake on LAN</legend>
-	<div id="wol_table_container"></div>
-</fieldset>
+	<legend class="sectionheader">Wake on LAN</legend>
 
+	<div id="wol_table_container"></div>
+
+	<p></p>
+
+	<div id="wol_help">
+		<span id="wol_help_txt">
+
+		<p><em>Wake on LAN (WoL)</em> is an Ethernet computer networking standard that allows a computer to be turned on or woken up by a network message. The message is sent by a program executed on the router on the same local area network.</p>
+
+		<p>This special network message called the magic packet and it is contains the MAC address of the destination computer. The listening computer waits for a magic packet addressed to it and then initiates system wake up.</p>
+
+		<p>Wake on LAN usually needs to be enabled in the Power Management section of a PC motherboard's BIOS setup utility. In addition, in order to get Wake on LAN to work it is sometimes required to enable this feature on the network interface card or on-board silicon device driver.</p>
+
+		</span>
+		<a id="wol_help_ref" onclick='setDescriptionVisibility("wol_help")' href="#wol_help">Hide Text</a>
+	</div>
+</fieldset>
 
 <script>
 <!--
