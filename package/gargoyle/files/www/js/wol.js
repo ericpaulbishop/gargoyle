@@ -1,11 +1,20 @@
+/*
+ * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL.
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
 
 function initWolTable()
 {
 	var dataList = [];
 	var ipToHostAndMac = [];
-	
 
-	arpLines.shift(); //skip header
+	initializeDescriptionVisibility(uciOriginal, "wol_help"); // set description visibility
+	uciOriginal.removeSection("gargoyle", "help"); // necessary, or we overwrite the help settings when we save
+
+	arpLines.shift(); // skip header
 	var lineIndex = 0;
 	for(lineIndex=0; lineIndex < arpLines.length; lineIndex++)
 	{
@@ -42,7 +51,6 @@ function initWolTable()
 		}
 	}
 
-
 	sort2dStrArr(dataList, 1);
 	var columnNames = ["Hostname", "IP", "MAC", "" ]
 	var table = createTable(columnNames, dataList, "wol_table", false, false);
@@ -54,13 +62,11 @@ function initWolTable()
 	tableContainer.appendChild(table);
 }
 
-
 function sort2dStrArr(arr, testIndex)
 {
 	var str2dSort = function(a,b){  return a[testIndex] == b[testIndex] ? 0 : (a[testIndex] < b[testIndex] ? -1 : 1);  }
 	arr.sort(str2dSort);
 }
-
 
 function getHostname(ip)
 {
@@ -69,19 +75,18 @@ function getHostname(ip)
 	return hostname;
 }
 
-
 function createWakeUpButton()
 {
-        var WakeUpButton = createInput("button");
-        WakeUpButton.value = "WakeUp";
-        WakeUpButton.className="default_button";
-        WakeUpButton.onclick = wakeHost;
-        return WakeUpButton;
+	var WakeUpButton = createInput("button");
+	WakeUpButton.value = "Wake Up";
+	WakeUpButton.className="default_button";
+	WakeUpButton.onclick = wakeHost;
+	return WakeUpButton;
 }
 
-function wakeHost() {
-
-	getRow=this.parentNode.parentNode;
+function wakeHost()
+{
+	getRow = this.parentNode.parentNode;
 
 	var mac = getRow.childNodes[2].firstChild.data;
 	var wakeHostCommand = [ "wol -i " + bcastIp + " " + mac ];
@@ -90,9 +95,5 @@ function wakeHost() {
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 
-        alert("Wakeup request sent");
-
+	alert("Wake Up request sent.");
 }
-
-
-
