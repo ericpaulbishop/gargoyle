@@ -521,13 +521,29 @@ initialiaze_quota_qos()
 
 
 
+
 block_static_ip_mismatches()
 {
 	block_mismatches=$(uci get firewall.@defaults[0].block_static_ip_mismatches 2> /dev/null)
+	delete_chain_from_table static_mismatch_check filter
+	iptables -t filter -N static_mismatch_check
 	if [ "$block_mismatches" = "1" ] && [ -e /etc/ethers ] ; then
-		eval $(cat /etc/ethers | sed '/^[ \t]*$/d' | awk '  { print "iptables -t filter -I forward ! -s " $2 " -m mac --mac-source " $1 " -j REJECT ;\n" } ' )
+		local pairs
+		local p
+		pairs=$(cat /etc/ethers | sed '/^[ \t]*$/d' | awk ' { print $1"^"$2"\n" ; } ' )
+		for p in $pairs ; do
+			local mac
+			local ip
+			mac=$(echo $p | sed 's/\^.*$//g')
+			ip=$(echo $p | sed 's/^.*\^//g')
+			if [ -n "$ip" ] && [ -n "$mac" ] ; then
+				iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT 
+			fi
+		done
 	fi
+	iptables -t filter -I forward -j static_mismatch_check
 }
+
 
 force_router_dns()
 {
