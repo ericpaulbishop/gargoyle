@@ -526,22 +526,24 @@ block_static_ip_mismatches()
 {
 	block_mismatches=$(uci get firewall.@defaults[0].block_static_ip_mismatches 2> /dev/null)
 	delete_chain_from_table static_mismatch_check filter
-	iptables -t filter -N static_mismatch_check
 	if [ "$block_mismatches" = "1" ] && [ -e /etc/ethers ] ; then
 		local pairs
-		local p
 		pairs=$(cat /etc/ethers | sed '/^[ \t]*$/d' | awk ' { print $1"^"$2"\n" ; } ' )
-		for p in $pairs ; do
-			local mac
-			local ip
-			mac=$(echo $p | sed 's/\^.*$//g')
-			ip=$(echo $p | sed 's/^.*\^//g')
-			if [ -n "$ip" ] && [ -n "$mac" ] ; then
-				iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT 
-			fi
-		done
+		if [ -n "$pairs" ] ; then
+			iptables -t filter -N static_mismatch_check
+			local p
+			for p in $pairs ; do
+				local mac
+				local ip
+				mac=$(echo $p | sed 's/\^.*$//g')
+				ip=$(echo $p | sed 's/^.*\^//g')
+				if [ -n "$ip" ] && [ -n "$mac" ] ; then
+					iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT 
+				fi
+			done
+			iptables -t filter -I forward -j static_mismatch_check
+		fi
 	fi
-	iptables -t filter -I forward -j static_mismatch_check
 }
 
 
