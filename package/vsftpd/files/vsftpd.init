@@ -76,9 +76,9 @@ update_user()
 	fi
 
 	if [ "$write" = "yes" ]; then
-		echo "write_enable=yes" > $vsftpd_basedir/users/"$username"
+		echo "write_enable=yes" > "$vsftpd_basedir/users/$username"
 	else
-		echo "write_enable=no" > $vsftpd_basedir/users/"$username"
+		echo "write_enable=no"  > "$vsftpd_basedir/users/$username"
 	fi
 
 	chown "$username" "$ftp_root"
@@ -89,7 +89,7 @@ anonymous()
 {
 	config_get anonymous $1 anonymous "no"
 	config_get anonymous_write $1 anonymous_write "no"
-	config_get anonymous_root $1 anonymous_root "/tmp/usb_mount"
+	config_get anonymous_root $1 anonymous_root "/tmp/ftp/anonymous"
 
 	if [ "$anonymous" = "yes" ]; then
 		mkdir -p "$anonymous_root"
@@ -129,6 +129,7 @@ start()
 	config_load "vsftpd"
 	config_foreach anonymous "vsftpd"
 	config_foreach update_user "user"
+	config_foreach update_share "share"
 
 	[ -d /var/run/vsftpd ] || mkdir -p /var/run/vsftpd
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
