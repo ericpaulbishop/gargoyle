@@ -5,15 +5,50 @@ START=50
 vsftpd_basedir="/tmp/vsftpd"
 vsftpd_conf="$vsftpd_basedir/vsftpd.conf"
 
+mount_share_dir()
+{
+	username="$1"
+	share_name="$2"
+	write="$3"
+	config_get config_get root "username" ftp_root "/tmp/ftp/$username"
+
+	
+	mkdir -p "$ftp_root/$share_name"
+	chmod 755 "$ftp_root/$share_name"
+	chown "$username"  "$ftp_root/$share_name"
+	mount -o bind "$share" "$ftp_root/$share_name"
+	if [ "$write" = "no" ] ; then
+		mount -o remount,bind,ro "$ftp_root/$share_name" 
+	fi
+}
+
+update_share()
+{
+	local share_name="$1"
+	config_get "$1" share_dir
+	
+	config_list_foreach "$1" users_rw mount_share_dir "$share_name" "yes"
+	config_list_foreach "$1" users_ro mount_share_dir "$share_name" "no"
+	
+}
+
 update_user()
 {
-	config_get username $1 username
+	username="$1"
 	config_get password $1 password
-	config_get write $1 write "no"
-	config_get root $1 root "/tmp/usb_mount"
+	config_get write $1 write "yes"
+	config_get root $1 ftp_root "/tmp/ftp/$username"
 
-	mkdir -p "$root"
-	chmod 777 "$root"
+
+
+	# users should not own/be able to modify root ftp dir, just subdirectories
+	# so set a mask of 755 and owner of root
+	mkdir -p "$ftp_root"
+	chmod 755 "$ftp_root"
+	chown root "$ftp_root"
+	chgrp root "$ftp_root"
+	
+	
 	echo "$username" >> $vsftpd_basedir/userlist
 
 	group=$(cat /etc/group | grep "^$username:x:" | sed 's/.*:x://g' | sed 's/://g')
@@ -35,7 +70,7 @@ update_user()
 			user_num=$((user_num+1))
 			tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
 		done
-		echo "$username:x:$user_num:$group:ftp_user:$root:/bin/false" >> /etc/passwd
+		echo "$username:x:$user_num:$group:ftp_user:$ftp_root:/bin/false" >> /etc/passwd
 
 		(echo "$password" ; sleep 1 ; echo "$password") | passwd "$username"
 	fi
@@ -45,6 +80,9 @@ update_user()
 	else
 		echo "write_enable=no" > $vsftpd_basedir/users/"$username"
 	fi
+
+	chown "$username" "$ftp_root"
+
 }
 
 anonymous()
