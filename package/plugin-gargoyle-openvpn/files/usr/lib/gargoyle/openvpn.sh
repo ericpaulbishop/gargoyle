@@ -90,8 +90,10 @@ copy_if_diff()
 	elif [ ! -f "$old_file" ] ; then
 		cp "$new_file" "$old_file"
 	else
-		old_md5=$(md5sum "$old_file" | cut -f 1 -d " ")
-		new_md5=$(md5sum "$new_file" | cut -f 1 -d " ")
+		old_md5=$(md5sum "$old_file")
+		old_md5=${old_md5% *}
+		new_md5=$(md5sum "$new_file")
+		new_md5=${new_md5% *}
 		if [ "$old_md5" != "$new_md5" ] ; then
 			cp "$new_file" "$old_file"
 		fi	

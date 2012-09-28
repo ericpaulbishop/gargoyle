@@ -69,8 +69,10 @@ start() {
 		exit;
 	fi
 
-	old_md5=$(md5sum /etc/exports 2>/dev/null | awk ' { print $1 } ')
+	old_md5=$(md5sum /etc/exports 2>/dev/null)
+	old_md5=${old_md5% *}
 	cur_md5=$(md5sum /tmp/tmp_exports)
+	cur_md5=${cur_md5% *}
 	if [ "$old_md5" = "$cur_md5" ] && [ -f /etc/exports ] ; then
 		rm /tmp/tmp_exports
 	else
