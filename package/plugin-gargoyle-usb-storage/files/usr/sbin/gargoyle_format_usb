@@ -32,6 +32,7 @@ for p in $partition_num_list ; do
 done
 
 
+
 if [ "$percent_swap" = "100" ] ; then
 	printf "n\np\n1\n\n\nt\n82\nw\n" | fdisk "$disk" >/dev/null 2>&1
 	sleep 10
@@ -42,16 +43,15 @@ elif [ "$percent_swap" = "0" ] ; then
 	sleep 10
 	mkfs.ext$ext_version "$disk"1
 else
-	cylinders=$(fdisk -l /dev/sda | awk ' $0 ~ /cylinders$/ { print $5 } ' )
-	ext_cylinders=$((  (100-$percent_swap)*$cylinders/100 ))
-	if [ "$ext_cylinders" = "0" ] ; then
-		ext_cylinders=1
+	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /cylinders.*total.*sectors/ { print $8 } ' )
+	ext_sectors=$((  (100-$percent_swap)*$sectors/100 ))
+	if [ "$ext_sectors" = "0" ] ; then
+		ext_sectors=1
 	fi
-	if [ "$ext_cylinders" = "$cylinders" ] ; then
-		ext_cylinders=$(( $cylinders - 1))
+	if [ "$ext_sectors" = "$sectors" ] ; then
+		ext_sectors=$(( $sectors - 1 ))
 	fi
-	echo "ext_cylinders=$ext_cylinders"
-	printf "n\np\n1\n\n$ext_cylinders\nt\n83\nn\np\n2\n\n\nt\n2\n82\nw\n" | fdisk "$disk" 
+	printf "n\np\n1\n\n$ext_sectors\nt\n83\nn\np\n2\n\n\nt\n2\n82\nw\n" | fdisk "$disk" 
 	sleep 10
 
 	
