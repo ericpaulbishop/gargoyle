@@ -11,7 +11,9 @@ tmp_cron="/tmp/tmp.cron"
 update_cron()
 {
 	old_md5=$(md5sum /etc/crontabs/root)
+	old_md5=${old_md5% *}
 	new_md5=$(md5sum "$tmp_cron")
+	new_md5=${new_md5% *}
 	if [ "$old_md5" = "$new_md5" ] ; then
 		rm "$tmp_cron"
 	else

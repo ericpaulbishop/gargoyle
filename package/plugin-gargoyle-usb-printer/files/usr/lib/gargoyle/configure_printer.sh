@@ -27,8 +27,10 @@ update_dnsmasq_conf()
 	printf "$new_lines\n"                                   >>/tmp/dns.new.tmp
 	echo '###### END BONJOUR PRINTER CONFIGURATION #######' >>/tmp/dns.new.tmp
 	
-	original_md5=$(md5sum "$dnsfile" | sed 's/[\t ].*$//g')
-	new_md5=$(md5sum "/tmp/dns.new.tmp" | sed 's/[\t ].*$//g')
+	original_md5=$(md5sum "$dnsfile")
+	original_md5=${original_md5% *}
+	new_md5=$(md5sum "/tmp/dns.new.tmp")
+	new_md5=${new_md5% *}
 	if [ "$original_md5" != "$new_md5" ] ; then
 		mv /tmp/dns.new.tmp "$dnsfile"
 		/etc/init.d/dnsmasq restart
