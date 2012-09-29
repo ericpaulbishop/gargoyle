@@ -11,18 +11,22 @@ mount_share_dir()
 	local username="$1"
 	local share_name="$2"
 	local write="$3"
-	config_get config_get ftp_root "username" root "/tmp/ftp/$username"
 	config_get share_dir "$share_name" share_dir "/tmp/ftp/$username"
-
+	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
+		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
+	else	
+		config_get ftp_root "$username" root "/tmp/ftp/$username"
+	fi
 	
-	mkdir -p "$ftp_root/$share_name"
-	chmod 755 "$ftp_root/$share_name"
+	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
+	chmod 755 "$ftp_root/$share_name" >/dev/null 2>&1
 
-	chown "$username"  "$ftp_root/$share_name"
-	mount -o bind "$share_dir" "$ftp_root/$share_name"
-	echo mount -o bind "$share_dir" "$ftp_root/$share_name"
+
+	chown "$username"  "$ftp_root/$share_name" >/dev/null 2>&1
+	mount -o bind "$share_dir" "$ftp_root/$share_name" >/dev/null 2>&1
 	if [ "$write" = "no" ] ; then
-		mount -o remount,bind,ro "$ftp_root/$share_name" 
+		mount -o remount,bind,ro "$ftp_root/$share_name" >/dev/null 2>&1
+
 	fi
 }
 mount_share_rw()
@@ -34,33 +38,59 @@ mount_share_ro()
 	mount_share_dir "$1" "$2" "no"
 }
 
-update_share()
+unmount_user_share()
+{
+	local username="$1"
+	local share_name="$2"
+	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
+		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
+	else	
+		config_get ftp_root "$username" root "/tmp/ftp/$username"
+	fi
+	umount  "$ftp_root/$share_name" >/dev/null 2>/dev/null
+
+
+}
+
+unmount_share()
 {
 	local share_name="$1"
-	config_get "$1" share_dir
-	
-	config_list_foreach "$1" users_rw mount_share_rw "$share_name"
-	config_list_foreach "$1" users_ro mount_share_ro "$share_name"
+	config_list_foreach "$share_name" users_rw unmount_user_share "$share_name"
+	config_list_foreach "$share_name" users_ro unmount_user_share "$share_name"
+
+}
+
+
+mount_share()
+{
+	local share_name="$1"
+	config_list_foreach "$share_name" users_rw mount_share_rw "$share_name"
+	config_list_foreach "$share_name" users_ro mount_share_ro "$share_name"
 	
 }
 
 update_user()
 {
 	username="$1"
+	if [ "$username" = "ftp" ] || [ "$username" = "anonymous" ] || [ "$username" = "root" ] || [ "$username" = "daemon" ] || [ "$username" = "network" ] || [ "$username" = "nobody" ] ; then
+		echo "ERROR: Username '$username' is not allowed"
+		return
+	fi
 	config_get password $1 password
 	config_get write $1 write "yes"
 	config_get ftp_root $1 root "/tmp/ftp/$username"
 
 
-	echo "ftp_root = $ftp_root"
+
 
 
 	# users should not own/be able to modify root ftp dir, just subdirectories
 	# so set a mask of 755 and owner of root
-	mkdir -p "$ftp_root"
-	chmod 555 "$ftp_root"
-	chown root "$ftp_root"
-	chgrp root "$ftp_root"
+	mkdir -p   "$ftp_root" >/dev/null 2>&1
+	chmod 555  "$ftp_root" >/dev/null 2>&1
+	chown root "$ftp_root" >/dev/null 2>&1
+	chgrp root "$ftp_root" >/dev/null 2>&1
+
 	
 	
 	echo "$username" >> $vsftpd_basedir/userlist
@@ -86,7 +116,7 @@ update_user()
 		done
 		echo "$username:x:$user_num:$group:ftp_user:$ftp_root:/bin/false" >> /etc/passwd
 
-		(echo "$password" ; sleep 1 ; echo "$password") | passwd "$username"
+		(echo "$password" ; echo "$password") | passwd "$username" >/dev/null 2>&1
 	fi
 
 	if [ "$write" = "yes" ]; then
@@ -95,7 +125,8 @@ update_user()
 		echo "write_enable=no"  > "$vsftpd_basedir/users/$username"
 	fi
 
-	chown "$username" "$ftp_root"
+	chown "$username" "$ftp_root" >/dev/null 2>&1
+
 
 }
 
@@ -107,7 +138,7 @@ anonymous()
 
 	if [ "$anonymous" = "yes" ]; then
 		mkdir -p "$anonymous_root"
-		chmod 555 "$anonymous_root"
+		chmod 555 "$anonymous_root" >/dev/null 2>&1
 
 		echo "anonymous" >> $vsftpd_basedir/userlist
 		echo "ftp" >> $vsftpd_basedir/userlist
@@ -143,14 +174,17 @@ start()
 	config_load "vsftpd"
 	config_foreach anonymous "vsftpd"
 	config_foreach update_user "user"
-	config_foreach update_share "share"
+	config_foreach mount_share "share"
 
-	[ -d /var/run/vsftpd ] || mkdir -p /var/run/vsftpd
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
 
-	/usr/sbin/vsftpd $vsftpd_conf
+	start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
 }
 
 stop() {
-	killall vsftpd
+
+	config_load "vsftpd"
+	start-stop-daemon -K -x /usr/sbin/vsftpd 
+	sleep 1
+	config_foreach unmount_share "share"
 }
