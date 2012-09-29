@@ -1,13 +1,17 @@
 #!/bin/sh /etc/rc.common
 
 START=56
-
+got_lock=0
 
 update_sharetype()
 {
-	section="$1"
-	config_get path $1 path
-	if [ "$path" = "$cur_mount" ] ; then
+	local section="$1"
+	config_get path "$section" path
+	
+	# subtract cur_mount from beginning of path, then test
+	# that something was removed
+	local subdir=${$path#$cur_mount}
+	if [ "$subdir" != "$cur_mount" ] ; then
 		shared=1		
 	fi
 }
@@ -21,8 +25,8 @@ is_mounted()
 
 usb_lock()
 {
-	timeout=15
 	got_lock=0
+	local timeout=15
 	if [ ! -e /tmp/usb_restart.lock ] ; then
 		touch /tmp/usb_restart.lock
 		got_lock=1
