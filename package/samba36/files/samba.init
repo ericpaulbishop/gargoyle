@@ -72,6 +72,7 @@ smb_add_share() {
 	config_get name $1 name
 	config_get path $1 path
 	config_get users $1 users
+	config_get users_ro $1 users_ro
 	config_get read_only $1 read_only
 	config_get guest_ok $1 guest_ok
 	config_get create_mask $1 create_mask
@@ -84,6 +85,7 @@ smb_add_share() {
 
 	echo -e "\n[$name]\n\tpath = $path" >> /var/etc/smb.conf
 	[ -n "$users" ] && echo -e "\tvalid users = $users" >> /var/etc/smb.conf
+	[ -n "$users_ro" ] && echo -e "\tread list = $users_ro" >> /var/etc/smb.conf
 	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /var/etc/smb.conf
 	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /var/etc/smb.conf
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /var/etc/smb.conf
