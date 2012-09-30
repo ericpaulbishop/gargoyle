@@ -5,6 +5,25 @@ START=50
 vsftpd_basedir="/tmp/vsftpd"
 vsftpd_conf="$vsftpd_basedir/vsftpd.conf"
 
+#####################################################################################################
+#
+# By default vsftpd is configured per-user, with each user having a home directory
+# under which that user has control.  However, ideally we want to be able to specify
+# things based on shared directories, with each user having (or not having) access to
+# a given shared directory.  
+# 
+# So... what we do is give each user a home directory under /tmp/ftp/[user_name]
+# The user root is not writable, but under the user root, we mount (using the bind option)
+# the shares, which may or may not be writable.  We can't just symlink, since we chroot into 
+# the user directory and symlinks don't work when we chroot.  Since the share name is 
+# consistent, and we chroot for each user if we specify the same share for two different
+# users, the url (minus user/pass) is the same, which is exactly what we want.  Also, we
+# can bind directories readonly.  This is useful since if we can't specify directory
+# permissions on a mounted drive, due to the drive being formatted with a non-unix 
+# filesystem, we can still specify readonly mounts.
+#
+###################################################################################################
+
 
 mount_share_dir()
 {
