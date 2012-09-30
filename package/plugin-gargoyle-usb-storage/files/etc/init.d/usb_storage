@@ -1,20 +1,9 @@
 #!/bin/sh /etc/rc.common
 
 START=56
-got_lock=0
+MOUNT_TABLE_FILE="/tmp/mounted_usb_storage.tab"
 
-update_sharetype()
-{
-	local section="$1"
-	config_get path "$section" path
-	
-	# subtract cur_mount from beginning of path, then test
-	# that something was removed
-	local subdir=${$path#$cur_mount}
-	if [ "$subdir" != "$cur_mount" ] ; then
-		shared=1		
-	fi
-}
+got_lock=0
 
 
 is_mounted()
@@ -51,7 +40,7 @@ start()
 
 do_start()
 {
-	gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
+	local gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
 	if [ -z "$gdisplay" ] ; then
 		uci set gargoyle.display.system_usb_storage='USB Storage'
 		uci set gargoyle.scripts.system_usb_storage='usb_storage.sh'
@@ -59,26 +48,24 @@ do_start()
 		uci commit
 	fi
 
-	drives="$(blkid | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
+	local drives="$(blkid | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
 	
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
 	
-	unset mounted
-
 	for devid in $drives; do
-		id=$(echo "$devid" | cut -f 2 -d ':')
-		d=$(echo "$devid" | cut -f 1 -d ':')
-		did="${d##*/}"
+		local id=$(echo "$devid" | cut -f 2 -d ':')
+		local d=$(echo "$devid" | cut -f 1 -d ':')
+		local did="${d##*/}"
 
 		if [ -z "$id" ] || [ -z "$d" ] || is_mounted "$d"; then
 			continue
 		fi
 		
 		rmdir "/tmp/usb_mount/$did" >/dev/null 2>&1
+		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
 
-		type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
-
+		local err
 		unset err
 		
 		case "${type}" in
@@ -121,29 +108,14 @@ do_start()
 		esac
 
 		if [ -z "$err" ] && [ "$type" != "Linux swap" ] ; then
-			share_type=""
-			cur_mount="/tmp/usb_mount/$id"
-		
-			shared=0
-			config_load "samba"
-			config_foreach update_sharetype "sambashare"
-			if [ "$shared" = "1" ] ; then share_type="S" ; fi
-			
-			shared=0
-			config_load "nfsd"
-			config_foreach update_sharetype "nfsshare"
-			if [ "$shared" = "1" ] ; then share_type="N$share_type" ; fi
-			if [ -z "$share_type" ] ; then share_type="-" ; fi
-					
-			share_size=$(df  | grep "$d" | awk '{ print $2 }')
-			if [ -z "$share_size" ] ; then share_size="-" ; fi
-			if [ -n "$share_size" ] && [ "${share_size}" != '-' ]; then share_size=$(($share_size*1024)) ; fi
+			local disk_size=$(df  | grep "$d" | awk '{ print $2 }')
+			if [ -z "$disk_size" ] ; then disk_size="-" ; fi
+			if [ -n "$disk_size" ] && [ "${disk_size}" != '-' ]; then disk_size=$(($disk_size*1024)) ; fi
 
-			echo "$d	/tmp/usb_mount/$id	$type	$share_size	$share_type"  >>/tmp/mounted_usb_storage.tab
+			sed -i  "/^$d\t.*$/d"  "$MOUNT_TABLE_FILE"
+			echo "$d	/tmp/usb_mount/$id	$type	$disk_size"  >> "$MOUNT_TABLE_FILE"
 		
 			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
-
-			mounted="$mounted /tmp/usb_mount/$id"
 		fi
 	done
 }
@@ -182,7 +154,7 @@ do_swapoff()
 
 do_stop()
 {
-	if [ -f '/tmp/mounted_usb_storage.tab' ];  then
+	if [ -f "$MOUNT_TABLE_FILE" ];  then
 		while read device_path mountpoint_path _; do
 			# Cleanup mountpoint and symlink.
 			if [ -d "${mountpoint_path}" ] ; then
@@ -190,9 +162,9 @@ do_stop()
 				rmdir "${mountpoint_path}"
 			fi
 			rm -rf "/tmp/usb_mount/dev_${device_path##*/}"
-		done < /tmp/mounted_usb_storage.tab
+		done < "$MOUNT_TABLE_FILE"
 
-		rm /tmp/mounted_usb_storage.tab
+		rm "$MOUNT_TABLE_FILE"
 	fi
 	do_swapoff
 }
