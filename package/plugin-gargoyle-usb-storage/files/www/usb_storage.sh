@@ -59,42 +59,27 @@
 	</div>
 
 	
-	<div id="cifs_policy_container">
-		<label id="cifs_policy_label" class="leftcolumn">CIFS and FTP Access Policy:</label>
-		<select class="rightcolumn" id="cifs_policy" onchange="setPolicyVisibility()">
-			<option value="share">Allow Anonymous Access</option>
-			<option value="user">Require User &amp; Password</option>
-		</select>
+	<div id="user_container">
+		<label id="cifs_user_label" class="leftcolumn">CIFS / FTP Users:</label>
+		<span class="rightcolumnonly" id="user_container">
+			<label id="user_label" for="cifs_user" style="float:left;width:100px;">User:</label>
+			<input id="user" type="text" />
+		</span>
 	</div>
-	<div class="rightcolumnonly" id="cifs_user_container">
-		<label id="cifs_user_label" for="cifs_user" style="float:left;width:100px;">User:</label>
-		<input id="cifs_user" type="text" />
-	</div>
-	<div class="rightcolumnonly" style="margin-bottom:20px;" id="cifs_pass_container">
-		<label id="cifs_pass_label" for="cifs_pass" style="float:left;width:100px;">Password:</label>
+	<div class="rightcolumnonly" id="user_pass_container">
+		<label id="cifs_pass_label" for="user_pass" style="float:left;width:100px;">Password:</label>
 		<input id="cifs_pass" type="text" />
 	</div>
-	<div id="nfs_policy_container">
-		<label id="nfs_policy_label" class="leftcolumn">NFS Access Policy:</label>
-		<select class="rightcolumn" id="nfs_policy" onchange="setPolicyVisibility()" >
-			<option value="share">Allow Anonymous Access</option>
-			<option value="ip">Allow Only The Following IPs</option>
-		</select>
+	<div class="rightcolumnonly" id="user_pass_container">
+		<input id="add_user" type="button"  class="default_button" value="Add User" style="margin-left:0px;" />
 	</div>
 
-	<div id="nfs_ip_container">
-		<div class="rightcolumnonly" id="nfs_ip_table_container"></div>
-		<div class="rightcolumnonly">
-			<input type='text' id='nfs_ip'  size='30' onkeyup='proofreadIp(this)'  />
-			<input type="button" class="default_button" id="add_nfs_ip" value="Add" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)' />
-		</div>
-		<div class="rightcolumnonly">
-			<em>Specify an IP or Subnet</em>
-		</div>
+	<div class="rightcolumnonly" style="margin-bottom:20px;" id="user_table_container">
 	</div>
+
 
 	<div id="sharing_add_heading_container">
-		<span class="nocolumn" style="text-decoration:underline;">Add Shared Disk:</span>
+		<span class="nocolumn" style="text-decoration:underline;">Add Shared Disk / Directory:</span>
 	</div>
 	<div id="sharing_add_controls_container" class="indent">
 		<? cat templates/usb_storage_template ?>

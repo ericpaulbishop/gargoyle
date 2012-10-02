@@ -185,6 +185,19 @@ fieldset label
 	margin-bottom:30px;
 }
 
+
+.aligned_check_label
+{
+	vertical-align:middle;
+}
+.aligned_check
+{
+	padding:0;
+	margin:0px;
+	vertical-align:middle;
+	overflow:hidden;
+}
+
 .code
 {
 	position:relative;
@@ -1402,4 +1415,5 @@ td.bandwidth_distribution_table_column_7
 	border-right:1px solid black;
 
 }
+
 

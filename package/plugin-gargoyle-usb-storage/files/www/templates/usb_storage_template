@@ -3,24 +3,14 @@
 	<select class="rightcolumn" id="share_disk"></select>
 	<span class="rightcolumn" id="share_disk_text"></span>
 </div>
-<div id="select_share_type_container">
-	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type(s):</label>
-	<span class='rightcolumn'>
-		<input type='checkbox' id='share_type_cifs' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-		<label for="share_type_cifs" style="vertical-align:middle">CIFS</label>&nbsp;
-		<input type='checkbox' id='share_type_ftp' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-		<label for="share_type_ftp" style="vertical-align:middle">FTP</label>&nbsp;
-		<input type='checkbox' id='share_type_nfs' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-		<label for="share_type_nfs" style="vertical-align:middle">NFS</label>
-	</span>
-	<br/>
+
+<div id="share_dir_container">
+	<label class="leftcolumn" id="share_dir_label" for="share_dir">Subdirectory:</label>
+	<input type='text' id='share_dir'  size='30' onkeyup='proofreadSubdir(this)'  />
 </div>
-<div id="share_access_container">
-	<label class="leftcolumn" id="share_access_label" for="share_access">Access Type:</label>
-	<select class="rightcolumn" id="share_access">
-		<option value="ro">Read Only</option>
-		<option value="rw">Read/Write</option>
-	</select>
+<div id="share_name_container">
+	<label class="leftcolumn" id="share_name_label" for="share_name">Share Name:</label>
+	<input type="text" class="rightcolumn" id="share_name" size='30' onkeyup="setPaths(this.ownerDocument)" />
 </div>
 <div id="share_specificity_container">
 	<label class="leftcolumn" id="share_name_label" for="share_specificity">Settings Apply To:</label>
@@ -29,12 +19,78 @@
 		<option value="blkid">Only This Specific Drive</option>
 	</select>
 </div>
-<div id="share_name_container">
-	<label class="leftcolumn" id="share_name_label" for="share_name">Name:</label>
-	<input type="text" class="rightcolumn" id="share_name" onkeyup="setNfsPath(this.ownerDocument)" />
+
+<div id="select_share_type_container" style="margin-bottom:20px;" >
+	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type(s):</label>
+	<span class='rightcolumn'>
+		<input type='checkbox' id='share_type_cifs' class="aligned_check"/>
+		<label for="share_type_cifs" class="aligned_check_label">CIFS</label>&nbsp;
+		<input type='checkbox' id='share_type_ftp' class="aligned_check"/>
+		<label for="share_type_ftp" class="aligned_check_label">FTP</label>&nbsp;
+		<input type='checkbox' id='share_type_nfs' class="aligned_check"/>
+		<label for="share_type_nfs" class="aligned_check_label">NFS</label>
+	</span>
+	<br/>
 </div>
+
+
+<div id="anonymous_access_container">
+	<label class="leftcolumn" id="anonymous_access_label" for="share_access"> CIFS/FTP Anonymous Access:</label>
+	<select class="rightcolumn" id="anonymous_access">
+		<option value="none">None</option>
+		<option value="ro">Read Only</option>
+		<option value="rw">Read/Write</option>
+	</select>
+</div>
+<div id="user_access_container" style="margin-bottom:20px;" >
+	<div>
+		<label class="leftcolumn" for="user_access">CIFS/FTP Users With Access:</label>
+
+		<span class="rightcolumn">
+			<select id="user_access"></select>
+			<select id="user_access_type">
+				<option value="ro">Read Only</option>
+				<option value="rw">Read/Write</option>
+			</select>
+			<input type="button" class="default_button" id="add_user_access" value="Add" onclick='addUserAccess()' />
+		</span>
+	</div>
+	<div class="rightcolumnonly" id="user_access_table_container"></div>
+</div>
+
+
+<div id="nfs_access_container">
+	<label class="leftcolumn" id="nfs_access_label" for="nfs_access">NFS Access:</label>
+	<select class="rightcolumn" id="nfs_access">
+		<option value="ro">Read Only</option>
+		<option value="rw">Read/Write</option>
+	</select>
+</div>
+<div id="nfs_policy_container">
+	<label id="nfs_policy_label" class="leftcolumn">NFS Access Policy:</label>
+	<select class="rightcolumn" id="nfs_policy" onchange="setPolicyVisibility()" >
+		<option value="share">Allow Anonymous Access</option>
+		<option value="ip">Allow Only The Following IPs</option>
+	</select>
+</div>
+<div id="nfs_ip_container"  style="margin-bottom:20px;" >
+	<div class="rightcolumnonly">
+		<input type='text' id='nfs_ip'  size='30' onkeyup='proofreadIp(this)'  />
+		<input type="button" class="default_button" id="add_nfs_ip" value="Add" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)' />
+	</div>
+	<div class="rightcolumnonly">
+		<em>Specify an IP or Subnet</em>
+	</div>
+	<div class="rightcolumnonly" id="nfs_ip_table_container"></div>
+</div>
+
+
+
+
+
+
 <div id="ftp_path_container">
-	<label class="leftcolumn" id="ftp_path_label" for="ftp_path">NFS Path:</label>
+	<label class="leftcolumn" id="ftp_path_label" for="ftp_path">FTP Path:</label>
 	<span class="rightcolumn" id="ftp_path"></span>
 </div>
 <div id="nfs_path_container">
