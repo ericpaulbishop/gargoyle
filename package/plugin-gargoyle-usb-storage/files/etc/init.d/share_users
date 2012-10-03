@@ -73,6 +73,8 @@ update_user()
 
 			uci_set    "share_users" "$username" password_salt "$password_salt"
 			uci_set    "share_users" "$username" password_sha1 "$new_sha1"
+
+			(echo "$password" ; echo "$password") | passwd "$username" >/dev/null 2>&1
 		fi
 		uci_remove "share_users" "$username" password
 		uci_commit
