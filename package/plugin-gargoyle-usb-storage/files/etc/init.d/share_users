@@ -26,7 +26,7 @@ update_user()
 	config_get password_sha1 "$username" password_sha1
 	config_get home_dir      "$username" home_dir	
 
-	if [ -z "home_dir" ] ; then
+	if [ -z "$home_dir" ] ; then
 		home_dir="/tmp/share_home/$username"
 	fi
 	if [ ! -d "$home_dir" ] ; then
