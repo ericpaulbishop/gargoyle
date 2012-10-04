@@ -13,7 +13,7 @@ vsftpd_anonymous_root="/tmp/share_home/anonymous"
 # things based on shared directories, with each user having (or not having) access to
 # a given shared directory.  
 # 
-# So... what we do is give each user a home directory under /tmp/ftp/[user_name]
+# So... what we do is give each user a home directory under /tmp/share_home/[user_name]
 # The user root is not writable, but under the user root, we mount (using the bind option)
 # the shares, which may or may not be writable.  We can't just symlink, since we chroot into 
 # the user directory and symlinks don't work when we chroot.  Since the share name is 
