@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-usb-storage
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=USB Storage Support for Gargoyle
-	DEPENDS:=+samba36-server +nfs-kernel-server +nfs-kernel-server-utils +gargoyle +fdisk +blkid +dosfsck
+	DEPENDS:=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +gargoyle +fdisk +blkid +dosfsck
 	DEPENDS+=+libusb +chat +kmod-usb-acm +kmod-usb-serial +comgt +usb-modeswitch +usb-modeswitch-data
 	DEPENDS+=+e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +swap-utils +vsftpd 
 	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat 

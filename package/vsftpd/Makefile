@@ -23,8 +23,8 @@ define Package/vsftpd
   CATEGORY:=Network
   TITLE:=A fast and secure FTP server
   URL:=http://vsftpd.beasts.org/
-  MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
-  DEPENDS:=+gargoyle
+  MAINTAINER:=Eric Bishop
+  DEPENDS:=+gargoyle +share-users
 endef
 
 define Package/vsftpd/conffiles
