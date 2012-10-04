@@ -98,45 +98,10 @@ smb_add_share() {
 }
 
 
-smb_add_user()
-{
-	samba_group=$(cat /etc/group | grep "^samba" | sed 's/.*:x://g' | sed 's/://g')
-	if [ -z "$samba_group" ] ; then
-		samba_group=1000
-		tst=$(cat /etc/group | grep ":$samba_group:")
-		while [ -n "$tst" ] ; do
-			samba_group=$(($samba_group+1))
-			tst=$(cat /etc/group | grep ":$samba_group:")
-		done
-		echo "samba:x:$samba_group:" >>/etc/group	
-	fi
-
-	config_get username $1 username
-	config_get password $1 password
-
-	if [ -z "$username" ] || [ -z "$password" ] ; then
-		return 
-	fi
-
-	user_line=$(cat /etc/passwd | grep "^$username:")
-	if [ -z "$user_line" ] ; then
-		user_num="$samba_group"
-		tst=$(cat /etc/passwd | grep ":.*:$user_num:.*:.*:/.*:/.*$")
-		while [ -n "$tst" ] ; do
-			user_num=$((user_num+1))
-			tst=$(cat /etc/passwd | grep ":.*:$user_num:.*:.*:/.*:/.*$")
-		done
-		echo "$username:*:$user_num:$samba_group:$username:/var:/bin/false" >>/etc/passwd
-	fi
-	printf "$password\n$password\n" | smbpasswd -a -s "$username"
-}
-
-
 start() {
 	config_load samba
 	config_foreach smb_header samba
 	config_foreach smb_add_share sambashare
-	config_foreach smb_add_user  sambauser
 
 	if [ "$found_sambashare" = "1" ] ; then
 		service_start /usr/sbin/smbd -D
