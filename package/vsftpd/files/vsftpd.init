@@ -4,6 +4,7 @@ START=50
 
 vsftpd_basedir="/tmp/vsftpd"
 vsftpd_conf="$vsftpd_basedir/vsftpd.conf"
+vsftpd_anonymous_root="/tmp/share_home/anonymous"
 
 #####################################################################################################
 #
@@ -30,11 +31,21 @@ mount_share_dir()
 	local username="$1"
 	local share_name="$2"
 	local write="$3"
-	config_get share_dir "$share_name" share_dir "/tmp/ftp/$username"
+	config_get share_dir "$share_name" share_dir
+	if [ -z "$share_dir" ] ; then
+		return
+	fi
+	if [ ! -d "$share_dir" ] ; then
+		return
+	fi
+
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
-		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
+		config_get ftp_root "vsftpd" anonymous_root "/tmp/share_home/anonymous"
 	else	
-		config_get ftp_root "$username" root "/tmp/ftp/$username"
+		ftp_root=$(/sbin/uci get share_users.$username.home_dir)
+		if [ -z "$ftp_root" ] ; then
+			ftp_root="/tmp/share_home/$username"
+		fi
 	fi
 	
 	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
@@ -45,8 +56,13 @@ mount_share_dir()
 	mount -o bind "$share_dir" "$ftp_root/$share_name" >/dev/null 2>&1
 	if [ "$write" = "no" ] ; then
 		mount -o remount,bind,ro "$ftp_root/$share_name" >/dev/null 2>&1
-
 	fi
+
+	# we can specify per-user write option in vsftpd config, though generally we won't use it
+	config_get write "$username" write "yes"
+	echo "write_enable=$write" > "$vsftpd_basedir/users/$username"
+
+
 }
 mount_share_rw()
 {
@@ -64,10 +80,13 @@ unmount_user_share()
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
 		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
 	else	
-		config_get ftp_root "$username" root "/tmp/ftp/$username"
+		ftp_root=$(/sbin/uci get share_users.$username.home_dir)
+		if [ -z "$ftp_root" ] ; then
+			ftp_root="/tmp/share_home/$username"
+		fi
 	fi
 	umount  "$ftp_root/$share_name" >/dev/null 2>/dev/null
-
+	rm -rf  "$ftp_root/$share_name" >/dev/null 2>/dev/null
 
 }
 
@@ -88,83 +107,19 @@ mount_share()
 	
 }
 
-update_user()
-{
-	username="$1"
-	if [ "$username" = "ftp" ] || [ "$username" = "anonymous" ] || [ "$username" = "root" ] || [ "$username" = "daemon" ] || [ "$username" = "network" ] || [ "$username" = "nobody" ] ; then
-		echo "ERROR: Username '$username' is not allowed"
-		return
-	fi
-	config_get password $1 password
-	config_get write $1 write "yes"
-	config_get ftp_root $1 root "/tmp/ftp/$username"
-
-
-
-
-
-	# users should not own/be able to modify root ftp dir, just subdirectories
-	# so set a mask of 755 and owner of root
-	mkdir -p   "$ftp_root" >/dev/null 2>&1
-	chmod 555  "$ftp_root" >/dev/null 2>&1
-	chown root "$ftp_root" >/dev/null 2>&1
-	chgrp root "$ftp_root" >/dev/null 2>&1
-
-	
-	
-	echo "$username" >> $vsftpd_basedir/userlist
-
-	group=$(cat /etc/group | grep "^$username:x:" | sed 's/.*:x://g' | sed 's/://g')
-	if [ -z "$group" ] ; then
-		group=1000
-		tst=$(grep ":$group:" /etc/group)
-		while [ -n "$tst" ] ; do
-			group=$(($group+1))
-			tst=$(grep ":$group:" /etc/group)
-		done
-		echo "$username:x:$group:" >> /etc/group
-	fi
-
-	user_line=$(grep "^$username:" /etc/passwd)
-	if [ -z "$user_line" ] ; then
-		user_num="$group"
-		tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
-		while [ -n "$tst" ] ; do
-			user_num=$((user_num+1))
-			tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
-		done
-		echo "$username:x:$user_num:$group:ftp_user:$ftp_root:/bin/false" >> /etc/passwd
-
-		(echo "$password" ; echo "$password") | passwd "$username" >/dev/null 2>&1
-	fi
-
-	if [ "$write" = "yes" ]; then
-		echo "write_enable=yes" > "$vsftpd_basedir/users/$username"
-	else
-		echo "write_enable=no"  > "$vsftpd_basedir/users/$username"
-	fi
-
-	chown "$username" "$ftp_root" >/dev/null 2>&1
-
-
-}
-
 anonymous()
 {
 	config_get anonymous $1 anonymous "no"
 	config_get anonymous_write $1 anonymous_write "no"
-	config_get anonymous_root $1 anonymous_root "/tmp/ftp/anonymous"
+	config_get anonymous_root $1 anonymous_root "$vsftpd_anonymous_root"
 
-	if [ "$anonymous" = "yes" ]; then
+	have_ftp_user=$(grep '^ftp:' /etc/passwd)
+	if [ -z "$have_ftp_user" ] && [ "$anonymous" = "yes" ] ; then
 		mkdir -p "$anonymous_root"
 		chmod 555 "$anonymous_root" >/dev/null 2>&1
-
-		echo "anonymous" >> $vsftpd_basedir/userlist
-		echo "ftp" >> $vsftpd_basedir/userlist
-
-		sed -i '/^ftp:*/d' /etc/passwd
 		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
-
+	fi
+	if [ "$anonymous" = "yes" ] ; then
 		if [ "$anonymous_write" = "yes" ]; then
 			echo "write_enable=yes" > $vsftpd_basedir/users/ftp
 		else
@@ -192,7 +147,6 @@ start()
 	create_config
 	config_load "vsftpd"
 	config_foreach anonymous "vsftpd"
-	config_foreach update_user "user"
 	config_foreach mount_share "share"
 
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
