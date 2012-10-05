@@ -189,6 +189,39 @@ function resetData()
 
 	if(storageDrives.length > 0)
 	{
+		
+		var userNames = uciOriginal.getAllSectionsOfType("share_users", "user");
+		var tableObject;
+		if(userNames.length > 0)
+		{
+			var userTableData = []
+			var userIndex
+			for(userIndex=0; userIndex < userNames.length; userIndex++)
+			{
+				nullFunc = function() { return 0 ; };
+				removeUserCallback = nullFunc
+				editUser = nullFunc
+
+				userEditButton = createEditButton( editUser )
+				userTableData.push( [ userNames[userIndex], userEditButton ] )
+			}
+			var tableObject = createTable(["", ""], userTableData, "share_user_table", true, false, removeUserCallback); 
+		}
+		else
+		{
+			tableObject = document.createElement("div");                                                                                      
+                	tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>"; 
+		}
+		var tableContainer = document.getElementById("user_table_container");
+		while(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild( tableContainer.firstChild);
+		}
+		tableContainer.appendChild(tableObject);
+
+
+
+		/*
 		//workgroup
 		var s =  uciOriginal.getAllSectionsOfType("samba", "samba");
 		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
@@ -235,7 +268,7 @@ function resetData()
 					mountedDrives[ shareDrive ] = 1;
 					
 					//device->[name, filesystem, size, sharetype, access]
-					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton()] : mountPointToDriveData[shareMountPoint];
+					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton(editShare)] : mountPointToDriveData[shareMountPoint];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
 					driveData[1] = mountPointToFs[shareMountPoint];
 					driveData[2] = mountPointToDriveSize[shareMountPoint];
@@ -274,7 +307,9 @@ function resetData()
 						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
 						if(allowedHosts != "" && allowedHosts != "*")
 						{
-							var allowedHosts = allowedHostsStr.split(/[\t ]*,[\t ]*/);
+	*/
+	//						var allowedHosts = allowedHostsStr.split(/[\t ]*,[\t ]*/);
+	/*
 							var allowedIps = [];
 							while(allowedHosts.length > 0)
 							{
@@ -349,6 +384,7 @@ function resetData()
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(shareTable);
+		*/
 	}
 
 	// format setttings
@@ -457,7 +493,7 @@ function addNewShare()
 	var specificity = getSelectedValue("share_specificity");
 
 	var table = document.getElementById("share_table");
-	addTableRow(table, [name, fs, size, type, access, createEditButton() ], true, false, removeShareCallback);
+	addTableRow(table, [name, fs, size, type, access, createEditButton(editShare) ], true, false, removeShareCallback);
 	nameToMountPath[name] = specificity == "blkid" ? mountPoint : driveToDevMountPath(drive);
 
 	//remove the drive we just used from the available list
@@ -477,12 +513,12 @@ function setPolicyVisibility()
 	setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
 }
 
-function createEditButton()
+function createEditButton( editFunction )
 {
 	editButton = createInput("button");
 	editButton.value = "Edit";
 	editButton.className="default_button";
-	editButton.onclick = editShare;
+	editButton.onclick = editFunction;
 	
 	editButton.className = "default_button"  ;
 	editButton.disabled  = false ;

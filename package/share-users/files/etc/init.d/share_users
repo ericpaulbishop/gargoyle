@@ -76,6 +76,7 @@ update_user()
 
 			(echo "$password" ; echo "$password") | passwd "$username" >/dev/null 2>&1
 			if [ -e /usr/sbin/smbpasswd ] ; then
+				touch /etc/samba/smbpasswd
 				printf "$password\n$password\n" | /usr/sbin/smbpasswd -a -s "$username"
 			fi
 		fi
