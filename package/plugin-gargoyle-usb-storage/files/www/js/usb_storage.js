@@ -178,6 +178,73 @@ function saveChanges()
 }
 
 
+function addUser()
+{
+	var user = document.getElementById("new_user").value
+	var pass1 = document.getElementById("user_pass").value
+	var pass2 = document.getElementById("user_pass_confirm").value
+
+
+	//validate
+	var errors = [];	
+	var testUser = user.gsub(/[0-9a-zA-Z]/, "");
+	if(user == "")
+	{
+		errors.push("Username cannot be empty")
+	}
+	if(testUser != "")
+	{
+		errors.push("Username can contain only letters and numbers")
+	}
+	if(pass1 == "" && pass2 == "")
+	{
+		errors.push("Password cannot be empty")
+	}
+	if(pass1 != pass2)
+	{
+		errors.push("Passwords don't match")
+	}
+	if(errors.length == 0)
+	{
+		//check to make sure user isn't a dupe
+		var userTable = document.getElementById("share_user_table");
+		if(userTable != null)
+		{
+			var found = 0;
+			var userData = getTableDataArray(userTable, true, false);
+			var userIndex;
+			for(userIndex=0; userIndex < userData.length && found == 0; userIndex++)
+			{
+				found = userData[userIndex][0] == user ? 1 : found;
+			}
+			if(found)
+			{
+				errors.push("Duplicate Username")
+			}
+		}
+	}
+	if(errors.length() > 0)
+	{
+		alert( errors.join("\n") + "\n\nCould not add user" );
+		return;
+	}
+	else
+	{
+		var userTable = document.getElementById("share_user_table");
+		if(userTable == null)
+		{
+
+		}
+		else
+		{
+
+		}
+
+	}
+
+}
+
+
 function resetData()
 {
 	document.getElementById("no_disks").style.display =  storageDrives.length == 0 ?   "block" : "none";
@@ -189,7 +256,13 @@ function resetData()
 
 	if(storageDrives.length > 0)
 	{
-		
+
+		//workgroup
+		var s =  uciOriginal.getAllSectionsOfType("samba", "samba");
+		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
+
+
+		//share users
 		var userNames = uciOriginal.getAllSectionsOfType("share_users", "user");
 		var tableObject;
 		if(userNames.length > 0)
@@ -222,9 +295,6 @@ function resetData()
 
 
 		/*
-		//workgroup
-		var s =  uciOriginal.getAllSectionsOfType("samba", "samba");
-		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
 
 		//access policy, default = anonymous
 		setSelectedValue("cifs_policy", "share", document);

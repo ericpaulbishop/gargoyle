@@ -62,13 +62,17 @@
 	<div id="user_container">
 		<label id="cifs_user_label" class="leftcolumn">CIFS / FTP Users:</label>
 		<span class="rightcolumnonly" id="user_container">
-			<label id="user_label" for="cifs_user" style="float:left;width:100px;">User:</label>
-			<input id="user" type="text" />
+			<label id="user_label" for="new_user" style="float:left;width:120px;">New User:</label>
+			<input id="new_user" type="text" />
 		</span>
 	</div>
 	<div class="rightcolumnonly" id="user_pass_container">
-		<label id="cifs_pass_label" for="user_pass" style="float:left;width:100px;">Password:</label>
-		<input id="cifs_pass" type="text" />
+		<label id="user_pass_label" for="user_pass" style="float:left;width:120px;">Password:</label>
+		<input id="user_pass" type="password" />
+	</div>
+	<div class="rightcolumnonly" id="user_pass_confirm_container">
+		<label id="user_pass_confirm_label" for="user_pass_confirm" style="float:left;width:120px;">Confirm Password:</label>
+		<input id="user_pass_confirm" type="password" />
 	</div>
 	<div class="rightcolumnonly" id="user_pass_container">
 		<input id="add_user" type="button"  class="default_button" value="Add User" style="margin-left:0px;" />
