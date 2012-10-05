@@ -25,7 +25,7 @@ vsftpd_anonymous_root="/tmp/share_home/anonymous"
 #
 ###################################################################################################
 
-
+found_share="0"
 mount_share_dir()
 {
 	local username="$1"
@@ -48,6 +48,7 @@ mount_share_dir()
 		fi
 	fi
 	
+	found_share="1"
 	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
 	chmod 755 "$ftp_root/$share_name" >/dev/null 2>&1
 
@@ -150,8 +151,12 @@ start()
 	config_foreach mount_share "share"
 
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
+	if [ "$found_share" != "1" ] ; then
+		echo "WARNING: No shares defined, vsftpd will not be started"
+	else
+		start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
+	fi
 
-	start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
 }
 
 stop() {
