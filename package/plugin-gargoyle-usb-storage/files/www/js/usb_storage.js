@@ -1,5 +1,5 @@
 /*	
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -22,7 +22,6 @@ var nameToMountPath = [];
 //temporary
 nullFunc = function() { return 0 ; };
 removeUserCallback = nullFunc
-editUser = nullFunc
 // end temporary
 
 
@@ -253,6 +252,82 @@ function addUser()
 		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
 	}
 
+}
+
+function editUser()
+{
+	if( typeof(editUserWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editUserWindow.close();
+		}
+		catch(e){}
+	}
+
+	
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+
+	editUserWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	var okButton = createInput("button", editUserWindow.document);
+	var cancelButton = createInput("button", editUserWindow.document);
+	
+	okButton.value         = "Change Password";
+	okButton.className     = "default_button";
+	cancelButton.value     = "Cancel";
+	cancelButton.className = "default_button";
+
+
+
+	runOnEditorLoaded = function () 
+	{
+		updateDone=false;
+		if(editUserWindow.document != null)
+		{
+			if(editUserWindow.document.getElementById("bottom_button_container") != null)
+			{
+				var editContainer = editUserWindow.document.getElementById("edit_container")
+				var parentContainer = editContainer.parentNode
+				parentContainer.removeChild( editContainer);
+				
+
+
+				editUserWindow.document.getElementById("bottom_button_container").appendChild(okButton);
+				editUserWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
+			
+				cancelButton.onclick = function()
+				{
+					editUserWindow.close();
+				}
+				okButton.onclick = function()
+				{
+					editUserWindow.close();
+
+				}
+				editUserWindow.moveTo(xCoor,yCoor);
+				editUserWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout( "runOnEditorLoaded()", 250);
+		}
+	}
+	runOnEditorLoaded();
 }
 
 
