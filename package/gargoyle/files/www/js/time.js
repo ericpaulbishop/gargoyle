@@ -84,8 +84,8 @@ function saveChanges()
 
 
 
-		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
-		//document.getElementById("output").value = commands;	
+		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd restart\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+		//document.getElementById("output").value = commands;
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
