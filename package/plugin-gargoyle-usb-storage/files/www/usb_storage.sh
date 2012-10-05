@@ -75,7 +75,7 @@
 		<input id="user_pass_confirm" type="password" />
 	</div>
 	<div class="rightcolumnonly" id="user_pass_container">
-		<input id="add_user" type="button"  class="default_button" value="Add User" style="margin-left:0px;" />
+		<input id="add_user" type="button"  class="default_button" value="Add User" onclick="addUser()" style="margin-left:0px;" />
 	</div>
 
 	<div class="rightcolumnonly" style="margin-bottom:20px;" id="user_table_container">

@@ -19,6 +19,13 @@ var mountPointToDriveSize = [];
 var nameToMountPath = [];  
 
 
+//temporary
+nullFunc = function() { return 0 ; };
+removeUserCallback = nullFunc
+editUser = nullFunc
+// end temporary
+
+
 function saveChanges()
 {
 	//validate samba user/pass if samba isn't set to anonymous access
@@ -187,7 +194,7 @@ function addUser()
 
 	//validate
 	var errors = [];	
-	var testUser = user.gsub(/[0-9a-zA-Z]/, "");
+	var testUser = user.replace(/[0-9a-zA-Z]+/g, "");
 	if(user == "")
 	{
 		errors.push("Username cannot be empty")
@@ -223,23 +230,27 @@ function addUser()
 			}
 		}
 	}
-	if(errors.length() > 0)
+	if(errors.length > 0)
 	{
 		alert( errors.join("\n") + "\n\nCould not add user" );
-		return;
 	}
 	else
 	{
 		var userTable = document.getElementById("share_user_table");
 		if(userTable == null)
 		{
-
+			var tableContainer = document.getElementById("user_table_container");
+			while(tableContainer.firstChild != null)
+			{
+				tableContainer.removeChild( tableContainer.firstChild);
+			}
+			userTable = createTable(["", ""], [], "share_user_table", true, false, removeUserCallback); 
+			tableContainer.appendChild(userTable);
 		}
-		else
-		{
-
-		}
-
+		var userPass = createInput("hidden")
+		userPass.value = pass1
+		var editButton = createEditButton(editUser);
+		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
 	}
 
 }
@@ -271,14 +282,13 @@ function resetData()
 			var userIndex
 			for(userIndex=0; userIndex < userNames.length; userIndex++)
 			{
-				nullFunc = function() { return 0 ; };
-				removeUserCallback = nullFunc
-				editUser = nullFunc
 
 				userEditButton = createEditButton( editUser )
-				userTableData.push( [ userNames[userIndex], userEditButton ] )
+				userPass = createInput("hidden")
+				userPass.value = ""
+				userTableData.push( [ userNames[userIndex], userPass, userEditButton ] )
 			}
-			var tableObject = createTable(["", ""], userTableData, "share_user_table", true, false, removeUserCallback); 
+			var tableObject = createTable(["", "", ""], userTableData, "share_user_table", true, false, removeUserCallback); 
 		}
 		else
 		{
