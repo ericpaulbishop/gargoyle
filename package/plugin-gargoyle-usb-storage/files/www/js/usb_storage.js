@@ -398,11 +398,7 @@ function resetData()
 
 
 
-		/*
 
-		//access policy, default = anonymous
-		setSelectedValue("cifs_policy", "share", document);
-		setSelectedValue("nfs_policy",  "share", document);
 
 		//full document, not edit, so share_disk option is select, not text
 		document.getElementById("share_disk_text").style.display = "none";
@@ -419,12 +415,16 @@ function resetData()
 		{
 			mountPointToDrive[ storageDrives[driveIndex][1] ]      = storageDrives[driveIndex][0];
 			driveToMountPoint[ storageDrives[driveIndex][0] ]      = storageDrives[driveIndex][1];
-			mountPointToFs[ storageDrives[driveIndex][1] ]         = storageDrives[driveIndex][2];
-			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][3] ).replace(/ytes/, "");
+			mountPointToFs[ storageDrives[driveIndex][1] ]         = storageDrives[driveIndex][3];
+			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
 		}
 		
+
+
+		
+		
 		nameToMountPath = [];   //global
-		var mountPointToDriveData = [];
+		var mountPointToShareData = [];
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
@@ -433,6 +433,9 @@ function resetData()
 			var shareIndex;
 			for(shareIndex=0; shareIndex < shareList.length; shareIndex++)
 			{
+		
+				
+				/*
 				var share = uciOriginal.get(config, shareList[shareIndex], "path");
 				var shareMountPoint = mountPathToMountPoint(share) ;
 				shareMountPoint = shareMountPoint == null ? "" : shareMountPoint;
@@ -512,8 +515,10 @@ function resetData()
 					}
 					mountPointToDriveData[shareMountPoint] = driveData;
 				}
+				*/
 			}
 		}
+		/*
 		getMounted(sambaShares, "samba");
 		getMounted(nfsShares, "nfsd");
 		var unmountedList = [];
