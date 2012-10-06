@@ -48,7 +48,7 @@ do_start()
 		uci commit
 	fi
 
-	local drives="$(blkid | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
+	local drives="$(blkid | grep UUID | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
 	
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
@@ -111,8 +111,12 @@ do_start()
 			local disk_size=$(df  | grep "$d" | awk '{ print $2 }')
 			if [ -z "$disk_size" ] ; then disk_size="-" ; fi
 			if [ -n "$disk_size" ] && [ "${disk_size}" != '-' ]; then disk_size=$(($disk_size*1024)) ; fi
-
-			sed -i  "/^$d\t.*$/d"  "$MOUNT_TABLE_FILE"
+			
+			if [ -e "$MOUNT_TABLE_FILE" ] ; then
+				escaped_d=$(echo $d | sed 's/\//\\\//g')
+				echo sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
+				sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
+			fi
 			echo "$d	/tmp/usb_mount/$id	$type	$disk_size"  >> "$MOUNT_TABLE_FILE"
 		
 			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
