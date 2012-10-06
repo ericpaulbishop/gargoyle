@@ -281,7 +281,7 @@ function editUser()
 	}
 
 
-	editUserWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=300,left=" + xCoor + ",top=" + yCoor );
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 	
@@ -291,6 +291,9 @@ function editUser()
 	cancelButton.className = "default_button";
 
 
+	editShareUserRow=this.parentNode.parentNode;
+	editShareUser=editShareUserRow.childNodes[0].firstChild.data;
+
 
 	runOnEditorLoaded = function () 
 	{
@@ -299,23 +302,39 @@ function editUser()
 		{
 			if(editUserWindow.document.getElementById("bottom_button_container") != null)
 			{
-				var editContainer = editUserWindow.document.getElementById("edit_container")
-				var parentContainer = editContainer.parentNode
-				parentContainer.removeChild( editContainer);
+				editUserWindow.document.getElementById("share_user_text").appendChild( document.createTextNode(editShareUser) )
 				
-
-
+				
 				editUserWindow.document.getElementById("bottom_button_container").appendChild(okButton);
 				editUserWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
-			
+				
 				cancelButton.onclick = function()
 				{
 					editUserWindow.close();
 				}
 				okButton.onclick = function()
 				{
-					editUserWindow.close();
+					var pass1 = editUserWindow.document.getElementById("new_password");
+					var pass2 = editUserWindow.document.getElementById("new_password_confirm");
+					var errors = []
+					if(pass1 == "" && pass2 == "")
+					{
+						errors.push("Password cannot be empty")
+					}
+					if(pass1 != pass2)
+					{
+						errors.push("Passwords don't match")
+					}
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\nPassword unchanged.");
 
+					}
+					else
+					{
+						editShareUserRow.childNodes[1].firstChild.value = pass1
+						editUserWindow.close();
+					}
 				}
 				editUserWindow.moveTo(xCoor,yCoor);
 				editUserWindow.focus();
