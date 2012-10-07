@@ -18,7 +18,7 @@ var mountPointToFs = [];
 var mountPointToDriveSize = [];
 var nameToMountPath = [];  
 var mountPointList = [];
-
+var mountPointToShareData = [];
 
 //temporary
 nullFunc = function() { return 0 ; };
@@ -430,7 +430,7 @@ function resetData()
 		
 		
 		nameToMountPath = [];   //global
-		var mountPointToShareData = [];
+		mountPointToShareData = []; //global
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
@@ -457,12 +457,16 @@ function resetData()
 					}
 				}
 
-				/*
+				
 				if( shareDrive != null )
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//device->[name, filesystem, size, sharetype, access]
+					//old: device->[name, filesystem, size, sharetype, access]
+					//shareMountPoint->[shareName, shareDisk, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, roUsers, rwUsers, nfsAccess, nfsAccessPolicy]
+					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", "", false, false, false, "none", [], [], "ro", "anonymous" ] :  mountPointToShareData[shareMountPoint] ;
+					
+					/*
 					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton(editShare)] : mountPointToDriveData[shareMountPoint];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
 					driveData[1] = mountPointToFs[shareMountPoint];
@@ -532,8 +536,9 @@ function resetData()
 						}
 					}
 					mountPointToDriveData[shareMountPoint] = driveData;
+					*/
 				}
-				*/
+				
 			}
 		}
 		/*
