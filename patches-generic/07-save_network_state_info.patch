@@ -103,7 +103,7 @@
  	$(INSTALL_DATA) ./files/etc/ppp/filter $(1)/etc/ppp/
  	$(INSTALL_DATA) ./files/etc/ppp/options $(1)/etc/ppp/
 +	$(INSTALL_BIN) ./files/etc/ppp/ip-up.d/state $(1)/etc/ppp/ip-up.d/
-+	$(INSTALL_BIN) ./files/etc/ppp/ip-down.d/state $(1)/etc/ppp/ip-up.d/
++	$(INSTALL_BIN) ./files/etc/ppp/ip-down.d/state $(1)/etc/ppp/ip-down.d/
  	ln -sf /tmp/resolv.conf.ppp $(1)/etc/ppp/resolv.conf
  	$(INSTALL_DIR) $(1)/lib/netifd/proto
  	$(INSTALL_BIN) ./files/ppp.sh $(1)/lib/netifd/proto/
