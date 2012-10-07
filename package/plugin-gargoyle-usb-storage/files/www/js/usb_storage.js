@@ -17,6 +17,7 @@ var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
 var nameToMountPath = [];  
+var mountPointList = [];
 
 
 //temporary
@@ -376,18 +377,17 @@ function resetData()
 			var userIndex
 			for(userIndex=0; userIndex < userNames.length; userIndex++)
 			{
-
 				userEditButton = createEditButton( editUser )
 				userPass = createInput("hidden")
 				userPass.value = ""
 				userTableData.push( [ userNames[userIndex], userPass, userEditButton ] )
 			}
-			var tableObject = createTable(["", "", ""], userTableData, "share_user_table", true, false, removeUserCallback); 
+			var tableObject = createTable(["", "", ""], userTableData, "share_user_table", true, false, removeUserCallback);
 		}
 		else
 		{
-			tableObject = document.createElement("div");                                                                                      
-                	tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>"; 
+			tableObject = document.createElement("div");
+                	tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>";
 		}
 		var tableContainer = document.getElementById("user_table_container");
 		while(tableContainer.firstChild != null)
@@ -409,17 +409,23 @@ function resetData()
 		mountPointToDrive = []; 
 		mountPointToFs = [];
 		mountPointToDriveSize = [];
-		
+		mountPointList = []
+
 		var driveIndex = 0;
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
-			mountPointToDrive[ storageDrives[driveIndex][1] ]      = storageDrives[driveIndex][0];
 			driveToMountPoint[ storageDrives[driveIndex][0] ]      = storageDrives[driveIndex][1];
-			mountPointToFs[ storageDrives[driveIndex][1] ]         = storageDrives[driveIndex][3];
-			mountPointToDriveSize[ storageDrives[driveIndex][1] ]  = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+			var mountPoints = [ storageDrives[driveIndex][1], storageDrives[driveIndex][2] ];
+			var mpIndex;
+			for(mpIndex=0;mpIndex < 2; mpIndex++)
+			{
+				var mp = mountPoints[mpIndex];
+				mountPointToDrive[ mp ]      = storageDrives[driveIndex][0];
+				mountPointToFs[ mp ]         = storageDrives[driveIndex][3];
+				mountPointToDriveSize[ mp ]  = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+				mountPointList.push(mp);
+			}
 		}
-		
-
 
 		
 		
@@ -428,18 +434,30 @@ function resetData()
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
+		var ftpShares = uciOriginal.getAllSectionsOfType("vsftpd", "share");
 		var getMounted = function(shareList, config)
 		{
 			var shareIndex;
 			for(shareIndex=0; shareIndex < shareList.length; shareIndex++)
 			{
-		
-				
+				var share = uciOriginal.get(config, shareList[shareIndex], (config == "vsftpd" ? "share_dir" : "path") );
+				var shareMountPoint = null;
+				var shareDirectory = null;
+				var shareDrive = null;
+				var mpIndex;
+				for(mpIndex=0;mpIndex<mountPointList.length && shareMountPoint==null && share !=null; mpIndex++)
+				{
+					var mp = mountPointList[mpIndex]
+					if( share.indexOf(mp) == 0 )
+					{
+						shareMountPoint = mp
+						shareDirectory  = share.substr( mp.length);
+						shareDirectory = shareDirectory.charAt(0) == "/" ? shareDirectory.substr(1) : shareDirectory;
+						shareDrive = mountPointToDrive[shareMountPoint];
+					}
+				}
+
 				/*
-				var share = uciOriginal.get(config, shareList[shareIndex], "path");
-				var shareMountPoint = mountPathToMountPoint(share) ;
-				shareMountPoint = shareMountPoint == null ? "" : shareMountPoint;
-				var shareDrive = mountPointToDrive[shareMountPoint];
 				if( shareDrive != null )
 				{
 					mountedDrives[ shareDrive ] = 1;
