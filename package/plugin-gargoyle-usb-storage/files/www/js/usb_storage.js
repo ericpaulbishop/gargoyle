@@ -467,8 +467,8 @@ function resetData()
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, roUsers, rwUsers, nfsAccess, nfsAccessPolicy]
-					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", "", false, false, false, "none", [], [], "ro", "anonymous" ] :  mountPointToShareData[shareMountPoint] ;
+					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
 					
 					//name
 					if( shareData[0] == "" || config == "samba")
@@ -485,13 +485,48 @@ function resetData()
 					shareData[7] = config == "samba"  ? true : shareData[7]; //isCIFS
 					shareData[8] = config == "nfsd"   ? true : shareData[8]; //isNFS
 
-					if(config == "vsftpd")
+					//both samba and vsftpd have ro_users and rw_users list options
+					//however, they handle anonymous access a bit differently
+					//samba has guest_ok option, while vsftpd includes "anonymous" (or "ftp") user in lists
+					if(config == "vsftpd" || config == "samba")
 					{
-						
-					}
-					if(config == "samba")
-					{
-						
+						var readTypes = ["rw", "ro"]
+						var readTypeShareDataIndices = [10,11]
+						var rtIndex;
+						for(rtIndex=0; rtIndex < 2; rtIndex++)
+						{
+							var shareDataUserList = [];
+							var readType = readTypes[rtIndex]
+							var userVar  = "users_" + readType
+							var userList = uciOriginal.get(config, shareId, userVar);
+							if(userList instanceof Array)
+							{
+								var uIndex;
+								for(uIndex=0; uIndex < userList.length; uIndex++)
+								{
+									var user = userList[uIndex];
+									if(user == "anonymous" || user == "ftp")
+									{
+										//handle anonymous for vsftpd
+										readTypeShareDataIndices[ 9 ] = readType
+										
+									}
+									else
+									{
+										shareDataUserList.push(user);
+									}
+								}
+							}
+							shareData[  readTypeShareDataIndices[rtIndex] ] = shareDataUserList;
+						}
+						if(config == "samba")
+						{
+							//handle anonymous for samba
+							if( uciOriginal.get(config, shareId, "guest_ok").toLowerCase() == "yes" || uciOriginal.get(config, shareId, "public").toLowerCase() == "yes" )
+							{
+								readTypeShareDataIndices[ 9 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
+							}
+						}
 					}
 					if(config == "nfsd")
 					{
