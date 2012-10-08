@@ -12,14 +12,35 @@ LOCK_D=/var/lib/nfs/sm
 fsid=6669
 valid_found=0
 
+allowed_host_star_found="0"
+allowed_host_list=""
+
+update_allowed_host_list()
+{
+	local host="$1"
+	if [ "$host" = "*" ] ; then
+		allowed_host_star_found="1"
+	else
+		local host_space=""
+		if [ -n "$allowed_host_list" ] ; then host_space=" " ; fi
+		allowed_host_list="$allowed_host_list$host_space$host"
+	fi
+}
+
 add_export_line()
 {
 	local state="$1"
 
-	vars="name path read_only sync insecure subtree_check allowed_hosts"
+	vars="name path read_only sync insecure subtree_check"
 	for v in $vars ; do
 		config_get "$v" "$state" "$v"
 	done
+
+	allowed_host_star_found="0"
+	allowed_host_list=""
+	config_list_foreach "allowed_hosts" update_allowed_host_list
+
+
 	
 	if [ -n "$name" ] || [ -n "$path" ] ; then
 		
@@ -27,11 +48,12 @@ add_export_line()
 		if [ "$sync" = "0" ] ; then sync="async" ; else sync="sync" ; fi
 		if [ "$secure" = "0" ] ; then secure="insecure" ; else secure="secure" ; fi
 		if [ "$subtree_check" = "0" ] ; then subtree_check="no_subtree_check" ; else subtree_check="subtree_check" ; fi
-		if [ -z "$allowed_hosts" ] ; then allowed_hosts="*" ; fi
-		allowed_hosts=$( echo "$allowed_hosts" | sed 's/\*/\"*\"/g' )
+		
+		if [ -z "$allowed_host_list" ] || [ "$allowed_hosts_star_found" = "1" ]; then allowed_host_list="*" ; fi
+		allowed_host_list=$( echo "$allowed_hosts" | sed 's/\*/\"*\"/g' )
 	
 		ln -s "$path" "/nfs/$name"
-		for h in $allowed_hosts ; do
+		for h in $allowed_host_list ; do
 			h=$(echo "$h" | sed 's/\"\*\"/*/g')
 			echo "/nfs/$name	$h($read_only,$sync,$secure,$subtree_check,all_squash,fsid=$fsid)" >> /tmp/tmp_exports
 		done

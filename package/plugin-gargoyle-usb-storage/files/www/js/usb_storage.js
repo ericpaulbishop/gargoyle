@@ -508,7 +508,7 @@ function resetData()
 									if(user == "anonymous" || user == "ftp")
 									{
 										//handle anonymous for vsftpd
-										readTypeShareDataIndices[ 9 ] = readType
+										sareData[ 9 ] = readType
 										
 									}
 									else
@@ -524,13 +524,36 @@ function resetData()
 							//handle anonymous for samba
 							if( uciOriginal.get(config, shareId, "guest_ok").toLowerCase() == "yes" || uciOriginal.get(config, shareId, "public").toLowerCase() == "yes" )
 							{
-								readTypeShareDataIndices[ 9 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
+								shareData[ 9 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
 							}
 						}
 					}
 					if(config == "nfsd")
 					{
-						
+						shareData[ 12 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
+
+						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
+						if(alowedHostsStr instanceof Array)
+						{
+							allowedHostStr = allowedHostsStr.join(",");
+						}
+
+						if(allowedHosts != "" && allowedHosts != "*")
+						{	
+							var allowedHosts = allowedHostsStr.split(/[\t ]*,[\t ]*/);
+							var allowedIps = [];
+							var foundStar = false;
+							while(allowedHosts.length > 0)
+							{
+								var h = allowedHosts.shift();
+								foundStar = h == "*" ? true : foundStar
+								if(validateIpRange(h) == 0)
+								{
+									allowedIps.push(h);
+								}
+							}
+							shareData[ 13 ] = foundStar ? "*" : allowedIps;
+						}
 					}
 
 					/*
