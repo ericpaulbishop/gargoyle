@@ -649,7 +649,7 @@ function shareSettingsToDefault()
 		document.getElementById( "share_type_" + shareTypes[stIndex] ).checked = true;
 	}
 	document.getElementById("share_dir").value = "/";
-	document.getElementById("share_name").value = "share" + sharePathList.length
+	document.getElementById("share_name").value = "share_" + (sharePathList.length + 1)
 	setNfsVisibility();
 	setSharePaths();
 }
@@ -893,7 +893,7 @@ function editShare()
 function setSharePaths(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var escapedName=fullEscape(controlDocument.getElementById("share_name").value);
+	var escapedName=escape(controlDocument.getElementById("share_name").value);
 	var ip = uciOriginal.get("network", "lan", "ipaddr");
 	if(document.getElementById("share_type_nfs").checked)
 	{
