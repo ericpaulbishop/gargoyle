@@ -5,7 +5,8 @@ START=60
 
 found_sambashare="0"
 
-smb_header() {
+smb_header() 
+{
 	local interface
 	config_get interface $1 interface "loopback lan"
 
@@ -58,7 +59,31 @@ EOT
 	[ -L /etc/samba/smb.conf ] || ln -nsf /var/etc/smb.conf /etc/samba/smb.conf
 }
 
-smb_add_share() {
+rw_user_list=""
+ro_user_list=""
+all_user_list=""
+
+add_user_to_lists()
+{
+	user="$1"
+	read_type="$2"
+
+	local rw_comma
+	local ro_comma
+	local all_comma
+	if [ "$read_type" = "rw" ] ; then
+		if [ -z "$rw_user_list" ] ; then  rw_comma="" ; else rw_comma=", " ; fi
+		rw_user_list="$rw_user_list$rw_comma$user"
+	else
+		if [ -z "$ro_user_list" ] ; then  ro_comma="" ; else ro_comma=", " ; fi
+		ro_user_list="$ro_user_list$ro_comma$user"
+	fi
+	if [ -z "$all_user_list" ] ; then all_comma="" ; else all_comma=", " ; fi
+	all_user_list="$all_user_list$all_comma$user"
+}
+
+smb_add_share() 
+{
 	local name
 	local path
 	local users
@@ -71,8 +96,6 @@ smb_add_share() {
 
 	config_get name $1 name
 	config_get path $1 path
-	config_get users $1 users
-	config_get users_ro $1 users_ro
 	config_get read_only $1 read_only
 	config_get guest_ok $1 guest_ok
 	config_get create_mask $1 create_mask
@@ -81,11 +104,20 @@ smb_add_share() {
 	config_get public $1 public
 	config_get browseable $1 browseable
 
+
+	rw_user_list=""
+	ro_user_list=""
+	all_user_list=""
+	config_list_foreach users_ro $1 add_user_to_lists "ro"
+	config_list_foreach users_rw $1 add_user_to_lists "rw"
+
+
 	[ -z "$name" -o -z "$path" ] && return
 
 	echo -e "\n[$name]\n\tpath = $path" >> /var/etc/smb.conf
-	[ -n "$users" ] && echo -e "\tvalid users = $users" >> /var/etc/smb.conf
-	[ -n "$users_ro" ] && echo -e "\tread list = $users_ro" >> /var/etc/smb.conf
+	[ -n "$all_user_list" ] && echo -e "\tvalid users = $all_user_list" >> /var/etc/smb.conf
+	[ -n "$rw_user_list" ] && echo -e "\twrite list = $rw_user_list" >> /var/etc/smb.conf
+	[ -n "$ro_user_list" ] && echo -e "\tread list = $ro_user_list" >> /var/etc/smb.conf
 	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /var/etc/smb.conf
 	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /var/etc/smb.conf
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /var/etc/smb.conf
@@ -94,11 +126,13 @@ smb_add_share() {
 	[ -n "$public" ]      && echo -e "\tpublic = $public" >> /var/etc/smb.conf
 	[ -n "$browseable" ]  && echo -e "\tbrowseable = $browseable" >> /var/etc/smb.conf
 
+	
 	found_sambashare="1"
 }
 
 
-start() {
+start() 
+{
 	config_load samba
 	config_foreach smb_header samba
 	config_foreach smb_add_share sambashare
@@ -109,7 +143,8 @@ start() {
 	fi
 }
 
-stop() {
+stop() 
+{
 	service_stop /usr/sbin/smbd
 	service_stop /usr/sbin/nmbd
 }

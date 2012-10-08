@@ -487,15 +487,15 @@ function resetData()
 
 					if(config == "vsftpd")
 					{
-
+						
 					}
 					if(config == "samba")
 					{
-
+						
 					}
 					if(config == "nfsd")
 					{
-
+						
 					}
 
 					/*
