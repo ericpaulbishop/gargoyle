@@ -586,29 +586,34 @@ function resetData()
 			document.getElementById("sharing_add_heading_container").style.display  = "none";
 			document.getElementById("sharing_add_controls_container").style.display = "none";
 		}
-		/*
+
+
+		
 		//create current share table
-		//name, file system, size, type, access, [edit], [remove]
+		//name, disk, subdirectory, type, [edit], [remove]
 		var shareTableData = [];
-		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
+		var shareIndex;
+		for(shareIndex=0; shareIndex < sharePathList; shareIndex++)
 		{
-			if( mountPointToDriveData[ storageDrives[driveIndex][1] ] != null )
+
+			var shareData = sharePathToShareData[ sharePathList[shareIndex] ];
+			var shareTypes=["ftp", "cifs", "nfs"]
+			var shareType = "";
+			var stIndex;
+			for(stIndex=0; stIndex < shareTypes.length; stIndex++)
 			{
-				mountType = (mountPointToDriveData[ storageDrives[driveIndex][1] ])[3];
-				mountType = mountType.replace(/samba/, "CIFS");
-				mountType = mountType.replace(/nfsd/, "NFS");
-				(mountPointToDriveData[ storageDrives[driveIndex][1] ])[3] = mountType;
-				shareTableData.push( mountPointToDriveData[ storageDrives[driveIndex][1] ] );
+				var plus = shareType == "" ? "" : "+"
+				shareType = shareType + ( document.getElementById( "share_type_" + shareTypes[stIndex] ).checked ? plus + (shareTypes[stIndex]).toUpperCase() : "" )
 			}
+			shareTableData.push( [ shareData[0], shareData[1], shareData[3], shareType, createEditButton(editShare) ] )
 		}
-		var shareTable = createTable(["Name", "File System", "Size", "Mount Type", "Access", ""], shareTableData, "share_table", true, false, removeShareCallback);
+		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
 		if(tableContainer.firstChild != null)
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(shareTable);
-		*/
 	}
 
 	// format setttings

@@ -68,7 +68,7 @@
 </div>
 <div id="nfs_policy_container">
 	<label id="nfs_policy_label" class="leftcolumn">NFS Access Policy:</label>
-	<select class="rightcolumn" id="nfs_policy" onchange="setPolicyVisibility()" >
+	<select class="rightcolumn" id="nfs_policy" onchange="setNfsVisibility()" >
 		<option value="share">Allow Anonymous Access</option>
 		<option value="ip">Allow Only The Following IPs</option>
 	</select>
