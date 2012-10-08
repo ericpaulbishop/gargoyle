@@ -20,9 +20,9 @@ var mountPointToDriveSize = [];
 //these global data structure are special -- they contain
 //the data that will be saved (other than user data)
 //once the user hits the save changes button
-var nameToMountPath = [];  
-var mountPointList = [];
-var mountPointToShareData = []; 
+var nameToSharePath = [];  
+var sharePathList = [];
+var sharePathToShareData = []; 
 
 //temporary
 nullFunc = function() { return 0 ; };
@@ -399,6 +399,8 @@ function resetData()
 			tableContainer.removeChild( tableContainer.firstChild);
 		}
 		tableContainer.appendChild(tableObject);
+		setAllowableSelections("user_access", userNames, userNames);
+
 
 
 
@@ -432,9 +434,10 @@ function resetData()
 		}
 
 		
+		sharePathList = [];	   //global
+		sharePathToShareData = []; //global
+		nameToSharePath = [];      //global
 		
-		nameToMountPath = [];   //global
-		mountPointToShareData = []; //global
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
@@ -445,18 +448,18 @@ function resetData()
 			for(shareIndex=0; shareIndex < shareList.length; shareIndex++)
 			{
 				var shareId = shareList[shareIndex]
-				var share = uciOriginal.get(config, shareId, (config == "vsftpd" ? "share_dir" : "path") );
+				var fullSharePath = uciOriginal.get(config, shareId, (config == "vsftpd" ? "share_dir" : "path") );
 				var shareMountPoint = null;
 				var shareDirectory = null;
 				var shareDrive = null;
 				var mpIndex;
-				for(mpIndex=0;mpIndex<mountPointList.length && shareMountPoint==null && share !=null; mpIndex++)
+				for(mpIndex=0;mpIndex<mountPointList.length && shareMountPoint==null && fullSharePath !=null; mpIndex++)
 				{
 					var mp = mountPointList[mpIndex]
-					if( share.indexOf(mp) == 0 )
+					if( fullSharePath.indexOf(mp) == 0 )
 					{
 						shareMountPoint = mp
-						shareDirectory  = share.substr( mp.length);
+						shareDirectory  = fullSharePath.substr( mp.length);
 						shareDirectory = shareDirectory.charAt(0) == "/" ? shareDirectory.substr(1) : shareDirectory;
 						shareDrive = mountPointToDrive[shareMountPoint];
 					}
@@ -476,14 +479,14 @@ function resetData()
 						shareData[0] = uciOriginal.get(config, shareId, "name");
 						shareData[0] == "" ? shareId : shareData[0];
 					}
-					shareData[1] = shareDrive                               //drive
+					shareData[1] = shareDrive                                //drive
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
 					shareData[4] = mountPointToFs[shareMountPoint];          //filesystem
-					shareData[5] = mountPointToDriveSize[shareMountPoint];   //Drive Size
-					shareData[6] = config == "vsftpd" ? true : shareData[6]; //isFTP
-					shareData[7] = config == "samba"  ? true : shareData[7]; //isCIFS
-					shareData[8] = config == "nfsd"   ? true : shareData[8]; //isNFS
+					shareData[5] = mountPointToDriveSize[shareMountPoint]    //Drive Size
+					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
+					shareData[7] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[8] = config == "nfsd"   ? true : shareData[8]  //isNFS
 
 					//both samba and vsftpd have ro_users and rw_users list options
 					//however, they handle anonymous access a bit differently
@@ -555,107 +558,35 @@ function resetData()
 							shareData[ 13 ] = foundStar ? "*" : allowedIps;
 						}
 					}
-
-					/*
-					//old: device->[name, filesystem, size, sharetype, access]
-					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton(editShare)] : mountPointToDriveData[shareMountPoint];
-					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
-					driveData[1] = mountPointToFs[shareMountPoint];
-					driveData[2] = mountPointToDriveSize[shareMountPoint];
-					driveData[3] = driveData[3].length > 0 ? driveData[3] + "+" + config : config;
-					driveData[4] = uciOriginal.get(config, shareList[shareIndex], "read_only");
-					driveData[4] = driveData[4] == "1" || driveData[4] == "yes" ? "Read Only" : "Read/Write";
-
-					nameToMountPath[ driveData[0] ] = share;
-
-					if(config == "samba")
-					{
-						var user = uciOriginal.get(config, shareList[shareIndex], "users").replace(/ .*$/, "");
-						
-						if(user != "")
-						{
-							var pass = "";
-							var sambaUsers = uciOriginal.getAllSectionsOfType("samba", "sambauser");
-							var userValid = false;
-							var sui = 0;
-							for(sui=0; sui < sambaUsers.length; sui++)
-							{
-								var v = uciOriginal.get("samba", sambaUsers[sui], "username") == user ? true : false;
-								pass = v ? uciOriginal.get("samba", sambaUsers[sui], "password") : pass;
-								userValid = userValid || v;
-							}
-							if(userValid)
-							{
-								setSelectedValue("cifs_policy", "user", document);
-								document.getElementById("cifs_user").value = user;
-								document.getElementById("cifs_pass").value = pass;
-							}
-						}
-					}
-					if(config == "nfsd")
-					{
-						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
-						if(allowedHosts != "" && allowedHosts != "*")
-						{
-	*/
-	//						var allowedHosts = allowedHostsStr.split(/[\t ]*,[\t ]*/);
-	/*
-							var allowedIps = [];
-							while(allowedHosts.length > 0)
-							{
-								var h = allowedHosts.shift();
-								if(validateIpRange(h) == 0)
-								{
-									allowedIps.push(h);
-								}
-							}
-							if(allowedIps.length > 0)
-							{
-								var tableContainer = document.getElementById("nfs_ip_table_container");
-								while(tableContainer.firstChild != null)
-								{
-									tableContainer.removeChild(tableContainer.firstChild);
-								}
-								setSelectedValue("nfs_policy", "ip", document);
-								
-								while(allowedIps.length > 0)
-								{
-									document.getElementById("nfs_ip").value = allowedIps.shift();
-									addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250);
-								}
-							}
-						}
-					}
-					mountPointToDriveData[shareMountPoint] = driveData;
-					*/
+					sharePathToShareData[ fullSharePath ] = shareData
+					sharePathList.push(fullSharePath)
+					nameToSharePath[ shareData[0] ] = fullSharePath
 				}
-				
 			}
 		}
-		/*
+		
+		getMounted(sambaShares, "ftp");
 		getMounted(sambaShares, "samba");
 		getMounted(nfsShares, "nfsd");
-		var unmountedList = [];
+		
+		var driveList = [];
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
-			if( mountedDrives[ storageDrives[driveIndex][0] ] == null ) { unmountedList.push( storageDrives[driveIndex][0]); }
+			driveList.push( storageDrives[driveIndex][0] )
 		}
-		if(unmountedList.length > 0)
+		if(driveList.length > 0)
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "block";
 			document.getElementById("sharing_add_controls_container").style.display = "block";
-
-			setAllowableSelections("share_disk", unmountedList, unmountedList);
-			document.getElementById("share_name").value = getSelectedValue("share_disk", document).replace(/^.*\//, "");
-			setNfsPath();
+			setAllowableSelections("share_disk", driveList, driveList);
+			shareSettingsToDefault();
 		}
 		else
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "none";
 			document.getElementById("sharing_add_controls_container").style.display = "none";
 		}
-		setPolicyVisibility();
-
+		/*
 		//create current share table
 		//name, file system, size, type, access, [edit], [remove]
 		var shareTableData = [];
@@ -707,6 +638,23 @@ function resetData()
 
 
 }
+
+
+function shareSettingsToDefault()
+{
+	var shareTypes=["ftp", "cifs", "nfs"]
+	var stIndex;
+	for(stIndex=0; stIndex < shareTypes.length; stIndex++)
+	{
+		document.getElementById( "share_type_" + shareTypes[stIndex] ).checked = true;
+	}
+	document.getElementById("share_dir").value = "/";
+	document.getElementById("share_name").value = "share" + sharePathList.length
+	setNfsVisibility();
+	setSharePaths();
+}
+
+
 
 function updateFormatPercentages(ctrlId)
 {
@@ -799,10 +747,8 @@ function addNewShare()
 }
 
 
-function setPolicyVisibility()
+function setNfsVisibility()
 {
-	setInvisibleIfIdMatches("cifs_policy", ["share"], "cifs_user_container", "block", document);
-	setInvisibleIfIdMatches("cifs_policy", ["share"], "cifs_pass_container", "block", document);
 	setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
 }
 
@@ -831,7 +777,7 @@ function removeShareCallback(table, row)
 	
 	
 	nameToMountPath[editName] = null;
-	setNfsPath();
+	setSharePaths();
 }
 
 function editShare()
@@ -944,21 +890,28 @@ function editShare()
 	runOnEditorLoaded();
 }
 
-function setNfsPath(controlDocument)
+function setSharePaths(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var shareType = getSelectedText("share_type", controlDocument);
-	if(shareType.match(/NFS/))
+	var escapedName=fullEscape(controlDocument.getElementById("share_name").value);
+	var ip = uciOriginal.get("network", "lan", "ipaddr");
+	if(document.getElementById("share_type_nfs").checked)
 	{
-
-		var name=controlDocument.getElementById("share_name").value;
-		var ip = uciOriginal.get("network", "lan", "ipaddr");
 		controlDocument.getElementById("nfs_path_container").style.display = "block";
-		setChildText("nfs_path", ip + ":/nfs/" + name, null, null, null, controlDocument);
+		setChildText("nfs_path", ip + ":/nfs/" + escapedName, null, null, null, controlDocument);
 	}
 	else
 	{
 		controlDocument.getElementById("nfs_path_container").style.display = "none";
+	}
+	if(document.getElementById("share_type_ftp").checked)
+	{
+		controlDocument.getElementById("ftp_path_container").style.display = "block";
+		setChildText("ftp_path", "ftp://" + ip + "/" + escapedName, null, null, null, controlDocument);
+	}
+	else
+	{
+		controlDocument.getElementById("ftp_path_container").style.display = "none";
 	}
 }
 
