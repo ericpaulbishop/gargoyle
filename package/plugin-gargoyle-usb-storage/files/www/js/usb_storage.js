@@ -16,9 +16,13 @@ var driveToMountPoint = [];
 var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
+
+//these global data structure are special -- they contain
+//the data that will be saved (other than user data)
+//once the user hits the save changes button
 var nameToMountPath = [];  
 var mountPointList = [];
-var mountPointToShareData = [];
+var mountPointToShareData = []; 
 
 //temporary
 nullFunc = function() { return 0 ; };
@@ -440,7 +444,8 @@ function resetData()
 			var shareIndex;
 			for(shareIndex=0; shareIndex < shareList.length; shareIndex++)
 			{
-				var share = uciOriginal.get(config, shareList[shareIndex], (config == "vsftpd" ? "share_dir" : "path") );
+				var shareId = shareList[shareIndex]
+				var share = uciOriginal.get(config, shareId, (config == "vsftpd" ? "share_dir" : "path") );
 				var shareMountPoint = null;
 				var shareDirectory = null;
 				var shareDrive = null;
@@ -462,11 +467,39 @@ function resetData()
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//old: device->[name, filesystem, size, sharetype, access]
-					//shareMountPoint->[shareName, shareDisk, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, roUsers, rwUsers, nfsAccess, nfsAccessPolicy]
+					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, roUsers, rwUsers, nfsAccess, nfsAccessPolicy]
 					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", "", false, false, false, "none", [], [], "ro", "anonymous" ] :  mountPointToShareData[shareMountPoint] ;
 					
+					//name
+					if( shareData[0] == "" || config == "samba")
+					{
+						shareData[0] = uciOriginal.get(config, shareId, "name");
+						shareData[0] == "" ? shareId : shareData[0];
+					}
+					shareData[1] = shareDrive                               //drive
+					shareData[2] = shareMountPoint                           //share drive mount
+					shareData[3] = shareDirectory                            //directory
+					shareData[4] = mountPointToFs[shareMountPoint];          //filesystem
+					shareData[5] = mountPointToDriveSize[shareMountPoint];   //Drive Size
+					shareData[6] = config == "vsftpd" ? true : shareData[6]; //isFTP
+					shareData[7] = config == "samba"  ? true : shareData[7]; //isCIFS
+					shareData[8] = config == "nfsd"   ? true : shareData[8]; //isNFS
+
+					if(config == "vsftpd")
+					{
+
+					}
+					if(config == "samba")
+					{
+
+					}
+					if(config == "nfsd")
+					{
+
+					}
+
 					/*
+					//old: device->[name, filesystem, size, sharetype, access]
 					var driveData = mountPointToDriveData[shareMountPoint] == null ? ["", "", "", "", "", createEditButton(editShare)] : mountPointToDriveData[shareMountPoint];
 					driveData[0] = uciOriginal.get(config, shareList[shareIndex], "name");
 					driveData[1] = mountPointToFs[shareMountPoint];
