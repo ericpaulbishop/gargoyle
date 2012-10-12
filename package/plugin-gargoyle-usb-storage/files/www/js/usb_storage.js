@@ -403,9 +403,6 @@ function resetData()
 
 
 
-
-
-
 		//full document, not edit, so share_disk option is select, not text
 		document.getElementById("share_disk_text").style.display = "none";
 		document.getElementById("share_disk").style.display = "block";
@@ -470,8 +467,8 @@ function resetData()
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, Filesystem, Size, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
+					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
 					
 					//name
 					if( shareData[0] == "" || config == "samba")
@@ -482,11 +479,9 @@ function resetData()
 					shareData[1] = shareDrive                                //drive
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
-					shareData[4] = mountPointToFs[shareMountPoint];          //filesystem
-					shareData[5] = mountPointToDriveSize[shareMountPoint]    //Drive Size
-					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
-					shareData[7] = config == "samba"  ? true : shareData[7]  //isCIFS
-					shareData[8] = config == "nfsd"   ? true : shareData[8]  //isNFS
+					shareData[4] = config == "vsftpd" ? true : shareData[6]  //isFTP
+					shareData[5] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[6] = config == "nfsd"   ? true : shareData[8]  //isNFS
 
 					//both samba and vsftpd have ro_users and rw_users list options
 					//however, they handle anonymous access a bit differently
@@ -494,7 +489,7 @@ function resetData()
 					if(config == "vsftpd" || config == "samba")
 					{
 						var readTypes = ["rw", "ro"]
-						var readTypeShareDataIndices = [10,11]
+						var readTypeShareDataIndices = [8,9]
 						var rtIndex;
 						for(rtIndex=0; rtIndex < 2; rtIndex++)
 						{
@@ -511,7 +506,7 @@ function resetData()
 									if(user == "anonymous" || user == "ftp")
 									{
 										//handle anonymous for vsftpd
-										sareData[ 9 ] = readType
+										sareData[ 7 ] = readType
 										
 									}
 									else
@@ -527,13 +522,13 @@ function resetData()
 							//handle anonymous for samba
 							if( uciOriginal.get(config, shareId, "guest_ok").toLowerCase() == "yes" || uciOriginal.get(config, shareId, "public").toLowerCase() == "yes" )
 							{
-								shareData[ 9 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
+								shareData[ 7 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
 							}
 						}
 					}
 					if(config == "nfsd")
 					{
-						shareData[ 12 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
+						shareData[ 10 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
 
 						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
 						if(alowedHostsStr instanceof Array)
@@ -555,7 +550,7 @@ function resetData()
 									allowedIps.push(h);
 								}
 							}
-							shareData[ 13 ] = foundStar ? "*" : allowedIps;
+							shareData[ 11 ] = foundStar ? "*" : allowedIps;
 						}
 					}
 					sharePathToShareData[ fullSharePath ] = shareData
@@ -570,15 +565,20 @@ function resetData()
 		getMounted(nfsShares, "nfsd");
 		
 		var driveList = [];
+		var driveDisplayList = [];
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
-			driveList.push( storageDrives[driveIndex][0] )
+			var driveName = storageDrives[driveIndex][0]
+			var driveFs = storageDrives[driveIndex][3];
+			var driveSize = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+			driveList.push( driveName )
+			driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
 		}
 		if(driveList.length > 0)
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "block";
 			document.getElementById("sharing_add_controls_container").style.display = "block";
-			setAllowableSelections("share_disk", driveList, driveList);
+			setAllowableSelections("share_disk", driveList, driveDisplayList);
 			shareSettingsToDefault();
 		}
 		else
