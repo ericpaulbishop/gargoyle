@@ -655,7 +655,7 @@ function shareSettingsToDefault()
 	}
 	document.getElementById("share_dir").value = "/";
 	document.getElementById("share_name").value = "share_" + (sharePathList.length + 1)
-	setNfsVisibility();
+	setShareTypeVisibility();
 	setSharePaths();
 }
 
@@ -724,6 +724,13 @@ function driveToDevMountPath(drive)
 
 function addNewShare()
 {
+	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+	//var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
+	var shareData = ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ]; //defaults
+	
+
+
+
 	var name = document.getElementById("share_name").value;
 	if(name.length == "")
 	{
@@ -738,6 +745,11 @@ function addNewShare()
 	var type = getSelectedText("share_type");
 	var specificity = getSelectedValue("share_specificity");
 
+
+
+
+
+
 	var table = document.getElementById("share_table");
 	addTableRow(table, [name, fs, size, type, access, createEditButton(editShare) ], true, false, removeShareCallback);
 	nameToMountPath[name] = specificity == "blkid" ? mountPoint : driveToDevMountPath(drive);
@@ -751,11 +763,41 @@ function addNewShare()
 	}
 }
 
-
-function setNfsVisibility()
+function setShareTypeVisibility()
 {
-	setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
+	var vis = []
+	var visTypes = ["ftp", "cifs", "nfs"]
+	var vIndex;
+	for(vIndex=0; vIndex < visTypes.length; vIndex++)
+	{
+		vis[ visTypes[vIndex] ] = document.getElementById( "share_type_" + visTypes[vIndex] ).checked
+	}
+	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
+
+	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
+	var userLabel = (getTypeDisplay("ftp") + "/" + getTypeDisplay("cifs")).replace(/^\//, "").replace(/\/$/, "");
+	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:")
+	setChildText("user_access_label",  userLabel + " Users With Access:")
+
+	var visIds = [];
+	visIds[ "ftp_or_cifs" ] =  [ "anonymous_access_container", "user_access_container" ];
+	visIds["nfs"] = [ "nfs_access_container", "nfs_policy_container", "nfs_ip_container", "nfs_spacer", "nfs_path_container" ];
+	visIds["ftp"] = [ "ftp_path_container" ]
+	for(idType in visIds)
+	{
+		var ids = visIds[idType]
+		var idIndex;
+		for(idIndex=0; idIndex<ids.length;idIndex++)
+		{
+			document.getElementById( ids[idIndex] ).style.display = vis[ idType ] ? "block" : "none"
+		}
+	}
+	if(vis["nfs"])
+	{
+		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
+	}
 }
+
 
 function createEditButton( editFunction )
 {
