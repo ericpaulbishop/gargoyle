@@ -35,7 +35,7 @@
 
 
 <div id="anonymous_access_container">
-	<label class="leftcolumn" id="anonymous_access_label" for="share_access"> CIFS/FTP Anonymous Access:</label>
+	<label class="leftcolumn" id="anonymous_access_label" for="share_access">FTP/CIFS Anonymous Access:</label>
 	<select class="rightcolumn" id="anonymous_access">
 		<option value="none">None</option>
 		<option value="ro">Read Only</option>
@@ -44,13 +44,13 @@
 </div>
 <div id="user_access_container" style="margin-bottom:20px;" >
 	<div>
-		<label class="leftcolumn" id="user_access_label" for="user_access">CIFS/FTP Users With Access:</label>
+		<label class="leftcolumn" id="user_access_label" for="user_access">FTP/CIFS Users With Access:</label>
 
 		<span class="rightcolumn">
 			<select id="user_access"></select>
 			<select id="user_access_type">
-				<option value="ro">Read Only</option>
-				<option value="rw">Read/Write</option>
+				<option value="R/O">Read Only</option>
+				<option value="R/W">Read/Write</option>
 			</select>
 			<input type="button" class="default_button" id="add_user_access" value="Add" onclick='addUserAccess()' />
 		</span>

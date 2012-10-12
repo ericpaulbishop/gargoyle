@@ -20,6 +20,7 @@ var mountPointToDriveSize = [];
 //these global data structure are special -- they contain
 //the data that will be saved (other than user data)
 //once the user hits the save changes button
+var userNames = [];
 var nameToSharePath = [];  
 var sharePathList = [];
 var sharePathToShareData = []; 
@@ -244,12 +245,8 @@ function addUser()
 		if(userTable == null)
 		{
 			var tableContainer = document.getElementById("user_table_container");
-			while(tableContainer.firstChild != null)
-			{
-				tableContainer.removeChild( tableContainer.firstChild);
-			}
 			userTable = createTable(["", ""], [], "share_user_table", true, false, removeUserCallback); 
-			tableContainer.appendChild(userTable);
+			setSingleChild(tableContainer, userTable);
 		}
 		var userPass = createInput("hidden")
 		userPass.value = pass1
@@ -373,7 +370,7 @@ function resetData()
 
 
 		//share users
-		var userNames = uciOriginal.getAllSectionsOfType("share_users", "user");
+		userNames = uciOriginal.getAllSectionsOfType("share_users", "user"); //global
 		var tableObject;
 		if(userNames.length > 0)
 		{
@@ -537,7 +534,7 @@ function resetData()
 						}
 
 						if(allowedHosts != "" && allowedHosts != "*")
-						{	
+						{
 							var allowedHosts = allowedHostsStr.split(/[\t ]*,[\t ]*/);
 							var allowedIps = [];
 							var foundStar = false;
@@ -609,11 +606,7 @@ function resetData()
 		}
 		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
-		if(tableContainer.firstChild != null)
-		{
-			tableContainer.removeChild(tableContainer.firstChild);
-		}
-		tableContainer.appendChild(shareTable);
+		setSingleChild(tableContainer, shareTable);
 	}
 
 	// format setttings
@@ -640,18 +633,15 @@ function resetData()
 	var vis = (drivesWithNoMounts.length > 0);
 	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container"],  [ (!vis), vis, vis, vis, vis, vis ] )
 	updateFormatPercentages()
-
-
 }
 
 
 function shareSettingsToDefault()
 {
-	var shareTypes=["ftp", "cifs", "nfs"]
-	var stIndex;
-	for(stIndex=0; stIndex < shareTypes.length; stIndex++)
+	var vis = getVis(document)
+	for(type in vis)
 	{
-		document.getElementById( "share_type_" + shareTypes[stIndex] ).checked = true;
+		document.getElementById( "share_type_" + type ).checked = true;
 	}
 	document.getElementById("share_dir").value = "/";
 	document.getElementById("share_name").value = "share_" + (sharePathList.length + 1)
@@ -659,6 +649,43 @@ function shareSettingsToDefault()
 	setSharePaths();
 }
 
+function addUserAccess(controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument
+	var addUser = getSelectedValue("user_access", controlDocument)
+	if(addUser == null || addUser == "")
+	{
+		alert("No User To Add -- You must configure a new share user above.")	
+	}
+	else
+	{
+		var access = getSelectedValue("user_access_type", controlDocument)
+		removeOptionFromSelectElement("user_access", addUser, controlDocument);
+		
+		var userAccessTable = controlDocument.getElementById("user_access_table");
+		if(userAccessTable ==  null)
+		{
+			var container = document.getElementById("user_access_table_container");
+			var userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback);
+			setSingleChild(container, userAccessTable);
+		}
+		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, controlDocument)
+	}
+}
+function removeUserAccessCallback(table, row)
+{
+	var removeUser=row.childNodes[0].firstChild.data;
+	addOptionToSelectElement("user_access", removeUser, removeUser, table.ownerDocument);
+}
+
+function setSingleChild(container, child)
+{
+	while(container.firstChild != null)
+	{
+		container.removeChild( container.firstChild);
+	}
+	container.appendChild(child);
+}
 
 
 function updateFormatPercentages(ctrlId)
@@ -722,34 +749,44 @@ function driveToDevMountPath(drive)
 	return drive.replace(/^.*\//, "/tmp/usb_mount/dev_");
 }
 
+function getVis(controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument
+	var vis = []
+	var visTypes = ["ftp", "cifs", "nfs"]
+	var vIndex;
+	for(vIndex=0; vIndex < visTypes.length; vIndex++)
+	{
+		vis[ visTypes[vIndex] ] = controlDocument.getElementById( "share_type_" + visTypes[vIndex] ).checked
+	}
+	return vis;
+}
+
 function addNewShare()
 {
 	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 	//var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
 	var shareData = ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ]; //defaults
 	
-
-
-
-	var name = document.getElementById("share_name").value;
-	if(name.length == "")
-	{
-		alert("Error: Invalid Share Name\n\nCould not add shared drive");
-		return;
-	}
 	var drive = getSelectedValue("share_disk");
+	var subdir = getSelectedValue("share_dir");
+	var specificity = getSelectedValue("share_specificity");
+	var name = document.getElementById("share_name").value;
+	
+	var vis = getVis();
+
+
 	var mountPoint = driveToMountPoint[drive];
 	var fs = mountPointToFs[mountPoint];
 	var size = mountPointToDriveSize[mountPoint];
 	var access = getSelectedText("share_access");
 	var type = getSelectedText("share_type");
-	var specificity = getSelectedValue("share_specificity");
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	var table = document.getElementById("share_table");
 	addTableRow(table, [name, fs, size, type, access, createEditButton(editShare) ], true, false, removeShareCallback);
 	nameToMountPath[name] = specificity == "blkid" ? mountPoint : driveToDevMountPath(drive);
@@ -765,13 +802,7 @@ function addNewShare()
 
 function setShareTypeVisibility()
 {
-	var vis = []
-	var visTypes = ["ftp", "cifs", "nfs"]
-	var vIndex;
-	for(vIndex=0; vIndex < visTypes.length; vIndex++)
-	{
-		vis[ visTypes[vIndex] ] = document.getElementById( "share_type_" + visTypes[vIndex] ).checked
-	}
+	var vis = getVis();
 	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
