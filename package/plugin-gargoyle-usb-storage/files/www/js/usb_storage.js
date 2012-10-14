@@ -645,7 +645,7 @@ function resetData()
 
 function shareSettingsToDefault(controlDocument)
 {
-	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+	controlDocument = controlDocument == null ? document : controlDocument
 	var currentDrive = getSelectedValue("share_disk", controlDocument);
 	var defaultData = [ "share_" + (sharePathList.length + 1), currentDrive,  driveToMountPoints[currentDrive][0], "/", driveToMountPoints[currentDrive][0], true, true, true, "none", [], [], "ro", "*" ] ;
 	setDocumentFromShareData(controlDocument, defaultData)
@@ -653,6 +653,7 @@ function shareSettingsToDefault(controlDocument)
 
 function createUserAccessTable(controlDocument)
 {
+	controlDocument = controlDocument == null ? document : controlDocument
 	var userAccessTable = controlDocument.getElementById("user_access_table");
 	if(userAccessTable ==  null)
 	{
@@ -825,7 +826,7 @@ function getShareDataFromDocument(controlDocument, originalName)
 			errors.push("Specified Shared Directory Is Already Configured: " + existing[0])
 		}
 	}
-	if( nameToSharePath[ shareName ] != null && (originalName == null || originalName != shareName)
+	if( nameToSharePath[ shareName ] != null && (originalName == null || originalName != shareName))
 	{
 		errors.push( "Share name is a duplicate" )
 	}
@@ -849,7 +850,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	controlDocument.getElementById("share_name").value = shareData[0]
 	
 	var shareSpecificity = (shareData[2] == driveToMountPoints[shareDrive][0]) ? "blkid" : "dev";
-	setSelectedValue("share_specificity", shareSpecficity, controlDocument)
+	setSelectedValue("share_specificity", shareSpecificity, controlDocument)
 	
 	
 	controlDocument.getElementById("share_type_ftp").checked  = shareData[5]
@@ -876,8 +877,8 @@ function setDocumentFromShareData(controlDocument, shareData)
 	
 	setSelectedValue("nfs_access", shareData[11]);
 	var nfsAccessIps = shareData[12];
-	setSelectedValue("nfs_policy", nfsAccessIps instanceof "String" ? "share" ? "ip", controlDocument);
-	if(nfsAccessIps instanceof "Array")
+	setSelectedValue("nfs_policy", nfsAccessIps instanceof String ? "share" : "ip", controlDocument);
+	if(nfsAccessIps instanceof Array)
 	{
 		addAddressesToTable(controlDocument,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
 	}
@@ -889,8 +890,8 @@ function setDocumentFromShareData(controlDocument, shareData)
 
 function addNewShare()
 {
-	var shareData = getShareDataFromDocument(document, null)
-	var errors = shareData["errors"]
+	var rawShareData = getShareDataFromDocument(document, null)
+	var errors = rawShareData["errors"]
 	if(errors.length > 0)
 	{
 		var errStr = errors.join("\n") + "\n\nCould Not Add Share"
@@ -898,8 +899,7 @@ function addNewShare()
 	}
 	else
 	{
-		var shareData = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["ftp"], enabledTypes["cifs"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-		var shareData = result["share"]
+		var shareData = rawShareData["share"]
 		
 		var shareName = shareData[0]
 		var fullSharePath = shareData[4];
