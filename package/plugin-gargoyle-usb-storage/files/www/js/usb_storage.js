@@ -678,14 +678,7 @@ function removeUserAccessCallback(table, row)
 	addOptionToSelectElement("user_access", removeUser, removeUser, table.ownerDocument);
 }
 
-function setSingleChild(container, child)
-{
-	while(container.firstChild != null)
-	{
-		container.removeChild( container.firstChild);
-	}
-	container.appendChild(child);
-}
+
 
 
 function updateFormatPercentages(ctrlId)
