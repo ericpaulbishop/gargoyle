@@ -12,14 +12,13 @@
  * or symlink to dev_[devid], wherever share is 
  * actually mounted
  */
-var driveToMountPoint = [];
+var driveToMountPoints = [];
 var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
 
 //these global data structure are special -- they contain
-//the data that will be saved (other than user data)
-//once the user hits the save changes button
+//the data that will be saved once the user hits the save changes button
 var userNames = [];
 var nameToSharePath = [];  
 var sharePathList = [];
@@ -405,7 +404,7 @@ function resetData()
 		document.getElementById("share_disk").style.display = "block";
 		
 		//globals
-		driveToMountPoint = [];
+		driveToMountPoints = [];
 		mountPointToDrive = []; 
 		mountPointToFs = [];
 		mountPointToDriveSize = [];
@@ -414,8 +413,8 @@ function resetData()
 		var driveIndex = 0;
 		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
 		{
-			driveToMountPoint[ storageDrives[driveIndex][0] ]      = storageDrives[driveIndex][1];
 			var mountPoints = [ storageDrives[driveIndex][1], storageDrives[driveIndex][2] ];
+			driveToMountPoints[ storageDrives[driveIndex][0] ] = mountPoints;
 			var mpIndex;
 			for(mpIndex=0;mpIndex < 2; mpIndex++)
 			{
@@ -464,8 +463,8 @@ function resetData()
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
+					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
 					
 					//name
 					if( shareData[0] == "" || config == "samba")
@@ -476,9 +475,10 @@ function resetData()
 					shareData[1] = shareDrive                                //drive
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
-					shareData[4] = config == "vsftpd" ? true : shareData[6]  //isFTP
-					shareData[5] = config == "samba"  ? true : shareData[7]  //isCIFS
-					shareData[6] = config == "nfsd"   ? true : shareData[8]  //isNFS
+					shareData[4] = fullSharePath				 //full path
+					shareData[5] = config == "vsftpd" ? true : shareData[6]  //isFTP
+					shareData[6] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[7] = config == "nfsd"   ? true : shareData[8]  //isNFS
 
 					//both samba and vsftpd have ro_users and rw_users list options
 					//however, they handle anonymous access a bit differently
@@ -486,7 +486,7 @@ function resetData()
 					if(config == "vsftpd" || config == "samba")
 					{
 						var readTypes = ["rw", "ro"]
-						var readTypeShareDataIndices = [8,9]
+						var readTypeShareDataIndices = [9,10]
 						var rtIndex;
 						for(rtIndex=0; rtIndex < 2; rtIndex++)
 						{
@@ -503,7 +503,7 @@ function resetData()
 									if(user == "anonymous" || user == "ftp")
 									{
 										//handle anonymous for vsftpd
-										sareData[ 7 ] = readType
+										sareData[ 8 ] = readType
 										
 									}
 									else
@@ -519,13 +519,13 @@ function resetData()
 							//handle anonymous for samba
 							if( uciOriginal.get(config, shareId, "guest_ok").toLowerCase() == "yes" || uciOriginal.get(config, shareId, "public").toLowerCase() == "yes" )
 							{
-								shareData[ 7 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
+								shareData[ 8 ] = uciOriginal.get(config, shareId, "read_only").toLowerCase() == "yes" ? "ro" : "rw"
 							}
 						}
 					}
 					if(config == "nfsd")
 					{
-						shareData[ 10 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
+						shareData[ 11 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
 
 						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
 						if(alowedHostsStr instanceof Array)
@@ -547,7 +547,7 @@ function resetData()
 									allowedIps.push(h);
 								}
 							}
-							shareData[ 11 ] = foundStar ? "*" : allowedIps;
+							shareData[ 12 ] = foundStar ? "*" : allowedIps;
 						}
 					}
 					sharePathToShareData[ fullSharePath ] = shareData
@@ -735,7 +735,7 @@ function updateFormatPercentages(ctrlId)
 	return valid
 }
 
-
+// FIXME
 function mountPathToMountPoint(mountPath)
 {
 	mountPath = mountPath == null ? "" : mountPath;
@@ -748,6 +748,7 @@ function driveToDevMountPath(drive)
 {
 	return drive.replace(/^.*\//, "/tmp/usb_mount/dev_");
 }
+//
 
 function getVis(controlDocument)
 {
@@ -762,42 +763,104 @@ function getVis(controlDocument)
 	return vis;
 }
 
+function getVisStr(vis)
+{
+	var shareTypeStr = function(type){ return vis[type] ? type.toUpperCase() : ""; }
+	var visStr = shareTypeStr("ftp") + "+" + shareTypeStr("cifs") + "+" + shareTypeStr("nfs");
+	return visStr.replace(/\+\+/g, "+").replace(/^\+/, "").replace(/\+$/, "");
+}
+
 function addNewShare()
 {
-	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 	//var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
-	var shareData = ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ]; //defaults
+	//var shareData = ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ]; //defaults
 	
-	var drive = getSelectedValue("share_disk");
-	var subdir = getSelectedValue("share_dir");
-	var specificity = getSelectedValue("share_specificity");
-	var name = document.getElementById("share_name").value;
-	
-	var vis = getVis();
+	var shareDrive = getSelectedValue("share_disk");
+	var shareSubdir = document.getElementById("share_dir").value
+	shareSubdir = shareSubdir == "" ? "/" : shareSubdir;
+	var shareSpecificity = getSelectedValue("share_specificity");
+	var shareName = document.getElementById("share_name").value;
+	var shareDiskMount =  driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 0 : 1 ) ];
+	var altDiskMount   = driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 1 : 0 ) ];
+	var fullSharePath  = (shareDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
+	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
 
-	var mountPoint = driveToMountPoint[drive];
-	var fs = mountPointToFs[mountPoint];
-	var size = mountPointToDriveSize[mountPoint];
-	var access = getSelectedText("share_access");
-	var type = getSelectedText("share_type");
-	
-	
-	
-	
-	
-	
-	var table = document.getElementById("share_table");
-	addTableRow(table, [name, fs, size, type, access, createEditButton(editShare) ], true, false, removeShareCallback);
-	nameToMountPath[name] = specificity == "blkid" ? mountPoint : driveToDevMountPath(drive);
+	var enabledTypes = getVis();
+	var shareType = getVisStr(enabledTypes);
 
-	//remove the drive we just used from the available list
-	removeOptionFromSelectElement("share_disk", drive);
-	if(document.getElementById("share_disk").options.length == 0)
+	var anonymousAccess = getSelectedValue("anonymous_access")
+	var roUsers = [];
+	var rwUsers = [];
+	var userAccessTable = document.getElementById("user_access_table")
+	if(userAccessTable != null)
 	{
-		document.getElementById("sharing_add_heading_container").style.display  = "none";
-		document.getElementById("sharing_add_controls_container").style.display = "none";
+		var userAccessTableData = getTableDataArray(userAccessTable, true, false);
+		var uatIndex;
+		for(uatIndex=0; uatIndex < userAccessTableData.length; uatIndex++)
+		{
+			var rowData = userAccessTableData[uatIndex];
+			if(rowData[1] == "R/O") { roUsers.push(rowData[0]); }
+			if(rowData[1] == "R/W") { rwUsers.push(rowData[0]); }
+		}
 	}
+	var nfsAccess = getSelectedValue("nfs_access")
+	var nfsAccessIps = getSelectedValue("nfs_policy") == "share" ? "*" : [];
+	if( typeof(nfsAccessIps) != "String")
+	{
+		var nfsIpTable = document.getElementById("nfs_ip_table");
+		if(nfsIpTable != null)
+		{
+			var nfsIpData = getTableDataArray(nfsIpTable);
+			var nipIndex;
+			for(nipIndex=0; nipIndex < nfsIpData.length; nipIndex++)
+			{
+				nfsAccessIps.push( nfsIpData[nipIndex][0] );
+			}
+		}
+	}
+	
+	
+	// error checking
+	var errors = [];
+	if( !(enabledTypes["ftp"] || enabledTypes["cifs"] || enabledTypes["nfs"]) )
+	{
+		errors.push("You must select at least one share type (FTP, CIFS, NFS)")
+	}
+	if( enabledTypes["ftp"] || enabledTypes["cifs"])
+	{
+		if( roUsers.length == 0 && rwUsers.length == 0 && anonymousAccess == "none" )
+		{
+			errors.push("FTP and/or CIFS share type selected, but neither anonymous access or users are configured");
+		}
+	}
+	if( sharePathToShareData[ fullSharePath ] != null || sharePathToShareData[ altSharePath ] != null )
+	{
+		var existing = sharePathToShareData[ fullSharePath ];
+		existing = existing == null ? sharePathToShareData[ altSharePath ] : existing
+		errors.push("Specified Shared Directory Is Already Configured: " + existing[0])
+	}
+	if( nameToSharePath[ shareName ] != null)
+	{
+		errors.push( "Share name is a duplicate" )
+	}
+	if(errors.length > 0)
+	{
+		var errStr = errors.join("\n") + "\n\nCould Not Add Share"
+		alert(errStr)
+	}
+	else
+	{
+		var shareData = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["ftp"], enabledTypes["cifs"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+		sharePathToShareData[ fullSharePath ] = shareData
+		sharePathList.push(fullSharePath)
+		nameToSharePath [ shareName ] = fullSharePath
+
+		var shareTable = document.getElementById("share_table")
+		addTableRow(shareTable, [shareName, shareDrive, shareSubdir, shareType, createEditButton(editShare) ], true, false, removeShareCallback)
+	}
+
 }
 
 function setShareTypeVisibility()

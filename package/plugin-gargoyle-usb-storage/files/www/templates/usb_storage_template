@@ -6,11 +6,11 @@
 
 <div id="share_dir_container">
 	<label class="leftcolumn" id="share_dir_label" for="share_dir">Subdirectory:</label>
-	<input type='text' id='share_dir'  size='30' onkeyup='proofreadSubdir(this)' onkeyup="setPaths(this.ownerDocument)"  />
+	<input type='text' id='share_dir'  size='30'  />
 </div>
 <div id="share_name_container">
 	<label class="leftcolumn" id="share_name_label" for="share_name">Share Name:</label>
-	<input type="text" class="rightcolumn" id="share_name" size='30' onkeyup="setPaths(this.ownerDocument)" />
+	<input type="text" class="rightcolumn" id="share_name" size='30' onkeyup="setSharePaths(this.ownerDocument)" />
 </div>
 <div id="share_specificity_container">
 	<label class="leftcolumn" id="share_name_label" for="share_specificity">Settings Apply To:</label>
