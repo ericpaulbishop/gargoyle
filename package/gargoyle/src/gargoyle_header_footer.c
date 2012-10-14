@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 	
 	if(display_type == HEADER || display_type == MINIMAL_HEADER)
 	{
-		printf("Content-type: text/html\n\n");
+		printf("Content-type: text/html ; charset=utf-8\n\n");
 
 		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
 		{
