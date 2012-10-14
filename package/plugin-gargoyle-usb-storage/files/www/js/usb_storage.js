@@ -17,17 +17,18 @@ var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
 
-//these global data structure are special -- they contain
-//the data that will be saved once the user hits the save changes button
+/* 
+ * These global data structure are special -- they contain
+ * the data that will be saved once the user hits the save changes button
+ *
+ * In other sections we load/save to uci variable, but we have 3 packages (samba, nfsd and vsftpd) to worry
+ * about for shares, and the conversion to uci isn't particularly straightforward.  So, we save in a global
+ * variable in a simpler format, and then update uci when we do the final save
+*/
 var userNames = [];
 var nameToSharePath = [];  
 var sharePathList = [];
 var sharePathToShareData = []; 
-
-//temporary
-nullFunc = function() { return 0 ; };
-removeUserCallback = nullFunc
-// end temporary
 
 
 function saveChanges()
@@ -253,6 +254,12 @@ function addUser()
 		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
 	}
 
+}
+
+function removeUserCallback()
+{
+	//TODO: implement this
+	//need to wipe out user in all shares (will be a bit of a pain)
 }
 
 function editUser()
@@ -728,21 +735,6 @@ function updateFormatPercentages(ctrlId)
 	return valid
 }
 
-// FIXME
-function mountPathToMountPoint(mountPath)
-{
-	mountPath = mountPath == null ? "" : mountPath;
-	var mountPoint = mountPath.replace(/^.*\//g, "").match(/dev_/) ? driveToMountPoint[ "/dev/" + mountPath.replace(/^.*\//g, "").substr(4) ] : mountPath;
-	mountPoint = mountPoint == null ? "" : mountPoint;
-	return mountPoint;
-
-}
-function driveToDevMountPath(drive)
-{
-	return drive.replace(/^.*\//, "/tmp/usb_mount/dev_");
-}
-//
-
 function getVis(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
@@ -763,25 +755,21 @@ function getVisStr(vis)
 	return visStr.replace(/\+\+/g, "+").replace(/^\+/, "").replace(/\+$/, "");
 }
 
-function addNewShare()
+function getShareDataFromDocument(controlDocument, originalName)
 {
-	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-	//var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
-	//var shareData = ["", "", "", "", false, false, false, "none", [], [], "ro", "*" ]; //defaults
+	controlDocument = controlDocument == null ? document : controlDocument
 	
-	var shareDrive = getSelectedValue("share_disk");
-	var shareSubdir = document.getElementById("share_dir").value
+	var shareDrive = getSelectedValue("share_disk", controlDocument);
+	var shareSubdir = controlDocument.getElementById("share_dir").value
 	shareSubdir = shareSubdir == "" ? "/" : shareSubdir;
-	var shareSpecificity = getSelectedValue("share_specificity");
-	var shareName = document.getElementById("share_name").value;
+	var shareSpecificity = getSelectedValue("share_specificity", controlDocument);
+	var shareName = controlDocument.getElementById("share_name").value;
 	var shareDiskMount =  driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 0 : 1 ) ];
 	var altDiskMount   = driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 1 : 0 ) ];
 	var fullSharePath  = (shareDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
-
 	var enabledTypes = getVis();
-	var shareType = getVisStr(enabledTypes);
 
 	var anonymousAccess = getSelectedValue("anonymous_access")
 	var roUsers = [];
@@ -813,8 +801,7 @@ function addNewShare()
 			}
 		}
 	}
-	
-	
+
 	// error checking
 	var errors = [];
 	if( !(enabledTypes["ftp"] || enabledTypes["cifs"] || enabledTypes["nfs"]) )
@@ -832,12 +819,38 @@ function addNewShare()
 	{
 		var existing = sharePathToShareData[ fullSharePath ];
 		existing = existing == null ? sharePathToShareData[ altSharePath ] : existing
-		errors.push("Specified Shared Directory Is Already Configured: " + existing[0])
+		if(originalName == null || existing[0] != originalName )
+		{
+			errors.push("Specified Shared Directory Is Already Configured: " + existing[0])
+		}
 	}
-	if( nameToSharePath[ shareName ] != null)
+	if( nameToSharePath[ shareName ] != null && (originalName == null || originalName != shareName)
 	{
 		errors.push( "Share name is a duplicate" )
 	}
+
+	var result = [];
+	result["errors"] = errors;
+	if(errors.length == 0)
+	{
+		result["share"] = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["ftp"], enabledTypes["cifs"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+	}
+	return result;
+}
+
+function setDocumentFromShareData(controlDocument, shareData)
+{
+	setSelectedValue("share_disk", shareData[1], controlDocument)
+	controlDocument.getElementById("share_dir").value = shareData[3]
+	controlDocument.getElementById("share_name").value = shareData[0]
+	
+
+}
+
+function addNewShare()
+{
+	var shareData = getShareDataFromDocument(document, null)
+	var errors = shareData["errors"]
 	if(errors.length > 0)
 	{
 		var errStr = errors.join("\n") + "\n\nCould Not Add Share"
@@ -846,12 +859,18 @@ function addNewShare()
 	else
 	{
 		var shareData = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["ftp"], enabledTypes["cifs"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+		var shareData = result["share"]
+		
+		var shareName = shareData[0]
+		var fullSharePath = shareData[4];
+		var shareType = getVisStr( getVis() );
+
 		sharePathToShareData[ fullSharePath ] = shareData
 		sharePathList.push(fullSharePath)
 		nameToSharePath [ shareName ] = fullSharePath
 
 		var shareTable = document.getElementById("share_table")
-		addTableRow(shareTable, [shareName, shareDrive, shareSubdir, shareType, createEditButton(editShare) ], true, false, removeShareCallback)
+		addTableRow(shareTable, [shareName, shareData[1], shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
 	}
 
 }
@@ -917,6 +936,9 @@ function removeShareCallback(table, row)
 	setSharePaths();
 }
 
+
+
+
 function editShare()
 {
 	if( typeof(editShareWindow) != "undefined" )
@@ -955,12 +977,9 @@ function editShare()
 
 	var editRow=this.parentNode.parentNode;
 	var editName=editRow.childNodes[0].firstChild.data;
-	var editMountPath=nameToMountPath[editName];
-	var editMountPoint=mountPathToMountPoint(editMountPath);
-	var editDrive=mountPointToDrive[editMountPoint];
-	
-	var editType=editRow.childNodes[3].firstChild.data;
-	var editAccess = editRow.childNodes[4].firstChild.data;
+	var editPath=nameToSharePath[editName];
+	var editShare=sharePathToShareData[ editPath ];
+
 
 	var runOnEditorLoaded = function () 
 	{
@@ -974,6 +993,7 @@ function editShare()
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 				
+				/*
 				//don't need set/load from UCI, since all data is in row text itself
 				//load data from row text here
 				//device->[name, filesystem, size, sharetype, access]
@@ -985,7 +1005,7 @@ function editShare()
 				setSelectedText("share_access", editAccess, editShareWindow.document);
 				setSelectedValue("share_specificity", (editMountPath.replace(/^.*\//g, "").match(/^dev_/) ? "dev" : "blkid"), editShareWindow.document);
 				setNfsPath(editShareWindow.document);
-
+				*/
 				
 				closeButton.onclick = function()
 				{
@@ -993,6 +1013,7 @@ function editShare()
 				}
 				saveButton.onclick = function()
 				{
+					/*
 					var errors = [];
 					var shareName = editShareWindow.document.getElementById("share_name").value;
 					if(shareName == "")
@@ -1014,6 +1035,7 @@ function editShare()
 						editRow.childNodes[4].firstChild.data = getSelectedText("share_access", editShareWindow.document);
 						editShareWindow.close();
 					}
+					*/
 				}
 				editShareWindow.moveTo(xCoor,yCoor);
 				editShareWindow.focus();
@@ -1026,6 +1048,17 @@ function editShare()
 	}
 	runOnEditorLoaded();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 function setSharePaths(controlDocument)
 {
