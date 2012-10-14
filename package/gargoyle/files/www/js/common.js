@@ -1137,6 +1137,15 @@ function setAllowableSelections(selectId, allowableValues, allowableNames, contr
 	}
 }
 
+function setSingleChild(container, child)
+{
+	while(container.firstChild != null)
+	{
+		container.removeChild( container.firstChild);
+	}
+	container.appendChild(child);
+}
+
 function setVariableFromValue(params)
 {
 	elementId    = params[0];
