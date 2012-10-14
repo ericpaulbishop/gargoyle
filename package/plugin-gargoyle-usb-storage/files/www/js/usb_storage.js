@@ -643,17 +643,23 @@ function resetData()
 }
 
 
-function shareSettingsToDefault()
+function shareSettingsToDefault(controlDocument)
 {
-	var vis = getVis(document)
-	for(type in vis)
+	//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+	var currentDrive = getSelectedValue("share_disk", controlDocument);
+	var defaultData = [ "share_" + (sharePathList.length + 1), currentDrive,  driveToMountPoints[currentDrive][0], "/", driveToMountPoints[currentDrive][0], true, true, true, "none", [], [], "ro", "*" ] ;
+	setDocumentFromShareData(controlDocument, defaultData)
+}
+
+function createUserAccessTable(controlDocument)
+{
+	var userAccessTable = controlDocument.getElementById("user_access_table");
+	if(userAccessTable ==  null)
 	{
-		document.getElementById( "share_type_" + type ).checked = true;
+		var container = document.getElementById("user_access_table_container");
+		userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback);
+		setSingleChild(container, userAccessTable);
 	}
-	document.getElementById("share_dir").value = "/";
-	document.getElementById("share_name").value = "share_" + (sharePathList.length + 1)
-	setShareTypeVisibility();
-	setSharePaths();
 }
 
 function addUserAccess(controlDocument)
@@ -669,13 +675,8 @@ function addUserAccess(controlDocument)
 		var access = getSelectedValue("user_access_type", controlDocument)
 		removeOptionFromSelectElement("user_access", addUser, controlDocument);
 		
+		createUserAccessTable()
 		var userAccessTable = controlDocument.getElementById("user_access_table");
-		if(userAccessTable ==  null)
-		{
-			var container = document.getElementById("user_access_table_container");
-			var userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback);
-			setSingleChild(container, userAccessTable);
-		}
 		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, controlDocument)
 	}
 }
@@ -840,10 +841,49 @@ function getShareDataFromDocument(controlDocument, originalName)
 
 function setDocumentFromShareData(controlDocument, shareData)
 {
-	setSelectedValue("share_disk", shareData[1], controlDocument)
+	controlDocument = controlDocument == null ? document : controlDocument
+	
+	var shareDrive = shareData[1]
+	setSelectedValue("share_disk", shareDrive, controlDocument)
 	controlDocument.getElementById("share_dir").value = shareData[3]
 	controlDocument.getElementById("share_name").value = shareData[0]
 	
+	var shareSpecificity = (shareData[2] == driveToMountPoints[shareDrive][0]) ? "blkid" : "dev";
+	setSelectedValue("share_specificity", shareSpecficity, controlDocument)
+	
+	
+	controlDocument.getElementById("share_type_ftp").checked  = shareData[5]
+	controlDocument.getElementById("share_type_cifs").checked = shareData[6]
+	controlDocument.getElementById("share_type_nfs").checked  = shareData[7]
+
+	setSelectedValue("anonymous_access", shareData[8], controlDocument)
+	createUserAccessTable(controlDocument)
+	var userAccessTable = controlDocument.getElementById("user_access_table")
+	var userIndices = [];
+	userIndices[9] = "rw"
+	userIndices[10] = "ro"
+	var userTypeIndex;
+	for( userTypeIndex in userIndices)
+	{
+		var userType = userIndices[userTypeIndex]
+		var userList = shareData[ userTypeIndex ];
+		var ulIndex;
+		for(ulIndex=0;ulIndex < userList.length; ulIndex++)
+		{
+			addTableRow(userAccessTable, [ userList[ulIndex], userType == "rw" ? "R/W" : "R/O" ], true, false, removeUserAccessCallback, null, controlDocument)
+		}
+	}
+	
+	setSelectedValue("nfs_access", shareData[11]);
+	var nfsAccessIps = shareData[12];
+	setSelectedValue("nfs_policy", nfsAccessIps instanceof "String" ? "share" ? "ip", controlDocument);
+	if(nfsAccessIps instanceof "Array")
+	{
+		addAddressesToTable(controlDocument,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
+	}
+
+	setShareTypeVisibility(controlDocument)
+	setSharePaths(controlDocument);
 
 }
 
@@ -875,9 +915,11 @@ function addNewShare()
 
 }
 
-function setShareTypeVisibility()
+function setShareTypeVisibility(controlDocument)
 {
-	var vis = getVis();
+	controlDocument = controlDocument == null ? document : controlDocument
+	
+	var vis = getVis(controlDocument);
 	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
@@ -895,12 +937,12 @@ function setShareTypeVisibility()
 		var idIndex;
 		for(idIndex=0; idIndex<ids.length;idIndex++)
 		{
-			document.getElementById( ids[idIndex] ).style.display = vis[ idType ] ? "block" : "none"
+			controlDocument.getElementById( ids[idIndex] ).style.display = vis[ idType ] ? "block" : "none"
 		}
 	}
 	if(vis["nfs"])
 	{
-		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
+		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", controlDocument);
 	}
 }
 

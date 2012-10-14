@@ -23,11 +23,11 @@
 <div id="select_share_type_container" style="margin-bottom:20px;" >
 	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type(s):</label>
 	<span class='rightcolumn'>
-		<input type='checkbox' id='share_type_cifs' class="aligned_check" onclick="setShareTypeVisibility()" />
+		<input type='checkbox' id='share_type_cifs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" />
 		<label for="share_type_cifs" class="aligned_check_label">CIFS</label>&nbsp;
-		<input type='checkbox' id='share_type_ftp' class="aligned_check" onclick="setShareTypeVisibility()" />
+		<input type='checkbox' id='share_type_ftp' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" />
 		<label for="share_type_ftp" class="aligned_check_label">FTP</label>&nbsp;
-		<input type='checkbox' id='share_type_nfs' class="aligned_check" onclick="setShareTypeVisibility()" />
+		<input type='checkbox' id='share_type_nfs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" />
 		<label for="share_type_nfs" class="aligned_check_label">NFS</label>
 	</span>
 	<br/>
