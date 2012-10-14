@@ -908,16 +908,19 @@ function createEditButton( editFunction )
 
 function removeShareCallback(table, row)
 {
-	var editName=row.childNodes[0].firstChild.data;
+	var removeName=row.childNodes[0].firstChild.data;
+	var removePath = nameToSharePath[removeName]
+	
+	nameToSharePath[removeName] = null;
+	sharePathToShareData[removePath] = null;
+	var newSharePathList = []
+	while(sharePathList.length > 0)
+	{
+		var next = sharePathList.shift()
+		if(next != removePath){ newSharePathList.push(next) }
+	}
+	sharePathList = newSharePathList;
 
-	var oldMountPoint = mountPathToMountPoint(nameToMountPath[editName]);
-	var oldDrive = mountPointToDrive[oldMountPoint];
-	addOptionToSelectElement("share_disk", oldDrive, oldDrive);
-	document.getElementById("sharing_add_heading_container").style.display  = "block";
-	document.getElementById("sharing_add_controls_container").style.display = "block";
-	
-	
-	nameToMountPath[editName] = null;
 	setSharePaths();
 }
 
