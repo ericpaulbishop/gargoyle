@@ -252,14 +252,52 @@ function addUser()
 		userPass.value = pass1
 		var editButton = createEditButton(editUser);
 		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
+		addOptionToSelectElement("user_access", user, user);
+		usserNames.push(user)
 	}
 
 }
 
-function removeUserCallback()
+
+function removeUserCallback(row, table)
 {
-	//TODO: implement this
-	//need to wipe out user in all shares (will be a bit of a pain)
+	var removeUser=row.childNodes[0].firstChild.data;
+		
+
+	//remove from userNames
+	var newUserNames = removeSringFromArray(userNames, removeUser)
+	userNames = newUserNames;
+
+	//remove in all shares
+	for (sharePath in sharePathToShareData)
+	{
+		var shareData = sharePathToShareData[sharePath]
+		var rwUsers   = shareData[9]
+		var roUsers   = shareData[10]
+		shareData[9]  = removeStringFromArray(rwUsers, removeUser) 
+		shareData[10] = removeStringFromArray(roUsers, removeUser)
+		sharePathToShareData[sharePath] = shareData;
+	}
+
+	//remove from controls of share currently being configured
+	removeOptionFromSelectElement("user_access", removeUser, removeUser);
+	var accessTable = document.getElementById("user_access_table")
+	if(accessTable != null)
+	{
+		var accessTableData = getTableDataArray(accessTable, true, false);
+		var newTableData = [];
+		while(accessTableData.length >0)
+		{
+			var next = accessTableData.shift();
+			if(next[0] != removeUser)
+			{
+				newTableData.push(next)
+			}
+		}
+		var newAccessTable =  createTable(["", ""], newTableData, "user_access_table", true, false, removeUserAccessCallback);
+		setSingleChild("user_access_table_container", newAccessTable);
+	}	
+		
 }
 
 function editUser()

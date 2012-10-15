@@ -601,7 +601,24 @@ function fullEscape(str)
 	return str;
 }
 
-
+function removeStringFromArray(var arr, var str)
+{
+	var arrIndex;
+	var newArr = [];
+	for(arrIndex=0;arrIndex<arr.length; arrIndex++)
+	{
+		var elFound = false;
+		if(arr[arrIndex] instanceof String)
+		{
+			elFound = (arr[arrIndex] == str)
+		}
+		if(!elFound)
+		{
+			newArr.push(arr[arrIndex]);
+		}
+	}
+	return newArr;
+}
 
 
 function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
