@@ -863,7 +863,8 @@ function setDocumentFromShareData(controlDocument, shareData)
 	var userIndices = [];
 	userIndices[9] = "rw"
 	userIndices[10] = "ro"
-	var userTypeIndex;
+	var userTypeIndex
+	var usersWithEntries = [];
 	for( userTypeIndex in userIndices)
 	{
 		var userType = userIndices[userTypeIndex]
@@ -872,6 +873,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 		for(ulIndex=0;ulIndex < userList.length; ulIndex++)
 		{
 			addTableRow(userAccessTable, [ userList[ulIndex], userType == "rw" ? "R/W" : "R/O" ], true, false, removeUserAccessCallback, null, controlDocument)
+			usersWithEntries[ userList[ulIndex] ] = 1
 		}
 	}
 	
@@ -882,6 +884,19 @@ function setDocumentFromShareData(controlDocument, shareData)
 	{
 		addAddressesToTable(controlDocument,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
 	}
+
+	//update user select element
+	var usersWithoutEntries = [];
+	var uIndex;
+	for(uIndex = 0; uIndex < userNames; uIndex++)
+	{
+		var u = userNames[uIndex];
+		if(usersWithEntries[ u ] != 1)
+		{
+			usersWithoutEntries.push(u);
+		}
+	}
+	setAllowableSelections("user_access", usersWithoutEntries, usersWithoutEntries, controlDocument);
 
 	setShareTypeVisibility(controlDocument)
 	setSharePaths(controlDocument);
@@ -1017,10 +1032,10 @@ function editShare()
 	closeButton.value = "Close and Discard Changes";
 	closeButton.className = "default_button";
 
-	var editRow=this.parentNode.parentNode;
-	var editName=editRow.childNodes[0].firstChild.data;
-	var editPath=nameToSharePath[editName];
-	var editShare=sharePathToShareData[ editPath ];
+	editRow=this.parentNode.parentNode;
+	editName=editRow.childNodes[0].firstChild.data;
+	editPath=nameToSharePath[editName];
+	editShare=sharePathToShareData[ editPath ];
 
 
 	var runOnEditorLoaded = function () 
@@ -1034,20 +1049,8 @@ function editShare()
 				
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-				
-				/*
-				//don't need set/load from UCI, since all data is in row text itself
-				//load data from row text here
-				//device->[name, filesystem, size, sharetype, access]
-				editShareWindow.document.getElementById("share_disk").style.display = "none";
-				editShareWindow.document.getElementById("share_disk_text").style.display = "block";
-				setChildText("share_disk_text", editDrive, null, null, null, editShareWindow.document);
-				editShareWindow.document.getElementById("share_name").value = editName;
-				setSelectedText("share_type", editType, editShareWindow.document);
-				setSelectedText("share_access", editAccess, editShareWindow.document);
-				setSelectedValue("share_specificity", (editMountPath.replace(/^.*\//g, "").match(/^dev_/) ? "dev" : "blkid"), editShareWindow.document);
-				setNfsPath(editShareWindow.document);
-				*/
+			
+				setDocumentFromShareData(editShareWindow.document, shareData)	
 				
 				closeButton.onclick = function()
 				{
@@ -1055,29 +1058,47 @@ function editShare()
 				}
 				saveButton.onclick = function()
 				{
-					/*
-					var errors = [];
-					var shareName = editShareWindow.document.getElementById("share_name").value;
-					if(shareName == "")
-					{
-						errors.push("Invalid Share Name");
-					}
+					var rawShareData = getShareDataFromDocument(editShareWindow.document, editName)
+					var errors = rawSahreData["errors"];
 					if(errors.length > 0)
 					{
 						alert(errors.join("\n") + "\nCould not update share.");
 					}
 					else
 					{
-						//set data
-						nameToMountPath[editName] = null;
-						nameToMountPath[shareName] = getSelectedValue("share_specificity", editShareWindow.document) == "blkid" ? editMountPoint : driveToDevMountPath(editDrive);
+						var shareData = rawShareData["share"]
+						var shareName = shareData[0]
+						var fullSharePath = shareData[4];
+						var shareType = getVisStr( getVis(editShareWindow.document) );
 
-						editRow.childNodes[0].firstChild.data = shareName;
-						editRow.childNodes[3].firstChild.data = getSelectedText("share_type", editShareWindow.document);
-						editRow.childNodes[4].firstChild.data = getSelectedText("share_access", editShareWindow.document);
+						if(editName != shareName)
+						{
+							nameToSharePath[ editName ] = null
+						}
+						if(editPath != fullSharePath)
+						{
+							var newSharePathList = []
+							while(sharePathList.length > 0)
+							{
+								var next = sharePathList.shift();
+								if(next != editPath)
+								{
+									newSharePathList.push(next)
+								}
+							}
+							newSharePathList.push(fullSharePath)
+							sharePathList = newSharePathList
+						}
+						sharePathToShareData[ fullSharePath ] = shareData
+						nameToSharePath [ shareName ] = fullSharePath
+
+						editRow.childNodes[0].firstChild.data = shareName
+						editRow.childNodes[1].firstChild.data = shareData[1]
+						editRow.childNodes[2].firstChild.data = shareData[3]
+						editRow.childNodes[3].firstChild.data = shareType
+
 						editShareWindow.close();
 					}
-					*/
 				}
 				editShareWindow.moveTo(xCoor,yCoor);
 				editShareWindow.focus();
