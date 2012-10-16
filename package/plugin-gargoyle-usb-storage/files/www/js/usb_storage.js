@@ -253,7 +253,12 @@ function addUser()
 		var editButton = createEditButton(editUser);
 		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
 		addOptionToSelectElement("user_access", user, user);
-		usserNames.push(user)
+		userNames.push(user)
+
+		document.getElementById("new_user").value = ""
+		document.getElementById("user_pass").value = ""
+		document.getElementById("user_pass_confirm").value = ""
+
 	}
 
 }
@@ -452,10 +457,6 @@ function resetData()
 		setAllowableSelections("user_access", userNames, userNames);
 
 
-
-		//full document, not edit, so share_disk option is select, not text
-		document.getElementById("share_disk_text").style.display = "none";
-		document.getElementById("share_disk").style.display = "block";
 		
 		//globals
 		driveToMountPoints = [];
@@ -615,21 +616,10 @@ function resetData()
 		getMounted(sambaShares, "samba");
 		getMounted(nfsShares, "nfsd");
 		
-		var driveList = [];
-		var driveDisplayList = [];
-		for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
-		{
-			var driveName = storageDrives[driveIndex][0]
-			var driveFs = storageDrives[driveIndex][3];
-			var driveSize = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
-			driveList.push( driveName )
-			driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
-		}
-		if(driveList.length > 0)
+		if(setDriveList(document))
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "block";
 			document.getElementById("sharing_add_controls_container").style.display = "block";
-			setAllowableSelections("share_disk", driveList, driveDisplayList);
 			shareSettingsToDefault();
 		}
 		else
@@ -689,6 +679,24 @@ function resetData()
 	updateFormatPercentages()
 }
 
+//returns (boolean) whether drive list is empty
+function setDriveList(controlDocument)
+{
+		
+	var driveList = [];
+	var driveDisplayList = [];
+	for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
+	{
+		var driveName = storageDrives[driveIndex][0]
+		var driveFs = storageDrives[driveIndex][3];
+		var driveSize = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+		driveList.push( driveName )
+		driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
+	}
+	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
+
+	return (driveList.length > 0)
+}
 
 function shareSettingsToDefault(controlDocument)
 {
@@ -698,14 +706,14 @@ function shareSettingsToDefault(controlDocument)
 	setDocumentFromShareData(controlDocument, defaultData)
 }
 
-function createUserAccessTable(controlDocument)
+function createUserAccessTable(clear, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
 	var userAccessTable = controlDocument.getElementById("user_access_table");
-	if(userAccessTable ==  null)
+	if(clear || userAccessTable ==  null)
 	{
-		var container = document.getElementById("user_access_table_container");
-		userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback);
+		var container = controlDocument.getElementById("user_access_table_container");
+		userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback, null, controlDocument);
 		setSingleChild(container, userAccessTable);
 	}
 }
@@ -723,7 +731,7 @@ function addUserAccess(controlDocument)
 		var access = getSelectedValue("user_access_type", controlDocument)
 		removeOptionFromSelectElement("user_access", addUser, controlDocument);
 		
-		createUserAccessTable()
+		createUserAccessTable(false)
 		var userAccessTable = controlDocument.getElementById("user_access_table");
 		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, controlDocument)
 	}
@@ -892,6 +900,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	controlDocument = controlDocument == null ? document : controlDocument
 	
 	var shareDrive = shareData[1]
+	setDriveList(controlDocument);
 	setSelectedValue("share_disk", shareDrive, controlDocument)
 	controlDocument.getElementById("share_dir").value = shareData[3]
 	controlDocument.getElementById("share_name").value = shareData[0]
@@ -905,7 +914,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	controlDocument.getElementById("share_type_nfs").checked  = shareData[7]
 
 	setSelectedValue("anonymous_access", shareData[8], controlDocument)
-	createUserAccessTable(controlDocument)
+	createUserAccessTable(true,controlDocument)
 	var userAccessTable = controlDocument.getElementById("user_access_table")
 	var userIndices = [];
 	userIndices[9] = "rw"
@@ -974,6 +983,8 @@ function addNewShare()
 
 		var shareTable = document.getElementById("share_table")
 		addTableRow(shareTable, [shareName, shareData[1], shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
+		
+		shareSettingsToDefault();
 	}
 
 }
@@ -1083,7 +1094,7 @@ function editShare()
 	editRow=this.parentNode.parentNode;
 	editName=editRow.childNodes[0].firstChild.data;
 	editPath=nameToSharePath[editName];
-	editShare=sharePathToShareData[ editPath ];
+	editShareData=sharePathToShareData[ editPath ];
 
 
 	var runOnEditorLoaded = function () 
@@ -1098,7 +1109,7 @@ function editShare()
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
 			
-				setDocumentFromShareData(editShareWindow.document, shareData)	
+				setDocumentFromShareData(editShareWindow.document, editShareData)	
 				
 				closeButton.onclick = function()
 				{
