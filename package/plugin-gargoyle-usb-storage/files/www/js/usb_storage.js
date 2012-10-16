@@ -808,7 +808,7 @@ function getVis(controlDocument)
 function getVisStr(vis)
 {
 	var shareTypeStr = function(type){ return vis[type] ? type.toUpperCase() : ""; }
-	var visStr = shareTypeStr("ftp") + "+" + shareTypeStr("cifs") + "+" + shareTypeStr("nfs");
+	var visStr = shareTypeStr("cifs") + "+" + shareTypeStr("ftp") + "+" + shareTypeStr("nfs");
 	return visStr.replace(/\+\+/g, "+").replace(/^\+/, "").replace(/\+$/, "");
 }
 
@@ -997,7 +997,7 @@ function setShareTypeVisibility(controlDocument)
 	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
-	var userLabel = (getTypeDisplay("ftp") + "/" + getTypeDisplay("cifs")).replace(/^\//, "").replace(/\/$/, "");
+	var userLabel = (getTypeDisplay("cifs") + "/" + getTypeDisplay("ftp")).replace(/^\//, "").replace(/\/$/, "");
 	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:")
 	setChildText("user_access_label",  userLabel + " Users With Access:")
 
