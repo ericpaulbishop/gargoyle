@@ -601,7 +601,7 @@ function fullEscape(str)
 	return str;
 }
 
-function removeStringFromArray(var arr, var str)
+function removeStringFromArray(arr, str)
 {
 	var arrIndex;
 	var newArr = [];
