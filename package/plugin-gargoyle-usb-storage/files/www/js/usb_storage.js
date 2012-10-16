@@ -739,7 +739,7 @@ function addUserAccess(controlDocument)
 function removeUserAccessCallback(table, row)
 {
 	var removeUser=row.childNodes[0].firstChild.data;
-	addOptionToSelectElement("user_access", removeUser, removeUser, table.ownerDocument);
+	addOptionToSelectElement("user_access", removeUser, removeUser, null, table.ownerDocument);
 }
 
 
@@ -828,10 +828,10 @@ function getShareDataFromDocument(controlDocument, originalName)
 
 	var enabledTypes = getVis();
 
-	var anonymousAccess = getSelectedValue("anonymous_access")
+	var anonymousAccess = getSelectedValue("anonymous_access", controlDocument)
 	var roUsers = [];
 	var rwUsers = [];
-	var userAccessTable = document.getElementById("user_access_table")
+	var userAccessTable = controlDocument.getElementById("user_access_table")
 	if(userAccessTable != null)
 	{
 		var userAccessTableData = getTableDataArray(userAccessTable, true, false);
@@ -843,11 +843,11 @@ function getShareDataFromDocument(controlDocument, originalName)
 			if(rowData[1] == "R/W") { rwUsers.push(rowData[0]); }
 		}
 	}
-	var nfsAccess = getSelectedValue("nfs_access")
-	var nfsAccessIps = getSelectedValue("nfs_policy") == "share" ? "*" : [];
-	if( typeof(nfsAccessIps) != "String")
+	var nfsAccess = getSelectedValue("nfs_access", controlDocument)
+	var nfsAccessIps = getSelectedValue("nfs_policy", controlDocument) == "share" ? "*" : [];
+	if( typeof(nfsAccessIps) != "string")
 	{
-		var nfsIpTable = document.getElementById("nfs_ip_table");
+		var nfsIpTable = controlDocument.getElementById("nfs_ip_table");
 		if(nfsIpTable != null)
 		{
 			var nfsIpData = getTableDataArray(nfsIpTable);
@@ -1118,7 +1118,7 @@ function editShare()
 				saveButton.onclick = function()
 				{
 					var rawShareData = getShareDataFromDocument(editShareWindow.document, editName)
-					var errors = rawSahreData["errors"];
+					var errors = rawShareData["errors"];
 					if(errors.length > 0)
 					{
 						alert(errors.join("\n") + "\nCould not update share.");
