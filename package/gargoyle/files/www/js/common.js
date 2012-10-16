@@ -608,10 +608,11 @@ function removeStringFromArray(arr, str)
 	for(arrIndex=0;arrIndex<arr.length; arrIndex++)
 	{
 		var elFound = false;
-		if(arr[arrIndex] instanceof String)
+		if(typeof(arr[arrIndex]) == "string" )
 		{
 			elFound = (arr[arrIndex] == str)
 		}
+		alert("str = '" + str + "', el = '" + arr[arrIndex] + "', elFound = " + elFound )
 		if(!elFound)
 		{
 			newArr.push(arr[arrIndex]);

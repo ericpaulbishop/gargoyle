@@ -259,14 +259,22 @@ function addUser()
 }
 
 
-function removeUserCallback(row, table)
+function removeUserCallback(table, row)
 {
 	var removeUser=row.childNodes[0].firstChild.data;
-		
 
 	//remove from userNames
-	var newUserNames = removeSringFromArray(userNames, removeUser)
+	var newUserNames = removeStringFromArray(userNames, removeUser)
 	userNames = newUserNames;
+
+	//if no users left, set a message indicating this instead of an empty table
+	if(userNames.length == 0)
+	{
+		var container = document.getElementById("user_table_container");
+		var tableObject = document.createElement("div");
+                tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>";
+		setSingleChild(container, tableObject);
+	}
 
 	//remove in all shares
 	for (sharePath in sharePathToShareData)
@@ -280,7 +288,7 @@ function removeUserCallback(row, table)
 	}
 
 	//remove from controls of share currently being configured
-	removeOptionFromSelectElement("user_access", removeUser, removeUser);
+	removeOptionFromSelectElement("user_access", removeUser);
 	var accessTable = document.getElementById("user_access_table")
 	if(accessTable != null)
 	{
@@ -294,8 +302,9 @@ function removeUserCallback(row, table)
 				newTableData.push(next)
 			}
 		}
+
 		var newAccessTable =  createTable(["", ""], newTableData, "user_access_table", true, false, removeUserAccessCallback);
-		setSingleChild("user_access_table_container", newAccessTable);
+		setSingleChild(document.getElementById("user_access_table_container"), newAccessTable);
 	}	
 		
 }
@@ -917,7 +926,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	
 	setSelectedValue("nfs_access", shareData[11]);
 	var nfsAccessIps = shareData[12];
-	setSelectedValue("nfs_policy", nfsAccessIps instanceof String ? "share" : "ip", controlDocument);
+	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", controlDocument);
 	if(nfsAccessIps instanceof Array)
 	{
 		addAddressesToTable(controlDocument,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
@@ -926,8 +935,9 @@ function setDocumentFromShareData(controlDocument, shareData)
 	//update user select element
 	var usersWithoutEntries = [];
 	var uIndex;
-	for(uIndex = 0; uIndex < userNames; uIndex++)
+	for(uIndex = 0; uIndex < userNames.length; uIndex++)
 	{
+		
 		var u = userNames[uIndex];
 		if(usersWithEntries[ u ] != 1)
 		{
