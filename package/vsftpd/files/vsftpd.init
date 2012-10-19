@@ -88,7 +88,6 @@ unmount_user_share()
 
 	local share_name
 	config_get share_name "$share_id" "name"
-	echo "share_name = $share_name"
 	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
 
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
@@ -144,18 +143,31 @@ anonymous()
 	fi
 }
 
+update_userlist()
+{
+	local username="$1"
+	echo "$username" >> "$vsftpd_basedir/userlist"
+}
+
 create_config()
 {
 	mkdir -p /tmp/vsftpd
 	sed -i '/:ftp_user:/d' /etc/passwd
 
-	cat /etc/vsftpd.conf.template > $vsftpd_conf
-	mkdir -p $vsftpd_basedir/users/
-	rm $vsftpd_basedir/users/* 2>/dev/null
-	rm $vsftpd_basedir/userlist 2>/dev/null
-	touch $vsftpd_basedir/userlist
-	
+	cat /etc/vsftpd.conf.template > "$vsftpd_conf"
+	mkdir -p "$vsftpd_basedir/users/"
+	rm       "$vsftpd_basedir/users/"*  2>/dev/null
+	rm       "$vsftpd_basedir/userlist" 2>/dev/null
+	touch    "$vsftpd_basedir/userlist"
+
+	config_load "share_users"
+	config_foreach update_userlist "user"
+
+
 	mkdir -p /var/vsftpd/secure_chroot
+
+	config_load "vsftpd"
+
 }
 
 start()
