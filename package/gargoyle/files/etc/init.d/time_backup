@@ -16,7 +16,9 @@ boot()
 	cat /etc/crontabs/root | grep -v "time_backup" > /tmp/new_cron
 	echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /tmp/new_cron
 	m1=$(md5sum /etc/crontabs/root)
+	m1=${m1% *}
 	m2=$(md5sum /tmp/new_cron)
+	m2=${m2% *}
 	if [ "$m1" = "$m2" ] ; then
 		rm /tmp/new_cron
 	else
