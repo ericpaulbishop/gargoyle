@@ -57,7 +57,7 @@ function saveChanges()
 
 
 	//update share_users
-	uci.removeAllSectionsOfType("share_users", "share_user");
+	uci.removeAllSectionsOfType("share_users", "user");
 	var userTable = document.getElementById("share_user_table");
 	if(userTable != null)
 	{
@@ -69,7 +69,7 @@ function saveChanges()
 			var pass = (nextUserData[1]).value
 			if( pass != null && pass != "")
 			{
-				uci.set("share_users", user, "", "share_user")
+				uci.set("share_users", user, "", "user")
 				uci.set("share_users", user, "password", pass)
 			}
 			else
@@ -78,6 +78,7 @@ function saveChanges()
 				var sha1 = uciOriginal.get("share_users", user, "password_sha1")
 				if(salt != "" && sha1 != "")
 				{
+					uci.set("share_users", user, "", "user")
 					uci.set("share_users", user, "password_salt", salt)
 					uci.set("share_users", user, "password_sha1", sha1)
 				}
@@ -211,7 +212,6 @@ function saveChanges()
 
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
-	
 }
 
 
