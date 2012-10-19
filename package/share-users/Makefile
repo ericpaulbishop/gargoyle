@@ -44,8 +44,8 @@ endef
 define Package/share-users/install
 	$(INSTALL_DIR)  $(1)/etc/config
 	$(INSTALL_DIR)  $(1)/etc/init.d
-	$(INSTALL_BIN)  ./files/share_users.init   $(1)/etc/init.d/share_users
-	$(INSTALL_CONF) ./files/share_users.config $(1)/etc/config/share_users
+	$(INSTALL_BIN)  ./files/share_users.init $(1)/etc/init.d/share_users
+	$(INSTALL_CONF) ./files/share_users.conf $(1)/etc/config/share_users
 	
 endef
 
