@@ -121,7 +121,7 @@ function saveChanges()
 		if(isCifs)
 		{
 			var pkg = "samba"
-			uci.set(pkg, shareId, "", "share")
+			uci.set(pkg, shareId, "", "sambashare")
 			uci.set(pkg, shareId, "name", shareName);
 			uci.set(pkg, shareId, "path", fullMountPath);
 			uci.set(pkg, shareId, "create_mask", "0777");
@@ -554,7 +554,7 @@ function resetData()
 					mountedDrives[ shareDrive ] = 1;
 					
 					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
+					var shareData = sharePathToShareData[shareMountPoint] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  sharePathToShareData[shareMountPoint] ;
 					
 					//name
 					if( shareData[0] == "" || config == "samba")
@@ -618,9 +618,9 @@ function resetData()
 						shareData[ 11 ] = uciOriginal.get(config, shareList[shareIndex], "read_only") == "1" ? "ro" : "rw";
 
 						var allowedHostsStr = uciOriginal.get(config, shareList[shareIndex], "allowed_hosts");
-						if(alowedHostsStr instanceof Array)
+						if(allowedHostsStr instanceof Array)
 						{
-							allowedHostStr = allowedHostsStr.join(",");
+							allowedHostsStr = allowedHostsStr.join(",");
 						}
 
 						if(allowedHosts != "" && allowedHosts != "*")
@@ -641,14 +641,17 @@ function resetData()
 						}
 					}
 					sharePathToShareData[ fullSharePath ] = shareData
-					sharePathList.push(fullSharePath)
-					nameToSharePath[ shareData[0] ] = fullSharePath
+					if(nameToSharePath [ shareData[0] ] != fullSharePath)
+					{
+						nameToSharePath[ shareData[0] ] = fullSharePath
+						sharePathList.push(fullSharePath)
+					}
 				}
 			}
 		}
 		
-		getMounted(sambaShares, "ftp");
 		getMounted(sambaShares, "samba");
+		getMounted(ftpShares, "vsftpd");
 		getMounted(nfsShares, "nfsd");
 		
 		if(setDriveList(document))
@@ -669,19 +672,15 @@ function resetData()
 		//name, disk, subdirectory, type, [edit], [remove]
 		var shareTableData = [];
 		var shareIndex;
-		for(shareIndex=0; shareIndex < sharePathList; shareIndex++)
+		for(shareIndex=0; shareIndex < sharePathList.length; shareIndex++)
 		{
 
 			var shareData = sharePathToShareData[ sharePathList[shareIndex] ];
-			var shareTypes=["ftp", "cifs", "nfs"]
-			var shareType = "";
-			var stIndex;
-			for(stIndex=0; stIndex < shareTypes.length; stIndex++)
-			{
-				var plus = shareType == "" ? "" : "+"
-				shareType = shareType + ( document.getElementById( "share_type_" + shareTypes[stIndex] ).checked ? plus + (shareTypes[stIndex]).toUpperCase() : "" )
-			}
-			shareTableData.push( [ shareData[0], shareData[1], shareData[3], shareType, createEditButton(editShare) ] )
+			var vis = [];
+			vis["cifs"] = shareData[5]
+			vis["ftp"]  = shareData[6];
+			vis["nfs"]  = shareData[7];
+			shareTableData.push( [ shareData[0], shareData[1], shareData[3], getVisStr(vis), createEditButton(editShare) ] )
 		}
 		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');

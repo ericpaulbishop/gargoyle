@@ -612,7 +612,6 @@ function removeStringFromArray(arr, str)
 		{
 			elFound = (arr[arrIndex] == str)
 		}
-		alert("str = '" + str + "', el = '" + arr[arrIndex] + "', elFound = " + elFound )
 		if(!elFound)
 		{
 			newArr.push(arr[arrIndex]);
