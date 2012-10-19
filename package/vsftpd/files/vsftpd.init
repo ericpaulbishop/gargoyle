@@ -39,18 +39,21 @@ mount_share_dir()
 		return
 	fi
 
-	local share_name = config_get "$share_id" "share_name"
+	local share_name
+	local ftp_root
+	config_get share_name "$share_id" "name"
 	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
-
 
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
 		config_get ftp_root "vsftpd" anonymous_root "/tmp/share_home/anonymous"
+		username="anonymous"
 	else	
-		ftp_root=$(/sbin/uci get share_users.$username.home_dir)
-		if [ -z "$ftp_root" ] ; then
-			ftp_root="/tmp/share_home/$username"
-		fi
+		ftp_root=$(/sbin/uci get share_users.$username.home_dir 2>/dev/null)
 	fi
+	if [ -z "$ftp_root" ] ; then
+		ftp_root="/tmp/share_home/$username"
+	fi
+
 	
 	found_share="1"
 	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
@@ -83,14 +86,15 @@ unmount_user_share()
 	local username="$1"
 	local share_id="$2"
 
-	local share_name = config_get "$share_id" "share_name"
+	local share_name
+	config_get share_name "$share_id" "name"
+	echo "share_name = $share_name"
 	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
-
 
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
 		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
 	else	
-		ftp_root=$(/sbin/uci get share_users.$username.home_dir)
+		ftp_root=$(/sbin/uci get share_users.$username.home_dir 2>/dev/null)
 		if [ -z "$ftp_root" ] ; then
 			ftp_root="/tmp/share_home/$username"
 		fi
@@ -150,6 +154,8 @@ create_config()
 	rm $vsftpd_basedir/users/* 2>/dev/null
 	rm $vsftpd_basedir/userlist 2>/dev/null
 	touch $vsftpd_basedir/userlist
+	
+	mkdir -p /var/vsftpd/secure_chroot
 }
 
 start()
@@ -159,6 +165,7 @@ start()
 	config_foreach anonymous "vsftpd"
 	config_foreach mount_share "share"
 
+	
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
 	if [ "$found_share" != "1" ] ; then
 		echo "WARNING: No shares defined, vsftpd will not be started"
