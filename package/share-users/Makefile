@@ -42,8 +42,11 @@ define Build/Compile
 endef
 
 define Package/share-users/install
-	$(INSTALL_DIR) $(1)
-	$(CP) ./files/* $(1)/
+	$(INSTALL_DIR)  $(1)/etc/config
+	$(INSTALL_DIR)  $(1)/etc/init.d
+	$(INSTALL_BIN)  ./files/share_users.init   $(1)/etc/init.d/share_users
+	$(INSTALL_CONF) ./files/share_users.config $(1)/etc/config/share_users
+	
 endef
 
 $(eval $(call BuildPackage,share-users))
