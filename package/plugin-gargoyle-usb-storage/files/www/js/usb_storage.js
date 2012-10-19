@@ -31,25 +31,18 @@ var sharePathList = [];
 var sharePathToShareData = []; 
 
 
+var badUserNames = [ "ftp", "anonymous", "root", "daemon", "network", "nobody" ];
+
+
 function saveChanges()
 {
-	//validate samba user/pass if samba isn't set to anonymous access
-	var sambaAuth  = getSelectedValue("cifs_policy");
-	var sambaUser  = document.getElementById("cifs_user").value;
-	var sambaPass  = document.getElementById("cifs_pass").value;
+
+	//proofread
 	var sambaGroup = document.getElementById("cifs_workgroup").value;
 	var errors = [];
 	if(sambaGroup == "")
 	{
 		errors.push("Invalid CIFS Workgroup");
-	}
-	if(sambaAuth == "user" && (sambaUser == ""))
-	{
-		errors.push("Invalid CIFS User");
-	}
-	if(sambaAuth == "user" && (sambaPass == ""))
-	{
-		errors.push("Invalid CIFS Password");
 	}
 	if(errors.length > 0)
 	{
@@ -58,123 +51,153 @@ function saveChanges()
 	}
 
 
+	//prepare to save
 	setControlsEnabled(false, true);
-	
-	//remove old shares 
-	var preCommands = [];
-	var sharePkg = ["samba", "samba", "nfsd"];
-	var shareCfg = ["sambashare", "sambauser", "nfsshare"];
-	while(sharePkg.length > 0)
-	{
-		pkg = sharePkg.shift();
-		cfg = shareCfg.shift();
-		var allOriginalConfigSections = uciOriginal.getAllSectionsOfType(pkg, cfg);
-		while(allOriginalConfigSections.length > 0)
-		{
-			var section = allOriginalConfigSections.shift();
-			uciOriginal.removeSection(pkg, section);
-			preCommands.push("uci del " + pkg + "." + section);	
-		}
-	}
-
-	
-	
 	var uci = uciOriginal.clone();
-	if(sambaAuth == "user")
+
+
+	//update share_users
+	uci.removeAllSectionsOfType("share_users", "share_user");
+	var userTable = document.getElementById("share_user_table");
+	if(userTable != null)
 	{
-		preCommands.push("uci set samba.sambauser=sambauser");
-		uci.set("samba", "sambauser", "", "sambauser");
-		uci.set("samba", "sambauser", "username", sambaUser);
-		uci.set("samba", "sambauser", "password", sambaPass);
-	}
-	preCommands.push("uci set samba.@samba[0].workgroup='" + sambaGroup + "'" );
-	
-	var nfsAuth    = getSelectedValue("nfs_policy");
-	var nfsIps = [];
-	if(nfsAuth == "ip")
-	{
-		var nfsIpTable = document.getElementById("nfs_ip_table");
-		if(nfsIpTable != null)
+		var userTableData = getTableDataArray(userTable);
+		while(userTableData.length >0)
 		{
-			var nfsIpData = getTableDataArray(nfsIpTable, true, false);
-			while(nfsIpData.length > 0)
+			var nextUserData = userTableData.shift();
+			var user = nextUserData[0]
+			var pass = (nextUserData[1]).value
+			if( pass != null && pass != "")
 			{
-				var row = nfsIpData.shift();
-				nfsIps.push(row[0]);
+				uci.set("share_users", user, "", "share_user")
+				uci.set("share_users", user, "password", pass)
+			}
+			else
+			{
+				var salt = uciOriginal.get("share_users", user, "password_salt")
+				var sha1 = uciOriginal.get("share_users", user, "password_sha1")
+				if(salt != "" && sha1 != "")
+				{
+					uci.set("share_users", user, "password_salt", salt)
+					uci.set("share_users", user, "password_sha1", sha1)
+				}
 			}
 		}
-		if(nfsIps.length == 0)
-		{
-			setSelectedValue("nfs_policy", "share");
-			document.getElementById("nfs_ip_container").style.display = "none";
-		}
 	}
 
-	var shareTableData = getTableDataArray(document.getElementById("share_table"), true, false);
-	var shIndex=0;
-	for(shIndex=0; shIndex<shareTableData.length; shIndex++)
-	{
-		var share       = shareTableData[shIndex];
-		var shareName   = share[0];
-		var shareMount  = nameToMountPath[shareName];
-		var shareType   = share[3];
-		var shareAccess = share[4];
-		
+	
 
-		var shareId = shIndex + "_" + shareName;
-		if(shareType.match(/CIFS/))
+	//update shares
+	uci.removeAllSectionsOfType("samba",  "samba")
+	uci.removeAllSectionsOfType("samba",  "sambashare")
+	uci.removeAllSectionsOfType("vsftpd", "vsftpd")
+	uci.removeAllSectionsOfType("vsftpd", "share")
+	uci.removeAllSectionsOfType("nfsd",   "nfsshare")
+	
+	uci.set("samba", "global", "", "samba")
+	uci.set("samba", "global", "workgroup", sambaGroup);
+
+	var haveAnonymousFtp = false;
+	for( fullMountPath in sharePathToShareData )
+	{
+		//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+		var shareData = sharePathToShareData[fullMountPath]
+
+		var shareName = shareData[0]
+		var shareId   = shareName.replace(/[^0-9A-Za-z]+/, "_").toLowerCase()
+		
+		var isCifs = shareData[5];
+		var isFtp  = shareData[6];
+		var isNfs  = shareData[7];
+		
+		var anonymousAccess = shareData[8]
+		var rwUsers = shareData[9]
+		var roUsers = shareData[10]
+
+		var nfsAccess = shareData[11];
+		var nfsAccessIps = shareData[12]
+
+		if(isCifs)
 		{
-			var pkg = "samba";
-			var cfg = "sambashare";
-			preCommands.push("uci set " + pkg + "." + shareId + "=" + cfg + "\n");
-			uci.set(pkg, shareId, "", cfg);
+			var pkg = "samba"
+			uci.set(pkg, shareId, "", "share")
 			uci.set(pkg, shareId, "name", shareName);
-			uci.set(pkg, shareId, "path", shareMount);
-			uci.set(pkg, shareId, "read_only", (shareAccess == "Read Only" ? "yes" : "no"));
+			uci.set(pkg, shareId, "path", fullMountPath);
 			uci.set(pkg, shareId, "create_mask", "0777");
 			uci.set(pkg, shareId, "dir_mask", "0777");
 			uci.set(pkg, shareId, "browseable", "yes");
-			if(sambaAuth == "user")
-			{
-				uci.set(pkg, shareId, "guest_ok", "no");
-				uci.set(pkg, shareId, "users", sambaUser);
-			}
-			else
-			{
-				uci.set(pkg, shareId, "guest_ok", "yes");
-			}
 			
+			uci.set(pkg, shareId, "read_only", (anonymousAccess == "ro" ? "yes" : "no"));
+			uci.set(pkg, shareId, "guest_ok", (anonymousAccess == "none" ? "no" : "yes"));
+			if(rwUsers.length > 0)
+			{
+				uci.set(pkg, shareId, "users_rw", rwUsers, false)
+			}
+			if(roUsers.length > 0)
+			{
+				uci.set(pkg, shareId, "users_ro", roUsers, false)
+			}
 		}
-		if(shareType.match(/NFS/))
+		if(isFtp)
 		{
-			var pkg = "nfsd";
-			var cfg = "nfsshare";
-			preCommands.push("uci set " + pkg + "." + shareId + "=" + cfg + "\n");
-			uci.set(pkg, shareId, "", cfg);
+			var pkg = "vsftpd"
+			uci.set(pkg, shareId, "", "share")
 			uci.set(pkg, shareId, "name", shareName);
-			uci.set(pkg, shareId, "path", shareMount);
-			uci.set(pkg, shareId, "read_only", (shareAccess == "Read Only" ? "1" : "0"));
+			uci.set(pkg, shareId, "share_dir", fullMountPath);
+			if(rwUsers.length > 0)
+			{
+				uci.set(pkg, shareId, "users_rw", rwUsers, false)
+			}
+			if(roUsers.length > 0)
+			{
+				uci.set(pkg, shareId, "users_ro", roUsers, false)
+			}
+			var uIndex;
+			for(uIndex=0; uIndex < rwUsers.length; uIndex++)
+			{
+				haveAnonymousFtp = rwUsers[uIndex] == "anonymous" || rwUsers[uIndex] == "ftp" ? true :  haveAnonymousFtp;
+			}
+			for(uIndex=0; uIndex < roUsers.length; uIndex++)
+			{
+				haveAnonymousFtp = roUsers[uIndex] == "anonymous" || roUsers[uIndex] == "ftp" ? true :  haveAnonymousFtp;
+			}
+		}
+		if(isNfs)
+		{
+			var pkg = "nfsd"
+			uci.set(pkg, shareId, "", "nfsshare")
+			uci.set(pkg, shareId, "name", shareName);
+			uci.set(pkg, shareId, "path", fullMountPath);
 			uci.set(pkg, shareId, "sync", "1");
 			uci.set(pkg, shareId, "insecure", "1");
 			uci.set(pkg, shareId, "subtree_check", "0");
-			if(nfsIps.length > 0)
+			
+			uci.set(pkg, shareId, "read_only", (nfsAccess == "ro" ? "1" : "0"));
+			if(nfsAccessIps instanceof Array)
 			{
-				uci.set(pkg, shareId, "allowed_hosts", nfsIps.join(","));
+				uci.set(pkg, shareId, "allowed_hosts", nfsAccessIps, false)
 			}
 			else
 			{
-				uci.set(pkg, shareId, "allowed_hosts", "*");
+				uci.set(pkg, shareId, "allowed_hosts", [ "*" ], false)
 			}
 
-		}
+		}	
 	}
-	preCommands.push("uci commit");
+	uci.set("vsftpd", "global", "", "vsftpd")
+	uci.set("vsftpd", "global", "anonymous", (haveAnonymousFtp ? "yes" : "no"))
+	uci.set("vsftpd", "global", "anonymous_write", (haveAnonymousFtp ? "yes" : "no")) //write possible but write on individual share dirs set individually elsewhere
+
 
 	var postCommands = [];
+	postCommands.push("/etc/init.d/share_users restart");
 	postCommands.push("/etc/init.d/samba restart");
+	postCommands.push("/etc/init.d/vsftpd restart");
 	postCommands.push("/etc/init.d/nfsd restart");
-	
-	var commands = preCommands.join("\n") + "\n" +  uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
+
+
+
+	var commands = uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
@@ -187,6 +210,8 @@ function saveChanges()
 	}
 
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+	
 }
 
 
@@ -234,6 +259,16 @@ function addUser()
 				errors.push("Duplicate Username")
 			}
 		}
+
+		var badUserIndex;
+		for(badUserIndex=0;badUserIndex < badUserNames.length && errors.length == 0; badUserIndex++)
+		{
+			if(user.toLowerCase() == (badUserNames[badUserIndex]).toLowerCase() )
+			{
+				errors.push("Username '" + user + "' is reserved and not permitted");
+			}
+		}
+
 	}
 	if(errors.length > 0)
 	{
@@ -518,7 +553,7 @@ function resetData()
 				{
 					mountedDrives[ shareDrive ] = 1;
 					
-					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isFtp, isCifs, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 					var shareData = mountPointToShareData[shareMountPoint] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  mountPointToShareData[shareMountPoint] ;
 					
 					//name
@@ -531,8 +566,8 @@ function resetData()
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
 					shareData[4] = fullSharePath				 //full path
-					shareData[5] = config == "vsftpd" ? true : shareData[6]  //isFTP
-					shareData[6] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[5] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
 					shareData[7] = config == "nfsd"   ? true : shareData[8]  //isNFS
 
 					//both samba and vsftpd have ro_users and rw_users list options
@@ -558,7 +593,7 @@ function resetData()
 									if(user == "anonymous" || user == "ftp")
 									{
 										//handle anonymous for vsftpd
-										sareData[ 8 ] = readType
+										shareData[ 8 ] = readType
 										
 									}
 									else
@@ -909,8 +944,8 @@ function setDocumentFromShareData(controlDocument, shareData)
 	setSelectedValue("share_specificity", shareSpecificity, controlDocument)
 	
 	
-	controlDocument.getElementById("share_type_ftp").checked  = shareData[5]
-	controlDocument.getElementById("share_type_cifs").checked = shareData[6]
+	controlDocument.getElementById("share_type_cifs").checked = shareData[5]
+	controlDocument.getElementById("share_type_ftp").checked  = shareData[6]
 	controlDocument.getElementById("share_type_nfs").checked  = shareData[7]
 
 	setSelectedValue("anonymous_access", shareData[8], controlDocument)
