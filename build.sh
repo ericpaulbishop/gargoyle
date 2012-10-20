@@ -25,14 +25,15 @@ set_version_variables()
 
 	#openwrt branch
 	branch_name="Attitude Adjustment"
-	branch_is_trunk="1"
+	branch_id="attitude_adjustment"
+	branch_is_trunk="0"
 	branch_packages_path="packages"
 
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=33444
+	rnum=33883
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -233,11 +234,11 @@ if [ ! -d "$top_dir/downloaded" ] ; then
 	mkdir "$top_dir/downloaded"
 fi
 
-openwrt_src_dir="$top_dir/downloaded/$branch_name"
-openwrt_package_dir="$top_dir/downloaded/$branch_name-packages"
+openwrt_src_dir="$top_dir/downloaded/$branch_id"
+openwrt_package_dir="$top_dir/downloaded/$branch_id-packages"
 if [ -n "$rnum" ] ; then
-	openwrt_src_dir="$top_dir/downloaded/$branch_name-$rnum"
-	openwrt_package_dir="$top_dir/downloaded/$branch_name-packages-$rnum"
+	openwrt_src_dir="$top_dir/downloaded/$branch_id-$rnum"
+	openwrt_package_dir="$top_dir/downloaded/$branch_id-packages-$rnum"
 else
 	rm -rf "$openwrt_src_dir"
 	rm -rf "$openwrt_package_dir"
@@ -251,20 +252,20 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 		revision=" -r $rnum "
 	fi
 	echo "fetching openwrt source"
-	rm -rf "$branch_name"
+	rm -rf "$branch_name" "$branch_id"
 	if [ "$branch_is_trunk" = "1" ] ; then 
-		svn checkout $revision svn://svn.openwrt.org/openwrt/trunk "$branch_name"
+		svn checkout $revision svn://svn.openwrt.org/openwrt/trunk "$branch_id"
 	else
-		svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_name/
+		svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_id/
 	fi
-	if [ ! -d "$branch_name" ] ; then
+	if [ ! -d "$branch_id" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
-	cd "$branch_name"
+	cd "$branch_id"
 	find . -name ".svn" | xargs -r rm -rf
 	cd "$top_dir" 
-	mv "$branch_name" "$openwrt_src_dir"
+	mv "$branch_id" "$openwrt_src_dir"
 fi
 
 rm -rf "$openwrt_src_dir/dl" 
