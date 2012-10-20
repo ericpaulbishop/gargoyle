@@ -1247,7 +1247,7 @@ function unmountAllUsb()
 	setControlsEnabled(false, true, "Unmounting Disks");
 
 	
-	var commands = "/etc/init.d/usb_storage stop ; "
+	var commands = "/etc/init.d/samba stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
