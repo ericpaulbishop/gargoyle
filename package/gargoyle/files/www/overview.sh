@@ -79,7 +79,12 @@
 		echo "var model=\"Unknown\";"
 	fi
 
-	echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq)"\";"
+	lan_ip=$(sbin/uci get network.lan.ipaddr 2>/dev/null)
+	if [ -n "$lan_ip" ] ; then
+		echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq | grep -v "$lan_ip" )"\";"
+	else
+		echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq )"\";"
+	fi
 
 ?>
 //-->
