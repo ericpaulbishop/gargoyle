@@ -554,7 +554,7 @@ function resetData()
 					mountedDrives[ shareDrive ] = 1;
 					
 					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
-					var shareData = sharePathToShareData[shareMountPoint] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  sharePathToShareData[shareMountPoint] ;
+					var shareData = sharePathToShareData[fullSharePath] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  sharePathToShareData[fullSharePath] ;
 					
 					//name
 					if( shareData[0] == "" || config == "samba")
@@ -569,6 +569,7 @@ function resetData()
 					shareData[5] = config == "samba"  ? true : shareData[7]  //isCIFS
 					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
 					shareData[7] = config == "nfsd"   ? true : shareData[8]  //isNFS
+
 
 					//both samba and vsftpd have ro_users and rw_users list options
 					//however, they handle anonymous access a bit differently
@@ -676,11 +677,17 @@ function resetData()
 		{
 
 			var shareData = sharePathToShareData[ sharePathList[shareIndex] ];
+			var shareSubdir =  shareData[3];
+			if(shareSubdir[0] != "/" )
+			{
+				shareSubdir = "/" + shareSubdir 
+			}
 			var vis = [];
 			vis["cifs"] = shareData[5]
 			vis["ftp"]  = shareData[6];
 			vis["nfs"]  = shareData[7];
-			shareTableData.push( [ shareData[0], shareData[1], shareData[3], getVisStr(vis), createEditButton(editShare) ] )
+			
+			shareTableData.push( [ shareData[0], shareData[1], shareSubdir, getVisStr(vis), createEditButton(editShare) ] )
 		}
 		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
