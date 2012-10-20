@@ -1072,9 +1072,10 @@ function removeShareCallback(table, row)
 {
 	var removeName=row.childNodes[0].firstChild.data;
 	var removePath = nameToSharePath[removeName]
+
+	delete nameToSharePath[removeName]
+	delete sharePathToShareData[removePath]
 	
-	nameToSharePath[removeName] = null;
-	sharePathToShareData[removePath] = null;
 	var newSharePathList = []
 	while(sharePathList.length > 0)
 	{
