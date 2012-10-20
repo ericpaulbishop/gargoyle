@@ -197,41 +197,49 @@ create_config()
 
 }
 
-start()
+do_start()
+{
+	create_config
+	config_load "vsftpd"
+	config_foreach anonymous "vsftpd"
+	config_foreach mount_share "share"
+
+	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
+	if [ "$found_share" != "1" ] ; then
+		echo "WARNING: No shares defined, vsftpd will not be started"
+	else
+		start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
+	fi
+}
+
+do_stop() {
+
+	config_load "vsftpd"
+	start-stop-daemon -K -x /usr/sbin/vsftpd 
+	sleep 1
+	config_foreach unmount_share "share"
+}
+
+
+stop()
 {
 	got_lock=$(usb_lock)
 	if [ "$got_lock" = "1" ] ; then
-		do_start
-
-		create_config
-		config_load "vsftpd"
-		config_foreach anonymous "vsftpd"
-		config_foreach mount_share "share"
-
-		[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
-		if [ "$found_share" != "1" ] ; then
-			echo "WARNING: No shares defined, vsftpd will not be started"
-		else
-			start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
-		fi
-	
+		do_stop
 		usb_unlock
 	fi
-
 }
 
-stop() {
-
+restart()
+{
 	got_lock=$(usb_lock)
 	if [ "$got_lock" = "1" ] ; then
-		config_load "vsftpd"
-		start-stop-daemon -K -x /usr/sbin/vsftpd 
-		sleep 1
-		config_foreach unmount_share "share"
-	
+		do_stop
+		do_start
 		usb_unlock
 	fi
 }
+
 
 restart()
 {
