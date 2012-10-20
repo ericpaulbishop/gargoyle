@@ -79,7 +79,7 @@
 		echo "var model=\"Unknown\";"
 	fi
 
-	lan_ip=$(sbin/uci get network.lan.ipaddr 2>/dev/null)
+	lan_ip=$(/sbin/uci get network.lan.ipaddr 2>/dev/null)
 	if [ -n "$lan_ip" ] ; then
 		echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq | grep -v "$lan_ip" )"\";"
 	else
@@ -117,7 +117,7 @@
 			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
  		<div>
- 			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)
+ 			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)</span>
  		</div>
 		<div class="internal_divider"></div>
 	</div>
