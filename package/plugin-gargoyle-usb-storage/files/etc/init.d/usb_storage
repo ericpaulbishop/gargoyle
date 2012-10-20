@@ -8,8 +8,8 @@ got_lock=0
 
 is_mounted()
 {
-	# Exit with 0 if is mounted, else $1
-	awk -v devpath="$1" '$1 == devpath {f=1; exit} END {exit !f}' /proc/mounts
+	# Exit with 0 if is mounted somewhere other than /tmp directory, else exit with 1
+	awk -v devpath="$1" '$1 == devpath  && $2 !~ /^\/tmp\// {f=1; exit} END {exit !f}' /proc/mounts
 }
 
 usb_lock()
