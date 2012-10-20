@@ -99,10 +99,16 @@ function saveChanges()
 	uci.set("samba", "global", "workgroup", sambaGroup);
 
 	var haveAnonymousFtp = false;
+	var makeDirCmds = [];
 	for( fullMountPath in sharePathToShareData )
 	{
-		//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+		//[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 		var shareData = sharePathToShareData[fullMountPath]
+		if( shareData[3] != "" )
+		{
+			makeDirCmds.push("mkdir -p \""  + fullMountPath + "\"" )
+		}
+
 
 		var shareName = shareData[0]
 		var shareId   = shareName.replace(/[^0-9A-Za-z]+/, "_").toLowerCase()
@@ -198,7 +204,7 @@ function saveChanges()
 
 
 
-	var commands = uci.getScriptCommands(uciOriginal) + "\n" + postCommands.join("\n") + "\n";
+	var commands = uci.getScriptCommands(uciOriginal) + "\n" +  makeDirCmds.join("\n") + "\n" + postCommands.join("\n") + "\n";
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
