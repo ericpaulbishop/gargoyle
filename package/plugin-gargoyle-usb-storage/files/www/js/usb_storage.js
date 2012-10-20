@@ -543,7 +543,7 @@ function resetData()
 					{
 						shareMountPoint = mp
 						shareDirectory  = fullSharePath.substr( mp.length);
-						shareDirectory = shareDirectory.charAt(0) == "/" ? shareDirectory.substr(1) : shareDirectory;
+						shareDirectory  = shareDirectory.replace(/^\//, "").replace(/\/$/, "")
 						shareDrive = mountPointToDrive[shareMountPoint];
 					}
 				}
@@ -676,18 +676,13 @@ function resetData()
 		for(shareIndex=0; shareIndex < sharePathList.length; shareIndex++)
 		{
 
-			var shareData = sharePathToShareData[ sharePathList[shareIndex] ];
-			var shareSubdir =  shareData[3];
-			if(shareSubdir[0] != "/" )
-			{
-				shareSubdir = "/" + shareSubdir 
-			}
-			var vis = [];
+			var shareData = sharePathToShareData[ sharePathList[shareIndex] ]
+			var vis = []
 			vis["cifs"] = shareData[5]
-			vis["ftp"]  = shareData[6];
-			vis["nfs"]  = shareData[7];
+			vis["ftp"]  = shareData[6]
+			vis["nfs"]  = shareData[7]
 			
-			shareTableData.push( [ shareData[0], shareData[1], shareSubdir, getVisStr(vis), createEditButton(editShare) ] )
+			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editShare) ] )
 		}
 		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
@@ -743,7 +738,7 @@ function shareSettingsToDefault(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
 	var currentDrive = getSelectedValue("share_disk", controlDocument);
-	var defaultData = [ "share_" + (sharePathList.length + 1), currentDrive,  driveToMountPoints[currentDrive][0], "/", driveToMountPoints[currentDrive][0], true, true, true, "none", [], [], "ro", "*" ] ;
+	var defaultData = [ "share_" + (sharePathList.length + 1), currentDrive,  driveToMountPoints[currentDrive][0], "", driveToMountPoints[currentDrive][0], true, true, true, "none", [], [], "ro", "*" ] ;
 	setDocumentFromShareData(controlDocument, defaultData)
 }
 
@@ -858,8 +853,10 @@ function getShareDataFromDocument(controlDocument, originalName)
 	controlDocument = controlDocument == null ? document : controlDocument
 	
 	var shareDrive = getSelectedValue("share_disk", controlDocument);
+	
 	var shareSubdir = controlDocument.getElementById("share_dir").value
-	shareSubdir = shareSubdir == "" ? "/" : shareSubdir;
+	shareSubdir     = shareSubdir.replace(/^\//, "").replace(/\/$/, "")
+
 	var shareSpecificity = getSelectedValue("share_specificity", controlDocument);
 	var shareName = controlDocument.getElementById("share_name").value;
 	var shareDiskMount =  driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 0 : 1 ) ];
@@ -943,7 +940,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	var shareDrive = shareData[1]
 	setDriveList(controlDocument);
 	setSelectedValue("share_disk", shareDrive, controlDocument)
-	controlDocument.getElementById("share_dir").value = shareData[3]
+	controlDocument.getElementById("share_dir").value = "/" + shareData[3]
 	controlDocument.getElementById("share_name").value = shareData[0]
 	
 	var shareSpecificity = (shareData[2] == driveToMountPoints[shareDrive][0]) ? "blkid" : "dev";
@@ -987,7 +984,6 @@ function setDocumentFromShareData(controlDocument, shareData)
 	var uIndex;
 	for(uIndex = 0; uIndex < userNames.length; uIndex++)
 	{
-		
 		var u = userNames[uIndex];
 		if(usersWithEntries[ u ] != 1)
 		{
@@ -1023,7 +1019,7 @@ function addNewShare()
 		nameToSharePath [ shareName ] = fullSharePath
 
 		var shareTable = document.getElementById("share_table")
-		addTableRow(shareTable, [shareName, shareData[1], shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
+		addTableRow(shareTable, [shareName, shareData[1], "/" + shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
 		
 		shareSettingsToDefault();
 	}
@@ -1174,7 +1170,7 @@ function editShare()
 
 						if(editName != shareName)
 						{
-							nameToSharePath[ editName ] = null
+							delete nameToSharePath[ editName ] 
 						}
 						if(editPath != fullSharePath)
 						{
@@ -1189,13 +1185,14 @@ function editShare()
 							}
 							newSharePathList.push(fullSharePath)
 							sharePathList = newSharePathList
+							delete sharePathToShareData[ editPath ]  
 						}
 						sharePathToShareData[ fullSharePath ] = shareData
 						nameToSharePath [ shareName ] = fullSharePath
 
 						editRow.childNodes[0].firstChild.data = shareName
 						editRow.childNodes[1].firstChild.data = shareData[1]
-						editRow.childNodes[2].firstChild.data = shareData[3]
+						editRow.childNodes[2].firstChild.data = "/" + shareData[3]
 						editRow.childNodes[3].firstChild.data = shareType
 
 						editShareWindow.close();
@@ -1328,7 +1325,6 @@ function doDiskFormat()
 	{
 		setControlsEnabled(true)
 	}
-
 }
 
 
