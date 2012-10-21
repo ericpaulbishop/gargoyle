@@ -1040,8 +1040,8 @@ function setShareTypeVisibility(controlDocument)
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
 	var userLabel = (getTypeDisplay("cifs") + "/" + getTypeDisplay("ftp")).replace(/^\//, "").replace(/\/$/, "");
-	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:")
-	setChildText("user_access_label",  userLabel + " Users With Access:")
+	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:", null, null, null, controlDocument)
+	setChildText("user_access_label",  userLabel + " Users With Access:", null, null, null, controlDocument)
 
 	var visIds = [];
 	visIds[ "ftp_or_cifs" ] =  [ "anonymous_access_container", "user_access_container" ];
@@ -1061,6 +1061,32 @@ function setShareTypeVisibility(controlDocument)
 		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", controlDocument);
 	}
 }
+
+function setSharePaths(controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+	var escapedName=escape(controlDocument.getElementById("share_name").value);
+	var ip = uciOriginal.get("network", "lan", "ipaddr");
+	if(controlDocument.getElementById("share_type_nfs").checked)
+	{
+		controlDocument.getElementById("nfs_path_container").style.display = "block";
+		setChildText("nfs_path", ip + ":/nfs/" + escapedName, null, null, null, controlDocument);
+	}
+	else
+	{
+		controlDocument.getElementById("nfs_path_container").style.display = "none";
+	}
+	if(controlDocument.getElementById("share_type_ftp").checked)
+	{
+		controlDocument.getElementById("ftp_path_container").style.display = "block";
+		setChildText("ftp_path", "ftp://" + ip + "/" + escapedName, null, null, null, controlDocument);
+	}
+	else
+	{
+		controlDocument.getElementById("ftp_path_container").style.display = "none";
+	}
+}
+
 
 
 function createEditButton( editFunction )
@@ -1224,32 +1250,6 @@ function editShare()
 
 
 
-
-
-function setSharePaths(controlDocument)
-{
-	controlDocument = controlDocument == null ? document : controlDocument;
-	var escapedName=escape(controlDocument.getElementById("share_name").value);
-	var ip = uciOriginal.get("network", "lan", "ipaddr");
-	if(document.getElementById("share_type_nfs").checked)
-	{
-		controlDocument.getElementById("nfs_path_container").style.display = "block";
-		setChildText("nfs_path", ip + ":/nfs/" + escapedName, null, null, null, controlDocument);
-	}
-	else
-	{
-		controlDocument.getElementById("nfs_path_container").style.display = "none";
-	}
-	if(document.getElementById("share_type_ftp").checked)
-	{
-		controlDocument.getElementById("ftp_path_container").style.display = "block";
-		setChildText("ftp_path", "ftp://" + ip + "/" + escapedName, null, null, null, controlDocument);
-	}
-	else
-	{
-		controlDocument.getElementById("ftp_path_container").style.display = "none";
-	}
-}
 
 
 function unmountAllUsb()
