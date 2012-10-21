@@ -870,7 +870,7 @@ function getShareDataFromDocument(controlDocument, originalName)
 	var fullSharePath  = (shareDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
-	var enabledTypes = getVis();
+	var enabledTypes = getVis(controlDocument);
 
 	var anonymousAccess = getSelectedValue("anonymous_access", controlDocument)
 	var roUsers = [];
