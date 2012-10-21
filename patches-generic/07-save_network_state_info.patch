@@ -91,7 +91,7 @@
 +	uci_set_state network "$PPP_IPPARAM" gateway "$PPP_REMOTE"
 +	
 +	# Point to Point link, Netmask should be 255.255.255.255
-+	uci set state network "$PPP_IPPARAM" netmask "255.255.255.255"
++	uci_set_state network "$PPP_IPPARAM" netmask "255.255.255.255"
 +}
 +
 --- a/package/ppp/Makefile	2012-09-16 12:56:58.156199098 -0400
