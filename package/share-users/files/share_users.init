@@ -2,6 +2,8 @@
 
 START=25
 
+cur_user_list="/etc/share_user_list"
+
 do_lock()
 {
 	got_lock=0
@@ -16,6 +18,23 @@ do_lock()
 do_unlock()
 {
 	rm -rf /tmp/share_users.lock
+}
+
+
+clear_old_users()
+{
+	cur_users=$(cat "$cur_user_list")
+	for u in $cur_users ; do
+		utest=$(/sbin/uci get share_users.$u)
+		if [ "$utest" != "user" ] ; then
+			for f in "/etc/passwd" "/etc/group" "/etc/shadow" "/etc/samba/smbpasswd" ; do
+				if [ -e "$f" ] ; then
+					sed -i "/^$u:*/d" "$f"
+				fi
+			done
+			sed -i "/^$u\$/d" "$cur_user_list"
+		fi
+	done
 }
 
 update_user()
@@ -40,7 +59,14 @@ update_user()
 		echo "ERROR: Username '$username' is not allowed"
 		return
 	fi
-	
+
+
+	local is_cur_user=$(grep "^$username\$" "$cur_user_list")
+	if [ -z "$is_cur_user" ] ; then
+		echo "$username" >> "$cur_user_list"
+	fi
+
+
 	if [ -n "$password" ] ; then
 		if [ -z "$password_salt" ] ; then
 			random_digit=$(</dev/urandom tr -dc 1-9 | head -c 1)
@@ -48,27 +74,42 @@ update_user()
 			password_salt=$(</dev/urandom tr -dc A-Za-z0-9 | head -c $length)
 		fi
 
-		new_sha1=$(printf "$password_salt$password" | sha1sum)
+		local new_sha1=$(printf "$password_salt$password" | sha1sum)
 		new_sha1=${new_sha1% *}
 		if [ "$new_sha1" != "$password_sha1" ] ; then
 			
-			sed -i "/^$username:*/d" /etc/passwd
-			sed -i "/^$username:*/d" /etc/group
-			
-			local group_num=1000
-			local tst=$(grep ":$group_num:" /etc/group)
-			while [ -n "$tst" ] ; do
-				group_num=$(($group_num+1))
-				tst=$(grep ":$group_num:" /etc/group)
+			local user_num=$( awk -F ":" -v username="$username" ' $1 == username { print $3 }' /etc/passwd)
+			local group_num=$(awk -F ":" -v username="$username" ' $1 == username { print $4 }' /etc/passwd)
+
+
+			for f in "/etc/passwd" "/etc/group" "/etc/shadow" ; do
+				if [ -e "$f" ] ; then
+					sed -i "/^$username:*/d" "$f"
+				fi
 			done
+
+			
+			if [ -z "$group_num" ] ; then
+				group_num=1000
+				local tst=$(awk -F ":" -v groupnum="$group_num" ' $3 == groupnum { print "found" }' /etc/group)
+				while [ -n "$tst" ] ; do
+					group_num=$(($group_num+1))
+					tst=$(awk -F ":" -v groupnum="$group_num" ' $3 == groupnum { print "found" }' /etc/group)
+				done
+			fi
 			echo "$username:x:$group_num:" >> /etc/group
+			if [ -e /etc/shadow ] ; then
+				echo "$username:*:0:0:99999:7:::" >> /etc/shadow
+			fi
 			
-			local user_num="$group_num"
-			local tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
-			while [ -n "$tst" ] ; do
-				user_num=$((user_num+1))
-				tst=$(grep ":.*:$user_num:.*:.*:/.*:/.*$" /etc/passwd)
-			done
+			if [ -z "$user_num" ] ; then
+				local user_num="$group_num"
+				local tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+				while [ -n "$tst" ] ; do
+					user_num=$((user_num+1))
+					tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+				done
+			fi
 			echo "$username:x:$user_num:$group_num:$username:$home_dir:/bin/false" >> /etc/passwd
 
 			uci_set    "share_users" "$username" password_salt "$password_salt"
@@ -83,9 +124,7 @@ update_user()
 		uci_remove "share_users" "$username" password
 		uci_commit
 	fi
-	cur_home_dir=$(grep "^$username:" /etc/passwd)
-	cur_home_dir=${cur_home_dir%:/bin/false*}
-	cur_home_dir=${cur_home_dir#*:*:*:*:*:}
+	local cur_home_dir=$( awk -F ":" -v username="$username" ' $1 == username { print $6 }' /etc/passwd )
 	if [ "$cur_home_dir" != "$home_dir" ] ; then
 		local home_line=$(grep "^$username:" /etc/passwd)
 		home_line=${home_line%:*:/bin/false}
@@ -100,6 +139,8 @@ start()
 {
 	got_lock=$(do_lock)
 	if [ "$got_lock" = "1" ] ; then
+		touch "$cur_user_list"
+		clear_old_users
 		config_load "share_users"
 		config_foreach update_user "user"
 		do_unlock
