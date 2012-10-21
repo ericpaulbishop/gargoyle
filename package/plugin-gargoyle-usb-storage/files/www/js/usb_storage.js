@@ -159,15 +159,12 @@ function saveChanges()
 			{
 				uci.set(pkg, shareId, "users_ro", roUsers, false)
 			}
-			var uIndex;
-			for(uIndex=0; uIndex < rwUsers.length; uIndex++)
+			if(anonymousAccess != "none")
 			{
-				haveAnonymousFtp = rwUsers[uIndex] == "anonymous" || rwUsers[uIndex] == "ftp" ? true :  haveAnonymousFtp;
+				haveAnonymousFtp = true;
+				uci.set(pkg, shareId, "users_" + anonymousAccess, [ "anonymous" ], true);
 			}
-			for(uIndex=0; uIndex < roUsers.length; uIndex++)
-			{
-				haveAnonymousFtp = roUsers[uIndex] == "anonymous" || roUsers[uIndex] == "ftp" ? true :  haveAnonymousFtp;
-			}
+			
 		}
 		if(isNfs)
 		{
