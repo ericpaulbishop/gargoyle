@@ -151,37 +151,6 @@ mount_share_ro()
 	mount_share_dir "$1" "$2" "no"
 }
 
-unmount_user_share()
-{
-	local username="$1"
-	local share_id="$2"
-
-	local share_name
-	config_get share_name "$share_id" "name"
-	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
-
-	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
-		config_get ftp_root "vsftpd" anonymous_root "/tmp/ftp/anonymous"
-	else	
-		ftp_root=$(/sbin/uci get share_users.$username.home_dir 2>/dev/null)
-		if [ -z "$ftp_root" ] ; then
-			ftp_root="/tmp/share_home/$username"
-		fi
-	fi
-	umount  "$ftp_root/$share_name" >/dev/null 2>/dev/null
-	rm -rf  "$ftp_root/$share_name" >/dev/null 2>/dev/null
-
-}
-
-unmount_share()
-{
-	local share_id="$1"
-	config_list_foreach "$share_id" users_rw unmount_user_share "$share_id"
-	config_list_foreach "$share_id" users_ro unmount_user_share "$share_id"
-
-}
-
-
 mount_share()
 {
 	local share_id="$1"
@@ -284,10 +253,20 @@ do_start()
 
 do_stop() {
 
-	config_load "vsftpd"
 	start-stop-daemon -K -x /usr/sbin/vsftpd 
 	sleep 1
-	config_foreach unmount_share "share"
+
+	IFS_ORIG="$IFS"
+	IFS_LINEBREAK="$(printf '\n\r')"
+	IFS="$IFS_LINEBREAK"
+	
+	user_share_mounts=$(awk   ' $2 ~ /^\/tmp\/share_home\// || /^\/var\/share_home\//  { print $2 } ' /proc/mounts)
+	for m in $user_share_mounts ; do
+		umount "$m" 2>/dev/null
+		rm -rf "$m" 2>/dev/null
+	done
+	IFS="$IFS_ORIG"
+
 }
 
 
