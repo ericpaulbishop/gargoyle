@@ -166,14 +166,30 @@ anonymous()
 	config_get anonymous_root $1 anonymous_root "$vsftpd_anonymous_root"
 
 
-	local have_ftp_user=$(grep '^ftp:' /etc/passwd)
-	if [ -z "$have_ftp_user" ] ; then
-		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
+	local ftp_group_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/group)
+	local ftp_user_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/passwd)
+	if [ -z "$ftp_group_num" ] ; then
+		ftp_group_num=55
+		local tst=$(awk -F ":" -v groupnum="$ftp_group_num"  ' $3 == groupnum { print "found" }' /etc/group)
+		while [ -n "$tst" ] ; do
+			ftp_group_num=$(($ftp_group_num+1))
+			tst=$(awk -F ":" -v groupnum="$ftp_group_num" ' $3 == groupnum { print "found" }' /etc/group)
+		done
+		echo "ftp:x:$ftp_group_num:" >>/etc/group
+	fi
+	if [ -z "$ftp_user_num" ] ; then
+		ftp_user_num="$ftp_group_num"
+		local tst=$(awk -F ":" -v usernum="$ftp_user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+		while [ -n "$tst" ] ; do
+			ftp_user_num=$(($ftp_user_num+1))
+			tst=$(awk -F ":" -v usernum="$ftp_user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+		done
+		echo "ftp:*:$ftp_user_num:$ftp_group_num:ftp:$anonymous_root:/bin/false" >> /etc/passwd
 	else
 		local tmp_pass_file="/tmp/tmp.passwd.tmp"
 		cp /etc/passwd "$tmp_pass_file"
 		escaped_anonymous_root=$( echo "$anonymous_root" | sed 's/\//\\\//g' )
-		sed -i "s/^ftp:.*\$/ftp:\*:55:55:ftp:$escaped_anonymous_root:\/bin\/false/g" "$tmp_pass_file"
+		sed -i "s/^ftp:.*\$/ftp:\*:$ftp_user_num:$ftp_group_num:ftp:$escaped_anonymous_root:\/bin\/false/g" "$tmp_pass_file"
 		copy_if_diff "$tmp_pass_file" /etc/passwd
 	fi
 	
