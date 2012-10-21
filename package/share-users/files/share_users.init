@@ -106,7 +106,7 @@ update_user()
 				local user_num="$group_num"
 				local tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
 				while [ -n "$tst" ] ; do
-					user_num=$((user_num+1))
+					user_num=$(($user_num+1))
 					tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
 				done
 			fi
