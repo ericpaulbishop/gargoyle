@@ -572,9 +572,9 @@ function resetData()
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
 					shareData[4] = fullSharePath				 //full path
-					shareData[5] = config == "samba"  ? true : shareData[7]  //isCIFS
+					shareData[5] = config == "samba"  ? true : shareData[5]  //isCIFS
 					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
-					shareData[7] = config == "nfsd"   ? true : shareData[8]  //isNFS
+					shareData[7] = config == "nfsd"   ? true : shareData[7]  //isNFS
 
 
 					//both samba and vsftpd have ro_users and rw_users list options
@@ -687,7 +687,6 @@ function resetData()
 			vis["cifs"] = shareData[5]
 			vis["ftp"]  = shareData[6]
 			vis["nfs"]  = shareData[7]
-			
 			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editShare) ] )
 		}
 		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
@@ -871,6 +870,9 @@ function getShareDataFromDocument(controlDocument, originalName)
 	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
 	var enabledTypes = getVis(controlDocument);
+	
+
+
 
 	var anonymousAccess = getSelectedValue("anonymous_access", controlDocument)
 	var roUsers = [];
@@ -934,7 +936,7 @@ function getShareDataFromDocument(controlDocument, originalName)
 	result["errors"] = errors;
 	if(errors.length == 0)
 	{
-		result["share"] = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["ftp"], enabledTypes["cifs"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
+		result["share"] = [shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, enabledTypes["cifs"], enabledTypes["ftp"], enabledTypes["nfs"], anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 	}
 	return result;
 }
