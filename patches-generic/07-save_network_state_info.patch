@@ -71,7 +71,7 @@
 +
 --- /dev/null	2012-09-18 15:11:33.606325627 -0400
 +++ b/package/ppp/files/etc/ppp/ip-up.d/state	2012-09-25 14:38:06.108295459 -0400
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,22 @@
 +#!/bin/sh
 +
 +. /lib/functions.sh
@@ -89,6 +89,9 @@
 +	uci_set_state network "$PPP_IPPARAM" ifname "$PPP_IFACE"
 +	uci_set_state network "$PPP_IPPARAM" ipaddr "$PPP_LOCAL"
 +	uci_set_state network "$PPP_IPPARAM" gateway "$PPP_REMOTE"
++	
++	# Point to Point link, Netmask should be 255.255.255.255
++	uci set state network "$PPP_IPPARAM" netmask "255.255.255.255"
 +}
 +
 --- a/package/ppp/Makefile	2012-09-16 12:56:58.156199098 -0400
