@@ -22,4 +22,5 @@ userlist_deny=no
 userlist_enable=yes
 userlist_file=/tmp/vsftpd/userlist
 use_sendfile=no
-secure_chroot_dir=/var/vsftpd/secure_chroot
+secure_chroot_dir=/tmp/vsftpd/secure_chroot
+ftp_username=ftp

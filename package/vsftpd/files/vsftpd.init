@@ -60,6 +60,28 @@ usb_unlock()
 	rm -rf /tmp/usb_restart.lock
 }
 
+
+
+copy_if_diff()
+{
+	new_file="$1"
+	old_file="$2"
+
+	if   [ ! -f "$new_file" ] ; then
+		return
+	elif [ ! -f "$old_file" ] ; then
+		cp "$new_file" "$old_file"
+	else
+		old_md5=$(md5sum "$old_file")
+		old_md5=${old_md5% *}
+		new_md5=$(md5sum "$new_file")
+		new_md5=${new_md5% *}
+		if [ "$old_md5" != "$new_md5" ] ; then
+			cp "$new_file" "$old_file"
+		fi	
+	fi
+}
+
 check_mounted()
 {
 	local timeout=25
@@ -93,7 +115,7 @@ mount_share_dir()
 	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
 
 	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
-		config_get ftp_root "vsftpd" anonymous_root "/tmp/share_home/anonymous"
+		config_get ftp_root "vsftpd" anonymous_root "$vsftpd_anonymous_root"
 		username="anonymous"
 	else	
 		ftp_root=$(/sbin/uci get share_users.$username.home_dir 2>/dev/null)
@@ -174,21 +196,48 @@ anonymous()
 	config_get anonymous_write $1 anonymous_write "no"
 	config_get anonymous_root $1 anonymous_root "$vsftpd_anonymous_root"
 
-	have_ftp_user=$(grep '^ftp:' /etc/passwd)
-	if [ -z "$have_ftp_user" ] && [ "$anonymous" = "yes" ] ; then
+
+	local have_ftp_user=$(grep '^ftp:' /etc/passwd)
+	if [ -z "$have_ftp_user" ] ; then
+		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
+	else
+		local tmp_pass_file="/tmp/tmp.passwd.tmp"
+		cp /etc/passwd "$tmp_pass_file"
+		escaped_anonymous_root=$( echo "$anonymous_root" | sed 's/\//\\\//g' )
+		sed -i "s/^ftp:.*\$/ftp:\*:55:55:ftp:$escaped_anonymous_root:\/bin\/false/g" "$tmp_pass_file"
+		copy_if_diff "$tmp_pass_file" /etc/passwd
+	fi
+	
+	if [ -e /etc/shadow ] ; then
+		local have_shadow_ftp=$(grep '^ftp:' /etc/shadow)
+		if [ -z "$have_shadow_ftp" ] ; then
+			echo 'ftp:*:0:0:99999:7:::' >> /etc/shadow
+		fi
+	fi
+
+
+
+	if [ "$anonymous" = "yes" ] ; then
+
 		mkdir -p "$anonymous_root"
 		chmod 555 "$anonymous_root" >/dev/null 2>&1
-		echo "ftp:*:55:55:ftp:$anonymous_root:/bin/false" >> /etc/passwd
-	fi
-	if [ "$anonymous" = "yes" ] ; then
+
+		echo "anon_root=$anonymous_root" >> "$vsftpd_conf"
+		echo "no_anon_password=yes"      >> "$vsftpd_conf"
+
+
 		if [ "$anonymous_write" = "yes" ]; then
-			echo "write_enable=yes" > $vsftpd_basedir/users/ftp
+				echo "write_enable=yes" > $vsftpd_basedir/users/ftp
 		else
-			echo "write_enable=no" > $vsftpd_basedir/users/ftp
+				echo "write_enable=no" > $vsftpd_basedir/users/ftp
 		fi
+		echo "ftp" >> "$vsftpd_basedir/userlist"
+		echo "anonymous" >> "$vsftpd_basedir/userlist"
 	else
-		echo "anonymous_enable=no" >> $vsftpd_conf
+		echo "anonymous_enable=no" >> "$vsftpd_conf"
 	fi
+
+
 }
 
 update_userlist()
@@ -199,22 +248,22 @@ update_userlist()
 
 create_config()
 {
-	mkdir -p /tmp/vsftpd
-	sed -i '/:ftp_user:/d' /etc/passwd
-
-	cat /etc/vsftpd.conf.template > "$vsftpd_conf"
+	mkdir -p "$vsftpd_basedir"
+	mkdir -p "$vsftpd_basedir/secure_chroot"
 	mkdir -p "$vsftpd_basedir/users/"
+
+	cat /etc/vsftpd.conf.template > "$vsftpd_conf"	
 	rm       "$vsftpd_basedir/users/"*  2>/dev/null
 	rm       "$vsftpd_basedir/userlist" 2>/dev/null
 	touch    "$vsftpd_basedir/userlist"
+
 
 	config_load "share_users"
 	config_foreach update_userlist "user"
 
 
-	mkdir -p /var/vsftpd/secure_chroot
-
 	config_load "vsftpd"
+
 
 }
 
