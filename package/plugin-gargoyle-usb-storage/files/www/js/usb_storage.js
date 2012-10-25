@@ -976,7 +976,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 		}
 	}
 	
-	setSelectedValue("nfs_access", shareData[11]);
+	setSelectedValue("nfs_access", shareData[11], controlDocument);
 	var nfsAccessIps = shareData[12];
 	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", controlDocument);
 	if(nfsAccessIps instanceof Array)
