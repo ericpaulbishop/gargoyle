@@ -127,7 +127,7 @@ mount_share_dir()
 	
 	found_share="1"
 	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
-	chmod 755 "$ftp_root/$share_name" >/dev/null 2>&1
+	chmod 777 "$ftp_root/$share_name" >/dev/null 2>&1
 
 
 	chown "$username"  "$ftp_root/$share_name" >/dev/null 2>&1
