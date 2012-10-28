@@ -1,8 +1,8 @@
---- custom-src/package/base-files/files/etc/passwd	2012-08-21 02:54:27.761245711 -0400
-+++ b/package/base-files/files/etc/passwd	2012-08-21 02:58:36.709130291 -0400
+--- a/package/base-files/files/etc/shadow
++++ b/package/base-files/files/etc/shadow
 @@ -1,4 +1,4 @@
--root:x:0:0:root:/root:/bin/ash
-+root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:root:/root:/bin/ash
- daemon:*:1:1:daemon:/var:/bin/false
- ftp:*:55:55:ftp:/home/ftp:/bin/false
- network:*:101:101:network:/var:/bin/false
+-root:x:0:0:99999:7:::
++root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::
+ daemon:*:0:0:99999:7:::
+ ftp:*:0:0:99999:7:::
+ network:*:0:0:99999:7:::
