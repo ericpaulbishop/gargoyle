@@ -13,7 +13,7 @@ var currentLanIp;
 var googleDns = ["8.8.8.8", "8.8.4.4" ];
 var openDns = ["208.67.222.222", "208.67.220.220" ];
 
-var ncDns  = [ "178.32.31.41", "78.47.86.43" ]
+var ncDns  = [ "178.32.31.41", "106.187.47.17", "176.58.118.172" ]
 var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
 var ncTlds = [ ".bit" ];
 var onTlds = [ ".glue", ".parody", ".dyn", ".bbs", ".free", ".fur", ".geek", ".gopher", ".indy", ".ing", ".null", ".oss", ".micro" ];
