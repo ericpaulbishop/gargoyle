@@ -689,17 +689,25 @@ function saveChanges()
 				else //atheros & mac80211 driver
 				{
 					var cfg = "cfg2";
-					if(wirelessDriver == "atheros")
+					if(wirelessDriver == "atheros" || (wirelessDriver == "mac80211" && getSelectedValue("bridge_repeater") =="enabled"))
 					{
 						uci.set("wireless", cfg, "", "wifi-iface");
 						uci.set("wireless", cfg, "device", bridgeDev);
 						uci.set("wireless", cfg, "network", "lan");
 						uci.set("wireless", cfg, "mode", "ap");
 						uci.set("wireless", cfg, "wds", "1");
-						uci.set("wireless", cfg, "ssid", ssid);
-						uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() );
 						uci.set("wireless", cfg, "encryption", encryption);
 						if(encryption != "none") { uci.set("wireless", cfg, "key", key); }
+
+						if(wirelessDriver == "atheros" )
+						{
+							uci.set("wireless", cfg, "ssid", ssid);
+							uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() );
+						}
+						else
+						{
+							uci.set("wireless", cfg, "ssid", document.getElementById("bridge_broadcast_ssid").value);
+						}
 						preCommands = preCommands + "\nuci set wireless." + cfg + "=wifi-iface\n";
 						cfg = "cfg3";
 					}
@@ -1188,13 +1196,15 @@ function setBridgeVisibility()
 		document.getElementById("bridge_pass_container").style.display = brenc.match(/psk/) || brenc.match(/WPA/) ? "block" : "none";
 		document.getElementById("bridge_wep_container").style.display  = brenc.match(/wep/) || brenc.match(/WEP/) ? "block" : "none";
 
-		document.getElementById("bridge_repeater_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" && (!isb43) ? "block" : "none";
-		document.getElementById("bridge_wifi_mac_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
-		document.getElementById("bridge_wds_container").style.display = getSelectedValue("bridge_mode") == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
+		var bridgeMode = getSelectedValue("bridge_mode") 
+		var repeaterPossible = (bridgeMode == "client_bridge" && (!isb43)) || (bridgeMode=="wds" && wirelessDriver == "mac80211") ;
+		document.getElementById("bridge_repeater_container").style.display = repeaterPossible  ? "block" : "none";
+		document.getElementById("bridge_wifi_mac_container").style.display = bridgeMode == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
+		document.getElementById("bridge_wds_container").style.display = bridgeMode == "wds" && wirelessDriver != "mac80211" ? "block" : "none";
 		document.getElementById("bridge_fixed_encryption_container").style.display="none";
 		document.getElementById("bridge_fixed_channel_container").style.display="none";
 		
-		document.getElementById("bridge_broadcast_ssid_container").style.display = getSelectedValue("bridge_mode") == "client_bridge" && getSelectedValue("bridge_repeater") =="enabled" ? "block" : "none";
+		document.getElementById("bridge_broadcast_ssid_container").style.display = repeaterPossible && getSelectedValue("bridge_repeater") =="enabled" ? "block" : "none";
 		if(document.getElementById("bridge_broadcast_ssid").value == "")
 		{
 			var ssid ="";
@@ -1328,7 +1338,7 @@ function resetData()
 		var repeaterSection = "";
 		var testSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 		var testIndex=0;
-		for(testIndex=0; testIndex < testSections.length && mode != "wds" && repeaterSection == ""; testIndex++)
+		for(testIndex=0; testIndex < testSections.length && ( mode != "wds" || wirelessDriver == "mac80211") && repeaterSection == ""; testIndex++)
 		{
 			var s = testSections[testIndex];
 			repeaterSection = uciOriginal.get("wireless", s, "mode") == "ap" ? s : "";

@@ -1979,23 +1979,26 @@ function getBridgeSection(testUci)
 	var wanDef = uciOriginal.get("network", "wan", "");
 	var bridgeSection = "";
 	var sectionIndex;
+	
+	
 	for(sectionIndex=0; sectionIndex < allWirelessSections.length && bridgeSection == ""; sectionIndex++)
 	{
-		if( testUci.get("wireless", allWirelessSections[sectionIndex], "mode").toLowerCase() == "wds" && wanDef == "")
+		var getWirelessVar = function(varName) 
+		{
+			return testUci.get("wireless", allWirelessSections[sectionIndex], varName).toLowerCase() 
+		}
+		
+		if( getWirelessVar("mode") == "wds" && wanDef == "")
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
 		}
-		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "wds") == "1" && wanDef == "")
+		else if( getWirelessVar("mode") == "sta" &&  getWirelessVar("wds") == "1" && wanDef == "")
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
 		}
-		else if( testUci.get("wireless", allWirelessSections[sectionIndex], "client_bridge") == "1")
+		else if(getWirelessVar("mode") == "sta" && getWirelessVar("client_bridge") == "1" )
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
-		}
-		if(bridgeSection != "")
-		{
-			bridgeSection = (testUci.get("wireless", bridgeSection, "mode").toLowerCase() == "ap") ? "" : bridgeSection;
 		}
 	}
 
