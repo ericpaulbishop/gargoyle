@@ -100,25 +100,20 @@ function saveChanges()
 	}
 
 	//update firewall
-	var ftpRa = [ "wan_ftp_server_command", "wan_ftp_server_data" ];
-	var ftpPorts=["21", "20"]
-	var fri;
-	for(fri=0; fri < ftpRa.length; fri++)
+	var sec = "wan_ftp_server_command";
+	if(ftpWanAccess)
 	{
-		var sec = ftpRa[fri];
-		if(ftpWanAccess)
-		{
-			uci.set("firewall", sec, "",            "remote_accept");
-			uci.set("firewall", sec, "proto",       "tcp");
-			uci.set("firewall", sec, "zone",        "wan");
-			uci.set("firewall", sec, "local_port",  ftpPorts[fri])
-			uci.set("firewall", sec, "remote_port", ftpPorts[fri])
-		}
-		else
-		{
-			uci.removeSection("firewall", sec);
-		}
+		uci.set("firewall", sec, "",            "remote_accept");
+		uci.set("firewall", sec, "proto",       "tcp");
+		uci.set("firewall", sec, "zone",        "wan");
+		uci.set("firewall", sec, "local_port",  "21")
+		uci.set("firewall", sec, "remote_port", "21")
 	}
+	else
+	{
+		uci.removeSection("firewall", sec);
+	}
+	
 	
 
 	//update shares
