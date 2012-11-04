@@ -33,6 +33,7 @@ var sharePathToShareData = [];
 
 var badUserNames = [ "ftp", "anonymous", "root", "daemon", "network", "nobody" ];
 
+var ftpFirewallRule = "wan_ftp_server_command";
 
 function saveChanges()
 {
@@ -47,7 +48,7 @@ function saveChanges()
 		{
 			errors.push("Invalid CIFS Workgroup");
 		}
-		if(ftpWanAccess && uciOriginal.get("firewall", "wan_ftp_server_command", "local_port") != "21")
+		if(ftpWanAccess && uciOriginal.get("firewall", ftpFirewallRule, "local_port") != "21")
 		{
 			var conflict = checkForPortConflict(21, "tcp");
 			conflict = conflict == "" ? checkForPortConflict(20, "tcp")  : conflict;
@@ -100,20 +101,19 @@ function saveChanges()
 	}
 
 	//update firewall
-	var sec = "wan_ftp_server_command";
 	if(ftpWanAccess)
 	{
-		uci.set("firewall", sec, "",            "remote_accept");
-		uci.set("firewall", sec, "proto",       "tcp");
-		uci.set("firewall", sec, "zone",        "wan");
-		uci.set("firewall", sec, "local_port",  "21")
-		uci.set("firewall", sec, "remote_port", "21")
+		uci.set("firewall", ftpFirewallRule, "",            "remote_accept");
+		uci.set("firewall", ftpFirewallRule, "proto",       "tcp");
+		uci.set("firewall", ftpFirewallRule, "zone",        "wan");
+		uci.set("firewall", ftpFirewallRule, "local_port",  "21")
+		uci.set("firewall", ftpFirewallRule, "remote_port", "21")
 	}
 	else
 	{
-		uci.removeSection("firewall", sec);
+		uci.removeSection("firewall", ftpFirewallRule);
 	}
-	
+		
 	
 
 	//update shares
@@ -222,6 +222,10 @@ function saveChanges()
 
 
 	var postCommands = [];
+	if(uciOriginal.get("firewall", ftpFirewallRule, "local_port") != uci.get("firewall", ftpFirewallRule, "local_port"))
+	{
+		postCommands.push("/etc/init.d/firewall restart");
+	}
 	postCommands.push("/etc/init.d/share_users restart");
 	postCommands.push("/etc/init.d/samba restart");
 	postCommands.push("/etc/init.d/vsftpd restart");
@@ -494,7 +498,7 @@ function resetData()
 		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
 
 		// wan access to FTP
-		document.getElementById("ftp_wan_access").checked = uciOriginal.get("firewall", "wan_ftp_server_command", "local_port") == "21";
+		document.getElementById("ftp_wan_access").checked = uciOriginal.get("firewall", ftpFirewallRule, "local_port") == "21";
 
 		//share users
 		userNames = uciOriginal.getAllSectionsOfType("share_users", "user"); //global
