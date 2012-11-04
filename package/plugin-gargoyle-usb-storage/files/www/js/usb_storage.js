@@ -38,11 +38,24 @@ function saveChanges()
 {
 
 	//proofread
-	var sambaGroup = document.getElementById("cifs_workgroup").value;
 	var errors = [];
-	if(sambaGroup == "")
+	var sambaGroup = document.getElementById("cifs_workgroup").value;
+	var ftpWanAccess = document.getElementById("ftp_wan_access").checked;
+	if( document.getElementById("shared_disks").style.display != "none")
 	{
-		errors.push("Invalid CIFS Workgroup");
+		if(sambaGroup == "")
+		{
+			errors.push("Invalid CIFS Workgroup");
+		}
+		if(ftpWanAccess && uciOriginal.get("firewall", "wan_ftp_server_command", "local_port") != "21")
+		{
+			var conflict = checkForPortConflict(21, "tcp");
+			conflict = conflict == "" ? checkForPortConflict(20, "tcp")  : conflict;
+			if(conflict != "")
+			{
+				errors.push("Cannot enable WAN FTP access because port conflicts with " + conflict);
+			}
+		}
 	}
 	if(errors.length > 0)
 	{
@@ -86,6 +99,26 @@ function saveChanges()
 		}
 	}
 
+	//update firewall
+	var ftpRa = [ "wan_ftp_server_command", "wan_ftp_server_data" ];
+	var ftpPorts=["21", "20"]
+	var fri;
+	for(fri=0; fri < ftpRa.length; fri++)
+	{
+		var sec = ftpRa[fri];
+		if(ftpWanAccess)
+		{
+			uci.set("firewall", sec, "",            "remote_accept");
+			uci.set("firewall", sec, "proto",       "tcp");
+			uci.set("firewall", sec, "zone",        "wan");
+			uci.set("firewall", sec, "local_port",  ftpPorts[fri])
+			uci.set("firewall", sec, "remote_port", ftpPorts[fri])
+		}
+		else
+		{
+			uci.removeSection("firewall", sec);
+		}
+	}
 	
 
 	//update shares
@@ -457,6 +490,7 @@ function resetData()
 
 
 
+
 	if(storageDrives.length > 0)
 	{
 
@@ -464,6 +498,8 @@ function resetData()
 		var s =  uciOriginal.getAllSectionsOfType("samba", "samba");
 		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
 
+		// wan access to FTP
+		document.getElementById("ftp_wan_access").checked = uciOriginal.get("firewall", "wan_ftp_server_command", "local_port") == "21";
 
 		//share users
 		userNames = uciOriginal.getAllSectionsOfType("share_users", "user"); //global
