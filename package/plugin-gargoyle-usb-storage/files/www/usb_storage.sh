@@ -60,7 +60,7 @@
 
 	<div id='ftp_wan_access_container'>
 		<input class="aligned_check" type='checkbox' id='ftp_wan_access' />
-		<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'Allow Access to FTP From WAN</label>
+		<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'>Allow Access to FTP From WAN</label>
 	</div>
 
 	
