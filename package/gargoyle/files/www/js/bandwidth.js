@@ -728,7 +728,15 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
+	if(interval.match(/month/) || interval.match(/day/))
+	{
+		// When interval is month or day, the transition is always at beginning of day/month, so adding just a few hours will never change the day or month
+		// However, when an hour gets subtracted for DST, there are problems.
+		// So, always add three hours, so when DST shifts an hour back in November date doesn't get pushed back to previous month and wrong month is displayed
+		nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
+	}
 	var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
 		var colIndex = 0;
@@ -759,6 +767,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		}
 		else if(interval.match(/month/))
 		{
+			//nextDate.setDate(2) //set second day of month, so when DST shifts hour back in November we don't push it back to previous month
 			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
 			nextDate.setUTCMonth( nextDate.getUTCMonth()-1);
 		}
