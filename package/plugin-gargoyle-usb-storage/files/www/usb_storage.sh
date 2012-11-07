@@ -53,15 +53,19 @@
 <fieldset id="shared_disks">
 	<legend class="sectionheader">Shared Disks</legend>
 	
-	<div id="cifs_workgroup_container">
+	<div id='ftp_wan_access_container' style="margin-bottom:30px;" >
+		<span class="nocolumn">
+			<input class="aligned_check" type='checkbox' id='ftp_wan_access' />&nbsp;
+			<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'>Allow Access to FTP From WAN</label>
+		</span>
+	</div>
+
+
+	<div id="cifs_workgroup_container" style="margin-bottom:20px;" >
 		<label id="cifs_workgroup_label" class="leftcolumn" for="cifs_workgroup">CIFS Workgroup:</label>
 		<input id="cifs_workgroup" class="rightcolumn" type="text" size='30'/>
 	</div>
 
-	<div id='ftp_wan_access_container'>
-		<input class="aligned_check" type='checkbox' id='ftp_wan_access' />
-		<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'Allow Access to FTP From WAN</label>
-	</div>
 
 	
 	<div id="user_container">
