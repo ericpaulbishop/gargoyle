@@ -51,7 +51,6 @@ function saveChanges()
 		if(ftpWanAccess && uciOriginal.get("firewall", ftpFirewallRule, "local_port") != "21")
 		{
 			var conflict = checkForPortConflict(21, "tcp");
-			conflict = conflict == "" ? checkForPortConflict(20, "tcp")  : conflict;
 			if(conflict != "")
 			{
 				errors.push("Cannot enable WAN FTP access because port conflicts with " + conflict);

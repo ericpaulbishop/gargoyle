@@ -283,7 +283,17 @@ function proofreadAll()
 		{
 			var serverPort  = document.getElementById(prefix + "port").value
 			var serverProto = getSelectedValue(prefix + "protocol", document)
-			var serverPortConflict = checkForPortConflict(serverPort, serverProto)
+			var oldServerEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled").toLowerCase()
+			var oldServerProto   = uciOriginal.get("openvpn_gargoyle", "server", "proto")
+			var oldServerPort    = uciOriginal.get("openvpn_gargoyle", "server", "port")
+			var oldServerPortDef = [];
+			if(oldServerEnabled == "true" || oldServerEnabled == 1 )
+			{
+				oldServerPortDef[oldServerProto] = [];
+				oldServerPortDef[oldServerProto][oldServerPort] = 1
+			}
+
+			var serverPortConflict = checkForPortConflict(serverPort, serverProto, oldServerPortDef)
 			if(serverPortConflict != "")
 			{
 				errors.push("OpenVPN server port conflicts with " + serverPortConflict)

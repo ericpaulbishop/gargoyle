@@ -82,35 +82,45 @@ insert_remote_accept_rules()
 	#add rules for remote_accepts
 	parse_remote_accept_config()
 	{
-		vars="local_port remote_port proto zone"
-		proto="tcp"
+		vars="local_port remote_port start_port end_port proto zone"
+		proto="tcp udp"
 		zone="wan"
 		for var in $vars ; do
 			config_get $var $1 $var
 		done
-		if [ -n "$local_port" ] ; then
-			if [ -z "$remote_port"  ] ; then
-				remote_port="$local_port"
-			fi
-
-			#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
-			#Each attempt gets a maximum of 10 password tries by dropbear.
-			if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] ; then
-				iptables -t filter -A "input_$zone" -p "$proto" --dport $ssh_port -m recent --set --name SSH_CHECK
-				iptables -t filter -A "input_$zone" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
-			fi
-
-			if [ "$remote_port" != "$local_port" ] ; then
-				#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
-				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"
-				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
-			else
-				iptables -t nat -I "zone_"$zone"_prerouting" -p "$proto" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-				iptables -t filter -A "input_$zone" -p $proto --dport "$local_port" -j ACCEPT
-			fi
-
+		if [ "$proto" = "tcpudp" ] || [ -z "$proto" ] ; then
+			proto="tcp udp"
 		fi
+		
+		
+		for prot in $proto ; do
+			if [ -n "$local_port" ] ; then
+				
+				if [ -z "$remote_port"  ] ; then
+					remote_port="$local_port"
+				fi
+
+				#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
+				#Each attempt gets a maximum of 10 password tries by dropbear.
+				if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] && [ "$prot" = "tcp" ] ; then
+					iptables -t filter -A "input_$zone" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK
+					iptables -t filter -A "input_$zone" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
+				fi
+	
+				if [ "$remote_port" != "$local_port" ] ; then
+					#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
+					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
+					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"
+					iptables -t filter -A "input_$zone" -p $prot --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
+				else
+					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
+					iptables -t filter -A "input_$zone" -p "$prot" --dport "$local_port" -j ACCEPT
+				fi
+			elif [ -n "$start_port" ] && [ -n "$end_port" ] ; then
+				iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$start_port:$end_port" -j REDIRECT
+				iptables -t filter -A "input_$zone" -p "$prot" --dport "$start_port:$end_port" -j ACCEPT
+			fi
+		done
 	}
 	config_load "$config_name"
 	config_foreach parse_remote_accept_config "$section_type"

@@ -2423,15 +2423,22 @@ function getUsedPorts()
 	var httpPort  = uciOriginal.get("httpd_gargoyle", "server", "http_port")
 	var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port")
 
+	var foundPorts = []
+	foundPorts["tcp"] = []
+	foundPorts["udp"] = []
+
 	var portDefs=[]
 	portDefs.push( [ sshPort, "tcp", "SSH port" ] )
+	foundPorts["tcp"][sshPort] = 1
 	if(httpPort != "")
 	{
 		portDefs.push( [ httpPort, "tcp", "web server port" ] )
+		foundPorts["tcp"][httpPort] = 1
 	}
 	if(httpsPort != "")
 	{
 		portDefs.push( [ httpsPort, "tcp", "web server port" ] )
+		foundPorts["tcp"][httpsPort] = 1
 	}
 
 
@@ -2440,49 +2447,66 @@ function getUsedPorts()
 	var acceptIndex;
 	for(acceptIndex=0; acceptIndex < remoteAcceptSections.length; acceptIndex++)
 	{
-		var section = remoteAcceptSections[acceptIndex];
-		var localPort = uciOriginal.get("firewall", section, "local_port");
+		var section    = remoteAcceptSections[acceptIndex];
+		var localPort  = uciOriginal.get("firewall", section, "local_port");
 		var remotePort = uciOriginal.get("firewall", section, "remote_port");
-		var proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
-		var zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+		var startPort  = uciOriginal.get("firewall", section, "start_port");
+		var endPort    = uciOriginal.get("firewall", section, "end_port");
+		var proto      = uciOriginal.get("firewall", section, "proto").toLowerCase();
+		var zone       = uciOriginal.get("firewall", section, "zone").toLowerCase();
 		if(zone == "wan" || zone == "")
 		{
 			var defIndex;
-			var found = false;
 			remotePort = remotePort == "" ? localPort : remotePort;
 			for(defIndex=0; defIndex<portDefs.length ; defIndex++)
 			{
 				if(defIndex[0] == localPort && (defIndex[1] == proto || proto == "" || proto == "tcpudp"))
 				{
-					found=true;
-					if(localport != remotePort)
+					if(localport != remotePort && localport != "")
 					{
 						if(proto == "" || proto == "tcpudp")
 						{	
 							portDefs.push([remotePort, "tcp", defIndex[2] ])
 							portDefs.push([remotePort, "udp", defIndex[2] ])
+							foundPorts["tcp"][remotePort] = 1;
+							foundPorts["udp"][remotePort] = 1;
+
 						}
 						else
 						{
 							portDefs.push([remotePort, proto, defIndex[2] ])
+							foundPorts[proto][remotePort]= 1
 						}
 					}
 				}
 			}
-			/*
-			if(!found)
+			if( localPort != "" ) //handle ports other than ssh, http, https
 			{
-				if(proto == "" || proto == "tcpudp")
-				{	
-					portDefs.push([remotePort, "tcp", "Other Application" ])
-					portDefs.push([remotePort, "udp", "Other Application" ])
-				}
-				else
+				var protoList = proto == "" || proto == "tcpudp" ? [ "tcp", "udp" ] : [ proto ];
+				while(protoList.length > 0)
 				{
-					portDefs.push([remotePort, proto, "Other Application" ])
+					var nextProto = protoList.shift();
+					if(foundPorts[nextProto][remotePort] == null) //bypasses adding second instance defs if already defined above as part of ssh/http/https
+					{
+						portDefs.push( [ remotePort, nextProto, "port redirected to router" ])
+						foundPorts[nextProto][remotePort] = 1;
+						if(foundPorts[nextProto][localPort] == null) //implies localPort != remotePort, since we just set this for remotePort
+						{
+							portDefs.push([localPort, nextProto, "port in use by router" ])
+							foundPorts[nextProto][localPort] = 1
+						}
+					}
 				}
 			}
-			*/
+			if(localPort == "" && startPort != "" && endPort != "")
+			{
+				var protoList = proto == "" || proto == "tcpudp" ? [ "tcp", "udp" ] : [ proto ];
+				while(protoList.length > 0)
+				{
+					var nextProto = protoList.shift();
+					portDefs.push([startPort + "-" + endPort, nextProto, "port redirected to router" ])
+				}
+			}
 		}
 	}
 
@@ -2499,15 +2523,58 @@ function getUsedPorts()
 		var port       = uciOriginal.get("firewall", section, "src_dport")
 		var ip         = uciOriginal.get("firewall", section, "dest_ip");
 
+		//note range notation already part of remotePort here, so range is handled properly by this code
 		portDefs.push([remotePort, proto, "port forwarded to " + ip ])
 	}
+
+	//for debugging only
+	/*
+	var portStr = [];
+	var pi;
+	for(pi=0; pi< portDefs.length; pi++)
+	{
+		portStr.push( (portDefs[pi]).join(",") );
+	}
+	alert(portStr.join("\n"));
+	*/
+
+
 	return portDefs;
 
 }
 
-function checkForPortConflict(port, proto)
+// ignorePorts should be 2d-associateive array with first dimension being proto, second port, eg. ignorePorts[proto][port or port range] = 1 if port is to be ignored
+function checkForPortConflict(port, proto, ignorePorts)
 {
+	if(ignorePorts != null)
+	{
+		ignorePorts["tcp"] = ignorePorts["tcp"] == null ? [] : ignorePorts["tcp"]
+		ignorePorts["udp"] = ignorePorts["udp"] == null ? [] : ignorePorts["udp"]
+		if(ignorePorts[proto][port] != null)
+		{
+			return "";
+		}
+		else
+		{
+			var range
+			for(range in ignorePorts[proto])
+			{
+				if(range.match(/-/))
+				{
+					var splitRange = range.split(/-/);
+					if(port >= splitRange[0] && port <= splitRange[1])
+					{
+						return "";
+					}
+				}
+						
+			}
+		}
+	}
+
+
 	var usedPorts = getUsedPorts();
+
 	var portIndex;
 	var portConflict = ""
 	for(portIndex=0; portIndex < usedPorts.length && portConflict == ""; portIndex++)
