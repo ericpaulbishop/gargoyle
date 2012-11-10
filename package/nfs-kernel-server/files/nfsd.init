@@ -32,10 +32,18 @@ add_export_line()
 {
 	local share="$1"
 
-	vars="name path read_only sync insecure subtree_check"
+	vars="name path read_only sync insecure subtree_check anonuid anongid"
 	for v in $vars ; do
 		config_get "$v" "$share" "$v"
 	done
+	
+	if [ -z "$anonuid" ] ; then
+		anonuid=0
+	fi
+	if [ -z "$anongid" ] ; then
+		anongid=0
+	fi
+
 
 	allowed_host_star_found="0"
 	allowed_host_list=""
@@ -57,7 +65,7 @@ add_export_line()
 		ln -s "$path" "/nfs/$name"
 		for h in $allowed_host_list ; do
 			h=$(echo "$h" | sed 's/\"\*\"/*/g')
-			echo "/nfs/$name	$h($read_only,$sync,$secure,$subtree_check,all_squash,fsid=$fsid)" >> /tmp/tmp_exports
+			echo "/nfs/$name	$h($read_only,$sync,$secure,$subtree_check,root_squash,anongid=$anongid,anonuid=$anonuid,fsid=$fsid)" >> /tmp/tmp_exports
 		done
 		fsid=$(($fsid+1))
 		valid_found=1
