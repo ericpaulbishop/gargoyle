@@ -2062,7 +2062,8 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 	}
 	return spanEl;
 }
-function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+
+function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 {
 	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
 	macsValid = macsValid == null ? true : false;
@@ -2110,7 +2111,6 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 	controlDocument = controlDocument == null ? document : controlDocument;
 	alertOnError = alertOnError == null ? true : alertOnError;
 
-	var newAddrs = controlDocument.getElementById(textId).value;
 	var splitAddrs = newAddrs.split(/[\t ]*,[\t ]*/);
 	var valid = splitAddrs.length > 0 ? 0 : 1; //1=error, 0=valid
 	var splitIndex;
@@ -2151,7 +2151,6 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 		{
 			tableContainer.appendChild(table);
 		}
-		controlDocument.getElementById(textId).value = "";
 		if(tableWidth != null)
 		{
 			table.style.width = "" + tableWidth + "px";
@@ -2163,6 +2162,20 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 	}
 
 	return valid == 0 ? true : false;
+
+}
+
+
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+{
+	
+	var newAddrs = controlDocument.getElementById(textId).value;
+	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+	if(valid)
+	{
+		controlDocument.getElementById(textId).value = "";
+	}
+	return valid;
 }
 
 
