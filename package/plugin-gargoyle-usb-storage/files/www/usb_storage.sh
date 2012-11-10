@@ -75,7 +75,6 @@
 		<input id="cifs_workgroup" class="rightcolumn" type="text" size='30'/>
 	</div>
 
-
 	
 	<div id="user_container">
 		<label id="cifs_user_label" class="leftcolumn">CIFS / FTP Users:</label>
