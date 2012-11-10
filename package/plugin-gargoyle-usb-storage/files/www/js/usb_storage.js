@@ -1392,7 +1392,7 @@ function formatDiskRequested()
 	}
 
 	var validFunc   = doDiskFormat;
-	var invalidFunc = function(){ alert("ERROR: Invalid Password"); }
+	var invalidFunc = function(){ alert("ERROR: Invalid Password"); setControlsEnabled(true); }
 
 	var driveId = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
 	confirmPassword("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", validFunc, invalidFunc);
