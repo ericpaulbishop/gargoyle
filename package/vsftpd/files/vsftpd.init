@@ -159,12 +159,20 @@ mount_share()
 	
 }
 
-anonymous()
+global()
 {
+	config_get pasv_min_port $1 pasv_min_port
+	config_get pasv_max_port $1 pasv_max_port
+
+	if [ -n "$pasv_min_port" ] && [ -n "$pasv_max_port" ] ; then
+		echo "pasv_min_port=$pasv_min_port" >> "$vsftpd_conf"
+		echo "pasv_max_port=$pasv_max_port" >> "$vsftpd_conf"
+	fi
+
+
 	config_get anonymous $1 anonymous "no"
 	config_get anonymous_write $1 anonymous_write "no"
 	config_get anonymous_root $1 anonymous_root "$vsftpd_anonymous_root"
-
 
 	local ftp_group_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/group)
 	local ftp_user_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/passwd)
@@ -248,15 +256,14 @@ create_config()
 
 
 	config_load "vsftpd"
-
-
+	
 }
 
 do_start()
 {
 	create_config
 	config_load "vsftpd"
-	config_foreach anonymous "vsftpd"
+	config_foreach global "vsftpd"
 	config_foreach mount_share "share"
 
 	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."

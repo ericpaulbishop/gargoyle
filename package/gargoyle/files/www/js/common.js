@@ -1929,7 +1929,6 @@ function proofreadPort(input)
 {
 	proofreadText(input, validatePort, 0);
 }
-
 function proofreadPortOrPortRange(input)
 {
 	proofreadText(input, validatePortOrPortRange, 0);
@@ -1941,7 +1940,6 @@ function proofreadText(input, proofFunction, validReturnCode)
 		input.style.color = (proofFunction(input.value) == validReturnCode) ? "black" : "red";
 	}
 }
-
 
 
 function getEmbeddedSvgWindow(embeddedId, controlDocument)
@@ -2546,13 +2544,29 @@ function getUsedPorts()
 // ignorePorts should be 2d-associateive array with first dimension being proto, second port, eg. ignorePorts[proto][port or port range] = 1 if port is to be ignored
 function checkForPortConflict(port, proto, ignorePorts)
 {
+	var portStart = null
+	var portEnd = null
+	var isRange = false
+	if(port.match(/-/))
+	{
+		var splitPort = port.split(/-/)
+		portStart = parseInt(splitPort[0])
+		portEnd   = parseInt(splitPort[1])
+		isRange = true;
+	}
+	else
+	{
+		port = parseInt(port)
+	}
+
+
 	if(ignorePorts != null)
 	{
 		ignorePorts["tcp"] = ignorePorts["tcp"] == null ? [] : ignorePorts["tcp"]
 		ignorePorts["udp"] = ignorePorts["udp"] == null ? [] : ignorePorts["udp"]
-		if(ignorePorts[proto][port] != null)
+		if(ignorePorts[proto][port] != null && ignorePorts[proto][(""+port)] != null)
 		{
-			return "";
+			return ""
 		}
 		else
 		{
@@ -2562,18 +2576,21 @@ function checkForPortConflict(port, proto, ignorePorts)
 				if(range.match(/-/))
 				{
 					var splitRange = range.split(/-/);
-					if(port >= splitRange[0] && port <= splitRange[1])
+					if((!isRange) && port >= parseInt(splitRange[0]) && port <= parseInt(splitRange[1]))
 					{
-						return "";
+						return ""
+					}
+					if(isRange && portStart <= parseInt(splitRange[1]) && portEnd >= parseInt(splitRange[0]))
+					{
+						return ""
 					}
 				}
-						
 			}
 		}
 	}
 
 
-	var usedPorts = getUsedPorts();
+	var usedPorts = getUsedPorts()
 
 	var portIndex;
 	var portConflict = ""
@@ -2586,14 +2603,22 @@ function checkForPortConflict(port, proto, ignorePorts)
 			if(portStr.match(/\-/))
 			{
 				var splitPort = portStr.split(/\-/)
-				if(port >= splitPort[0] && port <= splitPort[1])
+				if((!isRange) && port >= parseInt(splitPort[0]) && port <= parseInt(splitPort[1]))
+				{
+					portConflict = portDef[2]
+				}
+				if(isRange && portStart <= parseInt(splitPort[1]) && portEnd >= parseInt(splitPort[0]))
 				{
 					portConflict = portDef[2]
 				}
 			}
-			else 
+			else
 			{
-				if(port == portStr)
+				if((!isRange) && port == parseInt(portStr))
+				{
+					portConflict = portDef[2]
+				}
+				if(isRange && parseInt(portStr) >= portStart && parseInt(portStr) <= portEnd)
 				{
 					portConflict = portDef[2]
 				}

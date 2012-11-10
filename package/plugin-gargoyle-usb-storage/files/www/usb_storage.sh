@@ -53,13 +53,22 @@
 <fieldset id="shared_disks">
 	<legend class="sectionheader">Shared Disks</legend>
 	
-	<div id='ftp_wan_access_container' style="margin-bottom:30px;" >
+	<div id='ftp_wan_access_container' >
 		<span class="nocolumn">
-			<input class="aligned_check" type='checkbox' id='ftp_wan_access' />&nbsp;
+			<input class="aligned_check" type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()' />&nbsp;
 			<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'>Allow Access to FTP From WAN</label>
 		</span>
 	</div>
 
+	<div id='ftp_pasv_container' class="indent" >
+		<span class="nocolumn">
+			<input class="aligned_check" type='checkbox' id='ftp_wan_pasv' onclick='updateWanFtpVisibility()' />&nbsp;
+			<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_pasv'>Allow Passive FTP From WAN on ports</label>&nbsp;
+			<input type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_min_port'>&nbsp;-&nbsp;<input type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)'  id='pasv_max_port'>
+		</span>
+	</div>
+
+	<div id="ftp_wan_spacer" style="height:15px;"></div>
 
 	<div id="cifs_workgroup_container" style="margin-bottom:20px;" >
 		<label id="cifs_workgroup_label" class="leftcolumn" for="cifs_workgroup">CIFS Workgroup:</label>

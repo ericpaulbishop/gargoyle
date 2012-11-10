@@ -34,14 +34,19 @@ var sharePathToShareData = [];
 var badUserNames = [ "ftp", "anonymous", "root", "daemon", "network", "nobody" ];
 
 var ftpFirewallRule = "wan_ftp_server_command";
+var pasvFirewallRule = "wan_ftp_server_pasv";
 
 function saveChanges()
 {
 
 	//proofread
 	var errors = [];
-	var sambaGroup = document.getElementById("cifs_workgroup").value;
-	var ftpWanAccess = document.getElementById("ftp_wan_access").checked;
+	var sambaGroup   = document.getElementById("cifs_workgroup").value
+	var ftpWanAccess = document.getElementById("ftp_wan_access").checked
+	var ftpWanPasv   = document.getElementById("ftp_wan_pasv").checked
+	var pasvMin      = document.getElementById("pasv_min_port").value
+	var pasvMax      = document.getElementById("pasv_max_port").value
+
 	if( document.getElementById("shared_disks").style.display != "none")
 	{
 		if(sambaGroup == "")
@@ -54,6 +59,39 @@ function saveChanges()
 			if(conflict != "")
 			{
 				errors.push("Cannot enable WAN FTP access because port conflicts with " + conflict);
+			}
+		}
+		if(ftpWanAccess && ftpWanPasv)
+		{
+			var intPasvMin = parseInt(pasvMin)
+			var intPasvMax = parseInt(pasvMax)
+			var pasvValid = false
+			if( (!isNaN(intPasvMin)) && (!isNaN(intPasvMax)) )
+			{
+				if(intPasvMin < intPasvMax)
+				{
+					pasvValid = true
+				}
+			}
+			if(!pasvValid)
+			{
+				errors.push("Invalid FTP passive port range")
+			}
+			else
+			{
+				var oldPasvMin = uciOriginal.get("firewall", pasvFirewallRule, "start_port");
+				var oldPasvMax = uciOriginal.get("firewall", pasvFirewallRule, "end_port");
+				var ignorePorts = [];
+				if(oldPasvMin != "" && oldPasvMax != "")
+				{
+					ignorePorts["tcp"] = [];
+					ignorePorts["tcp"][oldPasvMin + "-" + oldPasvMax] = 1
+				}
+				var conflict = checkForPortConflict( "" + intPasvMin + "-" + intPasvMax, "tcp", ignorePorts )
+				if(conflict != "")
+				{
+					errors.push("Pasive FTP port range conflicts with " + conflict);
+				}
 			}
 		}
 	}
@@ -102,15 +140,28 @@ function saveChanges()
 	//update firewall
 	if(ftpWanAccess)
 	{
-		uci.set("firewall", ftpFirewallRule, "",            "remote_accept");
-		uci.set("firewall", ftpFirewallRule, "proto",       "tcp");
-		uci.set("firewall", ftpFirewallRule, "zone",        "wan");
+		uci.set("firewall", ftpFirewallRule, "",            "remote_accept")
+		uci.set("firewall", ftpFirewallRule, "proto",       "tcp")
+		uci.set("firewall", ftpFirewallRule, "zone",        "wan")
 		uci.set("firewall", ftpFirewallRule, "local_port",  "21")
 		uci.set("firewall", ftpFirewallRule, "remote_port", "21")
+		if(ftpWanPasv)
+		{
+			uci.set("firewall", pasvFirewallRule, "",           "remote_accept")
+			uci.set("firewall", pasvFirewallRule, "proto",      "tcp")
+			uci.set("firewall", pasvFirewallRule, "zone",       "wan")
+			uci.set("firewall", pasvFirewallRule, "start_port", pasvMin)
+			uci.set("firewall", pasvFirewallRule, "end_port",   pasvMax)
+		}
+		else
+		{
+			uci.removeSection("firewall", pasvFirewallRule);
+		}
 	}
 	else
 	{
 		uci.removeSection("firewall", ftpFirewallRule);
+		uci.removeSection("firewall", pasvFirewallRule);
 	}
 		
 	
@@ -218,10 +269,19 @@ function saveChanges()
 	uci.set("vsftpd", "global", "", "vsftpd")
 	uci.set("vsftpd", "global", "anonymous", (haveAnonymousFtp ? "yes" : "no"))
 	uci.set("vsftpd", "global", "anonymous_write", (haveAnonymousFtp ? "yes" : "no")) //write possible but write on individual share dirs set individually elsewhere
+	if(ftpWanPasv)
+	{
+		uci.set("vsftpd", "global", "pasv_min_port", pasvMin)
+		uci.set("vsftpd", "global", "pasv_max_port", pasvMax)
+	}
 
 
 	var postCommands = [];
-	if(uciOriginal.get("firewall", ftpFirewallRule, "local_port") != uci.get("firewall", ftpFirewallRule, "local_port"))
+	if(
+		uciOriginal.get("firewall", ftpFirewallRule,  "local_port") != uci.get("firewall", ftpFirewallRule,  "local_port") || 
+		uciOriginal.get("firewall", pasvFirewallRule, "start_port") != uci.get("firewall", pasvFirewallRule, "start_port") || 
+		uciOriginal.get("firewall", pasvFirewallRule, "end_port")   != uci.get("firewall", pasvFirewallRule, "end_port") 
+	)
 	{
 		postCommands.push("/etc/init.d/firewall restart");
 	}
@@ -478,6 +538,13 @@ function editUser()
 	runOnEditorLoaded();
 }
 
+function updateWanFtpVisibility()
+{
+	document.getElementById("ftp_pasv_container").style.display = document.getElementById("ftp_wan_access").checked ? "block" : "none"
+	var pasvCheck = document.getElementById("ftp_wan_pasv")
+	enableAssociatedField(pasvCheck, "pasv_min_port", 50990)
+	enableAssociatedField(pasvCheck, "pasv_max_port", 50999)
+}
 
 function resetData()
 {
@@ -485,10 +552,8 @@ function resetData()
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_unmount").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none"
-
-
-
-
+	
+	
 	if(storageDrives.length > 0)
 	{
 
@@ -497,7 +562,17 @@ function resetData()
 		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
 
 		// wan access to FTP
-		document.getElementById("ftp_wan_access").checked = uciOriginal.get("firewall", ftpFirewallRule, "local_port") == "21";
+		var wanFtp = uciOriginal.get("firewall", ftpFirewallRule, "local_port") == "21"
+		document.getElementById("ftp_wan_access").checked = wanFtp;
+		var pminText = document.getElementById("pasv_min_port");
+		var pmaxText = document.getElementById("pasv_max_port");
+		var pmin = uciOriginal.get("firewall", pasvFirewallRule, "start_port")
+		var pmax = uciOriginal.get("firewall", pasvFirewallRule, "end_port")
+		pminText.value = pmin == "" || pmax == "" ? 50990 : pmin;
+		pmaxText.value = pmin == "" || pmax == "" ? 50999 : pmax;
+		document.getElementById("ftp_wan_pasv").checked = (wanFtp && pmin != "" && pmax != "") || (!wanFtp); //enable pasv by default when WAN FTP access is selected
+		updateWanFtpVisibility()
+	
 
 		//share users
 		userNames = uciOriginal.getAllSectionsOfType("share_users", "user"); //global
