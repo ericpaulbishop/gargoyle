@@ -18,6 +18,7 @@ allowed_host_list=""
 update_allowed_host_list()
 {
 	local host="$1"
+	
 	if [ "$host" = "*" ] ; then
 		allowed_host_star_found="1"
 	else
@@ -29,16 +30,16 @@ update_allowed_host_list()
 
 add_export_line()
 {
-	local state="$1"
+	local share="$1"
 
 	vars="name path read_only sync insecure subtree_check"
 	for v in $vars ; do
-		config_get "$v" "$state" "$v"
+		config_get "$v" "$share" "$v"
 	done
 
 	allowed_host_star_found="0"
 	allowed_host_list=""
-	config_list_foreach "allowed_hosts" update_allowed_host_list
+	config_list_foreach "$share" "allowed_hosts" update_allowed_host_list
 
 
 	
@@ -49,8 +50,9 @@ add_export_line()
 		if [ "$secure" = "0" ] ; then secure="insecure" ; else secure="secure" ; fi
 		if [ "$subtree_check" = "0" ] ; then subtree_check="no_subtree_check" ; else subtree_check="subtree_check" ; fi
 		
-		if [ -z "$allowed_host_list" ] || [ "$allowed_hosts_star_found" = "1" ]; then allowed_host_list="*" ; fi
-		allowed_host_list=$( echo "$allowed_hosts" | sed 's/\*/\"*\"/g' )
+		if [ -z "$allowed_host_list" ] || [ "$allowed_host_star_found" = "1" ]; then allowed_host_list="*" ; fi
+		allowed_host_list=$( echo "$allowed_host_list" | sed 's/\*/"*"/g' )
+		
 	
 		ln -s "$path" "/nfs/$name"
 		for h in $allowed_host_list ; do
@@ -63,9 +65,7 @@ add_export_line()
 }
 
 start() {
-	
-	grep -q /proc/fs/nfsd /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd
-	
+
 	portmap_running=$(ps | grep "portmap" | grep -v "grep")
 	if [ -z "$portmap_running" ] ; then
 		/etc/init.d/portmap start
@@ -79,6 +79,7 @@ start() {
 	if [ ! -h /nfs ] ; then
 		ln -s /tmp/nfs /nfs		
 	fi
+
 
 	#build new exports file from uci
 	rm -rf /tmp/tmp_exports
@@ -101,6 +102,7 @@ start() {
 		mv /tmp/tmp_exports /etc/exports
 	fi
 
+
 	portmap_running=$(ps | grep "portmap" | grep -v "grep")
 	if [ -z "$portmap_running" ] ; then
 		echo "ERROR: Couldn't start portmap"
@@ -111,13 +113,20 @@ start() {
 	mkdir -p $LOCK_D
 	touch $NFS_D/rmtab
 
+
         sysctl -w fs.nfs.nlm_tcpport=32777 fs.nfs.nlm_udpport=32777 > /dev/null
 	service_start /usr/sbin/rpc.statd -p 32778 -o 32779
+
+
 	/usr/sbin/exportfs -r
 	/usr/sbin/rpc.nfsd
 	SERVICE_WRITE_PID=1 \
 	SERVICE_DAEMONIZE=1 \
 	service_start /usr/sbin/rpc.mountd -p 32780 -F
+
+	grep -q /proc/fs/nfsd /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd
+	
+
 }
 
 stop() {
