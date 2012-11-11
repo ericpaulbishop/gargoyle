@@ -272,8 +272,8 @@ create_allowed_client_conf()
 	openvpn_netmask=$(  awk ' $1 ~ /ifconfig/  { print $3 } ' /etc/openvpn/server.conf )
 	openvpn_cipher=$(   awk ' $1 ~ /cipher/    { print $2 } ' /etc/openvpn/server.conf )
 	openvpn_keysize=$(  awk ' $1 ~ /keysize/   { print $2 } ' /etc/openvpn/server.conf )
-	if [ "$openvpn_proto" = "tcp-server" ] ; then
-		openvpn_proto="tcp-client"
+	if [ "$openvpn_protocol" = "tcp-server" ] ; then
+		openvpn_protocol="tcp-client"
 	fi
 	if [ -z "$openvpn_keysize" ] && [ "$openvpn_cipher" = "BF-CBC" ] ; then openvpn_keysize="128" ; fi
 	if [ -n "$openvpn_keysize" ] ; then openvpn_keysize="keysize               $openvpn_keysize" ; fi
