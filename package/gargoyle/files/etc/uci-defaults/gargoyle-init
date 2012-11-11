@@ -52,8 +52,8 @@ uci commit
 curdate=$(date -u +%s)
 if [ $curdate -lt 978307200 ] ; then
 	date -u -s 2001.01.01-00:00:01
-	mkdir /data
-	echo "2001.01.01-00:00:01" >/data/time_backup
+	mkdir -p /usr/data
+	echo "2001.01.01-00:00:01" >/usr/data/time_backup
 fi
 
 
