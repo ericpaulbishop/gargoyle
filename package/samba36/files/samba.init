@@ -108,8 +108,8 @@ smb_add_share()
 	rw_user_list=""
 	ro_user_list=""
 	all_user_list=""
-	config_list_foreach users_ro $1 add_user_to_lists "ro"
-	config_list_foreach users_rw $1 add_user_to_lists "rw"
+	config_list_foreach $1 users_ro add_user_to_lists "ro"
+	config_list_foreach $1 users_rw add_user_to_lists "rw"
 
 
 	[ -z "$name" -o -z "$path" ] && return
