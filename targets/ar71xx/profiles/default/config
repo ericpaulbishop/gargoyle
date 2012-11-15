@@ -1889,7 +1889,7 @@ CONFIG_PACKAGE_kmod-ath=y
 #
 # Configuration
 #
-# CONFIG_ATH_USER_REGD is not set
+CONFIG_ATH_USER_REGD=y
 # CONFIG_PACKAGE_ATH_DEBUG is not set
 # CONFIG_PACKAGE_kmod-ath5k is not set
 CONFIG_PACKAGE_kmod-ath9k=y
