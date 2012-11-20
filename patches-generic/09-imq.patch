@@ -2202,9 +2202,9 @@
 --- a/target/linux/generic/config-3.3	2012-08-27 02:10:23.477828683 -0400
 +++ b/target/linux/generic/config-3.3	2012-08-28 07:45:37.072127611 -0400
 @@ -3468,3 +3468,8 @@
+ CONFIG_ZONE_DMA=y
  CONFIG_ZONE_DMA_FLAG=1
  # CONFIG_ZRAM is not set
- # CONFIG_SIGMA is not set
 +CONFIG_IMQ_NUM_DEVS=2
 +# CONFIG_IMQ_BEHAVIOR_AA is not set
 +# CONFIG_IMQ_BEHAVIOR_AB is not set
