@@ -258,12 +258,12 @@ insert_dmz_rule()
 			config_get $var $1 $var
 		done
 		if [ -n "$from" ] ; then
-			from_if=$(uci -p /tmp/state get network.$from.ifname)
+			from_if=$(uci -q -p /tmp/state get network.$from.ifname)
 		fi
-		echo "from_if = $from_if"
+		# echo "from_if = $from_if"
 		if [ -n "$to_ip" ] && [ -n "$from"  ] && [ -n "$from_if" ] ; then
 			iptables -t nat -A prerouting_wan -i $from_if -j DNAT --to-destination $to_ip
-			echo "iptables -t nat -A "prerouting_"$from -i $from_if -j DNAT --to-destination $to_ip"
+			# echo "iptables -t nat -A "prerouting_"$from -i $from_if -j DNAT --to-destination $to_ip"
 			iptables -t filter -I "zone_"$from"_forward" -d $to_ip -j ACCEPT
 		fi
 	}
