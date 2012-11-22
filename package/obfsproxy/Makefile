@@ -2,16 +2,21 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=obfsproxy
 
-PKG_VERSION:=0.1
+PKG_VERSION:=0.1.4
 PKG_RELEASE:=1
-
-LAST_COMMIT_FOR_VERSION=a58146de85899f73a2c8b9abe3b8de8b6cb25dc8
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 PKG_FIXUP:=autoreconf
 
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=git://gitweb.torproject.org/obfsproxy.git
+PKG_SOURCE_VERSION:=obfsproxy-0.1.4
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_SUBDIR:=obfsproxy
+
 include $(INCLUDE_DIR)/package.mk
+
 
 define Package/obfsproxy
 	TITLE:=Tor obfsproxy Plugin
@@ -19,20 +24,16 @@ define Package/obfsproxy
 	CATEGORY:=Network
 	DEPENDS:=+libevent2 +libopenssl +libpthread +librt
 	URL:=https://www.torproject.org/projects/obfsproxy-instructions.html
+
 endef
 
 define Package/obfsproxy/Default/description
-	Tor obfsproxy Plugin
+	obfsproxy is a tool that attempts to circumvent censorship, by transforming
+	the Tor traffic between the client and the bridge. This way, censors, who
+	usually monitor traffic between the client and the bridge, will see
+	innocent-looking transformed traffic instead of the actual Tor traffic.
 endef
 
-
-define Build/Prepare
-	mkdir -p $(PKG_BUILD_DIR)
-	rmdir  $(PKG_BUILD_DIR)
-	git clone https://git.torproject.org/obfsproxy.git $(PKG_BUILD_DIR)
-	cd $(PKG_BUILD_DIR) && git checkout $(LAST_COMMIT_FOR_VERSION) && rm -rf ./.git
-	$(Build/Patch)
-endef
 
 
 CONFIGURE_ARGS += \

@@ -1,10 +1,8 @@
-diff --git a/src/main.c b/src/main.c
-index 0d690b7..8f28d4e 100644
---- a/src/main.c
-+++ b/src/main.c
-@@ -31,6 +31,15 @@
- #include <event2/event.h>
- #include <event2/dns.h>
+--- a/src/main.c	2012-11-22 04:27:43.013477197 -0500
++++ obfsproxy/src/main.c	2012-11-22 04:26:59.584800903 -0500
+@@ -41,6 +41,15 @@
+ #endif
+   "";
  
 +
 +#ifdef HAVE_UNISTD_H 
@@ -18,9 +16,9 @@ index 0d690b7..8f28d4e 100644
  static struct event_base *the_event_base;
  static struct event *sig_int;
  static struct event *sig_term;
-@@ -41,6 +50,70 @@ static int is_external_proxy=1;
- /* Whether to scrub connection addresses -- on by default */
- int safe_logging=1;
+@@ -67,6 +76,72 @@
+   return the_obfsproxy_version;
+ }
  
 +
 +#ifdef HAVE_UNISTD_H 
@@ -34,6 +32,7 @@ index 0d690b7..8f28d4e 100644
 +{
 +
 +  //fork and end parent process
++  FILE* fp = NULL;
 +  int i=fork();
 +  if (i != 0)
 +  {  
@@ -57,9 +56,10 @@ index 0d690b7..8f28d4e 100644
 +    close(i);
 +  }
 +
-+  freopen( "/dev/null", "r", stdin);
-+  freopen( "/dev/null", "w", stdout);
-+  freopen( "/dev/null", "w", stderr);
++  fp = freopen( "/dev/null", "r", stdin);
++  fp = freopen( "/dev/null", "w", stdout);
++  fp = freopen( "/dev/null", "w", stderr);
++  if(fp) { i++; };
 +
 +  // record pid to lockfile, if pid is specified
 +  if(pid_path[0] != '\0')
@@ -89,7 +89,7 @@ index 0d690b7..8f28d4e 100644
  /**
     Prints the obfsproxy usage instructions then exits.
  */
-@@ -55,6 +128,11 @@ usage(void)
+@@ -81,6 +156,11 @@
    for (i=0;i<n_supported_protocols;i++)
      fprintf(stderr,"[%s] ", supported_protocols[i]->name);
    fprintf(stderr, "\n* obfsproxy_args:\n"
@@ -101,7 +101,7 @@ index 0d690b7..8f28d4e 100644
            "--log-file=<file> ~ set logfile\n"
            "--log-min-severity=warn|notice|info|debug ~ "
            "set minimum logging severity (default: notice)\n"
-@@ -144,6 +222,12 @@ handle_obfsproxy_args(const char *const *argv)
+@@ -185,6 +265,12 @@
    int logsev_set=0;
    int i=1;
  
@@ -114,7 +114,7 @@ index 0d690b7..8f28d4e 100644
    while (argv[i] &&
           !strncmp(argv[i],"--",2)) {
      if (!strncmp(argv[i], "--log-file=", 11)) {
-@@ -175,6 +259,22 @@ handle_obfsproxy_args(const char *const *argv)
+@@ -216,6 +302,22 @@
        safe_logging=0;
      } else if (!strncmp(argv[i], "--managed", 10)) {
        is_external_proxy=0;
@@ -134,27 +134,30 @@ index 0d690b7..8f28d4e 100644
 +    } else if (!strncmp(argv[i], "--daemonize", 12)) {
 +      is_daemon = 1;
 +#endif
-     } else {
-       log_error("Unrecognizable obfsproxy argument '%s'", argv[i]);
-     }
-@@ -279,6 +379,16 @@ obfsproxy_cleanup()
-   cleanup_crypto();
-   status_connections_cleanup();
-   close_obfsproxy_logfile();
+     } else if (!strncmp(argv[i], "--version", 10)) {
+       version();
+     } else if (!strncmp(argv[i], "--help", 7)) {
+@@ -327,6 +429,19 @@
+ 
+   if (the_obfsproxy_version)
+     free(the_obfsproxy_version);
++
 +
 +#ifdef HAVE_UNISTD_H 
 +  if(is_daemon == 1 && daemon_pid[0] != '\0')
 +  {
-+    lockf(daemon_pid_file,F_ULOCK,0);
++    int lockr = lockf(daemon_pid_file,F_ULOCK,0);
 +    close(daemon_pid_file);
 +    unlink(daemon_pid);
++    lockr++;
 +  }
 +#endif
 +
++
  }
  
- 
-@@ -290,6 +400,13 @@ obfs_main(int argc, const char *const *argv)
+ /** Entry point */
+@@ -337,6 +452,13 @@
  
    /* Handle optional obfsproxy arguments. */
    begin = argv + handle_obfsproxy_args(argv);
@@ -165,6 +168,6 @@ index 0d690b7..8f28d4e 100644
 +  }
 +#endif
 +
-   log_notice("Starting.");
+   log_notice("Starting (obfsproxy version: %s).", get_version());
  
    if (is_external_proxy) {
