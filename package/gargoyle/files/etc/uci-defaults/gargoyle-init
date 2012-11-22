@@ -80,9 +80,3 @@ EOF
 
 
 
-#create original backup
-sh /usr/lib/gargoyle/create_backup.sh
-mkdir /etc/original_backup
-cp /tmp/backup/backup.tar.gz /etc/original_backup/backup.tar.gz
-
-
