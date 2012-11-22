@@ -27,7 +27,7 @@
 +set system.reset_button=button
 +set system.reset_button.button='reset'
 +set system.reset_button.action='released'
-+set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
 +set system.reset_button.min='3'
 +set system.reset_button.max='90'
 +commit system
@@ -45,7 +45,7 @@
 +set system.reset_button=button
 +set system.reset_button.button='reset'
 +set system.reset_button.action='released'
-+set system.reset_button.handler='logger restore defaults ; /usr/lib/gargoyle/restore.sh /etc/original_backup/backup.tar.gz 1 ; reboot ;'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
 +set system.reset_button.min='13'
 +set system.reset_button.max='33'
 +commit system

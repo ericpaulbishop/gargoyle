@@ -7,6 +7,6 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 
-	firstboot >/dev/null 2>&1
+	/sbin/firstboot >/dev/null 2>&1
 	
 ?>
