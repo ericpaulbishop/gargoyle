@@ -82,7 +82,7 @@ start()
 
 		use_bridge_ip=$(uci get tor.client.use_bridge_ip 2>/dev/null)
 		use_bridge_port=$(uci get tor.client.use_bridge_port 2>/dev/null)
-		use_bridge_opbfsproxy=$(uci get tor.client.use_bridge_obfsproxy 2>/dev/null)
+		use_bridge_obfsproxy=$(uci get tor.client.use_bridge_obfsproxy 2>/dev/null)
 		if [ -n "$use_bridge_ip" ] && [ -n "$use_bridge_port" ] ; then
 			if [ "$use_bridge_obfsproxy" = "1" ] ; then
 				OPTIONS="$OPTIONS --UseBridges 1 --Bridge 'obfs2 $use_bridge_ip:$use_bridge_port' --ClientTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy --managed' "
