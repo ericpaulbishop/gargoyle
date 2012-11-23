@@ -14,7 +14,7 @@
 <!--
 <?
 	echo 'var monitorNames = new Array();'
-	mnames=$(cat /tmp/bw_backup/*.sh | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
+	mnames=$(cat /tmp/bw_backup/*.sh 2>/dev/null | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
 	for m in $mnames ; do 
 		echo "monitorNames.push(\"$m\");"
 	done
