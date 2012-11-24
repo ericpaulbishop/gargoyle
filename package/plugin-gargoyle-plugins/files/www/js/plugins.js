@@ -58,6 +58,7 @@ function resetData()
 	}
 	else
 	{
+		pluginsTableData.sort();
 		var tableContainer = document.getElementById('packages_table_container');
 		if(tableContainer.firstChild != null)
 		{
