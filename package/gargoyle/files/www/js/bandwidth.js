@@ -469,7 +469,7 @@ function getDisplayIp(realIp)
 function getRealIp(displayIp)
 {
 	var rip = displayIp
-	if(rip != null && currentWanIp != null && currentLanIp != null && rip != "")
+	if(rip != null && currentWanIp != null && currentLanIp != null && currentWanIp != "" && currentLanIp != "" && rip != "")
 	{
 		rip = rip == currentLanIp ? currentWanIp : rip;
 	}
