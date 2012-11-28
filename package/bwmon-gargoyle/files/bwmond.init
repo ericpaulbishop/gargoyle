@@ -270,16 +270,24 @@ start()
 
 stop()
 {
-	touch /etc/crontabs/root
+	#check that we aren't already stopped before backing up data
+	have_up=$(iptables   -t "$upload_table"   -L "$upload_chain" 2>/dev/null)
+	have_down=$(iptables -t "$download_table" -L "$download_chain" 2>/dev/null)
+	if [ -n "$have_up" ] || [ -n "$have_down" ] ; then
+		sh "$backup_script" 2>/dev/null
+		rm -rf "$backup_script"
 
-	sh "$backup_script" 2>/dev/null
-	rm -rf "$backup_script"
-
-	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
-	update_cron
+		touch /etc/crontabs/root
+		grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
+		update_cron
 	
-	delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
-	delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
+		if [ -n "$have_up" ] ; then
+			delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
+		fi
+		if [ -n "$have_down" ] ; then
+			delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
+		fi
+	fi
 }
 
 restart()

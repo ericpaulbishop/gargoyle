@@ -17,7 +17,7 @@ if [ "$INTERFACE" = "wan" ]; then
 
 		#Start up the bandwidth monitor which depends on the device name
 		if [ -h /etc/rc.d/S55bwmon_gargoyle ] ; then
-      			/etc/init.d/bwmon_gargoyle start
+      			/etc/init.d/bwmon_gargoyle restart
 		fi
 	fi
 
