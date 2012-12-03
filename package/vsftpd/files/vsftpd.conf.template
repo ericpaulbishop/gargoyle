@@ -1,6 +1,6 @@
 anon_mkdir_write_enable=yes
 anon_other_write_enable=yes
-anon_umask=022
+anon_umask=777
 anon_upload_enable=yes
 anon_world_readable_only=no
 background=yes
@@ -15,7 +15,7 @@ hide_ids=no
 listen_port=21
 listen=yes
 local_enable=yes
-local_umask=022
+local_umask=777
 syslog_enable=yes
 user_config_dir=/tmp/vsftpd/users
 userlist_deny=no
