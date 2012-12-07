@@ -84,7 +84,6 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://checkmyip.com",
 							"http://www.ipchicken.com",
 							"http://www.tracemyip.org",
-							"http://cmyip.com",
 							"http://checkip.dyndns.org",
 							"http://checkip.org", 
 							"http://automation.whatismyip.com/n09230945.asp",
