@@ -25,6 +25,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <getopt.h>
+#include <regex.h>
 
 #include "erics_tools.h"
 
@@ -34,15 +36,23 @@ typedef struct opkg_conf_struct
 	list* dest_roots;
 } opkg_conf;
 
+string_map* load_parameters(int argc, char** argv);
 opkg_conf* load_conf(char* conf_file_name);
 void free_conf(opkg_conf* conf);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, char** load_variables);
 int file_exists(const char* path);
+void print_usage(void);
+int convert_to_regex(char* str, regex_t* p);
 
 int main(int argc, char** argv)
 {
-	//load conf_file as argument
+
+	string_map* parameters = load_parameters(argc, argv);
+
+
 	char* conf_file_name = strdup("/etc/opkg.conf");
+
+	//load conf_file
 	opkg_conf* conf = load_conf(conf_file_name);
 	
 	//main data variable
@@ -94,6 +104,171 @@ int main(int argc, char** argv)
 	free(conf);
 	
 	return 0;
+}
+
+string_map* load_parameters(int argc, char** argv)
+{
+	//requires: --packages/-p OR -packages-matching/-m
+	//requires one or more of: --will-fit/-f [dest], --required-depends/-d, --required-size/-s, --install-destination/-i, --user-installed/-u, --version/-v, --install-time/-t, description/-e
+	//optional: --config/-c, --json/-j, --javascript/-a
+
+	/*
+	static struct option long_options[] = {
+		{"test1", 0, 0, 'a'},
+		{"test2", 0, 0, 0},
+		{NULL, 0, NULL, 0}
+	};
+	int option_index;
+	int c;
+	while ((c = getopt_long(argc, argv, "ab", long_options, &option_index)) != -1)
+	{
+		if(c == 0 )
+		{
+			printf ("found option %s\n", long_options[option_index].name );
+		}
+		else
+		{
+			printf ("found option %c\n", c);
+		}
+	}
+	*/
+	
+
+	
+	string_map* parameters = initialize_string_map(1);
+	static struct option long_options[] = {
+		{"packages",            1, 0, 'p'},
+		{"packages-matching",   1, 0, 'm'},
+		{"will-fit",            1, 0, 'f'},
+		{"required-depends",    0, 0, 'd'},
+		{"required-size",       0, 0, 's'},
+		{"install-destination", 0, 0, 'i'},
+		{"user-installed",      0, 0, 'u'},
+		{"version",             0, 0, 'v'},
+		{"time-installed",      0, 0, 't'},
+		{"description",         0, 0, 'e'},
+		{"config",              1, 0, 'c'},
+		{"json",                0, 0, 'j'},
+		{"javascript",          0, 0, 'a'},
+		{NULL, 0, NULL, 0}
+	};
+	int option_index;
+	int c;
+	while ((c = getopt_long(argc, argv, "p:m:f:dsiuvtec:ja", long_options, &option_index)) != -1)
+	{
+		regex_t* packages_matching_regex = NULL;
+		char* regex_str = NULL;
+		int regex_len = 0;
+		int valid_regex = 0;
+		char** package_list = NULL;
+		char package_separators[] = { ' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+		unsigned long num_pieces;
+		switch(c)
+		{
+			case 'p':
+				package_list = split_on_separators(optarg, package_separators, 9, -1, 0, &num_pieces);
+				if(num_pieces == 0)
+				{
+					fprintf(stderr, "ERROR: list of packages to display appears to be empty");
+					exit(1);
+				}
+				set_string_map_element(parameters, "packages", package_list);
+				break;
+			case 'm':
+				packages_matching_regex = (regex_t*)malloc(sizeof(regex_t));
+				regex_str = strdup(optarg);
+				regex_len = strlen(regex_str);
+				if(regex_str[0] != '/' || regex_str[regex_len-1] != '/')
+				{
+					free(regex_str);
+					regex_str=dynamic_strcat(3, "/", optarg, "/");
+				}
+				if( convert_to_regex(regex_str, packages_matching_regex) )
+				{
+					free(regex_str);
+					set_string_map_element(parameters, "packages-matching", packages_matching_regex);
+				}
+				else
+				{
+					fprintf(stderr, "ERROR: Invalid regular expression \"%s\"\n", optarg);
+					exit(1);
+				}
+
+				break;
+			case 'f':
+				set_string_map_element(parameters, "will-fit", strdup(optarg));
+				break;
+			case 'd':
+				set_string_map_element(parameters, "required-depends", strdup("D"));
+				break;
+			case 's':
+				set_string_map_element(parameters, "required-size", strdup("D"));
+				break;
+			case 'i':
+				set_string_map_element(parameters, "install-destination", strdup("D"));
+				break;
+			case 'u':
+				set_string_map_element(parameters, "user-installed", strdup("D"));
+				break;
+			case 'v':
+				set_string_map_element(parameters, "version", strdup("D"));
+				break;
+			case 't':
+				set_string_map_element(parameters, "time-installed", strdup("D"));
+				break;
+			case 'e':
+				set_string_map_element(parameters, "description", strdup("D"));
+				break;
+			case 'c':
+				set_string_map_element(parameters, "config", strdup(optarg));
+				break;
+			case 'j':
+				set_string_map_element(parameters, "json", strdup("D"));
+				break;
+			case 'a':
+				set_string_map_element(parameters, "javascript", strdup("D"));
+				break;
+			default:
+				print_usage();
+				exit(0);
+		}
+	}
+
+
+
+	if( get_string_map_element(parameters, "packages-matching") != NULL)
+	{
+		regex_t* r = get_string_map_element(parameters, "packages-matching");
+		int matches = regexec(r, "plugin-gargoyle-boogabooga", 0, NULL, 0) == 0  ? 1 : 0;
+		if(matches)
+		{
+			printf("it matches\n");
+		}
+		else
+		{
+			printf("it doesn't match\n");
+		}
+
+	}
+
+
+
+
+	
+
+
+
+	exit(0);
+
+	return parameters;
+
+}
+
+
+
+void print_usage(void)
+{
+
 }
 
 
@@ -278,4 +453,94 @@ int file_exists(const char* path)
 	return (stat(path,&sbuf) == 0 ? 1 : 0);
 }
 
+int convert_to_regex(char* str, regex_t* p)
+{
+	char* trimmed = trim_flanking_whitespace(strdup(str));
+	int trimmed_length = strlen(trimmed);
+	
+	int valid = 1;
+	//regex must be defined by surrounding '/' characters
+	if(trimmed[0] != '/' || trimmed[trimmed_length-1] != '/')
+	{
+		valid = 0;
+		free(trimmed);
+	}
 
+	char* new = NULL;
+	if(valid == 1)
+	{
+		char* internal = (char*)malloc(trimmed_length*sizeof(char));
+		int internal_length = trimmed_length-2;	
+		memcpy(internal, trimmed+1, internal_length);
+		internal[internal_length] = '\0';
+		free(trimmed);
+
+		new = (char*)malloc(trimmed_length*sizeof(char));
+		int new_index = 0;
+		int internal_index = 0;
+		char previous = '\0';
+		while(internal[internal_index] != '\0' && valid == 1)
+		{
+			char next = internal[internal_index];
+			if(next == '/' && previous != '\\')
+			{
+				valid = 0;
+			}
+			else if((next == 'n' || next == 'r' || next == 't' || next == '/') && previous == '\\')
+			{
+				char previous2 = '\0';
+				if(internal_index >= 2)
+				{
+					previous2 = internal[internal_index-2];
+				}
+
+				new_index = previous2 == '\\' ? new_index : new_index-1;
+				switch(next)
+				{
+					case 'n':
+						new[new_index] = previous2 == '\\' ? next : '\n';
+						break;
+					case 'r':
+						new[new_index] = previous2 == '\\' ? next : '\r';
+						break;
+					case 't':
+						new[new_index] = previous2 == '\\' ? next : '\t';
+						break;
+					case '/':
+						new[new_index] = previous2 == '\\' ? next : '/';
+						break;
+				}
+				previous = '\0';
+				internal_index++;
+				new_index++;
+
+			}
+			else
+			{
+				new[new_index] = next;
+				previous = next;
+				internal_index++;
+				new_index++;
+			}
+		}
+		new[new_index] = '\0';
+		if(previous == '\\')
+		{
+			valid = 0;
+			free(new);
+			new = NULL;
+		}
+		free(internal);
+	}
+	if(valid == 1)
+	{
+		valid = regcomp(p,new,REG_EXTENDED) == 0 ? 1 : 0;
+		if(valid == 0)
+		{
+			regfree(p);
+		}
+		free(new);
+	}
+	
+	return valid;	
+}
