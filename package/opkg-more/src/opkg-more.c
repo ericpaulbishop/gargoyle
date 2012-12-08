@@ -67,7 +67,6 @@ int main(int argc, char** argv)
 		}
 		free(status_path);
 	}
-	free_null_terminated_string_array(dests);	
 
 
 
@@ -81,7 +80,6 @@ int main(int argc, char** argv)
 	printf("conf_file = %s\n", conf_file_name);
 	printf("lists_dir = %s\n", conf->lists_dir);
 
-	dests = (char**)get_list_values(conf->dest_roots, &num_dests);
 	int i;
 	printf("\n\ndests:\n");
 	for(i=0; i < num_dests; i++)
@@ -91,6 +89,7 @@ int main(int argc, char** argv)
 	
 
 	//cleanup
+	free_null_terminated_string_array(dests);	
 	free(conf_file_name);
 	free(conf);
 	
