@@ -33,16 +33,17 @@
 typedef struct opkg_conf_struct
 {
 	char* lists_dir;
-	list* dest_roots;
+	string_map* dest_roots;
 } opkg_conf;
 
 string_map* load_parameters(int argc, char** argv);
 opkg_conf* load_conf(char* conf_file_name);
 void free_conf(opkg_conf* conf);
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, char** load_variables);
 int file_exists(const char* path);
 void print_usage(void);
 int convert_to_regex(char* str, regex_t* p);
+
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables);
 
 int main(int argc, char** argv)
 {
@@ -50,10 +51,8 @@ int main(int argc, char** argv)
 	string_map* parameters = load_parameters(argc, argv);
 
 
-	char* conf_file_name = strdup("/etc/opkg.conf");
-
 	//load conf_file
-	opkg_conf* conf = load_conf(conf_file_name);
+	opkg_conf* conf = load_conf(get_string_map_element(parameters, "config"));
 	
 	//main data variable
 	string_map* package_data = initialize_string_map(1);
@@ -62,44 +61,44 @@ int main(int argc, char** argv)
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
 	char* load_variables[] = { "Depends", "Installed-Size", "Status", NULL };
-	load_package_data(conf->lists_dir, 1, package_data, load_variables);
+	//load_package_data(conf->lists_dir, 1, package_data, load_variables);
+	//void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables)
 	
 	//load status data
 	unsigned long num_dests;
 	int dest_index =0;
-	char** dests = (char**)get_list_values(conf->dest_roots, &num_dests);
+	char** dest_paths = (char**)get_string_map_keys(conf->dest_roots, &num_dests);
 	for(dest_index=0; dest_index < num_dests; dest_index++)
 	{
-		char* status_path = dynamic_strcat(3, dests[dest_index], "/", "status");
+		char* status_path = dynamic_strcat(3, dest_paths[dest_index], "/", "status");
 		if(file_exists(status_path))
 		{
-			load_package_data(status_path, 0, package_data, load_variables);
+			//load_package_data(status_path, 0, package_data, load_variables);
 		}
 		free(status_path);
 	}
-
-
-
 	
-
-
-
-
-
 	
-	printf("conf_file = %s\n", conf_file_name);
+	
+	
+	
+	
+	
+	
+	
+	
 	printf("lists_dir = %s\n", conf->lists_dir);
-
+	
 	int i;
 	printf("\n\ndests:\n");
 	for(i=0; i < num_dests; i++)
 	{
-		printf("\t%s\n", dests[i]);
+		printf("\t%s\n", dest_paths[i]);
 	}
 	
 
 	//cleanup
-	free_null_terminated_string_array(dests);	
+	free_null_terminated_string_array(dest_paths);	
 	free(conf_file_name);
 	free(conf);
 	
@@ -111,27 +110,6 @@ string_map* load_parameters(int argc, char** argv)
 	//requires: --packages/-p OR -packages-matching/-m
 	//requires one or more of: --will-fit/-f [dest], --required-depends/-d, --required-size/-s, --install-destination/-i, --user-installed/-u, --version/-v, --install-time/-t, description/-e
 	//optional: --config/-c, --json/-j, --javascript/-a
-
-	/*
-	static struct option long_options[] = {
-		{"test1", 0, 0, 'a'},
-		{"test2", 0, 0, 0},
-		{NULL, 0, NULL, 0}
-	};
-	int option_index;
-	int c;
-	while ((c = getopt_long(argc, argv, "ab", long_options, &option_index)) != -1)
-	{
-		if(c == 0 )
-		{
-			printf ("found option %s\n", long_options[option_index].name );
-		}
-		else
-		{
-			printf ("found option %c\n", c);
-		}
-	}
-	*/
 	
 
 	
@@ -234,32 +212,31 @@ string_map* load_parameters(int argc, char** argv)
 		}
 	}
 
-
-
-	if( get_string_map_element(parameters, "packages-matching") != NULL)
+	if(get_string_map_element(parameters, "config") == NULL)
 	{
-		regex_t* r = get_string_map_element(parameters, "packages-matching");
-		int matches = regexec(r, "plugin-gargoyle-boogabooga", 0, NULL, 0) == 0  ? 1 : 0;
-		if(matches)
-		{
-			printf("it matches\n");
-		}
-		else
-		{
-			printf("it doesn't match\n");
-		}
-
+		set_string_map_element(parameters, "config", strdup("/etc/opkg.conf"));
 	}
-
-
-
+	if(get_string_map_element(parameters, "packages") == NULL && get_string_map_element(parameters, "packages-matching") == NULL)
+	{
+		fprintf(stderr, "ERROR: You must specify either --packages or --packages-matching\n");
+		exit(1);
+	}
+	if(
+		get_string_map_element(parameters, "will-fit")            == NULL &&
+		get_string_map_element(parameters, "required-depends")    == NULL &&
+		get_string_map_element(parameters, "required-size")       == NULL &&
+		get_string_map_element(parameters, "install-destination") == NULL &&
+		get_string_map_element(parameters, "user-installed")      == NULL &&
+		get_string_map_element(parameters, "version")             == NULL &&
+		get_string_map_element(parameters, "time-installed")      == NULL &&
+		get_string_map_element(parameters, "description")         == NULL
+		)
+	{
+		fprintf(stderr, "ERROR: You must specify at least one argument specifying what package information to display\n");
+		exit(1);
+	}		
 
 	
-
-
-
-	exit(0);
-
 	return parameters;
 
 }
@@ -275,7 +252,7 @@ void print_usage(void)
 opkg_conf* load_conf(char* conf_file_name)
 {
 	opkg_conf* conf = (opkg_conf*)malloc(sizeof(opkg_conf));
-	conf->dest_roots = initialize_list();
+	conf->dest_roots = initialize_string_map(1);
 	conf->lists_dir = strdup("/usr/lib/opkg/lists");
 
 	FILE* conf_file =  fopen(conf_file_name, "r");
@@ -299,7 +276,8 @@ opkg_conf* load_conf(char* conf_file_name)
 			{
 				if(strstr(split_line[0], "dest") == split_line[0])
 				{
-					push_list(conf->dest_roots, strdup(split_line[num_pieces-1]));
+					//key = file path, value = name
+					set_string_map_element(conf->dest_roots, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
 				}
 				else if(strstr(split_line[0], "lists_dir") == split_line[0])
 				{
@@ -324,19 +302,26 @@ void free_conf(opkg_conf* conf)
 {
 	unsigned long num_freed;
 	free(conf->lists_dir);
-	destroy_list(conf->dest_roots, DESTROY_MODE_FREE_VALUES, &num_freed);
+	destroy_string_map(conf->dest_roots, DESTROY_MODE_FREE_VALUES, &num_freed);
 	free(conf);
 }
 
-
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, char** load_variables)
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables)
 {
+	regex_t* match_regex = get_string_map_element(parameters, "packages-matching");
+	string_map* matching_list = get_string_map_element(parameters, "packages");
+
 	string_map* load_variable_map = initialize_string_map(0);
 	int load_var_index=0;
-	char* dummy = strdup("D");
-	for(load_var_index=0; load_variables[load_var_index] != NULL; load_var_index++)
+	char* all_dummy = strdup("A");
+	char* matching_dummy = strdup("M");
+	for(load_var_index=0; load_matching_variables[load_var_index] != NULL; load_var_index++)
 	{
-		set_string_map_element(load_variable_map, load_variables[load_var_index], dummy);
+		set_string_map_element(load_variable_map, load_matching_variables[load_var_index], matching_dummy);
+	}
+	for(load_var_index=0; load_all_variables[load_var_index] != NULL; load_var_index++)
+	{
+		set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
 	}
 
 	list* file_list = initialize_list();
@@ -377,6 +362,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		string_map* next_pkg_data = NULL;
 		char next_line[16384];
 		int read_data = 1;
+		int next_package_matches = 0;
 		while(read_data > 0)
 		{
 			read_data = 0;
@@ -391,6 +377,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 				char *key = next_line;
 				char *val = strchr(next_line, ':');
 				char *end = val;
+				char* var_type;
 				if(val != NULL)
 				{
 					while( val[0] == ':' || val[0] == ' ' || val[0] == '\t')
@@ -419,11 +406,22 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 							next_pkg_data = initialize_string_map(1);
 							set_string_map_element(existing_package_data, val, next_pkg_data);
 						}
+						if(match_regex != NULL)
+						{
+							next_package_matches = regexec(match_regex, val, 0, NULL, 0) == 0  ? 1 : 0;
+						}
+						else
+						{
+							next_package_matches = get_string_map_element(matching_list, "val") != NULL ?  1 : 0;
+						}
 					}
-					else if( get_string_map_element(load_variable_map, key) != NULL)
+					else if( (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
 					{
-						void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
-						if(old_val != NULL) { free(old_val); }
+						if(var_type[0] == 'A' || next_package_matches == 1)
+						{
+							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
+							if(old_val != NULL) { free(old_val); }
+						}
 					}
 
 
@@ -436,14 +434,11 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	}
 
 
-
-
-
-
 	unsigned long num_destroyed;
 	destroy_list(file_list, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(load_variable_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-	free(dummy);
+	free(all_dummy);
+	free(matching_dummy);
 }
 
 
