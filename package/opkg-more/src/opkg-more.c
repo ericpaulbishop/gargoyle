@@ -28,14 +28,15 @@
 #include <getopt.h>
 #include <regex.h>
 #include <stdint.h>
+#include <sys/statvfs.h>
 
 #include "erics_tools.h"
 
 
 #if __SIZEOF_POINTER__ == 8
-	#define SSCANF64 "%lu"
+	#define SCANFU64 "%lu"
 #else
-	#define SSCANF64 "%llu"
+	#define SCANFU64 "%llu"
 #endif
 
 
@@ -44,6 +45,7 @@ typedef struct opkg_conf_struct
 	char* lists_dir;
 	string_map* dest_roots;
 } opkg_conf;
+
 
 string_map* load_parameters(int argc, char** argv);
 opkg_conf* load_conf(char* conf_file_name);
@@ -115,32 +117,47 @@ int main(int argc, char** argv)
 	output_type     = get_string_map_element(parameters, "json")       ? 1 : output_type;  //json
 	output_type     = get_string_map_element(parameters, "javascript") ? 2 : output_type;  //javascript
 	
+	char** print_variables        = (char**)get_string_map_element(parameters, "print_variables");
+	char** print_variable_formats = (char**)get_string_map_element(parameters, "print_variable_formats");
 	if(output_type == 0)
 	{
 		for(match_index=0; match_array[match_index] != NULL ; match_index++)
 		{
 			string_map* info = get_string_map_element(package_data, match_array[match_index]);
-			uint64_t* required_size = (uint64_t*)get_string_map_element(info, "Required-Size");
-			printf("Package: %s\nSize: " SSCANF64 "\n\n", match_array[match_index], *required_size);
+			int print_index;
+			printf("Package: %s\n", match_array[match_index]);
+			for(print_index=0; print_variables[print_index] != NULL ; print_index++)
+			{
+				char* var_name = print_variables[print_index];
+				void* var = get_string_map_element(info, var_name);
+				if(var != NULL && print_variable_formats[print_index][0] == '%')
+				{
+					if(print_variable_formats[print_index][1] == 's')
+					{
+						printf("\t%s: %s\n", var_name, (char*)var);
+					}
+					else if(print_variable_formats[print_index][1] == 'l')
+					{
+						printf("\t%s: " SCANFU64 "\n", var_name, *((uint64_t*)var));
+					}
+				}
+				else if(var != NULL && print_variable_formats[print_index][0] == 'M')
+				{
+					unsigned long num_deps;
+					unsigned long dep_index;
+					char** dep_list = get_string_map_keys((string_map*)var, &num_deps);
+					printf("\t%s:\n", var_name);
+					for(dep_index=0; dep_index < num_deps; dep_index++)
+					{
+						printf("\t\t%s\n", dep_list[dep_index]);
+					}
+				}
+			}
+			printf("\n");
 		}
-		
-		
-		
 		free_null_terminated_string_array(match_array);
 	}
 
-	
-	/*
-	printf("lists_dir = %s\n", conf->lists_dir);
-	
-	int i;
-	printf("\n\ndests:\n");
-	for(i=0; i < num_dests; i++)
-	{
-		printf("\t%s\n", dest_paths[i]);
-	}
-	*/
-	
 	
 	//cleanup
 	free_null_terminated_string_array(dest_paths);	
@@ -152,7 +169,7 @@ int main(int argc, char** argv)
 string_map* load_parameters(int argc, char** argv)
 {
 	//requires: --packages/-p OR -packages-matching/-m
-	//requires one or more of: --will-fit/-f [dest], --required-depends/-d, --required-size/-s, --install-destination/-i, --user-installed/-u, --version/-v, --install-time/-t, description/-e
+	//requires one or more of: --will-fit/-f [dest], --required-depends/-d, --required-size/-s, --install-destination/-i, --user-installed/-u, --version/-v, --install-time/-t, --source/-o, description/-e
 	//optional: --config/-c, --json/-j, --javascript/-a
 	
 
@@ -168,6 +185,7 @@ string_map* load_parameters(int argc, char** argv)
 		{"user-installed",      0, 0, 'u'},
 		{"version",             0, 0, 'v'},
 		{"time-installed",      0, 0, 't'},
+		{"source",              0, 0, 'o'},
 		{"description",         0, 0, 'e'},
 		{"config",              1, 0, 'c'},
 		{"json",                0, 0, 'j'},
@@ -176,7 +194,7 @@ string_map* load_parameters(int argc, char** argv)
 	};
 	int option_index;
 	int c;
-	while ((c = getopt_long(argc, argv, "p:m:f:dsiuvtec:ja", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "p:m:f:dsiuvtoec:ja", long_options, &option_index)) != -1)
 	{
 		regex_t* packages_matching_regex = NULL;
 		char* regex_str = NULL;
@@ -233,10 +251,14 @@ string_map* load_parameters(int argc, char** argv)
 				set_string_map_element(parameters, "user-installed", strdup("D"));
 				break;
 			case 'v':
+				printf("v is here\n");
 				set_string_map_element(parameters, "version", strdup("D"));
 				break;
 			case 't':
 				set_string_map_element(parameters, "time-installed", strdup("D"));
+				break;
+			case 'o':
+				set_string_map_element(parameters, "source", strdup("D"));
 				break;
 			case 'e':
 				set_string_map_element(parameters, "description", strdup("D"));
@@ -273,6 +295,7 @@ string_map* load_parameters(int argc, char** argv)
 		get_string_map_element(parameters, "user-installed")      == NULL &&
 		get_string_map_element(parameters, "version")             == NULL &&
 		get_string_map_element(parameters, "time-installed")      == NULL &&
+		get_string_map_element(parameters, "source")              == NULL &&
 		get_string_map_element(parameters, "description")         == NULL
 		)
 	{
@@ -282,39 +305,61 @@ string_map* load_parameters(int argc, char** argv)
 
 	string_map* load_match_map = initialize_string_map(1);
 	string_map* load_all_map = initialize_string_map(1);
+	string_map* print_map = initialize_string_map(1);
+
 	char* dummy = strdup("D");
-	if(get_string_map_element(parameters, "will-fit") != NULL || get_string_map_element(parameters, "required-size") != NULL)
+	if(get_string_map_element(parameters, "will-fit") != NULL)
 	{
 		set_string_map_element(load_all_map, "Depends", dummy);
 		set_string_map_element(load_all_map, "Installed-Size", dummy);
 		set_string_map_element(load_all_map, "Status", dummy);
+		set_string_map_element(print_map, "Will-Fit", strdup("%s"));
+	}
+	if(get_string_map_element(parameters, "required-size") != NULL)
+	{
+		set_string_map_element(load_all_map, "Depends", dummy);
+		set_string_map_element(load_all_map, "Installed-Size", dummy);
+		set_string_map_element(load_all_map, "Status", dummy);
+		set_string_map_element(print_map, "Required-Size", strdup(SCANFU64));
 	}
 	if(get_string_map_element(parameters, "required-depends") != NULL)
 	{
 		set_string_map_element(load_all_map, "Depends", dummy);
 		set_string_map_element(load_all_map, "Status", dummy);
+		set_string_map_element(print_map, "Required-Depends", strdup("M"));
 	}
-	if(get_string_map_element(parameters, "install-destination"))
+	if(get_string_map_element(parameters, "install-destination") != NULL)
 	{
 		set_string_map_element(load_all_map, "Status", dummy);
-		set_string_map_element(load_match_map, "Destination", dummy);
-
+		set_string_map_element(load_match_map, "Install-Destination", dummy);
+		set_string_map_element(print_map, "Install-Destination", strdup("%s"));
 	}
-	if(get_string_map_element(parameters, "user-installed") )
+	if(get_string_map_element(parameters, "user-installed") != NULL)
 	{
 		set_string_map_element(load_all_map, "Status", dummy);
+		set_string_map_element(load_all_map, "User-Installed", dummy);
+		set_string_map_element(print_map, "User-Installed", strdup("%s"));
 	}
-	if(get_string_map_element(parameters, "version"))
+	if(get_string_map_element(parameters, "version") != NULL)
 	{
+		printf("version here\n");
 		set_string_map_element(load_match_map, "Version", dummy);
+		set_string_map_element(print_map, "Version", strdup("%s"));
 	}
-	if(get_string_map_element(parameters, "time-installed"))
+	if(get_string_map_element(parameters, "time-installed") != NULL)
 	{
 		set_string_map_element(load_match_map, "Installed-Time", dummy);
+		set_string_map_element(print_map, "Installed-Time", strdup("%s"));
 	}
-	if(get_string_map_element(parameters, "description"))
+	if(get_string_map_element(parameters, "source") != NULL)
+	{
+		set_string_map_element(load_match_map, "Source", dummy);
+		set_string_map_element(print_map, "Source", strdup("%s"));
+	}
+	if(get_string_map_element(parameters, "description") != NULL)
 	{
 		set_string_map_element(load_match_map, "Description", dummy);
+		set_string_map_element(print_map, "Description", strdup("%s"));
 	}
 	unsigned long num_elements;
 	char**  load_all_variables      = get_string_map_keys(load_all_map, &num_elements);
@@ -322,13 +367,25 @@ string_map* load_parameters(int argc, char** argv)
 	set_string_map_element(parameters, "load_all_variables",      load_all_variables);
 	set_string_map_element(parameters, "load_matching_variables", load_matching_variables);
 
-	destroy_string_map(load_all_map,   DESTROY_MODE_IGNORE_VALUES, &num_elements);
-	destroy_string_map(load_match_map, DESTROY_MODE_IGNORE_VALUES, &num_elements);
+	char** print_variables = get_string_map_keys(print_map, &num_elements);
+	char** print_variable_formats = (char**)malloc((num_elements+1)*sizeof(char*));
+	int print_variable_index = 0;
+	for(print_variable_index=0; print_variable_index < num_elements; print_variable_index++)
+	{
+		print_variable_formats[print_variable_index] = strdup((char*)get_string_map_element(print_map, print_variables[print_variable_index]));
+	}
+	print_variable_formats[num_elements] = NULL;
+	set_string_map_element(parameters, "print_variables",         print_variables);
+	set_string_map_element(parameters, "print_variable_formats",  print_variable_formats);
+	
+	
+	
+	destroy_string_map(print_map, DESTROY_MODE_FREE_VALUES,   &num_elements);
+	destroy_string_map(load_all_map,    DESTROY_MODE_IGNORE_VALUES, &num_elements);
+	destroy_string_map(load_match_map,  DESTROY_MODE_IGNORE_VALUES, &num_elements);
 	free(dummy);
-
-
+	
 	return parameters;
-
 }
 
 
@@ -416,7 +473,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
 	}
-	int save_destination = get_string_map_element(load_variable_map, "Destination") != NULL ? 1 : 0 ;
+	int save_destination      = get_string_map_element(load_variable_map, "Install-Destination") != NULL ? 1 : 0 ;
+	int save_user_installed   = get_string_map_element(load_variable_map, "User-Installed")      != NULL ? 1 : 0 ;
 
 
 	list* file_list = initialize_list();
@@ -514,9 +572,9 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						if(next_package_matches)
 						{
 							set_string_map_element(matching_packages, val, strdup("D"));
-							if(save_destination && dest_name != NULL)
+							if(save_destination)
 							{
-								set_string_map_element(next_pkg_data, "Destination", strdup(dest_name));
+								set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("not_installed") : strdup(dest_name)  ));
 							}
 						}
 					}
@@ -526,6 +584,15 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						{
 							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
 							if(old_val != NULL) { free(old_val); }
+							if(save_user_installed)
+							{
+								if(strcmp(key, "Status") == 0)
+								{
+									char* is_user = strstr(val, " user ") != NULL ? strdup("true") : strdup("false");
+									set_string_map_element(next_pkg_data, "User-Installed", is_user);
+
+								}
+							}
 						}
 					}
 				}
@@ -578,7 +645,7 @@ int load_recursive_variables(string_map* package_data, char* package, int load_s
 				if(load_size)
 				{
 					char* installed_size_str = get_string_map_element(package_info, "Installed-Size");
-					sscanf(installed_size_str, SSCANF64, required_size);
+					sscanf(installed_size_str, SCANFU64, required_size);
 				}
 				
 				if(deps != NULL)
