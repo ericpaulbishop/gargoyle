@@ -56,13 +56,14 @@ int main(int argc, char** argv)
 	
 	//main data variable
 	string_map* package_data = initialize_string_map(1);
+	string_map* matching_packages = initialize_string_map(1);
 	
 
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
 	char* load_variables[] = { "Depends", "Installed-Size", "Status", NULL };
-	//load_package_data(conf->lists_dir, 1, package_data, load_variables);
-	//void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables)
+	//void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, "none");
 	
 	//load status data
 	unsigned long num_dests;
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
 		char* status_path = dynamic_strcat(3, dest_paths[dest_index], "/", "status");
 		if(file_exists(status_path))
 		{
-			//load_package_data(status_path, 0, package_data, load_variables);
+			load_package_data(status_path, 0, package_data, matching_packages, parameters, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
 		}
 		free(status_path);
 	}
