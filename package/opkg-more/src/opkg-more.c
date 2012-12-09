@@ -42,6 +42,8 @@ void free_conf(opkg_conf* conf);
 int file_exists(const char* path);
 void print_usage(void);
 int convert_to_regex(char* str, regex_t* p);
+int sort_string_cmp(const void *a, const void *b);
+
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
 
@@ -61,9 +63,7 @@ int main(int argc, char** argv)
 
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
-	char* load_variables[] = { "Depends", "Installed-Size", "Status", NULL };
-	//void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
-	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, "none");
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, NULL);
 	
 	//load status data
 	unsigned long num_dests;
@@ -80,14 +80,34 @@ int main(int argc, char** argv)
 	}
 	
 	
+	//calculate total depends, total size, and will-fit if requested
+	unsigned long num_matching_packages;
+	char** match_array = get_string_map_keys(matching_packages, &num_matching_packages);
+	int match_index=0;
+	qsort(match_array, num_matching_packages, sizeof(char*), sort_string_cmp);
+
+
 	
+	//output
+	int output_type = 0; //human readable
+	output_type     = get_string_map_element(parameters, "json")       ? 1 : output_type;  //json
+	output_type     = get_string_map_element(parameters, "javascript") ? 2 : output_type;  //javascript
 	
+	if(output_type == 0)
+	{
+		int match_index=0;
+		for(match_index=0; match_array[match_index] != NULL ; match_index++)
+		{
+			printf("Package: %s\n", match_array[match_index]);
+		}
+		
+		
+		
+		free_null_terminated_string_array(match_array);
+	}
+
 	
-	
-	
-	
-	
-	
+	/*
 	printf("lists_dir = %s\n", conf->lists_dir);
 	
 	int i;
@@ -96,8 +116,9 @@ int main(int argc, char** argv)
 	{
 		printf("\t%s\n", dest_paths[i]);
 	}
+	*/
 	
-
+	
 	//cleanup
 	free_null_terminated_string_array(dest_paths);	
 	free(conf);
@@ -250,7 +271,13 @@ string_map* load_parameters(int argc, char** argv)
 		set_string_map_element(load_all_map, "Depends", dummy);
 		set_string_map_element(load_all_map, "Status", dummy);
 	}
-	if(get_string_map_element(parameters, "install-destination") || get_string_map_element(parameters, "user-installed") )
+	if(get_string_map_element(parameters, "install-destination"))
+	{
+		set_string_map_element(load_all_map, "Status", dummy);
+		set_string_map_element(load_match_map, "Destination", dummy);
+
+	}
+	if(get_string_map_element(parameters, "user-installed") )
 	{
 		set_string_map_element(load_all_map, "Status", dummy);
 	}
@@ -352,8 +379,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	string_map* matching_list      = get_string_map_element(parameters, "packages");
  	char** load_all_variables      = get_string_map_element(parameters, "load_all_variables");
 	char** load_matching_variables = get_string_map_element(parameters, "load_matching_variables");
-
-
+	
 
 	string_map* load_variable_map = initialize_string_map(0);
 	int load_var_index=0;
@@ -367,6 +393,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
 	}
+	int save_destination = get_string_map_element(load_variable_map, "Destination") != NULL ? 1 : 0 ;
+
 
 	list* file_list = initialize_list();
 	if(source_is_dir)
@@ -443,7 +471,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					}
 					if(strcmp(key, "Package") == 0)
 					{
-						printf("package: %s\n", val);
 						next_pkg_data = (string_map*)get_string_map_element(existing_package_data, val);
 						if(next_pkg_data == NULL)
 						{
@@ -456,7 +483,15 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						}
 						else
 						{
-							next_package_matches = get_string_map_element(matching_list, "val") != NULL ?  1 : 0;
+							next_package_matches = get_string_map_element(matching_list, val) != NULL ?  1 : 0;
+						}
+						if(next_package_matches)
+						{
+							set_string_map_element(matching_packages, val, strdup("D"));
+							if(save_destination && dest_name != NULL)
+							{
+								set_string_map_element(next_pkg_data, "Destination", strdup(dest_name));
+							}
 						}
 					}
 					else if( (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
@@ -467,8 +502,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 							if(old_val != NULL) { free(old_val); }
 						}
 					}
-
-
 				}
 				read_data = 1;
 			}
@@ -582,4 +615,12 @@ int convert_to_regex(char* str, regex_t* p)
 	}
 	
 	return valid;	
+}
+
+/* comparison function for qsort */ 
+int sort_string_cmp(const void *a, const void *b) 
+{ 
+    const char **a_ptr = (const char **)a;
+    const char **b_ptr = (const char **)b;
+    return strcmp(*a_ptr, *b_ptr);
 }
