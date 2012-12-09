@@ -43,7 +43,7 @@ int file_exists(const char* path);
 void print_usage(void);
 int convert_to_regex(char* str, regex_t* p);
 
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables);
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
 
 int main(int argc, char** argv)
 {
@@ -99,7 +99,6 @@ int main(int argc, char** argv)
 
 	//cleanup
 	free_null_terminated_string_array(dest_paths);	
-	free(conf_file_name);
 	free(conf);
 	
 	return 0;
@@ -236,7 +235,47 @@ string_map* load_parameters(int argc, char** argv)
 		exit(1);
 	}		
 
-	
+	string_map* load_match_map = initialize_string_map(1);
+	string_map* load_all_map = initialize_string_map(1);
+	char* dummy = strdup("D");
+	if(get_string_map_element(parameters, "will-fit") != NULL || get_string_map_element(parameters, "required-size") != NULL)
+	{
+		set_string_map_element(load_all_map, "Depends", dummy);
+		set_string_map_element(load_all_map, "Installed-Size", dummy);
+		set_string_map_element(load_all_map, "Status", dummy);
+	}
+	if(get_string_map_element(parameters, "required-depends") != NULL)
+	{
+		set_string_map_element(load_all_map, "Depends", dummy);
+		set_string_map_element(load_all_map, "Status", dummy);
+	}
+	if(get_string_map_element(parameters, "install-destination") || get_string_map_element(parameters, "user-installed") )
+	{
+		set_string_map_element(load_all_map, "Status", dummy);
+	}
+	if(get_string_map_element(parameters, "version"))
+	{
+		set_string_map_element(load_match_map, "Version", dummy);
+	}
+	if(get_string_map_element(parameters, "time-installed"))
+	{
+		set_string_map_element(load_match_map, "Installed-Time", dummy);
+	}
+	if(get_string_map_element(parameters, "description"))
+	{
+		set_string_map_element(load_match_map, "Description", dummy);
+	}
+	unsigned long num_elements;
+	char**  load_all_variables      = get_string_map_keys(load_all_map, &num_elements);
+	char**  load_matching_variables = get_string_map_keys(load_match_map, &num_elements);
+	set_string_map_element(parameters, "load_all_variables",      load_all_variables);
+	set_string_map_element(parameters, "load_matching_variables", load_matching_variables);
+
+	destroy_string_map(load_all_map,   DESTROY_MODE_IGNORE_VALUES, &num_elements);
+	destroy_string_map(load_match_map, DESTROY_MODE_IGNORE_VALUES, &num_elements);
+	free(dummy);
+
+
 	return parameters;
 
 }
@@ -306,10 +345,14 @@ void free_conf(opkg_conf* conf)
 	free(conf);
 }
 
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name, char** load_all_variables, char** load_matching_variables)
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name)
 {
-	regex_t* match_regex = get_string_map_element(parameters, "packages-matching");
-	string_map* matching_list = get_string_map_element(parameters, "packages");
+	regex_t* match_regex           = get_string_map_element(parameters, "packages-matching");
+	string_map* matching_list      = get_string_map_element(parameters, "packages");
+ 	char** load_all_variables      = get_string_map_element(parameters, "load_all_variables");
+	char** load_matching_variables = get_string_map_element(parameters, "load_matching_variables");
+
+
 
 	string_map* load_variable_map = initialize_string_map(0);
 	int load_var_index=0;
