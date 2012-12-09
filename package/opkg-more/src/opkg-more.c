@@ -27,8 +27,17 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <regex.h>
+#include <stdint.h>
 
 #include "erics_tools.h"
+
+
+#if __SIZEOF_POINTER__ == 8
+	#define SSCANF64 "%lu"
+#else
+	#define SSCANF64 "%llu"
+#endif
+
 
 typedef struct opkg_conf_struct
 {
@@ -45,7 +54,9 @@ int convert_to_regex(char* str, regex_t* p);
 int sort_string_cmp(const void *a, const void *b);
 
 
+
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
+int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit);
 
 int main(int argc, char** argv)
 {
@@ -71,7 +82,7 @@ int main(int argc, char** argv)
 	char** dest_paths = (char**)get_string_map_keys(conf->dest_roots, &num_dests);
 	for(dest_index=0; dest_index < num_dests; dest_index++)
 	{
-		char* status_path = dynamic_strcat(3, dest_paths[dest_index], "/", "status");
+		char* status_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/status");
 		if(file_exists(status_path))
 		{
 			load_package_data(status_path, 0, package_data, matching_packages, parameters, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
@@ -85,6 +96,17 @@ int main(int argc, char** argv)
 	char** match_array = get_string_map_keys(matching_packages, &num_matching_packages);
 	int match_index=0;
 	qsort(match_array, num_matching_packages, sizeof(char*), sort_string_cmp);
+	int load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
+	int load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
+	int load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+
+	if(load_depends || load_size || load_will_fit)
+	{
+		for(match_index=0; match_array[match_index] != NULL ; match_index++)
+		{
+			load_recursive_variables(package_data, match_array[match_index], load_size, load_will_fit);
+		}
+	}
 
 
 	
@@ -95,10 +117,11 @@ int main(int argc, char** argv)
 	
 	if(output_type == 0)
 	{
-		int match_index=0;
 		for(match_index=0; match_array[match_index] != NULL ; match_index++)
 		{
-			printf("Package: %s\n", match_array[match_index]);
+			string_map* info = get_string_map_element(package_data, match_array[match_index]);
+			uint64_t* required_size = (uint64_t*)get_string_map_element(info, "Required-Size");
+			printf("Package: %s\nSize: " SSCANF64 "\n\n", match_array[match_index], *required_size);
 		}
 		
 		
@@ -472,10 +495,13 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					if(strcmp(key, "Package") == 0)
 					{
 						next_pkg_data = (string_map*)get_string_map_element(existing_package_data, val);
+						
+
 						if(next_pkg_data == NULL)
 						{
 							next_pkg_data = initialize_string_map(1);
 							set_string_map_element(existing_package_data, val, next_pkg_data);
+
 						}
 						if(match_regex != NULL)
 						{
@@ -516,6 +542,93 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	destroy_string_map(load_variable_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	free(all_dummy);
 	free(matching_dummy);
+}
+
+//returns 0 if already installed or package doesn't exist, 1 if we need to install it
+int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit)
+{
+	string_map* package_info = get_string_map_element(package_data, package);
+	int ret = 1;
+	if(package_info == NULL)
+	{
+		ret = 0;
+	}
+	else
+	{
+		char* package_status     = get_string_map_element(package_info, "Status");
+		string_map* dep_map      = get_string_map_element(package_info, "Required-Depends");
+		uint64_t* required_size  = get_string_map_element(package_info, "Required-Size");
+		load_size = load_will_fit || load_size;
+		if(dep_map == NULL)
+		{
+			if(load_size)
+			{
+				required_size = (uint64_t*)malloc(sizeof(uint64_t));
+				*required_size = 0;
+			}
+			dep_map = initialize_map(1);
+	
+			if(strstr(package_status, "not-installed") == NULL)
+			{
+				ret=0;
+			}
+			else
+			{
+				char* deps = get_string_map_element(package_info, "Depends");
+				if(load_size)
+				{
+					char* installed_size_str = get_string_map_element(package_info, "Installed-Size");
+					sscanf(installed_size_str, SSCANF64, required_size);
+				}
+				
+				if(deps != NULL)
+				{
+					unsigned long num_pieces;
+					int dep_index;
+					char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+					char** dep_list = split_on_separators(deps, package_separators, 9, -1, 0, &num_pieces);
+					for(dep_index=0; dep_index < num_pieces; dep_index++)
+					{
+						if( load_recursive_variables(package_data, dep_list[dep_index], load_size, load_will_fit) )
+						{
+							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
+							
+							string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
+							string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
+							if(dep_dep_map != NULL)
+							{
+								unsigned long num_dep_deps;
+								unsigned long dep_dep_index;
+								char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
+								for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
+								{
+									set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
+								}
+								free_null_terminated_string_array(dep_dep_list);
+							}
+							
+							if(load_size)
+							{
+								uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
+								*required_size = (*required_size) + (*dep_size);
+							}
+							
+						}
+					}
+				}
+				
+			}
+			
+			if(load_size)
+			{
+				set_string_map_element(package_info, "Required-Size", required_size);
+			}
+			set_string_map_element(package_info, "Required-Depends", dep_map);		
+		}
+	}
+
+
+	return ret;
 }
 
 
