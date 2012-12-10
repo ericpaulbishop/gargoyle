@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 			{
 				uint64_t block_size  = (uint64_t)fs_data.f_bsize;
 				uint64_t blocks_free = (uint64_t)fs_data.f_bavail;
-				free_bytes = block_size*blocks_free;;
+				free_bytes = block_size*blocks_free;
 			}
 		}
 	}
@@ -147,6 +147,7 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
+
 
 string_map* load_parameters(int argc, char** argv)
 {
@@ -819,19 +820,23 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 			{
 				if(print_variable_formats[print_index][1] == 's')
 				{
+					char* esc_val_1 = dynamic_replace((char*)var, "\\", "\\\\");
+					char* esc_val_2 = dynamic_replace(esc_val_1, "\"", "\\\"");
 					if(output_type == 1)
 					{
 						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": \"%s\"", var_name, (char*)var);
+						printf("\t\t\"%s\": \"%s\"", var_name, esc_val_2);
 					}
 					else if(output_type == 2)
 					{
-						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", sorted_matching_packages[match_index], var_name, (char*)var );
+						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", sorted_matching_packages[match_index], var_name, esc_val_2 );
 					}
 					else
 					{
 						printf("\t%s: %s\n", var_name, (char*)var);
 					}
+					free(esc_val_1);
+					free(esc_val_2);
 				}
 				else if(print_variable_formats[print_index][1] == 'l')
 				{
