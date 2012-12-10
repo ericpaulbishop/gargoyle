@@ -44,6 +44,7 @@ typedef struct opkg_conf_struct
 {
 	char* lists_dir;
 	string_map* dest_roots;
+	string_map* dest_names;
 } opkg_conf;
 
 
@@ -57,7 +58,7 @@ int sort_string_cmp(const void *a, const void *b);
 
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
-int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit);
+int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
 
 void print_output(string_map* package_data, char** sorted_matching_packages, string_map* parameters);
 
@@ -104,12 +105,31 @@ int main(int argc, char** argv)
 	int load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
 	int load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
 	int load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+	uint64_t free_bytes = 0;
 
+	//if we want to calculate will_fit, need to determine free bytes on filesystem
+	if(load_will_fit)
+	{
+		char* dest_name = get_string_map_element(parameters, "will-fit");
+		char* dest_path = get_string_map_element(conf->dest_names, dest_name);
+		if(dest_path != NULL)
+		{
+			struct statvfs fs_data;
+			if( statvfs(dest_path, &fs_data) == 0 )
+			{
+				uint64_t block_size  = (uint64_t)fs_data.f_bsize;
+				uint64_t blocks_free = (uint64_t)fs_data.f_bavail;
+				free_bytes = block_size*blocks_free;;
+			}
+		}
+	}
+
+	//recursively load depends/size/will_fit
 	if(load_depends || load_size || load_will_fit)
 	{
 		for(match_index=0; sorted_matching_packages[match_index] != NULL ; match_index++)
 		{
-			load_recursive_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit);
+			load_recursive_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit, free_bytes);
 		}
 	}
 
@@ -422,6 +442,7 @@ opkg_conf* load_conf(char* conf_file_name)
 {
 	opkg_conf* conf = (opkg_conf*)malloc(sizeof(opkg_conf));
 	conf->dest_roots = initialize_string_map(1);
+	conf->dest_names = initialize_string_map(1);
 	conf->lists_dir = strdup("/usr/lib/opkg/lists");
 
 	FILE* conf_file =  fopen(conf_file_name, "r");
@@ -447,6 +468,7 @@ opkg_conf* load_conf(char* conf_file_name)
 				{
 					//key = file path, value = name
 					set_string_map_element(conf->dest_roots, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
+					set_string_map_element(conf->dest_names, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
 				}
 				else if(strstr(split_line[0], "lists_dir") == split_line[0])
 				{
@@ -634,7 +656,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 }
 
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
-int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit)
+int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes)
 {
 	string_map* package_info = get_string_map_element(package_data, package);
 	int ret = 1;
@@ -678,7 +700,7 @@ int load_recursive_variables(string_map* package_data, char* package, int load_s
 					char** dep_list = split_on_separators(deps, package_separators, 9, -1, 0, &num_pieces);
 					for(dep_index=0; dep_index < num_pieces; dep_index++)
 					{
-						if( load_recursive_variables(package_data, dep_list[dep_index], load_size, load_will_fit) )
+						if( load_recursive_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
 						{
 							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
 							
@@ -712,6 +734,34 @@ int load_recursive_variables(string_map* package_data, char* package, int load_s
 			{
 				set_string_map_element(package_info, "Required-Size", required_size);
 			}
+			if(load_will_fit)
+			{
+				if( *required_size >= free_bytes )
+				{
+					set_string_map_element(package_info, "Will-Fit", strdup("false"));
+				}
+				else
+				{
+					set_string_map_element(package_info, "Will-Fit", strdup("true"));
+				}
+			}
+			//#include <sys/statvfs.h>
+			/*
+			if(load_will_fit)
+			{
+				printf("here\n");
+				char* path = get_string_map_element(parameters, "will-fit");
+				printf("path = %s\n", path);
+				struct statvfs fs_data;
+				if( statvfs(path, &fs_data) == 0 )
+				{
+					printf("block size = %ld\n", fs_data.f_bsize);
+					printf("num blocks = %ld\n", fs_data.f_blocks);
+					printf("\n\n");
+				}
+			}
+			*/
+
 			set_string_map_element(package_info, "Required-Depends", dep_map);		
 		}
 	}
