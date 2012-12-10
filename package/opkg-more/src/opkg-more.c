@@ -138,6 +138,7 @@ string_map* load_parameters(int argc, char** argv)
 	
 	string_map* parameters = initialize_string_map(1);
 	static struct option long_options[] = {
+		{"help",                0, 0, 'h'},
 		{"packages",            1, 0, 'p'},
 		{"packages-matching",   1, 0, 'm'},
 		{"will-fit",            1, 0, 'f'},
@@ -152,11 +153,12 @@ string_map* load_parameters(int argc, char** argv)
 		{"config",              1, 0, 'c'},
 		{"json",                0, 0, 'j'},
 		{"javascript",          0, 0, 'a'},
+		{"human-readable",      0, 0, 'r'},
 		{NULL, 0, NULL, 0}
 	};
 	int option_index;
 	int c;
-	while ((c = getopt_long(argc, argv, "p:m:f:dsiuvtoec:ja", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "hp:m:f:dsiuvtoec:jar", long_options, &option_index)) != -1)
 	{
 		regex_t* packages_matching_regex = NULL;
 		char* regex_str = NULL;
@@ -174,7 +176,17 @@ string_map* load_parameters(int argc, char** argv)
 					fprintf(stderr, "ERROR: list of packages to display appears to be empty");
 					exit(1);
 				}
-				set_string_map_element(parameters, "packages", package_list);
+				else
+				{
+					string_map* package_map = initialize_string_map(1);
+					int p_index;
+					for(p_index=0; p_index < num_pieces ; p_index++)
+					{
+						set_string_map_element(package_map, package_list[p_index], strdup("D"));
+					}
+					set_string_map_element(parameters, "packages", package_map);
+					free_null_terminated_string_array(package_list);
+				}
 				break;
 			case 'm':
 				packages_matching_regex = (regex_t*)malloc(sizeof(regex_t));
@@ -233,6 +245,9 @@ string_map* load_parameters(int argc, char** argv)
 			case 'a':
 				set_string_map_element(parameters, "javascript", strdup("D"));
 				break;
+			case 'r':
+				//default
+				break;
 			default:
 				print_usage();
 				exit(0);
@@ -248,6 +263,12 @@ string_map* load_parameters(int argc, char** argv)
 		fprintf(stderr, "ERROR: You must specify either --packages or --packages-matching\n");
 		exit(1);
 	}
+	if(get_string_map_element(parameters, "packages") != NULL && get_string_map_element(parameters, "packages-matching") != NULL)
+	{
+		fprintf(stderr, "ERROR: You can only specify one of --packages or --packages-matching\n");
+		exit(1);
+	}
+
 	if(
 		get_string_map_element(parameters, "will-fit")            == NULL &&
 		get_string_map_element(parameters, "required-depends")    == NULL &&
@@ -352,6 +373,47 @@ string_map* load_parameters(int argc, char** argv)
 
 void print_usage(void)
 {
+
+	printf("USAGE:\n");
+	printf("  opkg-more displays supplemental package information that\n");
+	printf("  cannot be obtained from the opkg command.  In particular,\n");
+	printf("  it can display the amount of space required to install a\n");
+	printf("  package, *along with all needed dependencies*, and test\n");
+	printf("  whether that amount of space exists for a given destination.\n");
+	printf("\n");
+
+	printf("  To select which packages to display, specify one of:\n");
+	printf("    --packages [LIST_OF_PACKAGE_NAMES]\n");
+	printf("    --packages-matching [REGULAR_EXPRESSION]\n");
+	printf("\n");
+
+	printf("  To select what information to display specify one or more of:\n");
+	printf("    --will-fit, -w [DESTINATION] Whether there is enough space to\n");
+	printf("                                 install this package to [DESTINATION]\n");
+	printf("    --required-depends, -d       All uninstalled dependencies\n");
+	printf("    --required-size, -s          Amount of space needed to install\n");
+	printf("                                 this package and all dependencies\n");
+	printf("    --install-destination, -i    Destination where the package is installed\n");
+	printf("    --user-installed, -u         Whether package was installed by user\n");
+	printf("    --version, -v                Package version\n");
+	printf("    --install-time, -t           Unix epoch (UTC) when package was installed\n");
+	printf("    --source, -o                 Source that provides this package\n");
+	printf("    --description, -e            Description of package\n");
+	printf("\n");
+
+	printf("  Optional output formats:\n");
+	printf("    --human-readable, -r         Human readable output format (default)\n");
+	printf("    --json, -j                   JSON output format\n");
+	printf("    --javascript, -a             Javascript variable output format\n");
+	printf("\n");
+
+	printf("  Other options:\n");
+	printf("    --config, -c                 opkg config path, defaults to /etc/opkg.conf\n");
+	printf("\n");
+
+
+	printf("\n\n");	
+
 
 }
 
