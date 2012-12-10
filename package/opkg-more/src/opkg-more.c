@@ -59,6 +59,7 @@ int sort_string_cmp(const void *a, const void *b);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
 int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit);
 
+void print_output(string_map* package_data, char** sorted_matching_packages, string_map* parameters);
 
 
 
@@ -97,168 +98,30 @@ int main(int argc, char** argv)
 	
 	//calculate total depends, total size, and will-fit if requested
 	unsigned long num_matching_packages;
-	char** match_array = get_string_map_keys(matching_packages, &num_matching_packages);
+	char** sorted_matching_packages = get_string_map_keys(matching_packages, &num_matching_packages);
 	int match_index=0;
-	qsort(match_array, num_matching_packages, sizeof(char*), sort_string_cmp);
+	qsort(sorted_matching_packages, num_matching_packages, sizeof(char*), sort_string_cmp);
 	int load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
 	int load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
 	int load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
 
 	if(load_depends || load_size || load_will_fit)
 	{
-		for(match_index=0; match_array[match_index] != NULL ; match_index++)
+		for(match_index=0; sorted_matching_packages[match_index] != NULL ; match_index++)
 		{
-			load_recursive_variables(package_data, match_array[match_index], load_size, load_will_fit);
+			load_recursive_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit);
 		}
 	}
 
-
+	//dump output
+	print_output(package_data, sorted_matching_packages, parameters);
 	
-	//output
-	int output_type = 0; //human readable
-	output_type     = get_string_map_element(parameters, "json")       ? 1 : output_type;  //json
-	output_type     = get_string_map_element(parameters, "javascript") ? 2 : output_type;  //javascript
-	if(output_type == 1)
-	{
-		printf("{\n");
-	}
-	else if(output_type == 2)
-	{
-		printf("var opkg_info = [];\n");
-		printf("var opkg_matching_packages = [];\n");
-	}
 
 
-	char** print_variables        = (char**)get_string_map_element(parameters, "print_variables");
-	char** print_variable_formats = (char**)get_string_map_element(parameters, "print_variable_formats");
-	for(match_index=0; match_array[match_index] != NULL ; match_index++)
-	{
-		string_map* info = get_string_map_element(package_data, match_array[match_index]);
-		int print_index;
-		int printed_index =0;
-		
-		if(output_type == 1)
-		{
-			if(match_index >0){ printf(",\n"); }
-			printf("\t\"%s\": {\n", match_array[match_index]);
-		}
-		else if(output_type == 2)
-		{
-			printf("opkg_info[\"%s\"] = [];\n", match_array[match_index]);
-			printf("opkg_matching_packages.push(\"%s\");\n", match_array[match_index]);
-		}
-		else
-		{
-			printf("Package: %s\n", match_array[match_index]);
-		}
-		for(print_index=0; print_variables[print_index] != NULL ; print_index++)
-		{
-			char* var_name = print_variables[print_index];
-			void* var = get_string_map_element(info, var_name);
-			if(var != NULL && print_variable_formats[print_index][0] == '%')
-			{
-				if(print_variable_formats[print_index][1] == 's')
-				{
-					if(output_type == 1)
-					{
-						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": \"%s\"", var_name, (char*)var);
-					}
-					else if(output_type == 2)
-					{
-						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", match_array[match_index], var_name, (char*)var );
-					}
-					else
-					{
-						printf("\t%s: %s\n", var_name, (char*)var);
-					}
-				}
-				else if(print_variable_formats[print_index][1] == 'l')
-				{
-					if(output_type == 1)
-					{
-						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": " SCANFU64 , var_name, *((uint64_t*)var));
-					}
-					else if (output_type == 2)
-					{
-						printf("opkg_info[\"%s\"][\"%s\"] = "SCANFU64";\n", match_array[match_index], var_name, *((uint64_t*)var)  );
-
-					}
-					else
-					{
-						printf("\t%s: " SCANFU64 "\n", var_name, *((uint64_t*)var));
-					}
-				}
-				printed_index++;
-			}
-			else if(var != NULL && print_variable_formats[print_index][0] == 'M')
-			{
-				unsigned long num_deps;
-				unsigned long dep_index;
-				char** dep_list = get_string_map_keys((string_map*)var, &num_deps);
-				
-				if(output_type == 1)
-				{
-					if(printed_index >0){ printf(",\n"); }
-					printf("\t\t\"%s\": [\n", var_name);
-				}
-				else if(output_type ==2)
-				{
-					printf("opkg_info[\"%s\"][\"%s\"] = [\n", match_array[match_index], var_name );
-				}
-				else
-				{
-					printf("\t%s:\n", var_name);
-				}
-
-				for(dep_index=0; dep_index < num_deps; dep_index++)
-				{
-					if(output_type == 1)
-					{
-						if(dep_index >0){ printf(",\n"); }
-						printf("\t\t\t\"%s\"", dep_list[dep_index]);
-					}
-					else if(output_type == 2)
-					{
-						if(dep_index >0){ printf(",\n"); }
-						printf("\t\"%s\"", dep_list[dep_index]);
-					}
-					else
-					{
-						printf("\t\t%s\n", dep_list[dep_index]);
-					}
-				}
-				
-				if(output_type == 1)
-				{
-					printf("\n\t\t]");
-				}
-				else if(output_type == 2)
-				{
-					printf("\n\t];\n");
-				}
-				
-				printed_index++;
-			}
-		}
-		if(output_type == 1)
-		{
-			printf("\n\t}");
-		}
-		else
-		{
-			printf("\n");
-		}
-	}
-	if(output_type == 1)
-	{
-		printf("\n}\n");
-	}
 
 	
 	//cleanup
-	free_null_terminated_string_array(match_array);
+	free_null_terminated_string_array(sorted_matching_packages);
 	free_null_terminated_string_array(dest_paths);	
 	free(conf);
 	
@@ -794,6 +657,157 @@ int load_recursive_variables(string_map* package_data, char* package, int load_s
 
 	return ret;
 }
+
+
+void print_output(string_map* package_data, char** sorted_matching_packages, string_map* parameters)
+{
+	//output
+	int output_type = 0; //human readable
+	output_type     = get_string_map_element(parameters, "json")       ? 1 : output_type;  //json
+	output_type     = get_string_map_element(parameters, "javascript") ? 2 : output_type;  //javascript
+	if(output_type == 1)
+	{
+		printf("{\n");
+	}
+	else if(output_type == 2)
+	{
+		printf("var opkg_info = [];\n");
+		printf("var opkg_matching_packages = [];\n");
+	}
+
+
+	char** print_variables        = (char**)get_string_map_element(parameters, "print_variables");
+	char** print_variable_formats = (char**)get_string_map_element(parameters, "print_variable_formats");
+	int match_index;
+	for(match_index=0; sorted_matching_packages[match_index] != NULL ; match_index++)
+	{
+		string_map* info = get_string_map_element(package_data, sorted_matching_packages[match_index]);
+		int print_index;
+		int printed_index =0;
+		
+		if(output_type == 1)
+		{
+			if(match_index >0){ printf(",\n"); }
+			printf("\t\"%s\": {\n", sorted_matching_packages[match_index]);
+		}
+		else if(output_type == 2)
+		{
+			printf("opkg_info[\"%s\"] = [];\n", sorted_matching_packages[match_index]);
+			printf("opkg_matching_packages.push(\"%s\");\n", sorted_matching_packages[match_index]);
+		}
+		else
+		{
+			printf("Package: %s\n", sorted_matching_packages[match_index]);
+		}
+		for(print_index=0; print_variables[print_index] != NULL ; print_index++)
+		{
+			char* var_name = print_variables[print_index];
+			void* var = get_string_map_element(info, var_name);
+			if(var != NULL && print_variable_formats[print_index][0] == '%')
+			{
+				if(print_variable_formats[print_index][1] == 's')
+				{
+					if(output_type == 1)
+					{
+						if(printed_index >0){ printf(",\n"); }
+						printf("\t\t\"%s\": \"%s\"", var_name, (char*)var);
+					}
+					else if(output_type == 2)
+					{
+						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", sorted_matching_packages[match_index], var_name, (char*)var );
+					}
+					else
+					{
+						printf("\t%s: %s\n", var_name, (char*)var);
+					}
+				}
+				else if(print_variable_formats[print_index][1] == 'l')
+				{
+					if(output_type == 1)
+					{
+						if(printed_index >0){ printf(",\n"); }
+						printf("\t\t\"%s\": " SCANFU64 , var_name, *((uint64_t*)var));
+					}
+					else if (output_type == 2)
+					{
+						printf("opkg_info[\"%s\"][\"%s\"] = "SCANFU64";\n", sorted_matching_packages[match_index], var_name, *((uint64_t*)var)  );
+
+					}
+					else
+					{
+						printf("\t%s: " SCANFU64 "\n", var_name, *((uint64_t*)var));
+					}
+				}
+				printed_index++;
+			}
+			else if(var != NULL && print_variable_formats[print_index][0] == 'M')
+			{
+				unsigned long num_deps;
+				unsigned long dep_index;
+				char** dep_list = get_string_map_keys((string_map*)var, &num_deps);
+				
+				if(output_type == 1)
+				{
+					if(printed_index >0){ printf(",\n"); }
+					printf("\t\t\"%s\": [\n", var_name);
+				}
+				else if(output_type ==2)
+				{
+					printf("opkg_info[\"%s\"][\"%s\"] = [\n", sorted_matching_packages[match_index], var_name );
+				}
+				else
+				{
+					printf("\t%s:\n", var_name);
+				}
+
+				for(dep_index=0; dep_index < num_deps; dep_index++)
+				{
+					if(output_type == 1)
+					{
+						if(dep_index >0){ printf(",\n"); }
+						printf("\t\t\t\"%s\"", dep_list[dep_index]);
+					}
+					else if(output_type == 2)
+					{
+						if(dep_index >0){ printf(",\n"); }
+						printf("\t\"%s\"", dep_list[dep_index]);
+					}
+					else
+					{
+						printf("\t\t%s\n", dep_list[dep_index]);
+					}
+				}
+				
+				if(output_type == 1)
+				{
+					printf("\n\t\t]");
+				}
+				else if(output_type == 2)
+				{
+					printf("\n\t];\n");
+				}
+				
+				printed_index++;
+			}
+		}
+		if(output_type == 1)
+		{
+			printf("\n\t}");
+		}
+		else
+		{
+			printf("\n");
+		}
+	}
+	if(output_type == 1)
+	{
+		printf("\n}\n");
+	}
+}
+
+
+
+
 
 
 int file_exists(const char* path)
