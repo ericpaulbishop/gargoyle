@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2009 OpenWrt.org
+# Copyright (C) 2006-2012 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,9 +9,9 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=miniupnpd
-PKG_VERSION:=1.5.20110309
-PKG_RELEASE:=1
-PKG_MD5SUM:=350d20bf25922e12f8d69e06fa33fd83
+PKG_VERSION:=1.6.20110730
+PKG_RELEASE:=6
+PKG_MD5SUM:=8bd5c0447b6dc1101b96e958ee67d3ea
 
 PKG_SOURCE_URL:=http://miniupnp.free.fr/files
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
