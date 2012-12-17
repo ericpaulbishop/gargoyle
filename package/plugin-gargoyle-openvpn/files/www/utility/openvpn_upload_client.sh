@@ -62,8 +62,8 @@ tab=$(printf "\t")
 ta_direction=""
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
-	is_targz=$(echo "$FORM_openvpn_client_zip_file" | grep "\.tar\.gz$\|\.tgz$")
-	if [ -n "$is_targz" ] ; then
+	is_targz=$(dd if="$FORM_openvpn_client_zip_file" bs=1 count=2 2>/dev/null | hexdump -v -e '1/1 "%02x"')
+	if [ "x$is_targz" = "x1f8b" ] ; then
 		tar xzf "$FORM_openvpn_client_zip_file" >/dev/null 2>&1
 	else
 		unzip   "$FORM_openvpn_client_zip_file" >/dev/null 2>&1
