@@ -45,6 +45,8 @@ typedef struct opkg_conf_struct
 	char* lists_dir;
 	string_map* dest_roots;
 	string_map* dest_names;
+	string_map* dest_freespace;
+	string_map* dest_totalspace;
 } opkg_conf;
 
 
@@ -60,7 +62,7 @@ int sort_string_cmp(const void *a, const void *b);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
 int load_recursive_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
 
-void print_output(string_map* package_data, char** sorted_matching_packages, string_map* parameters);
+void print_output(string_map* package_data, char** sorted_matching_packages, opkg_conf* config, string_map* parameters);
 
 
 
@@ -134,7 +136,7 @@ int main(int argc, char** argv)
 	}
 
 	//dump output
-	print_output(package_data, sorted_matching_packages, parameters);
+	print_output(package_data, sorted_matching_packages, conf, parameters);
 	
 
 
@@ -143,7 +145,7 @@ int main(int argc, char** argv)
 	//cleanup
 	free_null_terminated_string_array(sorted_matching_packages);
 	free_null_terminated_string_array(dest_paths);	
-	free(conf);
+	free_conf(conf);
 	
 	return 0;
 }
@@ -168,7 +170,7 @@ string_map* load_parameters(int argc, char** argv)
 		{"install-destination", 0, 0, 'i'},
 		{"user-installed",      0, 0, 'u'},
 		{"version",             0, 0, 'v'},
-		{"time-installed",      0, 0, 't'},
+		{"install-time",        0, 0, 't'},
 		{"source",              0, 0, 'o'},
 		{"description",         0, 0, 'e'},
 		{"config",              1, 0, 'c'},
@@ -382,7 +384,7 @@ string_map* load_parameters(int argc, char** argv)
 	
 	
 	
-	destroy_string_map(print_map, DESTROY_MODE_FREE_VALUES,   &num_elements);
+	destroy_string_map(print_map,       DESTROY_MODE_FREE_VALUES,   &num_elements);
 	destroy_string_map(load_all_map,    DESTROY_MODE_IGNORE_VALUES, &num_elements);
 	destroy_string_map(load_match_map,  DESTROY_MODE_IGNORE_VALUES, &num_elements);
 	free(dummy);
@@ -442,8 +444,12 @@ void print_usage(void)
 opkg_conf* load_conf(char* conf_file_name)
 {
 	opkg_conf* conf = (opkg_conf*)malloc(sizeof(opkg_conf));
-	conf->dest_roots = initialize_string_map(1);
-	conf->dest_names = initialize_string_map(1);
+	conf->dest_roots      = initialize_string_map(1);
+	conf->dest_names      = initialize_string_map(1);
+	conf->dest_freespace  = initialize_string_map(1);
+	conf->dest_totalspace = initialize_string_map(1);
+
+
 	conf->lists_dir = strdup("/usr/lib/opkg/lists");
 
 	FILE* conf_file =  fopen(conf_file_name, "r");
@@ -467,9 +473,31 @@ opkg_conf* load_conf(char* conf_file_name)
 			{
 				if(strstr(split_line[0], "dest") == split_line[0])
 				{
+					struct statvfs fs_data;
+					uint64_t* free_bytes  = (uint64_t*)malloc(sizeof(uint64_t));
+					uint64_t* total_bytes = (uint64_t*)malloc(sizeof(uint64_t));
+					*free_bytes = 0;
+					if( statvfs(split_line[num_pieces-1], &fs_data) == 0 )
+					{
+						uint64_t block_size   = (uint64_t)fs_data.f_frsize;
+						uint64_t blocks_free  = (uint64_t)fs_data.f_bavail;
+						uint64_t blocks_total = (uint64_t)fs_data.f_blocks;
+
+						*free_bytes  = block_size*blocks_free;
+						*total_bytes = block_size*blocks_total;
+					}
+
+
 					//key = file path, value = name
 					set_string_map_element(conf->dest_roots, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
+
+					//key = name, value = file path
 					set_string_map_element(conf->dest_names, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
+
+					//key = name, value = size (uint64_t)
+					set_string_map_element(conf->dest_freespace,  split_line[num_pieces-2], free_bytes);
+					set_string_map_element(conf->dest_totalspace, split_line[num_pieces-2], total_bytes);
+
 				}
 				else if(strstr(split_line[0], "lists_dir") == split_line[0])
 				{
@@ -494,7 +522,10 @@ void free_conf(opkg_conf* conf)
 {
 	unsigned long num_freed;
 	free(conf->lists_dir);
-	destroy_string_map(conf->dest_roots, DESTROY_MODE_FREE_VALUES, &num_freed);
+	destroy_string_map(conf->dest_names,      DESTROY_MODE_FREE_VALUES, &num_freed);
+	destroy_string_map(conf->dest_roots,      DESTROY_MODE_FREE_VALUES, &num_freed);
+	destroy_string_map(conf->dest_freespace,  DESTROY_MODE_FREE_VALUES, &num_freed);
+	destroy_string_map(conf->dest_totalspace, DESTROY_MODE_FREE_VALUES, &num_freed);
 	free(conf);
 }
 
@@ -538,7 +569,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 			{
 				char* file_path = dynamic_strcat(3, data_source, "/", entry->d_name);
 				push_list(file_list, file_path);
-			}	
+			}
 		}
 		closedir(dir);
 	}
@@ -771,8 +802,24 @@ int load_recursive_variables(string_map* package_data, char* package, int load_s
 	return ret;
 }
 
+/*
+ *
+ * 	//key = file path, value = name
+	set_string_map_element(conf->dest_roots, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
 
-void print_output(string_map* package_data, char** sorted_matching_packages, string_map* parameters)
+	//key = name, value = file path
+	set_string_map_element(conf->dest_names, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
+
+	//key = name, value = size (uint64_t)
+	set_string_map_element(conf->dest_freespace,  split_line[num_pieces-2], free_bytes);
+	set_string_map_element(conf->dest_totalspace, split_line[num_pieces-2], total_bytes);
+
+ *
+ *
+ */
+
+
+void print_output(string_map* package_data, char** sorted_matching_packages, opkg_conf* conf, string_map* parameters)
 {
 	//output
 	int output_type = 0; //human readable
@@ -781,11 +828,54 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 	if(output_type == 1)
 	{
 		printf("{\n");
+		printf("\t\"Destinations\": {\n");
+
 	}
 	else if(output_type == 2)
 	{
 		printf("var opkg_info = [];\n");
 		printf("var opkg_matching_packages = [];\n");
+		printf("var opkg_dests = [];\n");
+	}
+
+	//conf->dest_freespace
+	unsigned long num_dests;
+	unsigned long dest_index;
+	char** dests = get_string_map_keys(conf->dest_freespace, &num_dests);
+	for(dest_index=0 ; dest_index < num_dests; dest_index++)
+	{
+		char* dest_name          = dests[dest_index];
+		char* dest_root          = (char*)get_string_map_element(conf->dest_names, dest_name);
+		uint64_t* dest_freespace  = (uint64_t*)get_string_map_element(conf->dest_freespace, dest_name);
+		uint64_t* dest_totalspace = (uint64_t*)get_string_map_element(conf->dest_totalspace, dest_name);
+		if(output_type == 1)
+		{
+			printf("\t\t\"%s\": {\n", dest_name);
+			printf("\t\t\t\"Root\": \"%s\"\n", dest_root);
+			printf("\t\t\t\"Bytes-Free\": "SCANFU64"\n", *dest_freespace);
+			printf("\t\t\t\"Bytes-Total\": "SCANFU64"\n", *dest_totalspace);
+			printf("\t\t}\n");
+		}
+		else if(output_type == 2)
+		{
+			printf("opkg_dests['%s'] = [];\n", dest_name);
+			printf("opkg_dests['%s']['Root'] = '%s';\n", dest_name, dest_root);
+			printf("opkg_dests['%s']['Bytes-Free']  = "SCANFU64"\n", dest_name, *dest_freespace);
+			printf("opkg_dests['%s']['Bytes-Total'] = "SCANFU64"\n", dest_name, *dest_totalspace);
+		}
+		else
+		{
+			printf("Destination: %s", dest_name);
+			printf("Destination-Root: %s\n", dest_root);
+			printf("Destination-Bytes-Free: "SCANFU64"\n", *dest_freespace);
+			printf("Destination-Bytes-Total: "SCANFU64"\n", *dest_totalspace);
+			printf("\n");
+		}
+	}
+	if(output_type == 1)
+	{
+		printf("\t}\n");
+		printf("\t\"Packages\" : {\n");
 	}
 
 
@@ -801,7 +891,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 		if(output_type == 1)
 		{
 			if(match_index >0){ printf(",\n"); }
-			printf("\t\"%s\": {\n", sorted_matching_packages[match_index]);
+			printf("\t\t\"%s\": {\n", sorted_matching_packages[match_index]);
 		}
 		else if(output_type == 2)
 		{
@@ -825,7 +915,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 					if(output_type == 1)
 					{
 						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": \"%s\"", var_name, esc_val_2);
+						printf("\t\t\t\"%s\": \"%s\"", var_name, esc_val_2);
 					}
 					else if(output_type == 2)
 					{
@@ -843,7 +933,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 					if(output_type == 1)
 					{
 						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": " SCANFU64 , var_name, *((uint64_t*)var));
+						printf("\t\t\t\"%s\": " SCANFU64 , var_name, *((uint64_t*)var));
 					}
 					else if (output_type == 2)
 					{
@@ -866,7 +956,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 				if(output_type == 1)
 				{
 					if(printed_index >0){ printf(",\n"); }
-					printf("\t\t\"%s\": [\n", var_name);
+					printf("\t\t\t\"%s\": [\n", var_name);
 				}
 				else if(output_type ==2)
 				{
@@ -882,7 +972,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 					if(output_type == 1)
 					{
 						if(dep_index >0){ printf(",\n"); }
-						printf("\t\t\t\"%s\"", dep_list[dep_index]);
+						printf("\t\t\t\t\"%s\"", dep_list[dep_index]);
 					}
 					else if(output_type == 2)
 					{
@@ -897,7 +987,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 				
 				if(output_type == 1)
 				{
-					printf("\n\t\t]");
+					printf("\n\t\t\t]");
 				}
 				else if(output_type == 2)
 				{
@@ -909,7 +999,7 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 		}
 		if(output_type == 1)
 		{
-			printf("\n\t}");
+			printf("\n\t\t}");
 		}
 		else
 		{
@@ -918,7 +1008,8 @@ void print_output(string_map* package_data, char** sorted_matching_packages, str
 	}
 	if(output_type == 1)
 	{
-		printf("\n}\n");
+		printf("\n\t}\n");
+		printf("}\n");
 	}
 }
 

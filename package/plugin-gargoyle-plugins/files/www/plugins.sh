@@ -2,6 +2,7 @@
 <?
 #
 #       Copyright (c) 2011 Cezary Jackiewicz <cezary@eko.one.pl>
+#       Copyright (c) 2012 Eric Bishop <eric@gargoyle-router.com>
 #
 #      This program is free software; you can redistribute it and/or modify
 #      it under the terms of the GNU General Public License as published by
@@ -22,13 +23,17 @@
 	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js"
 ?>
 <script>
-<!--
+
 <?
-	lines="@@"$(opkg info plugin-gargoyle* | sed 's/^$/@@@@@/g' | tr '\n' '@' | sed 's/@@@@@/\n/g')
-	echo "var packages = {};"
-	echo "$lines" | awk -F"[@:]" 'BEGIN {idx=-1} {gsub(/"/, ""); idx++; print "packages[\""idx"\"] = {};"; for (i=1; i<=NF; i++) {if ($i ~ /Package|Version|Status|Description/) print "packages[\""idx"\"][\""$i"\"] = \""$(i+1)"\";"; }}'
+	 opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
+	 if [ -z "$opkg_defs" ] ; then
+		var opkg_info = [];
+		var opkg_matching_packages = [];
+	 else
+	 	printf "%s\n" "$opkg_defs" 
+	 fi
 ?>
-//-->
+
 </script>
 <form>
 	<fieldset>
@@ -46,9 +51,8 @@
 </form>
 
 <script>
-<!--
 	resetData();
-//-->
+
 </script>
 
 <?
