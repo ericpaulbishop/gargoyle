@@ -22,7 +22,7 @@
 
 function createDisplayDiv(pkgName, pkgData)
 {
-	var div=document.createElement('div');
+	var div=document.createElement('div')
 	var elAdd=function(par, childData, isTxt, addBr)
 	{
 		par.appendChild(isTxt ? document.createTextNode(childData) : document.createElement(childData));
@@ -32,19 +32,48 @@ function createDisplayDiv(pkgName, pkgData)
 	statusTypes["not_installed"] = "Not Installed"
 	statusTypes["root"] = "Pre-Installed"
 	statusTypes["plugin_root"] = "Installed"
-	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ];
+	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
 
 	elAdd(div, "strong", false, false)
 	elAdd(div.firstChild, pkgName, true, true)
 	elAdd(div, 'Description: ' + pkgData["Description"], true, true)
+	elAdd(div, 'Version: ' + pkgData["Version"], true, true)
 	elAdd(div, 'Status: ' + pkgStatus, true, pkgStatus == "Not Installed" ? true : false)
 	if(pkgStatus == "Not Installed")
 	{
 		var dependsMatchUsb = false
-		var requiredSize = 0
-
+		for (var dep in pkgData["Required-Depends"])
+		{
+			if(dep.match(/^kmod.*usb/))
+			{
+				dependsMatchUsb = true
+			}
+		}
+		canInstall = (!dependsMatchUsb) && pkgData["Will-Fit"] == "true"
+		elAdd(div, "Required Disk Space: " + parseBytes(pkgData["Required-Size"]), true, (!canInstall))
+		
+		if(!canInstall)
+		{
+			elAdd(div, "em", false, false)
+			div.color = "#FF0000"
+			if(dependsMatchUsb)
+			{
+				elAdd(div.firstChild, "Package Cannot Be Installed (Requires USB support)", true, false)
+			}
+			if(pkgData["Will-Fit"] == "false")
+			{
+				elAdd(div.firstChild, "Package Cannot Be Installed (Insufficient Disk Space)", true, false)
+			}
+			pkgData["Can-Install"] = false;
+		}
+		else
+		{
+			pkgData["Can-Install"] = true;
+		}
 	}
+	return div;
 	
+
 }
 
 function resetData()
@@ -59,40 +88,43 @@ function resetData()
 		if (pkgData != null)
 		{
 			
-			var div=document.createElement('div');
-			div.appendChild(controlDocument.createElement('strong'));
-		       	div.firstChild.appendChild(controlDocument.createTextNode(pkgName));
-			div.appendChild('br');
-			div.appendChild(controlDocument.createTextNode('Description: ' + pkgData["Description"]));
-			div.appendChild('br');
-			div.appendChild(controlDocument.createTextNode(''))
+			var div=createDisplayDiv(pkgName, pkgData)
 
-			
-			/*
-			package = package.replace(/^\s+/, '');
-			var description = packages[i]["Description"];
-			if (!description) description = '';
-			var version = packages[i]["Version"];
 			
 			var enabledCheckbox = createInput('checkbox');
 			enabledCheckbox.disabled = true;
-			enabledCheckbox.checked = packages[i]["Status"].indexOf('not-installed') != "-1" ? false : true;
+			enabledCheckbox.checked = pkgData["Install-Destination"] == 'not_installed' ? false : true;
 			
 			var button = createInput("button");
 			button.className="default_button";
 			if (enabledCheckbox.checked)
 			{
 				button.value = "Uninstall";
-				button.onclick = uninstallPackage;
+				if( pkgData["Install-Destination"] == "root" )
+				{
+					button.disabled = true;
+					button.className = "default_button_disabled"
+				}
+				else
+				{
+					button.onclick = uninstallPackage;
+				}
 			}
 			else
 			{
 				button.value = "Install";
-				button.onclick = installPackage;
+				if( pkgData["Can-Install" ] )
+				{	
+					button.onclick = installPackage;
+				}
+				else
+				{
+					button.disabled = true;
+					button.className = "default_button_disabled"
+				}
 			}
-
-			pluginsTableData.push([package, description, version, enabledCheckbox, button]);
-			*/
+			pluginsTableData.push([div, enabledCheckbox, button]);
+			
 		}
 	}
 
@@ -103,15 +135,19 @@ function resetData()
 	else
 	{
 		pluginsTableData.sort();
-		var tableContainer = document.getElementById('packages_table_container');
-		if(tableContainer.firstChild != null)
-		{
-			tableContainer.removeChild(tableContainer.firstChild);
-		}
 		var pluginsTable = createTable(columnNames, pluginsTableData, "packages_table", false, false);
-		tableContainer.appendChild(pluginsTable);
-	}
+		var tableContainer = document.getElementById('packages_table_container');
+		setSingleChild(tableContainer, pluginsTable)
+	}	
 }
+
+function installPackage()
+{
+}
+function uninstallPackage()
+{
+}
+
 
 /*
 function installPackage()
