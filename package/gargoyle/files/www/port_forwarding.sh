@@ -92,7 +92,7 @@
 			<label class='leftcolumn' for='upnp_up' id='upnp_up_label'>Upload speed to report:</label>
 			<span class = 'rightcolumn'>
 				<input type='text' class='rightcolumn' id='upnp_up' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-				<em>Kbit / second</em>
+				<em>Kbytes / second</em>
 			</span>
 		</div>
 
@@ -100,7 +100,7 @@
 			<label class='leftcolumn' for='upnp_down' id='upnp_down_label'>Download speed to report:</label>
 			<span class='rightcolumn'>
 				<input type='text' id='upnp_down' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-				<em>Kbit / second</em>
+				<em>Kbytes / second</em>
 			</span>
 
 

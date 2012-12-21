@@ -561,10 +561,10 @@ function resetData()
 	downElement = document.getElementById("upnp_down");
 	
 	upElement.value = uciOriginal.get("upnpd", "config", "upload");
-	upElement.value = upElement.value == '' ? 10000 : upElement.value;
+	upElement.value = upElement.value == '' ? 1250 : upElement.value;
 	
 	downElement.value = uciOriginal.get("upnpd", "config", "download");
-	downElement.value = downElement.value == '' ? 10000 : downElement.value;
+	downElement.value = downElement.value == '' ? 1250 : downElement.value;
 
 	setUpnpEnabled();
 	initializeDescriptionVisibility(uciOriginal, "upnp_help");
