@@ -27,13 +27,27 @@ function createDisplayDiv(pkgName, pkgData)
 	div.id = pkgName;
 	var elAdd=function(par, childData, isTxt, addBr)
 	{
-		var el = isTxt ? document.createTextNode(childData) : document.createElement(childData)
+		var el;
+		if(isTxt)
+		{
+			el = document.createElement('span');
+			var lines = childData.split(/\n/);
+			while(lines.length >0)
+			{
+				el.appendChild(document.createTextNode(lines.shift()))
+				if(lines.length > 0){ el.appendChild(document.createElement('br')); }
+			}		
+		}
+		else
+		{
+			el = document.createElement(childData)
+		}
 		par.appendChild(el);
 		if(addBr){ par.appendChild(document.createElement('br')); }
 		return el;
 	}
 
-	var nameDisplay = pkgData["Description"] == null ? pkgName : pkgData["Description"]
+	var nameDisplay = pkgData["Description"] == null ? pkgName : (pkgData["Description"])
 	var statusTypes = [];
 	statusTypes["not_installed"] = "Not Installed"
 	statusTypes["root"] = "Pre-Installed"
@@ -41,8 +55,10 @@ function createDisplayDiv(pkgName, pkgData)
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
 
 
-	elAdd(div, "strong", false, false)
+	//deliberately add 2 newlines to spearate name/description from other data
+	elAdd(div, "strong", false, true)
 	elAdd(div.firstChild, nameDisplay, true, true)
+
 	elAdd(div, 'Version: ' + pkgData["Version"], true, true)
 	elAdd(div, 'Status: ' + pkgStatus, true, pkgStatus == "Not Installed" ? true : false)
 	if(pkgStatus == "Not Installed")
