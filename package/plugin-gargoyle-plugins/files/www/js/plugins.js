@@ -23,20 +23,26 @@
 function createDisplayDiv(pkgName, pkgData)
 {
 	var div=document.createElement('div')
+	div.style.width="320px";
+	div.id = pkgName;
 	var elAdd=function(par, childData, isTxt, addBr)
 	{
-		par.appendChild(isTxt ? document.createTextNode(childData) : document.createElement(childData));
+		var el = isTxt ? document.createTextNode(childData) : document.createElement(childData)
+		par.appendChild(el);
 		if(addBr){ par.appendChild(document.createElement('br')); }
+		return el;
 	}
+
+	var nameDisplay = pkgData["Description"] == null ? pkgName : pkgData["Description"]
 	var statusTypes = [];
 	statusTypes["not_installed"] = "Not Installed"
 	statusTypes["root"] = "Pre-Installed"
 	statusTypes["plugin_root"] = "Installed"
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
 
+
 	elAdd(div, "strong", false, false)
-	elAdd(div.firstChild, pkgName, true, true)
-	elAdd(div, 'Description: ' + pkgData["Description"], true, true)
+	elAdd(div.firstChild, nameDisplay, true, true)
 	elAdd(div, 'Version: ' + pkgData["Version"], true, true)
 	elAdd(div, 'Status: ' + pkgStatus, true, pkgStatus == "Not Installed" ? true : false)
 	if(pkgStatus == "Not Installed")
@@ -52,17 +58,17 @@ function createDisplayDiv(pkgName, pkgData)
 		canInstall = (!dependsMatchUsb) && pkgData["Will-Fit"] == "true"
 		elAdd(div, "Required Disk Space: " + parseBytes(pkgData["Required-Size"]), true, (!canInstall))
 		
-		if(!canInstall)
+		if(!canInstall) 
 		{
-			elAdd(div, "em", false, false)
-			div.color = "#FF0000"
+			var emEl = elAdd(div, "em", false, false)
+			emEl.style.color = "#FF0000"
 			if(dependsMatchUsb)
 			{
-				elAdd(div.firstChild, "Package Cannot Be Installed (Requires USB support)", true, false)
+				elAdd(emEl, "Package Cannot Be Installed (Requires USB support)", true, false)
 			}
-			if(pkgData["Will-Fit"] == "false")
+			else if(pkgData["Will-Fit"] == "false")
 			{
-				elAdd(div.firstChild, "Package Cannot Be Installed (Insufficient Disk Space)", true, false)
+				elAdd(emEl, "Package Cannot Be Installed (Insufficient Disk Space)", true, false)
 			}
 			pkgData["Can-Install"] = false;
 		}
@@ -72,8 +78,6 @@ function createDisplayDiv(pkgName, pkgData)
 		}
 	}
 	return div;
-	
-
 }
 
 function resetData()
@@ -138,31 +142,26 @@ function resetData()
 		var pluginsTable = createTable(columnNames, pluginsTableData, "packages_table", false, false);
 		var tableContainer = document.getElementById('packages_table_container');
 		setSingleChild(tableContainer, pluginsTable)
-	}	
+	}
 }
 
 function installPackage()
 {
-}
-function uninstallPackage()
-{
-}
+	var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
+	alert(pkg)
+	return;
+	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg  ];
 
-
-/*
-function installPackage()
-{
-	var package = this.parentNode.parentNode.firstChild.firstChild.data;
-	var cmd = [ "opkg install " + package ];
-	cmd.push("sleep 2")
-	cmd.push("for i in $(opkg files " + package + " | grep \"/etc/init.d\"); do $i enable; $i start; done");
+	// This should be done by implementing post-inst script for a given package, not as part of package installation procedure
+	//cmd.push("for i in $(opkg files " + package + " | grep \"/etc/init.d\"); do $i enable; $i start; done"); 
+	
 	execute(cmd);
 }
 
 function uninstallPackage()
 {
-	var package = this.parentNode.parentNode.firstChild.firstChild.data;
-	var cmd = [ "opkg remove " + package ];
+	var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
+	var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
 	execute(cmd);
 }
 
@@ -171,6 +170,7 @@ function updatePackagesList()
 	var cmd = [ "opkg update" ];
 	execute(cmd);
 }
+
 
 function execute(cmd,reload)
 {
@@ -188,4 +188,5 @@ function execute(cmd,reload)
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
-*/
+
+
