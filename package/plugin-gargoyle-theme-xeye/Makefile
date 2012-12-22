@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=plugin_gargoyle_xeye_theme
+PKG_NAME:=plugin_gargoyle_theme_xeye
 PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
@@ -12,7 +12,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-xeye-theme
+define Package/plugin-gargoyle-theme-xeye
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
@@ -21,7 +21,7 @@ define Package/plugin-gargoyle-xeye-theme
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-xeye-theme/description
+define Package/plugin-gargoyle-theme-xeye/description
 	Xeye Theme for Gargoyle
 endef
 
@@ -34,17 +34,17 @@ endef
 define Build/Compile
 endef
 
-define Package/plugin-gargoyle-xeye-theme/install
+define Package/plugin-gargoyle-theme-xeye/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
 endef
 
-define Package/plugin-gargoyle-xeye-theme/postinst
+define Package/plugin-gargoyle-theme-xeye/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		/etc/init.d/gargoyle_themes restart 
 	fi 
 endef
-define Package/plugin-gargoyle-xeye-theme/postrm
+define Package/plugin-gargoyle-theme-xeye/postrm
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		IFS=$$(echo -en "\n\b") 
 		for d in `find /www/themes/ -type d` ; do 
@@ -60,4 +60,4 @@ define Package/plugin-gargoyle-xeye-theme/postrm
 endef
 
 
-$(eval $(call BuildPackage,plugin-gargoyle-xeye-theme))
+$(eval $(call BuildPackage,plugin-gargoyle-theme-xeye))

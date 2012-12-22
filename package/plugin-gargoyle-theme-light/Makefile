@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=plugin_gargoyle_light_theme
+PKG_NAME:=plugin_gargoyle_theme_light
 PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
@@ -12,7 +12,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-light-theme
+define Package/plugin-gargoyle-theme-light
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
@@ -21,7 +21,7 @@ define Package/plugin-gargoyle-light-theme
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-light-theme/description
+define Package/plugin-gargoyle-theme-light/description
 	Light Theme for Gargoyle
 endef
 
@@ -34,17 +34,17 @@ endef
 define Build/Compile
 endef
 
-define Package/plugin-gargoyle-light-theme/install
+define Package/plugin-gargoyle-theme-light/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
 endef
 
-define Package/plugin-gargoyle-light-theme/postinst
+define Package/plugin-gargoyle-theme-light/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		/etc/init.d/gargoyle_themes restart 
 	fi 
 endef
-define Package/plugin-gargoyle-light-theme/postrm
+define Package/plugin-gargoyle-theme-light/postrm
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		IFS=$$(echo -en "\n\b") 
 		for d in `find /www/themes/ -type d` ; do 
@@ -60,4 +60,4 @@ define Package/plugin-gargoyle-light-theme/postrm
 endef
 
 
-$(eval $(call BuildPackage,plugin-gargoyle-light-theme))
+$(eval $(call BuildPackage,plugin-gargoyle-theme-light))
