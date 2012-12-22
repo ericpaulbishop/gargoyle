@@ -592,8 +592,11 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		char next_line[16384];
 		int read_data = 1;
 		int next_package_matches = 0;
+		char* last_variable = NULL;
 		while(read_data > 0)
 		{
+			char* tmp_last_variable = last_variable;
+			last_variable = NULL;
 			read_data = 0;
 			next_line[0] = '\0';
 			fgets(next_line, 16384, data_file);
@@ -660,6 +663,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						{
 							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
 							if(old_val != NULL) { free(old_val); }
+							last_variable = strdup(key);
+							
 							if(save_user_installed)
 							{
 								if(strcmp(key, "Status") == 0)
@@ -672,8 +677,35 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						}
 					}
 				}
+				else if( (next_line[0] == ' ' || next_line[0] == '\t') && tmp_last_variable != NULL ) //no ':' separator in line
+				{
+					char* old = remove_string_map_element(next_pkg_data, tmp_last_variable);
+					if(old != NULL)
+					{
+						int next_index;
+						char* start = next_line;
+						while(start[0] == ' ' || start[0] == '\t') { start++; };
+						for(next_index=0; start[next_index] != '\r' && start[next_index] != '\n' && start[next_index] != '\0'; next_index++){};
+						start[next_index] = '\0';
+						char* new = dynamic_strcat(3, old, "\n", start);
+						set_string_map_element(next_pkg_data, tmp_last_variable, new);
+						last_variable = tmp_last_variable;
+						tmp_last_variable = NULL;
+					}
+
+
+				}
 				read_data = 1;
 			}
+			if(tmp_last_variable != NULL)
+			{
+				free(tmp_last_variable);
+			}
+
+		}
+		if(last_variable != NULL)
+		{
+			free(last_variable);
 		}
 		fclose(data_file);
 		free(file_path);
@@ -881,21 +913,35 @@ void print_output(string_map* package_data, char** sorted_matching_packages, opk
 				{
 					char* esc_val_1 = dynamic_replace((char*)var, "\\", "\\\\");
 					char* esc_val_2 = dynamic_replace(esc_val_1, "\"", "\\\"");
+					char* esc_val_3 = dynamic_replace(esc_val_2, "\n", "\\n");
 					if(output_type == 1)
 					{
 						if(printed_index >0){ printf(",\n"); }
-						printf("\t\t\t\"%s\": \"%s\"", var_name, esc_val_2);
+						printf("\t\t\t\"%s\": \"%s\"", var_name, esc_val_3);
 					}
 					else if(output_type == 2)
 					{
-						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", sorted_matching_packages[match_index], var_name, esc_val_2 );
+						printf("opkg_info[\"%s\"][\"%s\"] = \"%s\";\n", sorted_matching_packages[match_index], var_name, esc_val_3 );
 					}
 					else
 					{
-						printf("\t%s: %s\n", var_name, (char*)var);
+						char spacer[30];
+						int varlen =strlen(var_name);
+						int vari;
+						spacer[0] = '\n';
+						spacer[1] = '\t';
+						for(vari=2; vari < varlen+4; vari++)
+						{
+							spacer[vari] = ' ';
+						}
+						spacer[vari] = '\0';
+						free(esc_val_1);
+						esc_val_1 = dynamic_replace((char*)var, "\n", spacer);
+						printf("\t%s: %s\n", var_name, esc_val_1);
 					}
 					free(esc_val_1);
 					free(esc_val_2);
+					free(esc_val_3);
 				}
 				else if(print_variable_formats[print_index][1] == 'l')
 				{
