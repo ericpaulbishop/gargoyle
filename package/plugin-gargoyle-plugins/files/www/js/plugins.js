@@ -148,8 +148,6 @@ function resetData()
 function installPackage()
 {
 	var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
-	alert(pkg)
-	return;
 	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg  ];
 
 	// This should be done by implementing post-inst script for a given package, not as part of package installation procedure
