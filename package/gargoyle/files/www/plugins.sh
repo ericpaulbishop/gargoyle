@@ -44,7 +44,7 @@
 		<legend class="sectionheader">Plugin Options</legend>
 		
 		<div>
-			<span class="leftcolumn">Plugin Root:</span>
+			<span class="leftcolumn">Plugin Root Directory:</span>
 			<span id="plugin_root_static" class="rightcolumn">/plugin_root</span>
 			<input type="text" id="plugin_root_text" class="rightcolumn" style="display:none" />
 		</div>
