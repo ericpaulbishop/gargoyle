@@ -109,6 +109,7 @@ do_start()
 
 		if [ -z "$err" ] && [ "$type" != "Linux swap" ] ; then
 			local disk_size=$(df  | grep "$d" | awk '{ print $2 }')
+			local disk_free=$(df  | grep "$d" | awk '{ print $4 }')
 			if [ -z "$disk_size" ] ; then disk_size="-" ; fi
 			if [ -n "$disk_size" ] && [ "${disk_size}" != '-' ]; then disk_size=$(($disk_size*1024)) ; fi
 			
@@ -119,7 +120,7 @@ do_start()
 			fi
 		
 			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
-			echo "$d	/tmp/usb_mount/$id	/tmp/usb_mount/dev_$did	$type	$disk_size"  >> "$MOUNT_TABLE_FILE"
+			echo "$d	/tmp/usb_mount/$id	/tmp/usb_mount/dev_$did	$type	$disk_size	$disk_free"  >> "$MOUNT_TABLE_FILE"
 		fi
 	done
 }

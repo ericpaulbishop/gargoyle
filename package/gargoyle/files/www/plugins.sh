@@ -33,7 +33,8 @@
 		printf "%s\n" "$opkg_defs" 
 	fi
 	
-	
+	echo "var storageDrives = [];"
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 	
 ?>
 
@@ -44,16 +45,16 @@
 		<legend class="sectionheader">Plugin Options</legend>
 		
 		<div>
-			<span class="leftcolumn">Plugin Root Directory:</span>
-			<span id="plugin_root_static" class="rightcolumn">/plugin_root</span>
-			<input type="text" id="plugin_root_text" class="rightcolumn" style="display:none" />
+			<span class="narrowleftcolumn">Plugin Root:</span>
+			<span id="plugin_root_static" class="widerightcolumn">/plugin_root</span>
+			<input type="text" id="plugin_root_text" class="widerightcolumn" style="display:none" />
 		</div>
 		<div>
-			<span id="plugin_root_drive_static" class="rightcolumnonly">Root Drive</span>
-			<select id="plugin_root_drive_select" class="rightcolumnonly" style="display:none"></select>
+			<span id="plugin_root_drive_static" class="widerightcolumnonly">Root Drive</span>
+			<select id="plugin_root_drive_select" class="widerightcolumnonly" style="display:none"></select>
 		</div>
-		<div>
-			<span id="plugin_root_bytes_free" class="rightcolumnonly"></span>
+		<div id="plugin_root_change_container" style="display:none" >
+			<span class="widerightcolumnonly" ><input type="button" class="default_button" value="Change Plugin Root" /></span>
 		</div>
 		<br/>
 
