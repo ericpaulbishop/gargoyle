@@ -98,6 +98,22 @@ function createDisplayDiv(pkgName, pkgData)
 
 function resetData()
 {
+
+	//set data for plugin options
+	var pluginRootDir   = uciOriginal.get("gargoyle", "plugin_options", "root_dir")
+	var pluginRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
+	pluginRootDrive  = pluginRootDrive == "" ? "root" : pluginRootDrive;
+	pluginRootDir    = pluginRootDir   == "" || pluginRootDrive == "root" ? "/plugin_root" : pluginRootDir;
+	
+	
+	
+
+
+
+
+
+
+	//set data for plugin list
 	var columnNames = ['Package', 'Installed', ''];
 	var pluginsTableData = new Array();
 	var pkgIndex=0;
