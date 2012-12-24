@@ -20,34 +20,65 @@
 #      MA 02110-1301, USA.
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js"
+	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" gargoyle
 ?>
 <script>
 
 <?
-	 opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
-	 if [ -z "$opkg_defs" ] ; then
-		var opkg_info = [];
-		var opkg_matching_packages = [];
-	 else
-	 	printf "%s\n" "$opkg_defs" 
-	 fi
+	opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
+	if [ -z "$opkg_defs" ] ; then
+		echo "var opkg_info = [];"
+		echo "var opkg_matching_packages = [];"
+	else
+		printf "%s\n" "$opkg_defs" 
+	fi
+	
+	
+	
 ?>
 
 </script>
 <form>
-	<fieldset>
-		<legend class="sectionheader">Plugins Manager</legend>
-		<div class='indent'>
-			<div id="packages_table_container"></div>
+	
+	<fieldset id="plugin_options">
+		<legend class="sectionheader">Plugin Options</legend>
+		
+		<div>
+			<span class="leftcolumn">Plugin Root:</span>
+			<span id="plugin_root_static" class="rightcolumn">/plugin_root</span>
+			<input type="text" id="plugin_root_text" class="rightcolumn" style="display:none" />
+		</div>
+		<div>
+			<span id="plugin_root_drive_static" class="rightcolumnonly">Root Drive</span>
+			<select id="plugin_root_drive_select" class="rightcolumnonly" style="display:none"></select>
+		</div>
+		<div>
+			<span id="plugin_root_bytes_free" class="rightcolumnonly"></span>
+		</div>
+		<br/>
+
+
+		<div>
+			<span class="leftcolumn">Plugin Sources:</span>
+		</div>	
+		<div id="package_source_table_container" style="margin-left:15px;" ></div>
+
+	</fieldset>
+
+
+	<fieldset id="plugin_list">
+		<legend class="sectionheader">Plugin List</legend>
+		<div>
+			<div id="packages_table_container" style="margin-left:5px" ></div>
 		</div>
 		<div id="no_packages" style='display:none;'>
-			Packages not found. Refresh list.
+			Packages not found. Refresh plugins list.
+		</div>
+		<div id="bottom_button_container">
+			<input type='button' value='Refresh Plugins' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
 		</div>
 	</fieldset>
-	<div id="bottom_button_container">
-		<input type='button' value='Refresh plugins list' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
-	</div>
+
 </form>
 
 <script>
