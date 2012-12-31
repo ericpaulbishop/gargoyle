@@ -34,7 +34,7 @@
 	fi
 	
 	echo "var storageDrives = [];"
-	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 	
 ?>
 
@@ -51,7 +51,7 @@
 		</div>
 		<div>
 			<span id="plugin_root_drive_static" class="widerightcolumnonly">Root Drive</span>
-			<select id="plugin_root_drive_select" class="widerightcolumnonly" style="display:none"></select>
+			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
 		</div>
 		<div id="plugin_root_change_container" style="display:none" >
 			<span class="widerightcolumnonly" ><input type="button" class="default_button" value="Change Plugin Root" /></span>

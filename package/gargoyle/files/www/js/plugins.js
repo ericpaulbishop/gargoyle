@@ -96,6 +96,30 @@ function createDisplayDiv(pkgName, pkgData)
 	return div;
 }
 
+function updatePluginRootDisplay()
+{
+	var pluginRootDrive = getSelectedValue("plugin_root_drive_select");
+	document.getElementById("plugin_root_static").style.display = pluginRootDrive == "root" ? "block" : "none";
+	document.getElementById("plugin_root_text").style.display   = pluginRootDrive == "root" ? "none"  : "block";
+}
+
+function changeRoot()
+{
+	var textEl = document.getElementById("plugin_root_text")
+	var newRootDir =  textEl.style.display != "none" ? textEl.value : "/plugin_root";
+	var newRootDrive = getSelectedValue("plugin_root_drive_select");
+	var oldRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
+	oldRootDrive = oldRootDrive == "" ? "root" : oldRootDrive;
+
+	if(oldRootDrive == "root" && newRootDrive != "root")
+	{
+		
+	}
+	
+
+
+}
+
 function resetData()
 {
 
@@ -104,15 +128,43 @@ function resetData()
 	var pluginRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
 	pluginRootDrive  = pluginRootDrive == "" ? "root" : pluginRootDrive;
 	pluginRootDir    = pluginRootDir   == "" || pluginRootDrive == "root" ? "/plugin_root" : pluginRootDir;
+
+	document.getElementById("plugin_root_static").style.display = pluginRootDrive == "root" ? "block" : "none";
+	document.getElementById("plugin_root_text").style.display   = pluginRootDrive == "root" ? "none"  : "block";
+	document.getElementById("plugin_root_drive_static").style.display = storageDrives.length == 0 ? "block" : "none";
+	document.getElementById("plugin_root_drive_select").style.display = storageDrives.length == 0 ? "none"  : "block";
+
+	
+	document.getElementById("plugin_root_text").value           = pluginRootDir;
+	if(storageDrives.length > 0)
+	{
+		var rootDriveDisplay = [];
+		var rootDriveValues  = [];
+		
+		rootDriveDisplay.push("Root Drive " +  parseBytes(opkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(opkg_dests['root']['Bytes-Free']) + " Free")
+		rootDriveValues.push("root");
+		
+		var driveIndex;
+		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+		{
+			rootDriveDisplay.push( storageDrives[driveIndex][0] + " " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+			rootDriveValues.push( storageDrives[driveIndex][0] )
+		}
+		setAllowableSelections("plugin_root_drive_select", rootDriveValues, rootDriveDisplay, document);
+		setSelectedValue("plugin_root_drive_select", pluginRootDrive);
+		document.getElementById("plugin_root_change_container").style.display = "block"
+	}
+	else
+	{
+		setChildText("plugin_root_drive_static", "Root Drive " +  parseBytes(opkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(opkg_dests['root']['Bytes-Free']) + " Free", null, null, null, document);
+		document.getElementById("plugin_root_change_container").style.display = "none"
+	}
 	
 	
 	
-
-
-
-
-
-
+	
+	
+	
 	//set data for plugin list
 	var columnNames = ['Package', 'Installed', ''];
 	var pluginsTableData = new Array();
@@ -150,7 +202,7 @@ function resetData()
 			{
 				button.value = "Install";
 				if( pkgData["Can-Install" ] )
-				{	
+				{
 					button.onclick = installPackage;
 				}
 				else
