@@ -25,6 +25,14 @@
 <script>
 
 <?
+
+	if [ ! -d '/plugin_root' ] && [ ! -h '/plugin_root' ] ; then
+		mkdir -p /plugin_root
+		ln -s /etc /plugin_root/etc
+		ln -s /tmp /plugin_root/tmp
+		ln -s /var /plugin_root/var
+	fi
+
 	opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
 	if [ -z "$opkg_defs" ] ; then
 		echo "var opkg_info = [];"
@@ -35,7 +43,7 @@
 	
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
-	
+
 ?>
 
 </script>
