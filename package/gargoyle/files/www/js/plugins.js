@@ -146,7 +146,6 @@ function changePluginRoot()
 	commands.push("/sbin/uci set gargoyle.plugin_options.root_drive='" + newRootDrive + "'")
 	commands.push("/sbin/uci commit");
 	
-	//alert(commands)
 	execute(commands);
 
 }

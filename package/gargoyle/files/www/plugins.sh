@@ -41,8 +41,13 @@
 		printf "%s\n" "$opkg_defs" 
 	fi
 	
+	echo "var plugin_sources = [];"
+	cat /etc/opkg.conf | awk  '$0 ~ /^src.gz/  { print "plugin_sources.push(\"" $2 "\", \"" $3 "\")" ; }'
+
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+
+	
 
 ?>
 
