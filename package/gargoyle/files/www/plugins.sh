@@ -54,7 +54,9 @@
 			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
 		</div>
 		<div id="plugin_root_change_container" style="display:none" >
-			<span class="widerightcolumnonly" ><input type="button" class="default_button" value="Change Plugin Root" /></span>
+			<span class="widerightcolumnonly" >
+				<input type="button" class="default_button" value="Change Plugin Root" onclick="changePluginRoot()" />
+			</span>
 		</div>
 		<br/>
 

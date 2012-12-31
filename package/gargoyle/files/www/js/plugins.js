@@ -18,6 +18,7 @@
  *     MA 02110-1301, USA.
  */
 
+var driveToPath = [];
 
 
 function createDisplayDiv(pkgName, pkgData)
@@ -103,20 +104,50 @@ function updatePluginRootDisplay()
 	document.getElementById("plugin_root_text").style.display   = pluginRootDrive == "root" ? "none"  : "block";
 }
 
-function changeRoot()
+function changePluginRoot()
 {
 	var textEl = document.getElementById("plugin_root_text")
-	var newRootDir =  textEl.style.display != "none" ? textEl.value : "/plugin_root";
-	var newRootDrive = getSelectedValue("plugin_root_drive_select");
+	var newRootDir =  textEl.style.display != "none" ? textEl.value : "/plugin_root"
+	var newRootDrive = getSelectedValue("plugin_root_drive_select")
 	var oldRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
 	oldRootDrive = oldRootDrive == "" ? "root" : oldRootDrive;
 
+	var commands = [];
+	var newDirPath = driveToPath[ newRootDrive ] + "/" + newRootDir
 	if(oldRootDrive == "root" && newRootDrive != "root")
 	{
-		
-	}
-	
+		if(!confirm("You are switching your plugin root directory to a USB drive. This means that in order for your plugins to work correctly you must NOT remove this drive.\n\nContinue?"))
+		{
+			return
+		}
+		commands.push("mkdir -p '" + newDirPath + "'")
+		commands.push("mv -f '/plugin_root/'* '" + newDirPath + "/'")
+		commands.push("rm -r '/plugin_root/'")
+		commands.push("ln -s '" + newDirPath + "' '/plugin_root'")
 
+	}
+	else if(oldRootDrive != "root" && newRootDrive == "root")
+	{
+		commands.push("mkdir -p '/plugin.root.tmp'")
+		commands.push("mv -f '/plugin_root/'* '/plugin.root.tmp/'")
+		commands.push("rm '/plugin_root'")
+		commands.push("mv '/plugin.root.tmp' '/plugin_root'")
+	}
+	else if(oldRootDrive != "root" && newRootDrive != "root")
+	{
+		commands.push("mkdir -p '" + newDirPath + "'")
+		commands.push("mv -f '/plugin_root/'* '" + newDirPath + "/'")
+		commands.push("rm '/plugin_root/'")
+		commands.push("ln -s '" + newDirPath + "' '/plugin_root'")
+	}
+
+	commands.push("/sbin/uci set gargoyle.plugin_options=plugin_options")
+	commands.push("/sbin/uci set gargoyle.plugin_options.root_dir='" + newRootDir + "'")
+	commands.push("/sbin/uci set gargoyle.plugin_options.root_drive='" + newRootDrive + "'")
+	commands.push("/sbin/uci commit");
+	
+	//alert(commands)
+	execute(commands);
 
 }
 
@@ -136,6 +167,7 @@ function resetData()
 
 	
 	document.getElementById("plugin_root_text").value           = pluginRootDir;
+	driveToPath["Root"] = "/";
 	if(storageDrives.length > 0)
 	{
 		var rootDriveDisplay = [];
@@ -149,6 +181,7 @@ function resetData()
 		{
 			rootDriveDisplay.push( storageDrives[driveIndex][0] + " " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
 			rootDriveValues.push( storageDrives[driveIndex][0] )
+			driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
 		}
 		setAllowableSelections("plugin_root_drive_select", rootDriveValues, rootDriveDisplay, document);
 		setSelectedValue("plugin_root_drive_select", pluginRootDrive);
@@ -254,7 +287,7 @@ function updatePackagesList()
 }
 
 
-function execute(cmd,reload)
+function execute(cmd)
 {
 	var commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
