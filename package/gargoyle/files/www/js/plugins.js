@@ -153,14 +153,22 @@ function changePluginRoot()
 function removePluginSource()
 {
 	var srcName = this.parentNode.parentNode.firstChild.firstChild.data
-	alert(srcName)
-
+	//alert(srcName)
+	var commands = []
+	commands.push("awk ' $1 != \"src/gz\" || $2 != \"" + srcName + "\"  { print $0 } ' /etc/opkg.conf >/tmp/opkg.conf.tmp")
+	commands.push("mv /tmp/opkg.conf.tmp /etc/opkg.conf")
+	commands.push("rm -r '/tmp/opkg-lists/" + srcName + "'")
+	commands.push("opkg update")
+	
+	execute(commands)
 
 }
 function addPluginSource()
 {
 	var srcName = document.getElementById("add_source_name").value
 	var srcUrl  = document.getElementById("add_source_url").value
+
+	//NOTE: proofread to check that (1) name cannot contain a space, (2) no duplicate names (3) no duplicate URLs
 }
 
 function resetData()
