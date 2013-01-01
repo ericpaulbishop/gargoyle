@@ -76,9 +76,21 @@
 
 		<div>
 			<span class="leftcolumn">Plugin Sources:</span>
-		</div>	
-		<div id="package_source_table_container" style="margin-left:15px;" ></div>
-
+		</div>
+		<div id="package_source_table_container" style="margin-left:5px;" ></div>
+		<div class="indent">
+			<div>
+				<label class="narrowleftcolumn" for="add_source_name">Add Name:</label>
+				<input type="text" class="widerightcolumn" id="add_source_name" style="width:325px;"/>
+			</div>
+			<div>
+				<label class="narrowleftcolumn" for="add_source_url">Add URL:</label>
+				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
+			</div>
+			
+			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="Add Plugin Source" onclick="addPluginSource()" /></span>
+			
+		</div>
 	</fieldset>
 
 

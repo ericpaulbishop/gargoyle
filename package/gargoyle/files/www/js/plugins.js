@@ -152,9 +152,15 @@ function changePluginRoot()
 
 function removePluginSource()
 {
+	var srcName = this.parentNode.parentNode.firstChild.firstChild.data
+	alert(srcName)
+
+
 }
 function addPluginSource()
 {
+	var srcName = document.getElementById("add_source_name").value
+	var srcUrl  = document.getElementById("add_source_url").value
 }
 
 function resetData()
@@ -207,8 +213,7 @@ function resetData()
 	{
 		var name = pluginSources[sourceIndex][0]
 		var url  = pluginSources[sourceIndex][1]
-		alert("name = " + name);
-		if(url.match(/\/\/downloads.openwrt.org/) || url.match(/\/\/www.gargoyle-router.com/))
+		if( url.match(/\/\/downloads.openwrt.org/) || url.match(/\/\/www.gargoyle-router.com/))
 		{
 			remove = document.createElement('em');
 			remove.appendChild(document.createTextNode("Preset"))
