@@ -168,8 +168,63 @@ function addPluginSource()
 	var srcName = document.getElementById("add_source_name").value
 	var srcUrl  = document.getElementById("add_source_url").value
 
-	//NOTE: proofread to check that (1) name cannot contain a space, (2) no duplicate names (3) no duplicate URLs
+	//proofread to check that (1) name cannot contain a space, (2) no duplicate names (3) no duplicate URLs
+	var errors = []
+	if(!srcName.match(/^[A-Za-z0-9_\-]+$/))
+	{
+		var err = "ERROR: Invalid Character(s) In Source Name" + ( srcName.match(/ /) ? " (no spaces allowed)" : "" )
+		errors.push(err);
+	}
+	if(srcName.length == 0)
+	{
+		errors.push("ERROR: You must specify Source Name")
+	}
+	if(srcUrl.length == 0)
+	{
+		errors.push("ERROR: You must specify Source URL")
+	}
+	var dupeName = false
+	var dupeUrl  = false
+	var sourceIndex;
+	for(sourceIndex=0; sourceIndex < pluginSources.length; sourceIndex++)
+	{
+		dupeName = srcName == pluginSources[sourceIndex][0] ? true : dupeName
+		dupeUrl  = srcUrl  == pluginSources[sourceIndex][1] ? true : dupeUrl 
+	}
+	if(dupeName)
+	{
+		errors.push("ERROR: Duplicate Source Name")
+	}
+	if(dupeUrl)
+	{
+		errors.push("ERROR: Duplicate Source URL")
+	}
+	if(errors.length > 0)
+	{
+		alert( errors.join("\n") + "\n\nCannot Add Plugin Source");
+	}
+	else
+	{
+		document.getElementById("add_source_name").value = ""
+		document.getElementById("add_source_url").value = ""
+
+		var commands = [];
+		srcUrl = srcUrl.replace(/'/, "%27");
+		commands.push("echo 'src/gz " + srcName + " " + srcUrl + "'>> /etc/opkg.conf")
+		commands.push("opkg update")
+	
+		execute(commands)
+	}
 }
+
+function proofreadSourceName(input)
+{
+	var validateSourceName = function(srcName) {
+		return srcName.length > 0 && srcName.match(/^[A-Za-z0-9_\-]+$/) ? 0 : 1;
+	}
+	proofreadText(input, validateSourceName, 0)
+}
+
 
 function resetData()
 {

@@ -81,7 +81,7 @@
 		<div class="indent">
 			<div>
 				<label class="narrowleftcolumn" for="add_source_name">Add Name:</label>
-				<input type="text" class="widerightcolumn" id="add_source_name" style="width:325px;"/>
+				<input type="text" class="widerightcolumn" id="add_source_name" onkeyup="proofreadSourceName(this)" style="width:325px;"/>
 			</div>
 			<div>
 				<label class="narrowleftcolumn" for="add_source_url">Add URL:</label>
