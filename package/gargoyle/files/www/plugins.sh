@@ -32,11 +32,14 @@
 		ln -s /tmp /plugin_root/tmp
 		ln -s /var /plugin_root/var
 	fi
+	plug_root_dest=$( awk '$1 == "dest" && $3 == "/plugin_root" ' /etc/opkg.conf 2>/dev/null )
+	if [ -z "$plug_root_dest" ] ; then
+		echo "dest plugin_root /plugin_root" >>/etc/opkg.conf
+	fi
 
 	opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
 	if [ -z "$opkg_defs" ] ; then
-		echo "var opkg_info = [];"
-		echo "var opkg_matching_packages = [];"
+		opkg-more --packages not_a_real_package --will-fit root --javascript
 	else
 		printf "%s\n" "$opkg_defs" 
 	fi
