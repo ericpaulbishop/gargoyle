@@ -150,10 +150,17 @@ function changePluginRoot()
 
 }
 
+function removePluginSource()
+{
+}
+function addPluginSource()
+{
+}
+
 function resetData()
 {
 
-	//set data for plugin options
+	//set data for plugin root
 	var pluginRootDir   = uciOriginal.get("gargoyle", "plugin_options", "root_dir")
 	var pluginRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
 	pluginRootDrive  = pluginRootDrive == "" ? "root" : pluginRootDrive;
@@ -191,6 +198,34 @@ function resetData()
 		setChildText("plugin_root_drive_static", "Root Drive " +  parseBytes(opkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(opkg_dests['root']['Bytes-Free']) + " Free", null, null, null, document);
 		document.getElementById("plugin_root_change_container").style.display = "none"
 	}
+
+
+	//set data for plugin sources
+	var sourceTableData = [];
+	var sourceIndex;
+	for(sourceIndex=0; sourceIndex < pluginSources.length; sourceIndex++)
+	{
+		var name = pluginSources[sourceIndex][0]
+		var url  = pluginSources[sourceIndex][1]
+		alert("name = " + name);
+		if(url.match(/\/\/downloads.openwrt.org/) || url.match(/\/\/www.gargoyle-router.com/))
+		{
+			remove = document.createElement('em');
+			remove.appendChild(document.createTextNode("Preset"))
+		}
+		else
+		{
+			remove = createInput("button");
+			remove.className = "default_button"
+			remove.value="Remove"
+			remove.onclick = removePluginSource;
+		}
+		sourceTableData.push( [name, url, remove] );
+	}
+	var sourceTable = createTable(["Name", "URL", ""], sourceTableData, "package_source_table", false, false);
+	var sourceContainer = document.getElementById('package_source_table_container');
+	setSingleChild(sourceContainer, sourceTable)
+
 	
 	
 	
