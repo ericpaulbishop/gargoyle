@@ -62,8 +62,8 @@ do_start()
 			continue
 		fi
 		
-		rmdir "/tmp/usb_mount/$did" >/dev/null 2>&1
-		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap") 
+		rm "/tmp/usb_mount/$did" >/dev/null 2>&1
+		local type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap") 
 
 		local err
 		unset err
@@ -80,6 +80,12 @@ do_start()
 				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				ntfs-3g "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
+			;;
+			'exFAT')
+				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount.exfat -o umask=0,dmask=0 "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2>/dev/null
 			;;
 			'Linux swap')
 				swapon "$d" >/dev/null 2>&1
@@ -117,7 +123,6 @@ do_start()
 			
 			if [ -e "$MOUNT_TABLE_FILE" ] ; then
 				escaped_d=$(echo $d | sed 's/\//\\\//g')
-				echo sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
 				sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
 			fi
 		
