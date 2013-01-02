@@ -32,6 +32,9 @@
 		ln -s /tmp /plugin_root/tmp
 		ln -s /var /plugin_root/var
 	fi
+	if [ ! -d '/var/opkg-lists' ] ; then
+		mkdir -p '/var/opkg-lists' 
+	fi
 	plug_root_dest=$( awk '$1 == "dest" && $3 == "/plugin_root" ' /etc/opkg.conf 2>/dev/null )
 	if [ -z "$plug_root_dest" ] ; then
 		echo "dest plugin_root /plugin_root" >>/etc/opkg.conf
