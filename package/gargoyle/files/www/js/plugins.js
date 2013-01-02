@@ -288,9 +288,9 @@ function resetData()
 			remove.value="Remove"
 			remove.onclick = removePluginSource;
 		}
-		sourceTableData.push( [name, url, remove] );
+		sourceTableData.push( [name + "\n" + url, remove] );
 	}
-	var sourceTable = createTable(["Name", "URL", ""], sourceTableData, "package_source_table", false, false);
+	var sourceTable = createTable(["Name", ""], sourceTableData, "package_source_table", false, false);
 	var sourceContainer = document.getElementById('package_source_table_container');
 	setSingleChild(sourceContainer, sourceTable)
 
