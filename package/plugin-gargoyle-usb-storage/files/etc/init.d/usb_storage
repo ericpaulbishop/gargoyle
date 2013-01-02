@@ -62,7 +62,7 @@ do_start()
 			continue
 		fi
 		
-		rmdir "/tmp/usb_mount/$did" >/dev/null 2>&1
+		rm "/tmp/usb_mount/$did" >/dev/null 2>&1
 		local type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap") 
 
 		local err
