@@ -2006,16 +2006,16 @@ CONFIG_PACKAGE_ubusd=y
 # Gargoyle Web Interface
 #
 CONFIG_PACKAGE_gargoyle=y
-CONFIG_PACKAGE_plugin-gargoyle-dark-one-theme=m
-CONFIG_PACKAGE_plugin-gargoyle-green-theme=m
-CONFIG_PACKAGE_plugin-gargoyle-light-theme=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
 CONFIG_PACKAGE_plugin-gargoyle-plugins=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 # CONFIG_PACKAGE_plugin-gargoyle-tor is not set
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
-CONFIG_PACKAGE_plugin-gargoyle-xeye-theme=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 
 #
 # Utilities

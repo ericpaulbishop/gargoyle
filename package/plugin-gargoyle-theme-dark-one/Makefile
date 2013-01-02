@@ -43,12 +43,12 @@ define Package/plugin-gargoyle-theme-dark-one/install
 endef
 
 define Package/plugin-gargoyle-theme-dark-one/postinst
-	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+	if [ -e "/etc/openwrt_version" ] ; then 
 		/etc/init.d/gargoyle_themes restart 
 	fi 
 endef
 define Package/plugin-gargoyle-theme-dark-one/postrm
-	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+	if [ -e "/etc/openwrt_version" ] ; then 
 		IFS=$$(echo -en "\n\b") 
 		for d in `find /www/themes/ -type d` ; do 
 			if [ -d "$$d" ] ; then 
