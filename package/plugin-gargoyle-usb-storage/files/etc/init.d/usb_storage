@@ -63,7 +63,12 @@ do_start()
 		fi
 		
 		rm "/tmp/usb_mount/$did" >/dev/null 2>&1
-		local type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap") 
+		
+		
+		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap")
+		if [ -e /sbin/mount.exfat ] ; then
+			type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap")
+		fi
 
 		local err
 		unset err
