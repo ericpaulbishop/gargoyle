@@ -302,13 +302,13 @@ static void check_for_backwards_time_shift(time_t now)
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
-		printk("ipt_bandwidth: backwards time shift detected, adjusting\n\n");
+		printk("ipt_bandwidth: backwards time shift detected, adjusting\n");
 
 		/* adjust */
 		down(&userspace_lock);
-		
-		/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
-		backwards_adjust_current_time = now - local_seconds_west; 		
+
+		/* This function is always called with absolute time, not time adjusted for timezone. Correct that before adjusting. */
+		backwards_adjust_current_time = now - local_seconds_west;
 		apply_to_every_string_map_value(id_map, adjust_id_for_backwards_time_shift);
 		up(&userspace_lock);
 	}
