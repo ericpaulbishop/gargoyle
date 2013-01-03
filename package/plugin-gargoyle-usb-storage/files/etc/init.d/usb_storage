@@ -131,7 +131,9 @@ do_start()
 				sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
 			fi
 		
-			ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
+			if [ ! -h  "/tmp/usb_mount/dev_$did" ] ; then
+				ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
+			fi
 			echo "$d	/tmp/usb_mount/$id	/tmp/usb_mount/dev_$did	$type	$disk_size	$disk_free"  >> "$MOUNT_TABLE_FILE"
 		fi
 	done
