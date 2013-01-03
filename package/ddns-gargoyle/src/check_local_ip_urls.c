@@ -239,7 +239,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			{
 				ip = get_ip_from_url(next_url);
 				//syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
-				printf("\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				printf("\t\t%s local IP from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
 				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
 				is_first_lookup = 0;
 			}
