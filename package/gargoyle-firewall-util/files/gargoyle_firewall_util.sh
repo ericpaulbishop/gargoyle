@@ -568,9 +568,9 @@ force_router_dns()
 
 add_adsl_modem_routes()
 {
-	wan_proto=$(uci get network.wan.proto)
+	wan_proto=$(uci -q get network.wan.proto)
 	if [ "$wan_proto" = "pppoe" ] ; then
-		wan_dev=$(uci get network.wan.ifname) #not really the interface, but the device
+		wan_dev=$(uci -q get network.wan.ifname) #not really the interface, but the device
 		iptables -A postrouting_rule -t nat -o $wan_dev -j MASQUERADE
 		iptables -A forwarding_rule -o $wan_dev -j ACCEPT
 		/etc/ppp/ip-up.d/modemaccess.sh firewall $wan_dev
