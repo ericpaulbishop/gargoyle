@@ -30,7 +30,8 @@
 #include <stdint.h>
 #include <sys/statvfs.h>
 
-#include "erics_tools.h"
+#include <libbbtargz.h>
+#include <erics_tools.h>
 
 
 #if __SIZEOF_POINTER__ == 8
@@ -560,8 +561,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		struct dirent *entry;
 		if(dir == NULL)
 		{
-			fprintf(stderr, "ERROR: package list directory \"%s\" does not exist\n", data_source);
-			exit(1);
+			fprintf(stderr, "WARNING: package list directory \"%s\" does not exist\n", data_source);
+			return;
 		}
 		while(entry = readdir(dir))
 		{
@@ -580,14 +581,22 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	while(file_list->length > 0)
 	{
 		char* file_path = (char*)shift_list(file_list);
-		FILE* data_file = fopen(file_path, "r");
+		FILE* data_file, raw_file;
+		int gz_pid;
+		
+		data_file = fopen(file_path, "r");
 		if(data_file == NULL)
 		{
-			fprintf(stderr, "ERROR: opkg file \"%s\" does not exist\n", file_path);
-			exit(1);
+			fprintf(stderr, "WARNING: opkg file \"%s\" does not exist\n", file_path);
+			return;
+		}
+	       	if(strstr(file_path, ".gz") == file_path + (strlen(file_path)-3))
+		{
+			raw_file = data_file;
+			data_file = gz_open(raw_file, &gz_pid);
 		}
 		
-		
+				
 		string_map* next_pkg_data = NULL;
 		char next_line[16384];
 		int read_data = 1;
@@ -707,7 +716,13 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		{
 			free(last_variable);
 		}
+
 		fclose(data_file);
+		if(raw_file != NULL)
+		{
+			fclose(raw_file);
+			gz_close(gz_pid); 
+		}
 		free(file_path);
 	}
 
