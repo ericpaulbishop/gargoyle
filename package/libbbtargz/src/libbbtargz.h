@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef	__LIBBB_H__
-#define	__LIBBB_H__    1
+#ifndef	__LIBBBTARGZ_H__
+#define	__LIBBBTARGZ_H__    1
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -148,4 +148,4 @@ enum {
 	FILEUTILS_FORCE = 8,
 };
 
-#endif /* __LIBBB_H__ */
+#endif /* __LIBBBTARGZ_H__ */

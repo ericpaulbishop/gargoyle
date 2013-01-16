@@ -47,7 +47,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#include "libtargz.h"
+#include "libbbtargz.h"
 
 static FILE *in_file, *out_file;
 

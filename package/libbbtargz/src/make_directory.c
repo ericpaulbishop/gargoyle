@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <libgen.h>
 
-#include "libtargz.h"
+#include "libbbtargz.h"
 
 /* Create the directory PATH with mode MODE, or the default if MODE is -1.
  * Also create parent directories as necessary if flags contains

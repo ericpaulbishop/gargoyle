@@ -27,7 +27,7 @@
 #include <utime.h>
 #include <libgen.h>
 
-#include "libtargz.h"
+#include "libbbtargz.h"
 
 #define CONFIG_FEATURE_TAR_OLDGNU_COMPATABILITY 1
 #define CONFIG_FEATURE_TAR_GNU_EXTENSIONS
@@ -75,7 +75,7 @@ seek_sub_file(FILE *fd, const int count)
 
 
 /* Extract the data postioned at src_stream to either filesystem, stdout or
- * buffer depending on the value of 'function' which is defined in libtargz.h
+ * buffer depending on the value of 'function' which is defined in libbbtargz.h
  *
  * prefix doesnt have to be just a directory, it may prefix the filename as well.
  *

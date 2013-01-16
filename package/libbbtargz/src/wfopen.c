@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "libtargz.h"
+#include "libbbtargz.h"
 
 FILE *wfopen(const char *path, const char *mode)
 {

@@ -23,7 +23,7 @@
 #include <string.h>
 #include <time.h>
 #include <utime.h>
-#include "libtargz.h"
+#include "libbbtargz.h"
 
 
 /*
