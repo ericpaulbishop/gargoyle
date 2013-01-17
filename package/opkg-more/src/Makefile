@@ -1,7 +1,7 @@
 all: opkg-more
 
 opkg-more: opkg-more.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -lbbtargz
 
 opkg-more.o: opkg-more.c
 	$(CC) $(CFLAGS) -c  $^ -o $@ 

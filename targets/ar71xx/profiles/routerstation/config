@@ -2138,3 +2138,4 @@ CONFIG_PACKAGE_uuidgen=y
 CONFIG_PACKAGE_vsftpd=y
 CONFIG_PACKAGE_share-users=y
 CONFIG_PACKAGE_opkg-more=y
+CONFIG_PACKAGE_libbbtargz=y

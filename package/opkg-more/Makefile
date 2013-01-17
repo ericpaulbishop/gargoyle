@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/opkg-more
 	SECTION:=utils
 	CATEGORY:=Utilities
-	DEPENDS:=+libericstools 
+	DEPENDS:=+libericstools +libbbtargz 
 	TITLE:=Supplemental opkg functionality
 	URL:=http://www.gargoyle-router.com
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>

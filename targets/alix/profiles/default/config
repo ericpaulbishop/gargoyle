@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Wed Sep 12 13:59:17 2012
+# Thu Jan 17 13:40:17 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -101,6 +101,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_at91_9260 is not set
 # CONFIG_TARGET_at91_9263 is not set
 # CONFIG_TARGET_pxa_Default is not set
+# CONFIG_TARGET_pxa_Gumstix is not set
 # CONFIG_TARGET_atheros_Default is not set
 # CONFIG_TARGET_imx21_Default is not set
 # CONFIG_TARGET_xburst_qi_lb60_Default is not set
@@ -169,6 +170,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_brcm47xx_Broadcom-ath5k is not set
 # CONFIG_TARGET_brcm47xx_Broadcom-none is not set
 # CONFIG_TARGET_brcm47xx_Bcm4705-b43 is not set
+# CONFIG_TARGET_brcm47xx_Bcm4705-wl is not set
 # CONFIG_TARGET_brcm47xx_Bcm4705-none is not set
 # CONFIG_TARGET_brcm47xx_Ps1208mfg is not set
 # CONFIG_TARGET_brcm47xx_WGT634U is not set
@@ -218,10 +220,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ar71xx_generic_DIR601A1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR615C1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR615E4 is not set
-# CONFIG_TARGET_ar71xx_generic_DIR825B1_ALL is not set
 # CONFIG_TARGET_ar71xx_generic_DIR825B1 is not set
-# CONFIG_TARGET_ar71xx_generic_DIR825B1_OPENWRT is not set
-# CONFIG_TARGET_ar71xx_generic_DIR825B1_TOSTOCK is not set
 # CONFIG_TARGET_ar71xx_generic_EWDORIN is not set
 # CONFIG_TARGET_ar71xx_generic_JA76PF is not set
 # CONFIG_TARGET_ar71xx_generic_JA76PF2 is not set
@@ -230,9 +229,13 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ar71xx_generic_WRT400N is not set
 # CONFIG_TARGET_ar71xx_generic_WNDR3700 is not set
 # CONFIG_TARGET_ar71xx_generic_OM2P is not set
+# CONFIG_TARGET_ar71xx_generic_MR600 is not set
+# CONFIG_TARGET_ar71xx_generic_UBDEV01 is not set
+# CONFIG_TARGET_ar71xx_generic_DLRTDEV01 is not set
 # CONFIG_TARGET_ar71xx_generic_MZKW04NU is not set
 # CONFIG_TARGET_ar71xx_generic_MZKW300NH is not set
 # CONFIG_TARGET_ar71xx_generic_RW2458N is not set
+# CONFIG_TARGET_ar71xx_generic_CAP4200AG is not set
 # CONFIG_TARGET_ar71xx_generic_TLMR11U is not set
 # CONFIG_TARGET_ar71xx_generic_TLMR3020 is not set
 # CONFIG_TARGET_ar71xx_generic_TLMR3040 is not set
@@ -240,6 +243,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ar71xx_generic_TLMR3420 is not set
 # CONFIG_TARGET_ar71xx_generic_TLWR703 is not set
 # CONFIG_TARGET_ar71xx_generic_TLWA701 is not set
+# CONFIG_TARGET_ar71xx_generic_TLWA7510 is not set
 # CONFIG_TARGET_ar71xx_generic_TLWA901 is not set
 # CONFIG_TARGET_ar71xx_generic_TLWDR4300 is not set
 # CONFIG_TARGET_ar71xx_generic_TLWR740 is not set
@@ -258,6 +262,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ar71xx_generic_UBNTRS is not set
 # CONFIG_TARGET_ar71xx_generic_UBNTRSPRO is not set
 # CONFIG_TARGET_ar71xx_generic_UBNTUNIFI is not set
+# CONFIG_TARGET_ar71xx_generic_UBNTUNIFIOUTDOOR is not set
 # CONFIG_TARGET_ar71xx_generic_UBNT is not set
 # CONFIG_TARGET_ar71xx_generic_ZCN1523H28 is not set
 # CONFIG_TARGET_ar71xx_generic_ZCN1523H516 is not set
@@ -281,6 +286,9 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ramips_rt305x_UPVEL is not set
 # CONFIG_TARGET_ramips_rt3883_Default is not set
 # CONFIG_TARGET_ramips_rt3883_RTN56U is not set
+# CONFIG_TARGET_ramips_rt3883_DIR645 is not set
+# CONFIG_TARGET_ramips_rt3883_TEW691GR is not set
+# CONFIG_TARGET_ramips_rt3883_TEW692GR is not set
 # CONFIG_TARGET_realview_Default is not set
 # CONFIG_TARGET_avr32_Default is not set
 # CONFIG_TARGET_lantiq_ar9_Generic is not set
@@ -463,6 +471,7 @@ CONFIG_TARGET_ROOTFS_SQUASHFS=y
 # Image Options
 #
 CONFIG_X86_GRUB_IMAGES=y
+# CONFIG_X86_USE_GRUB2 is not set
 # CONFIG_X86_GRUB_CONSOLE is not set
 CONFIG_X86_GRUB_SERIAL="ttyS0"
 CONFIG_X86_GRUB_BAUDRATE=38400
@@ -476,6 +485,7 @@ CONFIG_TARGET_KERNEL_PARTSIZE=4
 CONFIG_TARGET_ROOTFS_PARTNAME="/dev/sda2"
 CONFIG_TARGET_ROOTFS_PARTSIZE=48
 CONFIG_TARGET_ROOTFS_MAXINODE=6000
+CONFIG_TARGET_ROOTFS_RESERVED_PCT=5
 
 #
 # Global build settings
@@ -497,6 +507,7 @@ CONFIG_SHADOW_PASSWORDS=y
 # Kernel build options
 #
 CONFIG_KERNEL_DEBUG_FS=y
+# CONFIG_KERNEL_PERF_EVENTS is not set
 # CONFIG_KERNEL_PROFILING is not set
 # CONFIG_KERNEL_KALLSYMS is not set
 # CONFIG_KERNEL_FTRACE is not set
@@ -513,7 +524,8 @@ CONFIG_KERNEL_PRINTK_TIME=y
 #
 # CONFIG_DEBUG is not set
 CONFIG_IPV6=y
-# CONFIG_PKG_BUILD_PARALLEL is not set
+CONFIG_PKG_BUILD_PARALLEL=y
+CONFIG_PKG_BUILD_USE_JOBSERVER=y
 
 #
 # Stripping options
@@ -552,10 +564,13 @@ CONFIG_USE_UCLIBC=y
 CONFIG_UCLIBC_VERSION_0_9_33=y
 CONFIG_GDB=y
 # CONFIG_INSIGHT is not set
+CONFIG_USE_UCLIBC=y
 CONFIG_GCC_DEFAULT_VERSION_4_6_LINARO=y
 CONFIG_GCC_VERSION="4.6-linaro"
 CONFIG_GCC_VERSION_4_6=y
+CONFIG_GCC_VERSION_4_6_LINARO=y
 CONFIG_UCLIBC_VERSION="0.9.33.2"
+CONFIG_UCLIBC_VERSION_0_9_33=y
 CONFIG_LIBC="uClibc"
 CONFIG_LIBC_VERSION="0.9.33.2"
 CONFIG_TARGET_SUFFIX="uclibc"
@@ -632,6 +647,7 @@ CONFIG_BUSYBOX_CONFIG_FEATURE_SYSLOG=y
 #
 # CONFIG_BUSYBOX_CONFIG_STATIC is not set
 # CONFIG_BUSYBOX_CONFIG_PIE is not set
+# CONFIG_BUSYBOX_CONFIG_NOMMU is not set
 CONFIG_BUSYBOX_CONFIG_LFS=y
 CONFIG_BUSYBOX_CONFIG_CROSS_COMPILER_PREFIX=""
 CONFIG_BUSYBOX_CONFIG_EXTRA_CFLAGS=""
@@ -1163,6 +1179,8 @@ CONFIG_BUSYBOX_CONFIG_VERBOSE_RESOLUTION_ERRORS=y
 # CONFIG_BUSYBOX_CONFIG_ARP is not set
 CONFIG_BUSYBOX_CONFIG_ARPING=y
 # CONFIG_BUSYBOX_CONFIG_BRCTL is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_BRCTL_FANCY is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_BRCTL_SHOW is not set
 # CONFIG_BUSYBOX_CONFIG_DNSD is not set
 # CONFIG_BUSYBOX_CONFIG_ETHER_WAKE is not set
 # CONFIG_BUSYBOX_CONFIG_FAKEIDENTD is not set
@@ -1308,6 +1326,7 @@ CONFIG_BUSYBOX_CONFIG_ASH_CMDCMD=y
 # CONFIG_BUSYBOX_CONFIG_ASH_RANDOM_SUPPORT is not set
 CONFIG_BUSYBOX_CONFIG_ASH_EXPAND_PRMT=y
 # CONFIG_BUSYBOX_CONFIG_CTTYHACK is not set
+# CONFIG_BUSYBOX_CONFIG_HUSH is not set
 # CONFIG_BUSYBOX_CONFIG_MSH is not set
 CONFIG_BUSYBOX_CONFIG_FEATURE_SH_IS_ASH=y
 # CONFIG_BUSYBOX_CONFIG_FEATURE_SH_IS_HUSH is not set
@@ -1421,6 +1440,7 @@ CONFIG_PACKAGE_libubox=y
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
 CONFIG_PACKAGE_libusb=y
+# CONFIG_PACKAGE_libusbpp is not set
 CONFIG_PACKAGE_libuuid=y
 CONFIG_PACKAGE_libwrap=y
 # CONFIG_PACKAGE_linux-atm is not set
@@ -1433,6 +1453,11 @@ CONFIG_PACKAGE_zlib=y
 #
 
 #
+# File Transfer
+#
+CONFIG_PACKAGE_vsftpd=y
+
+#
 # Filesystem
 #
 CONFIG_PACKAGE_nfs-kernel-server=y
@@ -1443,6 +1468,7 @@ CONFIG_PACKAGE_nfs-kernel-server-utils=y
 #
 # CONFIG_PACKAGE_arptables is not set
 CONFIG_PACKAGE_ebtables=y
+# CONFIG_PACKAGE_ebtables-utils is not set
 CONFIG_PACKAGE_iptables=y
 CONFIG_PACKAGE_iptables-mod-bandwidth=y
 CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
@@ -1538,7 +1564,6 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_pppdump is not set
 # CONFIG_PACKAGE_pppstats is not set
 CONFIG_PACKAGE_qos-gargoyle=y
-# CONFIG_PACKAGE_samba3 is not set
 # CONFIG_PACKAGE_samba36-client is not set
 CONFIG_PACKAGE_samba36-server=y
 CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
@@ -1745,6 +1770,9 @@ CONFIG_PACKAGE_kmod-nls-utf8=y
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
 CONFIG_PACKAGE_kmod-ebtables=y
+# CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
+# CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
+# CONFIG_PACKAGE_kmod-ebtables-watchers is not set
 # CONFIG_PACKAGE_kmod-ip6tables is not set
 CONFIG_PACKAGE_kmod-ipt-core=y
 CONFIG_PACKAGE_kmod-ipt-bandwidth=y
@@ -1932,7 +1960,6 @@ CONFIG_PACKAGE_kmod-wdt-geode=y
 #
 # Sound Support
 #
-# CONFIG_PACKAGE_kmod-pcspkr is not set
 # CONFIG_PACKAGE_kmod-sound-core is not set
 
 #
@@ -1947,6 +1974,25 @@ CONFIG_PACKAGE_kmod-usb-core=y
 CONFIG_PACKAGE_kmod-usb-ohci=y
 CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_kmod-usb-serial=y
+# CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-belkin is not set
+# CONFIG_PACKAGE_kmod-usb-serial-ch341 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-cp210x is not set
+# CONFIG_PACKAGE_kmod-usb-serial-cypress-m8 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-ftdi is not set
+# CONFIG_PACKAGE_kmod-usb-serial-ipw is not set
+# CONFIG_PACKAGE_kmod-usb-serial-keyspan is not set
+# CONFIG_PACKAGE_kmod-usb-serial-mct is not set
+# CONFIG_PACKAGE_kmod-usb-serial-mos7720 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-motorola-phone is not set
+# CONFIG_PACKAGE_kmod-usb-serial-option is not set
+# CONFIG_PACKAGE_kmod-usb-serial-oti6858 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-pl2303 is not set
+# CONFIG_PACKAGE_kmod-usb-serial-qualcomm is not set
+# CONFIG_PACKAGE_kmod-usb-serial-sierrawireless is not set
+# CONFIG_PACKAGE_kmod-usb-serial-ti-usb is not set
+# CONFIG_PACKAGE_kmod-usb-serial-visor is not set
+# CONFIG_PACKAGE_kmod-usb-serial-wwan is not set
 # CONFIG_PACKAGE_kmod-usb-sierrawireless-directip is not set
 CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
@@ -2071,16 +2117,16 @@ CONFIG_PACKAGE_ubusd=y
 # Gargoyle Web Interface
 #
 CONFIG_PACKAGE_gargoyle=y
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
-CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
-CONFIG_PACKAGE_plugin-gargoyle-plugins=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 CONFIG_PACKAGE_plugin-gargoyle-tor=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
-CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
+
 
 #
 # Utilities
@@ -2090,6 +2136,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 # Boot Loaders
 #
 CONFIG_PACKAGE_grub=y
+# CONFIG_PACKAGE_grub2 is not set
 
 #
 # Filesystem
@@ -2099,6 +2146,7 @@ CONFIG_PACKAGE_disktype=y
 CONFIG_PACKAGE_dosfsck=y
 # CONFIG_PACKAGE_dosfslabel is not set
 CONFIG_PACKAGE_e2fsprogs=y
+# CONFIG_PACKAGE_exfat is not set
 # CONFIG_PACKAGE_fuse-utils is not set
 # CONFIG_PACKAGE_mkdosfs is not set
 # CONFIG_PACKAGE_mount.ntfs-3g is not set
@@ -2163,11 +2211,14 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_namei is not set
 # CONFIG_PACKAGE_ocf-crypto-headers is not set
 CONFIG_PACKAGE_openssl-util=y
+CONFIG_PACKAGE_opkg-more=y
+CONFIG_PACKAGE_libbbtargz=y
 # CONFIG_PACKAGE_owipcalc is not set
 # CONFIG_PACKAGE_parted is not set
 # CONFIG_PACKAGE_px5g is not set
 # CONFIG_PACKAGE_rename is not set
 # CONFIG_PACKAGE_robocfg is not set
+CONFIG_PACKAGE_share-users=y
 # CONFIG_PACKAGE_spidev-test is not set
 # CONFIG_PACKAGE_uboot-envtools is not set
 CONFIG_PACKAGE_usb-modeswitch=y
@@ -2194,6 +2245,3 @@ CONFIG_PACKAGE_uuidgen=y
 # CONFIG_PACKAGE_libiwinfo-lua is not set
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
-CONFIG_PACKAGE_vsftpd=y
-CONFIG_PACKAGE_share-users=y
-CONFIG_PACKAGE_opkg-more=y
