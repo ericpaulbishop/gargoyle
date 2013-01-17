@@ -581,7 +581,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	while(file_list->length > 0)
 	{
 		char* file_path = (char*)shift_list(file_list);
-		FILE* data_file, raw_file;
+		FILE* data_file;
+		FILE* raw_file;
 		int gz_pid;
 		
 		data_file = fopen(file_path, "r");

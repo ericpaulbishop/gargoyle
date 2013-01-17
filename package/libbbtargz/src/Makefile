@@ -1,4 +1,4 @@
-all: libtargz
+all: libbbtargz
 VERSION=1
 
 
@@ -27,32 +27,32 @@ ifeq ($(OS),Darwin)
   LINK=$(LD)
   SHLIB_EXT=dylib
   SHLIB_FLAGS=-dylib
-  SHLIB_FILE=libtargz.$(SHLIB_EXT).$(VERSION)
+  SHLIB_FILE=libbbtargz.$(SHLIB_EXT).$(VERSION)
   CFLAGS:=$(CFLAGS) -arch i386
 else
   LINK=$(CC)
   SHLIB_EXT=so
-  SHLIB_FILE=libtargz.$(SHLIB_EXT).$(VERSION)
+  SHLIB_FILE=libbbtargz.$(SHLIB_EXT).$(VERSION)
   SHLIB_FLAGS=-shared -Wl,-soname,$(SHLIB_FILE)
 endif
 
 
 
-all: libtargz
+all: libbbtargz
 
-libtargz: libtargz.$(SHLIB_EXT) libtargz.a
+libbbtargz: libbbtargz.$(SHLIB_EXT) libbbtargz.a
 
 
-libtargz.a: all_read_static.o concat_path_file_static.o copy_file_static.o copy_file_chunk_static.o gz_open_static.o last_char_is_static.o make_directory_static.o mode_string_static.o parse_mode_static.o safe_strncpy_static.o time_string_static.o unarchive_static.o unzip_static.o wfopen_static.o xfuncs_static.o xreadlink_static.o
+libbbtargz.a: all_read_static.o concat_path_file_static.o copy_file_static.o copy_file_chunk_static.o gz_open_static.o last_char_is_static.o make_directory_static.o mode_string_static.o parse_mode_static.o safe_strncpy_static.o time_string_static.o unarchive_static.o unzip_static.o wfopen_static.o xfuncs_static.o xreadlink_static.o targz_message_static.o
 	if [ -e $@ ] ; then rm $@ ; fi
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 	
 
-libtargz.$(SHLIB_EXT) : all_read_dyn.o concat_path_file_dyn.o copy_file_dyn.o copy_file_chunk_dyn.o gz_open_dyn.o last_char_is_dyn.o make_directory_dyn.o mode_string_dyn.o parse_mode_dyn.o safe_strncpy_dyn.o time_string_dyn.o unarchive_dyn.o unzip_dyn.o wfopen_dyn.o xfuncs_dyn.o xreadlink_dyn.o
-	if [ -e libtargz.$(SHLIB_EXT) ] ; then rm libtargz.$(SHLIB_EXT)* ; fi
+libbbtargz.$(SHLIB_EXT) : all_read_dyn.o concat_path_file_dyn.o copy_file_dyn.o copy_file_chunk_dyn.o gz_open_dyn.o last_char_is_dyn.o make_directory_dyn.o mode_string_dyn.o parse_mode_dyn.o safe_strncpy_dyn.o time_string_dyn.o unarchive_dyn.o unzip_dyn.o wfopen_dyn.o xfuncs_dyn.o xreadlink_dyn.o targz_message_dyn.o
+	if [ -e libbbtargz.$(SHLIB_EXT) ] ; then rm libbbtargz.$(SHLIB_EXT)* ; fi
 	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
-	ln -s $(SHLIB_FILE) libtargz.$(SHLIB_EXT)
+	ln -s $(SHLIB_FILE) libbbtargz.$(SHLIB_EXT)
 
 
 %_dyn.o: %.c
