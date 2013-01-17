@@ -581,21 +581,26 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	while(file_list->length > 0)
 	{
 		char* file_path = (char*)shift_list(file_list);
-		FILE* data_file;
-		FILE* raw_file;
+		FILE* data_file = NULL;
+		FILE* raw_file = NULL;
 		int gz_pid;
 		
 		data_file = fopen(file_path, "r");
-		if(data_file == NULL)
-		{
-			fprintf(stderr, "WARNING: opkg file \"%s\" does not exist\n", file_path);
-			return;
-		}
-	       	if(strstr(file_path, ".gz") == file_path + (strlen(file_path)-3))
+	       	if(data_file != NULL && strstr(file_path, ".gz") == file_path + (strlen(file_path)-3))
 		{
 			raw_file = data_file;
 			data_file = gz_open(raw_file, &gz_pid);
 		}
+		if(data_file == NULL)
+		{
+			if(raw_file != NULL)
+			{
+				fclose(raw_file);
+			}
+			fprintf(stderr, "WARNING: opkg file \"%s\" does not exist or can not be opened\n", file_path);
+			return;
+		}
+
 		
 				
 		string_map* next_pkg_data = NULL;
