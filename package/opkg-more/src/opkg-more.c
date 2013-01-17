@@ -583,13 +583,21 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		char* file_path = (char*)shift_list(file_list);
 		FILE* data_file = NULL;
 		FILE* raw_file = NULL;
-		int gz_pid;
+		int gz_pid = -1;
 		
 		data_file = fopen(file_path, "r");
-	       	if(data_file != NULL && strstr(file_path, ".gz") == file_path + (strlen(file_path)-3))
+	       	if(data_file != NULL)
 		{
-			raw_file = data_file;
-			data_file = gz_open(raw_file, &gz_pid);
+			int byte1 = fgetc(data_file);
+			int byte2 = fgetc(data_file);
+			fclose(data_file);
+			data_file = NULL;
+			data_file = fopen(file_path, "r");
+			if( data_file != NULL && byte1 == 0x1f && byte2 == 0x8b )
+			{
+				raw_file = data_file;
+				data_file = gz_open(raw_file, &gz_pid);
+			}
 		}
 		if(data_file == NULL)
 		{
@@ -727,7 +735,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		if(raw_file != NULL)
 		{
 			fclose(raw_file);
-			gz_close(gz_pid); 
+			gz_close(gz_pid);
 		}
 		free(file_path);
 	}
