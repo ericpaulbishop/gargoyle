@@ -88,6 +88,10 @@ function resetData()
 		{
 			setChildText("wan_dns", wanDnsList.shift() );
 		}
+		if(wanDns == "")
+		{
+			setChildText("wan_dns", "-");
+		}
 		while(wanDnsList.length > 0)
 		{
 			var brk = document.createElement("br");
