@@ -78,10 +78,10 @@ function resetData()
 		{
 			document.getElementById("wan_container").style.display = "none";
 		}
-		setChildText("wan_ip", currentWanIp);
-		setChildText("wan_mask", currentWanMask);
-		setChildText("wan_mac", currentWanMac );
-		setChildText("wan_gateway", currentWanGateway );
+		setChildText("wan_ip", currentWanIp==""?"-":currentWanIp);
+		setChildText("wan_mask", currentWanMask==""?"-":currentWanMask);
+		setChildText("wan_mac", currentWanMac==""?"-":currentWanMac);
+		setChildText("wan_gateway", currentWanGateway==""?"-":currentWanGateway);
 		
 		var wanDnsList = wanDns.split(/[\t ]+/);
 		if(wanDnsList.length > 0)
