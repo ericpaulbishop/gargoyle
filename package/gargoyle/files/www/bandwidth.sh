@@ -119,6 +119,10 @@
 
 		<div id="bandwidth_table_container"></div>
 
+		<div>
+			<center><input type='button' id='delete_data_button' class='big_button' value='Delete Data' onclick='deleteData();' /></center>
+		</div>
+
 	</fieldset>
 
 	<fieldset id="download_bandwidth_data" >

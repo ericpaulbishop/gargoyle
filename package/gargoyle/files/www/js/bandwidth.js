@@ -881,3 +881,29 @@ function highResChanged()
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 }
+
+function deleteData()
+{
+	if (confirm("Delete all data?") == false)
+	{
+		return;
+	}
+
+	setControlsEnabled(false, true, "Deleting data ...");
+
+	var commands = [];
+	commands.push("/etc/init.d/bwmon_gargoyle stop");
+	commands.push("rm /tmp/data/bwmon/*");
+	commands.push("rm /usr/data/bwmon/*");
+	commands.push("/etc/init.d/bwmon_gargoyle start");
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+		}
+	}
+	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
