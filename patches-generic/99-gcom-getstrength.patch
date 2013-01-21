@@ -1,5 +1,5 @@
---- a/package/3g.sh
-+++ b/package/3g.sh
+--- a/package/comgt/files/3g.sh
++++ b/package/comgt/files/3g.sh
 @@ -52,13 +52,32 @@
  				export MODE="AT_OPSYS=${CODE}"
  			elif echo "$cardinfo" | grep -q "Sierra Wireless"; then
