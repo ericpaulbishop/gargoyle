@@ -316,6 +316,7 @@ function updateMonitorTable()
 							var h = " " + lastVisitDate.getHours() + ":" +  twod(lastVisitDate.getMinutes())  + ":" + twod(lastVisitDate.getSeconds());
 							var lastVisit = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
 							lastVisit = systemDateFormat == "russia" ? d + "." + m + h : lastVisit;
+							lastVisit = systemDateFormat == "argentina" ? d + "/" + m + h : lastVisit;
 							lastVisit = systemDateFormat == "iso8601" ? m + "-" + d + h : lastVisit;
 
 							var host = getHostDisplay(splitLine[1], hostDisplayType);	
