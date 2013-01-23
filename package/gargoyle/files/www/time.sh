@@ -26,6 +26,8 @@
 		current_time=$(date "+%d/%m/%y %H:%M %Z")
 	elif [ "$dateformat" == "russia" ]; then
 		current_time=$(date "+%d.%m.%Y %H:%M %Z")
+	elif [ "$dateformat" == "argentina" ]; then
+		current_time=$(date "+%d/%m/%Y %H:%M %Z")	
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
@@ -66,6 +68,7 @@
 					<option value="usa">mm/dd/yy</option>
 					<option value="russia">dd.mm.yyyy</option>
 					<option value="australia">dd/mm/yy</option>
+					<option value="argentina">dd/mm/yyyy</option>
 					<option value="iso">yyyy/mm/dd</option>
 					<option value="iso8601">yyyy-mm-dd</option>
 				</select>

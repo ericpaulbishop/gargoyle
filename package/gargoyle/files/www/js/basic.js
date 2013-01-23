@@ -1255,6 +1255,10 @@ function localdate(ldate)
 	{
 		ldateStr = d + "." + m + "." + y4 + h;
 	}
+	else if(systemDateFormat == "argentina")
+	{
+		ldateStr = d + "/" + m + "/" + y4 + h;
+	}
 	else
 	{
 		ldateStr = m + "/" + d + "/" + y2 + h;

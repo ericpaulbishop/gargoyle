@@ -49,6 +49,7 @@ function saveChanges()
 		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
 		formatStrings["usa"]       = "\"+%m/%d/%y %H:%M %Z\"";
 		formatStrings["russia"]    = "\"+%d.%m.%Y %H:%M %Z\"";
+		formatStrings["argentina"] = "\"+%d/%m/%Y %H:%M %Z\"";
 		var outputDateCommand = "";
 		if(getSelectedValue("timezone").match(/UTC/))
 		{

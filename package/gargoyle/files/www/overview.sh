@@ -35,6 +35,8 @@
 		current_time=$(date "+%d/%m/%y %H:%M %Z")
 	elif [ "$dateformat" == "russia" ]; then
 		current_time=$(date "+%d.%m.%Y %H:%M %Z")
+	elif [ "$dateformat" == "argentina" ]; then
+		current_time=$(date "+%d/%m/%Y %H:%M %Z")
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
