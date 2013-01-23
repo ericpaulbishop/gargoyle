@@ -15,7 +15,7 @@
 "UTC-03:30 Newfoundland"							"NST3:30NDT,M3.2.0/0:01,M11.1.0/0:01"	"north-america"
 "UTC-03:00 Greenland"								"WGST3WGDT,M3.5.6/22,M10.5.6/23"	"north-america"
 "UTC-03:00 Brazil East"								"BRST3BRDT,M10.3.0/0,M2.5.0/0"		"south-america"
-"UTC-03:00 Guyana"								"UTC3"					"south-america"
+"UTC-03:00 Argentina, Guyana"						"UTC3"					"south-america"
 "UTC-02:00 Mid-Atlantic"							"UTC2"					"north-america"
 "UTC-01:00 Azores"								"STD1DST,M3.5.0/2,M10.5.0/2"		"europe"
 "UTC+00:00 Gambia, Liberia, Morocco"						"UTC0"					"africa"
