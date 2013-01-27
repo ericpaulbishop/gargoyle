@@ -33,7 +33,7 @@
 
 	<div id="schedule_reboot_container" class="indent">
 		<div>
-			<label class="narrowleftcolumn">Router Will Reboot:</label>
+			<label class="narrowleftcolumn" for="reboot_interval">Router Will Reboot:</label>
 			<select class="widerightcolumn" id="reboot_interval" onchange="setVisibility()">
 				<option value="day">Every Day</option>
 				<option value="week">Every Week</option>

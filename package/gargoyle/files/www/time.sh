@@ -60,7 +60,7 @@
 		</div>
 		
 		<div>
-			<label class='nocolumn' id='timezone_label' for='timezone'>Date Format:</label>
+			<label class='nocolumn' id='timezone_label' for='date_format'>Date Format:</label>
 		</div>
 		<div class="indent">
 			<div>

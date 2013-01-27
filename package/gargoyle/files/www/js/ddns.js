@@ -580,6 +580,8 @@ function setProvider(controlDocument)
 			input.id = variables[variableIndex];
 			div.appendChild(input);
 			newElements.push(div);
+
+			label.setAttribute("for", input.id);
 		}
 
 		var optionalVariables = provider["optional_variables"];
@@ -612,6 +614,8 @@ function setProvider(controlDocument)
 				span.appendChild(check);
 				span.appendChild(text);
 				div.appendChild(span);
+
+				label.setAttribute("for", check.id);				
 			}
 			else
 			{
@@ -619,6 +623,8 @@ function setProvider(controlDocument)
 				input.className = "rightcolumn";
 				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
+
+				label.setAttribute("for", input.id);				
 			}
 			newElements.push(div);
 		}

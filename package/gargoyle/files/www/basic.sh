@@ -70,9 +70,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<legend class="sectionheader">Device Configuration</legend>
 		<label class='leftcolumn' style="text-decoration:underline">Configure Device As:</label>
 		<div class='indent'>
-			<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" >Gateway (Default)</input>
+			<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" />
+			<label for="global_gateway">Gateway (Default)</label>
 			<br/>
-			<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" >Wireless Bridge/Repeater</input>
+			<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" />
+			<label for="global_bridge">Wireless Bridge/Repeater</label>
 		</div>
 	</fieldset>
 	
@@ -160,7 +162,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 
 			<div id='bridge_txpower_container'>
-				<label class='leftcolumn' for='bridge_txpower_max' id='bridge_txpower_label'>Transmit Power:</label>
+				<label class='leftcolumn' for='bridge_max_txpower' id='bridge_txpower_label'>Transmit Power:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_max_txpower' onchange='updateTxPower("bridge_max_txpower","bridge_txpower", "G")'>
 						<option value='max'>Max</option>
@@ -507,7 +509,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<span style="clear:both;"></span>
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='lan_dns_force' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-				<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;Force Clients To Use Router DNS Servers</span>
+				<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;Force Clients To Use Router DNS Servers</label>
 			</span>
 		</div>
 

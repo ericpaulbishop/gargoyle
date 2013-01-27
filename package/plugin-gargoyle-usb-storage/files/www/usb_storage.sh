@@ -144,7 +144,7 @@
 
 
 	<div id="format_disk_select_container">
-		<label id="format_disk_select_label" class="leftcolumn">Disk to format:</label>
+		<label id="format_disk_select_label" class="leftcolumn" for="format_disk_select">Disk to format:</label>
 		<select class="rightcolumn" id="format_disk_select" ></select>
 		<br/>
 		<span id="format_warning" class="right_column_only"></span>

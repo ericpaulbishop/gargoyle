@@ -35,7 +35,7 @@
 
 
 <div id="anonymous_access_container">
-	<label class="leftcolumn" id="anonymous_access_label" for="share_access">FTP/CIFS Anonymous Access:</label>
+	<label class="leftcolumn" id="anonymous_access_label" for="anonymous_access">FTP/CIFS Anonymous Access:</label>
 	<select class="rightcolumn" id="anonymous_access">
 		<option value="none">None</option>
 		<option value="ro">Read Only</option>
@@ -67,7 +67,7 @@
 	</select>
 </div>
 <div id="nfs_policy_container">
-	<label id="nfs_policy_label" class="leftcolumn">NFS Access Policy:</label>
+	<label id="nfs_policy_label" class="leftcolumn" for="nfs_policy">NFS Access Policy:</label>
 	<select class="rightcolumn" id="nfs_policy" onchange="setShareTypeVisibility()" >
 		<option value="share">Allow Anonymous Access</option>
 		<option value="ip">Allow Only The Following IPs</option>
@@ -97,4 +97,3 @@
 	<label class="leftcolumn" id="nfs_path_label" for="nfs_path">NFS Path:</label>
 	<span class="rightcolumn" id="nfs_path"></span>
 </div>
-
