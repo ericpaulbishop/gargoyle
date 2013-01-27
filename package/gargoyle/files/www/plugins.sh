@@ -69,7 +69,7 @@
 			<input type="text" id="plugin_root_text" class="widerightcolumn" style="display:none" />
 		</div>
 		<div>
-			<span id="plugin_root_drive_static" class="widerightcolumnonly">Root Drive</span>
+			<span id="plugin_root_drive_static" class="widerightcolumnonly" for="plugin_root_drive_select">Root Drive</span>
 			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
 		</div>
 		<div id="plugin_root_change_container" style="display:none" >

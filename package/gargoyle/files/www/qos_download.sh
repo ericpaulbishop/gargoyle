@@ -152,7 +152,7 @@
 			</div>
 
 			<div>
-				<label class='leftcolumn' id="classification_label" for='class_name' >Set Service Class To:</label>
+				<label class='leftcolumn' id="classification_label" for='classification' >Set Service Class To:</label>
 				<select class='rightcolumn' id="classification">
 				</select>
 			</div>

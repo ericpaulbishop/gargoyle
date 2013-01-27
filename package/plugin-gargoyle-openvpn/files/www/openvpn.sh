@@ -174,16 +174,18 @@
 
 	<form id='openvpn_client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_upload_client.sh" target="client_add_target">
 		<div>
-			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" /> Upload Client Configuration File(s)
+			<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" />
+			<label for="openvpn_client_config_upload">Upload Client Configuration File(s)</label>
 			<br/>
-			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" /> Configure Client Manually
+			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" />
+			<label for="openvpn_client_config_manual">Configure Client Manually</label>
 		</div>
 	
 	
 		<div id="openvpn_client_file_controls" class="indent">
 			
 			<div id="openvpn_client_file_type_container">
-				<label id="openvpn_client_file_type_label" class="leftcolumn">Upload Format:</label>
+				<label id="openvpn_client_file_type_label" class="leftcolumn" for="openvpn_client_file_type">Upload Format:</label>
 				<select id="openvpn_client_file_type" class="rightcolumn" onchange="setClientVisibility(document)">
 					<option value="zip">Single Zip File</option>
 					<option value="multi" >Individual Configuration Files</option>
@@ -287,7 +289,7 @@
 				<input type='checkbox' class='rightcolumn' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1");updateClientConfigTextFromControls()' >&nbsp;&nbsp;
 				<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'>Use TLS-Auth Key</label>
 				<br/>
-				<span class="leftcolumn">TLS-Auth Direction:</span>
+				<label class="leftcolumn" for="openvpn_client_ta_direction">TLS-Auth Direction:</label>
 				<span class="rightcolumn">
 					<select class='rightcolumnonly' id='openvpn_client_ta_direction' name="openvpn_client_ta_direction" onchange="updateClientConfigTextFromControls()">
 						<option value="1">1 (Client)</option>

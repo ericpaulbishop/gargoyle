@@ -1,6 +1,6 @@
 <div>
 	<span class='narrowleftcolumn'>
-		<label id="applies_to_label" for='applies_to'>Applies to:</label>
+		<label id="applies_to_label" for='applies_to_type'>Applies to:</label>
 	</span>
 	<span class='widerightcolumn'>
 		<select id="applies_to_type"  onchange='setVisibility()' >
@@ -24,7 +24,7 @@
 
 <div>
 	<span class='narrowleftcolumn'>
-		<label id="max_up_label" for='max_up'>Max Upload:</label>
+		<label id="max_up_label" for='max_up_type'>Max Upload:</label>
 	</span>
 	<span class='widerightcolumn'>
 		<select id="max_up_type" style='width:125px' onchange='setVisibility()'>
@@ -43,7 +43,7 @@
 </div>
 <div>
 	<span class='narrowleftcolumn'>
-		<label id="max_down_label" for='max_down'>Max Download:</label>
+		<label id="max_down_label" for='max_down_type'>Max Download:</label>
 	</span>
 	<span class='widerightcolumn'>
 		<select id="max_down_type" style='width:125px' onchange='setVisibility()'>
@@ -63,7 +63,7 @@
 </div>
 <div>
 	<span class='narrowleftcolumn'>
-		<label id="max_combined_label" for='max_combined'>Max Total Up+Down:</label>
+		<label id="max_combined_label" for='max_combined_type'>Max Total Up+Down:</label>
 	</span>
 	<span class='widerightcolumn'>
 		<select id="max_combined_type" style='width:125px' onchange='setVisibility()'>
@@ -180,7 +180,7 @@
 </div>
 <div id="quota_exceeded_container">
 	<span class='narrowleftcolumn'>                             
-		<label id="quota_exceeded_label" for='quota_active'>When Exceeded:</label>
+		<label id="quota_exceeded_label" for='quota_exceeded'>When Exceeded:</label>
 	</span>
 	<span class='widerightcolumn'>
 		<select id='quota_exceeded' onchange='setVisibility()' >
@@ -209,11 +209,11 @@
 </div>
 <div id="quota_full_qos_container">
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
-		<label style="float:left;width:100px;">Upload Class: </label>
+		<label style="float:left;width:100px;" for="quota_full_qos_up_class">Upload Class: </label>
 		<select id="quota_full_qos_up_class"></select>
 	</span>
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
-		<label style="float:left;width:100px;">Download Class: </label>
+		<label style="float:left;width:100px;" for="quota_full_qos_down_class">Download Class: </label>
 		<select id="quota_full_qos_down_class"></select>
 	</span>
 </div>
