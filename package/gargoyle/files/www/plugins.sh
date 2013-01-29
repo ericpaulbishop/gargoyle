@@ -1,24 +1,11 @@
 #!/usr/bin/haserl
 <?
-#
-#       Copyright (c) 2011 Cezary Jackiewicz <cezary@eko.one.pl>
-#       Copyright (c) 2012 Eric Bishop <eric@gargoyle-router.com>
-#
-#      This program is free software; you can redistribute it and/or modify
-#      it under the terms of the GNU General Public License as published by
-#      the Free Software Foundation; either version 2 of the License, or
-#      (at your option) any later version.
-#
-#      This program is distributed in the hope that it will be useful,
-#      but WITHOUT ANY WARRANTY; without even the implied warranty of
-#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#      GNU General Public License for more details.
-#
-#      You should have received a copy of the GNU General Public License
-#      along with this program; if not, write to the Free Software
-#      Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#      MA 02110-1301, USA.
-
+	# Copyright © 2012 Eric Bishop, © 2011 Cezary Jackiewicz <cezary@eko.one.pl>
+	# and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
+	# configure proprietary "back end" software provided that all modifications to the web interface
+	# itself remain covered by the GPL.
+	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" gargoyle
 ?>
@@ -33,7 +20,7 @@
 		ln -s /var /plugin_root/var
 	fi
 	if [ ! -d '/var/opkg-lists' ] ; then
-		mkdir -p '/var/opkg-lists' 
+		mkdir -p '/var/opkg-lists'
 	fi
 	plug_root_dest=$( awk '$1 == "dest" && $3 == "/plugin_root" ' /etc/opkg.conf 2>/dev/null )
 	if [ -z "$plug_root_dest" ] ; then
@@ -46,14 +33,12 @@
 	else
 		printf "%s\n" "$opkg_defs" 
 	fi
-	
+
 	echo "var pluginSources = [];"
 	awk  '$0 ~ /^src.gz/  { print "pluginSources.push([\"" $2 "\", \"" $3 "\"])" ; }' /etc/opkg.conf 2>/dev/null
 
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
-
-	
 
 ?>
 
@@ -122,4 +107,48 @@
 
 <?
 	gargoyle_header_footer -f -s "system" -p "plugins"
+?>
+#!/usr/bin/haserl
+<?
+
+	# Copyright © 2011 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>
+	# and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
+	# configure proprietary "back end" software provided that all modifications to the web interface
+	# itself remain covered by the GPL.
+	# See http://gargoyle-router.com/faq.html#qfoss for more information
+
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
+	gargoyle_header_footer -h -s "system" -p "themes" -c "internal.css" -j "table.js themes.js" gargoyle
+?>
+
+<script>
+<!--
+<?
+	echo "var themes = new Array();"
+	webroot="$(uci get gargoyle.global.web_root 2>/dev/null)"
+	for theme in "${webroot:-/www}/themes"/*; do printf 'themes.push("%s");\n' "${theme##*/}"; done
+?>
+//-->
+</script>
+
+<form>
+	<fieldset>
+		<legend class="sectionheader">Themes manager</legend>
+		<div class='indent'>
+		<div id="themes_table_container"></div>
+		</div>
+	</fieldset>
+
+	<span id="update_container" >Plase wait while new settings are applied...</span>
+</form>
+
+<script>
+<!--
+	resetData();
+//-->
+</script>
+
+<?
+	gargoyle_header_footer -f -s "system" -p "themes"
 ?>

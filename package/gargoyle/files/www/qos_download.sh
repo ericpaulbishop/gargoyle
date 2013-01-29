@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+	# This program is copyright Â© 2008 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -350,37 +350,37 @@
 		</div>
 		<div class="internal_divider"></div>
 
-              <div class="indent">
-              <table>
-              <tr><td><strong>Congestion Control Status</strong></td></tr>
-              <tr><td><span id='qstate'></span></td></tr>
-              <tr><td><span id='qllimit'></span></td></tr>
-              <tr><td><span id='qollimit'></span></td></tr>
-              <tr><td><span id='qload'></span></td></tr>
-              <tr><td><span id='qpinger'></span></td></tr>
-              <tr><td><span id='qpingtime'></span></td></tr>
-              <tr><td><span id='qpinglimit'></span></td></tr>
-              <tr><td><span id='qactivecnt'></span></td></tr>
-              </table>
-              </div>
+		<div class="indent">
+		<table>
+		<tr><td><strong>Congestion Control Status</strong></td></tr>
+		<tr><td><span id='qstate'></span></td></tr>
+		<tr><td><span id='qllimit'></span></td></tr>
+		<tr><td><span id='qollimit'></span></td></tr>
+		<tr><td><span id='qload'></span></td></tr>
+		<tr><td><span id='qpinger'></span></td></tr>
+		<tr><td><span id='qpingtime'></span></td></tr>
+		<tr><td><span id='qpinglimit'></span></td></tr>
+		<tr><td><span id='qactivecnt'></span></td></tr>
+		</table>
+		</div>
 
 		<div id="qos_down_4" class="indent">
 			<span id='qos_down_4_txt'>
-                            <table>
-              		<tr><td><strong>Status Help</strong></td></tr>
-                            <tr><td>CHECK</td><td>Check to see if the ping target will respond</td></tr>
-                            <tr><td>INIT</td><td>Estimate a ping limit</td></tr>
-                            <tr><td>ACTIVE</td><td>Congestion control active.</td></tr>
-                            <tr><td>MINRTT</td><td>Congestion control active, minRTT class active.</td></tr>
-                            <tr><td>IDLE</td><td>No Congestion, control idle.<td></tr>
-                            <tr><td>DISABLE</td><td>Controller is not enabled</td></tr>
-                            <tr><td>Link Limit</td><td>The download bandwidth limit currently enforce.</td></tr>
-                            <tr><td>Fair Link Limit</td><td>The apparent fair download bandwidth limit.</td></tr>
-                            <tr><td>Link Load</td><td>The current traffic in the downlink.</td></tr>
-                            <tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
-                            <tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
-                            <tr><td>Ping Limit</td><td>The point at which the controller will act to maintain fairness.</td></tr>
-                            <tr><td>Active Classes</td><td>Number of download classes with load over 4kbps.</td></tr>
+				<table>
+				<tr><td><strong>Status Help</strong></td></tr>
+				<tr><td>CHECK</td><td>Check to see if the ping target will respond</td></tr>
+				<tr><td>INIT</td><td>Estimate a ping limit</td></tr>
+				<tr><td>ACTIVE</td><td>Congestion control active.</td></tr>
+				<tr><td>MINRTT</td><td>Congestion control active, minRTT class active.</td></tr>
+				<tr><td>IDLE</td><td>No Congestion, control idle.<td></tr>
+				<tr><td>DISABLE</td><td>Controller is not enabled</td></tr>
+				<tr><td>Link Limit</td><td>The download bandwidth limit currently enforce.</td></tr>
+				<tr><td>Fair Link Limit</td><td>The apparent fair download bandwidth limit.</td></tr>
+				<tr><td>Link Load</td><td>The current traffic in the downlink.</td></tr>
+				<tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
+				<tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
+				<tr><td>Ping Limit</td><td>The point at which the controller will act to maintain fairness.</td></tr>
+				<tr><td>Active Classes</td><td>Number of download classes with load over 4kbps.</td></tr>
 				</table>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4">Hide Text</a>
