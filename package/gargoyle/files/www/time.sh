@@ -46,7 +46,7 @@
 		<legend class="sectionheader">Time</legend>
 	
 		<div>
-			<label id='current_time_label' for='timezone'>Current Date &amp; Time:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+			<label id='current_time_label' for='current_time'>Current Date &amp; Time:&nbsp;&nbsp;&nbsp;&nbsp;</label>
 			<span id="current_time"></span>
 		</div>
 				
