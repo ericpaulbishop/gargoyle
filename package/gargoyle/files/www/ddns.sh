@@ -1,9 +1,9 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright Â© 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "connection" -p "dyndns" -c "internal.css" -j "table.js ddns.js" gargoyle ddns_gargoyle
@@ -30,9 +30,9 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader">Dynamic DNS Services</legend>
-	
-		<span id="add_ddns_label"><p>Add Dynamic DNS Service:</p></span>	
-		
+
+		<span id="add_ddns_label"><p>Add Dynamic DNS Service:</p></span>
+
 		<div>
 			<div class="indent">
 				<label class='leftcolumn' for='ddns_provider' id='ddns_provider_label'>Service Provider:</label>
@@ -41,7 +41,7 @@
 		</div>
 
 		<div class="indent" id="ddns_variable_container">
-			
+
 		</div>
 
 
@@ -79,17 +79,13 @@
 				<a onclick='setDescriptionVisibility("ddns_1")'  id="ddns_1_ref" href="#ddns_1">Hide Text</a>
 			</div>
 		</div>
-	
-	
-	
-		<div id='internal_divider1' class='internal_divider'></div>
-	
 
+		<div id='internal_divider1' class='internal_divider'></div>
 
 		<span id="add_ddns_label"><p>Dynamic DNS Services:</p></span>	
 
 		<div id="ddns_table_container"></div>
-		
+
 	</fieldset>
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
