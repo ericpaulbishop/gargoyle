@@ -68,6 +68,8 @@ var currentTimezone = uciOriginal.get("system", systemSections[0], "timezone");
 currentTimezone = currentTimezone == "UTC" ? "UTC0" : currentTimezone;
 setSelectedValue("timezone", currentTimezone); //set value from config
 
+document.getElementById('password1').focus();
+
 //-->
 </script>
 
