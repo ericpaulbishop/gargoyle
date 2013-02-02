@@ -1,12 +1,12 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright Â© 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
-	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" system gargoyle 
+	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
+	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" system gargoyle
 ?>
 <script>
 <!--
@@ -27,7 +27,7 @@
 	elif [ "$dateformat" == "russia" ]; then
 		current_time=$(date "+%d.%m.%Y %H:%M %Z")
 	elif [ "$dateformat" == "argentina" ]; then
-		current_time=$(date "+%d/%m/%Y %H:%M %Z")	
+		current_time=$(date "+%d/%m/%Y %H:%M %Z")
 	else
 		current_time=$(date "+%D %H:%M %Z")
 	fi
@@ -118,5 +118,5 @@
 
 
 <?
-	gargoyle_header_footer -f -s "system" -p "time"  
+	gargoyle_header_footer -f -s "system" -p "time"
 ?>
