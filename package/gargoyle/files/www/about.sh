@@ -11,7 +11,7 @@
 
 <fieldset>
 	<legend class="sectionheader">Credits</legend>
-	
+
 	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
 
 	<p><span class="contributer">Paul Bixel:</span> Implemented Active Congestion Control, as well as many other improvements to QoS</p>
@@ -26,11 +26,11 @@
 
 	<p><span class="contributer">Igor Fedorenko:</span> Implemented inclusion of latest git commit in default version label</p>
 
-  	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> Provided several very helpful suggestions regarding the web design and css implementation of Gargoyle</p>
+	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> Provided several very helpful suggestions regarding the web design and css implementation of Gargoyle</p>
 
 	<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> Provided significant help in testing Gargoyle, particularly PPPoE functionality</p>
-	
-	<p>The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>	
+
+	<p>The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>
 
 	<p>The Gargoyle interface is a front end for the excellent OpenWrt firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team (<a href="http://openwrt.org">openwrt.org</a>).</p>
 
@@ -58,18 +58,17 @@
 		of this license.  Further, if any portion of the Program is used as part of an interface that can be rendered via a web browser, 
 		all portions of that interface that can be rendered via a web browser (including, but not limited to, javascript, 
 		svg/ecmascript, css, html, and shell/perl/php/other cgi scripts) shall be considered &ldquo;based on the Program.&rdquo;</p>
-	
+
 		<p>This clarification/exception shall apply to the license of all derived works, and must appear in all relevant
 		documentation.  If you choose to release your modification to the Program under a later version of the GPL that 
 		directly contridicts this clarification/exception, this clarification/exception shall supersede any contradictory 
 		language in that version.</p>
 	</div>
-	
+
 	<p>This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.</p>
-
 
 </fieldset>
 

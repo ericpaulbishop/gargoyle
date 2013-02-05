@@ -15,7 +15,6 @@
 	echo "var httpUserAgent = \"$HTTP_USER_AGENT\";"
 	echo "var remoteAddr = \"$REMOTE_ADDR\";"
 
-	
 	echo "var timezoneLines = new Array();"
 	if [ -e ./data/timezones.txt ] ; then
 		awk '{gsub(/"/, "\\\""); print "timezoneLines.push(\""$0"\");"}' ./data/timezones.txt
@@ -23,10 +22,8 @@
 	echo "var timezoneData = parseTimezones(timezoneLines);"
 ?>
 
-
 //-->
 </script>
-
 
 <fieldset>
 	<legend class="sectionheader">Initial Settings</legend>
@@ -48,12 +45,10 @@
 	<input class="default_button" type="button" value="Save Settings" onclick="setInitialSettings()" />
 </fieldset>
 
-
 <script>
 <!--
 var timezoneList = timezoneData[0];
 var timezoneDefinitions = timezoneData[2];
-
 
 removeAllOptionsFromSelectElement(document.getElementById("timezone"));
 var tzIndex=0;
@@ -72,7 +67,6 @@ document.getElementById('password1').focus();
 
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f

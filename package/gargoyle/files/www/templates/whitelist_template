@@ -82,7 +82,6 @@
 		</div>
 	</div>
 
-
 	<div>
 		<span class='narrowleftcolumn'>
 			<label id="exception_remote_port_label" for='exception_remote_port'>Remote Port(s):</label>
@@ -109,7 +108,6 @@
 			<input class='rightcolumn'  type='text' id='exception_local_port' onkeyup='proofreadMultiplePorts(this)' size='20' />
 		</span>
 	</div>
-
 
 	<div>
 		<span class='narrowleftcolumn'>

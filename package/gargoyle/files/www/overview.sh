@@ -22,7 +22,7 @@
 	else
 		echo "var qosEnabled = false;"
 	fi
-	
+
 	gargoyle_version=$(cat data/gargoyle_version.txt)
 	echo "var gargoyleVersion=\"$gargoyle_version\""
 
@@ -54,7 +54,6 @@
 	echo "var totalMemory=parseInt($total_mem);"
 	echo "var freeMemory=parseInt($free_mem);"
 
-
 	total_swap="$(sed -e '/^SwapTotal: /!d; s#SwapTotal: *##; s# kB##g' /proc/meminfo)"
 	cached_swap="$(sed -e '/^SwapCached: /!d; s#SwapCached: *##; s# kB##g' /proc/meminfo)"
 	free_swap="$(sed -e '/^SwapFree: /!d; s#SwapFree: *##; s# kB##g' /proc/meminfo)"
@@ -62,8 +61,6 @@
 	echo "var totalSwap=parseInt($total_swap);"
 	echo "var freeSwap=parseInt($free_swap);"
 
-
-	
 	load_avg="$(awk '{print $1 " / " $2 " / " $3}' /proc/loadavg)"
 	echo "var loadAvg=\"$load_avg\";"
 
@@ -124,7 +121,6 @@
 		<div class="internal_divider"></div>
 	</div>
 
-
 	<div id="time_container">
 		<div>
 			<span class='leftcolumn'>Uptime:</span><span id="uptime" class='rightcolumn'></span>
@@ -134,7 +130,6 @@
 		</div>
 		<div class="internal_divider"></div>
 	</div>
-
 
 	<div id="bridge_container">
 		<div>
@@ -158,7 +153,6 @@
 		<div class="internal_divider"></div>
 	</div>
 
-
 	<div id="lan_container">
 		<div>
 			<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
@@ -171,7 +165,6 @@
 		</div>
 		<div class="internal_divider"></div>
 	</div>
-
 
 	<div id="wan_container">
 		<div>
@@ -201,7 +194,6 @@
 		<div class="internal_divider"></div>
 	</div>
 
-
 	<div id="wifi_container">
 		<div>
 			<span class='leftcolumn'>Wireless Mode:</span><span id="wireless_mode" class='rightcolumn'></span>
@@ -221,9 +213,6 @@
 		<div class="internal_divider"></div>
 	</div>
 
-
-
-	
 	<div id="services_container">
 		<div>
 			<span class='leftcolumn'>QoS Upload:</span><span id="qos_upload" class='rightcolumn'></span>

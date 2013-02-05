@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "status" -p "qos" -c "internal.css" -j "qos_distribution.js" qos_gargoyle
 ?>
 
-
 <script>
 <!--
 <?
@@ -49,7 +48,7 @@
 		</div>
 		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
 	</fieldset>
-	
+
 	<fieldset id="download_container">
 		<legend class="sectionheader">QoS Download Bandwidth Distribution</legend>
 		<div>
@@ -69,13 +68,11 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
-	initializePieCharts();	
+	initializePieCharts();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "qos"

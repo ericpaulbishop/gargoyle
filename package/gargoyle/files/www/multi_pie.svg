@@ -9,7 +9,6 @@
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
 
-	
 <script type="text/ecmascript"> <![CDATA[
 		var svgNs="http://www.w3.org/2000/svg";
 		var svgDoc;
@@ -28,7 +27,7 @@
 		var orderedNames = [];
 		var numVisible = 0;
 		var numPies = 0;
-		
+
 		function init(evt)
 		{
 			svgDoc = evt.target.ownerDocument;
@@ -36,7 +35,6 @@
 
 		function addPercentsToLabel(labelBase, pieValues, pieTotals)
 		{
-			
 			var pcts = [];
 			var pieIndex;
 			for(pieIndex = 0; pieIndex < pieValues.length; pieIndex++)
@@ -49,7 +47,6 @@
 			return labelStr;
 		}
 
-
 		function setPieChartData(individualNames, pieNames, individualLabels, values, rankIndex, maxIndividualNames, recomputeColorsAndVisible, adjustLabelFunction)
 		{
 			if(svgDoc == null)
@@ -58,7 +55,6 @@
 			}
 			rankIndex = parseInt(rankIndex);
 			maxIndividualNames = parseInt(maxIndividualNames);	
-
 
 			if(!initialized){ recomputeColorsAndVisible = true; }
 			
@@ -73,7 +69,6 @@
 			var sortIndices= function(a,b) { return values[rankIndex][b] - values[rankIndex][a]; }
 			nameIndices.sort(sortIndices);
 
-
 			if(recomputeColorsAndVisible)
 			{
 				visibleIndividuals = [];
@@ -85,7 +80,6 @@
 
 				var numColors = individualNames.length <= maxIndividualNames ? maxIndividualNames : maxIndividualNames+1;
 				var color = [255,0,0];
-
 
 				var colorNum=0;
 				for(colorNum=0; colorNum < numColors; colorNum++)
@@ -176,7 +170,7 @@
 					orderedLabels.push( "Others");
 				}
 			}
-			
+
 			var totalHeight = (bottomCoor-topCoor)+1;
 			var radius = Math.ceil(((rightCoor-leftCoor)+1)/4); //diameter should never be bigger than 1/2 width
 			if(numPies > 1)
@@ -306,7 +300,6 @@
 				}
 			}
 
-
 			//construct labels;
 			var labelX = .005*totalHeight;
 			var nextLabelY=buffer-titleOffset;
@@ -334,7 +327,6 @@
 					selectedColor = visibleIndividuals[labelName][1];
 				}
 
-
 				var labelRect = svgDoc.createElementNS(svgNs, "rect");
 				labelRect.setAttribute("x", labelX);
 				labelRect.setAttribute("y", nextLabelY);
@@ -345,7 +337,6 @@
 				labelRect.setAttribute("id", "color_" + labelIndex);
 				labelRect.setAttribute("fill",  unselectedColor);
 
-
 				var labelText = svgDoc.createElementNS(svgNs, "text");
 				labelText.setAttribute("x", labelX+(labelBoxWidth*1.25));
 				labelText.setAttribute("y", nextLabelY+(labelBoxWidth*.85) );
@@ -355,14 +346,12 @@
 				labelText.setAttribute("id", "label_" + labelIndex);
 				labelText.setAttribute("font-weight", "normal");
 
-
 				if(selectedId == labelIndex)
 				{
 					labelRect.setAttribute("stroke-width", 2*regularStrokeWidth);
 					labelText.setAttribute("font-weight", "bold");
 					labelRect.setAttribute("fill", selectedColor);
 				}
-
 
 				var labelGroup = svgDoc.createElementNS(svgNs, "g");
 				labelGroup.setAttribute("id", "group_" + labelIndex);
@@ -373,7 +362,6 @@
 				pieChartLabels.push(labelGroup);
 				nextLabelY = nextLabelY + labelYIncrement;
 			}
-
 
 			//finally, add labels & pie slices to svgDoc
 			var pieContainer = svgDoc.getElementById("pie_container");
@@ -417,11 +405,8 @@
 			lab.removeChild (lab.firstChild);
 			lab.appendChild ( svgDoc.createTextNode(oldText) );
 
-
-			
 			var pieContainer = svgDoc.getElementById("pie_container");
 
-			
 			var pieIndex;
 			for(pieIndex=0; pieIndex< numPies; pieIndex++)
 			{
@@ -556,4 +541,3 @@
 <!-- <text x="50" y="500" font-family="serif" font-size="18px" id="text_box">.</text> -->
 
 </svg>
-

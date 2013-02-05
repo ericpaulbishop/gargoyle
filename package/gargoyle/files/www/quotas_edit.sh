@@ -30,6 +30,5 @@
 </fieldset>
 <div id="bottom_button_container"></div>
 
-
 </body>
 </html>

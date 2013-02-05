@@ -44,10 +44,10 @@
 
 </script>
 <form>
-	
+
 	<fieldset id="plugin_options">
 		<legend class="sectionheader">Plugin Options</legend>
-		
+
 		<div>
 			<span class="narrowleftcolumn">Plugin Root:</span>
 			<span id="plugin_root_static" class="widerightcolumn">/plugin_root</span>
@@ -64,7 +64,6 @@
 		</div>
 		<br/>
 
-
 		<div>
 			<span class="leftcolumn">Plugin Sources:</span>
 		</div>
@@ -78,12 +77,11 @@
 				<label class="narrowleftcolumn" for="add_source_url">Add URL:</label>
 				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
 			</div>
-			
+
 			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="Add Plugin Source" onclick="addPluginSource()" /></span>
-			
+
 		</div>
 	</fieldset>
-
 
 	<fieldset id="plugin_list">
 		<legend class="sectionheader">Plugin List</legend>

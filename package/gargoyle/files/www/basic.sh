@@ -40,8 +40,7 @@
 	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
 	if [ -z "$has_usb_tty" ] ; then
 		echo "hasUSB = false;"
-	fi	
-
+	fi
 
 ?>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
@@ -64,7 +63,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 //-->
 </script>
 
-
 <form>
 	<fieldset id="config_fieldset">
 		<legend class="sectionheader">Device Configuration</legend>
@@ -77,7 +75,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label for="global_bridge">Wireless Bridge/Repeater</label>
 		</div>
 	</fieldset>
-	
+
 	<fieldset id="bridge_fieldset">
 		<legend class="sectionheader">Wireless Bridge/Repeater</legend>
 		<div id='bridge_ip_container'>
@@ -103,7 +101,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='bridge'>Bridge To LAN</option>
 			</select>
 		</div>
-	
+
 		<div id="bridge_dns_source_container">
 			<span class="leftcolumn">
 				<label id='bridge_dns_source_label' for='bridge_dns_source'>DNS Servers:</label>
@@ -120,10 +118,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 			<span style="clear:both"></span>
 			<div class="rightcolumnonly"><div id="bridge_dns_table_container"></div></div>
-		</div>	
+		</div>
 
 		<div class='internal_divider'></div>
-		
+
 		<div id='bridge_mode_container'>
 			<select class='nocolumn' id='bridge_mode' onchange='setBridgeVisibility()'>
 				<option value='client_bridge'>Connect Via Client Bridge</option>
@@ -197,8 +195,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 
-
-
 			<div id='bridge_list_ssid_container'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'>SSID to Join:</label>
 				<span class="rightcolumn">
@@ -220,8 +216,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<label class='leftcolumn' for='bridge_broadcast_ssid' id='bridge_broadcast_ssid_label'>SSID to Broadcast:</label>
 				<input class="rightcolumn"  type='text' id='bridge_broadcast_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
-
-
 
 			<div id='bridge_channel_container'>
 				<label class='leftcolumn' for='bridge_channel' id='bridge_channel_label'>Wireless Channel:</label>
@@ -249,13 +243,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<select class='rightcolumn' id='bridge_channel_5ghz' onchange='setChannel(this)' ></select>
 			</div>
 
-
-
 			<div id='bridge_fixed_channel_container'>
 				<label class='leftcolumn' for='bridge_fixed_channel' id='bridge_fixed_channel_label'>Wireless Channel:</label>
 				<span class='rightcolumn' id='bridge_fixed_channel'>&nbsp;</span>
 			</div>
-
 
 			<div id='bridge_encryption_container'>
 				<label class='leftcolumn' for='bridge_encryption' id='bridge_encryption_label'>Encryption:</label>
@@ -271,7 +262,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<span class='rightcolumn' id='bridge_fixed_encryption'>&nbsp;</span>
 			</div>
 
-
 			<div id='bridge_pass_container'>
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'>Password:</label>
 				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
@@ -286,7 +276,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<div id='bridge_wifi_mac_container' >
 				<label class='leftcolumn' id='bridge_wifi_mac_label'>MAC Of <em>This</em> Device:</label>
 				<span class='rightcolumn' id='bridge_wifi_mac'> </span>
-			</div>	
+			</div>
 			<div id="bridge_wds_container" >
 				<label class='leftcolumn' for='bridge_wds_label' id='bridge_wds_label'><em>Other</em> WDS MAC Addresses:</label>
 				<span class='rightcolumn'>
@@ -314,7 +304,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='none'>Disabled</option>
 			</select>
 		</div>
-		
+
 		<div id='wan_dhcp_ip_container'>
 			<label class='leftcolumn'>Current IP:</label>
 			<span class='rightcolumn' id='dhcp_ip'></span>
@@ -324,11 +314,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<span class='rightcolumn'>
 				<span id="dhcp_expires"></span>
 			</span>
-			
+
 			<div class='rightcolumnonly' style="margin-bottom:15px">
 				<input type='button' id="dhcp_renew_button" value="Renew Lease Now" class="default_button" onclick="renewDhcpLease()" />
 			</div>
-			
 		</div>
 
 		<div id='wan_pppoe_user_container' >
@@ -368,8 +357,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<em>(seconds)</em>
 			</div>
 		</div>
-	
-		
+
 		<div id='wan_static_ip_container' >
 			<label class='leftcolumn' for='wan_static_ip' id='wan_static_ip_label'>Static IP:</label>
 			<input type='text' class='rightcolumn' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
@@ -442,7 +430,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='bridge'>Bridge To LAN</option>
 			</select>
 		</div>
-		
+
 		<div id='wan_mac_container' >
 			<span class='leftcolumn'>
 				<label for='wan_mac' id='wan_mac_label'>Use Custom MAC Address:</label>
@@ -461,12 +449,12 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' /> 
 			</span>
 		</div>
-	
+
 	</fieldset>
-	
+
 	<fieldset id="lan_fieldset">
 		<legend class="sectionheader">Local Network / LAN</legend>
-	
+
 		<div id='lan_ip_container'>
 			<label class='leftcolumn' for='lan_ip' id='lan_ip_label'>Router IP:</label>
 			<input type='text' class='rightcolumn' name='lan_ip' id='lan_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
@@ -516,7 +504,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	</fieldset>
 
 	<fieldset id="wifi_fieldset">
-		
+
 		<legend class="sectionheader">Wireless</legend>
 
 		<div id='wifi_mode_container'>
@@ -543,7 +531,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-
 		<div id='wifi_channel_width_container' >
 			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>Channel Width:</label>
 			<span class='rightcolumn'>
@@ -554,7 +541,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</select>
 			</span>
 		</div>
-
 
 		<div id='wifi_txpower_container' >
 			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'>Transmit Power:</label>
@@ -593,7 +579,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-
 		<div id="mac_enabled_container">
 			<label class="leftcolumn" for='mac_filter_enabled'>Wireless MAC Filter:</label>
 			<select class="rightcolumn" id='mac_filter_enabled' onchange='setWifiVisibility()' >
@@ -615,16 +600,15 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</select>
 			</div>
 			<div class='rightcolumnonly'>
-				<div>	
+				<div>
 					<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 					<input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter()" />
 				</div>
 			</div>
 			<div class="rightcolumnonly"><div id="mac_table_container"></div></div>
 		</div>
-		
-		<div id='internal_divider1' class='internal_divider'></div>
 
+		<div id='internal_divider1' class='internal_divider'></div>
 
 		<div id='wifi_list_ssid2_container'>
 			<label class='leftcolumn' for='wifi_list_ssid2' id='wifi_list_ssid2_label'>SSID to Join:</label>
@@ -643,7 +627,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input style="float:left;" type='button' class="default_button" id='wifi_scan_button' value='Scan' onclick='scanWifi("wifi_ssid2")' />
 			</span>
 		</div>
-		
+
 		<div id='wifi_client_band_container' class='indent'>
 			<label class='leftcolumn' for='wifi_client_band' id='wifi_client_band_label'>Wireless Band:</label>
 			<select class='rightcolumn' id='wifi_client_band' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
@@ -651,7 +635,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value="5">5 Ghz</option>
 			</select>
 		</div>
-
 
 		<div id='wifi_channel2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel2' id='wifi_channel2_label'>Wireless Channel:</label>
@@ -682,8 +665,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<select class='rightcolumn' id='wifi_channel2_5ghz' onchange='setChannel(this)' ></select>
 		</div>
 
-
-
 		<div id='wifi_encryption2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption2' id='wifi_encryption2_label'>Encryption:</label>
 			<select class='rightcolumn' id='wifi_encryption2' onchange='setWifiVisibility()'>
@@ -708,9 +689,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		
 		<div id='internal_divider2' class='internal_divider'></div>
-
 
 		<div id='wifi_ssid1_container'>
 			<label class='leftcolumn' for='wifi_ssid1' id='wifi_ssid1_label'>Access Point SSID:</label>
@@ -721,7 +700,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wifi_ssid1a' id='wifi_ssid1a_label'>AP 5GHz SSID:</label>
 			<input type='text' id='wifi_ssid1a'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		</div>
-
 
 		<div id='wifi_channel1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_channel1' id='wifi_channel1_label'>Wireless Channel:</label>
@@ -753,8 +731,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<select class='rightcolumn' id='wifi_channel1_5ghz' onchange='setChannel(this)' ></select>
 		</div>
 
-
-
 		<div id='wifi_encryption1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_encryption1' id='wifi_encryption1_label'>Encryption:</label>
 			<select class='rightcolumn' id='wifi_encryption1' onchange='setWifiVisibility()'>
@@ -784,7 +760,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-
 		<div id='wifi_server1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_server1' id='wifi_server1_label'>RADIUS Server IP:</label>
 			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIP(this)'/><br/>
@@ -811,7 +786,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_mac_container' class="indent">
 			<label class='leftcolumn' id='wifi_mac_label'>MAC Of <em>This</em> Device:</label>
 			<span class='rightcolumn' id='wifi_mac'> </span>
-		</div>	
+		</div>
 		<div id="wifi_wds_container" class="indent">
 			<label class='leftcolumn' for='wifi_wds_label' id='wifi_wds_label'><em>Other</em> WDS MAC Addresses:</label>
 			<span class='rightcolumn'>
@@ -820,9 +795,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 			<div class="rightcolumnonly"><div id="wifi_wds_mac_table_container"></div></div>
 		</div>
-	
-
-	
 	</fieldset>
 
 	<div id="bottom_button_container">
@@ -832,16 +804,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 </form>
 
-
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
-
 
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "basic"

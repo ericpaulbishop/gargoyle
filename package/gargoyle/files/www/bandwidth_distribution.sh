@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "status" -p "bdist" -c "internal.css" -j "table.js bdist.js" -n -i gargoyle
 ?>
 
-
 <script>
 <!--
 <?
@@ -28,13 +27,10 @@
 //-->
 </script>
 
-
 <form>
 
 	<fieldset>
 		<legend class="sectionheader">Bandwidth Distribution Display Options</legend>
-	
-
 
 		<div>
 			<label class="leftcolumn" for='time_frame' id='time_frame_label'>Distribution Time Frame:</label>
@@ -61,18 +57,15 @@
 		</div>
 
 	</fieldset>
-	
+
 	<div class="plot_header">Bandwidth Distribution:</div>
 	<div><embed id="pie_chart" style="margin-left:10px; width:525px; height:525px;" src="multi_pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
 	<fieldset>
 		<legend class="sectionheader">Bandwidth Distribution Table</legend>
-		<div id="bandwidth_distribution_table_container"></div>	
+		<div id="bandwidth_distribution_table_container"></div>
 	</fieldset>
-	
+
 </form>
-
-
-
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
@@ -81,8 +74,6 @@
 	initializePlotsAndTable();
 //-->
 </script>
-
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "bdist"  

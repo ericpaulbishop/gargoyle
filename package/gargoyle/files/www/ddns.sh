@@ -13,7 +13,6 @@
 <script>
 <!--
 <?
-	
 	echo "providerData = new Array();"
 	awk '{gsub(/"/,"'\''"); print "providerData.push(\""$0"\");" ;}' /etc/ddns_providers.conf
 
@@ -44,7 +43,6 @@
 
 		</div>
 
-
 		<div>
 			<div class='indent'>
 				<label class='leftcolumn' for='ddns_check' id='ddns_check_label'>Check Interval:</label>
@@ -56,11 +54,11 @@
 				<input type='text' class='rightcolumn' id='ddns_force'  size='8' onkeyup='proofreadNumeric(this)'/>
 				<em>days</em>
 			</div>
-			
+
 			<div class='indent'>
 				<input type="button" id="add_service_button" class="default_button" value="Add DDNS Service" onclick="addDdnsService()" />
 			</div>
-			
+
 			<div class='indent'>
 				<span id='ddns_1_txt'>
 					<p>
@@ -82,7 +80,7 @@
 
 		<div id='internal_divider1' class='internal_divider'></div>
 
-		<span id="add_ddns_label"><p>Dynamic DNS Services:</p></span>	
+		<span id="add_ddns_label"><p>Dynamic DNS Services:</p></span>
 
 		<div id="ddns_table_container"></div>
 
@@ -91,7 +89,6 @@
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-
 
 	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
@@ -103,7 +100,6 @@
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "dyndns"

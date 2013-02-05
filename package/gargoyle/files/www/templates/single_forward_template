@@ -13,7 +13,7 @@
 						<td><input type='text' id='add_fp' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5'/></td>
 						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15'/></td>
 						<td><input type='text' id='add_dp' size='5' onkeyup='proofreadNumeric(this,1,65535)' maxLength='5'/></td>
-							
+
 						<td><input type='button' id='add_button' value='Add' class='default_button' onclick='addPortfRule()'/></td>
 					</tr>
 				</table>

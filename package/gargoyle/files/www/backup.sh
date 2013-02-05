@@ -30,7 +30,6 @@
 	</div>
 	<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe> 
 
-
 </fieldset>
 
 <fieldset id="restore_original_section">
@@ -44,11 +43,6 @@
 	<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe>
 </fieldset>
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
-
-
-
-
-
 
 <?
 	gargoyle_header_footer -f -s "system" -p "backup"

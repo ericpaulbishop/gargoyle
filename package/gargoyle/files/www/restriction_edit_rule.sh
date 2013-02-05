@@ -12,14 +12,13 @@
 	<legend class="sectionheader">Edit Restriction Rule</legend>
 
 	<?
-         sed -e '/<L7OPTIONS>/,$ d' templates/restriction_template
-         sed -e '/^#/ d'  -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
-         sed -e '1,/<L7OPTIONS>/ d' templates/restriction_template
-  ?>
+	sed -e '/<L7OPTIONS>/,$ d' templates/restriction_template
+	sed -e '/^#/ d'  -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
+	sed -e '1,/<L7OPTIONS>/ d' templates/restriction_template
+	?>
 
 </fieldset>
 <div id="bottom_button_container"></div>
-
 
 </body>
 </html>

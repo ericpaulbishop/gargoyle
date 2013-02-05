@@ -47,9 +47,8 @@
 		if [ -n "$created" ] ; then
 			wlanconfig $created destroy 2>/dev/null
 		fi
-	}	
-	
-	
+	}
+
 	scan_brcm()
 	{
 		if_exists=$(ifconfig | grep wl0)
@@ -59,7 +58,7 @@
 			ifconfig wl0 up
 		fi
 		sleep 4
-	
+
 		iwlist wl0 scanning
 		if [ -z "$if_exists" ] ; then
 			ifconfig wl0 down
