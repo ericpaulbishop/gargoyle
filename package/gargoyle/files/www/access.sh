@@ -9,12 +9,9 @@
 	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -i httpd_gargoyle dropbear gargoyle firewall network wireless 
 ?>
 
-
 <form>
 	<fieldset>
 		<legend class='sectionheader'>Web Access</legend>
-
-
 
 		<div>
 			<label class='leftcolumn' id='local_web_protocol_label' for='local_web_protocol'>Web Admin Protocol:</label>
@@ -24,7 +21,7 @@
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
 		</div>
-		
+
 		<div class='indent'>
 			<div id='local_http_port_container'>
 				<label class='leftcolumn' for='local_http_port' id='local_http_port_label'>Local HTTP Port:</label>
@@ -120,7 +117,6 @@
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-
 
 	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>

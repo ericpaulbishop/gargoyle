@@ -1,14 +1,13 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright Â© 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "connection" -p "tor" -c "internal.css" -j "tor.js" tor httpd_gargoyle dropbear firewall
 ?>
-
 
 	<fieldset>
 		<legend class="sectionheader">Tor Anonymization Client</legend>
@@ -45,8 +44,6 @@
 			</div>
 		</div>
 
-
-
 		<div id='tor_other_proto_container'>
 			<label  class='wideleftcolumn' for='tor_other_proto' id='tor_other_proto_label'>Protocols Not Handled By Tor:</label>
 			<select class='rightcolumn' id="tor_other_proto">
@@ -63,12 +60,12 @@
 			<label  class='wideleftcolumn' for='tor_hidden_mask' id='tor_hidden_mask_label'>Tor Hidden Service Subnet Mask:</label>
 			<input type="text" class="rightcolumn" id='tor_hidden_mask' onkeyup='proofreadMask(this)'/>
 		</div>
-	
+
 	</fieldset>
 
 	<fieldset>
 		<legend class="sectionheader">Tor Anonymization Server</legend>
-		
+
 		<div id='tor_relay_mode_container'>
 			<label  class='wideleftcolumn' for='tor_relay_mode' id='tor_relay_mode_label' >Tor Server:</label>
 			<select class='rightcolumn' id="tor_relay_mode" onchange='setTorVisibility()' >
@@ -81,7 +78,7 @@
 			<em><span class="farrightcolumnonly" id="mode_description"></span></em>
 			<br/>
 		</div>
-		
+
 		<div id='tor_relay_port_container'>
 			<label  class='wideleftcolumn' for='tor_relay_port' id='tor_relay_port_label'>Bridge/Relay Port:</label>
 			<input type="text" class="rightcolumn" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' />
@@ -91,7 +88,6 @@
 			<label  class='wideleftcolumn' for='tor_obfsproxy_port' id='tor_obfsproxy_port_label'>Obfsproxy Port:</label>
 			<input type="text" class="rightcolumn" id='tor_obfsproxy_port' size='9' onkeyup='proofreadPort(this)' />
 		</div>
-
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'>Max Relay Banwidth:</label>
@@ -105,7 +101,6 @@
 				<option value="0">Do Not Publish Bridge Info</option>
 			</select>
 		</div>
-
 
 		<div id='tor_relay_nickname_container'>
 			<label  class='wideleftcolumn' for='tor_relay_nickname' id='tor_relay_nickname_label'>Node Nickname (optional):</label>
@@ -121,24 +116,16 @@
 			<span class='nocolum'>Within 1-2 hours of activating your relay, it should be visible <a href="http://torstatus.blutmagie.de/">in the global list</a></span>
 		</div>
 
-	
 	</fieldset>
-
-
-
 
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
 	</div>
 
-
-
 <script>
 	resetData();
 </script>
-
-
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "tor"

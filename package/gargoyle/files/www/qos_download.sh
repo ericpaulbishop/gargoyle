@@ -12,11 +12,10 @@
 
 <script>
 <!--
-       var direction = "download";
-       protocolMap = new Object;
+	var direction = "download";
+	protocolMap = new Object;
 <?
-       sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap\["\1"\]="\2";/' /etc/l7-protocols/l7index
-
+	sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap\["\1"\]="\2";/' /etc/l7-protocols/l7index
 
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
 		echo "var qosEnabled = true;"
@@ -42,7 +41,7 @@
 			in cases where you want to divide available bandwidth between competing requirements.  For example if you want
 			your VoIP phone to work correctly while downloading videos.  Another case would be if you want your bit torrents
 			throttled back when you are web surfing. 
-		  </p>
+			</p>
 		</div>
 		<div class="internal_divider"></div>
 
@@ -116,7 +115,6 @@
 				<input class='rightcolumn' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
 				<em>bytes</em>
 			</div>
-
 
 			<div>
 				<div class='leftcolumn'>
@@ -205,10 +203,10 @@
 				<p> Specifying <em>Total Download Bandwidth</em> correctly is crucial to making QoS work.  If you are using the active congestion
 				then just set this to the maximum download speed your ISP will deliver.  If you are using a PPPoE connection check your modem's
 				webpage and set this to your DSL downlink speed. </p>
-				
+
 				<p>If you are not using the ACC then you must establish what the minimum speed your ISP will deliver is and then set this number to that.
 				In general ISPs do not provide a guaranteed minimum bandwith so it will take some experimentation and frustration on your part 
-				to arrive at a number.	One approach is to start with a number which is half of what you think it should be and then test your 
+				to arrive at a number. One approach is to start with a number which is half of what you think it should be and then test your 
 				link under full load and make sure everything works.  Then increase it in steps, testing as you go until QoS starts to break down.  
 				You also may see that after your testing QoS works for a while and then stops working.  This is because your ISP is getting 
 				overloaded due to demands from their other customers so they are no longer delivering to you the bandwidth they did during your testing.  
@@ -384,12 +382,9 @@
 				</table>
 			</span>
 			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4">Hide Text</a>
-
 		</div>
 
-
 	</fieldset>
-
 
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
@@ -405,7 +400,6 @@
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "firewall" -p "qosdownload"

@@ -11,18 +11,18 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader">Edit QoS Service Class</legend>
 
-	<div>	
+	<div>
 		<label class='leftcolumn' id="class_name_label" for='class_name' >Service Class Name:</label>
 		<input class='rightcolumn' type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)"  size='12' maxlength='10' />
 	</div>
-	
+
 	<div>
 		<label class='leftcolumn' id="percent_bandwidth_label" for='percent_bandwidth' >Percent Bandwidth At Capacity:</label>
 		<span class='rightcolumn'>
 			<input type='text' id='percent_bandwidth' onkeyup="proofreadNumericRange(this,1,100)" size='5' maxlength='3' /><em>%</em>
 		</span>
 	</div>
-	
+
 	<div class='nocolumn'>Bandwidth Minimum:</div>
 	<div class='indent'>
 	<div class='nocolumn'>
@@ -60,7 +60,6 @@
 		</div>
 	</div>
 
-
 	<div id='rttdiv'>
 	<br>
 	<div class='nocolumn'>Minimize Round Trip Times (RTT):</div>
@@ -76,8 +75,6 @@
 			</span>
 		</div>
 	</div></div>
-
-
 
 </fieldset>
 <div id="bottom_button_container"></div>

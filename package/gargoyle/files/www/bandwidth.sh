@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "status" -p "bandwidth" -c "internal.css" -j "table.js bandwidth.js" -n -i gargoyle qos_gargoyle
 ?>
 
-
 <script>
 <!--
 <?
@@ -60,7 +59,7 @@
 				<div><select id="plot3_id" onchange="resetPlots()"></select></div>
 			</div>
 		</div>
-		
+
 		<div>
 			<input type="checkbox" id="use_high_res_15m" onclick="highResChanged()">&nbsp;
 			<label id="use_high_res_15m_label" for="use_high_res_15m">Save High Resolution 15 Minute Timeframe Data For All Hosts</label>
@@ -71,15 +70,15 @@
 		<br/>All bandwidth usage reported is via the WAN interface only.  
 		<br/>Traffic between local hosts is not reported.
 	</fieldset>
-	
+
 	<fieldset id="bandwidth_graphs">
 		<legend class="sectionheader">Bandwidth Graphs</legend>
 		<span class="bandwidth_title_text"><strong>Download</strong> (<span onclick='expand("Download")' class="pseudo_link">expand</span>)</span>
 		<span class="bandwidth_title_text"><strong>Upload</strong> (<span onclick='expand("Upload")' class="pseudo_link">expand</span>)</span>
 		<br/>
-		<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />	
+		<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 		<embed id="upload_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
-		<br/>	
+		<br/>
 		<span class="bandwidth_title_text"><strong>Total</strong> (<span onclick='expand("Total")' class="pseudo_link">expand</span>)</span>
 		<br/>
 		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
@@ -139,7 +138,6 @@
 	</fieldset>
 </form>
 
-
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
 <script>
@@ -147,8 +145,6 @@
 	initializePlotsAndTable();
 //-->
 </script>
-
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "bandwidth"  

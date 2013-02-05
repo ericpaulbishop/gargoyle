@@ -5,14 +5,14 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	
+
 	gargoyle_header_footer -h -s "" -p "" -c "internal.css" -j ""
 ?>
 
 
 <fieldset>
 	<legend class="sectionheader">AJAX Browser Support Needed</legend>
-	
+
 	<p>Please upgrade to an AJAX compatible browser and try again.  Such browsers include Firefox 2.0+, Safari and IE 6+.</p>
 
 </fieldset>

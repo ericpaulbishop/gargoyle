@@ -6,18 +6,17 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$POST_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	
+
 	echo "Content-Type: text/html;charset=utf-8"
 	echo ""
 
 	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
 	echo '<html xmlns="http://www.w3.org/1999/xhtml">'
 	echo '<body>'
-	
-	mkdir -p /tmp/up	
+
+	mkdir -p /tmp/up
 	mv $FORM_upgrade_file /tmp/up/upgrade
-	
-	
+
 	cd /tmp/up/
 	if [ -e /usr/bin/bin2trx ] ; then
 		/usr/bin/bin2trx /tmp/up/upgrade >/tmp/up/trxtest 2>&1
@@ -34,7 +33,7 @@
 				echo "     "
 				inc=$(($inc + 1))
 			done
-			
+
 			#tor eats up memory like crazy and can make an upgrade crash, kill it if it exists
 			if [ -e /etc/init.d/tor ] ; then
 				/etc/init.d/tor stop >/dev/null 2>&1

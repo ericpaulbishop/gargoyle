@@ -3,7 +3,6 @@
 	echo "Content-Type: text/plain"
 	echo ""
 
-
 	tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
 	tor_client_mode=$(uci get tor.client.client_mode 2>/dev/null)
 	tor_ip_file=$(uci get tor.client.enabled_ip_file 2>/dev/null)
@@ -20,7 +19,7 @@
 		echo "bad_ip"
 		exit
 	fi
-	
+
 	connect_mac=$(cat /proc/net/arp 2>/dev/null | grep "$connect_ip" | awk '{ print $4 }')
 	valid_dhcp=$(grep "$mac.*$connect_ip" /var/dhcp.leases 2>/dev/null)
 	valid_static=$(grep "$mac.*$connect_ip" /etc/ethers 2>/dev/null)

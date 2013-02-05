@@ -1,9 +1,9 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright Â© 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
@@ -17,7 +17,7 @@
 	else
 		echo "var haveDh = false;"
 	fi
-	
+
 	client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
 	echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = [];"
 	if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc/openvpn/${client_id}_ca.crt" ] && [ -f "/etc/openvpn/${client_id}.crt" ] && [ -f "/etc/openvpn/${client_id}.key" ] ; then
@@ -30,16 +30,16 @@
 		fi
 	fi
 
- 	echo "var tunIp=\""$(ifconfig tun0 2>/dev/null | awk ' { if ( $0 ~ /inet addr:/) { gsub(/^.*:/, "", $2) ; print $2 } }')"\";"
+	echo "var tunIp=\""$(ifconfig tun0 2>/dev/null | awk ' { if ( $0 ~ /inet addr:/) { gsub(/^.*:/, "", $2) ; print $2 } }')"\";"
 	echo "var openvpnProc=\""$(ps | grep openvpn | grep -v grep | awk ' { printf $1 }')"\";"
-	
+
 	tab=$(printf "\t")
 	config_file=$(uci get openvpn.custom_config.config 2>/dev/null)
 	remote_ping=""
 	if [ -f "$config_file" ] ; then
 		remote=$(egrep "^[$tab ]*remote[$tab ]" "$config_file" | awk ' { print $2 }')
 		if [ -n "$remote" ] ;then
-			remote_ping=$(ping -c 1 -W 2 www.google.com 2>/dev/null | grep "0% packet loss")	
+			remote_ping=$(ping -c 1 -W 2 www.google.com 2>/dev/null | grep "0% packet loss")
 		fi
 	fi
 	echo "var remotePing=\"$remote_ping\";"
@@ -48,8 +48,6 @@
 
 	var uci = uciOriginal.clone();
 </script>
-
-
 
 <fieldset id="openvpn_config_fieldset">
 	<legend class="sectionheader">OpenVPN Configuration</legend>
@@ -66,8 +64,6 @@
 		<span class='leftcolumn'>OpenVPN Status:</span>
 		<span class='rightcolumn' id='openvpn_config_status'></span>
 	</div>
-
-
 </fieldset>
 
 <fieldset id="openvpn_server_fieldset">
@@ -114,7 +110,7 @@
 			<option value='false'>Clients Can Only Communicate With Server</option>
 		</select>
 	</div>
-	
+
 	<div id= "openvpn_server_subnet_access_container">
 		<label class='leftcolumn' for='openvpn_server_subnet_access' id='openvpn_server_subnet_access_label'>LAN Subnet Access:</label>
 		<select class='rightcolumn' id='openvpn_server_subnet_access'>
@@ -122,7 +118,7 @@
 			<option value='false'>Clients Can Not Access LAN</option>
 		</select>
 	</div>
-	
+
 	<div id= "openvpn_server_duplicate_cn_container">
 		<label class='leftcolumn' for='openvpn_server_duplicate_cn' id='openvpn_server_duplicate_cn_label'>Credential Re-Use:</label>
 		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='setOpenvpnVisibility()'>
@@ -138,36 +134,28 @@
 			<option value='false'>Only Traffic Destined for Hosts Behind VPN</option>
 		</select>
 	</div>
-	
-
-
-
 </fieldset>
 
 <fieldset id="openvpn_allowed_client_fieldset">
 	<legend class="sectionheader">OpenVPN Server: Allowed Clients</legend>
-	
 
 	<span id="openvpn_allowed_client_table_label"><p>Currently Configured Clients:</p></span>
-	
+
 	<div id="openvpn_allowed_client_table_container"></div>
-	
+
 	<div><em>After generating client configuration, click download to obtain zip file containg necessary credentials, and place in your client&lsquo;s OpenVPN configuration folder</em></div>
-	
+
 	<div class='internal_divider'></div>
-	
+
 	<span id="openvpn_allowed_client_add_label"><p>Configure A New Client / Set of Credentials :</p></span>
-		
+
 	<div class="indent">
 		<? cat /www/templates/openvpn_allowed_client_template ?>
 		<div>
 			<input type='button' id='openvpn_allowed_client_add' value='Add' class='default_button' onclick='addAc()' />
 		</div>
 	</div>
-
-
 </fieldset>
-
 
 <fieldset id="openvpn_client_fieldset">
 	<legend class="sectionheader">OpenVPN Client</legend>
@@ -180,8 +168,7 @@
 			<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" />
 			<label for="openvpn_client_config_manual">Configure Client Manually</label>
 		</div>
-	
-	
+
 		<div id="openvpn_client_file_controls" class="indent">
 			
 			<div id="openvpn_client_file_type_container">
@@ -220,15 +207,14 @@
 				<input class='rightcolumnonly' type="file" id="openvpn_client_ta_key_file" name="openvpn_client_ta_key_file" />
 			</div>
 		</div>
-	
-	
+
 		<div id="openvpn_client_manual_controls" class="indent">
 
 			<div id='openvpn_client_remote_container'>
 				<label class='leftcolumn' for='openvpn_client_remote' id='openvpn_client_remote_label'>OpenVPN Server Address:</label>
 				<input type='text' class='rightcolumn' name='openvpn_client_remote' onkeyup="updateClientConfigTextFromControls()" id='openvpn_client_remote' size='30' />
 			</div>
-			
+
 			<div id='openvpn_client_port_container'>
 				<label class='leftcolumn' for='openvpn_client_port' id='openvpn_client_port_label'>OpenVPN Server Port:</label>
 				<input type='text' class='rightcolumn' name='openvpn_client_port' onkeyup="updateClientConfigTextFromControls();proofreadPort(this);" id='openvpn_client_port' size='30' />
@@ -241,7 +227,7 @@
 					<option value='tcp'>TCP</option>
 				</select>
 			</div>
-	
+
 			<div id='openvpn_client_cipher_container'>
 				<label class='leftcolumn' for='openvpn_client_cipher' id='openvpn_client_cipher_label'>OpenVPN Cipher:</label>
 				<select class='rightcolumn' id='openvpn_client_cipher' onchange="setClientVisibility(document);updateClientConfigTextFromControls();" >
@@ -250,14 +236,14 @@
 					<option value='AES-128-CBC'>AES-CBC 128bit</option>
 					<option value='AES-256-CBC'>AES-CBC 256bit</option>
 					<option value='other'>Other</option>
-	
+
 				</select>
 			</div>
 			<div id='openvpn_client_cipher_other_container'>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em>Cipher</em></span>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em>Key Size (optional)</em></span>
 			</div>
-			
+
 			<div id="openvpn_client_conf_text_container">
 				<br/>
 				<label class="leftcolumn" for='openvpn_client_conf_text' id='openvpn_client_conf_text_label'>OpenVPN Configuration:</label>
@@ -267,7 +253,7 @@
 				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
 
 			</div>
-		
+
 			<div id="openvpn_client_ca_text_container">
 				<label class="leftcolumn" for='openvpn_client_ca_text'  id='openvpn_client_ca_text_label'>CA Certificate:</label>
 				<br/>
@@ -308,22 +294,16 @@
 	</form>
 
 	<iframe id="client_add_target" name="client_add_target" src="#" style="display:none"></iframe> 
-
-
 </fieldset>
-
 
 <div id="bottom_button_container">
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
-
 </div>
 
 <script>
 	resetData()
 </script>
-
-
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "openvpn"

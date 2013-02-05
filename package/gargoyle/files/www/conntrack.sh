@@ -59,7 +59,6 @@
 			</select>
 		</div>
 
-
 		<div id="connection_table_container"></div>
 		<div style="width:375px">
 			<p>Connections between local hosts and the router are not displayed.</p>
@@ -67,15 +66,11 @@
 	</fieldset>
 </form>
 
-
-
-
 <script>
 <!--
 	initializeConnectionTable();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "connections"

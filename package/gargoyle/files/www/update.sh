@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "system" -p "update" -c "internal.css" -j "update.js" 
 ?>
 
-
 <script>
 <!--
 <?
@@ -29,7 +28,6 @@
 //-->
 </script>
 
-
 <fieldset id="upgrade_section">
 	<legend class="sectionheader">Upgrade Firmware</legend>
 	<div>
@@ -42,7 +40,7 @@
 			aware that this can potentially lead to problems if the new version is significantly newer than the old version, 
 			but for small, incremental differences this will likely work. It is always best to keep a backup just in case.
 		</div>
-		
+
 		<div class="internal_divider"></div>
 
 		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
@@ -75,8 +73,6 @@
 	setUpgradeFormat();
 //-->
 </script>
-
-
 
 <?
 	gargoyle_header_footer -f -s "system" -p "update" 

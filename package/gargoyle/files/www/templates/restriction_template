@@ -82,7 +82,6 @@
 		</div>
 	</div>
 
-
 	<div>
 		<span class='narrowleftcolumn'>
 			<label id="rule_remote_port_label" for='rule_remote_port'>Remote Port(s):</label>

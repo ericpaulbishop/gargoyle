@@ -36,24 +36,23 @@
 				<? cat templates/single_forward_template ?>
 			</div>
 		</div>
-		
+
 		<div id='portf_table_container' class="bottom_gap"></div>
 	</fieldset>
 
-
 	<fieldset>
 		<legend class="sectionheader">Port Range Forwarding</legend>
-		
+
 		<div id='portfrange_add_heading_container'>
 			<label class='nocolumn' id='portf_add_heading_label'>Forward Port Range From WAN to LAN:</label>
 		</div>
-		
+
 		<div class='bottom_gap'>
 			<div id='portfrange_add_container'>
 				<? cat templates/multi_forward_template ?>
 			</div>
 		</div>
-		
+
 		<div id='portfrange_table_container' class="bottom_gap"></div>
 	</fieldset>
 
@@ -69,14 +68,12 @@
 		</div>
 	</fieldset>
 
-	
 	<fieldset>
 		<legend class="sectionheader">UPnP / NAT-PMP</legend>
 		<div id='upnp_enabled_container'>
 			<input type='checkbox' id='upnp_enabled' onclick="setUpnpEnabled()" />
 			<label id='upnp_enabled_label' for='upnp_enabled'>Enable UPnP &amp; NAT-PMP service</label>
 		</div>
-
 
 		<div id='upnp_table_heading_container'>
 			<span class='nocolumn'>Active port forwards:</span>
@@ -103,7 +100,6 @@
 				<em>Kbytes / second</em>
 			</span>
 
-
 		<div id="upnp_help" class="indent">
 		<span id='upnp_help_txt'>
 
@@ -129,8 +125,7 @@
 		</div>
 
 	</fieldset>
-	
-	
+
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
@@ -139,7 +134,6 @@
 
 </form>
 
-
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
 <script>
@@ -147,7 +141,6 @@
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "firewall" -p "portforwarding"

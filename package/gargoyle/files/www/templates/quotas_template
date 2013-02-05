@@ -138,8 +138,6 @@
 	</span>
 </div>
 
-
-
 <div id="quota_active_container">
 	<span class='narrowleftcolumn'>
 		<label id="quota_active_label" for='quota_active'>Quota Is Active:</label>
@@ -179,7 +177,7 @@
 	</span>
 </div>
 <div id="quota_exceeded_container">
-	<span class='narrowleftcolumn'>                             
+	<span class='narrowleftcolumn'>
 		<label id="quota_exceeded_label" for='quota_exceeded'>When Exceeded:</label>
 	</span>
 	<span class='widerightcolumn'>

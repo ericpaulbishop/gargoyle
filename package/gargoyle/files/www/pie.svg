@@ -9,7 +9,6 @@
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
 
-	
 <script type="text/ecmascript"> <![CDATA[
 		var svgNs="http://www.w3.org/2000/svg";
 		var svgDoc;
@@ -34,7 +33,6 @@
 			{
 				return;
 			}
-
 
 			//first construct labels;
 			pieChartLabels = [];
@@ -62,7 +60,6 @@
 				labelRect.setAttribute("id", "color_" + labelIndex);
 				labelRect.setAttribute("fill",  unselectedColor);
 
-
 				labelText = svgDoc.createElementNS(svgNs, "text");
 				labelText.setAttribute("x", labelX+25);
 				labelText.setAttribute("y", nextLabelY+labelBoxWidth);
@@ -71,14 +68,12 @@
 				labelText.appendChild( svgDoc.createTextNode( labels[labelIndex] ));
 				labelText.setAttribute("id", "label_" + labelIndex);
 
-
 				if(selectedId == labelIndex)
 				{
 					labelRect.setAttribute("stroke-width", 3);
 					labelText.setAttribute("font-weight", "bolder");
 					labelRect.setAttribute("fill", selectedColor);
 				}
-
 
 				labelGroup = svgDoc.createElementNS(svgNs, "g");
 				labelGroup.setAttribute("id", "group_" + labelIndex);
@@ -91,9 +86,7 @@
 				nextColorIncrement = nextColorIncrement + colorIncrement;
 				nextLabelY = nextLabelY + labelYIncrement;
 			}
-		
 
-		
 			//now construct pie slices
 			centerX=325;
 			centerY=150;
@@ -301,8 +294,7 @@
 
 <g id="label_container"></g>
 <g id="pie_container"></g>
-	
+
 <!-- <text x="50" y="500" font-family="serif" font-size="18px" id="text_box">.</text> -->
 
 </svg>
-

@@ -1,9 +1,9 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
-	# version 2.0 with a special clarification/exception that permits adapting the program to 
+	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
-	# itself remain covered by the GPL. 
+	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "usb_storage" -c "internal.css" -j "table.js usb_storage.js" gargoyle network firewall nfsd samba vsftpd share_users
@@ -14,7 +14,7 @@
 <!--
 <?
 	echo "var driveSizes = [];"
-	
+
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
@@ -23,36 +23,29 @@
 	#note that drivesWithNoMounts, refers to drives 
 	# with no mounts on the OS, not lack of network mounts
 	echo "var drivesWithNoMounts = [];"
-	
+
 	#ugly one-liner
 	#unmounted_drives=$( drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) ; for d in $drives ; do mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") ; if [ -z "$mounted" ] ; then echo "$d" ; fi  ; done )
-	
+
 	drives="$(awk  -F':' '$1 ~ /^\/dev\// { sub(/[0-9]+$/, "", $1); arr[$1]; } END { for (x in arr) { print x; } }' /tmp/drives_found.txt)"
 	for d in ${drives}; do
 		if awk -v devpath="^${d}[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
 			size=$(( 1024 * $(fdisk -s "$d") ))
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
-		fi  
+		fi
 	done
-	
-
-
 ?>
 //-->
 </script>
-
-
 
 <fieldset id="no_disks" style="display:none;">
 	<legend class="sectionheader">Shared Disks</legend>
 	<em><span class="nocolumn">No mounted USB disks detected</span></em>
 </fieldset>
 
-
-
 <fieldset id="shared_disks">
 	<legend class="sectionheader">Shared Disks</legend>
-	
+
 	<div id='ftp_wan_access_container' >
 		<span class="nocolumn">
 			<input class="aligned_check" type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()' />&nbsp;
@@ -75,7 +68,6 @@
 		<input id="cifs_workgroup" class="rightcolumn" type="text" size='30'/>
 	</div>
 
-	
 	<div id="user_container">
 		<label id="cifs_user_label" class="leftcolumn">CIFS / FTP Users:</label>
 		<span class="rightcolumnonly" id="user_container">
@@ -98,7 +90,6 @@
 	<div class="rightcolumnonly" style="margin-bottom:20px;" id="user_table_container">
 	</div>
 
-
 	<div id="sharing_add_heading_container">
 		<span class="nocolumn" style="text-decoration:underline;">Add Shared Disk / Directory:</span>
 	</div>
@@ -119,8 +110,6 @@
 
 	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
-
-
 </fieldset>
 
 <fieldset id="disk_unmount">
@@ -142,7 +131,6 @@
 		<em><span class="nocolumn">WARNING: Formatting a disk will permanently wipe out all contents of that disk.<p>Disk will be formatted for storage with EXT4 filesystem<br/>EXT4 may not be readable if USB drive is removed and attached to a Windows/Mac computer</p></span></em>
 	</div>
 
-
 	<div id="format_disk_select_container">
 		<label id="format_disk_select_label" class="leftcolumn" for="format_disk_select">Disk to format:</label>
 		<select class="rightcolumn" id="format_disk_select" ></select>
@@ -160,16 +148,7 @@
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>
-
-
 </fieldset>
-
-
-
-
-
-
-
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
@@ -179,9 +158,6 @@
 //-->
 </script>
 
-
 <?
 	gargoyle_header_footer -f -s "system" -p "usb_storage"
 ?>
-
-

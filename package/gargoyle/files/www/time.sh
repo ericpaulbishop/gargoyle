@@ -40,16 +40,15 @@
 //-->
 </script>
 
-
 <form>
 	<fieldset>
 		<legend class="sectionheader">Time</legend>
-	
+
 		<div>
 			<label id='current_time_label' for='current_time'>Current Date &amp; Time:&nbsp;&nbsp;&nbsp;&nbsp;</label>
 			<span id="current_time"></span>
 		</div>
-				
+
 		<div class="internal_divider"></div>
 
 		<div>
@@ -58,7 +57,7 @@
 		<div class="indent">
 			<div><select class='nocolumn' id='timezone' onchange="timezoneChanged()"></select></div>
 		</div>
-		
+
 		<div>
 			<label class='nocolumn' id='timezone_label' for='date_format'>Date Format:</label>
 		</div>
@@ -75,7 +74,6 @@
 			</div>
 		</div>
 
-			
 		<div>
 			<label class='leftcolumn' id='region_label' for='region'>NTP Servers:</label>
 			<div class="indent">
@@ -109,13 +107,11 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "system" -p "time"
