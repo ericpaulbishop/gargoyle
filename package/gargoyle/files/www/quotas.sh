@@ -28,39 +28,32 @@
 //-->
 </script>
 
-
-
-
 <form>
 	<fieldset>
 		<legend class="sectionheader">Bandwidth Quotas</legend>
-	
+
 		<span id="add_quota_label" style="text-decoration:underline" >Add New Quota:</span>
-		
+
 		<div>
 
 			<? cat templates/quotas_template ?>
 
 			<div>
 				<input type="button" id="add_quota_button" class="default_button" value="Add New Quota" onclick="addNewQuota()" />
-			</div>	
+			</div>
 		</div>
-	
-	
+
 		<div id='internal_divider1' class='internal_divider'></div>
-	
 
-
-		<span id="active_quotas_label" style="text-decoration:underline" >Active Quotas:</span>	
+		<span id="active_quotas_label" style="text-decoration:underline" >Active Quotas:</span>
 
 		<div id="quota_table_container"></div>
-		
+
 	</fieldset>
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-
 
 	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
@@ -72,7 +65,6 @@
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "firewall" -p "quotas"

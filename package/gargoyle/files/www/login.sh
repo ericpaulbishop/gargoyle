@@ -5,7 +5,7 @@
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
-	
+
 	valid=$( eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" ) | grep "Set-Cookie" )
 	require=$(uci get gargoyle.global.require_web_password)
 	if [ "$require" = "0" ] ; then
@@ -24,7 +24,7 @@
 	fi
 
 	web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
-	
+
 	js="login.js"
 	if [ -d "$web_root/hooks/login" ] ; then
 		sh_hooks=$(ls "$web_root/hooks/login/"*.sh | sort )
@@ -75,12 +75,10 @@ var passInvalid = false;
 		current_time=$(echo $current_time | sed "s/UTC/UTC-$timezone_is_utc/g" | sed 's/\-\-/+/g')
 	fi
 	echo "var currentTime = \"$current_time\";"
-	
+
 ?>
 //-->
 </script>
-	
-
 
 <fieldset>
 	<legend class="sectionheader">Login</legend>
@@ -99,13 +97,11 @@ var passInvalid = false;
 	<div>
 		<span class="leftcolumn"><input class="default_button" type="button" value="Login" onclick="doLogin()" /></span>
 	</div>
-	
+
 </fieldset>
 <fieldset id="local_quotas" style="display:none">
 	<legend class="sectionheader">Your Quota</legend>
 </fieldset>
-
-
 
 <fieldset id="global_quotas" style="display:none">
 	<legend class="sectionheader">Entire Network Quota</legend>
@@ -128,7 +124,6 @@ var passInvalid = false;
 	setStatusAndQuotas();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f

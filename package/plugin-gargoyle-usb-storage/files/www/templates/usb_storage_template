@@ -33,7 +33,6 @@
 	<br/>
 </div>
 
-
 <div id="anonymous_access_container">
 	<label class="leftcolumn" id="anonymous_access_label" for="anonymous_access">FTP/CIFS Anonymous Access:</label>
 	<select class="rightcolumn" id="anonymous_access">
@@ -57,7 +56,6 @@
 	</div>
 	<div class="rightcolumnonly" id="user_access_table_container"></div>
 </div>
-
 
 <div id="nfs_access_container">
 	<label class="leftcolumn" id="nfs_access_label" for="nfs_access">NFS Access:</label>
@@ -84,10 +82,7 @@
 	<div class="rightcolumnonly" id="nfs_ip_table_container"></div>
 </div>
 
-
-
 <div id="nfs_spacer" style="margin-bottom:20px"></div>
-
 
 <div id="ftp_path_container">
 	<label class="leftcolumn" id="ftp_path_label" for="ftp_path">FTP Path:</label>

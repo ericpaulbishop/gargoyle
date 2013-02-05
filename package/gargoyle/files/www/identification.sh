@@ -16,7 +16,6 @@
 ?>
 </script>
 
-
 <form>
 	<fieldset>
 		<legend class="sectionheader">Identification</legend>
@@ -28,7 +27,7 @@
 			<label class='narrowleftcolumn' for='domain' id='domain_label'>Domain:</label>
 			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
 		</div>
-	
+
 	</fieldset>
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
@@ -39,13 +38,11 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "system" -p "ident"

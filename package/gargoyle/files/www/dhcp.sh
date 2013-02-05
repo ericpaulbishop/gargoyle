@@ -56,11 +56,9 @@ for (etherIndex in etherData)
 //-->
 </script>
 
-
 <form>
 	<fieldset>
 		<legend class="sectionheader">DHCP</legend>
-
 
 		<div id='dhcp_enabled_container'>
 			<div class='nocolumn'>
@@ -68,7 +66,6 @@ for (etherIndex in etherData)
 				<label id='dhcp_enabled_label' for='dhcp_enabled'>LAN DHCP Server Enabled</label>
 			</div>
 		</div>
-
 
 		<div id='dhcp_range_container'>
 			<label class='nocolumn' for='dhcp_start'>DHCP range:</label>
@@ -114,7 +111,7 @@ for (etherIndex in etherData)
 				</select>
 			</div>
 		</div>
-		
+
 		<div id='staticip_table_heading_container'>
 			<span class='nocolumn'>Assigned Static IP Addresses:</span>
 		</div>
@@ -127,26 +124,19 @@ for (etherIndex in etherData)
 		<input type='text' value='firefox3_bug' />
 	</div>
 
-
 	<div id="bottom_button_container">
 		<input type='button' value='Save Changes' id="save_button" class="bottom_button"  onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button"  onclick='resetData()'/>
 	</div>
 </form>
 
-
-
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
-
-
-
 
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "connection" -p "dhcp"

@@ -19,7 +19,7 @@
 	</div>
 
 	<div id="ddns_variable_container"></div>
-		
+
 	<div>
 		<div>
 			<label class='leftcolumn' for='ddns_check' id='ddns_check_label'>Check Interval:</label>
@@ -50,7 +50,6 @@
 
 </fieldset>
 <div id="bottom_button_container"></div>
-
 
 </body>
 </html>

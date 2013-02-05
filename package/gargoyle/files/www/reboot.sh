@@ -48,7 +48,7 @@
 
 		<div id="reboot_hour_container">
 			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'>Reboot Hour:</label>
-	
+
 			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
 				<option value="0">12:00 AM</option>
 				<option value="1">01:00 AM</option>

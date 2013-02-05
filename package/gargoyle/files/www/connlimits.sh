@@ -28,7 +28,6 @@
 ?>
 </script>
 
-
 <fieldset>
 	<legend class="sectionheader">Connection Limits</legend>
 	<div>
@@ -54,13 +53,11 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "firewall" -p "connlimits"

@@ -9,14 +9,12 @@
 	gargoyle_header_footer -h -s "firewall" -p "qosupload" -c "internal.css" -j "qos.js table.js" qos_gargoyle firewall gargoyle -i qos_gargoyle
 ?>
 
-
 <script>
 <!--
-       var direction = "upload";
-       protocolMap = new Object;
+	var direction = "upload";
+	protocolMap = new Object;
 <?
-       sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap\["\1"\]="\2";/' /etc/l7-protocols/l7index
-
+	sed -e '/^#/ d' -e 's/\([^ ]*\) \(.*\)/protocolMap\["\1"\]="\2";/' /etc/l7-protocols/l7index
 
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
 		echo "var qosEnabled = true;"
@@ -151,14 +149,11 @@
 				</select>
 			</div>
 
-
-
 			<div>
 				<label class='leftcolumn' id="classification_label" for='classification' >Set Service Class To:</label>
 				<select class='rightcolumn' id="classification">
 				</select>
 			</div>
-
 
 			<div id="add_rule_container">
 				<input type="button" id="add_rule_button" class="default_button" value="Add Rule" onclick="addClassificationRule()" />
@@ -206,7 +201,6 @@
 		</div>
 
 		<div class="internal_divider"></div>
-
 
 		<div><strong>Add New Service Class:</strong></div>
 		<div class="indent">
@@ -279,7 +273,6 @@
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "firewall" -p "qosupload"

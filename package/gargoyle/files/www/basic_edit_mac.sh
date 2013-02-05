@@ -25,12 +25,12 @@
 			<option value='allow'>Allow Only MACs Listed Below</option>
 			<option value='deny' >Deny Only MACs Listed Below</option>
 		</select>
-	</div>	
+	</div>
 	<div>
 		<span class='leftcolumn'><input type="button" class="default_button" id="add_mac_button" value="Add" onclick="addMacToFilter(document)" /></span>
 		<input type='text' id='add_mac' class='rightcolumn' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
 	</div>
-	
+
 	<div id="mac_table_container"></div>
 </fieldset>
 

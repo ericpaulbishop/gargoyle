@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "status" -p "quotause" -c "internal.css" -j "table.js quota_usage.js" -n gargoyle firewall
 ?>
 
-
 <script>
 <!--
 <?
@@ -18,9 +17,6 @@
 
 //-->
 </script>
-
-
-
 
 <form>
 	<fieldset>
@@ -31,17 +27,14 @@
 		</select>
 
 		<div id="quota_table_container"></div>
-		
 	</fieldset>
 </form>
-
 
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "quotause"

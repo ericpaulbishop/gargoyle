@@ -10,5 +10,5 @@
 						<td><select id='add_iface'><option value="wan">WAN</option><option value="lan">LAN</option></select></td>
 						<td><input type='text' id='add_gateway' size='20' onkeyup='proofreadGatewayIp(this)' maxLength='15'/></td>
 						<td><input type='button' id='add_button' value="Add" class='default_button' onclick='addStaticRoute()'/></td>
-					</tr>	
+					</tr>
 				</table>

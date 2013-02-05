@@ -9,7 +9,6 @@
 	gargoyle_header_footer -h -s "status" -p "webmon" -c "internal.css" -j "webmon.js table.js" -n webmon_gargoyle gargoyle
 ?>
 
-
 <script>
 <!--
 <?
@@ -23,7 +22,6 @@
 ?>
 //-->
 </script>
-
 
 <form>
 	<fieldset>
@@ -59,7 +57,6 @@
 			</div>
 		</div>
 
-		
 		<div class="internal_divider"></div>
 
 		<div id="bottom_button_container">
@@ -92,7 +89,6 @@
 		<div id="webmon_search_table_container"></div>
 	</fieldset>
 
-
 	<fieldset id="download_web_usage_data" >
 		<legend class="sectionheader">Download Web Usage Data</legend>
 		<div>
@@ -113,13 +109,11 @@
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
-
 <script>
 <!--
 	resetData();
 //-->
 </script>
-
 
 <?
 	gargoyle_header_footer -f -s "status" -p "webmon"
