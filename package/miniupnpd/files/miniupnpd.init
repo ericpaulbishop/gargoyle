@@ -1,53 +1,64 @@
 #!/bin/sh /etc/rc.common
+# Copyright (C) 2006-2011 OpenWrt.org
+
 START=95
 
-upnpd_get_port_range() {
-    local _var="$1"; shift
-    local _val
-   
-    config_get _val "$@"
+SERVICE_USE_PID=1
 
-    case "$_val" in
-	[0-9]*[:-][0-9]*)
-	    export -n -- "${_var}_start=${_val%%[:-]*}"
-	    export -n -- "${_var}_end=${_val##*[:-]}"
-	;;
-	[0-9]*)
-	    export -n -- "${_var}_start=$_val"
-	    export -n -- "${_var}_end="
-	;;
-    esac
+upnpd_get_port_range() {
+	local _var="$1"; shift
+	local _val
+
+	config_get _val "$@"
+
+	case "$_val" in
+		[0-9]*[:-][0-9]*)
+			export -n -- "${_var}_start=${_val%%[:-]*}"
+			export -n -- "${_var}_end=${_val##*[:-]}"
+		;;
+		[0-9]*)
+			export -n -- "${_var}_start=$_val"
+			export -n -- "${_var}_end="
+		;;
+	esac
 }
 
 conf_rule_add() {
-    local cfg="$1"
-    local tmpconf="$2"
-    local action external_port_start external_port_end int_addr
-    local internal_port_start internal_port_end
-    config_get action "$cfg" action "deny"               # allow or deny
-    upnpd_get_port_range "ext" "$cfg" ext_ports "0-65535" # external ports: x, x-y, x:y
-    config_get int_addr "$cfg" int_addr "0.0.0.0/0"       # ip or network and subnet mask (internal)
-    upnpd_get_port_range "int" "$cfg" int_ports "0-65535" # internal ports: x, x-y, x:y or range
-    # Make a single IP IP/32 so that miniupnpd.conf can use it.
-    case "$int_addr" in
-	*/*) ;;
-	*) int_addr="$int_addr/32"  ;;
-    esac
-    echo "${action} ${ext_start}${ext_end:+-}${ext_end} ${int_addr} ${int_start}${int_end:+-}${int_end}" >>$tmpconf   
+	local cfg="$1"
+	local tmpconf="$2"
+	local action external_port_start external_port_end int_addr
+	local internal_port_start internal_port_end
+
+	config_get action "$cfg" action "deny"               # allow or deny
+	upnpd_get_port_range "ext" "$cfg" ext_ports "0-65535" # external ports: x, x-y, x:y
+	config_get int_addr "$cfg" int_addr "0.0.0.0/0"       # ip or network and subnet mask (internal)
+	upnpd_get_port_range "int" "$cfg" int_ports "0-65535" # internal ports: x, x-y, x:y or range
+
+	# Make a single IP IP/32 so that miniupnpd.conf can use it.
+	case "$int_addr" in
+		*/*) ;;
+		*) int_addr="$int_addr/32" ;;
+	esac
+
+	echo "${action} ${ext_start}${ext_end:+-}${ext_end} ${int_addr} ${int_start}${int_end:+-}${int_end}" >>$tmpconf
 }
 
 upnpd_write_bool() {
-    local opt="$1"
-    local def="${2:-0}"
-    local alt="$3"
+	local opt="$1"
+	local def="${2:-0}"
+	local alt="$3"
+	local val
 
-    local val
-    config_get_bool val config "$opt" "$def"
-    if [ "$val" -eq 0 ]; then
-	echo "${alt:-$opt}=no" >> $tmpconf
-    else
-	echo "${alt:-$opt}=yes" >> $tmpconf
-    fi
+	config_get_bool val config "$opt" "$def"
+	if [ "$val" -eq 0 ]; then
+		echo "${alt:-$opt}=no" >> $tmpconf
+	else
+		echo "${alt:-$opt}=yes" >> $tmpconf
+	fi
+}
+
+boot() {
+	return
 }
 
 start() {
@@ -79,102 +90,102 @@ start() {
 
 	local args
 
-	include /lib/network
-	scan_interfaces
+	. /lib/functions/network.sh
 
 	local ifname
-	config_get ifname ${extiface:-wan} ifname
-	
+	network_get_device ifname ${extiface:-wan}
+
 	if [ -n "$conffile" ]; then
-	    args="-f $conffile"
+		args="-f $conffile"
 	else
-	    local tmpconf="/var/etc/miniupnpd.conf"
-	    args="-f $tmpconf"
-	    mkdir -p /var/etc
+		local tmpconf="/var/etc/miniupnpd.conf"
+		args="-f $tmpconf"
+		mkdir -p /var/etc
 
-	    echo "ext_ifname=$ifname" >$tmpconf
+		echo "ext_ifname=$ifname" >$tmpconf
 
-	    local iface
-	    
-	    [ -n "$extip" ] && \
-		echo "ext_ip=$extip" >>$tmpconf
-		
-	    for iface in ${intiface:-lan}; do
-		local ipaddr
-		config_get ipaddr "$iface" ipaddr
-		[ -n "$ipaddr" ] && \
-		    echo "listening_ip=$ipaddr" >>$tmpconf
-	    done
-	    
-	    [ "$port" != "auto" ] && \
-		echo "port=$port" >>$tmpconf
+		[ -n "$extip" ] && \
+			echo "ext_ip=$extip" >>$tmpconf
 
-	    config_load "upnpd"
-	    upnpd_write_bool enable_natpmp 1
-	    upnpd_write_bool enable_upnp 1
-	    upnpd_write_bool secure_mode 1
-	    upnpd_write_bool system_uptime 1
+		local iface
+		for iface in ${intiface:-lan}; do
+			local ipnet
+			network_get_subnet ipnet "$iface" && {
+				echo "listening_ip=$ipnet" >>$tmpconf
+			}
+		done
 
-	    [ -n "$upnp_lease_file" ] && \
-		echo "lease_file=$upnp_lease_file" >>$tmpconf
-		
-	    [ -n "$upload" -a -n "$download" ] && {
-		echo "bitrate_down=$(($download * 1024 * 8))" >>$tmpconf
-		echo "bitrate_up=$(($upload * 1024 * 8))" >>$tmpconf
-	    }
+		[ "$port" != "auto" ] && \
+			echo "port=$port" >>$tmpconf
 
-	    [ -n "${presentation_url}" ] && \
-		echo "presentation_url=${presentation_url}" >>$tmpconf
+		config_load "upnpd"
+		upnpd_write_bool enable_natpmp 1
+		upnpd_write_bool enable_upnp 1
+		upnpd_write_bool secure_mode 1
+		upnpd_write_bool system_uptime 1
 
-	    [ -n "${notify_interval}" ] && \
-		echo "notify_interval=${notify_interval}" >>$tmpconf
+		[ -n "$upnp_lease_file" ] && \
+			echo "lease_file=$upnp_lease_file" >>$tmpconf
 
-	    [ -n "${clean_ruleset_threshold}" ] && \
-		echo "clean_ruleset_threshold=${clean_ruleset_threshold}" >>$tmpconf
+		[ -n "$upload" -a -n "$download" ] && {
+			echo "bitrate_down=$(($download * 1024 * 8))" >>$tmpconf
+			echo "bitrate_up=$(($upload * 1024 * 8))" >>$tmpconf
+		}
 
-	    [ -n "${clean_ruleset_interval}" ] && \
-		echo "clean_ruleset_interval=${clean_ruleset_interval}" >>$tmpconf
+		[ -n "${presentation_url}" ] && \
+			echo "presentation_url=${presentation_url}" >>$tmpconf
 
-	    [ -z "$uuid" ] && {
-		uuid="$(cat /proc/sys/kernel/random/uuid)"
-		uci set upnpd.config.uuid=$uuid
-		uci commit upnpd
-	    }
+		[ -n "${notify_interval}" ] && \
+			echo "notify_interval=${notify_interval}" >>$tmpconf
 
-	    [ "$uuid" = "nocli" ] || \
-		echo "uuid=$uuid" >>$tmpconf
-		
-	    [ -n "${serial_number}" ] && \
-		echo "serial=${serial_number}" >>$tmpconf
-		
-	    [ -n "${model_number}" ] && \
-		echo "model_number=${model_number}" >>$tmpconf
-	    
+		[ -n "${clean_ruleset_threshold}" ] && \
+			echo "clean_ruleset_threshold=${clean_ruleset_threshold}" >>$tmpconf
+
+		[ -n "${clean_ruleset_interval}" ] && \
+			echo "clean_ruleset_interval=${clean_ruleset_interval}" >>$tmpconf
+
+		[ -z "$uuid" ] && {
+			uuid="$(cat /proc/sys/kernel/random/uuid)"
+			uci set upnpd.config.uuid=$uuid
+			uci commit upnpd
+		}
+
+		[ "$uuid" = "nocli" ] || \
+			echo "uuid=$uuid" >>$tmpconf
+
+		[ -n "${serial_number}" ] && \
+			echo "serial=${serial_number}" >>$tmpconf
+
+		[ -n "${model_number}" ] && \
+			echo "model_number=${model_number}" >>$tmpconf
+
 	    config_foreach conf_rule_add perm_rule "$tmpconf"
-	fi    
-	
-			
-	if [ -n "$ifname" ]; then
-	    # start firewall
-	    local zone
-	    config_load firewall
-	    config_get zone core "${extiface:-wan}_zone"
-	    [ -n "$zone" ] && \
-		miniupnpd_add_rules "$zone" "${extiface:-wan}" "$ifname"
+	fi
 
-	    if [ "$logging" = "1" ]; then
-		start-stop-daemon -b -S -x miniupnpd -- $args -d 
-	    else
-		start-stop-daemon -S -x miniupnpd -- $args 
-	    fi
+
+	if [ -n "$ifname" ]; then
+		# start firewall
+		local zone
+		config_load firewall
+		config_get zone core "${extiface:-wan}_zone"
+
+	    [ -n "$zone" ] && \
+			miniupnpd_add_rules "$zone" "${extiface:-wan}" "$ifname"
+
+		if [ "$logging" = "1" ]; then
+			SERVICE_DAEMONIZE=1 \
+			service_start /usr/sbin/miniupnpd $args -d
+		else
+			SERVICE_DAEMONIZE= \
+			service_start /usr/sbin/miniupnpd $args
+		fi
 	else
 		logger -t "upnp daemon" "external interface not found, not starting"
 	fi
 }
 
 stop() {
-	start-stop-daemon -K -q -x miniupnpd -p /var/run/miniupnpd.pid
-	rm -f /var/run/miniupnpd.pid
+	service_stop /usr/sbin/miniupnpd
 
 	type miniupnpd_remove_rules >/dev/null 2>/dev/null || \
 		ACTION=- . /etc/hotplug.d/firewall/50-miniupnpd
