@@ -121,17 +121,10 @@ define Package/ntfs-3g-utils/description
 
 endef
 
-# TODO: write a proper description
-# new in 2001.4.12
-define Package/ntfsprogs_ntfs-3g
-  $(call Package/ntfs-3g/common)
-  TITLE:=ntfsprogs (ntfs-3g)
-  DEPENDS+= +ntfs-3g +libgcrypt
-endef
-
 CONFIGURE_ARGS += \
 	--enable-shared \
-	--enable-static
+	--enable-static \
+	--disable-ntfsprogs
 
 # configure/make according selection
 ifdef CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE
@@ -140,13 +133,6 @@ ifdef CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE
 else
 	CONFIGURE_ARGS += --with-fuse=internal
 	TARGET_CPPFLAGS:=-I../include/fuse-lite $(TARGET_CPPFLAGS)
-endif
-
-# enable disable ntfsprogs
-ifneq ($(CONFIG_PACKAGE_ntfsprogs_ntfs-3g)$(SDK)$(DEVELOPER),)
-	CONFIGURE_ARGS += --enable-ntfsprogs
-else
-	CONFIGURE_ARGS += --disable-ntfsprogs
 endif
 
 # redefine prepare to extract to our build dir
@@ -220,16 +206,6 @@ define Package/ntfs-3g-utils/install
 	$(FIND) $(PKG_INSTALL_DIR)/usr/bin/ -type f ! -name ntfs-3g.probe ! -name ntfs-3g -exec $(INSTALL_BIN) {} $(1)/usr/bin/ \;
 endef
 
-define Package/ntfsprogs_ntfs-3g/install
-	$(INSTALL_DIR) $(1)/sbin
-	$(CP) $(PKG_INSTALL_DIR)/sbin/mkfs.ntfs $(1)/sbin/
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(FIND) $(PKG_INSTALL_DIR)/usr/bin/ -type f ! -regex '.*[^/]*ntfs-3g[^/]*' -exec $(INSTALL_BIN) {} $(1)/usr/bin/ \;
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/* $(1)/usr/sbin/
-endef
-
 $(eval $(call BuildPackage,ntfs-3g))
 $(eval $(call BuildPackage,ntfs-3g-low))
 $(eval $(call BuildPackage,ntfs-3g-utils))
-$(eval $(call BuildPackage,ntfsprogs_ntfs-3g))
