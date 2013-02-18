@@ -426,10 +426,10 @@ for target in $targets ; do
 
 	#copy packages to built/target directory
 	mkdir -p "$top_dir/built/$target"
-	arch=$(ls bin)
-	if [ -d "bin/$arch/packages/" ] ; then
-		package_files=$(find bin -name "*.ipk")
-		index_files=$(find bin -name "Packa*")
+	package_files=$(find bin -name "*.ipk")
+	index_files=$(find bin -name "Packa*")
+	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
+
 		for p in $package_files ; do
 			cp "$p" "$top_dir/built/$target"
 		done
@@ -504,6 +504,21 @@ for target in $targets ; do
 		if [ -z "$image_files" ] ; then
 			exit
 		fi
+
+		#copy packages to build/target directory
+		mkdir -p "$top_dir/built/$target"
+		arch=$(ls bin)
+		package_files=$(find bin -name "*.ipk")
+		index_files=$(find bin -name "Packa*")
+		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
+			for p in $package_files ; do
+				cp "$p" "$top_dir/built/$target"
+			done
+			for i in $index_files ; do
+				cp "$i" "$top_dir/built/$target"
+			done
+		fi
+
 
 		#copy relevant images for which this profile applies
 		profile_images=$(cat "$targets_dir/$target/profiles/$p/profile_images" 2>/dev/null)

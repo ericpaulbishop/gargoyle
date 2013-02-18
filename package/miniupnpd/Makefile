@@ -15,12 +15,19 @@ PKG_SOURCE_URL:=http://miniupnp.free.fr/files
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_MD5SUM:=0d8a8e936d5a0012cb260a3b972acbf3
 
+# generally don't want/need IPV6 in Gargoyle
+# Set this variable instead of testing global 
+# CONFIG_IPV6 To change this preference for this package
+# That way we can have IPV6 if plugins want to use it
+# But not build it into this default pacakge
+BUILD_UPNP_WITH_IPV6:=
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/miniupnpd
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=+iptables +libip4tc +IPV6:libip6tc +libnfnetlink
+  DEPENDS:=+iptables +libip4tc $(if $(BUILD_UPNP_WITH_IPV6),+IPV6:libip6tc) +libnfnetlink
   TITLE:=Lightweight UPnP daemon
   SUBMENU:=Firewall
   URL:=http://miniupnp.free.fr/
@@ -33,13 +40,13 @@ endef
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
-	echo "OpenWrt/$(OPENWRTVERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
+	echo "Gargoyle/$(GARGOYLE_VERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
 endef
 
 MAKE_FLAGS += \
 	LIBS="" \
-	CC="$(TARGET_CC) -DIPTABLES_143 -lnfnetlink -lip4tc $(if $(CONFIG_IPV6),-lip6tc)" \
-	CONFIG_OPTIONS="$(if $(CONFIG_IPV6),--ipv6) --leasefile" \
+	CC="$(TARGET_CC) -DIPTABLES_143 -lnfnetlink -lip4tc $(if $(BUILD_UPNP_WITH_IPV6),-lip6tc)" \
+	CONFIG_OPTIONS="$(if $(BUILD_UPNP_WITH_IPV6),--ipv6) --leasefile" \
 	-f Makefile.linux \
 	miniupnpd
 
