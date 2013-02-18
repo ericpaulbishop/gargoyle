@@ -210,8 +210,10 @@ apply_all_rules()
 				#and he did not indiate a protocal.
 				if [ -z "$proto" ] && [ -n "$need_proto" ] ; then
 
+					$echo_on
 					iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark
 					iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark
+					$echo_off
 
 				else
 
@@ -223,7 +225,9 @@ apply_all_rules()
 						tmp_proto=""
 					fi
 
+					$echo_on
 					iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark
+					$echo_off
 				fi
 
 			fi

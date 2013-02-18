@@ -125,6 +125,7 @@
 					<option value="TCP">TCP</option>
 					<option value="UDP">UDP</option>
 					<option value="ICMP">ICMP</option>
+					<option value="GRE">GRE</option>
 				</select>
 			</div>
 
