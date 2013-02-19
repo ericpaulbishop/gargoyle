@@ -5,7 +5,7 @@ config_get wan_proto "wan" "proto"
 
 if [ "$INTERFACE" = "wan" ] && [ "$ACTION" = "ifup" ] 
 then
-	sleep 5
+	sleep 15
 	/etc/init.d/openvpn restart
 fi
 
