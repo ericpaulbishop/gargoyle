@@ -34,6 +34,14 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+		FILE* out_stream = strcmp(out_file, "-") == 0 ? stdout : fopen(out_file, "w");
+		int ret = write_url_to_stream(argv[optind], user_agent, NULL, out_stream, NULL);
+		fclose(out_stream);
+		if(ret == 1)
+		{
+			fprintf(stderr, "Could Not Fetch URL\n");
+		}
+		/*
 		http_response* r = get_url(argv[optind], user_agent);
 		if(r == NULL)
 		{
@@ -45,7 +53,8 @@ int main(int argc, char** argv)
 		}
 		else if(strcmp(out_file, "-") == 0)
 		{
-			printf("%s", r->data);
+			//printf("%s", r->data);
+			fwrite(r->data, 1, r->length, stdout);
 		}
 		else 
 		{
@@ -56,14 +65,16 @@ int main(int argc, char** argv)
 			}
 			else
 			{
-				fprintf(out, "%s", r->data);
+				//fprintf(out, "%s", r->data);
+				fwrite(r->data, 1, r->length, out);
 				fclose(out);
 			}
 		}
 		if(r != NULL)
 		{
 			free_http_response(r);
-		}
+		}*/
+
 	}
 	printf("\n");
 	exit(0);
