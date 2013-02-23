@@ -58,6 +58,10 @@ static char* safe_strdup(const char* str)
 
 
 
+static unsigned long __ewget_timeout_seconds  = EWGET_DEFAULT_TIMEOUT_SECONDS;
+static unsigned long __ewget_read_buffer_size = EWGET_DEFAULT_READ_BUFFER_SIZE;
+
+
 
 static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -417,6 +421,25 @@ void free_url_request(url_request* url)
 
 
 
+void set_ewget_read_buffer_size(unsigned long size)
+{
+	__ewget_read_buffer_size = size;
+}
+void set_ewget_timeout_seconds(unsigned long seconds)
+{
+	__ewget_timeout_seconds  = seconds;
+}
+unsigned long get_ewget_read_buffer_size(void)
+{
+	return __ewget_read_buffer_size;
+}
+unsigned long get_ewget_timeout_seconds(void)
+{
+	return __ewget_timeout_seconds;
+}
+
+
+
 /**********************************************
  * Internal function definitions
  **********************************************/
@@ -586,7 +609,7 @@ static char* create_http_request(url_request* url)
 
 static void get_http_response(void* connection_data, int (*read_connection)(void*, char*, int), http_response *reply, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
 {
-	int read_buffer_size = DEFAULT_READ_BUFFER_SIZE;
+	unsigned long  read_buffer_size = __ewget_read_buffer_size ;
 	int bytes_read;
 	int header_bytes_read = 0;
 	int body_bytes_read = 0;
@@ -594,6 +617,7 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 	char* read_buffer = (char*)malloc((read_buffer_size+1)*sizeof(char));
 	char last_two_bytes_of_old_read_buffer[3] = { '\0', '\0', '\0' }; 
 	
+
 	if(reply != NULL)
 	{
 		if(reply->header != NULL) { free(reply->header); }
@@ -620,20 +644,21 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 			/* set cr_end and lf_end */
 			if(cr_end == NULL && lf_end == NULL && last_two_bytes_of_old_read_buffer[0] == '\n' && last_two_bytes_of_old_read_buffer[1] == '\r')
 			{
-				cr_end = read_buffer[1] == '\n' ? read_buffer+1 : cr_end;
+				cr_end = read_buffer[0] == '\n' ? read_buffer+1 : cr_end;
 			}
-			else if(cr_end == NULL && lf_end == NULL && last_two_bytes_of_old_read_buffer[1] == '\n')
+			if(cr_end == NULL && lf_end == NULL && last_two_bytes_of_old_read_buffer[1] == '\n')
 			{
 				cr_end = read_buffer[0] == '\r' && read_buffer[1] == '\n' ? read_buffer+2 : cr_end;
-				lf_end = read_buffer[1] == '\n' ? read_buffer+1 : lf_end;
+				lf_end = read_buffer[0] == '\n' ? read_buffer+1 : lf_end;
 			}
-			else
+			if(cr_end == NULL && lf_end == NULL)
 			{
 				cr_end = strstr(read_buffer, "\n\r\n");
 				lf_end = strstr(read_buffer, "\n\n");
 				cr_end = cr_end != NULL ? cr_end+3 : cr_end;
 				lf_end = lf_end != NULL ? lf_end+2 : lf_end;
 			}
+
 			
 			/* determine header_length given cr_end and lf_end */	
 			if(cr_end != NULL && lf_end != NULL)
@@ -724,6 +749,7 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 		
 		last_two_bytes_of_old_read_buffer[0] = bytes_read == 1 ? '\0' : read_buffer[bytes_read-2];
 		last_two_bytes_of_old_read_buffer[1] = read_buffer[bytes_read-1];
+
 		bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
 		bytes_read = bytes_read < 0 ? 0 : bytes_read;
 		read_buffer[bytes_read] = '\0'; /* facilitates header string processing */
@@ -908,7 +934,7 @@ static int tcp_connect(char* hostname, int port)
 			struct timeval tv;
 			int valopt;
 			
-      			tv.tv_sec = EWGET_TIMEOUT_SECONDS; 
+      			tv.tv_sec = __ewget_timeout_seconds; 
 			tv.tv_usec = 0; 
 			FD_ZERO(&myset); 
 			FD_SET(sockfd, &myset); 
@@ -1208,7 +1234,7 @@ static int read_http(void* connection_data, char* read_buffer, int read_length)
 
 	alarm_socket = *socket;	
 	signal(SIGALRM, alarm_triggered );
-	alarm(EWGET_TIMEOUT_SECONDS);
+	alarm(__ewget_timeout_seconds);
 	bytes_read = read(*socket, read_buffer, read_length);
 	alarm(0);
 
@@ -1340,7 +1366,7 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );
-	alarm(EWGET_TIMEOUT_SECONDS);
+	alarm(__ewget_timeout_seconds);
 	bytes_read = SSL_read(cd->ssl, read_buffer, read_length);
 	alarm(0);
 

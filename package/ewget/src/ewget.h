@@ -44,8 +44,8 @@
 
 
 
-#define EWGET_TIMEOUT_SECONDS 5
-#define DEFAULT_READ_BUFFER_SIZE 1024
+#define EWGET_DEFAULT_TIMEOUT_SECONDS 5
+#define EWGET_DEFAULT_READ_BUFFER_SIZE 1024
 
 typedef struct
 {
@@ -76,6 +76,12 @@ void free_url_request(url_request*);
 http_response* get_url(char* url_str, char* user_agent);
 http_response* get_url_request(url_request* url);
 void free_http_response(http_response* page);
+
+
+unsigned long get_ewget_read_buffer_size(void);
+unsigned long get_ewget_timeout_seconds(void);
+void set_ewget_read_buffer_size(unsigned long size);
+void set_ewget_timeout_seconds(unsigned long seconds);
 
 /* 
  * at LEAST one of header_stream, body_stream, combined_stream should not be NULL 
