@@ -1,0 +1,62 @@
+#
+# Copyright (C) 2006 OpenWrt.org
+# Copyright (C) 2009 Eric Bishop <eric@gargoyle-router.com>
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+#
+
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=gpkg
+PKG_VERSION:=$(GARGOYLE_VERSION)
+ifeq ($(GARGOYLE_VERSION),)
+     PKG_VERSION:=1.0.0
+endif
+PKG_RELEASE:=1
+
+PKG_BUILD_DIR:=$(BUILD_DIR)/gpkg
+
+include $(INCLUDE_DIR)/package.mk
+
+define Package/gpkg
+	SECTION:=utils
+	CATEGORY:=Utilities
+	DEPENDS:=+libericstools +libbbtargz +ewget
+	TITLE:= Gargoyle Package Manager (opkg compatible)
+	URL:=http://www.gargoyle-router.com
+	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
+endef
+
+
+define Package/gpkg/description
+   Gargoyle Package Manager (opkg compatible)
+endef
+
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
+
+define Build/Configure
+endef
+
+define Build/Compile
+	-$(MAKE) -C $(PKG_BUILD_DIR) clean
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		$(TARGET_CONFIGURE_OPTS) \
+		STAGING_DIR="$(STAGING_DIR)" \
+		CFLAGS="$(TARGET_CFLAGS) -I $(STAGING_DIR)/usr/include" \
+		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" \
+		all
+endef
+
+define Package/gpkg/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gpkg $(1)/usr/bin/gpkg
+endef
+
+
+$(eval $(call BuildPackage,gpkg))
