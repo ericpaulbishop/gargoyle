@@ -137,6 +137,8 @@ float BWTC;              //Time constant of the bandwidth filter
 int DBW_UL;              //This the absolute limit of the link passed in as a parameter.
 int dbw_ul;              //This is the last value of the limit sent to the kernel.
 int new_dbw_ul;          //The new link limit proposed by the state machine.
+int saved_active_limit;  //The new link limit last known to work with active mode.
+int saved_realtime_limit;//The new link limit last known to work with realtime mode.
 long int dbw_fil;        //Filtered total download load (bps).
 
 #define QMON_CHK   0
@@ -687,10 +689,11 @@ void update_status( FILE* fd )
 		DCA,RTDCA,pinglimit/1000,pinglimit2/1000,statename[qstate]);
     printw("Link Limit=%6d, Fair Limit=%6d, Current Load=%6d (kbps)\n", 
 		dbw_ul/1000,new_dbw_ul/1000,dbw/1000);
+    printw("Saved Active Limit=%6d, Saved Realtime Limit=%6d\n",saved_active_limit/1000,saved_realtime_limit/1000);
     printw("pings sent=%d, pings received=%d\n", 
 		ntransmitted,nreceived);
 
-    printw("Defined classes for %s %u\n",DEVICE); 
+    printw("Defined classes for %s\n",DEVICE); 
     printw("Errors: (mismatches,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
     cptr=dnstats;
     i=0; 
@@ -905,7 +908,7 @@ int main(int argc, char *argv[])
     memset((void *)&dnstats,0,sizeof(dnstats));
 
     //Initialize the fair linklimit to a reasonable number.
-    new_dbw_ul= DBW_UL * .9;
+    saved_realtime_limit=saved_active_limit=new_dbw_ul= DBW_UL * .9;
 
     while (!sigterm) {
         int len = sizeof (packet);
@@ -1044,6 +1047,10 @@ int main(int argc, char *argv[])
             case QMON_REALTIME:
                 pingon=1;
 
+                //Save the bandwidth limit for each mode.
+                if (qstate == QMON_REALTIME) saved_realtime_limit = new_dbw_ul;
+                if (qstate == QMON_ACTIVE) saved_active_limit = new_dbw_ul;
+
                 //The pinglimit we will use depends on if any realtime classes are active
                 //or not.  In realtime mode we only allow 'pinglimit' round trip times which
                 //makes our pings low but also lowers our throughput.  The automatic measurement 
@@ -1102,10 +1109,26 @@ int main(int argc, char *argv[])
 
                 if ((RTDCA == 0) && (pingflags & ADDENTITLEMENT)) {
                     if (pinglimit < 75000) pinglimit2=2*75000; else pinglimit2=2*pinglimit;
-                    qstate=QMON_ACTIVE;
+
+                    //When switching into active mode for the first time initialize the bandwidth
+                    //limit to the last value that was known to work.
+                    if (qstate != QMON_ACTIVE) {
+                        qstate=QMON_ACTIVE;
+                        new_dbw_ul=saved_active_limit;
+                        tc_class_modify(new_dbw_ul);
+                    }
+
                 } else {
                     pinglimit2 = 0;
-                    qstate=QMON_REALTIME;
+
+                    //When switching into realtime mode for the first time initialize the bandwidth
+                    //limit to the last value that was known to work.
+                    if (qstate != QMON_REALTIME) {
+                        qstate=QMON_REALTIME;
+                        new_dbw_ul=saved_realtime_limit;
+                        tc_class_modify(new_dbw_ul);
+                    }
+
                 }
 
                 //When the downlink falls below 10% utilization we turn off the pinger.
@@ -1118,20 +1141,14 @@ int main(int argc, char *argv[])
                 //Negative error means we might be able to increase the link limit.
                 if (err < 0) {
 
-                   //Do not increase the bandwidth until we reach 95% of the current setting.
-                   if  (dbw_fil < new_dbw_ul * 0.95) break;
+                   //Do not increase the bandwidth until we reach 90% of the current setting.
+                   if  (dbw_fil < dbw_ul * 0.90) break;
 
                    //Clamp the error
                    if (err < -2*plimit) err=-2*plimit;
 
-                   //In realtime mode ramp up .2%/sec otherwise at 0.1%/sec 
-                   if (qstate == QMON_REALTIME)
-                        err = .002*err;
-                   else
-                        err = .001*err;
-
                    //Increase slowly (0.2%/sec).  err is negative here.  
-                   new_dbw_ul = new_dbw_ul * (1.0 - (err/pinglimit)*period/1000);
+                   new_dbw_ul = new_dbw_ul * (1.0 - (0.002*err/pinglimit)*period/1000);
                    if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
                 } else {
 
