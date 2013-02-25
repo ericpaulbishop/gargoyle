@@ -213,8 +213,3 @@ function resetData()
 	setChildText("qos_download", qosDownloadStatus);
 }
 
-
-function getSsids()
-{
-		
-}

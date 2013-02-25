@@ -400,11 +400,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wan_3g_isp'>Mobile ISP:</label>
 			<select class='rightcolumn' id='wan_3g_isp' onchange='updateApnDetails()'>
 			<option value='custom'>Custom</option>
-<?
-	if [ -e ./data/apn.csv ] ; then
-		sort ./data/apn.csv | awk -F[\;] '{print "<option value=\""$1"\">"$1"</option>"}'
-	fi
-?>
 			</select>
 		</div>
 
