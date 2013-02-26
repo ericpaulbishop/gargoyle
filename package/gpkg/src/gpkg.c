@@ -1,16 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <errno.h>
-
-#include <erics_tools.h>
-#include <libbbtargz.h>
-#include <ewget.h>
-
-#define FILE_PATH_LEN 1024
+#include "gpkg.h"
 
 
 int mkdir_p(const char* path, mode_t mode);

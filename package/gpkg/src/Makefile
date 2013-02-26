@@ -1,9 +1,9 @@
 all: gpkg
 
-gpkg: gpkg.o
+gpkg: gpkg.o opkg_conf.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -lbbtargz -lewget
 
-gpkg.o: gpkg.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c  $^ -o $@ 
 clean:
 	rm -rf *.o *~ .*sw* gpkg
