@@ -18,7 +18,7 @@ opkg_conf* load_conf(const char* conf_file_name)
 
 	conf->lists_dir = strdup("/usr/lib/opkg/lists");
 
-	FILE* conf_file =  fopen(conf_file_name, "r");
+	FILE* conf_file =  fopen(dupe_conf_file_name, "r");
 	int read_data = 1;
 	char next_line[1024];
 	char* overlay_root = NULL;
@@ -73,15 +73,15 @@ opkg_conf* load_conf(const char* conf_file_name)
 				}
 				else if(strcmp(split_line[0], "src/gz") == 0)
 				{
-					set_string_map_element(conf->gzip_sources, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
+					set_string_map_element(conf->gzip_sources, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
 				}
 				else if(strcmp(split_line[0], "src") == 0 && num_pieces > 2)
 				{
-					set_string_map_element(conf->plain_sources, split_line[num_pieces-1], strdup(split_line[num_pieces-2]));
+					set_string_map_element(conf->plain_sources, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
 				}
 				else if( strcmp(split_line[0], "option") == 0 && strcmp(split_line[1], "overlay_root") == 0 && num_pieces > 2)
 				{
-					overlay_root = strdup(split_line[num_pieces-2]);
+					overlay_root = strdup(split_line[num_pieces-1]);
 				}
 			}
 			free_null_terminated_string_array(split_line);
