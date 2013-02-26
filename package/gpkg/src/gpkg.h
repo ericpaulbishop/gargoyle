@@ -17,7 +17,7 @@
 #include <libbbtargz.h>
 #include <ewget.h>
 
-#include "opkg_conf.h"
+#include "conf.h"
 
 #define FILE_PATH_LEN 1024
-
+#define DEFAULT_CONF_FILE_PATH "/etc/opkg.conf"
