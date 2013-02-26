@@ -47,6 +47,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 /* tree_map structs / prototypes */
 typedef struct long_tree_map_node

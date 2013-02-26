@@ -40,8 +40,16 @@
 #define malloc safe_malloc
 #define strdup safe_strdup
 
+
+static int __srand_called = 0;
+
 int create_tmp_dir(const char* tmp_root, char** tmp_dir)
 {
+	if(! __srand_called)
+	{
+		srand(time(NULL));
+		__srand_called = 1;
+	}
 	sprintf((*tmp_dir), "%s/tmp_%d\n", tmp_root, rand());
 	return (mkdir_p(*tmp_dir,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH  ));
 }
