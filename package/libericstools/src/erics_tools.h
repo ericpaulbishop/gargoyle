@@ -44,6 +44,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /* tree_map structs / prototypes */
 typedef struct long_tree_map_node
@@ -249,5 +252,21 @@ extern char** get_shell_command_output_lines(char* command, unsigned long* num_l
 extern void* safe_malloc(size_t size);
 extern char* safe_strdup(const char* str);
 
+/* other file utils */
+
+int mkdir_p(const char* path, mode_t mode); /* returns 0 on success, 1 on error */
+void rm_r(const char* path);
+int create_tmp_dir(const char* tmp_root, char** tmp_dir); /* returns 0 on success, 1 on error */
+
+
+/*
+returns:
+ 0 if path doesn't exist
+ 1 if path is regular file
+ 2 if path is directory
+ 3 if path is symbolic link
+ 4 if path exists and is something else
+ */
+int path_exists(const char* path);
 
 #endif /* ERICS_TOOLS_H */

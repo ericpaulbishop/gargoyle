@@ -64,13 +64,13 @@ all: erics_tools
 erics_tools: libericstools.$(SHLIB_EXT) libericstools.a
 
 
-libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_util_static.o safe_malloc_static.o
+libericstools.a: list_static.o priority_queue_static.o tree_map_static.o string_util_static.o file_util_static.o safe_malloc_static.o
 	if [ -e $@ ] ; then rm $@ ; fi
 	$(AR) rc $@ $^
 	$(RANLIB) $@
 	
 
-libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o safe_malloc_dyn.o
+libericstools.$(SHLIB_EXT) : list_dyn.o priority_queue_dyn.o tree_map_dyn.o string_util_dyn.o file_util_dyn.o safe_malloc_dyn.o 
 	if [ -e libericstools.$(SHLIB_EXT) ] ; then rm libericstools.$(SHLIB_EXT)* ; fi
 	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ -lc
 	ln -s $(SHLIB_FILE) libericstools.$(SHLIB_EXT)
