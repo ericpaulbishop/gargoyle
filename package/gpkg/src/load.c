@@ -5,7 +5,66 @@ static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 
 
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters)
+{
 
+
+	// load list data
+	// this tells us everything about packages except whether they are currently installed
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, NULL);
+	
+	//load status data
+	unsigned long num_dests;
+	int dest_index =0;
+	char** dest_paths = (char**)get_string_map_keys(conf->dest_roots, &num_dests);
+	for(dest_index=0; dest_index < num_dests; dest_index++)
+	{
+		char* status_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/status");
+		if(path_exists(status_path))
+		{
+			load_package_data(status_path, 0, package_data, matching_packages, parameters, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
+		}
+		free(status_path);
+	}
+	
+	
+	//calculate total depends, total size, and will-fit if requested
+	unsigned long num_matching_packages;
+	char** sorted_matching_packages = get_string_map_keys(matching_packages, &num_matching_packages);
+	int match_index=0;
+	do_istr_sort(sorted_matching_packages, num_matching_packages);
+	int load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
+	int load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
+	int load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+	uint64_t free_bytes = 0;
+
+	//if we want to calculate will_fit, need to determine free bytes on filesystem
+	if(load_will_fit)
+	{
+		char* dest_name = get_string_map_element(parameters, "will-fit");
+		char* dest_path = get_string_map_element(conf->dest_names, dest_name);
+		if(dest_path != NULL)
+		{
+			struct statvfs fs_data;
+			if( statvfs(dest_path, &fs_data) == 0 )
+			{
+				uint64_t block_size  = (uint64_t)fs_data.f_bsize;
+				uint64_t blocks_free = (uint64_t)fs_data.f_bavail;
+				free_bytes = block_size*blocks_free;
+			}
+		}
+	}
+
+	//recursively load depends/size/will_fit
+	if(load_depends || load_size || load_will_fit)
+	{
+		for(match_index=0; sorted_matching_packages[match_index] != NULL ; match_index++)
+		{
+			load_recursive_package_data_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit, free_bytes);
+		}
+	}
+
+}
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name)
 {
@@ -364,3 +423,5 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
 	fclose(__save_pkg_status_stream);
 	__save_pkg_status_stream = NULL;
 }
+
+

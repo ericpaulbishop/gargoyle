@@ -49,6 +49,12 @@
 #include <sys/types.h>
 #include <time.h>
 
+#ifndef stricmp
+	#define stricmp strcasecmp
+#endif
+
+
+
 /* tree_map structs / prototypes */
 typedef struct long_tree_map_node
 {
@@ -247,6 +253,17 @@ extern unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, 
 
 /* run a command and get (dynamically allocated) output lines */
 extern char** get_shell_command_output_lines(char* command, unsigned long* num_lines);
+
+
+/*  comparison functions for qsort */ 
+extern int sort_string_cmp(const void *a, const void *b);
+extern int sort_string_icmp(const void *a, const void *b);
+
+/* wrappers for qsort calls */
+extern void do_str_sort(char** string_arr, unsigned long string_arr_len);
+extern void do_istr_sort(char** string_arr, unsigned long string_arr_len);
+
+
 
 
 /* safe malloc & strdup functions used by all others (actually aliased to malloc / strdup and used) */

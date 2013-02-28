@@ -533,4 +533,30 @@ char** get_shell_command_output_lines(char* command, unsigned long* num_lines)
 	return ret;
 }
 
+/*  comparison functions for qsort */ 
+int sort_string_cmp(const void *a, const void *b)
+{ 
+    const char **a_ptr = (const char **)a;
+    const char **b_ptr = (const char **)b;
+    return strcmp(*a_ptr, *b_ptr);
+}
+
+int sort_string_icmp(const void *a, const void *b)
+{ 
+    const char **a_ptr = (const char **)a;
+    const char **b_ptr = (const char **)b;
+    return stricmp(*a_ptr, *b_ptr);
+}
+
+/* wrappers for qsort calls */
+void do_str_sort(char** string_arr, unsigned long string_arr_len)
+{
+	qsort(string_arr, string_arr_len, sizeof(char*), sort_string_cmp);
+}
+void do_istr_sort(char** string_arr, unsigned long string_arr_len)
+{
+	qsort(string_arr, string_arr_len, sizeof(char*), sort_string_icmp);
+}
+
+
 
