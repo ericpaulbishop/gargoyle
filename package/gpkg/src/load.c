@@ -1,6 +1,12 @@
 
 #include "gpkg.h"
 
+static FILE* __save_pkg_status_stream = NULL;
+void save_pkg_status_func(char* key, void* value);
+
+
+
+
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "packages-matching") : NULL;
@@ -334,3 +340,27 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 }
 
 
+
+void save_pkg_status_func(char* key, void* value)
+{
+	string_map* pkg_map = (string_map*)value;
+	char* pkg_vars[] = { "Package", "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", NULL };
+	int var_index;
+	for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
+	{
+		char* var_def = get_string_map_element(pkg_map, var_def);
+		fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
+	}
+}
+
+
+void save_package_data_as_status_file(string_map* package_data, char* status_file_path)
+{
+	__save_pkg_status_stream = fopen(status_file_path, "w");
+	if(__save_pkg_status_stream != NULL)
+	{
+		apply_to_every_string_map_value(package_data, save_pkg_status_func);
+	}
+	fclose(__save_pkg_status_stream);
+	__save_pkg_status_stream = NULL;
+}
