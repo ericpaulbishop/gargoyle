@@ -63,4 +63,6 @@ function setUpgradeFormat()
 	{
 		setChildText("upgrade_text", "Firmware should be a combined .img file");
 	}
+
+	setChildText("gargoyle_version", gargoyleVersion);
 }
