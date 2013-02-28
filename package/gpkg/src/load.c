@@ -400,13 +400,15 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 void save_pkg_status_func(char* key, void* value)
 {
 	string_map* pkg_map = (string_map*)value;
-	char* pkg_vars[] = { "Package", "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", NULL };
+	char* pkg_vars[] = { "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", NULL };
 	int var_index;
+	fprintf(__save_pkg_status_stream, "Package: %s\n", key);
 	for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
 	{
 		char* var_def = get_string_map_element(pkg_map, var_def);
 		fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
 	}
+	fprintf(__save_pkg_status_stream, "\n");
 }
 
 
