@@ -7,8 +7,6 @@ void save_pkg_status_func(char* key, void* value);
 
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters)
 {
-
-
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
 	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, NULL);
@@ -63,7 +61,6 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 			load_recursive_package_data_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit, free_bytes);
 		}
 	}
-
 }
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name)

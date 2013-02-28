@@ -3,6 +3,11 @@
 int install_to(const char* pkg_file, const char* pkg_name, const char* install_root);
 void update(opkg_conf* conf);
 
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root);
+int recursively_install(char* pkg_name, char* install_root, char* tmp_dir, string_map* package_data, string_map* install_called_pkgs);
+
+
+
 int main(void)
 {
 	rm_r("/tmp/test1/");
@@ -72,6 +77,33 @@ void update(opkg_conf* conf)
 	}
 	
 }
+
+
+
+
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root)
+{
+	/* 1) Determine all packages to install by first loading all package names & dependencies (and no other variables) */
+	string_map* load_variables = initialize_string_map(1);
+	string_map* 
+	
+
+}
+
+int recursively_install(char* pkg_name, char* install_root, char* tmp_dir, string_map* package_data, string_map* install_called_pkgs)
+{
+	
+}
+
+
+
+
+
+
+
+
+
+
 
 
 int install_to(const char* pkg_file, const char* pkg_name, const char* install_root)

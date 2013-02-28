@@ -416,6 +416,105 @@ char* dynamic_replace(char* template_str, char* old, char* new)
 }
 
 
+int convert_to_regex(char* str, regex_t* p)
+{
+	char* trimmed = trim_flanking_whitespace(strdup(str));
+	int trimmed_length = strlen(trimmed);
+	char* new = NULL;
+	
+	int valid = 1;
+	/* regex must be defined by surrounding '/' characters */
+	if(trimmed[0] != '/' || trimmed[trimmed_length-1] != '/')
+	{
+		valid = 0;
+		free(trimmed);
+	}
+
+	if(valid == 1)
+	{
+		char* internal = (char*)malloc(trimmed_length*sizeof(char));
+		int internal_length = trimmed_length-2;	
+		
+		int new_index = 0;
+		int internal_index = 0;
+		char previous = '\0';
+
+		
+		memcpy(internal, trimmed+1, internal_length);
+		internal[internal_length] = '\0';
+		free(trimmed);
+
+		new = (char*)malloc(trimmed_length*sizeof(char));
+		while(internal[internal_index] != '\0' && valid == 1)
+		{
+			char next = internal[internal_index];
+			if(next == '/' && previous != '\\')
+			{
+				valid = 0;
+			}
+			else if((next == 'n' || next == 'r' || next == 't' || next == '/') && previous == '\\')
+			{
+				char previous2 = '\0';
+				if(internal_index >= 2)
+				{
+					previous2 = internal[internal_index-2];
+				}
+
+				new_index = previous2 == '\\' ? new_index : new_index-1;
+				switch(next)
+				{
+					case 'n':
+						new[new_index] = previous2 == '\\' ? next : '\n';
+						break;
+					case 'r':
+						new[new_index] = previous2 == '\\' ? next : '\r';
+						break;
+					case 't':
+						new[new_index] = previous2 == '\\' ? next : '\t';
+						break;
+					case '/':
+						new[new_index] = previous2 == '\\' ? next : '/';
+						break;
+				}
+				previous = '\0';
+				internal_index++;
+				new_index++;
+
+			}
+			else
+			{
+				new[new_index] = next;
+				previous = next;
+				internal_index++;
+				new_index++;
+			}
+		}
+		if(valid == 0 || previous == '\\')
+		{
+			valid = 0;
+			free(new);
+			new = NULL;
+		}
+		else
+		{
+			new[new_index] = '\0';
+		}
+		free(internal);
+	}
+	if(valid == 1)
+	{
+		valid = regcomp(p,new,REG_EXTENDED) == 0 ? 1 : 0;
+		if(valid == 0)
+		{
+			regfree(p);
+		}
+		free(new);
+	}
+	
+	return valid;	
+}
+
+
 
 
 /* note: str element in return value is dynamically allocated, need to free */

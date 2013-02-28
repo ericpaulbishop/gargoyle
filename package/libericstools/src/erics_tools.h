@@ -44,6 +44,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+#include <regex.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -245,6 +246,8 @@ extern char* dcat_and_free(char** one, char** two, int free1, int free2);
 extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long* num_pieces); /*if max_pieces < 0, it is ignored */
 extern char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array); /*if max_parts < 0, it is ignored*/
 extern char* dynamic_replace(char* template_str, char* old_str, char* new_str);
+int convert_to_regex(char* str, regex_t* p);
+
 
 /* functions to dynamically read files */
 extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators, unsigned long* read_length);
