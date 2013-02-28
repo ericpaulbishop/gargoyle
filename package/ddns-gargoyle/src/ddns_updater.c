@@ -163,7 +163,6 @@ int output_requested;
 string_map* load_service_providers(char* filename);
 string_map* load_service_configurations(char* filename, string_map* service_providers);
 char** parse_variable_definition_line(char* line);
-int convert_to_regex(char* str, regex_t* p);
 int get_multiple_for_unit(char* unit);
 
 char* get_local_ip(int ip_source, void* check_parameter);
@@ -2089,99 +2088,4 @@ char** parse_variable_definition_line(char* line)
 	return variable_definition;
 }
 
-// requires expression to be surrounded by '/' characters, and deals with escape
-// characters '\/', '\r', '\n', and '\t' when escapes haven't been interpreted 
-// (e.g. after recieving regex string from user)
-//
-// returns 1 on good regex, 0 on bad regex
-int convert_to_regex(char* str, regex_t* p)
-{
-	char* trimmed = trim_flanking_whitespace(strdup(str));
-	int trimmed_length = strlen(trimmed);
-	
-	int valid = 1;
-	//regex must be defined by surrounding '/' characters
-	if(trimmed[0] != '/' || trimmed[trimmed_length-1] != '/')
-	{
-		valid = 0;
-		free(trimmed);
-	}
 
-	char* new = NULL;
-	if(valid == 1)
-	{
-		char* internal = (char*)malloc(trimmed_length*sizeof(char));
-		int internal_length = trimmed_length-2;	
-		memcpy(internal, trimmed+1, internal_length);
-		internal[internal_length] = '\0';
-		free(trimmed);
-
-		new = (char*)malloc(trimmed_length*sizeof(char));
-		int new_index = 0;
-		int internal_index = 0;
-		char previous = '\0';
-		while(internal[internal_index] != '\0' && valid == 1)
-		{
-			char next = internal[internal_index];
-			if(next == '/' && previous != '\\')
-			{
-				valid = 0;
-			}
-			else if((next == 'n' || next == 'r' || next == 't' || next == '/') && previous == '\\')
-			{
-				char previous2 = '\0';
-				if(internal_index >= 2)
-				{
-					previous2 = internal[internal_index-2];
-				}
-
-				new_index = previous2 == '\\' ? new_index : new_index-1;
-				switch(next)
-				{
-					case 'n':
-						new[new_index] = previous2 == '\\' ? next : '\n';
-						break;
-					case 'r':
-						new[new_index] = previous2 == '\\' ? next : '\r';
-						break;
-					case 't':
-						new[new_index] = previous2 == '\\' ? next : '\t';
-						break;
-					case '/':
-						new[new_index] = previous2 == '\\' ? next : '/';
-						break;
-				}
-				previous = '\0';
-				internal_index++;
-				new_index++;
-
-			}
-			else
-			{
-				new[new_index] = next;
-				previous = next;
-				internal_index++;
-				new_index++;
-			}
-		}
-		new[new_index] = '\0';
-		if(previous == '\\')
-		{
-			valid = 0;
-			free(new);
-			new = NULL;
-		}
-		free(internal);
-	}
-	if(valid == 1)
-	{
-		valid = regcomp(p,new,REG_EXTENDED) == 0 ? 1 : 0;
-		if(valid == 0)
-		{
-			regfree(p);
-		}
-		free(new);
-	}
-	
-	return valid;	
-}

@@ -416,6 +416,13 @@ char* dynamic_replace(char* template_str, char* old, char* new)
 }
 
 
+/*
+ requires expression to be surrounded by '/' characters, and deals with escape
+ characters '\/', '\r', '\n', and '\t' when escapes haven't been interpreted 
+ (e.g. after recieving regex string from user)
+
+ returns 1 on good regex, 0 on bad regex
+*/
 int convert_to_regex(char* str, regex_t* p)
 {
 	char* trimmed = trim_flanking_whitespace(strdup(str));
