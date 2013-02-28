@@ -1,6 +1,6 @@
 all: gpkg
 
-gpkg: gpkg.o conf.o
+gpkg: gpkg.o conf.o load.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -lbbtargz -lewget
 
 %.o: %.c
