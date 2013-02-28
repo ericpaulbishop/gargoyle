@@ -34,6 +34,9 @@
 #define FILE_PATH_LEN 1024
 #define DEFAULT_CONF_FILE_PATH "/etc/opkg.conf"
 
+#define LOAD_PARAMETER_DEFINED_PKG_VARIABLES 0  /* Parameter unused, load from parameter map */
+#define LOAD_MINIMAL_PKG_VARIABLES           1  /* Status, Depends, Size only */
+#define LOAD_ALL_PKG_VARIABLES               2  /* Everything */
 
 /* conf defs/prototypes */
 typedef struct opkg_conf_struct
@@ -54,8 +57,8 @@ void free_conf(opkg_conf* conf);
 
 
 /* package info load/save defs/prototypes */
-void load_all_package_data(opkg_conf* conf, string_map* existing_package_data, string_map* matching_packages, string_map* parameters);
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name);
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def);
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
 
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path);

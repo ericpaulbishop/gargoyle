@@ -86,8 +86,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root)
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
 
-
+	
 	/* 1) Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
+
+	/*
 	string_map* load_parameters = initialize_string_map(1);
 	const char* load_all_variables[3] = { "Depends", "Status", NULL };
 	
@@ -98,7 +100,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root)
 	set_string_map_element(load_parameters, "packages_matching", &match_all_regex);
 	
 	load_all_package_data(conf, package_data, matching_packages, load_parameters);
-	load_recursive_package_data_variables(package_data, pkg_name, 0, 0, 0); /* load required-depends for package of interest only */
+	load_recursive_package_data_variables(package_data, pkg_name, 0, 0, 0); // load required-depends for package of interest only 
 
 	unsigned long num_destroyed;
 	destroy_string_map(load_parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
@@ -120,6 +122,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root)
 		printf("ERROR: Package %s is already installed\n\n");
 		exit(1);
 	}
+	*/
 
 	
 	

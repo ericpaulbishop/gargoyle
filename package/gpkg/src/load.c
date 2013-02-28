@@ -5,11 +5,11 @@ static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 
 
-void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters)
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def)
 {
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
-	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, NULL);
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_all_packages, load_variable_def, NULL);
 	
 	//load status data
 	unsigned long num_dests;
@@ -20,7 +20,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 		char* status_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/status");
 		if(path_exists(status_path))
 		{
-			load_package_data(status_path, 0, package_data, matching_packages, parameters, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
+			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_all_packages, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
 		}
 		free(status_path);
 	}
@@ -63,7 +63,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	}
 }
 
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, char* dest_name)
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "packages-matching") : NULL;
 	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "packages") : NULL;
@@ -75,24 +75,39 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	int load_var_index=0;
 	char* all_dummy = strdup("A");
 	char* matching_dummy = strdup("M");
-	int load_all_packages_all_variables = 0;
-	if(load_matching_variables != NULL)
-	{
-		for(load_var_index=0; load_matching_variables[load_var_index] != NULL; load_var_index++)
-		{
-			set_string_map_element(load_variable_map, load_matching_variables[load_var_index], matching_dummy);
-		}
-	}
-	if(load_all_variables != NULL)
-	{
-		for(load_var_index=0; load_all_variables[load_var_index] != NULL; load_var_index++)
-		{
-			set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
-		}
-	}
+
 	if(parameters == NULL)
 	{
-		load_all_packages_all_variables = 1;
+		load_all_packages = 1;
+		load_variable_def = load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES ? LOAD_MINIMAL_PKG_VARIABLES : load_variable_def;
+	}
+	if(load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES)
+	{
+		if(load_matching_variables != NULL)
+		{
+			for(load_var_index=0; load_matching_variables[load_var_index] != NULL; load_var_index++)
+			{
+				set_string_map_element(load_variable_map, load_matching_variables[load_var_index], matching_dummy);
+			}
+		}
+		if(load_all_variables != NULL)
+		{
+			for(load_var_index=0; load_all_variables[load_var_index] != NULL; load_var_index++)
+			{
+				set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
+			}
+		}
+	}
+	else if(load_variable_def == LOAD_MINIMAL_PKG_VARIABLES)
+	{
+		set_string_map_element(load_variable_map, "Status",  all_dummy);
+		set_string_map_element(load_variable_map, "Depends", all_dummy);
+		set_string_map_element(load_variable_map, "Size",    all_dummy);
+	}
+	else
+	{
+		load_variable_def = LOAD_ALL_PKG_VARIABLES;
+		/* no need to set entries in load_variable_map */
 	}
 
 	int save_destination      = get_string_map_element(load_variable_map, "Install-Destination") != NULL ? 1 : 0 ;
@@ -209,7 +224,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 
 						}
 
-						next_package_matches = load_all_packages_all_variables;
+						next_package_matches = load_all_packages;
 						if(!next_package_matches)
 						{
 							if(match_regex != NULL)
@@ -224,21 +239,21 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						if(next_package_matches)
 						{
 							set_string_map_element(matching_packages, val, strdup("D"));
-							if(save_destination || load_all_packages_all_variables)
+							if(save_destination || load_variable_def == LOAD_ALL_PKG_VARIABLES )
 							{
 								set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("not_installed") : strdup(dest_name)  ));
 							}
 						}
 					}
-					else if(load_all_packages_all_variables || (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
+					else if(load_variable_def == LOAD_ALL_PKG_VARIABLES || (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
 					{
-						if(load_all_packages_all_variables || var_type[0] == 'A' || next_package_matches == 1)
+						if(load_variable_def == LOAD_ALL_PKG_VARIABLES || var_type[0] == 'A' || next_package_matches == 1)
 						{
 							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
 							if(old_val != NULL) { free(old_val); }
 							last_variable = strdup(key);
 							
-							if(load_all_packages_all_variables || save_user_installed)
+							if(load_variable_def == LOAD_ALL_PKG_VARIABLES  || save_user_installed)
 							{
 								if(strcmp(key, "Status") == 0)
 								{
