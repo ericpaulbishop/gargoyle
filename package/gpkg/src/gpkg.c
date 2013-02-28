@@ -80,49 +80,36 @@ void update(opkg_conf* conf)
 
 
 
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root)
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 {
 
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
+	unsigned long num_destroyed;
 
 	
 	/* 1) Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-
-	/*
-	string_map* load_parameters = initialize_string_map(1);
-	const char* load_all_variables[3] = { "Depends", "Status", NULL };
+	uint64_t free_bytes = destination_bytes_free(conf, install_root_name);
+	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES );
 	
-	regex_t match_all_regex;
-	convert_to_regex(".", &match_all_regex);
-
-	set_string_map_element(load_parameters, "load_all_variables", load_all_variables);
-	set_string_map_element(load_parameters, "packages_matching", &match_all_regex);
-	
-	load_all_package_data(conf, package_data, matching_packages, load_parameters);
-	load_recursive_package_data_variables(package_data, pkg_name, 0, 0, 0); // load required-depends for package of interest only 
-
-	unsigned long num_destroyed;
-	destroy_string_map(load_parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, matching_packages);
-	regfree(&match_all_regex);
-
+	load_recursive_package_data_variables(package_data, pkg_name, 1, 1, free_bytes); // load required-depends for package of interest only 
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	string_map* install_pkg_data = get_string_map_element(package_data, pkg_name);
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
-	string_map* install_pkg_depends = get_string_map_element(install_package_data, "Required-Depends");
+	string_map* install_pkg_depends = get_string_map_element(install_pkg_data, "Required-Depends");
 
 	if(install_pkg_data == NULL || install_status == NULL)
 	{
-		printf("ERROR: No package named %s found, try updating your package lists\n\n");
+		printf("ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 		exit(1);
 	}
 	if(strstr(install_status, "installed ") == 0)
 	{
-		printf("ERROR: Package %s is already installed\n\n");
+		printf("ERROR: Package %s is already installed\n\n", pkg_name);
 		exit(1);
 	}
-	*/
+	
 
 	
 	

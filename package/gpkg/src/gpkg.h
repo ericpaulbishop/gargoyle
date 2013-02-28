@@ -57,6 +57,7 @@ void free_conf(opkg_conf* conf);
 
 
 /* package info load/save defs/prototypes */
+uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name);
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);

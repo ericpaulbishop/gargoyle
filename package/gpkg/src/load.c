@@ -4,6 +4,22 @@
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 
+uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
+{
+	char* dest_path = get_string_map_element(conf->dest_names, dest_name);
+	uint64_t free_bytes = 0;
+	if(dest_path != NULL)
+	{
+		struct statvfs fs_data;
+		if( statvfs(dest_path, &fs_data) == 0 )
+		{
+			uint64_t block_size  = (uint64_t)fs_data.f_bsize;
+			uint64_t blocks_free = (uint64_t)fs_data.f_bavail;
+			free_bytes = block_size*blocks_free;
+		}
+	}
+	return free_bytes;
+}
 
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def)
 {
@@ -40,17 +56,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	if(load_will_fit)
 	{
 		char* dest_name = get_string_map_element(parameters, "will-fit");
-		char* dest_path = get_string_map_element(conf->dest_names, dest_name);
-		if(dest_path != NULL)
-		{
-			struct statvfs fs_data;
-			if( statvfs(dest_path, &fs_data) == 0 )
-			{
-				uint64_t block_size  = (uint64_t)fs_data.f_bsize;
-				uint64_t blocks_free = (uint64_t)fs_data.f_bavail;
-				free_bytes = block_size*blocks_free;
-			}
-		}
+		free_bytes = destination_bytes_free(conf, dest_name);
 	}
 
 	//recursively load depends/size/will_fit
