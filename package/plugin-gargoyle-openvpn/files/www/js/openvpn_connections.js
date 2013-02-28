@@ -9,7 +9,7 @@ function updateTableFromData(statusData)
 	var i;
 	var clientData = [];
 
-	while( statusData[0] != "OpenVPN CLIENT LIST")
+	while(statusData.length > 0 && statusData[0] != "OpenVPN CLIENT LIST")
 	{
 		statusData.shift() ; 
 	}
@@ -17,7 +17,7 @@ function updateTableFromData(statusData)
 	{
 		statusData.shift()
 	}
-	while( statusData[0] != "ROUTING TABLE" &&  statusData[0] != "GLOBAL STATS" && statusData[0] != "END")
+	while(statusData.length > 0 && statusData[0] != "ROUTING TABLE" &&  statusData[0] != "GLOBAL STATS" && statusData[0] != "END")
 	{
 		var lineParts = statusData.shift().split(/,/);
 		var clientName = uciOriginal.get("openvpn_gargoyle", lineParts[0]) == "allowed_client" ? uciOriginal.get("openvpn_gargoyle", lineParts[0], "name") : lineParts[0]
