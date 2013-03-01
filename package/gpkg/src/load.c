@@ -3,6 +3,8 @@
 
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
+void free_pkg_func(char* key, void* value);
+
 
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 {
@@ -21,7 +23,7 @@ uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 	return free_bytes;
 }
 
-void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def)
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root)
 {
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
@@ -49,7 +51,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	do_istr_sort(sorted_matching_packages, num_matching_packages);
 	int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
 	int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
-	int load_will_fit = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
+	int load_will_fit = load_variable_def == LOAD_ALL_PKG_VARIABLES && install_root != NULL ? 1 : 0;
 	if(parameters != NULL && load_variable_def != LOAD_ALL_PKG_VARIABLES )
 	{
 		load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
@@ -59,10 +61,13 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	uint64_t free_bytes = 0;
 
 	//if we want to calculate will_fit, need to determine free bytes on filesystem
-	if(load_will_fit && parameters != NULL)
+	if(install_root != NULL && parameters != NULL)
 	{
-		char* dest_name = get_string_map_element(parameters, "will-fit");
-		free_bytes = destination_bytes_free(conf, dest_name);
+		free_bytes = destination_bytes_free(conf, install_root);
+	}
+	else
+	{
+		load_will_fit = 0;
 	}
 
 	//recursively load depends/size/will_fit
@@ -450,4 +455,30 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
 	__save_pkg_status_stream = NULL;
 }
 
+
+void free_pkg_func(char* key, void* value)
+{
+	string_map* pkg_map = (string_map*)value;
+	unsigned long num_destroyed;
+
+	/* deal with dependency map, which is not simple string */
+	string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+	destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+	/* deal with version crap when it gets implemented */
+	
+	/* free the main package map, only strings left */
+	destroy_string_map(pkg_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+}
+
+void free_package_data(string_map* package_data)
+{
+	unsigned long num_destroyed;
+	apply_to_every_string_map_value(package_data, free_pkg_func);
+	
+	/* destroy top level map, values already freed so call with DESTROY_MODE_IGNORE_VALUES */
+	destroy_string_map(package_data, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+
+}
 
