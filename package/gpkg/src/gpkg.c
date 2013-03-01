@@ -10,16 +10,20 @@ int recursively_install(char* pkg_name, char* install_root, char* tmp_dir, strin
 
 int main(void)
 {
-	rm_r("/tmp/test1/");
-	mkdir_p("/tmp/test1/test2/test 3/test4/test5", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
-	rm_r("/tmp/test1/test2");
+	rm_r("/tmp/plugin_root/");
+	mkdir_p("/tmp/plugin_root", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 	
 
-	install_to("tor_0.2.3.24-rc-2_x86.ipk", "tor", "/tmp/test1");
+
+	//install_to("tor_0.2.3.24-rc-2_x86.ipk", "tor", "/tmp/test1");
 
 	
 	opkg_conf *conf = load_conf(NULL);
 	//update(conf);
+
+	do_install(conf, "irssi", "plugin_root");
+
+	
 
 
 	return(0);
@@ -94,38 +98,69 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 		exit(1);
 	}
 	
+	printf("here 1\n");
+
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, install_root_name );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
+	printf("here 2\n");
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
+	
+	printf("here 3\n");
 
 	string_map* install_pkg_data = get_string_map_element(package_data, pkg_name);
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
-	string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
 	
+	printf("here 4\n");
+
+
 	/* load detailed information for all packiages we are about to install */
-	if(install_pkg_depend_map == NULL && install_status != NULL)
-	{
-		install_pkg_depend_map = initialize_string_map(1);
-	}
 	if(install_status != NULL)
 	{
-		set_string_map_element(install_pkg_depend_map, pkg_name, strdup("D"));
+		string_map* load_detail_map = initialize_string_map(1);
+		set_string_map_element(load_detail_map, pkg_name, strdup("D"));
+		
+		string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
+		if(install_pkg_depend_map != NULL)
+		{
+			unsigned long num_keys;
+			char** load_detail_pkgs = get_string_map_keys(install_pkg_depend_map, &num_keys);
+			int ldp_index;
+			for(ldp_index=0;ldp_index < num_keys; ldp_index++)
+			{
+				set_string_map_element(load_detail_map, load_detail_pkgs[ldp_index], strdup("D"));
+			}
+		}
+		free_recursive_pkg_vars(package_data); /* note: whacks install_pkg_depend_map */
+		
+	
 		string_map* parameters = initialize_string_map(1);
 		matching_packages = initialize_string_map(1);
-		set_string_map_element(parameters, "packages", install_pkg_depend_map);
+		set_string_map_element(parameters, "packages", load_detail_map);
 		load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
 		install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
+		
+		int pkg_index;
+		for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
+		{
+			printf("loaded %s\n", install_pkg_list[pkg_index]);
+		}
+
+		
+		destroy_string_map(load_detail_map,   DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-		char* dummy = remove_string_map_element(install_pkg_depend_map, pkg_name);
-		free(dummy);
 
+		printf("here 5\n");
 	}
+	printf("a\n");
+	install_status = get_string_map_element(install_pkg_data, "Status");
+	printf("b\n");
 	char* will_fit = get_string_map_element(install_pkg_data, "Will-Fit");
+	printf("c\n");
 
 
 	/* error checking before we start install */
@@ -134,17 +169,20 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 		printf("ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 		exit(1);
 	}
-	if(install_status == NULL || strstr(install_status, "installed ") == 0)
+	if(install_status == NULL || strstr(install_status, "installed ") != NULL)
 	{
+		printf("install status = '%s'\n", install_status);
 		printf("ERROR: Package %s is already installed\n\n", pkg_name);
 		exit(1);
 	}
 	if(will_fit == NULL || strcmp(will_fit, "true") != 0)
 	{
+		printf("will_fit = %s\n", will_fit);
 		printf("ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
 		exit(1);
 	}
 
+	printf("d\n");
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
@@ -156,29 +194,36 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	}
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
+	printf("e\n");
+
 	int pkg_index;
 	time_t now = time(NULL);
 	char install_time[20];
 	sprintf(install_time, "%lu", now);
 
+	printf("install_time = %s\n", install_time);
 
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
-		string_map* pkg = remove_string_map_element(package_data, install_pkg_list[pkg_index]);
+		
+		string_map* pkg = get_string_map_element(package_data, install_pkg_list[pkg_index]);
+		if(get_string_map_element(pkg, "Installed-Time") == NULL)
+		{
+			printf("f\n");
+			char* old_status = remove_string_map_element(pkg, "Status");
+			free(old_status);
+			char* status_parts[3] = { "install", "ok", "half-installed" };
+			status_parts[1] = strcmp(pkg_name, install_pkg_list[pkg_index]) == 0 ? "user" : status_parts[1];
+			char* new_status = dynamic_strcat(5, status_parts[0], " ", status_parts[1], " ", status_parts[2]);
+			set_string_map_element(pkg, "Status", new_status);
 
-		char* old_status = remove_string_map_element(pkg, "Status");
-		free(old_status);
-		char* status_parts[3] = { "install", "ok", "half-installed" };
-		status_parts[1] = strcmp(pkg_name, install_pkg_list[pkg_index]) == 0 ? "user" : status_parts[1];
-		char* new_status = dynamic_strcat(5, status_parts[0], " ", status_parts[1], " ", status_parts[2]);
-		set_string_map_element(pkg, "Status", new_status);
-
-		set_string_map_element(pkg, "Installed-Time", strdup(install_time));
+			set_string_map_element(pkg, "Installed-Time", strdup(install_time));
 
 
-		set_string_map_element(install_root_status, install_pkg_list[pkg_index], pkg);
-
+			set_string_map_element(install_root_status, install_pkg_list[pkg_index], pkg);
+		}
 	}
+	printf("g\n");
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 
 	

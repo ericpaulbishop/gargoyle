@@ -4,6 +4,7 @@
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 void free_pkg_func(char* key, void* value);
+void free_recursive_pkg_vars_func(char* key, void* value);
 
 
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
@@ -61,14 +62,11 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	uint64_t free_bytes = 0;
 
 	//if we want to calculate will_fit, need to determine free bytes on filesystem
-	if(install_root != NULL && parameters != NULL)
+	if(install_root != NULL)
 	{
 		free_bytes = destination_bytes_free(conf, install_root);
 	}
-	else
-	{
-		load_will_fit = 0;
-	}
+	printf("loading will-fit = %d\n", load_will_fit);
 
 	//recursively load depends/size/will_fit
 	if(load_depends || load_size || load_will_fit)
@@ -119,7 +117,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, "Status",  all_dummy);
 		set_string_map_element(load_variable_map, "Depends", all_dummy);
-		set_string_map_element(load_variable_map, "Size",    all_dummy);
+		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
 	}
 	else
 	{
@@ -332,6 +330,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes)
 {
+	printf("load will fit = %d\n", load_will_fit);
 	string_map* package_info = get_string_map_element(package_data, package);
 	int ret = 1;
 	if(package_info == NULL)
@@ -359,11 +358,15 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			}
 			else
 			{
+				
 				char* deps = get_string_map_element(package_info, "Depends");
 				if(load_size)
 				{
 					char* installed_size_str = get_string_map_element(package_info, "Installed-Size");
-					sscanf(installed_size_str, SCANFU64, required_size);
+					if(installed_size_str != NULL)
+					{
+						sscanf(installed_size_str, SCANFU64, required_size);
+					}
 				}
 				
 				if(deps != NULL)
@@ -372,6 +375,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 					int dep_index;
 					char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
 					char** dep_list = split_on_separators(deps, package_separators, 9, -1, 0, &num_pieces);
+				
 					for(dep_index=0; dep_index < num_pieces; dep_index++)
 					{
 						if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
@@ -410,6 +414,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			}
 			if(load_will_fit)
 			{
+				printf("WE ARE HERE\n");
 				if( *required_size >= free_bytes )
 				{
 					set_string_map_element(package_info, "Will-Fit", strdup("false"));
@@ -427,8 +432,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 	return ret;
 }
 
-
-
 void save_pkg_status_func(char* key, void* value)
 {
 	string_map* pkg_map = (string_map*)value;
@@ -437,7 +440,7 @@ void save_pkg_status_func(char* key, void* value)
 	fprintf(__save_pkg_status_stream, "Package: %s\n", key);
 	for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
 	{
-		char* var_def = get_string_map_element(pkg_map, var_def);
+		char* var_def = get_string_map_element(pkg_map, pkg_vars[var_index]);
 		fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
 	}
 	fprintf(__save_pkg_status_stream, "\n");
@@ -446,12 +449,19 @@ void save_pkg_status_func(char* key, void* value)
 
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path)
 {
+	if(!path_exists(status_file_path))
+	{
+		/* make sure parent dir of path exists */
+		mkdir_p(status_file_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH  );
+		rm_r(status_file_path);
+	}
+
 	__save_pkg_status_stream = fopen(status_file_path, "w");
 	if(__save_pkg_status_stream != NULL)
 	{
 		apply_to_every_string_map_value(package_data, save_pkg_status_func);
+		fclose(__save_pkg_status_stream);
 	}
-	fclose(__save_pkg_status_stream);
 	__save_pkg_status_stream = NULL;
 }
 
@@ -481,4 +491,25 @@ void free_package_data(string_map* package_data)
 	destroy_string_map(package_data, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 
 }
+
+void free_recursive_pkg_vars_func(char* key, void* value)
+{
+	string_map* pkg_map = (string_map*)value;
+	unsigned long num_destroyed;
+
+
+	string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+	char* required_size = remove_string_map_element(pkg_map, "Required-Size");
+	char* will_fit      = remove_string_map_element(pkg_map, "Will-Fit");
+	
+	if(dep_map != NULL)       { destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
+	if(required_size != NULL) { free(required_size); }
+	if(will_fit != NULL)      { free(will_fit); }
+	
+}
+void free_recursive_pkg_vars(string_map* package_data)
+{
+	apply_to_every_string_map_value(package_data, free_recursive_pkg_vars_func);
+}
+
 
