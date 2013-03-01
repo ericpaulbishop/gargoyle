@@ -87,8 +87,14 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	string_map* matching_packages = initialize_string_map(1);
 	unsigned long num_destroyed;
 
+	char* install_root_path = get_string_map_value(conf->dest_names, install_root_name);
+	if(install_root_path == NULL)
+	{
+		printf("ERROR: No destination %s found, cannot install\n\n", install_root_name);
+		exit(1);
+	}
 	
-	/* 1) Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
+	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
 	uint64_t free_bytes = destination_bytes_free(conf, install_root_name);
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES );
 	
@@ -98,17 +104,38 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	string_map* install_pkg_data = get_string_map_element(package_data, pkg_name);
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
 	string_map* install_pkg_depends = get_string_map_element(install_pkg_data, "Required-Depends");
+	char* will_fit = get_string_map_element(install_pkg_data, "Will-Fit");
+
 
 	if(install_pkg_data == NULL || install_status == NULL)
 	{
 		printf("ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 		exit(1);
 	}
-	if(strstr(install_status, "installed ") == 0)
+	if(install_status == NULL || strstr(install_status, "installed ") == 0)
 	{
 		printf("ERROR: Package %s is already installed\n\n", pkg_name);
 		exit(1);
 	}
+	if(will_fit == NULL || strcmp(will_fit, "true") != 0)
+	{
+		printf("ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
+		exit(1);
+	}
+
+	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
+	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
+	string_map* install_root_status = initialize_string_map(1);
+	string_map* matching_packages = initialize_string_map(1);
+	if(path_exists(install_root_status_path))
+	{
+		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, install_root_name);
+	}
+
+
+	
+	
+	
 	
 
 	

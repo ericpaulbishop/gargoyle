@@ -47,13 +47,19 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	char** sorted_matching_packages = get_string_map_keys(matching_packages, &num_matching_packages);
 	int match_index=0;
 	do_istr_sort(sorted_matching_packages, num_matching_packages);
-	int load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
-	int load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
-	int load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+	int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
+	int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
+	int load_will_fit = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
+	if(parameters != NULL && load_variable_def != LOAD_ALL_PKG_VARIABLES )
+	{
+		load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
+		load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
+		load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+	}
 	uint64_t free_bytes = 0;
 
 	//if we want to calculate will_fit, need to determine free bytes on filesystem
-	if(load_will_fit)
+	if(load_will_fit && parameters != NULL)
 	{
 		char* dest_name = get_string_map_element(parameters, "will-fit");
 		free_bytes = destination_bytes_free(conf, dest_name);
