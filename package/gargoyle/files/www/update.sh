@@ -24,6 +24,9 @@
 	else
 		echo "var platform=\"x86\";"
 	fi
+
+	gargoyle_version=$(cat data/gargoyle_version.txt)
+	echo "var gargoyleVersion=\"$gargoyle_version\""
 ?>
 //-->
 </script>
@@ -39,6 +42,12 @@
 			<p>You can attempt to preserve your old settings by ticking <em>Attempt to Preserve Settings</em> below. Be
 			aware that this can potentially lead to problems if the new version is significantly newer than the old version, 
 			but for small, incremental differences this will likely work. It is always best to keep a backup just in case.
+		</div>
+
+		<div class="internal_divider"></div>
+
+		<div>
+			<span class='leftcolumn'>Current Gargoyle Version:</span><span id="gargoyle_version" class='rightcolumn'></span>
 		</div>
 
 		<div class="internal_divider"></div>
