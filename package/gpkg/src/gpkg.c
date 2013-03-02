@@ -4,7 +4,7 @@ int install_to(const char* pkg_file, const char* pkg_name, const char* install_r
 void update(opkg_conf* conf);
 
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root);
-int recursively_install(char* pkg_name, char* install_root, char* tmp_dir, string_map* package_data, string_map* install_called_pkgs);
+int recursively_install(char* pkg_name, char* install_root, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 
 
@@ -212,7 +212,12 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	}
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 
-	
+	char* tmp_dir;
+	if(!create_tmp_dir(tmp_root, &tmp_dir))
+	{
+		printf("ERROR: Could not create tmp dir, exiting\n");
+		exit(1);
+	}
 	
 	
 	
@@ -224,9 +229,67 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 }
 
-int recursively_install(char* pkg_name, char* install_root, char* tmp_dir, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* install_root, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
+	int err=0;
 	
+	string_map* pkg_data = get_string_map_element(package_data, pkg_name);
+	char* src_id = get_string_map_element(pkg_dat, "Source");
+	char* base_url = NULL;
+
+
+	string_map* src_lists[2] = { conf->gzip_sources, conf->plain_sources };
+	int src_list_index;
+	for(src_list_index=0; src_list_index < 2 && base_url == NULL; src_list_index++)
+	{
+		base_url = (char*)get_string_map_element(src_lists[src_list_index], src_id);
+	}
+	if(base_rule == NULL)
+	{
+		err = 1;
+	}
+
+	char* pkg_dest = NULL;
+	if(err == 0)
+	{
+		char* src_url  = dynamic_strcat(4, base_url, "/", pkg_name, ".ipk");
+		pkg_dest = dynamic_strcat(4, tmp_dir, "/", pkg_name, ".ipk");
+		FILE* package_file = fopen(pkg_dest, "w");
+		if(package_file != NULL)
+		{
+			err = write_url_to_stream(src_url, "gpkg", NULL, package_file, NULL);
+			fclose(package_file);
+		}
+		else
+		{
+			err = 1;
+		}
+		free(src_url);
+
+		
+
+		if(err == 1)
+		{
+			printf("ERROR: Could not download package %s\n", package_name);
+		}
+
+	}
+	if(err == 0)
+	{
+		//check md5sum
+
+	}
+	if(err == 0)
+	{
+
+	}
+
+
+
+	
+	if(pkg_dest != NULL) {free(pkg_dest); };
+
+	return err;
 }
 
 
