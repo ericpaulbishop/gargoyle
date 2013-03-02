@@ -213,7 +213,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 
 	char* tmp_dir;
-	if(!create_tmp_dir(tmp_root, &tmp_dir))
+	if(!create_tmp_dir("/tmp", &tmp_dir))
 	{
 		printf("ERROR: Could not create tmp dir, exiting\n");
 		exit(1);
@@ -234,7 +234,7 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 	int err=0;
 	
 	string_map* pkg_data = get_string_map_element(package_data, pkg_name);
-	char* src_id = get_string_map_element(pkg_dat, "Source");
+	char* src_id = get_string_map_element(package_data, "Source");
 	char* base_url = NULL;
 
 
@@ -244,7 +244,7 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 	{
 		base_url = (char*)get_string_map_element(src_lists[src_list_index], src_id);
 	}
-	if(base_rule == NULL)
+	if(base_url == NULL)
 	{
 		err = 1;
 	}
@@ -270,7 +270,7 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 
 		if(err == 1)
 		{
-			printf("ERROR: Could not download package %s\n", package_name);
+			printf("ERROR: Could not download package %s\n", pkg_name);
 		}
 
 	}
