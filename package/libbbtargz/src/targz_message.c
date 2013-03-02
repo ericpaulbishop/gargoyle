@@ -10,7 +10,7 @@ static struct errlist *error_list_head, *error_list_tail;
 
 	
 #include <stdio.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 	
 static void

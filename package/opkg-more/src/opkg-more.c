@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <sys/statvfs.h>
 
-#include <libbbtargz.h>
+#include <bbtargz.h>
 #include <erics_tools.h>
 
 

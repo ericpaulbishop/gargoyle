@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 
 extern void *xmalloc(size_t size)

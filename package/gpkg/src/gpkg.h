@@ -19,7 +19,7 @@
 
 
 #include <erics_tools.h>
-#include <libbbtargz.h>
+#include <bbtargz.h>
 #include <ewget.h>
 
 

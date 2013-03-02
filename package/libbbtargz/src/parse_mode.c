@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 
 /* This function parses the sort of string you might pass

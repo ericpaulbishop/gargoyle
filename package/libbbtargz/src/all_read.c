@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 extern void archive_xread_all(int fd , char *buf, size_t count)
 {

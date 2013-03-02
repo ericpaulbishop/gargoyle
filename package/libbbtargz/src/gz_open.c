@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 static int gz_use_vfork;
 

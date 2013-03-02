@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 /* Copy CHUNKSIZE bytes (or until EOF if CHUNKSIZE equals -1) from SRC_FILE
  * to DST_FILE.  */
