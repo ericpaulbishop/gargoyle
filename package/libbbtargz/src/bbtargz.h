@@ -267,6 +267,8 @@ extern void *__md5_buffer (const char *buffer, size_t len,
 
 
 
+char *file_md5sum_alloc(const char *file_name);
+
 
 
 

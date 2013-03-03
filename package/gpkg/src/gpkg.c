@@ -173,6 +173,8 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	}
 
 
+	printf("test\n");
+
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
 	string_map* install_root_status = initialize_string_map(1);
@@ -196,7 +198,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 		string_map* pkg = get_string_map_element(package_data, install_pkg_list[pkg_index]);
 		if(get_string_map_element(pkg, "Installed-Time") == NULL)
 		{
-			printf("f\n");
 			char* old_status = remove_string_map_element(pkg, "Status");
 			free(old_status);
 			char* status_parts[3] = { "install", "ok", "half-installed" };
@@ -212,14 +213,18 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	}
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 
-	char* tmp_dir;
-	if(!create_tmp_dir("/tmp", &tmp_dir))
+	char* tmp_dir = (char*)malloc(1024);
+	if(create_tmp_dir("/tmp", &tmp_dir) != 0)
 	{
 		printf("ERROR: Could not create tmp dir, exiting\n");
 		exit(1);
 	}
 	
-	
+	printf("start\n");
+
+	string_map* install_called_pkgs = initialize_string_map(1);
+	recursively_install(pkg_name, install_root_name, NULL, tmp_dir, conf, package_data, install_called_pkgs);
+
 	
 
 	
@@ -229,14 +234,15 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 }
 
-int recursively_install(char* pkg_name, char* install_root, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* install_root_name, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
 	
 	string_map* pkg_data = get_string_map_element(package_data, pkg_name);
-	char* src_id = get_string_map_element(package_data, "Source");
+	char* src_id = get_string_map_element(pkg_data, "Source-ID");
 	char* base_url = NULL;
 
+	printf("here1, src_id = %s\n", src_id);
 
 	string_map* src_lists[2] = { conf->gzip_sources, conf->plain_sources };
 	int src_list_index;
@@ -249,6 +255,7 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 		err = 1;
 	}
 
+	printf("here2\n");
 	char* pkg_dest = NULL;
 	if(err == 0)
 	{
@@ -277,6 +284,8 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 	if(err == 0)
 	{
 		//check md5sum
+		char* md5sum = file_md5sum_alloc(pkg_dest);
+		printf("md5sum = %s\n", md5sum);
 
 	}
 	if(err == 0)
@@ -291,8 +300,6 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 
 	return err;
 }
-
-
 
 
 

@@ -452,3 +452,54 @@ md5_process_block (const void *buffer, size_t len, struct md5_ctx *ctx)
   ctx->C = C;
   ctx->D = D;
 }
+
+
+
+
+char *file_md5sum_alloc(const char *file_name)
+{
+    static const int md5sum_bin_len = 16;
+    static const int md5sum_hex_len = 32;
+
+    static const unsigned char bin2hex[16] = {
+	'0', '1', '2', '3',
+	'4', '5', '6', '7',
+	'8', '9', 'a', 'b',
+	'c', 'd', 'e', 'f'
+    };
+
+    int i, err;
+    FILE *file;
+    char *md5sum_hex;
+    unsigned char md5sum_bin[md5sum_bin_len];
+
+    md5sum_hex = xcalloc(1, md5sum_hex_len + 1);
+
+    file = fopen(file_name, "r");
+    if (file == NULL) {
+	targz_perror(ERROR, "Failed to open file %s", file_name);
+	free(md5sum_hex);
+	return NULL;
+    }
+
+    err = md5_stream(file, md5sum_bin);
+    if (err) {
+	targz_msg(ERROR, "Could't compute md5sum for %s.\n", file_name);
+	fclose(file);
+	free(md5sum_hex);
+	return NULL;
+    }
+
+    fclose(file);
+
+    for (i=0; i < md5sum_bin_len; i++) {
+	md5sum_hex[i*2] = bin2hex[md5sum_bin[i] >> 4];
+	md5sum_hex[i*2+1] = bin2hex[md5sum_bin[i] & 0xf];
+    }
+
+    md5sum_hex[md5sum_hex_len] = '\0';
+
+    return md5sum_hex;
+}
+
+

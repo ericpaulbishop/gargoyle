@@ -66,7 +66,6 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	{
 		free_bytes = destination_bytes_free(conf, install_root);
 	}
-	printf("loading will-fit = %d\n", load_will_fit);
 
 	//recursively load depends/size/will_fit
 	if(load_depends || load_size || load_will_fit)
@@ -127,9 +126,11 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 
 	int save_destination      = get_string_map_element(load_variable_map, "Install-Destination") != NULL ? 1 : 0 ;
 	int save_user_installed   = get_string_map_element(load_variable_map, "User-Installed")      != NULL ? 1 : 0 ;
+	int save_src_id           = get_string_map_element(load_variable_map, "Source-ID")           != NULL ? 1 : 0 ;
 
 
 	list* file_list = initialize_list();
+	char* pkg_src_id = NULL;
 	if(source_is_dir)
 	{
 		DIR* dir = opendir(data_source);
@@ -182,6 +183,15 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 			}
 			fprintf(stderr, "WARNING: opkg file \"%s\" does not exist or can not be opened\n", file_path);
 			return;
+		}
+		if(source_is_dir)
+		{
+			pkg_src_id = strrchr(file_path, '/');
+			pkg_src_id = pkg_src_id == NULL ? file_path : pkg_src_id+1;
+		}
+		else
+		{
+			pkg_src_id = NULL;
 		}
 
 		
@@ -258,6 +268,10 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 							{
 								set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("not_installed") : strdup(dest_name)  ));
 							}
+							if(pkg_src_id != NULL && (save_src_id || load_variable_def == LOAD_ALL_PKG_VARIABLES))
+							{
+								set_string_map_element(next_pkg_data, "Source-ID", strdup(pkg_src_id));
+							}
 						}
 					}
 					else if(load_variable_def == LOAD_ALL_PKG_VARIABLES || (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
@@ -330,7 +344,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes)
 {
-	printf("load will fit = %d\n", load_will_fit);
 	string_map* package_info = get_string_map_element(package_data, package);
 	int ret = 1;
 	if(package_info == NULL)
@@ -414,7 +427,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			}
 			if(load_will_fit)
 			{
-				printf("WE ARE HERE\n");
 				if( *required_size >= free_bytes )
 				{
 					set_string_map_element(package_info, "Will-Fit", strdup("false"));
