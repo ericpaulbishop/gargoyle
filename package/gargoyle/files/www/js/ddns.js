@@ -148,6 +148,12 @@ function resetData()
 	{
 		providerNames.push( serviceProviders[providerIndex]["name"] );
 	}
+
+	providerNames.sort(function(a, b) {
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		return a < b ? -1 : a > b ? 1 : 0
+	});
 	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
 
 
