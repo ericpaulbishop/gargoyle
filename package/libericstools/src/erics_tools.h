@@ -275,10 +275,17 @@ extern char* safe_strdup(const char* str);
 
 /* other file utils */
 
-int mkdir_p(const char* path, mode_t mode); /* returns 0 on success, 1 on error */
-void rm_r(const char* path);
-int create_tmp_dir(const char* tmp_root, char** tmp_dir); /* returns 0 on success, 1 on error */
+extern int mkdir_p(const char* path, mode_t mode); /* returns 0 on success, 1 on error */
+extern void rm_r(const char* path);
+extern int create_tmp_dir(const char* tmp_root, char** tmp_dir); /* returns 0 on success, 1 on error */
 
+
+
+#define PATH_DOES_NOT_EXIST  0
+#define PATH_IS_REGULAR_FILE 1
+#define PATH_IS_DIRECTORY    2
+#define PATH_IS_SYMLINK      3
+#define PATH_IS_OTHER        4
 
 /*
 returns:
@@ -288,6 +295,9 @@ returns:
  3 if path is symbolic link
  4 if path exists and is something else
  */
-int path_exists(const char* path);
+extern int path_exists(const char* path);
+
+extern char** get_file_lines(char* file_path, unsigned long* lines_read);
+
 
 #endif /* ERICS_TOOLS_H */

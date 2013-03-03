@@ -232,6 +232,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 }
 
+
 int recursively_install(char* pkg_name, char* install_root_name, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
@@ -247,13 +248,18 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	char* info_dir            = NULL;
 	char* control_name_prefix = NULL;
 	char* list_file_name      = NULL;
+	string_map* conf_files    = NULL;
 
-
+	//recurse
+	//
+	// IMPLEMENT ME!
+	//
 
 	if(src_id == NULL || pkg_filename == NULL || install_root_path)
 	{
 		err = 1;
 	}
+
 	if(err == 0)
 	{
 		//determine source url
@@ -344,7 +350,6 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 				&err);
 		if(err)
 		{
-			rm_r(list_file_name);
 			fprintf(stderr, "ERROR: could not extract control files from packge %s.\n", pkg_name);
 			fprintf(stderr, "       package file may be corrupt\n\n");
 		}
@@ -353,15 +358,24 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//check for file conflicts
-		list_file = fopen(list_file_name, "r");
-		unsigned long list_file_length;
-		char line_seps[] = {'\r', '\n'};
-		char* list_file_data =  read_entire_file(list_file, FILE_PATH_LEN, &list_file_length);
-		fclose(list_file);
-		
 		unsigned long num_list_lines;
-		char** list_file_lines = split_on_separators(list_file_data, line_seps , 2, -1, 0, &num_list_lines);
-		free(list_file_data);
+		char** list_file_lines = get_file_lines(list_file, &num_list_lines);
+
+
+		char* conf_file_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
+		if(path_exists(conf_file_path))
+		{
+			unsigned long num_conf_lines;
+			char** conf_file_lines =  get_file_lines(conf_file_path, &num_list_lines);
+			int conf_line_index;
+			conf_files = initialize_string_map(1);
+			for(conf_line_index=0; conf_line_index < num_conf_lines; conf_line_index++)
+			{
+				set_string_map_element(conf_files, conf_file_lines[conf_line_index], strdup("D"));
+			}
+			free_null_terminated_string_array(conf_file_lines);
+		}
+
 	
 
 		int install_root_len = strlen(install_root);
@@ -376,28 +390,61 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 				if(list_file_lines[line_index][0] == '.' && list_file_lines[line_index][1] == '/' && list_file_lines[line_index][line_len-1] != '/')
 				{
 					char* adjusted_file_path = dynamic_strcat(2, install_root, fs_terminated_install_root, list_file_lines[line_index] + 2);
-					fprintf(list_file, "%s\n", adjusted_file_path);
-					err = path_exists(adjusted_file_path) ? 1 : 0;
+					int is_conf_file = conf_files != NULL ? 
+								(get_string_map_element(conf_files, adjusted_file_path) != NULL ? 1 : 0) : 
+								0;
+					err = path_exists(adjusted_file_path) && is_conf_file == 0 ? 1 : 0;
 					if(err)
 					{
 						fprintf(stderr, "ERROR: file '%s'\n", adjusted_file_path);
 						fprintf(stderr, "       from package %s already exists.\n\n", pkg_name);
 					}
+					else
+					{
+						fprintf(list_file, "%s\n", adjusted_file_path);
+						if(is_conf_file && path_exists(adjusted_file_path))
+						{
+							char* tmp_conf_path = dynamic_strcat(2, tmp_dir, adjusted_file_path);
+							mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+							rm_r(tmp_conf_path);
+							rename(adjusted_file_path, tmp_conf_path);
+							free(tmp_conf_path);
+						}
+					}	
 					free(adjusted_file_path);
 	
 				}
 			}
 		}
 		fclose(list_file);
+	}
+	if(err == 0)
+	{
+		//run preinst
+	}
+	if(err == 0)
+	{
+		//extract package files
+		deb_extract(	pkg_file,
+				stderr,
+				extract_data_tar_gz | extract_all_to_fs| extract_preserve_date| extract_unconditional,
+				fs_terminated_install_root, 
+				NULL, 
+				&err);
 		if(err)
 		{
-			rm_r(list_file_name);
+			fprintf(stderr, "ERROR: could not extract application files from packge %s.\n", pkg_name);
+			fprintf(stderr, "       package file may be corrupt\n\n");
 		}
 	}
-
-
-		
-
+	if(err == 0 && link_to_root != NULL)
+	{
+		//symlink
+	}
+	if(err == 0)
+	{
+		//run postinst
+	}
 
 
 	
@@ -504,7 +551,6 @@ int install_to(const char* pkg_file, const char* pkg_name, const char* install_r
 	}
 
 	//extract package files
-	
 	deb_extract(	pkg_file,
 			stderr,
 			extract_data_tar_gz | extract_all_to_fs| extract_preserve_date| extract_unconditional,
