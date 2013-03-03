@@ -155,6 +155,7 @@ function resetData()
 		return a < b ? -1 : a > b ? 1 : 0
 	});
 	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
+	//setSelectedValue("ddns_provider", 'freedns.afraid.org', document);
 
 
 	if(!resettingAfterFailedUpdate)
