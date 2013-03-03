@@ -173,7 +173,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	}
 
 
-	printf("test\n");
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
@@ -220,7 +219,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 		exit(1);
 	}
 	
-	printf("start\n");
 
 	string_map* install_called_pkgs = initialize_string_map(1);
 	recursively_install(pkg_name, install_root_name, NULL, tmp_dir, conf, package_data, install_called_pkgs);
@@ -239,28 +237,31 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	int err=0;
 	
 	string_map* pkg_data = get_string_map_element(package_data, pkg_name);
-	char* src_id = get_string_map_element(pkg_data, "Source-ID");
+	char* src_id       = get_string_map_element(pkg_data, "Source-ID");
+	char* pkg_filename = get_string_map_element(pkg_data, "Filename");
 	char* base_url = NULL;
+	char* pkg_dest = NULL;
 
-	printf("here1, src_id = %s\n", src_id);
-
-	string_map* src_lists[2] = { conf->gzip_sources, conf->plain_sources };
-	int src_list_index;
-	for(src_list_index=0; src_list_index < 2 && base_url == NULL; src_list_index++)
-	{
-		base_url = (char*)get_string_map_element(src_lists[src_list_index], src_id);
-	}
-	if(base_url == NULL)
+	if(src_id == NULL || pkg_filename == NULL)
 	{
 		err = 1;
 	}
-
-	printf("here2\n");
-	char* pkg_dest = NULL;
 	if(err == 0)
 	{
-		char* src_url  = dynamic_strcat(4, base_url, "/", pkg_name, ".ipk");
-		pkg_dest = dynamic_strcat(4, tmp_dir, "/", pkg_name, ".ipk");
+	
+		string_map* src_lists[2] = { conf->gzip_sources, conf->plain_sources };
+		int src_list_index;
+		for(src_list_index=0; src_list_index < 2 && base_url == NULL; src_list_index++)
+		{
+			base_url = (char*)get_string_map_element(src_lists[src_list_index], src_id);
+		}
+		err = base_url == NULL ? 1 : err;
+	}
+
+	if(err == 0)
+	{
+		char* src_url  = dynamic_strcat(3, base_url, "/", pkg_filename);
+		pkg_dest = dynamic_strcat(3, tmp_dir, "/", pkg_name);
 		FILE* package_file = fopen(pkg_dest, "w");
 		if(package_file != NULL)
 		{
@@ -285,7 +286,8 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	{
 		//check md5sum
 		char* md5sum = file_md5sum_alloc(pkg_dest);
-		printf("md5sum = %s\n", md5sum);
+		printf("md5sum         = %s\n", md5sum);
+		printf("package md5sum = %s\n", (char*)get_string_map_element(pkg_data, "MD5Sum"));
 
 	}
 	if(err == 0)
