@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <errno.h>
 
 #include <unistd.h>
@@ -21,8 +22,6 @@
 #include <erics_tools.h>
 #include <bbtargz.h>
 #include <ewget.h>
-
-
 
 #if __SIZEOF_POINTER__ == 8
 	#define SCANFU64 "%lu"
@@ -65,6 +64,20 @@ void free_package_data(string_map* package_data);
 void free_recursive_pkg_vars(string_map* package_data);
 
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path);
+
+
+
+
+
+/* Like system(3), but with error messages printed if the fork fails
+   or if the child process dies due to an uncaught signal. Also, the
+   return value is a bit simpler:
+
+   -1 if there was any problem
+   Otherwise, the 8-bit return value of the program ala WEXITSTATUS
+   as defined in <sys/wait.h>.
+*/
+int xsystem(const char *argv[]);
 
 
 #endif

@@ -171,20 +171,20 @@ char** get_file_lines(char* file_path, unsigned long* lines_read)
 	char** result = NULL;
 	int path_type = path_exists(file_path);
 	*lines_read = 0;
-	if(path_type != PATH_DOES_NOT_EXIST && path_type != PATH_IS_DIRECTORY) //exists and is not directory
+	if(path_type != PATH_DOES_NOT_EXIST && path_type != PATH_IS_DIRECTORY) /* exists and is not directory */
 	{
 		FILE* read_file = fopen(file_path, "r");
-		char* file_data = NULL;
+		unsigned char* file_data = NULL;
 		if(read_file != NULL)
 		{
 			unsigned long file_length;
-			file_data =  read_entire_file(read_file, FILE_PATH_LEN, &file_length);
+			file_data =  read_entire_file(read_file, 1024, &file_length);
 			fclose(read_file);
 		}
 		if(file_data != NULL)
 		{
 			char line_seps[] = {'\r', '\n'};
-			result = split_on_separators(file_data, line_seps , 2, -1, 0, lines_read);
+			result = split_on_separators((char*)file_data, line_seps , 2, -1, 0, lines_read);
 			free(file_data);
 		}
 	}

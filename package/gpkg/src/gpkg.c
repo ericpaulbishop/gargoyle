@@ -250,6 +250,10 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	char* list_file_name      = NULL;
 	string_map* conf_files    = NULL;
 
+	int install_root_len = strlen(install_root_path);
+	char* fs_terminated_install_root = install_root_path[install_root_len-1] == '/' ? strdup(install_root_path) : dynamic_strcat(2, install_root_path, "/");
+
+
 	//recurse
 	//
 	// IMPLEMENT ME!
@@ -299,7 +303,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	{
 		//check md5sum
 		char* md5sum = file_md5sum_alloc(pkg_dest);
-		char* expected_md5sum = (char*)get_string_map_element(pkg_data, "MD5Sum")
+		char* expected_md5sum = (char*)get_string_map_element(pkg_data, "MD5Sum");
 		
 		printf("md5sum         = %s\n", md5sum);
 		printf("package md5sum = %s\n", (char*)get_string_map_element(pkg_data, "MD5Sum"));
@@ -309,12 +313,14 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			printf("ERROR: Expected MD5Sum for %s not specified, cannot verify package\n", pkg_name);
 			err = 1;
 		}
-		else( strcmp(md5sum, expected_md5sum) != 0)
+		else if (safe_strcmp(md5sum, expected_md5sum) != 0)
 		{
 			printf("ERROR: MD5Sum mismatch for %s package\n", pkg_name);
 			err = 1;
 		}
+		/*
 		if(md5sum != NULL) { free(md5sum); }
+		*/
 	}
 	if(err == 0)
 	{
@@ -325,7 +331,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		
 		mkdir_p(info_dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 		FILE* list_file = fopen(list_file_name, "w");
-		deb_extract(	pkg_file,
+		deb_extract(	pkg_dest,
 				list_file,
 				extract_quiet | extract_data_tar_gz | extract_list,
 				NULL,
@@ -342,7 +348,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//extract control files
-		deb_extract(	pkg_file,
+		deb_extract(	pkg_dest,
 				stderr,
 				extract_control_tar_gz | extract_all_to_fs| extract_preserve_date | extract_unconditional,
 				control_name_prefix, 
@@ -359,7 +365,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	{
 		//check for file conflicts
 		unsigned long num_list_lines;
-		char** list_file_lines = get_file_lines(list_file, &num_list_lines);
+		char** list_file_lines = get_file_lines(list_file_name, &num_list_lines);
 
 
 		char* conf_file_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
@@ -378,9 +384,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 
 	
 
-		int install_root_len = strlen(install_root);
-		char* fs_terminated_install_root = install_root[install_root_len-1] == '/' ? strdup(install_root) : dynamic_strcat(2, install_root, "/");
-		list_file = fopen(list_file_name, "w");
+		FILE* list_file = fopen(list_file_name, "w");
 		int line_index;
 		for(line_index=0; line_index < num_list_lines && (!err) ; line_index++)
 		{
@@ -389,7 +393,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			{
 				if(list_file_lines[line_index][0] == '.' && list_file_lines[line_index][1] == '/' && list_file_lines[line_index][line_len-1] != '/')
 				{
-					char* adjusted_file_path = dynamic_strcat(2, install_root, fs_terminated_install_root, list_file_lines[line_index] + 2);
+					char* adjusted_file_path = dynamic_strcat(2, fs_terminated_install_root, list_file_lines[line_index] + 2);
 					int is_conf_file = conf_files != NULL ? 
 								(get_string_map_element(conf_files, adjusted_file_path) != NULL ? 1 : 0) : 
 								0;
@@ -425,7 +429,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//extract package files
-		deb_extract(	pkg_file,
+		deb_extract(	pkg_dest,
 				stderr,
 				extract_data_tar_gz | extract_all_to_fs| extract_preserve_date| extract_unconditional,
 				fs_terminated_install_root, 
@@ -446,6 +450,8 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		//run postinst
 	}
 
+
+	//cleanup
 
 	
 	if(pkg_dest != NULL) {free(pkg_dest); };
