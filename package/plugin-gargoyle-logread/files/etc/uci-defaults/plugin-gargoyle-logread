@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_logread='System Logs'
+uci set gargoyle.scripts.system_logread='logread.sh'
+uci set gargoyle.system.logread='311'
+uci commit
