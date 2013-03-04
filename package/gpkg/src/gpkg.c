@@ -4,7 +4,7 @@ int install_to(const char* pkg_file, const char* pkg_name, const char* install_r
 void update(opkg_conf* conf);
 
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root);
-int recursively_install(char* pkg_name, char* install_root, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
+int recursively_install(char* pkg_name, char* install_root, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 
 
@@ -221,7 +221,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	recursively_install(pkg_name, install_root_name, NULL, tmp_dir, conf, package_data, install_called_pkgs);
+	recursively_install(pkg_name, install_root_name, NULL, 0, tmp_dir, conf, package_data, install_called_pkgs);
 
 	
 
@@ -233,34 +233,55 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 }
 
 
-int recursively_install(char* pkg_name, char* install_root_name, char* link_to_root, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
 	
-	string_map* pkg_data    = get_string_map_element(package_data, pkg_name);
-	char* src_id            = get_string_map_element(pkg_data, "Source-ID");
-	char* pkg_filename      = get_string_map_element(pkg_data, "Filename");
-	char* install_root_path = get_string_map_element(conf->dest_names, install_root_name);
+	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
+	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
+	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
+	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
+	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
+	char* link_root_path            = link_to_root != NULL ? get_string_map_element(conf->dest_names, link_to_root) : NULL;
 	char* base_url = NULL;
 	char* pkg_dest = NULL;
+	string_map* files_to_link = NULL;
 
 
 	char* info_dir            = NULL;
 	char* control_name_prefix = NULL;
 	char* list_file_name      = NULL;
 	string_map* conf_files    = NULL;
+	string_map* copied_conf_files = NULL;
 
 	int install_root_len = strlen(install_root_path);
 	char* fs_terminated_install_root = install_root_path[install_root_len-1] == '/' ? strdup(install_root_path) : dynamic_strcat(2, install_root_path, "/");
 
-
-	//recurse
-	//
-	// IMPLEMENT ME!
-	//
-
-	if(src_id == NULL || pkg_filename == NULL || install_root_path)
+	int link_root_len;
+	char* fs_terminated_link_root = NULL;
+	if(link_root_path != NULL)
 	{
+		char* fs_terminated_link_root = link_root_path[link_root_len-1] == '/' ? strdup(link_root_path) : dynamic_strcat(2, link_root_path, "/");
+	}
+	set_string_map_element(install_called_pkgs, pkg_name, strdup("D"));
+
+
+
+	if(pkg_dependencies != NULL)
+	{
+		//recurse
+		unsigned long num_deps;
+		char** deps = get_string_map_keys(pkg_dependencies, &num_deps);
+		int dep_index;
+		for(dep_index=0; err == 0 && dep_index < num_deps && get_string_map_element(install_called_pkgs, deps[dep_index]) == NULL ; dep_index++)
+		{
+			err = recursively_install(deps[dep_index], install_root_name, link_to_root, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
+		}
+	}
+
+	if(err == 0 && src_id == NULL || pkg_filename == NULL || install_root_path)
+	{
+		//sanity check
 		err = 1;
 	}
 
@@ -303,10 +324,10 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	{
 		//check md5sum
 		char* md5sum = file_md5sum_alloc(pkg_dest);
-		char* expected_md5sum = (char*)get_string_map_element(pkg_data, "MD5Sum");
+		char* expected_md5sum = (char*)get_string_map_element(install_pkg_data, "MD5Sum");
 		
 		printf("md5sum         = %s\n", md5sum);
-		printf("package md5sum = %s\n", (char*)get_string_map_element(pkg_data, "MD5Sum"));
+		printf("package md5sum = %s\n", (char*)get_string_map_element(install_pkg_data, "MD5Sum"));
 
 		if(md5sum == NULL || expected_md5sum == NULL)
 		{
@@ -363,7 +384,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	}
 	if(err == 0)
 	{
-		//check for file conflicts
+		//check for file conflicts & correct list file to contain real root name in file paths
 		unsigned long num_list_lines;
 		char** list_file_lines = get_file_lines(list_file_name, &num_list_lines);
 
@@ -406,15 +427,25 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 					else
 					{
 						fprintf(list_file, "%s\n", adjusted_file_path);
+						if(link_root_path != NULL)
+						{
+							char* link_to_path = dynamic_strcat(2, fs_terminated_link_root, list_file_lines[line_index] + 2);
+							files_to_link = files_to_link == NULL ? initialize_string_map(1) : files_to_link;
+							set_string_map_element(files_to_link, adjusted_file_path, link_to_path);
+							//don't free link_to_path, should be freed with files_to_link map
+						}
+
 						if(is_conf_file && path_exists(adjusted_file_path))
 						{
 							char* tmp_conf_path = dynamic_strcat(2, tmp_dir, adjusted_file_path);
 							mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 							rm_r(tmp_conf_path);
 							rename(adjusted_file_path, tmp_conf_path);
-							free(tmp_conf_path);
+							copied_conf_files = copied_conf_files == NULL ? initialize_string_map(1) : copied_conf_files;
+							set_string_map_element(copied_conf_files, adjusted_file_path, tmp_conf_path);
+							//don't free tmp_conf_path, should be freed with copied_conf_files map 
 						}
-					}	
+					}
 					free(adjusted_file_path);
 	
 				}
@@ -425,6 +456,24 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//run preinst
+		char* script_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".preinst");
+		if(path_exists(script_path))
+		{
+			setenv("PKG_ROOT", install_root_path, 1);
+			if(link_root_path == NULL)
+			{
+				unsetenv("PKG_LINK_ROOT");
+			}
+			else
+			{
+				setenv("PKG_LINK_ROOT", link_root_path, 1);
+			}
+			char* cmd = dynamic_strcat(3, script_path, is_upgrade ? " upgrade " : " install ", pkg_name);
+			const char* argv[] = {"sh", "-c", cmd, NULL};
+			err = xsystem(argv);
+			free(cmd);
+		}
+		free(script_path);
 	}
 	if(err == 0)
 	{
@@ -440,14 +489,62 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			fprintf(stderr, "ERROR: could not extract application files from packge %s.\n", pkg_name);
 			fprintf(stderr, "       package file may be corrupt\n\n");
 		}
+
+		//move any conf files back
+		if(copied_conf_files != NULL)
+		{
+			unsigned long num_conf_paths;
+			char** conf_paths = get_string_map_keys(copied_conf_files, &num_conf_paths);
+			int conf_index;
+			for(conf_index=0; conf_index < num_conf_paths; conf_index++)
+			{
+				char* tmp_conf_path = get_string_map_element(copied_conf_files, conf_paths[conf_index]);
+				rm_r(conf_paths[conf_index]);
+				rename(tmp_conf_path, conf_paths[conf_index]);
+			}
+			destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_conf_paths);
+			copied_conf_files = NULL;
+		}
 	}
-	if(err == 0 && link_to_root != NULL)
+	if(err == 0 && files_to_link != NULL)
 	{
-		//symlink
+		unsigned long num_files;
+		char** real_files = get_string_map_keys(files_to_link, &num_files);
+		int file_index;
+		for(file_index=0;file_index < num_files; file_index++)
+		{
+			char* link_path = get_string_map_element(files_to_link, real_files[file_index]);
+			if(!path_exists(link_path))
+			{
+				mkdir_p(link_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+				rm_r(link_path);
+				symlink(real_files[file_index], link_path);
+			}
+		}
+		destroy_string_map(files_to_link, DESTROY_MODE_FREE_VALUES, &num_files);
+		files_to_link = NULL;
 	}
 	if(err == 0)
 	{
 		//run postinst
+		char* script_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".postinst");
+		if(path_exists(script_path))
+		{
+			setenv("PKG_ROOT", install_root_path, 1);
+			if(link_root_path == NULL)
+			{
+				unsetenv("PKG_LINK_ROOT");
+			}
+			else
+			{
+				setenv("PKG_LINK_ROOT", link_root_path, 1);
+			}
+			char* cmd = dynamic_strcat(3, script_path, is_upgrade ? " upgrade " : " install ", pkg_name);
+			const char* argv[] = {"sh", "-c", cmd, NULL};
+			err = xsystem(argv);
+			free(cmd);
+		}
+		free(script_path);
 	}
 
 
