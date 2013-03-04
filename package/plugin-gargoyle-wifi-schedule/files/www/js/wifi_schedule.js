@@ -7,17 +7,37 @@
  */
 
 /*
-
-/*
 TODO:
 • handle (not currently used, but some user might manually edit) crontabs with   * / 2   1,2,3,4,5   1-4,5 hours or days
+• add a monthly crontab to delete /tmp/cron-*.backup this script generates
+• wifi_status is barely glanced at in the wifi status
 
 ENHANCEMENTS:
-show current wifi state in a text box above the tables - the only way to see if wifi is up is via ifconfig/iwconfig
 2 buttons with manual WiFi up & WiFi down (toggle disabled)
-A disclosure triangle to show actual crontabs
+A disclosure triangle to show actual crontabs - I don't think is needed.
+  It would just confuse new users when the summary presents a natural language representation of the crontabs.
 */
 
+/* in this table:
+	+minutes represent an hour where wifi is up UNTIL that minute, where it goes down for the remainder of the hour
+	-minutes represent an hour where wifi is down UNTIL that minute, where it goes up for the remainder of the hour
+	 (- for when the hour starts wifi-off and some minutes later turns on)
+	 (+ for when the hour starts wifi-on and some minutes later turns on)
+	
+	all tables *display* positive minutes, but their .value may be positive or negative or 0 (fully off for the hour) or 60 (fully on)
+	an hour can only have negative minutes coming after an hour that was off (meaning this hour will go up) OR
+	 or after an hour that has positive minutes (@12:+05 goes down, up @ 13:-45)
+	
+	an hour can only have positive minutes coming after an hour that was on (meaning this hour will go down at some minutes) OR
+	 or after an hour that has positive minutes (was up at 23:+05, down @ 00:-55)
+*/
+
+/* version history
+v1.0 	initial release
+v1.1 	transition to storing positive/negative minutes in each table cell
+		display wifi status based on iwconfig & evaluate current time to find the wifi status @ current time
+		added diagonal gradients for cells with 1-59 minutes (Safari/Chrome/Firefox)
+*/
 
 //var showCronTabs=true; //comment this in to show the raw crontabs
 var showCronTabs=false  //comment this in to not show the raw crontabs
@@ -66,16 +86,12 @@ function generateCronTabStr(min, hour, day) {
 		return;
 	}
 	
-	if (new_cron_tabs.length > 0) {
-		previous_WiFi_state=new_cron_tabs[ new_cron_tabs.length-1 ].split(" ")[6];
-	}
-	
 	if (min == 0) {
 		a_cron_string="0 " + hour + " * * " + day_string + " " + garCronWIFI + " " + "down";
 	} else if (min == 60) {
 		a_cron_string="0 " + hour + " * * " + day_string + " " + garCronWIFI + " " + "up";
 	} else {
-		a_cron_string="" + min + " " + hour + " * * " + day_string + " " + garCronWIFI + " " + (previous_WiFi_state.search("up") >= 0 ? "down" : "up");
+		a_cron_string="" + Math.abs(min) + " " + hour + " * * " + day_string + " " + garCronWIFI + " " + (min > 0 ? "down" : "up");
 	}
 	
 	new_cron_tabs.push(a_cron_string);
@@ -104,11 +120,9 @@ function CronTabCull() {
 	culledTabs.length - 0;
 }
 
-function scanSettings() {
-	//this function will loop through the tabs & tables & generate a crontab for every hour
+function scanSettings() { //this function will loop through the tabs & tables & generate a crontab for every hour
 	var preceedingState=0;
 	new_cron_tabs.length = 0;
-	needs_initial_state=0;
 	weekdayperiod = [];
 		
 	for (var i = 0; i < timerMode; i++) {
@@ -122,21 +136,11 @@ function scanSettings() {
 		//step through the table
 		for( var j = 0; j < 24; j++ ) {
 			var aCell=aTable.rows[ (j < 12 ? 1 : 4) ].cells[ (j < 12 ? j : j-12) ].value;
-			if (j == 0 && i == 0 && (aCell > 0 && aCell < 60)) { needs_initial_state = 1; }
 			generateCronTabStr( aCell, j, i);
 			preceedingState=aCell;
 		}
 		if (timerMode == 3 && i == 0) {
 			weekdayperiod.push(new_cron_tabs.length); //start of weekdays
-		}
-	}
-	if (needs_initial_state == 1) { //we need an intial 0000 wifi state (found from terminal wifi state) to preceeed a 00XX crontab event
-		generateCronTabStr( 0, 0, 0);
-		var initial_crontab = new_cron_tabs.pop();
-		new_cron_tabs.splice(0, 0, initial_crontab);
-		if (timerMode == 3) {
-			weekdayperiod[0]++;
-			weekdayperiod[1]++;
 		}
 	}
 	CronTabCull();
@@ -183,15 +187,55 @@ function UpdateSummary() {  //summary is dynamically generated from parsed cront
 	}
 }
 
-//   Table functions	
-function ToggleTime(cell){
-	cell.value+=increment;
-	if (cell.value > 60) {
-		cell.value = 0;
+//   Table functions
+function PreviousCell(aday, ahour) {
+	if (ahour == 0) {
+		if (aday == 0) {
+			aday = timerMode-1;
+		} else {
+			aday--;
+		}
+		ahour = 23;
+	} else {
+		ahour--;
 	}
+	return document.getElementById("tab" + (1+aday) + "_timeTable").rows[ (ahour < 12 ? 1 : 4) ].cells[ (ahour < 12 ? ahour : ahour-12) ];
+}
+	
+function ToggleTime(cell){
+	var day_tab = -1;
+	var hour_cell = -1;
+	for ( var i = 0; i < timerMode; i++ ) {
+		var aTabTable = document.getElementById("tab" + (1+eval(i)) + "_timeTable");
+		if ( aTabTable.style.display == '') {
+			day_tab = eval( aTabTable.id.charAt(3) );
+			break;
+		}
+	}
+	hour_cell = cell.id.split("timer_ID_")[1];
+	
+	var previous_state=PreviousCell(day_tab-1, hour_cell).value;
+	
+	if ( previous_state == 60 || (previous_state > -60 && previous_state < 0) ) {
+		cell.value+=increment;
+		if (cell.value > 60) {
+			cell.value = 0;
+		}
+	} else {
+		if (cell.value == 60) {
+			cell.value = 0;
+		} else {
+			cell.value-=increment;
+		}
+		if (cell.value <= -60) {
+			cell.value = 60;
+		}
+	}
+		
 	ToggleTimerColor(cell);
     InitSummaryText();
 	UpdateSummary();
+	//AddSummaryText("previous to day: " + (day_tab-1) + ", hour:" + hour_cell + ", this was the value:" + PreviousCell(day_tab-1, hour_cell).value + "<br />\n");
 }
 
 function CleanTable(table) {
@@ -206,16 +250,36 @@ function PurgeTables() {
 	}
 }
 
+function CellGradient(cell) {
+	if (navigator.userAgent.match(/Safari/) || navigator.userAgent.match(/Chrome/)) {
+   		if (cell.value > 0) {
+			cell.style.backgroundImage = "-webkit-linear-gradient(70deg, #00ff00 0%,#44e664 45%,#e74c4c 55%,#ff0000 100%)";
+		} else {
+			cell.style.backgroundImage = "-webkit-linear-gradient(-70deg, #ff0000 0%,#e74c4c 45%,#44e664 55%,#00ff00 100%)";
+		}	
+	} else if (navigator.userAgent.match(/Firefox/)) {
+   		if (cell.value > 0) {
+			cell.style.backgroundImage = "-moz-linear-gradient(70deg, #00ff00 0%,#44e664 45%,#e74c4c 55%,#ff0000 100%)";
+		} else {
+			cell.style.backgroundImage = "-moz-linear-gradient(-70deg, #ff0000 0%,#e74c4c 45%,#44e664 55%,#00ff00 100%)";
+		}	
+	} else {
+		cell.style.backgroundColor = hour_partial_green;
+	}
+}
+
 function ToggleTimerColor(cell) {
 	if (cell.value == 0) {
 		cell.innerHTML = "&nbsp;";
 		cell.style.backgroundColor = hour_red;
+		cell.style.backgroundImage = "";
 	} else if (cell.value < 60) {
-		cell.style.backgroundColor = hour_partial_green;
-		cell.innerHTML = cell.value;
+		CellGradient(cell);
+		cell.innerHTML = Math.abs(cell.value);
 	} else {
 		cell.style.backgroundColor = hour_green;
 		cell.innerHTML = "&nbsp;";
+		cell.style.backgroundImage = "";
 	}
 }
 
@@ -316,8 +380,6 @@ function ShowTab(achor_tab) {
 	achor_tab.className = 'selected';
 }
 
-
-
 function SetupTabs(timer_style) {
 	var tab_li_items = document.getElementById("tab_ulist").childNodes;
 	var daycount = 0;
@@ -365,7 +427,6 @@ function SetTimerIncrement(timer_option) {
 function SetTimerMode(mode_option) {
 	timerMode=mode_option;
 	new_cron_tabs=[];
-	
 	if (mode_option == 0) {
 		document.getElementById("timer_mode").selectedIndex = 0;
 	}
@@ -381,61 +442,92 @@ function SetTimerMode(mode_option) {
 	}
 	InitSummaryText();
 	UpdateSummary();
-	AddSummaryText("raws" + raw_cron_tabs + "<br />\n");
 }
 
 //reading/parsing & encoding table data from crontabs
-function FinalizeTables(initial_wifi_state) {
-	var current_wifi_state = initial_wifi_state;
+function FinalizeTables() {
+	//loop through table, save the initial crontab event of the first 1to59 or -1to-59 or 1000 or -1000 minutes
+	//loop through the table, filling in as needed
+	//at the end, fill in from first cell to inital event the last state found at the end of the period
+	var initial_crontab = new Array();
+	var previous_wifi_state = 0;
+	
 	for (var i = 0; i < timerMode; i++) {
 		for (var j = 0; j < 24; j++ ) {
 			var acell = document.getElementById("tab" + (1+i) + "_timeTable").rows[ (j < 12 ? 1 : 4) ].cells[ (j < 12 ? j : j-12) ];
 			//AddSummaryText("hour" + (j) + "value: " + acell.value + "<br />\n");
-			if (acell.value == 60) {
-				if (current_wifi_state > 0) {
-					acell.value = 60;
-					acell.style.backgroundColor = hour_green;
-					acell.innerHTML = "&nbsp;";
-				} else {
-					acell.value = 0;
-					acell.style.backgroundColor = hour_red;
-					acell.innerHTML = "&nbsp;";
+			if (acell.value != 60 && initial_crontab.length == 0 ) {
+				initial_crontab[0]=i;
+				initial_crontab[1]=j;
+				previous_wifi_state=(acell.value > 0 ? 1 : -1);
+				//AddSummaryText("Initial event: day:" + i + "-hour:" + j + "value: " + acell.value + "<br />\n");
+			}
+			
+			if (acell.value == 1000) {
+				acell.value = 60;
+				acell.style.backgroundColor = hour_green;
+				acell.innerHTML = "&nbsp;";
+				previous_wifi_state = 1;
+			} else if (acell.value == -1000) {
+				acell.value = 0;
+				acell.style.backgroundColor = hour_red;
+				acell.innerHTML = "&nbsp;";
+				previous_wifi_state = -1;
+			} else if (acell.value == 60) { //default fill value
+				if ( previous_wifi_state != 0 && initial_crontab.length > 0 ) {
+					if (previous_wifi_state > 0) {
+						acell.value = 60;
+						acell.style.backgroundColor = hour_green;
+						acell.innerHTML = "&nbsp;";
+						previous_wifi_state = 1;
+					} else {
+						acell.value = 0;
+						acell.style.backgroundColor = hour_red;
+						acell.innerHTML = "&nbsp;";
+						previous_wifi_state = -1;
+					}
 				}
-			} else if (acell.value > 0) { //hard crontab wifi up
-				if (acell.value > 60) {
-					acell.value = 60;
-					acell.style.backgroundColor = hour_green;
-					acell.innerHTML = "&nbsp;";
-				} //minutes set on wifi up are already properly done
-				current_wifi_state=1;
-			} else if (acell.value < 0) { //hard crontab wifi down
-				if (acell.value == -1) {
-					acell.value = 0;
-					acell.style.backgroundColor = hour_red;
-					acell.innerHTML = "&nbsp;";
+			} else { //minutes
+				if (acell.value > 0) {
+					acell.innerHTML = acell.value;	
+					previous_wifi_state = -1; //the hour started with uptime, but some minutes it, wifi went down;			
 				} else {
-					acell.value = acell.value*-1;
-					acell.style.backgroundColor = hour_partial_green;
-					acell.innerHTML = acell.value;
+					acell.innerHTML = Math.abs(acell.value);
+					previous_wifi_state = 1;				
 				}
-				current_wifi_state=-1;
+				CellGradient(acell);
 			}
 		}
 	}
-}
-
-function FindTerminalWifiState() {
-	//loop backwards in the cycle; return final cell value
-	for (var i = timerMode; i > 0; i--) {
-		for (var j = 23; j >= 0; j--) {
-			var acell = document.getElementById("tab" + i + "_timeTable").rows[ (j < 12 ? 1 : 4) ].cells[ (j < 12 ? j : j-12) ];
-			if (acell.value != 60) {
-				return acell.value;
+	
+	//fill in span from 0day,0hour to intial crontab
+	if (initial_crontab.length > 0) {
+		//work backward filling in the gaps
+		var initial_state = PreviousCell(0, 0).value;
+		for (var k = 0; k < timerMode; k++) {
+			for (var m = 0; m < 24; m++ ) {
+				if (k == initial_crontab[0] && m == initial_crontab[1]) { k=20; break; }
+				var bcell = document.getElementById("tab" + (1+k) + "_timeTable").rows[ (m < 12 ? 1 : 4) ].cells[ (m < 12 ? m : m-12) ];
+				if (initial_state == 60) {
+					bcell.value = 60;
+					bcell.style.backgroundColor = hour_green;
+					bcell.innerHTML = "&nbsp;";
+				} else if (initial_state == 0) {
+					bcell.value = 0;
+					bcell.style.backgroundColor = hour_red;
+					bcell.innerHTML = "&nbsp;";
+				} else if (initial_state > 0) { //it went down at the end of the cycle
+					bcell.value = 0;
+					bcell.style.backgroundColor = hour_red;
+					bcell.innerHTML = "&nbsp;";
+				} else if (initial_state < 0) { //it went up at the end of the cycle
+					bcell.value = 60;
+					bcell.style.backgroundColor = hour_green;
+					bcell.innerHTML = "&nbsp;";
+				}
 			}
-			//AddSummaryText("&nbsp;&nbsp;table: " + (1+i) + " hour "+ j + "<br />\n");
 		}
 	}
-	return 0;
 }
 
 function SeatCronData(cron_minute, cron_hour, cron_day, cron_cmd) {
@@ -448,15 +540,15 @@ function SeatCronData(cron_minute, cron_hour, cron_day, cron_cmd) {
 	
 	if (ecron_minute > 0 && ecron_minute < 60) {
 		ecell.value = ecron_minute;
-		if (cron_cmd.search("down")>=0) { ecell.value = ecell.value*-1; }
-		ecell.style.backgroundColor = hour_partial_green;
+		if (cron_cmd.search("up")>=0) { ecell.value = ecell.value*-1; }
+		CellGradient(ecell);
 		ecell.innerHTML = ecell.value;
 	} else if (cron_cmd.search("up")>=0) {
 		ecell.value = 1000;
 		ecell.style.backgroundColor = hour_green;
 		ecell.innerHTML = "60";
 	}  else if (cron_cmd.search("down")>=0) {
-		ecell.value = -1;
+		ecell.value = -1000;
 		ecell.style.backgroundColor = hour_red;
 		ecell.innerHTML = "-1";
 	}
@@ -493,9 +585,7 @@ function CronTabsToTables() {
 			}
 		}		
 	}
-	var end_state = FindTerminalWifiState(); //cell represents the terminal wifi state of the cycle
-	//AddSummaryText("&nbsp;&nbsp;ending state: " + end_state + "<br />\n");
-	FinalizeTables(end_state);
+	FinalizeTables();
 }
 
 function LoadCrontabs() {
@@ -503,8 +593,10 @@ function LoadCrontabs() {
 	var foundDailySched = 0;
 	var found511Sched = 0;
 	var foundWeekend=0;
+	var foundWeekday=0;
 	var foundWeeklySched = 0;
-	
+	var current_wifi = []; // array members: 0=current day, 1=current hour, 2=current minute, 3-translated day
+
 	InitSummaryText();
 	
 	for ( var i=0; i < raw_cron_data.length; i++ ) {
@@ -524,6 +616,7 @@ function LoadCrontabs() {
 			
 		} else if (found_wifi_cron_tabs[j].split(" ")[4] == "1-5") {
 		 	found511Sched++; //511 (weedkay + sat + sun
+		 	foundWeekday++;
 		} else if (  found_wifi_cron_tabs[j].split(" ")[4].match(/[1-5]/g) >= 0  ) {
 			// there could also be this:   */2    1,2,3,4,5   1-4,5
 			foundWeeklySched++; //weekly
@@ -534,7 +627,7 @@ function LoadCrontabs() {
 	if (foundDailySched && (found511Sched == 0 && foundWeekend == 0 && foundWeeklySched == 0) ) {
 		timerMode=1;
 		document.getElementById("timer_mode").selectedIndex=1;
-	} else if ( (foundWeekend || found511Sched) && (foundWeeklySched == 0) ) {
+	} else if ( foundWeekday || ((foundWeekend || found511Sched) && (foundWeeklySched == 0)) ) {
 		timerMode=3;
 		document.getElementById("timer_mode").selectedIndex=2;
 	} else if (foundWeeklySched || foundWeekend) {
@@ -542,11 +635,43 @@ function LoadCrontabs() {
 		document.getElementById("timer_mode").selectedIndex=3;
 	} //else timerMode remains disabled
 	
-	//AddSummaryText("Mode: " + timerMode + "<br />\n");
-	
 	if (timerMode > 0) {
 		document.getElementById('div_timer_increment').style.display = 'block';
 		CronTabsToTables();
+	}
+	
+	//show wifi radio status relative to schedule
+	current_wifi[0]=eval(weekly_time.split("-")[0]);
+	current_wifi[1]=eval(weekly_time.split("-")[1]);
+	current_wifi[2]=eval(weekly_time.split("-")[2]);
+	
+	if (timerMode == 1) {
+		current_wifi[3] = 0;
+	} else if (timerMode == 3) {
+		if ( current_wifi[0] >0 && current_wifi[0] < 6) {
+			current_wifi[3] = 1;
+		} else if (current_wifi[0] == 6) {
+			current_wifi[3] = 2;
+		} else {
+			current_wifi[3] = 0;
+		}
+	} else {
+		current_wifi[3] = current_wifi[0];
+	}
+	if (found_wifi_cron_tabs.length > 0 && timerMode > 0) { 
+		var acell = document.getElementById("tab" + (current_wifi[3]+1) + "_timeTable").rows[ (current_wifi[1] < 12 ? 1 : 4) ].cells[ (current_wifi[1] < 12 ? current_wifi[1] : current_wifi[1]-12) ];
+		
+		if (acell.value == 60 || acell.value == 0) {
+			setChildText("wlan_status", (acell.value > 0 ? "active (scheduled)" : "disabled (scheduled)") );
+		} else {
+			if (acell.value > 0) {
+				setChildText("wlan_status", (acell.value > current_wifi[2] ? "active (scheduled)" : "disabled (scheduled)") );
+			} else {
+				setChildText("wlan_status", (current_wifi[2] > Math.abs(acell.value) ? "active (scheduled)" : "disabled (scheduled)") );
+			}
+		}
+	} else {
+		setChildText("wlan_status", (wifi_status.toString().length > 15 ? "active" : "disabled") );
 	}
 	UpdateSummary();
 }
