@@ -3,18 +3,23 @@
 	# This webpage is copyright ¬© 2013 by BashfulBladder 
 	# There is not much to this page, so this is public domain 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js"
+	gargoyle_header_footer -h -s "connection" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js"
 
 ?>
 
 <script>
 <!--
 <?
-	echo "var cron_data = new Array();";
+	echo "var cron_data = new Array();"
 	if [ -e /etc/crontabs/root ] ; then
 		awk '{gsub(/"/, "\\\""); print "cron_data.push(\""$0"\");" }' /etc/crontabs/root
 	fi
 	echo "var current_time=\"`date \"+%Y%m%d-%H%M\"`\";"
+	echo "var weekly_time=\"`date \"+%w-%H-%M\"`\";"
+		
+	echo "var wifi_status = new Array();"
+	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
+
 ?>
 
 var raw_cron_data = new Array();
@@ -39,6 +44,13 @@ for (tab_idx in cron_data) {
 </style>
 
 <fieldset id="wifi_schedule">
+	<div id='wlan_stat'>
+		<label class='leftcolumn'>Wireless radio(s) status:</label>
+		<span class='rightcolumn' id='wlan_status'></span>
+	</div>
+
+	<div class="internal_divider"></div>
+
 	<legend class="sectionheader">WiFi Schedule</legend>
 	<select id='timer_mode' onchange='SetTimerMode(this.value)'>
 		<option selected value='0'>Disable timer</option>
@@ -47,7 +59,8 @@ for (tab_idx in cron_data) {
 		<option value='7'>Weekly</option>
 	</select>
 
-	<br/><br/>
+	<br/>
+	<br/>
 
 	<div id="div_timer_increment" style="display:none;">
 		<label>Timer increment:</label>
@@ -113,5 +126,5 @@ for (tab_idx in cron_data) {
 </script>
 
 <?
-	gargoyle_header_footer -f -s "system" -p "wifi_schedule"
+	gargoyle_header_footer -f -s "connection" -p "wifi_schedule"
 ?>
