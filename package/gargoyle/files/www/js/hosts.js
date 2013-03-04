@@ -204,9 +204,10 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		    		[whost[0], whost[3], whost[5]], 
 				[whost[0], whost[2], whost[1]] 
 				];
-		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] ); 
+		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] );
 		mbs[0] = (mbs[0]).toUpperCase();
-	
+		mbs[1] = mbs[1] + " Mbit/s";
+
 		var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; } 
 
 		var sig = parseInt(mbs[2]);
@@ -215,10 +216,9 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		color = sig >= -70 && sig < -60 ? "#" + toHexTwo(170-(170*(sig+70)/10.0)) + "AA00" : color;
 		color = sig >= -60 ? "#00AA00" : color;
 		var sigSpan = document.createElement("span");
-		sigSpan.appendChild(document.createTextNode(""+mbs[2]));
+		sigSpan.appendChild(document.createTextNode(mbs[2] + " dBm"));
 		sigSpan.style.color = color;
 		mbs[2] = sigSpan;
-
 		
 
 		var ip = arpHash[ mbs[0] ] == null ? "unknown" : arpHash[ mbs[0] ] ;
