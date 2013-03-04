@@ -318,9 +318,9 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			printf("ERROR: MD5Sum mismatch for %s package\n", pkg_name);
 			err = 1;
 		}
-		/*
+		
 		if(md5sum != NULL) { free(md5sum); }
-		*/
+		
 	}
 	if(err == 0)
 	{
