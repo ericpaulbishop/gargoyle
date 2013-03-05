@@ -158,17 +158,17 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	/* error checking before we start install */
 	if(install_pkg_data == NULL || install_status == NULL)
 	{
-		printf("ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+		fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 		exit(1);
 	}
 	if(install_status == NULL || strstr(install_status, "installed ") != NULL)
 	{
-		printf("ERROR: Package %s is already installed\n\n", pkg_name);
+		fprintf(stderr, "ERROR: Package %s is already installed\n\n", pkg_name);
 		exit(1);
 	}
 	if(will_fit == NULL || strcmp(will_fit, "true") != 0)
 	{
-		printf("ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
+		fprintf(stderr, "ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
 		exit(1);
 	}
 
@@ -215,7 +215,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	char* tmp_dir = (char*)malloc(1024);
 	if(create_tmp_dir("/tmp", &tmp_dir) != 0)
 	{
-		printf("ERROR: Could not create tmp dir, exiting\n");
+		fprintf(stderr, "ERROR: Could not create tmp dir, exiting\n");
 		exit(1);
 	}
 	
@@ -225,7 +225,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 	if(err)
 	{
-		printf("an error occurred\n");
+		fprintf(stderr, "an error occurred\n");
 	}
 	
 
@@ -270,7 +270,6 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	set_string_map_element(install_called_pkgs, pkg_name, strdup("D"));
 
 
-
 	if(pkg_dependencies != NULL)
 	{
 		//recurse
@@ -286,6 +285,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 				if(strstr(dep_status, " half-installed") != NULL)
 				{
 					err = recursively_install(deps[dep_index], install_root_name, link_to_root, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
+					
 				}
 			}
 			else
@@ -297,11 +297,13 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 
 	if(err == 0 && src_id == NULL || pkg_filename == NULL || install_root_path == NULL)
 	{
-		printf("here pkg name = %s\n", pkg_name);
 		//sanity check
 		err = 1;
 	}
-
+	if(err == 0)
+	{
+		printf("Preparing to install package %s...\n", pkg_name);
+	}
 	if(err == 0)
 	{
 		//determine source url
@@ -316,7 +318,9 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 
 	if(err == 0)
 	{
+		
 		//download package
+		printf("\tDownloading...\n");
 		char* src_url  = dynamic_strcat(3, base_url, "/", pkg_filename);
 		pkg_dest = dynamic_strcat(3, tmp_dir, "/", pkg_name);
 		FILE* package_file = fopen(pkg_dest, "w");
@@ -331,7 +335,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		}
 		if(err == 1)
 		{
-			printf("ERROR: Could not download package %s\n", pkg_name);
+			fprintf(stderr, "ERROR: Could not download package %s\n", pkg_name);
 		}
 		free(src_url);
 
@@ -343,18 +347,22 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		char* md5sum = file_md5sum_alloc(pkg_dest);
 		char* expected_md5sum = (char*)get_string_map_element(install_pkg_data, "MD5Sum");
 		
-		printf("md5sum         = %s\n", md5sum);
-		printf("package md5sum = %s\n", (char*)get_string_map_element(install_pkg_data, "MD5Sum"));
+		//printf("md5sum         = %s\n", md5sum);
+		//printf("package md5sum = %s\n", (char*)get_string_map_element(install_pkg_data, "MD5Sum"));
 
 		if(md5sum == NULL || expected_md5sum == NULL)
 		{
-			printf("ERROR: Expected MD5Sum for %s not specified, cannot verify package\n", pkg_name);
+			fprintf(stderr, "ERROR: Expected MD5Sum for %s not specified, cannot verify package\n", pkg_name);
 			err = 1;
 		}
 		else if (safe_strcmp(md5sum, expected_md5sum) != 0)
 		{
-			printf("ERROR: MD5Sum mismatch for %s package\n", pkg_name);
+			fprintf(stderr, "ERROR: MD5Sum mismatch for %s package\n", pkg_name);
 			err = 1;
+		}
+		else
+		{
+			printf("\tDownloaded %s successfully.\n\tInstalling %s...\n", pkg_name, pkg_name);
 		}
 		
 		if(md5sum != NULL) { free(md5sum); }
@@ -562,6 +570,10 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			free(cmd);
 		}
 		free(script_path);
+	}
+	if(err == 0)
+	{
+		printf("\tSuccessfully installed %s.\n", pkg_name);
 	}
 
 
