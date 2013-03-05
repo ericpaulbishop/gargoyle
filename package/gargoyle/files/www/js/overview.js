@@ -211,5 +211,23 @@ function resetData()
 
 	setChildText("qos_upload", qosUploadStatus);
 	setChildText("qos_download", qosDownloadStatus);
-}
 
+	var portsColumns=['Port', 'Status'];
+	var idx;
+	var portsTableData = [];
+	if (ports.length > 0)
+	{
+		for(idx=0; idx < ports.length; idx++)
+		{
+			portsTableData.push( [ ports[idx][0], ports[idx][1] ] );
+		}
+
+		var portsTable=createTable(portsColumns, portsTableData, 'ports_table', false, false);
+		var tableContainer = document.getElementById('ports_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(portsTable);
+	}
+}
