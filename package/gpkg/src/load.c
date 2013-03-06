@@ -3,8 +3,15 @@
 
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
+
 void free_pkg_func(char* key, void* value);
 void free_recursive_pkg_vars_func(char* key, void* value);
+
+
+static int   __found_package_that_depends_on = 0;
+static char* __package_to_test_depends_on = NULL;
+void something_depends_on_func(char* key, void* value);
+
 
 
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
@@ -522,6 +529,37 @@ void free_recursive_pkg_vars_func(char* key, void* value)
 void free_recursive_pkg_vars(string_map* package_data)
 {
 	apply_to_every_string_map_value(package_data, free_recursive_pkg_vars_func);
+}
+
+
+
+void something_depends_on_func(char* key, void* value)
+{
+	if(__found_package_that_depends_on == 0)
+	{
+		string_map* pkg = (string_map*)value;
+		string_map* dep_map = get_string_map_element(pkg, "Required-Depends");
+		string_map* install_time = get_string_map_element(pkg, "Installed-Time");
+		if(dep_map != NULL && install_time != NULL) //check install_time to verify package is installed
+		{
+			__found_package_that_depends_on = get_string_map_element(dep_map, __package_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
+		}
+	}
+
+}
+int something_depends_on(string_map* package_data, char* package_name)
+{
+	int ret;
+	__package_to_test_depends_on = package_name;
+	ret = __found_package_that_depends_on = 0;
+
+	apply_to_every_string_map_value(package_data, something_depends_on_func);
+
+	ret = __found_package_that_depends_on;
+	__package_to_test_depends_on = NULL;
+	__found_package_that_depends_on = 0;
+	return ret;
+
 }
 
 

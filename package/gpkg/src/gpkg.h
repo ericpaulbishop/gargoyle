@@ -62,7 +62,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
 void free_package_data(string_map* package_data);
 void free_recursive_pkg_vars(string_map* package_data);
-
+int something_depends_on(string_map* package_data, char* package_name);
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path);
 
 
