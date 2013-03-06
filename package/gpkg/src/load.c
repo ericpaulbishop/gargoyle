@@ -8,8 +8,9 @@ void free_pkg_func(char* key, void* value);
 void free_recursive_pkg_vars_func(char* key, void* value);
 
 
-static int   __found_package_that_depends_on = 0;
-static char* __package_to_test_depends_on = NULL;
+static int         __found_package_that_depends_on = 0;
+static char*       __package_name_to_test_depends_on = NULL;
+static string_map* __package_data_to_test_depends_on = NULL;
 void something_depends_on_func(char* key, void* value);
 
 
@@ -542,24 +543,35 @@ void something_depends_on_func(char* key, void* value)
 		string_map* install_time = get_string_map_element(pkg, "Installed-Time");
 		if(dep_map != NULL && install_time != NULL) //check install_time to verify package is installed
 		{
-			__found_package_that_depends_on = get_string_map_element(dep_map, __package_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
+			__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
+			if(__found_package_that_depends_on)
+			{
+				//test for mutual dependency, return 0 in that case
+				dep_map = get_string_map_element(__package_data_to_test_depends_on, "Required-Depends");
+				if(dep_map != NULL)
+				{
+					__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
+
+				}
+			}
 		}
 	}
-
 }
 int something_depends_on(string_map* package_data, char* package_name)
 {
 	int ret;
-	__package_to_test_depends_on = package_name;
+	__package_name_to_test_depends_on = package_name;
+	__package_data_to_test_depends_on = get_string_map_element(package_data, package_name);
 	ret = __found_package_that_depends_on = 0;
-
-	apply_to_every_string_map_value(package_data, something_depends_on_func);
-
+	if(__package_data_to_test_depends_on != NULL)
+	{
+		apply_to_every_string_map_value(package_data, something_depends_on_func);
+	}
 	ret = __found_package_that_depends_on;
-	__package_to_test_depends_on = NULL;
+	__package_name_to_test_depends_on = NULL;
+	__package_data_to_test_depends_on = NULL;
 	__found_package_that_depends_on = 0;
 	return ret;
-
 }
 
 

@@ -114,6 +114,13 @@ void do_remove(opkg_conf* conf, char* pkg_name)
 
 }
 
+void remove_individual_package(string_map* package_data, char* pkg_name)
+{
+
+}
+
+
+
 
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 {
