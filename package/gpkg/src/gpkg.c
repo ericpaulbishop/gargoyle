@@ -11,7 +11,9 @@ int recursively_install(char* pkg_name, char* install_root, char* link_to_root, 
 int main(void)
 {
 	rm_r("/tmp/plugin_root/");
+	rm_r("/tmp/plugin_test/");
 	mkdir_p("/tmp/plugin_root", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+	mkdir_p("/tmp/plugin_test", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 	
 
 
@@ -221,7 +223,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_root_name, NULL, 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_root_name, "plugin_test", 0, tmp_dir, conf, package_data, install_called_pkgs);
 
 	if(err)
 	{
@@ -265,7 +267,8 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	char* fs_terminated_link_root = NULL;
 	if(link_root_path != NULL)
 	{
-		char* fs_terminated_link_root = link_root_path[link_root_len-1] == '/' ? strdup(link_root_path) : dynamic_strcat(2, link_root_path, "/");
+		link_root_len = strlen(link_root_path);
+		fs_terminated_link_root = link_root_path[link_root_len-1] == '/' ? strdup(link_root_path) : dynamic_strcat(2, link_root_path, "/");
 	}
 	set_string_map_element(install_called_pkgs, pkg_name, strdup("D"));
 
