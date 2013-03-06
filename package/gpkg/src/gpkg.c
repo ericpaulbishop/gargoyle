@@ -83,6 +83,34 @@ void update(opkg_conf* conf)
 }
 
 
+void do_remove(opkg_conf* conf, char* pkg_name)
+{
+	string_map* package_data       = initialize_string_map(1);
+	string_map* matching_packages  = initialize_string_map(1);
+	string_map* pkgs_to_remove     = initialize_string_map(1);
+	unsigned long num_destroyed;
+
+	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
+	
+	string_map* install_pkg_data = get_string_map_element(package_data, pkg_name);
+	char* install_status = get_string_map_element(install_pkg_data, "Status");
+
+	/* error checking before we start install */
+	if(install_pkg_data == NULL || install_status == NULL)
+	{
+		fprintf(stderr, "ERROR: No package named %s found, cannot uninstall\n\n", pkg_name);
+		exit(1);
+	}
+	if(install_status == NULL || strstr(install_status, " installed") == NULL )
+	{
+		fprintf(stderr, "ERROR: Package %s not installed, cannot uninstall\n\n", pkg_name);
+		exit(1);
+	}
+
+
+}
 
 
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
@@ -162,7 +190,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 		fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 		exit(1);
 	}
-	if(install_status == NULL || strstr(install_status, "installed ") != NULL)
+	if(install_status == NULL || strstr(install_status, " installed") != NULL)
 	{
 		fprintf(stderr, "ERROR: Package %s is already installed\n\n", pkg_name);
 		exit(1);
@@ -223,18 +251,50 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 	string_map* install_called_pkgs = initialize_string_map(1);
 	int err = recursively_install(pkg_name, install_root_name, "plugin_test", 0, tmp_dir, conf, package_data, install_called_pkgs);
+	
+	//remove tmp dir -- need to do this whether or not there is an error
+	rm_r(tmp_dir);
+	free(tmp_dir);
+	
 
 	if(err)
 	{
 		fprintf(stderr, "an error occurred\n");
+		//call remove function to do cleanup of partial install
+		//DO NOT EXIT HERE, fixup status file below
 	}
 	
 
-	
-	
+	//set status of new packages to installed on success, and remove on failure
+	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
+	{	
+		string_map* pkg = get_string_map_element(install_root_status, install_pkg_list[pkg_index]);
+		if(pkg != NULL)
+		{
+			if(!err)
+			{
+				char* status = get_string_map_element(pkg, "Status");
+				if(strstr(status, " half-installed") != NULL)
+				{
+					char* status_parts[3] = { "install", "ok", "installed" };
+					status_parts[1] = strcmp(pkg_name, install_pkg_list[pkg_index]) == 0 ? "user" : status_parts[1];
+					char* new_status = dynamic_strcat(5, status_parts[0], " ", status_parts[1], " ", status_parts[2]);
+					char* old_status = set_string_map_element(pkg, "Status", new_status);
+					free_if_not_null(old_status);
+				}
+			}
+			else
+			{
+				unsigned long num_destroyed;
+				pkg = remove_string_map_element(install_root_status, install_pkg_list[pkg_index]);
+				destroy_string_map(pkg, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+			}
+		}
+	}
+	save_package_data_as_status_file(install_root_status, install_root_status_path);
 
 	
-
 }
 
 
@@ -585,6 +645,8 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	}
 	if(err == 0)
 	{
+		// remove downloaded package file in tmp dir & print success
+		rm_r(pkg_dest);
 		printf("\tSuccessfully installed %s.\n", pkg_name);
 	}
 
