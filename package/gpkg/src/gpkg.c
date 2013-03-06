@@ -242,6 +242,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 {
 	int err=0;
 	
+	/* variables not allocated in this function, do not need to be freed */
 	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
 	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
@@ -249,10 +250,10 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
 	char* link_root_path            = link_to_root != NULL ? get_string_map_element(conf->dest_names, link_to_root) : NULL;
 	char* base_url = NULL;
+	
+	/* variables that may need to be freed */
 	char* pkg_dest = NULL;
 	string_map* files_to_link = NULL;
-
-
 	char* info_dir            = NULL;
 	char* control_name_prefix = NULL;
 	char* list_file_name      = NULL;
@@ -316,6 +317,11 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			base_url = (char*)get_string_map_element(src_lists[src_list_index], src_id);
 		}
 		err = base_url == NULL ? 1 : err;
+		if(err == 1)
+		{
+			fprintf(stderr, "ERROR: Could determine download  URL for package %s\n", pkg_name);
+		}
+
 	}
 
 	if(err == 0)
@@ -429,6 +435,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			}
 			free_null_terminated_string_array(conf_file_lines);
 		}
+		free(conf_file_path);
 
 	
 
@@ -479,6 +486,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			}
 		}
 		fclose(list_file);
+		if(list_file_lines != NULL) { free_null_terminated_string_array(list_file_lines); }
 	}
 	if(err == 0)
 	{
@@ -530,6 +538,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 				rename(tmp_conf_path, conf_paths[conf_index]);
 			}
 			destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_conf_paths);
+			if(conf_paths != NULL ) { free_null_terminated_string_array(conf_paths); }
 			copied_conf_files = NULL;
 		}
 	}
@@ -549,6 +558,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 			}
 		}
 		destroy_string_map(files_to_link, DESTROY_MODE_FREE_VALUES, &num_files);
+		free_null_terminated_string_array(real_files);
 		files_to_link = NULL;
 	}
 	if(err == 0)
@@ -580,9 +590,19 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 
 
 	//cleanup
+	unsigned long num_destroyed;
+	free_if_not_null(pkg_dest);
+	free_if_not_null(info_dir);
+	free_if_not_null(control_name_prefix);
+	free_if_not_null(list_file_name);
+	free_if_not_null(fs_terminated_install_root);
+	free_if_not_null(fs_terminated_link_root);
+	if(files_to_link != NULL)   { destroy_string_map(files_to_link,     DESTROY_MODE_FREE_VALUES, &num_destroyed); }
+	if(conf_files != NULL)      { destroy_string_map(conf_files,        DESTROY_MODE_FREE_VALUES, &num_destroyed); }
+	if(copied_conf_files!= NULL){ destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
 
-	
-	if(pkg_dest != NULL) {free(pkg_dest); };
+
+
 
 	return err;
 }

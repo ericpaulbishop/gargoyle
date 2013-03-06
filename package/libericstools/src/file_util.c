@@ -56,21 +56,21 @@ int create_tmp_dir(const char* tmp_root, char** tmp_dir)
 
 /*
 returns:
- 0 if path doesn't exist
- 1 if path is regular file
- 2 if path is directory
- 3 if path is symbolic link
- 4 if path exists and is something else
+ PATH_DOES_NOT_EXIST  (0) if path doesn't exist
+ PATH_IS_REGULAR_FILE (1) if path is regular file
+ PATH_IS_DIRECTORY    (2) if path is directory
+ PATH_IS_SYMLINK      (3) if path is symbolic link
+ PATH_IS_OTHER        (4) if path exists and is something else
  */
 int path_exists(const char* path)
 {
 	struct stat fs;
-	int exists = stat(path,&fs) >= 0 ? 4 : 0;
+	int exists = stat(path,&fs) >= 0 ? PATH_IS_OTHER : PATH_DOES_NOT_EXIST;
 	if(exists > 0)
 	{
-		exists = S_ISREG(fs.st_mode) ? 1 : exists;
-		exists = S_ISDIR(fs.st_mode) ? 2 : exists;
-		exists = S_ISLNK(fs.st_mode) ? 3 : exists;
+		exists = S_ISREG(fs.st_mode) ? PATH_IS_REGULAR_FILE  : exists;
+		exists = S_ISDIR(fs.st_mode) ? PATH_IS_DIRECTORY  : exists;
+		exists = S_ISLNK(fs.st_mode) ? PATH_IS_SYMLINK : exists;
 	}
 	return exists;
 }
