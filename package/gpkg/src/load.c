@@ -125,6 +125,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		set_string_map_element(load_variable_map, "Status",  all_dummy);
 		set_string_map_element(load_variable_map, "Depends", all_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
+		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
 	}
 	else
 	{
@@ -135,6 +136,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	int save_destination      = get_string_map_element(load_variable_map, "Install-Destination") != NULL ? 1 : 0 ;
 	int save_user_installed   = get_string_map_element(load_variable_map, "User-Installed")      != NULL ? 1 : 0 ;
 	int save_src_id           = get_string_map_element(load_variable_map, "Source-ID")           != NULL ? 1 : 0 ;
+
 
 
 	list* file_list = initialize_list();
@@ -551,7 +553,6 @@ void something_depends_on_func(char* key, void* value)
 				if(dep_map != NULL)
 				{
 					__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
-
 				}
 			}
 		}
