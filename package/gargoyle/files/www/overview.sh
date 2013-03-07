@@ -85,6 +85,8 @@
 		echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq )"\";"
 	fi
 
+	echo "var ports = new Array();"
+	/usr/lib/gargoyle/switchinfo.sh
 ?>
 //-->
 </script>
@@ -115,9 +117,9 @@
 		<div>
 			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
- 		<div>
- 			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)</span>
- 		</div>
+		<div>
+			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)</span>
+		</div>
 		<div class="internal_divider"></div>
 	</div>
 
@@ -162,6 +164,9 @@
 		</div>
 		<div>
 			<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class="rightcolumnonly"><div id="ports_table_container"></div></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>
