@@ -113,7 +113,15 @@ function resetData()
 			document.getElementById("wan_3g_container").style.display = "none";
 		}
 
-		setChildText("wireless_mode", wirelessMode);
+		if(wifi_status.toString().length == 0 && wirelessModeId != "disabled")
+		{
+			setChildText("wireless_mode", wirelessMode+" (disabled)");
+		}
+		else
+		{
+			setChildText("wireless_mode", wirelessMode);
+		}
+
 		if(wirelessModeId != "disabled")
 		{
 			var allWifiIfaceSections  = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
@@ -184,7 +192,7 @@ function resetData()
 				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : "SSID Joined by Client:"))
 				if(currentWirelessMacs.length > 0 && otherIsSta){ setChildText("wan_mac", currentWirelessMacs[0]); }
 			}
-			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "" );
+			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "-" );
 
 		}
 		else

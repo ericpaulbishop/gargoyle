@@ -87,6 +87,9 @@
 
 	echo "var ports = new Array();"
 	/usr/lib/gargoyle/switchinfo.sh
+
+	echo "var wifi_status = new Array();"
+	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 ?>
 //-->
 </script>
