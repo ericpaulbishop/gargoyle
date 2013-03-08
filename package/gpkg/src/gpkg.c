@@ -114,9 +114,23 @@ void do_remove(opkg_conf* conf, char* pkg_name)
 
 }
 
-void remove_individual_package(string_map* package_data, char* pkg_name)
+void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name)
 {
-
+	int err = 0;
+	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
+	char* pkg_root_name             = get_string_map_element(install_pkg_data, "Install-Destination");
+	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
+	
+	char* info_dir            = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
+	char* control_name_prefix = dynamic_strcat(3, info_dir, "/", pkg_name);
+	char* list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
+	
+	
+	
+	
+	
+	
+	
 }
 
 
@@ -243,7 +257,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 			set_string_map_element(pkg, "Status", new_status);
 
 			set_string_map_element(pkg, "Installed-Time", strdup(install_time));
-
+			set_string_map_element(pkg, "Install-Destination", strdup(install_root_name));
 
 			set_string_map_element(install_root_status, install_pkg_list[pkg_index], pkg);
 		}
