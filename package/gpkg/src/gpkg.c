@@ -2,9 +2,10 @@
 
 void update(opkg_conf* conf);
 
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root);
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name);
 int recursively_install(char* pkg_name, char* install_root, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
+int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
 
 
 int main(void)
@@ -22,12 +23,41 @@ int main(void)
 	opkg_conf *conf = load_conf(NULL);
 	//update(conf);
 
-	do_install(conf, "irssi", "plugin_root");
+	do_install(conf, "irssi", "plugin_root", "plugin_test");
 
 	
 
 
 	return(0);
+}
+
+
+/* returns err
+ * if script doesn't exist still returns err=0
+ * err=1 only if error running script
+ */
+int run_script_if_exists(char* install_root_path, char* link_root_path, char* pkg_name, char* script_type_postfix, char* action_arg)
+{
+	int err = 0;
+	char* script_path = dynamic_strcat(5, install_root_path, "/usr/lib/opkg/info/", pkg_name, ".", script_type_postfix);
+	if(path_exists(script_path))
+	{
+		setenv("PKG_ROOT", install_root_path, 1);
+		if(link_root_path == NULL)
+		{
+			unsetenv("PKG_LINK_ROOT");
+		}
+		else
+		{
+			setenv("PKG_LINK_ROOT", link_root_path, 1);
+		}
+		char* cmd = dynamic_strcat(5, script_path, " ", action_arg, " ", pkg_name);
+		const char* argv[] = {"sh", "-c", cmd, NULL};
+		err = xsystem(argv);
+		free(cmd);
+	}
+	free(script_path);
+	return err;
 }
 
 
@@ -118,13 +148,21 @@ void remove_individual_package(opkg_conf* conf, string_map* package_data, char* 
 {
 	int err = 0;
 	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
-	char* pkg_root_name             = get_string_map_element(install_pkg_data, "Install-Destination");
+	char* install_root_name         = get_string_map_element(install_pkg_data, "Install-Destination");
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
-	
+	char* link_root_name            = get_string_map_element(install_pkg_data, "Link-Destination");
+	char* link_root_path            = link_root_name != NULL ? get_string_map_element(conf->dest_names, install_root_name) : NULL;
+
 	char* info_dir            = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
 	char* control_name_prefix = dynamic_strcat(3, info_dir, "/", pkg_name);
 	char* list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
+	char* prerm_path          = dynamic_strcat(4, info_dir, "/", pkg_name, ".prerm");
+	char* postrm_path         = dynamic_strcat(4, info_dir, "/", pkg_name, ".postrm");
 	
+	//run preinst
+	err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "prerm", "remove" );
+
+
 	
 	
 	
@@ -136,7 +174,7 @@ void remove_individual_package(opkg_conf* conf, string_map* package_data, char* 
 
 
 
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name)
 {
 
 	string_map* package_data = initialize_string_map(1);
@@ -258,6 +296,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 
 			set_string_map_element(pkg, "Installed-Time", strdup(install_time));
 			set_string_map_element(pkg, "Install-Destination", strdup(install_root_name));
+			if(link_root_name != NULL)
+			{
+				set_string_map_element(pkg, "Link-Destination", strdup(link_root_name));
+			}
 
 			set_string_map_element(install_root_status, install_pkg_list[pkg_index], pkg);
 		}
@@ -273,7 +315,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name)
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_root_name, "plugin_test", 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_root_name, link_root_name, 0, tmp_dir, conf, package_data, install_called_pkgs);
 	
 	//remove tmp dir -- need to do this whether or not there is an error
 	rm_r(tmp_dir);
@@ -574,24 +616,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//run preinst
-		char* script_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".preinst");
-		if(path_exists(script_path))
-		{
-			setenv("PKG_ROOT", install_root_path, 1);
-			if(link_root_path == NULL)
-			{
-				unsetenv("PKG_LINK_ROOT");
-			}
-			else
-			{
-				setenv("PKG_LINK_ROOT", link_root_path, 1);
-			}
-			char* cmd = dynamic_strcat(3, script_path, is_upgrade ? " upgrade " : " install ", pkg_name);
-			const char* argv[] = {"sh", "-c", cmd, NULL};
-			err = xsystem(argv);
-			free(cmd);
-		}
-		free(script_path);
+		err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "preinst", (is_upgrade ? "upgrade" : "install") );
 	}
 	if(err == 0)
 	{
@@ -647,24 +672,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	if(err == 0)
 	{
 		//run postinst
-		char* script_path = dynamic_strcat(4, info_dir, "/", pkg_name, ".postinst");
-		if(path_exists(script_path))
-		{
-			setenv("PKG_ROOT", install_root_path, 1);
-			if(link_root_path == NULL)
-			{
-				unsetenv("PKG_LINK_ROOT");
-			}
-			else
-			{
-				setenv("PKG_LINK_ROOT", link_root_path, 1);
-			}
-			char* cmd = dynamic_strcat(3, script_path, is_upgrade ? " upgrade " : " install ", pkg_name);
-			const char* argv[] = {"sh", "-c", cmd, NULL};
-			err = xsystem(argv);
-			free(cmd);
-		}
-		free(script_path);
+		err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "postinst", (is_upgrade ? "upgrade" : "install") );
 	}
 	if(err == 0)
 	{
