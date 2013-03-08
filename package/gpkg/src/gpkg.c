@@ -691,15 +691,23 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		unsigned long num_files;
 		char** real_files = get_string_map_keys(files_to_link, &num_files);
 		int file_index;
-		for(file_index=0;file_index < num_files; file_index++)
+		if(num_files > 0)
 		{
-			char* link_path = get_string_map_element(files_to_link, real_files[file_index]);
-			if(!path_exists(link_path))
+			char* link_file_name = dynamic_strcat(4, info_dir, "/", pkg_name, ".linked");
+			FILE* link_file = fopen(link_file_name, "w");
+			for(file_index=0; link_file != NULL && file_index < num_files; file_index++)
 			{
-				mkdir_p(link_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
-				rm_r(link_path);
-				symlink(real_files[file_index], link_path);
+				char* link_path = get_string_map_element(files_to_link, real_files[file_index]);
+				if(!path_exists(link_path))
+				{
+					mkdir_p(link_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+					rm_r(link_path);
+					symlink(real_files[file_index], link_path);
+					fprintf("%s\n", link_path);
+				}
 			}
+			if(link_file != NULL) { fclose(link_file); }
+			free(link_file_name);
 		}
 		destroy_string_map(files_to_link, DESTROY_MODE_FREE_VALUES, &num_files);
 		free_null_terminated_string_array(real_files);
