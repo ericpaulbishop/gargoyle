@@ -144,7 +144,7 @@ void do_remove(opkg_conf* conf, char* pkg_name)
 
 }
 
-void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name, char* tmp_dir)
+void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name, char* tmp_dir, int save_conf_files)
 {
 	int err = 0;
 	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
@@ -157,32 +157,36 @@ void remove_individual_package(opkg_conf* conf, string_map* package_data, char* 
 	char* control_name_prefix     = dynamic_strcat(3, info_dir, "/", pkg_name);
 	char* list_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
 	char* conf_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
-	string_map* copied_conf_files = initialize_string_map();
+	string_map* copied_conf_files = initialize_string_map(1);
 	
 
-	//run preinst
-	err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "prerm", "remove" );
+	//run prerm
+	run_script_if_exists(install_root_path, link_root_path, pkg_name, "prerm", "remove" );
 
-	if(err == 0)
+	//copy conf files to tmp dir
+	if(path_exists(conf_file_name) && save_conf_files)
 	{
-		//copy conf files to tmp dir
-		if(path_exists(conf_file_name))
+		unsigned long num_list_lines;
+		char** conf_file_lines =  get_file_lines(conf_file_name, &num_list_lines);
+		int conf_line_index;
+		for(conf_line_index=0; conf_line_index < num_list_lines; conf_line_index++)
 		{
-			unsigned long num_conf_lines;
-			char** conf_file_lines =  get_file_lines(conf_file_path, &num_list_lines);
-			int conf_line_index;
-			for(conf_line_index=0; conf_line_index < num_conf_lines; conf_line_index++)
+			if(path_exists(conf_file_lines[conf_line_index]))
 			{
-				if(path_exists(conf_file_lines[conf_line_index]))
-				{
-					
-				}
-				set_string_map_element(conf_files, conf_file_lines[conf_line_index], strdup("D"));
-			}
-			free_null_terminated_string_array(conf_file_lines);
+				char* tmp_conf_path = dynamic_strcat(2, tmp_dir, conf_file_lines[conf_line_index] );
+				mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+				rm_r(tmp_conf_path);
+				rename(conf_file_lines[conf_line_index], tmp_conf_path);
+				set_string_map_element(copied_conf_files, conf_file_lines[conf_line_index], tmp_conf_path);
 
-		}	
-	}
+			}
+		}
+		free_null_terminated_string_array(conf_file_lines);
+	}	
+	
+	
+
+
 	if(err == 0)
 	{
 		//unlink if necessary
@@ -267,13 +271,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 		set_string_map_element(parameters, "packages", load_detail_map);
 		load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
 		install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
-		
-		int pkg_index;
-		for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
-		{
-			printf("loaded %s\n", install_pkg_list[pkg_index]);
-		}
-
 		
 		destroy_string_map(load_detail_map,   DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
