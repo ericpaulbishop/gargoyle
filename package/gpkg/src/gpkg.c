@@ -144,7 +144,7 @@ void do_remove(opkg_conf* conf, char* pkg_name)
 
 }
 
-void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name)
+void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name, char* tmp_dir)
 {
 	int err = 0;
 	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
@@ -153,20 +153,59 @@ void remove_individual_package(opkg_conf* conf, string_map* package_data, char* 
 	char* link_root_name            = get_string_map_element(install_pkg_data, "Link-Destination");
 	char* link_root_path            = link_root_name != NULL ? get_string_map_element(conf->dest_names, install_root_name) : NULL;
 
-	char* info_dir            = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
-	char* control_name_prefix = dynamic_strcat(3, info_dir, "/", pkg_name);
-	char* list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
-	char* prerm_path          = dynamic_strcat(4, info_dir, "/", pkg_name, ".prerm");
-	char* postrm_path         = dynamic_strcat(4, info_dir, "/", pkg_name, ".postrm");
+	char* info_dir                = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
+	char* control_name_prefix     = dynamic_strcat(3, info_dir, "/", pkg_name);
+	char* list_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
+	char* conf_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
+	string_map* copied_conf_files = initialize_string_map();
 	
+
 	//run preinst
 	err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "prerm", "remove" );
 
+	if(err == 0)
+	{
+		//copy conf files to tmp dir
+		if(path_exists(conf_file_name))
+		{
+			unsigned long num_conf_lines;
+			char** conf_file_lines =  get_file_lines(conf_file_path, &num_list_lines);
+			int conf_line_index;
+			for(conf_line_index=0; conf_line_index < num_conf_lines; conf_line_index++)
+			{
+				if(path_exists(conf_file_lines[conf_line_index]))
+				{
+					
+				}
+				set_string_map_element(conf_files, conf_file_lines[conf_line_index], strdup("D"));
+			}
+			free_null_terminated_string_array(conf_file_lines);
+
+		}	
+	}
+	if(err == 0)
+	{
+		//unlink if necessary
+	}
+	if(err == 0)
+	{
+		//remove all (non-directory) files
+	}
+	if(err == 0)
+	{
+		//call postrm
+	}
+	if(err == 0)
+	{
+		//remove control files (.control, .list, .conffiles, .prerm, .postrm, .preinst, .postinst )
+	}
+	if(err == 0)
+	{
+		//copy conf files back
+	}
 
 	
-	
-	
-	
+	//cleanup & return
 	
 	
 }

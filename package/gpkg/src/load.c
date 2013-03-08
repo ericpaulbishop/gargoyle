@@ -126,7 +126,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		set_string_map_element(load_variable_map, "Depends", all_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
-		set_string_map_element(load_variable_map, "Link-Root",    all_dummy);
+		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
 	}
 	else
 	{
@@ -458,7 +458,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 void save_pkg_status_func(char* key, void* value)
 {
 	string_map* pkg_map = (string_map*)value;
-	char* pkg_vars[] = { "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", "Link-Root", NULL };
+	char* pkg_vars[] = { "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", "Link-Destination", NULL };
 	int var_index;
 	fprintf(__save_pkg_status_stream, "Package: %s\n", key);
 	for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
