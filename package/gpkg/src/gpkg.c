@@ -146,18 +146,19 @@ void do_remove(opkg_conf* conf, char* pkg_name)
 
 void remove_individual_package(opkg_conf* conf, string_map* package_data, char* pkg_name, char* tmp_dir, int save_conf_files)
 {
-	int err = 0;
 	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
 	char* install_root_name         = get_string_map_element(install_pkg_data, "Install-Destination");
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
 	char* link_root_name            = get_string_map_element(install_pkg_data, "Link-Destination");
 	char* link_root_path            = link_root_name != NULL ? get_string_map_element(conf->dest_names, install_root_name) : NULL;
+	char* control_postfix_list[]    = { "control", "list",  "linked", "conffiles", "prerm", "postrm", "preinst", "postinst", NULL };
 
 	char* info_dir                = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
-	char* control_name_prefix     = dynamic_strcat(3, info_dir, "/", pkg_name);
 	char* list_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
+	char* link_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".linked");
 	char* conf_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
 	string_map* copied_conf_files = initialize_string_map(1);
+	
 	
 
 	//run prerm
@@ -185,32 +186,80 @@ void remove_individual_package(opkg_conf* conf, string_map* package_data, char* 
 	}	
 	
 	
+	//unlink if .linked file exists
+	if(path_exists(link_file_name))
+	{
+		unsigned long num_list_lines;
+		char** link_file_lines =  get_file_lines(link_file_name, &num_list_lines);
+		int link_line_index;
+		for(link_line_index=0; link_line_index < num_list_lines; link_line_index++)
+		{
+			if(path_exists(link_file_lines[link_line_index]) == PATH_IS_SYMLINK)
+			{
+				rm_r(link_file_lines[link_line_index]);
+			}
+		}
+		free_null_terminated_string_array(link_file_lines);
+	}
+	
+	//remove all (non-directory) files
+	if(path_exists(list_file_name))
+	{
+		unsigned long num_list_lines;
+		char** list_file_lines =  get_file_lines(list_file_name, &num_list_lines);
+		int list_line_index;
+		for(list_line_index=0; list_line_index < num_list_lines; list_line_index++)
+		{
+			int path_type = path_exists(list_file_lines[list_line_index]);
+			if(path_type != PATH_DOES_NOT_EXIST && path_type != PATH_IS_REGULAR_FILE)
+			{
+				rm_r(list_file_lines[list_line_index]);
+			}
+		}
+		free_null_terminated_string_array(list_file_lines);
+	}
 
-
-	if(err == 0)
-	{
-		//unlink if necessary
-	}
-	if(err == 0)
-	{
-		//remove all (non-directory) files
-	}
-	if(err == 0)
-	{
-		//call postrm
-	}
-	if(err == 0)
-	{
-		//remove control files (.control, .list, .conffiles, .prerm, .postrm, .preinst, .postinst )
-	}
-	if(err == 0)
-	{
-		//copy conf files back
-	}
+	//call postrm
+	run_script_if_exists(install_root_path, link_root_path, pkg_name, "postrm", "remove" );
 
 	
-	//cleanup & return
+	//remove control files (.control, .list, .linked, .conffiles, .prerm, .postrm, .preinst, .postinst )
+	int control_file_index;
+	for(control_file_index=0; control_postfix_list[control_file_index] != NULL; control_file_index++)
+	{
+		char* control_file_name = dynamic_strcat(5, info_dir, "/", pkg_name, ".", control_postfix_list[control_file_index]);
+		if(path_exists(control_file_name))
+		{
+			rm_r(control_file_name);
+		}
+		free(control_file_name);
+	}
+
+
+	//copy conf files back
+	if(copied_conf_files->num_elements > 0)
+	{
+		unsigned long num_conf_paths;
+		char** conf_paths = get_string_map_keys(copied_conf_files, &num_conf_paths);
+		int conf_index;
+		for(conf_index=0; conf_index < num_conf_paths; conf_index++)
+		{
+			char* tmp_conf_path = get_string_map_element(copied_conf_files, conf_paths[conf_index]);
+			rm_r(conf_paths[conf_index]);
+			rename(tmp_conf_path, conf_paths[conf_index]);
+		}
+		if(conf_paths != NULL ) { free_null_terminated_string_array(conf_paths); }
+
+	}
 	
+	//cleanup & return,  NOTE: Status file is NOT updated by this function
+	unsigned long num_destroyed;
+	free_if_not_null(info_dir);
+	free_if_not_null(list_file_name);
+	free_if_not_null(link_file_name);
+	free_if_not_null(conf_file_name);
+	destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_destroyed); 
+
 	
 }
 
@@ -703,7 +752,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 					mkdir_p(link_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 					rm_r(link_path);
 					symlink(real_files[file_index], link_path);
-					fprintf("%s\n", link_path);
+					fprintf(link_file, "%s\n", link_path);
 				}
 			}
 			if(link_file != NULL) { fclose(link_file); }
