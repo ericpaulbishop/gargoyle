@@ -14,7 +14,6 @@
 	if [ -e /etc/crontabs/root ] ; then
 		awk '{gsub(/"/, "\\\""); print "cron_data.push(\""$0"\");" }' /etc/crontabs/root
 	fi
-	echo "var current_time=\"`date \"+%Y%m%d-%H%M\"`\";"
 	echo "var weekly_time=\"`date \"+%w-%H-%M\"`\";"
 		
 	echo "var wifi_status = new Array();"
@@ -47,6 +46,14 @@ for (tab_idx in cron_data) {
 	<div id='wlan_stat'>
 		<label class='leftcolumn'>Wireless radio(s) status:</label>
 		<span class='rightcolumn' id='wlan_status'></span>
+	</div>
+	
+	<div id='wifi_action' style="margin-top:15px">
+		<label class='leftcolumn' style="margin-top:5px">Stop/Start wireless radios(s)</label>
+		<span class='rightcolumn'>
+			<input type='button' class='default_button' id='wifi_up_button' value="Start Wireless" onclick='GetWifiUpdate("up")'/>
+			<input type='button' class='default_button' id='wifi_down_button' value="Stop Wireless" onclick='GetWifiUpdate("down")'/>
+		</span>
 	</div>
 
 	<div class="internal_divider"></div>
