@@ -101,8 +101,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 	
 	string_map* rm_pkg_data = get_string_map_element(package_data, pkg_name);
-	char* rm_status = get_string_map_element(install_pkg_data, "Status");
-	char* rm_root_name = get_string_map_element(dep_data, "Install-Destination");
+	char* rm_status = get_string_map_element(rm_pkg_data, "Status");
+	char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
 	char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
 
 
@@ -132,11 +132,11 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	{
 		string_map* dep_data = get_string_map_element(package_data, rm_dep_list[rm_dep_index]);
 		char* dep_status = get_string_map_element(dep_data, "Status");
-		char* dep_root = get_string_map_element(dep_data, "Install-Destination");
+		char* dep_root_name = get_string_map_element(dep_data, "Install-Destination");
 		char* dep_root_path = get_string_map_element(conf->dest_names, dep_root_name);
-		if(dep_status != NULL && dep_root != NULL)
+		if(dep_status != NULL && dep_root_name != NULL)
 		{
-			if(strstr(dep_status, " user ") == NULL)
+			if(strstr(dep_status, " ok ") != NULL)
 			{
 				set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
 				char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
@@ -230,28 +230,65 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 		{
 			char** orphaned_depend_list = get_string_map_keys(found_map, &orphaned_deps_found);
 			int orphaned_depend_index;
+			string_map* changed_status_paths = initialize_string_map(1);\
+
+			//set statuses of packages we are removing in this round to half-installed
 			for(orphaned_depend_index=0; orphaned_depend_index < orphaned_deps_found; orphaned_depend_index++)
 			{
-				//update status data to deinstall, half-installed
+				char* status_path = get_string_map_element(pkg_status_paths, orphaned_depend_list[orphaned_depend_index]);
+				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
+				string_map* dep_status_data = get_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
+				char* old_status = set_string_map_element(dep_status_data, "Status",  strdup("deinstall ok half-installed"));
+				free_if_not_null(old_status);
+				if(get_string_map_element(changed_status_paths, status_path) == NULL)
+				{
+					set_string_map_element(changed_status_paths, status_path, strdup("D"));
+				}
 			}
-			// for each status updated save status
+			unsigned long num_changed_status_paths = 0;
+			char** changed_status_path_list = get_string_map_keys(changed_status_paths, &num_changed_status_paths);
+			int changed_status_index;
+			destroy_string_map(changed_status_paths, DESTROY_MODE_FREE_VALUES, &num_changed_status_paths);
+
+			// save each updated status file
+			for(changed_status_index=0; changed_status_index < num_changed_status_paths; changed_status_index++)
+			{
+				char* status_path = changed_status_path_list[changed_status_index];
+				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
+				save_package_data_as_status_file(status_data, status_path);
+			}
+
+
 			for(orphaned_depend_index=0; orphaned_depend_index < orphaned_deps_found; orphaned_depend_index++)
 			{
-				//remove
+				//remove the package
+				remove_individual_package(orphaned_depend_list[orphaned_depend_index], conf, package_data, tmp_dir, save_conf_files);
 			}
+			
+			
 			for(orphaned_depend_index=0; orphaned_depend_index < orphaned_deps_found; orphaned_depend_index++)
 			{
 				//remove from status data
+				char* status_path = get_string_map_element(pkg_status_paths, orphaned_depend_list[orphaned_depend_index]);
+				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
+				string_map* dep_already_removed = remove_string_map_element(status_data, pkg_name);
+				destroy_string_map(dep_already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			}
-			// for each status updated save status
-
-
-
-
-
-
+			
+			// save each updated status file
+			for(changed_status_index=0; changed_status_index < num_changed_status_paths; changed_status_index++)
+			{
+				char* status_path = changed_status_path_list[changed_status_index];
+				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
+				save_package_data_as_status_file(status_data, status_path);
+			}
+			free_null_terminated_string_array(changed_status_path_list);
+			free_null_terminated_string_array(orphaned_depend_list);
 		}
+		destroy_string_map(found_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	}
+
+	//cleanup
 
 
 }
