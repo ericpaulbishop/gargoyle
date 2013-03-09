@@ -65,7 +65,7 @@ returns:
 int path_exists(const char* path)
 {
 	struct stat fs;
-	int exists = stat(path,&fs) >= 0 ? PATH_IS_OTHER : PATH_DOES_NOT_EXIST;
+	int exists = lstat(path,&fs) >= 0 ? PATH_IS_OTHER : PATH_DOES_NOT_EXIST;
 	if(exists > 0)
 	{
 		exists = S_ISREG(fs.st_mode) ? PATH_IS_REGULAR_FILE  : exists;
@@ -133,7 +133,7 @@ int mkdir_p(const char* path, mode_t mode)
 void rm_r(const char* path)
 {
 	struct stat fs;
-	if(stat(path,&fs) >= 0)
+	if(lstat(path,&fs) >= 0)
 	{ 	
 		if(S_ISDIR (fs.st_mode))
 		{
