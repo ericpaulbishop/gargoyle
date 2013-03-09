@@ -130,11 +130,12 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	printf("d\n");
 
 
-	string_map* rm_deps = get_string_map_element(rm_pkg_data, "Required-Depends");
+	string_map* rm_deps = get_string_map_element(rm_pkg_data, "All-Depends");
 	unsigned long num_rm_deps;
 	char** rm_dep_list = get_string_map_keys(rm_deps, &num_rm_deps);
 	int rm_dep_index;
 	printf("e\n");
+	printf("num rm_deps = %lu\n", num_rm_deps);
 	for(rm_dep_index=0; rm_dep_index < num_rm_deps; rm_dep_index++)
 	{
 		string_map* dep_data = get_string_map_element(package_data, rm_dep_list[rm_dep_index]);
@@ -212,6 +213,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	unsigned long  orphaned_deps_found = remove_orphaned_depends;
 	while(orphaned_deps_found > 0)
 	{
+		printf("searching for orphaned deps\n");
+
 		/* update package data to latest */
 		matching_packages = initialize_string_map(1);
 		free_package_data(package_data);
@@ -225,15 +228,16 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 		unsigned long num_to_test;
 		char** test_list = get_string_map_keys(pkgs_to_maybe_remove, &num_to_test);
 		int  test_index=0;
+		printf("test candidates = %lu\n", num_to_test);
 		for(test_index=0; test_index < num_to_test; test_index++)
 		{
 			if(get_string_map_element(package_data, test_list[test_index]) != NULL)
 			{
+				printf("testing whether %s is OD\n",  test_list[test_index]);
 				load_recursive_package_data_variables(package_data, test_list[test_index], 1, 0, 0); // load required-depends for packages of interest only 
 				if(!something_depends_on(package_data, test_list[test_index]))
 				{
 					set_string_map_element(found_map, test_list[test_index], strdup("D"));
-
 				}
 			}
 		}

@@ -357,6 +357,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 {
 	string_map* package_info = get_string_map_element(package_data, package);
 	int ret = 1;
+	char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
 	if(package_info == NULL)
 	{
 		ret = 0;
@@ -365,9 +366,14 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 	{
 		char* package_status     = get_string_map_element(package_info, "Status");
 		string_map* dep_map      = get_string_map_element(package_info, "Required-Depends");
+		string_map* all_dep_map  = get_string_map_element(package_info, "All-Depends");
 		uint64_t* required_size  = get_string_map_element(package_info, "Required-Size");
 		load_size = load_will_fit || load_size;
-		if(dep_map == NULL)
+		if(dep_map != NULL)
+		{
+			ret = strstr(package_status, "not-installed") == NULL ? 0  : 1;
+		}
+		else
 		{
 			if(load_size)
 			{
@@ -375,15 +381,30 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				*required_size = 0;
 			}
 			dep_map = initialize_map(1);
+			all_dep_map = initialize_map(1);
 	
+			char* deps = get_string_map_element(package_info, "Depends");
+			char** dep_list = NULL;
+			unsigned long num_deps = 0;
+			if(deps != NULL)
+			{
+				dep_list = split_on_separators(deps, package_separators, 9, -1, 0, &num_deps);
+			}
+
+
 			if(strstr(package_status, "not-installed") == NULL)
 			{
+				//just deal with variables for All-Depends
 				ret=0;
+				int dep_index;
+				for(dep_index=0; dep_index < num_deps; dep_index++)
+				{
+					load_recursive_package_data_variables(package_data, dep_list[dep_index], 0, 0, 0);
+				}
 			}
 			else
 			{
 				
-				char* deps = get_string_map_element(package_info, "Depends");
 				if(load_size)
 				{
 					char* installed_size_str = get_string_map_element(package_info, "Installed-Size");
@@ -393,43 +414,59 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 					}
 				}
 				
-				if(deps != NULL)
-				{
-					unsigned long num_pieces;
-					int dep_index;
-					char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
-					char** dep_list = split_on_separators(deps, package_separators, 9, -1, 0, &num_pieces);
 				
-					for(dep_index=0; dep_index < num_pieces; dep_index++)
+				int dep_index;
+				for(dep_index=0; dep_index < num_deps; dep_index++)
+				{
+					if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
 					{
-						if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
+						set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
+						
+						string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
+						string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
+						if(dep_dep_map != NULL)
 						{
-							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
-							
-							string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
-							string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
-							if(dep_dep_map != NULL)
+							unsigned long num_dep_deps;
+							unsigned long dep_dep_index;
+							char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
+							for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
 							{
-								unsigned long num_dep_deps;
-								unsigned long dep_dep_index;
-								char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
-								for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
-								{
-									set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
-								}
-								free_null_terminated_string_array(dep_dep_list);
+								set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
 							}
-							
-							if(load_size)
-							{
-								uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
-								*required_size = (*required_size) + (*dep_size);
-							}
-							
+							free_null_terminated_string_array(dep_dep_list);
 						}
+						
+						if(load_size)
+						{
+							uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
+							*required_size = (*required_size) + (*dep_size);
+						}
+						
 					}
 				}
 				
+			}
+			if(num_deps > 0)
+			{
+				int dep_index;
+				for(dep_index=0; dep_index < num_deps; dep_index++)
+				{
+					set_string_map_element(all_dep_map, dep_list[dep_index], strdup("D"));
+					
+					string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
+					string_map* all_dep_dep_map = get_string_map_element(dep_info, "All-Depends");
+					unsigned long num_all_dep_deps;
+					char** all_dep_dep_list = get_string_map_keys(all_dep_dep_map, &num_all_dep_deps);
+					unsigned long all_dep_dep_index;
+					for(all_dep_dep_index=0; all_dep_dep_index < num_all_dep_deps; all_dep_dep_index++)
+					{
+						set_string_map_element(all_dep_map, all_dep_dep_list[all_dep_dep_index], strdup("D"));
+					}
+					free_null_terminated_string_array(all_dep_dep_list);
+
+				}
+				free_null_terminated_string_array(dep_list);
+
 			}
 			
 			if(load_size)
@@ -448,9 +485,9 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				}
 			}
 			set_string_map_element(package_info, "Required-Depends", dep_map);
+			set_string_map_element(package_info, "All-Depends", all_dep_map);
 		}
 	}
-
 
 	return ret;
 }
