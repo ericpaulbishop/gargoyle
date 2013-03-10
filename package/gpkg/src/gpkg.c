@@ -26,6 +26,47 @@ int main(void)
 
 	
 	opkg_conf *conf = load_conf(NULL);
+
+	/*
+	printf("a\n");
+	string_map* package_data = initialize_string_map(1);
+	string_map* matching_packages = initialize_string_map(1);
+	unsigned long num_destroyed;
+	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, NULL );
+	printf("b\n");
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+
+	string_map* libc_info = get_string_map_element(package_data, "libc");
+	printf("c\n");
+	string_map* libc_deps = get_string_map_element(libc_info, "All-Depends");
+	if(libc_deps != NULL)
+	{
+		printf("d\n");
+		char** libc_dep_list = get_string_map_keys(libc_deps, &num_destroyed);
+		printf("e\n");
+	
+		int i;
+		for(i=0; libc_dep_list[i] != NULL; i++)
+		{
+			printf("libc dep = %s\n", libc_dep_list[i]);
+		}
+	}
+	else
+	{
+		printf("libc deps = NULL\n");
+		char* deps = get_string_map_element(libc_info, "Depends");
+		printf("dep str = %s\n", deps);
+
+	}
+	*/
+
+
+
+	
+	
+	
+	
 	//update(conf);
 
 	do_install(conf, "irssi", "plugin_root", "plugin_test");
@@ -98,12 +139,10 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	string_map* path_to_root_name     = initialize_string_map(1);
 	unsigned long num_destroyed;
 
-	printf("a\n");
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 	
-	printf("b\n");
 	string_map* rm_pkg_data = get_string_map_element(package_data, pkg_name);
 	char* rm_status = get_string_map_element(rm_pkg_data, "Status");
 	char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
@@ -121,37 +160,29 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 		fprintf(stderr, "ERROR: Package %s not installed, cannot uninstall\n\n", pkg_name);
 		exit(1);
 	}
-	printf("c\n");
 
 	/* load data and status paths for packages we may need to de-install (depending on what orphaned dependencies are) */
 	char* rm_status_path = dynamic_strcat(2, rm_root_path, "/usr/lib/opkg/status");
 	set_string_map_element(pkg_status_paths, pkg_name, rm_status_path);
 	set_string_map_element(path_to_status_data, rm_status_path, initialize_string_map(1));
-	printf("d\n");
 
 
 	string_map* rm_deps = get_string_map_element(rm_pkg_data, "All-Depends");
 	unsigned long num_rm_deps;
 	char** rm_dep_list = get_string_map_keys(rm_deps, &num_rm_deps);
 	int rm_dep_index;
-	printf("e\n");
-	printf("num rm_deps = %lu\n", num_rm_deps);
 	for(rm_dep_index=0; rm_dep_index < num_rm_deps; rm_dep_index++)
 	{
 		string_map* dep_data = get_string_map_element(package_data, rm_dep_list[rm_dep_index]);
-		printf("dep name = %s\n", rm_dep_list[rm_dep_index]);
 		char* dep_status = get_string_map_element(dep_data, "Status");
 		char* dep_root_name = get_string_map_element(dep_data, "Install-Destination");
 		char* dep_root_path = get_string_map_element(conf->dest_names, dep_root_name);
-		printf("e 1\n");
 		if(dep_status != NULL && dep_root_name != NULL)
 		{
 			if(strstr(dep_status, " ok ") != NULL)
 			{
-				printf("e 2\n");
 				set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
 				char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
-				printf("e 3\n");
 				set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
 				if(get_string_map_element(path_to_status_data, status_path) == NULL)
 				{
@@ -160,13 +191,12 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 			}
 		}
 	}
-	printf("f\n");
 
 	/* load status path data for all relevant status files */
 	unsigned long num_status_paths;
 	char** status_paths = get_string_map_keys(path_to_status_data, &num_status_paths);
 	int status_path_index;
-	string_map* rm_status_data = NULL;;
+	string_map* rm_status_data = NULL;
 	for(status_path_index=0; status_path_index < num_status_paths; status_path_index++)
 	{
 		if(path_exists(status_paths[status_path_index]))
@@ -213,14 +243,18 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	unsigned long  orphaned_deps_found = remove_orphaned_depends;
 	while(orphaned_deps_found > 0)
 	{
-		printf("searching for orphaned deps\n");
 
 		/* update package data to latest */
 		matching_packages = initialize_string_map(1);
 		free_package_data(package_data);
 		package_data = initialize_string_map(1);
-		load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
+		
+		//load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
+		load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, NULL );
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+
+
 
 
 		/* find list of orphaned dependencies */
@@ -228,25 +262,30 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 		unsigned long num_to_test;
 		char** test_list = get_string_map_keys(pkgs_to_maybe_remove, &num_to_test);
 		int  test_index=0;
-		printf("test candidates = %lu\n", num_to_test);
 		for(test_index=0; test_index < num_to_test; test_index++)
 		{
 			if(get_string_map_element(package_data, test_list[test_index]) != NULL)
 			{
-				printf("testing whether %s is OD\n",  test_list[test_index]);
-				load_recursive_package_data_variables(package_data, test_list[test_index], 1, 0, 0); // load required-depends for packages of interest only 
-				if(!something_depends_on(package_data, test_list[test_index]))
+				load_recursive_package_data_variables(package_data, test_list[test_index], 1, 0, 0); // load required-depends for packages of interest only
+				string_map* rm_dep_data = get_string_map_element(package_data, test_list[test_index]);
+				char* install_root = get_string_map_element(rm_dep_data, "Install-Destination");
+								
+				if(install_root != NULL &&  strcmp(install_root, "not_installed") != 0 )
 				{
-					set_string_map_element(found_map, test_list[test_index], strdup("D"));
+					if(!something_depends_on(package_data, test_list[test_index]))
+					{
+						set_string_map_element(found_map, test_list[test_index], strdup("D"));
+					}
 				}
 			}
 		}
 		orphaned_deps_found = found_map->num_elements;
+
 		if(orphaned_deps_found > 0)
 		{
 			char** orphaned_depend_list = get_string_map_keys(found_map, &orphaned_deps_found);
 			int orphaned_depend_index;
-			string_map* changed_status_paths = initialize_string_map(1);\
+			string_map* changed_status_paths = initialize_string_map(1);
 
 			//set statuses of packages we are removing in this round to half-installed
 			for(orphaned_depend_index=0; orphaned_depend_index < orphaned_deps_found; orphaned_depend_index++)
@@ -287,7 +326,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 				//remove from status data
 				char* status_path = get_string_map_element(pkg_status_paths, orphaned_depend_list[orphaned_depend_index]);
 				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
-				string_map* dep_already_removed = remove_string_map_element(status_data, pkg_name);
+				string_map* dep_already_removed = remove_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
 				destroy_string_map(dep_already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			}
 			
@@ -359,7 +398,6 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 	
 	
 	//unlink if .linked file exists
-	printf("link file name = %s\n", link_file_name);
 	if(path_exists(link_file_name))
 	{
 		unsigned long num_list_lines;
@@ -370,18 +408,12 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 			if(path_exists(link_file_lines[link_line_index]) == PATH_IS_SYMLINK)
 			{
 				rm_r(link_file_lines[link_line_index]);
-				printf("removing link %s\n", link_file_lines[link_line_index]);
-			}
-			else
-			{
-				printf("could not find file = '%s'\n",  link_file_lines[link_line_index]);
 			}
 		}
 		free_null_terminated_string_array(link_file_lines);
 	}
 	
 	//remove all (non-directory) files
-	printf("list file name = %s\n", list_file_name);
 	if(path_exists(list_file_name))
 	{
 		unsigned long num_list_lines;
@@ -393,11 +425,6 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 			if(path_type != PATH_DOES_NOT_EXIST && path_type != PATH_IS_DIRECTORY)
 			{
 				rm_r(list_file_lines[list_line_index]);
-				printf("removing package file %s\n", list_file_lines[list_line_index]);
-			}
-			else
-			{
-				printf("could not find file = '%s'\n",  list_file_lines[list_line_index]);
 			}
 		}
 		free_null_terminated_string_array(list_file_lines);
@@ -791,7 +818,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	{
 		// Extract list file contaiing list of files to install
 		info_dir            = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
-		control_name_prefix = dynamic_strcat(3, info_dir, "/", pkg_name);
+		control_name_prefix = dynamic_strcat(4, info_dir, "/", pkg_name, ".");
 		list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
 		
 		mkdir_p(info_dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
@@ -954,7 +981,6 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 					rm_r(link_path);
 					symlink(real_files[file_index], link_path);
 					fprintf(link_file, "%s\n", link_path);
-					printf("\tlinking file '%s'->'%s'\n", link_path, real_files[file_index]);
 				}
 			}
 			if(link_file != NULL) { fclose(link_file); }

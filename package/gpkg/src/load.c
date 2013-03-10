@@ -75,6 +75,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 		free_bytes = destination_bytes_free(conf, install_root);
 	}
 
+
 	//recursively load depends/size/will_fit
 	if(load_depends || load_size || load_will_fit)
 	{
@@ -320,7 +321,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						tmp_last_variable = NULL;
 					}
 
-
 				}
 				read_data = 1;
 			}
@@ -343,7 +343,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		}
 		free(file_path);
 	}
-
 
 	unsigned long num_destroyed;
 	destroy_list(file_list, DESTROY_MODE_FREE_VALUES, &num_destroyed);
@@ -371,7 +370,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 		load_size = load_will_fit || load_size;
 		if(dep_map != NULL)
 		{
-			ret = strstr(package_status, "not-installed") == NULL ? 0  : 1;
+			ret = strstr(package_status, " installed") != NULL ? 0  : 1;
 		}
 		else
 		{
@@ -392,7 +391,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			}
 
 
-			if(strstr(package_status, "not-installed") == NULL)
+			if(strstr(package_status, " installed") != NULL)
 			{
 				//just deal with variables for All-Depends
 				ret=0;
@@ -420,53 +419,57 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				{
 					if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
 					{
-						set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
-						
 						string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
-						string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
-						if(dep_dep_map != NULL)
+						if(dep_info != NULL)
 						{
-							unsigned long num_dep_deps;
-							unsigned long dep_dep_index;
-							char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
-							for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
+							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
+							string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
+							if(dep_dep_map != NULL)
 							{
-								set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
+								unsigned long num_dep_deps;
+								unsigned long dep_dep_index;
+								char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
+								for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
+								{
+									set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
+								}
+								free_null_terminated_string_array(dep_dep_list);
 							}
-							free_null_terminated_string_array(dep_dep_list);
-						}
 						
-						if(load_size)
-						{
-							uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
-							*required_size = (*required_size) + (*dep_size);
+							if(load_size)
+							{
+								uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
+								*required_size = (*required_size) + (*dep_size);
+							}
 						}
-						
 					}
 				}
-				
 			}
 			if(num_deps > 0)
 			{
 				int dep_index;
 				for(dep_index=0; dep_index < num_deps; dep_index++)
 				{
-					set_string_map_element(all_dep_map, dep_list[dep_index], strdup("D"));
-					
 					string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
-					string_map* all_dep_dep_map = get_string_map_element(dep_info, "All-Depends");
-					unsigned long num_all_dep_deps;
-					char** all_dep_dep_list = get_string_map_keys(all_dep_dep_map, &num_all_dep_deps);
-					unsigned long all_dep_dep_index;
-					for(all_dep_dep_index=0; all_dep_dep_index < num_all_dep_deps; all_dep_dep_index++)
+					if(dep_info != NULL)
 					{
-						set_string_map_element(all_dep_map, all_dep_dep_list[all_dep_dep_index], strdup("D"));
+						set_string_map_element(all_dep_map, dep_list[dep_index], strdup("D"));
+					
+						string_map* all_dep_dep_map = get_string_map_element(dep_info, "All-Depends");
+						if(all_dep_dep_map != NULL)
+						{
+							unsigned long num_all_dep_deps;
+							char** all_dep_dep_list = get_string_map_keys(all_dep_dep_map, &num_all_dep_deps);
+							unsigned long all_dep_dep_index;
+							for(all_dep_dep_index=0; all_dep_dep_index < num_all_dep_deps; all_dep_dep_index++)
+							{
+								set_string_map_element(all_dep_map, all_dep_dep_list[all_dep_dep_index], strdup("D"));
+							}
+							free_null_terminated_string_array(all_dep_dep_list);
+						}
 					}
-					free_null_terminated_string_array(all_dep_dep_list);
-
 				}
 				free_null_terminated_string_array(dep_list);
-
 			}
 			
 			if(load_size)
@@ -488,6 +491,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			set_string_map_element(package_info, "All-Depends", all_dep_map);
 		}
 	}
+	
 
 	return ret;
 }
@@ -579,20 +583,26 @@ void something_depends_on_func(char* key, void* value)
 	if(__found_package_that_depends_on == 0)
 	{
 		string_map* pkg = (string_map*)value;
-		string_map* dep_map = get_string_map_element(pkg, "Required-Depends");
-		string_map* install_time = get_string_map_element(pkg, "Installed-Time");
-		if(dep_map != NULL && install_time != NULL) //check install_time to verify package is installed
+		string_map* dep_map = get_string_map_element(pkg, "All-Depends");
+		char* install_root = get_string_map_element(pkg, "Install-Destination");
+		if(dep_map != NULL && install_root != NULL && strcmp(install_root, "not_installed") != 0) 
 		{
 			__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
 			if(__found_package_that_depends_on)
 			{
 				//test for mutual dependency, return 0 in that case
-				dep_map = get_string_map_element(__package_data_to_test_depends_on, "Required-Depends");
+				dep_map = get_string_map_element(__package_data_to_test_depends_on, "All-Depends");
 				if(dep_map != NULL)
 				{
 					__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
 				}
 			}
+			/*
+			if(__found_package_that_depends_on )
+			{
+				printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
+			}
+			*/
 		}
 	}
 }
