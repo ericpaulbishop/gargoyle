@@ -86,6 +86,32 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	}
 }
 
+
+
+void set_package(string_map* all_package_data, string_map* package, char* package_name, char* package_version)
+{
+	string_map* all_versions = get_string_map_element(existing_package_data, pkg_name);
+	string_map* existing_version = NULL;
+	if(all_versions != NULL)
+	{
+		existing_version = get_string_map_element(all_versions, pkg_version);
+	}
+	else
+	{
+		all_versions = initialize_string_map(1);
+	}
+	if(existing_version != NULL)
+	{
+					
+	}
+	else
+	{
+		
+	}
+
+}
+
+
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "packages-matching") : NULL;
@@ -207,12 +233,16 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		}
 
 		
-				
+		
 		string_map* next_pkg_data = NULL;
+		char* pkg_name= NULL;
+		char* pkg_version=NULL;
+
 		char next_line[16384];
 		int read_data = 1;
 		int next_package_matches = 0;
 		char* last_variable = NULL;
+		int loaded_at_least_one_variable = 0;
 		while(read_data > 0)
 		{
 			char* tmp_last_variable = last_variable;
@@ -251,15 +281,20 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					}
 					if(strcmp(key, "Package") == 0)
 					{
-						next_pkg_data = (string_map*)get_string_map_element(existing_package_data, val);
-						
-
-						if(next_pkg_data == NULL)
+						if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 						{
-							next_pkg_data = initialize_string_map(1);
-							set_string_map_element(existing_package_data, val, next_pkg_data);
+
 
 						}
+						unsigned long num_destroyed;
+						free_if_not_null(pkg_name);
+						free_if_not_null(pkg_version);
+						if(next_pkg_data != NULL) { destroy_string_map(next_pkg_data, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
+						next_pkg_data = NULL;
+						loaded_at_least_one_variable = 0;
+
+						pkg_name = strdup(val);
+						next_pkg_data = initialize_string_map(1);
 
 						next_package_matches = load_all_packages;
 						if(!next_package_matches)
@@ -286,10 +321,15 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 							}
 						}
 					}
+					else if(strcmp(key, "Version") == 0)
+					{
+						pkg_version = strdup(val);
+					}
 					else if(load_variable_def == LOAD_ALL_PKG_VARIABLES || (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
 					{
 						if(load_variable_def == LOAD_ALL_PKG_VARIABLES || var_type[0] == 'A' || next_package_matches == 1)
 						{
+							loaded_at_least_one_variable = 1;
 							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
 							if(old_val != NULL) { free(old_val); }
 							last_variable = strdup(key);
