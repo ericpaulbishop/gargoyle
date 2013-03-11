@@ -88,27 +88,83 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 
 
 
-void set_package(string_map* all_package_data, string_map* package, char* package_name, char* package_version)
+void set_package(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
 {
-	string_map* all_versions = get_string_map_element(existing_package_data, pkg_name);
-	string_map* existing_version = NULL;
+	string_map* all_versions = get_string_map_element(all_package_data, package_name);
+	string_map* existing = NULL;
+	int set_all_versions = all_versions == NULL ? 1 : 0;
+	
 	if(all_versions != NULL)
 	{
-		existing_version = get_string_map_element(all_versions, pkg_version);
+		existing = get_string_map_element(all_versions, package_version);
 	}
 	else
 	{
 		all_versions = initialize_string_map(1);
 	}
-	if(existing_version != NULL)
+	
+	if(existing != NULL)
 	{
-					
+		unsigned long num_keys;
+		char** new_keys = get_string_map_keys(*package, &num_keys);
+		int ki;
+		for(ki=0; ki < num_keys; ki++)
+		{
+			char* old = set_string_map_element(existing, new_keys[ki],  remove_string_map_element(*package, new_keys[ki]));
+			free_if_not_null(old);
+		}
+		destroy_string_map(*package, DESTROY_MODE_FREE_VALUES, &num_keys);
+		free_null_terminated_string_array(new_keys);
+		*package = existing;
 	}
 	else
 	{
-		
+		set_string_map_element(all_versions, package_version, *package);
+	}
+	
+
+	/** set latest & current **/
+	char* latest = NULL;
+	char* current = NULL;
+	unsigned long num_versions;
+	char** all_version_names = get_string_map_keys(*package, &num_versions);
+	int vi;
+	for(vi=0;vi<num_versions; vi++)
+	{
+		latest = latest == NULL ? all_version_names[vi] : latest;
+		latest = compare_versions(all_version_names[vi], latest) > 0 ? all_version_names[vi] : latest;
+
+		char* status = get_string_map_element(*package, "Status");
+		if(status != NULL)
+		{
+			if(strstr(status, " installed") != NULL)
+			{
+				current = all_version_names[vi];
+			}
+		}
+	}
+	char* old = set_string_map_element(*package, "@@LATEST_VERSION@@", strdup(latest));
+	free(old);
+	if(current != NULL)
+	{
+		old = set_string_map_element(*package, "@@CURRENT_VERSION@@", strdup(current));
+		free(old);
+	}
+	free_null_terminated_string_array(all_version_names);
+
+
+	if(set_all_versions)
+	{
+		set_string_map_element(all_package_data, package_name, all_versions);
 	}
 
+
+}
+
+int compare_versions(char* v1, char* v2)
+{
+	int v1_first = strcmp(v1,v2);
+	return v1_first;
 }
 
 
@@ -283,8 +339,8 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					{
 						if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 						{
-
-
+							set_package(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+							next_pkg_data = NULL;
 						}
 						unsigned long num_destroyed;
 						free_if_not_null(pkg_name);
@@ -370,6 +426,12 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 			}
 
 		}
+		if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
+		{
+			set_package(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+			next_pkg_data = NULL;
+		}
+
 		if(last_variable != NULL)
 		{
 			free(last_variable);
