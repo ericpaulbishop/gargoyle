@@ -33,7 +33,7 @@ set_version_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=35786
+	rnum=35631
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -430,11 +430,11 @@ for target in $targets ; do
 	index_files=$(find bin -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 
-		for p in $package_files ; do
-			cp "$p" "$top_dir/built/$target"
+		for pf in $package_files ; do
+			cp "$pf" "$top_dir/built/$target/"
 		done
-		for i in $index_files ; do
-			cp "$i" "$top_dir/built/$target"
+		for inf in $index_files ; do
+			cp "$inf" "$top_dir/built/$target/"
 		done
 	fi
 	
@@ -443,16 +443,16 @@ for target in $targets ; do
 	arch=$(ls bin)
 	image_files=$(ls bin/$arch/ 2>/dev/null)
 	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
-		for i in $image_files ; do
-			if [ ! -d "bin/$arch/$i" ] ; then
-				newname=$(echo "$i" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-				cp "bin/$arch/$i" "$top_dir/images/$target/$newname"
+		for imf in $image_files ; do
+			if [ ! -d "bin/$arch/$imf" ] ; then
+				newname=$(echo "$imf" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
+				cp "bin/$arch/$imf" "$top_dir/images/$target/$newname"
 			fi
 		done
 	else
 		profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
-			candidates=$(ls bin/$arch/*$pi* 2>/dev/null | sed 's/^.*\///g')
+			candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
 			for c in $candidates ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
@@ -471,12 +471,11 @@ for target in $targets ; do
 	if [ "$target" != "custom" ] && [ -z "$specified_profile" ] ; then
 		other_profiles=$(ls "$targets_dir/$target/profiles" | grep -v "^$default_profile$" )
 	fi
-	for p in $other_profiles ; do
+	for profile_name in $other_profiles ; do
 
-		profile_name="$p"
 
 		#copy profile config and rebuild
-		cp "$targets_dir/$target/profiles/$p/config" .config
+		cp "$targets_dir/$target/profiles/$profile_name/config" .config
 		
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
@@ -485,7 +484,7 @@ for target in $targets ; do
 		echo ""
 		echo ""	
 		echo "**************************************************************************"
-		echo "        Gargoyle is now building target: $target / $p"
+		echo "        Gargoyle is now building target: $target / $profile_name"
 		echo "**************************************************************************"
 		echo ""
 		echo ""
@@ -511,17 +510,17 @@ for target in $targets ; do
 		package_files=$(find bin -name "*.ipk")
 		index_files=$(find bin -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
-			for p in $package_files ; do
-				cp "$p" "$top_dir/built/$target"
+			for pf in $package_files ; do
+				cp "$pf" "$top_dir/built/$target/"
 			done
-			for i in $index_files ; do
-				cp "$i" "$top_dir/built/$target"
+			for inf in $index_files ; do
+				cp "$inf" "$top_dir/built/$target/"
 			done
 		fi
 
 
 		#copy relevant images for which this profile applies
-		profile_images=$(cat "$targets_dir/$target/profiles/$p/profile_images" 2>/dev/null)
+		profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
 			candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
 			for c in $candidates ; do
