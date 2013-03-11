@@ -110,8 +110,10 @@ void set_package(string_map* all_package_data, string_map** package, char* packa
 		int ki;
 		for(ki=0; ki < num_keys; ki++)
 		{
-			char* old = set_string_map_element(existing, new_keys[ki],  remove_string_map_element(*package, new_keys[ki]));
-			free_if_not_null(old);
+			char* new_element = remove_string_map_element(*package, new_keys[ki]);
+			int ignore = strcmp(new_keys[ki], "Install-Destination") == 0 && strcmp(new_element, "@@NOT_INSTALLED@@") == 0 ? 1 : 0;
+			char* to_free = ignore ? new_element : set_string_map_element(existing, new_keys[ki],  remove_string_map_element(*package, new_keys[ki]));
+			free_if_not_null(to_free);
 		}
 		destroy_string_map(*package, DESTROY_MODE_FREE_VALUES, &num_keys);
 		free_null_terminated_string_array(new_keys);
