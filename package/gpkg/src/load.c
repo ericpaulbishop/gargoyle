@@ -134,10 +134,10 @@ void set_package(string_map* all_package_data, string_map** package, char* packa
 		latest = latest == NULL ? all_version_names[vi] : latest;
 		latest = compare_versions(all_version_names[vi], latest) > 0 ? all_version_names[vi] : latest;
 
-		char* status = get_string_map_element(*package, "Status");
-		if(status != NULL)
+		char* install_root = get_string_map_element(*package, "Install-Destination");
+		if(install_root != NULL)
 		{
-			if(strstr(status, " installed") != NULL)
+			if(strcmp(install_root, "@@NOT_INSTALLED@@") != 0)
 			{
 				current = all_version_names[vi];
 			}
@@ -217,7 +217,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		/* no need to set entries in load_variable_map */
 	}
 
-	int save_destination      = get_string_map_element(load_variable_map, "Install-Destination") != NULL ? 1 : 0 ;
 	int save_user_installed   = get_string_map_element(load_variable_map, "User-Installed")      != NULL ? 1 : 0 ;
 	int save_src_id           = get_string_map_element(load_variable_map, "Source-ID")           != NULL ? 1 : 0 ;
 
@@ -367,10 +366,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						if(next_package_matches)
 						{
 							set_string_map_element(matching_packages, val, strdup("D"));
-							if(save_destination || load_variable_def == LOAD_ALL_PKG_VARIABLES )
-							{
-								set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("not_installed") : strdup(dest_name)  ));
-							}
+							set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("@@NOT_INSTALLED@@") : strdup(dest_name)  ));
 							if(pkg_src_id != NULL && (save_src_id || load_variable_def == LOAD_ALL_PKG_VARIABLES))
 							{
 								set_string_map_element(next_pkg_data, "Source-ID", strdup(pkg_src_id));
@@ -687,7 +683,7 @@ void something_depends_on_func(char* key, void* value)
 		string_map* pkg = (string_map*)value;
 		string_map* dep_map = get_string_map_element(pkg, "All-Depends");
 		char* install_root = get_string_map_element(pkg, "Install-Destination");
-		if(dep_map != NULL && install_root != NULL && strcmp(install_root, "not_installed") != 0) 
+		if(dep_map != NULL && install_root != NULL && strcmp(install_root, "@@NOT_INSTALLED@@") != 0) 
 		{
 			__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
 			if(__found_package_that_depends_on)
