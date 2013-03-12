@@ -88,7 +88,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 
 
 
-void set_package(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
+void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
 {
 	string_map* all_versions = get_string_map_element(all_package_data, package_name);
 	string_map* existing = NULL;
@@ -163,11 +163,48 @@ void set_package(string_map* all_package_data, string_map** package, char* packa
 
 }
 
+
+/* returns 1 if v1 > v2, 0 if the same -1 if v2 > v1 */
 int compare_versions(char* v1, char* v2)
 {
-	int v1_first = strcmp(v1,v2);
-	return v1_first;
+	char version_separators[] = { '.', '-', '_', ' ', '\t', '(', ')', '{', '}', '[', ']', '+', '=', ';', '?', ',', '|', '/', '\\', '*', '&', '@', '#', '!', '$', '%', '~', '<', '>' };
+	int ret = strcmp(v1,v2);
+	if(ret != 0)
+	{
+		unsigned long v1_parts;
+		unsigned long v2_parts;
+		char** v1_split = split_on_separators(v1, version_separators, 29, -1, 0, &v1_parts);
+		char** v2_split = split_on_separators(v2, version_separators, 29, -1, 0, &v2_parts);
+
+		int mismatch_found = 0;
+		int part_index;
+		for(part_index=0; part_index < v1_parts && part_index < v2_parts && (!mismatch_found); part_index++)
+		{
+			unsigned long partnum1;
+			unsigned long partnum2;
+			int isnum1 = sscanf(v1_split[part_index], "%lu", &partnum1);
+			int isnum2 = sscanf(v2_split[part_index], "%lu", &partnum2);
+
+
+			if(isnum1 == 1 && isnum2 == 1)
+			{
+				ret = partnum1 >  partnum2 ? 1  : ret;
+				ret = partnum1 == partnum2 ? 0  : ret;
+				ret = partnum1 <  partnum2 ? -1 : ret;
+			}
+			else
+			{
+				ret = strcmp(v1_split[part_index], v2_split[part_index]);
+			}
+			mismatch_found = ret != 0 ? 1 : 0;
+		}
+		free_null_terminated_string_array(v1_split);
+		free_null_terminated_string_array(v2_split);
+	}
+	return ret;
 }
+
+
 
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name)
@@ -340,7 +377,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					{
 						if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 						{
-							set_package(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+							add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
 							next_pkg_data = NULL;
 						}
 						unsigned long num_destroyed;
@@ -426,7 +463,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		}
 		if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 		{
-			set_package(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+			add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
 			next_pkg_data = NULL;
 		}
 
