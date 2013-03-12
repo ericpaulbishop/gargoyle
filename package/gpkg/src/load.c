@@ -15,6 +15,10 @@ void something_depends_on_func(char* key, void* value);
 
 
 
+#define CURRENT_VERSION_STRING "@@@CURRENT_V@@@"
+#define LATEST_VERSION_STRING  "@@@LATEST_V@@@"
+#define NOT_INSTALLED_STRING   "@@@NOTINST@@@"
+
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 {
 	char* dest_path = get_string_map_element(conf->dest_names, dest_name);
@@ -86,6 +90,50 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	}
 }
 
+/* returns package with exact version or NULL */
+string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version)
+{
+	string_map *ret = NULL;
+	string_map *all_versions = get_string_map_element(all_package_data, package_name);
+	if(all_versions != NULL)
+	{
+		ret = get_string_map_element(all_versions, package_version);
+	}
+	return ret;
+}
+
+/* if installed returns current, otherwise returns latest version, and if not found NULL */
+/* if is_current is not NULL, *is_current will be set to 1 if returned package is current, otherwise 0 */
+/* if matching_version is not NULL, *matching version will be set to matching version, otherwise NULL */
+string_map* get_package_current_or_latest_package(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
+{
+	string_map *ret = NULL;
+	if(is_current != NULL)       { *is_current = 0;          }
+	if(matching_version != NULL) { *matching_version = NULL; }
+
+
+	string_map *all_versions = get_string_map_element(all_package_data, package_name);
+	if(all_versions != NULL)
+	{
+		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
+		if(current != NULL)
+		{
+			if(is_current != NULL)       { *is_current = 1;                     }
+			if(matching_version != NULL) { *matching_version = strdup(current); }
+			ret = get_string_map_element(all_versions, current);
+		}
+		else
+		{
+			char* latest = get_string_map_element(all_versions, package_name);
+			if(latest != NULL)
+			{
+				if(matching_version != NULL) { *matching_version = strdup(latest); }
+				ret = get_string_map_element(all_versions, latest);
+			}
+		}
+	}
+	return ret;
+}
 
 
 void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
@@ -111,7 +159,7 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 		for(ki=0; ki < num_keys; ki++)
 		{
 			char* new_element = remove_string_map_element(*package, new_keys[ki]);
-			int ignore = strcmp(new_keys[ki], "Install-Destination") == 0 && strcmp(new_element, "@@NOT_INSTALLED@@") == 0 ? 1 : 0;
+			int ignore = strcmp(new_keys[ki], "Install-Destination") == 0 && strcmp(new_element, NOT_INSTALLED_STRING) == 0 ? 1 : 0;
 			char* to_free = ignore ? new_element : set_string_map_element(existing, new_keys[ki],  remove_string_map_element(*package, new_keys[ki]));
 			free_if_not_null(to_free);
 		}
@@ -139,17 +187,17 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 		char* install_root = get_string_map_element(*package, "Install-Destination");
 		if(install_root != NULL)
 		{
-			if(strcmp(install_root, "@@NOT_INSTALLED@@") != 0)
+			if(strcmp(install_root, NOT_INSTALLED_STRING) != 0)
 			{
 				current = all_version_names[vi];
 			}
 		}
 	}
-	char* old = set_string_map_element(*package, "@@LATEST_VERSION@@", strdup(latest));
+	char* old = set_string_map_element(*package, LATEST_VERSION_STRING, strdup(latest));
 	free(old);
 	if(current != NULL)
 	{
-		old = set_string_map_element(*package, "@@CURRENT_VERSION@@", strdup(current));
+		old = set_string_map_element(*package, CURRENT_VERSION_STRING, strdup(current));
 		free(old);
 	}
 	free_null_terminated_string_array(all_version_names);
@@ -405,7 +453,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						if(next_package_matches)
 						{
 							set_string_map_element(matching_packages, val, strdup("D"));
-							set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup("@@NOT_INSTALLED@@") : strdup(dest_name)  ));
+							set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup(NOT_INSTALLED_STRING) : strdup(dest_name)  ));
 							if(pkg_src_id != NULL && (save_src_id || load_variable_def == LOAD_ALL_PKG_VARIABLES))
 							{
 								set_string_map_element(next_pkg_data, "Source-ID", strdup(pkg_src_id));
@@ -722,7 +770,7 @@ void something_depends_on_func(char* key, void* value)
 		string_map* pkg = (string_map*)value;
 		string_map* dep_map = get_string_map_element(pkg, "All-Depends");
 		char* install_root = get_string_map_element(pkg, "Install-Destination");
-		if(dep_map != NULL && install_root != NULL && strcmp(install_root, "@@NOT_INSTALLED@@") != 0) 
+		if(dep_map != NULL && install_root != NULL && strcmp(install_root, NOT_INSTALLED_STRING) != 0) 
 		{
 			__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
 			if(__found_package_that_depends_on)

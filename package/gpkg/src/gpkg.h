@@ -37,6 +37,14 @@
 #define LOAD_MINIMAL_PKG_VARIABLES           1  /* Status, Depends, Size only */
 #define LOAD_ALL_PKG_VARIABLES               2  /* Everything */
 
+
+
+#define CURRENT_VERSION_STRING "@@@CURRENT_V@@@"
+#define LATEST_VERSION_STRING  "@@@LATEST_V@@@"
+#define NOT_INSTALLED_STRING   "@@@NOTINST@@@"
+
+
+
 /* conf defs/prototypes */
 typedef struct opkg_conf_struct
 {
@@ -57,6 +65,10 @@ void free_conf(opkg_conf* conf);
 
 /* package info load/save defs/prototypes */
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name);
+
+string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version);
+string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version);
+
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
