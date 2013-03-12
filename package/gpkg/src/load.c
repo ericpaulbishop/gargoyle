@@ -537,9 +537,11 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 }
 
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
-int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes)
+int load_recursive_package_data_variables(string_map* package_data, char* package_name, int load_size, int load_will_fit, uint64_t free_bytes)
 {
-	string_map* package_info = get_string_map_element(package_data, package);
+	int package_is_installed = 0;
+	string_map* package_info = get_package_current_or_latest(package_data, package_name, &package_is_installed, NULL);
+	
 	int ret = 1;
 	char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
 	if(package_info == NULL)
@@ -555,7 +557,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 		load_size = load_will_fit || load_size;
 		if(dep_map != NULL)
 		{
-			ret = strstr(package_status, " installed") != NULL ? 0  : 1;
+			ret = package_is_installed ? 0 : 1;
 		}
 		else
 		{
@@ -576,7 +578,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 			}
 
 
-			if(strstr(package_status, " installed") != NULL)
+			if(package_is_installed)
 			{
 				//just deal with variables for All-Depends
 				ret=0;
@@ -604,7 +606,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				{
 					if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
 					{
-						string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
+						string_map* dep_info = get_package_current_or_latest(package_data, dep_list[dep_index], NULL, NULL);
 						if(dep_info != NULL)
 						{
 							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
@@ -635,7 +637,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				int dep_index;
 				for(dep_index=0; dep_index < num_deps; dep_index++)
 				{
-					string_map* dep_info = get_string_map_element(package_data, dep_list[dep_index]);
+					string_map* dep_info = get_package_current_or_latest(package_data, dep_list[dep_index], NULL, NULL);
 					if(dep_info != NULL)
 					{
 						set_string_map_element(all_dep_map, dep_list[dep_index], strdup("D"));
@@ -767,27 +769,33 @@ void something_depends_on_func(char* key, void* value)
 {
 	if(__found_package_that_depends_on == 0)
 	{
-		string_map* pkg = (string_map*)value;
-		string_map* dep_map = get_string_map_element(pkg, "All-Depends");
-		char* install_root = get_string_map_element(pkg, "Install-Destination");
-		if(dep_map != NULL && install_root != NULL && strcmp(install_root, NOT_INSTALLED_STRING) != 0) 
+		string_map* all_versions = (string_map*)value;
+		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
+		string_map* pkg = current != NULL ? get_string_map_element(all_versions, current) : NULL;
+
+		if(current != NULL && pkg != NULL)
 		{
-			__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
-			if(__found_package_that_depends_on)
+			string_map* dep_map = get_string_map_element(pkg, "All-Depends");
+			char* install_root = get_string_map_element(pkg, "Install-Destination");
+			if(dep_map != NULL && install_root != NULL && strcmp(install_root, NOT_INSTALLED_STRING) != 0) 
 			{
-				//test for mutual dependency, return 0 in that case
-				dep_map = get_string_map_element(__package_data_to_test_depends_on, "All-Depends");
-				if(dep_map != NULL)
+				__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
+				if(__found_package_that_depends_on)
 				{
-					__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
+					//test for mutual dependency, return 0 in that case
+					dep_map = get_string_map_element(__package_data_to_test_depends_on, "All-Depends");
+					if(dep_map != NULL)
+					{
+						__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
+					}
 				}
+				/*
+				if(__found_package_that_depends_on )
+				{
+					printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
+				}
+				*/
 			}
-			/*
-			if(__found_package_that_depends_on )
-			{
-				printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
-			}
-			*/
 		}
 	}
 }
@@ -795,7 +803,7 @@ int something_depends_on(string_map* package_data, char* package_name)
 {
 	int ret;
 	__package_name_to_test_depends_on = package_name;
-	__package_data_to_test_depends_on = get_string_map_element(package_data, package_name);
+	__package_data_to_test_depends_on = get_package_current_or_latest(package_data, package_name, NULL, NULL);
 	ret = __found_package_that_depends_on = 0;
 	if(__package_data_to_test_depends_on != NULL)
 	{
