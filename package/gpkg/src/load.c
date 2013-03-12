@@ -105,7 +105,7 @@ string_map* get_package_with_version(string_map* all_package_data, char* package
 /* if installed returns current, otherwise returns latest version, and if not found NULL */
 /* if is_current is not NULL, *is_current will be set to 1 if returned package is current, otherwise 0 */
 /* if matching_version is not NULL, *matching version will be set to matching version, otherwise NULL */
-string_map* get_package_current_or_latest_package(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
+string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
 {
 	string_map *ret = NULL;
 	if(is_current != NULL)       { *is_current = 0;          }
