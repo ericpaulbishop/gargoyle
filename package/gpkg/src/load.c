@@ -685,16 +685,22 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 
 void save_pkg_status_func(char* key, void* value)
 {
-	string_map* pkg_map = (string_map*)value;
-	char* pkg_vars[] = { "Version", "Depends", "Provides", "Status", "Architecture", "Installed-Time", "Link-Destination", NULL };
-	int var_index;
-	fprintf(__save_pkg_status_stream, "Package: %s\n", key);
-	for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
+	string_map* all_versions = (string_map*)value;
+	char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
+	string_map* pkg = current != NULL ? get_string_map_element(all_versions, current) : NULL;
+	if(pkg != NULL)
 	{
-		char* var_def = get_string_map_element(pkg_map, pkg_vars[var_index]);
-		fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
+		char* pkg_vars[] = { "Depends", "Provides", "Status", "Architecture", "Installed-Time", "Link-Destination", NULL };
+		int var_index;
+		fprintf(__save_pkg_status_stream, "Package: %s\n", key);
+		fprintf(__save_pkg_status_stream, "Version: %s\n", current);
+		for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
+		{
+			char* var_def = get_string_map_element(pkg, pkg_vars[var_index]);
+			fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
+		}
+		fprintf(__save_pkg_status_stream, "\n");
 	}
-	fprintf(__save_pkg_status_stream, "\n");
 }
 
 
@@ -717,7 +723,7 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
 }
 
 
-void free_pkg_func(char* key, void* value)
+void free_package_data_pkg_func(char* key, void* value)
 {
 	string_map* pkg_map = (string_map*)value;
 	unsigned long num_destroyed;
@@ -730,37 +736,61 @@ void free_pkg_func(char* key, void* value)
 	
 	/* free the main package map, only strings left */
 	destroy_string_map(pkg_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+}
 
+void free_all_package_versions(string_map* all_versions)
+{
+	unsigned long num_destroyed;
+	char* latest  =  remove_string_map_element(all_versions, LATEST_VERSION_STRING);
+	char* current =  remove_string_map_element(all_versions, CURRENT_VERSION_STRING);
+	free_if_not_null(latest);
+	free_if_not_null(current);
+
+	apply_to_every_string_map_value(all_versions, free_package_data_pkg_func);
+	destroy_string_map(all_versions, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+}
+
+void free_package_data_version_func(char* key, void* value)
+{
+	free_all_package_versions((string_map*)value);
 }
 
 void free_package_data(string_map* package_data)
 {
 	unsigned long num_destroyed;
-	apply_to_every_string_map_value(package_data, free_pkg_func);
+	apply_to_every_string_map_value(package_data, free_package_data_version_func);
 	
 	/* destroy top level map, values already freed so call with DESTROY_MODE_IGNORE_VALUES */
 	destroy_string_map(package_data, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-
 }
 
-void free_recursive_pkg_vars_func(char* key, void* value)
+
+
+
+void free_recursive_package_vars_pkg_func(char* key, void* value)
 {
-	string_map* pkg_map = (string_map*)value;
-	unsigned long num_destroyed;
+	if(strcmp(key, LATEST_VERSION_STRING) != 0 && strcmp(key, CURRENT_VERSION_STRING) != 0)
+	{
+		string_map* pkg_map = (string_map*)value;
+		unsigned long num_destroyed;
 
-
-	string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
-	char* required_size = remove_string_map_element(pkg_map, "Required-Size");
-	char* will_fit      = remove_string_map_element(pkg_map, "Will-Fit");
-	
-	if(dep_map != NULL)       { destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
-	if(required_size != NULL) { free(required_size); }
-	if(will_fit != NULL)      { free(will_fit); }
+		string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+		char* required_size = remove_string_map_element(pkg_map, "Required-Size");
+		char* will_fit      = remove_string_map_element(pkg_map, "Will-Fit");
+		
+		if(dep_map != NULL)       { destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
+		if(required_size != NULL) { free(required_size); }
+		if(will_fit != NULL)      { free(will_fit); }
+	}
 	
 }
-void free_recursive_pkg_vars(string_map* package_data)
+void free_recursive_package_vars_version_func(char* key, void* value)
 {
-	apply_to_every_string_map_value(package_data, free_recursive_pkg_vars_func);
+	apply_to_every_string_map_value((string_map*)value, free_recursive_package_vars_pkg_func);
+}
+void free_recursive_package_vars(string_map* package_data)
+{
+	apply_to_every_string_map_value(package_data, free_recursive_package_vars_version_func);
 }
 
 

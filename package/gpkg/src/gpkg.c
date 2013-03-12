@@ -142,8 +142,9 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
-	
-	string_map* rm_pkg_data = get_string_map_element(package_data, pkg_name);
+
+	string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+
 	char* rm_status = get_string_map_element(rm_pkg_data, "Status");
 	char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
 	char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
@@ -173,7 +174,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	int rm_dep_index;
 	for(rm_dep_index=0; rm_dep_index < num_rm_deps; rm_dep_index++)
 	{
-		string_map* dep_data = get_string_map_element(package_data, rm_dep_list[rm_dep_index]);
+		string_map* dep_data = get_package_current_or_latest(package_data, rm_dep_list[rm_dep_index], NULL, NULL);
+
 		char* dep_status = get_string_map_element(dep_data, "Status");
 		char* dep_root_name = get_string_map_element(dep_data, "Install-Destination");
 		char* dep_root_path = get_string_map_element(conf->dest_names, dep_root_name);
@@ -205,7 +207,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 			string_map* status_data = get_string_map_element(path_to_status_data, status_paths[status_path_index]);
 			load_package_data(status_paths[status_path_index], 0, status_data, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, "dummy-dest-name");
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-			if( strcmp(status_paths[status_path_index], rm_status_path) == 0)
+			if(strcmp(status_paths[status_path_index], rm_status_path) == 0)
 			{
 				rm_status_data = status_data;
 				rm_pkg_data = get_string_map_element(status_data, pkg_name);
@@ -267,9 +269,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 			if(get_string_map_element(package_data, test_list[test_index]) != NULL)
 			{
 				load_recursive_package_data_variables(package_data, test_list[test_index], 1, 0, 0); // load required-depends for packages of interest only
-				string_map* rm_dep_data = get_string_map_element(package_data, test_list[test_index]);
+				string_map* rm_dep_data = get_package_current_or_latest(package_data, test_list[test_index], NULL, NULL);
 				char* install_root = get_string_map_element(rm_dep_data, "Install-Destination");
-								
 				if(install_root != NULL &&  strcmp(install_root, "not_installed") != 0 )
 				{
 					if(!something_depends_on(package_data, test_list[test_index]))
@@ -292,7 +293,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 			{
 				char* status_path = get_string_map_element(pkg_status_paths, orphaned_depend_list[orphaned_depend_index]);
 				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
-				string_map* dep_status_data = get_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
+				string_map* dep_status_data = get_package_current_or_latest(status_data, orphaned_depend_list[orphaned_depend_index], NULL, NULL);
 				char* old_status = set_string_map_element(dep_status_data, "Status",  strdup("deinstall ok half-installed"));
 				free_if_not_null(old_status);
 				if(get_string_map_element(changed_status_paths, status_path) == NULL)
@@ -326,7 +327,10 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 				//remove from status data
 				char* status_path = get_string_map_element(pkg_status_paths, orphaned_depend_list[orphaned_depend_index]);
 				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
+
 				string_map* dep_already_removed = remove_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
+				//TODO : Remove version data in dep_already_removed
+
 				destroy_string_map(dep_already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 			}
 			
@@ -524,7 +528,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 				set_string_map_element(load_detail_map, load_detail_pkgs[ldp_index], strdup("D"));
 			}
 		}
-		free_recursive_pkg_vars(package_data); /* note: whacks install_pkg_depend_map */
+		free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */
 		
 	
 		string_map* parameters = initialize_string_map(1);
