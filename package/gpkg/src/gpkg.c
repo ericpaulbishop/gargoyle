@@ -329,9 +329,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 				string_map* status_data = get_string_map_element(path_to_status_data, status_path);
 
 				string_map* dep_already_removed = remove_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
-				//TODO : Remove version data in dep_already_removed
-
-				destroy_string_map(dep_already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+				free_all_package_versions(dep_already_removed);
 			}
 			
 			// save each updated status file
@@ -354,7 +352,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 
 void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* package_data, char* tmp_dir, int save_conf_files, int is_orphaned_dependency)
 {
-	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
+	string_map* install_pkg_data    = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+
 	char* install_root_name         = get_string_map_element(install_pkg_data, "Install-Destination");
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
 	char* link_root_name            = get_string_map_element(install_pkg_data, "Link-Destination");
@@ -504,7 +503,8 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 	
 
-	string_map* install_pkg_data = get_string_map_element(package_data, pkg_name);
+	string_map* install_pkg_data = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
@@ -584,9 +584,11 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
-		
-		string_map* pkg = get_string_map_element(package_data, install_pkg_list[pkg_index]);
-		if(get_string_map_element(pkg, "Installed-Time") == NULL)
+		int is_installed;
+		char* install_version = NULL;
+		string_map* pkg = get_package_current_or_latest(package_data, install_pkg_list[pkg_index], &is_installed, &install_version);
+
+		if(is_installed == 0)
 		{
 			char* old_status = remove_string_map_element(pkg, "Status");
 			free(old_status);
@@ -602,7 +604,8 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 				set_string_map_element(pkg, "Link-Destination", strdup(link_root_name));
 			}
 
-			set_string_map_element(install_root_status, install_pkg_list[pkg_index], pkg);
+			add_package_data(install_root_status, &pkg, install_pkg_list[pkg_index], install_version); 
+			/* Note: we just added pkg data structure from package_data to install_root_status, Be careful on cleanup! */
 		}
 	}
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
@@ -642,7 +645,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	//set status of new packages to installed on success, and remove on failure
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{	
-		string_map* pkg = get_string_map_element(install_root_status, install_pkg_list[pkg_index]);
+		string_map* pkg = get_package_current_or_latest(install_root_status, install_pkg_list[pkg_index], NULL, NULL);
 		if(pkg != NULL)
 		{
 			if(!err)
@@ -659,10 +662,8 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 			}
 			else
 			{
-				unsigned long num_destroyed;
-				pkg = remove_string_map_element(install_root_status, install_pkg_list[pkg_index]);
-				destroy_string_map(pkg, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-
+				string_map* all_pkg_versions = remove_string_map_element(install_root_status, install_pkg_list[pkg_index]);
+				free_all_package_versions(all_pkg_versions);
 			}
 		}
 	}
@@ -685,7 +686,7 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 	int err=0;
 	
 	/* variables not allocated in this function, do not need to be freed */
-	string_map* install_pkg_data    = get_string_map_element(package_data, pkg_name);
+	string_map* install_pkg_data    = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
 	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
 	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
@@ -723,7 +724,8 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		int dep_index;
 		for(dep_index=0; err == 0 && dep_index < num_deps && get_string_map_element(install_called_pkgs, deps[dep_index]) == NULL ; dep_index++)
 		{
-			string_map* dep_pkg = get_string_map_element(package_data, deps[dep_index]);
+			string_map* dep_pkg = get_package_current_or_latest(package_data, deps[dep_index], NULL, NULL);
+
 			if(dep_pkg != NULL)
 			{
 				char* dep_status = get_string_map_element(dep_pkg, "Status");

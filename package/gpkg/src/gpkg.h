@@ -66,9 +66,9 @@ void free_conf(opkg_conf* conf);
 /* package info load/save defs/prototypes */
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name);
 
-
 string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version);
 string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version);
+void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version);
 
 
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root);
