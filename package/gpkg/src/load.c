@@ -49,6 +49,9 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	for(dest_index=0; dest_index < num_dests; dest_index++)
 	{
 		char* status_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/status");
+		char* adjusted_status_path = dynamic_replace(status_path, "//", "/");
+		free(status_path);
+		status_path = adjusted_status_path;
 		if(path_exists(status_path))
 		{
 			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_all_packages, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
@@ -162,7 +165,7 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 		{
 			char* new_element = remove_string_map_element(*package, new_keys[ki]);
 			int ignore = strcmp(new_keys[ki], "Install-Destination") == 0 && strcmp(new_element, NOT_INSTALLED_STRING) == 0 ? 1 : 0;
-			char* to_free = ignore ? new_element : set_string_map_element(existing, new_keys[ki],  remove_string_map_element(*package, new_keys[ki]));
+			char* to_free = ignore ? new_element : set_string_map_element(existing, new_keys[ki],  new_element);
 			free_if_not_null(to_free);
 		}
 		destroy_string_map(*package, DESTROY_MODE_FREE_VALUES, &num_keys);
@@ -195,10 +198,13 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 				if(strcmp(install_root, NOT_INSTALLED_STRING) != 0)
 				{		
 					current = all_version_names[vi];
+					
 				}
 			}
 		}
 	}
+
+
 
 	char* old = set_string_map_element(all_versions, LATEST_VERSION_STRING, strdup(latest));
 	free_if_not_null(old);
@@ -209,10 +215,16 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	}
 	free_null_terminated_string_array(all_version_names);
 
+
+
+
+
 	if(set_all_versions)
 	{
 		set_string_map_element(all_package_data, package_name, all_versions);
 	}
+
+
 }
 
 
@@ -630,7 +642,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 							if(load_size)
 							{
 								uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
-								*required_size = (*required_size) + (*dep_size);
+								*required_size = (*required_size) + (dep_size == NULL ? 0 : *dep_size); // should never be null, but let's be careful
 							}
 						}
 					}
@@ -683,7 +695,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 		}
 	}
 	
-
 	return ret;
 }
 
