@@ -27,7 +27,7 @@ int main(void)
 	
 	opkg_conf *conf = load_conf(NULL);
 
-	/*
+	
 	printf("a\n");
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
@@ -36,8 +36,18 @@ int main(void)
 	printf("b\n");
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
+	/*
+	char** all_package_names = get_string_map_keys(package_data, &num_destroyed);
+	int i;
+	for(i=0; all_package_names[i] != NULL; i++)
+	{
+		printf("%s\n", all_package_names[i]);
+	}
+	*/
 
-	string_map* libc_info = get_string_map_element(package_data, "libc");
+
+
+	string_map* libc_info = get_package_current_or_latest(package_data, "libc", NULL, NULL);
 	printf("c\n");
 	string_map* libc_deps = get_string_map_element(libc_info, "All-Depends");
 	if(libc_deps != NULL)
@@ -59,7 +69,8 @@ int main(void)
 		printf("dep str = %s\n", deps);
 
 	}
-	*/
+	
+	return 0;
 
 
 

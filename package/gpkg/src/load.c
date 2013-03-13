@@ -124,7 +124,7 @@ string_map* get_package_current_or_latest(string_map* all_package_data, char* pa
 		}
 		else
 		{
-			char* latest = get_string_map_element(all_versions, package_name);
+			char* latest = get_string_map_element(all_versions, LATEST_VERSION_STRING);
 			if(latest != NULL)
 			{
 				if(matching_version != NULL) { *matching_version = strdup(latest); }
@@ -142,6 +142,7 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	string_map* existing = NULL;
 	int set_all_versions = all_versions == NULL ? 1 : 0;
 	
+
 	if(all_versions != NULL)
 	{
 		existing = get_string_map_element(all_versions, package_version);
@@ -151,6 +152,7 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 		all_versions = initialize_string_map(1);
 	}
 	
+
 	if(existing != NULL)
 	{
 		unsigned long num_keys;
@@ -177,38 +179,40 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	char* latest = NULL;
 	char* current = NULL;
 	unsigned long num_versions;
-	char** all_version_names = get_string_map_keys(*package, &num_versions);
+	char** all_version_names = get_string_map_keys(all_versions, &num_versions);
 	int vi;
 	for(vi=0;vi<num_versions; vi++)
 	{
-		latest = latest == NULL ? all_version_names[vi] : latest;
-		latest = compare_versions(all_version_names[vi], latest) > 0 ? all_version_names[vi] : latest;
-
-		char* install_root = get_string_map_element(*package, "Install-Destination");
-		if(install_root != NULL)
+		if( strcmp(all_version_names[vi], CURRENT_VERSION_STRING) != 0 && strcmp(all_version_names[vi], LATEST_VERSION_STRING) != 0)
 		{
-			if(strcmp(install_root, NOT_INSTALLED_STRING) != 0)
+			latest = latest == NULL ? all_version_names[vi] : latest;
+			latest = compare_versions(all_version_names[vi], latest) > 0 ? all_version_names[vi] : latest;
+	
+			string_map* vpkg = get_string_map_element(all_versions, all_version_names[vi]);
+			char* install_root = get_string_map_element(vpkg, "Install-Destination");
+			if(install_root != NULL)
 			{
-				current = all_version_names[vi];
+				if(strcmp(install_root, NOT_INSTALLED_STRING) != 0)
+				{		
+					current = all_version_names[vi];
+				}
 			}
 		}
 	}
-	char* old = set_string_map_element(*package, LATEST_VERSION_STRING, strdup(latest));
-	free(old);
+
+	char* old = set_string_map_element(all_versions, LATEST_VERSION_STRING, strdup(latest));
+	free_if_not_null(old);
 	if(current != NULL)
 	{
-		old = set_string_map_element(*package, CURRENT_VERSION_STRING, strdup(current));
-		free(old);
+		old = set_string_map_element(all_versions, CURRENT_VERSION_STRING, strdup(current));
+		free_if_not_null(old);
 	}
 	free_null_terminated_string_array(all_version_names);
-
 
 	if(set_all_versions)
 	{
 		set_string_map_element(all_package_data, package_name, all_versions);
 	}
-
-
 }
 
 
