@@ -552,6 +552,73 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	free(matching_dummy);
 }
 
+char** alloc_depend_def(char* def_version_str)
+{
+	char** dep_def = def_version_str == NULL ? (char**)malloc(2*sizeof(char*)) : (char**)malloc(3*sizeof(char*));
+	dep_def[0] = NULL;
+	dep_def[1] = NULL;
+	if(def_version_str != NULL )
+	{
+		char* adj = strdup(def_version_str + 1);
+		if(strchr(adj, ')') != NULL)
+		{
+			*(strchr(adj, ')')) = '\0';
+			char* start = adj;
+			char* end = adj;
+			while(*end == '>' || *end == '<' || *end == '=') 
+			{
+				end++;
+			}
+			char old = *end;
+			*end = '\0';
+			if(strlen(start) > 0)
+			{
+				dep_def[0] = strdup(start);
+				*end = old;
+				while(*end == ' ' || *end == '\t')
+				{
+					end++;
+				}
+				start = end;
+				while(*end != '\0' && *end != ' ' && *end != '\t')
+				{
+					end++;
+				}
+				*end = '\0';
+				if(strlen(start) > 0)
+				{
+					dep_def[1] = strdup(start);
+					dep_def[2] = NULL;
+				}
+				else
+				{
+					free(dep_def[0]);
+					dep_def[0] = NULL;
+				}
+			}
+		}
+		free(adj);
+	}
+	if(dep_def[0] == NULL)
+	{
+		dep_def[0] = strdup("*");
+	}
+	return dep_def;
+}
+
+char** copy_null_terminated_string_array(char** original)
+{
+	unsigned long size;
+	for(size=0; original[size] != NULL ; size++) ;
+	char** new = (char**)malloc( (size+1)*sizeof(char*));
+	for(size=0; original[size] != NULL; size++)
+	{
+		new[size] = strdup(original[size]);
+	}
+	new[size] = NULL;
+	return new;
+}
+
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
 int load_recursive_package_data_variables(string_map* package_data, char* package_name, int load_size, int load_will_fit, uint64_t free_bytes)
 {
@@ -622,10 +689,33 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				{
 					if( load_recursive_package_data_variables(package_data, dep_list[dep_index], load_size, load_will_fit,free_bytes) )
 					{
-						string_map* dep_info = get_package_current_or_latest(package_data, dep_list[dep_index], NULL, NULL);
+						char* dep_name = dep_list[dep_index];
+						char** dep_def = NULL;
+						if( dep_list[dep_index+1] != NULL )
+						{
+							if(dep_list[dep_index+1][0] == '(' )
+							{
+								dep_def = alloc_depend_def(dep_list[dep_index+1]);
+								dep_index++;
+							}
+						}
+						dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
+						set_string_map_element(dep_map, dep_name, dep_def);
+
+
+						string_map* dep_info;
+					       	if(dep_def[1] == NULL)
+						{
+							dep_info = get_package_current_or_latest(package_data, dep_name, NULL, NULL);
+						}
+						else
+						{
+							dep_info = get_package_with_version(package_data, dep_name, dep_def[1]);
+						}
+
+
 						if(dep_info != NULL)
 						{
-							set_string_map_element(dep_map, dep_list[dep_index], strdup("D"));
 							string_map* dep_dep_map = get_string_map_element(dep_info, "Required-Depends");
 							if(dep_dep_map != NULL)
 							{
@@ -634,7 +724,10 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 								char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
 								for(dep_dep_index=0; dep_dep_index < num_dep_deps; dep_dep_index++)
 								{
-									set_string_map_element(dep_map, dep_dep_list[dep_dep_index], strdup("D"));
+									char** dep_dep_def = (char**)get_string_map_element(dep_dep_map, dep_dep_list[dep_dep_index]);
+									char** old = set_string_map_element(dep_map, dep_dep_list[dep_dep_index], copy_null_terminated_string_array(dep_dep_def));
+									if(old != NULL){ free_null_terminated_string_array(old); }
+
 								}
 								free_null_terminated_string_array(dep_dep_list);
 							}
@@ -653,11 +746,33 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				int dep_index;
 				for(dep_index=0; dep_index < num_deps; dep_index++)
 				{
-					string_map* dep_info = get_package_current_or_latest(package_data, dep_list[dep_index], NULL, NULL);
+					char* dep_name = dep_list[dep_index];
+					char** dep_def = NULL;
+					if( dep_list[dep_index+1] != NULL )
+					{
+						if(dep_list[dep_index+1][0] == '(' )
+						{
+							dep_def = alloc_depend_def(dep_list[dep_index+1]);
+							dep_index++;
+						}
+					}
+					dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
+					set_string_map_element(all_dep_map, dep_name, dep_def);
+
+
+					string_map* dep_info;
+				       	if(dep_def[1] == NULL)
+					{
+						dep_info = get_package_current_or_latest(package_data, dep_name, NULL, NULL);
+					}
+					else
+					{
+						dep_info = get_package_with_version(package_data, dep_name, dep_def[1]);
+					}
+
+
 					if(dep_info != NULL)
 					{
-						set_string_map_element(all_dep_map, dep_list[dep_index], strdup("D"));
-					
 						string_map* all_dep_dep_map = get_string_map_element(dep_info, "All-Depends");
 						if(all_dep_dep_map != NULL)
 						{
@@ -666,7 +781,10 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 							unsigned long all_dep_dep_index;
 							for(all_dep_dep_index=0; all_dep_dep_index < num_all_dep_deps; all_dep_dep_index++)
 							{
-								set_string_map_element(all_dep_map, all_dep_dep_list[all_dep_dep_index], strdup("D"));
+								char** all_dep_dep_def = (char**)get_string_map_element(all_dep_dep_map, all_dep_dep_list[all_dep_dep_index]);
+								char** old = set_string_map_element(all_dep_map, all_dep_dep_list[all_dep_dep_index], copy_null_terminated_string_array(all_dep_dep_def));
+								if(old != NULL){ free_null_terminated_string_array(old); }
+
 							}
 							free_null_terminated_string_array(all_dep_dep_list);
 						}
