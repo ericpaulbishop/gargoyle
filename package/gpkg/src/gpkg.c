@@ -27,7 +27,7 @@ int main(void)
 	
 	opkg_conf *conf = load_conf(NULL);
 
-	
+	/*
 	printf("a\n");
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
@@ -36,14 +36,6 @@ int main(void)
 	printf("b\n");
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
-	/*
-	char** all_package_names = get_string_map_keys(package_data, &num_destroyed);
-	int i;
-	for(i=0; all_package_names[i] != NULL; i++)
-	{
-		printf("%s\n", all_package_names[i]);
-	}
-	*/
 
 
 
@@ -71,7 +63,7 @@ int main(void)
 	}
 	
 	return 0;
-
+	*/
 
 
 	
@@ -280,9 +272,9 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 			if(get_string_map_element(package_data, test_list[test_index]) != NULL)
 			{
 				load_recursive_package_data_variables(package_data, test_list[test_index], 1, 0, 0); // load required-depends for packages of interest only
-				string_map* rm_dep_data = get_package_current_or_latest(package_data, test_list[test_index], NULL, NULL);
-				char* install_root = get_string_map_element(rm_dep_data, "Install-Destination");
-				if(install_root != NULL &&  strcmp(install_root, "not_installed") != 0 )
+				int dep_is_installed;
+				string_map* rm_dep_data = get_package_current_or_latest(package_data, test_list[test_index], &dep_is_installed, NULL);
+				if(dep_is_installed)
 				{
 					if(!something_depends_on(package_data, test_list[test_index]))
 					{
@@ -341,6 +333,8 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 
 				string_map* dep_already_removed = remove_string_map_element(status_data, orphaned_depend_list[orphaned_depend_index]);
 				free_all_package_versions(dep_already_removed);
+
+
 			}
 			
 			// save each updated status file
