@@ -84,7 +84,6 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
 
 
 
-
 /* Like system(3), but with error messages printed if the fork fails
    or if the child process dies due to an uncaught signal. Also, the
    return value is a bit simpler:
@@ -94,6 +93,23 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
    as defined in <sys/wait.h>.
 */
 int xsystem(const char *argv[]);
+
+
+/* update.c */
+void update(opkg_conf* conf);
+
+/* remove.c */
+void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends);
+void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* package_data, char* tmp_dir, int save_conf_files, int is_orphaned_dependency);
+int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
+
+/* install.c */
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name);
+int recursively_install(char* pkg_name, char* install_root, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
+
+
+
+
 
 
 #endif

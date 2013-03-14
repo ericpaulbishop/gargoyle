@@ -812,8 +812,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 								uint64_t* dep_size = (uint64_t*)get_string_map_element(dep_info, "Required-Size");
 								*required_size = (*required_size) + (dep_size == NULL ? 0 : *dep_size); // should never be null, but let's be careful
 							}
-
-
 						}
 
 					}
@@ -834,9 +832,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 					}
 					set_string_map_element(package_info, "Required-Depends", req_dep_map);
 					set_string_map_element(package_info, "All-Depends",      all_dep_map);
-
-
-
 				}
 
 			}
