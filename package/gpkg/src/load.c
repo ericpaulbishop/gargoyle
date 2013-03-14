@@ -710,20 +710,20 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				int package_is_installed = some_version_is_installed && (strcmp(installed_version, package_version) == 0);
 				string_map* package_info = get_string_map_element(all_versions, package_version);
 				char* package_status     = get_string_map_element(package_info, "Status");
-				string_map* dep_map      = get_string_map_element(package_info, "Required-Depends");
+				string_map* req_dep_map  = get_string_map_element(package_info, "Required-Depends");
 				string_map* all_dep_map  = get_string_map_element(package_info, "All-Depends");
 				uint64_t* required_size  = get_string_map_element(package_info, "Required-Size");
 				load_size = load_will_fit || load_size;
 				
 
-				if(dep_map == NULL) // indicates it hasn't already been loaded, test prevents infinite recursion
+				if(req_dep_map == NULL) // indicates it hasn't already been loaded, test prevents infinite recursion
 				{
 					if(load_size)
 					{
 						required_size = (uint64_t*)malloc(sizeof(uint64_t));
 						*required_size = 0;
 					}
-					dep_map = initialize_map(1);
+					req_dep_map = initialize_map(1);
 					all_dep_map = initialize_map(1);
 
 
@@ -750,7 +750,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						char* dep_name = dep_list[dep_index];
 						char** dep_def = NULL;
 						int dep_is_installed;
-						load_recursive_package_data_variables(package_data, dep_name, load_size, load_will_fit, free_bytes);
+						load_recursive_package_data_variables(package_data, dep_name, load_size, load_will_fit, free_bytes); //recurse
 						if( dep_list[dep_index+1] != NULL )
 						{
 							if(dep_list[dep_index+1][0] == '(' )
@@ -760,28 +760,37 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 							}
 						}
 						dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
-						string_map* dep_info = get_package_current_or_latest_matching(package_data, package_name, dep_def, &dep_is_installed, NULL);
+						string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &dep_is_installed, NULL);
 
 
 						set_string_map_element(all_dep_map, dep_name, dep_def);
 						if(!dep_is_installed)
 						{
-							set_string_map_element(dep_map, dep_name, copy_null_terminated_string_array(dep_def));
+							set_string_map_element(req_dep_map, dep_name, copy_null_terminated_string_array(dep_def));
 						}
+						
 
 
 						if(dep_info != NULL)
 						{
 							char* add_map_names[3]  = { "All-Depends", "Required-Depends", NULL };
-							string_map* add_maps[3] = { all_dep_map, dep_map, NULL };
+							string_map* add_maps[3] = { all_dep_map, req_dep_map, NULL };
 							add_map_names[1] = dep_is_installed ? NULL :  add_map_names[1] ;
+							
+							
+								
 							int add_map_index;
 							for(add_map_index=0; add_map_names[add_map_index] != NULL; add_map_index++)
 							{
+
+
 								string_map* add_map = add_maps[add_map_index];
 								string_map* dep_dep_map = get_string_map_element(dep_info, add_map_names[add_map_index]);
+								
+
 								if(dep_dep_map != NULL)
 								{
+
 									unsigned long num_dep_deps;
 									unsigned long dep_dep_index;
 									char** dep_dep_list = get_string_map_keys(dep_dep_map, &num_dep_deps);
@@ -823,8 +832,10 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 							set_string_map_element(package_info, "Will-Fit", strdup("true"));
 						}
 					}
-					set_string_map_element(package_info, "Required-Depends", dep_map);
-					set_string_map_element(package_info, "All-Depends", all_dep_map);
+					set_string_map_element(package_info, "Required-Depends", req_dep_map);
+					set_string_map_element(package_info, "All-Depends",      all_dep_map);
+
+
 
 				}
 

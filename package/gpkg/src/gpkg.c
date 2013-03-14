@@ -28,6 +28,7 @@ int main(void)
 	opkg_conf *conf = load_conf(NULL);
 
 	/*
+	
 	printf("a\n");
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
@@ -38,8 +39,13 @@ int main(void)
 
 
 
+	int is_installed;
+	char* matching[2] = { "*", NULL };
+	string_map* libc_info = get_package_current_or_latest_matching(package_data, "libc", matching, &is_installed, NULL);
+	
+	printf("libc is installed = %d\n", is_installed);
 
-	string_map* libc_info = get_package_current_or_latest(package_data, "libc", NULL, NULL);
+	
 	printf("c\n");
 	string_map* libc_deps = get_string_map_element(libc_info, "All-Depends");
 	if(libc_deps != NULL)
@@ -569,7 +575,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	}
 
 
-
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
 	string_map* install_root_status = initialize_string_map(1);
@@ -614,6 +619,9 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 		}
 	}
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
+
+
+
 
 	char* tmp_dir = (char*)malloc(1024);
 	if(create_tmp_dir("/tmp", &tmp_dir) != 0)
