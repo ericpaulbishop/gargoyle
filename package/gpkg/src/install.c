@@ -3,8 +3,6 @@
 #include "gpkg.h"
 
 
-
-
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name)
 {
 
@@ -32,7 +30,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
-	
+	char* unsatisfied_dep_err = NULL;
 
 
 	/* load detailed information for all packiages we are about to install */
@@ -47,10 +45,41 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 			unsigned long num_keys;
 			char** load_detail_pkgs = get_string_map_keys(install_pkg_depend_map, &num_keys);
 			int ldp_index;
-			for(ldp_index=0;ldp_index < num_keys; ldp_index++)
+			for(ldp_index=0;ldp_index < num_keys && unsatisfied_dep_err == NULL; ldp_index++)
 			{
-				set_string_map_element(load_detail_map, load_detail_pkgs[ldp_index], strdup("D"));
+				char* dep_name = load_detail_pkgs[ldp_index];
+				set_string_map_element(load_detail_map, dep_name, strdup("D"));
+
+				//error checking, first check that dependency definition exists
+				char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
+				string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, NULL, NULL);
+				if(dep_info == NULL)
+				{
+					if(dep_def[1] != NULL)
+					{
+						unsatisfied_dep_err = dynamic_strcat(9, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " cannot be found, try updating your package lists");
+					}
+					else
+					{
+						unsatisfied_dep_err = dynamic_strcat(5, "ERROR: Dependency ", dep_name, " of package ", pkg_name, " cannot be found, try updating your package lists");
+					}
+				}
+				else
+				{
+					//check if we have a version installed different than what is required
+					int have_current;
+					char* current_version = NULL;
+					get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
+					if(have_current)
+					{
+						//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
+						unsatisfied_dep_err = dynamic_strcat(10, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed, but has incompatible version ", current_version);
+					}
+					free_if_not_null(current_version);
+				}
+				
 			}
+			free_null_terminated_string_array(load_detail_pkgs);
 		}
 		free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */
 		
@@ -84,6 +113,11 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	if(will_fit == NULL || strcmp(will_fit, "true") != 0)
 	{
 		fprintf(stderr, "ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
+		exit(1);
+	}
+	if(unsatisfied_dep_err != NULL)
+	{
+		fprintf(stderr, "%s\n", unsatisfied_dep_err);
 		exit(1);
 	}
 

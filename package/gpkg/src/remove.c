@@ -86,7 +86,6 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 				{
 					set_string_map_element(path_to_status_data, status_path, initialize_string_map(1));
 					set_string_map_element(path_to_status_name, status_path, strdup(dep_root_name));
-					printf("setting path to status name for %s to %s\n", status_path, dep_root_name);
 				}
 			}
 		}
