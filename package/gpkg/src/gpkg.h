@@ -110,7 +110,7 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
 
 /* install.c */
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name);
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria); /*if version_criteria is NULL, assumes latest version requested */
 int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 

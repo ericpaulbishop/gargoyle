@@ -3,7 +3,7 @@
 #include "gpkg.h"
 
 
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name)
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
 {
 
 	string_map* package_data = initialize_string_map(1);
@@ -25,9 +25,11 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 	
 
+
 	char* install_pkg_version = NULL;
 	int install_pkg_is_current;
-	string_map* install_pkg_data = get_package_current_or_latest(package_data, pkg_name, &install_pkg_is_current, &install_pkg_version);
+	version_criteria = version_criteria == NULL ? alloc_depend_def(NULL) : version_criteria;
+	string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
 
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
 	char** install_pkg_list = NULL;	
@@ -39,7 +41,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	string_map* install_pkgs_map = initialize_string_map(1);
 	if(install_status != NULL)
 	{
-		set_string_map_element(install_pkgs_map, pkg_name, alloc_depend_def(NULL));
+		set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
 		
 		string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
 		if(install_pkg_depend_map != NULL)

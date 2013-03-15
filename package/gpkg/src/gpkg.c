@@ -65,7 +65,7 @@ int main(void)
 	
 	//update(conf);
 
-	do_install(conf, "irssi", "plugin_root", "plugin_test");
+	do_install(conf, "irssi", "plugin_root", "plugin_test", NULL);
 
 	do_remove(conf, "irssi", 0, 1, 0);
 
