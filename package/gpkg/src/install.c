@@ -25,7 +25,9 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 	
 
-	string_map* install_pkg_data = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+	char* install_pkg_version = NULL;
+	int install_pkg_is_current;
+	string_map* install_pkg_data = get_package_current_or_latest(package_data, pkg_name, &install_pkg_is_current, &install_pkg_version);
 
 	char* install_status = get_string_map_element(install_pkg_data, "Status");
 	char** install_pkg_list = NULL;	
@@ -34,10 +36,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 
 
 	/* load detailed information for all packiages we are about to install */
+	string_map* install_pkgs_map = initialize_string_map(1);
 	if(install_status != NULL)
 	{
-		string_map* load_detail_map = initialize_string_map(1);
-		set_string_map_element(load_detail_map, pkg_name, strdup("D"));
+		set_string_map_element(install_pkgs_map, pkg_name, alloc_depend_def(NULL));
 		
 		string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
 		if(install_pkg_depend_map != NULL)
@@ -48,10 +50,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 			for(ldp_index=0;ldp_index < num_keys && unsatisfied_dep_err == NULL; ldp_index++)
 			{
 				char* dep_name = load_detail_pkgs[ldp_index];
-				set_string_map_element(load_detail_map, dep_name, strdup("D"));
+				char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
+				set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
 
 				//error checking, first check that dependency definition exists
-				char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
 				string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, NULL, NULL);
 				if(dep_info == NULL)
 				{
@@ -86,11 +88,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 		string_map* parameters = initialize_string_map(1);
 		matching_packages = initialize_string_map(1);
-		set_string_map_element(parameters, "packages", load_detail_map);
+		set_string_map_element(parameters, "packages", install_pkgs_map);
 		load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
 		install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
 		
-		destroy_string_map(load_detail_map,   DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 		destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 
@@ -143,9 +144,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	{
 		int is_installed;
 		char* install_version = NULL;
-		string_map* pkg = get_package_current_or_latest(package_data, install_pkg_list[pkg_index], &is_installed, &install_version);
+		char** match_criteria = get_string_map_element(install_pkgs_map, install_pkg_list[pkg_index]);
+		string_map* pkg = get_package_current_or_latest_matching(package_data, install_pkg_list[pkg_index], match_criteria, &is_installed, &install_version);
 
-		if(is_installed == 0)
+		if(is_installed == 0) /* should never be true, but check anyway */
 		{
 			char* old_status = remove_string_map_element(pkg, "Status");
 			free(old_status);
@@ -179,7 +181,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_root_name, link_root_name, 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, 0, tmp_dir, conf, package_data, install_called_pkgs);
 	
 	
 
@@ -205,7 +207,8 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	//set status of new packages to installed on success, and remove on failure
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{	
-		string_map* pkg = get_package_current_or_latest(install_root_status, install_pkg_list[pkg_index], NULL, NULL);
+		/* no need to check version, should only be one installed version at a time... */
+		string_map* pkg = get_package_current_or_latest(install_root_status, install_pkg_list[pkg_index], NULL, NULL); 
 		if(pkg != NULL)
 		{
 			if(!err)
@@ -241,12 +244,12 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 }
 
 
-int recursively_install(char* pkg_name, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
 	
 	/* variables not allocated in this function, do not need to be freed */
-	string_map* install_pkg_data    = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+	string_map* install_pkg_data    = get_package_with_version(package_data, pkg_name, pkg_version);
 	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
 	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
@@ -284,14 +287,17 @@ int recursively_install(char* pkg_name, char* install_root_name, char* link_to_r
 		int dep_index;
 		for(dep_index=0; err == 0 && dep_index < num_deps && get_string_map_element(install_called_pkgs, deps[dep_index]) == NULL ; dep_index++)
 		{
-			string_map* dep_pkg = get_package_current_or_latest(package_data, deps[dep_index], NULL, NULL);
+			char** dep_def = get_string_map_element(pkg_dependencies, deps[dep_index]);
+			int is_current;
+			char* matching_version;
+			string_map* dep_pkg = get_package_current_or_latest_matching(package_data, deps[dep_index], dep_def, &is_current, &matching_version);
 
 			if(dep_pkg != NULL)
 			{
 				char* dep_status = get_string_map_element(dep_pkg, "Status");
 				if(strstr(dep_status, " half-installed") != NULL)
 				{
-					err = recursively_install(deps[dep_index], install_root_name, link_to_root, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
+					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
 					
 				}
 			}

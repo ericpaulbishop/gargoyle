@@ -71,10 +71,12 @@ string_map* get_package_current_or_latest_matching(string_map* all_package_data,
 string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version);
 
 void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version);
+char** alloc_depend_def(char* def_version_str);
 
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
+
 
 void free_all_package_versions(string_map* all_versions);
 void free_package_data(string_map* package_data);
@@ -109,7 +111,7 @@ int run_script_if_exists(char* install_root_path, char* install_link_path, char*
 
 /* install.c */
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name);
-int recursively_install(char* pkg_name, char* install_root, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
+int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 
 

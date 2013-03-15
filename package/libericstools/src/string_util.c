@@ -161,6 +161,21 @@ int free_null_terminated_string_array(char** strs)
 	return str_index;
 }
 
+char** copy_null_terminated_string_array(char** original)
+{
+	unsigned long size;
+	char** new;
+	for(size=0; original[size] != NULL ; size++) ;
+	new = (char**)malloc( (size+1)*sizeof(char*));
+	for(size=0; original[size] != NULL; size++)
+	{
+		new[size] = strdup(original[size]);
+	}
+	new[size] = NULL;
+	return new;
+}
+
+
 
 char* dynamic_strcat(int num_strs, ...)
 {

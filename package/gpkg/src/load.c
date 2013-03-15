@@ -674,18 +674,6 @@ char** alloc_depend_def(char* def_version_str)
 	return dep_def;
 }
 
-char** copy_null_terminated_string_array(char** original)
-{
-	unsigned long size;
-	for(size=0; original[size] != NULL ; size++) ;
-	char** new = (char**)malloc( (size+1)*sizeof(char*));
-	for(size=0; original[size] != NULL; size++)
-	{
-		new[size] = strdup(original[size]);
-	}
-	new[size] = NULL;
-	return new;
-}
 
 //returns 0 if already installed or package doesn't exist, 1 if we need to install it
 int load_recursive_package_data_variables(string_map* package_data, char* package_name, int load_size, int load_will_fit, uint64_t free_bytes)
