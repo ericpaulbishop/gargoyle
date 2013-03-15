@@ -7,7 +7,7 @@ void save_pkg_status_func(char* key, void* value);
 void free_pkg_func(char* key, void* value);
 void free_recursive_pkg_vars_func(char* key, void* value);
 
-
+static char*       __found_package_name = NULL;
 static int         __found_package_that_depends_on = 0;
 static char*       __package_name_to_test_depends_on = NULL;
 static string_map* __package_data_to_test_depends_on = NULL;
@@ -978,30 +978,36 @@ void something_depends_on_func(char* key, void* value)
 						__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
 					}
 				}
-				/*
 				if(__found_package_that_depends_on )
 				{
-					printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
+					__found_package_name = key ; // don't dynamically allocate, we do strdup on match in calling function
+					//printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
 				}
-				*/
 			}
 		}
 	}
 }
-int something_depends_on(string_map* package_data, char* package_name)
+int something_depends_on(string_map* package_data, char* package_name, char** pkg_that_depends_on_query)
 {
 	int ret;
 	__package_name_to_test_depends_on = package_name;
 	__package_data_to_test_depends_on = get_package_current_or_latest(package_data, package_name, NULL, NULL);
+	__found_package_name = NULL;
 	ret = __found_package_that_depends_on = 0;
+
 	if(__package_data_to_test_depends_on != NULL)
 	{
 		apply_to_every_string_map_value(package_data, something_depends_on_func);
+		if(__found_package_name != NULL && pkg_that_depends_on_query != NULL)
+		{
+			*pkg_that_depends_on_query  = strdup(__found_package_name);
+		}
 	}
 	ret = __found_package_that_depends_on;
 	__package_name_to_test_depends_on = NULL;
 	__package_data_to_test_depends_on = NULL;
 	__found_package_that_depends_on = 0;
+	__found_package_name = NULL;
 	return ret;
 }
 

@@ -69,22 +69,26 @@ uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name);
 string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version);
 string_map* get_package_current_or_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version);
 string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version);
-void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version);
 
+void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version);
 
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
+
 void free_all_package_versions(string_map* all_versions);
 void free_package_data(string_map* package_data);
 void free_recursive_package_vars(string_map* package_data);
-int something_depends_on(string_map* package_data, char* package_name);
+
+int something_depends_on(string_map* package_data, char* package_name, char** pkg_that_depends_on_query);
+
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path);
 
 
 
 
-/* Like system(3), but with error messages printed if the fork fails
+/* xsystem.c 
+ * Like system(3), but with error messages printed if the fork fails
    or if the child process dies due to an uncaught signal. Also, the
    return value is a bit simpler:
 
@@ -99,7 +103,7 @@ int xsystem(const char *argv[]);
 void update(opkg_conf* conf);
 
 /* remove.c */
-void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends);
+void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force);
 void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* package_data, char* tmp_dir, int save_conf_files, int is_orphaned_dependency);
 int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
 
