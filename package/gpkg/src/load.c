@@ -4,6 +4,7 @@
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 
+void free_dep_map_func(char* key, void* value);
 void free_pkg_func(char* key, void* value);
 void free_recursive_pkg_vars_func(char* key, void* value);
 
@@ -881,15 +882,29 @@ void save_package_data_as_status_file(string_map* package_data, char* status_fil
 	__save_pkg_status_stream = NULL;
 }
 
+void free_dep_map_func(char* key, void* value)
+{
+	free_null_terminated_string_array(value);
+}
 
 void free_package_data_pkg_func(char* key, void* value)
 {
 	string_map* pkg_map = (string_map*)value;
 	unsigned long num_destroyed;
 
-	/* deal with dependency map, which is not simple string */
-	string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
-	destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	/* deal with dependency maps, which are not simple strings */
+	string_map* req_dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+	string_map* all_dep_map = remove_string_map_element(pkg_map, "All-Depends");
+	if(req_dep_map != NULL)
+	{
+		apply_to_every_string_map_value(req_dep_map, free_dep_map_func);
+		destroy_string_map(req_dep_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+	}
+	if(all_dep_map != NULL)
+	{
+		apply_to_every_string_map_value(all_dep_map, free_dep_map_func);
+		destroy_string_map(all_dep_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+	}
 
 	/* deal with version crap when it gets implemented */
 	
@@ -933,13 +948,24 @@ void free_recursive_package_vars_pkg_func(char* key, void* value)
 		string_map* pkg_map = (string_map*)value;
 		unsigned long num_destroyed;
 
-		string_map* dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+		string_map* req_dep_map = remove_string_map_element(pkg_map, "Required-Depends");
+		string_map* all_dep_map = remove_string_map_element(pkg_map, "All-Depends");
+		if(req_dep_map != NULL)
+		{
+			apply_to_every_string_map_value(req_dep_map, free_dep_map_func);
+			destroy_string_map(req_dep_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+		}
+		if(all_dep_map != NULL)
+		{
+			apply_to_every_string_map_value(all_dep_map, free_dep_map_func);
+			destroy_string_map(all_dep_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+		}
+
+
 		char* required_size = remove_string_map_element(pkg_map, "Required-Size");
 		char* will_fit      = remove_string_map_element(pkg_map, "Will-Fit");
-		
-		if(dep_map != NULL)       { destroy_string_map(dep_map, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
-		if(required_size != NULL) { free(required_size); }
-		if(will_fit != NULL)      { free(will_fit); }
+		free_if_not_null(required_size);
+		free_if_not_null(will_fit);	
 	}
 	
 }
