@@ -1,6 +1,6 @@
 all: gpkg
 
-gpkg: gpkg.o conf.o load.o xsystem.o update.o remove.o install.o
+gpkg: gpkg.o conf.o load.o xsystem.o update.o remove.o install.o upgrade.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lericstools -lbbtargz -lewget
 
 %.o: %.c
