@@ -83,7 +83,7 @@ void free_all_package_versions(string_map* all_versions);
 void free_package_data(string_map* package_data);
 void free_recursive_package_vars(string_map* package_data);
 
-int something_depends_on(string_map* package_data, char* package_name, char** pkg_that_depends_on_query);
+int something_depends_on(string_map* package_data, char* package_name, char* but_not_same_package_with_version, char** pkg_that_depends_on_query);
 
 void save_package_data_as_status_file(string_map* package_data, char* status_file_path);
 

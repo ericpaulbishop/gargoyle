@@ -26,7 +26,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
 
 	char* package_depending_on_name = NULL;
-	int other_package_depends_on = something_depends_on(package_data, pkg_name, &package_depending_on_name);
+	int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
 
 
 	/* error checking before we start install */
@@ -168,7 +168,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 				string_map* rm_dep_data = get_package_current_or_latest(package_data, test_list[test_index], &dep_is_installed, NULL);
 				if(dep_is_installed)
 				{
-					if(!something_depends_on(package_data, test_list[test_index], NULL))
+					if(!something_depends_on(package_data, test_list[test_index], NULL, NULL))
 					{
 						set_string_map_element(found_map, test_list[test_index], strdup("D"));
 					}

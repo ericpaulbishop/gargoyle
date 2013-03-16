@@ -9,9 +9,11 @@ void free_pkg_func(char* key, void* value);
 void free_recursive_pkg_vars_func(char* key, void* value);
 
 static char*       __found_package_name = NULL;
+static char*       __package_version_to_test_depends_on = NULL;
 static int         __found_package_that_depends_on = 0;
 static char*       __package_name_to_test_depends_on = NULL;
 static string_map* __package_data_to_test_depends_on = NULL;
+static char*       __but_not_same_package_with_version = NULL;
 void something_depends_on_func(char* key, void* value);
 
 
@@ -1000,7 +1002,32 @@ void something_depends_on_func(char* key, void* value)
 			char* install_root = get_string_map_element(pkg, "Install-Destination");
 			if(dep_map != NULL && install_root != NULL && strcmp(install_root, NOT_INSTALLED_STRING) != 0) 
 			{
-				__found_package_that_depends_on = get_string_map_element(dep_map, __package_name_to_test_depends_on) != NULL ? 1 : __found_package_that_depends_on;
+				char** matching = get_string_map_element(dep_map, __package_name_to_test_depends_on);
+				if(__but_not_same_package_with_version == NULL && matching != NULL)
+				{
+					__found_package_that_depends_on = 1;
+				}
+				else if(matching != NULL)
+				{
+					if( 	strcmp(matching[0], ">>") == 0 && strcmp(matching[0], ">")  == 0 &&  
+		  				strcmp(matching[0], "<<") == 0 && strcmp(matching[0], "<")  == 0 && 
+		  				strcmp(matching[0], "<=") == 0 && strcmp(matching[0], ">=") == 0 &&         
+		  				strcmp(matching[0], "=") == 0  && strcmp(matching[0], "==") == 0 )
+					{
+						int cmp = compare_versions(__but_not_same_package_with_version, matching[1]);
+
+						int valid = 0;
+						valid = (cmp == 0 && (strcmp(matching[0], "=") == 0  || strcmp(matching[0], "==") == 0 || strcmp(matching[0], "<=") == 0 || strcmp(matching[0], ">=") == 0)) ? 1 : valid;
+						valid = (cmp <  0 && (strcmp(matching[0], "<") == 0  || strcmp(matching[0], "<<") == 0 || strcmp(matching[0], "<=") == 0)) ? 1 : valid;
+						valid = (cmp >  0 && (strcmp(matching[0], ">") == 0  || strcmp(matching[0], ">>") == 0 || strcmp(matching[0], ">=") == 0)) ? 1 : valid;
+						if(valid == 0)
+						{
+							__found_package_that_depends_on = 1;
+						}
+
+					}
+				}
+				
 				if(__found_package_that_depends_on)
 				{
 					//test for mutual dependency, return 0 in that case
@@ -1010,6 +1037,8 @@ void something_depends_on_func(char* key, void* value)
 						__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
 					}
 				}
+				
+
 				if(__found_package_that_depends_on )
 				{
 					__found_package_name = key ; // don't dynamically allocate, we do strdup on match in calling function
@@ -1019,12 +1048,13 @@ void something_depends_on_func(char* key, void* value)
 		}
 	}
 }
-int something_depends_on(string_map* package_data, char* package_name, char** pkg_that_depends_on_query)
+int something_depends_on(string_map* package_data, char* package_name, char* but_not_same_package_with_version, char** pkg_that_depends_on_query)
 {
 	int ret;
 	__package_name_to_test_depends_on = package_name;
 	__package_data_to_test_depends_on = get_package_current_or_latest(package_data, package_name, NULL, NULL);
 	__found_package_name = NULL;
+	__but_not_same_package_with_version = but_not_same_package_with_version;
 	ret = __found_package_that_depends_on = 0;
 
 	if(__package_data_to_test_depends_on != NULL)
@@ -1040,6 +1070,7 @@ int something_depends_on(string_map* package_data, char* package_name, char** pk
 	__package_data_to_test_depends_on = NULL;
 	__found_package_that_depends_on = 0;
 	__found_package_name = NULL;
+	__but_not_same_package_with_version;
 	return ret;
 }
 
