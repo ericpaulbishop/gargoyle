@@ -109,7 +109,7 @@ string_map* get_package_with_version(string_map* all_package_data, char* package
 /* if installed returns current, otherwise returns latest version, and if not found NULL */
 /* if is_current is not NULL, *is_current will be set to 1 if returned package is current, otherwise 0 */
 /* if matching_version is not NULL, *matching version will be set to matching version, otherwise NULL */
-string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
+string_map* internal_get_package_current_or_latest(string_map* all_package_data, char* package_name, int prefer_latest_to_current, int* is_current, char** matching_version)
 {
 	string_map *ret = NULL;
 	if(is_current != NULL)       { *is_current = 0;          }
@@ -120,26 +120,35 @@ string_map* get_package_current_or_latest(string_map* all_package_data, char* pa
 	if(all_versions != NULL)
 	{
 		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
-		if(current != NULL)
+		char* latest = get_string_map_element(all_versions, LATEST_VERSION_STRING);
+		if(current != NULL && prefer_latest_to_current == 0)
 		{
-			if(is_current != NULL)       { *is_current = 1;                     }
+			if(is_current != NULL)       { *is_current = 1; }
 			if(matching_version != NULL) { *matching_version = strdup(current); }
 			ret = get_string_map_element(all_versions, current);
 		}
-		else
+		else if (latest != NULL )
 		{
-			char* latest = get_string_map_element(all_versions, LATEST_VERSION_STRING);
-			if(latest != NULL)
-			{
-				if(matching_version != NULL) { *matching_version = strdup(latest); }
-				ret = get_string_map_element(all_versions, latest);
-			}
+			if(is_current != NULL) { *is_current = safe_strcmp(current, latest) == 0 ? 1 : 0; } /* safe_strcmp returns -1 or 1 cleanly if one arg is NULL */
+			if(matching_version != NULL) { *matching_version = strdup(latest); }
+			ret = get_string_map_element(all_versions, latest);
 		}
 	}
 	return ret;
 }
+string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
+{
+	return internal_get_package_current_or_latest(all_package_data, package_name, 0,  is_current, matching_version);
+}
+string_map* get_package_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
+{
+	return internal_get_package_current_or_latest(all_package_data, package_name, 1,  is_current, matching_version);
+}
 
-string_map* get_package_current_or_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version)
+
+
+
+string_map* internal_get_package_current_or_latest_matching(string_map* all_package_data, char* package_name, int prefer_latest_to_current, char** matching, int* is_current, char** matching_version)
 {
 	string_map *ret = NULL;
 	if(is_current != NULL)       { *is_current = 0;          }
@@ -152,7 +161,7 @@ string_map* get_package_current_or_latest_matching(string_map* all_package_data,
 		  strcmp(matching[0], "=") != 0  && strcmp(matching[0], "==") != 0 )
 		)
 	{
-		ret = get_package_current_or_latest(all_package_data, package_name, is_current, matching_version);
+		ret = internal_get_package_current_or_latest(all_package_data, package_name, prefer_latest_to_current, is_current, matching_version);
 	}
 	else
 	{
@@ -176,15 +185,14 @@ string_map* get_package_current_or_latest_matching(string_map* all_package_data,
 					valid = (cmp >  0 && (strcmp(matching[0], ">") == 0  || strcmp(matching[0], ">>") == 0 || strcmp(matching[0], ">=") == 0)) ? 1 : valid;
 					if(found_version != NULL && valid)
 					{
-						if(strcmp(test_version, current_version))
+						if(safe_strcmp(test_version, current_version) == 0 && prefer_latest_to_current == 0)
 						{
 							found_version = test_version;
-							if(is_current != NULL) { *is_current = 1; }
 						}
 						else
 						{
 							cmp = compare_versions(test_version, found_version);
-							found_version = cmp > 0 && strcmp(found_version, current_version) != 0 ? test_version : found_version;
+							found_version = cmp > 0 && (prefer_latest_to_current || safe_strcmp(found_version, current_version) != 0) ? test_version : found_version;
 						}
 					}
 					else if(found_version == NULL && valid)
@@ -195,6 +203,7 @@ string_map* get_package_current_or_latest_matching(string_map* all_package_data,
 			}
 			if(found_version != NULL)
 			{
+				if(is_current != NULL) { *is_current = safe_strcmp(current_version, found_version) == 0 ? 1 : 0; }
 				if(matching_version != NULL) { *matching_version = strdup(found_version); }
 				ret = get_string_map_element(all_versions, found_version);
 			}
@@ -205,6 +214,15 @@ string_map* get_package_current_or_latest_matching(string_map* all_package_data,
 	return ret;
 
 }
+string_map* get_package_current_or_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version)
+{
+	return internal_get_package_current_or_latest_matching(all_package_data, package_name, 0, matching, is_current, matching_version);
+}
+string_map* get_package_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version)
+{
+	return internal_get_package_current_or_latest_matching(all_package_data, package_name, 1, matching, is_current, matching_version);
+}
+
 
 
 void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
