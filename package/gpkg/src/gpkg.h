@@ -106,7 +106,7 @@ int xsystem(const char *argv[]);
 void update(opkg_conf* conf);
 
 /* remove.c */
-void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force);
+void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced);
 void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* package_data, char* tmp_dir, int save_conf_files, int is_orphaned_dependency);
 int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
 
@@ -115,7 +115,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 /* upgrade.c */
-void do_upgrade(opkg_conf* conf, char* pkg_name, char** new_version_criteria);
+void do_upgrade(opkg_conf* conf, char* pkg_name, int preserve_conf_files, char** new_version_criteria);
 
 
 

@@ -4,7 +4,7 @@
 
 
 
-void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force)
+void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced)
 {
 	string_map* package_data          = initialize_string_map(1);
 	string_map* matching_packages     = initialize_string_map(1);
@@ -50,7 +50,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 		fprintf(stderr, "ERROR: Installed package %s depends on %s, can't uninstall\n\n", package_depending_on_name, pkg_name);
 		exit(1);
 	}
-	else if(other_package_depends_on && force)
+	else if(other_package_depends_on && force && warn_if_forced)
 	{
 		fprintf(stderr, "WARNING: Forced remove specified, uninstalling %s even though %s depends on it\n\n", pkg_name, package_depending_on_name);
 	}
