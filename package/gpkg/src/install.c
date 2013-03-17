@@ -55,9 +55,34 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 				char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
 				set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
 
-				//error checking, first check that dependency definition exists
-				string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, NULL, NULL);
-				if(dep_info == NULL)
+				//error checking, check that dependency definition exists
+				char* latest_version = NULL;
+				int latest_is_current = 0;
+				string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &latest_is_current, &latest_version);
+				
+				
+				//check if we have a version installed different than what is required
+				int have_current;
+				char* current_version = NULL;
+				string_map* cur_info = get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
+				if(have_current && (latest_is_current == 0 || dep_info == NULL))
+				{
+					//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
+					char* cur_status = get_string_map_element(cur_info, "Status");
+					if(strstr(cur_status, " hold ") != NULL)
+					{
+						unsatisfied_dep_err = dynamic_strcat(11, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version, "and is marked as 'hold'");
+					}
+					else
+					{
+						unsatisfied_dep_err = dynamic_strcat(10, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version);
+					}
+				}
+				free_if_not_null(current_version);
+				free_if_not_null(latest_version);
+
+				// check that dependency definition exists
+				if(unsatisfied_dep_err == NULL && dep_info == NULL)
 				{
 					if(dep_def[1] != NULL)
 					{
@@ -68,20 +93,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 						unsatisfied_dep_err = dynamic_strcat(5, "ERROR: Dependency ", dep_name, " of package ", pkg_name, " cannot be found, try updating your package lists");
 					}
 				}
-				else
-				{
-					//check if we have a version installed different than what is required
-					int have_current;
-					char* current_version = NULL;
-					get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
-					if(have_current)
-					{
-						//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
-						unsatisfied_dep_err = dynamic_strcat(10, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed, but has incompatible version ", current_version);
-					}
-					free_if_not_null(current_version);
-				}
-				
+								
 			}
 			free_null_terminated_string_array(load_detail_pkgs);
 		}
