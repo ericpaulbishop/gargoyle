@@ -195,7 +195,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, NULL, 0, tmp_dir, conf, package_data, install_called_pkgs);
 	
 	
 
@@ -258,7 +258,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 }
 
 
-int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
 	
@@ -311,7 +311,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 				char* dep_status = get_string_map_element(dep_pkg, "Status");
 				if(strstr(dep_status, " half-installed") != NULL)
 				{
-					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
+					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, overlay_path, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
 					
 				}
 			}

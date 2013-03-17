@@ -10,6 +10,8 @@ opkg_conf* load_conf(const char* conf_file_name)
 	conf->gzip_sources    = initialize_string_map(1);
 	conf->plain_sources   = initialize_string_map(1);
 
+	conf->overlays        = initialize_string_map(1);
+
 	conf->dest_roots      = initialize_string_map(1);
 	conf->dest_names      = initialize_string_map(1);
 	conf->dest_freespace  = initialize_string_map(1);
@@ -79,9 +81,13 @@ opkg_conf* load_conf(const char* conf_file_name)
 				{
 					set_string_map_element(conf->plain_sources, split_line[num_pieces-2], strdup(split_line[num_pieces-1]));
 				}
-				else if( strcmp(split_line[0], "option") == 0 && strcmp(split_line[1], "overlay_root") == 0 && num_pieces > 2)
+				else if( strcmp(split_line[0], "option") == 0 && strstr(split_line[1], "overlay_") != NULL && num_pieces > 2)
 				{
-					overlay_root = strdup(split_line[num_pieces-1]);
+					char* overlay_name = strstr(split_line[1], "overlay_");
+					if(path_exists(split_line[num_pieces-1]))
+					{
+						set_string_map_element(conf->overlays, overlay_name, strdup(split_line[num_pieces-1]));
+					}
 				}
 			}
 			free_null_terminated_string_array(split_line);
@@ -92,12 +98,6 @@ opkg_conf* load_conf(const char* conf_file_name)
 		}
 	}
 	fclose(conf_file);
-
-	/* if overlay_root & 'root' destination defined, swap that with root destination */
-	char* unneeded_root = (overlay_root != NULL && get_string_map_element(conf->dest_roots, "root") != NULL) ? 
-					set_string_map_element(conf->dest_roots, "root", overlay_root) : 
-					overlay_root;
-	free(unneeded_root);
 
 
 	free(dupe_conf_file_name);
@@ -114,6 +114,8 @@ void free_conf(opkg_conf* conf)
 	destroy_string_map(conf->gzip_sources,    DESTROY_MODE_FREE_VALUES, &num_freed);
 	destroy_string_map(conf->plain_sources,   DESTROY_MODE_FREE_VALUES, &num_freed);
 
+	destroy_string_map(conf->overlays,   DESTROY_MODE_FREE_VALUES, &num_freed);
+	
 	destroy_string_map(conf->dest_names,      DESTROY_MODE_FREE_VALUES, &num_freed);
 	destroy_string_map(conf->dest_roots,      DESTROY_MODE_FREE_VALUES, &num_freed);
 	destroy_string_map(conf->dest_freespace,  DESTROY_MODE_FREE_VALUES, &num_freed);

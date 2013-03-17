@@ -53,6 +53,8 @@ typedef struct opkg_conf_struct
 	string_map* gzip_sources;
 	string_map* plain_sources;
 
+	string_map* overlays;
+
 	string_map* dest_roots;
 	string_map* dest_names;
 	string_map* dest_freespace;
@@ -112,7 +114,7 @@ int run_script_if_exists(char* install_root_path, char* install_link_path, char*
 
 /* install.c */
 void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria); /*if version_criteria is NULL, assumes latest version requested */
-int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
+int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 /* upgrade.c */
 void do_upgrade(opkg_conf* conf, char* pkg_name, int preserve_conf_files, char** new_version_criteria);
