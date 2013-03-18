@@ -11,6 +11,10 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	unsigned long num_destroyed;
 
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
+	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
+
+	printf("overlay_path = %s\n", overlay_path);
+
 	if(install_root_path == NULL)
 	{
 		printf("ERROR: No destination %s found, cannot install\n\n", install_root_name);
@@ -195,7 +199,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, NULL, 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, 0, tmp_dir, conf, package_data, install_called_pkgs);
 	
 	
 
@@ -282,6 +286,18 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 
 	int install_root_len = strlen(install_root_path);
 	char* fs_terminated_install_root = install_root_path[install_root_len-1] == '/' ? strdup(install_root_path) : dynamic_strcat(2, install_root_path, "/");
+	
+	int overlay_root_len;
+	char* fs_terminated_overlay_root = NULL;
+	if(overlay_path != NULL)
+	{
+		overlay_root_len = strlen(overlay_path);
+		fs_terminated_overlay_root = overlay_path[overlay_root_len-1] == '/' ? strdup(overlay_path) : dynamic_strcat(2, overlay_path, "/");
+	}
+	else
+	{
+		fs_terminated_overlay_root = strdup(fs_terminated_install_root);
+	}
 
 	int link_root_len;
 	char* fs_terminated_link_root = NULL;
@@ -403,7 +419,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	if(err == 0)
 	{
 		// Extract list file contaiing list of files to install
-		info_dir            = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
+		info_dir            = dynamic_strcat(2, fs_terminated_overlay_root, "/usr/lib/opkg/info");
 		control_name_prefix = dynamic_strcat(4, info_dir, "/", pkg_name, ".");
 		list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
 		
@@ -523,7 +539,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		deb_extract(	pkg_dest,
 				stderr,
 				extract_data_tar_gz | extract_all_to_fs| extract_preserve_date| extract_unconditional,
-				fs_terminated_install_root, 
+				fs_terminated_overlay_root, 
 				NULL, 
 				&err);
 		if(err)
@@ -596,6 +612,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	free_if_not_null(control_name_prefix);
 	free_if_not_null(list_file_name);
 	free_if_not_null(fs_terminated_install_root);
+	free_if_not_null(fs_terminated_overlay_root);
 	free_if_not_null(fs_terminated_link_root);
 	if(files_to_link != NULL)   { destroy_string_map(files_to_link,     DESTROY_MODE_FREE_VALUES, &num_destroyed); }
 	if(conf_files != NULL)      { destroy_string_map(conf_files,        DESTROY_MODE_FREE_VALUES, &num_destroyed); }
