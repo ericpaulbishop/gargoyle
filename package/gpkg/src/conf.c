@@ -84,7 +84,6 @@ opkg_conf* load_conf(const char* conf_file_name)
 				else if( strcmp(split_line[0], "option") == 0 && strstr(split_line[1], "overlay_") != NULL && num_pieces > 2)
 				{
 					char* overlay_name = strstr(split_line[1], "overlay_") + strlen("overlay_");
-					printf("found overlay %s with path %s\n", overlay_name, split_line[num_pieces-1]);
 					if(path_exists(split_line[num_pieces-1]))
 					{
 						set_string_map_element(conf->overlays, overlay_name, strdup(split_line[num_pieces-1]));

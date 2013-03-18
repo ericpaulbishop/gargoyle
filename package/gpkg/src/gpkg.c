@@ -65,8 +65,8 @@ int main(void)
 	
 	//update(conf);
 
-	//do_install(conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL);
-	do_install(conf, "irssi", "plugin_root", "plugin_test", NULL);
+	//do_install(conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL0, 0, 0, NULL);
+	do_install(conf, "irssi", "plugin_root", "plugin_test", NULL, 0, 0, 0, NULL);
 
 	do_remove(conf, "irssi", 0, 1, 0, 1);
 

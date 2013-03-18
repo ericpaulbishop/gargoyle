@@ -2,9 +2,10 @@
 
 #include "gpkg.h"
 
-
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
+//void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
+void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
 {
+
 
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
@@ -12,8 +13,6 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
 	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
-
-	printf("overlay_path = %s\n", overlay_path);
 
 	if(install_root_path == NULL)
 	{
@@ -191,7 +190,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 
 
 	char* tmp_dir = (char*)malloc(1024);
-	if(create_tmp_dir("/tmp", &tmp_dir) != 0)
+	if(create_tmp_dir(tmp_root == NULL ? "/tmp" : tmp_root, &tmp_dir) != 0)
 	{
 		fprintf(stderr, "ERROR: Could not create tmp dir, exiting\n");
 		exit(1);
@@ -199,7 +198,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, 0, tmp_dir, conf, package_data, install_called_pkgs);
+	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
 	
 	
 
@@ -262,7 +261,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 }
 
 
-int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
+int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs)
 {
 	int err=0;
 	
@@ -327,7 +326,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 				char* dep_status = get_string_map_element(dep_pkg, "Status");
 				if(strstr(dep_status, " half-installed") != NULL)
 				{
-					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, overlay_path, is_upgrade, tmp_dir, conf, package_data, install_called_pkgs);
+					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
 					
 				}
 			}
@@ -492,7 +491,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 					int is_conf_file = conf_files != NULL ? 
 								(get_string_map_element(conf_files, adjusted_file_path) != NULL ? 1 : 0) : 
 								0;
-					err = path_exists(adjusted_file_path) && is_conf_file == 0 ? 1 : 0;
+					err = path_exists(adjusted_file_path) && is_conf_file == 0 && overwrite_other_package_files == 0 ? 1 : 0;
 					if(err)
 					{
 						fprintf(stderr, "ERROR: file '%s'\n", adjusted_file_path);
@@ -509,7 +508,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 							//don't free link_to_path, should be freed with files_to_link map
 						}
 
-						if(is_conf_file && path_exists(adjusted_file_path))
+						if(is_conf_file && path_exists(adjusted_file_path) && overwrite_config == 0)
 						{
 							char* tmp_conf_path = dynamic_strcat(2, tmp_dir, adjusted_file_path);
 							mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
