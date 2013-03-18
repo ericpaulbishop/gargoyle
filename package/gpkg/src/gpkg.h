@@ -43,6 +43,7 @@
 #define LATEST_VERSION_STRING  "@@@LATEST_V@@@"
 #define NOT_INSTALLED_STRING   "@@@NOTINST@@@"
 
+#define MAIN_PARAM_NAME "@@@MAIN_PARAM@@@"
 
 
 /* conf defs/prototypes */

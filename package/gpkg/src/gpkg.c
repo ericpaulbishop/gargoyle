@@ -1,7 +1,18 @@
 #include "gpkg.h"
 
-int main(void)
+string_map* parse_parameters(int argc, char** argv);
+
+void print_help(void);
+
+
+
+int main(int argc, char** argv)
 {
+	parse_parameters(argc, argv);
+
+
+	return(0);
+
 	rm_r("/tmp/plugin_root");
 	rm_r("/tmp/plugin_test");
 	
@@ -76,3 +87,40 @@ int main(void)
 
 
 
+string_map* parse_parameters(int argc, char** argv)
+{
+	printf("argc = %d\n", argc);
+	string_map* parameters = initialize_string_map(1);
+	if(argc == 1)
+	{
+		print_help();  //exits
+	}
+	char* main_var = argv[1];
+	if(	strcmp(main_var, "list") != 0 && 
+		strcmp(main_var, "list-installed") != 0 && 
+		strcmp(main_var, "info") != 0 && 
+		strcmp(main_var, "update") != 0 &&
+		strcmp(main_var, "install") != 0 &&
+	       	strcmp(main_var, "remove") != 0 &&
+	       	strcmp(main_var, "upgrade") != 0
+	  )
+	{
+		print_help();  //exits
+	}
+	set_string_map_element(parameters, MAIN_PARAM_NAME, main_var);
+
+
+
+
+
+
+
+
+	return parameters;
+}
+
+void print_help(void)
+{
+	printf("help (edit text later)\n\n");
+	exit(0);
+}
