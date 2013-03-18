@@ -3,7 +3,7 @@
 	# This webpage is copyright ¬© 2013 by BashfulBladder 
 	# There is not much to this page, so this is public domain 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js"
+	gargoyle_header_footer -h -s "system" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js"
 
 ?>
 
@@ -133,5 +133,5 @@ for (tab_idx in cron_data) {
 </script>
 
 <?
-	gargoyle_header_footer -f -s "connection" -p "wifi_schedule"
+	gargoyle_header_footer -f -s "system" -p "wifi_schedule"
 ?>
