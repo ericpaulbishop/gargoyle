@@ -1147,8 +1147,8 @@ int main(int argc, char *argv[])
                    //Clamp the error
                    if (err < -2*plimit) err=-2*plimit;
 
-                   //Increase slowly (0.2%/sec).  err is negative here.  
-                   new_dbw_ul = new_dbw_ul * (1.0 - (0.002*err/pinglimit)*period/1000);
+                   //Increase slowly (0.15%/sec).  err is negative here.  
+                   new_dbw_ul = new_dbw_ul * (1.0 - (0.0015*err/pinglimit)*period/1000);
                    if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
                 } else {
 
