@@ -29,7 +29,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 
-
 	/* determine list of all packiages we are about to install, including dependencies */
 	string_map* install_pkgs_map = initialize_string_map(1);
 	char** install_pkg_list = NULL;	
@@ -42,7 +41,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	int pkg_name_index;
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
-		char* pkg_name = pkg_names[num_pkg_names];
+		char* pkg_name = pkg_names[pkg_name_index];
 		char* install_pkg_version = NULL;
 		int install_pkg_is_current;
 
@@ -68,7 +67,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					char* dep_name = load_detail_pkgs[ldp_index];
 					char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
 					char** old_dep_def = set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
-					if(old_dep_def != NULL) { free_null_terminated_string_arr(old_dep_def); }
+					if(old_dep_def != NULL) { free_null_terminated_string_array(old_dep_def); }
 	
 					//error checking, check that dependency definition exists
 					char* latest_version = NULL;
@@ -182,6 +181,8 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 
+
+
 	time_t now = time(NULL);
 	char install_time[20];
 	sprintf(install_time, "%lu", now);
@@ -191,6 +192,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		char* install_version = NULL;
 		char** match_criteria = get_string_map_element(install_pkgs_map, install_pkg_list[pkg_index]);
 		string_map* pkg = get_package_current_or_latest_matching(package_data, install_pkg_list[pkg_index], match_criteria, &is_installed, &install_version);
+
 
 		if(is_installed == 0) /* should never be true, but check anyway */
 		{
@@ -230,7 +232,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	int err = 0;
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
-		char* pkg_name = pkg_names[num_pkg_names];
+		char* pkg_name = pkg_names[pkg_name_index];
 		int install_pkg_is_current;
 		char* install_pkg_version = NULL;
 		char** version_criteria = get_string_map_element(pkgs, pkg_name);

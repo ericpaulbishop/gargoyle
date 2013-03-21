@@ -8,10 +8,13 @@ void print_usage(void);
 
 int main(int argc, char** argv)
 {
+	/*
 	parse_parameters(argc, argv);
 
 
 	return(0);
+
+	*/
 
 	rm_r("/tmp/plugin_root");
 	rm_r("/tmp/plugin_test");
@@ -72,12 +75,13 @@ int main(int argc, char** argv)
 
 	
 	
-	
+	string_map* pkgs = initialize_string_map(1);
+	set_string_map_element(pkgs, "irssi",  alloc_depend_def(NULL));
 	
 	//update(conf);
 
 	//do_install(conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL0, 0, 0, NULL);
-	//do_install(conf, "irssi", "plugin_root", "plugin_test", NULL, 0, 0, 0, NULL);
+	do_install(conf, pkgs, "plugin_root", "plugin_test", 0, 0, 0, NULL);
 
 	//do_remove(conf, "irssi", 0, 1, 0, 1);
 

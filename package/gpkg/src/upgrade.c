@@ -73,7 +73,7 @@ void do_upgrade(opkg_conf* conf, char* pkg_name, int preserve_conf_files, char**
 
 	char* new_version_def[3] = { "=", new_pkg_version, NULL };
 	do_remove(conf, pkg_name, preserve_conf_files, 0, 1, 0);
-	do_install(conf, pkg_name, install_root, link_root, new_version_def, 1, (!preserve_conf_files), 0, NULL);
+	//do_install(conf, pkg_name, install_root, link_root, new_version_def, 1, (!preserve_conf_files), 0, NULL);
 		
 }
 
