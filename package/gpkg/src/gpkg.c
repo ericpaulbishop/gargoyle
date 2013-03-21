@@ -2,7 +2,7 @@
 
 string_map* parse_parameters(int argc, char** argv);
 
-void print_help(void);
+void print_usage(void);
 
 
 
@@ -77,9 +77,9 @@ int main(int argc, char** argv)
 	//update(conf);
 
 	//do_install(conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL0, 0, 0, NULL);
-	do_install(conf, "irssi", "plugin_root", "plugin_test", NULL, 0, 0, 0, NULL);
+	//do_install(conf, "irssi", "plugin_root", "plugin_test", NULL, 0, 0, 0, NULL);
 
-	do_remove(conf, "irssi", 0, 1, 0, 1);
+	//do_remove(conf, "irssi", 0, 1, 0, 1);
 
 
 	return(0);
@@ -89,11 +89,10 @@ int main(int argc, char** argv)
 
 string_map* parse_parameters(int argc, char** argv)
 {
-	printf("argc = %d\n", argc);
 	string_map* parameters = initialize_string_map(1);
 	if(argc == 1)
 	{
-		print_help();  //exits
+		print_usage();  //exits
 	}
 	char* main_var = argv[1];
 	if(	strcmp(main_var, "list") != 0 && 
@@ -105,21 +104,58 @@ string_map* parse_parameters(int argc, char** argv)
 	       	strcmp(main_var, "upgrade") != 0
 	  )
 	{
-		print_help();  //exits
+		print_usage();  //exits
 	}
 	set_string_map_element(parameters, MAIN_PARAM_NAME, main_var);
 
 
+	static struct option long_options[] = {
+		{"force-depends",           0, 0, 'n'},
+		{"force-overwrite",         0, 0, 'w'},
+		{"force-maintainer",        0, 0, 'm'},
+		{"force-overwrite-configs", 0, 0, 'm'},
+		{"help",                    0, 0, 'h'},
+		{NULL, 0, NULL, 0}
+	};
 
-
-
-
-
+	int option_index = 0;
+	int c;
+	while ((c = getopt_long(argc, argv, "hevm", long_options, &option_index)) != -1)
+	{
+		switch(c)
+		{
+			case 'n':
+				set_string_map_element(parameters, "force-depends", strdup("D"));
+				printf("here\n");
+				break;
+			case 'w':
+				set_string_map_element(parameters, "force-overwrite", strdup("D"));
+				break;
+			case 'm':
+				set_string_map_element(parameters, "force-overwrite-configs", strdup("D"));
+				break;
+			case 'h':
+			default:
+				print_usage();
+				break;
+		}
+	}
+	
+	
+	string_map* pkg_list = initialize_string_map(1);
+	set_string_map_element(parameters, "package_list", pkg_list);
+	for(option_index=2; option_index < argc; option_index++)
+	{
+		if(argv[option_index][0] != '-')
+		{
+			set_string_map_element(pkg_list, argv[option_index], strdup("D"));
+		}
+	}
 
 	return parameters;
 }
 
-void print_help(void)
+void print_usage(void)
 {
 	printf("help (edit text later)\n\n");
 	exit(0);

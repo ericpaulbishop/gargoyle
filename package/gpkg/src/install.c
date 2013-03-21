@@ -3,7 +3,7 @@
 #include "gpkg.h"
 
 //void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
-void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
+void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
 {
 
 
@@ -25,119 +25,150 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, install_root_name );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
-	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
-	
+		
 
 
-	char* install_pkg_version = NULL;
-	int install_pkg_is_current;
-	version_criteria = version_criteria == NULL ? alloc_depend_def(NULL) : version_criteria;
-	string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
 
-	char* install_status = get_string_map_element(install_pkg_data, "Status");
+
+	/* determine list of all packiages we are about to install, including dependencies */
+	string_map* install_pkgs_map = initialize_string_map(1);
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
 	char* unsatisfied_dep_err = NULL;
-
-
-	/* load detailed information for all packiages we are about to install */
-	string_map* install_pkgs_map = initialize_string_map(1);
-	if(install_status != NULL)
-	{
-		set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
-		
-		string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
-		if(install_pkg_depend_map != NULL)
-		{
-			unsigned long num_keys;
-			char** load_detail_pkgs = get_string_map_keys(install_pkg_depend_map, &num_keys);
-			int ldp_index;
-			for(ldp_index=0;ldp_index < num_keys && unsatisfied_dep_err == NULL; ldp_index++)
-			{
-				char* dep_name = load_detail_pkgs[ldp_index];
-				char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
-				set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
-
-				//error checking, check that dependency definition exists
-				char* latest_version = NULL;
-				int latest_is_current = 0;
-				string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &latest_is_current, &latest_version);
-				
-				
-				//check if we have a version installed different than what is required
-				int have_current;
-				char* current_version = NULL;
-				string_map* cur_info = get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
-				if(have_current && (latest_is_current == 0 || dep_info == NULL))
-				{
-					//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
-					char* cur_status = get_string_map_element(cur_info, "Status");
-					if(strstr(cur_status, " hold ") != NULL)
-					{
-						unsatisfied_dep_err = dynamic_strcat(11, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version, "and is marked as 'hold'");
-					}
-					else
-					{
-						unsatisfied_dep_err = dynamic_strcat(10, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version);
-					}
-				}
-				free_if_not_null(current_version);
-				free_if_not_null(latest_version);
-
-				// check that dependency definition exists
-				if(unsatisfied_dep_err == NULL && dep_info == NULL)
-				{
-					if(dep_def[1] != NULL)
-					{
-						unsatisfied_dep_err = dynamic_strcat(9, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " cannot be found, try updating your package lists");
-					}
-					else
-					{
-						unsatisfied_dep_err = dynamic_strcat(5, "ERROR: Dependency ", dep_name, " of package ", pkg_name, " cannot be found, try updating your package lists");
-					}
-				}
-								
-			}
-			free_null_terminated_string_array(load_detail_pkgs);
-		}
-		free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */
-		
 	
-		string_map* parameters = initialize_string_map(1);
-		matching_packages = initialize_string_map(1);
-		set_string_map_element(parameters, "packages", install_pkgs_map);
-		load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
-		install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
-		
-		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-		destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+	//new string map var with all pkgs to install = pkgs, keys = version
+	unsigned long num_pkg_names;
+	char** pkg_names = get_string_map_keys(pkgs, &num_pkg_names);
+	int pkg_name_index;
+	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
+	{
+		char* pkg_name = pkg_names[num_pkg_names];
+		char* install_pkg_version = NULL;
+		int install_pkg_is_current;
 
-	}
-	install_status = get_string_map_element(install_pkg_data, "Status");
-	char* will_fit = get_string_map_element(install_pkg_data, "Will-Fit");
+		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
+		char** version_criteria = get_string_map_element(pkgs, pkg_name);
+		string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+		char* install_status = get_string_map_element(install_pkg_data, "Status");
+
+	
+		if(install_status != NULL)
+		{
+			char* old_el = set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
+			free_if_not_null(old_el);
+
+			string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
+			if(install_pkg_depend_map != NULL)
+			{
+				unsigned long num_keys;
+				char** load_detail_pkgs = get_string_map_keys(install_pkg_depend_map, &num_keys);
+				int ldp_index;
+				for(ldp_index=0;ldp_index < num_keys && unsatisfied_dep_err == NULL; ldp_index++)
+				{
+					char* dep_name = load_detail_pkgs[ldp_index];
+					char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
+					char** old_dep_def = set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
+					if(old_dep_def != NULL) { free_null_terminated_string_arr(old_dep_def); }
+	
+					//error checking, check that dependency definition exists
+					char* latest_version = NULL;
+					int latest_is_current = 0;
+					string_map* dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &latest_is_current, &latest_version);
+					
+					
+					//check if we have a version installed different than what is required
+					int have_current;
+					char* current_version = NULL;
+					string_map* cur_info = get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
+					if(have_current && (latest_is_current == 0 || dep_info == NULL))
+					{
+						//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
+						char* cur_status = get_string_map_element(cur_info, "Status");
+						if(strstr(cur_status, " hold ") != NULL)
+						{
+							unsatisfied_dep_err = dynamic_strcat(11, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version, "and is marked as 'hold'");
+						}
+						else
+						{
+							unsatisfied_dep_err = dynamic_strcat(10, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version);
+						}
+					}
+					free_if_not_null(current_version);
+					free_if_not_null(latest_version);
+	
+					// check that dependency definition exists
+					if(unsatisfied_dep_err == NULL && dep_info == NULL)
+					{
+						if(dep_def[1] != NULL)
+						{
+							unsatisfied_dep_err = dynamic_strcat(9, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " cannot be found, try updating your package lists");
+						}
+						else
+						{
+							unsatisfied_dep_err = dynamic_strcat(5, "ERROR: Dependency ", dep_name, " of package ", pkg_name, " cannot be found, try updating your package lists");
+						}
+					}
+									
+				}
+				free_null_terminated_string_array(load_detail_pkgs);
+			}
+	
+		}
+		install_status = get_string_map_element(install_pkg_data, "Status");
+		char* will_fit = get_string_map_element(install_pkg_data, "Will-Fit");
 
 
-	/* error checking before we start install */
-	if(install_pkg_data == NULL || install_status == NULL)
+		/* error checking before we start install */
+		if(install_pkg_data == NULL || install_status == NULL)
+		{
+			fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+			exit(1);
+		}
+		if(install_status == NULL || strstr(install_status, " installed") != NULL)
+		{
+			fprintf(stderr, "WARNING: Package %s is already installed\n\n", pkg_name); 
+		}
+
+		if(unsatisfied_dep_err != NULL)
+		{
+			fprintf(stderr, "%s\n", unsatisfied_dep_err);
+			exit(1);
+		}
+	}
+
+
+	/* load more detailed data on packages we are about to install */
+	free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */	
+	string_map* parameters = initialize_string_map(1);
+	matching_packages = initialize_string_map(1);
+	set_string_map_element(parameters, "packages", install_pkgs_map);
+	load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
+	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+
+	char* all_pkg_list_str = join_strs(", ", install_pkg_list, install_pkg_list_len, 0, 0); 
+	uint64_t combined_size = 0;
+	int pkg_index;
+
+	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
-		fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+		string_map* pinfo = get_string_map_element(package_data, install_pkg_list[pkg_index]);
+		uint64_t* next_size = get_string_map_element(pinfo, "Required-Size");
+		if(next_size != NULL) { combined_size = combined_size + *next_size; } //should never be null, but check anyway to be sure
+	}
+	uint64_t root_size = destination_bytes_free(conf, install_root_name);
+	if(combined_size >= root_size )
+	{
+		fprintf(stderr, "ERROR: Not enough space in destination %s to install specified packages:\n\t%s\n\n", install_root_name, all_pkg_list_str);
 		exit(1);
 	}
-	if(install_status == NULL || strstr(install_status, " installed") != NULL)
-	{
-		fprintf(stderr, "ERROR: Package %s is already installed\n\n", pkg_name);
-		exit(1);
-	}
-	if(will_fit == NULL || strcmp(will_fit, "true") != 0)
-	{
-		fprintf(stderr, "ERROR: Not enough space in destination %s to install package %s \n\n", install_root_name, pkg_name);
-		exit(1);
-	}
-	if(unsatisfied_dep_err != NULL)
-	{
-		fprintf(stderr, "%s\n", unsatisfied_dep_err);
-		exit(1);
-	}
+
+
+
+	printf("Preparing to install the following packages, which will require %lu bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
+
+
 
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
@@ -151,12 +182,9 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 
-	int pkg_index;
 	time_t now = time(NULL);
 	char install_time[20];
 	sprintf(install_time, "%lu", now);
-
-
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
 		int is_installed;
@@ -169,7 +197,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 			char* old_status = remove_string_map_element(pkg, "Status");
 			free(old_status);
 			char* status_parts[3] = { "install", "ok", "half-installed" };
-			status_parts[1] = strcmp(pkg_name, install_pkg_list[pkg_index]) == 0 ? "user" : status_parts[1];
+			status_parts[1] = get_string_map_element(pkgs, install_pkg_list[pkg_index]) != NULL ? "user" : status_parts[1];
 			char* new_status = dynamic_strcat(5, status_parts[0], " ", status_parts[1], " ", status_parts[2]);
 			set_string_map_element(pkg, "Status", new_status);
 
@@ -198,8 +226,20 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
-	int err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
-	
+
+	int err = 0;
+	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
+	{
+		char* pkg_name = pkg_names[num_pkg_names];
+		int install_pkg_is_current;
+		char* install_pkg_version = NULL;
+		char** version_criteria = get_string_map_element(pkgs, pkg_name);
+		get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+		
+		err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
+		
+		free_if_not_null(install_pkg_version);
+	}
 	
 
 	if(err)
@@ -210,7 +250,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 		int pkg_index;
 		for(pkg_index=0; pkg_index < num_install_called_pkgs; pkg_index++)
 		{
-			remove_individual_package(pkg_name, conf, package_data, tmp_dir, 0, 0);
+			remove_individual_package(install_pkg_list[pkg_index], conf, package_data, tmp_dir, 0, 0);
 		}
 		free_null_terminated_string_array(install_called_pkg_list);
 		//call remove function to do cleanup of partial install
@@ -234,7 +274,7 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 				if(strstr(status, " half-installed") != NULL)
 				{
 					char* status_parts[3] = { "install", "ok", "installed" };
-					status_parts[1] = strcmp(pkg_name, install_pkg_list[pkg_index]) == 0 ? "user" : status_parts[1];
+					status_parts[1] = get_string_map_element(pkgs, install_pkg_list[pkg_index]) != NULL ? "user" : status_parts[1];
 					char* new_status = dynamic_strcat(5, status_parts[0], " ", status_parts[1], " ", status_parts[2]);
 					char* old_status = set_string_map_element(pkg, "Status", new_status);
 					free_if_not_null(old_status);
@@ -250,11 +290,11 @@ void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* 
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 	if(!err)
 	{
-		printf("Installation of %s package successful.\n\n", pkg_name);
+		printf("Installation of packages successful.\n\n");
 	}
 	else
 	{
-		printf("Finished removing partially installed packages.\n\n", pkg_name);
+		printf("Finished removing partially installed packages.\n\n");
 	}
 
 	
