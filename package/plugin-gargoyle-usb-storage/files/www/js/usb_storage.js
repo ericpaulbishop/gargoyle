@@ -503,8 +503,8 @@ function editUser()
 				}
 				okButton.onclick = function()
 				{
-					var pass1 = editUserWindow.document.getElementById("new_password");
-					var pass2 = editUserWindow.document.getElementById("new_password_confirm");
+					var pass1 = editUserWindow.document.getElementById("new_password").value;
+					var pass2 = editUserWindow.document.getElementById("new_password_confirm").value;
 					var errors = []
 					if(pass1 == "" && pass2 == "")
 					{
