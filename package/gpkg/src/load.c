@@ -860,11 +860,15 @@ void save_pkg_status_func(char* key, void* value)
 	{
 		char* pkg_vars[] = { "Depends", "Provides", "Status", "Architecture", "Installed-Time", "Link-Destination", NULL };
 		int var_index;
+		if(get_string_map_element(pkg, "Version") != NULL)
+		{
+			current = (char*)get_string_map_element(pkg, "Version");
+		}
 		fprintf(__save_pkg_status_stream, "Package: %s\n", key);
 		fprintf(__save_pkg_status_stream, "Version: %s\n", current);
 		for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
 		{
-			char* var_def = get_string_map_element(pkg, pkg_vars[var_index]);
+			char* var_def = (char*)get_string_map_element(pkg, pkg_vars[var_index]);
 			fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
 		}
 		fprintf(__save_pkg_status_stream, "\n");

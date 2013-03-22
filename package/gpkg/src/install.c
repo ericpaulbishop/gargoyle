@@ -18,6 +18,13 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		exit(1);
 	}
 	
+	char* tmp_dir = (char*)malloc(1024);
+	if(create_tmp_dir(tmp_root == NULL ? "/tmp" : tmp_root, &tmp_dir) != 0)
+	{
+		fprintf(stderr, "ERROR: Could not create tmp dir, exiting\n");
+		exit(1);
+	}
+
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, install_root_name );
@@ -37,11 +44,85 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
 		char* pkg_name = pkg_names[pkg_name_index];
+		char** version_criteria = get_string_map_element(pkgs, pkg_name);
 		char* install_pkg_version = NULL;
 		int install_pkg_is_current;
 
+		if(path_exists(pkg_name))
+		{
+			//installing from file
+			char* pkg_file = pkg_name;
+
+
+			//extract control files
+			int err = 0;
+			char* tmp_control        = dynamic_strcat(2, tmp_dir, "/tmp_ctrl");
+			char* tmp_control_prefix = dynamic_strcat(2, tmp_control, "/tmp.");
+			char* tmp_control_name   = dynamic_strcat(2, tmp_control_prefix, "control");
+
+			mkdir_p(tmp_control, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+			deb_extract(	pkg_file,
+					stderr,
+					extract_control_tar_gz | extract_all_to_fs| extract_preserve_date | extract_unconditional,
+					tmp_control_prefix, 
+					NULL, 
+					&err);
+			if(err != 0)
+			{
+				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				exit(1);
+			}
+			string_map* tmp_control_pkg_data = initialize_string_map(1);
+			matching_packages = initialize_string_map(1);
+		       	load_package_data(tmp_control_name, 0, tmp_control_pkg_data, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, NULL);
+			unsigned long num_ctrl_names;
+			char** ctrl_name_list = get_string_map_keys(matching_packages, &num_ctrl_names);
+			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
+			err = 1; //set back to 0 when data successfully loaded
+			if(num_ctrl_names > 0)
+			{
+				pkg_name = strdup(ctrl_name_list[0]);
+				char* version = NULL;
+				int is_current;
+				string_map* pkg_info = get_package_current_or_latest(tmp_control_pkg_data, pkg_name, &is_current, &version);
+				if(pkg_info != NULL)
+				{
+					err = 0;
+					set_string_map_element(pkg_info, "Install-File-Location", pkg_file);
+					set_string_map_element(pkg_info, "Version", version); //we need to save this, since we are going to set a special version to make sure data doesn't get over-written later, also no need to free version now
+
+					char* special_version = dynamic_strcat(2, version, "@@_FILE_INSTALL_VERSION_@@");
+					char** new_version_criteria = malloc(3*sizeof(char*));
+					new_version_criteria[0] = strdup("=");
+					new_version_criteria[1] = special_version;
+					new_version_criteria[0] = NULL;
+					
+					string_map* all_current_versions = get_string_map_element(package_data, pkg_name);
+					if(all_current_versions == NULL)
+					{
+						all_current_versions=initialize_string_map(1);
+						set_string_map_element(package_data, pkg_name, all_current_versions);
+					}
+					set_string_map_element(all_current_versions, special_version, pkg_info);
+				}
+			}
+			free_null_terminated_string_array(ctrl_name_list);
+			if(err != 0)
+			{
+				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				exit(1);
+			}
+
+			free_if_not_null(tmp_control);
+			free_if_not_null(tmp_control_prefix);
+			free_if_not_null(tmp_control_name);
+			rm_r(tmp_control);
+
+		}
+
+
 		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
-		char** version_criteria = get_string_map_element(pkgs, pkg_name);
 		string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
 		char* install_status = get_string_map_element(install_pkg_data, "Status");
 
@@ -217,12 +298,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 
-	char* tmp_dir = (char*)malloc(1024);
-	if(create_tmp_dir(tmp_root == NULL ? "/tmp" : tmp_root, &tmp_dir) != 0)
-	{
-		fprintf(stderr, "ERROR: Could not create tmp dir, exiting\n");
-		exit(1);
-	}
 	
 
 	string_map* install_called_pkgs = initialize_string_map(1);
@@ -309,6 +384,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	
 	/* variables not allocated in this function, do not need to be freed */
 	string_map* install_pkg_data    = get_package_with_version(package_data, pkg_name, pkg_version);
+	char* src_file_path             = get_string_map_element(install_pkg_data, "Install-File-Location");
 	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
 	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
@@ -391,7 +467,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	{
 		printf("Preparing to install package %s...\n", pkg_name);
 	}
-	if(err == 0)
+	if(err == 0 && src_file_path == NULL)
 	{
 		//determine source url
 		string_map* src_lists[2] = { conf->gzip_sources, conf->plain_sources };
@@ -408,7 +484,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 
 	}
 
-	if(err == 0)
+	if(err == 0 && src_file_path == NULL)
 	{
 		
 		//download package
@@ -432,6 +508,10 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		free(src_url);
 
 
+	}
+	if(err == 0 && src_file_path != NULL)
+	{
+		pkg_dest = strdup(src_file_path);
 	}
 	if(err == 0)
 	{
@@ -644,7 +724,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	if(err == 0)
 	{
 		// remove downloaded package file in tmp dir & print success
-		rm_r(pkg_dest);
+		if(src_file_path == NULL) { rm_r(pkg_dest); }
 		printf("\tSuccessfully installed %s.\n", pkg_name);
 	}
 
