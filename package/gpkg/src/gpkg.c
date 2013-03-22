@@ -77,7 +77,8 @@ int main(int argc, char** argv)
 	
 	string_map* pkgs = initialize_string_map(1);
 	set_string_map_element(pkgs, "irssi",  alloc_depend_def(NULL));
-	set_string_map_element(pkgs, "zlib",  alloc_depend_def(NULL));
+	//set_string_map_element(pkgs, "zlib",  alloc_depend_def(NULL));
+	set_string_map_element(pkgs, "/home/eric/gargoyle/package/gpkg/src/zlib_1.2.7-1_ar71xx.ipk",  alloc_depend_def(NULL));
 	
 	//update(conf);
 

@@ -129,8 +129,8 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	
 		if(install_status != NULL)
 		{
-			char* old_el = set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
-			free_if_not_null(old_el);
+			char** old_el = set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
+			if(old_el != NULL){ free_null_terminated_string_array(old_el); }
 
 			string_map* install_pkg_depend_map = get_string_map_element(install_pkg_data, "Required-Depends");
 			if(install_pkg_depend_map != NULL)
@@ -142,8 +142,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				{
 					char* dep_name = load_detail_pkgs[ldp_index];
 					char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
-					char** old_dep_def = set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
-					if(old_dep_def != NULL) { free_null_terminated_string_array(old_dep_def); }
+					if(get_string_map_element(install_pkgs_map, dep_name) != NULL)
+					{
+						dep_def = get_string_map_element(install_pkgs_map, dep_name);
+					}
+					else
+					{
+						set_string_map_element(install_pkgs_map, dep_name, copy_null_terminated_string_array(dep_def));
+					}
 	
 					//error checking, check that dependency definition exists
 					char* latest_version = NULL;
@@ -426,6 +432,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	set_string_map_element(install_called_pkgs, pkg_name, strdup("D"));
 
 
+
 	if(pkg_dependencies != NULL)
 	{
 		//recurse
@@ -458,7 +465,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		}
 	}
 
-	if(err == 0 && src_id == NULL || pkg_filename == NULL || install_root_path == NULL)
+	if(install_root_path == NULL || ( src_id == NULL && install_pkg_data == NULL) || (pkg_filename == NULL && install_pkg_data == NULL) )
 	{
 		//sanity check
 		err = 1;
@@ -506,14 +513,12 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 			fprintf(stderr, "ERROR: Could not download package %s\n", pkg_name);
 		}
 		free(src_url);
-
-
 	}
 	if(err == 0 && src_file_path != NULL)
 	{
 		pkg_dest = strdup(src_file_path);
 	}
-	if(err == 0)
+	if(err == 0 && src_file_path == NULL)
 	{
 		//check md5sum
 		char* md5sum = file_md5sum_alloc(pkg_dest);
