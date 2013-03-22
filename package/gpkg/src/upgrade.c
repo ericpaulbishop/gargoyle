@@ -72,9 +72,12 @@ void do_upgrade(opkg_conf* conf, char* pkg_name, int preserve_conf_files, char**
 	
 
 	char* new_version_def[3] = { "=", new_pkg_version, NULL };
-	//do_remove(conf, pkg_name, preserve_conf_files, 0, 1, 0);
-	//do_install(conf, pkg_name, install_root, link_root, new_version_def, 1, (!preserve_conf_files), 0, NULL);
-		
+	string_map* upgrade_pkgs = initialize_string_map(1);
+	set_string_map_element(upgrade_pkgs, pkg_name, new_version_def);
+	do_remove(conf, upgrade_pkgs, preserve_conf_files, 0, 1, 0);
+	do_install(conf, upgrade_pkgs, install_root, link_root, 1, (!preserve_conf_files), 0, NULL);
+	destroy_string_map(upgrade_pkgs, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+
 }
 
 
