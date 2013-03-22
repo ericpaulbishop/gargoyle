@@ -5,8 +5,6 @@
 //void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
 void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
 {
-
-
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
 	unsigned long num_destroyed;
@@ -26,9 +24,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
 		
-
-
-
 	/* determine list of all packiages we are about to install, including dependencies */
 	string_map* install_pkgs_map = initialize_string_map(1);
 	char** install_pkg_list = NULL;	
@@ -125,7 +120,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		}
 		if(install_status == NULL || strstr(install_status, " installed") != NULL)
 		{
-			fprintf(stderr, "WARNING: Package %s is already installed\n\n", pkg_name); 
+			fprintf(stderr, "WARNING: Package %s is already installed, ignoring\n\n", pkg_name);
 		}
 
 		if(unsatisfied_dep_err != NULL)
@@ -171,8 +166,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	printf("Preparing to install the following packages, which will require " SCANFU64 " bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
-
-
 
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
@@ -238,14 +231,16 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
 		char* pkg_name = pkg_names[pkg_name_index];
-		int install_pkg_is_current;
-		char* install_pkg_version = NULL;
-		char** version_criteria = get_string_map_element(pkgs, pkg_name);
-		get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+		if(get_string_map_element(install_pkgs_map, pkg_name) != NULL)
+		{
+			int install_pkg_is_current;
+			char* install_pkg_version = NULL;
+			char** version_criteria = get_string_map_element(pkgs, pkg_name);
+			get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+			err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
 		
-		err = recursively_install(pkg_name, install_pkg_version, install_root_name, link_root_name, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
-		
-		free_if_not_null(install_pkg_version);
+			free_if_not_null(install_pkg_version);
+		}
 	}
 	
 
@@ -666,9 +661,6 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	if(files_to_link != NULL)   { destroy_string_map(files_to_link,     DESTROY_MODE_FREE_VALUES, &num_destroyed); }
 	if(conf_files != NULL)      { destroy_string_map(conf_files,        DESTROY_MODE_FREE_VALUES, &num_destroyed); }
 	if(copied_conf_files!= NULL){ destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_destroyed); }
-
-
-
 
 	return err;
 }
