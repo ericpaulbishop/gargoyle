@@ -152,9 +152,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
-		string_map* pinfo = get_string_map_element(package_data, install_pkg_list[pkg_index]);
-		uint64_t* next_size = get_string_map_element(pinfo, "Required-Size");
-		if(next_size != NULL) { combined_size = combined_size + *next_size; } //should never be null, but check anyway to be sure
+		char** match_criteria = get_string_map_element(install_pkgs_map, install_pkg_list[pkg_index]);
+		string_map* pkg = get_package_current_or_latest_matching(package_data, install_pkg_list[pkg_index], match_criteria, NULL, NULL);
+		char* next_size_str = get_string_map_element(pkg, "Installed-Size");
+		uint64_t next_size = 0;
+		if(sscanf(next_size_str,  SCANFU64, &next_size) > 0)
+		{	
+			combined_size = combined_size + next_size; 
+		} 
 	}
 	uint64_t root_size = destination_bytes_free(conf, install_root_name);
 	if(combined_size >= root_size )
@@ -165,7 +170,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 
-	printf("Preparing to install the following packages, which will require %lu bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
+	printf("Preparing to install the following packages, which will require " SCANFU64 " bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
 
 
 
