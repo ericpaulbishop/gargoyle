@@ -4,7 +4,7 @@
 
 
 
-void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced)
+void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced)
 {
 	string_map* package_data          = initialize_string_map(1);
 	string_map* matching_packages     = initialize_string_map(1);
@@ -14,78 +14,85 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	string_map* path_to_status_name   = initialize_string_map(1);
 	string_map* path_to_root_name     = initialize_string_map(1);
 	unsigned long num_destroyed;
-
+	
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-	load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 
-	string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
-
-	char* rm_status = get_string_map_element(rm_pkg_data, "Status");
-	char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
-	char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
-
-	char* package_depending_on_name = NULL;
-	int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
-
-
-	/* error checking before we start install */
-	if(rm_pkg_data == NULL || rm_status == NULL)
+	unsigned long rm_pkg_list_length;
+	char** rm_pkg_list = get_string_map_keys(pkgs, &rm_pkg_list_length);
+	int rm_pkg_index;
+	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
 	{
-		fprintf(stderr, "ERROR: No package named %s found, cannot uninstall\n\n", pkg_name);
-		exit(1);
-	}
-	if(rm_root_path == NULL ||  strstr(rm_status, " installed") == NULL )
-	{
-		fprintf(stderr, "ERROR: Package %s not installed, cannot uninstall\n\n", pkg_name);
-		exit(1);
-	}
-	if(strstr(rm_status, " hold ") != NULL)
-	{
-		fprintf(stderr, "ERROR: Package %s marked as 'hold', cannot uninstall\n\n", pkg_name);
-		exit(1);
-	}
-	if(other_package_depends_on && !force)
-	{
-		fprintf(stderr, "ERROR: Installed package %s depends on %s, can't uninstall\n\n", package_depending_on_name, pkg_name);
-		exit(1);
-	}
-	else if(other_package_depends_on && force && warn_if_forced)
-	{
-		fprintf(stderr, "WARNING: Forced remove specified, uninstalling %s even though %s depends on it\n\n", pkg_name, package_depending_on_name);
-	}
-	
+		char* pkg_name = rm_pkg_list[rm_pkg_index];	
+		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
+
+		string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, NULL, NULL);
+
+		char* rm_status = get_string_map_element(rm_pkg_data, "Status");
+		char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
+		char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
+
+		char* package_depending_on_name = NULL;
+		int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
 
 
-	/* load data and status paths for packages we may need to de-install (depending on what orphaned dependencies are) */
-	char* rm_status_path = dynamic_strcat(2, rm_root_path, "/usr/lib/opkg/status");
-	set_string_map_element(pkg_status_paths, pkg_name, rm_status_path);
-	set_string_map_element(path_to_status_data, rm_status_path, initialize_string_map(1));
-	set_string_map_element(path_to_status_name, rm_status_path, strdup(rm_root_name));
-
-
-	string_map* rm_deps = get_string_map_element(rm_pkg_data, "All-Depends");
-	unsigned long num_rm_deps;
-	char** rm_dep_list = get_string_map_keys(rm_deps, &num_rm_deps);
-	int rm_dep_index;
-	for(rm_dep_index=0; rm_dep_index < num_rm_deps; rm_dep_index++)
-	{
-		string_map* dep_data = get_package_current_or_latest(package_data, rm_dep_list[rm_dep_index], NULL, NULL);
-
-		char* dep_status = get_string_map_element(dep_data, "Status");
-		char* dep_root_name = get_string_map_element(dep_data, "Install-Destination");
-		char* dep_root_path = get_string_map_element(conf->dest_names, dep_root_name);
-		if(dep_status != NULL && dep_root_name != NULL)
+		/* error checking before we start install */
+		if(rm_pkg_data == NULL || rm_status == NULL)
 		{
-			if(strstr(dep_status, " ok ") != NULL)
+			fprintf(stderr, "ERROR: No package named %s found, cannot uninstall\n\n", pkg_name);
+			exit(1);
+		}
+		if(rm_root_path == NULL ||  strstr(rm_status, " installed") == NULL )
+		{
+			fprintf(stderr, "WARNING: Package %s not installed, cannot uninstall\n\n", pkg_name);
+		}
+		if(strstr(rm_status, " hold ") != NULL)
+		{
+			fprintf(stderr, "ERROR: Package %s marked as 'hold', cannot uninstall\n\n", pkg_name);
+			exit(1);
+		}
+		if(other_package_depends_on && !force)
+		{
+			fprintf(stderr, "ERROR: Installed package %s depends on %s, can't uninstall\n\n", package_depending_on_name, pkg_name);
+			exit(1);
+		}
+		else if(other_package_depends_on && force && warn_if_forced)
+		{
+			fprintf(stderr, "WARNING: Forced remove specified, uninstalling %s even though %s depends on it\n\n", pkg_name, package_depending_on_name);
+		}
+
+		/* load data and status paths for packages we may need to de-install (depending on what orphaned dependencies are) */
+		char* rm_status_path = dynamic_strcat(2, rm_root_path, "/usr/lib/opkg/status");
+		set_string_map_element(pkg_status_paths, pkg_name, rm_status_path);
+		set_string_map_element(path_to_status_data, rm_status_path, initialize_string_map(1));
+		set_string_map_element(path_to_status_name, rm_status_path, strdup(rm_root_name));
+
+
+		string_map* rm_deps = get_string_map_element(rm_pkg_data, "All-Depends");
+		unsigned long num_rm_deps;
+		char** rm_dep_list = get_string_map_keys(rm_deps, &num_rm_deps);
+		int rm_dep_index;
+		for(rm_dep_index=0; rm_dep_index < num_rm_deps; rm_dep_index++)
+		{
+			string_map* dep_data = get_package_current_or_latest(package_data, rm_dep_list[rm_dep_index], NULL, NULL);
+	
+			char* dep_status = get_string_map_element(dep_data, "Status");
+			char* dep_root_name = get_string_map_element(dep_data, "Install-Destination");
+			char* dep_root_path = get_string_map_element(conf->dest_names, dep_root_name);
+			if(dep_status != NULL && dep_root_name != NULL)
 			{
-				set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
-				char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
-				set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
-				if(get_string_map_element(path_to_status_data, status_path) == NULL)
+				if(strstr(dep_status, " ok ") != NULL)
 				{
-					set_string_map_element(path_to_status_data, status_path, initialize_string_map(1));
-					set_string_map_element(path_to_status_name, status_path, strdup(dep_root_name));
+					char* old_el = set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
+					free_if_not_null(old_el);
+
+					char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
+					set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
+					if(get_string_map_element(path_to_status_data, status_path) == NULL)
+					{
+						set_string_map_element(path_to_status_data, status_path, initialize_string_map(1));
+						set_string_map_element(path_to_status_name, status_path, strdup(dep_root_name));
+					}
 				}
 			}
 		}
@@ -95,7 +102,6 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 	unsigned long num_status_paths;
 	char** status_paths = get_string_map_keys(path_to_status_data, &num_status_paths);
 	int status_path_index;
-	string_map* rm_status_data = NULL;
 	for(status_path_index=0; status_path_index < num_status_paths; status_path_index++)
 	{
 		if(path_exists(status_paths[status_path_index]))
@@ -106,11 +112,7 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 
 			load_package_data(status_paths[status_path_index], 0, status_data, matching_packages, NULL, 1, LOAD_ALL_PKG_VARIABLES, status_name);
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-			if(strcmp(status_paths[status_path_index], rm_status_path) == 0)
-			{
-				rm_status_data = status_data;
-				rm_pkg_data = get_string_map_element(status_data, pkg_name);
-			}
+
 		}
 	}
 
@@ -124,20 +126,58 @@ void do_remove(opkg_conf* conf, char* pkg_name, int save_conf_files, int remove_
 
 
 
-	/* remove main package 
+	/* remove main packages
 	 *
 	 * Yes, we write status to disk before every round of removal because we want to mark half-installed packages in case
 	 * program craps out for some unknown reason, even though this increases number of disk writes and can wear out flash 
 	 */
-	char* old_status = set_string_map_element(rm_pkg_data, "Status", strdup("deinstall user half-installed"));
-	free_if_not_null(old_status);
-	save_package_data_as_status_file(rm_status_data, rm_status_path);
-	
-	remove_individual_package(pkg_name, conf, package_data, tmp_dir, save_conf_files, 0);
-	
-	string_map* already_removed = remove_string_map_element(rm_status_data, pkg_name);
-	destroy_string_map(already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-	save_package_data_as_status_file(rm_status_data, rm_status_path);
+	string_map* main_rm_status_paths= initialize_string_map(1);
+	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
+	{
+		//set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
+		char* pkg_name = rm_pkg_list[rm_pkg_index];			
+		char* rm_status_path = get_string_map_element(pkg_status_paths, pkg_name);
+		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
+		string_map* rm_pkg_data = get_string_map_element(rm_status_data, pkg_name);
+
+		char* old_status = set_string_map_element(rm_pkg_data, "Status", strdup("deinstall user half-installed"));
+		free_if_not_null(old_status);
+		
+		char* old_path = set_string_map_element(main_rm_status_paths, rm_status_path, strdup("D"));
+		free_if_not_null(old_path);
+
+	}
+	unsigned long num_main_status_paths;
+	char** main_rm_status_path_list = get_string_map_keys(main_rm_status_paths, &num_main_status_paths);
+	int main_status_path_index;
+	for(main_status_path_index=0;main_status_path_index < num_main_status_paths; main_status_path_index++)
+	{
+		char* rm_status_path = main_rm_status_path_list[main_status_path_index];
+		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
+		save_package_data_as_status_file(rm_status_data, rm_status_path);
+	}
+
+
+	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
+	{
+		//set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
+		char* pkg_name = rm_pkg_list[rm_pkg_index];
+		char* rm_status_path = get_string_map_element(pkg_status_paths, pkg_name);
+		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
+		
+		remove_individual_package(pkg_name, conf, package_data, tmp_dir, save_conf_files, 0);
+		
+		string_map* already_removed = remove_string_map_element(rm_status_data, pkg_name);
+		destroy_string_map(already_removed, DESTROY_MODE_FREE_VALUES, &num_destroyed); //fix this at some point, not freed properly
+
+	}
+	for(main_status_path_index=0;main_status_path_index < num_main_status_paths; main_status_path_index++)
+	{
+		char* rm_status_path = main_rm_status_path_list[main_status_path_index];
+		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
+		save_package_data_as_status_file(rm_status_data, rm_status_path);
+	}
+
 
 
 	/* remove orphaned dependencies if requested */
