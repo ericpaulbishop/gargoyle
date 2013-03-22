@@ -361,25 +361,28 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		unsigned long num_deps;
 		char** deps = get_string_map_keys(pkg_dependencies, &num_deps);
 		int dep_index;
-		for(dep_index=0; err == 0 && dep_index < num_deps && get_string_map_element(install_called_pkgs, deps[dep_index]) == NULL ; dep_index++)
+		for(dep_index=0; err == 0 && dep_index < num_deps ; dep_index++)
 		{
-			char** dep_def = get_string_map_element(pkg_dependencies, deps[dep_index]);
-			int is_current;
-			char* matching_version;
-			string_map* dep_pkg = get_package_current_or_latest_matching(package_data, deps[dep_index], dep_def, &is_current, &matching_version);
+			if(get_string_map_element(install_called_pkgs, deps[dep_index]) == NULL )
+			{
+				char** dep_def = get_string_map_element(pkg_dependencies, deps[dep_index]);
+				int is_current;
+				char* matching_version;
+				string_map* dep_pkg = get_package_current_or_latest_matching(package_data, deps[dep_index], dep_def, &is_current, &matching_version);
 
-			if(dep_pkg != NULL)
-			{
-				char* dep_status = get_string_map_element(dep_pkg, "Status");
-				if(strstr(dep_status, " half-installed") != NULL)
+				if(dep_pkg != NULL)
 				{
-					err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
-					
+					char* dep_status = get_string_map_element(dep_pkg, "Status");
+					if(strstr(dep_status, " half-installed") != NULL)
+					{
+						err = recursively_install(deps[dep_index], matching_version, install_root_name, link_to_root, overlay_path, is_upgrade, overwrite_config, overwrite_other_package_files, tmp_dir, conf, package_data, install_called_pkgs);
+						
+					}
 				}
-			}
-			else
-			{
-				err = 1;
+				else
+				{
+					err = 1;
+				}
 			}
 		}
 	}
