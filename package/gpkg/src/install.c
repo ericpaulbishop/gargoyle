@@ -333,7 +333,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		int pkg_index;
 		for(pkg_index=0; pkg_index < num_install_called_pkgs; pkg_index++)
 		{
-			remove_individual_package(install_pkg_list[pkg_index], conf, package_data, tmp_dir, 0, 0);
+			remove_individual_package(install_called_pkg_list[pkg_index], conf, package_data, tmp_dir, 0, 0);
 		}
 		free_null_terminated_string_array(install_called_pkg_list);
 		//call remove function to do cleanup of partial install
