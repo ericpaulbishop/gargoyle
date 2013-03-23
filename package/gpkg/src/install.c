@@ -144,6 +144,16 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					char** dep_def= get_string_map_element(install_pkg_depend_map, dep_name);
 					if(get_string_map_element(install_pkgs_map, dep_name) != NULL)
 					{
+						/* 
+						 * We really should check here whether old dependency def can be reconciled with the new one, and report an error if it can't 
+						 * Right now we just use the heuristic that top-level (user specified, not dependency) package defs get preference, followed
+						 * by first dependency encountered.
+						 *
+						 * Since right now versioning features aren't really being used very much other than kernel dependencies in Gargoyle/OpenWrt
+						 * I'm just leaving this comment here as a reminder that this should be addressed at some point rather than messing with it now
+						 *
+						 */
+
 						dep_def = get_string_map_element(install_pkgs_map, dep_name);
 					}
 					else

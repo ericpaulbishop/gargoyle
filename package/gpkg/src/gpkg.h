@@ -119,7 +119,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 /* upgrade.c */
-void do_upgrade(opkg_conf* conf, char* pkg_name, int preserve_conf_files, char** new_version_criteria);
+void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root, char* link_root);
 
 
 
