@@ -9,6 +9,8 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	string_map* matching_packages = initialize_string_map(1);
 	unsigned long num_destroyed;
 
+
+
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
 	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
 
@@ -36,6 +38,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
 	char* unsatisfied_dep_err = NULL;
+	
 	
 	//new string map var with all pkgs to install = pkgs, keys = version
 	unsigned long num_pkg_names;
@@ -78,6 +81,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			unsigned long num_ctrl_names;
 			char** ctrl_name_list = get_string_map_keys(matching_packages, &num_ctrl_names);
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+		
 
 			err = 1; //set back to 0 when data successfully loaded
 			if(num_ctrl_names > 0)
@@ -124,7 +128,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 		string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
-		char* install_status = get_string_map_element(install_pkg_data, "Status");
+		char* install_status = install_pkg_data == NULL ? NULL : get_string_map_element(install_pkg_data, "Status");
 
 	
 		if(install_status != NULL)
@@ -205,8 +209,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			}
 	
 		}
-		install_status = get_string_map_element(install_pkg_data, "Status");
-		char* will_fit = get_string_map_element(install_pkg_data, "Will-Fit");
+		install_status = install_pkg_data == NULL ? NULL : get_string_map_element(install_pkg_data, "Status");
 
 
 		/* error checking before we start install */

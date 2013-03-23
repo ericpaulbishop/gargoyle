@@ -8,13 +8,44 @@ void print_usage(void);
 
 int main(int argc, char** argv)
 {
-	/*
-	parse_parameters(argc, argv);
+	
+	string_map* parameters = parse_parameters(argc, argv);
+
+	opkg_conf *conf = load_conf(NULL);
+
+	char* run_type                   = get_string_map_element(parameters, "run_type");
+	int force_overwrite_other_files  = get_string_map_element(parameters, "force-overwrite")         != NULL ? 1 : 0;
+	int force_overwrite_configs      = get_string_map_element(parameters, "force-overwrite-configs") != NULL ? 1 : 0;
+	int force_depends                = get_string_map_element(parameters, "force-depends")           != NULL ? 1 : 0;
+	char* install_root               = get_string_map_element(parameters, "install-destination");
+	install_root                     = install_root == NULL ? strdup("root") : install_root;
+	char* link_root                  = get_string_map_element(parameters, "link-destination");
+	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
+	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
+	string_map* pkgs                 = get_string_map_element(parameters, "package_list");
+
+	if(strcmp(run_type, "install") == 0)
+	{
+		do_install(conf, pkgs, install_root, link_root, 0, force_overwrite_configs, force_overwrite_other_files, tmp_root);
+	}
+	else if(strcmp(run_type, "remove") == 0)
+	{
+		do_remove(conf, pkgs, !force_overwrite_configs, 0, force_depends, 1);
+	}
+	else if(strcmp(run_type, "upgrade") == 0)
+	{
+		do_upgrade(conf, pkgs, !force_overwrite_configs, install_root, link_root);
+	}
+	else if(strcmp(run_type, "update") == 0)
+	{
+		update(conf);
+	}
 
 
 	return(0);
 
-	*/
+	/*
+	opkg_conf *test_conf = load_conf(NULL);
 
 	rm_r("/tmp/plugin_root");
 	rm_r("/tmp/plugin_test");
@@ -26,9 +57,20 @@ int main(int argc, char** argv)
 
 
 	//install_to("tor_0.2.3.24-rc-2_x86.ipk", "tor", "/tmp/test1");
-
+	string_map* pkgs = initialize_string_map(1);
+	set_string_map_element(pkgs, "irssi",  alloc_depend_def(NULL));
+	//set_string_map_element(pkgs, "zlib",  alloc_depend_def(NULL));
+	set_string_map_element(pkgs, "/home/eric/gargoyle/package/gpkg/src/zlib_1.2.7-1_ar71xx.ipk",  alloc_depend_def(NULL));
 	
-	opkg_conf *conf = load_conf(NULL);
+	//update(conf);
+
+	//do_install(test_conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL0, 0, 0, NULL);
+	do_install(test_conf, pkgs, "plugin_root", "plugin_test", 0, 0, 0, NULL);
+
+	//do_remove(test_conf, pkgs, 0, 1, 0, 1);
+
+	*/
+	
 
 	/*
 	printf("a\n");
@@ -75,17 +117,6 @@ int main(int argc, char** argv)
 
 	
 	
-	string_map* pkgs = initialize_string_map(1);
-	set_string_map_element(pkgs, "irssi",  alloc_depend_def(NULL));
-	//set_string_map_element(pkgs, "zlib",  alloc_depend_def(NULL));
-	set_string_map_element(pkgs, "/home/eric/gargoyle/package/gpkg/src/zlib_1.2.7-1_ar71xx.ipk",  alloc_depend_def(NULL));
-	
-	//update(conf);
-
-	//do_install(conf, "kmod-mmc-over-gpio", "plugin_root", "plugin_test", NULL0, 0, 0, NULL);
-	do_install(conf, pkgs, "plugin_root", "plugin_test", 0, 0, 0, NULL);
-
-	//do_remove(conf, pkgs, 0, 1, 0, 1);
 
 
 	return(0);
@@ -100,19 +131,19 @@ string_map* parse_parameters(int argc, char** argv)
 	{
 		print_usage();  //exits
 	}
-	char* main_var = argv[1];
-	if(	strcmp(main_var, "list") != 0 && 
-		strcmp(main_var, "list-installed") != 0 && 
-		strcmp(main_var, "info") != 0 && 
-		strcmp(main_var, "update") != 0 &&
-		strcmp(main_var, "install") != 0 &&
-	       	strcmp(main_var, "remove") != 0 &&
-	       	strcmp(main_var, "upgrade") != 0
+	char* run_type = argv[1];
+	if(	strcmp(run_type, "list") != 0 && 
+		strcmp(run_type, "list-installed") != 0 && 
+		strcmp(run_type, "info") != 0 && 
+		strcmp(run_type, "update") != 0 &&
+		strcmp(run_type, "install") != 0 &&
+	       	strcmp(run_type, "remove") != 0 &&
+	       	strcmp(run_type, "upgrade") != 0
 	  )
 	{
 		print_usage();  //exits
 	}
-	set_string_map_element(parameters, MAIN_PARAM_NAME, main_var);
+	set_string_map_element(parameters, "run_type", run_type);
 
 
 	static struct option long_options[] = {
@@ -120,6 +151,9 @@ string_map* parse_parameters(int argc, char** argv)
 		{"force-overwrite",         0, 0, 'w'},
 		{"force-maintainer",        0, 0, 'm'},
 		{"force-overwrite-configs", 0, 0, 'm'},
+		{"dest",                    1, 0, 'd'},
+		{"link-dest",               1, 0, 'l'},
+		{"tmp-dir",                 1, 0, 't'},
 		{"help",                    0, 0, 'h'},
 		{NULL, 0, NULL, 0}
 	};
@@ -132,7 +166,6 @@ string_map* parse_parameters(int argc, char** argv)
 		{
 			case 'n':
 				set_string_map_element(parameters, "force-depends", strdup("D"));
-				printf("here\n");
 				break;
 			case 'w':
 				set_string_map_element(parameters, "force-overwrite", strdup("D"));
@@ -140,21 +173,32 @@ string_map* parse_parameters(int argc, char** argv)
 			case 'm':
 				set_string_map_element(parameters, "force-overwrite-configs", strdup("D"));
 				break;
+			case 'd':
+				set_string_map_element(parameters, "install-destination", strdup(optarg));
+				break;
+			case 'l':
+				set_string_map_element(parameters, "link-destination", strdup(optarg));
+				break;
+			case 't':
+				set_string_map_element(parameters, "tmp-dir", strdup(optarg));
+				break;
 			case 'h':
 			default:
 				print_usage();
 				break;
 		}
 	}
-	
+
+
+	option_index = option_index  < 2 ? 2 : option_index;
 	
 	string_map* pkg_list = initialize_string_map(1);
 	set_string_map_element(parameters, "package_list", pkg_list);
-	for(option_index=2; option_index < argc; option_index++)
+	for(option_index; option_index < argc; option_index++)
 	{
 		if(argv[option_index][0] != '-')
 		{
-			set_string_map_element(pkg_list, argv[option_index], strdup("D"));
+			set_string_map_element(pkg_list, argv[option_index], alloc_depend_def(NULL));
 		}
 	}
 
