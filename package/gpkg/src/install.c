@@ -133,6 +133,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	
 		if(install_status != NULL)
 		{
+			
 			char** old_el = set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
 			if(old_el != NULL){ free_null_terminated_string_array(old_el); }
 
@@ -221,6 +222,9 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		if(install_status == NULL || strstr(install_status, " installed") != NULL)
 		{
 			fprintf(stderr, "WARNING: Package %s is already installed, ignoring\n\n", pkg_name);
+			char** old_el = remove_string_map_element(install_pkgs_map, pkg_name);
+			if(old_el != NULL){ free_null_terminated_string_array(old_el); };
+
 		}
 
 		if(unsatisfied_dep_err != NULL)
@@ -264,9 +268,10 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	}
 
 
-
-	printf("Preparing to install the following packages, which will require " SCANFU64 " bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
-
+	if(all_pkg_list_str != NULL)
+	{
+		printf("Preparing to install the following packages, which will require " SCANFU64 " bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
+	}
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
