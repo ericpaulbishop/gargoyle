@@ -18,10 +18,12 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
+	
+	
 	unsigned long rm_pkg_list_length;
 	char** rm_pkg_list = get_string_map_keys(pkgs, &rm_pkg_list_length);
 	int rm_pkg_index;
-	string_map uninstalled_pkgs_to_ignore = initialize_string_map(1);
+	string_map* uninstalled_pkgs_to_ignore = initialize_string_map(1);
 	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
 	{
 		char* pkg_name = rm_pkg_list[rm_pkg_index];	
@@ -142,17 +144,21 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	{
 		//set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
 		char* pkg_name = rm_pkg_list[rm_pkg_index];			
-		char* rm_status_path = get_string_map_element(pkg_status_paths, pkg_name);
-		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
-		string_map* rm_pkg_data = get_string_map_element(rm_status_data, pkg_name);
+		if(get_string_map_element(uninstalled_pkgs_to_ignore, pkg_name) == NULL)
+		{	
+			char* rm_status_path = get_string_map_element(pkg_status_paths, pkg_name);
+			string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
+			string_map* rm_pkg_data = get_string_map_element(rm_status_data, pkg_name);
 
-		char* old_status = set_string_map_element(rm_pkg_data, "Status", strdup("deinstall user half-installed"));
-		free_if_not_null(old_status);
+			char* old_status = set_string_map_element(rm_pkg_data, "Status", strdup("deinstall user half-installed"));
+			free_if_not_null(old_status);
 		
-		char* old_path = set_string_map_element(main_rm_status_paths, rm_status_path, strdup("D"));
-		free_if_not_null(old_path);
-
+			char* old_path = set_string_map_element(main_rm_status_paths, rm_status_path, strdup("D"));
+			free_if_not_null(old_path);
+		}
 	}
+
+
 	unsigned long num_main_status_paths;
 	char** main_rm_status_path_list = get_string_map_keys(main_rm_status_paths, &num_main_status_paths);
 	int main_status_path_index;
@@ -162,7 +168,6 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		string_map* rm_status_data = get_string_map_element(path_to_status_data, rm_status_path);
 		save_package_data_as_status_file(rm_status_data, rm_status_path);
 	}
-
 
 	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
 	{
