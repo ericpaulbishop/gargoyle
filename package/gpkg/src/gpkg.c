@@ -23,6 +23,13 @@ int main(int argc, char** argv)
 	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
 	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
 	string_map* pkgs                 = get_string_map_element(parameters, "package_list");
+	char* format_str                 = get_string_map_element(parameters, "output_format");
+	int format                       = OUTPUT_HUMAN_READABLE;
+	if(format_str == NULL)
+	{
+		format = strcmp(format_str, "json") == 0 ? OUTPUT_JSON : format;
+		format = strcmp(format_str, "js") == 0 || strcmp(format_str, "javascript") == 0 ? OUTPUT_JAVASCRIPT : format;
+	}
 
 	if(strcmp(run_type, "install") == 0)
 	{
@@ -39,6 +46,14 @@ int main(int argc, char** argv)
 	else if(strcmp(run_type, "update") == 0)
 	{
 		update(conf);
+	}
+	else if(strcmp(run_type, "list") == 0)
+	{
+		do_list(conf, 0, format);
+	}
+	else if(strcmp(run_type, "list-installed") == 0)
+	{
+		do_list(conf, 1, format);
 	}
 
 
@@ -148,12 +163,20 @@ string_map* parse_parameters(int argc, char** argv)
 
 	static struct option long_options[] = {
 		{"force-depends",           0, 0, 'n'},
+		{"force_depends",           0, 0, 'n'},
 		{"force-overwrite",         0, 0, 'w'},
+		{"force_overwrite",         0, 0, 'w'},
 		{"force-maintainer",        0, 0, 'm'},
+		{"force_maintainer",        0, 0, 'm'},
 		{"force-overwrite-configs", 0, 0, 'm'},
+		{"force_overwrite-configs", 0, 0, 'm'},
 		{"dest",                    1, 0, 'd'},
 		{"link-dest",               1, 0, 'l'},
+		{"link_dest",               1, 0, 'l'},
 		{"tmp-dir",                 1, 0, 't'},
+		{"tmp_dir",                 1, 0, 't'},
+		{"output-format",           1, 0, 'p'},
+		{"output_format",           1, 0, 'p'},
 		{"help",                    0, 0, 'h'},
 		{NULL, 0, NULL, 0}
 	};
@@ -181,6 +204,9 @@ string_map* parse_parameters(int argc, char** argv)
 				break;
 			case 't':
 				set_string_map_element(parameters, "tmp-dir", strdup(optarg));
+				break;
+			case 'p':
+				set_string_map_element(parameters, "output-format", strdup(optarg));
 				break;
 			case 'h':
 			default:

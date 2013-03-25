@@ -35,7 +35,9 @@
 
 #define LOAD_PARAMETER_DEFINED_PKG_VARIABLES 0  /* Parameter unused, load from parameter map */
 #define LOAD_MINIMAL_PKG_VARIABLES           1  /* Status, Depends, Size only */
-#define LOAD_ALL_PKG_VARIABLES               2  /* Everything */
+#define LOAD_DESCRIPTIVE_PKG_VARIABLES       2  /* Status, Depends, Size, Description*/
+#define LOAD_ALL_PKG_VARIABLES               3  /* Everything */
+
 
 
 
@@ -43,7 +45,13 @@
 #define LATEST_VERSION_STRING  "@@@LATEST_V@@@"
 #define NOT_INSTALLED_STRING   "@@@NOTINST@@@"
 
-#define MAIN_PARAM_NAME "@@@MAIN_PARAM@@@"
+
+
+
+#define OUTPUT_HUMAN_READABLE 1
+#define OUTPUT_JSON           2
+#define OUTPUT_JAVASCRIPT     3
+
 
 
 /* conf defs/prototypes */
@@ -121,7 +129,8 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root, char* link_root);
 
 
-
+/* list.c */
+void do_list(opkg_conf* conf, int installed_only, int format);
 
 
 #endif

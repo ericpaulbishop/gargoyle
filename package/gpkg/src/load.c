@@ -17,11 +17,6 @@ static char*       __but_not_same_package_with_version = NULL;
 void something_depends_on_func(char* key, void* value);
 
 
-
-#define CURRENT_VERSION_STRING "@@@CURRENT_V@@@"
-#define LATEST_VERSION_STRING  "@@@LATEST_V@@@"
-#define NOT_INSTALLED_STRING   "@@@NOTINST@@@"
-
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 {
 	char* dest_path = get_string_map_element(conf->dest_names, dest_name);
@@ -401,6 +396,16 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
+	}
+	else if(load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES)
+	{
+		set_string_map_element(load_variable_map, "Status",  all_dummy);
+		set_string_map_element(load_variable_map, "Depends", all_dummy);
+		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
+		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
+		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
+		set_string_map_element(load_variable_map, "Description",    all_dummy);
+
 	}
 	else
 	{
