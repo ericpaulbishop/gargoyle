@@ -23,9 +23,9 @@ int main(int argc, char** argv)
 	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
 	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
 	string_map* pkgs                 = get_string_map_element(parameters, "package_list");
-	char* format_str                 = get_string_map_element(parameters, "output_format");
+	char* format_str                 = get_string_map_element(parameters, "output-format");
 	int format                       = OUTPUT_HUMAN_READABLE;
-	if(format_str == NULL)
+	if(format_str != NULL)
 	{
 		format = strcmp(format_str, "json") == 0 ? OUTPUT_JSON : format;
 		format = strcmp(format_str, "js") == 0 || strcmp(format_str, "javascript") == 0 ? OUTPUT_JAVASCRIPT : format;

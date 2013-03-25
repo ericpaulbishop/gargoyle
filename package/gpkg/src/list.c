@@ -5,9 +5,11 @@ void do_list(opkg_conf* conf, int installed_only, int format)
 	string_map* package_data          = initialize_string_map(1);
 	string_map* matching_packages     = initialize_string_map(1);
 	unsigned long num_destroyed;
-	
-	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_MINIMAL_PKG_VARIABLES, NULL );
+
+
+	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_DESCRIPTIVE_PKG_VARIABLES, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	
 
 	unsigned long num_all_packages;
 	char** sorted_packages = get_string_map_keys(package_data, &num_all_packages);
