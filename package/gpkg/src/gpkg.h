@@ -132,5 +132,8 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 /* list.c */
 void do_list(opkg_conf* conf, int installed_only, int format);
 
+/* info.c */
+void do_print_dest_info(opkg_conf* conf, int format);
+
 
 #endif

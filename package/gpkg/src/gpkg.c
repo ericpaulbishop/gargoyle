@@ -51,11 +51,14 @@ int main(int argc, char** argv)
 	{
 		do_list(conf, 0, format);
 	}
-	else if(strcmp(run_type, "list-installed") == 0)
+	else if(strcmp(run_type, "list-installed") == 0 || strcmp(run_type, "list_installed") == 0)
 	{
 		do_list(conf, 1, format);
 	}
-
+	else if(strcmp(run_type, "dest-info") == 0 || strcmp(run_type, "dest_info") == 0)
+	{
+		do_print_dest_info(conf, format);
+	}
 
 	return(0);
 
@@ -149,6 +152,9 @@ string_map* parse_parameters(int argc, char** argv)
 	char* run_type = argv[1];
 	if(	strcmp(run_type, "list") != 0 && 
 		strcmp(run_type, "list-installed") != 0 && 
+		strcmp(run_type, "list_installed") != 0 && 
+		strcmp(run_type, "dest-info") != 0 && 
+		strcmp(run_type, "dest_info") != 0 && 
 		strcmp(run_type, "info") != 0 && 
 		strcmp(run_type, "update") != 0 &&
 		strcmp(run_type, "install") != 0 &&
