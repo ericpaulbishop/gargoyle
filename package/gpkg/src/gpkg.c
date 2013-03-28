@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 
 	opkg_conf *conf = load_conf(NULL);
 
-	char* run_type                   = get_string_map_element(parameters, "run_type");
+	char* run_type                   = get_string_map_element(parameters, "run-type");
 	int force_overwrite_other_files  = get_string_map_element(parameters, "force-overwrite")         != NULL ? 1 : 0;
 	int force_overwrite_configs      = get_string_map_element(parameters, "force-overwrite-configs") != NULL ? 1 : 0;
 	int force_depends                = get_string_map_element(parameters, "force-depends")           != NULL ? 1 : 0;
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	char* link_root                  = get_string_map_element(parameters, "link-destination");
 	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
 	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
-	string_map* pkgs                 = get_string_map_element(parameters, "package_list");
+	string_map* pkgs                 = get_string_map_element(parameters, "package-list");
 	char* format_str                 = get_string_map_element(parameters, "output-format");
 	int format                       = OUTPUT_HUMAN_READABLE;
 	if(format_str != NULL)
@@ -164,12 +164,12 @@ string_map* parse_parameters(int argc, char** argv)
 	{
 		print_usage();  //exits
 	}
-	set_string_map_element(parameters, "run_type", run_type);
+	set_string_map_element(parameters, "run-type", run_type);
 
 
 	static struct option long_options[] = {
-		{"force-depends",           0, 0, 'n'},
-		{"force_depends",           0, 0, 'n'},
+		{"force-depends",           0, 0, 'f'},
+		{"force_depends",           0, 0, 'f'},
 		{"force-overwrite",         0, 0, 'w'},
 		{"force_overwrite",         0, 0, 'w'},
 		{"force-maintainer",        0, 0, 'm'},
@@ -181,11 +181,18 @@ string_map* parse_parameters(int argc, char** argv)
 		{"link_dest",               1, 0, 'l'},
 		{"tmp-dir",                 1, 0, 't'},
 		{"tmp_dir",                 1, 0, 't'},
-		{"output-format",           1, 0, 'p'},
-		{"output_format",           1, 0, 'p'},
+		{"output-format",           1, 0, 'o'},
+		{"output_format",           1, 0, 'o'},
+		{"matching-regex",          0, 0, 'r'},
+		{"matching_regex",          0, 0, 'r'},
+		{"package-variables",       1, 0, 'v'},
+		{"package_variables",       1, 0, 'v'},
 		{"help",                    0, 0, 'h'},
 		{NULL, 0, NULL, 0}
 	};
+
+
+	int expect_regex =0;
 
 	int option_index = 0;
 	int c;
@@ -193,7 +200,7 @@ string_map* parse_parameters(int argc, char** argv)
 	{
 		switch(c)
 		{
-			case 'n':
+			case 'f':
 				set_string_map_element(parameters, "force-depends", strdup("D"));
 				break;
 			case 'w':
@@ -211,28 +218,87 @@ string_map* parse_parameters(int argc, char** argv)
 			case 't':
 				set_string_map_element(parameters, "tmp-dir", strdup(optarg));
 				break;
-			case 'p':
+			case 'o':
 				set_string_map_element(parameters, "output-format", strdup(optarg));
+				break;
+			case 'v':
+				//package-variables
+				//expect comma/whitespace separated list
+
+				
+
+			case 'r': 
+				//matching-regex
+				expect_regex = 1;
 				break;
 			case 'h':
 			default:
-				print_usage();
+				print_usage(); //exits
 				break;
 		}
+	}
+
+	if( expect_regex == 1 && strcmp(run_type, "info") != 0 && strcmp(run_type, "list") != 0 && strcmp(run_type, "list-installed") != 0 && strcmp(run_type, "list_installed") )
+	{
+		fprintf(stderr, "ERROR: package list can only specified with regular expression when using 'list', 'list-installed' or 'info' commands\n\n");
+		exit(1);
 	}
 
 
 	option_index = option_index  < 2 ? 2 : option_index;
 	
 	string_map* pkg_list = initialize_string_map(1);
-	set_string_map_element(parameters, "package_list", pkg_list);
+	set_string_map_element(parameters, "package-list", pkg_list);
 	for(option_index; option_index < argc; option_index++)
 	{
 		if(argv[option_index][0] != '-')
 		{
-			set_string_map_element(pkg_list, argv[option_index], alloc_depend_def(NULL));
+			if(expect_regex)
+			{
+				regex_t* packages_matching_regex = (regex_t*)malloc(sizeof(regex_t));
+				char* regex_str = strdup(argv[option_index]);
+				int regex_len = strlen(regex_str);
+				if(get_string_map_element(parameters, "package-regex") != NULL)
+				{
+					fprintf(stderr, "ERROR: Only one regular expression can be specified at a time.\n\n");
+					exit(1); 
+
+				}
+				if(regex_str[0] != '/' || regex_str[regex_len-1] != '/')
+				{
+					free(regex_str);
+					regex_str=dynamic_strcat(3, "/", argv[option_index], "/");
+				}
+				if( convert_to_regex(regex_str, packages_matching_regex) )
+				{
+					set_string_map_element(parameters, "package-regex", packages_matching_regex);
+				}
+				else
+				{
+					fprintf(stderr, "ERROR: Invalid regular expression \"%s\"\n\n", regex_str);
+					exit(1); 
+				}
+				free(regex_str);
+			}
+			else
+			{
+				set_string_map_element(pkg_list, argv[option_index], alloc_depend_def(NULL));
+			}
 		}
 	}
+	if(	strcmp(run_type, "install") == 0 ||
+	       	strcmp(run_type, "remove")  == 0 ||
+	       	strcmp(run_type, "upgrade") == 0
+		)
+	{
+		if(pkg_list->num_elements == 0)
+		{
+			printf("ERROR: No packages specified to %s.\n\n", run_type);
+			exit(1);
+		}
+	}
+
+
 
 	return parameters;
 }

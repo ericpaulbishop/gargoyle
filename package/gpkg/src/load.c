@@ -356,8 +356,8 @@ int compare_versions(char* v1, char* v2)
 
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name)
 {
-	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "packages-matching") : NULL;
-	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "packages") : NULL;
+	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "package-regex") : NULL;
+	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "package-list") : NULL;
  	char** load_all_variables      = parameters != NULL ? get_string_map_element(parameters, "load_all_variables") : NULL;
 	char** load_matching_variables = parameters != NULL ? get_string_map_element(parameters, "load_matching_variables") : NULL;
 	

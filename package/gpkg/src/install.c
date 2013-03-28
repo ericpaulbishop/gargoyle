@@ -239,7 +239,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */	
 	string_map* parameters = initialize_string_map(1);
 	matching_packages = initialize_string_map(1);
-	set_string_map_element(parameters, "packages", install_pkgs_map);
+	set_string_map_element(parameters, "package-list", install_pkgs_map);
 	load_all_package_data(conf, package_data, matching_packages, parameters, 0, LOAD_ALL_PKG_VARIABLES, install_root_name);
 	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);

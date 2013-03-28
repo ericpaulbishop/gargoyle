@@ -49,10 +49,15 @@ void do_print_dest_info(opkg_conf* conf, int format)
 	}
 	if(format == OUTPUT_JSON)
 	{
-		printf("}\n");
+		printf("\n}\n");
 
 	}
+}
 
 
+
+void do_print_info(opkg_conf* conf, string_map* parameters, int format)
+{
+	
 }
 
