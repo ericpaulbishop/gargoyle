@@ -51,33 +51,21 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 		string_map* pkg_info = get_package_current_or_latest(package_data, package_name, &is_currently_installed, &version);
 		if( (!installed_only) || is_currently_installed )
 		{
-			char* description = get_string_map_element(pkg_info, "Description");
-			char* adj_description = description == NULL ? NULL : strdup(description);
-			if(description != NULL && (format == OUTPUT_JSON || format == OUTPUT_JAVASCRIPT))
-			{
-				char* esc_val_1;
-				char* esc_val_2;
-				free(adj_description);
-				esc_val_1         = dynamic_replace(description, "\\", "\\\\");
-				esc_val_2         = dynamic_replace(esc_val_1, "\"", "\\\"");
-				adj_description   = dynamic_replace(esc_val_2, "\n", "\\n");
-				free(esc_val_1);
-				free(esc_val_2);
-			}
+			char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), format);
 			int print_description = (!installed_only) && description != NULL ? 1 : 0;
 			if(format == OUTPUT_HUMAN_READABLE)
 			{
-				printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? adj_description : ""));
+				printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
 			}
 			else if(format == OUTPUT_JAVASCRIPT)
 			{
-				printf("pkg_info[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? adj_description : ""), "\"];\n");
+				printf("pkg_info[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
 			}
 			else if(format == OUTPUT_JSON)
 			{
-				printf("\t\"%s\": [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? adj_description : ""), "\"],\n");
+				printf("\t\"%s\": [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"],\n");
 			}
-			free_if_not_null(adj_description);
+			free_if_not_null(description);
 		}
 		free_if_not_null(version);
 	}
