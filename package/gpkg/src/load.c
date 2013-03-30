@@ -1,6 +1,9 @@
 
 #include "gpkg.h"
 
+int include_variable(char* var, int package_matches, int include_package, int load_variable_def, string_map* load_variable_map);
+
+
 static FILE* __save_pkg_status_stream = NULL;
 void save_pkg_status_func(char* key, void* value);
 
@@ -34,11 +37,14 @@ uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 	return free_bytes;
 }
 
-void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* install_root)
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root)
 {
+	
+	string_map* package_variables = parameters == NULL ? NULL : get_string_map_element(parameters, "package-variables");
+
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
-	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_all_packages, load_variable_def, NULL);
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_variable_def, NULL);
 	
 	//load status data
 	unsigned long num_dests;
@@ -52,7 +58,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 		status_path = adjusted_status_path;
 		if(path_exists(status_path))
 		{
-			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_all_packages, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
+			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
 		}
 		free(status_path);
 	}
@@ -66,11 +72,11 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
 	int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
 	int load_will_fit = load_variable_def == LOAD_ALL_PKG_VARIABLES && install_root != NULL ? 1 : 0;
-	if(parameters != NULL && load_variable_def != LOAD_ALL_PKG_VARIABLES )
+	if(package_variables != NULL && load_variable_def != LOAD_ALL_PKG_VARIABLES )
 	{
-		load_depends  = get_string_map_element(parameters, "required-depends") != NULL ? 1 : 0;
-		load_size     = get_string_map_element(parameters, "required-size")    != NULL ? 1 : 0;
-		load_will_fit = get_string_map_element(parameters, "will-fit")         != NULL ? 1 : 0;
+		load_depends  = get_string_map_element(package_variables, "Required-Depends") != NULL ? 1 : 0;
+		load_size     = get_string_map_element(package_variables, "Required-Size")    != NULL ? 1 : 0;
+		load_will_fit = get_string_map_element(package_variables, "Will-Fit")         != NULL ? 1 : 0;
 	}
 	uint64_t free_bytes = 0;
 
@@ -352,69 +358,101 @@ int compare_versions(char* v1, char* v2)
 }
 
 
+int include_variable(char* var, int package_matches, int include_package, int load_variable_def, string_map* load_variable_map)
+{
+	int ret = 0;
+	ret = include_package && load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : ret;
+	ret = package_matches && load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING ? 1 : ret;
+	if(ret == 0 && include_package)
+	{
+		char* var_load_type = get_string_map_element(load_variable_map, var);
+		if(var_load_type != NULL)
+		{
+			ret = strcmp(var_load_type, "A") == 0 ? 1 : ret;
+			ret = strcmp(var_load_type, "M") == 0 && package_matches ? 1 : ret;
+		}
+	}
+	return ret;
 
+}
 
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_all_packages, int load_variable_def, char* dest_name)
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* dest_name)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "package-regex") : NULL;
 	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "package-list") : NULL;
  	char** load_all_variables      = parameters != NULL ? get_string_map_element(parameters, "load_all_variables") : NULL;
 	char** load_matching_variables = parameters != NULL ? get_string_map_element(parameters, "load_matching_variables") : NULL;
+	string_map* package_variables = parameters == NULL ? NULL : get_string_map_element(parameters, "package-variables");
 	
+	if(load_variable_def < LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING || load_variable_def >  LOAD_ALL_PKG_VARIABLES )
+	{
+		//if invalid load_variable_def set, load everything
+		load_variable_def =  LOAD_ALL_PKG_VARIABLES;
+	}
+	
+	if(package_variables == NULL && load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING || load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL)
+	{
+		return;
+	}
+	if(match_regex == NULL && matching_list == NULL && ( 
+		load_variable_def == LOAD_MINIMAL_PKG_VARIABLES_FOR_MATCHING || 
+		load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_MATCHING || 
+		load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING)
+	  	)
+	{
+		return;
+	}
+
+
 
 	string_map* load_variable_map = initialize_string_map(0);
 	int load_var_index=0;
 	char* all_dummy = strdup("A");
 	char* matching_dummy = strdup("M");
 
-	if(parameters == NULL)
+
+	int include_all_packages;
+	include_all_packages = 	load_variable_def != LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING && 
+				load_variable_def != LOAD_MINIMAL_PKG_VARIABLES_FOR_MATCHING &&
+				load_variable_def != LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_MATCHING
+				? 1 : 0;
+	
+	if(	load_variable_def == LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL || 
+		load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_ALL || 
+		load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_DESCRIPTIVE_FOR_MATCHING ||
+		load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING ||
+		load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING 
+			)
 	{
-		load_all_packages = 1;
-		load_variable_def = load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES ? LOAD_MINIMAL_PKG_VARIABLES : load_variable_def;
-	}
-	if(load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES)
-	{
-		if(load_matching_variables != NULL)
-		{
-			for(load_var_index=0; load_matching_variables[load_var_index] != NULL; load_var_index++)
-			{
-				set_string_map_element(load_variable_map, load_matching_variables[load_var_index], matching_dummy);
-			}
-		}
-		if(load_all_variables != NULL)
-		{
-			for(load_var_index=0; load_all_variables[load_var_index] != NULL; load_var_index++)
-			{
-				set_string_map_element(load_variable_map, load_all_variables[load_var_index], all_dummy);
-			}
-		}
-	}
-	else if(load_variable_def == LOAD_MINIMAL_PKG_VARIABLES)
-	{
-		set_string_map_element(load_variable_map, "Status",  all_dummy);
-		set_string_map_element(load_variable_map, "Depends", all_dummy);
-		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
-		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
+		set_string_map_element(load_variable_map, "Status",              all_dummy);
+		set_string_map_element(load_variable_map, "Depends",             all_dummy);
+		set_string_map_element(load_variable_map, "Installed-Size",      all_dummy);
+		set_string_map_element(load_variable_map, "Install-Destination", all_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
 	}
-	else if(load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES)
+	if( load_variable_def == LOAD_MINIMAL_PKG_VARIABLES_FOR_MATCHING || load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_MATCHING )
 	{
-		set_string_map_element(load_variable_map, "Status",  all_dummy);
-		set_string_map_element(load_variable_map, "Depends", all_dummy);
-		set_string_map_element(load_variable_map, "Installed-Size",    all_dummy);
-		set_string_map_element(load_variable_map, "Install-Destination",    all_dummy);
-		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
-		set_string_map_element(load_variable_map, "Description",    all_dummy);
-
+		set_string_map_element(load_variable_map, "Status",              matching_dummy);
+		set_string_map_element(load_variable_map, "Depends",             matching_dummy);
+		set_string_map_element(load_variable_map, "Installed-Size",      matching_dummy);
+		set_string_map_element(load_variable_map, "Install-Destination", matching_dummy);
+		set_string_map_element(load_variable_map, "Link-Destination",    matching_dummy);
 	}
-	else
+	if(load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_DESCRIPTIVE_FOR_MATCHING || load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_ALL || load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_MATCHING)
 	{
-		load_variable_def = LOAD_ALL_PKG_VARIABLES;
-		/* no need to set entries in load_variable_map */
+		set_string_map_element(load_variable_map, "Description", (load_variable_def == LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_ALL ? all_dummy : matching_dummy));
 	}
-
-	int save_user_installed   = get_string_map_element(load_variable_map, "User-Installed")      != NULL ? 1 : 0 ;
-	int save_src_id           = get_string_map_element(load_variable_map, "Source-ID")           != NULL ? 1 : 0 ;
+	if(load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING || load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING )
+	{
+		unsigned long num_vars;
+		char** vars = get_string_map_keys(package_variables, &num_vars);
+		int var_index;
+		for(var_index=0; var_index < num_vars; var_index++)
+		{
+			set_string_map_element(load_variable_map, vars[var_index], (load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? all_dummy : matching_dummy));
+		}
+		free_null_terminated_string_array(vars);
+	}
 
 
 
@@ -492,6 +530,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		char next_line[16384];
 		int read_data = 1;
 		int next_package_matches = 0;
+		int include_next_package = 0;
 		char* last_variable = NULL;
 		int loaded_at_least_one_variable = 0;
 		while(read_data > 0)
@@ -547,23 +586,28 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 						pkg_name = strdup(val);
 						next_pkg_data = initialize_string_map(1);
 
-						next_package_matches = load_all_packages;
-						if(!next_package_matches)
+						next_package_matches = 0;
+						if(match_regex != NULL)
 						{
-							if(match_regex != NULL)
-							{
-								next_package_matches = regexec(match_regex, val, 0, NULL, 0) == 0  ? 1 : 0;
-							}
-							else
-							{
-								next_package_matches = get_string_map_element(matching_list, val) != NULL ?  1 : 0;
-							}
+							next_package_matches = regexec(match_regex, val, 0, NULL, 0) == 0  ? 1 : 0;
 						}
-						if(next_package_matches)
+						else if(matching_list != NULL)
 						{
-							set_string_map_element(matching_packages, val, strdup("D"));
-							set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup(NOT_INSTALLED_STRING) : strdup(dest_name)  ));
-							if(pkg_src_id != NULL && (save_src_id || load_variable_def == LOAD_ALL_PKG_VARIABLES))
+							next_package_matches = get_string_map_element(matching_list, val) != NULL ?  1 : 0;
+						}
+						include_next_package = next_package_matches || include_all_packages ;
+
+						if(include_next_package)
+						{
+							if(next_package_matches && matching_packages != NULL)
+							{
+								set_string_map_element(matching_packages, val, strdup("D"));
+							}
+							if(include_variable("Install-Destination", next_package_matches, include_next_package, load_variable_def, load_variable_map))
+							{
+								set_string_map_element(next_pkg_data, "Install-Destination", (dest_name == NULL ? strdup(NOT_INSTALLED_STRING) : strdup(dest_name)  ));
+							}
+							if(pkg_src_id != NULL && include_variable("Source-ID", next_package_matches, include_next_package, load_variable_def, load_variable_map))
 							{
 								set_string_map_element(next_pkg_data, "Source-ID", strdup(pkg_src_id));
 							}
@@ -573,24 +617,19 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					{
 						pkg_version = strdup(val);
 					}
-					else if(load_variable_def == LOAD_ALL_PKG_VARIABLES || (var_type = (char*)get_string_map_element(load_variable_map, key)) != NULL)
+					else if(include_variable(key, next_package_matches, include_next_package, load_variable_def, load_variable_map))
 					{
-						if(load_variable_def == LOAD_ALL_PKG_VARIABLES || var_type[0] == 'A' || next_package_matches == 1)
+						loaded_at_least_one_variable = 1;
+						void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
+						free_if_not_null(old_val);
+						last_variable = strdup(key);
+						
+						if(strcmp(key, "Status") == 0 && include_variable("User-Installed", next_package_matches, include_next_package, load_variable_def, load_variable_map))
 						{
-							loaded_at_least_one_variable = 1;
-							void* old_val = set_string_map_element(next_pkg_data, key, strdup(val));
-							if(old_val != NULL) { free(old_val); }
-							last_variable = strdup(key);
-							
-							if(load_variable_def == LOAD_ALL_PKG_VARIABLES  || save_user_installed)
-							{
-								if(strcmp(key, "Status") == 0)
-								{
-									char* is_user = strstr(val, " user ") != NULL ? strdup("true") : strdup("false");
-									set_string_map_element(next_pkg_data, "User-Installed", is_user);
-								}
-							}
+							char* is_user = strstr(val, " user ") != NULL ? strdup("true") : strdup("false");
+							set_string_map_element(next_pkg_data, "User-Installed", is_user);
 						}
+						
 					}
 				}
 				else if( (next_line[0] == ' ' || next_line[0] == '\t') && tmp_last_variable != NULL ) //no ':' separator in line

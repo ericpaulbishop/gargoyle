@@ -7,7 +7,7 @@ void do_list(opkg_conf* conf, int installed_only, int format)
 	unsigned long num_destroyed;
 
 
-	load_all_package_data(conf, package_data, matching_packages, NULL, 1, LOAD_DESCRIPTIVE_PKG_VARIABLES, NULL );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_ALL, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
 

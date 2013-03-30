@@ -222,10 +222,31 @@ string_map* parse_parameters(int argc, char** argv)
 				set_string_map_element(parameters, "output-format", strdup(optarg));
 				break;
 			case 'v':
-				//package-variables
-				//expect comma/whitespace separated list
+				if(strlen(optarg) >0)
+				{
 
-				
+					unsigned long num_pieces=0;
+					char seps[] = {',', ';', ':', ' ', '\r', '\n', '\t' }; //include newlines to strip them off end of line
+					char** split_line = split_on_separators(optarg, seps, 7, -1, 0, &num_pieces);
+					if(num_pieces > 0)
+					{
+						string_map* package_variables = initialize_string_map(1); 
+						int piece_index;
+						for(piece_index=0;piece_index < num_pieces; piece_index++)
+						{
+							if(strlen(split_line[piece_index]) > 0)
+							{
+								set_string_map_element(package_variables, split_line[piece_index], strdup("D"));
+							}
+						}
+						if(package_variables->num_elements > 0)
+						{
+							set_string_map_element(parameters, "package-variables", package_variables);
+						}
+					}
+					free_null_terminated_string_array(split_line);
+				}
+				break;
 
 			case 'r': 
 				//matching-regex
