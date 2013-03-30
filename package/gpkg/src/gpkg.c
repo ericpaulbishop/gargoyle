@@ -47,13 +47,9 @@ int main(int argc, char** argv)
 	{
 		update(conf);
 	}
-	else if(strcmp(run_type, "list") == 0)
+	else if((strcmp(run_type, "list") == 0) || strcmp(run_type, "list-installed") == 0 || strcmp(run_type, "list_installed") == 0)
 	{
-		do_list(conf, 0, format);
-	}
-	else if(strcmp(run_type, "list-installed") == 0 || strcmp(run_type, "list_installed") == 0)
-	{
-		do_list(conf, 1, format);
+		do_list(conf, parameters, format);
 	}
 	else if(strcmp(run_type, "dest-info") == 0 || strcmp(run_type, "dest_info") == 0)
 	{
@@ -196,7 +192,7 @@ string_map* parse_parameters(int argc, char** argv)
 
 	int option_index = 0;
 	int c;
-	while ((c = getopt_long(argc, argv, "hevm", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "fwmd:l:t:o:rv:h", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
@@ -272,8 +268,9 @@ string_map* parse_parameters(int argc, char** argv)
 	set_string_map_element(parameters, "package-list", pkg_list);
 	for(option_index; option_index < argc; option_index++)
 	{
-		if(argv[option_index][0] != '-')
+		if(argv[option_index][0] != '-' && strcmp(argv[option_index], run_type) != 0)
 		{
+			printf("option index = %d, arg = %s\n", option_index, argv[option_index]);
 			if(expect_regex)
 			{
 				regex_t* packages_matching_regex = (regex_t*)malloc(sizeof(regex_t));
