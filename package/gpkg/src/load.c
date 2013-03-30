@@ -65,13 +65,12 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	
 	
 	//calculate total depends, total size, and will-fit if requested
-	unsigned long num_matching_packages;
-	char** sorted_matching_packages = get_string_map_keys(matching_packages, &num_matching_packages);
-	int match_index=0;
-	do_istr_sort(sorted_matching_packages, num_matching_packages);
-	int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
-	int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES ? 1 : 0;
-	int load_will_fit = load_variable_def == LOAD_ALL_PKG_VARIABLES && install_root != NULL ? 1 : 0;
+	unsigned long num_pkgs_to_recurse_on;
+	char** pkgs_to_recurse_on = get_string_map_keys( (load_variable_def == LOAD_ALL_PKG_VARIABLES || LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? package_data : matching_packages), &num_pkgs_to_recurse_on);
+
+	int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING ? 1 : 0;
+	int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING ? 1 : 0;
+	int load_will_fit = (load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING) && install_root != NULL ? 1 : 0;
 	if(package_variables != NULL && load_variable_def != LOAD_ALL_PKG_VARIABLES )
 	{
 		load_depends  = get_string_map_element(package_variables, "Required-Depends") != NULL ? 1 : 0;
@@ -90,9 +89,10 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	//recursively load depends/size/will_fit
 	if(load_depends || load_size || load_will_fit)
 	{
-		for(match_index=0; sorted_matching_packages[match_index] != NULL ; match_index++)
+		int recurse_index;
+		for(recurse_index=0; pkgs_to_recurse_on[recurse_index] != NULL ; recurse_index++)
 		{
-			load_recursive_package_data_variables(package_data, sorted_matching_packages[match_index], load_size, load_will_fit, free_bytes);
+			load_recursive_package_data_variables(package_data, pkgs_to_recurse_on[recurse_index], load_size, load_will_fit, free_bytes);
 		}
 	}
 }
