@@ -16,12 +16,11 @@ char* escape_package_variable(char* var_def, char* var_name, int format)
 	}
 	else if(var_def != NULL)
 	{
-		char spacer[30];
+		char spacer[125];
 		int varlen =strlen(var_name);
 		int vari;
 		spacer[0] = '\n';
-		spacer[1] = '\t';
-		for(vari=2; vari < varlen+4; vari++)
+		for(vari=1; vari < varlen+3; vari++)
 		{
 			spacer[vari] = ' ';
 		}
@@ -222,7 +221,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, int format)
 							}
 							else
 							{
-								printf("\t%s: ", var_name);
+								printf("%s: ", var_name);
 							}
 
 
@@ -276,6 +275,11 @@ void do_print_info(opkg_conf* conf, string_map* parameters, int format)
 						else
 						{
 							char* str_var = escape_package_variable((char*)var_def, var_name, format);
+							if(strcmp(var_name, "Install-Destination") == 0 && strcmp((char*)var_def, NOT_INSTALLED_STRING) == 0)
+							{
+								free(str_var);
+								str_var = strdup("Not Installed");
+							}
 							if(format == OUTPUT_JAVASCRIPT)
 							{
 								printf("pkg_info[\"%s\"][\"%s\"]][\"%s\"] = \"%s\";\n", package_name, escaped_version, var_name, str_var );
