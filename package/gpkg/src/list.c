@@ -36,7 +36,7 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 
 	if(format == OUTPUT_JAVASCRIPT)
 	{
-		printf("pkg_info = [];\n");
+		printf("pkg_list = [];\n");
 	}
 	else if(format == OUTPUT_JSON)
 	{
@@ -51,19 +51,19 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 		string_map* pkg_info = get_package_current_or_latest(package_data, package_name, &is_currently_installed, &version);
 		if( (!installed_only) || is_currently_installed )
 		{
-			char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), format);
+			char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), "Description", format);
 			int print_description = (!installed_only) && description != NULL ? 1 : 0;
-			if(format == OUTPUT_HUMAN_READABLE)
+			if(format == OUTPUT_JAVASCRIPT)
 			{
-				printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
-			}
-			else if(format == OUTPUT_JAVASCRIPT)
-			{
-				printf("pkg_info[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
+				printf("pkg_list[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
 			}
 			else if(format == OUTPUT_JSON)
 			{
 				printf("\t\"%s\": [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"],\n");
+			}
+			else
+			{
+				printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
 			}
 			free_if_not_null(description);
 		}

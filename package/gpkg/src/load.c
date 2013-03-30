@@ -2,6 +2,7 @@
 #include "gpkg.h"
 
 int include_variable(char* var, int package_matches, int include_package, int load_variable_def, string_map* load_variable_map);
+int sort_version_cmp_internal(const void *a, const void *b);
 
 
 static FILE* __save_pkg_status_stream = NULL;
@@ -354,6 +355,22 @@ int compare_versions(char* v1, char* v2)
 		free_null_terminated_string_array(v2_split);
 	}
 	return ret;
+}
+
+
+
+/*  comparison functions for qsort */ 
+int sort_version_cmp_internal(const void *a, const void *b)
+{ 
+    const char **a_ptr = (const char **)a;
+    const char **b_ptr = (const char **)b;
+    return compare_versions((char*)*a_ptr, (char*)*b_ptr);
+}
+
+/* wrappers for qsort call */
+void sort_versions(char** version_arr, unsigned long version_arr_len)
+{
+	qsort(version_arr, version_arr_len, sizeof(char*), sort_version_cmp_internal);
 }
 
 

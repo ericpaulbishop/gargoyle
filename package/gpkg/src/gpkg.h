@@ -82,6 +82,10 @@ typedef struct opkg_conf_struct
 opkg_conf* load_conf(const char* conf_file_name);
 void free_conf(opkg_conf* conf);
 
+void sort_versions(char** version_arr, unsigned long version_arr_len);
+int compare_versions(char* v1, char* v2);
+
+
 
 /* package info load/save defs/prototypes */
 uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name);
@@ -142,7 +146,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 void do_list(opkg_conf* conf, string_map* parameters, int format);
 
 /* info.c */
-char* escape_package_variable(char* def, int format);
+char* escape_package_variable(char* var_def, char* var_name, int format);
 void do_print_dest_info(opkg_conf* conf, int format);
 void do_print_info(opkg_conf* conf, string_map* parameters, int format);
 
