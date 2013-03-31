@@ -398,14 +398,6 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "package-list") : NULL;
 	string_map* package_variables = parameters == NULL ? NULL : get_string_map_element(parameters, "package-variables");
 
-	if(match_regex == NULL)
-	{
-		printf("regex is null\n");
-	}
-	if(matching_list == NULL)
-	{
-		printf("matching_list is null\n");
-	}
 
 	if(load_variable_def < LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING || load_variable_def >  LOAD_ALL_PKG_VARIABLES )
 	{

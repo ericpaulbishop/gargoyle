@@ -55,6 +55,10 @@ int main(int argc, char** argv)
 	{
 		do_print_dest_info(conf, format);
 	}
+	else if(strcmp(run_type, "info") == 0)
+	{
+		do_print_info(conf, parameters, format);
+	}
 
 	return(0);
 
@@ -270,7 +274,6 @@ string_map* parse_parameters(int argc, char** argv)
 	{
 		if(argv[option_index][0] != '-' && strcmp(argv[option_index], run_type) != 0)
 		{
-			printf("option index = %d, arg = %s\n", option_index, argv[option_index]);
 			if(expect_regex)
 			{
 				regex_t* packages_matching_regex = (regex_t*)malloc(sizeof(regex_t));
