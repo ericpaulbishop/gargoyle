@@ -113,7 +113,15 @@ function resetData()
 			document.getElementById("wan_3g_container").style.display = "none";
 		}
 
-		setChildText("wireless_mode", wirelessMode);
+		if(wifi_status.toString().length == 0 && wirelessModeId != "disabled")
+		{
+			setChildText("wireless_mode", wirelessMode+" (disabled)");
+		}
+		else
+		{
+			setChildText("wireless_mode", wirelessMode);
+		}
+
 		if(wirelessModeId != "disabled")
 		{
 			var allWifiIfaceSections  = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
@@ -139,7 +147,7 @@ function resetData()
 							devBand = "A";
 						}
 					}
-					apSsids[devBand] = secSsid
+					if (apSsids[devBand] == null) apSsids[devBand] = secSsid
 				}
 				else
 				{
@@ -184,7 +192,7 @@ function resetData()
 				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : "SSID Joined by Client:"))
 				if(currentWirelessMacs.length > 0 && otherIsSta){ setChildText("wan_mac", currentWirelessMacs[0]); }
 			}
-			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "" );
+			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "-" );
 
 		}
 		else
@@ -211,5 +219,23 @@ function resetData()
 
 	setChildText("qos_upload", qosUploadStatus);
 	setChildText("qos_download", qosDownloadStatus);
-}
 
+	var portsColumns=['Port', 'Status'];
+	var idx;
+	var portsTableData = [];
+	if (ports.length > 0)
+	{
+		for(idx=0; idx < ports.length; idx++)
+		{
+			portsTableData.push( [ ports[idx][0], ports[idx][1] ] );
+		}
+
+		var portsTable=createTable(portsColumns, portsTableData, 'ports_table', false, false);
+		var tableContainer = document.getElementById('ports_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(portsTable);
+	}
+}

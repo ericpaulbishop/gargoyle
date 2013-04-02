@@ -7,7 +7,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js" -i network wireless qos_gargoyle system
+	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js table.js" -i network wireless qos_gargoyle system
 ?>
 
 <script>
@@ -85,6 +85,11 @@
 		echo "var wanDns=\""$(sed -e '/nameserver/!d; s#nameserver ##g' /tmp/resolv.conf.auto | sort | uniq )"\";"
 	fi
 
+	echo "var ports = new Array();"
+	/usr/lib/gargoyle/switchinfo.sh
+
+	echo "var wifi_status = new Array();"
+	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 ?>
 //-->
 </script>
@@ -115,9 +120,9 @@
 		<div>
 			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
- 		<div>
- 			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)</span>
- 		</div>
+		<div>
+			<span class='leftcolumn'>CPU Load Averages:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 minutes)</span>
+		</div>
 		<div class="internal_divider"></div>
 	</div>
 
@@ -162,6 +167,9 @@
 		</div>
 		<div>
 			<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class="rightcolumnonly"><div id="ports_table_container"></div></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>
