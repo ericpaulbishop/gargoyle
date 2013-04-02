@@ -597,7 +597,7 @@ function SetWifiStatus(shell_iwconfig) {
 		Wi_Fi = -1;
 	}
 	if (found_wifi_cron_tabs.length > 0 && timerMode > 0) { //this causes a display hiccup when there are crontabs on the router, hit reset button (scheduled) disappears, but there is still a schedule
-		var this_cron_hour = cloned_crontab_table[ current_time[3] + 1 ][current_time[1]];
+		var this_cron_hour = cloned_crontab_table[ current_time[3] ][current_time[1]];
 		if (this_cron_hour == 60 || this_cron_hour == 0) {
 			if (Wi_Fi > 0) {
 				setChildText("wlan_status", (this_cron_hour == 60 ? "active (scheduled)" : "active (not scheduled)") );

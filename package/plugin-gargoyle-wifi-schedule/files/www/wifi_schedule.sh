@@ -43,6 +43,7 @@ for (tab_idx in cron_data) {
 </style>
 
 <fieldset id="wifi_schedule">
+	<legend class="sectionheader">WiFi Schedule</legend>
 	<div id='wlan_stat'>
 		<label class='leftcolumn'>Wireless radio(s) status:</label>
 		<span class='rightcolumn' id='wlan_status'></span>
@@ -58,29 +59,28 @@ for (tab_idx in cron_data) {
 
 	<div class="internal_divider"></div>
 
-	<legend class="sectionheader">WiFi Schedule</legend>
-	<select id='timer_mode' onchange='SetTimerMode(this.value)'>
-		<option selected value='0'>Disable timer</option>
-		<option value='1'>Daily</option>
-		<option value='3'>Weekday + Sat/Sun</option>
-		<option value='7'>Weekly</option>
-	</select>
-
-	<br/>
-	<br/>
-
-	<div id="div_timer_increment" style="display:none;">
-		<label>Timer increment:</label>
-		<select id='timer_increment' onchange='SetTimerIncrement(this)'>
-			<option value='5'>5 minutes</option>
-			<option value='10'>10 minutes</option>
-			<option selected value='15'>15 minutes</option>
-			<option value='30'>30 minutes</option>
-			<option value='60'>60 minutes</option>
+	<div>
+		<label for="timer_mode" class="narrowleftcolumn">Timer Period:</label>
+		<select id="timer_mode" class="rightcolumn" onchange="SetTimerMode(this.value)">
+			<option selected="" value="0">Disable timer</option>
+			<option value="1">Daily</option>
+			<option value="3">Weekday + Sat/Sun</option>
+			<option value="7">Weekly</option>
 		</select>
+		<br />
+		<br />
+		<div id="div_timer_increment" style="display:none;">
+			<label for="timer_increment" class="narrowleftcolumn">Timer increment:</label>
+			<select id="timer_increment" onchange="SetTimerIncrement(this)">
+				<option value="5">5 minutes</option>
+				<option value="10">10 minutes</option>
+				<option selected="" value="15">15 minutes</option>
+				<option value="30">30 minutes</option>
+				<option value="60">60 minutes</option>
+			</select>
+		</div>
 	</div>
 	
-  	<!-- This is the 5+1+1 or weekly table -->
   	<div id="tabs">
 		<ul id="tab_ulist">
 		  <li id="tab_li_1" style="display:none;"></li>

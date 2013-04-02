@@ -36,4 +36,6 @@ v1.1.1	write temp crontabs to emptied file
 		opkg removal removes scheduled_wifi.sh crontabs
 		uci inject webpage after USB plugins
 		fixed issue of displaying wifi status during an hour where wifi goes up/down on XX minutes
+v1.1.2	fix correlating current time to schedule when displaying wifi status (off by 1 day)
+		minor beautification + move legend to top of fieldset
 */
