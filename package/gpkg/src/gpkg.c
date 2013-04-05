@@ -185,6 +185,7 @@ string_map* parse_parameters(int argc, char** argv)
 		{"output_format",           1, 0, 'o'},
 		{"matching-regex",          0, 0, 'r'},
 		{"matching_regex",          0, 0, 'r'},
+		{"regex",                   0, 0, 'r'},
 		{"package-variables",       1, 0, 'v'},
 		{"package_variables",       1, 0, 'v'},
 		{"help",                    0, 0, 'h'},
@@ -249,7 +250,7 @@ string_map* parse_parameters(int argc, char** argv)
 				break;
 
 			case 'r': 
-				//matching-regex
+				//--matching-regex, or just --regex
 				expect_regex = 1;
 				break;
 			case 'h':
@@ -266,13 +267,37 @@ string_map* parse_parameters(int argc, char** argv)
 	}
 
 
-	option_index = option_index  < 2 ? 2 : option_index;
 	
 	string_map* pkg_list = initialize_string_map(1);
 	set_string_map_element(parameters, "package-list", pkg_list);
-	for(option_index; option_index < argc; option_index++)
+	for(option_index=1; option_index < argc; option_index++)
 	{
-		if(argv[option_index][0] != '-' && strcmp(argv[option_index], run_type) != 0)
+		int option_str_len = strlen(argv[option_index]);
+		if(argv[option_index][0] == '-' && option_str_len > 1)
+		{
+			int has_arg=0;
+			int test_index;
+			const char* name;
+			const char* test_name = argv[option_index] + 1;
+			int is_long_opt=0;
+			if(argv[option_index][1] == '-')
+			{
+				test_name = argv[option_index] + 2;
+				is_long_opt = 1;
+			}
+			for(test_index=0; (name = (long_options[test_index]).name) != NULL ; test_index++)
+			{
+				if( (is_long_opt == 1 && strcmp(test_name, name) == 0) || (is_long_opt == 0 && test_name[0] == (long_options[test_index]).val) )
+				{
+					has_arg = (long_options[test_index]).has_arg;
+				}
+			}
+			if(has_arg)
+			{
+				option_index++;
+			}
+		}
+		else if(strcmp(argv[option_index], run_type) != 0)
 		{
 			if(expect_regex)
 			{
@@ -318,7 +343,6 @@ string_map* parse_parameters(int argc, char** argv)
 			exit(1);
 		}
 	}
-
 
 
 	return parameters;
