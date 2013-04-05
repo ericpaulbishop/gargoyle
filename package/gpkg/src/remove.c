@@ -90,15 +90,18 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 				{
 					if(strstr(dep_status, " ok ") != NULL)
 					{
-						char* old_el = set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
-						free_if_not_null(old_el);
-	
-						char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
-						set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
-						if(get_string_map_element(path_to_status_data, status_path) == NULL)
+						if(remove_orphaned_depends != REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST || safe_strcmp(rm_root_name, dep_root_name) == 0 )
 						{
-							set_string_map_element(path_to_status_data, status_path, initialize_string_map(1));
-							set_string_map_element(path_to_status_name, status_path, strdup(dep_root_name));
+							char* old_el = set_string_map_element(pkgs_to_maybe_remove, rm_dep_list[rm_dep_index], strdup("D"));
+							free_if_not_null(old_el);
+		
+							char* status_path =  dynamic_strcat(2, dep_root_path, "/usr/lib/opkg/status");
+							set_string_map_element(pkg_status_paths, rm_dep_list[rm_dep_index], status_path);
+							if(get_string_map_element(path_to_status_data, status_path) == NULL)
+							{
+								set_string_map_element(path_to_status_data, status_path, initialize_string_map(1));
+								set_string_map_element(path_to_status_name, status_path, strdup(dep_root_name));
+							}
 						}
 					}
 				}
@@ -195,7 +198,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 
 
 	/* remove orphaned dependencies if requested */
-	unsigned long  orphaned_deps_found = remove_orphaned_depends;
+	unsigned long  orphaned_deps_found = remove_orphaned_depends == REMOVE_NO_ORPHANED_DEPENDENCIES ? 0 : 1;
 	while(orphaned_deps_found > 0)
 	{
 

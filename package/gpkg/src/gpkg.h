@@ -30,8 +30,19 @@
 #endif
 
 
+
+
 #define FILE_PATH_LEN 1024
 #define DEFAULT_CONF_FILE_PATH "/etc/opkg.conf"
+
+
+
+#define REMOVE_NO_ORPHANED_DEPENDENCIES           0
+#define REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST 1
+#define REMOVE_ALL_ORPHANED_DEPENDENCIES          2
+
+
+
 
 #define LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_MATCHING  0  /* Parameter unused, load from parameter map */
 #define LOAD_MINIMAL_PKG_VARIABLES_FOR_MATCHING            1  /* Status, Depends, Size only */
@@ -46,6 +57,8 @@
 #define LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING         8
 
 #define LOAD_ALL_PKG_VARIABLES                             9  /* Everything */
+
+
 
 
 

@@ -17,12 +17,18 @@ int main(int argc, char** argv)
 	int force_overwrite_other_files  = get_string_map_element(parameters, "force-overwrite")         != NULL ? 1 : 0;
 	int force_overwrite_configs      = get_string_map_element(parameters, "force-overwrite-configs") != NULL ? 1 : 0;
 	int force_depends                = get_string_map_element(parameters, "force-depends")           != NULL ? 1 : 0;
+
+	int remove_orphaned_depends      = get_string_map_element(parameters, "autoremove")                    != NULL ? REMOVE_ALL_ORPHANED_DEPENDENCIES : REMOVE_NO_ORPHANED_DEPENDENCIES;
+	remove_orphaned_depends          = get_string_map_element(parameters, "autoremove-same-destination")   != NULL ? REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST : remove_orhpaned_depends;
+
 	char* install_root               = get_string_map_element(parameters, "install-destination");
 	install_root                     = install_root == NULL ? strdup("root") : install_root;
+
 	char* link_root                  = get_string_map_element(parameters, "link-destination");
 	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
 	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
 	string_map* pkgs                 = get_string_map_element(parameters, "package-list");
+	
 	char* format_str                 = get_string_map_element(parameters, "output-format");
 	int format                       = OUTPUT_HUMAN_READABLE;
 	if(format_str != NULL)
@@ -37,7 +43,7 @@ int main(int argc, char** argv)
 	}
 	else if(strcmp(run_type, "remove") == 0)
 	{
-		do_remove(conf, pkgs, !force_overwrite_configs, 0, force_depends, 1);
+		do_remove(conf, pkgs, !force_overwrite_configs, remove_orphaned_depends, force_depends, 1);
 	}
 	else if(strcmp(run_type, "upgrade") == 0)
 	{
@@ -176,9 +182,14 @@ string_map* parse_parameters(int argc, char** argv)
 		{"force_maintainer",        0, 0, 'm'},
 		{"force-overwrite-configs", 0, 0, 'm'},
 		{"force_overwrite-configs", 0, 0, 'm'},
+		{"autoremove",              0, 0, 'a'},
+		{"autoremove-same-dest",    0, 0, 's'},
+		{"autoremove_same_dest",    0, 0, 's'},
 		{"dest",                    1, 0, 'd'},
 		{"link-dest",               1, 0, 'l'},
 		{"link_dest",               1, 0, 'l'},
+		{"only-dest",               1, 0, 'n'},
+		{"only_dest",               1, 0, 'n'},
 		{"tmp-dir",                 1, 0, 't'},
 		{"tmp_dir",                 1, 0, 't'},
 		{"output-format",           1, 0, 'o'},
@@ -197,7 +208,7 @@ string_map* parse_parameters(int argc, char** argv)
 
 	int option_index = 0;
 	int c;
-	while ((c = getopt_long(argc, argv, "fwmd:l:t:o:rv:h", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "fwmasd:l:n:t:o:rv:h", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
@@ -209,12 +220,21 @@ string_map* parse_parameters(int argc, char** argv)
 				break;
 			case 'm':
 				set_string_map_element(parameters, "force-overwrite-configs", strdup("D"));
+				break;			
+			case 'a':
+				set_string_map_element(parameters, "autoremove", strdup("D"));
+				break;
+			case 's':
+				set_string_map_element(parameters, "autoremove-same-destination", strdup("D"));
 				break;
 			case 'd':
 				set_string_map_element(parameters, "install-destination", strdup(optarg));
 				break;
 			case 'l':
 				set_string_map_element(parameters, "link-destination", strdup(optarg));
+				break;
+			case 'n':
+				set_string_map_element(parameters, "only-destination", strdup(optarg));
 				break;
 			case 't':
 				set_string_map_element(parameters, "tmp-dir", strdup(optarg));
