@@ -14,6 +14,16 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
+	//in order to test whether something depends on this pkg, we need to load recursive deps on all packages
+	unsigned long num_pkgs_to_recurse_on;
+	char** pkgs_to_recurse_on = get_string_map_keys(package_data, &num_pkgs_to_recurse_on);
+	int recurse_index;
+	for(recurse_index=0; pkgs_to_recurse_on[recurse_index] != NULL ; recurse_index++)
+	{
+		load_recursive_package_data_variables(package_data, pkgs_to_recurse_on[recurse_index], 1, 0, 0);
+	}
+
+
 
 	string_map* all_new_pkgs_map = initialize_string_map(1);
 	uint64_t combined_old_size = 0;
@@ -26,9 +36,6 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 		char* pkg_name = upgrade_pkg_list[upgrade_pkg_index];
 		char** new_version_criteria = get_string_map_element(pkgs, pkg_name);
 	
-
-		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
-
 
 		char* old_pkg_version = NULL;
 		char* new_pkg_version = NULL;
@@ -139,7 +146,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 		exit(1);
 	}
 	
-
+	free_package_data(package_data);
 	
 	do_remove(conf, pkgs, preserve_conf_files, 0, 1, 0);
 	do_install(conf, pkgs, install_root, link_root, 1, (!preserve_conf_files), 0, NULL);
