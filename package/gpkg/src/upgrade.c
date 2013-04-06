@@ -4,12 +4,28 @@
 #include "gpkg.h"
 
 
-void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root, char* link_root)
+void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root_name, char* link_root)
 {
+
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
 	unsigned long num_destroyed;
-	
+
+	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
+	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
+
+
+	char* test_dir  = dynamic_strcat(2, (overlay_path != NULL ? overlay_path : install_root_path), "/usr/lib/opkg/info");
+	if(!create_dir_and_test_writable(test_dir))
+	{
+		fprintf(stderr, "ERROR: Specified upgrade destination is not writable, exiting\n");
+		exit(1);
+	}
+	free(test_dir);
+
+
+
+
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
 	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
@@ -47,7 +63,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 		char* old_install_root = get_string_map_element(old_pkg_data, "Install-Destination");
 
 	
-		if(old_pkg_is_current == 0 || install_root == NULL)
+		if(old_pkg_is_current == 0 || install_root_name == NULL)
 		{
 			fprintf(stderr, "ERROR: package %s is not currently installed, cannot upgrade. Try installing it instead.\n", pkg_name);
 			exit(1);
@@ -78,7 +94,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 		{
 			sscanf(old_size_str, SCANFU64, &next_old_size);
 		}
-		if(strcmp(old_install_root, install_root) == 0)
+		if(strcmp(old_install_root, install_root_name) == 0)
 		{
 			combined_old_size = combined_old_size + next_old_size;
 		}
@@ -139,7 +155,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 		}
 	}
 	uint64_t additional_space_required = combined_old_size > combined_new_size ? 0 : combined_new_size - combined_old_size;
-	uint64_t space_available = destination_bytes_free(conf, install_root);
+	uint64_t space_available = destination_bytes_free(conf, install_root_name);
 	if(space_available <= additional_space_required)
 	{
 		fprintf(stderr, "ERROR: Not enough space (have " SCANFU64 " bytes, need " SCANFU64 " bytes) to upgrade specified packages to latest versions, cannot upgrade\n", space_available, additional_space_required );
@@ -149,7 +165,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 	free_package_data(package_data);
 	
 	do_remove(conf, pkgs, preserve_conf_files, 0, 1, 0);
-	do_install(conf, pkgs, install_root, link_root, 1, (!preserve_conf_files), 0, NULL);
+	do_install(conf, pkgs, install_root_name, link_root, 1, (!preserve_conf_files), 0, NULL);
 
 }
 

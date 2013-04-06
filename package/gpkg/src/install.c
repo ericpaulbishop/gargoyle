@@ -2,6 +2,24 @@
 
 #include "gpkg.h"
 
+int create_dir_and_test_writable(char* dir)
+{
+	int success;
+	FILE* test_file = NULL;
+	char* test_path = dynamic_strcat(2, dir, "/tmp.gpkg.write.test.tmp");
+	mkdir_p(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
+	test_file = fopen(test_path, "w");
+	success = test_file == NULL ? 0 : 1;
+	if(test_file != NULL)
+	{ 
+		fclose(test_file);
+       		rm_r(test_path);
+	}
+	free(test_path);
+
+	return success;
+}
+
 //void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
 void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
 {
@@ -12,6 +30,19 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
 	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
+
+
+	char* test_dir  = dynamic_strcat(2, (overlay_path != NULL ? overlay_path : install_root_path), "/usr/lib/opkg/info");
+	if(!create_dir_and_test_writable(test_dir))
+	{
+		fprintf(stderr, "ERROR: Specified install destination is not writable, exiting\n");
+		exit(1);
+	}
+	free(test_dir);
+
+	
+
+
 
 	if(install_root_path == NULL)
 	{

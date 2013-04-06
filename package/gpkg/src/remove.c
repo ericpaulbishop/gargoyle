@@ -48,9 +48,8 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
 
 
-
 		/* error checking before we start install */
-		if(rm_pkg_data == NULL || rm_status == NULL)
+		if(rm_pkg_data == NULL || rm_status == NULL || rm_root_path == NULL)
 		{
 			fprintf(stderr, "ERROR: No package named %s found, cannot uninstall\n\n", pkg_name);
 			exit(1);
@@ -59,6 +58,11 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		{
 			fprintf(stderr, "WARNING: Package %s not installed, cannot uninstall\n\n", pkg_name);
 			set_string_map_element(uninstalled_pkgs_to_ignore, pkg_name, strdup("D"));
+		}
+		else if(!create_dir_and_test_writable(rm_root_path))
+		{
+			fprintf(stderr, "ERROR: Package %s is installed to destination '%s' which is not writable, cannot uninstall\n", pkg_name, rm_root_name);
+			exit(1);
 		}
 		else
 		{
