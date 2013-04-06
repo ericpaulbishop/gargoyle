@@ -31,8 +31,9 @@ opkg_conf* load_conf(const char* conf_file_name)
 	}
 	while(read_data > 0)
 	{
+		char* tmp;
 		next_line[0] = '\0';
-		fgets(next_line, 1024, conf_file);
+		tmp = fgets(next_line, 1024, conf_file);
 		if(next_line[0] != '\0')
 		{
 			unsigned long num_pieces=0;

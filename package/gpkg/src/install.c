@@ -779,9 +779,10 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 				char* link_path = get_string_map_element(files_to_link, real_files[file_index]);
 				if(!path_exists(link_path))
 				{
+					int sym_success;
 					mkdir_p(link_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 					rm_r(link_path);
-					symlink(real_files[file_index], link_path);
+					sym_success = symlink(real_files[file_index], link_path);
 					fprintf(link_file, "%s\n", link_path);
 				}
 			}

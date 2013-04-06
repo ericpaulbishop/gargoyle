@@ -551,10 +551,11 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		while(read_data > 0)
 		{
 			char* tmp_last_variable = last_variable;
+			char* f;
 			last_variable = NULL;
 			read_data = 0;
 			next_line[0] = '\0';
-			fgets(next_line, 16384, data_file);
+			f = fgets(next_line, 16384, data_file);
 			if(next_line[0] != '\0')
 			{
 				// unlike for config, don't use split_line for parsing line. 
