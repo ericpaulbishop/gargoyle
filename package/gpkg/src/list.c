@@ -6,9 +6,10 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 	string_map* matching_packages     = initialize_string_map(1);
 	unsigned long num_destroyed;
 
-	
+	char* only_dest = get_string_map_element(parameters, "only-destination");
 	char* run_type = get_string_map_element(parameters, "run-type");
-	int installed_only = strcmp(run_type, "list") != 0 ? 1 : 0;
+	int installed_only = strcmp(run_type, "list") != 0 || only_dest != NULL ? 1 : 0;
+
 
 	int load_matching_only = get_string_map_element(parameters, "package-regex") != NULL ? 1 : 0;
 	string_map* test_match_list = NULL;
@@ -43,6 +44,9 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 		printf("{\n");
 	}
 
+
+
+
 	for(package_index=0;package_index < num_all_packages; package_index++)
 	{
 		int is_currently_installed;
@@ -51,21 +55,25 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 		string_map* pkg_info = get_package_current_or_latest(package_data, package_name, &is_currently_installed, &version);
 		if( (!installed_only) || is_currently_installed )
 		{
-			char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), "Description", format);
-			int print_description = (!installed_only) && description != NULL ? 1 : 0;
-			if(format == OUTPUT_JAVASCRIPT)
+			char* destination = get_string_map_element(pkg_info, "Install-Destination");
+			if(only_dest == NULL || safe_strcmp(only_dest, destination) == 0)
 			{
-				printf("pkg_list[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
+				char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), "Description", format);
+				int print_description = (!installed_only) && description != NULL ? 1 : 0;
+				if(format == OUTPUT_JAVASCRIPT)
+				{
+					printf("pkg_list[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
+				}
+				else if(format == OUTPUT_JSON)
+				{
+					printf("\t\"%s\": [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"],\n");
+				}
+				else
+				{
+					printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
+				}
+				free_if_not_null(description);
 			}
-			else if(format == OUTPUT_JSON)
-			{
-				printf("\t\"%s\": [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"],\n");
-			}
-			else
-			{
-				printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
-			}
-			free_if_not_null(description);
 		}
 		free_if_not_null(version);
 	}

@@ -212,7 +212,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 						char* cur_status = get_string_map_element(cur_info, "Status");
 						if(strstr(cur_status, " hold ") != NULL)
 						{
-							unsatisfied_dep_err = dynamic_strcat(11, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version, "and is marked as 'hold'");
+							unsatisfied_dep_err = dynamic_strcat(11, "ERROR: Dependency ", dep_name, " (", dep_def[0], " ", dep_def[1], ") of package ", pkg_name, " is installed,\n\t\tbut has incompatible version ", current_version, " and is marked as 'hold'");
 						}
 						else
 						{
