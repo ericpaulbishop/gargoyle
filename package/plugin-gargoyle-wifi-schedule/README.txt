@@ -1,6 +1,7 @@
 /*
 TODO:
 • handle (not currently used, but some user might manually edit) crontabs with   * / 2   1,2,3,4,5   1-4,5 hours or days
+• bring wifi up/down should timeout so the windoid doesn't spin endlessly
 
 ENHANCEMENTS:
 A disclosure triangle to show actual crontabs - I don't think is needed.
@@ -31,4 +32,10 @@ v1.1 	transition to storing positive/negative minutes in each table cell
 		added warnings & manual wifi buttons
 		added even day crontab to delete /tmp/cron-(datestamp).backup files older than 7 days
 		...and revert back to not saving full backup crontabs & deleting every 7 days; instead just 1 backup of system (non-wifi) crontabs
+v1.1.1	write temp crontabs to emptied file
+		opkg removal removes scheduled_wifi.sh crontabs
+		uci inject webpage after USB plugins
+		fixed issue of displaying wifi status during an hour where wifi goes up/down on XX minutes
+v1.1.2	fix correlating current time to schedule when displaying wifi status (off by 1 day)
+		minor beautification + move legend to top of fieldset
 */

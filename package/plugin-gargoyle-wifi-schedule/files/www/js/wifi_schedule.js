@@ -597,7 +597,7 @@ function SetWifiStatus(shell_iwconfig) {
 		Wi_Fi = -1;
 	}
 	if (found_wifi_cron_tabs.length > 0 && timerMode > 0) { //this causes a display hiccup when there are crontabs on the router, hit reset button (scheduled) disappears, but there is still a schedule
-		var this_cron_hour = cloned_crontab_table[ current_time[3] + 1 ][current_time[1]];
+		var this_cron_hour = cloned_crontab_table[ current_time[3] ][current_time[1]];
 		if (this_cron_hour == 60 || this_cron_hour == 0) {
 			if (Wi_Fi > 0) {
 				setChildText("wlan_status", (this_cron_hour == 60 ? "active (scheduled)" : "active (not scheduled)") );
@@ -605,7 +605,7 @@ function SetWifiStatus(shell_iwconfig) {
 				setChildText("wlan_status", (this_cron_hour == 60 ? "disabled (not scheduled)" : "disabled (scheduled)") );
 			}
 		} else { //minutes on the hour
-			if (acell.value > 0) {
+			if (this_cron_hour > 0) {
 				if (Wi_Fi > 0) {
 					setChildText("wlan_status", (this_cron_hour > current_time[2] ? "active (scheduled)" : "active (not scheduled)") );
 				} else {
@@ -727,8 +727,9 @@ function saveChanges() { 	//follow reboot.sh somewhat
 	setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
 	commands.push("mkdir -p /etc/crontabs"); //should fail gracefully
 	commands.push("touch /etc/crontabs/root"); //no harm, no foul
-	commands.push("cat /etc/crontabs/root | grep -v -e '" + garCronWIFI + "' >  /tmp/cron.backup");
-
+	commands.push("cat /etc/crontabs/root | grep -v -e '" + garCronWIFI + "' > /tmp/cron.backup");
+	commands.push("cat /dev/null > /tmp/cron.tmp");
+	
 	//these are pre-existing non-WiFi-schedule crontabs
 	for (var i=0; i < stripped_cron_tabs.length; i++) {
 		commands.push("echo \'" + stripped_cron_tabs[i] + "\' >> /tmp/cron.tmp");

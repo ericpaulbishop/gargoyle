@@ -1458,3 +1458,23 @@ td.initd_table_column_6
 	border-right:1px solid black;
 }
 
+td.bandwidth_table_column_1
+{
+	text-align:right;
+	border:1px solid black;
+}
+td.bandwidth_table_column_2
+{
+	text-align:right;
+	border:1px solid black;
+}
+td.bandwidth_table_column_3
+{
+	text-align:right;
+	border:1px solid black;
+}
+td.bandwidth_table_column_4
+{
+	text-align:right;
+	border:1px solid black;
+}
