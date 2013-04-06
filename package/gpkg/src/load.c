@@ -823,8 +823,23 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						{
 							if(dep_list[dep_index+1][0] == '(' )
 							{
-								dep_def = alloc_depend_def(dep_list[dep_index+1]);
-								dep_index++;
+								int last_part_inc=1;
+								for(last_part_inc=1;  dep_list[dep_index+last_part_inc] != NULL  && dep_list[dep_index+last_part_inc][ strlen(dep_list[dep_index+last_part_inc])-1] != ')'; last_part_inc++) ;
+								if(dep_list[dep_index+last_part_inc] != NULL && dep_list[dep_index+last_part_inc][ strlen(dep_list[dep_index+last_part_inc])-1] == ')' )
+								{
+									char* def_str = strdup("");
+									int last_part_inc_index;
+									for(last_part_inc_index=1; last_part_inc_index <= last_part_inc; last_part_inc_index++)
+									{
+										char* tmp_def_str=dynamic_strcat(2, def_str, dep_list[dep_index+last_part_inc_index]);
+										free(def_str);
+										def_str = tmp_def_str;									
+									}
+
+									dep_def = alloc_depend_def(def_str);
+									free(def_str);
+									dep_index= dep_index+(last_part_inc);
+								}
 							}
 						}
 						dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;

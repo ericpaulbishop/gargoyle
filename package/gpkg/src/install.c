@@ -398,8 +398,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	{
 		printf("Finished removing partially installed packages.\n\n");
 	}
-
-	
 }
 
 

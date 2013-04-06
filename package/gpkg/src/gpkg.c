@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 	}
 	else if(strcmp(run_type, "info") == 0)
 	{
-		do_print_info(conf, parameters, format);
+		do_print_info(conf, parameters, install_root, format);
 	}
 
 	return(0);

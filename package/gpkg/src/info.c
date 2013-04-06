@@ -87,7 +87,7 @@ void do_print_dest_info(opkg_conf* conf, int format)
 
 
 
-void do_print_info(opkg_conf* conf, string_map* parameters, int format)
+void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, int format)
 {
 	string_map* package_data          = initialize_string_map(1);
 	string_map* matching_packages     = initialize_string_map(1);
@@ -116,7 +116,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, int format)
 	load_type      = (!load_matching_only) && have_package_vars ? LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL     : load_type;
 	load_type      = load_matching_only && have_package_vars    ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 
-	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, NULL );
+	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root );
 	
 	unsigned long num_packages;
 	char** sorted_packages = get_string_map_keys( (load_matching_only ? matching_packages : package_data), &num_packages);
