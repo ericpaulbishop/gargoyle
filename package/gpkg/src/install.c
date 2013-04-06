@@ -321,6 +321,10 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	{
 		printf("Preparing to install the following packages, which will require " SCANFU64 " bytes:\n\t%s\n\n", combined_size, all_pkg_list_str);
 	}
+	else
+	{
+		fprintf(stderr, "No packages to install.\n\n");
+	}
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
@@ -439,7 +443,10 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	save_package_data_as_status_file(install_root_status, install_root_status_path);
 	if(!err)
 	{
-		printf("Installation of packages successful.\n\n");
+		if(all_pkg_list_str != NULL)
+		{
+			printf("Installation of packages successful.\n\n");
+		}
 	}
 	else
 	{
