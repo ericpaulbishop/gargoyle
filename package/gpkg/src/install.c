@@ -21,7 +21,7 @@ int create_dir_and_test_writable(char* dir)
 }
 
 //void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
-void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_root)
+void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, int force_reinstall, char* tmp_root)
 {
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
@@ -249,11 +249,27 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
 			exit(1);
 		}
-		if(install_status == NULL || strstr(install_status, " installed") != NULL)
+		if(strstr(install_status, " installed") != NULL)
 		{
-			fprintf(stderr, "WARNING: Package %s is already installed, ignoring\n\n", pkg_name);
-			char** old_el = remove_string_map_element(install_pkgs_map, pkg_name);
-			if(old_el != NULL){ free_null_terminated_string_array(old_el); };
+			if(force_reinstall)
+			{
+				fprintf(stderr, "WARNING: Package %s is already installed, forcing removal and reinstallation\n\n", pkg_name);
+				free_package_data(package_data);
+				string_map* rm_pkg = initialize_string_map(1);
+				set_string_map_element(rm_pkg, pkg_name, alloc_depend_def(NULL));
+				do_remove(conf, rm_pkg, (overwrite_config ? 0 : 1), 0, 1, 0);
+				
+				//restart install
+				return do_install(conf, pkgs, install_root_name, link_root_name, is_upgrade, overwrite_config, overwrite_other_package_files, force_reinstall, tmp_root);
+				
+			}
+			else
+			{
+				fprintf(stderr, "WARNING: Package %s is already installed, ignoring\n", pkg_name);
+				fprintf(stderr, "         Use --force-reinstall to force reinstallation\n\n");
+				char** old_el = remove_string_map_element(install_pkgs_map, pkg_name);
+				if(old_el != NULL){ free_null_terminated_string_array(old_el); };
+			}
 
 		}
 

@@ -17,6 +17,7 @@ int main(int argc, char** argv)
 	int force_overwrite_other_files  = get_string_map_element(parameters, "force-overwrite")         != NULL ? 1 : 0;
 	int force_overwrite_configs      = get_string_map_element(parameters, "force-overwrite-configs") != NULL ? 1 : 0;
 	int force_depends                = get_string_map_element(parameters, "force-depends")           != NULL ? 1 : 0;
+	int force_reinstall              = get_string_map_element(parameters, "force-reinstall")         != NULL ? 1 : 0;
 
 	int remove_orphaned_depends      = get_string_map_element(parameters, "autoremove")                    != NULL ? REMOVE_ALL_ORPHANED_DEPENDENCIES : REMOVE_NO_ORPHANED_DEPENDENCIES;
 	remove_orphaned_depends          = get_string_map_element(parameters, "autoremove-same-destination")   != NULL ? REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST : remove_orphaned_depends;
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
 	if(strcmp(run_type, "install") == 0)
 	{
 		printf("calling install\n");
-		do_install(conf, pkgs, install_root, link_root, 0, force_overwrite_configs, force_overwrite_other_files, tmp_root);
+		do_install(conf, pkgs, install_root, link_root, 0, force_overwrite_configs, force_overwrite_other_files, force_reinstall, tmp_root);
 	}
 	else if(strcmp(run_type, "remove") == 0)
 	{
@@ -184,6 +185,8 @@ string_map* parse_parameters(int argc, char** argv)
 		{"force_maintainer",        0, 0, 'm'},
 		{"force-overwrite-configs", 0, 0, 'm'},
 		{"force_overwrite-configs", 0, 0, 'm'},
+		{"force-reinstall",         0, 0, 'e'},
+		{"force_reinstall",         0, 0, 'e'},
 		{"autoremove",              0, 0, 'a'},
 		{"autoremove-same-dest",    0, 0, 's'},
 		{"autoremove_same_dest",    0, 0, 's'},
@@ -210,7 +213,7 @@ string_map* parse_parameters(int argc, char** argv)
 
 	int option_index = 0;
 	int c;
-	while ((c = getopt_long(argc, argv, "fwmasd:l:n:t:o:rv:h", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "fwmeasd:l:n:t:o:rv:h", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
@@ -222,7 +225,11 @@ string_map* parse_parameters(int argc, char** argv)
 				break;
 			case 'm':
 				set_string_map_element(parameters, "force-overwrite-configs", strdup("D"));
-				break;			
+				break;	
+			case 'e':
+				set_string_map_element(parameters, "force-reinstall", strdup("D"));
+				break;
+
 			case 'a':
 				set_string_map_element(parameters, "autoremove", strdup("D"));
 				break;
