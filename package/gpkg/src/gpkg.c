@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	int force_depends                = get_string_map_element(parameters, "force-depends")           != NULL ? 1 : 0;
 
 	int remove_orphaned_depends      = get_string_map_element(parameters, "autoremove")                    != NULL ? REMOVE_ALL_ORPHANED_DEPENDENCIES : REMOVE_NO_ORPHANED_DEPENDENCIES;
-	remove_orphaned_depends          = get_string_map_element(parameters, "autoremove-same-destination")   != NULL ? REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST : remove_orhpaned_depends;
+	remove_orphaned_depends          = get_string_map_element(parameters, "autoremove-same-destination")   != NULL ? REMOVE_ORPHANED_DEPENDENCIES_IN_SAME_DEST : remove_orphaned_depends;
 
 	char* install_root               = get_string_map_element(parameters, "install-destination");
 	install_root                     = install_root == NULL ? strdup("root") : install_root;
@@ -37,8 +37,10 @@ int main(int argc, char** argv)
 		format = strcmp(format_str, "js") == 0 || strcmp(format_str, "javascript") == 0 ? OUTPUT_JAVASCRIPT : format;
 	}
 
+
 	if(strcmp(run_type, "install") == 0)
 	{
+		printf("calling install\n");
 		do_install(conf, pkgs, install_root, link_root, 0, force_overwrite_configs, force_overwrite_other_files, tmp_root);
 	}
 	else if(strcmp(run_type, "remove") == 0)

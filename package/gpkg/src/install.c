@@ -10,7 +10,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	unsigned long num_destroyed;
 
 
-
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
 	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
 
@@ -240,14 +239,17 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	string_map* parameters = initialize_string_map(1);
 	matching_packages = initialize_string_map(1);
 	set_string_map_element(parameters, "package-list", install_pkgs_map);
+	
 	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name);
-	install_pkg_list = get_string_map_keys(package_data, &install_pkg_list_len);
+	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
+
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 
 	char* all_pkg_list_str = join_strs(", ", install_pkg_list, install_pkg_list_len, 0, 0); 
 	uint64_t combined_size = 0;
 	int pkg_index;
+
 
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
@@ -282,7 +284,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, install_root_name);
 	}
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-
 
 
 
@@ -413,7 +414,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
 	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
-	char* link_root_path            = link_to_root != NULL ? get_string_map_element(conf->dest_names, link_to_root) : NULL;
+	char* link_root_path            = link_to_root != NULL && safe_strcmp(link_to_root, install_root_name) != 0 ? get_string_map_element(conf->dest_names, link_to_root) : NULL;
 	char* base_url = NULL;
 	
 	/* variables that may need to be freed */
