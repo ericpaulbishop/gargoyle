@@ -89,7 +89,7 @@
 	/usr/lib/gargoyle/switchinfo.sh
 
 	echo "var wifi_status = new Array();"
-	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
+	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 ?>
 //-->
 </script>
