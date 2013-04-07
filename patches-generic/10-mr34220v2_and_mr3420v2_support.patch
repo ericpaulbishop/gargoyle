@@ -220,3 +220,23 @@ Index: a/tools/firmware-utils/src/mktplinkfw.c
  		.id		= "TL-WA701Nv1",
  		.hw_id		= HWID_TL_WA701N_V1,
  		.hw_rev		= 1,
+--- a/target/linux/ar71xx/base-files/lib/ar71xx.sh	2013-04-07 00:53:02.396097608 -0400
++++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh	2013-04-07 02:19:40.290261995 -0400
+@@ -363,7 +363,7 @@
+ 	*TL-WR741ND)
+ 		name="tl-wr741nd"
+ 		;;
+-	*"TL-WR741ND v4")
++	*"TL-WR741ND v4"*)
+ 		name="tl-wr741nd-v4"
+ 		;;
+ 	*"TL-WR841N v1")
+@@ -372,7 +372,7 @@
+ 	*"TL-WR841N/ND v7")
+ 		name="tl-wr841n-v7"
+ 		;;
+-	*"TL-WR841N/ND v8")
++	*"TL-WR841N/ND v8"*)
+ 		name="tl-wr841n-v8"
+ 		;;
+ 	*TL-WR941ND)
