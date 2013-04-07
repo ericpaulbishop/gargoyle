@@ -1,0 +1,222 @@
+Index: a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr841n-v8.c
+===================================================================
+--- a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr841n-v8.c	(revision 35052)
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr841n-v8.c	(working copy)
+@@ -8,6 +8,9 @@
+  *  by the Free Software Foundation.
+  */
+ 
++#include "dev-usb.h" 
++#include <linux/gpio.h>
++
+ #include <linux/platform_device.h>
+ 
+ #include <asm/mach-ath79/ath79.h>
+@@ -32,7 +35,7 @@
+ 
+ #define TL_WR841NV8_GPIO_BTN_RESET	17
+ #define TL_WR841NV8_GPIO_SW_RFKILL	16
+-
++#define TL_WR841NV8_GPIO_USB_POWER	4
+ #define TL_WR841NV8_KEYS_POLL_INTERVAL	20	/* msecs */
+ #define TL_WR841NV8_KEYS_DEBOUNCE_INTERVAL (3 * TL_WR841NV8_KEYS_POLL_INTERVAL)
+ 
+@@ -111,6 +114,13 @@
+ 					ARRAY_SIZE(tl_wr841n_v8_gpio_keys),
+ 					tl_wr841n_v8_gpio_keys);
+ 
++	/* enable power for the USB port */
++	gpio_request(TL_WR841NV8_GPIO_USB_POWER, "USB power");
++	gpio_direction_input(TL_WR841NV8_GPIO_USB_POWER);
++
++	ath79_register_usb();
++	/* END for the USB port */
++
+ 	ath79_register_m25p80(&tl_wr841n_v8_flash_data);
+ 
+ 	ath79_setup_ar934x_eth_cfg(AR934X_ETH_CFG_SW_PHY_SWAP);
+@@ -135,5 +145,5 @@
+ 	ath79_register_wmac(ee, mac);
+ }
+ 
+-MIPS_MACHINE(ATH79_MACH_TL_WR841N_V8, "TL-WR841N-v8", "TP-LINK TL-WR841N/ND v8",
++MIPS_MACHINE(ATH79_MACH_TL_WR841N_V8, "TL-WR841N-v8", "TP-LINK TL-MR3420 v2 | TP-LINK TL-WR841N/ND v8 (3G)",
+ 	     tl_wr841n_v8_setup);
+Index: a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr741nd-v4.c
+===================================================================
+--- a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr741nd-v4.c	(revision 35052)
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr741nd-v4.c	(working copy)
+@@ -13,6 +13,7 @@
+ #include <asm/mach-ath79/ath79.h>
+ #include <asm/mach-ath79/ar71xx_regs.h>
+ 
++#include "dev-usb.h"
+ #include "common.h"
+ #include "dev-eth.h"
+ #include "dev-gpio-buttons.h"
+@@ -120,6 +121,7 @@
+ 					ARRAY_SIZE(tl_wr741ndv4_gpio_keys),
+ 					tl_wr741ndv4_gpio_keys);
+ 
++	ath79_register_usb();
+ 	ath79_register_m25p80(&tl_wr741ndv4_flash_data);
+ 	ath79_init_mac(ath79_eth0_data.mac_addr, mac, 1);
+ 	ath79_init_mac(ath79_eth1_data.mac_addr, mac, -1);
+@@ -132,4 +134,4 @@
+ }
+ 
+ MIPS_MACHINE(ATH79_MACH_TL_WR741ND_V4, "TL-WR741ND-v4",
+-	     "TP-LINK TL-WR741ND v4", tl_wr741ndv4_setup);
++	     "TP-LINK TL-MR3220 v2 | TP-LINK TL-WR741ND v4 (3G)", tl_wr741ndv4_setup);
+Index: a/target/linux/ar71xx/image/Makefile
+===================================================================
+--- a/target/linux/ar71xx/image/Makefile	(revision 35052)
++++ b/target/linux/ar71xx/image/Makefile	(working copy)
+@@ -848,8 +848,7 @@
+ 
+ $(eval $(call SingleProfile,TPLINKOLD,$(fs_squash),TLWR841NV15,tl-wr841nd-v1.5,TL-WR841N-v1.5,ttyS0,115200,0x08410002,2,4M))
+ 
+-$(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLMR3220,tl-mr3220-v1,TL-MR3220,ttyS0,115200,0x32200001,1,4M))
+-$(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLMR3420,tl-mr3420-v1,TL-MR3420,ttyS0,115200,0x34200001,1,4M))
++
+ $(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLWA701,tl-wa701n-v1,TL-WA901ND,ttyS0,115200,0x07010001,1,4M))
+ $(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLWA7510NV1,tl-wa7510n,TL-WA7510N,ttyS0,115200,0x75100001,1,4M))
+ $(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLWA901NV1,tl-wa901nd-v1,TL-WA901ND,ttyS0,115200,0x09010001,1,4M))
+@@ -869,11 +868,12 @@
+ $(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLWR1043,tl-wr1043nd-v1,TL-WR1043ND,ttyS0,115200,0x10430001,1,8M))
+ 
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR11U,tl-mr11u-v1,TL-MR11U,ttyATH0,115200,0x00110101,1,4Mlzma))
+-$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3020,tl-mr3020-v1,TL-MR3020,ttyATH0,115200,0x30200001,1,4Mlzma))
+-$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3040,tl-mr3040-v1,TL-MR3040,ttyATH0,115200,0x30400001,1,4Mlzma))
++
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR703,tl-wr703n-v1,TL-WR703N,ttyATH0,115200,0x07030101,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR740NV4,tl-wr740n-v4,TL-WR741ND-v4,ttyATH0,115200,0x07400004,1,4Mlzma))
++########### referensi mr3220 v.2
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR741NV4,tl-wr741nd-v4,TL-WR741ND-v4,ttyATH0,115200,0x07410004,1,4Mlzma))
++########### 
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR841NV8,tl-wr841n-v8,TL-WR841N-v8,ttyS0,115200,0x08410008,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR1041,tl-wr1041n-v2,TL-WR1041N-v2,ttyS0,115200,0x10410002,1,4Mlzma))
+ $(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLWR2543,tl-wr2543-v1,TL-WR2543N,ttyS0,115200,0x25430001,1,8Mlzma,-v 3.13.99))
+@@ -912,6 +912,19 @@
+ 
+ $(eval $(call SingleProfile,ZyXEL,$(fs_64k),NBG_460N_550N_550NH,nbg460n_550n_550nh,NBG460N,ttyS0,115200,NBG-460N))
+ 
++$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3020V1,tl-mr3020-v1,TL-MR3020,ttyATH0,115200,0x30200001,1,4Mlzma))
++$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3040V1,tl-mr3040-v1,TL-MR3040,ttyATH0,115200,0x30400001,1,4Mlzma))
++$(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLMR3220V1,tl-mr3220-v1,TL-MR3220,ttyS0,115200,0x32200001,1,4M))
++$(eval $(call SingleProfile,TPLINK,$(fs_64kraw),TLMR3420V1,tl-mr3420-v1,TL-MR3420,ttyS0,115200,0x34200001,1,4M))
++############ MR3220 V.2
++$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3220V2,tl-mr3220-v2,TL-WR741ND-v4,ttyATH0,115200,0x32200002,1,4Mlzma))
++$(eval $(call SingleProfile,TPLINK-LZMA,$(fs_64kraw),TLMR3420V2,tl-mr3420-v2,TL-WR841N-v8,ttyS0,115200,0x34200002,1,4Mlzma))
++############ 
++#----------------------tambahan
++$(eval $(call MultiProfile,TLMR3220,TLMR3220V1 TLMR3220V2))
++$(eval $(call MultiProfile,TLMR3420,TLMR3420V1 TLMR3420V2))
++$(eval $(call MultiProfile,TLMR3020,TLMR3020V1 TLMR3020V2))
++#----------------------
+ $(eval $(call MultiProfile,AP121,AP121_2M AP121_4M))
+ $(eval $(call MultiProfile,EWDORIN, EWDORINAP EWDORINRT))
+ $(eval $(call MultiProfile,TEW652BRP,TEW652BRP_FW TEW652BRP_RECOVERY))
+Index: a/target/linux/ar71xx/patches-3.3/610-MIPS-ath79-openwrt-machines.patch
+===================================================================
+--- a/target/linux/ar71xx/patches-3.3/610-MIPS-ath79-openwrt-machines.patch	(revision 35052)
++++ b/target/linux/ar71xx/patches-3.3/610-MIPS-ath79-openwrt-machines.patch	(working copy)
+@@ -206,7 +206,7 @@
+  config ATH79_MACH_PB44
+  	bool "Atheros PB44 reference board"
+  	select SOC_AR71XX
+-@@ -67,6 +147,456 @@ config ATH79_MACH_PB44
++@@ -67,6 +147,458 @@ config ATH79_MACH_PB44
+  	  Say 'Y' here if you want your kernel to support the
+  	  Atheros PB44 reference board.
+  
+@@ -555,6 +555,7 @@
+ +config ATH79_MACH_TL_WR741ND_V4
+ +	bool "TP-LINK TL-WR741ND v4 support"
+ +	select SOC_AR933X
+++	select ATH79_DEV_USB
+ +	select ATH79_DEV_ETH
+ +	select ATH79_DEV_GPIO_BUTTONS
+ +	select ATH79_DEV_LEDS_GPIO
+@@ -573,6 +574,7 @@
+ +config ATH79_MACH_TL_WR841N_V8
+ +	bool "TP-LINK TL-WR841N/ND v8 support"
+ +	select SOC_AR934X
+++	select ATH79_DEV_USB
+ +	select ATH79_DEV_ETH
+ +	select ATH79_DEV_GPIO_BUTTONS
+ +	select ATH79_DEV_LEDS_GPIO
+Index: a/target/linux/ar71xx/base-files/etc/uci-defaults/network
+===================================================================
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/network	(revision 35052)
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/network	(working copy)
+@@ -134,6 +134,12 @@
+ 	ucidef_add_switch_vlan "switch0" "1" "0 1 2 3 4"
+ 	;;
+ 
++tl-mr3420-v2)
++	ucidef_set_interfaces_lan_wan "eth1" "eth0"
++	ucidef_add_switch "switch0" "1" "1"
++	ucidef_add_switch_vlan "switch0" "1" "0 1 2 3 4"
++	;;
++
+ wrt160nl)
+ 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
+ 	ucidef_add_switch "eth0" "1" "1"
+@@ -187,6 +193,7 @@
+ tew-632brp |\
+ tew-712br |\
+ tl-mr3220 |\
++tl-mr3220-v2 |\
+ tl-mr3420 |\
+ tl-wr741nd |\
+ tl-wr741nd-v4 |\
+Index: a/tools/firmware-utils/src/mktplinkfw.c
+===================================================================
+--- a/tools/firmware-utils/src/mktplinkfw.c	(revision 35052)
++++ b/tools/firmware-utils/src/mktplinkfw.c	(working copy)
+@@ -32,7 +32,9 @@
+ #define HEADER_VERSION_V1	0x01000000
+ #define HWID_TL_MR3020_V1	0x30200001
+ #define HWID_TL_MR3220_V1	0x32200001
++#define HWID_TL_MR3220_V2	0x32200002
+ #define HWID_TL_MR3420_V1	0x34200001
++#define HWID_TL_MR3420_V2	0x34200002
+ #define HWID_TL_WA701N_V1	0x07010001
+ #define HWID_TL_WA7510N_V1	0x75100001
+ #define HWID_TL_WA901ND_V1	0x09010001
+@@ -173,6 +175,12 @@
+ 		.kernel_ep	= 0x80060000,
+ 		.rootfs_ofs	= 0x100000,
+ 	}, {
++		.id             = "16Mlzma",
++		.fw_max_len     = 0xfc0000,
++		.kernel_la      = 0x80060000,
++		.kernel_ep      = 0x80060000,
++		.rootfs_ofs     = 0x100000,
++	}, {
+ 		/* terminating entry */
+ 	}
+ };
+@@ -189,11 +197,21 @@
+ 		.hw_rev		= 1,
+ 		.layout_id	= "4M",
+ 	}, {
++		.id		= "TL-MR3220v2",
++		.hw_id		= HWID_TL_MR3220_V2,
++		.hw_rev		= 1,
++		.layout_id	= "4Mlzma",
++	}, {
+ 		.id		= "TL-MR3420v1",
+ 		.hw_id		= HWID_TL_MR3420_V1,
+ 		.hw_rev		= 1,
+ 		.layout_id	= "4M",
+ 	}, {
++		.id		= "TL-MR3420v2",
++		.hw_id		= HWID_TL_MR3420_V2,
++		.hw_rev		= 1,
++		.layout_id	= "4Mlzma",
++	}, {
+ 		.id		= "TL-WA701Nv1",
+ 		.hw_id		= HWID_TL_WA701N_V1,
+ 		.hw_rev		= 1,
