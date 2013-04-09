@@ -156,6 +156,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 		printf("{\n");
 	}
 
+	int printed_a_package=0;
 	for(package_index=0;package_index < num_packages; package_index++)
 	{
 		char* package_name = sorted_packages[package_index];
@@ -165,19 +166,14 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 		char* latest_version  = remove_string_map_element(all_versions, LATEST_VERSION_STRING);
 		unsigned long num_versions;
 		char** versions = get_string_map_keys(all_versions, &num_versions);
-		sort_versions(versions, num_versions);
+		if(num_versions > 1)
+		{
+			sort_versions(versions, num_versions);
+		}
 
+		int printed_package_start = 0;
 		if(num_versions > 0)
 		{
-			if(format == OUTPUT_JAVASCRIPT)
-			{
-				printf("pkg_info[\"%s\"] = [];\n", package_name);
-			}
-			else if(format == OUTPUT_JSON)
-			{
-				if(package_index >0){ printf(",\n"); }
-				printf("\t\"%s\": {\n", package_name);
-			}
 
 
 			int version_index;
@@ -186,7 +182,21 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 				string_map* pkg_info = get_string_map_element(all_versions, versions[version_index]);
 				char* destination = get_string_map_element(pkg_info, "Install-Destination");
 				if(only_dest == NULL || safe_strcmp(only_dest, destination) == 0)
-				{					
+				{
+					if(printed_package_start == 0)
+					{
+						if(format == OUTPUT_JAVASCRIPT)
+						{
+							printf("pkg_info[\"%s\"] = [];\n", package_name);
+						}
+						else if(format == OUTPUT_JSON)
+						{
+							if(package_index >0 && printed_a_package == 1){ printf(",\n"); }
+							printf("\t\"%s\": {\n", package_name);
+						}
+						printed_package_start = 1;
+						printed_a_package=1;
+					}					
 					char* escaped_version = escape_package_variable(versions[version_index], "Version", format);
 	
 					if(format == OUTPUT_JAVASCRIPT)
@@ -307,7 +317,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 								}
 								if(format == OUTPUT_JAVASCRIPT)
 								{
-									printf("pkg_info[\"%s\"][\"%s\"]][\"%s\"] = \"%s\";\n", package_name, escaped_version, var_name, str_var );
+									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escaped_version, var_name, str_var );
 								}
 								else if(format == OUTPUT_JSON)
 								{
@@ -336,7 +346,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 				}
 			}
 
-			if(format == OUTPUT_JSON)
+			if(format == OUTPUT_JSON && printed_package_start == 1)
 			{
 				printf("\n\t}");
 			}
@@ -349,7 +359,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 	}
 	if(format == OUTPUT_JSON)
 	{
-		printf("}\n");
+		printf("\n}\n");
 	}
 
 	free_null_terminated_string_array(sorted_packages);
