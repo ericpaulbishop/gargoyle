@@ -41,7 +41,6 @@ int main(int argc, char** argv)
 
 	if(strcmp(run_type, "install") == 0)
 	{
-		printf("calling install\n");
 		do_install(conf, pkgs, install_root, link_root, 0, force_overwrite_configs, force_overwrite_other_files, force_reinstall, tmp_root);
 	}
 	else if(strcmp(run_type, "remove") == 0)

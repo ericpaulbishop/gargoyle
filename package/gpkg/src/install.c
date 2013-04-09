@@ -29,7 +29,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	char* install_root_path = (char*)get_string_map_element(conf->dest_names, install_root_name);
-	char* overlay_path = (char*)get_string_map_element(conf->overlays, install_root_name);
+	char* overlay_path = NULL; // no special treatment of overlay, can be reenabled  by setting this variable here if we ever need it
 
 
 	char* test_dir  = dynamic_strcat(2, (overlay_path != NULL ? overlay_path : install_root_path), "/usr/lib/opkg/info");
@@ -621,7 +621,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	if(err == 0)
 	{
 		// Extract list file contaiing list of files to install
-		info_dir            = dynamic_strcat(2, fs_terminated_overlay_root, "/usr/lib/opkg/info");
+		info_dir            = dynamic_strcat(2, fs_terminated_overlay_root, "usr/lib/opkg/info");
 		control_name_prefix = dynamic_strcat(4, info_dir, "/", pkg_name, ".");
 		list_file_name      = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
 		
