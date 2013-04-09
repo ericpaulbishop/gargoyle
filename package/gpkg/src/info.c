@@ -104,6 +104,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 			load_matching_only = 1;
 		}
 	}
+	//printf("load matching only = %d\n", load_matching_only);
 
 	int have_package_vars = 0;
 	string_map* package_variables = get_string_map_element(parameters, "package-variables");
@@ -111,10 +112,11 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 	{
 		have_package_vars = package_variables->num_elements > 0 ? 1 : 0;
 	}
+	//printf("have package vars = %d\n", have_package_vars);
 
 	int load_type  = LOAD_ALL_PKG_VARIABLES;
 	load_type      = load_matching_only && (!have_package_vars) ? LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING       : load_type;
-	load_type      = (!load_matching_only) && have_package_vars ? LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL     : load_type;
+	load_type      = (!load_matching_only) && have_package_vars ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 	load_type      = load_matching_only && have_package_vars    ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 
 	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root );

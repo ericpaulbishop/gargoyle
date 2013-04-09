@@ -32,8 +32,45 @@
 # include "unlocked-io.h"
 #endif
 
-#ifdef _LIBC
+
+
+/* Endian detection yoinked from busybox */
+
+#if defined(__digital__) && defined(__unix__)
+# include <sex.h>
+# define __BIG_ENDIAN__ (BYTE_ORDER == BIG_ENDIAN)
+# define __BYTE_ORDER BYTE_ORDER
+#elif defined __FreeBSD__
+char *strchrnul(const char *s, int c);
+# include <sys/resource.h>	/* rlimit */
+# include <machine/endian.h>
+# define bswap_64 __bswap64
+# define bswap_32 __bswap32
+# define bswap_16 __bswap16
+# define __BIG_ENDIAN__ (_BYTE_ORDER == _BIG_ENDIAN)
+#elif !defined __APPLE__
+# include <byteswap.h>
 # include <endian.h>
+#endif
+
+#if defined(__BIG_ENDIAN__) && __BIG_ENDIAN__
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif __BYTE_ORDER == __BIG_ENDIAN
+# define WORDS_BIGENDIAN 1
+# define BB_BIG_ENDIAN 1
+# define BB_LITTLE_ENDIAN 0
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+# define BB_BIG_ENDIAN 0
+# define BB_LITTLE_ENDIAN 1
+#else
+# error "Can't determine endiannes"
+#endif
+
+
+
+
+#ifdef _LIBC
 # if __BYTE_ORDER == __BIG_ENDIAN
 #  define WORDS_BIGENDIAN 1
 # endif
@@ -472,6 +509,7 @@ char *file_md5sum_alloc(const char *file_name)
     FILE *file;
     char *md5sum_hex;
     unsigned char md5sum_bin[md5sum_bin_len];
+
 
     md5sum_hex = xcalloc(1, md5sum_hex_len + 1);
 

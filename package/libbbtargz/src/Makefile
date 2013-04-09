@@ -37,7 +37,6 @@ else
 endif
 
 
-
 all: libbbtargz
 
 libbbtargz: libbbtargz.$(SHLIB_EXT) libbbtargz.a

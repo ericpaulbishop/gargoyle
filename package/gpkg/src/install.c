@@ -606,6 +606,8 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		else if (safe_strcmp(md5sum, expected_md5sum) != 0)
 		{
 			fprintf(stderr, "ERROR: MD5Sum mismatch for %s package\n", pkg_name);
+			fprintf(stderr, "       Expected:   %s\n", expected_md5sum);
+			fprintf(stderr, "       Downloaded: %s\n\n", md5sum);
 			err = 1;
 		}
 		else
@@ -796,7 +798,11 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	if(err == 0)
 	{
 		//run postinst
-		err = run_script_if_exists(install_root_path, link_root_path, pkg_name, "postinst", (is_upgrade ? "upgrade" : "install") );
+		int warn = run_script_if_exists(install_root_path, link_root_path, pkg_name, "postinst", (is_upgrade ? "upgrade" : "install") );
+		if(warn != 0)
+		{
+			fprintf(stderr, "Warning: postinstall script failed for package %s.\n", pkg_name);
+		}
 	}
 	if(err == 0)
 	{
