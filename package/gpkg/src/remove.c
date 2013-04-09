@@ -15,7 +15,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	string_map* path_to_root_name     = initialize_string_map(1);
 	unsigned long num_destroyed;
 	
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	//in order to test whether something depends on this pkg, we need to load recursive deps on all packages
@@ -26,6 +26,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	{
 		load_recursive_package_data_variables(package_data, pkgs_to_recurse_on[recurse_index], 1, 0, 0);
 	}
+	free_null_terminated_string_array(pkgs_to_recurse_on);
 
 	
 	
@@ -220,7 +221,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		free_package_data(package_data);
 		package_data = initialize_string_map(1);
 		
-		load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL );
+		load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 

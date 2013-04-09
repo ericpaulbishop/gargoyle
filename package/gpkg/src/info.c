@@ -119,7 +119,26 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 	load_type      = (!load_matching_only) && have_package_vars ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 	load_type      = load_matching_only && have_package_vars    ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 
-	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root );
+
+	//only recurse if user specifically requested a recursively defined variable -- determining
+	//these variables for a large number of packages tends to eat up memory
+	int load_recursive = 0;
+	if(have_package_vars)
+	{
+		if(	get_string_map_element(package_variables, "All-Depends") != NULL || 
+			get_string_map_element(package_variables, "Required-Depends") != NULL || 
+			get_string_map_element(package_variables, "Required-Size") != NULL ||
+		       	get_string_map_element(package_variables, "Will-Fit") != NULL
+			)
+		{
+			load_recursive = 1;
+		}
+	}
+
+
+
+
+	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root, !load_recursive);
 	
 	unsigned long num_packages;
 	char** sorted_packages = get_string_map_keys( (load_matching_only ? matching_packages : package_data), &num_packages);

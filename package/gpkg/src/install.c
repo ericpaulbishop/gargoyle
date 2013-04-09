@@ -59,7 +59,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1 );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
 		
@@ -287,7 +287,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	matching_packages = initialize_string_map(1);
 	set_string_map_element(parameters, "package-list", install_pkgs_map);
 	
-	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name);
+	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0);
 	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
 
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);

@@ -111,7 +111,7 @@ string_map* get_package_with_version(string_map* all_package_data, char* package
 void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version);
 char** alloc_depend_def(char* def_version_str);
 
-void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root);
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root, int ignore_recursive_variables);
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* dest_name);
 int load_recursive_package_data_variables(string_map* package_data, char* package, int load_size, int load_will_fit, uint64_t free_bytes);
 

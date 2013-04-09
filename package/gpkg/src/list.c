@@ -24,7 +24,7 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 	//printf("load matching only = %d\n", load_matching_only);
 
 	int load_type = load_matching_only ? LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_MATCHING : LOAD_DESCRIPTIVE_PKG_VARIABLES_FOR_ALL;
-	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, NULL );
+	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, NULL, 1 );
 	
 
 	unsigned long num_all_packages;

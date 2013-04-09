@@ -27,7 +27,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	//in order to test whether something depends on this pkg, we need to load recursive deps on all packages
@@ -38,6 +38,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 	{
 		load_recursive_package_data_variables(package_data, pkgs_to_recurse_on[recurse_index], 1, 0, 0);
 	}
+	free_null_terminated_string_array(pkgs_to_recurse_on);
 
 
 
