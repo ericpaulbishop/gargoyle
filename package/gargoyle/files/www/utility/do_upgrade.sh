@@ -41,6 +41,19 @@
 			mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; reboot
 		fi
 	else
+
+		is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
+		if [ -n "$is_tplink" ]; then
+			boot_size=$(dd bs=4 count=1 skip=37 if=/tmp/up/upgrade 2>/dev/null | hexdump -v -n 4 -e '1/1 "%02x"')
+			[ "$boot_size" != "00000000" ] && {
+				# Invalid image, it contains a bootloader
+				echo "<script type=\"text/javascript\">top.failure();</script>"
+				echo "</body></html>"
+				rm /tmp/up/upgrade
+				exit
+			}
+		fi
+
 		echo "<script type=\"text/javascript\">top.uploaded();</script>"
 		#make sure output buffer gets flushed by writing lots of whitespace to output
 		inc=1
