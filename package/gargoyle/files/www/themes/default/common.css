@@ -44,7 +44,7 @@ body
 #wait_msg
 {
 	display:none;
-	background:transparent url('images/wait_msg_back.gif') center center no-repeat;
+	background:transparent url('images/wait_msg_back.png') center center no-repeat;
 	z-index:3000;
 	position:fixed;
 	width:300px;
@@ -102,7 +102,7 @@ body
 	left:10px;
 	width:200px;
 	height:135px;
-	background: url("images/top-gradient-logo.gif") top no-repeat;
+	background: url("images/top-gradient-logo.png") top no-repeat;
 	z-index:800;
 }
 #garg_title
@@ -182,7 +182,7 @@ body
 #nav_top
 {
 	position:absolute;
-	background: url("images/nav_top_external.gif") top left no-repeat;
+	background: url("images/nav_top_external.png") top left no-repeat;
 	top:0px;
 	left:0px;
 	height:22px;
@@ -247,7 +247,7 @@ body
 }
 .nav_selected_end1
 {
-	background: url("images/nav_top_selected_internal.gif") top center no-repeat;
+	background: url("images/nav_top_selected_internal.png") top center no-repeat;
 	position:relative;
 	width:200px;
 	top:0px;
@@ -256,7 +256,7 @@ body
 }
 .nav_selected_container_end1
 {
-	background: url("images/nav_selected.gif") center repeat;
+	background: url("images/nav_selected.png") center repeat;
 	position:relative;
 	width:184px;
 	left:8px;
@@ -293,7 +293,7 @@ body
 
 .nav_selected
 {
-	background: url("images/nav_selected.gif") repeat;
+	background: url("images/nav_selected.png") repeat;
 	display:block;
 	position:relative;
 	width:184px;
@@ -355,7 +355,7 @@ body
 
 .nav_selected_divider1
 {
-	background: url("images/nav_selected_divider_1.gif") center top no-repeat;
+	background: url("images/nav_selected_divider_1.png") center top no-repeat;
 	position:relative;
 	width: 184px;
 	height: 8px;
@@ -424,7 +424,7 @@ body
 	left:0px;
 	height:22px;
 	width:570px;
-	background: url("images/main_top.gif") bottom center no-repeat;
+	background: url("images/main_top.png") bottom center no-repeat;
 }
 
 #main_bottom
@@ -434,7 +434,7 @@ body
 	left:0px;
 	height:50px;
 	width:570px;
-	background: url("images/main_bottom.gif") top center no-repeat;
+	background: url("images/main_bottom.png") top center no-repeat;
 }
 
 
@@ -448,7 +448,7 @@ body
 	width:542px;
 	padding-left:14px;
 	padding-right:14px;
-	background: url("images/main_internal.gif") center repeat;
+	background: url("images/main_internal.png") center repeat;
 }
 
 
