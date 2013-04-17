@@ -169,6 +169,11 @@ function saveChanges()
 		{
 			configureFirewall(true,false)
 			uci.remove("gargoyle", "status", "openvpn_connections")
+
+			if (document.getElementById("openvpn_client_manual_controls").style.display != "none")
+			{
+				clientManualCheckCaCertKey();
+			}
 		}
 
 
@@ -322,6 +327,29 @@ function proofreadAll()
 		}
 	}
 	return errors;
+}
+
+function clientManualCheckCaCertKey()
+{
+	var toAdd = "";
+	var elem = document.getElementById("openvpn_client_conf_text");
+	var clientConf = elem.value;
+	if ("" !== document.getElementById("openvpn_client_ca_text").value && !clientConf.match(/^[\t ]*ca[\t ].*$/im))
+	{
+		toAdd += "\nca ca.crt";
+	}
+	if ("" !== document.getElementById("openvpn_client_cert_text").value && !clientConf.match(/^[\t ]*cert[\t ].*$/im))
+	{
+		toAdd += "\ncert cert.crt";
+	}
+	if ("" !== document.getElementById("openvpn_client_key_text").value && !clientConf.match(/^[\t ]*key[\t ].*$/im))
+	{
+		toAdd += "\nkey key.key";
+	}
+	if ("" !== toAdd)
+	{
+		elem.value += toAdd;
+	}
 }
 
 
