@@ -903,6 +903,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 								*required_size = (*required_size) + (dep_size == NULL ? 0 : *dep_size); // should never be null, but let's be careful
 							}
 						}
+					
 
 					}
 					if(load_size)
@@ -922,6 +923,11 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 					}
 					set_string_map_element(package_info, "Required-Depends", req_dep_map);
 					set_string_map_element(package_info, "All-Depends",      all_dep_map);
+				
+					if(dep_list != NULL)
+					{
+						free_null_terminated_string_array(dep_list);
+					}
 				}
 
 			}
@@ -929,6 +935,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 		}
 		free_null_terminated_string_array(all_version_list);
 	}
+	free_if_not_null(installed_version);
 	return ret;
 }
 
