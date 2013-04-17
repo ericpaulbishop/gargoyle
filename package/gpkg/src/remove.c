@@ -18,16 +18,6 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
-	//in order to test whether something depends on this pkg, we need to load recursive deps on all packages
-	unsigned long num_pkgs_to_recurse_on;
-	char** pkgs_to_recurse_on = get_string_map_keys(package_data, &num_pkgs_to_recurse_on);
-	int recurse_index;
-	for(recurse_index=0; pkgs_to_recurse_on[recurse_index] != NULL ; recurse_index++)
-	{
-		load_recursive_package_data_variables(package_data, pkgs_to_recurse_on[recurse_index], 1, 0, 0);
-	}
-	free_null_terminated_string_array(pkgs_to_recurse_on);
-
 	
 	
 	unsigned long rm_pkg_list_length;
@@ -36,7 +26,10 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	string_map* uninstalled_pkgs_to_ignore = initialize_string_map(1);
 	for(rm_pkg_index=0;rm_pkg_index<rm_pkg_list_length;rm_pkg_index++)
 	{
-		char* pkg_name = rm_pkg_list[rm_pkg_index];	
+		char* pkg_name = rm_pkg_list[rm_pkg_index];
+		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0);
+
+
 
 		int rm_pkg_is_installed = 0;
 		string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, &rm_pkg_is_installed, NULL);

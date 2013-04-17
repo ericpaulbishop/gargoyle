@@ -1103,7 +1103,7 @@ void something_depends_on_func(char* key, void* value)
 			if(dep_map == NULL)
 			{
 				need_to_free_dep_map = 1;
-				string_map* dep_map = initialize_string_map(1);
+				dep_map = initialize_string_map(1);
 				char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
 				unsigned long num_deps;
 				char** dep_list = split_on_separators(depend_str, package_separators, 9, -1, 0, &num_deps);
