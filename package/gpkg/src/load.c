@@ -1093,10 +1093,58 @@ void something_depends_on_func(char* key, void* value)
 		string_map* all_versions = (string_map*)value;
 		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
 		string_map* pkg = current != NULL ? get_string_map_element(all_versions, current) : NULL;
+		char* depend_str = pkg != NULL ? (char*)get_string_map_element(pkg, "Depends") : NULL ;
 
-		if(current != NULL && pkg != NULL)
+		if(current != NULL && pkg != NULL && depend_str != NULL)
 		{
+	
 			string_map* dep_map = get_string_map_element(pkg, "All-Depends");
+			int need_to_free_dep_map = 0;
+			if(dep_map == NULL)
+			{
+				need_to_free_dep_map = 1;
+				string_map* dep_map = initialize_string_map(1);
+				char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+				unsigned long num_deps;
+				char** dep_list = split_on_separators(depend_str, package_separators, 9, -1, 0, &num_deps);
+				int dep_index;
+				for(dep_index=0; dep_index < num_deps; dep_index++)
+				{
+	
+				
+					char* dep_name = dep_list[dep_index];
+					char** dep_def = NULL;
+					int dep_is_installed;
+					if( dep_list[dep_index+1] != NULL )
+					{
+						if(dep_list[dep_index+1][0] == '(' )
+						{
+							int last_part_inc=1;
+							for(last_part_inc=1;  dep_list[dep_index+last_part_inc] != NULL  && dep_list[dep_index+last_part_inc][ strlen(dep_list[dep_index+last_part_inc])-1] != ')'; last_part_inc++) ;
+							if(dep_list[dep_index+last_part_inc] != NULL && dep_list[dep_index+last_part_inc][ strlen(dep_list[dep_index+last_part_inc])-1] == ')' )
+							{
+								char* def_str = strdup("");
+								int last_part_inc_index;
+								for(last_part_inc_index=1; last_part_inc_index <= last_part_inc; last_part_inc_index++)
+								{
+									char* tmp_def_str=dynamic_strcat(2, def_str, dep_list[dep_index+last_part_inc_index]);
+									free(def_str);
+									def_str = tmp_def_str;									
+								}
+	
+								dep_def = alloc_depend_def(def_str);
+								free(def_str);
+								dep_index= dep_index+(last_part_inc);
+							}
+						}
+					}
+					dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
+					set_string_map_element(dep_map, dep_name, dep_def);
+				}
+			}
+
+
+
 			char* install_root = get_string_map_element(pkg, "Install-Destination");
 			if(dep_map != NULL && install_root != NULL && strcmp(install_root, NOT_INSTALLED_STRING) != 0) 
 			{
@@ -1129,10 +1177,10 @@ void something_depends_on_func(char* key, void* value)
 				if(__found_package_that_depends_on)
 				{
 					//test for mutual dependency, return 0 in that case
-					dep_map = get_string_map_element(__package_data_to_test_depends_on, "All-Depends");
-					if(dep_map != NULL)
+					string_map* test_pkg_dep_map = get_string_map_element(__package_data_to_test_depends_on, "All-Depends");
+					if(test_pkg_dep_map != NULL)
 					{
-						__found_package_that_depends_on = get_string_map_element(dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
+						__found_package_that_depends_on = get_string_map_element(test_pkg_dep_map, key) != NULL ? 0 : __found_package_that_depends_on;
 					}
 				}
 				
@@ -1142,6 +1190,13 @@ void something_depends_on_func(char* key, void* value)
 					__found_package_name = key ; // don't dynamically allocate, we do strdup on match in calling function
 					//printf("found that %s depends on %s, installed in %s\n", key, __package_name_to_test_depends_on, install_root);
 				}
+			}
+
+			if(need_to_free_dep_map)
+			{
+				unsigned long num_destroyed;
+				apply_to_every_string_map_value(dep_map, free_dep_map_func);
+				destroy_string_map(dep_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 			}
 		}
 	}
