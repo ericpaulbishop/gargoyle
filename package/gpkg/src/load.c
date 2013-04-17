@@ -45,7 +45,9 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
 	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_variable_def, NULL);
-	
+
+
+
 	//load status data
 	unsigned long num_dests;
 	int dest_index =0;
@@ -64,11 +66,14 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	}
 	free_null_terminated_string_array(dest_paths);	
 	
+
+
 	if(!ignore_recursive_variables)
 	{
 		//calculate total depends, total size, and will-fit if requested
 		unsigned long num_pkgs_to_recurse_on;
-		char** pkgs_to_recurse_on = get_string_map_keys( (load_variable_def == LOAD_ALL_PKG_VARIABLES || LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? package_data : matching_packages), &num_pkgs_to_recurse_on);
+		char** pkgs_to_recurse_on = get_string_map_keys( (load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? package_data : matching_packages), &num_pkgs_to_recurse_on);
+
 
 		int load_depends  = load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING ? 1 : 0;
 		int load_size     = load_variable_def == LOAD_ALL_PKG_VARIABLES || load_variable_def == LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING ? 1 : 0;
@@ -100,6 +105,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 
 		free_null_terminated_string_array(pkgs_to_recurse_on);
 	}
+
 }
 
 /* returns package with exact version or NULL */
