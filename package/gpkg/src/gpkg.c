@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 	
 	string_map* parameters = parse_parameters(argc, argv);
 
-	opkg_conf *conf = load_conf(NULL);
+	opkg_conf *conf = load_conf((char*)get_string_map_element(parameters, "config"));
 
 	char* run_type                   = get_string_map_element(parameters, "run-type");
 	int force_overwrite_other_files  = get_string_map_element(parameters, "force-overwrite")         != NULL ? 1 : 0;
@@ -37,6 +37,9 @@ int main(int argc, char** argv)
 		format = strcmp(format_str, "json") == 0 ? OUTPUT_JSON : format;
 		format = strcmp(format_str, "js") == 0 || strcmp(format_str, "javascript") == 0 ? OUTPUT_JAVASCRIPT : format;
 	}
+
+
+	
 
 
 	if(strcmp(run_type, "install") == 0)
@@ -100,8 +103,8 @@ string_map* parse_parameters(int argc, char** argv)
 
 
 	static struct option long_options[] = {
-		{"force-depends",           0, 0, 'f'},
-		{"force_depends",           0, 0, 'f'},
+		{"force-depends",           0, 0, 'p'},
+		{"force_depends",           0, 0, 'p'},
 		{"force-overwrite",         0, 0, 'w'},
 		{"force_overwrite",         0, 0, 'w'},
 		{"force-maintainer",        0, 0, 'm'},
@@ -113,6 +116,7 @@ string_map* parse_parameters(int argc, char** argv)
 		{"autoremove",              0, 0, 'a'},
 		{"autoremove-same-dest",    0, 0, 's'},
 		{"autoremove_same_dest",    0, 0, 's'},
+		{"conf",                    1, 0, 'c'},
 		{"dest",                    1, 0, 'd'},
 		{"link-dest",               1, 0, 'l'},
 		{"link_dest",               1, 0, 'l'},
@@ -131,16 +135,15 @@ string_map* parse_parameters(int argc, char** argv)
 		{NULL, 0, NULL, 0}
 	};
 
-
 	int expect_regex =0;
 
 	int option_index = 0;
 	int c;
-	while ((c = getopt_long(argc, argv, "fwmeasd:l:n:t:o:rv:h", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "pwmeasc:d:l:n:t:o:rv:h", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
-			case 'f':
+			case 'p':
 				set_string_map_element(parameters, "force-depends", strdup("D"));
 				break;
 			case 'w':
@@ -152,12 +155,14 @@ string_map* parse_parameters(int argc, char** argv)
 			case 'e':
 				set_string_map_element(parameters, "force-reinstall", strdup("D"));
 				break;
-
 			case 'a':
 				set_string_map_element(parameters, "autoremove", strdup("D"));
 				break;
 			case 's':
 				set_string_map_element(parameters, "autoremove-same-destination", strdup("D"));
+				break;
+			case 'c':
+				set_string_map_element(parameters, "conf", strdup(optarg));
 				break;
 			case 'd':
 				set_string_map_element(parameters, "install-destination", strdup(optarg));
@@ -302,6 +307,64 @@ string_map* parse_parameters(int argc, char** argv)
 
 void print_usage(void)
 {
-	printf("help (edit text later)\n\n");
+	//printf("help (edit text later)\n\n");
+	
+	printf("gpkg: opkg/ipkg compatible package manager\n");
+	printf("      written by Eric Bishop\n\n");
+
+	printf("usage: gpkg sub-command [options] [package argument(s)]\n");
+	printf("where sub-command is one of:\n");
+	printf("\n");
+	
+	printf("Package Manipulation:\n");
+	printf("\tupdate                        Update list of available packages\n");
+	printf("\tupgrade [pkgs]                Upgrade packages\n");
+	printf("\tinstall [pkgs]                Install package(s)\n");
+	printf("\tremove  [pkgs]                Remove package(s)\n");
+	printf("\n");
+	
+	
+	printf("Informational Commands\n");
+	printf("  list [pkgs|regexp]            List available packages\n");
+	printf("  list-installed [pkgs|regexp]  List installed packages\n");
+	printf("  info [pkgs|regexp]            Display info for packages\n");
+	printf("  dest-info                     Display info about package destinations\n");
+	printf("\n");
+	
+	printf("Options:\n");
+	printf("  --regex,r                     Package argument is a regular expression\n");
+	printf("                                Only accepted for list/info commands\n");
+	printf("  --conf,-f [conf_file]         Use <conf_file> as opkg/gpkg configuration file\n");
+	printf("  --dest,-d [dest_name]         Use <dest_name> as the the root directory for\n");
+	printf("                                package installation, removal, upgrading.\n");
+	printf("                                <dest_name> should be a defined dest name from\n");
+	printf("                                the configuration file,\n");
+	printf("  --link-dest,-l [dest_name]    After installation, symlink files to a\n");
+	printf("                                differentdestination specified by <dest_name>\n");
+	printf("  --only-dest,-n [dest_name]    Only display packages installed in <dest_name>\n");
+	printf("  --tmp-dir,-t   [dir_path]     Specify path of tmp-dir\n");
+	printf("  --output-format,-o [format]   Specify output format of list/info commands\n");
+	printf("                                can be 'human-readable', 'json' or 'js'\n");
+	printf("                                Default is 'human-readable.\n");
+	printf("  --package-variables,-v [vars] Comma seperated list of package variables\n");
+	printf("                                to printwhen info command is called\n");
+	printf("\n");
+
+
+	printf("Force Options:\n");
+	printf("  --force-depends,-p            Install/remove despite failed dependencies\n");
+	printf("  --force-maintainer,-m         Overwrite preexisting config files\n");
+	printf("  --force-reinstall,-e          Reinstall package(s)\n");
+	printf("  --force-overwrite,-w          Overwrite files from other package(s)\n");
+	printf("  --autoremove,-a               Remove packages that were installed\n");
+	printf("                                automatically to satisfy dependencies\n");
+	printf("  autoremove-same-dest,-s       Remove packages that were installed\n");
+	printf("                                automatically to satisfy dependencies\n");
+	printf("                                if they were installed to same destination\n");
+	printf("                                package being removed\n");
+
+
+	
+	
 	exit(0);
 }
