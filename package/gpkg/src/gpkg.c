@@ -307,8 +307,6 @@ string_map* parse_parameters(int argc, char** argv)
 
 void print_usage(void)
 {
-	//printf("help (edit text later)\n\n");
-	
 	printf("gpkg: opkg/ipkg compatible package manager\n");
 	printf("      written by Eric Bishop\n\n");
 
