@@ -475,7 +475,10 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		int var_index;
 		for(var_index=0; var_index < num_vars; var_index++)
 		{
-			set_string_map_element(load_variable_map, vars[var_index], (load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? all_dummy : matching_dummy));
+			if(get_string_map_element(load_variable_map, vars[var_index]) == NULL)
+			{
+				set_string_map_element(load_variable_map, vars[var_index], (load_variable_def == LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL ? all_dummy : matching_dummy));
+			}
 		}
 		free_null_terminated_string_array(vars);
 	}

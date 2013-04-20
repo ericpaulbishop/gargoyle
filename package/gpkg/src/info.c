@@ -116,7 +116,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 
 	int load_type  = LOAD_ALL_PKG_VARIABLES;
 	load_type      = load_matching_only && (!have_package_vars) ? LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING       : load_type;
-	load_type      = (!load_matching_only) && have_package_vars ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
+	load_type      = (!load_matching_only) && have_package_vars ? LOAD_PARAMETER_DEFINED_PKG_VARIABLES_FOR_ALL     : load_type;
 	load_type      = load_matching_only && have_package_vars    ? LOAD_MINIMAL_FOR_ALL_PKGS_PARAMETER_FOR_MATCHING : load_type;
 
 
