@@ -7,6 +7,9 @@
 #
 
 include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/kernel.mk
+include $(INCLUDE_DIR)/version.mk
+
 
 PKG_NAME:=gpkg
 PKG_VERSION:=$(GARGOYLE_VERSION)
@@ -56,7 +59,18 @@ endef
 define Package/gpkg/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gpkg $(1)/usr/bin/gpkg
+
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(CP) ./files/gpkg-uci-defaults $(1)/etc/uci-defaults
+	$(CP) ./files/opkg.gpkg.tmp $(1)/etc/
+	$(VERSION_SED) $(1)/etc/opkg.gpkg.tmp
 endef
 
+define Package/gpkg/postinst
+	if [ -z "$${IPKG_INSTROOT}" ] ; then
+		sh /etc/uci-defaults/gpkg-uci-defaults
+		rm -rf /etc/uci-defaults/gpkg-uci-defaults
+	fi
+endef
 
 $(eval $(call BuildPackage,gpkg))
