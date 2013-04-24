@@ -2,6 +2,19 @@
 
 local plugin_root="/plugin_root" #doesn't change, we switch this to a symlink if we want to put files on USB drive
 local escaped_plugin_root=$(echo "$plugin_root" | sed 's/\//\\\//g' )
+
+local pkg="$1"
+if [ -z "$pkg" ] ; then
+	echo "ERROR: you must specify package to remove"
+	echo "Usage: $0 [PACKAGE_NAME]"
+	echo ""
+	exit
+fi
+
+
+gpkg remove --autoremove-same-dest "$pkg"
+
+
 IFS_ORIG="$IFS"
 IFS_LINEBREAK="$(printf '\n\r')"
 

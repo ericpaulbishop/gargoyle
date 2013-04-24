@@ -334,7 +334,7 @@ void print_usage(void)
 	printf("                                Only accepted for list/info commands\n");
 	printf("  --conf,-f [conf_file]         Use <conf_file> as opkg/gpkg configuration file\n");
 	printf("  --dest,-d [dest_name]         Use <dest_name> as the the root directory for\n");
-	printf("                                package installation, removal, upgrading.\n");
+	printf("                                package installation, removal, upgrading\n");
 	printf("                                <dest_name> should be a defined dest name from\n");
 	printf("                                the configuration file,\n");
 	printf("  --link-dest,-l [dest_name]    After installation, symlink files to a\n");
@@ -343,7 +343,7 @@ void print_usage(void)
 	printf("  --tmp-dir,-t   [dir_path]     Specify path of tmp-dir\n");
 	printf("  --output-format,-o [format]   Specify output format of list/info commands\n");
 	printf("                                can be 'human-readable', 'json' or 'js'\n");
-	printf("                                Default is 'human-readable.\n");
+	printf("                                Default is 'human-readable'\n");
 	printf("  --package-variables,-v [vars] Comma seperated list of package variables\n");
 	printf("                                to printwhen info command is called\n");
 	printf("\n");
@@ -356,10 +356,10 @@ void print_usage(void)
 	printf("  --force-overwrite,-w          Overwrite files from other package(s)\n");
 	printf("  --autoremove,-a               Remove packages that were installed\n");
 	printf("                                automatically to satisfy dependencies\n");
-	printf("  autoremove-same-dest,-s       Remove packages that were installed\n");
+	printf("  --autoremove-same-dest,-s     Remove packages that were installed\n");
 	printf("                                automatically to satisfy dependencies\n");
-	printf("                                if they were installed to same destination\n");
-	printf("                                package being removed\n");
+	printf("                                only if they were installed to same\n");
+	printf("                                destination as package being removed\n");
 
 
 	
