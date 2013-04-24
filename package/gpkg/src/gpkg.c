@@ -315,10 +315,10 @@ void print_usage(void)
 	printf("\n");
 	
 	printf("Package Manipulation:\n");
-	printf("\tupdate                        Update list of available packages\n");
-	printf("\tupgrade [pkgs]                Upgrade packages\n");
-	printf("\tinstall [pkgs]                Install package(s)\n");
-	printf("\tremove  [pkgs]                Remove package(s)\n");
+	printf("  update                        Update list of available packages\n");
+	printf("  upgrade [pkgs]                Upgrade packages\n");
+	printf("  install [pkgs]                Install package(s)\n");
+	printf("  remove  [pkgs]                Remove package(s)\n");
 	printf("\n");
 	
 	
@@ -345,7 +345,7 @@ void print_usage(void)
 	printf("                                can be 'human-readable', 'json' or 'js'\n");
 	printf("                                Default is 'human-readable'\n");
 	printf("  --package-variables,-v [vars] Comma seperated list of package variables\n");
-	printf("                                to printwhen info command is called\n");
+	printf("                                to print when info command is called\n");
 	printf("\n");
 
 
