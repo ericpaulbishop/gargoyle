@@ -677,17 +677,18 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		if(path_exists(conf_file_path))
 		{
 			unsigned long num_conf_lines;
-			char** conf_file_lines =  get_file_lines(conf_file_path, &num_list_lines);
+			char** conf_file_lines =  get_file_lines(conf_file_path, &num_conf_lines);
 			int conf_line_index;
 			conf_files = initialize_string_map(1);
 			for(conf_line_index=0; conf_line_index < num_conf_lines; conf_line_index++)
 			{
-				set_string_map_element(conf_files, conf_file_lines[conf_line_index], strdup("D"));
+				char* adjusted_conf_path = dynamic_strcat(2, fs_terminated_install_root, conf_file_lines[conf_line_index] + 1);
+				set_string_map_element(conf_files, adjusted_conf_path, strdup("D"));
+				free(adjusted_conf_path);
 			}
 			free_null_terminated_string_array(conf_file_lines);
 		}
 		free(conf_file_path);
-
 	
 
 		FILE* list_file = fopen(list_file_name, "w");
