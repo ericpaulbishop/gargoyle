@@ -36,7 +36,7 @@ done
 # Call opkg to install package to plugin_root
 ###############################################
 gpkg update
-gpkg install -d plugin_root -l root "$pkg"
+gpkg install --dest plugin_root --link-dest root "$pkg"
 
 
 
