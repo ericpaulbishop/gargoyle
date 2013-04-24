@@ -249,7 +249,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 									const char* end = num_deps > 0 ? "\n" : "];\n";
 									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = [%s", package_name, escaped_version, var_name, end );
 								}
-								if(format == OUTPUT_JSON)
+								else if(format == OUTPUT_JSON)
 								{
 									if(var_index >0){ printf(",\n"); }
 									printf("\t\t\t\"%s\": [\n", var_name);
@@ -297,7 +297,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 										printf("\n\t];\n");
 									}
 								}
-								if(format == OUTPUT_JSON)
+								else if(format == OUTPUT_JSON)
 								{
 									printf("\n\t\t\t]");
 								}
