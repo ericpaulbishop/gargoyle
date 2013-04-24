@@ -703,6 +703,12 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 					int is_conf_file = conf_files != NULL ? 
 								(get_string_map_element(conf_files, adjusted_file_path) != NULL ? 1 : 0) : 
 								0;
+					if(strcmp(pkg_name, "opkg") == 0 && strcmp(list_file_lines[line_index], "./bin/opkg") == 0 && path_exists("/bin/opkg") == PATH_IS_SYMLINK)
+					{
+						//very special case: we're installing opkg, and here all the preliminary checks have already been passed
+						//remove symlink placeholder to gpkg from /bin/opkg if it exists
+						rm_r("/bin/opkg");
+					}
 					err = path_exists(adjusted_file_path) && is_conf_file == 0 && overwrite_other_package_files == 0 ? 1 : 0;
 					if(err)
 					{
