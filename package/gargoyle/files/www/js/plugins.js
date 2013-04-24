@@ -20,6 +20,7 @@
 
 var driveToPath = [];
 
+var notInstalledVal = "Not Installed"
 
 function createDisplayDiv(pkgName, pkgVersion, pkgData)
 {
@@ -50,7 +51,7 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 
 	var nameDisplay = pkgData["Description"] == null ? pkgName : (pkgData["Description"])
 	var statusTypes = [];
-	statusTypes["Not Installed"] = "Not Installed"
+	statusTypes[notInstalledVal] = "Not Installed"
 	statusTypes["root"] = "Pre-Installed"
 	statusTypes["plugin_root"] = "Installed"
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
@@ -317,7 +318,7 @@ function resetData()
 			
 			var enabledCheckbox = createInput('checkbox');
 			enabledCheckbox.disabled = true;
-			enabledCheckbox.checked = pkgData["Install-Destination"] == 'not_installed' ? false : true;
+			enabledCheckbox.checked = pkgData["Install-Destination"] == notInstalledVal ? false : true;
 			
 			var button = createInput("button");
 			button.className="default_button";
@@ -418,7 +419,7 @@ function getCurrentOrLatestVersion(pkgVersions)
 	{
 
 		var versionData    = pkgVersions[version];
-		var nextIsCurrent  = versionData["Install-Destination"] != "Not Installed" ? true : false
+		var nextIsCurrent  = versionData["Install-Destination"] != notInstalledVal ? true : false
 		if(foundVer == null || nextIsCurrent || ((!isCurrent) && cmpPkgVersions(version,foundVer) > 0) )
 		{
 			foundVer = version
