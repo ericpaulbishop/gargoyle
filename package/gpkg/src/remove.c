@@ -329,6 +329,10 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 	char* conf_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".conffiles");
 	string_map* copied_conf_files = initialize_string_map(1);
 	
+	int install_root_len = strlen(install_root_path);
+	char* fs_terminated_install_root = install_root_path[install_root_len-1] == '/' ? strdup(install_root_path) : dynamic_strcat(2, install_root_path, "/");
+
+
 	if(is_orphaned_dependency)
 	{
 		printf("Removing orphaned dependency %s...\n", pkg_name);
@@ -344,20 +348,21 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 	//copy conf files to tmp dir
 	if(path_exists(conf_file_name) && save_conf_files)
 	{
-		unsigned long num_list_lines;
-		char** conf_file_lines =  get_file_lines(conf_file_name, &num_list_lines);
+		unsigned long num_conf_lines;
+		char** conf_file_lines =  get_file_lines(conf_file_name, &num_conf_lines);
 		int conf_line_index;
-		for(conf_line_index=0; conf_line_index < num_list_lines; conf_line_index++)
+		for(conf_line_index=0; conf_line_index < num_conf_lines; conf_line_index++)
 		{
-			if(path_exists(conf_file_lines[conf_line_index]))
+			char* adjusted_conf_path = dynamic_strcat(2, fs_terminated_install_root, conf_file_lines[conf_line_index] + 1);
+			if(adjusted_conf_path)
 			{
 				char* tmp_conf_path = dynamic_strcat(2, tmp_dir, conf_file_lines[conf_line_index] );
 				mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
 				rm_r(tmp_conf_path);
-				rename(conf_file_lines[conf_line_index], tmp_conf_path);
-				set_string_map_element(copied_conf_files, conf_file_lines[conf_line_index], tmp_conf_path);
-
+				rename(adjusted_conf_path, tmp_conf_path);
+				set_string_map_element(copied_conf_files, adjusted_conf_path, tmp_conf_path);
 			}
+			free(adjusted_conf_path);
 		}
 		free_null_terminated_string_array(conf_file_lines);
 	}	
