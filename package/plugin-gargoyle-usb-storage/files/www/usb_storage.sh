@@ -145,6 +145,12 @@
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
 		<span  class="rightcolumn"><input id="storage_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
 	</div>
+	<div id="extroot_container">
+		<span class="rightcolumnonly">
+			<input type="checkbox" id="extroot" name="extroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
+			<label id="extroot_label" for="extroot" style="vertical-align:middle">Make extroot on this disk</label>
+		</span>
+	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>

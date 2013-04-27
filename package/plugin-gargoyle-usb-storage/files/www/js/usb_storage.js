@@ -1403,6 +1403,7 @@ function doDiskFormat()
 {
 	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
 	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
+	var extroot        = document.getElementById("extroot").checked ? "1":"0";
 	
 	//format shell script requires percent as an integer, round as necessary
 	if(swapPercent >0 && swapPercent <1)
@@ -1421,7 +1422,7 @@ function doDiskFormat()
 		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
 	
 	
-		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" ; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
+		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
