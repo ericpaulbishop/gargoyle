@@ -644,7 +644,8 @@ initialize_qos()
 
 		#Start the monitor
 		if [ -n "$pinglimit" ] ; then
-			qosmon -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
+			#In manual mode the user selected the pinglimit.
+			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
 		else
 			#In auto mode we calculate transmission delay based on our bandwidth and then ask qosmon
 			#to add this value to its measured ping entitlement to form the final ping limit.

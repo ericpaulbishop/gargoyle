@@ -318,7 +318,7 @@
 		<div>
 			<span class='indent'>
 				<input type='checkbox' id='use_auto_pinglimit' onclick='enableAssociatedField(this, "pinglimit", 85)'/>&nbsp;&nbsp;
-				<label for='pinglimit' id='pinglimit_label'>Use custom ping limit:</label>
+				<label for='pinglimit' id='pinglimit_label'>Manually control ping targets:</label>
 				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' /> 
 			</span>
 		</div>
@@ -337,11 +337,10 @@
 			the round trip ping times to the target congestion is detected.  By default ACC uses your WAN gateway as the ping target.  If you know 
 			that congestion on your link will occur in a different segment then you can enter an alternate ping target.</p>
 
-			<p><em>Ping Limit-</em> Round trip ping times are compared against the ping limit.  ACC controls the link limit to maintain ping times
-			under limits.  In Auto mode, two ping limits are used depending on if a MINRTT class is active or not.  When no MINRTT mode is active the ACC
-			relaxes the ping limit in order to increase throughput.  In auto mode the ACC automatically determines the proper ping limits by using 
-			the link speeds you entered and measured ping time.  If you would like to try a different limit you can manually enter your own 
-                        custom ping limit in this field.  ACC will then use your limit as a realtime limit and always remain in MINRTT mode.</p>
+			<p><em>Manual Ping Limit-</em> Round trip ping times are compared against the ping limits.  ACC controls the link limit to maintain ping times
+			under the appropriate limit.  By default Gargoyle automatically selects appropriate ping limits for you based on the link speeds you entered.  If you would 
+			like to try different limits you can manually enter a time here.  Entering longer times will lead to higher ping limits, and shorter time shorter
+			limits.  You can see the limits ACC is using in the [] brackets next to ping time limits field. </p>
 
 		</span>
 		<a onclick='setDescriptionVisibility("qos_down_3")'  id="qos_down_3_ref" href="#qos_down_3">Hide Text</a>
@@ -378,7 +377,7 @@
 				<tr><td>Link Load</td><td>The current traffic in the downlink.</td></tr>
 				<tr><td>Ping</td><td>The round trip time of the last ping.</td></tr>
 				<tr><td>Filtered Ping</td><td>The round trip time filtered.</td></tr>
-				<tr><td>Ping Limit</td><td>The point at which the controller will act to maintain fairness.</td></tr>
+				<tr><td>Ping Time Limit</td><td>The point at which the controller will act to maintain fairness.</td></tr>
 				<tr><td>Active Classes</td><td>Number of download classes with load over 4kbps.</td></tr>
 				</table>
 			</span>
