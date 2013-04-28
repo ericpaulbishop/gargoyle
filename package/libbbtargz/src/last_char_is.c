@@ -20,7 +20,7 @@
  */
 
 #include <string.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 /* Find out if the last character of a string matches the one given Don't
  * underrun the buffer if the string length is 0.  Also avoids a possible

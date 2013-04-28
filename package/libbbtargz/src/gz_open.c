@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 static int gz_use_vfork;
 
@@ -38,7 +38,8 @@ gz_open(FILE *compressed_file, int *pid)
 	off_t floc;
 	int cfile = -1;
 
-	gz_use_vfork = (getenv("OPKG_USE_VFORK") != NULL);
+	//gz_use_vfork = (getenv("OPKG_USE_VFORK") != NULL);
+	gz_use_vfork=1;
 
 	if (gz_use_vfork) {
 		/* Create a new file descriptor for the input stream

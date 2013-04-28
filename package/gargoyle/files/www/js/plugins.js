@@ -20,8 +20,9 @@
 
 var driveToPath = [];
 
+var notInstalledVal = "Not Installed"
 
-function createDisplayDiv(pkgName, pkgData)
+function createDisplayDiv(pkgName, pkgVersion, pkgData)
 {
 	var div=document.createElement('div')
 	div.style.width="320px";
@@ -50,7 +51,7 @@ function createDisplayDiv(pkgName, pkgData)
 
 	var nameDisplay = pkgData["Description"] == null ? pkgName : (pkgData["Description"])
 	var statusTypes = [];
-	statusTypes["not_installed"] = "Not Installed"
+	statusTypes[notInstalledVal] = "Not Installed"
 	statusTypes["root"] = "Pre-Installed"
 	statusTypes["plugin_root"] = "Installed"
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
@@ -60,7 +61,7 @@ function createDisplayDiv(pkgName, pkgData)
 	elAdd(div, "strong", false, true)
 	elAdd(div.firstChild, nameDisplay, true, true)
 
-	elAdd(div, 'Version: ' + pkgData["Version"], true, true)
+	elAdd(div, 'Version: ' + pkgVersion, true, true)
 	elAdd(div, 'Status: ' + pkgStatus, true, pkgStatus == "Not Installed" ? true : false)
 	if(pkgStatus == "Not Installed")
 	{
@@ -248,7 +249,7 @@ function resetData()
 		var rootDriveDisplay = [];
 		var rootDriveValues  = [];
 		
-		rootDriveDisplay.push("Root Drive " +  parseBytes(opkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(opkg_dests['root']['Bytes-Free']) + " Free")
+		rootDriveDisplay.push("Root Drive " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(pkg_dests['root']['Bytes-Free']) + " Free")
 		rootDriveValues.push("root");
 		
 		var driveIndex;
@@ -264,7 +265,7 @@ function resetData()
 	}
 	else
 	{
-		setChildText("plugin_root_drive_static", "Root Drive " +  parseBytes(opkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(opkg_dests['root']['Bytes-Free']) + " Free", null, null, null, document);
+		setChildText("plugin_root_drive_static", "Root Drive " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(pkg_dests['root']['Bytes-Free']) + " Free", null, null, null, document);
 		document.getElementById("plugin_root_change_container").style.display = "none"
 	}
 
@@ -304,19 +305,20 @@ function resetData()
 	var columnNames = ['Package', 'Installed', ''];
 	var pluginsTableData = new Array();
 	var pkgIndex=0;
-	for(pkgIndex=0;pkgIndex < opkg_matching_packages.length; pkgIndex++)
+	for(pkgName in pkg_info)
 	{
-		var pkgName = opkg_matching_packages[pkgIndex];
-		var pkgData = opkg_info[pkgName];
+		var versions = pkg_info[pkgName];
+		var pkgVersion = getCurrentOrLatestVersion(versions)
+		var pkgData = pkg_info[pkgName][pkgVersion];
 		if (pkgData != null)
 		{
 			
-			var div=createDisplayDiv(pkgName, pkgData)
+			var div=createDisplayDiv(pkgName, pkgVersion, pkgData)
 
 			
 			var enabledCheckbox = createInput('checkbox');
 			enabledCheckbox.disabled = true;
-			enabledCheckbox.checked = pkgData["Install-Destination"] == 'not_installed' ? false : true;
+			enabledCheckbox.checked = pkgData["Install-Destination"] == notInstalledVal ? false : true;
 			
 			var button = createInput("button");
 			button.className="default_button";
@@ -407,3 +409,53 @@ function execute(cmd)
 }
 
 
+
+
+function getCurrentOrLatestVersion(pkgVersions)
+{
+	var foundVer = null;
+	var isCurrent = false;
+	for(version in pkgVersions)
+	{
+
+		var versionData    = pkgVersions[version];
+		var nextIsCurrent  = versionData["Install-Destination"] != notInstalledVal ? true : false
+		if(foundVer == null || nextIsCurrent || ((!isCurrent) && cmpPkgVersions(version,foundVer) > 0) )
+		{
+			foundVer = version
+			isCurrent = nextIsCurrent
+		}
+	}
+	return foundVer
+}
+
+
+function cmpPkgVersions(v1, v2)
+{
+	var split1 = v1.split(/[ \t.\-_\(\)\{\}\[\]\+=;\?,|\/\\\*\&@#\!\$\%\<\>]+/)
+	var split2 = v2.split(/[ \t.\-_\(\)\{\}\[\]\+=;\?,|\/\\\*\&@#\!\$\%\<\>]+/)
+
+	var ret = split1 == split2 ? 0 : 2;
+	var partNum;
+	var mismatchFound=false
+	for(partNum=0; partNum < split1.length && partNum < split2.length && !mismatchFound; partNum++)
+	{
+		if(split1[partNum] != split2[partNum])
+		{
+			if(parseInt(split1[partNum]).toString() != "NaN" && parseInt(split2[partNum]).toString() != "NaN" )
+			{
+				ret = parseInt(split1[partNum]) >  parseInt(split2[partNum]) ? 1 : -1
+			}
+			else
+			{
+				ret = split1[partNum] > split2[partNum] ? 1 : -1
+			}
+			mismatchFound = true;
+		}
+	}
+	if(ret == 2)
+	{
+		ret = split1.length > split2.length ? 1 : -1;
+	}
+	return ret;
+}

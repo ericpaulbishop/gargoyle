@@ -44,6 +44,17 @@
 #include <ctype.h>
 #include <stdarg.h>
 
+#include <regex.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+
+#ifndef stricmp
+	#define stricmp strcasecmp
+#endif
+
+
 
 /* tree_map structs / prototypes */
 typedef struct long_tree_map_node
@@ -230,11 +241,14 @@ extern void to_uppercase(char* str);
 
 /* dynamic functions (e.g. new memory is allocated, return values must be freed) */
 int free_null_terminated_string_array(char** strs);
+char** copy_null_terminated_string_array(char** original);
 extern char* dynamic_strcat(int num_strs, ...);
 extern char* dcat_and_free(char** one, char** two, int free1, int free2);
 extern char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max, unsigned long* num_pieces); /*if max_pieces < 0, it is ignored */
 extern char* join_strs(char* separator, char** parts, int max_parts, int free_parts, int free_parts_array); /*if max_parts < 0, it is ignored*/
 extern char* dynamic_replace(char* template_str, char* old_str, char* new_str);
+int convert_to_regex(char* str, regex_t* p);
+
 
 /* functions to dynamically read files */
 extern dyn_read_t dynamic_read(FILE* open_file, char* terminators, int num_terminators, unsigned long* read_length);
@@ -245,9 +259,51 @@ extern unsigned char* read_entire_file(FILE* in, unsigned long read_block_size, 
 extern char** get_shell_command_output_lines(char* command, unsigned long* num_lines);
 
 
+/*  comparison functions for qsort */ 
+extern int sort_string_cmp(const void *a, const void *b);
+extern int sort_string_icmp(const void *a, const void *b);
+
+/* wrappers for qsort calls */
+extern void do_str_sort(char** string_arr, unsigned long string_arr_len);
+extern void do_istr_sort(char** string_arr, unsigned long string_arr_len);
+
+
+
+
 /* safe malloc & strdup functions used by all others (actually aliased to malloc / strdup and used) */
 extern void* safe_malloc(size_t size);
 extern char* safe_strdup(const char* str);
+
+/* utility functions to free memory */
+extern void free_if_not_null(void* p);
+extern void free_and_set_null(void** p);
+
+
+/* other file utils */
+
+extern int mkdir_p(const char* path, mode_t mode); /* returns 0 on success, 1 on error */
+extern void rm_r(const char* path);
+extern int create_tmp_dir(const char* tmp_root, char** tmp_dir); /* returns 0 on success, 1 on error */
+
+
+
+#define PATH_DOES_NOT_EXIST  0
+#define PATH_IS_REGULAR_FILE 1
+#define PATH_IS_DIRECTORY    2
+#define PATH_IS_SYMLINK      3
+#define PATH_IS_OTHER        4
+
+/*
+returns:
+ PATH_DOES_NOT_EXIST  (0) if path doesn't exist
+ PATH_IS_REGULAR_FILE (1) if path is regular file
+ PATH_IS_DIRECTORY    (2) if path is directory
+ PATH_IS_SYMLINK      (3) if path is symbolic link
+ PATH_IS_OTHER        (4) if path exists and is something else
+ */
+extern int path_exists(const char* path);
+
+extern char** get_file_lines(char* file_path, unsigned long* lines_read);
 
 
 #endif /* ERICS_TOOLS_H */

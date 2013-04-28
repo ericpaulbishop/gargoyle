@@ -61,3 +61,20 @@ char* safe_strdup(const char* str)
 	}
 	return new_str;
 }
+
+
+void free_if_not_null(void* p)
+{
+	if(p != NULL)
+	{
+		free(p);
+	}
+}
+void free_and_set_null(void** p)
+{
+	if(*p != NULL)
+	{
+		free(*p);
+		*p = NULL;
+	}
+}

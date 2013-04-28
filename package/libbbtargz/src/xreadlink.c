@@ -11,7 +11,7 @@
  */
 
 #include <unistd.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 extern char *xreadlink(const char *path)
 {

@@ -1,0 +1,7 @@
+src/gz %n %U
+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.6/%T
+dest root /
+dest ram /tmp
+dest plugin_root /plugin_root
+lists_dir ext /var/opkg-lists
+option overlay_root /overlay
