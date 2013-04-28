@@ -20,6 +20,38 @@ int create_dir_and_test_writable(char* dir)
 	return success;
 }
 
+
+void cp(char* src_path, char* dst_path)
+{
+	if(path_exists(src_path) != PATH_DOES_NOT_EXIST && path_exists(src_path) != PATH_IS_DIRECTORY )
+	{
+		//make necessary parent directories
+		rm_r(dst_path);
+		mkdir_p(dst_path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+		rm_r(dst_path);
+
+		FILE* src = fopen(src_path, "rb");
+		FILE* dst= fopen(dst_path, "wb");
+		if(src != NULL && dst != NULL)
+		{
+			unsigned char buf[1024];
+			int num_read = 1;
+			while(num_read > 0)
+			{
+				num_read = fread(buf, 1, 1024, src);
+				if(num_read > 0)
+				{
+					fwrite(buf, 1, num_read, dst);
+				}
+			}
+		}
+		if(src != NULL){ fclose(src); }
+		if(dst != NULL){ fclose(dst); }
+	}
+}
+
+
+
 //void do_install(opkg_conf* conf, char* pkg_name, char* install_root_name, char* link_root_name, char** version_criteria)
 void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char* link_root_name, int is_upgrade, int overwrite_config, int overwrite_other_package_files, int force_reinstall, char* tmp_root)
 {
@@ -730,11 +762,12 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 						if(is_conf_file && path_exists(adjusted_file_path) && overwrite_config == 0)
 						{
 							char* tmp_conf_path = dynamic_strcat(2, tmp_dir, adjusted_file_path);
-							mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
-							rm_r(tmp_conf_path);
-							rename(adjusted_file_path, tmp_conf_path);
+							
+							cp(adjusted_file_path, tmp_conf_path);
+							
 							copied_conf_files = copied_conf_files == NULL ? initialize_string_map(1) : copied_conf_files;
 							set_string_map_element(copied_conf_files, adjusted_file_path, tmp_conf_path);
+						
 							//don't free tmp_conf_path, should be freed with copied_conf_files map 
 						}
 					}
@@ -775,8 +808,8 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 			for(conf_index=0; conf_index < num_conf_paths; conf_index++)
 			{
 				char* tmp_conf_path = get_string_map_element(copied_conf_files, conf_paths[conf_index]);
-				rm_r(conf_paths[conf_index]);
-				rename(tmp_conf_path, conf_paths[conf_index]);
+				
+				cp(tmp_conf_path, conf_paths[conf_index]);
 			}
 			destroy_string_map(copied_conf_files, DESTROY_MODE_FREE_VALUES, &num_conf_paths);
 			if(conf_paths != NULL ) { free_null_terminated_string_array(conf_paths); }
