@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 int copy_file(const char *source, const char *dest, int flags)
 {

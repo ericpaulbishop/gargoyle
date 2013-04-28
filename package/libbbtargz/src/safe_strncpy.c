@@ -20,7 +20,7 @@
  */
 
 #include <string.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 
 

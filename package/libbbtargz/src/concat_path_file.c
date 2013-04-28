@@ -26,7 +26,7 @@
 */
 
 #include <string.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 extern char *concat_path_file(const char *path, const char *filename)
 {

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+plugin_root=$(uci get gargoyle.plugin_options.root_drive 2>/dev/null)
+plugin_dir=$(uci get gargoyle.plugin_options.root_dir 2>/dev/null)
+if [ -n "$plugin_root" ] && [ "$plugin_root" != "root" ] ; then
+	drive_str=$(echo "$plugin_root" | sed 's/^\///g')
+	drive_str=$(echo "$drive_str"   | sed 's/\/$//g')
+	drive_str=$(echo "$drive_str"   | sed 's/\//_/g')
+
+	rm -r /plugin_root
+	ln -s "/tmp/usb_mount/$drive_str$plugin_dir" /plugin_root
+fi
+
+
+

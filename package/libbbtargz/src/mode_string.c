@@ -22,7 +22,7 @@
  */
 
 #include <stdio.h>
-#include "libbbtargz.h"
+#include "bbtargz.h"
 
 
 

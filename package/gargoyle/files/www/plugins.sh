@@ -27,11 +27,10 @@
 		echo "dest plugin_root /plugin_root" >>/etc/opkg.conf
 	fi
 
-	opkg_defs=$(opkg-more --packages-matching /^plugin\-gargoyle/  --install-destination --required-size --required-depends --description --version --will-fit plugin_root --javascript 2>/dev/null)
-	if [ -z "$opkg_defs" ] ; then
-		opkg-more --packages not_a_real_package --will-fit root --javascript
-	else
-		printf "%s\n" "$opkg_defs" 
+	pkg_info=$(gpkg info -v 'Install-Destination,Required-Size,Required-Depends,Description,Will-Fit,User-Installed' -d plugin_root -o 'js' -r /^plugin\-gargoyle/)
+	gpkg dest-info -o 'js'
+	if [ -n "$pkg_info" ] ; then
+		printf "%s\n" "$pkg_info" 
 	fi
 
 	echo "var pluginSources = [];"
