@@ -74,6 +74,14 @@ if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 	uci set fstab.@mount[0].enabled=1
 	uci set fstab.@mount[0].enabled_fsck=1
 	uci commit fstab
+
+	# copy all data
+	mkdir -p /tmp/extroot
+	mount -t ext$ext_version "$disk"1 /tmp/extroot
+	tar -C /overlay -cvf - . | tar -C /tmp/extroot -xf -
+	sync
+	umount "$disk"1
+
 	reboot
 fi
 
