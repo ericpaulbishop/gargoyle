@@ -357,9 +357,7 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 			if(adjusted_conf_path)
 			{
 				char* tmp_conf_path = dynamic_strcat(2, tmp_dir, conf_file_lines[conf_line_index] );
-				mkdir_p(tmp_conf_path,  S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH );
-				rm_r(tmp_conf_path);
-				rename(adjusted_conf_path, tmp_conf_path);
+				cp(adjusted_conf_path, tmp_conf_path);
 				set_string_map_element(copied_conf_files, adjusted_conf_path, tmp_conf_path);
 			}
 			free(adjusted_conf_path);
@@ -427,8 +425,7 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 		for(conf_index=0; conf_index < num_conf_paths; conf_index++)
 		{
 			char* tmp_conf_path = get_string_map_element(copied_conf_files, conf_paths[conf_index]);
-			rm_r(conf_paths[conf_index]);
-			rename(tmp_conf_path, conf_paths[conf_index]);
+			cp(tmp_conf_path, conf_paths[conf_index]);
 		}
 		if(conf_paths != NULL ) { free_null_terminated_string_array(conf_paths); }
 
