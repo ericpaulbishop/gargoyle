@@ -45,7 +45,7 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 	}
 
 
-
+	char description[4096];
 
 	for(package_index=0;package_index < num_all_packages; package_index++)
 	{
@@ -58,8 +58,8 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 			char* destination = get_string_map_element(pkg_info, "Install-Destination");
 			if(only_dest == NULL || safe_strcmp(only_dest, destination) == 0)
 			{
-				char* description = escape_package_variable(get_string_map_element(pkg_info, "Description"), "Description", format);
-				int print_description = (!installed_only) && description != NULL ? 1 : 0;
+				escape_package_variable(get_string_map_element(pkg_info, "Description"), "Description", format, description, 4096);
+				int print_description = (!installed_only) && description[0] != '\0'  ? 1 : 0;
 				if(format == OUTPUT_JAVASCRIPT)
 				{
 					printf("pkg_list[\"%s\"] = [\"%s%s%s%s", package_name, version, (print_description ? "\",\"" : ""),  (print_description ? description : ""), "\"];\n");
@@ -72,7 +72,6 @@ void do_list(opkg_conf* conf, string_map* parameters, int format)
 				{
 					printf("%s - %s%s%s\n", package_name, version, (print_description ? " - " : ""), (print_description ? description : ""));
 				}
-				free_if_not_null(description);
 			}
 		}
 		free_if_not_null(version);

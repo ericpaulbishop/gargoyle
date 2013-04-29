@@ -161,7 +161,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 void do_list(opkg_conf* conf, string_map* parameters, int format);
 
 /* info.c */
-char* escape_package_variable(char* var_def, char* var_name, int format);
+void escape_package_variable(char* var_def, char* var_name, int format, char* out_buf, int buf_len);
 void do_print_dest_info(opkg_conf* conf, int format);
 void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, int format);
 
