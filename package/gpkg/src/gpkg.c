@@ -48,11 +48,11 @@ int main(int argc, char** argv)
 	}
 	else if(strcmp(run_type, "remove") == 0)
 	{
-		do_remove(conf, pkgs, !force_overwrite_configs, remove_orphaned_depends, force_depends, 1);
+		do_remove(conf, pkgs, !force_overwrite_configs, remove_orphaned_depends, force_depends, 1, tmp_root);
 	}
 	else if(strcmp(run_type, "upgrade") == 0)
 	{
-		do_upgrade(conf, pkgs, !force_overwrite_configs, install_root, link_root);
+		do_upgrade(conf, pkgs, !force_overwrite_configs, install_root, link_root, tmp_root);
 	}
 	else if(strcmp(run_type, "update") == 0)
 	{
