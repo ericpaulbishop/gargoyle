@@ -1,33 +1,57 @@
 #include "gpkg.h"
 
 
-char* escape_package_variable(char* var_def, char* var_name, int format)
+void escape_package_variable(char* var_def, char* var_name, int format, char* out_buf, int buf_len)
 {
-	char* escaped = NULL;
-	if(var_def != NULL && (format == OUTPUT_JSON || format == OUTPUT_JAVASCRIPT))
+	if(out_buf != NULL && buf_len > 0)
 	{
-		char* esc_val_1 = dynamic_replace(var_def, "\\", "\\\\");
-		char* esc_val_2 = dynamic_replace(esc_val_1, "\"", "\\\"");
-		char* esc_val_3 = dynamic_replace(esc_val_2, "\n", "\\n");
-		escaped         = dynamic_replace(esc_val_3, "\r", "\\n");
-		free(esc_val_1);
-		free(esc_val_2);
-		free(esc_val_3);
+		out_buf[0] = '\0';
 	}
-	else if(var_def != NULL)
+	if(var_def != NULL && out_buf != NULL && buf_len > 0)
 	{
-		char spacer[125];
-		int varlen =strlen(var_name);
-		int vari;
-		spacer[0] = '\n';
-		for(vari=1; vari < varlen+3; vari++)
+		int index;
+		int out_index=0;
+		for(index=0; var_def[index] != '\0' && index < (buf_len-1); index++)
 		{
-			spacer[vari] = ' ';
+			if(format == OUTPUT_JSON || format == OUTPUT_JAVASCRIPT)
+			{
+				if(var_def[index] == '\\' || var_def[index] == '\"' || var_def[index] == '\n' || var_def[index] == '\r' )
+				{
+					char ch = var_def[index];
+				       	ch = (ch == '\r' || ch == '\n') ? 'n' : ch;
+					
+					
+					out_buf[out_index] = '\\';
+					out_index++;
+					out_buf[out_index] = ch;
+				}
+				else
+				{
+					out_buf[out_index] = var_def[index];
+				}
+			}
+			else
+			{
+				if(var_def[index] == '\n' || var_def[index] == '\r' )
+				{
+					int varlen =strlen(var_name);
+					int vari;
+					out_buf[out_index] = '\n';
+					for(vari=1; vari < varlen+3; vari++)
+					{
+						out_index++;
+						out_buf[out_index] = ' ';
+					}
+				}
+				else
+				{
+					out_buf[out_index] = var_def[index];
+				}
+			}
+			out_index++;
 		}
-		spacer[vari] = '\0';
-		escaped = dynamic_replace((char*)var_def, "\n", spacer);
+		out_buf[out_index] = '\0';
 	}
-	return escaped;
 }
 
 void do_print_dest_info(opkg_conf* conf, int format)
@@ -156,6 +180,8 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 		printf("{\n");
 	}
 
+	char escape_var_buf[4096];
+	char escape_ver_buf[4096];
 	int printed_a_package=0;
 	for(package_index=0;package_index < num_packages; package_index++)
 	{
@@ -197,21 +223,21 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 						printed_package_start = 1;
 						printed_a_package=1;
 					}					
-					char* escaped_version = escape_package_variable(versions[version_index], "Version", format);
+					escape_package_variable(versions[version_index], "Version", format, escape_ver_buf, 4096);
 	
 					if(format == OUTPUT_JAVASCRIPT)
 					{
-						printf("pkg_info[\"%s\"][\"%s\"] = [];\n", package_name, escaped_version);
+						printf("pkg_info[\"%s\"][\"%s\"] = [];\n", package_name, escape_ver_buf);
 					}
 					else if(format == OUTPUT_JSON)
 					{
 						if(version_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": {\n", escaped_version);
+						printf("\t\t\"%s\": {\n", escape_ver_buf);
 					}
 					else
 					{
 						printf("Package: %s\n", package_name);
-						printf("Version: %s\n", escaped_version);
+						printf("Version: %s\n", escape_ver_buf);
 					}
 	
 					unsigned long num_vars_to_print;
@@ -227,7 +253,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 							{
 								if(format == OUTPUT_JAVASCRIPT)
 								{
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = "SCANFU64";\n", package_name, escaped_version, var_name, *((uint64_t*)var_def) );
+									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = "SCANFU64";\n", package_name, escape_ver_buf, var_name, *((uint64_t*)var_def) );
 								}
 								else if(format == OUTPUT_JSON)
 								{
@@ -247,7 +273,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 								if(format == OUTPUT_JAVASCRIPT)
 								{
 									const char* end = num_deps > 0 ? "\n" : "];\n";
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = [%s", package_name, escaped_version, var_name, end );
+									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = [%s", package_name, escape_ver_buf, var_name, end );
 								}
 								else if(format == OUTPUT_JSON)
 								{
@@ -309,26 +335,25 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 							}
 							else
 							{
-								char* str_var = escape_package_variable((char*)var_def, var_name, format);
+								escape_package_variable((char*)var_def, var_name, format, escape_var_buf, 4096);
+
 								if(strcmp(var_name, "Install-Destination") == 0 && strcmp((char*)var_def, NOT_INSTALLED_STRING) == 0)
 								{
-									free(str_var);
-									str_var = strdup("Not Installed");
+									sprintf(escape_var_buf, "Not Installed");
 								}
 								if(format == OUTPUT_JAVASCRIPT)
 								{
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escaped_version, var_name, str_var );
+									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escape_ver_buf, var_name, escape_var_buf );
 								}
 								else if(format == OUTPUT_JSON)
 								{
 									if(var_index >0){ printf(",\n"); }
-									printf("\t\t\t\"%s\": \"%s\"", var_name, str_var);
+									printf("\t\t\t\"%s\": \"%s\"", var_name, escape_var_buf);
 								}
 								else
 								{
-									printf("%s: %s\n", var_name, str_var);
+									printf("%s: %s\n", var_name, escape_var_buf);
 								}
-								free(str_var);
 	
 							}
 						}

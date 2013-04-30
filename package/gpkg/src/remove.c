@@ -4,7 +4,7 @@
 
 
 
-void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced)
+void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced, char* tmp_root)
 {
 	string_map* package_data          = initialize_string_map(1);
 	string_map* matching_packages     = initialize_string_map(1);
@@ -136,7 +136,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 
 	/* create tmp dir */
 	char* tmp_dir = (char*)malloc(1024);
-	if(create_tmp_dir("/tmp", &tmp_dir) != 0)
+	if(create_tmp_dir(tmp_root == NULL ? "/tmp" : tmp_root, &tmp_dir) != 0)
 	{
 		fprintf(stderr, "ERROR: Could not create tmp dir, exiting\n");
 		exit(1);
@@ -309,6 +309,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 
 	//cleanup
 	free_package_data(package_data);
+	rm_r(tmp_dir);
 
 
 }

@@ -4,7 +4,7 @@
 #include "gpkg.h"
 
 
-void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root_name, char* link_root)
+void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root_name, char* link_root, char* tmp_root)
 {
 
 	string_map* package_data = initialize_string_map(1);
@@ -152,8 +152,8 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 	
 	free_package_data(package_data);
 	
-	do_remove(conf, pkgs, preserve_conf_files, 0, 1, 0);
-	do_install(conf, pkgs, install_root_name, link_root, 1, (!preserve_conf_files), 0, 0, NULL);
+	do_remove(conf, pkgs, preserve_conf_files, 0, 1, 0, tmp_root);
+	do_install(conf, pkgs, install_root_name, link_root, 1, (!preserve_conf_files), 0, 0, tmp_root);
 
 }
 

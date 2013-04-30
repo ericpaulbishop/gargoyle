@@ -143,7 +143,7 @@ int xsystem(const char *argv[]);
 void update(opkg_conf* conf);
 
 /* remove.c */
-void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced);
+void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remove_orphaned_depends, int force, int warn_if_forced, char* tmp_root);
 void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* package_data, char* tmp_dir, int save_conf_files, int is_orphaned_dependency);
 int run_script_if_exists(char* install_root_path, char* install_link_path, char* pkg_name, char* script_type_postfix, char* action_arg);
 
@@ -154,14 +154,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 int recursively_install(char* pkg_name, char* pkg_version, char* install_root_name, char* link_to_root, char* overlay_path, int is_upgrade, int overwrite_config, int overwrite_other_package_files, char* tmp_dir, opkg_conf* conf, string_map* package_data, string_map* install_called_pkgs);
 
 /* upgrade.c */
-void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root_name, char* link_root);
+void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char* install_root_name, char* link_root, char* tmp_root);
 
 
 /* list.c */
 void do_list(opkg_conf* conf, string_map* parameters, int format);
 
 /* info.c */
-char* escape_package_variable(char* var_def, char* var_name, int format);
+void escape_package_variable(char* var_def, char* var_name, int format, char* out_buf, int buf_len);
 void do_print_dest_info(opkg_conf* conf, int format);
 void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, int format);
 

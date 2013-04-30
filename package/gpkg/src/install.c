@@ -135,6 +135,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			if(err != 0)
 			{
 				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				rm_r(tmp_dir);
 				exit(1);
 			}
 			string_map* tmp_control_pkg_data = initialize_string_map(1);
@@ -177,6 +178,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			if(err != 0)
 			{
 				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				rm_r(tmp_dir);
 				exit(1);
 			}
 
@@ -281,6 +283,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		if(install_pkg_data == NULL || install_status == NULL)
 		{
 			fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+			rm_r(tmp_dir);
 			exit(1);
 		}
 		if(strstr(install_status, " installed") != NULL)
@@ -291,7 +294,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				free_package_data(package_data);
 				string_map* rm_pkg = initialize_string_map(1);
 				set_string_map_element(rm_pkg, pkg_name, alloc_depend_def(NULL));
-				do_remove(conf, rm_pkg, (overwrite_config ? 0 : 1), 0, 1, 0);
+				do_remove(conf, rm_pkg, (overwrite_config ? 0 : 1), 0, 1, 0, tmp_root);
 				
 				//restart install
 				return do_install(conf, pkgs, install_root_name, link_root_name, is_upgrade, overwrite_config, overwrite_other_package_files, force_reinstall, tmp_root);
@@ -310,6 +313,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		if(unsatisfied_dep_err != NULL)
 		{
 			fprintf(stderr, "%s\n", unsatisfied_dep_err);
+			rm_r(tmp_dir);
 			exit(1);
 		}
 	}
@@ -354,6 +358,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	if(combined_size >= root_size )
 	{
 		fprintf(stderr, "ERROR: Not enough space in destination %s to install specified packages:\n\t%s\n\n", install_root_name, all_pkg_list_str);
+		rm_r(tmp_dir);
 		exit(1);
 	}
 
