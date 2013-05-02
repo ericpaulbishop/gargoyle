@@ -7,8 +7,10 @@ start()
 	gdisplay=$(uci get gargoyle.system.themes 2>/dev/null)
 	webroot=$(uci get gargoyle.global.web_root 2>/dev/null)
 	webroot=${webroot:-/www}
+	theme_root=$(uci get gargoyle.global.theme_root 2>/dev/null)
+	theme_root=${theme_root:-/thmes}
 
-	set -- "${webroot}"/themes/*
+	set -- "${webroot}"/"${theme_root}"/*
 	num_themes="$#"
 
 	if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
@@ -21,4 +23,15 @@ start()
 		uci del gargoyle.system.themes
 		uci commit gargoyle
 	fi
+
+	
+	#if current theme doesn't exist anymore switch back to default
+	selected_theme=$(uci get gargoyle.global.theme  2>/dev/null)
+	if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}" ] ; then
+		if [ -e "${webroot}"/"${theme_root}"/"default" ] ; then
+			#should always have default theme, but check above to make sure
+			uci set gargoyle.global.theme=default
+		fi
+	fi
+
 }
