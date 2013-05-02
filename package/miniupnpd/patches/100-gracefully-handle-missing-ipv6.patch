@@ -67,7 +67,7 @@
  
  	if(bind(s, (struct sockaddr *)&listenname, listenname_len) < 0)
  	{
-@@ -1253,6 +1250,9 @@ main(int argc, char * * argv)
+@@ -1254,6 +1251,9 @@ main(int argc, char * * argv)
  	int sudp = -1;		/* IP v4 socket for receiving SSDP */
  #ifdef ENABLE_IPV6
  	int sudpv6 = -1;	/* IP v6 socket for receiving SSDP */
@@ -77,7 +77,7 @@
  #endif
  #ifdef ENABLE_NATPMP
  	int * snatpmp = NULL;
-@@ -1337,7 +1337,7 @@ main(int argc, char * * argv)
+@@ -1338,7 +1338,7 @@ main(int argc, char * * argv)
  	{
  
  		/* open socket for HTTP connections. Listen on the 1st LAN address */
@@ -97,8 +97,8 @@
  		i++;
  #endif
  	}
-@@ -406,6 +404,9 @@ SendSSDPNotifies(int s, const char * hos
- 	char bufr[512];
+@@ -495,6 +493,9 @@ SendSSDPNotifies(int s, const char * hos
+ 	int i=0;
  	char ver_str[4];
  
 +	if (s < 0)
@@ -107,7 +107,7 @@
  	memset(&sockname, 0, sizeof(sockname));
  #ifdef ENABLE_IPV6
  	if(ipv6)
-@@ -739,6 +740,10 @@ SendSSDPGoodbye(int * sockets, int n_soc
+@@ -868,6 +869,10 @@ SendSSDPGoodbye(int * sockets, int n_soc
  #ifdef ENABLE_IPV6
  		ipv6 = j & 1;
  #endif
