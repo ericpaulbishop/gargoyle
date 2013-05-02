@@ -3,6 +3,7 @@
 START=56
 MOUNT_TABLE_FILE="/tmp/mounted_usb_storage.tab"
 
+USB_LOCKFILE="/tmp/usb_restart.lock"
 got_lock=0
 
 
@@ -16,8 +17,8 @@ usb_lock()
 {
 	got_lock=0
 	local timeout=15
-	if [ ! -e /tmp/usb_restart.lock ] ; then
-		touch /tmp/usb_restart.lock
+	if [ ! -e "$USB_LOCKFILE" ] ; then
+		touch "$USB_LOCKFILE"
 		got_lock=1
 	fi
 	echo "$got_lock"
@@ -25,7 +26,7 @@ usb_lock()
 
 usb_unlock()
 {
-	rm -rf /tmp/usb_restart.lock
+	rm -rf "$USB_LOCKFILE"
 }
 
 
