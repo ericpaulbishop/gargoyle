@@ -109,9 +109,9 @@ start() {
 
 		local iface
 		for iface in ${intiface:-lan}; do
-			local ipnet
-			network_get_subnet ipnet "$iface" && {
-				echo "listening_ip=$ipnet" >>$tmpconf
+			local device
+			network_get_device device "$iface" && {
+				echo "listening_ip=$device" >>$tmpconf
 			}
 		done
 
