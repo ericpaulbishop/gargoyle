@@ -3,6 +3,7 @@
 START=56
 MOUNT_TABLE_FILE="/tmp/mounted_usb_storage.tab"
 
+USB_LOCKFILE="/tmp/usb_restart.lock"
 got_lock=0
 
 
@@ -16,8 +17,8 @@ usb_lock()
 {
 	got_lock=0
 	local timeout=15
-	if [ ! -e /tmp/usb_restart.lock ] ; then
-		touch /tmp/usb_restart.lock
+	if [ ! -e "$USB_LOCKFILE" ] ; then
+		touch "$USB_LOCKFILE"
 		got_lock=1
 	fi
 	echo "$got_lock"
@@ -25,7 +26,7 @@ usb_lock()
 
 usb_unlock()
 {
-	rm -rf /tmp/usb_restart.lock
+	rm -rf "$USB_LOCKFILE"
 }
 
 
@@ -137,6 +138,21 @@ do_start()
 			echo "$d	/tmp/usb_mount/$id	/tmp/usb_mount/dev_$did	$type	$disk_size	$disk_free"  >> "$MOUNT_TABLE_FILE"
 		fi
 	done
+
+
+	#update plugin links last, so if this takes a bit of time everything is already mounted and will work
+	plugin_drive=$(uci get gargoyle.plugin_options.root_drive 2>/dev/null)
+	plugin_root=$(uci get gargoyle.plugin_options.root_dir 2>/dev/null)
+	if [ -f "$MOUNT_TABLE_FILE" ] ;  then
+		while read device_path mountpoint_path _; do		
+			if [ -n "${plugin_drive}" ] && [ "${plugin_drive}" = "${device_path}" ] ; then
+				echo do_plugin_link "${plugin_drive}" "${plugin_root}" "${mountpoint_path}"
+				
+				do_plugin_link "${plugin_drive}" "${plugin_root}" "${mountpoint_path}"
+			fi
+		done < "$MOUNT_TABLE_FILE"
+	fi
+
 }
 
 stop()
@@ -171,10 +187,73 @@ do_swapoff()
 	done < /proc/swaps
 }
 
+
+do_plugin_link()
+{
+	plugin_drive="$1"
+	plugin_root="$2"
+	mountpoint="$3"
+	
+	IFS_ORIG="$IFS"                                                          
+	IFS_LINEBREAK="$(printf '\n\r')"         
+	IFS="$IFS_LINEBREAK"
+	
+	if [ -d "${mountpoint}${plugin_root}/usr/lib/opkg/info" ] ; then
+		echo links="\$("cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/"*".linked ")"
+		links=$(cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/*.linked 2>/dev/null)
+		echo "links=$links"
+		if [ -n "$links" ] ; then
+			for link in $links ; do
+				echo "testing $link"
+				if [ ! -e "$link" ] ; then
+					echo "linking $link"
+					mkdir -p "$link"
+					rmdir "$link"
+					ln -s "/plugin_root${plugin_dir}${link}" "$link"
+				fi
+			done
+		fi
+	fi
+	IFS="$IFS_ORIG"
+}
+
+do_plugin_unlink()
+{
+	plugin_drive="$1"
+	plugin_root="$2"
+	mountpoint="$3"
+
+	IFS_ORIG="$IFS"                                                          
+	IFS_LINEBREAK="$(printf '\n\r')"         
+	IFS="$IFS_LINEBREAK"
+	
+	if [ -d "${mountpoint}${plugin_root}/usr/lib/opkg/info" ] ; then
+		links=$(cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/*.linked 2>/dev/null)
+		if [ -n "$links" ] ; then
+			for link in $links ; do
+				if [ -h "$link" ] ; then
+					rm "$link"
+				fi
+			done
+		fi
+	fi
+	IFS="$IFS_ORIG"
+
+
+}
+
+
 do_stop()
 {
+	plugin_drive=$(uci get gargoyle.plugin_options.root_drive 2>/dev/null)
+	plugin_root=$(uci get gargoyle.plugin_options.root_dir 2>/dev/null)
 	if [ -f "$MOUNT_TABLE_FILE" ];  then
 		while read device_path mountpoint_path _; do
+			
+			if [ -n "${plugin_drive}" ] && [ "${plugin_drive}" = "${device_path}" ] ; then
+				do_plugin_unlink "${plugin_drive}" "${plugin_root}" "${mountpoint_path}"
+			fi
+
 			# Cleanup mountpoint and symlink.
 			if [ -d "${mountpoint_path}" ] ; then
 				umount "${mountpoint_path}" >/dev/null 2>&1

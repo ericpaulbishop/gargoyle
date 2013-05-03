@@ -1,24 +1,63 @@
 #!/bin/sh /etc/rc.common
 
-START=49
+START=99
+USB_LOCKFILE="/tmp/usb_restart.lock"
+
+
+usb_lock()
+{
+	got_lock=0
+	local timeout=15
+	if [ ! -e "$USB_LOCKFILE" ] ; then
+		touch "$USB_LOCKFILE"
+		got_lock=1
+	fi
+	echo "$got_lock"
+}
+
+usb_unlock()
+{
+	rm -rf "$USB_LOCKFILE"
+}
+
 
 start()
 {
 	gdisplay=$(uci get gargoyle.system.themes 2>/dev/null)
 	webroot=$(uci get gargoyle.global.web_root 2>/dev/null)
 	webroot=${webroot:-/www}
+	theme_root=$(uci get gargoyle.global.theme_root 2>/dev/null)
+	theme_root=${theme_root:-themes}
+	common_css=$(uci get gargoyle.global.common_css 2>/dev/null)
+	common_css=${common_css:-common.css}
 
-	set -- "${webroot}"/themes/*
-	num_themes="$#"
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
 
-	if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
-		uci set gargoyle.display.system_themes='Themes'
-		uci set gargoyle.scripts.system_themes='themes.sh'
-		uci set gargoyle.system.themes='311'
-		uci commit gargoyle
+		set -- $(find "${webroot}"/"${theme_root}"/ -name "common_css")
+		num_themes="$#"
+
+		if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
+			uci set gargoyle.display.system_themes='Themes'
+			uci set gargoyle.scripts.system_themes='themes.sh'
+			uci set gargoyle.system.themes='311'
+			uci commit gargoyle
+		fi
+		if [ -n "${gdisplay}" ] && [ "${num_themes}" = 1 ] ; then
+			uci del gargoyle.system.themes
+			uci commit gargoyle
+		fi
+
+	
+		#if current theme doesn't exist anymore switch back to default
+		selected_theme=$(uci get gargoyle.global.theme  2>/dev/null)
+		if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}"/"${common_css}"  ] ; then
+			if [ -e "${webroot}"/"${theme_root}"/"default"/"$comon_css" ] ; then
+				#should always have default theme, but check above to make sure
+				uci set gargoyle.global.theme=default
+			fi
+		fi
+		usb_unlock
 	fi
-	if [ -n "${gdisplay}" ] && [ "${num_themes}" = 1 ] ; then
-		uci del gargoyle.system.themes
-		uci commit gargoyle
-	fi
+
 }
