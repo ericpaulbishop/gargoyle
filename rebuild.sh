@@ -326,9 +326,11 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
-			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+
 		else
-			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+
 		fi
 
 
@@ -400,9 +402,11 @@ for target in $targets ; do
 
 
 			if [ "$verbosity" = "0" ] ; then
-				make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version"
+				make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+
 			else
-				make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version"
+				make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+
 			fi
 
 
