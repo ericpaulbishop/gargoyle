@@ -22,6 +22,13 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/gpkg
 
 include $(INCLUDE_DIR)/package.mk
 
+
+NUMERIC_GARGOYLE_VERSION:=$(shell echo '$(GARGOYLE_VERSION)' |  grep -o "[0-9\.xX]*")
+MAJOR_GARGOYLE_VERSION:=$(shell echo '$(NUMERIC_GARGOYLE_VERSION)' | awk ' BEGIN { FS="." } ; { if($$2 % 2 == 0){ print $$1"."$$2 ; } else { $$2=$$2+1 ; print $$1"."$$2 } }' )
+GARGOYLE_PACKAGE_VERSION:=$(shell usemajor=$$(echo $(NUMERIC_GARGOYLE_VERSION) | grep "[xX]") ; if [ -n "$$usemajor" ] ; then echo $(MAJOR_GARGOYLE_VERSION) ; else echo $(NUMERIC_GARGOYLE_VERSION) ; fi )
+
+
+
 define Package/gpkg
 	SECTION:=utils
 	CATEGORY:=Utilities
@@ -64,6 +71,9 @@ define Package/gpkg/install
 	$(CP) ./files/gpkg-uci-defaults $(1)/etc/uci-defaults
 	$(CP) ./files/opkg.gpkg.tmp $(1)/etc/
 	$(VERSION_SED) $(1)/etc/opkg.gpkg.tmp
+
+	$(SED) 's,%G,$(GARGOYLE_PACKAGE_VERSION),g'
+
 endef
 
 define Package/gpkg/postinst
