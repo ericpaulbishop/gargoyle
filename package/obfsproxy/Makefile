@@ -5,15 +5,15 @@ PKG_NAME:=obfsproxy
 PKG_VERSION:=0.1.4
 PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
+PKG_BUILD_DIR:=$(BUILD_DIR)/obfsproxy-legacy
 
 PKG_FIXUP:=autoreconf
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=git://gitweb.torproject.org/obfsproxy.git
-PKG_SOURCE_VERSION:=obfsproxy-0.1.4
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE_URL:=git://gitweb.torproject.org/pluggable-transports/obfsproxy-legacy.git
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_SUBDIR:=obfsproxy
+PKG_SOURCE_VERSION:=obfsproxy-0.1.4
+PKG_SOURCE_SUBDIR:=obfsproxy-legacy
 
 include $(INCLUDE_DIR)/package.mk
 
