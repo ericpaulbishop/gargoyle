@@ -34,7 +34,7 @@ start()
 	got_lock=$(usb_lock)
 	if [ "$got_lock" = "1" ] ; then
 
-		set -- $(find "${webroot}"/"${theme_root}"/ -name "common_css")
+		set -- $(find "${webroot}"/"${theme_root}"/ -name "${common_css}")
 		num_themes="$#"
 
 		if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
