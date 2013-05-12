@@ -156,14 +156,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				if(pkg_info != NULL)
 				{
 					err = 0;
-					set_string_map_element(pkg_info, "Install-File-Location", pkg_file);
+					set_string_map_element(pkg_info, "Install-File-Location", strdup(pkg_file));
 					set_string_map_element(pkg_info, "Version", version); //we need to save this, since we are going to set a special version to make sure data doesn't get over-written later, also no need to free version now
 
 					char* special_version = dynamic_strcat(2, version, "@@_FILE_INSTALL_VERSION_@@");
 					char** new_version_criteria = malloc(3*sizeof(char*));
 					new_version_criteria[0] = strdup("=");
 					new_version_criteria[1] = special_version;
-					new_version_criteria[0] = NULL;
+					new_version_criteria[2] = NULL;
 					
 					string_map* all_current_versions = get_string_map_element(package_data, pkg_name);
 					if(all_current_versions == NULL)
@@ -172,6 +172,12 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 						set_string_map_element(package_data, pkg_name, all_current_versions);
 					}
 					set_string_map_element(all_current_versions, special_version, pkg_info);
+					set_string_map_element(all_current_versions, LATEST_VERSION_STRING, special_version);
+				
+					free(pkg_names[pkg_name_index]);
+					pkg_names[pkg_name_index] = strdup(pkg_name);
+				
+					set_string_map_element(pkgs, pkg_name, copy_null_terminated_string_array(new_version_criteria));	
 				}
 			}
 			free_null_terminated_string_array(ctrl_name_list);
@@ -186,7 +192,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			free_if_not_null(tmp_control_prefix);
 			free_if_not_null(tmp_control_name);
 			rm_r(tmp_control);
-
 		}
 
 
@@ -581,7 +586,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 			}
 		}
 	}
-
+	
 	if(install_root_path == NULL || ( src_id == NULL && install_pkg_data == NULL) || (pkg_filename == NULL && install_pkg_data == NULL) )
 	{
 		//sanity check
@@ -605,9 +610,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		{
 			fprintf(stderr, "ERROR: Could determine download  URL for package %s\n", pkg_name);
 		}
-
 	}
-
 	if(err == 0 && src_file_path == NULL)
 	{
 		
