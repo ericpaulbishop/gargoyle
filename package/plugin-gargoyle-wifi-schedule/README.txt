@@ -38,4 +38,6 @@ v1.1.1	write temp crontabs to emptied file
 		fixed issue of displaying wifi status during an hour where wifi goes up/down on XX minutes
 v1.1.2	fix correlating current time to schedule when displaying wifi status (off by 1 day)
 		minor beautification + move legend to top of fieldset
+		
+	r2	bugfix displaying wifi radio status when scheduled to go down during the current hour
 */
