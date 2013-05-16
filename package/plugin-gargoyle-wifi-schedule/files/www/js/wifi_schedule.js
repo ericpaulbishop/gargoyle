@@ -615,7 +615,7 @@ function SetWifiStatus(shell_iwconfig) {
 				if (Wi_Fi > 0) {
 					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? "active (not scheduled)" : "active (scheduled)") );
 				} else {
-					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? "disabled (scheduled)" : "disabled (not scheduled)") );
+					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? "disabled (not scheduled)" : "disabled (scheduled)") );
 				}
 			}
 		}
