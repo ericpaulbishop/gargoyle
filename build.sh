@@ -17,7 +17,16 @@ set_constant_variables()
 	#cores / build threads
 	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
 	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
-	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	
+	#################################################################################################
+	# As of Attitude Adjustment r36470 multi-threaded builds often fail (race condition somewhere)
+	#
+	# Until this can be resolved, I am temporarily setting num_build_threads back to 1
+	# Unfortunately, this will make the build take WAY longer unfortunately, but that's 
+	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
+	#################################################################################################
+	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	num_build_threads=1
 }
 
 set_version_variables()
