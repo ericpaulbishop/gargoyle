@@ -222,12 +222,14 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 	else
 		js_compress="true"
 		rm -rf "$compress_js_dir"
-		cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
-		cd "$compress_js_dir"
-		jsfiles=*.js
-		for jsf in $jsfiles ; do
-			uglifyjs "$jsf" > "$jsf.cmp"
-			mv "$jsf.cmp" "$jsf"
+		mkdir "$compress_js_dir"
+		for jsdir in $(find $(pwd) -path "*/www/js"); do
+ 			cd "$jsdir"
+ 			jsfiles=*.js
+ 			for jsf in $jsfiles ; do
+ 				uglifyjs "$jsf" > "$jsf.cmp"
+ 				mv "$jsf.cmp" "$jsf"
+ 			 done
 		done
 	fi
 	cd "$top_dir"
