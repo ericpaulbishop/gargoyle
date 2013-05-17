@@ -120,8 +120,8 @@ do_start()
 		esac
 
 		if [ -z "$err" ] && [ "$type" != "Linux swap" ] ; then
-			local disk_size=$(df  | grep "$d" | awk '{ print $2 }')
-			local disk_free=$(df  | grep "$d" | awk '{ print $4 }')
+			local disk_size=$(df  | grep "$d" | awk '{ print $2 }' | head -n 1)
+			local disk_free=$(df  | grep "$d" | awk '{ print $4 }' | head -n 1)
 			if [ -z "$disk_size" ] ; then disk_size="-" ; fi
 			if [ -z "$disk_free" ] ; then disk_size="-" ; fi
 			if [ -n "$disk_size" ] && [ "${disk_size}" != '-' ]; then disk_size=$(($disk_size*1024)) ; fi
