@@ -146,7 +146,6 @@ do_js_compress()
 	mkdir "$compress_js_dir"
 	escaped_package_dir=$(echo "$top_dir/package/" | sed 's/\//\\\//g' ) ;
 	for jsdir in $(find ${top_dir}/package -path "*/www/js") ; do
-		echo "jsdir = $jsdir"
 		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
 		mkdir -p "$compress_js_dir/$pkg_rel_path"
 		cp "$jsdir/"*.js "$compress_js_dir/$pkg_rel_path/"
@@ -158,7 +157,6 @@ do_js_compress()
 	 	done
 	done
 	cd "$top_dir"
-	echo "done"
 }
 
 
