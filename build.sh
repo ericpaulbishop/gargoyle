@@ -328,8 +328,6 @@ for target in $targets ; do
 		cp -r "$compress_js_dir/"* "$target-src/package/"
 	fi
 
-	echo "TEST EXIT"
-	exit;
 
 	# specify default build profile	
 	default_profile="default"
