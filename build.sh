@@ -134,6 +134,9 @@ EOF
 
 do_js_compress()
 {
+	uglifyjs_arg1="$1"
+	uglifyjs_arg2="$2"
+
 	rm -rf "$compress_js_dir"
 	mkdir "$compress_js_dir"
 	escaped_package_dir=$(echo "$top_dir/package/" | sed 's/\//\\\//g' ) ;
@@ -144,7 +147,11 @@ do_js_compress()
 		cd "$compress_js_dir/$pkg_rel_path/"
 	 	
 		for jsf in *.js ; do
-	 		uglifyjs "$jsf" > "$jsf.cmp"
+	 		if [ -n "$uglifyjs_arg2" ] ; then
+				"$uglifyjs_arg1" "$uglifyjs_arg2" "$jsf" > "$jsf.cmp"
+			else
+				"$uglifyjs_arg1" "$jsf" > "$jsf.cmp"
+			fi
 	 		mv "$jsf.cmp" "$jsf"
 	 	done
 	done
@@ -221,7 +228,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
 		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
 			js_compress="true"
-			do_js_compress
+			do_js_compress "$node_bin" "$uglifyjs_bin"
 		else
 			js_compress="false"
 			echo ""
@@ -232,7 +239,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		fi
 	else
 		js_compress="true"
-		do_js_compress
+		do_js_compress "uglifyjs"
 	fi
 	cd "$top_dir"
 fi
@@ -320,6 +327,9 @@ for target in $targets ; do
 	if [ "$js_compress" = "true" ] ; then
 		cp -r "$compress_js_dir/"* "$target-src/package/"
 	fi
+
+	echo "TEST EXIT"
+	exit;
 
 	# specify default build profile	
 	default_profile="default"
