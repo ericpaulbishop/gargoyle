@@ -140,6 +140,32 @@ EOF
 
 }
 
+do_js_compress()
+{
+	uglifyjs_arg1="$1"
+	uglifyjs_arg2="$2"
+
+	rm -rf "$compress_js_dir"
+	mkdir "$compress_js_dir"
+	escaped_package_dir=$(echo "$top_dir/package/" | sed 's/\//\\\//g' ) ;
+	for jsdir in $(find ${top_dir}/package -path "*/www/js") ; do
+		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
+		mkdir -p "$compress_js_dir/$pkg_rel_path"
+		cp "$jsdir/"*.js "$compress_js_dir/$pkg_rel_path/"
+		cd "$compress_js_dir/$pkg_rel_path/"
+	 	
+		for jsf in *.js ; do
+	 		if [ -n "$uglifyjs_arg2" ] ; then
+				"$uglifyjs_arg1" "$uglifyjs_arg2" "$jsf" > "$jsf.cmp"
+			else
+				"$uglifyjs_arg1" "$jsf" > "$jsf.cmp"
+			fi
+	 		mv "$jsf.cmp" "$jsf"
+	 	done
+	done
+	cd "$top_dir"
+}
+
 
 
 ######################################################################################################
@@ -211,14 +237,8 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
 		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
 			js_compress="true"
-			rm -rf "$compress_js_dir"
-			cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
-			cd "$compress_js_dir"
-			jsfiles=*.js
-			for jsf in $jsfiles ; do	
-				"$node_bin" "$uglifyjs_bin" "$jsf" > "$jsf.cmp"
-				mv "$jsf.cmp" "$jsf"
-			done
+			do_js_compress "$node_bin" "$uglifyjs_bin"
+	
 		else
 			js_compress="false"
 			echo ""
@@ -229,14 +249,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 		fi
 	else
 		js_compress="true"
-		rm -rf "$compress_js_dir"
-		cp -r "package/gargoyle/files/www/js" "$compress_js_dir"
-		cd "$compress_js_dir"
-		jsfiles=*.js
-		for jsf in $jsfiles ; do
-			uglifyjs "$jsf" > "$jsf.cmp"
-			mv "$jsf.cmp" "$jsf"
-		done
+		do_js_compress "uglifyjs"
 	fi
 	cd "$top_dir"
 fi
@@ -274,8 +287,7 @@ for target in $targets ; do
 	
 		#copy compressed javascript to build directory
 		if [ "$js_compress" = "true" ] ; then
-			rm -rf "$target-src/package/gargoyle/files/www/js"
-			cp -r  "$compress_js_dir" "$target-src/package/gargoyle/files/www/js"
+			cp -r "$compress_js_dir/"* "$target-src/package/"
 		fi
 
 		# specify default build profile	
