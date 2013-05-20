@@ -274,17 +274,6 @@ function incrementColor(rgb, increment)
 }
 function getColorStr(rgb)
 {
-	toHex = function(num)
-	{
-		num = Math.floor(num);
-		h=num.toString(16);
-		h = h.length == 1 ? "0" + h : h;
-		return h;
-	}
-	return "#" + toHex(rgb[0]) + toHex(rgb[1]) + toHex(rgb[2]);
-}
-function getColorStr(rgb)
-{
 	function toHex(num) { return num < 16 ? "0" + Math.floor(num).toString(16) : Math.floor(num).toString(16) }
 	return "#" + toHex(rgb[0]) + toHex(rgb[1]) + toHex(rgb[2]);
 }
