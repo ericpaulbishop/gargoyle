@@ -57,6 +57,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 {
 	string_map* package_data = initialize_string_map(1);
 	string_map* matching_packages = initialize_string_map(1);
+	string_map* pkgs_from_file = initialize_string_map(1);
 	unsigned long num_destroyed;
 
 
@@ -176,8 +177,10 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				
 					free(pkg_names[pkg_name_index]);
 					pkg_names[pkg_name_index] = strdup(pkg_name);
+
 				
 					set_string_map_element(pkgs, pkg_name, copy_null_terminated_string_array(new_version_criteria));	
+					set_string_map_element(pkgs_from_file, pkg_name, strdup("D"));
 				}
 			}
 			free_null_terminated_string_array(ctrl_name_list);
@@ -333,8 +336,18 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	set_string_map_element(parameters, "package-list", install_pkgs_map);
 	
 	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0);
+	
+	unsigned long from_file_pkg_list_len;
+	char** from_file_pkg_list = get_string_map_keys(pkgs_from_file, &from_file_pkg_list_len);
+	int from_file_index;
+	for(from_file_index=0; from_file_index < from_file_pkg_list_len; from_file_index++)
+	{
+		char* old = set_string_map_element(matching_packages, from_file_pkg_list[from_file_index], strdup("D"));
+		free_if_not_null(old);
+	}
+	free_null_terminated_string_array(from_file_pkg_list);
 	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
-
+	
 
 
 	
@@ -355,7 +368,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		char* next_size_str = get_string_map_element(pkg, "Installed-Size");
 		uint64_t next_size = 0;
 		if(sscanf(next_size_str,  SCANFU64, &next_size) > 0)
-		{	
+		{
 			combined_size = combined_size + next_size; 
 		} 
 	}
