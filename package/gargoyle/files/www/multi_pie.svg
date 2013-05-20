@@ -7,7 +7,7 @@
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
 
-<script xlink:href="js/svg pie multi.js"/>
+<script xlink:href="js/svg_pie_multi.js"/>
 
 <g id="pie_container"></g>
 

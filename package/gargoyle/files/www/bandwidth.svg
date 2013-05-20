@@ -6,7 +6,7 @@
 	version 2.0. 
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
-<script xlink:href="js/svg bandwidth.js"/>
+<script xlink:href="js/svg_bandwidth.js"/>
 
 <rect id='graph-border' x='1' y='1' width='450' height='300' fill='none' stroke='white' stroke-width='1px' shape-rendering="crispEdges" />
 
