@@ -57,7 +57,7 @@
 		<input type='button' value='Save changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
 		<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" >Proszę czekać na wprowadzenie zmian...</span>
+	<span id="update_container" >Please wait while new settings are applied. . .</span>
 </form>
 
 <script>
