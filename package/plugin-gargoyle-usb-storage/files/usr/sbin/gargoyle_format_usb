@@ -81,8 +81,6 @@ if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 	tar -C /overlay -cvf - . | tar -C /tmp/extroot -xf -
 	sync
 	umount "$disk"1
-
-	reboot
 fi
 
 rm /tmp/usb_restart.lock
