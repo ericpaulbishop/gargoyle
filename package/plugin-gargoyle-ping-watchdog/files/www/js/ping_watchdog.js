@@ -23,6 +23,16 @@ function saveChanges()
 	var labelIds=["address_to_ping_label","ping_interval_label","startup_delay_label","failure_count_label"];
 	var functions = [validateIP, test59, test999, test10];
 	var errors = proofreadFields(addIds, labelIds, functions, [0,0,0,0], addIds, document);
+
+	if(failure_action == "custom")
+	{
+		failure_action = document.getElementById("script").value;
+		if(failure_action == "")
+		{
+			errors.push("You must add the script to execute");
+		}
+	}
+
 	if (errors.length > 0)
 	{
 		errorString = errors.join("\n") + "\n\nChanges could not be applied.";
@@ -37,7 +47,7 @@ function saveChanges()
 	commands.push("cat /etc/crontabs/root | grep -v \"/usr/lib/gargoyle/ping_watchdog.sh\" > /tmp/tmp.cron");
 	if (ping_watchdog_enable)
 	{
-		commands.push("echo \"*/" + ping_interval + " * * * * /usr/lib/gargoyle/ping_watchdog.sh " + startup_delay + " " + failure_count + " " + address_to_ping + " " + failure_action  +" \" >>/tmp/tmp.cron");
+		commands.push("echo \"*/" + ping_interval + " * * * * /usr/lib/gargoyle/ping_watchdog.sh " + startup_delay + " " + failure_count + " " + address_to_ping + " " + failure_action.replace(/"/g,"\\\"")  +" \" >>/tmp/tmp.cron");
 	}
 	commands.push("mv /tmp/tmp.cron /etc/crontabs/root");
 	commands.push("/etc/init.d/cron restart");
@@ -80,7 +90,18 @@ function resetData()
 					document.getElementById("startup_delay").value = ping_data[6];
 					document.getElementById("failure_count").value = ping_data[7];
 					document.getElementById("address_to_ping").value = ping_data[8]
-					document.getElementById("failure_action").value = ping_data[9];
+					if(ping_data[9] == "wan" || ping_data[9] == "reboot")
+					{
+						document.getElementById("failure_action").value = ping_data[9];
+					}
+					else
+					{
+						document.getElementById("failure_action").value = "custom";
+						var script = "";
+						for(i=9;i<ping_data.length;i++) {script = script + ping_data[i] + " ";}
+						document.getElementById("script").value = script;
+					}
+					showScript(ping_data[9]);
 				}
 			}
 			unlockFields();
@@ -98,4 +119,10 @@ function unlockFields()
 	{
 		setElementEnabled(document.getElementById(ids[idx]), ping_watchdog_enable, document.getElementById(ids[idx]).value);
 	}
+}
+
+function showScript(action)
+{
+	var show=action == "wan" || action == "reboot";
+	setVisibility(["custom_script"],[!show]);
 }

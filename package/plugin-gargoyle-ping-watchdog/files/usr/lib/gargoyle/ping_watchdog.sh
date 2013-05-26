@@ -22,6 +22,10 @@ if [ "$PR" = "0" ]; then
 			logger -t $0 "WAN Restart"
 			(ifdown wan; sleep 5; ifup wan) &
 			;;
+		*)
+			logger -t $0 "Run custom script"
+			($4) &
+			;;
 	esac
 fi
 

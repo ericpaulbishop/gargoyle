@@ -46,12 +46,20 @@
 		</div>
 		<div>
 			<label class='leftcolumn' for='failure_action' id='failure_action_label' >Action:</label>
-			<select class='rightcolumn' id='failure_action' >
+			<select class='rightcolumn' id='failure_action' onchange='showScript(this.value);' >
 				<option value='wan'>WAN Reconnect</option>
 				<option value='reboot'>Reboot</option>
+				<option value='custom'>Run custom script</option>
 			</select>
-
+			<div id='custom_script' style='display: none;'>
+				<label class='leftcolumn' for='script' id='script_label' >Script:</label>
+				<input class='rightcolumn' type='text' id='script' size='30' />
+				<div class="rightcolumnonly">
+					<em>If the command contains spaces, it must be given in quotes</em>
+				</div>
+			</div>
 		</div>
+
 	</fieldset>
 	<div id="bottom_button_container">
 		<input type='button' value='Save changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
