@@ -40,6 +40,8 @@
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
 		fi
 	done
+	echo "var extroot_enabled=\""$(mount | grep "/dev/sd.*on /overlay" | wc -l)"\";"
+	echo "var extroot_drive=\""$(mount | awk '/\/dev\/sd.*on \/overlay/ {print $1}')"\";"
 ?>
 //-->
 </script>
@@ -160,6 +162,12 @@
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>
+</fieldset>
+
+<fieldset id="extroot_fieldset" style="display:none;">
+	<legend class="sectionheader">Extroot</legend>
+	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="Disable extroot" id="extoot_button" class="default_button" onclick="disableExtroot();" /></span>
+	<span class="rightcolumn"><em>Extroot detected on <b><span id="extroot_drive"></span></b>.</em></span>
 </fieldset>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>

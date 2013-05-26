@@ -826,6 +826,12 @@ function resetData()
 	var vis = (drivesWithNoMounts.length > 0);
 	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container", "extroot_container"],  [ (!vis), vis, vis, vis, vis, vis, vis ] )
 	updateFormatPercentages()
+
+	document.getElementById("extroot_fieldset").style.display = extroot_enabled == "1" ? "block" : "none";
+	if(extroot_enabled == "1")
+	{
+		setChildText("extroot_drive", extroot_drive);
+	}
 }
 
 //returns (boolean) whether drive list is empty
@@ -1448,6 +1454,29 @@ function doDiskFormat()
 	else
 	{
 		setControlsEnabled(true)
+	}
+}
+
+function disableExtroot()
+{
+	if(confirm("If you disable extroot, all settings and installed plugins may be lost. After disabling extroot, router requires a reboot. Continue?"))
+	{
+		setControlsEnabled(false, true, "Disabling extroot...");
+		var commands = "/usr/lib/gargoyle/umount_extroot.sh"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				setControlsEnabled(true);
+				reboot();
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+	else
+	{
+		setControlsEnabled(true);
 	}
 }
 
