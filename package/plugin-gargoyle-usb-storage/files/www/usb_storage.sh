@@ -31,12 +31,6 @@
 	for d in ${drives}; do
 		if awk -v devpath="^${d}[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
 			size=$(( 1024 * $(fdisk -s "$d") ))
-			PART=$(echo ${d##/*/})
-			if [ -e "/sys/class/block/$PART/device/model" ]; then
-				V=$(cat /sys/class/block/$PART/device/vendor)
-				P=$(cat /sys/class/block/$PART/device/model)
-				d="$V $P"
-			fi
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
 		fi
 	done
