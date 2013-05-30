@@ -195,6 +195,8 @@
 <?
 	if [ -e /tmp/strength.txt ]; then
 		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "(no data)"} else {printf "%d%%, %ddBm\n", C*100/31, C*2-113}}' /tmp/strength.txt
+	else
+		echo "(no data)"
 	fi
 ?>
 			</span>

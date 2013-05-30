@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.connection_ping_watchdog='Ping Watchdog'
+uci set gargoyle.scripts.connection_ping_watchdog='ping_watchdog.sh'
+uci set gargoyle.connection.ping_watchdog='600'
+uci commit

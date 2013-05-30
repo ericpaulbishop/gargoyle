@@ -6,12 +6,12 @@
 disk=$1
 percent_swap=$2
 ext_version=$3
+extroot=$4
 
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]  ; then
 	echo "Usage: $0 [disk] [percent_swap] [ext_version]"
 	exit
 fi
-
 
 touch /tmp/usb_restart.lock
 
@@ -61,6 +61,26 @@ else
 
 	swapoff "$disk"2 >/dev/null 2>&1
 	mkswap "$disk"2
+fi
+
+if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
+	UUID=$(blkid | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
+	uci set fstab.automount.anon_mount=0
+	uci set fstab.@mount[0].target=/overlay
+	uci del fstab.@mount[0].device > /dev/null 2>&1
+	uci set fstab.@mount[0].uuid="$UUID"
+	uci set fstab.@mount[0].fstype=ext$ext_version
+	uci set fstab.@mount[0].options="rw,noatime"
+	uci set fstab.@mount[0].enabled=1
+	uci set fstab.@mount[0].enabled_fsck=1
+	uci commit fstab
+
+	# copy all data
+	DIR=$(mktemp -d)
+	mount -t ext$ext_version "$disk"1 $DIR
+	tar -C /overlay -cvf - . | tar -C $DIR -xf -
+	sync
+	umount "$disk"1
 fi
 
 rm /tmp/usb_restart.lock
