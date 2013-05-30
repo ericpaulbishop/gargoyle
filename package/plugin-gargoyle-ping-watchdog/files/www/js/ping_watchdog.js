@@ -113,7 +113,7 @@ function resetData()
 
 function unlockFields()
 {
-	ids=["address_to_ping", "ping_interval","startup_delay","failure_count","failure_action"];
+	ids=["address_to_ping", "ping_interval","startup_delay","failure_count","failure_action","script"];
 	var ping_watchdog_enable = document.getElementById("ping_watchdog_enable").checked;
 	for (idx=0;idx<ids.length;idx++)
 	{
