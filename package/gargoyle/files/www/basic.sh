@@ -42,8 +42,6 @@
 		echo "hasUSB = false;"
 	fi
 
-	echo "var interfaces = new Array();"
-	awk -F: '/eth|wwan|usb/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
 ?>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -304,11 +302,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wireless'>Static IP (Wireless)</option>
 				<option value='3g'>3G (GSM)</option>
 				<option value='none'>Disabled</option>
-			</select>
-		</div>
-		<div id='wan_interface_container'>
-			<label class='leftcolumn' for='wan_interface'>WAN Interface:</label>
-			<select class='rightcolumn' id='wan_interface'>
 			</select>
 		</div>
 
