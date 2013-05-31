@@ -1028,11 +1028,11 @@ function setWanVisibility()
 	var maxIdleIndex = 5;
 	var notWifi= getSelectedValue('wan_protocol').match(/wireless/) ? 0 : 1;
 
-	var dhcpVisability     = [notWifi,1,1,  0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
-	var pppoeVisability    = [      0,0,0,  1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
-	var staticVisability   = [notWifi,0,0,  0,0,0,0,0,0,  1,1,1,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
-	var disabledVisability = [      0,0,0,  0,0,0,0,0,0,  0,0,0,  0,0,             1, 0,0,0,0,0,0,0];
-	var tgVisability       = [      0,0,0,  0,0,0,0,0,0,  0,0,0,  0,0,             0, 1,1,1,1,1,1,1];
+	var dhcpVisability     = [1,1,1,  0,0,0,0,0,0,  0,0,0,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
+	var pppoeVisability    = [0,0,0,  1,1,1,1,1,1,  0,0,0,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
+	var staticVisability   = [1,0,0,  0,0,0,0,0,0,  1,1,1,  notWifi,notWifi, 0, 0,0,0,0,0,0,0];
+	var disabledVisability = [0,0,0,  0,0,0,0,0,0,  0,0,0,  0,0,             1, 0,0,0,0,0,0,0];
+	var tgVisability       = [0,0,0,  0,0,0,0,0,0,  0,0,0,  0,0,             0, 1,1,1,1,1,1,1];
 	
 	var wanVisibilities= new Array();
 	wanVisibilities['dhcp'] = dhcpVisability;
