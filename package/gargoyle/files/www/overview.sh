@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -13,9 +13,7 @@
 <script>
 <!--
 <?
-
-	uptime=$(cat /proc/uptime)
-	echo "uptime = \"$uptime\";"
+	echo "var uptime=\"$(cat /proc/uptime)\";"
 
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
 		echo "var qosEnabled = true;"
@@ -24,7 +22,7 @@
 	fi
 
 	gargoyle_version=$(cat data/gargoyle_version.txt)
-	echo "var gargoyleVersion=\"$gargoyle_version\""
+	echo "var gargoyleVersion=\"$gargoyle_version\";"
 
 	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
 	if [ "$dateformat" == "iso" ]; then
@@ -44,7 +42,7 @@
 	if [ -n "$timezone_is_utc" ] ; then
 		current_time=$(echo $current_time | sed "s/UTC/UTC-$timezone_is_utc/g" | sed 's/\-\-/+/g')
 	fi
-	echo "var currentTime = \"$current_time\";"
+	echo "var currentTime=\"$current_time\";"
 
 	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
 	buffers_mem="$(sed -e '/^Buffers: /!d; s#Buffers: *##; s# kB##g' /proc/meminfo)"
@@ -88,6 +86,12 @@
 	echo "var ports = new Array();"
 	/usr/lib/gargoyle/switchinfo.sh
 
+	if [ -e /var/run/pppoe-wan.pid ]; then
+		deltatime=$((`date -r /var/run/crond.pid +%s`-`date -r /var/run/pppoe-wan.pid +%s`))
+		[ $deltatime -lt 60 ] && deltatime=0 || let deltatime-=30
+		echo "var pppoeUptime=\""$((`date +%s`-`date -r /var/run/pppoe-wan.pid +%s`-$deltatime))"\";"
+	fi
+
 	echo "var wifi_status = new Array();"
 	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 ?>
@@ -116,7 +120,6 @@
 		<div id="swap_container">
 			<span class='leftcolumn'>Swap Memory Usage:</span><span id="swap" class='rightcolumn'></span>
 		</div>
-
 		<div>
 			<span class='leftcolumn'>Connections:</span><span id="connections" class='rightcolumn'></span>
 		</div>
@@ -190,8 +193,11 @@
 		<div id="wan_dns_container">
 			<span class='leftcolumn'>WAN DNS Server(s):</span><span id="wan_dns" class='rightcolumn'></span>
 		</div>
+		<div id="wan_pppoe_container">
+			<span class='leftcolumn'>WAN (PPPoE) Uptime:</span><span id="wan_pppoe_uptime" class='rightcolumn'></span>
+		</div>
 		<div id="wan_3g_container">
-			<span class='leftcolumn'>Signal Strength:</span><span id="wan_3g" class='rightcolumn'>
+			<span class='leftcolumn'>WAN (3G) Signal Strength:</span><span id="wan_3g" class='rightcolumn'>
 <?
 	if [ -e /tmp/strength.txt ]; then
 		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "(no data)"} else {printf "%d%%, %ddBm\n", C*100/31, C*2-113}}' /tmp/strength.txt
