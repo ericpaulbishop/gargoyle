@@ -34,6 +34,8 @@
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
 		fi
 	done
+	echo "var extroot_enabled=\""$(mount | grep "/dev/sd.*on /overlay" | wc -l)"\";"
+	echo "var extroot_drive=\""$(mount | awk '/\/dev\/sd.*on \/overlay/ {print $1}')"\";"
 ?>
 //-->
 </script>
@@ -145,10 +147,24 @@
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
 		<span  class="rightcolumn"><input id="storage_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
 	</div>
+	<div id="extroot_container">
+		<span class="rightcolumnonly">
+			<input type="checkbox" id="extroot" name="extroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
+			<label id="extroot_label" for="extroot" style="vertical-align:middle">Make extroot on this disk</label>
+		</span>
+	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>
 </fieldset>
+
+<fieldset id="extroot_fieldset" style="display:none;">
+	<legend class="sectionheader">Extroot</legend>
+	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="Disable extroot" id="extoot_button" class="default_button" onclick="disableExtroot();" /></span>
+	<span class="rightcolumn"><em>Extroot detected on <b><span id="extroot_drive"></span></b>.</em></span>
+</fieldset>
+
+<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

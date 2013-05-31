@@ -28,7 +28,7 @@ define Package/plugin-gargoyle-usb-storage
 	DEPENDS:=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +gargoyle +fdisk +blkid +dosfsck
 	DEPENDS+=+libusb +chat +kmod-usb-acm +kmod-usb-serial +comgt +usb-modeswitch +usb-modeswitch-data
 	DEPENDS+=+kmod-usb-net +kmod-usb-serial-option +kmod-usb-serial-qualcomm +kmod-usb-serial-wwan +kmod-usb-serial-sierrawireless 
-	DEPENDS+=+kmod-usb-sierrawireless-directip +e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +swap-utils +vsftpd 
+	DEPENDS+=+kmod-usb-sierrawireless-directip +e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +swap-utils +vsftpd +block-mount
 	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat 
 	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
 	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 

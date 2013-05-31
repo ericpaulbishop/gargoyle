@@ -36,6 +36,8 @@ var badUserNames = [ "ftp", "anonymous", "root", "daemon", "network", "nobody" ]
 var ftpFirewallRule = "wan_ftp_server_command";
 var pasvFirewallRule = "wan_ftp_server_pasv";
 
+var toggleReload = false;
+
 function saveChanges()
 {
 
@@ -822,8 +824,14 @@ function resetData()
 	document.getElementById("swap_percent").value  = "25";
 	document.getElementById("storage_percent").value = "75";
 	var vis = (drivesWithNoMounts.length > 0);
-	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container"],  [ (!vis), vis, vis, vis, vis, vis ] )
+	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container", "extroot_container"],  [ (!vis), vis, vis, vis, vis, vis, vis ] )
 	updateFormatPercentages()
+
+	document.getElementById("extroot_fieldset").style.display = extroot_enabled == "1" ? "block" : "none";
+	if(extroot_enabled == "1")
+	{
+		setChildText("extroot_drive", extroot_drive);
+	}
 }
 
 //returns (boolean) whether drive list is empty
@@ -1403,6 +1411,7 @@ function doDiskFormat()
 {
 	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
 	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
+	var extroot        = document.getElementById("extroot").checked ? "1":"0";
 	
 	//format shell script requires percent as an integer, round as necessary
 	if(swapPercent >0 && swapPercent <1)
@@ -1421,15 +1430,22 @@ function doDiskFormat()
 		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
 	
 	
-		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" ; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
+		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
 			{
-				alert("Formatting Complete.");
-				window.location=window.location
 				setControlsEnabled(true)
+				if(extroot == 1)
+				{
+					reboot();
+				}
+				else
+				{
+					alert("Formatting Complete.");
+					window.location=window.location
+				}
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
@@ -1441,4 +1457,69 @@ function doDiskFormat()
 	}
 }
 
+function disableExtroot()
+{
+	if(confirm("If you disable extroot, all settings and installed plugins may be lost. After disabling extroot, router requires a reboot. Continue?"))
+	{
+		setControlsEnabled(false, true, "Disabling extroot...");
+		var commands = "/usr/lib/gargoyle/umount_extroot.sh"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				setControlsEnabled(true);
+				reboot();
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+	else
+	{
+		setControlsEnabled(true);
+	}
+}
 
+function reboot()
+{
+	setControlsEnabled(false, true, "System Is Now Rebooting");
+
+	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4){}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
+	//test for router coming back up
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	testLocation = currentProtocol + "://" + window.location.host + "/utility/reboot_test.sh";
+	testReboot = function()
+	{
+		toggleReload = true;
+		setTimeout( "testReboot()", 5*1000);  //try again after 5 seconds
+		document.getElementById("reboot_test").src = testLocation;
+	}
+	setTimeout( "testReboot()", 25*1000);  //start testing after 15 seconds
+	setTimeout( "reloadPage()", 240*1000); //after 4 minutes, try to reload anyway
+}
+
+function reloadPage()
+{
+	if(toggleReload)
+	{
+		//IE calls onload even when page isn't loaded -- it just times out and calls it anyway
+		//We can test if it's loaded for real by looking at the (IE only) readyState property
+		//For Browsers NOT designed by dysfunctional cretins whose mothers were a pack of sewer-dwelling, shit-eating rodents,
+		//well, for THOSE browsers, readyState (and therefore reloadState) should be null 
+		var reloadState = document.getElementById("reboot_test").readyState;
+		if( typeof(reloadState) == "undefined" || reloadState == null || reloadState == "complete")
+		{
+			toggleReload = false;
+			document.getElementById("reboot_test").src = "";
+			window.location.href = window.location.href;
+		}
+	}
+}
