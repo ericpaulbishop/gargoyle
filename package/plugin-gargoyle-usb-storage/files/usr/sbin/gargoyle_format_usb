@@ -65,22 +65,24 @@ fi
 
 if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 	UUID=$(blkid | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
-	uci set fstab.automount.anon_mount=0
-	uci set fstab.@mount[0].target=/overlay
-	uci del fstab.@mount[0].device > /dev/null 2>&1
-	uci set fstab.@mount[0].uuid="$UUID"
-	uci set fstab.@mount[0].fstype=ext$ext_version
-	uci set fstab.@mount[0].options="rw,noatime"
-	uci set fstab.@mount[0].enabled=1
-	uci set fstab.@mount[0].enabled_fsck=1
-	uci commit fstab
+	if [ -n "$UUID" ]; then
+		uci set fstab.automount.anon_mount=0
+		uci set fstab.@mount[0].target=/overlay
+		uci del fstab.@mount[0].device > /dev/null 2>&1
+		uci set fstab.@mount[0].uuid="$UUID"
+		uci set fstab.@mount[0].fstype=ext$ext_version
+		uci set fstab.@mount[0].options="rw,noatime"
+		uci set fstab.@mount[0].enabled=1
+		uci set fstab.@mount[0].enabled_fsck=1
+		uci commit fstab
 
-	# copy all data
-	DIR=$(mktemp -d)
-	mount -t ext$ext_version "$disk"1 $DIR
-	tar -C /overlay -cvf - . | tar -C $DIR -xf -
-	sync
-	umount "$disk"1
+		# copy all data
+		DIR=$(mktemp -d)
+		mount -t ext$ext_version "$disk"1 $DIR
+		tar -C /overlay -cvf - . | tar -C $DIR -xf -
+		sync
+		umount "$disk"1
+	fi
 fi
 
 rm /tmp/usb_restart.lock
