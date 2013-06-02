@@ -55,6 +55,7 @@ start()
 			if [ -e "${webroot}"/"${theme_root}"/"default"/"${common_css}" ] ; then
 				#should always have default theme, but check above to make sure
 				uci set gargoyle.global.theme=default
+				uci commit gargoyle
 			fi
 		fi
 		usb_unlock
