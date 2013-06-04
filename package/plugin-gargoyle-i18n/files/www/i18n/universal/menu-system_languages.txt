@@ -7,3 +7,4 @@ FR=Langues
 DE=Sprachen
 AR=اللغات
 RI=Языки
+BR=Idiomas
