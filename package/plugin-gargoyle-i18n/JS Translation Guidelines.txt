@@ -1,0 +1,11 @@
+Internationalization lang.js Guidelines:
+
+• All files are to be UTF-8 with BOM
+• Only the fallback language is to have 'var something New Object' declarations
+• All object key/property pairs are to end with a '\n' newline; not '\r'
+• file searches ignore the variable name, only the key is used (UI.Save & page.Save will only find the first occurrence)
+• body of each property is MAX 4096 bytes (not UTF-8 characters).
+• A single translated.js file of strings is MAX 51200 bytes.
+
+Not Yet Determined:
+• I think all whacked html/js characters ('&') are to be escaped?

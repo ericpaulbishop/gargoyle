@@ -1,0 +1,91 @@
+Thinking about i18n, there were 3 important criteria to me:
+
+• setting up a router on the basic.sh page in their native language (new firstboot.sh support)
+• constraining firmware filesize (default firmware comes as single language i18n-aware)
+• allows 4MB routers some level of internationalization (compile-time switch forces a single language)
+
+--------------------------------
+Basic terminology used in this document:
+
+- localized firmware - firmware that once had variables, but a script has substituted strings back for variable names. localized English firmware would look virtually identical to what is available today
+- i18n-switching firmware - firmware that has variables for text strings. Language packages allow changing the UI text strings of the Gargoyle web UI.
+
+---------------------------------
+Checking the Boxes:
+
+Having a firmware image file with 13 languages sounds great. 12 languages that will never be used & suck up space sound crappy. And no single course of action could meet all 3 criteria. So I settled on a combination.
+
+1. Externalize all text strings to external files. menus, html & javascript require different avenues. Not solved are 3rd party javascript plugins.
+
+2. Compile-time scripts can localize the fully i18n firmware. All-English or All-Spanish... the language pack & the (as yet unwritten) script reintegrate the strings back in for variables. A localized firmware would be unable to switch to a different language because variables would be missing. Technically, menus *could* be - the uci gargoyle.property acts as a variable, but webpage content would not.
+
+3. For 8MB routers, i18n-switching firmware would be available (don't know about 4MB routers). Language packages would function very much like todays theme packages: install via plugins.sh; switch with themes.sh
+
+4. To configure a router in the native language, plugins.sh will only work on a configured router (one that has an internet connection). To address this, i18n-switching firmware has firstboot.sh with 2 added lines. A language package can be uploaded to the router & activated. Configuration is done in the native language.
+
+-------------------------------------
+i18n before an internet connnection
+
+Provided in this branch is NEWfirstboot.sh which is stripped of the password/timezone functionality. Only the new language section is active. This page demonstrates the new functionality.
+
+When a user downloads Gargoyle i18n-switching firmware (Gargoyle-EN-intl.bin or whatever) a new option is provided to the user: selecting a language package like Arabic-AR.ipk at the same time. User flashes the router. English-EN comes as the default language.
+
+firstboot.sh comes up in English. Maybe a few new pictograms explain password with a key & [****]; timezones with a map with some timezone lines. The language section I think anyone would recognize as a 'language' section. The Arabic-AR.ipk file is drag&dropped onto the input button. 'Save' uploads the file to the router. A shell script installs & activates the language. firstboot.sh reloads overview.sh
+
+overview.sh & the menu system are now in Arabic. Configuration of the router in basic.sh is done in the native language.
+
+So a user configured their router offline, in their native language & without 13 languages present in the firmware.
+
+----------------------------------
+
+How it works:
+
+- 2 extra persistent global variables are added: 
+    uci set gargoyle.global.fallback_lang=English-EN
+    uci set gargoyle.global.language=English-EN
+those 2 settings are used *extensively*; each page load via gargoyle_header_footer uses their value.
+  NOTE: these are *not* currently set; it probably makes sense to set them in the default language. The default language is the language pack that contains the javascript var UI=new Object(); declaration - only 1 language can have that.
+
+- A language package has a folder full of translations. One for menus (plain text), 1 for common elements (strings.js) & 1 for each html/js page (combined into for example English-EN/time.js). The makefile sources a shell script to evaluate when to show the language menu (more than 1 language is present).
+
+- languages.sh allows selecting an installed language. Once selected, a shell script searches the menu.txt file in each language for the translation. The languge page gets reloading after all the uci set gargoyle.display.blahblah="LaLa" are done. That only completes the menu system
+
+- gargoyle_header_footer is patched to serve up /www/i18n/fallback_lang-??/strings.js & /www/i18n/active_lang-??/strings.js (more about that later)
+
+- haserl is modified to to provide a <%~ translation %> directive. the 2 gargoyle.globals above are used to fopen & search for strings instead of slow shell script. It adds about 13k to the binary. Patch provided in the haserl folder. The patches use the active language, with a fallback to the fallback_lang & if not present, just echo back the key. time.sh also includes a transition from <? ?> to the newer <% %> form. The .js files sourced are formatted as javascript, but that is only so there isn't a common.txt & common.js file. string.js functions as a commons.js file for commonly used string elements sourced with a <%~ SaveChanges %> (no period) is used. A page specific <%~ time.TimeZone %> sources a specific time.js file.
+
+- javascript strings are much easier. The default language defines the variable & the properties. The active_language clobbers whichever properties it has translation strings for:
+fallback_lang/strings.js: var thing = new Object; thing.prop="This";
+active_lang/strings.js: thing.prop="Esso"; # I came last, I win! I clobber "This" with "Esso".
+So the Gargoyle javascript just has element.innerhtml=thing.prop and its all done automatically.
+
+-----------------------------------
+IMPORTANT NOTES:
+
+- compile-time scripts are not started
+- 3rd party plugins javascript i18n needs to be sorted out
+- there will likely be an issue with changing the fallback_lang to something other than English-EN with 3rd party plugins (the person compiling the firmware with an alternate fallback_lang can ensure the stock javascript has the variable declaration)
+- javascript i18n relies on the fallback_lang defining the variable (var thing = new Object) and the fallback properties (thing.savebutton="Save this"); the active language clobbers the property with its own (newer) thing.savebutton-"El botón de Savir" or whatever. The problem is when an overseen javascript element is missed by both. It would either fail rendering the page or be a null string. A way to return the key as a string (maybe in common.js) as a check should be used.
+- the haserl wepbage says "Old versions of haserl used <? ?> as token markers, instead of <% %>. Haserl will fall back to using <? ?> if <% does not appear anywhere in the script." So as each page is updated, the new <% %> form will be used
+- haserl has failed on at least 1 occasion to upload a language file via the form
+
+-----------------
+Progress:
+
+inject language download into firstboot: done
+sh scripts to install a firstboot language script: done
+sh scripts to switch browser menus to target language: done
+language selection webpage: done
+separating text strings from webpages to new files: working; very initial stage
+externalize javascript text strings for translation: working; very initial stage
+mod gargoyle_header_footer to serve up common strings file (fallback & active) + page_specific_str.js (fallback+active): done
+mod haserl to scan translation files using cgi form: done
+compile-time script to scrub i18n into single-language: no
+------------------
+
+The initial commit includes:
+- a stripped NEWfirstboot.sh to demonstrate installing a language package via drag&drop + save
+- menu switching shell scripts & language.sh webpage to switch languages
+- very initial stage of EN, ES, & AR translations to test features out
+- patches to gargoyle_header_footer & haserl
+- 1 modified webpages: time.sh
