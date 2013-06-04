@@ -3,7 +3,7 @@
 # Version 02
 
 #
-#  get_i18_3rd_party_menuoption /www/i18n/universal/menu-system_languages.txt /www/i18n/Spanish-ES
+#  get_i18_3rd_party_menuoption /www/i18n/universal/menu-system_languages.txt /www/i18n/Spanish-ES 
 #
 get_i18_3rd_party_menuoption() {
 	local target_file="$1"
