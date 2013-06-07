@@ -2,7 +2,6 @@
  * UTF-8 (with BOM) English-EN text strings for time.sh html elements
  */
 
-var TimeStr=new Object();
 TimeStr.ErrChanges="As alteracoes não podem ser alteradas";
 TimeStr.Section="Horario";
 TimeStr.CurrTime="Data &amp; Horario";

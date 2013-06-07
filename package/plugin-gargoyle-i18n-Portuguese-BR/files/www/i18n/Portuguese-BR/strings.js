@@ -2,7 +2,6 @@
  * UTF-8 (with BOM) English-EN text strings for User Interface elements
  */
 
-var UI=new Object();
 UI.SaveChanges="Salvar alterações";
 UI.Reset="Limpar";
 UI.Clear="Apagar historico";
