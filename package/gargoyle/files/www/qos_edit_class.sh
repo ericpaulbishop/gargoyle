@@ -66,12 +66,12 @@
 	<div class='indent'>
 		<div class='nocolumn'>
 			<input type='radio' name="rtt_radio" id='rtt_radio1'/>
-			<label for='max_radio1'>Minimize RTT (ping times) when active</label>
+			<label for='rtt_radio1'>Minimize RTT (ping times) when active</label>
 		</div>
 		<div>
 			<span class='leftcolumn'>
 				<input type='radio' name="rtt_radio" id="rtt_radio2" />
-				<label for='max_radio2'>Optimize WAN utilization</label>
+				<label for='rtt_radio2'>Optimize WAN utilization</label>
 			</span>
 		</div>
 	</div></div>
