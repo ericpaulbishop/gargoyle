@@ -3,3 +3,4 @@
 fallback=WiFi Survey
 EN=WiFi Survey
 ES=Encuesta del WiFi
+BR=Busca de WIFI

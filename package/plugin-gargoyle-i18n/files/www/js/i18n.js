@@ -21,7 +21,7 @@ function GenLangContainer() {
 //  GenLangMenu a highly simplistic language drop down menu with 3 preset languages
 //
 function GenLangMenu() {
-	var opts = [{lang:"English", iso:"EN"}, {lang:"Spanish", iso:"ES"}, {lang:"German", iso:"DE"}];
+	var opts = [{lang:"English", iso:"EN"}, {lang:"Spanish", iso:"ES"}, {lang:"German", iso:"DE"}, {lang:"Portugues BR", iso:"BR"}];
 	var elem = document.createElement("select");
 	elem.className="select";
 
