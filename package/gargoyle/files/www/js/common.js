@@ -6,6 +6,7 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var UI=new Object(); //part of i18n
 
 window.onresize = function onresize()
 {

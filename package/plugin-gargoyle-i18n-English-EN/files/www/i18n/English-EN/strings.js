@@ -2,7 +2,6 @@
  * UTF-8 (with BOM) English-EN text strings for User Interface elements
  */
 
-var UI=new Object();
 UI.SaveChanges="Save Changes";
 UI.Reset="Reset";
 UI.Clear="Clear History";
@@ -18,7 +17,6 @@ UI.NewRule="Add New Rule";
 UI.NewQuota="Add New Quota";
 UI.NewServiceClass="Add Service Class";
 UI.Edit="Edit";
-UI.Remove="Remove";
 UI.Select="Select";
 UI.ChPRoot="Change Plugin Root";
 UI.AddPSource="Add Plugin Source";
@@ -32,3 +30,5 @@ UI.Upgrade="Upgrade Now";
 UI.Reboot="Reboot Now";
 UI.MoreInfo="More Info";
 UI.WaitSettings="Please wait while new settings are applied. . .";
+UI.Seconds="Seconds";
+UI.Never="Never";

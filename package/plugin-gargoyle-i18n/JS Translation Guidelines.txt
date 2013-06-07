@@ -1,11 +1,21 @@
 Internationalization lang.js Guidelines:
 
 • All files are to be UTF-8 with BOM
-• Only the fallback language is to have 'var something New Object' declarations
 • All object key/property pairs are to end with a '\n' newline; not '\r'
-• file searches ignore the variable name, only the key is used (UI.Save & page.Save will only find the first occurrence)
 • body of each property is MAX 4096 bytes (not UTF-8 characters).
 • A single translated.js file of strings is MAX 51200 bytes.
 
+If you creating your own page & want to us internationalization:
+  Use the form <%~ yourpagename.descriptive_key %>
+  Note the space & the percentage sign. You cannot mix the older ? form with the newer anywhere on the page. Only the newer form is tested.
+  yourpagename will be used as the basis of the javascipt Object. You can use: yourpagename.aproperty; Yourpagename.aproperty; yourpagenameStr.aproperty or YourpagenameStr.aproperty.
+  Do not use spaces in the property key, or around the equal sign:
+    minidlna.VFolder="Select a folder for video files"; // correct
+    minidlna. VFolder = "Select a folder for video files" // wrong
+  You can incorporate common elements (from strings.js) by just using the key: <%~ SaveChanges %>
+
 Not Yet Determined:
 • I think all whacked html/js characters ('&') are to be escaped?
+
+TODO:
+transition to var somename = new Object; to a stand-alone file in i18n/universal for each page & modify gargoyle_header_footer.

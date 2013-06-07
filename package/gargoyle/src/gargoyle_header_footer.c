@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	char** package_variables_to_load = NULL;
 	int c;
 	
-	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:T:t:IiNnUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
+	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:Z:z:T:t:IiNnUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
 	{
 		switch(c)
 		{
@@ -315,19 +315,25 @@ int main(int argc, char **argv)
 		{
 			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\" />\n", theme_root, theme, all_css[css_index], gargoyle_version);
 		}
-		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
-		{
-			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
-			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
-			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
-			{
-				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-			}
-		}
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
 			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
+		}
+		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
+		{
+			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+			{
+				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+			}
+			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
+			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
+			{
+				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+				{
+					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+				}
+				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+			}
 		}
 		printf("</head>\n");
 		printf("<body>\n");

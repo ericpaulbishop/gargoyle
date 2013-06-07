@@ -88,7 +88,7 @@ change_menu_language() {
 install_lang_pack() {
 	local lang_file="$1"
 	
-	opkg-orig install "$lang_file"
+	gpkg install "$lang_file"
 	rm "$lang_file"
 }
 
