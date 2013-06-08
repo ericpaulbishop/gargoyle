@@ -30,5 +30,14 @@ UI.Upgrade="Upgrade Now";
 UI.Reboot="Reboot Now";
 UI.MoreInfo="More Info";
 UI.WaitSettings="Please wait while new settings are applied. . .";
-UI.Seconds="Seconds";
-UI.Never="Never";
+UI.ErrChanges="Changes could not be applied";
+UI.Disabled="Disabled";
+UI.Enabled="Enabled";
+
+UI.never="never";
+UI.disabled="disabled";
+UI.both="both";
+UI.seconds="seconds";
+UI.minutes="minutes";
+UI.hours="hours";
+UI.days="days";

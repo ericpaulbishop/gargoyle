@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" system gargoyle
+	gargoyle_header_footer -h -s "system" -p "time" -c "internal.css" -j "time.js" -z "time.js" system gargoyle
 %>
 <script>
 <!--
@@ -45,21 +45,21 @@
 		<legend class="sectionheader"><%~ time.Section %></legend>
 
 		<div>
-			<label id='current_time_label' for='current_time'><%~ time.CurrTime %>:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+			<label id='current_time_label' for='current_time'><%~ CurrTime %>:&nbsp;&nbsp;&nbsp;&nbsp;</label>
 			<span id="current_time"></span>
 		</div>
 
 		<div class="internal_divider"></div>
 
 		<div>
-			<label class='nocolumn' id='timezone_label' for='timezone'><%~ time.TimeZone %>:</label>
+			<label class='nocolumn' id='timezone_label' for='timezone'><%~ TimeZone %>:</label>
 		</div>
 		<div class="indent">
 			<div><select class='nocolumn' id='timezone' onchange="timezoneChanged()"></select></div>
 		</div>
 
 		<div>
-			<label class='nocolumn' id='timezone_label' for='date_format'><%~ time.DateForm %>:</label>
+			<label class='nocolumn' id='timezone_label' for='date_format'><%~ DateForm %>:</label>
 		</div>
 		<div class="indent">
 			<div>
@@ -75,19 +75,19 @@
 		</div>
 
 		<div>
-			<label class='leftcolumn' id='region_label' for='region'><%~ time.TServers %>:</label>
+			<label class='leftcolumn' id='region_label' for='region'><%~ TServers %>:</label>
 			<div class="indent">
 				<div>
 					<select class='leftcolumn' id='region' onchange='updateServerList()'>
-						<option value="global"><%~ time.Global %></option>
-						<option value="us"><%~ time.US %></option>
-						<option value="north-america"><%~ time.NA %></option>
-						<option value="south-america"><%~ time.SA %></option>
-						<option value="europe"><%~ time.EU %></option>
-						<option value="africa"><%~ time.Af %></option>
-						<option value="asia"><%~ time.As %></option>
-						<option value="oceania"><%~ time.Oc %></option>
-						<option value="custom"><%~ time.Cust %></option>
+						<option value="global"><%~ Global %></option>
+						<option value="us"><%~ US %></option>
+						<option value="north-america"><%~ NA %></option>
+						<option value="south-america"><%~ SA %></option>
+						<option value="europe"><%~ EU %></option>
+						<option value="africa"><%~ Af %></option>
+						<option value="asia"><%~ As %></option>
+						<option value="oceania"><%~ Oc %></option>
+						<option value="custom"><%~ Cust %></option>
 					</select>
 				</div>
 				<div class="indent">

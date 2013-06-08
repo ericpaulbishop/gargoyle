@@ -2,7 +2,6 @@
  * UTF-8 (with BOM) English-EN text strings for time.sh html elements
  */
 
-timeStr.ErrChanges="Changes could not be applied";
 timeStr.Section="Time";
 timeStr.CurrTime="Current Date &amp; Time";
 timeStr.TimeZone="Time Zone";

@@ -30,5 +30,14 @@ UI.Upgrade="Actualización Ahora";
 UI.Reboot="Reinicializar Ahora";
 UI.MoreInfo="Más Información";
 UI.WaitSettings="Espere por favor mientras se aplican nuevos ajustes. . .";
-UI.Seconds="Segundos";
-UI.Never="Nunca";
+UI.ErrChanges="Los cambios no se podrían aplicar";
+UI.Disabled="Desactivado";
+UI.Enabled="Activado";
+
+UI.never="nunca";
+UI.disabled="desactivado";
+UI.both="ambos";
+UI.seconds="segundos";
+UI.minutes="minutos";
+UI.hours="horas";
+UI.days="dias";

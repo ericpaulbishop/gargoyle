@@ -250,9 +250,9 @@
 +char* uci_get(char* package, char* section, char* option);
 +
 +#endif
---- /dev/null	2013-06-06 13:13:41.000000000 -0400
-+++ haserl-0.9.26/src/h_translate.c	2013-06-06 13:55:47.000000000 -0400
-@@ -0,0 +1,416 @@
+--- /dev/null	2013-06-08 00:10:27.000000000 -0400
++++ haserl-0.9.26/src/h_translate.c	2013-06-08 00:11:26.000000000 -0400
+@@ -0,0 +1,376 @@
 +/* --------------------------------------------------------------------------
 + * Copyright 2013 BashfulBladder (bashfulbladder@gmail.com)
 + *				Eric Bishop <eric@gargoyle-router.com>
@@ -311,16 +311,17 @@
 +
 +//
 +//  simpleParseLine looks at a line & tries to figure out if there is a key and if there is a value - it could be comments or an empty line
-+//  look for specific characters. A key comes at the beginning of the line, contains no spaces or quotes & comes before an equal sign
-+//  If those criteria are met AND there was a period - thats probably a key. And just to be sure, check that flanking the period is a
++//  look for specific characters. A page.key comes at the beginning of the line, contains no spaces or quotes & comes before an equal sign
++//  If those criteria are met AND there was a period - thats probably a page.key. And just to be sure, check that flanking the period is a
 +//  letter OR zero-nine.
-+//  NOTE: in this context, a 'key' contains a page modifier preceeding the key: "UI.SaveSchanges" or "TimeStr.TimeZones"
++//  NOTE: in a page.key (examples = "UI.SaveSchanges", "TimeStr.TimeZones"), the key comes after the period. The key portion enters the map
 +//  if there are 2 or more quotes, an equal sign & a terminating semicolon - a bonafide key-value pair has been found
 +//  so enter the key-value pair into the global map store. Each line begins anew with fresh variables.
 +//
 +void simpleParseLine(char* aline, unsigned short len) {
 +	unsigned char akey=0;
 +	unsigned char aeq=0;
++	unsigned short akey_start=0;
 +	unsigned short akey_len=0;
 +	unsigned char aquote=0;
 +	unsigned char aspace=0;
@@ -339,12 +340,13 @@
 +				( (aline[i+1] >= '0' && aline[i+1] <= '9') ||
 +				  (aline[i+1] >= 'A' && aline[i+1] <= 'Z') || (aline[i+1] >= 'a' && aline[i+1] <= 'z') )  ) {
 +				akey=1;
++				akey_start=i;
 +			}
 +			aperiod++;
 +		}
 +		if (aline[i] == '=') {
 +			if (aeq==0) {
-+				akey_len=i;
++				akey_len=(i-akey_start)-1;
 +			}
 +			aeq++;
 +		}
@@ -359,11 +361,11 @@
 +		}
 +		if (aline[i] == ';' && aline[i-1] == '\"') {
 +			aquote++;
-+			if (akey==1 && aeq>=1 && aquote>1){
++			if (akey==1 && aeq>=1 && aquote>1 && akey_len>0){
 +				char* strkey=(char*)calloc(akey_len<8?8:akey_len+1, sizeof(char));
 +				char* strvalue=(char*)calloc((len-avalue_start)<8?8:(len-avalue_start)+1, sizeof(char));
 +				if (strkey != NULL) {
-+					memcpy(strkey, aline, akey_len);
++					memcpy(strkey, aline+akey_start+1, akey_len);
 +				}
 +				if (strvalue != NULL) {
 +					memcpy(strvalue, aline+avalue_start, (i-1)-avalue_start);
@@ -413,9 +415,7 @@
 +	
 +	lfile = fopen(filepath, "r");
 +	if (lfile == NULL) { 
-+		printf("Translate error: invalid path\n");
-+		fclose(lfile);
-+		return;
++		return; // the file was not found
 +	}
 +	
 +	fseek(lfile, 0L, SEEK_END);
@@ -462,47 +462,33 @@
 +}
 +
 +//
-+//  lookup_key makes many attempts to make a key that will get a value from the global map store: global.translationKV_map
++//  lookup_key will use the the text inside the haserl tag to find the matching value from the global map
++//  store (global.global.translationKV_map)
 +//    buff is the buffer where results will be dumped & shuffled onto echoing in the shell for direct injection into the 
-+//    webpage key is the raw key from the Gargoyle webpage (trailing space apparently included)
++//    webpage key is the raw text from the Gargoyle webpage (trailing space apparently included): <%~ key %> or <%~ page.key %>
 +//
-+//  Optimistically, first try getting the value for the key - and if it is, it was a short trip. The first visit of a 
-+//  page_specifig.key will trigger constructing the path, reading, parsing & entering the key-value pair into the 
-+//  libericstools string_map object. First the fallback_language is entered into the map, then the active language sets
-+//  the values to the translated language strings. Try to split on a period (common elements skip the page: <%~ SaveChanges %> 
-+//  while page specific strings contain the period separator: <%~ time.Europe %>. The page portion is used to find which file
-+//  to source for the map (so name it appropriately). Common elements are prepended with UI.key - they is how they are stored in
-+//  the strings.js file. Use a pointer to the formed page.key to get a value from the map.
++//  Note: the 1st key from a page-specific (non UI.key) translation requires the page.key form to parse/load/map the key-value pairs
 +//
-+//  Note: there is added flexibilty in naming page_specific keys: time.key; Time.key timeStr.key & TimeStr.key will all be used
-+//  to attempt getting a value from the map. If all else fails, use what was given to us in the <%~ translate %> element
++//  First look for a period in the haserl translation tag - if present, split on the period & construct a filepath & parse
++//  No matter what, there is a space at the end of the key which will throw off a key: "key" != "key "
++//  If a value is not obtained, use what was given to us in the <%~ translate %> element
++//
 +void lookup_key (buffer_t *buf, char *key) {
++	char* tvalue;
 +	char** key_ptr = NULL;
 +	buffer_t fpath;
 +	char page_split[256], key_split[256];
++	char* kaddr=&key_split[0];
 +	char* split=strchr(key++, '.');
-+	char* tvalue=get_string_map_element(global.translationKV_map, key); //just for shits & giggles, lets see if the key is already there
 +
-+	if (tvalue != NULL) {
-+		bash_echo (buf, tvalue, strlen(tvalue));
-+		return; //well, that was easy... the key was in the map already!
-+	}
 +	haserl_buffer_init (&fpath);
 +	memset(page_split, 0, 256);
 +	memset(key_split, 0, 256);
 +
 +	if (split == NULL) {
-+		// say key="SaveChanges", its a strings.js key - note how its in the shortnened form, not PAGE.KEY
-+		char* kaddr=&key_split[0];
-+		key_split[0]='U';
-+		key_split[1]='I';
-+		key_split[2]='.';
-+		memcpy(key_split+3, key, strlen(key)-1); //there's a space there between the key %>
-+
-+	key_ptr=&kaddr;
++		memcpy(key_split, key, strlen(key)-1); //there's a space there between the key %>
 +	} else {
 +		// ah, a page_specific.key to find
-+		char* kaddr=&page_split[0];
 +		memcpy(page_split, key, split-key);
 +		memcpy(key_split, split+1, strlen(split)-2); //minus 1: the period; minus another 1 for trailing space
 +		memcpy(page_split+(split-key), ".js", 3);
@@ -519,36 +505,10 @@
 +			// TODO: apparently, this is done on faith, because whether the page was *actually* mapped isn't tested
 +			set_string_map_element(global.translationKV_map, page_split, "true");
 +		}
-+		memset(page_split, 0, 256); // we are going to reuse page_split to rid the key of trailing space; key_split is missing translation
-+		memcpy(page_split, key, strlen(key)-1);
-+		key_ptr=&kaddr;
 +	}
++	key_ptr=&kaddr;
 +
 +	tvalue=get_string_map_element(global.translationKV_map, *key_ptr);
-+	if (tvalue == NULL && split != NULL) {
-+		//for page_specific.js, given a page.key (or the probably rare Page.key), change the case & try again
-+		if ( page_split[0] >= 'A' && page_split[0] <= 'Z') {
-+			page_split[0]+=32;
-+		} else {
-+			page_split[0]-=32;
-+		}
-+		
-+		tvalue=get_string_map_element(global.translationKV_map, *key_ptr);
-+		if (tvalue == NULL) {
-+			//oy, bubula, maybe you need a 'Str' appendage
-+			memcpy(page_split+(split-key), "Str.", 4);
-+			memcpy(page_split+(split-key)+4, split+1, strlen(split)-2);
-+			tvalue=get_string_map_element(global.translationKV_map, *key_ptr);
-+			if (tvalue == NULL) {
-+				if ( page_split[0] >= 'A' && page_split[0] <= 'Z') {
-+					page_split[0]+=32;
-+				} else {
-+					page_split[0]-=32;
-+				}
-+				tvalue=get_string_map_element(global.translationKV_map, *key_ptr); //if that didn't work - its just not going to happen
-+			}
-+		}
-+	}
 +	if (tvalue != NULL) {
 +		// a mapped key-value pair was found
 +		bash_echo (buf, tvalue, strlen(tvalue));
@@ -582,7 +542,7 @@
 +	}
 +	set_string_map_element(global.translationKV_map, "strings.js", "true");
 +	
-+	//printf("Test: UI.SaveChanges='%s'\n", (char*)get_string_map_element(global.translationKV_map, "UI.SaveChanges"));
++	//printf("Test: SaveChanges='%s'\n", (char*)get_string_map_element(global.translationKV_map, "SaveChanges"));
 +}
 +
 +

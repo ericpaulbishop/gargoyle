@@ -6,6 +6,8 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var timeStr=new Object(); //part of i18n; currently unused
+
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
 
@@ -14,7 +16,7 @@ function saveChanges()
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n" + UI.ErrChanges;
 		alert(errorString);
 	}
 	else

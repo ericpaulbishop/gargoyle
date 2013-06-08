@@ -30,25 +30,25 @@ var currentTime;
 <fieldset>
 	<legend><%~ hosts.RefreshR %></legend>
 	<select id="refresh_rate">
-		<option value="2000">2 <%~ Seconds %></option>
-		<option value="10000">10 <%~ Seconds %></option>
-		<option value="30000">30 <%~ Seconds %></option>
-		<option value="60000">60 <%~ Seconds %></option>
-		<option value="never"><%~ Never %></option>
+		<option value="2000">2 <%~ seconds %></option>
+		<option value="10000">10 <%~ seconds %></option>
+		<option value="30000">30 <%~ seconds %></option>
+		<option value="60000">60 <%~ seconds %></option>
+		<option value="never"><%~ never %></option>
 	</select>
 	<br/>
-	<p><em><%~ hosts.RInfo %></em></p>
+	<p><em><%~ RInfo %></em></p>
 </fieldset>
 <fieldset id="dhcp_data">
-	<legend class="sectionHeader"><%~ hosts.CurrLeases %></legend>
+	<legend class="sectionHeader"><%~ CurrLeases %></legend>
 	<div id="lease_table_container"></div>
 </fieldset>
 <fieldset id="wifi_data">
-	<legend class="sectionheader"><%~ hosts.ConWifiHosts %></legend>
+	<legend class="sectionheader"><%~ ConWifiHosts %></legend>
 	<div id="wifi_table_container"></div>
 </fieldset>
 <fieldset id="active_data">
-	<legend class="sectionheader"><%~ hosts.ActiveHosts %></legend>
+	<legend class="sectionheader"><%~ ActiveHosts %></legend>
 	<div id="active_table_container"></div>
 </fieldset>
 
