@@ -1,24 +1,24 @@
-/*  ddns_updater -	A small tool for periodically performing dynamic DNS updates
- *  			Originally created for the Gargoyle Web Interface
+/* ddns_updater -	A small tool for periodically performing dynamic DNS updates
+ * 			Originally created for the Gargoyle Web Interface
  *
- * 			Created By Eric Bishop 
+ * 			Created By Eric Bishop
  * 			http://www.gargoyle-router.com
- * 		  
  *
- *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
- * 
- *  This file is free software: you may copy, redistribute and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation, either version 2 of the License, or (at your
- *  option) any later version.
  *
- *  This file is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * Copyright Â© 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This file is free software: you may copy, redistribute and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -100,12 +100,11 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							};
 char** default_ip_lookup_urls = NULL;
 
-
 typedef struct
 {
 	char* name;
-	char* url_template;	  	// contains vars that should be replaced, eg http://[USER]:[PASS]@dynservice.com
-	char** required_variables;	 	
+	char* url_template;		// contains vars that should be replaced, eg http://[USER]:[PASS]@dynservice.com
+	char** required_variables;
 	char** optional_variables;
 	char** optional_variable_defaults;
 	char** meta_variables;
@@ -115,8 +114,8 @@ typedef struct
 	regex_t* success_regexp;	// update considered success only if result matches this regex
 	regex_t* failure_regexp;	// update considered failure only if result matches this regex
 					//
-					// NOTE: only one of the two regexp variables should be defined, but in case 
-					//       where both are present success_regexp has precedence 
+					// NOTE: only one of the two regexp variables should be defined, but in case
+					//       where both are present success_regexp has precedence
 					//       (even if failure_regexp, it will be success if success_regexp matches
 } ddns_service_provider;
 
@@ -124,17 +123,15 @@ typedef struct
 {
 	char* name;
 	char* service_provider;			//name of service from ddns_service_provider
-	int check_interval; 			// seconds
-	int force_interval; 			// seconds
-	int ip_source; 			// INTERFACE or CHECK_URL
-	char** ip_url;			// url or (whitespace separated) list of urls if ip_source is CHECK_URL
+	int check_interval;			// seconds
+	int force_interval;			// seconds
+	int ip_source;				// INTERFACE or CHECK_URL
+	char** ip_url;				// url or (whitespace separated) list of urls if ip_source is CHECK_URL
 	char* ip_interface;			// name of an interface
-	
+
 	string_map* variable_definitions; 	// variable_id->variable_definition
 	string_map* cached_meta_variables;
-
 } ddns_service_config;
-
 
 typedef struct
 {
@@ -150,10 +147,9 @@ typedef struct
 	char msg_line[MAX_MSG_LINE];
 } message_t;
 
-//global variables for daemon (used in signal handler) 
-int terminated; 
-int output_requested; 
-
+//global variables for daemon (used in signal handler)
+int terminated;
+int output_requested;
 
 string_map* load_service_providers(char* filename);
 string_map* load_service_configurations(char* filename, string_map* service_providers);
@@ -172,7 +168,6 @@ char* do_url_substitution(ddns_service_provider* def, ddns_service_config* confi
 char* do_line_substitution(char* line, string_map* variables, string_map* escaped_variables);
 char *http_req_escape(char *unescaped);
 char *replace_str(char *s, char *old, char *new);
-
 
 int do_single_update(ddns_service_config *service_config, string_map *service_providers, char* remote_ip, char* local_ip, int force_update, int verbose);
 char* lookup_domain_ip(char* url_str);
@@ -211,7 +206,6 @@ int main(int argc, char** argv)
 
 }
 
-
 char* get_local_ip(int ip_source, void* check_parameter)
 {
 	char* ip = NULL;
@@ -227,8 +221,6 @@ char* get_local_ip(int ip_source, void* check_parameter)
 		char  first_url[MAX_LOOKUP_URL_LENGTH];
 		int   is_first_lookup;
 		initialize_default_ip_lookup_urls();
-		
-		
 
 		if(urls != NULL)
 		{
@@ -239,7 +231,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			{
 				ip = get_ip_from_url(next_url);
 				//syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
-				printf("\t\t%s local IP from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				printf("\t\t%s local IP from URL: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
 				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
 				is_first_lookup = 0;
 			}
@@ -253,14 +245,13 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			{
 				ip = get_ip_from_url(next_url);
 				//syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
-				printf("\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				printf("\t\t%s local IP from URL: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
 				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls); }
 				is_first_lookup = 0;
 			}
 		}
-
 	}
-	
+
 	return ip;
 }
 
@@ -289,13 +280,10 @@ void free_default_ip_lookup_urls(void)
 	}
 }
 
-
-
 char* get_next_url_and_rotate(char **urls)
 {
 	char next[MAX_LOOKUP_URL_LENGTH];
 	int url_index;
-
 
 	strcpy(next, urls[0]);
 	for(url_index=0; urls[url_index+1][0] != '\0' ; url_index++)
@@ -303,12 +291,9 @@ char* get_next_url_and_rotate(char **urls)
 		strcpy(urls[url_index], urls[url_index+1]);
 	}
 	strcpy(urls[url_index], next);
-	
 
 	return urls[url_index];
 }
-
-
 
 char* get_ip_from_url(char* url)
 {
@@ -339,7 +324,6 @@ char* get_ip_from_url(char* url)
 	return ip;
 }
 
-
 char* get_interface_ip(char* if_name)
 {
 	struct ifreq buffer;
@@ -355,6 +339,3 @@ char* get_interface_ip(char* if_name)
 
 	return ip;
 }
-
-
-
