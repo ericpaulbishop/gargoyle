@@ -194,11 +194,12 @@ global()
 		done
 		echo "ftp:*:$ftp_user_num:$ftp_group_num:ftp:$anonymous_root:/bin/false" >> /etc/passwd
 	else
-		local tmp_pass_file="/tmp/tmp.passwd.tmp"
+		local tmp_pass_file=$(mktemp)
 		cp /etc/passwd "$tmp_pass_file"
 		escaped_anonymous_root=$( echo "$anonymous_root" | sed 's/\//\\\//g' )
 		sed -i "s/^ftp:.*\$/ftp:\*:$ftp_user_num:$ftp_group_num:ftp:$escaped_anonymous_root:\/bin\/false/g" "$tmp_pass_file"
 		copy_if_diff "$tmp_pass_file" /etc/passwd
+		rm $tmp_pass_file
 	fi
 	
 	if [ -e /etc/shadow ] ; then
