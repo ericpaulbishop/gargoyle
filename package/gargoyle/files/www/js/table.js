@@ -116,7 +116,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	if(rowsAreRemovable)
 	{
 		cellContent = createInput("button", controlDocument);
-		cellContent.value = 'Remove';
+		cellContent.value = UI.Remove;
 		cellContent.className="default_button";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); }; 
 		cell = controlDocument.createElement('td');

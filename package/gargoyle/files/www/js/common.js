@@ -1863,10 +1863,9 @@ function validateWeeklyRange(weeklyStr)
 		var nextValid = splitStr.length == 2;
 		if(nextValid)
 		{
-			splitStr[0] = splitStr[0].toLowerCase();
-			splitStr[1] = splitStr[1].toLowerCase();
-			nextValid = nextValid && splitStr[0].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
-			nextValid = nextValid && splitStr[1].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
+			var dayReg=new RegExp("^[\\t ]*("+UI.Sun+"|"+UI.Mon+"|"+UI.Tue+"|"+UI.Wed+"|"+UI.Thu+"|"+UI.Fri+"|"+UI.Sat+")[\\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\\t ]*$");
+			nextValid = nextValid && splitStr[0].match(dayReg);
+			nextValid = nextValid && splitStr[1].match(dayReg);
 		}
 		valid = valid && nextValid;
 	}
