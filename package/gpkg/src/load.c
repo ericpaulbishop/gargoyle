@@ -368,6 +368,12 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 			
 			
 			string_map* all_provides_for_name = get_string_map_element(all_provides, provides_name);
+			if(all_provides_for_name == NULL)
+			{
+				all_provides_for_name = initialize_string_map(1);
+				set_string_map_element(all_provides, provides_name, all_provides_for_name);
+			}
+			
 			string_map* provides_map = get_string_map_element(all_provides_for_name, provides_unique_key);
 			if(provides_map ==  NULL)
 			{
@@ -376,11 +382,34 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 				set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
 				set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
 				set_string_map_element(provides_map, PROVIDES_PACKAGE_DATA_STRING, *package);
+				set_string_map_element(all_provides_for_name, provides_unique_key, provides_map);
 			}
 			free_if_not_null( set_string_map_element(provides_map, PROVIDES_IS_INSTALLED_STRING, current == NULL ? strdup("F") : strdup("T")) );
 			
 			
+			if(pkg_size != NULL)
+			{
+				uint64_t *min_size = get_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING);
+				unsigned char is_min = min_size == NULL ? 1 : 0;
+				if(min_size != NULL)
+				{
+					is_min = *min_size > *pkg_size ? 1 : 0;
+				}
+				if(is_min)
+				{
+					min_size = (uint64_t*)malloc(sizeof(uint64_t));
+					*min_size = pkg_size;
+					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING, min_size) );
+					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING,  strdup(provides_unique_key)) );
+				}
+			}
 			
+			char* cur_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+			if(cur_key == NULL && current != NULL)
+			{
+				set_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING, strdup(provides_unique_key));
+			}
+
 		}
 	}
 
