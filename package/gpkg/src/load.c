@@ -148,6 +148,28 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 			ret = get_string_map_element(all_versions, latest);
 		}
 	}
+	if(ret == NULL)
+	{
+		string_map *provides_map = get_string_map_element(all_package_data, PROVIDES_STRING);
+		if(provides_map != NULL)
+		{
+			string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
+			if(all_provides_for_name != NULL)
+			{
+				char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
+				if(pkg_key != NULL)
+				{
+					char* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+					char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
+					ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+				}
+			}
+		}
+	}
+	
+
+
 	return ret;
 }
 string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
@@ -225,6 +247,27 @@ string_map* internal_get_package_current_or_latest_matching(string_map* all_pack
 	
 		}
 	}
+	if(ret == NULL)
+	{
+		string_map *provides_map = get_string_map_element(all_package_data, PROVIDES_STRING);
+		if(provides_map != NULL)
+		{
+			string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
+			if(all_provides_for_name != NULL)
+			{
+				char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
+				if(pkg_key != NULL)
+				{
+					char* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+					char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
+					ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+				}
+			}
+		}
+	}
+
+
 	return ret;
 
 }

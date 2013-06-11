@@ -71,7 +71,7 @@
 #define PROVIDES_IS_INSTALLED_STRING   "@PI"
 #define MIN_SIZE_PROVIDES_STRING       "@MSP"
 #define MIN_KEY_PROVIDES_STRING        "@MKP"
-#define CUR_PROVIDES_STRING            "@CP"
+#define CURRENT_PROVIDES_STRING        "@CP"
 
 
 #define CURRENT_VERSION_STRING "@C"
