@@ -14,7 +14,7 @@
 <!--
 <?
 	lan_iface=$(uci -P /var/state get network.lan.ifname)
-	wan_iface=$(uci -P /var/state get network.wan.ifname)
+	wan_iface=$(uci -q -P /var/state get network.wan.ifname)
 	echo "var lanIface=\"$lan_iface\";"
 	echo "var wanIface=\"$wan_iface\";"
 	echo "var routingData = new Array();"
