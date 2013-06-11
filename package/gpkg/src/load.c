@@ -244,7 +244,6 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	string_map* all_versions = get_string_map_element(all_package_data, package_name);
 	string_map* existing = NULL;
 	int set_all_versions = all_versions == NULL ? 1 : 0;
-	
 
 	if(all_versions != NULL)
 	{
@@ -323,6 +322,69 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	{
 		set_string_map_element(all_package_data, package_name, all_versions);
 	}
+
+
+
+	//Handle 'Provides' option -- this is a huge pain in the ass...
+	string_map* all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+	if(all_provides = NULL)
+	{
+		all_provides = initialize_string_map(1);
+
+	}
+	char* provides_str = get_string_map_element(package, "Provides");
+	if(provides != NULL)
+	{
+		unsigned long num_provides;
+		char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+		char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
+		int provides_index;
+		char* provides_unique_key = dynamic_strcat(package_name, "@", package_version);	
+		uint64_t* pkg_size = get_string_map_element(*package, "Installed-Size");	
+
+		for(provides_index=0; provides_index < num_provides; provides_index++)
+		{
+			char* provides_name = strdup(provides_list[provides_index]);
+			char* provides_version = NULL;
+			if( strchr(provides_name, '=') != NULL)
+				{
+				char* tmp = provides_name;
+				char* eq = strchr(tmp, '=');
+				eq[0] = '\0';
+				eq++;
+				provides_version = strdup(eq);
+				provides_name = strdup(provides_name);
+				free(tmp);
+			}
+			else if( provides_index+1 < num_provides && provides_list[provides_index+1][0] == '=')
+			{
+				provides_index++;
+				provides_version = strdup( (provides_list[provides_index] + 1) );
+			}
+			else
+			{
+				provides_version = strdup(package_version);
+			}
+			
+			
+			string_map* all_provides_for_name = get_string_map_element(all_provides, provides_name);
+			string_map* provides_map = get_string_map_element(all_provides_for_name, provides_unique_key);
+			if(provides_map ==  NULL)
+			{
+				provides_map = initialize_string_map(1);
+				set_string_map_element(provides_map, PROVIDES_REAL_NAME_STRING, strdup(package_name));
+				set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
+				set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
+				set_string_map_element(provides_map, PROVIDES_PACKAGE_DATA_STRING, *package);
+			}
+			free_if_not_null( set_string_map_element(provides_map, PROVIDES_IS_INSTALLED_STRING, current == NULL ? strdup("F") : strdup("T")) );
+			
+			
+			
+		}
+	}
+
+
 
 
 }
@@ -452,6 +514,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, "Status",              all_dummy);
 		set_string_map_element(load_variable_map, "Depends",             all_dummy);
+		set_string_map_element(load_variable_map, "Provides",            all_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",      all_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination", all_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
@@ -460,6 +523,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, "Status",              matching_dummy);
 		set_string_map_element(load_variable_map, "Depends",             matching_dummy);
+		set_string_map_element(load_variable_map, "Provides",            matching_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",      matching_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination", matching_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    matching_dummy);
@@ -1097,10 +1161,9 @@ void something_depends_on_func(char* key, void* value)
 		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
 		string_map* pkg = current != NULL ? get_string_map_element(all_versions, current) : NULL;
 		char* depend_str = pkg != NULL ? (char*)get_string_map_element(pkg, "Depends") : NULL ;
-
+		
 		if(current != NULL && pkg != NULL && depend_str != NULL)
 		{
-	
 			string_map* dep_map = get_string_map_element(pkg, "All-Depends");
 			int need_to_free_dep_map = 0;
 			if(dep_map == NULL)
