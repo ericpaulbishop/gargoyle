@@ -29,6 +29,7 @@ UI.RestoreDefault="Restore Default Configuration Now";
 UI.Upgrade="Upgrade Now";
 UI.Reboot="Reboot Now";
 UI.MoreInfo="More Info";
+UI.Hide="Hide Text";
 UI.WaitSettings="Please wait while new settings are applied. . .";
 UI.ErrChanges="Changes could not be applied";
 UI.Always="Always";

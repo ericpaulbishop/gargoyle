@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+ 
+var qosStr=new Object; // part of i18n
 
 function saveChanges()
 {
@@ -79,7 +81,7 @@ function saveChanges()
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
 	{
-		errors="There is an error in Total Bandwidth field.\n\nCould not update QoS.";
+		errors=qosStr.TotErr;
 	}
 	else
 	{
@@ -145,12 +147,12 @@ function saveChanges()
 				uci.set("qos_gargoyle", classId, "min_bandwidth", minBandwidth);
 			}
 			maxBandwidth = classData[classIndex][3];
-			if(maxBandwidth != "nolimit")
+			if(maxBandwidth != qosStr.NOLIMIT)
 			{
 				uci.set("qos_gargoyle", classId, "max_bandwidth", maxBandwidth);
 			}
 
-			if (classData[classIndex][4] == "Yes") 
+			if (classData[classIndex][4] == qosStr.YES) 
 			{
 				uci.set("qos_gargoyle",classId,"minRTT","Yes");
 			}
@@ -295,9 +297,9 @@ function init_classtable()
 
 		classRow.Name = classRow.Name == "" ? classSection : classRow.Name;
 		classRow.Percent = Math.round((parseInt(classRow.Percent)*100)/totalPercent);
-		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW : "zero";
-		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW : "nolimit";
-		classRow.MinRTT = classRow.MinRTT == "Yes" ? classRow.MinRTT : "";
+		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW : qosStr.ZERO;
+		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW : qosStr.NOLIMIT;
+		classRow.MinRTT = classRow.MinRTT == qosStr.YES ? classRow.MinRTT : "";
 
 		classTable.push(classRow);
 		classTableData.push([classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, classRow.MinRTT, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)] );
@@ -311,7 +313,7 @@ function init_classtable()
 	var MinRTT="";
 	if (direction == "download") {MinRTT = "Min RTT";}
 
-	var classTableColumns = ["Service Class Name", "Percent BW", "Min BW (kbps)", "Max BW (kbps)", MinRTT, "Load (kbps)"];
+	var classTableColumns = [qosStr.SrvClassName, qosStr.pBdW, qosStr.mBdW+" (kbps)", qosStr.MBdW+" (kbps)", MinRTT, qosStr.qLd+" (kbps)"];
 	var HTMLclassTable=createTable(classTableColumns, classTableData, "qos_class_table", true, false, removeServiceClassCallback);
 	var classTableContainer = document.getElementById('qos_class_table_container');
 	if(classTableContainer.firstChild != null)
@@ -415,7 +417,7 @@ function resetData()
 	update_classtable();
 
 	var ruleSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionRule);
-	ruleTableColumns = ["Match Criteria", "Classification", ""];
+	ruleTableColumns = [qosStr.MatchC, qosStr.Classn, ""];
 	ruleTableData = new Array();
 	rulePriorities = [];
 	for(ruleIndex = 0; ruleIndex < ruleSections.length; ruleIndex++)
@@ -428,7 +430,7 @@ function resetData()
 
 
 		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes_kb"];
-		displayOptionList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $", "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ kBytes"];
+		displayOptionList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ bytes", qosStr.MinPktLen+": $ bytes", qosStr.TrProto+": $", qosStr.Connb+": $ kBytes"];
 
 		ruleText = "";
 		for (optionIndex = 0; optionIndex < optionList.length; optionIndex++)
@@ -457,7 +459,7 @@ function resetData()
 		if(uciOriginal.get("qos_gargoyle", ruleSection, "layer7") != "")
 		{
 
-			app_protocol="Application Protocol: " + protocolMap[uciOriginal.get("qos_gargoyle", ruleSection, "layer7")];
+			app_protocol=qosStr.APro+": " + protocolMap[uciOriginal.get("qos_gargoyle", ruleSection, "layer7")];
 			ruleText = ruleText == "" ? ruleText + app_protocol : ruleText + ", " + app_protocol;
 		}
 
@@ -603,13 +605,13 @@ function addClassificationRule()
 	errors = proofreadClassificationRule(document);
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add classification rule.");
+		alert(errors.join("\n") + "\n\n"+qosStr.CsErr);
 	}
 	else
 	{
 
 		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-		displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $","Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes", "Transport Protocol: $", "Connection bytes: $ kBytes", "Application Protocol: $"];
+		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.DstP+": $ bytes", qosStr.MinPktLen+": $ bytes", qosStr.TrProto+": $", qosStr.Connb+": $ kBytes", qosStr.APro+": $"];
 
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
@@ -659,7 +661,7 @@ function proofreadClassificationRule(controlDocument)
 	errors = [];
 	if(toggledMatchCriteria == 0)
 	{
-		errors.push("No match criteria have been selected.");
+		errors.push(qosStr.CrErr);
 	}
 	else
 	{
@@ -686,7 +688,7 @@ function addServiceClass()
 	errors = proofreadServiceClass(document);
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add new service class.");
+		alert(errors.join("\n") + "\n\n"+qosStr.SvErr);
 	}
 	else
 	{
@@ -695,11 +697,11 @@ function addServiceClass()
 		classRow = new classinfo();
 		classRow.Name    = document.getElementById("class_name").value;
 		classRow.Percent = document.getElementById("percent_bandwidth").value + "%";
-		classRow.MaxBW   = document.getElementById("min_radio1").checked == true ? "zero" : document.getElementById("min_bandwidth").value;
-		classRow.MinBW   = document.getElementById("max_radio1").checked == true ? "nolimit" : document.getElementById("max_bandwidth").value;
+		classRow.MaxBW   = document.getElementById("min_radio1").checked == true ? qosStr.ZERO : document.getElementById("min_bandwidth").value;
+		classRow.MinBW   = document.getElementById("max_radio1").checked == true ? qosStr.NOLIMIT : document.getElementById("max_bandwidth").value;
 
 		if (direction == "download") {
-			classRow.MinRTT  = document.getElementById("rtt_radio1").checked == true ? "Yes" : "";
+			classRow.MinRTT  = document.getElementById("rtt_radio1").checked == true ? qosStr.YES : "";
 		} else {
 			classRow.MinRTT  = "";
 		}
@@ -745,7 +747,7 @@ function proofreadServiceClass(controlDocument)
 			if(existingClassName == newClassName)
 			{
 				classNameMatches = true;
-				errors.push("Duplicate class name.");
+				errors.push(qosStr.DCErr);
 			}
 		}
 
@@ -789,7 +791,7 @@ function removeServiceClassCallback(table, row)
 	if(table.firstChild.childNodes.length == 1)
 	{
 		table.firstChild.appendChild(row);
-		alert("At least one service class is required.\nCannot remove service class.");
+		alert(qosStr.RemSCErr);
 	}
 	else
 	{
@@ -817,7 +819,7 @@ function removeServiceClassCallback(table, row)
 function createRuleTableEditButton()
 {
 	editRuleButton = createInput("button");
-	editRuleButton.value = "Edit";
+	editRuleButton.value = UI.Edit;
 	editRuleButton.className="default_button";
 	editRuleButton.onclick = editRuleTableRow;
 
@@ -865,9 +867,9 @@ function editRuleTableRow()
 		saveButton = editRuleWindow.createElement('<input type="button" />');
 		closeButton = editRuleWindow.createElement('<input type="button" />');
 	}
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = qosStr.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = qosStr.CDiscardChanges;
 	closeButton.className = "default_button";
 
 
@@ -938,13 +940,13 @@ function editRuleTableRow()
 					errors = proofreadClassificationRule(editRuleWindow.document);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\n\nCould not update classification rule.");
+						alert(errors.join("\n") + "\n\n"+qosStr.CUErr);
 						editRuleWindow.focus();
 					}
 					else
 					{
 						addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-						displayList = ["Source: $", "Source Port: $", "Destination: $", "Destination Port: $",  "Maximum Packet Length: $ bytes", "Minimum Packet Length: $ bytes","Transport Protocol: $", "Connection bytes: $ kBytes", "Application Protocol: $"];
+						displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ bytes", qosStr.MinPktLen+": $ bytes", qosStr.TrProto+": $", qosStr.Connb+": $ kBytes", qosStr.APro+": $"];
 						ruleText = ""
 						for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 						{
@@ -992,7 +994,7 @@ function editRuleTableRow()
 function createClassTableEditButton(rowIndex)
 {
 	editClassButton = createInput("button");
-	editClassButton.value = "Edit";
+	editClassButton.value = UI.Edit;
 	editClassButton.className="default_button";
 	editClassButton.onclick = editClassTableRow;
 	editClassButton.id = "" + rowIndex;
@@ -1044,9 +1046,9 @@ function editClassTableRow()
 		closeButton = editClassWindow.createElement('<input type="button" />');
 	}
 
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = qosStr.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = qosStr.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editClassWindowRow=this.parentNode.parentNode;
@@ -1083,7 +1085,7 @@ function editClassTableRow()
 				percent = cells[1].firstChild.data;
 				editClassWindow.document.getElementById("percent_bandwidth").value = percent.substr(0, percent.length-1);
 
-				if(cells[2].firstChild.data != "zero")
+				if(cells[2].firstChild.data != qosStr.ZERO)
 				{
 					editClassWindow.document.getElementById("min_radio2").checked = true;
 					enableAssociatedField(editClassWindow.document.getElementById("min_radio2"), "min_bandwidth", "", editClassWindow.document);
@@ -1092,7 +1094,7 @@ function editClassTableRow()
 					editClassWindow.document.getElementById("min_bandwidth").value = minBandwidth;
 				}
 
-				if(cells[3].firstChild.data != "nolimit")
+				if(cells[3].firstChild.data != qosStr.NOLIMIT)
 				{
 					editClassWindow.document.getElementById("max_radio2").checked = true;
 					enableAssociatedField(editClassWindow.document.getElementById("max_radio2"), "max_bandwidth", "", editClassWindow.document);
@@ -1102,7 +1104,7 @@ function editClassTableRow()
 				}
 
 
-				if (cells[4].firstChild.data == "Yes") {
+				if (cells[4].firstChild.data == qosStr.YES) {
 					editClassWindow.document.getElementById("rtt_radio1").checked = true;
 				} else {
 					editClassWindow.document.getElementById("rtt_radio2").checked = true;
@@ -1120,14 +1122,14 @@ function editClassTableRow()
 					errors = proofreadServiceClass(editClassWindow.document);
 					if(errors.length == 1)
 					{
-						if(errors[0] == "Duplicate class name." && editClassWindow.document.getElementById("class_name").value == editClassWindowRow.childNodes[0].firstChild.data)
+						if(errors[0] == qosStr.DCErr && editClassWindow.document.getElementById("class_name").value == editClassWindowRow.childNodes[0].firstChild.data)
 						{
 							errors = [];
 						}
 					}
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\n\nCould not update service class.");
+						alert(errors.join("\n") + "\n\n"+qosStr.SUErr);
 						editClassWindow.focus();
 					}
 					else
@@ -1171,9 +1173,9 @@ function editClassTableRow()
 						var rowData = classTable[ editClassWindowRow.childNodes[6].firstChild.id ];
 						rowData.Name    = editClassWindow.document.getElementById("class_name").value ;
 						rowData.Percent = editClassWindow.document.getElementById("percent_bandwidth").value ;
-						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? "zero" : editClassWindow.document.getElementById("min_bandwidth").value;
-						rowData.MaxBW   = editClassWindow.document.getElementById("max_radio1").checked == true ? "nolimit" : editClassWindow.document.getElementById("max_bandwidth").value;
-						rowData.MinRTT  = editClassWindow.document.getElementById("rtt_radio1").checked == true ? "Yes" : "";
+						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? qosStr.ZERO : editClassWindow.document.getElementById("min_bandwidth").value;
+						rowData.MaxBW   = editClassWindow.document.getElementById("max_radio1").checked == true ? qosStr.NOLIMIT : editClassWindow.document.getElementById("max_bandwidth").value;
+						rowData.MinRTT  = editClassWindow.document.getElementById("rtt_radio1").checked == true ? qosStr.YES : "";
 
 						editClassWindowRow.childNodes[0].firstChild.data = rowData.Name;
 						editClassWindowRow.childNodes[1].firstChild.data = rowData.Percent + "%";
@@ -1206,7 +1208,7 @@ function parseRuleMatchCriteria(matchText)
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
 
-	possibleCriteria = ["Source: (.*)", "Source Port: (.*)", "Destination: (.*)", "Destination Port: (.*)", "Maximum Packet Length: (.*) bytes", "Minimum Packet Length: (.*) bytes",  "Transport Protocol: (.*)", "Connection bytes: (.*) kBytes", "Application Protocol: (.*)"];
+	possibleCriteria = [qosStr.SUErr+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) bytes", qosStr.MinPktLen+": (.*) bytes",  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) kBytes", qosStr.APro+": (.*)"];
 
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{

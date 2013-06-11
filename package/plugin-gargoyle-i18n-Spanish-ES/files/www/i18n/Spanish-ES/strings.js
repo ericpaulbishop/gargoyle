@@ -29,6 +29,7 @@ UI.RestoreDefault="Restaurar Valor por Defecto Configuración Ahora";
 UI.Upgrade="Actualización Ahora";
 UI.Reboot="Reinicializar Ahora";
 UI.MoreInfo="Más Información";
+UI.Hide="Ocultar texto";
 UI.WaitSettings="Espere por favor mientras se aplican nuevos ajustes. . .";
 UI.ErrChanges="Los cambios no se podrían aplicar";
 UI.Disabled="Desactivado";
