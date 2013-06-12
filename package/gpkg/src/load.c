@@ -150,8 +150,8 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 	}
 	if(ret == NULL)
 	{
-		string_map *provides_map = get_string_map_element(all_package_data, PROVIDES_STRING);
-		if(provides_map != NULL)
+		string_map *all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+		if(all_provides != NULL)
 		{
 			string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
 			if(all_provides_for_name != NULL)
@@ -160,7 +160,7 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
 				if(pkg_key != NULL)
 				{
-					char* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+					string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
 					char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
 					ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
 				}
@@ -246,22 +246,28 @@ string_map* internal_get_package_current_or_latest_matching(string_map* all_pack
 			free_null_terminated_string_array(version_list); // note, this whacks found_version
 	
 		}
-	}
-	if(ret == NULL)
-	{
-		string_map *provides_map = get_string_map_element(all_package_data, PROVIDES_STRING);
-		if(provides_map != NULL)
+	
+		if(ret == NULL)
 		{
-			string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
-			if(all_provides_for_name != NULL)
+			string_map *all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+			if(all_provides != NULL)
 			{
-				char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
-				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
-				if(pkg_key != NULL)
+				string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
+				if(all_provides_for_name != NULL)
 				{
-					char* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
-					char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
-					ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+					
+					
+					char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+					pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
+					if(pkg_key != NULL)
+					{
+						string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+						char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
+						ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+					}
+
+
+
 				}
 			}
 		}
@@ -375,14 +381,14 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 		all_provides = initialize_string_map(1);
 
 	}
-	char* provides_str = get_string_map_element(package, "Provides");
-	if(provides != NULL)
+	char* provides_str = get_string_map_element(*package, "Provides");
+	if(provides_str != NULL)
 	{
 		unsigned long num_provides;
 		char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
 		char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
 		int provides_index;
-		char* provides_unique_key = dynamic_strcat(package_name, "@", package_version);	
+		char* provides_unique_key = dynamic_strcat(3, package_name, "@", package_version);	
 		uint64_t* pkg_size = get_string_map_element(*package, "Installed-Size");	
 
 		for(provides_index=0; provides_index < num_provides; provides_index++)
@@ -441,7 +447,7 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 				if(is_min)
 				{
 					min_size = (uint64_t*)malloc(sizeof(uint64_t));
-					*min_size = pkg_size;
+					*min_size = *pkg_size;
 					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING, min_size) );
 					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING,  strdup(provides_unique_key)) );
 				}
