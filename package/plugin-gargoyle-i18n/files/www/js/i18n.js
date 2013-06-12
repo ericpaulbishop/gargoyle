@@ -13,25 +13,31 @@ function GenLangContainer() {
 	function genDivider() { var a_div=document.createElement('div'); a_div.className="internal_divider"; return a_div }
 	var lc=document.getElementById("lang_container");
 	lc.appendChild(genDivider());
-    lc.appendChild(GenLangDiv(1));
+    lc.appendChild(GenLangDiv(HaveNet));
     lc.appendChild(genDivider());
 }
 
 //
-//  GenLangMenu a highly simplistic language drop down menu with 3 preset languages
+//  GenLangMenu uses the javascript output of gpkg to provide info on available packages & builds a table from the multi-dimensional
+//  associative array.
 //
 function GenLangMenu() {
-	var opts = [{lang:"English", iso:"EN"}, {lang:"Spanish", iso:"ES"}, {lang:"German", iso:"DE"}, {lang:"Portugues BR", iso:"BR"}];
-	var elem = document.createElement("select");
-	elem.className="select";
+	var columnNames = ["Language", 'Description', ''];
+	var TableData = new Array();
 
-	for (var i = 0; i < opts.length; i++) {
-    	var mop = document.createElement("option");
-    	mop.value = opts[i].lang;
-    	mop.appendChild(document.createTextNode(opts[i].lang+" ("+opts[i].iso+")"))
-    	elem.appendChild(mop);
+	for(pkgName in pkg_info) {
+		for (ver in pkg_info[pkgName]) {
+			//since firstboot.sh only comes up on a pristine router, the first version *should* be the most current - except in a case of failsafe...
+			var pStatus=pkg_info[pkgName][ver]["Status"].split(" ");
+			TableData.push([pkgName,
+							pkg_info[pkgName][ver]["Description"]==null?"":pkg_info[pkgName][ver]["Description"],
+							pStatus[2]=="not-installed"?createInstallButton(1):createInstallButton(0)]);
+			break;
+		}
 	}
-	return elem
+
+	var Table = createTable(columnNames, TableData, "lang_table", false, false);
+	return Table;
 }
 
 //
@@ -99,11 +105,11 @@ function GenLangDiv(field) {
 		b_div.innerHTML+=lang_back[i]+ " ";
 	}
 	a_div.appendChild(b_div);
-	if (field == 1) {
+	if (field == 0) {
 		a_div.appendChild(GenLangForm());
-	} /* else {
+	} else if (field == 1) {
 		a_div.appendChild(GenLangMenu());
-	} */
+	}
 	return a_div;
 }
 
@@ -121,6 +127,27 @@ function get_lfile() {
 	}
 }
 
+function InstallLang() {
+	console.log(this.parentNode.parentNode.firstChild.innerHTML);
+	var pkg = this.parentNode.parentNode.firstChild.innerHTML;
+	var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
+	//execute(cmd);
+}
+
+function createInstallButton(type)
+{
+	var inButton = createInput("button");
+	if (type == 1) {
+		inButton.value = "Install";
+		inButton.className="default_button";
+		inButton.onclick = InstallLang;
+	} else {
+		inButton.value = "Installed";
+		inButton.className="default_button_disabled";
+		inButton.onclick = ""
+	}
+	return inButton;
+}
 
 function createUseButton(type)
 {
@@ -140,7 +167,7 @@ function createUseButton(type)
 function resetData()
 {
 	var tableContainer = document.getElementById('lang_table_container');
-	tableContainer.appendChild(GenLangDiv(0));
+	tableContainer.appendChild(GenLangDiv(2));
 	
 	var columnNames = ['', '', ''];
 	var TableData = new Array();
