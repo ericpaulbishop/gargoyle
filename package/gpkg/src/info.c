@@ -186,200 +186,205 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 	for(package_index=0;package_index < num_packages; package_index++)
 	{
 		char* package_name = sorted_packages[package_index];
-		string_map* all_versions = get_string_map_element(package_data, package_name);
-
-		char* current_version = remove_string_map_element(all_versions, CURRENT_VERSION_STRING);
-		char* latest_version  = remove_string_map_element(all_versions, LATEST_VERSION_STRING);
-		unsigned long num_versions;
-		char** versions = get_string_map_keys(all_versions, &num_versions);
-		if(num_versions > 1)
+		if(strcmp(package_name, PROVIDES_STRING) != 0)
 		{
-			sort_versions(versions, num_versions);
-		}
-
-		int printed_package_start = 0;
-		if(num_versions > 0)
-		{
-
-
-			int version_index;
-			for(version_index=0; version_index < num_versions; version_index++)
+	
+			string_map* all_versions = get_string_map_element(package_data, package_name);
+	
+			char* current_version = remove_string_map_element(all_versions, CURRENT_VERSION_STRING);
+			char* latest_version  = remove_string_map_element(all_versions, LATEST_VERSION_STRING);
+			unsigned long num_versions;
+			char** versions = get_string_map_keys(all_versions, &num_versions);
+			if(num_versions > 1)
 			{
-				string_map* pkg_info = get_string_map_element(all_versions, versions[version_index]);
-				char* destination = get_string_map_element(pkg_info, "Install-Destination");
-				if(only_dest == NULL || safe_strcmp(only_dest, destination) == 0)
+				sort_versions(versions, num_versions);
+			}
+	
+			int printed_package_start = 0;
+			if(num_versions > 0)
+			{
+	
+	
+				int version_index;
+				for(version_index=0; version_index < num_versions; version_index++)
 				{
-					if(printed_package_start == 0)
+					string_map* pkg_info = get_string_map_element(all_versions, versions[version_index]);
+					char* destination = get_string_map_element(pkg_info, "Install-Destination");
+					if(only_dest == NULL || safe_strcmp(only_dest, destination) == 0)
 					{
+						if(printed_package_start == 0)
+						{
+							if(format == OUTPUT_JAVASCRIPT)
+							{
+								printf("pkg_info[\"%s\"] = [];\n", package_name);
+							}
+							else if(format == OUTPUT_JSON)
+							{
+								if(package_index >0 && printed_a_package == 1){ printf(",\n"); }
+								printf("\t\"%s\": {\n", package_name);
+							}
+							printed_package_start = 1;
+							printed_a_package=1;
+						}					
+						escape_package_variable(versions[version_index], "Version", format, escape_ver_buf, 4096);
+		
 						if(format == OUTPUT_JAVASCRIPT)
 						{
-							printf("pkg_info[\"%s\"] = [];\n", package_name);
+							printf("pkg_info[\"%s\"][\"%s\"] = [];\n", package_name, escape_ver_buf);
 						}
 						else if(format == OUTPUT_JSON)
 						{
-							if(package_index >0 && printed_a_package == 1){ printf(",\n"); }
-							printf("\t\"%s\": {\n", package_name);
+							if(version_index >0){ printf(",\n"); }
+							printf("\t\t\"%s\": {\n", escape_ver_buf);
 						}
-						printed_package_start = 1;
-						printed_a_package=1;
-					}					
-					escape_package_variable(versions[version_index], "Version", format, escape_ver_buf, 4096);
-	
-					if(format == OUTPUT_JAVASCRIPT)
-					{
-						printf("pkg_info[\"%s\"][\"%s\"] = [];\n", package_name, escape_ver_buf);
-					}
-					else if(format == OUTPUT_JSON)
-					{
-						if(version_index >0){ printf(",\n"); }
-						printf("\t\t\"%s\": {\n", escape_ver_buf);
-					}
-					else
-					{
-						printf("Package: %s\n", package_name);
-						printf("Version: %s\n", escape_ver_buf);
-					}
-	
-					unsigned long num_vars_to_print;
-					char** vars_to_print = get_string_map_keys(package_variables != NULL ? package_variables : pkg_info, &num_vars_to_print);
-					int var_index;
-					for(var_index=0; var_index < num_vars_to_print; var_index++)
-					{
-						char* var_name = vars_to_print[var_index];
-						void* var_def = get_string_map_element(pkg_info, var_name);
-						if(var_def != NULL)
+						else
 						{
-							if(strcmp(var_name, "Required-Size") == 0)
+							printf("Package: %s\n", package_name);
+							printf("Version: %s\n", escape_ver_buf);
+						}
+		
+						unsigned long num_vars_to_print;
+						char** vars_to_print = get_string_map_keys(package_variables != NULL ? package_variables : pkg_info, &num_vars_to_print);
+						int var_index;
+						for(var_index=0; var_index < num_vars_to_print; var_index++)
+						{
+							char* var_name = vars_to_print[var_index];
+							void* var_def = get_string_map_element(pkg_info, var_name);
+							if(var_def != NULL)
 							{
-								if(format == OUTPUT_JAVASCRIPT)
+								if(strcmp(var_name, "Required-Size") == 0)
 								{
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = "SCANFU64";\n", package_name, escape_ver_buf, var_name, *((uint64_t*)var_def) );
-								}
-								else if(format == OUTPUT_JSON)
-								{
-									if(var_index >0){ printf(",\n"); }
-									printf("\t\t\t\"%s\": "SCANFU64"", var_name, *((uint64_t*)var_def) ) ;
-								}
-								else
-								{
-									printf("%s: "SCANFU64"\n", var_name, *((uint64_t*)var_def) ) ;
-								}
-							}
-							else if(strcmp(var_name, "Required-Depends") == 0 || strcmp(var_name, "All-Depends") == 0)
-							{
-								unsigned long num_deps;
-								unsigned long dep_index;
-								char** dep_list = get_string_map_keys((string_map*)var_def, &num_deps);
-								if(format == OUTPUT_JAVASCRIPT)
-								{
-									const char* end = num_deps > 0 ? "\n" : "];\n";
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = [%s", package_name, escape_ver_buf, var_name, end );
-								}
-								else if(format == OUTPUT_JSON)
-								{
-									if(var_index >0){ printf(",\n"); }
-									printf("\t\t\t\"%s\": [\n", var_name);
-								}
-								else
-								{
-									printf("%s: ", var_name);
-								}
-	
-	
-								for(dep_index=0; dep_index < num_deps; dep_index++)
-								{
-									char* dep_name = dep_list[dep_index];
-									char** dep_def = get_string_map_element((string_map*)var_def, dep_name);
-									char* dep_def_str;
-									if(dep_def[0][0] != '*')
-									{
-										dep_def_str = dynamic_strcat(5, " (", dep_def[0], " ", dep_def[1], ")");
-									}
-									else
-									{
-										dep_def_str = strdup("");
-									}
 									if(format == OUTPUT_JAVASCRIPT)
 									{
-										if(dep_index >0){ printf(",\n"); }
-										printf("\t\"%s%s\"", dep_name, dep_def_str);
+										printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = "SCANFU64";\n", package_name, escape_ver_buf, var_name, *((uint64_t*)var_def) );
 									}
 									else if(format == OUTPUT_JSON)
 									{
-										if(dep_index >0){ printf(",\n"); }
-										printf("\t\t\t\t\"%s%s\"", dep_name, dep_def_str);
+										if(var_index >0){ printf(",\n"); }
+										printf("\t\t\t\"%s\": "SCANFU64"", var_name, *((uint64_t*)var_def) ) ;
 									}
 									else
 									{
-										if(dep_index >0){ printf(", "); }
-										printf("%s%s", dep_name, dep_def_str);
+										printf("%s: "SCANFU64"\n", var_name, *((uint64_t*)var_def) ) ;
 									}
-									free(dep_def_str);
 								}
-								if(format == OUTPUT_JAVASCRIPT)
+								else if(strcmp(var_name, "Required-Depends") == 0 || strcmp(var_name, "All-Depends") == 0)
 								{
-									if( num_deps > 0)
+									unsigned long num_deps;
+									unsigned long dep_index;
+									char** dep_list = get_string_map_keys((string_map*)var_def, &num_deps);
+									if(format == OUTPUT_JAVASCRIPT)
 									{
-										printf("\n\t];\n");
+										const char* end = num_deps > 0 ? "\n" : "];\n";
+										printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = [%s", package_name, escape_ver_buf, var_name, end );
 									}
-								}
-								else if(format == OUTPUT_JSON)
-								{
-									printf("\n\t\t\t]");
+									else if(format == OUTPUT_JSON)
+									{
+										if(var_index >0){ printf(",\n"); }
+										printf("\t\t\t\"%s\": [\n", var_name);
+									}
+									else
+									{
+										printf("%s: ", var_name);
+									}
+		
+		
+									for(dep_index=0; dep_index < num_deps; dep_index++)
+									{
+										char* dep_name = dep_list[dep_index];
+										char** dep_def = get_string_map_element((string_map*)var_def, dep_name);
+										char* dep_def_str;
+										if(dep_def[0][0] != '*')
+										{
+											dep_def_str = dynamic_strcat(5, " (", dep_def[0], " ", dep_def[1], ")");
+										}
+										else
+										{
+											dep_def_str = strdup("");
+										}
+										if(format == OUTPUT_JAVASCRIPT)
+										{
+											if(dep_index >0){ printf(",\n"); }
+											printf("\t\"%s%s\"", dep_name, dep_def_str);
+										}
+										else if(format == OUTPUT_JSON)
+										{
+											if(dep_index >0){ printf(",\n"); }
+											printf("\t\t\t\t\"%s%s\"", dep_name, dep_def_str);
+										}
+										else
+										{
+											if(dep_index >0){ printf(", "); }
+											printf("%s%s", dep_name, dep_def_str);
+										}
+										free(dep_def_str);
+									}
+									if(format == OUTPUT_JAVASCRIPT)
+									{
+										if( num_deps > 0)
+										{
+											printf("\n\t];\n");
+										}
+									}
+									else if(format == OUTPUT_JSON)
+									{
+										printf("\n\t\t\t]");
+									}
+									else
+									{
+										printf("\n");
+									}
+									free_null_terminated_string_array(dep_list);
 								}
 								else
 								{
-									printf("\n");
-								}
-								free_null_terminated_string_array(dep_list);
-							}
-							else
-							{
-								escape_package_variable((char*)var_def, var_name, format, escape_var_buf, 4096);
-
-								if(strcmp(var_name, "Install-Destination") == 0 && strcmp((char*)var_def, NOT_INSTALLED_STRING) == 0)
-								{
-									sprintf(escape_var_buf, "Not Installed");
-								}
-								if(format == OUTPUT_JAVASCRIPT)
-								{
-									printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escape_ver_buf, var_name, escape_var_buf );
-								}
-								else if(format == OUTPUT_JSON)
-								{
-									if(var_index >0){ printf(",\n"); }
-									printf("\t\t\t\"%s\": \"%s\"", var_name, escape_var_buf);
-								}
-								else
-								{
-									printf("%s: %s\n", var_name, escape_var_buf);
-								}
+									escape_package_variable((char*)var_def, var_name, format, escape_var_buf, 4096);
 	
+									if(strcmp(var_name, "Install-Destination") == 0 && strcmp((char*)var_def, NOT_INSTALLED_STRING) == 0)
+									{
+										sprintf(escape_var_buf, "Not Installed");
+									}
+									if(format == OUTPUT_JAVASCRIPT)
+									{
+										printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escape_ver_buf, var_name, escape_var_buf );
+									}
+									else if(format == OUTPUT_JSON)
+									{
+										if(var_index >0){ printf(",\n"); }
+										printf("\t\t\t\"%s\": \"%s\"", var_name, escape_var_buf);
+									}
+									else
+									{
+										printf("%s: %s\n", var_name, escape_var_buf);
+									}
+		
+								}
 							}
 						}
+						//end of one version of one package
+						if(format == OUTPUT_JSON)
+						{
+							printf("\n\t\t}");
+						}
+						else //javascript or human readable
+						{
+							printf("\n");
+						}
+						free_null_terminated_string_array(vars_to_print);
 					}
-					//end of one version of one package
-					if(format == OUTPUT_JSON)
-					{
-						printf("\n\t\t}");
-					}
-					else //javascript or human readable
-					{
-						printf("\n");
-					}
-					free_null_terminated_string_array(vars_to_print);
+				}
+	
+				if(format == OUTPUT_JSON && printed_package_start == 1)
+				{
+					printf("\n\t}");
 				}
 			}
+	
+			free_if_not_null(current_version);
+			free_if_not_null(latest_version);
+			free_null_terminated_string_array(versions);
 
-			if(format == OUTPUT_JSON && printed_package_start == 1)
-			{
-				printf("\n\t}");
-			}
 		}
-
-		free_if_not_null(current_version);
-		free_if_not_null(latest_version);
-		free_null_terminated_string_array(versions);
 
 	}
 	if(format == OUTPUT_JSON)

@@ -376,88 +376,100 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 
 	//Handle 'Provides' option -- this is a huge pain in the ass...
 	string_map* all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
-	if(all_provides = NULL)
+	if(all_provides == NULL)
 	{
 		all_provides = initialize_string_map(1);
+		set_string_map_element(all_package_data, PROVIDES_STRING, all_provides);
 
 	}
 	char* provides_str = get_string_map_element(*package, "Provides");
 	if(provides_str != NULL)
 	{
-		unsigned long num_provides;
-		char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
-		char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
-		int provides_index;
-		char* provides_unique_key = dynamic_strcat(3, package_name, "@", package_version);	
-		uint64_t* pkg_size = get_string_map_element(*package, "Installed-Size");	
-
-		for(provides_index=0; provides_index < num_provides; provides_index++)
+		if(strlen(provides_str) > 0)
 		{
-			char* provides_name = strdup(provides_list[provides_index]);
-			char* provides_version = NULL;
-			if( strchr(provides_name, '=') != NULL)
+			unsigned long num_provides;
+			char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+			char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
+			int provides_index;
+			char* provides_unique_key = dynamic_strcat(3, package_name, "@", package_version);
+			uint64_t* pkg_size = get_string_map_element(*package, "Installed-Size");
+	
+			for(provides_index=0; provides_index < num_provides; provides_index++)
+			{
+				char* provides_name = strdup(provides_list[provides_index]);
+				char* provides_version = NULL;
+				if( strchr(provides_name, '=') != NULL)
 				{
-				char* tmp = provides_name;
-				char* eq = strchr(tmp, '=');
-				eq[0] = '\0';
-				eq++;
-				provides_version = strdup(eq);
-				provides_name = strdup(provides_name);
-				free(tmp);
-			}
-			else if( provides_index+1 < num_provides && provides_list[provides_index+1][0] == '=')
-			{
-				provides_index++;
-				provides_version = strdup( (provides_list[provides_index] + 1) );
-			}
-			else
-			{
-				provides_version = strdup(package_version);
-			}
-			
-			
-			string_map* all_provides_for_name = get_string_map_element(all_provides, provides_name);
-			if(all_provides_for_name == NULL)
-			{
-				all_provides_for_name = initialize_string_map(1);
-				set_string_map_element(all_provides, provides_name, all_provides_for_name);
-			}
-			
-			string_map* provides_map = get_string_map_element(all_provides_for_name, provides_unique_key);
-			if(provides_map ==  NULL)
-			{
-				provides_map = initialize_string_map(1);
-				set_string_map_element(provides_map, PROVIDES_REAL_NAME_STRING, strdup(package_name));
-				set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
-				set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
-				set_string_map_element(provides_map, PROVIDES_PACKAGE_DATA_STRING, *package);
-				set_string_map_element(all_provides_for_name, provides_unique_key, provides_map);
-			}
-			free_if_not_null( set_string_map_element(provides_map, PROVIDES_IS_INSTALLED_STRING, current == NULL ? strdup("F") : strdup("T")) );
-			
-			
-			if(pkg_size != NULL)
-			{
-				uint64_t *min_size = get_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING);
-				unsigned char is_min = min_size == NULL ? 1 : 0;
-				if(min_size != NULL)
-				{
-					is_min = *min_size > *pkg_size ? 1 : 0;
+					char* tmp = provides_name;
+					char* eq = strchr(tmp, '=');
+					eq[0] = '\0';
+					eq++;
+					provides_version = strdup(eq);
+					provides_name = strdup(provides_name);
+					free(tmp);
 				}
-				if(is_min)
+				else if( provides_index+1 < num_provides && provides_list[provides_index+1][0] == '=')
 				{
-					min_size = (uint64_t*)malloc(sizeof(uint64_t));
-					*min_size = *pkg_size;
-					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING, min_size) );
-					free_if_not_null( set_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING,  strdup(provides_unique_key)) );
+					provides_index++;
+					provides_version = strdup( (provides_list[provides_index] + 1) );
 				}
+				else
+				{
+					provides_version = strdup(package_version);
+				}
+	
+				
+				string_map* all_provides_for_name = get_string_map_element(all_provides, provides_name);
+				if(all_provides_for_name == NULL)
+				{
+					all_provides_for_name = initialize_string_map(1);
+					set_string_map_element(all_provides, provides_name, all_provides_for_name);
+				}
+				
+				string_map* provides_map = get_string_map_element(all_provides_for_name, provides_unique_key);
+				if(provides_map ==  NULL)
+				{
+					provides_map = initialize_string_map(1);
+					set_string_map_element(provides_map, PROVIDES_REAL_NAME_STRING, strdup(package_name));
+					set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
+					set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
+					set_string_map_element(provides_map, PROVIDES_PACKAGE_DATA_STRING, *package);
+					set_string_map_element(all_provides_for_name, provides_unique_key, provides_map);
+				}
+				free_if_not_null( set_string_map_element(provides_map, PROVIDES_IS_INSTALLED_STRING, current == NULL ? strdup("F") : strdup("T")) );
+				
+				printf("d\n");
+				
+				if(pkg_size != NULL)
+				{
+					uint64_t *min_size = get_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING);
+					unsigned char is_min = min_size == NULL ? 1 : 0;
+					if(min_size != NULL)
+					{
+						is_min = *min_size > *pkg_size ? 1 : 0;
+					}
+					if(is_min)
+					{
+						min_size = (uint64_t*)malloc(sizeof(uint64_t));
+						*min_size = *pkg_size;
+						free_if_not_null( set_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING, min_size) );
+						free_if_not_null( set_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING,  strdup(provides_unique_key)) );
+					}
+				}
+				printf("e\n");
+				
+				char* cur_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+				if(cur_key == NULL && current != NULL)
+				{
+					set_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING, strdup(provides_unique_key));
+				}
+
+				free(provides_name);
+				free(provides_version);
+	
 			}
-			
-			char* cur_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
-			if(cur_key == NULL && current != NULL)
-			{
-				set_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING, strdup(provides_unique_key));
-			}
+			free_null_terminated_string_array(provides_list);
+			free(provides_unique_key);
 
 		}
 	}
