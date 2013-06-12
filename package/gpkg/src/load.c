@@ -157,7 +157,7 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 			if(all_provides_for_name != NULL)
 			{
 				char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
-				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
+				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
 				if(pkg_key != NULL)
 				{
 					string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
@@ -255,19 +255,14 @@ string_map* internal_get_package_current_or_latest_matching(string_map* all_pack
 				string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
 				if(all_provides_for_name != NULL)
 				{
-					
-					
 					char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
-					pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING) : pkg_key;
+					pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
 					if(pkg_key != NULL)
 					{
 						string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
 						char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
 						ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
 					}
-
-
-
 				}
 			}
 		}
@@ -392,7 +387,6 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 			char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
 			int provides_index;
 			char* provides_unique_key = dynamic_strcat(3, package_name, "@", package_version);
-			uint64_t* pkg_size = get_string_map_element(*package, "Installed-Size");
 	
 			for(provides_index=0; provides_index < num_provides; provides_index++)
 			{
@@ -433,30 +427,36 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 					set_string_map_element(provides_map, PROVIDES_REAL_NAME_STRING, strdup(package_name));
 					set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
 					set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
-					set_string_map_element(provides_map, PROVIDES_PACKAGE_DATA_STRING, *package);
 					set_string_map_element(all_provides_for_name, provides_unique_key, provides_map);
 				}
-				free_if_not_null( set_string_map_element(provides_map, PROVIDES_IS_INSTALLED_STRING, current == NULL ? strdup("F") : strdup("T")) );
-				
-				printf("d\n");
-				
-				if(pkg_size != NULL)
+			
+				/*
+				 * My initial thought was to set the preferred package to use 
+				 * when something has a provides alias  as a dependency, and none
+				 * of the packages that provide that thing are currently installed
+				 * as the package that is smallest.
+				 *
+				 * However, opkg seems to use whichever is last alphabetically, and package 
+				 * naming tends to assume this by having -custom, -full, and -mini versions 
+				 * of the package.  The -custom ends up being the smallest since unless 
+				 * compiled with specified parameters there are NO options compiled in and
+				 * it's basically useless.  The -mini is the one that makes the most sense with
+				 * reasonable minimal options and is the one that most people will want.  
+				 *
+				 * So... I'm just going to set the last alphabetically as the preferred package, 
+				 * for compatibility with opkg if nothing else.
+				 *
+				 */	
+				char* preferred_key = get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING);
+				unsigned char is_preferred = preferred_key == NULL ? 1 : 0;
+				if(preferred_key != NULL)
 				{
-					uint64_t *min_size = get_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING);
-					unsigned char is_min = min_size == NULL ? 1 : 0;
-					if(min_size != NULL)
-					{
-						is_min = *min_size > *pkg_size ? 1 : 0;
-					}
-					if(is_min)
-					{
-						min_size = (uint64_t*)malloc(sizeof(uint64_t));
-						*min_size = *pkg_size;
-						free_if_not_null( set_string_map_element(all_provides_for_name, MIN_SIZE_PROVIDES_STRING, min_size) );
-						free_if_not_null( set_string_map_element(all_provides_for_name, MIN_KEY_PROVIDES_STRING,  strdup(provides_unique_key)) );
-					}
+					is_preferred = strcmp(provides_unique_key,preferred_key) > 0 ? 1 : 0;
+				}	
+				if(is_preferred)
+				{
+					free_if_not_null( set_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING, strdup(provides_unique_key)) );
 				}
-				printf("e\n");
 				
 				char* cur_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
 				if(cur_key == NULL && current != NULL)
@@ -988,6 +988,26 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						char* dep_name = dep_list[dep_index];
 						char** dep_def = NULL;
 						int dep_is_installed;
+						if(get_string_map_element(package_data, dep_name) == NULL)
+						{
+							string_map* all_provides = get_string_map_element(package_data, PROVIDES_STRING);
+							if(all_provides != NULL)
+							{
+								string_map* all_provides_for_name = get_string_map_element(all_provides, dep_name);
+								if(all_provides_for_name != NULL)
+								{
+									char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+									pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
+									if(pkg_key != NULL)
+									{
+										string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+										char* real_def_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING) ;
+										dep_name = strdup(real_def_name);
+									}
+								}
+							}
+						}
+
 						load_recursive_package_data_variables(package_data, dep_name, load_size, load_will_fit, free_bytes); //recurse
 						if( dep_list[dep_index+1] != NULL )
 						{
