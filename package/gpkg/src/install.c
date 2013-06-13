@@ -241,7 +241,13 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		}
 	
 	}
-	
+
+
+	/* reload with new preferred_provides */
+	free_recursive_package_vars(package_data);
+	matching_packages = initialize_string_map(1);
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1, preferred_provides );
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	
 	
 	/* load data and do sanity checks for packages we are about to install */
@@ -501,7 +507,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
 		char* pkg_name = pkg_names[pkg_name_index];
-		if(get_string_map_element(install_pkgs_map, pkg_name) != NULL)
+		if(get_string_map_element(install_pkgs_map, pkg_name) != NULL && get_string_map_element(install_called_pkgs, pkg_name) == NULL)
 		{
 			int install_pkg_is_current;
 			char* install_pkg_version = NULL;
