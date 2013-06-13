@@ -96,8 +96,6 @@ qosStr.CUErr="No se pudo actualizar la norma de clasificación.";
 qosStr.DCErr="Duplicar nombre de la clase.";
 qosStr.RemSCErr="Se requiere al menos una clase de servicio.\nNo se pueden quitar clase de servicio.";
 qosStr.TotErr="Hay un error en el campo Total de Ancho de Banda.\n\nNo se pudo actualizar QoS.";
-qosStr.CApplyChanges="Cierre y Aplicar Cambios";
-qosStr.CDiscardChanges="Cerrar y Guardar Cambios";
 
 //one-word strings used in rules
 qosStr.NOLIMIT="sinlímite";

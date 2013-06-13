@@ -1,19 +1,19 @@
 				<table>
 					<tr class='table_row_add_header'>
-						<th><label id='addr_desc_label' for='addr_desc'>Description</label><br><em>(optional)</em></th>
-						<th><label id='addr_prot_label' for='addr_prot'>Protocol</label></th>
-						<th><label id='addr_sp_label' for='addr_sp'>Start Port</label></th>
-						<th><label id='addr_ep_label' for='addr_ep'>End Port</label></th>
-						<th><label id='addr_ip_label' for='addr_ip'>To IP</label></th>
+						<th><label id='addr_desc_label' for='addr_desc'><%~ port.Desc %></label><br><em><%~ optl %></em></th>
+						<th><label id='addr_prot_label' for='addr_prot'><%~ Proto %></label></th>
+						<th><label id='addr_sp_label' for='addr_sp'><%~ SPrt %></label></th>
+						<th><label id='addr_ep_label' for='addr_ep'><%~ EPrt %></label></th>
+						<th><label id='addr_ip_label' for='addr_ip'><%~ TIP %></label></th>
 						<th></th>
 					</tr>
 					<tr class='table_row_add'>
 						<td><input type='text' id='addr_desc'  size='10' maxLength='32' /></td>
-						<td><select id='addr_prot'><option value='Both'>Both</option><option value='TCP'>TCP</option><option value='UDP'>UDP</option></select></td>
+						<td><select id='addr_prot'><option value='<%~ both %>'><%~ both %></option><option value='TCP'>TCP</option><option value='UDP'>UDP</option></select></td>
 						<td><input type='text' id='addr_sp' size='5' onkeyup='proofreadNumericRange(this,1,65535)'  maxLength='5'/></td>
 						<td><input type='text' id='addr_ep' size='5' onkeyup='proofreadNumericRange(this,1,65535)'  maxLength='5'/></td>
 						<td><input type='text' id='addr_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15'/></td>
 							
-						<td><input type='button' id='addr_button' value='Add' class='default_button' onclick='addPortfRangeRule()'/></td>
+						<td><input type='button' id='addr_button' value='<%~ Add %>' class='default_button' onclick='addPortfRangeRule()'/></td>
 					</tr>
 				</table>

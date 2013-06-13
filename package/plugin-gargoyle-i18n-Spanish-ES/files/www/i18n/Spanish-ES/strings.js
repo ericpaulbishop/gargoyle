@@ -57,3 +57,7 @@ UI.seconds="segundos";
 UI.minutes="minutos";
 UI.hours="horas";
 UI.days="dias";
+
+UI.CApplyChanges="Cierre y Aplicar Cambios";
+UI.CDiscardChanges="Cerrar y Desechar Cambios";
+UI.waitText="Espere Mientras Ajustes Se Aplican Favor";

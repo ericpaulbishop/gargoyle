@@ -24,8 +24,6 @@ quotasStr.DuplicateRange="Rango IP / Tiempo duplicados - sólo se permite una cu
 quotasStr.OneTimeQuotaError="Usted puede tener una sola cuota en un momento dado para hosts sin cuotas explícitas";
 quotasStr.OneNetworkQuotaError="Usted puede tener una sola cuota en un momento dado que se aplica a toda la red";
 quotasStr.QuotaAddError="No se pudo añadir la cuota.";
-quotasStr.CApplyChanges="Cierre y Aplicar Cambios";
-quotasStr.CDiscardChanges="Cerrar y Guardar Cambios";
 
 //template
 quotasStr.AppliesTo="Se aplica a";

@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -7,14 +7,14 @@
  */
 
 
-
+var portStr=new Object(); //part of i18n
 
 function saveChanges()
 {
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -49,7 +49,7 @@ function saveChanges()
 			var rowData = singlePortData[rowIndex];
 			var enabled = rowData[5].checked;
 			
-			var protos = rowData[1].toLowerCase() == "both" ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protos = rowData[1].toLowerCase() == UI.both.toLowerCase() ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
 			var protoIndex=0;
 			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
 			{
@@ -76,7 +76,7 @@ function saveChanges()
 			var rowData = portRangeData[rowIndex];
 			var enabled = rowData[5].checked;
 
-			var protos = rowData[1].toLowerCase() == "both" ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protos = rowData[1].toLowerCase() == UI.both.toLowerCase() ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
 			var protoIndex=0;
 			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
 			{
@@ -164,7 +164,7 @@ function addPortfRule()
 	errors = proofreadForwardSingle();
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add forwarding rule.");
+		alert(errors.join("\n") + "\n\n"+portStr.AFRErr);
 	}
 	else
 	{
@@ -185,7 +185,7 @@ function addPortfRule()
 
 
 		//check if this is identical to another rule, but for a different protocol
-		//if so, just merge the two by setting the protocol on the old data to 'Both'
+		//if so, just merge the two by setting the protocol on the old data to 'both'
 		//
 		portfTable = document.getElementById('portf_table_container').firstChild;
 		currentPortfData = getTableDataArray(portfTable, true, false);
@@ -198,7 +198,7 @@ function addPortfRule()
 			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3] && values[4] == rowData[4])
 			{
 
-				portfTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = 'Both';
+				portfTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
 				if(values[0] != '-' && rowData[0] == '-')
 				{
 					portfTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
@@ -233,7 +233,7 @@ function addPortfRangeRule()
 	errors = proofreadForwardRange();
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add forwarding rule.");
+		alert(errors.join("\n") + "\n\n"+portStr.AFRErr);
 	}
 	else
 	{
@@ -260,7 +260,7 @@ function addPortfRangeRule()
 			rowData = currentRangeData[rowDataIndex];
 			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3] && values[4] == rowData[4])
 			{
-				portfRangeTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = 'Both';
+				portfRangeTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
 				if(values[0] != '-' && rowData[0] == '-')
 				{
 					portfRangeTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
@@ -307,7 +307,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 	{
 		if( (1*controlDocument.getElementById('addr_sp').value) > (1*controlDocument.getElementById('addr_ep').value) )
 		{
-			errors.push("Start Port > End Port");
+			errors.push(portStr.GTErr);
 		}
 		
 		
@@ -320,9 +320,9 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 		for (rowDataIndex=0; rowDataIndex < currentPortfData.length ; rowDataIndex++)
 		{
 			var rowData = currentPortfData[rowDataIndex];
-			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') &&  addStartPort*1 <= rowData[2]*1 && addEndPort*1 >= rowData[2]*1 )
+			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addStartPort*1 <= rowData[2]*1 && addEndPort*1 >= rowData[2]*1 )
 			{
-				errors.push("Port(s) Within Range Is/Are Already Being Forwarded");
+				errors.push(portStr.DupErr);
 			}
 		}
 
@@ -333,9 +333,9 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 			if(portfRangeTable.rows[rowDataIndex+1] != excludeRow)
 			{
 				var rowData = currentRangeData[rowDataIndex];
-				if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1)
+				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1)
 				{
-					errors.push("Port(s) Within Range Is/Are Already Being Forwarded");
+					errors.push(portStr.DupErr);
 				}
 			}
 		}
@@ -376,9 +376,9 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 			if(portfTable.rows[rowDataIndex+1] != excludeRow)
 			{
 				var rowData = currentPortfData[rowDataIndex];
-				if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') &&  addPort == rowData[2])
+				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addPort == rowData[2])
 				{
-					errors.push("Port Is Already Being Forwarded");
+					errors.push(portStr.CopErr);
 				}
 			}
 		}
@@ -388,9 +388,9 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 		for (rowDataIndex=0; rowDataIndex < currentRangeData; rowDataIndex++)
 		{
 			var rowData = currentRangeData[rowDataIndex];
-			if( (addProtocol == rowData[1] || addProtocol == 'Both' || rowData[1] == 'Both') && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1)
+			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1)
 			{
-				errors.push("Port Is Already Being Forwarded");
+				errors.push(portStr.CopErr);
 			}
 		}
 	}
@@ -400,7 +400,6 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 
 function resetData()
 {
-	
 	var singlePortTableData = new Array();
 	var portRangeTableData = new Array();
 	var singlePortEnabledStatus = new Array();
@@ -454,7 +453,7 @@ function resetData()
 					// otherwise, add rule to table data
 					if(portRangeProtoHash[otherProto][hashStr] != null)
 					{
-						portRangeProtoHash[otherProto][hashStr][1] = "Both";
+						portRangeProtoHash[otherProto][hashStr][1] = UI.both;
 					}
 					else
 					{
@@ -470,7 +469,7 @@ function resetData()
 					// otherwise, add rule to table data
 					if(singlePortProtoHash[otherProto][hashStr] != null)
 					{
-						singlePortProtoHash[otherProto][hashStr][1] = "Both";
+						singlePortProtoHash[otherProto][hashStr][1] = UI.both;
 					}
 					else
 					{
@@ -485,7 +484,7 @@ function resetData()
 	}
 
 
-	columnNames = ['Description', 'Protocol', 'From Port', 'To IP', 'To Port', 'Enabled', '']
+	columnNames = [portStr.Desc, portStr.Proto, portStr.FPrt, portStr.TIP, portStr.TPrt, UI.Enabled, '']
 	portfTable=createTable(columnNames, singlePortTableData, "portf_table", true, false);
 	table1Container = document.getElementById('portf_table_container');
 	
@@ -499,7 +498,7 @@ function resetData()
 	
 	
 
-	columnNames = ['Description', 'Protocol', 'Start Port', 'End Port', 'To IP', 'Enabled', '']
+	columnNames = [portStr.Desc, portStr.Proto, portStr.SPrt, portStr.EPrt, portStr.TIP, UI.Enabled, '']
 	portfrangeTable=createTable(columnNames, portRangeTableData, "portf_range_table", true, false);
 	table2Container = document.getElementById('portfrange_table_container');
 	if(document.getElementById('portfrange_table_container').firstChild != null)
@@ -582,7 +581,7 @@ function resetData()
 		var tableRow =['***','***********','***** '];
 		tableData.push(tableRow);
 
-		var columnNames= ['Proto', 'LAN Host', 'Port' ]; 
+		var columnNames= [portStr.Prot, portStr.LHst, portStr.Port ]; 
 		var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 		var tableContainer = document.getElementById('upnp_table_container');
 		if(tableContainer.firstChild != null)
@@ -613,7 +612,7 @@ function setDmzEnabled()
 function createEditButton(isSingle)
 {
 	var editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = isSingle ? function(){ editForward(true, this); } : function(){ editForward(false, this); } ;
 	return editButton;
@@ -651,9 +650,9 @@ function editForward(isSingle, triggerElement)
 	
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editRow=triggerElement.parentNode.parentNode;
@@ -704,7 +703,7 @@ function editForward(isSingle, triggerElement)
 					}
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not update port forward.");
+						alert(errors.join("\n") + "\n"+portStr.UpErr);
 					}
 					else
 					{
@@ -780,7 +779,7 @@ function update_upnp()
 					tableData.push(tableRow);
 				}
 
-				var columnNames= ['Proto', 'LAN Host', 'Port' ]; 
+				var columnNames= [portStr.Prot, portStr.LHst, portStr.Port ]; 
 				
 				var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 				var tableContainer = document.getElementById('upnp_table_container');

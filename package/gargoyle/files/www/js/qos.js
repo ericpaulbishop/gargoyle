@@ -867,9 +867,9 @@ function editRuleTableRow()
 		saveButton = editRuleWindow.createElement('<input type="button" />');
 		closeButton = editRuleWindow.createElement('<input type="button" />');
 	}
-	saveButton.value = qosStr.CApplyChanges;
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = qosStr.CDiscardChanges;
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 
@@ -1046,9 +1046,9 @@ function editClassTableRow()
 		closeButton = editClassWindow.createElement('<input type="button" />');
 	}
 
-	saveButton.value = qosStr.CApplyChanges;
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = qosStr.CDiscardChanges;
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editClassWindowRow=this.parentNode.parentNode;

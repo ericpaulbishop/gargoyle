@@ -1161,9 +1161,9 @@ function editQuota()
 	
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
-	saveButton.value = quotasStr.CApplyChanges;
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = quotasStr.CApplyChanges;
+	closeButton.value = UI.CApplyChanges;
 	closeButton.className = "default_button";
 
 	var editRow=this.parentNode.parentNode;

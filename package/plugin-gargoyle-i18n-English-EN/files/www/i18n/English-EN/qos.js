@@ -96,8 +96,6 @@ qosStr.CUErr="Could not update classification rule.";
 qosStr.DCErr="Duplicate class name.";
 qosStr.RemSCErr="At least one service class is required.\nCannot remove service class.";
 qosStr.TotErr="There is an error in Total Bandwidth field.\n\nCould not update QoS.";
-qosStr.CApplyChanges="Close and Apply Changes";
-qosStr.CDiscardChanges="Close and Discard Changes";
 
 //one-word strings used in rules
 qosStr.NOLIMIT="nolimit";

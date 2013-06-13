@@ -36,6 +36,7 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 {
 	var dark = document.getElementById("darken");
 	var msg  = document.getElementById("wait_msg");
+	document.getElementById("wait_txt").firstChild.data = UI.waitText;
 	if (!enabled)
 	{
 		var totalHeight="100%";
