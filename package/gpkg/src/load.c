@@ -297,7 +297,19 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	{
 		all_versions = initialize_string_map(1);
 	}
-	
+
+
+	/* if status is set to not-installed remove destination, as that implies it's installed */
+	char* new_status = get_string_map_element(*package, "Status");
+	char* new_dest   = get_string_map_element(*package, "Install-Destination");
+	if(new_status != NULL && new_dest != NULL)
+	{
+		if(strstr(new_status, "not-installed") != NULL)
+		{
+			free_if_not_null( set_string_map_element(*package, "Install-Destination", strdup(NOT_INSTALLED_STRING)) );
+		}
+	}
+
 
 	if(existing != NULL)
 	{
