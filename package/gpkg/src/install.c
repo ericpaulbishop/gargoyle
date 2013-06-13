@@ -149,7 +149,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					&err);
 			if(err != 0)
 			{
-				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				fprintf(stderr, "ERROR: %s is not a valid package file, cannot install\n", pkg_file);
 				rm_r(tmp_dir);
 				exit(1);
 			}
@@ -201,7 +201,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			free_null_terminated_string_array(ctrl_name_list);
 			if(err != 0)
 			{
-				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				fprintf(stderr, "ERROR: %s is not a valid package file, cannot install\n", pkg_file);
 				rm_r(tmp_dir);
 				exit(1);
 			}
