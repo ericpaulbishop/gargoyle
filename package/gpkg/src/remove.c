@@ -30,18 +30,27 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0);
 
 
-
 		int rm_pkg_is_installed = 0;
 		string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, &rm_pkg_is_installed, NULL);
 
-		char* rm_status = get_string_map_element(rm_pkg_data, "Status");
-		char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
-		char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
 
+
+
+		char* rm_status = NULL;
+		char* rm_root_name = NULL;
+		char* rm_root_path = NULL;
 		char* package_depending_on_name = NULL;
-		int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
+		int other_package_depends_on = 0;
 
+		if(rm_pkg_data != NULL)
+		{
+			rm_status = get_string_map_element(rm_pkg_data, "Status");
+			rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
+			rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
+			other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
+		}
 
+		
 		/* error checking before we start install */
 		if(rm_pkg_data == NULL || rm_status == NULL || rm_root_path == NULL)
 		{
