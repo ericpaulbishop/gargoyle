@@ -38,13 +38,13 @@ uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 	return free_bytes;
 }
 
-void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root, int ignore_recursive_variables)
+void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root, int ignore_recursive_variables, string_map* preferred_provides)
 {
 	string_map* package_variables = parameters == NULL ? NULL : get_string_map_element(parameters, "package-variables");
 
 	// load list data
 	// this tells us everything about packages except whether they are currently installed
-	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_variable_def, NULL);
+	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_variable_def, NULL, preferred_provides);
 
 
 
@@ -60,7 +60,7 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 		status_path = adjusted_status_path;
 		if(path_exists(status_path))
 		{
-			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]));
+			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]), preferred_provides);
 		}
 		free(status_path);
 	}
@@ -148,6 +148,28 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 			ret = get_string_map_element(all_versions, latest);
 		}
 	}
+	if(ret == NULL)
+	{
+		string_map *all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+		if(all_provides != NULL)
+		{
+			string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
+			if(all_provides_for_name != NULL)
+			{
+				char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+				pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
+				if(pkg_key != NULL)
+				{
+					string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+					char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
+					ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+				}
+			}
+		}
+	}
+	
+
+
 	return ret;
 }
 string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version)
@@ -224,7 +246,29 @@ string_map* internal_get_package_current_or_latest_matching(string_map* all_pack
 			free_null_terminated_string_array(version_list); // note, this whacks found_version
 	
 		}
+	
+		if(ret == NULL)
+		{
+			string_map *all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+			if(all_provides != NULL)
+			{
+				string_map* all_provides_for_name = get_string_map_element(all_provides, package_name);
+				if(all_provides_for_name != NULL)
+				{
+					char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+					pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
+					if(pkg_key != NULL)
+					{
+						string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+						char* real_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING);
+						ret = internal_get_package_current_or_latest(all_package_data, real_name, prefer_latest_to_current, is_current, matching_version);
+					}
+				}
+			}
+		}
 	}
+
+
 	return ret;
 
 }
@@ -239,12 +283,11 @@ string_map* get_package_latest_matching(string_map* all_package_data, char* pack
 
 
 
-void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version)
+void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version, string_map* preferred_provides)
 {
 	string_map* all_versions = get_string_map_element(all_package_data, package_name);
 	string_map* existing = NULL;
 	int set_all_versions = all_versions == NULL ? 1 : 0;
-	
 
 	if(all_versions != NULL)
 	{
@@ -254,7 +297,19 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	{
 		all_versions = initialize_string_map(1);
 	}
-	
+
+
+	/* if status is set to not-installed remove destination, as that implies it's installed */
+	char* new_status = get_string_map_element(*package, "Status");
+	char* new_dest   = get_string_map_element(*package, "Install-Destination");
+	if(new_status != NULL && new_dest != NULL)
+	{
+		if(strstr(new_status, "not-installed") != NULL)
+		{
+			free_if_not_null( set_string_map_element(*package, "Install-Destination", strdup(NOT_INSTALLED_STRING)) );
+		}
+	}
+
 
 	if(existing != NULL)
 	{
@@ -323,6 +378,128 @@ void add_package_data(string_map* all_package_data, string_map** package, char* 
 	{
 		set_string_map_element(all_package_data, package_name, all_versions);
 	}
+
+
+
+	//Handle 'Provides' option -- this is a huge pain in the ass...
+	string_map* all_provides = get_string_map_element(all_package_data, PROVIDES_STRING);
+	if(all_provides == NULL)
+	{
+		all_provides = initialize_string_map(1);
+		set_string_map_element(all_package_data, PROVIDES_STRING, all_provides);
+
+	}
+	char* provides_str = get_string_map_element(*package, "Provides");
+	if(provides_str != NULL)
+	{
+		if(strlen(provides_str) > 0)
+		{
+			unsigned long num_provides;
+			char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+			char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
+			int provides_index;
+			char* provides_unique_key = dynamic_strcat(3, package_name, "@", package_version);
+	
+			for(provides_index=0; provides_index < num_provides; provides_index++)
+			{
+				char* provides_name = strdup(provides_list[provides_index]);
+				char* provides_version = NULL;
+				if( strchr(provides_name, '=') != NULL)
+				{
+					char* tmp = provides_name;
+					char* eq = strchr(tmp, '=');
+					eq[0] = '\0';
+					eq++;
+					provides_version = strdup(eq);
+					provides_name = strdup(provides_name);
+					free(tmp);
+				}
+				else if( provides_index+1 < num_provides && provides_list[provides_index+1][0] == '=')
+				{
+					provides_index++;
+					provides_version = strdup( (provides_list[provides_index] + 1) );
+				}
+				else
+				{
+					provides_version = strdup(package_version);
+				}
+	
+				
+				string_map* all_provides_for_name = get_string_map_element(all_provides, provides_name);
+				if(all_provides_for_name == NULL)
+				{
+					all_provides_for_name = initialize_string_map(1);
+					set_string_map_element(all_provides, provides_name, all_provides_for_name);
+				}
+				
+				string_map* provides_map = get_string_map_element(all_provides_for_name, provides_unique_key);
+				if(provides_map ==  NULL)
+				{
+					provides_map = initialize_string_map(1);
+					set_string_map_element(provides_map, PROVIDES_REAL_NAME_STRING, strdup(package_name));
+					set_string_map_element(provides_map, PROVIDES_REAL_VERSION_STRING, strdup(package_version));
+					set_string_map_element(provides_map, PROVIDES_VERSION_STRING, strdup(provides_version));
+					set_string_map_element(all_provides_for_name, provides_unique_key, provides_map);
+				}
+			
+				/*
+				 * My initial thought was to set the preferred package to use 
+				 * when something has a provides alias as a dependency, and none
+				 * of the packages that provide that thing are currently installed
+				 * as the package that is smallest.
+				 *
+				 * However, opkg seems to use whichever is last alphabetically, and package 
+				 * naming tends to assume this by having -custom, -full, and -mini versions 
+				 * of the package.  The -custom ends up being the smallest since unless 
+				 * compiled with specified parameters there are NO options compiled in and
+				 * it's basically useless.  The -mini is the one that makes the most sense with
+				 * reasonable minimal options and is the one that most people will want.  
+				 *
+				 * So... I'm just going to set the last alphabetically as the preferred package, 
+				 * for compatibility with opkg if nothing else.
+				 *
+				 */
+				unsigned char in_preferred_provides = 0;
+				if(preferred_provides != NULL)
+				{
+					char* preferred_key = get_string_map_element(preferred_provides, provides_name);
+					if( preferred_key != NULL )
+					{
+						free_if_not_null( set_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING, strdup(preferred_key)) );
+						in_preferred_provides = 1;
+					}
+				}
+				if(!in_preferred_provides)
+				{
+					char* preferred_key = get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING);
+					unsigned char is_preferred = preferred_key == NULL ? 1 : 0;
+					if(preferred_key != NULL)
+					{
+						is_preferred = strcmp(provides_unique_key,preferred_key) > 0 ? 1 : 0;
+					}	
+					if(is_preferred)
+					{
+						free_if_not_null( set_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING, strdup(provides_unique_key)) );
+					}
+				}		
+				
+				char* cur_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+				if(cur_key == NULL && current != NULL)
+				{
+					set_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING, strdup(provides_unique_key));
+				}
+
+				free(provides_name);
+				free(provides_version);
+	
+			}
+			free_null_terminated_string_array(provides_list);
+			free(provides_unique_key);
+
+		}
+	}
+
+
 
 
 }
@@ -403,7 +580,7 @@ int include_variable(char* var, int package_matches, int include_package, int lo
 
 }
 
-void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* dest_name)
+void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* dest_name, string_map* preferred_provides)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "package-regex") : NULL;
 	string_map* matching_list      = parameters != NULL ? get_string_map_element(parameters, "package-list") : NULL;
@@ -452,6 +629,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, "Status",              all_dummy);
 		set_string_map_element(load_variable_map, "Depends",             all_dummy);
+		set_string_map_element(load_variable_map, "Provides",            all_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",      all_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination", all_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    all_dummy);
@@ -460,6 +638,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 	{
 		set_string_map_element(load_variable_map, "Status",              matching_dummy);
 		set_string_map_element(load_variable_map, "Depends",             matching_dummy);
+		set_string_map_element(load_variable_map, "Provides",            matching_dummy);
 		set_string_map_element(load_variable_map, "Installed-Size",      matching_dummy);
 		set_string_map_element(load_variable_map, "Install-Destination", matching_dummy);
 		set_string_map_element(load_variable_map, "Link-Destination",    matching_dummy);
@@ -603,7 +782,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					{
 						if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 						{
-							add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+							add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version, preferred_provides);
 							next_pkg_data = NULL;
 						}
 						unsigned long num_destroyed;
@@ -690,7 +869,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		}
 		if(pkg_name != NULL && pkg_version != NULL && loaded_at_least_one_variable)
 		{
-			add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version);
+			add_package_data(existing_package_data, &next_pkg_data, pkg_name, pkg_version, preferred_provides);
 			next_pkg_data = NULL;
 		}
 
@@ -834,6 +1013,26 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						char* dep_name = dep_list[dep_index];
 						char** dep_def = NULL;
 						int dep_is_installed;
+						if(get_string_map_element(package_data, dep_name) == NULL)
+						{
+							string_map* all_provides = get_string_map_element(package_data, PROVIDES_STRING);
+							if(all_provides != NULL)
+							{
+								string_map* all_provides_for_name = get_string_map_element(all_provides, dep_name);
+								if(all_provides_for_name != NULL)
+								{
+									char* pkg_key = get_string_map_element(all_provides_for_name, CURRENT_PROVIDES_STRING);
+									pkg_key = pkg_key == NULL ? get_string_map_element(all_provides_for_name, PREFERRED_PROVIDES_STRING) : pkg_key;
+									if(pkg_key != NULL)
+									{
+										string_map* provides_pkg = get_string_map_element(all_provides_for_name, pkg_key);
+										char* real_def_name = get_string_map_element(provides_pkg, PROVIDES_REAL_NAME_STRING) ;
+										dep_name = strdup(real_def_name);
+									}
+								}
+							}
+						}
+
 						load_recursive_package_data_variables(package_data, dep_name, load_size, load_will_fit, free_bytes); //recurse
 						if( dep_list[dep_index+1] != NULL )
 						{
@@ -1097,10 +1296,9 @@ void something_depends_on_func(char* key, void* value)
 		char* current = get_string_map_element(all_versions, CURRENT_VERSION_STRING);
 		string_map* pkg = current != NULL ? get_string_map_element(all_versions, current) : NULL;
 		char* depend_str = pkg != NULL ? (char*)get_string_map_element(pkg, "Depends") : NULL ;
-
+		
 		if(current != NULL && pkg != NULL && depend_str != NULL)
 		{
-	
 			string_map* dep_map = get_string_map_element(pkg, "All-Depends");
 			int need_to_free_dep_map = 0;
 			if(dep_map == NULL)

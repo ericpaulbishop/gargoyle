@@ -15,7 +15,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 	string_map* path_to_root_name     = initialize_string_map(1);
 	unsigned long num_destroyed;
 	
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 	
@@ -30,18 +30,27 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0);
 
 
-
 		int rm_pkg_is_installed = 0;
 		string_map* rm_pkg_data = get_package_current_or_latest(package_data, pkg_name, &rm_pkg_is_installed, NULL);
 
-		char* rm_status = get_string_map_element(rm_pkg_data, "Status");
-		char* rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
-		char* rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
 
+
+
+		char* rm_status = NULL;
+		char* rm_root_name = NULL;
+		char* rm_root_path = NULL;
 		char* package_depending_on_name = NULL;
-		int other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
+		int other_package_depends_on = 0;
 
+		if(rm_pkg_data != NULL)
+		{
+			rm_status = get_string_map_element(rm_pkg_data, "Status");
+			rm_root_name = get_string_map_element(rm_pkg_data, "Install-Destination");
+			rm_root_path = rm_root_name != NULL ? get_string_map_element(conf->dest_names, rm_root_name) : NULL;
+			other_package_depends_on = something_depends_on(package_data, pkg_name, NULL, &package_depending_on_name);
+		}
 
+		
 		/* error checking before we start install */
 		if(rm_pkg_data == NULL || rm_status == NULL || rm_root_path == NULL)
 		{
@@ -128,7 +137,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 			string_map* status_data = get_string_map_element(path_to_status_data, status_paths[status_path_index]);
 			char* status_name = get_string_map_element(path_to_status_name, status_paths[status_path_index]);
 
-			load_package_data(status_paths[status_path_index], 0, status_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, status_name);
+			load_package_data(status_paths[status_path_index], 0, status_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, status_name, NULL);
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 		}
@@ -214,7 +223,7 @@ void do_remove(opkg_conf* conf, string_map* pkgs, int save_conf_files, int remov
 		free_package_data(package_data);
 		package_data = initialize_string_map(1);
 		
-		load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
+		load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1, NULL );
 		destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 

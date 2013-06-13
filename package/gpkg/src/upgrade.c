@@ -24,7 +24,7 @@ void do_upgrade(opkg_conf* conf, string_map* pkgs, int preserve_conf_files, char
 	free(test_dir);
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1 );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, NULL, 1, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 
