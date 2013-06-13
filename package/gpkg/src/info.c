@@ -162,7 +162,7 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 
 
 
-	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root, !load_recursive);
+	load_all_package_data(conf, package_data, matching_packages, parameters, load_type, install_root, !load_recursive, NULL);
 	
 	unsigned long num_packages;
 	char** sorted_packages = get_string_map_keys( (load_matching_only ? matching_packages : package_data), &num_packages);

@@ -92,7 +92,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1 );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 		
@@ -141,7 +141,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			}
 			string_map* tmp_control_pkg_data = initialize_string_map(1);
 			matching_packages = initialize_string_map(1);
-		       	load_package_data(tmp_control_name, 0, tmp_control_pkg_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, NULL);
+		       	load_package_data(tmp_control_name, 0, tmp_control_pkg_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, NULL, NULL);
 			unsigned long num_ctrl_names;
 			char** ctrl_name_list = get_string_map_keys(tmp_control_pkg_data, &num_ctrl_names);
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
@@ -335,7 +335,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	matching_packages = initialize_string_map(1);
 	set_string_map_element(parameters, "package-list", install_pkgs_map);
 	
-	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0);
+	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0, NULL);
 	
 	unsigned long from_file_pkg_list_len;
 	char** from_file_pkg_list = get_string_map_keys(pkgs_from_file, &from_file_pkg_list_len);
@@ -396,7 +396,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	matching_packages = initialize_string_map(1);
 	if(path_exists(install_root_status_path))
 	{
-		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, install_root_name);
+		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, install_root_name, NULL);
 	}
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
@@ -429,7 +429,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				set_string_map_element(pkg, "Link-Destination", strdup(link_root_name));
 			}
 
-			add_package_data(install_root_status, &pkg, install_pkg_list[pkg_index], install_version); 
+			add_package_data(install_root_status, &pkg, install_pkg_list[pkg_index], install_version, NULL); 
 			/* Note: we just added pkg data structure from package_data to install_root_status, Be careful on cleanup! */
 		}
 	}
