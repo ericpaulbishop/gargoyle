@@ -61,3 +61,4 @@ UI.days="days";
 UI.CApplyChanges="Close and Apply Changes";
 UI.CDiscardChanges="Close and Discard Changes";
 UI.waitText="Please Wait While Settings Are Applied";
+UI.Cancel="Cancel";

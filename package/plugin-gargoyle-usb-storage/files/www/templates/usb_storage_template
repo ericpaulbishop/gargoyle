@@ -1,27 +1,27 @@
 <div id="share_disk_container">
-	<label class="leftcolumn" id="share_disk_label" for="share_disk">Disk:</label>
+	<label class="leftcolumn" id="share_disk_label" for="share_disk"><%~ Disk %>:</label>
 	<select class="rightcolumn" id="share_disk"></select>
 	<span class="rightcolumn" id="share_disk_text"></span>
 </div>
 
 <div id="share_dir_container">
-	<label class="leftcolumn" id="share_dir_label" for="share_dir">Subdirectory:</label>
+	<label class="leftcolumn" id="share_dir_label" for="share_dir"><%~ SDir %>:</label>
 	<input type='text' id='share_dir'  size='30'  />
 </div>
 <div id="share_name_container">
-	<label class="leftcolumn" id="share_name_label" for="share_name">Share Name:</label>
+	<label class="leftcolumn" id="share_name_label" for="share_name"><%~ SNam %>:</label>
 	<input type="text" class="rightcolumn" id="share_name" size='30' onkeyup="setSharePaths(this.ownerDocument)" />
 </div>
 <div id="share_specificity_container">
-	<label class="leftcolumn" id="share_name_label" for="share_specificity">Settings Apply To:</label>
+	<label class="leftcolumn" id="share_name_label" for="share_specificity"><%~ SAppl %>:</label>
 	<select class="rightcolumn" id="share_specificity">
-		<option value="dev">The Same Partition On Any USB Drive</option>
-		<option value="blkid">Only This Specific Drive</option>
+		<option value="dev"><%~ SPart %></option>
+		<option value="blkid"><%~ SDriv %></option>
 	</select>
 </div>
 
 <div id="select_share_type_container" style="margin-bottom:20px;" >
-	<label class="leftcolumn" id="share_type_label" for="share_type">Share Type(s):</label>
+	<label class="leftcolumn" id="share_type_label" for="share_type"><%~ STyp %>:</label>
 	<span class='rightcolumn'>
 		<input type='checkbox' id='share_type_cifs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" />
 		<label for="share_type_cifs" class="aligned_check_label">CIFS</label>&nbsp;
@@ -34,50 +34,50 @@
 </div>
 
 <div id="anonymous_access_container">
-	<label class="leftcolumn" id="anonymous_access_label" for="anonymous_access">FTP/CIFS Anonymous Access:</label>
+	<label class="leftcolumn" id="anonymous_access_label" for="anonymous_access"><%~ FAAcc %>:</label>
 	<select class="rightcolumn" id="anonymous_access">
-		<option value="none">None</option>
-		<option value="ro">Read Only</option>
-		<option value="rw">Read/Write</option>
+		<option value="none"><%~ ANon %></option>
+		<option value="ro"><%~ AROn %></option>
+		<option value="rw"><%~ ARWr %></option>
 	</select>
 </div>
 <div id="user_access_container" style="margin-bottom:20px;" >
 	<div>
-		<label class="leftcolumn" id="user_access_label" for="user_access">FTP/CIFS Users With Access:</label>
+		<label class="leftcolumn" id="user_access_label" for="user_access"><%~ FAUsr %>:</label>
 
 		<span class="rightcolumn">
 			<select id="user_access"></select>
 			<select id="user_access_type">
-				<option value="R/O">Read Only</option>
-				<option value="R/W">Read/Write</option>
+				<option value="R/O"><%~ AROn %></option>
+				<option value="R/W"><%~ ARWr %></option>
 			</select>
-			<input type="button" class="default_button" id="add_user_access" value="Add" onclick='addUserAccess()' />
+			<input type="button" class="default_button" id="add_user_access" value="<%~ Add %>" onclick='addUserAccess()' />
 		</span>
 	</div>
 	<div class="rightcolumnonly" id="user_access_table_container"></div>
 </div>
 
 <div id="nfs_access_container">
-	<label class="leftcolumn" id="nfs_access_label" for="nfs_access">NFS Access:</label>
+	<label class="leftcolumn" id="nfs_access_label" for="nfs_access"><%~ NAcc %>:</label>
 	<select class="rightcolumn" id="nfs_access">
-		<option value="ro">Read Only</option>
-		<option value="rw">Read/Write</option>
+		<option value="ro"><%~ AROn %></option>
+		<option value="rw"><%~ ARWr %></option>
 	</select>
 </div>
 <div id="nfs_policy_container">
-	<label id="nfs_policy_label" class="leftcolumn" for="nfs_policy">NFS Access Policy:</label>
+	<label id="nfs_policy_label" class="leftcolumn" for="nfs_policy"><%~ NAccPo %>:</label>
 	<select class="rightcolumn" id="nfs_policy" onchange="setShareTypeVisibility()" >
-		<option value="share">Allow Anonymous Access</option>
-		<option value="ip">Allow Only The Following IPs</option>
+		<option value="share"><%~ AnonAcc %></option>
+		<option value="ip"><%~ OnlyIPs %></option>
 	</select>
 </div>
 <div id="nfs_ip_container" >
 	<div class="rightcolumnonly">
 		<input type='text' id='nfs_ip'  size='30' onkeyup='proofreadIpRange(this)'  />
-		<input type="button" class="default_button" id="add_nfs_ip" value="Add" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)' />
+		<input type="button" class="default_button" id="add_nfs_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)' />
 	</div>
 	<div class="rightcolumnonly">
-		<em>Specify an IP or Subnet</em>
+		<em><%~ IPSub %></em>
 	</div>
 	<div class="rightcolumnonly" id="nfs_ip_table_container"></div>
 </div>
@@ -85,10 +85,10 @@
 <div id="nfs_spacer" style="margin-bottom:20px"></div>
 
 <div id="ftp_path_container">
-	<label class="leftcolumn" id="ftp_path_label" for="ftp_path">FTP Path:</label>
+	<label class="leftcolumn" id="ftp_path_label" for="ftp_path"><%~ FPath %>:</label>
 	<span class="rightcolumn" id="ftp_path"></span>
 </div>
 <div id="nfs_path_container">
-	<label class="leftcolumn" id="nfs_path_label" for="nfs_path">NFS Path:</label>
+	<label class="leftcolumn" id="nfs_path_label" for="nfs_path"><%~ NPath %>:</label>
 	<span class="rightcolumn" id="nfs_path"></span>
 </div>

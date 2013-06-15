@@ -5,6 +5,8 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+ 
+var usbSStr=new Object(); //part of i18n
 
 /* 
  * mountPoint refers to the blkid mount point 
@@ -53,14 +55,14 @@ function saveChanges()
 	{
 		if(sambaGroup == "")
 		{
-			errors.push("Invalid CIFS Workgroup");
+			errors.push(usbSStr.ICWErr);
 		}
 		if(ftpWanAccess && uciOriginal.get("firewall", ftpFirewallRule, "local_port") != "21")
 		{
 			var conflict = checkForPortConflict("21", "tcp");
 			if(conflict != "")
 			{
-				errors.push("Cannot enable WAN FTP access because port conflicts with " + conflict);
+				errors.push(usbSStr.FWPErr+" " + conflict);
 			}
 		}
 		if(ftpWanAccess && ftpWanPasv)
@@ -77,7 +79,7 @@ function saveChanges()
 			}
 			if(!pasvValid)
 			{
-				errors.push("Invalid FTP passive port range")
+				errors.push(usbSStr.FprErr)
 			}
 			else
 			{
@@ -92,14 +94,14 @@ function saveChanges()
 				var conflict = checkForPortConflict( "" + intPasvMin + "-" + intPasvMax, "tcp", ignorePorts )
 				if(conflict != "")
 				{
-					errors.push("Pasive FTP port range conflicts with " + conflict);
+					errors.push(usbSStr.FprcErr+" " + conflict);
 				}
 			}
 		}
 	}
 	if(errors.length > 0)
 	{
-		alert( errors.join("\n") + "\n\nCould not save settings" );
+		alert( errors.join("\n") + "\n\n"+usbSStr.SSetErr);
 		return;
 	}
 
@@ -323,19 +325,19 @@ function addUser()
 	var testUser = user.replace(/[0-9a-zA-Z]+/g, "");
 	if(user == "")
 	{
-		errors.push("Username cannot be empty")
+		errors.push(usbSStr.UsEmErr)
 	}
 	if(testUser != "")
 	{
-		errors.push("Username can contain only letters and numbers")
+		errors.push(usbSStr.UsChErr)
 	}
 	if(pass1 == "" && pass2 == "")
 	{
-		errors.push("Password cannot be empty")
+		errors.push(usbSStr.PwEmErr)
 	}
 	if(pass1 != pass2)
 	{
-		errors.push("Passwords don't match")
+		errors.push(usbSStr.PwEqErr)
 	}
 	if(errors.length == 0)
 	{
@@ -352,7 +354,7 @@ function addUser()
 			}
 			if(found)
 			{
-				errors.push("Duplicate Username")
+				errors.push(usbSStr.UsDErr)
 			}
 		}
 
@@ -361,14 +363,14 @@ function addUser()
 		{
 			if(user.toLowerCase() == (badUserNames[badUserIndex]).toLowerCase() )
 			{
-				errors.push("Username '" + user + "' is reserved and not permitted");
+				errors.push(usbSStr.Usnm+" '" + user + "' "+usbSStr.RsvErr);
 			}
 		}
 
 	}
 	if(errors.length > 0)
 	{
-		alert( errors.join("\n") + "\n\nCould not add user" );
+		alert( errors.join("\n") + "\n\n"+usbSStr.AUsErr);
 	}
 	else
 	{
@@ -408,7 +410,7 @@ function removeUserCallback(table, row)
 	{
 		var container = document.getElementById("user_table_container");
 		var tableObject = document.createElement("div");
-                tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>";
+                tableObject.innerHTML = "<span style=\"text-align:center\"><em>"+usbSStr.NUsrErr+"</em></span>";
 		setSingleChild(container, tableObject);
 	}
 
@@ -476,9 +478,9 @@ function editUser()
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 	
-	okButton.value         = "Change Password";
+	okButton.value         = usbSStr.CPass;
 	okButton.className     = "default_button";
-	cancelButton.value     = "Cancel";
+	cancelButton.value     = UI.Cancel;
 	cancelButton.className = "default_button";
 
 
@@ -510,15 +512,15 @@ function editUser()
 					var errors = []
 					if(pass1 == "" && pass2 == "")
 					{
-						errors.push("Password cannot be empty")
+						errors.push(usbSStr.PwEmErr)
 					}
 					if(pass1 != pass2)
 					{
-						errors.push("Passwords don't match")
+						errors.push(usbSStr.PwEqErr)
 					}
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nPassword unchanged.");
+						alert(errors.join("\n") + "\n"+usbSStr.PwUErr);
 
 					}
 					else
@@ -595,7 +597,7 @@ function resetData()
 		else
 		{
 			tableObject = document.createElement("div");
-                	tableObject.innerHTML = "<span style=\"text-align:center\"><em>No Share Users Defined</em></span>";
+                	tableObject.innerHTML = "<span style=\"text-align:center\"><em>"+usbSStr.NUsrErr+"</em></span>";
 		}
 		var tableContainer = document.getElementById("user_table_container");
 		while(tableContainer.firstChild != null)
@@ -797,7 +799,7 @@ function resetData()
 			vis["nfs"]  = shareData[7]
 			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editShare) ] )
 		}
-		var shareTable = createTable(["Name", "Disk", "Subdirectory", "Share Type", ""], shareTableData, "share_table", true, false, removeShareCallback);
+		var shareTable = createTable([usbSStr.Name, usbSStr.Name, usbSStr.SDir, usbSStr.STyp, ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
 		setSingleChild(tableContainer, shareTable);
 	}
@@ -879,7 +881,7 @@ function addUserAccess(controlDocument)
 	var addUser = getSelectedValue("user_access", controlDocument)
 	if(addUser == null || addUser == "")
 	{
-		alert("No User To Add -- You must configure a new share user above.")	
+		alert(usbSStr.NShUsrErr)	
 	}
 	else
 	{
@@ -1023,13 +1025,13 @@ function getShareDataFromDocument(controlDocument, originalName)
 	var errors = [];
 	if( !(enabledTypes["ftp"] || enabledTypes["cifs"] || enabledTypes["nfs"]) )
 	{
-		errors.push("You must select at least one share type (FTP, CIFS, NFS)")
+		errors.push(usbSStr.NoShTypErr)
 	}
 	if( enabledTypes["ftp"] || enabledTypes["cifs"])
 	{
 		if( roUsers.length == 0 && rwUsers.length == 0 && anonymousAccess == "none" )
 		{
-			errors.push("FTP and/or CIFS share type selected, but neither anonymous access or users are configured");
+			errors.push(usbSStr.NoAAUsrErr);
 		}
 	}
 	if( sharePathToShareData[ fullSharePath ] != null || sharePathToShareData[ altSharePath ] != null )
@@ -1038,12 +1040,12 @@ function getShareDataFromDocument(controlDocument, originalName)
 		existing = existing == null ? sharePathToShareData[ altSharePath ] : existing
 		if(originalName == null || existing[0] != originalName )
 		{
-			errors.push("Specified Shared Directory Is Already Configured: " + existing[0])
+			errors.push(usbSStr.DupDirErr+": " + existing[0])
 		}
 	}
 	if( nameToSharePath[ shareName ] != null && (originalName == null || originalName != shareName))
 	{
-		errors.push( "Share name is a duplicate" )
+		errors.push(usbSStr.DupShrErr)
 	}
 
 	var result = [];
@@ -1125,7 +1127,7 @@ function addNewShare()
 	var errors = rawShareData["errors"]
 	if(errors.length > 0)
 	{
-		var errStr = errors.join("\n") + "\n\nCould Not Add Share"
+		var errStr = errors.join("\n") + "\n\n"+usbSStr.AShErr
 		alert(errStr)
 	}
 	else
@@ -1209,11 +1211,9 @@ function setSharePaths(controlDocument)
 function createEditButton( editFunction )
 {
 	editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editFunction;
-	
-	editButton.className = "default_button"  ;
 	editButton.disabled  = false ;
 
 	return editButton;
@@ -1272,9 +1272,9 @@ function editShare()
 	
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editRow=this.parentNode.parentNode;
@@ -1307,7 +1307,7 @@ function editShare()
 					var errors = rawShareData["errors"];
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not update share.");
+						alert(errors.join("\n") + "\n"+usbSStr.UpShrErr);
 					}
 					else
 					{
@@ -1371,7 +1371,7 @@ function editShare()
 
 function unmountAllUsb()
 {
-	setControlsEnabled(false, true, "Unmounting Disks");
+	setControlsEnabled(false, true, usbSStr.UDisk);
 
 	
 	var commands = "/etc/init.d/samba stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
@@ -1395,15 +1395,15 @@ function formatDiskRequested()
 
 	if( !updateFormatPercentages("swap_percent") )
 	{
-		alert("ERROR: Invalid Allocation Percentages Specified");
+		alert(usbSStr.SwpPErr);
 		return;
 	}
 
 	var validFunc   = doDiskFormat;
-	var invalidFunc = function(){ alert("ERROR: Invalid Password"); setControlsEnabled(true); }
+	var invalidFunc = function(){ alert(usbSStr.InvPErr); setControlsEnabled(true); }
 
 	var driveId = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
-	confirmPassword("Are you sure you want to format drive " + driveId + "?\n\n" + "All data on this drive will be lost.\n\nTo proceed, enter your router login password:", validFunc, invalidFunc);
+	confirmPassword(usbSStr.FDmsg1+" " + driveId + "?\n\n" + usbSStr.FDmsg2+"\n\n"+usbSStr.FDmsg3+":", validFunc, invalidFunc);
 
 }
 
@@ -1424,10 +1424,10 @@ function doDiskFormat()
 	}
 	swapPercent=Math.round(swapPercent)
 
-	if(confirm("Password Accepted.\n\nThis is your LAST CHANCE to cancel.  Press 'OK' only if you are SURE you want to format " + driveId))
+	if(confirm(usbSStr.CfmPass1+"\n\n"+usbSStr.CfmPass2+" " + driveId))
 	{
 	
-		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
+		setControlsEnabled(false, true, usbSStr.FmtMsg);
 	
 	
 		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
@@ -1459,9 +1459,9 @@ function doDiskFormat()
 
 function disableExtroot()
 {
-	if(confirm("If you disable extroot, all settings and installed plugins may be lost. After disabling extroot, router requires a reboot. Continue?"))
+	if(confirm(usbSStr.ExtOffWarn))
 	{
-		setControlsEnabled(false, true, "Disabling extroot...");
+		setControlsEnabled(false, true, usbSStr.ExtOffMsg);
 		var commands = "/usr/lib/gargoyle/umount_extroot.sh"
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -1482,7 +1482,7 @@ function disableExtroot()
 
 function reboot()
 {
-	setControlsEnabled(false, true, "System Is Now Rebooting");
+	setControlsEnabled(false, true, usbSStr.SRboot);
 
 	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

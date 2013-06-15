@@ -43,7 +43,14 @@ do_start()
 {
 	local gdisplay=$(uci get gargoyle.display.system_usb_storage 2>/dev/null)
 	if [ -z "$gdisplay" ] ; then
-		uci set gargoyle.display.system_usb_storage='USB Storage'
+		local menu_name='USB Storage'
+		local active_lang=$(uci -q get gargoyle.global.language)
+		[ -n "$active_lang" ] && [ -f /www/i18n/universal/menu-system_usb_storage.txt ] && {
+			. /usr/lib/gargoyle/i18nServices.sh
+			local trans_menu=$(get_i18_3rd_party_menuoption /www/i18n/universal/menu-system_usb_storage.txt $active_lang)
+			[ -n "$trans_menu" ] && menu_name="$trans_menu"
+		}
+		uci set gargoyle.display.system_usb_storage="$menu_name"
 		uci set gargoyle.scripts.system_usb_storage='usb_storage.sh'
 		uci set gargoyle.system.usb_storage='350'
 		uci commit
