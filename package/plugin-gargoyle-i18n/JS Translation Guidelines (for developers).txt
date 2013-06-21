@@ -6,10 +6,11 @@ Internationalization lang.js Guidelines:
 • A single translated.js file of strings is MAX 51200 bytes.
 
 If you are creating your own page & want to use internationalization:
+  - In your javascript file, have "var yourvariable=new Object();" at the beginning. The translation key-value pairs will be in javascript form. This variable defines the object - the translation file with key-value pairs define the properties of the variable. The key in javascript is called a property. The yourvariable name should be something short but unique. If the variable is not defined, the sourced translation files have to variable to attach their properties to & the page will cause a overview.sh:1 error.
   - Use the form <%~ yourpagename.descriptive_key %> for the first instance in the haserl yourpage.sh page.
   - Note the space & the percentage sign. You cannot mix the older <? ?> form with the newer anywhere on the page. Only the newer form is tested.
   - yourpagename.js will be sourced as the translation file. In the haserl pages, only the first instance of the page used need be present. Subsequent (2nd, 3rd, 100th) instances can skip the full <%~ yourpagename.descritive_key %> form to the shorter <%~ descritive_key %> form.
-  - The javascript variable in yourpagename.js is used only inside javascript. In haserl parsing, the variable must be present, but only the key is used. For javascript, a distinctive variable should be used. In javascript the 'key' is called a property.
+  - The javascript variable in yourpagename.js is used only inside javascript. In haserl parsing, the variable must be present, but only the key is used.
   - The keys must be unique across the files. Typically, only the strings.js & the active page have keys loaded. The haserl <% key %> does not distinguish between UI.Close & somepage.Close - the final Close is the text that will be used. Using unique keys prevents this behavior.
   - Do not use spaces in the property key, or around the equal sign:
       minidlna.VFolder="Select a folder for video files"; // correct
