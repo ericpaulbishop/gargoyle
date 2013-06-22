@@ -1,10 +1,12 @@
 /*
- * This program is copyright 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+ 
+var bndwS=new Object(); //part of i18n - reused from bandwidth.js
 
 var plotsInitializedToDefaults = false;
 var updateInProgress = false;
@@ -184,7 +186,7 @@ function doUpdate()
 						
 						
 						
-						var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+						var monthNames = bndwS.FMonths;
 						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
 						
 						nextDate.setTime(parseInt(nextIntervalStart)*1000);
@@ -271,7 +273,7 @@ function resetDisplayInterval()
 		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
 		
 		var data = timeFrameIntervalData[intervalIndex];
-		var pieTotals = plotFunction(idList, ["Total", "Download", "Upload" ], getHostList(idList), data, 0, 9, resetColors);
+		var pieTotals = plotFunction(idList, [bndwS.Totl, bndwS.Dnld, bndwS.Upld ], getHostList(idList), data, 0, 9, resetColors);
 		resetColors = false;
 
 		//then update table, sorting ids alphabetically so order is consistant
@@ -281,7 +283,7 @@ function resetDisplayInterval()
 		var idSort = function(a,b) { return idList[a] < idList[b] ? 1 : -1; }	
 		sortedIdIndices.sort( idSort );
 		
-		var pieNames = ["Total", "Down", "Up"];
+		var pieNames = [bndwS.Totl, bndwS.Down, bndwS.Up];
 		var tableRows = [];
 
 		var pieIndex;
@@ -322,9 +324,9 @@ function resetDisplayInterval()
 			}
 			tableRows.push(tableRow);
 		}
-		tableRows.push(["Sum",parseBytes(sum[0]),parseBytes(sum[1]),parseBytes(sum[2]),"","",""]);
+		tableRows.push([bndwS.Sum,parseBytes(sum[0]),parseBytes(sum[1]),parseBytes(sum[2]),"","",""]);
 		
-		var columnNames = ["Host"];
+		var columnNames = [bndwS.Host];
 		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex]); }
 		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex] + " %"); }
 	

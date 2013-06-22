@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) English-EN text strings for bandwidth.sh html elements
+ * UTF-8 (with BOM) English-EN text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
 bndwS.GOpSect="Bandwidth Graph Display Options";
@@ -40,3 +40,18 @@ bndwS.Time="Time";
 bndwS.BPlot="Bandwidth Plot";
 bndwS.BUsag="Bandwidth Usage";
 bndwS.RstGr="Resetting Graphs...";
+
+//bandwidth_distribution.sh
+bndwS.DOpSect="Bandwidth Distribution Display Options";
+bndwS.DTFrm="Distribution Time Frame";
+bndwS.DtbI="Distribution Interval";
+bndwS.HDsp="Host Display";
+bndwS.DspHn="Display Hostnames";
+bndwS.DspHIP="Display Host IPs";
+bndwS.BDst="Bandwidth Distribution";
+bndwS.BDtbl="Bandwidth Distribution Table";
+bndwS.FMonths=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+bndwS.Down="Down";
+bndwS.Up="Up";
+bndwS.Sum="Sum";
+bndwS.Host="Host";
