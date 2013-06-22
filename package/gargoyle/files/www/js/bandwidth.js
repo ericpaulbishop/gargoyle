@@ -1,10 +1,12 @@
 /*
- * This program is copyright 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var bndwS=new Object(); //part of i18n
+ 
 var ipMonitorIds;
 var qosUploadMonitorIds;
 var qosDownloadMonitorIds;
@@ -147,11 +149,11 @@ function initializePlotsAndTable()
 		var plotIdName = plotIdNames[idIndex];
 		if(haveQosUpload)
 		{
-			addOptionToSelectElement(plotIdName, "QoS Upload Class", "qos-upload");
+			addOptionToSelectElement(plotIdName, "QoS "+bndwS.UpCl, "qos-upload");
 		}
 		if(haveQosDownload)
 		{
-			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
+			addOptionToSelectElement(plotIdName, "QoS "+bndwS.DlCl, "qos-download");
 		}
 		if(haveTor)
 		{
@@ -162,7 +164,7 @@ function initializePlotsAndTable()
 			addOptionToSelectElement(plotIdName, "OpenVPN", "openvpn");
 		}
 
-		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
+		addOptionToSelectElement(plotIdName, bndwS.HsNm, "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
 
 
@@ -735,7 +737,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		// So, always add three hours, so when DST shifts an hour back in November date doesn't get pushed back to previous month and wrong month is displayed
 		nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
 	}
-	var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	var monthNames = bndwS.EMonths;
 	
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
@@ -792,7 +794,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		timePoint = nextDate.getTime()/1000;
 	}
 
-	var columnNames = ["Time", "Total", "Download", "Upload"];
+	var columnNames = [bndwS.Time, bndwS.Totl, bndwS.Dnld, bndwS.Dnld];
 	var bwTable=createTable(columnNames , rowData, "bandwidth_table", false, false);
 	tableContainer = document.getElementById('bandwidth_table_container');
 	if(tableContainer.firstChild != null)
@@ -804,7 +806,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 
 
 
-function expand(name)
+function expand(name, trname)
 {
 	var expWindow = expandedWindows[name];
 	var xCoor = 0;
@@ -825,7 +827,7 @@ function expand(name)
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-	expWindow= window.open("bandwidth_expand.sh", name + " Bandwidth Plot", "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expWindow= window.open("bandwidth_expand.sh", trname==null?name:trname + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)
@@ -842,7 +844,7 @@ function expand(name)
 					expandedFunctions[name] = getEmbeddedSvgPlotFunction("bandwidth_plot", loadWin.document);
 					if(expandedFunctions[name] != null)
 					{
-						plotTitle.appendChild(loadWin.document.createTextNode(name + " Bandwidth Usage"));
+						plotTitle.appendChild(loadWin.document.createTextNode(trname==null?name:trname + " "+bndwS.BUsag));
 						loadWin.onbeforeunload=function(){ expandedFunctions[name] = null; expandedWindows[name] = null; }
 						loaded = true;
 					}
@@ -860,7 +862,7 @@ function expand(name)
 
 function highResChanged()
 {
-	setControlsEnabled(false, true, "Resetting Graphs...");
+	setControlsEnabled(false, true, bndwS.RstGr);
 
 	var useHighRes15m = document.getElementById("use_high_res_15m").checked;
 	var commands = [];
