@@ -1,18 +1,19 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var dhcpS=new Object(); //part of i18n
 
 function saveChanges()
 {
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -120,7 +121,7 @@ function saveChanges()
 function createEditButton()
 {
 	var editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editStatic;
 	return editButton;
@@ -136,7 +137,7 @@ function resetData()
 		rowData.push(createEditButton());
 		staticIpTableData[rowIndex] = rowData;
 	}
-	columnNames=['Hostname', 'MAC', 'IP', ''];
+	columnNames=[dhcpS.Hstnm, 'MAC', 'IP', ''];
 	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, resetHostnameMacList );
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)
@@ -203,7 +204,7 @@ function resetHostnameMacList()
 	}
 
 	var hmVals = [ "none" ];
-	var hmText = [ "Select Hostname/MAC From Currently Connected Hosts" ];
+	var hmText = [ dhcpS.SelH ];
 	var leaseIndex = 0;
 	for(leaseIndex=0; leaseIndex < leaseData.length; leaseIndex++)
 	{
@@ -304,15 +305,15 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 				rowData = currentData[rowDataIndex];
 				if(rowData[0] != '' && rowData[0] != '-' && rowData[0] == controlDocument.getElementById('add_host').value)
 				{
-					errors.push("duplicate Hostname");
+					errors.push(dhcpS.dHErr);
 				}
 				if(rowData[1] == controlDocument.getElementById('add_mac').value)
 				{
-					errors.push("duplicate MAC");
+					errors.push(dhcpS.dMErr);
 				}
 				if(rowData[2] == controlDocument.getElementById('add_ip').value)
 				{
-					errors.push("duplicate IP address");
+					errors.push(dhcpS.dIPErr);
 				}
 			}
 		}
@@ -327,11 +328,11 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 
 		if(!rangeInSubnet(mask, ip, testEnd, testEnd))
 		{
-			errors.push("Specified static IP falls outside LAN subnet.");
+			errors.push(dhcpS.subErr);
 		}
 		if(ip == testIp)
 		{
-			errors.push("Specified static IP is current router IP.");
+			errors.push(dhcpS.ipErr);
 		}	
 	}
 	return errors;
@@ -356,13 +357,13 @@ function proofreadAll()
 		var end = parseInt(document.getElementById("dhcp_end").value );
 		if(!rangeInSubnet(mask, ip, start, end))
 		{
-			errors.push("Specified DHCP range falls outside LAN subnet.");
+			errors.push(dhcpS.dsubErr);
 		}
 		
 		var ipEnd = parseInt( (ip.split("."))[3] );
 		if(ipEnd >= start && ipEnd <= end)
 		{
-			errors.push("Specified DHCP range contains current LAN IP.");
+			errors.push(dhcpS.dipErr);
 		}
 	}
 
@@ -400,9 +401,9 @@ function editStatic()
 	
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editRow=this.parentNode.parentNode;
@@ -432,7 +433,7 @@ function editStatic()
 					var errors = proofreadStatic(editStaticWindow.document, document, editRow);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not update static ip.");
+						alert(errors.join("\n") + "\n"+dhcpS.upErr);
 					}
 					else
 					{
