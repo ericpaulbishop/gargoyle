@@ -332,7 +332,14 @@ int main(int argc, char **argv)
 				{
 					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
-				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+				char* tran_file=(char*)calloc(4096, sizeof(char)); //MAXPATHLEN
+				if (tran_file != NULL) {
+					snprintf(tran_file, 4096, "%s/i18n/%s/%s", web_root, active_lang, all_lstr_js[lstr_js_index]);
+					if (path_exists(tran_file) == 1) {
+						printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					}
+					free(tran_file);
+				}
 			}
 		}
 		printf("</head>\n");
