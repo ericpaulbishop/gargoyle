@@ -1,8 +1,10 @@
+var rtgS=new Object(); //part of i18n
+
 var toggleReload = false;
 
 function saveChanges()
 {
-	setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
+	setControlsEnabled(false, true, UI.waitText);
 	
 	var removeCommands = [];
 	var oldSections = uciOriginal.getAllSectionsOfType("network", "route");
@@ -103,7 +105,7 @@ function resetData()
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var activeRouteTable = createTable(["Destination", "Interface(Network)", "Gateway", "Metric"], activeRouteTableData, "active_route_table", false, false);	
+	var activeRouteTable = createTable([rtgS.Dstn, rtgS.ItfN, rtgS.Gtwy, rtgS.Mtrc], activeRouteTableData, "active_route_table", false, false);	
 	tableContainer.appendChild( activeRouteTable );
 
 
@@ -128,7 +130,7 @@ function resetData()
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var staticRouteTable = createTable(["Destination", "Interface", "Gateway", ""], staticRouteTableData , "static_route_table", true, false);	
+	var staticRouteTable = createTable([rtgS.Dstn, rtgS.Itfc, rtgS.Gtwy, ""], staticRouteTableData , "static_route_table", true, false);	
 	tableContainer.appendChild( staticRouteTable );
 
 }
@@ -137,7 +139,7 @@ function resetData()
 function createEditButton()
 {
 	var editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editStaticRoute;
 	return editButton;
@@ -150,7 +152,7 @@ function addStaticRoute()
 	errors = proofreadStaticRoute(document);
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add row.");
+		alert(errors.join("\n") + "\n\n"+rtgS.AErr);
 	}
 	else
 	{
@@ -280,9 +282,9 @@ function editStaticRoute()
 	
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editRow=this.parentNode.parentNode;
@@ -316,7 +318,7 @@ function editStaticRoute()
 					var errors = proofreadStaticRoute(editStaticWindow.document, document, editRow);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not update static route.");
+						alert(errors.join("\n") + "\n"+rtgS.SRErr);
 					}
 					else
 					{
