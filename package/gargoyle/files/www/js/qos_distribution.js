@@ -5,6 +5,7 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var qosStr=new Object(); //part of i18n
 
 var uploadClassIds = [];
 var downloadClassIds = [];

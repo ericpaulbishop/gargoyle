@@ -101,3 +101,9 @@ qosStr.TotErr="Hay un error en el campo Total de Ancho de Banda.\n\nNo se pudo a
 qosStr.NOLIMIT="sinlímite";
 qosStr.ZERO="cero";
 qosStr.YES="Sí";
+
+//qos_distribution.sh
+qosStr.UBSect="QoS Cargar Distribución de Ancho de Banda";
+qosStr.DBSect="QoS Descargar Distribución de Ancho de Banda";
+qosStr.uTFrm="Cargar Marco de Tiempo";
+qosStr.dTFrm="Descargar Marco de Tiempo";

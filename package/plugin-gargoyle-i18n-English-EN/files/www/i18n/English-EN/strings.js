@@ -62,3 +62,17 @@ UI.CApplyChanges="Close and Apply Changes";
 UI.CDiscardChanges="Close and Discard Changes";
 UI.waitText="Please Wait While Settings Are Applied";
 UI.Cancel="Cancel";
+
+UI.Err="ERROR";
+UI.prfErr="There is an error in";
+UI.nex="does not exist";
+UI.InvAdd="ERROR: Invalid Address";
+
+UI.CPass="Confirm Password";
+UI.OK="OK";
+UI.VPass="Verifying Password...";
+UI.sprt="SSH port";
+UI.wsprt="web server port";
+UI.prdr="port redirected to router";
+UI.puse="port in use by router";
+UI.pfwd="port forwarded to";

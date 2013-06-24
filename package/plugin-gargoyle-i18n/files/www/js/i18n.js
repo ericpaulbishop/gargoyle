@@ -197,7 +197,6 @@ function activateLang(row, action)
 	cmd.push(". /usr/lib/gargoyle/i18nServices.sh");
 	cmd.push("change_menu_language \"" + lang + "\"");
 	cmd.push("uci commit");
-	cmd.push("sleep 5");
 
 	commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

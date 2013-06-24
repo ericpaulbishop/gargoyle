@@ -62,3 +62,17 @@ UI.CApplyChanges="Cierre y Aplicar Cambios";
 UI.CDiscardChanges="Cerrar y Desechar Cambios";
 UI.waitText="Espere Mientras Ajustes Se Aplican Favor";
 UI.Cancel="Cancelar";
+
+UI.Err="ERROR";
+UI.prfErr="Hay un error en";
+UI.nex="no existe";
+UI.InvAdd="ERROR: No Válido Dirección";
+
+UI.CPass="Confirmar Contraseña";
+UI.OK="Bueno";
+UI.VPass="Contraseña Verificando...";
+UI.sprt="puerto del SSH";
+UI.wsprt="puerto del servidor web";
+UI.prdr="puerto redirigido al enrutador";
+UI.puse="puerto en uso por el enrutador";
+UI.pfwd="puerto remitida a";

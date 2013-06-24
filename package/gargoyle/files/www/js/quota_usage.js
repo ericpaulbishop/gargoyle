@@ -5,6 +5,8 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var quotasStr=new Object(); //part of i18n
+ 
 var pkg = "firewall";
 var updateInProgress = false;
 
@@ -53,15 +55,15 @@ function getIpFromUci(srcUci, quotaSection)
 	var ipStr = srcUci.get(pkg, quotaSection, "ip");
 	if(ipStr == "ALL_OTHERS_INDIVIDUAL")
 	{
-		ipStr="Others (Individual)";
+		ipStr=quotasStr.OthersOne;
 	}
 	else if(ipStr == "ALL_OTHERS_COMBINED")
 	{
-		ipStr = "Others (Combined)";
+		ipStr = quotasStr.OthersAll;
 	}
 	else if(ipStr == "ALL" || ipStr == "")
 	{
-		ipStr = "All";
+		ipStr = quotasStr.All;
 	}
 	return ipStr;
 }
@@ -123,7 +125,7 @@ function timeParamsToTableSpan(timeParameters)
 	var textList = [];
 	if(active == "always")
 	{
-		textList.unshift("Always");
+		textList.unshift(quotasStr.Alws);
 	}
 	else
 	{
@@ -136,7 +138,7 @@ function timeParamsToTableSpan(timeParameters)
 			if(hours != ""){ textList = hours.match(",") ? hours.split(/[\t ]*,[\t ]*/) : [ hours ]; }
 			if(days  != ""){ textList.unshift(days); }
 		}
-		textList.unshift( active == "only" ? "Only:" : "All Times Except:" );
+		textList.unshift( active == "only" ? quotasStr.Only+":" : quotasStr.AllExcept+":" );
 	}
 	return textListToSpanElement(textList, false, document);
 }
@@ -202,7 +204,7 @@ function refreshTableData()
 			quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
 		}
 	}
-	var columnNames = ["Host(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
+	var columnNames = quotasStr.ColNms;
 	
 	var quotaTable = createTable(columnNames, quotaTableData, "quota_usage_table", false, false);
 	var tableContainer = document.getElementById('quota_table_container');

@@ -101,3 +101,9 @@ qosStr.TotErr="There is an error in Total Bandwidth field.\n\nCould not update Q
 qosStr.NOLIMIT="nolimit";
 qosStr.ZERO="zero";
 qosStr.YES="Yes";
+
+//qos_distribution.sh
+qosStr.UBSect="QoS Upload Bandwidth Distribution";
+qosStr.DBSect="QoS Download Bandwidth Distribution";
+qosStr.uTFrm="Upload Time Frame";
+qosStr.dTFrm="Download Time Frame";

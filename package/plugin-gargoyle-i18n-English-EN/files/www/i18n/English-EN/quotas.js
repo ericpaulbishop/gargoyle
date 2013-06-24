@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) English-EN text strings for quotas.sh html elements
+ * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
 quotasStr.Section="Bandwidth Quotas";
@@ -60,3 +60,9 @@ quotasStr.DownClass="Download Class";
 
 //quota_edit.sh
 quotasStr.ESection="Edit Quota";
+
+//quota_usage.sh/js
+quotasStr.USect="Bandwidth Quota Usage";
+quotasStr.All="All";
+quotasStr.Alws="Always";
+quotasStr.ColNms=["Host(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];

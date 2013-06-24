@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) Spanish-ES text strings for quotas.sh html elements
+ * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
 quotasStr.Section="Cuotas de Ancho de Banda";
@@ -52,7 +52,7 @@ quotasStr.TheseTimes="Estos Semanal Tiempos";
 quotasStr.Sample="e.g. lun 00:30 - jue 13:15, vie 14:00 - vie 15:00";
 quotasStr.Exceed="Cuando se ha superado";
 quotasStr.ShutdownNet="Apagar todo el acceso a Internet";
-quotasStr.Throttle="ancho de banda del acelerador";
+quotasStr.Throttle="Ancho de Banda Ahoga";
 quotasStr.UpLimit="Carga Limite";
 quotasStr.DownLimit="Descarga Limit";
 quotasStr.UpClass="Rango de Carga";
@@ -60,3 +60,9 @@ quotasStr.DownClass="Rango de Descarga";
 
 //quota_edit.sh
 quotasStr.ESection="Editar Cuota";
+
+//quota_usage.sh/js
+quotasStr.USect="Ancho de Banda de Uso de Cuotas";
+quotasStr.All="Todo";
+quotasStr.Alws="Siempre";
+quotasStr.ColNms=["Host(s)", "Activas", "% Total Usados", "% Carga Usados", "% Descarga Usados" ];
