@@ -22,7 +22,7 @@
 	<fieldset>
 		<legend class="sectionheader"><%~ quotas.USect %></legend>
 		<select id="host_display" >
-			<option value="hostname"><%~ bandwidth.DspHn %></option>
+			<option value="hostname"><%~ DspHn %></option>
 			<option value="ip"><%~ DspHIP %></option>
 		</select>
 

@@ -49,6 +49,9 @@ UI.Wed="mié";
 UI.Thu="jue";
 UI.Fri="vie";
 UI.Sat="sáb";
+UI.HDsp="Anfitrión Visualización";
+UI.DspHn="Visualización de Nombre de Anfitrión";
+UI.DspHIP="Visualización de IPs de Anfitrión";
 
 UI.never="nunca";
 UI.disabled="desactivado";

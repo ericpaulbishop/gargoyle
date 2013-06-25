@@ -49,6 +49,9 @@ UI.Wed="Wed";
 UI.Thu="Thu";
 UI.Fri="Fri";
 UI.Sat="Sat";
+UI.HDsp="Host Display";
+UI.DspHn="Display Hostnames";
+UI.DspHIP="Display Host IPs";
 
 UI.never="never";
 UI.disabled="disabled";

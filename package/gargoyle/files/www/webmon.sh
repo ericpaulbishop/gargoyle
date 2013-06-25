@@ -69,7 +69,7 @@
 		<legend class="sectionheader"><%~ RctSt %></legend>
 		<div>
 			<select id="domain_host_display" onchange="updateMonitorTable()">
-				<option value="hostname"><%~ bandwidth.DspHn %></option>
+				<option value="hostname"><%~ DspHn %></option>
 				<option value="ip"><%~ DspHIP %></option>
 			</select>
 		</div>
