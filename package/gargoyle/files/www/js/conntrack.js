@@ -1,10 +1,11 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var connTS=new Object(); //part of i18n
 
 var updateInProgress;
 var timeSinceUpdate;
@@ -188,9 +189,9 @@ function updateConnectionTable()
 				}
 
 
-				var columnNames= ['Proto', 'WAN Host/LAN Host', 'Bytes Up/Down' ]; 
-				if(qosEnabled) { columnNames.push("Qos Up/Down"); };
-				columnNames.push("L7 Proto");
+				var columnNames= [connTS.PrNm, connTS.WLNm, connTS.UDNm ]; 
+				if(qosEnabled) { columnNames.push(connTS.QSNm); };
+				columnNames.push(connTS.LPNm);
 				
 				var connTable = createTable(columnNames, tableData, "connection_table", false, false);
 				if(tableData.length > 0)
