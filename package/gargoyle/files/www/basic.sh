@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -203,7 +203,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 			<div id='bridge_custom_ssid_container'>
-				<input type='text' class='rightcolumnonly' id='bridge_custom_ssid'size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+				<input type='text' class='rightcolumnonly' id='bridge_custom_ssid' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
 			<div id='bridge_ssid_container'>
 				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'>SSID to Join:</label>
@@ -382,7 +382,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='gprs_only'>2G Only</option>
 			</select>
 		</div>
-		<div id='wan_3g_device_container' >
+		<div id='wan_3g_device_container'>
 			<label class='leftcolumn' for='wan_3g_device' id='wan_3g_device_label'>Device:</label>
 			<span class='rightcolumn'>
 				<select style="display:none;float:left;width:180px;max-width:180px" id="wan_3g_list_device" onchange='set3GDevice(this.value)' ></select>
@@ -390,7 +390,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input style="float:left;" type='button' class="default_button" id='wan_3g_scan_button' value='Scan' onclick='scan3GDevice("wan_3g_list_device")' />
 			</span>
 		</div>
-		<div id='wan_3g_pincode_container' >
+		<div id='wan_3g_pincode_container'>
 			<label class='leftcolumn' for='wan_3g_pincode' id='wan_3g_pincode_label'>Pincode:</label>
 			<input type='text' class='rightcolumn' id='wan_3g_pincode'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(optional)</em>
@@ -403,22 +403,22 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_3g_apn_container' >
+		<div id='wan_3g_apn_container'>
 			<label class='leftcolumn' for='wan_3g_apn' id='wan_3g_apn_label'>APN:</label>
 			<input type='text' class='rightcolumn' id='wan_3g_apn'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_3g_user_container' >
+		<div id='wan_3g_user_container'>
 			<label class='leftcolumn' for='wan_3g_user' id='wan_3g_user_label'>User Name:</label>
-			<input type='text' class='rightcolumn' id='wan_3g_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+			<input type='text' class='rightcolumn' id='wan_3g_user' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(optional)</em>
 		</div>
-		<div id='wan_3g_pass_container' >
+		<div id='wan_3g_pass_container'>
 			<label class='leftcolumn' for='wan_3g_pass' id='wan_3g_pass_label'>Password:</label>
-			<input type='text' class='rightcolumn' id='wan_3g_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
+			<input type='text' class='rightcolumn' id='wan_3g_pass' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(optional)</em>
 		</div>
 
-		<div id='wan_port_to_lan_container' >
+		<div id='wan_port_to_lan_container'>
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
 				<option value='disable'>Disable</option>
@@ -426,22 +426,30 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_mac_container' >
+		<div id='wan_mac_container'>
 			<span class='leftcolumn'>
-				<label for='wan_mac' id='wan_mac_label'>Use Custom MAC Address:</label>
+				<label for='wan_use_mac' id='wan_mac_label'>Use Custom MAC Address:</label>
 			</span>
-			<span class="rightcolumn">
+			<span class='rightcolumn'>
 				<input type='checkbox' id='wan_use_mac' onclick='enableAssociatedField(this, "wan_mac", defaultWanMac)'/>&nbsp;&nbsp;
-				<input type='text' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
+				<input type='text' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17'/>
 			</span>
 		</div>
-		<div id='wan_mtu_container' >
+		<div id='wan_mtu_container'>
 			<span class='leftcolumn'>
-				<label for='wan_mtu' id='wan_mtu_label'>Use Custom MTU:</label>
+				<label for='wan_use_mtu' id='wan_mtu_label'>Use Custom MTU:</label>
 			</span>
 			<span class='rightcolumn'>
 				<input type='checkbox' id='wan_use_mtu' onclick='enableAssociatedField(this, "wan_mtu", 1500)'/>&nbsp;&nbsp;
-				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' /> 
+				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)' size='20' maxlength='4'/> 
+			</span>
+		</div>
+		<div id='wan_ping_container'>
+			<span class='leftcolumn'>
+				<label for='drop_wan_ping' id='wan_ping_label'>Drop Ping From WAN Side</label>
+			</span>
+			<span class='rightcolumn'>
+				<input type='checkbox' id='drop_wan_ping'/>
 			</span>
 		</div>
 
@@ -499,7 +507,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	</fieldset>
 
 	<fieldset id="wifi_fieldset">
-
 		<legend class="sectionheader">Wireless</legend>
 
 		<div id='wifi_mode_container'>
