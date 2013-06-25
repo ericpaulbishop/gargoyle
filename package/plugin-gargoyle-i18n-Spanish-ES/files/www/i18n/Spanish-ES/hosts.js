@@ -9,9 +9,10 @@ hostsStr.ConWifiHosts="Hosts inalámbricos conectados";
 hostsStr.ActiveHosts="Hosts con conexiones activas";
 
 //javascript
+hostsStr.HostIP="IP de Anfitrión";
+hostsStr.HostMAC="MAC de Anfitrión";
 hostsStr.LeaseExp="Arriendo Vence";
 hostsStr.Signal="Señal";
 hostsStr.ActiveConx="TCP Cncs Activo";
 hostsStr.RecentConx="TCP Cncs Reciente";
 hostsStr.UDPConx="UDP Cncs";
-hostsStr.Hunknown="incógnita";

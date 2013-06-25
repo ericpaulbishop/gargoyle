@@ -12,7 +12,6 @@ dhcpS.BlckM="Block MAC addresses assigned a static IP that connect from a differ
 dhcpS.AdSIP="Add Static IP Address";
 dhcpS.SelH="Select Hostname/MAC From Currently Connected Hosts";
 dhcpS.AsSIP="Assigned Static IP Addresses";
-dhcpS.Hstnm="Hostname";
 dhcpS.opt="optional";
 dhcpS.ESIP="Edit Static IP";
 dhcpS.dHErr="duplicate Hostname";

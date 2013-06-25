@@ -9,7 +9,6 @@ hostsStr.ConWifiHosts="Connected Wireless Hosts";
 hostsStr.ActiveHosts="Hosts With Active Connections";
 
 //javascript
-hostsStr.Hostname="Hostname";
 hostsStr.HostIP="Host IP";
 hostsStr.HostMAC="Host MAC";
 hostsStr.LeaseExp="Lease Expires";
@@ -18,4 +17,3 @@ hostsStr.Signal="Signal";
 hostsStr.ActiveConx="Active TCP Cxns";
 hostsStr.RecentConx="Recent TCP Cxns";
 hostsStr.UDPConx="UDP Cxns";
-hostsStr.Hunknown="unknown";

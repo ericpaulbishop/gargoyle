@@ -137,7 +137,7 @@ function resetData()
 		rowData.push(createEditButton());
 		staticIpTableData[rowIndex] = rowData;
 	}
-	columnNames=[dhcpS.Hstnm, 'MAC', 'IP', ''];
+	columnNames=[UI.HsNm, 'MAC', 'IP', ''];
 	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, resetHostnameMacList );
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)

@@ -164,7 +164,7 @@ function initializePlotsAndTable()
 			addOptionToSelectElement(plotIdName, "OpenVPN", "openvpn");
 		}
 
-		addOptionToSelectElement(plotIdName, bndwS.HsNm, "hostname");
+		addOptionToSelectElement(plotIdName, UI.HsNm, "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
 
 

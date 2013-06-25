@@ -57,7 +57,7 @@ function resetVariables()
 	if(uciOriginal.get("dhcp", "lan", "ignore") != "1")
 	{
 		document.getElementById("dhcp_data").style.display="block";
-		var columnNames=[hostsStr.Hostname, hostsStr.Hostname, hostsStr.HostMAC, hostsStr.LeaseExp];
+		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.LeaseExp];
 		var table = createTable(columnNames, parseDhcp(dhcpLeaseLines), "lease_table", false, false);
 		var tableContainer = document.getElementById('lease_table_container');
 		if(tableContainer.firstChild != null)
@@ -86,7 +86,7 @@ function resetVariables()
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
-		var columnNames=[hostsStr.Hostname, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Bitrate, hostsStr.Bitrate ];
+		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Bitrate, hostsStr.Bitrate ];
 		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
@@ -100,7 +100,7 @@ function resetVariables()
 		document.getElementById("wifi_data").style.display="none";
 	}
 	
-	var columnNames=[hostsStr.Hostname, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.ActiveConx, hostsStr.RecentConx, hostsStr.UDPConx];
+	var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.ActiveConx, hostsStr.RecentConx, hostsStr.UDPConx];
 	var table = createTable(columnNames, parseConntrack(arpHash, currentWanIp, conntrackLines), "active_table", false, false);
 	var tableContainer = document.getElementById('active_table_container');
 	if(tableContainer.firstChild != null)
@@ -113,7 +113,7 @@ function resetVariables()
 
 function getHostname(ip)
 {
-	var hostname = ipToHostname[ip] == null ? "("+hostsStr.Hunknown+")" : ipToHostname[ip];
+	var hostname = ipToHostname[ip] == null ? "("+UI.unk+")" : ipToHostname[ip];
 	hostname = hostname.length < 25 ? hostname : hostname.substr(0,22)+"...";
 	return hostname;
 }
@@ -223,7 +223,7 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		mbs[2] = sigSpan;
 		
 
-		var ip = arpHash[ mbs[0] ] == null ? hostsStr.Hunknown : arpHash[ mbs[0] ] ;
+		var ip = arpHash[ mbs[0] ] == null ? UI.unk : arpHash[ mbs[0] ] ;
 		var hostname = getHostname(ip);
 		wifiTableData.push( [ hostname, ip, mbs[0], mbs[1], mbs[2] ] );
 	}
@@ -283,7 +283,7 @@ function parseConntrack(arpHash, currentWanIp, lines)
 	for(ipIndex = 0; ipIndex < ipList.length; ipIndex++)
 	{
 		var ip        = ipList[ipIndex];
-		var mac       = arpHash[ip] == null ? hostsStr.Hunknown : arpHash[ip];
+		var mac       = arpHash[ip] == null ? UI.unk : arpHash[ip];
 		var tcpOpen   = protoHash[ ip + "-tcp-open" ] == null   ? 0 : protoHash[ ip + "-tcp-open" ];
 		var tcpClosed = protoHash[ ip + "-tcp-closed" ] == null  ? 0 : protoHash[ ip + "-tcp-closed" ];
 		var udp       = protoHash[ ip + "-udp" ] == null ? 0 : protoHash[ ip + "-udp" ];

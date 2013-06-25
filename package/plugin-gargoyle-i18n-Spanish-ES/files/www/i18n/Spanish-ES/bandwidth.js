@@ -34,7 +34,6 @@ bndwS.expd="expandirse";
 //javascript
 bndwS.UpCl="Clase de Carga";
 bndwS.DlCl="Clase de Descarga";
-bndwS.HsNm="Nombre de Anfitrión"
 bndwS.EMonths=["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 bndwS.Time="Tiempo";
 bndwS.BPlot="Ancho de Banda Gráfico";
