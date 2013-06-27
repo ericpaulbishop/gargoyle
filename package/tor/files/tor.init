@@ -3,7 +3,6 @@
 START=75
 
 BIN=tor
-VAR_D=/etc/$BIN/var
 RUN_D=/var/run
 PID_F=$RUN_D/$BIN.pid
 OPID_F=$RUN_D/obfsproxy.pid
@@ -11,7 +10,11 @@ RUN_USER=root
 RUN_GROUP=root
 BOOT="0"
 
-OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1 --DataDirectory '/var/tor' --SocksPort 0 "
+
+
+
+
+OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 "
 
 boot()
 {
@@ -30,6 +33,12 @@ start()
 	control_port=$( uci get tor.global.control_port  2>/dev/null)
 	client_mode=$(uci get tor.client.client_mode     2>/dev/null)
 	relay_mode=$(uci get tor.relay.relay_mode        2>/dev/null)
+	tor_data_dir=$( uci get tor.global.data_dir      2>/dev/null)
+	if [ -z "$tor_data_dir" ] ; then
+		tor_data_dir="/var/tor"
+	fi
+
+
 
 	if [ "$enabled" = "0" ] || [ "$client_mode$relay_mode" = "00" ] ; then
 		exit
@@ -42,13 +51,13 @@ start()
 
 	mkdir -p /var/tor/keys
 
-        [ -d $VAR_D ] || ( mkdir -m 0700 -p $VAR_D && chown $RUN_USER:$RUN_GROUP $VAR_D )
+        [ -d "$tor_data_dir" ] || ( mkdir -m 0700 -p "$tor_data_dir" && chown $RUN_USER:$RUN_GROUP "$tor_data_dir" )
 	[ -d $RUN_D ] || mkdir -p $RUN_D
 	[ -f $PID_F ] || ( touch $PID_F && chown $RUN_USER:$RUN_GROUP $PID_F )
 
 
 
-	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --ControlPort $control_port"
+	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --ControlPort $control_port --DataDirectory '$tor_data_dir' "
 	if [ -n "$client_mode" ] && [ "$client_mode" != "0" ] ; then
 		client_zone=$( uci get tor.client.zone                                  2>/dev/null)
 		trans_port=$( uci get tor.client.trans_port                             2>/dev/null)
