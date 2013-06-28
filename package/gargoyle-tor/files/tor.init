@@ -58,8 +58,6 @@ start()
 	fi
 
 
-	mkdir -p /var/tor/keys
-
 	init_dir "$tor_data_dir" "0700"
 	init_dir "$KEY_D"        "0700"
 	init_dir "$RUN_D"        "0755"
