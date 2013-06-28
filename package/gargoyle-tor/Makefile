@@ -119,25 +119,31 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=tor
-PKG_VERSION:=0.2.3.25
+PKG_NAME:=gargoyle-tor
+PKG_VERSION:=0.2.4.14-alpha
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=a1c364189a9a66ed9daa8e6436489daf
+PKG_MD5SUM:=c8dc363b82e870ccff20a787fea8f0c9
 PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/tor/Default
+define Package/gargoyle-tor/Default
   SECTION:=net
   CATEGORY:=Network
   URL:=https://www.torproject.org/
 endef
 
-define Package/tor/Default/description
+define Package/gargoyle-tor/Default/description
+ The Gargoyle Tor Package contains the Tor binary along with a uci 
+ config file and init script compatible with the Gargoyle Web Interface
+ for OpenWRT. Another package, the plugin-gargoyle-tor package, is 
+ necessary to configure Tor in the web interface, and has this package 
+ as a dependency.
+
  Tor is a toolset for a wide range of organizations and people that want to
  improve their safety and security on the Internet. Using Tor can help you
  anonymize web browsing and publishing, instant messaging, IRC, SSH, and
@@ -145,19 +151,19 @@ define Package/tor/Default/description
  new applications with built-in anonymity, safety, and privacy features.
 endef
 
-define Package/tor
-$(call Package/tor/Default)
+define Package/gargoyle-tor
+$(call Package/gargoyle-tor/Default)
   TITLE:=An anonymous Internet communication system
   DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
 define Package/tor-geoip
-$(call Package/tor/Default)
+$(call Package/gargoyle-tor/Default)
   TITLE:=GeoIP db for tor
   DEPENDS:=+tor
 endef
 
-define Package/tor/conffiles
+define Package/gargoyle-tor/conffiles
 /etc/tor/torrc
 endef
 
@@ -173,7 +179,7 @@ CONFIGURE_VARS += \
 MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS) -fPIC "
 
-define Package/tor/install
+define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
 	$(INSTALL_DIR)  $(1)/etc/init.d
 	$(INSTALL_DIR)  $(1)/etc/tor
@@ -190,12 +196,12 @@ define Package/tor/install
 	$(INSTALL_CONF) ./files/tor.config                       $(1)/etc/config/tor
 	$(INSTALL_CONF) ./files/oniondns.pat                     $(1)/etc/l7-protocols/oniondns.pat
 endef
-define Package/tor/postinst
+define Package/gargoyle-tor/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		sh /etc/uci-defaults/tor.ucidefaults
 	fi
 endef
-define Package/tor/postrm
+define Package/gargoyle-tor/postrm
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		uci del firewall.tor_include_file
 		uci commit
@@ -211,5 +217,5 @@ define Package/tor-geoip/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/share/tor/geoip $(1)/usr/share/tor/
 endef
 
-$(eval $(call BuildPackage,tor))
+$(eval $(call BuildPackage,gargoyle-tor))
 $(eval $(call BuildPackage,tor-geoip))
