@@ -15,7 +15,7 @@ BOOT="0"
 
 
 
-OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 "
+OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
 
 
 init_dir()
