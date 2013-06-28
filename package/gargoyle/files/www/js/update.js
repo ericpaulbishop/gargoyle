@@ -39,13 +39,16 @@ function upgraded()
 	setTimeout( "doRedirect()", 120*1000);
 }
 
-
-
-
 function failure()
 {
 	setControlsEnabled(true);
 	alert("An error has occurred: Your router can not be upgraded.\n");
+}
+
+function failureByBootloader()
+{
+	setControlsEnabled(true);
+	alert("Firmware contains a bootloader. Your router can not be upgraded.\n");
 }
 
 function setUpgradeFormat()
