@@ -129,6 +129,9 @@ PKG_SOURCE_URL:=https://www.torproject.org/dist \
 PKG_MD5SUM:=c8dc363b82e870ccff20a787fea8f0c9
 PKG_INSTALL:=1
 
+PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
+
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/gargoyle-tor/Default
@@ -157,10 +160,10 @@ $(call Package/gargoyle-tor/Default)
   DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +iptables-mod-ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
-define Package/tor-geoip
+define Package/gargoyle-tor-geoip
 $(call Package/gargoyle-tor/Default)
   TITLE:=GeoIP db for tor
-  DEPENDS:=+tor
+  DEPENDS:=+gargoyle-tor
 endef
 
 define Package/gargoyle-tor/conffiles
@@ -170,6 +173,7 @@ endef
 CONFIGURE_ARGS += \
 	--with-libevent-dir="$(STAGING_DIR)/usr" \
 	--with-ssl-dir="$(STAGING_DIR)/usr" \
+	--disable-threads \
 	--disable-asciidoc
 
 CONFIGURE_VARS += \
@@ -212,10 +216,10 @@ endef
 
 
 
-define Package/tor-geoip/install
+define Package/gargoyle-tor-geoip/install
 	$(INSTALL_DIR) $(1)/usr/share/tor
 	$(CP) $(PKG_INSTALL_DIR)/usr/share/tor/geoip $(1)/usr/share/tor/
 endef
 
 $(eval $(call BuildPackage,gargoyle-tor))
-$(eval $(call BuildPackage,tor-geoip))
+$(eval $(call BuildPackage,gargoyle-tor-geoip))
