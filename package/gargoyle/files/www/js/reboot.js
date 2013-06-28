@@ -1,16 +1,17 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var rbS = new Object(); //part of i18n
 
 var toggleReload = false;
 
 function reboot()
 {
-	setControlsEnabled(false, true, "System Is Now Rebooting");
+	setControlsEnabled(false, true, rbS.SysR);
 	
 	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -141,18 +142,18 @@ function setVisibility()
 		{
 			var dayStr = "" + day;
 			var lastDigit = dayStr.substr( dayStr.length-1, 1);
-			var suffix="th"
+			var suffix=rbS.Digs
 			if( day % 100  != 11 && lastDigit == "1")
 			{
-				suffix="st"
+				suffix=rbS.LD1s
 			}
 			if( day % 100 != 12 && lastDigit == "2")
 			{
-				suffix="nd"
+				suffix=rbS.LD2s
 			}
 			if( day %100 != 13 && lastDigit == "3")
 			{
-				suffix="rd"
+				suffix=rbS.LD3s
 			}
 			names.push(dayStr + suffix);
 			vals.push( (day-1) + "" );
@@ -161,7 +162,7 @@ function setVisibility()
 	}
 	else if(rebootInterval == "week")
 	{
-		var names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+		var names = rbS.DaysWArr;
 		var vals = [];
 		var dayIndex;
 		for(dayIndex=0; dayIndex < 7; dayIndex++)
