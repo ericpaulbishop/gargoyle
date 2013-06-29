@@ -4,7 +4,17 @@ Internationalization lang.js Guidelines:
 • All object key/property pairs are to end with a '\n' newline; not '\r'
 • body of each property is MAX 4096 bytes (not UTF-8 characters).
 • A single translated.js file of strings is MAX 51200 bytes.
+• File ends with a newline character on its own line.
 
+
+var idS=new Object(); //definition in somepage.js
+idS.SomeSect="This New Section Title"; //a line in a translation.js file
+ |     |                |
+ |     |              value
+ |    key (also called a property in javascript)
+javascript object that stores all the keys/properties
+
+ 
 If you are creating your own page & want to use internationalization:
   - In your javascript file, have "var yourvariable=new Object();" at the beginning. The translation key-value pairs will be in javascript form. This variable defines the object - the translation file with key-value pairs define the properties of the variable. The key in javascript is called a property. The yourvariable name should be something short but unique. If the variable is not defined, the sourced translation files have to variable to attach their properties to & the page will cause a overview.sh:1 error.
   - Use the form <%~ yourpagename.descriptive_key %> for the first instance in the haserl yourpage.sh page.
@@ -19,7 +29,16 @@ If you are creating your own page & want to use internationalization:
   - If you use these characters in your translation, they need to be escaped to the corresponding sequence below:
 	&	<	>	"	'
 	&amp;	&lt;	&gt;	&quot;	&apos;
+  - To use a property object string in your genuine javascript code, use the full object_var.property notation - idS.SomeSect - which javascript will replace
 
 ---------------------------
-To see if you have duplicate keys a translation file (this does not work across strings.js & yourpage.js):
+To see if you have duplicate keys a particularly long translation file (this does not work across strings.js & yourpage.js):
 awk -F '=' '{ print $1 }' /path/to/yourpage.js | uniq -d
+
+---------------------------
+Toubleshooting:
+
+• overview.sh:1		SyntaxError: Unexpected token '<'
+  Caused by a missing/incorect gargoyle_header_footer -z "ident.jz" in page.sh top section. The default language "ident.jz" will always be included in the scripts to be included - ensure the file is present. Languages other than fallback language can have pages missing & will not be included, but the fallback must be present.
+• The last line of a translation.js file doesn't get translated in a haserl somepage.sh
+  A translation page must end with a newline character. The haserl translation map splits based on newline characters - if the last newline is missing, it won't be mapped as a key-value pair & haserl won't have a translation for that key.

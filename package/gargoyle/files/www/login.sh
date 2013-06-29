@@ -1,6 +1,6 @@
-#!/usr/bin/haserl
-<?
-	# This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+#!/usr/bin/haserl2
+<%
+	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -34,15 +34,15 @@
 	fi
 
 
-	gargoyle_header_footer -h  -c "internal.css" -j "$js"
-?>
+	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "login.js"
+%>
 
 
 <script>
 <!--
 
 var passInvalid = false;
-<?
+<%
 	if [ "$FORM_expired" = "1" ] ; then
 		echo "var sessionExpired = true;"
 	else
@@ -76,13 +76,13 @@ var passInvalid = false;
 	fi
 	echo "var currentTime = \"$current_time\";"
 
-?>
+%>
 //-->
 </script>
 
 <fieldset>
-	<legend class="sectionheader">Login</legend>
-	<span class="leftcolumn" >
+	<legend class="sectionheader"><%~ login.LSect %></legend>
+	<span class="leftcolumn">
 		<p>
 			<strong>
 				<span id="login_status"></span>
@@ -91,32 +91,32 @@ var passInvalid = false;
 	</span>
 
 	<div>
-		<label class="leftcolumn" for='password' id='password_label'>Enter Admin Password:</label>
+		<label class="leftcolumn" for='password' id='password_label'><%~ EAdmP %>:</label>
 		<input class="rightcolumn" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' />
 	</div>
 	<div>
-		<span class="leftcolumn"><input class="default_button" type="button" value="Login" onclick="doLogin()" /></span>
+		<span class="leftcolumn"><input class="default_button" type="button" value="<%~ LSect %>" onclick="doLogin()" /></span>
 	</div>
 
 </fieldset>
 <fieldset id="local_quotas" style="display:none">
-	<legend class="sectionheader">Your Quota</legend>
+	<legend class="sectionheader"><%~ YQot %></legend>
 </fieldset>
 
 <fieldset id="global_quotas" style="display:none">
-	<legend class="sectionheader">Entire Network Quota</legend>
+	<legend class="sectionheader"><%~ NQot %></legend>
 </fieldset>
 
 <fieldset id="current_time" style="display:block">
-	<legend class="sectionheader">Current Date & Time</legend>
+	<legend class="sectionheader"><%~ CTime %></legend>
 	<div class="nocolumn" id="current_time_date"></div>
 </fieldset>
 
-<?
+<%
 	for h in $sh_hooks ; do
 		haserl $h
 	done
-?>
+%>
 
 <script>
 <!--
@@ -125,6 +125,6 @@ var passInvalid = false;
 //-->
 </script>
 
-<?
+<%
 	gargoyle_header_footer -f
-?>
+%>

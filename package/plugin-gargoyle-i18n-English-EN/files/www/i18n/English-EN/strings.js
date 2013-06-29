@@ -81,3 +81,6 @@ UI.wsprt="web server port";
 UI.prdr="port redirected to router";
 UI.puse="port in use by router";
 UI.pfwd="port forwarded to";
+
+UI.AJAX="AJAX Browser Support Needed";
+UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";

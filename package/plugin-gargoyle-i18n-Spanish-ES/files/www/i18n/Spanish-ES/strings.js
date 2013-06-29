@@ -81,3 +81,6 @@ UI.wsprt="puerto del servidor web";
 UI.prdr="puerto redirigido al enrutador";
 UI.puse="puerto en uso por el enrutador";
 UI.pfwd="puerto remitida a";
+
+UI.AJAX="AJAX Soporte del Navegador Necesario";
+UI.AJAXUpg="Por favor actualice a un navegador compatible con AJAX y vuelva a intentarlo. Estos navegadores incluyen Firefox 2.0+, Safari y IE 6+.";
