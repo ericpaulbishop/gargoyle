@@ -90,6 +90,17 @@ function GenLangForm() {
 	return a_div
 }
 
+function GenPicto(path, hgt, wdt, top) {
+	var a_embed = document.createElement('embed');
+	a_embed.setAttribute('height', hgt);
+	a_embed.setAttribute('width', wdt);
+	a_embed.setAttribute('src', path);
+	a_embed.style.marginTop=top+"px";
+	a_embed.setAttribute('pluginspage', "http://www.adobe.com/svg/viewer/install/");
+	a_embed.setAttribute('type', "image/svg+xml");
+	return a_embed
+}
+
 function GenLangDiv(field) {
 	var lang_back = ["語","언어","ภาษา","भाषा","لغة","שפה","زبان","язык","γλώσσα",
 					"dil","Sprache","kieli","język","langue","lingua","lengua","language"];
@@ -105,11 +116,17 @@ function GenLangDiv(field) {
 		b_div.innerHTML+=lang_back[i]+ " ";
 	}
 	a_div.appendChild(b_div);
-	if (field == 0) {
-		a_div.appendChild(GenLangForm());
-	} else if (field == 1) {
+	
+	//connected or disconnected connection
+	if (field == 1) {
+		a_div.appendChild(GenPicto("i18n/graphics/connected.svg", 100, 400, 0));
 		a_div.appendChild(GenLangMenu());
 	}
+	if (field == 0 || field == 1) {
+		a_div.appendChild(GenPicto("i18n/graphics/disconnected.svg", 100, 400, 40));
+		a_div.appendChild(GenLangForm());
+	}
+	
 	return a_div;
 }
 
@@ -175,7 +192,7 @@ function resetData()
 
 	for (idx=0; idx < langs.length; idx++)
 	{
-		if (langs[idx] == "universal") { continue; }
+		if (langs[idx] == "universal" || langs[idx] == "graphics") { continue; }
 		TableData.push([ langs[idx], (langs[idx] == active_lang ? "*" : ""), createUseButton( (langs[idx]==active_lang?0:1) ) ]);
 	}
 

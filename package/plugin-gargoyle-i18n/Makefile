@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin_gargoyle_i18n
-PKG_VERSION:=0.1.0
+PKG_VERSION:=0.2.0
 PKG_RELEASE:=1
 
 
@@ -15,7 +15,7 @@ define Package/plugin-gargoyle-i18n
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:= Internationalization for Gargoyle-router
 	MAINTAINER:=BashfulBladder
-	DEPENDS:=+gargoyle
+	DEPENDS:=+gargoyle +plugin-gargoyle-i18n-English-EN
 	PKGARCH:=all
 endef
 
@@ -33,6 +33,13 @@ define Build/Compile
 endef
 
 define Package/plugin-gargoyle-i18n/postinst
+#!/bin/sh
+
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	uci set gargoyle.global.fallback_lang=English-EN
+	uci set gargoyle.global.language=English-EN
+	uci commit
+fi
 endef
 
 define Package/plugin-gargoyle-i18n/postrm
