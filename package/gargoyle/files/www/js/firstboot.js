@@ -58,7 +58,7 @@ function setInitialSettings()
 						expCookie = responseLines[rIndex].replace(/^.*exp=/, "").replace(/\";.*$/, "");
 					}
 				}
-				if (fbS.length > 0) {
+				if (ObjLen(fbS) > 0) {
 					get_lfile(); //should only run when i18n.js is loaded by the modded i18n gargoyle_header_footer
 				}
 				

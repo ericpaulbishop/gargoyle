@@ -229,3 +229,13 @@ function activateLang(row, action)
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
+
+//apparently these var fbS=new Object(); //part of i18n objects do not have a length (its undefined)
+function ObjLen(an_obj) {
+	var len=0;
+	for (item in an_obj) {
+		len++;
+	}
+	return len
+}
+

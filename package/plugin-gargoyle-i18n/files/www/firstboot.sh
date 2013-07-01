@@ -82,7 +82,7 @@ document.getElementById('password1').focus();
 	HaveNet=$(ping -q -w 1 -c 1 8.8.8.8 2>/dev/null | awk '/transmitted/ {print $4}') #Google's DNS servers; error nulled
 	if [ $HaveNet -ge 1 ]; then
 		echo "HaveNet=1;"
-		#gpkg update > /dev/null 2>&1
+		gpkg update > /dev/null 2>&1
 
 		lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
 		#lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle/)
