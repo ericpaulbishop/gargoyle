@@ -7,7 +7,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=haserl-i18n
+PKG_NAME:=haserl
 PKG_VERSION:=0.9.26
 PKG_RELEASE:=1
 
