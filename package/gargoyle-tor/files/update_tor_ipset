@@ -6,16 +6,21 @@ fi
 
 touch /tmp/tor.check
 
-cache_file="/var/tor/cached-consensus"
+tor_dir=$(uci get tor.global.data_dir)
+if [ -z "$tor_dir" ] ; then
+	tor_dir="/var/tor"
+fi
+cache_file="$tor_dir/cached-consensus"
 if [ ! -f "$cache_file" ] ; then
-	cache_file="/var/tor/cached-microdesc-consensus"
+	cache_file="$tor_dir/cached-microdesc-consensus"
 fi
 
 ipset --create  tor_relays iphash >/dev/null 2>&1
 old_md5sum=""
-if [ -f /tmp/tor/consensus-md5 ] ; then
-	old_md5sum=$(cat  /tmp/tor/consensus-md5 )
+if [ -f /tmp/tor-consensus-md5 ] ; then
+	old_md5sum=$(cat  /tmp/tor-consensus-md5 )
 fi
+
 if [ -f "$cache_file" ] ; then
 	new_md5sum=$(md5sum "$cache_file" | awk ' { print $1 ; } ' )
 	if [ "$old_md5sum" != "$new_md5sum" ] ; then 
@@ -24,7 +29,7 @@ if [ -f "$cache_file" ] ; then
 		for tip in $tor_ips ; do
 			ipset --add tor_relays $tip
 		done
-		echo "$new_md5sum" > /tmp/tor/consensus-md5
+		echo "$new_md5sum" > /tmp/tor-consensus-md5
 	fi
 fi
 
