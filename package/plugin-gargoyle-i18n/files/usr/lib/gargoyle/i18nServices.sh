@@ -11,7 +11,7 @@ get_i18_3rd_party_menuoption() {
 	local iso_lang=$(echo "$full_lang" | awk -F '-' '{print $2}')
 	local translation=""
 	
-	translation=$(awk -v lang="$iso_lang" -F '=' '$0 ~ lang { print $2 }' $target_file)
+	translation=$(awk -v lang="$iso_lang" -F '=' '$0 ~ lang { gsub(/\r$/,""); printf $2 }' $target_file)
 	echo "$translation"
 }
 
@@ -55,6 +55,8 @@ get_i18n_menuname() {
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$full_lang")
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$fallback_lang")
 	
+	translation=$(echo "$translation" | awk '{printf("%s", $0)}')
+	
 	echo "$translation"
 }
 
@@ -77,7 +79,8 @@ change_menu_language() {
 		
 		uci_val=$(get_i18n_menuname "$uciName" "$new_langDir")		
 		#echo "$uciName = $uci_val"
-		uci set "$uciName=$uci_val"
+		# uci set "$uciName=$uci_val" //deletes any menu item that doesn't have an i18n entry
+		[ -n "$uci_val" ] && uci set "$uciName=$uci_val"
 	done
 	#set +x
 	IFS=$old_ifs
