@@ -31,6 +31,8 @@ for( m in mask2bits )
 }
 // end conversion constant initialization
 
+var driveToPath = [];
+
 
 function saveChanges()
 {
@@ -104,6 +106,26 @@ function saveChanges()
 			//uci.set('tor', 'relay', 'max_bw_burst_kb', "" + (parseInt(document.getElementById('tor_relay_max_bw').value)*2) )
 
 		}
+		var dataDrive = getSelectedValue("tor_dir_drive_select")
+		if(dataDrive != "ramdisk" && dataDrive != "" && dataDrive != null)
+		{
+			var dataDrivePath = driveToPath[dataDrive]
+			var dataDriveDir  = document.getElementById("tor_dir_text").value
+			dataDriveDir = (dataDriveDir[0] == '/' ? "" : "/" ) + dataDriveDir
+			dataDirPath = dataDrivePath + dataDriveDir
+
+			uci.set("tor", "global", "data_dir", dataDirPath)
+			uci.set("tor", "global", "data_drive", dataDrive)
+			uci.set("tor", "global", "data_drive_dir", dataDriveDir)
+		}
+		else
+		{
+			uci.set("tor", "global", "data_dir", "/var/tor")
+			uci.remove("tor", "global", "data_drive")
+			uci.remove("tor", "global", "data_drive_dir")
+		}
+
+
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + "/etc/init.d/tor restart" + "\n";
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	
@@ -344,6 +366,35 @@ function resetData()
 	setSelectedValue("tor_relay_publish", uciOriginal.get("tor", "relay", "publish"));
 
 	setTorVisibility()
+
+
+	//data dir
+	driveToPath["ramdisk"] = "/";
+	if(storageDrives.length > 0)
+	{
+		var rootDriveDisplay = [];
+		var rootDriveValues  = [];
+		
+		rootDriveDisplay.push("RAM Disk")
+		rootDriveValues.push("ramdisk");
+		
+		var driveIndex;
+		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+		{
+			rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+			rootDriveValues.push( storageDrives[driveIndex][0] )
+			driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
+		}
+		setAllowableSelections("tor_dir_drive_select", rootDriveValues, rootDriveDisplay, document);
+		var torDataDrive    = uciOriginal.get("tor", "global", "data_drive")
+		var torDataDriveDir = uciOriginal.get("tor", "global", "data_drive_dir")
+		torDataDriveDir = torDataDrive == "" || torDataDriveDir == "" ? "/tor" : torDataDriveDir
+		torDataDrive = torDataDrive == "" ? "ramdisk" : torDataDrive;
+		setSelectedValue( "tor_dir_drive_select", torDataDrive)
+		document.getElementById("tor_dir_text").value = torDataDriveDir
+	}
+
+
 }
 
 function setTorVisibility()
@@ -379,6 +430,15 @@ function setTorVisibility()
 			opel.value = "9091"
 		}
 	}
+
+	var showDataDirControls = (storageDrives.length > 0 && (relayMode == "1" || relayMode == "2" || relayMode == "3" || clientMode != "0")) ? 1 : 0
+	setVisibility( [ "tor_data_dir_section" ], [ showDataDirControls ] );
+	if(showDataDirControls == 1)
+	{
+		setVisibility( ["tor_dir_static", "tor_dir_text"], getSelectedValue("tor_dir_drive_select") == "ramdisk" ? [1,0] : [0,1] )
+	}
+
+
 
 }
 

@@ -9,6 +9,14 @@
 	gargoyle_header_footer -h -s "connection" -p "tor" -c "internal.css" -j "tor.js" tor httpd_gargoyle dropbear firewall
 ?>
 
+<script>
+<?
+	echo "var storageDrives = [];"
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+?>
+</script>
+
+
 	<fieldset>
 		<legend class="sectionheader">Tor Anonymization Client</legend>
 		
@@ -116,6 +124,24 @@
 			<span class='nocolum'>Within 1-2 hours of activating your relay, it should be visible <a href="http://torstatus.blutmagie.de/">in the global list</a></span>
 		</div>
 
+	</fieldset>
+
+	<fieldset id="tor_data_dir_section">
+		<legend class="sectionheader">Tor Data Directory</legend>
+		<div>
+			<span class="narrowleftcolumn">Tor Data Directory:</span>
+			<span id="tor_dir_static" class="widerightcolumn">/var/tor</span>
+			<input type="text" id="tor_dir_text" class="widerightcolumn" style="display:none" />
+		</div>
+		<div>
+			<span class="narrowleftcolumn">Tor Data Drive:</span>
+			<select id="tor_dir_drive_select" class="widerightcolumn" onchange="setTorVisibility()" ></select>
+		</div>
+		<div>
+			<div class="widerightcolumnonly">
+				<em>Tor caches a large amount of data, typically 5-50MB. Relays and bridges require more cache space than client-only configurations. By default this cached data is stored on a ramdisk in memory. If you have limited memory or are running a relay, it is strongly recommended that you configure a Tor data directory on a connected USB drive.</em>
+			</div>
+		</div>
 	</fieldset>
 
 	<div id="bottom_button_container">
