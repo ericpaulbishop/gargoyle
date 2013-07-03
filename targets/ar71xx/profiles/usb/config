@@ -1506,7 +1506,7 @@ CONFIG_PACKAGE_gargoyle-firewall-util=y
 CONFIG_PACKAGE_ipset=y
 CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libiptbwctl=y
-CONFIG_PACKAGE_obfsproxy=y
+# CONFIG_PACKAGE_obfsproxy is not set
 CONFIG_PACKAGE_p910nd=y
 CONFIG_PACKAGE_portmap=y
 CONFIG_PACKAGE_ppp=y
