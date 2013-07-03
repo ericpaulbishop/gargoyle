@@ -33,13 +33,6 @@ define Build/Compile
 endef
 
 define Package/plugin-gargoyle-i18n/postinst
-#!/bin/sh
-
-if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci set gargoyle.global.fallback_lang=English-EN
-	uci set gargoyle.global.language=English-EN
-	uci commit
-fi
 endef
 
 define Package/plugin-gargoyle-i18n/postrm

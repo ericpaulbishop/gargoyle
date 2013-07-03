@@ -27,7 +27,7 @@ endef
 
 define Package/haserl/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/haserl2 $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/haserl $(1)/usr/bin/
 endef
 
 $(eval $(call BuildPackage,haserl))

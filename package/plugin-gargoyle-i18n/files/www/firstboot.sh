@@ -80,7 +80,7 @@ document.getElementById('password1').focus();
 <%
 	echo "var HaveNet=0;"
 	HaveNet=$(ping -q -w 1 -c 1 8.8.8.8 2>/dev/null | awk '/transmitted/ {print $4}') #Google's DNS servers; error nulled
-	if [ $HaveNet -ge 1 ]; then
+	if [ "$HaveNet" == "1" ] ; then
 		echo "HaveNet=1;"
 		gpkg update > /dev/null 2>&1
 

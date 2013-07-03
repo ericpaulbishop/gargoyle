@@ -1,5 +1,0 @@
-#!/bin/sh
-
-. /usr/lib/gargoyle/i18nServices.sh
-change_menu_language $(uci get gargoyle.global.fallback_lang)
-restart_lang_services
