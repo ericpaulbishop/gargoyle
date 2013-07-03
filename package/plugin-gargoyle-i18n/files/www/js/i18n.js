@@ -135,7 +135,8 @@ function get_lfile() {
 	
 	if (fname.length > 0 ) {
 		if (fname.match(/plugin-gargoyle-i18n/) && fname.substring(fname.lastIndexOf('.') + 1) == 'ipk') {
-			document.getElementById('lfile_fname').value = document.getElementById('lfile').files[0].fileName;
+			//document.getElementById('lfile_fname').value = document.getElementById('lfile').files[0].fileName;
+			document.getElementById('lfile_fname').value = document.getElementById('lfile').value
 			document.getElementById('lfile_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('lfile_form').submit();
 			setControlsEnabled(false, true, "Uploading Language File");
