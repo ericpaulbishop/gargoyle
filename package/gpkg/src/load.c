@@ -38,6 +38,33 @@ uint64_t destination_bytes_free(opkg_conf* conf, char* dest_name)
 	return free_bytes;
 }
 
+
+list* get_directory_list(char* directory_path, int relative_path, unsigned char include_regular_files, unsigned char include_dirs, unsigned char include_links, unsigned char include_other)
+{
+	list* file_list = NULL;
+	DIR* dir = opendir(directory_path);
+	struct dirent *entry;
+	if(dir != NULL)
+	{
+		file_list = initialize_list();
+		while(entry = readdir(dir))
+		{
+			int include_entry = 0;
+			include_entry = entry->d_type == DT_REG && include_regular_files                                                 ? 1 : include_entry;
+			include_entry = entry->d_type == DT_DIR && include_dirs                                                          ? 1 : include_entry;
+			include_entry = entry->d_type == DT_LNK && include_links                                                         ? 1 : include_entry;
+			include_entry = (entry->d_type != DT_REG && entry->d_type != DT_DIR && entry->d_type != DT_LNK) && include_other ? 1 : include_entry;
+			if(include_entry)
+			{
+				char* file_path = relative_path ? strdup(entry->d_name) : dynamic_strcat(3, directory_path, "/", entry->d_name);
+				push_list(file_list, file_path);
+			}
+		}
+		closedir(dir);
+	}
+	return file_list;
+}
+
 void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* install_root, int ignore_recursive_variables, string_map* preferred_provides)
 {
 	string_map* package_variables = parameters == NULL ? NULL : get_string_map_element(parameters, "package-variables");
@@ -48,20 +75,48 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 
 
 
-	//load status data
+	//load control / status data
 	unsigned long num_dests;
 	int dest_index =0;
 	char** dest_paths = (char**)get_string_map_keys(conf->dest_roots, &num_dests);
 	for(dest_index=0; dest_index < num_dests; dest_index++)
 	{
+		char* info_dir_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/info");
+		char* adjusted_info_dir_path = dynamic_replace(info_dir_path, "//", "/");
+
 		char* status_path = dynamic_strcat(2, dest_paths[dest_index], "/usr/lib/opkg/status");
 		char* adjusted_status_path = dynamic_replace(status_path, "//", "/");
+
+		free(info_dir_path);
 		free(status_path);
-		status_path = adjusted_status_path;
+		info_dir_path = adjusted_info_dir_path;
+		status_path   = adjusted_status_path;
+
+
+		
+		//load control data
+		list* info_file_list = get_directory_list(info_dir_path, 1, 1, 0, 0, 0);
+		if(info_file_list != NULL)
+		{
+			while(info_file_list->length > 0)
+			{
+				char* info_file_name = shift_list(info_file_list);
+				if(strstr(info_file_name, ".control") != NULL)
+				{
+					char* control_path = dynamic_strcat(3, info_dir_path, "/", info_file_name);
+					load_package_data(control_path, 0, package_data, matching_packages, parameters, load_variable_def, NULL, preferred_provides);
+					free(control_path);
+				}
+				free(info_file_name);
+			}
+		}
+
+		//load status data
 		if(path_exists(status_path))
 		{
 			load_package_data(status_path, 0, package_data, matching_packages, parameters, load_variable_def, get_string_map_element(conf->dest_roots, dest_paths[dest_index]), preferred_provides);
 		}
+		free(info_dir_path);
 		free(status_path);
 	}
 	free_null_terminated_string_array(dest_paths);	
@@ -580,6 +635,10 @@ int include_variable(char* var, int package_matches, int include_package, int lo
 
 }
 
+
+
+
+
 void load_package_data(char* data_source, int source_is_dir, string_map* existing_package_data, string_map* matching_packages, string_map* parameters, int load_variable_def, char* dest_name, string_map* preferred_provides)
 {
 	regex_t* match_regex           = parameters != NULL ? get_string_map_element(parameters, "package-regex") : NULL;
@@ -664,29 +723,16 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 
 
 
-	list* file_list = initialize_list();
+	list* file_list = NULL;
 	char* pkg_src_id = NULL;
 	if(source_is_dir)
 	{
-		DIR* dir = opendir(data_source);
-		struct dirent *entry;
-		if(dir == NULL)
-		{
-			fprintf(stderr, "WARNING: package list directory \"%s\" does not exist\n", data_source);
-			return;
-		}
-		while(entry = readdir(dir))
-		{
-			if(entry->d_type == DT_REG)
-			{
-				char* file_path = dynamic_strcat(3, data_source, "/", entry->d_name);
-				push_list(file_list, file_path);
-			}
-		}
-		closedir(dir);
+		file_list = get_directory_list(data_source, 0, 1, 0, 0, 0);
+		file_list = file_list == NULL ? initialize_list() : file_list;
 	}
 	else
 	{
+		file_list = initialize_list();
 		push_list(file_list, strdup(data_source));
 	}
 	while(file_list->length > 0)
