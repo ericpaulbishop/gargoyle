@@ -72,6 +72,8 @@ change_menu_language() {
 	local uci_val
 	local old_ifs=$IFS
 	
+	[ -z "$lang_ipk" ] && exit -1
+	
 	IFS=$(printf '\n\b')
 	#set -x
 	for uciMenu in $(uci show gargoyle.display 2>/dev/null | grep -v gargoyle.display=display); do
