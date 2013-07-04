@@ -29,15 +29,7 @@
  haserl_OBJECTS = $(am_haserl_OBJECTS)
  haserl_LDADD = $(LDADD)
  DEFAULT_INCLUDES = -I.@am__isrc@
-@@ -92,14 +92,14 @@
- ECHO_N = @ECHO_N@
- ECHO_T = @ECHO_T@
- EGREP = @EGREP@
--EXEEXT = @EXEEXT@
-+EXEEXT = @EXEEXT@
- GREP = @GREP@
- INSTALL = @INSTALL@
- INSTALL_DATA = @INSTALL_DATA@
+@@ -99,7 +99,7 @@
  INSTALL_PROGRAM = @INSTALL_PROGRAM@
  INSTALL_SCRIPT = @INSTALL_SCRIPT@
  INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
@@ -252,7 +244,7 @@
 +#endif
 --- /dev/null	2013-06-08 00:10:27.000000000 -0400
 +++ haserl-0.9.26/src/h_translate.c	2013-06-08 00:11:26.000000000 -0400
-@@ -0,0 +1,376 @@
+@@ -0,0 +1,384 @@
 +/* --------------------------------------------------------------------------
 + * Copyright 2013 BashfulBladder (bashfulbladder@gmail.com)
 + *				Eric Bishop <eric@gargoyle-router.com>
@@ -286,6 +278,7 @@
 +#include "common.h"
 +#include <erics_tools.h>
 +#include "h_translate.h"
++#include "h_error.h"
 +#include "h_bash.h"
 +#include "h_script.h"
 +#include "haserl.h"
@@ -414,14 +407,15 @@
 +	long int lf_len;
 +	
 +	lfile = fopen(filepath, "r");
-+	if (lfile == NULL) { 
++	if (lfile == NULL) {
++		die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", filepath);
 +		return; // the file was not found
 +	}
 +	
 +	fseek(lfile, 0L, SEEK_END);
 +	lf_len = ftell(lfile);
 +	if (lf_len > 51200) { 
-+		printf("Translate error: translation file > 50kb\n");
++		die_with_message(NULL, NULL, "Translate error: translation file > 50kb");
 +		fclose(lfile);
 +		return;
 +	}
@@ -429,7 +423,7 @@
 +	
 +	buf = (char*)calloc(lf_len, sizeof(char));
 +	if(buf == NULL) { 
-+		printf("Translate error: couldn't allocate buffer\n");
++		die_with_message(NULL, NULL, "Translate error: couldn't allocate buffer");
 +		fclose(lfile);
 +		free(buf);
 +		return;
@@ -441,7 +435,7 @@
 +		simpleParseFile(buf, (int)lf_len);
 +		
 +	} else {
-+		printf("Translate error:  %s No UTF-8 BOM\n", filepath);
++		die_with_message(NULL, NULL, "Translate error: '%s' No UTF-8 BOM", filepath);
 +	}
 +	fclose(lfile);
 +	free(buf);
@@ -528,6 +522,12 @@
 +//  Finally, add 1 extra key-value pair - the ability to check if a page is already mapped.
 +//
 +void buildTranslationMap () {
++	if (global.fallback_lang == NULL) {
++		die_with_message (NULL, NULL, "The fallback language was not set for gargoyle.global.fallback_lang");
++	} else if (global.active_lang == NULL) {
++		die_with_message (NULL, NULL, "The active language was not set for gargoyle.global.language");
++	}
++
 +	buffer_t fpath;
 +	haserl_buffer_init (&fpath);
 +	global.translationKV_map = initialize_string_map(1);
