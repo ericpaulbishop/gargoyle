@@ -1,17 +1,17 @@
 #!/usr/bin/haserl
-<?
-	# Copyright © 2012 Eric Bishop, © 2011 Cezary Jackiewicz <cezary@eko.one.pl>
+<%
+	# Copyright © 2012-2013 Eric Bishop, © 2011 Cezary Jackiewicz <cezary@eko.one.pl>
 	# and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" gargoyle
-?>
+	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" -z "plugins.js" gargoyle
+%>
 <script>
 
-<?
+<%
 
 	if [ ! -d '/plugin_root' ] && [ ! -h '/plugin_root' ] ; then
 		mkdir -p /plugin_root
@@ -39,59 +39,59 @@
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
-?>
+%>
 
 </script>
 <form>
 
 	<fieldset id="plugin_options">
-		<legend class="sectionheader">Plugin Options</legend>
+		<legend class="sectionheader"><%~ plugins.PgOpt %></legend>
 
 		<div>
-			<span class="narrowleftcolumn">Plugin Root:</span>
+			<span class="narrowleftcolumn"><%~ PRoot %>:</span>
 			<span id="plugin_root_static" class="widerightcolumn">/plugin_root</span>
 			<input type="text" id="plugin_root_text" class="widerightcolumn" style="display:none" />
 		</div>
 		<div>
-			<span id="plugin_root_drive_static" class="widerightcolumnonly" for="plugin_root_drive_select">Root Drive</span>
+			<span id="plugin_root_drive_static" class="widerightcolumnonly" for="plugin_root_drive_select"><%~ RDrv %></span>
 			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
 		</div>
 		<div id="plugin_root_change_container" style="display:none" >
 			<span class="widerightcolumnonly" >
-				<input type="button" class="default_button" value="Change Plugin Root" onclick="changePluginRoot()" />
+				<input type="button" class="default_button" value="<%~ Chroot %>" onclick="changePluginRoot()" />
 			</span>
 		</div>
 		<br/>
 
 		<div>
-			<span class="leftcolumn">Plugin Sources:</span>
+			<span class="leftcolumn"><%~ PgSrc %>:</span>
 		</div>
 		<div id="package_source_table_container" style="margin-left:5px;" ></div>
 		<div class="indent">
 			<div>
-				<label class="narrowleftcolumn" for="add_source_name">Add Name:</label>
+				<label class="narrowleftcolumn" for="add_source_name"><%~ ANam %>:</label>
 				<input type="text" class="widerightcolumn" id="add_source_name" onkeyup="proofreadSourceName(this)" style="width:325px;"/>
 			</div>
 			<div>
-				<label class="narrowleftcolumn" for="add_source_url">Add URL:</label>
+				<label class="narrowleftcolumn" for="add_source_url"><%~ Aurl %>L:</label>
 				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
 			</div>
 
-			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="Add Plugin Source" onclick="addPluginSource()" /></span>
+			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="<%~ APSrc %>" onclick="addPluginSource()" /></span>
 
 		</div>
 	</fieldset>
 
 	<fieldset id="plugin_list">
-		<legend class="sectionheader">Plugin List</legend>
+		<legend class="sectionheader"><%~ PList %></legend>
 		<div>
 			<div id="packages_table_container" style="margin-left:5px" ></div>
 		</div>
 		<div id="no_packages" style='display:none;'>
-			Packages not found. Refresh plugins list.
+			<%~ NoPkg %>
 		</div>
 		<div id="bottom_button_container">
-			<input type='button' value='Refresh Plugins' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
+			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
 		</div>
 	</fieldset>
 
@@ -102,6 +102,6 @@
 
 </script>
 
-<?
+<%
 	gargoyle_header_footer -f -s "system" -p "plugins"
-?>
+%>
