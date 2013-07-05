@@ -5,6 +5,7 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var intS=new Object();
 
 //
 //  GenLangContainer initiates generating the language container with 2 flanking dividing lines
@@ -22,7 +23,7 @@ function GenLangContainer() {
 //  associative array.
 //
 function GenLangMenu() {
-	var columnNames = ["Language", 'Description', ''];
+	var columnNames = [intS.Lang, intS.Desc, ''];
 	var TableData = new Array();
 
 	for(pkgName in pkg_info) {
@@ -139,7 +140,7 @@ function get_lfile() {
 			document.getElementById('lfile_fname').value = document.getElementById('lfile').value
 			document.getElementById('lfile_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('lfile_form').submit();
-			setControlsEnabled(false, true, "Uploading Language File");
+			setControlsEnabled(false, true, intS.UpMsg);
 			//nothing further needs to be done-firstboot.js will load overview.sh
 		}
 	}
@@ -156,11 +157,11 @@ function createInstallButton(type)
 {
 	var inButton = createInput("button");
 	if (type == 1) {
-		inButton.value = "Install";
+		inButton.value = UI.Install;
 		inButton.className="default_button";
 		inButton.onclick = InstallLang;
 	} else {
-		inButton.value = "Installed";
+		inButton.value = intS.Instd;
 		inButton.className="default_button_disabled";
 		inButton.onclick = ""
 	}
@@ -171,11 +172,11 @@ function createUseButton(type)
 {
 	var useButton = createInput("button");
 	if (type == 1) {
-		useButton.value = "Activate";
+		useButton.value = intS.Acv8;
 		useButton.className="default_button";
 		useButton.onclick = activateLang;
 	} else {
-		useButton.value = "Active";
+		useButton.value = intS.Actv;
 		useButton.className="default_button_disabled";
 		useButton.onclick = ""
 	}
@@ -218,7 +219,7 @@ function activateLang(row, action)
 
 	commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	setControlsEnabled(false, true, "Please wait...");
+	setControlsEnabled(false, true, UI.WaitSettings);
 
 	var stateChangeFunction = function(req)
 	{
