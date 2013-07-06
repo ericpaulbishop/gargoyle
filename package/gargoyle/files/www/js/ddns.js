@@ -571,7 +571,7 @@ function setProvider(controlDocument)
 			var label = controlDocument.createElement("label");
 			label.className="leftcolumn";
 			label.id=variables[variableIndex] + "_label";
-			label.appendChild( controlDocument.createTextNode( (DyDNS.length==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
+			label.appendChild( controlDocument.createTextNode( (ObjLen(DyDNS)==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
 			div.appendChild(label);
 			
 			var input;

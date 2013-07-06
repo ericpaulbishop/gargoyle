@@ -2689,3 +2689,12 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	}
 }
 
+//apparently these var fbS=new Object(); //part of i18n  -> objects do not have a length (it is undefined)
+function ObjLen(an_obj) {
+	var len=0;
+	for (item in an_obj) {
+		len++;
+	}
+	return len
+}
+
