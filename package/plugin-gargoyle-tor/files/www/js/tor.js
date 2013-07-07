@@ -109,10 +109,10 @@ function saveChanges()
 		var dataDrive = getSelectedValue("tor_dir_drive_select")
 		if(dataDrive != "ramdisk" && dataDrive != "" && dataDrive != null)
 		{
-			var dataDrivePath = driveToPath[dataDrive]
-			var dataDriveDir  = document.getElementById("tor_dir_text").value
+			var dataDrivePath = dataDrive == "root" ? "/usr/lib/tor" : driveToPath[dataDrive]
+			var dataDriveDir  = dataDrive == "root" ? "/usr/lib/tor" : document.getElementById("tor_dir_text").value
 			dataDriveDir = (dataDriveDir[0] == '/' ? "" : "/" ) + dataDriveDir
-			dataDirPath = dataDrivePath + dataDriveDir
+			dataDirPath = dataDrive == "root" ? dataDriveDir : dataDrivePath + dataDriveDir
 
 			uci.set("tor", "global", "data_dir", dataDirPath)
 			uci.set("tor", "global", "data_drive", dataDrive)
@@ -369,30 +369,45 @@ function resetData()
 
 
 	//data dir
-	driveToPath["ramdisk"] = "/";
-	if(storageDrives.length > 0)
+	var rootDriveDisplay = [];
+	var rootDriveValues  = [];
+	
+
+
+	var pkgrNames = ["ram", "root"]
+	var dispNames = ["RAM Disk", "Root Disk"]
+	var ni
+	for(ni=0;ni<2; ni++)
 	{
-		var rootDriveDisplay = [];
-		var rootDriveValues  = [];
-		
-		rootDriveDisplay.push("RAM Disk")
-		rootDriveValues.push("ramdisk");
-		
-		var driveIndex;
-		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+		var prn = pkgrNames[ni];
+		var dn  = dispNames[ni];
+		if(pkg_dests[ prn ] != null)
 		{
-			rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
-			rootDriveValues.push( storageDrives[driveIndex][0] )
-			driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
+			rootDriveDisplay.push(dn + ": " + parseBytes(pkg_dests[prn]["Bytes-Total"]) + " Total, " + parseBytes(pkg_dests[prn]["Bytes-Free"]) + " Free");
 		}
-		setAllowableSelections("tor_dir_drive_select", rootDriveValues, rootDriveDisplay, document);
-		var torDataDrive    = uciOriginal.get("tor", "global", "data_drive")
-		var torDataDriveDir = uciOriginal.get("tor", "global", "data_drive_dir")
-		torDataDriveDir = torDataDrive == "" || torDataDriveDir == "" ? "/tor" : torDataDriveDir
-		torDataDrive = torDataDrive == "" ? "ramdisk" : torDataDrive;
-		setSelectedValue( "tor_dir_drive_select", torDataDrive)
-		document.getElementById("tor_dir_text").value = torDataDriveDir
+		else
+		{
+			rootDriveDisplay.push(dn)
+		}
 	}
+	rootDriveValues.push("ramdisk");
+	rootDriveValues.push("root");
+
+
+	var driveIndex;
+	for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+	{
+		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+		rootDriveValues.push( storageDrives[driveIndex][0] )
+		driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
+	}
+	setAllowableSelections("tor_dir_drive_select", rootDriveValues, rootDriveDisplay, document);
+	var torDataDrive    = uciOriginal.get("tor", "global", "data_drive")
+	var torDataDriveDir = uciOriginal.get("tor", "global", "data_drive_dir")
+	torDataDriveDir = torDataDrive == "" || torDataDriveDir == "" ? "/tor" : torDataDriveDir
+	torDataDrive = torDataDrive == "" ? "ramdisk" : torDataDrive;
+	setSelectedValue( "tor_dir_drive_select", torDataDrive)
+	document.getElementById("tor_dir_text").value = torDataDriveDir
 
 
 }
@@ -431,11 +446,15 @@ function setTorVisibility()
 		}
 	}
 
-	var showDataDirControls = (storageDrives.length > 0 && (relayMode == "1" || relayMode == "2" || relayMode == "3" || clientMode != "0")) ? 1 : 0
+	var showDataDirControls = relayMode == "1" || relayMode == "2" || relayMode == "3" || clientMode != "0" ? 1 : 0
 	setVisibility( [ "tor_data_dir_section" ], [ showDataDirControls ] );
 	if(showDataDirControls == 1)
 	{
-		setVisibility( ["tor_dir_static", "tor_dir_text"], getSelectedValue("tor_dir_drive_select") == "ramdisk" ? [1,0] : [0,1] )
+		var torDirDrive =  getSelectedValue("tor_dir_drive_select");
+		var vis = [0,0,1];
+		vis = torDirDrive == "ramdisk" ? [1,0,0] : vis;
+		vis = torDirDrive == "root"    ? [0,1,0] : vis;
+		setVisibility( ["tor_dir_ramdisk_static", "tor_dir_root_static", "tor_dir_text"], vis )
 	}
 
 

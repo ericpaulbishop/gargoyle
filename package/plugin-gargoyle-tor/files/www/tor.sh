@@ -13,6 +13,8 @@
 <?
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+
+	gpkg dest-info -o 'js'
 ?>
 </script>
 
@@ -130,7 +132,8 @@
 		<legend class="sectionheader">Tor Data Directory</legend>
 		<div>
 			<span class="narrowleftcolumn">Tor Data Directory:</span>
-			<span id="tor_dir_static" class="widerightcolumn">/var/tor</span>
+			<span id="tor_dir_ramdisk_static" class="widerightcolumn">/var/tor</span>
+			<span id="tor_dir_root_static" class="widerightcolumn">/usr/lib/tor</span>
 			<input type="text" id="tor_dir_text" class="widerightcolumn" style="display:none" />
 		</div>
 		<div>
