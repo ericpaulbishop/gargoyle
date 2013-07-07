@@ -150,8 +150,13 @@
 	<div id="extroot_container">
 		<span class="rightcolumnonly">
 			<input type="checkbox" id="extroot" name="extroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
-			<label id="extroot_label" for="extroot" style="vertical-align:middle">Make extroot on this disk</label>
+			<label id="extroot_label" for="extroot" style="vertical-align:middle">Use Disk As External Root (Extroot)</label>
 		</span>
+		<div class="rightcolumnonly">
+			<em>
+				When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost.
+			</em>
+		</div>
 	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
@@ -160,8 +165,8 @@
 
 <fieldset id="extroot_fieldset" style="display:none;">
 	<legend class="sectionheader">Extroot</legend>
-	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="Disable extroot" id="extoot_button" class="default_button" onclick="disableExtroot();" /></span>
-	<span class="rightcolumn"><em>Extroot detected on <b><span id="extroot_drive"></span></b>.</em></span>
+	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="Disable External Root" id="extroot_button" class="default_button" onclick="disableExtroot();" /></span>
+	<span class="rightcolumn"><em>External root detected on <b><span id="extroot_drive"></span></b>.</em></span>
 </fieldset>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
