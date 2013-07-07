@@ -2,3 +2,4 @@
 
 fallback=USB Storage
 EN=USB Storage
+ES=Almacenaje de USB
