@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-tor
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Tor Anonymyizer Support for Gargoyle
-	DEPENDS:=+gargoyle +tor +obfsproxy
+	DEPENDS:=+gargoyle +gargoyle-tor +obfsproxy
 	MAINTAINER:=Eric Bishop
 endef
 
