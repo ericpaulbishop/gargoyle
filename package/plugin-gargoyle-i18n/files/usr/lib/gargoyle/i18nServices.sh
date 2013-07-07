@@ -1,6 +1,45 @@
 #!/bin/sh
 # Copyright (C) 2013 BashfulBladder as part of i18n support for Gargoyle router firmware
-# Version 02
+# Version 03
+
+#
+#  shell_get_value /www/i18n/English-EN/openvpn.js uc_cfg_f
+#
+shell_get_value() {
+	local jsfile="$1"
+	local key="$2"
+	local translation=""
+	
+	# awk -v key=uc_cfg_f -F '=' '$0 ~ key {sub(/\"/,""); sub(/\";$/,""); print $2}' /www/i18n/English-EN/openvpn.js
+	[ -f "$jsfile" ] && translation=$(awk -v key=$key -F '=' '$0 ~ key {sub(/\"/,""); sub(/\";$/,""); print $2}' $jsfile)
+	
+	echo "$translation"
+}
+
+#
+#  shell_i18n_string openvpn uc_cfg_f
+#
+shell_i18n_string() {
+	local page="$1"
+	local key="$2"
+	local web_root=$(uci get gargoyle.global.web_root)
+	local active_lang=$(uci -q get gargoyle.global.language)
+	local fallback_lang=$(uci -q get gargoyle.global.fallback_lang)
+	local js_page=""
+	local translation=""
+	
+	[ -n "$active_lang" ] && [ -n "$fallback_lang" ] && {
+		js_page="$web_root/i18n/$active_lang/$page.js"
+		translation=$(shell_get_value "$js_page" $key)
+		[ -z "$translation" ] && {
+			js_page="$web_root/i18n/$fallback_lang/$page.js"
+			translation=$(shell_get_value "$js_page" $key)
+		}
+	}
+	[ -z "$translation" ] && translation=$key
+	
+	echo "$translation"
+}
 
 #
 #  get_i18_3rd_party_menuoption /www/i18n/universal/menu-system_languages.txt /www/i18n/Spanish-ES 
