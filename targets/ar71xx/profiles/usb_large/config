@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Mon Jul  8 14:15:04 2013
+# Mon Jul  8 15:55:38 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -1351,7 +1351,7 @@ CONFIG_PACKAGE_libext2fs=y
 # Firewall
 #
 CONFIG_PACKAGE_libip4tc=y
-# CONFIG_PACKAGE_libip6tc is not set
+CONFIG_PACKAGE_libip6tc=y
 # CONFIG_PACKAGE_libipq is not set
 # CONFIG_PACKAGE_libiptc is not set
 CONFIG_PACKAGE_libxtables=y
@@ -2081,7 +2081,7 @@ CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 CONFIG_PACKAGE_plugin-gargoyle-minidlna=y
 CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
-# CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog is not set
+CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
