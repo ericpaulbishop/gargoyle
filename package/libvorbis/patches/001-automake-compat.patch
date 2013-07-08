@@ -1,0 +1,10 @@
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,6 +1,7 @@
+ ## Process this file with automake to produce Makefile.in
+ 
+ AUTOMAKE_OPTIONS = 1.6 foreign dist-zip dist-bzip2
++ACLOCAL_AMFLAGS = -I m4
+ 
+ SUBDIRS = m4 include vq lib examples test doc
+ 
