@@ -365,7 +365,6 @@ function resetData()
 	}
 	setSelectedValue("tor_relay_publish", uciOriginal.get("tor", "relay", "publish"));
 
-	setTorVisibility()
 
 
 	//data dir
@@ -408,7 +407,8 @@ function resetData()
 	torDataDrive = torDataDrive == "" ? "ramdisk" : torDataDrive;
 	setSelectedValue( "tor_dir_drive_select", torDataDrive)
 	document.getElementById("tor_dir_text").value = torDataDriveDir
-
+	
+	setTorVisibility();
 
 }
 
@@ -452,7 +452,7 @@ function setTorVisibility()
 	{
 		var torDirDrive =  getSelectedValue("tor_dir_drive_select");
 		var vis = [0,0,1];
-		vis = torDirDrive == "ramdisk" ? [1,0,0] : vis;
+		vis = torDirDrive == "ramdisk" || torDirDrive == "" ? [1,0,0] : vis;
 		vis = torDirDrive == "root"    ? [0,1,0] : vis;
 		setVisibility( ["tor_dir_ramdisk_static", "tor_dir_root_static", "tor_dir_text"], vis )
 	}
