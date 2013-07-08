@@ -1,0 +1,10 @@
+--- a/minidlna.c
++++ b/minidlna.c
+@@ -58,6 +58,7 @@
+ #include <fcntl.h>
+ #include <sys/file.h>
+ #include <sys/time.h>
++#include <sys/stat.h>
+ #include <time.h>
+ #include <signal.h>
+ #include <sys/param.h>
