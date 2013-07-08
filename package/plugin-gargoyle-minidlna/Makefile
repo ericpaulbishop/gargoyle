@@ -14,6 +14,7 @@ define Package/plugin-gargoyle-minidlna
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=DLNA Support for Gargoyle
 	DEPENDS:=+gargoyle +minidlna
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-minidlna/description
