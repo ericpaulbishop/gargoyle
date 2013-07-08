@@ -1,0 +1,38 @@
+#!/bin/bash
+
+
+openwrt_src_dir="$1"
+if [ -z "$openwrt_src_dir" ]  || [ ! -d "$openwrt_src_dir" ] ; then
+	echo "usage: $0 [OPENWRT_SRC_DIR]  [TARGET_ROOT_DIR] [GARGOYLE_PACKAGE_DIR]"
+	exit
+fi
+
+echo "WARNING: MAKE SURE YOU ARE USING OPENWRT SRC DIR WITH PATCHED IPTABLES MODULES!!!"
+sleep 3
+
+
+
+target_root="$2"
+if [ -z "$target_root" ] ; then
+	target_root="./targets"
+fi
+
+gargoyle_package_dir="./package"
+if [ -d "$gargoyle_package_dir" ] ; then
+	cp -r "$gargoyle_package_dir"/*  "$openwrt_src_dir"/package
+fi
+
+
+cur_dir=$(pwd);
+IFS=$(printf "\n\r")
+configs=$(find "$target_root" -name "config")
+for c in $configs ; do
+	cp "$c" "$openwrt_src_dir/.config"
+	cd "$openwrt_src_dir"
+	make defconfig
+	
+	
+	cd "$cur_dir"
+	cp "$openwrt_src_dir/.config" "$c"
+done
+
