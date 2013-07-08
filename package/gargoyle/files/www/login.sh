@@ -31,10 +31,13 @@
 		js_hooks=$(ls "$web_root/hooks/login" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/login/\"\$1  }")
 		js_hooks=$(echo $js_hooks)
 		js="$js $js_hooks"
+		ljs=$(echo "$js" | awk -F '[ /]' '{ for(i = 1; i <= NF; i++) {  print $i; } }' | awk '/.js/')
+		lang_js=$(echo $ljs)
+		[ -n "$ljs" ] && ljs="$js"
 	fi
 
 
-	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "login.js"
+	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "$lang_js"
 %>
 
 
