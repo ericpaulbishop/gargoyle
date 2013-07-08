@@ -5,6 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var pingS=new Object(); //part of i18n
 
 function saveChanges()
 {
@@ -29,13 +30,13 @@ function saveChanges()
 		failure_action = document.getElementById("script").value;
 		if(failure_action == "")
 		{
-			errors.push("You must add the script to execute");
+			errors.push(pingS.ScptErr);
 		}
 	}
 
 	if (errors.length > 0)
 	{
-		errorString = errors.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errors.join("\n") + "\n\n"+pingS.ScptErr;
 		alert(errorString);
 		return;
 	}
