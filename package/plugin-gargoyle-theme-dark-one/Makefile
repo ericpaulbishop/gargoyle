@@ -16,7 +16,7 @@ define Package/plugin-gargoyle-theme-dark-one
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
-	TITLE:="Dark One" Theme for Gargoyle
+	TITLE:=Dark One Theme for Gargoyle
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 	PKGARCH:=all
 endef
