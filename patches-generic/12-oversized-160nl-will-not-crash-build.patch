@@ -1,0 +1,23 @@
+--- orig/target/linux/ar71xx/image/Makefile	2013-07-09 01:35:52.160678940 -0400
++++ orig2/target/linux/ar71xx/image/Makefile	2013-07-09 01:38:54.984685883 -0400
+@@ -572,15 +572,11 @@
+ 
+ define Image/Build/CyberTAN
+ 	$(call MkuImageGzip,$(2),$(3))
+-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
+-		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
+-	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) \
+-		-i $(KDIR)/image.tmp \
+-		-o $(call sysupname,$(1),$(2))
+-	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) -g \
+-		-i $(KDIR)/image.tmp \
+-		-o $(call factoryname,$(1),$(2))
+-	rm $(KDIR)/image.tmp
++	( \
++		$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage -x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1) -$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) -i $(KDIR)/image.tmp -o $(call sysupname,$(1),$(2)) -$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) -g -i $(KDIR)/image.tmp -o $(call factoryname,$(1),$(2)) 2>/dev/null ; \
++		echo "" ; \
++	)
++	rm -rf $(KDIR)/image.tmp
+ endef
+ 
+ define Image/Build/Netgear/Build_uImage
