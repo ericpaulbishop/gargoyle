@@ -2033,8 +2033,8 @@ function parseWifiScan(rawScanOutput)
 			if(idIndex >= 0 && splitIndex > idIndex)
 			{
 				var val=line.substr(splitIndex+1);
-				//val = val.replace(/^[^\"]*\"/g, ""); //OUCH
-				//val = val.replace(/\".*$/g, ""); //OUCH
+				val = val.replace(/^[^\"]*\"/g, "");
+				val = val.replace(/\".*$/g, "");
 				vals.push(val);
 			}
 		}
@@ -2415,7 +2415,7 @@ function releaseDhcpLease()
         setChildText("dhcp_ip", "");
         if(req.readyState == 4)
         {
-            setTimeout(setControlsEnabled(true), 2=1000);
+            setTimeout(setControlsEnabled(true), 2*1000);
         }
     }
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
