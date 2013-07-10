@@ -233,6 +233,7 @@ persist-key
 persist-tun
 comp-lzo
 
+push "topology subnet"
 push "route-gateway $openvpn_server_internal_ip"
 $openvpn_redirect_gateway
 
