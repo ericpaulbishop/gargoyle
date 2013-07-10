@@ -1241,6 +1241,7 @@ function resetData()
 	if(leaseStart != "")
 	{
 		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
+		setElementEnabled(document.getElementById("dhcp_release_button"), true);
 		var releaseDate = new Date();
 		var leaseStartSeconds = (parseInt(currentDateSeconds) - parseInt(uptime)) + parseInt(leaseStart);
 		releaseDate.setTime( (leaseStartSeconds*1000) + (parseInt(leaseLifetime)*1000) + (timezoneOffset*1000) );
@@ -1250,7 +1251,8 @@ function resetData()
 	}
 	else
 	{
-		setElementEnabled(document.getElementById("dhcp_renew_button"), false);
+		setElementEnabled(document.getElementById("dhcp_renew_button"), true);
+		setElementEnabled(document.getElementById("dhcp_release_button"), false);
 	}
 
 	setChildText("bridge_wifi_mac",  currentWirelessMacs[0], null, null, null);
@@ -2031,8 +2033,8 @@ function parseWifiScan(rawScanOutput)
 			if(idIndex >= 0 && splitIndex > idIndex)
 			{
 				var val=line.substr(splitIndex+1);
-				val = val.replace(/^[^\"]*\"/g, "");
-				val = val.replace(/\".*$/g, "");
+				//val = val.replace(/^[^\"]*\"/g, ""); //OUCH
+				//val = val.replace(/\".*$/g, ""); //OUCH
 				vals.push(val);
 			}
 		}
@@ -2365,63 +2367,59 @@ function updateTxPower(selectId, textId, band)
 
 function renewDhcpLease()
 {
-       //To aquire an new DHCP lease we send the SIGUSR1 signal to udhcpc.  Then we wait up to 20 seconds for the lease_aquired time to change.
-       //This indicates we have a new lease.  Otherwise we just timeout and show the old data.
-       //This technique relies on udhcpc already working against the correct WAN interface so we do not need to figure that out here.
-       // 
-       //we don't have to worry about date/lease time mismatch here (corrected for by lease_acquired_uptime variable, in patched udhcpcd script), since date should already be set by now
+    //Send the SUGUSR1 signal to the still running but inactive udhcpc process to obtain an IP. Hopeully, it will be new (not checked).
+    //The sleep seems to be necessary for the new IP to propogate through the configuration files used by uci.
+    //Such problems with setChildText("dhcp_ip", wi) - wi never got an updated IP - so just reload the page for a quick fix
 	var commands = [];
-	commands.push("ls=$(uci -P /var/state get network.wan.lease_acquired)");
 	commands.push("killall -SIGUSR1 udhcpc");
-	commands.push("wait_sec=20");
-	commands.push("while [ $ls -eq $(uci -P /var/state get network.wan.lease_acquired 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do");
 	commands.push("sleep 1");
-	commands.push("wait_sec=$(($wait_sec - 1))");
+	commands.push("wait_sec=10");
+	commands.push("while [ $(uci -p /tmp/state get network.wan.ipaddr 2>/dev/null) == NULL ] && [ $wait_sec -gt 0 ] ; do");
+	commands.push("sleep 1");
 	commands.push("done");
-	commands.push("echo \"var cd = \\\"\"$(date +%s)\"\\\";\"");
-	commands.push("echo \"var up  = \\\"\"$(cat /proc/uptime | sed 's/\\..*$//g' | sed 's/ .*$//g')\"\\\";\"");
-	commands.push("echo \"var wi  = \\\"\"$(uci -P /var/state get network.wan.ipaddr )\"\\\";\"");
-	commands.push("echo \"var ls  = \\\"\"$(uci -P /var/state get network.wan.lease_acquired )\"\\\";\"");
-	commands.push("echo \"var ll  = \\\"\"$(uci -P /var/state get network.wan.lease_lifetime )\"\\\";\"");
 
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	setControlsEnabled(false, true, "Renewing DHCP Lease");
+	setControlsEnabled(false, true, "Acquiring new DHCP Lease");
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
 		{
-			var reqLines = req.responseText.split(/[\r\n]+/);
-			leaseLifetime = -1;
-			while(reqLines.length > 0)
-			{
-				var cd = "";
-				var up = "";
-				var wi = "";
-				var ls = "";
-				var ll = "";
-				var line = reqLines.shift();
-				if(line.match(/^var/))
-				{
-					eval(line);
-					if(cd != "") { currentDateSeconds = parseInt(cd); }
-					if(up != "") { uptime = parseInt(up);  }
-					if(ll != "") { leaseLifetime = parseInt(ll); }
-					if(ls != "") { leaseStart = parseInt(ls); }
-					if(wi != "") { setChildText("dhcp_ip", wi); }
-				}
-			}
-			if(leaseLifetime > 0)
-			{
-				var releaseDate = new Date();
-				var leaseStartSeconds = (currentDateSeconds - uptime) + leaseStart;
-				releaseDate.setTime( (leaseStartSeconds*1000) + (leaseLifetime*1000) + (timezoneOffset*1000) );
-				setChildText("dhcp_expires", localdate(releaseDate));
-			}
-
 			setControlsEnabled(true);
+            window.location.reload(true); //this reload will get the IP
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+function releaseDhcpLease()
+{
+    //To release a DHCP lease we send the SIGUSR2 signal to udhcpc & will go inactive or wait for a SIGUSR1 renew signal.
+    //Leave the WAN interface semi-configured to bring back up, just delete the IP for checks & set variables to ""
+    //Then just spin for 2 seconds & update page data.
+	var commands = [];
+	commands.push("killall -SIGUSR2 udhcpc");
+	commands.push("uci -P /var/state set network.wan.ipaddr=\'\'");
+	commands.push("uci -P /var/state set network.wan.lease_lifetime=\'\'");
+	commands.push("uci -P /var/state set network.wan.lease_acquired=\'\'");
+	commands.push("uci -P /var/state set network.wan.gateway=\'\'");
+	commands.push("uci -P /var/state set network.wan.lease_server=\'\'");
+	commands.push("uci -P /var/state set network.wan.up=0");
+	commands.push("uci commit");
+
+	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	setControlsEnabled(false, true, "Releasing DHCP Lease");
+    setElementEnabled(document.getElementById("dhcp_release_button"), false);
+    var stateChangeFunction = function(req)
+    {
+        setChildText("dhcp_expires", "");
+        setChildText("dhcp_ip", "");
+        if(req.readyState == 4)
+        {
+            setTimeout(setControlsEnabled(true), 2=1000);
+        }
+    }
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+
 }
 
 function singleEthernetIsWan()
@@ -2518,5 +2516,16 @@ function getPingSection()
 		{
 			return section;
 		}
+	}
+}
+
+function togglePass(radio)
+{
+	password_field = document.getElementById('wifi_pass' + radio);
+	if(password_field.type == 'password')
+	{
+		password_field.type = 'text';
+	} else {
+		password_field.type = 'password';
 	}
 }

@@ -316,7 +316,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 
 			<div class='rightcolumnonly' style="margin-bottom:15px">
-				<input type='button' id="dhcp_renew_button" value="Renew Lease Now" class="default_button" onclick="renewDhcpLease()" />
+				<input type='button' id="dhcp_renew_button" value="DHCP Renew" class="default_button" onclick="renewDhcpLease()" />
+				<input type='button' id="dhcp_release_button" value="DHCP Release" class="default_button" onclick="releaseDhcpLease()" />
 			</div>
 		</div>
 
@@ -682,7 +683,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'>Password:</label>
-			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_pass2' onclick='togglePass(2)'/>
+			<label for="show_pass2" id="show_pass2_label" class='rightcolumn'>reveal</label><br/>
 		</div>
 		<div id='wifi_wep2_container' class='indent'>
 			<div style="display:block;">
@@ -747,7 +750,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wifi_pass1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass1' id='wifi_pass1_label'>Password:</label>
-			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_pass1' onclick='togglePass(1)'/>
+			<label for="show_pass1" id="show_pass1_label" class='rightcolumn'>reveal</label><br/>
 		</div>
 		<div id='wifi_wep1_container' class='indent'>
 			<div style="display:block;">
