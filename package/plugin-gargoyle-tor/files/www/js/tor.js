@@ -261,7 +261,7 @@ function proofreadAll()
 		}
 		if(relayPort == httpPort || relayPort == httpsPort || relayPort == remoteHttpPort || relayPort == remoteHttpsPort)
 		{
-			errors.push( relayType + " "+torS.ReWSErr);
+			errors.push( relayType + " "+torS.RPeWSErr);
 		}
 		if(obfsPort == httpPort || obfsPort == httpsPort || obfsPort == remoteHttpPort || obfsPort == remoteHttpsPort)
 		{

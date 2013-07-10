@@ -14,7 +14,7 @@ rbS.RDay="Reboot Day";
 rbS.RHr="Reboot Hour";
 
 //javascript
-rbS.SysR="System Is Now Rebooting"
+rbS.SysR="System Is Now Rebooting";
 rbS.Digs="th";
 rbS.LD1s="st";
 rbS.LD2s="nd";

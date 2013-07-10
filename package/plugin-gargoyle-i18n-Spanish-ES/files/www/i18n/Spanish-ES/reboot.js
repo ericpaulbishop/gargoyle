@@ -14,7 +14,7 @@ rbS.RDay="Día de Reiniciar";
 rbS.RHr="Hora de Reiniciar";
 
 //javascript
-rbS.SysR="El Sistema Está Ahora Reiniciar"
+rbS.SysR="El Sistema Está Ahora Reiniciar";
 rbS.Digs="o";
 rbS.LD1s="er";
 rbS.LD2s="o";
