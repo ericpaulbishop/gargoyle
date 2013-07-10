@@ -1,5 +1,5 @@
 <div>
-	<label class='narrowleftcolumn' for='exception_name' id='exception_name_label'><%~ ESect %>:</label>
+	<label class='narrowleftcolumn' for='exception_name' id='exception_name_label'><%~ restrictions.ESect %>:</label>
 	<input type='text' class='rightcolumn' id='exception_name'  size='30' />
 </div>
 <div>

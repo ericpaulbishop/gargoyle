@@ -1,5 +1,5 @@
 <div id="share_disk_container">
-	<label class="leftcolumn" id="share_disk_label" for="share_disk"><%~ Disk %>:</label>
+	<label class="leftcolumn" id="share_disk_label" for="share_disk"><%~ usb_storage.Disk %>:</label>
 	<select class="rightcolumn" id="share_disk"></select>
 	<span class="rightcolumn" id="share_disk_text"></span>
 </div>

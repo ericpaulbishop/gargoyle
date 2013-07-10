@@ -1,5 +1,5 @@
 <div id='openvpn_allowed_client_name_container'>
-	<label class='narrowleftcolumn' for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'><%~ ClntN %>:</label>
+	<label class='narrowleftcolumn' for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'><%~ openvpn.ClntN %>:</label>
 	<input type='text' class='rightcolumn' name='openvpn_allowed_client_name' id='openvpn_allowed_client_name' size='30' />
 </div>
 
