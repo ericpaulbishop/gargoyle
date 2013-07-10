@@ -7,7 +7,7 @@ basicS.CfgDev="Configurar el Dispositivo como";
 basicS.DvGtwy="Puerta de Enlace (Defecto)";
 basicS.DvWBrg="Inalámbrico Puente/Repetidor";
 basicS.BrIP="Puente IP";
-basicS.GwIP-"AP/Puerta de Enlace IP";
+basicS.GwIP="AP/Puerta de Enlace IP";
 basicS.StIP="IP Estática";
 basicS.CurrIP="IP Corriente";
 basicS.RtrIP="IP del Enrutador";

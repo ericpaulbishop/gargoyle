@@ -7,7 +7,7 @@ basicS.CfgDev="Configure Device As";
 basicS.DvGtwy="Gateway (Default)";
 basicS.DvWBrg="Wireless Bridge/Repeater";
 basicS.BrIP="Bridge IP";
-basicS.GwIP-"AP/Gateway IP";
+basicS.GwIP="AP/Gateway IP";
 basicS.StIP="Static IP";
 basicS.CurrIP="Current IP";
 basicS.RtrIP="Router IP";

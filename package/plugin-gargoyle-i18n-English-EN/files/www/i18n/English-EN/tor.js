@@ -35,7 +35,7 @@ torS.VisMsg="Within 1-2 hours of activating your relay, it should be visible";
 torS.GlbMsg="in the global list";
 torS.TDDir="Tor Data Directory";
 torS.TDDrv="Tor Data Drive";
-torS.CacheWarn="Tor caches a large amount of data, typically 5-50MB. Relays and bridges require more cache space than client-only configurations. By default this cached data is stored on a ramdisk in memory. If you have limited memory or are running a relay, it is strongly recommended that you configure a Tor data directory on a connected USB drive."
+torS.CacheWarn="Tor caches a large amount of data, typically 5-50MB. Relays and bridges require more cache space than client-only configurations. By default this cached data is stored on a ramdisk in memory. If you have limited memory or are running a relay, it is strongly recommended that you configure a Tor data directory on a connected USB drive.";
 
 //javascript
 torS.ConProb="WARNING: Tor is active, but may be having problems connecting -- check your connection";

@@ -35,7 +35,7 @@ torS.VisMsg="Dentro de 1-2 horas luego de activar el relé, debe ser visible";
 torS.GlbMsg="en la lista mundial";
 torS.TDDir="Tor Directorio de Datos";
 torS.TDDrv="Tor Unidad de Datos";
-torS.CacheWarn="Tor almacena una gran cantidad de datos, por lo general 5 a 50 MB. Relés y puentes requieren más espacio de caché de cliente de sólo configuraciones. Por defecto los datos en caché se almacena en un disco RAM en la memoria. Si tiene poca memoria o se está ejecutando un relé, se recomienda encarecidamente que configure un directorio de datos de Tor en una unidad USB conectada."
+torS.CacheWarn="Tor almacena una gran cantidad de datos, por lo general 5 a 50 MB. Relés y puentes requieren más espacio de caché de cliente de sólo configuraciones. Por defecto los datos en caché se almacena en un disco RAM en la memoria. Si tiene poca memoria o se está ejecutando un relé, se recomienda encarecidamente que configure un directorio de datos de Tor en una unidad USB conectada.";
 
 //javascript
 torS.ConProb="ADVERTENCIA: Tor está activo, pero puede estar teniendo problemas para conectarse - compruebe su conexión";
