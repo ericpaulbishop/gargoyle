@@ -418,7 +418,26 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' id='wan_3g_pass' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(optional)</em>
 		</div>
+		<div id="lan_dns_source_container">
+			<span class="leftcolumn">
+				<label id='lan_dns_source_label' for='lan_dns_source'>DNS Servers:</label>
+			</span>
+			<select class='rightcolumn' id="lan_dns_source" onchange="setDnsSource(this)"> 
+				<option value="isp">Default DNS Servers Specified by ISP</option>
+				<option value="opendns">OpenDNS Servers</option>
+				<option value="google">Google DNS Servers</option>
+				<option value="custom">Custom DNS Servers</option>
+			</select>
+		</div>
+		<div id="lan_dns_custom_container">
 
+			<span class='rightcolumnonly'>
+				<input type='text' id='add_lan_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
+				<input type="button" class="default_button" id="add_lan_dns_button" value="Add" onclick='addDns("lan")' />
+			</span>
+			<span style="clear:both"></span>
+			<div class="rightcolumnonly"><div id="lan_dns_table_container"></div></div>
+		</div>
 		<div id='wan_port_to_lan_container'>
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'>Wan Ethernet Port:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
@@ -472,26 +491,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id="lan_dns_source_container">
-			<span class="leftcolumn">
-				<label id='lan_dns_source_label' for='lan_dns_source'>DNS Servers:</label>
-			</span>
-			<select class='rightcolumn' id="lan_dns_source" onchange="setDnsSource(this)"> 
-				<option value="isp">Default DNS Servers Specified by ISP</option>
-				<option value="opendns">OpenDNS Servers</option>
-				<option value="google">Google DNS Servers</option>
-				<option value="custom">Custom DNS Servers</option>
-			</select>
-		</div>
-		<div id="lan_dns_custom_container">
-
-			<span class='rightcolumnonly'>
-				<input type='text' id='add_lan_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
-				<input type="button" class="default_button" id="add_lan_dns_button" value="Add" onclick='addDns("lan")' />
-			</span>
-			<span style="clear:both"></span>
-			<div class="rightcolumnonly"><div id="lan_dns_table_container"></div></div>
-		</div>
+		
 		<div id="lan_dns_options_container">
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='lan_dns_altroot' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
