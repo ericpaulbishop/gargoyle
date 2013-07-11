@@ -269,7 +269,7 @@ def process_javascript_file( jsfile ):
 	
 def process_i18n_shell_file( ):
 	gdir=os.getcwd()
-	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir, shell=True, cwd='./', stdout=subprocess.PIPE )
+	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir+"/package", shell=True, cwd='./', stdout=subprocess.PIPE )
 	i18n_list = gproc.communicate()[0].split('\n')
 	for ifile in i18n_list:
 		if len(ifile) > 0:
@@ -312,7 +312,8 @@ def process_i18n_shell_file( ):
 					new_script_contents.append(anewline)
 				else:
 					new_script_contents.append(iline)
-	
+		if len(ifile[:-3]) < 10:
+			return
 		new_ifileFO = open(ifile[:-3]+'-new.sh', 'wb')
 		new_ifileFO.writelines(new_script_contents)
 		new_ifileFO.close()
