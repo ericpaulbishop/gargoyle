@@ -21,10 +21,10 @@
 	client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
 	echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = [];"
 	if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc/openvpn/${client_id}_ca.crt" ] && [ -f "/etc/openvpn/${client_id}.crt" ] && [ -f "/etc/openvpn/${client_id}.key" ] ; then
-		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
+		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
 		if [ -f "/etc/openvpn/${client_id}_ta.key" ] ; then
 			awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientTaKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}_ta.key"      2>/dev/null
 		fi
