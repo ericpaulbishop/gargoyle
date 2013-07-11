@@ -160,24 +160,8 @@
 		</div>
 		<div class="internal_divider"></div>
 	</div>
-
-	<div id="lan_container">
-		<div>
-			<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'>LAN Netmask:</span><span id="lan_mask" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class="rightcolumnonly"><div id="ports_table_container"></div></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="wan_container">
+	
+		<div id="wan_container">
 		<div>
 			<span class='leftcolumn'>WAN IP Address:</span><span id="wan_ip" class='rightcolumn'></span>
 		</div>
@@ -206,6 +190,22 @@
 	fi
 ?>
 			</span>
+		</div>
+		<div class="internal_divider"></div>
+	</div>
+
+	<div id="lan_container">
+		<div>
+			<span class='leftcolumn'>LAN IP Address:</span><span id="lan_ip" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>LAN Netmask:</span><span id="lan_mask" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class='leftcolumn'>LAN MAC Address:</span><span id="lan_mac" class='rightcolumn'></span>
+		</div>
+		<div>
+			<span class="rightcolumnonly"><div id="ports_table_container"></div></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>
