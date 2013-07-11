@@ -86,7 +86,7 @@ function resetVariables()
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
-		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Bitrate, hostsStr.Bitrate ];
+		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Bitrate, hostsStr.Signal ];
 		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
