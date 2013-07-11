@@ -1,0 +1,26 @@
+Index: alsa-lib-1.0.24.1/src/Makefile.in
+===================================================================
+--- alsa-lib-1.0.24.1.orig/src/Makefile.in
++++ alsa-lib-1.0.24.1/src/Makefile.in
+@@ -372,7 +372,7 @@ clean-libLTLIBRARIES:
+ 	  rm -f "$${dir}/so_locations"; \
+ 	done
+ libasound.la: $(libasound_la_OBJECTS) $(libasound_la_DEPENDENCIES) 
+-	$(AM_V_CCLD)$(libasound_la_LINK) -rpath $(libdir) $(libasound_la_OBJECTS) $(libasound_la_LIBADD) $(LIBS)
++	$(AM_V_CCLD)$(libasound_la_LINK) -rpath $(DESTDIR)$(libdir) $(libasound_la_OBJECTS) $(libasound_la_LIBADD) $(LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+Index: alsa-lib-1.0.24.1/src/pcm/scopes/Makefile.in
+===================================================================
+--- alsa-lib-1.0.24.1.orig/src/pcm/scopes/Makefile.in
++++ alsa-lib-1.0.24.1/src/pcm/scopes/Makefile.in
+@@ -300,7 +300,7 @@ clean-pkglibLTLIBRARIES:
+ 	  rm -f "$${dir}/so_locations"; \
+ 	done
+ scope-level.la: $(scope_level_la_OBJECTS) $(scope_level_la_DEPENDENCIES) 
+-	$(AM_V_CCLD)$(scope_level_la_LINK) -rpath $(pkglibdir) $(scope_level_la_OBJECTS) $(scope_level_la_LIBADD) $(LIBS)
++	$(AM_V_CCLD)$(scope_level_la_LINK) -rpath $(DESTDIR)$(pkglibdir) $(scope_level_la_OBJECTS) $(scope_level_la_LIBADD) $(LIBS)
+ 
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)

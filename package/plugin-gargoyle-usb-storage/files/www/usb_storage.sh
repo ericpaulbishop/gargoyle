@@ -152,6 +152,9 @@
 			<input type="checkbox" id="extroot" name="extroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
 			<label id="extroot_label" for="extroot" style="vertical-align:middle"><%~ MExtr %></label>
 		</span>
+		<div class="rightcolumnonly">
+			<em><%~ ExtrWarn %></em>
+		</div>
 	</div>
 	<div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="<%~ FmtNow %>" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
@@ -160,7 +163,7 @@
 
 <fieldset id="extroot_fieldset" style="display:none;">
 	<legend class="sectionheader"><%~ ExtrS %></legend>
-	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="<%~ ExtrOff %>" id="extoot_button" class="default_button" onclick="disableExtroot();" /></span>
+	<span class="leftcolumn"  style="margin-left:0px;"><input type="button" value="<%~ ExtrOff %>" id="extroot_button" class="default_button" onclick="disableExtroot();" /></span>
 	<span class="rightcolumn"><em><%~ ExtDt %> <b><span id="extroot_drive"></span></b>.</em></span>
 </fieldset>
 

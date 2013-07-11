@@ -92,7 +92,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	/* Determine all packages to install by first loading all package names, status & dependencies (and no other variables) */
-	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1 );
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1, NULL );
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 		
@@ -101,12 +101,24 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	char** install_pkg_list = NULL;	
 	unsigned long install_pkg_list_len = 0;
 	char* unsatisfied_dep_err = NULL;
+
+
+
 	
-	
-	//new string map var with all pkgs to install = pkgs, keys = version
+	/* new string map var with all pkgs to install = pkgs, keys = version */
 	unsigned long num_pkg_names;
 	char** pkg_names = get_string_map_keys(pkgs, &num_pkg_names);
 	int pkg_name_index;
+	
+	
+	
+	
+	/* 
+	 * Load data for any packages being installed via ipk and
+	 * determine if any packages we are about to install 
+	 * provide anything, and if so set package we are installing to preferred
+	 */
+	string_map* preferred_provides = initialize_string_map(1);
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
 		char* pkg_name = pkg_names[pkg_name_index];
@@ -114,6 +126,8 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		char* install_pkg_version = NULL;
 		int install_pkg_is_current;
 
+		
+		/* deal with case where we're installing from file */
 		if(path_exists(pkg_name))
 		{
 			//installing from file
@@ -135,13 +149,13 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					&err);
 			if(err != 0)
 			{
-				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				fprintf(stderr, "ERROR: %s is not a valid package file, cannot install\n", pkg_file);
 				rm_r(tmp_dir);
 				exit(1);
 			}
 			string_map* tmp_control_pkg_data = initialize_string_map(1);
 			matching_packages = initialize_string_map(1);
-		       	load_package_data(tmp_control_name, 0, tmp_control_pkg_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, NULL);
+		       	load_package_data(tmp_control_name, 0, tmp_control_pkg_data, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, NULL, NULL);
 			unsigned long num_ctrl_names;
 			char** ctrl_name_list = get_string_map_keys(tmp_control_pkg_data, &num_ctrl_names);
 			destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
@@ -165,6 +179,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					new_version_criteria[0] = strdup("=");
 					new_version_criteria[1] = special_version;
 					new_version_criteria[2] = NULL;
+					version_criteria = new_version_criteria;
 					
 					string_map* all_current_versions = get_string_map_element(package_data, pkg_name);
 					if(all_current_versions == NULL)
@@ -186,7 +201,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			free_null_terminated_string_array(ctrl_name_list);
 			if(err != 0)
 			{
-				fprintf(stderr, "ERROR: %s is not a vailid package file, cannot install\n", pkg_file);
+				fprintf(stderr, "ERROR: %s is not a valid package file, cannot install\n", pkg_file);
 				rm_r(tmp_dir);
 				exit(1);
 			}
@@ -197,6 +212,53 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			rm_r(tmp_control);
 		}
 
+		/* determine if package provides anything, and set this package to preferred if so*/
+		string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+		if(install_pkg_data != NULL)
+		{
+			char* provides_str = get_string_map_element(install_pkg_data, "Provides");
+			if(provides_str != NULL)
+			{
+				if(strlen(provides_str) > 0)
+				{
+					unsigned long num_provides;
+					char package_separators[] = {' ', ',', ':', ';', '\'', '\"', '\t', '\r', '\n'};
+					char** provides_list = split_on_separators(provides_str, package_separators, 9, -1, 0, &num_provides);
+					int provides_index;
+					char* provides_unique_key = dynamic_strcat(3, pkg_name, "@", install_pkg_version);
+					for(provides_index=0; provides_index < num_provides; provides_index++)
+					{
+						char* provides_name = strdup(provides_list[provides_index]);
+						char* eq = strchr(provides_name, '=');
+						if(eq != NULL) { *eq = '\0' ; }
+						if(strlen(provides_name) > 0)
+						{
+							set_string_map_element(preferred_provides, provides_name, strdup(provides_unique_key));
+						}
+					}
+				}
+			}
+		}
+	
+	}
+
+
+	/* reload with new preferred_provides */
+	free_recursive_package_vars(package_data);
+	matching_packages = initialize_string_map(1);
+	load_all_package_data(conf, package_data, matching_packages, NULL, LOAD_MINIMAL_PKG_VARIABLES_FOR_ALL, install_root_name, 1, preferred_provides );
+	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	
+	
+	/* load data and do sanity checks for packages we are about to install */
+	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
+	{
+		char* pkg_name = pkg_names[pkg_name_index];
+		char** version_criteria = get_string_map_element(pkgs, pkg_name);
+		char* install_pkg_version = NULL;
+		int install_pkg_is_current;
+
+		
 
 		load_recursive_package_data_variables(package_data, pkg_name, 1, 0, 0); // load required-depends for package of interest only 
 		string_map* install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
@@ -205,7 +267,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	
 		if(install_status != NULL)
 		{
-			
 			char** old_el = set_string_map_element(install_pkgs_map, pkg_name, copy_null_terminated_string_array(version_criteria) );
 			if(old_el != NULL){ free_null_terminated_string_array(old_el); }
 
@@ -335,7 +396,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	matching_packages = initialize_string_map(1);
 	set_string_map_element(parameters, "package-list", install_pkgs_map);
 	
-	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0);
+	load_all_package_data(conf, package_data, matching_packages, parameters, LOAD_MINIMAL_FOR_ALL_PKGS_ALL_FOR_MATCHING, install_root_name, 0, preferred_provides);
 	
 	unsigned long from_file_pkg_list_len;
 	char** from_file_pkg_list = get_string_map_keys(pkgs_from_file, &from_file_pkg_list_len);
@@ -396,7 +457,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	matching_packages = initialize_string_map(1);
 	if(path_exists(install_root_status_path))
 	{
-		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, install_root_name);
+		load_package_data(install_root_status_path, 0, install_root_status, matching_packages, NULL, LOAD_ALL_PKG_VARIABLES, install_root_name, preferred_provides);
 	}
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
@@ -429,7 +490,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				set_string_map_element(pkg, "Link-Destination", strdup(link_root_name));
 			}
 
-			add_package_data(install_root_status, &pkg, install_pkg_list[pkg_index], install_version); 
+			add_package_data(install_root_status, &pkg, install_pkg_list[pkg_index], install_version, NULL); 
 			/* Note: we just added pkg data structure from package_data to install_root_status, Be careful on cleanup! */
 		}
 	}
@@ -446,7 +507,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	for(pkg_name_index=0;pkg_name_index < num_pkg_names; pkg_name_index++)
 	{
 		char* pkg_name = pkg_names[pkg_name_index];
-		if(get_string_map_element(install_pkgs_map, pkg_name) != NULL)
+		if(get_string_map_element(install_pkgs_map, pkg_name) != NULL && get_string_map_element(install_called_pkgs, pkg_name) == NULL)
 		{
 			int install_pkg_is_current;
 			char* install_pkg_version = NULL;

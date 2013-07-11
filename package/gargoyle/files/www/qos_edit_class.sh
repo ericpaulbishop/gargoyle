@@ -66,12 +66,12 @@
 	<div class='indent'>
 		<div class='nocolumn'>
 			<input type='radio' name="rtt_radio" id='rtt_radio1'/>
-			<label for='max_radio1'><%~ ActRTT %></label>
+			<label for='rtt_radio1'><%~ ActRTT %></label>
 		</div>
 		<div>
 			<span class='leftcolumn'>
 				<input type='radio' name="rtt_radio" id="rtt_radio2" />
-				<label for='max_radio2'><%~ OptiWAN %></label>
+				<label for='rtt_radio2'><%~ OptiWAN %></label>
 			</span>
 		</div>
 	</div></div>

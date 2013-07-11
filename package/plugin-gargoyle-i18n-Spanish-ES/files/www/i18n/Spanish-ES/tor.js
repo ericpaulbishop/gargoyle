@@ -45,6 +45,7 @@ torS.ObPeWSErr="Servidor Obfsproxy puerto no puede ser la misma que Router Puert
 torS.RPeSSHErr="Puerto de Relay Servidor no puede ser la misma que Router Puerto SSH";
 torS.ObPeSSHErr="Servidor Obfsproxy puerto no puede ser la misma que Router Puerto SSH";
 torS.RAMD="Disco de RAM";
+torS.RootD="Disco Raíz";
 torS.Free="Libre";
 torS.Totl="Total";
 torS.AnonTraf="Todo el tráfico será anónima";

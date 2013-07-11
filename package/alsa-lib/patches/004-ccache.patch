@@ -1,0 +1,27 @@
+Index: alsa-lib-1.0.24.1/configure.in
+===================================================================
+--- alsa-lib-1.0.24.1.orig/configure.in	2011-01-31 15:18:50.000000000 +0100
++++ alsa-lib-1.0.24.1/configure.in	2012-06-09 15:57:42.600834238 +0200
+@@ -22,22 +22,6 @@
+ 
+ AC_PREFIX_DEFAULT(/usr)
+ 
+-dnl Checks for programs.
+-
+-dnl try to gues cross-compiler if not set
+-if test "x$host" != "x$build" -a -z "`echo $CC | grep -e '-gcc'`";
+-then
+-  AC_MSG_CHECKING(for cross-compiler)
+-
+-  which ${program_prefix}gcc >/dev/null 2>&1 && CC=${program_prefix}gcc
+-  which ${host_cpu}-${host_os}-gcc >/dev/null 2>&1 \
+-  && CC=${host_cpu}-${host-os}-gcc
+-  which ${host_cpu}-${host_vendor}-${host_os}-gcc >/dev/null 2>&1 \
+-  && CC=${host_cpu}-${host_vendor}-${host_os}-gcc
+-
+-  AC_MSG_RESULT($CC)
+-fi
+-	    
+ CFLAGS="$CFLAGS -D_GNU_SOURCE"
+ 
+ 

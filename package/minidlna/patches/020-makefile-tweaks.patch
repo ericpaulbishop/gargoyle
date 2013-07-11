@@ -1,0 +1,48 @@
+--- a/Makefile
++++ b/Makefile
+@@ -10,19 +10,23 @@
+ # or :
+ # $ make install
+ #
++PREFIX ?= /usr
++ICONV_PREFIX ?= $(PREFIX)
++INTL_PREFIX ?= $(PREFIX)
+ #CFLAGS = -Wall -O -D_GNU_SOURCE -g -DDEBUG
+ #CFLAGS = -Wall -g -Os -D_GNU_SOURCE
+ CFLAGS = -Wall -g -O3 -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
+-	 -I/usr/include/ffmpeg \
+-	 -I/usr/include/libavutil -I/usr/include/libavcodec -I/usr/include/libavformat \
+-	 -I/usr/include/ffmpeg/libavutil -I/usr/include/ffmpeg/libavcodec -I/usr/include/ffmpeg/libavformat
++	 -I$(PREFIX)/include/ffmpeg \
++	 -I$(PREFIX)/include/libavutil -I$(PREFIX)/include/libavcodec -I$(PREFIX)/include/libavformat \
++	 -I$(PREFIX)/include/ffmpeg/libavutil -I$(PREFIX)/include/ffmpeg/libavcodec -I$(PREFIX)/include/ffmpeg/libavformat
++
+ #STATIC_LINKING: CFLAGS += -DSTATIC
+ #STATIC_LINKING: LDFLAGS = -static
+ CC = gcc
+ RM = rm -f
+ INSTALL = install
+ 
+-INSTALLPREFIX ?= $(DESTDIR)/usr
++INSTALLPREFIX ?= $(DESTDIR)$(PREFIX)
+ SBININSTALLDIR = $(INSTALLPREFIX)/sbin
+ ETCINSTALLDIR = $(DESTDIR)/etc
+ 
+@@ -37,7 +41,7 @@ BASEOBJS = minidlna.o upnphttp.o upnpdes
+ 
+ ALLOBJS = $(BASEOBJS) $(LNXOBJS)
+ 
+-LIBS = -lpthread -lexif -ljpeg -lsqlite3 -lavformat -lavutil -lavcodec -lid3tag -lFLAC -logg -lvorbis
++LIBS = -lpthread -lexif -ljpeg -lsqlite3 -lavformat -lavutil -lavcodec -lid3tag -lFLAC -logg -lvorbis -luuid $(ICONV_LIBS)
+ #STATIC_LINKING: LIBS = -lvorbis -logg -lm -lsqlite3 -lpthread -lexif -ljpeg -lFLAC -lm -lid3tag -lz -lavformat -lavutil -lavcodec -lm
+ 
+ TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
+@@ -64,7 +68,7 @@ install-conf:
+ 	$(INSTALL) -d $(ETCINSTALLDIR)
+ 	$(INSTALL) --mode=0644 minidlna.conf $(ETCINSTALLDIR)
+ 
+-minidlna:	$(BASEOBJS) $(LNXOBJS) $(LIBS)
++minidlna:	$(BASEOBJS) $(LNXOBJS)
+ 	@echo Linking $@
+ 	@$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(BASEOBJS) $(LNXOBJS) $(LIBS)
+ 

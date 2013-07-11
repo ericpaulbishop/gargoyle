@@ -1032,7 +1032,7 @@ function editClassTableRow()
 	}
 
 
-	editClassWindow = window.open("qos_edit_class.sh", "test", "width=560,height=375,left=" + xCoor + ",top=" + yCoor );
+	editClassWindow = window.open("qos_edit_class.sh", "test", "width=560,height=400,left=" + xCoor + ",top=" + yCoor );
 	try
 	{
 		saveButton = editClassWindow.document.createElement('input');

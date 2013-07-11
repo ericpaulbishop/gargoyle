@@ -24,11 +24,12 @@ usbSStr.FmtWarn="WARNING: Formatting a disk will permanently wipe out all conten
 usbSStr.DskForm="Disk to format";
 usbSStr.PSwap="Percent Swap";
 usbSStr.PStor="Percent Storage";
-usbSStr.MExtr="Make extroot on this disk";
+usbSStr.MExtr="Use Disk As External Root (Extroot)";
 usbSStr.FmtNow="Format Now";
 usbSStr.ExtrS="Extroot";
-usbSStr.ExtrOff="Disable extroot";
-usbSStr.ExtDt="Extroot detected on";
+usbSStr.ExtrOff="Disable External Root";
+usbSStr.ExtDt="External root detected on";
+usbSStr.ExtrWarn="When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost."
 
 //template
 usbSStr.Disk="Disk";

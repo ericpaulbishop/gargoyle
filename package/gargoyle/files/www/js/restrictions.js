@@ -808,16 +808,16 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 		daysActiveStr = daysActive.join(",");
 		uci.set(pkg, sectionId, "active_weekdays", daysActiveStr);
 	}
-	setIfVisible(controlDocument, pkg, sectionId, "active_hours", rulePrefix + "hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, "active_hours",         rulePrefix + "hours_active",          rulePrefix + "hours_active_container" );
 	var weekly_ranges=controlDocument.getElementById(rulePrefix + "days_and_hours_active");
 	weekly_ranges.value=weekly_i18n(weekly_ranges.value, "table");
-	setIfVisible(controlDocument, pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active");
+	setIfVisible(controlDocument, pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active", rulePrefix + "days_and_hours_active_container");
 
 	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
 	{
 		setFromIpTable(controlDocument, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
-		setIfVisible(controlDocument, pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
-		setIfVisible(controlDocument, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
+		setIfVisible(controlDocument, pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
+		setIfVisible(controlDocument, pkg, sectionId, "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port_type");
 		
 		uci.set(pkg, sectionId, "proto", getSelectedValue(rulePrefix + "transport_protocol", controlDocument));
 
@@ -876,18 +876,19 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 
 
 
-function setIfVisible(controlDocument, pkg, sectionId, optionId, textId, prefixSelectId)
+function setIfVisible(controlDocument, pkg, sectionId, optionId, textId, visId, prefixSelectId)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	var element = controlDocument.getElementById(textId);
-	if(element.style.display != "none")
+	visElement = controlDocument.getElementById(visId);
+	if(visElement.style.display != "none")
 	{
+		var textElement = controlDocument.getElementById(textId);
 		if(prefixSelectId != null)
 		{
 			prefixValue = getSelectedValue(prefixSelectId, controlDocument);
 			optionId = prefixValue == "except" ? "not_" + optionId : optionId;
 		}
-		uci.set(pkg, sectionId, optionId, element.value);
+		uci.set(pkg, sectionId, optionId, textElement.value);
 	}
 }
 

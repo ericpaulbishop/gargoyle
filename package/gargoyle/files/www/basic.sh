@@ -203,7 +203,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 			<div id='bridge_custom_ssid_container'>
-				<input type='text' class='rightcolumnonly' id='bridge_custom_ssid'size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
+				<input type='text' class='rightcolumnonly' id='bridge_custom_ssid' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
 			<div id='bridge_ssid_container'>
 				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'><%~ Join %>:</label>
@@ -317,18 +317,19 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 			<div class='rightcolumnonly' style="margin-bottom:15px">
 				<input type='button' id="dhcp_renew_button" value="<%~ Renew %>" class="default_button" onclick="renewDhcpLease()" />
+				<input type='button' id="dhcp_release_button" value="<%~ Rleas %>" class="default_button" onclick="releaseDhcpLease()" />
 			</div>
 		</div>
 
-		<div id='wan_pppoe_user_container' >
+		<div id='wan_pppoe_user_container'>
 			<label class='leftcolumn' for='wan_pppoe_user' id='wan_pppoe_user_label'><%~ UNam %>:</label>
 			<input type='text' class='rightcolumn' id='wan_pppoe_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_pppoe_pass_container' >
+		<div id='wan_pppoe_pass_container'>
 			<label class='leftcolumn' for='wan_pppoe_pass' id='wan_pppoe_pass_label'><%~ Pswd %>:</label>
 			<input type='password' class='rightcolumn' id='wan_pppoe_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_pppoe_reconnect_mode_container' >
+		<div id='wan_pppoe_reconnect_mode_container'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_mode'><%~ RMod %>:</label>
 			<select class='rightcolumn' id='wan_pppoe_reconnect_mode' onchange='setWanVisibility()'>
 				<option value='demand'><%~ CDmd %></option>
@@ -343,14 +344,14 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		<div id='wan_pppoe_reconnect_pings_container' >
+		<div id='wan_pppoe_reconnect_pings_container'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_pings' id='wan_pppoe_reconnect_pings_label'><%~ FPngs %>:</label>
 			<div class='rightcolumn'>
 				<input type='text' id='wan_pppoe_reconnect_pings' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
 			</div>
 		</div>
 
-		<div id='wan_pppoe_interval_container' >
+		<div id='wan_pppoe_interval_container'>
 			<label class='leftcolumn' for='wan_pppoe_interval' id='wan_pppoe_interval_label'><%~ PngI %>:</label>
 			<div class='rightcolumn'>
 				<input type='text' id='wan_pppoe_interval' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
@@ -358,15 +359,15 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		<div id='wan_static_ip_container' >
+		<div id='wan_static_ip_container'>
 			<label class='leftcolumn' for='wan_static_ip' id='wan_static_ip_label'><%~ StIP %>:</label>
 			<input type='text' class='rightcolumn' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
-		<div id='wan_static_mask_container' >
+		<div id='wan_static_mask_container'>
 			<label class='leftcolumn' for='wan_static_mask' id='wan_static_mask_label'><%~ SMsk %>:</label>
 			<input type='text' class='rightcolumn' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
-		<div id='wan_static_gateway_container' >
+		<div id='wan_static_gateway_container'>
 			<label class='leftcolumn' for='wan_static_gateway' id='wan_static_gateway_label'><%~ Gtwy %>:</label>
 			<input type='text' class='rightcolumn' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
@@ -382,7 +383,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='gprs_only'>2G <%~ Only %></option>
 			</select>
 		</div>
-		<div id='wan_3g_device_container' >
+		<div id='wan_3g_device_container'>
 			<label class='leftcolumn' for='wan_3g_device' id='wan_3g_device_label'><%~ Dvic %>:</label>
 			<span class='rightcolumn'>
 				<select style="display:none;float:left;width:180px;max-width:180px" id="wan_3g_list_device" onchange='set3GDevice(this.value)' ></select>
@@ -390,7 +391,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input style="float:left;" type='button' class="default_button" id='wan_3g_scan_button' value='<%~ Scan %>' onclick='scan3GDevice("wan_3g_list_device")' />
 			</span>
 		</div>
-		<div id='wan_3g_pincode_container' >
+		<div id='wan_3g_pincode_container'>
 			<label class='leftcolumn' for='wan_3g_pincode' id='wan_3g_pincode_label'><%~ Pncd %>:</label>
 			<input type='text' class='rightcolumn' id='wan_3g_pincode'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
@@ -403,7 +404,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_3g_apn_container' >
+		<div id='wan_3g_apn_container'>
 			<label class='leftcolumn' for='wan_3g_apn' id='wan_3g_apn_label'>APN:</label>
 			<input type='text' class='rightcolumn' id='wan_3g_apn'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
@@ -412,13 +413,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input type='text' class='rightcolumn' id='wan_3g_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
 		</div>
-		<div id='wan_3g_pass_container' >
+		<div id='wan_3g_pass_container'>
 			<label class='leftcolumn' for='wan_3g_pass' id='wan_3g_pass_label'><%~ Pswd %>:</label>
 			<input type='text' class='rightcolumn' id='wan_3g_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
 		</div>
 
-		<div id='wan_port_to_lan_container' >
+		<div id='wan_port_to_lan_container'>
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'><%~ WanEP %>:</label>
 			<select class='rightcolumn' id='wan_port_to_lan'>
 				<option value='disable'><%~ Dsbl %></option>
@@ -426,22 +427,30 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_mac_container' >
+		<div id='wan_mac_container'>
 			<span class='leftcolumn'>
-				<label for='wan_mac' id='wan_mac_label'><%~ CustMAC %>:</label>
+				<label for='wan_use_mac' id='wan_mac_label'><%~ CustMAC %>:</label>
 			</span>
-			<span class="rightcolumn">
+			<span class='rightcolumn'>
 				<input type='checkbox' id='wan_use_mac' onclick='enableAssociatedField(this, "wan_mac", defaultWanMac)'/>&nbsp;&nbsp;
-				<input type='text' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
+				<input type='text' name='wan_mac' id='wan_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17'/>
 			</span>
 		</div>
-		<div id='wan_mtu_container' >
+		<div id='wan_mtu_container'>
 			<span class='leftcolumn'>
-				<label for='wan_mtu' id='wan_mtu_label'><%~ CustMTU %>:</label>
+				<label for='wan_use_mtu' id='wan_mtu_label'><%~ CustMTU %>:</label>
 			</span>
 			<span class='rightcolumn'>
 				<input type='checkbox' id='wan_use_mtu' onclick='enableAssociatedField(this, "wan_mtu", 1500)'/>&nbsp;&nbsp;
-				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' /> 
+				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)' size='20' maxlength='4'/> 
+			</span>
+		</div>
+		<div id='wan_ping_container'>
+			<span class='leftcolumn'>
+				<label for='drop_wan_ping' id='wan_ping_label'><%~ DPing %></label>
+			</span>
+			<span class='rightcolumn'>
+				<input type='checkbox' id='drop_wan_ping'/>
 			</span>
 		</div>
 
@@ -499,7 +508,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	</fieldset>
 
 	<fieldset id="wifi_fieldset">
-
 		<legend class="sectionheader"><%~ Wrlss %></legend>
 
 		<div id='wifi_mode_container'>
@@ -673,7 +681,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'><%~ Pswd %>:</label>
-			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_pass2' onclick='togglePass(2)'/>
+			<label for="show_pass2" id="show_pass2_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep2_container' class='indent'>
 			<div style="display:block;">
@@ -738,7 +748,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wifi_pass1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass1' id='wifi_pass1_label'><%~ Pswd %>:</label>
-			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_pass1' onclick='togglePass(1)'/>
+			<label for="show_pass1" id="show_pass1_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep1_container' class='indent'>
 			<div style="display:block;">

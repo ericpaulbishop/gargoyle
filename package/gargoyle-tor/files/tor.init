@@ -1,0 +1,185 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+START=75
+
+BIN=tor
+RUN_D=/var/run
+KEY_D=/etc/tor
+PID_F=$RUN_D/$BIN.pid
+OPID_F=$RUN_D/obfsproxy.pid
+RUN_USER=root
+RUN_GROUP=root
+BOOT="0"
+
+
+
+
+
+OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
+
+
+init_dir()
+{
+	new_dir="$1"
+	new_mask="$2"
+	[ -d "$new_dir" ] || ( mkdir -m "$new_mask" -p "$new_dir" && chown $RUN_USER:$RUN_GROUP "$new_dir" )
+}
+
+boot()
+{
+	BOOT="1"
+	mem_disabled=$(uci get tor.global.disabled_due_to_memory 2>/dev/null)
+	if [ "$mem_disabled" = "1" ] ; then
+		sleep 3
+	fi
+	start
+}
+
+start()
+{
+	enabled=$(uci get tor.global.enabled             2>/dev/null)
+	loglevel=$( uci get tor.global.loglevel          2>/dev/null)
+	control_port=$( uci get tor.global.control_port  2>/dev/null)
+	client_mode=$(uci get tor.client.client_mode     2>/dev/null)
+	relay_mode=$(uci get tor.relay.relay_mode        2>/dev/null)
+	tor_data_dir=$( uci get tor.global.data_dir      2>/dev/null)
+	if [ -z "$tor_data_dir" ] ; then
+		tor_data_dir="/var/tor"
+	fi
+
+
+
+	if [ "$enabled" = "0" ] || [ "$client_mode$relay_mode" = "00" ] ; then
+		exit
+	fi
+
+	if [ -z "$control_port" ] ; then
+		control_port=9051
+	fi
+
+
+	init_dir "$tor_data_dir" "0700"
+	init_dir "$KEY_D"        "0700"
+	init_dir "$RUN_D"        "0755"
+	[ -h "$tor_data_dir/keys" ] || ( rm -rf "$tor_data_dir/keys" && ln -s "$KEY_D" "$tor_data_dir/keys" )
+	[ -f "$PID_F" ] || ( touch "$PID_F" && chown $RUN_USER:$RUN_GROUP "$PID_F" )
+
+
+
+	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --ControlPort $control_port --DataDirectory '$tor_data_dir' "
+	if [ -n "$client_mode" ] && [ "$client_mode" != "0" ] ; then
+		client_zone=$( uci get tor.client.zone                                  2>/dev/null)
+		trans_port=$( uci get tor.client.trans_port                             2>/dev/null)
+		dns_port=$( uci get tor.client.dns_port                                 2>/dev/null)
+		hidden_service_subnet=$( uci get tor.client.hidden_service_subnet       2>/dev/null)
+		hidden_service_mask_bits=$( uci get tor.client.hidden_service_mask_bits 2>/dev/null)
+		if [ -z "$hidden_service_subnet" ] || [ -z "$hidden_service_mask_bits" ] ; then
+			hidden_service_subnet="10.192.0.0"
+			hidden_service_mask_bits="12"
+			uci set tor.client.hidden_service_subnet="$hidden_service_subnet"
+			uci set tor.client.hidden_service_mask_bits="$hidden_service_mask_bits"
+			uci commit
+		fi	
+	
+		if [ -z "$client_zone" ] ; then
+			client_zone="lan"
+		fi
+		if [ -z "$trans_port" ] ; then
+			trans_port=9040
+		fi
+		if [ -z "$dns_port" ] ; then
+			dns_port=9053
+		fi
+	
+		OPTIONS="$OPTIONS  --Log '$loglevel syslog' --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+		
+		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
+		if [ -n "$client_listen_ip" ] ; then
+			OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
+		fi
+
+		use_bridge_ip=$(uci get tor.client.use_bridge_ip 2>/dev/null)
+		use_bridge_port=$(uci get tor.client.use_bridge_port 2>/dev/null)
+		use_bridge_obfsproxy=$(uci get tor.client.use_bridge_obfsproxy 2>/dev/null)
+		if [ -n "$use_bridge_ip" ] && [ -n "$use_bridge_port" ] ; then
+			if [ "$use_bridge_obfsproxy" = "1" ] ; then
+				OPTIONS="$OPTIONS --UseBridges 1 --Bridge 'obfs2 $use_bridge_ip:$use_bridge_port' --ClientTransportPlugin 'obfs2 exec /usr/sbin/obfsproxy --managed' "
+			else
+				OPTIONS="$OPTIONS --UseBridges 1 --Bridge '$use_bridge_ip:$use_bridge_port' "
+			fi
+		fi
+	fi
+
+	relay_options=""
+	if [ "$relay_mode" != "0" ] && [ -n "$relay_mode" ] ; then
+		
+		relay_port=$(uci get tor.relay.relay_port)
+		max_bw_rate_kb=$(uci get tor.relay.max_bw_rate_kb)
+		max_bw_burst_kb=$(uci get tor.relay.max_bw_burst_kb)
+		relay_nickname=$( uci get tor.relay.relay_nickname )
+		relay_contact=$( uci get tor.relay.relay_contact )
+		obfsproxy_port=$( uci get tor.relay.obfsproxy_port )
+		publish=$(uci get tor.relay.publish )
+
+		relay_ip=0.0.0.0
+				
+		relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
+		if [ "$relay_mode" = "1" ] ; then
+			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
+			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
+				obfsproxy --no-log --daemonize_with_pid=$OPID_F obfs2 --dest=127.0.0.1:$relay_port server 0.0.0.0:$obfsproxy_port
+			fi
+		else
+			if [ -n "$relay_nickname" ] ; then
+				relay_options=" $relay_options --Nickname '$relay_nickname' "
+			fi
+			if [ -n "$relay_contact" ]  ; then
+				relay_options=" $relay_options --ContactInfo '$relay_contact' "
+			fi
+		fi
+		if [ -n "$max_bw_burst_kb" ] ; then
+			relay_options=" $relay_options --RelayBandwidthBurst '$max_bw_burst_kb KB' "
+		fi
+		if [ -n "$publish" ] ; then
+			relay_options=" $relay_options --PublishServerDescriptor $publish "
+		fi
+		
+		relay_options=" $relay_options --RelayBandwidthRate '$max_bw_rate_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*' "
+	else
+		relay_options=" --ClientOnly 1"
+	fi
+	
+	eval "$BIN $OPTIONS $relay_options"
+
+
+	if [ "$BOOT" = "0" ] ; then
+		sh /etc/tor.firewall
+	fi	
+}
+
+stop()
+{
+	[ -f $PID_F ] && kill $(cat $PID_F)
+	[ -f $OPID_F ] && kill   $(cat $OPID_F)
+
+	sh /etc/tor.firewall stop
+	
+	count=25
+	while [ $count -gt 0 ] && [ -f $PID_F ] ; do
+		sleep 1
+		count=$(($count - 1 ))
+	done
+
+	if  [ -f $PID_F ] || [ -f $OPID_F ] ; then
+		[ -f $PID_F ]  && kill -9  $(cat $PID_F)
+		[ -f $OPID_F ] && kill -9  $(cat $OPID_F)
+	fi
+}
+
+restart()
+{
+	stop
+	sleep 1
+	start
+}
+

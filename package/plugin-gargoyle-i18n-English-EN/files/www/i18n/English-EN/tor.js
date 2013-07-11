@@ -45,6 +45,7 @@ torS.ObPeWSErr="Server Obfsproxy Port Cannot Be The Same As Router Web Server Po
 torS.RPeSSHErr="Server Relay Port Cannot Be The Same As Router SSH Port";
 torS.ObPeSSHErr="Server Obfsproxy Port Cannot Be The Same As Router SSH Port";
 torS.RAMD="RAM Disk";
+torS.RootD="Root Disk";
 torS.Free="Free";
 torS.Totl="Total";
 torS.AnonTraf="All traffic will be anonymized";

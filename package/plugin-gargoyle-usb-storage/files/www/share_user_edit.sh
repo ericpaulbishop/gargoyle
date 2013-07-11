@@ -9,7 +9,7 @@
 	gargoyle_header_footer -m  -c "internal.css"
 %>
 
-<fieldset>
+<fieldset id="edit_container">
 	<legend class="sectionheader"><%~ usb_storage.ChUPass %></legend>
 
 	<div style="clear:both;display:block">
@@ -25,9 +25,8 @@
 		<label class="leftcolumn" for="new_password_confirm"><%~ CPass %>:</label>
 		<input class="rightcolumn" type="password" id="new_password_confirm" />
 	</div>
-
-	<div id="bottom_button_container"></div>
 </fieldset>
+<div id="bottom_button_container"></div>
 
 </body>
 </html>

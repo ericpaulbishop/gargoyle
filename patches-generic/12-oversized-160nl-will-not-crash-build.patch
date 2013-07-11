@@ -1,0 +1,42 @@
+--- a/target/linux/ar71xx/image/Makefile	2013-07-09 01:35:52.160678940 -0400
++++ b/target/linux/ar71xx/image/Makefile	2013-07-09 17:18:49.474827520 -0400
+@@ -572,15 +572,27 @@
+ 
+ define Image/Build/CyberTAN
+ 	$(call MkuImageGzip,$(2),$(3))
+-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
++	echo "Building CyberTAN"
++	
++	-$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
++
+ 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) \
+ 		-i $(KDIR)/image.tmp \
+-		-o $(call sysupname,$(1),$(2))
++		-o $(call sysupname,$(1),$(2)) 
++
+ 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(4) -g \
+ 		-i $(KDIR)/image.tmp \
+-		-o $(call factoryname,$(1),$(2))
+-	rm $(KDIR)/image.tmp
++		-o $(call factoryname,$(1),$(2)) 
++	
++	( \
++		sysup_size=$$$$( du -s -b $(call sysupname,$(1),$(2)) | awk ' { print $$$$1 } ' ) ; \
++		fact_size=$$$$(  du -s -b $(call factoryname,$(1),$(2)) | awk ' { print $$$$1 } ' ) ; \
++		if [ "$$$$sysup_size" -lt 4096 ] ; then rm -rf $(call sysupname,$(1),$(2)) ; fi ; \
++		if [ "$$$$fact_size"  -lt 4096 ] ; then rm -rf $(call factoryname,$(1),$(2)) ; fi ; \
++	)
++
++	rm -f $(KDIR)/image.tmp
+ endef
+ 
+ define Image/Build/Netgear/Build_uImage
+@@ -706,6 +718,7 @@
+ 			-k $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 			-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+ 			-o $(call imgname,$(1),$(2))-factory.img; \
++		echo "" ; \
+ 	fi
+ endef
+ 

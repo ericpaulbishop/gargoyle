@@ -117,7 +117,7 @@ for i in $image_dirs ; do
 		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$major_version/$i"
 		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$version/$i"
 		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$major_version"
-		$ssh_pub $user@gargoyle-router.com "ln -s    gargoyle_site/packages/gargoyle-$version/$i gargoyle_site/packages/gargoyle-$major_version/$i"
+		$ssh_pub $user@gargoyle-router.com "cd gargoyle_site/packages/gargoyle-$major_version/ ; ln -s ../gargoyle-$version/$i"
 
 		$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/gargoyle-$version/$i/
 

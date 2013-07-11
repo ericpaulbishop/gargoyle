@@ -24,11 +24,12 @@ usbSStr.FmtWarn="AVISO: Formatear un disco borrará de forma permanente todo el 
 usbSStr.DskForm="Disco para formatear";
 usbSStr.PSwap="Porcentaje Swap (Intercambio)";
 usbSStr.PStor="Porcentaje Almacenamiento";
-usbSStr.MExtr="Hacer extroot en este disco";
+usbSStr.MExtr="Utilice Disco como Raíz Externa (Extroot)";
 usbSStr.FmtNow="Formatear Ahora";
 usbSStr.ExtrS="Extroot";
-usbSStr.ExtrOff="Desactivar extroot";
-usbSStr.ExtDt="Extroot detectado en";
+usbSStr.ExtrOff="Desactivar Raíz Externa";
+usbSStr.ExtDt="Raíz externa detectado en";
+usbSStr.ExtrWarn="Cuando se utiliza una unidad externa de la raíz o <strong>extroot</strong> una unidad USB externa se convierte en la unidad raíz de tu router. Esto puede permitir una gran unidad de raíz, pero si se quita la unidad de todos los cambios de configuración desde el extroot se activó se perderá."
 
 //template
 usbSStr.Disk="Disco";
