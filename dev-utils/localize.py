@@ -207,6 +207,28 @@ def js_var_prop_len( aline ):
 		else:
 			break
 	return l
+	
+def process_js_line( aline, active_dict, fallback_dict, js_object_var ):
+	x=0
+	anewline=''
+	while x < len(aline):
+		if x+len(js_object_var)+1 < len(aline):
+			if aline[x:x+len(js_object_var)+1] == js_object_var+'.':
+				vlen=js_var_prop_len(aline[x:])
+				js_obj_prop_key=aline[x:x+vlen]
+				
+				avalue=getValue_forKey( active_dict, js_obj_prop_key, act_lang+' did not contain key \'' +js_obj_prop_key+'\' (javascript)')
+				if avalue == '':
+					avalue=getValue_forKey( fallback_dict, js_obj_prop_key, 'fallback language '+fb_lang+' also did not contain key \'' +js_obj_prop_key+'\' (javascript)')
+					if avalue == '':
+						print 'MissingKey: '+js_obj_prop_key+ ' in both active & fallback languages; using key as value (javascript)'
+						avalue=js_obj_prop_key
+				anewline+=avalue
+				x+=vlen
+						
+		anewline+=aline[x]
+		x+=1
+	return anewline
 
 def process_javascript_file( jsfile ):
 	js_list = []
@@ -239,24 +261,10 @@ def process_javascript_file( jsfile ):
 		
 		for jsObj in js_tran_objects:
 			if jsObj+'.' in jsline:
-				x=0
-				while x < len(jsline):
-					if x+len(jsObj)+1 < len(jsline):
-						if jsline[x:x+len(jsObj)+1] == jsObj+'.':
-							vlen=js_var_prop_len(jsline[x:])
-							js_obj_prop_key=jsline[x:x+vlen]
-							
-							avalue=getValue_forKey( active_dict, js_obj_prop_key, act_lang+' did not contain key \'' +js_obj_prop_key+'\' (javascript)')
-							if avalue == '':
-								avalue=getValue_forKey( fallback_dict, js_obj_prop_key, 'fallback language '+fb_lang+' also did not contain key \'' +js_obj_prop_key+'\' (javascript)')
-								if avalue == '':
-									print 'MissingKey: '+js_obj_prop_key+ ' in both active & fallback languages; using key as value (javascript)'
-									avalue=js_obj_prop_key
-							anewline+=avalue
-							x+=vlen
-						
-					anewline+=jsline[x]
-					x+=1
+				if anewline=='':
+					anewline=process_js_line(jsline, active_dict, fallback_dict, jsObj)
+				else:
+					anewline=process_js_line(anewline, active_dict, fallback_dict, jsObj)
 		
 		if anewline == '':
 			new_page_contents.append(jsline)
