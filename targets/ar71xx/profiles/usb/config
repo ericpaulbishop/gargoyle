@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Mon Jul  8 15:55:39 2013
+# Fri Jul 12 14:50:13 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -2068,6 +2068,7 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_ffmpeg is not set
 # CONFIG_PACKAGE_ffprobe is not set
 # CONFIG_PACKAGE_ffserver is not set
+# CONFIG_PACKAGE_gargoyle-mjpg-streamer is not set
 
 #
 # Administration
@@ -2079,7 +2080,7 @@ CONFIG_PACKAGE_ubusd=y
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
-CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m 
+CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
@@ -2088,6 +2089,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 # CONFIG_PACKAGE_plugin-gargoyle-tor is not set
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
+# CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
 CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 
