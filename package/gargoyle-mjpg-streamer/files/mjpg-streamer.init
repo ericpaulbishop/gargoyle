@@ -1,0 +1,67 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2009-2012 OpenWrt.org
+
+START=50
+
+SERVICE_DAEMONIZE=1
+SERVICE_WRITE_PID=1
+
+PROG=/usr/bin/mjpg_streamer
+
+error() {
+	echo "${initscript}:" "$@" 1>&2
+}
+
+section_enabled() {
+	config_get_bool enabled "$1" 'enabled' 0
+	[ $enabled -gt 0 ]
+}
+
+start_instance() {
+	local s="$1"
+	local auth=""
+
+	section_enabled "$s" || return 1
+
+	config_get device "$s" 'device'
+	config_get resolution "$s" 'resolution'
+	config_get fps "$s" 'fps'
+	config_get yuv "$s" 'yuv' 0
+	config_get port "$s" 'port'
+	config_get www "$s" 'www' "/usr/lib/mjpg-streamer/www"
+	config_get username "$s" 'username'
+	config_get password "$s" 'password'
+
+	[ $yuv = "1" ] && yuv="-y" || yuv=""
+
+	[ -c "$device" ] || {
+		error "device '$device' does not exist"
+		return 1
+	}
+
+	[ -n "$username" -a -n "$password" ] && {
+		auth="--credentials $username:$password"
+	}
+
+	service_start /usr/bin/mjpg_streamer \
+		--input "input_uvc.so $yuv --device $device --fps $fps --resolution $resolution" \
+		--output "output_http.so --www $www --port $port $auth"
+}
+
+stop_instance() {
+	local s="$1"
+
+	section_enabled "$s" || return 1
+
+	service_stop /usr/bin/mjpg_streamer
+}
+
+start() {
+	config_load 'mjpg-streamer'
+	config_foreach start_instance 'mjpg-streamer'
+}
+
+stop() {
+	config_load 'mjpg-streamer'
+	config_foreach stop_instance 'mjpg-streamer'
+}
