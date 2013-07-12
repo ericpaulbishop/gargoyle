@@ -426,7 +426,7 @@ function setVisibility(controlDocument)
 	}
 	if(qri == "week")
 	{
-		var names = [UI.Sunday, UI.Sunday, UI.Tuesday, UI.Tuesday, UI.Tuesday, UI.Friday, UI.Saturday];
+		var names = [UI.Sunday, UI.Monday, UI.Tuesday, UI.Wednesday, UI.Thursday, UI.Friday, UI.Saturday];
 		var vals = [];
 		var dayIndex;
 		for(dayIndex=0; dayIndex < 7; dayIndex++)
@@ -724,7 +724,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 			{	
 				if(!ip.match(/ALL/))
 				{
-					errors.push(quotasStr.IPError);
+					errors.push(quotasStr.DuplicateRange);
 				}
 				else if(ip.match(/OTHER/))
 				{
@@ -1163,7 +1163,7 @@ function editQuota()
 	var closeButton = createInput("button", editQuotaWindow.document);
 	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = UI.CApplyChanges;
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	var editRow=this.parentNode.parentNode;

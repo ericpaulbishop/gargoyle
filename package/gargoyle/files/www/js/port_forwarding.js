@@ -5,9 +5,7 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
-
-
-var portStr=new Object(); //part of i18n
+var prtS=new Object(); //part of i18n
 
 function saveChanges()
 {
@@ -164,7 +162,7 @@ function addPortfRule()
 	errors = proofreadForwardSingle();
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\n"+portStr.AFRErr);
+		alert(errors.join("\n") + "\n\n"+prtS.AFRErr);
 	}
 	else
 	{
@@ -233,7 +231,7 @@ function addPortfRangeRule()
 	errors = proofreadForwardRange();
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\n"+portStr.AFRErr);
+		alert(errors.join("\n") + "\n\n"+prtS.AFRErr);
 	}
 	else
 	{
@@ -307,7 +305,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 	{
 		if( (1*controlDocument.getElementById('addr_sp').value) > (1*controlDocument.getElementById('addr_ep').value) )
 		{
-			errors.push(portStr.GTErr);
+			errors.push(prtS.GTErr);
 		}
 		
 		
@@ -322,7 +320,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 			var rowData = currentPortfData[rowDataIndex];
 			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addStartPort*1 <= rowData[2]*1 && addEndPort*1 >= rowData[2]*1 )
 			{
-				errors.push(portStr.DupErr);
+				errors.push(prtS.DupErr);
 			}
 		}
 
@@ -335,7 +333,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 				var rowData = currentRangeData[rowDataIndex];
 				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1)
 				{
-					errors.push(portStr.DupErr);
+					errors.push(prtS.DupErr);
 				}
 			}
 		}
@@ -378,7 +376,7 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 				var rowData = currentPortfData[rowDataIndex];
 				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addPort == rowData[2])
 				{
-					errors.push(portStr.CopErr);
+					errors.push(prtS.CopErr);
 				}
 			}
 		}
@@ -390,7 +388,7 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 			var rowData = currentRangeData[rowDataIndex];
 			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1)
 			{
-				errors.push(portStr.CopErr);
+				errors.push(prtS.CopErr);
 			}
 		}
 	}
@@ -484,7 +482,7 @@ function resetData()
 	}
 
 
-	columnNames = [portStr.Desc, portStr.Proto, portStr.FPrt, portStr.TIP, portStr.TPrt, UI.Enabled, '']
+	columnNames = [prtS.Desc, prtS.Proto, prtS.FPrt, prtS.TIP, prtS.TPrt, UI.Enabled, '']
 	portfTable=createTable(columnNames, singlePortTableData, "portf_table", true, false);
 	table1Container = document.getElementById('portf_table_container');
 	
@@ -498,7 +496,7 @@ function resetData()
 	
 	
 
-	columnNames = [portStr.Desc, portStr.Proto, portStr.SPrt, portStr.EPrt, portStr.TIP, UI.Enabled, '']
+	columnNames = [prtS.Desc, prtS.Proto, prtS.SPrt, prtS.EPrt, prtS.TIP, UI.Enabled, '']
 	portfrangeTable=createTable(columnNames, portRangeTableData, "portf_range_table", true, false);
 	table2Container = document.getElementById('portfrange_table_container');
 	if(document.getElementById('portfrange_table_container').firstChild != null)
@@ -581,7 +579,7 @@ function resetData()
 		var tableRow =['***','***********','***** '];
 		tableData.push(tableRow);
 
-		var columnNames= [portStr.Prot, portStr.LHst, portStr.Port ]; 
+		var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ]; 
 		var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 		var tableContainer = document.getElementById('upnp_table_container');
 		if(tableContainer.firstChild != null)
@@ -703,7 +701,7 @@ function editForward(isSingle, triggerElement)
 					}
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\n"+portStr.UpErr);
+						alert(errors.join("\n") + "\n"+prtS.UpErr);
 					}
 					else
 					{
@@ -779,7 +777,7 @@ function update_upnp()
 					tableData.push(tableRow);
 				}
 
-				var columnNames= [portStr.Prot, portStr.LHst, portStr.Port ]; 
+				var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ]; 
 				
 				var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 				var tableContainer = document.getElementById('upnp_table_container');
