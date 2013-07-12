@@ -11,12 +11,10 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader">Edit Shared Disk</legend>
 
-<div style="height: 500px; overflow-y: scroll;">
 <?
 	cat templates/usb_storage_template
 ?>
 
-</div>
 </fieldset>
 <div id="bottom_button_container"></div>
 
