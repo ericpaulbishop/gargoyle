@@ -11,12 +11,14 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader">Edit Exception Rule</legend>
 
+	<div style="height: 500px; overflow-y: scroll;">
 	<?
 	sed -e '/<L7OPTIONS>/,$ d' templates/whitelist_template
 	sed -e '/^#/ d' -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
 	sed -e '1,/<L7OPTIONS>/ d' templates/whitelist_template
 	?>
 
+</div>
 </fieldset>
 <div id="bottom_button_container"></div>
 
