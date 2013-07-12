@@ -210,7 +210,7 @@ def js_var_prop_len( aline ):
 			break
 	return l
 	
-def process_js_line( aline, active_dict, fallback_dict, js_object_var ):
+def process_js_line( aline, active_dict, fallback_dict, js_object_var, avail_js_objs ):
 	x=0
 	anewline=''
 	while x < len(aline):
@@ -218,8 +218,22 @@ def process_js_line( aline, active_dict, fallback_dict, js_object_var ):
 			if aline[x:x+len(js_object_var)+1] == js_object_var+'.':
 				vlen=js_var_prop_len(aline[x:])
 				js_obj_prop_key=aline[x:x+vlen]
+				avalue=getValue(js_obj_prop_key, fallback_dict, active_dict, 'javascript')
+				#TODO inject here
+				for embed_JSO in avail_js_objs:
+					if embed_JSO+'.' in avalue:
+						y=0
+						while y < len(avalue):
+							#print avalue[y:]
+							if y+len(embed_JSO)+1 < len(avalue):
+								if avalue[y:y+len(embed_JSO)+1] == embed_JSO+'.':
+									ext_len=js_var_prop_len(avalue[y:])
+									ext_js_obj_prop_key=avalue[y:y+ext_len]
+									extvalue=getValue(ext_js_obj_prop_key, fallback_dict, active_dict, 'javascript')
+									avalue=avalue[:y]+extvalue+avalue[y+ext_len:]
+							y+=1
 				
-				anewline+=getValue(js_obj_prop_key, fallback_dict, active_dict, 'javascript')
+				anewline+=avalue
 				x+=vlen
 						
 		anewline+=aline[x]
@@ -260,9 +274,9 @@ def process_javascript_file( jsfile ):
 		for jsObj in js_tran_objects:
 			if jsObj+'.' in jsline:
 				if anewline=='':
-					anewline=process_js_line(jsline, active_dict, fallback_dict, jsObj)
+					anewline=process_js_line(jsline, active_dict, fallback_dict, jsObj, js_tran_objects)
 				else:
-					anewline=process_js_line(anewline, active_dict, fallback_dict, jsObj)
+					anewline=process_js_line(anewline, active_dict, fallback_dict, jsObj, js_tran_objects)
 		
 		if anewline == '':
 			new_page_contents.append(jsline)
