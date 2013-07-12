@@ -14,19 +14,27 @@ import os
 fb_lang=''
 act_lang=''
 
-def PrintSection( msg):
-	print "-----------------------------------------------------------"
-	print msg
-	print "-----------------------------------------------------------"
-
 def getValue_forKey( lang_dict, key, kErrMsg):
 	try:
 		return lang_dict[key]
 	except AttributeError:
 		return ''
 	except KeyError:
-		print 'KeyError: ' + kErrMsg
+		print '\tKeyError: ' + kErrMsg
 		return ''
+		
+def getValue(key, fb_dict, act_dict, err_msg_type):
+	avalue=''
+	avalue=getValue_forKey( act_dict, key, act_lang+' did not contain key \'' +key+'\' ('+err_msg_type+')')
+	if avalue == '':
+		avalue=getValue_forKey( fb_dict, key, 'fallback language '+fb_lang+' also did not contain key \'' +key+'\' ('+err_msg_type+')')
+		if avalue == '':
+			print '\tMissingKey: '+key+ ' in both active & fallback languages; using key as value  ('+err_msg_type+')'
+			avalue=key
+		else:
+			print '\t  Using '+fb_lang+' for translation of key: '+key
+	
+	return avalue
 
 def parseJStrans( lang, page, lang_dict, js_style, js_objects ):
 	try:
@@ -104,14 +112,7 @@ def parse_sh_page( flines ):
 								active_dict=parseJStrans( act_lang, key.split('.')[0]+'.js', active_dict, False, None )
 								key=key.split('.')[1]
 								
-							avalue=getValue_forKey( active_dict, key, act_lang+' did not contain key \'' +key+'\' (haserl)')
-							if avalue == '':
-								avalue=getValue_forKey( fallback_dict, key, 'fallback language '+fb_lang+' also did not contain key \'' +key+'\' (haserl)')
-								if avalue == '':
-									print 'MissingKey: '+key+ ' in both active & fallback languages; using key as value (haserl)'
-									avalue=key
-									
-							anewline+=avalue
+							anewline+=getValue(key, fallback_dict, active_dict, 'haserl')
 							x=y+3
 							break
 						y+=1
@@ -217,13 +218,7 @@ def process_js_line( aline, active_dict, fallback_dict, js_object_var ):
 				vlen=js_var_prop_len(aline[x:])
 				js_obj_prop_key=aline[x:x+vlen]
 				
-				avalue=getValue_forKey( active_dict, js_obj_prop_key, act_lang+' did not contain key \'' +js_obj_prop_key+'\' (javascript)')
-				if avalue == '':
-					avalue=getValue_forKey( fallback_dict, js_obj_prop_key, 'fallback language '+fb_lang+' also did not contain key \'' +js_obj_prop_key+'\' (javascript)')
-					if avalue == '':
-						print 'MissingKey: '+js_obj_prop_key+ ' in both active & fallback languages; using key as value (javascript)'
-						avalue=js_obj_prop_key
-				anewline+=avalue
+				anewline+=getValue(js_obj_prop_key, fallback_dict, active_dict, 'javascript')
 				x+=vlen
 						
 		anewline+=aline[x]
@@ -306,13 +301,7 @@ def process_i18n_shell_file( ):
 								fallback_dict=parseJStrans( fb_lang, i18n_cmd[1]+'.js', fallback_dict, False, None )
 								active_dict=parseJStrans( act_lang, i18n_cmd[1]+'.js', active_dict, False, None )
 								
-								avalue=getValue_forKey( active_dict, i18n_cmd[2], act_lang+' did not contain key \'' +i18n_cmd[2]+'\' (i18n shell script)')
-								if avalue =='':
-									avalue=getValue_forKey( fallback_dict, i18n_cmd[2], 'fallback language '+fb_lang+' also did not contain key \'' +i18n_cmd[2]+'\' (i18n shell script)')
-									if avalue == '':
-										print 'MissingKey: '+i18n_cmd[2]+' in both active & fallback languages; using key as value (i18n shell script)'
-										avalue=i18n_cmd[2]
-								anewline+=('\"'+avalue+'\"')
+								anewline+=('\"'+ getValue(i18n_cmd[2], fallback_dict, active_dict, 'i18n shell script') +'\"')
 								x=y+1
 							
 						anewline+=iline[x]
@@ -325,9 +314,51 @@ def process_i18n_shell_file( ):
 		new_ifileFO = open(ifile[:-3]+'-new.sh', 'wb')
 		new_ifileFO.writelines(new_script_contents)
 		new_ifileFO.close()
+		
+def process_ddns_config():
+	print '---->   Localizing ddns-gargoyle into '+act_lang
+	print './package/ddns-gargoyle/files/etc/ddns_providers-new.conf'
+	
+	fallback_dict = {}
+	active_dict= {}
+	new_dconf_contents=[]
+
+	dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers.conf', 'rb')
+	ddpage=dconf_fileFO.readlines()
+	dconf_fileFO.close()
+	
+	fallback_dict=parseJStrans( fb_lang, 'ddns.js', fallback_dict, False, None )
+	active_dict=parseJStrans( act_lang, 'ddns.js', active_dict, False, None )
+	
+	for ddline in ddpage:
+		if 'DyDNS.' in ddline:
+			x=0
+			anewline=''
+			while x < len(ddline):
+				if ddline[x:x+6] == 'DyDNS.':
+					y=x
+					while y<len(ddline):
+						y+=1
+						if ddline[y] == ' ' or ddline[y] == ',' or ddline[y] == '\n':
+							break
+					
+					DyDNSkey=ddline[x+6:y]
+					anewline+=getValue(DyDNSkey, fallback_dict, active_dict, 'direct')
+					x=y
+					
+				anewline+=ddline[x]
+				x+=1
+				
+			new_dconf_contents.append(anewline)
+		else:
+			new_dconf_contents.append(ddline)
+			
+	new_dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers-new.conf', 'wb')
+	new_dconf_fileFO.writelines(new_dconf_contents)
+	new_dconf_fileFO.close()
 
 def target_dirs( pdir ):
-	PrintSection("   Localizing "+pdir+" into "+act_lang)
+	print "---->   Localizing "+pdir+" into "+act_lang
 	if (os.path.exists('./package/'+pdir+'/files/www')):
 		for hfiles in glob.glob('./package/'+pdir+'/files/www/*.sh'):
 			process_haserl_file(hfiles)
@@ -358,4 +389,5 @@ for filename in os.listdir('./package'):
 		target_dirs(filename)
 
 process_i18n_shell_file()
+process_ddns_config()
     	

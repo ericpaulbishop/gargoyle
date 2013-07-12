@@ -29,7 +29,7 @@ usbSStr.FmtNow="Formatear Ahora";
 usbSStr.ExtrS="Extroot";
 usbSStr.ExtrOff="Desactivar Raíz Externa";
 usbSStr.ExtDt="Raíz externa detectado en";
-usbSStr.ExtrWarn="Cuando se utiliza una unidad externa de la raíz o <strong>extroot</strong> una unidad USB externa se convierte en la unidad raíz de tu router. Esto puede permitir una gran unidad de raíz, pero si se quita la unidad de todos los cambios de configuración desde el extroot se activó se perderá."
+usbSStr.ExtrWarn="Cuando se utiliza una unidad externa de la raíz o <strong>extroot</strong> una unidad USB externa se convierte en la unidad raíz de tu router. Esto puede permitir una gran unidad de raíz, pero si se quita la unidad de todos los cambios de configuración desde el extroot se activó se perderá.";
 
 //template
 usbSStr.Disk="Disco";
