@@ -31,3 +31,4 @@ DyDNS.Pssw="Contraseña";
 DyDNS.Eml="E-mail";
 DyDNS.Key="Llave";
 DyDNS.AKey="API Llave";
+DyDNS.Tokn="Ficha";
