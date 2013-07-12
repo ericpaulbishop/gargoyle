@@ -25,8 +25,10 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader">Edit Quota</legend>
 
+	<div style="height: 500px; overflow-y: scroll;">
 	<? cat templates/quotas_template ?>
 
+</div>
 </fieldset>
 <div id="bottom_button_container"></div>
 
