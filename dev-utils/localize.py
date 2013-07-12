@@ -9,7 +9,7 @@ import os
 
 #WARNING: this script doesn't handle exotic javascript variable names or object properties
 #WARNING: js variable names are only mapped in this script if they are ascii [a-z,A=Z,0-9,_,.]
-#WARNING: see WARNING in get_JS_pages() about login
+#WARNING: for hooks/page.js, it will only find translation.js pages that are identically named (as 050-tor.js)
 
 fb_lang=''
 act_lang=''
@@ -84,8 +84,7 @@ def get_JS_pages( flines, js_list ):
 				for page in ext_pages:
 					if '.js' in page:
 						js_list.append(page)
-			########## WARNING ###########
-			# login.sh will have extra js pages that are missed here
+
 	return js_list
 			
 def parse_sh_page( flines ):
@@ -138,13 +137,13 @@ def process_haserl_file( shfile ):
 	if sf_head.startswith('\xEF\xBB\xBF#!/usr/bin/haserl') or sf_head.startswith('#!/usr/bin/haserl'):
 		shfileFO.seek(0)
 		webpage=shfileFO.readlines()
-		
+		shfileFO.close()
 		js_list=get_JS_pages(webpage, js_list)
 		new_page_contents = parse_sh_page(webpage)
 		
-		new_shfileFO = open(shfile[:-3]+'-new.sh', 'wb')
-		new_shfileFO.writelines(new_page_contents)
-		new_shfileFO.close()
+		shfileFO = open(shfile, 'wb')
+		shfileFO.seek(0)
+		shfileFO.writelines(new_page_contents)
 	
 	shfileFO.close()
 	
@@ -159,10 +158,10 @@ def process_haserl_template_file( tfile ):
 	
 	new_page_contents = parse_sh_page(templatepage)
 	
-	new_tfileFO = open(tfile+'-new', 'wb')
-	new_tfileFO.writelines(new_page_contents)
-	new_tfileFO.close()
-	
+	tfileFO = open(tfile, 'wb')
+	tfileFO.seek(0)
+	tfileFO.writelines(new_page_contents)
+	tfileFO.close()
 
 def find_js_trans_inc_files( jsname ):
 	js_list = []
@@ -189,8 +188,10 @@ def find_js_trans_inc_files( jsname ):
 						for page in js_trans_pages:
 							if '.js' in page:
 								js_list.append(page)
-			break
-			
+			#break
+	if jsname == 'login.js':
+		js_list.append(jsname)
+	
 	return js_list
 	
 def js_var_prop_len( aline ):
@@ -239,6 +240,8 @@ def process_javascript_file( jsfile ):
 	
 	if not any("strings.js" in jso for jso in js_list):
 		js_list.append('strings.js')
+	if '/hooks/' in jsfile:
+		js_list.append(jsname)
 	
 	if len(js_list) > 0:
 		i=0
@@ -266,9 +269,10 @@ def process_javascript_file( jsfile ):
 		else:
 			new_page_contents.append(anewline)
 		
-	new_jsfileFO = open(jsfile[:-3]+'-new.js', 'wb')
-	new_jsfileFO.writelines(new_page_contents)
-	new_jsfileFO.close()
+	jsfileFO = open(jsfile, 'wb')
+	jsfileFO.seek(0)
+	jsfileFO.writelines(new_page_contents)
+	jsfileFO.close()
 	
 def process_i18n_shell_file( ):
 	gdir=os.getcwd()
@@ -311,9 +315,11 @@ def process_i18n_shell_file( ):
 					new_script_contents.append(iline)
 		if len(ifile[:-3]) < 10:
 			return
-		new_ifileFO = open(ifile[:-3]+'-new.sh', 'wb')
-		new_ifileFO.writelines(new_script_contents)
-		new_ifileFO.close()
+		
+		ifileFO = open(ifile, 'wb')
+		ifileFO.seek(0)
+		ifileFO.writelines(new_script_contents)
+		ifileFO.close()
 		
 def process_ddns_config():
 	print '---->   Localizing ddns-gargoyle into '+act_lang
@@ -353,9 +359,10 @@ def process_ddns_config():
 		else:
 			new_dconf_contents.append(ddline)
 			
-	new_dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers-new.conf', 'wb')
-	new_dconf_fileFO.writelines(new_dconf_contents)
-	new_dconf_fileFO.close()
+	dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers.conf', 'wb')
+	dconf_fileFO.seek(0)
+	dconf_fileFO.writelines(new_dconf_contents)
+	dconf_fileFO.close()
 
 def target_dirs( pdir ):
 	print "---->   Localizing "+pdir+" into "+act_lang
@@ -390,4 +397,45 @@ for filename in os.listdir('./package'):
 
 process_i18n_shell_file()
 process_ddns_config()
-    	
+
+
+print '    Finding overlooked i18n files'
+jsObjects=[]
+for lpack in glob.glob('./package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js' % (fb_lang, fb_lang) ):
+	lfileFO = open(lpack, 'rb')
+	lpage=lfileFO.readlines()
+	lfileFO.close()
+	for aline in lpage:
+		if '.' in aline and '=' in aline and ('[' in aline or '"' in aline or "'" in aline) and aline.endswith(';\n'):
+			jsObjects.append(aline.split('.')[0])
+			break
+			
+#loop through each file looking for <%~ haserl token start or a javascript object jsObj found in each translation file
+#print jsObjects
+errs=0
+for x in xrange(1,10):
+	for rnd_file in glob.glob('./package%s' % (x*'/*',)):
+		if '/package/haserl' in rnd_file:
+			continue
+		if 'plugin-gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
+			continue
+		if os.path.isfile(rnd_file):
+			afileFO = open(rnd_file, 'rb')
+			filelines=afileFO.readlines()
+			afileFO.close()
+
+			for aline in filelines:
+				for jso in jsObjects:
+					if jso+'.' in aline:
+						print rnd_file
+						print '\t FOUND javascript object:%s' % (jso,)
+						print '\t\t'+aline
+						errs+=1
+				if '<%~ ' in aline:
+					print rnd_file
+					print '\t FOUND haserl translation tag'
+					errs+=1
+					
+if errs==0:
+	print '    0 errors found'
+    				
