@@ -794,7 +794,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		timePoint = nextDate.getTime()/1000;
 	}
 
-	var columnNames = [bndwS.Time, bndwS.Totl, bndwS.Dnld, bndwS.Dnld];
+	var columnNames = [bndwS.Time, bndwS.Totl, bndwS.Dnld, bndwS.Upld];
 	var bwTable=createTable(columnNames , rowData, "bandwidth_table", false, false);
 	tableContainer = document.getElementById('bandwidth_table_container');
 	if(tableContainer.firstChild != null)
@@ -806,7 +806,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 
 
 
-function expand(name, trname)
+function expand(name)
 {
 	var expWindow = expandedWindows[name];
 	var xCoor = 0;
@@ -827,7 +827,7 @@ function expand(name, trname)
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-	expWindow= window.open("bandwidth_expand.sh", trname==null?name:trname + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expWindow= window.open("bandwidth_expand.sh", name + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)
@@ -844,7 +844,7 @@ function expand(name, trname)
 					expandedFunctions[name] = getEmbeddedSvgPlotFunction("bandwidth_plot", loadWin.document);
 					if(expandedFunctions[name] != null)
 					{
-						plotTitle.appendChild(loadWin.document.createTextNode(trname==null?name:trname + " "+bndwS.BUsag));
+						plotTitle.appendChild(loadWin.document.createTextNode(name + " "+bndwS.BUsag));
 						loadWin.onbeforeunload=function(){ expandedFunctions[name] = null; expandedWindows[name] = null; }
 						loaded = true;
 					}

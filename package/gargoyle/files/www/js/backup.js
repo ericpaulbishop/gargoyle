@@ -50,7 +50,7 @@ function doDefaultRestore()
 	{
 		document.getElementById('restore_original_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 		document.getElementById('restore_original_form').submit();
-		setControlsEnabled(false, true, bks.LdOrig);	
+		setControlsEnabled(false, true, bkS.LdOrig);	
 	}
 
 }
