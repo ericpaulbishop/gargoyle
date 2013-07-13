@@ -12,9 +12,9 @@
 <form>
 	<fieldset id="log">
 		<legend class="sectionheader">Ping Watchdog</legend>
-		<div>
+		<div class="nocolumn">
 			<input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();" />
-			<label class='leftcolumn' for='ping_watchdog_enable' id='ping_watchdog_enable_label' >Enable Ping Watchdog:</label>
+			<label for='ping_watchdog_enable' id='ping_watchdog_enable_label' >Enable Ping Watchdog</label>
 		</div>
 		<div>
 			<label class='leftcolumn' for='address_to_ping' id='address_to_ping_label' >IP Address To Ping:</label>

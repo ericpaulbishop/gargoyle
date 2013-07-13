@@ -17,7 +17,7 @@ if [ "$INTERFACE" = "wan" ]; then
 
 		#Start up the bandwidth monitor which depends on the device name
 		if [ -h /etc/rc.d/S55bwmon_gargoyle ] ; then
-      			/etc/init.d/bwmon_gargoyle restart
+			/etc/init.d/bwmon_gargoyle restart
 		fi
 	fi
 
@@ -26,10 +26,10 @@ if [ "$INTERFACE" = "wan" ]; then
 		if [ -n "$quota_chains_exist" ] ; then
 			backup_quotas
 		fi
-
 	fi
 
 fi
+
 if [ "$INTERFACE" = "lan" ]; then
 	wan_exists=$(uci get network.wan 2>/dev/null)
 	if [ -z "$wan_exists" ] ; then
@@ -38,6 +38,6 @@ if [ "$INTERFACE" = "lan" ]; then
 		fi
 		if [ "$ACTION" = "ifdown" ]; then
 			/etc/init.d/bwmon_gargoyle stop
-		fi 
+		fi
 	fi
 fi
