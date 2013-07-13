@@ -179,7 +179,7 @@ function ipToTableSpan(ip)
 	}
 	else if(ipStr == "ALL" || ipStr == "")
 	{
-		ipStr=quotasStr.OthersAll;
+		ipStr=quotasStr.All;
 	}
 	return textListToSpanElement(ipStr.split(/[\t ]*,[\t ]*/), true, document);
 }

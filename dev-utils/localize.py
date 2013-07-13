@@ -210,6 +210,30 @@ def js_var_prop_len( aline ):
 			break
 	return l
 	
+def optimizeJSline( anewline ):
+	optline=''
+	x=0
+	while x < len(anewline):
+		if anewline[x]=='"':
+			if anewline[x:x+3] == '"+"':
+				x+=3
+			if anewline[x:x+4] == '" +"' or anewline[x:x+4] == '"+ "':
+				x+=4
+			if anewline[x:x+5] == '" + "':
+				x+=5
+		if anewline[x]=="'":
+			if anewline[x:x+3] == "'+'":
+				x+=3
+			if anewline[x:x+4] == "' +'" or anewline[x:x+4] == "'+ '":
+				x+=4
+			if anewline[x:x+5] == "' + '":
+				x+=5
+		
+		optline+=anewline[x]
+		x+=1
+
+	return optline
+	
 def process_js_line( aline, active_dict, fallback_dict, js_object_var, avail_js_objs ):
 	x=0
 	anewline=''
@@ -219,12 +243,12 @@ def process_js_line( aline, active_dict, fallback_dict, js_object_var, avail_js_
 				vlen=js_var_prop_len(aline[x:])
 				js_obj_prop_key=aline[x:x+vlen]
 				avalue=getValue(js_obj_prop_key, fallback_dict, active_dict, 'javascript')
-				#TODO inject here
+				if "'" in aline and not '"' in aline:
+					avalue="'"+avalue[1:-1]+"'"
 				for embed_JSO in avail_js_objs:
 					if embed_JSO+'.' in avalue:
 						y=0
 						while y < len(avalue):
-							#print avalue[y:]
 							if y+len(embed_JSO)+1 < len(avalue):
 								if avalue[y:y+len(embed_JSO)+1] == embed_JSO+'.':
 									ext_len=js_var_prop_len(avalue[y:])
@@ -238,6 +262,7 @@ def process_js_line( aline, active_dict, fallback_dict, js_object_var, avail_js_
 						
 		anewline+=aline[x]
 		x+=1
+	anewline=optimizeJSline(anewline)
 	return anewline
 
 def process_javascript_file( jsfile ):

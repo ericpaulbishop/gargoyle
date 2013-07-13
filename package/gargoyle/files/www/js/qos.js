@@ -611,7 +611,7 @@ function addClassificationRule()
 	{
 
 		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.DstP+": $ bytes", qosStr.MinPktLen+": $ bytes", qosStr.TrProto+": $", qosStr.Connb+": $ kBytes", qosStr.APro+": $"];
+		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ bytes", qosStr.MinPktLen+": $ bytes", qosStr.TrProto+": $", qosStr.Connb+": $ kBytes", qosStr.APro+": $"];
 
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
@@ -1208,7 +1208,7 @@ function parseRuleMatchCriteria(matchText)
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
 
-	possibleCriteria = [qosStr.SUErr+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) bytes", qosStr.MinPktLen+": (.*) bytes",  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) kBytes", qosStr.APro+": (.*)"];
+	possibleCriteria = [qosStr.Src+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) bytes", qosStr.MinPktLen+": (.*) bytes",  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) kBytes", qosStr.APro+": (.*)"];
 
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{
