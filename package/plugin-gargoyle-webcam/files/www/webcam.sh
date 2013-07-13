@@ -33,9 +33,9 @@ var webcams = [];
 <fieldset id="webcam">
 	<legend class="sectionheader">Webcam</legend>
 
-	<div>
-		<label id="webcam_enable_label" class="leftcolumn" for="webcam_enable">Enabled:</label>
-		<input id="webcam_enable" class="rightcolumn" type="checkbox" onchange='updateWebcamWanAccess()'/>
+	<div class="nocolumn">
+		<input id="webcam_enable" type="checkbox" onchange='updateWebcamWanAccess()'/>
+		<label id="webcam_enable_label" for="webcam_enable">Enable Webcam</label>
 	</div>
 
 	<div>
