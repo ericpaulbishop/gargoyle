@@ -61,7 +61,11 @@ UI.both="ambos";
 UI.seconds="segundos";
 UI.minutes="minutos";
 UI.hours="horas";
-UI.days="dias";
+UI.days="días";
+UI.second="segundo";
+UI.minute="minuto";
+UI.hour="hora";
+UI.day="día";
 
 UI.CApplyChanges="Cierre y Aplicar Cambios";
 UI.CDiscardChanges="Cerrar y Desechar Cambios";

@@ -73,7 +73,7 @@
 				<input type="text" class="widerightcolumn" id="add_source_name" onkeyup="proofreadSourceName(this)" style="width:325px;"/>
 			</div>
 			<div>
-				<label class="narrowleftcolumn" for="add_source_url"><%~ Aurl %>L:</label>
+				<label class="narrowleftcolumn" for="add_source_url"><%~ Aurl %>:</label>
 				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
 			</div>
 

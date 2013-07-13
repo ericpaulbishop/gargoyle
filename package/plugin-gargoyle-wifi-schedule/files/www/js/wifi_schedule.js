@@ -195,7 +195,7 @@ function UpdateSummary() {  //summary is dynamically generated from parsed cront
 		if (dayCronText == "4") { day_string = UI.Thursday; }
 		if (dayCronText == "5") { day_string = UI.Friday; }
 		if (dayCronText == "6") { day_string = UI.Saturday; }
-		if (dayCronText == "1-5") { day_string = UI.Monday+"-"+UIFriday; }		
+		if (dayCronText == "1-5") { day_string = UI.Monday+"-"+UI.Friday; }		
 		
 		AddSummaryText(Wsch.SumGo+" " + (wifiCronCMD.search("up") >= 0 ? Wsch.SumUp : Wsch.SumDn) + " - " +  day_string + " "+Wsch.SumAt+" " + (hourCronText < 10 ? '0' + hourCronText : hourCronText) + ":" + minuteStr + "<br />\n");
 	}

@@ -73,13 +73,13 @@
 
 	<fieldset id="bandwidth_graphs">
 		<legend class="sectionheader"><%~ BGrSect %></legend>
-		<span class="bandwidth_title_text"><strong><%~ Dnld %></strong> (<span onclick='expand("Download","<%~ Dnld %>")' class="pseudo_link"><%~ expd %></span>)</span>
-		<span class="bandwidth_title_text"><strong><%~ Upld %></strong> (<span onclick='expand("Upload","<%~ Upld %>")' class="pseudo_link"><%~ expd %></span>)</span>
+		<span class="bandwidth_title_text"><strong><%~ Dnld %></strong> (<span onclick='expand("<%~ Dnld %>")' class="pseudo_link"><%~ expd %></span>)</span>
+		<span class="bandwidth_title_text"><strong><%~ Upld %></strong> (<span onclick='expand("<%~ Upld %>")' class="pseudo_link"><%~ expd %></span>)</span>
 		<br/>
 		<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 		<embed id="upload_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 		<br/>
-		<span class="bandwidth_title_text"><strong><%~ Totl %></strong> (<span onclick='expand("Total","<%~ Totl %>")' class="pseudo_link"><%~ expd %></span>)</span>
+		<span class="bandwidth_title_text"><strong><%~ Totl %></strong> (<span onclick='expand("<%~ Totl %>")' class="pseudo_link"><%~ expd %></span>)</span>
 		<br/>
 		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 	</fieldset>

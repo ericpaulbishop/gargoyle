@@ -96,7 +96,7 @@
 			<label class='leftcolumn' for='upnp_down' id='upnp_down_label'><%~ DSpd %>:</label>
 			<span class='rightcolumn'>
 				<input type='text' id='upnp_down' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-				<em>Kbytes /  <%~ scnd %></em>
+				<em>Kbytes / <%~ scnd %></em>
 			</span>
 
 		<div id="upnp_help" class="indent">
@@ -105,7 +105,7 @@
 		<p><%~ UPHelp %></p>
 
 		</span>
-		<a id="upnp_help_ref" onclick='setDescriptionVisibility("upnp_help")'  href="#upnp_help"> <%~ Hide %></a>
+		<a id="upnp_help_ref" onclick='setDescriptionVisibility("upnp_help")'  href="#upnp_help"><%~ Hide %></a>
 
 		</div>
 

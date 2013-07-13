@@ -219,7 +219,7 @@
 				<div>
 					<span class='leftcolumn'>
 						<input type='radio' name="min_radio" id="min_radio2" onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
-						<label id="min_bandwidth_label" for='min_radio2'><%~ BandMinNo %>:</label>
+						<label id="min_bandwidth_label" for='min_radio2'><%~ BandMin %>:</label>
 					</span>
 					<span class='rightcolumn'>
 						<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />

@@ -478,7 +478,7 @@ function editUser()
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 	
-	okButton.value         = usbSStr.CPass;
+	okButton.value         = usbSStr.ChPass;
 	okButton.className     = "default_button";
 	cancelButton.value     = UI.Cancel;
 	cancelButton.className = "default_button";
@@ -799,7 +799,7 @@ function resetData()
 			vis["nfs"]  = shareData[7]
 			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editShare) ] )
 		}
-		var shareTable = createTable([usbSStr.Name, usbSStr.Name, usbSStr.SDir, usbSStr.STyp, ""], shareTableData, "share_table", true, false, removeShareCallback);
+		var shareTable = createTable([usbSStr.Name, usbSStr.Disk, usbSStr.SDir, usbSStr.STyp, ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
 		setSingleChild(tableContainer, shareTable);
 	}

@@ -22,7 +22,7 @@
 		<input class="rightcolumn" type="password" id="new_password" />
 	</div>
 	<div style="clear:both">
-		<label class="leftcolumn" for="new_password_confirm"><%~ CPass %>:</label>
+		<label class="leftcolumn" for="new_password_confirm"><%~ ChPass %>:</label>
 		<input class="rightcolumn" type="password" id="new_password_confirm" />
 	</div>
 </fieldset>

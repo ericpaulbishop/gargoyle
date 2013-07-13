@@ -36,7 +36,7 @@ function saveChanges()
 
 	if (errors.length > 0)
 	{
-		errorString = errors.join("\n") + "\n\n"+pingS.ScptErr;
+		errorString = errors.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 		return;
 	}
