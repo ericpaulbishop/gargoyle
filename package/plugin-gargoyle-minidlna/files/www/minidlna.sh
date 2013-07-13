@@ -22,9 +22,9 @@
 <fieldset id="dlna">
 	<legend class="sectionheader">DLNA</legend>
 
-	<div>
-		<label id="dlna_enable_label" class="leftcolumn" for="webcam_enable">Enabled:</label>
-		<input id="dlna_enable" class="rightcolumn" type="checkbox" />&nbsp;&nbsp;<span id="dlna_status"></span>
+	<div class="nocolumn">
+		<input id="dlna_enable" type="checkbox" />
+		<label id="dlna_enable_label" for="webcam_enable">Enable DLNA</label>
 	</div>
 
 	<div class="rightcolumnonly">
