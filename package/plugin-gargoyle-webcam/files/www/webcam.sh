@@ -27,7 +27,7 @@ var webcams = [];
 </script>
 <fieldset id="nowebcam">
 	<legend class="sectionheader">Webcam</legend>
-	<em><span class="nocolumn">Not detected any USB webcam.</span></em>
+	<em><span class="nocolumn">No USB Webcam Detected.</span></em>
 </fieldset>
 
 <fieldset id="webcam">
@@ -56,7 +56,7 @@ var webcams = [];
 	</div>
 
 	<div>
-		<label id="webcam_fps_label" class="leftcolumn" for="webcam_fps">FPS:</label>
+	<label id="webcam_fps_label" class="leftcolumn" for="webcam_fps">Frames Per Second (FPS):</label>
 		<input id="webcam_fps" class="rightcolumn" type="text" size='20' maxlength='2' onkeyup='proofreadNumericRange(this,1,59)'/>
 	</div>
 
