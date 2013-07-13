@@ -10,7 +10,6 @@ ra_mark="$ra_mask/$ra_mask"
 death_mask=0x8000
 death_mark="$death_mask"
 
-
 wan_if=""
 
 mask_to_cidr()
@@ -41,11 +40,9 @@ mask_to_cidr()
 	echo $bits
 }
 
-
 define_wan_if()
 {
 	if  [ -z "$wan_if" ] ;  then
-	
 		#Wait for up to 15 seconds for the wan interface to indicate it is up.
 		wait_sec=15
 		while [ -z "$(uci -P /var/state get network.wan.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
@@ -53,7 +50,7 @@ define_wan_if()
 			wait_sec=$(($wait_sec - 1))
 		done
 
-		#The interface name will depend on if pppoe is used or not.  If pppoe is used then 
+		#The interface name will depend on if pppoe is used or not.  If pppoe is used then
 		#the name we are looking for is in network.wan.ifname.  If there is nothing there
 		#use the device named by network.wan.device
 
@@ -63,7 +60,6 @@ define_wan_if()
 		fi
 	fi
 }
-
 
 # parse remote_accept sections in firewall config and add necessary rules
 insert_remote_accept_rules()
@@ -91,8 +87,7 @@ insert_remote_accept_rules()
 		if [ "$proto" = "tcpudp" ] || [ -z "$proto" ] ; then
 			proto="tcp udp"
 		fi
-		
-		
+
 		for prot in $proto ; do
 			if [ -n "$local_port" ] ; then
 				
@@ -106,7 +101,7 @@ insert_remote_accept_rules()
 					iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK
 					iptables -t filter -A "input_${zone}_rule" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
 				fi
-	
+
 				if [ "$remote_port" != "$local_port" ] ; then
 					#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
 					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
@@ -124,13 +119,9 @@ insert_remote_accept_rules()
 	}
 	config_load "$config_name"
 	config_foreach parse_remote_accept_config "$section_type"
-
 }
 
-
-
-
-# creates a chain that sets third byte of connmark to a value that denotes what l7 proto 
+# creates a chain that sets third byte of connmark to a value that denotes what l7 proto
 # is associated with connection. This only sets the connmark, it does not save it to mark
 create_l7marker_chain()
 {
@@ -187,14 +178,14 @@ insert_pf_loopback_rules()
 {
 	config_name="firewall"
 	section_type="redirect"
-	
+
 	#Need to always delete the old chains first.
 	delete_chain_from_table "nat"    "pf_loopback_A"
 	delete_chain_from_table "filter" "pf_loopback_B"
 	delete_chain_from_table "nat"    "pf_loopback_C"
 
 	define_wan_if
-	if [ -z "$wan_if" ]  ; then return ; fi        
+	if [ -z "$wan_if" ]  ; then return ; fi
 	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 
@@ -208,7 +199,6 @@ insert_pf_loopback_rules()
 		iptables -t filter -I zone_lan_forward               -j pf_loopback_B
 		iptables -t nat    -I postrouting_rule -o br-lan     -j pf_loopback_C
 
-
 		add_pf_loopback()
 		{
 			local vars="src dest proto src_dport dest_ip dest_port"
@@ -220,24 +210,22 @@ insert_pf_loopback_rules()
 				if [ -z "$loaded" ] && [ ! "$var" = "$src_dport" ] ; then
 					all_defined="0"
 				fi
-			done	
-			
+			done
+
 			if [ -z "$src_dport" ] ; then
 				src_dport=$dest_port
 			fi
-			
+
 			sdp_dash=$src_dport
 			sdp_colon=$(echo $sdp_dash | sed 's/\-/:/g')
 			dp_dash=$dest_port
 			dp_colon=$(echo $dp_dash | sed 's/\-/:/g')
-			
-			
-			
+
 			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ]  ; then
 				iptables -t nat    -A pf_loopback_A -p $proto --dport $sdp_colon -j DNAT --to-destination $dest_ip:$dp_dash
 				iptables -t filter -A pf_loopback_B -p $proto --dport $dp_colon -d $dest_ip -j ACCEPT
 				iptables -t nat    -A pf_loopback_C -p $proto --dport $dp_colon -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
-			fi	
+			fi
 		}
 
 		config_load "$config_name"
@@ -274,8 +262,8 @@ insert_dmz_rule()
 insert_restriction_rules()
 {
 	define_wan_if
-	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
-	
+	if [ -z "$wan_if" ]  ; then return ; fi
+
 	if [ -e /tmp/restriction_init.lock ] ; then return ; fi
 	touch /tmp/restriction_init.lock
 
@@ -290,48 +278,47 @@ insert_restriction_rules()
 		delete_chain_from_table filter ingress_whitelist
 		delete_chain_from_table filter ingress_restrictions
 	fi
-	
-	iptables -t filter -N egress_restrictions	
-	iptables -t filter -N ingress_restrictions	
+
+	iptables -t filter -N egress_restrictions
+	iptables -t filter -N ingress_restrictions
 	iptables -t filter -N egress_whitelist
 	iptables -t filter -N ingress_whitelist
 
-	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions	
-	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions	
+	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions
+	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions
 
 	iptables -t filter -I egress_restrictions  -j egress_whitelist
 	iptables -t filter -I ingress_restrictions -j ingress_whitelist
-			
-	
-	package_name="firewall"	
+
+	package_name="firewall"
 	parse_rule_config()
 	{
 		section=$1
 		section_type=$(uci get "$package_name"."$section")
-		
+
 		config_get "enabled" "$section" "enabled"
 		if [ -z "$enabled" ] ; then enabled="1" ; fi
 		if [ "$enabled" = "1" ] && ( [ "$section_type"  = "restriction_rule" ] || [ "$section_type" = "whitelist_rule" ] ) ; then
 			#convert app_proto && not_app_proto to connmark here
 			config_get "app_proto" "$section" "app_proto"
 			config_get "not_app_proto" "$section" "not_app_proto"
-			
+
 			if [ -n "$app_proto" ] ; then
 				app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep $app_proto | awk '{ print $2 ; }' )
 				app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep $app_proto | awk '{ print $3 ;  }' )
 				uci set "$package_name"."$section".connmark="$app_proto_connmark/$app_proto_mask"
-			fi	
+			fi
 			if [ -n "$not_app_proto" ] ; then
 				not_app_proto_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $2 }')
 				not_app_proto_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$not_app_proto" | awk '{ print $3 }')
 				uci set "$package_name"."$section".not_connmark="$not_app_proto_connmark/$not_app_proto_mask"
 			fi
-			
+
 			table="filter"
 			chain="egress_restrictions"
 			ingress=""
 			target="REJECT"
-			
+
 			config_get "is_ingress" "$section" "is_ingress"
 			if [ "$is_ingress" = "1" ] ; then
 				ingress=" -i "
@@ -344,17 +331,17 @@ insert_restriction_rules()
 				if [ "$section_type" = "restriction_rule"  ] ; then
 					chain="egress_restrictions"
 				else
-					chain="egress_whitelist"	
-				fi				
+					chain="egress_whitelist"
+				fi
 			fi
-					
+
 			if [ "$section_type" = "whitelist_rule" ] ; then
 				target="ACCEPT"
 			fi
-			
+
 			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress
 			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress -r
-				
+
 			uci del "$package_name"."$section".connmark 2>/dev/null	
 			uci del "$package_name"."$section".not_connmark	 2>/dev/null
 		fi
@@ -367,15 +354,14 @@ insert_restriction_rules()
 	rm -rf /tmp/restriction_init.lock
 }
 
-
 initialize_quotas()
 {
 	define_wan_if
-	if [ -z "$wan_if" ]  ; then return ; fi                                                                       
-	
+	if [ -z "$wan_if" ]  ; then return ; fi
+
 	if [  -e /tmp/quota_init.lock ] ; then return ; fi
 	touch /tmp/quota_init.lock
-	
+
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
@@ -386,13 +372,12 @@ initialize_quotas()
 	# have up and down speeds defined for when quota is exceeded
 	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
-		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		initialiaze_quota_qos
 	else
-		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1" 	
+		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		cleanup_old_quota_qos
-	fi	
-
+	fi
 
 	#enable cron, but only restart cron if it is currently running
 	#since we initialize this before cron, this will
@@ -428,9 +413,7 @@ load_all_config_sections()
 
 	config_load "$config_name"
 	echo "$all_config_sections"
-
 }
-
 
 cleanup_old_quota_qos()
 {
@@ -438,7 +421,6 @@ cleanup_old_quota_qos()
 		tc qdisc del dev "$iface" root >/dev/null 2>&1
 	done
 }
-
 
 initialiaze_quota_qos()
 {
@@ -459,14 +441,14 @@ initialiaze_quota_qos()
 			fi
 		fi
 	done
-	
+
 	#echo "upload_speeds = $upload_speeds"
-	
-	unique_up=$( printf "%d\n" $upload_speeds 2>/dev/null | sort -u -n)  
-	unique_down=$( printf "%d\n" $download_speeds 2>/dev/null | sort -u -n)  
-	
+
+	unique_up=$( printf "%d\n" $upload_speeds 2>/dev/null | sort -u -n)
+	unique_down=$( printf "%d\n" $download_speeds 2>/dev/null | sort -u -n)
+
 	#echo "unique_up = $unique_up"
-	
+
 	num_up_bands=1
 	num_down_bands=1
 	if [ -n "$upload_speeds" ] ; then
@@ -475,22 +457,20 @@ initialiaze_quota_qos()
 	if [ -n "$download_speeds" ] ; then
 		num_down_bands=$((1 + $(printf "%d\n" $download_speeds 2>/dev/null | sort -u -n |  wc -l) ))
 	fi
-	
+
 	#echo "num_up_bands=$num_up_bands"
 	#echo "num_down_bands=$num_down_bands"
-	
 
 	if [ -n "$wan_if" ] && [ $num_up_bands -gt 1 ] && [ $num_down_bands -gt 1 ] ; then
 		insmod sch_prio  >/dev/null 2>&1
 		insmod sch_tbf   >/dev/null 2>&1
 		insmod cls_fw    >/dev/null 2>&1
-	
+
 		ifconfig imq0 down  >/dev/null 2>&1
 		ifconfig imq1 down  >/dev/null 2>&1
 		rmmod  imq          >/dev/null 2>&1
 		insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
 		ip link set imq0 up
-
 
 		#egress/upload
 		tc qdisc del dev $wan_if root >/dev/null 2>&1
@@ -517,20 +497,13 @@ initialiaze_quota_qos()
 			tc qdisc  add dev imq0 parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
 			cur_band=$(($cur_band+1))
 		done
-		
+
 		iptables -t mangle -I ingress_quotas -i $wan_if -j IMQ --todev 0
-		
+
 		#tc -s qdisc show dev $wan_if
 		#tc -s qdisc show dev imq0
 	fi
-
 }
-
-
-
-
-
-
 
 block_static_ip_mismatches()
 {
@@ -548,14 +521,13 @@ block_static_ip_mismatches()
 				mac=$(echo $p | sed 's/\^.*$//g')
 				ip=$(echo $p | sed 's/^.*\^//g')
 				if [ -n "$ip" ] && [ -n "$mac" ] ; then
-					iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT 
+					iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
 				fi
 			done
 			iptables -t filter -I forward -j static_mismatch_check
 		fi
 	fi
 }
-
 
 force_router_dns()
 {
@@ -594,4 +566,3 @@ ifup_firewall()
 	initialize_quotas
 	insert_pf_loopback_rules
 }
-

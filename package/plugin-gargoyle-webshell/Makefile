@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-webshell
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
-	TITLE:=Webshell for Gargoyle (PL)
+	TITLE:=Webshell for Gargoyle
 	MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
 	DEPENDS:=+gargoyle
 	PKGARCH:=all

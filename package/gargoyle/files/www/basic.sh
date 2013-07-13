@@ -442,15 +442,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 			<span class='rightcolumn'>
 				<input type='checkbox' id='wan_use_mtu' onclick='enableAssociatedField(this, "wan_mtu", 1500)'/>&nbsp;&nbsp;
-				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)' size='20' maxlength='4'/> 
+				<input type='text' name='wan_mtu' id='wan_mtu' onkeyup='proofreadNumeric(this)' size='20' maxlength='4'/>
 			</span>
 		</div>
 		<div id='wan_ping_container'>
-			<span class='leftcolumn'>
-				<label for='drop_wan_ping' id='wan_ping_label'>Drop Ping From WAN Side</label>
-			</span>
-			<span class='rightcolumn'>
-				<input type='checkbox' id='drop_wan_ping'/>
+			<span class='rightcolumnonly'>
+				<input type='checkbox' id='drop_wan_ping' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
+				<label for='drop_wan_ping' id='wan_ping_label' style="vertical-align:middle">&nbsp;&nbsp;Drop Ping From WAN Side</label>
 			</span>
 		</div>
 
