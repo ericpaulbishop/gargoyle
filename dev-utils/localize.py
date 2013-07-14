@@ -11,6 +11,8 @@ import os
 #WARNING: js variable names are only mapped in this script if they are ascii [a-z,A=Z,0-9,_,.]
 #WARNING: for hooks/page.js, it will only find translation.js pages that are identically named (as 050-tor.js)
 
+#WARNING: stripping the gargoyle_header_footer of the -z 'page.js' typically results in hanging dead whitespace; diff -u will mark it
+
 fb_lang=''
 act_lang=''
 
@@ -46,9 +48,17 @@ def parseJStrans( lang, page, lang_dict, js_style, js_objects ):
 		pass
 	found_js_object=False
 	
+	dfileFO=None
+	
 	#package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/strings.js
 	if (os.path.exists('./package/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page)):
 		dfileFO = open('./package/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page, 'rb')
+	else:
+		ext_trans_files=glob.glob('./package/*/files/www/i18n/'+lang+'/'+page)
+		if ext_trans_files != []:
+			dfileFO = open(ext_trans_files[0], 'rb')
+	
+	if dfileFO != None:
 		dtranslines=dfileFO.readlines()
 		for dline in dtranslines:
 			if '.' in dline and '=' in dline and ('"' in dline or "'" in dline) and ';' in dline:
@@ -421,6 +431,60 @@ def target_dirs( pdir ):
 		for jsfile in glob.glob('./package/'+pdir+'/files/www/hooks/login/*.js'):
 			process_javascript_file(jsfile)
 	return
+	
+def remove_ghf_zopt():
+	#do this after processing all other javascript files which rely on gargoyle_header_footer -z "page.js" to figure out which page to use
+	print "---->   Removing gargoyle_header_footer -z option"
+	for webpage in glob.glob('./package/*/files/www/*.sh'):
+		print webpage
+		w_fileFO = open(webpage, 'rb')
+		wpage=w_fileFO.readlines()
+		w_fileFO.close()
+		new_wpage_contents=[]
+		token_start=0
+		token_end=0
+		for wline in wpage:
+			anewline=''
+			
+			if wline[:2] == '<%':
+				token_start+=1
+			if wline[:2] == '%>':
+				token_end+=1
+			if 'gargoyle_header_footer' in wline and '-z' in wline and token_start==1 and token_end==0:
+				x=0
+				quotes=False
+				page=False
+				
+				while x < len(wline):
+					if wline[x:x+3] == '-z ':
+						y=x
+						while y < len(wline):
+							if wline[y:y+3] == '.js':
+								page=True
+							if wline[y] == '"' or wline[y] == "'":
+								if quotes == False:
+									quotes=True
+								elif quotes == True:
+									y+=1
+									break
+							if wline[y] == ' ' and quotes==False and page==True:
+								break
+							if wline[y] == '\n':
+								break
+							y+=1
+						x=y
+					anewline+=wline[x]
+					x+=1
+				
+			if anewline != '':
+				new_wpage_contents.append(anewline)
+			else:
+				new_wpage_contents.append(wline)
+		
+		w_fileFO = open(webpage, 'wb')
+		w_fileFO.seek(0)
+		w_fileFO.writelines(new_wpage_contents)
+		w_fileFO.close()
 
 if len(sys.argv) == 3:
 	fb_lang=sys.argv[1]
@@ -436,6 +500,7 @@ for filename in os.listdir('./package'):
 
 process_i18n_shell_file()
 process_ddns_config()
+remove_ghf_zopt()
 
 
 print '    Finding overlooked i18n files'
