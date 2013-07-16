@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import shutil
 import subprocess
 import re
 import shlex
@@ -493,6 +494,10 @@ else:
 	sys.stderr.write('Usage: %s fallback_language active_language\n' % sys.argv[0])
 	sys.stderr.write('  example: %s English-EN English-EN\n' % sys.argv[0])
 	sys.exit('  example: cd gargoyle && %s English-EN Spanish-ES' % sys.argv[0])
+	
+	
+shutil.copytree('./package', './package-orig')
+
 
 for filename in os.listdir('./package'):
 	if (filename == 'gargoyle' or filename.startswith('plugin')) and not (filename.startswith('plugin-gargoyle-i18n-') or  filename.startswith('plugin-gargoyle-theme-')):
@@ -542,4 +547,13 @@ for x in xrange(1,10):
 					
 if errs==0:
 	print '    0 errors found'
-    				
+	
+#and wrap up loose ends
+if os.path.exists('./package/haserl/patches/104-translate.patch'):
+	print 'Removing haserl i18n translate patch'
+	os.remove('./package/haserl/patches/104-translate.patch')
+	
+for i18n_pack in glob.glob('./package/plugin-gargoyle-i18n*'):
+	print 'Removing %s package from packages folder' % (i18n_pack, )
+	#os.removedirs(i18n_pack)
+	shutil.rmtree(i18n_pack)

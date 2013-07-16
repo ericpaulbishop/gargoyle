@@ -181,6 +181,10 @@ verbosity="$3"
 custom_template="$4"
 js_compress="$5"
 specified_profile="$6"
+translation_type="$7"
+fallback_lang="$8"
+active_lang="$9"
+
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
 	targets=$(ls $targets_dir | sed 's/custom//g' 2>/dev/null)
@@ -191,6 +195,8 @@ fi
 set_version_variables "$full_gargoyle_version"
 
 
+[ "$translation_type" = "localize" ] 	&& ./dev-utils/localize.py "$fallback_lang" "$active_lang" \
+										|| ./dev-utils/internationalize.py "$active_lang"
 
 
 #compress javascript
