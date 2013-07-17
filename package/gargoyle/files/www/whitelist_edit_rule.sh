@@ -11,8 +11,10 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader"><%~ restrictions.EESect %></legend>
 
-	<%in templates/whitelist_template %>
-
+	<div style="height: 500px; overflow-y: scroll;">
+		<%in templates/whitelist_template %>
+	</div>
+	
 </fieldset>
 <div id="bottom_button_container"></div>
 

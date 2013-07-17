@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_webcam='Webcam'
+uci set gargoyle.scripts.system_webcam='webcam.sh'
+uci set gargoyle.system.webcam='352'
+uci commit gargoyle

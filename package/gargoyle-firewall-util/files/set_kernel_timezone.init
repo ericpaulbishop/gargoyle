@@ -18,11 +18,7 @@ start()
 	if [ -n "$cron_active" ] ; then
 		/etc/init.d/cron restart
 	fi
-
-	
 }
-
-
 
 stop()
 {

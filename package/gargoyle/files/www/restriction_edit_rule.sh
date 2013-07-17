@@ -11,8 +11,10 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader"><%~ restrictions.ERSect %></legend>
 
-	<%in templates/restriction_template %>
-
+	<div style="height: 500px; overflow-y: scroll;">
+		<%in templates/restriction_template %>
+	</div>
+	
 </fieldset>
 <div id="bottom_button_container"></div>
 

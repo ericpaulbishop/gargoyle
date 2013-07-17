@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -309,8 +309,17 @@ int main(int argc, char **argv)
 		printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n");
 		printf("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
 		printf("<head>\n");
+		printf("\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
 		printf("\t<title>%s</title>\n", title);
+		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\" />\n", theme_root, theme);
 		int css_index, js_index, lstr_js_index;
+		printf("\t<style>\n"); //older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
+		printf("\t\t.unselected_submenu_container   { display:none; }\n");
+		printf("\t\t#nav_internal_container2 #selected_header_link         { display:inline; padding:0px; color:#000000; cursor:default; }\n");
+		printf("\t\t#nav_internal_container2 #selected_header_link:hover   { color:#000000; cursor:default; }\n");
+		printf("\t\t#nav_internal_container2 #selected_header_link:visited { color:#000000; cursor:default; }\n");
+		printf("\t\t#nav_internal_container2 #selected_header_link:active  { color:#000000; cursor:default; }\n");
+		printf("\t</style>\n"); 
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
 			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\" />\n", theme_root, theme, all_css[css_index], gargoyle_version);
@@ -443,7 +452,7 @@ int main(int argc, char **argv)
 		printf("\t\t\t</div>\n");
 		printf("\t\t\t<div id=\"main_bottom\"></div>\n");
 		printf("\t\t</div>\n");
-		printf("\t\t<div id=\"nav_external_container\">\n");
+		printf("\t\t<div id=\"nav_external_container\" onClick=\"return true\">\n");
 		printf("\t\t\t<div id=\"nav_top\"></div>\n");
 		printf("\t\t\t<div id=\"nav_internal_container1\">\n");
 		printf("\t\t\t\t<div id=\"nav_internal_container2\">\n");
@@ -456,7 +465,7 @@ int main(int argc, char **argv)
 		{
 			char* section_display = "";
 			priority_queue* section_pages;
-		       	section_pages	= (priority_queue*)next_section->value;
+			section_pages	= (priority_queue*)next_section->value;
 			if(get_uci_option(ctx, &e, p, "gargoyle", "display", next_section->id) == UCI_OK)
 			{
 				section_display = get_option_value_string(uci_to_option(e));
@@ -498,7 +507,9 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
+					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" a onClick=\"return true\">\n");
+					printf("\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
+					printf("\t\t\t\t\t\t\t</a>\n");
 					printf("\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
 					priority_queue_node *next_section_page;
 					while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
@@ -524,11 +535,11 @@ int main(int argc, char **argv)
 							char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 							if(strcmp(bin_root, ".") == 0)
 							{
-  								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
 							}
-  							else
+							else
 							{
-  								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
 							}
 							free(bin_slash);
 							free(page_slash);
@@ -547,10 +558,12 @@ int main(int argc, char **argv)
 				{
 					printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n");
 					printf("\t\t\t\t\t<div class=\"nav_unselected_end1\">\n");
+					printf("\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected\">\n");
+					printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n");
+					printf("\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
 				}
 				
 				priority_queue_node *next_section_page;
@@ -577,14 +590,55 @@ int main(int argc, char **argv)
 				char* script_slash = next_section_script[0] == '/' ? strdup("") : strdup("/");
 				if(strcmp(bin_root, ".") == 0)
 				{
-					printf("\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", script_slash, next_section_script, section_display);
+					printf("\t\t\t\t\t\t\t<a href=\"%s%s\" onClick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
 				}
-  				else
+				else
 				{
-					printf("\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+					printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
 				}
-				free(bin_slash);
-				free(script_slash);
+				printf("\t\t\t\t\t\t</div>\n");
+				
+				int empty_section = 0;
+				if (peek_priority_queue_node(section_pages) == NULL)
+				{
+					empty_section = 1;
+				}
+				if (empty_section == 0)
+				{
+					printf("\t\t\t\t\t\t<div class=\"unselected_submenu_container\">\n");
+				}
+				while(next_section_page != NULL)
+				{
+					char* page_display="";
+					char* page_script="";
+					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+					if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
+					{
+						page_display = get_option_value_string(uci_to_option(e));
+					}
+					if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
+					{
+						page_script = get_option_value_string(uci_to_option(e));
+					}
+					char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
+					if(strcmp(bin_root, ".") == 0)
+					{
+						printf("\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+					}
+					else
+					{
+						printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+					}
+					free(bin_slash);
+					free(page_slash);
+					free(lookup);
+					next_section_page=shift_priority_queue_node(section_pages);
+				}
+				if (empty_section == 0)
+				{
+					printf("\t\t\t\t\t\t</div>\n");
+				}
 
 
 				printf("\t\t\t\t\t</div>\n");
@@ -773,7 +827,7 @@ void print_interface_vars(void)
 
 
 	uci_add_delta_path(state_ctx, state_ctx->savedir);
-       	uci_set_savedir(state_ctx, "/var/state"); 
+      	uci_set_savedir(state_ctx, "/var/state"); 
 	if(uci_load(state_ctx, "network", &p) == UCI_OK)
 	{
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
@@ -1309,7 +1363,7 @@ string_map* get_hostnames(void)
 			struct uci_package *p = NULL;
 			struct uci_element *e = NULL;
 			uci_add_delta_path(state_ctx, state_ctx->savedir);
-		       	uci_set_savedir(state_ctx, "/var/state");
+			uci_set_savedir(state_ctx, "/var/state");
 			if(uci_load(state_ctx, "network", &p) == UCI_OK)
 			{
 				if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
