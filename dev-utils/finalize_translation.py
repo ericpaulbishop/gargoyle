@@ -23,6 +23,7 @@ else:
 #if os.path.exists('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n'):
 for config_file in glob.glob('./*-src/.config'):
 	#there should be only one
+	print ('Editing config file to build in %s translation\n' % (active_lang,))
 	cfg_fileFO = open(config_file, 'rb')
 	cfg_doc=cfg_fileFO.readlines()
 	cfg_fileFO.close()

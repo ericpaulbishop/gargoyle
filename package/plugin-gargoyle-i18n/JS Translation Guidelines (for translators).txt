@@ -7,8 +7,9 @@ http://www.loc.gov/standards/iso639-2/php/code_list.php
 
 • the Makefile is to remain in English, but replace the multiple instances of English-ES with Yourlang-YL; the description should be translated into the target language. The description will appear in the plugins.sh & language tables at firstboot.
 • the 20+ individual translation files + the menus.txt file
+• each plugin-gargoyle-* may have a files/www/menu*.txt file for a language to add its translation
 
-
+---------------------------------------
 
 When converting English to the target language in the pagename.js files:
 

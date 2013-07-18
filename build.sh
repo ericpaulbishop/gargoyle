@@ -372,6 +372,13 @@ for target in $targets ; do
 
 	#copy this target configuration to build directory
 	cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
+	
+	
+	
+	#finish internationalization by setting the target language & adding the i18n plugin to the config file
+	#finish localization just deletes the (now unnecessary) language packages from the config file
+	[ "$translation_type" = "localize" ] 	&& ./dev-utils/finalize_translation.py 'localize' \
+											|| ./dev-utils/finalize_translation.py 'internationalize' "$active_lang"
 
 
 	#if target is custom, checkout optional packages and copy all that don't 
@@ -504,6 +511,9 @@ for target in $targets ; do
 
 		#copy profile config and rebuild
 		cp "$targets_dir/$target/profiles/$profile_name/config" .config
+		
+		[ "$translation_type" = "localize" ] 	&& ../dev-utils/finalize_translation.py 'localize' \
+												|| ../dev-utils/finalize_translation.py 'internationalize' "$active_lang"
 		
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."

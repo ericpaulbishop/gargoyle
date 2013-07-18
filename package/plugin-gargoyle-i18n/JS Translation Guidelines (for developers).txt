@@ -39,6 +39,6 @@ awk -F '=' '{ print $1 }' /path/to/yourpage.js | uniq -d
 Toubleshooting:
 
 • overview.sh:1		SyntaxError: Unexpected token '<'
-  Caused by a missing/incorect gargoyle_header_footer -z "ident.jz" in page.sh top section. The default language "ident.jz" will always be included in the scripts to be included - ensure the file is present. Languages other than fallback language can have pages missing & will not be included, but the fallback must be present.
+  Caused by a missing/incorect gargoyle_header_footer -z "ident.js" in page.sh top section. The default language "ident.jz" will always be included in the scripts to be included - ensure the file is present. Languages other than fallback language can have pages missing & will not be included, but the fallback must be present.
 • The last line of a translation.js file doesn't get translated in a haserl somepage.sh
   A translation page must end with a newline character. The haserl translation map splits based on newline characters - if the last newline is missing, it won't be mapped as a key-value pair & haserl won't have a translation for that key.
