@@ -251,20 +251,16 @@ char* get_root_hash(void)
 char* get_cookie_time(time_t t)
 {
 	struct tm* utc = gmtime(&t);
-	char wday[4];
-	char month[4];
 
 	char *wdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 			  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-	sprintf(wday, wdays[utc->tm_wday]);
-	sprintf(month, months[utc->tm_mon]);
-
 	char utc_str[200];
+
 	sprintf(utc_str, "%s, %d %s %d %02d:%02d:%02d UTC",
-		wday, utc->tm_mday, month, (utc->tm_year + 1900),
-		utc->tm_hour, utc->tm_min, utc->tm_sec);
+		wdays[utc->tm_wday], utc->tm_mday, months[utc->tm_mon],
+		(utc->tm_year + 1900), utc->tm_hour, utc->tm_min, utc->tm_sec);
 
 	return strdup(utc_str);
 }
