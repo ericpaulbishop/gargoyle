@@ -34,7 +34,7 @@ int main (int argc, char **argv)
 	int next_opt;
 	int read;
 	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:b:B:gG")) != -1)
-	{	
+	{
 		switch(next_opt)
 		{
 			case 'p':
@@ -77,7 +77,6 @@ int main (int argc, char **argv)
 			case 'B':
 				read = sscanf(optarg, "%ld", &browser_time);
 				browser_time = read > 0 ? browser_time : 0;
-				break;
 
 				break;
 			case 'g':
@@ -87,7 +86,7 @@ int main (int argc, char **argv)
 		}
 	}
 
-		
+
 	int valid = 0;
 	char* root_hash = get_root_hash();
 	if(root_hash != NULL)
