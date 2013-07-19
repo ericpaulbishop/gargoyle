@@ -237,14 +237,14 @@ void**  destroy_list(list* l, int destruction_type, unsigned long* num_values)
 	return values;
 }
 
-void* list_element_at(list* l, unsigned long index) 
+void* list_element_at(list* l, unsigned long index)
 {
 	void* return_value = NULL;
-	if(index >= 0 && l != NULL)
+	if(l != NULL)
 	{
 		unsigned long current_index = index - (unsigned long)((l->length)/2) > 0 ? l->length -1 : 0;
 		list_node* current_node = current_index == 0 ? l->head : l->tail;
-		
+
 		while(current_index != index && current_node != NULL)
 		{
 			current_node = current_index > index ? current_node->previous : current_node->next;
