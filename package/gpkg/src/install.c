@@ -164,7 +164,17 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			err = 1; //set back to 0 when data successfully loaded
 			if(num_ctrl_names > 0)
 			{
-				pkg_name = strdup(ctrl_name_list[0]);
+				int ctrl_name_index;
+				for(ctrl_name_index=0; ctrl_name_list[ctrl_name_index] != NULL; ctrl_name_index++)
+				{
+					if( strcmp(ctrl_name_list[ctrl_name_index], PROVIDES_STRING) != 0)
+					{
+						pkg_name = strdup(ctrl_name_list[ctrl_name_index]);
+					}
+				}
+
+
+
 				char* version = NULL;
 				int is_current;
 				string_map* pkg_info = get_package_current_or_latest(tmp_control_pkg_data, pkg_name, &is_current, &version);
