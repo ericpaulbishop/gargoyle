@@ -746,8 +746,8 @@ int main(int argc, char *argv[])
 
 #ifdef ONLYBG
     if (!(pingflags & BACKGROUND)) {
-        fprintf(stderr, "Must use the -b switch\n", av[0]);
-        exit(1);        
+        fprintf(stderr, "Must use the -b switch\n");
+        exit(1);
     }
 #endif
 
@@ -755,7 +755,7 @@ int main(int argc, char *argv[])
     period = atoi( av[0] );
     if ((period > 2000) || (period < 100)) {
         fprintf(stderr, "Invalid ping interval '%s'\n", av[0]);
-        exit(1);        
+        exit(1);
     }
 
     bzero((char *)&whereto, sizeof(whereto) );
@@ -780,7 +780,7 @@ int main(int argc, char *argv[])
     DBW_UL = atoi( av[2] );
     if ((DBW_UL < 100) || (DBW_UL >= INT_MAX/1000)) {
         fprintf(stderr, "Invalid download bandwidth '%s'\n", av[2]);
-        exit(1);        
+        exit(1);
     }
 
     //Convert kbps to bps.
