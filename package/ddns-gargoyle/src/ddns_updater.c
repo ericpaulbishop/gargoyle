@@ -1497,7 +1497,7 @@ char* lookup_domain_ip(char* url_str)
 	char* ip = NULL;
 
 	url_request* url = parse_url(url_str, NULL);
-	if(url !=  NULL);
+	if(url !=  NULL)
 	{
 		struct hostent* host;
 		host = gethostbyname(url->hostname);
@@ -1520,13 +1520,12 @@ char* get_local_ip(int ip_source, void* check_parameter)
 	else
 	{
 		char** urls = (char**)check_parameter;
-		
+
 		char* next_url;
 		char  first_url[MAX_LOOKUP_URL_LENGTH];
 		int   is_first_lookup;
 		initialize_default_ip_lookup_urls();
-		
-		
+
 
 		if(urls != NULL)
 		{
@@ -1556,7 +1555,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 		}
 
 	}
-	
+
 	return ip;
 }
 
