@@ -26,7 +26,7 @@ set_constant_variables()
 	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
 	#################################################################################################
 	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=1
+	num_build_threads=6
 }
 
 set_version_variables()
@@ -195,8 +195,21 @@ fi
 set_version_variables "$full_gargoyle_version"
 
 
-[ "$translation_type" = "localize" ] 	&& ./dev-utils/localize.py "$fallback_lang" "$active_lang" \
-										|| ./dev-utils/internationalize.py "$active_lang"
+#packages-orig is the original untouched packages directory before i18n/L10n occurred
+#restore the original so that the i18n/L10n scripts can modify them again
+[ -d "$top_dir/package-orig" ] && {
+	rm -rf "$top_dir/package"
+	mv "$top_dir/package-orig" "$top_dir/package"
+}
+
+[ ! -z $(which python 2>&1) ] && {
+	#whether localize or internationalize, the packages directory is going to be modified
+	#default behavior is internationalize; defined in Makefile
+	[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
+											|| ./dev-utils/accessibility/internationalize.py "$active_lang"
+} || {
+	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" '"$active_lang")
+}
 
 
 #compress javascript
@@ -375,10 +388,15 @@ for target in $targets ; do
 	
 	
 	
-	#finish internationalization by setting the target language & adding the i18n plugin to the config file
-	#finish localization just deletes the (now unnecessary) language packages from the config file
-	[ "$translation_type" = "localize" ] 	&& ./dev-utils/finalize_translation.py 'localize' \
-											|| ./dev-utils/finalize_translation.py 'internationalize' "$active_lang"
+	[ ! -z $(which python 2>&1) ] && {
+		#finish internationalization by setting the target language & adding the i18n plugin to the config file
+		#finish localization just deletes the (now unnecessary) language packages from the config file
+		[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
+												|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+	} || {
+		#NOTE: localize is not supported because it requires python
+		./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+	}
 
 
 	#if target is custom, checkout optional packages and copy all that don't 
@@ -512,8 +530,17 @@ for target in $targets ; do
 		#copy profile config and rebuild
 		cp "$targets_dir/$target/profiles/$profile_name/config" .config
 		
-		[ "$translation_type" = "localize" ] 	&& ../dev-utils/finalize_translation.py 'localize' \
-												|| ../dev-utils/finalize_translation.py 'internationalize' "$active_lang"
+		
+		[ ! -z $(which python 2>&1) ] && {
+			#finish internationalization by setting the target language & adding the i18n plugin to the config file
+			#finish localization just deletes the (now unnecessary) language packages from the config file
+			[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
+													|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+		} || {
+			#NOTE: localize is not supported because it requires python
+			./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+		}
+		
 		
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."

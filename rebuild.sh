@@ -47,7 +47,7 @@ set_constant_variables()
 	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
 	#################################################################################################
 	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=1
+	num_build_threads=6
 
 }
 
@@ -190,6 +190,9 @@ full_gargoyle_version="$2"
 verbosity="$3"
 js_compress="$4"
 specified_profile="$5"
+translation_type="$6"
+fallback_lang="$7"
+active_lang="$8"
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
 	targets=$(ls $targets_dir | sed 's/custom//g' 2>/dev/null)
@@ -200,6 +203,17 @@ fi
 set_version_variables "$full_gargoyle_version"
 
 
+#packages-orig is the original untouched packages directory before i18n/L10n occurred
+#restore the original so that the i18n/L10n scripts can modify them again
+[ -d "$top_dir/package-orig" ] && {
+	rm -rf "$top_dir/package"
+	mv "$top_dir/package-orig" "$top_dir/package"
+}
+
+
+#perhaps there were changes in some webpages or translations to be localized, so run the scripts again
+[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
+										|| ./dev-utils/accessibility/internationalize.py "$active_lang"
 
 
 #compress javascript
@@ -325,6 +339,17 @@ for target in $targets ; do
 	
 		#copy this target configuration to build directory
 		cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
+		
+		
+		[ ! -z $(which paython 2>&1) ] && {
+			#finish internationalization by setting the target language & adding the i18n plugin to the config file
+			#finish localization just deletes the (now unnecessary) language packages from the config file
+			[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
+													|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+		} || {
+			#NOTE: localize is not supported because it requires python
+			./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+		}
 
 
 		#enter build directory and make sure we get rid of all those pesky .svn files, 
@@ -409,6 +434,18 @@ for target in $targets ; do
 
 			#copy profile config and rebuild
 			cp "$targets_dir/$target/profiles/$profile_name/config" .config
+			
+			
+			[ ! -z $(which paython 2>&1) ] && {
+				#finish internationalization by setting the target language & adding the i18n plugin to the config file
+				#finish localization just deletes the (now unnecessary) language packages from the config file
+				[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
+														|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+			} || {
+				#NOTE: localize is not supported because it requires python
+				./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+			}
+			
 
 			openwrt_target=$(get_target_from_config "./.config")
 			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."

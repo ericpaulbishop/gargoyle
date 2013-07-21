@@ -554,6 +554,6 @@ if os.path.exists('./package/haserl/patches/104-translate.patch'):
 	os.remove('./package/haserl/patches/104-translate.patch')
 	
 for i18n_pack in glob.glob('./package/plugin-gargoyle-i18n*'):
-	print 'Removing %s package from packages folder' % (i18n_pack, )
+	print 'Removing %s package from package folder' % (i18n_pack, )
 	#os.removedirs(i18n_pack)
 	shutil.rmtree(i18n_pack)
