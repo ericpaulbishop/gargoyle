@@ -4,17 +4,17 @@
 
 pingS.Pdog="Perro Guardián de Ping";
 pingS.EnbP="Activar Perro Guardián de Ping";
-pingS.PgIP="Dirección IP para Ping";
+pingS.PgIP="Dirección IP A Realizar Ping";
 pingS.IPAd="Dirección IP";
 pingS.Intv="Intervalo de Ping";
-pingS.StDly="Comenzar Demora";
-pingS.FlCnt="Recuento de ping fracaso";
+pingS.StDly="Demora Inicial";
+pingS.FlCnt="Recuento de pings fallidos";
 pingS.Actn="Acción";
-pingS.WRcon="Vuelva a Conectar WAN";
+pingS.WRcon="Reconectar WAN";
 pingS.Rbot="Reiniciar";
-pingS.Rscp="Ejecutar guión personalizado";
-pingS.Scpt="Guión";
-pingS.SpcWarn="Si el comando contiene espacios, se debe dar entre comillas";
+pingS.Rscp="Ejecutar script personalizado";
+pingS.Scpt="Script";
+pingS.SpcWarn="Si el comando contiene espacios debe ser escrito entre comillas";
 
 //javascript
-pingS.ScptErr="Debe agregar la secuencia de comandos para ejecutar";
+pingS.ScptErr="Debe agregar el script a ejecutar";
