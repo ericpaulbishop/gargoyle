@@ -3,18 +3,18 @@
  */
 
 logS.LSect="Iniciar Sesión";
-logS.EAdmP="Introduzca Contraseña de Administrador";
+logS.EAdmP="Introduzca la Contraseña de Administrador";
 logS.YQot="Su Cuota";
-logS.NQot="Todo el Cuota del Red";
+logS.NQot="Cuota de la Red Entera";
 logS.CTime="Fecha y Hora Actual";
 
 //javascript
 logS.passErr="ERROR: Debe introducir una contraseña";
 logS.Lging="Inicio de Sesión";
-logS.SExp="Sesión Expirado";
+logS.SExp="Sesión Expirada";
 logS.InvP="Contraseña no válida";
-logS.LOut="Salido";
-logS.Qnam=["total arriba+abajo", "descargar", "cargar" ];
+logS.LOut="Sesión Finalizada";
+logS.Qnam=["total subida+descarga", "descarga", "subida" ];
 logS.of="de";
 logS.fQuo="para Cuota";
 logS.husd="se ha utilizado";

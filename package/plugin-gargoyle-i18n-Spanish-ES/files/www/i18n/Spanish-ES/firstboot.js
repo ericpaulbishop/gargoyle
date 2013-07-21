@@ -3,7 +3,7 @@
  */
 
 fbS.ISSect="Ajustes Iniciales";
-fbS.npass="Introduzca una nueva contraseña ahora";
+fbS.npass="Ingrese una nueva contraseña ahora";
 fbS.NPass="Nueva Contraseña";
 fbS.Stz="Seleccione su zona horaria";
 fbS.SSet="Guardar Ajustes";

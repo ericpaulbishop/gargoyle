@@ -3,5 +3,5 @@
  */
 
 sylS.SLogs="Registros del Sistema";
-sylS.Rfsh="Refrescar";
+sylS.Rfsh="Actualizar";
 sylS.Load="Cargando Registros...";
