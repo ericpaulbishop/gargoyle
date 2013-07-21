@@ -3,7 +3,7 @@
  */
 
 connLS.CLSect="Límites de Conexión";
-connLS.MaxC="Conexiones máx";
+connLS.MaxC="Conexiones Máximas";
 connLS.TTout="Tiempo de espera de TCP";
 connLS.UTout="Tiempo de espera de UDP";
-connLS.max="max";
+connLS.max="máx";
