@@ -3,9 +3,9 @@
  */
 
 torLS.tIP="Para su IP, Tor es";
-torLS.tEnab="Habilitar Tor para su IP";
+torLS.tEnab="Activar Tor para su IP";
 torLS.tDisa="Desactivar Tor para su IP";
-torLS.IPErr="ERROR: Su IP no fue asignado por el servidor DHCP y no se configura como un IP estático conocido\n\nConfiguración de Tor prohibido";
-torLS.EqErr="ERROR: desactivado juego por IP a Tor\n\nConfiguración de Tor prohibido";
-torLS.EnabMsg="Tor inhabilitado para su IP con éxito";
-torLS.DisbMsg="Tor habilitado para su IP con éxito";
+torLS.IPErr="ERROR: Su IP no ha sido asignada por el servidor DHCP y no se encuentra configurada como una IP estática conocida\n\nConfiguración de Tor prohibida";
+torLS.EqErr="ERROR: La asociación de Tor para cada IP se encuentra desactivada\n\nConfiguración de Tor prohibida";
+torLS.EnabMsg="Tor activado exitosamente para su IP";
+torLS.DisbMsg="Tor desactivado exitosamente para su IP";
