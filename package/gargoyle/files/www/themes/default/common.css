@@ -1,15 +1,15 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright Â© 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
 
 html
 {
-	background: url("images/slant_background.jpg") top center repeat;
+	background:url("images/slant_background.jpg") top center repeat;
 	padding:0px;
 	margin:0px;
 	border:0px;
@@ -32,7 +32,6 @@ body
 	width:100%;
 	height:100%;
 	overflow:hidden;
-
 	display:none;
 	background:#000;
 	position:absolute;
@@ -41,6 +40,7 @@ body
 	MozOpacity:0.75;
 	filter:alpha(opacity=75);
 }
+
 #wait_msg
 {
 	display:none;
@@ -50,6 +50,7 @@ body
 	width:300px;
 	height:150px;
 }
+
 #wait_icon
 {
 	left:135px;
@@ -57,6 +58,7 @@ body
 	position:absolute;
 	display:block;
 }
+
 #wait_txt
 {
 	left:10px;
@@ -69,6 +71,7 @@ body
 	font-weight:bold;
 	padding-bottom:20px;
 }
+
 .select_free
 {
 	display:none;
@@ -81,18 +84,18 @@ body
 	height:3500px;
 }
 
-
 #outer_logo
 {
 	position:absolute;
 	display:block;
 	top:0px;
-	left: 0px;
+	left:0px;
 	width:210px;
 	height:160px;
-	background: url("images/slant_background.jpg") top center repeat;
+	background:url("images/slant_background.jpg") top center repeat;
 	z-index:700;
 }
+
 #inner_logo
 {
 	position:absolute;
@@ -102,9 +105,10 @@ body
 	left:10px;
 	width:200px;
 	height:135px;
-	background: url("images/top-gradient-logo.png") top no-repeat;
+	background:url("images/top-gradient-logo.png") top no-repeat;
 	z-index:800;
 }
+
 #garg_title
 {
 	position:absolute;
@@ -116,6 +120,7 @@ body
 	z-index:900;
 	color:#211679;
 }
+
 #garg_desc
 {
 	position:absolute;
@@ -128,6 +133,7 @@ body
 	z-index:900;
 	color:#211679;
 }
+
 #garg_host
 {
 	position:absolute;
@@ -140,8 +146,6 @@ body
 	color:#211679;
 }
 
-
-
 #outer_container
 {
 	display:block;
@@ -153,12 +157,13 @@ body
 	margin:0px;
 	border:0px;
 	padding-bottom:30px;
-	background: url("images/nav_unselected.png") left repeat-y;
+	background:url("images/nav_unselected.png") left repeat-y;
 }
+
 #outer_footer
 {
 	display:block;
-	background: url("images/nav_unselected.png") center repeat;
+	background:url("images/nav_unselected.png") center repeat;
 	position:absolute;
 	width:200px;
 	top:0px;
@@ -174,15 +179,15 @@ body
 	position:absolute;
 	display:block;
 	top:160px;
-	left:  0px;
-	width: 200px;
+	left:0px;
+	width:200px;
 	bottom:0px;
 }
 
 #nav_top
 {
 	position:absolute;
-	background: url("images/nav_top_external.png") top left no-repeat;
+	background:url("images/nav_top_external.png") top left no-repeat;
 	top:0px;
 	left:0px;
 	height:22px;
@@ -190,26 +195,24 @@ body
 	z-index:500;
 }
 
-
 #nav_internal_container1
 {
 	position:absolute;
-	background: url("images/nav_unselected.png") center repeat;
+	background:url("images/nav_unselected.png") center repeat;
 	top:8px;
 	width:200px;
 	bottom:0px;
 	z-index:250;
 }
 
-
 #nav_internal_container2
 {
-	background: url("images/nav_unselected.png") center repeat;
+	background:url("images/nav_unselected.png") center repeat;
 	position:relative;
 	width:200px;
 	top:0px;
 	left:0px;
-	font-family: verdana, arial, sans-serif;
+	font-family:verdana, arial, sans-serif;
 	font-size:18px;
 	z-index:300;
 }
@@ -223,10 +226,12 @@ body
 	padding-top:12px;
 	padding-bottom:12px;
 }
+
 #nav_internal_container2 a:visited
 {
 	color:#211679;
 }
+
 #nav_internal_container2 a:hover
 {
 	color:#fff;
@@ -235,28 +240,29 @@ body
 	font-weight:bolder;
 }
 
-
 .nav_unselected_divider_end1
 {
-	background: url("images/nav_top_unselected_internal.png") top no-repeat;
+	background:url("images/nav_top_unselected_internal.png") top no-repeat;
 	position:absolute;
 	width:200px;
 	height:10px;
 	left:0px;
 	z-index:400;
 }
+
 .nav_selected_end1
 {
-	background: url("images/nav_top_selected_internal.png") top center no-repeat;
+	background:url("images/nav_top_selected_internal.png") top center no-repeat;
 	position:relative;
 	width:200px;
 	top:0px;
 	padding-top:14px;
 	z-index:400;
 }
+
 .nav_selected_container_end1
 {
-	background: url("images/nav_selected.png") center repeat;
+	background:url("images/nav_selected.png") center repeat;
 	position:relative;
 	width:184px;
 	left:8px;
@@ -274,9 +280,7 @@ body
 	left:8px;
 	width:184px;
 	z-index:0;
-	
 }
-
 
 .nav_unselected
 {
@@ -287,23 +291,23 @@ body
 	height:40px;
 	margin:0px;
 	padding:0px;
-
 }
-
 
 .nav_selected
 {
-	background: url("images/nav_selected.png") repeat;
+	background:url("images/nav_selected.png") repeat;
 	display:block;
 	position:relative;
 	width:184px;
 	left:8px;
 }
+
 .nav_selected_container
 {
 	width:184px;
 	top:0px;
 }
+
 .selected_header
 {
 	padding-left:12px;
@@ -311,16 +315,15 @@ body
 	text-decoration:underline;
 	color:#000;
 }
+
 .selected_single_header
 {
 	padding-top:6px;
-	padding-bottom:15px; 
+	padding-bottom:15px;
 	padding-left:12px;
 	font-weight:bolder;
 	color:#000;
 }
-
-
 
 #submenu_container
 {
@@ -334,8 +337,9 @@ body
 {
 	color:#000;
 	padding-left:15px;
-	background: url("images/black_carat.png") left no-repeat;
+	background:url("images/black_carat.png") left no-repeat;
 }
+
 #submenu_container a
 {
 	display:block;
@@ -343,44 +347,43 @@ body
 	padding-bottom:0px;
 	padding-left:15px;
 }
+
 #submenu_container a:hover
 {
 	display:block;
-	background: url("images/blue_carat.png") left no-repeat;
+	background:url("images/blue_carat.png") left no-repeat;
 	padding-left:15px;
 	color:#211679;
-
 }
-
 
 .nav_selected_divider1
 {
-	background: url("images/nav_selected_divider_1.png") center top no-repeat;
+	background:url("images/nav_selected_divider_1.png") center top no-repeat;
 	position:relative;
-	width: 184px;
-	height: 8px;
+	width:184px;
+	height:8px;
 	left:8px;
 	overflow:hidden;
 }
 
-
 .nav_selected_divider2
 {
-	background: url("images/nav_selected_divider_2.png") center top no-repeat;
+	background:url("images/nav_selected_divider_2.png") center top no-repeat;
 	position:relative;
-	width: 184px;
-	height: 1px;
+	width:184px;
+	height:1px;
 	left:8px;
 	margin:0px;
 	padding:0px;
 	overflow:hidden;
 }
+
 .nav_selected_divider_end2
 {
-	background: url("images/nav_selected_divider_2.png") center top no-repeat;
+	background:url("images/nav_selected_divider_2.png") center top no-repeat;
 	position:relative;
-	width: 184px;
-	height: 1px;
+	width:184px;
+	height:1px;
 	left:8px;
 	margin:0px;
 	padding:0px;
@@ -389,32 +392,31 @@ body
 
 .nav_unselected_divider
 {
-	background: url("images/nav_unselected_divider.png") center top no-repeat;
+	background:url("images/nav_unselected_divider.png") center top no-repeat;
 	position:relative;
 	width:184px;
-	height: 4px;
+	height:4px;
 	left:8px;
 	overflow:hidden;
 }
 
 .nav_unselected_divider_end2
 {
-	background: url("images/nav_unselected_divider.png") center top no-repeat;
+	background:url("images/nav_unselected_divider.png") center top no-repeat;
 	position:relative;
 	width:184px;
-	height: 4px;
+	height:4px;
 	left:8px;
 	overflow:hidden;
 }
 
-
 #main_external_container
-{	
+{
 	display:block;
 	position:relative;
 	top:30px;
-	left:  230px;
-	width: 570px;
+	left:230px;
+	width:570px;
 }
 
 #main_top
@@ -424,7 +426,7 @@ body
 	left:0px;
 	height:22px;
 	width:570px;
-	background: url("images/main_top.png") bottom center no-repeat;
+	background:url("images/main_top.png") bottom center no-repeat;
 }
 
 #main_bottom
@@ -434,10 +436,8 @@ body
 	left:0px;
 	height:50px;
 	width:570px;
-	background: url("images/main_bottom.png") top center no-repeat;
+	background:url("images/main_bottom.png") top center no-repeat;
 }
-
-
 
 #main_internal_container
 {
@@ -448,7 +448,5 @@ body
 	width:542px;
 	padding-left:14px;
 	padding-right:14px;
-	background: url("images/main_internal.png") center repeat;
+	background:url("images/main_internal.png") center repeat;
 }
-
-

@@ -1,27 +1,27 @@
 /*
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
 
 button *
 {
-border: none !important; 
- }
+        border:none !important;
+}
 
 input,
 input *
 {
-outline: none !important; 
- }
+        outline:none !important;
+}
 
 button::-moz-focus-outer,
 ::-moz-focus-inner
 {
-border:none!important;
+        border:none!important;
 }
 
 
@@ -29,14 +29,17 @@ a
 {
 	color:#211679;
 }
+
 a:visited
 {
 	color:#a400b3;
 }
+
 a:active
 {
 	outline:none;
 }
+
 a:focus
 {
 	outline:none;
@@ -44,11 +47,12 @@ a:focus
 
 legend
 {
-	font-family: verdana, arial, sans-serif;
+	font-family:verdana, arial, sans-serif;
 	font-size:18px;
 	font-weight:bold;
 	color:#888AB8;
 }
+
 fieldset
 {
 	width:500px;
@@ -57,10 +61,10 @@ fieldset
 	border:1px;
 	border-style:solid;
 	border-color:#888AB8;
-	
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 }
+
 fieldset div
 {
 	display:block;
@@ -68,24 +72,24 @@ fieldset div
 	margin-bottom:5px;
 	clear:left;
 }
-	
+
 fieldset input
 {
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 }
+
 fieldset select
 {
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 }
+
 fieldset label
 {
 	font-family:verdana, arial, sans-serif;
 	font-size:10px;
 }
-
-
 
 .leftcolumn
 {
@@ -96,21 +100,25 @@ fieldset label
 	margin-left:5px;
 	margin-right:5px;
 }
+
 .rightcolumn
 {
 	display:inline;
 }
+
 .rightcolumnonly
 {
 	display:block;
 	margin-left:210px;
 }
+
 .rightcolumnindent
 {
 	display:inline;
 	margin-left:25px;
 
 }
+
 .nocolumn
 {
 	display:block;
@@ -118,6 +126,7 @@ fieldset label
 	margin-left:5px;
 	margin-right:5px;
 }
+
 .narrowleftcolumn
 {
 	display:block;
@@ -127,11 +136,13 @@ fieldset label
 	margin-left:5px;
 	margin-right:5px;
 }
+
 .widerightcolumnonly
 {
 	display:block;
 	margin-left:135px;
 }
+
 .middlecolumn
 {
 	display:block;
@@ -149,49 +160,45 @@ fieldset label
 
 .wideleftcolumn
 {
-	display:block;                          
-	float:left;                             
-	width:250px;                            
-	margin-left:5px;                        
+	display:block;
+	float:left;
+	width:250px;
+	margin-left:5px;
 	margin-right:5px;
 }
+
 .farrightcolumnonly
 {
 	display:block;
 	margin-left:260px;
 }
 
-
 .internal_divider
 {
 	display:block;
 	height:3px;
 	width:175px;
-	
 	margin-bottom:20px;
 	margin-top:20px;
 	margin-left:5px;
-	
 	border-top:1px;
 	border-left:0px;
 	border-right:0px;
 	border-bottom:0px;
-
 	border-style:solid;
 	border-color:#888AB8;
 }
 
-	
 .bottom_gap
 {
 	margin-bottom:30px;
 }
 
-
 .aligned_check_label
 {
 	vertical-align:middle;
 }
+
 .aligned_check
 {
 	padding:0;
@@ -206,18 +213,18 @@ fieldset label
 	display:block;
 	margin-left:10px;
 	width:475px;
-	background: #ffeab3;
-	border: 1px solid #000;
-	font-family: monospace;
+	background:#ffeab3;
+	border:1px solid #000;
+	font-family:monospace;
 	padding:5px;
 }
+
 .contributer
 {
 	font-size:115%;
 	font-weight:bold;
 	text-decoration:underline;
 }
-
 
 p
 {
@@ -227,18 +234,20 @@ p
 table
 {
 	border-spacing:0px;
-	border-collapse: collapse
+	border-collapse:collapse
 }
 
 tr.table_row_add
 {
 	text-align:center;
 }
+
 tr.table_row_header
 {
 	border-bottom:1px solid #000;
 	text-align:center;
 }
+
 tr.table_row_header_disabled
 {
 	border-bottom:1px solid #000;
@@ -248,25 +257,29 @@ tr.table_row_header_disabled
 tr.odd
 {
 	border:1px solid #000;
-	background-color: #dadaff;
+	background-color:#dadaff;
 }
+
 tr.even
 {
 	border:1px solid #000;
-	background-color: #fff;
+	background-color:#fff;
 }
+
 tr.disabled_odd
 {
 	border:1px solid #000;
-	color: #606060;
-	background-color: #e1e1e1;
+	color:#606060;
+	background-color:#e1e1e1;
 }
+
 tr.disabled_even
 {
 	border:1px solid #000;
-	color: #606060;
-	background-color: #fff;
+	color:#606060;
+	background-color:#fff;
 }
+
 th
 {
 	padding-left:5px;
@@ -275,102 +288,105 @@ th
 	font-weight:normal;
 	font-style:italic;
 }
-td 
+
+td
 {
 	padding-left:5px;
 	padding-right:5px;
 }
 
-
 input.default_button
 {
 	text-align:center;
-	background: url("images/default_button_gradient_normal.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right:  1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: #000;
-	margin: 5px;
-	cursor: pointer;
-}
-input.default_button:hover
-{
-	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555;
-	border-top: 1px solid #737582;
-	border-left:  1px solid #737582;
-	border-right: 1px solid #fff;
-	border-bottom: 1px solid #fff;
-	margin: 5px;
-}
-input.default_button:active
-{
-	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555;
-	border-top: 1px solid #737582;
-	border-left:  1px solid #737582;
-	border-right: 1px solid #fff;
-	border-bottom: 1px solid #fff;
-	margin: 5px;
+	background:url("images/default_button_gradient_normal.png") center top repeat-x;
+	border-bottom:1px solid #737582;
+	border-right:1px solid #737582;
+	border-left:1px solid #fff;
+	border-top:1px solid #fff;
+	color:#000;
+	margin:5px;
+	cursor:pointer;
 }
 
+input.default_button:hover
+{
+	background:url("images/default_button_gradient_pressed.png") center top repeat-x;
+	color:#555;
+	border-top:1px solid #737582;
+	border-left:1px solid #737582;
+	border-right:1px solid #fff;
+	border-bottom:1px solid #fff;
+	margin:5px;
+}
+
+input.default_button:active
+{
+	background:url("images/default_button_gradient_pressed.png") center top repeat-x;
+	color:#555;
+	border-top:1px solid #737582;
+	border-left:1px solid #737582;
+	border-right:1px solid #fff;
+	border-bottom:1px solid #fff;
+	margin:5px;
+}
 
 input.default_button_disabled
 {
 	text-align:center;
-	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right:  1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: #808080;
-	margin: 5px;
-	cursor: auto;
+	background:url("images/default_button_gradient_disabled.png") center top repeat-x;
+	border-bottom:1px solid #737582;
+	border-right:1px solid #737582;
+	border-left:1px solid #fff;
+	border-top:1px solid #fff;
+	color:#808080;
+	margin:5px;
+	cursor:auto;
 }
+
 input.default_button_disabled:hover
 {
 	text-align:center;
-	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right:  1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: #808080;
-	margin: 5px;
-	cursor: auto;
+	background:url("images/default_button_gradient_disabled.png") center top repeat-x;
+	border-bottom:1px solid #737582;
+	border-right:1px solid #737582;
+	border-left:1px solid #fff;
+	border-top:1px solid #fff;
+	color:#808080;
+	margin:5px;
+	cursor:auto;
 }
-
 
 input.big_button
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_normal.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_normal.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#333;
 }
+
 input.big_button:hover
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_highlighted.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_highlighted.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#000;
 }
+
 input.big_button:active
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_pressed.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_pressed.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#555;
@@ -381,87 +397,90 @@ input.big_button_disabled
 	text-align:center;
 	width:187px;
 	height:45px;
-	background: url("images/big_button_disabled.png") center top no-repeat;
-	border: none;
+	background:url("images/big_button_disabled.png") center top no-repeat;
+	border:none;
 	font-weight:bold;
 	font-size:16px;
-	color: #808080;
-	cursor: auto;
+	color:#808080;
+	cursor:auto;
 }
+
 input.big_button_disabled:hover
 {
 	text-align:center;
 	width:187px;
 	height:45px;
-	background: url("images/big_button_disabled.png") center top no-repeat;
-	border: none;
+	background:url("images/big_button_disabled.png") center top no-repeat;
+	border:none;
 	font-weight:bold;
 	font-size:16px;
-	color: #808080;
-	cursor: auto;
+	color:#808080;
+	cursor:auto;
 }
-
-
 
 input.text_error
 {
 	color:#f00;
 }
+
 input.text_disabled
 {
 	color:#aaa;
 }
+
 select.select_disabled
 {
 	color:#aaa;
 }
-
 
 #bottom_button_container
 {
 	margin-top:10px;
 	margin-left:10px;
 }
+
 #update_container
 {
 	margin-top:10px;
 	margin-left:10px;
 	display:none;
 }
+
 input.bottom_button
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_normal.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_normal.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#333;
 }
+
 input.bottom_button:hover
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_highlighted.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_highlighted.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#000;
 }
+
 input.bottom_button:active
 {
 	width:187px;
 	height:45px;
-	background: url("images/big_button_pressed.png") center top no-repeat;
-	border: none;
-	cursor: pointer;
+	background:url("images/big_button_pressed.png") center top no-repeat;
+	border:none;
+	cursor:pointer;
 	font-weight:bold;
 	font-size:16px;
 	color:#555;
 }
-
 
 #control_column_container
 {
@@ -469,6 +488,7 @@ input.bottom_button:active
 	width:450px;
 	height:100px;
 }
+
 #plot1_control_column
 {
 	position:absolute;
@@ -479,6 +499,7 @@ input.bottom_button:active
 	height:100px;
 	margin-right:10px;
 }
+
 #plot2_control_column
 {
 	position:absolute;
@@ -489,6 +510,7 @@ input.bottom_button:active
 	height:100px;
 	margin-right:10px;
 }
+
 #plot3_control_column
 {
 	position:absolute;
@@ -499,24 +521,28 @@ input.bottom_button:active
 	height:100px;
 	margin-right:10px;
 }
+
 #plot1_title
 {
 	font-weight:bold;
 	text-decoration:underline;
 	color:blue;
 }
+
 #plot2_title
 {
 	font-weight:bold;
 	text-decoration:underline;
 	color:red;
 }
+
 #plot3_title
 {
 	font-weight:bold;
 	text-decoration:underline;
 	color:green;
 }
+
 .pseudo_link
 {
 	cursor:pointer;
@@ -524,9 +550,10 @@ input.bottom_button:active
 	text-decoration:underline;
 	font-style:italic;
 }
+
 .bandwidth_title_text
 {
-	font-family: verdana, arial, sans-serif;
+	font-family:verdana, arial, sans-serif;
 	margin-left:0px;
 	margin-bottom:5px;
 	display:block;
@@ -539,7 +566,7 @@ input.bottom_button:active
 
 .plot_header
 {
-	font-family: verdana, arial, sans-serif;
+	font-family:verdana, arial, sans-serif;
 	font-size:18px;
 	font-weight:bold;
 	color:#888AB8;
@@ -548,27 +575,23 @@ input.bottom_button:active
 	margin-bottom:10px;
 }
 
-
 td.total_bandwidth_table_column_1
 {
 	text-align:right;
 	border:1px solid #000;
 }
+
 td.total_bandwidth_table_column_2
 {
 	text-align:right;
 	border:1px solid #000;
 }
+
 td.total_bandwidth_table_column_3
 {
 	text-align:right;
 	border:1px solid #000;
 }
-
-
-
-
-
 
 td.static_ip_table_column_1
 {
@@ -577,26 +600,31 @@ td.static_ip_table_column_1
 	border-left:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_ip_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_ip_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_ip_table_column_4
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_ip_table_column_5
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_ip_table_column_6
 {
         border-top:1px solid #000;
@@ -604,44 +632,46 @@ td.static_ip_table_column_6
         border-bottom:1px solid #000;
 }
 
-
-
-
-
-
 td.portf_table_column_1
 {
 	max-width:30px;
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_table_column_2
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_table_column_3
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_table_column_4
 {
 	border:1px solid #000;
 }
+
 td.portf_table_column_5
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_table_column_6
 {
 	border:1px solid #000;
 }
+
 td.portf_table_column_7
 {
 	border:1px solid #000;
 }
+
 td.portf_table_column_8
 {
 	border:1px solid #000;
@@ -653,33 +683,40 @@ td.portf_range_table_column_1
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_2
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_3
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_4
 {
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_5
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_6
 {
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_7
 {
 	border:1px solid #000;
 }
+
 td.portf_range_table_column_8
 {
 	border:1px solid #000;
@@ -690,11 +727,13 @@ td.upnp_table_column_1
 	text-align:left;
 	border:1px solid #000;
 }
+
 td.upnp_table_column_2
 {
 	text-align:center;
 	border:1px solid #000;
 }
+
 td.upnp_table_column_3
 {
 	text-align:right;
@@ -708,42 +747,49 @@ td.qos_class_table_column_1
 	border-left:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_3
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_4
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_5
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_6
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_7
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_class_table_column_8
 {
 	text-align:center;
@@ -752,9 +798,6 @@ td.qos_class_table_column_8
 	border-bottom:1px solid #000;
 }
 
-
-
-
 td.qos_rule_table_column_1
 {
 	text-align:left;
@@ -762,30 +805,35 @@ td.qos_rule_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_rule_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_rule_table_column_3
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_rule_table_column_4
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_rule_table_column_5
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.qos_rule_table_column_6
 {
 	text-align:center;
@@ -794,7 +842,6 @@ td.qos_rule_table_column_6
 	border-bottom:1px solid #000;
 }
 
-
 td.ddns_table_column_1
 {
 	text-align:left;
@@ -802,30 +849,35 @@ td.ddns_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ddns_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ddns_table_column_3
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ddns_table_column_4
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ddns_table_column_5
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ddns_table_column_6
 {
 	text-align:center;
@@ -834,7 +886,6 @@ td.ddns_table_column_6
 	border-bottom:1px solid #000;
 }
 
-
 td.connection_table_column_1
 {
 	text-align:left;
@@ -842,6 +893,7 @@ td.connection_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.connection_table_column_2
 {
 	text-align:left;
@@ -849,6 +901,7 @@ td.connection_table_column_2
 	border-bottom:1px solid #000;
 	width:15em;
 }
+
 td.connection_table_column_3
 {
 	text-align:left;
@@ -856,6 +909,7 @@ td.connection_table_column_3
 	border-bottom:1px solid #000;
 	width:10em;
 }
+
 td.connection_table_column_4
 {
 	text-align:left;
@@ -863,6 +917,7 @@ td.connection_table_column_4
 	border-bottom:1px solid #000;
 	width:7em;
 }
+
 td.connection_table_column_5
 {
 	text-align:left;
@@ -871,8 +926,6 @@ td.connection_table_column_5
 	border-bottom:1px solid #000;
 }
 
-
-
 td.mac_table_column_1
 {
 	text-align:left;
@@ -880,6 +933,7 @@ td.mac_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.mac_table_column_2
 {
 	text-align:left;
@@ -895,6 +949,7 @@ td.wifi_wds_mac_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.wifi_wds_mac_table_column_2
 {
 	text-align:left;
@@ -902,6 +957,7 @@ td.wifi_wds_mac_table_column_2
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bridge_wds_mac_table_column_1
 {
 	text-align:left;
@@ -909,6 +965,7 @@ td.bridge_wds_mac_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bridge_wds_mac_table_column_2
 {
 	text-align:left;
@@ -916,6 +973,7 @@ td.bridge_wds_mac_table_column_2
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bridge_dns_table_column_1
 {
 	text-align:left;
@@ -923,6 +981,7 @@ td.bridge_dns_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bridge_dns_table_column_2
 {
 	text-align:left;
@@ -930,6 +989,7 @@ td.bridge_dns_table_column_2
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.lan_dns_table_column_1
 {
 	text-align:left;
@@ -937,6 +997,7 @@ td.lan_dns_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.lan_dns_table_column_2
 {
 	text-align:left;
@@ -945,7 +1006,6 @@ td.lan_dns_table_column_2
 	border-bottom:1px solid #000;
 }
 
-
 td.ip_table_column_1
 {
 	text-align:left;
@@ -953,6 +1013,7 @@ td.ip_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.ip_table_column_2
 {
 	text-align:left;
@@ -968,12 +1029,14 @@ td.webmon_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.webmon_table_column_2
 {
 	text-align:left;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.webmon_table_column_3
 {
 	text-align:left;
@@ -994,12 +1057,14 @@ td.rule_applies_to_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_applies_to_table_column_2
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_remote_ip_table_column_1
 {
 	border-left:1px solid #000;
@@ -1007,12 +1072,14 @@ td.rule_remote_ip_table_column_1
 	border-bottom:1px solid #000;
 
 }
+
 td.rule_remote_ip_table_column_2
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_url_match_table_column_1
 {
 	border-left:1px solid #000;
@@ -1020,16 +1087,19 @@ td.rule_url_match_table_column_1
 	border-bottom:1px solid #000;
 
 }
+
 td.rule_url_match_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_url_match_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_url_match_table_column_4
 {
 	border-right:1px solid #000;
@@ -1043,17 +1113,20 @@ td.rule_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.rule_table_column_4
 {
 	border-right:1px solid #000;
@@ -1067,12 +1140,14 @@ td.exception_applies_to_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_applies_to_table_column_2
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_remote_ip_table_column_1
 {
 	border-left:1px solid #000;
@@ -1080,12 +1155,14 @@ td.exception_remote_ip_table_column_1
 	border-bottom:1px solid #000;
 
 }
+
 td.exception_remote_ip_table_column_2
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_url_match_table_column_1
 {
 	border-left:1px solid #000;
@@ -1093,16 +1170,19 @@ td.exception_url_match_table_column_1
 	border-bottom:1px solid #000;
 
 }
+
 td.exception_url_match_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_url_match_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_url_match_table_column_4
 {
 	border-right:1px solid #000;
@@ -1116,23 +1196,27 @@ td.exception_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.exception_table_column_4
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_ip_table_column_1
 {
 	text-align:left;
@@ -1140,6 +1224,7 @@ td.quota_ip_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_ip_table_column_2
 {
 	text-align:right;
@@ -1148,8 +1233,6 @@ td.quota_ip_table_column_2
 	border-bottom:1px solid #000;
 }
 
-
-
 td.quota_table_column_1
 {
 	text-align:center;
@@ -1157,29 +1240,34 @@ td.quota_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_table_column_2
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_table_column_3
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_table_column_4
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_table_column_5
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_table_column_6
 {
 	border-right:1px solid #000;
@@ -1195,6 +1283,7 @@ td.quota_usage_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_usage_table_column_2
 {
 	text-align:center;
@@ -1202,6 +1291,7 @@ td.quota_usage_table_column_2
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_usage_table_column_3
 {
 	text-align:right;
@@ -1209,6 +1299,7 @@ td.quota_usage_table_column_3
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_usage_table_column_4
 {
 	text-align:right;
@@ -1216,6 +1307,7 @@ td.quota_usage_table_column_4
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.quota_usage_table_column_5
 {
 	text-align:right;
@@ -1225,23 +1317,25 @@ td.quota_usage_table_column_5
 	border-bottom:1px solid #000;
 }
 
-
 td.lease_table_column_1
 {
 	border-left:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.lease_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.lease_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.lease_table_column_4
 {
 	text-align:right;
@@ -1256,29 +1350,33 @@ td.wifi_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.wifi_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.wifi_table_column_3
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.wifi_table_column_4
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
-	text-align: right;
+	text-align:right;
 }
+
 td.wifi_table_column_5
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
-	text-align: right;
+	text-align:right;
 }
 
 td.active_table_column_1
@@ -1287,22 +1385,26 @@ td.active_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_table_column_4
 {
 	text-align:center;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_table_column_5
 {
 	text-align:center;
@@ -1324,16 +1426,19 @@ td.active_route_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_route_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_route_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.active_route_table_column_4
 {
 	border-right:1px solid #000;
@@ -1347,21 +1452,25 @@ td.static_route_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_route_table_column_2
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_route_table_column_3
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_route_table_column_4
 {
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.static_route_table_column_5
 {
 	border-right:1px solid #000;
@@ -1377,40 +1486,42 @@ td.bandwidth_distribution_table_column_1
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_2
-
 {
 	text-align:right;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_3
-
 {
 	text-align:right;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_4
 {
 	text-align:right;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_5
-
 {
 	text-align:right;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_6
-
 {
 	text-align:right;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
+
 td.bandwidth_distribution_table_column_7
 {
 	text-align:right;
@@ -1425,16 +1536,19 @@ td.bandwidth_table_column_1
 	text-align:right;
 	border:1px solid #000;
 }
+
 td.bandwidth_table_column_2
 {
 	text-align:right;
 	border:1px solid #000;
 }
+
 td.bandwidth_table_column_3
 {
 	text-align:right;
 	border:1px solid #000;
 }
+
 td.bandwidth_table_column_4
 {
 	text-align:right;
