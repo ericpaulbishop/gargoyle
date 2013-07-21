@@ -152,7 +152,7 @@ function resetData()
 	dhcpOptions = ['start', ['start','limit'], 'leasetime'];
 	
 	enabledTest = function(value){return value != 1;};
-	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])); };
+	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])-1); };
 	leaseModFunc = function(value)
 	{
 		var leaseHourValue;
