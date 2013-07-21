@@ -29,7 +29,7 @@ function saveChanges()
 		dhcpOptions = ['start', 'limit', 'leasetime'];
 	
 		dhcpFunctions = [setVariableFromValue, setVariableFromCombined, setVariableFromModifiedValue];
-		limitParams =  [false, function(values){ return (parseInt(values[1]) - parseInt(values[0])); }];
+		limitParams =  [false, function(values){ return (parseInt(values[1]) - parseInt(values[0]) + 1); }];
 		leaseParams = [false, function(value){ return value + "h"; }];
 		dhcpParams = [false, limitParams,leaseParams];	
 	
@@ -152,7 +152,7 @@ function resetData()
 	dhcpOptions = ['start', ['start','limit'], 'leasetime'];
 	
 	enabledTest = function(value){return value != 1;};
-	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])); };
+	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])-1); };
 	leaseModFunc = function(value)
 	{
 		var leaseHourValue;
