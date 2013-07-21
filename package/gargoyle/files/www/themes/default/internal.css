@@ -182,9 +182,9 @@ fieldset label
 	margin-top:20px;
 	margin-left:5px;
 	border-top:1px;
-	border-left:0px;
-	border-right:0px;
-	border-bottom:0px;
+	border-left:0;
+	border-right:0;
+	border-bottom:0;
 	border-style:solid;
 	border-color:#888AB8;
 }
@@ -202,7 +202,7 @@ fieldset label
 .aligned_check
 {
 	padding:0;
-	margin:0px;
+	margin:0;
 	vertical-align:middle;
 	overflow:hidden;
 }
@@ -228,12 +228,12 @@ fieldset label
 
 p
 {
-	margin:1em 0px;
+	margin:1em 0;
 }
 
 table
 {
-	border-spacing:0px;
+	border-spacing:0;
 	border-collapse:collapse
 }
 
@@ -494,7 +494,7 @@ input.bottom_button:active
 	position:absolute;
 	display:block;
 	text-align:left;
-	left:0px;
+	left:0;
 	width:150px;
 	height:100px;
 	margin-right:10px;
@@ -554,7 +554,7 @@ input.bottom_button:active
 .bandwidth_title_text
 {
 	font-family:verdana, arial, sans-serif;
-	margin-left:0px;
+	margin-left:0;
 	margin-bottom:5px;
 	display:block;
 	width:245px;
