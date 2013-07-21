@@ -211,9 +211,14 @@ set_version_variables "$full_gargoyle_version"
 }
 
 
-#perhaps there were changes in some webpages or translations to be localized, so run the scripts again
-[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
-										|| ./dev-utils/accessibility/internationalize.py "$active_lang"
+[ ! -z $(which python 2>&1) ] && {
+	#perhaps there were changes in some webpages or translations to be localized, so run the scripts again
+	[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
+											|| ./dev-utils/accessibility/internationalize.py "$active_lang"
+
+} || {
+	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
+}
 
 
 #compress javascript

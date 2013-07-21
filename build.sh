@@ -208,7 +208,7 @@ set_version_variables "$full_gargoyle_version"
 	[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
 											|| ./dev-utils/accessibility/internationalize.py "$active_lang"
 } || {
-	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" '"$active_lang")
+	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
 }
 
 
