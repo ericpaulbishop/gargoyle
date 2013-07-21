@@ -207,7 +207,7 @@ fieldset label
 	margin-left:10px;
 	width:475px;
 	background: #ffeab3;
-	border: 1px solid black;
+	border: 1px solid #000;
 	font-family: monospace;
 	padding:5px;
 }
@@ -236,36 +236,36 @@ tr.table_row_add
 }
 tr.table_row_header
 {
-	border-bottom:1px solid black;
+	border-bottom:1px solid #000;
 	text-align:center;
 }
 tr.table_row_header_disabled
 {
-	border-bottom:1px solid black;
+	border-bottom:1px solid #000;
 	text-align:center;
 }
 
 tr.odd
 {
-	border:1px solid black;
+	border:1px solid #000;
 	background-color: #dadaff;
 }
 tr.even
 {
-	border:1px solid black;
-	background-color: #FFFFFF;
+	border:1px solid #000;
+	background-color: #fff;
 }
 tr.disabled_odd
 {
-	border:1px solid black;
+	border:1px solid #000;
 	color: #606060;
 	background-color: #e1e1e1;
 }
 tr.disabled_even
 {
-	border:1px solid black;
+	border:1px solid #000;
 	color: #606060;
-	background-color: #FFFFFF;
+	background-color: #fff;
 }
 th
 {
@@ -288,30 +288,30 @@ input.default_button
 	background: url("images/default_button_gradient_normal.png") center top repeat-x;
 	border-bottom: 1px solid #737582;
 	border-right:  1px solid #737582;
-	border-left: 1px solid #FFFFFF;
-	border-top: 1px solid #FFFFFF;
-	color: #000000;
+	border-left: 1px solid #fff;
+	border-top: 1px solid #fff;
+	color: #000;
 	margin: 5px;
 	cursor: pointer;
 }
 input.default_button:hover
 {
 	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555555;
+	color: #555;
 	border-top: 1px solid #737582;
 	border-left:  1px solid #737582;
-	border-right: 1px solid #FFFFFF;
-	border-bottom: 1px solid #FFFFFF;
+	border-right: 1px solid #fff;
+	border-bottom: 1px solid #fff;
 	margin: 5px;
 }
 input.default_button:active
 {
 	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555555;
+	color: #555;
 	border-top: 1px solid #737582;
 	border-left:  1px solid #737582;
-	border-right: 1px solid #FFFFFF;
-	border-bottom: 1px solid #FFFFFF;
+	border-right: 1px solid #fff;
+	border-bottom: 1px solid #fff;
 	margin: 5px;
 }
 
@@ -322,8 +322,8 @@ input.default_button_disabled
 	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
 	border-bottom: 1px solid #737582;
 	border-right:  1px solid #737582;
-	border-left: 1px solid #FFFFFF;
-	border-top: 1px solid #FFFFFF;
+	border-left: 1px solid #fff;
+	border-top: 1px solid #fff;
 	color: #808080;
 	margin: 5px;
 	cursor: auto;
@@ -334,8 +334,8 @@ input.default_button_disabled:hover
 	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
 	border-bottom: 1px solid #737582;
 	border-right:  1px solid #737582;
-	border-left: 1px solid #FFFFFF;
-	border-top: 1px solid #FFFFFF;
+	border-left: 1px solid #fff;
+	border-top: 1px solid #fff;
 	color: #808080;
 	margin: 5px;
 	cursor: auto;
@@ -351,7 +351,7 @@ input.big_button
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#333333;
+	color:#333;
 }
 input.big_button:hover
 {
@@ -362,7 +362,7 @@ input.big_button:hover
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#000000;
+	color:#000;
 }
 input.big_button:active
 {
@@ -373,7 +373,7 @@ input.big_button:active
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#555555;
+	color:#555;
 }
 
 input.big_button_disabled
@@ -405,15 +405,15 @@ input.big_button_disabled:hover
 
 input.text_error
 {
-	color:#FF0000;
+	color:#f00;
 }
 input.text_disabled
 {
-	color:#AAAAAA;
+	color:#aaa;
 }
 select.select_disabled
 {
-	color:#AAAAAA;
+	color:#aaa;
 }
 
 
@@ -437,7 +437,7 @@ input.bottom_button
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#333333;
+	color:#333;
 }
 input.bottom_button:hover
 {
@@ -448,7 +448,7 @@ input.bottom_button:hover
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#000000;
+	color:#000;
 }
 input.bottom_button:active
 {
@@ -459,7 +459,7 @@ input.bottom_button:active
 	cursor: pointer;
 	font-weight:bold;
 	font-size:16px;
-	color:#555555;
+	color:#555;
 }
 
 
@@ -534,7 +534,7 @@ input.bottom_button:active
 	float:left;
 	text-align:left;
 	font-size:14px;
-	color:black;
+	color:#000;
 }
 
 .plot_header
@@ -552,17 +552,17 @@ input.bottom_button:active
 td.total_bandwidth_table_column_1
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.total_bandwidth_table_column_2
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.total_bandwidth_table_column_3
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 
 
@@ -573,35 +573,35 @@ td.total_bandwidth_table_column_3
 td.static_ip_table_column_1
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-left:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-left:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_ip_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_ip_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_ip_table_column_4
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_ip_table_column_5
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_ip_table_column_6
 {
-        border-top:1px solid black;
-        border-right:1px solid black;
-        border-bottom:1px solid black;
+        border-top:1px solid #000;
+        border-right:1px solid #000;
+        border-bottom:1px solid #000;
 }
 
 
@@ -613,143 +613,143 @@ td.portf_table_column_1
 {
 	max-width:30px;
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_2
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_3
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_4
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_5
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_6
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_7
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_table_column_8
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 
 td.portf_range_table_column_1
 {
 	max-width:30px;
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_2
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_3
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_4
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_5
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_6
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_7
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.portf_range_table_column_8
 {
-	border:1px solid black;
+	border:1px solid #000;
 }
 
 td.upnp_table_column_1
 {
 	text-align:left;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.upnp_table_column_2
 {
 	text-align:center;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.upnp_table_column_3
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 
 td.qos_class_table_column_1
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-left:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-left:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_3
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_4
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_5
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_6
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_7
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_class_table_column_8
 {
 	text-align:center;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
@@ -758,117 +758,117 @@ td.qos_class_table_column_8
 td.qos_rule_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_rule_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_rule_table_column_3
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_rule_table_column_4
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_rule_table_column_5
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.qos_rule_table_column_6
 {
 	text-align:center;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
 td.ddns_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ddns_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ddns_table_column_3
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ddns_table_column_4
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ddns_table_column_5
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ddns_table_column_6
 {
 	text-align:center;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
 td.connection_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.connection_table_column_2
 {
 	text-align:left;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 	width:15em;
 }
 td.connection_table_column_3
 {
 	text-align:left;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 	width:10em;
 }
 td.connection_table_column_4
 {
 	text-align:left;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 	width:7em;
 }
 td.connection_table_column_5
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
@@ -876,110 +876,110 @@ td.connection_table_column_5
 td.mac_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.mac_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.wifi_wds_mac_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.wifi_wds_mac_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bridge_wds_mac_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bridge_wds_mac_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bridge_dns_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bridge_dns_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.lan_dns_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.lan_dns_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
 td.ip_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.ip_table_column_2
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.webmon_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.webmon_table_column_2
 {
 	text-align:left;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.webmon_table_column_3
 {
 	text-align:left;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 /*
@@ -990,162 +990,162 @@ td.rule_restriction_table (4 cells no dividers)
 */
 td.rule_applies_to_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_applies_to_table_column_2
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_remote_ip_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 
 }
 td.rule_remote_ip_table_column_2
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_url_match_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 
 }
 td.rule_url_match_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_url_match_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_url_match_table_column_4
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.rule_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.rule_table_column_4
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.exception_applies_to_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_applies_to_table_column_2
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_remote_ip_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 
 }
 td.exception_remote_ip_table_column_2
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_url_match_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 
 }
 td.exception_url_match_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_url_match_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_url_match_table_column_4
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.exception_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.exception_table_column_4
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_ip_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_ip_table_column_2
 {
 	text-align:right;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
@@ -1153,290 +1153,290 @@ td.quota_ip_table_column_2
 td.quota_table_column_1
 {
 	text-align:center;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_table_column_2
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_table_column_3
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_table_column_4
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_table_column_5
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_table_column_6
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.quota_usage_table_column_1
 {
 	text-align:center;
 	padding-right:15px;
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_usage_table_column_2
 {
 	text-align:center;
 	padding-right:15px;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_usage_table_column_3
 {
 	text-align:right;
 	padding-right:15px;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_usage_table_column_4
 {
 	text-align:right;
 	padding-right:15px;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.quota_usage_table_column_5
 {
 	text-align:right;
 	padding-right:15px;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 
 td.lease_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.lease_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.lease_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.lease_table_column_4
 {
 	text-align:right;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.wifi_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.wifi_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.wifi_table_column_3
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.wifi_table_column_4
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 	text-align: right;
 }
 td.wifi_table_column_5
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 	text-align: right;
 }
 
 td.active_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_table_column_4
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_table_column_5
 {
 	text-align:center;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.active_table_column_6
 {
 	text-align:center;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.active_route_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_route_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_route_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.active_route_table_column_4
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.static_route_table_column_1
 {
-	border-left:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_route_table_column_2
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_route_table_column_3
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_route_table_column_4
 {
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.static_route_table_column_5
 {
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 
 td.bandwidth_distribution_table_column_1
 {
 	text-align:left;
-	border-left:1px solid black;
-	border-right:1px solid black;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-left:1px solid #000;
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_2
 
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_3
 
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_4
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_5
 
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_6
 
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
 }
 td.bandwidth_distribution_table_column_7
 {
 	text-align:right;
-	border-top:1px solid black;
-	border-bottom:1px solid black;
-	border-right:1px solid black;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
+	border-right:1px solid #000;
 
 }
 
 td.bandwidth_table_column_1
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.bandwidth_table_column_2
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.bandwidth_table_column_3
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }
 td.bandwidth_table_column_4
 {
 	text-align:right;
-	border:1px solid black;
+	border:1px solid #000;
 }

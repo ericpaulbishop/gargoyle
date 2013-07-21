@@ -34,7 +34,7 @@ body
 	overflow:hidden;
 
 	display:none;
-	background:#000000;
+	background:#000;
 	position:absolute;
 	z-index:2000;
 	opacity:0.75;
@@ -229,7 +229,7 @@ body
 }
 #nav_internal_container2 a:hover
 {
-	color:#FFFFFF;
+	color:#fff;
 	text-decoration:none;
 	cursor:pointer;
 	font-weight:bolder;
@@ -309,7 +309,7 @@ body
 	padding-left:12px;
 	font-weight:bolder;
 	text-decoration:underline;
-	color:#000000;
+	color:#000;
 }
 .selected_single_header
 {
@@ -317,7 +317,7 @@ body
 	padding-bottom:15px; 
 	padding-left:12px;
 	font-weight:bolder;
-	color:#000000;
+	color:#000;
 }
 
 
@@ -332,7 +332,7 @@ body
 
 .submenu_selected
 {
-	color:#000000;
+	color:#000;
 	padding-left:15px;
 	background: url("images/black_carat.png") left no-repeat;
 }
