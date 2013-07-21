@@ -341,7 +341,7 @@ for target in $targets ; do
 		cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
 		
 		
-		[ ! -z $(which paython 2>&1) ] && {
+		[ ! -z $(which python 2>&1) ] && {
 			#finish internationalization by setting the target language & adding the i18n plugin to the config file
 			#finish localization just deletes the (now unnecessary) language packages from the config file
 			[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
@@ -436,7 +436,7 @@ for target in $targets ; do
 			cp "$targets_dir/$target/profiles/$profile_name/config" .config
 			
 			
-			[ ! -z $(which paython 2>&1) ] && {
+			[ ! -z $(which python 2>&1) ] && {
 				#finish internationalization by setting the target language & adding the i18n plugin to the config file
 				#finish localization just deletes the (now unnecessary) language packages from the config file
 				[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
