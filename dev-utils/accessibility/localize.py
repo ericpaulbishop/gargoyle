@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import string
 import shutil
 import subprocess
 import re
@@ -413,6 +414,149 @@ def process_ddns_config():
 	dconf_fileFO.seek(0)
 	dconf_fileFO.writelines(new_dconf_contents)
 	dconf_fileFO.close()
+	
+def process_std_menunames(lng, men_dict):
+	menu_text_path=(('./package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/menus.txt') % (lng,lng))
+	if (os.path.exists(menu_text_path)):
+		menu_fileFO = open(menu_text_path, 'rb')
+		menutext=menu_fileFO.readlines()
+		menu_fileFO.close()
+		
+		for m_item in menutext:
+			if m_item.startswith('gargoyle_display_'):
+				#menu_value will be in double-quotes, directly from the file
+				uci_menu_name, menu_value = m_item[:-1].split("=", 1)
+				men_dict[uci_menu_name] = menu_value
+	
+	#return men_dict
+	
+def process_plugin_menunames(pm_path, fb_dict, act_dict):
+	base_menuname=os.path.basename(pm_path).split("menu-", 1)[1][:-4]
+	menu_fileFO = open(pm_path, 'rb')
+	menutext=menu_fileFO.readlines()
+	menu_fileFO.close()
+	
+	for m_item in menutext:
+		if '=' in m_item:
+			if m_item[:2] == act_lang[-2:]:
+				menu_value = m_item[:].split("=", 1)[1][:-1] #there is a hanging newline there
+				
+				act_dict["gargoyle_display_"+base_menuname] = '"'+menu_value+'"'
+			elif m_item[:2] == fb_lang[-2:]:
+				menu_value = m_item[:].split("=", 1)[1][:-1] #there is a hanging newline there
+				fb_dict["gargoyle_display_"+base_menuname] = '"'+menu_value+'"'
+
+def process_menunames():
+	print '---->   Localizing menu names into '+act_lang
+	
+	fallback_menu_dict = {}
+	active_menu_dict= {}
+	
+	#generate te dictionaries first...
+	process_std_menunames(fb_lang, fallback_menu_dict)
+	process_std_menunames(act_lang, active_menu_dict)
+	topdir=os.getcwd()
+	
+	for plugin_menu in glob.glob('./package/plugin-gargoyle-*/files/www/i18n/universal/menu-*.txt'):
+		if os.path.basename(plugin_menu) != "menus.txt":
+			process_plugin_menunames(plugin_menu, fallback_menu_dict, active_menu_dict)
+	
+	#...and the find where those menus are set - because there isn't a fixed place where the are set	
+	for menu_i in fallback_menu_dict:
+		uci_menu_item=string.replace(menu_i, "_", ".",2)
+		
+		menu_value=getValue_forKey( active_menu_dict, menu_i, "the "+act_lang+" translation does not have a menu "+menu_i+" entry.")
+		if menu_value == '':
+			print "\t  Warning: using the "+fb_lang+" translation"
+			menu_value=getValue_forKey( fallback_menu_dict, menu_i, "the "+fb_lang+" translation does not have a menu "+menu_i+" entry.")
+			if menu_value == '':
+				print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a menu name."
+				print "\t  The text of the menu item will not be localized"
+				continue
+				
+		grep_proc = subprocess.Popen("grep -r -e 'uci set "+uci_menu_item+"=' -r "+topdir+"/package/ | grep -v .git | grep -v plugin-gargoyle-i18n", shell=True, cwd='./', stdout=subprocess.PIPE )
+		file_list = grep_proc.communicate()[0].split('\n')
+		
+		#plugin menu names
+		for a_menu_file in file_list:
+			if len(a_menu_file) > 0:
+				new_cfgpage_contents=[]
+				a_cfg_path=a_menu_file.split(':')[0]
+				if os.path.exists(a_cfg_path):
+					cfg_fileFO = open(a_cfg_path, 'rb')
+					cfgdoc=cfg_fileFO.readlines()
+					cfg_fileFO.close()
+			
+					for aline in cfgdoc:
+						anewline=''
+						if "uci set "+uci_menu_item+"=" in aline:
+							x=0
+							menu_val_len=len(uci_menu_item)
+							while x < len(aline):
+								if aline[x:x+9+menu_val_len] == "uci set "+uci_menu_item+"=":
+									anewline+="uci set "+uci_menu_item+"="+menu_value+"\n"
+									break
+								anewline+=aline[x]
+								x+=1
+						
+						if anewline != '':
+							new_cfgpage_contents.append(anewline)
+						else:
+							new_cfgpage_contents.append(aline)
+				
+					cfg_fileFO = open(a_cfg_path, 'wb')
+					cfg_fileFO.seek(0)
+					cfg_fileFO.writelines(new_cfgpage_contents)
+					cfg_fileFO.close()
+		
+	std_menu_cfg_FO=open("./package/gargoyle/files/etc/config/gargoyle", 'rb')
+	std_menu_doc=std_menu_cfg_FO.readlines()
+	std_menu_cfg_FO.close()
+	
+	new_std_menu_cfg_contents=[]
+	display_sect=False
+	for optline in std_menu_doc:
+		anewline=''
+		if optline.startswith('config'):
+			if display_sect==True:
+				display_sect=False
+			if optline == 'config display display\n':
+				display_sect=True
+			
+		if display_sect==True and (optline.startswith('\toption ') or optline.startswith('    option ')):
+			
+			menu_opts=shlex.split(optline)
+			if len(menu_opts) != 3:
+				print "Error parsing standard menu items: unexpected format"
+				sys.exit(1)
+			
+			menu_value=getValue_forKey( active_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+act_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
+			if menu_value == '':
+				print "\t  Warning: using the "+fb_lang+" translation"
+				menu_value=getValue_forKey( fallback_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+fb_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
+				if menu_value == '':
+					print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a stardard menu name."
+					print "\t  The text of the stardard menu item will not be localized"
+					continue
+					
+			num_tabs=7-(len(menu_opts[1]))//4
+			anewline="\toption "+menu_opts[1]
+			x=1
+			while x <= num_tabs:
+				anewline+="\t"
+				x+=1
+			anewline+="'"+menu_value[1:-1]+"'\n"
+			
+		
+		if anewline != '':
+			new_std_menu_cfg_contents.append(anewline)
+		else:
+			new_std_menu_cfg_contents.append(optline)
+			
+	std_menu_cfg_FO=open("./package/gargoyle/files/etc/config/gargoyle", 'wb')
+	std_menu_cfg_FO.seek(0)
+	std_menu_cfg_FO.writelines(new_std_menu_cfg_contents)
+	std_menu_cfg_FO.close()
 
 def target_dirs( pdir ):
 	print "---->   Localizing "+pdir+" into "+act_lang
@@ -505,6 +649,7 @@ for filename in os.listdir('./package'):
 
 process_i18n_shell_file()
 process_ddns_config()
+process_menunames()
 remove_ghf_zopt()
 
 
@@ -555,5 +700,7 @@ if os.path.exists('./package/haserl/patches/104-translate.patch'):
 	
 for i18n_pack in glob.glob('./package/plugin-gargoyle-i18n*'):
 	print 'Removing %s package from package folder' % (i18n_pack, )
-	#os.removedirs(i18n_pack)
 	shutil.rmtree(i18n_pack)
+	
+for i18n_folder in glob.glob('./package/*/files/www/i18n'):
+	shutil.rmtree(i18n_folder)

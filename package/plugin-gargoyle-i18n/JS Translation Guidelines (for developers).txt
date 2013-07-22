@@ -36,6 +36,15 @@ To see if you have duplicate keys a particularly long translation file (this doe
 awk -F '=' '{ print $1 }' /path/to/yourpage.js | uniq -d
 
 ---------------------------
+To make the haserl webpages & javascript read easier, it is possible to (on a duplicate folder that you will discard later) localize the pages to assist in development. In a duplicate gargoyle folder:
+
+cd path/to/gargoyle_folder && ./dev-utils/accessibility/localize.py 'English-EN' 'English-EN'
+
+- 1st language is the fallback language
+- 2nd language is the active language
+
+If the active language is missing a definition, the fallback language will be sourced; if the fallback language is missing a definition, the key itself will be used.
+---------------------------
 Toubleshooting:
 
 • overview.sh:1		SyntaxError: Unexpected token '<'
