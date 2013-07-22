@@ -30,4 +30,4 @@ UI.RestoreDefault="Restaurar configurações de fábrica";
 UI.Upgrade="Atualizar";
 UI.Reboot="Reiniciar";
 UI.MoreInfo="Mais informações";
-UI.WaitSettings="Por favor, aguarde até que as novas alteracoes sejam aplicadas...";
+UI.WaitSettings="Por favor, aguarde até que as novas alterações sejam aplicadas...";
