@@ -1,17 +1,15 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" onload="init(evt)">
+<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" onload="init(evt)">
 <!--
 	This program is copyright 2008,2013 Eric Bishop and is distributed under the terms of the GNU GPL 
 	version 2.0. 
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 -->
-
 <script xlink:href="js/svg_pie.js"/>
 
 <g id="label_container"></g>
 <g id="pie_container"></g>
 
 <!-- <text x="50" y="500" font-family="serif" font-size="18px" id="text_box">.</text> -->
-
 </svg>
