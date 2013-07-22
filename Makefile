@@ -45,7 +45,7 @@ cleanup:
 		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
 			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)"; \
 		else \
-			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile"; \
+			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)"; \
 		fi ; \
 	)
 
