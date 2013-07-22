@@ -15,6 +15,6 @@ rtgS.ItfN="Interfaz(Red)";
 rtgS.Itfc="Interfaz";
 rtgS.Ntwk="Red";
 rtgS.Gtwy="Puerta de Enlace";
-rtgS.Mtrc="Métrico";
+rtgS.Mtrc="Métrica";
 rtgS.AErr="No se pudo añadir la fila.";
 rtgS.SRErr="No se pudo actualizar la ruta estática.";

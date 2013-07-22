@@ -5,8 +5,8 @@
 TimeStr.Section="Tiempo";
 TimeStr.CurrTime="Fecha y Hora Actual";
 TimeStr.TimeZone="Zona Horaria";
-TimeStr.DateForm="Formato de fecha";
-TimeStr.TServers="Servidores de NTP";
+TimeStr.DateForm="Formato de Fecha";
+TimeStr.TServers="Servidores NTP";
 TimeStr.Global="Global";
 TimeStr.US="Estados Unidos";
 TimeStr.NA="Norteamérica";
@@ -15,4 +15,4 @@ TimeStr.EU="Europa";
 TimeStr.Af="África";
 TimeStr.As="Asia";
 TimeStr.Oc="Oceanía";
-TimeStr.Cust="Personalizar";
+TimeStr.Cust="Personalizado";
