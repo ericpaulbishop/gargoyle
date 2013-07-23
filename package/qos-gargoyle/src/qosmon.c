@@ -316,7 +316,6 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 {
     struct ip *ip;
     struct icmp *icp;
-    long *lp = (long *) packet;
     struct timeval tv;
     struct timeval *tp;
     int hlen,triptime;
