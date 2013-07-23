@@ -81,7 +81,7 @@ for (etherIndex in etherData)
 			<input type='text' class='rightcolumn' id='dhcp_end' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
 		</div>
 		<div id='dhcp_lease_container'>
-			<label class='leftcolumn' for='dhcp_lease' id='dhcp_lease_label'><%~ dhcpS.LsTm %>:</label>
+			<label class='leftcolumn' for='dhcp_lease' id='dhcp_lease_label'><%~ LsTm %>:</label>
 			<input type='text' class='rightcolumnindent' onkeyup='proofreadNumeric(this)' id='dhcp_lease' size='5' maxlength='4' />
 			<em>(<%~ hours %>)</em>
 		</div>

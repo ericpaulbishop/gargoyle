@@ -70,7 +70,7 @@
 
 		<div id='internal_divider1' class='internal_divider'></div>
 
-		<span id="add_ddns_label"><p><%~ DyDNS.DYSect %>:</p></span>
+		<span id="add_ddns_label"><p><%~ DYSect %>:</p></span>
 
 		<div id="ddns_table_container"></div>
 
