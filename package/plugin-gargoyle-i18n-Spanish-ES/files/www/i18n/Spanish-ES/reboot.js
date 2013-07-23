@@ -3,20 +3,20 @@
  */
 
 rbS.RbSect="Reiniciar";
-rbS.SchRb="Reinicio Programado";
-rbS.NoSch="Sin Reinicio Programado";
-rbS.RbSch="Reinicio Programado";
-rbS.WillR="El Enrutador se Reiniciará";
-rbS.EDay="Todos los Días";
-rbS.EWek="Cada Semana";
-rbS.EMnh="Cada Mes";
-rbS.RDay="Día de Reinicio";
-rbS.RHr="Hora de Reinicio";
+rbS.SchRb="Reinicio programado";
+rbS.NoSch="Sin reinicio programado";
+rbS.RbSch="Reinicio programado";
+rbS.WillR="El enrutador se reiniciará";
+rbS.EDay="Todos los días";
+rbS.EWek="Cada semana";
+rbS.EMnh="Cada mes";
+rbS.RDay="Día de reinicio";
+rbS.RHr="Hora de reinicio";
 
 //javascript
-rbS.SysR="El Sistema Se Está Reiniciando";
+rbS.SysR="El sistema se está reiniciando";
 rbS.Digs="o";
 rbS.LD1s="er";
 rbS.LD2s="do";
 rbS.LD3s="er";
-rbS.DaysWArr=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+rbS.DaysWArr=["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];

@@ -2,17 +2,17 @@
  * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
-quotasStr.Section="Cuotas de Ancho de Banda";
+quotasStr.Section="Cuotas de ancho de banda";
 quotasStr.AddQuota="Añadir nueva cuota";
-quotasStr.ActivQuotas="Cuotas Activas";
+quotasStr.ActivQuotas="Cuotas activas";
 quotasStr.IPs="IP(s)";
 quotasStr.Active="Activa";
 quotasStr.Limits="Límites";
 quotasStr.Totals="(Total/Abajo/Arriba)";
-quotasStr.OthersOne="Otros (Individual)";
-quotasStr.OthersAll="Otros (Combinado)";
+quotasStr.OthersOne="Otros (individual)";
+quotasStr.OthersAll="Otros (combinado)";
 quotasStr.Only="Solamente";
-quotasStr.AllExcept="En Todo Momento Excepto";
+quotasStr.AllExcept="En todo momento excepto";
 quotasStr.AddError="No se pudo añadir la cuota.";
 quotasStr.LD1s="er";
 quotasStr.LD2s="do";
@@ -21,48 +21,48 @@ quotasStr.Digs="o";
 quotasStr.IPError="Debe especificar al menos una IP válida o un rango de direcciones IP";
 quotasStr.AllUnlimitedError="La subida, descarga y los límites de ancho de banda combinados no pueden ser todos ilimitados";
 quotasStr.DuplicateRange="Intervalo de IP/Tiempo Duplicado - sólo se permite una cuota por IP en un momento dado";
-quotasStr.OneTimeQuotaError="Usted puede tener una sola cuota en un momento dado para hosts sin cuotas explícitas";
-quotasStr.OneNetworkQuotaError="Usted puede tener una sola cuota en un momento dado que se aplica a toda la red";
+quotasStr.OneTimeQuotaError="Es posible tener una sola cuota, en un momento dado, para hosts sin cuotas explícitas";
+quotasStr.OneNetworkQuotaError="Es posible solamente una única cuota, en un momento dado, que se aplique a toda la red";
 quotasStr.QuotaAddError="No se pudo añadir la cuota.";
 
 //template
 quotasStr.AppliesTo="Se aplica a";
-quotasStr.QLocalNet="Red Local Completa";
-quotasStr.QOnlyHosts="Sólo Los Siguientes Equipos";
-quotasStr.HostsWithoutQuotas="Todos Los Equipos Individuales Sin Cuotas Explícitas";
-quotasStr.ComboHostsWithoutQuotas="Todos Los Equipos Sin Cuotas Explícitas (Combinado)";
+quotasStr.QLocalNet="Red local completa";
+quotasStr.QOnlyHosts="Sólo los siguientes equipos";
+quotasStr.HostsWithoutQuotas="Todos los equipos individuales sin cuotas explícitas";
+quotasStr.ComboHostsWithoutQuotas="Todos los equipos sin cuotas explícitas (combinado)";
 quotasStr.IPorRange="Especificar una IP o rango de IP";
-quotasStr.MaxUp="Subida Máxima";
-quotasStr.MaxDown="Descarga Máxima";
-quotasStr.MaxUpDown="Total Subida+Descarga Máximo";
+quotasStr.MaxUp="Subida máxima";
+quotasStr.MaxDown="Descarga máxima";
+quotasStr.MaxUpDown="Total subida+descarga máximo";
 quotasStr.Unlimited="Ilimitado";
 quotasStr.Limited="Limitar a";
-quotasStr.QResets="Restablecer Cuota";
-quotasStr.EvHour="Cada Hora";
-quotasStr.EvDay="Cada Día";
-quotasStr.EvWeek="Cada Semana";
-quotasStr.EvMonth="Cada Mes";
-quotasStr.ResetDay="Restablecer el Día";
-quotasStr.ResetHour="Restablecer a la Hora";
-quotasStr.QuotaActive="La Cuota Se Encuentra Activa";
-quotasStr.TheseHours="Estas Horas";
-quotasStr.TheseDays="Estos Días";
-quotasStr.TheseDaysHours="Estos Días y Horarios";
-quotasStr.TheseTimes="Estos Horarios en la Semana";
-quotasStr.Sample="Por ejemplo: lun 00:30 - jue 13:15, vie 14:00 - vie 15:00";
+quotasStr.QResets="Restablecer cuota";
+quotasStr.EvHour="Cada hora";
+quotasStr.EvDay="Cada día";
+quotasStr.EvWeek="Cada semana";
+quotasStr.EvMonth="Cada mes";
+quotasStr.ResetDay="Restablecer el día";
+quotasStr.ResetHour="Restablecer a la hora";
+quotasStr.QuotaActive="La cuota Se encuentra activa";
+quotasStr.TheseHours="Estas horas";
+quotasStr.TheseDays="Estos días";
+quotasStr.TheseDaysHours="Estos días y horarios";
+quotasStr.TheseTimes="Estos horarios en la semana";
+quotasStr.Sample="P. ej. Lun 00:30 - Jue 13:15, Vie 14:00 - Vie 15:00";
 quotasStr.Exceed="Al exceder la cuota";
-quotasStr.ShutdownNet="Desactivar Todo el Acceso a Internet";
-quotasStr.Throttle="Limitar Ancho de Banda";
-quotasStr.UpLimit="Límite de Subida";
-quotasStr.DownLimit="Límite de Descarga";
-quotasStr.UpClass="Clase de Subida";
-quotasStr.DownClass="Clase de Descarga";
+quotasStr.ShutdownNet="Desactivar todo el acceso a Internet";
+quotasStr.Throttle="Limitar ancho de banda";
+quotasStr.UpLimit="Límite de subida";
+quotasStr.DownLimit="Límite de descarga";
+quotasStr.UpClass="Clase de subida";
+quotasStr.DownClass="Clase de descarga";
 
 //quota_edit.sh
 quotasStr.ESection="Editar Cuota";
 
 //quota_usage.sh/js
-quotasStr.USect="Uso del Ancho de Banda de Cuota";
+quotasStr.USect="Uso de ancho de banda de la cuota";
 quotasStr.All="Todo";
 quotasStr.Alws="Siempre";
-quotasStr.ColNms=["Equipo(s)", "Activas", "% Total Utilizado", "% Subida Utilizado", "% Descarga Utilizado" ];
+quotasStr.ColNms=["Equipo(s)", "Activas", "% Total usado", "% Subida usado", "% Descarga usado" ];

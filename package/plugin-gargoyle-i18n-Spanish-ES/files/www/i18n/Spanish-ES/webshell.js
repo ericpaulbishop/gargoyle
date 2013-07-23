@@ -5,4 +5,4 @@
 webS.Webs="Webshell";
 webS.Cmd="Comando";
 webS.Exe="Ejecutar";
-webS.CmdWarn="¡No ejecute ningún comando interactivo o sin fin!";
+webS.CmdWarn="¡No ejecute ningún comando interactivo o que nunca finalice!";
