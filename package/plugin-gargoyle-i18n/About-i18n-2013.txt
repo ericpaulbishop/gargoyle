@@ -5,6 +5,7 @@ Table of Contents:
   i18n before an internet connnection
   How internationalization works
   Localizing
+  Building an internationalized/localized Gargoyle firmware image
 
 
 
@@ -87,6 +88,18 @@ There are 3 reasons why you would want to localize the firmware:
   * Your 4MB router is really tight on space, and every bit helps. If you only speak Spanish, English is only wasting space.
   * You are a translator. The script to localize the firmware (localize.py) will find variables that you skipped, or handled erroneously - feedback tells you which variable was not present in the target language.
   * You are a developer. Finding errors in the translation, or keys that are not present in any language - the localize.py script will tell which which keys rendered to a key & not to a translation string.
+
+----------------------------------
+
+Building Internationalize/Localized Firmware:
+
+The Makefile is set to default to an internationalized build (which allows you to install other language packs & switch between them) with English-EN as the only installed language. No matter what, the scripts are set up to only include 1 language in the firmware.
+
+make ar71xx.usb
+	internationalizded build; defaults to English-EN
+make ar71xx.usb TRANSLATION=internationalize ACTIVE_LANG=Spanish-ES 		internationalized build; UI comes up immediately in Spanish-ES
+make ar71xx.usb TRANSLATION=localize FALLBACK_LANG=English-EN ACTIVE_LANG=Spanish-ES
+	localized build; UI comes up immediately in Spanish-ES; no possibility of switching to another language
 
 -----------------------------------
 IMPORTANT NOTES:
