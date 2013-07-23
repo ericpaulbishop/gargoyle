@@ -366,6 +366,15 @@ initialize_quotas()
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
+	if [ -n "$full_qos_enabled" ] ; then
+		full_up=$(uci get qos_gargoyle.upload.total_bandwidth 2>/dev/null)
+		full_down=$(uci get qos_gargoyle.download.total_bandwidth 2>/dev/null)
+		if [ -z "$full_up" ] && [ -z "$full_down" ] ; then
+			full_qos_enabled=""
+		fi
+	fi
+
+
 	# restore_quotas does the hard work of building quota chains & rebuilding crontab file to do backups
 	#
 	# this initializes qos functions ONLY if we have quotas that

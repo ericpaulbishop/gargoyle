@@ -715,6 +715,14 @@ stop()
 
 start()
 {
+	test_total_up=$(uci get qos_gargoyle.upload.total_bandwidth 2>/dev/null)
+	test_total_down=$(uci get qos_gargoyle.download.total_bandwidth 2>/dev/null)
+	if [ -z "$test_total_up" ] && [ -z "$test_total_down" ] ;then
+		disable
+		exit 0
+	fi
+
+
 	#This script is called by a hotplug event.  If the WAN comes
 	#up fast we could end up trying to run qos_gargoyle while the
 	#boot is still in progress which causes issues in low memory
