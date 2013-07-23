@@ -4,4 +4,4 @@
 
 idtS.IdSect="Identificación";
 idtS.Domn="Dominio";
-idtS.DevNm="Nombre del Dispositivo";
+idtS.DevNm="Nombre del dispositivo";
