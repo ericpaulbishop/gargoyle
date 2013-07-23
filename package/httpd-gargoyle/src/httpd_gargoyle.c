@@ -2838,7 +2838,6 @@ static char* virtual_file( char* file )
 
 static void send_redirect(char* extra_header, char* hostname, char* new_location, int is_ssl)
 {
-	int extra_length = 0;
 	char extra_header_buf[5000];
 	const char *sep = new_location[0] == '/' ? "" : "/";
 	const char *proto = is_ssl == 1 ? "https://" : "http://";
