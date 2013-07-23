@@ -35,7 +35,7 @@
 	<legend class="sectionheader"><%~ update.UpFrm %></legend>
 	<div>
 		<div>
-			<p><%~ upS.Warn %></p>
+			<p><%~ Warn %></p>
 		</div>
 
 		<div class="internal_divider"></div>
