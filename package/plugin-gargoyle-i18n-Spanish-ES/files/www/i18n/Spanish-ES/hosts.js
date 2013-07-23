@@ -3,16 +3,16 @@
  */
 
 hostsStr.RefreshR="Frecuencia de actualización";
-hostsStr.RInfo="Esto especifica la frecuencia con la que los datos en esta página son actualizados";
-hostsStr.CurrLeases="Actuales Concesiones DHCP";
-hostsStr.ConWifiHosts="Equipos Inalámbricos Conectados";
-hostsStr.ActiveHosts="Equipos Con Conexiones Activas";
+hostsStr.RInfo="Este valor specifica la frecuencia con la que se actualizan los datos en esta página";
+hostsStr.CurrLeases="Asignaciones DHCP actuales";
+hostsStr.ConWifiHosts="Equipos inalámbricos conectados";
+hostsStr.ActiveHosts="Equipos con conexiones activas";
 
 //javascript
-hostsStr.HostIP="IP del Equipo";
-hostsStr.HostMAC="MAC del Equipo";
-hostsStr.LeaseExp="Concesión Vence";
+hostsStr.HostIP="IP del equipo";
+hostsStr.HostMAC="MAC del equipo";
+hostsStr.LeaseExp="Asignación finaliza";
 hostsStr.Signal="Señal";
-hostsStr.ActiveConx="Conexiones TCP Activas";
-hostsStr.RecentConx="Conexiones TCP Recientes";
-hostsStr.UDPConx="Conexiones UDP";
+hostsStr.ActiveConx="Conex. TCP activas";
+hostsStr.RecentConx="Conex. TCP recientes";
+hostsStr.UDPConx="Conex. UDP";
