@@ -42,9 +42,10 @@ int main(int argc, char** argv)
 			}
 			fprintf(out, "};\n");
 			fprintf(out, "unsigned long _binary_%s_size=%ld;\n", argv[2], file_size);
-			fclose(in);
-			fclose(out);
 		}
+		if (in != NULL) fclose(in);
+		if (out != NULL) fclose(out);
+
 	}
 	return 0;
 }
