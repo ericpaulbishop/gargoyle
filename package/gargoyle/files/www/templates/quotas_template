@@ -3,7 +3,7 @@
 		<label id="applies_to_label" for='applies_to_type'>Applies to:</label>
 	</span>
 	<span class='widerightcolumn'>
-		<select id="applies_to_type"  onchange='setVisibility()' >
+		<select id="applies_to_type" onchange='setVisibility()'>
 			<option value="all">Entire Local Network</option>
 			<option value="only">Only the following Host(s)</option>
 			<option value="others_individual">All Individual Hosts Without Explicit Quotas</option>
@@ -11,14 +11,14 @@
 		</select>
 		<br/>
 	</span>
-	<div id="quota_ip_container" >
-		<div id="quota_ip_table_container" class="widerightcolumnonly" style="padding-left:5px;margin-top:0px;margin-bottom:0px;" ></div>
-		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:0px"  >
-			<input  type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;"/>
+	<div id="quota_ip_container">
+		<div id="quota_ip_table_container" class="widerightcolumnonly" style="padding-left:5px;margin-top:0px;margin-bottom:0px;"></div>
+		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:0px">
+			<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;"/>
 			&nbsp;
-			<input type="button" class="default_button" id="add_ip_button" value="Add" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)' />
+			<input type="button" class="default_button" id="add_ip_button" value="Add" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'/>
 		</div>
-		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:5px;" ><em>Specify an IP or IP range</em></div>
+		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:5px;"><em>Specify an IP or IP range</em></div>
 	</div>
 </div>
 
@@ -32,7 +32,7 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_up_container">
-			<input  type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<input type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_up_unit">
 				<option value="MB">MBytes</option>
 				<option value="GB">GBytes</option>
@@ -51,7 +51,7 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_down_container">
-			<input  type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<input type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_down_unit">
 				<option value="MB">MBytes</option>
 				<option value="GB">GBytes</option>
@@ -71,7 +71,7 @@
 			<option value="limited">Limit to</option>
 		</select>&nbsp;
 		<span id="max_combined_container">
-			<input  type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+			<input type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_combined_unit">
 				<option value="MB">MBytes</option>
 				<option value="GB">GBytes</option>
@@ -86,7 +86,7 @@
 		<label id="quota_reset_label" for='quota_reset'>Quota Resets:</label>
 	</span>
 	<span class='widerightcolumn'>
-		<select id="quota_reset" style='width:125px' onchange='setVisibility()' >
+		<select id="quota_reset" style='width:125px' onchange='setVisibility()'>
 			<option value="hour">Every Hour</option>
 			<option value="day">Every Day</option>
 			<option value="week">Every Week</option>
@@ -143,13 +143,13 @@
 		<label id="quota_active_label" for='quota_active'>Quota Is Active:</label>
 	</span>
 	<span class='widerightcolumn'>
-		<select id='quota_active' style='width:125px' onchange='setVisibility()' >
+		<select id='quota_active' style='width:125px' onchange='setVisibility()'>
 			<option value="always">Always</option>
 			<option value="only">Only</option>
 			<option value="except">All Times Except</option>
 		</select>
 		&nbsp;&nbsp;
-		<select id='quota_active_type' onchange='setVisibility()' >
+		<select id='quota_active_type' onchange='setVisibility()'>
 			<option value="hours">These Hours</option>
 			<option value="days">These Days</option>
 			<option value="days_and_hours">These Days &amp; Hours</option>
@@ -159,20 +159,20 @@
 </div>
 <div id="quota_active_controls_container">
 	<span id="active_days_container" class="widerightcolumnonly" style="margin-top:10px;margin-bottom:10px;">
-		<input type='checkbox' id='quota_sun' /><label for="quota_sun">Sun</label>
-		<input type='checkbox' id='quota_mon' /><label for="quota_mon">Mon</label>
-		<input type='checkbox' id='quota_tue' /><label for="quota_tue">Tue</label>
-		<input type='checkbox' id='quota_wed' /><label for="quota_wed">Wed</label>
-		<input type='checkbox' id='quota_thu' /><label for="quota_thu">Thu</label>
-		<input type='checkbox' id='quota_fri' /><label for="quota_fri">Fri</label>
-		<input type='checkbox' id='quota_sat' /><label for="quota_sat">Sat</label>
-	</span>	
+		<input type='checkbox' id='quota_sun'/><label for="quota_sun">Sun</label>
+		<input type='checkbox' id='quota_mon'/><label for="quota_mon">Mon</label>
+		<input type='checkbox' id='quota_tue'/><label for="quota_tue">Tue</label>
+		<input type='checkbox' id='quota_wed'/><label for="quota_wed">Wed</label>
+		<input type='checkbox' id='quota_thu'/><label for="quota_thu">Thu</label>
+		<input type='checkbox' id='quota_fri'/><label for="quota_fri">Fri</label>
+		<input type='checkbox' id='quota_sat'/><label for="quota_sat">Sat</label>
+	</span>
 	<span id="active_hours_container">
-		<input class="widerightcolumnonly" type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;" />
+		<input class="widerightcolumnonly" type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
 		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em>e.g. 02:00-04:00,11:35-13:25</em></span>
 	</span>
 	<span id="active_weekly_container">
-		<input class="widerightcolumnonly" type='text' id='active_weekly' onkeyup='proofreadWeeklyRange(this)' style="width:250px;margin-bottom:5px;margin-top:5px;" />
+		<input class="widerightcolumnonly" type='text' id='active_weekly' onkeyup='proofreadWeeklyRange(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
 		<span class="widerightcolumnonly" id="weekly_example" style="margin-top:0px;padding-top:0px;"><em>e.g. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00</em></span>
 	</span>
 </div>
@@ -181,16 +181,16 @@
 		<label id="quota_exceeded_label" for='quota_exceeded'>When Exceeded:</label>
 	</span>
 	<span class='widerightcolumn'>
-		<select id='quota_exceeded' onchange='setVisibility()' >
+		<select id='quota_exceeded' onchange='setVisibility()'>
 			<option value="hard_cutoff">Shut Down All Internet Access</option>
 			<option value="throttle">Throttle Bandwidth</option>
 		</select>
 	</span>
 </div>
 <div id="quota_only_qos_container">
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
 		<label style="float:left;width:100px;">Upload Limit: </label>
-		<input  type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+		<input type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 		<select id="quota_qos_up_unit">
 			<option value="KBytes/s">KBytes/s</option>
 			<option value="MBytes/s">MBytes/s</option>
@@ -198,7 +198,7 @@
 	</span>
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
 		<label style="float:left;width:100px;">Download Limit: </label>
-		<input  type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' />
+		<input type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 		<select id="quota_qos_down_unit">
 			<option value="KBytes/s">KBytes/s</option>
 			<option value="MBytes/s">MBytes/s</option>
@@ -206,7 +206,7 @@
 	</span>
 </div>
 <div id="quota_full_qos_container">
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;" >
+	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
 		<label style="float:left;width:100px;" for="quota_full_qos_up_class">Upload Class: </label>
 		<select id="quota_full_qos_up_class"></select>
 	</span>
