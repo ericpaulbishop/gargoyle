@@ -2519,11 +2519,11 @@ make_argp( void )
     ** have enough.  We could actually use strlen/2.
     */
     argp = (char**) malloc( ( strlen( query ) + 2 ) * sizeof(char*) );
-    if ( argp == (char**) 0 )
-	return (char**) 0;
+    if ( argp == NULL )
+	return NULL;
 
     argp[0] = strrchr( file, '/' );
-    if ( argp[0] != (char*) 0 )
+    if ( argp[0] != NULL )
 	++argp[0];
     else
 	argp[0] = file;
@@ -2534,7 +2534,7 @@ make_argp( void )
     ** character to determine if the command line is to be used, if it finds
     ** one, the command line is not to be used."
     */
-    if ( strchr( query, '=' ) == (char*) 0 )
+    if ( strchr( query, '=' ) == NULL )
 	{
 	for ( cp1 = cp2 = query; *cp2 != '\0'; ++cp2 )
 	    {
@@ -2838,7 +2838,6 @@ static char* virtual_file( char* file )
 
 static void send_redirect(char* extra_header, char* hostname, char* new_location, int is_ssl)
 {
-	int extra_length = 0;
 	char extra_header_buf[5000];
 	const char *sep = new_location[0] == '/' ? "" : "/";
 	const char *proto = is_ssl == 1 ? "https://" : "http://";

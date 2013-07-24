@@ -316,7 +316,6 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 {
     struct ip *ip;
     struct icmp *icp;
-    long *lp = (long *) packet;
     struct timeval tv;
     struct timeval *tp;
     int hlen,triptime;
@@ -331,7 +330,7 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
         tip.s_addr = ntohl(*(uint32_t *) &from->sin_addr);
         return 0;
     }
-    cc -= hlen;
+
     icp = (struct icmp *)(buf + hlen);
     if( icp->icmp_type != ICMP_ECHOREPLY )  {
         tip.s_addr = ntohl(*(uint32_t *) &from->sin_addr);
