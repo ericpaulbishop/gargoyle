@@ -2,17 +2,17 @@
  * UTF-8 (with BOM) Spanish-ES text strings for time.sh html elements
  */
 
-TimeStr.Section="Tiempo";
-TimeStr.CurrTime="Fecha y Hora Actual";
-TimeStr.TimeZone="Zona Horaria";
-TimeStr.DateForm="Formato de fecha";
-TimeStr.TServers="Servidores NTP";
-TimeStr.Global="Global";
-TimeStr.US="Estados Unidos";
-TimeStr.NA="Norteamérica";
-TimeStr.SA="Sudamérica";
-TimeStr.EU="Europa";
-TimeStr.Af="África";
-TimeStr.As="Asia";
-TimeStr.Oc="Oceanía";
-TimeStr.Cust="Personalizado";
+timeStr.Section="Tiempo";
+timeStr.CurrTime="Fecha y Hora Actual";
+timeStr.TimeZone="Zona Horaria";
+timeStr.DateForm="Formato de fecha";
+timeStr.TServers="Servidores NTP";
+timeStr.Global="Global";
+timeStr.US="Estados Unidos";
+timeStr.NA="Norteamérica";
+timeStr.SA="Sudamérica";
+timeStr.EU="Europa";
+timeStr.Af="África";
+timeStr.As="Asia";
+timeStr.Oc="Oceanía";
+timeStr.Cust="Personalizado";
