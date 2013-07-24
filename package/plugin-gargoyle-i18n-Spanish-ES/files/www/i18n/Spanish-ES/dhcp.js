@@ -2,19 +2,19 @@
  * UTF-8 (with BOM) Spanish-ES text strings for dhcp.sh html elements
  */
 
-dhcpS.SrvE="Servidor DHCP de LAN activado";
+dhcpS.SrvE="Servidor DHCP de LAN Activado";
 dhcpS.Drng="Rango DHCP";
 dhcpS.Strt="Comienzo";
 dhcpS.End="Fin";
-dhcpS.LsTm="Tiempo de asignación";
-dhcpS.SIPs="IPs estáticas";
+dhcpS.LsTm="Tiempo de Asignación";
+dhcpS.SIPs="IPs Estáticas";
 dhcpS.BlckM="Bloquear direcciones MAC que posean asignada una dirección IP estática y se conecten desde una IP diferente";
-dhcpS.AdSIP="Agregar dirección IP estática";
-dhcpS.SelH="Seleccionar nombre de equipo/MAC desde equipos conectados actualmente";
-dhcpS.AsSIP="Direcciones IP estáticas asignadas";
+dhcpS.AdSIP="Agregar Dirección IP Estática";
+dhcpS.SelH="Seleccionar Nombre de Equipo/MAC desde Equipos Conectados Actualmente";
+dhcpS.AsSIP="Direcciones IP Estáticas Asignadas";
 dhcpS.opt="opcional";
-dhcpS.ESIP="Editar IP estática";
-dhcpS.dHErr="Nombre de equipo duplicado";
+dhcpS.ESIP="Editar IP Estática";
+dhcpS.dHErr="Nombre de Equipo duplicado";
 dhcpS.dMErr="MAC duplicada";
 dhcpS.dIPErr="Dirección IP duplicada";
 dhcpS.subErr="La IP estática especificada se encuentra fuera de la subred LAN.";

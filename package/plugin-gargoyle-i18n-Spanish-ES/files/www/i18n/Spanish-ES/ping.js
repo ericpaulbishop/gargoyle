@@ -2,13 +2,13 @@
  * UTF-8 (with BOM) English-EN text strings for ping_watchdog.sh html elements
  */
 
-pingS.Pdog="Perro Guardián de ping";
-pingS.EnbP="Activar Perro Guardián de ping";
-pingS.PgIP="Dirección IP a realizar ping";
+pingS.Pdog="Perro Guardián de Ping";
+pingS.EnbP="Activar Perro Guardián de Ping";
+pingS.PgIP="Dirección IP a Realizar Ping";
 pingS.IPAd="Dirección IP";
-pingS.Intv="Intervalo de ping";
-pingS.StDly="Demora inicial";
-pingS.FlCnt="Recuento de pings fallidos";
+pingS.Intv="Intervalo de Ping";
+pingS.StDly="Demora Inicial";
+pingS.FlCnt="Recuento de Pings Fallidos";
 pingS.Actn="Acción";
 pingS.WRcon="Reconectar WAN";
 pingS.Rbot="Reiniciar";

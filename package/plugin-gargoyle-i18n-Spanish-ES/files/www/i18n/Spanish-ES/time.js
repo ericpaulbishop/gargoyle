@@ -3,8 +3,8 @@
  */
 
 TimeStr.Section="Tiempo";
-TimeStr.CurrTime="Fecha y hora actual";
-TimeStr.TimeZone="Zona horaria";
+TimeStr.CurrTime="Fecha y Hora Actual";
+TimeStr.TimeZone="Zona Horaria";
 TimeStr.DateForm="Formato de fecha";
 TimeStr.TServers="Servidores NTP";
 TimeStr.Global="Global";

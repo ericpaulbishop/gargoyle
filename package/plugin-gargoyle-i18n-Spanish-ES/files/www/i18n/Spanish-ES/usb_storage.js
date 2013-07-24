@@ -2,61 +2,61 @@
  * UTF-8 (with BOM) Spanish-ES text strings for USB Storage html elements
  */
 
-usbSStr.SDisk="Discos compartidos";
+usbSStr.SDisk="Discos Compartidos";
 usbSStr.Nomdsk="No se detectaron discos USB montados";
 usbSStr.WFTP="Permitir el acceso a FTP desde WAN";
 usbSStr.WpFTP="Permitir FTP pasivo desde WAN en los puertos";
 usbSStr.CFWkg="Grupo de trabajo de CIFS";
 usbSStr.CFUsr="Usuarios CIFS / FTP";
-usbSStr.NewU="Nuevo usuario";
-usbSStr.AddU="Agregar usuario";
+usbSStr.NewU="Nuevo Usuario";
+usbSStr.AddU="Agregar Usuario";
 usbSStr.Pasw="Contraseña";
-usbSStr.CfPass="Confirmar contraseña";
-usbSStr.ADir="Agregar disco / directorio compartido";
-usbSStr.ADsk="Agregar disco compartido";
-usbSStr.CShare="Discos compartidos actualmente";
+usbSStr.CfPass="Confirmar Contraseña";
+usbSStr.ADir="Agregar Disco / Directorio Compartido";
+usbSStr.ADsk="Agregar Disco Compartido";
+usbSStr.CShare="Discos Compartidos Actualmente";
 usbSStr.Umnt="Desmontar";
-usbSStr.UmntB="Desmontar todos los discos USB";
+usbSStr.UmntB="Desmontar Todos los Discos USB";
 usbSStr.UmntWarn="Los discos USB deben ser desmontados antes de ser extraídos del enrutador. Los discos USB que se encuentren conectados serán montados automáticamente en el siguiente reinicio del enrutador.";
 usbSStr.FDisk="Formatear discos";
 usbSStr.NoUmntDev="<p>No se detectaron unidades conectadas y desmontadas.</p><p>Debe desmontar las unidades antes de intentar darles formato.</p>";
 usbSStr.FmtWarn="AVISO: Formatear un disco borrará de forma permanente todo el contenido de ese disco.<p>El disco será formateado para almacenamiento con el sistema de archivos EXT4<br/>EXT4 puede no ser legible si la unidad USB es extraída y conectada luego a un equipo con Windows/Mac</p>";
 usbSStr.DskForm="Disco a formatear";
-usbSStr.PSwap="Porcentaje de intercambio (Swap)";
-usbSStr.PStor="Porcentaje de almacenamiento";
-usbSStr.MExtr="Utilizar disco como raíz externa (extroot)";
-usbSStr.FmtNow="Formatear ahora";
+usbSStr.PSwap="Porcentaje de Intercambio (Swap)";
+usbSStr.PStor="Porcentaje de Almacenamiento";
+usbSStr.MExtr="Utilizar Disco como Raíz Externa (Extroot)";
+usbSStr.FmtNow="Formatear Ahora";
 usbSStr.ExtrS="Extroot";
-usbSStr.ExtrOff="Desactivar raíz externa";
+usbSStr.ExtrOff="Desactivar Raíz Externa";
 usbSStr.ExtDt="Raíz externa detectada en";
 usbSStr.ExtrWarn="Cuando se utiliza una unidad raíz externa o <strong>extroot</strong> una unidad USB externa se convierte en la unidad raíz de su enrutador. Esto permite establecer una unidad raíz de gran capacidad pero si se quitara la unidad entonces todos los cambios en la configuración desde que el extroot fuera activado se perderán.";
 
 //template
 usbSStr.Disk="Disco";
 usbSStr.SDir="Subdirectorio";
-usbSStr.SNam="Nombre del recurso compartido";
-usbSStr.SAppl="Los ajustes se aplican a";
-usbSStr.SPart="La misma partición en cualquier unidad USB";
-usbSStr.SDriv="Sólo esta unidad específica";
-usbSStr.STyp="Tipo(s) de recurso(s) compartido(s)";
-usbSStr.FAAcc="Acceso anónimo FTP/CIFS";
+usbSStr.SNam="Nombre del Recurso Compartido";
+usbSStr.SAppl="Los Ajustes se Aplican a";
+usbSStr.SPart="La Misma Partición en Cualquier Unidad USB";
+usbSStr.SDriv="Sólo Esta Unidad Específica";
+usbSStr.STyp="Tipo(s) de Recurso(s) Compartido(s)";
+usbSStr.FAAcc="Acceso Anónimo FTP/CIFS";
 usbSStr.ANon="Ninguno";
-usbSStr.AROn="Sólo lectura";
+usbSStr.AROn="Sólo Lectura";
 usbSStr.ARWr="Lectura/Escritura";
-usbSStr.FAUsr="Usuarios con acceso FTP/CIFS";
+usbSStr.FAUsr="Usuarios con Acceso FTP/CIFS";
 usbSStr.NAcc="Acceso a NFS";
-usbSStr.NAccPo="Política de acceso a NFS";
-usbSStr.AnonAcc="Permitir acceso anónimo";
-usbSStr.OnlyIPs="Permitir sólo las siguientes IPs";
+usbSStr.NAccPo="Política de Acceso a NFS";
+usbSStr.AnonAcc="Permitir Acceso Anónimo";
+usbSStr.OnlyIPs="Permitir Sólo las Siguientes IPs";
 usbSStr.IPSub="Especifique una IP o subred";
 usbSStr.FPath="Ruta FTP";
 usbSStr.NPath="Ruta NFS";
 
 //edit files
-usbSStr.EshDS="Editar disco compartido";
-usbSStr.ChUPass="Cambiar contraseña de usuario";
+usbSStr.EshDS="Editar Disco Compartido";
+usbSStr.ChUPass="Cambiar Contraseña de Usuario";
 usbSStr.User="Usuario";
-usbSStr.NPass="Nueva contraseña";
+usbSStr.NPass="Nueva Contraseña";
 
 //javascript
 usbSStr.ICWErr="Grupo de trabajo de CIFS inválido";

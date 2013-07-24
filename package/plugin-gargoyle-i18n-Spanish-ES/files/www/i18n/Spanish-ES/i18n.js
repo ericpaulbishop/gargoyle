@@ -7,7 +7,7 @@ intS.LMSect="Administrador de idiomas";
 //i18n.js javascript
 intS.Lang="Idioma";
 intS.Desc="Descripción";
-intS.UpMsg="Cargando archivo de idioma";
+intS.UpMsg="Cargando Archivo de idioma";
 intS.Acv8="Activar";
 intS.Actv="Activo";
 intS.Instd="Instalado";

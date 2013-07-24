@@ -2,10 +2,10 @@
  * UTF-8 (with BOM) Spanish-ES text strings for port_forwarding(single,multi).sh html elements
  */
 
-prtS.PISect="Redirección individual de puerto";
-prtS.PRSect="Redirección de un rango de puertos";
-prtS.ForIPort="Redireccionar puertos individuales desde WAN a LAN";
-prtS.ForRPort="Redireccionar rango de puertos desde WAN a LAN";
+prtS.PISect="Redirección Individual de Puerto";
+prtS.PRSect="Redirección de un Rango de Puertos";
+prtS.ForIPort="Redireccionar Puertos Individuales desde WAN a LAN";
+prtS.ForRPort="Redireccionar Rango de Puertos desde WAN a LAN";
 prtS.DMZ="DMZ";
 prtS.UseDMZ="Utilizar DMZ (Zona Desmilitarizada)";
 prtS.DMZIP="IP de DMZ";
@@ -21,11 +21,11 @@ prtS.UPHelp="UPnP (Universal Plug and Play) y NAT-PMP (NAT Port Mapping Protocol
 prtS.Desc="Descripción";
 prtS.optl="(opcional)";
 prtS.Proto="Protocolo";
-prtS.FPrt="Desde puerto";
+prtS.FPrt="Desde Puerto";
 prtS.TIP="Hacia IP";
-prtS.TPrt="Hacia puerto";
-prtS.SPrt="Puerto inicial";
-prtS.EPrt="Puerto final";
+prtS.TPrt="Hacia Puerto";
+prtS.SPrt="Puerto Inicial";
+prtS.EPrt="Puerto Final";
 
 //javascript
 prtS.AFRErr="No se pudo agregar la regla de redireccionamiento.";
@@ -38,4 +38,4 @@ prtS.LHst="Equipo LAN";
 prtS.Port="Puerto";
 
 //edit.sh pages
-prtS.PESect="Editar redirección de puerto";
+prtS.PESect="Editar Redirección de Puerto";
