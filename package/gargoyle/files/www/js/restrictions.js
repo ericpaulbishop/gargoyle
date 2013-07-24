@@ -605,8 +605,6 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	controlDocument.getElementById(rulePrefix + "hours_active").value = hours;
 	controlDocument.getElementById(rulePrefix + "all_day").checked = allDay;
 	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = weekly_i18n(daysAndHours,"uci");
-	console.log(weekly_i18n(daysAndHours,"uci"));
-	console.log(weekly_i18n(daysAndHours,"table"));
 	setSelectedValue(rulePrefix + "schedule_repeats", (daysAndHours == "" ? "daily" : "weekly"), controlDocument);
 
 	var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
