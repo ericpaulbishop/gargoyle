@@ -2,30 +2,30 @@
  * UTF-8 (with BOM) English-EN text strings for wifi_schedule.sh html elements
  */
 
-Wsch.Wisch="Horario para WiFi";
+Wsch.Wisch="Programación de WiFi";
 Wsch.Rstat="Estado de la(s) radio(s) inalámbrica(s)";
 Wsch.StStR="Detener/Iniciar radio(s) inalámbrica(s)";
-Wsch.RadOn="Iniciar Wireless";
-Wsch.RadOf="Detener Wireless";
-Wsch.TPer="Intervalo del Temporizador";
-Wsch.NoTm="Desactivar Temporizador";
+Wsch.RadOn="Iniciar radio inalámbrica";
+Wsch.RadOf="Detener radio inalámbrica";
+Wsch.TPer="Intervalo del temporizador";
+Wsch.NoTm="Desactivar temporizador";
 Wsch.Dly="Diario";
-Wsch.Wkd="Día Laboral + Sáb/Dom";
+Wsch.Wkd="Día laboral + sáb/dom";
 Wsch.Wkly="Semanal";
-Wsch.TInc="Incremento del Temporizador";
+Wsch.TInc="Incremento del temporizador";
 
 //javscript
-Wsch.WeekA=["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-Wsch.WDayA=["Domingo", "Lunes-Viernes", "Sábado"];
+Wsch.WeekA=["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+Wsch.WDayA=["domingo", "lunes-viernes", "sábado"];
 Wsch.Warn="Advertencia";
 Wsch.NextEv="El horario entrará en vigencia en el próximo evento.";
 Wsch.SelTM="Modo de temporizador seleccionado";
-Wsch.SumDis="desactivado (sin horario).";
-Wsch.SumDly="horario diario (es igual cada día).";
-Wsch.SumSwS="horario de Domingo/Día laboral/Sábado (es igual cada día laboral).";
-Wsch.SumWky="horario semanal (hay un temporizador independiente para cada día de la semana; es igual cada semana).";
+Wsch.SumDis="desactivado (sin programación).";
+Wsch.SumDly="programación diaria (es igual cada día).";
+Wsch.SumSwS="programación de domingo/día laboral/sábado (es igual cada día laboral).";
+Wsch.SumWky="programación semanal (hay un temporizador independiente para cada día de la semana; es igual cada semana).";
 Wsch.SumGo="WiFi será";
-Wsch.SumUp="activado";
+Wsch.SumUp="&nbsp;&nbsp;activado&nbsp;&nbsp;";
 Wsch.SumDn="desactivado";
 Wsch.SumAt="a";
 Wsch.actv="activo";
