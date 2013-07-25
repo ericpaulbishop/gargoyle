@@ -310,6 +310,11 @@ def process_javascript_file( jsfile ):
 		
 		for jsObj in js_tran_objects:
 			if jsObj+'.' in jsline:
+				jsObjIdx=string.index(jsline, jsObj+'.')
+				if jsObjIdx >= 0:
+					if jsline[jsObjIdx-1].isalpha():
+						continue
+						
 				if anewline=='':
 					anewline=process_js_line(jsline, active_dict, fallback_dict, jsObj, js_tran_objects)
 				else:
@@ -681,6 +686,10 @@ for x in xrange(1,10):
 			for aline in filelines:
 				for jso in jsObjects:
 					if jso+'.' in aline:
+						jsObjIdx=string.index(aline, jso+'.')
+						if jsObjIdx >= 0:
+							if aline[jsObjIdx-1].isalpha():
+								continue
 						print rnd_file
 						print '\t FOUND javascript object:%s' % (jso,)
 						print '\t\t'+aline
