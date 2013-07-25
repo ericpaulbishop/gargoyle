@@ -453,7 +453,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ ovpnS.ClntN, ovpnS.IntIP, ovpnS.IntIP, ovpnS.CfgCredF, ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
+	var acTable = createTable([ ovpnS.ClntN, ovpnS.IntIP, UI.Enabled, ovpnS.CfgCredF, ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
