@@ -290,22 +290,22 @@ int main(int argc, char **argv)
 		printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
 		       "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
 		       "<head>\n"
-		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n"
+		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n"
 		       "\t<title>%s</title>\n", title);
-		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\" />\n", theme_root, theme);
+		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\"/>\n", theme_root, theme);
 		int css_index, js_index;
 
 		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
 		printf("\t<style>\n"
-		       "\t\t.unselected_submenu_container   { display:none; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link         { display:inline; padding:0px; color:#000000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:hover   { color:#000000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:visited { color:#000000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:active  { color:#000000; cursor:default; }\n"
+		       "\t\t.unselected_submenu_container	{ display:none; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link	{ display:inline; padding:0; color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:hover	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:visited	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:active	{ color:#000; cursor:default; }\n"
 		       "\t</style>\n");
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\" />\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
 		}
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
@@ -316,20 +316,21 @@ int main(int argc, char **argv)
 
 		if(display_type == HEADER)
 		{
-			printf("\t<div id=\"darken\" ><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
+			printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
 			       "\t<div id=\"wait_msg\">\n"
 			       "\t\t<div id=\"wait_txt\">\n"
 			       "\t\t\tPlease Wait While Settings Are Applied\n"
 			       "\t\t</div>\n"
 			       "\t\t<div id=\"wait_icon\">\n"
-			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\" />\n", theme_root, theme);
+			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", theme_root, theme);
+
 			printf("\t\t</div>\n"
 			       "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
 			       "\t</div>\n"
 			       "\t<div id=\"outer_logo\">\n"
 			       "\t\t<div id=\"inner_logo\">\n"
 			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
-			       "\t\t\t<div id=\"garg_desc\">Router<br />Management<br />Utility</div>\n"
+			       "\t\t\t<div id=\"garg_desc\">Router<br/>Management<br/>Utility</div>\n"
 			       "\t\t\t<div id=\"garg_host\">Device Name: %s</div>\n", hostname);
 
 			printf("\t\t</div>\n"
