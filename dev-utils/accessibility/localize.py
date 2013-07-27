@@ -179,7 +179,7 @@ def find_js_trans_inc_files( jsname ):
 	js_list = []
 	
 	gdir=os.getcwd()
-	gproc = subprocess.Popen("grep -r gargoyle_header_footer -r "+gdir+" | grep -v .git | grep .sh", shell=True, cwd='./', stdout=subprocess.PIPE )
+	gproc = subprocess.Popen("grep -r gargoyle_header_footer -r "+gdir+"/package | grep -v .git | grep .sh", shell=True, cwd='./', stdout=subprocess.PIPE )
 	GHF_list = gproc.communicate()[0].split('\n')
 	for GHF_item in GHF_list:
 		if jsname in GHF_item:

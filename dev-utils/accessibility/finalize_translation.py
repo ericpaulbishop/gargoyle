@@ -23,7 +23,9 @@ else:
 #if os.path.exists('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n'):
 for config_file in glob.glob('./*-src/.config'):
 	#there should be only one
-	print ('Editing config file to build in %s translation\n' % (active_lang,))
+	if tran_type=='internationalize':
+		print ('Editing config file to build in %s translation\n' % (active_lang,))
+		
 	cfg_fileFO = open(config_file, 'rb')
 	cfg_doc=cfg_fileFO.readlines()
 	cfg_fileFO.close()
@@ -60,9 +62,9 @@ for config_file in glob.glob('./*-src/.config'):
 				
 		newcfg_doc.append('\n')
 		
-	if found_lang == False:
-		sys.stderr.write('finalize was unable to find the target language\n')
-		sys.exit(1)
+		if found_lang == False:
+			sys.stderr.write('finalize was unable to find the target language\n')
+			sys.exit(1)
 		
 	cfg_fileFO = open(config_file, 'wb')
 	cfg_fileFO.seek(0)
