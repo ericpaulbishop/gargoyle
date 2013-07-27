@@ -26,7 +26,7 @@ quotasStr.OneNetworkQuotaError="Es posible solamente una única cuota, en un mom
 quotasStr.QuotaAddError="No se pudo añadir la cuota.";
 
 //template
-quotasStr.AppliesTo="Se aplica a";
+quotasStr.AppliesTo="Se Aplica a";
 quotasStr.QLocalNet="Red Local Completa";
 quotasStr.QOnlyHosts="Sólo los Siguientes Equipos";
 quotasStr.HostsWithoutQuotas="Todos los Equipos Individuales Sin Cuotas Explícitas";
