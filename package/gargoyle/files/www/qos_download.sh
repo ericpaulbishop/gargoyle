@@ -152,7 +152,7 @@
 
 
 			<div id="add_rule_container">
-				<input type="button" id="add_rule_button" class="default_button" value="Add Rule" onclick="addClassificationRule()" />
+				<input type="button" id="add_rule_button" class="default_button" value="<%~ AddRule %>" onclick="addClassificationRule()" />
 			</div>
 	</div>
 	</fieldset>
@@ -261,7 +261,7 @@
 			</div>
 
 			<div id="add_class_container">
-				<input type="button" id="add_class_button" class="default_button" value="Add Service Class" onclick="addServiceClass()" />
+				<input type="button" id="add_class_button" class="default_button" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
 			</div>
 		</div>
 	</fieldset>

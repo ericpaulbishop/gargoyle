@@ -142,7 +142,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", classId, "percent_bandwidth", percent );
 
 			minBandwidth = classData[classIndex][2];
-			if(minBandwidth != "zero")
+			if(minBandwidth != qosStr.ZERO)
 			{
 				uci.set("qos_gargoyle", classId, "min_bandwidth", minBandwidth);
 			}

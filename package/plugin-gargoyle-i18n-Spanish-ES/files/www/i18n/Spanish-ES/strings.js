@@ -15,7 +15,8 @@ UI.DDNSService="Servicio DDNS";
 UI.WakeUp="Despertar";
 UI.NewRule="Agregar Nueva Regla";
 UI.NewQuota="Agregar Nueva Cuota";
-UI.NewServiceClass="Agregar Clase de Servicio";
+UI.AddRule="Agregar Regla";
+UI.AddSvcCls="Agregar Clase de Servicio";
 UI.Edit="Editar";
 UI.Select="Seleccionar";
 UI.ChPRoot="Cambiar Raíz de Plugins";
@@ -69,7 +70,7 @@ UI.day="día";
 
 UI.CApplyChanges="Cerrar y Aplicar Cambios";
 UI.CDiscardChanges="Cerrar y Descartar Cambios";
-UI.waitText="Por favor, espere mientras se aplican los ajustes";
+UI.waitText="Por Favor, Espere Mientras Se Aplican los Ajustes";
 UI.Cancel="Cancelar";
 
 UI.Err="ERROR";
