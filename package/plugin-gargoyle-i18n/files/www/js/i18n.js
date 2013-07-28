@@ -56,6 +56,8 @@ function GenLangForm() {
 	var a_input=document.createElement('input');
 	var f_input=document.createElement('input');
 	var h_input=document.createElement('input');
+	var a_butt=createInput("button");
+	var b_div=document.createElement('div');
 
 	a_form.action="utility/do_fb_lang.sh";
 	a_form.method="post";
@@ -81,11 +83,18 @@ function GenLangForm() {
 	h_input.name='hash';
 	h_input.id='lfile_hash';
 	h_input.value='';
+	
+	a_butt.value = "Upload \u21e7"; //\u21D1
+	a_butt.setAttribute('class', "default_button");
+	a_butt.onclick = do_get_lfile;
+	b_div.setAttribute('class', "farrightcolumnonly");
+	b_div.appendChild(a_butt);
 
 	a_form.appendChild(a_input);
 	a_form.appendChild(f_input);
 	a_form.appendChild(h_input);
 	a_div.appendChild(a_form);
+	a_div.appendChild(b_div);
 	a_div.appendChild(a_iframe);
 
 	return a_div
@@ -99,6 +108,7 @@ function GenPicto(path, hgt, wdt, top) {
 	a_embed.style.marginTop=top+"px";
 	a_embed.setAttribute('pluginspage', "http://www.adobe.com/svg/viewer/install/");
 	a_embed.setAttribute('type', "image/svg+xml");
+	a_embed.setAttribute('encoding', "gzip");
 	return a_embed
 }
 
@@ -131,17 +141,16 @@ function GenLangDiv(field) {
 	return a_div;
 }
 
-function get_lfile() {
+function do_get_lfile() {
 	var fname=document.getElementById('lfile').value;
 	
 	if (fname.length > 0 ) {
 		if (fname.match(/plugin-gargoyle-i18n/) && fname.substring(fname.lastIndexOf('.') + 1) == 'ipk') {
-			//document.getElementById('lfile_fname').value = document.getElementById('lfile').files[0].fileName;
-			document.getElementById('lfile_fname').value = document.getElementById('lfile').value
+			setControlsEnabled(false, true, intS.UpMsg);
+
+			document.getElementById('lfile_fname').value = fname;
 			document.getElementById('lfile_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('lfile_form').submit();
-			setControlsEnabled(false, true, intS.UpMsg);
-			//nothing further needs to be done-firstboot.js will load overview.sh
 		}
 	}
 }
@@ -151,6 +160,11 @@ function InstallLang() {
 	var pkg = this.parentNode.parentNode.firstChild.innerHTML;
 	var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
 	//execute(cmd);
+}
+
+function ldone() {
+	setControlsEnabled(true);
+	location.reload(true);
 }
 
 function createInstallButton(type)
