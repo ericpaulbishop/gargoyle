@@ -164,7 +164,9 @@ restart_lang_services() {
 	if [ ! -e "$web_root/i18n/$active_lang/menus.txt"  ] ; then
 		if [ -e "$web_root/i18n/$fallback_lang/menus.txt" ] ; then
 			#should always have fallback language, but check above to make sure
-			uci set gargoyle.global.language=$fallback_lang
+			uci set gargoyle.global.language="$fallback_lang"
+			active_lang="$fallback_lang"
 		fi
 	fi
+	change_menu_language "$active_lang"
 }
