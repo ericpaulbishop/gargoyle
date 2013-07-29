@@ -84,7 +84,7 @@ function GenLangForm() {
 	h_input.id='lfile_hash';
 	h_input.value='';
 	
-	a_butt.value = "Upload \u21e7"; //\u21D1
+	a_butt.value = intS.Upld+" \u21e7";
 	a_butt.setAttribute('class', "default_button");
 	a_butt.onclick = do_get_lfile;
 	b_div.setAttribute('class', "farrightcolumnonly");
@@ -164,7 +164,7 @@ function InstallLang() {
 
 function ldone() {
 	setControlsEnabled(true);
-	location.reload(true);
+	window.location.reload(true);
 }
 
 function createInstallButton(type)

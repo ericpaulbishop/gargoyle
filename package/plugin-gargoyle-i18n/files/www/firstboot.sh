@@ -40,9 +40,6 @@
 	<div>
 		<select class='nocolumn' id='timezone'></select>
 		<br/>
-		<div align="left">
-			<img src="i18n/graphics/timezones.png" style="padding:30px 0 0 30px;" />
-		</div>
 	</div>
 	<br/>
 	<div>

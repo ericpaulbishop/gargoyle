@@ -7,6 +7,7 @@ intS.LMSect="Language manager";
 //i18n.js javascript
 intS.Lang="Language";
 intS.Desc="Description";
+intS.Upld="Upload";
 intS.UpMsg="Uploading Language File";
 intS.Acv8="Activate";
 intS.Actv="Active";
