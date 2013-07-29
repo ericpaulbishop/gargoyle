@@ -75,17 +75,13 @@ var webcams = [];
 		<input id="webcam_username" class="rightcolumn" type="text" size='20'/>
 		<em>(optional)</em>
 	</div>
+	
 	<div>
 		<label id="webcam_password_label" class="leftcolumn" for="webcam_password">Password:</label>
 		<input id="webcam_password" class="rightcolumn" type="text" size='20'/>
 		<em>(optional)</em>
 	</div>
 </fieldset>
-
-<div id="bottom_button_container">
-	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
-</div>
 
 <fieldset id="webcam_preview">
 	<legend class="sectionheader">Preview</legend>
@@ -94,6 +90,11 @@ var webcams = [];
 		<iframe id="videoframe" scrolling="no" border="0" width="320" height="240" frameBorder="0" src="about:blank" align="center"></iframe>
 	</div>
 </fieldset>
+
+<div id="bottom_button_container">
+	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='resetData()'/>
+</div>
 
 <script>
 <!--
