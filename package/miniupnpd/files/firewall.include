@@ -1,0 +1,15 @@
+#!/bin/sh
+# miniupnpd integration for firewall3
+
+iptables -t filter -N MINIUPNPD 2>/dev/null
+iptables -t nat -N MINIUPNPD 2>/dev/null
+
+local ext_iface
+for ext_iface in $(uci -q get upnpd.config.external_iface); do
+	local ext_zone
+	for ext_zone in $(fw3 -q network "$ext_iface"); do
+		iptables -t filter -I zone_${ext_zone}_forward -j MINIUPNPD
+		iptables -t nat -I zone_${ext_zone}_prerouting -j MINIUPNPD
+	done
+done
+
