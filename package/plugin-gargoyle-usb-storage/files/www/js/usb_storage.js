@@ -821,10 +821,11 @@ function resetData()
 		}
 		setAllowableSelections("format_disk_select", driveIds, driveText);
 	}
-	document.getElementById("swap_percent").value  = "25";
-	document.getElementById("storage_percent").value = "75";
+	document.getElementById("swap_percent").value  = "20";
+	document.getElementById("extroot_percent").value = "20";
+    document.getElementById("storage_percent").value = "60";
 	var vis = (drivesWithNoMounts.length > 0);
-	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container", "extroot_container"],  [ (!vis), vis, vis, vis, vis, vis, vis ] )
+	setVisibility( ["no_unmounted_drives", "format_warning", "format_disk_select_container", "extroot_percent_container", "swap_percent_container", "storage_percent_container", "usb_format_button_container", "extroot_container"],  [ (!vis), vis, vis, vis, vis, vis, vis ] )
 	updateFormatPercentages()
 
 	document.getElementById("extroot_fieldset").style.display = extroot_enabled == "1" ? "block" : "none";
@@ -897,51 +898,51 @@ function removeUserAccessCallback(table, row)
 	addOptionToSelectElement("user_access", removeUser, removeUser, null, table.ownerDocument);
 }
 
-
-
-
-function updateFormatPercentages(ctrlId)
+function updateFormatPercentages()
 {
 	var valid = false;
-
-
-	if(ctrlId == null)
-	{
-		ctrlId="swap_percent";
-	}
-	var otherCtrlId  = ctrlId == "swap_percent" ? "storage_percent" : "swap_percent"
-	var sizeId       = ctrlId == "swap_percent" ? "swap_size"       : "storage_size"
-	var otherSizeId  = ctrlId == "swap_percent" ? "storage_size"    : "swap_size"
-	
 				
 	var driveId = getSelectedValue("format_disk_select")
 	if(driveId != null)
 	{
 		try
-		{
-			var percent1 = parseFloat(document.getElementById(ctrlId).value)
-			if( percent1 != "NaN" && percent1 <= 100 && percent1 >= 0)
+		{	
+		    var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);  
+			var percent1 = parseFloat(document.getElementById('swap_percent').value)
+            var percent2 = parseFloat(document.getElementById('extroot_percent').value)
+            var total = percent1 + percent2;
+            
+            document.getElementById('storage_percent').value = (100-total);
+            var size3 = ((100-total) * size)/100;
+            setChildText(storage_size, "(" + parseBytes(size3) + ")");
+                        
+			if( percent1 != "NaN" && percent1 <= 100 && percent1 >= 0 && total <= 100)
 			{
-				document.getElementById(ctrlId).style.color = "black"
-				var percent2 = 100 - percent1;
-				var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
-	
+				document.getElementById('swap_percent').style.color = "black"
 				var size1 = (percent1 * size)/100;
-				var size2 = size - size1;
-	
-				document.getElementById(otherCtrlId).value = "" + percent2
-				setChildText(sizeId, "(" + parseBytes(size1) + ")");
-				setChildText(otherSizeId, "(" + parseBytes(size2) + ")");
-				valid=true
+				setChildText(swap_size, "(" + parseBytes(size1) + ")");
+				valid=true               
 			}
 			else
 			{
-				document.getElementById(ctrlId).style.color = "red"
+				document.getElementById('swap_percent').style.color = "red"
+			}
+			if( percent2 != "NaN" && percent2 <= 100 && percent2 >= 0 && total <= 100)
+			{			 
+				document.getElementById('extroot_percent').style.color = "black"
+				var size2 = (percent2 * size)/100;
+				setChildText(extroot_size, "(" + parseBytes(size2) + ")");
+				valid=true
+            }
+			else
+			{
+				document.getElementById('extroot_percent').style.color = "red"
 			}
 		}
 		catch(e)
 		{
-			document.getElementById(ctrlId).style.color = "red"
+			document.getElementById('swap_percent').style.color = "red"
+            document.getElementById('extroot_percent').style.color = "red"
 		}
 	}
 	return valid
@@ -1409,9 +1410,9 @@ function formatDiskRequested()
 
 function doDiskFormat()
 {
-	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
-	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
-	var extroot        = document.getElementById("extroot").checked ? "1":"0";
+	var driveId         = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
+	var swapPercent     = parseFloat(document.getElementById("swap_percent").value)
+    var extroot_percent = parseFloat(document.getElementById("extroot_percent").value)
 	
 	//format shell script requires percent as an integer, round as necessary
 	if(swapPercent >0 && swapPercent <1)
@@ -1422,7 +1423,16 @@ function doDiskFormat()
 	{
 		swapPerent = 99
 	}
+	if(extroot_percent >0 && extroot_percent <1)
+	{
+		extroot_percent = 1
+	}
+	if(extroot_percent >99 && extroot_percent < 100)
+	{
+		extroot_percent = 99
+	}
 	swapPercent=Math.round(swapPercent)
+    extroot_percent=Math.round(extroot_percent)
 
 	if(confirm("Password Accepted.\n\nThis is your LAST CHANCE to cancel.  Press 'OK' only if you are SURE you want to format " + driveId))
 	{
@@ -1430,7 +1440,7 @@ function doDiskFormat()
 		setControlsEnabled(false, true, "Formatting,\nPlease Be Patient...");
 	
 	
-		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
+		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot_percent + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
