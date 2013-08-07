@@ -885,7 +885,8 @@ void print_interface_vars(void)
 		if(wireless_mac == NULL)
 		{
 			wireless_mac = (char*)malloc(20);
-			sprintf(wireless_mac, "00:11:22:33:44:%02d", wireless_if_num);
+			sprintf(wireless_mac, "00:11:22:33:44:%02x",
+				wireless_if_num & 0xff);
 		}
 		push_list(wireless_macs, (void*)wireless_mac);
 		push_list(tmp_list, (void*)wireless_if);
