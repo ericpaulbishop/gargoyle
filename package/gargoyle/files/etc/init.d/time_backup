@@ -13,18 +13,10 @@ boot()
 
 	#set cron to periodically backup date
 	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "time_backup" > /tmp/new_cron
-	echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /tmp/new_cron
-	m1=$(md5sum /etc/crontabs/root)
-	m1=${m1% *}
-	m2=$(md5sum /tmp/new_cron)
-	m2=${m2% *}
-	if [ "$m1" = "$m2" ] ; then
-		rm /tmp/new_cron
-	else
-		mv /tmp/new_cron /etc/crontabs/root
+	if ! grep -q "time_backup" /etc/crontabs/root; then
+		echo '0 0,4,8,12,16,20 * * * date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup' >> /etc/crontabs/root
+		/etc/init.d/cron enable
 	fi
-	/etc/init.d/cron enable
 }
 
 start()
