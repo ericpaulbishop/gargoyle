@@ -4,19 +4,10 @@ START=30
 start()
 {
 	/usr/bin/set_kernel_timezone
-	mkdir -p /etc/crontabs
-	touch /etc/crontabs/root
-	cat /etc/crontabs/root | grep -v "set_kernel_timezone" > /tmp/new_cron
-	echo '0,1,11,21,31,41,51 * * * * /usr/bin/set_kernel_timezone >/dev/null 2>&1' >> /tmp/new_cron
 
-	m1=$(md5sum /etc/crontabs/root)
-	m1=${m1% *}
-	m2=$(md5sum /tmp/new_cron)
-	m2=${m2% *}
-	if [ "$m1" = "$m2" ] ; then
-		rm /tmp/new_cron
-	else
-		mv /tmp/new_cron /etc/crontabs/root
+	touch /etc/crontabs/root
+	if ! grep -q "set_kernel_timezone" /etc/crontabs/root; then
+		echo '0,1,11,21,31,41,51 * * * * /usr/bin/set_kernel_timezone >/dev/null 2>&1' >> /etc/crontabs/root
 		/etc/init.d/cron enable
 		#only restart cron if it is currently running
 		#since we initialize this before cron, this will
