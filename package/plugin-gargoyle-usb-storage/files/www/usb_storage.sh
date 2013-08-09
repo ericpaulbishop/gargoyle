@@ -141,24 +141,17 @@
 	</div>
 	<div id="swap_percent_container">
 		<label class="leftcolumn" id="swap_percent_label" for="swap_percent" >Percent Swap:</label>
-		<span  class="rightcolumn"><input id="swap_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
+		<span  class="rightcolumn"><input id="swap_percent" type="text" onkeyup="updateFormatPercentages()" /></span>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
+	</div>
+	<div id="extroot_percent_container">
+        <label class="leftcolumn" id="extroot_percent_label" for="extroot_percent" >Percent Extroot:</label>
+		<span  class="rightcolumn"><input id="extroot_percent" type="text" onkeyup="updateFormatPercentages()" /></span>%&nbsp;&nbsp;<em><span id="extroot_size"></span></em>
 	</div>
 	<div id="storage_percent_container">
 		<label class="leftcolumn" id="storage_percent_label" for="storage_percent" >Percent Storage:</label>
-		<span  class="rightcolumn"><input id="storage_percent" type="text" onkeyup="updateFormatPercentages(this.id)" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
-	</div>
-	<div id="extroot_container">
-		<span class="rightcolumnonly">
-			<input type="checkbox" id="extroot" name="extroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
-			<label id="extroot_label" for="extroot" style="vertical-align:middle">Use Disk As External Root (Extroot)</label>
-		</span>
-		<div class="rightcolumnonly">
-			<em>
-				When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost.
-			</em>
-		</div>
-	</div>
-	<div id="usb_format_button_container">
+		<span  class="rightcolumn"><input id="storage_percent" type="text" readonly="readonly" /></span>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
+	</div>	
+    <div id="usb_format_button_container">
 		<span class="leftcolumn" style="margin-left:0px;" ><input type="button" value="Format Now" id="usb_format_button" class="default_button" onclick="formatDiskRequested()" /></span>
 	</div>
 </fieldset>
