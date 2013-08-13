@@ -1,6 +1,6 @@
 <div>
 	<label class='narrowleftcolumn' for='rule_name' id='rule_name_label'><%~ restrictions.RDesc %>:</label>
-	<input type='text' class='rightcolumn' id='rule_name'  size='30' />
+	<input type='text' class='rightcolumn' id='rule_name' size='30'/>
 </div>
 <div>
 	<label class='narrowleftcolumn' for='rule_applies_to' id='rule_applies_to_label'><%~ RAppl %>:</label>
@@ -10,11 +10,11 @@
 		<option value='only'><%~ OHsts %></option>
 	</select>
 </div>
-<div id="rule_applies_to_container" >
+<div id="rule_applies_to_container">
 	<div class="widerightcolumnonly" id="rule_applies_to_table_container"></div>
 	<div class="widerightcolumnonly">
-		<input type='text' id='rule_applies_to_addr'  size='30' onkeyup='proofreadMultipleIpsOrMacs(this)'  />
-		<input type="button" class="default_button" id="rule_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)' />
+		<input type='text' id='rule_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)'/>
+		<input type="button" class="default_button" id="rule_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'/>
 	</div>
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
@@ -22,8 +22,8 @@
 </div>
 <div>
 	<label class='narrowleftcolumn' for='rule_all_day' id='rule_schedule_label'><%~ Schd %>:</label>
-	<input type='checkbox' id='rule_all_day' onclick='setVisibility(document,"rule_")' /><label for="rule_all_day"><%~ ADay %></label>
-	<input type='checkbox' id='rule_every_day' onclick='setVisibility(document,"rule_")' /><label for="rule_every_day"><%~ EDay %></label>&nbsp;&nbsp;
+	<input type='checkbox' id='rule_all_day' onclick='setVisibility(document,"rule_")'/><label for="rule_all_day"><%~ ADay %></label>
+	<input type='checkbox' id='rule_every_day' onclick='setVisibility(document,"rule_")'/><label for="rule_every_day"><%~ EDay %></label>&nbsp;&nbsp;
 	<select id='rule_schedule_repeats' onchange='setVisibility(document,"rule_")'>
 		<option value='daily'><%~ DSchd %></option>
 		<option value='weekly'><%~ WSchd %></option>
@@ -31,17 +31,17 @@
 </div>
 <div id="rule_days_active" class="indent">
 	<label class="narrowleftcolumn"><%~ DActv %>:</label>
-	<input type='checkbox' id='rule_sun' /><label for="rule_sun"><%~ Sun %></label>
-	<input type='checkbox' id='rule_mon' /><label for="rule_mon"><%~ Mon %></label>
-	<input type='checkbox' id='rule_tue' /><label for="rule_tue"><%~ Tue %></label>
-	<input type='checkbox' id='rule_wed' /><label for="rule_wed"><%~ Wed %></label>
-	<input type='checkbox' id='rule_thu' /><label for="rule_thu"><%~ Thu %></label>
-	<input type='checkbox' id='rule_fri' /><label for="rule_fri"><%~ Fri %></label>
-	<input type='checkbox' id='rule_sat' /><label for="rule_sat"><%~ Sat %></label>
+	<input type='checkbox' id='rule_sun'/><label for="rule_sun"><%~ Sun %></label>
+	<input type='checkbox' id='rule_mon'/><label for="rule_mon"><%~ Mon %></label>
+	<input type='checkbox' id='rule_tue'/><label for="rule_tue"><%~ Tue %></label>
+	<input type='checkbox' id='rule_wed'/><label for="rule_wed"><%~ Wed %></label>
+	<input type='checkbox' id='rule_thu'/><label for="rule_thu"><%~ Thu %></label>
+	<input type='checkbox' id='rule_fri'/><label for="rule_fri"><%~ Fri %></label>
+	<input type='checkbox' id='rule_sat'/><label for="rule_sat"><%~ Sat %></label>
 </div>
 <div id="rule_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='rule_hours_active' id='rule_hours_active_label'><%~ HActv %>:</label>
-	<input type='text' id='rule_hours_active' size='30' onkeyup='proofreadHours(this)' />
+	<input type='text' id='rule_hours_active' size='30' onkeyup='proofreadHours(this)'/>
 	<br/>
 	<div class="widerightcolumnonly">
 		<em>e.g. 00:30-13:15, 14:00-15:00</em>
@@ -51,7 +51,7 @@
 
 <div id="rule_days_and_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='rule_days_and_hours_active' id='rule_days_and_hours_active_label'><%~ DHActv %>:</label>
-	<input type='text' id='rule_days_and_hours_active'  size='30' onkeyup='proofreadWeeklyRange(this)' />
+	<input type='text' id='rule_days_and_hours_active' size='30' onkeyup='proofreadWeeklyRange(this)'/>
 	<br/>
 	<div class="widerightcolumnonly">
 		<em><%~ Sample %></em>
@@ -60,7 +60,7 @@
 
 <div>
 	<label class='narrowleftcolumn' for='rule_all_access' id='rule_all_access_label'><%~ RRsrc %>:</label>
-	<input type='checkbox' id='rule_all_access' onclick='setVisibility(document,"rule_")' /><label for="rule_all_access"><%~ NetAcc %></label>
+	<input type='checkbox' id='rule_all_access' onclick='setVisibility(document,"rule_")'/><label for="rule_all_access"><%~ NetAcc %></label>
 </div>
 
 <div class="indent" id="rule_resources">
@@ -68,17 +68,17 @@
 		<span class='narrowleftcolumn'>
 			<label id="rule_remote_ip_label" for='rule_remote_ip'><%~ RemIP %>:</label>
 		</span>
-		<select class='middlecolumn' id='rule_remote_ip_type' onchange='setVisibility(document,"rule_")' >
+		<select class='middlecolumn' id='rule_remote_ip_type' onchange='setVisibility(document,"rule_")'>
 			<option value="all"><%~ BlAll %></option>
 			<option value="only"><%~ BlOny %></option>
 			<option value="except"><%~ BlExc %></option>
 		</select>
 	</div>
-	<div id="rule_remote_ip_container" >
+	<div id="rule_remote_ip_container">
 		<div class="widerightcolumnonly" id="rule_remote_ip_table_container"></div>
 		<div class="widerightcolumnonly">
-			<input type='text' id='rule_remote_ip'  size='30'  onkeyup='proofreadMultipleIps(this)'  />
-			<input type="button" class="default_button" id="rule_add_remote_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'  />
+			<input type='text' id='rule_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)'/>
+			<input type="button" class="default_button" id="rule_add_remote_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'/>
 		</div>
 	</div>
 
@@ -86,35 +86,35 @@
 		<span class='narrowleftcolumn'>
 			<label id="rule_remote_port_label" for='rule_remote_port'><%~ RemPrt %>:</label>
 		</span>
-		<select class='middlecolumn' id="rule_remote_port_type" onchange='setVisibility(document,"rule_")' >
+		<select class='middlecolumn' id="rule_remote_port_type" onchange='setVisibility(document,"rule_")'>
 			<option value="all"><%~ BlAll %></option>
 			<option value="only"><%~ BlOny %></option>
 			<option value="except"><%~ BlExc %></option>
 		</select>
-		<span class='rightcolumn' >
-			<input  type='text' id='rule_remote_port' onkeyup='proofreadMultiplePorts(this)'  size='20'  />
+		<span class='rightcolumn'>
+			<input type='text' id='rule_remote_port' onkeyup='proofreadMultiplePorts(this)' size='20'/>
 		</span>
 	</div>
 	<div>
 		<span class='narrowleftcolumn'>
 			<label id="rule_local_port_label" for='rule_local_port'><%~ LclPrt %>:</label>
 		</span>
-		<select class='middlecolumn' id="rule_local_port_type"  onchange='setVisibility(document,"rule_")' >
+		<select class='middlecolumn' id="rule_local_port_type" onchange='setVisibility(document,"rule_")'>
 			<option value="all"><%~ BlAll %></option>
 			<option value="only"><%~ BlOny %></option>
 			<option value="except"><%~ BlExc %></option>
 		</select>
 		<span>
-			<input class='rightcolumn'  type='text' id='rule_local_port' onkeyup='proofreadMultiplePorts(this)' size='20' />
+			<input class='rightcolumn' type='text' id='rule_local_port' onkeyup='proofreadMultiplePorts(this)' size='20'/>
 		</span>
 	</div>
 
 
 	<div>
 		<span class='narrowleftcolumn'>
-			<label class='rightcolumn'  id="rule_transport_protocol_label" for='rule_transport_protocol'><%~ TrProto %>:</label>
+			<label class='rightcolumn' id="rule_transport_protocol_label" for='rule_transport_protocol'><%~ TrProto %>:</label>
 		</span>	
-		<select class="middlecolumn" id="rule_transport_protocol" >
+		<select class="middlecolumn" id="rule_transport_protocol">
 			<option value="both"><%~ BlAll %></option>
 			<option value="tcp"><%~ BlTCP %></option>
 			<option value="udp"><%~ BlUDP %></option>
@@ -124,12 +124,12 @@
 		<span class='narrowleftcolumn'>
 			<label id="rule_app_protocol_label" for='rule_app_protocol'><%~ ApProto %>:</label>
 		</span>
-		<select id="rule_app_protocol_type" class='middlecolumn'  onchange='setVisibility(document,"rule_")' >
+		<select id="rule_app_protocol_type" class='middlecolumn' onchange='setVisibility(document,"rule_")'>
 			<option value="all"><%~ BlAll %></option>
 			<option value="only"><%~ BlOny %></option>
 			<option value="except"><%~ BlExc %></option>
 		</select>
-		
+
 		<select class='rightcolumn' id="rule_app_protocol">
 			<option value='aim '>AIM</option>
 			<option value='bittorrent '>BitTorrent</option>
@@ -161,7 +161,7 @@
 		<span class='narrowleftcolumn'>
 			<label id="rule_url_label" for='rule_url_type'><%~ WebURL %>:</label>
 		</span>
-		<select id="rule_url_type" class='rightcolumn'  onchange='setVisibility(document,"rule_")' >
+		<select id="rule_url_type" class='rightcolumn' onchange='setVisibility(document,"rule_")'>
 			<option value="all"><%~ BlAll %></option>
 			<option value="only"><%~ BlOny %></option>
 			<option value="except"><%~ BlExc %></option>
@@ -178,8 +178,8 @@
 				<option value="url_domain_contains"><%~ DmCon %>:</option>
 				<option value="url_domain_regex"><%~ DmRgx %>:</option>
 			</select>
-			<input type='text' id='rule_url_match'  size='30'/>
-			<input type="button" class="default_button" id="rule_add_url_match" value="<%~ Add %>" onclick='addUrlToTable(document, "rule_url_match", "rule_url_match_type", "rule_url_match_table_container", "rule_url_match_table")' />
+			<input type='text' id='rule_url_match' size='30'/>
+			<input type="button" class="default_button" id="rule_add_url_match" value="<%~ Add %>" onclick='addUrlToTable(document, "rule_url_match", "rule_url_match_type", "rule_url_match_table_container", "rule_url_match_table")'/>
 		</div>
 	</div>
 </div>

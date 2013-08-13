@@ -8,7 +8,7 @@
 						<th></th>
 					</tr>
 					<tr class='table_row_add'>
-						<td><input type='text' id='add_desc'  size='10' maxLength='32'/></td>
+						<td><input type='text' id='add_desc' size='10' maxLength='32'/></td>
 						<td><select id='add_prot'><option value='<%~ both %>'><%~ both %></option><option value='TCP'>TCP</option><option value='UDP'>UDP</option></select></td>
 						<td><input type='text' id='add_fp' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5'/></td>
 						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15'/></td>
