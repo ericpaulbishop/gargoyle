@@ -178,12 +178,13 @@ cd "$top_dir"
 targets="$1"
 full_gargoyle_version="$2"
 verbosity="$3"
-custom_template="$4"
-js_compress="$5"
-specified_profile="$6"
-translation_type="$7"
-fallback_lang="$8"
-active_lang="$9"
+custom_target="$4"
+custom_template="$5"
+js_compress="$6"
+specified_profile="$7"
+translation_type="$8"
+fallback_lang="$9"
+active_lang="${10}"
 
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
@@ -386,6 +387,10 @@ for target in $targets ; do
 	#copy this target configuration to build directory
 	cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
 	
+	#pre-set the target in a custom build (default target only)
+	if [ "$target" = "custom" ] && [ "$default_profile" = "default" ] ; then
+		./dev-utils/set_config_custom_target.sh "$custom_target"
+	fi
 	
 	
 	[ ! -z $(which python 2>&1) ] && {
