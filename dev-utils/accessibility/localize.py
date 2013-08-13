@@ -52,11 +52,11 @@ def parseJStrans( lang, page, lang_dict, js_style, js_objects ):
 	
 	dfileFO=None
 	
-	#package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/strings.js
-	if (os.path.exists('./package/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page)):
-		dfileFO = open('./package/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page, 'rb')
+	#package-prepare/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/strings.js
+	if (os.path.exists('./package-prepare/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page)):
+		dfileFO = open('./package-prepare/plugin-gargoyle-i18n-'+lang+'/files/www/i18n/'+lang+'/'+page, 'rb')
 	else:
-		ext_trans_files=glob.glob('./package/*/files/www/i18n/'+lang+'/'+page)
+		ext_trans_files=glob.glob('./package-prepare/*/files/www/i18n/'+lang+'/'+page)
 		if ext_trans_files != []:
 			dfileFO = open(ext_trans_files[0], 'rb')
 	
@@ -379,13 +379,13 @@ def process_i18n_shell_file( ):
 		
 def process_ddns_config():
 	print '---->   Localizing ddns-gargoyle into '+act_lang
-	print './package/ddns-gargoyle/files/etc/ddns_providers-new.conf'
+	print './package-prepare/ddns-gargoyle/files/etc/ddns_providers-new.conf'
 	
 	fallback_dict = {}
 	active_dict= {}
 	new_dconf_contents=[]
 
-	dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers.conf', 'rb')
+	dconf_fileFO = open('./package-prepare/ddns-gargoyle/files/etc/ddns_providers.conf', 'rb')
 	ddpage=dconf_fileFO.readlines()
 	dconf_fileFO.close()
 	
@@ -415,13 +415,13 @@ def process_ddns_config():
 		else:
 			new_dconf_contents.append(ddline)
 			
-	dconf_fileFO = open('./package/ddns-gargoyle/files/etc/ddns_providers.conf', 'wb')
+	dconf_fileFO = open('./package-prepare/ddns-gargoyle/files/etc/ddns_providers.conf', 'wb')
 	dconf_fileFO.seek(0)
 	dconf_fileFO.writelines(new_dconf_contents)
 	dconf_fileFO.close()
 	
 def process_std_menunames(lng, men_dict):
-	menu_text_path=(('./package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/menus.txt') % (lng,lng))
+	menu_text_path=(('./package-prepare/plugin-gargoyle-i18n-%s/files/www/i18n/%s/menus.txt') % (lng,lng))
 	if (os.path.exists(menu_text_path)):
 		menu_fileFO = open(menu_text_path, 'rb')
 		menutext=menu_fileFO.readlines()
@@ -462,7 +462,7 @@ def process_menunames():
 	process_std_menunames(act_lang, active_menu_dict)
 	topdir=os.getcwd()
 	
-	for plugin_menu in glob.glob('./package/plugin-gargoyle-*/files/www/i18n/universal/menu-*.txt'):
+	for plugin_menu in glob.glob('./package-prepare/plugin-gargoyle-*/files/www/i18n/universal/menu-*.txt'):
 		if os.path.basename(plugin_menu) != "menus.txt":
 			process_plugin_menunames(plugin_menu, fallback_menu_dict, active_menu_dict)
 	
@@ -479,7 +479,7 @@ def process_menunames():
 				print "\t  The text of the menu item will not be localized"
 				continue
 				
-		grep_proc = subprocess.Popen("grep -r -e 'uci set "+uci_menu_item+"=' -r "+topdir+"/package/ | grep -v .git | grep -v plugin-gargoyle-i18n", shell=True, cwd='./', stdout=subprocess.PIPE )
+		grep_proc = subprocess.Popen("grep -r -e 'uci set "+uci_menu_item+"=' -r "+topdir+"/package-prepare/ | grep -v .git | grep -v plugin-gargoyle-i18n", shell=True, cwd='./', stdout=subprocess.PIPE )
 		file_list = grep_proc.communicate()[0].split('\n')
 		
 		#plugin menu names
@@ -514,7 +514,7 @@ def process_menunames():
 					cfg_fileFO.writelines(new_cfgpage_contents)
 					cfg_fileFO.close()
 		
-	std_menu_cfg_FO=open("./package/gargoyle/files/etc/config/gargoyle", 'rb')
+	std_menu_cfg_FO=open("./package-prepare/gargoyle/files/etc/config/gargoyle", 'rb')
 	std_menu_doc=std_menu_cfg_FO.readlines()
 	std_menu_cfg_FO.close()
 	
@@ -558,34 +558,34 @@ def process_menunames():
 		else:
 			new_std_menu_cfg_contents.append(optline)
 			
-	std_menu_cfg_FO=open("./package/gargoyle/files/etc/config/gargoyle", 'wb')
+	std_menu_cfg_FO=open("./package-prepare/gargoyle/files/etc/config/gargoyle", 'wb')
 	std_menu_cfg_FO.seek(0)
 	std_menu_cfg_FO.writelines(new_std_menu_cfg_contents)
 	std_menu_cfg_FO.close()
 
 def target_dirs( pdir ):
 	print "---->   Localizing "+pdir+" into "+act_lang
-	if (os.path.exists('./package/'+pdir+'/files/www')):
-		for hfiles in glob.glob('./package/'+pdir+'/files/www/*.sh'):
+	if (os.path.exists('./package-prepare/'+pdir+'/files/www')):
+		for hfiles in glob.glob('./package-prepare/'+pdir+'/files/www/*.sh'):
 			process_haserl_file(hfiles)
-	if (os.path.exists('./package/'+pdir+'/files/www/hooks')):
-		for hooks in glob.glob('./package/'+pdir+'/files/www/hooks/login/*.sh'):
+	if (os.path.exists('./package-prepare/'+pdir+'/files/www/hooks')):
+		for hooks in glob.glob('./package-prepare/'+pdir+'/files/www/hooks/login/*.sh'):
 			process_haserl_file(hooks)
-	if (os.path.exists('./package/'+pdir+'/files/www/templates')):
-		for tfiles in glob.glob('./package/'+pdir+'/files/www/templates/*_template'):
+	if (os.path.exists('./package-prepare/'+pdir+'/files/www/templates')):
+		for tfiles in glob.glob('./package-prepare/'+pdir+'/files/www/templates/*_template'):
 			process_haserl_template_file(tfiles)
-	if os.path.exists('./package/'+pdir+'/files/www/js'):
-		for jsfile in glob.glob('./package/'+pdir+'/files/www/js/*.js'):
+	if os.path.exists('./package-prepare/'+pdir+'/files/www/js'):
+		for jsfile in glob.glob('./package-prepare/'+pdir+'/files/www/js/*.js'):
 			process_javascript_file(jsfile)
-	if os.path.exists('./package/'+pdir+'/files/www/js'):
-		for jsfile in glob.glob('./package/'+pdir+'/files/www/hooks/login/*.js'):
+	if os.path.exists('./package-prepare/'+pdir+'/files/www/js'):
+		for jsfile in glob.glob('./package-prepare/'+pdir+'/files/www/hooks/login/*.js'):
 			process_javascript_file(jsfile)
 	return
 	
 def remove_ghf_zopt():
 	#do this after processing all other javascript files which rely on gargoyle_header_footer -z "page.js" to figure out which page to use
 	print "---->   Removing gargoyle_header_footer -z option"
-	for webpage in glob.glob('./package/*/files/www/*.sh'):
+	for webpage in glob.glob('./package-prepare/*/files/www/*.sh'):
 		print webpage
 		w_fileFO = open(webpage, 'rb')
 		wpage=w_fileFO.readlines()
@@ -645,10 +645,10 @@ else:
 	sys.exit('  example: cd gargoyle && %s English-EN Spanish-ES' % sys.argv[0])
 	
 	
-shutil.copytree('./package', './package-orig')
+shutil.copytree('./package', './package-prepare')
 
 
-for filename in os.listdir('./package'):
+for filename in os.listdir('./package-prepare'):
 	if (filename == 'gargoyle' or filename.startswith('plugin')) and not (filename.startswith('plugin-gargoyle-i18n-') or  filename.startswith('plugin-gargoyle-theme-')):
 		target_dirs(filename)
 
@@ -660,7 +660,7 @@ remove_ghf_zopt()
 
 print '    Finding overlooked i18n files'
 jsObjects=[]
-for lpack in glob.glob('./package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js' % (fb_lang, fb_lang) ):
+for lpack in glob.glob('./package-prepare/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js' % (fb_lang, fb_lang) ):
 	lfileFO = open(lpack, 'rb')
 	lpage=lfileFO.readlines()
 	lfileFO.close()
@@ -674,7 +674,7 @@ for lpack in glob.glob('./package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js
 errs=0
 for x in xrange(1,10):
 	for rnd_file in glob.glob('./package%s' % (x*'/*',)):
-		if '/package/haserl' in rnd_file:
+		if '/package-prepare/haserl' in rnd_file:
 			continue
 		if 'plugin-gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
 			continue
@@ -703,13 +703,13 @@ if errs==0:
 	print '    0 errors found'
 	
 #and wrap up loose ends
-if os.path.exists('./package/haserl/patches/104-translate.patch'):
+if os.path.exists('./package-prepare/haserl/patches/104-translate.patch'):
 	print 'Removing haserl i18n translate patch'
-	os.remove('./package/haserl/patches/104-translate.patch')
+	os.remove('./package-prepare/haserl/patches/104-translate.patch')
 	
-for i18n_pack in glob.glob('./package/plugin-gargoyle-i18n*'):
-	print 'Removing %s package from package folder' % (i18n_pack, )
+for i18n_pack in glob.glob('./package-prepare/plugin-gargoyle-i18n*'):
+	print 'Removing %s package from package-prepare folder' % (i18n_pack, )
 	shutil.rmtree(i18n_pack)
 	
-for i18n_folder in glob.glob('./package/*/files/www/i18n'):
+for i18n_folder in glob.glob('./package-prepare/*/files/www/i18n'):
 	shutil.rmtree(i18n_folder)

@@ -11,6 +11,8 @@ requested_lang="$2"
 target_lang=''
 top_dir=$(pwd)
 
+cp -r "$top_dir/package" "$top_dir/package-prepare"
+
 [ "$translation_type" = "localize" ] && {
 	echo "Error: python was not found. Please install python to run the localization script."
 	exit 1

@@ -121,6 +121,8 @@ create_gargoyle_banner()
 |                                                                |
 |----------------------------------------------------------------|
 EOF
+	#' Leave this comment, fixes display formatting in vim
+
 	echo "$top_line"    >> "$banner_file_path"
 	echo "$middle_line" >> "$banner_file_path"
 	echo "$bottom_line" >> "$banner_file_path"
@@ -198,9 +200,9 @@ set_version_variables "$full_gargoyle_version"
 
 #packages-orig is the original untouched packages directory before i18n/L10n occurred
 #restore the original so that the i18n/L10n scripts can modify them again
-[ -d "$top_dir/package-orig" ] && {
-	rm -rf "$top_dir/package"
-	mv "$top_dir/package-orig" "$top_dir/package"
+[ -d "$top_dir/package-prepare" ] && {
+	
+	rm -rf "$top_dir/package-prepare"
 }
 
 [ ! -z $(which python 2>&1) ] && {

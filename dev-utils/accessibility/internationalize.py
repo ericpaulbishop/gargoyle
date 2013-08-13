@@ -15,11 +15,11 @@ else:
 	sys.stderr.write('Usage: %s active_language\n' % sys.argv[0])
 	sys.stderr.write('  example: %s English-EN\n' % sys.argv[0])
 	
-shutil.copytree('./package', './package-orig')
+shutil.copytree('./package', './package-prepare')
 
-if os.path.exists('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n'):
+if os.path.exists('./package-prepare/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n'):
 	print 'Setting target language'
-	uci_fileFO = open('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n', 'rb')
+	uci_fileFO = open('./package-prepare/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n', 'rb')
 	ucipage=uci_fileFO.readlines()
 	uci_fileFO.close()
 	new_ucipage_contents=[]
@@ -38,7 +38,7 @@ if os.path.exists('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plu
 		else:
 			new_ucipage_contents.append(uciline)
 			
-	out_uci_fileFO = open('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n', 'wb')
+	out_uci_fileFO = open('./package-prepare/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n', 'wb')
 	out_uci_fileFO.seek(0)
 	out_uci_fileFO.writelines(new_ucipage_contents)
 	out_uci_fileFO.close()
