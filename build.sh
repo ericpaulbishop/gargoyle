@@ -200,8 +200,6 @@ fi
 set_version_variables "$full_gargoyle_version"
 
 
-#packages-orig is the original untouched packages directory before i18n/L10n occurred
-#restore the original so that the i18n/L10n scripts can modify them again
 if [ -d "$top_dir/package-prepare" ] ; then	
 	rm -rf "$top_dir/package-prepare"
 fi
@@ -209,10 +207,10 @@ fi
 [ ! -z $(which python 2>&1) ] && {
 	#whether localize or internationalize, the packages directory is going to be modified
 	#default behavior is internationalize; defined in Makefile
-	[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
-											|| ./dev-utils/accessibility/internationalize.py "$active_lang"
+	[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/localize.py "$fallback_lang" "$active_lang" \
+											|| ./i18n-scripts/internationalize.py "$active_lang"
 } || {
-	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
+	active_lang=$(sh ./i18n-scripts/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
 }
 
 
@@ -399,11 +397,11 @@ for target in $targets ; do
 	[ ! -z $(which python 2>&1) ] && {
 		#finish internationalization by setting the target language & adding the i18n plugin to the config file
 		#finish localization just deletes the (now unnecessary) language packages from the config file
-		[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
-												|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+		[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
+												|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
 	} || {
 		#NOTE: localize is not supported because it requires python
-		./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+		./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
 	}
 
 
@@ -542,11 +540,11 @@ for target in $targets ; do
 		[ ! -z $(which python 2>&1) ] && {
 			#finish internationalization by setting the target language & adding the i18n plugin to the config file
 			#finish localization just deletes the (now unnecessary) language packages from the config file
-			[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
-													|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+			[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
+													|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
 		} || {
 			#NOTE: localize is not supported because it requires python
-			./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+			./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
 		}
 		
 		
