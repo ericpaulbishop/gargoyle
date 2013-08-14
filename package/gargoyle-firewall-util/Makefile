@@ -45,7 +45,7 @@ endef
 
 define Package/gargoyle-firewall-util/postinst
 	included=$$(cat $${IPKG_INSTROOT}/etc/config/firewall | grep 'gargoyle_additions.firewall'  )
-	if [ -z "$$included" ] ; then printf "config include\n\toption path /usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall\n\n" >> $${IPKG_INSTROOT}/etc/config/firewall ; fi
+	if [ -z "$$included" ] ; then printf "config include\n\toption type script\n\toption path /usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall\n\toption family IPv4\n\toption reload 1\n\n" >> $${IPKG_INSTROOT}/etc/config/firewall ; fi
 endef
 
 define Package/gargoyle-firewall-util/install
