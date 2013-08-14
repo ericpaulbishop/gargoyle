@@ -126,22 +126,22 @@ int main(int argc, char **argv)
 			case 'u':
 			default:
 				printf("USAGE: %s [OPTIONS] [UCI SECTIONS]\n", argv[0]);
-				printf("\t-m Generate Minimal Header (for popup boxes used for editing table rows)\n");
-				printf("\t-h Generate Standard Header\n");
-				printf("\t-f Generate Footer\n");
-				printf("\t-s [SECTION-ID] Section/Main Menu Id\n");
-				printf("\t-p [PAGE-ID] Page Id\n");
-				printf("\t-c [CSS FILES] List of additional css files necessary for page\n");
-				printf("\t-z [JS FILES] List of additional i18n language-string javascript files necessary for page\n");
-				printf("\t-j [JS FILES] List of additional javascript files necessary for page\n");
-				printf("\t-t [TITLE] Title of page\n");
-				printf("\t-i Include output of javascript variables that specify network interface ips and MAC addresses\n");
-				printf("\t-n Include output of javascript variables specifying association of ips with hostnames\n");
-				printf("\t-u print usage and exit\n");
+				printf("\t-m Generate Minimal Header (for popup boxes used for editing table rows)\n"
+				       "\t-h Generate Standard Header\n"
+				       "\t-f Generate Footer\n"
+				       "\t-s [SECTION-ID] Section/Main Menu Id\n"
+				       "\t-p [PAGE-ID] Page Id\n"
+				       "\t-c [CSS FILES] List of additional css files necessary for page\n"
+				       "\t-z [JS FILES] List of additional i18n language-string javascript files necessary for page\n"
+				       "\t-j [JS FILES] List of additional javascript files necessary for page\n"
+				       "\t-t [TITLE] Title of page\n"
+				       "\t-i Include output of javascript variables that specify network interface ips and MAC addresses\n"
+				       "\t-n Include output of javascript variables specifying association of ips with hostnames\n"
+				       "\t-u print usage and exit\n");
 				return 0;
 		}
 	}
-	
+
 	if(optind < argc)
 	{
 		int packages_length = argc-optind;
@@ -306,23 +306,25 @@ int main(int argc, char **argv)
 		
 
 
-		printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n");
-		printf("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
-		printf("<head>\n");
-		printf("\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n");
-		printf("\t<title>%s</title>\n", title);
-		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\" />\n", theme_root, theme);
+		printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+		       "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+		       "<head>\n"
+		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n"
+		       "\t<title>%s</title>\n", title);
+		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\"/>\n", theme_root, theme);
 		int css_index, js_index, lstr_js_index;
-		printf("\t<style>\n"); //older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
-		printf("\t\t.unselected_submenu_container   { display:none; }\n");
-		printf("\t\t#nav_internal_container2 #selected_header_link         { display:inline; padding:0px; color:#000000; cursor:default; }\n");
-		printf("\t\t#nav_internal_container2 #selected_header_link:hover   { color:#000000; cursor:default; }\n");
-		printf("\t\t#nav_internal_container2 #selected_header_link:visited { color:#000000; cursor:default; }\n");
-		printf("\t\t#nav_internal_container2 #selected_header_link:active  { color:#000000; cursor:default; }\n");
-		printf("\t</style>\n"); 
+
+		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
+		printf("\t<style>\n"
+		       "\t\t.unselected_submenu_container	{ display:none; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link	{ display:inline; padding:0; color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:hover	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:visited	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:active	{ color:#000; cursor:default; }\n"
+		       "\t</style>\n");
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\" />\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
 		}
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
@@ -351,41 +353,42 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-		printf("</head>\n");
-		printf("<body>\n");
+		printf("</head>\n"
+		       "<body>\n");
 
 		if(display_type == HEADER)
 		{
-			printf("\t<div id=\"darken\" ><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n");
-			printf("\t<div id=\"wait_msg\">\n");
-			printf("\t\t<div id=\"wait_txt\">\n");
-			printf("\t\t\tPlease Wait While Settings Are Applied\n");
-			printf("\t\t</div>\n");
-			printf("\t\t<div id=\"wait_icon\">\n");
-			printf("\t\t\t<img src=\"%s/%s/images/wait_icon.gif\" />\n", theme_root, theme);
-			printf("\t\t</div>\n");
-			printf("\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n");
-			printf("\t</div>\n");
+			printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
+			       "\t<div id=\"wait_msg\">\n"
+			       "\t\t<div id=\"wait_txt\">\n"
+			       "\t\t\tPlease Wait While Settings Are Applied\n"
+			       "\t\t</div>\n"
+			       "\t\t<div id=\"wait_icon\">\n"
+			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", theme_root, theme);
 
+			printf("\t\t</div>\n"
+			       "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
+			       "\t</div>\n"
+			       "\t<div id=\"outer_logo\">\n"
+			       "\t\t<div id=\"inner_logo\">\n"
+			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
+			       "\t\t\t<div id=\"garg_desc\">Router<br/>Management<br/>Utility</div>\n"
+			       "\t\t\t<div id=\"garg_host\">Device Name: %s</div>\n", hostname);
 
-			printf("\t<div id=\"outer_logo\">\n");
-			printf("\t\t<div id=\"inner_logo\">\n");
-			printf("\t\t\t<div id=\"garg_title\">Gargoyle</div>\n");
-			printf("\t\t\t<div id=\"garg_desc\">Router<br />Management<br />Utility</div>\n");
-			printf("\t\t\t<div id=\"garg_host\">Device Name: %s</div>\n", hostname);
-			printf("\t\t</div>\n");
-			printf("\t</div>\n");
-
-			printf("\t<div id=\"outer_header\"></div>\n");
-			printf("\t<div id=\"outer_container\">\n");
-			printf("\t\t<div id=\"main_external_container\">\n");
-			printf("\t\t\t<div id=\"main_top\"></div>\n");
-			printf("\t\t\t<div id=\"main_internal_container\">\n");
-			printf("\n\n");
+			printf("\t\t</div>\n"
+			       "\t</div>\n"
+			       "\t<div id=\"outer_header\"></div>\n"
+			       "\t<div id=\"outer_container\">\n"
+			       "\t\t<div id=\"main_external_container\">\n"
+			       "\t\t\t<div id=\"main_top\"></div>\n"
+			       "\t\t\t<div id=\"main_internal_container\">\n"
+			       "\n\n");
 		}
-		printf("<script>\n");
-		printf("<!--\n");
-		printf("\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+
+		printf("<script>\n"
+		       "<!--\n"
+		       "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+
 		if(display_interface_vars == 1)
 		{
 			print_interface_vars();
@@ -395,13 +398,12 @@ int main(int argc, char **argv)
 			print_hostname_map();
 		}
 		define_package_vars(package_variables_to_load);
-		printf("\n\tsetBrowserTimeCookie();\n");
-		printf("\n\tvar testAjax = getRequestObj();\n");
-		printf("\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n");
-		printf("//-->\n");
-		printf("</script>\n");
-		printf("\n\n");
-	
+		printf("\n\tsetBrowserTimeCookie();\n"
+		       "\n\tvar testAjax = getRequestObj();\n"
+		       "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
+		       "//-->\n"
+		       "</script>\n"
+		       "\n\n");
 	}
 	else if(display_type == FOOTER)
 	{
@@ -410,7 +412,7 @@ int main(int argc, char **argv)
 			printf("ERROR: no gargoyle package defined!\n");
 			return 0;
 		}
-	
+
 		char* web_root = "/www";
 		char* bin_root = ".";
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
@@ -423,10 +425,8 @@ int main(int argc, char **argv)
 		}
 
 
-
-		
 		priority_queue* sections = initialize_priority_queue();
-		
+
 		uci_foreach_element( &p->sections, e)
 		{
 			struct uci_section *section = uci_to_section(e);
@@ -434,7 +434,7 @@ int main(int argc, char **argv)
 			if(sscanf(section->type, "%d", &section_rank) > 0)
 			{
 				priority_queue* section_pages =  initialize_priority_queue();
-					
+
 				struct uci_element *e2;
 				uci_foreach_element(&section->options, e2) 
 				{
@@ -448,16 +448,16 @@ int main(int argc, char **argv)
 			}
 		}
 
-		
-		printf("\t\t\t</div>\n");
-		printf("\t\t\t<div id=\"main_bottom\"></div>\n");
-		printf("\t\t</div>\n");
-		printf("\t\t<div id=\"nav_external_container\" onClick=\"return true\">\n");
-		printf("\t\t\t<div id=\"nav_top\"></div>\n");
-		printf("\t\t\t<div id=\"nav_internal_container1\">\n");
-		printf("\t\t\t\t<div id=\"nav_internal_container2\">\n");
-		printf("\t\t\t\t\t<div class=\"nav_internal_end1\"></div>\n");
-		
+
+		printf("\t\t\t</div>\n"
+		       "\t\t\t<div id=\"main_bottom\"></div>\n"
+		       "\t\t</div>\n"
+		       "\t\t<div id=\"nav_external_container\" onClick=\"return true\">\n"
+		       "\t\t\t<div id=\"nav_top\"></div>\n"
+		       "\t\t\t<div id=\"nav_internal_container1\">\n"
+		       "\t\t\t\t<div id=\"nav_internal_container2\">\n"
+		       "\t\t\t\t\t<div class=\"nav_internal_end1\"></div>\n");
+
 		int first_section=1;
 		int prev_section_selected=0;
 		priority_queue_node *next_section;
@@ -488,15 +488,15 @@ int main(int argc, char **argv)
 			{
 				if(first_section == 1)
 				{
-					printf("\t\t\t\t\t<div class=\"nav_selected_divider_end1\"></div>\n");
-					printf("\t\t\t\t\t<div class=\"nav_selected_end1\">\n");
-					printf("\t\t\t\t\t\t<div class=\"nav_selected_container_end1\">\n");
+					printf("\t\t\t\t\t<div class=\"nav_selected_divider_end1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_selected_end1\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_selected_container_end1\">\n");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_selected_divider1\"></div>\n");
-					printf("\t\t\t\t\t<div class=\"nav_selected\">\n");
-					printf("\t\t\t\t\t\t<div class=\"nav_selected_container\">\n");
+					printf("\t\t\t\t\t<div class=\"nav_selected_divider1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_selected\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_selected_container\">\n");
 				}
 
 
@@ -507,10 +507,10 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" a onClick=\"return true\">\n");
-					printf("\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
-					printf("\t\t\t\t\t\t\t</a>\n");
-					printf("\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
+					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" a onClick=\"return true\">\n"
+					       "\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
+					printf("\t\t\t\t\t\t\t</a>\n"
+					       "\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
 					priority_queue_node *next_section_page;
 					while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 					{
@@ -548,24 +548,24 @@ int main(int argc, char **argv)
 					}
 					printf("\t\t\t\t\t\t\t</div>\n");
 				}
-				printf("\t\t\t\t\t\t</div>\n");
-				printf("\t\t\t\t\t</div>\n");
+				printf("\t\t\t\t\t\t</div>\n"
+				       "\t\t\t\t\t</div>\n");
 				prev_section_selected=1;
 			}
 			else
 			{
 				if(first_section == 1)
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n");
-					printf("\t\t\t\t\t<div class=\"nav_unselected_end1\">\n");
-					printf("\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+					printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_unselected_end1\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n");
-					printf("\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+					printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
 				}
-				
+
 				priority_queue_node *next_section_page;
 				char* next_section_script = "";
 				if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
@@ -654,20 +654,20 @@ int main(int argc, char **argv)
 		{
 			printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end2\"></div>\n");
 		}
-	
-		printf("\t\t\t\t\t<div class=\"nav_internal_end2\"></div>\n");
-		printf("\t\t\t\t</div>\n");
-		printf("\t\t\t</div>\n");
-		printf("\t\t\t<div id=\"nav_bottom\"></div>\n");
-		printf("\t\t</div>\n");
-		printf("\t</div>\n");
-		printf("\t<div id=\"outer_footer\"></div>\n");
-		printf("</body>\n");
-		printf("</html>\n");	
-	}	
-			
+
+		printf("\t\t\t\t\t<div class=\"nav_internal_end2\"></div>\n"
+		       "\t\t\t\t</div>\n"
+		       "\t\t\t</div>\n"
+		       "\t\t\t<div id=\"nav_bottom\"></div>\n"
+		       "\t\t</div>\n"
+		       "\t</div>\n"
+		       "\t<div id=\"outer_footer\"></div>\n"
+		       "</body>\n"
+		       "</html>\n");
+	}
+
 	uci_free_context(ctx);
-}	
+}
 
 void define_package_vars(char** package_vars_to_load)
 {
@@ -927,14 +927,8 @@ void print_interface_vars(void)
 		if(wireless_mac == NULL)
 		{
 			wireless_mac = (char*)malloc(20);
-			if(wireless_if_num < 10)
-			{
-				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_if_num);
-			}
-			else
-			{
-				sprintf(wireless_mac, "00:11:22:33:44:0%d", wireless_if_num);
-			}
+			sprintf(wireless_mac, "00:11:22:33:44:%02x",
+				wireless_if_num & 0xff);
 		}
 		push_list(wireless_macs, (void*)wireless_mac);
 		push_list(tmp_list, (void*)wireless_if);
@@ -978,20 +972,6 @@ void print_interface_vars(void)
 	 * code to free them at a later time
 	 */
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 void print_hostname_map(void)
@@ -1052,14 +1032,9 @@ void print_js_list_var(char* var, list** value)
 
 void print_js_var(char* var, char* value)
 {
-	if(value != NULL)
-	{
-		printf("\tvar %s = \"%s\";\n", var, value);
-	}
-	else
-	{
-		printf("\tvar %s = \"\";\n", var);
-	}
+	printf("\tvar %s = \"%s\";\n",
+	       var,
+	       (value != NULL) ? value : "");
 }
 
 char* get_interface_mac(char* if_name)

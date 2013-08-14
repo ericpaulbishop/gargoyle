@@ -62,9 +62,6 @@ boot() {
 }
 
 start() {
-	type miniupnpd_add_rules >/dev/null 2>/dev/null || \
-		ACTION=- . /etc/hotplug.d/firewall/50-miniupnpd
-
 	config_load "upnpd"
 	local extiface intiface upload download logging secure enabled natpmp
 	local extip port usesysuptime conffile serial_number model_number
@@ -165,12 +162,7 @@ start() {
 
 	if [ -n "$ifname" ]; then
 		# start firewall
-		local zone
-		config_load firewall
-		config_get zone core "${extiface:-wan}_zone"
-
-	    [ -n "$zone" ] && \
-			miniupnpd_add_rules "$zone" "${extiface:-wan}" "$ifname"
+		iptables -L MINIUPNPD >/dev/null 2>/dev/null || fw3 reload
 
 		if [ "$logging" = "1" ]; then
 			SERVICE_DAEMONIZE=1 \
@@ -187,13 +179,6 @@ start() {
 stop() {
 	service_stop /usr/sbin/miniupnpd
 
-	type miniupnpd_remove_rules >/dev/null 2>/dev/null || \
-		ACTION=- . /etc/hotplug.d/firewall/50-miniupnpd
-
-	miniupnpd_remove_rules
-
 	iptables -t nat -F MINIUPNPD 2>/dev/null
-	iptables -t nat -X MINIUPNPD 2>/dev/null
 	iptables -t filter -F MINIUPNPD 2>/dev/null
-	iptables -t filter -X MINIUPNPD 2>/dev/null
 }

@@ -6,7 +6,7 @@
 						<th></th>
 					</tr>
 					<tr class='table_row_add'>
-						<td><input type='text' id='add_host'  size='15'/></td>
+						<td><input type='text' id='add_host' size='15'/></td>
 						<td><input type='text' id='add_mac' size='20' onkeyup='proofreadMac(this)' maxLength='17'/></td>
 						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15'/></td>
 						<td><input type='button' id='add_button' value="<%~ Add %>" class='default_button' onclick='addStatic()'/></td>
