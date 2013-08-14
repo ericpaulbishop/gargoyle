@@ -34,9 +34,9 @@ for config_file in glob.glob('./*-src/.config'):
 	for cline in cfg_doc:
 		anewline=''
 		
-		if cline.startswith('CONFIG_PACKAGE_plugin-gargoyle-i18n') and tran_type=='localize' :
+		if (cline.startswith('CONFIG_PACKAGE_plugin-gargoyle-i18n') or cline.startswith('CONFIG_PACKAGE_gargoyle-i18n')) and tran_type=='localize' :
 			anewline='# '+cline
-		if cline.startswith('CONFIG_PACKAGE_plugin-gargoyle-i18n') and tran_type=='internationalize' :
+		if (cline.startswith('CONFIG_PACKAGE_plugin-gargoyle-i18n') or cline.startswith('CONFIG_PACKAGE_gargoyle-i18n')) and tran_type=='internationalize' :
 			#sorry, but I'm sure your some slick brotha and you've got mad dope skillz, but...
 			anewline='# '+cline
 	
@@ -50,7 +50,7 @@ for config_file in glob.glob('./*-src/.config'):
 		newcfg_doc.append('# Gargoyle I18N\n')
 		newcfg_doc.append('#\n')
 		newcfg_doc.append('\n')
-		newcfg_doc.append('CONFIG_PACKAGE_plugin-gargoyle-i18n=y\n')
+		newcfg_doc.append('CONFIG_PACKAGE_gargoyle-i18n=y\n')
 		found_lang=False
 		for langpack in glob.glob('./package/plugin-gargoyle-i18n-*/files/www/i18n/*'):
 			lang=os.path.basename(langpack)
