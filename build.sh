@@ -335,9 +335,9 @@ for target in $targets ; do
 
 	
 	#copy gargoyle-specific packages to build directory
-	package_dir="package-prepare"
+	package_dir="$top_dir/package-prepare"
 	if [ ! -d "$package_dir" ] ; then
-		package_dir="package"
+		package_dir="$top_dir/package"
 	fi
 	
 	gargoyle_packages=$(ls "$package_dir" )
