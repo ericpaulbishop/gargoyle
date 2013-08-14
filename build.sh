@@ -141,8 +141,8 @@ do_js_compress()
 
 	rm -rf "$compress_js_dir"
 	mkdir "$compress_js_dir"
-	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' ) ;
-	for jsdir in $(find ${top_dir}/package -path "*/www/js") ; do
+	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
+	for jsdir in $(find "${top_dir}/package-prepare" -path "*/www/js") ; do
 		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
 		mkdir -p "$compress_js_dir/$pkg_rel_path"
 		cp "$jsdir/"*.js "$compress_js_dir/$pkg_rel_path/"
@@ -264,8 +264,6 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 	fi
 	cd "$top_dir"
 fi
-
-
 
 
 
@@ -444,7 +442,7 @@ for target in $targets ; do
 	echo "OFFICIAL_VERSION:=$full_gargoyle_version" > .ver
 	cat .ver "$package_dir/gargoyle/Makefile" >.vermake
 	rm .ver
-	mv .vermake "$package_dir/gargoyle/Makefile"
+	mv .vermake "$top_dir/$target-src/package/gargoyle/Makefile"
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
