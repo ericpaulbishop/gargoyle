@@ -17,7 +17,7 @@ set_constant_variables()
 	#even though build can take several hours
 	build_date=$(date +"%B %d, %Y")
 
-	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
+	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
 }
 
@@ -43,21 +43,22 @@ set_constant_variables()
 	# As of Attitude Adjustment r36470 multi-threaded builds often fail (race condition somewhere)
 	#
 	# Until this can be resolved, I am temporarily setting num_build_threads back to 1
-	# Unfortunately, this will make the build take WAY longer unfortunately, but that's 
+	# Unfortunately, this will make the build take WAY longer unfortunately, but that is 
 	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
 	#################################################################################################
+	
 	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=6
+	#num_build_threads=6
 
 }
 
 set_version_variables()
 {
-	#set date here, so it's guaranteed the same for all images
+	#set date here, so it is guaranteed the same for all images
 	#even though build can take several hours
 	build_date=$(date +"%B %d, %Y")
 
-	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
+	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
 	# Full display version in gargoyle web interface
 	if [ -z "$full_gargoyle_version" ] ; then
@@ -140,6 +141,7 @@ EOF
 
 }
 
+
 do_js_compress()
 {
 	uglifyjs_arg1="$1"
@@ -147,8 +149,8 @@ do_js_compress()
 
 	rm -rf "$compress_js_dir"
 	mkdir "$compress_js_dir"
-	escaped_package_dir=$(echo "$top_dir/package/" | sed 's/\//\\\//g' ) ;
-	for jsdir in $(find ${top_dir}/package -path "*/www/js") ; do
+	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
+	for jsdir in $(find "${top_dir}/package-prepare" -path "*/www/js") ; do
 		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
 		mkdir -p "$compress_js_dir/$pkg_rel_path"
 		cp "$jsdir/"*.js "$compress_js_dir/$pkg_rel_path/"
@@ -163,9 +165,10 @@ do_js_compress()
 	 		mv "$jsf.cmp" "$jsf"
 	 	done
 	done
+	cp -r "$compress_js_dir"/* "$top_dir/package-prepare/"
+
 	cd "$top_dir"
 }
-
 
 
 ######################################################################################################
@@ -203,21 +206,17 @@ fi
 set_version_variables "$full_gargoyle_version"
 
 
-#packages-orig is the original untouched packages directory before i18n/L10n occurred
-#restore the original so that the i18n/L10n scripts can modify them again
-[ -d "$top_dir/package-orig" ] && {
-	rm -rf "$top_dir/package"
-	mv "$top_dir/package-orig" "$top_dir/package"
-}
-
+if [ -d "$top_dir/package-prepare" ] ; then	
+	rm -rf "$top_dir/package-prepare"
+fi
 
 [ ! -z $(which python 2>&1) ] && {
-	#perhaps there were changes in some webpages or translations to be localized, so run the scripts again
-	[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/localize.py "$fallback_lang" "$active_lang" \
-											|| ./dev-utils/accessibility/internationalize.py "$active_lang"
-
+	#whether localize or internationalize, the packages directory is going to be modified
+	#default behavior is internationalize; defined in Makefile
+	[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/localize.py "$fallback_lang" "$active_lang" \
+											|| ./i18n-scripts/internationalize.py "$active_lang"
 } || {
-	active_lang=$(sh ./dev-utils/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
+	active_lang=$(sh ./i18n-scripts/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
 }
 
 
@@ -295,7 +294,10 @@ for target in $targets ; do
 
 	
 		#copy gargoyle-specific packages to build directory
-		package_dir="package"
+		package_dir="$top_dir/package-prepare"
+		if [ ! -d "$package_dir" ] ; then
+			package_dir="$top_dir/package"
+		fi
 		gargoyle_packages=$(ls "$package_dir" )
 		for gp in $gargoyle_packages ; do
 			if [ -d "$target-src/package/$gp" ] ; then
@@ -304,10 +306,7 @@ for target in $targets ; do
 			cp -r "$package_dir/$gp" "$target-src/package"
 		done
 	
-		#copy compressed javascript to build directory
-		if [ "$js_compress" = "true" ] ; then
-			cp -r "$compress_js_dir/"* "$target-src/package/"
-		fi
+
 
 		# specify default build profile	
 		default_profile="default"
@@ -349,11 +348,11 @@ for target in $targets ; do
 		[ ! -z $(which python 2>&1) ] && {
 			#finish internationalization by setting the target language & adding the i18n plugin to the config file
 			#finish localization just deletes the (now unnecessary) language packages from the config file
-			[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
-													|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+			[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
+													|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
 		} || {
 			#NOTE: localize is not supported because it requires python
-			./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+			./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
 		}
 
 
@@ -372,16 +371,18 @@ for target in $targets ; do
 		echo "OFFICIAL_VERSION:=$full_gargoyle_version" > .ver
 		cat .ver "$package_dir/gargoyle/Makefile" >.vermake
 		rm .ver
-		mv .vermake "$package_dir/gargoyle/Makefile"
-
+		mv .vermake "$top_dir/$target-src/package/gargoyle/Makefile"
+		
 		#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
-			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			#make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 		else
-			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 		fi
 
@@ -444,11 +445,11 @@ for target in $targets ; do
 			[ ! -z $(which python 2>&1) ] && {
 				#finish internationalization by setting the target language & adding the i18n plugin to the config file
 				#finish localization just deletes the (now unnecessary) language packages from the config file
-				[ "$translation_type" = "localize" ] 	&& ./dev-utils/accessibility/finalize_translation.py 'localize' \
-														|| ./dev-utils/accessibility/finalize_translation.py 'internationalize' "$active_lang"
+				[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
+														|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
 			} || {
 				#NOTE: localize is not supported because it requires python
-				./dev-utils/accessibility/finalize_tran_ltd.sh "$target-src" "$active_lang"
+				./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
 			}
 			
 
@@ -466,10 +467,12 @@ for target in $targets ; do
 
 
 			if [ "$verbosity" = "0" ] ; then
-				make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				#make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 			else
-				make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 			fi
 
