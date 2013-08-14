@@ -48,7 +48,7 @@ set_version_variables()
 	#even though build can take several hours
 	build_date=$(date +"%B %d, %Y")
 
-	gargoyle_git_revision=$(git log -1 --pretty=format:%h)
+	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
 
 	# Full display version in gargoyle web interface
@@ -121,7 +121,7 @@ create_gargoyle_banner()
 |                                                                |
 |----------------------------------------------------------------|
 EOF
-	#' Leave this comment, fixes display formatting in vim
+	
 
 	echo "$top_line"    >> "$banner_file_path"
 	echo "$middle_line" >> "$banner_file_path"
@@ -141,7 +141,7 @@ do_js_compress()
 
 	rm -rf "$compress_js_dir"
 	mkdir "$compress_js_dir"
-	escaped_package_dir=$(echo "$top_dir/package/" | sed 's/\//\\\//g' ) ;
+	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' ) ;
 	for jsdir in $(find ${top_dir}/package -path "*/www/js") ; do
 		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
 		mkdir -p "$compress_js_dir/$pkg_rel_path"
@@ -157,6 +157,8 @@ do_js_compress()
 	 		mv "$jsf.cmp" "$jsf"
 	 	done
 	done
+	cp -r "$compress_js_dir"/* "$top_dir/package-prepare/"
+
 	cd "$top_dir"
 }
 
@@ -200,10 +202,9 @@ set_version_variables "$full_gargoyle_version"
 
 #packages-orig is the original untouched packages directory before i18n/L10n occurred
 #restore the original so that the i18n/L10n scripts can modify them again
-[ -d "$top_dir/package-prepare" ] && {
-	
+if [ -d "$top_dir/package-prepare" ] ; then	
 	rm -rf "$top_dir/package-prepare"
-}
+fi
 
 [ ! -z $(which python 2>&1) ] && {
 	#whether localize or internationalize, the packages directory is going to be modified
@@ -336,7 +337,11 @@ for target in $targets ; do
 
 	
 	#copy gargoyle-specific packages to build directory
-	package_dir="package"
+	package_dir="package-prepare"
+	if [ ! -d "$package_dir" ] ; then
+		package_dir="package"
+	fi
+	
 	gargoyle_packages=$(ls "$package_dir" )
 	for gp in $gargoyle_packages ; do
 		if [ -d "$target-src/package/$gp" ] ; then
@@ -345,10 +350,6 @@ for target in $targets ; do
 		cp -r "$package_dir/$gp" "$target-src/package"
 	done
 
-	#copy compressed javascript to build directory
-	if [ "$js_compress" = "true" ] ; then
-		cp -r "$compress_js_dir/"* "$target-src/package/"
-	fi
 
 
 	# specify default build profile	
