@@ -392,24 +392,6 @@ function updatePackagesList()
 }
 
 
-function execute(cmd)
-{
-	var commands = cmd.join("\n");
-	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	setControlsEnabled(false, true, UI.WaitSettings);
-	
-	var stateChangeFunction = function(req)
-	{
-		if(req.readyState == 4)
-		{
-			setControlsEnabled(true);
-			window.location.href=window.location.href;
-		}
-	}
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-}
-
-
 
 
 function getCurrentOrLatestVersion(pkgVersions)

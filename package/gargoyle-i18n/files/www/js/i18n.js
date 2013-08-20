@@ -32,8 +32,8 @@ function genLangTable()
 
 	var langTable = createTable(columnNames, tableData, "lang_table", false, false);
 	
-	var tableContainer = document.getElementById("lang_table_container");
-	tableContainer.appendChild(langTable);
+	return langTable;
+
 }
 
 
@@ -58,8 +58,8 @@ function InstallLang()
 {
 	console.log(this.parentNode.parentNode.firstChild.innerHTML);
 	var pkg = this.parentNode.parentNode.firstChild.innerHTML;
-	var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
-	//execute(cmd);
+	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg ];
+	execute(cmd);
 }
 
 function ldone()
@@ -106,26 +106,10 @@ function createUseButton(type)
 
 function resetData()
 {
-	
-	var tableContainer = document.getElementById('lang_table_container');
-	tableContainer.appendChild(GenLangDiv(2));
-	
-	var columnNames = ['', '', ''];
-	var TableData = new Array();
-	var active_lang = uciOriginal.get("gargoyle", "global", "language");
-
-	for (idx=0; idx < langs.length; idx++)
-	{
-		if (langs[idx] == "universal" || langs[idx] == "graphics") { continue; }
-		TableData.push([ langs[idx], (langs[idx] == active_lang ? "*" : ""), createUseButton( (langs[idx]==active_lang?0:1) ) ]);
-	}
-
-	var Table = createTable(columnNames, TableData, "lang_table", false, false);
-	//if(tableContainer.firstChild != null)
-	//{
-	//	tableContainer.removeChild(tableContainer.firstChild);
-	//}
-	tableContainer.appendChild(Table);
+	document.getElementById("upload_lang_button").value = intS.Upld +" \u21e7";
+	var langTable = genLangTable();
+	var tableContainer = document.getElementById("lang_table_container");
+	tableContainer.appendChild(langTable);
 	
 }
 

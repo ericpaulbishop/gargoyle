@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js plugins.js" -z "firstboot.js i18n.js" system 
+	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js" -z "firstboot.js i18n.js" system 
 %>
 
 <script>
@@ -69,7 +69,7 @@
 				<div>
 					<span class="leftcolumn">&nbsp;</span>
 					<span class="rightcolumn">
-						<input class="default_button" type="button" value="Upload ⇧" />
+					<input class="default_button" type="button" onclick="do_get_lfile()" id="upload_lang_button" value="Upload ⇧" />
 					</span>
 				</div>
 				<input id="lfile_fname" type="hidden" name="fname" value="" />
@@ -122,7 +122,7 @@ document.getElementById('password1').focus();
 	fi
 %>
 
-	genLangTable();
+	resetData();
 //-->
 </script>
 
