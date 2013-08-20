@@ -20,6 +20,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/haserl
   SECTION:=utils
   CATEGORY:=Utilities
+  DEPENDS:=+uci +libericstools
   TITLE:=A CGI wrapper to embed shell scripts in HTML documents
   URL:=http://haserl.sourceforge.net/
 endef

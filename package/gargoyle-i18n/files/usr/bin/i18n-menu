@@ -1,0 +1,14 @@
+#!/bin/sh
+# Copyright (C) 2013 BashfulBladder as part of i18n support for Gargoyle router firmware
+
+# example: /usr/bin/i18n-menu gargoyle.display.status_openvpn_connections
+
+menu_name="$1"
+translation=""
+
+[ -n "$menu_name" ] && {
+	. /usr/lib/gargoyle/i18nServices.sh
+	translation=$(get_i18n_menuname "$menu_name" $(uci -q get gargoyle.global.language))
+}
+
+echo "$translation"

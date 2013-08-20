@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var bkS=new Object(); //part of i18n
+
 var toggleReload = false;
 var globalLanIp;
 
@@ -28,39 +30,39 @@ function doRestore()
 {
 	if(document.getElementById('restore_file').value.length == 0)
 	{
-		alert("ERROR: You must select a configuration file to restore from.");
+		alert(bkS.SelCErr);
 	}
 	else
 	{
-		confirmRestore = window.confirm("This will completely erase your current settings and replace them with new ones from the selected configuration file.  Are you sure you want to continue?");
+		confirmRestore = window.confirm(bkS.EraseWarn);
 		if(confirmRestore)
 		{
 			document.getElementById('restore_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('restore_form').submit();
-			setControlsEnabled(false, true, "Uploading Configuration File");	
+			setControlsEnabled(false, true, bkS.UpingC);	
 		}
 	}
 }
 function doDefaultRestore()
 {
-	var confirmRestore = window.confirm("This will completely erase your current settings and replace them with the original, default settings.  Are you sure you want to continue?");
+	var confirmRestore = window.confirm(bkS.EraseWarn);
 	if(confirmRestore)
 	{
 		document.getElementById('restore_original_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 		document.getElementById('restore_original_form').submit();
-		setControlsEnabled(false, true, "Loading Original Configuration File");	
+		setControlsEnabled(false, true, bkS.LdOrig);	
 	}
 
 }
 function restoreFailed()
 {
 	setControlsEnabled(true);
-	alert("Restore failed.  Ensure that uploaded file is a valid Gargoyle configuration file and try again.");
+	alert(bkS.FailErr);
 }
 
 function restoreSuccessful(lanIp)
 {
-	setControlsEnabled(false, true, "Please wait while new settings are applied")
+	setControlsEnabled(false, true, UI.waitText)
 	
 	globalLanIp = lanIp;
 

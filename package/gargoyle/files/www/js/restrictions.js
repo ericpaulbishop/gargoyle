@@ -1,3 +1,5 @@
+var restStr=new Object(); //part of i18n
+
 var pkg = "firewall";
 
 function saveChanges()
@@ -132,7 +134,7 @@ function addNewRule(ruleType, rulePrefix)
 	var errors = validateRule(document, rulePrefix);
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\nCould not add rule.");
+		alert(errors.join("\n") + "\n"+restStr.ARErr);
 	}
 	else
 	{
@@ -249,7 +251,7 @@ function createEnabledCheckbox(enabled)
 function createEditButton(enabled, ruleType, rulePrefix)
 {
 	editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editRule;
 	
@@ -319,9 +321,9 @@ function editRule()
 	
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	editRuleSectionId = editRow.childNodes[1].firstChild.id;
@@ -349,7 +351,7 @@ function editRule()
 					var errors = validateRule(editRuleWindow.document, editRulePrefix);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not add rule.");
+						alert(errors.join("\n") + "\n"+restStr.ARErr);
 					}
 					else
 					{
@@ -403,7 +405,7 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 	}
 	else
 	{
-		alert("ERROR: Invalid Address\n");
+		alert(restStr.IAErr+"\n");
 	}
 }
 
@@ -418,7 +420,7 @@ function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tabl
 	{
 		var urlSpan = createUrlSpan(newUrl, controlDocument);
 		var tableContainer = controlDocument.getElementById(tableContainerId);
-		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable(["URL Part", "Match Type", "Match Text / Expression"], [], tableId, true, false);
+		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([restStr.UPrt, restStr.MTyp, restStr.MTExp], [], tableId, true, false);
 		addTableRow(table, [(urlType.match("domain") ? "domain" : "full"), urlType.substring(urlType.lastIndexOf("_")+1), urlSpan ], true, false);
 		if(tableContainer.childNodes.length == 0)
 		{
@@ -430,11 +432,11 @@ function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tabl
 	{
 		if( newUrl.length == 0)
 		{
-			alert("ERROR: URL match length must be greater than zero");
+			alert(restStr.UMZErr);
 		}
 		else
 		{
-			alert("ERROR: URL match cannot contain quote or newline characters\n");
+			alert(restStr.UChErr+"\n");
 		}
 	}
 }
@@ -602,7 +604,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	var allDay = (daysAndHours == "" && hours == "");
 	controlDocument.getElementById(rulePrefix + "hours_active").value = hours;
 	controlDocument.getElementById(rulePrefix + "all_day").checked = allDay;
-	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = daysAndHours;
+	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = weekly_i18n(daysAndHours,"uci");
 	setSelectedValue(rulePrefix + "schedule_repeats", (daysAndHours == "" ? "daily" : "weekly"), controlDocument);
 
 	var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
@@ -688,7 +690,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 
 	if(urlDefFound)
 	{
-		var table = createTable(["URL Part", "Match Type", "Match Text / Expression"], [], rulePrefix + "url_match_table", true, false, null, null, controlDocument);
+		var table = createTable([restStr.UPrt, restStr.MTyp, restStr.MTExp], [], rulePrefix + "url_match_table", true, false, null, null, controlDocument);
 		for(urlTypeIndex=0; urlTypeIndex < urlTypes.length; urlTypeIndex++)
 		{
 			var defStr = urlDefinitions[urlTypeIndex];
@@ -805,6 +807,8 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 		uci.set(pkg, sectionId, "active_weekdays", daysActiveStr);
 	}
 	setIfVisible(controlDocument, pkg, sectionId, "active_hours",         rulePrefix + "hours_active",          rulePrefix + "hours_active_container" );
+	var weekly_ranges=controlDocument.getElementById(rulePrefix + "days_and_hours_active");
+	weekly_ranges.value=weekly_i18n(weekly_ranges.value, "table");
 	setIfVisible(controlDocument, pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active", rulePrefix + "days_and_hours_active_container");
 
 	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
@@ -908,3 +912,29 @@ function setFromIpTable(controlDocument, pkg, sectionId, optionId, containerId, 
 	}
 }
 
+function weekly_i18n(weekly_schd, source) { //this is part of i18n; TODO: best to have an uci get language to see if absent to just return daystrings
+	if (weekly_schd.length < 6) return weekly_schd;
+	var localdays=[UI.Sun, UI.Mon, UI.Tue, UI.Wed, UI.Thu, UI.Fri, UI.Sat];
+	var fwdays=["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	var indays, outdays, splits, idx;
+	var joiner=[];
+
+	if (source == "uci") {
+		indays=fwdays;
+		outdays=localdays;
+	} else { // from the browser
+		indays=localdays;
+		outdays=fwdays;
+	}
+
+	splits=weekly_schd.split(" ");
+	for (idx=0; idx < splits.length; idx++) {
+		var pos= indays.indexOf(splits[idx]);
+		if (pos >= 0) {
+			joiner[idx]=outdays[pos];
+		} else {
+			joiner[idx]=splits[idx];
+		}
+	}
+	return joiner.join(" ");
+}

@@ -5,6 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var ovwS=new Object(); //part of i18n
 
 function secondsToString(seconds)
 {
@@ -12,7 +13,7 @@ function secondsToString(seconds)
 	var numHours = Math.floor((seconds % 86400) / 3600);
 	var numMinutes = Math.floor(((seconds % 86400) % 3600) / 60);
 
-	return numDays + " days, " + numHours + " hours, " + numMinutes + " minutes";
+	return numDays + " "+UI.days+", " + numHours + " "+UI.hours+", " + numMinutes + " "+UI.minutes;
 }
 
 function resetData()
@@ -28,17 +29,17 @@ function resetData()
 	var swapUsed=Math.floor((totalSwap-freeSwap)*10/1024)/10;
 
 	wirelessModes= [];
-	wirelessModes["ap"] = "Access Point (AP)"
-	wirelessModes["sta"] = "Client"
-	wirelessModes["ap+sta"] = "AP+Client"
+	wirelessModes["ap"] = ovwS.AcPt+" (AP)"
+	wirelessModes["sta"] = ovwS.Clnt
+	wirelessModes["ap+sta"] = "AP+"+ovwS.Clnt
 	wirelessModes["ap+wds"] = "AP+WDS"
 	wirelessModes["adhoc"]  = "Ad Hoc";
-	wirelessModes["disabled"] = "Disabled";
+	wirelessModes["disabled"] = UI.Disabled;
 	var wirelessModeId = getWirelessMode(uciOriginal);
 	var wirelessMode = wirelessModes[ wirelessModeId ];
 
-	qosUploadStatus = qosEnabled && uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") != "" ? "Enabled" : "Disabled";
-	qosDownloadStatus = qosEnabled && uciOriginal.get("qos_gargoyle", "download", "total_bandwidth") != "" ? "Enabled" : "Disabled";
+	qosUploadStatus = qosEnabled && uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") != "" ? UI.Enabled : UI.Disabled;
+	qosDownloadStatus = qosEnabled && uciOriginal.get("qos_gargoyle", "download", "total_bandwidth") != "" ? UI.Enabled : UI.Disabled;
 
 	var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 	setChildText("device_model", model);
@@ -61,7 +62,7 @@ function resetData()
 	setChildText("current_time", currentTime);
 
 	var bridgeSection = getBridgeSection(uciOriginal);
-	setChildText("device_config", bridgeSection == "" ? "Gateway" : "Wireless Bridge/Repeater");
+	setChildText("device_config", bridgeSection == "" ? ovwS.Gtwy : ovwS.WBrgR);
 	if(bridgeSection == "")
 	{
 		document.getElementById("bridge_container").style.display = "none";
@@ -110,7 +111,7 @@ function resetData()
 		}
 		else
 		{
-			setChildText("wan_pppoe_uptime", (typeof pppoeUptime != "undefined") ? secondsToString(pppoeUptime) : "Disconnected");
+			setChildText("wan_pppoe_uptime", (typeof pppoeUptime != "undefined") ? secondsToString(pppoeUptime) : ovwS.Discon);
 		}
 
 		if(uciOriginal.get("network", "wan", "proto") != "3g")
@@ -120,7 +121,7 @@ function resetData()
 
 		if(wifi_status.toString().length == 0 && wirelessModeId != "disabled")
 		{
-			setChildText("wireless_mode", wirelessMode+" (disabled)");
+			setChildText("wireless_mode", wirelessMode+" ("+UI.disabled+")");
 		}
 		else
 		{
@@ -170,7 +171,7 @@ function resetData()
 			{
 				document.getElementById("wireless_apssid_div").style.display="block";
 				document.getElementById("wireless_apssid_5ghz_div").style.display="block";
-				setChildText("wireless_apssid_label", "2.4 GHz Access Point SSID:");
+				setChildText("wireless_apssid_label", ovwS.T2p4GID+":");
 				setChildText("wireless_apssid", apSsids["G"])
 				setChildText("wireless_apssid_5ghz", apSsids["A"])
 			}
@@ -178,7 +179,7 @@ function resetData()
 			{
 				document.getElementById("wireless_apssid_div").style.display="block";
 				document.getElementById("wireless_apssid_5ghz_div").style.display="none";
-				setChildText("wireless_apssid_label", "Access Point SSID:");
+				setChildText("wireless_apssid_label", ovwS.APID+":");
 				setChildText("wireless_apssid", (apSsids["G"] == null ? apSsids["A"] : apSsids["G"]))
 			}
 
@@ -190,7 +191,7 @@ function resetData()
 			else
 			{
 				setChildText("wireless_otherssid", otherSsid);
-				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : "SSID Joined by Client:"))
+				setChildText("wireless_otherssid_label", (otherIsSta ? "SSID:" : ovwS.IDJoin+":"))
 				if(currentWirelessMacs.length > 0 && otherIsSta){ setChildText("wan_mac", currentWirelessMacs[0]); }
 			}
 			setChildText("wireless_mac", currentWirelessMacs.length > 0 ? currentWirelessMacs[0] : "-" );
@@ -214,14 +215,14 @@ function resetData()
 		setChildText("bridge_mask", currentLanMask);
 		setChildText("bridge_mac", currentLanMac );
 		setChildText("bridge_gateway", uciOriginal.get("network", "lan", "gateway") );
-		setChildText("bridge_mode", uciOriginal.get("wireless", bridgeSection, "client_bridge") == "1" ? "Client Bridge" : "WDS");
+		setChildText("bridge_mode", uciOriginal.get("wireless", bridgeSection, "client_bridge") == "1" ? ovwS.ClBr : "WDS");
 		setChildText("bridge_ssid", uciOriginal.get("wireless", bridgeSection, "ssid") );
 	}
 
 	setChildText("qos_upload", qosUploadStatus);
 	setChildText("qos_download", qosDownloadStatus);
 
-	var portsColumns=['Port', 'Status'];
+	var portsColumns=[ovwS.Port, ovwS.Sts];
 	var idx;
 	var portsTableData = [];
 	if (ports.length > 0)

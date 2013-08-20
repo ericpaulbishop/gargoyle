@@ -69,11 +69,12 @@ int main(int argc, char **argv)
 	char* selected_section = "";
 	char* css_includes = "";
 	char* js_includes = "";
+	char* langstr_js_includes = "";
 	char* title = "Gargoyle Router Management Utility";
 	char** package_variables_to_load = NULL;
 	int c;
 	
-	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:T:t:IiNnUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
+	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:Z:z:T:t:IiNnUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
 	{
 		switch(c)
 		{
@@ -105,6 +106,10 @@ int main(int argc, char **argv)
 			case 'j':
 				js_includes = strdup(optarg);
 				break;
+			case 'Z':
+			case 'z':
+				langstr_js_includes = strdup(optarg);
+				break;
 			case 'T':
 			case 't':
 				title = strdup(optarg);
@@ -127,6 +132,7 @@ int main(int argc, char **argv)
 				       "\t-s [SECTION-ID] Section/Main Menu Id\n"
 				       "\t-p [PAGE-ID] Page Id\n"
 				       "\t-c [CSS FILES] List of additional css files necessary for page\n"
+				       "\t-z [JS FILES] List of additional i18n language-string javascript files necessary for page\n"
 				       "\t-j [JS FILES] List of additional javascript files necessary for page\n"
 				       "\t-t [TITLE] Title of page\n"
 				       "\t-i Include output of javascript variables that specify network interface ips and MAC addresses\n"
@@ -175,6 +181,8 @@ int main(int argc, char **argv)
 		char* web_root = "/www";
 		char* bin_root = ".";
 		char* gargoyle_version = "default";
+		char* fallback_lang = "";
+		char* active_lang = "";
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
 		{
 			theme_root=get_option_value_string(uci_to_option(e));
@@ -234,6 +242,7 @@ int main(int argc, char **argv)
 
 		char** all_css;
 		char** all_js;
+		char** all_lstr_js;
 		char whitespace_separators[] = { '\t', ' ' };
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "common_css") == UCI_OK && display_type == HEADER)
 		{
@@ -260,6 +269,16 @@ int main(int argc, char **argv)
 		{
 			unsigned long num_pieces;
 			all_js=split_on_separators(js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
+		}
+		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "fallback_lang") == UCI_OK)
+		{
+			fallback_lang=get_option_value_string(uci_to_option(e));
+			if(get_uci_option(ctx, &e, p, "gargoyle", "global", "language") == UCI_OK)
+			{
+				active_lang=get_option_value_string(uci_to_option(e));
+				unsigned long num_pieces;
+				all_lstr_js=split_on_separators(langstr_js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
+			}
 		}
 		
 		
@@ -293,7 +312,7 @@ int main(int argc, char **argv)
 		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n"
 		       "\t<title>%s</title>\n", title);
 		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\"/>\n", theme_root, theme);
-		int css_index, js_index;
+		int css_index, js_index, lstr_js_index;
 
 		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
 		printf("\t<style>\n"
@@ -310,6 +329,29 @@ int main(int argc, char **argv)
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
 			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
+		}
+		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
+		{
+			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+			{
+				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+			}
+			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
+			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
+			{
+				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+				{
+					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+				}
+				char* tran_file=(char*)calloc(4096, sizeof(char)); //MAXPATHLEN
+				if (tran_file != NULL) {
+					snprintf(tran_file, 4096, "%s/i18n/%s/%s", web_root, active_lang, all_lstr_js[lstr_js_index]);
+					if (path_exists(tran_file) == 1) {
+						printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					}
+					free(tran_file);
+				}
+			}
 		}
 		printf("</head>\n"
 		       "<body>\n");

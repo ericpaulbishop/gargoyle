@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+ 
+var accessStr=new Object(); //part of i18n
 
 var stopRedirect = false;
 
@@ -13,7 +15,7 @@ function saveChanges()
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n" + UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -232,7 +234,7 @@ function proofreadAll()
 	pass2 = document.getElementById("password2").value;
 	if( (pass1 != "" || pass2 != "") && pass1 != pass2)
 	{
-		errors.push("Administrator password cannot be confirmed. Specified passwords are not equal.");
+		errors.push(accessStr.PasswordsDiffer);
 	}
 	return errors;
 }
@@ -458,7 +460,7 @@ function getRemoteOptionValueHash()
 	allOptionValueHash["both"]     = "HTTPS & HTTP";
 	allOptionValueHash["https"]    = "HTTPS";
 	allOptionValueHash["http"]     = "HTTP";
-	allOptionValueHash["disabled"] = "Disabled";
+	allOptionValueHash["disabled"] = UI.disabled;
 	return allOptionValueHash;
 }
 

@@ -1,17 +1,17 @@
 #!/usr/bin/haserl
-<?
-	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
+<%
+	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "bandwidth" -c "internal.css" -j "table.js bandwidth.js" -n -i gargoyle qos_gargoyle
-?>
+	gargoyle_header_footer -h -s "status" -p "bandwidth" -c "internal.css" -j "table.js bandwidth.js" -z "bandwidth.js" -n -i gargoyle qos_gargoyle
+%>
 
 <script>
 <!--
-<?
+<%
 	echo 'var monitorNames = new Array();'
 	mnames=$(cat /tmp/bw_backup/*.sh 2>/dev/null | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
 	for m in $mnames ; do 
@@ -23,92 +23,92 @@
 	tz_m=$(($tz_hundred_hours-($tz_h*100)))
 	tz_minutes=$((($tz_h*60)+$tz_m))
 	echo "var tzMinutes = $tz_minutes;";
-?>
+%>
 //-->
 </script>
 
 <form>
 	<fieldset>
-		<legend class="sectionheader">Bandwidth Graph Display Options</legend>
+		<legend class="sectionheader"><%~ bandwidth.GOpSect %></legend>
 		<div>
-			<label for='plot_time_frame' id='time_frame_label'>Time Frame:</label>
+			<label for='plot_time_frame' id='time_frame_label'><%~ TFrm %>:</label>
 			<select id="plot_time_frame" onchange="resetPlots()">
-				<option value="1">15 Minutes</option>
-				<option value="2"> 6 Hours</option>
-				<option value="3">24 Hours</option>
-				<option value="4">30 Days</option>
-				<option value="5"> 1 Year</option>
+				<option value="1">15 <%~ minutes %></option>
+				<option value="2"> 6 <%~ hours %></option>
+				<option value="3">24 <%~ hours %></option>
+				<option value="4">30 <%~ days %></option>
+				<option value="5"> 1 <%~ year %></option>
 			</select>
 		</div>
 
 		<div id="control_column_container">
 			<div id="plot1_control_column">
-				<div><span  id="plot1_title">Plot 1</span></div>
-				<div><select id="plot1_type" onchange="resetPlots()" ><option value="total">Total Bandwidth</option></select></div>
+				<div><span  id="plot1_title"><%~ Plot %> 1</span></div>
+				<div><select id="plot1_type" onchange="resetPlots()" ><option value="total"><%~ TBdw %></option></select></div>
 				<div><select id="plot1_id" onchange="resetPlots()"></select></div>
 
 			</div>
 			<div id="plot2_control_column">
-				<div><span   id="plot2_title">Plot 2</span></div>
-				<div><select id="plot2_type" onchange="resetPlots()" ><option value="none">None</option></select></div>
+				<div><span   id="plot2_title"><%~ Plot %> 2</span></div>
+				<div><select id="plot2_type" onchange="resetPlots()" ><option value="none"><%~ None %></option></select></div>
 				<div><select id="plot2_id" onchange="resetPlots()"></select></div>
 			</div>
 			<div id="plot3_control_column">
-				<div><span   id="plot3_title">Plot 3</span></div>
-				<div><select id="plot3_type" onchange="resetPlots()"><option value="none">None</option></select></div>
+				<div><span   id="plot3_title"><%~ Plot %> 3</span></div>
+				<div><select id="plot3_type" onchange="resetPlots()"><option value="none"><%~ None %></option></select></div>
 				<div><select id="plot3_id" onchange="resetPlots()"></select></div>
 			</div>
 		</div>
 
 		<div>
 			<input type="checkbox" id="use_high_res_15m" onclick="highResChanged()">&nbsp;
-			<label id="use_high_res_15m_label" for="use_high_res_15m">Save High Resolution 15 Minute Timeframe Data For All Hosts</label>
+			<label id="use_high_res_15m_label" for="use_high_res_15m"><%~ HRInf %></label>
 			<br/>
-			<em>Not recommended for routers with &lt; 32MB of RAM</em>
+			<em><%~ HRWrn %></em>
 		</div>
 
-		<br/>All bandwidth usage reported is via the WAN interface only.  
-		<br/>Traffic between local hosts is not reported.
+		<br/><%~ UsInf %>  
+		<br/><%~ LclTrff %>
 	</fieldset>
 
 	<fieldset id="bandwidth_graphs">
-		<legend class="sectionheader">Bandwidth Graphs</legend>
-		<span class="bandwidth_title_text"><strong>Download</strong> (<span onclick='expand("Download")' class="pseudo_link">expand</span>)</span>
-		<span class="bandwidth_title_text"><strong>Upload</strong> (<span onclick='expand("Upload")' class="pseudo_link">expand</span>)</span>
+		<legend class="sectionheader"><%~ BGrSect %></legend>
+		<span class="bandwidth_title_text"><strong><%~ Dnld %></strong> (<span onclick='expand("<%~ Dnld %>")' class="pseudo_link"><%~ expd %></span>)</span>
+		<span class="bandwidth_title_text"><strong><%~ Upld %></strong> (<span onclick='expand("<%~ Upld %>")' class="pseudo_link"><%~ expd %></span>)</span>
 		<br/>
 		<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 		<embed id="upload_plot" style="margin-left:0px; margin-right:5px; float:left; width:240px; height:180px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 		<br/>
-		<span class="bandwidth_title_text"><strong>Total</strong> (<span onclick='expand("Total")' class="pseudo_link">expand</span>)</span>
+		<span class="bandwidth_title_text"><strong><%~ Totl %></strong> (<span onclick='expand("<%~ Totl %>")' class="pseudo_link"><%~ expd %></span>)</span>
 		<br/>
 		<embed id="total_plot" style="margin-left:0px; width:480px; height:360px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/' />
 	</fieldset>
 	<fieldset id="total_bandwidth_use">
-		<legend class="sectionheader">Bandwidth Usage Table</legend>
+		<legend class="sectionheader"><%~ BUTab %></legend>
 		<div>
-			<label for='table_time_frame' class="narrowleftcolumn" id='table_time_frame_label'>Display Interval:</label>
+			<label for='table_time_frame' class="narrowleftcolumn" id='table_time_frame_label'><%~ DspI %>:</label>
 			<select id="table_time_frame" class="rightcolumn" onchange="resetPlots()">
-				<option value="1">Minutes</option>
-				<option value="2">Quarter Hours</option>
-				<option value="3">Hours</option>
-				<option value="4">Days</option>
-				<option value="5">Months</option>
+				<option value="1"><%~ minutes %></option>
+				<option value="2"><%~ qhour %></option>
+				<option value="3"><%~ hours %></option>
+				<option value="4"><%~ days %></option>
+				<option value="5"><%~ mnths %></option>
 			</select>
 		</div>
 		<div>
-			<label for='table_type' class="narrowleftcolumn" id='total_type_label'>Display Type:</label>
+			<label for='table_type' class="narrowleftcolumn" id='total_type_label'><%~ DspT %>:</label>
 			<select id="table_type" class="rightcolumn" onchange="resetPlots()">
-				<option value="total">Total Bandwidth</option>
+				<option value="total"><%~ TBdw %></option>
 			</select>
 		</div>
 		<div id="table_id_container" style="display:none" >
-			<label for='table_id' class="narrowleftcolumn" id='total_id_label'>Display Id:</label>
+			<label for='table_id' class="narrowleftcolumn" id='total_id_label'><%~ DspID %>:</label>
 			<select id="table_id" class="rightcolumn" onchange="resetPlots()"></select>
 		</div>
 		<div class="bottom_gap">
-			<label for='table_units' class="narrowleftcolumn" id='table_units_label'>Table Units:</label>
+			<label for='table_units' class="narrowleftcolumn" id='table_units_label'><%~ TbUnt %>:</label>
 			<select id="table_units" class="rightcolumn" onchange="resetPlots()">
-				<option value="mixed">Auto (Mixed)</option>
+				<option value="mixed"><%~ AutoM %></option>
 				<option value="KBytes">KBytes</option>
 				<option value="MBytes">MBytes</option>
 				<option value="GBytes">GBytes</option>
@@ -119,21 +119,21 @@
 		<div id="bandwidth_table_container"></div>
 
 		<div>
-			<center><input type='button' id='delete_data_button' class='big_button' value='Delete Data' onclick='deleteData();' /></center>
+			<center><input type='button' id='delete_data_button' class='big_button' value='<%~ DelD %>' onclick='deleteData();' /></center>
 		</div>
 
 	</fieldset>
 
 	<fieldset id="download_bandwidth_data" >
-		<legend class="sectionheader">Download Bandwidth Data</legend>
+		<legend class="sectionheader"><%~ DBData %></legend>
 		<div>
-			<span style='text-decoration:underline'>Data is comma separated:</span>
+			<span style='text-decoration:underline'><%~ DSep %>:</span>
 			<br/>
-			<em>[Direction],[Interval Length],[Intervals Saved],[IP],[Interval Start],[Interval End],[Bytes Used]</em>
+			<em><%~ DFmt %></em>
 			<br/>
 		</div>
 		<div>
-			<center><input type='button' id='download_data_button' class='big_button' value='Download Now' onclick='window.location="bandwidth.csv";' /></center>
+			<center><input type='button' id='download_data_button' class='big_button' value='<%~ DNow %>' onclick='window.location="bandwidth.csv";' /></center>
 		</div>
 	</fieldset>
 </form>
@@ -146,6 +146,6 @@
 //-->
 </script>
 
-<?
+<%
 	gargoyle_header_footer -f -s "status" -p "bandwidth"  
-?>
+%>

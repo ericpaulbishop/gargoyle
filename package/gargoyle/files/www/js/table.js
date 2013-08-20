@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -116,7 +116,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	if(rowsAreRemovable)
 	{
 		cellContent = createInput("button", controlDocument);
-		cellContent.value = 'Remove';
+		cellContent.value = UI.Remove;
 		cellContent.className="default_button";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); }; 
 		cell = controlDocument.createElement('td');

@@ -1,15 +1,14 @@
 #!/usr/bin/haserl
-<?
-	# This webpage is copyright ¬© 2013 by BashfulBladder 
+<%
+	# This webpage is copyright © 2013 by BashfulBladder 
 	# There is not much to this page, so this is public domain 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js"
-
-?>
+	gargoyle_header_footer -h -s "system" -p "wifi_schedule" -c "internal.css" -j "wifi_schedule.js" -z "wifi_schedule.js"
+%>
 
 <script>
 <!--
-<?
+<%
 	echo "var cron_data = new Array();"
 	if [ -e /etc/crontabs/root ] ; then
 		awk '{gsub(/"/, "\\\""); print "cron_data.push(\""$0"\");" }' /etc/crontabs/root
@@ -19,7 +18,7 @@
 	echo "var wifi_status = new Array();"
 	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 
-?>
+%>
 
 var raw_cron_data = new Array();
 for (tab_idx in cron_data) {
@@ -43,40 +42,40 @@ for (tab_idx in cron_data) {
 </style>
 
 <fieldset id="wifi_schedule">
-	<legend class="sectionheader">WiFi Schedule</legend>
+	<legend class="sectionheader"><%~ wifi_schedule.Wisch %></legend>
 	<div id='wlan_stat'>
-		<label class='leftcolumn'>Wireless radio(s) status:</label>
+		<label class='leftcolumn'><%~ Rstat %>:</label>
 		<span class='rightcolumn' id='wlan_status'></span>
 	</div>
 	
 	<div id='wifi_action' style="margin-top:15px">
-		<label class='leftcolumn' style="margin-top:5px">Stop/Start wireless radios(s)</label>
+		<label class='leftcolumn' style="margin-top:5px"><%~ StStR %></label>
 		<span class='rightcolumn'>
-			<input type='button' class='default_button' id='wifi_up_button' value="Start Wireless" onclick='GetWifiUpdate("up")'/>
-			<input type='button' class='default_button' id='wifi_down_button' value="Stop Wireless" onclick='GetWifiUpdate("down")'/>
+			<input type='button' class='default_button' id='wifi_up_button' value="<%~ RadOn %>" onclick='GetWifiUpdate("up")'/>
+			<input type='button' class='default_button' id='wifi_down_button' value="<%~ RadOf %>" onclick='GetWifiUpdate("down")'/>
 		</span>
 	</div>
 
 	<div class="internal_divider"></div>
 
 	<div>
-		<label for="timer_mode" class="narrowleftcolumn">Timer Period:</label>
+		<label for="timer_mode" class="narrowleftcolumn"><%~ TPer %>:</label>
 		<select id="timer_mode" class="rightcolumn" onchange="SetTimerMode(this.value)">
-			<option selected="" value="0">Disable timer</option>
-			<option value="1">Daily</option>
-			<option value="3">Weekday + Sat/Sun</option>
-			<option value="7">Weekly</option>
+			<option selected="" value="0"><%~ NoTm %></option>
+			<option value="1"><%~ Dly %></option>
+			<option value="3"><%~ Wkd %></option>
+			<option value="7"><%~ Wkly %></option>
 		</select>
 		<br />
 		<br />
 		<div id="div_timer_increment" style="display:none;">
-			<label for="timer_increment" class="narrowleftcolumn">Timer increment:</label>
+			<label for="timer_increment" class="narrowleftcolumn"><%~ TInc %>:</label>
 			<select id="timer_increment" onchange="SetTimerIncrement(this)">
-				<option value="5">5 minutes</option>
-				<option value="10">10 minutes</option>
-				<option selected="" value="15">15 minutes</option>
-				<option value="30">30 minutes</option>
-				<option value="60">60 minutes</option>
+				<option value="5">5 <%~ minutes %></option>
+				<option value="10">10 <%~ minutes %></option>
+				<option selected="" value="15">15 <%~ minutes %></option>
+				<option value="30">30 <%~ minutes %></option>
+				<option value="60">60 <%~ minutes %></option>
 			</select>
 		</div>
 	</div>
@@ -122,8 +121,8 @@ for (tab_idx in cron_data) {
 </fieldset>
 
 <div id="bottom_button_container">
-	<input type='button' value='Save Changes' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='Reset' id="reset_button" class="bottom_button" onclick='SetTimerMode(0)'/>
+	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
+	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='SetTimerMode(0)'/>
 </div>
 
 <script>
@@ -132,6 +131,6 @@ for (tab_idx in cron_data) {
 //-->
 </script>
 
-<?
+<%
 	gargoyle_header_footer -f -s "system" -p "wifi_schedule"
-?>
+%>
