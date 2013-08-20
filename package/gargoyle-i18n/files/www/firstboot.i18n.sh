@@ -50,6 +50,32 @@
 			<span class='widerightcolumn' style="font-size:15px;">
 				<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
 			</span>
+
+			<div id="lang_table_container"></div>
+
+			<form id="lfile_form" action="utility/do_fb_lang.sh" method="post" enctype="multipart/form-data" target="get_lfile">
+				<div>
+					<span class="leftcolumn">&nbsp;</span>
+					<span class="rightcolumn">
+						<label>Upload Language File:</label>
+					</span>
+				</div>
+				<div>
+					<span class="leftcolumn">&nbsp;</span>
+					<span class="rightcolumn">
+						<input id="lfile" type="file" name="lfile" />
+					</span>
+				</div>
+				<div>
+					<span class="leftcolumn">&nbsp;</span>
+					<span class="rightcolumn">
+						<input class="default_button" type="button" value="Upload ⇧" />
+					</span>
+				</div>
+				<input id="lfile_fname" type="hidden" name="fname" value="" />
+				<input id="lfile_hash" type="hidden" name="hash" value="" />
+			</form>
+			<iframe id="get_lfile" style="display: none;" src="#" name="get_lfile"></iframe>
 		</div>
 	</div>
 	<input class="default_button" type="button" value="<%~ SSet %>" onclick="setInitialSettings()" />
@@ -96,7 +122,7 @@ document.getElementById('password1').focus();
 	fi
 %>
 
-	GenLangContainer();
+	genLangTable();
 //-->
 </script>
 
