@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=gargoyle_i18n
+PKG_NAME:=gargoyle-i18n
 PKG_VERSION:=0.2.0
 PKG_RELEASE:=1
 

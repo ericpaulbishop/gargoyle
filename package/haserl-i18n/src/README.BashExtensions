@@ -1,0 +1,161 @@
+April 2008
+
+The following documents the modifications to the haserl parser
+when --enable-bash-extensions is enabled.  The following was 
+written by Scott, and should not be considered as a core part
+of haserl.  (Ask on the mailing list if you need help)
+
+--------------------------------------------------------------
+
+Haserl supports four tags by default. These are generic and
+suitable for use with a great variety of shells. If, like
+me, you write your scripts with vi (vim) with the syntax
+highlighting enabled, then you will have noted how badly
+this looks in the editor.
+
+I also prefer the tags to be a bit more intelligent, as I
+find it makes the source that much more readable.
+
+To this end I have added the following tags (again, these
+are designed with bash in mind, may not work with other
+sh-type shells, and are not at all supported if you are
+using LUA/LUAC.)
+
+
+     Tag version:               Expands to:
+     ------------------------   ------------------------
+     <%if list %>               if [[ list ]] ; then
+     <%elif list %>             elif [[ list ]] ; then
+     <%else [comment] %>        else [# comment]
+     <%endif [comment] %>       fi [# comment]
+
+     <%case word %>             case word in
+     <%when pattern %>          pattern)
+     <%otherwise [comment] %>   *) : [comment] ;;
+     <%endcase [comment] %>     esac [# comment]
+
+     <%while list %>            while list ; do
+     <%endwhile %>              done [# comment]
+
+     <%until list %>            until list ; do
+     <%enduntil [comment] %>    done [# comment]
+
+     <%for name in word %>      for name in word ; do
+     <%endfor [comment] %>      done [# comment]
+
+     <%unless list %>           if [[ ! list ]] ; then
+     <%elun list %>             elif [[ ! list ]] ; then
+     <%unelse [comment] %>      else [#comment]
+     <%endunless [comment %>    fi [# comment]
+
+
+To simplify parsing, and to reduce confusion when reading
+your source, unique words are used. For example, the use of
+endwhile, enduntil and endfor instead of done. Also, for
+clarity I have used endif/endcase instead of fi/esac.
+
+------
+UNLESS
+------
+
+Note the last command, the unless...endunless. I find it is
+often more clear to express an unless condition than an if
+not condition. For example, and to show the streamlining of
+code these tags provide:
+
+     <% if [[ ! IsLogged ]] ; then %>
+          something
+     <% fi %>
+
+This is the improved (IMHO) version:
+
+     <%unless IsLogged %>
+          something
+     <%endunless %>
+
+Personally, I find no use for "else unless", but I decided
+to include it for consistency.
+
+--------------------
+CONDITIONAL COMMANDS
+--------------------
+
+There is one syntactic problem, concerning the use of the
+<%if %>, <%while %>, <%until %> and <%unless %> tags. The
+default action is to create a test-style condition; however,
+sometime you need to do this:
+
+     <% if grep "text" file &>/dev/null ; then %>
+
+If you simply write this:
+
+     <%if grep "text" file &>/dev/null %>
+
+Then it is expanded to:
+
+     if [[ grep "text" file &>/dev/null ]] %>
+
+That is obviously incorrect. To allow for this the parser
+provides a bit of syntactic sugar. It checks the first
+character of the expression list and if it is, then it
+rewrites the list as a command. For example:
+
+     <%if |grep "text" file &>/dev/null %>
+
+Becomes:
+
+     if grep "text" file &>/dev/null ; then
+
+--------------
+CASE STATMENTS
+--------------
+
+The case statement provided another challenge, namely how to
+handle the pesky ;; required at the end of each case. I am
+not a C person, so personally I find the next instance of a
+case to be sufficient to terminate the first. Given that the
+shell version of case can accept multiple conditions, there
+is really no reason to worry with cases falling through as
+they do in C. In other words, I'm all for ditching the ;;
+construct altogether.
+
+So I did.
+
+The enhanced <%case %> tag operates without an explicit ;;
+being required. It is perhaps easier to show than explain,
+so here's an example:
+
+     <%case "$FRUIT" %>
+     <%when apple %>
+          echo "It's an apple!"
+     <%when orange %>
+          echo "It's an orange!"
+     <%otherwise something else %>
+          echo "Not what I expected."
+     <%endcase %>
+
+The parser renders this as follows:
+
+     case "$FRUIT" in
+     "\000\012\004") :
+     ;;
+     apple)
+     echo "It's an apple!"
+     ;;
+     orange)
+     echo "It's an orange!"
+     ;;
+     *) # something else
+     echo "Not what I expected."
+     ;;
+     esac
+
+Note the odd first case. The parser inserts this so ensure
+that each subsequent when/otherwise/endcase can be preceded
+by ;;. This eliminates the need to remember the ;;, and I
+believe makes for cleaner code. There is, of course, a small
+performance penalty for always having to evaluate this extra
+case. In real life I find this not to be a problem, however,
+if you are processing inside a loop and expect a large chunk
+of items, then it is something to be aware of.
+
