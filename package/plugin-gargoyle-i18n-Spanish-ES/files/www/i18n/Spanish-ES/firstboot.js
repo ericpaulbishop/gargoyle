@@ -7,6 +7,7 @@ fbS.npass="Ingrese una nueva contraseña ahora";
 fbS.NPass="Nueva Contraseña";
 fbS.Stz="Seleccione su zona horaria";
 fbS.SSet="Guardar Ajustes";
+fbS.ULngF="Subir archivo de Idioma";
 
 //javascript
 fbS.nopsErr="ERROR: Debe especificar una contraseña";

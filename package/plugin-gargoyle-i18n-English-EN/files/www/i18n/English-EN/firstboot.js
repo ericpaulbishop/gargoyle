@@ -7,6 +7,7 @@ fbS.npass="Enter a new password now";
 fbS.NPass="New Password";
 fbS.Stz="Select your timezone";
 fbS.SSet="Save Settings";
+fbS.ULngF="Upload Language File";
 
 //javascript
 fbS.nopsErr="ERROR: You must specify a password";

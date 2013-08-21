@@ -14,8 +14,11 @@ var intS=new Object();
 //
 function genLangTable()
 {
-	var columnNames = [intS.Lang, intS.Desc, ''];
+	var columnNames = [intS.Lang, intS.Actv, ''];
 	var tableData = new Array();
+
+
+	var curLangPkgName = "plugin-gargoyle-i18n-" + uciOriginal.get("gargoyle", "global", "language")
 
 	for(pkgName in pkg_info)
 	{
@@ -23,9 +26,16 @@ function genLangTable()
 		{
 			//since firstboot.sh only comes up on a pristine router, the first version *should* be the most current - except in a case of failsafe...
 			var pStatus=pkg_info[pkgName][ver]["Status"].split(" ");
-			tableData.push([pkgName,
-							pkg_info[pkgName][ver]["Description"]==null?"":pkg_info[pkgName][ver]["Description"],
-							pStatus[2]=="not-installed"?createInstallButton(1):createInstallButton(0)]);
+			var descriptionSpan = document.createElement("span");
+			var descriptionStr =  pkg_info[pkgName][ver]["Description"]==null ? "" : pkg_info[pkgName][ver]["Description"] 
+			descriptionSpan.id = pkgName;
+			descriptionSpan.appendChild(document.createTextNode(descriptionStr));
+			tableData.push([
+					descriptionSpan,
+					pStatus[2] == "not-installed" ? "" : createUseCheck( pkgName == curLangPkgName ? 0 : 1 ),
+					createInstallButton(pStatus[2] == "not-installed" ? 1 : 0)
+					]
+					);
 			break;
 		}
 	}
@@ -54,10 +64,9 @@ function do_get_lfile()
 	}
 }
 
-function InstallLang()
+function installLang()
 {
-	console.log(this.parentNode.parentNode.firstChild.innerHTML);
-	var pkg = this.parentNode.parentNode.firstChild.innerHTML;
+	var pkg = this.parentNode.parentNode.firstChild.id;
 	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg ];
 	execute(cmd);
 }
@@ -73,38 +82,27 @@ function createInstallButton(type)
 	var inButton = createInput("button");
 	if (type == 1)
 	{
+		inButton.style.marginLeft = "0px";
 		inButton.value = UI.Install;
 		inButton.className="default_button";
-		inButton.onclick = InstallLang;
+		inButton.onclick = installLang;
 	}
 	else
 	{
-		inButton.value = intS.Instd;
-		inButton.className="default_button_disabled";
-		inButton.onclick = ""
+		inButton = document.createTextNode(intS.Instd);
 	}
 	return inButton;
 }
 
-function createUseButton(type)
+function createUseCheck(type)
 {
-	var useButton = createInput("button");
-	if (type == 1)
-	{
-		useButton.value = intS.Acv8;
-		useButton.className="default_button";
-		useButton.onclick = activateLang;
-	}
-	else
-	{
-		useButton.value = intS.Actv;
-		useButton.className="default_button_disabled";
-		useButton.onclick = ""
-	}
-	return useButton;
+	var useCheck = createInput("checkbox");
+	useCheck.checked = type == 1 ? false : true;
+	useCheck.onclick=activateLang;
+	return useCheck;
 }
 
-function resetData()
+function resetFirstBootData()
 {
 	document.getElementById("upload_lang_button").value = intS.Upld +" \u21e7";
 	var langTable = genLangTable();
@@ -113,10 +111,10 @@ function resetData()
 	
 }
 
-function activateLang(row, action)
+function activateLang()
 {
 	var row = this.parentNode.parentNode;
-	var lang = row.firstChild.firstChild.data;
+	var lang = row.firstChild.firstChild.id;
 
 	var cmd = [];
 	//cmd.push("uci set gargoyle.global.language=\"" + lang + "\"");

@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js" -z "firstboot.js i18n.js" system 
+	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js" -z "firstboot.js i18n.js" system gargoyle
 %>
 
 <script>
@@ -48,7 +48,7 @@
 				<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
 			</span>
 			<span class='widerightcolumn' style="font-size:15px;">
-				<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
+				<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
 			</span>
 
 			<div id="lang_table_container"></div>
@@ -57,7 +57,7 @@
 				<div>
 					<span class="leftcolumn">&nbsp;</span>
 					<span class="rightcolumn">
-						<label>Upload Language File:</label>
+						<label><%~ ULngF %>:</label>
 					</span>
 				</div>
 				<div>
@@ -108,21 +108,20 @@ document.getElementById('password1').focus();
 <!--
 
 <%
-	echo "var HaveNet=0;"
-	HaveNet=$(ping -q -w 1 -c 1 8.8.8.8 2>/dev/null | awk '/transmitted/ {print $4}') #Google's DNS servers; error nulled
-	if [ "$HaveNet" == "1" ] ; then
-		echo "HaveNet=1;"
+	echo "var haveNet=0;"
+	have_net=$(ping -q -w 1 -c 1 8.8.8.8 2>/dev/null | awk '/transmitted/ {print $4}') #Google's DNS servers; error nulled
+	if [ "$have_net" == "1" ] ; then
+		echo "haveNet=1;"
 		gpkg update > /dev/null 2>&1
 
 		lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
-		#lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle/)
 		if [ -n "$lang_info" ] ; then
 			printf "%s\n" "$lang_info" 
 		fi
 	fi
 %>
 
-	resetData();
+	resetFirstBootData();
 //-->
 </script>
 
