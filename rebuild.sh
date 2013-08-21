@@ -216,7 +216,7 @@ fi
 	[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/localize.py "$fallback_lang" "$active_lang" \
 											|| ./i18n-scripts/internationalize.py "$active_lang"
 } || {
-	active_lang=$(sh ./i18n-scripts/accessibility/intl_ltd.sh "$translation_type" "$active_lang")
+	active_lang=$(sh ./i18n-scripts/intl_ltd.sh "$translation_type" "$active_lang")
 }
 
 
