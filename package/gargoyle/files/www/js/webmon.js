@@ -1,12 +1,12 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-
+var webmS=new Object(); //part of i18n
 
 var updateInProgress;
 var timeSinceUpdate;
@@ -25,7 +25,7 @@ function saveChanges()
 	if(errorList.length > 0)
 	{
 		updateInProgress = false;
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -350,8 +350,8 @@ function updateMonitorTable()
 				//loadedData = loadedData && (webmonLines[webmonLines.length -1].match(/^Success/) != null);
 				if(loadedData)
 				{	
-					var domainColumns=['Local Host', 'Last Access Time', 'Website'];
-					var searchColumns=['Local Host', 'Last Access Time', 'Search Text'];
+					var domainColumns=webmS.dCol;
+					var searchColumns=webmS.sCol;
 					var domainTable = createTable(domainColumns, domainData, "webmon_domain_table", false, false);
 					var searchTable = createTable(searchColumns, searchData, "webmon_search_table", false, false);
 					

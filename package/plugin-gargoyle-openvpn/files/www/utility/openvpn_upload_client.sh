@@ -1,5 +1,10 @@
 #!/usr/bin/haserl --upload-limit=1048576 --upload-dir=/tmp/
-<?
+<%
+	# This program is copyright © 2012-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+	# version 2.0 with a special clarification/exception that permits adapting the program to
+	# configure proprietary "back end" software provided that all modifications to the web interface
+	# itself remain covered by the GPL.
+	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )	
 
@@ -135,13 +140,13 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	fi
 
 	if   [ ! -f "$ca_file" ] ; then
-		error="Could not find CA file"
+		error=$(i18n openvpn uc_CA_f)
 	elif [ ! -f "$cert_file" ] ; then
-		error="Could not find certificate file"
+		error=$(i18n openvpn uc_crt_f)
 	elif [ ! -f "$key_file" ] ; then
-		error="Could not find key File"
+		error=$(i18n openvpn uc_key_f)
 	elif [ ! -f "$conf_file" ] ; then
-		error="Could not find config file"
+		error=$(i18n openvpn uc_cfg_f)
 	else
 		cat "$conf_file" | tr -d "\r" > "${client_name}.conf"
 		cat "$ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
@@ -193,7 +198,7 @@ else
 fi
 
 if [ ! -f "${client_name}.conf" ] ; then
-	error="Could not find config file"
+	error=$(i18n openvpn uc_cfg_f)
 fi
 
 if [ -z "$error" ] ; then
@@ -209,7 +214,7 @@ if [ -z "$error" ] ; then
 	#proofreading
 	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")
 	if [ -n "$use_tap" ] ; then
-		error="Gargoyle does not support TAP OpenVPN configurations"
+		error=$(i18n openvpn uc_TAP_Err)
 	fi
 
 	if [ -z "$error" ] ; then
@@ -246,7 +251,7 @@ if [ -z "$error" ] ; then
 		done
 		
 		if [ -z "$have_tun_if" ] ; then
-			error="Parameters saved but OpenVPN failed to connect. Re-check your configuration."
+			error=$(i18n openvpn uc_conn_Err)
 		fi
 	fi
 fi
@@ -265,4 +270,4 @@ rm -rf "$tmp_dir"
 
 
 
-?>
+%>

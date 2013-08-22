@@ -1,0 +1,5 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Webshell
+EN=Webshell
+ES=Webshell

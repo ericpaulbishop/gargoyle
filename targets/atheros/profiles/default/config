@@ -430,7 +430,9 @@ CONFIG_KERNEL_PRINTK_TIME=y
 #
 # CONFIG_DEBUG is not set
 CONFIG_IPV6=y
-# CONFIG_PKG_BUILD_PARALLEL is not set
+CONFIG_PKG_BUILD_PARALLEL=y
+CONFIG_PKG_BUILD_USE_JOBSERVER=y
+
 
 #
 # Stripping options
@@ -2041,7 +2043,7 @@ CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 # CONFIG_PACKAGE_getopt is not set
 CONFIG_PACKAGE_gpioctl=y
 CONFIG_PACKAGE_gpkg=y
-CONFIG_PACKAGE_haserl=y
+CONFIG_PACKAGE_haserl-i18n=y
 # CONFIG_PACKAGE_hwclock is not set
 # CONFIG_PACKAGE_iconv is not set
 # CONFIG_PACKAGE_iwcap is not set

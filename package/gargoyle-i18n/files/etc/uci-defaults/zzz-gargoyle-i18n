@@ -1,0 +1,11 @@
+#!/bin/sh
+
+uci set gargoyle.global.fallback_lang=English-EN
+uci set gargoyle.global.language=English-EN
+uci commit
+
+mv /www/firstboot.i18n.sh /www/firstboot.sh
+
+. /usr/lib/gargoyle/i18nServices.sh
+change_menu_language "English-EN"
+restart_lang_services

@@ -1,3 +1,5 @@
+var ovpnS=new Object(); //part of i18n
+
 function resetData()
 {
 	updateTableFromData(statusFileLines)
@@ -24,7 +26,7 @@ function updateTableFromData(statusData)
 		clientData.push( [ clientName, lineParts[1].replace(/:.*$/, ""), lineParts[4]] )
 	}
 
-	var clientTable = createTable([ "Client Name", "Connected From", "Connected Since" ], clientData, "openvpn_connection_table", false, false)
+	var clientTable = createTable([ ovpnS.ClntN, ovpnS.ConnFr, ovpnS.ConnSc ], clientData, "openvpn_connection_table", false, false)
 	
 	var tableContainer = document.getElementById("openvpn_connection_table_container");
 	while(tableContainer.firstChild != null)
@@ -38,7 +40,7 @@ function updateTableFromData(statusData)
 	else
 	{
 		var emptyDiv = document.createElement("div");
-		emptyDiv.innerHTML = "<span style=\"text-align:center\"><em>No Clients Connected</em></span>";
+		emptyDiv.innerHTML = "<span style=\"text-align:center\"><em>"+ovpnS.NoCConn+"</em></span>";
 		tableContainer.appendChild(emptyDiv);
 	}
 

@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright Â© 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+ 
+var wolS=new Object(); //part of i18n
 
 function initWolTable()
 {
@@ -52,7 +54,7 @@ function initWolTable()
 	}
 
 	sort2dStrArr(dataList, 1);
-	var columnNames = ["Hostname", "IP", "MAC", "" ]
+	var columnNames = [UI.HsNm, "IP", "MAC", "" ]
 	var table = createTable(columnNames, dataList, "wol_table", false, false);
 	var tableContainer = document.getElementById('wol_table_container');
 	if(tableContainer.firstChild != null)
@@ -70,7 +72,7 @@ function sort2dStrArr(arr, testIndex)
 
 function getHostname(ip)
 {
-	var hostname = ipToHostname[ip] == null ? "(unknown)" : ipToHostname[ip];
+	var hostname = ipToHostname[ip] == null ? "("+UI.unk+")" : ipToHostname[ip];
 	hostname = hostname.length < 25 ? hostname : hostname.substr(0,22)+"...";
 	return hostname;
 }
@@ -78,7 +80,7 @@ function getHostname(ip)
 function createWakeUpButton()
 {
 	var WakeUpButton = createInput("button");
-	WakeUpButton.value = "Wake Up";
+	WakeUpButton.value = wolS.WkUp;
 	WakeUpButton.className="default_button";
 	WakeUpButton.onclick = wakeHost;
 	return WakeUpButton;
@@ -95,5 +97,5 @@ function wakeHost()
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 
-	alert("Wake Up request sent.");
+	alert(wolS.WAlr);
 }

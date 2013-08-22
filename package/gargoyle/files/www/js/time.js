@@ -1,10 +1,12 @@
 /*
- * This program is copyright � 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+
+var timeStr=new Object(); //part of i18n; currently unused
 
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
@@ -14,7 +16,7 @@ function saveChanges()
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n" + UI.ErrChanges;
 		alert(errorString);
 	}
 	else

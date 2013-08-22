@@ -1,6 +1,6 @@
 /*
  *     Copyright (c) 2011 Cezary Jackiewicz <cezary@eko.one.pl>
- *     Copyright (c) 2012 Eric Bishop <eric@gargoyle-router.com>
+ *     Copyright (c) 2012-2013 Eric Bishop <eric@gargoyle-router.com>
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
  *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  *     MA 02110-1301, USA.
  */
+var pgS=new Object(); //part of i18n
 
 var driveToPath = [];
 
@@ -51,9 +52,9 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 
 	var nameDisplay = pkgData["Description"] == null ? pkgName : (pkgData["Description"])
 	var statusTypes = [];
-	statusTypes[notInstalledVal] = "Not Installed"
-	statusTypes["root"] = "Pre-Installed"
-	statusTypes["plugin_root"] = "Installed"
+	statusTypes[notInstalledVal] = pgS.NInst
+	statusTypes["root"] = pgS.PInst
+	statusTypes["plugin_root"] = pgS.Instd
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
 
 
@@ -61,9 +62,9 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 	elAdd(div, "strong", false, true)
 	elAdd(div.firstChild, nameDisplay, true, true)
 
-	elAdd(div, 'Version: ' + pkgVersion, true, true)
-	elAdd(div, 'Status: ' + pkgStatus, true, pkgStatus == "Not Installed" ? true : false)
-	if(pkgStatus == "Not Installed")
+	elAdd(div, pgS.Vers+': ' + pkgVersion, true, true)
+	elAdd(div, pgS.Stus+': ' + pkgStatus, true, pkgStatus == pgS.NInst ? true : false)
+	if(pkgStatus == pgS.NInst)
 	{
 		var dependsMatchUsb = false
 		for (var dep in pkgData["Required-Depends"])
@@ -74,7 +75,7 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 			}
 		}
 		canInstall = (!dependsMatchUsb) && pkgData["Will-Fit"] == "true"
-		elAdd(div, "Required Disk Space: " + parseBytes(pkgData["Required-Size"]), true, (!canInstall))
+		elAdd(div, pgS.RDSpc+": " + parseBytes(pkgData["Required-Size"]), true, (!canInstall))
 		
 		if(!canInstall) 
 		{
@@ -82,11 +83,11 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 			emEl.style.color = "#FF0000"
 			if(dependsMatchUsb)
 			{
-				elAdd(emEl, "Package Cannot Be Installed (Requires USB support)", true, false)
+				elAdd(emEl, pgS.USBErr, true, false)
 			}
 			else if(pkgData["Will-Fit"] == "false")
 			{
-				elAdd(emEl, "Package Cannot Be Installed (Insufficient Disk Space)", true, false)
+				elAdd(emEl, pgS.DskErr, true, false)
 			}
 			pkgData["Can-Install"] = false;
 		}
@@ -117,7 +118,7 @@ function changePluginRoot()
 	var newDirPath = driveToPath[ newRootDrive ] + "/" + newRootDir
 	if(oldRootDrive == "root" && newRootDrive != "root")
 	{
-		if(!confirm("You are switching your plugin root directory to a USB drive. This means that in order for your plugins to work correctly you must NOT remove this drive.\n\nContinue?"))
+		if(!confirm(pgS.ChrootWarn))
 		{
 			return
 		}
@@ -173,16 +174,16 @@ function addPluginSource()
 	var errors = []
 	if(!srcName.match(/^[A-Za-z0-9_\-]+$/))
 	{
-		var err = "ERROR: Invalid Character(s) In Source Name" + ( srcName.match(/ /) ? " (no spaces allowed)" : "" )
+		var err = pgS.CharErr + ( srcName.match(/ /) ? " "+pgS.SpcErr : "" )
 		errors.push(err);
 	}
 	if(srcName.length == 0)
 	{
-		errors.push("ERROR: You must specify Source Name")
+		errors.push(pgS.SNamErr)
 	}
 	if(srcUrl.length == 0)
 	{
-		errors.push("ERROR: You must specify Source URL")
+		errors.push(pgS.SURLErr)
 	}
 	var dupeName = false
 	var dupeUrl  = false
@@ -194,15 +195,15 @@ function addPluginSource()
 	}
 	if(dupeName)
 	{
-		errors.push("ERROR: Duplicate Source Name")
+		errors.push(pgS.DupSNamErr)
 	}
 	if(dupeUrl)
 	{
-		errors.push("ERROR: Duplicate Source URL")
+		errors.push(pgS.DupSURLErr)
 	}
 	if(errors.length > 0)
 	{
-		alert( errors.join("\n") + "\n\nCannot Add Plugin Source");
+		alert( errors.join("\n") + "\n\n"+pgS.AddPSErr);
 	}
 	else
 	{
@@ -249,13 +250,13 @@ function resetData()
 		var rootDriveDisplay = [];
 		var rootDriveValues  = [];
 		
-		rootDriveDisplay.push("Root Drive " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(pkg_dests['root']['Bytes-Free']) + " Free")
+		rootDriveDisplay.push(pgS.RDrv+" " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " "+pgS.Totl+", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " "+pgS.Free)
 		rootDriveValues.push("root");
 		
 		var driveIndex;
 		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 		{
-			rootDriveDisplay.push( storageDrives[driveIndex][0] + " " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+			rootDriveDisplay.push( storageDrives[driveIndex][0] + " " + parseBytes(storageDrives[driveIndex][4]) + " "+pgS.Totl+", " + parseBytes(storageDrives[driveIndex][5]) + " "+pgS.Free )
 			rootDriveValues.push( storageDrives[driveIndex][0] )
 			driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
 		}
@@ -265,7 +266,7 @@ function resetData()
 	}
 	else
 	{
-		setChildText("plugin_root_drive_static", "Root Drive " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " Total, " + parseBytes(pkg_dests['root']['Bytes-Free']) + " Free", null, null, null, document);
+		setChildText("plugin_root_drive_static", pgS.RDrv+" " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " "+pgS.Totl+", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " "+pgS.Free, null, null, null, document);
 		document.getElementById("plugin_root_change_container").style.display = "none"
 	}
 
@@ -280,18 +281,18 @@ function resetData()
 		if( url.match(/\/\/downloads.openwrt.org/) || url.match(/\/\/www.gargoyle-router.com/))
 		{
 			remove = document.createElement('em');
-			remove.appendChild(document.createTextNode("Preset"))
+			remove.appendChild(document.createTextNode(pgS.Prst))
 		}
 		else
 		{
 			remove = createInput("button");
 			remove.className = "default_button"
-			remove.value="Remove"
+			remove.value=UI.Remove
 			remove.onclick = removePluginSource;
 		}
 		sourceTableData.push( [name + "\n" + url, remove] );
 	}
-	var sourceTable = createTable(["Name", ""], sourceTableData, "package_source_table", false, false);
+	var sourceTable = createTable([pgS.Name, ""], sourceTableData, "package_source_table", false, false);
 	var sourceContainer = document.getElementById('package_source_table_container');
 	setSingleChild(sourceContainer, sourceTable)
 
@@ -302,7 +303,7 @@ function resetData()
 	
 	
 	//set data for plugin list
-	var columnNames = ['Package', 'Installed', ''];
+	var columnNames = [pgS.Pkg, pgS.Instd, ''];
 	var pluginsTableData = new Array();
 	var pkgIndex=0;
 	for(pkgName in pkg_info)
@@ -324,7 +325,7 @@ function resetData()
 			button.className="default_button";
 			if (enabledCheckbox.checked)
 			{
-				button.value = "Uninstall";
+				button.value = UI.Uninstall;
 				if( pkgData["Install-Destination"] == "root" )
 				{
 					button.disabled = true;
@@ -337,7 +338,7 @@ function resetData()
 			}
 			else
 			{
-				button.value = "Install";
+				button.value = UI.Install;
 				if( pkgData["Can-Install" ] )
 				{
 					button.onclick = installPackage;
@@ -388,24 +389,6 @@ function updatePackagesList()
 {
 	var cmd = [ "opkg update" ];
 	execute(cmd);
-}
-
-
-function execute(cmd)
-{
-	var commands = cmd.join("\n");
-	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	setControlsEnabled(false, true, "Please wait...");
-	
-	var stateChangeFunction = function(req)
-	{
-		if(req.readyState == 4)
-		{
-			setControlsEnabled(true);
-			window.location.href=window.location.href;
-		}
-	}
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
 
 

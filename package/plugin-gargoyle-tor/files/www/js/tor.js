@@ -1,10 +1,11 @@
 /*
- * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var torS=new Object(); //part of i18n
 
 // save timeout variables
 var maxSaveWait=90
@@ -39,7 +40,7 @@ function saveChanges()
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -176,7 +177,7 @@ function savePartTwo()
 			}
 			else if(saveCount == maxSaveWait)
 			{
-				alert("WARNING: Tor is active, but may be having problems connecting -- check your connection")
+				alert(torS.ConProb)
 				setControlsEnabled(true)
 			}
 			else
@@ -256,23 +257,23 @@ function proofreadAll()
 		var relayType = getSelectedValue("tor_relay_mode") == "1" ? "Relay" : "Bridge";
 		if(relayPort == obfsPort)
 		{
-			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Bridge/Relay Port");
+			errors.push( relayType + " "+torS.ObPeBErr);
 		}
 		if(relayPort == httpPort || relayPort == httpsPort || relayPort == remoteHttpPort || relayPort == remoteHttpsPort)
 		{
-			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router Web Server Port");
+			errors.push( relayType + " "+torS.RPeWSErr);
 		}
 		if(obfsPort == httpPort || obfsPort == httpsPort || obfsPort == remoteHttpPort || obfsPort == remoteHttpsPort)
 		{
-			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router Web Server Port");
+			errors.push( relayType + " "+torS.ObPeWSErr);
 		}
 		if(relayPort == sshPort || relayPort == remoteSshPort )
 		{
-			errors.push( relayType + " Server Relay Port Cannot Be The Same As Router SSH Port");
+			errors.push( relayType + " "+torS.RPeSSHErr);
 		}
 		if(obfsPort == sshPort || obfsPort == remoteSshPort )
 		{
-			errors.push( relayType + " Server Obfsproxy Port Cannot Be The Same As Router SSH Port");
+			errors.push( relayType + " "+torS.ObPeSSHErr);
 		}
 	}
 
@@ -374,7 +375,7 @@ function resetData()
 
 
 	var pkgrNames = ["ram", "root"]
-	var dispNames = ["RAM Disk", "Root Disk"]
+	var dispNames = [torS.RAMD, torS.RootD]
 	var ni
 	for(ni=0;ni<2; ni++)
 	{
@@ -382,7 +383,7 @@ function resetData()
 		var dn  = dispNames[ni];
 		if(pkg_dests[ prn ] != null)
 		{
-			rootDriveDisplay.push(dn + ": " + parseBytes(pkg_dests[prn]["Bytes-Total"]) + " Total, " + parseBytes(pkg_dests[prn]["Bytes-Free"]) + " Free");
+			rootDriveDisplay.push(dn + ": " + parseBytes(pkg_dests[prn]["Bytes-Total"]) + " "+torS.Totl+", " + parseBytes(pkg_dests[prn]["Bytes-Free"]) + " "+torS.Free);
 		}
 		else
 		{
@@ -396,7 +397,7 @@ function resetData()
 	var driveIndex;
 	for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 	{
-		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " "+torS.Totl+", " + parseBytes(storageDrives[driveIndex][5]) + " "+torS.Free )
 		rootDriveValues.push( storageDrives[driveIndex][0] )
 		driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
 	}
@@ -423,9 +424,9 @@ function setTorVisibility()
 
 	var modeDescriptions = []
 	modeDescriptions["0"] = ""
-	modeDescriptions["1"] = "All traffic will be anonymized"
-	modeDescriptions["2"] = "Users can choose whether traffic will be anonymized"
-	modeDescriptions["3"] = "Tor hidden services can be accessed, but no other traffic is anonymized"
+	modeDescriptions["1"] = torS.AnonTraf
+	modeDescriptions["2"] = torS.AnonOpt
+	modeDescriptions["3"] = torS.TorTraf
 
 	setChildText("mode_description", modeDescriptions[clientMode])
 

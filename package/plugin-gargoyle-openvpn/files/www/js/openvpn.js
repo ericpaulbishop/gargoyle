@@ -1,10 +1,11 @@
 /*
- * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var ovpnS=new Object(); //part of i18n
 
 var newRouterIp=""
 
@@ -13,7 +14,7 @@ function saveChanges()
 	var errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -87,7 +88,7 @@ function saveChanges()
 		{
 			if(!haveDh)
 			{
-				var doSave = confirm("This is the first time you have configured an OpenVPN Server.\n\nIt will take 5-10 minutes to generate the necessary cryptographic parameters.  This is a one-time wait -- updates after this one will be fast.\n\nProceed?\n")
+				var doSave = confirm(ovpnS.CryptoWaitMsg+"\n")
 				if(!doSave)
 				{
 					setControlsEnabled(true);
@@ -240,8 +241,8 @@ function clientNetMismatchQuery(expected, current, newIp)
 			document.getElementById("openvpn_client_form").submit();
 		}
 	}
-	query("Client Subnet Mismatch", "The OpenVPN expects your router to have a subnet of " + expected + "but your router is configured with a subnet of " + current + ".  Do you want to...", 
-		[ "Switch Router to expected subnet, with IP " + newIp, "Keep Current Subnet and Continue", "Cancel"], continueFun );
+	query(ovpnS.SubMis, ovpnS.ExpSubN+" " + expected + ovpnS.ActSubN+" " + current + ".  "+ovpnS.WantQ, 
+		[ ovpnS.Switch+" " + newIp, ovpnS.KeepC, UI.Cancel], continueFun );
 
 }
 
@@ -250,7 +251,7 @@ function clientSaved(result)
 {
 	if(result != "Success")
 	{
-		alert("ERROR: " + result)
+		alert(UI.Err+": " + result)
 		if(result.match(/failed to connect/))
 		{
 			window.location=window.location
@@ -301,7 +302,7 @@ function proofreadAll()
 			var serverPortConflict = checkForPortConflict(serverPort, serverProto, oldServerPortDef)
 			if(serverPortConflict != "")
 			{
-				errors.push("OpenVPN server port conflicts with " + serverPortConflict)
+				errors.push(ovpnS.SrvPrtErr+" " + serverPortConflict)
 			}
 		}
 	}
@@ -314,15 +315,15 @@ function proofreadAll()
 			var clientConf   = document.getElementById("openvpn_client_conf_text").value
 			if(clientRemote == "")
 			{
-				errors.push("Server address is not defined")
+				errors.push(ovpnS.SrvAddErr)
 			}
 			if(clientPort < 1 || clientPort > 65535)
 			{
-				errors.push("OpenVPN Port must be between 1-65535")
+				errors.push(ovpnS.OPrtErr)
 			}
 			if(clientConf.match(/^[\t ]*dev[\t ]+tap.*$/i))
 			{
-				errors.push("Gargoyle does not support TAP OpenVPN configurations");
+				errors.push(ovpnS.GTAPErr);
 			}
 		}
 	}
@@ -371,15 +372,15 @@ function resetData()
 	{
 		if( tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnMode == "server") )
 		{
-			setChildText("openvpn_config_status", "Running, Connected, IP: " + tunIp, "#008800", true, null, document)
+			setChildText("openvpn_config_status", ovpnS.RunC+", IP: " + tunIp, "#008800", true, null, document)
 		}
 		else if(openvpnProc != "")
 		{
-			setChildText("openvpn_config_status", "Running, Not Connected", "#880000", true, null, document)
+			setChildText("openvpn_config_status", ovpnS.RunNC, "#880000", true, null, document)
 		}
 		else
 		{
-			setChildText("openvpn_config_status", "Not Running", "#880000", true, null, document)
+			setChildText("openvpn_config_status", ovpnS.RunNot, "#880000", true, null, document)
 		}
 	}
 	
@@ -452,7 +453,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ "Client Name", "Internal IP\n(Routed Subnet)", "Enabled", "Credentials\n& Config Files", ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
+	var acTable = createTable([ ovpnS.ClntN, ovpnS.IntIP, UI.Enabled, ovpnS.CfgCredF, ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
@@ -686,8 +687,8 @@ function createAllowedClientControls(haveDownload)
 
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButton = haveDownload ? createButton("Download", "default_button", downloadAc, false) : createButton("Download", "default_button_disabled", function(){ return; }, true ) ;
-	var editButton     = createButton("Edit",     "default_button", editAc, false)
+	var downloadButton = haveDownload ? createButton(ovpnS.Dload, "default_button", downloadAc, false) : createButton(ovpnS.Dload, "default_button_disabled", function(){ return; }, true ) ;
+	var editButton     = createButton(UI.Edit,     "default_button", editAc, false)
 
 	return [enabledCheck, downloadButton, editButton]
 }
@@ -796,13 +797,13 @@ function setRemoteNames( controlDocument, selectedRemote)
 		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain")
 		if( (enabled != "0" && enabled != "false") && domain != "")
 		{
-			names.push("Dynamic DNS: " + domain)
+			names.push(ovpnS.DDNS+": " + domain)
 			values.push(domain)
 			selectedFound = selectedRemote == domain ? true : selectedFound
 		}
 	}
 	selectedFound = (selectedRemote == currentWanIp) || selectedFound
-	names.push("WAN IP: " + currentWanIp, "Other IP or Domain (specfied below)")
+	names.push(ovpnS.WANIP+": " + currentWanIp, ovpnS.OthIPD)
 	values.push(currentWanIp, "custom")
 	
 	setAllowableSelections(selectId, values, names, controlDocument)
@@ -825,12 +826,12 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 		var allIdList = getDefinedAcIds(false)
 		var allIdHash = getDefinedAcIds(true)
 		var clientCount = allIdList.length +1
-		name = "Client" + clientCount
+		name = ovpnS.Clnt + clientCount
 		id = "client" + clientCount
 		while(allIdHash[id] == 1)
 		{
 			clientCount++
-			name = "Client" + clientCount
+			name = ovpnS.Clnt + clientCount
 			id = "client" + clientCount
 		}
 		controlDocument.getElementById("openvpn_allowed_client_default_id").value = id
@@ -1018,7 +1019,7 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 		var vpnMask = getNumericMask(internalServerMask)
 		if( ( testIp & vpnMask ) != ( vpnIp & vpnMask ) )
 		{
-			errors.push("Specified Client Internal IP " + controlDocument.getElementById(prefix + "ip").value + " is not in OpenVPN Subnet")
+			errors.push(ovpnS.ClntIntIP+" " + controlDocument.getElementById(prefix + "ip").value + " "+ovpnS.OSubErr)
 		}
 	}
 	if(errors.length == 0 && controlDocument.getElementById(prefix + "subnet_ip_container").style.display != "none")
@@ -1054,7 +1055,7 @@ function addAc()
 	var errors = validateAc(document, document.getElementById("openvpn_server_ip").value , document.getElementById("openvpn_server_mask").value );
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\nCould not add client configuration.");
+		alert(errors.join("\n") + "\n"+ovpnS.AddCErr);
 	}
 	else
 	{
@@ -1156,9 +1157,9 @@ function editAc()
 	
 	var saveButton = createInput("button", editAcWindow.document);
 	var closeButton = createInput("button", editAcWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	var editRow=this.parentNode.parentNode;
@@ -1192,7 +1193,7 @@ function editAc()
 					var errors = validateAc(editAcWindow.document, serverInternalIp, serverInternalMask);
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\nCould not update client configuration.");
+						alert(errors.join("\n") + "\n"+ovpnS.UpCErr);
 					}
 					else
 					{

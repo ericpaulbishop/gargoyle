@@ -1,11 +1,12 @@
 /*
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+var UI=new Object(); //part of i18n
 
 window.onresize = function onresize()
 {
@@ -35,6 +36,7 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 {
 	var dark = document.getElementById("darken");
 	var msg  = document.getElementById("wait_msg");
+	document.getElementById("wait_txt").firstChild.data = UI.waitText;
 	if (!enabled)
 	{
 		var totalHeight="100%";
@@ -207,6 +209,27 @@ function runAjax(method, url, params, stateChangeFunction)
 	}
 	return req;
 }
+
+
+function execute(cmd)
+{
+	var commands = cmd.join("\n");
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	setControlsEnabled(false, true, UI.WaitSettings);
+	
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+			window.location.href=window.location.href;
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+
+
 
 // The way we store keys is massively inefficient, but
 // there are generally few enough keys defined that
@@ -735,8 +758,8 @@ function getWirelessMode(uciTest)
 function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hideText)
 {
 	defaultDisplay = (defaultDisplay == null) ? "inline" : defaultDisplay;
-	displayText = (displayText == null) ? "More Info" : displayText;
-	hideText = (hideText == null) ? "Hide Text" : hideText;
+	displayText = (displayText == null) ? UI.MoreInfo : displayText;
+	hideText = (hideText == null) ? UI.Hide : hideText;
 
 	var ref = document.getElementById( descriptionId + "_ref" );
 	var txt = document.getElementById( descriptionId + "_txt" );
@@ -764,8 +787,8 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay, displayText, hideText)
 {
 	defaultDisplay = (defaultDisplay == null) ? "inline" : defaultDisplay;
-	displayText = (displayText == null) ? "More Info" : displayText;
-	hideText = (hideText == null) ? "Hide Text" : hideText;
+	displayText = (displayText == null) ? UI.MoreInfo : displayText;
+	hideText = (hideText == null) ? UI.Hide : hideText;
 
 	var descLinkText = displayText;
 	var descDisplay = "none";
@@ -868,7 +891,7 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 				{
 					alert("error in proofread: label with id " +  labelIds[idIndex] + " is not defined");
 				}
-				errorArray.push("There is an error in " + labelStr);
+				errorArray.push(UI.prfErr+" " + labelStr);
 			}
 		}
 	}
@@ -1004,7 +1027,7 @@ function getSelectedValue(selectId, controlDocument)
 	
 	if(controlDocument.getElementById(selectId) == null)
 	{
-		alert("ERROR:" + selectId + " does not exist");
+		alert(UI.Err+": " + selectId + " "+UI.nex);
 		return;
 	}
 
@@ -1036,7 +1059,7 @@ function setSelectedValue(selectId, selection, controlDocument)
 	var controlDocument = controlDocument == null ? document : controlDocument;
 	
 	var selectElement = controlDocument.getElementById(selectId);
-	if(selectElement == null){ alert("ERROR: " + selectId + " does not exist"); }
+	if(selectElement == null){ alert(UI.Err+": " + selectId + " "+UI.nex); }
 
 	var selectionFound = false;
 	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
@@ -1862,10 +1885,9 @@ function validateWeeklyRange(weeklyStr)
 		var nextValid = splitStr.length == 2;
 		if(nextValid)
 		{
-			splitStr[0] = splitStr[0].toLowerCase();
-			splitStr[1] = splitStr[1].toLowerCase();
-			nextValid = nextValid && splitStr[0].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
-			nextValid = nextValid && splitStr[1].match(/^[\t ]*(sun|mon|tue|wed|thu|fri|sat)[\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\t ]*$/);
+			var dayReg=new RegExp("^[\\t ]*("+UI.Sun+"|"+UI.Mon+"|"+UI.Tue+"|"+UI.Wed+"|"+UI.Thu+"|"+UI.Fri+"|"+UI.Sat+")[\\t ]*([0-1]?[0-9]|2[0-3])(:[0-5]?[0-9])?(:[0-5]?[0-9])?[\\t ]*$");
+			nextValid = nextValid && splitStr[0].match(dayReg);
+			nextValid = nextValid && splitStr[1].match(dayReg);
 		}
 		valid = valid && nextValid;
 	}
@@ -2158,7 +2180,7 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 	}
 	else if(alertOnError)
 	{
-		alert("ERROR: Invalid Address\n");
+		alert(UI.InvAdd+"\n");
 	}
 
 	return valid == 0 ? true : false;
@@ -2338,7 +2360,7 @@ function arrToHash(arr)
 
 function confirmPassword(confirmText, validatedFunc, invalidFunc)
 {
-	confirmText = confirmText == null ? "Confirm Password:" : confirmText;
+	confirmText = confirmText == null ? UI.CPass+":" : confirmText;
 	if( typeof(confirmWindow) != "undefined" )
 	{
 		//opera keeps object around after
@@ -2366,9 +2388,9 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
 	
-	okButton.value         = "OK";
+	okButton.value         = UI.OK;
 	okButton.className     = "default_button";
-	cancelButton.value     = "Cancel";
+	cancelButton.value     = UI.Cancel;
 	cancelButton.className = "default_button";
 
 
@@ -2389,7 +2411,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 				}
 				okButton.onclick = function()
 				{
-					setControlsEnabled(false, true, "Verifying Password...");
+					setControlsEnabled(false, true, UI.VPass);
 	
 					var commands = "gargoyle_session_validator -p \"" + confirmWindow.document.getElementById("password").value + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
 					var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -2439,16 +2461,16 @@ function getUsedPorts()
 	foundPorts["udp"] = []
 
 	var portDefs=[]
-	portDefs.push( [ sshPort, "tcp", "SSH port" ] )
+	portDefs.push( [ sshPort, "tcp", UI.sprt ] )
 	foundPorts["tcp"][sshPort] = 1
 	if(httpPort != "")
 	{
-		portDefs.push( [ httpPort, "tcp", "web server port" ] )
+		portDefs.push( [ httpPort, "tcp", UI.wsprt ] )
 		foundPorts["tcp"][httpPort] = 1
 	}
 	if(httpsPort != "")
 	{
-		portDefs.push( [ httpsPort, "tcp", "web server port" ] )
+		portDefs.push( [ httpsPort, "tcp", UI.wsprt ] )
 		foundPorts["tcp"][httpsPort] = 1
 	}
 
@@ -2499,11 +2521,11 @@ function getUsedPorts()
 					var nextProto = protoList.shift();
 					if(foundPorts[nextProto][remotePort] == null) //bypasses adding second instance defs if already defined above as part of ssh/http/https
 					{
-						portDefs.push( [ remotePort, nextProto, "port redirected to router" ])
+						portDefs.push( [ remotePort, nextProto, UI.prdr ])
 						foundPorts[nextProto][remotePort] = 1;
 						if(foundPorts[nextProto][localPort] == null) //implies localPort != remotePort, since we just set this for remotePort
 						{
-							portDefs.push([localPort, nextProto, "port in use by router" ])
+							portDefs.push([localPort, nextProto, UI.puse ])
 							foundPorts[nextProto][localPort] = 1
 						}
 					}
@@ -2515,7 +2537,7 @@ function getUsedPorts()
 				while(protoList.length > 0)
 				{
 					var nextProto = protoList.shift();
-					portDefs.push([startPort + "-" + endPort, nextProto, "port redirected to router" ])
+					portDefs.push([startPort + "-" + endPort, nextProto, UI.prdr ])
 				}
 			}
 		}
@@ -2535,7 +2557,7 @@ function getUsedPorts()
 		var ip         = uciOriginal.get("firewall", section, "dest_ip");
 
 		//note range notation already part of remotePort here, so range is handled properly by this code
-		portDefs.push([remotePort, proto, "port forwarded to " + ip ])
+		portDefs.push([remotePort, proto, UI.pfwd+" " + ip ])
 	}
 
 	//for debugging only
@@ -2686,5 +2708,14 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 		document.getElementById("query_button_container").appendChild(b);
 		document.getElementById("query_button_container").appendChild( document.createElement("br") )
 	}
+}
+
+//apparently these var fbS=new Object(); //part of i18n  -> objects do not have a length (it is undefined)
+function ObjLen(an_obj) {
+	var len=0;
+	for (item in an_obj) {
+		len++;
+	}
+	return len
 }
 

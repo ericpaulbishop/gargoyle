@@ -1,21 +1,22 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var logS=new Object(); //part of i18n
 
 function doLogin()
 {
 	var password = document.getElementById("password").value;
 	if(password.length == 0)
 	{
-		alert("ERROR: You must enter a password");
+		alert(logS.passErr);
 	}
 	else
 	{
-		setControlsEnabled(false, true, "Logging In");
+		setControlsEnabled(false, true, logS.Lging);
 		
 		sessionExpired=false;
 		passInvalid=false;
@@ -71,15 +72,15 @@ function setStatusAndQuotas()
 
 	if(sessionExpired)
 	{
-		setChildText("login_status", "Session Expired", "red");
+		setChildText("login_status", logS.SExp, "red");
 	}
 	else if(passInvalid)
 	{
-		setChildText("login_status", "Invalid Password", "red");
+		setChildText("login_status", logS.InvP, "red");
 	}
 	else if(loggedOut)
 	{
-		setChildText("login_status", "Logged Out", "black");
+		setChildText("login_status", logS.LOut, "black");
 	}
 	else
 	{
@@ -225,7 +226,7 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 
 	}
 
-	var names = ["total up+down", "download", "upload" ];
+	var names = logS.Qnam;
 	var typeIndex;
 	for(typeIndex=0; typeIndex < 3; typeIndex++)
 	{
@@ -241,11 +242,11 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 			var par = document.createElement("p");
 			if(quotaNumber > 0)
 			{
-				par.appendChild( document.createTextNode(perc + "% of " + name + " for Quota" + quotaNumber + " has been used (" + used + "/" + limit + ")"));
+				par.appendChild( document.createTextNode(perc + "% "+logS.of+" " + name + " "+logS.fQuo + quotaNumber + " "+logS.husd+" (" + used + "/" + limit + ")"));
 			}
 			else
 			{
-				par.appendChild( document.createTextNode(perc + "% of " + name + " quota has been used (" + used + "/" + limit + ")"));
+				par.appendChild( document.createTextNode(perc + "% "+logS.of+" " + name + " "+logS.qusd+" (" + used + "/" + limit + ")"));
 			}
 			var fontParams = (pct[typeIndex] == 100) ? usedFontParams : normalFontParams;
 			par.style.color = fontParams[0];
@@ -275,7 +276,7 @@ function timeParamsToLines(timeParameters)
 	var textList = [];
 	if(active == "always")
 	{
-		textList.unshift("Always");
+		textList.unshift(UI.Always);
 	}
 	else
 	{

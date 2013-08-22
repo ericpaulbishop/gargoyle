@@ -5,6 +5,7 @@
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var Wsch=new Object(); //part of i18n
 
 //var showCronTabs=true; //comment this in to show the raw crontabs
 var showCronTabs=false  //comment this in to not show the raw crontabs
@@ -19,9 +20,9 @@ var new_cron_tabs = [];
 var stripped_cron_tabs = [];
 var found_wifi_cron_tabs = [];
 
-var weeklyPeriod = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-var week511Period = ["Sunday", "Monday-Friday", "Saturday"];
-var dailyPeriod = ["Daily"];
+var weeklyPeriod = [];
+var week511Period = [];
+var dailyPeriod = [];
 
 var shellvarsupdater = null;
 var current_time = []; // array members: 0=current day, 1=current hour, 2=current minute, 3-translated day
@@ -148,25 +149,25 @@ function CronWarning() {
 	//find current time in table; if our status differes from the schedule, alert user the schedule will take effect in on dayXhourY
 	var thishour = ThisCell(current_time[3], current_time[1]);
 	if ( (Wi_Fi == 1 && thishour.value == 0) || (Wi_Fi == -1 && thishour.value == 60) ) {
-		AddSummaryText("<br/>\n<strong>Warning:</strong><br/>\n");
-		AddSummaryText("Schedule will take effect with the next event.<br/>\n");
+		AddSummaryText("<br/>\n<strong>"+Wsch.Warn+":</strong><br/>\n");
+		AddSummaryText(Wsch.NextEv+"<br/>\n");
 	} else if (thishour.value > 0 && thishour.value < 60 && current_time[2] > thishour.value && Wi_Fi == 1) {
-		AddSummaryText("<br/>\n<strong>Warning:</strong><br/>\n");
-		AddSummaryText("Schedule will take effect with the next event.<br/>\n");
+		AddSummaryText("<br/>\n<strong>"+Wsch.Warn+":</strong><br/>\n");
+		AddSummaryText(Wsch.NextEv+"<br/>\n");
 	} else if (thishour.value < 0 && current_time[2] < Math.abs(thishour.value) && Wi_Fi == 1) {
-		AddSummaryText("<br/>\n<strong>Warning:</strong><br/>\n");
-		AddSummaryText("Schedule will take effect with the next event.<br/>\n");
+		AddSummaryText("<br/>\n<strong>"+Wsch.Warn+":</strong><br/>\n");
+		AddSummaryText(Wsch.NextEv+"<br/>\n");
 	}
 }
 
 function UpdateSummary() {  //summary is dynamically generated from parsed crontab text
 	if (timerMode > 0) { scanSettings(); }
 	
-	AddSummaryText("Selected timer mode: ");
-	if (timerMode == 0) { AddSummaryText("disabled (no schedule).<br />\n"); }
-	if (timerMode == 1) { AddSummaryText("daily schedule (every day is the same).<br />\n"); }
-	if (timerMode == 3) { AddSummaryText("Sun/weekday/Sat schedule (every weekday is the same).<br />\n"); }
-	if (timerMode == 7) { AddSummaryText("weekly schedule (separate timer for each day of the week; each week is the same).<br />\n"); }
+	AddSummaryText(Wsch.SelTM+": ");
+	if (timerMode == 0) { AddSummaryText(Wsch.SumDis+"<br />\n"); }
+	if (timerMode == 1) { AddSummaryText(Wsch.SumDly+"<br />\n"); }
+	if (timerMode == 3) { AddSummaryText(Wsch.SumSwS+"<br />\n"); }
+	if (timerMode == 7) { AddSummaryText(Wsch.SumWky+"<br />\n"); }
 	
 	if (showCronTabs) {
 		for(var i = 0; i < new_cron_tabs.length; i++) {
@@ -186,17 +187,17 @@ function UpdateSummary() {  //summary is dynamically generated from parsed cront
 		var day_string="";
 		
 		//dayCronText could be 0,2,4-6 or */2 but this script won't generate that, so no need to parse it
-		if (dayCronText == "*") { day_string = "Daily"; }
-		if (dayCronText == "0") { day_string = "Sunday"; }
-		if (dayCronText == "1") { day_string = "Monday"; }
-		if (dayCronText == "2") { day_string = "Tuesday"; }
-		if (dayCronText == "3") { day_string = "Wednesday"; }
-		if (dayCronText == "4") { day_string = "Thursday"; }
-		if (dayCronText == "5") { day_string = "Friday"; }
-		if (dayCronText == "6") { day_string = "Saturday"; }
-		if (dayCronText == "1-5") { day_string = "Monday-Friday"; }		
+		if (dayCronText == "*") { day_string = Wsch.Dly; }
+		if (dayCronText == "0") { day_string = UI.Sunday; }
+		if (dayCronText == "1") { day_string = UI.Monday; }
+		if (dayCronText == "2") { day_string = UI.Tuesday; }
+		if (dayCronText == "3") { day_string = UI.Wednesday; }
+		if (dayCronText == "4") { day_string = UI.Thursday; }
+		if (dayCronText == "5") { day_string = UI.Friday; }
+		if (dayCronText == "6") { day_string = UI.Saturday; }
+		if (dayCronText == "1-5") { day_string = UI.Monday+"-"+UI.Friday; }		
 		
-		AddSummaryText("Wifi will go " + (wifiCronCMD.search("up") >= 0 ? "&nbsp;&nbsp;up&nbsp;&nbsp;" : "down") + " - " +  day_string + " at " + (hourCronText < 10 ? '0' + hourCronText : hourCronText) + ":" + minuteStr + "<br />\n");
+		AddSummaryText(Wsch.SumGo+" " + (wifiCronCMD.search("up") >= 0 ? Wsch.SumUp : Wsch.SumDn) + " - " +  day_string + " "+Wsch.SumAt+" " + (hourCronText < 10 ? '0' + hourCronText : hourCronText) + ":" + minuteStr + "<br />\n");
 	}
 	
 	if (timerMode > 0) { CronWarning(); }
@@ -600,27 +601,27 @@ function SetWifiStatus(shell_iwconfig) {
 		var this_cron_hour = cloned_crontab_table[ current_time[3] ][current_time[1]];
 		if (this_cron_hour == 60 || this_cron_hour == 0) {
 			if (Wi_Fi > 0) {
-				setChildText("wlan_status", (this_cron_hour == 60 ? "active (scheduled)" : "active (not scheduled)") );
+				setChildText("wlan_status", (this_cron_hour == 60 ? Wsch.actv+" ("+Wsch.schd+")" : Wsch.actv+" ("+Wsch.nscd+")") );
 			} else {
-				setChildText("wlan_status", (this_cron_hour == 60 ? "disabled (not scheduled)" : "disabled (scheduled)") );
+				setChildText("wlan_status", (this_cron_hour == 60 ? UI.disabled+" ("+Wsch.nscd+")" : UI.disabled+" ("+Wsch.schd+")") );
 			}
 		} else { //minutes on the hour
 			if (this_cron_hour > 0) {
 				if (Wi_Fi > 0) {
-					setChildText("wlan_status", (this_cron_hour > current_time[2] ? "active (scheduled)" : "active (not scheduled)") );
+					setChildText("wlan_status", (this_cron_hour > current_time[2] ? Wsch.actv+" ("+Wsch.schd+")" : Wsch.actv+" ("+Wsch.nscd+")") );
 				} else {
-					setChildText("wlan_status", (this_cron_hour > current_time[2] ? "disabled (not scheduled)" : "disabled (scheduled)") );
+					setChildText("wlan_status", (this_cron_hour > current_time[2] ? UI.disabled+" ("+Wsch.nscd+")" : UI.disabled+" ("+Wsch.schd+")") );
 				}
 			} else {
 				if (Wi_Fi > 0) {
-					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? "active (not scheduled)" : "active (scheduled)") );
+					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? Wsch.actv+" ("+Wsch.nscd+")" : Wsch.actv+" ("+Wsch.schd+")") );
 				} else {
-					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? "disabled (not scheduled)" : "disabled (scheduled)") );
+					setChildText("wlan_status", (current_time[2] > Math.abs(this_cron_hour) ? UI.disabled+" ("+Wsch.nscd+")" : UI.disabled+" ("+Wsch.schd+")") );
 				}
 			}
 		}
 	} else {
-		setChildText("wlan_status", (Wi_Fi > 0 ? "active" : "disabled") );
+		setChildText("wlan_status", (Wi_Fi > 0 ? Wsch.actv : UI.disabled) );
 	}
 }
 
@@ -649,6 +650,7 @@ function ParseCurrentTime(shell_vars) {
 }
 
 function CloneTable() {
+	cloned_crontab_table.length=0;
 	for (var i = 0; i < timerMode; i++) {
 		cloned_crontab_table[i] = new Array();
 		for (var j = 0; j < 24; j++ ) {
@@ -665,6 +667,10 @@ function LoadCrontabs() {
 	var foundWeekend=0;
 	var foundWeekday=0;
 	var foundWeeklySched = 0;
+	
+	dailyPeriod = [ Wsch.Dly ];
+	week511Period = Wsch.WDayA;
+	weeklyPeriod = Wsch.WeekA;
 
 	InitSummaryText();
 	shellvarsupdater = setInterval("GetWifiUpdate(null)", 5000);
@@ -746,6 +752,7 @@ function saveChanges() { 	//follow reboot.sh somewhat
 			setControlsEnabled(true);
 		}
 	}
+	CloneTable();
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
 

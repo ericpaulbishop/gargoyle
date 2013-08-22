@@ -1,44 +1,44 @@
 #!/usr/bin/haserl
-<?
-	# This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
+<%
+	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "about" -c "internal.css" -j ""
-?>
+%>
 
 <fieldset>
-	<legend class="sectionheader">Credits</legend>
+	<legend class="sectionheader"><%~ about.CSect %></legend>
 
-	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> Project founder, lead developer of Gargoyle </p>
+	<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> <%~ EBishop %></p>
 
-	<p><span class="contributer">Paul Bixel:</span> Implemented Active Congestion Control, as well as many other improvements to QoS</p>
+	<p><span class="contributer">Paul Bixel:</span> <%~ PBixel %></p>
 
-	<p><span class="contributer">Artur Wronowski (<a href="http://openwrt.pl">openwrt.pl</a>):</span> Implemented wake-on-lan functionality along with several minor improvements/fxes</p>
+	<p><span class="contributer">Artur Wronowski (<a href="http://openwrt.pl">openwrt.pl</a>):</span> <%~ AWronowski %></p>
 
-	<p><span class="contributer">Cezary Jackiewicz:</span> Translated Gargoyle into Polish in addition to contributing several minor code fixes and correcting several typos</p>
+	<p><span class="contributer">Cezary Jackiewicz (<a href="http://eko.one.pl">eko.one.pl</a>):</span> <%~ CJackiewicz %></p>
 
-	<p><span class="contributer">Piotr Karbowski (<a href="https://github.com/slashbeast">github.com/slashbeast</a>):</span> Implemented numerous bugfixes and performance improvements</p>
+	<p><span class="contributer">Piotr Karbowski (<a href="https://github.com/slashbeast">github.com/slashbeast</a>):</span> <%~ PKarbowski %></p>
 
-	<p><span class="contributer">Tony Butler:</span> Implemented several improvements for displaying tables and large buttons</p>
+	<p><span class="contributer">Tony Butler:</span> <%~ TButler %></p>
 
-	<p><span class="contributer">Igor Fedorenko:</span> Implemented inclusion of latest git commit in default version label</p>
+	<p><span class="contributer">Igor Fedorenko:</span> <%~ IFedorenko %></p>
 
-	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> Provided several very helpful suggestions regarding the web design and css implementation of Gargoyle</p>
+	<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> <%~ BCoy %></p>
 
-	<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> Provided significant help in testing Gargoyle, particularly PPPoE functionality</p>
+	<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> <%~ FRiC %></p>
 
-	<p>The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>
+	<p><%~ logo %> (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>
 
-	<p>The Gargoyle interface is a front end for the excellent OpenWrt firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team (<a href="http://openwrt.org">openwrt.org</a>).</p>
+	<p><%~ openwrt %> (<a href="http://openwrt.org">openwrt.org</a>).</p>
 
 </fieldset>
 
 <fieldset>
-	<legend class="sectionheader">License</legend>
-	<p>Gargoyle is copyright &copy; 2008, 2009 by Eric Bishop</p>
+	<legend class="sectionheader"><%~ LSect %></legend>
+	<p>Gargoyle is copyright &copy; 2008, 2009-2013 by Eric Bishop</p>
 
 	<p>Gargoyle is free software; you can redistribute it and/or modify it under the terms of the 
 	<a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License version 2.0</a>
@@ -72,6 +72,6 @@
 
 </fieldset>
 
-<?
+<%
 	gargoyle_header_footer -f -s "system" -p "about"
-?>
+%>
