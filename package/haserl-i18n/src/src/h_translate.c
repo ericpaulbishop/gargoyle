@@ -154,15 +154,15 @@ void simpleParseFile(char* fdata, int f_len) {
 //  It is highly unlikely a single page would *EVER* need 50k); the read-buffer was successfully allocated & the UTF-8 BOM present
 //  Note: windows users: no UTF16, UCS2... And a byte order mark please.
 //
-void readFile (char* filepath) {
+int readFile (char* filepath) {
 	FILE *lfile;
 	char *buf;
 	long int lf_len;
+	int ret_value=0;
 	
 	lfile = fopen(filepath, "r");
 	if (lfile == NULL) {
-		/* die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", filepath); */
-		return; // the file was not found
+		return -1; // the file was not found
 	}
 	
 	fseek(lfile, 0L, SEEK_END);
@@ -170,7 +170,7 @@ void readFile (char* filepath) {
 	if (lf_len > 51200) { 
 		die_with_message(NULL, NULL, "Translate error: translation file > 50kb");
 		fclose(lfile);
-		return;
+		return ret_value;
 	}
 	fseek(lfile, 0L, SEEK_SET);
 	
@@ -179,7 +179,7 @@ void readFile (char* filepath) {
 		die_with_message(NULL, NULL, "Translate error: couldn't allocate buffer");
 		fclose(lfile);
 		free(buf);
-		return;
+		return ret_value;
 	}
 	
 	fread(buf, sizeof(char), 3, lfile);
@@ -192,6 +192,7 @@ void readFile (char* filepath) {
 	}
 	fclose(lfile);
 	free(buf);
+	return ret_value;
 }
 
 //
@@ -242,12 +243,15 @@ void lookup_key (buffer_t *buf, char *key) {
 		
 		if (AssertPageMapped(page_split) == 0) {
 			gen_lang_fpath(&fpath, global.fallback_lang, page_split);
-			readFile((char *)fpath.data);
+			if (readFile((char *)fpath.data) == -1) {
+				die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", (char *)fpath.data);
+				return;
+			}
 			
 			if (memcmp(global.fallback_lang, global.active_lang, strlen(global.active_lang)) != 0) {
 				buffer_reset(&fpath);
 				gen_lang_fpath(&fpath, global.active_lang, page_split);
-				readFile((char *)fpath.data);
+				int trfile_success=readFile((char *)fpath.data);
 			}
 			// TODO: apparently, this is done on faith, because whether the page was *actually* mapped isn't tested
 			set_string_map_element(global.translationKV_map, page_split, "true");
@@ -286,12 +290,15 @@ void buildTranslationMap () {
 	global.translationKV_map = initialize_string_map(1);
 	
 	gen_lang_fpath(&fpath, global.fallback_lang, "strings.js");
-	readFile((char *)fpath.data);
+	if (readFile((char *)fpath.data) == -1) {
+		die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", (char *)fpath.data);
+		return;
+	}
 	
 	if (memcmp(global.fallback_lang, global.active_lang, strlen(global.active_lang)) != 0) {
 		buffer_reset(&fpath);
 		gen_lang_fpath(&fpath, global.active_lang, "strings.js");
-		readFile((char *)fpath.data);
+		int trfile_success=readFile((char *)fpath.data);
 	}
 	set_string_map_element(global.translationKV_map, "strings.js", "true");
 	
