@@ -250,7 +250,7 @@ insert_dmz_rule()
 		fi
 		# echo "from_if = $from_if"
 		if [ -n "$to_ip" ] && [ -n "$from"  ] && [ -n "$from_if" ] ; then
-			iptables -t nat -A prerouting_wan -i $from_if -j DNAT --to-destination $to_ip
+			iptables -t nat -A "prerouting_"$from"_rule" -i $from_if -j DNAT --to-destination $to_ip
 			# echo "iptables -t nat -A "prerouting_"$from -i $from_if -j DNAT --to-destination $to_ip"
 			iptables -t filter -I "zone_"$from"_forward" -d $to_ip -j ACCEPT
 		fi
