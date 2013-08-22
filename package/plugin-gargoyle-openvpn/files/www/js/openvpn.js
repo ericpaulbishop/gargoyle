@@ -223,18 +223,18 @@ function clientNetMismatchQuery(expected, current, newIp)
 {
 	var continueFun = function(result)
 	{
-		if(result.match(/Cancel/))
+		if(result == UI.Cancel)
 		{
 			window.location=window.location
 		}
 		else
 		{
-			if(result.match(/Switch/))
+			if(result == (ovpnS.Switch+" "+newIp))
 			{
 				document.getElementById("net_mismatch_action").value = "change"
 				newRouterIp = newIp
 			}
-			if(result.match(/Keep/))
+			if(result == ovpnS.KeepC)
 			{
 				document.getElementById("net_mismatch_action").value = "keep"
 			}
@@ -242,7 +242,7 @@ function clientNetMismatchQuery(expected, current, newIp)
 		}
 	}
 	query(ovpnS.SubMis, ovpnS.ExpSubN+" " + expected + ovpnS.ActSubN+" " + current + ".  "+ovpnS.WantQ, 
-		[ ovpnS.Switch+" " + newIp, ovpnS.KeepC, UI.Cancel], continueFun );
+		[ ovpnS.Switch+" "+newIp, ovpnS.KeepC, UI.Cancel], continueFun );
 
 }
 
