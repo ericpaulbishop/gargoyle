@@ -112,6 +112,15 @@ function resetFirstBootData()
 	
 }
 
+
+function resetLanguagesData()
+{
+	var langTable = genLangTable();
+	var tableContainer = document.getElementById("lang_table_container");
+	tableContainer.appendChild(langTable);
+
+}
+
 function activateLang()
 {
 	var row = this.parentNode.parentNode;
