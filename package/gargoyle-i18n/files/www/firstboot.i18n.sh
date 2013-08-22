@@ -47,7 +47,7 @@
 			<span class='narrowleftcolumn'>
 				<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
 			</span>
-			<span class='widerightcolumn' style="font-size:15px;">
+			<span class='widerightcolumn' style="display:block; clear:right; margin-right:100px" >
 				<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
 			</span>
 
