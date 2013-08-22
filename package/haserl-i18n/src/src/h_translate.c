@@ -161,7 +161,7 @@ void readFile (char* filepath) {
 	
 	lfile = fopen(filepath, "r");
 	if (lfile == NULL) {
-		die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", filepath);
+		/* die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", filepath); */
 		return; // the file was not found
 	}
 	

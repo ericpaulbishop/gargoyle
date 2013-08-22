@@ -66,7 +66,8 @@ function do_get_lfile()
 
 function installLang()
 {
-	var pkg = this.parentNode.parentNode.firstChild.id;
+	var row = this.parentNode.parentNode;
+	var pkg = row.firstChild.firstChild.id;
 	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg ];
 	execute(cmd);
 }
