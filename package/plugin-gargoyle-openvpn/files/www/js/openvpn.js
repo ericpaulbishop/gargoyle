@@ -252,7 +252,7 @@ function clientSaved(result)
 	if(result != "Success")
 	{
 		alert(UI.Err+": " + result)
-		if(result.match(/failed to connect/))
+		if(result == ovpnS.uc_conn_Err)
 		{
 			window.location=window.location
 		}
