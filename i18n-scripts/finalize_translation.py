@@ -39,6 +39,8 @@ for config_file in glob.glob('./*-src/.config'):
 		if (cline.startswith('CONFIG_PACKAGE_plugin-gargoyle-i18n') or cline.startswith('CONFIG_PACKAGE_gargoyle-i18n')) and tran_type=='internationalize' :
 			#sorry, but I'm sure your some slick brotha and you've got mad dope skillz, but...
 			anewline='# '+cline
+		if cline.startswith('CONFIG_PACKAGE_haserl-i18n') and tran_type=='localize' :
+			anewline='CONFIG_PACKAGE_haserl=y\n'
 	
 		if anewline != '':
 			newcfg_doc.append(anewline)

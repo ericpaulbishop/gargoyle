@@ -673,10 +673,10 @@ for lpack in glob.glob('./package-prepare/plugin-gargoyle-i18n-%s/files/www/i18n
 #print jsObjects
 errs=0
 for x in xrange(1,10):
-	for rnd_file in glob.glob('./package%s' % (x*'/*',)):
+	for rnd_file in glob.glob('./package-prepare%s' % (x*'/*',)):
 		if '/package-prepare/haserl' in rnd_file:
 			continue
-		if 'plugin-gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
+		if 'gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
 			continue
 		if os.path.isfile(rnd_file):
 			afileFO = open(rnd_file, 'rb')
