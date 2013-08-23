@@ -3,3 +3,4 @@
 fallback=Ping Watchdog
 EN=Ping Watchdog
 ES=Perro Guardián de Ping
+PL=Monitor połączenia

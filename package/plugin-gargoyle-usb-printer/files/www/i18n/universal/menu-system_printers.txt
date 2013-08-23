@@ -3,3 +3,4 @@
 fallback=USB Printer
 EN=USB Printer
 ES=Impresora USB
+PL=Drukarki
