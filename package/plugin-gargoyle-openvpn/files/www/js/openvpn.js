@@ -249,6 +249,8 @@ function clientNetMismatchQuery(expected, current, newIp)
 
 function clientSaved(result)
 {
+	//Success value here does not need to be and should not be translated
+	//it is an internal value only used for determining return status, never displayed
 	if(result != "Success")
 	{
 		alert(UI.Err+": " + result)
