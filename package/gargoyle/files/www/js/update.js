@@ -42,7 +42,7 @@ function upgraded()
 function failure()
 {
 	setControlsEnabled(true);
-	alert();
+	alert(upS.UErr+"\n");
 }
 
 function failureByBootloader()
