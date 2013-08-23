@@ -16,6 +16,7 @@ upS.Uping="Uploading Firmware";
 upS.UWait="Upgrading, Please Wait.";
 upS.Rbtg="Upgrade Complete, Rebooting...";
 upS.UErr="An error has occurred: Your router can not be upgraded.";
+upS.UErrBB="Firmware contains a bootloader. Your router can not be upgraded.";
 upS.brcmT="Firmware should be a .bin or .trx file";
 upS.ar71xxT="Firmware should be a sysupgrade.bin file";
 upS.othrT="Firmware should be a combined .img file";
