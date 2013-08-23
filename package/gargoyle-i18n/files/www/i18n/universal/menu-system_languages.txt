@@ -8,3 +8,4 @@ DE=Sprachen
 AR=اللغات
 RI=Языки
 BR=Idiomas
+PL=Języki

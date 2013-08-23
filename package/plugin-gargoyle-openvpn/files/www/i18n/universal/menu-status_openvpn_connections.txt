@@ -3,3 +3,4 @@
 fallback=OpenVPN Status
 EN=OpenVPN Status
 ES=Estado de OpenVPN
+PL=Status OpenVPN

@@ -3,3 +3,4 @@
 fallback=System Logs
 EN=System Logs
 ES=Registros del Sistema
+PL=Logi systemowe
