@@ -12,7 +12,7 @@ function runCmd()
 
 	Commands.push(document.getElementById("cmd").value);
 
-	setControlsEnabled(false, true);
+	setControlsEnabled(false, true, UI.Wait);
 
 	var param = getParameterDefinition("commands", Commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)

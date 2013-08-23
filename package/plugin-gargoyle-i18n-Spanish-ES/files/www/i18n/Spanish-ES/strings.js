@@ -32,6 +32,7 @@ UI.Reboot="Reiniciar Ahora";
 UI.MoreInfo="Más información";
 UI.Hide="Ocultar texto";
 UI.WaitSettings="Espere por favor mientras se aplican los nuevos ajustes. . .";
+UI.Wait="Espere por favor. . .";
 UI.ErrChanges="Los cambios no se pudieron aplicar";
 UI.Disabled="Desactivado";
 UI.Enabled="Activado";
