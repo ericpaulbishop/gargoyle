@@ -1141,14 +1141,11 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						}
 						dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
 						
-						printf("here 1\n");
 						string_map* dep_info = get_package_current_or_latest_matching_and_satisfiable(package_data, dep_name, dep_def, &dep_is_installed, NULL);
-						printf("here 2\n");
 						if(dep_info == NULL)
 						{
 							dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &dep_is_installed, NULL);
 						}
-						printf("here 3\n");
 
 						set_string_map_element(all_dep_map, dep_name, dep_def);
 						if(!dep_is_installed)
