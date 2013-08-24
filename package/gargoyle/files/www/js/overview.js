@@ -240,4 +240,6 @@ function resetData()
 		}
 		tableContainer.appendChild(portsTable);
 	}
+
+	setChildText("wan_3g", csq);
 }

@@ -681,20 +681,20 @@ function doUpdate()
 					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
 					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
 
-					
-					if(expandedFunctions["Total"] != null)
+
+					if(expandedFunctions[bndwS.Totl] != null)
 					{
-						var f = expandedFunctions["Total"] ;
+						var f = expandedFunctions[bndwS.Totl] ;
 						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
-					}			
-					if(expandedFunctions["Download"] != null)
+					}
+					if(expandedFunctions[bndwS.Dnld] != null)
 					{
-						var f = expandedFunctions["Download"] ;
+						var f = expandedFunctions[bndwS.Dnld] ;
 						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
 					}
-					if(expandedFunctions["Upload"] != null)
+					if(expandedFunctions[bndwS.Upld] != null)
 					{
-						var f = expandedFunctions["Upload"] ;
+						var f = expandedFunctions[bndwS.Upld] ;
 						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
 					}
 
