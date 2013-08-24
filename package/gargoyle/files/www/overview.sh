@@ -94,6 +94,13 @@
 
 	echo "var wifi_status = new Array();"
 	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
+
+	if [ -e /tmp/strength.txt ]; then
+		CSQ=$(awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "-"} else {printf "%d%% (%ddBm, CSQ: %d)\n", C*100/31, C*2-113, C}}' /tmp/strength.txt)
+	else
+		CSQ="-";
+	fi
+	echo "var csq='$CSQ';"
 %>
 //-->
 </script>
@@ -181,15 +188,7 @@
 			<span class='leftcolumn'><%~ WUptm %>:</span><span id="wan_pppoe_uptime" class='rightcolumn'></span>
 		</div>
 		<div id="wan_3g_container">
-			<span class='leftcolumn'><%~ W3GSS %>:</span><span id="wan_3g" class='rightcolumn'>
-<%
-	if [ -e /tmp/strength.txt ]; then
-		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "(no data)"} else {printf "%d%%, %ddBm\n", C*100/31, C*2-113}}' /tmp/strength.txt
-	else
-		echo "(no data)"
-	fi
-%>
-			</span>
+			<span class='leftcolumn'><%~ W3GSS %>:</span><span id="wan_3g" class='rightcolumn'></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>
