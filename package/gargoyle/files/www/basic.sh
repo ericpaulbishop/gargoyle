@@ -300,7 +300,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wired'><%~ StIP %> (<%~ Wird %>)</option>
 				<option value='dhcp_wireless'>DHCP (<%~ Wrlss %>)</option>
 				<option value='static_wireless'><%~ StIP %> (<%~ Wrlss %>)</option>
-				<option value='3g'>3G (GSM)</option>
+				<option value='3g'><%~ Mo3g %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>

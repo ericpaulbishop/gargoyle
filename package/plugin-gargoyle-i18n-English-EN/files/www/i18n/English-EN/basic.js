@@ -53,6 +53,7 @@ basicS.WANSec="Internet / WAN";
 basicS.Cnct="Connect Via";
 basicS.Wird="Wired";
 basicS.Wrlss="Wireless";
+basicS.Mo3g="3G (GSM)";
 basicS.CLsExp="Current Lease Expires";
 basicS.Renew="DHCP Renew";
 basicS.Rleas="DHCP Release";
