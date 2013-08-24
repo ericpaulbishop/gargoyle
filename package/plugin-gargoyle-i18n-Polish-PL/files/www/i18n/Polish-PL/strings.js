@@ -54,8 +54,8 @@ UI.Sat="Sob";
 UI.unk="nieznane";
 UI.HsNm="Nazwa urządzenia";
 UI.HDsp="Wyświetlanie";
-UI.DspHn="Nazw urządzeń";
-UI.DspHIP="Adresów IP urządzeń";
+UI.DspHn="Nazwa urządzenia";
+UI.DspHIP="Adres IP urządzenia";
 
 UI.never="nigdy";
 UI.disabled="wyłączone";
