@@ -39,6 +39,8 @@ bndwS.Time="Czas";
 bndwS.BPlot="Bandwidth Plot";
 bndwS.BUsag=" - wykorzystanie pasma";
 bndwS.RstGr="Resetowanie wykresów...";
+bndwS.DelAD="Usunąć wszystkie dane?";
+bndwS.DelDW="Usuwanie danych...";
 
 //bandwidth_distribution.sh
 bndwS.DOpSect="Opcje wyświetlania podziału pasma";
