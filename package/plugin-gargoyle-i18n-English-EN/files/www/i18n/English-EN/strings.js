@@ -67,6 +67,8 @@ UI.second="second";
 UI.minute="minute";
 UI.hour="hour";
 UI.day="day";
+UI.hAM="AM";
+UI.hPM="PM";
 
 UI.CApplyChanges="Close and Apply Changes";
 UI.CDiscardChanges="Close and Discard Changes";
