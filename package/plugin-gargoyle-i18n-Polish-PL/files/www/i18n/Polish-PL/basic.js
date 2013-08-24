@@ -53,6 +53,7 @@ basicS.WANSec="Internet / WAN";
 basicS.Cnct="Połączenie";
 basicS.Wird="Kablowe";
 basicS.Wrlss="Wi-Fi";
+basicS.Mo3g="Modem CDMA/3G/LTE";
 basicS.CLsExp="Bieżąca dzierżawa wygasa";
 basicS.Renew="Odśwież dzierżawę";
 basicS.Rleas="Zwolnij dzierżawę DHCP";
