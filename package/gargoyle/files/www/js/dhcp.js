@@ -262,7 +262,7 @@ function addStatic()
 	errors = proofreadStatic(document);
 	if(errors.length > 0)
 	{
-		alert(errors.join("\n") + "\n\nCould not add row.");
+		alert(errors.join("\n") + "\n\n" + dhcpS.AErr);
 	}
 	else
 	{

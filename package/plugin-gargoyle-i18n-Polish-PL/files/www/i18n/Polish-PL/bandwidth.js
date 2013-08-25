@@ -18,8 +18,8 @@ bndwS.Upld="Wysyłanie";
 bndwS.Totl="Łącznie";
 bndwS.BUTab="Tabela zużycia pasma";
 bndwS.DspI="Okres wyświetlania";
-bndwS.qhour="Kwadranse";
-bndwS.mnths="Miesiące";
+bndwS.qhour="kwadr.";
+bndwS.mnths="mies.";
 bndwS.DspT="Typ wyświetlania";
 bndwS.DspID="ID";
 bndwS.TbUnt="Jednostki pasma";
@@ -39,6 +39,8 @@ bndwS.Time="Czas";
 bndwS.BPlot="Bandwidth Plot";
 bndwS.BUsag=" - wykorzystanie pasma";
 bndwS.RstGr="Resetowanie wykresów...";
+bndwS.DelAD="Usunąć wszystkie dane?";
+bndwS.DelDW="Usuwanie danych...";
 
 //bandwidth_distribution.sh
 bndwS.DOpSect="Opcje wyświetlania podziału pasma";

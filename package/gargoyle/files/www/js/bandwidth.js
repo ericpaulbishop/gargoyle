@@ -875,7 +875,7 @@ function highResChanged()
 	{
 		if(req.readyState == 4)
 		{
-			window.location = window.location;	
+			window.location = window.location;
 			setControlsEnabled(true);
 		}
 	}	
@@ -886,12 +886,12 @@ function highResChanged()
 
 function deleteData()
 {
-	if (confirm("Delete all data?") == false)
+	if (confirm(bndwS.DelAD) == false)
 	{
 		return;
 	}
 
-	setControlsEnabled(false, true, "Deleting data ...");
+	setControlsEnabled(false, true, bndwS.DelDW);
 
 	var commands = [];
 	commands.push("/etc/init.d/bwmon_gargoyle stop");

@@ -22,3 +22,4 @@ dhcpS.ipErr="Specified static IP is current router IP.";
 dhcpS.dsubErr="Specified DHCP range falls outside LAN subnet.";
 dhcpS.dipErr="Specified DHCP range contains current LAN IP.";
 dhcpS.upErr="Could not update static IP.";
+dhcpS.AErr="Could not add row.";
