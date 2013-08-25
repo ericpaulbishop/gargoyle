@@ -22,3 +22,4 @@ dhcpS.ipErr="Specified static IP is current router IP.";
 dhcpS.dsubErr="Podany statyczny adres IP jest adresem routera.";
 dhcpS.dipErr="Podany zakres DHCP zawiera adres IP LAN.";
 dhcpS.upErr="Nie można zaktualizować statycznego IP.";
+dhcpS.AErr="Nie można dodać wiersza.";
