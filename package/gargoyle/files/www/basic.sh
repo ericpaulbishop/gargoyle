@@ -143,7 +143,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<select id='bridge_hwmode' onchange='setHwMode(this)'>
 						<option value='11ng'>N+G+B</option>
 						<option value='11g'>G+B</option>
-						<option value='11b'>B <%~ Only %></option>
+						<option value='11b'>B</option>
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -526,7 +526,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<select id='wifi_hwmode' onchange='setHwMode(this)'>
 					<option value='11ng'>N+G+B</option>
 					<option value='11g'>G+B</option>
-					<option value='11b'>B <%~ Only %></option>
+					<option value='11b'>B</option>
 					<option value='auto'><%~ auto %></option>
 				</select>
 			</span>
