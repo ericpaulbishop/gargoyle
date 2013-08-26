@@ -44,7 +44,7 @@ function InitSummaryText() {
 	document.getElementById("summary_container").className = 'tabField';
 	var textSpan=document.getElementById("summary_txt");
 	
-	textSpan.innerHTML="<strong>Summary:</strong><br />\n";
+	textSpan.innerHTML="<strong>"+Wsch.Smmy+":</strong><br />\n";
 }
 
 function AddSummaryText(more_text) {

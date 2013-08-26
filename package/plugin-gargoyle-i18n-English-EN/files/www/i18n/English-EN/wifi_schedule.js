@@ -15,6 +15,7 @@ Wsch.Wkly="Weekly";
 Wsch.TInc="Timer increment";
 
 //javscript
+Wsch.Smmy="Summary";
 Wsch.WeekA=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 Wsch.WDayA=["Sunday", "Monday-Friday", "Saturday"];
 Wsch.Warn="Warning";

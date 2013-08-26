@@ -15,6 +15,7 @@ Wsch.Wkly="Tygodniowy";
 Wsch.TInc="Rozdzielczość";
 
 //javscript
+Wsch.Smmy="Podsumowanie";
 Wsch.WeekA=["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
 Wsch.WDayA=["Niedziela", "Poniedziałek - Piątek", "Sobota"];
 Wsch.Warn="Uwaga";
