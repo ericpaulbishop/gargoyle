@@ -15,6 +15,7 @@ Wsch.Wkly="Tygodniowy";
 Wsch.TInc="Rozdzielczość";
 
 //javscript
+Wsch.Smmy="Podsumowanie";
 Wsch.WeekA=["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
 Wsch.WDayA=["Niedziela", "Poniedziałek - Piątek", "Sobota"];
 Wsch.Warn="Uwaga";
@@ -31,3 +32,12 @@ Wsch.SumAt="o";
 Wsch.actv="włączony";
 Wsch.schd="harmonogram";
 Wsch.nscd="bez harmonogramu";
+Wsch.STDly="codziennie";
+Wsch.STSunday="w niedzielę";
+Wsch.STMonday="w poniedziałek";
+Wsch.STTuesday="we wtorek";
+Wsch.STWednesday="w środę";
+Wsch.STThursday="w czwartek";
+Wsch.STFriday="w piątek";
+Wsch.STSaturday="w sobotę";
+Wsch.STMonFri="od poniedziałku do piątku";

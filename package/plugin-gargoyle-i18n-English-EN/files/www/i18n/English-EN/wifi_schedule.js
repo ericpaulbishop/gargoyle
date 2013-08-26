@@ -15,6 +15,7 @@ Wsch.Wkly="Weekly";
 Wsch.TInc="Timer increment";
 
 //javscript
+Wsch.Smmy="Summary";
 Wsch.WeekA=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 Wsch.WDayA=["Sunday", "Monday-Friday", "Saturday"];
 Wsch.Warn="Warning";
@@ -31,3 +32,12 @@ Wsch.SumAt="at";
 Wsch.actv="active";
 Wsch.schd="scheduled";
 Wsch.nscd="not scheduled";
+Wsch.STDly="Daily";
+Wsch.STSunday="Sunday";
+Wsch.STMonday="Monday";
+Wsch.STTuesday="Tuesday";
+Wsch.STWednesday="Wednesday";
+Wsch.STThursday="Thursday";
+Wsch.STFriday="Friday";
+Wsch.STSaturday="Saturday";
+Wsch.STMonFri="Monday-Friday";
