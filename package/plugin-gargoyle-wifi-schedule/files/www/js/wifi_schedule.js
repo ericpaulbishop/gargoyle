@@ -621,7 +621,7 @@ function SetWifiStatus(shell_iwconfig) {
 			}
 		}
 	} else {
-		setChildText("wlan_status", (Wi_Fi > 0 ? Wsch.actv : UI.disabled) );
+		setChildText("wlan_status", (Wi_Fi > 0 ? Wsch.actv : UI.disabled), (Wi_Fi > 0 ? "green" : "red") );
 	}
 }
 
