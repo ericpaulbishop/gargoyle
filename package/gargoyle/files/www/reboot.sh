@@ -50,30 +50,30 @@
 			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
 
 			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
-				<option value="0">12:00 AM</option>
-				<option value="1">01:00 AM</option>
-				<option value="2">02:00 AM</option>
-				<option value="3">03:00 AM</option>
-				<option value="4">04:00 AM</option>
-				<option value="5">05:00 AM</option>
-				<option value="6">06:00 AM</option>
-				<option value="7">07:00 AM</option>
-				<option value="8">08:00 AM</option>
-				<option value="9">09:00 AM</option>
-				<option value="10">10:00 AM</option>
-				<option value="11">11:00 AM</option>
-				<option value="12">12:00 PM</option>
-				<option value="13">01:00 PM</option>
-				<option value="14">02:00 PM</option>
-				<option value="15">03:00 PM</option>
-				<option value="16">04:00 PM</option>
-				<option value="17">05:00 PM</option>
-				<option value="18">06:00 PM</option>
-				<option value="19">07:00 PM</option>
-				<option value="20">08:00 PM</option>
-				<option value="21">09:00 PM</option>
-				<option value="22">10:00 PM</option>
-				<option value="23">11:00 PM</option>
+				<option value="0"><%~ twelveam %></option>
+				<option value="1"><%~ oneam %></option>
+				<option value="2"><%~ twoam %></option>
+				<option value="3"><%~ threeam %></option>
+				<option value="4"><%~ fouram %></option>
+				<option value="5"><%~ fiveam %></option>
+				<option value="6"><%~ sixam %></option>
+				<option value="7"><%~ sevenam %></option>
+				<option value="8"><%~ eightam %></option>
+				<option value="9"><%~ nineam %></option>
+				<option value="10"><%~ tenam %></option>
+				<option value="11"><%~ elevenam %></option>
+				<option value="12"><%~ twelvepm %></option>
+				<option value="13"><%~ onepm %></option>
+				<option value="14"><%~ twopm %></option>
+				<option value="15"><%~ threepm %></option>
+				<option value="16"><%~ fourpm %></option>
+				<option value="17"><%~ fivepm %></option>
+				<option value="18"><%~ sixpm %></option>
+				<option value="19"><%~ sevenpm %></option>
+				<option value="20"><%~ eightpm %></option>
+				<option value="21"><%~ ninepm %></option>
+				<option value="22"><%~ tenpm %></option>
+				<option value="23"><%~ elevenpm %></option>
 			</select>
 		</div>
 	</div>
