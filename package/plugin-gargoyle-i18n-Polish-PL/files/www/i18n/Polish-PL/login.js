@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for login.sh html elements
  */
 
-logS.LSect="Logowanie"
+logS.LSect="Logowanie";
 logS.EAdmP="Hasło";
 logS.YQot="Twój limit";
 logS.NQot="Limit dla całej sieci";
