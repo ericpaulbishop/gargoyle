@@ -113,11 +113,11 @@ document.getElementById('password1').focus();
 	if [ "$have_net" == "1" ] ; then
 		echo "haveNet=1;"
 		gpkg update > /dev/null 2>&1
+	fi
 
-		lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
-		if [ -n "$lang_info" ] ; then
-			printf "%s\n" "$lang_info" 
-		fi
+	lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
+	if [ -n "$lang_info" ] ; then
+		printf "%s\n" "$lang_info"
 	fi
 %>
 
