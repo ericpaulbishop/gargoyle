@@ -40,15 +40,14 @@ set_constant_variables()
 	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
 	
 	#################################################################################################
-	# As of Attitude Adjustment r36470 multi-threaded builds often fail (race condition somewhere)
+	# Starging in Attitude Adjustment r36470 multi-threaded builds often fail due to race conditions 
+	# somewhere. As of Attitude Adjustment r7838 these issues seem to have been resolved.
 	#
-	# Until this can be resolved, I am temporarily setting num_build_threads back to 1
-	# Unfortunately, this will make the build take WAY longer unfortunately, but that is 
-	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
+	# However, if there is trouble with parallel builds, or you start getting mysterious non-obvious
+	# build errors in the future try setting num_build_threads to 1 below.
 	#################################################################################################
-	
-	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	#num_build_threads=6
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	#num_build_threads=1
 
 }
 
@@ -377,12 +376,12 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
-			#make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			#make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 		else
-			#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			#make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 		fi
 
@@ -467,12 +466,12 @@ for target in $targets ; do
 
 
 			if [ "$verbosity" = "0" ] ; then
-				#make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-				make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				#make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 			else
-				#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-				make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+				#make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
 
 			fi
 
