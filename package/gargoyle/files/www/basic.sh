@@ -143,7 +143,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<select id='bridge_hwmode' onchange='setHwMode(this)'>
 						<option value='11ng'>N+G+B</option>
 						<option value='11g'>G+B</option>
-						<option value='11b'>B <%~ Only %></option>
+						<option value='11b'>B</option>
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -300,7 +300,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wired'><%~ StIP %> (<%~ Wird %>)</option>
 				<option value='dhcp_wireless'>DHCP (<%~ Wrlss %>)</option>
 				<option value='static_wireless'><%~ StIP %> (<%~ Wrlss %>)</option>
-				<option value='3g'>3G (GSM)</option>
+				<option value='3g'><%~ Mo3g %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>
@@ -376,11 +376,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wan_3g_service'><%~ Srvc %>:</label>
 			<select class='rightcolumn' id='wan_3g_service' onchange="updateService()">
 				<option value='cdma'>CDMA/EV-DO</option>
-				<option value='umts'>4G/3G/2G (<%~ auto %>)</option>
-				<option value='umts_pref'>3G <%~ Prfr %></option>
-				<option value='gprs_pref'>2G <%~ Prfr %></option>
-				<option value='umts_only'>3G <%~ Only %></option>
-				<option value='gprs_only'>2G <%~ Only %></option>
+				<option value='umts'><%~ S4G3G2G %></option>
+				<option value='umts_pref'><%~ S3GPrfr %></option>
+				<option value='gprs_pref'><%~ S2GPrfr %></option>
+				<option value='umts_only'><%~ S3GOnly %></option>
+				<option value='gprs_only'><%~ S2GOnly %></option>
 			</select>
 		</div>
 		<div id='wan_3g_device_container'>
@@ -476,8 +476,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 			<select class='rightcolumn' id="lan_dns_source" onchange="setDnsSource(this)"> 
 				<option value="isp"><%~ DfltDNS %></option>
-				<option value="opendns">OpenDNS <%~ Srvs %></option>
-				<option value="google">Google DNS <%~ Srvs %></option>
+				<option value="opendns"><%~ OpnSrvs %></option>
+				<option value="google"><%~ GooSrvs %></option>
 				<option value="custom"><%~ CstDSrv %></option>
 			</select>
 		</div>
@@ -526,7 +526,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<select id='wifi_hwmode' onchange='setHwMode(this)'>
 					<option value='11ng'>N+G+B</option>
 					<option value='11g'>G+B</option>
-					<option value='11b'>B <%~ Only %></option>
+					<option value='11b'>B</option>
 					<option value='auto'><%~ auto %></option>
 				</select>
 			</span>
@@ -630,8 +630,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_client_band_container' class='indent'>
 			<label class='leftcolumn' for='wifi_client_band' id='wifi_client_band_label'><%~ WlBnd %>:</label>
 			<select class='rightcolumn' id='wifi_client_band' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
-				<option value="2.4">2.4 Ghz</option>
-				<option value="5">5 Ghz</option>
+				<option value="2.4">2.4 GHz</option>
+				<option value="5">5 GHz</option>
 			</select>
 		</div>
 

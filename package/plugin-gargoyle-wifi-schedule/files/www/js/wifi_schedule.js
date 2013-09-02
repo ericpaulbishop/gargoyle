@@ -44,7 +44,7 @@ function InitSummaryText() {
 	document.getElementById("summary_container").className = 'tabField';
 	var textSpan=document.getElementById("summary_txt");
 	
-	textSpan.innerHTML="<strong>Summary:</strong><br />\n";
+	textSpan.innerHTML="<strong>"+Wsch.Smmy+":</strong><br />\n";
 }
 
 function AddSummaryText(more_text) {
@@ -187,15 +187,15 @@ function UpdateSummary() {  //summary is dynamically generated from parsed cront
 		var day_string="";
 		
 		//dayCronText could be 0,2,4-6 or */2 but this script won't generate that, so no need to parse it
-		if (dayCronText == "*") { day_string = Wsch.Dly; }
-		if (dayCronText == "0") { day_string = UI.Sunday; }
-		if (dayCronText == "1") { day_string = UI.Monday; }
-		if (dayCronText == "2") { day_string = UI.Tuesday; }
-		if (dayCronText == "3") { day_string = UI.Wednesday; }
-		if (dayCronText == "4") { day_string = UI.Thursday; }
-		if (dayCronText == "5") { day_string = UI.Friday; }
-		if (dayCronText == "6") { day_string = UI.Saturday; }
-		if (dayCronText == "1-5") { day_string = UI.Monday+"-"+UI.Friday; }		
+		if (dayCronText == "*") { day_string = Wsch.STDly; }
+		if (dayCronText == "0") { day_string = Wsch.STSunday; }
+		if (dayCronText == "1") { day_string = Wsch.STMonday; }
+		if (dayCronText == "2") { day_string = Wsch.STTuesday; }
+		if (dayCronText == "3") { day_string = Wsch.STWednesday; }
+		if (dayCronText == "4") { day_string = Wsch.STThursday; }
+		if (dayCronText == "5") { day_string = Wsch.STFriday; }
+		if (dayCronText == "6") { day_string = Wsch.STSaturday; }
+		if (dayCronText == "1-5") { day_string = Wsch.STMonFri; }
 		
 		AddSummaryText(Wsch.SumGo+" " + (wifiCronCMD.search("up") >= 0 ? Wsch.SumUp : Wsch.SumDn) + " - " +  day_string + " "+Wsch.SumAt+" " + (hourCronText < 10 ? '0' + hourCronText : hourCronText) + ":" + minuteStr + "<br />\n");
 	}
@@ -621,7 +621,7 @@ function SetWifiStatus(shell_iwconfig) {
 			}
 		}
 	} else {
-		setChildText("wlan_status", (Wi_Fi > 0 ? Wsch.actv : UI.disabled) );
+		setChildText("wlan_status", (Wi_Fi > 0 ? Wsch.actv : UI.disabled), (Wi_Fi > 0 ? "green" : "red") );
 	}
 }
 

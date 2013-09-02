@@ -114,6 +114,8 @@ string_map* get_package_latest(string_map* all_package_data, char* package_name,
 string_map* get_package_current_or_latest(string_map* all_package_data, char* package_name, int* is_current, char** matching_version);
 string_map* get_package_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version);
 string_map* get_package_current_or_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version);
+string_map* get_package_current_or_latest_matching_and_satisfiable(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version);
+string_map* get_package_latest_matching(string_map* all_package_data, char* package_name, char** matching, int* is_current, char** matching_version);
 string_map* get_package_with_version(string_map* all_package_data, char* package_name, char* package_version);
 
 void add_package_data(string_map* all_package_data, string_map** package, char* package_name, char* package_version, string_map* preferred_provides);

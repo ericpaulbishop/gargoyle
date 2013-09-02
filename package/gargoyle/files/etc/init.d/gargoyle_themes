@@ -41,6 +41,13 @@ start()
 			uci set gargoyle.display.system_themes='Themes'
 			uci set gargoyle.scripts.system_themes='themes.sh'
 			uci set gargoyle.system.themes='311'
+
+			LANG=$(uci -q get gargoyle.global.language);
+			if [ -n "$LANG" -a -e /usr/lib/gargoyle/i18nServices.sh ]; then
+				. /usr/lib/gargoyle/i18nServices.sh
+				change_menu_language $LANG
+			fi
+
 			uci commit gargoyle
 		fi
 		if [ -n "${gdisplay}" ] && [ "${num_themes}" = 1 ] ; then

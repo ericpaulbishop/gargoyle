@@ -50,13 +50,30 @@
 			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
 
 			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
-
-<% if [ $(uci -q get gargoyle.global.hour_style) == 24 ] ; then %>
-			<%in templates/simple_24hr_template %>
-<% else %>
-			<%in templates/simple_12hr_template %>
-<% fi %>
-
+				<option value="0"><%~ twelveam %></option>
+				<option value="1"><%~ oneam %></option>
+				<option value="2"><%~ twoam %></option>
+				<option value="3"><%~ threeam %></option>
+				<option value="4"><%~ fouram %></option>
+				<option value="5"><%~ fiveam %></option>
+				<option value="6"><%~ sixam %></option>
+				<option value="7"><%~ sevenam %></option>
+				<option value="8"><%~ eightam %></option>
+				<option value="9"><%~ nineam %></option>
+				<option value="10"><%~ tenam %></option>
+				<option value="11"><%~ elevenam %></option>
+				<option value="12"><%~ twelvepm %></option>
+				<option value="13"><%~ onepm %></option>
+				<option value="14"><%~ twopm %></option>
+				<option value="15"><%~ threepm %></option>
+				<option value="16"><%~ fourpm %></option>
+				<option value="17"><%~ fivepm %></option>
+				<option value="18"><%~ sixpm %></option>
+				<option value="19"><%~ sevenpm %></option>
+				<option value="20"><%~ eightpm %></option>
+				<option value="21"><%~ ninepm %></option>
+				<option value="22"><%~ tenpm %></option>
+				<option value="23"><%~ elevenpm %></option>
 			</select>
 		</div>
 	</div>

@@ -1,0 +1,117 @@
+﻿/*
+ * UTF-8 (with BOM) Polish-PL text strings for User Interface elements
+ */
+
+UI.SaveChanges="Zapisz zmiany";
+UI.Reset="Anuluj";
+UI.Clear="Wyczyść historię";
+UI.Delete="Usuń dane";
+UI.DNow="Pobierz";
+UI.Visited="Witryny";
+UI.Requests="Wyszukiwania";
+UI.Add="Dodaj";
+UI.Remove="Usuń";
+UI.DDNSService="Usługa DDNS";
+UI.WakeUp="Wybudź";
+UI.NewRule="Dodaj nową regułę";
+UI.NewQuota="Dodaj nowy limit";
+UI.AddRule="Dodaj regułę";
+UI.AddSvcCls="Dodaj klasę usługi";
+UI.Edit="Edycja";
+UI.Select="Wybór";
+UI.ChPRoot="Zmień folder główny";
+UI.AddPSource="Dodaj nowe źródło";
+UI.Uninstall="Odinstaluj";
+UI.Install="Zainstaluj";
+UI.RefreshPlugins="Odśwież";
+UI.GetBackup="Pobierz";
+UI.RestoreConfig="Przywróć starą konfigurację";
+UI.RestoreDefault="Przywróć domyślną konfigurację";
+UI.Upgrade="Aktualizuj";
+UI.Reboot="Uruchom ponownie";
+UI.MoreInfo="Więcej informacji";
+UI.Hide="Ukryj opis";
+UI.WaitSettings="Proszę czekać na wprowadzenie zmian...";
+UI.Wait="Proszę czekać...";
+UI.ErrChanges="Zmiany nie mogą być wprowadzone.";
+UI.Always="Zawsze";
+UI.Disabled="Wyłączone";
+UI.Enabled="Włączone";
+UI.Sunday="Niedziela";
+UI.Monday="Poniedziałek";
+UI.Tuesday="Wtorek";
+UI.Wednesday="Środa";
+UI.Thursday="Czwartek";
+UI.Friday="Piątek";
+UI.Saturday="Sobota";
+UI.Sun="Nie";
+UI.Mon="Pon";
+UI.Tue="Wto";
+UI.Wed="Śro";
+UI.Thu="Czw";
+UI.Fri="Pią";
+UI.Sat="Sob";
+UI.unk="nieznane";
+UI.HsNm="Nazwa urządzenia";
+UI.HDsp="Wyświetlanie";
+UI.DspHn="Nazwa urządzenia";
+UI.DspHIP="Adres IP urządzenia";
+
+UI.never="nigdy";
+UI.disabled="wyłączone";
+UI.both="oba";
+UI.seconds="sek.";
+UI.minutes="min.";
+UI.hours="godz.";
+UI.days="dni";
+UI.second="sek.";
+UI.minute="min.";
+UI.hour="godz.";
+UI.day="dzień";
+
+UI.CApplyChanges="Zamknij i zapisz zmiany";
+UI.CDiscardChanges="Zamknij i anuluj zmiany";
+UI.waitText="Proszę czekać na wprowadzenie zmian";
+UI.Cancel="Anuluj";
+
+UI.Err="BŁĄD";
+UI.prfErr="Znaleziono błąd w polu";
+UI.nex="nie istnieje";
+UI.InvAdd="BŁĄD: Zły adres";
+
+UI.CPass="Weryfikacja hasła";
+UI.OK="OK";
+UI.VPass="Trwa weryfikowanie hasła...";
+UI.sprt="lokalny port SSH";
+UI.wsprt="lokalny port serwera www";
+UI.prdr="port przekierowany na router";
+UI.puse="port używany przez router";
+UI.pfwd="port przekierowany do";
+
+UI.AJAX="Wymagane wsparcie AJAX ze strony przeglądarki";
+UI.AJAXUpg="Niezbędne jest użycie przeglądarki ze wsparciem dla AJAX. Może to być jedna z wymienionych: Firefox 2.0+, Safari lub IE 6+.";
+
+UI.twelveam="00:00";
+UI.oneam="01:00";
+UI.twoam="02:00";
+UI.threeam="03:00";
+UI.fouram="04:00";
+UI.fiveam="05:00";
+UI.sixam="06:00";
+UI.sevenam="07:00";
+UI.eightam="08:00";
+UI.nineam="09:00";
+UI.tenam="10:00";
+UI.elevenam="11:00";
+UI.twelvepm="12:00";
+UI.onepm="13:00";
+UI.twopm="14:00";
+UI.threepm="15:00";
+UI.fourpm="16:00";
+UI.fivepm="17:00";
+UI.sixpm="18:00";
+UI.sevenpm="19:00";
+UI.eightpm="20:00";
+UI.ninepm="21:00";
+UI.tenpm="22:00";
+UI.elevenpm="23:00";

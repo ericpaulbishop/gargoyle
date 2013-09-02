@@ -48,7 +48,7 @@ function failure()
 function failureByBootloader()
 {
 	setControlsEnabled(true);
-	alert("Firmware contains a bootloader. Your router can not be upgraded.\n");
+	alert(upS.UErrBB+"\n");
 }
 
 function setUpgradeFormat()

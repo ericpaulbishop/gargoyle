@@ -32,6 +32,7 @@ UI.Reboot="Reiniciar Ahora";
 UI.MoreInfo="Más información";
 UI.Hide="Ocultar texto";
 UI.WaitSettings="Espere por favor mientras se aplican los nuevos ajustes. . .";
+UI.Wait="Espere por favor. . .";
 UI.ErrChanges="Los cambios no se pudieron aplicar";
 UI.Disabled="Desactivado";
 UI.Enabled="Activado";
@@ -67,8 +68,6 @@ UI.second="segundo";
 UI.minute="minuto";
 UI.hour="hora";
 UI.day="día";
-UI.hAM="a.m.";
-UI.hPM="p.m.";
 
 UI.CApplyChanges="Cerrar y Aplicar Cambios";
 UI.CDiscardChanges="Cerrar y Descartar Cambios";
