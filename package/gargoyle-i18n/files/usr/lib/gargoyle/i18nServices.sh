@@ -8,7 +8,7 @@
 shell_get_value() {
 	local jsfile="$1"
 	local key="$2"
-	local translation=""
+	local translation=
 	
 	# awk -v key=uc_cfg_f -F '=' '$0 ~ key {sub(/\"/,""); sub(/\";$/,""); print $2}' /www/i18n/English-EN/openvpn.js
 	[ -f "$jsfile" ] && translation=$(awk -v key=$key -F '=' '$0 ~ key {sub(/\"/,""); sub(/\";$/,""); print $2}' $jsfile)
@@ -22,21 +22,24 @@ shell_get_value() {
 shell_i18n_string() {
 	local page="$1"
 	local key="$2"
+	local null_ret="$3"
 	local web_root=$(uci get gargoyle.global.web_root)
 	local active_lang=$(uci -q get gargoyle.global.language)
 	local fallback_lang=$(uci -q get gargoyle.global.fallback_lang)
 	local js_page=""
-	local translation=""
+	local translation=
 	
 	[ -n "$active_lang" ] && [ -n "$fallback_lang" ] && {
 		js_page="$web_root/i18n/$active_lang/$page.js"
 		translation=$(shell_get_value "$js_page" $key)
-		[ -z "$translation" ] && {
+		[ -n "$translation" ] && {
 			js_page="$web_root/i18n/$fallback_lang/$page.js"
 			translation=$(shell_get_value "$js_page" $key)
 		}
 	}
-	[ -z "$translation" ] && translation=$key
+	[ -z "$translation" ] && [ -z $null_ret ] && {
+		translation=$key
+	}
 	
 	echo "$translation"
 }
