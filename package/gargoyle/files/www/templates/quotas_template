@@ -1,3 +1,34 @@
+<%
+	prAM=$(i18n strings pAM 1)
+	prPM=$(i18n strings pPM 1)
+	hrAM=$(i18n strings hAM 1)
+	hrPM=$(i18n strings hPM 1)
+	tfmt=$(uci -q get gargoyle.global.hour_style)
+	tabs=""
+
+	otime() {
+		for h in $(seq 0 23); do
+			tstr=""
+			[ -z $tfmt ] || [ $tfmt = "12" ] && {
+				hr=$(date -u -d $h:00 +"%I:%M")
+				[ $h -lt 12 ] && {
+					tstr="$prAM $hr $hrAM"
+				} || {
+					tstr="$prPM $hr $hrPM"
+				}
+			} || {
+				tstr=$(date -u -d $h:00 +"%H:%M")
+			}
+			echo -e "$tabs<option value=\"$(expr $h \* 3600)\">$tstr</option>"
+			[ $h = 0 ] && {
+				for t in $(seq 1 $1); do
+					tabs="$tabs\t"
+				done
+			}
+		done
+	}
+%>
+
 <div>
 	<span class='narrowleftcolumn'>
 		<label id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
@@ -110,30 +141,7 @@
 	</span>
 	<span class='widerightcolumn'>
 		<select id='quota_hour' style='width:125px'>
-			<option value="0"><%~ twelveam %></option>
-			<option value="3600"><%~ oneam %></option>
-			<option value="7200"><%~ twoam %></option>
-			<option value="10800"><%~ threeam %></option>
-			<option value="14400"><%~ fouram %></option>
-			<option value="18000"><%~ fiveam %></option>
-			<option value="21600"><%~ sixam %></option>
-			<option value="25200"><%~ sevenam %></option>
-			<option value="28800"><%~ eightam %></option>
-			<option value="32400"><%~ nineam %></option>
-			<option value="36000"><%~ tenam %></option>
-			<option value="39600"><%~ elevenam %></option>
-			<option value="43200"><%~ twelvepm %></option>
-			<option value="46800"><%~ onepm %></option>
-			<option value="50400"><%~ twopm %></option>
-			<option value="54000"><%~ threepm %></option>
-			<option value="57600"><%~ fourpm %></option>
-			<option value="61200"><%~ fivepm %></option>
-			<option value="64800"><%~ sixpm %></option>
-			<option value="68400"><%~ sevenpm %></option>
-			<option value="72000"><%~ eightpm %></option>
-			<option value="75600"><%~ ninepm %></option>
-			<option value="79200"><%~ tenpm %></option>
-			<option value="82800"><%~ elevenpm %></option>
+			<% otime 3 %>
 		</select>
 	</span>
 </div>
