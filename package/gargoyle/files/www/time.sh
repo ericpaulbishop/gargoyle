@@ -36,6 +36,8 @@
 		current_time=$(echo $current_time | sed "s/UTC/UTC-$timezone_is_utc/g" | sed 's/\-\-/+/g')
 	fi
 	echo "var currentTime = \"$current_time\";"
+	timeformat=$(uci -q get gargoyle.global.hour_style)
+	echo "var timeformat=$([[ -z $timeformat ]] && echo 0 || echo $timeformat);"
 %>
 //-->
 </script>
@@ -70,6 +72,16 @@
 					<option value="argentina">dd/mm/yyyy</option>
 					<option value="iso">yyyy/mm/dd</option>
 					<option value="iso8601">yyyy-mm-dd</option>
+				</select>
+			</div>
+		</div>
+		
+		<div>
+			<label class='nocolumn' id='timezone_label' for='time_format'>Time Format:</label>
+			<div class="indent">
+				<select class='nocolumn' id='time_format'>
+					<option value=12>12 <%~ hour %></option>
+					<option value=24>24 <%~ hour %></option>
 				</select>
 			</div>
 		</div>
