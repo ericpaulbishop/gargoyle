@@ -19,11 +19,11 @@ set_constant_variables()
 	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
 	
 	#################################################################################################
-	# As of Attitude Adjustment r36470 multi-threaded builds often fail (race condition somewhere)
+	# Starging in Attitude Adjustment r36470 multi-threaded builds often fail due to race conditions 
+	# somewhere. As of Attitude Adjustment r7838 these issues seem to have been resolved.
 	#
-	# Until this can be resolved, I am temporarily setting num_build_threads back to 1
-	# Unfortunately, this will make the build take WAY longer unfortunately, but that's 
-	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
+	# However, if there is trouble with parallel builds, or you start getting mysterious non-obvious
+	# build errors in the future try setting num_build_threads to 1 below.
 	#################################################################################################
 	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
 	#num_build_threads=1
