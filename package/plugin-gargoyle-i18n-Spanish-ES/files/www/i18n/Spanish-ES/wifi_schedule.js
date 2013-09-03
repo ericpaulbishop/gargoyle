@@ -15,6 +15,7 @@ Wsch.Wkly="Semanal";
 Wsch.TInc="Incremento del temporizador";
 
 //javscript
+Wsch.Smmy="Resumen";
 Wsch.WeekA=["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 Wsch.WDayA=["domingo", "lunes-viernes", "sábado"];
 Wsch.Warn="Advertencia";
@@ -31,3 +32,12 @@ Wsch.SumAt="a";
 Wsch.actv="activo";
 Wsch.schd="programado";
 Wsch.nscd="no programado";
+Wsch.STDly="Diario";
+Wsch.STSunday="domingo";
+Wsch.STMonday="lunes";
+Wsch.STTuesday="martes";
+Wsch.STWednesday="miércoles";
+Wsch.STThursday="jueves";
+Wsch.STFriday="viernes";
+Wsch.STSaturday="sábado";
+Wsch.STMonFri="lunes-viernes";
