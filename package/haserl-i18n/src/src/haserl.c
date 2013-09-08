@@ -763,7 +763,24 @@ main (int argc, char *argv[])
 
       break;
     }
-
+    
+    if (av2[0] != NULL && command == 1) { //prevents argument reconstruction (update.sh & reboot.sh)
+		unsigned int prg_len=strlen(av2[0]);
+		if (memcmp(av2[0]+prg_len-4, "i18n", 4) == 0) {
+	
+			if (global.translationKV_map == NULL) {
+				buildTranslationMap ();
+			}
+			lookup_key (NULL, av2[optind], HASERL_SHELL_SYMBOLIC_LINK);
+		
+			buffer_destroy (&script_text);
+		
+			unsigned long num_destroyed;
+			destroy_string_map(global.translationKV_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+		
+			return (0);
+		}
+	}
 
   scriptchain = load_script (filename, NULL);
 /* drop permissions */
@@ -923,6 +940,9 @@ main (int argc, char *argv[])
 
   free_list_chain (env);
   free_script_list (scriptchain);
+    
+  unsigned long num_destroyed;
+  destroy_string_map(global.translationKV_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 
   return (0);
 

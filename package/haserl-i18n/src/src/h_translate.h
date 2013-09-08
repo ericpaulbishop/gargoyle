@@ -21,7 +21,12 @@
 #ifndef H_TRANSLATE_H
 #define H_TRANSLATE_H
 
-void lookup_key (buffer_t *buf, char *key);
+enum {
+	HASERL_HTML_INPUT_OUTPUT    = 0, //token arrives with flanking space
+	HASERL_SHELL_SYMBOLIC_LINK  = 1, //optarg arrives without flanking space
+};
+
+void lookup_key (buffer_t *buf, char *key, unsigned char key_source);
 void buildTranslationMap ();
 
 void uci_init();
