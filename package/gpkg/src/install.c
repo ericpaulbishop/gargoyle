@@ -178,7 +178,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 				char* version = NULL;
 				int is_current;
 				char* match_all_versions = "*";
-				string_map* pkg_info = get_package_current_or_latest_matching_and_satisfiable(tmp_control_pkg_data, pkg_name, &match_all_versions, &is_current, &version);
+				string_map* pkg_info = get_package_current_or_latest_matching(tmp_control_pkg_data, pkg_name, &match_all_versions, &is_current, &version);
 				if(pkg_info != NULL)
 				{
 					err = 0;
@@ -395,8 +395,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			{
 				fprintf(stderr, "WARNING: Package %s is already installed, ignoring\n", pkg_name);
 				fprintf(stderr, "         Use --force-reinstall to force reinstallation\n\n");
+				
 				char** old_el = remove_string_map_element(install_pkgs_map, pkg_name);
 				if(old_el != NULL){ free_null_terminated_string_array(old_el); };
+				
+				old_el = remove_string_map_element(pkgs_from_file, pkg_name);
+				if(old_el != NULL){ free(old_el); };
+
+
 			}
 
 		}
@@ -430,7 +436,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	}
 	free_null_terminated_string_array(from_file_pkg_list);
 	install_pkg_list = get_string_map_keys(matching_packages, &install_pkg_list_len);
-	
 
 
 	
@@ -442,8 +447,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	char* all_pkg_list_str = join_strs(", ", install_pkg_list, install_pkg_list_len, 0, 0); 
 	uint64_t combined_size = 0;
 	int pkg_index;
-
-
 	for(pkg_index=0; pkg_index < install_pkg_list_len; pkg_index++)
 	{
 		char** match_criteria = get_string_map_element(install_pkgs_map, install_pkg_list[pkg_index]);
@@ -455,6 +458,7 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 			combined_size = combined_size + next_size; 
 		} 
 	}
+	
 	uint64_t root_size = destination_bytes_free(conf, install_root_name);
 	if(combined_size >= root_size )
 	{
