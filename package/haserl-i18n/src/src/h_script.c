@@ -94,7 +94,7 @@ load_script (char *filename, script_t * scriptlist)
   scriptfp = open (filename, O_NONBLOCK + O_RDONLY);
   if (scriptfp == -1)
     {				/* open failed */
-      die_with_message (NULL, NULL, g_err_msg[E_FILE_OPEN_FAIL], filename);
+        die_with_message (NULL, NULL, g_err_msg[E_FILE_OPEN_FAIL], filename);
     }
 
   fstat (scriptfp, &filestat);
@@ -558,7 +558,7 @@ process_token_list (buffer_t * buf, token_t * token)
 	  shell_eval (buf, token->buf, token->len);
 	  break;
 	case TRANSLATE:
-	  lookup_key (buf, token->buf);
+	  lookup_key (buf, token->buf, HASERL_HTML_INPUT_OUTPUT);
 	  break;
 #ifdef BASHEXTENSIONS
 	case IF:

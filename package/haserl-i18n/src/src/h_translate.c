@@ -214,6 +214,7 @@ unsigned char AssertPageMapped(char* page) {
 //  store (global.global.translationKV_map)
 //    buff is the buffer where results will be dumped & shuffled onto echoing in the shell for direct injection into the 
 //    webpage key is the raw text from the Gargoyle webpage (trailing space apparently included): <%~ key %> or <%~ page.key %>
+//    key_source (0 or 1) either fprintf to std_out (1 when haserl is invoked via /usr/bin/i18n) or route through bash (when using <%~ tokens %>)
 //
 //  Note: the 1st key from a page-specific (non UI.key) translation requires the page.key form to parse/load/map the key-value pairs
 //
@@ -221,24 +222,29 @@ unsigned char AssertPageMapped(char* page) {
 //  No matter what, there is a space at the end of the key which will throw off a key: "key" != "key "
 //  If a value is not obtained, use what was given to us in the <%~ translate %> element
 //
-void lookup_key (buffer_t *buf, char *key) {
+void lookup_key (buffer_t *buf, char *key, unsigned char key_source) {
 	char* tvalue;
 	char** key_ptr = NULL;
 	buffer_t fpath;
 	char page_split[256], key_split[256];
 	char* kaddr=&key_split[0];
-	char* split=strchr(key++, '.');
+	unsigned char offset=0;
+	if (key_source == HASERL_HTML_INPUT_OUTPUT) {
+		offset=1; //haserl <%~ token %> in html pages arrive with whitespace, copying (for splitting) needs to account for the space
+		key++;
+	}
+	char* split=strchr(key+offset, '.');
 
 	haserl_buffer_init (&fpath);
 	memset(page_split, 0, 256);
 	memset(key_split, 0, 256);
 
 	if (split == NULL) {
-		memcpy(key_split, key, strlen(key)-1); //there's a space there between the key %>
+		memcpy(key_split, key, strlen(key)-offset);
 	} else {
 		// ah, a page_specific.key to find
 		memcpy(page_split, key, split-key);
-		memcpy(key_split, split+1, strlen(split)-2); //minus 1: the period; minus another 1 for trailing space
+		memcpy(key_split, split+1, strlen(split)-(1+offset)); //minus 1: the period; if a haserl token minus another 1 for trailing space
 		memcpy(page_split+(split-key), ".js", 3);
 		
 		if (AssertPageMapped(page_split) == 0) {
@@ -262,10 +268,18 @@ void lookup_key (buffer_t *buf, char *key) {
 	tvalue=get_string_map_element(global.translationKV_map, *key_ptr);
 	if (tvalue != NULL) {
 		// a mapped key-value pair was found
-		bash_echo (buf, tvalue, strlen(tvalue));
+		if (key_source == HASERL_SHELL_SYMBOLIC_LINK) {
+			printf("%s", tvalue);
+		} else {
+			bash_echo (buf, tvalue, strlen(tvalue));
+		}
 	} else {
 		// an exisinng value for the key wasn't found. Regurgitate the key - if the key had a period (split!=null), then use split key
-		bash_echo (buf, split==NULL?key:&key_split[0], strlen(split==NULL?key:&key_split[0]));
+		if (key_source == HASERL_SHELL_SYMBOLIC_LINK) {
+			printf("%s", split==NULL?key:&key_split[0]);
+		} else {
+			bash_echo (buf, split==NULL?key:&key_split[0], strlen(split==NULL?key:&key_split[0]));
+		}
 	}
 	buffer_destroy(&fpath);
 	return;
