@@ -22,17 +22,17 @@ def getValue_forKey( lang_dict, key, kErrMsg):
 	try:
 		return lang_dict[key]
 	except AttributeError:
-		return ''
+		return None
 	except KeyError:
 		print '\tKeyError: ' + kErrMsg
-		return ''
+		return None
 		
 def getValue(key, fb_dict, act_dict, err_msg_type):
 	avalue=''
 	avalue=getValue_forKey( act_dict, key, act_lang+' did not contain key \'' +key+'\' ('+err_msg_type+')')
-	if avalue == '':
+	if avalue == None:
 		avalue=getValue_forKey( fb_dict, key, 'fallback language '+fb_lang+' also did not contain key \'' +key+'\' ('+err_msg_type+')')
-		if avalue == '':
+		if avalue == None:
 			print '\tMissingKey: '+key+ ' in both active & fallback languages; using key as value  ('+err_msg_type+')'
 			avalue=key
 		else:
@@ -331,8 +331,9 @@ def process_javascript_file( jsfile ):
 	jsfileFO.close()
 	
 def process_i18n_shell_file( ):
+	print '---->   Localizing i18n shell script translations into '+act_lang
 	gdir=os.getcwd()
-	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir+"/package", shell=True, cwd='./', stdout=subprocess.PIPE )
+	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir+"/package-prepare", shell=True, cwd='./', stdout=subprocess.PIPE )
 	i18n_list = gproc.communicate()[0].split('\n')
 	for ifile in i18n_list:
 		if len(ifile) > 0:
@@ -471,10 +472,10 @@ def process_menunames():
 		uci_menu_item=string.replace(menu_i, "_", ".",2)
 		
 		menu_value=getValue_forKey( active_menu_dict, menu_i, "the "+act_lang+" translation does not have a menu "+menu_i+" entry.")
-		if menu_value == '':
+		if menu_value == None:
 			print "\t  Warning: using the "+fb_lang+" translation"
 			menu_value=getValue_forKey( fallback_menu_dict, menu_i, "the "+fb_lang+" translation does not have a menu "+menu_i+" entry.")
-			if menu_value == '':
+			if menu_value == None:
 				print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a menu name."
 				print "\t  The text of the menu item will not be localized"
 				continue
@@ -536,10 +537,10 @@ def process_menunames():
 				sys.exit(1)
 			
 			menu_value=getValue_forKey( active_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+act_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
-			if menu_value == '':
+			if menu_value == None:
 				print "\t  Warning: using the "+fb_lang+" translation"
 				menu_value=getValue_forKey( fallback_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+fb_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
-				if menu_value == '':
+				if menu_value == None:
 					print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a stardard menu name."
 					print "\t  The text of the stardard menu item will not be localized"
 					continue

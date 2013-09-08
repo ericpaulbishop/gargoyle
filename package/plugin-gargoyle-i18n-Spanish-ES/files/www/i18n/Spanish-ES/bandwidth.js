@@ -39,6 +39,8 @@ bndwS.Time="Tiempo";
 bndwS.BPlot="Gráfico del Ancho de Banda";
 bndwS.BUsag="Utilización del Ancho de Banda";
 bndwS.RstGr="Restableciendo Gráficos...";
+bndwS.DelAD="¿Eliminar todos los datos?";
+bndwS.DelDW="Eliminación de Datos...";
 
 //bandwidth_distribution.sh
 bndwS.DOpSect="Opciones de Visualización de Distribución del Ancho de Banda ";

@@ -22,3 +22,4 @@ dhcpS.ipErr="La IP estática especificada es actualmente la IP del enrutador.";
 dhcpS.dsubErr="El rango DHCP especificado se encuentra fuera de la subred LAN.";
 dhcpS.dipErr="El rango DHCP especificado contiene la IP de la LAN actual.";
 dhcpS.upErr="No se pudo actualizar la IP estática.";
+dhcpS.AErr="No se pudo agregar fila.";
