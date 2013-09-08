@@ -6,6 +6,7 @@ timeStr.Section="Time";
 timeStr.CurrTime="Current Date &amp; Time";
 timeStr.TimeZone="Time Zone";
 timeStr.DateForm="Date Format";
+timeStr.TimeForm="Time Format";
 timeStr.TServers="NTP Servers";
 timeStr.Global="Global";
 timeStr.US="United States";

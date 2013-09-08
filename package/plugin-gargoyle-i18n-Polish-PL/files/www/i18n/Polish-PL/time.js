@@ -6,6 +6,7 @@ timeStr.Section="Czas";
 timeStr.CurrTime="Bieżąca data i czas";
 timeStr.TimeZone="Strefa czasowa";
 timeStr.DateForm="Format daty";
+timeStr.TimeForm="Format czasu";
 timeStr.TServers="Serwery czasu";
 timeStr.Global="Bez określenia";
 timeStr.US="Stany Zjednoczone";

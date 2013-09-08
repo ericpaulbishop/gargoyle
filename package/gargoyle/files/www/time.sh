@@ -77,7 +77,7 @@
 		</div>
 		
 		<div>
-			<label class='nocolumn' id='timezone_label' for='time_format'>Time Format:</label>
+			<label class='nocolumn' id='timezone_label' for='time_format'><% TimeForm %>:</label>
 			<div class="indent">
 				<select class='nocolumn' id='time_format'>
 					<option value=12>12 <%~ hour %></option>
