@@ -357,12 +357,19 @@ def process_i18n_shell_file( ):
 									break
 							i18n_cmd=iline[x:y].split()
 							if i18n_cmd[0].endswith('i18n'):
-								fallback_dict={}
-								active_dict={}
-								fallback_dict=parseJStrans( fb_lang, i18n_cmd[1]+'.js', fallback_dict, False, None )
-								active_dict=parseJStrans( act_lang, i18n_cmd[1]+'.js', active_dict, False, None )
+								fallback_dict = {}
+								active_dict= {}
 								
-								anewline+=('\"'+ getValue(i18n_cmd[2], fallback_dict, active_dict, 'i18n shell script') +'\"')
+								fallback_dict=parseJStrans( fb_lang, 'strings.js', fallback_dict, False, None )
+								active_dict=parseJStrans( act_lang, 'strings.js', active_dict, False, None )
+								
+								key=i18n_cmd[1]
+								if '.' in key:
+									fallback_dict=parseJStrans( fb_lang, key.split('.')[0]+'.js', fallback_dict, False, None )
+									active_dict=parseJStrans( act_lang, key.split('.')[0]+'.js', active_dict, False, None )
+									key=key.split('.')[1]
+								
+								anewline+=('\"'+ getValue(key, fallback_dict, active_dict, 'i18n shell script') +'\"')
 								x=y+1
 							
 						anewline+=iline[x]

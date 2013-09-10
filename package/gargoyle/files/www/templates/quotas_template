@@ -1,8 +1,8 @@
 <%
-	prAM=$(i18n strings pAM 1)
-	prPM=$(i18n strings pPM 1)
-	hrAM=$(i18n strings hAM 1)
-	hrPM=$(i18n strings hPM 1)
+	prAM=$(i18n pAM)
+	prPM=$(i18n pPM)
+	hrAM=$(i18n hAM)
+	hrPM=$(i18n hPM)
 	tfmt=$(uci -q get gargoyle.global.hour_style)
 	tabs=""
 
@@ -20,11 +20,7 @@
 				tstr=$(date -u -d $h:00 +"%H:%M")
 			}
 			echo -e "$tabs<option value=\"$(expr $h \* 3600)\">$tstr</option>"
-			[ $h = 0 ] && {
-				for t in $(seq 1 $1); do
-					tabs="$tabs\t"
-				done
-			}
+			[ $h = 0 ] && tabs="$1"
 		done
 	}
 %>
@@ -65,9 +61,9 @@
 		<span id="max_up_container">
 			<input type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_up_unit">
-				<option value="MB">MBytes</option>
-				<option value="GB">GBytes</option>
-				<option value="TB">TBytes</option>
+				<option value="MB"><%~ MBy %></option>
+				<option value="GB"><%~ GBy %></option>
+				<option value="TB"><%~ TBy %></option>
 			</select>
 		</span>
 	</span>
@@ -84,9 +80,9 @@
 		<span id="max_down_container">
 			<input type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_down_unit">
-				<option value="MB">MBytes</option>
-				<option value="GB">GBytes</option>
-				<option value="TB">TBytes</option>
+				<option value="MB"><%~ MBy %></option>
+				<option value="GB"><%~ GBy %></option>
+				<option value="TB"><%~ TBy %></option>
 			</select>
 
 		</span>
@@ -104,9 +100,9 @@
 		<span id="max_combined_container">
 			<input type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 			<select id="max_combined_unit">
-				<option value="MB">MBytes</option>
-				<option value="GB">GBytes</option>
-				<option value="TB">TBytes</option>
+				<option value="MB"><%~ MBy %></option>
+				<option value="GB"><%~ GBy %></option>
+				<option value="TB"><%~ TBy %></option>
 			</select>
 
 		</span>
@@ -141,7 +137,7 @@
 	</span>
 	<span class='widerightcolumn'>
 		<select id='quota_hour' style='width:125px'>
-			<% otime 3 %>
+			<% otime '\t\t\t' %>
 		</select>
 	</span>
 </div>
@@ -200,16 +196,16 @@
 		<label style="float:left;width:100px;"><%~ UpLimit %>: </label>
 		<input type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 		<select id="quota_qos_up_unit">
-			<option value="KBytes/s">KBytes/s</option>
-			<option value="MBytes/s">MBytes/s</option>
+			<option value="KBytes/s"><%~ KBs %></option>
+			<option value="MBytes/s"><%~ MBs %></option>
 		</select>
 	</span>
 	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
 		<label style="float:left;width:100px;"><%~ DownLimit %>: </label>
 		<input type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15'/>
 		<select id="quota_qos_down_unit">
-			<option value="KBytes/s">KBytes/s</option>
-			<option value="MBytes/s">MBytes/s</option>
+			<option value="KBytes/s"><%~ KBs %></option>
+			<option value="MBytes/s"><%~ MBs %></option>
 		</select>
 	</span>
 </div>

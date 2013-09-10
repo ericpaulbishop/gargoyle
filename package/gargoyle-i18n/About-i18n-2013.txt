@@ -75,8 +75,9 @@ The javascript strings themselves are automatically placed in by the browser's j
 
 The menu system has its strings set on the flash chip of the router. Each time languages are switched, every page is looked up, translated & written to memory to survive a reboot.
 
-Finally, there is an openvpn page that uses shell script lookups to handle translations because the translated values need to exist in the html before the page leaves the router. These shell script lookups (and menu changes are a special type of shell script lookup) are the slowest. Javascript is the fastest because its letting the browser on your computer do the work. The haserl translation token is in between, running on the router as a compiled function inside haserl.
+Finally, there are shell script lookups to handle translations (quotas_template & reboot.sh, openvpn_upload_client.sh) for pages where translations are needed as part of the shell script logic. The shell script lookups (via /usr/bin/i18n symlinked to haserl) work through haserl.
 
+The slowest types of lookups are menu names. These rely on pure shell scripts.
 
 ----------------------------------
 

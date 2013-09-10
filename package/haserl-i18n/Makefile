@@ -35,6 +35,7 @@ endef
 define Package/haserl-i18n/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/haserl $(1)/usr/bin/
+	ln -s haserl $(1)/usr/bin/i18n
 endef
 
 $(eval $(call BuildPackage,haserl-i18n))
