@@ -109,10 +109,10 @@
 			<label for='table_units' class="narrowleftcolumn" id='table_units_label'><%~ TbUnt %>:</label>
 			<select id="table_units" class="rightcolumn" onchange="resetPlots()">
 				<option value="mixed"><%~ AutoM %></option>
-				<option value="KBytes">KBytes</option>
-				<option value="MBytes">MBytes</option>
-				<option value="GBytes">GBytes</option>
-				<option value="TBytes">TBytes</option>
+				<option value="KBytes"><%~ KBy %></option>
+				<option value="MBytes"><%~ MBy %></option>
+				<option value="GBytes"><%~ GBy %></option>
+				<option value="TBytes"><%~ TBy %></option>
 			</select>
 		</div>
 

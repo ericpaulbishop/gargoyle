@@ -898,25 +898,25 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 	return errorArray;
 }
 
-function parseBytes(bytes, units)
+function parseBytes(bytes, units, abbr)
 {
 	var parsed;
 	units = units != "KBytes" && units != "MBytes" && units != "GBytes" && units != "TBytes" ? "mixed" : units;
 	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || units == "TBytes")
 	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " TBytes";
+		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " "+(abbr?UI.TB:UI.TBy);
 	}
 	else if( (units == "mixed" && bytes > 1024*1024*1024) || units == "GBytes")
 	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " GBytes";
+		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " "+(abbr?UI.GB:UI.GBy);
 	}
 	else if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes" )
 	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes";
+		parsed = truncateDecimal(bytes/(1024*1024)) + " "+(abbr?UI.MB:UI.MBy);
 	}
 	else
 	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes";
+		parsed = truncateDecimal(bytes/(1024)) + " "+(abbr?UI.KB:UI.KBy);
 	}
 	
 	return parsed;
@@ -929,11 +929,11 @@ function parseKbytesPerSecond(kbytes, units)
 	
 	if( (units == "mixed" && kbytes > 1024) || units == "MBytes/s")
 	{
-		parsed = truncateDecimal(kbytes/(1024)) + " MBytes/s";
+		parsed = truncateDecimal(kbytes/(1024)) + " "+UI.MBs;
 	}
 	else
 	{
-		parsed = kbytes + " KBytes/s";
+		parsed = kbytes + " "+UI.KBs;
 	}
 	return parsed;
 }

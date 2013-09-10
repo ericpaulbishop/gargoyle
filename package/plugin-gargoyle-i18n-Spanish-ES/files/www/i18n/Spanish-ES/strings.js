@@ -78,6 +78,20 @@ UI.CDiscardChanges="Cerrar y Descartar Cambios";
 UI.waitText="Por Favor, Espere Mientras Se Aplican los Ajustes";
 UI.Cancel="Cancelar";
 
+UI.byt="bytes";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
+
 UI.Err="ERROR";
 UI.prfErr="Existe un error en";
 UI.nex="no existe";

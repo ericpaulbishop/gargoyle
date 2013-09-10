@@ -73,6 +73,20 @@ UI.pPM="";
 UI.hAM="AM";
 UI.hPM="PM";
 
+UI.byt="bytes";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
+
 UI.CApplyChanges="Close and Apply Changes";
 UI.CDiscardChanges="Close and Discard Changes";
 UI.waitText="Please Wait While Settings Are Applied";

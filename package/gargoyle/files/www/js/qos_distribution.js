@@ -33,7 +33,7 @@ function getEmbeddedSvgSetFunction(embeddedId)
 
 function initializePieCharts()
 {
-	
+	alert(parseBytes(2558478992,null,true))
 	uploadClassIds = [];
 	downloadClassIds = [];
 	uploadClassNames = [];
@@ -242,12 +242,12 @@ function updatePieCharts()
 						if(sumIsZero)
 						{
 							var percentage = "(" + truncateDecimal( 100*(1/classData.length) ) + "%)";
-							classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1)) + " " + percentage);
+							classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1),null,true) + " " + percentage);
 						}
 						else
 						{
 							var percentage = "(" + truncateDecimal( 100*(classData[nameIndex])/totalSum ) + "%)";
-							classLabels.push( className + " - " + parseBytes(classData[nameIndex]) + " " + percentage);
+							classLabels.push( className + " - " + parseBytes(classData[nameIndex],null,true) + " " + percentage);
 						}
 					}
 					uploadClassData = direction.match("up") ? classData : uploadClassData;
@@ -292,32 +292,6 @@ function parseMonitors(outputData)
 		}
 	}
 	return monitors;
-}
-
-function parseBytes(bytes)
-{
-	var parsed;
-	if(bytes > 1024*1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + "TB";
-	}
-	else if(bytes > 1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + "GB";
-	}
-	else if(bytes > 1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + "MB";
-	}
-	else if(bytes > 1024)
-	{
-		parsed = truncateDecimal(bytes/(1024)) + "KB";
-	}
-	else
-	{
-		parsed = bytes + "B";
-	}
-	return parsed;
 }
 
 function truncateDecimal(dec)
