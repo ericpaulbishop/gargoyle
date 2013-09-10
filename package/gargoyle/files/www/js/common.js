@@ -902,7 +902,7 @@ function parseBytes(bytes, units, abbr)
 {
 	var parsed;
 	units = units != "KBytes" && units != "MBytes" && units != "GBytes" && units != "TBytes" ? "mixed" : units;
-	spcr = abbr==null ? "" : " ";
+	spcr = abbr==null ? " " : "";
 	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || units == "TBytes")
 	{
 		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + spcr + (abbr?UI.TB:UI.TBy);

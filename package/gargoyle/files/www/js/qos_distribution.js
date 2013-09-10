@@ -33,7 +33,7 @@ function getEmbeddedSvgSetFunction(embeddedId)
 
 function initializePieCharts()
 {
-	alert(parseBytes(2558478992,null,true))
+	
 	uploadClassIds = [];
 	downloadClassIds = [];
 	uploadClassNames = [];
