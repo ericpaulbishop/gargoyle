@@ -55,7 +55,7 @@ for P in $PORTS; do
 		"link:up speed:100baseT") STATUS="100Mbps";;
 		"link:up speed:10baseT") STATUS="10Mbps";;
 		"0") STATUS="-";;
-		"1") STATUS="connected";;
+		"1") STATUS=$(i18n conn);;
 		*) STATUS="?";;
 	esac
 	case "$counter" in
