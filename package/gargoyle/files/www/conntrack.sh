@@ -46,9 +46,9 @@
 			<label for="bw_units" class="narrowleftcolumn" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
 			<select id="bw_units" class="rightcolumn">
 				<option value="mixed"><%~ AtMxd %></option>
-				<option value="KBytes">KBytes</option>
-				<option value="MBytes">MBytes</option>
-				<option value="GBytes">GBytes</option>
+				<option value="KBytes"><%~ KBy %></option>
+				<option value="MBytes"><%~ MBy %></option>
+				<option value="GBytes"><%~ GBy %></option>
 			</select>
 		</div>
 		<div>
