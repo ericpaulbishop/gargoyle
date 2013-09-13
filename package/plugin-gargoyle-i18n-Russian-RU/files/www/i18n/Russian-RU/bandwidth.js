@@ -22,7 +22,7 @@ bndwS.qhour="за 15 минут";
 bndwS.mnths="за месяц";
 bndwS.DspT="Отображать тип";
 bndwS.DspID="Отображать идентификатор";
-bndwS.TbUnt="Еденици измерения";
+bndwS.TbUnt="Еденицы измерения";
 bndwS.AutoM="Авто (смешенные)";
 bndwS.DelD="Удалить информацию";
 bndwS.DBData="Скачать информацию";
@@ -37,7 +37,7 @@ bndwS.DlCl="Клас скачиваемых данных";
 bndwS.Time="Время";
 bndwS.BPlot="График полосы пропускания";
 bndwS.BUsag="Использование полосы пропускания";
-bndwS.RstGr="Resetting Graphs...";
+bndwS.RstGr="Перерисовка графиков...";
 bndwS.DelAD="Удалить всю информацию?";
 bndwS.DelDW="Информация удаляется...";
 
