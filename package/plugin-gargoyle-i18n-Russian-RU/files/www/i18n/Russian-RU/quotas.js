@@ -24,6 +24,7 @@ quotasStr.DuplicateRange="Повторяющийся IP-адрес/период 
 quotasStr.OneTimeQuotaError="Может быть установлена только одна квота в один временной промежуток для хоста у которого ещё нет установленных квот";
 quotasStr.OneNetworkQuotaError="Может быть установлена только одна квота относящаяся ко всей сети в один временной промежуток";
 quotasStr.QuotaAddError="Невозможно добавить квоту.";
+quotasStr.NA="НП"; //Not Applicable abbr
 
 //template
 quotasStr.AppliesTo="Применяется к";

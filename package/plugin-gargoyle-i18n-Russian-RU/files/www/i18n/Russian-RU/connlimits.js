@@ -3,7 +3,7 @@
  */
 
 connLS.CLSect="Ограничения подключений";
-connLS.MaxC="Максимальное число подключений";
+connLS.MaxC="Максимальное количество подключений";
 connLS.TTout="Таймаут TCP";
 connLS.UTout="Таймаут UDP";
 connLS.max="максимум";
