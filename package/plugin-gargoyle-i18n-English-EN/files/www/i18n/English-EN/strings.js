@@ -68,10 +68,16 @@ UI.second="second";
 UI.minute="minute";
 UI.hour="hour";
 UI.day="day";
+UI.month="month";
+UI.year="year";
+UI.sc="s"; //abbr for second
+UI.hr="hr"; //abbr for hour
 UI.pAM="";
 UI.pPM="";
 UI.hAM="AM";
 UI.hPM="PM";
+
+UI.EMonths=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 UI.byt="bytes";
 UI.Bu="B";
@@ -79,6 +85,10 @@ UI.KB="kB";
 UI.MB="MB";
 UI.GB="GB";
 UI.TB="TB";
+UI.KB1="kByte";
+UI.MB1="MByte";
+UI.GB1="GByte";
+UI.TB1="TByte";
 UI.KBy="kBytes";
 UI.MBy="MBytes";
 UI.GBy="GBytes";

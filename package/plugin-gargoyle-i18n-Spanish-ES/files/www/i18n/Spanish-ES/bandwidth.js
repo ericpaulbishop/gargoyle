@@ -34,7 +34,6 @@ bndwS.expd="expandir";
 //javascript
 bndwS.UpCl="Clase de Subida";
 bndwS.DlCl="Clase de Descarga";
-bndwS.EMonths=["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 bndwS.Time="Tiempo";
 bndwS.BPlot="Gráfico del Ancho de Banda";
 bndwS.BUsag="Utilización del Ancho de Banda";

@@ -40,7 +40,7 @@ function init(evt)
 
 //note: numDisplay intervals does NOT include last point, which is not a complete interval, so (max) number
 //of points plotted is numDisplayIntervals+1
-function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalStart, lastTime, tzm)
+function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalStart, lastTime, tzm, UI)
 {
 	if(svgDoc == null)
 	{
@@ -111,8 +111,8 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 	intervalLengths[0] = realFirstIntervalLength > lastIntervalSeconds ? realFirstIntervalLength - lastIntervalSeconds : realFirstIntervalLength -  Math.floor(lastIntervalSeconds*.95);
 
 	var minIntervalSeconds = getMinIntervalSeconds(intervalLength);
-	var xTickUnit = createXTicks(numDisplayIntervals, minIntervalSeconds, firstTime, lastTime, topCoor, graphBottomCoor, leftCoor, graphRightCoor)
-	var graphYMax = createYTicks(xTickUnit, maxPoint, leftCoor, graphRightCoor, topCoor, graphBottomCoor)
+	var xTickUnit = createXTicks(numDisplayIntervals, minIntervalSeconds, firstTime, lastTime, topCoor, graphBottomCoor, leftCoor, graphRightCoor, UI)
+	var graphYMax = createYTicks(xTickUnit, maxPoint, leftCoor, graphRightCoor, topCoor, graphBottomCoor, UI)
 
 	for(plotIndex=0; plotIndex < 3; plotIndex++)
 	{
@@ -206,7 +206,7 @@ function getMinIntervalSeconds(intervalLength)
 }
 
 //max point must be in bytes/s
-function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, graphBottom)
+function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, graphBottom, UI)
 {
 	var timePoints;
 	var yTimeUnit;
@@ -214,21 +214,21 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 
 	if(xTickUnit == "minute")
 	{
-		yTimeUnit="s"; //bytes/s
+		yTimeUnit=UI.sc; //bytes/s
 	}
 	else if(xTickUnit == "hour") 
 	{
-		yTimeUnit="s";  //bytes/s
+		yTimeUnit=UI.sc;  //bytes/s
 	}
 	else if(xTickUnit == "day") 
 	{
 		rateMultiple=rateMultiple/(60*60);
-		yTimeUnit="hr"; //bytes/hr
+		yTimeUnit=UI.hr; //bytes/hr
 	}
 	else if(xTickUnit == "month") 
 	{
 		rateMultiple=rateMultiple/(60*60*24);
-		yTimeUnit="day"; //bytes/day
+		yTimeUnit=UI.hr; //bytes/day
 	}
 
 	maxRate = maxPoint/rateMultiple;
@@ -254,22 +254,22 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 	var unitScaleFactor;
 	if(maxLog < 3)
 	{
-		unit="KByte";
+		unit=UI.KB1;
 		unitScaleFactor=1;
 	}
 	else if(maxLog < 6)
 	{
-		unit="MByte";
+		unit=UI.MB1;
 		unitScaleFactor=Math.pow(10,3);
 	}
 	else if(maxLog < 9)
 	{
-		unit="GByte";
+		unit=UI.GB1;
 		unitScaleFactor=Math.pow(10,6);
 	}
 	else
 	{
-		unit="TByte";
+		unit=UI.TB1;
 		unitScaleFactor=Math.pow(10,9);
 	}
 	unit = unit + " / " + yTimeUnit;
@@ -334,7 +334,7 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 	return rateMultiple * maxLogMultiple * Math.pow(10,maxLog); //return raw value of max value on graph
 }
 
-function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime, graphTop, graphBottom, graphLeft, graphRight)
+function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime, graphTop, graphBottom, graphLeft, graphRight, UI)
 {
 	var minTotalIntervalLength = intervalSeconds*numDisplayIntervals;
 	var timeUnit = "minute";
@@ -401,7 +401,7 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 		tickDate = new Date();
 		tickDate.setTime(nextMajorTick*1000);
 		tickDate.setUTCMinutes( tickDate.getUTCMinutes()+tzMinutes )
-		monthAbbreviations=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+		monthAbbreviations=UI.EMonths;
 		if(timeUnit == "minute" || timeUnit == "hour")
 		{
 			tickLabel = tickDate.getUTCHours() + ":" + (tickDate.getUTCMinutes() >= 10 ? tickDate.getUTCMinutes() : "0" + tickDate.getUTCMinutes());
