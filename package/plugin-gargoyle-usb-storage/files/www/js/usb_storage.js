@@ -627,7 +627,7 @@ function resetData()
 				var mp = mountPoints[mpIndex];
 				mountPointToDrive[ mp ]      = storageDrives[driveIndex][0];
 				mountPointToFs[ mp ]         = storageDrives[driveIndex][3];
-				mountPointToDriveSize[ mp ]  = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+				mountPointToDriveSize[ mp ]  = parseBytes( storageDrives[driveIndex][4],null,true );
 				mountPointList.push(mp);
 			}
 		}
@@ -846,7 +846,7 @@ function setDriveList(controlDocument)
 	{
 		var driveName = storageDrives[driveIndex][0]
 		var driveFs = storageDrives[driveIndex][3];
-		var driveSize = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+		var driveSize = parseBytes( storageDrives[driveIndex][4],null,true );
 		driveList.push( driveName )
 		driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
 	}

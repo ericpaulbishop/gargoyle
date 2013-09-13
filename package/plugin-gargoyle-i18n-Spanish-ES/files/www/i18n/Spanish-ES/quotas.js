@@ -24,6 +24,7 @@ quotasStr.DuplicateRange="Intervalo de IP/Tiempo Duplicado - sólo se permite un
 quotasStr.OneTimeQuotaError="Es posible tener una sola cuota, en un momento dado, para hosts sin cuotas explícitas";
 quotasStr.OneNetworkQuotaError="Es posible solamente una única cuota, en un momento dado, que se aplique a toda la red";
 quotasStr.QuotaAddError="No se pudo añadir la cuota.";
+quotasStr.NA="N.A."; //No Aplica abbr - can't use the proper N/A
 
 //template
 quotasStr.AppliesTo="Se Aplica a";

@@ -36,7 +36,7 @@
 			</span>
 			<span class='rightcolumn'>
 				<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-				<em>kbit/s</em>
+				<em><%~ Kbs %></em>
 			</span>
 		</div>
 	</div>
@@ -55,7 +55,7 @@
 			</span>
 			<span class='rightcolumn'>
 				<input type='text' class="rightcolumn" id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-				<em>kbit/s</em>
+				<em><%~ Kbs %></em>
 			</span>
 		</div>
 	</div>

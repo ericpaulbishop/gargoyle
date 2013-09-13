@@ -109,7 +109,7 @@
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'><%~ MaxRB %>:</label>
-			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;KBytes/s</em></span>
+			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;<%~ KBs %></em></span>
 		</div>
 
 		<div id='tor_relay_publish_container'>

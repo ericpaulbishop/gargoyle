@@ -140,13 +140,13 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	fi
 
 	if   [ ! -f "$ca_file" ] ; then
-		error=$(i18n openvpn uc_CA_f)
+		error=$(i18n openvpn.uc_CA_f)
 	elif [ ! -f "$cert_file" ] ; then
-		error=$(i18n openvpn uc_crt_f)
+		error=$(i18n openvpn.uc_crt_f)
 	elif [ ! -f "$key_file" ] ; then
-		error=$(i18n openvpn uc_key_f)
+		error=$(i18n openvpn.uc_key_f)
 	elif [ ! -f "$conf_file" ] ; then
-		error=$(i18n openvpn uc_cfg_f)
+		error=$(i18n openvpn.uc_cfg_f)
 	else
 		cat "$conf_file" | tr -d "\r" > "${client_name}.conf"
 		cat "$ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
@@ -198,7 +198,7 @@ else
 fi
 
 if [ ! -f "${client_name}.conf" ] ; then
-	error=$(i18n openvpn uc_cfg_f)
+	error=$(i18n openvpn.uc_cfg_f)
 fi
 
 if [ -z "$error" ] ; then
@@ -214,7 +214,7 @@ if [ -z "$error" ] ; then
 	#proofreading
 	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")
 	if [ -n "$use_tap" ] ; then
-		error=$(i18n openvpn uc_TAP_Err)
+		error=$(i18n openvpn.uc_TAP_Err)
 	fi
 
 	if [ -z "$error" ] ; then
@@ -251,7 +251,7 @@ if [ -z "$error" ] ; then
 		done
 		
 		if [ -z "$have_tun_if" ] ; then
-			error=$(i18n openvpn uc_conn_Err)
+			error=$(i18n openvpn.uc_conn_Err)
 		fi
 	fi
 fi

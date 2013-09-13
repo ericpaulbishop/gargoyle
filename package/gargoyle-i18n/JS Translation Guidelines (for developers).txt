@@ -30,15 +30,21 @@ If you are creating your own page & want to use internationalization:
 	&	<	>	"	'
 	&amp;	&lt;	&gt;	&quot;	&apos;
   - To use a property object string in your genuine javascript code, use the full object_var.property notation - idS.SomeSect - which javascript will replace
+  - To use a property object string either on the command line or in a shell script, use haserl-style yourpagename.descriptive_key:
+  		/usr/bin/i18n time.hPM
+  		i18n usb_storage.ChPass
 
 ---------------------------
 To see if you have duplicate keys a particularly long translation file (this does not work across strings.js & yourpage.js):
 awk -F '=' '{ print $1 }' /path/to/yourpage.js | uniq -d
 
+To compare 2 languages to see if there are missing keys/properties:
+/path/to/gargoyle/i18n-scripts/comparitor.py English-EN Spanish-ES
+
 ---------------------------
 To make the haserl webpages & javascript read easier, it is possible to (on a duplicate folder that you will discard later) localize the pages to assist in development. In a duplicate gargoyle folder:
 
-cd path/to/gargoyle_folder && ./dev-utils/accessibility/localize.py 'English-EN' 'English-EN'
+cd path/to/gargoyle_folder && ./i18n-scripts/localize.py 'English-EN' 'English-EN'
 
 - 1st language is the fallback language
 - 2nd language is the active language
