@@ -65,6 +65,8 @@ def parseJStrans( lang, page, lang_dict, js_style, js_objects ):
 		for dline in dtranslines:
 			if '.' in dline and '=' in dline and ('"' in dline or "'" in dline) and ';' in dline:
 				js_obj_prop, js_value = dline[:-2].split("=", 1)
+				if '";' in js_value:
+					js_value=js_value.split(";", 1)[0]
 				if not js_style:
 					js_obj_prop=js_obj_prop.split('.')[1]
 				if js_style:
@@ -694,10 +696,15 @@ for x in xrange(1,10):
 			for aline in filelines:
 				for jso in jsObjects:
 					if jso+'.' in aline:
+						if '/'+jso+'.' in aline:
+							continue #its just a path
 						jsObjIdx=string.index(aline, jso+'.')
 						if jsObjIdx >= 0:
 							if aline[jsObjIdx-1].isalpha():
 								continue
+						commentIdx=string.find(aline, "//")
+						if commentIdx > 0 and commentIdx < jsObjIdx:
+							continue
 						print rnd_file
 						print '\t FOUND javascript object:%s' % (jso,)
 						print '\t\t'+aline
