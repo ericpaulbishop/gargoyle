@@ -228,7 +228,7 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 	else if(xTickUnit == "month") 
 	{
 		rateMultiple=rateMultiple/(60*60*24);
-		yTimeUnit=UI.hr; //bytes/day
+		yTimeUnit=UI.day; //bytes/day
 	}
 
 	maxRate = maxPoint/rateMultiple;
