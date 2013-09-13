@@ -24,6 +24,7 @@ quotasStr.DuplicateRange="Duplicate IP/Time Range -- only one quota per IP at a 
 quotasStr.OneTimeQuotaError="You may have only one quota at a given time for hosts without explicit quotas";
 quotasStr.OneNetworkQuotaError="You may have only one quota at a given time that applies to entire network";
 quotasStr.QuotaAddError="Could not add quota.";
+quotasStr.NA="NA"; //Not Applicable abbr
 
 //template
 quotasStr.AppliesTo="Applies to";

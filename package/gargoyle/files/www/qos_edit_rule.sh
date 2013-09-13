@@ -45,7 +45,7 @@
 			<label id="max_pktsize_label" for='max_pktsize'><%~ MaxPktLen %>:</label>
 		</div>
 		<input class='rightcolumn' type='text' id='max_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
-		<em>bytes</em>
+		<em><%~ byt %></em>
 	</div>
 	<div>
 		<div class='leftcolumn'>
@@ -53,7 +53,7 @@
 			<label id="min_pktsize_label" for='min_pktsize'><%~ MinPktLen %>:</label>
 		</div>
 		<input class='rightcolumn' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
-		<em>bytes</em>
+		<em><%~ byt %></em>
 	</div>
 
 	<div>
@@ -74,7 +74,7 @@
 			<label id="connbytes_kb_label" for='connbytes_kb'><%~ Conreach %>:</label>
 		</div>
 		<input class='rightcolumn' type='text' id='connbytes_kb' onkeyup='proofreadNumeric(this)' size='17' maxlength='28' />
-		<em>kBytes</em>
+		<em><%~ KBy %></em>
 	</div>
 	<div>
 		<div class='leftcolumn'>

@@ -218,7 +218,7 @@ function getLimitStrFromUci(srcUci, section)
 	var downLimit  = uci.get(pkg, section, "ingress_limit");
 	var upLimit    = uci.get(pkg, section, "egress_limit");
 
-	var parseLimit = function(limStr){ return limStr == "" ? "NA" : parseBytes(parsePaddedInt(limStr)).replace(/ytes/, "").replace(/\.[\d]+/,"").replace(/[\t ]+/, ""); }
+	var parseLimit = function(limStr){ return limStr == "" ? quotasStr.NA : parseBytes(parsePaddedInt(limStr), null,true).replace(/\.[\d]+/,"").replace(/[\t ]+/, ""); }
 	return parseLimit(totalLimit) + "/" + parseLimit(downLimit) + "/" + parseLimit(upLimit);
 }
 
@@ -861,7 +861,7 @@ function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 {
 	bytes = bytes == "" ? 0 : parseInt(bytes);
 	var textEl = controlDocument.getElementById(textId);
-	var defaultUnit = "MB";
+	var defaultUnit = UI.MB;
 	var defaultMultiple = 1024*1024;
 	if(bytes <= 0)
 	{
@@ -873,8 +873,8 @@ function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 		var pb = parseBytes(bytes);
 		var unit = defaultUnit;
 		var multiple = defaultMultiple;
-		if(pb.match(/GBytes/)) { unit = "GB"; multiple = 1024*1024*1024; };
-		if(pb.match(/TBytes/)) { unit = "TB"; multiple = 1024*1024*1024*1024; };
+		if(pb.match(new RegExp(UI.GBy))) { unit = UI.GB; multiple = 1024*1024*1024; };
+		if(pb.match(new RegExp(UI.TBy))) { unit = UI.TB; multiple = 1024*1024*1024*1024; };
 		setSelectedValue(unitSelectId, unit, controlDocument);
 		var adjustedVal = truncateDecimal(bytes/multiple);
 		textEl.value = adjustedVal;
@@ -882,7 +882,7 @@ function setDocumentLimit(bytes, textId, unitSelectId, controlDocument)
 }
 function setDocumentSpeed(kbytes, textId, unitSelectId, controlDocument)
 {
-	var defaultUnit = "KBytes/s";
+	var defaultUnit = UI.KBs;
 	var textEl = controlDocument.getElementById(textId);
 	setSelectedValue(unitSelectId, defaultUnit, controlDocument);
 	

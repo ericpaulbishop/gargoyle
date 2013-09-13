@@ -677,25 +677,25 @@ function doUpdate()
 							tablePointSets.unshift(tableTotal);
 						}
 					}
-					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
-					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
-					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
+					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
+					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI );
+					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI );
 
 
 					if(expandedFunctions[bndwS.Totl] != null)
 					{
 						var f = expandedFunctions[bndwS.Totl] ;
-						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
 					}
 					if(expandedFunctions[bndwS.Dnld] != null)
 					{
 						var f = expandedFunctions[bndwS.Dnld] ;
-						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
 					}
 					if(expandedFunctions[bndwS.Upld] != null)
 					{
 						var f = expandedFunctions[bndwS.Upld] ;
-						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
 					}
 
 
@@ -737,7 +737,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		// So, always add three hours, so when DST shifts an hour back in November date doesn't get pushed back to previous month and wrong month is displayed
 		nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
 	}
-	var monthNames = bndwS.EMonths;
+	var monthNames = UI.EMonths;
 	
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{

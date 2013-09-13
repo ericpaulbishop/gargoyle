@@ -16,10 +16,10 @@
 		awk ' $0 ~ /usr\/lib\/gargoyle\/reboot.sh/ {print "cronLine=\""$0"\";"};' /etc/crontabs/root
 	fi
 
-	prAM=$(i18n strings pAM 1)
-	prPM=$(i18n strings pPM 1)
-	hrAM=$(i18n strings hAM 1)
-	hrPM=$(i18n strings hPM 1)
+	prAM=$(i18n pAM)
+	prPM=$(i18n pPM)
+	hrAM=$(i18n hAM)
+	hrPM=$(i18n hPM)
 	tfmt=$(uci -q get gargoyle.global.hour_style)
 	tabs=""
 
@@ -37,11 +37,7 @@
 				tstr=$(date -u -d $h:00 +"%H:%M")
 			}
 			echo -e "$tabs<option value=\"$h\">$tstr</option>"
-			[ $h = 0 ] && {
-				for t in $(seq 1 $1); do
-					tabs="$tabs\t"
-				done
-			}
+			[ $h = 0 ] && tabs="$1"
 		done
 	}
 %>
@@ -79,7 +75,7 @@
 			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
 
 			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
-				<% otime 4 %>
+				<% otime '\t\t\t\t' %>
 			</select>
 		</div>
 	</div>
