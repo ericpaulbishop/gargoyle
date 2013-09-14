@@ -24,7 +24,7 @@ quotasStr.DuplicateRange="Powtórzony adres IP/zakres czasu - tylko jeden limit 
 quotasStr.OneTimeQuotaError="Można mieć tylko jeden limit w danym czasie dla urządzeń bez jawnie podanego limitu";
 quotasStr.OneNetworkQuotaError="Można mieć tylko jeden limit w danym czasie który ma zastosowanie do całej sieci";
 quotasStr.QuotaAddError="Nie można dodać limitu.";
-quotasStr.NA="-"
+quotasStr.NA="-";
 
 //template
 quotasStr.AppliesTo="Ma zastosowanie do";
