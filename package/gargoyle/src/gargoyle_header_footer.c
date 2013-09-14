@@ -276,6 +276,7 @@ int main(int argc, char **argv)
 			unsigned long num_pieces;
 			all_js=split_on_separators(js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
 		}
+#ifndef LOCALIZED_BUILD
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "fallback_lang") == UCI_OK)
 		{
 			fallback_lang=get_option_value_string(uci_to_option(e));
@@ -287,7 +288,7 @@ int main(int argc, char **argv)
 				translation_strings=ParseGHF_TranslationStrings(web_root, active_lang, fallback_lang);
 			}
 		}
-		
+#endif
 		
 		if(uci_load(ctx, "system", &p) != UCI_OK)
 		{
@@ -337,6 +338,7 @@ int main(int argc, char **argv)
 		{
 			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
 		}
+#ifndef LOCALIZED_BUILD
 		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
 		{
 			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
@@ -350,16 +352,14 @@ int main(int argc, char **argv)
 				{
 					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
-				char* tran_file=(char*)calloc(4096, sizeof(char)); //MAXPATHLEN
-				if (tran_file != NULL) {
-					snprintf(tran_file, 4096, "%s/i18n/%s/%s", web_root, active_lang, all_lstr_js[lstr_js_index]);
-					if (path_exists(tran_file) == 1) {
-						printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-					}
-					free(tran_file);
+				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
+				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE) {
+					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
+                free(tran_file);
 			}
 		}
+#endif
 		printf("</head>\n"
 		       "<body>\n");
 
@@ -380,8 +380,8 @@ int main(int argc, char **argv)
 			       "\t\t<div id=\"inner_logo\">\n"
 			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
 			       "\t\t\t<div id=\"garg_desc\">%s</div>\n"
-			       "\t\t\t<div id=\"garg_host\">%s: %s</div>\n",	translation_strings == NULL ? dname : translation_strings[1], 
-																	translation_strings == NULL ? wait_txt : translation_strings[2],
+			       "\t\t\t<div id=\"garg_host\">%s: %s</div>\n",	translation_strings == NULL ? desc : translation_strings[1], 
+																	translation_strings == NULL ? dname : translation_strings[2],
 																	hostname);
 
 			printf("\t\t</div>\n"
@@ -1472,6 +1472,9 @@ int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_p
 }
 
 char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang) {
+#ifdef LOCALIZED_BUILD
+	return NULL;
+#else
 	unsigned char ghf_idx=0;
 	char** GHFstrings = (char**)calloc(5, sizeof(char*)); //4 strings + emptyval
 	//same order as in file:
@@ -1522,6 +1525,7 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
 	free(ghfs_path);
 	return GHFstrings;
 	// don't forget to free_null_terminated_string_array(GHFstrings-or whatever);
+#endif
 }
 
 #endif
