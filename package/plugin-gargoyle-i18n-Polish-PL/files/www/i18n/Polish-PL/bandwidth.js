@@ -34,7 +34,6 @@ bndwS.expd="rozwiń";
 //javascript
 bndwS.UpCl="Klasa wysyłania:";
 bndwS.DlCl="Klasa pobierania";
-bndwS.EMonths=["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"];
 bndwS.Time="Czas";
 bndwS.BPlot="Bandwidth Plot";
 bndwS.BUsag=" - wykorzystanie pasma";
