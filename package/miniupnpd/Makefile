@@ -51,7 +51,7 @@ endef
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
-	echo "Gargoyle/$(GARGOYLE_VERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
+	echo "$(GARGOYLE_VERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
 endef
 
 MAKE_FLAGS += \

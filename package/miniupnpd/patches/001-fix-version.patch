@@ -1,0 +1,12 @@
+--- a/genconfig.sh
++++ b/genconfig.sh
+@@ -238,7 +238,8 @@
+ 		FW=netfilter
+ 		;;
+ 	OpenWRT)
+-		OS_URL=http://www.openwrt.org/
++		OS_NAME=Gargoyle
++		OS_URL=http://gargoyle-router.com/
+ 		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
+ 		FW=netfilter
+ 		;;
