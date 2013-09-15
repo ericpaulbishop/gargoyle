@@ -19,7 +19,7 @@ define Package/plugin-gargoyle-i18n-Polish-PL
 endef
 
 define Package/plugin-gargoyle-i18n-Polish-PL/description
-	Polski (PL) plik językowy dla interfejsu Gargoyle
+	Polski (PL) pakiet językowy dla interfejsu Gargoyle
 endef
 
 define Build/Prepare
