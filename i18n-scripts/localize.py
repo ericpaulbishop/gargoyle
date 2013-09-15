@@ -645,6 +645,51 @@ def remove_ghf_zopt():
 		w_fileFO.seek(0)
 		w_fileFO.writelines(new_wpage_contents)
 		w_fileFO.close()
+		
+def process_eval_file( efile, src_pg , jsObjects):
+	js_list = []
+	fallback_dict = {}
+	active_dict= {}
+	new_page_contents=[]
+	
+	print efile
+	ename=os.path.basename(efile)
+	js_list.append(src_pg)
+	
+	if not any("strings.js" in jso for jso in js_list):
+		js_list.append('strings.js')
+	
+	if len(js_list) > 0:
+		i=0
+		while i < len(js_list):
+			fallback_dict=parseJStrans( fb_lang, js_list[i], fallback_dict, True, None )
+			active_dict=parseJStrans( act_lang, js_list[i], active_dict, True, None )
+			i+=1
+	
+	efileFO = open(efile, 'rb')
+	epage=efileFO.readlines()
+	efileFO.close()
+	
+	for eline in epage:
+		anewline=''
+		
+		for jsObj in jsObjects:
+			if jsObj+'.' in eline:
+				jsObjIdx=string.index(eline, jsObj+'.')
+				if jsObjIdx >= 0:
+					closing_dbl_quote_itx=string.index(eline[1:], '"')
+					js_obj_prop=eline[jsObjIdx:closing_dbl_quote_itx+1]
+					anewline=eline[:jsObjIdx]+ getValue(js_obj_prop, fallback_dict, active_dict, 'javascript eval')[1:-1] +eline[closing_dbl_quote_itx+1:]
+		
+		if anewline == '':
+			new_page_contents.append(eline)
+		else:
+			new_page_contents.append(anewline)
+		
+	efileFO = open(efile, 'wb')
+	efileFO.seek(0)
+	efileFO.writelines(new_page_contents)
+	efileFO.close()
 
 if len(sys.argv) == 3:
 	fb_lang=sys.argv[1]
@@ -666,7 +711,7 @@ process_i18n_shell_file()
 process_ddns_config()
 process_menunames()
 remove_ghf_zopt()
-
+process_eval_file('./package-prepare/gargoyle/files/www/data/timezones.txt', "time.js", ["TiZ"])
 
 print '    Finding overlooked i18n files'
 jsObjects=[]

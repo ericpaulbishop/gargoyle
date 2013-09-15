@@ -2033,7 +2033,7 @@ function isBridge(testUci)
 	return bridgeTest;
 }
 
-function parseTimezones(timezoneLines)
+function parseTimezones(timezoneLines, TZobj)
 {
 	timezoneList = [];
 	timezoneRegions = [];
@@ -2048,7 +2048,12 @@ function parseTimezones(timezoneLines)
 			region = stripQuotes( splitLine.pop() );
 			definition = stripQuotes( splitLine.pop() );
 			timezone = stripQuotes( splitLine.pop() );
-			
+			if (ObjLen(TZobj) > 0) { //localized firmware will = 0
+				tz_parts=timezone.split(" ");
+				if (tz_parts.length == 2 && tz_parts[1].search("TiZ.") == 0) {
+					timezone=tz_parts[0]+" "+eval(tz_parts[1]);
+				}
+			}
 
 			timezoneList.push(timezone);
 			timezoneDefinitions[timezone] = definition;

@@ -15,7 +15,7 @@
 	if [ -e ./data/timezones.txt ] ; then
 		awk '{gsub(/"/, "\\\""); print "timezoneLines.push(\""$0"\");"}' ./data/timezones.txt
 	fi
-	echo "var timezoneData = parseTimezones(timezoneLines);"
+	echo "var timezoneData = parseTimezones(timezoneLines, TiZ);"
 
 	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
 	if [ "$dateformat" == "iso" ]; then
