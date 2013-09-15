@@ -1159,8 +1159,8 @@ function setShareTypeVisibility(controlDocument)
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
 	var userLabel = (getTypeDisplay("cifs") + "/" + getTypeDisplay("ftp")).replace(/^\//, "").replace(/\/$/, "");
-	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:", null, null, null, controlDocument)
-	setChildText("user_access_label",  userLabel + " Users With Access:", null, null, null, controlDocument)
+	setChildText("anonymous_access_label", usbSStr.FAAcc.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
+	setChildText("user_access_label", usbSStr.FAUsr.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
 
 	var visIds = [];
 	visIds[ "ftp_or_cifs" ] =  [ "anonymous_access_container", "user_access_container" ];
