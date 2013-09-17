@@ -88,7 +88,7 @@
 			<label class='leftcolumn' for='upnp_up' id='upnp_up_label'><%~ USpd %>:</label>
 			<span class = 'rightcolumn'>
 				<input type='text' class='rightcolumn' id='upnp_up' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-				<em><%~ Kbs %></em>
+				<em><%~ KBs %></em>
 			</span>
 		</div>
 
@@ -96,7 +96,7 @@
 			<label class='leftcolumn' for='upnp_down' id='upnp_down_label'><%~ DSpd %>:</label>
 			<span class='rightcolumn'>
 				<input type='text' id='upnp_down' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-				<em><%~ Kbs %></em>
+				<em><%~ KBs %></em>
 			</span>
 
 		<div id="upnp_help" class="indent">
