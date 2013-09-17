@@ -68,10 +68,34 @@ UI.second="sek.";
 UI.minute="min.";
 UI.hour="godz.";
 UI.day="dzień";
+UI.month="miesiąc";
+UI.year="rok";
+UI.sc="s"; //skrot od sekund
+UI.hr="h"; //skrot od godzin
 UI.pAM="";
 UI.pPM="";
 UI.hAM="AM";
 UI.hPM="PM";
+
+UI.EMonths=["Sty", "Lut", "Mar", "Kwi", "Maj", "Cze", "Lip", "Sie", "Wrz", "Paź", "Lis", "Gru"];
+
+UI.byt="bajtów";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KB1="KB";
+UI.MB1="MB";
+UI.GB1="GB";
+UI.TB1="TB";
+UI.KBy="KB";
+UI.MBy="MB";
+UI.GBy="GB";
+UI.TBy="TB";
+UI.Kbs="kbitów/s";
+UI.KBs="KB/s";
+UI.MBs="MB/s";
 
 UI.CApplyChanges="Zamknij i zapisz zmiany";
 UI.CDiscardChanges="Zamknij i anuluj zmiany";
@@ -91,6 +115,7 @@ UI.wsprt="lokalny port serwera www";
 UI.prdr="port przekierowany na router";
 UI.puse="port używany przez router";
 UI.pfwd="port przekierowany do";
+UI.conn="połączony";
 
 UI.AJAX="Wymagane wsparcie AJAX ze strony przeglądarki";
 UI.AJAXUpg="Niezbędne jest użycie przeglądarki ze wsparciem dla AJAX. Może to być jedna z wymienionych: Firefox 2.0+, Safari lub IE 6+.";
