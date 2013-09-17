@@ -59,7 +59,7 @@ function resetData()
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
-	setChildText("current_time", currentTime);
+	setChildText("current_time", cnv_LocaleTime(currentTime));
 
 	var bridgeSection = getBridgeSection(uciOriginal);
 	setChildText("device_config", bridgeSection == "" ? ovwS.Gtwy : ovwS.WBrgR);
