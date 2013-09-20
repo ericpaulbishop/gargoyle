@@ -1039,6 +1039,7 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 		unsigned long num_versions;
 		char** all_version_list = get_string_map_keys(all_versions, &num_versions); 
 		int version_index;
+
 		for(version_index=0; version_index < num_versions; version_index++)
 		{
 			char* package_version = all_version_list[version_index];
@@ -1055,12 +1056,11 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				
 				if(req_dep_map == NULL) // indicates it hasn't already been loaded, test prevents infinite recursion
 				{					
-					//note we still need to check that IF package is installed, 
-					//version installed statisfies the dependency if status 
-					//matches " hold " , this special case is handled in install.c, not here
-					//this means that depends satisfiable will be 1 even if install will fail due
-					//to hold being set on an existing package
 					int depends_satisfiable = 1; 
+					if(installed_version != NULL && (!package_is_installed) && (strstr(package_status, " hold ") != NULL))
+					{
+						depends_satisfiable = 0;
+					}
 
 
 					if(load_size)
@@ -1191,7 +1191,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 									}
 									free_null_terminated_string_array(dep_dep_list);
 								}
-
 							}
 
 
@@ -1216,7 +1215,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						{
 							depends_satisfiable = 0;
 						}
-					
 
 					}
 					if(load_size)
