@@ -6,6 +6,7 @@ timeStr.Section="Настройка времени";
 timeStr.CurrTime="Дата и время";
 timeStr.TimeZone="Часовой пояс";
 timeStr.DateForm="Формат даты";
+timeStr.TimeForm="Формат времени";
 timeStr.TServers="NTP-сервера";
 timeStr.Global="Глобальные";
 timeStr.US="США";

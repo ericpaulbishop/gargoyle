@@ -10,7 +10,7 @@ accessStr.RemoteWebAccess="Удалённый доступ к администр
 accessStr.RemotePort="Удалённый порт HTTP";
 accessStr.Remote_S_Port="Удалённый порт HTTPS";
 accessStr.Session="Длительность сеанса веб-сесии";
-accessStr.DisablePassword="Отключить защиту паролем доступ к веб-интерфейсу";
+accessStr.DisablePassword="Отключить защиту паролем доступа к веб-интерфейсу";
 accessStr.warning="Не рекомендуется!";
 accessStr.SSHAccess="SSH доступ";
 accessStr.LocalSSHPort="Локальный порт SSH";
@@ -24,4 +24,4 @@ accessStr.NewPass="Новый пароль";
 accessStr.ConfirmPass="Подтвердите пароль";
 
 //javascript
-accessStr.PasswordsDiffer="Пароль администратора не подтверждён - введённые пароли различаются.";
+accessStr.PasswordsDiffer="Пароль администратора не подтверждён - введённые пароли не совпадают.";

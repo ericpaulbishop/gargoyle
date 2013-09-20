@@ -3,7 +3,7 @@
  */
 
 ovpnS.OCfg="Настройка OpenVPN";
-ovpnS.ODis="OpenVPN отключен";
+ovpnS.ODis="Сервис OpenVPN отключен";
 ovpnS.OClt="Клиент OpenVPN";
 ovpnS.OSrv="Сервер OpenVPN";
 ovpnS.OSts="Статус OpenVPN";
@@ -14,10 +14,10 @@ ovpnS.OPrt="Порт OpenVPN";
 ovpnS.OProto="Протокол OpenVPN";
 ovpnS.OCiph="Шифр OpenVPN";
 ovpnS.CCTr="Межклиентский трафик";
-ovpnS.CtoC="Позволить клиентам соеденятся между собой";
-ovpnS.CtoS="Клиенты могут соеденятся только с сервером";
+ovpnS.CtoC="Позволить клиентам общатся между собой";
+ovpnS.CtoS="Клиенты могут общатся только с сервером";
 ovpnS.LSAc="Доступ к локальной подсети";
-ovpnS.CtoH="Разрешить доступ к локальным хостам клиентам";
+ovpnS.CtoH="Разрешить клиентам доступ к локальным хостам";
 ovpnS.CnoL="Клиенты не имеют доступа в локальную сеть";
 ovpnS.CredR="Повторное использование учётных данных";
 ovpnS.CredSC="Учётные данные специфичны для каждого клиента";
