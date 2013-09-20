@@ -1054,8 +1054,14 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				
 				
 				if(req_dep_map == NULL) // indicates it hasn't already been loaded, test prevents infinite recursion
-				{
-					int depends_satisfiable  = package_is_installed || (strstr(package_status, " hold ") == NULL);
+				{					
+					//note we still need to check that IF package is installed, 
+					//version installed statisfies the dependency if status 
+					//matches " hold " , this special case is handled in install.c, not here
+					//this means that depends satisfiable will be 1 even if install will fail due
+					//to hold being set on an existing package
+					int depends_satisfiable = 1; 
+
 
 					if(load_size)
 					{
