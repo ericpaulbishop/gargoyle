@@ -2033,6 +2033,36 @@ function isBridge(testUci)
 	return bridgeTest;
 }
 
+//cnv_LocaleTime takes a "21:09" 24hr timestamp
+//  returns a locale-based timestamp (using 12h/24h time prefs & pre/post AM/PM notations): 21:09, 午前 9:09 or 9:09 PM
+//NOTE: requires uciOriginal to have the 'gargoyle' section; use 'gargoyle_header_footer [options] gargoyle'
+function cnv24hToLocal(timestamp) {
+	style=uciOriginal.get("gargoyle", "global", "hour_style");
+	if (style == 24) return timestamp;
+	locale_time=""
+	
+	h_m_stamp=timestamp.split(":");
+	curr_hour=eval(h_m_stamp[0]);
+	if (UI.pAM.length > 0 && UI.pPM.length > 0) {
+		locale_time+=(curr_hour < 12 ? UI.pAM : UI.pPM)+" "
+		locale_time+=(curr_hour == 0 ? "12" : (curr_hour <= 12 ? curr_hour : curr_hour-12) )+":" + h_m_stamp[1]
+	} else {
+		locale_time+=(curr_hour == 0 ? "12" : (curr_hour <= 12 ? curr_hour : curr_hour-12) )+":" + h_m_stamp[1]
+		locale_time+=" "+(curr_hour < 12 ? UI.hAM : UI.hPM);
+	}
+	return locale_time
+}
+
+//cnv_LocaleTime takes a full "09/16/13 21:09 EDT" date/time stamp
+//  returns (based on hour prefs & pre/post AM/PM notations): "09/16/13 21:09 EDT", "09/16/13 午前 9:09 UTC" or "09/16/13 9:09 PM EDT"
+//NOTE: requires uciOriginal to have the 'gargoyle' section; use 'gargoyle_header_footer [options] gargoyle'
+function cnv_LocaleTime(full_date) { // 
+	style=uciOriginal.get("gargoyle", "global", "hour_style");
+	if (style == 24) return full_date;
+	tcomponents=full_date.split(" ");
+	return tcomponents[0]+" "+cnv24hToLocal(tcomponents[1])+" "+tcomponents[2]
+}
+
 function parseTimezones(timezoneLines)
 {
 	timezoneList = [];

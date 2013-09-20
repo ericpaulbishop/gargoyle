@@ -728,3 +728,29 @@ for i18n_pack in glob.glob('./package-prepare/plugin-gargoyle-i18n*'):
 	
 for i18n_folder in glob.glob('./package-prepare/*/files/www/i18n'):
 	shutil.rmtree(i18n_folder)
+
+# add LOCALIZED_BUILD flag to compiler command to not build i18n portions
+if os.path.exists('./package-prepare/gargoyle/Makefile'):
+	print 'Adding CFLAG to compile a localized gargoyle_header_footer'
+	make_fileFO = open('./package-prepare/gargoyle/Makefile', 'rb')
+	makefile=make_fileFO.readlines()
+	make_fileFO.close()
+	new_makefile_contents=[]
+	
+	for aline in makefile:
+		anewline=''
+		if 'CFLAGS="$(TARGET_CFLAGS)' in aline:
+			target_str="(TARGET_CFLAGS)"
+			targetIdx=string.find(aline, target_str)
+			if targetIdx > 0:
+				anewline=aline[:targetIdx+len(target_str)]+" -DLOCALIZED_BUILD "+aline[targetIdx+len(target_str)+1:]
+			
+		if anewline != '':
+			new_makefile_contents.append(anewline)
+		else:
+			new_makefile_contents.append(aline)
+			
+	make_fileFO = open('./package-prepare/gargoyle/Makefile', 'wb')
+	make_fileFO.seek(0)
+	make_fileFO.writelines(new_makefile_contents)
+	make_fileFO.close()

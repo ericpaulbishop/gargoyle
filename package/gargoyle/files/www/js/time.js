@@ -130,7 +130,7 @@ function proofreadAll()
 
 function resetData()
 {
-	setChildText("current_time", currentTime);
+	setChildText("current_time", cnv_LocaleTime(currentTime));
 	
 	timezoneList = timezoneData[0];
 	timezoneDefinitions = timezoneData[2];
