@@ -73,8 +73,6 @@ void load_all_package_data(opkg_conf* conf, string_map* package_data, string_map
 	// this tells us everything about packages except whether they are currently installed
 	load_package_data(conf->lists_dir, 1, package_data, matching_packages, parameters, load_variable_def, NULL, preferred_provides);
 
-
-
 	//load control / status data
 	unsigned long num_dests;
 	int dest_index =0;
@@ -183,7 +181,6 @@ string_map* internal_get_package_current_or_latest(string_map* all_package_data,
 	string_map *ret = NULL;
 	if(is_current != NULL)       { *is_current = 0;          }
 	if(matching_version != NULL) { *matching_version = NULL; }
-
 
 	string_map *all_versions = get_string_map_element(all_package_data, package_name);
 	if(all_versions != NULL)
@@ -1055,13 +1052,16 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 				
 				
 				if(req_dep_map == NULL) // indicates it hasn't already been loaded, test prevents infinite recursion
-				{					
+				{
 					int depends_satisfiable = 1; 
-					if(installed_version != NULL && (!package_is_installed) && (strstr(package_status, " hold ") != NULL))
+					if(package_status != NULL)
 					{
-						depends_satisfiable = 0;
+						if(some_version_is_installed && (!package_is_installed) && (strstr(package_status, " hold ") != NULL))
+						{
+							int strc = strcmp(installed_version, package_version);
+							depends_satisfiable = 0;
+						}
 					}
-
 
 					if(load_size)
 					{
@@ -1158,8 +1158,6 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						{
 							set_string_map_element(req_dep_map, dep_name, copy_null_terminated_string_array(dep_def));
 						}
-						
-
 
 						if(dep_info != NULL)
 						{

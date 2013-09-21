@@ -275,7 +275,24 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		string_map* install_pkg_data = get_package_current_or_latest_matching_and_satisfiable(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
 		if(install_pkg_data == NULL)
 		{
-			install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+			int have_current;
+			char* current_version = NULL;
+			string_map* cur_info = get_package_current_or_latest(package_data, pkg_name, &have_current, &current_version);
+			if(have_current)
+			{
+				//should only get here if version_criteria[1] is not null -- the only reason get_package_current_or_latest_matching_and_satisfiable will return null, while package is installed is if there is a version mismatch
+				char* cur_status = get_string_map_element(cur_info, "Status");
+				if(strstr(cur_status, " hold ") != NULL)
+				{
+					unsatisfied_dep_err = dynamic_strcat(9, "ERROR: Package ", pkg_name, " (", version_criteria[0], " ", version_criteria[1], ") is installed,\n\t\tand has incompatible version ", current_version, " that is marked as 'hold'");
+				}
+			}
+			else
+			{
+				//issue is with one of the dependencies, load temporary data to find it and be more specific with error
+				install_pkg_data = get_package_current_or_latest_matching(package_data, pkg_name, version_criteria, &install_pkg_is_current, &install_pkg_version);
+			}
+			free_if_not_null(current_version);
 
 		}
 		char* install_status = install_pkg_data == NULL ? NULL : get_string_map_element(install_pkg_data, "Status");
@@ -319,19 +336,14 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 					char* latest_version = NULL;
 					int latest_is_current = 0;
 					string_map* dep_info = get_package_current_or_latest_matching_and_satisfiable(package_data, dep_name, dep_def, &latest_is_current, &latest_version);
-					if(dep_info == NULL)
-					{
-						/* this will result in an being discovered, but better to keep going and be explicit about what the error is in error message that gets printed*/
-						dep_info = get_package_current_or_latest_matching(package_data, dep_name, dep_def, &latest_is_current, &latest_version);
 
-					}
 
 					
 					//check if we have a version installed different than what is required
 					int have_current;
 					char* current_version = NULL;
 					string_map* cur_info = get_package_current_or_latest(package_data, dep_name, &have_current, &current_version);
-					if(have_current && (latest_is_current == 0 || dep_info == NULL))
+					if(have_current && dep_info == NULL)
 					{
 						//should only get here if dep_def[1] is not null (version mismatch doesn't make sense if no version is specified)
 						char* cur_status = get_string_map_element(cur_info, "Status");
@@ -368,12 +380,17 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		install_status = install_pkg_data == NULL ? NULL : get_string_map_element(install_pkg_data, "Status");
 
 
-
-
 		/* error checking before we start install */
 		if(install_pkg_data == NULL || install_status == NULL)
 		{
-			fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+			if(unsatisfied_dep_err != NULL)
+			{
+				fprintf(stderr, "%s\n", unsatisfied_dep_err);
+			}
+			else
+			{
+				fprintf(stderr, "ERROR: No package named %s found, try updating your package lists\n\n", pkg_name);
+			}
 			rm_r(tmp_dir);
 			exit(1);
 		}
@@ -416,8 +433,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	}
 
 
-	
-	
 	/* load more detailed data on packages we are about to install */
 	free_recursive_package_vars(package_data); /* note: whacks install_pkg_depend_map */	
 	string_map* parameters = initialize_string_map(1);
@@ -439,7 +454,6 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 
 
 	
-	
 	destroy_string_map(matching_packages, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(parameters, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	
@@ -456,9 +470,9 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 		if(sscanf(next_size_str,  SCANFU64, &next_size) > 0)
 		{
 			combined_size = combined_size + next_size; 
-		} 
+		}
 	}
-	
+
 	uint64_t root_size = destination_bytes_free(conf, install_root_name);
 	if(combined_size >= root_size )
 	{
@@ -476,6 +490,8 @@ void do_install(opkg_conf* conf, string_map* pkgs, char* install_root_name, char
 	{
 		fprintf(stderr, "No packages to install.\n\n");
 	}
+
+
 
 	/* Set status of new required packages to half-installed, set user-installed on requested package, installed time on all */
 	char* install_root_status_path = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/status");
