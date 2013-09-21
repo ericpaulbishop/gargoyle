@@ -1199,19 +1199,22 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 							}
 
 
-							char* dep_is_satisfiable_str = get_string_map_element(dep_info, "Depends-Satisfiable");
-							if(dep_is_satisfiable_str == NULL)
+							if(!dep_is_installed)
 							{
-								depends_satisfiable = 0;
-							}
-							else
-							{
-								depends_satisfiable = depends_satisfiable && (strcmp(dep_is_satisfiable_str,"Y") == 0);
+								char* dep_is_satisfiable_str = get_string_map_element(dep_info, "Depends-Satisfiable");
+								if(dep_is_satisfiable_str == NULL)
+								{
+									depends_satisfiable = 0;
+								}
+								else
+								{
+									depends_satisfiable = depends_satisfiable && (strcmp(dep_is_satisfiable_str,"Y") == 0);
+								}
 							}
 						}
 						else
 						{
-							depends_satisfiable = 0;
+							depends_satisfiable = dep_is_installed ? 1 : 0;
 						}
 
 					}
