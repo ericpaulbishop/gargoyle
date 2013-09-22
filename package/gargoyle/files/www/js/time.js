@@ -7,6 +7,7 @@
  */
 
 var timeStr=new Object(); //part of i18n; currently unused
+var TiZ=new Object();
 
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
