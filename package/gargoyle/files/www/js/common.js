@@ -7,6 +7,7 @@
  */
 
 var UI=new Object(); //part of i18n
+var TiZ=new Object(); //i18n timezones
 
 window.onresize = function onresize()
 {
@@ -2063,7 +2064,7 @@ function cnv_LocaleTime(full_date) { //
 	return tcomponents[0]+" "+cnv24hToLocal(tcomponents[1])+" "+tcomponents[2]
 }
 
-function parseTimezones(timezoneLines, TZobj)
+function parseTimezones(timezoneLines)
 {
 	timezoneList = [];
 	timezoneRegions = [];
@@ -2078,7 +2079,7 @@ function parseTimezones(timezoneLines, TZobj)
 			region = stripQuotes( splitLine.pop() );
 			definition = stripQuotes( splitLine.pop() );
 			timezone = stripQuotes( splitLine.pop() );
-			if (ObjLen(TZobj) > 0) { //localized firmware will = 0
+			if (ObjLen(TiZ) > 0) { //localized firmware will = 0
 				tz_parts=timezone.split(" ");
 				if (tz_parts.length == 2 && tz_parts[1].search("TiZ.") == 0) {
 					timezone=tz_parts[0]+" "+eval(tz_parts[1]);
