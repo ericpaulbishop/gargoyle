@@ -619,6 +619,15 @@ int compare_versions(char* v1, char* v2)
 		}
 		free_null_terminated_string_array(v1_split);
 		free_null_terminated_string_array(v2_split);
+
+		if(ret == 0 && v1_parts < v2_parts)
+		{
+			ret = -1;
+		}
+		if(ret == 0 && v2_parts > v1_parts)
+		{
+			ret = 1;
+		}
 	}
 	return ret;
 }
