@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dropbear
-PKG_VERSION:=2011.54
-PKG_RELEASE:=2
+PKG_VERSION:=2013.58
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:= \
 	http://matt.ucc.asn.au/dropbear/releases/ \
 	http://www.mirrors.wiretapped.net/security/cryptography/apps/ssh/dropbear/
-PKG_MD5SUM:=c627ffe09570fad7aa94d8eac2b9320c
+PKG_MD5SUM:=8d3579bbbfcea48404a3219643076450
 
 PKG_BUILD_PARALLEL:=1
 

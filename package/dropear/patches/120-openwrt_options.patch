@@ -44,9 +44,9 @@
  #define DROPBEAR_SHA1_HMAC
 -#define DROPBEAR_SHA1_96_HMAC
 +/*#define DROPBEAR_SHA1_96_HMAC*/
+ /*#define DROPBEAR_SHA2_256_HMAC*/
+ /*#define DROPBEAR_SHA2_512_HMAC*/
  #define DROPBEAR_MD5_HMAC
- 
- /* Hostkey/public key algorithms - at least one required, these are used
 @@ -148,7 +148,7 @@ much traffic. */
  
  /* Whether to print the message of the day (MOTD). This doesn't add much code
