@@ -1,5 +1,5 @@
 src/gz %n %U
-src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T
+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T/%P
 dest root /
 dest ram /tmp
 dest plugin_root /plugin_root
