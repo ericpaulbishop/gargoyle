@@ -459,7 +459,7 @@ CONFIG_TARGET_ROOTFS_SQUASHFS=y
 #
 # CONFIG_DISPLAY_SUPPORT is not set
 CONFIG_BUILD_PATENTED=y
-# CONFIG_BUILD_NLS is not set
+CONFIG_BUILD_NLS=m
 # CONFIG_BUILD_STATIC_TOOLS is not set
 CONFIG_SHADOW_PASSWORDS=y
 # CONFIG_CLEAN_IPKG is not set
@@ -560,7 +560,7 @@ CONFIG_TARGET_INIT_SUPPRESS_STDERR=y
 # Base system
 #
 CONFIG_PACKAGE_base-files=y
-# CONFIG_PACKAGE_block-mount is not set
+CONFIG_PACKAGE_block-mount=m
 CONFIG_EXTROOT_SETTLETIME=20
 CONFIG_PACKAGE_bridge=y
 CONFIG_PACKAGE_busybox=y
@@ -1323,8 +1323,8 @@ CONFIG_PACKAGE_firewall=y
 CONFIG_PACKAGE_hotplug2=y
 CONFIG_PACKAGE_libc=y
 CONFIG_PACKAGE_libgcc=y
-# CONFIG_PACKAGE_libpthread is not set
-# CONFIG_PACKAGE_librt is not set
+CONFIG_PACKAGE_libpthread=m
+CONFIG_PACKAGE_librt=m
 # CONFIG_PACKAGE_libstdcpp is not set
 CONFIG_PACKAGE_mtd=y
 CONFIG_PACKAGE_netifd=y
@@ -1345,8 +1345,8 @@ CONFIG_PACKAGE_wireless-tools=y
 #
 # Filesystem
 #
-# CONFIG_PACKAGE_libcom_err is not set
-# CONFIG_PACKAGE_libext2fs is not set
+CONFIG_PACKAGE_libcom_err=m
+CONFIG_PACKAGE_libext2fs=m
 # CONFIG_PACKAGE_libfuse is not set
 
 #
@@ -1362,40 +1362,40 @@ CONFIG_PACKAGE_libxtables=y
 # SSL
 #
 CONFIG_PACKAGE_libcyassl=y
-# CONFIG_PACKAGE_libopenssl is not set
+CONFIG_PACKAGE_libopenssl=m
 
 #
 # database
 #
-# CONFIG_PACKAGE_libsqlite3 is not set
+CONFIG_PACKAGE_libsqlite3=m
 # CONFIG_PACKAGE_alsa-lib is not set
 CONFIG_PACKAGE_libbbtargz=y
-# CONFIG_PACKAGE_libblkid is not set
+CONFIG_PACKAGE_libblkid=m
 CONFIG_PACKAGE_libblobmsg-json=y
-# CONFIG_PACKAGE_libbz2 is not set
+CONFIG_PACKAGE_libbz2=m
 # CONFIG_PACKAGE_libcharset is not set
 CONFIG_PACKAGE_libericstools=y
-# CONFIG_PACKAGE_libevent is not set
-# CONFIG_PACKAGE_libevent2 is not set
+CONFIG_PACKAGE_libevent=m
+CONFIG_PACKAGE_libevent2=m
 # CONFIG_PACKAGE_libevent2-core is not set
 # CONFIG_PACKAGE_libevent2-extra is not set
 # CONFIG_PACKAGE_libevent2-openssl is not set
 # CONFIG_PACKAGE_libevent2-pthreads is not set
-# CONFIG_PACKAGE_libexif is not set
+CONFIG_PACKAGE_libexif=m
 # CONFIG_PACKAGE_libffmpeg-full is not set
-# CONFIG_PACKAGE_libffmpeg-mini is not set
-# CONFIG_PACKAGE_libflac is not set
-# CONFIG_PACKAGE_libiconv-full is not set
-# CONFIG_PACKAGE_libid3tag is not set
-# CONFIG_PACKAGE_libintl-full is not set
+CONFIG_PACKAGE_libffmpeg-mini=m
+CONFIG_PACKAGE_libflac=m
+CONFIG_PACKAGE_libiconv-full=m
+CONFIG_PACKAGE_libid3tag=m
+CONFIG_PACKAGE_libintl-full=m
 # CONFIG_PACKAGE_libiw is not set
 # CONFIG_PACKAGE_libiwinfo is not set
-# CONFIG_PACKAGE_libjpeg is not set
+CONFIG_PACKAGE_libjpeg=m
 CONFIG_PACKAGE_libjson=y
 CONFIG_PACKAGE_libjson-c=y
 # CONFIG_PACKAGE_libltdl is not set
 # CONFIG_PACKAGE_liblua is not set
-# CONFIG_PACKAGE_liblzo is not set
+CONFIG_PACKAGE_liblzo=m
 # CONFIG_PACKAGE_libmatrixssl-nothread is not set
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
@@ -1404,22 +1404,22 @@ CONFIG_PACKAGE_libmnl=y
 CONFIG_PACKAGE_libnfnetlink=y
 # CONFIG_PACKAGE_libnl is not set
 CONFIG_PACKAGE_libnl-tiny=y
-# CONFIG_PACKAGE_libogg is not set
+CONFIG_PACKAGE_libogg=m
 # CONFIG_PACKAGE_libpcap is not set
 # CONFIG_PACKAGE_libreadline is not set
-# CONFIG_PACKAGE_librpc is not set
+CONFIG_PACKAGE_librpc=m
 CONFIG_PACKAGE_libubox=y
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-# CONFIG_PACKAGE_libusb is not set
+CONFIG_PACKAGE_libusb=m
 # CONFIG_PACKAGE_libusbpp is not set
-# CONFIG_PACKAGE_libuuid is not set
-# CONFIG_PACKAGE_libvorbis is not set
-# CONFIG_PACKAGE_libwrap is not set
+CONFIG_PACKAGE_libuuid=m
+CONFIG_PACKAGE_libvorbis=m
+CONFIG_PACKAGE_libwrap=m
 # CONFIG_PACKAGE_linux-atm is not set
 # CONFIG_PACKAGE_terminfo is not set
 # CONFIG_PACKAGE_uclibcxx is not set
-# CONFIG_PACKAGE_zlib is not set
+CONFIG_PACKAGE_zlib=m
 
 #
 # Network
@@ -1428,12 +1428,12 @@ CONFIG_PACKAGE_libuci=y
 #
 # File Transfer
 #
-# CONFIG_PACKAGE_vsftpd is not set
+CONFIG_PACKAGE_vsftpd=m
 
 #
 # Filesystem
 #
-# CONFIG_PACKAGE_nfs-kernel-server is not set
+CONFIG_PACKAGE_nfs-kernel-server=m
 
 #
 # Firewall
@@ -1476,8 +1476,8 @@ CONFIG_PACKAGE_ip=y
 #
 # VPN
 #
-# CONFIG_PACKAGE_openvpn is not set
-# CONFIG_PACKAGE_openvpn-easy-rsa is not set
+CONFIG_PACKAGE_openvpn=m
+CONFIG_PACKAGE_openvpn-easy-rsa=m
 
 #
 # Web
@@ -1491,12 +1491,12 @@ CONFIG_PACKAGE_webmon-gargoyle=y
 # CONFIG_PACKAGE_uhttpd is not set
 # CONFIG_PACKAGE_uhttpd_debug is not set
 CONFIG_PACKAGE_bwmon-gargoyle=y
-# CONFIG_PACKAGE_chat is not set
+CONFIG_PACKAGE_chat=m
 # CONFIG_PACKAGE_crda is not set
 CONFIG_PACKAGE_ddns-gargoyle=y
 CONFIG_PACKAGE_ewget=y
 CONFIG_PACKAGE_gargoyle-firewall-util=y
-# CONFIG_PACKAGE_gargoyle-tor is not set
+CONFIG_PACKAGE_gargoyle-tor=m
 # CONFIG_PACKAGE_gargoyle-tor-geoip is not set
 # CONFIG_PACKAGE_genl is not set
 # CONFIG_PACKAGE_hostapd is not set
@@ -1506,9 +1506,9 @@ CONFIG_PACKAGE_gargoyle-firewall-util=y
 CONFIG_PACKAGE_ipset=y
 CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libiptbwctl=y
-# CONFIG_PACKAGE_obfsproxy is not set
-# CONFIG_PACKAGE_p910nd is not set
-# CONFIG_PACKAGE_portmap is not set
+CONFIG_PACKAGE_obfsproxy=m
+CONFIG_PACKAGE_p910nd=m
+CONFIG_PACKAGE_portmap=m
 CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
 CONFIG_PACKAGE_ppp-mod-pppoe=y
@@ -1520,7 +1520,7 @@ CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_pppstats is not set
 CONFIG_PACKAGE_qos-gargoyle=y
 # CONFIG_PACKAGE_samba36-client is not set
-# CONFIG_PACKAGE_samba36-server is not set
+CONFIG_PACKAGE_samba36-server=m
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_ss is not set
 CONFIG_PACKAGE_tc=y
@@ -1537,7 +1537,7 @@ CONFIG_PACKAGE_wol=y
 # CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
 # CONFIG_WPA_RFKILL_SUPPORT is not set
 CONFIG_WPA_MSG_MIN_PRIORITY=3
-# CONFIG_DRIVER_WEXT_SUPPORT is not set
+CONFIG_DRIVER_WEXT_SUPPORT=m
 CONFIG_DRIVER_11N_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-mini is not set
 # CONFIG_PACKAGE_wpad is not set
@@ -2013,7 +2013,7 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_ffmpeg is not set
 # CONFIG_PACKAGE_ffprobe is not set
 # CONFIG_PACKAGE_ffserver is not set
-# CONFIG_PACKAGE_gargoyle-mjpg-streamer is not set
+CONFIG_PACKAGE_gargoyle-mjpg-streamer=m
 
 #
 # Administration
@@ -2024,17 +2024,17 @@ CONFIG_PACKAGE_ubusd=y
 #
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
-# CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=m
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-# CONFIG_PACKAGE_plugin-gargoyle-tor is not set
-# CONFIG_PACKAGE_plugin-gargoyle-usb-printer is not set
-# CONFIG_PACKAGE_plugin-gargoyle-usb-storage is not set
-# CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
+CONFIG_PACKAGE_plugin-gargoyle-tor=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage=m
+CONFIG_PACKAGE_plugin-gargoyle-webcam=m
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
 CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 
@@ -2049,16 +2049,16 @@ CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 #
 # Filesystem
 #
-# CONFIG_PACKAGE_badblocks is not set
-# CONFIG_PACKAGE_disktype is not set
-# CONFIG_PACKAGE_dosfsck is not set
+CONFIG_PACKAGE_badblocks=m
+CONFIG_PACKAGE_disktype=m
+CONFIG_PACKAGE_dosfsck=m
 # CONFIG_PACKAGE_dosfslabel is not set
-# CONFIG_PACKAGE_e2fsprogs is not set
+CONFIG_PACKAGE_e2fsprogs=m
 # CONFIG_PACKAGE_exfat is not set
 # CONFIG_PACKAGE_fuse-utils is not set
 # CONFIG_PACKAGE_mkdosfs is not set
-# CONFIG_PACKAGE_nfs-utils is not set
-# CONFIG_PACKAGE_ntfs-3g is not set
+CONFIG_PACKAGE_nfs-utils=m
+CONFIG_PACKAGE_ntfs-3g=m
 # CONFIG_PACKAGE_ntfs-3g-low is not set
 # CONFIG_PACKAGE_ntfs-3g-utils is not set
 # CONFIG_PACKAGE_resize2fs is not set
@@ -2075,7 +2075,7 @@ CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 #
 # compression
 #
-# CONFIG_PACKAGE_zip is not set
+CONFIG_PACKAGE_zip=m
 
 #
 # database
@@ -2085,19 +2085,19 @@ CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 #
 # disc
 #
-# CONFIG_PACKAGE_blkid is not set
+CONFIG_PACKAGE_blkid=m
 # CONFIG_PACKAGE_cfdisk is not set
-# CONFIG_PACKAGE_fdisk is not set
+CONFIG_PACKAGE_fdisk=m
 # CONFIG_PACKAGE_findfs is not set
 # CONFIG_PACKAGE_lsblk is not set
 # CONFIG_PACKAGE_partx-utils is not set
 # CONFIG_PACKAGE_sfdisk is not set
-# CONFIG_PACKAGE_swap-utils is not set
+CONFIG_PACKAGE_swap-utils=m
 # CONFIG_PACKAGE_wipefs is not set
 # CONFIG_PACKAGE_bin2trx is not set
 # CONFIG_PACKAGE_bzip2 is not set
 # CONFIG_PACKAGE_cal is not set
-# CONFIG_PACKAGE_comgt is not set
+CONFIG_PACKAGE_comgt=m
 # CONFIG_PACKAGE_dmesg is not set
 # CONFIG_PACKAGE_dropbearconvert is not set
 # CONFIG_PACKAGE_fconfig is not set
@@ -2127,7 +2127,7 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_mountd is not set
 # CONFIG_PACKAGE_namei is not set
 # CONFIG_PACKAGE_ocf-crypto-headers is not set
-# CONFIG_PACKAGE_openssl-util is not set
+CONFIG_PACKAGE_openssl-util=m
 # CONFIG_PACKAGE_opkg-more is not set
 # CONFIG_PACKAGE_owipcalc is not set
 # CONFIG_PACKAGE_parted is not set
@@ -2135,13 +2135,13 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_rbcfg is not set
 # CONFIG_PACKAGE_rename is not set
 # CONFIG_PACKAGE_robocfg is not set
-# CONFIG_PACKAGE_share-users is not set
+CONFIG_PACKAGE_share-users=m
 # CONFIG_PACKAGE_spidev-test is not set
 CONFIG_PACKAGE_uboot-envtools=y
-# CONFIG_PACKAGE_usb-modeswitch is not set
+CONFIG_PACKAGE_usb-modeswitch=m
 # CONFIG_PACKAGE_usbreset is not set
 # CONFIG_PACKAGE_uuidd is not set
-# CONFIG_PACKAGE_uuidgen is not set
+CONFIG_PACKAGE_uuidgen=m
 # CONFIG_PACKAGE_whereis is not set
 # CONFIG_PACKAGE_xfs-fsck is not set
 # CONFIG_PACKAGE_xfs-growfs is not set
@@ -2170,3 +2170,13 @@ CONFIG_PACKAGE_kmod-video-gspca-core=m
 CONFIG_PACKAGE_kmod-video-videobuf2=m
 CONFIG_PACKAGE_kmod-video-gspca-zc3xx=m
 CONFIG_PACKAGE_kmod-usb-serial-option=m
+CONFIG_PACKAGE_minidlna=m
+CONFIG_MADWIFI_SINGLE_MODULE=m
+CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=m
+CONFIG_PACKAGE_nfs-kernel-server-utils=m
+CONFIG_MADWIFI_RCA_MINSTREL=m
+CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
+CONFIG_OPENVPN_DISABLE_MANAGEMENT=m
+CONFIG_WPA_SUPPLICANT_OPENSSL=m
+CONFIG_PACKAGE_usb-modeswitch-data=m
+CONFIG_OPENVPN_DISABLE_EUREPHIA=m
