@@ -26,10 +26,10 @@ foreach my $arch (@arches)
 				while (my $line = <IN>)
 				{
 					chomp $line;
-					if($line =~ /CONFIG_/ && $line !~ /is not set/ && $line !~ /CONFIG_TARGET/ )
+					if($line =~ /CONFIG_PACKAGE_/ && $line !~ /is not set/ )
 					{
 						my $package = $line;
-						$package =~ s/^.*CONFIG_//g;
+						$package =~ s/^.*CONFIG_PACKAGE_//g;
 						$package =~ s/[=\t ]+.*$//g;
 						$packages->{$package} = 1;
 						$profilePackages->{$profile}->{$package} = 1;
@@ -55,13 +55,13 @@ foreach my $arch (@arches)
 					if($line =~ /CONFIG_/ && $line =~ /is not set/ )
 					{
 						my $package = $line;
-						$package =~ s/^.*CONFIG_//g;
+						$package =~ s/^.*CONFIG_PACKAGE_//g;
 						$package =~ s/[=\t ]+.*$//g;
 						print "not set package = $package\n";
 
 						if(defined($packages->{$package}))
 						{
-							$newLine="CONFIG_${package}=m";
+							$newLine="CONFIG_PACKAGE_${package}=m";
 							print "$newLine\n";
 							$existingPackages->{$package}=1;
 						}
