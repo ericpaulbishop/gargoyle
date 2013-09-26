@@ -1495,10 +1495,10 @@ function resetData()
 		var sec = allWirelessSections[seci];
 		var secmode = uciOriginal.get("wireless", sec, "mode");
 		var secdev  = uciOriginal.get("wireless", sec, "device") 
-		apcfg     = secmode == "ap" && apcfg == "" ? sec : apcfg;
-		ap2cfg    = secmode == "ap" && secdev == wifiDevA && ap2cfg == "" ? sec : ap2cfg;
-		othercfg  = secmode != "ap" && secmode != "wds" && othercfg == ""  ? sec : othercfg
-		otherdev  = secmode != "ap" && secmode != "wds" && otherdev == ""  ? secdev : otherdev
+		apcfg     = secmode == "ap" && secdev != wifiDevA && apcfg    == ""  ? sec : apcfg;
+		ap2cfg    = secmode == "ap" && secdev == wifiDevA && ap2cfg   == ""  ? sec : ap2cfg;
+		othercfg  = secmode != "ap" && secmode != "wds"   && othercfg == ""  ? sec : othercfg
+		otherdev  = secmode != "ap" && secmode != "wds"   && otherdev == ""  ? secdev : otherdev
 	}
 	var apgcfg = apcfg;
 	var apacfg = ap2cfg;
