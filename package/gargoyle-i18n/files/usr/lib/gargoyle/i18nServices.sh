@@ -8,7 +8,7 @@
 get_i18_3rd_party_menuoption() {
 	local target_file="$1"
 	local full_lang="$2"
-	local iso_lang=$(echo "$full_lang" | awk -F '-' '{print $2}')
+	local iso_lang=$(echo "$full_lang" | sed -e 's/^\([^-]*-\)\{1\}//')
 	local translation=""
 	
 	translation=$(awk -v lang="$iso_lang" -F '=' '$0 ~ lang { gsub(/\r$/,""); printf $2 }' $target_file)
