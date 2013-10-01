@@ -20,8 +20,9 @@ else:
 	
 #if localize, ensure hidden .config file is devoid of i18n
 #if internationalize, ensure the hidden .config file contains plugin-gargoyle-i18n and the target language package
-#if os.path.exists('./package/plugin-gargoyle-i18n/files/etc/uci-defaults/zzz-plugin-gargoyle-i18n'):
-for config_file in glob.glob('./*-src/.config'):
+
+g_base=os.path.dirname(os.path.dirname(sys.argv[0]))
+for config_file in glob.glob(g_base+'/*-src/.config'):
 	#there should be only one
 	if tran_type=='internationalize':
 		print ('Editing config file to build in %s translation\n' % (active_lang,))
