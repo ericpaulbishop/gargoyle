@@ -25,8 +25,12 @@ set_constant_variables()
 	# However, if there is trouble with parallel builds, or you start getting mysterious non-obvious
 	# build errors in the future try setting num_build_threads to 1 below.
 	#################################################################################################
-	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	#num_build_threads=1
+
+	#
+	# Aaaand... this little bugger is causing problems again...
+	#
+	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	num_build_threads=1
 }
 
 set_version_variables()
@@ -460,8 +464,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-		#make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
@@ -478,22 +481,21 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-		#make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	fi
 
 	#copy packages to built/target directory
-	mkdir -p "$top_dir/built/$target"
+	mkdir -p "$top_dir/built/$target/$default_profile"
 	package_files=$(find bin -name "*.ipk")
 	index_files=$(find bin -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 
 		for pf in $package_files ; do
-			cp "$pf" "$top_dir/built/$target/"
+			cp "$pf" "$top_dir/built/$target/$default_profile/"
 		done
 		for inf in $index_files ; do
-			cp "$inf" "$top_dir/built/$target/"
+			cp "$inf" "$top_dir/built/$target/$default_profile/"
 		done
 	fi
 	
@@ -564,11 +566,9 @@ for target in $targets ; do
 
 		if [ "$verbosity" = "0" ] ; then
 			
-			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			#make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		else
-			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			#make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
 
@@ -579,16 +579,16 @@ for target in $targets ; do
 		fi
 
 		#copy packages to build/target directory
-		mkdir -p "$top_dir/built/$target"
+		mkdir -p "$top_dir/built/$target/$profile_name"
 		arch=$(ls bin)
 		package_files=$(find bin -name "*.ipk")
 		index_files=$(find bin -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 			for pf in $package_files ; do
-				cp "$pf" "$top_dir/built/$target/"
+				cp "$pf" "$top_dir/built/$target/$profile_name/"
 			done
 			for inf in $index_files ; do
-				cp "$inf" "$top_dir/built/$target/"
+				cp "$inf" "$top_dir/built/$target/$profile_name/"
 			done
 		fi
 

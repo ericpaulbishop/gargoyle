@@ -152,7 +152,10 @@ function resetData()
 							devBand = "A";
 						}
 					}
-					if (apSsids[devBand] == null) apSsids[devBand] = secSsid
+					if (apSsids[devBand] == null)
+					{
+						apSsids[devBand] = secSsid
+					}
 				}
 				else
 				{

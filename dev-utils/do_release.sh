@@ -41,7 +41,7 @@ if [ -z "$user" ] ; then
 	exit
 fi
 
-scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
+scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes -r'
 ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 
 if [ ! -d "images" ] ; then
