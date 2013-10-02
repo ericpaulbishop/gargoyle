@@ -646,6 +646,45 @@ def remove_ghf_zopt():
 		w_fileFO.writelines(new_wpage_contents)
 		w_fileFO.close()
 		
+def process_ghf_source():
+	fallback_dict={}
+	active_dict={}
+	new_ghf_contents=[]
+	print "---->   Localizing gargoyle_header_footer.c into "+act_lang
+	
+	if act_lang=='English-EN':
+		return
+		
+	fallback_dict=parseJStrans( fb_lang, 'ghf.js', fallback_dict, True, None )
+	active_dict=parseJStrans( act_lang, 'ghf.js', active_dict, True, None )
+	
+	ghf_fileFO = open('./package-prepare/gargoyle/src/gargoyle_header_footer.c', 'rb')
+	ghf_src=ghf_fileFO.readlines()
+	ghf_fileFO.close()
+	
+	for sline in ghf_src:
+		anewline=''
+		
+		if sline.startswith('\tchar* title = "Gargoyle Router Management Utility";'):
+			anewline='\tchar* title = '+getValue("ghf.title", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* desc = "Router<br/>Management<br/>Utility";'):
+			anewline='\tchar* desc = '+getValue("ghf.desc", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* dname = "Device Name";'):
+			anewline='\tchar* dname = '+getValue("ghf.devn", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* wait_txt = "Please Wait While Settings Are Applied";'):
+			anewline='\tchar* wait_txt = '+getValue("ghf.waits", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		
+		if anewline != '':
+			new_ghf_contents.append(anewline)
+		else:
+			new_ghf_contents.append(sline)
+	
+	ghf_fileFO = open('./package-prepare/gargoyle/src/gargoyle_header_footer.c', 'wb')
+	ghf_fileFO.seek(0)
+	ghf_fileFO.writelines(new_ghf_contents)
+	ghf_fileFO.close()	
+		
+		
 def process_eval_file( efile, src_pg , jsObjects):
 	js_list = []
 	fallback_dict = {}
@@ -710,6 +749,7 @@ for filename in os.listdir('./package-prepare'):
 process_i18n_shell_file()
 process_ddns_config()
 process_menunames()
+process_ghf_source()
 remove_ghf_zopt()
 process_eval_file('./package-prepare/gargoyle/files/www/data/timezones.txt', "time.js", ["TiZ"])
 
