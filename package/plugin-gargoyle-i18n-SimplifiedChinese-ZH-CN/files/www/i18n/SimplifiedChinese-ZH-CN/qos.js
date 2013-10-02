@@ -3,15 +3,15 @@
  * Looks a lot like English
  */
 
-qosStr.URSection="QoS (Upload) -- Classification Rules";
-qosStr.DRSection="QoS (Download) -- Classification Rules";
-qosStr.UCSection="QoS (Upload) -- Service Classes";
-qosStr.DCSection="QoS (Download) -- Service Classes";
-qosStr.DACCSect="QoS (Download) -- Active Congestion Control";
-qosStr.UEnable="Enable Quality of Service (Upload Direction)";
-qosStr.DEnable="Enable Quality of Service (Download Direction)";
-qosStr.UTotBand="Total (Upload) Bandwidth";
-qosStr.DTotBand="Total Download Bandwidth";
+qosStr.URSection="QoS (上传) -- 分类规则";
+qosStr.DRSection="QoS (下载) -- 分类规则";
+qosStr.UCSection="QoS (上传) -- 服务类;
+qosStr.DCSection="QoS (下载) -- 服务类";
+qosStr.DACCSect="QoS (下载) -- 主动拥塞控制";
+qosStr.UEnable="启用 QoS 服务 (上传)";
+qosStr.DEnable="启用 QoS 服务 (下载)";
+qosStr.UTotBand="总 (上传) 带宽";
+qosStr.DTotBand="总 (下载) 带宽;
 
 qosStr.USCAbout="Each upload service class is specified by three parameters: percent bandwidth at capacity, minimum bandwidth and maximum bandwidth.";
 qosStr.DSCAbout="Each service class is specified by four parameters: percent bandwidth at capacity, realtime bandwidth and maximum bandwidth and the minimimze round trip time flag.";
@@ -28,33 +28,33 @@ qosStr.MaxBandAbout="<em>Maximum bandwidth</em> specifies an absolute maximum am
 qosStr.PackAbout="Packets are tested against the rules in the order specified -- rules toward the top have priority. As soon as a packet matches a rule it is classified, and the rest of the rules are ignored. The order of the rules can be altered using the arrow controls.";
 qosStr.DefServClassAbout="The <em>Default Service Class</em> specifies how packets that do not match any rule should be classified.";
 qosStr.AbACC="<p>The active congestion control (ACC) observes your download activity and automatically adjusts your download link limit to maintain proper QoS performance. ACC automatically compensates for changes in your ISP's download speed and the demand from your network adjusting the link speed to the highest speed possible which will maintain proper QoS function. The effective range of this control is between 15% and 100% of the total download bandwidth you entered above.</p><p>While ACC does not adjust your upload link speed you must enable and properly configure your upload QoS for it to function properly.</p><p><em>Ping Target-</em> The segment of network between your router and the ping target is where congestion is controlled. By monitoring the round trip ping times to the target congestion is detected. By default ACC uses your WAN gateway as the ping target. If you know that congestion on your link will occur in a different segment then you can enter an alternate ping target.</p><p><em>Manual Ping Limit-</em> Round trip ping times are compared against the ping limits. ACC controls the link limit to maintain ping times under the appropriate limit. By default Gargoyle automatically selects appropriate ping limits for you based on the link speeds you entered. If you would like to try different limits you can manually enter a time here. Entering longer times will lead to higher ping limits, and shorter time shorter limits. You can see the limits ACC is using in the [] brackets next to ping time limits field. </p>";
-qosStr.ServClass="Default Service Class";
+qosStr.ServClass="默认服务类";
 
-qosStr.AddNewClassRule="Add New Classification Rule";
-qosStr.AddNewServiceRule="Add New Service Class";
-qosStr.SrcIP="Source IP";
-qosStr.SrcPort="Source Port(s)";
-qosStr.DstIP="Destination IP";
-qosStr.DstPort="Destination Port(s)";
-qosStr.MaxPktLen="Maximum Packet Length";
-qosStr.MinPktLen="Minimum Packet Length";
-qosStr.TrProto="Transport Protocol";
-qosStr.Conreach="Connection bytes reach";
-qosStr.AppProto="Application (Layer7) Protocol";
-qosStr.SetClass="Set Service Class To";
-qosStr.SrvClassName="Service Class Name";
-qosStr.PerBandCap="Percent Bandwidth At Capacity";
-qosStr.BandMin="Bandwidth Minimum";
-qosStr.BandMinNo="No Bandwidth Minimum";
-qosStr.BandMax="Bandwidth Maximum";
-qosStr.BandMaxNo="No Bandwidth Maximum";
-qosStr.MinRTT="Minimize Round Trip Times (RTT)";
-qosStr.ActRTT="Minimize RTT (ping times) when active";
-qosStr.OptiWAN="Optimize WAN utilization";
-qosStr.ACCOn="Enable active congestions control (Download Direction)";
-qosStr.ACC_Pt="Use non-standard ping target";
-qosStr.ACC_con="Manually control ping targets";
-qosStr.ACC_Stat="Congestion Control Status";
+qosStr.AddNewClassRule="添加新的分类规则";
+qosStr.AddNewServiceRule="添加新的服务类";
+qosStr.SrcIP="来源 IP";
+qosStr.SrcPort="来源端口(范围)";
+qosStr.DstIP="目标 IP";
+qosStr.DstPort="目标端口(范围)";
+qosStr.MaxPktLen="最大包长";
+qosStr.MinPktLen="最小包长";
+qosStr.TrProto="传输协议";
+qosStr.Conreach="连接字节";
+qosStr.AppProto="应用程序(Layer7)协议";
+qosStr.SetClass="服务类设置为";
+qosStr.SrvClassName="服务类名称";
+qosStr.PerBandCap="带宽容量百分比";
+qosStr.BandMin="最小带宽";
+qosStr.BandMinNo="不限制最小带宽";
+qosStr.BandMax="最大带宽";
+qosStr.BandMaxNo="不限制最大带宽";
+qosStr.MinRTT="最小往返延时(MINRTT)";
+qosStr.ActRTT="MINRTT条件激活(ping延时)";
+qosStr.OptiWAN="优化WAN使用率";
+qosStr.ACCOn="启用主动拥塞控制 (下载)";
+qosStr.ACC_Pt="使用自定义ping目标";
+qosStr.ACC_con="使用自定义ping延时";
+qosStr.ACC_Stat="拥塞控制状态";
 qosStr.ACC_L_Ck="Check to see if the ping target will respond";
 qosStr.ACC_L_In="Estimate a ping limit";
 qosStr.ACC_L_Act="Congestion control active.";
@@ -70,24 +70,24 @@ qosStr.ACC_L_plim="The point at which the controller will act to maintain fairne
 qosStr.ACC_L_AC="Number of download classes with load over 4kbps.";
 
 //qos_edit_class.sh
-qosStr.QESrvClass="Edit QoS Service Class";
-qosStr.QESrvName="Service Class Name";
+qosStr.QESrvClass="编辑QoS服务类";
+qosStr.QESrvName="服务类名称";
 
 //qos_edit_rule.sh
-qosStr.QERulClass="Edit QoS Classification Rule";
+qosStr.QERulClass="编辑QoS分类规则<";
 
 //javascript
 qosStr.MatchC="Match Criteria";
 qosStr.Classn="Classification";
-qosStr.Src="Source";
-qosStr.SrcP="Source Port";
-qosStr.Dst="Destination";
-qosStr.DstP="Destination Port";
-qosStr.Connb="Connection bytes";
-qosStr.APro="Application Protocol";
-qosStr.pBdW="Percent BW";
-qosStr.mBdW="Min BW";
-qosStr.MBdW="Max BW";
+qosStr.Src="来源";
+qosStr.SrcP="来源端口(范围)";
+qosStr.Dst="目标";
+qosStr.DstP="目标端口(范围)";
+qosStr.Connb="连接字节";
+qosStr.APro="应用程序协议";
+qosStr.pBdW="带宽分比";
+qosStr.mBdW="最小带宽";
+qosStr.MBdW="最大带宽";
 qosStr.qLd="Load";
 qosStr.CrErr="No match criteria have been selected.";
 qosStr.SvErr="Could not add new service class.";
@@ -104,7 +104,7 @@ qosStr.ZERO="zero";
 qosStr.YES="Yes";
 
 //qos_distribution.sh
-qosStr.UBSect="QoS Upload Bandwidth Distribution";
-qosStr.DBSect="QoS Download Bandwidth Distribution";
-qosStr.uTFrm="Upload Time Frame";
-qosStr.dTFrm="Download Time Frame";
+qosStr.UBSect="QoS上传流量分布";
+qosStr.DBSect="QoS下载流量分布";
+qosStr.uTFrm="上传流量分布周期";
+qosStr.dTFrm="下载流量分布周期";
