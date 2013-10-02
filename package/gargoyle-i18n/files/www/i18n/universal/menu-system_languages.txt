@@ -9,3 +9,4 @@ AR=اللغات
 RI=Языки
 BR=Idiomas
 PL=Języki
+ZH-CN=语言

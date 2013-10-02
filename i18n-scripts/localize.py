@@ -453,7 +453,7 @@ def process_plugin_menunames(pm_path, fb_dict, act_dict):
 	
 	for m_item in menutext:
 		if '=' in m_item:
-			if m_item[:2] == act_lang[-2:]:
+			if m_item.split("=",1)[0] == act_lang.split("-",1)[1]:
 				menu_value = m_item[:].split("=", 1)[1][:-1] #there is a hanging newline there
 				
 				act_dict["gargoyle_display_"+base_menuname] = '"'+menu_value+'"'
