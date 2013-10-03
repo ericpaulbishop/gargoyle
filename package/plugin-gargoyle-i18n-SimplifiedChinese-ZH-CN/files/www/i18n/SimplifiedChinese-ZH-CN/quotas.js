@@ -24,7 +24,7 @@ quotasStr.DuplicateRange="IP/时间范围重复，一个指定的时间段内每
 quotasStr.OneTimeQuotaError="You may have only one quota at a given time for hosts without explicit quotas";
 quotasStr.OneNetworkQuotaError="You may have only one quota at a given time that applies to entire network";
 quotasStr.QuotaAddError="无法增加配额。";
-quotasStr.NA="NA //不适用的缩写"; //Not Applicable abbr
+quotasStr.NA="不适用"; //Not Applicable
 
 //template
 quotasStr.AppliesTo="适用于";
