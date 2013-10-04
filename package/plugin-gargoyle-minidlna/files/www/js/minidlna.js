@@ -45,7 +45,6 @@ function resetData()
 		for(storageIndex=0; storageIndex < storageDrives.length && drive == "root"; storageIndex++)
 		{
 			var sd = storageDrives[storageIndex];
-			alert(sd);
 			var sdre = new RegExp("^" + sd[1], "g");
 			if( md.match(sdre) )
 			{
