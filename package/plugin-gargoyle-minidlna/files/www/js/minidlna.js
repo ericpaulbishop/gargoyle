@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2013 Cezary Jackiewicz and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2013 Cezary Jackiewicz and Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
@@ -27,18 +27,37 @@ function resetData()
 	for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 	{
 		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
-		rootDriveValues.push( storageDrives[driveIndex][1] )
+		rootDriveValues.push( storageDrives[driveIndex][0] )
 	}
 	setAllowableSelections("drive_select", rootDriveValues, rootDriveDisplay, document);
 	document.getElementById("media_dir").value = "/";
 
-	var columnNames = ['Folder'];
+	var columnNames = ['Drive', 'Folder'];
 	var mediaTableData = [];
 	var mediaDir = [];
 	mediaDir = uciOriginal.get(pkg, sec, "media_dir");
 	for (idx=0; idx < mediaDir.length; idx++)
 	{
-		mediaTableData.push([mediaDir[idx]]);
+		var md = mediaDir[idx];
+		var drive = "root";
+		var folder = md;
+		var storageIndex;
+		for(storageIndex=0; storageIndex < storageDrives.length && drive == "root"; storageIndex++)
+		{
+			var sd = storageDrives[storageIndex];
+			alert(sd);
+			var sdre = new RegExp("^" + sd[1], "g");
+			if( md.match(sdre) )
+			{
+				drive = sd[0];
+				folder = folder.replace(sdre, "/");
+				while(folder.match(/\/\//g))
+				{
+					folder = folder.replace("//", "/");
+				}
+			}
+		}
+		mediaTableData.push([drive, folder]);
 	}
 	var mediaTable = createTable(columnNames, mediaTableData, "media_table", true, false, removeCallback);
 	var tableContainer = document.getElementById('media_table_container');
@@ -56,23 +75,15 @@ function removeCallback()
 function addNewMediaDir()
 {
 	var drive = getSelectedValue("drive_select");
-	var dir = document.getElementById('media_dir').value;
-	if (dir == "/" || dir == "")
-	{
-		dir = "";
-	}
-	else
-	{
-		dir = "/" + dir;
-	}
-	var folder = drive + dir;
-	folder = folder.replace("//", "/");
+	var folder = document.getElementById('media_dir').value;
+
 
 	var media_type = getSelectedValue("media_type");
 	if (media_type != "")
 	{
 		folder = media_type + "," + folder;
 	}
+	
 
 	var errors = [];
 	var mediaTable = document.getElementById("media_table");
@@ -99,10 +110,10 @@ function addNewMediaDir()
 		if(mediaTable == null)
 		{
 			var tableContainer = document.getElementById("media_table_container");
-			mediaTable = createTable(["Folder"], [], "media_table", true, false, removeCallback);
+			mediaTable = createTable(["Drive", "Folder"], [], "media_table", true, false, removeCallback);
 			setSingleChild(tableContainer, mediaTable);
 		}
-		addTableRow(mediaTable, [ folder ], true, false, removeCallback)
+		addTableRow(mediaTable, [ drive, folder ], true, false, removeCallback)
 		document.getElementById("media_dir").value = "/"
 		setSelectedValue("media_type", "");
 	}
@@ -120,7 +131,9 @@ function saveChanges()
 		return;
 	}
 
+
 	var strict = document.getElementById("dlna_strict").checked ? "1":"0";
+	
 
 	var uci = uciOriginal.clone()
 
@@ -128,8 +141,11 @@ function saveChanges()
 	uci.set(pkg, sec, "friendly_name", name);
 	uci.set(pkg, sec, "strict_dlna", strict);
 
+
+
 	uci.remove(pkg, sec, "media_dir");
 	var mediaTable = document.getElementById("media_table");
+
 	if(mediaTable != null)
 	{
 		var mediaData = getTableDataArray(mediaTable, true, false);
@@ -138,12 +154,31 @@ function saveChanges()
 
 		for(idx=0; idx < mediaData.length; idx++)
 		{
-			media.push(mediaData[idx][0]);
+			var drive = mediaData[idx][0];
+			var folder = "/" + mediaData[idx][1];
+			var found = false;
+		
+			var mediaPath = folder;
+			var storageIndex;
+			for(storageIndex=0; storageIndex < storageDrives.length && (!found) ; storageIndex++)
+			{
+				if(drive == storageDrives[storageIndex][0])
+				{
+					mediaPath = storageDrives[storageIndex][1] + folder;
+				}
+			}
+			while(mediaPath.match(/\/\//g))
+			{
+				mediaPath = mediaPath.replace("//", "/");
+			}
+
+			media.push(mediaPath);
 		}
 		if(media.length > 0)
 		{
-			uci.set(pkg, sec, "db_dir", media[0] + "/_minidlna");
-			uci.set(pkg, sec, "log_dir", media[0] + "/_minidlna");
+			var base = (media[0]).replace(/[\/]+$/g, "");
+			uci.set(pkg, sec, "db_dir", base + "/_minidlna");
+			uci.set(pkg, sec, "log_dir", base + "/_minidlna");
 			uci.createListOption(pkg, sec, "media_dir", true);
 			uci.set(pkg, sec, "media_dir", media, false)
 		}
