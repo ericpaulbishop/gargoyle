@@ -42,6 +42,7 @@
 		<br/>
 	</div>
 	<br/>
+	<p><strong><%~ Sla %>:</strong></p>
 	<div>
 		<div id='lang_container' >
 			<span class='narrowleftcolumn'>

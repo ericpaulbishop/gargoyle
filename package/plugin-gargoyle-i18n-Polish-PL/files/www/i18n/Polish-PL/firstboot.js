@@ -6,6 +6,7 @@ fbS.ISSect="Ustawienia początkowe";
 fbS.npass="Wprowadź nowe hasło";
 fbS.NPass="Nowe hasło";
 fbS.Stz="Strefa czasowa";
+fbS.Sla="Język";
 fbS.SSet="Zapisz zmiany";
 fbS.ULngF="Załaduj plik językowy";
 
