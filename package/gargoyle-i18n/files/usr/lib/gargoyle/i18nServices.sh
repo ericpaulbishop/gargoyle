@@ -48,7 +48,7 @@ get_i18n_menuname() {
 	local translation=""
 	
 	[ -e "$web_root/i18n/$fallback_lang/menus.txt" ] && . "$web_root/i18n/$fallback_lang/menus.txt"
-	[ -e "$full_lang/menus.txt" ] && . "$full_lang/menus.txt"
+	[ -e "$web_root/i18n/$full_lang/menus.txt" ] && . "$web_root/i18n/$full_lang/menus.txt"
 	
 	translation="$(eval echo \$$uci_menu_var)"
 	
