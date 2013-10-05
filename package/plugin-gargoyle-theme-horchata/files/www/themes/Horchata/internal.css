@@ -1,0 +1,352 @@
+/*
+  This Cascading Style Sheet is copyright © 2013 by BashfulBladder
+  This page is part of the Horchata (horizontal charcoal theme) theme for Gargoyle web interface running on routers.
+  This page has GPL portions & public domain portions.
+*/
+
+/*      ------------- below are css definitions under the GPL, copied from the default theme  -----------------      */
+
+button::-moz-focus-outer, ::-moz-focus-inner { border:none!important; }
+
+p { margin:1em 0; }
+
+.aligned_check_label
+{
+	vertical-align:middle;
+}
+.aligned_check
+{
+	padding:0;
+	margin:0;
+	vertical-align:middle;
+	overflow:hidden;
+}
+
+.code
+{
+	position:relative;
+	display:block;
+	margin-left:10px;
+	width:475px;
+	background: #ffeab3;
+	border: 1px solid black;
+	font-family: monospace;
+	padding:5px;
+}
+.contributer
+{
+	font-size:115%;
+	font-weight:bold;
+	text-decoration:underline;
+}
+
+#control_column_container
+{
+	position:relative;
+	width:450px;
+	height:100px;
+}
+#plot1_control_column
+{
+	position:absolute;
+	display:block;
+	text-align:left;
+	left:0;
+	width:180px;
+	height:100px;
+	margin-right:10px;
+}
+#plot2_control_column
+{
+	position:absolute;
+	display:block;
+	text-align:left;
+	left:180px;
+	width:180px;
+	height:100px;
+	margin-right:10px;
+}
+#plot3_control_column
+{
+	position:absolute;
+	display:block;
+	text-align:left;
+	left:360px;
+	width:180px;
+	height:100px;
+	margin-right:10px;
+}
+#plot1_title
+{
+	font-weight:bold;
+	text-decoration:underline;
+	color:blue;
+}
+#plot2_title
+{
+	font-weight:bold;
+	text-decoration:underline;
+	color:red;
+}
+#plot3_title
+{
+	font-weight:bold;
+	text-decoration:underline;
+	color:green;
+}
+.pseudo_link
+{
+	cursor:pointer;
+	color:blue;
+	text-decoration:underline;
+	font-style:italic;
+}
+.bandwidth_title_text
+{
+	font-family: verdana, arial, sans-serif;
+	margin-left:0;
+	margin-bottom:5px;
+	display:block;
+	width:415px;
+	float:left;
+	text-align:left;
+	font-size:14px;
+	color:black;
+}
+
+.plot_header
+{
+	font-family: verdana, arial, sans-serif;
+	font-size:18px;
+	font-weight:bold;
+	color:#888AB8;
+	margin-left:20px;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+/*      ------------- above are css definitions under the GPL, copied from the default theme  -----------------      */
+/*      ----------------------- below are public domain CSS definitions from Horchata  ------------------------      */
+select { height: 21px;
+    border:1px solid #27292c; border-radius:3px;
+    box-shadow:inset 0 0 1px #393939;
+    -webkit-box-shadow:inset 0 01px #393939;
+    background:#cbcbda;
+    color:#000;
+}
+select:focus { outline:none; }
+select.select_disabled { color:#aaa; }
+
+.default_button { position:relative; display:inline-block; margin:4px 9px; padding:1px 11px; text-decoration:none; cursor:pointer;
+	color:#111; text-shadow:2px 2px 5px #fff, -1px -2px 5px #fff;
+
+	border:1px solid #ccc;
+	border-radius:5px;
+	-webkit-border-radius:5px;
+
+	background:#8Ae65e;
+	background:-moz-linear-gradient(-90deg, #CACAD3 5%, #A9AEB6 15%, #c2c2c9 35%, #CFCFD6 75%, #e3e3e6 100%, #ffffff);
+	background:-webkit-gradient(linear, left top, left bottom, from(#CACAD3), to(#CFCFD6), color-stop(0.15, #A9AEB6), color-stop(0.35, #c2c2c9), color-stop(.75, #e3e3e6));
+	box-shadow:0 0 1px 1pt #666, 0 2px 2px 3pt #ccc;
+	
+	transition:background .25s ease-out;
+	-moz-transition:background .25s ease-out;
+	-webkit-transition:background  .25s ease-out;
+}
+.default_button:hover { color:#2a2a2f; text-shadow:0 4px 3px #fff; border:1px solid #ccc; border-radius:5px; 
+    background:#bababf;
+	background:-moz-linear-gradient(-90deg, #D1D1DF 5%, #c2c2c9 15%, #CACAD3 35%, #d6d6e3 75%, #e9e9ec 100%, #ffffff);
+	background:-webkit-gradient(linear, left top, left bottom, from(#D1D1DF), to(#dfdfe3), color-stop(0.15, #d6d6e3), color-stop(0.35, #CACAD3), color-stop(.75, #e9e9ec));
+	box-shadow:0 0 1px 1pt #666, 0 2px 2px 3pt #ccc;
+}
+.default_button:active { border:1px solid #dddde2; border-radius:5px; box-shadow:inset 0 1px 0 #c0c0d5, 0 2px 2px #d5d5f4, 0 0 4px 1px #35353f;
+	transition:none;
+	-moz-transition:none;
+	-webkit-transition:none;
+	background:#fff; color:#000;
+}
+.default_button_disabled { position:relative; display:inline-block; margin:4px 9px; padding:1px 11px; text-decoration:none; background:#bababf; border:1px solid #bbb; border-radius:5px; color:#f1f1f5; box-shadow:inset 0 2px 2px rgba(255,255,255,0.5), 0 0 1px 1pt #666, 0 2px 2px 3pt #ccc;
+	
+  	transition:background .25s ease-out;
+	-moz-transition:background .25s ease-out;
+	-webkit-transition:background .25s ease-out;
+}
+.default_button_disabled:hover { cursor:auto; }
+
+[class*="table"] .default_button { margin:4px 9px; }
+[class*="table"] .default_button_disabled { margin:4px 9px; }
+[class*="table"] .default_button:active { margin:5px 9px 3px 9px; }
+.even > td[class*="table"] .default_button { margin-top:2px; margin-bottom:3px; }
+.odd > td[class*="table"] .default_button { margin-top:2px; margin-bottom:2px;
+	box-shadow:inset 0 1px 0 rgba(255,255,255,0.5), 0 0 0 2pt #666, 0 2px 2px 3pt #ccc, 0 2px 2px rgba(0,0,0,0.3), 0 0 4px 1px rgba(0,0,0,0.2), 0 0 5px 4px rgba(255,255,255,0.9); }
+
+input.text_error { color:#f00; }
+input.text_disabled { color:#aaa; }
+
+#bottom_button_container { margin:5px 0 5px 10px; }
+#update_container { margin-top:10px; margin-left:10px; display:none; }
+.bottom_button, .big_button { height:42px; width:180px; margin:10px 40px 18px 0; padding:5px 10px 5px 10px; cursor:pointer; font-family:Verdana, Geneva, sans-serif; font-size:19px; color:#ddd; text-shadow:2px 2px 5px #000; text-decoration:none;
+	border:1px solid #999;
+	border-radius:15px;
+	-webkit-border-radius:15px;
+
+	background:#8Ae65e;
+	background:-moz-linear-gradient(-90deg, #CACAD3 5%, #A9AEB6 15%, #c2c2c9 35%, #CFCFD6 75%, #e3e3e6 100%, #fff);
+	background:-webkit-gradient(linear, left top, left bottom, from(#CACAD3), to(#CFCFD6), color-stop(0.15, #A9AEB6), color-stop(0.35, #c2c2c9), color-stop(.75, #e3e3e6));
+	box-shadow:0 0 0 2pt #666, 3px 3px 12px 6pt #ccc, 0 0 6px 4pt #fff, 0 0 0 6pt #666, 0 0 12px 8pt #fff, 0 6px 2px 12px #555;
+}
+.big_button { margin-top:20px; }
+.bottom_button { margin-top:-12px; }
+.big_button_disabled { height:42px; width:180px; margin:10px 40px 18px 0; padding:5px 10px 5px 10px; cursor:pointer; font-family:Verdana, Geneva, sans-serif; font-size:19px; text-decoration:none; color:#e3e3e7;
+    border:1px solid #bbb;
+	border-radius:15px;
+	-webkit-border-radius:15px;
+	background:#bababf;
+	box-shadow:inset 0 2px 2px rgba(255,255,255,0.5), 0 0 0 2pt #999, 3px 3px 12px 6pt #bbb, 0 0 6px 4pt #ddd, 0 0 0 6pt #999, 0 0 12px 8pt #ddd;
+}
+.big_button_disabled:hover { cursor:auto; }
+
+.bottom_button:hover, input.big_button:hover { color:#555; text-shadow:0 4px 3px #fff;
+    background:#bababf;
+	background:-moz-linear-gradient(-90deg, #D1D1DF 5%, #c2c2c9 15%, #CACAD3 35%, #d6d6e3 75%, #e9e9ec 100%, #ffffff);
+	background:-webkit-gradient(linear, left top, left bottom, from(#D1D1DF), to(#dfdfe3), color-stop(0.15, #d6d6e3), color-stop(0.35, #CACAD3), color-stop(.75, #e9e9ec));
+	box-shadow:0 0 0 2pt #666, 3px 3px 12px 6pt #ccc, 0 0 6px 4pt #fff, 0 0 0 6pt #666, 0 0 12px 8pt #fff, 0 6px 2px 12px #555;
+}
+.bottom_button:active, input.big_button:active { background: #e3e3e6;
+	box-shadow:inset 0 3px #555, 0 0 0 2pt #666, 3px 3px 12px 6pt #ccc, 0 0 6px 4pt #fff, 0 0 0 6pt #666, 0 0 12px 8pt #fff, 0 6px 2px 10px #555;
+}
+legend { float:left; width:105%; height:30px; line-height:30px; margin-top:-2em; margin-left:-1.3em; margin-bottom:20px; padding:0; font-size:17px; font-family:verdana, arial, sans-serif; text-align:center; color:#fff;
+	border-top-left-radius:5px;
+	border-top-right-radius:5px;
+	-webkit-border-top-left-radius:5px;
+	-webkit-border-top-right-radius:5px;
+	background:#66667a;
+	background:-webkit-linear-gradient(top, #A3A3AF 0%,#66667a 100%);
+    background:-moz-linear-gradient(top, #A3A3AF 0%,#66667a 100%);
+    background:-o-linear-gradient(top, #A3A3AF 0%,#66667a 100%);
+    background:-ms-linear-gradient(top, #A3A3AF 0%,#66667a 100%);
+    background:linear-gradient(to top, #A3A3AF 0%,#66667a 100%);
+}
+legend:before { display:inline-block; height:0; width:0; margin-top:30px; position:relative; float:left; content:"";
+    border-top:10px solid #44445a; border-left:10px solid transparent;
+}
+legend:after { display:inline-block; height:0; width:0; margin-top:30px; position:relative; float:right; content:"";
+    border-top:10px solid #44445a; border-right:10px solid transparent;
+}
+
+fieldset { float:left; clear:both; width:900px; margin:0 0 4.5em 0; padding:1em 1em 1em 1em; font-family:verdana, arial, sans-serif; font-size:12px;
+    border:0 solid #000; 
+	border-radius:5px;
+	-webkit-border-radius:5px;
+	box-shadow:3px 3px 10px #c0c0c5;
+	-webkit-box-shadow:3px 3px 10px #c0c0c5;
+	background:#f4f4f9;
+	background:-moz-linear-gradient(center top, #e1e1e5, #ffffff 100%);
+	background:-webkit-gradient(linear, left top, left bottom, from(#e1e1e5), to(#ffffff));
+}
+fieldset:after { margin:5px; }
+fieldset div { display:block; margin-top:5px; margin-bottom:5px; clear:left; font:inherit; }
+fieldset input { font:inherit; }
+fieldset input:focus { background:#fffff0; }
+fieldset select { font:inherit; }
+fieldset label { font:inherit; }
+
+fieldset+div+div+fieldset { margin-top:30px; }
+fieldset+div { position:relative; display:inline;}
+fieldset#edit_container { margin-top:30px; margin-left:20px; width:auto; }
+fieldset#edit_container>legend { width:106.5%; }
+
+fieldset:first-of-type p:nth-last-child(3):after {
+	content:"\a\a Horchata theme by BashfulBladder 2013\a Metamorphous used as Gargoyle display font Copyright© 2011 Sorkin Type Co (www.sorkintype.com) under the SIL Open Font License 1.1";
+	white-space:pre;
+	color:#4D4D52;
+}
+
+.leftcolumn { display:block; float:left; clear:left; width:240px; margin-left:5px; margin-right:5px; }
+.rightcolumn { display:inline; }
+.rightcolumnonly { display:block; margin-left:250px; }
+.rightcolumn+.rightcolumnonly { padding:5px 0 5px 0; }
+.rightcolumnindent { display:inline; margin-left:25px; }
+.nocolumn { display:block; float:left; margin-left:5px; margin-right:5px; }
+.narrowleftcolumn { display:block; float:left; clear:left; width:125px; margin-left:5px; margin-right:5px; }
+.widerightcolumnonly { display:block; margin-left:135px; }
+.middlecolumn { display:block; float:left; width:110px; margin-right:10px; margin-bottom:5px; }
+.indent { display:block; margin-left:25px; }
+.wideleftcolumn { display:block; float:left; width:300px; margin-left:5px; margin-right:5px; }
+.farrightcolumnonly { display:block; margin-left:310px; }
+.bottom_gap { margin-bottom:30px; }
+
+.internal_divider { display:block; height:3px; margin:20px 6em 20px 6em;
+	background:#b5b6c1;
+	background:-moz-linear-gradient(left,  #b5b6c1 0%, #a9bfd1 50%, #b5b6c1 100%);
+	background:-webkit-linear-gradient(left,  #b5b6c1 0%, #a9bfd1 50%, #b5b6c1 100%);
+	background:-o-linear-gradient(left,  #b5b6c1 0%, #a9bfd1 50%, #b5b6c1 100%);
+	background:-ms-linear-gradient(left,  #b5b6c1 0%, #a9bfd1 50%, #b5b6c1 100%);
+	background:linear-gradient(to right,  #b5b6c1 0%, #a9bfd1 50%, #b5b6c1 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b5b6c1', endColorstr='#a9bfd1',GradientType=1 ); /* IE6-9 */
+}
+
+table { border-spacing:0; border-collapse:collapse; }
+tr.table_row_add { text-align:center; }
+tr.table_row_header { border-bottom:1px solid black; text-align:center; }
+tr.table_row_header_disabled { border-bottom:1px solid black; text-align:center; }
+tr.odd { background-color: #d1d1d9; padding:20px; }
+tr:first-child+tr.odd { border-top:1px solid black; } /* line after table header, before odd row */
+tr.even { background-color:#fff; padding:20px; }
+tr.odd:last-child, tr.even:last-child { border-bottom:1px solid black; }
+tr.disabled_odd { background-color:#e1e1e1; color:#606060; }
+tr.disabled_even { background-color:#f6f6fc; color:#606060; }
+tr.disabled_odd:last-child, tr.disabled_even:last-child { border-bottom:1px solid transparent; }
+th { padding:2px 5px 2px 5px; font-style:italic; font-weight:normal; text-align:center; }
+td { padding:5px; }	
+	
+td[class^="total_bandwidth_table_column"] { text-align:right; padding-left:1em; padding-right:1em; }
+td[class^="static_ip_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="portf_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="portf_range_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td.upnp_table_column_1 { text-align:left; }
+td.upnp_table_column_2 { text-align:center; }
+td.upnp_table_column_3 { text-align:right; }
+td[class^="qos_class_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td.qos_class_table_column_1 { text-align:left; }
+td[class^="qos_rule_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td.qos_rule_table_column_1 { text-align:left; }
+td[class^="ddns_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td.ddns_table_column_1 { text-align:left; }
+td[class^="connection_table_column"] { text-align:left; padding-right:4em; }
+td.connection_table_column_1 { text-align:center; padding-left:1em; }
+td[class^="mac_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="wifi_wds_mac_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="bridge_wds_mac_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="bridge_dns_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="lan_dns_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="ip_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="webmon_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="webmon_domain_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="webmon_search_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="rule_applies_to_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="rule_remote_ip_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="rule_url_match_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="rule_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="exception_applies_to_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="exception_remote_ip_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="exception_url_match_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="exception_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="quota_ip_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="quota_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="quota_usage_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="lease_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="wifi_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td.wifi_table_column_3 { border-right:1px solid #454545; }
+td[class^="active_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="active_route_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="static_route_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="bandwidth_distribution_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+td[class^="bandwidth_table_column"] { text-align:center; padding-left:1em; padding-right:1em; }
+
+table[id*="timeTable"]>tbody>tr { line-height:12px; }
+td[class^="station_table_column"] { text-align:center; padding-left:1em; padding-right:1em; width:auto; }
+
+#download_plot { width:400px !important; height:300px !important }
+#upload_plot { width:400px !important; height:300px !important }
+#total_plot { width:800px !important; height:600px !important }
