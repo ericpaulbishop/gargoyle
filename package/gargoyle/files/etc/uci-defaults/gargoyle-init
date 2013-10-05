@@ -30,6 +30,25 @@ if [ "$settings_not_preserved" == "1" ] ; then
 
 fi
 
+#
+# firewall includes MUST all have reload=1
+#
+# Some idiot decided firewall hotplug scripts call reload only, which 
+# by default doesn't trigger includes... BUT... hotplug scripts
+# always get called before firewall init script  That means any include 
+# that doesn't have reload=1 never gets called on boot.
+#
+include_index=0
+next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+while [ "$next_include" = "include" ] ; do
+	uci set firewall.@include[$include_index].reload="1"
+	include_index=$(( $include_index+1 ))
+	next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+	echo "$include_index"
+done
+
+
+
 # add new busybox ntp system section if necessary
 ntp_section=$(uci get system.ntp 2>/dev/null)
 if [ "$ntp_section" != "timeserver" ] ; then
