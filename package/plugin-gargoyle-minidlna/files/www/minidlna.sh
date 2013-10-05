@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <?
-	# This program is copyright © 2013 Cezary Jackiewicz and is distributed under the terms of the GNU GPL 
+	# This program is copyright © 2013 Cezary Jackiewicz and Eric Bishop and is distributed under the terms of the GNU GPL 
 	# version 2.0 with a special clarification/exception that permits adapting the program to 
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -14,8 +14,8 @@
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
 	echo "currentLanIp=\"$lan_ip\";"
 	echo "var storageDrives = [];"
-	df /overlay | head -n2 | awk '/overlay/ {printf "storageDrives.push([\"Root Disk\",\"/\",\"/\",\"jffs2\", \"%.0f\", \"%.0f\"]);" , $2 * 1024, $4 * 1024}'
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+	df /overlay | head -n2 | awk '/overlay/ {printf "storageDrives.push([\"Root Disk\",\"/\",\"/\",\"jffs2\", \"%.0f\", \"%.0f\"]);" , $2 * 1024, $4 * 1024}'
 ?>
 //-->
 </script>

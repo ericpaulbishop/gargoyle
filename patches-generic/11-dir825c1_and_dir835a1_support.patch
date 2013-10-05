@@ -15,10 +15,14 @@
  	eap7660d)
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/leds	2013-06-30 00:37:09.653901325 -0400
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/leds	2013-06-30 00:37:22.181901800 -0400
-@@ -60,7 +60,8 @@
+@@ -60,7 +60,12 @@
  	ucidef_set_led_switch "lan4" "LAN4" "d-link:green:lan4" "switch0" "0x10"
  	;;
  
++dir-835-c1)
++	ucidef_set_led_netdev "wan" "WAN" "d-link:orange:planet" "eth0.2"
++	;;
++
 -dir-825-b1)
 +dir-825-b1 | \
 +dir-825-c1)
