@@ -4,7 +4,7 @@
 
 upS.UpFrm="固件升级";
 upS.bkup="备份";
-upS.Warn="By default upgrading your firmware will completely erase your current configuration. It is <em>strongly</em> recommended that you <a href='backup.sh'>back up</a> your current configuration before performing an upgrade.</p><p>You can attempt to preserve your old settings by ticking <em>Attempt to Preserve Settings</em> below. Be aware that this can potentially lead to problems if the new version is significantly newer than the old version, but for small, incremental differences this will likely work. It is always best to keep a backup just in case.";
+upS.Warn="升级固件默认不保留当前配置. <em>强烈</em>建议您<a href='backup.sh'>备份</a>当前配置再执行固件升级.</p><p>You can attempt to preserve your old settings by ticking <em>Attempt to Preserve Settings</em> below. Be aware that this can potentially lead to problems if the new version is significantly newer than the old version, but for small, incremental differences this will likely work. It is always best to keep a backup just in case.";
 upS.CGV="当前石像鬼（Gargoyle）版本";
 upS.SelF="选择固件文件";
 upS.Prsv="尝试保存设置";

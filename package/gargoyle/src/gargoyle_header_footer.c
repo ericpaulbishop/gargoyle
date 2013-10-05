@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright Â© 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the

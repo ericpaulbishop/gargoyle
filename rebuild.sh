@@ -354,7 +354,7 @@ for target in $targets ; do
 													|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang"
 		} || {
 			#NOTE: localize is not supported because it requires python
-			./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
+			"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
 		}
 
 
@@ -448,7 +448,7 @@ for target in $targets ; do
 														|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang"
 			} || {
 				#NOTE: localize is not supported because it requires python
-				./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
+				"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
 			}
 			
 
