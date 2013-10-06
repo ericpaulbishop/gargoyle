@@ -40,7 +40,7 @@ get_i18n_3rd_party_menuname() {
 #
 get_i18n_menuname() {
 	local uci_menu_item="$1"
-	local full_lang="$2"
+	local tgt_lang=$(echo "$2" | awk -F'/' '{ print $(NF) }')
 	local uci_menu_var=$(echo "$uci_menu_item" | awk '{gsub(/\./, "_"); print $1}')
 	local web_root=$(uci get gargoyle.global.web_root)
 	local fallback_lang=$(uci get gargoyle.global.fallback_lang)
@@ -48,11 +48,11 @@ get_i18n_menuname() {
 	local translation=""
 	
 	[ -e "$web_root/i18n/$fallback_lang/menus.txt" ] && . "$web_root/i18n/$fallback_lang/menus.txt"
-	[ -e "$full_lang/menus.txt" ] && . "$full_lang/menus.txt"
+	[ -e "$web_root/i18n/$tgt_lang/menus.txt" ] && . "$web_root/i18n/$tgt_lang/menus.txt"
 	
 	translation="$(eval echo \$$uci_menu_var)"
 	
-	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$full_lang")
+	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$tgt_lang")
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$fallback_lang")
 	
 	translation=$(echo "$translation" | awk '{printf("%s", $0)}')
