@@ -4,7 +4,7 @@
 
 upS.UpFrm="Aktualizacja firmware";
 upS.bkup="back up";
-upS.Warn="Domyślnie aktualizacja firmware spowoduje kompletne usunięcie całej bieżącej konfiguracji. <em>Zalecane</em> jest wykonanie <a href='backup.sh'>kopii bezpieczeństwa</a> bieżącej konfiguracji przed wykonaniem aktualizacji.</p><p>Można zatrzymać konfigurację zaznaczając opcję <em>Zachowaj ustawienia</em>. Należy mieć na uw'adze, że może to spowodować problemy jeżeli wersja firmware jest znacząco nowsza od zainstalowanej, ale dla małych, przyrostowych różnic może działać poprawnie. Aby uniknąć problemów należy zawsze wykonać kopię ustawień.";
+upS.Warn="Domyślnie aktualizacja firmware spowoduje kompletne usunięcie całej bieżącej konfiguracji. <em>Zalecane</em> jest wykonanie <a href='backup.sh'>kopii bezpieczeństwa</a> bieżącej konfiguracji przed wykonaniem aktualizacji.</p><p>Można zatrzymać konfigurację zaznaczając opcję <em>Zachowaj ustawienia</em>. Należy mieć na uwadze, że może to spowodować problemy jeżeli wersja firmware jest znacząco nowsza od zainstalowanej, ale dla małych, przyrostowych różnic może działać poprawnie. Aby uniknąć problemów należy zawsze wykonać kopię ustawień.";
 upS.CGV="Aktualna wersja Gargoyle";
 upS.SelF="Wybierz plik z firmware";
 upS.Prsv="Zachowaj ustawienia";
