@@ -13,3 +13,4 @@ bkS.EraseWarn="This will completely erase your current settings and replace them
 bkS.UpingC="Uploading Configuration File";
 bkS.LdOrig="Loading Original Configuration File";
 bkS.FailErr="Restore failed. Ensure that uploaded file is a valid Gargoyle configuration file and try again.";
+bkS.PrepBack="Preparing Backup File";
