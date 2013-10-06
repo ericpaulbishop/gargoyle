@@ -13,3 +13,4 @@ bkS.EraseWarn="To całkowicie usunie wszystkie ustawienia i zastąpi je nowymi z
 bkS.UpingC="Ładowanie pliku konfiguracji";
 bkS.LdOrig="Ładowanie oryginalnych plików konfiguracyjnych";
 bkS.FailErr="Przywrócenie nie powiodło się. Upewnij się, że załadowany plik zawiera poprawną konfigurację Gargoyle i spróbuj ponownie.";
+bkS.PrepBack="Przygotowanie kopii bezpieczeństwa";

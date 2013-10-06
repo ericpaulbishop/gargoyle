@@ -12,7 +12,7 @@ var globalLanIp;
 
 function getBackup()
 {
-	setControlsEnabled(false, true, "Preparing Backup File");
+	setControlsEnabled(false, true, bkS.PrepBack);
 	var param = getParameterDefinition("commands", "sh /usr/lib/gargoyle/create_backup.sh ;\n" )  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 	var stateChangeFunction = function(req)
