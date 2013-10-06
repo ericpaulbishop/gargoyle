@@ -8,7 +8,9 @@ translation=""
 
 [ -n "$menu_name" ] && {
 	. /usr/lib/gargoyle/i18nServices.sh
-	translation=$(get_i18n_menuname "$menu_name" $(uci -q get gargoyle.global.language))
+	local web_root=$(uci get gargoyle.global.web_root)
+	local active_lang=$(uci -q get gargoyle.global.language)
+	translation=$(get_i18n_menuname "$menu_name" "$web_root/i18n/$active_lang")
 }
 
 echo "$translation"
