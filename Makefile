@@ -14,9 +14,9 @@ ALL:
 		targets=`ls targets | sed 's/custom//g' ` ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "";\
+				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)";\
 			else \
-				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "";\
+				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)";\
 			fi ;\
 		done ;\
 	)
