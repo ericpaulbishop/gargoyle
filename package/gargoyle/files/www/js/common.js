@@ -605,25 +605,9 @@ function UCIContainer()
 
 function getParameterDefinition(parameter, definition)
 {
-	return(fullEscape(parameter) + "=" + fullEscape(definition));
+	return(encodeURIComponent(parameter) + "=" + encodeURIComponent(definition));
 }
 
-
-function fullEscape(str)
-{
-	str = escape(str);
-	var otherEscape = [ '*', '@', '-', '_', '+', '.', '/' ];
-	var otherEscaped= [ '2A','40','2D','5F','2B','2E','2F'];
-	for(oeIndex=0; oeIndex < otherEscape.length; oeIndex++)
-	{
-		var splitStr = str.split( otherEscape[oeIndex] );
-		if(splitStr.length > 1)
-		{
-			str = splitStr.join( "%" + otherEscaped[oeIndex] );
-		}
-	}
-	return str;
-}
 
 function removeStringFromArray(arr, str)
 {
