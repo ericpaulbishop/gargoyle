@@ -4,3 +4,4 @@ fallback=System Logs
 EN=System Logs
 ES=Registros del Sistema
 PL=Logi systemowe
+RU=Системные журналы

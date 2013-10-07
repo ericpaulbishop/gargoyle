@@ -4,3 +4,4 @@ fallback=Webshell
 EN=Webshell
 ES=Webshell
 PL=Webshell
+RU=Webshell

@@ -6,3 +6,4 @@ ES=Horario para WiFi
 BR=Horario para WiFi
 PL=Harmonogram Wi-Fi
 ZH-CN=WIFI计划
+RU=График работы WiFi

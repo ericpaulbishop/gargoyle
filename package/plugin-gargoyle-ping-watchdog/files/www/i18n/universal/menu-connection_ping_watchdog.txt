@@ -5,3 +5,4 @@ EN=Ping Watchdog
 ES=Perro Guardián de Ping
 PL=Monitor połączenia
 ZH-CN=Ping守护进程
+RU=Самоконтроль по Ping-запросам

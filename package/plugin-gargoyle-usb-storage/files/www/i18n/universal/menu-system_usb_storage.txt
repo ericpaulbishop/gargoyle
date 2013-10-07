@@ -5,3 +5,4 @@ EN=USB Storage
 ES=Almacenaje de USB
 PL=Nośniki USB
 ZH-CN=USB存储
+RU=USB-устройства хранения данных
