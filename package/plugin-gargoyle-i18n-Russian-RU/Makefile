@@ -12,14 +12,14 @@ define Package/plugin-gargoyle-i18n-Russian-RU
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
-	TITLE:=Russian-RU language for Gargoyle interface
+	TITLE:=Русский-RU язык для веб-интерфейса Gargoyle
 	MAINTAINER:=Wild Rat
 	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-i18n-Russian-RU/description
-	Russian-RU language strings for Gargoyle web interface
+	Русский-RU язык для веб-интерфейса Gargoyle
 endef
 
 define Build/Prepare
