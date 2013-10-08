@@ -2,11 +2,12 @@
 
 # $1 is the platform
 # $2 is the profile
+# $3 [for distribution type builds] output directory
 
 # creates a massive 500k+ HTML file of (basic) licensing, copyright & binary distribution info for packages used in the profile
 
 scr_path="${BASH_SOURCE[0]}"
-gargoyle_path=$(dirname $(dirname "$scr_path"))
+gargoyle_path=$(echo ${scr_path%/*/*})
 folders=(linux-*_generic target* toolchain*)
 completed_packages=()
 openwrt_GPL_pkgs=(base-files gpio-button-hotplug lzma-loader root* swconfig)
@@ -14,8 +15,12 @@ skip_dirs=(tmp packages squashfs-64k stamp toolchain)
 binary_distribution_search=1
 redistribution_clause_limit=10
 copyright_limit=10
-
 outFile="$gargoyle_path/images/$1/Licenses $1-$2.html"
+
+[[ -n "$3" ]] && {
+	outFile="$gargoyle_path/Distribution/LICENSES/Licenses $1-$2.html"
+}
+
 
 ScrapeLine() {
 	rslt=
@@ -59,7 +64,7 @@ IncludedScrape() {
 	suppl_file="COPYING"
 	[[ "$2" == lua* ]] && suppl_file="COPYRIGHT"
 	
-	ifiles=$(find "$1" -name "$suppl_file" -or -name "LICENSE" -or -name "COPYRIGHT" -or -name "*.*" -and -not -name "*.o" | xargs grep -s -l -i "Copyright")
+	ifiles=$(find "$1" -name "$suppl_file" -or -name "LICENSE" -or -name "COPYRIGHT" -or -name "*.*" -and -not -name "*.o" -print0 | xargs -0 grep -s -l -i "Copyright")
 	r=1
 	while true; do
 		ifile=$(echo "$ifiles" | awk -v rec=$r 'NR==rec {print $0}')
@@ -82,7 +87,7 @@ IncludedScrape() {
 }
 
 FindLicenseFile() {
-	lfiles=$(find "$1" -name "COPYING" -or -name "LICENSE" | xargs grep -s -l -i "license")
+	lfiles=$(find "$1" -name "COPYING" -or -name "LICENSE" -print0 | xargs -0 grep -s -l -i "license")
 	lfound=0
 	r=1
 	
@@ -173,7 +178,7 @@ FindBinaryClause() {
 	[[ "$2" == libncurses* ]] && {
 		return #hackers guide will be a false positive
 	}
-	cfiles=$(find "$1" -name "COPYING" -or -name "LICENSE" -or -name "README" -or -name "*.*" -and -not -type l | xargs grep -s -l "binary form ")
+	cfiles=$(find "$1" -name "COPYING" -or -name "LICENSE" -or -name "README" -or -name "*.*" -and -not -type l -print0 | xargs -0 grep -s -l "binary form ")
 	while true; do
 		cline=$(echo "$cfiles" | awk -v rec=$c 'NR==rec {print $0}')
 		[[ -z "$cline" ]] && break
@@ -199,7 +204,7 @@ FindBinaryClause() {
 
 ScrapeCopyright() {
 	cr=1
-	cfiles=$(find "$1" -name "*.*" -and -not -type l -and -not -name ".o" | xargs grep -s -l "Copyright")
+	cfiles=$(find "$1" -name "*.*" -and -not -type l -and -not -name ".o" -print0 | xargs -0 grep -s -l "Copyright")
 	while true; do
 		crfile=$(echo "$cfiles" | awk -v rec=$cr 'NR==rec {print $0}')
    		[[ -z "$crfile" ]] && break
@@ -217,7 +222,6 @@ ScrapeCopyright() {
 
 #---------------------------
 
-cp -fR "$gargoyle_path/LICENSES" "$gargoyle_path/images/ar71xx/"
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
@@ -240,7 +244,7 @@ strong { font-weight:bold }
 <body>' > "$outFile"
 
 
-build_dirs=$(find "$gargoyle_path/$1-src/build_dir" -maxdepth 1 -type d -and -not -name "host" -and -not -name "build_dir")
+build_dirs=$(find "$gargoyle_path/$1-src/build_dir" -maxdepth 1 -type d -and -not -name "host" -and -not -name "build_dir" | sort)
 bf=1
 while true; do
 	bdir=$(echo "$build_dirs" | awk -v rec=$bf 'NR==rec {print $0}')
@@ -260,6 +264,42 @@ while true; do
 						break
 					}
 				done
+				bare_pkg_name=$(echo "$fldr" | sed 's/[-_ .][rv0-9].*//g')
+				[[ $(basename "$bdir") == target-* ]] && {
+					#weed out the =y packages from the =m packages that are built but not included in the image
+					found_pkg=0
+					[[ $(grep -m 1 "^CONFIG_PACKAGE_$bare_pkg_name" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }') != 'y' ]] && {
+						[[ $(grep -m 1 "^CONFIG_PACKAGE_lib$bare_pkg_name" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }') = 'y' ]] && found_pkg=1
+						
+						[[ $(grep -m 1 "^CONFIG_PACKAGE_$bare_pkg_name" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }') = 'm' ]] && skip_pkg=1
+						
+						[[ -f "$gargoyle_path/$1-src/package/$bare_pkg_name/Makefile" ]] || {
+							bare_pkg_base=$(echo "$bare_pkg_name" | sed 's/_/-/g')
+							[[ -e "$gargoyle_path/$1-src/package/$bare_pkg_base" ]] && {
+								[[ $(grep -m 1 "^CONFIG_PACKAGE_$bare_pkg_base" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }') = 'y' ]] && {
+									found_pkg=1
+								}
+							}
+						}
+					} || {
+						[[ $(grep -m 1 "^CONFIG_PACKAGE_$bare_pkg_name" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }') = 'y' ]] && {
+							found_pkg=1
+						}
+					}
+					
+					[[ $found_pkg != 1 ]] && skip_pkg=1 || skip_pkg=0
+					
+				} || {
+					[[ $(grep -m 1 "$bare_pkg_name" "$gargoyle_path/$1-src/.config") == \#* ]] && {
+						skip_pkg=1
+						[[ "$bare_pkg_name" = 'iw' ]] && skip_pkg=0
+						[[ "$bare_pkg_name" = 'uci' ]] && skip_pkg=0
+					} || {
+						pkg_built_in=$(grep -m 1 "$bare_pkg_name" "$gargoyle_path/$1-src/.config" | awk -F'=' '{ print $2 }')
+					}
+					[[ "$pkg_built_in" = 'm' ]] || [[ "$fldr" ==  plugin_gargoyle* ]] && skip_pkg=1
+				}
+				
 				[[ $skip_pkg = 0 ]] && {
 					echo "Processing package: $fldr"
 					FindLicenseFile "$pkgdir" "$fldr"

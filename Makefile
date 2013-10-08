@@ -7,16 +7,18 @@ JS_COMPRESS=true
 TRANSLATION=internationalize
 FALLBACK_LANG=English-EN
 ACTIVE_LANG=English-EN
+DISTRIBUTION=false
 
 
 ALL:
 	( \
 		targets=`ls targets | sed 's/custom//g' ` ;\
+		if [ -d "Distribution" ] ; then rm -rf "Distribution" ; fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)";\
+				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(DISTRIBUTION)";\
 			else \
-				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)";\
+				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(DISTRIBUTION)";\
 			fi ;\
 		done ;\
 	)
@@ -43,10 +45,11 @@ cleanup:
 		if [ -z "$$have_profile" ] ; then profile="" ; fi ; \
 		if [ ! -d "targets/$${target}" ] ; then echo "ERROR: Specified Target Does Not Exist" ; exit ; fi ; \
 		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
+		if [ -d "Distribution" ] ; then rm -rf "Distribution" ; fi ;\
 		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TARGET)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)"; \
+			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TARGET)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(DISTRIBUTION)"; \
 		else \
-			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)"; \
+			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(DISTRIBUTION)"; \
 		fi ; \
 	)
 
