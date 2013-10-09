@@ -16,7 +16,7 @@ if len(sys.argv) == 3:
 	lang2=sys.argv[2]
 else:
 	sys.stderr.write('Usage: %s lang_1 lang_2\n' % sys.argv[0])
-	sys.exit('  example: %s English-EN English-EN\n' % sys.argv[0])
+	sys.exit('  example: %s English-EN SimplifiedChinese-ZH-CN\n' % sys.argv[0])
 	
 g_base=os.path.dirname(os.path.dirname(sys.argv[0]))
 	

@@ -13,3 +13,4 @@ bkS.EraseWarn="Esto borrará completamente las configuraciones actuales y las re
 bkS.UpingC="Cargando Archivo de Configuración";
 bkS.LdOrig="Cargando Archivo de Configuración Original";
 bkS.FailErr="Restauración fallida. Asegúrese que el archivo cargado es un archivo de configuración válido de Gargoyle y vuelva a intentarlo.";
+bkS.PrepBack="Preparación del Archivo de Copia de Seguridad";

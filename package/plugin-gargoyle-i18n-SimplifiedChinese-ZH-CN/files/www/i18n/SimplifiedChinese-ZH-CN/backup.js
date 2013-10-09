@@ -13,3 +13,4 @@ bkS.EraseWarn="这将完全清除当前设置并使用所选配置文件中新�
 bkS.UpingC="上传配置文件";
 bkS.LdOrig="正在载入原始配置文件";
 bkS.FailErr="恢复失败。确保所上传的文件是一个有效的石像鬼（Gargoyle）配置文件，然后再试一次。";
+bkS.PrepBack="准备备份文件";
