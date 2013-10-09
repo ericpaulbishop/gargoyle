@@ -40,16 +40,17 @@ get_i18n_3rd_party_menuname() {
 #
 get_i18n_menuname() {
 	local uci_menu_item="$1"
-	local tgt_lang=$(echo "$2" | awk -F'/' '{ print $(NF) }')
+	local tgt_lang="$2"
 	local uci_menu_var=$(echo "$uci_menu_item" | awk '{gsub(/\./, "_"); print $1}')
 	local web_root=$(uci get gargoyle.global.web_root)
 	local fallback_lang=$(uci get gargoyle.global.fallback_lang)
 	local uci_trans=""
 	local translation=""
+
 	
 	[ -e "$web_root/i18n/$fallback_lang/menus.txt" ] && . "$web_root/i18n/$fallback_lang/menus.txt"
 	[ -e "$web_root/i18n/$tgt_lang/menus.txt" ] && . "$web_root/i18n/$tgt_lang/menus.txt"
-	
+
 	translation="$(eval echo \$$uci_menu_var)"
 	
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$tgt_lang")
@@ -66,8 +67,6 @@ get_i18n_menuname() {
 change_menu_language() {
 	local lang_ipk="$1"
 	local new_lang=$(echo "$lang_ipk" | awk '{gsub(/\/.*\//,""); gsub("plugin-gargoyle-i18n-",""); gsub(/_[0-9]/, " "); print $1}')
-	local web_root=$(uci get gargoyle.global.web_root)
-	local new_langDir="$web_root/i18n/$new_lang"
 	local uciName
 	local uci_val
 	local old_ifs=$IFS
@@ -78,8 +77,7 @@ change_menu_language() {
 	#set -x
 	for uciMenu in $(uci show gargoyle.display 2>/dev/null | grep -v gargoyle.display=display); do
 		uciName=$(echo "$uciMenu" | awk -F '=' '{print $1}')
-		
-		uci_val=$(get_i18n_menuname "$uciName" "$new_langDir")		
+		uci_val=$(get_i18n_menuname "$uciName" "$new_lang")
 		[ -n "$uci_val" ] && uci set "$uciName=$uci_val"
 	done
 	#set +x
