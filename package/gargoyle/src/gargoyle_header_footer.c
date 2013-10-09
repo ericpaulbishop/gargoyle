@@ -1471,7 +1471,8 @@ int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_p
 	return ret_value;
 }
 
-char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang) {
+char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang)
+{
 #ifdef LOCALIZED_BUILD
 	return NULL;
 #else
@@ -1484,34 +1485,43 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
 	//index=3: ghf.waits="Please Wait While Settings Are Applied";
 	char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
 	
-	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK ) {
+	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK )
+	{
 		unsigned long num_lines = 0;
 		char** ghf_js_lines = get_file_lines(ghfs_path, &num_lines);
 		
-		if (memcmp(ghf_js_lines[0], "\xEF\xBB\xBF", 3) == 0) { //Found a UTF8 BOM
+		if (memcmp(ghf_js_lines[0], "\xEF\xBB\xBF", 3) == 0)
+		{ //Found a UTF8 BOM
 			unsigned long ghf_line;
 			
-			for (ghf_line=0; ghf_line < num_lines; ghf_line++) {
+			for (ghf_line=0; ghf_line < num_lines; ghf_line++)
+			{
 				char* this_line = ghf_js_lines[ghf_line];
 				unsigned char idx, start_str, end_str = 0;
 				
-				for (idx=0; idx < strlen(this_line); idx++) {
+				for (idx=0; idx < strlen(this_line); idx++)
+				{
 					//UTF8-BOM+ start of comment (/*) or just start of comment (/*)? skip the line
-					if (memcmp(this_line+idx, "\xEF\xBB\xBF/*", 5) == 0 || memcmp(this_line+idx, "/*", 2) == 0) {
+					if (memcmp(this_line+idx, "\xEF\xBB\xBF/*", 5) == 0 || memcmp(this_line+idx, "/*", 2) == 0)
+					{
 						continue;
 					}
 					//skip lines shorter than 4 bytes (ghf. is 4 bytes, which is malformed) + skip empty lines
-					if (strlen(this_line) < 5 || this_line[idx] == '\n') {
+					if (strlen(this_line) < 5 || this_line[idx] == '\n')
+					{
 						continue;
 					}
-					if (this_line[idx] == '"' && this_line[idx-1] == '=') {
+					if (this_line[idx] == '"' && this_line[idx-1] == '=')
+					{
 						start_str=idx+1;
 					}
-					if (this_line[idx] == '"' && this_line[idx+1] == ';') {
+					if (this_line[idx] == '"' && this_line[idx+1] == ';')
+					{
 						end_str=idx;
 					}
 				}
-				if (start_str > 0 && end_str > 0) {
+				if (start_str > 0 && end_str > 0)
+				{
 					char* val=(char*)calloc(end_str-start_str<8?8:(end_str-start_str)+1, sizeof(char));
 					memcpy(val, this_line+start_str, end_str-start_str);
 					GHFstrings[ghf_idx]=val;
