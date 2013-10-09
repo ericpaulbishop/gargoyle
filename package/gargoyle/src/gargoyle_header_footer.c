@@ -1484,7 +1484,7 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
 	//index=3: ghf.waits="Please Wait While Settings Are Applied";
 	char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
 	
-	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE) {
+	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK ) {
 		unsigned long num_lines = 0;
 		char** ghf_js_lines = get_file_lines(ghfs_path, &num_lines);
 		
