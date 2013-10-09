@@ -6,7 +6,7 @@ fbS.ISSect="Initial Settings";
 fbS.npass="Enter a new password now";
 fbS.NPass="New Password";
 fbS.Stz="Select your timezone";
-fbs.Sla="Select Language";
+fbS.Sla="Select Language";
 fbS.SSet="Save Settings";
 fbS.ULngF="Upload Language File";
 
