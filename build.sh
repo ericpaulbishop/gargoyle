@@ -166,6 +166,59 @@ do_js_compress()
 	cd "$top_dir"
 }
 
+distrib_copy_arch_ind_ipk()
+{
+	local tgt="$1"
+	local ltype="$2"
+	local di=1
+	
+	local dpkgs=$(find "$top_dir/package" -path '*plugin-gargoyle-*' -and -name 'Makefile' -and -not -path '*-i18n-*' | xargs grep -s -l "DEPENDS:=+gargoyle$" | xargs grep -s -l "PKGARCH:=all$" | awk -F'/' '{print $(NF-1)}')
+	
+	# printf -- '%s\n' "${dpkgs[@]}"
+	
+	if [ ! -d "$top_dir/Distribution/architecture-independent packages ]" ] ; then
+		mkdir -p "$top_dir/Distribution/architecture-independent packages"
+	fi
+	#if [ ! -d "$top_dir/Distribution/theme packages ]" ] ; then
+	#	mkdir -p "$top_dir/Distribution/theme packages"
+	#fi
+	
+	if [ ! -d "$top_dir/Distribution/theme packages ]" ] && [ "$ltype" = 'internationalize' ] ; then
+		mkdir -p "$top_dir/Distribution/language packages"
+	fi
+	
+	while true; do
+		local apkg=$(echo "$dpkgs" | awk -v rec=$di 'NR==rec {print $0}')
+		[[ -z "$apkg" ]] && 
+		{
+			break
+		} || {
+			ipkg=("$top_dir/$tgt-src/bin/$tgt/packages/${apkg}"*"ipk")
+			[[ -f "${ipkg[0]}" ]] &&
+			{
+				cp -f "$top_dir/$tgt-src/bin/$tgt/packages/$apkg"*".ipk" "$top_dir/Distribution/architecture-independent packages/"
+			}
+		}
+		let di++
+	done
+	#cp -f "$top_dir/$tgt-src/bin/$tgt/packages/plugin-gargoyle-theme-"*".ipk" "$top_dir/Distribution/theme packages/"
+	
+	if [ "$ltype" = 'internationalize' ] ; then
+		cp -f "$top_dir/$tgt-src/bin/$tgt/packages/plugin-gargoyle-i18n-"*".ipk" "$top_dir/Distribution/language packages/"
+	fi
+}
+
+distrib_init ()
+{
+	if [ ! -d "$top_dir/Distribution" ] ; then
+		mkdir "$top_dir/Distribution"
+	fi
+	#git log --since=5/16/2013 $(git log -1 --pretty=format:%h) --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/changelog.txt"
+	git log 1.5.10..$(git log -1 --pretty=format:%h) --no-merges --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/Gargoyle changelog.txt"
+	svn log -r "$rnum":36425 svn://svn.openwrt.org/openwrt/branches/attitude_adjustment/ > "$top_dir/Distribution/OpenWrt changelog.txt"
+	cp -fR "$top_dir/LICENSES" "$top_dir/Distribution/"
+}
+
 
 ######################################################################################################
 ## Begin Main Body of Build Script                                                                  ##
@@ -193,6 +246,7 @@ specified_profile="$7"
 translation_type="$8"
 fallback_lang="$9"
 active_lang="${10}"
+distribution="${11}"
 
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
@@ -484,6 +538,12 @@ for target in $targets ; do
 		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	fi
+	
+	if [ "$distribution" = "true" ] || [ "$distribution" = "TRUE" ] || [ "$distribution" = "1" ] ; then
+		distribution="true"
+		distrib_init
+		mkdir -p "$top_dir/Distribution/Images/$target-$default_profile"
+	fi
 
 	#copy packages to built/target directory
 	mkdir -p "$top_dir/built/$target/$default_profile"
@@ -508,6 +568,9 @@ for target in $targets ; do
 			if [ ! -d "bin/$arch/$imf" ] ; then
 				newname=$(echo "$imf" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 				cp "bin/$arch/$imf" "$top_dir/images/$target/$newname"
+				if [ "$distribution" = "true" ] ; then
+					cp "bin/$arch/$imf" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+				fi
 			fi
 		done
 	else
@@ -518,6 +581,9 @@ for target in $targets ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+					if [ "$distribution" = "true" ] ; then
+						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+					fi
 				fi
 			done
 		done
@@ -526,6 +592,14 @@ for target in $targets ; do
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
 		exit
+	fi
+	
+	if [ "$distribution" = "true" ] ; then
+		#Generate licenses file for each profile
+		#Copy architecture independent packages & themes to Distribution folder
+		echo "Generating Licenses file (expect it to take 5+ minutes)"
+		sh "$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+		distrib_copy_arch_ind_ipk "$target" "$translation_type"
 	fi
 
 	other_profiles=""
@@ -591,6 +665,10 @@ for target in $targets ; do
 				cp "$inf" "$top_dir/built/$target/$profile_name/"
 			done
 		fi
+		
+		if [ "$distribution" = "true" ] ; then
+			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"
+		fi
 
 
 		#copy relevant images for which this profile applies
@@ -601,9 +679,19 @@ for target in $targets ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+					if [ "$distribution" = "true" ] ; then
+						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$profile_name/$newname"
+					fi
 				fi
 			done
 		done
+		if [ "$distribution" = "true" ] ; then
+			#Generate licenses file for each profile
+			#Copy architecture independent packages & themes to Distribution folder
+			echo "Generating Licenses file (expect it to take 5+ minutes)"
+			sh "$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+			distrib_copy_arch_ind_ipk "$target" "$translation_type"
+		fi
 	done
 
        
