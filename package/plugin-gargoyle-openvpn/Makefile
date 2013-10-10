@@ -27,6 +27,7 @@ define Package/plugin-gargoyle-openvpn
 	TITLE:=OpenVPN Support for Gargoyle
 	DEPENDS:=+gargoyle +openvpn +openvpn-easy-rsa +zip
 	MAINTAINER:=Eric Bishop
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-openvpn/description
