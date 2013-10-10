@@ -36,7 +36,11 @@ define Package/plugin-gargoyle-wifi-schedule/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci set gargoyle.display.system_wifi_schedule='WiFi Schedule'
+	menu_name="WiFi Schedule"
+	[ -n `which i18n` ] && {
+		menu_name=$$(i18n-menu gargoyle.display.system_wifi_schedule)
+	}
+	uci set gargoyle.display.system_wifi_schedule="$$menu_name"
 	uci set gargoyle.scripts.system_wifi_schedule='wifi_schedule.sh'
 	uci set gargoyle.system.wifi_schedule='370'
 	uci commit
