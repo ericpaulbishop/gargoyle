@@ -36,7 +36,11 @@ define Package/plugin-gargoyle-webshell/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci set gargoyle.display.system_webshell='Webshell'
+	menu_name="Webshell"
+	[ -n `which i18n` ] && {
+		menu_name=$$(i18n-menu gargoyle.display.system_webshell)
+	}
+	uci set gargoyle.display.system_webshell="$$menu_name"
 	uci set gargoyle.scripts.system_webshell='webshell.sh'
 	uci set gargoyle.system.webshell='312'
 	uci commit
