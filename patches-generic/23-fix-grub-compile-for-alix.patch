@@ -1,0 +1,10 @@
+--- a/package/grub/Makefile	2013-10-09 16:07:12.977620664 -0400
++++ b/package/grub/Makefile	2013-10-12 16:15:04.524722401 -0400
+@@ -69,6 +69,7 @@
+ define Host/Configure
+ 	(cd $(HOST_BUILD_DIR); aclocal && autoconf && automake)
+ 	$(call Host/Configure/Default)
++	echo "good"
+ endef
+ 
+ ifeq ($(HOST_OS),Darwin)
