@@ -34,11 +34,7 @@ define Package/plugin-gargoyle-ping-watchdog/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	menu_name="Ping Watchdog"
-	[ -n `which i18n` ] && {
-		menu_name=$$(i18n-menu gargoyle.display.connection_ping_watchdog)
-	}
-	uci set gargoyle.display.connection_ping_watchdog="$$menu_name"
+	uci set gargoyle.display.connection_ping_watchdog='Ping Watchdog'
 	uci set gargoyle.scripts.connection_ping_watchdog='ping_watchdog.sh'
 	uci set gargoyle.connection.ping_watchdog='600'
 	uci commit

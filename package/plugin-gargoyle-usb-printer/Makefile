@@ -50,11 +50,7 @@ endef
 
 define Package/plugin-gargoyle-usb-printer/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
-		menu_name="USB Printer"
-		[ -n `which i18n` ] && {
-			menu_name=$$(i18n-menu gargoyle.display.system_printers)
-		}
-		uci set gargoyle.display.system_printers="$$menu_name"
+		uci set gargoyle.display.system_printers="USB Printer"
 		uci set gargoyle.scripts.system_printers="printers.sh"
 		uci set gargoyle.system.printers="360"
 		uci commit
