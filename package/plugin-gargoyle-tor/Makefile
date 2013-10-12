@@ -27,6 +27,7 @@ define Package/plugin-gargoyle-tor
 	TITLE:=Tor Anonymizer Support for Gargoyle
 	DEPENDS:=+gargoyle +gargoyle-tor +obfsproxy
 	MAINTAINER:=Eric Bishop
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-tor/description

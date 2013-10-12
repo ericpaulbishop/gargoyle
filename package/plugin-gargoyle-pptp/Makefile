@@ -16,6 +16,7 @@ define Package/plugin-gargoyle-pptp
 	TITLE:=PPTP Support for Gargoyle
 	DEPENDS:=+gargoyle +ppp-mod-pptp
 	MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-pptp/description

@@ -27,6 +27,7 @@ define Package/plugin-gargoyle-usb-printer
 	TITLE:=USB Printer Support for Gargoyle
 	DEPENDS:=+kmod-usb-printer +p910nd
 	MAINTAINER:=Eric Bishop
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-usb-printer/description
