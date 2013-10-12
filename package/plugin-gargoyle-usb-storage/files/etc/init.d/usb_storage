@@ -71,9 +71,9 @@ do_start()
 		rm "/tmp/usb_mount/$did" >/dev/null 2>&1
 		
 		
-		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap")
+		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap|HFS Plus")
 		if [ -e /sbin/mount.exfat ] ; then
-			type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap")
+			type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap|HFS Plus")
 		fi
 
 		local err
@@ -118,6 +118,13 @@ do_start()
 				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
 				mount -t ext2 -o noatime "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+			;;
+			'HFS Plus')
+				mkdir -p "/tmp/usb_mount/$id"
+				chmod 777  "/tmp/usb_mount/$id"
+				umount "/tmp/usb_mount/$id" 2>/dev/null
+				mount -t hfsplus "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id" 2> /dev/null
+				type="HFS+"
 			;;
 			*)
 				err="unmountable"
