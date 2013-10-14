@@ -6,8 +6,7 @@
 
 # creates a massive 500k+ HTML file of (basic) licensing, copyright & binary distribution info for packages used in the profile
 
-scr_path="${BASH_SOURCE[0]}"
-gargoyle_path=$(echo ${scr_path%/*/*})
+gargoyle_path="${BASH_SOURCE[0]%/*/*}"
 folders=(linux-*_generic target* toolchain*)
 completed_packages=()
 openwrt_GPL_pkgs=(base-files gpio-button-hotplug lzma-loader root* swconfig)
@@ -26,8 +25,7 @@ ScrapeLine() {
 	rslt=
 	GPL_idx=$(echo "$1" | awk '{for (i=1;i<=NF;i++) {if ($i ~ /GNU/) {print i}}}')
 	[[ -n "$GPL_idx" ]] && {
-		rslt=$(echo "$1" | awk -v g_idx=$GPL_idx '{for (i=g_idx;i<=NF;i++) printf("%s%s", $i, i==NF?"\n":" ") }')
-		
+		rslt=$(echo "$1" | awk -v g_idx=$GPL_idx '{for (i=g_idx;i<=NF;i++) printf("%s%s", $i, i==NF?"\n":" ") }')		
 	}
 	echo "$rslt"
 }
@@ -250,7 +248,7 @@ while true; do
 	bdir=$(echo "$build_dirs" | awk -v rec=$bf 'NR==rec {print $0}')
 	[[ -z "$bdir" ]] && break
    	[[ -d "$bdir" ]] && {
-		pkg_folders=$(find "$bdir" -maxdepth 1 -type d)
+		pkg_folders=$(find "$bdir" -maxdepth 1 -type d | sort)
 		pkg=1
 		while true; do
 			pkgdir=$(echo "$pkg_folders" | awk -v rec=$pkg 'NR==rec {print $0}')
