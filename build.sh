@@ -598,7 +598,7 @@ for target in $targets ; do
 		#Generate licenses file for each profile
 		#Copy architecture independent packages & themes to Distribution folder
 		echo "Generating Licenses file (expect it to take 5+ minutes)"
-		sh "$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+		"$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
 		distrib_copy_arch_ind_ipk "$target" "$translation_type"
 	fi
 
@@ -689,7 +689,7 @@ for target in $targets ; do
 			#Generate licenses file for each profile
 			#Copy architecture independent packages & themes to Distribution folder
 			echo "Generating Licenses file (expect it to take 5+ minutes)"
-			sh "$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+			"$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
 			distrib_copy_arch_ind_ipk "$target" "$translation_type"
 		fi
 	done
