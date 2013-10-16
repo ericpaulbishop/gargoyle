@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Fri Jul 12 14:50:21 2013
+# Wed Oct 16 14:52:43 2013
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -489,7 +489,6 @@ CONFIG_KERNEL_RELAY=y
 CONFIG_IPV6=y
 CONFIG_PKG_BUILD_PARALLEL=y
 CONFIG_PKG_BUILD_USE_JOBSERVER=y
-
 
 #
 # Stripping options
@@ -1332,11 +1331,17 @@ CONFIG_PACKAGE_netifd=y
 # CONFIG_PACKAGE_om-watchdog is not set
 CONFIG_PACKAGE_opkg=m
 # CONFIG_PACKAGE_qos-scripts is not set
-# CONFIG_PACKAGE_resolveip is not set
+CONFIG_PACKAGE_resolveip=m
 CONFIG_PACKAGE_swconfig=y
+CONFIG_PACKAGE_ubus=y
+CONFIG_PACKAGE_ubusd=y
 CONFIG_PACKAGE_uci=y
 # CONFIG_PACKAGE_udev is not set
 CONFIG_PACKAGE_wireless-tools=y
+
+#
+# Emulators
+#
 
 #
 # Libraries
@@ -1409,6 +1414,8 @@ CONFIG_PACKAGE_libnl-tiny=y
 # CONFIG_PACKAGE_libreadline is not set
 # CONFIG_PACKAGE_librpc is not set
 CONFIG_PACKAGE_libubox=y
+CONFIG_PACKAGE_libubus=y
+# CONFIG_PACKAGE_libubus-lua is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
 # CONFIG_PACKAGE_libusb is not set
@@ -1422,144 +1429,39 @@ CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_zlib is not set
 
 #
-# Network
+# Administration
 #
 
 #
-# File Transfer
+# Gargoyle Web Interface
 #
-# CONFIG_PACKAGE_vsftpd is not set
-
-#
-# Filesystem
-#
-# CONFIG_PACKAGE_nfs-kernel-server is not set
-
-#
-# Firewall
-#
-# CONFIG_PACKAGE_arptables is not set
-CONFIG_PACKAGE_ebtables=y
-# CONFIG_PACKAGE_ebtables-utils is not set
-CONFIG_PACKAGE_iptables=y
-CONFIG_PACKAGE_iptables-mod-bandwidth=y
-CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
-CONFIG_PACKAGE_iptables-mod-extra=y
-CONFIG_PACKAGE_iptables-mod-filter=y
-# CONFIG_PACKAGE_iptables-mod-hashlimit is not set
-CONFIG_PACKAGE_iptables-mod-imq=y
-CONFIG_PACKAGE_iptables-mod-ipopt=y
-CONFIG_PACKAGE_iptables-mod-iprange=y
-# CONFIG_PACKAGE_iptables-mod-ipsec is not set
-CONFIG_PACKAGE_iptables-mod-ipset=y
-# CONFIG_PACKAGE_iptables-mod-led is not set
-CONFIG_PACKAGE_iptables-mod-nat-extra=y
-# CONFIG_PACKAGE_iptables-mod-tee is not set
-CONFIG_PACKAGE_iptables-mod-timerange=y
-# CONFIG_PACKAGE_iptables-mod-tproxy is not set
-# CONFIG_PACKAGE_iptables-mod-u32 is not set
-# CONFIG_PACKAGE_iptables-mod-ulog is not set
-CONFIG_PACKAGE_iptables-mod-webmon=y
-CONFIG_PACKAGE_iptables-mod-weburl=y
-CONFIG_PACKAGE_miniupnpd=y
-
-#
-# Routing and Redirection
-#
-CONFIG_PACKAGE_ip=y
-# CONFIG_PACKAGE_relayd is not set
-
-#
-# Telephony
-#
-
-#
-# VPN
-#
-# CONFIG_PACKAGE_openvpn is not set
-# CONFIG_PACKAGE_openvpn-easy-rsa is not set
-
-#
-# Web
-#
-CONFIG_PACKAGE_httpd-gargoyle=y
-CONFIG_PACKAGE_webmon-gargoyle=y
-
-#
-# Web Servers/Proxies
-#
-# CONFIG_PACKAGE_uhttpd is not set
-# CONFIG_PACKAGE_uhttpd_debug is not set
-CONFIG_PACKAGE_bwmon-gargoyle=y
-# CONFIG_PACKAGE_chat is not set
-# CONFIG_PACKAGE_crda is not set
-CONFIG_PACKAGE_ddns-gargoyle=y
-CONFIG_PACKAGE_ewget=y
-CONFIG_PACKAGE_gargoyle-firewall-util=y
-# CONFIG_PACKAGE_gargoyle-tor is not set
-# CONFIG_PACKAGE_gargoyle-tor-geoip is not set
-# CONFIG_PACKAGE_genl is not set
-# CONFIG_PACKAGE_hostapd is not set
-# CONFIG_PACKAGE_hostapd-mini is not set
-# CONFIG_PACKAGE_hostapd-utils is not set
-# CONFIG_PACKAGE_ifenslave is not set
-CONFIG_PACKAGE_ipset=y
-CONFIG_PACKAGE_iw=y
-CONFIG_PACKAGE_libiptbwctl=y
-# CONFIG_PACKAGE_obfsproxy is not set
-# CONFIG_PACKAGE_p910nd is not set
-# CONFIG_PACKAGE_portmap is not set
-CONFIG_PACKAGE_ppp=y
-# CONFIG_PACKAGE_ppp-mod-pppoa is not set
-CONFIG_PACKAGE_ppp-mod-pppoe=y
-# CONFIG_PACKAGE_ppp-mod-pppol2tp is not set
-CONFIG_PACKAGE_ppp-mod-pptp=m
-# CONFIG_PACKAGE_ppp-mod-radius is not set
-# CONFIG_PACKAGE_ppp-multilink is not set
-# CONFIG_PACKAGE_pppdump is not set
-# CONFIG_PACKAGE_pppstats is not set
-CONFIG_PACKAGE_qos-gargoyle=y
-# CONFIG_PACKAGE_samba36-client is not set
-# CONFIG_PACKAGE_samba36-server is not set
-# CONFIG_PACKAGE_soloscli is not set
-# CONFIG_PACKAGE_ss is not set
-CONFIG_PACKAGE_tc=y
-# CONFIG_PACKAGE_vsc7385-ucode-ap83 is not set
-# CONFIG_PACKAGE_vsc7385-ucode-pb44 is not set
-# CONFIG_PACKAGE_vsc7395-ucode-ap83 is not set
-# CONFIG_PACKAGE_vsc7395-ucode-pb44 is not set
-# CONFIG_PACKAGE_wget-default is not set
-# CONFIG_PACKAGE_wget-matrixssl is not set
-# CONFIG_PACKAGE_wget-nossl is not set
-CONFIG_PACKAGE_wol=y
-# CONFIG_PACKAGE_wpa-cli is not set
-# CONFIG_PACKAGE_wpa-supplicant is not set
-# CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
-# CONFIG_WPA_RFKILL_SUPPORT is not set
-CONFIG_WPA_MSG_MIN_PRIORITY=3
-# CONFIG_DRIVER_WEXT_SUPPORT is not set
-CONFIG_DRIVER_11N_SUPPORT=y
-# CONFIG_PACKAGE_wpa-supplicant-mini is not set
-# CONFIG_PACKAGE_wpad is not set
-CONFIG_PACKAGE_wpad-mini=y
-# CONFIG_PACKAGE_wprobe-export is not set
-# CONFIG_PACKAGE_wprobe-util is not set
-
-#
-# IPv6
-#
-
-#
-# Firewall
-#
-# CONFIG_PACKAGE_ip6tables is not set
-# CONFIG_PACKAGE_6in4 is not set
-# CONFIG_PACKAGE_6rd is not set
-# CONFIG_PACKAGE_6relayd is not set
-# CONFIG_PACKAGE_6to4 is not set
-# CONFIG_PACKAGE_ds-lite is not set
-# CONFIG_PACKAGE_ipv6-support is not set
-# CONFIG_PACKAGE_odhcp6c is not set
+CONFIG_PACKAGE_gargoyle=y
+# CONFIG_PACKAGE_gargoyle-i18n is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES is not set
+# CONFIG_PACKAGE_plugin-gargoyle-initd is not set
+# CONFIG_PACKAGE_plugin-gargoyle-logread is not set
+# CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
+# CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog is not set
+CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
+# CONFIG_PACKAGE_plugin-gargoyle-tor is not set
+# CONFIG_PACKAGE_plugin-gargoyle-usb-printer is not set
+# CONFIG_PACKAGE_plugin-gargoyle-usb-storage is not set
+# CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
+# CONFIG_PACKAGE_plugin-gargoyle-webshell is not set
+# CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule is not set
 
 #
 # Kernel modules
@@ -1978,6 +1880,7 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-rt2800-pci is not set
 # CONFIG_PACKAGE_kmod-rt2800-usb is not set
 # CONFIG_PACKAGE_kmod-rt2x00-lib is not set
+# CONFIG_PACKAGE_kmod-rt2x00-mmio is not set
 # CONFIG_PACKAGE_kmod-rt2x00-pci is not set
 # CONFIG_PACKAGE_kmod-rt2x00-usb is not set
 # CONFIG_PACKAGE_kmod-rt61-pci is not set
@@ -1985,27 +1888,6 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-rtl8180 is not set
 # CONFIG_PACKAGE_kmod-rtl8187 is not set
 # CONFIG_PACKAGE_kmod-zd1211rw is not set
-
-#
-# Boot Loaders
-#
-CONFIG_PACKAGE_uboot-ar71xx-nbg460n_550n_550nh=y
-
-#
-# LuCI2
-#
-
-#
-# Libraries
-#
-CONFIG_PACKAGE_libubus=y
-# CONFIG_PACKAGE_libubus-lua is not set
-
-#
-# System
-#
-CONFIG_PACKAGE_ubus=y
-CONFIG_PACKAGE_ubusd=y
 
 #
 # Multimedia
@@ -2016,29 +1898,25 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_gargoyle-mjpg-streamer is not set
 
 #
-# Administration
+# IPv6
 #
 
 #
-# Gargoyle Web Interface
+# Firewall
 #
-CONFIG_PACKAGE_gargoyle=y
-# CONFIG_PACKAGE_plugin-gargoyle-logread is not set
-# CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
-# CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog is not set
-CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-# CONFIG_PACKAGE_plugin-gargoyle-tor is not set
-# CONFIG_PACKAGE_plugin-gargoyle-usb-printer is not set
-# CONFIG_PACKAGE_plugin-gargoyle-usb-storage is not set
-# CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
-# CONFIG_PACKAGE_plugin-gargoyle-webshell is not set
-# CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule is not set
+# CONFIG_PACKAGE_ip6tables is not set
+# CONFIG_PACKAGE_6in4 is not set
+# CONFIG_PACKAGE_6rd is not set
+# CONFIG_PACKAGE_6relayd is not set
+# CONFIG_PACKAGE_6to4 is not set
+# CONFIG_PACKAGE_ds-lite is not set
+# CONFIG_PACKAGE_ipv6-support is not set
+# CONFIG_PACKAGE_odhcp6c is not set
+
+#
+# Boot Loaders
+#
+CONFIG_PACKAGE_uboot-ar71xx-nbg460n_550n_550nh=y
 
 #
 # Utilities
@@ -2109,6 +1987,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 # CONFIG_PACKAGE_getopt is not set
 # CONFIG_PACKAGE_gpioctl is not set
 CONFIG_PACKAGE_gpkg=y
+# CONFIG_PACKAGE_haserl is not set
 CONFIG_PACKAGE_haserl-i18n=y
 # CONFIG_PACKAGE_hwclock is not set
 # CONFIG_PACKAGE_iconv is not set
@@ -2150,10 +2029,6 @@ CONFIG_PACKAGE_uboot-envtools=y
 # CONFIG_PACKAGE_xfs-mkfs is not set
 
 #
-# Emulators
-#
-
-#
 # Languages
 #
 
@@ -2163,4 +2038,127 @@ CONFIG_PACKAGE_uboot-envtools=y
 # CONFIG_PACKAGE_libiwinfo-lua is not set
 # CONFIG_PACKAGE_lua is not set
 # CONFIG_PACKAGE_luac is not set
-CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+
+#
+# Network
+#
+
+#
+# File Transfer
+#
+# CONFIG_PACKAGE_vsftpd is not set
+
+#
+# Filesystem
+#
+# CONFIG_PACKAGE_nfs-kernel-server is not set
+
+#
+# Firewall
+#
+# CONFIG_PACKAGE_arptables is not set
+CONFIG_PACKAGE_ebtables=y
+# CONFIG_PACKAGE_ebtables-utils is not set
+CONFIG_PACKAGE_iptables=y
+CONFIG_PACKAGE_iptables-mod-bandwidth=y
+CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+CONFIG_PACKAGE_iptables-mod-extra=y
+CONFIG_PACKAGE_iptables-mod-filter=y
+# CONFIG_PACKAGE_iptables-mod-hashlimit is not set
+CONFIG_PACKAGE_iptables-mod-imq=y
+CONFIG_PACKAGE_iptables-mod-ipopt=y
+CONFIG_PACKAGE_iptables-mod-iprange=y
+# CONFIG_PACKAGE_iptables-mod-ipsec is not set
+CONFIG_PACKAGE_iptables-mod-ipset=y
+# CONFIG_PACKAGE_iptables-mod-led is not set
+CONFIG_PACKAGE_iptables-mod-nat-extra=y
+# CONFIG_PACKAGE_iptables-mod-tee is not set
+CONFIG_PACKAGE_iptables-mod-timerange=y
+# CONFIG_PACKAGE_iptables-mod-tproxy is not set
+# CONFIG_PACKAGE_iptables-mod-u32 is not set
+# CONFIG_PACKAGE_iptables-mod-ulog is not set
+CONFIG_PACKAGE_iptables-mod-webmon=y
+CONFIG_PACKAGE_iptables-mod-weburl=y
+CONFIG_PACKAGE_miniupnpd=y
+
+#
+# Routing and Redirection
+#
+CONFIG_PACKAGE_ip=y
+# CONFIG_PACKAGE_relayd is not set
+
+#
+# Telephony
+#
+
+#
+# VPN
+#
+# CONFIG_PACKAGE_openvpn is not set
+# CONFIG_PACKAGE_openvpn-easy-rsa is not set
+
+#
+# Web
+#
+CONFIG_PACKAGE_httpd-gargoyle=y
+CONFIG_PACKAGE_webmon-gargoyle=y
+
+#
+# Web Servers/Proxies
+#
+# CONFIG_PACKAGE_uhttpd is not set
+# CONFIG_PACKAGE_uhttpd_debug is not set
+CONFIG_PACKAGE_bwmon-gargoyle=y
+# CONFIG_PACKAGE_chat is not set
+# CONFIG_PACKAGE_crda is not set
+CONFIG_PACKAGE_ddns-gargoyle=y
+CONFIG_PACKAGE_ewget=y
+CONFIG_PACKAGE_gargoyle-firewall-util=y
+# CONFIG_PACKAGE_gargoyle-tor is not set
+# CONFIG_PACKAGE_gargoyle-tor-geoip is not set
+# CONFIG_PACKAGE_genl is not set
+# CONFIG_PACKAGE_hostapd is not set
+# CONFIG_PACKAGE_hostapd-mini is not set
+# CONFIG_PACKAGE_hostapd-utils is not set
+# CONFIG_PACKAGE_ifenslave is not set
+CONFIG_PACKAGE_ipset=y
+CONFIG_PACKAGE_iw=y
+CONFIG_PACKAGE_libiptbwctl=y
+# CONFIG_PACKAGE_obfsproxy is not set
+# CONFIG_PACKAGE_p910nd is not set
+# CONFIG_PACKAGE_portmap is not set
+CONFIG_PACKAGE_ppp=y
+# CONFIG_PACKAGE_ppp-mod-pppoa is not set
+CONFIG_PACKAGE_ppp-mod-pppoe=y
+# CONFIG_PACKAGE_ppp-mod-pppol2tp is not set
+CONFIG_PACKAGE_ppp-mod-pptp=m
+# CONFIG_PACKAGE_ppp-mod-radius is not set
+# CONFIG_PACKAGE_ppp-multilink is not set
+# CONFIG_PACKAGE_pppdump is not set
+# CONFIG_PACKAGE_pppstats is not set
+CONFIG_PACKAGE_qos-gargoyle=y
+# CONFIG_PACKAGE_samba36-client is not set
+# CONFIG_PACKAGE_samba36-server is not set
+# CONFIG_PACKAGE_soloscli is not set
+# CONFIG_PACKAGE_ss is not set
+CONFIG_PACKAGE_tc=y
+# CONFIG_PACKAGE_vsc7385-ucode-ap83 is not set
+# CONFIG_PACKAGE_vsc7385-ucode-pb44 is not set
+# CONFIG_PACKAGE_vsc7395-ucode-ap83 is not set
+# CONFIG_PACKAGE_vsc7395-ucode-pb44 is not set
+# CONFIG_PACKAGE_wget-default is not set
+# CONFIG_PACKAGE_wget-matrixssl is not set
+# CONFIG_PACKAGE_wget-nossl is not set
+CONFIG_PACKAGE_wol=y
+# CONFIG_PACKAGE_wpa-cli is not set
+# CONFIG_PACKAGE_wpa-supplicant is not set
+# CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
+# CONFIG_WPA_RFKILL_SUPPORT is not set
+CONFIG_WPA_MSG_MIN_PRIORITY=3
+# CONFIG_DRIVER_WEXT_SUPPORT is not set
+CONFIG_DRIVER_11N_SUPPORT=y
+# CONFIG_PACKAGE_wpa-supplicant-mini is not set
+# CONFIG_PACKAGE_wpad is not set
+CONFIG_PACKAGE_wpad-mini=y
+# CONFIG_PACKAGE_wprobe-export is not set
+# CONFIG_PACKAGE_wprobe-util is not set
