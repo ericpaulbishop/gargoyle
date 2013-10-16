@@ -38,7 +38,10 @@ define Package/plugin-gargoyle-logread/postinst
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	menu_name="System Logs"
 	[ -n `which i18n` ] && {
-		menu_name=$$(i18n-menu gargoyle.display.system_logread)
+		mn=$$(i18n-menu gargoyle.display.system_logread)
+		if [ -n "$$mn" ] ; then
+			menu_name="$$mn"
+		fi
 	}
 	uci set gargoyle.display.system_logread="$$menu_name"
 	uci set gargoyle.scripts.system_logread='logread.sh'

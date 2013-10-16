@@ -53,7 +53,14 @@ endef
 
 define Package/plugin-gargoyle-tor/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
-		uci set gargoyle.display.connection_tor="Tor"
+		menu_name="Tor"
+		[ -n `which i18n` ] && {
+			mn=$$(i18n-menu gargoyle.display.connection_tor)
+			if [ -n "$$mn" ] ; then
+				menu_name="$$mn"
+			fi
+		}
+		uci set gargoyle.display.connection_tor="$$menu_name"
 		uci set gargoyle.scripts.connection_tor="tor.sh"
 		uci set gargoyle.connection.tor="250"
 		uci commit

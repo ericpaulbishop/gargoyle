@@ -36,7 +36,10 @@ define Package/plugin-gargoyle-initd/postinst
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	menu_name="Services"
 	[ -n `which i18n` ] && {
-		menu_name=$$(i18n-menu gargoyle.display.system_initd)
+		mn=$$(i18n-menu gargoyle.display.system_initd)
+		if [ -n "$$mn" ] ; then
+			menu_name="$$mn"
+		fi
 	}
 	uci set gargoyle.display.system_initd="$$menu_name"
 	uci set gargoyle.scripts.system_initd='initd.sh'

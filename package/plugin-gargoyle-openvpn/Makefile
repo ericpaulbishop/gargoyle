@@ -55,7 +55,10 @@ define Package/plugin-gargoyle-openvpn/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
 		menu_name="OpenVPN Status"
 		[ -n `which i18n` ] && {
-			menu_name=$$(i18n-menu gargoyle.scripts.status_openvpn_connections)
+			mn=$$(i18n-menu gargoyle.scripts.status_openvpn_connections)
+			if [ -n "$$mn" ] ; then
+				menu_name="$$mn"
+			fi
 		}
 		uci set gargoyle.display.connection_openvpn="OpenVPN"
 		uci set gargoyle.scripts.connection_openvpn="openvpn.sh"

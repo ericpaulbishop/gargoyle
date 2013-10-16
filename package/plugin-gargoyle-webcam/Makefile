@@ -38,7 +38,10 @@ define Package/plugin-gargoyle-webcam/postinst
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	menu_name="Webcam"
 	[ -n `which i18n` ] && {
-		menu_name=$$(i18n-menu gargoyle.display.system_webcam)
+		mn=$$(i18n-menu gargoyle.display.system_webcam)
+		if [ -n "$$mn" ] ; then
+			menu_name="$$mn"
+		fi
 	}
 	uci set gargoyle.display.system_webcam="$$menu_name"
 	uci set gargoyle.scripts.system_webcam='webcam.sh'

@@ -39,7 +39,14 @@ endef
 
 define Package/plugin-gargoyle-pptp/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then
-		uci set gargoyle.display.connection_pptp="PPTP"
+		menu_name="PPTP"
+		[ -n `which i18n` ] && {
+			mn=$$(i18n-menu gargoyle.display.connection_pptp)
+			if [ -n "$$mn" ] ; then
+				menu_name="$$mn"
+			fi
+		}
+		uci set gargoyle.display.connection_pptp="$$menu_name"
 		uci set gargoyle.scripts.connection_pptp="pptp.sh"
 		uci set gargoyle.connection.pptp="261"
 		uci commit
