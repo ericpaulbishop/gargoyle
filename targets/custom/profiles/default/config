@@ -1513,7 +1513,7 @@ CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
 CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_ppp-mod-pppol2tp is not set
-# CONFIG_PACKAGE_ppp-mod-pptp is not set
+CONFIG_PACKAGE_ppp-mod-pptp=m
 # CONFIG_PACKAGE_ppp-mod-radius is not set
 # CONFIG_PACKAGE_ppp-multilink is not set
 # CONFIG_PACKAGE_pppdump is not set
@@ -1592,14 +1592,14 @@ CONFIG_PACKAGE_kmod-crypto-core=y
 # CONFIG_PACKAGE_kmod-crypto-crc32c is not set
 # CONFIG_PACKAGE_kmod-crypto-deflate is not set
 # CONFIG_PACKAGE_kmod-crypto-des is not set
-# CONFIG_PACKAGE_kmod-crypto-ecb is not set
-# CONFIG_PACKAGE_kmod-crypto-hash is not set
+CONFIG_PACKAGE_kmod-crypto-ecb=m
+CONFIG_PACKAGE_kmod-crypto-hash=m
 # CONFIG_PACKAGE_kmod-crypto-hmac is not set
 # CONFIG_PACKAGE_kmod-crypto-hw-geode is not set
 # CONFIG_PACKAGE_kmod-crypto-hw-hifn-795x is not set
 # CONFIG_PACKAGE_kmod-crypto-hw-padlock is not set
 # CONFIG_PACKAGE_kmod-crypto-iv is not set
-# CONFIG_PACKAGE_kmod-crypto-manager is not set
+CONFIG_PACKAGE_kmod-crypto-manager=m
 # CONFIG_PACKAGE_kmod-crypto-md4 is not set
 # CONFIG_PACKAGE_kmod-crypto-md5 is not set
 # CONFIG_PACKAGE_kmod-crypto-michael-mic is not set
@@ -1607,7 +1607,7 @@ CONFIG_PACKAGE_kmod-crypto-core=y
 # CONFIG_PACKAGE_kmod-crypto-null is not set
 # CONFIG_PACKAGE_kmod-crypto-ocf is not set
 # CONFIG_PACKAGE_kmod-crypto-rng is not set
-# CONFIG_PACKAGE_kmod-crypto-sha1 is not set
+CONFIG_PACKAGE_kmod-crypto-sha1=m
 # CONFIG_PACKAGE_kmod-crypto-test is not set
 # CONFIG_PACKAGE_kmod-crypto-user is not set
 # CONFIG_PACKAGE_kmod-crypto-wq is not set
@@ -1807,7 +1807,7 @@ CONFIG_PACKAGE_kmod-gre=y
 # CONFIG_PACKAGE_kmod-misdn is not set
 # CONFIG_PACKAGE_kmod-mp-alg is not set
 CONFIG_PACKAGE_kmod-ppp=y
-# CONFIG_PACKAGE_kmod-mppe is not set
+CONFIG_PACKAGE_kmod-mppe=m
 # CONFIG_PACKAGE_kmod-netem is not set
 # CONFIG_PACKAGE_kmod-pktgen is not set
 # CONFIG_PACKAGE_kmod-ppp-synctty is not set
