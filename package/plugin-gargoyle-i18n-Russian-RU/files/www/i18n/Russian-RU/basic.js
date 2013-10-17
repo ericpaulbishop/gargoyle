@@ -3,7 +3,7 @@
  */
 
 basicS.DCfgSect="Настройки устройства";
-basicS.CfgDev="Функция устройства";
+basicS.CfgDev="Режим работы устройства";
 basicS.DvGtwy="Шлюз (по-умолчанию)";
 basicS.DvWBrg="Безпроводной мост/повторитель";
 basicS.BrIP="IP-адрес моста";
