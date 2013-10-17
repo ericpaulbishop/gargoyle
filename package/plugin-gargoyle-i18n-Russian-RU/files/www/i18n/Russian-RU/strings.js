@@ -2,8 +2,8 @@
  * UTF-8 (with BOM) Russian-RU text strings for User Interface elements
  */
 
-UI.SaveChanges="Сохранить изменения";
-UI.Reset="Сброс";
+UI.SaveChanges="Сохранить";
+UI.Reset="Сбросить";
 UI.Clear="Очистить историю";
 UI.Delete="Удалить данные";
 UI.DNow="Скачать";
@@ -61,9 +61,9 @@ UI.never="никогда";
 UI.disabled="отключено";
 UI.both="оба";
 UI.seconds="секунд";
-UI.minutes="минут";
-UI.hours="часов";
-UI.days="дней";
+UI.minutes="за минуту";
+UI.hours="за час";
+UI.days="за день";
 UI.second="секунда";
 UI.minute="минута";
 UI.hour="час";
