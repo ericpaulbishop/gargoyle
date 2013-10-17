@@ -2,14 +2,14 @@
  * UTF-8 (with BOM) Russian-RU text strings for overview.sh html elements
  */
 
-ovwS.Sts="Статус";
+ovwS.Sts="Состояние устройства";
 ovwS.DNam="Имя устройства";
 ovwS.GVer="Версия Gargoyle";
 ovwS.Modl="Модель";
-ovwS.DevC="Характеристики устройства";
+ovwS.DevC="Режим работы устройства";
 ovwS.MemU="Использование памяти";
 ovwS.SwMemU="Использование файла подкачки";
-ovwS.Conns="Соеденения";
+ovwS.Conns="Подключения";
 ovwS.CPUAvg="Средние значения загрузки ЦПУ";
 ovwS.Uptm="Время работы";
 ovwS.CDaT="Текущая дата и время";
