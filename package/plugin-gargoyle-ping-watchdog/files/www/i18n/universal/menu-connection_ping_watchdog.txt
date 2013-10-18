@@ -1,7 +1,7 @@
-#fallback is the string the web UI will use when the target language is not present
+﻿#fallback is the string the web UI will use when the target language is not present
 
 fallback=Ping Watchdog
 EN=Ping Watchdog
 ES=Perro Guardián de Ping
 PL=Monitor połączenia
-RU=Самоконтроль по Ping-запросам
+RU=Контроль за соединением
