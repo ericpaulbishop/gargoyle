@@ -1,4 +1,4 @@
-/*
+﻿/*
 * UTF-8 (with BOM) English-EN text strings for pptp.sh html elements
 */
 
