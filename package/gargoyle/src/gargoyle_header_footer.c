@@ -353,10 +353,11 @@ int main(int argc, char **argv)
 					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
 				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
-				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE) {
+				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
+				{
 					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
-                free(tran_file);
+				free(tran_file);
 			}
 		}
 #endif
