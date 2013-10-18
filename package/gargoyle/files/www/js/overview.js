@@ -45,11 +45,11 @@ function resetData()
 	setChildText("device_model", model);
 	setChildText("device_name", uciOriginal.get("system", systemSections[0], "hostname" ));
 	setChildText("gargoyle_version", gargoyleVersion);
-	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
+	setChildText("memory", "" + ramUsed + UI.MB +" / " + ramMemory + UI.MB +" (" + percentRamUsed + "%)" );
 	if(swapMemory > 0)
 	{
 		document.getElementById("swap_container").style.display = "block";
-		setChildText("swap", "" + swapUsed + "MB / " + swapMemory + "MB (" + percentSwapUsed + "%)" );
+		setChildText("swap", "" + swapUsed + UI.MB + " / " + swapMemory + UI.MB + " (" + percentSwapUsed + "%)" );
 	}
 	else
 	{
