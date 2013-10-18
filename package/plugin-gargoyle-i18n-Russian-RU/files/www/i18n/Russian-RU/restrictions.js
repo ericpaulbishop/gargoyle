@@ -7,7 +7,7 @@ restStr.NRRule="Новое ограничение";
 restStr.ANRule="Добавить новое правило";
 restStr.CRestr="Текущие ограничения";
 restStr.EWSect="Исключения (Белый список)";
-restStr.NExcp="Новые исключения";
+restStr.NExcp="Новое исключение";
 restStr.CExcp="Текущие исключения";
 
 restStr.ERSect="Редактировать правило ограничений";
