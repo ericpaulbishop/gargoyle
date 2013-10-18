@@ -4,4 +4,4 @@ fallback=Webshell
 EN=Webshell
 ES=Webshell
 PL=Webshell
-RU=Коммандная строка
+RU=СЃРµС‚СЊ РїСѓР»СЊС‚
