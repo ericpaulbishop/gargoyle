@@ -58,9 +58,9 @@ start()
 		#if current theme doesn't exist anymore switch back to default
 		selected_theme=$(uci get gargoyle.global.theme  2>/dev/null)
 		if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}"/"${common_css}"  ] ; then
-			if [ -e "${webroot}"/"${theme_root}"/"default"/"${common_css}" ] ; then
+			if [ -e "${webroot}"/"${theme_root}"/"Gargoyle"/"${common_css}" ] ; then
 				#should always have default theme, but check above to make sure
-				uci set gargoyle.global.theme=default
+				uci set gargoyle.global.theme=Gargoyle
 				uci commit gargoyle
 			fi
 		fi
