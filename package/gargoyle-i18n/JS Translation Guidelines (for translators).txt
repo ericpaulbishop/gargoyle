@@ -20,10 +20,28 @@ When converting English to the target language in the pagename.js files:
 
 - If the English text cannot be translated or is good enough for the target language (WAN IP for example), you can delete line (pageS.WIP="WAN IP"). The fallback language (typically English) will be used. If that is not present, the key itself (WIP) will be used.
 
+-----------------------------------------
 
+To see how your translations work within Gargoyle 1.5.11 & later:
+
+- open a ssh session to the router first: ssh root@192.168.1.1
+- make the required folders the first time: mkdir /www/i18n/YourLang-LG
+
+Then you can copy the files over where they need to be:
+
+- scp /path//on/your/computer/to/package/YourLang-LG/somefile.js root@192.168.1.1:/www/i18n/YourLang-LG
+
+Finally in the web browser activate that language in System->Language
+Reload the target webpage
+
+-----------------------------------------
 
 Technical details:
 
 • All files are to be UTF-8 with BOM (Byte Order Mark)
+• All lines are to end with unix style line endings
+• All files are to end with a single newline character on its own line
 • body of each property is MAX 4096 bytes (not UTF-8 characters).
 • A single translated.js file of strings is MAX 51200 bytes.
+
+Note: Windows Notepad application is not suitable
