@@ -35,4 +35,6 @@ pgS.Totl="Всего";
 pgS.Free="Свободно";
 pgS.Prst="Настройка";
 pgS.Name="Название";
-pgS.Pkg="Пакет";
+pgS.Langs="Языки";
+pgS.Thems="Темы";
+pgS.Pkgs="Дополнения";
