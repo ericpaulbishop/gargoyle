@@ -35,4 +35,6 @@ pgS.Totl="Total";
 pgS.Free="Free";
 pgS.Prst="Preset";
 pgS.Name="Name";
-pgS.Pkg="Package";
+pgS.Langs="Languages";
+pgS.Thems="Themes";
+pgS.Pkgs="Packages";

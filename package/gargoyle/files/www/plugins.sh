@@ -85,6 +85,12 @@
 	<fieldset id="plugin_list">
 		<legend class="sectionheader"><%~ PList %></legend>
 		<div>
+			<div id="languages_table_container" style="margin-left:5px" ></div>
+		</div>
+		<div>
+			<div id="themes_table_container" style="margin-left:5px" ></div>
+		</div>
+		<div>
 			<div id="packages_table_container" style="margin-left:5px" ></div>
 		</div>
 		<div id="no_packages" style='display:none;'>

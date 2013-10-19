@@ -35,4 +35,6 @@ pgS.Totl="ogółem";
 pgS.Free="wolne";
 pgS.Prst="Systemowe";
 pgS.Name="Nazwa";
-pgS.Pkg="Pakiet";
+pgS.Langs="Języki";
+pgS.Thems="Motywy";
+pgS.Pkgs="Pakiety";
