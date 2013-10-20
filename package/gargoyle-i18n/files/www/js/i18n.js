@@ -66,8 +66,7 @@ function do_get_lfile()
 
 function installLang()
 {
-	var row = this.parentNode.parentNode;
-	var pkg = row.firstChild.firstChild.id;
+	var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
 	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg ];
 	execute(cmd);
 }
@@ -123,14 +122,11 @@ function resetLanguagesData()
 
 function activateLang()
 {
-	var row = this.parentNode.parentNode;
-	var lang = row.firstChild.firstChild.id;
+	var lang = this.parentNode.parentNode.firstChild.firstChild.id;
 
 	var cmd = [];
-	//cmd.push("uci set gargoyle.global.language=\"" + lang + "\"");
 	cmd.push(". /usr/lib/gargoyle/i18nServices.sh");
 	cmd.push("change_menu_language \"" + lang + "\"");
-	cmd.push("uci commit");
 
 	commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
