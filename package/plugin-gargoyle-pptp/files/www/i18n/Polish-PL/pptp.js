@@ -15,3 +15,4 @@ pptpS.UErr="Należy podać nazwę użytkownika";
 pptpS.PErr="Należy podać hasło";
 pptpS.RunC="Uruchomiony, połączony";
 pptpS.RunNot="Nie uruchomiony";
+pptpS.ReCnt="Połącz ponownie";
