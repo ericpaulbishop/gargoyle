@@ -104,8 +104,8 @@ function resetData()
 			}
 		}
 		
-		var firstColumn = ruleType == "restriction_rule" ? "Rule Description" : "Exception Description";
-		columnNames=[firstColumn, "Enabled", ""];
+		var firstColumn = ruleType == "restriction_rule" ? restStr.RDesc : restStr.ESect;
+		columnNames=[firstColumn, UI.Enabled, ""];
 		ruleTable = createTable(columnNames, ruleTableData, rulePrefix + "table", true, false, removeRuleCallback);
 		
 		tableContainer = document.getElementById(rulePrefix + 'table_container');
