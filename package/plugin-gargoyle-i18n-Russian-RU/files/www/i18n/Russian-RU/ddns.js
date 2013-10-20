@@ -22,7 +22,7 @@ DyDNS.UpOK="Обновление прошло успешно.";
 DyDNS.UpSrvErr="Невозможно обновить сервис.";
 
 //ddns_edit.sh
-DyDNS.EDSect="Редактировать сервис динамического DNS"";
+DyDNS.EDSect="Редактировать сервис динамического DNS";
 
 // /etc/ddns_providers.conf
 DyDNS.DoNm="Доменное имя";
