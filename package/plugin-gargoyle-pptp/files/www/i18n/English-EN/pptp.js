@@ -15,3 +15,4 @@ pptpS.UErr="User name is not defined";
 pptpS.PErr="Password is not defined";
 pptpS.RunC="Running, Connected";
 pptpS.RunNot="Not Running";
+pptpS.ReCnt="Reconnect";
