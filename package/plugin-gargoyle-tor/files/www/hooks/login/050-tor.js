@@ -41,7 +41,7 @@ function updateTorStatus()
 			}
 			else if(req.responseText.match(/^success_enabled/))
 			{
-				alert("Tor Successfully Enabled for your IP")
+				alert(torLS.DisbMsg)
 				torIsActive = true;
 			}
 			setTorData()
