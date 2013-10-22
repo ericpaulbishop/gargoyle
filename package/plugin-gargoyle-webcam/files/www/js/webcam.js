@@ -95,13 +95,13 @@ function saveChanges()
 		var conflict = checkForPortConflict("" + port, "tcp");
 		if(conflict != "")
 		{
-			errors.push("Webcam server port conflicts with " + conflict);
+			errors.push(webcam.ErrorPortWebC + conflict);
 		}
 	}
 
 	if (errors.length > 0)
 	{
-		errorString = errors.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errors.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 		return;
 	}
@@ -140,7 +140,7 @@ function saveChanges()
 	Commands.push('/etc/init.d/firewall restart');
 	var commands = uci.getScriptCommands(uciOriginal) + "\n" + Commands.join("\n")
 
-	setControlsEnabled(false, true, 'Please Wait While Settings Are Applied');
+	setControlsEnabled(false, true, UI.WaitSettings);
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -168,7 +168,7 @@ function showPreview(enabled, port, username, password)
 		}
 		var webcam_url = 'http://' + auth + currentLanIp + ':' + port + '/?action=stream';
 		document.getElementById("webcam_preview").style.display = "block";
-		setChildText("webcam_info", "Webcam is available at " + webcam_url);
+		setChildText("webcam_info", webcam.AvelAtWebC + webcam_url);
 		document.getElementById('videoframe').src = webcam_url;
 	}
 	else
