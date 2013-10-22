@@ -5,6 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var WebC=new Object();
 
 var pkg = "mjpg-streamer";
 var webcamWanAccess = "webcam_wan_access"

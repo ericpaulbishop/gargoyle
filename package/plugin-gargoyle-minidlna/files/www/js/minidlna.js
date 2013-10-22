@@ -5,6 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var dlna=new Object();
 
 var pkg = "minidlna";
 var sec = "config";
@@ -26,13 +27,13 @@ function resetData()
 	var driveIndex;
 	for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 	{
-		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
+		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " " + dlna.Totl + ", " + parseBytes(storageDrives[driveIndex][5]) + " " + dlna.Free )
 		rootDriveValues.push( storageDrives[driveIndex][0] )
 	}
 	setAllowableSelections("drive_select", rootDriveValues, rootDriveDisplay, document);
 	document.getElementById("media_dir").value = "/";
 
-	var columnNames = ['Drive', 'Folder'];
+	var columnNames = [dlna.Drv, dlna.Dir];
 	var mediaTableData = [];
 	var mediaDir = [];
 	mediaDir = uciOriginal.get(pkg, sec, "media_dir");
@@ -97,19 +98,19 @@ function addNewMediaDir()
 		}
 		if(found)
 		{
-			errors.push("This folder is already added")
+			errors.push(dlna.ERRAllrAdd)
 		}
 	}
 	if(errors.length > 0)
 	{
-		alert( errors.join("\n") + "\n\nChanges could not be applied." );
+		alert( errors.join("\n") + "\n\n"+UI.ErrChanges);
 	}
 	else
 	{
 		if(mediaTable == null)
 		{
 			var tableContainer = document.getElementById("media_table_container");
-			mediaTable = createTable(["Drive", "Folder"], [], "media_table", true, false, removeCallback);
+			mediaTable = createTable([dlna.Drv, dlna.Dir], [], "media_table", true, false, removeCallback);
 			setSingleChild(tableContainer, mediaTable);
 		}
 		addTableRow(mediaTable, [ drive, folder ], true, false, removeCallback)
@@ -126,7 +127,7 @@ function saveChanges()
 
 	if(name == "")
 	{
-		alert("DLNA server name can not be empty");
+		alert(dlna.ERRSName);
 		return;
 	}
 
@@ -197,7 +198,7 @@ function saveChanges()
 	}
 	var commands = uci.getScriptCommands(uciOriginal) + "\n" + Commands.join("\n");
 
-	setControlsEnabled(false, true, 'Please Wait While Settings Are Applied');
+	setControlsEnabled(false, true, UI.WaitSettings);
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -230,7 +231,7 @@ function rescanMedia()
 	Commands.push("rm -f $(uci get minidlna.config.db_dir)/files.db");
 	Commands.push("/etc/init.d/minidlna start");
 
-	setControlsEnabled(false, true, 'Please Wait While Settings Are Applied');
+	setControlsEnabled(false, true, UI.WaitSettings);
 	var param = getParameterDefinition("commands", Commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
