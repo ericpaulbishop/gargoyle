@@ -95,6 +95,7 @@ basicS.Clnt="Klient";
 basicS.OpMod="Standard";
 basicS.WlFltr="Filtrowanie adresów MAC";
 basicS.FltrInfo="Filtrowanie adresów MAC ma zastosowanie do wszystkich interfejsów bezprzewodowych, włącznie z tymi pracującymi w trybie klienta. W trybie klienta należy upewnić się, że zezwolono na połączenia adresu MAC punktu dostępowego do którego ma być urządzenie połączone.";
+basicS.MACFiPo="Polityka filtrowania MAC";
 basicS.AllwMAC="Zezwalaj tylko na adresy MAC podane poniżej";
 basicS.DnyMAC="Odrzucaj adresy MAC podane poniżej";
 basicS.WlBnd="Pasmo";

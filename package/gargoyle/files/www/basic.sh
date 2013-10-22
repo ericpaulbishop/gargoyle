@@ -592,7 +592,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<em><%~ FltrInfo %></em>
 			</div>
 			<div>
-				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
+				<label class='leftcolumn' for='mac_filter_policy'><%~ MACFiPo %>:</label>
 				<select class='rightcolumn' id='mac_filter_policy'>
 					<option value='allow'><%~ AllwMAC %></option>
 					<option value='deny' ><%~ DnyMAC %></option>
