@@ -67,10 +67,31 @@ function saveChanges()
 		uci.set("network", "vpnpptp", "server",        server)
 		uci.set("network", "vpnpptp", "username",      username)
 		uci.set("network", "vpnpptp", "password",      password)
+
+		uci.set("firewall", "vpnpptp_zone", "",        "zone")
+		uci.set("firewall", "vpnpptp_zone", "name",    "vpnpptp")
+		uci.set("firewall", "vpnpptp_zone", "network", "vpnpptp")
+		uci.set("firewall", "vpnpptp_zone", "input",   "ACCEPT")
+		uci.set("firewall", "vpnpptp_zone", "output",  "ACCEPT")
+		uci.set("firewall", "vpnpptp_zone", "forward", "ACCEPT")
+		uci.set("firewall", "vpnpptp_zone", "mtu_fix", "1")
+		uci.set("firewall", "vpnpptp_zone", "masq",    "1")
+
+		uci.set("firewall", "vpnpptp_lan_forwarding", "",     "forwarding")
+		uci.set("firewall", "vpnpptp_lan_forwarding", "src",  "lan")
+		uci.set("firewall", "vpnpptp_lan_forwarding", "dest", "vpnpptp")
+
 	}
 	else
 	{
 		uci.removeSection("network",  "vpnpptp")
+		uci.removeSection("firewall", "vpnpptp_zone")
+		uci.removeSection("firewall", "vpnpptp_lan_forwarding")
 	}
 	execute([uci.getScriptCommands(uciOriginal) + "\n/usr/lib/gargoyle/restart_network.sh\n"]);
+}
+
+function pptpReconnect()
+{
+	execute(["ifup vpnpptp\nsleep 5\n"]);
 }

@@ -296,15 +296,13 @@ function resetData()
 	var sourceContainer = document.getElementById('package_source_table_container');
 	setSingleChild(sourceContainer, sourceTable)
 
-	
-	
-	
-	
-	
-	
 	//set data for plugin list
-	var columnNames = [pgS.Pkg, pgS.Instd, ''];
-	var pluginsTableData = new Array();
+	var columnLangNames = [pgS.Langs, pgS.Instd, ''];
+	var columnThemNames = [pgS.Thems, pgS.Instd, ''];
+	var columnPackNames = [pgS.Pkgs, pgS.Instd, ''];
+	var langTableData = new Array();
+	var themTableData = new Array();
+	var packTableData = new Array();
 	var pkgIndex=0;
 	for(pkgName in pkg_info)
 	{
@@ -313,14 +311,12 @@ function resetData()
 		var pkgData = pkg_info[pkgName][pkgVersion];
 		if (pkgData != null)
 		{
-			
 			var div=createDisplayDiv(pkgName, pkgVersion, pkgData)
 
-			
 			var enabledCheckbox = createInput('checkbox');
 			enabledCheckbox.disabled = true;
 			enabledCheckbox.checked = pkgData["Install-Destination"] == notInstalledVal ? false : true;
-			
+
 			var button = createInput("button");
 			button.className="default_button";
 			if (enabledCheckbox.checked)
@@ -349,21 +345,49 @@ function resetData()
 					button.className = "default_button_disabled"
 				}
 			}
-			pluginsTableData.push([div, enabledCheckbox, button]);
-			
+
+			if (pkgName.match(/plugin-gargoyle-i18n-/))
+			{
+				langTableData.push([div, enabledCheckbox, button]);
+			}
+			else if (pkgName.match(/plugin-gargoyle-theme-/))
+			{
+				themTableData.push([div, enabledCheckbox, button]);
+			}
+			else
+			{
+				packTableData.push([div, enabledCheckbox, button]);
+			}
 		}
 	}
 
-	if (pluginsTableData.length == 0)
+	if ((langTableData.length + themTableData.length + packTableData.length) == 0)
 	{
 		document.getElementById('no_packages').style.display="block";
 	}
 	else
 	{
-		pluginsTableData.sort();
-		var pluginsTable = createTable(columnNames, pluginsTableData, "packages_table", false, false);
-		var tableContainer = document.getElementById('packages_table_container');
-		setSingleChild(tableContainer, pluginsTable)
+		if (langTableData.length > 0)
+		{
+			langTableData.sort();
+			var langTable = createTable(columnLangNames, langTableData, "languages_table", false, false);
+			var tableContainer = document.getElementById('languages_table_container');
+			setSingleChild(tableContainer, langTable)
+		}
+		if (themTableData.length > 0)
+		{
+			themTableData.sort();
+			var themTable = createTable(columnThemNames, themTableData, "themes_table", false, false);
+			var tableContainer = document.getElementById('themes_table_container');
+			setSingleChild(tableContainer, themTable)
+		}
+		if (packTableData.length > 0)
+		{
+			packTableData.sort();
+			var packTable = createTable(columnPackNames, packTableData, "packages_table", false, false);
+			var tableContainer = document.getElementById('packages_table_container');
+			setSingleChild(tableContainer, packTable)
+		}
 	}
 }
 

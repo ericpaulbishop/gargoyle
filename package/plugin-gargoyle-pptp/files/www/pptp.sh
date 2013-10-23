@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "pptp" -c "internal.css" -j "pptp.js" -z "pptp.js" network
+	gargoyle_header_footer -h -s "connection" -p "pptp" -c "internal.css" -j "pptp.js" -z "pptp.js" network firewall
 %>
 
 <script>
@@ -34,6 +34,10 @@
 
 <fieldset id="pptp_client_fieldset">
 	<legend class="sectionheader"><%~ PClt %></legend>
+
+	<div class='rightcolumnonly' style="margin-bottom:15px">
+		<input type='button' id="pptp_reconnect_button" value="<%~ ReCnt %>" class="default_button" onclick="pptpReconnect()" />
+	</div>
 
 	<div id='pptp_server_container'>
 		<label class='leftcolumn' for='pptp_server' id='pptp_server_label'><%~ PHostNm %>:</label>
