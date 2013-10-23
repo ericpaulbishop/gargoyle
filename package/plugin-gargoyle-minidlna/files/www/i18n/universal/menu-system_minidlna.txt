@@ -2,4 +2,5 @@
 
 fallback=DLNA
 EN=DLNA
+PL=DLNA
 RU=DLNA-сервер
