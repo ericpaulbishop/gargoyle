@@ -1,5 +1,5 @@
 ﻿/*
-* UTF-8 (with BOM) English-EN text strings for pptp.sh html elements
+* UTF-8 (with BOM) Russian-RU text strings for pptp.sh html elements
 */
 
 pptpS.PCfg="Настройка PPTP";
