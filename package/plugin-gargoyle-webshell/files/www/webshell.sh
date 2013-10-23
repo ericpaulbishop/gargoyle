@@ -13,7 +13,7 @@
 	<legend class="sectionheader"><%~ webshell.Webs %></legend>
 	<label class='leftcolumn' for='cmd' id='cmd_label'><%~ Cmd %>:</label>
 	<span class="rightcolumn">
-		<input id="cmd" class="rightcolumn" type="text" size='80'/>
+		<input id="cmd" class="rightcolumn" onkeydown='checkKey(event)' type="text" size='80'/>
 		<input type='button' class='default_button' id='cmd_button' value='<%~ Exe %>' onclick='runCmd()' />
 	</span>
 	<span class="nocolumn"><em><%~ CmdWarn %></em></span>

@@ -6,6 +6,18 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+function checkKey(e)
+{
+        var keycode = 0;
+
+        if ( window.event )
+                keycode = window.event.keyCode;
+        else if ( e )
+                keycode = e.which;
+        if ( keycode == 13 )
+                runCmd();
+}
+
 function runCmd()
 {
 	var Commands = [];
