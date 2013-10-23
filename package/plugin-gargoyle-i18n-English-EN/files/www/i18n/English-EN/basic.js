@@ -95,6 +95,7 @@ basicS.Clnt="Client";
 basicS.OpMod="Operation Mode";
 basicS.WlFltr="Wireless MAC Filter";
 basicS.FltrInfo="MAC filtering applies to all wireless interfaces, including those in client mode. In client mode you must be sure to allow the MAC address of the AP to which you are connected.";
+basicS.MACFiPo="MAC Filter Policy";
 basicS.AllwMAC="Allow Only MACs Listed Below";
 basicS.DnyMAC="Deny Only MACs Listed Below";
 basicS.WlBnd="Wireless Band";
