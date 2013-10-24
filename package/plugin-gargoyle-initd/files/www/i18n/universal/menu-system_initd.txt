@@ -1,3 +1,4 @@
 fallback=Services
 EN=Services
 PL=Usługi
+RU=Сервисы
