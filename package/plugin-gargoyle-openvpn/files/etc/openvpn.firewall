@@ -6,14 +6,14 @@ fi
 touch /tmp/openvpn.firewall.running
 
 
-# constants for openvpn bandwidth moniopenvpning rules
+# constants for openvpn bandwidth moniotoring rules
 
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_openvpn_bw_backup.sh"
 tmp_cron="/tmp/tmp.openvpn.cron"
 
 
-# constants for openvpn bandwidth moniopenvpning rules
+# constants for openvpn bandwidth monitoring rules
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_openvpn_bw_backup.sh"
 tmp_cron="/tmp/tmp.openvpn.cron"
