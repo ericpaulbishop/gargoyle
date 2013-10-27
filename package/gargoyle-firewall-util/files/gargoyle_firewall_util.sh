@@ -533,7 +533,7 @@ block_static_ip_mismatches()
 					iptables -t filter -A static_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
 				fi
 			done
-			iptables -t filter -I forward -j static_mismatch_check
+			iptables -t filter -I delegate_forward -j static_mismatch_check
 		fi
 	fi
 }
