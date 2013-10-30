@@ -64,6 +64,34 @@ if [ -e /etc/init.d/usb_storage -a -e /etc/config/fstab ]; then
 	uci set fstab.automount.anon_mount=0
 fi
 
+
+#remove gargoyle menu entries that have script entries that have file paths set to files that do not exist
+. /lib/functions.sh
+gargoyle_web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
+config_cb()
+{
+	config_name="$1"
+	section_id="$2"
+	option_cb()
+	{
+		if [ "$config_name" = "display" ] ; then
+			key="$1"
+			script=$(uci get gargoyle.scripts.$key 2>/dev/null)
+			if [ -n "$script" ] ; then
+				if [ ! -e "$gargoyle_web_root/$script" ] ; then
+					section_id=$(echo $key | sed 's/_/\./g')
+					uci delete gargoyle.display.$key
+					uci delete gargoyle.$section_id
+				fi
+			fi
+		fi
+	}
+}
+config_load "gargoyle"
+
+
+
+
 #save changes to uci
 uci commit
 
