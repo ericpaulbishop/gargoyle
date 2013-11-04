@@ -5,17 +5,17 @@
  $(eval $(call Profile,ALFANX))
  
 +
-+define Profile/HORNETUBx2 
-+	NAME:=ALFA Network Hornet-UB-x2 board (16MB flash, 64MB ram) 
++define Profile/GPRv2 
++	NAME:=Gargoyle Pocket Router v2
 +	PACKAGES:=kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev 
 +endef 
 +	 
-+define Profile/HORNETUBx2/Description 
-+	Package set optimized for the ALFA Network Hornet-UB board with 16MB 
-+	flash and 64MB ram. 
++define Profile/GPRv2/Description 
++	Gargoyle Pocket Router v2
++	Based on ALFA Network Hornet-UB board with 16MB flash and 64MB ram. 
 +endef 
 +
-+$(eval $(call Profile,HORNETUBx2))
++$(eval $(call Profile,GPRv2))
 +
 --- atheros-src/target/linux/ar71xx/image/Makefile	2013-10-16 23:01:31.496947263 -0400
 +++ ar71xx-src/target/linux/ar71xx/image/Makefile	2013-11-03 01:45:28.392758625 -0400
@@ -34,7 +34,7 @@
  $(eval $(call SingleProfile,AthLzma,$(fs_64k),PB92,pb92,PB92,ttyS0,115200,$$(pb92_mtdlayout),917504,2818048,KRuImage))
  
 +
-+$(eval $(call SingleProfile,AthLzma,$(fs_64k),HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),1638400,16318464,KRuImage))
++$(eval $(call SingleProfile,AthLzma,$(fs_64k),GPRv2,gargoyle-pocket-router-v2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),1638400,14680064,RKuImage))
 +
  $(eval $(call SingleProfile,Cameo7240,$(fs_64k),DIR600A1,dir-600-a1,DIR-600-A1,ttyS0,115200,"AP91-AR7240-RT-090223-00"))
  $(eval $(call SingleProfile,Cameo7240,$(fs_64k),DIR601A1,dir-601-a1,DIR-600-A1,ttyS0,115200,"AP91-AR7240-RT-090223-02"))
@@ -54,18 +54,18 @@
 +		fi 
 +
 +		if [ "x$size" = "x00f90000" ]; then 
-+			name="hornet-ub-x2" 
++			name="gargoyle-pocket-router-v2" 
 +		fi 
  		;;
  	*LS-SR71)
  		name="ls-sr71"
 --- atheros-src/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2013-10-16 23:01:31.492947330 -0400
-+++ ar71xx-src/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2013-11-03 03:11:37.970116108 -0500
-@@ -109,6 +109,7 @@
- 	dir-835-a1 | \
- 	ew-dorin | \
- 	ew-dorin-router | \
-+	hornet-ub-x2 | \
- 	mzk-w04nu | \
- 	mzk-w300nh | \
- 	tew-632brp | \
++++ ar71xx-src/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2013-11-04 01:21:44.642080525 -0500
+@@ -92,6 +92,7 @@
+ 	ap96 | \
+ 	db120 | \
+ 	hornet-ub | \
++	gargoyle-pocket-router-v2 | \
+ 	zcn-1523h-2 | \
+ 	zcn-1523h-5)
+ 		[ "$magic_long" != "68737173" -a "$magic_long" != "19852003" ] && {
