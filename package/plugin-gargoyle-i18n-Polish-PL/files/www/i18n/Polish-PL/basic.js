@@ -117,4 +117,4 @@ basicS.Sgnl="Sygnału";
 basicS.RnwL="Pobieranie nowej dzierżawy DHCP";
 basicS.RlsL="Zwalnianie dzierżawy DHCP";
 basicS.ScnMo="Poszukiwanie urządzeń mobilnych";
-basicS.NoDv="No devices found";
+basicS.NoDv="Nie znaleziono urządzeń";
