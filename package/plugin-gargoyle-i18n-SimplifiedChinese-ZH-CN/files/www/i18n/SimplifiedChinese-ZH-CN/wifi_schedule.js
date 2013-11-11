@@ -16,16 +16,16 @@ Wsch.TInc="定时器增量";
 
 //javscript
 Wsch.Smmy="概要";
-Wsch.WeekA=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
-Wsch.WDayA=["星期日","星期一至五","星期六"];
+Wsch.WeekA=["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+Wsch.WDayA=["星期日", "星期一至五", "星期六"];
 Wsch.Warn="警告";
 Wsch.NextEv="计划将在下一个事件后生效。";
-Wsch.SelTM="选定的定时器模式";
-Wsch.SumDis="禁用（没有计划）。";
-Wsch.SumDly="每日计划（每天重复）。";
-Wsch.SumSwS="周日/工作日/周六计划（每个工作日重复）。";
-Wsch.SumWky="每周计划（每天独立定时器，每周重复）。";
-Wsch.SumGo="Wifi将会变";
+Wsch.SelTM="选择的定时器模式";
+Wsch.SumDis="禁用（不设置计划）";
+Wsch.SumDly="每日计划（每天重复）";
+Wsch.SumSwS="周日/工作日/周六计划（每个工作日重复）";
+Wsch.SumWky="每周计划（每天独立定时器，每周重复）";
+Wsch.SumGo="Wifi将";
 Wsch.SumUp="&nbsp;&nbsp;开启&nbsp;&nbsp;";
 Wsch.SumDn="关闭";
 Wsch.SumAt="在";

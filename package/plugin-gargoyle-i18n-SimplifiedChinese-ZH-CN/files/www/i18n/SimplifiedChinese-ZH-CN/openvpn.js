@@ -19,12 +19,12 @@ ovpnS.CtoS="客户端只能与服务器通信";
 ovpnS.LSAc="局域网子网访问";
 ovpnS.CtoH="允许客户端访问局域网内的主机";
 ovpnS.CnoL="客户端不能访问局域网";
-ovpnS.CredR="凭据再利用";
+ovpnS.CredR="凭据复用";
 ovpnS.CredSC="为每个客户端指定凭据";
 ovpnS.CredMC="多个客户端共用凭据";
-ovpnS.CUse="Clients Use VPN For";
-ovpnS.ATrff="All Client Traffic";
-ovpnS.HTrff="Only Traffic Destined for Hosts Behind VPN";
+ovpnS.CUse="客户端使用VPN作为";
+ovpnS.ATrff="整个客户端的通信通道";
+ovpnS.HTrff="与VPN后端主机的通信通道";
 ovpnS.OSAC="OpenVPN服务器：允许的客户端";
 ovpnS.CClnt="目前配置的客户端";
 ovpnS.ZipCred="生成客户端配置后，单击下载得到包含凭证的zip文件，并放置在你的OpenVPN配置文件夹内";
@@ -64,7 +64,7 @@ ovpnS.Clnt="Client";
 ovpnS.Symm="Omitted (Symmetric)";
 
 //javascript
-ovpnS.CryptoWaitMsg="This is the first time you have configured an OpenVPN Server.\n\nIt will take 5-10 minutes to generate the necessary cryptographic parameters.  This is a one-time wait -- updates after this one will be fast.\n\nProceed?";
+ovpnS.CryptoWaitMsg="这是你第一次配置OpenVPN服务器。\n\n这需要花费5-10分钟以产生必要的加密参数。这是一个一次性的等待—之后的更新将会很快\n\n继续吗？";
 ovpnS.SubMis="客户端子网不匹配";
 ovpnS.ExpSubN="OpenVPN预期你路由至子网";
 ovpnS.ActSubN="但你的路由配置的子网是";

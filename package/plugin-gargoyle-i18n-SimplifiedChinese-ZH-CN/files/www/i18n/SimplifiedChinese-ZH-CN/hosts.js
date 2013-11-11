@@ -5,7 +5,7 @@
 hostsStr.RefreshR="刷新率";
 hostsStr.RInfo="该参数指定该页面上的数据重新加载的频率";
 hostsStr.CurrLeases="当前DHCP租约";
-hostsStr.ConWifiHosts="连接的无线主机";
+hostsStr.ConWifiHosts="已连接的无线主机";
 hostsStr.ActiveHosts="主机活动连接数";
 
 //javascript
