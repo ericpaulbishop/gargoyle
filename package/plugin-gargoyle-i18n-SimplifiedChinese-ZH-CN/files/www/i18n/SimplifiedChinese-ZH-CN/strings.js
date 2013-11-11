@@ -74,28 +74,28 @@ UI.sc="秒";
 UI.hr="小时";
 UI.pAM="上午";
 UI.pPM="下午";
-UI.hAM="";
-UI.hPM="";
+UI.hAM
+UI.hPM
 
-UI.EMonths=["一","二","三","四","五","六","七","八","九","十","十一","十二"];
+UI.EMonths=["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
 
-UI.byt="字节";
+UI.byt="bytes";
 UI.Bu="B";
 UI.KB="kB";
 UI.MB="MB";
 UI.GB="GB";
 UI.TB="TB";
-UI.KB1="k 字节";
-UI.MB1="M 字节";
-UI.GB1="G 字节";
-UI.TB1="T 字节";
-UI.KBy="k 字节";
-UI.MBy="M 字节";
-UI.GBy="G 字节";
-UI.TBy="T 字节";
-UI.Kbs="k 位/秒";
-UI.KBs="k 字节/秒";
-UI.MBs="M 字节/秒";
+UI.KB1="kByte";
+UI.MB1="MByte";
+UI.GB1="GByte";
+UI.TB1="TByte";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
 
 UI.CApplyChanges="关闭并应用更改";
 UI.CDiscardChanges="关闭并放弃更改";
@@ -118,4 +118,4 @@ UI.pfwd="端口转发到";
 UI.conn="已连接";
 
 UI.AJAX="需要浏览器支持AJAX";
-UI.AJAXUpg="请升级到兼容AJAX的浏览器并重试。这些浏览器包括Firefox 2.0+，Safari和IE 6+。";
+UI.AJAXUpg="请升级到兼容AJAX的浏览器并重试。这些浏览器包括Firefox 2.0+，Safari和IE 6+";

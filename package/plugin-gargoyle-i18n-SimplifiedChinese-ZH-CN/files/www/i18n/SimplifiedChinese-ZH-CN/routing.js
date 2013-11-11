@@ -9,8 +9,8 @@ rtgS.CSRSect="当前静态路由";
 rtgS.ESSect="编辑静态路由";
 
 //javascript & template
-rtgS.Dstn="目的地址";
-rtgS.DstnM="目的地址/掩码";
+rtgS.Dstn="目标网络";
+rtgS.DstnM="目标网络/掩码";
 rtgS.ItfN="接口（网络）";
 rtgS.Itfc="接口";
 rtgS.Ntwk="网络";

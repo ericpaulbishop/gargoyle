@@ -10,5 +10,5 @@ intS.Desc="描述";
 intS.Upld="上传";
 intS.UpMsg="正在上传语言文件";
 intS.Acv8="激活";
-intS.Actv="活动的";
+intS.Actv="生效";
 intS.Instd="已安装";

@@ -15,9 +15,9 @@ pgS.NoPkg="找不到插件包，请更新插件包列表。";
 pgS.RfshP="刷新插件";
 
 //javascript
-pgS.NInst="未装";
+pgS.NInst="未安装";
 pgS.PInst="预装";
-pgS.Instd="已装";
+pgS.Instd="已安装";
 pgS.Vers="版本";
 pgS.Stus="状态";
 pgS.RDSpc="所需空间";
@@ -31,8 +31,8 @@ pgS.SURLErr="错误：你必须指定源URL";
 pgS.DupSNamErr="错误：源名称重复";
 pgS.DupSURLErr="错误：源URL重复";
 pgS.AddPSErr="不能添加插件源";
-pgS.Totl="总";
-pgS.Free="免费";
+pgS.Totl="总空间";
+pgS.Free="空闲";
 pgS.Prst="预置";
 pgS.Name="名称";
 pgS.Pkg="插件包";
