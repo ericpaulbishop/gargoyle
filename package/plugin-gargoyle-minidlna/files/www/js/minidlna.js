@@ -33,13 +33,22 @@ function resetData()
 	setAllowableSelections("drive_select", rootDriveValues, rootDriveDisplay, document);
 	document.getElementById("media_dir").value = "/";
 
-	var columnNames = [dlna.Drv, dlna.Dir];
+	var columnNames = [dlna.Drv, dlna.Dir, dlna.DLNAMType];
 	var mediaTableData = [];
 	var mediaDir = [];
 	mediaDir = uciOriginal.get(pkg, sec, "media_dir");
 	for (idx=0; idx < mediaDir.length; idx++)
 	{
+		
 		var md = mediaDir[idx];
+		var mediaType = dlna.DLNAAll;
+		if(md.charAt(1) == ',')
+		{
+			mediaType = "" + md.charAt(0);
+			md = md.substr(2);
+		}
+		
+		
 		var drive = "root";
 		var folder = md;
 		var storageIndex;
@@ -57,7 +66,7 @@ function resetData()
 				}
 			}
 		}
-		mediaTableData.push([drive, folder]);
+		mediaTableData.push([drive, folder, mediaType]);
 	}
 	var mediaTable = createTable(columnNames, mediaTableData, "media_table", true, false, removeCallback);
 	var tableContainer = document.getElementById('media_table_container');
@@ -78,10 +87,10 @@ function addNewMediaDir()
 	var folder = document.getElementById('media_dir').value;
 
 
-	var media_type = getSelectedValue("media_type");
-	if (media_type != "")
+	var mediaType = getSelectedValue("media_type");
+	if (mediaType == "")
 	{
-		folder = media_type + "," + folder;
+		mediaType = dlna.DLNAAll;
 	}
 	
 
@@ -110,10 +119,10 @@ function addNewMediaDir()
 		if(mediaTable == null)
 		{
 			var tableContainer = document.getElementById("media_table_container");
-			mediaTable = createTable([dlna.Drv, dlna.Dir], [], "media_table", true, false, removeCallback);
+			mediaTable = createTable([dlna.Drv, dlna.Dir, dlna.DLNAMType], [], "media_table", true, false, removeCallback);
 			setSingleChild(tableContainer, mediaTable);
 		}
-		addTableRow(mediaTable, [ drive, folder ], true, false, removeCallback)
+		addTableRow(mediaTable, [ drive, folder, mediaType ], true, false, removeCallback)
 		document.getElementById("media_dir").value = "/"
 		setSelectedValue("media_type", "");
 	}
@@ -156,6 +165,7 @@ function saveChanges()
 		{
 			var drive = mediaData[idx][0];
 			var folder = "/" + mediaData[idx][1];
+			var mediaType = mediaData[idx][2];
 			var found = false;
 		
 			var mediaPath = folder;
@@ -171,7 +181,10 @@ function saveChanges()
 			{
 				mediaPath = mediaPath.replace("//", "/");
 			}
-
+			if(mediaType != dlna.DLNAAll)
+			{
+				mediaPath = mediaType + "," + mediaPath;
+			}
 			media.push(mediaPath);
 		}
 		if(media.length > 0)
