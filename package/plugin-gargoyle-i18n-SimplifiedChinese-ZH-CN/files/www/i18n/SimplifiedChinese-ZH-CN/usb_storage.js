@@ -5,7 +5,7 @@
 usbSStr.SDisk="共享磁盘";
 usbSStr.Nomdsk="没有检测到挂载的USB磁盘";
 usbSStr.WFTP="允许从WAN访问FTP";
-usbSStr.WpFTP="Allow Passive FTP From WAN on ports";
+usbSStr.WpFTP="允许WAN口上的被动FTP";
 usbSStr.CFWkg="CIFS工作组";
 usbSStr.CFUsr="CIFS/FTP用户";
 usbSStr.NewU="新用户";
@@ -29,7 +29,7 @@ usbSStr.FmtNow="格式化";
 usbSStr.ExtrS="Extroot";
 usbSStr.ExtrOff="禁用外部根目录";
 usbSStr.ExtDt="检测到外部根目录";
-usbSStr.ExtrWarn="When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost.";
+usbSStr.ExtrWarn="使用外部根驱动器或<strong>extroot</strong>一个外置USB驱动器成为路由的根驱动器。这将允许你使用一个非常大的根驱动器（注：即扩展路由的根目录空间），但如果你移除该驱动器，所有自extroot功能激活后作做的修改将会丢失。";
 
 //template
 usbSStr.Disk="磁盘";

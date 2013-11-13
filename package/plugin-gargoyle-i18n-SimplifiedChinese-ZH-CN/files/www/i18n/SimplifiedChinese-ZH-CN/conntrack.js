@@ -4,7 +4,7 @@
 
 connTS.CCSect="当前连接";
 connTS.RRate="刷新率";
-connTS.BUnt="带宽单位";
+connTS.BUnt="流量单位";
 connTS.AtMxd="自动（混合）";
 connTS.CnWarn="不显示本地主机和路由器之间的连接。";
 connTS.PrNm="协议";
