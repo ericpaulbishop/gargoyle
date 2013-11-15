@@ -189,7 +189,7 @@ typedef long long int64_t;
 #define WRITE_TIMEOUT 300
 #endif /* WRITE_TIMEOUT */
 #ifndef DEFAULT_CHARSET
-#define DEFAULT_CHARSET "iso-8859-1"
+#define DEFAULT_CHARSET "utf-8"
 #endif /* DEFAULT_CHARSET */
 
 
@@ -374,6 +374,7 @@ static char* e_strdup( char* ostr );
 static int snprintf( char* str, size_t size, const char* format, ... );
 #endif /* NO_SNPRINTF */
 
+static char* default_content_type;
 
 int
 main( int argc, char** argv )
@@ -570,6 +571,13 @@ main( int argc, char** argv )
 	}
     if ( argn != argc )
 	usage();
+
+
+    /* set default_content_type */
+    default_content_type = (char*)e_malloc(strlen("text/html; charset=") +  strlen(charset) + 1);
+    sprintf(default_content_type, "text/html; charset=%s", charset);
+
+
 
     cp = strrchr( argv0, '/' );
     if ( cp != (char*) 0 )
@@ -1554,6 +1562,12 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 	*protocol++ = '\0';
 	protocol += strspn( protocol, " \t\012\015" );
 	query = strchr( path, '?' );
+	
+	//print path
+	syslog( LOG_NOTICE, "GOT REQUEST: '%s'",  method_str );
+	syslog( LOG_NOTICE, "PARSED PATH: '%s'", path);
+	
+	
 	if ( query == (char*) 0 )
 	{
 		query = "";
@@ -2042,7 +2056,9 @@ static void do_dir( int is_ssl )
 	buflen = snprintf( buf, sizeof(buf), "</PRE>\n<HR>\n<ADDRESS><A HREF=\"%s\">%s</A></ADDRESS>\n</BODY>\n</HTML>\n", SERVER_URL, SERVER_SOFTWARE );
 	add_to_buf( &contents, &contents_size, &contents_len, buf, buflen );
 
-	add_headers( 200, "Ok", "", "", "text/html; charset=%s", contents_len, sb.st_mtime );
+	
+	add_headers( 200, "Ok", "", "", default_content_type, contents_len, sb.st_mtime );
+	
 	if ( method != METHOD_HEAD )
 	{
 		add_to_response( contents, contents_len );
@@ -2374,6 +2390,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		int status;
 		char* title;
 		char* cp;
+		char* tmp_headers;
 	
 	
 		/* Slurp in all headers. */
@@ -2398,26 +2415,112 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 				break;
 			}
 		}
+
+		/* NULL terminate the headers */
+		tmp_headers = (char*)e_malloc(headers_len+1);
+		memcpy(tmp_headers, headers, headers_len);
+		tmp_headers[headers_len] = '\0';
+		free(headers);
+		headers=tmp_headers;
+		
+
 	
 		/* If there were no headers, bail. */
 		if ( headers[0] == '\0' )
 		{
 			return;
 		}
+		
 
 
 		/* Figure out the status. */
 		status = 200;
+		char line[200];
+		char* location = NULL;
+		line[0] = '\0';
 		if ( ( cp = strstr( headers, "Status:" ) ) != (char*) 0 && cp < br && ( cp == headers || *(cp-1) == '\012' ) )
 		{
 			cp += 7;
 			cp += strspn( cp, " \t" );
 			status = atoi( cp );
 		}
+
+		if(strstr(headers, "HTTP/") == headers)
+		{
+			char* e1 = strchr(headers, '\n');
+			char* e2 = strchr(headers, '\r');
+			char* s1 = strchr(headers, ' ');
+			char* s2 = strchr(headers, '\t');
+			char* end_first_line   = e1 >= headers && (e2 < headers || e1 < e2) ? e1 : e2;
+			char* start_first_line = s1 >= headers && (s2 < headers || s1 < s2) ? s1 : s2;
+			if(start_first_line >= headers && end_first_line > start_first_line)
+			{
+				*end_first_line = '\0';
+				sprintf(line, "HTTP/1.0 %s\015\012", start_first_line+1);
+				headers = end_first_line + 1;
+				while(headers[0] == '\015' || headers[0] == '\012')
+				{
+					headers = headers + 1;
+				}
+			}
+		}
+		
 		if ( ( cp = strstr( headers, "Location:" ) ) != (char*) 0 && cp < br && ( cp == headers || *(cp-1) == '\012' ) )
 		{
-			status = 302;
+			status = 302; //unless set to something else in initial line above
+			char* location_start = strstr( headers, "Location:" );
+			char* e1 = strchr(location_start, '\n');
+			char* e2 = strchr(location_start, '\r');
+			char* s1 = strchr(location_start, ' ');
+			char* s2 = strchr(location_start, '\t');
+			char* url_end   = e1 >= location_start && (e2 < location_start || e1 < e2) ? e1 : e2;
+			char* url_start = s1 >= location_start && (s2 < location_start || s1 < s2) ? s1 : s2;
+			if(url_start >= location_start && url_end > url_start)
+			{
+				char* original_url;
+				while(*url_start == ' ' || *url_start == '\t')
+				{
+					url_start++;
+				}
+				*url_end = '\0';
+				original_url = e_strdup(url_start);
+
+				*url_end = '\015';
+				while(*url_end == '\015' || *url_end == '\012')
+				{
+					url_end++;
+				}
+
+
+				//write over location, since we are modifying it and handling it separately
+				while(*url_end != '\0')
+				{
+					location_start[0] = url_end[0];
+					url_end++;
+					location_start++;
+				}
+				location_start[0] = '\0';
+				
+				
+				/*
+				 * If a redirect Location header path doesn't start with either a protocol 
+				 * or the root (e.g. "location.sh" instead of "http://1.2.3.4/location.sh" or "/location.sh")
+				 * then Chrome (but no other browser) has a pissy little shit-fit, responding with
+				 * the ever-so relevant, descriptive and helpful error message: ERR_RESPONSE_HEADERS_TRUNCATED
+				*/
+				if(strstr(original_url, "://") == NULL && original_url[0] != '/')
+				{
+					location = (char*)e_malloc(2+strlen(original_url));
+					sprintf(location, "/%s", original_url);
+				}
+				else
+				{
+					location = e_strdup(original_url);
+				}
+				free(original_url);
+			}
 		}
+		
 		/* Write the status line. */
 		switch ( status )
 			{
@@ -2434,18 +2537,29 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			case 503: title = "Service Temporarily Overloaded"; break;
 			default: title = "Something"; break;
 			}
-		(void) snprintf( buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
+		if(line[0] == '\0')
+		{
+			(void) snprintf( buf, sizeof(buf), "HTTP/1.0 %d %s\015\012", status, title );
+		}
+		else
+		{
+			(void) snprintf( buf, sizeof(buf), "%s", line );
+		}
 		(void) my_write( buf, strlen( buf ), is_ssl );
+		if(location != NULL)
+		{
+			sprintf(line, "Location: %s\015\012", location );
+			(void) my_write(line, strlen(line), is_ssl );
+			free(location);
+		}
 		if(strstr(headers, "Server:") == NULL)
 		{
-			char line[200];
 			sprintf(line, "Server: %s\015\012", SERVER_SOFTWARE );
 			(void) my_write(line, strlen(line), is_ssl );
 		}
 
 		if(strstr(headers, "Date:") == NULL)
 		{
-			char line[200];
 			char timebuf[100];
 			time_t now = time( (time_t*) 0 );
 			const char* rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
@@ -2461,13 +2575,19 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		}
 		else if(strstr(headers, "Expires:") == NULL)
 		{
-			char* line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			char* exp_line = "Expires: Thu, 01 Jan 1970 00:00:00 GMT\015\012";
+			(void) my_write(exp_line, strlen(exp_line), is_ssl );
+		}
+		if(strstr(headers, "Content-Type:") == NULL)
+		{
+			sprintf(line, "Content-Type: text/html; charset=%s\015\012", charset);;
 			(void) my_write(line, strlen(line), is_ssl );
 		}
 
 	
 		/* Write the saved headers. */
-		(void) my_write( headers, headers_len, is_ssl );
+		(void) my_write( headers, strlen(headers), is_ssl );
+		(void) my_write("\015\012", 2, is_ssl);
 		
 	}
 	
@@ -2850,7 +2970,7 @@ static void send_redirect(char* extra_header, char* hostname, char* new_location
 	{
 		sprintf(extra_header_buf, "%s\r\nLocation: %s%s%s%s", extra_header, proto, hostname, sep, new_location);
 	}
-	add_headers(301, "Moved Permanently", extra_header_buf, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
+	add_headers(301, "Moved Permanently", extra_header_buf, "", default_content_type, (off_t) -1, (time_t) -1 );
 	send_error_body(301, "Moved Permanently", "Moved Permanently" );
 	send_error_tail();
 	send_response(is_ssl);
@@ -2864,7 +2984,7 @@ static void send_redirect(char* extra_header, char* hostname, char* new_location
 
 static void send_error( int s, char* title, char* extra_header, char* text, int is_ssl )
 {
-	add_headers(s, title, extra_header, "", "text/html; charset=%s", (off_t) -1, (time_t) -1 );
+	add_headers(s, title, extra_header, "", default_content_type, (off_t) -1, (time_t) -1 );
 	send_error_body( s, title, text );
 	send_error_tail();
 	send_response(is_ssl);
