@@ -96,7 +96,7 @@ function saveChanges()
 		var conflict = checkForPortConflict("" + port, "tcp");
 		if(conflict != "")
 		{
-			errors.push(webcam.ErrorPortWebC + conflict);
+			errors.push(WebC.ErrorPortWebC + conflict);
 		}
 	}
 
@@ -169,7 +169,7 @@ function showPreview(enabled, port, username, password)
 		}
 		var webcam_url = 'http://' + auth + currentLanIp + ':' + port + '/?action=stream';
 		document.getElementById("webcam_preview").style.display = "block";
-		setChildText("webcam_info", webcam.AvelAtWebC + webcam_url);
+		setChildText("webcam_info", WebC.AvelAtWebC + webcam_url);
 		document.getElementById('videoframe').src = webcam_url;
 	}
 	else
