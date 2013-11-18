@@ -14,6 +14,7 @@ WebC.WebCPort="Port";
 WebC.WebCUName="User Name";
 WebC.WebCPass="Password";
 WebC.PrevWebC="Preview";
+WebC.WebCOpt="optional";
 
 WebC.ErrorPortWebC="Webcam server port conflicts with ";
 WebC.AvelAtWebC="Webcam is available at ";
