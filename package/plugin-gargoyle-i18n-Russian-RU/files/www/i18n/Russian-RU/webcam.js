@@ -3,7 +3,7 @@
  */
 
 WebC.WebC="Вебкамера";
-WebC.NoWebC="USB вебкамера не найдена";
+WebC.NoWebC="USB-вебкамера не найдена";
 WebC.EnWebC="Включить вебкамеру";
 WebC.EnRAWebC="Включить дистанционный доступ";
 WebC.WebCDev="Устройство";
