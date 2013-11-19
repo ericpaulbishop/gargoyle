@@ -14,6 +14,7 @@ WebC.WebCPort="Порт";
 WebC.WebCUName="Имя пользователя";
 WebC.WebCPass="Пароль";
 WebC.PrevWebC="Предпросмотр";
+WebC.WebCOpt="опционально";
 
 WebC.ErrorPortWebC="Порт сервера вебкамеры конфликтует с ";
 WebC.AvelAtWebC="Вебкамера доступна на ";
