@@ -1443,7 +1443,7 @@ function doDiskFormat()
 				}
 				else
 				{
-					alert("Formatting Complete.");
+					alert(usbSStr.FmtCplt);
 					window.location=window.location
 				}
 			}

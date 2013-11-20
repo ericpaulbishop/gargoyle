@@ -92,6 +92,7 @@ usbSStr.FDmsg3="To proceed, enter your router login password";
 usbSStr.CfmPass1="Password Accepted.";
 usbSStr.CfmPass2="This is your LAST CHANCE to cancel.  Press 'OK' only if you are SURE you want to format";
 usbSStr.FmtMsg="Formatting,\nPlease Be Patient...";
+usbSStr.FmtCplt="Formatting Complete.";
 usbSStr.ExtOffWarn="If you disable extroot, all settings and installed plugins may be lost. After disabling extroot, router requires a reboot. Continue?";
 usbSStr.ExtOffMsg="Disabling extroot...";
 usbSStr.SRboot="System Is Now Rebooting";
