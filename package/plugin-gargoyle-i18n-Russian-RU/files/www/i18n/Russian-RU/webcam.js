@@ -3,7 +3,7 @@
  */
 
 WebC.WebC="Вебкамера";
-WebC.NoWebC="USB вебкамера не найдена";
+WebC.NoWebC="USB-вебкамера не найдена";
 WebC.EnWebC="Включить вебкамеру";
 WebC.EnRAWebC="Включить дистанционный доступ";
 WebC.WebCDev="Устройство";
@@ -14,6 +14,7 @@ WebC.WebCPort="Порт";
 WebC.WebCUName="Имя пользователя";
 WebC.WebCPass="Пароль";
 WebC.PrevWebC="Предпросмотр";
+WebC.WebCOpt="опционально";
 
 WebC.ErrorPortWebC="Порт сервера вебкамеры конфликтует с ";
 WebC.AvelAtWebC="Вебкамера доступна на ";
