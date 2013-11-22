@@ -1420,7 +1420,7 @@ function doDiskFormat()
 	}
 	if(swapPercent >99 && swapPercent < 100)
 	{
-		swapPerent = 99
+		swapPercent = 99
 	}
 	swapPercent=Math.round(swapPercent)
 
