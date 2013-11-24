@@ -16,6 +16,7 @@ dlna.DLNAI="Image";
 dlna.DLNADrive="Drive";
 dlna.DLNAMFolder="Media folder";
 dlna.DLNAFolders="Folders list";
+dlna.RootD="Root Disk";
 
 dlna.Totl="Total";
 dlna.Free="Free";

@@ -92,6 +92,7 @@ usbSStr.FDmsg3="Aby kontynuować, wprowadź hasło do routera";
 usbSStr.CfmPass1="Hasło zostało zaakceptowane.";
 usbSStr.CfmPass2="To jest ostatnia szansa aby przerwać operację. Naciśnij 'OK' tylko jeżeli jesteś pewien że chcesz kontynuować formatowanie";
 usbSStr.FmtMsg="Trwa formatowanie,\nzajmie to nieco czasu...";
+usbSStr.FmtCplt="Zakończono formatowanie.";
 usbSStr.ExtOffWarn="Jeżeli extroot zostanie wyłączony, wszystkie ustawienia i zainstalowane dodatki mogą zostać utracone. Po wyłączeniu extroota nastąpi ponowne uruchomienie routera. Kontynuować?";
 usbSStr.ExtOffMsg="Wyłączanie extroota...";
 usbSStr.SRboot="Nastąpi ponowne uruchomienie systemu";

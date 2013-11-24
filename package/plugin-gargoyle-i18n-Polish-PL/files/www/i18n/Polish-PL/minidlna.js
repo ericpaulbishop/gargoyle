@@ -16,8 +16,9 @@ dlna.DLNAI="Zdjęcia";
 dlna.DLNADrive="Nośnik";
 dlna.DLNAMFolder="Folder danych";
 dlna.DLNAFolders="Lista folderów";
+dlan.RootD="Pamięć wewnętrzna";
 
-dlna.Totl=", w tym";
+dlna.Totl="ogółem";
 dlna.Free="wolne";
 dlna.Drv="Nośnik";
 dlna.Dir="Folder";

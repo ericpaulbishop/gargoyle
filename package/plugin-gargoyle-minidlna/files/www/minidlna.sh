@@ -15,7 +15,7 @@
 	echo "currentLanIp=\"$lan_ip\";"
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
-	df /overlay | head -n2 | awk '/overlay/ {printf "storageDrives.push([\"Root Disk\",\"/\",\"/\",\"jffs2\", \"%.0f\", \"%.0f\"]);" , $2 * 1024, $4 * 1024}'
+	df /overlay | head -n2 | awk -v root="$(i18n minidlna.RootD)" '/overlay/ {printf "storageDrives.push([\"%s\",\"/\",\"/\",\"jffs2\", \"%.0f\", \"%.0f\"]);" , root, $2 * 1024, $4 * 1024}'
 %>
 //-->
 </script>
