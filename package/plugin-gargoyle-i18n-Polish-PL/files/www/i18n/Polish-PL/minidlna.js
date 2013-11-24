@@ -17,7 +17,7 @@ dlna.DLNADrive="Nośnik";
 dlna.DLNAMFolder="Folder danych";
 dlna.DLNAFolders="Lista folderów";
 
-dlna.Totl=", w tym";
+dlna.Totl="ogółem";
 dlna.Free="wolne";
 dlna.Drv="Nośnik";
 dlna.Dir="Folder";
