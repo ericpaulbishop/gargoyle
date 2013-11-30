@@ -73,13 +73,13 @@ var webcams = [];
 	<div>
 		<label id="webcam_username_label" class="leftcolumn" for="webcam_username"><%~ WebCUName %>:</label>
 		<input id="webcam_username" class="rightcolumn" type="text" size='20'/>
-		<em>(optional)</em>
+		<em>(<%~ WebCOpt %>)</em>
 	</div>
 	
 	<div>
 		<label id="webcam_password_label" class="leftcolumn" for="webcam_password"><%~ WebCPass %>:</label>
 		<input id="webcam_password" class="rightcolumn" type="text" size='20'/>
-		<em>(optional)</em>
+		<em>(<%~ WebCOpt %>)</em>
 	</div>
 </fieldset>
 
