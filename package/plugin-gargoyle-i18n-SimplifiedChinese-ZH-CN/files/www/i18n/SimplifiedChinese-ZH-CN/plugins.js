@@ -35,4 +35,6 @@ pgS.Totl="总空间";
 pgS.Free="空闲";
 pgS.Prst="预置";
 pgS.Name="名称";
+pgS.Langs="语言";
+pgS.Thems="主题";
 pgS.Pkg="插件包";
