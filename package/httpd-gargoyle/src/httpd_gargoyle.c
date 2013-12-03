@@ -1563,9 +1563,6 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 	protocol += strspn( protocol, " \t\012\015" );
 	query = strchr( path, '?' );
 	
-	//print path
-	syslog( LOG_NOTICE, "GOT REQUEST: '%s'",  method_str );
-	syslog( LOG_NOTICE, "PARSED PATH: '%s'", path);
 	
 	
 	if ( query == (char*) 0 )
