@@ -6,3 +6,4 @@ ES=Estado de OpenVPN
 PL=Status OpenVPN
 ZH-CN=OpenVPN状态
 RU=Статус OpenVPN
+NO=OpenVPN Status
