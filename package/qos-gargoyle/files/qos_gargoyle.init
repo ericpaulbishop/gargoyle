@@ -644,7 +644,10 @@ initialize_qos()
 
 		#Start the monitor
 		if [ -n "$pinglimit" ] ; then
-			#In manual mode the user selected the pinglimit.
+			#In manual mode the user selects the active mode pinglimit indirectly.  qosmon always measures the RTT of a ping on an unloaded link.
+			#This is called the ping entitlement.  With a manual entry the minRTT ping limit is 110% of this measured ping entitlement
+			#and the active mode ping limit is the minRTT limit plus the user entered value.  See the qosmon source code for more details.
+			#In summary manaully entered ping times only affect the active mode, not the minRTT mode ping time limits.
 			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
 		else
 			#In auto mode we calculate transmission delay based on our bandwidth and then ask qosmon

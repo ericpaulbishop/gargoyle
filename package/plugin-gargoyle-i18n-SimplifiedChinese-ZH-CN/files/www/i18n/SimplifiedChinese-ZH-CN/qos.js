@@ -1,6 +1,5 @@
 ﻿/*
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
- * Looks a lot like English
  */
 
 qosStr.URSection="QoS（上传）—分类规则";

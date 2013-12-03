@@ -92,6 +92,7 @@ usbSStr.FDmsg3="要继续，请输入你的路由器登录密码";
 usbSStr.CfmPass1="密码接受。";
 usbSStr.CfmPass2="这是你最后一次机会取消。只有当你确定你要格式化才点击'OK'";
 usbSStr.FmtMsg="正在格式化\n请耐心等待...";
+usbSStr.FmtCplt="格式化完成";
 usbSStr.ExtOffWarn="如果你禁用extroot，所有设置及安装的插件可能会丢失。禁用extroot后路由器需要重启。要继续吗？";
 usbSStr.ExtOffMsg="正在禁用extroot...";
 usbSStr.SRboot="系统正在重启";
