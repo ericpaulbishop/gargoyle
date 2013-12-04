@@ -95,6 +95,7 @@ basicS.Clnt="客户端";
 basicS.OpMod="工作模式";
 basicS.WlFltr="无线MAC地址过滤";
 basicS.FltrInfo="MAC过滤功能适用于所有的无线接口，包括那些在客户端模式的。在客户端模式下，你必须确保允许你所连接的接入点的MAC地址通行。";
+basicS.MACFiPo="MAC地址过滤策略";
 basicS.AllwMAC="仅允许下面列出的MAC";
 basicS.DnyMAC="仅拒绝下面列出的MAC";
 basicS.WlBnd="无线频段";

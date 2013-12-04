@@ -730,7 +730,7 @@ function LoadCrontabs() {
 
 function saveChanges() { 	//follow reboot.sh somewhat
 	var commands = [];
-	setControlsEnabled(false, true, "Please Wait While Settings Are Applied");
+	setControlsEnabled(false, true, UI.WaitSettings);
 	commands.push("mkdir -p /etc/crontabs"); //should fail gracefully
 	commands.push("touch /etc/crontabs/root"); //no harm, no foul
 	commands.push("cat /etc/crontabs/root | grep -v -e '" + garCronWIFI + "' > /tmp/cron.backup");

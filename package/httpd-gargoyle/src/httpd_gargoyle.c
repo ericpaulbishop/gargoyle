@@ -1563,9 +1563,6 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 	protocol += strspn( protocol, " \t\012\015" );
 	query = strchr( path, '?' );
 	
-	//print path
-	syslog( LOG_NOTICE, "GOT REQUEST: '%s'",  method_str );
-	syslog( LOG_NOTICE, "PARSED PATH: '%s'", path);
 	
 	
 	if ( query == (char*) 0 )
@@ -2587,8 +2584,6 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 	
 		/* Write the saved headers. */
 		(void) my_write( headers, strlen(headers), is_ssl );
-		(void) my_write("\015\012", 2, is_ssl);
-		
 	}
 	
 	/* Echo the rest of the output. */
