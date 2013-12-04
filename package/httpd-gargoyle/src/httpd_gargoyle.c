@@ -2584,8 +2584,6 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 	
 		/* Write the saved headers. */
 		(void) my_write( headers, strlen(headers), is_ssl );
-		(void) my_write("\015\012", 2, is_ssl);
-		
 	}
 	
 	/* Echo the rest of the output. */
