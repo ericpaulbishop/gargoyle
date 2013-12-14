@@ -54,9 +54,6 @@
 			<div id='custom_script' style='display: none;'>
 				<label class='leftcolumn' for='script' id='script_label' ><%~ Scpt %>:</label>
 				<input class='rightcolumn' type='text' id='script' size='30' />
-				<div class="rightcolumnonly">
-					<em><%~ SpcWarn %></em>
-				</div>
 			</div>
 		</div>
 
