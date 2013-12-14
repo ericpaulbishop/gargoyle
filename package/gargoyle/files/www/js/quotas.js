@@ -896,7 +896,14 @@ function setDocumentSpeed(kbytes, textId, unitSelectId, controlDocument)
 		var pb = parseKbytesPerSecond(kbytes);
 		var splitParsed = pb.split(/[\t ]+/);
 		textEl.value = splitParsed[0];
-		setSelectedValue(unitSelectId, splitParsed[1], controlDocument);
+		switch (splitParsed[1])
+		{
+		case UI.KBs:
+			defaultUnit = 'KBytes/s'; break;
+		case UI.MBs:
+			defaultUnit = 'MBytes/s'; break;
+		}
+		setSelectedValue(unitSelectId, defaultUnit, controlDocument);
 	}
 }
 

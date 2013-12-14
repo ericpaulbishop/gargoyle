@@ -14,7 +14,6 @@ pingS.WRcon="WAN重新连接";
 pingS.Rbot="重启";
 pingS.Rscp="运行自定义脚本";
 pingS.Scpt="脚本";
-pingS.SpcWarn="如果命令中包含空格，则必须使用引号";
 
 //javascript
 pingS.ScptErr="你必须添加要执行的脚本";
