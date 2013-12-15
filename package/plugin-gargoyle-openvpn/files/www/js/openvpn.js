@@ -567,7 +567,7 @@ function updateClientControlsFromConfigText()
 		if(cipher == "BF-CBC" && (keysize == "128" || keysize == "256" || keysize == null))
 		{
 			keysize = keysize == null ? "128" : keysize
-			setSelectedValue("openvpn_client_cipher", cipher + ":" + key)
+			setSelectedValue("openvpn_client_cipher", cipher + ":" + keysize)
 		}
 		else if(cipher == "AES-128-CBC" || cipher == "AES-256-CBC")
 		{
