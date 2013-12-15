@@ -22,6 +22,7 @@ tl-mr3420 | \
 tl-wr741nd | \
 tl-wr841n-v7)
 	PORTS="1 2 3 4";;
+tl-wr741nd-v4 | \
 tl-mr3220-v2)
 	PORTS="2 3 4 1";;
 tl-wdr4300)
