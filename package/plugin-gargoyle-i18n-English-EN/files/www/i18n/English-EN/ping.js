@@ -14,7 +14,6 @@ pingS.WRcon="WAN Reconnect";
 pingS.Rbot="Reboot";
 pingS.Rscp="Run custom script";
 pingS.Scpt="Script";
-pingS.SpcWarn="If the command contains spaces, it must be given in quotes";
 
 //javascript
 pingS.ScptErr="You must add the script to execute";

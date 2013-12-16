@@ -63,12 +63,14 @@ int main(int argc, char** argv)
 	char* death_mark = NULL;
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
+    int ret;
 	
 	unsigned char full_qos_active = 0;
 
 	char c;
-	while((c = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((ret = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
+        c = ret;
 		switch(c)
 		{
 			case 'W':
