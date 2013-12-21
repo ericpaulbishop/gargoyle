@@ -121,8 +121,10 @@ start() {
 		upnpd_write_bool secure_mode 1
 		upnpd_write_bool system_uptime 1
 
-		[ -n "$upnp_lease_file" ] && \
+		[ -n "$upnp_lease_file" ] && {
 			echo "lease_file=$upnp_lease_file" >>$tmpconf
+			touch $upnp_lease_file
+		}
 
 		[ -n "$upload" -a -n "$download" ] && {
 			echo "bitrate_down=$(($download * 1024 * 8))" >>$tmpconf
