@@ -6,7 +6,6 @@ MOUNT_TABLE_FILE="/tmp/mounted_usb_storage.tab"
 USB_LOCKFILE="/tmp/usb_restart.lock"
 got_lock=0
 
-
 is_mounted()
 {
 	# Exit with 0 if is mounted somewhere other than /tmp directory, else exit with 1
@@ -27,7 +26,6 @@ usb_unlock()
 {
 	rm -rf "$USB_LOCKFILE"
 }
-
 
 start()
 {
@@ -54,10 +52,10 @@ do_start()
 	fi
 
 	local drives="$(blkid | grep UUID | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
-	
+
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
-	
+
 	for devid in $drives; do
 		local id=$(echo "$devid" | cut -f 2 -d ':')
 		local d=$(echo "$devid" | cut -f 1 -d ':')
@@ -66,10 +64,9 @@ do_start()
 		if [ -z "$id" ] || [ -z "$d" ] || is_mounted "$d"; then
 			continue
 		fi
-		
+
 		rm "/tmp/usb_mount/$did" >/dev/null 2>&1
-		
-		
+
 		local type=$(disktype "$d" | egrep -o "Ext.|FAT..|NTFS|Linux swap|HFS Plus")
 		if [ -e /sbin/mount.exfat ] ; then
 			type=$(disktype "$d" | egrep -o "Ext.|exFAT|FAT..|NTFS|Linux swap|HFS Plus")
@@ -77,7 +74,7 @@ do_start()
 
 		local err
 		unset err
-		
+
 		case "${type}" in
 			'FAT32'|'FAT16')
 				mkdir -p "/tmp/usb_mount/$id"
@@ -137,12 +134,12 @@ do_start()
 			if [ -z "$disk_free" ] ; then disk_size="-" ; fi
 			if [ -n "$disk_size" ] && [ "${disk_size}" != '-' ]; then disk_size=$(($disk_size*1024)) ; fi
 			if [ -n "$disk_free" ] && [ "${disk_free}" != '-' ]; then disk_free=$(($disk_free*1024)) ; fi
-			
+
 			if [ -e "$MOUNT_TABLE_FILE" ] ; then
 				escaped_d=$(echo $d | sed 's/\//\\\//g')
 				sed -i  "/^$escaped_d\t.*$/d"  "$MOUNT_TABLE_FILE"
 			fi
-		
+
 			if [ ! -h  "/tmp/usb_mount/dev_$did" ] ; then
 				ln -s "/tmp/usb_mount/$id" "/tmp/usb_mount/dev_$did"
 			fi
@@ -150,12 +147,11 @@ do_start()
 		fi
 	done
 
-
 	#update plugin links last, so if this takes a bit of time everything is already mounted and will work
 	plugin_drive=$(uci get gargoyle.plugin_options.root_drive 2>/dev/null)
 	plugin_root=$(uci get gargoyle.plugin_options.root_dir 2>/dev/null)
 	if [ -f "$MOUNT_TABLE_FILE" ] ;  then
-		while read device_path mountpoint_path _; do		
+		while read device_path mountpoint_path _; do
 			if [ -n "${plugin_drive}" ] && [ "${plugin_drive}" = "${device_path}" ] ; then
 				echo do_plugin_link "${plugin_drive}" "${plugin_root}" "${mountpoint_path}"
 				
@@ -163,7 +159,6 @@ do_start()
 			fi
 		done < "$MOUNT_TABLE_FILE"
 	fi
-
 }
 
 stop()
@@ -198,17 +193,16 @@ do_swapoff()
 	done < /proc/swaps
 }
 
-
 do_plugin_link()
 {
 	plugin_drive="$1"
 	plugin_root="$2"
 	mountpoint="$3"
-	
-	IFS_ORIG="$IFS"                                                          
-	IFS_LINEBREAK="$(printf '\n\r')"         
+
+	IFS_ORIG="$IFS"
+	IFS_LINEBREAK="$(printf '\n\r')"
 	IFS="$IFS_LINEBREAK"
-	
+
 	if [ -d "${mountpoint}${plugin_root}/usr/lib/opkg/info" ] ; then
 		echo links="\$("cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/"*".linked ")"
 		links=$(cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/*.linked 2>/dev/null)
@@ -234,10 +228,10 @@ do_plugin_unlink()
 	plugin_root="$2"
 	mountpoint="$3"
 
-	IFS_ORIG="$IFS"                                                          
-	IFS_LINEBREAK="$(printf '\n\r')"         
+	IFS_ORIG="$IFS"
+	IFS_LINEBREAK="$(printf '\n\r')"
 	IFS="$IFS_LINEBREAK"
-	
+
 	if [ -d "${mountpoint}${plugin_root}/usr/lib/opkg/info" ] ; then
 		links=$(cat "${mountpoint}${plugin_root}/usr/lib/opkg/info"/*.linked 2>/dev/null)
 		if [ -n "$links" ] ; then
@@ -249,10 +243,7 @@ do_plugin_unlink()
 		fi
 	fi
 	IFS="$IFS_ORIG"
-
-
 }
-
 
 do_stop()
 {
@@ -260,7 +251,7 @@ do_stop()
 	plugin_root=$(uci get gargoyle.plugin_options.root_dir 2>/dev/null)
 	if [ -f "$MOUNT_TABLE_FILE" ];  then
 		while read device_path mountpoint_path _; do
-			
+
 			if [ -n "${plugin_drive}" ] && [ "${plugin_drive}" = "${device_path}" ] ; then
 				do_plugin_unlink "${plugin_drive}" "${plugin_root}" "${mountpoint_path}"
 			fi
