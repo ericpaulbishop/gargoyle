@@ -1,3 +1,8 @@
 #!/bin/sh
 
-/etc/init.d/usb_storage restart
+case $DEVICENAME in
+	mtdblock*);;
+	*)
+		/etc/init.d/usb_storage restart
+		;;
+esac
