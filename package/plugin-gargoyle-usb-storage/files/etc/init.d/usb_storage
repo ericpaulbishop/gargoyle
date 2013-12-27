@@ -16,7 +16,6 @@ is_mounted()
 usb_lock()
 {
 	got_lock=0
-	local timeout=15
 	if [ ! -e "$USB_LOCKFILE" ] ; then
 		touch "$USB_LOCKFILE"
 		got_lock=1
