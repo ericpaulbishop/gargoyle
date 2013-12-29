@@ -1,4 +1,4 @@
-#!/usr/bin/haserl --upload-limit=4096 --upload-target=/tmp/ --upload-dir=/tmp/
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp/
 <%
 	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
