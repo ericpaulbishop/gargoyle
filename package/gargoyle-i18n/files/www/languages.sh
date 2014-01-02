@@ -29,7 +29,7 @@
 		<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
 	</span>
 	<span class='widerightcolumn' style="display:block; clear:right; margin-right:100px" >
-		<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Dil / γλώσσα / Язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
+		<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Språk / Dil / γλώσσα / Язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
 	</span>
 	<div id="lang_table_container"></div>
 </fieldset>
