@@ -51,6 +51,7 @@ quotasStr.TheseDays="Tych dni";
 quotasStr.TheseDaysHours="Tych dni i godzin";
 quotasStr.TheseTimes="Tych tygodni";
 quotasStr.Sample="np. Pon 00:30 - Wto 13:15, Pią 14:00 - Pią 15:00";
+quotasStr.SSample="np.";
 quotasStr.Exceed="Kiedy przekroczy";
 quotasStr.ShutdownNet="Zablokuj wszystkie połączenia internetowe";
 quotasStr.Throttle="Ogranicz pasmo";
