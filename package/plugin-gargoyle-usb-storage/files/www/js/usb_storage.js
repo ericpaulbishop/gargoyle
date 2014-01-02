@@ -819,7 +819,14 @@ function resetData()
 		for(dindex=0; dindex< drivesWithNoMounts.length ; dindex++)
 		{
 			driveIds.push( "" + dindex);
-			driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			if (drivesWithNoMounts[dindex][0] == drivesWithNoMounts[dindex][2])
+			{
+				driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
+			else
+			{
+				driveText.push( drivesWithNoMounts[dindex][2] + " (" + drivesWithNoMounts[dindex][0] + ", " + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
 		}
 		setAllowableSelections("format_disk_select", driveIds, driveText);
 	}
