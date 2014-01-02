@@ -4,3 +4,4 @@ fallback=Webcam
 EN=Webcam
 PL=Webcam
 RU=Вебкамера
+NO=Webcam

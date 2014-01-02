@@ -5,3 +5,4 @@ EN=Webshell
 ES=Webshell
 PL=Webshell
 RU=Коммандная строка
+NO=Webshell
