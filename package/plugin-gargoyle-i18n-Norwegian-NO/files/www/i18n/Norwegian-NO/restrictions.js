@@ -2,15 +2,15 @@
  * UTF-8 (with BOM) English-EN text strings for restrictions.sh html elements
  */
 
-restStr.ARSect="Tilgangs Begrensninger";
-restStr.NRRule="Ny Begrensning Regel";
+restStr.ARSect="Tilgangs Restriksjoner";
+restStr.NRRule="Ny Restriksjons Regel";
 restStr.ANRule="Legg Til Ny Regel";
-restStr.CRestr="Gjeldene Begrensninger";
+restStr.CRestr="Gjeldene Restriksjoner";
 restStr.EWSect="Unntak (Hvit Liste)";
 restStr.NExcp="Nytt Unntak";
 restStr.CExcp="Gjeldene Unntak";
 
-restStr.ERSect="Endre Begrensning Regel";
+restStr.ERSect="Endre Restriksjons Regel";
 restStr.EESect="Endre Unntak Regel";
 
 //templates

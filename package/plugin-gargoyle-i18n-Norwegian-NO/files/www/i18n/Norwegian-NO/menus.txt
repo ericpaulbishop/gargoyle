@@ -3,7 +3,7 @@
 gargoyle_display_firewall="Brannmur"
 gargoyle_display_firewall_portforwarding="Port Videresending"
 gargoyle_display_firewall_connlimits="Tilkobling Grenser"
-gargoyle_display_firewall_restriction="Begrensninger"
+gargoyle_display_firewall_restriction="Restriksjoner"
 gargoyle_display_firewall_quotas="Kvoter"
 gargoyle_display_firewall_qosupload="QoS (Opplasting)"
 gargoyle_display_firewall_qosdownload="QoS (Nedlasting)"
