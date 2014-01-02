@@ -3,7 +3,7 @@
  */
 
 basicS.DCfgSect="Enhetskonfigurasjon";
-basicS.CfgDev="Konfigurer Enhet Som";
+basicS.CfgDev="Konfigurere Enhet Som";
 basicS.DvGtwy="Gateway (Standard)";
 basicS.DvWBrg="Trådløs Bro/Repeater";
 basicS.BrIP="Bro IP";
@@ -15,7 +15,7 @@ basicS.BrNote="(må være i AP subnett)";
 basicS.SMsk="Nettverksmaske";
 basicS.SMNote="(samme som AP maske)";
 basicS.WanEP="Wan Ethernet Port";
-basicS.Dsbl="Deaktiver";
+basicS.Dsbl="Deaktivere";
 basicS.BrLAN="Bro til LAN";
 basicS.DnsSvs="DNS Servere";
 basicS.GwDNS="Bruk Gateway som DNS server";
@@ -25,7 +25,7 @@ basicS.BrWDS="Koble via WDS";
 basicS.Rptr="Repeater";
 basicS.RptrE="Repeater Aktivert";
 basicS.RptrD="Repeater Deaktivert";
-basicS.BrOpr="Operasjonmodus";
+basicS.BrOpr="Operasjons Modus";
 basicS.None="Ingen";
 basicS.Only="Bare";
 basicS.Auto="Auto";
@@ -91,7 +91,7 @@ basicS.WlMod="Trådløs Modus";
 basicS.AcPt="Aksesspunkt";
 basicS.AcPtID="Aksesspunkt SSID";
 basicS.Clnt="Klient";
-//tror ikke Ad Hoc bør oversettes
+//don't think Ad Hoc should be translated
 basicS.OpMod="Operasjons Modus";
 basicS.WlFltr="Trådløs MAC Filter";
 basicS.FltrInfo="MAC filtrering gjelder for alle trådløse grensesnitt, inkludert de i klient modus. I klient modus må du derfor tillate MAC adressen til AP som du er koblet opp til.";

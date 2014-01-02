@@ -4,8 +4,8 @@
 
 rtgS.ARSect="Aktive Ruter";
 rtgS.SRSect="Statiske Ruter";
-rtgS.ASRte="Legg Til Statisk Ruter";
-rtgS.CSRSect="Gjeldene Statisk Ruter";
+rtgS.ASRte="Legg Til Statiske Ruter";
+rtgS.CSRSect="Gjeldene Statiske Ruter";
 rtgS.ESSect="Endre Statisk Rute";
 
 //javascript & template

@@ -28,7 +28,7 @@ ovpnS.HTrff="Kun Trafikk Bestemt For Verter Bak VPN";
 ovpnS.OSAC="OpenVPN Server: Tillatte Klienter";
 ovpnS.CClnt="Gjeldende Konfigurerte Klienter";
 ovpnS.ZipCred="Etter opprettelse av klient konfigurasjon, klikk last ned for å hente zip fil med nødvendig berettigelsebevis, og plasser det i klient&lsquo;s OpenVPN konfigurasjonmappe";
-ovpnS.CfgCred="Konfigurer En Ny Klient / Berettigelsebevis";
+ovpnS.CfgCred="Konfigurere En Ny Klient / Berettigelsebevis";
 ovpnS.ClntN="Klient Navn";
 ovpnS.ClntIP="Klient Intern IP";
 ovpnS.ClntConn="Klient Kobler Til";
@@ -38,7 +38,7 @@ ovpnS.RtSub="Rute Subnettet Under";
 ovpnS.SubIP="Subnett IP";
 ovpnS.SubM="Subnett Maske";
 ovpnS.UpCfgF="Last Opp Klient Konfigurasjon Fil(er)";
-ovpnS.CfgMan="Konfigurer Klient Manuelt";
+ovpnS.CfgMan="Konfigurere Klient Manuelt";
 ovpnS.UpFmt="Last Opp Format";
 ovpnS.SZipF="En Zip Fil";
 ovpnS.CfgF="Individuelle Konfig Filer";
@@ -46,19 +46,19 @@ ovpnS.ZipF="Zip Fil";
 ovpnS.OCfgF="OpenVPN Konfigurasjon Fil";
 ovpnS.CACF="CA Sertifikat Fil";
 ovpnS.CCertF="Klient Sertifikat Fil";
-ovpnS.CNøkkelF="Klient Nøkkel Fil";
-ovpnS.TANøkkelF="TLS-Auth Nøkkel File";
-ovpnS.UseTAK="Use TLS-Auth Nøkkel";
+ovpnS.CKeyF="Klient Nøkkel Fil";
+ovpnS.TAKeyF="TLS-Auth Nøkkel File";
+ovpnS.UseTAK="Bruk TLS-Auth Nøkkel";
 ovpnS.OSrvAddr="OpenVPN Server Address";
 ovpnS.OSrvPrt="OpenVPN Server Port";
-ovpnS.Othr="Other";
+ovpnS.Othr="Annen";
 ovpnS.Cphr="Cipher";
-ovpnS.Nøkkelopt="Nøkkel Size (optional)";
+ovpnS.Keyopt="Nøkkel Størrelse (valgfritt)";
 ovpnS.CfgUpd="Konfigurasjonen under er oppdatert automatisk med parametere spesifisert over";
 ovpnS.CACert="CA Sertifikat";
 ovpnS.CCert="Klient Sertifikat";
-ovpnS.CNøkkel="Klient Nøkkel";
-ovpnS.TANøkkel="TLS-Aut Nøkkel";
+ovpnS.CKey="Klient Nøkkel";
+ovpnS.TAKey="TLS-Aut Nøkkel";
 ovpnS.TADir="TLS-Aut Retning";
 ovpnS.Clnt="Klient";
 ovpnS.Symm="Utelatt (Symmetrisk)";
@@ -89,13 +89,13 @@ ovpnS.OSubErr="er ikke i Subnettet";
 ovpnS.AddCErr="Kunne ikke legge til Klient Konfigurasjon.";
 ovpnS.UpCErr="Kunne ikke oppdatere Klient Konfigurasjon.";
 
-//openvpn_Tillated_Klient_edit.sh
+//openvpn_allowed_client_edit.sh
 ovpnS.EditOCS="Endre OpenVPN Klient Innstillinger";
 
-//openvpn_upload_Klient.sh (handled by shell scripts)
+//openvpn_upload_client.sh (handled by shell scripts)
 ovpnS.uc_CA_f="Kunne ikke finne CA fil";
 ovpnS.uc_crt_f="Kunne ikke finne Sertifikat fil";
-ovpnS.uc_Nøkkel_f="Kunne ikke finne Nøkkel fil";
+ovpnS.uc_key_f="Kunne ikke finne Nøkkel fil";
 ovpnS.uc_cfg_f="Kunne ikke finne Konfig fil";
 ovpnS.uc_TAP_Err="Gargoyle støtter ikke TAP OpenVPN Konfigurasjon";
 ovpnS.uc_conn_Err="Parametere lagret med OpenVPN kunne ikke tilkoble. Sjekk din konfigurasjon.";

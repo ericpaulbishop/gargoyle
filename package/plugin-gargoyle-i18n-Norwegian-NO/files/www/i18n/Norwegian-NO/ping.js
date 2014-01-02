@@ -14,7 +14,6 @@ pingS.WRcon="WAN Igjentilkobling";
 pingS.Rbot="Omstart";
 pingS.Rscp="Kjør egendefinert skript";
 pingS.Scpt="Skript";
-pingS.SpcWarn="Hvis kommandoen inneholder mellomrom, må anførselstegn brukes";
 
 //javascript
 pingS.ScptErr="Du må legge til skriptet som skal kjøres";
