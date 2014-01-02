@@ -10,7 +10,7 @@ get_i18_3rd_party_menuoption() {
 	local full_lang="$2"
 	local iso_lang=$(echo "$full_lang" | sed -e 's/^\([^-]*-\)\{1\}//')
 	local translation=""
-	
+
 	translation=$(awk -v lang="$iso_lang" -F '=' '$0 ~ lang { gsub(/\r$/,""); printf $2 }' $target_file)
 	echo "$translation"
 }
@@ -25,7 +25,7 @@ get_i18n_3rd_party_menuname() {
 	local menu_filename=$(echo "$uci_menu_item" | awk -F '.' '{print "menu-"$3".txt"}')
 	local fallback_lang=$(uci get gargoyle.global.fallback_lang)
 	local translation=""
-	
+
 	if [ -e "$web_root/i18n/universal/$menu_filename" ] ; then
 		translation=$(get_i18_3rd_party_menuoption "$web_root/i18n/universal/$menu_filename" "$full_lang")
 		[ -z "$translation" ] && translation=$(get_i18_3rd_party_menuoption "$web_root/i18n/universal/$menu_filename" "$fallback_lang")
@@ -47,17 +47,16 @@ get_i18n_menuname() {
 	local uci_trans=""
 	local translation=""
 
-	
 	[ -e "$web_root/i18n/$fallback_lang/menus.txt" ] && . "$web_root/i18n/$fallback_lang/menus.txt"
 	[ -e "$web_root/i18n/$tgt_lang/menus.txt" ] && . "$web_root/i18n/$tgt_lang/menus.txt"
 
 	translation="$(eval echo \$$uci_menu_var)"
-	
+
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$tgt_lang")
 	[ -z "$translation" ] && translation=$(get_i18n_3rd_party_menuname "$uci_menu_item" "$fallback_lang")
-	
+
 	translation=$(echo "$translation" | awk '{printf("%s", $0)}')
-	
+
 	echo "$translation"
 }
 
@@ -70,9 +69,9 @@ change_menu_language() {
 	local uciName
 	local uci_val
 	local old_ifs=$IFS
-	
+
 	[ -z "$lang_ipk" ] && exit -1
-	
+
 	IFS=$(printf '\n\b')
 	#set -x
 	for uciMenu in $(uci show gargoyle.display 2>/dev/null | grep -v gargoyle.display=display); do
@@ -83,11 +82,12 @@ change_menu_language() {
 	#set +x
 	IFS=$old_ifs
 	uci set gargoyle.global.language=$new_lang
+	uci commit
 }
 
 install_lang_pack() {
 	local lang_file="$1"
-	
+
 	gpkg install "$lang_file"
 	rm "$lang_file"
 }
@@ -99,11 +99,11 @@ restart_lang_services() {
 	local active_lang=$(uci -q get gargoyle.global.language)
 	local fallback_lang=$(uci -q get gargoyle.global.fallback_lang)
 	local translation
-		
+
 	if [ -z $web_lang_menu ] && [ $installed_langs -gt 1 ] ; then
 		#uci set gargoyle.display.system_languages='Languages' #old way
 		translation=$(get_i18n_menuname "gargoyle.display.system_languages" "$web_root/i18n/$active_lang")
-		
+
 		# only use translation if not "" - it was something before, so lets keep it
 		# uci set gargoyle.display.system_languages="$translation"
 		[ ! -z "$translation" ] && uci set gargoyle.display.system_languages="$translation"
@@ -115,7 +115,7 @@ restart_lang_services() {
 		uci -q del gargoyle.system.languages
 		uci commit gargoyle
 	fi
-	
+
 	#if current language doesn't exist anymore switch back to default
 	if [ ! -e "$web_root/i18n/$active_lang/menus.txt"  ] ; then
 		if [ -e "$web_root/i18n/$fallback_lang/menus.txt" ] ; then
