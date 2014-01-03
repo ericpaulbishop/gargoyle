@@ -29,6 +29,7 @@ restStr.DActv="生效的日子";
 restStr.HActv="生效的时间";
 restStr.DHActv="生效的日子和时间";
 restStr.Sample="例如：周一 00:30 - 周四 13:15, 周五 14:00 - 周五 15:00";
+restStr.SSample="例如：";
 restStr.RRsrc="被限制资源";
 restStr.NetAcc="全网络访问";
 restStr.RemIP="远程IP";

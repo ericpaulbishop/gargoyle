@@ -51,6 +51,7 @@ quotasStr.TheseDays="В указанные дни недели";
 quotasStr.TheseDaysHours="В указанные дни и часы";
 quotasStr.TheseTimes="В указанные еженедельные периоды";
 quotasStr.Sample="например: Пон 00:30 - Врн 13:15, Пят 14:00 - Пят 15:00";
+quotasStr.SSample="например:";
 quotasStr.Exceed="При привышении";
 quotasStr.ShutdownNet="Отключить весь доступ к Интернету";
 quotasStr.Throttle="Ограничение пропускной способности";

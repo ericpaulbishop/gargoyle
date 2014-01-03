@@ -51,6 +51,7 @@ quotasStr.TheseDays="以下日期";
 quotasStr.TheseDaysHours="以下日期和时段";
 quotasStr.TheseTimes="以下周天时段";
 quotasStr.Sample="例如：周一 00:30 - 周四 13:15, 周五 14:00 - 周五 15:00";
+quotasStr.SSample="例如：";
 quotasStr.Exceed="当超出配额则";
 quotasStr.ShutdownNet="关闭所有互联网访问";
 quotasStr.Throttle="带宽限速";

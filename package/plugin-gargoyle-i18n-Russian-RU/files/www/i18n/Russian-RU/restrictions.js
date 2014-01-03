@@ -29,6 +29,7 @@ restStr.DActv="Применяется к дням";
 restStr.HActv="Применяется к часам";
 restStr.DHActv="Применяется к дням и часам";
 restStr.Sample="например: Пон 00:30 - Врн 13:15, Пят 14:00 - Пят 15:00";
+restStr.SSample="например:";
 restStr.RRsrc="Запрещенные сетевые ресурсы";
 restStr.NetAcc="Полностью доступ к сети";
 restStr.RemIP="Дистанционные IP-адреса";

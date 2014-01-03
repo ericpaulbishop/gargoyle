@@ -51,6 +51,7 @@ quotasStr.TheseDays="Disse Dager";
 quotasStr.TheseDaysHours="Disse Dager&amp; Timer";
 quotasStr.TheseTimes="Disse Ukentlige Tider";
 quotasStr.Sample="f.eks. Man 00:30 - Tir 13:15, Fre 14:00 - Fre 15:00";
+quotasStr.SSample="f.eks.";
 quotasStr.Exceed="Når Overskredet";
 quotasStr.ShutdownNet="Slå Av All Internett Tilgang";
 quotasStr.Throttle="Begrens Båndbredde";
