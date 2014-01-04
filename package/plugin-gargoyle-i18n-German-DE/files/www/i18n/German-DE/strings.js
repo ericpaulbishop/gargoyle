@@ -1,0 +1,121 @@
+﻿/*
+ * UTF-8 (with BOM) German-DE text strings for User Interface elements
+ */
+
+UI.SaveChanges="&Auml;nderungen speichern";
+UI.Reset="Zur&uuml;cksetzen";
+UI.Clear="Historie l&ouml;schen";
+UI.Delete="Daten l&ouml;schen";
+UI.DNow="Jetzt herunterladen";
+UI.Visited="Besuchte Seiten";
+UI.Requests="Suchanfragen";
+UI.Add="Hinzuf&uuml;gen";
+UI.Remove="Entfernen";
+UI.DDNSService="DDNS Service";
+UI.WakeUp="Aufwecken";
+UI.NewRule="Neue Regel hinzuf&uuml;gen";
+UI.NewQuota="Neues Kontigent hinzuf&uuml;gen";
+UI.AddRule="Regel hinzuf&uuml;gen";
+UI.AddSvcCls="Serviceklasse hinzuf&uuml;gen";
+UI.Edit="Ändern";
+UI.Select="ausw&auml;hlen";
+UI.ChPRoot="&Auml;ndere Plugin Quelle";
+UI.AddPSource="Neue Plugin Quelle hinzuf&uuml;gen";
+UI.Uninstall="Deinstallieren";
+UI.Install="Installieren";
+UI.RefreshPlugins="Aktualisiere Plugins";
+UI.GetBackup="Einstellungen jetzt herunterladen";
+UI.RestoreConfig="Einstellungen jetzt wiederherstellen";
+UI.RestoreDefault="Defaultkonfiguration wiederherstellen";
+UI.Upgrade="Firmware aktualisieren";
+UI.Reboot="Router neustarten";
+UI.MoreInfo="More Info";
+UI.Hide="Hide Text";
+UI.WaitSettings="Bitte warten, Einstellungen werden angewendet. . .";
+UI.Wait="Bitte warten. . .";
+UI.ErrChanges="&Auml;nderungen konnten nicht angewendet werden";
+UI.Always="Immer";
+UI.Disabled="Deaktiviert";
+UI.Enabled="Aktiviert";
+UI.Sunday="Sonntag";
+UI.Monday="Montag";
+UI.Tuesday="Dienstag";
+UI.Wednesday="Mittwoch";
+UI.Thursday="Donnerstag";
+UI.Friday="Freitag";
+UI.Saturday="Sonnabend";
+UI.Sun="So";
+UI.Mon="Mo";
+UI.Tue="Di";
+UI.Wed="Mi";
+UI.Thu="Do";
+UI.Fri="Fr";
+UI.Sat="Sa";
+UI.unk="unbekannt";
+UI.HsNm="Rechnername";
+UI.HDsp="Rechner";
+UI.DspHn="Zeige Rechnernamen";
+UI.DspHIP="Zeige Rechner IPs";
+
+UI.never="nie";
+UI.disabled="deaktiviert";
+UI.both="beide";
+UI.seconds="Sekunden";
+UI.minutes="Minuten";
+UI.hours="Stunden";
+UI.days="Tage";
+UI.second="Sekunde";
+UI.minute="Minute";
+UI.hour="Stunde";
+UI.day="Tag";
+UI.month="Monat";
+UI.year="Jahr";
+UI.sc="s"; //abbr for second
+UI.hr="Std"; //abbr for hour
+UI.pAM="";
+UI.pPM="";
+UI.hAM="";
+UI.hPM="";
+
+UI.EMonths=["Jan", "Feb", "M&auml;r", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+
+UI.byt="Bytes";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KB1="kByte";
+UI.MB1="MByte";
+UI.GB1="GByte";
+UI.TB1="TByte";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
+
+UI.CApplyChanges="Schliessen und &Auml;nderungen anwenden";
+UI.CDiscardChanges="&Auml;nderungen verwerfen";
+UI.waitText="Bitte warten, w&auml;hrend die &Auml;nderungen angewendet werden";
+UI.Cancel="Abbrechen";
+
+UI.Err="FEHLER";
+UI.prfErr="Da ist ein Fehler in";
+UI.nex="existiert nicht";
+UI.InvAdd="FEHLER: Ung&uuml;ltige Addresse";
+
+UI.CPass="Passwort best&auml;tigen";
+UI.OK="OK";
+UI.VPass="&Uuml;berpr&uuml;fe Passwort...";
+UI.sprt="SSH port";
+UI.wsprt="web server port";
+UI.prdr="Portumleitung zum Router";
+UI.puse="Port wird durch Router verwendet";
+UI.pfwd="Portweiterleitung nach";
+UI.conn="verbunden";
+
+UI.AJAX="AJAX Unterst&uuml;tzung des Browser wird ben&ouml;tigt";
+UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";
