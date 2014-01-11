@@ -322,7 +322,7 @@
 				<tr><td>INIT</td><td><%~ ACC_L_In %></td></tr>
 				<tr><td>ACTIVE</td><td><%~ ACC_L_Act %></td></tr>
 				<tr><td>MINRTT</td><td><%~ ACC_L_Min %></td></tr>
-				<tr><td>IDLE</td><td><%~ ACC_L_Id %><td></tr>
+				<tr><td>IDLE</td><td><%~ ACC_L_Id %></td></tr>
 				<tr><td>DISABLE</td><td><%~ ACC_L_Dis %></td></tr>
 				<tr><td>Link Limit</td><td><%~ ACC_L_Lim %></td></tr>
 				<tr><td>Fair Link Limit</td><td><%~ ACC_L_Fr %></td></tr>

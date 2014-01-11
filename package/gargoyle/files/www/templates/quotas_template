@@ -173,7 +173,7 @@
 	</span>	
 	<span id="active_hours_container">
 		<input class="widerightcolumnonly" type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
-		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em>e.g. 02:00-04:00,11:35-13:25</em></span>
+		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>
 	</span>
 	<span id="active_weekly_container">
 		<input class="widerightcolumnonly" type='text' id='active_weekly' onkeyup='proofreadWeeklyRange(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>

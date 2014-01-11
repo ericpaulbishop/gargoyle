@@ -29,6 +29,7 @@ restStr.DActv="Dager Aktiv";
 restStr.HActv="Timer Aktiv";
 restStr.DHActv="Dager og Timer Aktiv";
 restStr.Sample="f.eks. Man 00:30 - Tir 13:15, Fre 14:00 - Fre 15:00";
+restStr.SSample="f.eks.";
 restStr.RRsrc="Begrensede Ressurser";
 restStr.NetAcc="All Nettverk Tilgang";
 restStr.RemIP="Ekstern IP(er)";

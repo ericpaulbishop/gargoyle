@@ -16,7 +16,7 @@
 	echo "var driveSizes = [];"
 
 	echo "var storageDrives = [];"
-	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$7"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
 	echo "var physicalDrives = [];"
 
