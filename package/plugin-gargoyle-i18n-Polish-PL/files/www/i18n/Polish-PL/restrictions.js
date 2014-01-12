@@ -6,7 +6,7 @@ restStr.ARSect="Ograniczenia dostępu";
 restStr.NRRule="Reguła ograniczenia";
 restStr.ANRule="Dodaj nową regułę";
 restStr.CRestr="Aktualne ograniczenia";
-restStr.EWSect="Wyjątki (biała lista";
+restStr.EWSect="Wyjątki (biała lista)";
 restStr.NExcp="Nowy wyjątek";
 restStr.CExcp="Aktualne wyjątki";
 
