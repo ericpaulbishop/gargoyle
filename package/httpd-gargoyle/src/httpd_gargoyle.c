@@ -256,6 +256,10 @@ static char* pageNotFoundFile;
 static unsigned char allowDirectoryListing;
 static unsigned short sslPort; 
 static int listen4s_fd, listen6s_fd;
+
+static int requested_port;
+static int requested_is_https;
+
 /* end gargoyle variables */
 
 /* Request variables. */
@@ -287,6 +291,8 @@ static char* referer;
 static char* useragent;
 
 static char* remoteuser;
+
+
 
 
 /* Forwards. */
@@ -1061,6 +1067,11 @@ main( int argc, char** argv )
 	conn_port = port;
 #endif /* HAVE_SSL */
 
+
+
+
+
+
 	/* Accept the new connection. */
 	sz = sizeof(usa);
 	if ( listen4_fd != -1 && FD_ISSET( listen4_fd, &lfdset ) ) { conn_fd = accept( listen4_fd, &usa.sa, &sz ); }
@@ -1103,6 +1114,12 @@ main( int argc, char** argv )
 	    if ( listen6_fd != -1 )  { (void) close( listen6_fd );  }
 	    if ( listen6s_fd != -1 ) { (void) close( listen6s_fd ); }
  
+	    // set global connection variables
+	    // seriously ugly way of doing this, but we need
+	    // this to reconstruct full url if we need to do a relative redirect
+	    requested_port = conn_port;
+	    requested_is_https = is_ssl;
+
 
 	    handle_request(is_ssl, conn_port);
 	    exit( 0 );
@@ -1613,6 +1630,27 @@ static void handle_request( int is_ssl, unsigned short conn_port )
 			if ( strchr( host, '/' ) != (char*) 0 || host[0] == '.' )
 			{
 				send_error( 400, "Bad Request", "", "Can't parse request.", is_ssl );
+			}
+			else
+			{
+				/* Use the request's hostname, or fall back on the IP address. */
+				if ( host != (char*) 0 )
+				{
+					req_hostname = host;
+				}
+				else
+				{
+					usockaddr usa;
+					int sz = sizeof(usa);
+					if ( getsockname( conn_fd, &usa.sa, &sz ) < 0 )
+					{
+						req_hostname = "UNKNOWN_HOST";
+					}
+					else
+					{
+						req_hostname = ntoa( &usa );
+					}
+				}
 			}
 		}
 		else if ( strncasecmp( line, "If-Modified-Since:", 18 ) == 0 )
@@ -2388,10 +2426,12 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		char* title;
 		char* cp;
 		char* tmp_headers;
+		int eof_after_headers;
 	
 	
 		/* Slurp in all headers. */
 		headers_size = 0;
+		eof_after_headers = 0;
 		add_to_buf( &headers, &headers_size, &headers_len, (char*) 0, 0 );
 		for (;;)
 		{
@@ -2404,6 +2444,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			if ( r <= 0 )
 			{
 				br = &(headers[headers_len]);
+				eof_after_headers = 1;
 				break;
 			}
 			add_to_buf( &headers, &headers_size, &headers_len, buf, r );
@@ -2500,15 +2541,39 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 				
 				
 				/*
-				 * If a redirect Location header path doesn't start with either a protocol 
-				 * or the root (e.g. "location.sh" instead of "http://1.2.3.4/location.sh" or "/location.sh")
+				 * If a redirect Location header path doesn't start with a protocol 
+				 * (e.g. "location.sh" instead of "http://1.2.3.4/location.sh" )
 				 * then Chrome (but no other browser) has a pissy little shit-fit, responding with
 				 * the ever-so relevant, descriptive and helpful error message: ERR_RESPONSE_HEADERS_TRUNCATED
 				*/
-				if(strstr(original_url, "://") == NULL && original_url[0] != '/')
+				if(strstr(original_url, "://") == NULL)
 				{
-					location = (char*)e_malloc(2+strlen(original_url));
-					sprintf(location, "/%s", original_url);
+					/* syslog( LOG_NOTICE, "updating relative location: '%s'",  original_url ); */
+
+					char http_proto[] = "http://";
+					char https_proto[] = "https://";
+					char* location_proto = requested_is_https ? https_proto : http_proto;
+					char location_port[6];
+					
+
+
+					if( (requested_is_https == 1 && requested_port == 443) || (requested_is_https == 0 && requested_port == 80))
+					{
+						sprintf(location_port, "");
+					}
+					else
+					{
+						sprintf(location_port, ":%d", requested_port);
+					}
+
+
+
+					location = (char*)e_malloc(strlen(location_proto) + strlen(location_port) + strlen(req_hostname) + strlen(original_url) + 2);
+					sprintf(location, "%s%s%s/%s", location_proto, location_port, req_hostname, original_url);
+
+					/* syslog( LOG_NOTICE, "\tlocation is  : '%s'",  location ); */
+
+
 				}
 				else
 				{
@@ -2584,6 +2649,10 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 	
 		/* Write the saved headers. */
 		(void) my_write( headers, strlen(headers), is_ssl );
+		if(eof_after_headers == 1)
+		{
+			(void) my_write("\015\012", 2, is_ssl);
+		}
 	}
 	
 	/* Echo the rest of the output. */

@@ -819,7 +819,14 @@ function resetData()
 		for(dindex=0; dindex< drivesWithNoMounts.length ; dindex++)
 		{
 			driveIds.push( "" + dindex);
-			driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			if (drivesWithNoMounts[dindex][0] == drivesWithNoMounts[dindex][2])
+			{
+				driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
+			else
+			{
+				driveText.push( drivesWithNoMounts[dindex][2] + " (" + drivesWithNoMounts[dindex][0] + ", " + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
 		}
 		setAllowableSelections("format_disk_select", driveIds, driveText);
 	}
@@ -848,7 +855,14 @@ function setDriveList(controlDocument)
 		var driveFs = storageDrives[driveIndex][3];
 		var driveSize = parseBytes( storageDrives[driveIndex][4],null,true );
 		driveList.push( driveName )
-		driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
+		if (storageDrives[driveIndex][5] == driveName)
+		{
+			driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" );
+		}
+		else
+		{
+			driveDisplayList.push( storageDrives[driveIndex][5].replace("%20", " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
+		}
 	}
 	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
 

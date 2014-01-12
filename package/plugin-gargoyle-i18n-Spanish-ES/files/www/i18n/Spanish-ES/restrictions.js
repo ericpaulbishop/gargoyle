@@ -29,6 +29,7 @@ restStr.DActv="Días Activos";
 restStr.HActv="Horas Activo";
 restStr.DHActv="Días y Horas Activas";
 restStr.Sample="p. ej. lun 00:30 - jue 13:15, vie 14:00 - vie 15:00";
+restStr.SSample="p. ej.";
 restStr.RRsrc="Recursos Restringidos";
 restStr.NetAcc="Todo Acceso a la Red";
 restStr.RemIP="IP(s) Remota(s)";
