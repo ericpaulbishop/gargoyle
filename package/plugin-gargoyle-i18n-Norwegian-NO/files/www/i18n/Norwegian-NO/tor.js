@@ -4,8 +4,8 @@
 
 torS.TorAC="Tor Anonymisering Klient";
 torS.TorC="Tor Klient";
-torS.EnByHost="Aktivert, Slått På Av Hver Vert";
-torS.EnAll="Aktivert For Alle Verter";
+torS.EnByHost="Aktivert, Slått På Av Hver Klient";
+torS.EnAll="Aktivert For Alle Klienter";
 torS.HidAcc="Kun Skjult Tjeneste Tilgang";
 torS.ConVia="Tilkoble Via";
 torS.TRly="Tor Relay (anbefalt)";
