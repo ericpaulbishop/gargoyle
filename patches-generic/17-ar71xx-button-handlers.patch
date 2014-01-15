@@ -59,8 +59,8 @@
 +set system.bottom_red_button.button='wps'
 +set system.bottom_red_button.action='released'
 +set system.bottom_red_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
-+set system.reset_button.min='3'
-+set system.reset_button.max='90'
++set system.bottom_red_button.min='3'
++set system.bottom_red_button.max='90'
 +commit system
 +EOF
 +fi
