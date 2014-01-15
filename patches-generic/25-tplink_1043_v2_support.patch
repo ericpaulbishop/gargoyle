@@ -675,7 +675,7 @@
  };
 --- a/package/base-files/files/lib/preinit/99_10_failsafe_login	2014-01-12 12:48:12.581100190 -0500
 +++ b/package/base-files/files/lib/preinit/99_10_failsafe_login	2014-01-15 07:32:09.922299517 -0500
-@@ -4,6 +4,18 @@
+@@ -4,6 +4,20 @@
  
  failsafe_netlogin () {
      telnetd -l /bin/login.sh <> /dev/null 2>&1    
@@ -689,6 +689,8 @@
 +		mount --bind /tmp/config /etc/config
 +		sh /etc/uci-defaults/network
 +		/etc/init.d/network restart
++		sleep 2
++		umount /etc/config
 +	fi
 +    fi
  }
