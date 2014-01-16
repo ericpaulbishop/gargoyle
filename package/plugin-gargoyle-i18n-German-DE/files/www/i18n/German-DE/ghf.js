@@ -2,5 +2,5 @@
 
 ghf.title="Gargoyle Router Verwaltung";
 ghf.desc="Router <br/>Verwaltung";
-ghf.devn="Ger&auml;tename";
-ghf.waits="´Bitte warten, w&auml;hrend die &Auml;nderungen angewendet werden";
+ghf.devn="Gerätename";
+ghf.waits="´Bitte warten, während die Änderungen angewendet werden";

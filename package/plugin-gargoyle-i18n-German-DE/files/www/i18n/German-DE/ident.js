@@ -3,4 +3,4 @@
  */
 
 idtS.IdSect="Identifikation";
-idtS.DevNm="Ger&auml;tename";
+idtS.DevNm="Gerätename";

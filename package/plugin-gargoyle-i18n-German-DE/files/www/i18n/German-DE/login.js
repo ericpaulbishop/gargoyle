@@ -9,10 +9,10 @@ logS.NQot="Netzwerkkontigent";
 logS.CTime="Aktuelle Zeit";
 
 //javascript
-logS.passErr="ERROR: Sie m&uuml;ssen ein Passwort eingeben";
+logS.passErr="ERROR: Sie müssen ein Passwort eingeben";
 logS.Lging="Logging In";
 logS.SExp="Sitzung abgelaufen";
-logS.InvP="Ung&uuml;ltiges Passwort";
+logS.InvP="Ungültiges Passwort";
 logS.LOut="Abgemeldet";
 logS.Qnam=["total up+down", "download", "upload" ];
 logS.of="of";
