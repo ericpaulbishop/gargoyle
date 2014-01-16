@@ -305,7 +305,7 @@
 +
 +static struct gpio_keys_button tl_wr1043_v2_gpio_keys[] __initdata = {
 +	{
-+		.desc		= "Reset button",
++		.desc		= "reset",
 +		.type		= EV_KEY,
 +		.code		= KEY_RESTART,
 +		.debounce_interval = TL_WR1043_V2_KEYS_DEBOUNCE_INTERVAL,
@@ -313,9 +313,9 @@
 +		.active_low	= 1,
 +	},
 +	{
-+		.desc		= "WLAN button",
++		.desc		= "wps",
 +		.type		= EV_KEY,
-+		.code		= KEY_WLAN,
++		.code		= KEY_WPS_BUTTON,
 +		.debounce_interval = TL_WR1043_V2_KEYS_DEBOUNCE_INTERVAL,
 +		.gpio		= TL_WR1043_V2_GPIO_BTN_WLAN,
 +		.active_low	= 1,
@@ -673,3 +673,26 @@
 +	struct ar8327_port_cfg port6_cfg;
  	struct ar8327_led_cfg *led_cfg;
  };
+--- a/package/base-files/files/lib/preinit/99_10_failsafe_login	2014-01-12 12:48:12.581100190 -0500
++++ b/package/base-files/files/lib/preinit/99_10_failsafe_login	2014-01-15 07:32:09.922299517 -0500
+@@ -4,6 +4,20 @@
+ 
+ failsafe_netlogin () {
+     telnetd -l /bin/login.sh <> /dev/null 2>&1    
++	
++    if [ -e /lib/ar71xx.sh ] ; then
++	. /lib/ar71xx.sh
++	board_name=$(ar71xx_board_name)
++	if [ "$board_name" = "tl-wr1043nd-v2" ] ; then
++		mkdir /tmp/config
++		cp /etc/config/* /tmp/config
++		mount --bind /tmp/config /etc/config
++		sh /etc/uci-defaults/network
++		/etc/init.d/network restart
++		sleep 2
++		umount /etc/config
++	fi
++    fi
+ }
+ 
+ failsafe_shell() {
