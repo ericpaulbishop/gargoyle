@@ -182,6 +182,8 @@ static int unlock_sem(int sid)
 	return success;
 }
 
+
+
 static int lock(unsigned long max_wait_milliseconds)
 {
 	int locked = 0;
@@ -300,7 +302,6 @@ static void parse_returned_ip_data(	void *out_data,
 					)
 {
 	uint32_t ip = *( (uint32_t*)(in_buffer + *in_index) );
-    ip_bw_kernel_data *ip_bw_data = (ip_bw_kernel_data*)in_buffer;
 	if(get_history == 0)
 	{
 		(((ip_bw*)out_data)[*out_index]).ip = ip;
@@ -315,19 +316,23 @@ static void parse_returned_ip_data(	void *out_data,
 			history.reset_time = reset_time;
 			history.is_constant_interval = is_constant_interval;
 
-            history.ip = ip_bw_data->ip;
-			history.num_nodes = ip_bw_data->num_nodes;
-			history.first_start = ip_bw_data->first_start;
-			history.first_end   = ip_bw_data->first_end;
-			history.last_end    = ip_bw_data->last_end;
+			history.ip = ip;
+			history.num_nodes = *( (uint32_t*)(in_buffer + *in_index+4));
+			history.first_start = (time_t) *( (uint64_t*)(in_buffer + *in_index+8));
+			history.first_end   = (time_t) *( (uint64_t*)(in_buffer + *in_index+16));
+			history.last_end    = (time_t) *( (uint64_t*)(in_buffer + *in_index+24));
+			*in_index = *in_index + 32;
+
 
 			history.history_bws =  (uint64_t*)malloc( (history.num_nodes+1)*sizeof(uint64_t) );
 			
 			/* read bws */
 			int node_index = 0;
-            for (node_index = 0; node_index < history.num_nodes; node_index++)
+			while(node_index < history.num_nodes)
 			{
-				(history.history_bws)[node_index] =  ip_bw_data->ipbw_data[node_index];
+				(history.history_bws)[node_index] =  *( (uint64_t*)(in_buffer + *in_index) );
+				*in_index = *in_index + 8;
+				node_index++;
 			}
 
 
@@ -417,6 +422,7 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 			time_t reset_time                  = (time_t) *( (uint64_t*)(buf+21) );
 			unsigned char is_constant_interval = *( (unsigned char*)(buf+29) );
 			
+
 			if(!data_initialized)
 			{
 				*num_ips = total_ips;
@@ -1162,6 +1168,7 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 	for(history_index=0; history_index < num_histories; history_index++)
 	{
 		ip_bw_history history = histories[history_index];
+		
 		int history_initialized = 1;
 		if( history.first_start == 0 && history.first_end == 0 && history.last_end == 0)
 		{

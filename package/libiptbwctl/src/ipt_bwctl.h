@@ -63,38 +63,6 @@ typedef struct ip_bw_struct
 	uint64_t bw;
 }ip_bw;
 
-#pragma pack(push, 1)
-/*
-* format of response:
-* byte 1 : error code (0 for ok)
-* bytes 2-5 : total_num_ips found in query (further gets may be necessary to retrieve them)
-* bytes 6-9 : start_index, index (in a list of total_num_ips) of first ip in response
-* bytes 10-13 : num_ips_in_response, number of ips in this response
-* bytes 14-21 : reset_interval (helps deal with DST shifts in userspace)
-* bytes 22-29 : reset_time (helps deal with DST shifts in userspace)
-* byte  30    : reset_is_constant_interval (helps deal with DST shifts in userspace)
-* remaining bytes contain blocks of ip data
-* format is dependent on whether history was queried
-*/
-typedef struct ip_bw_kernel_data_struct
-{
-    uint8_t error;
-    uint32_t ip_total;
-    uint32_t index_start;
-    uint32_t ip_num;
-    uint64_t reset_interval;
-    uint64_t reset_time;
-    uint8_t reset_is_constant_interval;
-    /*payload for history ip bw data*/
-    uint32_t ip;
-    uint32_t num_nodes;
-    uint64_t first_start;
-    uint64_t first_end;
-    uint64_t last_end;
-    uint64_t ipbw_data[0];
-}ip_bw_kernel_data;
-#pragma pack(pop)
-
 typedef struct history_struct
 {
 	uint32_t ip;
