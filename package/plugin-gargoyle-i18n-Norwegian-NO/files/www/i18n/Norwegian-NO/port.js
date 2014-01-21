@@ -33,7 +33,7 @@ prtS.DupErr="Port(er) Innenfor Området er Allerede Videresendte";
 prtS.CopErr="Port er Allerede Videresendt";
 prtS.UpErr="Kunne ikke oppdater port videresending.";
 prtS.Prot="Proto";
-prtS.LHst="LAN Vert";
+prtS.LHst="LAN Klient";
 prtS.Port="Port";
 
 //edit.sh pages
