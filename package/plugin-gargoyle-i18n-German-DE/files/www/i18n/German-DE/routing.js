@@ -11,7 +11,7 @@ rtgS.ESSect="Static Route ändern";
 //javascript & template
 rtgS.Dstn="Ziel";
 rtgS.DstnM="Ziel/Maske";
-rtgS.ItfN="Interfac(Network)";
+rtgS.ItfN="Interface(Netzwerk)";
 rtgS.Itfc="Interface";
 rtgS.Ntwk="Netwerk";
 rtgS.Gtwy="Gateway";
