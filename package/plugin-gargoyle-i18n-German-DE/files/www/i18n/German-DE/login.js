@@ -9,7 +9,7 @@ logS.NQot="Netzwerkkontigent";
 logS.CTime="Aktuelle Zeit";
 
 //javascript
-logS.passErr="ERROR: Sie müssen ein Passwort eingeben";
+logS.passErr="FEHLER: Sie müssen ein Passwort eingeben";
 logS.Lging="Logging In";
 logS.SExp="Sitzung abgelaufen";
 logS.InvP="Ungültiges Passwort";
