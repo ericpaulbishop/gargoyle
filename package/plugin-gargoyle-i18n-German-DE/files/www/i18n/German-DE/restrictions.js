@@ -62,6 +62,6 @@ restStr.ARErr="Regel konnte nicht eingetragen werden.";
 restStr.IAErr="FEHLER: Ungültige Adresse";
 restStr.UPrt="URL-Teil";
 restStr.MTyp="Vergleichstyp";
-restStr.MTExp="Vergleichsttext / Regulärer Ausdruck";
+restStr.MTExp="Vergleichstext / Regulärer Ausdruck";
 restStr.UMZErr="FEHLER: URL match muss länger sein als null";
 restStr.UChErr="FEHLER: URL match darf keine Anführungszeichen oder Zeilenumbrüche enthalten";

@@ -24,4 +24,4 @@ accessStr.NewPass="Neues Passwort";
 accessStr.ConfirmPass="Passwort bestätigen";
 
 //javascript
-accessStr.PasswordsDiffer="Administratorpassort konnte nicht bestätigt werden. Passwörter sind nicht identisch.";
+accessStr.PasswordsDiffer="Administratorpasswort konnte nicht bestätigt werden. Passwörter sind nicht identisch.";
