@@ -59,9 +59,9 @@ restStr.PmUDP="Erlaube UDP";
 
 //javascript
 restStr.ARErr="Regel konnte nicht eingetragen werden.";
-restStr.IAErr="ERROR: Ungültige Adresse";
+restStr.IAErr="FEHLER: Ungültige Adresse";
 restStr.UPrt="URL-Teil";
 restStr.MTyp="Vergleichstyp";
 restStr.MTExp="Vergleichsttext / Regulärer Ausdruck";
-restStr.UMZErr="ERROR: URL match length must be greater than zero";
-restStr.UChErr="ERROR: URL match cannot contain quote or newline characters";
+restStr.UMZErr="FEHLER: URL match muss länger sein als null";
+restStr.UChErr="FEHLER: URL match darf keine Anführungszeichen oder Zeilenumbrüche enthalten";
