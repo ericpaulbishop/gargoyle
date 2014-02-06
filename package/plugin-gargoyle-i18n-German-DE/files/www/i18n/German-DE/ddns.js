@@ -14,10 +14,12 @@ DyDNS.UpErr1="Aktualisierung der neuen Konfiguration fehlgeschlagen";
 DyDNS.UpErr2="Dienst(e) konnte nicht aktualisiert werden und wurde deshalb entfernt";
 DyDNS.cNams=["Domain", "Letzte Aktualisierung", "Aktiv", "", "" ];
 DyDNS.InvErr="FEHLER: Anbieter ist ungültig";
+DyDNS.DupErr="Duplicate update specified.";
 DyDNS.ForceU="aktualisieren";
 DyDNS.ModErr="Die Konfiguration wurde geändert und muss erst gespeichert werden.";
 DyDNS.UpFErr="Aktualisierung fehlgeschlagen. Bitte stellen Sie sicher, das die Konfiguration gültig ist und eine Verbindung mit dem Internet besteht.";
 DyDNS.UpOK="Aktualisierung erfolgreich.";
+DyDNS.UpSrvErr="Could not update service class.";
 
 //ddns_edit.sh
 DyDNS.EDSect="DDNS Eintrag ändern";
