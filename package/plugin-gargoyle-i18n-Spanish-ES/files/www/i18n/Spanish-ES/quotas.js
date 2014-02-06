@@ -51,6 +51,7 @@ quotasStr.TheseDays="Estos Días";
 quotasStr.TheseDaysHours="Estos Días y Horarios";
 quotasStr.TheseTimes="Estos Horarios en la Semana";
 quotasStr.Sample="p. ej. lun 00:30 - jue 13:15, vie 14:00 - vie 15:00";
+quotasStr.SSample="p. ej.";
 quotasStr.Exceed="Al exceder la cuota";
 quotasStr.ShutdownNet="Desactivar todo el acceso a Internet";
 quotasStr.Throttle="Limitar Ancho de Banda";

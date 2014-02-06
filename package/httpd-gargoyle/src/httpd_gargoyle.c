@@ -2388,10 +2388,12 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 		char* title;
 		char* cp;
 		char* tmp_headers;
-	
+		int eof_after_headers;
+
 	
 		/* Slurp in all headers. */
 		headers_size = 0;
+		eof_after_headers = 0;
 		add_to_buf( &headers, &headers_size, &headers_len, (char*) 0, 0 );
 		for (;;)
 		{
@@ -2404,6 +2406,7 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 			if ( r <= 0 )
 			{
 				br = &(headers[headers_len]);
+				eof_after_headers = 1;
 				break;
 			}
 			add_to_buf( &headers, &headers_size, &headers_len, buf, r );
@@ -2584,6 +2587,10 @@ static void cgi_interpose_output( int rfd, int parse_headers, int is_ssl )
 	
 		/* Write the saved headers. */
 		(void) my_write( headers, strlen(headers), is_ssl );
+		if(eof_after_headers == 1)
+		{
+			(void) my_write("\015\012", 2, is_ssl);
+		}
 	}
 	
 	/* Echo the rest of the output. */

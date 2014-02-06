@@ -16,9 +16,9 @@ restStr.EESect="Endre Unntak Regel";
 //templates
 restStr.RDesc="Regel Beskrivelse";
 restStr.RAppl="Regel Gjelder For";
-restStr.AHsts="Alle Verter";
-restStr.EHsts="Alle Verter Unntatt";
-restStr.OHsts="Kun De Følgende Verter";
+restStr.AHsts="Alle Klienter";
+restStr.EHsts="Alle Klienter Unntatt";
+restStr.OHsts="Kun De Følgende Klienter";
 restStr.HstAddr="Spesifiser en IP, IP område eller MAC adresse";
 restStr.Schd="Planlegger";
 restStr.ADay="Hele Dagen";

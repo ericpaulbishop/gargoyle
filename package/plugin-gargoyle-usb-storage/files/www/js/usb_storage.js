@@ -855,7 +855,14 @@ function setDriveList(controlDocument)
 		var driveFs = storageDrives[driveIndex][3];
 		var driveSize = parseBytes( storageDrives[driveIndex][4],null,true );
 		driveList.push( driveName )
-		driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
+		if (storageDrives[driveIndex][5] == driveName)
+		{
+			driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" );
+		}
+		else
+		{
+			driveDisplayList.push( storageDrives[driveIndex][5].replace("%20", " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
+		}
 	}
 	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
 

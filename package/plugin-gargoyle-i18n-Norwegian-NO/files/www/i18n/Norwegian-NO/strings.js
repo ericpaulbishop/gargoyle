@@ -52,10 +52,10 @@ UI.Thu="Tor";
 UI.Fri="Fre";
 UI.Sat="Lør";
 UI.unk="ukjent";
-UI.HsNm="Vertsnavn";
-UI.HDsp="Vis Verter";
-UI.DspHn="Vis Vertsnavn";
-UI.DspHIP="Vis Verts IP'er";
+UI.HsNm="Klientnavn";
+UI.HDsp="Vis Klienter";
+UI.DspHn="Vis Klientnavn";
+UI.DspHIP="Vis Klient IP'er";
 
 UI.never="aldri";
 UI.disabled="deaktivert";

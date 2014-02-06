@@ -5,12 +5,12 @@
 hostsStr.RefreshR="Oppdateringsfrekvens";
 hostsStr.RInfo="Dette angir hvor ofte denne siden oppdateres";
 hostsStr.CurrLeases="Gjeldene DHCP Leier";
-hostsStr.ConWifiHosts="Tilkoblede Trådløse Verter";
-hostsStr.ActiveHosts="Verter med Aktive Tilkoplinger";
+hostsStr.ConWifiHosts="Tilkoblede Trådløse Klienter";
+hostsStr.ActiveHosts="Klienter med Aktive Tilkoplinger";
 
 //javascript
-hostsStr.HostIP="Verts IP";
-hostsStr.HostMAC="Verts MAC";
+hostsStr.HostIP="Klient IP";
+hostsStr.HostMAC="Klient MAC";
 hostsStr.LeaseExp="Leietid Utgår";
 hostsStr.Bitrate="Bit rate";
 hostsStr.Signal="Signal";
