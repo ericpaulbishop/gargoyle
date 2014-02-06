@@ -3,7 +3,7 @@
  */
 
 timeStr.Section="Zeiteinstellung";
-timeStr.CurrTime="Aktuelles Datum &amp; Time";
+timeStr.CurrTime="Aktuelles Datum &amp; Uhrzeit";
 timeStr.TimeZone="Zeitzone";
 timeStr.DateForm="Datumsformat";
 timeStr.TimeForm="Zeitformat";

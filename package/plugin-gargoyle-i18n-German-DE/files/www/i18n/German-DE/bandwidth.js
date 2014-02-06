@@ -27,6 +27,7 @@ bndwS.AutoM="Automatisch";
 bndwS.DelD="Daten löschen";
 bndwS.DBData="Daten herunterladen";
 bndwS.DSep="Daten sind durch Komma separiert.";
+bndwS.DFmt="[Direction],[Interval Länge],[Intervals Saved],[IP],[Interval Start],[Interval End],[Bytes Used]";
 bndwS.DNow="Jetzt herunterladen";
 bndwS.expd="vergrößern";
 
@@ -46,7 +47,7 @@ bndwS.DTFrm="Zeitintervall";
 bndwS.DtbI="Verteilung der Bandbreite";
 bndwS.BDst="Verteilung der Bandbreite";
 bndwS.BDtbl="Verteilung der Bandbreite (Tabelle)";
-bndwS.FMonths=["Januar", "Februar", "März", "April", "Mai, "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+bndwS.FMonths=["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 bndwS.Down="Down";
 bndwS.Up="Up";
 bndwS.Sum="Summe";
