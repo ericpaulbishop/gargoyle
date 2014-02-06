@@ -29,6 +29,7 @@ restStr.DActv="Aktive Tage";
 restStr.HActv="Aktive Stunden";
 restStr.DHActv="Aktive Tage und Stunden";
 restStr.Sample="z.B. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00";
+restStr.SSample="z.B.";
 restStr.RRsrc="Beschränkte Resourcen";
 restStr.NetAcc="Gesamtes Netzwerk erlaubt";
 restStr.RemIP="entfernte IP(s)";
