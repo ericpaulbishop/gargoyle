@@ -11,7 +11,7 @@ Wsch.TPer="Zeitperiode";
 Wsch.NoTm="Timer deaktivieren";
 Wsch.Dly="Täglich";
 Wsch.Wkd="Wochentag + Sa/So";
-Wsch.Wkly=Wöchentlich";
+Wsch.Wkly="Wöchentlich";
 Wsch.TInc="Timer inkrementieren";
 
 //javscript
