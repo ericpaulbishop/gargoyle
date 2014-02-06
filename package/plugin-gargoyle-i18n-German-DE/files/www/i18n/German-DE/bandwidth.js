@@ -27,6 +27,7 @@ bndwS.AutoM="Automatisch";
 bndwS.DelD="Daten löschen";
 bndwS.DBData="Daten herunterladen";
 bndwS.DSep="Daten sind durch Komma separiert.";
+bndwS.DFmt="[Direction],[Interval Länge],[Intervals Saved],[IP],[Interval Start],[Interval End],[Bytes Used]";
 bndwS.DNow="Jetzt herunterladen";
 bndwS.expd="vergrößern";
 
