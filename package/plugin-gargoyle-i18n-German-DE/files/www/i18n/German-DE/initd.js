@@ -3,7 +3,7 @@
  */
 
 initdS.Services="Dienste";
-initdS.NoServ="Keine Aktualisierung der Dienste notwendig!";
+initdS.NoServ="Keine Aktualisierung notwendig!";
 initdS.ActServ="Dienste aktualisieren";
 initdS.ServColumn=['Service', 'Autostart', '', '', ''];
 initdS.ServStart="Versuche Dienst zu starten";

@@ -51,6 +51,7 @@ quotasStr.TheseDays="These Days";
 quotasStr.TheseDaysHours="These Days &amp; Hours";
 quotasStr.TheseTimes="These Weekly Times";
 quotasStr.Sample="e.g. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00";
+quotasStr.SSample="z.B.";
 quotasStr.Exceed="Wenn aufgebraucht";
 quotasStr.ShutdownNet="weiteren Internetzugriff deaktivieren";
 quotasStr.Throttle="Bandbreite begrenze";
@@ -64,6 +65,6 @@ quotasStr.ESection="Kontigente editieren";
 
 //quota_usage.sh/js
 quotasStr.USect="Bandwidth Quota Usage";
-quotasStr.All="All";
+quotasStr.All="Alle";
 quotasStr.Alws="Always";
 quotasStr.ColNms=["Host(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
