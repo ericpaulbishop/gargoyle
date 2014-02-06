@@ -19,4 +19,4 @@ rbS.Digs="";
 rbS.LD1s="";
 rbS.LD2s="";
 rbS.LD3s="";
-rbS.DaysWArr=["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Sonnabend"];
+rbS.DaysWArr=["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
