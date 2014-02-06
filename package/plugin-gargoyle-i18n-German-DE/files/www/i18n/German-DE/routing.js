@@ -11,9 +11,9 @@ rtgS.ESSect="Static Route ändern";
 //javascript & template
 rtgS.Dstn="Ziel";
 rtgS.DstnM="Ziel/Maske";
-rtgS.ItfN="Interface(Netzwerk)";
-rtgS.Itfc="Interface";
-rtgS.Ntwk="Netwerk";
+rtgS.ItfN="Schnittstelle(Netzwerk)";
+rtgS.Itfc="Schnittstelle";
+rtgS.Ntwk="Netzwerk";
 rtgS.Gtwy="Gateway";
 rtgS.Mtrc="Metric";
 rtgS.AErr="Konnte nicht hinzugefügt werden.";
