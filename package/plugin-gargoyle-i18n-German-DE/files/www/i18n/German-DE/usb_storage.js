@@ -3,9 +3,9 @@
  */
 
 usbSStr.SDisk="Shared Disks";
-usbSStr.Nomdsk="Kein eingebundenes USB-Laufwerk USB gefunden.";
+usbSStr.Nomdsk="Kein eingebundenes USB-Laufwerk gefunden.";
 usbSStr.WFTP="Erlaube den Zugang per FTP vom WAN-Anschluss";
-usbSStr.WpFTP="Erlaube Passiven FTP vom WAN-Anschluss auf den Ports";
+usbSStr.WpFTP="Erlaube Passives FTP vom WAN-Anschluss auf den Ports";
 usbSStr.CFWkg="CIFS Workgroup";
 usbSStr.CFUsr="CIFS / FTP Users";
 usbSStr.NewU="Neuer Nutzer";
@@ -17,7 +17,7 @@ usbSStr.ADsk="Add Shared Disk";
 usbSStr.CShare="Currently Shared Disks";
 usbSStr.Umnt="Aushängen";
 usbSStr.UmntB="hänge alle USB-Laufwerke aus";
-usbSStr.UmntWarn="USB-Laufwerke sollten vor dem entfernen vom Router Ausgehängt werden. Noch angeschlossene USB-Laufwerke werden nach einem Reboot des Routers automatisch wieder eingebunden.";
+usbSStr.UmntWarn="USB-Laufwerke sollten vor dem entfernen vom Router ausgehängt werden. Noch angeschlossene USB-Laufwerke werden nach einem Reboot des Routers automatisch wieder eingebunden.";
 usbSStr.FDisk="Format Disk";
 usbSStr.NoUmntDev="<p>No attached, unmounted drives detected.</p><p>You must unmount drives before attempting to format them.</p>";
 usbSStr.FmtWarn="WARNING: Formatting a disk will permanently wipe out all contents of that disk.<p>Disk will be formatted for storage with EXT4 filesystem<br/>EXT4 may not be readable if USB drive is removed and attached to a Windows/Mac computer</p>";
@@ -46,7 +46,7 @@ usbSStr.ARWr="Read/Write";
 usbSStr.FAUsr="FTP/CIFS Users With Access";
 usbSStr.NAcc="NFS Access";
 usbSStr.NAccPo="NFS Access Policy";
-usbSStr.AnonAcc="Erlaube Anonymous Access";
+usbSStr.AnonAcc="Erlaube anonymen Zugriff";
 usbSStr.OnlyIPs="Erlaube nur die folgenden IPs";
 usbSStr.IPSub="gib eine IP oder ein Subnetz an";
 usbSStr.FPath="FTP Path";
@@ -61,7 +61,7 @@ usbSStr.NPass="Neues Passwort";
 //javascript
 usbSStr.ICWErr="Ungültige CIFS Arbeitsgruppe";
 usbSStr.FWPErr="Cannot enable WAN FTP access because port conflicts with";
-usbSStr.FprErr="Ungültige FTP passive port Bereich";
+usbSStr.FprErr="Ungültiger Port Bereich für passives FTP";
 usbSStr.FprcErr="Passive FTP port range conflicts with";
 usbSStr.SSetErr="Einstellungen konnten nicht gespeichert werden";
 usbSStr.UsEmErr="Benutzername darf nicht leer sein";
