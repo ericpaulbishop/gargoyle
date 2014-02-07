@@ -3,9 +3,9 @@
  */
 
 usbSStr.SDisk="Shared Disks";
-usbSStr.Nomdsk="No mounted USB disks detected";
-usbSStr.WFTP="Allow Access to FTP From WAN";
-usbSStr.WpFTP="Allow Passive FTP From WAN on ports";
+usbSStr.Nomdsk="Kein eingebundenes USB-Laufwerk USB gefunden.";
+usbSStr.WFTP="Erlaube den Zugang per FTP vom WAN-Anschluss";
+usbSStr.WpFTP="Erlaube Passiven FTP vom WAN-Anschluss auf den Ports";
 usbSStr.CFWkg="CIFS Workgroup";
 usbSStr.CFUsr="CIFS / FTP Users";
 usbSStr.NewU="Neuer Nutzer";
@@ -15,16 +15,16 @@ usbSStr.CfPass="Bestätige Passwort";
 usbSStr.ADir="Add Shared Disk / Directory";
 usbSStr.ADsk="Add Shared Disk";
 usbSStr.CShare="Currently Shared Disks";
-usbSStr.Umnt="Unmount";
-usbSStr.UmntB="Unmount All USB Disks";
-usbSStr.UmntWarn="USB Disks should be unmounted before removal from the router. USB Disks still connected will be automatically remounted after next router reboot.";
+usbSStr.Umnt="Aushängen";
+usbSStr.UmntB="hänge alle USB-Laufwerke aus";
+usbSStr.UmntWarn="USB-Laufwerke sollten vor dem entfernen vom Router Ausgehängt werden. Noch angeschlossene USB-Laufwerke werden nach einem Reboot des Routers automatisch wieder eingebunden.";
 usbSStr.FDisk="Format Disk";
 usbSStr.NoUmntDev="<p>No attached, unmounted drives detected.</p><p>You must unmount drives before attempting to format them.</p>";
 usbSStr.FmtWarn="WARNING: Formatting a disk will permanently wipe out all contents of that disk.<p>Disk will be formatted for storage with EXT4 filesystem<br/>EXT4 may not be readable if USB drive is removed and attached to a Windows/Mac computer</p>";
 usbSStr.DskForm="Disk to format";
-usbSStr.PSwap="Percent Swap";
-usbSStr.PStor="Percent Storage";
-usbSStr.MExtr="Use Disk As External Root (Extroot)";
+usbSStr.PSwap="Prozent Swap";
+usbSStr.PStor="Prozent Speicherplatz";
+usbSStr.MExtr="Verwende Laufwerk als externe Hauptpartition (Extroot)";
 usbSStr.FmtNow="Jetzt formatieren";
 usbSStr.ExtrS="Extroot";
 usbSStr.ExtrOff="Disable External Root";
@@ -32,9 +32,9 @@ usbSStr.ExtDt="External root detected on";
 usbSStr.ExtrWarn="When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost.";
 
 //template
-usbSStr.Disk="Disk";
-usbSStr.SDir="Subdirectory";
-usbSStr.SNam="Share Name";
+usbSStr.Disk="Laufwerk";
+usbSStr.SDir="Unterverzeichnis";
+usbSStr.SNam="Freigabename";
 usbSStr.SAppl="Settings Apply To";
 usbSStr.SPart="The Same Partition On Any USB Drive";
 usbSStr.SDriv="Only This Specific Drive";
@@ -46,9 +46,9 @@ usbSStr.ARWr="Read/Write";
 usbSStr.FAUsr="FTP/CIFS Users With Access";
 usbSStr.NAcc="NFS Access";
 usbSStr.NAccPo="NFS Access Policy";
-usbSStr.AnonAcc="Allow Anonymous Access";
-usbSStr.OnlyIPs="Allow Only The Following IPs";
-usbSStr.IPSub="Specify an IP or Subnet";
+usbSStr.AnonAcc="Erlaube Anonymous Access";
+usbSStr.OnlyIPs="Erlaube nur die folgenden IPs";
+usbSStr.IPSub="gib eine IP oder ein Subnetz an";
 usbSStr.FPath="FTP Path";
 usbSStr.NPath="NFS Path";
 
@@ -59,9 +59,9 @@ usbSStr.User="Benutzer";
 usbSStr.NPass="Neues Passwort";
 
 //javascript
-usbSStr.ICWErr="Invalid CIFS Workgroup";
+usbSStr.ICWErr="Ungültige CIFS Arbeitsgruppe";
 usbSStr.FWPErr="Cannot enable WAN FTP access because port conflicts with";
-usbSStr.FprErr="Invalid FTP passive port range";
+usbSStr.FprErr="Ungültige FTP passive port Bereich";
 usbSStr.FprcErr="Passive FTP port range conflicts with";
 usbSStr.SSetErr="Einstellungen konnten nicht gespeichert werden";
 usbSStr.UsEmErr="Benutzername darf nicht leer sein";

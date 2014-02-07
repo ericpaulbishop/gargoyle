@@ -9,11 +9,11 @@ pingS.IPAd="IP Adresse";
 pingS.Intv="Ping Interval";
 pingS.StDly="Startup Delay";
 pingS.FlCnt="Failure ping count";
-pingS.Actn="Action";
+pingS.Actn="Aktion";
 pingS.WRcon="WAN Reconnect";
-pingS.Rbot="Reboot";
+pingS.Rbot="Neustart";
 pingS.Rscp="Run custom script";
 pingS.Scpt="Script";
 
 //javascript
-pingS.ScptErr="You must add the script to execute";
+pingS.ScptErr="Sie müssen das Skript hinzufügen um es ausführen zu können";
