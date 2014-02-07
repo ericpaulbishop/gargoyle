@@ -2,10 +2,10 @@
  * UTF-8 (with BOM) German-DE text strings for tor.sh html elements
  */
 
-torS.TorAC="Tor Anonymization Client";
+torS.TorAC="Tor Anonymisierungsclient";
 torS.TorC="Tor Client";
 torS.EnByHost="Enabled, Toggled By Each Host";
-torS.EnAll="Enabled For All Hosts";
+torS.EnAll="für alle Hosts aktiviert";
 torS.HidAcc="Hidden Service Access Only";
 torS.ConVia="Verbinden über";
 torS.TRly="Tor Relay (recommended)";
@@ -27,8 +27,8 @@ torS.BrRPrt="Bridge/Relay Port";
 torS.ObfPrt="Obfsproxy Port";
 torS.MaxRB="Max Relay Bandwidth";
 torS.PubBrDB="Publish Bridge in Public Database";
-torS.PubBr="Publish Bridge Info";
-torS.NoPub="Do Not Publish Bridge Info";
+torS.PubBr="Bridge Info veröffentlichen";
+torS.NoPub="Bridge Info nicht veröffentlichen";
 torS.Nick="Node Nickname (optional)";
 torS.Mail="Contact email / PGP PubKey (optional)";
 torS.VisMsg="Within 1-2 hours of activating your relay, it should be visible";
@@ -44,10 +44,10 @@ torS.RPeWSErr="Server Relay Port Cannot Be The Same As Router Web Server Port";
 torS.ObPeWSErr="Server Obfsproxy Port Cannot Be The Same As Router Web Server Port";
 torS.RPeSSHErr="Server Relay Port Cannot Be The Same As Router SSH Port";
 torS.ObPeSSHErr="Server Obfsproxy Port Cannot Be The Same As Router SSH Port";
-torS.RAMD="RAM Disk";
-torS.RootD="Root Disk";
+torS.RAMD="RAM Laufwerk";
+torS.RootD="Root Laufwerk";
 torS.Free="Free";
 torS.Totl="Total";
-torS.AnonTraf="All traffic will be anonymized";
-torS.AnonOpt="Users can choose whether traffic will be anonymized";
+torS.AnonTraf="Der gesammte Datenverkehr wird anonymisiert werden";
+torS.AnonOpt="Der Benutzer kann entscheiden ob der Datenverkehr anonymisiert werden soll";
 torS.TorTraf="Tor hidden services can be accessed, but no other traffic is anonymized";
