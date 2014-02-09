@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UTF-8 (with BOM) German-DE text strings for about.sh html elements
  */
 

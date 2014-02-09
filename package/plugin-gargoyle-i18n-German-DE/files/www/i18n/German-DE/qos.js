@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UTF-8 (with BOM) German-DE text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
