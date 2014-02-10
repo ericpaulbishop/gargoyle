@@ -29,7 +29,7 @@ qosStr.DefServClassAbout="Die <em>Standard Serviceklasse</em> gibt an wie Packet
 qosStr.AbACC="<p>The active congestion control (ACC) observes your download activity and automatically adjusts your download link limit to maintain proper QoS performance. ACC automatically compensates for changes in your ISP's download speed and the demand from your network adjusting the link speed to the highest speed possible which will maintain proper QoS function. The effective range of this control is between 15% and 100% of the total download bandwidth you entered above.</p><p>While ACC does not adjust your upload link speed you must enable and properly configure your upload QoS for it to function properly.</p><p><em>Ping Target-</em> The segment of network between your router and the ping target is where congestion is controlled. By monitoring the round trip ping times to the target congestion is detected. By default ACC uses your WAN gateway as the ping target. If you know that congestion on your link will occur in a different segment then you can enter an alternate ping target.</p><p><em>Manual Ping Limit-</em> Round trip ping times are compared against the ping limits. ACC controls the link limit to maintain ping times under the appropriate limit. By default Gargoyle attempts to automatically select appropriate target ping limits for you based on the link speeds you entered and the performance of your link it measures during initialization.  You cannot change the target ping time for the minRTT mode but by entering a manual time you can control the target ping time of the active mode.  The time you enter becomes the increase in the target ping time between minRTT and active mode. You can see the limits ACC is using in the [] brackets next to ping time limits field. </p>";
 qosStr.ServClass="Standard Serviceklasse";
 
-qosStr.AddNewClassRule="Neue Classification Regel einfügen";
+qosStr.AddNewClassRule="Neue Klassifizierungsregel einfügen";
 qosStr.AddNewServiceRule="Neue Serviceklasse einfügen";
 qosStr.SrcIP="Quell-IP";
 qosStr.SrcPort="Quellport(s)";
@@ -40,7 +40,7 @@ qosStr.MinPktLen="Minimale Paketlänge";
 qosStr.TrProto="Transport Protokoll";
 qosStr.Conreach="Connection bytes reach";
 qosStr.AppProto="Anwendungsprotokoll (Layer7)";
-qosStr.SetClass="Set Service Class To";
+qosStr.SetClass="Setze Serviceklasse auf";
 qosStr.SrvClassName="Name der Serviceklasse";
 qosStr.PerBandCap="Percent Bandwidth At Capacity";
 qosStr.BandMin="Minimale Bandbreite";
@@ -76,7 +76,7 @@ qosStr.QESrvName="Name der Serviceklasse";
 qosStr.QERulClass="Editiere QoS Klassifizierungsregeln";
 
 //javascript
-qosStr.MatchC="Match Criteria";
+qosStr.MatchC="Vergleichskriterium";
 qosStr.Classn="Klassifizierung";
 qosStr.Src="Quelle";
 qosStr.SrcP="Quellport";
@@ -88,22 +88,22 @@ qosStr.pBdW="Percent BW";
 qosStr.mBdW="Min BW";
 qosStr.MBdW="Max BW";
 qosStr.qLd="Load";
-qosStr.CrErr="No match criteria have been selected.";
-qosStr.SvErr="Could not add new service class.";
-qosStr.SUErr="Could not update service class.";
-qosStr.CsErr="Could not add classification rule.";
-qosStr.CUErr="Could not update classification rule.";
-qosStr.DCErr="Duplicate class name.";
-qosStr.RemSCErr="At least one service class is required.\nCannot remove service class.";
+qosStr.CrErr="Es wurden keine Vergleichskriterien ausgewählt:";
+qosStr.SvErr="Serviceklasse konnte nicht hinzugefügt werden.";
+qosStr.SUErr="Serviceklasse konnte nicht aktualisiert werden.";
+qosStr.CsErr="Klassifizierungsregel konnte nicht hinzugefügt werden.";
+qosStr.CUErr="Klassifizierungsregel konnte nicht aktualisiert werden.";
+qosStr.DCErr="Name der Serviceklasse existiert schon.";
+qosStr.RemSCErr="Mindestens ein Serviceklasse wird benötigt.\nServiceklasse kann nicht entfernt werden.";
 qosStr.TotErr="There is an error in Total Bandwidth field.\n\nCould not update QoS.";
 
 //one-word strings used in rules
-qosStr.NOLIMIT="nolimit";
-qosStr.ZERO="zero";
-qosStr.YES="Yes";
+qosStr.NOLIMIT="unbegrenzt";
+qosStr.ZERO="null";
+qosStr.YES="Ja";
 
 //qos_distribution.sh
-qosStr.UBSect="QoS Upload Bandwidth Distribution";
-qosStr.DBSect="QoS Download Bandwidth Distribution";
-qosStr.uTFrm="Upload Time Frame";
-qosStr.dTFrm="Download Time Frame";
+qosStr.UBSect="QoS Upload Bandbreitenverteilung";
+qosStr.DBSect="QoS Download Bandbreitenverteilung";
+qosStr.uTFrm="Upload Zeitraum";
+qosStr.dTFrm="Download Zeitraum";
