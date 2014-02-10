@@ -2,17 +2,17 @@
  * UTF-8 (with BOM) German-DE text strings for ping_watchdog.sh html elements
  */
 
-pingS.Pdog="Ping Watchdog";
-pingS.EnbP="aktiviere Ping Watchdog";
-pingS.PgIP="IP Adresse To Ping";
+pingS.Pdog="Ping Überwachung";
+pingS.EnbP="aktiviere Ping Überwachung";
+pingS.PgIP="IP Adresse die angePingt werden soll";
 pingS.IPAd="IP Adresse";
 pingS.Intv="Ping Interval";
-pingS.StDly="Startup Delay";
+pingS.StDly="Startverzögerung";
 pingS.FlCnt="Failure ping count";
 pingS.Actn="Aktion";
-pingS.WRcon="WAN Reconnect";
+pingS.WRcon="WAN neu verbindnen";
 pingS.Rbot="Neustart";
-pingS.Rscp="Run custom script";
+pingS.Rscp="Start des benutzerdefinierten skripts";
 pingS.Scpt="Script";
 
 //javascript
