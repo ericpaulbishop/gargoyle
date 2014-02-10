@@ -3,15 +3,15 @@
  */
 
 abt.CSect="Credits";
-abt.EBishop="Projekt founder, lead developer of Gargoyle";
+abt.EBishop="Projekt Gründer, Hauptentwickler von Gargoyle";
 abt.PBixel="Implemented Active Congestion Control, as well as many other improvements to QoS";
 abt.AWronowski="Implemented Wake-on-LAN functionality along with several minor improvements/fixes";
 abt.CJackiewicz="Polish translation, several bugfixes, corrections, enhancements, plugins, custom Polish builds and Polish support via his website";
-abt.PKarbowski="Implemented numerous bugfixes and performance improvements";
+abt.PKarbowski="Umsetzung zahlreicher Bugfixes und Performance-Verbesserungen";
 abt.TButler="Implemented several improvements for displaying tables and large buttons";
 abt.IFedorenko="Implemented inclusion of latest git commit in default version label";
 abt.BCoy="Provided several very helpful suggestions regarding the web design and CSS implementation of Gargoyle";
 abt.FRiC="Provided significant help in testing Gargoyle, particularly PPPoE functionality";
-abt.logo="The Gargoyle logo was derived from the Gargoyle font created by Manfred Klein, which he makes freely available for both commercial and non-commercial use";
-abt.openwrt="The Gargoyle interface is a front end for the excellent OpenWrt firmware, and this project would clearly not have been possible without all the hard work of the OpenWrt team";
+abt.logo="Das Gargoyle-Logo ist abgeleitet von der Gargoyle Schrift die von Manfred Klein erstellt wurde, und die er für kommerzielle und Nichtkommerzielle Nitzung freigegeben hat.";
+abt.openwrt="Die Gargoyle Schnittstelle ist eine grafische Benutzeroberfläche für die hervorragende OpenWrt Firmware. Dieses Projekt wäre ohne die harte Arbeit des OpenWRT-Teams nicht realisierbar.";
 abt.LSect="Lizenz";
