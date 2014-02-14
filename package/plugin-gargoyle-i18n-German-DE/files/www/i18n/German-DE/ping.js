@@ -10,10 +10,10 @@ pingS.Intv="Ping Interval";
 pingS.StDly="Startverzögerung";
 pingS.FlCnt="Failure ping count";
 pingS.Actn="Aktion";
-pingS.WRcon="WAN neu verbindnen";
+pingS.WRcon="WAN neu verbinden";
 pingS.Rbot="Neustart";
-pingS.Rscp="Start des benutzerdefinierten skripts";
-pingS.Scpt="Script";
+pingS.Rscp="Start des benutzerdefinierten Skripts";
+pingS.Scpt="Skript";
 
 //javascript
 pingS.ScptErr="Sie müssen das Skript hinzufügen um es ausführen zu können";
