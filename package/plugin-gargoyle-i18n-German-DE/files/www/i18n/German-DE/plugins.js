@@ -4,8 +4,8 @@
 
 pgS.PgOpt="Plugin Optionen";
 pgS.PRoot="Plugin Root";
-pgS.RDrv="Root Drive";
-pgS.Chroot="Change Plugin Root";
+pgS.RDrv="Root Laufwerk";
+pgS.Chroot="Ändere Plugin Root";
 pgS.PgSrc="Plugin Quelle";
 pgS.ANam="Name";
 pgS.Aurl="URL";
