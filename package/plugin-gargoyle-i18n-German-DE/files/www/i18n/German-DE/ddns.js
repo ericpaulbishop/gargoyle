@@ -19,7 +19,7 @@ DyDNS.ForceU="aktualisieren";
 DyDNS.ModErr="Die Konfiguration wurde geändert und muss erst gespeichert werden.";
 DyDNS.UpFErr="Aktualisierung fehlgeschlagen. Bitte stellen Sie sicher, das die Konfiguration gültig ist und eine Verbindung mit dem Internet besteht.";
 DyDNS.UpOK="Aktualisierung erfolgreich.";
-DyDNS.UpSrvErr="Could not update service class.";
+DyDNS.UpSrvErr="Konnte Serviceklasse nicht aktualisieren.";
 
 //ddns_edit.sh
 DyDNS.EDSect="DDNS Eintrag ändern";
