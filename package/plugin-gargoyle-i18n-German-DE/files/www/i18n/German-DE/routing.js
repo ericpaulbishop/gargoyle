@@ -6,7 +6,7 @@ rtgS.ARSect="Aktive Routen";
 rtgS.SRSect="Statische Routen";
 rtgS.ASRte="Statische Route hinzufügen";
 rtgS.CSRSect="Aktuelle Statische Routen";
-rtgS.ESSect="Static Route ändern";
+rtgS.ESSect="Statische Route ändern";
 
 //javascript & template
 rtgS.Dstn="Ziel";
