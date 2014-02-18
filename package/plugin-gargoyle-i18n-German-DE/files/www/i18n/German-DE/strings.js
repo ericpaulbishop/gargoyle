@@ -118,4 +118,4 @@ UI.pfwd="Portweiterleitung nach";
 UI.conn="verbunden";
 
 UI.AJAX="AJAX Unterstützung des Browser wird benötigt";
-UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";
+UI.AJAXUpg="Bitte aktualisieren sie zu einem AJAX-kompatiblen Browser und versuchen es erneut. Solche Browser sind z.B. Firefox 2.0+, Safari und IE 6+.";
