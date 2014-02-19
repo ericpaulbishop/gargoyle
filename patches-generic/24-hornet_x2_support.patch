@@ -69,3 +69,13 @@
  	zcn-1523h-2 | \
  	zcn-1523h-5)
  		[ "$magic_long" != "68737173" -a "$magic_long" != "19852003" ] && {
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/leds	2014-01-16 21:23:39.556582430 -0500
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/leds	2014-02-17 17:25:19.933304852 -0500
+@@ -69,6 +69,7 @@
+ 	ucidef_set_led_usbdev "usb" "USB" "d-link:blue:usb" "1-1"
+ 	;;
+ 
++gargoyle-pocket-router-v2|\
+ hornet-ub)
+ 	ucidef_set_led_netdev "lan" "LAN" "alfa:blue:lan" "eth0"
+ 	ucidef_set_led_netdev "wan" "WAN" "alfa:blue:wan" "eth1"
