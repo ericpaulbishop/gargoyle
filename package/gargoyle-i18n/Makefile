@@ -15,7 +15,7 @@ define Package/gargoyle-i18n
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:= Internationalization for Gargoyle-router
 	MAINTAINER:=BashfulBladder
-	DEPENDS:=+gargoyle +gargoyle-i18n-English-EN
+	DEPENDS:=+gargoyle +plugin-gargoyle-i18n-English-EN
 	PKGARCH:=all
 endef
 
