@@ -4,6 +4,6 @@
 
 connLS.CLSect="Verbindungslimit";
 connLS.MaxC="Max. Verbindungen";
-connLS.TTout="TCP Auszeit";
-connLS.UTout="UDP Auszeit";
+connLS.TTout="TCP Zeitüberschreitung";
+connLS.UTout="UDP Zeitüberschreitung";
 connLS.max="max";
