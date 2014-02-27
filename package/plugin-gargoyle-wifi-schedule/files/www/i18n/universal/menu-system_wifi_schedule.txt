@@ -3,6 +3,7 @@
 fallback=WiFi Schedule
 EN=WiFi Schedule
 ES=Horario para WiFi
+DE=WLAN Zeitschaltung
 BR=Horario para WiFi
 PL=Harmonogram Wi-Fi
 ZH-CN=WIFI计划
