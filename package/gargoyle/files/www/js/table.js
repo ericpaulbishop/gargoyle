@@ -12,13 +12,13 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	controlDocument = controlDocument == null ? document : controlDocument;
 	
 	var newTable = controlDocument.createElement('table');
-	var tableBody = controlDocument.createElement('tbody');
-	newTable.appendChild(tableBody);
-	newTable.id=tableId;
-
-	var row = controlDocument.createElement('tr');
-	row.className='header_row';
-	tableBody.appendChild(row);
+        var tableHead = controlDocument.createElement('thead');
+        newTable.appendChild(tableHead);
+        newTable.id = tableId;
+         
+        var row = controlDocument.createElement('tr');
+        row.className = 'header_row';
+        tableHead.appendChild(row);
 	
 	var columnIndex;
 	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
@@ -62,6 +62,9 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 		}
 	}
 	
+	var tableBody = controlDocument.createElement('tbody');
+	newTable.appendChild(tableBody);
+	
 	if(rowData != null)
 	{
 		for (rowIndex in rowData)
@@ -84,7 +87,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 
 
 	row = controlDocument.createElement('tr');
-	tableBody=table.firstChild;
+	tableBody=table.getElementsByTagName("tbody")[0];
 	numRows= tableBody.rows.length;
 	tableBody.appendChild(row);
 
