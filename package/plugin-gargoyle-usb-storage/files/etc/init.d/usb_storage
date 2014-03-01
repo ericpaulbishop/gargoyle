@@ -149,7 +149,7 @@ do_start()
 			if [ -e "/sys/class/block/$DRIVE/device/model" ]; then
 				V=$(cat /sys/class/block/$DRIVE/device/vendor | xargs)
 				P=$(cat /sys/class/block/$DRIVE/device/model | xargs)
-				DRIVE="$V%20$P"
+				DRIVE=$(echo "$V $P" | sed 's/ /%20/g')
 			else
 				DRIVE=$d
 			fi
