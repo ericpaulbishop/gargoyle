@@ -302,6 +302,7 @@ static void parse_returned_ip_data(	void *out_data,
 					)
 {
 	uint32_t ip = *( (uint32_t*)(in_buffer + *in_index) );
+    ip_bw_kernel_data_item* ip_bw_data = (ip_bw_kernel_data*)(in_buffer + *in_index);
 	if(get_history == 0)
 	{
 		(((ip_bw*)out_data)[*out_index]).ip = ip;
@@ -311,28 +312,26 @@ static void parse_returned_ip_data(	void *out_data,
 	}
 	else
 	{
-			ip_bw_history history = ((ip_bw_history*)out_data)[*out_index];
-			history.reset_interval = reset_interval;
-			history.reset_time = reset_time;
-			history.is_constant_interval = is_constant_interval;
+			ip_bw_history *history = ((ip_bw_history*)out_data) + *out_index;
+			history->reset_interval = reset_interval;
+			history->reset_time = reset_time;
+			history->is_constant_interval = is_constant_interval;
 
-			history.ip = ip;
-			history.num_nodes = *( (uint32_t*)(in_buffer + *in_index+4));
-			history.first_start = (time_t) *( (uint64_t*)(in_buffer + *in_index+8));
-			history.first_end   = (time_t) *( (uint64_t*)(in_buffer + *in_index+16));
-			history.last_end    = (time_t) *( (uint64_t*)(in_buffer + *in_index+24));
-			*in_index = *in_index + 32;
+            history->ip = ip_bw_data->ip;
+			history->num_nodes = ip_bw_data->num_nodes;
+			history->first_start = ip_bw_data->first_start;
+			history->first_end   = ip_bw_data->first_end;
+			history->last_end    = ip_bw_data->last_end;
 
-
-			history.history_bws =  (uint64_t*)malloc( (history.num_nodes+1)*sizeof(uint64_t) );
+			history->history_bws =  (uint64_t*)malloc( (history->num_nodes+1)*sizeof(uint64_t) );
 			
 			/* read bws */
 			int node_index = 0;
-			while(node_index < history.num_nodes)
+            *in_index += 32;
+            for (node_index = 0; node_index < history->num_nodes; node_index++)
 			{
-				(history.history_bws)[node_index] =  *( (uint64_t*)(in_buffer + *in_index) );
-				*in_index = *in_index + 8;
-				node_index++;
+                *in_index += 8;
+				(history->history_bws)[node_index] =  ip_bw_data->ipbw_data[node_index];
 			}
 
 
@@ -351,11 +350,9 @@ static void parse_returned_ip_data(	void *out_data,
 			time_t now;
 			time(&now);
 			int current_minutes_west = get_minutes_west(now);
-			history.first_start = history.first_start + (60*(get_minutes_west(history.first_start)-current_minutes_west));
-			history.first_end = history.first_end + (60*(get_minutes_west(history.first_end)-current_minutes_west));
-			history.last_end = history.last_end + (60*(get_minutes_west(history.last_end)-current_minutes_west));
-
-			((ip_bw_history*)out_data)[*out_index] = history;
+			history->first_start = history->first_start + (60*(get_minutes_west(history->first_start)-current_minutes_west));
+			history->first_end = history->first_end + (60*(get_minutes_west(history->first_end)-current_minutes_west));
+			history->last_end = history->last_end + (60*(get_minutes_west(history->last_end)-current_minutes_west));
 	}
 	*out_index = *out_index + 1;
 }
@@ -367,7 +364,8 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	memset(buf, '\0',  BANDWIDTH_QUERY_LENGTH);
 	int done = 0;
-	
+    ip_bw_kernel_data* ip_bw_data = (ip_bw_kernel_data*)(buf);
+
 	*data = NULL;
 	*num_ips = 0;
 
@@ -415,14 +413,13 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 		}
 		else
 		{
-			uint32_t total_ips                 = *( (uint32_t*)(buf+1) );
+			uint32_t total_ips                 = ip_bw_data->ip_total;
 			/*uint32_t next_ip_index             = *( (uint32_t*)(buf+5) ); //unused */
-			uint32_t response_ips              = *( (uint32_t*)(buf+9) );
-			time_t reset_interval              = (time_t) *( (uint64_t*)(buf+13) );
-			time_t reset_time                  = (time_t) *( (uint64_t*)(buf+21) );
-			unsigned char is_constant_interval = *( (unsigned char*)(buf+29) );
+			uint32_t response_ips              = ip_bw_data->ip_num;
+			time_t reset_interval              = ip_bw_data->reset_interval;
+			time_t reset_time                  = ip_bw_data->reset_time;
+			unsigned char is_constant_interval = ip_bw_data->reset_is_constant_interval;
 			
-
 			if(!data_initialized)
 			{
 				*num_ips = total_ips;
