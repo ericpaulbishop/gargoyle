@@ -861,7 +861,7 @@ function setDriveList(controlDocument)
 		}
 		else
 		{
-			driveDisplayList.push( storageDrives[driveIndex][5].replace("%20", " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
+			driveDisplayList.push( storageDrives[driveIndex][5].replace(/%20/g, " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
 		}
 	}
 	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
