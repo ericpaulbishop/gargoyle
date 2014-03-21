@@ -239,6 +239,19 @@
 
 				</select>
 			</div>
+
+			<div id='openvpn_client_block_nonovpn_container'>
+				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn'>Non-OpenVPN Traffic:</label>
+				<select class='rightcolumn' id='openvpn_client_block_nonovpn' >
+					<option value='allow'>Allow Non-OpenVPN Traffic</option>
+					<option value='block'>Block All Non-OpenVPN Traffic</option>
+				</select>
+				<br/>
+				<span class='rightcolumnonly'><em>If you want all traffic to pass through the VPN, it is best to block all non-OpenVPN traffic so that if OpenVPN fails traffic will not fallback to the default, unencrypted route. However if you are using OpenVPN only to access some remote clients you should allow Non-OpenVPN traffic.</em></span>
+			</div>
+
+
+
 			<div id='openvpn_client_cipher_other_container'>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em></span>
@@ -251,7 +264,6 @@
 				<span class="leftcolumnonly" style="margin-left:5px;"><em><%~ CfgUpd %></em></span>
 				<br/>
 				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
-
 			</div>
 
 			<div id="openvpn_client_ca_text_container">

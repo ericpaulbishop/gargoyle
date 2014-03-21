@@ -65,6 +65,7 @@ error=""
 tab=$(printf "\t")
 
 ta_direction=""
+block_non_openvpn=0
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 	is_targz=$(dd if="$FORM_openvpn_client_zip_file" bs=1 count=2 2>/dev/null | hexdump -v -e '1/1 "%02x"')
@@ -92,7 +93,9 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	key_file=$( egrep "^[$tab ]*key[$tab ]+"            "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
 	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+"      "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $2 } ' | sed 's/^.*\///g' )
 	ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
-
+	if [ -e ./block_non_openvpn ] ; then
+		block_non_openvpn=1
+	fi
 
 	if [ -s network ] ; then
 		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' network)
@@ -229,8 +232,13 @@ if [ -z "$error" ] ; then
 		uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
 		uci set openvpn.custom_config.config="/etc/openvpn/$client_name.conf"  >/dev/null 2>&1
 		uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
-		uci commit
 
+		#block non-openvpn traffic to prevent leak if openvpn quits unexpectedly?
+		if [ "$block_non_openvpn" = "1" ] ; then
+			uci set openvpn_gargoyle.@client[0].block_non_openvpn="true"
+		fi
+		uci commit
+		
 		#run other commands passed to script (includes firewall config and openvpn restart)
 		if [ -n "$FORM_commands" ] ; then	
 			tmp_file="$tmp_dir/tmp.sh"

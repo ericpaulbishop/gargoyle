@@ -173,8 +173,11 @@ function saveChanges()
 
 			if (document.getElementById("openvpn_client_manual_controls").style.display != "none")
 			{
-				clientManualCheckCaCertKey();
+				clientManualCheckCaCertKey() 
+				blockNonOpenVpn = getSelectedValue("openvpn_client_block_nonovpn");
+				uci.set("openvpn_gargoyle", "client", "block_non_openvpn", blockNonOpenVpn == "block" ? true : false)
 			}
+
 		}
 
 
@@ -188,6 +191,10 @@ function saveChanges()
 		if(commands.match(/uci.*firewall\.vpn_zone\./) || commands.match(/uci.*firewall\.vpn_lan_forwarding\./) || commands.match(/uci.*firewall\.vpn_wan_forwarding\./) || commands.match(/uci.*firewall\.ra_openvpn\./))
 		{
 			commands = commands + "\n/usr/lib/gargoyle/restart_network.sh ;\n"
+		}
+		else
+		{
+			commands = commands + "\n/etc/openvpn.firewall update_enabled ;\n"
 		}
 
 		// if anything in server section or client section has changed, restart openvpn
@@ -485,6 +492,10 @@ function resetData()
 		document.getElementById("openvpn_client_ta_key_text").value  = curClientTaKey.join("\n");
 		var textTaCheck = document.getElementById("openvpn_client_use_ta_key_text");	
 		textTaCheck.checked = curClientTaKey.length > 0 ? true : false;
+
+		blockNonOpenVpn = uciOriginal.get("openvpn_gargoyle", "client", "block_non_openvpn")
+		setSelectedValue("openvpn_client_block_nonovpn", (blockNonOpenVpn == "true" || blockNonOpenVpn == "1") ? "block" : "allowed")
+
 		updateClientControlsFromConfigText()
 	}
 	else
