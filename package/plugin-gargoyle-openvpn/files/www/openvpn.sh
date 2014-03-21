@@ -241,7 +241,7 @@
 			</div>
 
 			<div id='openvpn_client_block_nonovpn_container'>
-				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn'>Non-OpenVPN Traffic:</label>
+				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn_label'>Non-OpenVPN Traffic:</label>
 				<select class='rightcolumn' id='openvpn_client_block_nonovpn' >
 					<option value='allow'>Allow Non-OpenVPN Traffic</option>
 					<option value='block'>Block All Non-OpenVPN Traffic</option>
