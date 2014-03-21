@@ -244,7 +244,7 @@ set_openvpn_cron_watchdog()
 RUN_MODE="$1"
 
 
-if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] && [ "$RUN_MODE" != "update_enabled" ] then
+if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] && [ "$RUN_MODE" != "update_enabled" ] ; then
 	RUN_MODE="restart"
 fi
 
