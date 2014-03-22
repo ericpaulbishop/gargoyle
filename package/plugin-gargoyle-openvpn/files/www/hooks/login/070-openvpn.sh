@@ -1,8 +1,5 @@
 #!/usr/bin/haserl
 
-<!-- client is ~openvpn.OClt
-status is ~openvpn.OSts -->
-
 <script>
 <%
 	openvpn_enabled=$( uci get openvpn.custom_config.enable 2>/dev/null )
