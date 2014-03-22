@@ -238,6 +238,13 @@ push "route-gateway $openvpn_server_internal_ip"
 $openvpn_redirect_gateway
 
 EOF
+	
+	if [ -n "$openvpn_redirect_gateway" ] ; then
+		touch "$OPENVPN_DIR/block_non_openvpn"
+	else
+		rm -rf "$OPENVPN_DIR/block_non_openvpn"
+	fi
+
 	if [ -n "$openvpn_server_local_subnet_ip" ] && [ -n "$openvpn_server_local_subnet_mask" ] ; then
 		# save routes -- we need to update all route lines 
 		# once all client ccd files are in place on the server
@@ -372,6 +379,11 @@ EOF
 		fi
 	fi
 
+	if [ -e  "$OPENVPN_DIR/block_non_openvpn" ] ; then
+		touch "$OPENVPN_DIR/client_conf/${openvpn_client_id}/block_non_openvpn"
+	else
+		rm -rf "$OPENVPN_DIR/client_conf/${openvpn_client_id}/block_non_openvpn"
+	fi
 		
 
 	touch "$random_dir/ccd_${openvpn_client_id}"
