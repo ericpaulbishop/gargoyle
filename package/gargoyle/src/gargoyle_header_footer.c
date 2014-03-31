@@ -610,7 +610,7 @@ int main(int argc, char **argv)
 				printf("\t\t\t\t\t\t</div>\n");
 				
 				int empty_section = 0;
-				if (peek_priority_queue_node(section_pages) == NULL)
+				if (next_section_page == NULL)
 				{
 					empty_section = 1;
 				}
