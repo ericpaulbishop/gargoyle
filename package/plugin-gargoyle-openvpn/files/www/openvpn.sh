@@ -241,13 +241,13 @@
 			</div>
 
 			<div id='openvpn_client_block_nonovpn_container'>
-				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn_label'>Non-OpenVPN Traffic:</label>
+				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn_label'><%~ NOVPNT %>:</label>
 				<select class='rightcolumn' id='openvpn_client_block_nonovpn' >
-					<option value='allow'>Allow Non-OpenVPN Traffic</option>
-					<option value='block'>Block All Non-OpenVPN Traffic</option>
+					<option value='allow'><%~ AllowNOVPNT %></option>
+					<option value='block'><%~ BlockNOVPNT %></option>
 				</select>
 				<br/>
-				<span class='rightcolumnonly'><em>If you want all traffic to pass through the VPN, it is best to block all non-OpenVPN traffic so that if OpenVPN fails traffic will not fallback to the default, unencrypted route. However if you are using OpenVPN only to access some remote clients you should allow Non-OpenVPN traffic.</em></span>
+				<span class='rightcolumnonly'><em><%~ DescNOVPNT %></em></span>
 			</div>
 
 
