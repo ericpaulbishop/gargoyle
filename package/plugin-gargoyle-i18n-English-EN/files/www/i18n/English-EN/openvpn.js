@@ -107,3 +107,8 @@ ovpnS.ConnOC="Connected OpenVPN Clients";
 ovpnS.ConnFr="Connected From";
 ovpnS.ConnSc="Connected Since";
 ovpnS.NoCConn="No Clients Connected";
+
+ovpnS.NOVPNT="Non-OpenVPN Traffic";
+ovpnS.AllowNOVPNT="Allow Non-OpenVPN Traffic";
+ovpnS.BlockNOVPNT="Block All Non-OpenVPN Traffic";
+openS.DescNOVPNT="If you want all traffic to pass through the VPN, it is best to block all non-OpenVPN traffic so that if OpenVPN fails traffic will not fallback to the default, unencrypted route. However if you are using OpenVPN only to access some remote clients you should allow Non-OpenVPN traffic.";

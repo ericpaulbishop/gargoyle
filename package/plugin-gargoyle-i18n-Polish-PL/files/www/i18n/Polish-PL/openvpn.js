@@ -76,7 +76,7 @@ ovpnS.SrvAddErr="Adres serwera nie jest określony";
 ovpnS.OPrtErr="Port serwera musi być z zakresu 1-65535";
 ovpnS.GTAPErr="Gargoyle nie wspiera konfiguracji typu TAP OpenVPN";
 ovpnS.RunC="Uruchomiony, połączony";
-ovpnS.RunNC="Uruchomiony, połączony";
+ovpnS.RunNC="Uruchomiony, niepołączony";
 ovpnS.RunNot="Nie uruchomiony";
 ovpnS.IntIP="Wewnętrzne IP\n(obsługiwana podsieć)";
 ovpnS.CfgCredF="Poświadczenia\ni konfiguracja";
@@ -107,3 +107,8 @@ ovpnS.ConnOC="Połączone klienty OpenVPN";
 ovpnS.ConnFr="Połączony z";
 ovpnS.ConnSc="Połączony od";
 ovpnS.NoCConn="Brak połączonych klientów";
+
+ovpnS.NOVPNT="Ruch poza VPN";
+ovpnS.AllowNOVPNT="Akceptuj";
+ovpnS.BlockNOVPNT="Blokuj";
+openS.DescNOVPNT="Jeżeli cały ruch ma przechodzić przez VPN, najlepiej jest blokować inny ruch, dzięki czemu jeżeli nie będzie działał tunel OpenVPN to nie będzie ruchu niezaszyfrowanego. Jeżeli OpenVPN używany jest tylko do dostępu do zdalnych zasobów, inny ruch może być akceptowalny.";
