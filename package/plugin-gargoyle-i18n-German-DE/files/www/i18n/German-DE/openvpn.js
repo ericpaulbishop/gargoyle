@@ -107,3 +107,8 @@ ovpnS.ConnOC="Verbundene OpenVPN Clienten";
 ovpnS.ConnFr="Verbunden von";
 ovpnS.ConnSc="Verbunden seit";
 ovpnS.NoCConn="Keine Client verbunden";
+
+ovpnS.NOVPNT="Non-OpenVPN Traffic";
+ovpnS.AllowNOVPNT="Erlaube Datenverkehr ohne OpenVPN";
+ovpnS.BlockNOVPNT="Blockiere Datenverkehr ohne OpenVPN";
+openS.DescNOVPNT="Wenn der gesamte Datenverkehr durch das VPN geleitet werden soll, ist es am besten jeglichen Datenverkehr ausser OpenVPN zu blockieren. In diesem Fall erfolgt kein Rückgriff auf die unverschlüsselte Verbindung, wenn das VPN nicht aufgebaut werden kann. Wenn OpenVPN genutzt wird, um entfernte Klienten anzubinden, ist es sinnvoll auch Nicht-OpenVPN Datenverkehr zu erlauben.";
