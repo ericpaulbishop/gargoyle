@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
-PKG_VERSION:=0.2.4.17-rc
+PKG_VERSION:=0.2.4.21
 PKG_RELEASE:=1
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=2cdfb8dcc3306a43cf465a858bf97b2d
+PKG_MD5SUM:=bde981d10e8faf1e171ef1ebbb7b398a
 PKG_INSTALL:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
