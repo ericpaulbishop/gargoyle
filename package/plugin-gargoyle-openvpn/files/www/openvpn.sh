@@ -64,6 +64,11 @@
 		<span class='leftcolumn'><%~ OSts %>:</span>
 		<span class='rightcolumn' id='openvpn_config_status'></span>
 	</div>
+
+	<div id='openvpn_clear_keys_container' style='display:none' >
+		<span class="rightcolumnonly"><input type='button' id='openvpn_clear_keys_button' value='<%~ OClrK %>' class='default_button' onclick='clearOpenvpnKeys()' /></span>
+	</div>
+
 </fieldset>
 
 <fieldset id="openvpn_server_fieldset">

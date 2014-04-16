@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2014 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -72,6 +72,8 @@ function saveChanges()
 				uci.removeSection("firewall", "vpn_zone")
 				uci.removeSection("firewall", "vpn_lan_forwarding")
 				uci.removeSection("firewall", "vpn_wan_forwarding")
+				uci.removeSection("firewall", "ra_openvpn")
+
 			}
 		}
 
@@ -376,7 +378,8 @@ function resetData()
 	openvpnMode = clientEnabled ? "client" : openvpnMode
 	setSelectedValue("openvpn_config", openvpnMode)
 
-	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none" : "block"
+	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none"  : "block"
+	
 	if(openvpnMode != "disabled")
 	{
 		if( tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnMode == "server") )
@@ -718,8 +721,22 @@ function createButton(text, cssClass, actionFunction, disabled)
 
 function setOpenvpnVisibility()
 {
+
+	var originalEnabled = false
+	var originalServerEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled") 
+	var originalClientEnabled = uciOriginal.get("openvpn_gargoyle", "client", "enabled")
+	if(originalServerEnabled == "true" || originalServerEnabled == "1" || originalClientEnabled == "true" || originalClientEnabled == "1")
+	{
+		originalEnabled = true
+	}
+
 	openvpnMode = getSelectedValue("openvpn_config");
 	
+	
+	document.getElementById("openvpn_clear_keys_container").style.display = (openvpnMode == "disabled" && (!originalEnabled)) ? "block" : "none"
+
+
+
 	document.getElementById("openvpn_server_fieldset").style.display         = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none"
@@ -1266,4 +1283,22 @@ function editAc()
 	}
 	runOnEditorLoaded();
 }
+function clearOpenvpnKeys()
+{
+	var confirmed = confirm(ovpnS.OClrC)
+	if(confirmed)
+	{
+		setControlsEnabled(false, true);
 
+		var commands = "rm -rf /etc/openvpn/* ; ln -s /var/openvpn/current_status /etc/openvpn/current_status ;"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				window.location=window.location
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}
