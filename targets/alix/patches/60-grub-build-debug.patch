@@ -1,0 +1,14 @@
+--- a/package/grub/Makefile	2014-04-18 06:39:11.688720542 -0400
++++ b/package/grub/Makefile	2014-04-18 09:25:04.460899313 -0400
+@@ -67,8 +67,11 @@
+ HOST_CONFIGURE_VARS += $(MY_CONFIGURE_VARS)
+ 
+ define Host/Configure
++	echo '*********************THIS IS TEST ONE***********************************'
+ 	(cd $(HOST_BUILD_DIR); aclocal && autoconf && automake)
++	echo '*********************THIS IS TEST TWO***********************************'
+ 	$(call Host/Configure/Default)
++	echo '*********************THIS IS TEST THREE***********************************'
+ endef
+ 
+ ifeq ($(HOST_OS),Darwin)
