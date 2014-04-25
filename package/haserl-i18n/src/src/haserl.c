@@ -653,7 +653,15 @@ assignGlobalStartupValues ()
 
   global.webroot=uci_get("gargoyle", "global", "web_root");
   global.fallback_lang=uci_get("gargoyle", "global", "fallback_lang");
+  if(global.fallback_lang == NULL)
+  {
+	  global.fallback_lang = strdup("English-EN");
+  }
   global.active_lang=uci_get("gargoyle", "global", "language");
+  if(global.active_lang == NULL)
+  {
+	  global.active_lang = strdup( global.fallback_lang );
+  }
 }
 
 
