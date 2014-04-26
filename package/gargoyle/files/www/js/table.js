@@ -26,7 +26,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 		var header = controlDocument.createElement('th');
 		if( typeof(columnNames[columnIndex]) == 'string' )
 		{
-			var splitText = (columnNames[columnIndex]).split(/\n/)
+			var splitText = (columnNames[columnIndex]).replace(/\&amp;/g, '&').split(/\n/)
 			while(splitText.length > 0)
 			{
 				var next = splitText.shift()

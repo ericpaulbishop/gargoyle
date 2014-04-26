@@ -654,7 +654,7 @@ function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 		}
 
 		text = text == null ? "" : text;
-		var textParts = text.split("\n");
+		var textParts = text.replace(/\&amp;/g, '&').split("\n");
 		while(textParts.length > 0)
 		{
 			var txt = textParts.shift()
