@@ -719,6 +719,55 @@ function createButton(text, cssClass, actionFunction, disabled)
 	return button;
 }
 
+
+function updateDupeCn()
+{
+	var serverInternalIp = document.getElementById("openvpn_server_ip").value
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+	
+
+	var allowedTable = document.getElementById("openvpn_allowed_client_table");
+	var setNewIp = false;
+	if(allowedTable != null)
+	{
+		var rows = allowedTable.rows;
+		var ri;
+		for(ri =1; ri < rows.length ; ri++)
+		{
+			var ipElementContainer = rows[ri].childNodes[1].firstChild;
+			var id = ipElementContainer.id;
+		
+			if(!dupeCn && uci.get("openvpn_gargoyle", id, "ip") == "")
+			{
+				var serverInternalIp = document.getElementById("openvpn_server_ip").value
+				var ip = getUnusedAcIp(serverInternalIp)
+				uci.set("openvpn_gargoyle", id, "ip", ip)
+				
+				var ipContainer = ipElementContainer.childNodes[1]	
+				setSingleChild(ipContainer, document.createTextNode(ip))
+				ipContainer.appendChild( document.createElement("br") )
+				ipContainer.appendChild( document.createTextNode("") )
+
+				setNewIp = true
+			}
+		}
+	}
+	if(setNewIp)
+	{
+		var definedIps = getDefinedAcIps(true);
+		definedIps[serverInternalIp] = 1
+		if( definedIps[ document.getElementById('openvpn_allowed_client_ip').value ] != null )
+		{
+			var ip = getUnusedAcIp(serverInternalIp)
+			document.getElementById('openvpn_allowed_client_ip').value = ip
+		}
+	}
+
+	setOpenvpnVisibility()
+}
+
+
 function setOpenvpnVisibility()
 {
 
@@ -741,10 +790,9 @@ function setOpenvpnVisibility()
 	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none"
 	
-
 	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
 	dupeCn= dupeCn == "true" || dupeCn == "1"
-	
+
 
 	var allowedTable = document.getElementById("openvpn_allowed_client_table");
 	if(allowedTable != null)
@@ -759,8 +807,13 @@ function setOpenvpnVisibility()
 			{
 				ipElementContainer.childNodes[ipChildIndex].style.display = (ipChildIndex == 0 && dupeCn) || (ipChildIndex > 0 && (!dupeCn)) ? "inline" : "none"
 			}
+
 		}
 	}
+
+
+
+
 	initializeAllowedClientVisibility(document, dupeCn);
 	setClientVisibility(document)
 }
@@ -846,6 +899,44 @@ function setRemoteNames( controlDocument, selectedRemote)
 	}
 }
 
+function getUnusedAcIp(serverInternalIp)
+{
+	var ipParts = serverInternalIp.split(/\./)
+	var fourthIpPart = ipParts.pop()
+	var thirdIpPart  = ipParts.pop()
+	var secondIpPart = ipParts.pop()
+	var firstIpPart  = ipParts.pop()
+
+	fourthIpPart = parseInt(fourthIpPart);
+	thirdIpPart  = parseInt(thirdIpPart);
+	secondIpPart = parseInt(secondIpPart);
+	fourthIpPart++;
+
+	
+	var candidateDefaultIp = firstIpPart + "." + secondIpPart + "." + thirdIpPart + "." + fourthIpPart
+
+	var definedIps = getDefinedAcIps(true);
+	definedIps[serverInternalIp] = 1
+	while( (fourthIpPart < 255 || thirdIpPart < 255 || secondIpPart < 255) && definedIps[candidateDefaultIp] == 1)
+	{
+		fourthIpPart++
+		if(fourthIpPart == 255)
+		{
+			fourthIpPart = 1
+			thirdIpPart++
+		}
+		if(thirdIpPart == 255)
+		{
+			thirdIpPart = 0
+			secondIpPart++
+		}
+		if(secondIpPart != 255)
+		{	
+			candidateDefaultIp = firstIpPart + "." + secondIpPart + "." + thirdIpPart + "." + fourthIpPart
+		}
+	}
+	return candidateDefaultIp
+}
 
 function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInternalIp)
 {
@@ -877,20 +968,8 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 	var ip = srcUci.get("openvpn_gargoyle", id, "ip")
 	if(ip == "")
 	{
-		var ipParts = serverInternalIp.split(/\./)
-		var lastIpPart = ipParts.pop()
-		lastIpPart = lastIpPart == "1" ? 2 : 1;
-		
+		ip = getUnusedAcIp(serverInternalIp)
 
-		var candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
-		var definedIps = getDefinedAcIps(true);
-		definedIps[serverInternalIp] = 1
-		while(lastIpPart < 255 && definedIps[candidateDefaultIp] == 1)
-		{
-			lastIpPart++
-			candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
-		}
-		ip = candidateDefaultIp
 	}
 	controlDocument.getElementById("openvpn_allowed_client_ip").value = ip
 	

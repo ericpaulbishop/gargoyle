@@ -126,7 +126,7 @@
 
 	<div id= "openvpn_server_duplicate_cn_container">
 		<label class='leftcolumn' for='openvpn_server_duplicate_cn' id='openvpn_server_duplicate_cn_label'><%~ CredR %>:</label>
-		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='setOpenvpnVisibility()'>
+		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='updateDupeCn()'>
 			<option value='false'><%~ CredSC %></option>
 			<option value='true'><%~ CredMC %></option>
 		</select>
