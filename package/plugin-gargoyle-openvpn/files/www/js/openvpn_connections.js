@@ -58,4 +58,4 @@ function doUpdate()
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-}	
+}
