@@ -11,7 +11,7 @@
 +
 +if [ "$ACTION" = "ifup" ] && [ "$INTERFACE" = "$trigger_if" ] ; then
 +	sleep 3
-+	killall sysntpd >/dev/null 2>&1
++	killall ntpd >/dev/null 2>&1
 +	/etc/init.d/sysntpd restart
 +fi
 --- backfire-a/package/base-files/files/etc/init.d/sysntpd	2012-06-21 11:01:21.804182454 -0400
