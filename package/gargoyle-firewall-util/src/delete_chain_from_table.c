@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	char *command = dynamic_strcat(3, "iptables -t ", table, " -L --line-numbers 2>/dev/null");
+	char *command = dynamic_strcat(3, "iptables -t ", table, " -L -n --line-numbers 2>/dev/null");
 	unsigned long num_lines = 0;
 	char** table_dump = get_shell_command_output_lines(command, &num_lines);
 	free(command);
