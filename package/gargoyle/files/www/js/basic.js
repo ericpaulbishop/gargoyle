@@ -197,7 +197,7 @@ function saveChanges()
 					uci.set("wireless", apacfg, "device", wifiDevA);
 					uci.set('wireless', apacfg, 'mode', 'ap');
 					uci.set('wireless', apacfg, 'network', 'lan');
-					uci.set('wireless', apcfg, 'disassoc_low_ack', '0');
+					uci.set('wireless', apacfg, 'disassoc_low_ack', '0');
 					preCommands = preCommands + "uci set wireless." + apacfg + "='wifi-iface' \n"
 					if(dualBandSelected)
 					{
