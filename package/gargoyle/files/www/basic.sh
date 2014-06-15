@@ -765,7 +765,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wifi_server1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_server1' id='wifi_server1_label'>RADIUS <%~ Srvr %> IP:</label>
-			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIP(this)'/><br/>
+			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIp(this)'/><br/>
 		</div>
 		<div id='wifi_port1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_port1' id='wifi_port1_label'>RADIUS <%~ SrvPt %>:</label>
