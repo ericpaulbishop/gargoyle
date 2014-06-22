@@ -71,9 +71,6 @@ function restoreSuccessful(lanIp)
 	var stateChangeFunction = function(req) { return 0; } ;
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
-
-
-
 	//test for router coming back up
 	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
 	testLocation = currentProtocol + "://" + globalLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
@@ -85,6 +82,24 @@ function restoreSuccessful(lanIp)
 	}
 	setTimeout( "testReboot()", 25*1000);  //start testing after 25 seconds
 	setTimeout( "reloadPage()", 240*1000); //after 4 minutes, try to reload anyway
+}
+
+function reboot(lanIp)
+{
+	setControlsEnabled(false, true, UI.waitText)
+
+	globalLanIp = lanIp;
+
+	currentProtocol = location.href.match(/^https:/) ? "https" : "http";
+	testLocation = currentProtocol + "://" + globalLanIp + ":" + window.location.port + "/utility/reboot_test.sh";
+	testReboot = function()
+	{
+		toggleReload = true;
+		setTimeout( "testReboot()", 5*1000);
+		document.getElementById("reboot_test").src = testLocation;
+	}
+	setTimeout( "testReboot()", 25*1000);
+	setTimeout( "reloadPage()", 240*1000);
 }
 
 function reloadPage()
