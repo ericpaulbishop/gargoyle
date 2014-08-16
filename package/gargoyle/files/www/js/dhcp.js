@@ -461,3 +461,7 @@ function editStatic()
 	runOnEditorLoaded();
 }
 
+function RowRemovedDHCP(ip)
+{
+	delete ipHostHash[ip];
+}
