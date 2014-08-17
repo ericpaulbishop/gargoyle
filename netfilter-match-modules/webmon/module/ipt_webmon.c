@@ -949,6 +949,11 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 							search_part = strstr(path, "/ws/results/Web/");
 							search_part = search_part == NULL ? search_part : search_part+16;
 						}
+						else if(strstr(domain, "thepiratebay.") != NULL)
+						{
+							search_part = strstr(path, "/search/");
+							search_part = search_part == NULL ? search_part : search_part+8;
+						}
 
 						
 						if(search_part != NULL)
