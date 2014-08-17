@@ -7,6 +7,8 @@
  */
 var upS=new Object();
 
+var reloadTarget = "http://192.168.1.1/"
+
 function doUpgrade()
 {
 	if(document.getElementById('upgrade_file').value.length == 0)
@@ -15,6 +17,11 @@ function doUpgrade()
 	}
 	else
 	{
+		var curIp = uciOriginal.get("network", "lan", "ipaddr");
+		curIp = curIp == "" ? "192.168.1.1" : curIp;
+		reloadTarget = document.getElementById("upgrade_preserve").checked == true ? "http://" + curIp + "/" : "http://192.168.1.1/"
+
+
 		confirmUpgrade = window.confirm(upS.Warn2);
 		if(confirmUpgrade)
 		{
@@ -34,7 +41,7 @@ function upgraded()
 	setControlsEnabled(false, true, upS.Rbtg);
 	doRedirect= function()
 	{
-		window.location =  "http://192.168.1.1/";
+		window.location =  reloadTarget;
 	}
 	setTimeout( "doRedirect()", 120*1000);
 }
