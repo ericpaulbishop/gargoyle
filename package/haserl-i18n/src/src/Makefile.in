@@ -472,7 +472,7 @@ uninstall-am: uninstall-binPROGRAMS
 @USE_LUA_TRUE@h_lua_common.c : haserl_lualib.inc
 
 install-strip:
-        $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
           install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
           `test -z '$(STRIP)' || \
             echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
