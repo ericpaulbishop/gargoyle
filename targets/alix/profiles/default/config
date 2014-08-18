@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Attitude Adjustment (unknown)
-# Wed Oct 16 14:52:42 2013
+# Mon Aug 18 16:52:55 2014
 #
 CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_ppc40x is not set
@@ -64,13 +64,13 @@ CONFIG_TARGET_x86=y
 # CONFIG_TARGET_at91_9g20 is not set
 # CONFIG_TARGET_at91_9260 is not set
 # CONFIG_TARGET_at91_9263 is not set
-# CONFIG_TARGET_lantiq_ar9 is not set
 # CONFIG_TARGET_lantiq_ase is not set
-# CONFIG_TARGET_lantiq_danube is not set
-# CONFIG_TARGET_lantiq_falcon is not set
 # CONFIG_TARGET_lantiq_svip_be is not set
-# CONFIG_TARGET_lantiq_svip_le is not set
+# CONFIG_TARGET_lantiq_ar9 is not set
+# CONFIG_TARGET_lantiq_falcon is not set
 # CONFIG_TARGET_lantiq_vr9 is not set
+# CONFIG_TARGET_lantiq_svip_le is not set
+# CONFIG_TARGET_lantiq_danube is not set
 # CONFIG_TARGET_orion_generic is not set
 # CONFIG_TARGET_orion_harddisk is not set
 # CONFIG_TARGET_orion_dns323 is not set
@@ -153,6 +153,11 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_at91_9263_Default is not set
 # CONFIG_TARGET_avr32_Default is not set
 # CONFIG_TARGET_rb532_Default is not set
+# CONFIG_TARGET_lantiq_ase_Generic is not set
+# CONFIG_TARGET_lantiq_ase_EASY50601 is not set
+# CONFIG_TARGET_lantiq_svip_be_Generic is not set
+# CONFIG_TARGET_lantiq_svip_be_EASY336 is not set
+# CONFIG_TARGET_lantiq_svip_be_EASY33016 is not set
 # CONFIG_TARGET_lantiq_ar9_Generic is not set
 # CONFIG_TARGET_lantiq_ar9_EASY50812 is not set
 # CONFIG_TARGET_lantiq_ar9_DGN3500B is not set
@@ -160,8 +165,13 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_lantiq_ar9_FRITZ7320 is not set
 # CONFIG_TARGET_lantiq_ar9_P2601HNFX is not set
 # CONFIG_TARGET_lantiq_ar9_H201L is not set
-# CONFIG_TARGET_lantiq_ase_Generic is not set
-# CONFIG_TARGET_lantiq_ase_EASY50601 is not set
+# CONFIG_TARGET_lantiq_falcon_Generic is not set
+# CONFIG_TARGET_lantiq_falcon_EASY98000 is not set
+# CONFIG_TARGET_lantiq_falcon_EASY98020 is not set
+# CONFIG_TARGET_lantiq_vr9_Generic is not set
+# CONFIG_TARGET_lantiq_vr9_FRITZ3370 is not set
+# CONFIG_TARGET_lantiq_svip_le_Generic is not set
+# CONFIG_TARGET_lantiq_svip_le_EASY336 is not set
 # CONFIG_TARGET_lantiq_danube_Generic is not set
 # CONFIG_TARGET_lantiq_danube_EASY50712 is not set
 # CONFIG_TARGET_lantiq_danube_ARV3527P is not set
@@ -178,16 +188,6 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_lantiq_danube_GIGASX76X is not set
 # CONFIG_TARGET_lantiq_danube_BTHOMEHUBV2B is not set
 # CONFIG_TARGET_lantiq_danube_BTHOMEHUBV2BOPENRG is not set
-# CONFIG_TARGET_lantiq_falcon_Generic is not set
-# CONFIG_TARGET_lantiq_falcon_EASY98000 is not set
-# CONFIG_TARGET_lantiq_falcon_EASY98020 is not set
-# CONFIG_TARGET_lantiq_svip_be_Generic is not set
-# CONFIG_TARGET_lantiq_svip_be_EASY336 is not set
-# CONFIG_TARGET_lantiq_svip_be_EASY33016 is not set
-# CONFIG_TARGET_lantiq_svip_le_Generic is not set
-# CONFIG_TARGET_lantiq_svip_le_EASY336 is not set
-# CONFIG_TARGET_lantiq_vr9_Generic is not set
-# CONFIG_TARGET_lantiq_vr9_FRITZ3370 is not set
 # CONFIG_TARGET_orion_generic_Default is not set
 # CONFIG_TARGET_orion_harddisk_Default is not set
 # CONFIG_TARGET_orion_dns323_Default is not set
@@ -211,6 +211,7 @@ CONFIG_TARGET_x86_alix2=y
 # CONFIG_TARGET_ar71xx_generic_ALFAAP96 is not set
 # CONFIG_TARGET_ar71xx_generic_HORNETUB is not set
 # CONFIG_TARGET_ar71xx_generic_ALFANX is not set
+# CONFIG_TARGET_ar71xx_generic_GPRv2 is not set
 # CONFIG_TARGET_ar71xx_generic_ALL0305 is not set
 # CONFIG_TARGET_ar71xx_generic_ALL0258N is not set
 # CONFIG_TARGET_ar71xx_generic_ALL0315N is not set
@@ -473,7 +474,7 @@ CONFIG_TARGET_ROOTFS_SQUASHFS=y
 # Image Options
 #
 CONFIG_X86_GRUB_IMAGES=y
-# CONFIG_X86_USE_GRUB2 is not set
+CONFIG_X86_USE_GRUB2=y
 # CONFIG_X86_GRUB_CONSOLE is not set
 CONFIG_X86_GRUB_SERIAL="ttyS0"
 CONFIG_X86_GRUB_BAUDRATE=38400
@@ -1379,135 +1380,15 @@ CONFIG_PACKAGE_uci=y
 CONFIG_PACKAGE_wireless-tools=y
 
 #
-# Emulators
+# Languages
 #
 
 #
-# Libraries
+# Lua
 #
-
-#
-# Filesystem
-#
-CONFIG_PACKAGE_libcom_err=y
-CONFIG_PACKAGE_libext2fs=y
-# CONFIG_PACKAGE_libfuse is not set
-
-#
-# Firewall
-#
-CONFIG_PACKAGE_libip4tc=y
-CONFIG_PACKAGE_libip6tc=y
-# CONFIG_PACKAGE_libipq is not set
-# CONFIG_PACKAGE_libiptc is not set
-CONFIG_PACKAGE_libxtables=y
-
-#
-# SSL
-#
-CONFIG_PACKAGE_libcyassl=y
-CONFIG_PACKAGE_libopenssl=y
-
-#
-# Configuration
-#
-CONFIG_OPENSSL_ENGINE_CRYPTO=y
-# CONFIG_OPENSSL_ENGINE_DIGEST is not set
-
-#
-# database
-#
-CONFIG_PACKAGE_libsqlite3=y
-# CONFIG_PACKAGE_alsa-lib is not set
-CONFIG_PACKAGE_libbbtargz=y
-CONFIG_PACKAGE_libblkid=y
-CONFIG_PACKAGE_libblobmsg-json=y
-CONFIG_PACKAGE_libbz2=y
-# CONFIG_PACKAGE_libcharset is not set
-CONFIG_PACKAGE_libericstools=y
-CONFIG_PACKAGE_libevent=y
-CONFIG_PACKAGE_libevent2=y
-# CONFIG_PACKAGE_libevent2-core is not set
-# CONFIG_PACKAGE_libevent2-extra is not set
-# CONFIG_PACKAGE_libevent2-openssl is not set
-# CONFIG_PACKAGE_libevent2-pthreads is not set
-CONFIG_PACKAGE_libexif=y
-# CONFIG_PACKAGE_libffmpeg-full is not set
-CONFIG_PACKAGE_libffmpeg-mini=y
-CONFIG_PACKAGE_libflac=y
-CONFIG_PACKAGE_libiconv-full=y
-CONFIG_PACKAGE_libid3tag=y
-CONFIG_PACKAGE_libintl-full=y
-# CONFIG_PACKAGE_libiw is not set
-# CONFIG_PACKAGE_libiwinfo is not set
-CONFIG_PACKAGE_libjpeg=y
-CONFIG_PACKAGE_libjson=y
-CONFIG_PACKAGE_libjson-c=y
-# CONFIG_PACKAGE_libltdl is not set
-# CONFIG_PACKAGE_liblua is not set
-CONFIG_PACKAGE_liblzo=y
-# CONFIG_PACKAGE_libmatrixssl-nothread is not set
-CONFIG_PACKAGE_libmnl=y
-# CONFIG_PACKAGE_libmount is not set
-# CONFIG_PACKAGE_libncurses is not set
-# CONFIG_PACKAGE_libncursesw is not set
-CONFIG_PACKAGE_libnfnetlink=y
-# CONFIG_PACKAGE_libnl is not set
-CONFIG_PACKAGE_libnl-tiny=y
-CONFIG_PACKAGE_libogg=y
-# CONFIG_PACKAGE_libpcap is not set
-# CONFIG_PACKAGE_libreadline is not set
-CONFIG_PACKAGE_librpc=y
-CONFIG_PACKAGE_libubox=y
-CONFIG_PACKAGE_libubus=y
-# CONFIG_PACKAGE_libubus-lua is not set
-CONFIG_PACKAGE_libuci=y
-# CONFIG_PACKAGE_libuci-lua is not set
-CONFIG_PACKAGE_libusb-1.0=y
-# CONFIG_PACKAGE_libusbpp is not set
-CONFIG_PACKAGE_libuuid=y
-CONFIG_PACKAGE_libvorbis=y
-CONFIG_PACKAGE_libwrap=y
-# CONFIG_PACKAGE_linux-atm is not set
-# CONFIG_PACKAGE_terminfo is not set
-# CONFIG_PACKAGE_uclibcxx is not set
-CONFIG_PACKAGE_zlib=y
-
-#
-# Administration
-#
-
-#
-# Gargoyle Web Interface
-#
-CONFIG_PACKAGE_gargoyle=y
-# CONFIG_PACKAGE_gargoyle-i18n is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES is not set
-# CONFIG_PACKAGE_plugin-gargoyle-initd is not set
-CONFIG_PACKAGE_plugin-gargoyle-logread=m
-CONFIG_PACKAGE_plugin-gargoyle-minidlna=y
-CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
-CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
-CONFIG_PACKAGE_plugin-gargoyle-pptp=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-CONFIG_PACKAGE_plugin-gargoyle-tor=y
-CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
-CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
-CONFIG_PACKAGE_plugin-gargoyle-webcam=y
-CONFIG_PACKAGE_plugin-gargoyle-webshell=m
-CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
+# CONFIG_PACKAGE_libiwinfo-lua is not set
+# CONFIG_PACKAGE_lua is not set
+# CONFIG_PACKAGE_luac is not set
 
 #
 # Kernel modules
@@ -1983,6 +1864,8 @@ CONFIG_PACKAGE_kmod-video-videobuf2=y
 CONFIG_PACKAGE_kmod-ath=y
 # CONFIG_ATH_USER_REGD is not set
 # CONFIG_PACKAGE_ATH_DEBUG is not set
+# CONFIG_PACKAGE_ATH_DFS is not set
+# CONFIG_PACKAGE_kmod-ath10k is not set
 CONFIG_PACKAGE_kmod-ath5k=y
 CONFIG_PACKAGE_kmod-ath9k=y
 CONFIG_PACKAGE_kmod-ath9k-common=y
@@ -2025,47 +1908,147 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-rt2400-pci is not set
 # CONFIG_PACKAGE_kmod-rt2500-pci is not set
 # CONFIG_PACKAGE_kmod-rt2500-usb is not set
-# CONFIG_PACKAGE_kmod-rt2800-lib is not set
 # CONFIG_PACKAGE_kmod-rt2800-pci is not set
 # CONFIG_PACKAGE_kmod-rt2800-usb is not set
 # CONFIG_PACKAGE_kmod-rt2x00-lib is not set
-# CONFIG_PACKAGE_kmod-rt2x00-mmio is not set
-# CONFIG_PACKAGE_kmod-rt2x00-pci is not set
-# CONFIG_PACKAGE_kmod-rt2x00-usb is not set
 # CONFIG_PACKAGE_kmod-rt61-pci is not set
 # CONFIG_PACKAGE_kmod-rt73-usb is not set
 # CONFIG_PACKAGE_kmod-rtl8180 is not set
 # CONFIG_PACKAGE_kmod-rtl8187 is not set
+# CONFIG_PACKAGE_kmod-rtl8192ce is not set
+# CONFIG_PACKAGE_kmod-rtl8192cu is not set
+# CONFIG_PACKAGE_kmod-rtl8192de is not set
+# CONFIG_PACKAGE_kmod-rtl8192se is not set
+# CONFIG_PACKAGE_kmod-rtlwifi is not set
 # CONFIG_PACKAGE_kmod-zd1211rw is not set
 
 #
-# Multimedia
+# Administration
 #
-# CONFIG_PACKAGE_ffmpeg is not set
-# CONFIG_PACKAGE_ffprobe is not set
-# CONFIG_PACKAGE_ffserver is not set
-CONFIG_PACKAGE_gargoyle-mjpg-streamer=y
-CONFIG_PACKAGE_minidlna=y
 
 #
-# IPv6
+# Gargoyle Web Interface
 #
+CONFIG_PACKAGE_gargoyle=y
+# CONFIG_PACKAGE_gargoyle-i18n is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN is not set
+# CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES is not set
+# CONFIG_PACKAGE_plugin-gargoyle-initd is not set
+CONFIG_PACKAGE_plugin-gargoyle-logread=m
+CONFIG_PACKAGE_plugin-gargoyle-minidlna=y
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
+CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
+CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
+CONFIG_PACKAGE_plugin-gargoyle-tor=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
+CONFIG_PACKAGE_plugin-gargoyle-webcam=y
+CONFIG_PACKAGE_plugin-gargoyle-webshell=m
+CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
+
+#
+# Libraries
+#
+
+#
+# Filesystem
+#
+CONFIG_PACKAGE_libcom_err=y
+CONFIG_PACKAGE_libext2fs=y
+# CONFIG_PACKAGE_libfuse is not set
 
 #
 # Firewall
 #
-# CONFIG_PACKAGE_ip6tables is not set
-# CONFIG_PACKAGE_6in4 is not set
-# CONFIG_PACKAGE_6rd is not set
-# CONFIG_PACKAGE_6relayd is not set
-# CONFIG_PACKAGE_6to4 is not set
-# CONFIG_PACKAGE_ds-lite is not set
-# CONFIG_PACKAGE_ipv6-support is not set
-# CONFIG_PACKAGE_odhcp6c is not set
+CONFIG_PACKAGE_libip4tc=y
+CONFIG_PACKAGE_libip6tc=y
+# CONFIG_PACKAGE_libipq is not set
+# CONFIG_PACKAGE_libiptc is not set
+CONFIG_PACKAGE_libxtables=y
 
 #
-# Boot Loaders
+# SSL
 #
+CONFIG_PACKAGE_libcyassl=y
+CONFIG_PACKAGE_libopenssl=y
+
+#
+# Configuration
+#
+CONFIG_OPENSSL_ENGINE_CRYPTO=y
+# CONFIG_OPENSSL_ENGINE_DIGEST is not set
+
+#
+# database
+#
+CONFIG_PACKAGE_libsqlite3=y
+# CONFIG_PACKAGE_alsa-lib is not set
+CONFIG_PACKAGE_libbbtargz=y
+CONFIG_PACKAGE_libblkid=y
+CONFIG_PACKAGE_libblobmsg-json=y
+CONFIG_PACKAGE_libbz2=y
+# CONFIG_PACKAGE_libcharset is not set
+CONFIG_PACKAGE_libericstools=y
+CONFIG_PACKAGE_libevent=y
+CONFIG_PACKAGE_libevent2=y
+# CONFIG_PACKAGE_libevent2-core is not set
+# CONFIG_PACKAGE_libevent2-extra is not set
+# CONFIG_PACKAGE_libevent2-openssl is not set
+# CONFIG_PACKAGE_libevent2-pthreads is not set
+CONFIG_PACKAGE_libexif=y
+# CONFIG_PACKAGE_libffmpeg-full is not set
+CONFIG_PACKAGE_libffmpeg-mini=y
+CONFIG_PACKAGE_libflac=y
+CONFIG_PACKAGE_libiconv-full=y
+CONFIG_PACKAGE_libid3tag=y
+CONFIG_PACKAGE_libintl-full=y
+# CONFIG_PACKAGE_libiw is not set
+# CONFIG_PACKAGE_libiwinfo is not set
+CONFIG_PACKAGE_libjpeg=y
+CONFIG_PACKAGE_libjson=y
+CONFIG_PACKAGE_libjson-c=y
+# CONFIG_PACKAGE_libltdl is not set
+# CONFIG_PACKAGE_liblua is not set
+CONFIG_PACKAGE_liblzo=y
+# CONFIG_PACKAGE_libmatrixssl-nothread is not set
+CONFIG_PACKAGE_libmnl=y
+# CONFIG_PACKAGE_libmount is not set
+# CONFIG_PACKAGE_libncurses is not set
+# CONFIG_PACKAGE_libncursesw is not set
+CONFIG_PACKAGE_libnfnetlink=y
+# CONFIG_PACKAGE_libnl is not set
+CONFIG_PACKAGE_libnl-tiny=y
+CONFIG_PACKAGE_libogg=y
+# CONFIG_PACKAGE_libpcap is not set
+# CONFIG_PACKAGE_libreadline is not set
+CONFIG_PACKAGE_librpc=y
+CONFIG_PACKAGE_libubox=y
+CONFIG_PACKAGE_libubus=y
+# CONFIG_PACKAGE_libubus-lua is not set
+CONFIG_PACKAGE_libuci=y
+# CONFIG_PACKAGE_libuci-lua is not set
+CONFIG_PACKAGE_libusb-1.0=y
+CONFIG_PACKAGE_libuuid=y
+CONFIG_PACKAGE_libvorbis=y
+CONFIG_PACKAGE_libwrap=y
+# CONFIG_PACKAGE_linux-atm is not set
+# CONFIG_PACKAGE_terminfo is not set
+# CONFIG_PACKAGE_uclibcxx is not set
+CONFIG_PACKAGE_zlib=y
 
 #
 # Utilities
@@ -2074,8 +2057,8 @@ CONFIG_PACKAGE_minidlna=y
 #
 # Boot Loaders
 #
-CONFIG_PACKAGE_grub=y
-# CONFIG_PACKAGE_grub2 is not set
+# CONFIG_PACKAGE_grub is not set
+CONFIG_PACKAGE_grub2=y
 
 #
 # Filesystem
@@ -2181,15 +2164,13 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 # CONFIG_PACKAGE_xfs-mkfs is not set
 
 #
-# Languages
+# Multimedia
 #
-
-#
-# Lua
-#
-# CONFIG_PACKAGE_libiwinfo-lua is not set
-# CONFIG_PACKAGE_lua is not set
-# CONFIG_PACKAGE_luac is not set
+# CONFIG_PACKAGE_ffmpeg is not set
+# CONFIG_PACKAGE_ffprobe is not set
+# CONFIG_PACKAGE_ffserver is not set
+CONFIG_PACKAGE_gargoyle-mjpg-streamer=y
+CONFIG_PACKAGE_minidlna=y
 
 #
 # Network
@@ -2329,7 +2310,32 @@ CONFIG_WPA_MSG_MIN_PRIORITY=3
 # CONFIG_DRIVER_WEXT_SUPPORT is not set
 CONFIG_DRIVER_11N_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-mini is not set
+# CONFIG_PACKAGE_wpa-supplicant-p2p is not set
 CONFIG_PACKAGE_wpad=y
 # CONFIG_PACKAGE_wpad-mini is not set
 # CONFIG_PACKAGE_wprobe-export is not set
 # CONFIG_PACKAGE_wprobe-util is not set
+
+#
+# Emulators
+#
+
+#
+# IPv6
+#
+
+#
+# Firewall
+#
+# CONFIG_PACKAGE_ip6tables is not set
+# CONFIG_PACKAGE_6in4 is not set
+# CONFIG_PACKAGE_6rd is not set
+# CONFIG_PACKAGE_6relayd is not set
+# CONFIG_PACKAGE_6to4 is not set
+# CONFIG_PACKAGE_ds-lite is not set
+# CONFIG_PACKAGE_ipv6-support is not set
+# CONFIG_PACKAGE_odhcp6c is not set
+
+#
+# Boot Loaders
+#
