@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dropbear
-PKG_VERSION:=2013.58
+PKG_VERSION:=2014.65
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:= \
 	http://matt.ucc.asn.au/dropbear/releases/ \
 	http://www.mirrors.wiretapped.net/security/cryptography/apps/ssh/dropbear/
-PKG_MD5SUM:=8d3579bbbfcea48404a3219643076450
+PKG_MD5SUM:=1918604238817385a156840fa2c39490
 
 PKG_BUILD_PARALLEL:=1
 
@@ -70,9 +70,23 @@ TARGET_CFLAGS += -DARGTYPE=3 -ffunction-sections -fdata-sections
 TARGET_LDFLAGS += -Wl,--gc-sections
 
 define Build/Configure
+
+	# Enforce that all replacements are made, otherwise options.h has changed
+	# format and this logic is broken.
+	for OPTION in DROPBEAR_ECDSA DROPBEAR_ECDH DROPBEAR_CURVE25519; do \
+	  awk 'BEGIN { rc = 1 } \
+	       /'$$$$OPTION'/ { $$$$0 = "$(if $(CONFIG_DROPBEAR_ECC),,// )#define '$$$$OPTION'"; rc = 0 } \
+	       { print } \
+	       END { exit(rc) }' $(PKG_BUILD_DIR)/options.h \
+	       >$(PKG_BUILD_DIR)/options.h.new && \
+	  mv $(PKG_BUILD_DIR)/options.h.new $(PKG_BUILD_DIR)/options.h || exit 1; \
+	done
+	
 	$(SED) 's,^/\* #define PKG_MULTI.*,#define PKG_MULTI,g' $(PKG_BUILD_DIR)/options.h
 	$(SED) 's,^#define DO_HOST_LOOKUP,/* & */,g' $(PKG_BUILD_DIR)/options.h
+	
 	$(call Build/Configure/Default)
+	
 endef
 
 define Build/Compile
