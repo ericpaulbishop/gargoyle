@@ -46,7 +46,7 @@ set_version_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=41503
+	rnum=42171
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
