@@ -161,6 +161,12 @@ function removeThisCellsRow(button)
 	tableBody.removeChild(row);
 
 	setRowClasses(tableBody.parentNode, true);
+
+	//rowRemovedDHCP function is used in dhcp.js to delete array elements when rows are removed.
+	if (typeof RowRemovedDHCP == 'function') 
+	{ 
+		RowRemovedDHCP(row.childNodes[2].firstChild.data); 
+	}
 }
 function moveThisCellsRowUp(button)
 {
