@@ -138,7 +138,7 @@ function resetData()
 		staticIpTableData[rowIndex] = rowData;
 	}
 	columnNames=[UI.HsNm, 'MAC', 'IP', ''];
-	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, resetHostnameMacList );
+	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, removeStaticIp );
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)
 	{
@@ -190,6 +190,13 @@ function resetData()
 	resetHostnameMacList();
 }
 
+function removeStaticIp(table, row)
+{
+	var removedIp = row.childNodes[2].firstChild.data
+	delete ipHostHash[ip]
+	resetHostnameMacList()
+
+}
 
 function resetHostnameMacList()
 {
