@@ -193,7 +193,7 @@ function resetData()
 function removeStaticIp(table, row)
 {
 	var removedIp = row.childNodes[2].firstChild.data
-	delete ipHostHash[ip]
+	delete ipHostHash[removedIp]
 	resetHostnameMacList()
 
 }
