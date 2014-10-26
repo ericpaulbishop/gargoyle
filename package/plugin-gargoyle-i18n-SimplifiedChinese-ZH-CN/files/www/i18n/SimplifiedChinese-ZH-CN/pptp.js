@@ -1,12 +1,12 @@
 ﻿/*
- * UTF-8 (with BOM) English-EN text strings for pptp.sh html elements
+ * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for pptp.sh html elements
  */
 
 pptpS.PCfg="PPTP配置";
 pptpS.PDis="禁用PPTP";
 pptpS.PClt="PPTP客户端模式";
 pptpS.PSts="PPTP状态";
-pptpS.PHostNm="PPTP服务器模式";
+pptpS.PHostNm="PPTP服务器地址";
 pptpS.PUser="用户名";
 pptpS.PPass="密码";
 

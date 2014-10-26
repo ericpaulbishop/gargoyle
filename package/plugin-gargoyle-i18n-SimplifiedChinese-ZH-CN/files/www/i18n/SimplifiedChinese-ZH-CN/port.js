@@ -4,10 +4,10 @@
 
 prtS.PISect="单个端口转发";
 prtS.PRSect="端口范围转发";
-prtS.ForIPort="从WAN到LAN转发单个端口";
-prtS.ForRPort="从WAN到LAN转发端口范围";
+prtS.ForIPort="从WAN端到LAN端转发单个端口";
+prtS.ForRPort="从WAN端到LAN端转发端口范围";
 prtS.DMZ="DMZ";
-prtS.UseDMZ="使用DMZ（隔离区）";
+prtS.UseDMZ="使用DMZ（非军事区，即完全没保护的区域）";
 prtS.DMZIP="DMZ IP";
 prtS.UP_NAT="UPnP / NAT-PMP";
 prtS.UPNAT_En="启用UPnP和NAT-PMP服务";

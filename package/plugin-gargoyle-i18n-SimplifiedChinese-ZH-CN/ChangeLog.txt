@@ -1,6 +1,13 @@
 ChangeLog:
 
 ==================================================
+Version: 1.0.4-20141026
+Release time: 13:40 2014-10-26 UTC+8
+Changes:
+
+translation update
+
+==================================================
 Version: 1.0.3-1
 Release time: 21:29 2013-11-30 UTC+8
 Changes:

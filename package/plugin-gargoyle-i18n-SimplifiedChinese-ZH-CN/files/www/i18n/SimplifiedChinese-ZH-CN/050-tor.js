@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for login hook for tor html elements
  */
 
-torLS.tIP="你IP的Tor是";
+torLS.tIP="你IP的Tor状态是";
 torLS.tEnab="为你的IP启用Tor";
 torLS.tDisa="为你的IP禁用Tor";
 torLS.IPErr="错误：你的IP并非由DHCP服务器分配并且没有配置为一个已知的静态IP\n\nTor配置被禁止";

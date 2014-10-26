@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN
-PKG_VERSION:=1.0.3
-PKG_RELEASE:=1
+PKG_VERSION:=1.0.4
+PKG_RELEASE:=20141026
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Simplfied Chinese ZH-CN language for Gargoyle interface
-	MAINTAINER:=BashfulBladder
+	MAINTAINER:=Cappie
 	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef
