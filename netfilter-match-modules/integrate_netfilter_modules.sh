@@ -355,8 +355,6 @@ fi
 
 #cleanup
 cd ..
-echo "patch_dir=$patch_dir"
-echo "iptables_patch_dir=$iptables_patch_dir"
 
-#rm -rf nf-patch-build
+rm -rf nf-patch-build
 
