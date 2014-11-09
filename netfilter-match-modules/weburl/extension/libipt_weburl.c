@@ -235,8 +235,8 @@ static struct iptables_match weburl =
 	#else
 		.version = IPTABLES_VERSION,
 	#endif
-	.size		= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_weburl_info)),
+	.size		= XT_ALIGN(sizeof(struct ipt_weburl_info)),
+	.userspacesize	= XT_ALIGN(sizeof(struct ipt_weburl_info)),
 	.help		= &help,
 	.parse		= &parse,
 	.final_check	= &final_check,

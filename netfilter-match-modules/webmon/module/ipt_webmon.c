@@ -1146,16 +1146,8 @@ static int __init init(void)
 
 
 	#ifdef CONFIG_PROC_FS
-		proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
-		proc_webmon_recent_searches = create_proc_entry("webmon_recent_searches", 0, NULL);
-		if(proc_webmon_recent_domains)
-		{
-			proc_webmon_recent_domains->proc_fops = &webmon_proc_domain_fops;
-		}
-		if(proc_webmon_recent_searches)
-		{
-			proc_webmon_recent_searches->proc_fops = &webmon_proc_search_fops;
-		}
+		proc_create("webmon_recent_domains",  0, NULL, &webmon_proc_domain_fops);
+		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
 	#endif
 	
 	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)

@@ -307,8 +307,8 @@ static struct iptables_match webmon =
 	#else
 		.version = IPTABLES_VERSION,
 	#endif
-	.size		= IPT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_webmon_info)),
+	.size		= XT_ALIGN(sizeof(struct ipt_webmon_info)),
+	.userspacesize	= XT_ALIGN(sizeof(struct ipt_webmon_info)),
 	.help		= &help,
 	.init           = &webmon_init,
 	.parse		= &parse,
