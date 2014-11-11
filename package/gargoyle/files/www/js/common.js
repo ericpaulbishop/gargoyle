@@ -42,17 +42,17 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	{
 		var totalHeight="100%";
 		var totalWidth="100%";
-		if(document.body.scrollHeight)
+		if(document.body.parentNode.scrollHeight)
 		{
-			totalHeight = document.body.scrollHeight + "px";
+			totalHeight = document.body.parentNode.scrollHeight + "px";
 		}
 		else if(document.height)
 		{
 			totalHeight = document.height + "px";
 		}
-		if(document.body.scrollWidth)
+		if(document.body.parentNode.scrollWidth)
 		{
-			totalWidth  = document.body.scrollWidth;
+			totalWidth  = document.body.parentNode.scrollWidth;
 			if(document.width)
 			{
 				totalWidth = document.width > totalWidth ? document.width : totalWidth;
@@ -481,7 +481,6 @@ function UCIContainer()
 				else
 				{
 					//should never get here -- if problems put debugging code here
-				        //val = val;    // good enough for a breakpoint to be set.
 				}
 			}
 			copy.set(splitKey[1], splitKey[2], splitKey[3], val, true);
