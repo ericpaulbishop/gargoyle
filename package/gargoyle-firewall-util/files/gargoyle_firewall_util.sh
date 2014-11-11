@@ -580,6 +580,7 @@ isolate_guest_networks() {
                     wlan*|eth*.*)
                         local guest_if
                         for guest_if in $guest_ifaces; do
+                            ebtables -I FORWARD -i $guest_if -o br-lan -j DROP
                             ebtables -I FORWARD -i $guest_if -o $if -j DROP
                         done
                         ;;
