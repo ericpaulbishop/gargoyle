@@ -1167,6 +1167,7 @@ function setWifiVisibility()
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
+        var gns = wirelessDriver == "mac80211" || wirelessDriver == "atheros"; //drivers that support guest networks
 	var gn = getSelectedValue("wifi_guest_mode") != "disabled" ? 1 : 0;
 	var gng = getSelectedValue("wifi_guest_mode") == "24ghz" ? 1 : 0;
 	var gna = getSelectedValue("wifi_guest_mode") == "5ghz" ? 1 : 0;
@@ -1182,10 +1183,10 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   1,gng,gna,gn,gn,gn,gp1,gw1,1,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,     1,gng,gna,gn,gn,gn,gp1,gw1,1,    b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,     gns,gng,gna,gn,gn,gn,gp1,gw1,gns,    b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
 	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,1,g,0,sa,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   1,gng,gna,gn,gn,gn,gp1,gw1,1,   0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
 	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,0,g,0,sa,0,1,0,p2,w2];
 	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
 
