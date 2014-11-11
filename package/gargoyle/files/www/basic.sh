@@ -801,14 +801,15 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='internal_divider3' class='internal_divider'></div>
 
-		<div id="wifi_guest_mode_container">
+		<div id='wifi_guest_mode_container'>
 			<label class="leftcolumn" for='wifi_guest_mode'><%~ GNet %>:</label>
-			<select class="rightcolumn" id='wifi_guest_mode' onchange='setWifiVisibility()' >
+		        <input type='text' id='wifi_guest_mode_wanted' style='display: none'/>
+			<select class="rightcolumn" id='wifi_guest_mode' onchange='setWifiGuestMode()' >
 				<option value='disabled'><%~ Disabled %></option>
 				<option value='enabled'><%~ Enabled %></option>
 			</select>
 		</div>
-                <div id="wifi_guest_container">
+                <div id='wifi_guest_container'>
 
 		<div id='wifi_guest_ssid1_container'>
 			<label class='leftcolumn' for='wifi_guest_ssid1' id='wifi_guest_ssid1_label'><%~ GNetID %>:</label>

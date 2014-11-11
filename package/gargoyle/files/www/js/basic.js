@@ -1670,12 +1670,14 @@ function resetData()
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
 
-    setAllowableSelections( "wifi_guest_mode", (hwmode == 'dual' ? [ 'disabled', 'enabled', '24ghz', '5ghz' ] : [ 'enabled', 'disabled' ]), (hwmode == 'dual' ? [ UI.Disabled, UI.Enabled, basicS.F24GHzOnly, basicS.F5GHzOnly ] : [ UI.Enabled, UI.Disabled ]));
+        setAllowableSelections( "wifi_guest_mode", (hwmode == 'dual' ? [ 'disabled', 'enabled', '24ghz', '5ghz' ] : [ 'disabled', 'enabled' ]), (hwmode == 'dual' ? [ UI.Disabled, UI.Enabled, basicS.F24GHzOnly, basicS.F5GHzOnly ] : [ UI.Disabled, UI.Enabled ]));
 
-        if(apgncfg || apgnacfg) {
-	    setSelectedValue('wifi_guest_mode', apgncfg && apgnacfg ? 'enabled' : (apgncfg ? "24ghz" : "5ghz"));
+        if (apgncfg || apgnacfg) {
+	    var gmode = apgncfg && apgnacfg ? 'enabled' : (apgncfg ? "24ghz" : "5ghz");
+            document.getElementById('wifi_guest_mode_wanted').value = gmode;
+	    setSelectedValue('wifi_guest_mode', gmode);
 	} else {
-	    setSelectValue('wifi_guest_mode', 'disabled');
+            setSelectedValue('wifi_guest_mode', 'disabled');
 	}
 
 	setSelectedValue('wifi_guest_hidden', uciOriginal.get("wireless", apgncfg, "hidden")==1 ? "disabled" : "enabled")
@@ -2332,6 +2334,14 @@ function getSelectedWifiChannels()
 	return channels ;
 }
 
+function setWifiGuestMode() {
+    var gmode = getSelectedValue('wifi_guest_mode');
+    if (gmode != 'disabled') {
+	document.getElementById('wifi_guest_mode_wanted').value = gmode;
+    }
+    setWifiVisibility();
+}
+
 function setHwMode(selectCtl)
 {
 	if(	document.getElementById("wifi_hwmode_container").style.display == "none"  && 
@@ -2422,6 +2432,26 @@ function setHwMode(selectCtl)
 		}
 	}
 
+        if(selectCtl.id == "wifi_hwmode") {
+            var gmode = document.getElementById("wifi_guest_mode_wanted").value;
+
+            var modes = ['disabled', 'enabled'];
+            var mnames = [UI.Disabled, UI.Enabled];
+            if (hwmode == 'dual') {
+		modes.push('24ghz');
+		mnames.push(basicS.F24GHzOnly);
+		modes.push('5ghz');
+		mnames.push(basicS.F5GHzOnly);
+	    } else {
+		if (gmode != 'disabled') {
+		    gmode = 'enabled';
+		}
+	    }
+
+            setAllowableSelections( "wifi_guest_mode", modes, mnames);
+	    setSelectedValue('wifi_guest_mode', gmode);
+	}
+
 	for(ci=0 ; ci < containers.length; ci++)
 	{
 		var container = document.getElementById( containers[ci] );
@@ -2449,18 +2479,6 @@ function setHwMode(selectCtl)
 		document.getElementById("wifi_channel2_container").style.display      = cband == "2.4" && (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_5ghz_container").style.display = cband == "5"   && (!fixedChannels) ? "block" : "none"
 	}
-
-        var modes = ['disabled', 'enabled'];
-        var mnames = [UI.Disabled, UI.Enabled];
-        if (hwmode == 'dual') {
-	    modes.push('24ghz');
-	    modes.push('5ghz');
-	    mnames.push(basicS.F24GHzOnly);
-	    mnames.push(basicS.F5GHzOnly);
-	}
-
-        var gmode = getSelectedValue("wifi_guest_mode");
-	setSelectedValue('wifi_guest_mode', gmode);
 }
 
 function getMaxTxPower(band)
