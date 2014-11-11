@@ -2385,11 +2385,12 @@ function setHwMode(selectCtl)
 	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz "+basicS.TrPwr+":" : basicS.TrPwr+":"));
 	setChildText("wifi_channel_width_label", (hwmode == "dual" ? "2.4GHz "+basicS.ChWdth+":" : basicS.ChWdth+":"));
 
-        setChildText("wifi_guest_ssid1a_label", (hwmode == "11na" ? basicS.GNetID : basicS.GNet5ID));
+        var gmode = getSelectedValue('wifi_guest_mode');
+        setChildText("wifi_guest_ssid1a_label", (hwmode == "dual" && gmode == "enabled" ? basicS.GNet5ID : basicS.GNetID));
 	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + " 5GHz" :  document.getElementById("wifi_ssid1a").value;
-
-	setChildText("wifi_guest_ssid1_label", (hwmode == "dual" ?  basicS.GNet24ID : basicS.GNetID));
+	setChildText("wifi_guest_ssid1_label", (hwmode == "dual" && gmode == "enabled" ?  basicS.GNet24ID : basicS.GNetID));
 	document.getElementById("wifi_guest_ssid1a").value = document.getElementById("wifi_guest_ssid1a").style.display == "block" && document.getElementById("wifi_guest_ssid1a").value == "" && document.getElementById("wifi_guest_ssid1").value != "" ?  document.getElementById("wifi_guest_ssid1").value + " 5GHz" :  document.getElementById("wifi_guest_ssid1a").value;
+
 	if(wirelessDriver == "mac80211")
 	{
 		setChannel(document.getElementById("wifi_channel1"), "G")
