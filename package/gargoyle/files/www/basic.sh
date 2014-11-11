@@ -680,7 +680,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'><%~ Pswd %>:</label>
 			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
-			<input type='checkbox' id='show_pass2' onclick='togglePass(2)'/>
+			<input type='checkbox' id='show_pass2' onclick='togglePass("wifi_pass2")'/>
 			<label for="show_pass2" id="show_pass2_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep2_container' class='indent'>
@@ -747,7 +747,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_pass1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass1' id='wifi_pass1_label'><%~ Pswd %>:</label>
 			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
-			<input type='checkbox' id='show_pass1' onclick='togglePass(1)'/>
+			<input type='checkbox' id='show_pass1' onclick='togglePass("wifi_pass1")'/>
 			<label for="show_pass1" id="show_pass1_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep1_container' class='indent'>
@@ -797,6 +797,72 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="<%~ Add %>" onclick='addMacToWds("wifi")' />
 			</span>
 			<div class="rightcolumnonly"><div id="wifi_wds_mac_table_container"></div></div>
+		</div>
+
+		<div id='internal_divider3' class='internal_divider'></div>
+
+		<div id="wifi_guest_mode_container">
+			<label class="leftcolumn" for='wifi_guest_mode'><%~ GNet %>:</label>
+			<select class="rightcolumn" id='wifi_guest_mode' onchange='setWifiVisibility()' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
+                <div id="wifi_guest_container">
+
+		<div id='wifi_guest_ssid1_container'>
+			<label class='leftcolumn' for='wifi_guest_ssid1' id='wifi_guest_ssid1_label'><%~ GNetID %>:</label>
+			<input type='text' id='wifi_guest_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		</div>
+
+		<div id='wifi_guest_ssid1a_container'>
+			<label class='leftcolumn' for='wifi_guest_ssid1a' id='wifi_guest_ssid1a_label'><%~ GNet5ID %></label>
+			<input type='text' id='wifi_guest_ssid1a'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		</div>
+
+		<div id='wifi_guest_encryption1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_guest_encryption1' id='wifi_guest_encryption1_label'><%~ Encr %>:</label>
+			<select class='rightcolumn' id='wifi_guest_encryption1' onchange='setWifiVisibility()'>
+				<option value='none'><%~ None %></option>
+				<option value='psk2'>WPA2 PSK</option>
+				<option value='psk'>WPA PSK</option>
+				<option value='wep'>WEP</option>
+			</select>
+		</div>
+
+		<div id='wifi_guest_pass1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_guest_pass1' id='wifi_guest_pass1_label'><%~ Pswd %>:</label>
+			<input type='password' id='wifi_guest_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_guest_pass1' onclick='togglePass("wifi_guest_pass1")'/>
+			<label for="show_guest_pass1" id="show_guest_pass1_label" class='rightcolumn'><%~ rvel %></label><br/>
+		</div>
+		<div id='wifi_guest_wep1_container' class='indent'>
+			<div style="display:block;">
+				<label class='leftcolumn' for='wifi_guest_wep1' id='wifi_guest_wep1_label'><%~ HexK %>:</label>
+				<input type='text' id='wifi_guest_wep1' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
+			</div>
+			<div>
+				<input class='rightcolumnonly' type='button' value='<%~ Rndm %> 40/64 Bit WEP Key' id='guestwep1gen40' onclick='setToWepKey("wifi_guest_wep1",10)'>
+			</div>
+			<div>
+				<input class='rightcolumnonly' type='button' value='<%~ Rndm %> 104/128 Bit WEP Key' id='guestwep1gen104' onclick='setToWepKey("wifi_guest_wep1",26)'>
+			</div>
+		</div>
+
+		<div id='wifi_guest_hidden_container' class='indent'>
+			<label class='leftcolumn' id='wifi_guest_hidden_label' for='wifi_guest_hidden'><%~ BcsID %>:</label>
+			<select class='rightcolumn' id='wifi_guest_hidden' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
+		<div id='wifi_guest_isolate_container' class='indent'>
+			<label class='leftcolumn' id='wifi_guest_isolate_label' for='wifi_guest_isolate'><%~ WlIso %>:</label>
+			<select class='rightcolumn' id='wifi_guest_isolate' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
 		</div>
 	</fieldset>
 

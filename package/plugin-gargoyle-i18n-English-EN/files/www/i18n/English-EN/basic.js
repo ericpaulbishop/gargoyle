@@ -90,6 +90,12 @@ basicS.RtrDNS="Force Clients To Use Router DNS Servers";
 basicS.WlMod="Wireless Mode";
 basicS.AcPt="Access Point";
 basicS.AcPtID="Access Point SSID";
+basicS.GNet="Guest Network";
+basicS.GNetID="Guest Network SSID";
+basicS.GNet24ID="Guest Net 2.4GHz SSID";
+basicS.GNet5ID="Guest Net 5GHz SSID";
+basicS.F24GHzOnly="Enabled (2.4GHz Only)";
+basicS.F5GHzOnly="Enabled (5GHz Only)";
 basicS.Clnt="Client";
 //don't think Ad Hoc should be translated
 basicS.OpMod="Operation Mode";

@@ -481,6 +481,7 @@ function UCIContainer()
 				else
 				{
 					//should never get here -- if problems put debugging code here
+				        //val = val;    // good enough for a breakpoint to be set.
 				}
 			}
 			copy.set(splitKey[1], splitKey[2], splitKey[3], val, true);

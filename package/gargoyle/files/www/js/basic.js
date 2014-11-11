@@ -172,9 +172,15 @@ function saveChanges()
 
 			//define new sections, now that we have cleared old ones
 			//cfg2 should be AP if we have an AP section, otherwise cfg2 is whatever single mode we are in
-			currentModes= getSelectedValue('wifi_mode');
+			currentModes = getSelectedValue('wifi_mode');
+
+		        var guestGSelected = wifiGSelected && (getSelectedValue('wifi_guest_mode') == 'enabled' || getSelectedValue('wifi_guest_mode') == '24ghz');
+		        var guestASelected = wifiASelected && (getSelectedValue('wifi_guest_mode') == 'enabled' || getSelectedValue('wifi_guest_mode') == '5ghz');
+
 			var apcfg = '';
 			var ap2cfg = '';
+			var apgncfg = '';
+			var apgn2cfg = '';
 			var othercfg = '';
 
 			if(currentModes.match(/ap/))
@@ -188,7 +194,17 @@ function saveChanges()
 					uci.set('wireless', apcfg, 'mode', 'ap');
 					uci.set('wireless', apcfg, 'network', 'lan');
 					uci.set('wireless', apcfg, 'disassoc_low_ack', '0');
-					preCommands = preCommands + "uci set wireless." + apcfg + "='wifi-iface' \n"
+					preCommands = preCommands + "uci set wireless." + apcfg + "='wifi-iface' \n";
+
+				        if (guestGSelected) {
+					    apgncfg = 'ap_gn_g';
+					    uci.set("wireless", apgncfg, "", "wifi-iface");
+					    uci.set("wireless", apgncfg, "device", wifiDevG);
+					    uci.set('wireless', apgncfg, 'mode', 'ap');
+					    uci.set('wireless', apgncfg, 'network', 'lan');
+					    uci.set('wireless', apgncfg, 'disassoc_low_ack', '0');
+					    preCommands = preCommands + "uci set wireless." + apgncfg + "='wifi-iface' \n";
+					    }
 				}
 				if(wifiASelected)
 				{
@@ -198,14 +214,31 @@ function saveChanges()
 					uci.set('wireless', apacfg, 'mode', 'ap');
 					uci.set('wireless', apacfg, 'network', 'lan');
 					uci.set('wireless', apacfg, 'disassoc_low_ack', '0');
-					preCommands = preCommands + "uci set wireless." + apacfg + "='wifi-iface' \n"
+					preCommands = preCommands + "uci set wireless." + apacfg + "='wifi-iface' \n";
+
+				        if (guestASelected) {
+					    apgnacfg='ap_gn_a';
+					    uci.set("wireless", apgnacfg, "", "wifi-iface");
+					    uci.set("wireless", apgnacfg, "device", wifiDevA);
+					    uci.set('wireless', apgnacfg, 'mode', 'ap');
+					    uci.set('wireless', apgnacfg, 'network', 'lan');
+					    uci.set('wireless', apgnacfg, 'disassoc_low_ack', '0');
+					    preCommands = preCommands + "uci set wireless." + apgnacfg + "='wifi-iface' \n";
+					}
+
 					if(dualBandSelected)
 					{
-						ap2cfg = apacfg
+						ap2cfg = apacfg;
+					        if (guestASelected) {
+					            apgn2cfg = apgnacfg;
+						}
 					}
 					else
 					{
-						apcfg = apacfg
+						apcfg = apacfg;
+					        if (guestASelected) {
+					            apgncfg = apgnacfg;
+						}
 					}
 				}
 				if(currentModes == "ap+wds") //non-ap sections for ap+wds
@@ -383,16 +416,16 @@ function saveChanges()
 
 			ppoeReconnectIds = ['wan_pppoe_reconnect_pings', 'wan_pppoe_interval'];
 			wifiSsidId = wifiGSelected ? "wifi_ssid1" : "wifi_ssid1a";
-			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifiSsidId, 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1' , 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_user', 'wan_3g_pass', 'wan_3g_apn', 'wan_3g_pincode', 'wan_3g_service', 'wan_3g_isp'];
+		        wifiGuestSsidId = wifiGSelected ? "wifi_guest_ssid1" : "wifi_guest_ssid1a";
+			inputIds = ['wan_protocol', 'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', ppoeReconnectIds, 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', wifiSsidId, 'wifi_hidden', 'wifi_isolate', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', wifiGuestSsidId, 'wifi_guest_hidden', 'wifi_guest_isolate', 'wifi_guest_encryption1', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_user', 'wan_3g_pass', 'wan_3g_apn', 'wan_3g_pincode', 'wan_3g_service', 'wan_3g_isp'];
 
-			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key', 'device', 'username', 'password', 'apn', 'pincode', 'service', 'mobile_isp'];
+			options = ['proto', 'username', 'password', 'demand', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr', 'mtu', 'ipaddr', 'netmask', 'gateway', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'ssid', 'hidden', 'isolate', 'encryption', 'key', 'key', 'server', 'port', 'key', 'key', 'device', 'username', 'password', 'apn', 'pincode', 'service', 'mobile_isp'];
 
 			var sv=  setVariableFromValue;
 			var svm= setVariableFromModifiedValue;
 			var svcat= setVariableFromConcatenation;
 			var svcond= setVariableConditionally;
-			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv];
-
+			setFunctions = [sv,sv,sv,svm,svcat,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv,sv];
 			var f=false;
 			var t=true;
 			var minutesToSeconds = function(value){return value*60;};
@@ -401,17 +434,21 @@ function saveChanges()
 			var ifCustomMtu = function(value){ return (document.getElementById('wan_use_mtu').checked == true &&  document.getElementById('wan_mtu').value != 1500);};
 			var ifHiddenChecked =  function(value) { return getSelectedValue('wifi_hidden') == "disabled" ? 1 : 0;}; //the label is for "broadcast", so disabled means it is hidden
 			var ifIsolateChecked = function(value) { return getSelectedValue('wifi_isolate') == "enabled" ? 1 : 0;};
+			var ifGuestHiddenChecked =  function(value) { return getSelectedValue('wifi_guest_hidden') == "disabled" ? 1 : 0;}; //the label is for "broadcast", so disabled means it is hidden
+			var ifGuestIsolateChecked = function(value) { return getSelectedValue('wifi_guest_isolate') == "enabled" ? 1 : 0;};
 			var demandParams = [f,minutesToSeconds];
 			var macParams = [ifCustomMac,f,  document.getElementById('wan_mac').value.toLowerCase()];
 			var mtuParams = [ifCustomMtu,t,''];
 			var hiddenParams = [ifHiddenChecked,f,'1'];
 			var isolateParams = [ifIsolateChecked,f,'1'];
+			var guestHiddenParams = [ifGuestHiddenChecked,f,'1'];
+			var guestIsolateParams = [ifGuestIsolateChecked,f,'1'];
 
-			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,f,f,f,f,f,f,f,f,f,f];
+			additionalParams = [f,f,f, demandParams,f,f,f,f,macParams,mtuParams,f,f,f,f,hiddenParams,isolateParams,f,f,f,f,guestHiddenParams,guestIsolateParams,f,f,f,f,f,f,f,f,f,f,f,f,f,f];
 
 			pppoeReconnectVisibilityIds = ['wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container'];
 			multipleVisibilityIds= [pppoeReconnectVisibilityIds];
-			wirelessSections=[apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg];
+			wirelessSections=[apcfg, apcfg, apcfg, apcfg, apcfg, apcfg, apgncfg, apgncfg, apgncfg, apgncfg, apgncfg, apgncfg, apcfg, apcfg, othercfg, othercfg];
 			visibilityIds = [];
 			pkgs = [];
 			sections = [];
@@ -427,7 +464,7 @@ function saveChanges()
 					visibilityIds.push(inputIds[idIndex]+ "_container");
 				}
 
-				if(idIndex < 10 || idIndex > 22)
+				if(idIndex < 10 || idIndex > 28)
 				{
 					pkgs.push('network');
 					sections.push('wan');
@@ -446,6 +483,11 @@ function saveChanges()
 				}
 			}
 			setVariables(inputIds, visibilityIds, uci, pkgs, sections, options, setFunctions, additionalParams);
+
+		        //correct G networks as needed (though it would be better not to write them)
+		        if (apgncfg && uci.get("wireless", apgncfg, "ssid") == "") {
+			    uci.set("wireless", apgncfg, "disabled", "1");
+			}
 
 			//set wifi channel(s), othercfg ssid, othercfg encryption
 			//this is a bit complex (and we have to do it here) because of options introduced by wireless scanning
@@ -485,8 +527,26 @@ function saveChanges()
 							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
 						}
 					}
-					uci.set("wireless", ap2cfg, "ssid", document.getElementById("wifi_ssid1a").value );
+				        var ssid = document.getElementById("wifi_ssid1a").value;
+					uci.set("wireless", ap2cfg, "ssid", ssid );
+				        ssid || uci.set("wireless", ap2cfg, "disabled", "1");
 					dup_sec_options("wireless", apcfg, ap2cfg, ['hidden', 'isolate', 'encryption', 'key', 'server', 'port'])
+				}
+				if(apgn2cfg != "")
+				{
+					var dup_sec_options = function(pkg, fromcfg, tocfg, optlist)
+					{
+						var opti;
+						for(opti=0; opti < optlist.length; opti++)
+						{
+							uci.set(pkg, tocfg, optlist[opti], uci.get("wireless", fromcfg, optlist[opti]));
+						}
+					}
+				        var ssid = document.getElementById("wifi_guest_ssid1a").value;
+					uci.set("wireless", apgn2cfg, "ssid", ssid );
+				        ssid || uci.set("wireless", apgn2cfg, "disabled", "1");
+
+					dup_sec_options("wireless", apgncfg, apgn2cfg, ['hidden', 'isolate', 'encryption', 'key'])
 				}
 			}
 
@@ -866,9 +926,18 @@ function proofreadAll()
 	var errors = [];
 	if(document.getElementById("global_gateway").checked)
 	{
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
+		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
 
-		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vlr8, vw, vip, vn, vlr1, vlr8, vw, vlr1, vlr1];
+		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vlr8, vw, vlr8, vw, vip, vn, vlr1, vlr8, vw, vlr1, vlr1];
+
+	        var optInputIds = ['wifi_ssid1a', 'wifi_guest_ssid1', 'wifi_guest_ssid1a']
+	        for (index in optInputIds) {
+		    var input = optInputIds[index]
+	            if (document.getElementById(input + "_container").style.display == "block") {
+			inputIds.push(input);
+			functions.push(vlr1);
+		    }
+		}
 
 		var returnCodes= new Array();
 		var visibilityIds = new Array();
@@ -1023,7 +1092,8 @@ function setWifiVisibility()
 			mnames.unshift(basicS.DBand)
 		}
 	}
-	setAllowableSelections( "wifi_hwmode", modes, mnames );
+    
+        setAllowableSelections( "wifi_hwmode", modes, mnames );
 
 	var wifiIds=[	'internal_divider1',
 			'wifi_hwmode_container',
@@ -1047,6 +1117,17 @@ function setWifiVisibility()
 			'wifi_wep1_container',
 			'wifi_server1_container',
 			'wifi_port1_container',
+
+
+			'internal_divider3',
+			'wifi_guest_ssid1_container',
+			'wifi_guest_ssid1a_container',
+			'wifi_guest_hidden_container',
+			'wifi_guest_isolate_container',
+			'wifi_guest_encryption1_container',
+			'wifi_guest_pass1_container',
+			'wifi_guest_wep1_container',
+			'wifi_guest_mode_container',
 
 
 			'wifi_mac_container',
@@ -1079,6 +1160,14 @@ function setWifiVisibility()
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
+	var gn = getSelectedValue("wifi_guest_mode") != "disabled" ? 1 : 0;
+	var gng = getSelectedValue("wifi_guest_mode") == "24ghz" ? 1 : 0;
+	var gna = getSelectedValue("wifi_guest_mode") == "5ghz" ? 1 : 0;
+        var dg = da && gn;
+	var ge1 = document.getElementById('wifi_guest_encryption1').value;
+	var gp1 = gn && (ge1 != 'none' && ge1 != 'wep') ? 1 : 0;
+	var gw1 = gn && (ge1 == 'wep') ? 1 : 0;
+	var gr1 = gn && (ge1 == 'wpa' || ge1 == 'wpa2') ? 1 : 0;
 	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
 	var b = wifiN ? 0 : 1;
 
@@ -1086,12 +1175,12 @@ function setWifiVisibility()
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,1,g,0,sa,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1, 0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,1,0,g,0,sa,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,       0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   1,gng,gna,gn,gn,gn,gp1,gw1,1,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,     1,gng,gna,gn,gn,gn,gp1,gw1,1,    b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,1,g,0,sa,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   1,gng,gna,gn,gn,gn,gp1,gw1,1,   0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,0,g,0,sa,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
 
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1489,6 +1578,8 @@ function resetData()
 	// generic variables
 	var apcfg = "";
 	var ap2cfg = "";
+        var apgncfg = "";
+        var apgn2cfg = "";
 	var othercfg = "";
 	var otherdev = "";
 	var seci=0;
@@ -1499,11 +1590,15 @@ function resetData()
 		var secdev  = uciOriginal.get("wireless", sec, "device") 
 		apcfg     = secmode == "ap" && secdev != wifiDevA && apcfg    == ""  ? sec : apcfg;
 		ap2cfg    = secmode == "ap" && secdev == wifiDevA && ap2cfg   == ""  ? sec : ap2cfg;
+		apgncfg     = secmode == "ap" && secdev != wifiDevA && apgncfg    == ""  && apcfg != sec ? sec : apgncfg;
+		apgn2cfg    = secmode == "ap" && secdev == wifiDevA && apgn2cfg   == ""  && ap2cfg != sec ? sec : apgn2cfg;
 		othercfg  = secmode != "ap" && secmode != "wds"   && othercfg == ""  ? sec : othercfg
 		otherdev  = secmode != "ap" && secmode != "wds"   && otherdev == ""  ? secdev : otherdev
 	}
 	var apgcfg = apcfg;
 	var apacfg = ap2cfg;
+        var apgngcfg = apgncfg;
+        var apgnacfg = apgn2cfg;
 	var apcfgBand = apcfg != "" || ap2cfg != "" ? "G" : ""
 	if(apgcfg == "" && apacfg != "")
 	{
@@ -1556,21 +1651,36 @@ function resetData()
 		document.getElementById("bridge_hwmode_container").style.display = "none";
 	}
 
-	var wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_channel1_5ghz', 'wifi_channel2_5ghz', 'wifi_ssid1', 'wifi_ssid1a', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+	var wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_channel1_5ghz', 'wifi_channel2_5ghz', 'wifi_ssid1', 'wifi_ssid1a', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_guest_ssid1', 'wifi_guest_ssid1a', 'wifi_guest_encryption1', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 	var wirelessPkgs= new Array();
 	var wIndex;
 	for(wIndex=0; wIndex < wirelessIds.length; wIndex++)
 	{
 		wirelessPkgs.push('wireless');
 	}
-	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apgcfg, apacfg, apcfg, apcfg, apcfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
-	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
-	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', 'Gargoyle_5GHz', 'none', '', '', '', '', 'ExistingWireless', 'none', '',''];
-	var wirelessFunctions=[lsv,lsv,lsv,lsv,lv,lv,lsv,lv,lv,lv,lv,lv,lsv,lv,lv];
+        var default5ID = uciOriginal.get("wireless", apcfg, "ssid") ? uciOriginal.get("wireless", apcfg, "ssid") + " 5GHz" : "Gargoyle 5GHz";
+        var defaultGuest5ID = apgncfg && uciOriginal.get("wireless", apgncfg, "ssid") ? uciOriginal.get("wireless", apgncfg, "ssid") + " 5GHz" : "Guests 5GHz";
+
+	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apgcfg, apacfg, apcfg, apcfg, apcfg, apgngcfg, apgnacfg, apgncfg, apgncfg, apgncfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
+	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key', 'ssid', 'ssid', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
+	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', default5ID, 'none', '', '', 'Guests', defaultGuest5ID, 'none', '', '', '', '', 'ExistingWireless', 'none', '',''];
+	var wirelessFunctions=[lsv, lsv, lsv, lsv, lv, lv, lsv, lv, lv, lv, lv, lsv, lv, lv, lv, lv, lv, lsv, lv, lv];
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
+
+    setAllowableSelections( "wifi_guest_mode", (hwmode == 'dual' ? [ 'disabled', 'enabled', '24ghz', '5ghz' ] : [ 'enabled', 'disabled' ]), (hwmode == 'dual' ? [ UI.Disabled, UI.Enabled, basicS.F24GHzOnly, basicS.F5GHzOnly ] : [ UI.Enabled, UI.Disabled ]));
+
+        if(apgncfg || apgnacfg) {
+	    setSelectedValue('wifi_guest_mode', apgncfg && apgnacfg ? 'enabled' : (apgncfg ? "24ghz" : "5ghz"));
+	} else {
+	    setSelectValue('wifi_guest_mode', 'disabled');
+	}
+
+	setSelectedValue('wifi_guest_hidden', uciOriginal.get("wireless", apgncfg, "hidden")==1 ? "disabled" : "enabled")
+	setSelectedValue('wifi_guest_isolate', !apgncfg || uciOriginal.get("wireless", apgncfg, "isolate")==1 ? "enabled" : "disabled")
+
 	var initTxPwr = function(sel_id, txt_id, dev, band)
 	{
 		var txpwr = uciOriginal.get("wireless", dev, "txpower");
@@ -2243,7 +2353,8 @@ function setHwMode(selectCtl)
 	document.getElementById("wifi_channel_width_5ghz_container").style.marginTop = hwmode == "11na" ?  "5px" : "20px";
 	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = hwmode == "11na" ?  "5px" : "20px";
 
-	setChildText("wifi_ssid1a_label", (hwmode == "11na" ? basicS.AcPt+" SSID:" : "AP 5GHz SSID:"));
+
+        setChildText("wifi_ssid1a_label", (hwmode == "11na" ? basicS.AcPt+" SSID:" : "AP 5GHz SSID:"));
 	setChildText("wifi_channel1_5ghz_label", (hwmode == "11na" ? basicS.WChn+":" : basicS.WChn+" (5GHz):"));
 	setChildText("wifi_txpower_5ghz_label", (hwmode == "11na" ? basicS.TrPwr+":" : "5GHz "+basicS.TrPwr+":"));
 	setChildText("wifi_channel_width_5ghz_label", (hwmode == "11na" ? basicS.ChWdth+":" : "5GHz "+basicS.ChWdth+":"));
@@ -2253,7 +2364,11 @@ function setHwMode(selectCtl)
 	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz "+basicS.TrPwr+":" : basicS.TrPwr+":"));
 	setChildText("wifi_channel_width_label", (hwmode == "dual" ? "2.4GHz "+basicS.ChWdth+":" : basicS.ChWdth+":"));
 
-	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + "_5GHz" :  document.getElementById("wifi_ssid1a").value;
+        setChildText("wifi_guest_ssid1a_label", (hwmode == "11na" ? basicS.GNetID : basicS.GNet5ID));
+	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + " 5GHz" :  document.getElementById("wifi_ssid1a").value;
+
+	setChildText("wifi_guest_ssid1_label", (hwmode == "dual" ?  basicS.GNet24ID : basicS.GNetID));
+	document.getElementById("wifi_guest_ssid1a").value = document.getElementById("wifi_guest_ssid1a").style.display == "block" && document.getElementById("wifi_guest_ssid1a").value == "" && document.getElementById("wifi_guest_ssid1").value != "" ?  document.getElementById("wifi_guest_ssid1").value + " 5GHz" :  document.getElementById("wifi_guest_ssid1a").value;
 	if(wirelessDriver == "mac80211")
 	{
 		setChannel(document.getElementById("wifi_channel1"), "G")
@@ -2286,7 +2401,10 @@ function setHwMode(selectCtl)
 				"bridge_txpower_container",
 				"bridge_txpower_5ghz_container",
 				"bridge_channel_container",
-				"bridge_channel_5ghz_container"
+				"bridge_channel_5ghz_container",
+ 
+				"wifi_guest_ssid1a_container",
+				"wifi_guest_ssid1_container",	    
 
 				];
 
@@ -2315,8 +2433,12 @@ function setHwMode(selectCtl)
 		var cli_only = cid.match(/2_/) || cid.match(/2a_/) 
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
 		var hide_in_favor_of_fixed_channel = fixedChannels && (cid.match(/channel/) && (!cid.match(/channel_width/))) && ((!wimode.match(/ap/)) || fixedChannelBand == cBand);
-		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container" || cid == "bridge_txpower_container" || cid == 'bridge_channel_container'
+		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_ssid1a_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container" || cid == "bridge_txpower_container" || cid == 'bridge_channel_container' || cid == "wifi_guest_ssid1_container" || cid == "wifi_guest_ssid1a_container"
 		var vis = (displayWidth || displayWithoutWidth) && (!cli_ap_mismatch) && (!hide_in_favor_of_fixed_channel) && ((isA && (hwmode == "dual" || hwmode == "11na")) || (notA && (hwmode != "11na")))
+	        if (vis && cid.match(/^wifi_guest_/)) {
+		    var gmode = getSelectedValue("wifi_guest_mode");
+		    vis = gmode == 'enabled' || (isA ? gmode == '5ghz' : gmode == '24ghz');
+		}
 		container.style.display = vis ? "block" : "none";
 	}
 	document.getElementById("wifi_client_band_container").style.display = (wimode == "ap+sta" && hwmode == "dual") ? "block" : "none";
@@ -2327,6 +2449,18 @@ function setHwMode(selectCtl)
 		document.getElementById("wifi_channel2_container").style.display      = cband == "2.4" && (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_5ghz_container").style.display = cband == "5"   && (!fixedChannels) ? "block" : "none"
 	}
+
+        var modes = ['disabled', 'enabled'];
+        var mnames = [UI.Disabled, UI.Enabled];
+        if (hwmode == 'dual') {
+	    modes.push('24ghz');
+	    modes.push('5ghz');
+	    mnames.push(basicS.F24GHzOnly);
+	    mnames.push(basicS.F5GHzOnly);
+	}
+
+        var gmode = getSelectedValue("wifi_guest_mode");
+	setSelectedValue('wifi_guest_mode', gmode);
 }
 
 function getMaxTxPower(band)
@@ -2523,9 +2657,9 @@ function getPingSection()
 	}
 }
 
-function togglePass(radio)
+function togglePass(name)
 {
-	password_field = document.getElementById('wifi_pass' + radio);
+	password_field = document.getElementById(name);
 	if(password_field.type == 'password')
 	{
 		password_field.type = 'text';
