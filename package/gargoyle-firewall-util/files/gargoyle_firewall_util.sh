@@ -567,6 +567,26 @@ initialize_firewall()
 	block_static_ip_mismatches
 	force_router_dns
 	add_adsl_modem_routes
+        isolate_guest_networks
+}
+
+isolate_guest_networks() {
+        local guest_ifaces=`ifconfig | sed -n -e 's/^\(wlan[0-9]-[^: ]*\)[: ].*/\1/p'`
+        if [ -n "$guest_ifaces" ]; then
+            local ifaces=`ifconfig | sed -n -e '/^wlan[0-9]-/d' -e 's/^\([a-z][^ :]*\)[: ].*/\1/p'`
+            local if
+            for if in $ifaces; do
+                case "$if" in
+                    wlan*|eth*.*)
+                        local guest_if
+                        for guest_if in $guest_ifaces; do
+                            ebtables -I FORWARD -i $guest_if -o br-lan -j DROP
+                            ebtables -I FORWARD -i $guest_if -o $if -j DROP
+                        done
+                        ;;
+                esac
+            done
+        fi
 }
 
 ifup_firewall()
