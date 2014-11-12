@@ -42,17 +42,17 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	{
 		var totalHeight="100%";
 		var totalWidth="100%";
-		if(document.body.parentNode.scrollHeight)
+		if(document.body.scrollHeight)
 		{
-			totalHeight = document.body.parentNode.scrollHeight + "px";
+			totalHeight = document.body.scrollHeight + "px";
 		}
 		else if(document.height)
 		{
 			totalHeight = document.height + "px";
 		}
-		if(document.body.parentNode.scrollWidth)
+		if(document.body.scrollWidth)
 		{
-			totalWidth  = document.body.parentNode.scrollWidth;
+			totalWidth  = document.body.scrollWidth;
 			if(document.width)
 			{
 				totalWidth = document.width > totalWidth ? document.width : totalWidth;
