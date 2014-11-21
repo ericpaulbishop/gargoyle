@@ -1,0 +1,26 @@
+--- a/package/network/config/netifd/files/lib/netifd/proto/dhcp.sh	2014-11-08 12:48:51.664427828 -0500
++++ b/package/network/config/netifd/files/lib/netifd/proto/dhcp.sh	2014-11-21 18:23:07.169891045 -0500
+@@ -44,6 +44,14 @@
+ 	[ -n "$zone" ] && proto_export "ZONE=$zone"
+ 	[ "$delegate" = "0" ] && proto_export "IFACE6RD_DELEGATE=0"
+ 
++	
++	case x"$clientid" in
++		x) clientid_opt='';;  # pre-AA default
++		xnone) clientid_opt="-C";;
++		x*) clientid_opt="-x 0x3d:${clientid//:/}";;
++	esac
++
++
+ 	proto_export "INTERFACE=$config"
+ 	proto_run_command "$config" udhcpc \
+ 		-p /var/run/udhcpc-$iface.pid \
+@@ -52,7 +60,7 @@
+ 		${ipaddr:+-r $ipaddr} \
+ 		${hostname:+-H $hostname} \
+ 		${vendorid:+-V $vendorid} \
+-		$clientid $broadcast $dhcpopts
++		$clientid_opt $broadcast $dhcpopts
+ }
+ 
+ proto_dhcp_renew() {
