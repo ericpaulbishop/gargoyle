@@ -1,0 +1,11 @@
+--- a/include/kernel.mk	2013-05-20 13:52:08.366213886 -0400
++++ b/include/kernel.mk	2013-09-22 20:40:32.449875714 -0400
+@@ -135,7 +135,7 @@
+     CATEGORY:=Kernel modules
+     DESCRIPTION:=$(DESCRIPTION)
+     EXTRA_DEPENDS:=kernel (=$(LINUX_VERSION)-$(LINUX_RELEASE)-$(LINUX_VERMAGIC))
+-    VERSION:=$(LINUX_VERSION)$(if $(PKG_VERSION),+$(PKG_VERSION))-$(if $(PKG_RELEASE),$(PKG_RELEASE),$(LINUX_RELEASE))
++    VERSION:=$(LINUX_VERSION)$(if $(PKG_VERSION),+$(PKG_VERSION))-$(if $(PKG_RELEASE),$(PKG_RELEASE),$(LINUX_RELEASE))-$(LINUX_VERMAGIC)
+     $(call KernelPackage/$(1))
+     $(call KernelPackage/$(1)/$(BOARD))
+   endef
