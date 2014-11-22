@@ -1,16 +1,19 @@
 BINDIR = /usr/sbin
-TCDIR:=$(BUILD_DIR)/iproute2*
+TCDIR:=$(BUILD_DIR)/iproute2-full/ip*
 
 #The ncurses library only needed if we remove the ONLYBG switch
 #below.  Mostly for debug
 #LDLIBS += -lncurses
+
+LDLIBS += -lm
+
 
 TCOBJS := $(TCDIR)/tc/tc_util.o
 TCOBJS += $(TCDIR)/tc/tc_core.o
 TCOBJS += $(TCDIR)/tc/q_hfsc.o
 TCOBJS += $(TCDIR)/lib/libnetlink.a
 TCOBJS += $(TCDIR)/lib/libutil.a
-LDFLAGS += -Wl,-export-dynamic
+LDFLAGS += -Wl,-export-dynamic 
 
 all: qosmon
 

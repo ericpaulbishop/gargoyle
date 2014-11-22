@@ -100,11 +100,11 @@
 		#ifdef USE_CYASSL_INCLUDE_DIR
 			#include <cyassl/openssl/ssl.h>
 			#include <cyassl/openssl/err.h>
-			#include <cyassl/cyassl_error.h>
+			#include <cyassl/error-ssl.h>
 		#else
 			#include <openssl/ssl.h>
 			#include <openssl/err.h>
-			#include <cyassl_error.h>
+			#include <error-ssl.h>
 		#endif
 	#endif
 	#ifdef USE_MATRIXSSL
