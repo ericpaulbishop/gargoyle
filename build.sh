@@ -29,8 +29,8 @@ set_constant_variables()
 	#
 	# Aaaand... this little bugger is causing problems again...
 	#
-	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=1
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	#num_build_threads=1
 }
 
 set_version_variables()
