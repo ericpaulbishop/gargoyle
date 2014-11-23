@@ -59,3 +59,15 @@
 + 		return 0;
 + 	}
 + 
+--- a/package/network/services/hostapd/files/netifd.sh	2014-11-21 23:38:25.405688745 -0500
++++ b/package/network/services/hostapd/files/netifd.sh	2014-11-23 04:06:22.764197759 -0500
+@@ -433,9 +433,6 @@
+ 			adhoc)
+ 				fail=1
+ 			;;
+-			sta)
+-				[ "$wds" = 1 ] || fail=1
+-			;;
+ 		esac
+ 
+ 		[ -n "$fail" ] && {
