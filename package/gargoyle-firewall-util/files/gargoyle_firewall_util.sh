@@ -1,7 +1,7 @@
 # Copyright Eric Bishop, 2008-2010
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
-. /etc/functions.sh
+. /lib/functions.sh
 include /lib/network
 
 ra_mask="0x0080"

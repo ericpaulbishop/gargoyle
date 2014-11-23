@@ -1,5 +1,5 @@
---- bb-src/target/linux/ar71xx/image/Makefile	2014-11-21 23:38:25.365689410 -0500
-+++ ar71xx-src/target/linux/ar71xx/image/Makefile	2014-11-22 23:07:19.198803611 -0500
+--- a/target/linux/ar71xx/image/Makefile	2014-11-21 23:38:25.365689410 -0500
++++ b/target/linux/ar71xx/image/Makefile	2014-11-22 23:07:19.198803611 -0500
 @@ -239,7 +239,11 @@
  
  alfa_ap96_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env)ro,13312k(rootfs),2048k(kernel),512k(caldata)ro,15360k@0x80000(firmware)

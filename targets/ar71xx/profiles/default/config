@@ -190,7 +190,7 @@ CONFIG_DEFAULT_mtd=y
 CONFIG_DEFAULT_netifd=y
 CONFIG_DEFAULT_odhcp6c=y
 CONFIG_DEFAULT_odhcpd=y
-CONFIG_DEFAULT_opkg=m
+CONFIG_DEFAULT_opkg=y
 CONFIG_DEFAULT_ppp=y
 CONFIG_DEFAULT_ppp-mod-pppoe=y
 CONFIG_DEFAULT_swconfig=y
@@ -1287,7 +1287,7 @@ CONFIG_PACKAGE_mtd=y
 CONFIG_PACKAGE_netifd=y
 # CONFIG_PACKAGE_nvram is not set
 # CONFIG_PACKAGE_om-watchdog is not set
-CONFIG_PACKAGE_opkg=y
+CONFIG_PACKAGE_opkg=m
 # CONFIG_PACKAGE_opkg-smime is not set
 CONFIG_PACKAGE_procd=y
 # CONFIG_PACKAGE_qos-scripts is not set
@@ -1299,7 +1299,7 @@ CONFIG_PACKAGE_ubus=y
 CONFIG_PACKAGE_ubusd=y
 CONFIG_PACKAGE_uci=y
 # CONFIG_PACKAGE_udev is not set
-# CONFIG_PACKAGE_wireless-tools is not set
+CONFIG_PACKAGE_wireless-tools=y
 # CONFIG_PACKAGE_zram-swap is not set
 
 #
@@ -1311,15 +1311,15 @@ CONFIG_PACKAGE_uci=y
 #
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR is not set
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN=y
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN is not set
-# CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES is not set
+CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
 # CONFIG_PACKAGE_plugin-gargoyle-initd is not set
 # CONFIG_PACKAGE_plugin-gargoyle-logread is not set
 # CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
@@ -1561,6 +1561,7 @@ CONFIG_PACKAGE_kmod-ipt-filter=y
 # CONFIG_PACKAGE_kmod-ipt-geoip is not set
 # CONFIG_PACKAGE_kmod-ipt-hashlimit is not set
 # CONFIG_PACKAGE_kmod-ipt-iface is not set
+CONFIG_PACKAGE_kmod-ipt-imq=y
 # CONFIG_PACKAGE_kmod-ipt-ipmark is not set
 CONFIG_PACKAGE_kmod-ipt-ipopt=y
 # CONFIG_PACKAGE_kmod-ipt-ipp2p is not set
@@ -1892,7 +1893,7 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 #
 CONFIG_PACKAGE_libip4tc=y
 CONFIG_PACKAGE_libip6tc=y
-# CONFIG_PACKAGE_libiptc is not set
+CONFIG_PACKAGE_libiptc=y
 CONFIG_PACKAGE_libxtables=y
 
 #
@@ -2031,6 +2032,7 @@ CONFIG_PACKAGE_iptables-mod-filter=y
 # CONFIG_PACKAGE_iptables-mod-geoip is not set
 # CONFIG_PACKAGE_iptables-mod-hashlimit is not set
 # CONFIG_PACKAGE_iptables-mod-iface is not set
+CONFIG_PACKAGE_iptables-mod-imq=y
 # CONFIG_PACKAGE_iptables-mod-ipmark is not set
 CONFIG_PACKAGE_iptables-mod-ipopt=y
 # CONFIG_PACKAGE_iptables-mod-ipp2p is not set
@@ -2096,8 +2098,8 @@ CONFIG_PACKAGE_miniupnpd=y
 #
 # CONFIG_PACKAGE_genl is not set
 # CONFIG_PACKAGE_igmpproxy is not set
-CONFIG_PACKAGE_ip=y
-# CONFIG_PACKAGE_ip-full is not set
+# CONFIG_PACKAGE_ip=y
+CONFIG_PACKAGE_ip-full=y
 # CONFIG_PACKAGE_lldpd is not set
 # CONFIG_PACKAGE_relayd is not set
 # CONFIG_PACKAGE_ss is not set
