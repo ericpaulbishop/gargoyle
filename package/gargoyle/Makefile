@@ -30,7 +30,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +haserl-i18n +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +bridge +wol +gpkg $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
+	DEPENDS:=+uci +libuci +haserl-i18n +miniupnpd +httpd-gargoyle +qos-gargoyle +bwmon-gargoyle +ddns-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +bridge +wol +gpkg +wireless-tools $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
