@@ -4,14 +4,11 @@ if [ "$INTERFACE" = "wan" ]; then
 
 	if [ "$ACTION" = "ifup" ]; then
 
-		#When we are booting we want to make sure that the firewall core loads before we install
-		#these device and IP specific rules.  We need the chains loaded by the core.
-		wait_sec=45
-		while [ -z "$(uci -P /var/state get firewall.core.loaded 2>/dev/null)" ] && [ $wait_sec -gt 0 ] ; do
-			sleep 1
-			wait_sec=$(($wait_sec - 1))
-		done
-
+		# previously we waited until firewall was up here, testing firewall.core.loaded in /var/state
+		# unfortunately that was removed in barrier breaker, but new firewall (fw3) loads very FAST as it's a binary
+		# So... just wait 2 seconds
+		sleep 2	
+	
 		#Bring up the parts of the firewall that depend on device name and WAN IP address.
 		ifup_firewall
 
