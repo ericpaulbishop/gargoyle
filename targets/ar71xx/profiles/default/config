@@ -249,6 +249,7 @@ CONFIG_BUILD_PATENTED=y
 # CONFIG_BUILD_NLS is not set
 # CONFIG_BUILD_STATIC_TOOLS is not set
 CONFIG_SHADOW_PASSWORDS=y
+CONFIG_CLEAN_IPKG_PARTIAL=y
 # CONFIG_CLEAN_IPKG is not set
 # CONFIG_COLLECT_KERNEL_DEBUG is not set
 
@@ -287,7 +288,7 @@ CONFIG_KERNEL_RELAY=y
 # Package build options
 #
 # CONFIG_DEBUG is not set
-CONFIG_IPV6=y
+# CONFIG_IPV6 is not set
 CONFIG_PKG_BUILD_PARALLEL=y
 CONFIG_PKG_BUILD_USE_JOBSERVER=y
 
@@ -1004,7 +1005,7 @@ CONFIG_BUSYBOX_DEFAULT_PING=y
 CONFIG_BUSYBOX_DEFAULT_PING6=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_FANCY_PING=y
 # CONFIG_BUSYBOX_DEFAULT_WHOIS is not set
-CONFIG_BUSYBOX_DEFAULT_FEATURE_IPV6=y
+# CONFIG_BUSYBOX_DEFAULT_FEATURE_IPV6 is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_UNIX_LOCAL is not set
 CONFIG_BUSYBOX_DEFAULT_FEATURE_PREFER_IPV4_ADDRESS=y
 CONFIG_BUSYBOX_DEFAULT_VERBOSE_RESOLUTION_ERRORS=y
@@ -1311,6 +1312,7 @@ CONFIG_PACKAGE_wireless-tools=y
 #
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
+CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN=y
 CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE=m
@@ -1541,7 +1543,7 @@ CONFIG_PACKAGE_kmod-ebtables=y
 # CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
 # CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
 # CONFIG_PACKAGE_kmod-ebtables-watchers is not set
-CONFIG_PACKAGE_kmod-ip6tables=y
+# CONFIG_PACKAGE_kmod-ip6tables is not set
 # CONFIG_PACKAGE_kmod-ip6tables-extra is not set
 # CONFIG_PACKAGE_kmod-ipt-account is not set
 CONFIG_PACKAGE_kmod-ipt-bandwidth=y
@@ -1666,7 +1668,7 @@ CONFIG_PACKAGE_kmod-gre=y
 # CONFIG_PACKAGE_kmod-ipsec is not set
 CONFIG_PACKAGE_kmod-iptunnel=y
 # CONFIG_PACKAGE_kmod-iptunnel6 is not set
-CONFIG_PACKAGE_kmod-ipv6=y
+# CONFIG_PACKAGE_kmod-ipv6 is not set
 # CONFIG_PACKAGE_kmod-isdn4linux is not set
 # CONFIG_PACKAGE_kmod-l2tp is not set
 # CONFIG_PACKAGE_kmod-l2tp-eth is not set
@@ -1892,8 +1894,8 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # Firewall
 #
 CONFIG_PACKAGE_libip4tc=y
-CONFIG_PACKAGE_libip6tc=y
-CONFIG_PACKAGE_libiptc=y
+# CONFIG_PACKAGE_libip6tc is not set
+# CONFIG_PACKAGE_libiptc is not set
 CONFIG_PACKAGE_libxtables=y
 
 #
@@ -2014,7 +2016,7 @@ CONFIG_PACKAGE_zlib=m
 # CONFIG_PACKAGE_conntrack-tools is not set
 CONFIG_PACKAGE_ebtables=y
 # CONFIG_PACKAGE_ebtables-utils is not set
-CONFIG_PACKAGE_ip6tables=y
+# CONFIG_PACKAGE_ip6tables is not set
 # CONFIG_PACKAGE_ip6tables-extra is not set
 # CONFIG_PACKAGE_ip6tables-mod-nat is not set
 CONFIG_PACKAGE_iptables=y
