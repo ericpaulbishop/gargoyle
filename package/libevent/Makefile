@@ -18,7 +18,6 @@ PKG_MD5SUM:=a00e037e4d3f9e4fe9893e8a2d27918c
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -51,16 +50,30 @@ CONFIGURE_ARGS += \
 MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS)" \
 
+
+
+define Build/Compile
+	+$(MAKE_VARS) \
+	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
+		$(MAKE_FLAGS) \
+		$(1); \
+	echo ""
+endef
+
+
+
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/libevent
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/libevent/
 	$(INSTALL_DIR) $(1)/usr/lib/libevent
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.{a,so} $(1)/usr/lib/libevent/
+	echo ""
 endef
 
 define Package/libevent/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so.* $(1)/usr/lib/
+	echo ""
 endef
 
 $(eval $(call BuildPackage,libevent))
