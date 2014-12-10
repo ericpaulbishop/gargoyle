@@ -231,7 +231,7 @@ if [ -z "$error" ] ; then
 		uci set openvpn_gargoyle.client.enabled="true"                         >/dev/null 2>&1
 		uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
 		uci set openvpn.custom_config.config="/etc/openvpn/$client_name.conf"  >/dev/null 2>&1
-		uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
+		uci set openvpn.custom_config.enabled="1"                               >/dev/null 2>&1
 
 		#block non-openvpn traffic to prevent leak if openvpn quits unexpectedly?
 		if [ "$block_non_openvpn" = "1" ] ; then
