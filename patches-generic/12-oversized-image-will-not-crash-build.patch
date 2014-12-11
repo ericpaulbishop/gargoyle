@@ -1,6 +1,16 @@
---- a/target/linux/ar71xx/image/Makefile	2014-11-30 11:21:41.870644632 -0500
-+++ b/target/linux/ar71xx/image/Makefile	2014-12-02 07:17:24.058812497 -0500
-@@ -574,7 +578,8 @@
+--- a/target/linux/ar71xx/image/Makefile	2014-12-10 21:07:29.591993287 -0500
++++ b/target/linux/ar71xx/image/Makefile	2014-12-10 21:02:38.080566476 -0500
+@@ -450,7 +454,8 @@
+ 				-o $(call imgname,$(1),$(2))-factory$$$$dashr.bin; \
+ 			true; \
+ 		done; \
+-	fi
++	fi ; \
++	echo ""
+ endef
+ 
+ Image/Build/CameoAP121/buildkernel=$(call MkuImageLzma,$(2),$(3) $(cameo_ap121_mtdlayout))
+@@ -574,7 +579,8 @@
  	-$(STAGING_DIR_HOST)/bin/mkfwimage2 -f 0x9f000000 \
  		-v $(5).$(6).v6.0.0-OpenWrt-$(REVISION) \
  		-p jffs2:0x50000:0xf60000:0:0:$(call sysupname,$(1),$(2)) \
@@ -10,7 +20,7 @@
  endef
  
  # $(4) = board (XS2, XS5, RS, XM)
-@@ -591,7 +596,8 @@
+@@ -591,7 +597,8 @@
  			-k $(KDIR_TMP)/$(2)-mtdpart-kernel.bin \
  			-r $(KDIR_TMP)/$(2)-mtdpart-rootfs.bin \
  			-o $(call factoryname,$(1),$(2)); \
@@ -20,3 +30,32 @@
  endef
  
  Image/Build/UBNTXM/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(ubntxm_mtdlayout))
+@@ -808,23 +815,25 @@
+ 		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) $(7) -s \
+ 		-k $(KDIR_TMP)/vmlinux-initramfs-$(2).bin.lzma \
+ 		-o $(call imgname,$(1),$(2))-uImage.bin
++	echo ""
+ endef
+ 
+ 
+ define Image/Build/CyberTAN
+ 	echo -n '' > $(KDIR_TMP)/empty.bin
+-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp \
++	-$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp \
+ 		-f $(KDIR_TMP)/vmlinux-$(2).uImage -F $(KDIR_TMP)/empty.bin \
+ 		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
+ 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(5) \
+ 		-i $(KDIR)/image.tmp \
+ 		-o $(call sysupname,$(1),$(2))
+-	$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
++	-$(STAGING_DIR_HOST)/bin/trx -o $(KDIR)/image.tmp -f $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 		-x 32 -a 0x10000 -x -32 -f $(KDIR)/root.$(1)
+ 	-$(STAGING_DIR_HOST)/bin/addpattern -B $(2) -v v$(5) -g \
+ 		-i $(KDIR)/image.tmp \
+ 		-o $(call factoryname,$(1),$(2))
+-	rm $(KDIR)/image.tmp
++	rm $(KDIR)/image.tmp ; \
++	echo ""
+ endef
+ 
+ Image/Build/CyberTANGZIP/loader=$(call Image/BuildLoader,$(1),gz,$(2),0x80060000)

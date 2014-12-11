@@ -174,6 +174,7 @@ CONFIGURE_ARGS += \
 	--with-libevent-dir="$(STAGING_DIR)/usr" \
 	--with-ssl-dir="$(STAGING_DIR)/usr" \
 	--disable-threads \
+	--disable-gcc-hardening \
 	--disable-asciidoc
 
 CONFIGURE_VARS += \
