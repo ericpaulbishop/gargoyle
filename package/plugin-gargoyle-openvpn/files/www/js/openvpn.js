@@ -201,11 +201,12 @@ function saveChanges()
 
 		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
+		var openvpnCurrentlyRunning = (tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnConfig == "server"))
 		if(openvpnConfig == "disabled")
 		{
 			commands = "/etc/init.d/openvpn stop ; " + commands
 		}
-		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" )
+		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
 		{
 			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}
