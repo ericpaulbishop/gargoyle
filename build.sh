@@ -29,8 +29,8 @@ set_constant_variables()
 	#
 	# Aaaand... this little bugger is causing problems again...
 	#
-	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=1
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
+	#num_build_threads=1
 }
 
 set_version_variables()
@@ -46,7 +46,7 @@ set_version_variables()
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=43166
+	rnum=43694
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
