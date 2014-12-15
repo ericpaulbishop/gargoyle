@@ -2378,3 +2378,4 @@ CONFIG_PACKAGE_uboot-envtools=y
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_whereis is not set
+CONFIG_PACKAGE_bridge=y
