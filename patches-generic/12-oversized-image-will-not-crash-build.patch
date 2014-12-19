@@ -1,5 +1,5 @@
---- a/target/linux/ar71xx/image/Makefile	2014-12-10 21:07:29.591993287 -0500
-+++ b/target/linux/ar71xx/image/Makefile	2014-12-10 21:02:38.080566476 -0500
+--- a/target/linux/ar71xx/image/Makefile	2014-12-13 14:40:10.275036031 -0500
++++ b/target/linux/ar71xx/image/Makefile	2014-12-19 13:34:07.784703651 -0500
 @@ -450,7 +454,8 @@
  				-o $(call imgname,$(1),$(2))-factory$$$$dashr.bin; \
  			true; \
@@ -59,3 +59,13 @@
  endef
  
  Image/Build/CyberTANGZIP/loader=$(call Image/BuildLoader,$(1),gz,$(2),0x80060000)
+@@ -1008,7 +1017,8 @@
+ 			-k $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 			-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+ 			-o $(call imgname,$(1),$(2))-factory.img; \
+-	fi
++	fi ; \
++	echo ""
+ endef
+ 
+ 
