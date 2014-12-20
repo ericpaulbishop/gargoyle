@@ -14,23 +14,6 @@ set_constant_variables()
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 
 
-	#cores / build threads
-	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
-	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
-	
-	#################################################################################################
-	# Starging in Attitude Adjustment r36470 multi-threaded builds often fail due to race conditions 
-	# somewhere. As of Attitude Adjustment r7838 these issues seem to have been resolved.
-	#
-	# However, if there is trouble with parallel builds, or you start getting mysterious non-obvious
-	# build errors in the future try setting num_build_threads to 1 below.
-	#################################################################################################
-
-	#
-	# Aaaand... this little bugger is causing problems again...
-	#
-	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	#num_build_threads=1
 }
 
 set_version_variables()
@@ -246,7 +229,22 @@ specified_profile="$7"
 translation_type="$8"
 fallback_lang="$9"
 active_lang="${10}"
-distribution="${11}"
+num_build_threads="${11}"
+distribution="${12}"
+
+
+if [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "single" ] ; then
+	num_build_threads="1"
+elif [ "$num_build_threads" = "auto" ] ; then
+	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
+	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
+	num_build_threads=$num_cores
+elif [ "$num_build_threads" -lt 1 ] ; then
+	num_build_threads="1"
+fi
+
+
+
 
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
@@ -434,6 +432,7 @@ for target in $targets ; do
 	echo ""	
 	echo "**************************************************************************"
 	echo "        Gargoyle is now building target: $target / $profile_name"
+	echo "                 (with $num_build_threads build threads)"
 	echo "**************************************************************************"
 	echo ""
 	echo ""
@@ -632,6 +631,7 @@ for target in $targets ; do
 		echo ""	
 		echo "**************************************************************************"
 		echo "        Gargoyle is now building target: $target / $profile_name"
+		echo "                 (with $num_build_threads build threads)"
 		echo "**************************************************************************"
 		echo ""
 		echo ""
