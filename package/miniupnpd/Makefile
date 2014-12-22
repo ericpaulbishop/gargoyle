@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2013 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,30 +8,25 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=miniupnpd
-PKG_VERSION:=1.8.20130426
-PKG_RELEASE:=2
+PKG_VERSION:=1.9.20141209
+PKG_RELEASE:=1
 
 PKG_SOURCE_URL:=http://miniupnp.free.fr/files
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_MD5SUM:=ca5344eba200e4a6d1313849d68310f6
+PKG_MD5SUM:=e9e53869bb725e931cae74b20d4a39be
 
-# generally don't want/need IPV6 in Gargoyle
-# Set this variable instead of testing global 
-# CONFIG_IPV6 To change this preference for this package
-# That way we can have IPV6 if plugins want to use it
-# But not build it into this default pacakge
-BUILD_UPNP_WITH_IPV6:=
+PKG_MAINTAINER:=Markus Stenberg <fingon@iki.fi>
+PKG_LICENSE:=BSD-3-Clause
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/miniupnpd
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS:=+iptables +libip4tc $(if $(BUILD_UPNP_WITH_IPV6),+IPV6:libip6tc) +libnfnetlink
-  TITLE:=Lightweight UPnP daemon
+  DEPENDS:=+iptables +libip4tc +IPV6:libip6tc +IPV6:ip6tables +libnfnetlink
+  TITLE:=Lightweight UPnP IGD, NAT-PMP & PCP daemon
   SUBMENU:=Firewall
   URL:=http://miniupnp.free.fr/
-  MAINTAINER:=Daniel Dickinson <openwrt@cshore.neomailbox.net>
 endef
 
 define Package/miniupnpd/conffiles
@@ -51,13 +46,14 @@ endef
 
 define Build/Prepare
 	$(call Build/Prepare/Default)
-	echo "$(GARGOYLE_VERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
+	echo "OpenWrt/$(OPENWRTVERSION)" | tr \(\)\  _ >$(PKG_BUILD_DIR)/os.openwrt
 endef
 
 MAKE_FLAGS += \
+	TEST=0 \
 	LIBS="" \
-	CC="$(TARGET_CC) -DIPTABLES_143 -lnfnetlink -lip4tc $(if $(BUILD_UPNP_WITH_IPV6),-lip6tc)" \
-	CONFIG_OPTIONS="$(if $(BUILD_UPNP_WITH_IPV6),--ipv6) --leasefile" \
+	CC="$(TARGET_CC) -DIPTABLES_143 -lnfnetlink -lip4tc $(if $(CONFIG_IPV6),-lip6tc)" \
+	CONFIG_OPTIONS="$(if $(CONFIG_IPV6),--ipv6) --leasefile" \
 	-f Makefile.linux \
 	miniupnpd
 
