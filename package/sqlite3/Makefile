@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2012 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,12 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sqlite
-PKG_VERSION:=3071201
+PKG_VERSION:=3080704
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-autoconf-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://www.sqlite.org
-PKG_MD5SUM:=eb7bbd258913518ad30971ea7ecb0ca9
+PKG_SOURCE_URL:=http://www.sqlite.org/2014/
+PKG_MD5SUM:=33bb8db0038317ce1b0480ca1185c7ba
+
+PKG_LICENSE:=PUBLICDOMAIN
+PKG_LICENSE_FILES:=
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-autoconf-$(PKG_VERSION)
 PKG_BUILD_DEPENDS:=libncurses libreadline
@@ -28,6 +31,7 @@ define Package/sqlite3/Default
   SUBMENU:=database
   TITLE:=SQLite (v3.x) database engine
   URL:=http://www.sqlite.org/
+  MAINTAINER:=Etienne CHAMPETIER <champetier.etienne@gmail.com>
 endef
 
 define Package/sqlite3/Default/description
