@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,12 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libexif
-PKG_VERSION:=0.6.19
+PKG_VERSION:=0.6.21
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=@SF/libexif
-PKG_MD5SUM:=56144a030a4c875c600b1ccf713f69f7
+PKG_MD5SUM:=27339b89850f28c8f1c237f233e05b27
+
+PKG_LICENSE:=LGPL-2.1
+PKG_LICENSE_FILES:=COPYING
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
@@ -25,6 +28,7 @@ define Package/libexif
   CATEGORY:=Libraries
   TITLE:=library for jpeg files with exif tags
   URL:=http://libexif.sourceforge.net/
+  MAINTAINER:=W. Michael Petullo <mike@flyn.org>
 endef
 
 define Package/libexif/description
