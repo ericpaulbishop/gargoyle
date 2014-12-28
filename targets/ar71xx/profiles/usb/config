@@ -1290,7 +1290,7 @@ CONFIG_PACKAGE_opkg=m
 # CONFIG_PACKAGE_opkg-smime is not set
 CONFIG_PACKAGE_procd=y
 # CONFIG_PACKAGE_qos-scripts is not set
-# CONFIG_PACKAGE_resolveip is not set
+CONFIG_PACKAGE_resolveip=y
 # CONFIG_PACKAGE_rpcd is not set
 CONFIG_PACKAGE_swconfig=y
 CONFIG_PACKAGE_ubox=y
@@ -2426,6 +2426,5 @@ CONFIG_plugin-gargoyle-minidlna=m
 CONFIG_kmod-video-gspca-ov534=m
 CONFIG_kmod-video-uvc=m
 CONFIG_kmod-video-gspca-zc3xx=m
-CONFIG_minidlana=m
 CONFIG_minidlna=m
 CONFIG_kmod-video-videobuf2=m
