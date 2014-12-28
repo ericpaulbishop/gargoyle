@@ -1320,25 +1320,25 @@ CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
-# CONFIG_PACKAGE_plugin-gargoyle-initd is not set
-# CONFIG_PACKAGE_plugin-gargoyle-logread is not set
+CONFIG_PACKAGE_plugin-gargoyle-initd=m
+CONFIG_PACKAGE_plugin-gargoyle-logread=m
 CONFIG_PACKAGE_plugin-gargoyle-minidlna=y
 CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
-# CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog is not set
-# CONFIG_PACKAGE_plugin-gargoyle-pptp is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-green is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-horchata is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-light is not set
-# CONFIG_PACKAGE_plugin-gargoyle-theme-xeye is not set
+CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
+CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 CONFIG_PACKAGE_plugin-gargoyle-tor=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
 CONFIG_PACKAGE_plugin-gargoyle-webcam=y
-# CONFIG_PACKAGE_plugin-gargoyle-webshell is not set
-# CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule is not set
+CONFIG_PACKAGE_plugin-gargoyle-webshell=m
+CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 
 #
 # Boot Loaders
@@ -2311,7 +2311,7 @@ CONFIG_DRIVER_11N_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-mini is not set
 # CONFIG_PACKAGE_wpa-supplicant-p2p is not set
 CONFIG_PACKAGE_wpad=y
-# CONFIG_PACKAGE_wpad-mini is not set
+CONFIG_PACKAGE_wpad-mini=m
 
 #
 # Utilities
@@ -2430,3 +2430,4 @@ CONFIG_PACKAGE_usb-modeswitch-data=y
 # CONFIG_PACKAGE_whereis is not set
 CONFIG_PACKAGE_minidlana=y
 CONFIG_PACKAGE_bridge=y
+CONFIG_minidlna=m
