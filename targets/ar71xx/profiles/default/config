@@ -2390,5 +2390,5 @@ CONFIG_kmod-video-uvc=m
 CONFIG_kmod-video-gspca-zc3xx=m
 CONFIG_kmod-usb-serial-wwan=m
 CONFIG_kmod-usb-serial-sierrawireless=m
-CONFIG_minidlna=m
+CONFIG_PACKAGE_minidlna=m
 CONFIG_kmod-video-videobuf2=m

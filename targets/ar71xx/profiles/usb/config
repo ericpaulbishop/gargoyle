@@ -2426,5 +2426,5 @@ CONFIG_plugin-gargoyle-minidlna=m
 CONFIG_kmod-video-gspca-ov534=m
 CONFIG_kmod-video-uvc=m
 CONFIG_kmod-video-gspca-zc3xx=m
-CONFIG_minidlna=m
+CONFIG_PACKAGE_minidlna=m
 CONFIG_kmod-video-videobuf2=m
