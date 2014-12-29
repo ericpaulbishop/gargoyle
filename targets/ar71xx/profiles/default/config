@@ -1679,7 +1679,7 @@ CONFIG_PACKAGE_kmod-llc=y
 # CONFIG_PACKAGE_kmod-netem is not set
 # CONFIG_PACKAGE_kmod-pktgen is not set
 CONFIG_PACKAGE_kmod-ppp=y
-CONFIG_PACKAGE_kmod-mppe=m
+CONFIG_PACKAGE_kmod-mppe=y
 # CONFIG_PACKAGE_kmod-ppp-synctty is not set
 # CONFIG_PACKAGE_kmod-pppoa is not set
 CONFIG_PACKAGE_kmod-pppoe=y
@@ -2379,29 +2379,29 @@ CONFIG_PACKAGE_usb-modeswitch=m
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_whereis is not set
 CONFIG_PACKAGE_bridge=y
-CONFIG_kmod-usb-serial-option=m
-CONFIG_kmod-usb-serial-qualcomm=m
-CONFIG_usb-modeswitch-data=m
-CONFIG_plugin-gargoyle-minidlna=m
-CONFIG_nfs-kernel-server-utils=m
-CONFIG_kmod-video-gspca-ov534=m
-CONFIG_SAMBA_MAX_DEBUG_LEVEL=m
-CONFIG_kmod-video-uvc=m
-CONFIG_kmod-video-gspca-zc3xx=m
-CONFIG_kmod-usb-serial-wwan=m
-CONFIG_kmod-usb-serial-sierrawireless=m
-CONFIG_PACKAGE_minidlna=m
-CONFIG_kmod-video-videobuf2=m
-CONFIG_kmod-video-videobuf2=m
-CONFIG_kmod-usb-serial-option=m
-CONFIG_kmod-video-gspca-ov534=m
-CONFIG_kmod-usb-serial-wwan=m
-CONFIG_nfs-kernel-server-utils=m
-CONFIG_kmod-video-uvc=m
-CONFIG_SAMBA_MAX_DEBUG_LEVEL=m
-CONFIG_kmod-video-gspca-core=m
-CONFIG_kmod-video-gspca-zc3xx=m
-CONFIG_usb-modeswitch-data=m
-CONFIG_plugin-gargoyle-minidlna=m
-CONFIG_kmod-usb-serial-sierrawireless=m
-CONFIG_kmod-usb-serial-qualcomm=m
+CONFIG_PACKAGE_kmod-usb-serial-option=m
+CONFIG_PACKAGE_kmod-usb-serial-qualcomm=m
+CONFIG_PACKAGE_usb-modeswitch-data=m
+CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
+CONFIG_PACKAGE_nfs-kernel-server-utils=m
+CONFIG_PACKAGE_kmod-video-gspca-ov534=m
+CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=m
+CONFIG_PACKAGE_kmod-video-uvc=m
+CONFIG_PACKAGE_kmod-video-gspca-zc3xx=m
+CONFIG_PACKAGE_kmod-usb-serial-wwan=m
+CONFIG_PACKAGE_kmod-usb-serial-sierrawireless=m
+CONFIG_PACKAGE_PACKAGE_minidlna=m
+CONFIG_PACKAGE_kmod-video-videobuf2=m
+CONFIG_PACKAGE_kmod-video-videobuf2=m
+CONFIG_PACKAGE_kmod-usb-serial-option=m
+CONFIG_PACKAGE_kmod-video-gspca-ov534=m
+CONFIG_PACKAGE_kmod-usb-serial-wwan=m
+CONFIG_PACKAGE_nfs-kernel-server-utils=m
+CONFIG_PACKAGE_kmod-video-uvc=m
+CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=m
+CONFIG_PACKAGE_kmod-video-gspca-core=m
+CONFIG_PACKAGE_kmod-video-gspca-zc3xx=m
+CONFIG_PACKAGE_usb-modeswitch-data=m
+CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
+CONFIG_PACKAGE_kmod-usb-serial-sierrawireless=m
+CONFIG_PACKAGE_kmod-usb-serial-qualcomm=m
