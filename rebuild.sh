@@ -295,7 +295,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#node
 			git clone git://github.com/joyent/node.git
 			cd node
-			git checkout v0.7.12
+			git checkout v0.11.14
 			./configure 
 			make
 			cd "$top_dir"
@@ -304,7 +304,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#uglifyjs
 			git clone git://github.com/mishoo/UglifyJS.git
 			cd UglifyJS/bin
-			git checkout v1.3.1
+			git checkout v1.3.5
 			cd "$top_dir"
 		fi
 		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
