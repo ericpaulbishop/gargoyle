@@ -7,8 +7,8 @@ JS_COMPRESS=true
 TRANSLATION=internationalize
 FALLBACK_LANG=English-EN
 ACTIVE_LANG=English-EN
-#BUILD_THREADS=auto
-BUILD_THREADS=1
+BUILD_THREADS=auto
+#BUILD_THREADS=1
 DISTRIBUTION=false
 
 ALL:
@@ -25,11 +25,24 @@ ALL:
 	)
 
 
-distclean: cleanup
+distclean: 
 	rm -rf ./*-src
+	rm -rf ./compressed_javascript
+	rm -rf ./package-prepare
 	rm -rf ./built
 	rm -rf ./images
 	rm -rf ./downloaded
+	rm -rf ./node
+	rm -rf ./UglifyJS
+
+
+clean:
+	rm -rf ./*-src
+	rm -rf ./compressed_javascript
+	rm -rf ./package-prepare
+	rm -rf ./built
+	rm -rf ./images
+
 
 cleanup:
 	find . -name ".svn" | xargs rm -rf

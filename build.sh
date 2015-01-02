@@ -232,15 +232,18 @@ active_lang="${10}"
 num_build_threads="${11}"
 distribution="${12}"
 
-
-if [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "single" ] ; then
+num_build_thread_str=""
+if [ "$num_build_threads" = "single" ] ; then
 	num_build_threads="1"
-elif [ "$num_build_threads" = "auto" ] ; then
-	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
-	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
-	num_build_threads=$num_cores
+	num_build_thread_str="-j1"
+elif [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "auto" ] ; then
+	num_build_threads="auto"
+	num_build_thread_str=""
 elif [ "$num_build_threads" -lt 1 ] ; then
 	num_build_threads="1"
+	num_build_thread_str="-j1"
+else
+	num_build_thread_str="-j$num_build_threads"
 fi
 
 
@@ -517,7 +520,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
+		make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
@@ -534,7 +537,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
+		make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	fi
 	
@@ -640,9 +643,9 @@ for target in $targets ; do
 
 		if [ "$verbosity" = "0" ] ; then
 			
-			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
+			make $num_build_thread_str  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		else
-			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
+			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
 
