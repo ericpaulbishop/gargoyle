@@ -238,12 +238,6 @@ fi
 rm -rf /tmp/passwd
 rm -rf /tmp/shadow
 
-
-#overwrite old date, then restart ntpclient and then bwmon
-#this makes sure that we don't restore crontab that tries
-#to save bwmon save files when rules don't exist, wiping old bwmon data
-date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
-
 sleep 3
 rm -rf /tmp/restore_lock_file
 if [ -n "$error" ] ; then

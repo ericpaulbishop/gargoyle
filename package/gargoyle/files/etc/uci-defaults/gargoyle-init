@@ -107,14 +107,6 @@ config_load "gargoyle"
 #save changes to uci
 uci commit
 
-#make sure date isn't set to 1970, which may cause issues with timezones that cause time to go back before unix epoch,  set to Jan 1st 2001
-curdate=$(date -u +%s)
-if [ $curdate -lt 978307200 ] ; then
-	date -u -s 2001.01.01-00:00:01
-	mkdir -p /usr/data
-	echo "2001.01.01-00:00:01" >/usr/data/time_backup
-fi
-
 #set sysupgrade.conf
 cat << EOF >/etc/sysupgrade.conf
 /etc/passwd
