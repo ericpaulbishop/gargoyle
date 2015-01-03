@@ -64,7 +64,7 @@ else
 fi
 
 if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
-	UUID=$(blkid | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
+	UUID=$(block info | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
 	if [ -n "$UUID" ]; then
 		uci set fstab.@global[0].anon_mount=0
 		uci set fstab.@global[0].check_fs=1
