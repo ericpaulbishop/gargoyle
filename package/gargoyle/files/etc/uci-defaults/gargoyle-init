@@ -73,7 +73,7 @@ fi
 
 # prevent automount by block-mount/fstab
 if [ -e /etc/init.d/usb_storage -a -e /etc/config/fstab ]; then
-	uci set fstab.automount.anon_mount=0
+	uci set fstab.@global[0].anon_mount=0
 fi
 
 
