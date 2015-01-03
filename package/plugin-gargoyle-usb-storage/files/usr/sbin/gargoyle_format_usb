@@ -68,6 +68,8 @@ if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 	if [ -n "$UUID" ]; then
 		uci set fstab.@global[0].anon_mount=0
 		uci set fstab.@global[0].check_fs=1
+		uci del fstab.@mount[0] > /dev/null 2>&1
+		uci set fstab.@mount[0]=mount
 		uci set fstab.@mount[0].target=/overlay
 		uci del fstab.@mount[0].device > /dev/null 2>&1
 		uci set fstab.@mount[0].uuid="$UUID"
