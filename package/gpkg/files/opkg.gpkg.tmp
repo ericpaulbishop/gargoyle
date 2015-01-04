@@ -4,7 +4,7 @@ src/gz %n_packages %U/packages
 src/gz %n_routing %U/routing
 src/gz %n_telephony %U/telephony
 
-src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T/%P
+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T/%F
 
 dest root /
 dest ram /tmp
