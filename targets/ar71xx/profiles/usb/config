@@ -2415,7 +2415,6 @@ CONFIG_PACKAGE_uboot-envtools=y
 # CONFIG_UBOOT_ENVTOOLS_UBI is not set
 # CONFIG_PACKAGE_ugps is not set
 CONFIG_PACKAGE_usb-modeswitch=y
-CONFIG_PACKAGE_usb-modeswitch-data=y
 # CONFIG_PACKAGE_usbreset is not set
 # CONFIG_PACKAGE_usbutils is not set
 # CONFIG_PACKAGE_uuidd is not set
