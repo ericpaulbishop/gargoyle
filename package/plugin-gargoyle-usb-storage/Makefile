@@ -26,7 +26,7 @@ define Package/plugin-gargoyle-usb-storage
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=USB Storage Support for Gargoyle
 	DEPENDS:=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +gargoyle +fdisk +blkid +dosfsck
-	DEPENDS+=+libusb-1.0 +chat +kmod-usb-acm +kmod-usb-serial +comgt +usb-modeswitch
+	DEPENDS+=+libusb-1.0 +chat +kmod-usb-acm +kmod-usb-serial +comgt +usb-modeswitch +kmod-usb-net-qmi-wwan +uqmi
 	DEPENDS+=+kmod-usb-net +kmod-usb-serial-option +kmod-usb-serial-qualcomm +kmod-usb-serial-wwan +kmod-usb-serial-sierrawireless 
 	DEPENDS+=+kmod-usb-sierrawireless-directip +e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +swap-utils +vsftpd +block-mount
 	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat +kmod-fs-hfsplus
