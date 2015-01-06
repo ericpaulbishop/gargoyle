@@ -118,3 +118,7 @@ basicS.RnwL="Получение в аренду новых DHCP-настоек";
 basicS.RlsL="Освобождение арендованных DHCP-настроек";
 basicS.ScnMo="Поиск мобильных устройств";
 basicS.NoDv="Устройства не найдены";
+
+basicS.WANIntr="Интерфейс WAN";
+basicS.Mo3gQMI="LTE (QMI)";
+basicS.Dfult="По умолчанию";
