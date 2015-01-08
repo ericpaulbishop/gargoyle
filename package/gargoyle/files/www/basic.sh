@@ -39,7 +39,10 @@
 
 	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
 	if [ -z "$has_usb_tty" ] ; then
-		echo "hasUSB = false;"
+		echo "var hasUSB = false;"
+	else
+		echo "var hasUSB = true;"
+
 	fi
 
 %>
