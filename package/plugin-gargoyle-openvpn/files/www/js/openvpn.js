@@ -47,6 +47,10 @@ function saveChanges()
 				uci.set("firewall", "vpn_lan_forwarding", "src",  "lan")
 				uci.set("firewall", "vpn_lan_forwarding", "dest", "vpn")
 
+				uci.set("firewall", "lan_vpn_forwarding", "",     "forwarding")
+				uci.set("firewall", "lan_vpn_forwarding", "src",  "vpn")
+				uci.set("firewall", "lan_vpn_forwarding", "dest", "lan")	
+
 
 				if(isServer)
 				{
@@ -60,6 +64,14 @@ function saveChanges()
 					uci.set("firewall", "vpn_wan_forwarding", "",     "forwarding")
 					uci.set("firewall", "vpn_wan_forwarding", "src",  "vpn")
 					uci.set("firewall", "vpn_wan_forwarding", "dest", "wan")
+
+					
+					if(getSelectedValue("openvpn_server_subnet_access") != "true" )
+					{
+						uci.removeSection("firewall", "lan_vpn_forwarding")
+					}
+
+
 				}
 				else
 				{
@@ -70,6 +82,7 @@ function saveChanges()
 			{
 				uci.removeSection("network",  "vpn")
 				uci.removeSection("firewall", "vpn_zone")
+				uci.removeSection("firewall", "lan_vpn_forwarding")
 				uci.removeSection("firewall", "vpn_lan_forwarding")
 				uci.removeSection("firewall", "vpn_wan_forwarding")
 				uci.removeSection("firewall", "ra_openvpn")
