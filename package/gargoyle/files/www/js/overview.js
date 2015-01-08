@@ -147,7 +147,7 @@ function resetData()
 					var devBand = "G";
 					if(dev != "")
 					{
-						if(uciOriginal.get("wireless", dev, "hwmode") == "11na")
+						if(uciOriginal.get("wireless", dev, "hwmode") == "11na" || uciOriginal.get("wireless", dev, "hwmode") == "11a")
 						{
 							devBand = "A";
 						}
