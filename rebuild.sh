@@ -362,9 +362,16 @@ for target in $targets ; do
 		fi
 		gargoyle_packages=$(ls "$package_dir" )
 		for gp in $gargoyle_packages ; do
-			if [ -d "$target-src/package/$gp" ] ; then
-				rm -rf "$target-src/package/$gp" 
-			fi
+			IFS_ORIG="$IFS"
+			IFS_LINEBREAK="$(printf '\n\r')"
+			IFS="$IFS_LINEBREAK"
+			matching_packages=$(find "$target-src/package" -name "$gp")
+			for mp in $matching_packages ; do
+				if [ -d "$mp" ] && [ -e "$mp/Makefile" ] ; then
+					rm -rf "$mp" 
+				fi
+			done
+			IFS="$IFS_ORIG"
 			cp -r "$package_dir/$gp" "$target-src/package"
 		done
 	
