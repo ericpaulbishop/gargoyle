@@ -46,19 +46,26 @@ if [ -e /tmp/printer_hotplug_lock ] ; then exit ; fi
 touch /tmp/printer_hotplug_lock
 
 count=5
-while [ ! -e /proc/bus/usb/devices ] && [ $count -gt 0 ] ; do
+while [ ! -e /sys/kernel/debug/usb/devices ] && [ $count -gt 0 ] ; do
 	sleep 1
 	count=$(( $count - 1 ))
 done 
 
-if [ ! -e /proc/bus/usb/devices ] ; then 
+if [ ! -e /sys/kernel/debug/usb/devices ] ; then 
 	rm -rf /tmp/printer_hotplug_lock
 	exit 
 fi
 
 
-usb_device_lines=$(  echo $(cat "/proc/bus/usb/devices" | sed 's/^$/@@@@@/g') | sed 's/@@@@@/\n/g')
+usb_device_lines=$(  echo $(cat "/sys/kernel/debug/usb/devices" | sed 's/^$/@@@@@/g') | sed 's/@@@@@/\n/g')
 printer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*Product=//g' | sed 's/ .:.*$//g'| head -n1)
+if [ -z "$printer" ] ; then
+	printer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*SerialNumber=//g' | sed 's/ .:.*$//g'| head -n1)
+	if [ -n "$printer" ] ; then
+		printer="Unknown Printer with S/N $printer"
+	fi
+fi
+
 
 p910nd_enabled=$(uci get p910nd.@p910nd[0].enabled 2>/dev/null)
 p910nd_printer_name=$(uci get p910nd.@p910nd[0].printer_name 2>/dev/null)
