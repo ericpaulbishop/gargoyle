@@ -1,7 +1,7 @@
 --- /dev/null	2010-11-24 23:45:48.644474123 -0500
 +++ b/target/linux/ar71xx/base-files/etc/hotplug.d/button/00-button	2010-11-28 02:17:38.312589496 -0500
 @@ -0,0 +1,24 @@
-+. /etc/functions.sh
++. /lib/functions.sh
 +do_button () {
 +	local button
 +	local action
