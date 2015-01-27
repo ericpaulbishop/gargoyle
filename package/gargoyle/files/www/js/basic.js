@@ -2715,3 +2715,21 @@ function togglePass(name)
 		password_field.type = 'password';
 	}
 }
+
+
+function randHexDigit()
+{
+	return (Math.floor(Math.random()*16)).toString(16); 
+}
+
+function getRandomMac()
+{
+	var macPairs = []
+	while(macPairs.length < 6 )
+	{
+		macPairs.push( randHexDigit() + randHexDigit() )
+	}
+	return macPairs.join(":");
+
+}
+
