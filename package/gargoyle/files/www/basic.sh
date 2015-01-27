@@ -817,11 +817,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_guest_ssid1_container'>
 			<label class='leftcolumn' for='wifi_guest_ssid1' id='wifi_guest_ssid1_label'><%~ GNetID %>:</label>
 			<input type='text' id='wifi_guest_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		        <input type='text' id='wifi_guest_mac_g' style='display: none'/>
 		</div>
 
 		<div id='wifi_guest_ssid1a_container'>
 			<label class='leftcolumn' for='wifi_guest_ssid1a' id='wifi_guest_ssid1a_label'><%~ GNet5ID %></label>
 			<input type='text' id='wifi_guest_ssid1a'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		        <input type='text' id='wifi_guest_mac_a' style='display: none'/>
 		</div>
 
 		<div id='wifi_guest_encryption1_container' class='indent'>
