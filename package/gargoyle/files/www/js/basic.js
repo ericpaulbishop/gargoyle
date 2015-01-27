@@ -235,10 +235,10 @@ function saveChanges()
 						uci.set('wireless', apgnacfg, 'disassoc_low_ack', '0');
 						uci.set('wireless', apgnacfg, 'is_guest_network', '1');
 
-					   	var mac = document.getElementById("wifi_guest_mac_g").value;
+					   	var mac = document.getElementById("wifi_guest_mac_a").value ;
 						mac = mac == "" ? getRandomMac() : mac;
 						uci.set("wireless", apgncfg, 'macaddr', mac);
-						preCommands = preCommands + "uci set wireless." + apgnacfg + "='wifi-iface' \n";
+						preCommands = preCommands + "uci set wireless." + apgnacfg + "='wifi-iface' \n"; 
 					}
 
 					if(dualBandSelected)
@@ -1626,8 +1626,11 @@ function resetData()
 	}
 	var apgcfg = apcfg;
 	var apacfg = ap2cfg;
-	var apgngcfg = apgncfg;
-	var apgnacfg = apgn2cfg;
+	var apgngcfg = apgncfg ;
+	var apgnacfg = apgn2cfg ;
+	apgncfg = apgncfg != "" || (apgncfg == "" && apgn2cfg == "") ? apgncfg : apgn2cfg;
+	
+	
 	var apcfgBand = apcfg != "" || ap2cfg != "" ? "G" : ""
 	if(apgcfg == "" && apacfg != "")
 	{
@@ -1698,7 +1701,7 @@ function resetData()
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 	*/
 
-	var wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_channel1_5ghz', 'wifi_channel2_5ghz', 'wifi_ssid1', 'wifi_ssid1a', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1', 'wifi_guest_ssid1', 'wifi_guest_mac_g', 'wifi_guest_ssid1a', 'wifi_guest_mac_a', 'wifi_guest_encryption1', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
+	var wirelessIds=['wifi_channel1', 'wifi_channel2', 'wifi_channel1_5ghz', 'wifi_channel2_5ghz', 'wifi_ssid1', 'wifi_ssid1a', 'wifi_encryption1', 'wifi_pass1', 'wifi_wep1',      'wifi_guest_ssid1', 'wifi_guest_mac_g', 'wifi_guest_ssid1a', 'wifi_guest_mac_a', 'wifi_guest_encryption1', 'wifi_guest_pass1', 'wifi_guest_wep1',        'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_encryption2', 'wifi_pass2', 'wifi_wep2'];
 	var wirelessPkgs= new Array();
 	var wIndex;
 	for(wIndex=0; wIndex < wirelessIds.length; wIndex++)
@@ -1708,10 +1711,15 @@ function resetData()
 	var default5ID = uciOriginal.get("wireless", apcfg, "ssid") ? uciOriginal.get("wireless", apcfg, "ssid") + " 5GHz" : "Gargoyle 5GHz";
 	var defaultGuest5ID = apgncfg && uciOriginal.get("wireless", apgncfg, "ssid") ? uciOriginal.get("wireless", apgncfg, "ssid") + " 5GHz" : "Guests 5GHz";
 
-	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apgcfg, apacfg, apcfg, apcfg, apcfg, apgngcfg, apgnacfg, apgncfg, apgncfg, apgncfg, apgncfg, apgncfg, apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
-	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key', 'ssid', 'macaddr', 'ssid', 'macaddr', 'encryption', 'key', 'key', 'server', 'port', 'ssid', 'encryption', 'key','key'];
-	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', '', default5ID, '', 'none', '', '', 'Guests', defaultGuest5ID, 'none', '', '', '', '', 'ExistingWireless', 'none', '',''];
-	var wirelessFunctions=[lsv, lsv, lsv, lsv, lv, lv, lsv, lv, lv, lv, lv, lv, lv, lsv, lv, lv, lv, lv, lv, lsv, lv, lv];
+
+
+	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apcfg, apcfg, apcfg, apcfg, apcfg,                                                                apgngcfg, apgngcfg, apgnacfg, apgnacfg, apgncfg, apgncfg, apgncfg,               apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
+	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key',                                                    'ssid', 'macaddr', 'ssid', 'macaddr', 'encryption', 'key', 'key',                   'server', 'port', 'ssid', 'encryption', 'key','key'];
+	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', default5ID, 'none','','',        'Guests', '', defaultGuest5ID, '', 'none', '', '',                                  '', '', 'ExistingWireless', 'none', '',''];
+	var wirelessFunctions=[lsv, lsv, lsv, lsv, lv, lv, lsv, lv, lv,                                                                                                 lv, lv, lv, lv, lsv, lv, lv,                                                        lv, lv, lv, lsv, lv, lv];
+
+
+
 	loadVariables(uciOriginal, wirelessIds, wirelessPkgs, wirelessSections, wirelessOptions, wirelessParams, wirelessFunctions);	
 
 
