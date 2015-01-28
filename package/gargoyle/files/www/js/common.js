@@ -42,27 +42,41 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	{
 		var totalHeight="100%";
 		var totalWidth="100%";
+		
+		var heightFromDoc=0;
+		var widthFromDoc=0;
+		if(document.body.parentNode.scrollHeight)
+		{
+			heightFromDoc = heightFromDoc >= document.body.parentNode.scrollHeight ? heightFromDoc : document.body.parentNode.scrollHeight
+		}
 		if(document.body.scrollHeight)
 		{
-			totalHeight = document.body.scrollHeight + "px";
+			heightFromDoc = heightFromDoc >= document.body.scrollHeight ? heightFromDoc : document.body.scrollHeight
 		}
-		else if(document.height)
+		if(document.height)
 		{
-			totalHeight = document.height + "px";
+			heightFromDoc = heightFromDoc >= document.height ? heightFromDoc : document.height
+		}
+		totalHeight = heightFromDoc > 0 ? heightFromDoc + "px" : totalHeight
+
+		if(document.body.parentNode.scrollWidth)
+		{
+			widthFromDoc = widthFromDoc >= document.body.parentNode.scrollWidth ? widthFromDoc : document.body.parentNode.scrollWidth
 		}
 		if(document.body.scrollWidth)
 		{
-			totalWidth  = document.body.scrollWidth;
-			if(document.width)
-			{
-				totalWidth = document.width > totalWidth ? document.width : totalWidth;
-			}
-			totalWidth = totalWidth + "px";
+			widthFromDoc = widthFromDoc >= document.body.scrollWidth ? widthFromDoc : document.body.scrollWidth
 		}
-		else if(document.width)
+		if(document.width)
 		{
-			totalWidth = document.width + "px";
+			widthFromDoc = widthFromDoc >= document.width ? widthFromDoc : document.width
 		}
+		totalWidth = widthFromDoc > 0 ? widthFromDoc + "px" : totalWidth
+		
+
+
+
+		
 
 		var viewportHeight;
 		var vewportWidth;
