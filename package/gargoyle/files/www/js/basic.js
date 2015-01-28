@@ -2767,10 +2767,25 @@ function randHexDigit()
 
 function getRandomMac()
 {
+	//for some reason, second hex digit NEEDS to be even, or hostapd won't accept mac
+	//Only the second digit has this limit, all the others can be anything
 	var macPairs = []
 	while(macPairs.length < 6 )
 	{
-		macPairs.push( randHexDigit() + randHexDigit() )
+		if(macPairs.length == 0)
+		{
+			var secondDigit = randHexDigit();
+			while(secondDigit == '1' || secondDigit == '3' || secondDigit == '5' || secondDigit == '7' || secondDigit == '9' || secondDigit == 'b' || secondDigit == 'd' || secondDigit == 'f' )
+			{
+				secondDigit = randHexDigit();
+			}
+			macPairs.push( randHexDigit() + secondDigit )
+
+		}
+		else
+		{
+			macPairs.push( randHexDigit() + randHexDigit() )
+		}
 	}
 	return macPairs.join(":");
 
