@@ -570,24 +570,42 @@ initialize_firewall()
         isolate_guest_networks
 }
 
-isolate_guest_networks() {
-        local guest_ifaces=`ifconfig | sed -n -e 's/^\(wlan[0-9]-[^: ]*\)[: ].*/\1/p'`
-        if [ -n "$guest_ifaces" ]; then
-            local ifaces=`ifconfig | sed -n -e '/^wlan[0-9]-/d' -e 's/^\([a-z][^ :]*\)[: ].*/\1/p'`
-            local if
-            for if in $ifaces; do
-                case "$if" in
-                    wlan*|eth*.*)
-                        local guest_if
-                        for guest_if in $guest_ifaces; do
-                            ebtables -I FORWARD -i $guest_if -o br-lan -j DROP
-                            ebtables -I FORWARD -i $guest_if -o $if -j DROP
-                        done
-                        ;;
-                esac
-            done
-        fi
+
+guest_mac_from_uci()
+{
+	local is_guest_network
+	local macaddr
+	config_get is_guest_network "$1" is_guest_network
+	if [ "$is_guest_network" = "1" ] ; then
+		config_get macaddr "$1" macaddr
+		echo "$macaddr"
+	fi
 }
+get_guest_macs()
+{
+	config_load "wireless"
+	config_foreach guest_mac_from_uci "wifi-iface"
+}
+isolate_guest_networks()
+{
+	ebtables -t filter -F FORWARD
+	local guest_macs=$( get_guest_macs )
+	if [ -n "$guest_macs" ] ; then
+		local lanifs=`brctl show br-lan 2>/dev/null | awk ' $NF !~ /interfaces/ { print $NF } '`
+		local lif
+	
+		for lif in $lanifs ; do
+			for gmac in $guest_macs ; do
+				local is_guest=$(ifconfig "$lif"	2>/dev/null | grep -i "$gmac")
+				if [ -n "$is_guest" ] ; then
+					echo "$ifname with mac $gmac is wireless guest"
+					ebtables -t filter -I FORWARD -i "$gi" --logical-out br-lan -j DROP
+				fi
+			done
+		done
+	fi
+}
+
 
 ifup_firewall()
 {
