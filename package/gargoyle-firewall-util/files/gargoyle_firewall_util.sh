@@ -589,17 +589,29 @@ get_guest_macs()
 isolate_guest_networks()
 {
 	ebtables -t filter -F FORWARD
+	ebtables -t filter -F INPUT
 	local guest_macs=$( get_guest_macs )
 	if [ -n "$guest_macs" ] ; then
 		local lanifs=`brctl show br-lan 2>/dev/null | awk ' $NF !~ /interfaces/ { print $NF } '`
 		local lif
-	
+		
+		local lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+
 		for lif in $lanifs ; do
 			for gmac in $guest_macs ; do
 				local is_guest=$(ifconfig "$lif"	2>/dev/null | grep -i "$gmac")
 				if [ -n "$is_guest" ] ; then
-					echo "$ifname with mac $gmac is wireless guest"
-					ebtables -t filter -I FORWARD -i "$gi" --logical-out br-lan -j DROP
+					echo "$lif with mac $gmac is wireless guest"
+					
+					#Allow access to WAN but not other LAN hosts for anyone on guest network
+					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -j DROP
+					
+					#Only allow DHCP/DNS access to router for anyone on guest network
+					ebtables -t filter -A INPUT -i "$lif" -p ARP -j ACCEPT
+					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol UDP --ip-destination-port 53 -j ACCEPT
+					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol UDP --ip-destination-port 67 -j ACCEPT
+					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-destination $lan_ip -j DROP
+
 				fi
 			done
 		done
