@@ -240,7 +240,7 @@ function rescanMedia()
 {
 	var Commands = [];
 	Commands.push("/etc/init.d/minidlna stop");
-	Commands.push("kill -9 $(pidof minidlnad)");
+	Commands.push("kill -9 $(pidof minidlna)");
 	Commands.push("rm -f $(uci get minidlna.config.db_dir)/files.db");
 	Commands.push("/etc/init.d/minidlna start");
 
