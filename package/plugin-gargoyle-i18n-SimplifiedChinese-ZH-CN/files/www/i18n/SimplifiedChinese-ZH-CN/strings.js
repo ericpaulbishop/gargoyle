@@ -79,22 +79,22 @@ UI.hPM="";
 
 UI.EMonths=["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
 
-UI.byt="Bytes";
+UI.byt="bytes";
 UI.Bu="B";
-UI.KB="KB";
+UI.KB="kB";
 UI.MB="MB";
 UI.GB="GB";
 UI.TB="TB";
-UI.KB1="KByte";
+UI.KB1="kByte";
 UI.MB1="MByte";
 UI.GB1="GByte";
 UI.TB1="TByte";
-UI.KBy="KBytes";
+UI.KBy="kBytes";
 UI.MBy="MBytes";
 UI.GBy="GBytes";
 UI.TBy="TBytes";
-UI.Kbs="KBits/s";
-UI.KBs="KBytes/s";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
 UI.MBs="MBytes/s";
 
 UI.CApplyChanges="关闭并应用更改";
