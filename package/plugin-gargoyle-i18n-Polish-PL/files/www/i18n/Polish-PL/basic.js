@@ -90,6 +90,12 @@ basicS.RtrDNS="Wymuszaj używanie routera jako serwera DNS";
 basicS.WlMod="Tryb pracy Wi-Fi";
 basicS.AcPt="Punkt dostępowy";
 basicS.AcPtID="Nazwa AP (SSID)";
+basicS.GNet="Sieć gościnna";
+basicS.GNetID="Nazwa sieci gościnnej (SSID):";
+basicS.GNet24ID="Nazwa sieci gościnnej 2.4GHz (SSID):";
+basicS.GNet5ID="Nazwa sieci gościnnej 5GHz (SSID):";
+basicS.F24GHzOnly="Włączone (tylko 2.4GHz)";
+basicS.F5GHzOnly="Włączone (tylko 5GHz)";
 basicS.Clnt="Klient";
 //don't think Ad Hoc should be translated
 basicS.OpMod="Standard";
