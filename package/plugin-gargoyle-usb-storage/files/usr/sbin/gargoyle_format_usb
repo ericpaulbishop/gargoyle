@@ -43,7 +43,7 @@ elif [ "$percent_swap" = "0" ] ; then
 	sleep 10
 	mkfs.ext$ext_version "$disk"1
 else
-	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /cylinders.*total.*sectors/ { print $8 } ' )
+	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /^Disk.*sectors/ { print $7 } ' )
 	ext_sectors=$((  (100-$percent_swap)*$sectors/100 ))
 	if [ "$ext_sectors" = "0" ] ; then
 		ext_sectors=1
