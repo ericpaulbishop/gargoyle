@@ -198,7 +198,7 @@ function saveChanges()
 	}
 
 	Commands.push("/etc/init.d/minidlna stop");
-	Commands.push("kill $(pidof minidlnad)");
+	Commands.push("kill $(pidof minidlna)");
 	if(enabled==1)
 	{
 		Commands.push("sleep 2");
