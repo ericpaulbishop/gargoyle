@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN
-PKG_VERSION:=1.0.5
-PKG_RELEASE:=20150202
+PKG_VERSION:=1.0.4
+PKG_RELEASE:=20141026
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 

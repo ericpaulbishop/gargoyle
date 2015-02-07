@@ -90,12 +90,6 @@ basicS.RtrDNS="强制客户端使用路由器的DNS服务器";
 basicS.WlMod="无线模式";
 basicS.AcPt="接入点";
 basicS.AcPtID="接入点的SSID";
-basicS.GNet="访客网络";
-basicS.GNetID="访客网络SSID:";
-basicS.GNet24ID="2.4GHz访客网络SSID:";
-basicS.GNet5ID="5GHz访客网络SSID:";
-basicS.F24GHzOnly="只启用2.4GHz";
-basicS.F5GHzOnly="只启用5GHz";
 basicS.Clnt="客户端";
 //don't think Ad Hoc should be translated
 basicS.OpMod="工作模式";
@@ -124,7 +118,3 @@ basicS.RnwL="获取新的DHCP租约";
 basicS.RlsL="释放DHCP租约";
 basicS.ScnMo="正在扫描移动设备";
 basicS.NoDv="没有找到设备";
-
-basicS.WANIntr="WAN接口";
-basicS.Mo3gQMI="LTE (QMI)";
-basicS.Dfult="默认"

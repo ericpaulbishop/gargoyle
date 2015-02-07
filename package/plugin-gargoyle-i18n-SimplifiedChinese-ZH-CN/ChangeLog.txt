@@ -1,13 +1,6 @@
 ChangeLog:
 
 ==================================================
-Version: 1.0.5-20150202
-Release time: 14:34 2015-02-02 UTC+8
-Changes:
-
-i18n/SimplifiedChinese: fix bugs in ddns.js, firstboot.js and strings.js. Add missing key in basic.js
-
-==================================================
 Version: 1.0.4-20141026
 Release time: 13:40 2014-10-26 UTC+8
 Changes:
