@@ -90,6 +90,12 @@ basicS.RtrDNS="Принудить клиентов использовать DNS-
 basicS.WlMod="Беспроводной режим";
 basicS.AcPt="Точка доступа (ТД)";
 basicS.AcPtID="Имя (SSID) точки доступа";
+basicS.GNet="Гостевая сеть";
+basicS.GNetID="Имя (SSID) гостевой сети:";
+basicS.GNet24ID="Имя гостевой 2.4GHz сети (SSID):";
+basicS.GNet5ID="Имя гостевой 5GHz сети (SSID):";
+basicS.F24GHzOnly="Задействована (только 2.4GHz)";
+basicS.F5GHzOnly="Задействована (только 5GHz)";
 basicS.Clnt="Клиент";
 //don't think Ad Hoc should be translated
 basicS.OpMod="Режим работы";
