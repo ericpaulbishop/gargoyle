@@ -90,12 +90,6 @@ basicS.RtrDNS="Tving Klienter til å Bruke Ruterens DNS Servere";
 basicS.WlMod="Trådløs Modus";
 basicS.AcPt="Aksesspunkt";
 basicS.AcPtID="Aksesspunkt SSID";
-basicS.GNet="Gjeste Nettverk";
-basicS.GNetID="Gjeste Nettverk SSID:";
-basicS.GNet24ID="Gjeste Nettverk 2.4GHz SSID:";
-basicS.GNet5ID="Gjeste Nettverk 5GHz SSID:";
-basicS.F24GHzOnly="Aktivert (2.4GHz Bare)";
-basicS.F5GHzOnly="Aktivert (5GHz Bare)";
 basicS.Clnt="Klient";
 //don't think Ad Hoc should be translated
 basicS.OpMod="Operasjons Modus";
