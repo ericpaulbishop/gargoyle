@@ -11,5 +11,5 @@ fbS.SSet="保存设置";
 fbS.ULngF="上传语言文件";
 
 //javascript
-fbS.nopsErr="错误：你必须设置一个密码";
+fbS.nopsErr="错误：你必须指定一个密码";
 fbS.pseqErr="错误：两次输入的密码不相同";
