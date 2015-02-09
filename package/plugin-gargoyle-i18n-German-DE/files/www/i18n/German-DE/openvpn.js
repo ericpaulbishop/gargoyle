@@ -7,6 +7,8 @@ ovpnS.ODis="OpenVPN Deaktiviert";
 ovpnS.OClt="OpenVPN Client";
 ovpnS.OSrv="OpenVPN Server";
 ovpnS.OSts="OpenVPN Status";
+ovpnS.OClrK="Alle bestehenden OpenVPN Schlüssel entfernen";
+ovpnS.OClrC="Diese Funktion wird alle zuvor eingerichteten Schlüssel dauerhaft Löschen, Sind Sie sicher dass Sie Fortfahren möchten?"
 ovpnS.OSCfg="OpenVPN Server: Konfiguration";
 ovpnS.OInIP="interne OpenVPN IP";
 ovpnS.OIMsk="interne OpenVPN Subnetzmaske";
@@ -106,4 +108,9 @@ ovpnS.ConnOC="Verbundene OpenVPN Clienten";
 //openvpn_connections.js
 ovpnS.ConnFr="Verbunden von";
 ovpnS.ConnSc="Verbunden seit";
-ovpnS.NoCConn="Keine Client verbunden";
+ovpnS.NoCConn="Kein Client verbunden";
+
+ovpnS.NOVPNT="Nicht-OpenVPN Datenverkehr";
+ovpnS.AllowNOVPNT="Erlaube Nicht-OpenVPN Datenverkehr";
+ovpnS.BlockNOVPNT="Verbiete jeden Non-OpenVPN Traffic";
+openS.DescNOVPNT="Wenn Sie den gesammten Datenverkehr durch den VPN leiten möchten, empfiehlt es sich jeden nicht-OpenVPN Datenverkehr zu blockieren. Wenn der Datenverkehr durch die OpenVPN fehlschlägt, findet dann kein Rückgriff auf die unverschlüsselte Standartroute statt. Wenn Sie allerdings nur für einige Remote-Clients eien OpenVPN Verbindung verwenden, sollten Sie den Nicht-OpenVPN datenverkehr zulassen.";
