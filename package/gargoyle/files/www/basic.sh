@@ -50,8 +50,8 @@
 		echo "hasQMI = false;"
 	fi
 
-	echo "var interfaces = new Array();"
-	awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
+	#echo "var interfaces = new Array();"
+	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
 
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
@@ -317,11 +317,6 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_interface_container'>
-			<label class='leftcolumn' for='wan_interface'><%~ WANIntr %>:</label>
-			<select class='rightcolumn' id='wan_interface'>
-			</select>
-		</div>
 
 		<div id='wan_dhcp_ip_container'>
 			<label class='leftcolumn'><%~ CurrIP %>:</label>

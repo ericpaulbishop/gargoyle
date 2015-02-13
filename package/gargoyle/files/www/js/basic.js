@@ -142,19 +142,19 @@ function saveChanges()
 				}
 				else if( singleEthernetIsWan() )
 				{
-					uci.set('network', 'wan', 'ifname', getSelectedValue('wan_interface'));
+					uci.set('network', 'wan', 'ifname', defaultLanIf);
 				}
 				else if(getSelectedValue("wan_protocol").match(/qmi/))
 				{
-					uci.set('network', 'wan', 'ifname', getSelectedValue('wan_interface'));
+					uci.set('network', 'wan', 'ifname', qmiInterface );
 				}
 				else if(getSelectedValue("wan_protocol").match(/3g/))
 				{
-					uci.remove('network', 'wan', 'ifname');
+					uci.set('network', 'wan', 'auto', '1');
 				}
 				else
 				{
-					uci.set('network', 'wan', 'ifname', getSelectedValue('wan_interface'));
+					uci.set('network', 'wan', 'ifname', defaultWanIf);
 				}
 			}
 
@@ -165,15 +165,8 @@ function saveChanges()
 			else if( singleEthernetIsWan() )
 			{
 				//just in case wirelessIf does not exist, remove variable first
-				if(getSelectedValue('wan_interface') == defaultLanIf)
-				{
-					uci.remove('network', 'lan', 'ifname');
-					uci.set('network', 'lan', 'ifname', wirelessIfs.length > 0 ? wirelessIfs[0] : "");
-				}
-				else
-				{
-					uci.set('network', 'lan', 'ifname', defaultLanIf);
-				}
+				uci.remove('network', 'lan', 'ifname');
+				uci.set('network', 'lan', 'ifname', wirelessIfs.length > 0 ? wirelessIfs[0] : "");
 			}
 			else 
 			{
@@ -1070,17 +1063,17 @@ function setGlobalVisibility()
 
 function setWanVisibility()
 {
-	var wanIds=['wan_dhcp_ip_container', 'wan_dhcp_expires_container', 'wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'wan_ping_container', 'lan_gateway_container', 'wan_3g_device_container', 'wan_3g_user_container', 'wan_3g_pass_container', 'wan_3g_apn_container', 'wan_3g_pincode_container', 'wan_3g_service_container', 'wan_3g_isp_container', 'wan_interface_container'];
+	var wanIds=['wan_dhcp_ip_container', 'wan_dhcp_expires_container', 'wan_pppoe_user_container', 'wan_pppoe_pass_container', 'wan_pppoe_reconnect_mode_container', 'wan_pppoe_max_idle_container', 'wan_pppoe_reconnect_pings_container', 'wan_pppoe_interval_container', 'wan_static_ip_container', 'wan_static_mask_container', 'wan_static_gateway_container', 'wan_mac_container', 'wan_mtu_container', 'wan_ping_container', 'lan_gateway_container', 'wan_3g_device_container', 'wan_3g_user_container', 'wan_3g_pass_container', 'wan_3g_apn_container', 'wan_3g_pincode_container', 'wan_3g_service_container', 'wan_3g_isp_container'];
 
 	var maxIdleIndex = 5;
 	var notWifi= getSelectedValue('wan_protocol').match(/wireless/) ? 0 : 1;
 
-	var dhcpVisability     = [1,1,  0,0,0,0,0,0,  0,0,0,  1,notWifi,1,       0, 0,0,0,0,0,0,0, notWifi];
-	var pppoeVisability    = [0,0,  1,1,1,1,1,1,  0,0,0,  notWifi,notWifi,1, 0, 0,0,0,0,0,0,0, 0];
-	var staticVisability   = [0,0,  0,0,0,0,0,0,  1,1,1,  1,notWifi,1,       0, 0,0,0,0,0,0,0, notWifi];
-	var disabledVisability = [0,0,  0,0,0,0,0,0,  0,0,0,  0,0,0,             1, 0,0,0,0,0,0,0, 0];
-	var tgVisability       = [0,0,  0,0,0,0,0,0,  0,0,0,  0,0,1,             0, 1,1,1,1,1,1,1, 0];
-	var qmiVisability      = [0,0,  0,0,0,0,0,0,  0,0,0,  1,0,1,             0, 1,1,1,1,1,0,1, 1];
+	var dhcpVisability     = [1,1,  0,0,0,0,0,0,  0,0,0,  1,notWifi,1,       0, 0,0,0,0,0,0,0];
+	var pppoeVisability    = [0,0,  1,1,1,1,1,1,  0,0,0,  notWifi,notWifi,1, 0, 0,0,0,0,0,0,0];
+	var staticVisability   = [0,0,  0,0,0,0,0,0,  1,1,1,  1,notWifi,1,       0, 0,0,0,0,0,0,0];
+	var disabledVisability = [0,0,  0,0,0,0,0,0,  0,0,0,  0,0,0,             1, 0,0,0,0,0,0,0];
+	var tgVisability       = [0,0,  0,0,0,0,0,0,  0,0,0,  0,0,1,             0, 1,1,1,1,1,1,1];
+	var qmiVisability      = [0,0,  0,0,0,0,0,0,  0,0,0,  1,0,1,             0, 1,1,1,1,1,0,1];
 
 	var wanVisibilities= new Array();
 	wanVisibilities['dhcp'] = dhcpVisability;
@@ -1392,16 +1385,6 @@ function resetData()
 		setElementEnabled(document.getElementById("dhcp_release_button"), false);
 	}
 
-	removeAllOptionsFromSelectElement(document.getElementById("wan_interface"));
-	addOptionToSelectElement("wan_interface", basicS.Dfult, defaultWanIf);
-	for (idx=0;idx<interfaces.length;idx++)
-	{
-		if(interfaces[idx] == defaultWanIf) {continue;}
-		if(interfaces[idx] == defaultLanIf) {continue;}
-		if(interfaces[idx] == defaultWanIf.replace(/\.[0-9]/,"")) {continue;}
-		if(interfaces[idx] == defaultLanIf.replace(/\.[0-9]/,"")) {continue;}
-		addOptionToSelectElement("wan_interface", interfaces[idx], interfaces[idx]);
-	}
 
 	setChildText("bridge_wifi_mac",  currentWirelessMacs[0], null, null, null);
 	setChildText("wifi_mac", currentWirelessMacs[0], null, null, null);
@@ -1517,7 +1500,6 @@ function resetData()
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none" && wp != "3g" && wp != "qmi" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
 	setSelectedValue("wan_protocol", wp);
-	setSelectedValue("wan_interface", wanUciIf);
 
 	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
 	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
