@@ -90,6 +90,12 @@ basicS.RtrDNS="Erzwinge Nutzung des Routers als DNS Server";
 basicS.WlMod="Wlan Modus";
 basicS.AcPt="Access Point";
 basicS.AcPtID="Access Point SSID";
+basicS.GNet="Gast Netz";
+basicS.GNetID="Gast Netz SSID:";
+basicS.GNet24ID="Gast Netz 2.4GHz SSID:";
+basicS.GNet5ID="Guest Netz 5GHz SSID:";
+basicS.F24GHzOnly="Aktiviert (nur 2.4GHz)";
+basicS.F5GHzOnly="Aktiviert (nur 5GHz)";
 basicS.Clnt="Client";
 //don't think Ad Hoc should be translated
 basicS.OpMod="Betriebsmodus";
