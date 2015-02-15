@@ -1787,7 +1787,7 @@ CONFIG_PACKAGE_kmod-usb-net=m
 # CONFIG_PACKAGE_kmod-usb-net-kaweth is not set
 # CONFIG_PACKAGE_kmod-usb-net-mcs7830 is not set
 # CONFIG_PACKAGE_kmod-usb-net-pegasus is not set
-# CONFIG_PACKAGE_kmod-usb-net-qmi-wwan is not set
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=m
 # CONFIG_PACKAGE_kmod-usb-net-rndis is not set
 # CONFIG_PACKAGE_kmod-usb-net-sierrawireless is not set
 # CONFIG_PACKAGE_kmod-usb-net-smsc95xx is not set
@@ -2331,7 +2331,7 @@ CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
 # CONFIG_PACKAGE_uclient-fetch is not set
-# CONFIG_PACKAGE_uqmi is not set
+CONFIG_PACKAGE_uqmi=m
 # CONFIG_PACKAGE_vsc7385-ucode-ap83 is not set
 # CONFIG_PACKAGE_vsc7385-ucode-pb44 is not set
 # CONFIG_PACKAGE_vsc7395-ucode-ap83 is not set
