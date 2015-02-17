@@ -124,3 +124,7 @@ basicS.RnwL="Pobieranie nowej dzierżawy DHCP";
 basicS.RlsL="Zwalnianie dzierżawy DHCP";
 basicS.ScnMo="Poszukiwanie urządzeń mobilnych";
 basicS.NoDv="Nie znaleziono urządzeń";
+
+basicS.WANIntr="Interfejs WAN";
+basicS.Mo3gQMI="LTE (QMI)";
+basicS.Dfult="Domyślny";

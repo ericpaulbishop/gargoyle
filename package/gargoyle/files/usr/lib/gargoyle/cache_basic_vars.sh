@@ -112,6 +112,19 @@ else
 fi
 
 
+#detect qmi interface if it exists
+qmi_if=""
+if [ -e /sys/class/usbmisc/ ] ; then
+	local devnames=$(ls /sys/class/usbmisc)
+	for devname in devnames ; do
+		if [ -e "/sys/class/usbmisc/$devname/device/net" ] && [ -z "$qmi_if" ] ; then
+			qmi_if=$( ls "/sys/class/usbmisc/$devname/device/net" | head -n 1 )
+		fi
+	done
+fi
+echo "qmiInterface=\"$qmi_if\";"
+
+
 # cache default interfaces if we haven't already
 # this script is run on first boot by hotplug, so
 # this will make sure the defaults get cached right
