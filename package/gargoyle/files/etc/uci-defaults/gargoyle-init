@@ -4,6 +4,18 @@
 gargoyle_version=$(cat /www/data/gargoyle_version.txt)
 uci set gargoyle.global.version="$gargoyle_version"
 
+#disable ANI for ath9k (code below does nothing if no ath9k driver present)
+ani_already_disabled=$(cat /etc/rc.local | grep "/sys/kernel/debug/ieee80211/phy0/ath9k/ani")
+if [ -z "$ani_already_disabled" ] ; then
+
+	sed -i '/^exit.*/d' /etc/rc.local
+	ani_files=$(find /sys/kernel/debug/ieee80211 -name "ani" 2>/dev/null)
+	for ani_file in $ani_files ; do
+		echo "echo '0' > '${ani_file}'" >> /etc/rc.local 2>/dev/null
+	done
+fi
+
+
 settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
 if [ "$settings_not_preserved" == "1" ] ; then
 
@@ -30,6 +42,25 @@ if [ "$settings_not_preserved" == "1" ] ; then
 
 fi
 
+#
+# firewall includes MUST all have reload=1
+#
+# Some idiot decided firewall hotplug scripts call reload only, which 
+# by default doesn't trigger includes... BUT... hotplug scripts
+# always get called before firewall init script  That means any include 
+# that doesn't have reload=1 never gets called on boot.
+#
+include_index=0
+next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+while [ "$next_include" = "include" ] ; do
+	uci set firewall.@include[$include_index].reload="1"
+	include_index=$(( $include_index+1 ))
+	next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+	echo "$include_index"
+done
+
+
+
 # add new busybox ntp system section if necessary
 ntp_section=$(uci get system.ntp 2>/dev/null)
 if [ "$ntp_section" != "timeserver" ] ; then
@@ -42,19 +73,39 @@ fi
 
 # prevent automount by block-mount/fstab
 if [ -e /etc/init.d/usb_storage -a -e /etc/config/fstab ]; then
-	uci set fstab.automount.anon_mount=0
+	uci set fstab.@global[0].anon_mount=0
 fi
+
+
+#remove gargoyle menu entries that have script entries that have file paths set to files that do not exist
+. /lib/functions.sh
+gargoyle_web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
+config_cb()
+{
+	config_name="$1"
+	section_id="$2"
+	option_cb()
+	{
+		if [ "$config_name" = "display" ] ; then
+			key="$1"
+			script=$(uci get gargoyle.scripts.$key 2>/dev/null)
+			if [ -n "$script" ] ; then
+				if [ ! -e "$gargoyle_web_root/$script" ] ; then
+					section_id=$(echo $key | sed 's/_/\./g')
+					uci delete gargoyle.display.$key
+					uci delete gargoyle.$section_id
+				fi
+			fi
+		fi
+	}
+}
+config_load "gargoyle"
+
+
+
 
 #save changes to uci
 uci commit
-
-#make sure date isn't set to 1970, which may cause issues with timezones that cause time to go back before unix epoch,  set to Jan 1st 2001
-curdate=$(date -u +%s)
-if [ $curdate -lt 978307200 ] ; then
-	date -u -s 2001.01.01-00:00:01
-	mkdir -p /usr/data
-	echo "2001.01.01-00:00:01" >/usr/data/time_backup
-fi
 
 #set sysupgrade.conf
 cat << EOF >/etc/sysupgrade.conf

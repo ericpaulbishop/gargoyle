@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright Â© 2008-2013 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -56,6 +56,7 @@ char** load_interfaces_from_proc_file(char* filename);
 string_map* get_hostnames(void);
 char* get_option_value_string(struct uci_option* uopt);
 int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name);
+char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang);
 
 
 
@@ -71,6 +72,9 @@ int main(int argc, char **argv)
 	char* js_includes = "";
 	char* langstr_js_includes = "";
 	char* title = "Gargoyle Router Management Utility";
+	char* desc = "Router<br/>Management<br/>Utility";
+	char* dname = "Device Name";
+	char* wait_txt = "Please Wait While Settings Are Applied";
 	char** package_variables_to_load = NULL;
 	int c;
 	
@@ -167,7 +171,7 @@ int main(int argc, char **argv)
 	
 	if(display_type == HEADER || display_type == MINIMAL_HEADER)
 	{
-		printf("Content-Type: text/html;charset=utf-8\n\n");
+		printf("Content-Type: text/html; charset=utf-8\n\n");
 
 		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
 		{
@@ -183,6 +187,8 @@ int main(int argc, char **argv)
 		char* gargoyle_version = "default";
 		char* fallback_lang = "";
 		char* active_lang = "";
+		char** translation_strings = NULL;
+		
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
 		{
 			theme_root=get_option_value_string(uci_to_option(e));
@@ -270,6 +276,7 @@ int main(int argc, char **argv)
 			unsigned long num_pieces;
 			all_js=split_on_separators(js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
 		}
+#ifndef LOCALIZED_BUILD
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "fallback_lang") == UCI_OK)
 		{
 			fallback_lang=get_option_value_string(uci_to_option(e));
@@ -278,9 +285,10 @@ int main(int argc, char **argv)
 				active_lang=get_option_value_string(uci_to_option(e));
 				unsigned long num_pieces;
 				all_lstr_js=split_on_separators(langstr_js_includes, whitespace_separators, 2, -1, 0, &num_pieces);
+				translation_strings=ParseGHF_TranslationStrings(web_root, active_lang, fallback_lang);
 			}
 		}
-		
+#endif
 		
 		if(uci_load(ctx, "system", &p) != UCI_OK)
 		{
@@ -310,7 +318,7 @@ int main(int argc, char **argv)
 		       "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
 		       "<head>\n"
 		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n"
-		       "\t<title>%s</title>\n", title);
+		       "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
 		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\"/>\n", theme_root, theme);
 		int css_index, js_index, lstr_js_index;
 
@@ -330,29 +338,29 @@ int main(int argc, char **argv)
 		{
 			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
 		}
+#ifndef LOCALIZED_BUILD
 		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
 		{
 			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 			{
-				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
 			}
 			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
 			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
 			{
 				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 				{
-					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
-				char* tran_file=(char*)calloc(4096, sizeof(char)); //MAXPATHLEN
-				if (tran_file != NULL) {
-					snprintf(tran_file, 4096, "%s/i18n/%s/%s", web_root, active_lang, all_lstr_js[lstr_js_index]);
-					if (path_exists(tran_file) == 1) {
-						printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-					}
-					free(tran_file);
+				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
+				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
+				{
+					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
+				free(tran_file);
 			}
 		}
+#endif
 		printf("</head>\n"
 		       "<body>\n");
 
@@ -361,10 +369,10 @@ int main(int argc, char **argv)
 			printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
 			       "\t<div id=\"wait_msg\">\n"
 			       "\t\t<div id=\"wait_txt\">\n"
-			       "\t\t\tPlease Wait While Settings Are Applied\n"
+			       "\t\t\t%s\n"
 			       "\t\t</div>\n"
 			       "\t\t<div id=\"wait_icon\">\n"
-			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", theme_root, theme);
+			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
 
 			printf("\t\t</div>\n"
 			       "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
@@ -372,8 +380,10 @@ int main(int argc, char **argv)
 			       "\t<div id=\"outer_logo\">\n"
 			       "\t\t<div id=\"inner_logo\">\n"
 			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
-			       "\t\t\t<div id=\"garg_desc\">Router<br/>Management<br/>Utility</div>\n"
-			       "\t\t\t<div id=\"garg_host\">Device Name: %s</div>\n", hostname);
+			       "\t\t\t<div id=\"garg_desc\">%s</div>\n"
+			       "\t\t\t<div id=\"garg_host\">%s: %s</div>\n",	translation_strings == NULL ? desc : translation_strings[1], 
+																	translation_strings == NULL ? dname : translation_strings[2],
+																	hostname);
 
 			printf("\t\t</div>\n"
 			       "\t</div>\n"
@@ -404,6 +414,7 @@ int main(int argc, char **argv)
 		       "//-->\n"
 		       "</script>\n"
 		       "\n\n");
+		free_null_terminated_string_array(translation_strings);
 	}
 	else if(display_type == FOOTER)
 	{
@@ -599,7 +610,7 @@ int main(int argc, char **argv)
 				printf("\t\t\t\t\t\t</div>\n");
 				
 				int empty_section = 0;
-				if (peek_priority_queue_node(section_pages) == NULL)
+				if (next_section_page == NULL)
 				{
 					empty_section = 1;
 				}
@@ -1459,6 +1470,73 @@ int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_p
 	free(lookup_str);
 
 	return ret_value;
+}
+
+char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang)
+{
+#ifdef LOCALIZED_BUILD
+	return NULL;
+#else
+	unsigned char ghf_idx=0;
+	char** GHFstrings = (char**)calloc(5, sizeof(char*)); //4 strings + emptyval
+	//same order as in file:
+	//index=0: ghf.title="Gargoyle Router Management Utility";
+	//index=1: ghf.desc="Router<br/>Management<br/>Utility";
+	//index=2: ghf.devn="Device Name";
+	//index=3: ghf.waits="Please Wait While Settings Are Applied";
+	char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
+	
+	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK )
+	{
+		unsigned long num_lines = 0;
+		char** ghf_js_lines = get_file_lines(ghfs_path, &num_lines);
+		
+		if (memcmp(ghf_js_lines[0], "\xEF\xBB\xBF", 3) == 0)
+		{ //Found a UTF8 BOM
+			unsigned long ghf_line;
+			
+			for (ghf_line=0; ghf_line < num_lines; ghf_line++)
+			{
+				char* this_line = ghf_js_lines[ghf_line];
+				unsigned char idx, start_str, end_str = 0;
+				
+				for (idx=0; idx < strlen(this_line); idx++)
+				{
+					//UTF8-BOM+ start of comment (/*) or just start of comment (/*)? skip the line
+					if (memcmp(this_line+idx, "\xEF\xBB\xBF/*", 5) == 0 || memcmp(this_line+idx, "/*", 2) == 0)
+					{
+						continue;
+					}
+					//skip lines shorter than 4 bytes (ghf. is 4 bytes, which is malformed) + skip empty lines
+					if (strlen(this_line) < 5 || this_line[idx] == '\n')
+					{
+						continue;
+					}
+					if (this_line[idx] == '"' && this_line[idx-1] == '=')
+					{
+						start_str=idx+1;
+					}
+					if (this_line[idx] == '"' && this_line[idx+1] == ';')
+					{
+						end_str=idx;
+					}
+				}
+				if (start_str > 0 && end_str > 0)
+				{
+					char* val=(char*)calloc(end_str-start_str<8?8:(end_str-start_str)+1, sizeof(char));
+					memcpy(val, this_line+start_str, end_str-start_str);
+					GHFstrings[ghf_idx]=val;
+					ghf_idx++;
+				}
+			}
+		}
+		free_null_terminated_string_array(ghf_js_lines);
+	}
+	
+	free(ghfs_path);
+	return GHFstrings;
+	// don't forget to free_null_terminated_string_array(GHFstrings-or whatever);
+#endif
 }
 
 #endif

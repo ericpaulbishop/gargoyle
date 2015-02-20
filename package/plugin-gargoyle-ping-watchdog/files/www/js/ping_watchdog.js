@@ -66,7 +66,7 @@ function resetData()
 {
 	var commands = [];
 	commands.push("cat /etc/crontabs/root | grep \"/usr/lib/gargoyle/ping_watchdog.sh\"");
-	
+
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -79,11 +79,12 @@ function resetData()
 			document.getElementById("startup_delay").value = "240";
 			document.getElementById("failure_count").value = "3";
 			document.getElementById("failure_action").value = "wan";
-			if(data[0] != "Success")
+			for(var i=0;i<data.length;i++)
+			if(data[i].match(/ping_watchdog.sh/))
 			{
 				//0   1 2 3 4 5                                  6   7 8       9 
 				//*/3 * * * * /usr/lib/gargoyle/ping_watchdog.sh 240 3 8.8.8.8 reboot
-				ping_data = data[0].split(/ /);
+				ping_data = data[i].split(/ /);
 				if (ping_data[5] == "/usr/lib/gargoyle/ping_watchdog.sh")
 				{
 					document.getElementById("ping_watchdog_enable").checked = true;

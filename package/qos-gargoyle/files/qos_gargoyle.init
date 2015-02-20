@@ -627,9 +627,36 @@ initialize_qos()
 
 		#if the user specified a ping target then use that otherwise use the gateway.
 		if [ -z "$ptarget_ip" ] ; then
-		       ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
+			old_ifs="$IFS"
+			IFS=$(printf "\n\r")
+			targets=$(traceroute -n -I -w 1 -q 2 -m6 100.100.100.100 | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}.*ms' | grep -v '8.8.8.8' | sed 's/ms//g')
+			ptarget_ip=""
+			for t in $targets ; do
+				if [ -z "$ptarget_ip" ] ; then
+					#ip of potential gateway
+					target=$(echo "$t" | awk '{ print $1 ; }')
+					target_is_local=$(echo "$target" | grep -E '^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|0\.0\.0\.0|127\.|255\.)') 
+
+
+					# round or rather ceil() time up to nearest millisecond since bash doesn't like working with decimals
+					time=$(echo "$t" | awk ' { print $3 ; }' | sed 's/\..*$//g')
+					time=$(( $time + 1 ))
+	
+					if [ -z "$target_is_local" ] || [ "$time" -gt 5 ] ; then
+						ptarget_ip="$target"
+					fi
+				fi
+			done
+			IFS="$old_ifs"
+			
+			#in case ping target is still not defined use default gateway
+			if [ -z "$ptarget_ip" ] ; then
+				ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
+			fi
 		fi
 
+
+		
 		#Ping responses for the ping target never go to the IMQ device.
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
 
@@ -644,7 +671,10 @@ initialize_qos()
 
 		#Start the monitor
 		if [ -n "$pinglimit" ] ; then
-			#In manual mode the user selected the pinglimit.
+			#In manual mode the user selects the active mode pinglimit indirectly.  qosmon always measures the RTT of a ping on an unloaded link.
+			#This is called the ping entitlement.  With a manual entry the minRTT ping limit is 110% of this measured ping entitlement
+			#and the active mode ping limit is the minRTT limit plus the user entered value.  See the qosmon source code for more details.
+			#In summary manaully entered ping times only affect the active mode, not the minRTT mode ping time limits.
 			qosmon -a -b 800 $ptarget_ip $total_download_bandwidth $pinglimit
 		else
 			#In auto mode we calculate transmission delay based on our bandwidth and then ask qosmon

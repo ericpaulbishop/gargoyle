@@ -68,7 +68,7 @@ function checkKey(e)
 
 function setStatusAndQuotas()
 {
-	setChildText("current_time_date", currentTime);
+	setChildText("current_time_date", cnv_LocaleTime(currentTime));
 
 	if(sessionExpired)
 	{

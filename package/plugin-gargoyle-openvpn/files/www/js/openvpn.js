@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2014 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -47,6 +47,10 @@ function saveChanges()
 				uci.set("firewall", "vpn_lan_forwarding", "src",  "lan")
 				uci.set("firewall", "vpn_lan_forwarding", "dest", "vpn")
 
+				uci.set("firewall", "lan_vpn_forwarding", "",     "forwarding")
+				uci.set("firewall", "lan_vpn_forwarding", "src",  "vpn")
+				uci.set("firewall", "lan_vpn_forwarding", "dest", "lan")	
+
 
 				if(isServer)
 				{
@@ -60,6 +64,14 @@ function saveChanges()
 					uci.set("firewall", "vpn_wan_forwarding", "",     "forwarding")
 					uci.set("firewall", "vpn_wan_forwarding", "src",  "vpn")
 					uci.set("firewall", "vpn_wan_forwarding", "dest", "wan")
+
+					
+					if(getSelectedValue("openvpn_server_subnet_access") != "true" )
+					{
+						uci.removeSection("firewall", "lan_vpn_forwarding")
+					}
+
+
 				}
 				else
 				{
@@ -70,8 +82,11 @@ function saveChanges()
 			{
 				uci.removeSection("network",  "vpn")
 				uci.removeSection("firewall", "vpn_zone")
+				uci.removeSection("firewall", "lan_vpn_forwarding")
 				uci.removeSection("firewall", "vpn_lan_forwarding")
 				uci.removeSection("firewall", "vpn_wan_forwarding")
+				uci.removeSection("firewall", "ra_openvpn")
+
 			}
 		}
 
@@ -82,7 +97,7 @@ function saveChanges()
 			uci.remove("gargoyle", "status", "openvpn_connections")
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
-			uci.set("openvpn", "custom_config", "enable", "0")
+			uci.set("openvpn", "custom_config", "enabled", "0")
 		}
 		if(openvpnConfig == "server")
 		{
@@ -103,7 +118,7 @@ function saveChanges()
 
 
 			uci.set("gargoyle", "status", "openvpn_connections", "500")
-			uci.set("openvpn", "custom_config", "enable", "1")
+			uci.set("openvpn", "custom_config", "enabled", "1")
 			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
 
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
@@ -173,8 +188,11 @@ function saveChanges()
 
 			if (document.getElementById("openvpn_client_manual_controls").style.display != "none")
 			{
-				clientManualCheckCaCertKey();
+				clientManualCheckCaCertKey() 
+				blockNonOpenVpn = getSelectedValue("openvpn_client_block_nonovpn");
+				uci.set("openvpn_gargoyle", "client", "block_non_openvpn", blockNonOpenVpn == "block" ? true : false)
 			}
+
 		}
 
 
@@ -189,10 +207,19 @@ function saveChanges()
 		{
 			commands = commands + "\n/usr/lib/gargoyle/restart_network.sh ;\n"
 		}
+		else
+		{
+			commands = commands + "\n/etc/openvpn.firewall update_enabled ;\n"
+		}
 
 		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
-		if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client")
+		var openvpnCurrentlyRunning = (tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnConfig == "server"))
+		if(openvpnConfig == "disabled")
+		{
+			commands = "/etc/init.d/openvpn stop ; " + commands
+		}
+		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
 		{
 			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}
@@ -223,18 +250,18 @@ function clientNetMismatchQuery(expected, current, newIp)
 {
 	var continueFun = function(result)
 	{
-		if(result.match(/Cancel/))
+		if(result == UI.Cancel)
 		{
 			window.location=window.location
 		}
 		else
 		{
-			if(result.match(/Switch/))
+			if(result == (ovpnS.Switch+" "+newIp))
 			{
 				document.getElementById("net_mismatch_action").value = "change"
 				newRouterIp = newIp
 			}
-			if(result.match(/Keep/))
+			if(result == ovpnS.KeepC)
 			{
 				document.getElementById("net_mismatch_action").value = "keep"
 			}
@@ -242,17 +269,19 @@ function clientNetMismatchQuery(expected, current, newIp)
 		}
 	}
 	query(ovpnS.SubMis, ovpnS.ExpSubN+" " + expected + ovpnS.ActSubN+" " + current + ".  "+ovpnS.WantQ, 
-		[ ovpnS.Switch+" " + newIp, ovpnS.KeepC, UI.Cancel], continueFun );
+		[ ovpnS.Switch+" "+newIp, ovpnS.KeepC, UI.Cancel], continueFun );
 
 }
 
 
 function clientSaved(result)
 {
+	//Success value here does not need to be and should not be translated
+	//it is an internal value only used for determining return status, never displayed
 	if(result != "Success")
 	{
 		alert(UI.Err+": " + result)
-		if(result.match(/failed to connect/))
+		if(result == ovpnS.uc_conn_Err)
 		{
 			window.location=window.location
 		}
@@ -367,7 +396,8 @@ function resetData()
 	openvpnMode = clientEnabled ? "client" : openvpnMode
 	setSelectedValue("openvpn_config", openvpnMode)
 
-	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none" : "block"
+	document.getElementById("openvpn_config_status_container").style.display= openvpnMode == "disabled" ? "none"  : "block"
+	
 	if(openvpnMode != "disabled")
 	{
 		if( tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnMode == "server") )
@@ -483,6 +513,10 @@ function resetData()
 		document.getElementById("openvpn_client_ta_key_text").value  = curClientTaKey.join("\n");
 		var textTaCheck = document.getElementById("openvpn_client_use_ta_key_text");	
 		textTaCheck.checked = curClientTaKey.length > 0 ? true : false;
+
+		blockNonOpenVpn = uciOriginal.get("openvpn_gargoyle", "client", "block_non_openvpn")
+		setSelectedValue("openvpn_client_block_nonovpn", (blockNonOpenVpn == "true" || blockNonOpenVpn == "1") ? "block" : "allowed")
+
 		updateClientControlsFromConfigText()
 	}
 	else
@@ -565,7 +599,7 @@ function updateClientControlsFromConfigText()
 		if(cipher == "BF-CBC" && (keysize == "128" || keysize == "256" || keysize == null))
 		{
 			keysize = keysize == null ? "128" : keysize
-			setSelectedValue("openvpn_client_cipher", cipher + ":" + key)
+			setSelectedValue("openvpn_client_cipher", cipher + ":" + keysize)
 		}
 		else if(cipher == "AES-128-CBC" || cipher == "AES-256-CBC")
 		{
@@ -703,18 +737,80 @@ function createButton(text, cssClass, actionFunction, disabled)
 	return button;
 }
 
+
+function updateDupeCn()
+{
+	var serverInternalIp = document.getElementById("openvpn_server_ip").value
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+	
+
+	var allowedTable = document.getElementById("openvpn_allowed_client_table");
+	var setNewIp = false;
+	if(allowedTable != null)
+	{
+		var rows = allowedTable.rows;
+		var ri;
+		for(ri =1; ri < rows.length ; ri++)
+		{
+			var ipElementContainer = rows[ri].childNodes[1].firstChild;
+			var id = ipElementContainer.id;
+		
+			if(!dupeCn && uci.get("openvpn_gargoyle", id, "ip") == "")
+			{
+				var serverInternalIp = document.getElementById("openvpn_server_ip").value
+				var ip = getUnusedAcIp(serverInternalIp)
+				uci.set("openvpn_gargoyle", id, "ip", ip)
+				
+				var ipContainer = ipElementContainer.childNodes[1]	
+				setSingleChild(ipContainer, document.createTextNode(ip))
+				ipContainer.appendChild( document.createElement("br") )
+				ipContainer.appendChild( document.createTextNode("") )
+
+				setNewIp = true
+			}
+		}
+	}
+	if(setNewIp)
+	{
+		var definedIps = getDefinedAcIps(true);
+		definedIps[serverInternalIp] = 1
+		if( definedIps[ document.getElementById('openvpn_allowed_client_ip').value ] != null )
+		{
+			var ip = getUnusedAcIp(serverInternalIp)
+			document.getElementById('openvpn_allowed_client_ip').value = ip
+		}
+	}
+
+	setOpenvpnVisibility()
+}
+
+
 function setOpenvpnVisibility()
 {
+
+	var originalEnabled = false
+	var originalServerEnabled = uciOriginal.get("openvpn_gargoyle", "server", "enabled") 
+	var originalClientEnabled = uciOriginal.get("openvpn_gargoyle", "client", "enabled")
+	if(originalServerEnabled == "true" || originalServerEnabled == "1" || originalClientEnabled == "true" || originalClientEnabled == "1")
+	{
+		originalEnabled = true
+	}
+
 	openvpnMode = getSelectedValue("openvpn_config");
 	
+	
+	document.getElementById("openvpn_clear_keys_container").style.display = (openvpnMode == "disabled" && (!originalEnabled)) ? "block" : "none"
+
+
+
 	document.getElementById("openvpn_server_fieldset").style.display         = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none"
 	
-
 	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
 	dupeCn= dupeCn == "true" || dupeCn == "1"
-	
+
 
 	var allowedTable = document.getElementById("openvpn_allowed_client_table");
 	if(allowedTable != null)
@@ -729,8 +825,13 @@ function setOpenvpnVisibility()
 			{
 				ipElementContainer.childNodes[ipChildIndex].style.display = (ipChildIndex == 0 && dupeCn) || (ipChildIndex > 0 && (!dupeCn)) ? "inline" : "none"
 			}
+
 		}
 	}
+
+
+
+
 	initializeAllowedClientVisibility(document, dupeCn);
 	setClientVisibility(document)
 }
@@ -816,6 +917,44 @@ function setRemoteNames( controlDocument, selectedRemote)
 	}
 }
 
+function getUnusedAcIp(serverInternalIp)
+{
+	var ipParts = serverInternalIp.split(/\./)
+	var fourthIpPart = ipParts.pop()
+	var thirdIpPart  = ipParts.pop()
+	var secondIpPart = ipParts.pop()
+	var firstIpPart  = ipParts.pop()
+
+	fourthIpPart = parseInt(fourthIpPart);
+	thirdIpPart  = parseInt(thirdIpPart);
+	secondIpPart = parseInt(secondIpPart);
+	fourthIpPart++;
+
+	
+	var candidateDefaultIp = firstIpPart + "." + secondIpPart + "." + thirdIpPart + "." + fourthIpPart
+
+	var definedIps = getDefinedAcIps(true);
+	definedIps[serverInternalIp] = 1
+	while( (fourthIpPart < 255 || thirdIpPart < 255 || secondIpPart < 255) && definedIps[candidateDefaultIp] == 1)
+	{
+		fourthIpPart++
+		if(fourthIpPart == 255)
+		{
+			fourthIpPart = 1
+			thirdIpPart++
+		}
+		if(thirdIpPart == 255)
+		{
+			thirdIpPart = 0
+			secondIpPart++
+		}
+		if(secondIpPart != 255)
+		{	
+			candidateDefaultIp = firstIpPart + "." + secondIpPart + "." + thirdIpPart + "." + fourthIpPart
+		}
+	}
+	return candidateDefaultIp
+}
 
 function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInternalIp)
 {
@@ -847,20 +986,8 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 	var ip = srcUci.get("openvpn_gargoyle", id, "ip")
 	if(ip == "")
 	{
-		var ipParts = serverInternalIp.split(/\./)
-		var lastIpPart = ipParts.pop()
-		lastIpPart = lastIpPart == "1" ? 2 : 1;
-		
+		ip = getUnusedAcIp(serverInternalIp)
 
-		var candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
-		var definedIps = getDefinedAcIps(true);
-		definedIps[serverInternalIp] = 1
-		while(lastIpPart < 255 && definedIps[candidateDefaultIp] == 1)
-		{
-			lastIpPart++
-			candidateDefaultIp = ipParts.join(".") + "." + lastIpPart
-		}
-		ip = candidateDefaultIp
 	}
 	controlDocument.getElementById("openvpn_allowed_client_ip").value = ip
 	
@@ -1253,4 +1380,22 @@ function editAc()
 	}
 	runOnEditorLoaded();
 }
+function clearOpenvpnKeys()
+{
+	var confirmed = confirm(ovpnS.OClrC)
+	if(confirmed)
+	{
+		setControlsEnabled(false, true);
 
+		var commands = "rm -rf /etc/openvpn/* ; ln -s /var/openvpn/current_status /etc/openvpn/current_status ;"
+		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				window.location=window.location
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+}

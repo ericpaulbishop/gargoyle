@@ -154,15 +154,15 @@ void simpleParseFile(char* fdata, int f_len) {
 //  It is highly unlikely a single page would *EVER* need 50k); the read-buffer was successfully allocated & the UTF-8 BOM present
 //  Note: windows users: no UTF16, UCS2... And a byte order mark please.
 //
-void readFile (char* filepath) {
+int readFile (char* filepath) {
 	FILE *lfile;
 	char *buf;
 	long int lf_len;
+	int ret_value=0;
 	
 	lfile = fopen(filepath, "r");
 	if (lfile == NULL) {
-		/* die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", filepath); */
-		return; // the file was not found
+		return -1; // the file was not found
 	}
 	
 	fseek(lfile, 0L, SEEK_END);
@@ -170,7 +170,7 @@ void readFile (char* filepath) {
 	if (lf_len > 51200) { 
 		die_with_message(NULL, NULL, "Translate error: translation file > 50kb");
 		fclose(lfile);
-		return;
+		return ret_value;
 	}
 	fseek(lfile, 0L, SEEK_SET);
 	
@@ -179,7 +179,7 @@ void readFile (char* filepath) {
 		die_with_message(NULL, NULL, "Translate error: couldn't allocate buffer");
 		fclose(lfile);
 		free(buf);
-		return;
+		return ret_value;
 	}
 	
 	fread(buf, sizeof(char), 3, lfile);
@@ -192,6 +192,7 @@ void readFile (char* filepath) {
 	}
 	fclose(lfile);
 	free(buf);
+	return ret_value;
 }
 
 //
@@ -213,6 +214,7 @@ unsigned char AssertPageMapped(char* page) {
 //  store (global.global.translationKV_map)
 //    buff is the buffer where results will be dumped & shuffled onto echoing in the shell for direct injection into the 
 //    webpage key is the raw text from the Gargoyle webpage (trailing space apparently included): <%~ key %> or <%~ page.key %>
+//    key_source (0 or 1) either fprintf to std_out (1 when haserl is invoked via /usr/bin/i18n) or route through bash (when using <%~ tokens %>)
 //
 //  Note: the 1st key from a page-specific (non UI.key) translation requires the page.key form to parse/load/map the key-value pairs
 //
@@ -220,34 +222,42 @@ unsigned char AssertPageMapped(char* page) {
 //  No matter what, there is a space at the end of the key which will throw off a key: "key" != "key "
 //  If a value is not obtained, use what was given to us in the <%~ translate %> element
 //
-void lookup_key (buffer_t *buf, char *key) {
+void lookup_key (buffer_t *buf, char *key, unsigned char key_source) {
 	char* tvalue;
 	char** key_ptr = NULL;
 	buffer_t fpath;
 	char page_split[256], key_split[256];
 	char* kaddr=&key_split[0];
-	char* split=strchr(key++, '.');
+	unsigned char offset=0;
+	if (key_source == HASERL_HTML_INPUT_OUTPUT) {
+		offset=1; //haserl <%~ token %> in html pages arrive with whitespace, copying (for splitting) needs to account for the space
+		key++;
+	}
+	char* split=strchr(key+offset, '.');
 
 	haserl_buffer_init (&fpath);
 	memset(page_split, 0, 256);
 	memset(key_split, 0, 256);
 
 	if (split == NULL) {
-		memcpy(key_split, key, strlen(key)-1); //there's a space there between the key %>
+		memcpy(key_split, key, strlen(key)-offset);
 	} else {
 		// ah, a page_specific.key to find
 		memcpy(page_split, key, split-key);
-		memcpy(key_split, split+1, strlen(split)-2); //minus 1: the period; minus another 1 for trailing space
+		memcpy(key_split, split+1, strlen(split)-(1+offset)); //minus 1: the period; if a haserl token minus another 1 for trailing space
 		memcpy(page_split+(split-key), ".js", 3);
 		
 		if (AssertPageMapped(page_split) == 0) {
 			gen_lang_fpath(&fpath, global.fallback_lang, page_split);
-			readFile((char *)fpath.data);
+			if (readFile((char *)fpath.data) == -1) {
+				die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", (char *)fpath.data);
+				return;
+			}
 			
 			if (memcmp(global.fallback_lang, global.active_lang, strlen(global.active_lang)) != 0) {
 				buffer_reset(&fpath);
 				gen_lang_fpath(&fpath, global.active_lang, page_split);
-				readFile((char *)fpath.data);
+				int trfile_success=readFile((char *)fpath.data);
 			}
 			// TODO: apparently, this is done on faith, because whether the page was *actually* mapped isn't tested
 			set_string_map_element(global.translationKV_map, page_split, "true");
@@ -258,10 +268,18 @@ void lookup_key (buffer_t *buf, char *key) {
 	tvalue=get_string_map_element(global.translationKV_map, *key_ptr);
 	if (tvalue != NULL) {
 		// a mapped key-value pair was found
-		bash_echo (buf, tvalue, strlen(tvalue));
+		if (key_source == HASERL_SHELL_SYMBOLIC_LINK) {
+			printf("%s", tvalue);
+		} else {
+			bash_echo (buf, tvalue, strlen(tvalue));
+		}
 	} else {
 		// an exisinng value for the key wasn't found. Regurgitate the key - if the key had a period (split!=null), then use split key
-		bash_echo (buf, split==NULL?key:&key_split[0], strlen(split==NULL?key:&key_split[0]));
+		if (key_source == HASERL_SHELL_SYMBOLIC_LINK) {
+			printf("%s", split==NULL?key:&key_split[0]);
+		} else {
+			bash_echo (buf, split==NULL?key:&key_split[0], strlen(split==NULL?key:&key_split[0]));
+		}
 	}
 	buffer_destroy(&fpath);
 	return;
@@ -286,12 +304,15 @@ void buildTranslationMap () {
 	global.translationKV_map = initialize_string_map(1);
 	
 	gen_lang_fpath(&fpath, global.fallback_lang, "strings.js");
-	readFile((char *)fpath.data);
+	if (readFile((char *)fpath.data) == -1) {
+		die_with_message(NULL, NULL, "A needed translation file: '%s' was not found", (char *)fpath.data);
+		return;
+	}
 	
 	if (memcmp(global.fallback_lang, global.active_lang, strlen(global.active_lang)) != 0) {
 		buffer_reset(&fpath);
 		gen_lang_fpath(&fpath, global.active_lang, "strings.js");
-		readFile((char *)fpath.data);
+		int trfile_success=readFile((char *)fpath.data);
 	}
 	set_string_map_element(global.translationKV_map, "strings.js", "true");
 	

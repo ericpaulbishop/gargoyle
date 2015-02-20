@@ -24,6 +24,7 @@ quotasStr.DuplicateRange="Duplicate IP/Time Range -- only one quota per IP at a 
 quotasStr.OneTimeQuotaError="You may have only one quota at a given time for hosts without explicit quotas";
 quotasStr.OneNetworkQuotaError="You may have only one quota at a given time that applies to entire network";
 quotasStr.QuotaAddError="Could not add quota.";
+quotasStr.NA="NA"; //Not Applicable abbr
 
 //template
 quotasStr.AppliesTo="Applies to";
@@ -50,6 +51,7 @@ quotasStr.TheseDays="These Days";
 quotasStr.TheseDaysHours="These Days &amp; Hours";
 quotasStr.TheseTimes="These Weekly Times";
 quotasStr.Sample="e.g. Mon 00:30 - Thu 13:15, Fri 14:00 - Fri 15:00";
+quotasStr.SSample="e.g.";
 quotasStr.Exceed="When Exceeded";
 quotasStr.ShutdownNet="Shut Down All Internet Access";
 quotasStr.Throttle="Throttle Bandwidth";

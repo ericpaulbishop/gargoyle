@@ -1,0 +1,13 @@
+--- a/package/grub2/Makefile	2014-08-19 12:31:33.685525914 -0400
++++ b/package/grub2/Makefile	2014-08-21 12:02:55.164256149 -0400
+@@ -36,7 +36,9 @@
+ 	--target=$(REAL_GNU_TARGET_NAME) \
+ 	--sbindir="$(STAGING_DIR_HOST)/bin" \
+ 	--disable-werror \
+-	--disable-nls
++	--disable-nls \
++	--disable-libzfs \
++	--disable-grub-mkfont
+ 
+ HOST_MAKE_FLAGS += \
+ 	TARGET_RANLIB=$(TARGET_RANLIB) \

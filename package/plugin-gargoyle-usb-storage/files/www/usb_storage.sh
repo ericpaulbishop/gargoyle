@@ -16,7 +16,7 @@
 	echo "var driveSizes = [];"
 
 	echo "var storageDrives = [];"
-	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
+	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$7"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
 	echo "var physicalDrives = [];"
 
@@ -31,7 +31,15 @@
 	for d in ${drives}; do
 		if awk -v devpath="^${d}[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
 			size=$(( 1024 * $(fdisk -s "$d") ))
-			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\" ] );"
+			DRIVE=$(echo ${d##/*/})
+			if [ -e "/sys/class/block/$DRIVE/device/model" ]; then
+				V=$(cat /sys/class/block/$DRIVE/device/vendor | xargs)
+				P=$(cat /sys/class/block/$DRIVE/device/model | xargs)
+				DRIVE="$V $P"
+			else
+				DRIVE=$d
+			fi
+			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\", \"$DRIVE\" ] );"
 		fi
 	done
 	echo "var extroot_enabled=\""$(mount | grep "/dev/sd.*on /overlay" | wc -l)"\";"

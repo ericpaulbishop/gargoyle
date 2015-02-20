@@ -1,4 +1,4 @@
-#!/usr/bin/haserl --upload-limit=8192 --upload-target=/tmp/ --upload-dir=/tmp/
+#!/usr/bin/haserl --upload-limit=8192 --upload-dir=/tmp/
 <%
 	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "update" -c "internal.css" -j "update.js" -z "update.js"
+	gargoyle_header_footer -h -s "system" -p "update" -c "internal.css" -j "update.js" -z "update.js" network
 %>
 
 <script>

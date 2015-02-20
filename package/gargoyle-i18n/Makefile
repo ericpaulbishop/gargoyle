@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-i18n
-PKG_VERSION:=0.2.0
+PKG_VERSION:=0.2.1
 PKG_RELEASE:=1
 
 
@@ -15,7 +15,7 @@ define Package/gargoyle-i18n
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:= Internationalization for Gargoyle-router
 	MAINTAINER:=BashfulBladder
-	DEPENDS:=+gargoyle +gargoyle-i18n-English-EN
+	DEPENDS:=+gargoyle +plugin-gargoyle-i18n-English-EN
 	PKGARCH:=all
 endef
 

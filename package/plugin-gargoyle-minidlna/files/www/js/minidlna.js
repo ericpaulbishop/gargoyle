@@ -1,10 +1,11 @@
 /*
- * This program is copyright © 2013 Cezary Jackiewicz and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2013 Cezary Jackiewicz and Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var dlna=new Object();
 
 var pkg = "minidlna";
 var sec = "config";
@@ -26,19 +27,46 @@ function resetData()
 	var driveIndex;
 	for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 	{
-		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " Total, " + parseBytes(storageDrives[driveIndex][5]) + " Free" )
-		rootDriveValues.push( storageDrives[driveIndex][1] )
+		rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " " + dlna.Totl + ", " + parseBytes(storageDrives[driveIndex][5]) + " " + dlna.Free )
+		rootDriveValues.push( storageDrives[driveIndex][0] )
 	}
 	setAllowableSelections("drive_select", rootDriveValues, rootDriveDisplay, document);
 	document.getElementById("media_dir").value = "/";
 
-	var columnNames = ['Folder'];
+	var columnNames = [dlna.Drv, dlna.Dir, dlna.DLNAMType];
 	var mediaTableData = [];
 	var mediaDir = [];
 	mediaDir = uciOriginal.get(pkg, sec, "media_dir");
 	for (idx=0; idx < mediaDir.length; idx++)
 	{
-		mediaTableData.push([mediaDir[idx]]);
+		
+		var md = mediaDir[idx];
+		var mediaType = dlna.DLNAAll;
+		if(md.charAt(1) == ',')
+		{
+			mediaType = "" + md.charAt(0);
+			md = md.substr(2);
+		}
+		
+		
+		var drive = "root";
+		var folder = md;
+		var storageIndex;
+		for(storageIndex=0; storageIndex < storageDrives.length && drive == "root"; storageIndex++)
+		{
+			var sd = storageDrives[storageIndex];
+			var sdre = new RegExp("^" + sd[1], "g");
+			if( md.match(sdre) )
+			{
+				drive = sd[0];
+				folder = folder.replace(sdre, "/");
+				while(folder.match(/\/\//g))
+				{
+					folder = folder.replace("//", "/");
+				}
+			}
+		}
+		mediaTableData.push([drive, folder, mediaType]);
 	}
 	var mediaTable = createTable(columnNames, mediaTableData, "media_table", true, false, removeCallback);
 	var tableContainer = document.getElementById('media_table_container');
@@ -56,23 +84,15 @@ function removeCallback()
 function addNewMediaDir()
 {
 	var drive = getSelectedValue("drive_select");
-	var dir = document.getElementById('media_dir').value;
-	if (dir == "/" || dir == "")
-	{
-		dir = "";
-	}
-	else
-	{
-		dir = "/" + dir;
-	}
-	var folder = drive + dir;
-	folder = folder.replace("//", "/");
+	var folder = document.getElementById('media_dir').value;
 
-	var media_type = getSelectedValue("media_type");
-	if (media_type != "")
+
+	var mediaType = getSelectedValue("media_type");
+	if (mediaType == "")
 	{
-		folder = media_type + "," + folder;
+		mediaType = dlna.DLNAAll;
 	}
+	
 
 	var errors = [];
 	var mediaTable = document.getElementById("media_table");
@@ -87,22 +107,22 @@ function addNewMediaDir()
 		}
 		if(found)
 		{
-			errors.push("This folder is already added")
+			errors.push(dlna.ERRAllrAdd)
 		}
 	}
 	if(errors.length > 0)
 	{
-		alert( errors.join("\n") + "\n\nChanges could not be applied." );
+		alert( errors.join("\n") + "\n\n"+UI.ErrChanges);
 	}
 	else
 	{
 		if(mediaTable == null)
 		{
 			var tableContainer = document.getElementById("media_table_container");
-			mediaTable = createTable(["Folder"], [], "media_table", true, false, removeCallback);
+			mediaTable = createTable([dlna.Drv, dlna.Dir, dlna.DLNAMType], [], "media_table", true, false, removeCallback);
 			setSingleChild(tableContainer, mediaTable);
 		}
-		addTableRow(mediaTable, [ folder ], true, false, removeCallback)
+		addTableRow(mediaTable, [ drive, folder, mediaType ], true, false, removeCallback)
 		document.getElementById("media_dir").value = "/"
 		setSelectedValue("media_type", "");
 	}
@@ -116,11 +136,13 @@ function saveChanges()
 
 	if(name == "")
 	{
-		alert("DLNA server name can not be empty");
+		alert(dlna.ERRSName);
 		return;
 	}
 
+
 	var strict = document.getElementById("dlna_strict").checked ? "1":"0";
+	
 
 	var uci = uciOriginal.clone()
 
@@ -128,8 +150,11 @@ function saveChanges()
 	uci.set(pkg, sec, "friendly_name", name);
 	uci.set(pkg, sec, "strict_dlna", strict);
 
+
+
 	uci.remove(pkg, sec, "media_dir");
 	var mediaTable = document.getElementById("media_table");
+
 	if(mediaTable != null)
 	{
 		var mediaData = getTableDataArray(mediaTable, true, false);
@@ -138,19 +163,42 @@ function saveChanges()
 
 		for(idx=0; idx < mediaData.length; idx++)
 		{
-			media.push(mediaData[idx][0]);
+			var drive = mediaData[idx][0];
+			var folder = "/" + mediaData[idx][1];
+			var mediaType = mediaData[idx][2];
+			var found = false;
+		
+			var mediaPath = folder;
+			var storageIndex;
+			for(storageIndex=0; storageIndex < storageDrives.length && (!found) ; storageIndex++)
+			{
+				if(drive == storageDrives[storageIndex][0])
+				{
+					mediaPath = storageDrives[storageIndex][1] + folder;
+				}
+			}
+			while(mediaPath.match(/\/\//g))
+			{
+				mediaPath = mediaPath.replace("//", "/");
+			}
+			if(mediaType != dlna.DLNAAll)
+			{
+				mediaPath = mediaType + "," + mediaPath;
+			}
+			media.push(mediaPath);
 		}
 		if(media.length > 0)
 		{
-			uci.set(pkg, sec, "db_dir", media[0] + "/_minidlna");
-			uci.set(pkg, sec, "log_dir", media[0] + "/_minidlna");
+			var base = (media[0]).replace(/[\/]+$/g, "").replace(/.*,/, "");
+			uci.set(pkg, sec, "db_dir", base + "/_minidlna");
+			uci.set(pkg, sec, "log_dir", base + "/_minidlna");
 			uci.createListOption(pkg, sec, "media_dir", true);
 			uci.set(pkg, sec, "media_dir", media, false)
 		}
 	}
 
 	Commands.push("/etc/init.d/minidlna stop");
-	Commands.push("kill $(pidof minidlnad)");
+	Commands.push("kill $(pidof minidlna)");
 	if(enabled==1)
 	{
 		Commands.push("sleep 2");
@@ -163,7 +211,7 @@ function saveChanges()
 	}
 	var commands = uci.getScriptCommands(uciOriginal) + "\n" + Commands.join("\n");
 
-	setControlsEnabled(false, true, 'Please Wait While Settings Are Applied');
+	setControlsEnabled(false, true, UI.WaitSettings);
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -192,11 +240,11 @@ function rescanMedia()
 {
 	var Commands = [];
 	Commands.push("/etc/init.d/minidlna stop");
-	Commands.push("kill -9 $(pidof minidlnad)");
+	Commands.push("kill -9 $(pidof minidlna)");
 	Commands.push("rm -f $(uci get minidlna.config.db_dir)/files.db");
 	Commands.push("/etc/init.d/minidlna start");
 
-	setControlsEnabled(false, true, 'Please Wait While Settings Are Applied');
+	setControlsEnabled(false, true, UI.WaitSettings);
 	var param = getParameterDefinition("commands", Commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{

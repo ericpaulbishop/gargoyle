@@ -39,8 +39,19 @@
 
 	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
 	if [ -z "$has_usb_tty" ] ; then
-		echo "hasUSB = false;"
+		echo "var hasUSB = false;"
+	else
+		echo "var hasUSB = true;"
+
 	fi
+
+	has_qmi=$( ls /dev/cdc-wdm* 2>/dev/null )
+	if [ -z "$has_qmi" ] ; then
+		echo "hasQMI = false;"
+	fi
+
+	#echo "var interfaces = new Array();"
+	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
 
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
@@ -143,7 +154,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<select id='bridge_hwmode' onchange='setHwMode(this)'>
 						<option value='11ng'>N+G+B</option>
 						<option value='11g'>G+B</option>
-						<option value='11b'>B <%~ Only %></option>
+						<option value='11b'>B</option>
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -300,10 +311,12 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wired'><%~ StIP %> (<%~ Wird %>)</option>
 				<option value='dhcp_wireless'>DHCP (<%~ Wrlss %>)</option>
 				<option value='static_wireless'><%~ StIP %> (<%~ Wrlss %>)</option>
-				<option value='3g'>3G (GSM)</option>
+				<option value='3g'><%~ Mo3g %></option>
+				<option value='qmi'><%~ Mo3gQMI %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>
+
 
 		<div id='wan_dhcp_ip_container'>
 			<label class='leftcolumn'><%~ CurrIP %>:</label>
@@ -376,11 +389,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<label class='leftcolumn' for='wan_3g_service'><%~ Srvc %>:</label>
 			<select class='rightcolumn' id='wan_3g_service' onchange="updateService()">
 				<option value='cdma'>CDMA/EV-DO</option>
-				<option value='umts'>4G/3G/2G (<%~ auto %>)</option>
-				<option value='umts_pref'>3G <%~ Prfr %></option>
-				<option value='gprs_pref'>2G <%~ Prfr %></option>
-				<option value='umts_only'>3G <%~ Only %></option>
-				<option value='gprs_only'>2G <%~ Only %></option>
+				<option value='umts'><%~ S4G3G2G %></option>
+				<option value='umts_pref'><%~ S3GPrfr %></option>
+				<option value='gprs_pref'><%~ S2GPrfr %></option>
+				<option value='umts_only'><%~ S3GOnly %></option>
+				<option value='gprs_only'><%~ S2GOnly %></option>
 			</select>
 		</div>
 		<div id='wan_3g_device_container'>
@@ -476,8 +489,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 			<select class='rightcolumn' id="lan_dns_source" onchange="setDnsSource(this)"> 
 				<option value="isp"><%~ DfltDNS %></option>
-				<option value="opendns">OpenDNS <%~ Srvs %></option>
-				<option value="google">Google DNS <%~ Srvs %></option>
+				<option value="opendns"><%~ OpnSrvs %></option>
+				<option value="google"><%~ GooSrvs %></option>
 				<option value="custom"><%~ CstDSrv %></option>
 			</select>
 		</div>
@@ -526,7 +539,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<select id='wifi_hwmode' onchange='setHwMode(this)'>
 					<option value='11ng'>N+G+B</option>
 					<option value='11g'>G+B</option>
-					<option value='11b'>B <%~ Only %></option>
+					<option value='11b'>B</option>
 					<option value='auto'><%~ auto %></option>
 				</select>
 			</span>
@@ -592,7 +605,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<em><%~ FltrInfo %></em>
 			</div>
 			<div>
-				<label class='leftcolumn' for='mac_filter_policy'>MAC Filter Policy:</label>
+				<label class='leftcolumn' for='mac_filter_policy'><%~ MACFiPo %>:</label>
 				<select class='rightcolumn' id='mac_filter_policy'>
 					<option value='allow'><%~ AllwMAC %></option>
 					<option value='deny' ><%~ DnyMAC %></option>
@@ -630,8 +643,8 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_client_band_container' class='indent'>
 			<label class='leftcolumn' for='wifi_client_band' id='wifi_client_band_label'><%~ WlBnd %>:</label>
 			<select class='rightcolumn' id='wifi_client_band' onchange='setHwMode(document.getElementById("wifi_hwmode"))'>
-				<option value="2.4">2.4 Ghz</option>
-				<option value="5">5 Ghz</option>
+				<option value="2.4">2.4 GHz</option>
+				<option value="5">5 GHz</option>
 			</select>
 		</div>
 
@@ -680,7 +693,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_pass2_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass2' id='wifi_pass2_label'><%~ Pswd %>:</label>
 			<input type='password' id='wifi_pass2' size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
-			<input type='checkbox' id='show_pass2' onclick='togglePass(2)'/>
+			<input type='checkbox' id='show_pass2' onclick='togglePass("wifi_pass2")'/>
 			<label for="show_pass2" id="show_pass2_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep2_container' class='indent'>
@@ -747,7 +760,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		<div id='wifi_pass1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_pass1' id='wifi_pass1_label'><%~ Pswd %>:</label>
 			<input type='password' id='wifi_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
-			<input type='checkbox' id='show_pass1' onclick='togglePass(1)'/>
+			<input type='checkbox' id='show_pass1' onclick='togglePass("wifi_pass1")'/>
 			<label for="show_pass1" id="show_pass1_label" class='rightcolumn'><%~ rvel %></label><br/>
 		</div>
 		<div id='wifi_wep1_container' class='indent'>
@@ -765,7 +778,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='wifi_server1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_server1' id='wifi_server1_label'>RADIUS <%~ Srvr %> IP:</label>
-			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIP(this)'/><br/>
+			<input type='text' id='wifi_server1'  size='20' onkeyup='proofreadIp(this)'/><br/>
 		</div>
 		<div id='wifi_port1_container' class='indent'>
 			<label class='leftcolumn' for='wifi_port1' id='wifi_port1_label'>RADIUS <%~ SrvPt %>:</label>
@@ -797,6 +810,74 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input type="button" class="default_button" id="add_wifi_wds_mac_button" value="<%~ Add %>" onclick='addMacToWds("wifi")' />
 			</span>
 			<div class="rightcolumnonly"><div id="wifi_wds_mac_table_container"></div></div>
+		</div>
+
+		<div id='internal_divider3' class='internal_divider'></div>
+
+		<div id='wifi_guest_mode_container'>
+			<label class="leftcolumn" for='wifi_guest_mode'><%~ GNet %>:</label>
+			<select class="rightcolumn" id='wifi_guest_mode' onchange='setWifiVisibility()' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
+                <div id='wifi_guest_container'>
+
+		<div id='wifi_guest_ssid1_container'>
+			<label class='leftcolumn' for='wifi_guest_ssid1' id='wifi_guest_ssid1_label'><%~ GNetID %>:</label>
+			<input type='text' id='wifi_guest_ssid1'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		        <input type='text' id='wifi_guest_mac_g' style='display: none'/>
+		</div>
+
+		<div id='wifi_guest_ssid1a_container'>
+			<label class='leftcolumn' for='wifi_guest_ssid1a' id='wifi_guest_ssid1a_label'><%~ GNet5ID %></label>
+			<input type='text' id='wifi_guest_ssid1a'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
+		        <input type='text' id='wifi_guest_mac_a' style='display: none'/>
+		</div>
+
+		<div id='wifi_guest_encryption1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_guest_encryption1' id='wifi_guest_encryption1_label'><%~ Encr %>:</label>
+			<select class='rightcolumn' id='wifi_guest_encryption1' onchange='setWifiVisibility()'>
+				<option value='none'><%~ None %></option>
+				<option value='psk2'>WPA2 PSK</option>
+				<option value='psk'>WPA PSK</option>
+				<option value='wep'>WEP</option>
+			</select>
+		</div>
+
+		<div id='wifi_guest_pass1_container' class='indent'>
+			<label class='leftcolumn' for='wifi_guest_pass1' id='wifi_guest_pass1_label'><%~ Pswd %>:</label>
+			<input type='password' id='wifi_guest_pass1'  size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+			<input type='checkbox' id='show_guest_pass1' onclick='togglePass("wifi_guest_pass1")'/>
+			<label for="show_guest_pass1" id="show_guest_pass1_label" class='rightcolumn'><%~ rvel %></label><br/>
+		</div>
+		<div id='wifi_guest_wep1_container' class='indent'>
+			<div style="display:block;">
+				<label class='leftcolumn' for='wifi_guest_wep1' id='wifi_guest_wep1_label'><%~ HexK %>:</label>
+				<input type='text' id='wifi_guest_wep1' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
+			</div>
+			<div>
+				<input class='rightcolumnonly' type='button' value='<%~ Rndm %> 40/64 Bit WEP Key' id='guestwep1gen40' onclick='setToWepKey("wifi_guest_wep1",10)'>
+			</div>
+			<div>
+				<input class='rightcolumnonly' type='button' value='<%~ Rndm %> 104/128 Bit WEP Key' id='guestwep1gen104' onclick='setToWepKey("wifi_guest_wep1",26)'>
+			</div>
+		</div>
+
+		<div id='wifi_guest_hidden_container' class='indent'>
+			<label class='leftcolumn' id='wifi_guest_hidden_label' for='wifi_guest_hidden'><%~ BcsID %>:</label>
+			<select class='rightcolumn' id='wifi_guest_hidden' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
+		<div id='wifi_guest_isolate_container' class='indent'>
+			<label class='leftcolumn' id='wifi_guest_isolate_label' for='wifi_guest_isolate'><%~ WlIso %>:</label>
+			<select class='rightcolumn' id='wifi_guest_isolate' >
+				<option value='disabled'><%~ Disabled %></option>
+				<option value='enabled'><%~ Enabled %></option>
+			</select>
+		</div>
 		</div>
 	</fieldset>
 

@@ -34,7 +34,14 @@ define Package/plugin-gargoyle-minidlna/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci set gargoyle.display.system_minidlna='DLNA'
+	menu_name="DLNA"
+	[ -n `which i18n` ] && {
+		mn=$$(i18n-menu gargoyle.display.system_minidlna)
+		if [ -n "$$mn" ] ; then
+			menu_name="$$mn"
+		fi
+	}
+	uci set gargoyle.display.system_minidlna="$$menu_name"
 	uci set gargoyle.scripts.system_minidlna='minidlna.sh'
 	uci set gargoyle.system.minidlna='352'
 	uci commit gargoyle

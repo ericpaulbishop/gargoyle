@@ -43,7 +43,7 @@ elif [ "$percent_swap" = "0" ] ; then
 	sleep 10
 	mkfs.ext$ext_version "$disk"1
 else
-	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /cylinders.*total.*sectors/ { print $8 } ' )
+	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /^Disk.*sectors/ { print $7 } ' )
 	ext_sectors=$((  (100-$percent_swap)*$sectors/100 ))
 	if [ "$ext_sectors" = "0" ] ; then
 		ext_sectors=1
@@ -66,14 +66,16 @@ fi
 if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 	UUID=$(blkid | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
 	if [ -n "$UUID" ]; then
-		uci set fstab.automount.anon_mount=0
+		uci set fstab.@global[0].anon_mount=0
+		uci set fstab.@global[0].check_fs=1
+		uci del fstab.@mount[0] > /dev/null 2>&1
+		uci set fstab.@mount[0]=mount
 		uci set fstab.@mount[0].target=/overlay
 		uci del fstab.@mount[0].device > /dev/null 2>&1
 		uci set fstab.@mount[0].uuid="$UUID"
 		uci set fstab.@mount[0].fstype=ext$ext_version
 		uci set fstab.@mount[0].options="rw,noatime"
 		uci set fstab.@mount[0].enabled=1
-		uci set fstab.@mount[0].enabled_fsck=1
 		uci commit fstab
 
 		# copy all data

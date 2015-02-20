@@ -65,7 +65,7 @@
  }
 --- a/librpc/ndr/libndr.h
 +++ b/librpc/ndr/libndr.h
-@@ -598,4 +598,20 @@ _PUBLIC_ enum ndr_err_code ndr_push_enum
+@@ -604,4 +604,20 @@ _PUBLIC_ enum ndr_err_code ndr_push_enum
  
  _PUBLIC_ void ndr_print_bool(struct ndr_print *ndr, const char *name, const bool b);
  
@@ -200,7 +200,7 @@
  
  	result = talloc_asprintf(talloc_tos(), "NT_STATUS(0x%08x)",
  				 NT_STATUS_V(nt_code));
-@@ -767,12 +773,14 @@ NTSTATUS nt_status_string_to_code(const 
+@@ -767,12 +773,14 @@ NTSTATUS nt_status_string_to_code(const
  {
  	int idx = 0;
  

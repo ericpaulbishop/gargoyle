@@ -1,0 +1,112 @@
+--- a/package/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:26:21.321451783 -0400
++++ b/package/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:23:46.186983811 -0400
+@@ -4,6 +4,13 @@
+ . /lib/functions.sh
+ . /lib/netifd/netifd-proto.sh
+ 
++change_state () {
++	[ -n "$INTERFACE" ] || return
++	uci_revert_state "$1" "$2" "$3" "$4"
++	uci_set_state "$1" "$2" "$3" "$4"
++}
++
++
+ set_classless_routes() {
+ 	local max=128
+ 	local type
+@@ -35,10 +42,35 @@
+ 	done
+ 	proto_send_update "$INTERFACE"
+ 
++	
++	
++	local old_ip
++	local old_broadcast
++	local old_subnet
++	[ -n "$INTERFACE" ] && {
++		old_ip="$(uci_get_state network "$INTERFACE" ipaddr)"
++		old_broadcast="$(uci_get_state network "$INTERFACE" broadcast)"
++		old_subnet="$(uci_get_state network "$INTERFACE" netmask)"
++	}
++	[ "$ip" != "$old_ip" ] \
++	|| [ "${broadcast:-+}" != "$old_broadcast" ] \
++	|| [ "${subnet:-255.255.255.0}" != "$old_subnet" ] && {
++		change_state network "$INTERFACE" ipaddr "$ip"
++		change_state network "$INTERFACE" broadcast "${broadcast:-+}"
++		change_state network "$INTERFACE" netmask "${subnet:-255.255.255.0}"
++	}
++	change_state network "$INTERFACE" gateway "$router"
++	[ -n "$hostname" ] &&	change_state network "$INTERFACE" lease_hostname "$hostname"
++	
++	change_state network "$INTERFACE" lease_server "$serverid" 
++	change_state network "$INTERFACE" lease_lifetime "$lease" 
++	change_state network "$INTERFACE" lease_acquired "$(sed -ne 's![^0-9].*$!!p' /proc/uptime)"
++
++
++
+ 	# TODO
+ 	# [ -n "$ntpsrv" ] && 	change_state network "$ifc" lease_ntpsrv "$ntpsrv"
+ 	# [ -n "$timesvr" ] && 	change_state network "$ifc" lease_timesrv "$timesvr"
+-	# [ -n "$hostname" ] &&	change_state network "$ifc" lease_hostname "$hostname"
+ 	# [ -n "$timezone" ] && 	change_state network "$ifc" lease_timezone "$timezone"
+ }
+ 
+--- /dev/null	2012-09-18 15:11:33.606325627 -0400
++++ b/package/ppp/files/etc/ppp/ip-down.d/state	2012-09-25 14:39:52.633923965 -0400
+@@ -0,0 +1,15 @@
++#!/bin/sh
++. /lib/functions.sh
++PPP_IFACE="$1"
++PPP_TTY="$2"
++PPP_SPEED="$3"
++PPP_LOCAL="$4"
++PPP_REMOTE="$5"
++PPP_IPPARAM="$(echo $6 | sed 's/\./_/g')"
++export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
++[ -z "$PPP_IPPARAM" ] || {
++
++	# remove the interface's network state
++	uci_revert_state network "$PPP_IPPARAM"
++}
++
+--- /dev/null	2012-09-18 15:11:33.606325627 -0400
++++ b/package/ppp/files/etc/ppp/ip-up.d/state	2012-09-25 14:38:06.108295459 -0400
+@@ -0,0 +1,22 @@
++#!/bin/sh
++
++. /lib/functions.sh
++. /lib/network/config.sh
++
++PPP_IFACE="$1"
++PPP_TTY="$2"
++PPP_SPEED="$3"
++PPP_LOCAL="$4"
++PPP_REMOTE="$5"
++PPP_IPPARAM="$(echo $6 | sed 's/\./_/g')"
++
++export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
++[ -z "$PPP_IPPARAM" -o -z "$PPP_LOCAL" ] || {
++	uci_set_state network "$PPP_IPPARAM" ifname "$PPP_IFACE"
++	uci_set_state network "$PPP_IPPARAM" ipaddr "$PPP_LOCAL"
++	uci_set_state network "$PPP_IPPARAM" gateway "$PPP_REMOTE"
++	
++	# Point to Point link, Netmask should be 255.255.255.255
++	uci_set_state network "$PPP_IPPARAM" netmask "255.255.255.255"
++}
++
+--- a/package/ppp/Makefile	2012-09-16 12:56:58.156199098 -0400
++++ b/package/ppp/Makefile	2012-10-06 18:11:23.826886573 -0400
+@@ -185,9 +185,13 @@
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/sbin/pppd $(1)/usr/sbin/
+ 	$(INSTALL_DIR) $(1)/etc/ppp
++	$(INSTALL_DIR) $(1)/etc/ppp/ip-up.d
++	$(INSTALL_DIR) $(1)/etc/ppp/ip-down.d
+ 	$(INSTALL_CONF) ./files/etc/ppp/chap-secrets $(1)/etc/ppp/
+ 	$(INSTALL_DATA) ./files/etc/ppp/filter $(1)/etc/ppp/
+ 	$(INSTALL_DATA) ./files/etc/ppp/options $(1)/etc/ppp/
++	$(INSTALL_BIN) ./files/etc/ppp/ip-up.d/state $(1)/etc/ppp/ip-up.d/
++	$(INSTALL_BIN) ./files/etc/ppp/ip-down.d/state $(1)/etc/ppp/ip-down.d/
+ 	ln -sf /tmp/resolv.conf.ppp $(1)/etc/ppp/resolv.conf
+ 	$(INSTALL_DIR) $(1)/lib/netifd/proto
+ 	$(INSTALL_BIN) ./files/ppp.sh $(1)/lib/netifd/proto/

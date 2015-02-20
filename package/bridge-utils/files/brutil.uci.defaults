@@ -1,0 +1,5 @@
+#!/bin/sh
+
+rm -rf /usr/sbin/brctl
+ln -s /usr/sbin/brctl.real /usr/sbin/brctl
+

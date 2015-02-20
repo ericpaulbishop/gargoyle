@@ -1,0 +1,22 @@
+--- backfire-a/target/imagebuilder/files/Makefile	2011-11-24 22:56:17.838893060 -0500
++++ backfire-b/target/imagebuilder/files/Makefile	2011-12-11 02:01:09.549754393 -0500
+@@ -148,6 +148,8 @@
+ 		done || true; \
+ 	)
+ 	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.control)
+ 
+ build_image: FORCE
+ 	@echo
+--- backfire-a/package/Makefile	2011-11-24 22:56:18.198898455 -0500
++++ backfire-b/package/Makefile	2011-12-11 02:00:14.148899606 -0500
+@@ -86,6 +86,8 @@
+ 	@-find $(TARGET_DIR) -name .svn  | $(XARGS) rm -rf
+ 	@-find $(TARGET_DIR) -name '.#*' | $(XARGS) rm -f
+ 	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.control)
+ 	$(call mklibs)
+ 
+ $(curdir)/index: FORCE

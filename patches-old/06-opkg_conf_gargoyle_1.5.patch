@@ -1,0 +1,28 @@
+--- a/include/version.mk	2013-09-22 20:50:10.164101285 -0400
++++ b/include/version.mk	2013-10-08 17:57:04.843271041 -0400
+@@ -15,7 +15,7 @@
+ 	CONFIG_VERSION_DIST
+ 
+ VERSION_NUMBER:=$(call qstrip,$(CONFIG_VERSION_NUMBER))
+-VERSION_NUMBER:=$(if $(VERSION_NUMBER),$(VERSION_NUMBER),12.09.1)
++VERSION_NUMBER:=$(if $(VERSION_NUMBER),$(VERSION_NUMBER),12.09)
+ 
+ VERSION_CODE:=$(call qstrip,$(CONFIG_VERSION_NUMBER))
+ VERSION_CODE:=$(if $(VERSION_CODE),$(VERSION_CODE),Attitude Adjustment)
+@@ -24,7 +24,7 @@
+ VERSION_NICK:=$(if $(VERSION_NICK),$(VERSION_NICK),$(RELEASE))
+ 
+ VERSION_REPO:=$(call qstrip,$(CONFIG_VERSION_REPO))
+-VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/attitude_adjustment/12.09.1/%S/packages)
++VERSION_REPO:=$(if $(VERSION_REPO),$(VERSION_REPO),http://downloads.openwrt.org/attitude_adjustment/12.09/%S/packages)
+ 
+ VERSION_DIST:=$(call qstrip,$(CONFIG_VERSION_DIST))
+ VERSION_DIST:=$(if $(VERSION_DIST),$(VERSION_DIST),OpenWrt)
+--- a/package/opkg/files/opkg.conf	2011-07-05 12:21:07.058893966 -0400
++++ b/package/opkg/files/opkg.conf	2011-07-05 12:59:45.805329997 -0400
+@@ -1,4 +1,5 @@
+ src/gz %n %U
++src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.6/%T
+ dest root /
+ dest ram /tmp
+ lists_dir ext /var/opkg-lists

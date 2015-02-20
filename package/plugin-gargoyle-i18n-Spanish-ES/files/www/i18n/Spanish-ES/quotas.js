@@ -24,6 +24,7 @@ quotasStr.DuplicateRange="Intervalo de IP/Tiempo Duplicado - sólo se permite un
 quotasStr.OneTimeQuotaError="Es posible tener una sola cuota, en un momento dado, para hosts sin cuotas explícitas";
 quotasStr.OneNetworkQuotaError="Es posible solamente una única cuota, en un momento dado, que se aplique a toda la red";
 quotasStr.QuotaAddError="No se pudo añadir la cuota.";
+quotasStr.NA="N.A."; //No Aplica abbr - can't use the proper N/A
 
 //template
 quotasStr.AppliesTo="Se Aplica a";
@@ -50,6 +51,7 @@ quotasStr.TheseDays="Estos Días";
 quotasStr.TheseDaysHours="Estos Días y Horarios";
 quotasStr.TheseTimes="Estos Horarios en la Semana";
 quotasStr.Sample="p. ej. lun 00:30 - jue 13:15, vie 14:00 - vie 15:00";
+quotasStr.SSample="p. ej.";
 quotasStr.Exceed="Al exceder la cuota";
 quotasStr.ShutdownNet="Desactivar todo el acceso a Internet";
 quotasStr.Throttle="Limitar Ancho de Banda";

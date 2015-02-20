@@ -14,7 +14,6 @@ pingS.WRcon="Reconectar WAN";
 pingS.Rbot="Reiniciar";
 pingS.Rscp="Ejecutar script personalizado";
 pingS.Scpt="Script";
-pingS.SpcWarn="Si el comando contiene espacios debe ser escrito entre comillas";
 
 //javascript
 pingS.ScptErr="Debe agregar el script a ejecutar";

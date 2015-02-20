@@ -13,14 +13,6 @@
 <%
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
-%>
-</script>
-
-
-<script>
-<%
-	echo "var storageDrives = [];"
-	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
 	gpkg dest-info -o 'js'
 %>
@@ -109,7 +101,7 @@
 
 		<div id='tor_relay_max_bw_container'>
 			<label  class='wideleftcolumn' for='tor_relay_max_bw' id='tor_relay_max_bw_label'><%~ MaxRB %>:</label>
-			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;KBytes/s</em></span>
+			<span class="rightcolumn"><input type="text" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;<%~ KBs %></em></span>
 		</div>
 
 		<div id='tor_relay_publish_container'>

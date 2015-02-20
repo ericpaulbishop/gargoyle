@@ -34,11 +34,12 @@ bndwS.expd="expand";
 //javascript
 bndwS.UpCl="Upload Class";
 bndwS.DlCl="Download Class";
-bndwS.EMonths=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 bndwS.Time="Time";
 bndwS.BPlot="Bandwidth Plot";
 bndwS.BUsag="Bandwidth Usage";
 bndwS.RstGr="Resetting Graphs...";
+bndwS.DelAD="Delete All Data?";
+bndwS.DelDW="Deleting Data...";
 
 //bandwidth_distribution.sh
 bndwS.DOpSect="Bandwidth Distribution Display Options";

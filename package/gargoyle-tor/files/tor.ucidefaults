@@ -2,4 +2,5 @@
 
 uci set firewall.tor_include_file=include
 uci set firewall.tor_include_file.path='/etc/tor.firewall'
+uci set firewall.tor_include_file.reload='1'
 uci commit

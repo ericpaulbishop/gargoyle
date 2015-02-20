@@ -98,7 +98,7 @@
 					<label id="max_pktsize_label" for='max_pktsize'><%~ MaxPktLen %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='max_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
-				<em>bytes</em>
+				<em><%~ byt %></em>
 			</div>
 			<div>
 				<div class='leftcolumn'>
@@ -106,7 +106,7 @@
 					<label id="min_pktsize_label" for='min_pktsize'><%~ MinPktLen %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
-				<em>bytes</em>
+				<em><%~ byt %></em>
 			</div>
 
 
@@ -129,7 +129,7 @@
 					<label id="connbytes_kb_label" for='connbytes_kb'><%~ Conreach %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='connbytes_kb' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='28' />
-				<em>kBytes</em>
+				<em><%~ KBy %></em>
 			</div>
 
 			<div>
@@ -164,7 +164,7 @@
 		<div>
 			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth"><%~ UTotBand %>:</label>
 			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-			<em>kbit/s</em>
+			<em><%~ Kbs %></em>
 
 		</div>
 
@@ -213,7 +213,7 @@
 					</span>
 					<span class='rightcolumn'>
 						<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-						<em>kbit/s</em>
+						<em><%~ Kbs %></em>
 					</span>
 				</div>
 			</div>
@@ -231,7 +231,7 @@
 					</span>
 					<span class='rightcolumn'>
 						<input type='text' class="rightcolumn" id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-						<em>kbit/s</em>
+						<em><%~ Kbs %></em>
 					</span>
 				</div>
 			</div>

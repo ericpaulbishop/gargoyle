@@ -1,0 +1,52 @@
+--- a/package/comgt/files/3g.sh
++++ b/package/comgt/files/3g.sh
+@@ -52,13 +52,32 @@
+ 				export MODE="AT_OPSYS=${CODE}"
+ 			elif echo "$cardinfo" | grep -q "Sierra Wireless"; then
+ 				SIERRA=1
++				case "$service" in
++					umts_only) CODE="01";;
++					gprs_only) CODE="02";;
++					umts_pref) CODE="03";;
++					gprs_pref) CODE="04";;
++					*) CODE="00";;
++				esac
++				export MODE="AT!SELRAT=${CODE}"
+ 			elif echo "$cardinfo" | grep -qi huawei; then
+ 				case "$service" in
+ 					umts_only) CODE="14,2";;
+ 					gprs_only) CODE="13,1";;
++					umts_pref) CODE="2,2";;
++					gprs_pref) CODE="2,1";;
+ 					*) CODE="2,2";;
+ 				esac
+ 				export MODE="AT^SYSCFG=${CODE},3FFFFFFF,2,4"
++			elif echo "$cardinfo" | grep -q ZTE; then
++				case "$service" in
++					umts_only) CODE="2,0,0";;
++					gprs_only) CODE="1,0,0";;
++					umts_pref) CODE="0,0,2";;
++					gprs_pref) CODE="0,0,1";;
++					*) CODE="0,0,0";;
++				esac
++				export MODE="AT+ZSNT=${CODE}"
+ 			fi
+ 
+ 			if [ -n "$pincode" ]; then
+@@ -68,6 +87,7 @@
+ 					return 1
+ 				}
+ 			fi
++			[ "$service" = "umts" ] && MODE=""
+ 			[ -n "$MODE" ] && gcom -d "$device" -s /etc/gcom/setmode.gcom
+ 
+ 			# wait for carrier to avoid firmware stability bugs
+@@ -77,6 +97,8 @@
+ 		;;
+ 	esac
+ 
++	gcom -d "$device" -s /etc/gcom/getstrength.gcom > /tmp/strength.txt
++
+ 	connect="${apn:+USE_APN=$apn }/usr/sbin/chat -t5 -v -E -f $chat"
+ 	ppp_generic_setup "$interface" \
+ 		noaccomp \

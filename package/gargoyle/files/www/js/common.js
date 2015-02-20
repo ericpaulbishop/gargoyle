@@ -7,6 +7,7 @@
  */
 
 var UI=new Object(); //part of i18n
+var TiZ=new Object(); //i18n timezones
 
 window.onresize = function onresize()
 {
@@ -41,27 +42,41 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	{
 		var totalHeight="100%";
 		var totalWidth="100%";
+		
+		var heightFromDoc=0;
+		var widthFromDoc=0;
 		if(document.body.parentNode.scrollHeight)
 		{
-			totalHeight = document.body.parentNode.scrollHeight + "px";
+			heightFromDoc = heightFromDoc >= document.body.parentNode.scrollHeight ? heightFromDoc : document.body.parentNode.scrollHeight
 		}
-		else if(document.height)
+		if(document.body.scrollHeight)
 		{
-			totalHeight = document.height + "px";
+			heightFromDoc = heightFromDoc >= document.body.scrollHeight ? heightFromDoc : document.body.scrollHeight
 		}
+		if(document.height)
+		{
+			heightFromDoc = heightFromDoc >= document.height ? heightFromDoc : document.height
+		}
+		totalHeight = heightFromDoc > 0 ? heightFromDoc + "px" : totalHeight
+
 		if(document.body.parentNode.scrollWidth)
 		{
-			totalWidth  = document.body.parentNode.scrollWidth;
-			if(document.width)
-			{
-				totalWidth = document.width > totalWidth ? document.width : totalWidth;
-			}
-			totalWidth = totalWidth + "px";
+			widthFromDoc = widthFromDoc >= document.body.parentNode.scrollWidth ? widthFromDoc : document.body.parentNode.scrollWidth
 		}
-		else if(document.width)
+		if(document.body.scrollWidth)
 		{
-			totalWidth = document.width + "px";
+			widthFromDoc = widthFromDoc >= document.body.scrollWidth ? widthFromDoc : document.body.scrollWidth
 		}
+		if(document.width)
+		{
+			widthFromDoc = widthFromDoc >= document.width ? widthFromDoc : document.width
+		}
+		totalWidth = widthFromDoc > 0 ? widthFromDoc + "px" : totalWidth
+		
+
+
+
+		
 
 		var viewportHeight;
 		var vewportWidth;
@@ -480,6 +495,7 @@ function UCIContainer()
 				else
 				{
 					//should never get here -- if problems put debugging code here
+				        //val = val;    // good enough for a breakpoint to be set.
 				}
 			}
 			copy.set(splitKey[1], splitKey[2], splitKey[3], val, true);
@@ -604,25 +620,9 @@ function UCIContainer()
 
 function getParameterDefinition(parameter, definition)
 {
-	return(fullEscape(parameter) + "=" + fullEscape(definition));
+	return(encodeURIComponent(parameter) + "=" + encodeURIComponent(definition));
 }
 
-
-function fullEscape(str)
-{
-	str = escape(str);
-	var otherEscape = [ '*', '@', '-', '_', '+', '.', '/' ];
-	var otherEscaped= [ '2A','40','2D','5F','2B','2E','2F'];
-	for(oeIndex=0; oeIndex < otherEscape.length; oeIndex++)
-	{
-		var splitStr = str.split( otherEscape[oeIndex] );
-		if(splitStr.length > 1)
-		{
-			str = splitStr.join( "%" + otherEscaped[oeIndex] );
-		}
-	}
-	return str;
-}
 
 function removeStringFromArray(arr, str)
 {
@@ -669,7 +669,7 @@ function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 		}
 
 		text = text == null ? "" : text;
-		var textParts = text.split("\n");
+		var textParts = text.replace(/\&amp;/g, '&').split("\n");
 		while(textParts.length > 0)
 		{
 			var txt = textParts.shift()
@@ -898,25 +898,26 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 	return errorArray;
 }
 
-function parseBytes(bytes, units)
+function parseBytes(bytes, units, abbr, dDgt)
 {
 	var parsed;
 	units = units != "KBytes" && units != "MBytes" && units != "GBytes" && units != "TBytes" ? "mixed" : units;
+	spcr = abbr==null||abbr==0 ? " " : "";
 	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || units == "TBytes")
 	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + " TBytes";
+		parsed = (bytes/(1024*1024*1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.TB:UI.TBy);
 	}
 	else if( (units == "mixed" && bytes > 1024*1024*1024) || units == "GBytes")
 	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + " GBytes";
+		parsed = (bytes/(1024*1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.GB:UI.GBy);
 	}
 	else if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes" )
 	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + " MBytes";
+		parsed = (bytes/(1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.MB:UI.MBy);
 	}
 	else
 	{
-		parsed = truncateDecimal(bytes/(1024)) + " KBytes";
+		parsed = (bytes/(1024)).toFixed(dDgt||3) + spcr + (abbr?UI.KB:UI.KBy);
 	}
 	
 	return parsed;
@@ -929,11 +930,11 @@ function parseKbytesPerSecond(kbytes, units)
 	
 	if( (units == "mixed" && kbytes > 1024) || units == "MBytes/s")
 	{
-		parsed = truncateDecimal(kbytes/(1024)) + " MBytes/s";
+		parsed = (kbytes/(1024)).toFixed(3) + " "+UI.MBs;
 	}
 	else
 	{
-		parsed = kbytes + " KBytes/s";
+		parsed = kbytes + " "+UI.KBs;
 	}
 	return parsed;
 }
@@ -2032,6 +2033,36 @@ function isBridge(testUci)
 	return bridgeTest;
 }
 
+//cnv_LocaleTime takes a "21:09" 24hr timestamp
+//  returns a locale-based timestamp (using 12h/24h time prefs & pre/post AM/PM notations): 21:09, 午前 9:09 or 9:09 PM
+//NOTE: requires uciOriginal to have the 'gargoyle' section; use 'gargoyle_header_footer [options] gargoyle'
+function cnv24hToLocal(timestamp) {
+	style=uciOriginal.get("gargoyle", "global", "hour_style");
+	if (style == 24) return timestamp;
+	locale_time=""
+	
+	h_m_stamp=timestamp.split(":");
+	curr_hour=eval(h_m_stamp[0]);
+	if (UI.pAM.length > 0 && UI.pPM.length > 0) {
+		locale_time+=(curr_hour < 12 ? UI.pAM : UI.pPM)+" "
+		locale_time+=(curr_hour == 0 ? "12" : (curr_hour <= 12 ? curr_hour : curr_hour-12) )+":" + h_m_stamp[1]
+	} else {
+		locale_time+=(curr_hour == 0 ? "12" : (curr_hour <= 12 ? curr_hour : curr_hour-12) )+":" + h_m_stamp[1]
+		locale_time+=" "+(curr_hour < 12 ? UI.hAM : UI.hPM);
+	}
+	return locale_time
+}
+
+//cnv_LocaleTime takes a full "09/16/13 21:09 EDT" date/time stamp
+//  returns (based on hour prefs & pre/post AM/PM notations): "09/16/13 21:09 EDT", "09/16/13 午前 9:09 UTC" or "09/16/13 9:09 PM EDT"
+//NOTE: requires uciOriginal to have the 'gargoyle' section; use 'gargoyle_header_footer [options] gargoyle'
+function cnv_LocaleTime(full_date) { // 
+	style=uciOriginal.get("gargoyle", "global", "hour_style");
+	if (style == 24) return full_date;
+	tcomponents=full_date.split(" ");
+	return tcomponents[0]+" "+cnv24hToLocal(tcomponents[1])+" "+tcomponents[2]
+}
+
 function parseTimezones(timezoneLines)
 {
 	timezoneList = [];
@@ -2047,7 +2078,12 @@ function parseTimezones(timezoneLines)
 			region = stripQuotes( splitLine.pop() );
 			definition = stripQuotes( splitLine.pop() );
 			timezone = stripQuotes( splitLine.pop() );
-			
+			if (ObjLen(TiZ) > 0) { //localized firmware will = 0
+				tz_parts=timezone.split(" ");
+				if (tz_parts.length == 2 && tz_parts[1].search("TiZ.") == 0) {
+					timezone=tz_parts[0]+" "+eval(tz_parts[1]);
+				}
+			}
 
 			timezoneList.push(timezone);
 			timezoneDefinitions[timezone] = definition;

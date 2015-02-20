@@ -3,3 +3,8 @@
 fallback=USB Printer
 EN=USB Printer
 ES=Impresora USB
+DE=USB Drucker
+PL=Drukarki
+ZH-CN=USB打印机
+RU=USB-принтер
+NO=USB Skriver

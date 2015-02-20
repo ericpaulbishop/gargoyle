@@ -63,12 +63,14 @@ int main(int argc, char** argv)
 	char* death_mark = NULL;
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
+    int ret;
 	
 	unsigned char full_qos_active = 0;
 
 	char c;
-	while((c = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((ret = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
+        c = ret;
 		switch(c)
 		{
 			case 'W':
@@ -952,7 +954,7 @@ uint32_t ip_to_host_int(char* ip_str)
 
 void delete_chain_from_table(char* table, char* delete_chain)
 {
-	char *command = dynamic_strcat(3, "iptables -t ", table, " -L --line-numbers 2>/dev/null");
+	char *command = dynamic_strcat(3, "iptables -t ", table, " -L -n --line-numbers 2>/dev/null");
 	unsigned long num_lines = 0;
 	char** table_dump = get_shell_command_output_lines(command, &num_lines );
 	free(command);	

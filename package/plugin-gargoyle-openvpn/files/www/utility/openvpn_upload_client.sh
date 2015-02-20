@@ -10,7 +10,7 @@ eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_
 
 
 
-echo "Content-Type: text/html;charset=utf-8"
+echo "Content-Type: text/html; charset=utf-8"
 echo ""
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
@@ -65,6 +65,7 @@ error=""
 tab=$(printf "\t")
 
 ta_direction=""
+block_non_openvpn=0
 if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 
 	is_targz=$(dd if="$FORM_openvpn_client_zip_file" bs=1 count=2 2>/dev/null | hexdump -v -e '1/1 "%02x"')
@@ -92,7 +93,9 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	key_file=$( egrep "^[$tab ]*key[$tab ]+"            "$conf_file" | sed 's/^.*\///g' | sed 's/[\t ]*$//g' | sed 's/^.*[\t ]//g' )
 	ta_file=$(  egrep "^[$tab ]*tls\-auth[$tab ]+"      "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $2 } ' | sed 's/^.*\///g' )
 	ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "$conf_file" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
-
+	if [ -e ./block_non_openvpn ] ; then
+		block_non_openvpn=1
+	fi
 
 	if [ -s network ] ; then
 		expected_ip=$(awk ' $0 ~ /ipaddr/ { print $NF }' network)
@@ -140,13 +143,13 @@ if [ -s "$FORM_openvpn_client_zip_file" ] ; then
 	fi
 
 	if   [ ! -f "$ca_file" ] ; then
-		error=$(i18n openvpn uc_CA_f)
+		error=$(i18n openvpn.uc_CA_f)
 	elif [ ! -f "$cert_file" ] ; then
-		error=$(i18n openvpn uc_crt_f)
+		error=$(i18n openvpn.uc_crt_f)
 	elif [ ! -f "$key_file" ] ; then
-		error=$(i18n openvpn uc_key_f)
+		error=$(i18n openvpn.uc_key_f)
 	elif [ ! -f "$conf_file" ] ; then
-		error=$(i18n openvpn uc_cfg_f)
+		error=$(i18n openvpn.uc_cfg_f)
 	else
 		cat "$conf_file" | tr -d "\r" > "${client_name}.conf"
 		cat "$ca_file"   | tr -d "\r" > "${client_name}_ca.crt"
@@ -198,7 +201,7 @@ else
 fi
 
 if [ ! -f "${client_name}.conf" ] ; then
-	error=$(i18n openvpn uc_cfg_f)
+	error=$(i18n openvpn.uc_cfg_f)
 fi
 
 if [ -z "$error" ] ; then
@@ -214,7 +217,7 @@ if [ -z "$error" ] ; then
 	#proofreading
 	use_tap=$(egrep  "^[$tab ]*dev[$tab ]+tap" "${client_name}.conf")
 	if [ -n "$use_tap" ] ; then
-		error=$(i18n openvpn uc_TAP_Err)
+		error=$(i18n openvpn.uc_TAP_Err)
 	fi
 
 	if [ -z "$error" ] ; then
@@ -228,9 +231,14 @@ if [ -z "$error" ] ; then
 		uci set openvpn_gargoyle.client.enabled="true"                         >/dev/null 2>&1
 		uci set openvpn_gargoyle.client.id="$client_name"                      >/dev/null 2>&1
 		uci set openvpn.custom_config.config="/etc/openvpn/$client_name.conf"  >/dev/null 2>&1
-		uci set openvpn.custom_config.enable="1"                               >/dev/null 2>&1
-		uci commit
+		uci set openvpn.custom_config.enabled="1"                               >/dev/null 2>&1
 
+		#block non-openvpn traffic to prevent leak if openvpn quits unexpectedly?
+		if [ "$block_non_openvpn" = "1" ] ; then
+			uci set openvpn_gargoyle.@client[0].block_non_openvpn="true"
+		fi
+		uci commit
+		
 		#run other commands passed to script (includes firewall config and openvpn restart)
 		if [ -n "$FORM_commands" ] ; then	
 			tmp_file="$tmp_dir/tmp.sh"
@@ -251,7 +259,7 @@ if [ -z "$error" ] ; then
 		done
 		
 		if [ -z "$have_tun_if" ] ; then
-			error=$(i18n openvpn uc_conn_Err)
+			error=$(i18n openvpn.uc_conn_Err)
 		fi
 	fi
 fi

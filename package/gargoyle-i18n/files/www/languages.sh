@@ -1,6 +1,6 @@
 #!/usr/bin/haserl
 <%
-	# Copyright © 2013 BashfulBladder and is distributed under the terms of the GNU GPL
+	# Copyright © 2013 BashfulBladder and Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
 	# configure proprietary "back end" software provided that all modifications to the web interface
 	# itself remain covered by the GPL.
@@ -14,20 +14,29 @@
 <!--
 <%
 	echo "var langs = new Array();"
-	webroot="$(uci get gargoyle.global.web_root 2>/dev/null)"
-	for lang in "${webroot:-/www}/i18n"/*; do printf 'langs.push("%s");\n' "${lang##*/}"; done
+	lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
+	if [ -n "$lang_info" ] ; then
+		printf "%s\n" "$lang_info" 
+	fi
 %>
 //-->
 </script>
 
 <fieldset>
 	<legend class="sectionheader"><%~ i18n.LMSect %></legend>
+	
+	<span class='narrowleftcolumn'>
+		<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
+	</span>
+	<span class='widerightcolumn' style="display:block; clear:right; margin-right:100px" >
+		<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Språk / Dil / γλώσσα / Язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
+	</span>
 	<div id="lang_table_container"></div>
 </fieldset>
 
 <script>
 <!--
-	resetData();
+	resetLanguagesData();
 //-->
 </script>
 

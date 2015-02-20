@@ -39,7 +39,7 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 			{
 				el.appendChild(document.createTextNode(lines.shift()))
 				if(lines.length > 0){ el.appendChild(document.createElement('br')); }
-			}		
+			}
 		}
 		else
 		{
@@ -56,7 +56,6 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 	statusTypes["root"] = pgS.PInst
 	statusTypes["plugin_root"] = pgS.Instd
 	var pkgStatus = statusTypes[ pkgData["Install-Destination"] ]
-
 
 	//deliberately add 2 newlines to spearate name/description from other data
 	elAdd(div, "strong", false, true)
@@ -76,8 +75,8 @@ function createDisplayDiv(pkgName, pkgVersion, pkgData)
 		}
 		canInstall = (!dependsMatchUsb) && pkgData["Will-Fit"] == "true"
 		elAdd(div, pgS.RDSpc+": " + parseBytes(pkgData["Required-Size"]), true, (!canInstall))
-		
-		if(!canInstall) 
+
+		if(!canInstall)
 		{
 			var emEl = elAdd(div, "em", false, false)
 			emEl.style.color = "#FF0000"
@@ -147,9 +146,8 @@ function changePluginRoot()
 	commands.push("/sbin/uci set gargoyle.plugin_options.root_dir='" + newRootDir + "'")
 	commands.push("/sbin/uci set gargoyle.plugin_options.root_drive='" + newRootDrive + "'")
 	commands.push("/sbin/uci commit");
-	
-	execute(commands);
 
+	execute(commands);
 }
 
 function removePluginSource()
@@ -161,10 +159,10 @@ function removePluginSource()
 	commands.push("mv /tmp/opkg.conf.tmp /etc/opkg.conf")
 	commands.push("rm -r '/tmp/opkg-lists/" + srcName + "'")
 	commands.push("opkg update")
-	
-	execute(commands)
 
+	execute(commands)
 }
+
 function addPluginSource()
 {
 	var srcName = document.getElementById("add_source_name").value
@@ -214,7 +212,7 @@ function addPluginSource()
 		srcUrl = srcUrl.replace(/'/, "%27");
 		commands.push("echo 'src/gz " + srcName + " " + srcUrl + "'>> /etc/opkg.conf")
 		commands.push("opkg update")
-	
+
 		execute(commands)
 	}
 }
@@ -227,10 +225,8 @@ function proofreadSourceName(input)
 	proofreadText(input, validateSourceName, 0)
 }
 
-
 function resetData()
 {
-
 	//set data for plugin root
 	var pluginRootDir   = uciOriginal.get("gargoyle", "plugin_options", "root_dir")
 	var pluginRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
@@ -242,21 +238,20 @@ function resetData()
 	document.getElementById("plugin_root_drive_static").style.display = storageDrives.length == 0 ? "block" : "none";
 	document.getElementById("plugin_root_drive_select").style.display = storageDrives.length == 0 ? "none"  : "block";
 
-	
 	document.getElementById("plugin_root_text").value           = pluginRootDir;
 	driveToPath["Root"] = "/";
 	if(storageDrives.length > 0)
 	{
 		var rootDriveDisplay = [];
 		var rootDriveValues  = [];
-		
-		rootDriveDisplay.push(pgS.RDrv+" " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " "+pgS.Totl+", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " "+pgS.Free)
+
+		rootDriveDisplay.push(pgS.RDrv + ": " + parseBytes(pkg_dests['root']['Bytes-Total']) + " " + pgS.Totl + ", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " " + pgS.Free)
 		rootDriveValues.push("root");
 		
 		var driveIndex;
 		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 		{
-			rootDriveDisplay.push( storageDrives[driveIndex][0] + " " + parseBytes(storageDrives[driveIndex][4]) + " "+pgS.Totl+", " + parseBytes(storageDrives[driveIndex][5]) + " "+pgS.Free )
+			rootDriveDisplay.push( storageDrives[driveIndex][0] + ": " + parseBytes(storageDrives[driveIndex][4]) + " "+pgS.Totl + ", " + parseBytes(storageDrives[driveIndex][5]) + " " + pgS.Free )
 			rootDriveValues.push( storageDrives[driveIndex][0] )
 			driveToPath[ storageDrives[driveIndex][0] ] = storageDrives[driveIndex][1];
 		}
@@ -269,7 +264,6 @@ function resetData()
 		setChildText("plugin_root_drive_static", pgS.RDrv+" " +  parseBytes(pkg_dests['root']['Bytes-Total']) + " "+pgS.Totl+", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " "+pgS.Free, null, null, null, document);
 		document.getElementById("plugin_root_change_container").style.display = "none"
 	}
-
 
 	//set data for plugin sources
 	var sourceTableData = [];
@@ -296,15 +290,13 @@ function resetData()
 	var sourceContainer = document.getElementById('package_source_table_container');
 	setSingleChild(sourceContainer, sourceTable)
 
-	
-	
-	
-	
-	
-	
 	//set data for plugin list
-	var columnNames = [pgS.Pkg, pgS.Instd, ''];
-	var pluginsTableData = new Array();
+	var columnLangNames = [pgS.Langs, pgS.Instd, ''];
+	var columnThemNames = [pgS.Thems, pgS.Instd, ''];
+	var columnPackNames = [pgS.Pkgs, pgS.Instd, ''];
+	var langTableData = new Array();
+	var themTableData = new Array();
+	var packTableData = new Array();
 	var pkgIndex=0;
 	for(pkgName in pkg_info)
 	{
@@ -313,14 +305,12 @@ function resetData()
 		var pkgData = pkg_info[pkgName][pkgVersion];
 		if (pkgData != null)
 		{
-			
 			var div=createDisplayDiv(pkgName, pkgVersion, pkgData)
 
-			
 			var enabledCheckbox = createInput('checkbox');
 			enabledCheckbox.disabled = true;
 			enabledCheckbox.checked = pkgData["Install-Destination"] == notInstalledVal ? false : true;
-			
+
 			var button = createInput("button");
 			button.className="default_button";
 			if (enabledCheckbox.checked)
@@ -349,21 +339,49 @@ function resetData()
 					button.className = "default_button_disabled"
 				}
 			}
-			pluginsTableData.push([div, enabledCheckbox, button]);
-			
+
+			if (pkgName.match(/plugin-gargoyle-i18n-/))
+			{
+				langTableData.push([div, enabledCheckbox, button]);
+			}
+			else if (pkgName.match(/plugin-gargoyle-theme-/))
+			{
+				themTableData.push([div, enabledCheckbox, button]);
+			}
+			else
+			{
+				packTableData.push([div, enabledCheckbox, button]);
+			}
 		}
 	}
 
-	if (pluginsTableData.length == 0)
+	if ((langTableData.length + themTableData.length + packTableData.length) == 0)
 	{
 		document.getElementById('no_packages').style.display="block";
 	}
 	else
 	{
-		pluginsTableData.sort();
-		var pluginsTable = createTable(columnNames, pluginsTableData, "packages_table", false, false);
-		var tableContainer = document.getElementById('packages_table_container');
-		setSingleChild(tableContainer, pluginsTable)
+		if (langTableData.length > 0)
+		{
+			langTableData.sort();
+			var langTable = createTable(columnLangNames, langTableData, "languages_table", false, false);
+			var tableContainer = document.getElementById('languages_table_container');
+			setSingleChild(tableContainer, langTable)
+		}
+		if (themTableData.length > 0)
+		{
+			themTableData.sort();
+			var themTable = createTable(columnThemNames, themTableData, "themes_table", false, false);
+			var tableContainer = document.getElementById('themes_table_container');
+			setSingleChild(tableContainer, themTable)
+		}
+		if (packTableData.length > 0)
+		{
+			packTableData.sort();
+			var packTable = createTable(columnPackNames, packTableData, "packages_table", false, false);
+			var tableContainer = document.getElementById('packages_table_container');
+			setSingleChild(tableContainer, packTable)
+		}
 	}
 }
 
@@ -374,7 +392,7 @@ function installPackage()
 
 	// This should be done by implementing post-inst script for a given package, not as part of package installation procedure
 	//cmd.push("for i in $(opkg files " + package + " | grep \"/etc/init.d\"); do $i enable; $i start; done"); 
-	
+
 	execute(cmd);
 }
 
@@ -390,9 +408,6 @@ function updatePackagesList()
 	var cmd = [ "opkg update" ];
 	execute(cmd);
 }
-
-
-
 
 function getCurrentOrLatestVersion(pkgVersions)
 {
@@ -411,7 +426,6 @@ function getCurrentOrLatestVersion(pkgVersions)
 	}
 	return foundVer
 }
-
 
 function cmpPkgVersions(v1, v2)
 {

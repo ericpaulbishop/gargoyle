@@ -1,0 +1,257 @@
+/*
+  This Cascading Style Sheet is copyright © 2013 by BashfulBladder
+  This page is part of the Demantoid theme for Gargoyle web interface running on routers.
+  This page has GPL portions & public domain portions.
+*/
+
+html { margin:0px; padding:0px; border:0px; background:#F4F4F4; }
+body { margin:0px; padding:0px; height:100%; border:0px; font-family:verdana, arial, sans-serif; }
+
+#darken { position:absolute; display:none; top:0px; width:100%; height:100%; overflow:hidden; z-index:2000; opacity:0.75;
+	/* http://lea.verou.me/css3patterns/ */
+	background:-webkit-radial-gradient(100% 50%, circle, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent),
+	-webkit-radial-gradient(0% 50%, circle, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent) 0 -50px;
+	
+	background:
+radial-gradient(circle at 100% 50%, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent),
+radial-gradient(circle at 0% 50%, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent) 0 -50px;
+
+	background-color:#43A621;
+	background-size:75px 100px;
+}
+#wait_msg { position:fixed; display:none; height:180px; width:320px; z-index:3000; background:#F4F4F4;
+	-webkit-border-radius:20px;
+	border-radius:20px;
+	box-shadow:0px 0px 0px 2px #666, 3px 3px 12px 6px #ccc, 0px 0px 6px 4px #fff, 0px 0px 0px 6px #666, 0px 0px 12px 8px #fff;
+}
+/*      ---------- below are css definitions under the GPL, copied (mostly) from the default theme  -----------      */
+#wait_icon
+{
+	left:128px;
+	top:80px;
+	position:absolute;
+	display:block;
+}
+#wait_txt
+{
+	left:10px;
+	top:20px;
+	width:300px;
+	position:relative;
+	display:block;
+	text-align:center;
+	font-size:18px;
+	font-weight:bold;
+	padding-bottom:20px;
+}
+.select_free
+{
+	display:none;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	width:2000px;
+	height:3500px;
+}
+
+/*      ---------- above are css definitions under the GPL, copied (mostly) from the default theme  -----------      */
+/*      ----------------------- below are public domain CSS definitions from Demantoid  -----------------------      */
+
+/* undo the the things a 2013 gargoyle_header_footer does for ancient themes */
+.unselected_submenu_container { }
+#nav_internal_container2 #selected_header_link { color:#fff; }
+#nav_internal_container2 #selected_header_link:hover { color:#fff; }
+
+#outer_logo { position:fixed; left:0px; width:45px; height:100%; background:#4AB825;
+	-webkit-background-size:10px 10px;
+   background-size:10px 10px; /* http://lea.verou.me/demos/css3-patterns.html Controls the size of the stripes */
+    
+	background-color:#4AB825;
+    background-image:-webkit-gradient(linear, 0 0, 100% 0, color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.5, transparent), to(transparent));
+    background-image:-webkit-linear-gradient(0deg, rgba(255, 255, 255, .2) 50%, transparent 50%, transparent);
+    background-image:-moz-linear-gradient(0deg, rgba(255, 255, 255, .2) 50%, transparent 50%, transparent);
+    background-image:-ms-linear-gradient(0deg, rgba(255, 255, 255, .2) 50%, transparent 50%, transparent);
+    background-image:-o-linear-gradient(0deg, rgba(255, 255, 255, .2) 50%, transparent 50%, transparent);
+    background-image:linear-gradient(0deg, rgba(255, 255, 255, .2) 50%, transparent 50%, transparent);	
+}
+#inner_logo { }
+/* Typeface is Daimonion - http://www.dafont.com/daimonion.font?fpp=50&psize=l&text=Gargoyle */
+#garg_title { color:transparent; position:fixed; display:block; top:42%; left:0px; width:46px; height:164.2px;
+	background-image:
+        url("data:image/svg+xml;utf8, <svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' width='46.1px' height='164.2px' viewBox='0 0 46.1 164.2' enable-background='new 0 0 46.1 164.2' xml:space='preserve'> <path fill='%23FFFFFF' d='M2.7,145.2c0.7-2,0.6-2.7,0.8-2.7h8.1c0.2,0-0.5,0.8-1.2,2.8c-0.7,2-0.6,2.7-0.7,2.7H3.2l1.7,10.1h26.5 l-1.7-10.1H18.4l0.4,2.1c0.1,0,0.9,0.7,1.6,2.7c0.7,2,1.4,2.9,1.2,2.9h-3.7c0,0-1.2-7.6-1.2-7.7c0-0.2,0.6-1.1,1.2-2.8 c0.7-2,0.6-2.7,0.7-2.7h0.5c0,0,0.1,0,0.1,0h10.2c0.1,0,0,0.7,0.8,2.7c0.6,1.8,1.2,2.6,1.2,2.8l1.7,10.1c0,0.3-0.6,1.1-1.2,2.8 c-0.7,2-0.6,2.7-0.7,2.7h-26c-0.1,0,0-0.7-0.7-2.7c-0.7-1.8-1.2-2.4-1.2-2.8L1.5,148C1.5,147.8,2.1,146.9,2.7,145.2z'/> <path fill='%23FFFFFF' d='M13,122.8c0.7-2,0.6-2.7,0.8-2.7h17.4c0.1,0,0,0.7,0.7,2.7c0.7,1.9,1.4,2.8,1.2,2.8H32l1.1,7.6 c0,0.3-0.5,0.9-1.2,2.8c-0.7,2-0.6,2.7-0.8,2.7h-8.8c-0.1,0,0-0.7-0.8-2.7c-0.7-1.9-1.2-2.6-1.2-2.8l-1.1-7.6h-5.8l1.2,7.6h1.2 c0.1,0,0.9,0.7,1.6,2.7s1.4,2.9,1.2,2.9h-4.8h0l-2-13.2C11.7,125.5,12.3,124.6,13,122.8z M21,125.6l1.1,7.6h9.3l-1.1-7.6H21z'/> <path fill='%23FFFFFF' d='M31.1,110.2c0.1,0,0,0.7,0.7,2.7c0.7,1.9,1.4,2.8,1.2,2.8H12.6c-0.1,0,0-0.7-0.8-2.7s-1.4-2.8-1.2-2.8h2.3 l-1.4-8.8h1.7h3.1c0.1,0,0,0.7,0.7,2.7s1.4,2.8,1.2,2.8h-4.1l0.6,3.3H31.1z'/> <path fill='%23FFFFFF' d='M31.8,95.8c-0.7,2-0.6,2.7-0.8,2.7H15c-0.1,0,0-0.7-0.7-2.7C13.6,94,13.1,93.2,13,93l-1.2-7.6 c-0.1-0.5-0.2-1.2-0.8-2.7c-0.7-2-1.4-2.8-1.2-2.8h30.7c0.1,0,0,0.7,0.7,2.6c0.6,1.8,1.3,2.7,1.2,2.8l1.1,7.8c0,0.2-0.6,1.1-1.2,2.8 c-0.7,1.9-0.6,2.6-0.8,2.6h-4.9c-0.1,0,0-0.7-0.7-2.6c-0.7-2-1.4-2.9-1.2-2.9h7l-1.1-7.6h-9l1.2,7.6C33,93.3,32.4,94.1,31.8,95.8z M30.1,85.4H13.5l1.2,7.5h16.6L30.1,85.4z'/> <path fill='%23FFFFFF' d='M12.9,59.3c0.7-1.9,0.6-2.7,0.7-2.7h16.2c0.1,0,0,0.8,0.7,2.7c0.6,1.8,1.2,2.6,1.2,2.8l1.3,8 c0,0.1-0.6,1-1.2,2.8c-0.7,1.9-0.6,2.6-0.7,2.6H14.9c-0.1,0,0-0.7-0.7-2.6c-0.6-1.8-1.2-2.6-1.2-2.8l-1.3-8 C11.7,61.9,12.3,61,12.9,59.3z M30.1,62.1H13.4l1.3,7.9h16.7L30.1,62.1z'/> <path fill='%23FFFFFF' d='M12.6,39.7c-0.1,0,0-0.7-0.7-2.6c-0.7-2-1.4-2.9-1.2-2.9h21.8c5.4,0,11.3,7.3,13.4,15.3c0,0.1-0.4,0-0.6,0.1 c-0.2,0.1-0.4,0.5-0.5,0.4c-0.9-1.5-1.8-5-4.5-7.3c-3.2-2.8-6.1-2.9-12.9-3h0l5.6,7.6c0.2,0.1-0.4,0.8-1.2,2.8 c-0.7,2-0.6,2.7-0.8,2.7H12.6c-0.1,0,0-0.7-0.7-2.7s-1.4-2.8-1.2-2.8h20.7l-5.7-7.6H12.6z'/> <path fill='%23FFFFFF' d='M0.6,23.6h30.6c0.1,0,0,0.7,0.7,2.7c0.7,2,1.4,2.8,1.2,2.8H2.5c-0.1,0,0-0.7-0.7-2.6 C1,24.5,0.3,23.6,0.6,23.6z'/> <path fill='%23FFFFFF' d='M26.2,6.3c-0.1,0,0-0.7-0.8-2.7c-0.7-2-1.4-2.8-1.2-2.8H30c0.1,0,0,0.7,0.7,2.6c0.6,1.8,1.2,2.6,1.2,2.8 l1.2,7.5c0,0.1-0.6,1-1.2,2.8c-0.7,1.9-0.6,2.6-0.8,2.6H14.9c-0.1,0,0-0.7-0.8-2.6c-0.6-1.8-1.2-2.6-1.2-2.8l-1.2-7.5 c0-0.1,0.6-1,1.2-2.8c0.7-1.9,0.6-2.6,0.7-2.6h5.1c0.1,0,0,0.7,0.7,2.6c0.6,1.7,1.2,2.6,1.2,2.8l1.2,7.5h9.4l-1.2-7.4H26.2z M19.1,6.3h-5.6l1.2,7.4h5.6L19.1,6.3z'/> </svg>");
+}
+#garg_desc { position:absolute; display:inline; top:250px; left:-28px; width:300px; font-family:verdana, arial, sans-serif; font-style:italic; font-size:12px; text-align:right; color:#000;
+	-webkit-transform:rotate(-90deg);
+	-moz-transform:rotate(-90deg);
+	-ms-transform:rotate(-90deg);
+	-o-transform:rotate(-90deg);
+	filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+	-webkit-transform-origin:20% bottom;
+	-moz-transform-origin:20% bottom;
+	-ms-transform-origin:20% bottom;
+	-o-transform-origin:20% bottom;
+}
+#garg_desc br { content:" " !important; display:none !important; }
+#garg_host { position:absolute; display:inline; bottom:15%; left:-76px; width:200px; font-family:verdana, arial, sans-serif; font-size:12px; color:#000;
+	-webkit-transform:rotate(-90deg);
+	-moz-transform:rotate(-90deg);
+	-ms-transform:rotate(-90deg);
+	-o-transform:rotate(-90deg);
+	filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+	
+#nav_external_container { position:fixed; left:0px; height:100%; width:45px; }
+#nav_external_container:hover #nav_internal_container1 { height:100%; visibility:visible; }
+
+#nav_external_container:hover #nav_top { /*shim to keep menu exposed*/
+	left:45px; width:10px; height:100%; position:relative; background:transparent;
+}
+#nav_internal_container1 { position:fixed; left:0px; height:0px; width:45px; background:#f00; visibility:hidden; }
+#nav_internal_container2 { position:relative; top:-50%; left:49px; width:160px; margin:-85px 0 0 0; background:#444;
+   	-webkit-border-radius:10px;
+	border-radius:10px;
+	box-shadow:0px 0px 0px 2px #fff, 0px 0px 6px 4px #000, 0px 0px 12px 6px #000;
+}
+#nav_internal_container2 .nav_unselected_container { width:160px; }
+.nav_internal_end1 {
+	height:20px; width:160px; background:#444;	
+	-webkit-border-radius:10px 10px 0px 0px;
+	border-radius:10px 10px 0px 0px;
+}
+.nav_internal_end2 {
+	height:20px; width:160px; background:#444;	
+	-webkit-border-radius:0px 0px 10px 10px;
+	border-radius:0px 0px 10px 10px;
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1 #submenu_container,
+#nav_internal_container2 .nav_selected .nav_selected_container #submenu_container,
+#nav_internal_container2 .nav_unselected_end1 .unselected_submenu_container,
+#nav_internal_container2 .nav_unselected_container .unselected_submenu_container {
+	visibility:hidden;
+	height:0px;
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1,
+#nav_internal_container2 .nav_selected .nav_selected_container,
+#nav_internal_container2 .nav_unselected_end1,
+#nav_internal_container2 .nav_unselected_container {
+	display:block; cursor:pointer; width:160px; color:#fff; padding:0 0 5px 0;
+	text-align:center; text-decoration:none; font-family:verdana, arial, sans-serif; font-size:16px; line-height:26px;
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover,
+#nav_internal_container2 .nav_unselected_end1:hover,
+#nav_internal_container2 .nav_unselected_container:hover,
+#nav_internal_container2 .nav_unselected_container a:hover {
+	background:#5CE62E;
+}
+
+.selected_header a,
+#nav_internal_container2 .nav_unselected_container > .nav_unselected > a,
+.nav_unselected_end1 a,
+#nav_internal_container2 .nav_unselected_container > a,
+.nav_selected_container a .selected_header {
+	text-decoration:none; left:50px; color:#fff;
+}
+
+/* submenu indicators */
+#nav_external_container:hover .nav_selected_container_end1:before,
+#nav_external_container:hover .nav_selected_container:before  {
+	content:""; position:relative; display:block; top:15px; height:0; width:0; left:145px; 
+	border-left:8px solid #5CE62E;
+    border-right:none;
+    border-top:5px solid transparent;
+    border-bottom:5px solid transparent;
+    visibility:visible;
+}
+#nav_external_container:hover .nav_unselected:before {
+	content:""; position:relative; display:block; height:0; width:0; top:18px; left:165px;
+	border-left:8px solid #999;
+    border-right:none;
+    border-top:5px solid transparent;
+    border-bottom:5px solid transparent;
+    visibility:visible;
+}
+#nav_external_container:hover #nav_internal_container2 div:nth-child(11) .nav_unselected:before { visibility:hidden; } /* rids logout of > */
+
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover #submenu_container:before,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover #submenu_container:before {
+	visibility:hidden; display:none;
+}
+
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover #submenu_container,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover #submenu_container,
+#nav_internal_container2 .nav_unselected_end1:hover .unselected_submenu_container,
+#nav_internal_container2 .nav_unselected_container:hover .unselected_submenu_container {
+	position:absolute; top:20%; left:172px; height:auto; margin:-30% 10px 0 0;
+	
+	display:block; width:190px; text-align:left; padding:25px 15px 25px 15px; line-height:26px; visibility:visible; 
+	
+	border-radius:20px;
+	-webkit-border-radius:20px;
+    background:#444;
+    box-shadow:0px 0px 0px 2px #fff, 0px 0px 6px 4px #000, 0px 0px 12px 6px #000;
+}
+
+#nav_internal_container2 div:nth-child(9):hover .unselected_submenu_container { top:-35%; } /* raises the (not current) System menu higher */
+#nav_internal_container2 div:nth-child(9):hover .nav_selected_container #submenu_container { top:-35%; } /* raises the System menu higher */
+
+/*shim to keep menu exposed*/
+.nav_selected_container_end1 .selected_header,
+.nav_selected_container .selected_header,
+.nav_unselected_end1 .nav_unselected,
+.nav_unselected_container .nav_unselected {
+	margin:-5px -20px; background:transparent; line-height:28px;
+}
+
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover #submenu_container .submenu_selected,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover #submenu_container .submenu_selected {
+	color:#5CE62E; padding:0px 12px; text-align:center; margin:-23px 0px -23px 0px; cursor:default;
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover #submenu_container a,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover #submenu_container a,
+#nav_internal_container2 .nav_unselected_end1:hover .unselected_submenu_container a,
+#nav_internal_container2 .nav_unselected_container:hover .unselected_submenu_container a {
+	display:block; background:#444; color:#fff; padding:2px 12px; text-align:center; text-decoration:none; cursor:pointer; font-family:verdana, arial, sans-serif; font-size:16px; line-height:26px;
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover #submenu_container a:hover,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover #submenu_container a:hover,
+#nav_internal_container2 .nav_unselected_end1:hover .unselected_submenu_container a:hover,
+#nav_internal_container2 .nav_unselected_container:hover .unselected_submenu_container a:hover {
+	background:#5CE62E; color:#fff; pointer-events:auto; cursor:pointer; width:195px; margin:0px 0px 0px -15px;
+}
+
+/* caret on current menu item selection */
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover .submenu_selected:before,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover .submenu_selected:before {
+    content:""; position:relative; display:block; height:0; width:0; top:26px; left:-27px;
+    border-color:transparent #fff;
+    border-style:solid;
+    border-width:12px 0 12px 12px; 
+}
+#nav_internal_container2 .nav_selected_end1 .nav_selected_container_end1:hover .submenu_selected:after,
+#nav_internal_container2 .nav_selected .nav_selected_container:hover .submenu_selected:after {
+    content:""; position:relative; display:block; height:0; width:0; top:-24px; left:-30px;
+    border-color:transparent #5CE62E;
+    border-style:solid;
+    border-width:12px 0 12px 12px; 
+}
+#nav_internal_container2 .nav_selected .nav_selected_container .selected_header a:active,
+#nav_internal_container2 .nav_unselected:active {
+   pointer-events:none; cursor:default;
+}
+/* accommodate last menu item as an active link; WARNING:relies on menu being 3rd to last div */
+/* since nth-last doesn't work on classes, only types — 3nd style eliminates the drop-down menu  */
+#nav_external_container:hover #nav_internal_container2 > *:nth-last-of-type(3) > div > a {
+	cursor:auto; pointer-events:auto; cursor:pointer;
+}
+
+#outer_container { position:absolute; display:block; top:0px; left:0; right:0; height:auto; 
+}
+#outer_footer {
+}
+#main_external_container { display:block; position:absolute; top:0px; left:46px;
+}
+#main_internal_container {
+	position:relative; display:block; margin:25px; padding:10px; background:#F4F4F4; line-height:1.3em;
+}

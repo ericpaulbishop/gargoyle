@@ -7,7 +7,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js table.js" -z "overview.js" -i network wireless qos_gargoyle system
+	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js table.js" -z "overview.js" -i network wireless qos_gargoyle system gargoyle
 %>
 
 <script>
@@ -24,25 +24,7 @@
 	gargoyle_version=$(cat data/gargoyle_version.txt)
 	echo "var gargoyleVersion=\"$gargoyle_version\";"
 
-	dateformat=$(uci get gargoyle.global.dateformat 2>/dev/null)
-	if [ "$dateformat" == "iso" ]; then
-		current_time=$(date "+%Y/%m/%d %H:%M %Z")
-	elif [ "$dateformat" == "iso8601" ]; then
-		current_time=$(date "+%Y-%m-%d %H:%M %Z")
-	elif [ "$dateformat" == "australia" ]; then
-		current_time=$(date "+%d/%m/%y %H:%M %Z")
-	elif [ "$dateformat" == "russia" ]; then
-		current_time=$(date "+%d.%m.%Y %H:%M %Z")
-	elif [ "$dateformat" == "argentina" ]; then
-		current_time=$(date "+%d/%m/%Y %H:%M %Z")
-	else
-		current_time=$(date "+%D %H:%M %Z")
-	fi
-	timezone_is_utc=$(uci get system.@system[0].timezone | grep "^UTC" | sed 's/UTC//g')
-	if [ -n "$timezone_is_utc" ] ; then
-		current_time=$(echo $current_time | sed "s/UTC/UTC-$timezone_is_utc/g" | sed 's/\-\-/+/g')
-	fi
-	echo "var currentTime=\"$current_time\";"
+	. /usr/lib/gargoyle/current_time.sh
 
 	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
 	buffers_mem="$(sed -e '/^Buffers: /!d; s#Buffers: *##; s# kB##g' /proc/meminfo)"
@@ -94,6 +76,13 @@
 
 	echo "var wifi_status = new Array();"
 	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
+
+	if [ -e /tmp/strength.txt ]; then
+		CSQ=$(awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "-"} else {printf "%d%% (%ddBm, CSQ: %d)\n", C*100/31, C*2-113, C}}' /tmp/strength.txt)
+	else
+		CSQ="-";
+	fi
+	echo "var csq='$CSQ';"
 %>
 //-->
 </script>
@@ -181,15 +170,7 @@
 			<span class='leftcolumn'><%~ WUptm %>:</span><span id="wan_pppoe_uptime" class='rightcolumn'></span>
 		</div>
 		<div id="wan_3g_container">
-			<span class='leftcolumn'><%~ W3GSS %>:</span><span id="wan_3g" class='rightcolumn'>
-<%
-	if [ -e /tmp/strength.txt ]; then
-		awk -F[,\ ] '/^\+CSQ:/ {if ($2>31) {C=0} else {C=$2}} END {if (C==0) {printf "(no data)"} else {printf "%d%%, %ddBm\n", C*100/31, C*2-113}}' /tmp/strength.txt
-	else
-		echo "(no data)"
-	fi
-%>
-			</span>
+			<span class='leftcolumn'><%~ W3GSS %>:</span><span id="wan_3g" class='rightcolumn'></span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>

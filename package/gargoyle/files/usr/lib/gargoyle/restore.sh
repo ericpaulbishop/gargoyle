@@ -12,7 +12,7 @@ if [ -z "$restore_password" ] ; then
 	restore_password=0
 fi
 
-echo "Content-Type: text/html;charset=utf-8"
+echo "Content-Type: text/html; charset=utf-8"
 echo ""
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
@@ -237,12 +237,6 @@ fi
 
 rm -rf /tmp/passwd
 rm -rf /tmp/shadow
-
-
-#overwrite old date, then restart ntpclient and then bwmon
-#this makes sure that we don't restore crontab that tries
-#to save bwmon save files when rules don't exist, wiping old bwmon data
-date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
 
 sleep 3
 rm -rf /tmp/restore_lock_file

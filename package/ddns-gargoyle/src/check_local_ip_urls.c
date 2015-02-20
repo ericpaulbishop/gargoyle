@@ -75,18 +75,14 @@
 #define MAX_MSG_LINE 		250
 
 
-#define MAX_LOOKUP_URL_LENGTH	100
+#define MAX_LOOKUP_URL_LENGTH	65
 
 char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
-							"http://whatismyip.org",
 							"http://checkmyip.com",
 							"http://www.ipchicken.com",
 							"http://www.tracemyip.org",
-							"http://cmyip.com",
 							"http://checkip.dyndns.org",
 							"http://checkip.org", 
-							"http://automation.whatismyip.com/n09230945.asp",
-							"http://myip.dk",
 							"http://www.ip-address.org",
 							"http://my-ip-address.com",
 							"http://www.selfseo.com/what_is_my_ip.php",
@@ -98,6 +94,23 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://www.dslreports.com/whois",
 							"\0"
 							};
+
+#define MAX_USER_AGENT_LENGTH	125
+char user_agents[][MAX_USER_AGENT_LENGTH] = {
+						"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)",        //IE 8, Windows
+						"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.2; .NET CLR 1.1.4322)",  //IE 7, Windows
+						"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0",         //IE 9, Windows
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5", //Chrome, Mac
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.25 (KHTML, like Gecko) Version/6.0 Safari/536.25",       //Safari 6, Mac
+						"\0"
+						};
+
+
+
+
+
+
+
 char** default_ip_lookup_urls = NULL;
 
 typedef struct
@@ -295,10 +308,25 @@ char* get_next_url_and_rotate(char **urls)
 	return urls[url_index];
 }
 
+int srand_called = 0;
+char* get_random_user_agent(void)
+{
+	int num_user_agents=0;
+	for(num_user_agents=0; user_agents[num_user_agents][0] != '\0'; num_user_agents++);
+	if(!srand_called)
+	{
+		srand( time(NULL) );
+		srand_called=1;
+	}
+	int ua_num = rand() % num_user_agents;
+	return user_agents[ua_num];
+}
+
+
 char* get_ip_from_url(char* url)
 {
 	char* ip = NULL;
-	http_response* page = get_url(url, NULL);
+	http_response* page = get_url(url, get_random_user_agent());
 	if(page != NULL)
 	{
 		if(page->data != NULL)

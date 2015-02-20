@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin_gargoyle_ping_watchdog
-PKG_VERSION:=20130527
+PKG_VERSION:=20131030
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -34,7 +34,14 @@ define Package/plugin-gargoyle-ping-watchdog/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci set gargoyle.display.connection_ping_watchdog='Ping Watchdog'
+	menu_name="Ping Watchdog"
+	[ -n `which i18n` ] && {
+		mn=$$(i18n-menu gargoyle.display.connection_ping_watchdog)
+		if [ -n "$$mn" ] ; then
+			menu_name="$$mn"
+		fi
+	}
+	uci set gargoyle.display.connection_ping_watchdog="$$menu_name"
 	uci set gargoyle.scripts.connection_ping_watchdog='ping_watchdog.sh'
 	uci set gargoyle.connection.ping_watchdog='600'
 	uci commit

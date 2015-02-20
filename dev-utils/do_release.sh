@@ -41,7 +41,7 @@ if [ -z "$user" ] ; then
 	exit
 fi
 
-scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
+scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes -r'
 ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 
 if [ ! -d "images" ] ; then
@@ -60,7 +60,7 @@ if [ -z  "$gargoyle_checkout_branchname" ] ; then
 fi
 mkdir src
 cd src
-git clone git://gargoyle-router.com/gargoyle.git
+git clone git://github.com/ericpaulbishop/gargoyle.git
 cd gargoyle
 git checkout "$gargoyle_checkout_branchname"
 cd ..

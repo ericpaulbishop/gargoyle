@@ -3,3 +3,7 @@
 fallback=System Logs
 EN=System Logs
 ES=Registros del Sistema
+PL=Logi systemowe
+RU=Системные журналы
+NO=System Logger
+ZH-CN=系统日志

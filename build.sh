@@ -14,35 +14,22 @@ set_constant_variables()
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 
 
-	#cores / build threads
-	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
-	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
-	
-	#################################################################################################
-	# As of Attitude Adjustment r36470 multi-threaded builds often fail (race condition somewhere)
-	#
-	# Until this can be resolved, I am temporarily setting num_build_threads back to 1
-	# Unfortunately, this will make the build take WAY longer unfortunately, but that's 
-	# better than breaking the build entirely. If anyone has a reliable way to fix this, let me know.
-	#################################################################################################
-	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=6
 }
 
 set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Attitude Adjustment"
-	branch_id="attitude_adjustment"
+	branch_name="Barrier Breaker"
+	branch_id="barrier_breaker"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_12.09"
+	branch_packages_path="branches/packages_14.07"
 
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=37174
+	rnum=43694
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -162,6 +149,59 @@ do_js_compress()
 	cd "$top_dir"
 }
 
+distrib_copy_arch_ind_ipk()
+{
+	local tgt="$1"
+	local ltype="$2"
+	local di=1
+	
+	local dpkgs=$(find "$top_dir/package" -path '*plugin-gargoyle-*' -and -name 'Makefile' -and -not -path '*-i18n-*' | xargs grep -s -l "DEPENDS:=+gargoyle$" | xargs grep -s -l "PKGARCH:=all$" | awk -F'/' '{print $(NF-1)}')
+	
+	# printf -- '%s\n' "${dpkgs[@]}"
+	
+	if [ ! -d "$top_dir/Distribution/architecture-independent packages ]" ] ; then
+		mkdir -p "$top_dir/Distribution/architecture-independent packages"
+	fi
+	#if [ ! -d "$top_dir/Distribution/theme packages ]" ] ; then
+	#	mkdir -p "$top_dir/Distribution/theme packages"
+	#fi
+	
+	if [ ! -d "$top_dir/Distribution/theme packages ]" ] && [ "$ltype" = 'internationalize' ] ; then
+		mkdir -p "$top_dir/Distribution/language packages"
+	fi
+	
+	while true; do
+		local apkg=$(echo "$dpkgs" | awk -v rec=$di 'NR==rec {print $0}')
+		[[ -z "$apkg" ]] && 
+		{
+			break
+		} || {
+			ipkg=("$top_dir/$tgt-src/bin/$tgt/packages/${apkg}"*"ipk")
+			[[ -f "${ipkg[0]}" ]] &&
+			{
+				cp -f "$top_dir/$tgt-src/bin/$tgt/packages/$apkg"*".ipk" "$top_dir/Distribution/architecture-independent packages/"
+			}
+		}
+		let di++
+	done
+	#cp -f "$top_dir/$tgt-src/bin/$tgt/packages/plugin-gargoyle-theme-"*".ipk" "$top_dir/Distribution/theme packages/"
+	
+	if [ "$ltype" = 'internationalize' ] ; then
+		cp -f "$top_dir/$tgt-src/bin/$tgt/packages/plugin-gargoyle-i18n-"*".ipk" "$top_dir/Distribution/language packages/"
+	fi
+}
+
+distrib_init ()
+{
+	if [ ! -d "$top_dir/Distribution" ] ; then
+		mkdir "$top_dir/Distribution"
+	fi
+	#git log --since=5/16/2013 $(git log -1 --pretty=format:%h) --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/changelog.txt"
+	git log $(git describe --abbrev=0 --tags)..$(git log -1 --pretty=format:%h) --no-merges --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/Gargoyle changelog.txt"
+	svn log -r "$rnum":36425 svn://svn.openwrt.org/openwrt/branches/attitude_adjustment/ > "$top_dir/Distribution/OpenWrt changelog.txt"
+	cp -fR "$top_dir/LICENSES" "$top_dir/Distribution/"
+}
+
 
 ######################################################################################################
 ## Begin Main Body of Build Script                                                                  ##
@@ -189,6 +229,25 @@ specified_profile="$7"
 translation_type="$8"
 fallback_lang="$9"
 active_lang="${10}"
+num_build_threads="${11}"
+distribution="${12}"
+
+num_build_thread_str=""
+if [ "$num_build_threads" = "single" ] ; then
+	num_build_threads="1"
+	num_build_thread_str="-j1"
+elif [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "auto" ] ; then
+	num_build_threads="auto"
+	num_build_thread_str=""
+elif [ "$num_build_threads" -lt 1 ] ; then
+	num_build_threads="1"
+	num_build_thread_str="-j1"
+else
+	num_build_thread_str="-j$num_build_threads"
+fi
+
+
+
 
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
@@ -207,8 +266,8 @@ fi
 [ ! -z $(which python 2>&1) ] && {
 	#whether localize or internationalize, the packages directory is going to be modified
 	#default behavior is internationalize; defined in Makefile
-	[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/localize.py "$fallback_lang" "$active_lang" \
-											|| ./i18n-scripts/internationalize.py "$active_lang"
+	[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/localize.py" "$fallback_lang" "$active_lang" \
+											|| "$top_dir/i18n-scripts/internationalize.py" "$active_lang"
 } || {
 	active_lang=$(sh ./i18n-scripts/intl_ltd.sh "$translation_type" "$active_lang")
 }
@@ -234,7 +293,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#node
 			git clone git://github.com/joyent/node.git
 			cd node
-			git checkout v0.7.12
+			git checkout v0.11.14
 			./configure 
 			make
 			cd "$top_dir"
@@ -243,7 +302,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#uglifyjs
 			git clone git://github.com/mishoo/UglifyJS.git
 			cd UglifyJS/bin
-			git checkout v1.3.1
+			git checkout v1.3.5
 			cd "$top_dir"
 		fi
 		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
@@ -340,9 +399,16 @@ for target in $targets ; do
 	
 	gargoyle_packages=$(ls "$package_dir" )
 	for gp in $gargoyle_packages ; do
-		if [ -d "$target-src/package/$gp" ] ; then
-			rm -rf "$target-src/package/$gp" 
-		fi
+		IFS_ORIG="$IFS"
+		IFS_LINEBREAK="$(printf '\n\r')"
+		IFS="$IFS_LINEBREAK"
+		matching_packages=$(find "$target-src/package" -name "$gp")
+		for mp in $matching_packages ; do
+			if [ -d "$mp" ] && [ -e "$mp/Makefile" ] ; then
+				rm -rf "$mp" 
+			fi
+		done
+		IFS="$IFS_ORIG"
 		cp -r "$package_dir/$gp" "$target-src/package"
 	done
 
@@ -376,6 +442,7 @@ for target in $targets ; do
 	echo ""	
 	echo "**************************************************************************"
 	echo "        Gargoyle is now building target: $target / $profile_name"
+	echo "                 (with $num_build_threads build threads)"
 	echo "**************************************************************************"
 	echo ""
 	echo ""
@@ -395,11 +462,11 @@ for target in $targets ; do
 	[ ! -z $(which python 2>&1) ] && {
 		#finish internationalization by setting the target language & adding the i18n plugin to the config file
 		#finish localization just deletes the (now unnecessary) language packages from the config file
-		[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
-												|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
+		[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/finalize_translation.py" 'localize' "$target" \
+												|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang" "$target"
 	} || {
 		#NOTE: localize is not supported because it requires python
-		./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
+		"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
 	}
 
 
@@ -417,7 +484,16 @@ for target in $targets ; do
 			cd "$openwrt_package_dir"
 			find . -name ".svn" | xargs rm -rf
 			for gp in $gargoyle_packages ; do
-				find . -name "$gp" | xargs rm -rf
+				IFS_ORIG="$IFS"
+				IFS_LINEBREAK="$(printf '\n\r')"
+				IFS="$IFS_LINEBREAK"
+				matching_packages=$(find . -name "$gp")
+				for mp in $matching_packages ; do
+					if [ -d "$mp" ] && [ -e "$mp/Makefile" ] ; then
+						rm -rf "$mp" 
+					fi
+				done
+				IFS="$IFS_ORIG"
 			done
 			cd "$top_dir"
 		fi
@@ -460,8 +536,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		#make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-		make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+		make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
@@ -478,22 +553,27 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-		make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+		make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
+	fi
+	
+	if [ "$distribution" = "true" ] || [ "$distribution" = "TRUE" ] || [ "$distribution" = "1" ] ; then
+		distribution="true"
+		distrib_init
+		mkdir -p "$top_dir/Distribution/Images/$target-$default_profile"
 	fi
 
 	#copy packages to built/target directory
-	mkdir -p "$top_dir/built/$target"
+	mkdir -p "$top_dir/built/$target/$default_profile"
 	package_files=$(find bin -name "*.ipk")
 	index_files=$(find bin -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 
 		for pf in $package_files ; do
-			cp "$pf" "$top_dir/built/$target/"
+			cp "$pf" "$top_dir/built/$target/$default_profile/"
 		done
 		for inf in $index_files ; do
-			cp "$inf" "$top_dir/built/$target/"
+			cp "$inf" "$top_dir/built/$target/$default_profile/"
 		done
 	fi
 	
@@ -506,6 +586,9 @@ for target in $targets ; do
 			if [ ! -d "bin/$arch/$imf" ] ; then
 				newname=$(echo "$imf" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 				cp "bin/$arch/$imf" "$top_dir/images/$target/$newname"
+				if [ "$distribution" = "true" ] ; then
+					cp "bin/$arch/$imf" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+				fi
 			fi
 		done
 	else
@@ -516,6 +599,9 @@ for target in $targets ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+					if [ "$distribution" = "true" ] ; then
+						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+					fi
 				fi
 			done
 		done
@@ -524,6 +610,14 @@ for target in $targets ; do
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
 		exit
+	fi
+	
+	if [ "$distribution" = "true" ] ; then
+		#Generate licenses file for each profile
+		#Copy architecture independent packages & themes to Distribution folder
+		echo "Generating Licenses file (expect it to take 5+ minutes)"
+		"$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+		distrib_copy_arch_ind_ipk "$target" "$translation_type"
 	fi
 
 	other_profiles=""
@@ -540,11 +634,11 @@ for target in $targets ; do
 		[ ! -z $(which python 2>&1) ] && {
 			#finish internationalization by setting the target language & adding the i18n plugin to the config file
 			#finish localization just deletes the (now unnecessary) language packages from the config file
-			[ "$translation_type" = "localize" ] 	&& ./i18n-scripts/finalize_translation.py 'localize' \
-													|| ./i18n-scripts/finalize_translation.py 'internationalize' "$active_lang"
+			[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/finalize_translation.py" 'localize' "$target" \
+													|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang" "$target"
 		} || {
 			#NOTE: localize is not supported because it requires python
-			./i18n-scripts/finalize_tran_ltd.sh "$target-src" "$active_lang"
+			"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
 		}
 		
 		
@@ -556,6 +650,7 @@ for target in $targets ; do
 		echo ""	
 		echo "**************************************************************************"
 		echo "        Gargoyle is now building target: $target / $profile_name"
+		echo "                 (with $num_build_threads build threads)"
 		echo "**************************************************************************"
 		echo ""
 		echo ""
@@ -564,11 +659,9 @@ for target in $targets ; do
 
 		if [ "$verbosity" = "0" ] ; then
 			
-			#make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			make GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make $num_build_thread_str  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		else
-			#make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
-			make V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version"
+			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
 
@@ -579,17 +672,21 @@ for target in $targets ; do
 		fi
 
 		#copy packages to build/target directory
-		mkdir -p "$top_dir/built/$target"
+		mkdir -p "$top_dir/built/$target/$profile_name"
 		arch=$(ls bin)
 		package_files=$(find bin -name "*.ipk")
 		index_files=$(find bin -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 			for pf in $package_files ; do
-				cp "$pf" "$top_dir/built/$target/"
+				cp "$pf" "$top_dir/built/$target/$profile_name/"
 			done
 			for inf in $index_files ; do
-				cp "$inf" "$top_dir/built/$target/"
+				cp "$inf" "$top_dir/built/$target/$profile_name/"
 			done
+		fi
+		
+		if [ "$distribution" = "true" ] ; then
+			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"
 		fi
 
 
@@ -601,9 +698,19 @@ for target in $targets ; do
 				if [ ! -d "bin/$arch/$c" ] ; then
 					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
 					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+					if [ "$distribution" = "true" ] ; then
+						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$profile_name/$newname"
+					fi
 				fi
 			done
 		done
+		if [ "$distribution" = "true" ] ; then
+			#Generate licenses file for each profile
+			#Copy architecture independent packages & themes to Distribution folder
+			echo "Generating Licenses file (expect it to take 5+ minutes)"
+			"$top_dir/dev-utils/GenLicences.sh" "$target" "$profile_name" 1 2>&1
+			distrib_copy_arch_ind_ipk "$target" "$translation_type"
+		fi
 	done
 
        

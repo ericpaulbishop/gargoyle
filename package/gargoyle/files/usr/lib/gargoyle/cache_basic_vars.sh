@@ -10,6 +10,7 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
+	[ "$mode" = "11a" ]  &&  mode="11an"
 	[ "$mode" = "11na" ] &&  mode="11an"
 	if [ "$mode" = "11an" ] ; then
 		chId="A"
@@ -24,7 +25,7 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "phy${dev_num}" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detection/d;s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "phy${dev_num}" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect/d;s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
@@ -110,11 +111,19 @@ else
 	echo "var wifiN = false;" >> "$out_file"
 fi
 
-if [ -e /proc/bus/usb/devices ]; then 
-	echo "var hasUSB=true;" >> "$out_file"
-else
-	echo "var hasUSB=false;" >> "$out_file"
+
+#detect qmi interface if it exists
+qmi_if=""
+if [ -e /sys/class/usbmisc/ ] ; then
+	local devnames=$(ls /sys/class/usbmisc)
+	for devname in devnames ; do
+		if [ -e "/sys/class/usbmisc/$devname/device/net" ] && [ -z "$qmi_if" ] ; then
+			qmi_if=$( ls "/sys/class/usbmisc/$devname/device/net" | head -n 1 )
+		fi
+	done
 fi
+echo "qmiInterface=\"$qmi_if\";"
+
 
 # cache default interfaces if we haven't already
 # this script is run on first boot by hotplug, so

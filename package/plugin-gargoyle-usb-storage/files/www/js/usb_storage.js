@@ -627,7 +627,7 @@ function resetData()
 				var mp = mountPoints[mpIndex];
 				mountPointToDrive[ mp ]      = storageDrives[driveIndex][0];
 				mountPointToFs[ mp ]         = storageDrives[driveIndex][3];
-				mountPointToDriveSize[ mp ]  = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+				mountPointToDriveSize[ mp ]  = parseBytes( storageDrives[driveIndex][4],null,true );
 				mountPointList.push(mp);
 			}
 		}
@@ -819,7 +819,14 @@ function resetData()
 		for(dindex=0; dindex< drivesWithNoMounts.length ; dindex++)
 		{
 			driveIds.push( "" + dindex);
-			driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			if (drivesWithNoMounts[dindex][0] == drivesWithNoMounts[dindex][2])
+			{
+				driveText.push( drivesWithNoMounts[dindex][0] + " (" + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
+			else
+			{
+				driveText.push( drivesWithNoMounts[dindex][2] + " (" + drivesWithNoMounts[dindex][0] + ", " + parseBytes(parseInt(drivesWithNoMounts[dindex][1])) + ")")
+			}
 		}
 		setAllowableSelections("format_disk_select", driveIds, driveText);
 	}
@@ -846,9 +853,16 @@ function setDriveList(controlDocument)
 	{
 		var driveName = storageDrives[driveIndex][0]
 		var driveFs = storageDrives[driveIndex][3];
-		var driveSize = parseBytes( storageDrives[driveIndex][4] ).replace(/ytes/, "");
+		var driveSize = parseBytes( storageDrives[driveIndex][4],null,true );
 		driveList.push( driveName )
-		driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" )
+		if (storageDrives[driveIndex][5] == driveName)
+		{
+			driveDisplayList.push( driveName + " ("  + driveFs + ", " + driveSize + ")" );
+		}
+		else
+		{
+			driveDisplayList.push( storageDrives[driveIndex][5].replace(/%20/g, " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
+		}
 	}
 	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
 
@@ -1159,8 +1173,8 @@ function setShareTypeVisibility(controlDocument)
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
 	var userLabel = (getTypeDisplay("cifs") + "/" + getTypeDisplay("ftp")).replace(/^\//, "").replace(/\/$/, "");
-	setChildText("anonymous_access_label",  userLabel + " Anonymous Access:", null, null, null, controlDocument)
-	setChildText("user_access_label",  userLabel + " Users With Access:", null, null, null, controlDocument)
+	setChildText("anonymous_access_label", usbSStr.FAAcc.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
+	setChildText("user_access_label", usbSStr.FAUsr.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
 
 	var visIds = [];
 	visIds[ "ftp_or_cifs" ] =  [ "anonymous_access_container", "user_access_container" ];
@@ -1420,7 +1434,7 @@ function doDiskFormat()
 	}
 	if(swapPercent >99 && swapPercent < 100)
 	{
-		swapPerent = 99
+		swapPercent = 99
 	}
 	swapPercent=Math.round(swapPercent)
 
@@ -1443,7 +1457,7 @@ function doDiskFormat()
 				}
 				else
 				{
-					alert("Formatting Complete.");
+					alert(usbSStr.FmtCplt);
 					window.location=window.location
 				}
 			}

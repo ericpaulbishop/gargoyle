@@ -27,6 +27,7 @@ define Package/plugin-gargoyle-openvpn
 	TITLE:=OpenVPN Support for Gargoyle
 	DEPENDS:=+gargoyle +openvpn +openvpn-easy-rsa +zip
 	MAINTAINER:=Eric Bishop
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-openvpn/description
@@ -52,11 +53,18 @@ endef
 
 define Package/plugin-gargoyle-openvpn/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
+		menu_name="OpenVPN Status"
+		[ -n `which i18n` ] && {
+			mn=$$(i18n-menu gargoyle.scripts.status_openvpn_connections)
+			if [ -n "$$mn" ] ; then
+				menu_name="$$mn"
+			fi
+		}
 		uci set gargoyle.display.connection_openvpn="OpenVPN"
 		uci set gargoyle.scripts.connection_openvpn="openvpn.sh"
 		uci set gargoyle.connection.openvpn="260"
 		uci set gargoyle.scripts.status_openvpn_connections="openvpn_connections.sh"
-		uci set gargoyle.display.status_openvpn_connections="OpenVPN Status"
+		uci set gargoyle.display.status_openvpn_connections="$$menu_name"
 		uci commit
 	fi
 endef

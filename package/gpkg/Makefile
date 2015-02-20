@@ -76,6 +76,7 @@ define Package/gpkg/install
 
 	$(VERSION_SED)                              $(1)/etc/opkg.gpkg.tmp
 	$(SED) 's,%G,$(GARGOYLE_PACKAGE_VERSION),g' $(1)/etc/opkg.gpkg.tmp
+	$(SED) 's,%F,$(GARGOYLE_PROFILE),g' $(1)/etc/opkg.gpkg.tmp
 
 
 endef

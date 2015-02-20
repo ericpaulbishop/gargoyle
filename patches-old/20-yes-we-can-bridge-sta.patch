@@ -1,0 +1,66 @@
+--- a/package/hostapd/files/wpa_supplicant.sh	2012-08-27 02:10:27.897897285 -0400
++++ b/package/hostapd/files/wpa_supplicant.sh	2012-08-31 09:25:51.704829519 -0400
+@@ -29,10 +29,7 @@
+ 	config_get mode "$vif" mode
+ 	config_get ifname "$vif" ifname
+ 	config_get_bool wds "$vif" wds 0
+-	[ -z "$bridge" ] || [ "$mode" = ap ] || [ "$mode" = sta -a $wds -eq 1 ] || {
+-		echo "wpa_supplicant_setup_vif($ifname): Refusing to bridge $mode mode interface"
+-		return 1
+-	}
++
+ 	[ "$mode" = "adhoc" ] && {
+ 		modestr="mode=1"
+ 		scan_ssid="0"
+--- /dev/null	2012-08-30 10:26:33.967132591 -0400
++++ b/package/mac80211/patches/969-allow-sta-bridge.patch	2012-08-31 10:36:47.950953368 -0400
+@@ -0,0 +1,49 @@
++--- a/net/wireless/util.c	2012-07-16 18:36:36.000000000 -0400
+++++ b/net/wireless/util.c	2012-08-31 10:26:17.533159374 -0400
++@@ -819,7 +819,6 @@
++ 	/* if it's part of a bridge, reject changing type to station/ibss */
++ 	if (br_port_exists(dev) &&
++ 	    (ntype == NL80211_IFTYPE_ADHOC ||
++-	     ntype == NL80211_IFTYPE_STATION ||
++ 	     ntype == NL80211_IFTYPE_P2P_CLIENT))
++ 		return -EBUSY;
++ 
++@@ -867,14 +866,11 @@
++ 	if (!err) {
++ 		dev->priv_flags &= ~IFF_DONT_BRIDGE;
++ 		switch (ntype) {
++-		case NL80211_IFTYPE_STATION:
++-			if (dev->ieee80211_ptr->use_4addr)
++-				break;
++-			/* fall through */
++ 		case NL80211_IFTYPE_P2P_CLIENT:
++ 		case NL80211_IFTYPE_ADHOC:
++ 			dev->priv_flags |= IFF_DONT_BRIDGE;
++ 			break;
+++		case NL80211_IFTYPE_STATION:
++ 		case NL80211_IFTYPE_P2P_GO:
++ 		case NL80211_IFTYPE_AP:
++ 		case NL80211_IFTYPE_AP_VLAN:
++--- a/net/wireless/core.c	2012-07-16 18:36:36.000000000 -0400
+++++ b/net/wireless/core.c	2012-08-31 10:24:29.083474529 -0400
++@@ -875,8 +875,7 @@
++ 		if (!dev->ethtool_ops)
++ 			dev->ethtool_ops = &cfg80211_ethtool_ops;
++ 
++-		if ((wdev->iftype == NL80211_IFTYPE_STATION ||
++-		     wdev->iftype == NL80211_IFTYPE_P2P_CLIENT ||
+++		if ((wdev->iftype == NL80211_IFTYPE_P2P_CLIENT ||
++ 		     wdev->iftype == NL80211_IFTYPE_ADHOC) && !wdev->use_4addr)
++ 			dev->priv_flags |= IFF_DONT_BRIDGE;
++ 		break;
++--- a/net/wireless/nl80211.c	2012-07-16 18:36:36.000000000 -0400
+++++ b/net/wireless/nl80211.c	2012-08-31 10:27:30.854298470 -0400
++@@ -1873,8 +1873,6 @@
++ 			       enum nl80211_iftype iftype)
++ {
++ 	if (!use_4addr) {
++-		if (netdev && (netdev->priv_flags & IFF_BRIDGE_PORT))
++-			return -EBUSY;
++ 		return 0;
++ 	}
++ 

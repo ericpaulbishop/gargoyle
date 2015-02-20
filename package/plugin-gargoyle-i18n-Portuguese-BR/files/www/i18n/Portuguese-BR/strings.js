@@ -31,3 +31,4 @@ UI.Upgrade="Atualizar";
 UI.Reboot="Reiniciar";
 UI.MoreInfo="Mais informações";
 UI.WaitSettings="Por favor, aguarde até que as novas alterações sejam aplicadas...";
+UI.Wait="Por favor, aguarde...";

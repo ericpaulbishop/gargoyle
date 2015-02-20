@@ -142,11 +142,21 @@ function resetData()
 
 
 	// setup providers in add section
+	// also, make sure freedns.afraid.org is at top of list [ DO NOT CHANGE THIS! ]
 	var providerNames = [];
 	var providerIndex;
+	var foundAfraid = false;
 	for(providerIndex=0; providerIndex < serviceProviders.length; providerIndex++)
 	{
-		providerNames.push( serviceProviders[providerIndex]["name"] );
+		var p = serviceProviders[providerIndex]["name"]
+		if(p != "freedns.afraid.org")
+		{
+			providerNames.push( serviceProviders[providerIndex]["name"] );
+		}
+		else
+		{
+			foundAfraid=true;
+		}
 	}
 
 	providerNames.sort(function(a, b) {
@@ -154,8 +164,12 @@ function resetData()
 		b = b.toLowerCase();
 		return a < b ? -1 : a > b ? 1 : 0
 	});
+	if(foundAfraid)
+	{
+		providerNames.unshift("freedns.afraid.org")
+	}
 	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
-	//setSelectedValue("ddns_provider", 'freedns.afraid.org', document);
+	setSelectedValue("ddns_provider", 'freedns.afraid.org', document);
 
 
 	if(!resettingAfterFailedUpdate)

@@ -57,11 +57,47 @@
 #define BANDWIDTH_NEVER			  85
 
 
+#pragma pack(push, 1)
 typedef struct ip_bw_struct
 {
 	uint32_t ip;
 	uint64_t bw;
 }ip_bw;
+
+/*
+* format of response:
+* byte 1 : error code (0 for ok)
+* bytes 2-5 : total_num_ips found in query (further gets may be necessary to retrieve them)
+* bytes 6-9 : start_index, index (in a list of total_num_ips) of first ip in response
+* bytes 10-13 : num_ips_in_response, number of ips in this response
+* bytes 14-21 : reset_interval (helps deal with DST shifts in userspace)
+* bytes 22-29 : reset_time (helps deal with DST shifts in userspace)
+* byte  30    : reset_is_constant_interval (helps deal with DST shifts in userspace)
+* remaining bytes contain blocks of ip data
+* format is dependent on whether history was queried
+*/
+typedef struct ip_bw_kernel_data_item_struct
+{
+    uint32_t ip;
+    uint32_t num_nodes;
+    uint64_t first_start;
+    uint64_t first_end;
+    uint64_t last_end;
+    uint64_t ipbw_data[0];
+}ip_bw_kernel_data_item;
+
+typedef struct 
+{
+    uint8_t error;
+    uint32_t ip_total;
+    uint32_t index_start;
+    uint32_t ip_num;
+    uint64_t reset_interval;
+    uint64_t reset_time;
+    uint8_t reset_is_constant_interval;
+    /*payload for history ip bw data*/
+    ip_bw_kernel_data_item data_item[0];
+}ip_bw_kernel_data;
 
 typedef struct history_struct
 {
@@ -78,12 +114,11 @@ typedef struct history_struct
 
 	uint64_t* history_bws;
 } ip_bw_history;
+#pragma pack(pop)
 
 time_t* get_interval_starts_for_history(ip_bw_history history);
 
 extern void free_ip_bw_histories(ip_bw_history* histories, int num_histories);
-
-
 
 extern int get_all_bandwidth_history_for_rule_id(char* id, unsigned long* num_ips, ip_bw_history** data, unsigned long max_wait_milliseconds);
 extern int get_ip_bandwidth_history_for_rule_id(char* id, char* ip, ip_bw_history** data, unsigned long max_wait_milliseconds);

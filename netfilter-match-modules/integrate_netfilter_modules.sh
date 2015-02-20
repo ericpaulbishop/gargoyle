@@ -137,7 +137,7 @@ LINUX_CONFIG:=$(firstword $(wildcard $(foreach subdir,$(PLATFORM_DIR) $(PLATFORM
 LINUX_DIR:=linux
 PKG_BUILD_DIR:=$(LINUX_DIR)
 TARGET_BUILD:=1
-LINUX_SOURCE:=linux-$(LINUX_VERSION).tar.bz2
+LINUX_SOURCE:=linux-$(LINUX_VERSION).tar.xz
 TESTING:=$(if $(findstring -rc,$(LINUX_VERSION)),/testing,)
 ifeq ($(call qstrip,$(CONFIG_EXTERNAL_KERNEL_TREE))$(call qstrip,$(CONFIG_KERNEL_GIT_CLONE_URI)),)
   ifeq ($(word 1,$(subst ., ,$(KERNEL_BASE))),3)
@@ -157,7 +157,7 @@ all:
 	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_MD5SUM) $(LINUX_SITE) ; fi ; 
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
 	rm -rf linux linux-$(LINUX_VERSION)
-	tar xjf $(LINUX_SOURCE)
+	tar xfJ $(LINUX_SOURCE)
 	if [  ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then mv $(LINUX_SOURCE) "$(DL_DIR)/" ; else rm $(LINUX_SOURCE) ; fi
 	mv linux-$(LINUX_VERSION) linux
 	rm -rf $(PKG_BUILD_DIR)/patches; mkdir -p $(PKG_BUILD_DIR)/patches 
@@ -184,8 +184,8 @@ EOF
 	echo 'DL_DIR:=$(TOPDIR)/dl' >> nf-patch-build/iptables-download-make
 	egrep "CONFIG_LINUX_.*=y" .config | sed 's/=/:=/g' >> nf-patch-build/iptables-download-make
 
-	package_include_line_num=$(cat package/iptables/Makefile | egrep -n "include.*package.mk" | sed 's/:.*$//g' )
-	head -n $package_include_line_num package/iptables/Makefile | awk ' { if( ( $0 !~ /^include/ ) && ($0 !~ /^#/ )){ print $0 ; }} ' >> nf-patch-build/iptables-download-make
+	package_include_line_num=$(cat package/network/utils/iptables/Makefile | egrep -n "include.*package.mk" | sed 's/:.*$//g' )
+	head -n $package_include_line_num package/network/utils/iptables/Makefile | awk ' { if( ( $0 !~ /^include/ ) && ($0 !~ /^#/ )){ print $0 ; }} ' >> nf-patch-build/iptables-download-make
 
 
 	echo 'all:' >> nf-patch-build/iptables-download-make
@@ -194,8 +194,8 @@ EOF
 	echo '	tar xjf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
 	echo '	rm *.bz2' >>nf-patch-build/iptables-download-make
 	echo '	mv iptables* iptables' >>nf-patch-build/iptables-download-make
-	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/iptables/patches/' >>nf-patch-build/iptables-download-make
-	echo '	echo $(TOPDIR)/package/iptables/patches/ > iptables-patch-dir' >>nf-patch-build/iptables-download-make
+	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/network/utils/iptables/patches/' >>nf-patch-build/iptables-download-make
+	echo '	echo $(TOPDIR)/package/network/utils/iptables/patches/ > iptables-patch-dir' >>nf-patch-build/iptables-download-make
 fi
 
 
@@ -230,6 +230,8 @@ if [ "$patch_kernel" = 1 ] ; then
 	mkdir -p "$iptables_patch_dir"
 	mkdir -p "$patch_dir"
 fi
+
+echo "new_module_dirs=$new_module_dirs"
 
 for new_d in $new_module_dirs ; do
 	new_d="$module_dir/$new_d"
@@ -279,29 +281,32 @@ for new_d in $new_module_dirs ; do
 		done
 	fi
 	
+	kernel_netfilter_mk="package/kernel/linux/modules/netfilter.mk"
+	iptables_makefile="package/network/utils/iptables/Makefile"
 	if [ "$patch_openwrt" = "1" ] ; then
 		#add OpenWrt package definition for netfilter module
-		echo "" >>../package/kernel/modules/netfilter.mk
-		echo "" >>../package/kernel/modules/netfilter.mk
-		echo "define KernelPackage/ipt-$lower_name" >>../package/kernel/modules/netfilter.mk
-		echo "  SUBMENU:=\$(NF_MENU)" >>../package/kernel/modules/netfilter.mk
-		echo "  TITLE:=$lower_name" >>../package/kernel/modules/netfilter.mk
-		echo "  KCONFIG:=\$(KCONFIG_IPT_$upper_name)" >>../package/kernel/modules/netfilter.mk
-		echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../package/kernel/modules/netfilter.mk
-		echo "  AUTOLOAD:=\$(call AutoLoad,45,\$(notdir \$(IPT_$upper_name-m)))" >>../package/kernel/modules/netfilter.mk
-		echo "	DEPENDS:= kmod-ipt-core" >>../package/kernel/modules/netfilter.mk
-		echo "endef" >>../package/kernel/modules/netfilter.mk
-		echo "\$(eval \$(call KernelPackage,ipt-$lower_name))" >>../package/kernel/modules/netfilter.mk
+		echo "" >>../"$kernel_netfilter_mk"
+		echo "" >>../"$kernel_netfilter_mk"
+		echo "define KernelPackage/ipt-$lower_name" >>../"$kernel_netfilter_mk"
+
+		echo "  SUBMENU:=\$(NF_MENU)" >>../"$kernel_netfilter_mk"
+		echo "  TITLE:=$lower_name" >>../"$kernel_netfilter_mk"
+		echo "  KCONFIG:=\$(KCONFIG_IPT_$upper_name)" >>../"$kernel_netfilter_mk"
+		echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
+		echo "  AUTOLOAD:=\$(call AutoLoad,45,\$(notdir \$(IPT_$upper_name-m)))" >>../"$kernel_netfilter_mk"
+		echo "	DEPENDS:= kmod-ipt-core" >>../"$kernel_netfilter_mk"
+		echo "endef" >>../"$kernel_netfilter_mk"
+		echo "\$(eval \$(call KernelPackage,ipt-$lower_name))" >>../"$kernel_netfilter_mk"
 
 	
 		#add OpenWrt package definition for iptables extension
-		echo "" >>../package/iptables/Makefile 
-		echo "" >>../package/iptables/Makefile 
-		echo "define Package/iptables-mod-$lower_name" >>../package/iptables/Makefile 
-		echo "\$(call Package/iptables/Module, +kmod-ipt-$lower_name)" >>../package/iptables/Makefile 
-		echo "  TITLE:=$lower_name" >>../package/iptables/Makefile 
-		echo "endef" >>../package/iptables/Makefile 
-		echo "\$(eval \$(call BuildPlugin,iptables-mod-$lower_name,\$(IPT_$upper_name-m)))" >>../package/iptables/Makefile 
+		echo "" >>../"$iptables_makefile" 
+		echo "" >>../"$iptables_makefile" 
+		echo "define Package/iptables-mod-$lower_name" >>../"$iptables_makefile" 
+		echo "\$(call Package/iptables/Module, +kmod-ipt-$lower_name)" >>../"$iptables_makefile" 
+		echo "  TITLE:=$lower_name" >>../"$iptables_makefile" 
+		echo "endef" >>../"$iptables_makefile" 
+		echo "\$(eval \$(call BuildPlugin,iptables-mod-$lower_name,\$(IPT_$upper_name-m)))" >>../"$iptables_makefile" 
 	
 	
 		#update include/netfilter.mk with new module
@@ -350,5 +355,6 @@ fi
 
 #cleanup
 cd ..
+
 rm -rf nf-patch-build
 

@@ -516,8 +516,8 @@ static struct iptables_match bandwidth =
 	#else
 		.version = IPTABLES_VERSION,
 	#endif
-	.size		= IPT_ALIGN(sizeof(struct ipt_bandwidth_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_bandwidth_info)),
+	.size		= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
+	.userspacesize	= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
 	.help		= &help,
 	.parse		= &parse,
 	.final_check	= &final_check,

@@ -1,0 +1,52 @@
+ChangeLog:
+
+==================================================
+Version: 1.0.5-20150202
+Release time: 14:34 2015-02-02 UTC+8
+Changes:
+
+i18n/SimplifiedChinese: fix bugs in ddns.js, firstboot.js and strings.js. Add missing key in basic.js
+
+==================================================
+Version: 1.0.4-20141026
+Release time: 13:40 2014-10-26 UTC+8
+Changes:
+
+translation update
+
+==================================================
+Version: 1.0.3-1
+Release time: 21:29 2013-11-30 UTC+8
+Changes:
+
+added translation: initd.js minidlna.js pptp.js webcam.js
+
+==================================================
+Version: 1.0.2-1
+Release time: 21:35 2013-10-19 UTC+8
+Changes:
+
+translated the all js file to Chinese.
+adjusted some words in several files.
+
+==================================================
+Version: 1.0.1-1
+Release time: 12:02 2013-10-05 UTC+8
+Changes:
+
+translated the following file:
+  about.js  openvpn.js  qos.js  tor.js  update.js
+
+the following elements return back to Engilsh:
+  bndwS.FMonths in bandwidth.js
+  DyDNS.cNams in ddns.js
+  logS.Qnam in login.js
+  quotasStr.ColNms in quotas.js
+  rbS.DaysWArr in reboot.js
+  UI.EMonths in strings.js
+  webmS.dForm in webmon.js
+  section below "//javscript" in wifi_schedule.js
+
+adjusted some words in several files
+
+==================================================

@@ -1,7 +1,8 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2006-2011 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 
 START=95
+STOP=15
 
 SERVICE_USE_PID=1
 
@@ -67,8 +68,10 @@ start() {
 	local extip port usesysuptime conffile serial_number model_number
 	local uuid notify_interval presentation_url enable_upnp
 	local upnp_lease_file clean_ruleset_threshold clean_ruleset_interval
+        local ipv6_listening_ip
 
 	config_get extiface config external_iface
+	config_get extzone config external_zone
 	config_get intiface config internal_iface
 	config_get extip config external_ip
 	config_get port config port 5000
@@ -84,13 +87,26 @@ start() {
 	config_get upnp_lease_file config upnp_lease_file
 	config_get clean_ruleset_threshold config clean_ruleset_threshold
 	config_get clean_ruleset_interval config clean_ruleset_interval
+	config_get ipv6_listening_ip config ipv6_listening_ip
 
 	local args
 
 	. /lib/functions/network.sh
 
 	local ifname
-	network_get_device ifname ${extiface:-wan}
+
+        # manual external interface overrides everything
+        if [ -z "$extiface" ] ; then
+            # manual external zone (if dynamically find interfaces
+            # belonging to it) overrides network_find_wan*
+            if [ -n "$extzone" ] ; then
+                ifname=$(fw3 -q zone $extzone | head -1)
+            fi
+            [ -n "$extiface" ] || network_find_wan extiface
+            [ -n "$extiface" ] || network_find_wan6 extiface
+        fi
+
+	[ -n "$ifname" ] || network_get_device ifname ${extiface}
 
 	if [ -n "$conffile" ]; then
 		args="-f $conffile"
@@ -119,6 +135,7 @@ start() {
 		upnpd_write_bool enable_natpmp 1
 		upnpd_write_bool enable_upnp 1
 		upnpd_write_bool secure_mode 1
+		upnpd_write_bool pcp_allow_thirdparty 0
 		upnpd_write_bool system_uptime 1
 
 		[ -n "$upnp_lease_file" ] && \
@@ -140,6 +157,9 @@ start() {
 
 		[ -n "${clean_ruleset_interval}" ] && \
 			echo "clean_ruleset_interval=${clean_ruleset_interval}" >>$tmpconf
+
+		[ -n "${ipv6_listening_ip}" ] && \
+			echo "ipv6_listening_ip=${ipv6_listening_ip}" >>$tmpconf
 
 		[ -z "$uuid" ] && {
 			uuid="$(cat /proc/sys/kernel/random/uuid)"
@@ -181,4 +201,8 @@ stop() {
 
 	iptables -t nat -F MINIUPNPD 2>/dev/null
 	iptables -t filter -F MINIUPNPD 2>/dev/null
+
+        [ -x /usr/sbin/ip6tables ] && {
+	    ip6tables -t filter -F MINIUPNPD 2>/dev/null
+        }
 }

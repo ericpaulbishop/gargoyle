@@ -64,6 +64,11 @@
 		<span class='leftcolumn'><%~ OSts %>:</span>
 		<span class='rightcolumn' id='openvpn_config_status'></span>
 	</div>
+
+	<div id='openvpn_clear_keys_container' style='display:none' >
+		<span class="rightcolumnonly"><input type='button' id='openvpn_clear_keys_button' value='<%~ OClrK %>' class='default_button' onclick='clearOpenvpnKeys()' /></span>
+	</div>
+
 </fieldset>
 
 <fieldset id="openvpn_server_fieldset">
@@ -121,7 +126,7 @@
 
 	<div id= "openvpn_server_duplicate_cn_container">
 		<label class='leftcolumn' for='openvpn_server_duplicate_cn' id='openvpn_server_duplicate_cn_label'><%~ CredR %>:</label>
-		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='setOpenvpnVisibility()'>
+		<select class='rightcolumn' id='openvpn_server_duplicate_cn' onchange='updateDupeCn()'>
 			<option value='false'><%~ CredSC %></option>
 			<option value='true'><%~ CredMC %></option>
 		</select>
@@ -239,6 +244,19 @@
 
 				</select>
 			</div>
+
+			<div id='openvpn_client_block_nonovpn_container'>
+				<label class='leftcolumn' for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn_label'><%~ NOVPNT %>:</label>
+				<select class='rightcolumn' id='openvpn_client_block_nonovpn' >
+					<option value='allow'><%~ AllowNOVPNT %></option>
+					<option value='block'><%~ BlockNOVPNT %></option>
+				</select>
+				<br/>
+				<span class='rightcolumnonly'><em><%~ DescNOVPNT %></em></span>
+			</div>
+
+
+
 			<div id='openvpn_client_cipher_other_container'>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
 				<span class="rightcolumnonly"><input type='text' onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em></span>
@@ -251,7 +269,6 @@
 				<span class="leftcolumnonly" style="margin-left:5px;"><em><%~ CfgUpd %></em></span>
 				<br/>
 				<textarea id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()' style="margin-left:5px;width:95%;height:200px;"></textarea>
-
 			</div>
 
 			<div id="openvpn_client_ca_text_container">

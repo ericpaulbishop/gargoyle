@@ -22,12 +22,18 @@ tl-mr3420 | \
 tl-wr741nd | \
 tl-wr841n-v7)
 	PORTS="1 2 3 4";;
-tl-mr3220-v2)
+tl-mr3220-v2 | \
+tl-mr3420-v2 | \
+tl-wr741nd-v4 | \
+tl-wr841n-v8)
 	PORTS="2 3 4 1";;
 tl-wdr4300)
 	PORTS="2 3 4 5";;
 tl-wr1043nd)
 	PORTS="1 2 3 4";;
+tl-wdr3500 | \
+tl-wr1043nd-v2)
+        PORTS="4 3 2 1";;
 wndr3700 | \
 wrt160nl | \
 wzr-hp-g300nh)
@@ -55,7 +61,7 @@ for P in $PORTS; do
 		"link:up speed:100baseT") STATUS="100Mbps";;
 		"link:up speed:10baseT") STATUS="10Mbps";;
 		"0") STATUS="-";;
-		"1") STATUS="connected";;
+		"1") STATUS=$(i18n conn);;
 		*) STATUS="?";;
 	esac
 	case "$counter" in

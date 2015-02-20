@@ -1,4 +1,4 @@
-#!/usr/bin/haserl --upload-limit=8192 --upload-target=/tmp/ --upload-dir=/tmp/
+#!/usr/bin/haserl --upload-limit=8192 --upload-dir=/tmp/
 <%
 	# This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
 	# version 2.0 with a special clarification/exception that permits adapting the program to
@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js" -z "firstboot.js i18n.js" system gargoyle
+	gargoyle_header_footer -h -c "internal.css" -j "i18n.js firstboot.js table.js time.js" -z "firstboot.js i18n.js time.js" system gargoyle
 %>
 
 <script>
@@ -42,6 +42,7 @@
 		<br/>
 	</div>
 	<br/>
+	<p><strong><%~ Sla %>:</strong></p>
 	<div>
 		<div id='lang_container' >
 			<span class='narrowleftcolumn'>
@@ -113,11 +114,11 @@ document.getElementById('password1').focus();
 	if [ "$have_net" == "1" ] ; then
 		echo "haveNet=1;"
 		gpkg update > /dev/null 2>&1
+	fi
 
-		lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
-		if [ -n "$lang_info" ] ; then
-			printf "%s\n" "$lang_info" 
-		fi
+	lang_info=$(gpkg info -v 'Status,Description' -d plugin_root -o 'js' -r /^plugin-gargoyle-i18n-/)
+	if [ -n "$lang_info" ] ; then
+		printf "%s\n" "$lang_info"
 	fi
 %>
 

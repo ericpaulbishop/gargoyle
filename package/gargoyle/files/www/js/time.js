@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
@@ -41,8 +41,11 @@ function saveChanges()
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
 
 		//update date format
-		var systemDateFormat = getSelectedValue("date_format"); 
+		var systemDateFormat = getSelectedValue("date_format");
 		uci.set("gargoyle", "global", "dateformat", getSelectedValue("date_format"));
+		
+		//update time format
+		uci.set("gargoyle", "global", "hour_style", getSelectedValue("time_format"));
 
 		//update command to output date
 		var formatStrings=[];
@@ -127,7 +130,7 @@ function proofreadAll()
 
 function resetData()
 {
-	setChildText("current_time", currentTime);
+	setChildText("current_time", cnv_LocaleTime(currentTime));
 	
 	timezoneList = timezoneData[0];
 	timezoneDefinitions = timezoneData[2];
@@ -151,7 +154,10 @@ function resetData()
 	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 	setSelectedValue("date_format", "usa"); //set default value for date
 	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
-
+	
+	var sysTimeFmt = uciOriginal.get("gargoyle",  "global", "hour_style");
+	setSelectedValue("time_format", 12);
+	setSelectedValue("time_format", sysTimeFmt);
 
 	var tzServers = uciOriginal.get("system", "ntp", "server");
 	var tzServers = tzServers == null || tzServers == "" ? [] : tzServers

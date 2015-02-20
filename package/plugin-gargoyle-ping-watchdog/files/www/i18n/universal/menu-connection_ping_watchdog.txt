@@ -3,3 +3,7 @@
 fallback=Ping Watchdog
 EN=Ping Watchdog
 ES=Perro Guardián de Ping
+PL=Monitor połączenia
+ZH-CN=Ping守护进程
+RU=Контроль за соединением
+NO=Ping Vokter

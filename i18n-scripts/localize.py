@@ -22,17 +22,17 @@ def getValue_forKey( lang_dict, key, kErrMsg):
 	try:
 		return lang_dict[key]
 	except AttributeError:
-		return ''
+		return None
 	except KeyError:
 		print '\tKeyError: ' + kErrMsg
-		return ''
+		return None
 		
 def getValue(key, fb_dict, act_dict, err_msg_type):
 	avalue=''
 	avalue=getValue_forKey( act_dict, key, act_lang+' did not contain key \'' +key+'\' ('+err_msg_type+')')
-	if avalue == '':
+	if avalue == None:
 		avalue=getValue_forKey( fb_dict, key, 'fallback language '+fb_lang+' also did not contain key \'' +key+'\' ('+err_msg_type+')')
-		if avalue == '':
+		if avalue == None:
 			print '\tMissingKey: '+key+ ' in both active & fallback languages; using key as value  ('+err_msg_type+')'
 			avalue=key
 		else:
@@ -65,6 +65,8 @@ def parseJStrans( lang, page, lang_dict, js_style, js_objects ):
 		for dline in dtranslines:
 			if '.' in dline and '=' in dline and ('"' in dline or "'" in dline) and ';' in dline:
 				js_obj_prop, js_value = dline[:-2].split("=", 1)
+				if '";' in js_value:
+					js_value=js_value.split(";", 1)[0]
 				if not js_style:
 					js_obj_prop=js_obj_prop.split('.')[1]
 				if js_style:
@@ -331,8 +333,9 @@ def process_javascript_file( jsfile ):
 	jsfileFO.close()
 	
 def process_i18n_shell_file( ):
+	print '---->   Localizing i18n shell script translations into '+act_lang
 	gdir=os.getcwd()
-	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir+"/package", shell=True, cwd='./', stdout=subprocess.PIPE )
+	gproc = subprocess.Popen("grep '\$(i18n ' -m 1 -l -r "+gdir+"/package-prepare", shell=True, cwd='./', stdout=subprocess.PIPE )
 	i18n_list = gproc.communicate()[0].split('\n')
 	for ifile in i18n_list:
 		if len(ifile) > 0:
@@ -356,12 +359,19 @@ def process_i18n_shell_file( ):
 									break
 							i18n_cmd=iline[x:y].split()
 							if i18n_cmd[0].endswith('i18n'):
-								fallback_dict={}
-								active_dict={}
-								fallback_dict=parseJStrans( fb_lang, i18n_cmd[1]+'.js', fallback_dict, False, None )
-								active_dict=parseJStrans( act_lang, i18n_cmd[1]+'.js', active_dict, False, None )
+								fallback_dict = {}
+								active_dict= {}
 								
-								anewline+=('\"'+ getValue(i18n_cmd[2], fallback_dict, active_dict, 'i18n shell script') +'\"')
+								fallback_dict=parseJStrans( fb_lang, 'strings.js', fallback_dict, False, None )
+								active_dict=parseJStrans( act_lang, 'strings.js', active_dict, False, None )
+								
+								key=i18n_cmd[1]
+								if '.' in key:
+									fallback_dict=parseJStrans( fb_lang, key.split('.')[0]+'.js', fallback_dict, False, None )
+									active_dict=parseJStrans( act_lang, key.split('.')[0]+'.js', active_dict, False, None )
+									key=key.split('.')[1]
+								
+								anewline+=('\"'+ getValue(key, fallback_dict, active_dict, 'i18n shell script') +'\"')
 								x=y+1
 							
 						anewline+=iline[x]
@@ -443,7 +453,7 @@ def process_plugin_menunames(pm_path, fb_dict, act_dict):
 	
 	for m_item in menutext:
 		if '=' in m_item:
-			if m_item[:2] == act_lang[-2:]:
+			if m_item.split("=",1)[0] == act_lang.split("-",1)[1]:
 				menu_value = m_item[:].split("=", 1)[1][:-1] #there is a hanging newline there
 				
 				act_dict["gargoyle_display_"+base_menuname] = '"'+menu_value+'"'
@@ -471,10 +481,10 @@ def process_menunames():
 		uci_menu_item=string.replace(menu_i, "_", ".",2)
 		
 		menu_value=getValue_forKey( active_menu_dict, menu_i, "the "+act_lang+" translation does not have a menu "+menu_i+" entry.")
-		if menu_value == '':
+		if menu_value == None:
 			print "\t  Warning: using the "+fb_lang+" translation"
 			menu_value=getValue_forKey( fallback_menu_dict, menu_i, "the "+fb_lang+" translation does not have a menu "+menu_i+" entry.")
-			if menu_value == '':
+			if menu_value == None:
 				print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a menu name."
 				print "\t  The text of the menu item will not be localized"
 				continue
@@ -536,10 +546,10 @@ def process_menunames():
 				sys.exit(1)
 			
 			menu_value=getValue_forKey( active_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+act_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
-			if menu_value == '':
+			if menu_value == None:
 				print "\t  Warning: using the "+fb_lang+" translation"
 				menu_value=getValue_forKey( fallback_menu_dict, "gargoyle_display_"+menu_opts[1], "the "+fb_lang+" translation does not have a stardard menu "+menu_opts[1]+" entry.")
-				if menu_value == '':
+				if menu_value == None:
 					print "\t  Warning: the "+fb_lang+" translation and the "+act_lang+" translation both did not contain a stardard menu name."
 					print "\t  The text of the stardard menu item will not be localized"
 					continue
@@ -635,6 +645,90 @@ def remove_ghf_zopt():
 		w_fileFO.seek(0)
 		w_fileFO.writelines(new_wpage_contents)
 		w_fileFO.close()
+		
+def process_ghf_source():
+	fallback_dict={}
+	active_dict={}
+	new_ghf_contents=[]
+	print "---->   Localizing gargoyle_header_footer.c into "+act_lang
+	
+	if act_lang=='English-EN':
+		return
+		
+	fallback_dict=parseJStrans( fb_lang, 'ghf.js', fallback_dict, True, None )
+	active_dict=parseJStrans( act_lang, 'ghf.js', active_dict, True, None )
+	
+	ghf_fileFO = open('./package-prepare/gargoyle/src/gargoyle_header_footer.c', 'rb')
+	ghf_src=ghf_fileFO.readlines()
+	ghf_fileFO.close()
+	
+	for sline in ghf_src:
+		anewline=''
+		
+		if sline.startswith('\tchar* title = "Gargoyle Router Management Utility";'):
+			anewline='\tchar* title = '+getValue("ghf.title", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* desc = "Router<br/>Management<br/>Utility";'):
+			anewline='\tchar* desc = '+getValue("ghf.desc", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* dname = "Device Name";'):
+			anewline='\tchar* dname = '+getValue("ghf.devn", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		if sline.startswith('\tchar* wait_txt = "Please Wait While Settings Are Applied";'):
+			anewline='\tchar* wait_txt = '+getValue("ghf.waits", fallback_dict, active_dict, "gargoyle_header_footer source file")+';\n'
+		
+		if anewline != '':
+			new_ghf_contents.append(anewline)
+		else:
+			new_ghf_contents.append(sline)
+	
+	ghf_fileFO = open('./package-prepare/gargoyle/src/gargoyle_header_footer.c', 'wb')
+	ghf_fileFO.seek(0)
+	ghf_fileFO.writelines(new_ghf_contents)
+	ghf_fileFO.close()	
+		
+		
+def process_eval_file( efile, src_pg , jsObjects):
+	js_list = []
+	fallback_dict = {}
+	active_dict= {}
+	new_page_contents=[]
+	
+	print efile
+	ename=os.path.basename(efile)
+	js_list.append(src_pg)
+	
+	if not any("strings.js" in jso for jso in js_list):
+		js_list.append('strings.js')
+	
+	if len(js_list) > 0:
+		i=0
+		while i < len(js_list):
+			fallback_dict=parseJStrans( fb_lang, js_list[i], fallback_dict, True, None )
+			active_dict=parseJStrans( act_lang, js_list[i], active_dict, True, None )
+			i+=1
+	
+	efileFO = open(efile, 'rb')
+	epage=efileFO.readlines()
+	efileFO.close()
+	
+	for eline in epage:
+		anewline=''
+		
+		for jsObj in jsObjects:
+			if jsObj+'.' in eline:
+				jsObjIdx=string.index(eline, jsObj+'.')
+				if jsObjIdx >= 0:
+					closing_dbl_quote_itx=string.index(eline[1:], '"')
+					js_obj_prop=eline[jsObjIdx:closing_dbl_quote_itx+1]
+					anewline=eline[:jsObjIdx]+ getValue(js_obj_prop, fallback_dict, active_dict, 'javascript eval')[1:-1] +eline[closing_dbl_quote_itx+1:]
+		
+		if anewline == '':
+			new_page_contents.append(eline)
+		else:
+			new_page_contents.append(anewline)
+		
+	efileFO = open(efile, 'wb')
+	efileFO.seek(0)
+	efileFO.writelines(new_page_contents)
+	efileFO.close()
 
 if len(sys.argv) == 3:
 	fb_lang=sys.argv[1]
@@ -655,8 +749,9 @@ for filename in os.listdir('./package-prepare'):
 process_i18n_shell_file()
 process_ddns_config()
 process_menunames()
+process_ghf_source()
 remove_ghf_zopt()
-
+process_eval_file('./package-prepare/gargoyle/files/www/data/timezones.txt', "time.js", ["TiZ"])
 
 print '    Finding overlooked i18n files'
 jsObjects=[]
@@ -673,10 +768,10 @@ for lpack in glob.glob('./package-prepare/plugin-gargoyle-i18n-%s/files/www/i18n
 #print jsObjects
 errs=0
 for x in xrange(1,10):
-	for rnd_file in glob.glob('./package%s' % (x*'/*',)):
+	for rnd_file in glob.glob('./package-prepare%s' % (x*'/*',)):
 		if '/package-prepare/haserl' in rnd_file:
 			continue
-		if 'plugin-gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
+		if 'gargoyle-i18n' in rnd_file or 'i18n.js' in rnd_file:
 			continue
 		if os.path.isfile(rnd_file):
 			afileFO = open(rnd_file, 'rb')
@@ -686,10 +781,15 @@ for x in xrange(1,10):
 			for aline in filelines:
 				for jso in jsObjects:
 					if jso+'.' in aline:
+						if '/'+jso+'.' in aline:
+							continue #its just a path
 						jsObjIdx=string.index(aline, jso+'.')
 						if jsObjIdx >= 0:
 							if aline[jsObjIdx-1].isalpha():
 								continue
+						commentIdx=string.find(aline, "//")
+						if commentIdx > 0 and commentIdx < jsObjIdx:
+							continue
 						print rnd_file
 						print '\t FOUND javascript object:%s' % (jso,)
 						print '\t\t'+aline
@@ -713,3 +813,29 @@ for i18n_pack in glob.glob('./package-prepare/plugin-gargoyle-i18n*'):
 	
 for i18n_folder in glob.glob('./package-prepare/*/files/www/i18n'):
 	shutil.rmtree(i18n_folder)
+
+# add LOCALIZED_BUILD flag to compiler command to not build i18n portions
+if os.path.exists('./package-prepare/gargoyle/Makefile'):
+	print 'Adding CFLAG to compile a localized gargoyle_header_footer'
+	make_fileFO = open('./package-prepare/gargoyle/Makefile', 'rb')
+	makefile=make_fileFO.readlines()
+	make_fileFO.close()
+	new_makefile_contents=[]
+	
+	for aline in makefile:
+		anewline=''
+		if 'CFLAGS="$(TARGET_CFLAGS)' in aline:
+			target_str="(TARGET_CFLAGS)"
+			targetIdx=string.find(aline, target_str)
+			if targetIdx > 0:
+				anewline=aline[:targetIdx+len(target_str)]+" -DLOCALIZED_BUILD "+aline[targetIdx+len(target_str)+1:]
+			
+		if anewline != '':
+			new_makefile_contents.append(anewline)
+		else:
+			new_makefile_contents.append(aline)
+			
+	make_fileFO = open('./package-prepare/gargoyle/Makefile', 'wb')
+	make_fileFO.seek(0)
+	make_fileFO.writelines(new_makefile_contents)
+	make_fileFO.close()

@@ -38,7 +38,13 @@ start()
 		num_themes="$#"
 
 		if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
-			uci set gargoyle.display.system_themes='Themes'
+
+			menu_name="Themes"
+			[ -x /usr/bin/i18n-menu ] && {
+				translation=$(i18n-menu gargoyle.display.system_themes)
+				[ -n "$translation" ] && menu_name="$translation"
+			}
+			uci set gargoyle.display.system_themes="$menu_name"
 			uci set gargoyle.scripts.system_themes='themes.sh'
 			uci set gargoyle.system.themes='311'
 			uci commit gargoyle
@@ -52,9 +58,9 @@ start()
 		#if current theme doesn't exist anymore switch back to default
 		selected_theme=$(uci get gargoyle.global.theme  2>/dev/null)
 		if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}"/"${common_css}"  ] ; then
-			if [ -e "${webroot}"/"${theme_root}"/"default"/"${common_css}" ] ; then
+			if [ -e "${webroot}"/"${theme_root}"/"Gargoyle"/"${common_css}" ] ; then
 				#should always have default theme, but check above to make sure
-				uci set gargoyle.global.theme=default
+				uci set gargoyle.global.theme=Gargoyle
 				uci commit gargoyle
 			fi
 		fi

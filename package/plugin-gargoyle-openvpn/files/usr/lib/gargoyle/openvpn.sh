@@ -238,6 +238,13 @@ push "route-gateway $openvpn_server_internal_ip"
 $openvpn_redirect_gateway
 
 EOF
+	
+	if [ -n "$openvpn_redirect_gateway" ] ; then
+		touch "$OPENVPN_DIR/block_non_openvpn"
+	else
+		rm -rf "$OPENVPN_DIR/block_non_openvpn"
+	fi
+
 	if [ -n "$openvpn_server_local_subnet_ip" ] && [ -n "$openvpn_server_local_subnet_mask" ] ; then
 		# save routes -- we need to update all route lines 
 		# once all client ccd files are in place on the server
@@ -372,6 +379,11 @@ EOF
 		fi
 	fi
 
+	if [ -e  "$OPENVPN_DIR/block_non_openvpn" ] ; then
+		touch "$OPENVPN_DIR/client_conf/${openvpn_client_id}/block_non_openvpn"
+	else
+		rm -rf "$OPENVPN_DIR/client_conf/${openvpn_client_id}/block_non_openvpn"
+	fi
 		
 
 	touch "$random_dir/ccd_${openvpn_client_id}"
@@ -413,7 +425,7 @@ EOF
 
 			# save routes -- we need to update all route lines 
 			# once all client ccd files are in place on the server
-			if  [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+			if  [ "$client_enabled" != "false" ] && [ "$client_enabled" != "0" ] ; then
 				echo "$openvpn_client_local_subnet_ip $openvpn_client_local_subnet_mask $openvpn_client_internal_ip \"$openvpn_client_id\"" > "$random_dir/route_data_${openvpn_client_id}"
 			fi
 		fi
@@ -424,7 +436,7 @@ EOF
 		ln -s "$client_conf_dir/$openvpn_client_id.conf" "$client_conf_dir/$openvpn_client_id.ovpn"	
 	fi
 	copy_if_diff "$random_dir/ccd_${openvpn_client_id}"         "$OPENVPN_DIR/ccd/${openvpn_client_id}"
-	if  [ "$client_enabled" != "false" ] || [ "$client_enabled" != "0" ] ; then
+	if  [ "$client_enabled" != "false" ] && [ "$client_enabled" != "0" ] ; then
 		copy_if_diff "$random_dir/route_data_${openvpn_client_id}"  "$OPENVPN_DIR/route_data/${openvpn_client_id}"
 	fi
 	
@@ -548,6 +560,15 @@ regenerate_allowed_client_from_uci()
 	for var in $ac_vars ; do
 		config_get "$var" "$section" "$var"
 	done
+	
+	config_get "duplicate_cn" "server" "duplicate_cn"
+	if [ "$duplicate_cn" = "true" ] || [  "$duplicate_cn" = "1" ] ; then
+		ip=""
+		subnet_ip=""
+		subnet_mask=""
+	fi	
+	
+
 	if [ "$enabled" != "false" ] || [ "$enabled" != "0" ] ; then
 		create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask" "false" "$enabled"
 	fi
@@ -556,7 +577,7 @@ regenerate_allowed_client_from_uci()
 
 regenerate_server_and_allowed_clients_from_uci()
 {
-	. /etc/functions.sh
+	. /lib/functions.sh
 	config_load "openvpn_gargoyle"
 	
 	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"

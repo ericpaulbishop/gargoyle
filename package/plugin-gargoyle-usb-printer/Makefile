@@ -27,6 +27,7 @@ define Package/plugin-gargoyle-usb-printer
 	TITLE:=USB Printer Support for Gargoyle
 	DEPENDS:=+kmod-usb-printer +p910nd
 	MAINTAINER:=Eric Bishop
+	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-usb-printer/description
@@ -50,7 +51,14 @@ endef
 
 define Package/plugin-gargoyle-usb-printer/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 
-		uci set gargoyle.display.system_printers="USB Printer"
+		menu_name="USB Printer"
+		[ -n `which i18n` ] && {
+			mn=$$(i18n-menu gargoyle.display.system_printers)
+			if [ -n "$$mn" ] ; then
+				menu_name="$$mn"
+			fi
+		}
+		uci set gargoyle.display.system_printers="$$menu_name"
 		uci set gargoyle.scripts.system_printers="printers.sh"
 		uci set gargoyle.system.printers="360"
 		uci commit

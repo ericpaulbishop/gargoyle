@@ -32,6 +32,7 @@ UI.Reboot="Reiniciar Ahora";
 UI.MoreInfo="Más información";
 UI.Hide="Ocultar texto";
 UI.WaitSettings="Espere por favor mientras se aplican los nuevos ajustes. . .";
+UI.Wait="Espere por favor. . .";
 UI.ErrChanges="Los cambios no se pudieron aplicar";
 UI.Disabled="Desactivado";
 UI.Enabled="Activado";
@@ -67,11 +68,39 @@ UI.second="segundo";
 UI.minute="minuto";
 UI.hour="hora";
 UI.day="día";
+UI.month="mes";
+UI.year="año";
+UI.sc="s"; //abbr for second
+UI.hr="h"; //abbr for hour
+UI.pAM="";
+UI.pPM="";
+UI.hAM="a.m.";
+UI.hPM="p.m.";
+
+UI.EMonths=["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
 UI.CApplyChanges="Cerrar y Aplicar Cambios";
 UI.CDiscardChanges="Cerrar y Descartar Cambios";
 UI.waitText="Por Favor, Espere Mientras Se Aplican los Ajustes";
 UI.Cancel="Cancelar";
+
+UI.byt="bytes";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KB1="kByte";
+UI.MB1="MByte";
+UI.GB1="GByte";
+UI.TB1="TByte";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
 
 UI.Err="ERROR";
 UI.prfErr="Existe un error en";
@@ -86,6 +115,7 @@ UI.wsprt="puerto del servidor web";
 UI.prdr="puerto redireccionado al enrutador";
 UI.puse="puerto en uso por el enrutador";
 UI.pfwd="puerto redireccionado a";
+UI.conn="conectado";
 
 UI.AJAX="Se requiere un navegador con soporte de AJAX";
 UI.AJAXUpg="Por favor actualice a un navegador compatible con AJAX y vuelva a intentarlo. Estos navegadores incluyen Firefox 2.0+, Safari y IE 6+ entre otros.";

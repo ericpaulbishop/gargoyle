@@ -45,11 +45,11 @@ function resetData()
 	setChildText("device_model", model);
 	setChildText("device_name", uciOriginal.get("system", systemSections[0], "hostname" ));
 	setChildText("gargoyle_version", gargoyleVersion);
-	setChildText("memory", "" + ramUsed + "MB / " + ramMemory + "MB (" + percentRamUsed + "%)" );
+	setChildText("memory", "" + ramUsed + UI.MB +" / " + ramMemory + UI.MB +" (" + percentRamUsed + "%)" );
 	if(swapMemory > 0)
 	{
 		document.getElementById("swap_container").style.display = "block";
-		setChildText("swap", "" + swapUsed + "MB / " + swapMemory + "MB (" + percentSwapUsed + "%)" );
+		setChildText("swap", "" + swapUsed + UI.MB + " / " + swapMemory + UI.MB + " (" + percentSwapUsed + "%)" );
 	}
 	else
 	{
@@ -59,7 +59,7 @@ function resetData()
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
-	setChildText("current_time", currentTime);
+	setChildText("current_time", cnv_LocaleTime(currentTime));
 
 	var bridgeSection = getBridgeSection(uciOriginal);
 	setChildText("device_config", bridgeSection == "" ? ovwS.Gtwy : ovwS.WBrgR);
@@ -147,12 +147,15 @@ function resetData()
 					var devBand = "G";
 					if(dev != "")
 					{
-						if(uciOriginal.get("wireless", dev, "hwmode") == "11na")
+						if(uciOriginal.get("wireless", dev, "hwmode") == "11na" || uciOriginal.get("wireless", dev, "hwmode") == "11a")
 						{
 							devBand = "A";
 						}
 					}
-					if (apSsids[devBand] == null) apSsids[devBand] = secSsid
+					if (apSsids[devBand] == null)
+					{
+						apSsids[devBand] = secSsid
+					}
 				}
 				else
 				{
@@ -240,4 +243,6 @@ function resetData()
 		}
 		tableContainer.appendChild(portsTable);
 	}
+
+	setChildText("wan_3g", csq);
 }

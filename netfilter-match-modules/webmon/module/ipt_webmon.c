@@ -949,6 +949,11 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 							search_part = strstr(path, "/ws/results/Web/");
 							search_part = search_part == NULL ? search_part : search_part+16;
 						}
+						else if(strstr(domain, "thepiratebay.") != NULL)
+						{
+							search_part = strstr(path, "/search/");
+							search_part = search_part == NULL ? search_part : search_part+8;
+						}
 
 						
 						if(search_part != NULL)
@@ -1141,16 +1146,8 @@ static int __init init(void)
 
 
 	#ifdef CONFIG_PROC_FS
-		proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
-		proc_webmon_recent_searches = create_proc_entry("webmon_recent_searches", 0, NULL);
-		if(proc_webmon_recent_domains)
-		{
-			proc_webmon_recent_domains->proc_fops = &webmon_proc_domain_fops;
-		}
-		if(proc_webmon_recent_searches)
-		{
-			proc_webmon_recent_searches->proc_fops = &webmon_proc_search_fops;
-		}
+		proc_create("webmon_recent_domains",  0, NULL, &webmon_proc_domain_fops);
+		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
 	#endif
 	
 	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)
