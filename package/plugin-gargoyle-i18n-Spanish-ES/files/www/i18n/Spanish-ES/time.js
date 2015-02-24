@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for time.sh html elements
  */
 
-timeStr.Section="Tiempo";
+timeStr.Section="Fecha y hora";
 timeStr.CurrTime="Fecha y Hora Actual";
 timeStr.TimeZone="Zona Horaria";
 timeStr.DateForm="Formato de Fecha";
@@ -48,11 +48,11 @@ TiZ.STDm2="Grecia, Ucrania, Rumanía, Turquía";
 TiZ.UTCm3="Iraq, Jordania, Kuwait";
 TiZ.EETm2="Finlandia";
 TiZ.UTCm4="Armenia";
-TiZ.UTCm5="Pakistán, Rusa";
+TiZ.UTCm5="Pakistán, Rusia";
 TiZ.UTCm5c3="Bombay, Calcutta, Madras, Nueva Delhi";
-TiZ.UTCm6="Bangladesh, Rusa";
-TiZ.UTCm7="Tailandia, Rusa";
-TiZ.UTCm8="China, Hong Kong, Singapur, Taiwan, Rusa";
+TiZ.UTCm6="Bangladesh, Rusia";
+TiZ.UTCm7="Tailandia, Rusia";
+TiZ.UTCm8="China, Hong Kong, Singapur, Taiwan, Rusia";
 TiZ.AWSTm8="Australia, Australia Occidental";
 TiZ.UTCm8c45="Australia, Eucla, La Carretera de Eyre";
 TiZ.UTCm9="Japón, Corea";
@@ -60,7 +60,7 @@ TiZ.ACSTm9c3="Australia, Territorio del Norte";
 TiZ.ACDT="Australia, Australia del Sur";
 TiZ.AESTm10="Australia, Queensland";
 TiZ.AEDT="Australia, Nueva Gales del Sur, Victoria, Tasmania";
-TiZ.UTCm10="Guam, Rusa";
+TiZ.UTCm10="Guam, Rusia";
 TiZ.UTCm11="Islas Salomón";
 TiZ.UTCm12="Fiyi";
 TiZ.NZST="Nueva Zelanda";

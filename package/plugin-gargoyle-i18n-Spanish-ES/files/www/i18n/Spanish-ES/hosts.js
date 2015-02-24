@@ -3,7 +3,7 @@
  */
 
 hostsStr.RefreshR="Frecuencia de actualización";
-hostsStr.RInfo="Este valor specifica la frecuencia con la que se actualizan los datos en esta página";
+hostsStr.RInfo="Este valor especifica la frecuencia con la que se actualizan los datos en esta página";
 hostsStr.CurrLeases="Asignaciones DHCP Actuales";
 hostsStr.ConWifiHosts="Equipos inalámbricos conectados";
 hostsStr.ActiveHosts="Equipos con conexiones activas";
