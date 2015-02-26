@@ -382,7 +382,7 @@ initialize_quotas()
 	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
 		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
-		initialiaze_quota_qos
+		initialize_quota_qos
 	else
 		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		cleanup_old_quota_qos
@@ -431,7 +431,7 @@ cleanup_old_quota_qos()
 	done
 }
 
-initialiaze_quota_qos()
+initialize_quota_qos()
 {
 	cleanup_old_quota_qos
 
