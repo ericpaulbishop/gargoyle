@@ -130,7 +130,7 @@ my $targetOrder =
 		"mynet-n750-squashfs-factory.bin",
 		"mynet-n750-squashfs-sysupgrade.bin",
 		"mynet-rext-squashfs-factory.bin",
-		"mynet-rext-squashfs-sysupgrade.bin"
+		"mynet-rext-squashfs-sysupgrade.bin",
 		"mzk-w04nu-squashfs-factory.bin",
 		"mzk-w04nu-squashfs-sysupgrade.bin",
 		"mzk-w300nh-squashfs-factory.bin",
