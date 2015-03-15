@@ -1,0 +1,24 @@
+config uhttpd main
+	list listen_http	0.0.0.0:80
+	option 'index_file'	'firstboot.sh'
+	option 'index_page'	'firstboot.sh'
+	option 'error_page'	'/firstboot.sh'
+	option 'no_dirlists'	'1'
+	
+	list listen_https	0.0.0.0:443
+	option home		/www
+	option rfc1918_filter	1
+	option max_requests	3
+	option max_connections	100
+	option cert		/etc/uhttpd.crt
+	option key		/etc/uhttpd.key
+	option cgi_prefix	/cgi-bin
+	list interpreter	".sh=/usr/bin/haserl"
+	list interpreter	".svg=/usr/bin/haserl"
+	list interpreter	".csv=/usr/bin/haserl"
+	option script_timeout	900
+	option network_timeout	30
+	option http_keepalive	20
+	option tcp_keepalive	1
+
+

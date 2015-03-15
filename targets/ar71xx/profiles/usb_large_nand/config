@@ -2272,7 +2272,7 @@ CONFIG_OPENVPN_openssl_ENABLE_SMALL=y
 #
 # Web
 #
-CONFIG_PACKAGE_httpd-gargoyle=y
+# CONFIG_PACKAGE_httpd-gargoyle is not set
 CONFIG_PACKAGE_webmon-gargoyle=y
 
 #
@@ -2280,7 +2280,7 @@ CONFIG_PACKAGE_webmon-gargoyle=y
 #
 # CONFIG_PACKAGE_sockd is not set
 # CONFIG_PACKAGE_socksify is not set
-# CONFIG_PACKAGE_uhttpd is not set
+CONFIG_PACKAGE_uhttpd=y
 # CONFIG_PACKAGE_uhttpd_debug is not set
 # CONFIG_PACKAGE_6in4 is not set
 # CONFIG_PACKAGE_6rd is not set

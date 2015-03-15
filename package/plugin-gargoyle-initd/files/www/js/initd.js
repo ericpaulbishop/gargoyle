@@ -108,7 +108,7 @@ function resetData()
 	var initdTableData = new Array();
 	var initdEnabledData = new Array();
 	var serviceIds = new Array();
-	var blockedServices = ['boot','bwmon_gargoyle','create_original_backup','cron','ddns_gargoyle','defconfig','dnsmasq','done','dropbear','firewall','gargoyle_themes','httpd_gargoyle','led','miniupnpd','network','plugins','portmap','qos_gargoyle','rcS','set_kernel_timezone','share_users','sysctl','sysntpd','telnet','time_backup','ubus','umount','usb','usb_storage','watchdog','webmon_gargoyle','wol'];
+	var blockedServices = ['boot','bwmon_gargoyle','create_original_backup','cron','ddns_gargoyle','defconfig','dnsmasq','done','dropbear','firewall','gargoyle_themes','uhttpd','led','miniupnpd','network','plugins','portmap','qos_gargoyle','rcS','set_kernel_timezone','share_users','sysctl','sysntpd','telnet','time_backup','ubus','umount','usb','usb_storage','watchdog','webmon_gargoyle','wol'];
 
 	for (servicesIndex=0; servicesIndex < allInitScripts.length; servicesIndex++)
 	{
