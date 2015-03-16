@@ -14,7 +14,6 @@ config uhttpd main
 	option key		/etc/uhttpd.key
 	option cgi_prefix	/cgi-bin
 	list interpreter	".sh=/usr/bin/haserl"
-	list interpreter	".svg=/usr/bin/haserl"
 	list interpreter	".csv=/usr/bin/haserl"
 	option script_timeout	900
 	option network_timeout	30
