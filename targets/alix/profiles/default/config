@@ -2120,7 +2120,7 @@ CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuclient is not set
 CONFIG_PACKAGE_libusb-1.0=y
 # CONFIG_PACKAGE_libusb-compat is not set
-# CONFIG_PACKAGE_libustream-cyassl is not set
+CONFIG_PACKAGE_libustream-cyassl=y
 # CONFIG_PACKAGE_libustream-openssl is not set
 # CONFIG_PACKAGE_libustream-polarssl is not set
 CONFIG_PACKAGE_libuuid=y
