@@ -20,6 +20,8 @@
 		else
 			echo "Location: overview.sh"
 		fi
+		echo ""
+		echo ""
 		exit
 	fi
 

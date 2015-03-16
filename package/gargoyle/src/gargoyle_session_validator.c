@@ -183,7 +183,7 @@ int main (int argc, char **argv)
 				{
 					sprintf(exp_str, "?expired=1");
 				}
-				printf("echo \"Status: 302 Found\" ;echo \"Location: %s%s\" ;", redirect, exp_str);
+				printf("echo \"Status: 302 Found\" ;echo \"Location: %s%s\" ; echo \"\" ; ", redirect, exp_str);
 			}
 			else
 			{
