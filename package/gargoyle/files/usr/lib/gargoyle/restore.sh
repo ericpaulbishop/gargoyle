@@ -92,7 +92,7 @@ error=$(cat error)
 
 # make sure http settings are correct for uhttp
 uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
-if [ "$uhttpd_main_error_page" != "/firstboot.sh" ] ; then
+if [ "$uhttpd_main_error_page" != "/login.sh" ] ; then
 	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
 fi
 

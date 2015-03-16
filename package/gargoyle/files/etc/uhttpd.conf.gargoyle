@@ -1,8 +1,8 @@
 config uhttpd main
 	list listen_http	0.0.0.0:80
-	option 'index_file'	'firstboot.sh'
-	option 'index_page'	'firstboot.sh'
-	option 'error_page'	'/firstboot.sh'
+	option 'index_file'	'login.sh'
+	option 'index_page'	'login.sh'
+	option 'error_page'	'/login.sh'
 	option 'no_dirlists'	'1'
 	
 	list listen_https	0.0.0.0:443
