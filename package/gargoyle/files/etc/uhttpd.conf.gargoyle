@@ -13,8 +13,8 @@ config uhttpd main
 	option cert		/etc/uhttpd.crt
 	option key		/etc/uhttpd.key
 	option cgi_prefix	/cgi-bin
-	list interpreter	".sh=/usr/bin/haserl"
-	list interpreter	".csv=/usr/bin/haserl"
+	list interpreter	".sh=/usr/bin/run_haserl"
+	list interpreter	".csv=/usr/bin/run_haserl"
 	option script_timeout	900
 	option network_timeout	30
 	option http_keepalive	20

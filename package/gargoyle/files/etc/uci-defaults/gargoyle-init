@@ -18,7 +18,8 @@ fi
 
 #make sure we have uhttpd compapatible config
 uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
-if [ "$uhttpd_main_error_page" != "/login.sh" ] ; then
+use_run_haserl=$(uci get uhttpd.main.interpreter 2>/dev/null | grep "run_haserl")
+if [ "$uhttpd_main_error_page" != "/login.sh" ] || [ -z "$use_run_haserl" ] ; then
 	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
 fi
 
