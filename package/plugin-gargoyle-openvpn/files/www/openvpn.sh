@@ -39,7 +39,7 @@
 	if [ -f "$config_file" ] ; then
 		remote=$(egrep "^[$tab ]*remote[$tab ]" "$config_file" | awk ' { print $2 }')
 		if [ -n "$remote" ] ;then
-			remote_ping=$(ping -c 1 -W 2 www.google.com 2>/dev/null | grep "0% packet loss")
+			remote_ping=$(ping -c 1 -W 2 8.8.8.8 2>/dev/null | grep "0% packet loss")
 		fi
 	fi
 	echo "var remotePing=\"$remote_ping\";"
