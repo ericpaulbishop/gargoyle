@@ -80,6 +80,8 @@ define Package/minidlna/install
 	$(INSTALL_BIN) ./files/minidlna.init $(1)/etc/init.d/minidlna
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./files/minidlna.config $(1)/etc/config/minidlna
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
+	$(INSTALL_DATA) ./files/minidlna-refresh.hotplug $(1)/etc/hotplug.d/iface/80-minidlna-refresh
 endef
 
 $(eval $(call BuildPackage,minidlna))
