@@ -219,8 +219,8 @@ function proofreadAll()
 		var dropbearSections = uciOriginal.getAllSections("dropbear"); 
 		var sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
 
-		var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
-		var httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
+		var httpsPort = getHttpsPort() 
+		var httpPort = getHttpPort() 
 
 
 

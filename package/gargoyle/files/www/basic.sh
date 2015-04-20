@@ -45,6 +45,14 @@
 
 	fi
 
+	has_qmi=$( ls /dev/cdc-wdm* 2>/dev/null )
+	if [ -z "$has_qmi" ] ; then
+		echo "hasQMI = false;"
+	fi
+
+	#echo "var interfaces = new Array();"
+	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
+
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -304,9 +312,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='dhcp_wireless'>DHCP (<%~ Wrlss %>)</option>
 				<option value='static_wireless'><%~ StIP %> (<%~ Wrlss %>)</option>
 				<option value='3g'><%~ Mo3g %></option>
+				<option value='qmi'><%~ Mo3gQMI %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>
+
 
 		<div id='wan_dhcp_ip_container'>
 			<label class='leftcolumn'><%~ CurrIP %>:</label>

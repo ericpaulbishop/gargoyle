@@ -132,7 +132,7 @@ shutdown()
 
 initialize()
 {
-	enabled=$( uci get openvpn.custom_config.enable 2>/dev/null )
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
 	if [ "$enabled" == "1" ] ; then
 		
 		
@@ -197,7 +197,7 @@ initialize()
 
 set_block_nonovpn()
 {
-	enabled=$( uci get openvpn.custom_config.enable 2>/dev/null )
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
 	client_enabled="false"
 	if [ "$enabled" = "1" ] ; then
 		client_enabled=$(uci get openvpn_gargoyle.@client[0].enabled 2>/dev/null)
@@ -222,7 +222,7 @@ set_block_nonovpn()
 
 set_openvpn_cron_watchdog()
 {
-	enabled=$( uci get openvpn.custom_config.enable 2>/dev/null )
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
 	touch /etc/crontabs/root
 	have_watchdog=$( grep "ifconfig.*tun.*init.*openvpn" /etc/crontabs/root )
 	if [ "$enabled" == "1" ] ; then

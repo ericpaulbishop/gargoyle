@@ -124,3 +124,7 @@ basicS.RnwL="Acquiring new DHCP Lease";
 basicS.RlsL="Releasing DHCP Lease";
 basicS.ScnMo="Scanning For Mobile Devices";
 basicS.NoDv="No devices found";
+
+basicS.WANIntr="WAN Interface";
+basicS.Mo3gQMI="LTE (QMI)";
+basicS.Dfult="Default";

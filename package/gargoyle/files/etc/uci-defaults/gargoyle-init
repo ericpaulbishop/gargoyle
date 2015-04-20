@@ -16,6 +16,15 @@ if [ -z "$ani_already_disabled" ] ; then
 fi
 
 
+#make sure we have uhttpd compapatible config
+uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
+use_run_haserl=$(uci get uhttpd.main.interpreter 2>/dev/null | grep "run_haserl")
+if [ "$uhttpd_main_error_page" != "/login.sh" ] || [ -z "$use_run_haserl" ] ; then
+	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
+fi
+
+
+
 settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
 if [ "$settings_not_preserved" == "1" ] ; then
 

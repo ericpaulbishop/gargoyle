@@ -79,8 +79,8 @@ static void help(void)
 	printf("  --reset_time [OFFSET IN SECONDS]\n");
 	printf("  --intervals_to_save [NUMBER OF PREVIOS INTERVALS TO STORE IN MEMORY]\n");
 	printf("  --last_backup_time [UTC SECONDS SINCE 1970]\n");
-	printf("  --check Check another bandwidth rule without incrementing it\n");
-	printf("  --check_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
+	printf("  --bcheck Check another bandwidth rule without incrementing it\n");
+	printf("  --bcheck_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
 }
 
 static struct option opts[] = 
@@ -95,8 +95,8 @@ static struct option opts[] =
 	{ .name = "reset_time",			.has_arg = 1, .flag = 0, .val = BANDWIDTH_RESET_TIME },
 	{ .name = "intervals_to_save",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_NUM_INTERVALS },
 	{ .name = "last_backup_time",		.has_arg = 1, .flag = 0, .val = BANDWIDTH_LAST_BACKUP},
-	{ .name = "check",	 		.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_NOSWAP },
-	{ .name = "check_with_src_dst_swap",	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_SWAP },
+	{ .name = "bcheck",	 		.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_NOSWAP },
+	{ .name = "bcheck_with_src_dst_swap",	.has_arg = 0, .flag = 0, .val = BANDWIDTH_CHECK_SWAP },
 	{ .name = 0 }
 };
 
@@ -342,11 +342,11 @@ static void print_bandwidth_args( struct ipt_bandwidth_info* info )
 	{
 		if(info->check_type == BANDWIDTH_CHECK_NOSWAP)
 		{
-			printf("--check ");
+			printf("--bcheck ");
 		}
 		else
 		{
-			printf("--check_with_src_dst_swap ");
+			printf("--bcheck_with_src_dst_swap ");
 		}
 	}
 	printf("--id %s ", info->id);

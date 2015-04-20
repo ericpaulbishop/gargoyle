@@ -27,8 +27,9 @@ function saveChanges()
 		//remove all old firewall remote_accept sections that redirected to ssh or http server
 		var dropbearSections = uciOriginal.getAllSections("dropbear");
 		var oldLocalSshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
-		var oldLocalHttpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
-		var oldLocalHttpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
+		
+		var oldLocalHttpsPort = getHttpsPort(uciOriginal);
+		var oldLocalHttpPort  = getHttpPort(uciOriginal);
 
 		var firewallSectionCommands = [];
 		var remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept");
@@ -113,14 +114,21 @@ function saveChanges()
 
 		//set local web protocols
 		localWebProtocol = getSelectedValue("local_web_protocol");
-		uci.set("httpd_gargoyle", "server", "web_protocol", localWebProtocol);
 		if(localWebProtocol == "https" || localWebProtocol == "both")
 		{
-			uci.set("httpd_gargoyle", "server", "https_port", document.getElementById("local_https_port").value);
+			uci.set("uhttpd", "main", "listen_https", [ "0.0.0.0:" + document.getElementById("local_https_port").value ] );
+		}
+		else
+		{
+			uci.set("uhttpd", "main", "listen_https", [ ] );
 		}
 		if(localWebProtocol == "http" || localWebProtocol == "both")
 		{
-			uci.set("httpd_gargoyle", "server", "http_port", document.getElementById("local_http_port").value);
+			uci.set("uhttpd", "main", "listen_http",  [ "0.0.0.0:" + document.getElementById("local_http_port").value ] );
+		}
+		else
+		{
+			uci.set("uhttpd", "main", "listen_http",  [ ] );
 		}
 
 		//password update
@@ -136,7 +144,7 @@ function saveChanges()
 		
 		
 		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
-		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uciPreCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall httpd_gargoyle\n/etc/init.d/httpd_gargoyle restart\n";
+		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uciPreCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall uhttpd\n/etc/init.d/uhttpd restart\n";
 		//document.getElementById("output").value = commands;
 
 
@@ -245,9 +253,14 @@ function resetData()
 	document.getElementById("disable_web_password").checked = uciOriginal.get("gargoyle", "global", "require_web_password") == "0" ? true : false;
 	setSelectedValue("session_length", uciOriginal.get("gargoyle", "global", "session_timeout"));
 
-	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
-	httpPort = uciOriginal.get("httpd_gargoyle", "server", "http_port");
-	localProtocol = uciOriginal.get("httpd_gargoyle", "server", "web_protocol");
+	httpsPort = getHttpsPort()
+	httpPort = getHttpPort()
+	
+	localProtocol = ""
+	localProtocol = localProtocol + ( httpsPort != "" ? "https" : "" );
+	localProtocol = localProtocol + ( httpPort != "" ? "http" : "" );
+	localProtocol = localProtocol == "httpshttp" ? "both" : localProtocol;
+
 	setSelectedValue("local_web_protocol", localProtocol);
 
 

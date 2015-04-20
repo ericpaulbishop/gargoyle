@@ -3,10 +3,10 @@
  */
 
 Wsch.Wisch="Programación de WiFi";
-Wsch.Rstat="Estado de la(s) radio(s) inalámbrica(s)";
-Wsch.StStR="Detener/Iniciar radio(s) inalámbrica(s)";
-Wsch.RadOn="Iniciar radio inalámbrica";
-Wsch.RadOf="Detener radio inalámbrica";
+Wsch.Rstat="Estado de wi-fi";
+Wsch.StStR="Detener/Iniciar wi-fi";
+Wsch.RadOn="Iniciar wi-fi";
+Wsch.RadOf="Detener wi-fi";
 Wsch.TPer="Intervalo del temporizador";
 Wsch.NoTm="Desactivar temporizador";
 Wsch.Dly="Diario";

@@ -3,4 +3,4 @@
 ghf.title="Gargoyle Utilidad de Administración del Router";
 ghf.desc="Utilidad de <br/>Administración <br/>del Router";
 ghf.devn="Nombre del Dispositivo";
-ghf.waits="Espere Mientras Ajustes Se Aplican Por Favor";
+ghf.waits="Por favor, espere mientras se aplica la configuración";

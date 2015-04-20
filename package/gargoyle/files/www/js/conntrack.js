@@ -21,8 +21,8 @@ var markToQosClass = [];
 
 function initializeConnectionTable()
 {
-	httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port");
-	httpPort= uciOriginal.get("httpd_gargoyle", "server", "http_port");
+	httpsPort = getHttpsPort()
+	httpPort  = getHttpPort()
 
 	setSelectedValue("host_display", "hostname");
 

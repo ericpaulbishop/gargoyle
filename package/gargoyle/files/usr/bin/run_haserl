@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /usr/bin/haserl --upload-limit=1048576 --upload-dir=/tmp/ $@

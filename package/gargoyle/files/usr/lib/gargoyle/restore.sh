@@ -90,13 +90,12 @@ fi
 error=$(cat error)
 
 
-# make sure http settings are correct for cookie-based auth
-uci set httpd_gargoyle.server.default_page_file="overview.sh" 2>/dev/null
-uci set httpd_gargoyle.server.page_not_found_file="login.sh" 2>/dev/null
-uci set httpd_gargoyle.server.no_password="1" 2>/dev/null
-uci del httpd_gargoyle.server.default_realm_name 2>/dev/null
-uci del httpd_gargoyle.server.default_realm_password_file 2>/dev/null
-uci commit;
+# make sure http settings are correct for uhttp
+uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
+use_run_haserl=$(uci get uhttpd.main.interpreter 2>/dev/null | grep "run_haserl")
+if [ "$uhttpd_main_error_page" != "/login.sh" ] || [ -z "$use_run_haserl" ] ; then
+	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
+fi
 
 
 # set proper gargoyle visibility

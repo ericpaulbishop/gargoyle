@@ -2483,14 +2483,41 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	runOnEditorLoaded();
 }
 
+function getUhttpServerPort(isHttps, serverName, uciData)
+{
+	uciData = uciData == null ? uciOriginal : uciData;
+	var portList = uciData.get("uhttpd", serverName, isHttps ? "listen_https" : "listen_http");
+	var port = ""
+	var portIndex;
+	for(portIndex=0 ; portIndex < portList.length ; portIndex++)
+	{
+		var listenDef = portList[portIndex];
+		if(listenDef.match(/^0\.0\.0\.0:/))
+		{
+			port = listenDef.replace(/^.*:/, "");
+		}
+	}
+	return port;
+}
+
+function getHttpsPort(uciData)
+{
+	return getUhttpServerPort(true, "main", uciData);
+}
+function getHttpPort(uciData)
+{
+	return getUhttpServerPort(false, "main", uciData);
+}
 
 
 function getUsedPorts()
 {
 	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
 	var sshPort   = uciOriginal.get("dropbear", dropbearSections[0], "Port")
-	var httpPort  = uciOriginal.get("httpd_gargoyle", "server", "http_port")
-	var httpsPort = uciOriginal.get("httpd_gargoyle", "server", "https_port")
+	var httpPort  = getHttpPort()
+	var httpsPort = getHttpsPort()
+
+
 
 	var foundPorts = []
 	foundPorts["tcp"] = []

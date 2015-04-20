@@ -2,7 +2,7 @@
 
 <script>
 <%
-	openvpn_enabled=$( uci get openvpn.custom_config.enable 2>/dev/null )
+	openvpn_enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
 	openvpn_client_enabled=$(uci get openvpn_gargoyle.@client[0].enabled 2>/dev/null)
 	
 	echo "var openvpnEnabled = \"$openvpn_enabled\";"

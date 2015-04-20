@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" -z "openvpn.js" openvpn_gargoyle ddns_gargoyle httpd_gargoyle dropbear firewall tor -i
+	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" -z "openvpn.js" openvpn_gargoyle ddns_gargoyle uhttpd dropbear firewall tor -i
 %>
 
 <script>
@@ -39,7 +39,7 @@
 	if [ -f "$config_file" ] ; then
 		remote=$(egrep "^[$tab ]*remote[$tab ]" "$config_file" | awk ' { print $2 }')
 		if [ -n "$remote" ] ;then
-			remote_ping=$(ping -c 1 -W 2 www.google.com 2>/dev/null | grep "0% packet loss")
+			remote_ping=$(ping -c 1 -W 2 8.8.8.8 2>/dev/null | grep "0% packet loss")
 		fi
 	fi
 	echo "var remotePing=\"$remote_ping\";"

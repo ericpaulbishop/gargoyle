@@ -6,8 +6,10 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	echo "HTTP/1.1 301 Moved Permanently" 
+	echo "Status: 302 Found" 
 	echo "Set-Cookie:hash=loggedout;"
 	echo "Location: login.sh?logout=1"
+	echo ""
+	echo ""
 	exit
 ?>

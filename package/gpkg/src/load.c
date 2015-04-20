@@ -285,7 +285,9 @@ string_map* internal_get_package_current_or_latest_matching(string_map* all_pack
 					if(valid && must_be_satisfiable)
 					{
 						string_map* pkg_version_info = get_string_map_element(all_versions, test_version);
-						valid = valid && safe_strcmp((char*)get_string_map_element(pkg_version_info,"Depends-Satisfiable"), "Y") == 0;
+						
+						//if depends don't seem to be satisfiable BUT package is already installed, it's by definition valid
+						valid = valid &&  (  safe_strcmp(test_version, current_version) == 0  || (safe_strcmp((char*)get_string_map_element(pkg_version_info,"Depends-Satisfiable"), "Y") == 0) );
 					}
 					if(found_version != NULL && valid)
 					{
@@ -1161,8 +1163,9 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 								}
 							}
 						}
+
 						dep_def = dep_def == NULL ? alloc_depend_def(NULL) : dep_def;
-						
+
 						string_map* dep_info = get_package_current_or_latest_matching_and_satisfiable(package_data, dep_name, dep_def, &dep_is_installed, NULL);
 						if(dep_info == NULL)
 						{
@@ -1170,6 +1173,8 @@ int load_recursive_package_data_variables(string_map* package_data, char* packag
 						}
 
 						set_string_map_element(all_dep_map, dep_name, dep_def);
+						
+						
 						if(!dep_is_installed)
 						{
 							set_string_map_element(req_dep_map, dep_name, copy_null_terminated_string_array(dep_def));
