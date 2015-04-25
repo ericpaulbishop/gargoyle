@@ -5,7 +5,6 @@
 -all0305-kernel
 -all0305-rootfs-squashfs
 -all0305-squashfs-
--archer-c7-v1-squashfs-
 -dir-505-a1-squashfs-
 -dir-825-b1-fat-squashfs-
 -eap300v2-squashfs-
