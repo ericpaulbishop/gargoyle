@@ -1,6 +1,11 @@
 #!/bin/sh
-if [ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] ; then
-	/etc/init.d/minidlna stop
-	kill -9 $(pidof minidlna)
-	/etc/init.d/minidlna start
-fi
+
+/etc/init.d/minidlna enabled && {
+	local intif="$(uci get minidlna.config.interface)"
+	[ "$INTERFACE" = "$intif" ] && [ "$ACTION" = "ifup" ] && {
+		logger -t minidlna-refresh "ifup for interface '$intif', restart minidlna"
+		/etc/init.d/minidlna stop
+		kill -9 $(pidof minidlna)
+		/etc/init.d/minidlna start
+	}
+}
