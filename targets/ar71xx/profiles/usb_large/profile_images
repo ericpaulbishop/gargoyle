@@ -1,9 +1,6 @@
 -all0315n-kernel
 -all0315n-rootfs-squashfs
 -all0315n-squashfs-
--archer-c5-squashfs-
--archer-c7-v2-squashfs-
--esr1750-squashfs-
 -esr900-squashfs-
 -wzr-600dhp-squashfs-
 -wzr-hp-ag300h-squashfs
