@@ -65,7 +65,7 @@ function saveChanges()
 		
 		var hour = getSelectedValue("reboot_hour");
 		var weekday = rebootInterval == "week" ? day : "*";
-		var monthday = rebootInterval == "month" ? day : "*";
+		var monthday = rebootInterval == "month" ? (day - -1) : "*";
 
 		cronLine = "0 " + hour + " " + monthday + " * " + weekday + " sh /usr/lib/gargoyle/reboot.sh"
 	}
@@ -103,7 +103,7 @@ function resetData()
 	{
 		var hour     = parseInt(cronParts[1]) + "";
 		var weekday  = parseInt(cronParts[4]) + "";
-		var monthday = parseInt(cronParts[2]) + "";
+		var monthday = (parseInt(cronParts[2]) - 1) + "";
 		var day = "";
 		
 		hour     = hour == "NaN" ? "0" : hour;
