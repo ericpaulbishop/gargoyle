@@ -48,7 +48,10 @@
 	has_qmi=$( ls /dev/cdc-wdm* 2>/dev/null )
 	if [ -z "$has_qmi" ] ; then
 		echo "hasQMI = false;"
+	else
+		echo "hasQMI = true;"
 	fi
+
 
 	#echo "var interfaces = new Array();"
 	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
