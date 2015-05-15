@@ -143,11 +143,11 @@ create_server_conf()
 	mkdir -p "$OPENVPN_DIR/ccd"
 	mkdir -p "$OPENVPN_DIR/route_data"
 
-	mkdir -p /var/openvpn
-	touch /var/openvpn/current_status
+	mkdir -p /var/run
+	touch /var/run/openvpn_status
 	if [ ! -h /etc/openvpn/current_status ] ; then
 		rm -rf /etc/openvpn/current_status
-		ln -s  /var/openvpn/current_status /etc/openvpn/current_status 
+		ln -s  /var/run/openvpn_status /etc/openvpn/current_status 
 	fi
 
 	random_dir_num=$(random_string)
@@ -219,7 +219,7 @@ $openvpn_keysize
 
 dev                   tun
 keepalive             25 180
-status                /var/openvpn/current_status
+status                /var/run/openvpn_status
 verb                  3
 
 
