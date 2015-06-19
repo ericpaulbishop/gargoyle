@@ -205,4 +205,5 @@ stop() {
         [ -x /usr/sbin/ip6tables ] && {
 	    ip6tables -t filter -F MINIUPNPD 2>/dev/null
         }
+        /usr/lib/gargoyle/firewall_restart.sh
 }
