@@ -8,8 +8,8 @@ config uhttpd main
 	list listen_https	0.0.0.0:443
 	option home		/www
 	option rfc1918_filter	1
-	option max_requests	3
-	option max_connections	100
+	option max_requests	50
+	option max_connections	200
 	option cert		/etc/uhttpd.crt
 	option key		/etc/uhttpd.key
 	option cgi_prefix	/cgi-bin

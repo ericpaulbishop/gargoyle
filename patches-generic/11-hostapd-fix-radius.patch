@@ -1,0 +1,23 @@
+--- /dev/null	2015-04-30 14:22:31.446573489 -0400
++++ b/package/network/services/hostapd/patches/950-hostapd-fix-radius.patch	2015-05-06 13:28:35.527630390 -0400
+@@ -0,0 +1,20 @@
++--- a/src/radius/radius_client.c	2015-04-28 15:26:13.022096268 -0400
+++++ b/src/radius/radius_client.c	2015-04-28 15:27:36.756716047 -0400
++@@ -658,7 +658,7 @@
++ 	}
++ 
++ 	if (msg_type == RADIUS_ACCT || msg_type == RADIUS_ACCT_INTERIM) {
++-		if (conf->acct_server == NULL || radius->acct_sock < 0) {
+++		if (conf->acct_server == NULL) {
++ 			hostapd_logger(radius->ctx, NULL,
++ 				       HOSTAPD_MODULE_RADIUS,
++ 				       HOSTAPD_LEVEL_INFO,
++@@ -672,7 +672,7 @@
++ 		s = radius->acct_sock;
++ 		conf->acct_server->requests++;
++ 	} else {
++-		if (conf->auth_server == NULL || radius->auth_sock < 0) {
+++		if (conf->auth_server == NULL) {
++ 			hostapd_logger(radius->ctx, NULL,
++ 				       HOSTAPD_MODULE_RADIUS,
++ 				       HOSTAPD_LEVEL_INFO,
