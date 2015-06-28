@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_adblock='Adblock'
+uci set gargoyle.scripts.system_adblock='adblock.sh'
+uci set gargoyle.system_adblock='357'
+uci commit
