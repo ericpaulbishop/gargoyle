@@ -143,6 +143,10 @@ update_blocklist()
 	else
 		cat /tmp/block.build.before > /etc/block.hosts
 	fi
+		
+	#Record when the last time we updated the block list is
+	LASTRUN=`date +"%a %d %b"`
+	uci set adblock.config.lastrun="$LASTRUN" && uci commit
 }
 
 restart_firewall()
