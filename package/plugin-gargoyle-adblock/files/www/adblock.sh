@@ -22,6 +22,11 @@
 		<input type ="button" value="<%~ ADBLOCKupdate %>" id="adblock_update" class="default_button" onclick='adblockUpdate()' />
 	</div>
 
+	<div class="rightcolumnonly">
+		<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
+		<label id="adblock_lastrunval"></label>
+	</div>
+
 	<div>
 		<label id="adblock_wireless_label" class="leftcolumn" for="adblock_wireless"><%~ ADBLOCKWireless %>:</label>
 		<input id="adblock_wireless" class="rightcolumn" type="checkbox" />
