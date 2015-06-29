@@ -5,6 +5,7 @@
 adblock.Adblock="Adblock";
 adblock.ADBLOCKEn="Enable Adblock";
 adblock.ADBLOCKupdate="Update blocklist";
+adblock.ADBLOCKLstrn="Last Run";
 adblock.ADBLOCKWireless="Only block ads for wireless clients";
 adblock.ADBLOCKTrans="Attempt to hide blocked ads";
 adblock.ADBLOCKHelp="This option attempts to replace the ads presented with a small transparent pixel. This can *sometimes* stop the ugly 'Page Not Found' errors that you see instead of ads.</p><p>However, with this option enabled, in some rare cases ads will show up as your routers login screen instead. This is not a phishing attempt, just a by-product of enabling this setting.";
