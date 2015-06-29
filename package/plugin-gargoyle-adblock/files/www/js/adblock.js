@@ -14,6 +14,8 @@ function resetData()
 {
 	var enabled = uciOriginal.get(pkg, sec, "enabled");
 	document.getElementById("adblock_enable").checked = enabled == 1;
+	updateStatus(enabled);
+	updateLastrun();
 	var onlywireless = uciOriginal.get(pkg, sec, "onlywireless");
 	document.getElementById("adblock_wireless").checked = onlywireless == 1;
 	var transparent = uciOriginal.get(pkg, sec, "trans");
@@ -26,6 +28,25 @@ function resetData()
 	document.getElementById('adblock_exemptf').value = exend;
 	initializeDescriptionVisibility(uciOriginal, "adblock_help");
 	uciOriginal.removeSection("gargoyle", "help");
+}
+
+function updateLastrun()
+{
+	var enabled = uciOriginal.get(pkg, sec, "enabled");
+	var lastrun = uciOriginal.get(pkg, sec, "lastrun");
+	if(enabled == 1)
+	{
+		document.getElementById('adblock_lastrunval').innerHTML = lastrun;
+	}
+	else
+	{
+		document.getElementById('adblock_lastrunval').innerHTML = '-';
+	}
+}
+
+function updateStatus(enabled)
+{
+	setElementEnabled(document.getElementById("adblock_update"), enabled == 1);
 }
 
 function adblockUpdate()
@@ -41,9 +62,11 @@ function adblockUpdate()
 		if(req.readyState == 4)
 		{
 			setControlsEnabled(true);
+			updateLastrun();
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	updateLastrun();
 }
 
 function saveChanges()
@@ -63,7 +86,7 @@ function saveChanges()
 	}
 
 
-	var uci = uciOriginal.clone();
+	var uci = uciOriginal.clone()
 
 	uci.set(pkg, sec, "enabled", enabled);
 	uci.set(pkg, sec, "onlywireless", onlywireless);
@@ -91,6 +114,8 @@ function saveChanges()
 		if(req.readyState == 4)
 		{
 			uciOriginal = uci.clone();
+			updateStatus(enabled);
+			updateLastrun();
 			setControlsEnabled(true);
 		}
 	}
