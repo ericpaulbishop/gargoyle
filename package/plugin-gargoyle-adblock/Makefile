@@ -36,14 +36,14 @@ define Package/plugin-gargoyle-adblock/postinst
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	menu_name="Adblock"
 	[ -n `which i18n` ] && {
-		mn=$$(i18n-menu gargoyle.display.system_adblock)
+		mn=$$(i18n-menu gargoyle.display.firewall_adblock)
 		if [ -n "$$mn" ] ; then
 			menu_name="$$mn"
 		fi
 	}
-	uci set gargoyle.display.system_adblock="$$menu_name"
-	uci set gargoyle.scripts.system_adblock='adblock.sh'
-	uci set gargoyle.system.adblock='357'
+	uci set gargoyle.display.firewall_adblock="$$menu_name"
+	uci set gargoyle.scripts.firewall_adblock='adblock.sh'
+	uci set gargoyle.firewall.adblock='120'
 	uci commit gargoyle
 fi
 endef
@@ -52,9 +52,9 @@ define Package/plugin-gargoyle-adblock/postrm
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci del gargoyle.display.system_adblock
-	uci del gargoyle.scripts.system_adblock
-	uci del gargoyle.system.adblock
+	uci del gargoyle.display.firewall_adblock
+	uci del gargoyle.scripts.firewall_adblock
+	uci del gargoyle.firewall.adblock
 	uci commit gargoyle
 fi
 cat /etc/crontabs/root | grep -v -e 'runadblock.sh' > /tmp/cron.backup
