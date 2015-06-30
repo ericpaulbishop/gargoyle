@@ -4,7 +4,7 @@
 
 adblock.Adblock="Adblock";
 adblock.ADBLOCKEn="Enable Adblock";
-adblock.ADBLOCKupdate="Update blocklist";
+adblock.ADBLOCKupdate="Update Blocklist";
 adblock.ADBLOCKLstrn="Last Run";
 adblock.ADBLOCKWireless="Only block ads for wireless clients";
 adblock.ADBLOCKTrans="Attempt to hide blocked ads";
