@@ -62,7 +62,7 @@ function adblockUpdate()
 		if(req.readyState == 4)
 		{
 			setControlsEnabled(true);
-			updateLastrun();
+			document.getElementById('adblock_lastrunval').innerHTML = 'Today';
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
