@@ -52,7 +52,7 @@ function updateStatus(enabled)
 function adblockUpdate()
 {
 	var Commands = [];
-	Commands.push("/usr/lib/gargoyle/runadblock.sh");
+	Commands.push("sh /usr/lib/gargoyle/runadblock.sh");
 	Commands.push("sleep 2");
 
 	setControlsEnabled(false, true, UI.WaitSettings);
@@ -99,11 +99,11 @@ function saveChanges()
 
 	if(enabled==1)
 	{
-		Commands.push("/usr/lib/gargoyle/runadblock.sh -enable");
+		Commands.push("sh /usr/lib/gargoyle/runadblock.sh -enable");
 	}
 	else
 	{
-		Commands.push("/usr/lib/gargoyle/runadblock.sh -disable");
+		Commands.push("sh /usr/lib/gargoyle/runadblock.sh -disable");
 	}
 	var commands = uci.getScriptCommands(uciOriginal) + "\n" + Commands.join("\n");
 
