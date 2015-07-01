@@ -13,6 +13,7 @@ define Package/plugin-gargoyle-adblock
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=DNS Adblocking support for Gargoyle
+	MAINTAINER:=Michael Gray
 	DEPENDS:=+gargoyle +iptables-mod-nat-extra +iptables-mod-iprange
 	PKGARCH:=all
 endef
@@ -48,6 +49,12 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 fi
 endef
 
+define Package/plugin-gargoyle-adblock/prerm
+#!/bin/sh
+
+sh /usr/lib/gargoyle/runadblock.sh -disable
+endef
+
 define Package/plugin-gargoyle-adblock/postrm
 #!/bin/sh
 
@@ -60,6 +67,7 @@ fi
 cat /etc/crontabs/root | grep -v -e 'runadblock.sh' > /tmp/cron.backup
 mv /tmp/cron.backup /etc/crontabs/root
 /etc/init.d/cron restart
+rm -f /etc/block.hosts
 endef
 
 define Package/plugin-gargoyle-adblock/install
