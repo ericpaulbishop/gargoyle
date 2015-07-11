@@ -1,0 +1,11 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Adblock
+EN=Adblock
+ES=Bloque de anuncios
+DE=Anzeigenblock
+BR=Bloco de anuncios
+PL=Blok reklam
+ZH-CN=Guanggao kuai
+RU=Reklamnyy blok
+NO=Ad blokk
