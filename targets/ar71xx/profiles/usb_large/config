@@ -1264,7 +1264,7 @@ CONFIG_BUSYBOX_DEFAULT_FEATURE_IPC_SYSLOG_BUFFER_SIZE=0
 # CONFIG_BUSYBOX_DEFAULT_KLOGD is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_KLOGD_KLOGCTL is not set
 CONFIG_BUSYBOX_DEFAULT_LOGGER=y
-# CONFIG_PACKAGE_ca-certificates is not set
+CONFIG_PACKAGE_ca-certificates=m
 CONFIG_PACKAGE_dnsmasq=y
 CONFIG_PACKAGE_dropbear=y
 
@@ -2436,3 +2436,11 @@ CONFIG_PACKAGE_kmod-video-gspca-core=y
 
 CONFIG_PACKAGE_uhttpd-mod-tls=y
 CONFIG_PACKAGE_uhttpd-mod-tls_cyassl=y
+
+
+
+CONFIG_PACKAGE_msmtp-nossl=m
+CONFIG_PACKAGE_msmtp=m
+CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
+CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
+

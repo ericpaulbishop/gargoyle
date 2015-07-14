@@ -709,7 +709,7 @@ function getData(){
     data['serverPort'] = document.getElementById("serverport").value;
     data['sender'] = document.getElementById("sender").value;
     data['receiver'] = document.getElementById("receiver").value;
-	data['certpath'] = "/etc/ssl/certs/ca-certificates";
+	data['certpath'] = "/etc/ssl/certs/ca-certificates.crt";
 	data['include'] = "";
 	
 	var interval = document.getElementById("table_time_frame").value;

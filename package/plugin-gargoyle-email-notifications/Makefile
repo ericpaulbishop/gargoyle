@@ -5,23 +5,46 @@ PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-email-notifications
+define Package/plugin-gargoyle-email-notifications/Default
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Email notifications for Gargoyle
 	MAINTAINER:=dpint
-	DEPENDS:=+gargoyle +msmtp-nossl
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-email-notifications/description
-	Email notifications for Gargoyle
+
+define Package/plugin-gargoyle-email-notifications
+$(call Package/plugin-gargoyle-email-notifications/Default)
+	DEPENDS:=gargoyle +msmtp +ca-certificates
+	TITLE+= (with SSL support)
+	VARIANT:=ssl
 endef
+
+define Package/plugin-gargoyle-email-notifications-nossl
+$(call Package/plugin-gargoyle-email-notifications/Default)
+	DEPENDS:=gargoyle +msmtp-nossl
+	TITLE+= (without SSL support)
+	VARIANT:=nossl
+endef
+
+
+
+
+
+define Package/plugin-gargoyle-email-notifications/description
+	Email notifications for Gargoyle (with SSL support)
+endef
+define Package/plugin-gargoyle-email-notifications-nossl/description
+	Email notifications for Gargoyle (without SSL support)
+endef
+
+
 
 define Build/Prepare
 endef
@@ -73,4 +96,12 @@ define Package/plugin-gargoyle-email-notifications/install
 	$(CP) ./files/* $(1)/
 endef
 
+
+Package/plugin-gargoyle-email-notifications-nossl/install = $(Package/plugin-gargoyle-email-notifications/install)
+Package/plugin-gargoyle-email-notifications-nossl/postinst = $(Package/plugin-gargoyle-email-notifications/postinst)
+Package/plugin-gargoyle-email-notifications-nossl/prerm = $(Package/plugin-gargoyle-email-notifications/prerm)
+
+
+
+$(eval $(call BuildPackage,plugin-gargoyle-email-notifications-nossl))
 $(eval $(call BuildPackage,plugin-gargoyle-email-notifications))
