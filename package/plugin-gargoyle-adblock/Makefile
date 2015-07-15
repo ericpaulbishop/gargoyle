@@ -43,7 +43,7 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 		fi
 	}
 	uci set gargoyle.display.firewall_adblock="$$menu_name"
-	uci set gargoyle.scripts.firewall_adblock='adblock.sh'
+	uci set gargoyle.scripts.firewall_adblock='ablock.sh'
 	uci set gargoyle.firewall.adblock='120'
 	uci commit gargoyle
 fi
