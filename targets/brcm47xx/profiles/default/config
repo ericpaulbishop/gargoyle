@@ -1827,7 +1827,7 @@ CONFIG_PACKAGE_libxtables=y
 # SSL
 #
 CONFIG_PACKAGE_libcyassl=y
-# CONFIG_PACKAGE_libopenssl is not set
+CONFIG_PACKAGE_libopenssl=m
 # CONFIG_PACKAGE_libpolarssl is not set
 
 #
