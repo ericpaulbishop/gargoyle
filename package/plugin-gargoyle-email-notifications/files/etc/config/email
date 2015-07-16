@@ -1,0 +1,7 @@
+
+config email 'email'
+	option recipient 'gargoyle.test.email@gmail.com'
+	option bandwidthInterval 'minute'
+	option data '2'
+	
+
