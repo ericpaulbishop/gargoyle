@@ -5,7 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
-var Adblk=new Object(); //part of i18n
+var ablock=new Object(); //part of i18n
 
 var pkg = "adblock";
 var sec = "config";
@@ -81,7 +81,7 @@ function saveChanges()
 
 	if((exempt == 1 && exstart == "") || (exempt == 1 && exend == ""))
 	{
-		alert(adblock.ERRrange);
+		alert(ablock.ERRrange);
 		return;
 	}
 
