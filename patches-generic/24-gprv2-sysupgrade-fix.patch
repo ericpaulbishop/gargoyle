@@ -51,7 +51,7 @@
 -$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
 +
 +#$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
-++$(eval $(call SingleProfile,AthLzma,64k,GPRv2,gargoyle-pocket-router-v2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),RKuImage))
++$(eval $(call SingleProfile,AthLzma,64k,GPRv2,gargoyle-pocket-router-v2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),RKuImage))
 +
 +
  $(eval $(call SingleProfile,AthLzma,64k,MR12,mr12,MR12,ttyS0,115200,$$(mr12_mtdlayout),RKuImage))
