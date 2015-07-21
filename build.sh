@@ -20,10 +20,10 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Barrier Breaker"
-	branch_id="barrier_breaker"
+	branch_name="Chaos Calmer"
+	branch_id="chaos_calmer"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_14.07"
+	branch_packages_path="packages"
 
 
 	# set svn revision number to use 
