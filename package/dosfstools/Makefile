@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,51 +8,62 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dosfstools
-PKG_VERSION:=3.0.9
+PKG_VERSION:=3.0.27
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=http://www.daniel-baumann.ch/software/dosfstools/
-PKG_MD5SUM:=7f159ec44d3b9c502904bab0236050e4
+PKG_LICENSE:=GPL-3.0+
+PKG_LICENSE_FILES:=COPYING
+
+PKG_MAINTAINER:=David Bonnes <david.bonnes@gmail.com>
+
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=http://daniel-baumann.ch/files/software/dosfstools \
+		http://fossies.org/linux/misc
+PKG_MD5SUM:=2e31e7bdf92998e41ed17de505a4a552
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/nls.mk
 
 define Package/dosfstools/Default
   SECTION:=utils
   CATEGORY:=Utilities
   URL:=http://www.daniel-baumann.ch/software/dosfstools/
   SUBMENU:=Filesystem
+  DEPENDS:=$(ICONV_DEPENDS)
 endef
 
 define Package/dosfsck
   $(call Package/dosfstools/Default)
-  TITLE:=dosfsck
+  TITLE:=fsck (fsck.fat) utility from dosfstools
 endef
 
 define Package/dosfslabel
   $(call Package/dosfstools/Default)
-  TITLE:=dosfslabel
+  TITLE:=fslabel (fatlabel) utility from dosfstools
 endef
 
 define Package/mkdosfs
   $(call Package/dosfstools/Default)
-  TITLE:=mkdosfs
+  TITLE:=mkfs (mkfs.fat) utility from dosfstools
 endef
 
 define Package/dosfsck/description
 	Utilities to create and check MS-DOS FAT filesystems.
-	(fsck.vfat and fsck.msdos for checking integrity of FAT volumes)
+	(fsck.vfat and fsck.fat for checking integrity of FAT volumes)
 endef
 
 define Package/dosfslabel/description
 	Utilities to create and check MS-DOS FAT filesystems.
-	(dosfslabel for reading and writing labels of FAT volumes)
+	(fatlabel for reading and writing labels of FAT volumes)
 endef
 
 define Package/mkdosfs/description
 	Utilities to create and check MS-DOS FAT filesystems.
-	(mkfs.vfat and mkfs.msdos for creating FAT volumes)
+	(mkfs.vfat and mkfs.fat for creating FAT volumes)
 endef
+
+LDFLAGS+=$(ICONV_LDFLAGS)
+LDLIBS+=-liconv
 
 define Build/Configure
 endef
@@ -60,9 +71,11 @@ endef
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
-		OPTFLAGS="$(TARGET_CFLAGS) -D_FILE_OFFSET_BITS=64" \
+		OPTFLAGS="$(TARGET_CFLAGS) -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE" \
 		PREFIX="/usr" \
 		SBINDIR="/usr/sbin" \
+		LDFLAGS="$(LDFLAGS)" \
+		LDLIBS="$(LDLIBS)" \
 		all
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
@@ -73,20 +86,22 @@ define Build/Compile
 endef
 
 define Package/dosfsck/install
+	$(INSTALL_DIR) $(1)/lib/functions/fsck
+	$(INSTALL_DATA) ./files/dosfsck.sh $(1)/lib/functions/fsck/
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/dosfsck $(1)/usr/sbin/
-	(cd $(1)/usr/sbin; ln -sf dosfsck fsck.msdos; ln -sf dosfsck fsck.vfat)
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/fsck.fat $(1)/usr/sbin/
+	(cd $(1)/usr/sbin; ln -sf fsck.fat fsck.msdos; ln -sf fsck.fat fsck.vfat; ln -sf fsck.fat dosfsck)
 endef
 
 define Package/dosfslabel/install
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/dosfslabel $(1)/usr/sbin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/fatlabel $(1)/usr/sbin/
 endef
 
 define Package/mkdosfs/install
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/mkdosfs $(1)/usr/sbin/
-	(cd $(1)/usr/sbin; ln -sf mkdosfs mkfs.msdos; ln -sf mkdosfs mkfs.vfat)
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/mkfs.fat $(1)/usr/sbin/
+	(cd $(1)/usr/sbin; ln -sf mkfs.fat mkfs.msdos; ln -sf mkfs.fat mkfs.vfat)
 endef
 
 $(eval $(call BuildPackage,dosfsck))
