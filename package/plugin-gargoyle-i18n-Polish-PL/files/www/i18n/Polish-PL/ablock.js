@@ -2,14 +2,14 @@
  * UTF-8 (with BOM) Polish-PL text strings for adblock.sh html elements
  */
 
-ablock.Adblock="Blok reklam";
-ablock.ADBLOCKEn="Umożliwiać Blok Reklam";
-ablock.ADBLOCKupdate="Aktualizacja listy zablokowanych";
-ablock.ADBLOCKLstrn="Ostatni bieg";
-ablock.ADBLOCKWireless="Tylko blokować reklamy dla klientów bezprzewodowych";
-ablock.ADBLOCKTrans="Próbować ukryć zablokowanych reklam";
-ablock.ADBLOCKHelp="Ta opcja próbuje zastąpić reklamy prezentowane w małej przezroczystej piksela. To może czasami <i>czasami</i> zatrzymanie brzydkie 'Nie znaleziono strony' błędy, które widzisz, zamiast reklam.</p><p>Jednak po włączeniu opcji, w niektórych rzadkich przypadkach reklamy będą wyświetlane jako routery ekranu logowania zamiast. To nie jest próba wyłudzenia informacji, po prostu produktem ubocznym Włączenie tego ustawienia.";
-ablock.ADBLOCKExempts="IP Zakres zacząć";
-ablock.ADBLOCKExemptf="IP wykończenie Zakres";
-ablock.ADBLOCKExemptEn="Włącz wyłączenie reklam dla klientów";
-ablock.ERRrange="Albo początek lub koniec zakresu zwolnienia jest puste. Jeśli chcesz tylko zwolnić 1 IP a następnie użyć go jako zarówno na początku i na końcu zakresu.";
+ablock.Adblock="Reklamy";
+ablock.ADBLOCKEn="Włącz blokadę reklam";
+ablock.ADBLOCKupdate="Aktualizacja listy blokad";
+ablock.ADBLOCKLstrn="Ostatnia aktualizacja";
+ablock.ADBLOCKWireless="Blokowanie tylko dla klientów bezprzewodowych";
+ablock.ADBLOCKTrans="Ukrywanie zablokowanych reklam";
+ablock.ADBLOCKHelp="Ta opcja próbuje zastąpić reklamy własnym obrazkiem. Może to <i>czasami</i> powodować wyświetlanie błędu typu 'Nie znaleziono strony' zamiast reklam.</p><p>W nielicznych przypadkach może to też powodować wyświetlanie strony logowania routera zamiast reklamy. Nie jest to próba wyłudzenia informacji, wynika to ze sposobu działania tego rozszerzenia.";
+ablock.ADBLOCKExempts="Początek zakresu (IP)";
+ablock.ADBLOCKExemptf="Koniec zakresu (IP)";
+ablock.ADBLOCKExemptEn="Ignorowanie blokad dla klientów";
+ablock.ERRrange="Oba pola zakresu muszą zostać wypełnione. Jeśli chcesz tylko zwolnić jeden adres IP to należy go wprowadzić zarówno na początku jak i na końcu zakresu.";

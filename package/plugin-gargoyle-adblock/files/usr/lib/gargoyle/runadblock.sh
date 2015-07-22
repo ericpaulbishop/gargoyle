@@ -145,7 +145,7 @@ update_blocklist()
 	fi
 		
 	#Record when the last time we updated the block list is
-	LASTRUN=`date +"%a %d %b"`
+	LASTRUN=$(/usr/lib/gargoyle/current_time.sh | cut -f2 -d\")
 	uci set adblock.config.lastrun="$LASTRUN" && uci commit
 }
 
