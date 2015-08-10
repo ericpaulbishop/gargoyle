@@ -19,6 +19,9 @@ ENDPOINT_IP4=`uci get adblock.config.endpoint4`
 
 #Change the cron command to what is comfortable, or leave as is
 CRON="0 4 * * 0 sh /usr/lib/gargoyle/runadblock.sh"
+
+#Check if Tor is enabled
+TOR=`uci get tor.global.enabled`
 #### END CONFIG ####
 
 #### FUNCTIONS ####
@@ -63,10 +66,15 @@ add_config()
 	logger -t ADBLOCK Adding cron entry
 	echo "$CRON" >> /etc/crontabs/root
 
-	#Add firewall rules
-	logger -t ADBLOCK Adding firewall rules
-	echo "$FW1" >> /etc/firewall.user
-	echo "$FW2" >> /etc/firewall.user
+	#Add firewall rules unless TOR is enabled
+	if [ "$TOR" == 0 ]
+	then
+		logger -t ADBLOCK Adding firewall rules
+		echo "$FW1" >> /etc/firewall.user
+		echo "$FW2" >> /etc/firewall.user
+	else
+		logger -t ADBLOCK Tor is enabled, discarding firewall rules
+	fi
 
 	# Determining uhttpd/httpd_gargoyle for transparent pixel support
 	if [ "$TRANS" == 1 ]
