@@ -6,6 +6,6 @@ ES=Bloque de anuncios
 DE=Anzeigenblock
 BR=Bloco de anuncios
 PL=Reklamy
-ZH-CN=Guanggao kuai
+ZH-CN=广告过滤
 RU=Reklamnyy blok
 NO=Ad blokk
