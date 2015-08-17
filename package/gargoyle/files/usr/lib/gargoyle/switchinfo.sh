@@ -10,6 +10,9 @@ board=""
 if [ -e /lib/ar71xx.sh ]; then
 	. /lib/ar71xx.sh
 	board=$(ar71xx_board_name)
+elif [ -e /lib/mvebu.sh ]; then
+	. /lib/mvebu.sh
+	board=$(mvebu_board_name)
 fi
 
 # PORTS="LAN1 LAN2 LAN3 LAN4"
@@ -36,6 +39,7 @@ dir-835-a1 | \
 tl-wr1043nd-v2)
         PORTS="4 3 2 1";;
 wndr3700 | \
+armada-xp-linksys-mamba | \
 wrt160nl | \
 wzr-hp-g300nh)
 	PORTS="3 2 1 0";;
@@ -55,12 +59,12 @@ for P in $PORTS; do
 		PVID=$(swconfig dev switch0 port $P get pvid)
 		[ "$PVID" != "$VLAN" ] && continue
 	}
-	LINK=$(swconfig dev switch0 port $P get link | cut -f2,3 -d" ")
+	LINK=$(swconfig dev switch0 port $P get status | cut -f1,2 -d",")
 	case "$LINK" in
-		"link:down") STATUS="-";;
-		"link:up speed:1000baseT") STATUS="1Gbps";;
-		"link:up speed:100baseT") STATUS="100Mbps";;
-		"link:up speed:10baseT") STATUS="10Mbps";;
+		"link: down") STATUS="-";;
+		"link: up, speed: 1000 Mbps") STATUS="1Gbps";;
+		"link: up, speed: 100 Mbps") STATUS="100Mbps";;
+		"link: up, speed: 10 Mbps") STATUS="10Mbps";;
 		"0") STATUS="-";;
 		"1") STATUS=$(i18n conn);;
 		*) STATUS="?";;
