@@ -83,6 +83,15 @@
 		CSQ="-";
 	fi
 	echo "var csq='$CSQ';"
+	
+	if [ -d /sys/class/hwmon ]; then
+		TEMP_cpu="$(cut -c1-2 /sys/class/hwmon/hwmon2/temp1_input)"
+		echo "var tempcpu=\"$TEMP_cpu\";"
+		TEMP_mem="$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input)"
+		echo "var tempmem=\"$TEMP_mem\";"
+		TEMP_cpu="$(cut -c1-2 /sys/class/hwmon/hwmon1/temp2_input)"
+		echo "var tempwifi=\"$TEMP_wifi\";"
+	fi
 %>
 //-->
 </script>
@@ -114,6 +123,15 @@
 		</div>
 		<div>
 			<span class='leftcolumn'><%~ CPUAvg %>:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 <%~ minutes %>)</span>
+		</div>
+		<div>
+			<span class='leftcolumn'><%~ TEMPcpu %>:</span><span id="temp_cpu" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
+		</div>
+		<div>
+			<span class='leftcolumn'><%~ TEMPmem %>:</span><span id="temp_mem" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
+		</div>
+		<div>
+			<span class='leftcolumn'><%~ TEMPwifi %>:</span><span id="temp_wifi" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
 		</div>
 		<div class="internal_divider"></div>
 	</div>

@@ -56,6 +56,9 @@ function resetData()
 		document.getElementById("swap_container").style.display = "none";
 	}
 	setChildText("load_avg", loadAvg);
+	setChildText("temp_cpu", tempcpu);
+	setChildText("temp_mem", tempmem);
+	setChildText("temp_wifi", tempwifi);
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
