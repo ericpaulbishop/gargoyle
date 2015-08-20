@@ -55,10 +55,21 @@ function resetData()
 	{
 		document.getElementById("swap_container").style.display = "none";
 	}
+	
 	setChildText("load_avg", loadAvg);
-	setChildText("temp_cpu", tempcpu);
-	setChildText("temp_mem", tempmem);
-	setChildText("temp_wifi", tempwifi);
+	
+	if(show_TEMP == 1)
+	{
+		document.getElementById("temp_container").style.display = "block";
+		setChildText("temp_cpu", tempcpu);
+		setChildText("temp_mem", tempmem);
+		setChildText("temp_wifi", tempwifi);
+	}
+	else
+	{
+		document.getElementById("temp_container").style.display = "none";
+	}
+	
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
