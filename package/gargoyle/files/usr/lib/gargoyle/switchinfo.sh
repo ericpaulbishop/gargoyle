@@ -10,6 +10,9 @@ board=""
 if [ -e /lib/ar71xx.sh ]; then
 	. /lib/ar71xx.sh
 	board=$(ar71xx_board_name)
+elif [ -e /lib/mvebu.sh ]; then
+	. /lib/mvebu.sh
+	board=$(mvebu_board_name)
 fi
 
 # PORTS="LAN1 LAN2 LAN3 LAN4"
@@ -36,6 +39,7 @@ dir-835-a1 | \
 tl-wr1043nd-v2)
         PORTS="4 3 2 1";;
 wndr3700 | \
+armada-xp-linksys-mamba | \
 wrt160nl | \
 wzr-hp-g300nh)
 	PORTS="3 2 1 0";;
@@ -61,6 +65,9 @@ for P in $PORTS; do
 		"link:up speed:1000baseT") STATUS="1Gbps";;
 		"link:up speed:100baseT") STATUS="100Mbps";;
 		"link:up speed:10baseT") STATUS="10Mbps";;
+		"1000") STATUS="1Gbps";;
+		"100") STATUS="100Mbps";;
+		"10") STATUS="10Mbps";;
 		"0") STATUS="-";;
 		"1") STATUS=$(i18n conn);;
 		*) STATUS="?";;
