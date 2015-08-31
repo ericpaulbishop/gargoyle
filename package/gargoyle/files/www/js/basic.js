@@ -95,7 +95,10 @@ function saveChanges()
 			uci.set("wireless", wifiDevG, "channel", channels["G"]);
 			if( document.getElementById("wifi_channel_width_container").style.display == "block" || document.getElementById("bridge_channel_width_container").style.display == "block" )
 			{
-				uci.set("wireless", wifiDevG, "htmode",  getSelectedValue("wifi_channel_width") );
+				if(wifiN)
+				{
+					uci.set("wireless", wifiDevG, "htmode",  getSelectedValue("wifi_channel_width") );
+				}
 			}
 			txPowerSet("wifi_max_txpower", "wifi_txpower", wifiDevG)
 		}
