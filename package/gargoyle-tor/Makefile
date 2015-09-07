@@ -182,7 +182,7 @@ CONFIGURE_VARS += \
 
 # pass CFLAGS again to override -O2 set by configure
 MAKE_FLAGS += \
-	CFLAGS="$(TARGET_CFLAGS) -fPIC "
+	CFLAGS="$(TARGET_CFLAGS) -fPIC -std=gnu99"
 
 define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
