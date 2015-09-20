@@ -21,8 +21,8 @@ gargoyle_header_footer -h -s "system" -p "mail" -c "internal.css" -j "email.js" 
 		awk '{gsub(/"/, "\\\""); print "cron_data.push(\""$0"\");" }' /etc/crontabs/root
 	fi
 	echo 'var msmtprc='"'$(cat /etc/msmtprc | tr '\n' ' ')'"';';
-	echo 'var TLSsupport='"'$(msmtp --version | grep OpenSSL)'"';';
 	echo "var weekly_time=\"`date \"+%w-%H-%M\"`\";"
+	echo 'var TLSsupport='"'$(msmtp --version | grep OpenSSL)'"';';
 	webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle* 2>/dev/null)
 	if [ -n "$webmon_enabled" ] ; then
 		echo "var webmonEnabled=true;"
@@ -62,8 +62,6 @@ for (tab_idx in cron_data) {
 			<input type='text' class='rightcolumn' id='serverport' size='35' />
 		</div>
 		<div>
-			<div id="encryptionText"><%~ TLSinstallText %></div>
-			<input type="button" id="encryptionButton" value="<%~ installTLS %>" class="default_button" onclick="installTLS()">
 			<label class='narrowleftcolumn'><%~ email.Encryption %></label>
 			<input type='radio' value="plain" id='plain' name='encryption'/> None
 			<input type='radio' value="tls" id='TLS' name='encryption'/> TLS
@@ -112,8 +110,8 @@ for (tab_idx in cron_data) {
 	<br />
 	<input type='checkbox' name='content' onclick="intervalVisibility(this)" /><%~ email.Bandwidth %>
 	<br />
-	<label for="table_time_frame" class="narrowleftcolumn" id="table_time_frame_label">Display Interval:</label>
-	<select id="table_time_frame" class="rightcolumn" disabled>
+	<label class="narrowleftcolumn" id="bandwidthIntervalLabel">Display Interval:</label>
+	<select id="bandwidthIntervalSelect" class="rightcolumn" disabled>
 				<option value="minutes">minutes</option>
 				<option value="quarter hours">quarter hours</option>
 				<option value="hours">hours</option>
