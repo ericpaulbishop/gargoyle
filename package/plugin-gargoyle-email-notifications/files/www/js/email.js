@@ -626,16 +626,16 @@ function Visibility() {
 
 function enableAuthOptions(){
 	document.getElementById("auth").checked = true;
-    document.getElementById("username").disabled = false;
-    document.getElementById("password").disabled = false
+	document.getElementById("username").disabled = false;
+	document.getElementById("password").disabled = false
 	document.getElementById("show_pass").disabled = false;
 	document.getElementById("show_pass_label").disabled = false;
 }
 
 function disableAuthOptions(){
 	document.getElementById("auth").checked = false;
-    document.getElementById("username").disabled = true;
-    document.getElementById("password").disabled = true
+	document.getElementById("username").disabled = true;
+    	document.getElementById("password").disabled = true
 	document.getElementById("show_pass").disabled = true;
 	document.getElementById("show_pass_label").disabled = true;
 }
@@ -709,7 +709,7 @@ function getData(){
     data['serverPort'] = document.getElementById("serverport").value;
     data['sender'] = document.getElementById("sender").value;
     data['receiver'] = document.getElementById("receiver").value;
-	data['certpath'] = "/etc/ssl/certs/ca-certificates";
+	data['certpath'] = "/etc/ssl/certs/ca-certificates.crt";
 	data['include'] = "";
 	
 	var interval = document.getElementById("table_time_frame").value;
@@ -869,7 +869,8 @@ function LoadData() {
 			}
 		}
 	}
-	
+
+
 	if(TLSsupport==''){
 		document.getElementById("encryptionText").style.display = "block";
 		document.getElementById("encryptionButton").style.display = "block";
@@ -879,12 +880,15 @@ function LoadData() {
 		switch(config['tls']){
 			case "off":
 				document.getElementById("plain").checked = true;
+				document.getElementById("TLS").checked = false;
 				break;
 			case "on":
 				document.getElementById("TLS").checked = true;
+				document.getElementById("plain").checked = false;
 				break;
 			default:
 				document.getElementById("plain").checked = true;
+				document.getElementById("TLS").checked = false;
 				break;
 		}	
 	}
@@ -895,7 +899,7 @@ function LoadData() {
 			break;
 		case "plain":
 			enableAuthOptions();
-			document.getElementById("plain").checked = true;
+			document.getElementById("auth").checked = true;
 			document.getElementById("username").value = config['user'];
 			document.getElementById("password").value = config['password'];
 			break;

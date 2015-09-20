@@ -1,6 +1,13 @@
 ChangeLog:
 
 ==================================================
+Version: 1.0.6-20150810
+Release time: 15:30 2015-08-10 UTC+8
+Changes:
+
+i18n/SimplifiedChinese: fixed translation: ablock.js
+
+==================================================
 Version: 1.0.5-20150202
 Release time: 14:34 2015-02-02 UTC+8
 Changes:

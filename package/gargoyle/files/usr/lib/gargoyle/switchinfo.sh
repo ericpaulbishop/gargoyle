@@ -32,6 +32,7 @@ tl-wdr4300)
 tl-wr1043nd)
 	PORTS="1 2 3 4";;
 tl-wdr3500 | \
+dir-835-a1 | \
 tl-wr1043nd-v2)
         PORTS="4 3 2 1";;
 wndr3700 | \

@@ -1,0 +1,13 @@
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
+@@ -120,6 +120,10 @@ dir-825-c1)
+ 	ucidef_set_led_wlan "wlan2g" "WLAN 2.4 GHz" "d-link:blue:wlan2g" "phy0tpt"
+ 	;;
+ 
++dir-835-a1)
++	ucidef_set_led_netdev "wan" "WAN" "d-link:amber:planet" "eth0.2"
++	;;
++
+ gl-inet)
+ 	ucidef_set_led_netdev "lan" "LAN" "gl-connect:green:lan" "eth1"
+ 	ucidef_set_led_wlan "wlan" "WLAN" "gl-connect:red:wlan" "phy0tpt"

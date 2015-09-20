@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
-PKG_VERSION:=0.2.5.10
+PKG_VERSION:=0.2.6.10
 PKG_RELEASE:=1
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=4bde375229a7a7f77c0596ae05556527
+PKG_MD5SUM:=04f919e7882d1ca80f835545af562bad
 PKG_INSTALL:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
@@ -182,7 +182,7 @@ CONFIGURE_VARS += \
 
 # pass CFLAGS again to override -O2 set by configure
 MAKE_FLAGS += \
-	CFLAGS="$(TARGET_CFLAGS) -fPIC "
+	CFLAGS="$(TARGET_CFLAGS) -fPIC -std=gnu99"
 
 define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
