@@ -5,7 +5,7 @@
  	;;
  
 +dir-835-a1)
-+	ucidef_set_led_netdev "wav" "WAN" "d-link:amber:planet" "eth0.2"
++	ucidef_set_led_netdev "wan" "WAN" "d-link:amber:planet" "eth0.2"
 +	;;
 +
  gl-inet)
