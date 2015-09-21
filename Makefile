@@ -1,4 +1,4 @@
-GARGOYLE_VERSION:=1.7.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log -1 --pretty=format:%h`"))
+GARGOYLE_VERSION:=1.9.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log -1 --pretty=format:%h`"))
 V=99
 FULL_BUILD=true
 CUSTOM_TEMPLATE=ar71xx
