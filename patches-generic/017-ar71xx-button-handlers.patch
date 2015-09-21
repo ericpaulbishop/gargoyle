@@ -1,0 +1,66 @@
+--- /dev/null
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	
+@@ -0,0 +1,63 @@
++#!/bin/sh
++#
++# Copyright (C) 2010 OpenWrt.org
++#
++
++. /lib/ar71xx.sh
++
++is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
++is_wrt160nl=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WRT160NL")
++is_netgear=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WNDR3700")
++is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
++is_buffalo_wzr=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep -i "WZR.HP.G300NH")
++is_dlink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep -i "DIR.8[23]5")
++is_hornet=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep -i "ALFA.*Hornet")
++
++
++if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] || [ -n "$is_netgear" ] || [ -n "$is_buffalo_wzr" ] || [ -n "$is_dlink" ] ; then
++	uci batch <<EOF
++set system.reboot_button=button
++set system.reboot_button.button='wps'
++set system.reboot_button.action='released'
++set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
++set system.reboot_button.min='3'
++set system.reboot_button.max='90'
++set system.reset_button=button
++set system.reset_button.button='reset'
++set system.reset_button.action='released'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.reset_button.min='3'
++set system.reset_button.max='90'
++commit system
++EOF
++fi
++
++if [ -n "$is_ubntrspro" ] ; then
++	uci batch <<EOF
++set system.reboot_button=button
++set system.reboot_button.button='wps'
++set system.reboot_button.action='released'
++set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
++set system.reboot_button.min='3'
++set system.reboot_button.max='13'
++set system.reset_button=button
++set system.reset_button.button='reset'
++set system.reset_button.action='released'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.reset_button.min='13'
++set system.reset_button.max='33'
++commit system
++EOF
++fi
++
++if [ -n "$is_hornet" ] ; then
++	uci batch <<EOF
++set system.bottom_red_button=button
++set system.bottom_red_button.button='wps'
++set system.bottom_red_button.action='released'
++set system.bottom_red_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.bottom_red_button.min='3'
++set system.bottom_red_button.max='90'
++commit system
++EOF
++fi
