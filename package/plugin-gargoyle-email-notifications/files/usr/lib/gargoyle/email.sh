@@ -10,6 +10,9 @@
 
 receiver=$(uci get email.@email[0].recipient)
 data=$(uci get email.@email[0].data)
+tlscert="/etc/ssl/certs/ca-certificates.crt"
+tls=$(uci get email.@email[0].tls)
+count=$(uci get email.@email[0].count)
 thstyle="style='border: 1px solid #CCC; height: 30px;background:#F3F3F3;font-weight:700'"
 tablestyle="style='color:#333;font-family:Helvetica,Arial,sans-serif;width:640px;border-collapse:collapse;border-spacing:0'"
 tdstyle="style='border: 1px solid #CCC; height: 30px;background:#FAFAFA;text-align:center'"
@@ -36,6 +39,7 @@ then
 	converttime=$(date -d @$time);
 	echo "<tr><td $tdstyle>"$converttime"</td><td $tdstyle>"$ip"</td><td $tdstyle>"$domain"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
+	rm /tmp/work.tmp
 	echo -e "</table>" >> /tmp/email-log.txt
 fi
 
@@ -53,6 +57,7 @@ then
 	converttime=$(date -d @$time);
 	echo "<tr><td $tdstyle>"$converttime"</td><td $tdstyle>"$ip"</td><td $tdstyle>"$domain"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
+	rm /tmp/work.tmp
 	echo -e "</table>" >> /tmp/email-log.txt	
 fi
 
@@ -66,8 +71,9 @@ then
 	do
 	time=`echo $line | cut -f1-5 -d " "`
 	log=`echo $line | cut -d " " -f6-`
-		echo "<tr><td $tdstyle>$time</td><td $tdstyle>$log</td></tr>" >> /tmp/email-log.txt
+	echo "<tr><td $tdstyle>$time</td><td $tdstyle>$log</td></tr>" >> /tmp/email-log.txt
 	done < /tmp/work.tmp 
+	rm /tmp/work.tmp
 	echo -e "</table>" >> /tmp/email-log.txt	
 fi
 
@@ -86,6 +92,7 @@ then
 	converttime=$(date -d @$time);
 	echo "<tr><td $tdstyle>"$converttime"</td><td $tdstyle>"$mac"</td><td $tdstyle>"$ip"</td><td $tdstyle>"$domain"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
+	rm /tmp/work.tmp
 	echo -e "</table>" >> /tmp/email-log.txt
 fi
 
@@ -105,6 +112,7 @@ then
 	device=`echo "$line" | awk '{split($0,a," "); print a[6]}'`
 	echo "<tr><td $tdstyle>"$ip"</td><td $tdstyle>"$hw"</td><td $tdstyle>"$flags"</td><td $tdstyle>"$hwaddr"</td><td $tdstyle>"$mask"</td><td $tdstyle>"$device"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
+	rm /tmp/work.tmp
 	echo -e "</table>" >> /tmp/email-log.txt
 fi
 
@@ -138,37 +146,40 @@ then
 			fi
 		fi
 	done < /tmp/work.tmp
+	rm /tmp/work.tmp
 	echo "<table $tablestyle><tr><th $thstyle>Time</th><th $thstyle>Download</th><th $thstyle>Upload</th></tr>" >> /tmp/email-log.txt
 	lines=1
 	while read line           
 	do
 		upload=$(head -n $lines /tmp/emailupload.tmp | tail -1)
 		if [[ $upload -gt $((1024*1024*1024*1024)) ]]; then
-			upload=$(echo $(($upload/1024/1024/1024/1024)) && echo "TBytes")
+			upload=$(printf $(($upload/1024/1024/1024/1024)) && printf "TBytes")
 		elif [[ $upload -gt $((1024*1024*1024)) ]]; then
-			upload=$(echo $(($upload/1024/1024/1024)) && echo "GBytes")
+			upload=$(printf $(($upload/1024/1024/1024)) && printf "GBytes")
 		elif [[ $upload -gt $((1024*1024)) ]]; then
-			upload=$(echo $(($upload/1024/1024)) && echo "MBytes")
+			upload=$(printf $(($upload/1024/1024)) && printf "MBytes")
 		elif [[ $upload -gt $((1024)) ]]; then
-			upload=$(echo $(($upload/1024)) && echo "KBytes")
+			upload=$(printf $(($upload/1024)) && printf "KBytes")
 		else
-			upload=$(echo "$upload Bytes")
+			upload=$(printf "$upload Bytes")
 		fi
 		download=$(head -n $lines /tmp/emaildownload.tmp | tail -1)
 		if [[ $download -gt $((1024*1024*1024*1024)) ]]; then
-			download=$(echo $(($download/1024/1024/1024/1024)) && echo "TBytes")
+			download=$(printf $(($download/1024/1024/1024/1024)) && printf "TBytes")
 		elif [[ $download -gt $((1024*1024*1024)) ]]; then
-			download=$(echo $(($download/1024/1024/1024)) && echo "GBytes")
+			download=$(printf $(($download/1024/1024/1024)) && printf "GBytes")
 		elif [[ $download -gt $((1024*1024)) ]]; then
-			download=$(echo $(($download/1024/1024)) && echo "MBytes")
+			download=$(printf $(($download/1024/1024)) && printf "MBytes")
 		elif [[ $download -gt $((1024)) ]]; then
-			download=$(echo $(($download/1024)) && echo "KBytes")
+			download=$(printf $(($download/1024)) && printf "KBytes")
 		else
-			download=$(echo "$download Bytes")
+			download=$(printf "$download Bytes")
 		fi
-		echo "<tr><td $tdstyle>$line</td><td $tdstyle>$download</td><td $tdstyle>$upload</td></tr>" >> /tmp/email-log.txt
+		echo "<tr><td $tdstyle>$line</td><td $tdstyle>$download</td><td $tdstyle>$upload</td></tr>" >> /tmp/bandwidth.tmp
 		lines=$((lines+1))
 	done < /tmp/emailtime.tmp 
+	cat /tmp/bandwidth.tmp | tail -n $count >> /tmp/email-log.txt
+	rm /tmp/bandwidth.tmp
 	rm /tmp/emailtime.tmp
 	rm /tmp/emaildownload.tmp
 	rm /tmp/emailupload.tmp
@@ -176,8 +187,11 @@ then
 fi
 echo "</body></html>" >> /tmp/email-log.txt
 
-cat /tmp/email-log.txt | sendmail $receiver 
+if printf '%s' "$tls" | egrep -q "0"
+then
+	cat /tmp/email-log.txt | sendmail $receiver 
+else
+	cat /tmp/email-log.txt | sendmail --tls-trust-file $tlscert $receiver 
+fi
 
-#Cleanup
 rm /tmp/email-log.txt
-rm /tmp/work.tmp
