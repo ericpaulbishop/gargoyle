@@ -1,5 +1,5 @@
-# 
-# Copyright (C) 2006-2012 OpenWrt.org
+#
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,13 +8,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=jpeg
-PKG_VERSION:=6b
+PKG_VERSION:=9a
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)src.v$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://www.ijg.org/files/ \
-        ftp://ftp.uu.net/graphics/jpeg/
-PKG_MD5SUM:=dbd5f3b47ed13132f04c685d608a7547
+PKG_SOURCE_URL:=http://www.ijg.org/files
+PKG_MD5SUM:=3353992aecaee1805ef4109aadd433e7
+
+PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>
+PKG_LICENSE:=IJG
+PKG_LICENSE_FILES:=README
 
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=libltdl
@@ -52,26 +55,15 @@ HOST_CONFIGURE_ARGS += \
 	--enable-shared \
 	--enable-static \
 
-define Build/Prepare
-	$(call Build/Prepare/Default)
-	(cd $(PKG_BUILD_DIR); \
-		rm -f ltconfig ltmain.sh libtool; \
-		ln -s `which true` ltconfig; \
-		ln -s $(STAGING_DIR)/host/bin/libtool libtool; \
-	)
-endef
-
 define Build/Compile
-	$(INSTALL_DIR) $(PKG_INSTALL_DIR)/usr/{include,lib,bin,man/man1}
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
 		LIBTOOL="./libtool --tag=CC" \
 		prefix="$(PKG_INSTALL_DIR)/usr" \
 		exec_prefix="$(PKG_INSTALL_DIR)/usr" \
 		all
 	$(MAKE) -C $(PKG_BUILD_DIR) \
-		prefix="$(PKG_INSTALL_DIR)/usr" \
-		exec_prefix="$(PKG_INSTALL_DIR)/usr" \
-		install install-headers install-lib
+		DESTDIR="$(PKG_INSTALL_DIR)" \
+		install
 endef
 
 define Build/InstallDev
