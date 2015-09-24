@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libiconv-full
-PKG_VERSION:=1.11.1
+PKG_VERSION:=1.14
 PKG_RELEASE:=1
 
 PKG_SOURCE:=libiconv-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/libiconv
-PKG_MD5SUM:=d42b97f6ef5dd0ba4469d520ed732fed
+PKG_MD5SUM:=e34509b1623cec449dfeb73d7ce9c6c6
 PKG_BUILD_DIR:=$(BUILD_DIR)/libiconv-$(PKG_VERSION)
 
 PKG_FIXUP:=patch-libtool
