@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2011 OpenWrt.org
+# Copyright (C) 2006-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,25 +8,27 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libevent
-PKG_VERSION:=1.4.14b
-PKG_RELEASE:=2
+PKG_VERSION:=1.4.15
+PKG_RELEASE:=1
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)-stable
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-stable.tar.gz
-PKG_SOURCE_URL:=http://www.monkey.org/~provos/
-PKG_MD5SUM:=a00e037e4d3f9e4fe9893e8a2d27918c
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-release-$(PKG_VERSION)-stable
+PKG_SOURCE:=release-$(PKG_VERSION)-stable.tar.gz
+PKG_SOURCE_URL:=https://github.com/libevent/libevent/archive/
+PKG_MD5SUM:=6dce6fe39f133c09ffe63de895805f7f
+PKG_MAINTAINER:=Steven Barth <cyrus@openwrt.org>
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/libevent
   SECTION:=libs
   CATEGORY:=Libraries
-  TITLE:=Event notification library
+  TITLE:=Event notification library (legacy)
   DEPENDS:=+librt
-  URL:=http://www.monkey.org/~provos/libevent/
+  URL:=http://www.libevent.org
 endef
 
 define Package/libevent/description
@@ -50,30 +52,16 @@ CONFIGURE_ARGS += \
 MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS)" \
 
-
-
-define Build/Compile
-	+$(MAKE_VARS) \
-	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(MAKE_PATH) \
-		$(MAKE_FLAGS) \
-		$(1); \
-	echo ""
-endef
-
-
-
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/libevent
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/libevent/
 	$(INSTALL_DIR) $(1)/usr/lib/libevent
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.{a,so} $(1)/usr/lib/libevent/
-	echo ""
 endef
 
 define Package/libevent/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/*.so.* $(1)/usr/lib/
-	echo ""
 endef
 
 $(eval $(call BuildPackage,libevent))
