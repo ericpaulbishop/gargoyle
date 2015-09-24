@@ -1,4 +1,4 @@
-# Copyright (C) 2009 OpenWrt.org
+# Copyright (C) 2009-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -7,9 +7,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nfs-kernel-server
-PKG_VERSION:=1.2.9
-PKG_RELEASE:=1
-PKG_MD5SUM:=18869d16db3f49c053f8c68eba3fe2e0
+PKG_VERSION:=1.3.2
+PKG_RELEASE:=4
+PKG_MD5SUM:=1e2f3c1ed468dee02d00c534c002ea10
 
 PKG_SOURCE_URL:=@SF/nfs
 PKG_SOURCE:=nfs-utils-$(PKG_VERSION).tar.bz2
@@ -29,6 +29,7 @@ define Package/nfs-kernel-server/Default
   SUBMENU:=Filesystem
   DEPENDS:=+libwrap +libblkid +libuuid $(LIBRPC_DEPENDS)
   URL:=http://nfs.sourceforge.net/
+  MAINTAINER:=Peter Wagner <tripolar@gmx.at>
 endef
 
 define Package/nfs-kernel-server
@@ -76,6 +77,7 @@ CONFIGURE_ARGS += \
 	--disable-gss \
 	--disable-nfsv4 \
 	--disable-nfsv41 \
+	--disable-ipv6 \
 	--enable-static \
 	--enable-shared \
 	--disable-caps \
@@ -83,6 +85,7 @@ CONFIGURE_ARGS += \
 	--disable-nfsdcld
 
 CONFIGURE_VARS += \
+	libblkid_cv_is_recent=yes \
 	CONFIG_SQLITE3_TRUE="\#" \
 	CONFIG_NFSDCLD_TRUE="\#"
 
@@ -99,6 +102,8 @@ HOST_CONFIGURE_ARGS += \
 	--disable-gss \
 	--disable-nfsv4 \
 	--disable-nfsv41 \
+	--disable-ipv6 \
+	--disable-tirpc \
 	--without-tcp-wrappers
 
 HOST_CONFIGURE_VARS += \
@@ -128,9 +133,8 @@ define Package/nfs-kernel-server/install
 	$(INSTALL_DIR) $(1)/usr/sbin 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DATA) ./files/nfsd.exports  $(1)/etc/exports
-	$(INSTALL_BIN)  ./files/nfsd.init     $(1)/etc/init.d/nfsd
 	$(INSTALL_DATA) ./files/nfsd.conf     $(1)/etc/config/nfsd
-
+	$(INSTALL_BIN)  ./files/nfsd.init     $(1)/etc/init.d/nfsd
 
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/statd/sm-notify   $(1)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/statd/statd       $(1)/usr/sbin/rpc.statd
