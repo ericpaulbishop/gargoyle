@@ -1555,7 +1555,7 @@ CONFIG_PACKAGE_kmod-fuse=y
 #
 # I2C support
 #
-CONFIG_PACKAGE_kmod-i2c-core=m
+# CONFIG_PACKAGE_kmod-i2c-core is not set
 # CONFIG_PACKAGE_kmod-i2c-algo-bit is not set
 # CONFIG_PACKAGE_kmod-i2c-algo-pca is not set
 # CONFIG_PACKAGE_kmod-i2c-algo-pcf is not set
