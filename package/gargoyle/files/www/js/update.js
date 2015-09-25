@@ -69,6 +69,10 @@ function setUpgradeFormat()
 	{
 		setChildText("upgrade_text", upS.ar71xxT);
 	}
+	else if(platform == "mvebu")
+	{
+		setChildText("upgrade_text", upS.mvebu);
+	}
 	else
 	{
 		setChildText("upgrade_text", upS.othrT);
