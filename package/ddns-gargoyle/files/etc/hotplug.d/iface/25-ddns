@@ -1,6 +1,11 @@
 #!/bin/sh
 
+/etc/init.d/ddns_gargoyle enabled || exit 0
 if [ "$INTERFACE" = "wan" ] && [ "$ACTION" = "ifup" ] ; then
 	sleep 5
-	/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf
+	if [ -f /var/run/ddns_updaterd.pid ] ; then
+		/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf
+	else
+		/usr/bin/ddns_gargoyle -P /etc/ddns_providers.conf -C /etc/ddns_gargoyle.conf -d
+	fi
 fi
