@@ -75,12 +75,19 @@
  	*LS-SR71)
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2015-07-21 12:50:17.091881187 -0400
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2015-07-21 13:48:42.933857266 -0400
-@@ -213,7 +213,7 @@
+@@ -184,6 +184,7 @@
+ 	db120 | \
+ 	f9k1115v2 |\
+ 	hornet-ub | \
++	gargoyle-pocket-router-v2 | \
+ 	mr12 | \
+ 	mr16 | \
+ 	wpj558 | \
+@@ -216,7 +217,6 @@
  	ew-dorin | \
  	ew-dorin-router | \
  	hiwifi-hc6361 | \
 -	hornet-ub-x2 | \
-+	gargoyle-pocket-router-v2 | \
  	mzk-w04nu | \
  	mzk-w300nh | \
  	tew-632brp | \
