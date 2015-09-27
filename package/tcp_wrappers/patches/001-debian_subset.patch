@@ -1,6 +1,6 @@
---- tcp-wrappers-7.6.orig/hosts_access.c
-+++ tcp-wrappers-7.6/hosts_access.c
-@@ -240,6 +240,26 @@
+--- a/hosts_access.c
++++ b/hosts_access.c
+@@ -240,6 +240,26 @@ struct request_info *request;
      }
  }
  
@@ -27,7 +27,7 @@
  /* host_match - match host name and/or address against pattern */
  
  static int host_match(tok, host)
-@@ -267,6 +287,8 @@
+@@ -267,6 +287,8 @@ struct host_info *host;
  	tcpd_warn("netgroup support is disabled");	/* not tcpd_jump() */
  	return (NO);
  #endif
@@ -36,8 +36,8 @@
      } else if (STR_EQ(tok, "KNOWN")) {		/* check address and name */
  	char   *name = eval_hostname(host);
  	return (STR_NE(eval_hostaddr(host), unknown) && HOSTNAME_KNOWN(name));
---- tcp-wrappers-7.6.orig/tcpd.h
-+++ tcp-wrappers-7.6/tcpd.h
+--- a/tcpd.h
++++ b/tcpd.h
 @@ -4,6 +4,25 @@
    * Author: Wietse Venema, Eindhoven University of Technology, The Netherlands.
    */
@@ -64,7 +64,7 @@
  /* Structure to describe one communications endpoint. */
  
  #define STRING_LENGTH	128		/* hosts, users, processes */
-@@ -25,10 +44,10 @@
+@@ -25,10 +44,10 @@ struct request_info {
      char    pid[10];			/* access via eval_pid(request) */
      struct host_info client[1];		/* client endpoint info */
      struct host_info server[1];		/* server endpoint info */
@@ -79,7 +79,7 @@
      struct netconfig *config;		/* netdir handle */
  };
  
-@@ -61,25 +80,30 @@
+@@ -61,25 +80,30 @@ extern char paranoid[];
  /* Global functions. */
  
  #if defined(TLI) || defined(PTX) || defined(TLI_SEQUENT)
@@ -120,7 +120,7 @@
  extern char *hosts_allow_table;		/* for verification mode redirection */
  extern char *hosts_deny_table;		/* for verification mode redirection */
  extern int hosts_access_verbose;	/* for verbose matching mode */
-@@ -92,9 +116,14 @@
+@@ -92,9 +116,14 @@ extern int resident;			/* > 0 if residen
    */
  
  #ifdef __STDC__
@@ -135,7 +135,7 @@
  extern struct request_info *request_init();	/* initialize request */
  extern struct request_info *request_set();	/* update request structure */
  #endif
-@@ -117,27 +146,31 @@
+@@ -117,27 +146,31 @@ extern struct request_info *request_set(
    * host_info structures serve as caches for the lookup results.
    */
  
@@ -177,7 +177,7 @@
  #endif
  
   /*
-@@ -178,7 +211,7 @@
+@@ -178,7 +211,7 @@ extern struct tcpd_context tcpd_context;
    * behavior.
    */
  
@@ -186,7 +186,7 @@
  extern int dry_run;			/* verification flag */
  
  /* Bug workarounds. */
-@@ -217,3 +250,7 @@
+@@ -217,3 +250,7 @@ extern char *fix_strtok();
  #define strtok	my_strtok
  extern char *my_strtok();
  #endif
@@ -194,8 +194,8 @@
 +__END_DECLS
 +
 +#endif /* tcpd.h */
---- tcp-wrappers-7.6.orig/Makefile
-+++ tcp-wrappers-7.6/Makefile
+--- a/Makefile
++++ b/Makefile
 @@ -1,5 +1,10 @@
 +GLIBC=$(shell grep -s -c __GLIBC__ /usr/include/features.h)
 +
@@ -207,7 +207,7 @@
  what:
  	@echo
  	@echo "Usage: edit the REAL_DAEMON_DIR definition in the Makefile then:"
-@@ -19,7 +24,7 @@
+@@ -19,7 +24,7 @@ what:
  	@echo "	generic (most bsd-ish systems with sys5 compatibility)"
  	@echo "	386bsd aix alpha apollo bsdos convex-ultranet dell-gcc dgux dgux543"
  	@echo "	dynix epix esix freebsd hpux irix4 irix5 irix6 isc iunix"
@@ -216,7 +216,7 @@
  	@echo "	ptx-2.x ptx-generic pyramid sco sco-nis sco-od2 sco-os5 sinix sunos4"
  	@echo "	sunos40 sunos5 sysv4 tandem ultrix unicos7 unicos8 unixware1 unixware2"
  	@echo "	uts215 uxp"
-@@ -43,8 +48,8 @@
+@@ -43,8 +48,8 @@ what:
  # Ultrix 4.x SunOS 4.x ConvexOS 10.x Dynix/ptx
  #REAL_DAEMON_DIR=/usr/etc
  #
@@ -227,7 +227,7 @@
  #
  # BSD 4.4
  #REAL_DAEMON_DIR=/usr/libexec
-@@ -141,10 +146,21 @@
+@@ -141,10 +146,21 @@ freebsd:
  	LIBS= RANLIB=ranlib ARFLAGS=rv AUX_OBJ= NETGROUP= TLI= \
  	EXTRA_CFLAGS=-DSYS_ERRLIST_DEFINED VSYSLOG= all
  
@@ -251,7 +251,7 @@
  
  # This is good for many SYSV+BSD hybrids with NIS, probably also for HP-UX 7.x.
  hpux hpux8 hpux9 hpux10:
-@@ -391,7 +407,7 @@
+@@ -391,7 +407,7 @@ AR	= ar
  # the ones provided with this source distribution. The environ.c module
  # implements setenv(), getenv(), and putenv().
  
@@ -260,7 +260,7 @@
  #AUX_OBJ= environ.o
  #AUX_OBJ= environ.o strcasecmp.o
  
-@@ -454,7 +470,8 @@
+@@ -454,7 +470,8 @@ AUX_OBJ= setenv.o
  # host name aliases. Compile with -DSOLARIS_24_GETHOSTBYNAME_BUG to work
  # around this. The workaround does no harm on other Solaris versions.
  
@@ -270,7 +270,7 @@
  #BUGS = -DGETPEERNAME_BUG -DBROKEN_FGETS -DINET_ADDR_BUG
  #BUGS = -DGETPEERNAME_BUG -DBROKEN_FGETS -DSOLARIS_24_GETHOSTBYNAME_BUG
  
-@@ -464,7 +481,7 @@
+@@ -464,7 +481,7 @@ BUGS = -DGETPEERNAME_BUG -DBROKEN_FGETS
  # If your system supports NIS or YP-style netgroups, enable the following
  # macro definition. Netgroups are used only for host access control.
  #
@@ -279,7 +279,7 @@
  
  ###############################################################
  # System dependencies: whether or not your system has vsyslog()
-@@ -491,7 +508,7 @@
+@@ -491,7 +508,7 @@ VSYSLOG	= -Dvsyslog=myvsyslog
  # Uncomment the next definition to turn on the language extensions
  # (examples: allow, deny, banners, twist and spawn).
  # 
@@ -288,7 +288,7 @@
  
  ################################################################
  # Optional: Changing the default disposition of logfile records
-@@ -514,7 +531,7 @@
+@@ -514,7 +531,7 @@ VSYSLOG	= -Dvsyslog=myvsyslog
  #
  # The LOG_XXX names below are taken from the /usr/include/syslog.h file.
  
@@ -297,7 +297,7 @@
  
  # The syslog priority at which successful connections are logged.
  
-@@ -610,7 +627,7 @@
+@@ -610,7 +627,7 @@ TABLES	= -DHOSTS_DENY=\"/etc/hosts.deny\
  # Paranoid mode implies hostname lookup. In order to disable hostname
  # lookups altogether, see the next section.
  
@@ -306,7 +306,7 @@
  
  ########################################
  # Optional: turning off hostname lookups
-@@ -623,7 +640,7 @@
+@@ -623,7 +640,7 @@ PARANOID= -DPARANOID
  # In order to perform selective hostname lookups, disable paranoid
  # mode (see previous section) and comment out the following definition.
  
@@ -315,7 +315,7 @@
  
  #############################################
  # Optional: Turning on host ADDRESS checking
-@@ -649,28 +666,46 @@
+@@ -649,28 +666,46 @@ HOSTNAME= -DALWAYS_HOSTNAME
  # source-routed traffic in the kernel. Examples: 4.4BSD derivatives,
  # Solaris 2.x, and Linux. See your system documentation for details.
  #
@@ -365,7 +365,7 @@
  FROM_OBJ= fromhost.o
  
  KIT	= README miscd.c tcpd.c fromhost.c hosts_access.c shell_cmd.c \
-@@ -684,46 +719,78 @@
+@@ -684,46 +719,78 @@ KIT	= README miscd.c tcpd.c fromhost.c h
  	refuse.c tcpdchk.8 setenv.c inetcf.c inetcf.h scaffold.c \
  	scaffold.h tcpdmatch.8 README.NIS
  
@@ -463,7 +463,7 @@
  
  shar:	$(KIT)
  	@shar $(KIT)
-@@ -739,7 +806,8 @@
+@@ -739,7 +806,8 @@ archive:
  
  clean:
  	rm -f tcpd miscd safe_finger tcpdmatch tcpdchk try-from *.[oa] core \
@@ -473,16 +473,16 @@
  
  tidy:	clean
  	chmod -R a+r .
-@@ -885,5 +953,6 @@
+@@ -885,5 +953,6 @@ update.o: cflags
  update.o: mystdarg.h
  update.o: tcpd.h
  vfprintf.o: cflags
 +weak_symbols.o: tcpd.h
  workarounds.o: cflags
  workarounds.o: tcpd.h
---- tcp-wrappers-7.6.orig/hosts_access.5
-+++ tcp-wrappers-7.6/hosts_access.5
-@@ -8,9 +8,9 @@
+--- a/hosts_access.5
++++ b/hosts_access.5
+@@ -8,9 +8,9 @@ name, host name/address) patterns.  Exam
  impatient reader is encouraged to skip to the EXAMPLES section for a
  quick introduction.
  .PP
@@ -495,7 +495,7 @@
  .PP
  In the following text, \fIdaemon\fR is the the process name of a
  network daemon process, and \fIclient\fR is the name and/or address of
-@@ -40,7 +40,7 @@
+@@ -40,7 +40,7 @@ A newline character is ignored when it i
  character. This permits you to break up long lines so that they are
  easier to edit.
  .IP \(bu
@@ -504,7 +504,7 @@
  This permits you to insert comments and whitespace so that the tables
  are easier to read.
  .IP \(bu
-@@ -69,26 +69,33 @@
+@@ -69,26 +69,33 @@ checks are case insensitive.
  .SH PATTERNS
  The access control language implements the following patterns:
  .IP \(bu
@@ -549,7 +549,7 @@
  .SH WILDCARDS
  The access control language supports explicit wildcards:
  .IP ALL
-@@ -115,19 +122,19 @@
+@@ -115,19 +122,19 @@ without -DPARANOID when you want more co
  .ne 6
  .SH OPERATORS
  .IP EXCEPT
@@ -573,7 +573,7 @@
  at the end of the command if you do not want to wait until it has
  completed.
  .PP
-@@ -159,7 +166,7 @@
+@@ -159,7 +166,7 @@ depending on how much information is ava
  .IP %u
  The client user name (or "unknown").
  .IP %%
@@ -582,7 +582,7 @@
  .PP
  Characters in % expansions that may confuse the shell are replaced by
  underscores.
-@@ -243,9 +250,9 @@
+@@ -243,9 +250,9 @@ A positive IDENT lookup result (the clie
  less trustworthy. It is possible for an intruder to spoof both the
  client connection and the IDENT lookup, although doing so is much
  harder than spoofing just a client connection. It may also be that
@@ -594,7 +594,7 @@
  .SH EXAMPLES
  The language is flexible enough that different types of access control
  policy can be expressed with a minimum of fuss. Although the language
-@@ -285,7 +292,7 @@
+@@ -285,7 +292,7 @@ ALL: LOCAL @some_netgroup
  .br
  ALL: .foobar.edu EXCEPT terminalserver.foobar.edu
  .PP
@@ -603,7 +603,7 @@
  in the host name) and from members of the \fIsome_netgroup\fP
  netgroup.  The second rule permits access from all hosts in the
  \fIfoobar.edu\fP domain (notice the leading dot), with the exception of
-@@ -322,8 +329,8 @@
+@@ -322,8 +329,8 @@ in.tftpd: LOCAL, .my.domain
  /etc/hosts.deny:
  .in +3
  .nf
@@ -614,7 +614,7 @@
  .fi
  .PP
  The safe_finger command comes with the tcpd wrapper and should be
-@@ -349,7 +356,7 @@
+@@ -349,7 +356,7 @@ control rule; when the length of an acce
  capacity of an internal buffer; when an access control rule is not
  terminated by a newline character; when the result of %<letter>
  expansion would overflow an internal buffer; when a system call fails
@@ -623,9 +623,9 @@
  .SH FILES
  .na
  .nf
---- tcp-wrappers-7.6.orig/rfc931.c
-+++ tcp-wrappers-7.6/rfc931.c
-@@ -33,7 +33,7 @@
+--- a/rfc931.c
++++ b/rfc931.c
+@@ -33,7 +33,7 @@ static char sccsid[] = "@(#) rfc931.c 1.
  
  int     rfc931_timeout = RFC931_TIMEOUT;/* Global so it can be changed */
  
@@ -634,7 +634,7 @@
  
  /* fsocket - open stdio stream on top of socket */
  
-@@ -62,7 +62,7 @@
+@@ -62,7 +62,7 @@ int     protocol;
  static void timeout(sig)
  int     sig;
  {
@@ -643,7 +643,7 @@
  }
  
  /* rfc931 - return remote user name, given socket structures */
-@@ -99,7 +99,7 @@
+@@ -99,7 +99,7 @@ char   *dest;
  	 * Set up a timer so we won't get stuck while waiting for the server.
  	 */
  
@@ -652,9 +652,9 @@
  	    signal(SIGALRM, timeout);
  	    alarm(rfc931_timeout);
  
---- tcp-wrappers-7.6.orig/tcpd.8
-+++ tcp-wrappers-7.6/tcpd.8
-@@ -94,7 +94,7 @@
+--- a/tcpd.8
++++ b/tcpd.8
+@@ -94,7 +94,7 @@ configuration files.
  .PP
  The example assumes that the network daemons live in /usr/etc. On some
  systems, network daemons live in /usr/sbin or in /usr/libexec, or have
@@ -663,7 +663,7 @@
  .SH EXAMPLE 2
  This example applies when \fItcpd\fR expects that the network daemons
  are left in their original place.
-@@ -110,26 +110,26 @@
+@@ -110,26 +110,26 @@ finger  stream  tcp  nowait  nobody  /us
  becomes:
  .sp
  .ti +5
@@ -695,8 +695,8 @@
  .sp
  .fi
  .PP
---- tcp-wrappers-7.6.orig/hosts_access.3
-+++ tcp-wrappers-7.6/hosts_access.3
+--- a/hosts_access.3
++++ b/hosts_access.3
 @@ -3,7 +3,7 @@
  hosts_access, hosts_ctl, request_init, request_set \- access control library
  .SH SYNOPSIS
@@ -706,9 +706,9 @@
  
  extern int allow_severity;
  extern int deny_severity;
---- tcp-wrappers-7.6.orig/options.c
-+++ tcp-wrappers-7.6/options.c
-@@ -473,6 +473,9 @@
+--- a/options.c
++++ b/options.c
+@@ -473,6 +473,9 @@ static struct syslog_names log_fac[] = {
  #ifdef LOG_CRON
      "cron", LOG_CRON,
  #endif
@@ -718,9 +718,9 @@
  #ifdef LOG_LOCAL0
      "local0", LOG_LOCAL0,
  #endif
---- tcp-wrappers-7.6.orig/fix_options.c
-+++ tcp-wrappers-7.6/fix_options.c
-@@ -35,7 +35,12 @@
+--- a/fix_options.c
++++ b/fix_options.c
+@@ -35,7 +35,12 @@ struct request_info *request;
  #ifdef IP_OPTIONS
      unsigned char optbuf[BUFFER_SIZE / 3], *cp;
      char    lbuf[BUFFER_SIZE], *lp;
@@ -733,9 +733,9 @@
      struct protoent *ip;
      int     fd = request->fd;
      unsigned int opt;
---- tcp-wrappers-7.6.orig/workarounds.c
-+++ tcp-wrappers-7.6/workarounds.c
-@@ -163,7 +163,11 @@
+--- a/workarounds.c
++++ b/workarounds.c
+@@ -163,7 +163,11 @@ int    *fromlen;
  int     fix_getpeername(sock, sa, len)
  int     sock;
  struct sockaddr *sa;
@@ -747,9 +747,9 @@
  {
      int     ret;
      struct sockaddr_in *sin = (struct sockaddr_in *) sa;
---- tcp-wrappers-7.6.orig/socket.c
-+++ tcp-wrappers-7.6/socket.c
-@@ -76,7 +76,11 @@
+--- a/socket.c
++++ b/socket.c
+@@ -76,7 +76,11 @@ struct request_info *request;
  {
      static struct sockaddr_in client;
      static struct sockaddr_in server;
@@ -761,7 +761,7 @@
      char    buf[BUFSIZ];
      int     fd = request->fd;
  
-@@ -224,7 +228,11 @@
+@@ -224,7 +228,11 @@ int     fd;
  {
      char    buf[BUFSIZ];
      struct sockaddr_in sin;
@@ -773,9 +773,9 @@
  
      /*
       * Eat up the not-yet received datagram. Some systems insist on a
---- tcp-wrappers-7.6.orig/safe_finger.c
-+++ tcp-wrappers-7.6/safe_finger.c
-@@ -26,21 +26,24 @@
+--- a/safe_finger.c
++++ b/safe_finger.c
+@@ -26,21 +26,24 @@ static char sccsid[] = "@(#) safe_finger
  #include <stdio.h>
  #include <ctype.h>
  #include <pwd.h>
@@ -802,9 +802,9 @@
  
  void    cleanup(sig)
  int     sig;
---- tcp-wrappers-7.6.orig/hosts_options.5
-+++ tcp-wrappers-7.6/hosts_options.5
-@@ -58,12 +58,12 @@
+--- a/hosts_options.5
++++ b/hosts_options.5
+@@ -58,12 +58,12 @@ Notice the leading dot on the domain nam
  Execute, in a child process, the specified shell command, after
  performing the %<letter> expansions described in the hosts_access(5)
  manual page.  The command is executed with stdin, stdout and stderr
@@ -819,9 +819,9 @@
  .fi
  .sp
  executes, in a background child process, the shell command "safe_finger
---- tcp-wrappers-7.6.orig/tcpdchk.c
-+++ tcp-wrappers-7.6/tcpdchk.c
-@@ -350,6 +350,8 @@
+--- a/tcpdchk.c
++++ b/tcpdchk.c
+@@ -350,6 +350,8 @@ char   *pat;
  {
      if (pat[0] == '@') {
  	tcpd_warn("%s: daemon name begins with \"@\"", pat);
@@ -830,7 +830,7 @@
      } else if (pat[0] == '.') {
  	tcpd_warn("%s: daemon name begins with dot", pat);
      } else if (pat[strlen(pat) - 1] == '.') {
-@@ -382,6 +384,8 @@
+@@ -382,6 +384,8 @@ char   *pat;
  {
      if (pat[0] == '@') {			/* @netgroup */
  	tcpd_warn("%s: user name begins with \"@\"", pat);
@@ -839,7 +839,7 @@
      } else if (pat[0] == '.') {
  	tcpd_warn("%s: user name begins with dot", pat);
      } else if (pat[strlen(pat) - 1] == '.') {
-@@ -402,8 +406,13 @@
+@@ -402,8 +406,13 @@ char   *pat;
  static int check_host(pat)
  char   *pat;
  {
@@ -853,7 +853,7 @@
  
      if (pat[0] == '@') {			/* @netgroup */
  #ifdef NO_NETGRENT
-@@ -422,6 +431,21 @@
+@@ -422,6 +431,21 @@ char   *pat;
  	tcpd_warn("netgroup support disabled");
  #endif
  #endif
@@ -875,9 +875,9 @@
      } else if (mask = split_at(pat, '/')) {	/* network/netmask */
  	if (dot_quad_addr(pat) == INADDR_NONE
  	    || dot_quad_addr(mask) == INADDR_NONE)
---- tcp-wrappers-7.6.orig/percent_m.c
-+++ tcp-wrappers-7.6/percent_m.c
-@@ -13,7 +13,7 @@
+--- a/percent_m.c
++++ b/percent_m.c
+@@ -13,7 +13,7 @@ static char sccsid[] = "@(#) percent_m.c
  #include <string.h>
  
  extern int errno;
@@ -886,7 +886,7 @@
  extern char *sys_errlist[];
  extern int sys_nerr;
  #endif
-@@ -29,11 +29,15 @@
+@@ -29,11 +29,15 @@ char   *ibuf;
  
      while (*bp = *cp)
  	if (*cp == '%' && cp[1] == 'm') {
@@ -902,9 +902,9 @@
  	    bp += strlen(bp);
  	    cp += 2;
  	} else {
---- tcp-wrappers-7.6.orig/scaffold.c
-+++ tcp-wrappers-7.6/scaffold.c
-@@ -180,10 +180,12 @@
+--- a/scaffold.c
++++ b/scaffold.c
+@@ -180,10 +180,12 @@ struct request_info *request;
  
  /* ARGSUSED */
  
@@ -920,8 +920,8 @@
  }
  
  /* check_path - examine accessibility */
---- tcp-wrappers-7.6.orig/weak_symbols.c
-+++ tcp-wrappers-7.6/weak_symbols.c
+--- /dev/null
++++ b/weak_symbols.c
 @@ -0,0 +1,11 @@
 + /*
 +  * @(#) weak_symbols.h 1.5 99/12/29 23:50

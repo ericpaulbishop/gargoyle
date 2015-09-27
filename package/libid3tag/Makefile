@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2010 OpenWrt.org
+# Copyright (C) 2006-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,11 +9,15 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libid3tag
 PKG_VERSION:=0.15.1b
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@SF/mad
 PKG_MD5SUM:=e5808ad997ba32c498803822078748c3
+PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>
+
+PKG_LICENSE:=GPL-2
+PKG_LICENSE_FILES:=COPYING
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
@@ -29,11 +33,13 @@ define Package/libid3tag
 endef
 
 define Package/libid3tag/description
-	libid3tag is a library for reading and (eventually) writing ID3 tags, both 
+	libid3tag is a library for reading and (eventually) writing ID3 tags, both
 	ID3v1 and the various versions of ID3v2.
 endef
 
 TARGET_CFLAGS += $(FPIC)
+
+CONFIGURE_VARS += CC="$(TARGET_CC) $(TARGET_CFLAGS)"
 
 define Build/Configure
 	$(call Build/Configure/Default, \

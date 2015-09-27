@@ -20,16 +20,16 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Barrier Breaker"
-	branch_id="barrier_breaker"
+	branch_name="Chaos Calmer"
+	branch_id="chaos_calmer"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_14.07"
+	branch_packages_path="packages"
 
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=46817
+	rnum=47046
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours

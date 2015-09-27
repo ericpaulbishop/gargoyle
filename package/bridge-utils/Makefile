@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2013 OpenWrt.org
+# Copyright (C) 2006-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,10 +9,18 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=bridge-utils
-PKG_RELEASE:=2
-PKG_SOURCE_URL:=@SF/bridge
 PKG_VERSION:=1.5
-PKG_MD5SUM:=ec7b381160b340648dede58c31bb2238
+PKG_RELEASE:=5
+
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://git.kernel.org/pub/scm/linux/kernel/git/shemminger/bridge-utils.git
+PKG_SOURCE_VERSION:=v${PKG_VERSION}
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+
+PKG_LICENSE:=GPL-2.0+
+PKG_LICENSE_FILES:=COPYING
+PKG_FIXUP:=autoreconf
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 
@@ -23,6 +31,7 @@ define Package/bridge
   CATEGORY:=Base system
   TITLE:=Ethernet bridging configuration utility
   URL:=http://bridge.sourceforge.net/
+  PKG_MAINTAINER:=Nikolay Martynov <mar.kolya@gmail.com>
 endef
 
 define Package/bridge/description
@@ -30,20 +39,24 @@ define Package/bridge/description
  form a larger network.
 endef
 
+TARGET_CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE
+
 CONFIGURE_ARGS += \
 	--with-linux-headers="$(LINUX_DIR)" \
 
-define Build/Prepare
-$(call Build/Prepare/Default)
-	( cd $(PKG_BUILD_DIR) ; \
-		[ -f ./configure ] || { \
-			ln -sf configure.in configure.ac ; \
-			autoconf ; \
-		} \
-	)
+define Package/bridge/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/brctl/brctl $(1)/usr/sbin/brctl.real
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(CP) ./files/* $(1)/etc/uci-defaults/
 endef
 
-
+define Package/bridge/postrm
+#!/bin/sh
+$${IPKG_INSTROOT}/bin/busybox brctl -h 2>&1 | grep -q BusyBox && \
+ln -sf ../../bin/busybox $${IPKG_INSTROOT}/usr/sbin/brctl
+exit 0
+endef
 
 define Package/bridge/postinst
 #!/bin/sh
@@ -52,24 +65,6 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	rm -rf /usr/sbin/brctl
 	ln -s /usr/sbin/brctl.real /usr/sbin/brctl
 fi
-endef
-
-
-define Package/bridge/postrm
-#!/bin/sh
-
-if [ -z "$${IPKG_INSTROOT}" ]; then
-	rm -rf /usr/sbin/brctl
-	ln -s /bin/busybox /usr/sbin/brctl
-fi
-endef
-
-define Package/bridge/install
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/brctl/brctl $(1)/usr/sbin/brctl.real
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(CP) ./files/* $(1)/etc/uci-defaults/
-
 endef
 
 $(eval $(call BuildPackage,bridge))

@@ -1,6 +1,6 @@
---- a/package/comgt/files/3g.sh
-+++ b/package/comgt/files/3g.sh
-@@ -52,13 +52,32 @@
+--- bb-src-bak/package/network/utils/comgt/files/3g.sh	2014-11-08 12:48:51.656427958 -0500
++++ bb-src/package/network/utils/comgt/files/3g.sh	2014-11-21 22:38:54.180491281 -0500
+@@ -54,13 +54,32 @@
  				export MODE="AT_OPSYS=${CODE}"
  			elif echo "$cardinfo" | grep -q "Sierra Wireless"; then
  				SIERRA=1
@@ -33,7 +33,7 @@
  			fi
  
  			if [ -n "$pincode" ]; then
-@@ -68,6 +87,7 @@
+@@ -70,6 +89,7 @@
  					return 1
  				}
  			fi
@@ -41,12 +41,12 @@
  			[ -n "$MODE" ] && gcom -d "$device" -s /etc/gcom/setmode.gcom
  
  			# wait for carrier to avoid firmware stability bugs
-@@ -77,6 +97,8 @@
+@@ -84,6 +104,8 @@
  		;;
  	esac
  
 +	gcom -d "$device" -s /etc/gcom/getstrength.gcom > /tmp/strength.txt
 +
- 	connect="${apn:+USE_APN=$apn }/usr/sbin/chat -t5 -v -E -f $chat"
+ 	connect="${apn:+USE_APN=$apn }DIALNUMBER=$dialnumber /usr/sbin/chat -t5 -v -E -f $chat"
  	ppp_generic_setup "$interface" \
  		noaccomp \

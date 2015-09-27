@@ -15,6 +15,9 @@ PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=ftp://ftp.porcupine.org/pub/security
 PKG_MD5SUM:=e6fa25f71226d090f34de3f6b122fb5a
 
+PKG_LICENSE:=BSD
+PKG_LICENE_FILES:=DISCLAIMER
+
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)_$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
@@ -24,15 +27,20 @@ define Package/libwrap
   CATEGORY:=Libraries
   TITLE:=Security wrapper library for TCP services
   URL:=ftp://ftp.porcupine.org/pub/security/index.html
+  MAINTAINER:=Peter Wagner <tripolar@gmx.at>
 endef
 
 TARGET_CFLAGS += $(FPIC)
+
+ifeq ($(CONFIG_USE_MUSL),)
+TARGET_EXTRA_LIBS:=LIBS=-lnsl
+endif
 
 define Build/Compile	
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
 		OPT_CFLAGS="$(TARGET_CFLAGS)" \
-		LIBS=-lnsl \
+		$(TARGET_EXTRA_LIBS) \
 		NETGROUP= \
 		VSYSLOG= \
 		BUGS= \
