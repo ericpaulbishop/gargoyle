@@ -279,8 +279,8 @@ CONFIG_SIGNED_PACKAGES=y
 CONFIG_BUILD_PATENTED=y
 # CONFIG_BUILD_NLS is not set
 CONFIG_SHADOW_PASSWORDS=y
-CONFIG_CLEAN_IPKG_PARTIAL=y
-# CONFIG_CLEAN_IPKG is not set
+# CONFIG_CLEAN_IPKG_PARTIAL=y
+CONFIG_CLEAN_IPKG=y
 # CONFIG_COLLECT_KERNEL_DEBUG is not set
 
 #
@@ -1369,7 +1369,7 @@ CONFIG_PACKAGE_ubusd=y
 CONFIG_PACKAGE_uci=y
 # CONFIG_PACKAGE_udev is not set
 CONFIG_PACKAGE_usign=y
-CONFIG_PACKAGE_wireless-tools=y
+# CONFIG_PACKAGE_wireless-tools is not set
 # CONFIG_PACKAGE_zram-swap is not set
 
 #
@@ -1380,6 +1380,7 @@ CONFIG_PACKAGE_wireless-tools=y
 # Gargoyle Web Interface
 #
 CONFIG_PACKAGE_gargoyle=y
+CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
@@ -2261,7 +2262,7 @@ CONFIG_PACKAGE_iptables-mod-timerange=y
 CONFIG_PACKAGE_iptables-mod-webmon=y
 CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptaccount is not set
-CONFIG_PACKAGE_miniupnpd=y
+# CONFIG_PACKAGE_miniupnpd is not set
 # CONFIG_PACKAGE_nftables is not set
 
 #
@@ -2299,9 +2300,9 @@ CONFIG_PACKAGE_miniupnpd=y
 #
 # CONFIG_PACKAGE_genl is not set
 # CONFIG_PACKAGE_igmpproxy is not set
-# CONFIG_PACKAGE_ip is not set
+CONFIG_PACKAGE_ip=y
 # CONFIG_PACKAGE_ip-bridge is not set
-CONFIG_PACKAGE_ip-full=y
+# CONFIG_PACKAGE_ip-full is not set
 # CONFIG_PACKAGE_lldpd is not set
 # CONFIG_PACKAGE_relayd is not set
 # CONFIG_PACKAGE_ss is not set
@@ -2599,7 +2600,7 @@ CONFIG_PACKAGE_openssl-util=m
 CONFIG_PACKAGE_share-users=m
 # CONFIG_PACKAGE_spidev-test is not set
 # CONFIG_PACKAGE_strace is not set
-CONFIG_PACKAGE_uboot-envtools=y
+# CONFIG_PACKAGE_uboot-envtools is not set
 # CONFIG_UBOOT_ENVTOOLS_UBI is not set
 # CONFIG_PACKAGE_ugps is not set
 CONFIG_PACKAGE_usb-modeswitch=m

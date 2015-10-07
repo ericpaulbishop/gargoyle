@@ -12,11 +12,16 @@
 <script>
 <!--
 <%
-	upnp_config_enabled=$(uci get upnpd.config.enable_upnp)
-	if [ -h /etc/rc.d/S95miniupnpd ] && [ "$upnp_config_enabled" != "0" ] ; then
+	upnp_config_enabled=$(uci get upnpd.config.enable_upnp 2>/dev/null)
+	if [ -h /etc/rc.d/S95miniupnpd ] && [ -n "$upnp_config_enabled" ] && [ "$upnp_config_enabled" != "0" ] ; then
 		echo "var upnpdEnabled = true;"
 	else
 		echo "var upnpdEnabled = false;"
+	fi
+	if [ -z "$upnp_config_enabled" ] ; then
+		echo var haveUpnpd = false;
+	else
+		echo "var haveUpnpd = true;"
 	fi
 %>
 //-->
@@ -67,7 +72,7 @@
 		</div>
 	</fieldset>
 
-	<fieldset>
+	<fieldset id="upnp_fieldset" >
 		<legend class="sectionheader"><%~ UP_NAT %></legend>
 		<div id='upnp_enabled_container'>
 			<input type='checkbox' id='upnp_enabled' onclick="setUpnpEnabled()" />
