@@ -2232,10 +2232,13 @@ function setSsidVisibility(selectId)
 
 function parseWifiScan(rawScanOutput)
 {
-	var parsed = [ [],[],[],[],[] ];
-	var cells = rawScanOutput.split(/Cell/);
-	cells.shift(); //get rid of anything before first AP data
+	adjScanOutput = rawScanOutput.replace(/Quality/g, "\n          Quality");
+	adjScanOutput = adjScanOutput.replace(/Channel/g, "\n          Channel");
 
+	var parsed = [ [],[],[],[],[] ];
+	var cells = adjScanOutput.split(/Cell/);
+	cells.shift(); //get rid of anything before first AP data
+		
 	var getCellValues=function(id, cellLines)
 	{
 		var vals=[];
@@ -2264,35 +2267,40 @@ function parseWifiScan(rawScanOutput)
 
 	while(cells.length > 0)
 	{
-		var cellData = cells.shift();
+		var cellData  = cells.shift();
 		var cellLines = cellData.split(/[\r\n]+/);
-		var ssid = getCellValues("ESSID", cellLines).shift();
+		
+		var ssid    = getCellValues("ESSID", cellLines).shift();
 		var channel = getCellValues("Channel", cellLines).shift();
-		var freq = getCellValues("Frequency", cellLines).shift();
-		var encOn = getCellValues("Encryption key", cellLines).shift();
-		var ie = getCellValues("IE", cellLines);
 		var qualStr = getCellValues("Quality", cellLines).shift();
+		var encStr  = getCellValues("Encryption", cellLines).shift();
 
-		if(ssid != null && ssid != "" && encOn != null && qualStr != null)
+
+
+		if(ssid != null && channel != null && qualStr != null && encStr != null ) 
 		{
-			var encType = "wep";
-			while(ie.length > 0)
+			var enc = "psk2"
+			if(encStr.match(/WPA2 PSK/))
 			{
-				e = ie.shift();
-				encType = e.match(/WPA2/) ? "psk2" : encType;
-				encType = encType=="wep" && e.match(/WPA/) ? "psk" : encType;
+				enc = "psk2"
 			}
-			var enc = encOn == "on" ? encType : "none";
-
+			else if(encStr.match(/WPA PSK/))
+			{
+				enc = "psk"
+			}
+			else if(encStr.match(/WEP/))
+			{
+				enc = "wep"
+			}
+			else if(encStr.match(/none/))
+			{
+				enc = "none"	
+			}
+			
 			var splitQual =qualStr.replace(/[\t ]+Sig.*$/g, "").split(/\//);
 			var quality = Math.round( (parseInt(splitQual[0])*100)/parseInt(splitQual[1]) );
 			quality = quality > 100 ? 100 : quality;
 
-			if(channel == null)
-			{
-				channel = freq.split(/\(Channel /)[1];
-				channel = channel.split(/\)/)[0];
-			}	
 
 			parsed[0].push(ssid);
 			parsed[1].push(enc);
@@ -2316,8 +2324,13 @@ function parseWifiScan(rawScanOutput)
 		for(pIndex=0; pIndex < 5; pIndex++){ sortedParsed[pIndex].push( parsed[pIndex][i] ); }
 	}
 	
+
 	return sortedParsed;
+
+
+
 }
+
 
 function setChannelWidth(selectCtl, band)
 {
