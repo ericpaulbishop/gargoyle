@@ -63,7 +63,7 @@ for (tab_idx in cron_data) {
 		</div>
 		<div>
 			<label class='narrowleftcolumn'><%~ email.Encryption %></label>
-			<input type='radio' value="plain" id='plain' name='encryption'/> None
+			<input type='radio' value="plain" id='plain' name='encryption'/> <%~ email.None %>
 			<input type='radio' value="tls" id='TLS' name='encryption'/> TLS
 		</div>
 		<div>
@@ -78,7 +78,7 @@ for (tab_idx in cron_data) {
 			<label class='narrowleftcolumn'><%~ email.Password %></label>
 			<input type='password' class='rightcolumn' id='password' size='35' disabled/>&nbsp;&nbsp;
 			<input type="checkbox" id="show_pass" onclick="togglePass('password')">
-			<label for="show_pass" id="show_pass_label" class="rightcolumn">reveal</label>
+			<label for="show_pass" id="show_pass_label" class="rightcolumn"><%~ email.rvel %></label>
 		</div>
 	</fieldset>
 	
@@ -96,7 +96,7 @@ for (tab_idx in cron_data) {
 	</fieldset>
 	<fieldset>
 	<legend class="sectionheader"><%~ email.DataSettings %></legend>
-	Include following data in report:
+	<%~ email.Include %>
 	<p />
 	<input type='checkbox' name='content' /><%~ email.recentWebsites %>
 	<br />
@@ -110,12 +110,12 @@ for (tab_idx in cron_data) {
 	<br />
 	<input type='checkbox' name='content' onclick="intervalVisibility(this)" /><%~ email.Bandwidth %>
 	<br />
-	<label class="narrowleftcolumn" id="bandwidthIntervalLabel">Display Interval:</label>
+	<label class="narrowleftcolumn" id="bandwidthIntervalLabel"><%~ email.BandwidthInterval %></label>
 	<select id="bandwidthIntervalSelect" class="rightcolumn" disabled>
-				<option value="minutes">minutes</option>
-				<option value="quarter hours">quarter hours</option>
-				<option value="hours">hours</option>
-				<option value="days">days</option>
+				<option value="minutes"><%~ email.minutes %></option>
+				<option value="quarter hours"><%~ email.quarterhours %></option>
+				<option value="hours"><%~ email.hours %></option>
+				<option value="days"><%~ email.days %></option>
 			</select>
 	<div>
 		<label class='narrowleftcolumn'><%~ email.Count %></label>
@@ -147,7 +147,7 @@ for (tab_idx in cron_data) {
 		</div>
 	</div>
 	
-  	<div id="tabs">
+	<div id="tabs">
 		<ul id="tab_ulist">
 		  <li id="tab_li_1" style="display:none;"></li>
 		  <li id="tab_li_2" style="display:none;"></li>

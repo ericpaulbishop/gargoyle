@@ -28,6 +28,14 @@ email.DHCP="DHCP leases";
 email.ARP="ARP table";
 email.Bandwidth="Bandwidth usage";
 email.Count="Number of entries:";
+email.Encryption="Encryption";
+email.Include="Include following data in report:";
+email.rvel="reveal";
+email.None="None";
+email.minutes="minutes";
+email.quarterhours="quarter hours";
+email.hours="hours";
+email.days="days";
 
 //javscript
 email.Smmy="Summary";
