@@ -45,11 +45,18 @@
 
 	fi
 
-	has_qmi=$( ls /dev/cdc-wdm* 2>/dev/null )
+	has_qmi=$( grep qmi_wwan /sys/kernel/debug/usb/devices 2>/dev/null)
 	if [ -z "$has_qmi" ] ; then
 		echo "hasQMI = false;"
 	else
 		echo "hasQMI = true;"
+	fi
+
+	has_ncm=$( grep cdc_ncm /sys/kernel/debug/usb/devices 2>/dev/null)
+	if [ -z "$has_ncm" ] ; then
+		echo "hasNCM = false;"
+	else
+		echo "hasNCM = true;"
 	fi
 
 
@@ -316,6 +323,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='static_wireless'><%~ StIP %> (<%~ Wrlss %>)</option>
 				<option value='3g'><%~ Mo3g %></option>
 				<option value='qmi'><%~ Mo3gQMI %></option>
+				<option value='ncm'><%~ Mo3gNCM %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>

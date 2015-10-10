@@ -147,13 +147,17 @@ function saveChanges()
 				{
 					uci.set('network', 'wan', 'ifname', defaultLanIf);
 				}
-				else if(getSelectedValue("wan_protocol").match(/qmi/))
-				{
-					uci.set('network', 'wan', 'ifname', qmiInterface );
-				}
 				else if(getSelectedValue("wan_protocol").match(/3g/))
 				{
-					uci.set('network', 'wan', 'auto', '1');
+					uci.remove('network', 'wan', 'ifname');
+				}
+				else if(getSelectedValue("wan_protocol").match(/qmi/))
+				{
+					uci.remove('network', 'wan', 'ifname');
+				}
+				else if(getSelectedValue("wan_protocol").match(/ncm/))
+				{
+					uci.remove('network', 'wan', 'ifname');
 				}
 				else
 				{
@@ -1043,20 +1047,30 @@ function setGlobalVisibility()
 		}
 	}
 
-	if(hasUSB == false)
+	var proto1 = ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless'];
+	var proto2 = ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')', 'DHCP ('+basicS.Wrlss+')', basicS.StIP+' ('+basicS.Wrlss+')'];
+
+	if(hasUSB)
 	{
-		setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', 'none'], ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')', 'DHCP ('+basicS.Wrlss+')', basicS.StIP+' ('+basicS.Wrlss+')',UI.Disabled]);
+		proto1.push('3g');
+		proto2.push(basicS.Mo3g);
 	}
-	else
+
+	if(hasQMI)
 	{
-		if (hasQMI == false) {
-			setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', '3g', 'none'], ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')', 'DHCP ('+basicS.Wrlss+')', basicS.StIP+' ('+basicS.Wrlss+')', basicS.Mo3g, UI.Disabled]);
-		}
-		else
-		{
-			setAllowableSelections('wan_protocol', ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless', '3g', 'qmi', 'none'], ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')', 'DHCP ('+basicS.Wrlss+')', basicS.StIP+' ('+basicS.Wrlss+')', basicS.Mo3g, basicS.Mo3gQMI, UI.Disabled]);
-		}
+		proto1.push('qmi');
+		proto2.push(basicS.Mo3gQMI);
 	}
+
+	if(hasNCM)
+	{
+		proto1.push('ncm');
+		proto2.push(basicS.Mo3gNCM);
+	}
+
+	proto1.push('none');
+	proto2.push(UI.Disabled);
+	setAllowableSelections('wan_protocol', proto1, proto2);
 
 	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol") == 'none' || getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/) || getSelectedValue("wan_protocol").match(/qmi/))  && (!singleEthernetPort())) ? [1] : [0] )
 
@@ -1085,6 +1099,7 @@ function setWanVisibility()
 	wanVisibilities['none'] = disabledVisability;
 	wanVisibilities['3g'] = tgVisability;
 	wanVisibilities['qmi'] = qmiVisability;
+	wanVisibilities['ncm'] = qmiVisability;
 
 	var selectedVisibility= wanVisibilities[ getSelectedValue("wan_protocol").replace(/_.*$/g, "") ];
 
@@ -1501,7 +1516,7 @@ function resetData()
 	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
 	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
-	if(wp != "none" && wp != "3g" && wp != "qmi" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
+	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
 	setSelectedValue("wan_protocol", wp);
 
 	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
@@ -2778,14 +2793,7 @@ function scan3GDevice(field)
 			setControlsEnabled(true);
 		}
 	}
-	if (getSelectedValue("wan_protocol") == "qmi")
-	{
-		runAjax("POST", "utility/scan_qmidevices.sh", param, stateChangeFunction);
-	}
-	else
-	{
-		runAjax("POST", "utility/scan_3gdevices.sh", param, stateChangeFunction);
-	}
+	runAjax("POST", "utility/scan_3gdevices.sh", param, stateChangeFunction);
 }
 
 function updateService()
@@ -2800,7 +2808,7 @@ function updateService()
 
 function showApn()
 {
-	document.getElementById("wan_3g_apn_container").style.display = (getSelectedValue("wan_3g_service") != "cdma" && getSelectedValue("wan_protocol") == "3g") || getSelectedValue("wan_protocol") == "qmi" ? "block" : "none";
+	document.getElementById("wan_3g_apn_container").style.display = (getSelectedValue("wan_3g_service") != "cdma" && getSelectedValue("wan_protocol") == "3g") || getSelectedValue("wan_protocol") == "qmi" || getSelectedValue("wan_protocol") == "ncm" ? "block" : "none";
 }
 
 function getPingSection()
