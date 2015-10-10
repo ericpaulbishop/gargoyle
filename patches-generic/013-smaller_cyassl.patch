@@ -1,0 +1,12 @@
+--- cc-bak/package/libs/cyassl/Makefile	2015-09-26 14:19:37.121769109 -0400
++++ cc/package/libs/cyassl/Makefile	2015-10-07 16:45:23.354398682 -0400
+@@ -40,9 +40,8 @@
+ CONFIGURE_ARGS += \
+ 	--without-zlib \
+ 	--enable-singlethreaded \
+	--enable-opensslextra \
+ 	--enable-sni \
+-	--enable-ecc \
+ 	--disable-examples
+ 
+ define Build/InstallDev
