@@ -4,5 +4,5 @@
 	echo "Content-type: text/plain"
 	echo ""
 
-	ls -1 /dev/tty[A\|U][C\|S]* 2>/dev/null
+	ls -1 /dev/ttyUSB* /dev/ttyACM* /dev/cdc-wdm* 2>/dev/null
 ?>

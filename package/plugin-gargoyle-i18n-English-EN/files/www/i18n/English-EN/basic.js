@@ -53,7 +53,7 @@ basicS.WANSec="Internet / WAN";
 basicS.Cnct="Connect Via";
 basicS.Wird="Wired";
 basicS.Wrlss="Wireless";
-basicS.Mo3g="3G (GSM)";
+basicS.Mo3g="3G (ppp)";
 basicS.CLsExp="Current Lease Expires";
 basicS.Renew="DHCP Renew";
 basicS.Rleas="DHCP Release";
@@ -127,4 +127,5 @@ basicS.NoDv="No devices found";
 
 basicS.WANIntr="WAN Interface";
 basicS.Mo3gQMI="LTE (QMI)";
+basicS.Mo3gNCM="LTE (NCM)";
 basicS.Dfult="Default";
