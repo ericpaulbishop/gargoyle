@@ -22,6 +22,7 @@ routerstation-pro)
 	PORTS="4 3 2";;
 tl-mr3220 | \
 tl-mr3420 | \
+tl-wr1043nd | \
 tl-wr741nd | \
 tl-wr841n-v7)
 	PORTS="1 2 3 4";;
@@ -34,15 +35,13 @@ archer-c5 | \
 archer-c7 | \
 tl-wdr4300)
 	PORTS="2 3 4 5";;
-tl-wr1043nd)
-	PORTS="1 2 3 4";;
-tl-wdr3500 | \
 dir-835-a1 | \
-wndr4300 | \
-tl-wr1043nd-v2)
+tl-wdr3500 | \
+tl-wr1043nd-v2 | \
+wndr4300)
         PORTS="4 3 2 1";;
-wndr3700 | \
 armada-xp-linksys-mamba | \
+wndr3700 | \
 wrt160nl | \
 wzr-hp-g300nh)
 	PORTS="3 2 1 0";;
