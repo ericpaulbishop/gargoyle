@@ -30,6 +30,8 @@ tl-mr3420-v2 | \
 tl-wr741nd-v4 | \
 tl-wr841n-v8)
 	PORTS="2 3 4 1";;
+archer-c5 | \
+archer-c7 | \
 tl-wdr4300)
 	PORTS="2 3 4 5";;
 tl-wr1043nd)
