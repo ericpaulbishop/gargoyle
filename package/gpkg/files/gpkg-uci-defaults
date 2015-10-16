@@ -3,7 +3,8 @@
 gpkg_conf_template="/etc/opkg.gpkg.tmp"
 
 if [ ! -f /etc/opkg.conf ] ; then
-	mv $gpkg_conf_template /etc/opkg.conf
+	cp $gpkg_conf_template /etc/opkg.conf
+	rm $gpkg_conf_template
 else
 	local plugin_root="/plugin_root"
 	local escaped_plugin_root=$(echo "$plugin_root" | sed 's/\//\\\//g' )
