@@ -518,7 +518,7 @@ int main(int argc, char **argv)
 				}
 				else
 				{
-					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" a onClick=\"return true\">\n"
+					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" onClick=\"return true\">\n"
 					       "\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
 					printf("\t\t\t\t\t\t\t</a>\n"
 					       "\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
