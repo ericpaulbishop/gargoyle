@@ -269,11 +269,11 @@
 + 	ebt_register_target(&dnat_target);
 ++	ebt_register_target(&arpnat_target);
 + }
---- /dev/null	2014-11-19 03:51:59.087785361 -0500
-+++ ar71xx-src/target/linux/generic/patches-3.10/666-arpnat.patch	2014-11-27 17:13:41.934792523 -0500
-@@ -0,0 +1,655 @@
-+--- linux-3.10.49-bak/net/bridge/netfilter/Makefile	2014-11-26 06:48:40.561611818 -0500
-++++ linux-3.10.49/net/bridge/netfilter/Makefile	2014-11-26 06:30:50.375034000 -0500
+--- /dev/null	2015-09-29 21:55:33.701849578 -0400
++++ ar71xx-src/target/linux/generic/patches-3.18/666-arpnat.patch	2015-10-26 14:27:14.635454765 -0400
+@@ -0,0 +1,664 @@
++--- linux-3.18.21-bak/net/bridge/netfilter/Makefile	2014-11-26 06:48:40.561611818 -0500
+++++ linux-3.18.21/net/bridge/netfilter/Makefile	2014-11-26 06:30:50.375034000 -0500
 +@@ -27,6 +27,7 @@
 + obj-$(CONFIG_BRIDGE_EBT_DNAT) += ebt_dnat.o
 + obj-$(CONFIG_BRIDGE_EBT_REDIRECT) += ebt_redirect.o
@@ -282,8 +282,8 @@
 + 
 + # watchers
 + obj-$(CONFIG_BRIDGE_EBT_LOG) += ebt_log.o
-+--- linux-3.10.49-bak/net/bridge/netfilter/Kconfig	2014-11-26 06:48:40.561611818 -0500
-++++ linux-3.10.49/net/bridge/netfilter/Kconfig	2014-11-26 06:32:59.172934464 -0500
++--- linux-3.18.21-bak/net/bridge/netfilter/Kconfig	2014-11-26 06:48:40.561611818 -0500
+++++ linux-3.18.21/net/bridge/netfilter/Kconfig	2014-11-26 06:32:59.172934464 -0500
 +@@ -177,6 +177,18 @@
 + 	  source address of frames.
 + 
@@ -303,8 +303,8 @@
 + #
 + # watchers
 + #
-+--- linux-3.10.49-bak/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:48:58.933312564 -0500
-++++ linux-3.10.49/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:35:35.226396095 -0500
++--- linux-3.18.21-bak/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:48:58.933312564 -0500
+++++ linux-3.18.21/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:35:35.226396095 -0500
 +@@ -9,5 +9,6 @@
 + };
 + #define EBT_SNAT_TARGET "snat"
@@ -312,9 +312,9 @@
 ++#define EBT_ARPNAT_TARGET "arpnat"
 + 
 + #endif
-+--- /dev/null	2014-11-19 03:51:59.087785361 -0500
-++++ linux-3.10.49/net/bridge/netfilter/ebt_arpnat.c	2014-11-26 10:28:45.471424702 -0500
-+@@ -0,0 +1,612 @@
++--- /dev/null	2015-09-29 21:55:33.701849578 -0400
+++++ linux-3.18.21/net/bridge/netfilter/ebt_arpnat.c	2015-10-26 13:59:43.654994107 -0400
++@@ -0,0 +1,621 @@
 ++/*
 ++ *  ebt_arpnat
 ++ *
@@ -401,6 +401,15 @@
 ++static spinlock_t arpnat_lock = __SPIN_LOCK_UNLOCKED(arpnat_lock);
 ++
 ++static uint8_t bootpnat = 1;
+++
+++
+++static __be32 inet_confirm_addr_adapter(struct in_device *in_dev, __be32 dst, __be32 local, int scope)
+++{
+++	struct net *net = dev_net(in_dev->dev);
+++	return inet_confirm_addr(net, in_dev, dst, local, scope);
+++}
+++
+++
 ++
 ++static struct mac2ip* find_mac_nat(struct hlist_head* head, const uint8_t* mac)
 ++{
@@ -662,7 +671,7 @@
 ++			}
 ++
 ++
-++			if (inet_confirm_addr( __in_dev_get_rcu(in_br_port->br->dev) , 0, *arp_dip, RT_SCOPE_HOST))
+++			if (inet_confirm_addr_adapter( __in_dev_get_rcu(in_br_port->br->dev) , 0, *arp_dip, RT_SCOPE_HOST))
 ++			{
 ++				if (debug)
 ++				{
@@ -753,7 +762,7 @@
 ++				entry = find_ip_nat(&arpnat_table, iph->daddr);
 ++				if (entry)
 ++				{
-++					if (inet_confirm_addr( __in_dev_get_rcu(in_br_port->br->dev),  0, entry->data.ip, RT_SCOPE_HOST))
+++					if (inet_confirm_addr_adapter( __in_dev_get_rcu(in_br_port->br->dev),  0, entry->data.ip, RT_SCOPE_HOST))
 ++					{
 ++						//to me
 ++						if (debug)
@@ -813,11 +822,11 @@
 ++
 ++				
 ++				/* do BR ip lookup */
-++				if(inet_confirm_addr( __in_dev_get_rcu(out_br_port->br->dev), 0, *arp_dip, RT_SCOPE_HOST))
+++				if(inet_confirm_addr_adapter( __in_dev_get_rcu(out_br_port->br->dev), 0, *arp_dip, RT_SCOPE_HOST))
 ++				{
 ++					return info->target;
 ++				}
-++				if(!inet_confirm_addr( __in_dev_get_rcu(out_br_port->br->dev), 0, *arp_sip, RT_SCOPE_HOST))
+++				if(!inet_confirm_addr_adapter( __in_dev_get_rcu(out_br_port->br->dev), 0, *arp_sip, RT_SCOPE_HOST))
 ++				{
 ++					spin_lock_irqsave(&arpnat_lock, flags);
 ++					update_arp_nat(&arpnat_table, arp_smac, *arp_sip);
