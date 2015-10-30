@@ -314,12 +314,14 @@ int main(int argc, char **argv)
 		
 
 
-		printf("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
-		       "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+		printf("<!DOCTYPE html>\n"
 		       "<head>\n"
-		       "\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n"
+		       "\t<meta charset=\"utf-8\">\n"
+		       "\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
+	   	       "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
+		       "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
 		       "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
-		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\" type=\"image/png\"/>\n", theme_root, theme);
+		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
 		int css_index, js_index, lstr_js_index;
 
 		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
@@ -332,30 +334,30 @@ int main(int argc, char **argv)
 		       "\t</style>\n");
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\" type=\"text/css\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
 		}
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
-			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
+			printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
 		}
 #ifndef LOCALIZED_BUILD
 		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
 		{
 			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 			{
-				printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+				printf("\t<script src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
 			}
-			printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
+			printf("\t<script src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
 			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
 			{
 				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 				{
-					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
 				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
 				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
 				{
-					printf("\t<script language=\"javascript\" type=\"text/javascript\" src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
 				free(tran_file);
 			}
