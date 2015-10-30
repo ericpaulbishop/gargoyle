@@ -6,13 +6,10 @@ uci set gargoyle.global.version="$gargoyle_version"
 
 #disable ANI for ath9k (code below does nothing if no ath9k driver present)
 ani_already_disabled=$(cat /etc/rc.local | grep "/sys/kernel/debug/ieee80211/phy0/ath9k/ani")
-if [ -z "$ani_already_disabled" ] ; then
+if [ -n "$ani_already_disabled" ] ; then
 
 	sed -i '/^exit.*/d' /etc/rc.local
-	ani_files=$(find /sys/kernel/debug/ieee80211 -name "ani" 2>/dev/null)
-	for ani_file in $ani_files ; do
-		echo "echo '0' > '${ani_file}'" >> /etc/rc.local 2>/dev/null
-	done
+	sed -i '/\/ani.$/d' /etc/rc.local
 fi
 
 
