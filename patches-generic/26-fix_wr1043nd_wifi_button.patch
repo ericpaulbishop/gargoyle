@@ -1,0 +1,22 @@
+--- a/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr1043nd-v2.c
++++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-tl-wr1043nd-v2.c
+@@ -44,5 +44,5 @@
+ 
+ #define TL_WR1043_V2_GPIO_BTN_RESET	16
+-#define TL_WR1043_V2_GPIO_BTN_WLAN	17
++#define TL_WR1043_V2_GPIO_BTN_RFKILL	17
+ 
+ #define TL_WR1043_V2_GPIO_USB_POWER	21
+@@ -95,9 +95,9 @@
+ 	},
+ 	{
+-		.desc		= "WLAN button",
++		.desc		= "RFKILL button",
+ 		.type		= EV_KEY,
+-		.code		= KEY_WLAN,
++		.code		= KEY_RFKILL,
+ 		.debounce_interval = TL_WR1043_V2_KEYS_DEBOUNCE_INTERVAL,
+-		.gpio		= TL_WR1043_V2_GPIO_BTN_WLAN,
++		.gpio		= TL_WR1043_V2_GPIO_BTN_RFKILL,
+ 		.active_low	= 1,
+ 	},
