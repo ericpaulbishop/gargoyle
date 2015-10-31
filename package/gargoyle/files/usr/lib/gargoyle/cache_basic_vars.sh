@@ -10,13 +10,15 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
-	[ "$mode" = "11a" ]  &&  mode="11an"
-	[ "$mode" = "11na" ] &&  mode="11an"
-	if [ "$mode" = "11an" ] ; then
+	[ "$mode" = "11an"  ] &&  mode="11a"
+	[ "$mode" = "11na"  ] &&  mode="11a"
+	[ "$mode" = "11bgn" ] &&  mode="11g"
+	[ "$mode" = "11bg"  ] &&  mode="11g"
+
+	if [ "$mode" = "11a" ] ; then
 		chId="A"
 		echo "wifiDevA=\"$wifi_dev\";" >> "$out"
 	else
-		mode="11bgn"
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
 	fi
@@ -110,20 +112,6 @@ else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
 	echo "var wifiN = false;" >> "$out_file"
 fi
-
-
-#detect qmi interface if it exists
-qmi_if=""
-if [ -e /sys/class/usbmisc/ ] ; then
-	local devnames=$(ls /sys/class/usbmisc)
-	for devname in $devnames ; do
-		if [ -e "/sys/class/usbmisc/$devname/device/net" ] && [ -z "$qmi_if" ] ; then
-			qmi_if=$( ls "/sys/class/usbmisc/$devname/device/net" | head -n 1 )
-		fi
-	done
-fi
-echo "qmiInterface=\"$qmi_if\";"
-
 
 # cache default interfaces if we haven't already
 # this script is run on first boot by hotplug, so

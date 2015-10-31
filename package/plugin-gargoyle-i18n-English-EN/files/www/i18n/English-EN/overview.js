@@ -36,6 +36,9 @@ ovwS.F5GID="5GHz Access Point SSID";
 ovwS.IDJoin="SSID Joined By Client";
 ovwS.QUp="QoS Upload";
 ovwS.QDwn="QoS Download";
+ovwS.TEMPcpu="CPU Temperature";
+ovwS.TEMPmem="RAM Temperature";
+ovwS.TEMPwifi="Wifi Temperature";
 
 //javascript
 ovwS.AcPt="Access Point";

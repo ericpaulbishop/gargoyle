@@ -1,11 +1,11 @@
---- a/package/base-files/files/lib/upgrade/common.sh	2012-09-19 15:25:07.324042187 -0400
-+++ b/package/base-files/files/lib/upgrade/common.sh	2012-09-20 01:28:05.205981711 -0400
-@@ -99,7 +99,7 @@
+--- a/package/base-files/files/lib/upgrade/common.sh	2014-11-08 12:48:51.664427828 -0500
++++ b/package/base-files/files/lib/upgrade/common.sh	2014-11-21 17:28:43.455539521 -0500
+@@ -129,7 +129,7 @@
+ 		else 
+ 			case "$name" in
+ 				# Skip essential services
+-				*procd*|*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*nas*) : ;;
++				*procd*|*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*nas*|*httpd*|*upgrade*|*haserl*|*awk*) : ;;
  
- 		case "$name" in
- 			# Skip essential services
--			*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*) : ;;
-+			*ash*|*init*|*watchdog*|*ssh*|*dropbear*|*telnet*|*login*|*hostapd*|*wpa_supplicant*|*httpd*|*upgrade*|*haserl*|*awk*) : ;;
- 
- 			# Killable process
- 			*)
+ 				# Killable process
+ 				*)

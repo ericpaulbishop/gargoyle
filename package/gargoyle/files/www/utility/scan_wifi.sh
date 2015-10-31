@@ -39,7 +39,7 @@
 		sleep 4
 
 
-		iwlist $scanif scanning  2>/dev/null
+		iwinfo $scanif scan  2>/dev/null
 
 		if [ -z "$is_up" ] ; then
 			ifconfig $scanif down 2>/dev/null
@@ -59,7 +59,7 @@
 		fi
 		sleep 4
 
-		iwlist wl0 scanning
+		iwinfo wl0 scan
 		if [ -z "$if_exists" ] ; then
 			ifconfig wl0 down
 		fi
@@ -96,16 +96,7 @@
 		fi
 
 		for if in $test_ifs ; do
-			if [ "$if" = "phy0" ] || [ "$if" = "phy1" ] ; then
-				iw phy $if interface add tmpsta type managed
-				ifconfig tmpsta hw ether 00:11:22:33:55:77
-				ifconfig tmpsta up
-				iwlist tmpsta scanning
-				ifconfig tmpsta down
-				iw dev tmpsta del
-			else
-				iwlist $if scanning
-			fi
+			iwinfo "$if" scan
 		done
 
 	}

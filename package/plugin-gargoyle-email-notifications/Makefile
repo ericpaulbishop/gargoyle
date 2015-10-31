@@ -89,6 +89,10 @@ if [ $(opkg info msmtp 2>/dev/null | grep -c "not-installed") -eq 0 ];
 then
   opkg remove msmtp
 fi
+if [ $(opkg info msmtp-nossl 2>/dev/null | grep -c "not-installed") -eq 0 ];
+then
+  opkg remove msmtp-nossl
+fi
 endef
 
 define Package/plugin-gargoyle-email-notifications/install

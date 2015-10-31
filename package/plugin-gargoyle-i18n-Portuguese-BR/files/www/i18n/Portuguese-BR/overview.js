@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UTF-8 (with BOM) Portuguese-BR text strings for overview.sh html elements
  */
 

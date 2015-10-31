@@ -2124,7 +2124,7 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 {
 	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
-	macsValid = macsValid == null ? true : false;
+	macsValid = macsValid == null ? true : macsValid;
 	ipValidType = ipValidType == null ? 3 : ipValidType;
 	var ipValidFunction;
 	if(ipValidType == 0)

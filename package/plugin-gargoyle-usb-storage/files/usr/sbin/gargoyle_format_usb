@@ -69,13 +69,13 @@ if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 		uci set fstab.@global[0].anon_mount=0
 		uci set fstab.@global[0].check_fs=1
 		uci del fstab.@mount[0] > /dev/null 2>&1
-		uci set fstab.@mount[0]=mount
-		uci set fstab.@mount[0].target=/overlay
-		uci del fstab.@mount[0].device > /dev/null 2>&1
-		uci set fstab.@mount[0].uuid="$UUID"
-		uci set fstab.@mount[0].fstype=ext$ext_version
-		uci set fstab.@mount[0].options="rw,noatime"
-		uci set fstab.@mount[0].enabled=1
+		uci add fstab mount
+		uci set fstab.@mount[-1].target=/overlay
+		uci del fstab.@mount[-1].device > /dev/null 2>&1
+		uci set fstab.@mount[-1].uuid="$UUID"
+		uci set fstab.@mount[-1].fstype=ext$ext_version
+		uci set fstab.@mount[-1].options="rw,noatime"
+		uci set fstab.@mount[-1].enabled=1
 		uci commit fstab
 
 		# copy all data

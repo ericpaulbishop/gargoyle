@@ -1,6 +1,6 @@
---- a/include/netfilter.mk	2012-08-27 02:10:23.773833277 -0400
-+++ b/include/netfilter.mk	2012-08-30 05:17:04.583372998 -0400
-@@ -262,6 +270,10 @@
+--- a/include/netfilter.mk	2014-11-08 12:48:51.104436993 -0500
++++ b/include/netfilter.mk	2014-11-26 08:17:22.531038338 -0500
+@@ -298,6 +306,10 @@
  $(eval $(call nf_add,EBTABLES,CONFIG_BRIDGE_EBT_REDIRECT, $(P_EBT)ebt_redirect))
  $(eval $(call nf_add,EBTABLES_IP4,CONFIG_BRIDGE_EBT_SNAT, $(P_EBT)ebt_snat))
  
@@ -11,14 +11,12 @@
  # watchers
  $(eval $(call nf_add,EBTABLES_WATCHERS,CONFIG_BRIDGE_EBT_LOG, $(P_EBT)ebt_log))
  $(eval $(call nf_add,EBTABLES_WATCHERS,CONFIG_BRIDGE_EBT_ULOG, $(P_EBT)ebt_ulog))
---- a/target/linux/generic/config-3.3	2012-08-27 02:10:23.477828683 -0400
-+++ b/target/linux/generic/config-3.3	2012-08-30 05:21:20.503403288 -0400
-@@ -295,30 +295,31 @@
- CONFIG_BRANCH_PROFILE_NONE=y
- # CONFIG_BRCMFMAC is not set
+--- a/target/linux/generic/config-3.10	2014-11-08 12:48:51.508430381 -0500
++++ b/target/linux/generic/config-3.10	2014-11-26 08:22:07.790420732 -0500
+@@ -419,28 +419,29 @@
  CONFIG_BRIDGE=y
--# CONFIG_BRIDGE_EBT_802_3 is not set
--# CONFIG_BRIDGE_EBT_AMONG is not set
+ # CONFIG_BRIDGE_EBT_802_3 is not set
+ # CONFIG_BRIDGE_EBT_AMONG is not set
 -# CONFIG_BRIDGE_EBT_ARP is not set
 -# CONFIG_BRIDGE_EBT_ARPREPLY is not set
 -# CONFIG_BRIDGE_EBT_BROUTE is not set
@@ -38,8 +36,6 @@
 -# CONFIG_BRIDGE_EBT_T_NAT is not set
 -# CONFIG_BRIDGE_EBT_ULOG is not set
 -# CONFIG_BRIDGE_EBT_VLAN is not set
-+#CONFIG_BRIDGE_EBT_802_3 is not set
-+#CONFIG_BRIDGE_EBT_AMONG is not set
 +CONFIG_BRIDGE_EBT_ARP=y
 +CONFIG_BRIDGE_EBT_ARPREPLY=y
 +CONFIG_BRIDGE_EBT_BROUTE=y
@@ -60,16 +56,16 @@
 +CONFIG_BRIDGE_EBT_T_NAT=y
 +CONFIG_BRIDGE_EBT_ULOG=y
 +CONFIG_BRIDGE_EBT_VLAN=y
- # CONFIG_BRIDGE_IGMP_SNOOPING is not set
+ CONFIG_BRIDGE_IGMP_SNOOPING=y
 -# CONFIG_BRIDGE_NETFILTER is not set
 -# CONFIG_BRIDGE_NF_EBTABLES is not set
 +CONFIG_BRIDGE_NETFILTER=y
 +CONFIG_BRIDGE_NF_EBTABLES=y
+ # CONFIG_BRIDGE_VLAN_FILTERING is not set
  # CONFIG_BROADCOM_PHY is not set
  CONFIG_BROKEN_ON_SMP=y
- # CONFIG_BSD_DISKLABEL is not set
---- a/package/ebtables/Makefile	2012-08-27 02:10:27.461890518 -0400
-+++ b/package/ebtables/Makefile	2012-08-30 05:23:23.673341400 -0400
+--- a/package/network/utils/ebtables/Makefile	2014-11-08 12:48:51.656427958 -0500
++++ b/package/network/utils/ebtables/Makefile	2014-11-30 10:27:31.675960717 -0500
 @@ -59,6 +59,8 @@
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/extensions/*.so $(1)/usr/lib/ebtables/
  	$(INSTALL_DIR) $(1)/usr/sbin
@@ -79,8 +75,8 @@
  endef
  
  define Package/ebtables-utils/install
---- /dev/null	2012-08-18 22:23:01.258815424 -0400
-+++ b/package/ebtables/files/20-client_bridge	2012-08-30 05:24:21.450250186 -0400
+--- /dev/null	2014-11-19 03:51:59.087785361 -0500
++++ b/package/network/utils/ebtables/files/20-client_bridge	2014-11-26 08:13:56.810379020 -0500
 @@ -0,0 +1,45 @@
 +######################################################################
 +# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
@@ -127,11 +123,20 @@
 +		fi			
 +	fi
 +fi
---- /dev/null	2012-08-18 22:23:01.258815424 -0400
-+++ b/package/ebtables/patches/100-arpnat.patch	2012-08-30 05:30:23.207935551 -0400
-@@ -0,0 +1,131 @@
-+--- old-ebtables/extensions/ebt_nat.c	2009-09-20 19:06:39.000000000 -0400
-++++ ebtables-v2.0.9-1/extensions/ebt_nat.c	2009-09-20 18:50:07.000000000 -0400
+--- /dev/null	2014-11-19 03:51:59.087785361 -0500
++++ b/package/network/utils/ebtables/patches/100-arpnat.patch	2014-11-26 08:09:37.330591710 -0500
+@@ -0,0 +1,143 @@
++--- ebtables-v2.0.10-4-bak/include/linux/netfilter_bridge/ebt_nat.h	2011-12-15 15:02:48.000000000 -0500
+++++ ebtables-v2.0.10-4/include/linux/netfilter_bridge/ebt_nat.h	2014-11-26 07:27:47.767440175 -0500
++@@ -9,5 +9,6 @@
++ };
++ #define EBT_SNAT_TARGET "snat"
++ #define EBT_DNAT_TARGET "dnat"
+++#define EBT_ARPNAT_TARGET "arpnat"
++ 
++ #endif
++--- ebtables-v2.0.10-4-bak/extensions/ebt_nat.c	2011-12-15 15:02:47.000000000 -0500
+++++ ebtables-v2.0.10-4/extensions/ebt_nat.c	2014-11-26 07:26:31.400683276 -0500
 +@@ -21,6 +21,9 @@
 + #define NAT_S_TARGET '2'
 + #define NAT_D_TARGET '2'
@@ -142,7 +147,7 @@
 + static struct option opts_s[] =
 + {
 + 	{ "to-source"     , required_argument, 0, NAT_S },
-+@@ -30,6 +33,13 @@
++@@ -38,6 +41,13 @@
 + 	{ 0 }
 + };
 + 
@@ -153,13 +158,14 @@
 ++};
 ++
 ++
-+ static struct option opts_d[] =
++ static void print_help_s()
 + {
-+ 	{ "to-destination", required_argument, 0, NAT_D },
-+@@ -47,6 +57,13 @@
++ 	printf(
++@@ -47,6 +57,16 @@
 + 	" --snat-arp             : also change src address in arp msg\n");
 + }
 + 
+++
 ++static void print_help_arpnat()
 ++{
 ++	printf(
@@ -167,13 +173,17 @@
 ++	" --arpnat-target target   : ACCEPT, DROP, RETURN or CONTINUE\n");
 ++}
 ++
+++
+++
 + static void print_help_d()
 + {
 + 	printf(
-+@@ -73,6 +90,57 @@
++@@ -73,6 +93,64 @@
 + 	return;
 + }
 + 
+++
+++
 ++static void init_arpnat(struct ebt_entry_target *target)
 ++{
 ++	struct ebt_nat_info *natinfo = (struct ebt_nat_info *)target->data;
@@ -225,13 +235,18 @@
 ++
 ++
 ++
+++
+++
+++
+++
+++
 + #define OPT_SNAT         0x01
 + #define OPT_SNAT_TARGET  0x02
 + #define OPT_SNAT_ARP     0x04
-+@@ -230,9 +298,23 @@
-+ 	.compare	= compare,
++@@ -231,8 +309,25 @@
 + 	.extra_ops	= opts_d,
 + };
++ 
 ++static struct ebt_u_target arpnat_target =
 ++{
 ++	.name		= EBT_ARPNAT_TARGET,
@@ -245,35 +260,20 @@
 ++	.extra_ops	= opts_arpnat,
 ++};
 ++
-+ 
+++
+++
+++
 + void _init(void)
 + {
 + 	ebt_register_target(&snat_target);
 + 	ebt_register_target(&dnat_target);
 ++	ebt_register_target(&arpnat_target);
 + }
-+--- old-ebtables/include/linux/netfilter_bridge/ebt_nat.h	2009-09-20 19:06:39.000000000 -0400
-++++ ebtables-v2.0.9-1/include/linux/netfilter_bridge/ebt_nat.h	2009-09-20 18:53:58.000000000 -0400
-+@@ -10,5 +10,5 @@
-+ };
-+ #define EBT_SNAT_TARGET "snat"
-+ #define EBT_DNAT_TARGET "dnat"
-+-
-++#define EBT_ARPNAT_TARGET "arpnat"
-+ #endif
---- /dev/null	2012-08-18 22:23:01.258815424 -0400
-+++ custom-src/target/linux/generic/patches-3.3/666-arpnat.patch	2012-08-30 07:41:55.628586225 -0400
-@@ -0,0 +1,683 @@
-+--- linux-old/net/bridge/br_fdb.c	2009-09-15 13:46:05.000000000 -0400
-++++ linux-2.6.30.7/net/bridge/br_fdb.c	2009-09-22 19:52:51.000000000 -0400
-+@@ -415,3 +415,5 @@
-+ 		spin_unlock(&br->hash_lock);
-+ 	}
-+ }
-++EXPORT_SYMBOL(br_fdb_get);
-++
-+--- linux-2.6.30.7-orig/net/bridge/netfilter/Makefile	2009-09-15 13:46:05.000000000 -0400
-++++ linux-2.6.30.7/net/bridge/netfilter/Makefile	2009-09-20 16:04:20.000000000 -0400
+--- /dev/null	2014-11-19 03:51:59.087785361 -0500
++++ ar71xx-src/target/linux/generic/patches-3.10/666-arpnat.patch	2014-11-27 17:13:41.934792523 -0500
+@@ -0,0 +1,655 @@
++--- linux-3.10.49-bak/net/bridge/netfilter/Makefile	2014-11-26 06:48:40.561611818 -0500
+++++ linux-3.10.49/net/bridge/netfilter/Makefile	2014-11-26 06:30:50.375034000 -0500
 +@@ -27,6 +27,7 @@
 + obj-$(CONFIG_BRIDGE_EBT_DNAT) += ebt_dnat.o
 + obj-$(CONFIG_BRIDGE_EBT_REDIRECT) += ebt_redirect.o
@@ -282,12 +282,13 @@
 + 
 + # watchers
 + obj-$(CONFIG_BRIDGE_EBT_LOG) += ebt_log.o
-+--- linux-2.6.30.7-orig/net/bridge/netfilter/Kconfig	2009-09-15 13:46:05.000000000 -0400
-++++ linux-2.6.30.7/net/bridge/netfilter/Kconfig	2009-09-20 16:05:32.000000000 -0400
-+@@ -177,6 +177,16 @@
++--- linux-3.10.49-bak/net/bridge/netfilter/Kconfig	2014-11-26 06:48:40.561611818 -0500
+++++ linux-3.10.49/net/bridge/netfilter/Kconfig	2014-11-26 06:32:59.172934464 -0500
++@@ -177,6 +177,18 @@
 + 	  source address of frames.
 + 
 + 	  To compile it as a module, choose M here.  If unsure, say N.
+++
 ++
 ++config BRIDGE_EBT_ARPNAT
 ++	tristate "ebt: arpnat target support"
@@ -298,29 +299,22 @@
 ++ 
 ++	  To compile it as a module, choose M here. If unsure, say N.
 ++
+++
 + #
 + # watchers
 + #
-+--- linux-2.6.30.7-orig/include/linux/netfilter_bridge/ebt_nat.h	2009-09-15 13:46:05.000000000 -0400
-++++ linux-2.6.30.7/include/linux/netfilter_bridge/ebt_nat.h	2009-09-20 16:06:35.000000000 -0400
-+@@ -10,5 +10,6 @@
++--- linux-3.10.49-bak/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:48:58.933312564 -0500
+++++ linux-3.10.49/include/uapi/linux/netfilter_bridge/ebt_nat.h	2014-11-26 06:35:35.226396095 -0500
++@@ -9,5 +9,6 @@
 + };
 + #define EBT_SNAT_TARGET "snat"
 + #define EBT_DNAT_TARGET "dnat"
 ++#define EBT_ARPNAT_TARGET "arpnat"
 + 
 + #endif
-+--- linux.orig/net/ipv4/devinet.c	2012-06-01 03:16:13.000000000 -0400
-++++ linux.new/net/ipv4/devinet.c	2012-08-30 06:13:36.844740505 -0400
-+@@ -1842,4 +1842,4 @@
-+ 	rtnl_register(PF_INET, RTM_DELADDR, inet_rtm_deladdr, NULL, NULL);
-+ 	rtnl_register(PF_INET, RTM_GETADDR, NULL, inet_dump_ifaddr, NULL);
-+ }
-+-
-++EXPORT_SYMBOL(inet_confirm_addr);
-+--- /dev/null	2012-08-18 22:23:01.258815424 -0400
-++++ linux-3.3.8/net/bridge/netfilter/ebt_arpnat.c	2012-08-30 07:37:48.220576042 -0400
-+@@ -0,0 +1,626 @@
++--- /dev/null	2014-11-19 03:51:59.087785361 -0500
+++++ linux-3.10.49/net/bridge/netfilter/ebt_arpnat.c	2014-11-26 10:28:45.471424702 -0500
++@@ -0,0 +1,612 @@
 ++/*
 ++ *  ebt_arpnat
 ++ *
@@ -412,9 +406,8 @@
 ++{
 ++	struct mac2ip* tpos;
 ++	struct mac2ip* result = NULL;
-++	struct hlist_node* pos;
 ++	struct hlist_node* n;
-++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	hlist_for_each_entry_safe(tpos, n, head, node)
 ++	{
 ++		if (memcmp(tpos->data.mac, mac, ETH_ALEN) == 0)
 ++		{
@@ -429,10 +422,9 @@
 ++{
 ++	struct mac2ip* tpos;
 ++	struct mac2ip* result = NULL;
-++	struct hlist_node* pos;
 ++	struct hlist_node* n;
 ++
-++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	hlist_for_each_entry_safe(tpos, n, head, node)
 ++	{
 ++		if (tpos->data.ip == ip)
 ++		{
@@ -447,14 +439,13 @@
 ++static void clear_ip_nat(struct hlist_head* head, uint32_t ip)
 ++{
 ++	struct mac2ip* tpos;
-++	struct hlist_node* pos;
 ++	struct hlist_node* n;
 ++
-++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	hlist_for_each_entry_safe(tpos, n, head, node)
 ++	{
 ++		if (tpos->data.ip == ip)
 ++		{
-++			hlist_del(pos);
+++			hlist_del(&tpos->node);
 ++	   		kfree(tpos);
 ++		}
 ++	}
@@ -463,11 +454,10 @@
 ++static void free_arp_nat(struct hlist_head* head)
 ++{
 ++	struct mac2ip* tpos;
-++	struct hlist_node* pos;
 ++	struct hlist_node* n;
-++	hlist_for_each_entry_safe(tpos, pos, n, head, node)
+++	hlist_for_each_entry_safe(tpos, n, head, node)
 ++	{
-++		hlist_del(pos);
+++		hlist_del(&tpos->node);
 ++		kfree(tpos);
 ++	}
 ++}
@@ -533,12 +523,11 @@
 ++static int arpnat_cache_show(struct seq_file *s, void *v)
 ++{
 ++	struct mac2ip* tpos;
-++	struct hlist_node* pos;
 ++	struct hlist_node* n;
 ++	unsigned long flags;
 ++
 ++	spin_lock_irqsave(&arpnat_lock, flags);
-++	hlist_for_each_entry_safe(tpos, pos, n, &arpnat_table, node)
+++	hlist_for_each_entry_safe(tpos, n, &arpnat_table, node)
 ++	{
 ++		seq_printf(s, STRMAC"\t"STRIP"\n", MAC2STR(tpos->data.mac), IP2STR(tpos->data.ip));
 ++	}
@@ -917,17 +906,8 @@
 ++static int __init init(void)
 ++{
 ++#ifdef CONFIG_PROC_FS
-++	struct proc_dir_entry *proc_arpnat_info  = create_proc_entry("arpnat_info", 0, NULL);
-++	struct proc_dir_entry *proc_arpnat_cache = create_proc_entry("arpnat_cache", 0, NULL);
-++	if(proc_arpnat_info)
-++	{
-++		proc_arpnat_info->proc_fops = &arpnat_info_fops;
-++	}
-++	
-++	if(proc_arpnat_cache)
-++	{
-++		proc_arpnat_cache->proc_fops = &arpnat_cache_fops;
-++	}
+++	struct proc_dir_entry *proc_arpnat_info  = proc_create("arpnat_info", 0, NULL,  &arpnat_info_fops);
+++	struct proc_dir_entry *proc_arpnat_cache = proc_create("arpnat_cache", 0, NULL,  &arpnat_cache_fops);
 ++#endif
 ++	return xt_register_target(&arpnat);
 ++}

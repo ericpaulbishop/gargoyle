@@ -20,16 +20,16 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Barrier Breaker"
-	branch_id="barrier_breaker"
+	branch_name="Chaos Calmer"
+	branch_id="chaos_calmer"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_14.07"
+	branch_packages_path="packages"
 
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=46817
+	rnum=47277
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -565,8 +565,9 @@ for target in $targets ; do
 
 	#copy packages to built/target directory
 	mkdir -p "$top_dir/built/$target/$default_profile"
-	package_files=$(find bin -name "*.ipk")
-	index_files=$(find bin -name "Packa*")
+	package_base_dir=$(find bin -name "base")
+	package_files=$(find "$package_base_dir" -name "*.ipk")
+	index_files=$(find "$package_base_dir" -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 
 		for pf in $package_files ; do
@@ -674,8 +675,9 @@ for target in $targets ; do
 		#copy packages to build/target directory
 		mkdir -p "$top_dir/built/$target/$profile_name"
 		arch=$(ls bin)
-		package_files=$(find bin -name "*.ipk")
-		index_files=$(find bin -name "Packa*")
+		package_base_dir=$(find bin -name "base")
+		package_files=$(find "$package_base_dir" -name "*.ipk")
+		index_files=$(find "$package_base_dir" -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 			for pf in $package_files ; do
 				cp "$pf" "$top_dir/built/$target/$profile_name/"
@@ -684,7 +686,10 @@ for target in $targets ; do
 				cp "$inf" "$top_dir/built/$target/$profile_name/"
 			done
 		fi
-		
+
+
+
+	
 		if [ "$distribution" = "true" ] ; then
 			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"
 		fi

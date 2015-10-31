@@ -1,5 +1,5 @@
---- a/package/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:26:21.321451783 -0400
-+++ b/package/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:23:46.186983811 -0400
+--- a/package/network/config/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:26:21.321451783 -0400
++++ b/package/network/config/netifd/files/lib/netifd/dhcp.script	2012-09-25 15:23:46.186983811 -0400
 @@ -4,6 +4,13 @@
  . /lib/functions.sh
  . /lib/netifd/netifd-proto.sh
@@ -52,7 +52,7 @@
  }
  
 --- /dev/null	2012-09-18 15:11:33.606325627 -0400
-+++ b/package/ppp/files/etc/ppp/ip-down.d/state	2012-09-25 14:39:52.633923965 -0400
++++ b/package/network/services/ppp/files/etc/ppp/ip-down.d/state	2012-09-25 14:39:52.633923965 -0400
 @@ -0,0 +1,15 @@
 +#!/bin/sh
 +. /lib/functions.sh
@@ -70,7 +70,7 @@
 +}
 +
 --- /dev/null	2012-09-18 15:11:33.606325627 -0400
-+++ b/package/ppp/files/etc/ppp/ip-up.d/state	2012-09-25 14:38:06.108295459 -0400
++++ b/package/network/services/ppp/files/etc/ppp/ip-up.d/state	2012-09-25 14:38:06.108295459 -0400
 @@ -0,0 +1,22 @@
 +#!/bin/sh
 +
@@ -94,8 +94,8 @@
 +	uci_set_state network "$PPP_IPPARAM" netmask "255.255.255.255"
 +}
 +
---- a/package/ppp/Makefile	2012-09-16 12:56:58.156199098 -0400
-+++ b/package/ppp/Makefile	2012-10-06 18:11:23.826886573 -0400
+--- a/package/services/ppp/Makefile	2012-09-16 12:56:58.156199098 -0400
++++ b/package/network/services/ppp/Makefile	2012-10-06 18:11:23.826886573 -0400
 @@ -185,9 +185,13 @@
  	$(INSTALL_DIR) $(1)/usr/sbin
  	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/sbin/pppd $(1)/usr/sbin/

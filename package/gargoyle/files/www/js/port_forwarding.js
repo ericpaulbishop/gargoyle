@@ -113,20 +113,23 @@ function saveChanges()
 
 		//upnp
 		upnpStartCommands = new Array();
-		upnpdEnabled = document.getElementById("upnp_enabled").checked;
-		if(upnpdEnabled)
+		if(haveUpnpd)
 		{
-			upnpStartCommands.push("/etc/init.d/miniupnpd enable");
-			uci.set("upnpd", "config", "enable_upnp", "1");
-			uci.set("upnpd", "config", "enable_natpmp", "1");
-			uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
-			uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
-		}
-		else
-		{
-			uci.set("upnpd", "config", "enable_upnp", "0");
-			uci.set("upnpd", "config", "enable_natpmp", "0");
-			upnpStartCommands.push("/etc/init.d/miniupnpd disable");
+			upnpdEnabled = document.getElementById("upnp_enabled").checked;
+			if(upnpdEnabled)
+			{
+				upnpStartCommands.push("/etc/init.d/miniupnpd enable");
+				uci.set("upnpd", "config", "enable_upnp", "1");
+				uci.set("upnpd", "config", "enable_natpmp", "1");
+				uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
+				uci.set("upnpd", "config", "download", document.getElementById("upnp_down").value);
+			}
+			else
+			{
+				uci.set("upnpd", "config", "enable_upnp", "0");
+				uci.set("upnpd", "config", "enable_natpmp", "0");
+				upnpStartCommands.push("/etc/init.d/miniupnpd disable");
+			}
 		}
 	
 
@@ -553,6 +556,7 @@ function resetData()
 
 
 	//upnp
+	document.getElementById("upnp_fieldset").style.display = haveUpnpd;
 	document.getElementById("upnp_enabled").checked = upnpdEnabled;
 	upElement = document.getElementById("upnp_up");
 	downElement = document.getElementById("upnp_down");

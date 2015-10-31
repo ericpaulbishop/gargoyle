@@ -126,5 +126,6 @@ basicS.ScnMo="Poszukiwanie urządzeń mobilnych";
 basicS.NoDv="Nie znaleziono urządzeń";
 
 basicS.WANIntr="Interfejs WAN";
-basicS.Mo3gQMI="LTE (QMI)";
+basicS.Mo3gQMI="Modem LTE (QMI)";
+basicS.Mo3gNCM="Modem LTE (NCM)";
 basicS.Dfult="Domyślny";
