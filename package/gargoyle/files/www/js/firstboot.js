@@ -30,11 +30,11 @@ function setInitialSettings()
 		saveCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
 		saveCommands = saveCommands + "\nuci set system.@system[0].timezone=\'" + getSelectedValue("timezone") + "\'\n";
 		saveCommands = saveCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
-		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ 2>/dev/null\n";
+		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' | sed \"s/'//g\" >/etc/TZ 2>/dev/null\n";
 		saveCommands = saveCommands + "\n/etc/init.d/dropbear restart 2>/dev/null\n";
 		saveCommands = saveCommands + "\n/etc/init.d/sysntpd restart >/dev/null 2>&1\n/usr/bin/set_kernel_timezone >/dev/null 2>&1\n";
+		saveCommands = saveCommands + "\ntouch /etc/banner  >/dev/null 2>&1\n";
 		saveCommands = saveCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
-
 		
 		var param = getParameterDefinition("commands", saveCommands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
