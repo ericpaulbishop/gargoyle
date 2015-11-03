@@ -543,7 +543,6 @@ function CronTabsToTables() {
 }
 
 function ParseCurrentTime(shell_vars) {
-	
     var globbed_time = shell_vars == null ? weekly_time : shell_vars;
     current_time.length = 0;
     current_time = globbed_time.split("-");
@@ -667,6 +666,7 @@ function disableAuthOptions(){
 }
 
 function saveChanges() {
+	
 	var e = new Array();
     var command;
 	var data = getData();
@@ -739,6 +739,7 @@ function togglePass(e){
 }
 
 function getData(){
+	
 	var data = new Array();
 	
     data['serverIP'] = document.getElementById("serverip").value.trim();
@@ -801,6 +802,7 @@ function getData(){
 }
 
 function validateInput(data){
+	
 	if(data['encryption'] == null){
 		alert(email.encryptionTypeError);
 		return false;
@@ -826,9 +828,11 @@ function validateInput(data){
 		return false;
 	}
 	
-	if(isNaN(data['count']) || data['count']==""){
-		alert(email.countError);
-		return false;
+	if(data['include'].indexOf("5") > -1){
+		if(isNaN(data['count']) || data['count']==""){
+			alert(email.countError);
+			return false;
+		}
 	}
 	
 	if(/\s/g.test(data['serverIP']) || /\s/g.test(data['receiver']) || /\s/g.test(data['sender']) || /\s/g.test(data['username']) || /\s/g.test(data['password'])){
@@ -891,12 +895,8 @@ function testMail() {
     runAjax("POST", "utility/run_commands.sh", command, w);
 }
 
-function getLastLogreadMessage(){
-	var command = getParameterDefinition("commands", command) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/, "").replace(/[\t ;]+.*$/, ""));
-				runAjax("POST", "utility/run_commands.sh", command, w);
-}
-
 function LoadData() {
+	
 	LoadCrontabs();
 	
 	var uci = uciOriginal.clone();
@@ -937,6 +937,7 @@ function LoadData() {
 					el[i].checked=true;
 					if(i == 5){
 						document.getElementById("bandwidthIntervalSelect").disabled = false;
+						document.getElementById("count").disabled = false;
 						var interval = uciOriginal.get("email", selector[0], "bandwidthInterval");
 						switch(interval){
 							case "minute":
@@ -992,12 +993,15 @@ function LoadData() {
 function intervalVisibility(obj){
 	if(obj.checked){
 		document.getElementById("bandwidthIntervalSelect").disabled = false;
+		document.getElementById("count").disabled = false;
 	}else{
 		document.getElementById("bandwidthIntervalSelect").disabled = true;
+		document.getElementById("count").disabled = true;
 	}
 }
 
 function readSendmailConfig(){
+	
 	var array = msmtprc.split(' ');
 	var data = new Array();
 	
