@@ -411,8 +411,8 @@ function updatePackagesList()
 		document.getElementById("wan-warn").style.display = "inline";
 	} else {	
 		document.getElementById("wan-warn").style.display = "none";
- 		var e=["opkg update"];
-		execute(e)
+ 		var cmd=["opkg update"];
+		execute(cmd)
  	}
 }
 
