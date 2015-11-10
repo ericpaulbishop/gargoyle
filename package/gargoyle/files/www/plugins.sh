@@ -87,6 +87,7 @@
 		<div id="bottom_button_container">
 			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
 		</div>
+		<span id="wan-warn" style="color:red;display:none">Check your Internet connection.</span>
 		<div>
 			<div id="languages_table_container" style="margin-left:5px" ></div>
 		</div>
