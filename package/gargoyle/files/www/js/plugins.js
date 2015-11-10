@@ -405,8 +405,7 @@ function uninstallPackage()
 
 function updatePackagesList()
 {
- 
-	if(uciOriginal.get("network", "wan", "") == "")
+	if(currentWanIp=="")
 	{
 		document.getElementById("wan-warn").style.display = "inline";
 	} else {	
