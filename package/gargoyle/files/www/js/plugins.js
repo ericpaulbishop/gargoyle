@@ -405,8 +405,15 @@ function uninstallPackage()
 
 function updatePackagesList()
 {
-	var cmd = [ "opkg update" ];
-	execute(cmd);
+ 
+	if(uciOriginal.get("network", "wan", "") == "")
+	{
+		document.getElementById("wan-warn").style.display = "inline";
+	} else {	
+		document.getElementById("wan-warn").style.display = "none";
+ 		var e=["opkg update"];
+		execute(e)
+ 	}
 }
 
 function getCurrentOrLatestVersion(pkgVersions)
