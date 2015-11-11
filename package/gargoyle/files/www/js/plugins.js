@@ -410,9 +410,9 @@ function updatePackagesList()
 		document.getElementById("wan-warn").style.display = "inline";
 	} else {	
 		document.getElementById("wan-warn").style.display = "none";
- 		var cmd=["opkg update"];
-		execute(cmd)
- 	}
+	}
+ 	var cmd=["opkg update"];
+	execute(cmd);
 }
 
 function getCurrentOrLatestVersion(pkgVersions)
