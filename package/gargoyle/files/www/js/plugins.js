@@ -405,7 +405,13 @@ function uninstallPackage()
 
 function updatePackagesList()
 {
-	var cmd = [ "opkg update" ];
+	if(currentWanIp=="")
+	{
+		document.getElementById("wan-warn").style.display = "inline";
+	} else {	
+		document.getElementById("wan-warn").style.display = "none";
+	}
+ 	var cmd=["opkg update"];
 	execute(cmd);
 }
 

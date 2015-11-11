@@ -84,6 +84,10 @@
 
 	<fieldset id="plugin_list">
 		<legend class="sectionheader"><%~ PList %></legend>
+		<div id="bottom_button_container">
+			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
+		</div>
+		<span id="wan-warn" style="color:red;display:none"><%~ NoWan %></span>
 		<div>
 			<div id="languages_table_container" style="margin-left:5px" ></div>
 		</div>
@@ -95,9 +99,6 @@
 		</div>
 		<div id="no_packages" style='display:none;'>
 			<%~ NoPkg %>
-		</div>
-		<div id="bottom_button_container">
-			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
 		</div>
 	</fieldset>
 
