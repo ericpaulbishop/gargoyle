@@ -13,6 +13,7 @@ pgS.APSrc="Dodaj nowe źródło";
 pgS.PList="Lista dodatków";
 pgS.NoPkg="Nie znaleziono pakietów. Odśwież listę dodatków.";
 pgS.RfshP="Odśwież";
+pgS.NoWan="Sprawdź połączenie z internetem.";
 
 //javascript
 pgS.NInst="Nie zainstalowany";
