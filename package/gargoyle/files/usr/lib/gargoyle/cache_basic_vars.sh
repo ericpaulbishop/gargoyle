@@ -5,64 +5,39 @@ print_mac80211_channels_for_wifi_dev()
 	wifi_dev="$1"
 	dev_num="$2"
 	out="$3"
-	persistent_out="$4"
-	need_htcapab="$5"
 	
 	echo "nextCh     = [];" >> "$out"
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
-	[ "$mode" = "11an"  ] &&  mode="11a"
-	[ "$mode" = "11na"  ] &&  mode="11a"
-	[ "$mode" = "11bgn" ] &&  mode="11g"
-	[ "$mode" = "11bg"  ] &&  mode="11g"
+	#these modes are invalid now, removed.
 
 	#check the high throughput capabilities. eventually we will have to detect 160MHz also. cross that bridge later.
-	htcapab=$(uci get wireless.$wifi_dev.htmode)
-	case "$htcapab" in
-	HT20 | \
-	HT40 | \
-	HT40+ | \
-	HT40-)
-		wifiN="true"
-		wifiAC="false";;
-	VHT20 | \
-	VHT40 | \
-	VHT80)
-		wifiN="true"
-		wifiAC="true";;
-	*)
-		wifiN="false"
-		wifiAC="false";;
-	esac
+	wifiN=$(iwinfo $wifi_dev h | grep HT20) || $(iwinfo $wifi_dev h | grep HT40)
+	wifiAC=$(iwinfo $wifi_dev h | grep VHT20) || $(iwinfo $wifi_dev h | grep VHT40)|| $(iwinfo $wifi_dev h | grep VHT80)
 
 	#802.11ac should only be able to operate on the "A" device
-	#we only need to build this file if it doesn't exist
 	
 	if [ "$mode" = "11a" ] ; then
 		chId="A"
 		echo "wifiDevA=\"$wifi_dev\";" >> "$out"
-		if [ "$need_htcapab" ] ; then
-			if [ "$wifiN" = "true" ] ; then
-				echo "var AwifiN = true;" >> "$persistent_out"
-			else
-				echo "var AwifiN = false;" >> "$persistent_out"
-			fi
-			if [ "$wifiAC" = "true" ] ; then
-				echo "var AwifiAC = true;" >> "$persistent_out"
-			else
-				echo "var AwifiAC = false;" >> "$persistent_out"
-			fi
+		if [ "$wifiN" ] ; then
+			echo "var AwifiN = true;" >> "$out"
+		else
+			echo "var AwifiN = false;" >> "$out"
+		fi
+		if [ "$wifiAC" ] ; then
+			echo "var AwifiAC = true;" >> "$out"
+		else
+			echo "var AwifiAC = false;" >> "$out"
 		fi
 	else
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
-		if [ "$need_htcapab" ] ; then
-			if [ "$wifiN" = "true" ] ; then
-				echo "var GwifiN = true;" >> "$persistent_out"
-			else
-				echo "var GwifiN = false;" >> "$persistent_out"
-			fi
+		if [ "$wifiN" ] ; then
+			echo "var GwifiN = true;" >> "$out"
+		else
+			echo "var GwifiN = false;" >> "$out"
 		fi
 	fi
 	
@@ -82,17 +57,12 @@ print_mac80211_channels_for_wifi_dev()
 
 
 out_file="/var/cached_basic_vars"
-persistent_out_file="/etc/cached_htcapab"
 if [ -e "$out_file" ] ; then
 	noDriver="$(grep "wirelessDriver=..;" "$out_file" 2>/dev/null)"
 	echo "no driver = $noDriver"
-	if [ -z "$noDriver" && -s "$persistent_out_file" ] ; then exit ; else rm -f "$out_file" ; fi #trash the out file, but not the persistent one.
+	if [ -z "$noDriver" ] ; then exit ; else rm -f "$out_file" ; fi
 fi
 touch "$out_file"
-touch "$persistent_out_file"
-if [ ! -s "$persistent_out_file" ] ; then
-	needHtcapab="true";
-fi
 
 # determine if this board is a bcm94704, for which the uci wan macaddr variable must ALWAYS be set
 PART="$(grep 'nvram' /proc/mtd)"
@@ -125,11 +95,9 @@ echo "var wifiDevA=\"\";" >> "$out_file"
 
 if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";" >> "$out_file"
-	if [ "$needHtcapab" ] ; then
-		echo "var GwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiAC = false;" >> "$persistent_out_file"
-	fi
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
@@ -151,25 +119,21 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	radios="$(uci show wireless | sed -e '/wifi-device/!d; s/^.*\.//g; s/=.*$//g')"
 	rnum=0;
 	for r in $radios ; do
-		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file" "$persistent_out_file" "$needHtcapab"
+		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file"
 		rnum=$(( $rnum+1 ))
 	done
 
 
 elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 	echo "var wirelessDriver=\"atheros\";" >> "$out_file"
-	if [ "$needHtcapab" ] ; then
-		echo "var GwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiAC = false;" >> "$persistent_out_file"
-	fi
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
-	if [ "$needHtcapab" ] ; then
-		echo "var GwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiN = false;" >> "$persistent_out_file"
-		echo "var AwifiAC = false;" >> "$persistent_out_file"
-	fi
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 fi
 
 # cache default interfaces if we haven't already

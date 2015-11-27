@@ -19,7 +19,6 @@
 	#script dies if cache file exists and wifi driver defined
 	/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null
 	cat "/var/cached_basic_vars" 2>/dev/null
-	cat "/etc/cached_htcapab" 2>/dev/null
 
 	cur_date_seconds=$(date +%s)
 	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')

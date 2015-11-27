@@ -853,7 +853,6 @@ function saveChanges()
 			restartNetworkCommand = "\nsh /usr/lib/gargoyle/reboot.sh ;\n";
 		}
 		var regenerateCacheCommand = "\nrm -rf /tmp/cached_basic_vars ;\n/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null\n";
-		//i'm not sure why we would regenerate the cache here?
 		
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand + regenerateCacheCommand;
 
