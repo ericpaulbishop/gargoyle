@@ -275,6 +275,7 @@ function UCIContainer()
 			{
 				this.values[ list_key ] = [existing_value];
 			}
+			this.keys.push(list_key);
 		}
 
 
@@ -319,7 +320,6 @@ function UCIContainer()
 
 	this.get = function(pkg, section, option)
 	{
-
 		var next_key = pkg + "\." + section;
 		if(option != null && option != '')
 		{
@@ -328,6 +328,7 @@ function UCIContainer()
 		var value = this.values[next_key];
 		return value != null ? value : '';
 	}
+
 	this.removeAllSectionsOfType = function(pkg, type)
 	{
 		var removeSections = this.getAllSectionsOfType(pkg, type);
@@ -337,6 +338,7 @@ function UCIContainer()
 			this.removeSection(pkg, removeSections[rmIndex]);
 		}
 	}
+
 	this.getAllOptionsInSection = function(pkg, section, includeLists)
 	{
 		includeLists = includeLists == null ? false : includeLists;
@@ -353,6 +355,7 @@ function UCIContainer()
 		}
 		return matches;
 	}
+
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();
@@ -370,6 +373,7 @@ function UCIContainer()
 		}
 		return matches;
 	}
+
 	this.getAllSections = function(pkg)
 	{
 		var matches = new Array();
@@ -411,6 +415,7 @@ function UCIContainer()
 		}
 		return value;
 	}
+
 	this.removeSection = function(pkg, section)
 	{
 		removeKeys = new Array();
