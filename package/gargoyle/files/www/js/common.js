@@ -303,9 +303,6 @@ function UCIContainer()
 					for(vi=0; vi<newValues.length; vi++)
 					{
 						var val = newValues[vi];
-
-//window.alert("val " + val + "\nexistinValues " + existingValues + "\nindex" + existingValues.indexOf(val));
-
 						if (existingValues.indexOf(val) == -1)
 						{	// only add unique values
 							existingValues.push( val );
