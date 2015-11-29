@@ -7,7 +7,7 @@
  * 		  	The original mini_httpd was created by Jef Poscanzer
  * 		  	http://www.acme.com/software/mini_httpd/
  *
- *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright ï¿½ 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -25,7 +25,7 @@
  * This file incorporates work covered by the following copyright and
  * permission notice:
  *
- *	Copyright © 1999,2000 by Jef Poskanzer <jef@acme.com>.
+ *	Copyright ï¿½ 1999,2000 by Jef Poskanzer <jef@acme.com>.
  *	All rights reserved.
  *
  *
@@ -2121,6 +2121,7 @@ do_cgi( int is_ssl, unsigned short conn_port )
     int parse_headers;
     char* binary;
     char* directory;
+    int internal_error;
 
     if ( method != METHOD_GET && method != METHOD_POST )
 	send_error( 501, "Not Implemented", "", "That method is not implemented for CGI.", is_ssl );
@@ -2152,11 +2153,11 @@ do_cgi( int is_ssl, unsigned short conn_port )
     ** interposer process, depending on if we've read some of the data
     ** into our buffer.  We also have to do this for all SSL CGIs.
     */
+    internal_error = method == METHOD_POST && request_len > request_idx;
 #ifdef HAVE_SSL
-    if ( ( method == METHOD_POST && request_len > request_idx ) || is_ssl )
-#else /* HAVE_SSL */
-    if ( ( method == METHOD_POST && request_len > request_idx ) )
+    internal_error = internal_error || is_ssl;
 #endif /* HAVE_SSL */
+	if (internal_error)
 	{
 	int p[2];
 	int r;
@@ -2194,11 +2195,11 @@ do_cgi( int is_ssl, unsigned short conn_port )
 	parse_headers = 0;
     else
 	parse_headers = 1;
+    internal_error = parse_headers;
 #ifdef HAVE_SSL
-    if ( parse_headers || is_ssl )
-#else /* HAVE_SSL */
-    if ( parse_headers )
+    internal_error = internal_error || is_ssl
 #endif /* HAVE_SSL */
+	if (internal_error)
 	{
 	int p[2];
 	int r;
