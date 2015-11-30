@@ -255,7 +255,6 @@ function execute(cmd)
 // they are defined with set method
 function UCIContainer()
 {
-	this.keys = new Array();
 	this.values = new Object();
 
 		this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
@@ -275,9 +274,7 @@ function UCIContainer()
 			{
 				this.values[ list_key ] = [existing_value];
 			}
-			this.keys.push(list_key);
 		}
-
 
 
 		this.set = function(pkg, section, option, value, preserveExistingListValues)
@@ -288,12 +285,7 @@ function UCIContainer()
 			{
 				key = key + "\." + option;
 			}
-			if(this.keys.indexOf(key) == -1)
-			{	// add a new key and value
-				this.keys.push(key);
-				this.values[ key ] = value;
-			}
-			else
+			if(this.values.hasOwnProperty(key))
 			{	// an existing key
 				if (preserveExistingListValues)
 				{
@@ -314,6 +306,11 @@ function UCIContainer()
 				{	// simply replace the existing values
 					this.values[ key ] = value;
 				}
+			}
+			else
+			{	// add a new key and value
+					this.values[ key ] = value;
+			}
 			}
 		}
 
@@ -343,14 +340,15 @@ function UCIContainer()
 	{
 		includeLists = includeLists == null ? false : includeLists;
 		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			var key = this.keys[keyIndex];
-			var test = pkg + "." + section;
-			if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) && (includeLists || !(this.values[key] instanceof Array)))
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
-				matches.push(option);
+				var test = pkg + "." + section;
+				if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) && (includeLists || !(this.values[key] instanceof Array)))
+				{
+					var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
+					matches.push(option);
+				}
 			}
 		}
 		return matches;
@@ -359,15 +357,16 @@ function UCIContainer()
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			key = this.keys[keyIndex];
-			if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				if(this.values[key] == type)
+				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
 				{
-					var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
-					matches.push(section);
+					if(this.values[key] == type)
+					{
+						var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
+						matches.push(section);
+					}
 				}
 			}
 		}
@@ -377,13 +376,14 @@ function UCIContainer()
 	this.getAllSections = function(pkg)
 	{
 		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			key = this.keys[keyIndex];
-			if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
-				matches.push(section);
+				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+				{
+					var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
+					matches.push(section);
+				}
 			}
 		}
 		return matches;
@@ -398,21 +398,8 @@ function UCIContainer()
 		}
 
 		var value = this.values[removeKey];
-		if(value != null)
-		{
-			this.values[removeKey] = null;
-			var newKeys = [];
-			while(this.keys.length > 0)
-			{
-				var nextKey = this.keys.shift();
-				if(nextKey != removeKey){ newKeys.push(nextKey); }
-			}
-			this.keys = newKeys;
-		}
-		else
-		{
-			value = ''
-		}
+		value = (value == null) ? '' : value;
+		this.values[removeKey] = null;
 		return value;
 	}
 
@@ -420,20 +407,21 @@ function UCIContainer()
 	{
 		removeKeys = new Array();
 		sectionDefined = false;
-		for (keyIndex in this.keys)
+		for (var key in this.values)
 		{
-			key = this.keys[keyIndex];
-			testExp = new RegExp(pkg + "\\." + section + "\\.");
-			if(key.match(testExp))
+		  if (this.values.hasOwnProperty(key))
 			{
-				var splitKey = key.split("\.");
-				removeKeys.push(splitKey[2]);
+				testExp = new RegExp(pkg + "\\." + section + "\\.");
+				if(key.match(testExp))
+				{
+					var splitKey = key.split("\.");
+					removeKeys.push(splitKey[2]);
+				}
+				if(key == pkg + "." + section)
+				{
+					sectionDefined = true;
+				}
 			}
-			if(key == pkg + "." + section)
-			{
-				sectionDefined = true;
-			}
-
 		}
 		for (rkIndex in removeKeys)
 		{
@@ -449,30 +437,31 @@ function UCIContainer()
 	{
 		var copy = new UCIContainer();
 		var keyIndex = 0;
-		for(keyIndex = 0; keyIndex < this.keys.length; keyIndex++)
-		{
-			var key = this.keys[keyIndex];
-			var val = this.values[key]
-			if (val instanceof Array)
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				val = val.slice(0);
-			}
-
-			var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
-			if(splitKey == null)
-			{
-				splitKey = key.match(/^([^\.]+)\.([^\.]+)$/);
-				if(splitKey != null)
+				var val = this.values[key]
+				if (val instanceof Array)
 				{
-					splitKey.push("");
+					val = val.slice(0);
 				}
-				else
+
+				var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
+				if(splitKey == null)
 				{
+					splitKey = key.match(/^([^\.]+)\.([^\.]+)$/);
+					if(splitKey != null)
+					{
+						splitKey.push("");
+					}
+					else
+					{
 					//should never get here -- if problems put debugging code here
 				        //val = val;    // good enough for a breakpoint to be set.
+					}
 				}
+				copy.set(splitKey[1], splitKey[2], splitKey[3], val);
 			}
-			copy.set(splitKey[1], splitKey[2], splitKey[3], val);
 		}
 		return copy;
 	}
@@ -481,16 +470,18 @@ function UCIContainer()
 	{
 		var str="";
 		var keyIndex=0;
-		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
+		for (var key in this.values)
 		{
-			var key = this.keys[keyIndex]
-			if(this.values[key] instanceof Array )
+		  if (this.values.hasOwnProperty(key))
 			{
-				str=str+ "\n" + key + " = \"" + this.values[key].join(",") + "\"";
-			}
-			else
-			{
-				str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+				if(this.values[key] instanceof Array )
+				{
+					str=str+ "\n" + key + " = \"" + this.values[key].join(",") + "\"";
+				}
+				else
+				{
+					str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+				}
 			}
 		}
 		return str;
@@ -543,43 +534,45 @@ function UCIContainer()
 			}
 		}
 
-		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
+		for (var key in this.values)
 		{
-			var key = this.keys[keyIndex];
-			var oldValue = oldSettings.values[key];
-			var newValue = this.values[key];
-			try
+			if (this.values.hasOwnProperty(key))
 			{
-
-				if( (oldValue instanceof Array) || (newValue instanceof Array) )
+				var oldValue = oldSettings.values[key];
+				var newValue = this.values[key];
+				try
 				{
-					if(newValue instanceof Array)
+
+					if( (oldValue instanceof Array) || (newValue instanceof Array) )
 					{
-						if(listsWithoutUpdates[key] == null)
+						if(newValue instanceof Array)
 						{
-							var vi;
-							for(vi=0; vi< newValue.length ; vi++)
+							if(listsWithoutUpdates[key] == null)
 							{
-								var nv = "" + newValue[vi] + "";
-								commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+								var vi;
+								for(vi=0; vi< newValue.length ; vi++)
+								{
+									var nv = "" + newValue[vi] + "";
+									commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+								}
 							}
 						}
+						else
+						{
+							newValue = "" + newValue + ""
+							commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+						}
 					}
-					else
+					else if(oldValue != newValue && (newValue != null && newValue !=''))
 					{
 						newValue = "" + newValue + ""
 						commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
 					}
 				}
-				else if(oldValue != newValue && (newValue != null && newValue !=''))
+				catch(e)
 				{
-					newValue = "" + newValue + ""
-					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+					alert("bad key = " + key + "\n");
 				}
-			}
-			catch(e)
-			{
-				alert("bad key = " + key + "\n");
 			}
 		}
 
