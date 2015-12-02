@@ -1,6 +1,6 @@
 				<table>
 					<tr class='table_row_add_header'>
-						<th><label id='add_host_label' for='add_host'><%~ HsNm %></label></th>
+						<th><label id='add_host_label' for='add_host'><%~ GpNm %></label></th>
 						<th><label id='add_mac_label' for='add_mac'>MACs</label></th>
 						<th></th>
 					</tr>

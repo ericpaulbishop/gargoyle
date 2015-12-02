@@ -37,7 +37,7 @@
 <form>
 
 	<fieldset>
-		<legend class="sectionheader"><%~ KnDev %></legend>
+		<legend class="sectionheader"><%~ device.KnDev %></legend>
 
 		<div id='device_add_heading_container'>
 			<label class='nocolumn' id='device_add_heading_label' style='text-decoration:underline'><%~ AdKnDev %>:</label>
@@ -48,7 +48,7 @@
 			</div>
 			<div>
 				<select id="host_list" onchange="hostSelected()" >
-					<option value="none"><%~ KnSelH %></option>
+					<option value="none"><%~ SelH %></option>
 				</select>
 			</div>
 		</div>
