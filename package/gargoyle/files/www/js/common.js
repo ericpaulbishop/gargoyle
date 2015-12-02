@@ -311,8 +311,8 @@ function UCIContainer()
 			{	// add a new key and value
 					this.values[ key ] = value;
 			}
-			}
 		}
+
 
 
 	this.get = function(pkg, section, option)
