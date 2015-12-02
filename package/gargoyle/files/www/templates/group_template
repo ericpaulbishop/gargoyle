@@ -1,0 +1,12 @@
+<table>
+  <tr class='table_row_add_header'>
+    <th><label id='add_group_label' for='add_group'><%~ GpNm %></label></th>
+    <th><label id='add_known_dev_label' for='add_known_device'><%~ DevNm %></label></th>
+    <th></th>
+  </tr>
+  <tr class='table_row_add'>
+    <td><input type='text' id='add_group' size='15'/></td>
+    <td><input type='text' id='add_device' size='50'/></td>
+    <td><input type='button' id='add_device_button' value="<%~ Add %>" class='default_button' onclick='addDevice()'/></td>
+  </tr>
+</table>
