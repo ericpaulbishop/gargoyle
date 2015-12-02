@@ -36,6 +36,7 @@ function saveChanges()
 			{
 				uciOriginal = uci.clone();
 				//resetData();
+				setControlsEnabled(true);
 				//alert(req.responseText);
 			}
 		}
@@ -48,18 +49,37 @@ function saveDeviceChanges(uci){
 	deviceTable = document.getElementById('device_table_container').firstChild;
 	tableData = getTableDataArray(deviceTable, true, false);
 
-	uci.removeAllSectionsOfType('known','device');
 	for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
 	{
 		rowData = tableData[rowIndex];
 		var device = rowData[0];
 		var macs = rowData[1];
+		if (uci.get("known", device).length == 0){
+			uci.set("known", device, null, "device");
+		}
 		uci.set("known", device, "mac", macs.split("\n"), true);
 	}
 }
 
 
 function saveGroupChanges(uci){
+	groupTable = document.getElementById('group_table_container').firstChild;
+	tableData = getTableDataArray(groupTable, true, false);
+
+	for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
+	{
+		rowData = tableData[rowIndex];
+		var group = rowData[0];
+		var devices = rowData[1].split("\n");
+		for(dIx=0; dIx < devices.length; dIx++)
+		{
+			var device = devices[dIx];
+			if (uci.get("known", device).length == 0){
+				uci.set("known", device, null, "device");
+			}
+			uci.set("known", device, "group", group, true);
+		}
+	}
 }
 
 
@@ -78,7 +98,7 @@ function resetData()
 	resetGroupTable();
 
 	//setup hostname/mac list
-	resetHostList();
+	resetMacList();
 	resetGroupList();
 	resetDeviceList();
 }
@@ -112,10 +132,10 @@ function resetDeviceTable()
 
 
 /**
-*	Populates a Select id=host_list with know MACs which have not yet been assigned
+*	Populates a Select id=mac_list with know MACs which have not yet been assigned
 * to a Known Device.
 */
-function resetHostList()
+function resetMacList()
 {
 	var kmMacIndex = 0;
 	var kmHostIndex = 2;
@@ -129,8 +149,8 @@ function resetHostList()
 		deviceMacs = deviceMacs.concat(deviceTableData[dtdIx][dtdMacIx], ",");
 	}
 
-	var hlVals = [ "none" ];
-	var hlText = [ deviceS.SelH ];
+	var hlVals = [ "" ];
+	var hlText = [ deviceS.SelM ];
 	for (var mac in knownMac)
 	{
     if (knownMac.hasOwnProperty(mac))
@@ -144,22 +164,22 @@ function resetHostList()
 		}
 	}
 
-	setAllowableSelections("host_list", hlVals, hlText, document);
+	setAllowableSelections("mac_list", hlVals, hlText, document);
 }
 
 
 
 function removeDevice(table, row)
 {
-	resetHostList();
+	resetMacList();
 }
 
 
 
-function hostSelected()
+function macSelected()
 {
-	var selectedVal = getSelectedValue("host_list");
-	var host = 	document.getElementById("add_host");
+	var selectedVal = getSelectedValue("mac_list");
+	var host = document.getElementById("add_host");
 	var macs = document.getElementById("add_mac");
 	if(selectedVal == "")
 	{
@@ -171,10 +191,11 @@ function hostSelected()
 		if (host.value == "")
 		{
 			host.value = (selectedVal.split(/,/))[0];
+			fixGroupName(host);
 		}
 		var selMac = (selectedVal.split(/,/))[1];
-		macs.value = (macs.value == null) ? selMac : macs.value.concat(" ", selMac);
-		setSelectedValue("host_list", "");
+		macs.value = (macs.value == "") ? selMac : macs.value.concat(" ", selMac);
+		setSelectedValue("mac_list", "");
 	}
 }
 
@@ -195,17 +216,24 @@ function addMac()
 		{
 			var deviceTable = document.getElementById('device_table_container').firstChild;
 			var values = [host.value, macs.value.replace(/ /g, "\n"), createEditButton("editDevice")];
-			addTableRow(deviceTable, values, true, false, resetHostList);
+			addTableRow(deviceTable, values, true, false, resetMacList);
 			host.value = "";
 			macs.value = "";
 		}
 	}
 }
 
+function fixGroupName(element)
+{
+		var name = element.value;
+		name = name.replace(/-|\s/g,"_");
+		element.value = name;
+}
+
 
 function proofReadMac(input)
 {
-		window.alert("please implement proofReadMAC");
+		// please implement proofReadMAC
 }
 
 
@@ -393,18 +421,17 @@ function mergeEtherHost()
 	var macHostData = etherData.slice();
 	for(var mhdIndex=0; mhdIndex < macHostData.length; mhdIndex++)
 	{
-		macHostData[mhdIndex][mhdMacIndex] = macHostData[mhdIndex][mhdMacIndex].toUpperCase();
 		var host = null;
 		var mhdRow = macHostData[mhdIndex];
+		mhdRow[mhdMacIndex] = mhdRow[mhdMacIndex].toUpperCase();
 		var ip = mhdRow[mhdIpIndex];
 		var hdRow = hostLookup[ ip ];
 		if (hdRow instanceof Array)
 		{
 			host = hdRow[hdHostIndex] ;
 		}
-		macHostData[mhdIndex][mhdHostIndex] = (host == null) ? "?" : host ;
+		mhdRow[mhdHostIndex] = (host == null) ? "?" : host ;
 	}
-
 	return macHostData;
 }
 

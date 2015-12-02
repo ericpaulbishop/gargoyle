@@ -47,8 +47,8 @@
 				<%in templates/device_template %>
 			</div>
 			<div>
-				<select id="host_list" onchange="hostSelected()" >
-					<option value="none"><%~ SelH %></option>
+				<select id="mac_list" onchange="macSelected()" >
+					<option value="none"><%~ SelM %></option>
 				</select>
 			</div>
 		</div>

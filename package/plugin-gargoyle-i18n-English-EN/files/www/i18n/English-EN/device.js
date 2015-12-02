@@ -11,6 +11,6 @@ deviceS.DevNms="Device names";
 deviceS.GpNm="Group name";
 deviceS.EdKnDev="Edit Device";
 deviceS.DevGp="Device Groups";
-deviceS.SelH="Select Known Host";
+deviceS.SelM="Select MAC";
 deviceS.SelG="Select Group";
 deviceS.SelD="Select Known Device";
