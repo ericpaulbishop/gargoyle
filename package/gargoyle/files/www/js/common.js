@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
@@ -42,7 +42,7 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 	{
 		var totalHeight="100%";
 		var totalWidth="100%";
-		
+
 		var heightFromDoc=0;
 		var widthFromDoc=0;
 		if(document.body.parentNode.scrollHeight)
@@ -72,11 +72,11 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 			widthFromDoc = widthFromDoc >= document.width ? widthFromDoc : document.width
 		}
 		totalWidth = widthFromDoc > 0 ? widthFromDoc + "px" : totalWidth
-		
 
 
 
-		
+
+
 
 		var viewportHeight;
 		var vewportWidth;
@@ -97,7 +97,7 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 		}
 
 		var leftOffset = Math.floor((viewportWidth-300)/2);
-		var topOffset  = Math.floor((viewportHeight-150)/2); 
+		var topOffset  = Math.floor((viewportHeight-150)/2);
 		var is_ie = false;
 		if(document.all)
 		{
@@ -128,7 +128,7 @@ function setControlsEnabled(enabled, showWaitMessage, waitText)
 		msg.style.left = leftOffset >= 0 ? leftOffset+"px" : "0px";
 		msg.style.top  = topOffset >=0 ? topOffset+"px" : "0px";
 
-		
+
 		dark.style.display="block";
 
 		if(showWaitMessage)
@@ -174,12 +174,12 @@ function getRequestObj()
 		{
 			req = new ActiveXObject("Msxml2.XMLHTTP");
 		}
-		catch (ex) 
+		catch (ex)
 		{
 			try
 			{
 				req = new ActiveXObject("Microsoft.XMLHTTP");
-			} 
+			}
 			catch (ex)
 			{
 				// Browser is not Ajax compliant
@@ -209,7 +209,7 @@ function runAjax(method, url, params, stateChangeFunction)
 		{
 			//for some reason we need at least one character of data, so use a space if params == null
 			params = (params == null) ? " " : params;
-			
+
 			req.open("POST", url, true);
 			req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			//req.setRequestHeader("Content-length", params.length);
@@ -231,7 +231,7 @@ function execute(cmd)
 	var commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	setControlsEnabled(false, true, UI.WaitSettings);
-	
+
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
@@ -255,98 +255,68 @@ function execute(cmd)
 // they are defined with set method
 function UCIContainer()
 {
-	this.keys = new Array();
-	this.values = new Array();
-	this.listOptions = new Array();
+	this.values = new Object();
 
-
-	this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
-	{
-		destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
-		var  list_key = pkg + "\." + section + "\." + option;
-		if( this.listOptions[ list_key ] != null )
+		this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
 		{
-			return;
-		}
-
-		this.listOptions[ list_key ] = 1;
-		if( this.values[list_key] != null )
-		{
-			var old = this.values[list_key];
-			this.values[list_key] = (!destroy_existing_nonlist) && old != null ? [old] : [] ; 
-		}
-		else
-		{
-			this.keys.push(list_key);
-			this.values[list_key] = [];
-		}
-	}
-	this.set = function(pkg, section, option, value, preserveExistingListValues)
-	{
-		preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
-		var next_key = pkg + "\." + section;
-	       	if(option != null && option != "" )
-		{
-			next_key = next_key + "\." + option;
-		}
-		if(this.values[next_key] != null)
-		{
-			if (this.listOptions[ next_key ] != null)
+			destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
+			var  list_key = pkg + "\." + section + "\." + option;
+			var existing_value = this.values[ list_key ];
+			if( existing_value instanceof Array )
 			{
-				var set = this.values[next_key];
-				while(set.length > 0 && (!preserveExistingListValues))
+				return;
+			}
+			else if(destroy_existing_nonlist)
+			{
+				this.values[ list_key ] = [];
+			}
+			else
+			{
+				this.values[ list_key ] = [existing_value];
+			}
+		}
+
+
+		this.set = function(pkg, section, option, value, preserveExistingListValues)
+		{
+			preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
+			var key = pkg + "\." + section;
+			if(option != null && option != "" )
+			{
+				key = key + "\." + option;
+			}
+			if(this.values.hasOwnProperty(key))
+			{	// an existing key
+				if (preserveExistingListValues)
 				{
-					set.pop();
-				}
-				if( value instanceof Array )
-				{
+					var existingValue = this.values[ key ];
+					var existingValues = (existingValue instanceof Array) ? existingValue : [existingValue];
+					var newValues = ( value instanceof Array ) ? value : [value];
 					var vi;
-					for(vi=0; vi<value.length; vi++)
+					for(vi=0; vi<newValues.length; vi++)
 					{
-						set.push( value[vi] );
+						var val = newValues[vi];
+						if (existingValues.indexOf(val) == -1)
+						{	// only add unique values
+							existingValues.push( val );
+						}
 					}
 				}
 				else
-				{
-					set.push(value);
+				{	// simply replace the existing values
+					this.values[ key ] = value;
 				}
-				this.values[next_key] = set;
 			}
 			else
-			{
-				this.values[next_key] = value;
+			{	// add a new key and value
+					this.values[ key ] = value;
 			}
 		}
-		else
-		{
-			this.keys.push(next_key);
-			if (this.listOptions[ next_key ] != null)
-			{
-				var set = [];
-				if(value instanceof Array)
-				{
-					var setIndex;
-					for(setIndex=0;setIndex < value.length; setIndex++)
-					{
-						set.push( value[setIndex] )
-					}
-				}
-				else
-				{
-					set = [ value ]
-				}
-				this.values[next_key] = set
-			}
-			else
-			{
-				this.values[next_key] = value;
-			}
-		}
-	}
+
+
 
 	this.get = function(pkg, section, option)
 	{
-		
 		var next_key = pkg + "\." + section;
 		if(option != null && option != '')
 		{
@@ -355,6 +325,7 @@ function UCIContainer()
 		var value = this.values[next_key];
 		return value != null ? value : '';
 	}
+
 	this.removeAllSectionsOfType = function(pkg, type)
 	{
 		var removeSections = this.getAllSectionsOfType(pkg, type);
@@ -364,49 +335,55 @@ function UCIContainer()
 			this.removeSection(pkg, removeSections[rmIndex]);
 		}
 	}
+
 	this.getAllOptionsInSection = function(pkg, section, includeLists)
 	{
 		includeLists = includeLists == null ? false : includeLists;
 		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			var key = this.keys[keyIndex];
-			var test = pkg + "." + section;
-			if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) && (includeLists || this.listOptions[key] == null) )
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
-				matches.push(option);
-			}
-		}
-		return matches;
-	}
-	this.getAllSectionsOfType = function(pkg, type)
-	{
-		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			key = this.keys[keyIndex];
-			if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
-			{
-				if(this.values[key] == type)
+				var test = pkg + "." + section;
+				if(key.match(test) && key.match(/^[^\.]+\.[^\.]+\.[^\.]+/) && (includeLists || !(this.values[key] instanceof Array)))
 				{
-					var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
-					matches.push(section);
+					var option = key.match(/^[^\.]+\.[^\.]+\.([^\.]+)$/)[1];
+					matches.push(option);
 				}
 			}
 		}
 		return matches;
 	}
+
+	this.getAllSectionsOfType = function(pkg, type)
+	{
+		var matches = new Array();
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
+			{
+				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+				{
+					if(this.values[key] == type)
+					{
+						var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
+						matches.push(section);
+					}
+				}
+			}
+		}
+		return matches;
+	}
+
 	this.getAllSections = function(pkg)
 	{
 		var matches = new Array();
-		for (keyIndex in this.keys)
-		{
-			key = this.keys[keyIndex];
-			if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
-				matches.push(section);
+				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
+				{
+					var section = key.match(/^[^\.]+\.([^\.]+)$/)[1];
+					matches.push(section);
+				}
 			}
 		}
 		return matches;
@@ -419,47 +396,32 @@ function UCIContainer()
 		{
 			removeKey = removeKey + "\." + option;
 		}
-		if( this.listOptions[ removeKey ] != null )
-		{
-			this.listOptions[ removeKey ] = null;
-		}
 
 		var value = this.values[removeKey];
-		if(value != null)
-		{
-			this.values[removeKey] = null;
-			var newKeys = [];
-			while(this.keys.length > 0)
-			{
-				var nextKey = this.keys.shift();
-				if(nextKey != removeKey){ newKeys.push(nextKey); }
-			}
-			this.keys = newKeys;
-		}
-		else
-		{
-			value = ''
-		}
+		value = (value == null) ? '' : value;
+		this.values[removeKey] = null;
 		return value;
 	}
+
 	this.removeSection = function(pkg, section)
 	{
 		removeKeys = new Array();
 		sectionDefined = false;
-		for (keyIndex in this.keys)
+		for (var key in this.values)
 		{
-			key = this.keys[keyIndex];
-			testExp = new RegExp(pkg + "\\." + section + "\\.");
-			if(key.match(testExp))
+		  if (this.values.hasOwnProperty(key))
 			{
-				var splitKey = key.split("\.");
-				removeKeys.push(splitKey[2]);
+				testExp = new RegExp(pkg + "\\." + section + "\\.");
+				if(key.match(testExp))
+				{
+					var splitKey = key.split("\.");
+					removeKeys.push(splitKey[2]);
+				}
+				if(key == pkg + "." + section)
+				{
+					sectionDefined = true;
+				}
 			}
-			if(key == pkg + "." + section)
-			{
-				sectionDefined = true;
-			}
-
 		}
 		for (rkIndex in removeKeys)
 		{
@@ -475,30 +437,31 @@ function UCIContainer()
 	{
 		var copy = new UCIContainer();
 		var keyIndex = 0;
-		for(keyIndex = 0; keyIndex < this.keys.length; keyIndex++)
-		{
-			var key = this.keys[keyIndex];
-			var val = this.values[key]
-			if( this.listOptions[ key ] != null )
+		for (var key in this.values) {
+		  if (this.values.hasOwnProperty(key))
 			{
-				copy.listOptions[ key ] = 1;
-			}
-
-			var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
-			if(splitKey == null)
-			{
-				splitKey = key.match(/^([^\.]+)\.([^\.]+)$/);
-				if(splitKey != null)
+				var val = this.values[key]
+				if (val instanceof Array)
 				{
-					splitKey.push("");
+					val = val.slice(0);
 				}
-				else
+
+				var splitKey = key.match(/^([^\.]+)\.([^\.]+)\.([^\.]+)$/);
+				if(splitKey == null)
 				{
+					splitKey = key.match(/^([^\.]+)\.([^\.]+)$/);
+					if(splitKey != null)
+					{
+						splitKey.push("");
+					}
+					else
+					{
 					//should never get here -- if problems put debugging code here
 				        //val = val;    // good enough for a breakpoint to be set.
+					}
 				}
+				copy.set(splitKey[1], splitKey[2], splitKey[3], val);
 			}
-			copy.set(splitKey[1], splitKey[2], splitKey[3], val, true);
 		}
 		return copy;
 	}
@@ -507,16 +470,18 @@ function UCIContainer()
 	{
 		var str="";
 		var keyIndex=0;
-		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
+		for (var key in this.values)
 		{
-			var key = this.keys[keyIndex]
-			if(this.values[key] instanceof Array )
+		  if (this.values.hasOwnProperty(key))
 			{
-				str=str+ "\n" + key + " = \"" + this.values[key].join(",") + "\"";
-			}
-			else
-			{
-				str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+				if(this.values[key] instanceof Array )
+				{
+					str=str+ "\n" + key + " = \"" + this.values[key].join(",") + "\"";
+				}
+				else
+				{
+					str=str+ "\n" + key + " = \"" + this.values[key] + "\"";
+				}
 			}
 		}
 		return str;
@@ -526,17 +491,17 @@ function UCIContainer()
 	this.getScriptCommands = function(oldSettings)
 	{
 		var commandArray = new Array();
-		
+
 		var listsWithoutUpdates = [];
 
-		var keyIndex=0;	
+		var keyIndex=0;
 		for(keyIndex=0; keyIndex < oldSettings.keys.length; keyIndex++)
 		{
 			var key = oldSettings.keys[keyIndex];
 			var oldValue = oldSettings.values[key];
 			var newValue = this.values[key];
 
-			if( (oldValue instanceof Array && !(newValue instanceof Array)) || (newValue instanceof Array   && !(oldValue instanceof Array))  ) 
+			if( (oldValue instanceof Array && !(newValue instanceof Array)) || (newValue instanceof Array   && !(oldValue instanceof Array))  )
 			{
 				commandArray.push( "uci del " + key);
 			}
@@ -569,48 +534,50 @@ function UCIContainer()
 			}
 		}
 
-		for(keyIndex=0; keyIndex < this.keys.length; keyIndex++)
+		for (var key in this.values)
 		{
-			var key = this.keys[keyIndex];
-			var oldValue = oldSettings.values[key];
-			var newValue = this.values[key];
-			try
+			if (this.values.hasOwnProperty(key))
 			{
-
-				if( (oldValue instanceof Array) || (newValue instanceof Array) )
+				var oldValue = oldSettings.values[key];
+				var newValue = this.values[key];
+				try
 				{
-					if(newValue instanceof Array)
+
+					if( (oldValue instanceof Array) || (newValue instanceof Array) )
 					{
-						if(listsWithoutUpdates[key] == null)
+						if(newValue instanceof Array)
 						{
-							var vi;
-							for(vi=0; vi< newValue.length ; vi++)
+							if(listsWithoutUpdates[key] == null)
 							{
-								var nv = "" + newValue[vi] + "";
-								commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+								var vi;
+								for(vi=0; vi< newValue.length ; vi++)
+								{
+									var nv = "" + newValue[vi] + "";
+									commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+								}
 							}
 						}
+						else
+						{
+							newValue = "" + newValue + ""
+							commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+						}
 					}
-					else
+					else if(oldValue != newValue && (newValue != null && newValue !=''))
 					{
 						newValue = "" + newValue + ""
 						commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
 					}
 				}
-				else if(oldValue != newValue && (newValue != null && newValue !=''))
-				{		
-					newValue = "" + newValue + ""
-					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+				catch(e)
+				{
+					alert("bad key = " + key + "\n");
 				}
-			}
-			catch(e)
-			{
-				alert("bad key = " + key + "\n");
 			}
 		}
 
 		commandArray.push("uci commit");
-		
+
 		return commandArray.join("\n");
 	}
 }
@@ -747,7 +714,7 @@ function getWirelessMode(uciTest)
 		}
 	}
 
-	
+
 	var p = ap != '' && other != '' ? '+' : '';
 	var wirelessMode = ap + p + other;
 	var wirelessMode= wirelessMode == '' ? 'disabled' : wirelessMode;
@@ -781,7 +748,7 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 	// we don't wait/notify user on completion so update seems instant
 	var param = getParameterDefinition("commands", command)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
-	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; }); 
+	runAjax("POST", "utility/run_commands.sh", param, function(){ return 0; });
 }
 
 function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay, displayText, hideText)
@@ -827,7 +794,7 @@ function getSubnetRange(mask, ip)
 		}
 		subnetBits = subnetBits + nextBits;
 	}
-	
+
 	var subnetLength = Math.pow(2, subnetBits);
 	var testIpEnd = parseInt( (ip.split("."))[3] );
 
@@ -875,7 +842,7 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 		if(isVisible)
 		{
 			input = fieldDocument.getElementById(inputIds[idIndex]);
-			
+
 			f = functions[idIndex];
 			proofreadText(input, f, validReturnCodes[idIndex]);
 
@@ -919,7 +886,7 @@ function parseBytes(bytes, units, abbr, dDgt)
 	{
 		parsed = (bytes/(1024)).toFixed(dDgt||3) + spcr + (abbr?UI.KB:UI.KBy);
 	}
-	
+
 	return parsed;
 }
 
@@ -927,7 +894,7 @@ function parseKbytesPerSecond(kbytes, units)
 {
 	var parsed;
 	units = units != "bytes/s" && units != "KBytes/s" && units != "MBytes/s" ? "mixed" : units;
-	
+
 	if( (units == "mixed" && kbytes > 1024) || units == "MBytes/s")
 	{
 		parsed = (kbytes/(1024)).toFixed(3) + " "+UI.MBs;
@@ -942,15 +909,15 @@ function parseKbytesPerSecond(kbytes, units)
 function truncateDecimal(dec)
 {
 	result = "" + ((Math.floor(dec*1000))/1000);
-	
-	//make sure we have exactly three decimal places so 
+
+	//make sure we have exactly three decimal places so
 	//results line up properly in table presentation
 	decMatch=result.match(/.*\.(.*)$/);
 	if(decMatch == null)
 	{
 		result = result + ".000"
 	}
-	else 
+	else
 	{
 		if(decMatch[1].length==1)
 		{
@@ -974,7 +941,7 @@ function enableAssociatedField(checkbox, associatedId, defaultValue, controlDocu
 
 function setElementEnabled(element, enabled, defaultValue)
 {
-	
+
 	if(enabled)
 	{
 		element.readonly=false;
@@ -1025,7 +992,7 @@ function setElementEnabled(element, enabled, defaultValue)
 function getSelectedValue(selectId, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	if(controlDocument.getElementById(selectId) == null)
 	{
 		alert(UI.Err+": " + selectId + " "+UI.nex);
@@ -1045,7 +1012,7 @@ function getSelectedValue(selectId, controlDocument)
 function getSelectedText(selectId, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	selectedIndex = controlDocument.getElementById(selectId).selectedIndex;
 	selectedText = "";
 	if(selectedIndex >= 0)
@@ -1058,7 +1025,7 @@ function getSelectedText(selectId, controlDocument)
 function setSelectedValue(selectId, selection, controlDocument)
 {
 	var controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	var selectElement = controlDocument.getElementById(selectId);
 	if(selectElement == null){ alert(UI.Err+": " + selectId + " "+UI.nex); }
 
@@ -1082,7 +1049,7 @@ function setSelectedValue(selectId, selection, controlDocument)
 function setSelectedText(selectId, selection, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	selectElement = controlDocument.getElementById(selectId);
 	selectionFound = false;
 	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
@@ -1106,7 +1073,7 @@ function addOptionToSelectElement(selectId, optionText, optionValue, before, con
 	option = controlDocument.createElement("option");
 	option.text=optionText;
 	option.value=optionValue;
-	
+
 	//FUCK M$ IE, FUCK IT UP THE ASS WITH A BASEBALL BAT.  A BIG WOODEN ONE. WITH SPLINTERS.
 	try
 	{
@@ -1120,14 +1087,14 @@ function addOptionToSelectElement(selectId, optionText, optionValue, before, con
 		}
 		else
 		{
-			controlDocument.getElementById(selectId).add(option, before.index);	
+			controlDocument.getElementById(selectId).add(option, before.index);
 		}
 	}
 }
 function removeOptionFromSelectElement(selectId, optionText, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	selectElement = controlDocument.getElementById(selectId);
 	selectionFound = false;
 	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
@@ -1236,7 +1203,7 @@ function setVariableFromModifiedValue(params)
 		{
 			uci.set(pkg, section, option, modFunction(value));
 		}
-	}	
+	}
 }
 function setVariableFromCombined(params)
 {
@@ -1248,7 +1215,7 @@ function setVariableFromCombined(params)
 	option           = params[5];
 	setIfBlank       = params[6];
 	combineFunction  = params[7];
-	
+
 	isVisible = true;
 	if(visibilityId != null)
 	{
@@ -1307,7 +1274,7 @@ function setVariableFromConcatenation(params)
 }
 function setVariableConditionally(params)
 {
-	elementId    = params[0]; 
+	elementId    = params[0];
 	visibilityId = params[1];
 	uci          = params[2];
 	pkg          = params[3];
@@ -1316,7 +1283,7 @@ function setVariableConditionally(params)
 	testFunction = params[6];
 	useValueFromElement = params[7];
 	alternateValue =      params[8];
-	
+
 	isVisible = true;
 	if(visibilityId != null)
 	{
@@ -1325,7 +1292,7 @@ function setVariableConditionally(params)
 	if(isVisible==true)
 	{
 		value = useValueFromElement == true ? document.getElementById(elementId).value : alternateValue;
-		
+
 		if(testFunction(value))
 		{
 			uci.set(pkg, section, option, value);
@@ -1371,7 +1338,7 @@ function loadSelectedValueFromVariable(params)
 	var section      = params[3];
 	var option       = params[4];
 	var defaultValue = params[5];
-	
+
 	var v=uci.get(pkg, section, option);
 	if(v != null && v != '')
 	{
@@ -1393,7 +1360,7 @@ function loadValueFromVariable(params)
 	var section      = params[3];
 	var option       = params[4];
 	var defaultValue = params[5];
-	
+
 	var v=uci.get(pkg, section, option);
 	var e=document.getElementById(elementId);
 	if(v != null && v != '')
@@ -1421,7 +1388,7 @@ function loadValueFromModifiedVariable(params)
 	var option       = params[4];
 	var defaultValue = params[5];
 	var modificationFunction = params[6];
-	
+
 	var v=modificationFunction(uci.get(pkg, section, option));
 	var e=document.getElementById(elementId);
 	if(v != null && v != '')
@@ -1431,7 +1398,7 @@ function loadValueFromModifiedVariable(params)
 	else if(defaultValue != null)
 	{
 		e.value = defaultValue;
-	}	
+	}
 
 }
 function loadValueFromVariableAtIndex(params)
@@ -1443,10 +1410,10 @@ function loadValueFromVariableAtIndex(params)
 	var option       = params[4];
 	var defaultValue = params[5];
 	var index        = params[6];
-	
+
 	var vStr=uci.get(pkg, section, option);
 	var vSplit = vStr.split(/[,\t ]+/);
-	
+
 
 	var v;
 	if(index < vSplit.length)
@@ -1457,7 +1424,7 @@ function loadValueFromVariableAtIndex(params)
 	{
 		v = '';
 	}
-	
+
 	var e=document.getElementById(elementId);
 	if(v != null && v != '')
 	{
@@ -1487,7 +1454,7 @@ function isArray(obj)
 }
 
 function loadVariables(uci, varIds, varPkgs, varSections, varOptions, varParams, varFunctions)
-{	
+{
 	for (idIndex in varIds)
 	{
 		nextId      = varIds[idIndex];
@@ -1511,7 +1478,7 @@ function loadVariables(uci, varIds, varPkgs, varSections, varOptions, varParams,
 			nextFunc([nextId, uci, nextPkg, nextSection, nextOption, nextParams]);
 		}
 	}
-}	
+}
 function loadValueFromMultipleVariables(params)
 {
 	var elementId   = params[0];
@@ -1655,7 +1622,7 @@ function validateMultipleIps(ips)
 			else
 			{
 				valid = 1;
-			}		
+			}
 		}
 		else
 		{
@@ -1685,7 +1652,7 @@ function validateMultipleIpsOrMacs(addresses)
 			else
 			{
 				valid = 1;
-			}		
+			}
 		}
 		else if(nextAddr.match(/:/))
 		{
@@ -1766,7 +1733,7 @@ function validateNetMask(mask)
 	//return codes:
 	//0 = valid mask
 	//1 = invalid digit
-	//2 = invalid field order 
+	//2 = invalid field order
 	//3 = fields > 255
 	//4 = invalid format
 
@@ -1789,12 +1756,12 @@ function validateNetMask(mask)
 			{
 				errorCode = 2;
 			}
-			if(	ipFields[field] != 255 && 
-				ipFields[field] != 254 && 
-				ipFields[field] != 252 && 
+			if(	ipFields[field] != 255 &&
+				ipFields[field] != 254 &&
+				ipFields[field] != 252 &&
 				ipFields[field] != 248 &&
-				ipFields[field] != 240 && 
-				ipFields[field] != 224 && 
+				ipFields[field] != 240 &&
+				ipFields[field] != 224 &&
 				ipFields[field] != 192 &&
 				ipFields[field] != 128 &&
 				ipFields[field] != 0 &&
@@ -1823,9 +1790,9 @@ function validateIpRange(range)
 			var ipValid = validateIP(split[0]);
 			var maskValid = validateNetMask(split[1]) == 0 || validateNumericRange(split[1],1,31) == 0 ? 0 : 1;
 			valid = ipValid == 0 && maskValid == 0 ? 0 : 1;
-		}	
+		}
 	}
-	else 
+	else
 	{
 		valid = validateIP(range);
 	}
@@ -2000,15 +1967,15 @@ function getBridgeSection(testUci)
 	var wanDef = uciOriginal.get("network", "wan", "");
 	var bridgeSection = "";
 	var sectionIndex;
-	
-	
+
+
 	for(sectionIndex=0; sectionIndex < allWirelessSections.length && bridgeSection == ""; sectionIndex++)
 	{
-		var getWirelessVar = function(varName) 
+		var getWirelessVar = function(varName)
 		{
-			return testUci.get("wireless", allWirelessSections[sectionIndex], varName).toLowerCase() 
+			return testUci.get("wireless", allWirelessSections[sectionIndex], varName).toLowerCase()
 		}
-		
+
 		if( getWirelessVar("mode") == "wds" && wanDef == "")
 		{
 			bridgeSection = allWirelessSections[sectionIndex];
@@ -2040,7 +2007,7 @@ function cnv24hToLocal(timestamp) {
 	style=uciOriginal.get("gargoyle", "global", "hour_style");
 	if (style == 24) return timestamp;
 	locale_time=""
-	
+
 	h_m_stamp=timestamp.split(":");
 	curr_hour=eval(h_m_stamp[0]);
 	if (UI.pAM.length > 0 && UI.pPM.length > 0) {
@@ -2056,7 +2023,7 @@ function cnv24hToLocal(timestamp) {
 //cnv_LocaleTime takes a full "09/16/13 21:09 EDT" date/time stamp
 //  returns (based on hour prefs & pre/post AM/PM notations): "09/16/13 21:09 EDT", "09/16/13 午前 9:09 UTC" or "09/16/13 9:09 PM EDT"
 //NOTE: requires uciOriginal to have the 'gargoyle' section; use 'gargoyle_header_footer [options] gargoyle'
-function cnv_LocaleTime(full_date) { // 
+function cnv_LocaleTime(full_date) { //
 	style=uciOriginal.get("gargoyle", "global", "hour_style");
 	if (style == 24) return full_date;
 	tcomponents=full_date.split(" ");
@@ -2115,7 +2082,7 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 		{
 			spanEl.appendChild( controlDocument.createElement("br") );
 		}
-		
+
 		spanEl.appendChild(controlDocument.createTextNode(  textList[tlIndex] + (tlIndex < textList.length-1 && addCommas ? "," : "")  ));
 	}
 	return spanEl;
@@ -2186,7 +2153,7 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 				currAddrs.push(addr); //if we're adding multiple addrs and there's overlap, this will allow us to detect it
 			}
 		}
-		else 
+		else
 		{
 			valid = 1;
 		}
@@ -2199,12 +2166,12 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		newAddrs = newAddrs.replace(/^[\t ]*/, "");
 		newAddrs = newAddrs.replace(/[\t ]*$/, "");
 		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
-		
+
 		while(addrs.length > 0)
 		{
 			addTableRow(table, [ addrs.shift() ], true, false, null, null, controlDocument);
 		}
-		
+
 		if(tableContainer.childNodes.length == 0)
 		{
 			tableContainer.appendChild(table);
@@ -2226,7 +2193,7 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 
 function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 {
-	
+
 	var newAddrs = controlDocument.getElementById(textId).value;
 	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 	if(valid)
@@ -2294,14 +2261,14 @@ function getIpRangeIntegers(ipStr)
 
 function testSingleAddrOverlap(addrStr1, addrStr2)
 {
-	/* 
+	/*
 	 * this adjustment is useful in multiple places, particularly quotas
 	 * if you don't want these conversions, just validate quota BEFORE you
 	 * try calling this function
 	 */
 	var adj = function(addrStr)
 	{
-		addrStr = addrStr == "" ? "ALL" : addrStr.toUpperCase();	
+		addrStr = addrStr == "" ? "ALL" : addrStr.toUpperCase();
 		if(addrStr == "ALL_OTHERS_COMBINED" || addrStr == "ALL_OTHERS_INDIVIDUAL")
 		{
 			addrStr = "ALL_OTHERS_COMBINED";
@@ -2420,17 +2387,17 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	}
 	var wlocation = "password_confirm.sh";
 	confirmWindow = window.open(wlocation, "password", "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
-	
+
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
-	
+
 	okButton.value         = UI.OK;
 	okButton.className     = "default_button";
 	cancelButton.value     = UI.Cancel;
 	cancelButton.className = "default_button";
 
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(confirmWindow.document != null)
@@ -2440,7 +2407,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 				confirmWindow.document.getElementById("bottom_button_container").appendChild(okButton);
 				confirmWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
 				setChildText("confirm_text", confirmText, null, null, null, confirmWindow.document);
-			
+
 				cancelButton.onclick = function()
 				{
 					confirmWindow.close();
@@ -2448,7 +2415,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 				okButton.onclick = function()
 				{
 					setControlsEnabled(false, true, UI.VPass);
-	
+
 					var commands = "gargoyle_session_validator -p \"" + confirmWindow.document.getElementById("password").value + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
 					var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 					var stateChangeFunction = function(req)
@@ -2512,7 +2479,7 @@ function getHttpPort(uciData)
 
 function getUsedPorts()
 {
-	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+	var dropbearSections = uciOriginal.getAllSections("dropbear");
 	var sshPort   = uciOriginal.get("dropbear", dropbearSections[0], "Port")
 	var httpPort  = getHttpPort()
 	var httpsPort = getHttpsPort()
@@ -2561,7 +2528,7 @@ function getUsedPorts()
 					if(localport != remotePort && localport != "")
 					{
 						if(proto == "" || proto == "tcpudp")
-						{	
+						{
 							portDefs.push([remotePort, "tcp", defIndex[2] ])
 							portDefs.push([remotePort, "udp", defIndex[2] ])
 							foundPorts["tcp"][remotePort] = 1;
@@ -2746,9 +2713,9 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 
 	queryFieldset = document.createElement("fieldset");
 	queryFieldset.innerHTML='<legend class="sectionheader" id="query_header">' + queryHeader + '</legend><div style="clear:both;display:block"><span class="nocolumn" id="query_text">' + queryText + '</span></div><div id="spacer_div" style="display:block; mrgin:8px;">&nbsp;</div><div id="query_button_container"></div>'
-	
+
 	document.getElementById("wait_msg").appendChild(queryFieldset)
-	
+
 	var buttonList = [];
 	var bIndex;
 	for(bIndex=0; bIndex < buttonNameList.length ; bIndex++)
@@ -2781,4 +2748,3 @@ function ObjLen(an_obj) {
 	}
 	return len
 }
-
