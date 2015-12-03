@@ -257,62 +257,64 @@ function UCIContainer()
 {
 	this.values = new Object();
 
-		this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
+	this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
+	{
+		destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
+		var  list_key = pkg + "\." + section + "\." + option;
+		var existing_value = this.values[ list_key ];
+		if( existing_value instanceof Array )
 		{
-			destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
-			var  list_key = pkg + "\." + section + "\." + option;
-			var existing_value = this.values[ list_key ];
-			if( existing_value instanceof Array )
-			{
-				return;
-			}
-			else if(destroy_existing_nonlist)
-			{
-				this.values[ list_key ] = [];
-			}
-			else
-			{
-				this.values[ list_key ] = [existing_value];
-			}
+			return;
 		}
-
-
-		this.set = function(pkg, section, option, value, preserveExistingListValues)
+		else if(destroy_existing_nonlist)
 		{
-			preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
-			var key = pkg + "\." + section;
-			if(option != null && option != "" )
+			this.values[ list_key ] = [];
+		}
+		else
+		{
+			this.values[ list_key ] = [existing_value];
+		}
+	}
+
+	this.set = function(pkg, section, option, value, preserveExistingListValues)
+	{
+		preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
+		var key = pkg + "\." + section;
+		if(option != null && option != "" )
+		{
+			key = key + "\." + option;
+		}
+		if(this.values.hasOwnProperty(key))
+		{	// an existing key
+			if (preserveExistingListValues)
 			{
-				key = key + "\." + option;
-			}
-			if(this.values.hasOwnProperty(key))
-			{	// an existing key
-				if (preserveExistingListValues)
+				var existingValue = this.values[ key ];
+				var existingValues = (existingValue instanceof Array) ? existingValue : [existingValue];
+				var newValues = ( value instanceof Array ) ? value : [value];
+				var vi;
+				for(vi=0; vi<newValues.length; vi++)
 				{
-					var existingValue = this.values[ key ];
-					var existingValues = (existingValue instanceof Array) ? existingValue : [existingValue];
-					var newValues = ( value instanceof Array ) ? value : [value];
-					var vi;
-					for(vi=0; vi<newValues.length; vi++)
-					{
-						var val = newValues[vi];
-						if (existingValues.indexOf(val) == -1)
-						{	// only add unique values
-							existingValues.push( val );
-						}
+					var val = newValues[vi];
+					if (existingValues.indexOf(val) == -1)
+					{	// only add unique values
+						existingValues.push( val );
 					}
 				}
-				else
-				{	// simply replace the existing values
-					this.values[ key ] = value;
-				}
+			}
+			else
+			{	// simply replace the existing values
+				this.values[ key ] = value;
 			}
 			else
 			{	// add a new key and value
 					this.values[ key ] = value;
 			}
 		}
-
+		else
+		{	// add a new key and value
+				this.values[ key ] = value;
+		}
+	}
 
 
 	this.get = function(pkg, section, option)
@@ -494,43 +496,45 @@ function UCIContainer()
 
 		var listsWithoutUpdates = [];
 
-		var keyIndex=0;
-		for(keyIndex=0; keyIndex < oldSettings.keys.length; keyIndex++)
-		{
-			var key = oldSettings.keys[keyIndex];
-			var oldValue = oldSettings.values[key];
-			var newValue = this.values[key];
 
-			if( (oldValue instanceof Array && !(newValue instanceof Array)) || (newValue instanceof Array   && !(oldValue instanceof Array))  )
+		for (var key in oldSettings.values)
+		{
+			if (oldSettings.values.hasOwnProperty(key))
 			{
-				commandArray.push( "uci del " + key);
-			}
-			else if (oldValue instanceof Array && newValue instanceof Array)
-			{
-				var matches = oldValue.length == newValue.length;
-				if(matches)
-				{
-					var sortedOld = oldValue.sort()
-					var sortedNew = newValue.sort()
-					var sortedIndex;
-					for(sortedIndex=0; matches && sortedIndex <sortedOld.length; sortedIndex++)
-					{
-						matches = sortedOld[sortedIndex] == sortedNew[sortedIndex] ? true : false
-					}
-				}
-				if(matches)
-				{
-					listsWithoutUpdates[key] = 1
-				}
-				else
+				var oldValue = oldSettings.values[key];
+				var newValue = this.values[key];
+
+				if( (oldValue instanceof Array && !(newValue instanceof Array)) || (newValue instanceof Array   && !(oldValue instanceof Array))  )
 				{
 					commandArray.push( "uci del " + key);
 				}
+				else if (oldValue instanceof Array && newValue instanceof Array)
+				{
+					var matches = oldValue.length == newValue.length;
+					if(matches)
+					{
+						var sortedOld = oldValue.sort()
+						var sortedNew = newValue.sort()
+						var sortedIndex;
+						for(sortedIndex=0; matches && sortedIndex <sortedOld.length; sortedIndex++)
+						{
+							matches = sortedOld[sortedIndex] == sortedNew[sortedIndex] ? true : false
+						}
+					}
+					if(matches)
+					{
+						listsWithoutUpdates[key] = 1
+					}
+					else
+					{
+						commandArray.push( "uci del " + key);
+					}
 
-			}
-			else if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
-			{
-				commandArray.push( "uci del " + key);
+				}
+				else if((newValue == null || newValue == '') && (oldValue != null && oldValue !=''))
+				{
+					commandArray.push( "uci del " + key);
+				}
 			}
 		}
 
