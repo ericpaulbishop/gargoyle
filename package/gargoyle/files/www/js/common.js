@@ -256,11 +256,12 @@ function execute(cmd)
 function UCIContainer()
 {
 	this.values = new Object();
+	const DOT = ".";
 
 	this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
 	{
 		destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
-		var  list_key = pkg + "\." + section + "\." + option;
+		var  list_key = pkg + DOT + section + DOT + option;
 		var existing_value = this.values[ list_key ];
 		if( existing_value instanceof Array )
 		{
@@ -279,25 +280,37 @@ function UCIContainer()
 	this.set = function(pkg, section, option, value, preserveExistingListValues)
 	{
 		preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
-		var key = pkg + "\." + section;
+		var key = pkg + DOT + section;
 		if(option != null && option != "" )
 		{
-			key = key + "\." + option;
+			key = key + DOT + option;
 		}
+
 		if(this.values.hasOwnProperty(key))
 		{	// an existing key
 			if (preserveExistingListValues)
-			{
-				var existingValue = this.values[ key ];
-				var existingValues = (existingValue instanceof Array) ? existingValue : [existingValue];
-				var newValues = ( value instanceof Array ) ? value : [value];
-				var vi;
-				for(vi=0; vi<newValues.length; vi++)
+			{ // guarantee that the existing values are an Array
+				var existing = this.values[ key ];
+				if (!(existing instanceof Array))
 				{
-					var val = newValues[vi];
+					this.values[ key ] = (existing == null) ? [] : [existing];
+				}
+
+				var existingValues = this.values[ key ];
+				var newValues = ( value instanceof Array ) ? value : [value];
+				for(nvIx=0; nvIx<newValues.length; nvIx++)
+				{
+					var val = newValues[nvIx];
 					if (existingValues.indexOf(val) == -1)
 					{	// only add unique values
-						existingValues.push( val );
+						if (typeof existingValues[0] == "undefined" )	// hack!
+						{	// for some unknown reason often this is true!
+							existingValues[0] = val;
+						}
+						else
+						{
+							existingValues.push( val );
+						}
 					}
 				}
 			}
@@ -315,10 +328,10 @@ function UCIContainer()
 
 	this.get = function(pkg, section, option)
 	{
-		var next_key = pkg + "\." + section;
+		var next_key = pkg + DOT + section;
 		if(option != null && option != '')
 		{
-			next_key = next_key + "\." + option;
+			next_key = next_key + DOT + option;
 		}
 		var value = this.values[next_key];
 		return value != null ? value : '';
@@ -389,10 +402,10 @@ function UCIContainer()
 
 	this.remove = function(pkg, section, option)
 	{
-		var removeKey = pkg + "\." + section;
+		var removeKey = pkg + DOT + section;
 	       	if(option != "")
 		{
-			removeKey = removeKey + "\." + option;
+			removeKey = removeKey + DOT + option;
 		}
 
 		var value = this.values[removeKey];
@@ -412,7 +425,7 @@ function UCIContainer()
 				testExp = new RegExp(pkg + "\\." + section + "\\.");
 				if(key.match(testExp))
 				{
-					var splitKey = key.split("\.");
+					var splitKey = key.split(DOT);
 					removeKeys.push(splitKey[2]);
 				}
 				if(key == pkg + "." + section)

@@ -57,7 +57,7 @@ function saveDeviceChanges(uci){
 		if (uci.get("known", device).length == 0){
 			uci.set("known", device, null, "device");
 		}
-		uci.set("known", device, "mac", macs.split("\n"), true);
+		uci.set("known", device, "mac", macs.split(" "), true);
 	}
 }
 
@@ -71,9 +71,9 @@ function saveGroupChanges(uci){
 		rowData = tableData[rowIndex];
 		var group = rowData[0];
 		var devices = rowData[1].split("\n");
-		for(dIx=0; dIx < devices.length; dIx++)
+		for(dIndex=0; dIndex < devices.length; dIndex++)
 		{
-			var device = devices[dIx];
+			var device = devices[dIndex];
 			if (uci.get("known", device).length == 0){
 				uci.set("known", device, null, "device");
 			}
@@ -92,12 +92,12 @@ function createEditButton(onclick)
 	return editButton;
 }
 
+
 function resetData()
 {
 	resetDeviceTable();
 	resetGroupTable();
 
-	//setup hostname/mac list
 	resetMacList();
 	resetGroupList();
 	resetDeviceList();
@@ -110,12 +110,11 @@ function resetDeviceTable()
 	var deviceTableData = new Array();
 
 	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIx=0; dIx < devices.length; dIx++)
+	for (dIndex=0; dIndex < devices.length; dIndex++)
 	{	// process the MAC's assigned to each device
-		var device = devices[dIx];
+		var device = devices[dIndex];
 		var devMacs = uciOriginal.get("known", device, "mac");
 		var macs = (devMacs instanceof Array) ? devMacs.join("\n") : "" ;
-		macs = macs.slice(1); // truely horrible brittle removal of the first extraneous /n
 		deviceTableData.push([device, macs, createEditButton("editDevice")]);
 	}
 
@@ -131,113 +130,6 @@ function resetDeviceTable()
 }
 
 
-/**
-*	Populates a Select id=mac_list with know MACs which have not yet been assigned
-* to a Known Device.
-*/
-function resetMacList()
-{
-	var kmMacIndex = 0;
-	var kmHostIndex = 2;
-	var knownMac = knownMacLookup();
-
-	var deviceTable = document.getElementById("device_table_container").firstChild;
-	var dtdMacIx = 1;
-	var deviceTableData = (deviceTable == null) ? [] : getTableDataArray(deviceTable, true, false);
-	var deviceMacs = '';
-	for (dtdIx=0; dtdIx < deviceTableData.length; dtdIx++){
-		deviceMacs = deviceMacs.concat(deviceTableData[dtdIx][dtdMacIx], ",");
-	}
-
-	var hlVals = [ "" ];
-	var hlText = [ deviceS.SelM ];
-	for (var mac in knownMac)
-	{
-    if (knownMac.hasOwnProperty(mac))
-		{
-			if( deviceMacs.indexOf(mac) == -1 )
-			{ // exclude MAC's that are already assigned to a device
-				var host = knownMac[mac][kmHostIndex];
-				hlVals.push( host + "," + mac );
-				hlText.push((host == "" || host == "*" ? mac : host ) + " " + mac);
-			}
-		}
-	}
-
-	setAllowableSelections("mac_list", hlVals, hlText, document);
-}
-
-
-
-function removeDevice(table, row)
-{
-	resetMacList();
-}
-
-
-
-function macSelected()
-{
-	var selectedVal = getSelectedValue("mac_list");
-	var host = document.getElementById("add_host");
-	var macs = document.getElementById("add_mac");
-	if(selectedVal == "")
-	{
-		host.value = "";
-		macs.value = "";
-	}
-	else
-	{
-		if (host.value == "")
-		{
-			host.value = (selectedVal.split(/,/))[0];
-			fixGroupName(host);
-		}
-		var selMac = (selectedVal.split(/,/))[1];
-		macs.value = (macs.value == "") ? selMac : macs.value.concat(" ", selMac);
-		setSelectedValue("mac_list", "");
-	}
-}
-
-
-function addMac()
-{
-	//errors = proofreadDevice(document);
-	errors = "";
-	if(errors.length > 0)
-	{
-		alert(errors.join("\n") + "\n\n" + deviceS.AErr);
-	}
-	else
-	{
-		var host = document.getElementById("add_host");
-		var macs = document.getElementById("add_mac");
-		if (host.value != null && macs.value != null)
-		{
-			var deviceTable = document.getElementById('device_table_container').firstChild;
-			var values = [host.value, macs.value.replace(/ /g, "\n"), createEditButton("editDevice")];
-			addTableRow(deviceTable, values, true, false, resetMacList);
-			host.value = "";
-			macs.value = "";
-		}
-	}
-}
-
-function fixGroupName(element)
-{
-		var name = element.value;
-		name = name.replace(/-|\s/g,"_");
-		element.value = name;
-}
-
-
-function proofReadMac(input)
-{
-		// please implement proofReadMAC
-}
-
-
-
 function resetGroupTable()
 {
 	var groupTableData = new Array();
@@ -245,9 +137,9 @@ function resetGroupTable()
 	var groups = new Object();
 	var devices = uciOriginal.getAllSectionsOfType("known", "device");
 
-	for (dIx=0; dIx < devices.length; dIx++)
+	for (dIndex=0; dIndex < devices.length; dIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIx];
+		var device = devices[dIndex];
 		var group = uciOriginal.get("known", device, "group");
 		if (group != null && group.length > 0)
 		{
@@ -282,6 +174,43 @@ function resetGroupTable()
 }
 
 
+
+/**
+*	Populates a Select id=mac_list with know MACs which have not yet been assigned
+* to a Known Device.
+*/
+function resetMacList()
+{
+	var kmMacIndex = 0;
+	var kmHostIndex = 2;
+	var knownMac = knownMacLookup();
+
+	var deviceTable = document.getElementById("device_table_container").firstChild;
+	var dtdMacIx = 1;
+	var deviceTableData = (deviceTable == null) ? [] : getTableDataArray(deviceTable, true, false);
+	var deviceMacs = '';
+	for (dtdIndex=0; dtdIndex < deviceTableData.length; dtdIndex++){
+		deviceMacs = deviceMacs.concat(deviceTableData[dtdIndex][dtdMacIx], ",");
+	}
+
+	var hlVals = [ "" ];
+	var hlText = [ deviceS.SelM ];
+	for (var mac in knownMac)
+	{
+    if (knownMac.hasOwnProperty(mac))
+		{
+			if( deviceMacs.indexOf(mac) == -1 )
+			{ // exclude MAC's that are already assigned to a device
+				var host = knownMac[mac][kmHostIndex];
+				hlVals.push( host + "," + mac );
+				hlText.push((host == "" || host == "*" ? mac : host ) + " " + mac);
+			}
+		}
+	}
+
+	setAllowableSelections("mac_list", hlVals, hlText, document);
+}
+
 /**
 *	Populates a Select id=group_list with know MACs which have not yet been assigned
 * to a Known Device.
@@ -290,11 +219,11 @@ function resetGroupList()
 {
 	var groups = [];
 	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIx=0; dIx < devices.length; dIx++)
+	for (dIndex=0; dIndex < devices.length; dIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIx];
+		var device = devices[dIndex];
 		var group = uciOriginal.get("known", device, "group");
-		if (groups.indexOf(group) == -1)
+		if (group.length > 0  && groups.indexOf(group) == -1)
 		{
 			groups.push(group);
 		}
@@ -311,19 +240,6 @@ function resetGroupList()
 	setAllowableSelections("group_list", gpVals, gpText, document);
 }
 
-
-function removeGroup(table, row)
-{
-	resetGroupList();
-}
-
-
-function groupSelected()
-{
-	document.getElementById("add_group").value = getSelectedValue("group_list");
-}
-
-
 /**
 *	Populates a Select id=device_list with know MACs which have not yet been assigned
 * to a Known Device.
@@ -334,9 +250,9 @@ function resetDeviceList()
 	var gpText = [ deviceS.SelD ];
 
 	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIx=0; dIx < devices.length; dIx++)
+	for (dIndex=0; dIndex < devices.length; dIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIx];
+		var device = devices[dIndex];
 		var group = uciOriginal.get("known", device, "group");
 		if (group == null || group.length == 0)
 		{
@@ -344,8 +260,42 @@ function resetDeviceList()
 			gpText.push( device );
 		}
 	}
-
 	setAllowableSelections("device_list", gpVals, gpText, document);
+}
+
+
+/*******************************************************************************
+* Event functions
+*******************************************************************************/
+
+
+function macSelected()
+{
+	var selectedVal = getSelectedValue("mac_list");
+	var host = document.getElementById("add_host");
+	var macs = document.getElementById("add_mac");
+	if(selectedVal == "")
+	{
+		host.value = "";
+		macs.value = "";
+	}
+	else
+	{
+		if (host.value == "")
+		{
+			host.value = (selectedVal.split(/,/))[0];
+			fixGroupName(host);
+		}
+		var selMac = (selectedVal.split(/,/))[1];
+		macs.value = (macs.value == "") ? selMac : macs.value.concat(" ", selMac);
+		setSelectedValue("mac_list", "");
+	}
+}
+
+
+function groupSelected()
+{
+	document.getElementById("add_group").value = getSelectedValue("group_list");
 }
 
 
@@ -353,6 +303,32 @@ function deviceSelected()
 {
 	document.getElementById("add_device").value = getSelectedValue("device_list");
 }
+
+
+
+function addMac()
+{
+	//errors = proofreadDevice(document);
+	errors = "";
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n\n" + deviceS.AErr);
+	}
+	else
+	{
+		var host = document.getElementById("add_host");
+		var macs = document.getElementById("add_mac");
+		if (host.value != null && macs.value != null)
+		{
+			var deviceTable = document.getElementById('device_table_container').firstChild;
+			var values = [host.value, macs.value, createEditButton("editDevice")];
+			addTableRow(deviceTable, values, true, false, resetMacList);
+			host.value = "";
+			macs.value = "";
+		}
+	}
+}
+
 
 
 function addDevice()
@@ -377,6 +353,40 @@ function addDevice()
 		}
 	}
 }
+
+
+
+function removeDevice(table, row)
+{
+	resetMacList();
+}
+
+
+function removeGroup(table, row)
+{
+	resetGroupList();
+}
+
+
+
+function fixGroupName(element)
+{
+	var name = element.value;
+	name = name.replace(/-|\s/g,"_");
+	element.value = name;
+}
+
+
+function proofReadMac(input)
+{
+		// please implement proofReadMAC
+}
+
+
+
+/*******************************************************************************
+* Utility functions
+*******************************************************************************/
 
 /**
 * Returns an Object able to be used as a lookup table indexed by the MAC and
