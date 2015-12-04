@@ -305,10 +305,6 @@ function UCIContainer()
 			{	// simply replace the existing values
 				this.values[ key ] = value;
 			}
-			else
-			{	// add a new key and value
-					this.values[ key ] = value;
-			}
 		}
 		else
 		{	// add a new key and value
