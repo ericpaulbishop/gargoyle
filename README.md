@@ -17,6 +17,4 @@ Status
 TODO device.sh
 - Update selects after address
 - layout input and select elements
-- implement edit button
-- implement remove button
--
+- validate inputs

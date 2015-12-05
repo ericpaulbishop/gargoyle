@@ -403,7 +403,7 @@ function UCIContainer()
 	this.remove = function(pkg, section, option)
 	{
 		var removeKey = pkg + DOT + section;
-	       	if(option != "")
+	    if(option != "")
 		{
 			removeKey = removeKey + DOT + option;
 		}

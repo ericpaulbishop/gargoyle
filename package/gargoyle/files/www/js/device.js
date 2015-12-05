@@ -22,9 +22,39 @@ function saveChanges()
 		setControlsEnabled(false, true);
 
 		uci = uciOriginal.clone();
+		uci.removeAllSectionsOfType("known", "device");
 
-		saveDeviceChanges(uci);
-		saveGroupChanges(uci);
+		// save Device changes
+		deviceTable = document.getElementById('device_table_container').firstChild;
+		tableData = getTableDataArray(deviceTable, true, false);
+		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
+		{
+			rowData = tableData[rowIndex];
+			var device = rowData[0];
+			var macs = rowData[1];
+			if (uci.get("known", device).length == 0){
+				uci.set("known", device, null, "device");
+			}
+			uci.set("known", device, "mac", macs.split(" "), true);
+		}
+
+		// save Group changes
+		groupTable = document.getElementById('group_table_container').firstChild;
+		tableData = getTableDataArray(groupTable, true, false);
+		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
+		{
+			rowData = tableData[rowIndex];
+			var group = rowData[0];
+			var devices = rowData[1].split(" ");
+			for(dIndex=0; dIndex < devices.length; dIndex++)
+			{
+				var device = devices[dIndex];
+				if (uci.get("known", device).length == 0){
+					uci.set("known", device, null, "device");
+				}
+				uci.set("known", device, "group", group);
+			}
+		}
 
 		commands = uci.getScriptCommands(uciOriginal) ;
 
@@ -41,44 +71,6 @@ function saveChanges()
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-	}
-}
-
-
-function saveDeviceChanges(uci){
-	deviceTable = document.getElementById('device_table_container').firstChild;
-	tableData = getTableDataArray(deviceTable, true, false);
-
-	for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
-	{
-		rowData = tableData[rowIndex];
-		var device = rowData[0];
-		var macs = rowData[1];
-		if (uci.get("known", device).length == 0){
-			uci.set("known", device, null, "device");
-		}
-		uci.set("known", device, "mac", macs.split(" "), true);
-	}
-}
-
-
-function saveGroupChanges(uci){
-	groupTable = document.getElementById('group_table_container').firstChild;
-	tableData = getTableDataArray(groupTable, true, false);
-
-	for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
-	{
-		rowData = tableData[rowIndex];
-		var group = rowData[0];
-		var devices = rowData[1].split("\n");
-		for(dIndex=0; dIndex < devices.length; dIndex++)
-		{
-			var device = devices[dIndex];
-			if (uci.get("known", device).length == 0){
-				uci.set("known", device, null, "device");
-			}
-			uci.set("known", device, "group", group, true);
-		}
 	}
 }
 
@@ -114,8 +106,8 @@ function resetDeviceTable()
 	{	// process the MAC's assigned to each device
 		var device = devices[dIndex];
 		var devMacs = uciOriginal.get("known", device, "mac");
-		var macs = (devMacs instanceof Array) ? devMacs.join("\n") : "" ;
-		deviceTableData.push([device, macs, createEditButton("editDevice")]);
+		var macs = (devMacs instanceof Array) ? devMacs.join(" ") : "" ;
+		deviceTableData.push([device, macs, createEditButton(editDevice)]);
 	}
 
 	// create the device Table and place it into the document
@@ -158,7 +150,7 @@ function resetGroupTable()
 	{	// place each group in an array
     if (groups.hasOwnProperty(group))
 		{	// with a list of member devices
-			groupTableData.push([group, groups[group].join("\n"), createEditButton("editGroup")]);
+			groupTableData.push([group, groups[group].join(" "), createEditButton(editGroup)]);
 		}
 	}
 
@@ -352,6 +344,24 @@ function addDevice()
 			devices.value="";
 		}
 	}
+}
+
+
+function editDevice()
+{
+	editRow=this.parentNode.parentNode;
+	editRow.parentNode.removeChild(editRow);
+	document.getElementById('add_host').value = editRow.childNodes[0].firstChild.data;
+	document.getElementById('add_mac').value = editRow.childNodes[1].firstChild.data;
+}
+
+
+function editGroup()
+{
+	editRow=this.parentNode.parentNode;
+	editRow.parentNode.removeChild(editRow);
+	document.getElementById('add_group').value = editRow.childNodes[0].firstChild.data;
+	document.getElementById('add_device').value = editRow.childNodes[1].firstChild.data;
 }
 
 
