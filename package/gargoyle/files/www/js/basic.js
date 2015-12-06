@@ -1134,24 +1134,24 @@ function setWifiVisibility()
 
 	if(GwifiN == false)
 	{
-		setAllowableSelections('wifi_hwmode', ['disabled', '11g'], ['Disabled', 'B+G']);
+		setAllowableSelections('wifi_hwmode', ['disabled', '11g'], [UI.Disabled, 'B+G']);
 	}
 	else
 	{
-		setAllowableSelections('wifi_hwmode', ['disabled', '11g', '11gn'], ['Disabled', 'B+G', 'B+G+N']);
+		setAllowableSelections('wifi_hwmode', ['disabled', '11g', '11gn'], [UI.Disabled, 'B+G', 'B+G+N']);
 	}
 	
 	if(AwifiN == false)
 	{
-		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a'], ['Disabled', 'A']);
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a'], [UI.Disabled, 'A']);
 	}
 	else if(AwifiAC == true)
 	{
-		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an', '11anac'], ['Disabled', 'A', 'A+N', 'A+N+AC']);
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an', '11anac'], [UI.Disabled, 'A', 'A+N', 'A+N+AC']);
 	}
 	else
 	{
-		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an'], ['Disabled', 'A', 'A+N']);
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an'], [UI.Disabled, 'A', 'A+N']);
 	}
 	
 
@@ -1723,21 +1723,21 @@ function resetData()
 	{
 		var hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 		hwGmode = hwGmode == "" ? "11g" : hwGmode;
-		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11g', '11gn' ], ['Disabled', 'B+G', 'B+G+N' ] );
+		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11g', '11gn' ], [UI.Disabled, 'B+G', 'B+G+N' ] );
 		setSelectedValue("wifi_hwmode", hwGmode);
 		if(dualBandWireless)
 		{
 			if(AwifiAC)
 			{
-				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an', '11anac' ], ['Disabled', 'A', 'A+N', 'A+N+AC' ] );
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an', '11anac' ], [UI.Disabled, 'A', 'A+N', 'A+N+AC' ] );
 			}
 			else if(AwifiN)
 			{
-				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an' ], ['Disabled', 'A', 'A+N' ] );
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an' ], [UI.Disabled, 'A', 'A+N' ] );
 			}
 			else
 			{
-				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a' ], ['Disabled', 'A' ] );
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a' ], [UI.Disabled, 'A' ] );
 			}
 			//setAllowableSelections( "bridge_hwmode", [ '11g', '11a' ], ['N+G+B', 'N+A' ] );	//we do this later anyway
 			hwAmode = uciOriginal.get("wireless", wifiDevA, "hwmode");
