@@ -1,17 +1,17 @@
-/*	
- * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+/*
+ * This program is copyright © 2008-2012 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
- 
+
 var usbSStr=new Object(); //part of i18n
 
-/* 
- * mountPoint refers to the blkid mount point 
+/*
+ * mountPoint refers to the blkid mount point
  * mountPath may refer to either blkid mount point
- * or symlink to dev_[devid], wherever share is 
+ * or symlink to dev_[devid], wherever share is
  * actually mounted
  */
 var driveToMountPoints = [];
@@ -19,7 +19,7 @@ var mountPointToDrive = [];
 var mountPointToFs = [];
 var mountPointToDriveSize = [];
 
-/* 
+/*
  * These global data structure are special -- they contain
  * the data that will be saved once the user hits the save changes button
  *
@@ -28,9 +28,9 @@ var mountPointToDriveSize = [];
  * variable in a simpler format, and then update uci when we do the final save
 */
 var userNames = [];
-var nameToSharePath = [];  
+var nameToSharePath = [];
 var sharePathList = [];
-var sharePathToShareData = []; 
+var sharePathToShareData = [];
 
 
 var badUserNames = [ "ftp", "anonymous", "root", "daemon", "network", "nobody" ];
@@ -167,8 +167,8 @@ function saveChanges()
 		uci.removeSection("firewall", ftpFirewallRule);
 		uci.removeSection("firewall", pasvFirewallRule);
 	}
-		
-	
+
+
 
 	//update shares
 	uci.removeAllSectionsOfType("samba",  "samba")
@@ -176,7 +176,7 @@ function saveChanges()
 	uci.removeAllSectionsOfType("vsftpd", "vsftpd")
 	uci.removeAllSectionsOfType("vsftpd", "share")
 	uci.removeAllSectionsOfType("nfsd",   "nfsshare")
-	
+
 	uci.set("samba", "global", "", "samba")
 	uci.set("samba", "global", "workgroup", sambaGroup);
 
@@ -194,11 +194,11 @@ function saveChanges()
 
 		var shareName = shareData[0]
 		var shareId   = shareName.replace(/[^0-9A-Za-z]+/, "_").toLowerCase()
-		
+
 		var isCifs = shareData[5];
 		var isFtp  = shareData[6];
 		var isNfs  = shareData[7];
-		
+
 		var anonymousAccess = shareData[8]
 		var rwUsers = shareData[9]
 		var roUsers = shareData[10]
@@ -215,7 +215,7 @@ function saveChanges()
 			uci.set(pkg, shareId, "create_mask", "0777");
 			uci.set(pkg, shareId, "dir_mask", "0777");
 			uci.set(pkg, shareId, "browseable", "yes");
-			
+
 			uci.set(pkg, shareId, "read_only", (anonymousAccess == "ro" ? "yes" : "no"));
 			uci.set(pkg, shareId, "guest_ok", (anonymousAccess == "none" ? "no" : "yes"));
 			if(rwUsers.length > 0)
@@ -246,7 +246,7 @@ function saveChanges()
 				haveAnonymousFtp = true;
 				uci.set(pkg, shareId, "users_" + anonymousAccess, [ "anonymous" ], true);
 			}
-			
+
 		}
 		if(isNfs)
 		{
@@ -257,7 +257,7 @@ function saveChanges()
 			uci.set(pkg, shareId, "sync", "1");
 			uci.set(pkg, shareId, "insecure", "1");
 			uci.set(pkg, shareId, "subtree_check", "0");
-			
+
 			uci.set(pkg, shareId, "read_only", (nfsAccess == "ro" ? "1" : "0"));
 			if(nfsAccessIps instanceof Array)
 			{
@@ -268,7 +268,7 @@ function saveChanges()
 				uci.set(pkg, shareId, "allowed_hosts", [ "*" ], false)
 			}
 
-		}	
+		}
 	}
 	uci.set("vsftpd", "global", "", "vsftpd")
 	uci.set("vsftpd", "global", "anonymous", (haveAnonymousFtp ? "yes" : "no"))
@@ -282,9 +282,9 @@ function saveChanges()
 
 	var postCommands = [];
 	if(
-		uciOriginal.get("firewall", ftpFirewallRule,  "local_port") != uci.get("firewall", ftpFirewallRule,  "local_port") || 
-		uciOriginal.get("firewall", pasvFirewallRule, "start_port") != uci.get("firewall", pasvFirewallRule, "start_port") || 
-		uciOriginal.get("firewall", pasvFirewallRule, "end_port")   != uci.get("firewall", pasvFirewallRule, "end_port") 
+		uciOriginal.get("firewall", ftpFirewallRule,  "local_port") != uci.get("firewall", ftpFirewallRule,  "local_port") ||
+		uciOriginal.get("firewall", pasvFirewallRule, "start_port") != uci.get("firewall", pasvFirewallRule, "start_port") ||
+		uciOriginal.get("firewall", pasvFirewallRule, "end_port")   != uci.get("firewall", pasvFirewallRule, "end_port")
 	)
 	{
 		postCommands.push("/etc/init.d/firewall restart");
@@ -321,7 +321,7 @@ function addUser()
 
 
 	//validate
-	var errors = [];	
+	var errors = [];
 	var testUser = user.replace(/[0-9a-zA-Z]+/g, "");
 	if(user == "")
 	{
@@ -378,7 +378,7 @@ function addUser()
 		if(userTable == null)
 		{
 			var tableContainer = document.getElementById("user_table_container");
-			userTable = createTable(["", ""], [], "share_user_table", true, false, removeUserCallback); 
+			userTable = createTable(["", ""], [], "share_user_table", true, false, removeUserCallback);
 			setSingleChild(tableContainer, userTable);
 		}
 		var userPass = createInput("hidden")
@@ -420,7 +420,7 @@ function removeUserCallback(table, row)
 		var shareData = sharePathToShareData[sharePath]
 		var rwUsers   = shareData[9]
 		var roUsers   = shareData[10]
-		shareData[9]  = removeStringFromArray(rwUsers, removeUser) 
+		shareData[9]  = removeStringFromArray(rwUsers, removeUser)
 		shareData[10] = removeStringFromArray(roUsers, removeUser)
 		sharePathToShareData[sharePath] = shareData;
 	}
@@ -443,8 +443,8 @@ function removeUserCallback(table, row)
 
 		var newAccessTable =  createTable(["", ""], newTableData, "user_access_table", true, false, removeUserAccessCallback);
 		setSingleChild(document.getElementById("user_access_table_container"), newAccessTable);
-	}	
-		
+	}
+
 }
 
 function editUser()
@@ -461,7 +461,7 @@ function editUser()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -477,7 +477,7 @@ function editUser()
 	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=300,left=" + xCoor + ",top=" + yCoor );
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
-	
+
 	okButton.value         = usbSStr.ChPass;
 	okButton.className     = "default_button";
 	cancelButton.value     = UI.Cancel;
@@ -488,7 +488,7 @@ function editUser()
 	editShareUser=editShareUserRow.childNodes[0].firstChild.data;
 
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(editUserWindow.document != null)
@@ -496,11 +496,11 @@ function editUser()
 			if(editUserWindow.document.getElementById("bottom_button_container") != null)
 			{
 				editUserWindow.document.getElementById("share_user_text").appendChild( document.createTextNode(editShareUser) )
-				
-				
+
+
 				editUserWindow.document.getElementById("bottom_button_container").appendChild(okButton);
 				editUserWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
-				
+
 				cancelButton.onclick = function()
 				{
 					editUserWindow.close();
@@ -556,8 +556,8 @@ function resetData()
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_unmount").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none"
-	
-	
+
+
 	if(storageDrives.length > 0)
 	{
 
@@ -576,7 +576,7 @@ function resetData()
 		pmaxText.value = pmin == "" || pmax == "" ? 50999 : pmax;
 		document.getElementById("ftp_wan_pasv").checked = (wanFtp && pmin != "" && pmax != "") || (!wanFtp); //enable pasv by default when WAN FTP access is selected
 		updateWanFtpVisibility()
-	
+
 
 		//share users
 		userNames = uciOriginal.getAllSectionsOfType("share_users", "user"); //global
@@ -608,10 +608,10 @@ function resetData()
 		setAllowableSelections("user_access", userNames, userNames);
 
 
-		
+
 		//globals
 		driveToMountPoints = [];
-		mountPointToDrive = []; 
+		mountPointToDrive = [];
 		mountPointToFs = [];
 		mountPointToDriveSize = [];
 		mountPointList = []
@@ -632,11 +632,11 @@ function resetData()
 			}
 		}
 
-		
+
 		sharePathList = [];	   //global
 		sharePathToShareData = []; //global
 		nameToSharePath = [];      //global
-		
+
 		var mountedDrives = [];
 		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
@@ -664,14 +664,14 @@ function resetData()
 					}
 				}
 
-				
+
 				if( shareDrive != null )
 				{
 					mountedDrives[ shareDrive ] = 1;
-					
+
 					//shareMountPoint->[shareName, shareDrive, shareDiskMount, shareSubdir, fullSharePath, isCifs, isFtp, isNfs, anonymousAccess, rwUsers, roUsers, nfsAccess, nfsAccessIps]
 					var shareData = sharePathToShareData[fullSharePath] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  sharePathToShareData[fullSharePath] ;
-					
+
 					//name
 					if( shareData[0] == "" || config == "samba")
 					{
@@ -711,7 +711,7 @@ function resetData()
 									{
 										//handle anonymous for vsftpd
 										shareData[ 8 ] = readType
-										
+
 									}
 									else
 									{
@@ -766,11 +766,11 @@ function resetData()
 				}
 			}
 		}
-		
+
 		getMounted(sambaShares, "samba");
 		getMounted(ftpShares, "vsftpd");
 		getMounted(nfsShares, "nfsd");
-		
+
 		if(setDriveList(document))
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "block";
@@ -784,7 +784,7 @@ function resetData()
 		}
 
 
-		
+
 		//create current share table
 		//name, disk, subdirectory, type, [edit], [remove]
 		var shareTableData = [];
@@ -810,7 +810,7 @@ function resetData()
 	// not lack of network shared/mounts which is what the other variables
 	// refer to.  This can be confusing, so I'm putting this comment here
 
-	
+
 	if(drivesWithNoMounts.length > 0)
 	{
 		var dindex;
@@ -846,7 +846,7 @@ function resetData()
 //returns (boolean) whether drive list is empty
 function setDriveList(controlDocument)
 {
-		
+
 	var driveList = [];
 	var driveDisplayList = [];
 	for(driveIndex=0; driveIndex < storageDrives.length; driveIndex++)
@@ -895,13 +895,13 @@ function addUserAccess(controlDocument)
 	var addUser = getSelectedValue("user_access", controlDocument)
 	if(addUser == null || addUser == "")
 	{
-		alert(usbSStr.NShUsrErr)	
+		alert(usbSStr.NShUsrErr)
 	}
 	else
 	{
 		var access = getSelectedValue("user_access_type", controlDocument)
 		removeOptionFromSelectElement("user_access", addUser, controlDocument);
-		
+
 		createUserAccessTable(false)
 		var userAccessTable = controlDocument.getElementById("user_access_table");
 		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, controlDocument)
@@ -928,8 +928,8 @@ function updateFormatPercentages(ctrlId)
 	var otherCtrlId  = ctrlId == "swap_percent" ? "storage_percent" : "swap_percent"
 	var sizeId       = ctrlId == "swap_percent" ? "swap_size"       : "storage_size"
 	var otherSizeId  = ctrlId == "swap_percent" ? "storage_size"    : "swap_size"
-	
-				
+
+
 	var driveId = getSelectedValue("format_disk_select")
 	if(driveId != null)
 	{
@@ -941,10 +941,10 @@ function updateFormatPercentages(ctrlId)
 				document.getElementById(ctrlId).style.color = "black"
 				var percent2 = 100 - percent1;
 				var size = parseInt(drivesWithNoMounts[parseInt(driveId)][1]);
-	
+
 				var size1 = (percent1 * size)/100;
 				var size2 = size - size1;
-	
+
 				document.getElementById(otherCtrlId).value = "" + percent2
 				setChildText(sizeId, "(" + parseBytes(size1) + ")");
 				setChildText(otherSizeId, "(" + parseBytes(size2) + ")");
@@ -986,9 +986,9 @@ function getVisStr(vis)
 function getShareDataFromDocument(controlDocument, originalName)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
-	
+
 	var shareDrive = getSelectedValue("share_disk", controlDocument);
-	
+
 	var shareSubdir = controlDocument.getElementById("share_dir").value
 	shareSubdir     = shareSubdir.replace(/^\//, "").replace(/\/$/, "")
 
@@ -1000,7 +1000,7 @@ function getShareDataFromDocument(controlDocument, originalName)
 	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
 	var enabledTypes = getVis(controlDocument);
-	
+
 
 
 
@@ -1074,17 +1074,17 @@ function getShareDataFromDocument(controlDocument, originalName)
 function setDocumentFromShareData(controlDocument, shareData)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
-	
+
 	var shareDrive = shareData[1]
 	setDriveList(controlDocument);
 	setSelectedValue("share_disk", shareDrive, controlDocument)
 	controlDocument.getElementById("share_dir").value = "/" + shareData[3]
 	controlDocument.getElementById("share_name").value = shareData[0]
-	
+
 	var shareSpecificity = (shareData[2] == driveToMountPoints[shareDrive][0]) ? "blkid" : "dev";
 	setSelectedValue("share_specificity", shareSpecificity, controlDocument)
-	
-	
+
+
 	controlDocument.getElementById("share_type_cifs").checked = shareData[5]
 	controlDocument.getElementById("share_type_ftp").checked  = shareData[6]
 	controlDocument.getElementById("share_type_nfs").checked  = shareData[7]
@@ -1108,13 +1108,13 @@ function setDocumentFromShareData(controlDocument, shareData)
 			usersWithEntries[ userList[ulIndex] ] = 1
 		}
 	}
-	
+
 	setSelectedValue("nfs_access", shareData[11], controlDocument);
 	var nfsAccessIps = shareData[12];
 	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", controlDocument);
 	if(nfsAccessIps instanceof Array)
 	{
-		addAddressStringToTable(controlDocument,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
+		addAddressStringToTable(controlDocument,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, false, true, 250)
 	}
 
 	//update user select element
@@ -1147,7 +1147,7 @@ function addNewShare()
 	else
 	{
 		var shareData = rawShareData["share"]
-		
+
 		var shareName = shareData[0]
 		var fullSharePath = shareData[4];
 		var shareType = getVisStr( getVis() );
@@ -1158,7 +1158,7 @@ function addNewShare()
 
 		var shareTable = document.getElementById("share_table")
 		addTableRow(shareTable, [shareName, shareData[1], "/" + shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
-		
+
 		shareSettingsToDefault();
 	}
 
@@ -1167,7 +1167,7 @@ function addNewShare()
 function setShareTypeVisibility(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument
-	
+
 	var vis = getVis(controlDocument);
 	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
 
@@ -1240,7 +1240,7 @@ function removeShareCallback(table, row)
 
 	delete nameToSharePath[removeName]
 	delete sharePathToShareData[removePath]
-	
+
 	var newSharePathList = []
 	while(sharePathList.length > 0)
 	{
@@ -1269,7 +1269,7 @@ function editShare()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -1283,7 +1283,7 @@ function editShare()
 
 
 	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
-	
+
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
 	saveButton.value = UI.CApplyChanges;
@@ -1297,7 +1297,7 @@ function editShare()
 	editShareData=sharePathToShareData[ editPath ];
 
 
-	var runOnEditorLoaded = function () 
+	var runOnEditorLoaded = function ()
 	{
 		var updateDone=false;
 		if(editShareWindow.document != null)
@@ -1305,12 +1305,12 @@ function editShare()
 			if(editShareWindow.document.getElementById("bottom_button_container") != null)
 			{
 				updateDone = true;
-				
+
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
-				setDocumentFromShareData(editShareWindow.document, editShareData)	
-				
+
+				setDocumentFromShareData(editShareWindow.document, editShareData)
+
 				closeButton.onclick = function()
 				{
 					editShareWindow.close();
@@ -1332,7 +1332,7 @@ function editShare()
 
 						if(editName != shareName)
 						{
-							delete nameToSharePath[ editName ] 
+							delete nameToSharePath[ editName ]
 						}
 						if(editPath != fullSharePath)
 						{
@@ -1347,7 +1347,7 @@ function editShare()
 							}
 							newSharePathList.push(fullSharePath)
 							sharePathList = newSharePathList
-							delete sharePathToShareData[ editPath ]  
+							delete sharePathToShareData[ editPath ]
 						}
 						sharePathToShareData[ fullSharePath ] = shareData
 						nameToSharePath [ shareName ] = fullSharePath
@@ -1387,7 +1387,7 @@ function unmountAllUsb()
 {
 	setControlsEnabled(false, true, usbSStr.UDisk);
 
-	
+
 	var commands = "/etc/init.d/samba stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -1426,7 +1426,7 @@ function doDiskFormat()
 	var driveId        = drivesWithNoMounts[ parseInt(getSelectedValue("format_disk_select")) ][0]
 	var swapPercent    = parseFloat(document.getElementById("swap_percent").value)
 	var extroot        = document.getElementById("extroot").checked ? "1":"0";
-	
+
 	//format shell script requires percent as an integer, round as necessary
 	if(swapPercent >0 && swapPercent <1)
 	{
@@ -1440,10 +1440,10 @@ function doDiskFormat()
 
 	if(confirm(usbSStr.CfmPass1+"\n\n"+usbSStr.CfmPass2+" " + driveId))
 	{
-	
+
 		setControlsEnabled(false, true, usbSStr.FmtMsg);
-	
-	
+
+
 		var commands = "/usr/sbin/gargoyle_format_usb \"" + driveId + "\" \"" + swapPercent + "\" \"4\" \""+ extroot + "\"; sleep 1 ; /etc/init.d/usb_storage restart ; sleep 1 "
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -1527,7 +1527,7 @@ function reloadPage()
 		//IE calls onload even when page isn't loaded -- it just times out and calls it anyway
 		//We can test if it's loaded for real by looking at the (IE only) readyState property
 		//For Browsers NOT designed by dysfunctional cretins whose mothers were a pack of sewer-dwelling, shit-eating rodents,
-		//well, for THOSE browsers, readyState (and therefore reloadState) should be null 
+		//well, for THOSE browsers, readyState (and therefore reloadState) should be null
 		var reloadState = document.getElementById("reboot_test").readyState;
 		if( typeof(reloadState) == "undefined" || reloadState == null || reloadState == "complete")
 		{

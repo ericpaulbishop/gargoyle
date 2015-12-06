@@ -1557,6 +1557,7 @@ function validateIP(address)
 	//3 = ends with 255 (actually, broadcast address can end with other value if subnet smaller than 255... but let's not worry about that)
 	//4 = value >255 in at least one field
 	//5 = improper format
+	//6 = Undefined Group
 
 	var errorCode = 0;
 	if(address == "0.0.0.0")
@@ -1610,6 +1611,24 @@ function validateMac(mac)
 				errorCode = 1;
 			}
 		}
+	}
+	return errorCode;
+}
+
+
+function validateGroup(name)
+{
+	var errorCode = (deviceGroups().indexOf(name) == -1) ? 6 : 0 ;
+	return errorCode;
+}
+
+
+function validateMultipleIpsOrGroup(ips)
+{
+	var errorCode = validateGroup(ips);
+	if (errorCode != 0)
+	{
+		errorCode = validateMultipleIps(ips);
 	}
 	return errorCode;
 }
@@ -1915,6 +1934,10 @@ function proofreadMultipleIpsOrMacs(input)
 {
 	proofreadText(input, validateMultipleIpsOrMacs, 0);
 }
+function proofreadMultipleIpsOrGroup(input)
+{
+	proofreadText(input, validateMultipleIpsOrGroup, 0);
+}
 
 function proofreadDecimal(input)
 {
@@ -2101,10 +2124,11 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 	return spanEl;
 }
 
-function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 {
 	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
 	macsValid = macsValid == null ? true : macsValid;
+	groupsValid = groupsValid == null ? true : groupsValid;
 	ipValidType = ipValidType == null ? 3 : ipValidType;
 	var ipValidFunction;
 	if(ipValidType == 0)
@@ -2135,7 +2159,11 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		for(rowIndex=0; rowIndex < data.length; rowIndex++)
 		{
 			var addr = data[rowIndex][0];
-			if(validateMac(addr) == 0)
+			if (validateGroup(addr) == 0)
+			{
+				allCurrentMacs.push(groupMacs(addr));
+			}
+			else if(validateMac(addr) == 0)
 			{
 				allCurrentMacs.push(addr);
 			}
@@ -2157,9 +2185,9 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		var addr = splitAddrs[splitIndex];
 		var macValid = (macsValid && validateMac(addr) == 0);
 		var ipValid = (ipValidFunction(addr) == 0);
-		if(macValid || ipValid)
+		if(macValid || ipValid || groupsValid)
 		{
-			var currAddrs = macValid ? allCurrentMacs : allCurrentIps;
+			var currAddrs = (macValid || groupsValid) ? allCurrentMacs : allCurrentIps;
 			valid = currAddrs.length == 0 || (!testAddrOverlap(addr, currAddrs.join(","))) ? 0 : 1;
 			if(valid == 0)
 			{
@@ -2204,11 +2232,11 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 }
 
 
-function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 {
 
 	var newAddrs = controlDocument.getElementById(textId).value;
-	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 	if(valid)
 	{
 		controlDocument.getElementById(textId).value = "";
@@ -2754,10 +2782,62 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 }
 
 //apparently these var fbS=new Object(); //part of i18n  -> objects do not have a length (it is undefined)
-function ObjLen(an_obj) {
+function ObjLen(an_obj)
+{
 	var len=0;
 	for (item in an_obj) {
 		len++;
 	}
 	return len
+}
+
+
+function deviceGroups()
+{
+	// get a list of Device Groups from uci
+	var groups = [];
+	var devices = uciOriginal.getAllSectionsOfType("known", "device");
+	for (dIndex=0; dIndex < devices.length; dIndex++)
+	{	// survey all of the devices and groups
+		var device = devices[dIndex];
+		var group = uciOriginal.get("known", device, "group");
+		if (group.length > 0  && groups.indexOf(group) == -1)
+		{
+			groups.push(group);
+		}
+	}
+	return groups;
+}
+
+function groupDevices(group)
+{
+	var groupDevices = [];
+	var devices = uciOriginal.getAllSectionsOfType("known", "device");
+	for (dIndex=0; dIndex < devices.length; dIndex++)
+	{	// survey all of the devices
+		var device = devices[dIndex];
+		var deviceGroup = uciOriginal.get("known", device, "group");
+		if (deviceGroup.localeCompare(group) == 0)
+		{
+			groupDevices.push(device);
+		}
+	}
+	return groupDevices;
+}
+
+
+function groupMacs(group)
+{
+	groupMacs = [];
+	var devices = groupDevices(group);
+	for (dIndex = 0 ; dIndex < devices.length; dIndex++)
+	{
+		var device = devices[dIndex];
+		var mac = uciOriginal.get("known", device, "mac");
+		if (mac.length > 0)
+		{
+			groupMacs = groupMacs.concat(mac);
+		}
+	}
+	return groupMacs;
 }
