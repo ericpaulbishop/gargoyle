@@ -22,7 +22,7 @@ function saveChanges()
 		setControlsEnabled(false, true);
 
 		uci = uciOriginal.clone();
-		uci.removeAllSectionsOfType("known", "device");
+		uci.removeAllSectionsOfType("dhcp", "host");
 
 		// save Device changes
 		deviceTable = document.getElementById('device_table_container').firstChild;
@@ -30,17 +30,20 @@ function saveChanges()
 		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
 		{
 			rowData = tableData[rowIndex];
-			var device = rowData[0];
+			var host = rowData[0];
 			var macs = rowData[1];
-			if (uci.get("known", device).length == 0){
-				uci.set("known", device, null, "device");
+			if (uci.get("dhcp", host).length == 0){
+				uci.set("dhcp", host, null, "host");
+				uci.set("dhcp", host, "name", host);
+				uci.set("dhcp", host, "ip", 'ignore');
 			}
-			uci.set("known", device, "mac", macs.split(" "), true);
+			uci.set("dhcp", host, "mac", macs);
 		}
 
 		// save Group changes
 		groupTable = document.getElementById('group_table_container').firstChild;
 		tableData = getTableDataArray(groupTable, true, false);
+		var groups = [];
 		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
 		{
 			rowData = tableData[rowIndex];
@@ -48,15 +51,21 @@ function saveChanges()
 			var devices = rowData[1].split(" ");
 			for(dIndex=0; dIndex < devices.length; dIndex++)
 			{
-				var device = devices[dIndex];
-				if (uci.get("known", device).length == 0){
-					uci.set("known", device, null, "device");
+				var host = devices[dIndex];
+				if (uci.get("dhcp", host).length == 0){
+					uci.set("dhcp", host, null, "host");
+					uci.set("dhcp", host, "name", host);
+					uci.set("dhcp", host, "ip", 'ignore');
 				}
-				uci.set("known", device, "group", group);
+				uci.set("dhcp", host, "group", group);
+				if(groups.indexOf(group) == -1)
+				{
+					groups.push(group);
+				}
 			}
 		}
 
-		commands = uci.getScriptCommands(uciOriginal) ;
+		var commands = uci.getScriptCommands(uciOriginal) + "\n" + ipsetCommands.join("\n");
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
@@ -101,17 +110,17 @@ function resetDeviceTable()
 {
 	var deviceTableData = new Array();
 
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// process the MAC's assigned to each device
-		var device = devices[dIndex];
-		var devMacs = uciOriginal.get("known", device, "mac");
-		var macs = (devMacs instanceof Array) ? devMacs.join(" ") : "" ;
-		deviceTableData.push([device, macs, createEditButton(editDevice)]);
+		var host = hosts[hIndex];
+		var hostMacs = uciOriginal.get("dhcp", host, "mac");
+		var macs = (hostMacs instanceof Array) ? devMacs.join(" ") : hostMacs ;
+		deviceTableData.push([host, macs, createEditButton(editDevice)]);
 	}
 
 	// create the device Table and place it into the document
-	var columnNames=[deviceS.DevNm, "MACs", ''];
+	var columnNames=[hosts.DevNm, "MACs", ''];
 	var deviceTable=createTable(columnNames, deviceTableData, "device_table", true, false, removeDevice );
 	var tableContainer = document.getElementById('device_table_container');
 	if(tableContainer.firstChild != null)
@@ -127,21 +136,21 @@ function resetGroupTable()
 	var groupTableData = new Array();
 
 	var groups = new Object();
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
 
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIndex];
-		var group = uciOriginal.get("known", device, "group");
+		var host = hosts[hIndex];
+		var group = uciOriginal.get("dhcp", host, "group");
 		if (group != null && group.length > 0)
 		{
 			if (groups.hasOwnProperty(group))
 			{
-				groups[group].push(device);
+				groups[group].push(host);
 			}
 			else
 			{
-				groups[group] = [device];
+				groups[group] = [host];
 			}
 		}
 	}
@@ -210,11 +219,11 @@ function resetMacList()
 function resetGroupList()
 {
 	var groups = [];
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIndex];
-		var group = uciOriginal.get("known", device, "group");
+		var host = hosts[hIndex];
+		var group = uciOriginal.get("dhcp", host, "group");
 		if (group.length > 0  && groups.indexOf(group) == -1)
 		{
 			groups.push(group);
@@ -241,15 +250,15 @@ function resetDeviceList()
 	var gpVals = [ "" ];
 	var gpText = [ deviceS.SelD ];
 
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIndex];
-		var group = uciOriginal.get("known", device, "group");
+		var host = hosts[hIndex];
+		var group = uciOriginal.get("dhcp", host, "group");
 		if (group == null || group.length == 0)
 		{
-			gpVals.push( device );
-			gpText.push( device );
+			gpVals.push( host );
+			gpText.push( host );
 		}
 	}
 	setAllowableSelections("device_list", gpVals, gpText, document);

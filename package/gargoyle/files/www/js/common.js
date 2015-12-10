@@ -2796,11 +2796,11 @@ function deviceGroups()
 {
 	// get a list of Device Groups from uci
 	var groups = [];
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices and groups
-		var device = devices[dIndex];
-		var group = uciOriginal.get("known", device, "group");
+		var host = hosts[hIndex];
+		var group = uciOriginal.get("dhcp", host, "group");
 		if (group.length > 0  && groups.indexOf(group) == -1)
 		{
 			groups.push(group);
@@ -2809,31 +2809,31 @@ function deviceGroups()
 	return groups;
 }
 
-function groupDevices(group)
+function groupHosts(group)
 {
-	var groupDevices = [];
-	var devices = uciOriginal.getAllSectionsOfType("known", "device");
-	for (dIndex=0; dIndex < devices.length; dIndex++)
+	var groupHosts = [];
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices
-		var device = devices[dIndex];
-		var deviceGroup = uciOriginal.get("known", device, "group");
-		if (deviceGroup.localeCompare(group) == 0)
+		var host = hosts[hIndex];
+		var hostGroup = uciOriginal.get("dhcp", host, "group");
+		if (hostGroup.localeCompare(group) == 0)
 		{
-			groupDevices.push(device);
+			groupHosts.push(host);
 		}
 	}
-	return groupDevices;
+	return groupHosts;
 }
 
 
 function groupMacs(group)
 {
 	groupMacs = [];
-	var devices = groupDevices(group);
-	for (dIndex = 0 ; dIndex < devices.length; dIndex++)
+	var hosts = groupHosts(group);
+	for (hIndex = 0 ; hIndex < hosts.length; hIndex++)
 	{
-		var device = devices[dIndex];
-		var mac = uciOriginal.get("known", device, "mac");
+		var host = hosts[hIndex];
+		var mac = uciOriginal.get("dhcp", host, "mac");
 		if (mac.length > 0)
 		{
 			groupMacs = groupMacs.concat(mac);
