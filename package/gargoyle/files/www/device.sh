@@ -46,11 +46,6 @@
 			<div id='device_add_container'>
 				<%in templates/device_template %>
 			</div>
-			<div>
-				<select id="mac_list" onchange="macSelected()" >
-					<option value="none"><%~ SelM %></option>
-				</select>
-			</div>
 		</div>
 
 		<div id='device_table_heading_container'>
@@ -71,14 +66,6 @@
 			<div class='bottom_gap'>
 				<div id='group_add_container'>
 					<%in templates/group_template %>
-				</div>
-				<div>
-					<select id="group_list" onchange="groupSelected()" >
-						<option value="none"><%~ SelG %></option>
-					</select>
-					<select id="device_list" onchange="deviceSelected()" >
-						<option value="none"><%~ SelD %></option>
-					</select>
 				</div>
 			</div>
 

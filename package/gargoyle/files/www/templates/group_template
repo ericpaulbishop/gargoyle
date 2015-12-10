@@ -9,4 +9,17 @@
     <td><input type='text' id='add_device' size='50'/></td>
     <td><input type='button' id='add_device_button' value="<%~ Add %>" class='default_button' onclick='addDevice()'/></td>
   </tr>
+  <tr>
+    <td>
+        <select id="group_list" onchange="groupSelected()" >
+            <option value="none"><%~ SelG %></option>
+        </select>
+    </td>
+    <td>
+        <select id="device_list" onchange="deviceSelected()" >
+            <option value="none"><%~ SelD %></option>
+        </select>
+    </td>
+    <td></td>
+  </tr>
 </table>
