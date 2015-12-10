@@ -80,7 +80,7 @@ function saveChanges()
 			if(req.readyState == 4)
 			{
 				uciOriginal = uci.clone();
-				//resetData();
+				resetData();
 				setControlsEnabled(true);
 				//alert(req.responseText);
 			}
@@ -204,7 +204,7 @@ function resetMacList()
 	var hlText = [ deviceS.SelM ];
 	for (var mac in knownMac)
 	{
-    if (knownMac.hasOwnProperty(mac))
+    	if (knownMac.hasOwnProperty(mac))
 		{
 			if( deviceMacs.indexOf(mac) == -1 )
 			{ // exclude MAC's that are already assigned to a device
@@ -330,6 +330,7 @@ function addMac()
 			var deviceTable = document.getElementById('device_table_container').firstChild;
 			var values = [host.value, macs.value, createEditButton("editDevice")];
 			addTableRow(deviceTable, values, true, false, resetMacList);
+			addNewOption('device_list', host.value, host.value);
 			host.value = "";
 			macs.value = "";
 		}
@@ -355,6 +356,8 @@ function addDevice()
 			var groupTable = document.getElementById('group_table_container').firstChild;
 			var values = [group.value, devices.value, createEditButton("editGroup")];
 			addTableRow(groupTable,values, true, false, resetDeviceList);
+			addNewOption('group_list', group.value, group.value);
+			addOptionToSelectElement('group_list', group.value, group.value, null, document)
 			group.value="";
 			devices.value="";
 		}
@@ -486,4 +489,19 @@ function lookupList(data, field){
 		lookup[key] = data[index];
 	}
 	return lookup;
+}
+
+
+function addNewOption(selectId, optionText, optionValue)
+{
+	var options = document.getElementById(selectId).options;
+	var exists = false;
+	for(oIndex=0; oIndex < options.length; oIndex++)
+	{
+		exists = exists | (options[oIndex].text == optionText);
+	}
+	if (!exists)
+	{
+		addOptionToSelectElement(selectId, optionText, optionValue, null, document)
+	}
 }
