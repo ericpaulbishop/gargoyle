@@ -65,6 +65,12 @@ function saveChanges()
 			}
 		}
 
+		// create ipsets
+		var ipsetCommands = ["ipset destroy"]; // fails on ipsets with existing references
+		for (gIndex=0; gIndex < groups.length; gIndex++){
+			ipsetCommands.push("ipset create " + groups[gIndex] + " iphash");
+		}
+
 		var commands = uci.getScriptCommands(uciOriginal) + "\n" + ipsetCommands.join("\n");
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
