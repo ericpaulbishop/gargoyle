@@ -1557,7 +1557,7 @@ function validateIP(address)
 	//3 = ends with 255 (actually, broadcast address can end with other value if subnet smaller than 255... but let's not worry about that)
 	//4 = value >255 in at least one field
 	//5 = improper format
-	//6 = Undefined Group
+	//6 = invalid characters
 
 	var errorCode = 0;
 	if(address == "0.0.0.0")
@@ -1615,10 +1615,29 @@ function validateMac(mac)
 	return errorCode;
 }
 
-
+/*
+* Each Group is reflected by an ipset of the same name so the Group Name must
+ be a valid ipset name.
+*/
 function validateGroup(name)
 {
-	var errorCode = (deviceGroups().indexOf(name) == -1) ? 6 : 0 ;
+	if(name.match(/^[a-zA-Z0-9-_.:]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
+	return errorCode;
+}
+
+
+/*
+* Host names may include a-z, A-Z, 0-9 and -
+*/
+function validateHost(name)
+{
+	if(name.match(/^[a-zA-Z0-9-]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
 	return errorCode;
 }
 
@@ -1698,6 +1717,35 @@ function validateMultipleIpsOrMacs(addresses)
 	return valid;
 
 }
+
+function validateMultipleMacs(macs)
+{
+	macs = macs.replace(/^[\t ]+/g, "");
+	macs = macs.replace(/[\t ]+$/g, "");
+	var splitMacs = macs.split(/[\t ]*,[\t ]*/);
+	var valid = splitMacs.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitMacs.length > 0)
+	{
+		var nextMac = splitMacs.pop();
+		valid = validateMac(nextMac);
+	}
+	return valid;
+}
+
+function validateMultipleHosts(hosts)
+{
+	hosts = hosts.replace(/^[\t ]+/g, "");
+	hosts = hosts.replace(/[\t ]+$/g, "");
+	var splitHosts = hosts.split(/[\t ]*,[\t ]*/);
+	var valid = splitHosts.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitHosts.length > 0)
+	{
+		var nextHost = splitHosts.pop();
+		valid = validateHost(nextHost);
+	}
+	return valid;
+}
+
 
 function validateDecimal(num)
 {
@@ -1926,6 +1974,10 @@ function proofreadMac(input)
 {
 	proofreadText(input, validateMac, 0);
 }
+function proofreadMultipleMacs(input)
+{
+	proofreadText(input, validateMultipleMacs, 0);
+}
 function proofreadMultipleIps(input)
 {
 	proofreadText(input, validateMultipleIps, 0);
@@ -1937,6 +1989,18 @@ function proofreadMultipleIpsOrMacs(input)
 function proofreadMultipleIpsOrGroup(input)
 {
 	proofreadText(input, validateMultipleIpsOrGroup, 0);
+}
+function proofreadHost(input)
+{
+	proofreadText(input, validateHost, 0);
+}
+function proofreadMultipleHosts(input)
+{
+	proofreadText(input, validateMultipleHosts, 0);
+}
+function proofreadGroup(input)
+{
+	proofreadText(input, validateGroup, 0);
 }
 
 function proofreadDecimal(input)

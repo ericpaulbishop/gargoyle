@@ -13,11 +13,4 @@ of needing to assign a static IP address to each device requiring management.
 Status
 - Gargoyle-Connection-Devices has a Section for Known Devices and another for Device Groups.
 - Known Device and Group data is stored in uci /etc/config/dhcp
-
-TODO device.sh
-- Update selects after address
-- layout input and select elements
-- validate inputs
-
-TODO quotas.sh
--
+- Device Groups can be used to apply a Quota.

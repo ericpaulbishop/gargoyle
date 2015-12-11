@@ -291,7 +291,6 @@ function macSelected()
 		if (host.value == "")
 		{
 			host.value = (selectedVal.split(/,/))[0];
-			fixGroupName(host);
 		}
 		var selMac = (selectedVal.split(/,/))[1];
 		macs.value = (macs.value == "") ? selMac : macs.value.concat(" ", selMac);
@@ -313,10 +312,9 @@ function deviceSelected()
 
 
 
-function addMac()
+function addDevice()
 {
-	//errors = proofreadDevice(document);
-	errors = "";
+	errors = proofReadDeviceForm();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n" + deviceS.AErr);
@@ -339,10 +337,9 @@ function addMac()
 
 
 
-function addDevice()
+function addDeviceToGroup()
 {
-	//errors = proofreadDevice(document);
-	errors = "";
+	errors = proofReadGroupForm();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n" + deviceS.AErr);
@@ -394,22 +391,6 @@ function removeGroup(table, row)
 {
 	resetGroupList();
 }
-
-
-
-function fixGroupName(element)
-{
-	var name = element.value;
-	name = name.replace(/-|\s/g,"_");
-	element.value = name;
-}
-
-
-function proofReadMac(input)
-{
-		// please implement proofReadMAC
-}
-
 
 
 /*******************************************************************************
@@ -504,4 +485,58 @@ function addNewOption(selectId, optionText, optionValue)
 	{
 		addOptionToSelectElement(selectId, optionText, optionValue, null, document)
 	}
+}
+
+/******************************************************************************
+* Validation functions
+******************************************************************************/
+
+/**
+* Checks for invalid or duplicate host names and MACs
+*/
+function proofReadDeviceForm()
+{
+	addIds=['add_host', 'add_mac'];
+	labelIds= ['add_host_label', 'add_mac_label'];
+	functions = [validateHost, validateMac];
+	returnCodes = [0,0];
+	visibilityIds=addIds;
+	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+
+	if(errors.length == 0)
+	{	// check that the host and mac are not duplicates of existing values
+		var newHost = document.getElementById('add_host').value;
+		var newMac = document.getElementById('add_mac').value;
+		var deviceTable = tableDocument.getElementById('device_table_container').firstChild;
+		var currentData = getTableDataArray(deviceTable, true, false);
+		for (cdIndex=0; cdIndex < currentData.length ; cdIndex++)
+		{
+			var rowData = currentData[cdIndex];
+			var oldHost = rowData[0];
+			var oldMac = rowData[1];
+			if(oldHost != '' && oldHost != '-' && oldHost == newHost)
+			{
+				errors.push(dhcpS.dHErr);
+			}
+			if(oldMac == newMac)
+			{
+				errors.push(dhcpS.dMErr);
+			}
+		}
+	}
+	return errors;
+}
+
+
+/**
+* Checks for invalid host or group names
+*/
+function proofReadGroupForm()
+{
+	addIds=['add_group', 'add_device'];
+	labelIds= ['add_group_label', 'add_device_label'];
+	functions = [validateGroup, validateDevice];
+	returnCodes = [0,0];
+	visibilityIds=addIds;
+	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
 }
