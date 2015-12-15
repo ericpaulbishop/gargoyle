@@ -83,7 +83,7 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci del gargoyle.system.email_notifications
 	uci commit
 fi
-cat /etc/crontabs/root | sed '/\/usr\/email\/email.sh/d' > /tmp/cron.backup
+cat /etc/crontabs/root | sed '/\/usr\/lib\/gargoyle\/email.sh/d' > /tmp/cron.backup
 mv /tmp/cron.backup /etc/crontabs/root
 /etc/init.d/cron restart
 endef
