@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-email-notifications
-PKG_VERSION:=1.0
-PKG_RELEASE:=1
+PKG_VERSION:=2.0
+PKG_RELEASE:=2
 
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
@@ -71,6 +71,7 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci set gargoyle.system.email_notifications='380'
 	uci commit
 fi
+chmod +x /usr/lib/gargoyle/email.sh
 endef
 
 define Package/plugin-gargoyle-email-notifications/postrm
@@ -82,17 +83,9 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci del gargoyle.system.email_notifications
 	uci commit
 fi
-cat /etc/crontabs/root | sed '/\\/usr\\/email\\/email.sh/d' > /tmp/cron.backup
+cat /etc/crontabs/root | sed '/\/usr\/email\/email.sh/d' > /tmp/cron.backup
 mv /tmp/cron.backup /etc/crontabs/root
 /etc/init.d/cron restart
-if [ $(opkg info msmtp 2>/dev/null | grep -c "not-installed") -eq 0 ];
-then
-  opkg remove msmtp
-fi
-if [ $(opkg info msmtp-nossl 2>/dev/null | grep -c "not-installed") -eq 0 ];
-then
-  opkg remove msmtp-nossl
-fi
 endef
 
 define Package/plugin-gargoyle-email-notifications/install

@@ -501,7 +501,6 @@ function SeatCronData(cron_minute, cron_hour, cron_day, cron_cmd) {
     }else if (cron_cmd.search(garCron) >= 0) {
 		SetCellContents(ecell, "60", 1000, hour_green);
 	} 
-	
 }
 
 function CronTabsToTables() {
@@ -909,6 +908,15 @@ function LoadData() {
 		document.getElementById("TLS").disabled = true;
 	}
 	
+	var el = document.getElementsByName('content');
+	
+	if(!webmonEnabled){
+		el[0].disabled=true;
+		el[1].disabled=true;
+		el[0].checked=false;
+		el[1].checked=false;
+	}
+	
 	if(config['host'] == "mailhub.oursite.example"){
 		return;
 	}
@@ -919,45 +927,34 @@ function LoadData() {
 	document.getElementById("receiver").value = uciOriginal.get("email", selector[0], "recipient");
 	document.getElementById("count").value = uciOriginal.get("email", selector[0], "count");
 	
-	var el = document.getElementsByName('content');
 	var chars = uciOriginal.get("email", selector[0], "data").split('');
 	
 	for (var i=0;i<el.length;i++){
 		for(var o = 0;o<chars.length;o++){
-			if(i == 0){
-				if(!webmonEnabled){
-					el[i].disabled=true;
-					el[i+1].disabled=true;
-					el[i].checked=false;
-					el[i+1].checked=false;
-					i++;
+			if(parseInt(chars[o]) == i){
+				el[i].checked=true;
+				if(i == 5){
+					document.getElementById("bandwidthIntervalSelect").disabled = false;
+					document.getElementById("count").disabled = false;
+					var interval = uciOriginal.get("email", selector[0], "bandwidthInterval");
+					switch(interval){
+						case "minute":
+							document.getElementById("bandwidthIntervalSelect").value = "minutes";
+							break;
+						case "180":
+							document.getElementById("bandwidthIntervalSelect").value = "quarter hours";
+							break;
+						case "hour":
+							document.getElementById("bandwidthIntervalSelect").value = "hours";
+							break;
+						case "day":
+							document.getElementById("bandwidthIntervalSelect").value = "days";
+							break;
+						default:
+							break;
+					}			
 				}
-			}else{
-				if(parseInt(chars[o]) == i){
-					el[i].checked=true;
-					if(i == 5){
-						document.getElementById("bandwidthIntervalSelect").disabled = false;
-						document.getElementById("count").disabled = false;
-						var interval = uciOriginal.get("email", selector[0], "bandwidthInterval");
-						switch(interval){
-							case "minute":
-								document.getElementById("bandwidthIntervalSelect").value = "minutes";
-								break;
-							case "180":
-								document.getElementById("bandwidthIntervalSelect").value = "quarter hours";
-								break;
-							case "hour":
-								document.getElementById("bandwidthIntervalSelect").value = "hours";
-								break;
-							case "day":
-								document.getElementById("bandwidthIntervalSelect").value = "days";
-								break;
-							default:
-								break;
-						}			
-					}
-					break;
-				}
+				break;
 			}
 		}
 	}
