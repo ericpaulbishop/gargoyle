@@ -35,7 +35,7 @@ function saveChanges()
 			if (uci.get("dhcp", host).length == 0){
 				uci.set("dhcp", host, null, "host");
 				uci.set("dhcp", host, "name", host);
-				uci.set("dhcp", host, "ip", 'ignore');
+				//uci.set("dhcp", host, "ip", 'ignore');
 			}
 			uci.set("dhcp", host, "mac", macs);
 		}
@@ -55,7 +55,7 @@ function saveChanges()
 				if (uci.get("dhcp", host).length == 0){
 					uci.set("dhcp", host, null, "host");
 					uci.set("dhcp", host, "name", host);
-					uci.set("dhcp", host, "ip", 'ignore');
+					//uci.set("dhcp", host, "ip", 'ignore');
 				}
 				uci.set("dhcp", host, "group", group);
 				if(groups.indexOf(group) == -1)
@@ -108,6 +108,11 @@ function resetData()
 	resetMacList();
 	resetGroupList();
 	resetDeviceList();
+
+	var host = document.getElementById("add_host").value = "";
+	var macs = document.getElementById("add_mac").value = "";
+	var group = document.getElementById("add_group").value = "";
+	var devices = document.getElementById("add_device").value = "";
 }
 
 
@@ -126,7 +131,7 @@ function resetDeviceTable()
 	}
 
 	// create the device Table and place it into the document
-	var columnNames=[hosts.DevNm, "MACs", ''];
+	var columnNames=[deviceS.DevNm, "MACs", ''];
 	var deviceTable=createTable(columnNames, deviceTableData, "device_table", true, false, removeDevice );
 	var tableContainer = document.getElementById('device_table_container');
 	if(tableContainer.firstChild != null)
@@ -290,7 +295,8 @@ function macSelected()
 	{
 		if (host.value == "")
 		{
-			host.value = (selectedVal.split(/,/))[0];
+			var selectedHost = (selectedVal.split(/,/))[0];
+			host.value = selectedHost.replace(/-| /g,"_");
 		}
 		var selMac = (selectedVal.split(/,/))[1];
 		macs.value = (macs.value == "") ? selMac : macs.value.concat(" ", selMac);
@@ -299,15 +305,11 @@ function macSelected()
 }
 
 
-function groupSelected()
-{
-	document.getElementById("add_group").value = getSelectedValue("group_list");
-}
-
-
 function deviceSelected()
 {
-	document.getElementById("add_device").value = getSelectedValue("device_list");
+	var selectedVal = getSelectedValue("device_list");
+	var devices = document.getElementById("add_device");
+	devices.value = selectedValue + " " + devices.value;
 }
 
 
@@ -353,8 +355,6 @@ function addDeviceToGroup()
 			var groupTable = document.getElementById('group_table_container').firstChild;
 			var values = [group.value, devices.value, createEditButton("editGroup")];
 			addTableRow(groupTable,values, true, false, resetDeviceList);
-			addNewOption('group_list', group.value, group.value);
-			addOptionToSelectElement('group_list', group.value, group.value, null, document)
 			group.value="";
 			devices.value="";
 		}
@@ -364,6 +364,7 @@ function addDeviceToGroup()
 
 function editDevice()
 {
+	location.hash="#device_form";
 	editRow=this.parentNode.parentNode;
 	editRow.parentNode.removeChild(editRow);
 	document.getElementById('add_host').value = editRow.childNodes[0].firstChild.data;
@@ -373,6 +374,7 @@ function editDevice()
 
 function editGroup()
 {
+	location.hash="#group_form";
 	editRow=this.parentNode.parentNode;
 	editRow.parentNode.removeChild(editRow);
 	document.getElementById('add_group').value = editRow.childNodes[0].firstChild.data;
@@ -498,16 +500,16 @@ function proofReadDeviceForm()
 {
 	addIds=['add_host', 'add_mac'];
 	labelIds= ['add_host_label', 'add_mac_label'];
-	functions = [validateHost, validateMac];
+	functions = [validateUCI, validateMultipleMacs];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
-	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 
 	if(errors.length == 0)
 	{	// check that the host and mac are not duplicates of existing values
 		var newHost = document.getElementById('add_host').value;
 		var newMac = document.getElementById('add_mac').value;
-		var deviceTable = tableDocument.getElementById('device_table_container').firstChild;
+		var deviceTable = document.getElementById('device_table_container').firstChild;
 		var currentData = getTableDataArray(deviceTable, true, false);
 		for (cdIndex=0; cdIndex < currentData.length ; cdIndex++)
 		{
@@ -534,9 +536,9 @@ function proofReadDeviceForm()
 function proofReadGroupForm()
 {
 	addIds=['add_group', 'add_device'];
-	labelIds= ['add_group_label', 'add_device_label'];
-	functions = [validateGroup, validateDevice];
+	labelIds= ['add_group_label', 'add_known_device_label'];
+	functions = [validateGroup, validateMultipleUCIs];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
-	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 }

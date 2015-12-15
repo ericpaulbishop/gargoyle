@@ -351,7 +351,8 @@ function UCIContainer()
 	{
 		includeLists = includeLists == null ? false : includeLists;
 		var matches = new Array();
-		for (var key in this.values) {
+		for (var key in this.values)
+		{
 		  if (this.values.hasOwnProperty(key))
 			{
 				var test = pkg + "." + section;
@@ -368,7 +369,8 @@ function UCIContainer()
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();
-		for (var key in this.values) {
+		for (var key in this.values)
+		{
 		  if (this.values.hasOwnProperty(key))
 			{
 				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
@@ -505,7 +507,6 @@ function UCIContainer()
 
 		var listsWithoutUpdates = [];
 
-
 		for (var key in oldSettings.values)
 		{
 			if (oldSettings.values.hasOwnProperty(key))
@@ -555,7 +556,6 @@ function UCIContainer()
 				var newValue = this.values[key];
 				try
 				{
-
 					if( (oldValue instanceof Array) || (newValue instanceof Array) )
 					{
 						if(newValue instanceof Array)
@@ -1621,6 +1621,7 @@ function validateMac(mac)
 */
 function validateGroup(name)
 {
+	var errorCode = 0;
 	if(name.match(/^[a-zA-Z0-9-_.:]{2,63}$/) == null)
 	{
 		errorCode = 6;
@@ -1634,7 +1635,22 @@ function validateGroup(name)
 */
 function validateHost(name)
 {
+	var errorCode = 0;
 	if(name.match(/^[a-zA-Z0-9-]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
+	return errorCode;
+}
+
+
+/*
+* UCI names may include a-z, A-Z, 0-9 and _
+*/
+function validateUCI(name)
+{
+	var errorCode = 0;
+	if(name.match(/^[a-zA-Z0-9_]{2,63}$/) == null)
 	{
 		errorCode = 6;
 	}
@@ -1722,7 +1738,7 @@ function validateMultipleMacs(macs)
 {
 	macs = macs.replace(/^[\t ]+/g, "");
 	macs = macs.replace(/[\t ]+$/g, "");
-	var splitMacs = macs.split(/[\t ]*,[\t ]*/);
+	var splitMacs = macs.split(/[\t ]+/);
 	var valid = splitMacs.length > 0 ? 0 : 1; //1= error, 0=true
 	while(valid == 0 && splitMacs.length > 0)
 	{
@@ -1742,6 +1758,20 @@ function validateMultipleHosts(hosts)
 	{
 		var nextHost = splitHosts.pop();
 		valid = validateHost(nextHost);
+	}
+	return valid;
+}
+
+function validateMultipleUCIs(ucis)
+{
+	ucis = ucis.replace(/^[\t ]+/g, "");
+	ucis = ucis.replace(/[\t ]+$/g, "");
+	var splitUCIs = ucis.split(/[\t ]* [\t ]*/);
+	var valid = splitUCIs.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitUCIs.length > 0)
+	{
+		var nextUCI = splitUCIs.pop();
+		valid = validateUCI(nextUCI);
 	}
 	return valid;
 }
@@ -1997,6 +2027,14 @@ function proofreadHost(input)
 function proofreadMultipleHosts(input)
 {
 	proofreadText(input, validateMultipleHosts, 0);
+}
+function proofreadUCI(input)
+{
+	proofreadText(input, validateUCI, 0);
+}
+function proofreadMultipleUCIs(input)
+{
+	proofreadText(input, validateMultipleUCIs, 0);
 }
 function proofreadGroup(input)
 {

@@ -54,11 +54,7 @@ void free_split_pieces(char** split_pieces);
 list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* section_type);
 char* get_uci_option(struct uci_context* ctx,char* package_name, char* section_name, char* option_name);
 char* get_option_value_string(struct uci_option* uopt);
-char* get_ip_from_group(struct uci_context* ctx, char* mac_group);
 char* get_groups(struct uci_context* ctx);
-
-
-string_map* get_leases(void);
 
 
 int main(int argc, char** argv)
@@ -292,6 +288,7 @@ int main(int argc, char** argv)
 
 			if(enabled)
 			{
+				char* ip = get_uci_option(ctx, "firewall", next_quota, "ip");
 				char* exceeded_up_speed_str = NULL;
 				char* exceeded_down_speed_str = NULL;
 				if(!full_qos_active) /* without defined up/down speeds we always set hard cutoff, which is what we want when full qos is active */
@@ -301,15 +298,6 @@ int main(int argc, char** argv)
 				}
 				if(exceeded_up_speed_str == NULL) { exceeded_up_speed_str = strdup(" "); }
 				if(exceeded_down_speed_str == NULL) { exceeded_down_speed_str = strdup(" "); }
-
-				char* mac = get_uci_option(ctx, "firewall", next_quota, "mac");
-				char* ip = (mac != NULL) ?  get_ip_from_group(ctx, mac) : get_uci_option(ctx, "firewall", next_quota, "ip");
-
-				if (strlen(ip) == 0)
-				{
-					ip = get_uci_option(ctx, "firewall", next_quota, "ip");
-					free(mac);
-				}
 
 				if(ip == NULL) { ip = strdup("ALL"); }
 				if(strlen(ip) == 0) { ip  = strdup("ALL"); }
@@ -326,6 +314,12 @@ int main(int argc, char** argv)
 					char* tmp_ip = ip;
 					ip = dynamic_replace(ip, "- ", "-");
 					free(tmp_ip);
+				}
+
+				char* groups = get_groups(ctx);
+				if (strstr(groups, ip) != NULL)
+				{	// ensure that an ipset corresponding to the group exists
+					run_shell_command(dynamic_strcat(3, "ipset create ", ip, " hash:ip hashsize 64 2>/dev/null"), 1);
 				}
 
 
@@ -494,13 +488,12 @@ int main(int argc, char** argv)
 						char* ip_test = strdup("");
 						if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
 						{
-							char* groups = dynamic_strcat(3, ",", get_groups(ctx), ",");
 							char* src_test;
 							char* dst_test;
 							if (strstr(groups, ip) != NULL)
 							{
-								src_test = dynamic_strcat(3, " -m set --set ", ip, " src ");
-								dst_test = dynamic_strcat(3, " -m set --set ", ip, " dst ");
+								src_test = dynamic_strcat(3, " -m set --match-set ", ip, " src ");
+								dst_test = dynamic_strcat(3, " -m set --match-set ", ip, " dst ");
 							}
 							else if (strstr(ip, "-") == NULL)
 							{
@@ -526,8 +519,8 @@ int main(int argc, char** argv)
 									char* ingress_test;
 									if (strstr(groups, next_ip) != NULL)
 									{
-										egress_test = dynamic_strcat(3, " -m set --set ", next_ip, " src ");
-										ingress_test = dynamic_strcat(3, " -m set --set ", next_ip, " dst ");
+										egress_test = dynamic_strcat(3, " -m set --match-set ", next_ip, " src ");
+										ingress_test = dynamic_strcat(3, " -m set --match-set ", next_ip, " dst ");
 									}
 									else if (strstr(ip, "-") == NULL)
 									{
@@ -1146,7 +1139,7 @@ char* get_option_value_string(struct uci_option* uopt)
 }
 
 /**
-* returns a comma delimited string of group names
+* returns a space delimited string of group names
 */
 char* get_groups(struct uci_context* ctx)
 {
@@ -1157,92 +1150,16 @@ char* get_groups(struct uci_context* ctx)
 	{
 		char* next_host = shift_list(hosts);
 		char* group = get_uci_option(ctx, "dhcp", next_host, "group");
-		if (strstr(groups, group) == NULL)
+
+		if (group != NULL && strlen(group) > 0 && strstr(groups, group) == NULL)
 		{
 			char* tmp;
-			tmp = dynamic_strcat(3, groups, ",", strdup(group));
+			tmp = dynamic_strcat(3, groups, " ", strdup(group));
 			free(groups);
 			groups = tmp;
 		}
 		free(next_host);
+
 	}
 	return groups;
-}
-
-
-
-/**
-* Takes the name of a MAC Group, retrieves the MAC addresses in the Group, and
-* returns a comma delimited list of IP addresses that are currently dhcp.leased
-* to those MACs in the Group.
-*/
-char* get_ip_from_group(struct uci_context* ctx, char* group)
-{
-	char* ip = "";
-
-	char* macs = get_uci_option(ctx, "known", group, "mac");
-	if (macs != NULL || sizeof(macs) > 0)
-	{	// get dhcp.leases relating to MACs in the Group
-		string_map* mac_to_ip = get_leases();
-		unsigned long num_keys;
-		get_string_map_keys(mac_to_ip, &num_keys);
-
-		if (num_keys > 0)
-		{	// check each MAC in the Group against dhcp.leases
-			char mac_breaks[] = { ',', ' ', '\t' };
-			unsigned long num_macs = 0;
-			char** mac_list = split_on_separators(macs, mac_breaks, 3, -1, 0, &num_macs);
-			unsigned long mac_index;
-			for(mac_index=0; mac_index < num_macs; mac_index++)
-			{	//
-				char* next_ip = get_string_map_element(mac_to_ip, mac_list[mac_index]);
-				char* tmp;
-				tmp = dynamic_strcat(3, ip, ",", strdup(next_ip));
-				free(ip);
-				ip = tmp;
-			}
-
-			unsigned long num_destroyed;
-			destroy_string_map(mac_to_ip, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-		}
-	}
-	return ip;
-}
-
-
-
-string_map* get_leases(void)
-{
-	string_map* mac_to_ip = initialize_string_map(1);
-
-	char* dhcp_leases = "/tmp/dhcp.leases";
-	int ip_index = 2;
-	int mac_index = 1;
-	int min_line_pieces = ip_index > mac_index ? ip_index+1 : mac_index+1;
-
-	FILE* lease_file = fopen(dhcp_leases, "r");
-	if(lease_file != NULL)
-	{
-		char *line = NULL;
-		unsigned long read_len;
-		int sep = '\n';
-		do
-		{
-			sep = dyn_read_line(lease_file, &line, &read_len);
-			unsigned long num_line_pieces;
-			char* whitespace_seps = "\t ";
-			char** line_pieces = split_on_separators(line, whitespace_seps, 2, -1, 0, &num_line_pieces);
-			free(line);
-			if(num_line_pieces >= min_line_pieces)
-			{
-				char* mac = line_pieces[ mac_index ];
-				char* ip  = line_pieces[ ip_index ];
-				set_string_map_element(mac_to_ip, mac, ip);
-			}
-			free_null_terminated_string_array(line_pieces);
-		}while(sep != EOF);
-		fclose(lease_file);
-	}
-
-	return mac_to_ip;
 }

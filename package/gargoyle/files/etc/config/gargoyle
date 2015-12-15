@@ -95,7 +95,7 @@ config 100 status
 config 200 connection
 	option basic	'100'
 	option dhcp	'200'
-	option devices '250'
+	option devices '220'
 	option dyndns	'300'
 	option routing	'400'
 	option wol	'500'

@@ -1,5 +1,7 @@
-# This program is copyright © 2015 John Brown and is distributed under the terms of the GNU GPL 
-# version 2.0 with a special clarification/exception that permits adapting the program to 
+#!/bin/sh
+#
+# This program is copyright © 2015 John Brown and is distributed under the terms of the GNU GPL
+# version 2.0 with a special clarification/exception that permits adapting the program to
 # configure proprietary "back end" software provided that all modifications to the web interface
 # itself remain covered by the GPL.
 # See http://gargoyle-router.com/faq.html#qfoss for more information
@@ -11,37 +13,39 @@
 # This script searches Know Devices for a matching MAC and will add/del the IP to/from the Group's ipset
 
 
-event = $1
-mac = $2
-ip = $3
-host = $4
+event=$1
+mac="$(echo $2 | awk '{print toupper($0)}')"
+ip=$3
+host=$4
 
 OIFS=$IFS;
 
-deviceStr=$(uci get known.device | grep 'known.device=' | awk ' -F= { print $2 ; } ');
-IFS="\n";
-devices = ($deviceStr);
+#echo "" >>//tmp/post_lease
+#echo $event $mac $ip $host >>/tmp/post_lease
 
-for ((d=0; d<${#devices[@]}; ++d)); do
-	device  = devices[$d];
-	group = $(uci get known.$device.group);
-	macStr = $(uci get known.$device.mac);
-	IFS=" ";
-	macs = $(macStr);
+uciHosts=$(uci show dhcp 2>>//dev/null | grep '=host' | sed s/dhcp.// | sed s/=host// | awk '{ print $1 ; } ')
 
-	for ((m=0; m<${#macs[@]}; ++m)); do
-		if [macs[$m] = mac]; then
-			if [event = "add"]; then
-				ipset add $group $ip
-			fi
-			if [event = "old"]; then
-			fi
-			if [event = "del"]; then
-				ipset del $group $ip -exist
+for uciHost in $uciHosts; do
+
+	IFS=" "
+	uciMacs=$(uci get dhcp.$uciHost.mac 2>>//dev/null)
+	for uciMac in $uciMacs ; do
+		if [ "$uciMac" = "$mac" ]; then
+
+			uciGroup=$(uci get dhcp.$uciHost.group 2>>//dev/null)
+			if [ "${#uciGroup}" -gt 0 ]; then
+
+				if [ "$event" = "add" ] || [ "$event" = "old" ]; then
+					ipset create $uciGroup hash:ip hashsize 64 2>>//dev/null	# create ipset if not exist
+					ipset add $uciGroup $ip 2>>//dev/null
+				fi
+				if [ "$event" = "del" ]; then
+					ipset del $uciGroup $ip -exist 2>>//dev/null
+				fi
+				#ipset list $uciGroup >>//tmp/post_lease
+				IFS=$OIFS;
+				return 0	# remove to continue searching for Macs in other Hosts
 			fi
 		fi
 	done
 done
-
-
-IFS=$OIFS;

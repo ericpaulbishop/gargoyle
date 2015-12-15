@@ -163,12 +163,12 @@ function resetData()
 
 	setDocumentFromUci(document, new UCIContainer(), "");
 
-	resetMacGroupData();
+	resetGroupData();
 
 	setVisibility(document);
 }
 
-function resetMacGroupData()
+function resetGroupData()
 {
 	var select = document.getElementById("group");
 	var groups = deviceGroups();
@@ -186,9 +186,9 @@ function resetMacGroupData()
 			var group = groups[gIndex];
 			mgVals.push(group);
 			mgText.push(group);
-	}
+		}
 		setAllowableSelections('group', mgVals, mgText, document)
-		select.disabled=false;
+		select.disabled = false;
 	}
 }
 

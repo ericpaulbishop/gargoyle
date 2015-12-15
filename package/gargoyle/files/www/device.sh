@@ -40,6 +40,7 @@
 		<legend class="sectionheader"><%~ device.KnDev %></legend>
 
 		<div id='device_add_heading_container'>
+			<a name='device_form'></a>
 			<label class='nocolumn' id='device_add_heading_label' style='text-decoration:underline'><%~ AdKnDev %>:</label>
 		</div>
 		<div class='bottom_gap'>
@@ -61,6 +62,7 @@
 			<legend class="sectionheader"><%~ DevGp %></legend>
 
 			<div id='group_add_heading_container'>
+				<a name='group_form'></a>
 				<label class='nocolumn' id='group_add_heading_label' style='text-decoration:underline'><%~ AdGp %>:</label>
 			</div>
 			<div class='bottom_gap'>
