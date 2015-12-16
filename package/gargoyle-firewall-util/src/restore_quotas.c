@@ -259,6 +259,7 @@ int main(int argc, char** argv)
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
 		list* other_quota_section_names = initialize_list();
 		list* defined_ip_groups = initialize_list();
+		char* groups = get_groups(ctx);
 
 		unlock_bandwidth_semaphore_on_exit();
 		while(quota_sections->length > 0 || other_quota_section_names->length > 0)
@@ -316,7 +317,6 @@ int main(int argc, char** argv)
 					free(tmp_ip);
 				}
 
-				char* groups = get_groups(ctx);
 				if (strstr(groups, ip) != NULL)
 				{	// ensure that an ipset corresponding to the group exists
 					run_shell_command(dynamic_strcat(3, "ipset create ", ip, " hash:ip hashsize 64 2>/dev/null"), 1);
@@ -731,6 +731,7 @@ int main(int argc, char** argv)
 			free(next_quota);
 
 		}
+		free(groups);
 
 		run_shell_command("iptables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null", 0);
 		run_shell_command(dynamic_strcat(3,"iptables -t ", quota_table, " -A egress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
@@ -1153,13 +1154,15 @@ char* get_groups(struct uci_context* ctx)
 
 		if (group != NULL && strlen(group) > 0 && strstr(groups, group) == NULL)
 		{
-			char* tmp;
-			tmp = dynamic_strcat(3, groups, " ", strdup(group));
-			free(groups);
-			groups = tmp;
+			char* tmp = groups;
+			groups= dynamic_strcat(3, groups, " ", strdup(group));
+			free(tmp);
 		}
 		free(next_host);
-
+		free(group);
 	}
+	unsigned long num_destroyed;
+	destroy_list(hosts, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
 	return groups;
 }
