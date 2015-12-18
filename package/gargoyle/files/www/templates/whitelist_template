@@ -18,7 +18,7 @@
 	</div>
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
-		<span id="quota_group_container">
+		<span id="exception_group_container">
 			<select id="group_exception" onchange='groupException()'>
 				<option value=""><%~ HstSelGrp %></option>
 			</select>

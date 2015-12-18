@@ -18,7 +18,7 @@
 	</div>
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
-		<span id="quota_group_container">
+		<span id="restriction_group_container">
 			<select id="group_restriction" onchange='groupRestriction()'>
 				<option value=""><%~ HstSelGrp %></option>
 			</select>

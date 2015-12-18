@@ -56,7 +56,7 @@ UI.HsNm="Hostname";
 UI.HDsp="Host Display";
 UI.DspHn="Display Hostnames";
 UI.DspHIP="Display Host IPs";
-UI.SelGrp="Select a Group";
+UI.SelGrp="Group";
 
 UI.never="never";
 UI.disabled="disabled";

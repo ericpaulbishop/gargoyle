@@ -49,7 +49,7 @@
 		<em><%~ IPorRange %></em>
 		<span id="quota_group_container">
 			<select id="group" onchange='groupSelected()'>
-				<option value=""><%~ QSelGrp %></option>
+				<option value=""><%~ HstSelGrp %></option>
 			</select>
 		</span>
 		</div>
