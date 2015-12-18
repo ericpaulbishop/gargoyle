@@ -1658,7 +1658,7 @@ function validateUCI(name)
 }
 
 
-function validateMultipleIpsOrGroup(ips)
+function validateMultipleIpsOrGroups(ips)
 {
 	var errorCode = validateGroup(ips);
 	if (errorCode != 0)
@@ -1698,7 +1698,7 @@ function validateMultipleIps(ips)
 	}
 	return valid;
 }
-function validateMultipleIpsOrMacs(addresses)
+function validateMultipleIpsMacsOrGroups(addresses)
 {
 	var addr = addresses.replace(/^[\t ]+/g, "");
 	addr = addr.replace(/[\t ]+$/g, "");
@@ -1725,9 +1725,13 @@ function validateMultipleIpsOrMacs(addresses)
 		{
 			valid = validateMac(nextAddr);
 		}
-		else
+		else if(nextAddr.match(/\//))
 		{
 			valid = validateIpRange(nextAddr);
+		}
+		else
+		{
+			valid = validateGroup(nextAddr);
 		}
 	}
 	return valid;
@@ -2012,13 +2016,13 @@ function proofreadMultipleIps(input)
 {
 	proofreadText(input, validateMultipleIps, 0);
 }
-function proofreadMultipleIpsOrMacs(input)
+function proofreadMultipleIpsMacsOrGroups(input)
 {
-	proofreadText(input, validateMultipleIpsOrMacs, 0);
+	proofreadText(input, validateMultipleIpsMacsOrGroups, 0);
 }
 function proofreadMultipleIpsOrGroup(input)
 {
-	proofreadText(input, validateMultipleIpsOrGroup, 0);
+	proofreadText(input, validateMultipleIpsOrGroups, 0);
 }
 function proofreadHost(input)
 {
@@ -2942,4 +2946,29 @@ function groupMacs(group)
 		}
 	}
 	return groupMacs;
+}
+
+
+function resetGroupOptions(selectId)
+{
+	selectElement = document.getElementById(selectId);
+	var groups = deviceGroups();
+	if (groups.length == 0)
+	{
+		selectElement.disabled = true;
+	}
+	else
+	{
+		var mgVals = [ "" ];
+		var mgText = [ UI.SelGrp ];
+
+		for(gIndex = 0; gIndex < groups.length; gIndex++)
+		{
+			var group = groups[gIndex];
+			mgVals.push(group);
+			mgText.push(group);
+		}
+		setAllowableSelections(selectId, mgVals, mgText, document)
+		selectElement.disabled = false;
+	}
 }

@@ -163,33 +163,9 @@ function resetData()
 
 	setDocumentFromUci(document, new UCIContainer(), "");
 
-	resetGroupData();
+	resetGroupOptions("group");
 
 	setVisibility(document);
-}
-
-function resetGroupData()
-{
-	var select = document.getElementById("group");
-	var groups = deviceGroups();
-	if (groups.length == 0)
-	{
-		select.disabled = true;
-	}
-	else
-	{
-		var mgVals = [ "" ];
-		var mgText = [ quotasStr.QSelGrp ];
-
-		for(gIndex = 0; gIndex < groups.length; gIndex++)
-		{
-			var group = groups[gIndex];
-			mgVals.push(group);
-			mgText.push(group);
-		}
-		setAllowableSelections('group', mgVals, mgText, document)
-		select.disabled = false;
-	}
 }
 
 
