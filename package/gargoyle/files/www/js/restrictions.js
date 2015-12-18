@@ -474,62 +474,6 @@ function validateRule(controlDocument, rulePrefix)
 
 	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
 }
-function validateMultipleIps(ips)
-{
-	ips = ips.replace(/^[\t ]+/g, "");
-	ips = ips.replace(/[\t ]+$/g, "");
-	var splitIps = ips.split(/[\t ]*,[\t ]*/);
-	var valid = splitIps.length > 0 ? 0 : 1;
-	while(valid == 0 && splitIps.length > 0)
-	{
-		var nextIp = splitIps.pop();
-		if(nextIp.match(/-/))
-		{
-			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else
-		{
-			valid = validateIpRange(nextIp);
-		}
-	}
-	return valid;
-}
-function proofreadMultipleIps(input)
-{
-	proofreadText(input, validateMultipleIps, 0);
-}
-function proofreadMultipleIpsOrMacs(input)
-{
-	proofreadText(input, validateMultipleIpsOrMacs, 0);
-}
-function validateMultipleIpsOrMacs(addresses)
-{
-	var addr = addresses.replace(/^[\t ]+/g, "");
-	addr = addr.replace(/[\t ]+$/g, "");
-	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
-	var valid = splitAddr.length > 0 ? 0 : 1;
-	while(valid == 0 && splitAddr.length > 0)
-	{
-		var nextAddr = splitAddr.pop();
-		if(nextAddr.match(/-/))
-		{
-			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else if(nextAddr.match(/:/))
-		{
-			valid = validateMac(nextAddr);
-		}
-		else
-		{
-			valid = validateIpRange(nextAddr);
-		}
-	}
-	return valid;
-
-}
-
 function validateMultiplePorts(portStr)
 {
 	portStr = portStr.replace(/^[\t ]+/g, "");
