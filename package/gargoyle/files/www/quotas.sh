@@ -22,6 +22,12 @@
 		echo "var fullQosEnabled = false;"
 	fi
 
+	echo "";
+	echo "var leaseData = new Array();";
+	if [ -e /tmp/dhcp.leases ] ; then
+		awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};' /tmp/dhcp.leases
+	fi
+
 	print_quotas
 %>
 	var uci = uciOriginal.clone();

@@ -2471,11 +2471,12 @@ function testSingleAddrOverlap(addrStr1, addrStr2)
 
 function testAddrOverlap(addrStr1, addrStr2)
 {
-	if (isGroup(addrStr1))
+	var groups = deviceGroups();
+	if (groups.indexOf(addrStr1) > -1)
 	{
 		addrStr1 = groupIPs(addrStr1).join();
 	}
-	if (isGroup(addrStr2))
+	if (groups.indexOf(addrStr2) > -1)
 	{
 		addrStr2 = groupIPs(addrStr2).join();
 	}
@@ -2966,15 +2967,19 @@ function groupHosts(group)
 
 function groupMacs(group)
 {
-	groupMacs = [];
+	var groupMacs = [];
 	var hosts = groupHosts(group);
 	for (hIndex = 0 ; hIndex < hosts.length; hIndex++)
 	{
 		var host = hosts[hIndex];
-		var mac = uciOriginal.get("dhcp", host, "mac");
-		if (mac.length > 0)
+		var uciMac = uciOriginal.get("dhcp", host, "mac");
+		if (typeof uciMac === 'string')
 		{
-			groupMacs = groupMacs.concat(mac);
+			var macs = uciMac.split(" ");
+			for (mIndex = 0; mIndex < macs.length; mIndex++)
+			{
+				groupMacs.push(macs[mIndex]);
+			}
 		}
 	}
 	return groupMacs;
@@ -2983,21 +2988,36 @@ function groupMacs(group)
 
 function groupIPs(group)
 {
-	var ipStr = [];
+	var groupIPs = [];
+	var macs = groupMacs(group);
+	var ldMacIndex = 0;
 	var ldIpIndex = 1;
 	for (ldIndex=0; ldIndex < leaseData.length; ldIndex++)
 	{
-		var ip = leaseData[ldIndex][ldIpIndex];
-		if (ip != null && ip.length > 0){
-			ipStr.push(ip);
+		var mac = leaseData[ldIndex][ldMacIndex];
+		if (typeof mac === 'string' && macs.indexOf(mac.toUpperCase()) > -1)
+		{
+			var ip = leaseData[ldIndex][ldIpIndex];
+			if (ip != null && ip.length > 0){
+				groupIPs.push(ip);
+			}
 		}
 	}
-	return ipStr;
+	return groupIPs;
 }
 
 function isGroup(group)
 {
-	return (uciOriginal.get("dhcp", group).length > 0);
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
+	{	// survey all of the device groups until found
+		var host = hosts[hIndex];
+		if (uciOriginal.get("dhcp", host, "group").localeCompare(group) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 
