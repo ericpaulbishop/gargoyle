@@ -2471,6 +2471,15 @@ function testSingleAddrOverlap(addrStr1, addrStr2)
 
 function testAddrOverlap(addrStr1, addrStr2)
 {
+	if (isGroup(addrStr1))
+	{
+		addrStr1 = groupIPs(addrStr1).join();
+	}
+	if (isGroup(addrStr2))
+	{
+		addrStr2 = groupIPs(addrStr2).join();
+	}
+
 	addrStr1 = addrStr1.replace(/^[\t ]+/, "");
 	addrStr1 = addrStr1.replace(/[\t ]+$/, "");
 	addrStr2 = addrStr2.replace(/^[\t ]+/, "");
@@ -2969,6 +2978,26 @@ function groupMacs(group)
 		}
 	}
 	return groupMacs;
+}
+
+
+function groupIPs(group)
+{
+	var ipStr = [];
+	var ldIpIndex = 1;
+	for (ldIndex=0; ldIndex < leaseData.length; ldIndex++)
+	{
+		var ip = leaseData[ldIndex][ldIpIndex];
+		if (ip != null && ip.length > 0){
+			ipStr.push(ip);
+		}
+	}
+	return ipStr;
+}
+
+function isGroup(group)
+{
+	return (uciOriginal.get("dhcp", group).length > 0);
 }
 
 
