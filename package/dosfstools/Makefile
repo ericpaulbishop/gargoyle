@@ -17,7 +17,7 @@ PKG_LICENSE_FILES:=COPYING
 PKG_MAINTAINER:=David Bonnes <david.bonnes@gmail.com>
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://daniel-baumann.ch/files/software/dosfstools \
+PKG_SOURCE_URL:=https://github.com/dosfstools/dosfstools/releases/download/v$(PKG_VERSION)/ \
 		http://fossies.org/linux/misc
 PKG_MD5SUM:=64e3b3a59b51d2a97d7ac38b23a124bb
 
@@ -27,7 +27,7 @@ include $(INCLUDE_DIR)/nls.mk
 define Package/dosfstools/Default
   SECTION:=utils
   CATEGORY:=Utilities
-  URL:=http://www.daniel-baumann.ch/software/dosfstools/
+  URL:=https://github.com/dosfstools
   SUBMENU:=Filesystem
   DEPENDS:=$(ICONV_DEPENDS)
 endef

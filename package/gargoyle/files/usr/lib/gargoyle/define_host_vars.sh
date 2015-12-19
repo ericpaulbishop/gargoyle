@@ -17,7 +17,7 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	wl assoclist | awk '{print "wifiLines.push(\""$0"\");"}'
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo "var wirelessDriver=\"mac80211\";"
-	aps=$( iwconfig 2>/dev/null | grep "Mode:Master" | awk ' { print $1 ; } ' )
+	aps=$( iwinfo | grep ESSID | awk ' { print $1 ; } ' )
 	if [ -n "$aps" ] ; then
 		for ap in $aps ; do
 			iw $ap station dump | awk ' /^Station/ { printf "wifiLines.push(\""$2" " ;} /signal:/ {printf ""$2" "} /rx.*bitrate:/ {print ""$3"\");"}'
