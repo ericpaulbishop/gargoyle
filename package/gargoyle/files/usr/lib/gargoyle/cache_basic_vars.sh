@@ -5,6 +5,7 @@ print_mac80211_channels_for_wifi_dev()
 	wifi_dev="$1"
 	dev_num="$2"
 	out="$3"
+	dualband="$4"
 	
 	echo "nextCh     = [];" >> "$out"
 	echo "nextChFreq = [];" >> "$out"
@@ -31,6 +32,9 @@ print_mac80211_channels_for_wifi_dev()
 		else
 			echo "var AwifiAC = false;" >> "$out"
 		fi
+		if [ "$dualband" == false ] ; then
+			echo "var GwifiN = false;" >> "$out_file"
+		fi
 	else
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
@@ -38,6 +42,10 @@ print_mac80211_channels_for_wifi_dev()
 			echo "var GwifiN = true;" >> "$out"
 		else
 			echo "var GwifiN = false;" >> "$out"
+		fi
+		if [ "$dualband" == false ] ; then
+			echo "var AwifiN = false;" >> "$out_file"
+			echo "var AwifiAC = false;" >> "$out_file"
 		fi
 	fi
 	
@@ -111,15 +119,17 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	#test for dual band
 	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
+		dualband='true'
 	else
 		echo "var dualBandWireless=false;" >> "$out_file"
+		dualband='false'
 	fi
 	
 	radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
 	radios="$(uci show wireless | sed -e '/wifi-device/!d; s/^.*\.//g; s/=.*$//g')"
 	rnum=0;
 	for r in $radios ; do
-		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file"
+		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file" "$dualband"
 		rnum=$(( $rnum+1 ))
 	done
 
