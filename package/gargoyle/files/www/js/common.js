@@ -952,9 +952,20 @@ function enableAssociatedField(checkbox, associatedId, defaultValue, controlDocu
 	setElementEnabled(element, checkbox.checked, defaultValue);
 }
 
+function enableAssociatedFields(checkbox, associatedId, defaultValue, controlDocument)
+{
+	associatedId = Array.isArray(associatedId) ? associatedId : [associatedArray];
+	defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+	if (associatedId.length == defaultValue.length){
+		for (index=0; index < associatedId.length; index++)
+		{
+			enableAssociatedField(checkbox, associatedId[index], defaultValue[index], controlDocument);
+		}
+	}
+}
+
 function setElementEnabled(element, enabled, defaultValue)
 {
-
 	if(enabled)
 	{
 		element.readonly=false;
@@ -1913,6 +1924,14 @@ function validateIpRange(range)
 	return valid;
 }
 
+function validateIpRangeOrGroup(range)
+{
+	if (range.indexOf(".") != -1)
+	{
+		return validateIpRange(range);
+	}
+	return validateGroup(range);
+}
 
 function validateLengthRange(text,min,max)
 {
@@ -2003,6 +2022,10 @@ function proofreadMask(input)
 function proofreadIpRange(input)
 {
 	proofreadText(input, validateIpRange, 0);
+}
+function proofreadIpRangeOrGroup(input)
+{
+	proofreadText(input, validateIpRangeOrGroup, 0);
 }
 function proofreadMac(input)
 {

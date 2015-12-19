@@ -19,6 +19,8 @@ Status
  - Gargoyle-Firewall-Quotas-BandwidthQuotas-AppliesTo
  - Gargoyle-Firewall-Restrictions-AccessRestrictions-RuleAppliesTo
  - Gargoyle-Firewall-Restrictions-Exceptions(Whitelist)-RuleAppliesTo
+ - Gargoyle-Forewall-QoS(Upload)-ClassificationRules
+ - Gargoyle-Forewall-QoS(Download)-ClassificationRules
 
 Technical
 - Approx 17k in size
