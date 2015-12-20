@@ -59,6 +59,12 @@
 		echo "hasNCM = true;"
 	fi
 
+	cdcif=$(grep -Hi "cdc ethernet control" /sys/class/net/*/device/interface | cut -f5 -d/ 2>/dev/null)
+	if [ -z "$cdcif" ]; then
+		echo "cdcif = \"\";"
+	else
+		echo "cdcif = \"$cdcif\";"
+	fi
 
 	#echo "var interfaces = new Array();"
 	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
@@ -324,6 +330,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='3g'><%~ Mo3g %></option>
 				<option value='qmi'><%~ Mo3gQMI %></option>
 				<option value='ncm'><%~ Mo3gNCM %></option>
+				<option value='dhcp_cdc'><%~ Mo3gHiLink %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
 		</div>
