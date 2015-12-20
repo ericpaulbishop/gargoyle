@@ -196,6 +196,7 @@ function refreshTableData(scheme)
 		var id =  allQuotaIds[idIndex];
 		var quotaIpList = allQuotaIps[ id ];
 		var timeParameters = idToTimeParams[ id ];
+        var hide = false;
 		for(ipIndex=0; ipIndex < quotaIpList.length; ipIndex++)
 		{
 			var ip       = quotaIpList[ipIndex];
@@ -207,6 +208,8 @@ function refreshTableData(scheme)
 				if(quotaData[id][ip] != null)
 				{
     				var data = quotaData[id][ip];
+                    var noData = data[0]<=0 && data[1]<=0 && data[2]<=0 ;
+                    hide = noData && id.localeCompare("ALL_OTHERS_INDIVIDUAL") == 0;
                     if (scheme.localeCompare("pcts") == 0)
                     {
     				    total = data[0] >= 0 ? data[0] + "%" : total;
@@ -223,7 +226,10 @@ function refreshTableData(scheme)
 			}
 			ipList = ip.split(/[\t ]*,[\t ]*/);
 			hostList = getHostList(ipList);
-			quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
+            if (!hide)
+            {
+			    quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
+            }
 		}
 	}
 	var columnNames = quotasStr.ColNms;
