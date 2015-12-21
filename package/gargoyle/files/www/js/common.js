@@ -2782,3 +2782,15 @@ function ObjLen(an_obj) {
 	}
 	return len
 }
+
+
+function reregisterTableSort()
+{
+    TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+    var args = Array.prototype.slice.call(arguments);
+    TSort_Data = args;
+    TSort_Initial = '0A';
+    tsRegister();
+    tsSetTable (args[0]);
+    tsInit();
+}
