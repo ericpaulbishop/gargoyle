@@ -59,7 +59,7 @@
 		echo "hasNCM = true;"
 	fi
 
-	cdcif=$(grep -Hi "cdc ethernet control" /sys/class/net/*/device/interface | cut -f5 -d/ 2>/dev/null)
+	cdcif=$(grep -Hi "cdc ethernet control" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
 	if [ -z "$cdcif" ]; then
 		echo "cdcif = \"\";"
 	else
