@@ -764,7 +764,7 @@ function GetWifiUpdate(force_wifi) {
 	}
 	commands.push("echo \"var weekly_time=\\\"`date \"+%w-%H-%M\"`\\\";\"");
 	commands.push("echo \"var wifi_status = new Array();\"");
-	commands.push("iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d' | awk -F'\\\n' '{print \"wifi_status.push(\\\"\"$0\"\\\");\" }'");
+	commands.push("iwinfo 2>&1 | sed 's/\"//g' | awk -F'\\\n' '{print \"wifi_status.push(\\\"\"$0\"\\\");\" }'");
 	
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));		
 	var stateChangeFunction = function(req) {
@@ -781,4 +781,3 @@ function GetWifiUpdate(force_wifi) {
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
-

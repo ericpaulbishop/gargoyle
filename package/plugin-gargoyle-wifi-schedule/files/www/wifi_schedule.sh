@@ -16,7 +16,7 @@
 	echo "var weekly_time=\"`date \"+%w-%H-%M\"`\";"
 		
 	echo "var wifi_status = new Array();"
-	iwconfig 2>&1 | grep -v 'wireless' | sed '/^$/d;s/"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
+	iwinfo 2>&1 | sed 's/\"//g' | awk -F'\n' '{print "wifi_status.push(\""$0"\");" }'
 
 %>
 
@@ -112,25 +112,20 @@ for (tab_idx in cron_data) {
 	<div class="tabField" id="tab_7">
 		<table id="tab7_timeTable" style="width:100%; height:100%; text-align: center;"></table>
 	</div>
-
 	<br/><br/>
-
 	<div  id="summary_container">
 		<span id='summary_txt'></span>
 	</div>
 </fieldset>
-
 <div id="bottom_button_container">
 	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
 	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='SetTimerMode(0)'/>
 </div>
-
 <script>
 <!--
 	LoadCrontabs();
 //-->
 </script>
-
 <%
 	gargoyle_header_footer -f -s "system" -p "wifi_schedule"
 %>
