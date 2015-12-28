@@ -85,12 +85,12 @@ function saveChanges()
 			uciOriginal.removeSection("system", systemSections[0]);
 			uci.removeSection("system", systemSections[0]);
 		}
-		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ\n";
+		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' | sed \"s/'//g\" >/etc/TZ\n";
 		
 
 
 
-		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd restart\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
+		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd restart\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand + " ;\ntouch /etc/banner ;\n"
 		//document.getElementById("output").value = commands;
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

@@ -21,8 +21,8 @@ my $typeOrder = [ "images", "fon-flash", "src" ];
 my $typeNames = {"src"=>"Source Code", "images"=>"Firmware Images", "fon-flash"=>"FonFlash"};
 my $typeMatches={"src"=>"src", "fon-flash"=>"fon" };
 
-my $archOrder = [ "ar71xx", "brcm47xx", "atheros", "alix" ];
-my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "alix"=>"Alix/X86" };
+my $archOrder = [ "ar71xx", "mvebu", "alix", "brcm47xx", "atheros",  ];
+my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "alix"=>"Alix/X86" };
 my $targetOrder = 
 { 
 	"atheros"=>
@@ -117,6 +117,7 @@ my $targetOrder =
 		"gargoyle-pocket-router-v2-kernel.bin",
 		"gargoyle-pocket-router-v2-rootfs-squashfs.bin",
 		"gargoyle-pocket-router-v2-squashfs-sysupgrade.bin",
+		"gl_ar150-squashfs-sysupgrade.bin",
 		"gl-inet-v1-squashfs-factory.bin",
 		"gl-inet-v1-squashfs-sysupgrade.bin",
 		"hornet-ub-squashfs-factory.bin",
@@ -347,6 +348,15 @@ my $targetOrder =
 		"vmlinux.elf",
 		"vmlinux.gz",
 		"vmlinux.lzma"
+		],
+	"mvebu"=>
+		[ 
+		"linksys-caiman-squashfs-factory.img",
+		"linksys-caiman-squashfs-sysupgrade.tar",
+		"linksys-cobra-squashfs-factory.img",
+		"linksys-cobra-squashfs-sysupgrade.tar",
+		"linksys-mamba-squashfs-factory.img",
+		"linksys-mamba-squashfs-sysupgrade.tar"
 		],
 	"alix"=> 
 		[ 

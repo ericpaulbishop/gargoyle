@@ -23,13 +23,13 @@ then
 fi
 
 #Email header
-echo -e "Subject: Gargoyle Router report - $(date)\r\nFrom: $(cat /etc/msmtprc | grep from | grep @ | sed "s/from //")\r\nContent-Type: text/html; charset='UTF-8';\r\n<html><body>" > /tmp/email-log.txt;
+echo -e "Subject: Gargoyle Router report - $(date)\r\nFrom: $(cat /etc/msmtprc | grep from | sed "s/ from //")\r\nContent-Type: text/html; charset='UTF-8';\r\n<html><body>" > /tmp/email-log.txt;
 
 if printf '%s' "$data" | egrep -q "0"
 then
 	#Recently visited sites, converting unix time
 	echo -e "<h1>Recently visited sites:</h1><br><table $tablestyle>" >> /tmp/email-log.txt
-	echo "<tr><th $thstyle>Time/<th><th $thstyle>IP address</th><th $thstyle>Website</th>" >> /tmp/email-log.txt;
+	echo "<tr><th $thstyle>Time</th><th $thstyle>IP address</th><th $thstyle>Website</th></tr>" >> /tmp/email-log.txt;
 	cat /usr/data/webmon_domains.txt > /tmp/work.tmp
 	while read line
 	do
@@ -185,6 +185,7 @@ then
 	rm /tmp/emailupload.tmp
 	echo "</table>" >> /tmp/email-log.txt
 fi
+
 echo "</body></html>" >> /tmp/email-log.txt
 
 if printf '%s' "$tls" | egrep -q "0"

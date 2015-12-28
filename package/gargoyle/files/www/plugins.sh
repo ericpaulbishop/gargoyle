@@ -7,7 +7,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" -z "plugins.js" gargoyle
+	gargoyle_header_footer -h -s "system" -p "plugins" -c "internal.css" -j "table.js plugins.js" -z "plugins.js" -i gargoyle
 %>
 <script>
 
@@ -84,6 +84,10 @@
 
 	<fieldset id="plugin_list">
 		<legend class="sectionheader"><%~ PList %></legend>
+		<div id="bottom_button_container">
+			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
+		</div>
+		<span id="wan-warn" style="color:red;display:none"><%~ NoWan %></span>
 		<div>
 			<div id="languages_table_container" style="margin-left:5px" ></div>
 		</div>
@@ -95,9 +99,6 @@
 		</div>
 		<div id="no_packages" style='display:none;'>
 			<%~ NoPkg %>
-		</div>
-		<div id="bottom_button_container">
-			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
 		</div>
 	</fieldset>
 

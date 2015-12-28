@@ -1311,7 +1311,7 @@ function updateqosmon()
 	if (!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands="cat /tmp/qosmon.status"
+		var commands="cat /tmp/qosmon.status 2>/dev/null"
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)

@@ -119,7 +119,7 @@ for (tab_idx in cron_data) {
 			</select>
 	<div>
 		<label class='narrowleftcolumn'><%~ email.Count %></label>
-		<input type='number' class='rightcolumn' id='count' style="width:50px" min="0"/>
+		<input type='number' class='rightcolumn' id='count' style="width:50px" min="0" disabled/>
 	</div>
 </fieldset>
 <fieldset>
