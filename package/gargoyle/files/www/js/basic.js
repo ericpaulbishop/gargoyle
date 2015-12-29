@@ -2213,7 +2213,7 @@ function scanWifi(ssidField)
 					var qual = scannedSsids[3][ssidIndex];
 
 					enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
-					if(wifiN && dualBandWireless)
+					if((GwifiN || AwifiN || AwifiAC) && dualBandWireless)
 					{
 						var ghz = scannedSsids[4][ssidIndex] == "A" ? "5GHz" : "2.4GHz";
 						ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal, " + ghz +  ")");
@@ -2296,14 +2296,37 @@ function setSsidVisibility(selectId)
 			var chan = scannedSsids[2][scannedIndex];
 			var band = scannedSsids[4][scannedIndex];
 
-			var modes = ['11g']
-			var mnames = wifiN ? ['N+G+B'] : [ 'G+B' ]
+			if(GwifiN)
+			{
+				var modes = ['11g','11gn'];
+				var mnames = ['B+G','B+G+N'];
+			}
+			else
+			{
+				var modes = ['11g'];
+				var mnames = ['B+G'];
+			}
 			if(band == "A")
 			{
 				modes  = [ '11a' ];
 				mnames = [ 'N+A'  ];
+				if(AwifiAC)
+				{
+					var modes = ['11a','11an','11anac'];
+					var mnames = ['A','A+N','A+N+AC'];
+				}
+				else if(AwifiN)
+				{
+					var modes = ['11a','11an'];
+					var mnames = ['A','A+N'];
+				}
+				else
+				{
+					var modes = ['11a'];
+					var mnames = ['A'];
+				}
 			}
-			if(wifiN && dualBandWireless && isAp )
+			if((GwifiN || AwifiN || AwifiAC) && dualBandWireless && isAp )
 			{
 				modes.unshift("dual")
 				mnames.unshift(basicS.DBand)
@@ -2311,10 +2334,6 @@ function setSsidVisibility(selectId)
 			var curBand = getSelectedValue("wifi_hwmode")
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
 			setAllowableSelections( "bridge_hwmode", modes, mnames );
-			if(band == "A" && curBand != "dual" && curBand != "11a")
-			{
-				setSelectedValue("wifi_hwmode", "dual");
-			}
 
 			setSelectedValue("wifi_encryption2", enc);
 			setSelectedValue("bridge_encryption", enc);
