@@ -10,7 +10,7 @@ rtgS.ESSect="Modifier la route statique";
 
 //javascript & template
 rtgS.Dstn="Destination";
-rtgS.DstnM="Destination/Masque;
+rtgS.DstnM="Destination/Masque";
 rtgS.ItfN="Interface(Réseau)";
 rtgS.Itfc="Interface";
 rtgS.Ntwk="Réseau";
