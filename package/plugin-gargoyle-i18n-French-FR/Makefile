@@ -8,7 +8,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-i18n-English-EN
+define Package/plugin-gargoyle-i18n-French-FR
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
@@ -18,7 +18,7 @@ define Package/plugin-gargoyle-i18n-English-EN
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-i18n-English-EN/description
+define Package/plugin-gargoyle-i18n-French-FR/description
 	French-FR language strings for Gargoyle web interface
 endef
 
