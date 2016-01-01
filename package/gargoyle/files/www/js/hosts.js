@@ -8,11 +8,11 @@
 
 var hostsStr=new Object(); //part of i18n
 
-var TSort_Data = new Array ('lease_table', 's', 's', 's', 's');
+var TSort_Data = new Array ('lease_table', 's', 'p', 's', 's');
 tsRegister();
-TSort_Data = new Array ('wifi_table', 's', 's', 's', 's', 's');
+TSort_Data = new Array ('wifi_table', 's', 'p', 's', 's', 's');
 tsRegister();
-TSort_Data = new Array ('active_table', 's', 's', 's', 'i', 'i', 'i');
+TSort_Data = new Array ('active_table', 's', 'p', 's', 'i', 'i', 'i');
 tsRegister();
 
 var updateInProgress = false;
@@ -72,7 +72,7 @@ function resetVariables()
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(table);
-        reregisterTableSort('lease_table', 's', 's', 's', 's');
+        reregisterTableSort('lease_table', 's', 'p', 's', 's');
 	}
 	else
 	{
@@ -102,7 +102,7 @@ function resetVariables()
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(table);
-        reregisterTableSort('wifi_table', 's', 's', 's', 's');
+        reregisterTableSort('wifi_table', 's', 'p', 's', 's');
 	}
 	else
 	{
@@ -117,7 +117,7 @@ function resetVariables()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(table);
-    reregisterTableSort('active_table', 's', 's', 's', 'i', 'i', 'i');
+    reregisterTableSort('active_table', 's', 'p', 's', 'i', 'i', 'i');
 }
 
 

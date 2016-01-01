@@ -185,6 +185,14 @@ function tsInit()
 				else
 					text = Date.parse(text);
 			}
+			else if (sorting == 'p')
+			{
+				text = text.replace(/\.(?=\d(\.|$))/g, "00");
+				text = text.replace(/\.(?=\d\d(\.|$))/g, "0");
+				text = text.replace(/\./g, "");
+				text = parseInt(text);
+				if	(isNaN(text))	text = 0;
+			}
 			row_data.push(text);
 		}
 		TSort_Store.rows.push(row_data);
