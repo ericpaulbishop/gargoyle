@@ -6,6 +6,13 @@
 
 // Script version 1.8
 
+// Modified 2016 John A Brown for Gargoyle
+// javaScript element.cloneNode(true) does not copy the event handlers and
+// Gargoyle table rows with Edit Buttons contain an event handler.
+// The use of cloneNode was removed.
+// An alternate approach would have been to clone the event handlers properly
+//.http://blog.sivavaka.com/2010/11/javascript-clonenode-doesnt-copy-event.html
+
 var TSort_Store;
 var TSort_All;
 
@@ -13,7 +20,6 @@ function TSort_StoreDef () {
 	this.sorting = [];
 	this.nodes = [];
 	this.rows = [];
-	this.row_clones = [];
 	this.sort_state = [];
 	this.initialized = 0;
 //	this.last_sorted = -1;
@@ -182,10 +188,7 @@ function tsInit()
 			row_data.push(text);
 		}
 		TSort_Store.rows.push(row_data);
-		// Save a reference to the TR element
-		var new_row = row.cloneNode(true);
-		new_row.tsort_row_id = i;
-		TSort_Store.row_clones[i] = new_row;
+		row.tsort_row_id = i;
 	}
 	TSort_Store.initialized = 1;
 
@@ -202,6 +205,7 @@ function tsInit()
 			TSort_Store.initial = (text == '')? null: text.split(/\s*,\s*/);
 		}
 	}
+
 
 	var	initial = TSort_Store.initial;
 	if	(initial != null)
@@ -302,38 +306,31 @@ function tsDraw(p_id, p_table)
 		TSort_Store.sort_state[i] = null;
 	}
 
-	// Sort the rows
-	TSort_Store.row_clones.sort(tsSort);
-
-	// Save the currently selected order
-	var new_tbody = document.createElement('tbody');
-	var row_clones = TSort_Store.row_clones;
-	len = row_clones.length;
+	// Sort rows in the table body
+	var table = document.getElementById(table_id);
+	var tbody = table.getElementsByTagName('tbody')[0];
+	var rows = [].slice.call(tbody.getElementsByTagName('tr'));
+	rows.sort(tsSort);
+	len = rows.length;
 	var classes = TSort_Store.classes;
 	if	(classes == null)
 	{
 		for (i = 0; i < len; i++)
-			new_tbody.appendChild (row_clones[i].cloneNode(true));
+			tbody.appendChild(rows[i]);
 	}
 	else
 	{
-		var clone;
+		var row;
 		var j = 0;
 		var cl_len = classes.length;
 		for (i = 0; i < len; i++)
 		{
-			clone = row_clones[i].cloneNode(true);
-			clone.className = classes[j++];
+			row = rows[i];
+			row.className = classes[j++];
 			if	(j >= cl_len)  j = 0;
-			new_tbody.appendChild (clone);
+			tbody.appendChild(row);
 		}
 	}
-
-	// Replace table body
-	var table = document.getElementById(table_id);
-	var tbody = table.getElementsByTagName('tbody')[0];
-	table.removeChild(tbody);
-	table.appendChild(new_tbody);
 
 	var obj, color, icon, state;
 	len = sort_keys.length;
