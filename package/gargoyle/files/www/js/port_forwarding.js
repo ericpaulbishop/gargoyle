@@ -1,11 +1,12 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var prtS=new Object(); //part of i18n
+var TSort_Data = new Array ('portf_table', 's', 's', 'i', 'p', 'i', '');
 
 function saveChanges()
 {
@@ -32,13 +33,13 @@ function saveChanges()
 				firewallSectionCommands.push("uci del firewall." + lastSection);
 			}
 		}
-		
+
 
 		var uci = uciOriginal.clone();
-		
 
-		var singlePortTable = document.getElementById('portf_table_container').firstChild;	
-		var singlePortData= getTableDataArray(singlePortTable, true, false);	
+
+		var singlePortTable = document.getElementById('portf_table_container').firstChild;
+		var singlePortData= getTableDataArray(singlePortTable, true, false);
 		var enabledIndex = 0;
 		var disabledIndex = 0;
 		for(rowIndex = 0; rowIndex < singlePortData.length; rowIndex++)
@@ -46,7 +47,7 @@ function saveChanges()
 
 			var rowData = singlePortData[rowIndex];
 			var enabled = rowData[5].checked;
-			
+
 			var protos = rowData[1].toLowerCase() == UI.both.toLowerCase() ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
 			var protoIndex=0;
 			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
@@ -67,8 +68,8 @@ function saveChanges()
 		}
 
 
-		var portRangeTable = document.getElementById('portfrange_table_container').firstChild;	
-		var portRangeData= getTableDataArray(portRangeTable, true, false);	
+		var portRangeTable = document.getElementById('portfrange_table_container').firstChild;
+		var portRangeData= getTableDataArray(portRangeTable, true, false);
 		for(rowIndex = 0; rowIndex < portRangeData.length; rowIndex++)
 		{
 			var rowData = portRangeData[rowIndex];
@@ -88,7 +89,7 @@ function saveChanges()
 				uci.set("firewall", id, "src_dport", rowData[2] + "-" + rowData[3]);
 				uci.set("firewall", id, "dest_port", rowData[2] + "-" + rowData[3]);
 				uci.set("firewall", id, "dest_ip", rowData[4]);
-				
+
 				enabledIndex = enabledIndex + (enabled ? 1 : 0);
 				disabledIndex = disabledIndex + (enabled ? 0 : 1);
 			}
@@ -100,14 +101,14 @@ function saveChanges()
 		{
 			var id = "dmz";
 			firewallSectionCommands.push("uci firewall.dmz=dmz" );
-			
+
 			uci.set("firewall", id, "", "dmz");
 			uci.set("firewall", id, "from", "wan");
 			uci.set("firewall", id, "to_ip", document.getElementById('dmz_ip').value);
-		}		
+		}
 
 		firewallSectionCommands.push("uci commit");
-			
+
 		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
 
 
@@ -131,7 +132,7 @@ function saveChanges()
 				upnpStartCommands.push("/etc/init.d/miniupnpd disable");
 			}
 		}
-	
+
 
 		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + upnpStartCommands.join("\n") + "\n" + restartFirewallCommand;
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -195,7 +196,7 @@ function addPortfRule()
 		for (rowDataIndex in currentPortfData)
 		{
 			rowData = currentPortfData[rowDataIndex];
-			
+
 			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3] && values[4] == rowData[4])
 			{
 
@@ -204,7 +205,7 @@ function addPortfRule()
 				{
 					portfTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
 				}
-				
+
 				table1Container = document.getElementById('portf_table_container');
 				if(table1Container.firstChild != null)
 				{
@@ -221,7 +222,7 @@ function addPortfRule()
 			checkbox = createInput('checkbox');
 			checkbox.checked = true;
 			values.push(checkbox);
-			values.push(createEditButton(true));	
+			values.push(createEditButton(true));
 			addTableRow(portfTable,values, true, false);
 		}
 	}
@@ -266,7 +267,7 @@ function addPortfRangeRule()
 				{
 					portfRangeTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
 				}
-				
+
 				table2Container = document.getElementById('portfrange_table_container');
 				if(table2Container.firstChild != null)
 				{
@@ -282,10 +283,10 @@ function addPortfRangeRule()
 
 		if(!mergedWithExistingRule)
 		{
-			checkbox = createInput('checkbox');	
+			checkbox = createInput('checkbox');
 			checkbox.checked = true;
 			values.push(checkbox);
-			values.push(createEditButton(false));	
+			values.push(createEditButton(false));
 
 			portfrangeTable = document.getElementById('portfrange_table_container').firstChild;
 			addTableRow(portfrangeTable,values, true, false);
@@ -310,8 +311,8 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 		{
 			errors.push(prtS.GTErr);
 		}
-		
-		
+
+
 		var portfTable = tableDocument.getElementById('portf_table_container').firstChild;
 		var currentPortfData = getTableDataArray(portfTable, true, false);
 		var addStartPort = controlDocument.getElementById('addr_sp').value;
@@ -342,7 +343,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 		}
 	}
 
-	
+
 	return errors;
 
 }
@@ -433,10 +434,10 @@ function resetData()
 			var srcdport	= uciOriginal.get("firewall", rId, "src_dport");
 			var destip	= uciOriginal.get("firewall", rId, "dest_ip");
 			var destport	= uciOriginal.get("firewall", rId, "dest_port");
-	
-			
+
+
 			if(srcdport == "" && destport == "" && sectionType == "redirect")
-			{	
+			{
 				dmzIp = dmzIp == "" ? destip : dmzIp;
 			}
 			else if(proto.toLowerCase() == "tcp" || proto.toLowerCase() == "udp")
@@ -488,16 +489,16 @@ function resetData()
 	columnNames = [prtS.Desc, prtS.Proto, prtS.FPrt, prtS.TIP, prtS.TPrt, UI.Enabled, '']
 	portfTable=createTable(columnNames, singlePortTableData, "portf_table", true, false);
 	table1Container = document.getElementById('portf_table_container');
-	
+
 	if(table1Container.firstChild != null)
 	{
 		table1Container.removeChild(table1Container.firstChild);
 	}
 	table1Container.appendChild(portfTable);
-	
-	
-	
-	
+
+
+
+
 
 	columnNames = [prtS.Desc, prtS.Proto, prtS.SPrt, prtS.EPrt, prtS.TIP, UI.Enabled, '']
 	portfrangeTable=createTable(columnNames, portRangeTableData, "portf_range_table", true, false);
@@ -560,10 +561,10 @@ function resetData()
 	document.getElementById("upnp_enabled").checked = upnpdEnabled;
 	upElement = document.getElementById("upnp_up");
 	downElement = document.getElementById("upnp_down");
-	
+
 	upElement.value = uciOriginal.get("upnpd", "config", "upload");
 	upElement.value = upElement.value == '' ? 1250 : upElement.value;
-	
+
 	downElement.value = uciOriginal.get("upnpd", "config", "download");
 	downElement.value = downElement.value == '' ? 1250 : downElement.value;
 
@@ -583,7 +584,7 @@ function resetData()
 		var tableRow =['***','***********','***** '];
 		tableData.push(tableRow);
 
-		var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ]; 
+		var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ];
 		var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 		var tableContainer = document.getElementById('upnp_table_container');
 		if(tableContainer.firstChild != null)
@@ -596,7 +597,7 @@ function resetData()
 	}
 
 
-	
+
 }
 
 function setUpnpEnabled()
@@ -634,7 +635,7 @@ function editForward(isSingle, triggerElement)
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -649,7 +650,7 @@ function editForward(isSingle, triggerElement)
 
 	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
 	editForwardWindow = window.open(editLocation, "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
-	
+
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);
 	saveButton.value = UI.CApplyChanges;
@@ -659,7 +660,7 @@ function editForward(isSingle, triggerElement)
 
 	editRow=triggerElement.parentNode.parentNode;
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(editForwardWindow.document != null)
@@ -668,7 +669,7 @@ function editForward(isSingle, triggerElement)
 			{
 				editForwardWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editForwardWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
+
 				//set edit values
 				var r= isSingle ? "" : "r";
 				editForwardWindow.document.getElementById("add" + r + "_button").style.display="none";
@@ -686,7 +687,7 @@ function editForward(isSingle, triggerElement)
 					editForwardWindow.document.getElementById("addr_ep").value   = editRow.childNodes[3].firstChild.data;
 					editForwardWindow.document.getElementById("addr_ip").value   = editRow.childNodes[4].firstChild.data;
 				}
-				
+
 				closeButton.onclick = function()
 				{
 					editForwardWindow.close();
@@ -710,7 +711,7 @@ function editForward(isSingle, triggerElement)
 					else
 					{
 						//update document with new data
-						
+
 						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_desc").value;
 						editRow.childNodes[1].firstChild.data = getSelectedValue( "add" + r + "_prot", editForwardWindow.document );
 						if(isSingle)
@@ -781,8 +782,8 @@ function update_upnp()
 					tableData.push(tableRow);
 				}
 
-				var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ]; 
-				
+				var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ];
+
 				var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 				var tableContainer = document.getElementById('upnp_table_container');
 				if(tableContainer.firstChild != null)
