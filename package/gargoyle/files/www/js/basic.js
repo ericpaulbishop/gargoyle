@@ -159,6 +159,10 @@ function saveChanges()
 				{
 					uci.remove('network', 'wan', 'ifname');
 				}
+				else if(getSelectedValue("wan_protocol").match(/cdc/))
+				{
+					uci.set('network', 'wan', 'ifname', cdcif);
+				}
 				else
 				{
 					uci.set('network', 'wan', 'ifname', defaultWanIf);
@@ -1068,6 +1072,12 @@ function setGlobalVisibility()
 		proto2.push(basicS.Mo3gNCM);
 	}
 
+	if(cdcif != "")
+	{
+		proto1.push('dhcp_cdc');
+		proto2.push(basicS.Mo3gHiLink);
+	}
+
 	proto1.push('none');
 	proto2.push(UI.Disabled);
 	setAllowableSelections('wan_protocol', proto1, proto2);
@@ -1517,6 +1527,7 @@ function resetData()
 	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
+	if(wp == "dhcp_wired" && wanUciIf != defaultWanIf) { wp = "dhcp_cdc"; }
 	setSelectedValue("wan_protocol", wp);
 
 	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;

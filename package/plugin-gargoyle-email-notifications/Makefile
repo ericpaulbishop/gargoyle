@@ -70,8 +70,8 @@ if [ -z "$${IPKG_INSTROOT}" ]; then
 	uci set gargoyle.scripts.system_email_notifications='email.sh'
 	uci set gargoyle.system.email_notifications='380'
 	uci commit
+	chmod +x /usr/lib/gargoyle/email.sh
 fi
-chmod +x /usr/lib/gargoyle/email.sh
 endef
 
 define Package/plugin-gargoyle-email-notifications/postrm

@@ -1,0 +1,30 @@
+--- a/scanner.c
++++ b/scanner.c
+@@ -794,11 +794,22 @@
+ 		}
+ 		if( (type == TYPE_DIR) && (access(full_path, R_OK|X_OK) == 0) )
+ 		{
+-			char *parent_id;
+-			insert_directory(name, full_path, BROWSEDIR_ID, THISORNUL(parent), i+startID);
+-			xasprintf(&parent_id, "%s$%X", THISORNUL(parent), i+startID);
+-			ScanDirectory(full_path, parent_id, dir_types);
+-			free(parent_id);
++			char ignore_file[PATH_MAX];
++			sprintf(ignore_file, "%s/.minidlnaignore", full_path);
++			FILE *ignore = fopen(ignore_file, "r");
++			if( ignore == NULL )
++			{
++				char *parent_id;
++				insert_directory(name, full_path, BROWSEDIR_ID, THISORNUL(parent), i+startID);
++				xasprintf(&parent_id, "%s$%X", THISORNUL(parent), i+startID);
++				ScanDirectory(full_path, parent_id, dir_types);
++				free(parent_id);
++			}
++			else
++			{
++				fclose(ignore);
++				DPRINTF(E_INFO, L_SCANNER, _("Skipping dir %s\n"), full_path);
++			}
+ 		}
+ 		else if( type == TYPE_FILE && (access(full_path, R_OK) == 0) )
+ 		{

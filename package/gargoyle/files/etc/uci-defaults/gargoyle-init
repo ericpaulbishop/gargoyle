@@ -24,6 +24,17 @@ fi
 
 
 
+
+#button handlers
+cd /etc/rc.button
+for file in * ; do
+	if [ "$file" != "gargoyle_button_handler" ] ; then
+		rm "$file"
+		ln -s "gargoyle_button_handler" "$file"
+	fi
+done
+
+
 settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
 if [ "$settings_not_preserved" == "1" ] ; then
 
@@ -132,3 +143,5 @@ cat << EOF >/etc/sysupgrade.conf
 /usr/data
 /etc/tor
 EOF
+
+
