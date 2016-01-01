@@ -194,16 +194,37 @@ function tsInit()
 				if	(isNaN(text))	text = 0;
 			}
 			else if (sorting == 'm')
-			{	text = text.replace(/,/g, "");
-				metrics = text.match(/\d+(P|T|G|M|k)/);
-				text = (metrics.length == 0) ? "0" : metrics[0];
-				text = text.replace(/P/, "000000000000000");
-				text = text.replace(/T/, "000000000000");
-				text = text.replace(/G/, "000000000");
-				text = text.replace(/M/, "000000");
-				text = text.replace(/k/, "000");
-				text = parseInt(text);
-				if	(isNaN(text))	text = 0;
+			{
+				text = text.replace(/,/g, "");
+				metric = text.match(/\d+.?\d+\s?(P|T|G|M|k)/);
+				float = parseFloat(metric[0]);
+				if (isNaN(float))
+				{
+					text = 0;
+				}
+				else if (metrics[1] == "P" )
+				{
+					text = float * 1000000000000000
+				}
+				else if (metrics[1] == "T" )
+				{
+					text = float * 1000000000000
+				}
+				else if (metrics[1] == "G" )
+				{
+					text = float * 1000000000
+				}
+				else if (metrics[1] == "M" )
+				{
+					text = float * 1000000
+				}
+				else if (metrics[1] == "k" )
+				{
+					text = float * 1000
+				} else
+				{
+					text = float;
+				}
 			}
 			row_data.push(text);
 		}
