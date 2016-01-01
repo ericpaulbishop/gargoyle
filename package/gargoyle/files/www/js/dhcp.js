@@ -1,12 +1,13 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
 var dhcpS=new Object(); //part of i18n
+var TSort_Data = new Array ('static_ip_table', 's', 's', 's', '', '');
 
 function saveChanges()
 {
@@ -28,12 +29,12 @@ function saveChanges()
 		dhcpPkgs = ['dhcp','dhcp','dhcp'];
 		dhcpSections = [dhcpSection,dhcpSection,dhcpSection];
 		dhcpOptions = ['start', 'limit', 'leasetime'];
-	
+
 		dhcpFunctions = [setVariableFromValue, setVariableFromCombined, setVariableFromModifiedValue];
 		limitParams =  [false, function(values){ return (parseInt(values[1]) - parseInt(values[0]) + 1); }];
 		leaseParams = [false, function(value){ return value + "h"; }];
-		dhcpParams = [false, limitParams,leaseParams];	
-	
+		dhcpParams = [false, limitParams,leaseParams];
+
 		setVariables(dhcpIds, dhcpVisIds, uci, dhcpPkgs, dhcpSections, dhcpOptions, dhcpFunctions, dhcpParams);
 
 		dhcpWillBeEnabled = true;
@@ -46,11 +47,11 @@ function saveChanges()
 			uci.set("dhcp", "lan", "ignore", "1");
 			dhcpWillBeEnabled = false;
 		}
-	
 
-		staticIpTable = document.getElementById('staticip_table_container').firstChild;	
+
+		staticIpTable = document.getElementById('staticip_table_container').firstChild;
 		tableData = getTableDataArray(staticIpTable, true, false);
-	
+
 		createEtherCommands = [ "touch /etc/ethers", "rm /etc/ethers" ];
 		staticIpTableData = new Array();
 		for (rowIndex in tableData)
@@ -64,7 +65,7 @@ function saveChanges()
 			}
 		}
 
-	
+
 		createHostCommands = [ "touch /etc/hosts", "rm /etc/hosts" ];
 		for (ip in ipHostHash)
 		{
@@ -79,7 +80,7 @@ function saveChanges()
 		if(newBlockMismatches != oldBlockMismatches)
 		{
 			if(newBlockMismatches)
-			{ 
+			{
 				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
 				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
 			}
@@ -93,7 +94,7 @@ function saveChanges()
 
 
 		//need to restart firewall here because for add/remove of static ips, we need to restart bandwidth monitor, as well as for firewall commands above if we have any
-		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ; \nsh /usr/lib/gargoyle/restart_firewall.sh\n" ; 
+		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ; \nsh /usr/lib/gargoyle/restart_firewall.sh\n" ;
 
 		commands = uci.getScriptCommands(uciOriginal) + "\n" + createEtherCommands.join("\n") + "\n" + createHostCommands.join("\n") + "\n" + firewallCommands.join("\n") + "\n" + restartDhcpCommand ;
 
@@ -151,7 +152,7 @@ function resetData()
 	dhcpPkgs = ['dhcp',['dhcp','dhcp'],'dhcp'];
 	dhcpSections = [dhcpSection,[dhcpSection,dhcpSection],dhcpSection];
 	dhcpOptions = ['start', ['start','limit'], 'leasetime'];
-	
+
 	enabledTest = function(value){return value != 1;};
 	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])-1); };
 	leaseModFunc = function(value)
@@ -169,9 +170,9 @@ function resetData()
 		{
 			leaseHourValue=value.substr(0,value.length-1)/(60*60);
 		}
-		return leaseHourValue;  
+		return leaseHourValue;
 	};
-	
+
 	dhcpParams = [100, [endCombineFunc,150],[12,leaseModFunc]];
 	dhcpFunctions = [loadValueFromVariable, loadValueFromMultipleVariables, loadValueFromModifiedVariable];
 
@@ -224,7 +225,7 @@ function resetHostnameMacList()
 		}
 	}
 	setAllowableSelections("static_from_connected", hmVals, hmText);
-	
+
 	var hmEnabled = hmText.length > 1 && document.getElementById('dhcp_enabled').checked ? true : false;
 	setElementEnabled(document.getElementById("static_from_connected"), hmEnabled, "none");
 
@@ -258,10 +259,10 @@ function setEnabled(enabled)
 
 	var staticIpTable = document.getElementById('staticip_table_container').firstChild;
 	setRowClasses(staticIpTable, enabled);
-	
+
 	resetHostnameMacList();
 
-	
+
 }
 
 function addStatic()
@@ -293,7 +294,7 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	tableDocument = tableDocument == null ? document : tableDocument;
-	
+
 	addIds=['add_mac', 'add_ip'];
 	labelIds= ['add_mac_label', 'add_ip_label'];
 	functions = [validateMac, validateIP];
@@ -340,7 +341,7 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 		if(ip == testIp)
 		{
 			errors.push(dhcpS.ipErr);
-		}	
+		}
 	}
 	return errors;
 }
@@ -366,7 +367,7 @@ function proofreadAll()
 		{
 			errors.push(dhcpS.dsubErr);
 		}
-		
+
 		var ipEnd = parseInt( (ip.split("."))[3] );
 		if(ipEnd >= start && ipEnd <= end)
 		{
@@ -391,7 +392,6 @@ function editStatic()
 		catch(e){}
 	}
 
-	
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -403,9 +403,8 @@ function editStatic()
 		yCoor = window.top + 225;
 	}
 
-
 	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
-	
+
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
 	saveButton.value = UI.CApplyChanges;
@@ -415,7 +414,7 @@ function editStatic()
 
 	editRow=this.parentNode.parentNode;
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(editStaticWindow.document != null)
@@ -424,12 +423,12 @@ function editStatic()
 			{
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
+
 				//set edit values
 				editStaticWindow.document.getElementById("add_host").value = editRow.childNodes[0].firstChild.data;
 				editStaticWindow.document.getElementById("add_mac").value  = editRow.childNodes[1].firstChild.data;
 				editStaticWindow.document.getElementById("add_ip").value   = editRow.childNodes[2].firstChild.data;
-				editStaticWindow.document.getElementById("add_button").style.display="none";				
+				editStaticWindow.document.getElementById("add_button").style.display="none";
 				closeButton.onclick = function()
 				{
 					editStaticWindow.close();
@@ -448,7 +447,7 @@ function editStatic()
 						editRow.childNodes[0].firstChild.data = editStaticWindow.document.getElementById("add_host").value;
 						editRow.childNodes[1].firstChild.data = editStaticWindow.document.getElementById("add_mac").value;
 						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_ip").value;
-						
+
 						editStaticWindow.close();
 
 						resetHostnameMacList();
@@ -467,4 +466,3 @@ function editStatic()
 	}
 	runOnEditorLoaded();
 }
-
