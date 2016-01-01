@@ -193,6 +193,18 @@ function tsInit()
 				text = parseInt(text);
 				if	(isNaN(text))	text = 0;
 			}
+			else if (sorting == 'm')
+			{	text = text.replace(/,/g, "");
+				metrics = text.match(/\d+(P|T|G|M|k)/);
+				text = (metrics.length == 0) ? "0" : metrics[0];
+				text = text.replace(/P/, "000000000000000");
+				text = text.replace(/T/, "000000000000");
+				text = text.replace(/G/, "000000000");
+				text = text.replace(/M/, "000000");
+				text = text.replace(/k/, "000");
+				text = parseInt(text);
+				if	(isNaN(text))	text = 0;
+			}
 			row_data.push(text);
 		}
 		TSort_Store.rows.push(row_data);
