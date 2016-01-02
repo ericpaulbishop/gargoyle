@@ -2112,7 +2112,6 @@ CONFIG_PACKAGE_libblobmsg-json=y
 CONFIG_PACKAGE_libbz2=m
 # CONFIG_PACKAGE_libcurl is not set
 CONFIG_PACKAGE_libericstools=y
-CONFIG_PACKAGE_libevent=m
 CONFIG_PACKAGE_libevent2=m
 CONFIG_PACKAGE_libevent2-core=m
 CONFIG_PACKAGE_libevent2-extra=m
