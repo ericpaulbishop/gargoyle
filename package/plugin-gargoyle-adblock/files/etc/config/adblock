@@ -1,6 +1,5 @@
 config adblock 'config'
 	option enabled '0'
-	option onlywireless '0'
 	option trans '0'
 	option exempt '0'
 	option exstart '192.168.1.1'

@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin_gargoyle_adblock
-PKG_VERSION:=20150909
-PKG_RELEASE:=1.0.4
+PKG_VERSION:=20151229
+PKG_RELEASE:=1.1.0
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -52,7 +52,7 @@ endef
 define Package/plugin-gargoyle-adblock/prerm
 #!/bin/sh
 
-sh /usr/lib/gargoyle/runadblock.sh -disable
+sh /plugin_root/adblock/runadblock.sh -disable
 endef
 
 define Package/plugin-gargoyle-adblock/postrm
@@ -67,7 +67,7 @@ fi
 cat /etc/crontabs/root | grep -v -e 'runadblock.sh' > /tmp/cron.backup
 mv /tmp/cron.backup /etc/crontabs/root
 /etc/init.d/cron restart
-rm -f /etc/block.hosts
+rm -f /plugin_root/adblock/block.hosts
 endef
 
 define Package/plugin-gargoyle-adblock/install
