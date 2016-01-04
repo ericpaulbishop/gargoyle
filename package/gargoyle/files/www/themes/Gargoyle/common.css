@@ -5,27 +5,8 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
-
-
-html
-{
-	background:url("images/slant_background.jpg") top center repeat;
-	padding:0;
-	margin:0;
-	border:0;
-}
-
-body
-{
-	font-family:verdana, arial, sans-serif;
-	font-size:85%;
-	line-height:1.3em;
-	padding:0;
-	margin:0;
-	border:0;
-	height:100%;
-}
-
+@import url('normalize.css');
+@import url('bootstrap.min.css');
 #darken
 {
 	top:0;
@@ -71,7 +52,6 @@ body
 	font-weight:bold;
 	padding-bottom:20px;
 }
-
 .select_free
 {
 	display:none;
@@ -84,6 +64,24 @@ body
 	height:3500px;
 }
 
+html
+{
+	background:url("images/slant_background.jpg") top center repeat;
+	padding:0;
+	margin:0;
+	border:0;
+}
+
+body
+{
+	font-family:verdana, arial, sans-serif;
+	font-size:85%;
+	line-height:1.3em;
+	padding:0;
+	margin:0;
+	border:0;
+	height:100%;
+}
 #outer_logo
 {
 	position:absolute;
@@ -92,10 +90,9 @@ body
 	left:0;
 	width:210px;
 	height:160px;
-	background:url("images/slant_background.jpg") top center repeat;
+	/* background:url("images/slant_background.jpg") top center repeat; */
 	z-index:700;
 }
-
 #inner_logo
 {
 	position:absolute;
@@ -108,7 +105,6 @@ body
 	background:url("images/top-gradient-logo.png") top no-repeat;
 	z-index:800;
 }
-
 #garg_title
 {
 	position:absolute;
@@ -120,7 +116,6 @@ body
 	z-index:900;
 	color:#211679;
 }
-
 #garg_desc
 {
 	position:absolute;
@@ -133,7 +128,6 @@ body
 	z-index:900;
 	color:#211679;
 }
-
 #garg_host
 {
 	position:absolute;
@@ -145,7 +139,6 @@ body
 	z-index:900;
 	color:#211679;
 }
-
 #outer_container
 {
 	display:block;
@@ -157,13 +150,13 @@ body
 	margin:0;
 	border:0;
 	padding-bottom:30px;
-	background:url("images/nav_unselected.png") left repeat-y;
+	/* background:url("images/nav_unselected.png") left repeat-y; */
 }
 
 #outer_footer
 {
 	display:block;
-	background:url("images/nav_unselected.png") center repeat;
+	/* background:url("images/nav_unselected.png") center repeat; */
 	position:absolute;
 	width:200px;
 	top:0;
@@ -182,12 +175,26 @@ body
 	left:0;
 	width:200px;
 	bottom:0;
+	border-color: rgb(182, 186, 241);
+	border-top-width:2px;
+	border-left-width:2px;
+	border-right-width:2px;
+	border-radius: 15px 15px 0 0;
+    background: rgba(182,186,241,1);
+    background: -moz-linear-gradient(left, rgba(182,186,241,1) 0%, rgba(255,255,255,1) 100%);
+    background: -webkit-gradient(left top, right top, color-stop(0%, rgba(182,186,241,1)), color-stop(100%, rgba(255,255,255,1)));
+    background: -webkit-linear-gradient(left, rgba(182,186,241,1) 0%, rgba(255,255,255,1) 100%);
+    background: -o-linear-gradient(left, rgba(182,186,241,1) 0%, rgba(255,255,255,1) 100%);
+    background: -ms-linear-gradient(left, rgba(182,186,241,1) 0%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(to right, rgba(182,186,241,1) 0%, rgba(255,255,255,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b6baf1', endColorstr='#ffffff', GradientType=1 );
 }
+
 
 #nav_top
 {
 	position:absolute;
-	background:url("images/nav_top_external.png") top left no-repeat;
+	/* background:url("images/nav_top_external.png") top left no-repeat; */
 	top:0;
 	left:0;
 	height:22px;
@@ -198,7 +205,7 @@ body
 #nav_internal_container1
 {
 	position:absolute;
-	background:url("images/nav_unselected.png") center repeat;
+	/* background:url("images/nav_unselected.png") center repeat; */
 	top:8px;
 	width:200px;
 	bottom:0;
@@ -207,7 +214,7 @@ body
 
 #nav_internal_container2
 {
-	background:url("images/nav_unselected.png") center repeat;
+	/* background:url("images/nav_unselected.png") center repeat; */
 	position:relative;
 	width:200px;
 	top:0;
@@ -242,7 +249,7 @@ body
 
 .nav_unselected_divider_end1
 {
-	background:url("images/nav_top_unselected_internal.png") top no-repeat;
+	/* background:url("images/nav_top_unselected_internal.png") top no-repeat; */
 	position:absolute;
 	width:200px;
 	height:10px;
@@ -252,7 +259,7 @@ body
 
 .nav_selected_end1
 {
-	background:url("images/nav_top_selected_internal.png") top center no-repeat;
+	/* background:url("images/nav_top_selected_internal.png") top center no-repeat; */
 	position:relative;
 	width:200px;
 	top:0;
@@ -262,7 +269,7 @@ body
 
 .nav_selected_container_end1
 {
-	background:url("images/nav_selected.png") center repeat;
+	/* background:url("images/nav_selected.png") center repeat; */
 	position:relative;
 	width:184px;
 	left:8px;
@@ -295,7 +302,7 @@ body
 
 .nav_selected
 {
-	background:url("images/nav_selected.png") repeat;
+	/* background:url("images/nav_selected.png") repeat; */
 	display:block;
 	position:relative;
 	width:184px;
@@ -337,7 +344,11 @@ body
 {
 	color:#000;
 	padding-left:15px;
-	background:url("images/black_carat.png") left no-repeat;
+	/* background:url("images/black_carat.png") left no-repeat; */
+}
+
+.submenu_selected:before{
+	content: "»";
 }
 
 #submenu_container a
@@ -351,14 +362,16 @@ body
 #submenu_container a:hover
 {
 	display:block;
-	background:url("images/blue_carat.png") left no-repeat;
 	padding-left:15px;
 	color:#211679;
+}
+#submenu_container a:hover:before{
+	content: "»";
 }
 
 .nav_selected_divider1
 {
-	background:url("images/nav_selected_divider_1.png") center top no-repeat;
+	/* background:url("images/nav_selected_divider_1.png") center top no-repeat; */
 	position:relative;
 	width:184px;
 	height:8px;
@@ -368,7 +381,7 @@ body
 
 .nav_selected_divider2
 {
-	background:url("images/nav_selected_divider_2.png") center top no-repeat;
+	/* background:url("images/nav_selected_divider_2.png") center top no-repeat; */
 	position:relative;
 	width:184px;
 	height:1px;
@@ -380,7 +393,7 @@ body
 
 .nav_selected_divider_end2
 {
-	background:url("images/nav_selected_divider_2.png") center top no-repeat;
+	/* background:url("images/nav_selected_divider_2.png") center top no-repeat; */
 	position:relative;
 	width:184px;
 	height:1px;
@@ -392,7 +405,7 @@ body
 
 .nav_unselected_divider
 {
-	background:url("images/nav_unselected_divider.png") center top no-repeat;
+	/* background:url("images/nav_unselected_divider.png") center top no-repeat; */
 	position:relative;
 	width:184px;
 	height:4px;
@@ -402,7 +415,7 @@ body
 
 .nav_unselected_divider_end2
 {
-	background:url("images/nav_unselected_divider.png") center top no-repeat;
+	/* background:url("images/nav_unselected_divider.png") center top no-repeat; */
 	position:relative;
 	width:184px;
 	height:4px;
@@ -417,6 +430,12 @@ body
 	top:30px;
 	left:230px;
 	width:570px;
+	background-color: #FFF;
+	border-color: rgb(182, 186, 241);
+	border-top-width:2px;
+	border-left-width:2px;
+	border-right-width:2px;
+	border-radius:15px 15px 0 0;
 }
 
 #main_top
@@ -426,7 +445,7 @@ body
 	left:0;
 	height:22px;
 	width:570px;
-	background:url("images/main_top.png") bottom center no-repeat;
+	/* background:url("images/main_top.png") bottom center no-repeat; */
 }
 
 #main_bottom
@@ -436,7 +455,7 @@ body
 	left:0;
 	height:50px;
 	width:570px;
-	background:url("images/main_bottom.png") top center no-repeat;
+	/* background:url("images/main_bottom.png") top center no-repeat; */
 }
 
 #main_internal_container
@@ -448,5 +467,5 @@ body
 	width:542px;
 	padding-left:14px;
 	padding-right:14px;
-	background:url("images/main_internal.png") center repeat;
+	/* background:url("images/main_internal.png") center repeat; */
 }

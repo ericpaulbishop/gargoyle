@@ -51,6 +51,8 @@ legend
 	font-size:18px;
 	font-weight:bold;
 	color:#888AB8;
+	width: auto;
+    border-bottom: 0;
 }
 
 fieldset
@@ -298,7 +300,7 @@ td
 input.default_button
 {
 	text-align:center;
-	background:url("images/default_button_gradient_normal.png") center top repeat-x;
+	/* background:url("images/default_button_gradient_normal.png") center top repeat-x; */
 	border-bottom:1px solid #737582;
 	border-right:1px solid #737582;
 	border-left:1px solid #fff;
@@ -310,7 +312,7 @@ input.default_button
 
 input.default_button:hover
 {
-	background:url("images/default_button_gradient_pressed.png") center top repeat-x;
+	/* background:url("images/default_button_gradient_pressed.png") center top repeat-x; */
 	color:#555;
 	border-top:1px solid #737582;
 	border-left:1px solid #737582;
@@ -321,7 +323,7 @@ input.default_button:hover
 
 input.default_button:active
 {
-	background:url("images/default_button_gradient_pressed.png") center top repeat-x;
+	/* background:url("images/default_button_gradient_pressed.png") center top repeat-x; */
 	color:#555;
 	border-top:1px solid #737582;
 	border-left:1px solid #737582;
@@ -333,7 +335,7 @@ input.default_button:active
 input.default_button_disabled
 {
 	text-align:center;
-	background:url("images/default_button_gradient_disabled.png") center top repeat-x;
+	/* background:url("images/default_button_gradient_disabled.png") center top repeat-x; */
 	border-bottom:1px solid #737582;
 	border-right:1px solid #737582;
 	border-left:1px solid #fff;
@@ -346,7 +348,7 @@ input.default_button_disabled
 input.default_button_disabled:hover
 {
 	text-align:center;
-	background:url("images/default_button_gradient_disabled.png") center top repeat-x;
+	/* background:url("images/default_button_gradient_disabled.png") center top repeat-x; */
 	border-bottom:1px solid #737582;
 	border-right:1px solid #737582;
 	border-left:1px solid #fff;
@@ -360,7 +362,7 @@ input.big_button
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_normal.png") center top no-repeat;
+	/* background:url("images/big_button_normal.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
@@ -372,7 +374,7 @@ input.big_button:hover
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_highlighted.png") center top no-repeat;
+	/* background:url("images/big_button_highlighted.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
@@ -384,7 +386,7 @@ input.big_button:active
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_pressed.png") center top no-repeat;
+	/* background:url("images/big_button_pressed.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
@@ -397,7 +399,7 @@ input.big_button_disabled
 	text-align:center;
 	width:187px;
 	height:45px;
-	background:url("images/big_button_disabled.png") center top no-repeat;
+	/* background:url("images/big_button_disabled.png") center top no-repeat; */
 	border:none;
 	font-weight:bold;
 	font-size:16px;
@@ -410,7 +412,7 @@ input.big_button_disabled:hover
 	text-align:center;
 	width:187px;
 	height:45px;
-	background:url("images/big_button_disabled.png") center top no-repeat;
+	/* background:url("images/big_button_disabled.png") center top no-repeat; */
 	border:none;
 	font-weight:bold;
 	font-size:16px;
@@ -450,7 +452,7 @@ input.bottom_button
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_normal.png") center top no-repeat;
+	/* background:url("images/big_button_normal.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
@@ -462,7 +464,7 @@ input.bottom_button:hover
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_highlighted.png") center top no-repeat;
+	/* background:url("images/big_button_highlighted.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
@@ -474,7 +476,7 @@ input.bottom_button:active
 {
 	width:187px;
 	height:45px;
-	background:url("images/big_button_pressed.png") center top no-repeat;
+	/* background:url("images/big_button_pressed.png") center top no-repeat; */
 	border:none;
 	cursor:pointer;
 	font-weight:bold;
