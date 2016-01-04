@@ -314,92 +314,98 @@ int main(int argc, char **argv)
 		
 
 
-		printf("<!DOCTYPE html>\n"
-		       "<head>\n"
-		       "\t<meta charset=\"utf-8\">\n"
-		       "\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-	   	       "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
-		       "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-		       "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
-		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
+		printf("<!DOCTYPE html>"
+		       "<head>"
+		       "<meta charset=\"utf-8\">"
+		       "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
+	   	       "<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">"
+		       "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+		       "<title>%s</title>", translation_strings == NULL ? title : translation_strings[0]);
+		printf("<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>", theme_root, theme);
 		int css_index, js_index, lstr_js_index;
 
 		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
-		printf("\t<style>\n"
-		       "\t\t.unselected_submenu_container	{ display:none; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link	{ display:inline; padding:0; color:#000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:hover	{ color:#000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:visited	{ color:#000; cursor:default; }\n"
-		       "\t\t#nav_internal_container2 #selected_header_link:active	{ color:#000; cursor:default; }\n"
-		       "\t</style>\n");
+		printf("<style>"
+		       ".unselected_submenu_container	{ display:none; }"
+		       "#nav_internal_container2 #selected_header_link	{ display:inline; padding:0; color:#000; cursor:default; }"
+		       "#nav_internal_container2 #selected_header_link:hover	{ color:#000; cursor:default; }"
+		       "#nav_internal_container2 #selected_header_link:visited	{ color:#000; cursor:default; }"
+		       "#nav_internal_container2 #selected_header_link:active	{ color:#000; cursor:default; }"
+		       "</style>");
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			printf("<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>", theme_root, theme, all_css[css_index], gargoyle_version);
 		}
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
-			printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
+			printf("<script src=\"%s/%s?%s\"></script>", js_root, all_js[js_index], gargoyle_version);
 		}
 #ifndef LOCALIZED_BUILD
 		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
 		{
 			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 			{
-				printf("\t<script src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+				printf("<script src=\"/i18n/%s/strings.js?%s\"></script>", fallback_lang, gargoyle_version);
 			}
-			printf("\t<script src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
+			printf("<script src=\"i18n/%s/strings.js?%s\"></script>", active_lang, gargoyle_version);
 			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
 			{
 				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
 				{
-					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					printf("<script src=\"/i18n/%s/%s?%s\"></script>", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
 				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
 				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
 				{
-					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+					printf("<script src=\"/i18n/%s/%s?%s\"></script>", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
 				}
 				free(tran_file);
 			}
 		}
 #endif
-		printf("</head>\n"
-		       "<body>\n");
+		printf("</head>"
+		       "<body>"
+			   "<div class=\"container-fluid>");
 
 		if(display_type == HEADER)
 		{
-			printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
-			       "\t<div id=\"wait_msg\">\n"
-			       "\t\t<div id=\"wait_txt\">\n"
-			       "\t\t\t%s\n"
-			       "\t\t</div>\n"
-			       "\t\t<div id=\"wait_icon\">\n"
-			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
+			printf("<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>"
+			       "<div id=\"wait_msg\">"
+			       "<div id=\"wait_txt\">"
+			       "%s"
+			       "</div>"
+			       "<div id=\"wait_icon\">"
+			       "<img src=\"%s/%s/images/wait_icon.gif\"/>", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
 
-			printf("\t\t</div>\n"
-			       "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-			       "\t</div>\n"
-			       "\t<div id=\"outer_logo\">\n"
-			       "\t\t<div id=\"inner_logo\">\n"
-			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
-			       "\t\t\t<div id=\"garg_desc\">%s</div>\n"
-			       "\t\t\t<div id=\"garg_host\">%s: %s</div>\n",	translation_strings == NULL ? desc : translation_strings[1], 
+			printf("</div>"
+			       "<iframe id=\"m_iframe\" class=\"select_free\"></iframe>"
+			       "</div>"
+				   "<div class=\"row\">"
+				   "<div class=\"col-xs-6 col-md-4\">"
+			       "<div id=\"outer_logo\">"
+			       "<div id=\"inner_logo\">"
+			       "<div id=\"garg_title\">Gargoyle</div>"
+			       "<div id=\"garg_desc\">%s</div>"
+			       "<div id=\"garg_host\">%s: %s</div>",	translation_strings == NULL ? desc : translation_strings[1], 
 																	translation_strings == NULL ? dname : translation_strings[2],
 																	hostname);
 
-			printf("\t\t</div>\n"
-			       "\t</div>\n"
-			       "\t<div id=\"outer_header\"></div>\n"
-			       "\t<div id=\"outer_container\">\n"
-			       "\t\t<div id=\"main_external_container\">\n"
-			       "\t\t\t<div id=\"main_top\"></div>\n"
-			       "\t\t\t<div id=\"main_internal_container\">\n"
-			       "\n\n");
+			printf("</div>"
+			       "</div>"
+			       "<div id=\"outer_header\"></div>"
+				   "</div>"
+				   "<div class=\"row\">"
+			       "<div id=\"outer_container\">"
+				   "<div class=\"col-xs-6 col-md-8 col-md-pull-4 col-xs-pull-6\">"
+			       "<div id=\"main_external_container\">"
+			       "<div id=\"main_top\"></div>"
+			       "<div id=\"main_internal_container\">"
+			       "");
 		}
 
-		printf("<script>\n"
-		       "<!--\n"
-		       "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+		printf("<script>"
+		       "<!--"
+		       "var gargoyleBinRoot = \"%s/%s\";", web_root, bin_root);
 
 		if(display_interface_vars == 1)
 		{
@@ -410,19 +416,19 @@ int main(int argc, char **argv)
 			print_hostname_map();
 		}
 		define_package_vars(package_variables_to_load);
-		printf("\n\tsetBrowserTimeCookie();\n"
-		       "\n\tvar testAjax = getRequestObj();\n"
-		       "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
-		       "//-->\n"
-		       "</script>\n"
-		       "\n\n");
+		printf("setBrowserTimeCookie();"
+		       "var testAjax = getRequestObj();"
+		       "if(!testAjax) { window.location = \"no_ajax.sh\"; }"
+		       "//-->"
+		       "</script>"
+		       "");
 		free_null_terminated_string_array(translation_strings);
 	}
 	else if(display_type == FOOTER)
 	{
 		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
 		{
-			printf("ERROR: no gargoyle package defined!\n");
+			printf("ERROR: no gargoyle package defined!");
 			return 0;
 		}
 
@@ -462,14 +468,16 @@ int main(int argc, char **argv)
 		}
 
 
-		printf("\t\t\t</div>\n"
-		       "\t\t\t<div id=\"main_bottom\"></div>\n"
-		       "\t\t</div>\n"
-		       "\t\t<div id=\"nav_external_container\" onClick=\"return true\">\n"
-		       "\t\t\t<div id=\"nav_top\"></div>\n"
-		       "\t\t\t<div id=\"nav_internal_container1\">\n"
-		       "\t\t\t\t<div id=\"nav_internal_container2\">\n"
-		       "\t\t\t\t\t<div class=\"nav_internal_end1\"></div>\n");
+		printf("</div>"
+		       "<div id=\"main_bottom\"></div>"
+		       "</div>"
+			   "</div>"
+			   "<div class=\"col-xs-6 col-md-4 col-md-pull-8 col-xs-pull-6\">"
+		       "<div id=\"nav_external_container\" onClick=\"return true\">"
+		       "<div id=\"nav_top\"></div>"
+		       "<div id=\"nav_internal_container1\">"
+		       "<div id=\"nav_internal_container2\">"
+		       "<div class=\"nav_internal_end1\"></div>");
 
 		int first_section=1;
 		int prev_section_selected=0;
@@ -490,40 +498,40 @@ int main(int argc, char **argv)
 			{
 				if(prev_section_selected == 0)
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected_divider\"></div>\n");
+					printf("<div class=\"nav_unselected_divider\"></div>");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_selected_divider2\"></div>\n");
+					printf("<div class=\"nav_selected_divider2\"></div>");
 				}
 			}
 			if(strcmp(selected_section, next_section->id) == 0)
 			{
 				if(first_section == 1)
 				{
-					printf("\t\t\t\t\t<div class=\"nav_selected_divider_end1\"></div>\n"
-					       "\t\t\t\t\t<div class=\"nav_selected_end1\">\n"
-					       "\t\t\t\t\t\t<div class=\"nav_selected_container_end1\">\n");
+					printf("<div class=\"nav_selected_divider_end1\"></div>"
+					       "<div class=\"nav_selected_end1\">"
+					       "<div class=\"nav_selected_container_end1\">");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_selected_divider1\"></div>\n"
-					       "\t\t\t\t\t<div class=\"nav_selected\">\n"
-					       "\t\t\t\t\t\t<div class=\"nav_selected_container\">\n");
+					printf("<div class=\"nav_selected_divider1\"></div>"
+					       "<div class=\"nav_selected\">"
+					       "<div class=\"nav_selected_container\">");
 				}
 
 
 
 				if(peek_priority_queue_node(section_pages) == NULL)
 				{
-					printf("\t\t\t\t\t\t\t<div class=\"selected_single_header\">%s</div>\n", section_display);
+					printf("<div class=\"selected_single_header\">%s</div>", section_display);
 				}
 				else
 				{
-					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" onClick=\"return true\">\n"
-					       "\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
-					printf("\t\t\t\t\t\t\t</a>\n"
-					       "\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
+					printf("<a id=\"selected_header_link\" onClick=\"return true\">"
+					       "<div class=\"selected_header\">%s</div>", section_display);
+					printf("</a>"
+					       "<div id=\"submenu_container\">");
 					priority_queue_node *next_section_page;
 					while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 					{
@@ -540,7 +548,7 @@ int main(int argc, char **argv)
 						}
 						if(strcmp(next_section_page->id, selected_page)==0)
 						{
-							printf("\t\t\t\t\t\t\t\t<div class=\"submenu_selected\">%s</div>\n", page_display);
+							printf("<div class=\"submenu_selected\">%s</div>", page_display);
 						}
 						else
 						{
@@ -548,35 +556,35 @@ int main(int argc, char **argv)
 							char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 							if(strcmp(bin_root, ".") == 0)
 							{
-								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+								printf("<a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
 							}
 							else
 							{
-								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+								printf("<a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
 							}
 							free(bin_slash);
 							free(page_slash);
 						}
 						free(lookup);
 					}
-					printf("\t\t\t\t\t\t\t</div>\n");
+					printf("</div>");
 				}
-				printf("\t\t\t\t\t\t</div>\n"
-				       "\t\t\t\t\t</div>\n");
+				printf("</div>"
+				       "</div>");
 				prev_section_selected=1;
 			}
 			else
 			{
 				if(first_section == 1)
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n"
-					       "\t\t\t\t\t<div class=\"nav_unselected_end1\">\n"
-					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+					printf("<div class=\"nav_unselected_divider_end1\"></div>"
+					       "<div class=\"nav_unselected_end1\">"
+					       "<div class=\"nav_unselected\">");
 				}
 				else
 				{
-					printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n"
-					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+					printf("<div class=\"nav_unselected_container\">"
+					       "<div class=\"nav_unselected\">");
 				}
 
 				priority_queue_node *next_section_page;
@@ -603,13 +611,13 @@ int main(int argc, char **argv)
 				char* script_slash = next_section_script[0] == '/' ? strdup("") : strdup("/");
 				if(strcmp(bin_root, ".") == 0)
 				{
-					printf("\t\t\t\t\t\t\t<a href=\"%s%s\" onClick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
+					printf("<a href=\"%s%s\" onClick=\"return true\">%s</a>", script_slash, next_section_script, section_display);
 				}
 				else
 				{
-					printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+					printf("<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>", bin_slash, bin_root, script_slash, next_section_script, section_display);
 				}
-				printf("\t\t\t\t\t\t</div>\n");
+				printf("</div>");
 				
 				int empty_section = 0;
 				if (next_section_page == NULL)
@@ -618,7 +626,7 @@ int main(int argc, char **argv)
 				}
 				if (empty_section == 0)
 				{
-					printf("\t\t\t\t\t\t<div class=\"unselected_submenu_container\">\n");
+					printf("<div class=\"unselected_submenu_container\">");
 				}
 				while(next_section_page != NULL)
 				{
@@ -637,11 +645,11 @@ int main(int argc, char **argv)
 					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 					if(strcmp(bin_root, ".") == 0)
 					{
-						printf("\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+						printf("<a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
 					}
 					else
 					{
-						printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+						printf("<a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
 					}
 					free(bin_slash);
 					free(page_slash);
@@ -650,33 +658,36 @@ int main(int argc, char **argv)
 				}
 				if (empty_section == 0)
 				{
-					printf("\t\t\t\t\t\t</div>\n");
+					printf("</div>");
 				}
 
 
-				printf("\t\t\t\t\t</div>\n");
+				printf("</div>");
 				prev_section_selected=0;
 			}
 			first_section = 0;	
 		}
 		if(prev_section_selected ==1 )
 		{
-			printf("\t\t\t\t\t<div class=\"nav_selected_divider_end2\"></div>\n");
+			printf("<div class=\"nav_selected_divider_end2\"></div>");
 		}
 		else
 		{
-			printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end2\"></div>\n");
+			printf("<div class=\"nav_unselected_divider_end2\"></div>");
 		}
 
-		printf("\t\t\t\t\t<div class=\"nav_internal_end2\"></div>\n"
-		       "\t\t\t\t</div>\n"
-		       "\t\t\t</div>\n"
-		       "\t\t\t<div id=\"nav_bottom\"></div>\n"
-		       "\t\t</div>\n"
-		       "\t</div>\n"
-		       "\t<div id=\"outer_footer\"></div>\n"
-		       "</body>\n"
-		       "</html>\n");
+		printf("<div class=\"nav_internal_end2\"></div>"
+		       "</div>"
+		       "</div>"
+		       "<div id=\"nav_bottom\"></div>"
+		       "</div>"
+		       "</div>"
+			   "</div>"
+		       "<div id=\"outer_footer\"></div>"
+			   "</div>"
+			   "</div>"
+		       "</body>"
+		       "</html>");
 	}
 
 	uci_free_context(ctx);
