@@ -13,7 +13,7 @@ pgS.APSrc="Add Plugin Source";
 pgS.PList="Plugin List";
 pgS.NoPkg="Packages not found. Refresh plugins list.";
 pgS.RfshP="Refresh Plugins";
-pgS.NoWan="Please check your Internet connection.";
+pgS.NoWan="An Internet connection is required to Refresh Plugins.";
 
 //javascript
 pgS.NInst="Not Installed";

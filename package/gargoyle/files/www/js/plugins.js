@@ -395,6 +395,8 @@ function resetData()
 			setSingleChild(tableContainer, packTable)
 		}
 	}
+
+	document.getElementById("wan-warn").style.display = currentWanIp=="" ? "inline" : "none";
 }
 
 function installPackage()
@@ -417,12 +419,6 @@ function uninstallPackage()
 
 function updatePackagesList()
 {
-	if(currentWanIp=="")
-	{
-		document.getElementById("wan-warn").style.display = "inline";
-	} else {
-		document.getElementById("wan-warn").style.display = "none";
-	}
  	var cmd=["opkg update"];
 	execute(cmd);
 }
