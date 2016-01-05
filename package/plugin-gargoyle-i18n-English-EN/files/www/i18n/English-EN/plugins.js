@@ -39,3 +39,7 @@ pgS.Name="Name";
 pgS.Langs="Languages";
 pgS.Thems="Themes";
 pgS.Pkgs="Packages";
+pgS.NoSpace="Insufficient space on";
+pgS.PlgSz="Installed plugins";
+pgS.FreeSp="Free space";
+pgS.Rslv="Please uninstall some plugins and try again,\n or choose another destination.";
