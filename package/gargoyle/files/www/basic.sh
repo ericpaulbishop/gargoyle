@@ -85,7 +85,7 @@ else
 var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211" ? 20 : 18);
 
 //not perfect, but it this will do for now since only mac80211 drivers are ath9k and b43
-var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ; 
+var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ; 
 
 //-->
 </script>
@@ -168,9 +168,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<label class='leftcolumn' for='bridge_hwmode' id='bridge_hwmode_label'><%~ BrOpr %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_hwmode' onchange='setHwMode(this)'>
-						<option value='11ng'>N+G+B</option>
-						<option value='11g'>G+B</option>
-						<option value='11b'>B</option>
+						<option value='11g'>B+G</option>
+						<option value='11gn'>B+G+N</option>
+						<option value='11a'>A</option>
+						<option value='11an'>A+N</option>
+						<option value='11anac'>A+N+AC</option>
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -206,6 +208,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 						<option value='HT20'>20MHz</option>
 						<option value='HT40+'>40MHz (<%~ ChAbv %>)</option>
 						<option value='HT40-'>40MHz (<%~ ChBlw %>)</option>
+						<option value='VHT20'>20MHz</option>
+						<option value='VHT40'>40MHz</option>
+						<option value='VHT80'>80MHz</option>
 					</select>
 				</span>
 			</div>
@@ -552,19 +557,18 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 
 		<div id='wifi_hwmode_container'>
-			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'><%~ OpMod %>:</label>
+			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'>2.4GHz <%~ OpMod %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_hwmode' onchange='setHwMode(this)'>
-					<option value='11ng'>N+G+B</option>
-					<option value='11g'>G+B</option>
-					<option value='11b'>B</option>
-					<option value='auto'><%~ auto %></option>
+					<option value='disabled'>Disabled</option>
+					<option value='11g'>B+G</option>
+					<option value='11gn'>B+G+N</option>
 				</select>
 			</span>
 		</div>
 
 		<div id='wifi_channel_width_container' >
-			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'><%~ ChWdth %>:</label>
+			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>2.4GHz <%~ ChWdth %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width' onchange='setChannelWidth(this, "G")'>
 					<option value='HT20'>20MHz</option>
@@ -575,7 +579,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 
 		<div id='wifi_txpower_container' >
-			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'><%~ TrPwr %>:</label>
+			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'>2.4GHz <%~ TrPwr %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_max_txpower' onchange='updateTxPower("wifi_max_txpower","wifi_txpower", "G")'>
 					<option value='max'><%~ Max %></option>
@@ -587,6 +591,18 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
+		<div id='wifi_hwmode_5ghz_container'>
+			<label class='leftcolumn' for='wifi_hwmode_5ghz' id='wifi_hwmode_5ghz_label'>5GHz <%~ OpMod %>:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_hwmode_5ghz' onchange='setHwMode(this)'>
+					<option value='disabled'>Disabled</option>
+					<option value='11a'>A</option>
+					<option value='11an'>A+N</option>
+					<option value='11anac'>A+N+AC</option>
+				</select>
+			</span>
+		</div>
+		
 		<div id='wifi_channel_width_5ghz_container'>
 			<label class='leftcolumn' for='wifi_channel_width_5ghz' id='wifi_channel_width_5ghz_label'>5GHz <%~ ChWdth %>:</label>
 			<span class='rightcolumn'>
@@ -594,6 +610,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<option value='HT20'>20MHz</option>
 					<option value='HT40+'>40MHz (<%~ ChAbv %>)</option>
 					<option value='HT40-'>40MHz (<%~ ChBlw %>)</option>
+					<option value='VHT20'>20MHz</option>
+					<option value='VHT40'>40MHz</option>
+					<option value='VHT80'>80MHz</option>
 				</select>
 			</span>
 		</div>

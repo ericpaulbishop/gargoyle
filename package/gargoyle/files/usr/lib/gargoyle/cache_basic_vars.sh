@@ -5,23 +5,50 @@ print_mac80211_channels_for_wifi_dev()
 	wifi_dev="$1"
 	dev_num="$2"
 	out="$3"
+	dualband="$4"
 	
 	echo "nextCh     = [];" >> "$out"
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
-	[ "$mode" = "11an"  ] &&  mode="11a"
-	[ "$mode" = "11na"  ] &&  mode="11a"
-	[ "$mode" = "11bgn" ] &&  mode="11g"
-	[ "$mode" = "11bg"  ] &&  mode="11g"
+	#these modes are invalid now, removed.
 
+	#check the high throughput capabilities. eventually we will have to detect 160MHz also. cross that bridge later.
+	wifiN=$(iwinfo $wifi_dev h | grep HT20) || $(iwinfo $wifi_dev h | grep HT40)
+	wifiAC=$(iwinfo $wifi_dev h | grep VHT20) || $(iwinfo $wifi_dev h | grep VHT40)|| $(iwinfo $wifi_dev h | grep VHT80)
+
+	#802.11ac should only be able to operate on the "A" device
+	
 	if [ "$mode" = "11a" ] ; then
 		chId="A"
 		echo "wifiDevA=\"$wifi_dev\";" >> "$out"
+		if [ "$wifiN" ] ; then
+			echo "var AwifiN = true;" >> "$out"
+		else
+			echo "var AwifiN = false;" >> "$out"
+		fi
+		if [ "$wifiAC" ] ; then
+			echo "var AwifiAC = true;" >> "$out"
+		else
+			echo "var AwifiAC = false;" >> "$out"
+		fi
+		if [ "$dualband" == false ] ; then
+			echo "var GwifiN = false;" >> "$out_file"
+		fi
 	else
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
+		if [ "$wifiN" ] ; then
+			echo "var GwifiN = true;" >> "$out"
+		else
+			echo "var GwifiN = false;" >> "$out"
+		fi
+		if [ "$dualband" == false ] ; then
+			echo "var AwifiN = false;" >> "$out_file"
+			echo "var AwifiAC = false;" >> "$out_file"
+		fi
 	fi
+	
 	
 	# we are about to screen-scrape iw output, which the tool specifically says we should NOT do
 	# however, as far as I can tell there is no other way to get max txpower for each channel
@@ -76,7 +103,9 @@ echo "var wifiDevA=\"\";" >> "$out_file"
 
 if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";" >> "$out_file"
-	echo "var wifiN = false;" >> "$out_file"
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
@@ -86,31 +115,35 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 
 
 	echo "var nextCh=[];" >> "$out_file"
-	ncapab="$ncapab"$( uci get wireless.@wifi-device[0].htmode 2>/dev/null; uci get wireless.@wifi-device[0].ht_capab 2>/dev/null | grep 40 ; )
-	if [ -n "$ncapab" ] ; then echo "var wifiN = true ;"  >> "$out_file"; else echo "var wifiN = false ;"  >> "$out_file" ; fi
 	
 	#test for dual band
 	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
+		dualband='true'
 	else
 		echo "var dualBandWireless=false;" >> "$out_file"
+		dualband='false'
 	fi
 	
 	radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
 	radios="$(uci show wireless | sed -e '/wifi-device/!d; s/^.*\.//g; s/=.*$//g')"
 	rnum=0;
 	for r in $radios ; do
-		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file"
+		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file" "$dualband"
 		rnum=$(( $rnum+1 ))
 	done
 
 
 elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 	echo "var wirelessDriver=\"atheros\";" >> "$out_file"
-	echo "var wifiN = false;" >> "$out_file"
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
-	echo "var wifiN = false;" >> "$out_file"
+	echo "var GwifiN = false;" >> "$out_file"
+	echo "var AwifiN = false;" >> "$out_file"
+	echo "var AwifiAC = false;" >> "$out_file"
 fi
 
 # cache default interfaces if we haven't already
@@ -118,4 +151,3 @@ fi
 # this will make sure the defaults get cached right
 # away
 gargoyle_header_footer -i >/dev/null 2>&1
-
