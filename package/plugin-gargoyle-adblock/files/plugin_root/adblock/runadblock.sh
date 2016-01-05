@@ -3,9 +3,6 @@
 #Block ads, malware, etc.
 
 #### CONFIG SECTION ####
-# Only block wireless ads? Y/N
-ONLY_WIRELESS=`uci get adblock.config.onlywireless`
-
 # Try to transparently serve pixel response?
 TRANS=`uci get adblock.config.trans`
 
@@ -18,7 +15,7 @@ END_RANGE=`uci get adblock.config.exend`
 ENDPOINT_IP4=`uci get adblock.config.endpoint4`
 
 #Change the cron command to what is comfortable, or leave as is
-CRON="0 4 * * 0 sh /usr/lib/gargoyle/runadblock.sh"
+CRON="0 4 * * 0 sh /plugin_root/adblock/runadblock.sh"
 
 #Check if Tor is enabled
 TOR=`uci get tor.global.enabled`
@@ -34,33 +31,19 @@ cleanup()
 
 add_config()
 {
-	if [ "$ONLY_WIRELESS" == 1 ]
+	if [ "$EXEMPT" == 1 ]
 	then
-		logger -t ADBLOCK Only blocking ads for wireless clients
-		if [ "$EXEMPT" == 1 ]
-		then
-			logger -t ADBLOCK Exempting some clients from ad blocking
-			FW1="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -i wlan+ -p tcp --dport 53 -j REDIRECT --to-ports 53"
-			FW2="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -i wlan+ -p udp --dport 53 -j REDIRECT --to-ports 53"
-		else
-			FW1="iptables -t nat -I PREROUTING -i wlan+ -p tcp --dport 53 -j REDIRECT --to-ports 53"
-			FW2="iptables -t nat -I PREROUTING -i wlan+ -p udp --dport 53 -j REDIRECT --to-ports 53"
-		fi
+		logger -t ADBLOCK Exempting some clients from ad blocking
+		FW1="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p tcp --dport 53 -j REDIRECT --to-ports 53"
+		FW2="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p udp --dport 53 -j REDIRECT --to-ports 53"
 	else
-		if [ "$EXEMPT" == 1 ]
-		then
-			logger -t ADBLOCK Exempting some clients from ad blocking
-			FW1="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p tcp --dport 53 -j REDIRECT --to-ports 53"
-			FW2="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p udp --dport 53 -j REDIRECT --to-ports 53"
-		else
-			FW1="iptables -t nat -I PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53"
-			FW2="iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53"
-		fi
+		FW1="iptables -t nat -I PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53"
+		FW2="iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53"
 	fi
  
 	#Update DHCP config
 	logger -t ADBLOCK Adding hosts file to dnsmasq
-	uci add_list dhcp.@dnsmasq[0].addnhosts=/etc/block.hosts > /dev/null 2>&1 && uci commit
+	uci add_list dhcp.@dnsmasq[0].addnhosts=/plugin_root/adblock/block.hosts > /dev/null 2>&1 && uci commit
 
 	#Add to crontab
 	logger -t ADBLOCK Adding cron entry
@@ -76,24 +59,11 @@ add_config()
 		logger -t ADBLOCK Tor is enabled, discarding firewall rules
 	fi
 
-	# Determining uhttpd/httpd_gargoyle for transparent pixel support
+	# Modifying uHTTPd for transparent pixel support
 	if [ "$TRANS" == 1 ]
 	then
-		logger -t ADBLOCK Pointing server error page at transparent pixel
-		ENDPOINT_IP4=$(uci get network.lan.ipaddr)
-		if [ ! -e "/www/1.gif" ]
-		then
-			/usr/bin/wget -O /www/1.gif http://upload.wikimedia.org/wikipedia/commons/c/ce/Transparent.gif  > /dev/null
-		fi
-		if [ -s "/usr/sbin/uhttpd" ]
-		then
-			uci set uhttpd.main.error_page="/1.gif" && uci commit
-		elif [ -s "/usr/sbin/httpd_gargoyle" ]
-		then
-			uci set httpd_gargoyle.server.page_not_found_file="1.gif" && uci commit
-		else
-			ENDPOINT_IP4="0.0.0.0"
-		fi
+		logger -t ADBLOCK Pointing uHTTPd error page at transparent pixel
+		uci set uhttpd.main.error_page="/transpixel.gif" && uci commit
 	fi
 }
 
@@ -101,7 +71,7 @@ remove_config()
 { 
 	# Remove addnhosts
 	logger -t ADBLOCK Removing hosts file from dnsmasq
-	uci del_list dhcp.@dnsmasq[0].addnhosts=/etc/block.hosts > /dev/null 2>&1 && uci commit
+	uci del_list dhcp.@dnsmasq[0].addnhosts=/plugin_root/adblock/block.hosts > /dev/null 2>&1 && uci commit
 
 	# Remove cron entry
 	logger -t ADBLOCK Removing cron entry
@@ -111,21 +81,16 @@ remove_config()
 	logger -t ADBLOCK Removing firewall rules
 	sed -i '/--to-ports 53/d' /etc/firewall.user
 
-	# Remove proxying
-	logger -t ADBLOCK Reverting server error page
-	if [ -s "/usr/sbin/uhttpd" ]
-	then
-		uci set uhttpd.main.error_page="/login.sh" && uci commit
-	else
-		uci set httpd_gargoyle.server.page_not_found_file="login.sh" && uci commit
-	fi
+	# Remove pixel redirect
+	logger -t ADBLOCK Reverting uHTTPd error page
+	uci set uhttpd.main.error_page="/login.sh" && uci commit
 }
 
 update_blocklist()
 {
 	#Delete the old block.hosts to make room for the updates
 	logger -t ADBLOCK Removing old hosts file
-	rm -f /etc/block.hosts
+	rm -f /plugin_root/adblock/block.hosts
 
 	#Download and process the files needed to make the lists
 	logger -t ADBLOCK Retrieving ad lists from remote source
@@ -134,9 +99,9 @@ update_blocklist()
 
 	#Add black list, if non-empty
 	logger -t ADBLOCK Adding entries from black.list
-	if [ -s "/etc/black.list" ]
+	if [ -s "/plugin_root/adblock/black.list" ]
 	then
-		awk -v r="$ENDPOINT_IP4" '/^[^#]/ { print r,$1 }' /etc/black.list >> /tmp/block.build.list
+		awk -v r="$ENDPOINT_IP4" '{ print r,$1 }' /plugin_root/adblock/black.list >> /tmp/block.build.list
 	fi
 
 	#Sort the download/black lists
@@ -144,12 +109,12 @@ update_blocklist()
 
 	#Filter (if applicable)
 	logger -t ADBLOCK Removing entries from white.list
-	if [ -s "/etc/white.list" ]
+	if [ -s "/plugin_root/adblock/white.list" ]
 	then
 		#Filter the blacklist, supressing whitelist matches
-		egrep -v "^[[:space:]]*$" /etc/white.list | awk '/^[^#]/ {sub(/\r$/,"");print $1}' | grep -vf - /tmp/block.build.before > /etc/block.hosts
+		egrep -v "^[[:space:]]*$" /plugin_root/adblock/white.list | awk '/^[^#]/ {sub(/\r$/,"");print $1}' | grep -vf - /tmp/block.build.before > /plugin_root/adblock/block.hosts
 	else
-		cat /tmp/block.build.before > /etc/block.hosts
+		cat /tmp/block.build.before > /plugin_root/adblock/block.hosts
 	fi
 		
 	#Record when the last time we updated the block list is
@@ -177,14 +142,8 @@ restart_dnsmasq()
 
 restart_http()
 {
-	logger -t ADBLOCK Restarting web server
-	if [ -s "/usr/sbin/uhttpd" ]
-	then
-		/etc/init.d/uhttpd restart
-	elif [ -s "/usr/sbin/httpd_gargoyle" ]
-	then
-		/etc/init.d/httpd_gargoyle restart
-	fi
+	logger -t ADBLOCK Restarting uHTTPd
+	/etc/init.d/uhttpd restart
 }
 
 #### END FUNCTIONS ####
