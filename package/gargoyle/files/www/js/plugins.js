@@ -113,15 +113,28 @@ function changePluginRoot()
 	var oldRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
 	oldRootDrive = oldRootDrive == "" ? "root" : oldRootDrive;
 
-        if (pluginRootSize > pkg_dests[newRootDrive]['Bytes-Free'])
-        {
-            window.alert
-    		(       pgS.NoSpace + " " + newRootDrive + "\n\n" +
-                	pgS.PlgSz + " = " + parseBytes(pluginRootSize) + "\n" +
-                	pgS.FreeSp + " = " + parseBytes(pkg_dests[newRootDrive]['Bytes-Free']) + "\n\n" +
-                	pgS.Rslv
-        	);
-        return;
+	// Check free space on the newRootDrive and alert if insufficient
+	var newRootFree = pkg_dests['root']['Bytes-Free'];
+	if (newRootDrive.localeCompare('root') != 0)
+	{
+		var driveIndex;
+		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+		{
+			if (storageDrives[driveIndex][0].localeCompare(newRootDrive) == 0)
+			{
+				newRootFree = storageDrives[driveIndex][5];
+			}
+		}
+	}
+    if (pluginRootSize > newRootFree)
+    {
+        window.alert
+    	(       pgS.NoSpace + " " + newRootDrive + "\n\n" +
+            	pgS.PlgSz + " = " + parseBytes(pluginRootSize) + "\n" +
+            	pgS.FreeSp + " = " + parseBytes(newRootFree) + "\n\n" +
+            	pgS.Rslv
+    	);
+    	return;
     }
 
 	var commands = [];
