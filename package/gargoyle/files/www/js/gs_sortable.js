@@ -202,23 +202,23 @@ function tsInit()
 				{
 					text = 0;
 				}
-				else if (metrics[1] == "P" )
+				else if (metric[1] == "P" )
 				{
 					text = float * 1000000000000000
 				}
-				else if (metrics[1] == "T" )
+				else if (metric[1] == "T" )
 				{
 					text = float * 1000000000000
 				}
-				else if (metrics[1] == "G" )
+				else if (metric[1] == "G" )
 				{
 					text = float * 1000000000
 				}
-				else if (metrics[1] == "M" )
+				else if (metric[1] == "M" )
 				{
 					text = float * 1000000
 				}
-				else if (metrics[1] == "k" )
+				else if (metric[1] == "k" )
 				{
 					text = float * 1000
 				} else

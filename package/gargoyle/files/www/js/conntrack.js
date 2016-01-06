@@ -7,6 +7,8 @@
  */
 var connTS=new Object(); //part of i18n
 
+var TSort_Data = new Array('connection_table', 's', 's', 'm', 's', 's');
+
 var updateInProgress;
 var timeSinceUpdate;
 
@@ -126,7 +128,7 @@ function updateConnectionTable()
 						var dstIp2   = (line.match(/dst=([^ \t]*)[\t ]+.*dst=([^ \t]*)[\t ]+/))[2];
 						var dstPort2 = (line.match(/dport=([^ \t]*)[\t ]+.*dport=([^ \t]*)[\t ]+/))[2];
 						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
-						
+
 						var i = currentLanIp.lastIndexOf('.')
 
 						//filter connections to and from the router
@@ -156,8 +158,8 @@ function updateConnectionTable()
 							}
 
 							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
-									protocol, 
-									textListToSpanElement([ getHostDisplay(WanIp) + ":" + WanPort, getHostDisplay(localIp) + ":" + localPort]), 
+									protocol,
+									textListToSpanElement([ getHostDisplay(localIp) + ":" + localPort, getHostDisplay(WanIp) + ":" + WanPort ]),
 									textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 									];
 							if(qosEnabled)
@@ -176,7 +178,7 @@ function updateConnectionTable()
 					}
 					catch(e){}
 				}
-				
+
 				//Sort on the total of up bytes + down bytes
 				var tableSortFun = function(a,b){ return parseInt(b[0]) - parseInt(a[0]); }
 				tableData.sort(tableSortFun);
@@ -184,15 +186,15 @@ function updateConnectionTable()
 				//remove integer totals we used to sort
 				var rowIndex;
 				for(rowIndex=0; rowIndex < tableData.length; rowIndex++)
-				{ 
+				{
 					(tableData[rowIndex]).shift();
 				}
 
 
-				var columnNames= [connTS.PrNm, connTS.WLNm, connTS.UDNm ]; 
+				var columnNames= [connTS.PrNm, connTS.WLNm, connTS.UDNm ];
 				if(qosEnabled) { columnNames.push(connTS.QSNm); };
 				columnNames.push(connTS.LPNm);
-				
+
 				var connTable = createTable(columnNames, tableData, "connection_table", false, false);
 				if(tableData.length > 0)
 				{
@@ -203,13 +205,15 @@ function updateConnectionTable()
 					}
 					catch(e){}
 				}
-				
+
+
 				var tableContainer = document.getElementById('connection_table_container');
 				if(tableContainer.firstChild != null)
 				{
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
+        		reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
 
 				updateInProgress = false;
 			}
@@ -217,5 +221,3 @@ function updateConnectionTable()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
-
