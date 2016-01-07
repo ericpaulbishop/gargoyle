@@ -299,7 +299,7 @@ function init_classtable()
 		classRow.Percent = Math.round((parseInt(classRow.Percent)*100)/totalPercent);
 		classRow.MinBW = classRow.MinBW != "" && classRow.MinBW > 0 ? classRow.MinBW : qosStr.ZERO;
 		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW : qosStr.NOLIMIT;
-		classRow.MinRTT = classRow.MinRTT == qosStr.YES ? classRow.MinRTT : "";
+		classRow.MinRTT = classRow.MinRTT == "Yes" ? qosStr.YES : "";
 
 		classTable.push(classRow);
 		classTableData.push([classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, classRow.MinRTT, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)] );
@@ -1368,6 +1368,5 @@ function updateqosmon()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
 
 
