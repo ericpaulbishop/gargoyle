@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright ï¿½ 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
@@ -1553,4 +1553,25 @@ td.bandwidth_table_column_4
 {
 	text-align:right;
 	border:1px solid #000;
+}
+
+td.device_table_column_1
+{
+	text-align:left;
+}
+
+td.device_table_column_2
+{
+	text-align:center;
+    width:10em;
+}
+
+td.group_table_column_1
+{
+	text-align:left;
+}
+
+td.group_table_column_2
+{
+	text-align:left;
 }

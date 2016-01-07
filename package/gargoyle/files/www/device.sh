@@ -40,16 +40,12 @@
 		<legend class="sectionheader"><%~ device.KnDev %></legend>
 
 		<div id='device_add_heading_container'>
+			<a name='device_form'></a>
 			<label class='nocolumn' id='device_add_heading_label' style='text-decoration:underline'><%~ AdKnDev %>:</label>
 		</div>
 		<div class='bottom_gap'>
 			<div id='device_add_container'>
 				<%in templates/device_template %>
-			</div>
-			<div>
-				<select id="mac_list" onchange="macSelected()" >
-					<option value="none"><%~ SelM %></option>
-				</select>
 			</div>
 		</div>
 
@@ -66,19 +62,12 @@
 			<legend class="sectionheader"><%~ DevGp %></legend>
 
 			<div id='group_add_heading_container'>
+				<a name='group_form'></a>
 				<label class='nocolumn' id='group_add_heading_label' style='text-decoration:underline'><%~ AdGp %>:</label>
 			</div>
 			<div class='bottom_gap'>
 				<div id='group_add_container'>
 					<%in templates/group_template %>
-				</div>
-				<div>
-					<select id="group_list" onchange="groupSelected()" >
-						<option value="none"><%~ SelG %></option>
-					</select>
-					<select id="device_list" onchange="deviceSelected()" >
-						<option value="none"><%~ SelD %></option>
-					</select>
 				</div>
 			</div>
 

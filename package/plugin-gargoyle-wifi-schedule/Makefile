@@ -15,7 +15,7 @@ define Package/plugin-gargoyle-wifi-schedule
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=WiFi scheduling for Gargoyle-router
 	MAINTAINER:=BashfulBladder
-	DEPENDS:=+gargoyle +wireless-tools
+	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef
 

@@ -256,11 +256,12 @@ function execute(cmd)
 function UCIContainer()
 {
 	this.values = new Object();
+	const DOT = ".";
 
 	this.createListOption = function(pkg,section,option,destroy_existing_nonlist)
 	{
 		destroy_existing_nonlist = destroy_existing_nonlist == null ? true : false;
-		var  list_key = pkg + "\." + section + "\." + option;
+		var  list_key = pkg + DOT + section + DOT + option;
 		var existing_value = this.values[ list_key ];
 		if( existing_value instanceof Array )
 		{
@@ -279,35 +280,43 @@ function UCIContainer()
 	this.set = function(pkg, section, option, value, preserveExistingListValues)
 	{
 		preserveExistingListValues = preserveExistingListValues == null ? false : preserveExistingListValues;
-		var key = pkg + "\." + section;
+		var key = pkg + DOT + section;
 		if(option != null && option != "" )
 		{
-			key = key + "\." + option;
+			key = key + DOT + option;
 		}
+
 		if(this.values.hasOwnProperty(key))
 		{	// an existing key
 			if (preserveExistingListValues)
-			{
-				var existingValue = this.values[ key ];
-				var existingValues = (existingValue instanceof Array) ? existingValue : [existingValue];
-				var newValues = ( value instanceof Array ) ? value : [value];
-				var vi;
-				for(vi=0; vi<newValues.length; vi++)
+			{ // guarantee that the existing values are an Array
+				var existing = this.values[ key ];
+				if (!(existing instanceof Array))
 				{
-					var val = newValues[vi];
+					this.values[ key ] = (existing == null) ? [] : [existing];
+				}
+
+				var existingValues = this.values[ key ];
+				var newValues = ( value instanceof Array ) ? value : [value];
+				for(nvIx=0; nvIx<newValues.length; nvIx++)
+				{
+					var val = newValues[nvIx];
 					if (existingValues.indexOf(val) == -1)
 					{	// only add unique values
-						existingValues.push( val );
+						if (typeof existingValues[0] == "undefined" )	// hack!
+						{	// for some unknown reason often this is true!
+							existingValues[0] = val;
+						}
+						else
+						{
+							existingValues.push( val );
+						}
 					}
 				}
 			}
 			else
 			{	// simply replace the existing values
 				this.values[ key ] = value;
-			}
-			else
-			{	// add a new key and value
-					this.values[ key ] = value;
 			}
 		}
 		else
@@ -319,10 +328,10 @@ function UCIContainer()
 
 	this.get = function(pkg, section, option)
 	{
-		var next_key = pkg + "\." + section;
+		var next_key = pkg + DOT + section;
 		if(option != null && option != '')
 		{
-			next_key = next_key + "\." + option;
+			next_key = next_key + DOT + option;
 		}
 		var value = this.values[next_key];
 		return value != null ? value : '';
@@ -342,7 +351,8 @@ function UCIContainer()
 	{
 		includeLists = includeLists == null ? false : includeLists;
 		var matches = new Array();
-		for (var key in this.values) {
+		for (var key in this.values)
+		{
 		  if (this.values.hasOwnProperty(key))
 			{
 				var test = pkg + "." + section;
@@ -359,7 +369,8 @@ function UCIContainer()
 	this.getAllSectionsOfType = function(pkg, type)
 	{
 		var matches = new Array();
-		for (var key in this.values) {
+		for (var key in this.values)
+		{
 		  if (this.values.hasOwnProperty(key))
 			{
 				if(key.match(pkg) && key.match(/^[^\.]+\.[^\.]+$/))
@@ -393,10 +404,10 @@ function UCIContainer()
 
 	this.remove = function(pkg, section, option)
 	{
-		var removeKey = pkg + "\." + section;
-	       	if(option != "")
+		var removeKey = pkg + DOT + section;
+	    if(option != "")
 		{
-			removeKey = removeKey + "\." + option;
+			removeKey = removeKey + DOT + option;
 		}
 
 		var value = this.values[removeKey];
@@ -416,7 +427,7 @@ function UCIContainer()
 				testExp = new RegExp(pkg + "\\." + section + "\\.");
 				if(key.match(testExp))
 				{
-					var splitKey = key.split("\.");
+					var splitKey = key.split(DOT);
 					removeKeys.push(splitKey[2]);
 				}
 				if(key == pkg + "." + section)
@@ -496,7 +507,6 @@ function UCIContainer()
 
 		var listsWithoutUpdates = [];
 
-
 		for (var key in oldSettings.values)
 		{
 			if (oldSettings.values.hasOwnProperty(key))
@@ -546,7 +556,6 @@ function UCIContainer()
 				var newValue = this.values[key];
 				try
 				{
-
 					if( (oldValue instanceof Array) || (newValue instanceof Array) )
 					{
 						if(newValue instanceof Array)
@@ -943,9 +952,20 @@ function enableAssociatedField(checkbox, associatedId, defaultValue, controlDocu
 	setElementEnabled(element, checkbox.checked, defaultValue);
 }
 
+function enableAssociatedFields(checkbox, associatedId, defaultValue, controlDocument)
+{
+	associatedId = Array.isArray(associatedId) ? associatedId : [associatedArray];
+	defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+	if (associatedId.length == defaultValue.length){
+		for (index=0; index < associatedId.length; index++)
+		{
+			enableAssociatedField(checkbox, associatedId[index], defaultValue[index], controlDocument);
+		}
+	}
+}
+
 function setElementEnabled(element, enabled, defaultValue)
 {
-
 	if(enabled)
 	{
 		element.readonly=false;
@@ -1548,6 +1568,7 @@ function validateIP(address)
 	//3 = ends with 255 (actually, broadcast address can end with other value if subnet smaller than 255... but let's not worry about that)
 	//4 = value >255 in at least one field
 	//5 = improper format
+	//6 = invalid characters
 
 	var errorCode = 0;
 	if(address == "0.0.0.0")
@@ -1605,6 +1626,59 @@ function validateMac(mac)
 	return errorCode;
 }
 
+/*
+* Each Group is reflected by an ipset of the same name so the Group Name must
+ be a valid ipset name.
+*/
+function validateGroup(name)
+{
+	var errorCode = 0;
+	if(name.match(/^[a-zA-Z0-9-_.:]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
+	return errorCode;
+}
+
+
+/*
+* Host names may include a-z, A-Z, 0-9 and -
+*/
+function validateHost(name)
+{
+	var errorCode = 0;
+	if(name.match(/^[a-zA-Z0-9-]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
+	return errorCode;
+}
+
+
+/*
+* UCI names may include a-z, A-Z, 0-9 and _
+*/
+function validateUCI(name)
+{
+	var errorCode = 0;
+	if(name.match(/^[a-zA-Z0-9_]{2,63}$/) == null)
+	{
+		errorCode = 6;
+	}
+	return errorCode;
+}
+
+
+function validateMultipleIpsOrGroups(ips)
+{
+	var errorCode = validateGroup(ips);
+	if (errorCode != 0)
+	{
+		errorCode = validateMultipleIps(ips);
+	}
+	return errorCode;
+}
+
 function validateMultipleIps(ips)
 {
 	ips = ips.replace(/^[\t ]+/g, "");
@@ -1635,7 +1709,7 @@ function validateMultipleIps(ips)
 	}
 	return valid;
 }
-function validateMultipleIpsOrMacs(addresses)
+function validateMultipleIpsMacsOrGroups(addresses)
 {
 	var addr = addresses.replace(/^[\t ]+/g, "");
 	addr = addr.replace(/[\t ]+$/g, "");
@@ -1662,14 +1736,61 @@ function validateMultipleIpsOrMacs(addresses)
 		{
 			valid = validateMac(nextAddr);
 		}
-		else
+		else if(nextAddr.match(/\//))
 		{
 			valid = validateIpRange(nextAddr);
+		}
+		else
+		{
+			valid = validateGroup(nextAddr);
 		}
 	}
 	return valid;
 
 }
+
+function validateMultipleMacs(macs)
+{
+	macs = macs.replace(/^[\t ]+/g, "");
+	macs = macs.replace(/[\t ]+$/g, "");
+	var splitMacs = macs.split(/[\t ]+/);
+	var valid = splitMacs.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitMacs.length > 0)
+	{
+		var nextMac = splitMacs.pop();
+		valid = validateMac(nextMac);
+	}
+	return valid;
+}
+
+function validateMultipleHosts(hosts)
+{
+	hosts = hosts.replace(/^[\t ]+/g, "");
+	hosts = hosts.replace(/[\t ]+$/g, "");
+	var splitHosts = hosts.split(/[\t ]*,[\t ]*/);
+	var valid = splitHosts.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitHosts.length > 0)
+	{
+		var nextHost = splitHosts.pop();
+		valid = validateHost(nextHost);
+	}
+	return valid;
+}
+
+function validateMultipleUCIs(ucis)
+{
+	ucis = ucis.replace(/^[\t ]+/g, "");
+	ucis = ucis.replace(/[\t ]+$/g, "");
+	var splitUCIs = ucis.split(/[\t ]* [\t ]*/);
+	var valid = splitUCIs.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitUCIs.length > 0)
+	{
+		var nextUCI = splitUCIs.pop();
+		valid = validateUCI(nextUCI);
+	}
+	return valid;
+}
+
 
 function validateDecimal(num)
 {
@@ -1803,6 +1924,14 @@ function validateIpRange(range)
 	return valid;
 }
 
+function validateIpRangeOrGroup(range)
+{
+	if (range.indexOf(".") != -1)
+	{
+		return validateIpRange(range);
+	}
+	return validateGroup(range);
+}
 
 function validateLengthRange(text,min,max)
 {
@@ -1894,17 +2023,49 @@ function proofreadIpRange(input)
 {
 	proofreadText(input, validateIpRange, 0);
 }
+function proofreadIpRangeOrGroup(input)
+{
+	proofreadText(input, validateIpRangeOrGroup, 0);
+}
 function proofreadMac(input)
 {
 	proofreadText(input, validateMac, 0);
+}
+function proofreadMultipleMacs(input)
+{
+	proofreadText(input, validateMultipleMacs, 0);
 }
 function proofreadMultipleIps(input)
 {
 	proofreadText(input, validateMultipleIps, 0);
 }
-function proofreadMultipleIpsOrMacs(input)
+function proofreadMultipleIpsMacsOrGroups(input)
 {
-	proofreadText(input, validateMultipleIpsOrMacs, 0);
+	proofreadText(input, validateMultipleIpsMacsOrGroups, 0);
+}
+function proofreadMultipleIpsOrGroup(input)
+{
+	proofreadText(input, validateMultipleIpsOrGroups, 0);
+}
+function proofreadHost(input)
+{
+	proofreadText(input, validateHost, 0);
+}
+function proofreadMultipleHosts(input)
+{
+	proofreadText(input, validateMultipleHosts, 0);
+}
+function proofreadUCI(input)
+{
+	proofreadText(input, validateUCI, 0);
+}
+function proofreadMultipleUCIs(input)
+{
+	proofreadText(input, validateMultipleUCIs, 0);
+}
+function proofreadGroup(input)
+{
+	proofreadText(input, validateGroup, 0);
 }
 
 function proofreadDecimal(input)
@@ -2092,10 +2253,11 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 	return spanEl;
 }
 
-function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 {
 	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
 	macsValid = macsValid == null ? true : macsValid;
+	groupsValid = groupsValid == null ? true : groupsValid;
 	ipValidType = ipValidType == null ? 3 : ipValidType;
 	var ipValidFunction;
 	if(ipValidType == 0)
@@ -2126,7 +2288,11 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		for(rowIndex=0; rowIndex < data.length; rowIndex++)
 		{
 			var addr = data[rowIndex][0];
-			if(validateMac(addr) == 0)
+			if (validateGroup(addr) == 0)
+			{
+				allCurrentMacs.push(groupMacs(addr));
+			}
+			else if(validateMac(addr) == 0)
 			{
 				allCurrentMacs.push(addr);
 			}
@@ -2148,9 +2314,9 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		var addr = splitAddrs[splitIndex];
 		var macValid = (macsValid && validateMac(addr) == 0);
 		var ipValid = (ipValidFunction(addr) == 0);
-		if(macValid || ipValid)
+		if(macValid || ipValid || groupsValid)
 		{
-			var currAddrs = macValid ? allCurrentMacs : allCurrentIps;
+			var currAddrs = (macValid || groupsValid) ? allCurrentMacs : allCurrentIps;
 			valid = currAddrs.length == 0 || (!testAddrOverlap(addr, currAddrs.join(","))) ? 0 : 1;
 			if(valid == 0)
 			{
@@ -2195,11 +2361,11 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 }
 
 
-function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 {
 
 	var newAddrs = controlDocument.getElementById(textId).value;
-	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
+	var valid = addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, groupsValid, alertOnError, tableWidth)
 	if(valid)
 	{
 		controlDocument.getElementById(textId).value = "";
@@ -2305,6 +2471,16 @@ function testSingleAddrOverlap(addrStr1, addrStr2)
 
 function testAddrOverlap(addrStr1, addrStr2)
 {
+	var groups = deviceGroups();
+	if (groups.indexOf(addrStr1) > -1)
+	{
+		addrStr1 = groupIPs(addrStr1).join();
+	}
+	if (groups.indexOf(addrStr2) > -1)
+	{
+		addrStr2 = groupIPs(addrStr2).join();
+	}
+
 	addrStr1 = addrStr1.replace(/^[\t ]+/, "");
 	addrStr1 = addrStr1.replace(/[\t ]+$/, "");
 	addrStr2 = addrStr2.replace(/^[\t ]+/, "");
@@ -2745,10 +2921,126 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 }
 
 //apparently these var fbS=new Object(); //part of i18n  -> objects do not have a length (it is undefined)
-function ObjLen(an_obj) {
+function ObjLen(an_obj)
+{
 	var len=0;
 	for (item in an_obj) {
 		len++;
 	}
 	return len
+}
+
+
+function deviceGroups()
+{
+	// get a list of Device Groups from uci
+	var groups = [];
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
+	{	// survey all of the devices and groups
+		var host = hosts[hIndex];
+		var group = uciOriginal.get("dhcp", host, "group");
+		if (group.length > 0  && groups.indexOf(group) == -1)
+		{
+			groups.push(group);
+		}
+	}
+	return groups;
+}
+
+function groupHosts(group)
+{
+	var groupHosts = [];
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
+	{	// survey all of the devices
+		var host = hosts[hIndex];
+		var hostGroup = uciOriginal.get("dhcp", host, "group");
+		if (hostGroup.localeCompare(group) == 0)
+		{
+			groupHosts.push(host);
+		}
+	}
+	return groupHosts;
+}
+
+
+function groupMacs(group)
+{
+	var groupMacs = [];
+	var hosts = groupHosts(group);
+	for (hIndex = 0 ; hIndex < hosts.length; hIndex++)
+	{
+		var host = hosts[hIndex];
+		var uciMac = uciOriginal.get("dhcp", host, "mac");
+		if (typeof uciMac === 'string')
+		{
+			var macs = uciMac.split(" ");
+			for (mIndex = 0; mIndex < macs.length; mIndex++)
+			{
+				groupMacs.push(macs[mIndex]);
+			}
+		}
+	}
+	return groupMacs;
+}
+
+
+function groupIPs(group)
+{
+	var groupIPs = [];
+	var macs = groupMacs(group);
+	var ldMacIndex = 0;
+	var ldIpIndex = 1;
+	for (ldIndex=0; ldIndex < leaseData.length; ldIndex++)
+	{
+		var mac = leaseData[ldIndex][ldMacIndex];
+		if (typeof mac === 'string' && macs.indexOf(mac.toUpperCase()) > -1)
+		{
+			var ip = leaseData[ldIndex][ldIpIndex];
+			if (ip != null && ip.length > 0){
+				groupIPs.push(ip);
+			}
+		}
+	}
+	return groupIPs;
+}
+
+function isGroup(group)
+{
+	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
+	for (hIndex=0; hIndex < hosts.length; hIndex++)
+	{	// survey all of the device groups until found
+		var host = hosts[hIndex];
+		if (uciOriginal.get("dhcp", host, "group").localeCompare(group) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+
+function resetGroupOptions(selectId)
+{
+	selectElement = document.getElementById(selectId);
+	var groups = deviceGroups();
+	if (groups.length == 0)
+	{
+		selectElement.disabled = true;
+	}
+	else
+	{
+		var mgVals = [ "" ];
+		var mgText = [ UI.SelGrp ];
+
+		for(gIndex = 0; gIndex < groups.length; gIndex++)
+		{
+			var group = groups[gIndex];
+			mgVals.push(group);
+			mgText.push(group);
+		}
+		setAllowableSelections(selectId, mgVals, mgText, document)
+		selectElement.disabled = false;
+	}
 }

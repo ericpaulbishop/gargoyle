@@ -29,7 +29,7 @@ if printf '%s' "$data" | egrep -q "0"
 then
 	#Recently visited sites, converting unix time
 	echo -e "<h1>Recently visited sites:</h1><br><table $tablestyle>" >> /tmp/email-log.txt
-	echo "<tr><th $thstyle>Time/<th><th $thstyle>IP address</th><th $thstyle>Website</th>" >> /tmp/email-log.txt;
+	echo "<tr><th $thstyle>Time</th><th $thstyle>IP address</th><th $thstyle>Website</th></tr>" >> /tmp/email-log.txt;
 	cat /usr/data/webmon_domains.txt > /tmp/work.tmp
 	while read line
 	do

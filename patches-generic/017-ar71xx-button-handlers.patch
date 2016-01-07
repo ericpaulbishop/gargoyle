@@ -56,7 +56,7 @@
 +if [ -n "$is_hornet" ] ; then
 +	uci batch <<EOF
 +set system.bottom_red_button=button
-+set system.bottom_red_button.button='wps'
++set system.bottom_red_button.button='reset'
 +set system.bottom_red_button.action='released'
 +set system.bottom_red_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
 +set system.bottom_red_button.min='3'
