@@ -168,11 +168,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<label class='leftcolumn' for='bridge_hwmode' id='bridge_hwmode_label'><%~ BrOpr %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_hwmode' onchange='setHwMode(this)'>
-						<option value='11g'>B+G</option>
 						<option value='11gn'>B+G+N</option>
-						<option value='11a'>A</option>
-						<option value='11an'>A+N</option>
+						<option value='11g'>B+G</option>
 						<option value='11anac'>A+N+AC</option>
+						<option value='11an'>A+N</option>
+						<option value='11a'>A</option>
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -561,8 +561,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			<span class='rightcolumn'>
 				<select id='wifi_hwmode' onchange='setHwMode(this)'>
 					<option value='disabled'>Disabled</option>
-					<option value='11g'>B+G</option>
 					<option value='11gn'>B+G+N</option>
+					<option value='11g'>B+G</option>
 				</select>
 			</span>
 		</div>
