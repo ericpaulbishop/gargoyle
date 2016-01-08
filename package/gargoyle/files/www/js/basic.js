@@ -1335,35 +1335,37 @@ function setBridgeVisibility()
 	var allowedbridgemodes2 = [];
 	if(dualBandWireless)
 	{
-		allowedbridgemodes = ['B+G'];
-		allowedbridgemodes2 = ['11g'];
 		if(GwifiN)
 		{
 			allowedbridgemodes.push('B+G+N')
 			allowedbridgemodes2.push('11gn');
 		}
-		allowedbridgemodes.push('A');
-		allowedbridgemodes2.push('11a');
-		if(AwifiN)
-		{
-			allowedbridgemodes.push('A+N')
-			allowedbridgemodes2.push('11an');
-		}
+		allowedbridgemodes = ['B+G'];
+		allowedbridgemodes2 = ['11g'];
 		if(AwifiAC)
 		{
 			allowedbridgemodes.push('A+N+AC')
 			allowedbridgemodes2.push('11anac');
 		}
+		if(AwifiN)
+		{
+			allowedbridgemodes.push('A+N')
+			allowedbridgemodes2.push('11an');
+		}
+
+		allowedbridgemodes.push('A');
+		allowedbridgemodes2.push('11a');
 	}
 	else
 	{
-		allowedbridgemodes = ['B+G'];
-		allowedbridgemodes2 = ['11g'];
 		if(GwifiN)
 		{
 			allowedbridgemodes.push('B+G+N')
 			allowedbridgemodes2.push('11gn');
 		}
+		allowedbridgemodes = ['B+G'];
+		allowedbridgemodes2 = ['11g'];
+
 	}
 	setAllowableSelections("bridge_hwmode",allowedbridgemodes2,allowedbridgemodes)
 	setHwMode(document.getElementById("bridge_hwmode"))
@@ -1741,17 +1743,17 @@ function resetData()
 	{
 		var hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
 		hwGmode = hwGmode == "" ? "11g" : hwGmode;
-		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11g', '11gn' ], [UI.Disabled, 'B+G', 'B+G+N' ] );
+		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11gn', '11g' ], [UI.Disabled, 'B+G+N', 'B+G' ] );
 		setSelectedValue("wifi_hwmode", hwGmode);
 		if(dualBandWireless)
 		{
 			if(AwifiAC)
 			{
-				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an', '11anac' ], [UI.Disabled, 'A', 'A+N', 'A+N+AC' ] );
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled',  '11anac', '11an', '11a' ], [UI.Disabled,  'A+N+AC', 'A+N', 'A' ] );
 			}
 			else if(AwifiN)
 			{
-				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a', '11an' ], [UI.Disabled, 'A', 'A+N' ] );
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11an', '11a' ], [UI.Disabled, 'A+N', 'A' ] );
 			}
 			else
 			{
@@ -2310,8 +2312,8 @@ function setSsidVisibility(selectId)
 
 			if(GwifiN)
 			{
-				var modes = ['11g','11gn'];
-				var mnames = ['B+G','B+G+N'];
+				var modes = ['11gn','11g'];
+				var mnames = ['B+G+N','B+G'];
 			}
 			else
 			{
@@ -2324,13 +2326,13 @@ function setSsidVisibility(selectId)
 				mnames = [ 'N+A'  ];
 				if(AwifiAC)
 				{
-					var modes = ['11a','11an','11anac'];
-					var mnames = ['A','A+N','A+N+AC'];
+					var modes = ['11anac','11an','11a'];
+					var mnames = ['A+N+AC','A+N','A'];
 				}
 				else if(AwifiN)
 				{
-					var modes = ['11a','11an'];
-					var mnames = ['A','A+N'];
+					var modes = ['11an','11a'];
+					var mnames = ['A+N','A'];
 				}
 				else
 				{
