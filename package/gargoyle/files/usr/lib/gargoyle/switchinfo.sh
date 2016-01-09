@@ -18,7 +18,7 @@ fi
 # PORTS="LAN1 LAN2 LAN3 LAN4"
 
 case "$board" in
-gl-net)
+gl-inet)
 	PORTS="1";;
 routerstation-pro)
 	PORTS="4 3 2";;
