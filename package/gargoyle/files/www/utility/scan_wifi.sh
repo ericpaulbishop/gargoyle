@@ -69,7 +69,24 @@
 	{
 		radio_disabled1=$(uci get wireless.@wifi-device[0].disabled 2>/dev/null)
 		radio_disabled2=$(uci get wireless.@wifi-device[1].disabled 2>/dev/null)
-		g_sta=$(iwconfig 2>/dev/null | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
+		g_sta=""
+		a_sta=""
+		iflist=$(iwinfo | awk '$0 ~ /^[a-z]/ { print $1 ; }' )
+		for i in $iflist ; do
+			i_info=$( iwinfo "$i" info 2>/dev/null )
+			is_sta=$( printf "$i_info\n" | grep "Mode: *Client" )
+			if [ -n "$is_sta" ] ; then
+				is_g=$(   printf "$i_info\n" | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" )
+				is_a=$(   printf "$i_info\n" | egrep "802.11an" )
+				if [ -n "$is_g" ] ; then
+					g_sta="$i"
+				elif [ -n "$is_a" ] ; then
+					a_sta="$i"
+				fi
+			fi
+		done	
+
+
 		test_ifs="$g_sta"
 		if [ -z "$g_sta" ] || [ "$radio_disabled1" = "1" ] || [ "$radio_disabled2" = "1" ]  ; then
 			g_sta=""
@@ -77,7 +94,6 @@
 		fi
 
 		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
-			a_sta=$(iwconfig 2>/dev/null | egrep "802.11an" | grep -v "Master" | grep -v "Monitor" | awk '{ print $1 ; }' )
 			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
 			g_phy="phy0"
 			a_phy="phy1"
