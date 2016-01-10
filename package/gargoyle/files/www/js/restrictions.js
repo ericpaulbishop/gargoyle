@@ -126,7 +126,7 @@ function resetData()
 		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
 		setVisibility(document, rulePrefix);
 	}
-	resetGroupOptions("group_restriction");
+	resetGroupOptions("group");
 	resetGroupOptions("group_exception");
 	document.getElementById("rule_applies_to_addr").value="";
 	document.getElementById("exception_applies_to_addr").value="";
@@ -135,8 +135,8 @@ function resetData()
 
 function groupRestriction()
 {
-	document.getElementById("rule_applies_to_addr").value = getSelectedValue("group_restriction");
-	setSelectedValue("group_restriction", "");
+	document.getElementById("rule_applies_to_addr").value = getSelectedValue("group");
+	setSelectedValue("group", "");
 }
 
 function groupException()
@@ -386,6 +386,7 @@ function editRule()
 				updateDone = true;
 
 			}
+			resetGroupOptions("group", editRuleWindow.document);
 		}
 		if(!updateDone)
 		{
@@ -707,7 +708,6 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 		optionValue = optionValue.replace(/^[\t ]*/, "");
 		optionValue = optionValue.replace(/[\t ]*$/, "");
 		var ips = optionValue.split(/[\t ]*,[\t ]*/);
-
 
 		var table = createTable([""], [], tableId, true, false, null, null, controlDocument);
 		while(ips.length > 0)

@@ -20,7 +20,7 @@
 		<em><%~ HstAddr %></em>
 		<span id="exception_group_container">
 			<select id="group_exception" onchange='groupException()'>
-				<option value=""><%~ HstSelGrp %></option>
+				<option value=""><%~ SelGrp %></option>
 			</select>
 		</span>
 	</div>

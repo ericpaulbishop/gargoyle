@@ -19,8 +19,8 @@
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
 		<span id="restriction_group_container">
-			<select id="group_restriction" onchange='groupRestriction()'>
-				<option value=""><%~ HstSelGrp %></option>
+			<select id="group" onchange='groupRestriction()'>
+				<option value=""><%~ SelGrp %></option>
 			</select>
 		</span>
 	</div>
