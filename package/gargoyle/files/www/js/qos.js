@@ -541,30 +541,14 @@ function resetData()
 	//The default screen updater.
 	if (timerid == null) { timerid=setInterval("updatetc()", 2500); }
 
-
-	if (direction == "download")
-	{
-    	resetGroupOptions("group_dest");
-    	document.getElementById("dest_ip").value="";
-    }
-    else
-    {
-    	resetGroupOptions("group_source");
-    	document.getElementById("source_ip").value="";
-    }
+	resetGroupOptions("group");
+	document.getElementById((direction == "download") ? "dest_ip" : "source_ip" ).value="";
 }
 
-
-function groupSource()
+function groupSelected(id)
 {
-    document.getElementById("source_ip").value = getSelectedValue("group_source");
-    setSelectedValue("group_source", "");
-}
-
-function groupDest()
-{
-    document.getElementById("dest_ip").value = getSelectedValue("group_dest");
-    setSelectedValue("group_dest", "");
+    document.getElementById(id).value = getSelectedValue("group");
+    setSelectedValue("group", "");
 }
 
 function qosQuotasExist()
@@ -671,8 +655,7 @@ function proofreadClassificationRule(controlDocument)
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
 	alwaysValid = function(text){return 0;};
-    var validateSource = (controlDocument.getElementById("group_source") != null) ? validateIpRangeOrGroup : validateIpRange;
-    var validateDest = (controlDocument.getElementById("group_dest") != null) ? validateIpRangeOrGroup : validateIpRange;
+    var validateDest = (controlDocument.getElementById("group") != null) ? validateIpRangeOrGroup : validateIpRange;
 	ruleValidationFunctions = [ validateSource, validatePortOrPortRange, validateDest, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid ];
 	labelIds = new Array();
 	returnCodes = new Array();
@@ -707,15 +690,11 @@ function resetRuleControls()
 		enableAssociatedField( checkbox, ruleControlIds[ruleControlIndex], "");
 	}
 
-    var groupIds = ["group_source","group_dest"];
-    for (index=0; index < groupIds.length; index++)
-    {
-        var element = document.getElementById(groupIds[index]);
-        if (element != null){
-            // only half does the job for some reason ????
-            setElementEnabled(element, false, "");
-        }
-    }
+	var element = document.getElementById("group");
+	if (element != null)
+	{
+			setElementEnabled(element, false, "");
+	}
 }
 
 function addServiceClass()
@@ -960,10 +939,6 @@ function editRuleTableRow()
 				}
 				setSelectedText("classification", editRuleWindowRow.childNodes[1].firstChild.data, editRuleWindow.document);
 
-
-
-
-
 				//exit & save functions
 				closeButton.onclick = function()
 				{
@@ -1015,6 +990,19 @@ function editRuleTableRow()
 				editRuleWindow.focus();
 				update_done = true;
 			}
+
+			container = (direction == "download") ? "dest_group_container" : "source_group_container";
+			groupSpan = editRuleWindow.document.getElementById(container);
+			if (groupSpan != null)
+			{
+				groupSelect = editRuleWindow.document.createElement('select');
+				groupSelect.id = "group";
+				groupSelected = (direction == "download") ? "groupSelected('dest_ip')" : "groupSelected('source_ip')";
+				groupSelect.setAttribute("onchange", groupSelected);
+				groupSpan.appendChild(groupSelect);
+			}
+
+			resetGroupOptions("group", editRuleWindow.document);
 		}
 		if(update_done == false)
 		{

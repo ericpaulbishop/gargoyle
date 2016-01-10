@@ -80,13 +80,13 @@
 			</div>
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_dest_ip' onclick='enableAssociatedFields(this,["dest_ip","group_dest"], ["",""])' />
+					<input type='checkbox'  id='use_dest_ip' onclick='enableAssociatedFields(this,["dest_ip","group"], ["",""])' />
 					<label id="dest_ip_label" for='dest_ip'><%~ DstIPor %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRangeOrGroup(this)' size='17' maxlength='31' />
 				<span id="dest_group_container">
-					<select id="group_dest" disabled onchange='groupDest()'>
-						<option value=""><%~ HstSelGrp %></option>
+					<select id="group" disabled onchange="groupSelected('dest_ip')">
+						<option value=""><%~ SelGrp %></option>
 					</select>
 				</span>
 			</div>

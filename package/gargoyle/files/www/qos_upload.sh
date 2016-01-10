@@ -65,13 +65,13 @@
 		<div class="indent">
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedFields(this,["source_ip","group_source"], ["",""])' />
+					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedFields(this,["source_ip","group"], ["",""])' />
 					<label id="source_ip_label" for='source_ip'><%~ SrcIPor %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRangeOrGroup(this)' size='17' maxlength='31' />
 				<span id="source_group_container">
-					<select id="group_source" disabled onchange='groupSource()'>
-						<option value=""><%~ HstSelGrp %></option>
+					<select id="group" disabled onchange="groupSelected('source_ip')">
+						<option value=""><%~ SelGrp %></option>
 					</select>
 				</span>
 			</div>
