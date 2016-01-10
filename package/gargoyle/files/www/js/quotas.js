@@ -323,6 +323,11 @@ function setDocumentIp(ip, controlDocument)
 	{
 		setSelectedValue("applies_to_type", "others_individual", controlDocument);
 	}
+	else if (isGroup(ip))
+	{
+		setSelectedValue("applies_to_type", "only", controlDocument);
+		controlDocument.getElementById("add_ip").value = ip;
+	}
 	else
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
@@ -1185,7 +1190,7 @@ function editQuota()
 	closeButton.className = "default_button";
 
 	var editRow=this.parentNode.parentNode;
-	var editId          = editRow.childNodes[rowCheckIndex].firstChild.id;
+	var editId = editRow.childNodes[rowCheckIndex].firstChild.id;
 
 	var editIp;
 
@@ -1263,6 +1268,7 @@ function editQuota()
 				updateDone = true;
 
 			}
+			resetGroupOptions("group", editQuotaWindow.document);
 		}
 		if(!updateDone)
 		{

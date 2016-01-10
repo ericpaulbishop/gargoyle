@@ -3021,26 +3021,30 @@ function isGroup(group)
 }
 
 
-function resetGroupOptions(selectId)
+function resetGroupOptions(selectId, controlDocument)
 {
-	selectElement = document.getElementById(selectId);
-	var groups = deviceGroups();
-	if (groups.length == 0)
+	controlDocument = controlDocument == null ? document : controlDocument;
+	selectElement = controlDocument.getElementById(selectId);
+	if (selectElement != null)
 	{
-		selectElement.disabled = true;
-	}
-	else
-	{
-		var mgVals = [ "" ];
-		var mgText = [ UI.SelGrp ];
-
-		for(gIndex = 0; gIndex < groups.length; gIndex++)
+		var groups = deviceGroups();
+		if (groups.length == 0)
 		{
-			var group = groups[gIndex];
-			mgVals.push(group);
-			mgText.push(group);
+			selectElement.disabled = true;
 		}
-		setAllowableSelections(selectId, mgVals, mgText, document)
-		selectElement.disabled = false;
+		else
+		{
+			var mgVals = [ "" ];
+			var mgText = [ UI.SelGrp ];
+
+			for(gIndex = 0; gIndex < groups.length; gIndex++)
+			{
+				var group = groups[gIndex];
+				mgVals.push(group);
+				mgText.push(group);
+			}
+			setAllowableSelections(selectId, mgVals, mgText, controlDocument)
+			selectElement.disabled = false;
+		}
 	}
 }
