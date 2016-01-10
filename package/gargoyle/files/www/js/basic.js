@@ -2707,7 +2707,7 @@ function setHwMode(selectCtl)
 	}
 	else
 	{
-		setAllowableSelections('wifi_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz above', '40MHz below']);
+		setAllowableSelections('wifi_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
 	}
 	
 	if(hwAmode == "disabled")
@@ -2720,7 +2720,7 @@ function setHwMode(selectCtl)
 	}
 	else if(hwAmode == "11an")
 	{
-		setAllowableSelections('wifi_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz above', '40MHz below']);
+		setAllowableSelections('wifi_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
 	}
 	else
 	{
@@ -2734,7 +2734,7 @@ function setHwMode(selectCtl)
 	}
 	else if(bridgehwmode == "11gn")
 	{
-		setAllowableSelections('bridge_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz above', '40MHz below']);
+		setAllowableSelections('bridge_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
 	}
 	else if(bridgehwmode == "11a")
 	{
@@ -2742,7 +2742,7 @@ function setHwMode(selectCtl)
 	}
 	else if(bridgehwmode == "11an")
 	{
-		setAllowableSelections('bridge_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz above', '40MHz below']);
+		setAllowableSelections('bridge_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
 	}
 	else
 	{
