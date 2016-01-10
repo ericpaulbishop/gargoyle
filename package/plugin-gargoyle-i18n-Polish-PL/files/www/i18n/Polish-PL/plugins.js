@@ -39,3 +39,7 @@ pgS.Name="Nazwa";
 pgS.Langs="Języki";
 pgS.Thems="Motywy";
 pgS.Pkgs="Pakiety";
+pgS.NoSpace="Brak miejsca na";
+pgS.PlgSz="Zainstalowane dodatki";
+pgS.FreeSp="Wolne miejsce";
+pgS.Rslv="Proszę odinstalowane niektóre dodatki i powtórzyć operację,\n lub wybrać inne miejsce.";

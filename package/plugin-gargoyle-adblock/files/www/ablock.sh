@@ -9,6 +9,16 @@
 	gargoyle_header_footer -h -s "firewall" -p "adblock" -c "internal.css" -j "ablock.js" -z "ablock.js" gargoyle adblock
 %>
 
+<script>
+<%
+	echo "var blocklistlines = new Array();"
+	cat /plugin_root/adblock/block.hosts | awk '{print "blocklistlines.push(\""$2"\");"}'
+	echo "var blacklistlines = new Array();"
+	cat /plugin_root/adblock/black.list | awk '{print "blacklistlines.push(\""$0"\");"}'
+	echo "var whitelistlines = new Array();"
+	cat /plugin_root/adblock/white.list | awk '{print "whitelistlines.push(\""$0"\");"}'
+%>
+</script>
 
 <fieldset id="adblock-fieldset">
 	<legend class="sectionheader"><%~ ablock.Adblock %></legend>
@@ -25,11 +35,6 @@
 	<div class="rightcolumnonly">
 		<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
 		<label id="adblock_lastrunval"></label>
-	</div>
-
-	<div>
-		<label id="adblock_wireless_label" class="leftcolumn" for="adblock_wireless"><%~ ADBLOCKWireless %>:</label>
-		<input id="adblock_wireless" class="rightcolumn" type="checkbox" />
 	</div>
 
 	<div>
@@ -61,7 +66,52 @@
 		<label class="leftcolumn" id="adblock_exempt_labelf" for="adblock_exemptf"><%~ ADBLOCKExemptf %>:</label>
 		<input id="adblock_exemptf" class="rightcolumn" type="text" size='15' />
 	</div>
+	
+	<div id="list_gui">
+	<div class="internal_divider"></div>
+	<div>
+		<label id="adblock_blocklist_label" class="leftcolumn" for="adblock_blocklist"><%~ ADBLOCKBlocklist %></label>
+		<label id="adblock_whitelist_label" class="rightcolumn" style="padding-left: 30px;" for="adblock_whitelist"><%~ ADBLOCKWhitelist %></label>
+	</div>
+	<div>
+		<label id="adblock_displayed_count" class="leftcolumn">-</label>
+	</div>
+	<div>
+		<select id="adblock_blocklist_list" multiple class="leftcolumn" style="width: 200px; height: 150px;"></select>
+		<input id="adblock_transfer_button" type="button" value="-->" onclick="transferwhiteList();" />
+		<select id="adblock_whitelist_list" multiple style="width: 200px; height: 150px;"></select>
+		<input id="adblock_whitelist_delete_button" class="rightcolumn" type="button" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_whitelist_list);" />
+	</div>
+	<div>
+		<input id="adblock_blocklist_search" class="leftcolumn" type="text" />
+	</div>
+	<div>
+		<input type="button" value='<%~ ADBLOCKSearch %>' class="leftcolumn" onclick="searchBlocklist();" />
+	</div>
+	<div>
+		<label id="adblock_blacklist_label" class="leftcolumn" style="margin-top: 10px; margin-bottom: 5px;" for="adblock_blacklist"><%~ ADBLOCKBlacklist %></label>
+	</div>
+	<div>
+		<select id="adblock_blacklist_list" multiple class="leftcolumn" style="width: 200px; height: 150px;"></select>
+		<input id="adblock_blacklist_delete_button" type="button" class="rightcolumn" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_blacklist_list);" />
+	</div>
+	<div>
+		<input id="adblock_blacklist_add" class="leftcolumn" type="text" />
+	</div>
+	<div>
+		<input type="button" class="leftcolumn" value='<%~ ADBLOCKBlackadd %>' onclick="addBlacklist();" />
+	</div>
+	<div id="adblock_help2" class="indent">
+	<span id="adblock_help2_txt">
 
+	<p><%~ ADBLOCKHelp2 %></p>
+
+	</span>
+	<a id="adblock_help2_ref" onclick='setDescriptionVisibility("adblock_help2")' href="#adblock_help2"><%~ Hide %></a>
+
+	</div>
+	</div>
+	
 </fieldset>
 
 <div id="bottom_button_container">
@@ -71,6 +121,7 @@
 
 <script>
 <!--
+	document.getElementById('adblock_transfer_button').value = String.fromCharCode(8594);
 	resetData();
 //-->
 </script>
