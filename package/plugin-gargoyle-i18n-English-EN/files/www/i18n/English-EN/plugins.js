@@ -13,7 +13,7 @@ pgS.APSrc="Add Plugin Source";
 pgS.PList="Plugin List";
 pgS.NoPkg="Packages not found. Refresh plugins list.";
 pgS.RfshP="Refresh Plugins";
-pgS.NoWan="Please check your Internet connection.";
+pgS.NoWan="An Internet connection is required to Refresh Plugins.";
 
 //javascript
 pgS.NInst="Not Installed";
@@ -39,3 +39,7 @@ pgS.Name="Name";
 pgS.Langs="Languages";
 pgS.Thems="Themes";
 pgS.Pkgs="Packages";
+pgS.NoSpace="Insufficient space on";
+pgS.PlgSz="Installed plugins";
+pgS.FreeSp="Free space";
+pgS.Rslv="Please uninstall some plugins and try again,\n or choose another destination.";

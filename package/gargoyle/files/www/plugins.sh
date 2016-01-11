@@ -30,7 +30,7 @@
 	pkg_info=$(gpkg info -v 'Install-Destination,Required-Size,Required-Depends,Description,Will-Fit,User-Installed' -d plugin_root -o 'js' -r /^plugin\-gargoyle/)
 	gpkg dest-info -o 'js'
 	if [ -n "$pkg_info" ] ; then
-		printf "%s\n" "$pkg_info" 
+		printf "%s\n" "$pkg_info"
 	fi
 
 	echo "var pluginSources = [];"
@@ -39,6 +39,7 @@
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
+    du -s $plugin_root_dest | awk '{ print "var pluginRootSize="$1*1000";" }' 2>/dev/null
 %>
 
 </script>
