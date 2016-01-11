@@ -26,8 +26,8 @@
 			<option value="ip"><%~ DspHIP %></option>
 		</select>
 		<select id="data_display" >
-			<option value="usds"><%~ DspUsd %></option>
 			<option value="pcts"><%~ DspPct %></option>
+			<option value="usds"><%~ DspUsd %></option>
 			<option value="lims"><%~ DspLim %></option>
 		</select>
 		<div id="quota_table_container"></div>
