@@ -294,7 +294,11 @@ for new_d in $new_module_dirs ; do
 		echo "  KCONFIG:=\$(KCONFIG_IPT_$upper_name)" >>../"$kernel_netfilter_mk"
 		echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
 		echo "  AUTOLOAD:=\$(call AutoLoad,45,\$(notdir \$(IPT_$upper_name-m)))" >>../"$kernel_netfilter_mk"
-		echo "	DEPENDS:= kmod-ipt-core" >>../"$kernel_netfilter_mk"
+		if [ "$lower_name" = "layer7" ] ; then
+			echo "	DEPENDS:= +kmod-ipt-core +kmod-ipt-conntrack" >>../"$kernel_netfilter_mk"
+		else
+			echo "	DEPENDS:= kmod-ipt-core" >>../"$kernel_netfilter_mk"
+		fi
 		echo "endef" >>../"$kernel_netfilter_mk"
 		echo "\$(eval \$(call KernelPackage,ipt-$lower_name))" >>../"$kernel_netfilter_mk"
 
