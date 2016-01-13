@@ -312,391 +312,375 @@ int main(int argc, char **argv)
 			}
 		}
 
-printf("<!DOCTYPE html>\n"
-       "<head>\n"
-       "\t<meta charset=\"utf-8\">\n"
-       "\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
-       "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
-       "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-       "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
-printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
-printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
-printf("\t<link rel=\"stylesheet\" href=\"%s/%s/dashboard.css\">\n", theme_root, theme);
-printf("\t<script src=\"%s/%s/jquery-1.11.3.min.js\"></script>\n", theme_root, theme);
-printf("\t<script src=\"%s/%s/bootstrap.min.js\"></script>\n", theme_root, theme);
-printf("\t<script>"
-"$(\".sidebar-toggle\").on(\"click\", function () {"
-"$(\".row-offcanvas\").toggleClass(\"active\");"
-"});"
-"</script>");
-int css_index, js_index, lstr_js_index;
 
-//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
-printf("\t<style>\n"
-       "\tul ul{ display:none; } ul li.active>ul{ display:inline;}ul ul>a{ display:inline; padding:0; color:#000; cursor:default; }ul ul>li:hover{ color:#000; cursor:default; }ul ul>a:visited{ color:#000; cursor:default; }ul ul>a:active{ color:#000; cursor:default; }nav>li.active>a{ background-color: #eee;}\n"
-       "\t</style>\n");
-for(css_index=0; all_css[css_index] != NULL; css_index++)
-{
-  printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
-}
-for(js_index=0; all_js[js_index] != NULL; js_index++)
-{
-  printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
-}
+
+		printf("<!DOCTYPE html>\n"
+		       "<head>\n"
+		       "\t<meta charset=\"utf-8\">\n"
+		       "\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
+	   	       "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
+		       "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+		       "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
+		printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
+		int css_index, js_index, lstr_js_index;
+
+		//older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
+		printf("\t<style>\n"
+		       "\t\t.unselected_submenu_container	{ display:none; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link	{ display:inline; padding:0; color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:hover	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:visited	{ color:#000; cursor:default; }\n"
+		       "\t\t#nav_internal_container2 #selected_header_link:active	{ color:#000; cursor:default; }\n"
+		       "\t</style>\n");
+		for(css_index=0; all_css[css_index] != NULL; css_index++)
+		{
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
+		}
+		for(js_index=0; all_js[js_index] != NULL; js_index++)
+		{
+			printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
+		}
 #ifndef LOCALIZED_BUILD
-if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
-{
-  if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
-  {
-    printf("\t<script src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
-  }
-  printf("\t<script src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
-  for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
-  {
-    if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
-    {
-      printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-    }
-    char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
-    if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
-    {
-      printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
-    }
-    free(tran_file);
-  }
-}
+		if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
+		{
+			if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+			{
+				printf("\t<script src=\"/i18n/%s/strings.js?%s\"></script>\n", fallback_lang, gargoyle_version);
+			}
+			printf("\t<script src=\"i18n/%s/strings.js?%s\"></script>\n", active_lang, gargoyle_version);
+			for(lstr_js_index=0; all_lstr_js[lstr_js_index] != NULL; lstr_js_index++)
+			{
+				if (memcmp(fallback_lang, active_lang, strlen(active_lang)) != 0)
+				{
+					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", fallback_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+				}
+				char* tran_file = dynamic_strcat(5, web_root, "/i18n/", active_lang, "/", all_lstr_js[lstr_js_index]);
+				if (path_exists(tran_file) == PATH_IS_REGULAR_FILE || path_exists(tran_file) == PATH_IS_SYMLINK)
+				{
+					printf("\t<script src=\"/i18n/%s/%s?%s\"></script>\n", active_lang, all_lstr_js[lstr_js_index], gargoyle_version);
+				}
+				free(tran_file);
+			}
+		}
 #endif
-printf("</head>\n"
-       "<body>\n"
-       "<div class=\"row-offcanvas full-height\">"
-           "<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
+		printf("</head>\n"
+		       "<body>\n"
+		       "<div class=\"container-fluid\">\n");
 
-if(display_type == HEADER)
-{
-  printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
-         "\t<div id=\"wait_msg\">\n"
-         "\t\t<div id=\"wait_txt\">\n"
-         "\t\t\t%s\n"
-         "\t\t</div>\n"
-         "\t\t<div id=\"wait_icon\">\n"
-         "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
+		if(display_type == HEADER)
+		{
+			printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
+			       "\t<div id=\"wait_msg\">\n"
+			       "\t\t<div id=\"wait_txt\">\n"
+			       "\t\t\t%s\n"
+			       "\t\t</div>\n"
+			       "\t\t<div id=\"wait_icon\">\n"
+			       "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
 
-  printf("\t\t</div>\n"
-         "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-         "\t</div>\n"
-         "<div class=\"row full-height\">\n"
-             "<div id=\"sidebar\" class=\"col-xs-12 col-sm-3 col-md-3 col-lg-3 full-height\">\n"
-               "<nav>\n"
-                 "<ul class=\"sidebar\">\n"
-                     "<li class=\"sidebar-header\">\n"
-                       "<a><span>Gargoyle</span>\n"
-                       "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\"></a>\n", theme_root, theme);
-                           printf("<a>%s: %s</div>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
-  printf("</a></li>\n");
-}
+			printf("\t\t</div>\n"
+			       "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
+			       "\t</div>\n"
+			       "\t<div id=\"outer_logo\" class=\"row\">\n"
+			       "\t\t<div id=\"inner_logo\">\n"
+			       "\t\t\t<div id=\"garg_title\">Gargoyle</div>\n"
+			       "\t\t\t<div id=\"garg_desc\">%s</div>\n"
+			       "\t\t\t<div id=\"garg_host\">%s: %s</div>\n",	translation_strings == NULL ? desc : translation_strings[1],
+																	translation_strings == NULL ? dname : translation_strings[2],
+																	hostname);
 
-priority_queue* sections = initialize_priority_queue();
+			printf("\t\t</div>\n"
+			       "\t</div>\n"
+			       "\t<div id=\"outer_header\"></div>\n"
+			       "\t<div id=\"outer_container\" class=\"row\">\n"
+						 "\t\t<div id=\"main_external_container\" class=\"col-xs-12 col-sm-6 col-md-8 col-md-push-4\">\n"
+			       "\t\t\t<div id=\"main_top\"></div>\n"
+			       "\t\t\t<div id=\"main_internal_container\">\n"
+			       "\n\n");
+		}
 
-uci_foreach_element( &p->sections, e)
-{
-  struct uci_section *section = uci_to_section(e);
-  int section_rank;
-  if(sscanf(section->type, "%d", &section_rank) > 0)
-  {
-    priority_queue* section_pages =  initialize_priority_queue();
+		printf("<script>\n"
+		       "<!--\n"
+		       "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
 
-    struct uci_element *e2;
-    uci_foreach_element(&section->options, e2)
-    {
-      int page_rank;
-      if(sscanf(get_option_value_string(uci_to_option(e2)), "%d", &page_rank) > 0)
-      {
-        push_priority_queue(section_pages, page_rank, strdup(e2->name), NULL);
-      }
-    }
-    push_priority_queue(sections, section_rank, strdup(section->e.name),  section_pages);
-  }
-}
+		if(display_interface_vars == 1)
+		{
+			print_interface_vars();
+		}
+		if(display_hostname_map == 1)
+		{
+			print_hostname_map();
+		}
+		define_package_vars(package_variables_to_load);
+		printf("\n\tsetBrowserTimeCookie();\n"
+		       "\n\tvar testAjax = getRequestObj();\n"
+		       "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
+		       "//-->\n"
+		       "</script>\n"
+		       "\n\n");
+		free_null_terminated_string_array(translation_strings);
+	}
+	else if(display_type == FOOTER)
+	{
+		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
+		{
+			printf("ERROR: no gargoyle package defined!\n");
+			return 0;
+		}
 
-int first_section=1;
-int prev_section_selected=0;
-priority_queue_node *next_section;
-while( (next_section=shift_priority_queue_node(sections)) != NULL)
-{
-  char* section_display = "";
-  priority_queue* section_pages;
-  section_pages	= (priority_queue*)next_section->value;
-  if(get_uci_option(ctx, &e, p, "gargoyle", "display", next_section->id) == UCI_OK)
-  {
-    section_display = get_option_value_string(uci_to_option(e));
-  }
-
-
-
-  if(first_section == 0 && strcmp(selected_section, next_section->id) != 0)
-  {
-    if(prev_section_selected == 0)
-    {
-      printf("\t\t\t\t\t<div class=\"nav_unselected_divider\"></div>\n");
-    }
-    else
-    {
-      printf("\t\t\t\t\t<div class=\"nav_selected_divider2\"></div>\n");
-    }
-  }
-  if(strcmp(selected_section, next_section->id) == 0)
-  {
-    if(first_section == 1)
-    {
-      printf("\t\t\t\t\t<div class=\"nav_selected_divider_end1\"></div>\n"
-             "\t\t\t\t\t<div class=\"nav_selected_end1\">\n"
-             "\t\t\t\t\t\t<div class=\"nav_selected_container_end1\">\n");
-    }
-    else
-    {
-      printf("\t\t\t\t\t<div class=\"nav_selected_divider1\"></div>\n"
-             "\t\t\t\t\t<div class=\"nav_selected\">\n"
-             "\t\t\t\t\t\t<div class=\"nav_selected_container\">\n");
-    }
+		char* web_root = "/www";
+		char* bin_root = ".";
+		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
+		{
+			web_root=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "bin_root") == UCI_OK)
+		{
+			bin_root=get_option_value_string(uci_to_option(e));
+		}
 
 
+		priority_queue* sections = initialize_priority_queue();
 
-    if(peek_priority_queue_node(section_pages) == NULL)
-    {
-      printf("\t\t\t\t\t\t\t<div class=\"selected_single_header\">%s</div>\n", section_display);
-    }
-    else
-    {
-      printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" onClick=\"return true\">\n"
-             "\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
-      printf("\t\t\t\t\t\t\t</a>\n"
-             "\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
-      priority_queue_node *next_section_page;
-      while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
-      {
-        char* page_display="";
-        char* page_script="";
-        char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
-        if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
-        {
-          page_display = get_option_value_string(uci_to_option(e));
-        }
-        if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
-        {
-          page_script = get_option_value_string(uci_to_option(e));
-        }
-        if(strcmp(next_section_page->id, selected_page)==0)
-        {
-          printf("\t\t\t\t\t\t\t\t<div class=\"submenu_selected\">%s</div>\n", page_display);
-        }
-        else
-        {
-          char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
-          char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
-          if(strcmp(bin_root, ".") == 0)
-          {
-            printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
-          }
-          else
-          {
-            printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
-          }
-          free(bin_slash);
-          free(page_slash);
-        }
-        free(lookup);
-      }
-      printf("\t\t\t\t\t\t\t</div>\n");
-    }
-    printf("\t\t\t\t\t\t</div>\n"
-           "\t\t\t\t\t</div>\n");
-    prev_section_selected=1;
-  }
-  else
-  {
-    if(first_section == 1)
-    {
-      printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n"
-             "\t\t\t\t\t<div class=\"nav_unselected_end1\">\n"
-             "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
-    }
-    else
-    {
-      printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n"
-             "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
-    }
+		uci_foreach_element( &p->sections, e)
+		{
+			struct uci_section *section = uci_to_section(e);
+			int section_rank;
+			if(sscanf(section->type, "%d", &section_rank) > 0)
+			{
+				priority_queue* section_pages =  initialize_priority_queue();
 
-    priority_queue_node *next_section_page;
-    char* next_section_script = "";
-    if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
-    {
-      char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
-      if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
-      {
-        next_section_script = get_option_value_string(uci_to_option(e));
-      }
-      free(lookup);
-    }
-    else
-    {
-      if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", next_section->id) == UCI_OK)
-      {
-        next_section_script = get_option_value_string(uci_to_option(e));
-      }
-    }
+				struct uci_element *e2;
+				uci_foreach_element(&section->options, e2)
+				{
+					int page_rank;
+					if(sscanf(get_option_value_string(uci_to_option(e2)), "%d", &page_rank) > 0)
+					{
+						push_priority_queue(section_pages, page_rank, strdup(e2->name), NULL);
+					}
+				}
+				push_priority_queue(sections, section_rank, strdup(section->e.name),  section_pages);
+			}
+		}
 
 
-    char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
-    char* script_slash = next_section_script[0] == '/' ? strdup("") : strdup("/");
-    if(strcmp(bin_root, ".") == 0)
-    {
-      printf("\t\t\t\t\t\t\t<a href=\"%s%s\" onClick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
-    }
-    else
-    {
-      printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
-    }
-    printf("\t\t\t\t\t\t</div>\n");
+		printf("\t\t\t</div>\n"
+		       "\t\t\t<div id=\"main_bottom\"></div>\n"
+		       "\t\t</div>\n"
+		       "\t\t<div id=\"nav_external_container\" onClick=\"return true\" class=\"col-xs-6 col-md-4 col-md-pull-8\">\n"
+		       "\t\t\t<div id=\"nav_top\"></div>\n"
+		       "\t\t\t<div id=\"nav_internal_container1\">\n"
+		       "\t\t\t\t<div id=\"nav_internal_container2\">\n"
+		       "\t\t\t\t\t<div class=\"nav_internal_end1\"></div>\n");
 
-    int empty_section = 0;
-    if (next_section_page == NULL)
-    {
-      empty_section = 1;
-    }
-    if (empty_section == 0)
-    {
-      printf("\t\t\t\t\t\t<div class=\"unselected_submenu_container\">\n");
-    }
-    while(next_section_page != NULL)
-    {
-      char* page_display="";
-      char* page_script="";
-      char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
-      if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
-      {
-        page_display = get_option_value_string(uci_to_option(e));
-      }
-      if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
-      {
-        page_script = get_option_value_string(uci_to_option(e));
-      }
-      char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
-      char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
-      if(strcmp(bin_root, ".") == 0)
-      {
-        printf("\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
-      }
-      else
-      {
-        printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
-      }
-      free(bin_slash);
-      free(page_slash);
-      free(lookup);
-      next_section_page=shift_priority_queue_node(section_pages);
-    }
-    if (empty_section == 0)
-    {
-      printf("\t\t\t\t\t\t</div>\n");
-    }
+		int first_section=1;
+		int prev_section_selected=0;
+		priority_queue_node *next_section;
+		while( (next_section=shift_priority_queue_node(sections)) != NULL)
+		{
+			char* section_display = "";
+			priority_queue* section_pages;
+			section_pages	= (priority_queue*)next_section->value;
+			if(get_uci_option(ctx, &e, p, "gargoyle", "display", next_section->id) == UCI_OK)
+			{
+				section_display = get_option_value_string(uci_to_option(e));
+			}
 
 
-    printf("\t\t\t\t\t</div>\n");
-    prev_section_selected=0;
-  }
-  first_section = 0;
-}
-if(prev_section_selected ==1 )
-{
-  printf("\t\t\t\t\t<div class=\"nav_selected_divider_end2\"></div>\n");
-}
-else
-{
-  printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end2\"></div>\n");
-}
 
-printf("</ul>\n"
-"</nav>\n"
-"<div class=\"sidebar-footer\"\n>"
-    "<div class=\"col-xs-6\"\n>"
-        "<a href=\"/logout.sh\" target=\"_blank\">Logout</a>\n"
-    "</div>\n"
-    "<div class=\"col-xs-6\">\n"
-        "<a href=\"https://www.gargoyle-router.com/\">Support</a>\n"
-    "</div>\n"
-"</div>\n"
-"<div id=\"content\" class=\"col-xs-12 col-sm-9 col-md-9 col-lg-9 full-height\">\n"
-"<div id=\"topnavbar\" class=\"navbar navbar-default\">\n"
-    "<div class=\"container-fluid\">\n"
-        "<div class=\"navbar-header\">\n"
-            "<a class=\"btn btn-default sidebar-toggle navbar-toggle\"><i class=\"fa fa-exchange\"></i></a>\n"
-        "</div>\n"
-        "<a class=\"navbar-brand\">%s</a>\n", translation_strings == NULL ? desc : translation_strings[1]);
-printf("</div>\n"
-"</div>\n"
-"<div class=\"row\">\n"
-    "<div class=\"col-xs-12\">\n"
-      "<div class=\"row\">\n"
-"<div class=\"col-lg-8\">\n"
-"<div class=\"widget\">\n"
-    "<div class=\"widget-body\">\n");
+			if(first_section == 0 && strcmp(selected_section, next_section->id) != 0)
+			{
+				if(prev_section_selected == 0)
+				{
+					printf("\t\t\t\t\t<div class=\"nav_unselected_divider\"></div>\n");
+				}
+				else
+				{
+					printf("\t\t\t\t\t<div class=\"nav_selected_divider2\"></div>\n");
+				}
+			}
+			if(strcmp(selected_section, next_section->id) == 0)
+			{
+				if(first_section == 1)
+				{
+					printf("\t\t\t\t\t<div class=\"nav_selected_divider_end1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_selected_end1\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_selected_container_end1\">\n");
+				}
+				else
+				{
+					printf("\t\t\t\t\t<div class=\"nav_selected_divider1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_selected\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_selected_container\">\n");
+				}
 
-    printf("<script>\n"
-           "<!--\n"
-           "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
 
-    if(display_interface_vars == 1)
-    {
-      print_interface_vars();
-    }
-    if(display_hostname_map == 1)
-    {
-      print_hostname_map();
-    }
-    define_package_vars(package_variables_to_load);
-    printf("\n\tsetBrowserTimeCookie();\n"
-           "\n\tvar testAjax = getRequestObj();\n"
-           "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
-           "//-->\n"
-           "</script>\n"
-           "\n\n");
-    free_null_terminated_string_array(translation_strings);
-    }
-    else if(display_type == FOOTER)
-    {
-    if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
-    {
-      printf("ERROR: no gargoyle package defined!\n");
-      return 0;
-    }
 
-    char* web_root = "/www";
-    char* bin_root = ".";
-    if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
-    {
-      web_root=get_option_value_string(uci_to_option(e));
-    }
-    if(get_uci_option(ctx, &e, p, "gargoyle", "global", "bin_root") == UCI_OK)
-    {
-      bin_root=get_option_value_string(uci_to_option(e));
-    }
+				if(peek_priority_queue_node(section_pages) == NULL)
+				{
+					printf("\t\t\t\t\t\t\t<div class=\"selected_single_header\">%s</div>\n", section_display);
+				}
+				else
+				{
+					printf("\t\t\t\t\t\t\t<a id=\"selected_header_link\" onClick=\"return true\">\n"
+					       "\t\t\t\t\t\t\t\t<div class=\"selected_header\">%s</div>\n", section_display);
+					printf("\t\t\t\t\t\t\t</a>\n"
+					       "\t\t\t\t\t\t\t<div id=\"submenu_container\">\n");
+					priority_queue_node *next_section_page;
+					while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
+					{
+						char* page_display="";
+						char* page_script="";
+						char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+						if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
+						{
+							page_display = get_option_value_string(uci_to_option(e));
+						}
+						if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
+						{
+							page_script = get_option_value_string(uci_to_option(e));
+						}
+						if(strcmp(next_section_page->id, selected_page)==0)
+						{
+							printf("\t\t\t\t\t\t\t\t<div class=\"submenu_selected\">%s</div>\n", page_display);
+						}
+						else
+						{
+							char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+							char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
+							if(strcmp(bin_root, ".") == 0)
+							{
+								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+							}
+							else
+							{
+								printf("\t\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+							}
+							free(bin_slash);
+							free(page_slash);
+						}
+						free(lookup);
+					}
+					printf("\t\t\t\t\t\t\t</div>\n");
+				}
+				printf("\t\t\t\t\t\t</div>\n"
+				       "\t\t\t\t\t</div>\n");
+				prev_section_selected=1;
+			}
+			else
+			{
+				if(first_section == 1)
+				{
+					printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end1\"></div>\n"
+					       "\t\t\t\t\t<div class=\"nav_unselected_end1\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+				}
+				else
+				{
+					printf("\t\t\t\t\t<div class=\"nav_unselected_container\">\n"
+					       "\t\t\t\t\t\t<div class=\"nav_unselected\">\n");
+				}
 
-printf("</div>\n" //widget-body
-"</div>\n" //widget
-"</div>\n" //col-lg-8
-"</div>\n" //row
-"</div>\n" //col-xs-12
-"</div>\n" //row
-"</div>\n" //content
-"</div>\n"
-"</div>\n"
-"</div>\n"
-"</div>\n"
-"</body>"
-"</html>");
-}
+				priority_queue_node *next_section_page;
+				char* next_section_script = "";
+				if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
+				{
+					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+					if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
+					{
+						next_section_script = get_option_value_string(uci_to_option(e));
+					}
+					free(lookup);
+				}
+				else
+				{
+					if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", next_section->id) == UCI_OK)
+					{
+						next_section_script = get_option_value_string(uci_to_option(e));
+					}
+				}
 
-uci_free_context(ctx);
+
+				char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+				char* script_slash = next_section_script[0] == '/' ? strdup("") : strdup("/");
+				if(strcmp(bin_root, ".") == 0)
+				{
+					printf("\t\t\t\t\t\t\t<a href=\"%s%s\" onClick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
+				}
+				else
+				{
+					printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+				}
+				printf("\t\t\t\t\t\t</div>\n");
+
+				int empty_section = 0;
+				if (next_section_page == NULL)
+				{
+					empty_section = 1;
+				}
+				if (empty_section == 0)
+				{
+					printf("\t\t\t\t\t\t<div class=\"unselected_submenu_container\">\n");
+				}
+				while(next_section_page != NULL)
+				{
+					char* page_display="";
+					char* page_script="";
+					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+					if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
+					{
+						page_display = get_option_value_string(uci_to_option(e));
+					}
+					if(get_uci_option(ctx, &e, p, "gargoyle", "scripts", lookup) == UCI_OK)
+					{
+						page_script = get_option_value_string(uci_to_option(e));
+					}
+					char* bin_slash = bin_root[0] == '/' ? strdup("") : strdup("/");
+					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
+					if(strcmp(bin_root, ".") == 0)
+					{
+						printf("\t\t\t\t\t\t\t<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+					}
+					else
+					{
+						printf("\t\t\t\t\t\t\t<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+					}
+					free(bin_slash);
+					free(page_slash);
+					free(lookup);
+					next_section_page=shift_priority_queue_node(section_pages);
+				}
+				if (empty_section == 0)
+				{
+					printf("\t\t\t\t\t\t</div>\n");
+				}
+
+
+				printf("\t\t\t\t\t</div>\n");
+				prev_section_selected=0;
+			}
+			first_section = 0;
+		}
+		if(prev_section_selected ==1 )
+		{
+			printf("\t\t\t\t\t<div class=\"nav_selected_divider_end2\"></div>\n");
+		}
+		else
+		{
+			printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end2\"></div>\n");
+		}
+
+		printf("\t\t\t\t\t<div class=\"nav_internal_end2\"></div>\n"
+		       "\t\t\t\t</div>\n"
+		       "\t\t\t</div>\n"
+		       "\t\t\t<div id=\"nav_bottom\"></div>\n"
+		       "\t\t</div>\n"
+		       "\t</div>\n"
+		       "\t<div id=\"outer_footer\"></div>\n"
+		       "</body>\n"
+		       "</html>\n");
+	}
+
+	uci_free_context(ctx);
 }
 
 void define_package_vars(char** package_vars_to_load)
