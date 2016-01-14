@@ -89,7 +89,7 @@ for (etherIndex in etherData)
 	</fieldset>
 
 	<fieldset>
-		<legend class="sectionheader"><%~ device.KnDev %></legend>
+		<legend class="sectionheader"><%~ KnDev %></legend>
 
 		<div id='block_mismatches_container'>
 			<div class='nocolumn'>
