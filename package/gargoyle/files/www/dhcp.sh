@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "dhcp" -c "internal.css" -j "table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall
+	gargoyle_header_footer -h -s "connection" -p "dhcp" -c "internal.css" -j "table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall known
 	subnet=$(ifconfig br-lan | awk 'BEGIN {FS=":"}; $0 ~ /inet.addr/ {print $2}' | awk 'BEGIN {FS="."}; {print $1"\."$2"\."$3"\."}')
 %>
 
@@ -89,7 +89,7 @@ for (etherIndex in etherData)
 	</fieldset>
 
 	<fieldset>
-		<legend class="sectionheader"><%~ SIPs %></legend>
+		<legend class="sectionheader"><%~ device.KnDev %></legend>
 
 		<div id='block_mismatches_container'>
 			<div class='nocolumn'>
@@ -98,27 +98,46 @@ for (etherIndex in etherData)
 			</div>
 		</div>
 
-		<div id='staticip_add_heading_container'>
-			<label class='nocolumn' id='staticip_add_heading_label' style='text-decoration:underline'><%~ AdSIP %>:</label>
+		<div id='device_add_heading_container'>
+			<a name='device_form'></a>
+			<label class='nocolumn' id='device_add_heading_label' style='text-decoration:underline'><%~ AdKnDev %>:</label>
 		</div>
 		<div class='bottom_gap'>
-			<div id='staticip_add_container'>
-				<%in templates/static_ip_template %>
-			</div>
-			<div>
-				<select id="static_from_connected" onchange="staticFromConnected()" >
-					<option value="none"><%~ SelH %></option>
-				</select>
+			<div id='device_add_container'>
+				<%in templates/device_template %>
 			</div>
 		</div>
 
-		<div id='staticip_table_heading_container'>
-			<span class='nocolumn'><%~ AsSIP %>:</span>
+		<div id='device_table_heading_container'>
+			<span class='nocolumn'><%~ KnDev %>:</span>
 		</div>
 		<div class='indent'>
-			<div id='staticip_table_container' class="bottom_gap"></div>
+			<div id='device_table_container' class="bottom_gap"></div>
 		</div>
 	</fieldset>
+
+
+		<fieldset>
+			<legend class="sectionheader"><%~ DevGp %></legend>
+
+			<div id='group_add_heading_container'>
+				<a name='group_form'></a>
+				<label class='nocolumn' id='group_add_heading_label' style='text-decoration:underline'><%~ AdGp %>:</label>
+			</div>
+			<div class='bottom_gap'>
+				<div id='group_add_container'>
+					<%in templates/group_template %>
+				</div>
+			</div>
+
+			<div id='group_table_heading_container'>
+				<span class='nocolumn'><%~ DevGp %>:</span>
+			</div>
+			<div class='indent'>
+				<div id='group_table_container' class="bottom_gap"></div>
+			</div>
+		</fieldset>
+
 
 	<div id="firefox3_bug_correct" style="display:none">
 		<input type='text' value='firefox3_bug' />

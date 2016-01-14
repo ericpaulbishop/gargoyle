@@ -23,3 +23,15 @@ dhcpS.dsubErr="Specified DHCP range falls outside LAN subnet.";
 dhcpS.dipErr="Specified DHCP range contains current LAN IP.";
 dhcpS.upErr="Could not update static IP.";
 dhcpS.AErr="Could not add row.";
+
+dhcpS.KnDev="Known Devices";
+dhcpS.AdKnDev="Add Known Device";
+dhcpS.AdGp="Add Group";
+dhcpS.GpNm="Group name";
+dhcpS.DevNm="Device name";
+dhcpS.DevNms="Device names";
+dhcpS.EdKnDev="Edit Device";
+dhcpS.DevGp="Device Groups";
+dhcpS.SelM="Include MAC";
+dhcpS.SelD="Include Device";
+dhcpS.StcIP="Static IP";

@@ -6,7 +6,7 @@
 # itself remain covered by the GPL.
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
-# This script was written as part of the Device Groups implementation (see: /www/device.sh)
+# This script was written as part of the Device Groups implementation (see: /www/dhcp.sh)
 # Know Devices may be assigned to a Group (see: uci show known.device)
 # An ipset is created for each Group (see: ipset list -n)
 # Each new dhcp lease must update the ipset (see: uci show dnsmasq.dhcp-script)
