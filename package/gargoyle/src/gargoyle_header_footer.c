@@ -368,51 +368,30 @@ if(active_lang[0] != '\0' && fallback_lang[0] != '\0')
 #endif
 printf("</head>\n"
        "<body>\n"
+			 "\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
+		   "\t<div id=\"wait_msg\">\n"
+		   "\t\t<div id=\"wait_txt\">\n"
+		   "\t\t\t%s\n"
+		   "\t\t</div>\n"
+		   "\t\t<div id=\"wait_icon\">\n"
+		   "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
+
+printf("\t\t</div>\n"
+		   "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
+		   "\t</div>\n");
        "<div class=\"row-offcanvas full-height\">"
-           "<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
+       "<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
 
 if(display_type == HEADER)
 {
-	char* web_root = "/www";
-	char* bin_root = ".";
-  printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
-         "\t<div id=\"wait_msg\">\n"
-         "\t\t<div id=\"wait_txt\">\n"
-         "\t\t\t%s\n"
-         "\t\t</div>\n"
-         "\t\t<div id=\"wait_icon\">\n"
-         "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
-
-  printf("\t\t</div>\n"
-         "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-         "\t</div>\n");
-				 printf("<script>"
-				 			 "<!--\n"
-				 			 "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
-
-				 if(display_interface_vars == 1)
-				 {
-				 	print_interface_vars();
-				 }
-				 if(display_hostname_map == 1)
-				 {
-				 	print_hostname_map();
-				 }
-				 define_package_vars(package_variables_to_load);
-				 printf("\n\tsetBrowserTimeCookie();\n"
-				 			 "\n\tvar testAjax = getRequestObj();\n"
-				 			 "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
-				 			 "//-->\n"
-				 			 "</script>\n"
-				 			 "\n\n");
-         printf("<div class=\"row full-height\">\n"
-             "<div id=\"sidebar\" class=\"col-xs-12 col-sm-3 col-md-3 col-lg-3 full-height\">\n"
-               "<nav>\n"
-                 "<ul class=\"sidebar\">\n"
-                     "<li class=\"sidebar-header\">\n"
-                       "<a><span>Gargoyle</span>\n"
-                       "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\"></a>\n", theme_root, theme);
-                           printf("<a>%s: %s</div>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
+  printf("<div class=\"row full-height\">\n"
+         "<div id=\"sidebar\" class=\"col-xs-12 col-sm-3 col-md-3 col-lg-3 full-height\">\n"
+         "<nav>\n"
+         "<ul class=\"sidebar\">\n"
+         "<li class=\"sidebar-header\">\n"
+         "<a><span>Gargoyle</span>\n"
+         "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"></a>\n", theme_root, theme);
+  printf("<a>%s: %s</div>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
   printf("</a></li>\n");
 }
 
@@ -657,12 +636,33 @@ printf("</ul>\n"
 printf("</div>\n"
 "</div>\n"
 "<div class=\"row\">\n"
-    "<div class=\"col-xs-12\">\n"
-      "<div class=\"row\">\n"
+"<div class=\"col-xs-12\">\n"
+"<div class=\"row\">\n"
 "<div class=\"col-lg-8\">\n"
 "<div class=\"widget\">\n"
-    "<div class=\"widget-body\">\n");
+"<div class=\"widget-body\">\n");
 
+char* web_root = "/www";
+char* bin_root = ".";
+printf("<script>"
+			 "<!--\n"
+			 "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+
+					 if(display_interface_vars == 1)
+					 {
+						print_interface_vars();
+					 }
+					 if(display_hostname_map == 1)
+					 {
+						print_hostname_map();
+					 }
+					 define_package_vars(package_variables_to_load);
+					 printf("\n\tsetBrowserTimeCookie();\n"
+								 "\n\tvar testAjax = getRequestObj();\n"
+								 "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
+								 "//-->\n"
+								 "</script>\n"
+								 "\n\n");
     free_null_terminated_string_array(translation_strings);
     }
     else if(display_type == FOOTER)
