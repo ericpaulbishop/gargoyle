@@ -48,8 +48,10 @@ function saveChanges()
 			dhcpWillBeEnabled = false;
 		}
 
-		// save Device changes
+		// save Device changes to uci
 		uci.removeAllSectionsOfType("dhcp", "host");
+		var etherMap = map(etherData, 0);
+		var hostMap = map(hostData, 0);
 		deviceTable = document.getElementById('device_table_container').firstChild;
 		tableData = getTableDataArray(deviceTable, true, false);
 		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
@@ -64,6 +66,42 @@ function saveChanges()
 			}
 			uci.set("dhcp", host, "mac", macs);
 			uci.set("dhcp", host, "ip", ip);
+
+			// remove devices moved to uci from /etc/ethers & /etc/hosts
+			var macList = macs.split("\t");
+			for (mIndex = 0; mIndex < macList.length; mIndex++)
+			{
+				uciMac = macList[mIndex];
+				if (etherMap.hasOwnProperty(uciMac))
+				{
+					etherIP = etherMap[uciMac][1];
+					delete etherMap[uciMac];
+					if (hostMap.hasOwnProperty(etherIP))
+					{
+						delete hostMap[etherIP];
+					}
+				}
+			}
+		}
+
+		// recreate /etc/ethers without redundant entries
+		createEtherCommands = [ "touch /etc/ethers", "rm /etc/ethers" ];
+		for (mac in etherMap)
+		{
+			if (etherMap.hasOwnProperty(mac))
+			{
+				createEtherCommands.push("echo \"" + mac.toLowerCase() + "\t" + etherMap[mac][1] + "\" >> /etc/ethers");
+			}
+		}
+
+		// recreate /etc/hosts without redundant entries
+		createHostCommands = [ "touch /etc/hosts", "rm /etc/hosts" ];
+		for (ip in hostMap)
+		{
+			if (hostMap.hasOwnProperty(ip))
+			{
+				createHostCommands.push("echo \"" + ip + "\t" + hostMap[ip][1] + "\" >> /etc/hosts");
+			}
 		}
 
 		// save Group changes
@@ -117,10 +155,14 @@ function saveChanges()
 			firewallCommands.push("uci commit");
 		}
 
-		//need to restart firewall here because for add/remove of static ips, we need to restart bandwidth monitor, as well as for firewall commands above if we have any
-		var restartDhcpCommand = "\n/etc/init.d/dnsmasq restart ; \nsh /usr/lib/gargoyle/restart_firewall.sh\n" ;
+		commands = uci.getScriptCommands(uciOriginal) + "\n";
+		commands += ipsetCommands.join("\n") + "\n";
+		commands += createEtherCommands.join("\n") + "\n";
+		commands += createHostCommands.join("\n")  + "\n";
+		commands += firewallCommands.join("\n") + "\n";
 
-		commands = uci.getScriptCommands(uciOriginal) + "\n" + ipsetCommands.join("\n")  + "\n" + firewallCommands.join("\n") + "\n" + restartDhcpCommand ;
+		//need to restart firewall here because for add/remove of static ips, we need to restart bandwidth monitor, as well as for firewall commands above if we have any
+		commands += "\n/etc/init.d/dnsmasq restart ; \nsh /usr/lib/gargoyle/restart_firewall.sh\n" ;
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
@@ -228,15 +270,15 @@ function resetDeviceTable()
 	}
 
 	// process /etc/hosts & /etc/ethers
-	var etherMap = map(etherData);
-	var hostMap = map(hostData);
+	var etherMap = map(etherData, 0);
+	var hostMap = map(hostData, 0);
 	for (mac in etherMap)
 	{
 		ucMAC = mac.toUpperCase();
 		if (etherMap.hasOwnProperty(mac) && uciMacs.indexOf(ucMAC) == -1)
 		{
-			ip = etherMap[mac][0];
-			host = (hostMap.hasOwnProperty(ip)) ? hostMap[ip][0] : "";
+			ip = etherMap[mac][1];
+			host = (hostMap.hasOwnProperty(ip)) ? hostMap[ip][1] : "";
 			deviceTableData.push([host, ucMAC, ip, createEditButton(editDevice)]);
 		}
 	}
@@ -252,25 +294,6 @@ function resetDeviceTable()
 	tableContainer.appendChild(deviceTable);
 }
 
-
-function map(data)
-{
-	var map = new Object();
-	if (data instanceof Array)
-	{
-		for (i=0; i<data.length; i++)
-		{
-			value = data[i];
-			if (value instanceof Array)
-			{
-				value = value.slice();
-				key = value.shift();
-				map[key] = value;
-			}
-		}
-	}
-	return map;
-}
 
 
 function resetGroupTable()
@@ -563,7 +586,7 @@ function knownMacLookup()
 {	// gather known MACs from /etc/ethers
 	var knownMac = mergeEtherHost();
 	var kmMacIndex = 0;
-	var macLookup = lookupList(knownMac, kmMacIndex);
+	var macMap = map(knownMac, kmMacIndex);
 
 	var ldMacIndex = 0;
 	var ldIpIndex = 1;
@@ -572,12 +595,12 @@ function knownMacLookup()
 	{	// gather known MACs from dhcp leases
 		var leaseRow = leaseData[ldIndex];
 		var mac = leaseRow[ldMacIndex].toUpperCase();
-		if(macLookup[mac] == null)
+		if(macMap[mac] == null)
 		{
-			macLookup[mac] = [mac, leaseRow[ldIpIndex], leaseRow[ldHostIndex]];
+			macMap[mac] = [mac, leaseRow[ldIpIndex], leaseRow[ldHostIndex]];
 		}
 	}
-	return macLookup;
+	return macMap;
 }
 
 
@@ -589,7 +612,7 @@ function mergeEtherHost()
 {
 	var hdIpIndex = 0;
 	var hdHostIndex = 1;
-	var hostLookup = lookupList(hostData, hdIpIndex);
+	var hostLookup = map(hostData, hdIpIndex);
 
 	var mhdMacIndex = 0;
 	var mhdIpIndex = 1;
@@ -618,16 +641,24 @@ function mergeEtherHost()
 * data: an Array of Arrays
 * field: the index of a field in the inner array to be used as the lookup index.
 */
-function lookupList(data, field){
-	var lookup = new Object();
-	var index=0;
-	for(index=0; index < data.length; index++)
+function map(data, field)
+{
+	var map = new Object();
+	if (data instanceof Array)
 	{
-		var key = (data[index][field]);
-		lookup[key] = data[index];
+		for (index=0; index<data.length; index++)
+		{
+			value = data[index];
+			if (value instanceof Array)
+			{
+				key = value[field];
+				map[key] = value;
+			}
+		}
 	}
-	return lookup;
+	return map;
 }
+
 
 
 function addNewOption(selectId, optionText, optionValue)
