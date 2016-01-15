@@ -373,6 +373,8 @@ printf("</head>\n"
 
 if(display_type == HEADER)
 {
+	char* web_root = "/www";
+	char* bin_root = ".";
   printf("\t<div id=\"darken\"><iframe id=\"d_iframe\" class=\"select_free\"></iframe></div>\n"
          "\t<div id=\"wait_msg\">\n"
          "\t\t<div id=\"wait_txt\">\n"
@@ -383,8 +385,27 @@ if(display_type == HEADER)
 
   printf("\t\t</div>\n"
          "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-         "\t</div>\n"
-         "<div class=\"row full-height\">\n"
+         "\t</div>\n");
+				 printf("<script>"
+				 			 "<!--\n"
+				 			 "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+
+				 if(display_interface_vars == 1)
+				 {
+				 	print_interface_vars();
+				 }
+				 if(display_hostname_map == 1)
+				 {
+				 	print_hostname_map();
+				 }
+				 define_package_vars(package_variables_to_load);
+				 printf("\n\tsetBrowserTimeCookie();\n"
+				 			 "\n\tvar testAjax = getRequestObj();\n"
+				 			 "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
+				 			 "//-->\n"
+				 			 "</script>\n"
+				 			 "\n\n");
+         printf("<div class=\"row full-height\">\n"
              "<div id=\"sidebar\" class=\"col-xs-12 col-sm-3 col-md-3 col-lg-3 full-height\">\n"
                "<nav>\n"
                  "<ul class=\"sidebar\">\n"
@@ -394,6 +415,7 @@ if(display_type == HEADER)
                            printf("<a>%s: %s</div>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
   printf("</a></li>\n");
 }
+
 
 priority_queue* sections = initialize_priority_queue();
 
@@ -641,25 +663,6 @@ printf("</div>\n"
 "<div class=\"widget\">\n"
     "<div class=\"widget-body\">\n");
 
-    printf("<script>\n"
-           "<!--\n"
-           "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
-
-    if(display_interface_vars == 1)
-    {
-      print_interface_vars();
-    }
-    if(display_hostname_map == 1)
-    {
-      print_hostname_map();
-    }
-    define_package_vars(package_variables_to_load);
-    printf("\n\tsetBrowserTimeCookie();\n"
-           "\n\tvar testAjax = getRequestObj();\n"
-           "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
-           "//-->\n"
-           "</script>\n"
-           "\n\n");
     free_null_terminated_string_array(translation_strings);
     }
     else if(display_type == FOOTER)
