@@ -6,4 +6,4 @@ before_install:
  # http://docs.travis-ci.com/user/database-setup/#MySQL
  - sudo /etc/init.d/mysql stop
  - sudo /etc/init.d/postgresql stop
-install: make ar71xx.usb -s
+install: make ar71xx.usb --silent
