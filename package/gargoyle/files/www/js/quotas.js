@@ -323,7 +323,7 @@ function setDocumentIp(ip, controlDocument)
 	{
 		setSelectedValue("applies_to_type", "others_individual", controlDocument);
 	}
-	else if (isGroup(ip))
+	else if (uci.get("dhcp", ip).length > 0)
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
 		controlDocument.getElementById("add_ip").value = ip;

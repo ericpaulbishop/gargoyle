@@ -52,6 +52,7 @@ function saveChanges()
 		uci.removeAllSectionsOfType("dhcp", "host");
 		var etherMap = map(etherData, 0);
 		var hostMap = map(hostData, 0);
+		var macMap = new Object();
 		deviceTable = document.getElementById('device_table_container').firstChild;
 		tableData = getTableDataArray(deviceTable, true, false);
 		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
@@ -66,6 +67,7 @@ function saveChanges()
 			}
 			uci.set("dhcp", host, "mac", macs);
 			uci.set("dhcp", host, "ip", ip);
+			macMap[host]=macs;
 
 			// remove devices moved to uci from /etc/ethers & /etc/hosts
 			var macList = macs.split("\t");
@@ -105,34 +107,35 @@ function saveChanges()
 		}
 
 		// save Group changes
+		uci.removeAllSectionsOfType("dhcp", "mac");
+		var ipsetCommands = ["ipset destroy"]; // fails on ipsets with existing references
+
 		groupTable = document.getElementById('group_table_container').firstChild;
 		tableData = getTableDataArray(groupTable, true, false);
-		var groups = [];
 		for (rowIndex = 0; rowIndex < tableData.length; rowIndex++)
 		{
 			rowData = tableData[rowIndex];
 			var group = rowData[0];
 			var devices = rowData[1].split(" ");
+
+			if (uci.get("dhcp", group).length == 0){
+				uci.set("dhcp", group, null, "mac");
+				uci.set("dhcp", group, "networkid", group);
+			}
+
 			for(dIndex=0; dIndex < devices.length; dIndex++)
 			{
 				var host = devices[dIndex];
-				if (uci.get("dhcp", host).length == 0){
-					uci.set("dhcp", host, null, "host");
-					uci.set("dhcp", host, "name", host);
-					//uci.set("dhcp", host, "ip", 'ignore');
-				}
-				uci.set("dhcp", host, "group", group);
-				if(groups.indexOf(group) == -1)
+				var macs = macMap[host].split(" ");
+				for (mIndex=0; mIndex < macs.length; mIndex++)
 				{
-					groups.push(group);
+					uci.set("dhcp", group, "mac", macs[mIndex[]);
 				}
+-				uci.set("dhcp", host, "group", group);
 			}
-		}
 
-		// create ipsets
-		var ipsetCommands = ["ipset destroy"]; // fails on ipsets with existing references
-		for (gIndex=0; gIndex < groups.length; gIndex++){
-			ipsetCommands.push("ipset create " + groups[gIndex] + " iphash");
+			// create ipset
+			ipsetCommands.push("ipset create " + group + " iphash");
 		}
 
 		// save blockMismatches changes

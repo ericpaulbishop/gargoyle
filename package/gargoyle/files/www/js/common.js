@@ -2290,7 +2290,8 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 			var addr = data[rowIndex][0];
 			if (validateGroup(addr) == 0)
 			{
-				allCurrentMacs.push(groupMacs(addr));
+				var groupMacs = uciOriginal("dhcp", addr, "mac");
+				allCurrentMacs.push(groupMacs);
 			}
 			else if(validateMac(addr) == 0)
 			{
@@ -2471,7 +2472,7 @@ function testSingleAddrOverlap(addrStr1, addrStr2)
 
 function testAddrOverlap(addrStr1, addrStr2)
 {
-	var groups = deviceGroups();
+	var groups = uciOriginal.getAllSectionsOfType("dhcp", "mac");
 	if (groups.indexOf(addrStr1) > -1)
 	{
 		addrStr1 = groupIPs(addrStr1).join();
@@ -2930,24 +2931,6 @@ function ObjLen(an_obj)
 	return len
 }
 
-
-function deviceGroups()
-{
-	// get a list of Device Groups from uci
-	var groups = [];
-	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
-	for (hIndex=0; hIndex < hosts.length; hIndex++)
-	{	// survey all of the devices and groups
-		var host = hosts[hIndex];
-		var group = uciOriginal.get("dhcp", host, "group");
-		if (group.length > 0  && groups.indexOf(group) == -1)
-		{
-			groups.push(group);
-		}
-	}
-	return groups;
-}
-
 function groupHosts(group)
 {
 	var groupHosts = [];
@@ -2965,31 +2948,10 @@ function groupHosts(group)
 }
 
 
-function groupMacs(group)
-{
-	var groupMacs = [];
-	var hosts = groupHosts(group);
-	for (hIndex = 0 ; hIndex < hosts.length; hIndex++)
-	{
-		var host = hosts[hIndex];
-		var uciMac = uciOriginal.get("dhcp", host, "mac");
-		if (typeof uciMac === 'string')
-		{
-			var macs = uciMac.split(" ");
-			for (mIndex = 0; mIndex < macs.length; mIndex++)
-			{
-				groupMacs.push(macs[mIndex]);
-			}
-		}
-	}
-	return groupMacs;
-}
-
-
 function groupIPs(group)
 {
 	var groupIPs = [];
-	var macs = groupMacs(group);
+	var macs = uciOriginal("dhcp", group, "mac");
 	var ldMacIndex = 0;
 	var ldIpIndex = 1;
 	for (ldIndex=0; ldIndex < leaseData.length; ldIndex++)
@@ -3006,20 +2968,6 @@ function groupIPs(group)
 	return groupIPs;
 }
 
-function isGroup(group)
-{
-	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
-	for (hIndex=0; hIndex < hosts.length; hIndex++)
-	{	// survey all of the device groups until found
-		var host = hosts[hIndex];
-		if (uciOriginal.get("dhcp", host, "group").localeCompare(group) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 
 function resetGroupOptions(selectId, controlDocument)
 {
@@ -3027,7 +2975,7 @@ function resetGroupOptions(selectId, controlDocument)
 	selectElement = controlDocument.getElementById(selectId);
 	if (selectElement != null)
 	{
-		var groups = deviceGroups();
+		var groups = uciOriginal.getAllSectionsOfType("dhcp", "mac");
 		if (groups.length == 0)
 		{
 			selectElement.disabled = true;
