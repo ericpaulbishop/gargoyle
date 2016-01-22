@@ -182,7 +182,7 @@ function resetData()
 	setEnabled(document.getElementById('dhcp_enabled').checked);
 
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
-	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
 	document.getElementById("block_mismatches").checked = blockMismatches;
 
 
