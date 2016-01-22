@@ -36,6 +36,9 @@ ovwS.F5GID="Nazwa AP 5GHz (SSID)";
 ovwS.IDJoin="Połączony jako klient do SSID";
 ovwS.QUp="QoS (wysyłanie)";
 ovwS.QDwn="QoS (pobieranie)";
+ovwS.TEMPcpu="Temperatura CPU";
+ovwS.TEMPmem="Temperatura RAM";
+ovwS.TEMPwifi="Temperatura Wi-Fi";
 
 //javascript
 ovwS.AcPt="Punkt dostępowy";
