@@ -518,23 +518,34 @@ enforce_dhcp_assignments()
 {
 	enforce_assignments=$(uci get firewall.@defaults[0].enforce_dhcp_assignments 2> /dev/null)
 	delete_chain_from_table lease_mismatch_check filter
-	if [ "$enforce_assignments" = "1" ] && [ -e /tmp/dhcp.leases ] ; then
-		local pairs
-		pairs=$(cat /tmp/dhcp.leases | sed '/^[ \t]*$/d' | awk ' { print $2"^"$3"\n" ; } ' )
-		if [ -n "$pairs" ] ; then
-			iptables -t filter -N lease_mismatch_check
-			local p
-			for p in $pairs ; do
-				local mac
-				local ip
-				mac=$(echo $p | sed 's/\^.*$//g')
-				ip=$(echo $p | sed 's/^.*\^//g')
-				if [ -n "$ip" ] && [ -n "$mac" ] ; then
-					iptables -t filter -A lease_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
-				fi
-			done
-			iptables -t filter -I delegate_forward -j lease_mismatch_check
-		fi
+
+	local pairs1
+	local pairs2
+	local pairs
+	pairs1=""
+	pairs2=""
+	if [ -e /tmp/dhcp.leases ] ; then
+		pairs1=$(cat /tmp/dhcp.leases | sed '/^[ \t]*$/d' | awk ' { print $2"^"$3"\n" ; } ' )
+	fi
+	if [ -e /etc/ethers ] ; then
+		pairs2=$(cat /etc/ethers | sed '/^[ \t]*$/d' | awk ' { print $1"^"$2"\n" ; } ' )
+	fi
+	pairs=$( printf "$pairs1\n$pairs2\n" | sort | uniq )
+
+
+	if [ "$enforce_assignments" = "1" ] && [ -n "$pairs" ] ; then
+		iptables -t filter -N lease_mismatch_check
+		local p
+		for p in $pairs ; do
+			local mac
+			local ip
+			mac=$(echo $p | sed 's/\^.*$//g')
+			ip=$(echo $p | sed 's/^.*\^//g')
+			if [ -n "$ip" ] && [ -n "$mac" ] ; then
+				iptables -t filter -A lease_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
+			fi
+		done
+		iptables -t filter -I delegate_forward -j lease_mismatch_check
 	fi
 }
 
@@ -564,7 +575,7 @@ initialize_firewall()
 	insert_remote_accept_rules
 	insert_dmz_rule
 	create_l7marker_chain
-	block_static_ip_mismatches
+	enforce_dhcp_assignments
 	force_router_dns
 	add_adsl_modem_routes
         isolate_guest_networks
