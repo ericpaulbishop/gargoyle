@@ -564,7 +564,7 @@ initialize_firewall()
 	insert_remote_accept_rules
 	insert_dmz_rule
 	create_l7marker_chain
-	block_static_ip_mismatches
+	enforce_dhcp_assignments
 	force_router_dns
 	add_adsl_modem_routes
         isolate_guest_networks
