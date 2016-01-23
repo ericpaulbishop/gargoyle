@@ -2530,8 +2530,8 @@ function setChannelWidth(selectCtl, band)
 		if(h40)
 		{
 			aChannels  = []
-			var validAPlus  = [36, 44, 52, 60, 149, 157]
-			var validAMinus = [40, 48, 56, 64, 153, 161]
+			var validAPlus  = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
+			var validAMinus = [40, 48, 56, 64, 104, 112, 120, 128, 136, 144, 153, 161]
 			var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
 			for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
 			{
@@ -2542,8 +2542,8 @@ function setChannelWidth(selectCtl, band)
 		else if(vht && (chw != 'VHT20'))
 		{
 			aChannels = []
-			var valid40 = [36, 44, 52, 60, 149, 157]
-			var valid80 = [36, 52, 149]
+			var valid40 = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
+			var valid80 = [36, 52, 100, 116, 132, 149]
 			if(chw == 'VHT40')
 			{
 				var validTest  = arrToHash(valid40)

@@ -1,5 +1,5 @@
 /*
- * This program is copyright © 2015 John Brown and is distributed under the terms of the GNU GPL
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
@@ -141,19 +141,19 @@ function saveChanges()
 		// save blockMismatches changes
 		var firewallCommands = [];
 		var firewallDefaultSections = uci.getAllSectionsOfType("firewall", "defaults");
-		var oldBlockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+		var oldBlockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
 		var newBlockMismatches = document.getElementById("block_mismatches").checked;
 		if(newBlockMismatches != oldBlockMismatches)
 		{
 			if(newBlockMismatches)
 			{
-				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
-				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
+				uci.set("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments", "1");
+				firewallCommands.push("uci set firewall.@defaults[0].enforce_dhcp_assignments=1");
 			}
 			else
 			{
-				uci.remove("firewall", firewallDefaultSections[0], "block_static_ip_mismatches");
-				firewallCommands.push("uci del firewall.@defaults[0].block_statip_mismatches");
+				uci.remove("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments");
+				firewallCommands.push("uci del firewall.@defaults[0].enforce_dhcp_assignments");
 			}
 			firewallCommands.push("uci commit");
 		}
@@ -298,14 +298,12 @@ function resetDeviceTable()
 }
 
 
-
 function resetGroupTable()
 {
 	var groupTableData = new Array();
 
 	var groups = new Object();
 	var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
-
 	for (hIndex=0; hIndex < hosts.length; hIndex++)
 	{	// survey all of the devices and groups
 		var host = hosts[hIndex];
@@ -322,6 +320,10 @@ function resetGroupTable()
 			}
 		}
 	}
+
+	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
+	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
+	document.getElementById("block_mismatches").checked = blockMismatches;
 
 	for (var group in groups)
 	{	// place each group in an array
