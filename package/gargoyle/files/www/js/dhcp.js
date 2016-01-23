@@ -129,7 +129,7 @@ function saveChanges()
 				var macs = macMap[host].split(" ");
 				for (mIndex=0; mIndex < macs.length; mIndex++)
 				{
-					uci.set("dhcp", group, "mac", macs[mIndex[]);
+					uci.set("dhcp", group, "mac", macs[mIndex]);
 				}
 -				uci.set("dhcp", host, "group", group);
 			}
