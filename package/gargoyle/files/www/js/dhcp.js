@@ -75,19 +75,24 @@ function saveChanges()
 
 		var firewallCommands = [];
 		var firewallDefaultSections = uci.getAllSectionsOfType("firewall", "defaults");
-		var oldBlockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+		var oldBlockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
 		var newBlockMismatches = document.getElementById("block_mismatches").checked;
 		if(newBlockMismatches != oldBlockMismatches)
 		{
 			if(newBlockMismatches)
 			{
+<<<<<<< HEAD
 				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
 				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
+=======
+				uci.set("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments", "1");
+				firewallCommands.push("uci set firewall.@defaults[0].enforce_dhcp_assignments=1");
+>>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 			}
 			else
 			{
-				uci.remove("firewall", firewallDefaultSections[0], "block_static_ip_mismatches");
-				firewallCommands.push("uci del firewall.@defaults[0].block_statip_mismatches");
+				uci.remove("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments");
+				firewallCommands.push("uci del firewall.@defaults[0].enforce_dhcp_assignments");
 			}
 			firewallCommands.push("uci commit");
 		}
@@ -183,7 +188,7 @@ function resetData()
 	setEnabled(document.getElementById('dhcp_enabled').checked);
 
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
-	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "block_static_ip_mismatches") == "1" ? true : false;
+	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
 	document.getElementById("block_mismatches").checked = blockMismatches;
 
 
@@ -392,6 +397,10 @@ function editStatic()
 		catch(e){}
 	}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 	try
 	{
 		xCoor = window.screenX + 225;

@@ -113,6 +113,30 @@ function changePluginRoot()
 	var oldRootDrive = uciOriginal.get("gargoyle", "plugin_options", "root_drive")
 	oldRootDrive = oldRootDrive == "" ? "root" : oldRootDrive;
 
+	// Check free space on the newRootDrive and alert if insufficient
+	var newRootFree = pkg_dests['root']['Bytes-Free'];
+	if (newRootDrive.localeCompare('root') != 0)
+	{
+		var driveIndex;
+		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
+		{
+			if (storageDrives[driveIndex][0].localeCompare(newRootDrive) == 0)
+			{
+				newRootFree = storageDrives[driveIndex][5];
+			}
+		}
+	}
+    if (pluginRootSize > newRootFree)
+    {
+        window.alert
+    	(       pgS.NoSpace + " " + newRootDrive + "\n\n" +
+            	pgS.PlgSz + " = " + parseBytes(pluginRootSize) + "\n" +
+            	pgS.FreeSp + " = " + parseBytes(newRootFree) + "\n\n" +
+            	pgS.Rslv
+    	);
+    	return;
+    }
+
 	var commands = [];
 	var newDirPath = driveToPath[ newRootDrive ] + "/" + newRootDir
 	if(oldRootDrive == "root" && newRootDrive != "root")
@@ -148,6 +172,7 @@ function changePluginRoot()
 	commands.push("/sbin/uci commit");
 
 	execute(commands);
+	document.reload(); // ensure that pkg_info is refreshed
 }
 
 function removePluginSource()
@@ -189,7 +214,7 @@ function addPluginSource()
 	for(sourceIndex=0; sourceIndex < pluginSources.length; sourceIndex++)
 	{
 		dupeName = srcName == pluginSources[sourceIndex][0] ? true : dupeName
-		dupeUrl  = srcUrl  == pluginSources[sourceIndex][1] ? true : dupeUrl 
+		dupeUrl  = srcUrl  == pluginSources[sourceIndex][1] ? true : dupeUrl
 	}
 	if(dupeName)
 	{
@@ -247,7 +272,7 @@ function resetData()
 
 		rootDriveDisplay.push(pgS.RDrv + ": " + parseBytes(pkg_dests['root']['Bytes-Total']) + " " + pgS.Totl + ", " + parseBytes(pkg_dests['root']['Bytes-Free']) + " " + pgS.Free)
 		rootDriveValues.push("root");
-		
+
 		var driveIndex;
 		for(driveIndex=0;driveIndex < storageDrives.length; driveIndex++)
 		{
@@ -383,6 +408,8 @@ function resetData()
 			setSingleChild(tableContainer, packTable)
 		}
 	}
+
+	document.getElementById("wan-warn").style.display = currentWanIp=="" ? "inline" : "none";
 }
 
 function installPackage()
@@ -391,7 +418,7 @@ function installPackage()
 	var cmd = [ "sh /usr/lib/gargoyle/install_gargoyle_package.sh " + pkg  ];
 
 	// This should be done by implementing post-inst script for a given package, not as part of package installation procedure
-	//cmd.push("for i in $(opkg files " + package + " | grep \"/etc/init.d\"); do $i enable; $i start; done"); 
+	//cmd.push("for i in $(opkg files " + package + " | grep \"/etc/init.d\"); do $i enable; $i start; done");
 
 	execute(cmd);
 }
@@ -405,12 +432,6 @@ function uninstallPackage()
 
 function updatePackagesList()
 {
-	if(currentWanIp=="")
-	{
-		document.getElementById("wan-warn").style.display = "inline";
-	} else {	
-		document.getElementById("wan-warn").style.display = "none";
-	}
  	var cmd=["opkg update"];
 	execute(cmd);
 }

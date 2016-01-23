@@ -95,10 +95,7 @@ function saveChanges()
 			uci.set("wireless", wifiDevG, "channel", channels["G"]);
 			if( document.getElementById("wifi_channel_width_container").style.display == "block" || document.getElementById("bridge_channel_width_container").style.display == "block" )
 			{
-				if(wifiN)
-				{
-					uci.set("wireless", wifiDevG, "htmode",  getSelectedValue("wifi_channel_width") );
-				}
+				uci.set("wireless", wifiDevG, "htmode",  getSelectedValue("wifi_channel_width") );	//always set htmode, even if it is "NONE"
 			}
 			txPowerSet("wifi_max_txpower", "wifi_txpower", wifiDevG)
 		}
@@ -119,12 +116,10 @@ function saveChanges()
 			var dualBandSelected = false;
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
-				var hwMode = getSelectedValue("wifi_hwmode");
-				var hwGMode = hwMode == "dual" || hwMode == "11a" ? "11g" : hwMode;
-				uci.set("wireless",  wifiDevG, "hwmode", hwGMode);
-				wifiASelected = hwMode == "dual" || hwMode == "11a";
-				wifiGSelected = hwMode != "11a";
-				dualBandSelected = hwMode == "dual";
+				uci.set("wireless",  wifiDevG, "hwmode", "11g");
+				wifiASelected = (getSelectedValue("wifi_hwmode_5ghz") == "disabled") ? false : true;
+				wifiGSelected = (getSelectedValue("wifi_hwmode") == "disabled") ? false : true;
+				dualBandSelected = ((wifiGSelected == true) && (wifiASelected == true));
 			}
 
 			currentLanIp = document.getElementById("lan_ip").value;
@@ -158,6 +153,10 @@ function saveChanges()
 				else if(getSelectedValue("wan_protocol").match(/ncm/))
 				{
 					uci.remove('network', 'wan', 'ifname');
+				}
+				else if(getSelectedValue("wan_protocol").match(/cdc/))
+				{
+					uci.set('network', 'wan', 'ifname', cdcif);
 				}
 				else
 				{
@@ -633,10 +632,13 @@ function saveChanges()
 			if(document.getElementById("bridge_hwmode_container").style.display != "none")
 			{
 				var hwMode = getSelectedValue("bridge_hwmode");
-				bridgeDev = hwMode == "11a" ? wifiDevA : wifiDevG
+				var hwMode = getSelectedValue("bridge_hwmode"); //true or false, are we using 5ghz for bridge?
+				var hwMode = !(String(hwMode).match(/11g/))
+				bridgeDev = hwMode == true ? wifiDevA : wifiDevG
 				if(wifiDevG == bridgeDev)
 				{
-					uci.set("wireless",  wifiDevG, "hwmode", hwMode);
+					hwGMode = getSelectedValue("wifi_hwmode");
+					uci.set("wireless",  wifiDevG, "hwmode", hwGMode);
 				}
 			}
 
@@ -855,7 +857,7 @@ function saveChanges()
 			restartNetworkCommand = "\nsh /usr/lib/gargoyle/reboot.sh ;\n";
 		}
 		var regenerateCacheCommand = "\nrm -rf /tmp/cached_basic_vars ;\n/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null\n";
-
+		
 		commands = preCommands + commands + adjustIpCommands + bridgeEnabledCommands + restartNetworkCommand + regenerateCacheCommand;
 
 		//document.getElementById("output").value = commands;
@@ -1068,6 +1070,12 @@ function setGlobalVisibility()
 		proto2.push(basicS.Mo3gNCM);
 	}
 
+	if(cdcif != "")
+	{
+		proto1.push('dhcp_cdc');
+		proto2.push(basicS.Mo3gHiLink);
+	}
+
 	proto1.push('none');
 	proto2.push(UI.Disabled);
 	setAllowableSelections('wan_protocol', proto1, proto2);
@@ -1134,25 +1142,38 @@ function setWifiVisibility()
 		setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP']);
 	}
 
-	var modes  = ['11g']
-	var mnames = wifiN ? ['N+G+B'] : [ "G+B" ];
-	if(wifiN && dualBandWireless )
+	if(GwifiN == false)
 	{
-		modes.splice( 1,0,"11a")
-		mnames.splice(1,0,"N+A")
-		if(wifiMode.match(/ap/) || wifiMode.match(/disabled/))
-		{
-			modes.unshift("dual")
-			mnames.unshift(basicS.DBand)
-		}
+		setAllowableSelections('wifi_hwmode', ['disabled', '11g'], [UI.Disabled, 'B+G']);
 	}
-
-	setAllowableSelections( "wifi_hwmode", modes, mnames );
+	else
+	{
+		setAllowableSelections('wifi_hwmode', ['disabled', '11g', '11gn'], [UI.Disabled, 'B+G', 'B+G+N']);
+	}
+	
+	if((AwifiN == false) && ((uciOriginal.get("wireless", wifiDevA, "hwmode"))==""))
+	{
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled'], [UI.Disabled]);
+	}
+	else if(AwifiN == false)
+	{
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a'], [UI.Disabled, 'A']);
+	}
+	else if(AwifiAC == true)
+	{
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an', '11anac'], [UI.Disabled, 'A', 'A+N', 'A+N+AC']);
+	}
+	else
+	{
+		setAllowableSelections('wifi_hwmode_5ghz', ['disabled', '11a', '11an'], [UI.Disabled, 'A', 'A+N']);
+	}
+	
 
 	var wifiIds=[	'internal_divider1',
 			'wifi_hwmode_container',
 			'wifi_channel_width_container',
 			'wifi_txpower_container',
+			'wifi_hwmode_5ghz_container',
 			'wifi_channel_width_5ghz_container',
 			'wifi_txpower_5ghz_container',
 			'mac_enabled_container',
@@ -1203,11 +1224,11 @@ function setWifiVisibility()
 			'wifi_wep2_container'
 			];
 
-	var wn = wifiN ? 1 : 0; //N active
-	var da = wn && (getSelectedValue("wifi_hwmode") == "11a" || getSelectedValue("wifi_hwmode") == "dual") ? 1 : 0; //A active
-	var sa = wn && getSelectedValue("wifi_hwmode")  == "11a" ? 1 : 0; //A only
-	var  g = sa == 1 ? 0 : 1; //any G active
-	var ng = wn && sa==0  //N+G active
+	var ae = AwifiN ? 1 : 0; //A band exists
+	var g  = (getSelectedValue("wifi_hwmode") == "disabled") ? 0: 1; //2.4 disabled?
+	var a  = (getSelectedValue("wifi_hwmode_5ghz") == "disabled") ? 0: 1; //5 disabled?
+	var gw = g && (getSelectedValue("wifi_hwmode") != "11g"); //do we need 2.4 ch width? g& a check for N
+	var aw = a && (getSelectedValue("wifi_hwmode_5ghz") != "11a"); //do we need 5 ch width? a& a check for N or AC
 
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
@@ -1218,24 +1239,23 @@ function setWifiVisibility()
 	var gn = getSelectedValue("wifi_guest_mode") != "disabled" ? 1 : 0;
 	var gng = getSelectedValue("wifi_guest_mode") == "24ghz" || getSelectedValue("wifi_guest_mode") == 'dual'  ? 1 : 0;
 	var gna = getSelectedValue("wifi_guest_mode") == "5ghz" || getSelectedValue("wifi_guest_mode") == 'dual' ? 1 : 0;
-	var dg = da && gn;
 	var ge1 = document.getElementById('wifi_guest_encryption1').value;
 	var gp1 = gn && (ge1 != 'none' && ge1 != 'wep') ? 1 : 0;
 	var gw1 = gn && (ge1 == 'wep') ? 1 : 0;
 	var gr1 = gn && (ge1 == 'wpa' || ge1 == 'wpa2') ? 1 : 0;
 	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
-	var b = wifiN ? 0 : 1;
+	var b = (GwifiN ? 0 : 1) && (AwifiN ? 0 : 1); //we shouldnt have to look for AC here
 
 	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,wn,ng,g,da,da,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,     gns,gng,gna,gn,gn,gn,gp1,gw1,gns,    b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,1,g,0,sa,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,wn,ng,g,da,da,1,mf,   1,da,1,0,da,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,1,g,0,sa,da,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,wn,ng,g,da,da,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,1,0,g,0,sa,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,        0,0,0,0,0,0,0,0,0,0,0,0,         0,0,0,0,0,0,0,0,0,            0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,1,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,1,g,0,a,a,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,0,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0 ];
 
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1310,7 +1330,49 @@ function setBridgeVisibility()
 
 		setSsidVisibility("bridge_list_ssid");
 	}
+	
+	var allowedbridgemodes = [];
+	var allowedbridgemodes2 = [];
+	if(dualBandWireless)
+	{
+		if(GwifiN)
+		{
+			allowedbridgemodes.push('B+G+N')
+			allowedbridgemodes2.push('11gn');
+		}
+		allowedbridgemodes.push('B+G');
+		allowedbridgemodes2.push('11g');
+		if(AwifiAC)
+		{
+			allowedbridgemodes.push('A+N+AC')
+			allowedbridgemodes2.push('11anac');
+		}
+		if(AwifiN)
+		{
+			allowedbridgemodes.push('A+N')
+			allowedbridgemodes2.push('11an');
+		}
+
+		allowedbridgemodes.push('A');
+		allowedbridgemodes2.push('11a');
+	}
+	else
+	{
+		if(GwifiN)
+		{
+			allowedbridgemodes.push('B+G+N')
+			allowedbridgemodes2.push('11gn');
+		}
+		allowedbridgemodes.push('B+G');
+		allowedbridgemodes2.push('11g');
+
+	}
+
+
+	setAllowableSelections("bridge_hwmode",allowedbridgemodes2,allowedbridgemodes)
+
 	setHwMode(document.getElementById("bridge_hwmode"))
+	
 	setGlobalVisibility();
 }
 
@@ -1355,6 +1417,8 @@ function localdate(ldate)
 function resetData()
 {
 	var removeChannels = [];
+	var hwAmode = "disabled";
+	var hwGmode = "disabled";
 	if(wirelessDriver == "broadcom")
 	{
 		//no auto for brcm
@@ -1517,6 +1581,7 @@ function resetData()
 	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
+	if(wp == "dhcp_wired" && wanUciIf != defaultWanIf) { wp = "dhcp_cdc"; }
 	setSelectedValue("wan_protocol", wp);
 
 	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
@@ -1677,11 +1742,80 @@ function resetData()
 		apcfgBand = "A"
 	}
 
-	//wireless N variables
-	if( wifiN )
+	//wireless N + AC variables
+	if( GwifiN || AwifiN || AwifiAC )
 	{
+		var hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
+		hwGmode = hwGmode == "" ? "11g" : hwGmode;
+		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11gn', '11g' ], [UI.Disabled, 'B+G+N', 'B+G' ] );
+		setSelectedValue("wifi_hwmode", hwGmode);
+		if(dualBandWireless)
+		{
+			if(AwifiAC)
+			{
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled',  '11anac', '11an', '11a' ], [UI.Disabled,  'A+N+AC', 'A+N', 'A' ] );
+			}
+			else if(AwifiN)
+			{
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11an', '11a' ], [UI.Disabled, 'A+N', 'A' ] );
+			}
+			else
+			{
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a' ], [UI.Disabled, 'A' ] );
+			}
+			hwAmode = uciOriginal.get("wireless", wifiDevA, "hwmode");
+			setSelectedValue("wifi_hwmode_5ghz", hwAmode);
+		}
+		
+		dualMode = ((hwGmode != "disabled") && (hwAmode != "disabled"))
+		if(hwGmode == "disabled")
+		{
+			hwdualMode=hwAmode;
+			if(dualMode == false)
+			{
+				setAllowableSelections( "wifi_hwmode", [ 'disabled' ], [ UI.Disabled ] );
+			}
+		}
+		else
+		{
+			hwdualMode=hwGmode;
+			if(dualMode == false)
+			{
+				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled' ], [ UI.Disabled ] );
+			}
+		}
+		setSelectedValue("bridge_hwmode", (dualMode == true ? hwGmode : hwdualMode));
+		if(dualBandWireless && otherdev != "" )
+		{
+			setSelectedValue("wifi_client_band", (otherdev == wifiDevA ? "5" : "2.4") )
+		}
+		
 		var htGMode = uciOriginal.get("wireless", wifiDevG, "htmode");
 		var htAMode = uciOriginal.get("wireless", wifiDevA, "htmode");
+	
+		if((htGMode != "NONE") && (htGMode != ""))
+		{
+			setSelectedValue("wifi_hwmode", "11gn");
+			setSelectedValue("bridge_hwmode", "11gn");
+		}
+		else if((htGMode == ""))
+		{
+			setSelectedValue("wifi_hwmode", "11g");
+			setSelectedValue("bridge_hwmode", "11g");
+		}
+		
+		if((htAMode != "NONE") && (htAMode != ""))
+		{
+			setSelectedValue("wifi_hwmode_5ghz", "11an");
+			if(/VHT/i.test(htAMode))
+			{
+				setSelectedValue("wifi_hwmode_5ghz", "11anac");
+			}
+		}
+		else if((htAMode == ""))
+		{
+			setSelectedValue("wifi_hwmode_5ghz", "11a");
+		}
 		
 		setSelectedValue("wifi_channel_width", htGMode);
 		setSelectedValue("wifi_channel_width_5ghz", htAMode);
@@ -1696,29 +1830,11 @@ function resetData()
 	else
 	{
 		document.getElementById("bridge_channel_width_container").style.display="none";
-	}
-
-	if(wifiN)
-	{
-		var hwmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
-		hwmode = hwmode == "" ? "11g" : hwmode;
-		if(dualBandWireless)
-		{
-			setAllowableSelections( "wifi_hwmode", [ 'dual', '11g', '11n' ], [basicS.DBand, 'N+G+B', 'N+A' ] );
-			setAllowableSelections( "bridge_hwmode", [ '11g', '11a' ], ['N+G+B', 'N+A' ] );
-			hwmode = (ap2cfg != "" && apcfg != "") || (apcfg == "" && ap2cfg == "") || (apcfgBand == "A" && otherdev == wifiDevG) || (apcfgBand == "G" && otherdev == wifiDevA) ? "dual" : hwmode ;
-			hwmode = apgcfg == "" && (apacfg != "" || otherdev == wifiDevA) ? "11a" : hwmode ;
-		}
-		setSelectedValue("wifi_hwmode", hwmode);
-		setSelectedValue("bridge_hwmode", (hwmode == "dual" ? "11g" : hwmode));
-		if(hwmode == "dual" && otherdev != "" )
-		{
-			setSelectedValue("wifi_client_band", (otherdev == wifiDevA ? "5" : "2.4") )
-		}
-	}
-	else
-	{
 		document.getElementById("bridge_hwmode_container").style.display = "none";
+		hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
+		hwAmode = uciOriginal.get("wireless", wifiDevA, "hwmode");
+		setSelectedValue("wifi_hwmode", hwGmode);
+		setSelectedValue("wifi_hwmode_5ghz", hwAmode);
 	}
 
 
@@ -1749,13 +1865,12 @@ function resetData()
 
 
 
-
 	setSelectedValue('wifi_hidden', uciOriginal.get("wireless", apcfg, "hidden")==1 ? "disabled" : "enabled")
 	setSelectedValue('wifi_isolate', uciOriginal.get("wireless", apcfg, "isolate")==1 ? "enabled" : "disabled")
 
 	var gmvalues = [ 'disabled' ] 
 	var gmnames  = [ UI.Disabled ] 
-	if(hwmode == 'dual')
+	if((hwGmode != "disabled") && (hwAmode != "disabled"))
 	{
 		gmvalues.push('dual');
 		gmnames.push(UI.Enabled);
@@ -1767,7 +1882,7 @@ function resetData()
 		gmnames.push(basicS.F5GHzOnly);
 
 	}
-	else if(hwmode == "11a")
+	else if(hwGmode == "disabled")
 	{
 		gmvalues.push('5ghz');
 		gmnames.push(UI.Enabled);
@@ -1782,11 +1897,11 @@ function resetData()
 
 	if(apgncfg != "")
 	{
-		if(hwmode == 'dual' && apgngcfg == "")
+		if(dualMode == true && apgngcfg == "")
 		{
 			setSelectedValue('wifi_guest_mode', '5ghz')
 		}
-		else if(hwmode == 'dual' && apgnacfg == "")
+		else if(dualMode == true && apgnacfg == "")
 		{
 			setSelectedValue('wifi_guest_mode', '24ghz')
 		}
@@ -1832,12 +1947,10 @@ function resetData()
 		/*
 		Atheros & MAC80211 have definitions in interface sections, broadcom in wifi-device section.
 		To keep consistency we apply first atheros mac filter defined (if any) to all sections
-
 		Granted, this means you can not use the enhanced atheros functionality of specifying mac
 		filters on a per-interface basis.  However, I believe consistency is more important than
 		flexibility in this case.  The interface will seem to the user to be identical on all platforms
 		and that is my highest priority.
-
 		Here, if mac filter is active on any interface we apply to all of them
 		I am not sure this is the best policy, but the alternative is ditching the filter
 		which someone may want and went to some trouble to configure.  I do it this way
@@ -1940,6 +2053,21 @@ function resetData()
 	}
 	wifiWdsTableContainer.appendChild(wifiWdsMacTable);
 
+	
+	// should they be enabled?
+	var originalGmode = uciOriginal.get("wireless","ap_g");
+	var originalAmode = uciOriginal.get("wireless","ap_a");
+	if(originalGmode == "")
+	{
+		//hwGmode=originalGmode;
+		setSelectedValue("wifi_hwmode", "disabled");
+	}
+	if(originalAmode == "")
+	{
+		//hwAmode=originalAmode;
+		setSelectedValue("wifi_hwmode_5ghz", "disabled");
+	}
+		
 	resetWirelessMode();
 	proofreadAll();
 	setBridgeVisibility();
@@ -2103,7 +2231,7 @@ function scanWifi(ssidField)
 					var qual = scannedSsids[3][ssidIndex];
 
 					enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
-					if(wifiN && dualBandWireless)
+					if((GwifiN || AwifiN || AwifiAC) && dualBandWireless)
 					{
 						var ghz = scannedSsids[4][ssidIndex] == "A" ? "5GHz" : "2.4GHz";
 						ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal, " + ghz +  ")");
@@ -2186,14 +2314,37 @@ function setSsidVisibility(selectId)
 			var chan = scannedSsids[2][scannedIndex];
 			var band = scannedSsids[4][scannedIndex];
 
-			var modes = ['11g']
-			var mnames = wifiN ? ['N+G+B'] : [ 'G+B' ]
+			if(GwifiN)
+			{
+				var modes = ['11gn','11g'];
+				var mnames = ['B+G+N','B+G'];
+			}
+			else
+			{
+				var modes = ['11g'];
+				var mnames = ['B+G'];
+			}
 			if(band == "A")
 			{
 				modes  = [ '11a' ];
 				mnames = [ 'N+A'  ];
+				if(AwifiAC)
+				{
+					var modes = ['11anac','11an','11a'];
+					var mnames = ['A+N+AC','A+N','A'];
+				}
+				else if(AwifiN)
+				{
+					var modes = ['11an','11a'];
+					var mnames = ['A+N','A'];
+				}
+				else
+				{
+					var modes = ['11a'];
+					var mnames = ['A'];
+				}
 			}
-			if(wifiN && dualBandWireless && isAp )
+			if((GwifiN || AwifiN || AwifiAC) && dualBandWireless && isAp )
 			{
 				modes.unshift("dual")
 				mnames.unshift(basicS.DBand)
@@ -2201,10 +2352,6 @@ function setSsidVisibility(selectId)
 			var curBand = getSelectedValue("wifi_hwmode")
 			setAllowableSelections( "wifi_hwmode", modes, mnames );
 			setAllowableSelections( "bridge_hwmode", modes, mnames );
-			if(band == "A" && curBand != "dual" && curBand != "11a")
-			{
-				setSelectedValue("wifi_hwmode", "dual");
-			}
 
 			setSelectedValue("wifi_encryption2", enc);
 			setSelectedValue("bridge_encryption", enc);
@@ -2351,7 +2498,8 @@ function setChannelWidth(selectCtl, band)
 {
 	var chw =  getSelectedValue(selectCtl.id)
 	var hplus = chw =='HT40+';
-	var h40 = (chw == 'HT40+' || chw == 'HT40-')
+	var h40 = (chw == 'HT40+' || chw == 'HT40-');
+	var vht = (chw == 'VHT20' || chw == 'VHT40' || chw == 'VHT80');
 	if(band == "G")
 	{
 		setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
@@ -2382,13 +2530,37 @@ function setChannelWidth(selectCtl, band)
 		if(h40)
 		{
 			aChannels  = []
-			var validAPlus  = [36, 44, 52, 60, 149, 157]
-			var validAMinus = [40, 48, 56, 64, 153, 161]
+			var validAPlus  = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
+			var validAMinus = [40, 48, 56, 64, 104, 112, 120, 128, 136, 144, 153, 161]
 			var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
 			for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
 			{
 				var ch = origAChan[chanIndex]
 				if(validTest[ch] == 1) { aChannels.push(ch); }
+			}
+		}
+		else if(vht && (chw != 'VHT20'))
+		{
+			aChannels = []
+			var valid40 = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
+			var valid80 = [36, 52, 100, 116, 132, 149]
+			if(chw == 'VHT40')
+			{
+				var validTest  = arrToHash(valid40)
+				for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
+				{
+					var ch = origAChan[chanIndex]
+					if(validTest[ch] == 1) { aChannels.push(ch); }
+				}
+			}
+			else if(chw == 'VHT80')
+			{
+				var validTest  = arrToHash(valid80)
+				for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
+				{
+					var ch = origAChan[chanIndex]
+					if(validTest[ch] == 1) { aChannels.push(ch); }
+				}
 			}
 		}
 		setAllowableSelections("wifi_channel1_5ghz",  aChannels, aChannels, document);
@@ -2406,16 +2578,14 @@ function getSelectedWifiChannels()
 	if(document.getElementById("global_gateway").checked)
 	{
 		var wimode = getSelectedValue("wifi_mode")
-		var hwmode = "g";
 		var wifiGSelected = true;
 		var wifiASelected = false;
 		var dualBandSelected = false;
 		if(document.getElementById("wifi_hwmode_container").style.display == "block")
 		{
-			hwMode = getSelectedValue("wifi_hwmode");
-			wifiASelected = hwMode == "dual" || hwMode == "11a";
-			wifiGSelected = hwMode != "11a";
-			dualBandSelected = hwMode == "dual";
+			wifiASelected = (getSelectedValue("wifi_hwmode_5ghz") == "disabled") ? "false" : "true";
+			wifiGSelected = (getSelectedValue("wifi_hwmode") == "disabled") ? "false" : "true";
+			dualBandSelected = ((wifiGSelected == true) && (wifiASelected == true));
 		}
 		var fixedChannels = scannedSsids[0].length > 0 && wimode.match(/sta/);
 		var ssidIndex = getSelectedValue("wifi_list_ssid2") 
@@ -2449,8 +2619,9 @@ function getSelectedWifiChannels()
 	{
 		if( document.getElementById("bridge_hwmode_container").style.display == "block")
 		{
-			var hwmode = getSelectedValue("bridge_hwmode")
-			if(hwmode == '11a')
+			var bridgeModeA = getSelectedValue("bridge_hwmode"); //true or false, are we using 5ghz for bridge?
+			var bridgeModeA = !(String(bridgeModeA).match(/11g/))
+			if(bridgeModeA)
 			{
 				channels["A"] = document.getElementById("bridge_fixed_channel_container").style.display != "none" ?  document.getElementById("bridge_fixed_channel").firstChild.data : getSelectedValue("bridge_channel_5ghz");
 			}
@@ -2476,45 +2647,140 @@ function setHwMode(selectCtl)
 		//setting of hwmode not allowed, nothing here applies
 		return;
 	}
-	var hwmode = getSelectedValue(selectCtl.id)
-	hwmode = hwmode == "dual" && document.getElementById("global_bridge").checked ? "11g" : hwmode
-	if(selectCtl.id == "bridge_hwmode" && getSelectedValue("wifi_hwmode") != "dual")
-	{
-		setSelectedValue("wifi_hwmode", hwmode);
-	}
-	setSelectedValue("bridge_hwmode", hwmode == "dual" ? "11g" : hwmode)
-
-	document.getElementById("wifi_channel_width_container").style.marginTop      = hwmode == "dual" ? "20px" :  "5px";
-	document.getElementById("wifi_channel_width_5ghz_container").style.marginTop = hwmode == "11a" ?  "5px" : "20px";
-	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = hwmode == "11a" ?  "5px" : "20px";
-
-
-	setChildText("wifi_ssid1a_label", (hwmode == "11a" ? basicS.AcPt+" SSID:" : "AP 5GHz SSID:"));
-	setChildText("wifi_channel1_5ghz_label", (hwmode == "11a" ? basicS.WChn+":" : basicS.WChn+" (5GHz):"));
-	setChildText("wifi_txpower_5ghz_label", (hwmode == "11a" ? basicS.TrPwr+":" : "5GHz "+basicS.TrPwr+":"));
-	setChildText("wifi_channel_width_5ghz_label", (hwmode == "11a" ? basicS.ChWdth+":" : "5GHz "+basicS.ChWdth+":"));
 	
-	setChildText("wifi_ssid1_label", (hwmode == "dual" ?  "AP 2.4GHz SSID:" : basicS.AcPt+" SSID:"));
-	setChildText("wifi_channel1_label", (hwmode == "dual" ? basicS.WChn+" (2.4GHz):" : basicS.WChn+":"));
-	setChildText("wifi_txpower_label", (hwmode == "dual" ? "2.4GHz "+basicS.TrPwr+":" : basicS.TrPwr+":"));
-	setChildText("wifi_channel_width_label", (hwmode == "dual" ? "2.4GHz "+basicS.ChWdth+":" : basicS.ChWdth+":"));
+		
+	hwGmode=getSelectedValue("wifi_hwmode");
+	hwAmode=getSelectedValue("wifi_hwmode_5ghz");
+	
+
+
+
+	dualMode = ((hwGmode != "disabled") && (hwAmode != "disabled"))
+	if(hwGmode == "disabled")
+	{
+		hwdualMode=hwAmode;
+	}
+	else
+	{
+		hwdualMode=hwGmode;
+	}
+
+	hwmode = dualMode == true && document.getElementById("global_bridge").checked ? hwGmode : hwdualMode;
+	if(selectCtl.id == "bridge_hwmode" && dualMode == false)
+	{
+		setSelectedValue("wifi_hwmode", hwGmode);
+	}
+	bridgehwmode = getSelectedValue("bridge_hwmode");
+
+
+
+
+
+	document.getElementById("wifi_txpower_container").style.marginBottom    = "20px";
+	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = "20px";
+	if(getSelectedValue("wifi_hwmode")=="disabled")
+	{
+		document.getElementById("wifi_hwmode_container").style.marginBottom    = "20px";
+	}
+	else
+	{
+		document.getElementById("wifi_hwmode_container").style.marginBottom    = "5px";
+	}
+	
+	if(getSelectedValue("wifi_hwmode_5ghz")=="disabled")
+	{
+		document.getElementById("wifi_hwmode_5ghz_container").style.marginBottom    = "20px";
+	}
+	else
+	{
+		document.getElementById("wifi_hwmode_5ghz_container").style.marginBottom    = "5px";
+	}
+	
+	//need to check if the allowable selections for channel width has changed
+	if(hwGmode == "disabled")
+	{
+		setAllowableSelections('wifi_channel_width', ['NONE']);
+	}
+	else if(hwGmode == "11g")
+	{
+		setAllowableSelections('wifi_channel_width', ['NONE'], ['20MHz']);
+	}
+	else
+	{
+		setAllowableSelections('wifi_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
+	}
+	
+	if(hwAmode == "disabled")
+	{
+		setAllowableSelections('wifi_channel_width_5ghz', ['NONE']);
+	}
+	else if(hwAmode == "11a")
+	{
+		setAllowableSelections('wifi_channel_width_5ghz', ['NONE'], ['20MHz']);
+	}
+	else if(hwAmode == "11an")
+	{
+		setAllowableSelections('wifi_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
+	}
+	else
+	{
+		setAllowableSelections('wifi_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+	}
+	
+	//now check for bridge also.
+	if(bridgehwmode == "11g")
+	{
+		setAllowableSelections('bridge_channel_width', ['NONE'], ['20MHz']);
+	}
+	else if(bridgehwmode == "11gn")
+	{
+		setAllowableSelections('bridge_channel_width', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
+	}
+	else if(bridgehwmode == "11a")
+	{
+		setAllowableSelections('bridge_channel_width_5ghz', ['NONE'], ['20MHz']);
+	}
+	else if(bridgehwmode == "11an")
+	{
+		setAllowableSelections('bridge_channel_width_5ghz', ['HT20', 'HT40+', 'HT40-'], ['20MHz', '40MHz ' + basicS.ChAbv, '40MHz ' + basicS.ChBlw]);
+	}
+	else
+	{
+		setAllowableSelections('bridge_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+	}
+
+
+	setChildText("wifi_ssid1a_label", (dualMode == false ? basicS.AcPt+" SSID:" : "AP 5GHz SSID:"));
+	setChildText("wifi_channel1_5ghz_label", (dualMode == false ? basicS.WChn+":" : basicS.WChn+" (5GHz):"));
+	
+	setChildText("wifi_ssid1_label", (dualMode == true ?  "AP 2.4GHz SSID:" : basicS.AcPt+" SSID:"));
+	setChildText("wifi_channel1_label", (dualMode == true ? basicS.WChn+" (2.4GHz):" : basicS.WChn+":"));
 
 
 	if(wirelessDriver == "mac80211")
 	{
 		setChannel(document.getElementById("wifi_channel1"), "G")
-		if(hwmode == "dual" || hwmode == "11a")
+		if(dualMode == true || hwAmode != "disabled")
 		{
 			setChannel(document.getElementById("wifi_channel1_5ghz"), "A")
 		}
 	}
-	var displayWidth = wifiN;
+	var displayWidth = GwifiN;
 	if(!displayWidth)
 	{
-		setSelectedValue("wifi_channel_width", "HT20");
+		setSelectedValue("wifi_channel_width", "NONE");
 		setChannelWidth(document.getElementById("wifi_channel_width"), "G")
 	}
+	
+	displayWidth = (AwifiN || AwifiAC);
+	if(!displayWidth)
+	{
+		setSelectedValue("wifi_channel_width_5ghz", "NONE");
+		setChannelWidth(document.getElementById("wifi_channel_width_5ghz"), "A")
+	}
 
+	displayWidth = (GwifiN || AwifiN || AwifiAC);
+	
 	var containers = [
 				"wifi_channel_width_container",
 				"wifi_txpower_container",
@@ -2564,7 +2830,7 @@ function setHwMode(selectCtl)
 		var mvalues = ['disabled' ]
 		var mnames  = [ UI.Disabled ]
 		
-		if(hwmode == 'dual')
+		if(dualMode == true)
 		{
 			mvalues.push('dual');
 			mnames.push(UI.Enabled);
@@ -2578,7 +2844,7 @@ function setHwMode(selectCtl)
 			gval = gname == UI.Enabled ? 'dual' : gval;
 
 		}
-		else if(hwmode == "11a")
+		else if(hwAmode != "disabled")
 		{
 			mvalues.push('5ghz');
 			mnames.push(UI.Enabled);
@@ -2597,9 +2863,9 @@ function setHwMode(selectCtl)
 
 	}
 	var gmode = getSelectedValue('wifi_guest_mode');
-	setChildText("wifi_guest_ssid1a_label", (hwmode == "dual" && gmode == "dual" ? basicS.GNet5ID : basicS.GNetID));
+	setChildText("wifi_guest_ssid1a_label", (dualMode == true && gmode == "dual" ? basicS.GNet5ID : basicS.GNetID));
 	document.getElementById("wifi_ssid1a").value = document.getElementById("wifi_ssid1a").value == "" ?  document.getElementById("wifi_ssid1").value + " 5GHz" :  document.getElementById("wifi_ssid1a").value;
-	setChildText("wifi_guest_ssid1_label", (hwmode == "dual" && gmode == "dual" ?  basicS.GNet24ID : basicS.GNetID));
+	setChildText("wifi_guest_ssid1_label", (dualMode == true && gmode == "dual" ?  basicS.GNet24ID : basicS.GNetID));
 	document.getElementById("wifi_guest_ssid1a").value = document.getElementById("wifi_guest_ssid1a").style.display == "block" && document.getElementById("wifi_guest_ssid1a").value == "" && document.getElementById("wifi_guest_ssid1").value != "" ?  document.getElementById("wifi_guest_ssid1").value + " 5GHz" :  document.getElementById("wifi_guest_ssid1a").value;
 
 
@@ -2614,11 +2880,16 @@ function setHwMode(selectCtl)
 		var cli_only = cid.match(/2_/) || cid.match(/2a_/) 
 		var cli_ap_mismatch = (ap_only && !wimode.match(/ap/)) || (cli_only && !wimode.match(/sta/))
 		var hide_in_favor_of_fixed_channel = fixedChannels && (cid.match(/channel/) && (!cid.match(/channel_width/))) && ((!wimode.match(/ap/)) || fixedChannelBand == cBand);
-		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_ssid1a_container" || cid == "wifi_txpower_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container" || cid == "bridge_txpower_container" || cid == 'bridge_channel_container' || cid == "wifi_guest_ssid1_container" || cid == "wifi_guest_ssid1a_container"
+		var displayWithoutWidth = cid ==  "wifi_ssid1_container" || cid == "wifi_ssid1a_container" || cid == "wifi_txpower_container" || cid == "wifi_txpower_5ghz_container" || cid == "wifi_channel1_container" || cid == "wifi_channel2_container" || cid == "bridge_txpower_container" || cid == 'bridge_channel_container' || cid == "wifi_guest_ssid1_container" || cid == "wifi_guest_ssid1a_container"
+		var isitbridge = 1 && document.getElementById("global_bridge").checked; //are we looking at bridge?
+		var bridgeModeA = getSelectedValue("bridge_hwmode"); //true or false, are we using 5ghz for bridge?
+		var bridgeModeA = !(String(bridgeModeA).match(/11g/))
 		var vis = 	(displayWidth || displayWithoutWidth) && 
 				(!cli_ap_mismatch) && 
 				(!hide_in_favor_of_fixed_channel) && 
-				((isA && (hwmode == "dual" || hwmode == "11a")) || (notA && (hwmode != "11a"))) &&
+				((isA && (dualMode == true || hwAmode != "disabled")) || (notA && (hwGmode != "disabled"))) &&
+				(!(isA && (isitbridge == true) && (bridgeModeA == false))) &&
+				(!(notA && (isitbridge == true) && (bridgeModeA == true))) &&
 				( (!cid.match(/^wifi_guest_/)) || gmode == "dual" || (gmode == "5ghz" && isA) || (gmode == "24ghz" && (!isA)) );
 
 		container.style.display = vis ? "block" : "none";
@@ -2630,6 +2901,30 @@ function setHwMode(selectCtl)
 		document.getElementById("wifi_client_band_container").style.display   = (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_container").style.display      = cband == "2.4" && (!fixedChannels) ? "block" : "none"
 		document.getElementById("wifi_channel2_5ghz_container").style.display = cband == "5"   && (!fixedChannels) ? "block" : "none"
+	}
+	
+	//at this point we should double check the allowed channels
+	//we should also store any existing channel selection and attempt to reapply it (if still valid)
+	channelG=getSelectedValue('wifi_channel1');
+	channelA=getSelectedValue('wifi_channel1_5ghz');
+	setChannelWidth(Object(wifi_channel_width),"G");
+	setChannelWidth(Object(wifi_channel_width_5ghz),"A");
+	setSelectedValue('wifi_channel1',channelG);
+	setSelectedValue('wifi_channel1_5ghz',channelA);
+	
+	//im thinking if they both get disabled, we should just set wireless mode to disabled also, and reset the others so we dont end up in a loop
+	if(hwGmode == "disabled" && hwAmode == "disabled")
+	{
+		setSelectedValue('wifi_mode',"disabled");
+		setSelectedValue('wifi_hwmode',"11g");
+		setSelectedValue('wifi_hwmode_5ghz',"11a");
+
+		//atempt to set to higher bandwidth values if they are available as these should be the defautls
+		setSelectedValue('wifi_hwmode',"11gn");
+		setSelectedValue('wifi_hwmode_5ghz',"11an");
+		setSelectedValue('wifi_hwmode_5ghz',"11anac");
+
+		setWifiVisibility();
 	}
 }
 
@@ -2871,4 +3166,3 @@ function getRandomMac()
 	return macPairs.join(":");
 
 }
-

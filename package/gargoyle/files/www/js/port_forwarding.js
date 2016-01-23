@@ -557,7 +557,7 @@ function resetData()
 
 
 	//upnp
-	document.getElementById("upnp_fieldset").style.display = haveUpnpd;
+	document.getElementById("upnp_fieldset").style.display = haveUpnpd == true ? "block" : "none";
 	document.getElementById("upnp_enabled").checked = upnpdEnabled;
 	upElement = document.getElementById("upnp_up");
 	downElement = document.getElementById("upnp_down");
