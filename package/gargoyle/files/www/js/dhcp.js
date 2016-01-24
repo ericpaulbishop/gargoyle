@@ -131,7 +131,7 @@ function saveChanges()
 				{
 					uci.set("dhcp", group, "mac", macs[mIndex]);
 				}
--				uci.set("dhcp", host, "group", group);
+				uci.set("dhcp", host, "group", group);
 			}
 
 			// create ipset
