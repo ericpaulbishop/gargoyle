@@ -228,14 +228,6 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		if(mbs.length > 3)
 		{
 			mbs[3] = mbs[3] + " Mbps";
-			if(mbs[4] == "y")
-			{
-				mbs[4] = "5GHz";
-			}
-			else
-			{
-				mbs[4] = "2.4GHz";
-			}
 			wifiTableData.push( [ hostname, ip, mbs[0], mbs[4], mbs[1], mbs[3], mbs[2] ] );
 		}
 		else
