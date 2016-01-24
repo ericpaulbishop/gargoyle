@@ -86,7 +86,7 @@ function resetVariables()
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
-		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Bitrate, hostsStr.Signal ];
+		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Band, "TX "+hostsStr.Bitrate, "RX "+hostsStr.Bitrate, hostsStr.Signal ];
 		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
@@ -187,7 +187,7 @@ function sort2dStrArr(arr, testIndex)
 function parseWifi(arpHash, wirelessDriver, lines)
 {
 	if(wirelessDriver == "" || lines.length == 0) { return []; }
-
+	
 	//Host IP, Host MAC
 	var wifiTableData = [];
 	var lineIndex = 0;
@@ -204,11 +204,11 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		var macBitSig =	[
 				[whost[1], "0", "0"], 
 		    		[whost[0], whost[3], whost[5]], 
-				[whost[0], whost[2], whost[1]] 
+				[whost[0], whost[2], whost[1], whost[3], whost[4]] 
 				];
 		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] );
 		mbs[0] = (mbs[0]).toUpperCase();
-		mbs[1] = mbs[1] + " Mbit/s";
+		mbs[1] = mbs[1] + " Mbps";
 
 		var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; } 
 
@@ -225,7 +225,15 @@ function parseWifi(arpHash, wirelessDriver, lines)
 
 		var ip = arpHash[ mbs[0] ] == null ? UI.unk : arpHash[ mbs[0] ] ;
 		var hostname = getHostname(ip);
-		wifiTableData.push( [ hostname, ip, mbs[0], mbs[1], mbs[2] ] );
+		if(mbs.length > 3)
+		{
+			mbs[3] = mbs[3] + " Mbps";
+			wifiTableData.push( [ hostname, ip, mbs[0], mbs[4], mbs[1], mbs[3], mbs[2] ] );
+		}
+		else
+		{
+			wifiTableData.push( [ hostname, ip, mbs[0], "-", mbs[1], "-", mbs[2] ] );
+		}
 	}
 	sort2dStrArr(wifiTableData, 1);
 	return wifiTableData;
@@ -293,5 +301,4 @@ function parseConntrack(arpHash, currentWanIp, lines)
 	sort2dStrArr(activeTableData, 1);
 	return activeTableData;
 }
-
 

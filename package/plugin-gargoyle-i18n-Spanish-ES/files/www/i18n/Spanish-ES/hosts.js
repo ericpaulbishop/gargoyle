@@ -16,3 +16,4 @@ hostsStr.Signal="Señal";
 hostsStr.ActiveConx="Conex. TCP Activas";
 hostsStr.RecentConx="Conex. TCP Recientes";
 hostsStr.UDPConx="Conex. UDP";
+hostsStr.Band="Banda";
