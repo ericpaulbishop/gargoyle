@@ -1359,19 +1359,32 @@ td.wifi_table_column_2
 
 td.wifi_table_column_3
 {
-	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
 
 td.wifi_table_column_4
 {
+	border-right:1px solid #000;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
+}
+
+td.wifi_table_column_5
+{
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 	text-align:right;
 }
 
-td.wifi_table_column_5
+td.wifi_table_column_6
+{
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
+	text-align:right;
+}
+
+td.wifi_table_column_7
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
