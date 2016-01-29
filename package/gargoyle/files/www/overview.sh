@@ -86,12 +86,12 @@
 	
 	tmodel=$(cat /tmp/sysinfo/model)
 	case "$tmodel" in
-	"Linksys WRT1900AC" | \
-	"Linksys WRT1900ACv2")
+	"Linksys WRT1900AC")
 		TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon2/temp1_input);
 		TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
 		TEMPWIFI=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp2_input);
 		show_temp=1;;
+	"Linksys WRT1900ACv2" | \
 	"Linksys WRT1200AC")
 		TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
 		TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp2_input);
