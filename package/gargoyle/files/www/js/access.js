@@ -1,11 +1,11 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
- 
+
 var accessStr=new Object(); //part of i18n
 
 var stopRedirect = false;
@@ -27,7 +27,7 @@ function saveChanges()
 		//remove all old firewall remote_accept sections that redirected to ssh or http server
 		var dropbearSections = uciOriginal.getAllSections("dropbear");
 		var oldLocalSshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
-		
+
 		var oldLocalHttpsPort = getHttpsPort(uciOriginal);
 		var oldLocalHttpPort  = getHttpPort(uciOriginal);
 
@@ -44,10 +44,10 @@ function saveChanges()
 			}
 		}
 		var uci = uciOriginal.clone();
-		
-		
-		
-		// add updated remote accepts 
+
+
+
+		// add updated remote accepts
 		var addAccept = function(local,remote)
 		{
 			var id = "ra_" + local + "_" + remote;
@@ -70,7 +70,7 @@ function saveChanges()
 		{
 			addAccept( document.getElementById("local_ssh_port").value, document.getElementById("remote_ssh_port").value);
 		}
-		
+
 		//recreate dropbear config section if anonymous-- anonymous uci section can cause problems saving
 		var newLocalSshPort =  document.getElementById("local_ssh_port").value;
 		var remoteAttempts =  document.getElementById("remote_ssh_attempts").disabled ? "" : getSelectedValue("remote_ssh_attempts");
@@ -97,6 +97,15 @@ function saveChanges()
 		dropbearRestart = oldLocalSshPort == document.getElementById("local_ssh_port").value ? "" : "/etc/init.d/dropbear restart\n"; //only restart dropbear if we need to
 
 
+		authorizedKeys = new Array();
+		for (var key in authorizedKeyMap) {
+		    if (authorizedKeyMap.hasOwnProperty(key)) {
+		        authorizedKeys.push(authorizedKeyMap[key]);
+		    }
+		}
+		var sshKeysCommands = ["rm /etc/dropbear/authorized_keys"];
+		sshKeysCommands.push("echo '" + authorizedKeys.join("\n") + "' >> /etc/dropbear/authorized_keys");
+
 
 		//set web password enabled/disabled
 		if(document.getElementById("disable_web_password").checked)
@@ -107,7 +116,7 @@ function saveChanges()
 		{
 			uci.set("gargoyle", "global", "require_web_password", "1");
 		}
-		
+
 		//set web session timout
 		uci.set("gargoyle", "global", "session_timeout", getSelectedValue("session_length"));
 
@@ -133,18 +142,23 @@ function saveChanges()
 
 		//password update
 		passwordCommands = "";
-		newPassword = document.getElementById("password1").value; 
+		newPassword = document.getElementById("password1").value;
 		if(newPassword != "")
 		{
 			var escapedPassword = newPassword.replace(/'/, "'\"'\"'");
 			passwordCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
-			dropBearRestart = "/etc/init.d/dropbear restart\n"; 
+			dropBearRestart = "/etc/init.d/dropbear restart\n";
 		}
 
-		
-		
-		restartFirewallCommand = "\nsh /usr/lib/gargoyle/restart_firewall.sh ;\n";
-		commands =passwordCommands + "\n" + firewallSectionCommands.join("\n") + "\n" + uciPreCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + restartFirewallCommand + "\n" + dropbearRestart + "\nkillall uhttpd\n/etc/init.d/uhttpd restart\n";
+		commands = passwordCommands + "\n";
+		commands += firewallSectionCommands.join("\n") + "\n";
+		commands += uciPreCommands.join("\n") + "\n";
+		commands += uci.getScriptCommands(uciOriginal) + "\n";
+		commands += sshKeysCommands.join("\n") + "\n";
+		commands += "sh /usr/lib/gargoyle/restart_firewall.sh ;\n";
+		commands += dropbearRestart + "\n";
+		commands += "killall uhttpd\n";
+		commands += "/etc/init.d/uhttpd restart\n";
 		//document.getElementById("output").value = commands;
 
 
@@ -155,14 +169,14 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
-				setControlsEnabled(true); 
-				stopRedirect=true; 
+				setControlsEnabled(true);
+				stopRedirect=true;
 			}
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 		//we're going to assume user is connecting locally,
-		//redirect for remote connections can get fubar, 
+		//redirect for remote connections can get fubar,
 		//but there isn't a good way around that without
 		//a lot of ugly code
 		//
@@ -188,24 +202,24 @@ function saveChanges()
 
 function proofreadAll()
 {
-	
+
 	controlIds=['local_https_port', 'local_http_port', 'local_ssh_port', 'remote_https_port', 'remote_http_port', 'remote_ssh_port'];
 	validatePort = function(text){  return validateNumericRange(text,1,65535); };
 	labelIds = [];
 	functions = [];
 	returnCodes = [];
 	visibilityIds = [];
-	
+
 	for(idIndex = 0; idIndex < controlIds.length; idIndex++)
 	{
 		id=controlIds[idIndex];
 		labelIds.push(id + "_label");
 		functions.push(validatePort);
 		returnCodes.push(0);
-		visibilityIds.push(   id.match(/ssh/) ? id : id + "_container" ); //ssh control just gets disabled, while others have containers that become invisible	
+		visibilityIds.push(   id.match(/ssh/) ? id : id + "_container" ); //ssh control just gets disabled, while others have containers that become invisible
 	}
 	errors = proofreadFields(controlIds, labelIds, functions, returnCodes, visibilityIds);
-	
+
 
 
 	localIds = ['local_https_port', 'local_http_port', 'local_ssh_port'];
@@ -237,6 +251,8 @@ function proofreadAll()
 		}
 	}
 
+  sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
+  uciOriginal.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
 
 	pass1 = document.getElementById("password1").value;
 	pass2 = document.getElementById("password2").value;
@@ -255,7 +271,7 @@ function resetData()
 
 	httpsPort = getHttpsPort()
 	httpPort = getHttpPort()
-	
+
 	localProtocol = ""
 	localProtocol = localProtocol + ( httpsPort != "" ? "https" : "" );
 	localProtocol = localProtocol + ( httpPort != "" ? "http" : "" );
@@ -266,7 +282,7 @@ function resetData()
 
 	if(localProtocol == "https" ||  localProtocol == "both")
 	{
-		document.getElementById("local_https_port").value = httpsPort;	
+		document.getElementById("local_https_port").value = httpsPort;
 	}
 	if(localProtocol == "http" || localProtocol == "both")
 	{
@@ -276,7 +292,7 @@ function resetData()
 
 
 
-	var dropbearSections = uciOriginal.getAllSections("dropbear"); 
+	var dropbearSections = uciOriginal.getAllSections("dropbear");
 	var sshPort = uciOriginal.get("dropbear", dropbearSections[0], "Port");
 	var connectionAttempts=uciOriginal.get("dropbear", dropbearSections[0], "max_remote_attempts");
 	connectionAttempts = connectionAttempts == "" ? 10 : connectionAttempts;
@@ -286,7 +302,7 @@ function resetData()
 
 
 
-	
+
 	var remoteHttpsPort = "";
 	var remoteHttpPort = "";
 	var remoteSshPort = "";
@@ -316,9 +332,15 @@ function resetData()
 			}
 		}
 	}
-	
+
+  resetAuthorizedKeysTable();
+  sshPwdEnabled = uciOriginal.get("dropbear", "global", "PasswordAuth") == "on" ? true : false;
+  document.getElementById("pwd_auth_enabled").checked = sshPwdEnabled;
+	document.getElementById("public_key_file").value = "";
+	document.getElementById('public_key_file').addEventListener('change', readKeyFile, false);
+
 	allOptionValueHash=getRemoteOptionValueHash();
-	setSelectElementOptions("remote_web_protocol", ["both", "https", "http", "disabled"], allOptionValueHash);	
+	setSelectElementOptions("remote_web_protocol", ["both", "https", "http", "disabled"], allOptionValueHash);
 	if(!isBridge(uciOriginal))
 	{
 
@@ -362,7 +384,7 @@ function resetData()
 			document.getElementById(hideIds[hi]).style.display="none";
 		}
 	}
-	
+
 	//clear password fields
 	document.getElementById("password1").value = "";
 	document.getElementById("password2").value = "";
@@ -372,6 +394,26 @@ function resetData()
 	updateVisibility();
 
 }
+
+
+function resetAuthorizedKeysTable()
+{
+  keysTableData = new Array();
+	for (var key in authorizedKeyMap) {
+	    if (authorizedKeyMap.hasOwnProperty(key)) {
+	        keysTableData.push([key])
+	    }
+	}
+
+	keysTable=createTable([], keysTableData, "authorized_keys_table", true, false, removeKey );
+	tableContainer = document.getElementById('authorized_keys_table_container');
+	if(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer.appendChild(keysTable);
+}
+
 
 function updateVisibility()
 {
@@ -443,7 +485,7 @@ function updateVisibility()
 		vis.push( document.getElementById(ids[idIndex]).value != "" ? true : false );
 	}
 	setVisibility(visIds, vis);
-		
+
 	var dropbearSections = uciOriginal.getAllSections("dropbear");
 	var defaultConnectionAttempts=uciOriginal.get("dropbear", dropbearSections[0], "max_remote_attempts");
 	defaultConnectionAttempts = defaultConnectionAttempts == "" ? 10 : defaultConnectionAttempts;
@@ -462,7 +504,7 @@ function setSelectElementOptions(selectId, enabledOptionValues, possibleOptionVa
 		addOptionToSelectElement(selectId, possibleOptionValueToTextHash[optionValue], optionValue);
 	}
 	setSelectedValue(selectId, originalSelection);
-	
+
 }
 
 
@@ -478,8 +520,39 @@ function getRemoteOptionValueHash()
 }
 
 
+function removeKey(table, row)
+{
+		var key = row.childNodes[0].firstChild.data;
+		delete authorizedKeyMap[key];
+		resetAuthorizedKeysTable();
+}
 
 
+function addKey()
+{
+	var file_contents = document.getElementById('file_contents').value;
+	var key = file_contents.match(/[\S]*[\s]*[^=]+==[\s]+.*/)[0];
+	if(key.length == 0)
+	{
+		alert(accessStr.SSHInvalidKey);
+	}
+	else
+	{
+		var key_name = key.split("== ")[1];
+		authorizedKeyMap[key_name]=key;
+		resetAuthorizedKeysTable()
+	}
+}
 
 
-
+function readKeyFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+		document.getElementById('file_contents').value = e.target.result;
+  };
+  reader.readAsText(file);
+}
