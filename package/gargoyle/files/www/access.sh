@@ -26,7 +26,7 @@
 		<div>
 			<label class='leftcolumn' id='local_web_protocol_label' for='local_web_protocol'><%~ WebProtocol %>:</label>
 			<select class='rightcolumn' id='local_web_protocol' onchange='updateVisibility()'>
-				<option value='https'>HTTPS</option>
+				<option value='https'>HTTPS (<%~ Recmd %>)</option>
 				<option value='http'>HTTP</option>
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
@@ -46,7 +46,7 @@
 			<label class='leftcolumn' id='remote_web_protocol_label' for='remote_web_protocol'><%~ RemoteWebAccess %>:</label>
 			<select class='rightcolumn' id='remote_web_protocol' onchange='updateVisibility()'>
 				<option value='disabled'><%~ disabled %></option>
-				<option value='https'>HTTPS</option>
+				<option value='https'>HTTPS (<%~ Recmd %>)</option>
 				<option value='http'>HTTP</option>
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
@@ -103,6 +103,7 @@
 			</form>
 			<label id='authorized_keys_label' class='leftcolumn' for='authorized_keys_table_container'><%~ SSHKeys %>:</label>
 			<div id='authorized_keys_table_container' class='rightcolumn'></div>
+			<label class='indent'>(<%~ Recmd %>)</label>
 			<iframe id='authorize_ssh_key' name='authorize_ssh_key' src='#' style='display:none'></iframe>
 			<div class='bottom_gap'></div>
 

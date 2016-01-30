@@ -56,6 +56,8 @@ UI.HsNm="Hostname";
 UI.HDsp="Host Display";
 UI.DspHn="Display Hostnames";
 UI.DspHIP="Display Host IPs";
+UI.Recmd="Recommended";
+UI.SRecmd="<b>Recommended</b>";
 
 UI.never="never";
 UI.disabled="disabled";
