@@ -140,6 +140,18 @@ function saveChanges()
 			uci.set("uhttpd", "main", "listen_http",  [ ] );
 		}
 
+		remoteWebProtocol = getSelectedValue("remote_web_protocol");
+		var httpsCommands = new Array();
+		if(!httpsCertOK && (localWebProtocol == "https" || localWebProtocol == "both" || remoteWebProtocol == "https"))
+		{
+			httpsCommands.push("openssl genpkey -algorithm RSA -out /etc/uhttpd.key -pkeyopt rsa_keygen_bits:2048");
+			httpsCommands.push("openssl req -new -key /etc/uhttpd.key -out /etc/uhttpd.csr -subj '/O=gargoyle-router.com/CN=Gargoyle Router Management Utility'");
+			httpsCommands.push("openssl x509 -req -days 3650 -in /etc/uhttpd.csr -signkey /etc/uhttpd.key -out /etc/uhttpd.crt");
+			httpsCommands.push("chmod 640 uhttpd.key");
+			httpsCommands.push("rm /etc/uhttpd.csr");
+			httpsCommands.push("chmod 640 uhttpd.crt");
+		}
+
 		//password update
 		passwordCommands = "";
 		newPassword = document.getElementById("password1").value;
@@ -151,6 +163,7 @@ function saveChanges()
 		}
 
 		commands = passwordCommands + "\n";
+		commands += httpsCommands.join("\n") + "\n";
 		commands += firewallSectionCommands.join("\n") + "\n";
 		commands += uciPreCommands.join("\n") + "\n";
 		commands += uci.getScriptCommands(uciOriginal) + "\n";

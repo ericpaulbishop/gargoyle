@@ -16,6 +16,12 @@
 		if [ -e /etc/hosts ] ; then
 			cat /etc/dropbear/authorized_keys | awk -F'== ' ' {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
 		fi
+
+		if [ -e /etc/uhttpd.key ] && [ -e /etc/uhttpd.key ] ; then
+			echo "var httpsCertOK = true;"
+		else
+			echo "var httpsCertOK = false;"
+		fi
 %>
 //-->
 </script>
