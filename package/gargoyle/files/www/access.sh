@@ -12,15 +12,24 @@
 <script>
 <!--
 <%
+		if [ -e /etc/uhttpd.key ] && [ -e /etc/uhttpd.key ] ; then
+			md5sum /etc/uhttpd.key | awk ' {print "var uhttpd_key_md5=\""$1"\";"}'
+			md5sum /etc/uhttpd.crt | awk ' {print "var uhttpd_crt_md5=\""$1"\";"}'
+		else
+			echo "var httpsCertOK = false;"
+			echo "var uhttpd_key_md5='';"
+			echo "var uhttpd_crt_md5='';"
+		fi
+
+		if [ -e /usr/bin/openssl ] ; then
+			echo "var opensslInstalled = true;"
+		else
+			echo "var opensslInstalled = false;"
+		fi
+
 		echo "var authorizedKeyMap = new Object();"
 		if [ -e /etc/hosts ] ; then
 			cat /etc/dropbear/authorized_keys | awk -F'== ' ' {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
-		fi
-
-		if [ -e /etc/uhttpd.key ] && [ -e /etc/uhttpd.key ] ; then
-			echo "var httpsCertOK = true;"
-		else
-			echo "var httpsCertOK = false;"
 		fi
 %>
 //-->

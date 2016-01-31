@@ -140,16 +140,22 @@ function saveChanges()
 			uci.set("uhttpd", "main", "listen_http",  [ ] );
 		}
 
+		// replace the default https private-key and certificate if https is required
 		remoteWebProtocol = getSelectedValue("remote_web_protocol");
 		var httpsCommands = new Array();
-		if(!httpsCertOK && (localWebProtocol == "https" || localWebProtocol == "both" || remoteWebProtocol == "https"))
+		if(opensslInstalled && (localWebProtocol == "https" || localWebProtocol == "both" || remoteWebProtocol == "https"))
 		{
-			httpsCommands.push("openssl genpkey -algorithm RSA -out /etc/uhttpd.key -pkeyopt rsa_keygen_bits:2048");
-			httpsCommands.push("openssl req -new -key /etc/uhttpd.key -out /etc/uhttpd.csr -subj '/O=gargoyle-router.com/CN=Gargoyle Router Management Utility'");
-			httpsCommands.push("openssl x509 -req -days 3650 -in /etc/uhttpd.csr -signkey /etc/uhttpd.key -out /etc/uhttpd.crt");
-			httpsCommands.push("chmod 640 uhttpd.key");
-			httpsCommands.push("rm /etc/uhttpd.csr");
-			httpsCommands.push("chmod 640 uhttpd.crt");
+			is_default_key = uhttpd_key_md5.localeCompare("0afea33b3c46c423e31383305ec5b1d7") == 0;
+			is_default_crt = uhttpd_crt_md5.localeCompare("1abb57c1829e7cb819c51ecc8602da7e") == 0;
+			if(is_default_key || is_default_crt)
+			{ // generate and install a new private-key and self-signed certificate
+				httpsCommands.push("openssl genpkey -algorithm RSA -out /etc/uhttpd.key -pkeyopt rsa_keygen_bits:2048");
+				httpsCommands.push("openssl req -new -key /etc/uhttpd.key -out /etc/uhttpd.csr -subj '/O=gargoyle-router.com/CN=Gargoyle Router Management Utility'");
+				httpsCommands.push("openssl x509 -req -days 3650 -in /etc/uhttpd.csr -signkey /etc/uhttpd.key -out /etc/uhttpd.crt");
+				httpsCommands.push("chmod 640 uhttpd.key");
+				httpsCommands.push("rm /etc/uhttpd.csr");
+				httpsCommands.push("chmod 640 uhttpd.crt");
+			}
 		}
 
 		//password update
