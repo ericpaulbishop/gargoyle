@@ -41,7 +41,7 @@
 		<div>
 			<label class='leftcolumn' id='local_web_protocol_label' for='local_web_protocol'><%~ WebProtocol %>:</label>
 			<select class='rightcolumn' id='local_web_protocol' onchange='updateVisibility()'>
-				<option value='https'>HTTPS (<%~ Recmd %>)</option>
+				<option value='https'>HTTPS</option>
 				<option value='http'>HTTP</option>
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
@@ -61,7 +61,7 @@
 			<label class='leftcolumn' id='remote_web_protocol_label' for='remote_web_protocol'><%~ RemoteWebAccess %>:</label>
 			<select class='rightcolumn' id='remote_web_protocol' onchange='updateVisibility()'>
 				<option value='disabled'><%~ disabled %></option>
-				<option value='https'>HTTPS</option>
+				<option value='https'>HTTPS (<%~ Recmd %>)</option>
 				<option value='http'>HTTP</option>
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
