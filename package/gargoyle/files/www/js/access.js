@@ -20,9 +20,10 @@ function saveChanges()
 	}
 	else
 	{
-
 		setControlsEnabled(false, true);
-
+		restartFirewall = true;
+		restartDropbear = false;
+		restartUhttpd = true;
 
 		//remove all old firewall remote_accept sections that redirected to ssh or http server
 		var dropbearSections = uciOriginal.getAllSections("dropbear");
@@ -94,7 +95,7 @@ function saveChanges()
 			if(remoteAttempts != "") { uci.set("dropbear", "global", "max_remote_attempts",  remoteAttempts ); }
 
 		}
-		dropbearRestart = oldLocalSshPort == document.getElementById("local_ssh_port").value ? "" : "/etc/init.d/dropbear restart\n"; //only restart dropbear if we need to
+		restartDropbear = oldLocalSshPort != document.getElementById("local_ssh_port").value; //only restart dropbear if we need to
 
 
 		authorizedKeys = new Array();
@@ -159,7 +160,11 @@ function saveChanges()
 		}
 
 		sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
-		uci.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
+		if (sshPwdEnabled.localeCompare(uciOriginal.get("dropbear", "global", "PasswordAuth")) != 0)
+		{
+			uci.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
+			restartDropbear = true;
+		}
 
 		//password update
 		passwordCommands = "";
@@ -168,7 +173,7 @@ function saveChanges()
 		{
 			var escapedPassword = newPassword.replace(/'/, "'\"'\"'");
 			passwordCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
-			dropBearRestart = "/etc/init.d/dropbear restart\n";
+			restartDropbear = true;
 		}
 
 		commands = passwordCommands + "\n";
@@ -177,10 +182,9 @@ function saveChanges()
 		commands += uciPreCommands.join("\n") + "\n";
 		commands += uci.getScriptCommands(uciOriginal) + "\n";
 		commands += sshKeysCommands.join("\n") + "\n";
-		commands += "sh /usr/lib/gargoyle/restart_firewall.sh ;\n";
-		commands += dropbearRestart + "\n";
-		commands += "killall uhttpd\n";
-		commands += "/etc/init.d/uhttpd restart\n";
+		commands += restartFirewall ? "sh /usr/lib/gargoyle/restart_firewall.sh ;\n" : "";
+		commands += restartDropbear ? "/etc/init.d/dropbear restart\n" : "";
+		commands += restartUhttpd ? "killall uhttpd\n/etc/init.d/uhttpd restart\n" : "";
 		//document.getElementById("output").value = commands;
 
 		stopRedirect = false;
