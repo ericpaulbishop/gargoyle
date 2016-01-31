@@ -100,7 +100,7 @@
 		<legend class='sectionheader'><%~ SSHAccess %></legend>
 
 		<div class='bottom_gap' id='pwd_enabled_container'>
-			<input type='checkbox' id='pwd_auth_enabled' onclick="updateSSHPassword()" />
+			<input type='checkbox' id='pwd_auth_enabled' />
 			<label id='pwd_auth_label' for='pwd_auth_enabled'><%~ SSHEnablePwd %></label>
 		</div>
 
