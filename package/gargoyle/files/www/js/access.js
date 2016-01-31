@@ -158,6 +158,9 @@ function saveChanges()
 			}
 		}
 
+		sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
+		uci.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
+
 		//password update
 		passwordCommands = "";
 		newPassword = document.getElementById("password1").value;
@@ -179,7 +182,6 @@ function saveChanges()
 		commands += "killall uhttpd\n";
 		commands += "/etc/init.d/uhttpd restart\n";
 		//document.getElementById("output").value = commands;
-
 
 		stopRedirect = false;
 		var param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -269,9 +271,6 @@ function proofreadAll()
 			}
 		}
 	}
-
-  sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
-  uciOriginal.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
 
 	pass1 = document.getElementById("password1").value;
 	pass2 = document.getElementById("password2").value;
