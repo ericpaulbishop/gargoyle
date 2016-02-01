@@ -17,3 +17,4 @@ hostsStr.Signal="信号";
 hostsStr.ActiveConx="活动的TCP连接";
 hostsStr.RecentConx="最近的TCP连接";
 hostsStr.UDPConx="UDP连接";
+hostsStr.Band="频";
