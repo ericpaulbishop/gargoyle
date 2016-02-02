@@ -99,10 +99,12 @@ function saveChanges()
 
 
 		authorizedKeys = new Array();
-		for (var key in authorizedKeyMap) {
-		    if (authorizedKeyMap.hasOwnProperty(key)) {
-		        authorizedKeys.push(authorizedKeyMap[key]);
-		    }
+		for (var key in authorizedKeyMap)
+		{
+			if (authorizedKeyMap.hasOwnProperty(key))
+			{
+				authorizedKeys.push(authorizedKeyMap[key]);
+			}
 		}
 		var sshKeysCommands = ["rm /etc/dropbear/authorized_keys"];
 		sshKeysCommands.push("echo '" + authorizedKeys.join("\n") + "' >> /etc/dropbear/authorized_keys");
@@ -355,9 +357,9 @@ function resetData()
 		}
 	}
 
-  resetAuthorizedKeysTable();
-  sshPwdEnabled = uciOriginal.get("dropbear", "global", "PasswordAuth") == "on" ? true : false;
-  document.getElementById("pwd_auth_enabled").checked = sshPwdEnabled;
+	resetAuthorizedKeysTable();
+	sshPwdEnabled = uciOriginal.get("dropbear", "global", "PasswordAuth") == "on" ? true : false;
+	document.getElementById("pwd_auth_enabled").checked = sshPwdEnabled;
 	document.getElementById("public_key_file").value = "";
 	document.getElementById('public_key_file').addEventListener('change', readKeyFile, false);
 
@@ -420,11 +422,13 @@ function resetData()
 
 function resetAuthorizedKeysTable()
 {
-  keysTableData = new Array();
-	for (var key in authorizedKeyMap) {
-	    if (authorizedKeyMap.hasOwnProperty(key)) {
-	        keysTableData.push([key])
-	    }
+	keysTableData = new Array();
+	for (var key in authorizedKeyMap)
+	{
+		if (authorizedKeyMap.hasOwnProperty(key))
+		{
+			keysTableData.push([key])
+		}
 	}
 
 	keysTable=createTable([], keysTableData, "authorized_keys_table", true, false, removeKey );
@@ -544,9 +548,9 @@ function getRemoteOptionValueHash()
 
 function removeKey(table, row)
 {
-		var key = row.childNodes[0].firstChild.data;
-		delete authorizedKeyMap[key];
-		resetAuthorizedKeysTable();
+	var key = row.childNodes[0].firstChild.data;
+	delete authorizedKeyMap[key];
+	resetAuthorizedKeysTable();
 }
 
 
@@ -567,14 +571,14 @@ function addKey()
 }
 
 
-function readKeyFile(e) {
-  var file = e.target.files[0];
-  if (!file) {
-    return;
-  }
-  var reader = new FileReader();
-  reader.onload = function(e) {
-		document.getElementById('file_contents').value = e.target.result;
-  };
-  reader.readAsText(file);
+function readKeyFile(e)
+{
+	var file = e.target.files[0];
+	if (!file)
+	{
+		return;
+	}
+	var reader = new FileReader();
+	reader.onload = function(e){ document.getElementById('file_contents').value = e.target.result; };
+	reader.readAsText(file);
 }
