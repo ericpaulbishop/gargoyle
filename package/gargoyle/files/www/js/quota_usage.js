@@ -117,7 +117,7 @@ function getTimeParametersFromUci(srcUci, quotaSection)
 function timeParamsToTableSpan(timeParameters)
 {
 	var hours = timeParameters[0];
-       	var days = timeParameters[1];
+	var days = timeParameters[1];
 	var weekly = timeParameters[2];
 	var active = timeParameters[3];
 
@@ -171,23 +171,23 @@ function getHostList(ipList)
 
 function refreshTableData(scheme)
 {
-  scheme = scheme == null ? "pcts" : scheme;
+	scheme = scheme == null ? "pcts" : scheme;
 	var quotaSections = uciOriginal.getAllSectionsOfType(pkg, "quota");
 	var quotaTableData = [];
 
-  var quotaData = [];
-  if (scheme.localeCompare("usds") == 0)
-  {
-    quotaData = allQuotaUsed;
-  }
-  else if (scheme.localeCompare("lims") == 0)
-  {
-    quotaData = allQuotaLimits;
-  }
-  else if (scheme.localeCompare("pcts") == 0)
-  {
-    quotaData = allQuotaPercents;
-  }
+	var quotaData = [];
+	if (scheme.localeCompare("usds") == 0)
+	{
+		quotaData = allQuotaUsed;
+	}
+	else if (scheme.localeCompare("lims") == 0)
+	{
+		quotaData = allQuotaLimits;
+	}
+	else if (scheme.localeCompare("pcts") == 0)
+	{
+		quotaData = allQuotaPercents;
+	}
 
 	var idIndex;
 	for(idIndex=0; idIndex < allQuotaIds.length; idIndex++)
@@ -196,7 +196,7 @@ function refreshTableData(scheme)
 		var id =  allQuotaIds[idIndex];
 		var quotaIpList = allQuotaIps[ id ];
 		var timeParameters = idToTimeParams[ id ];
-        var hide = false;
+		var hide = false;
 		for(ipIndex=0; ipIndex < quotaIpList.length; ipIndex++)
 		{
 			var ip       = quotaIpList[ipIndex];
@@ -206,30 +206,31 @@ function refreshTableData(scheme)
 			if(quotaData[id] != null)
 			{
 				if(quotaData[id][ip] != null)
-			  {
-    			var data = quotaData[id][ip];
-          var noData = data[0]<=0 && data[1]<=0 && data[2]<=0 ;
-          hide = noData && id.localeCompare("ALL_OTHERS_INDIVIDUAL") == 0;
-          if (scheme.localeCompare("pcts") == 0)
-          {
-    			  total = data[0] >= 0 ? percentColorSpan(data[0]) : total;
-    			  down = data[1] >= 0 ? percentColorSpan(data[1]) : down;
-    			  up = data[2] >= 0 ? percentColorSpan(data[2]) : up;
-          }
-          else
-          {
-    			  total = data[0] >= 0 ? parseBytes(data[0]) : total;
-    			  down = data[1] >= 0 ? parseBytes(data[1]) : down;
-    			  up = data[2] >= 0 ? parseBytes(data[2]) : up;
-          }
-			  }
-		  }
-		  ipList = ip.split(/[\t ]*,[\t ]*/);
-		  hostList = getHostList(ipList);
-      if (!hide)
-      {
-		    quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
-      }
+				{
+					var data = quotaData[id][ip];
+					var usedData = allQuotaUsed[id][ip]
+					var noData = usedData[0]<=0 && usedData[1]<=0 && usedData[2]<=0 ;
+					hide = noData && id.localeCompare("ALL_OTHERS_INDIVIDUAL") == 0;
+					if (scheme.localeCompare("pcts") == 0)
+					{
+						total = data[0] >= 0 ? percentColorSpan(data[0]) : total;
+						down = data[1] >= 0 ? percentColorSpan(data[1]) : down;
+						up = data[2] >= 0 ? percentColorSpan(data[2]) : up;
+					}
+					else
+					{
+						total = data[0] >= 0 ? parseBytes(data[0]) : total;
+						down = data[1] >= 0 ? parseBytes(data[1]) : down;
+						up = data[2] >= 0 ? parseBytes(data[2]) : up;
+					}
+				}
+			}
+			ipList = ip.split(/[\t ]*,[\t ]*/);
+			hostList = getHostList(ipList);
+			if (!hide)
+			{
+				quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
+			}
 		}
 	}
 	var columnNames = quotasStr.ColNms;
@@ -245,23 +246,23 @@ function refreshTableData(scheme)
 
 function percentColorSpan(percent)
 {
-  span = document.createElement("span");
-  text = null;
+	span = document.createElement("span");
+	text = null;
 	color = 'black';
-  if (percent != null)
-  {
-    text = document.createTextNode(percent + "%");
+	if (percent != null)
+	{
+		text = document.createTextNode(percent + "%");
 
-    var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; }
+		var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; }
 
-    color = percent >= 100  ? "#AA0000" : "";
-	  color = percent >= 50 && percent < 100 ? "#AA" + toHexTwo(170-(170*((percent-50)/50.0))) + "00" : color;
-	  color = percent >= 0 && percent < 50 ? "#" + toHexTwo(170*(percent)/50.0) + "AA00" : color;
-	  color = percent <= 0 ? "#00AA00" : color;
-  	span.style.color = color;
-  }
+		color = percent >= 100  ? "#AA0000" : "";
+		color = percent >= 50 && percent < 100 ? "#AA" + toHexTwo(170-(170*((percent-50)/50.0))) + "00" : color;
+		color = percent >= 0 && percent < 50 ? "#" + toHexTwo(170*(percent)/50.0) + "AA00" : color;
+		color = percent <= 0 ? "#00AA00" : color;
+		span.style.color = color;
+	}
 	span.appendChild(text);
-  return span;
+	return span;
 }
 
 function updateTableData()
