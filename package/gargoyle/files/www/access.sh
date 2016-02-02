@@ -6,10 +6,35 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "access.js" -z "access.js" -i uhttpd dropbear gargoyle firewall network wireless 
+	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "table.js access.js" -z "access.js" -i uhttpd dropbear gargoyle firewall network wireless
 %>
 
-<form>
+<script>
+<!--
+<%
+		if [ -e /etc/uhttpd.key ] && [ -e /etc/uhttpd.key ] ; then
+			md5sum /etc/uhttpd.key | awk ' {print "var uhttpd_key_md5=\""$1"\";"}'
+			md5sum /etc/uhttpd.crt | awk ' {print "var uhttpd_crt_md5=\""$1"\";"}'
+		else
+			echo "var httpsCertOK = false;"
+			echo "var uhttpd_key_md5='';"
+			echo "var uhttpd_crt_md5='';"
+		fi
+
+		if [ -e /usr/bin/openssl ] ; then
+			echo "var opensslInstalled = true;"
+		else
+			echo "var opensslInstalled = false;"
+		fi
+
+		echo "var authorizedKeyMap = new Object();"
+		if [ -e /etc/hosts ] ; then
+			cat /etc/dropbear/authorized_keys | awk -F'== ' ' {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
+		fi
+%>
+//-->
+</script>
+
 	<fieldset>
 		<legend class='sectionheader'><%~ access.Section %></legend>
 
@@ -36,7 +61,7 @@
 			<label class='leftcolumn' id='remote_web_protocol_label' for='remote_web_protocol'><%~ RemoteWebAccess %>:</label>
 			<select class='rightcolumn' id='remote_web_protocol' onchange='updateVisibility()'>
 				<option value='disabled'><%~ disabled %></option>
-				<option value='https'>HTTPS</option>
+				<option value='https'>HTTPS (<%~ Recmd %>)</option>
 				<option value='http'>HTTP</option>
 				<option value='both'>HTTP & HTTPS</option>
 			</select>
@@ -74,7 +99,48 @@
 	<fieldset>
 		<legend class='sectionheader'><%~ SSHAccess %></legend>
 
-		<div>
+		<div class='bottom_gap' id='pwd_enabled_container'>
+			<input type='checkbox' id='pwd_auth_enabled' />
+			<label id='pwd_auth_label' for='pwd_auth_enabled'><%~ SSHEnablePwd %></label>
+		</div>
+
+		<div style='display: block;' id='internal_divider1' class='internal_divider'></div>
+
+		<div class='nocolumn' id='authorized_keys_container'>
+			<form id='authorize_ssh_key_form' enctype='multipart/form-data' method='post' action='utility/authorize_ssh_key.sh'  target="authorize_ssh_key">
+				<label class='leftcolumn' id='add_key_label' for='add_key'><%~ SSHExistKey %>:</label>
+				<div class='rightcolumn'>
+					<input type='file' id='public_key_file' name='public_key_file' />
+					<input type='button' class='default_button' id='add_key' name='add_key' value='<%~ Add %>' onclick='addKey()'/>
+					<input id='file_contents' name='file_contents' type='hidden' value='' />
+					<input id='authorize_hash' name='hash' type='hidden' value='' />
+				</div>
+			</form>
+			<label id='authorized_keys_label' class='leftcolumn' for='authorized_keys_table_container'><%~ SSHKeys %>:</label>
+			<div id='authorized_keys_table_container' class='rightcolumn'></div>
+			<label class='indent'>(<%~ Recmd %>)</label>
+			<iframe id='authorize_ssh_key' name='authorize_ssh_key' src='#' style='display:none'></iframe>
+			<div class='bottom_gap'></div>
+
+			<div id="ssh_help" class="indent">
+				<span id='ssh_help_txt' style='display:none'>
+					<p><%~ SSHHelp1 %></p>
+					<p><%~ SSHHelp2 %></p>
+					<p><%~ SSHHelp3 %></p>
+					<ul>
+						<li><%~ SSHHelp3a %></li>
+						<li><%~ SSHHelp3b %></li>
+					</ul>
+					<p><%~ SSHHelp4 %></p>
+				</span>
+				<a onclick='setDescriptionVisibility("ssh_help")'  id="ssh_help_ref" href="#ssh_help"><%~ MoreInfo %></a>
+			</div>
+
+		</div>
+
+		<div style='display: block;' id='internal_divider2' class='internal_divider'></div>
+
+		<div class='nocolumn' id='local_ssh_port_container'>
 			<label class='leftcolumn' for='local_ssh_port' id='local_ssh_port_label'><%~ LocalSSHPort %>:</label>
 			<input type='text' class='rightcolumn' id='local_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
 		</div>
@@ -119,7 +185,6 @@
 	</div>
 
 	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

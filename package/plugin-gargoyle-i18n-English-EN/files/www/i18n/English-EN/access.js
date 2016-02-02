@@ -22,6 +22,16 @@ accessStr.Unlimited="Unlimited Attempts";
 accessStr.ChangePass="Change Administrator Password";
 accessStr.NewPass="New Password";
 accessStr.ConfirmPass="Confirm Password";
+accessStr.SSHEnablePwd="Enable password authetication for ssh access";
+accessStr.SSHKeys="Authorized Keys";
+accessStr.SSHExistKey="Upload SSH public-key";
+accessStr.SSHHelp1="SSH Keys are the recommended secure alternative to password authentication.";
+accessStr.SSHHelp2="It is strongly recommended that you setup a SSH key-pair and <u>disable password access before you enable remote SSH access</u>.";
+accessStr.SSHHelp3="You may use an existing SSH key-pair or create a new key-pair.";
+accessStr.SSHHelp3a="Linux and Mac SSH clients usually keep SSH keys in <code>~/.ssh/</code> and a new key-pair can be generated with <code>ssh-keygen -t rsa -b 4096 -f gargoyle</code>";
+accessStr.SSHHelp3b="Windows has been known to keep private keys in <code>C:\Documents and Settings\mylogin\Application Data\SSH\UserKeys\</code> ";
+accessStr.SSHHelp4="The <b>private-key</b> should be stored securely and backed-up. Only the <b>public-key</b> (<i>gargoyle.pub</i>) should be uploaded to Gargoyle. Gargoyle will accept multiple public-keys.";
+accessStr.SSHInvalidKey="Invalid Key\nplease ensure that file contains a valid SSH public-key and try again.";
 
 //javascript
 accessStr.PasswordsDiffer="Administrator password cannot be confirmed. Specified passwords are not equal.";
