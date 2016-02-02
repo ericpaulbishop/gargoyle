@@ -28,8 +28,8 @@
 		fi
 
 		echo "var authorizedKeyMap = new Object();"
-		if [ -e /etc/hosts ] ; then
-			cat /etc/dropbear/authorized_keys | awk -F'== ' ' {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
+		if [ -e /etc/dropbear/authorized_keys ] ; then
+			cat /etc/dropbear/authorized_keys | awk -F'== ' ' $0 ~ /=/ {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
 		fi
 %>
 //-->
@@ -99,12 +99,39 @@
 	<fieldset>
 		<legend class='sectionheader'><%~ SSHAccess %></legend>
 
+		<div class='nocolumn' id='local_ssh_port_container'>
+			<label class='leftcolumn' for='local_ssh_port' id='local_ssh_port_label'><%~ LocalSSHPort %>:</label>
+			<input type='text' class='rightcolumn' id='local_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
+		</div>
+
+		<div class='nocolumn' id='remote_ssh_enabled_container'>
+			<input type='checkbox' id='remote_ssh_enabled' onclick="updateVisibility()" />
+			<label id='remote_ssh_enabled_label' for='remote_ssh_enabled'><%~ EnableRemoteAccess %></label>
+		</div>
+		<div class='indent' id='remote_ssh_port_container'>
+			<label class='leftcolumn' for='remote_ssh_port' id='remote_ssh_port_label'><%~ RemoteSSHPort %>:</label>
+			<input type='text' class='rightcolumn' id='remote_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
+		</div>
+		<div class='indent' id='remote_ssh_attempts_container'>
+			<label class='leftcolumn' for='remote_ssh_attempts' id='remote_ssh_attempts_label'><%~ MaxRemoteTries %>:</label>
+			<select class='rightcolumn' id='remote_ssh_attempts'>
+				<option value="1">1 <%~ Attempts %></option>
+				<option value="3">3 <%~ Attempts %></option>
+				<option value="5">5 <%~ Attempts %></option>
+				<option value="10">10 <%~ Attempts %></option>
+				<option value="15">15 <%~ Attempts %></option>
+				<option value="unlimited"><%~ Unlimited %></option>
+			</select>
+		</div>
+
+
+		<div style='display: block;' id='internal_divider1' class='internal_divider'></div>
 		<div class='bottom_gap' id='pwd_enabled_container'>
 			<input type='checkbox' id='pwd_auth_enabled' />
 			<label id='pwd_auth_label' for='pwd_auth_enabled'><%~ SSHEnablePwd %></label>
 		</div>
 
-		<div style='display: block;' id='internal_divider1' class='internal_divider'></div>
+		<div style='display: block;' id='internal_divider2' class='internal_divider'></div>
 
 		<div class='nocolumn' id='authorized_keys_container'>
 			<form id='authorize_ssh_key_form' enctype='multipart/form-data' method='post' action='utility/authorize_ssh_key.sh'  target="authorize_ssh_key">
@@ -138,32 +165,8 @@
 
 		</div>
 
-		<div style='display: block;' id='internal_divider2' class='internal_divider'></div>
 
-		<div class='nocolumn' id='local_ssh_port_container'>
-			<label class='leftcolumn' for='local_ssh_port' id='local_ssh_port_label'><%~ LocalSSHPort %>:</label>
-			<input type='text' class='rightcolumn' id='local_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
-		</div>
 
-		<div class='nocolumn' id='remote_ssh_enabled_container'>
-			<input type='checkbox' id='remote_ssh_enabled' onclick="updateVisibility()" />
-			<label id='remote_ssh_enabled_label' for='remote_ssh_enabled'><%~ EnableRemoteAccess %></label>
-		</div>
-		<div class='indent' id='remote_ssh_port_container'>
-			<label class='leftcolumn' for='remote_ssh_port' id='remote_ssh_port_label'><%~ RemoteSSHPort %>:</label>
-			<input type='text' class='rightcolumn' id='remote_ssh_port'  size='7' maxlength='5' onkeyup='proofreadNumericRange(this,1,65535)'/>
-		</div>
-		<div class='indent' id='remote_ssh_attempts_container'>
-			<label class='leftcolumn' for='remote_ssh_attempts' id='remote_ssh_attempts_label'><%~ MaxRemoteTries %>:</label>
-			<select class='rightcolumn' id='remote_ssh_attempts'>
-				<option value="1">1 <%~ Attempts %></option>
-				<option value="3">3 <%~ Attempts %></option>
-				<option value="5">5 <%~ Attempts %></option>
-				<option value="10">10 <%~ Attempts %></option>
-				<option value="15">15 <%~ Attempts %></option>
-				<option value="unlimited"><%~ Unlimited %></option>
-			</select>
-		</div>
 	</fieldset>
 
 	<fieldset>

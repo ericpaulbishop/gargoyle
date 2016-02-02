@@ -278,6 +278,21 @@ function proofreadAll()
 		}
 	}
 
+
+	var ak = new Array();
+	for (var key in authorizedKeyMap)
+	{
+		if (authorizedKeyMap.hasOwnProperty(key))
+		{
+			ak.push(authorizedKeyMap[key]);
+		}
+	}
+	if(ak.length == 0 && (!document.getElementById("pwd_auth_enabled").checked))
+	{
+		errors.push("Cannot disable SSH passwords without setting private key(s)");
+	}
+
+
 	pass1 = document.getElementById("password1").value;
 	pass2 = document.getElementById("password2").value;
 	if( (pass1 != "" || pass2 != "") && pass1 != pass2)
