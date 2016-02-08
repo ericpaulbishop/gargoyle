@@ -163,8 +163,8 @@ initialize()
 	
 
 		if [ "$client_mode" = "3" ] || [ "$client_mode" = "2" ] ; then
-			iptables -t nat -A tor_client -p udp --dport 53  -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
-			iptables -t nat -A tor_client -p tcp --dport 53  -m layer7 --l7proto oniondns -j REDIRECT --to-ports $dns_port
+			iptables -t nat -A tor_client -p udp --dport 53  -m string --hex-string '|056f6e696f6e00|' --algo bm -j REDIRECT --to-ports $dns_port
+			iptables -t nat -A tor_client -p tcp --dport 53  -m string --hex-string '|056f6e696f6e00|' --algo bm -j REDIRECT --to-ports $dns_port
 			iptables -t nat -A tor_client -p tcp ! --dport 53 -d $hidden_service_subnet/$hidden_service_mask_bits  -j REDIRECT --to-ports $trans_port 
 		fi
 
