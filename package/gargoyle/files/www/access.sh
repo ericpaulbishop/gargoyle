@@ -29,7 +29,7 @@
 
 		echo "var authorizedKeyMap = new Object();"
 		if [ -e /etc/dropbear/authorized_keys ] ; then
-			cat /etc/dropbear/authorized_keys | awk -F'== ' ' $0 ~ /=/ {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
+			cat /etc/dropbear/authorized_keys | awk -F'== ' ' $0 ~ /./ {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
 		fi
 %>
 //-->
