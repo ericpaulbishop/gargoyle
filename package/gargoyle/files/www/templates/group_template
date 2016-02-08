@@ -5,7 +5,7 @@
     <th></th>
   </tr>
   <tr class='table_row_add'>
-    <td><input type='text' id='add_group' size='15' onkeyup='proofreadGroup(this)'/></td>
+    <td><input type='text' id='add_group' size='15' placeholder="a-zA-Z0-9-_.:" onkeyup='proofreadGroup(this)'/></td>
     <td><input type='text' id='add_device' size='50' onkeyup='proofreadMultipleUCIs(this)'/></td>
     <td><input type='button' id='add_device_to_group_button' value="<%~ Add %>" class='default_button' onclick='addDeviceToGroup()'/></td>
   </tr>
