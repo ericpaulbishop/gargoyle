@@ -56,6 +56,7 @@ UI.HsNm="主机名";
 UI.HDsp="主机显示";
 UI.DspHn="显示主机名";
 UI.DspHIP="显示主机IP";
+UI.SelGrp=“组”;
 
 UI.never="从不";
 UI.disabled="禁用";
