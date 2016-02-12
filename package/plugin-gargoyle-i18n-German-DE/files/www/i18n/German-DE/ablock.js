@@ -2,12 +2,12 @@
  * UTF-8 (with BOM) German-DE text strings for adblock.sh html elements
  */
 
-ablock.Adblock="Anzeigenblock";
-ablock.ADBLOCKEn="Aktivieren Adblock";
-ablock.ADBLOCKupdate="Aktualisierung Blockliste";
+ablock.Adblock="Adblock";
+ablock.ADBLOCKEn="Aktiviere Adblock";
+ablock.ADBLOCKupdate="Aktualisiere Blockliste";
 ablock.ADBLOCKLstrn="Letzte Ausführung";
-ablock.ADBLOCKTrans="Versuchen, blockiert Anzeigen verbergen";
-ablock.ADBLOCKHelp="Diese Option versucht, die Anzeigen mit einem kleinen transparenten Pixel vorgestellt ersetzen. Dies kann manchmal <i>manchmal</i> stoppen das hässliche 'Seite nicht gefunden' Fehler, die Sie anstelle von Anzeigen zu sehen.</p><p>Doch mit aktivierter Option, in einigen seltenen Fällen Anzeigen wird zeigen, wie Sie Ihren Router anmelden Bildschirm statt. Dies ist nicht ein Phishing-Versuch, nur ein Nebenprodukt der Aktivierung dieser Einstellung.";
+ablock.ADBLOCKTrans="Versuchen, blockierte Anzeigen zu verbergen";
+ablock.ADBLOCKHelp="Diese Option versucht, die Werbung durch ein kleines transparentes Pixel zu ersetzen. Dies verhindert <i>manchmal</i> den 'Seite nicht gefunden'-Fehler, der anstelle der Werbung angezeigt wird.</p><p>Mit aktivierter Option, wird jedoch in einigen seltenen Fällen stattdessen die Login-Seite Ihres Routers angezeigt. Dies ist keine Phishing-Attacke, sondern lediglich ein Nebenprodukt der Aktivierung dieser Funktion.";
 ablock.ADBLOCKExempts="IP angebot anfang";
 ablock.ADBLOCKExemptf="IP angebot fertig";
 ablock.ADBLOCKExemptEn="Aktivieren ad Befreiung für Kunden";
