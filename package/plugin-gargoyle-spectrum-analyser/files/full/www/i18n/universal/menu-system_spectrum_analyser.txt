@@ -1,0 +1,4 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Spectrum Analyser
+EN=Spectrum Analyser
