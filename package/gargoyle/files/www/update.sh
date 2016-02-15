@@ -49,30 +49,30 @@
 
 		<div class="internal_divider"></div>
 
-		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade" class="form-horizontal">
 
-			<div id="upgrade_file1_container">
+			<div id="upgrade_file1_container" class="form-group">
 				<label id="upgrade_label" class='leftcolumn' for="upgrade_file"><%~ SelF %>:</label>
-				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
+				<input class='rightcolumn form-control' type="file" id="upgrade_file" name="upgrade_file"/>
 				<br/>
 				<em><span id="upgrade_text" class="rightcolumnonly"></span></em>
 			</div>
-			<div id="upgrade_preserve_container">
+			<div id="upgrade_preserve_container" class="form-group">
 				<span class="rightcolumnonly">
-					<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
+					<input type="checkbox" id="upgrade_preserve" class="form-control" name="upgrade_preserve"/>
 					<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
 				</span>
 			</div>
 
 			<input id='upgrade_hash' name="hash" type='hidden' value='' />
 			<input id='upgrade_arch' name="arch" type='hidden' value='' />
+
+			<button id="upgrade_button" class="btn btn-default" onclick="doUpgrade()"><%~ Upgrade %></button>
 		</form>
-	</div>
-	<div>
-		<input id="upgrade_button" type='button' class="default_button" value="<%~ Upgrade %>" onclick="doUpgrade()" style="margin-left:0px;"/>
+
 	</div>
 
-	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe> 
+	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
 
 <script>
 <!--
@@ -81,5 +81,5 @@
 </script>
 
 <%
-	gargoyle_header_footer -f -s "system" -p "update" 
+	gargoyle_header_footer -f -s "system" -p "update"
 %>

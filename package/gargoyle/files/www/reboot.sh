@@ -45,44 +45,43 @@
 
 <fieldset>
 	<legend class="sectionheader"><%~ reboot.RbSect %></legend>
-	<center><input type='button' value='<%~ Reboot %>' id="reboot_button" class="big_button" onclick='reboot()' /></center>
-
+	<button id="reboot_button" class="btn btn-default btn-lg" onclick='reboot()'><%~ Reboot %></button
 </fieldset>
 <fieldset>
-	<legend class="sectionheader"><%~ SchRb %></legend>
-	<select class="leftcolumn" id="sched_reboot" onchange="setVisibility()">
-		<option value="none"><%~ NoSch %></option>
-		<option value="scheduled"><%~ RbSch %></option>
-	</select>
-	<br/>
+	<div class="form-group">
+		<legend class="sectionheader"><%~ SchRb %></legend>
+		<select class="leftcolumn form-control" id="sched_reboot" onchange="setVisibility()">
+			<option value="none"><%~ NoSch %></option>
+			<option value="scheduled"><%~ RbSch %></option>
+			</select>
+	</div>
 
 	<div id="schedule_reboot_container" class="indent">
-		<div>
+		<div class="form-group">
 			<label class="narrowleftcolumn" for="reboot_interval"><%~ WillR %>:</label>
-			<select class="widerightcolumn" id="reboot_interval" onchange="setVisibility()">
+			<select class="widerightcolumn form-control" id="reboot_interval" onchange="setVisibility()">
 				<option value="day"><%~ EDay %></option>
 				<option value="week"><%~ EWek %></option>
 				<option value="month"><%~ EMnh %></option>
 			</select>
 		</div>
 
-		<div id="reboot_day_container">
+		<div id="reboot_day_container" class="form-group">
 			<label class='narrowleftcolumn' id="reboot_day_label" for='reboot_day'><%~ RDay %>:</label>
-			<select class="widerightcolumn" id='reboot_day' style='width:125px'></select>
+			<select class="widerightcolumn form-control" id='reboot_day' style='width:125px'></select>
 		</div>
 
-		<div id="reboot_hour_container">
+		<div id="reboot_hour_container" class="form-group">
 			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
-
-			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
+			<select class="widerightcolumn form-control" id='reboot_hour' style='width:125px'>
 				<% otime '\t\t\t\t' %>
 			</select>
 		</div>
 	</div>
 </fieldset>
 <div id="bottom_button_container">
-	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>

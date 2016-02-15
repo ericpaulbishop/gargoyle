@@ -16,22 +16,22 @@
 %>
 </script>
 
-<form>
+<form class="form-horizontal">
 	<fieldset>
 		<legend class="sectionheader"><%~ ident.IdSect %></legend>
-		<div>
-			<label class='narrowleftcolumn' for='hostname' id='hostname_label'><%~ HsNm %>:</label>
-			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' />
+		<div class="form-group">
+			<label class='narrowleftcolumn sr-only' for='hostname' id='hostname_label'><%~ HsNm %></label>
+			<input type='text' class='rightcolumn form-control' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' placeholder='<%~ HsNm %>'/>
 		</div>
-		<div id="domain_container">
-			<label class='narrowleftcolumn' for='domain' id='domain_label'><%~ Domn %>:</label>
-			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
+		<div id="domain_container" class="form-group">
+			<label class='narrowleftcolumn sr-only' for='domain' id='domain_label'><%~ Domn %></label>
+			<input type='text' class='rightcolumn form-control' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' placeholder='<%~ Domn %>'/>
 		</div>
 
 	</fieldset>
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+	<div id="bottom_button_container" class="form-group">
+		<button id="save_button" class="btn btn-default" onclick='saveChanges()'><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>
 </form>

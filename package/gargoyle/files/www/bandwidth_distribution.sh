@@ -14,7 +14,7 @@
 <%
 	echo 'monitorNames = new Array();'
 	mnames=$(cat /tmp/bw_backup/do_bw_backup.sh 2>/dev/null | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
-	for m in $mnames ; do 
+	for m in $mnames ; do
 		echo "monitorNames.push(\"$m\");"
 	done
 
@@ -32,9 +32,9 @@
 	<fieldset>
 		<legend class="sectionheader"><%~ bandwidth.DOpSect %></legend>
 
-		<div>
+		<div class="form-group">
 			<label class="leftcolumn" for='time_frame' id='time_frame_label'><%~ DTFrm %>:</label>
-			<select class="rightcolumn" id="time_frame" onchange="resetTimeFrame()">
+			<select class="rightcolumn form-control" id="time_frame" onchange="resetTimeFrame()">
 				<option value="bdist1"><%~ minutes %></option>
 				<option value="bdist2"><%~ qhour %></option>
 				<option value="bdist3"><%~ hours %></option>
@@ -43,14 +43,14 @@
 			</select>
 		</div>
 
-		<div>
+		<div class="form-group">
 			<label class="leftcolumn" for='time_interval' id='time_interval_label'><%~ DtbI %>:</label>
-			<select class="rightcolumn" id="time_interval" onchange="resetDisplayInterval()"></select>
+			<select class="rightcolumn form-control" id="time_interval" onchange="resetDisplayInterval()"></select>
 		</div>
 
-		<div>
+		<div class="form-group">
 			<label class="leftcolumn" for='host_display' id='time_interval_label'><%~ HDsp %>:</label>
-			<select class="rightcolumn" id="host_display" onchange="resetTimeFrame()">
+			<select class="rightcolumn form-control" id="host_display" onchange="resetTimeFrame()">
 				<option value="hostname"><%~ DspHn %></option>
 				<option value="ip"><%~ DspHIP %></option>
 			</select>
@@ -76,5 +76,5 @@
 </script>
 
 <%
-	gargoyle_header_footer -f -s "status" -p "bdist"  
+	gargoyle_header_footer -f -s "status" -p "bdist"
 %>

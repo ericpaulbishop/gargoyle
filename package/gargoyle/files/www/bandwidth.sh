@@ -14,7 +14,7 @@
 <%
 	echo 'var monitorNames = new Array();'
 	mnames=$(cat /tmp/bw_backup/*.sh 2>/dev/null | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
-	for m in $mnames ; do 
+	for m in $mnames ; do
 		echo "monitorNames.push(\"$m\");"
 	done
 
@@ -30,9 +30,9 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader"><%~ bandwidth.GOpSect %></legend>
-		<div>
+		<div class='form-group'>
 			<label for='plot_time_frame' id='time_frame_label'><%~ TFrm %>:</label>
-			<select id="plot_time_frame" onchange="resetPlots()">
+			<select id="plot_time_frame" class='form-control' onchange="resetPlots()">
 				<option value="1">15 <%~ minutes %></option>
 				<option value="2"> 6 <%~ hours %></option>
 				<option value="3">24 <%~ hours %></option>
@@ -42,32 +42,32 @@
 		</div>
 
 		<div id="control_column_container">
-			<div id="plot1_control_column">
+			<div id="plot1_control_column" class='form-group'>
 				<div><span  id="plot1_title"><%~ Plot %> 1</span></div>
-				<div><select id="plot1_type" onchange="resetPlots()" ><option value="total"><%~ TBdw %></option></select></div>
-				<div><select id="plot1_id" onchange="resetPlots()"></select></div>
+				<div><select id="plot1_type" class="form-control" onchange="resetPlots()" ><option value="total"><%~ TBdw %></option></select></div>
+				<div><select id="plot1_id" class="form-control" onchange="resetPlots()"></select></div>
 
 			</div>
-			<div id="plot2_control_column">
+			<div id="plot2_control_column" class='form-group'>
 				<div><span   id="plot2_title"><%~ Plot %> 2</span></div>
-				<div><select id="plot2_type" onchange="resetPlots()" ><option value="none"><%~ None %></option></select></div>
-				<div><select id="plot2_id" onchange="resetPlots()"></select></div>
+				<div><select id="plot2_type" class="form-control" onchange="resetPlots()" ><option value="none"><%~ None %></option></select></div>
+				<div><select id="plot2_id" class="form-control" onchange="resetPlots()"></select></div>
 			</div>
-			<div id="plot3_control_column">
+			<div id="plot3_control_column" class='form-group'>
 				<div><span   id="plot3_title"><%~ Plot %> 3</span></div>
-				<div><select id="plot3_type" onchange="resetPlots()"><option value="none"><%~ None %></option></select></div>
-				<div><select id="plot3_id" onchange="resetPlots()"></select></div>
+				<div><select id="plot3_type" class="form-control" onchange="resetPlots()"><option value="none"><%~ None %></option></select></div>
+				<div><select id="plot3_id" class="form-control" onchange="resetPlots()"></select></div>
 			</div>
 		</div>
 
-		<div>
-			<input type="checkbox" id="use_high_res_15m" onclick="highResChanged()">&nbsp;
+		<div class='form-group'>
+			<input type="checkbox" id="use_high_res_15m" class="form-control" onclick="highResChanged()">&nbsp;
 			<label id="use_high_res_15m_label" for="use_high_res_15m"><%~ HRInf %></label>
 			<br/>
 			<em><%~ HRWrn %></em>
 		</div>
 
-		<br/><%~ UsInf %>  
+		<br/><%~ UsInf %>
 		<br/><%~ LclTrff %>
 	</fieldset>
 
@@ -85,9 +85,9 @@
 	</fieldset>
 	<fieldset id="total_bandwidth_use">
 		<legend class="sectionheader"><%~ BUTab %></legend>
-		<div>
+		<div class='form-group'>
 			<label for='table_time_frame' class="narrowleftcolumn" id='table_time_frame_label'><%~ DspI %>:</label>
-			<select id="table_time_frame" class="rightcolumn" onchange="resetPlots()">
+			<select id="table_time_frame" class="rightcolumn form-control" onchange="resetPlots()">
 				<option value="1"><%~ minutes %></option>
 				<option value="2"><%~ qhour %></option>
 				<option value="3"><%~ hours %></option>
@@ -95,19 +95,19 @@
 				<option value="5"><%~ mnths %></option>
 			</select>
 		</div>
-		<div>
+		<div class='form-group'>
 			<label for='table_type' class="narrowleftcolumn" id='total_type_label'><%~ DspT %>:</label>
-			<select id="table_type" class="rightcolumn" onchange="resetPlots()">
+			<select id="table_type" class="rightcolumn form-control" onchange="resetPlots()">
 				<option value="total"><%~ TBdw %></option>
 			</select>
 		</div>
-		<div id="table_id_container" style="display:none" >
+		<div id="table_id_container" style="display:none" class='form-group'>
 			<label for='table_id' class="narrowleftcolumn" id='total_id_label'><%~ DspID %>:</label>
-			<select id="table_id" class="rightcolumn" onchange="resetPlots()"></select>
+			<select id="table_id" class="rightcolumn form-control" onchange="resetPlots()"></select>
 		</div>
-		<div class="bottom_gap">
+		<div class="bottom_gap form-group">
 			<label for='table_units' class="narrowleftcolumn" id='table_units_label'><%~ TbUnt %>:</label>
-			<select id="table_units" class="rightcolumn" onchange="resetPlots()">
+			<select id="table_units" class="rightcolumn form-control" onchange="resetPlots()">
 				<option value="mixed"><%~ AutoM %></option>
 				<option value="KBytes"><%~ KBy %></option>
 				<option value="MBytes"><%~ MBy %></option>
@@ -119,7 +119,7 @@
 		<div id="bandwidth_table_container"></div>
 
 		<div>
-			<center><input type='button' id='delete_data_button' class='big_button' value='<%~ DelD %>' onclick='deleteData();' /></center>
+			<button id='delete_data_button' class='btn btn-warning btn-lg' onclick='deleteData();'><%~ DelD %></button>
 		</div>
 
 	</fieldset>
@@ -133,7 +133,7 @@
 			<br/>
 		</div>
 		<div>
-			<center><input type='button' id='download_data_button' class='big_button' value='<%~ DNow %>' onclick='window.location="bandwidth.csv";' /></center>
+			<button id='download_data_button' class='btn btn-info btn-lg' onclick='window.location="bandwidth.csv";'><%~ DNow %></button>
 		</div>
 	</fieldset>
 </form>
@@ -147,5 +147,5 @@
 </script>
 
 <%
-	gargoyle_header_footer -f -s "status" -p "bandwidth"  
+	gargoyle_header_footer -f -s "status" -p "bandwidth"
 %>

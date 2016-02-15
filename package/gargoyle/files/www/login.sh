@@ -9,12 +9,12 @@
 	valid=$( eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" ) | grep "Set-Cookie" )
 	require=$(uci get gargoyle.global.require_web_password)
 	if [ "$require" = "0" ] ; then
-		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) ) 
+		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) )
 		valid="1"
 	fi
 	if [ -n "$valid" ] ; then
 		firstboot=$( uci get gargoyle.global.is_first_boot 2>/dev/null )
-		echo "Status: 302 Found" 
+		echo "Status: 302 Found"
 		if [ "$firstboot" = "1" ] ; then
 			echo "Location: firstboot.sh"
 		else
@@ -66,7 +66,7 @@ var passInvalid = false;
 //-->
 </script>
 
-<fieldset>
+<fieldset class="form-inline">
 	<legend class="sectionheader"><%~ login.LSect %></legend>
 	<span class="leftcolumn">
 		<p>
@@ -76,13 +76,12 @@ var passInvalid = false;
 		</p>
 	</span>
 
-	<div>
-		<label class="leftcolumn" for='password' id='password_label'><%~ EAdmP %>:</label>
-		<input class="rightcolumn" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' />
+	<div class="form-group">
+		<label class="sr-only" for='password' id='password_label'><%~ EAdmP %></label>
+		<input class="form-control" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' placeholder="<%~ EAdmP %>"/>
 	</div>
-	<div>
-		<span class="leftcolumn"><input class="default_button" type="button" value="<%~ LSect %>" onclick="doLogin()" /></span>
-	</div>
+
+	<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
 
 </fieldset>
 <fieldset id="local_quotas" style="display:none">

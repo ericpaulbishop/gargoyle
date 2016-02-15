@@ -28,13 +28,13 @@
 </script>
 
 
-<form>
+<form class="form-horizontal">
 	<fieldset>
 		<legend class="sectionheader"><%~ conntrack.CCSect %></legend>
 
-		<div>
+		<div class="form-group">
 			<label for="refresh_rate" class="narrowleftcolumn"><%~ RRate %>:</label>
-			<select id="refresh_rate" class="rightcolumn" >
+			<select id="refresh_rate" class="rightcolumn form-control" >
 				<option value="2000">2 <%~ seconds %></option>
 				<option value="10000">10 <%~ seconds %></option>
 				<option value="30000">30 <%~ seconds %></option>
@@ -42,18 +42,18 @@
 				<option value="never"><%~ never %></option>
 			</select>
 		</div>
-		<div>
+		<div class="form-group">
 			<label for="bw_units" class="narrowleftcolumn" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
-			<select id="bw_units" class="rightcolumn">
+			<select id="bw_units" class="rightcolumn form-control">
 				<option value="mixed"><%~ AtMxd %></option>
 				<option value="KBytes"><%~ KBy %></option>
 				<option value="MBytes"><%~ MBy %></option>
 				<option value="GBytes"><%~ GBy %></option>
 			</select>
 		</div>
-		<div>
+		<div class="form-group">
 			<label for="host_display" class="narrowleftcolumn" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
-			<select id="host_display" class="rightcolumn">
+			<select id="host_display" class="rightcolumn form-control">
 				<option value="hostname"><%~ DspHn %></option>
 				<option value="ip"><%~ DspHIP %></option>
 			</select>
