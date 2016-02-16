@@ -11,6 +11,7 @@
 -el-m150-squashfs-
 -el-mini-squashfs-
 -gl-inet-v1-squashfs-
+-gl-inet-6416A-v1-squashfs-
 -mzk-w04nu-squashfs
 -mzk-w300nh-squashfs
 -mr600-squashfs-
@@ -24,6 +25,7 @@
 -tl-wdr4300-v1-squashfs
 -tl-wdr4310-v1-squashfs
 -tl-wr842n-v1-squashfs
+-tl-wr842n-v2-squashfs-
 -tl-wr2543-v1-squashfs
 -wrt160nl-squashfs
 -wrt400n-squashfs

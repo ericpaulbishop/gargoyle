@@ -50,13 +50,13 @@ add_config()
 	echo "$CRON" >> /etc/crontabs/root
 
 	#Add firewall rules unless TOR is enabled
-	if [ "$TOR" == 0 ]
+	if [ "$TOR" == 1 ]
 	then
+		logger -t ADBLOCK Tor is enabled, discarding firewall rules
+	else
 		logger -t ADBLOCK Adding firewall rules
 		echo "$FW1" >> /etc/firewall.user
 		echo "$FW2" >> /etc/firewall.user
-	else
-		logger -t ADBLOCK Tor is enabled, discarding firewall rules
 	fi
 
 	# Modifying uHTTPd for transparent pixel support
@@ -96,6 +96,14 @@ update_blocklist()
 	logger -t ADBLOCK Retrieving ad lists from remote source
 	wget -qO- http://www.mvps.org/winhelp2002/hosts.txt| awk -v r="$ENDPOINT_IP4" '{sub(/^0.0.0.0/, r)} $0 ~ "^"r' > /tmp/block.build.list
 	wget -qO- "http://adaway.org/hosts.txt"|awk -v r="$ENDPOINT_IP4" '{sub(/^127.0.0.1/, r)} $0 ~ "^"r' >> /tmp/block.build.list
+
+	#Check we got a hosts file
+	if [ -s "/tmp/block.build.list" ]
+	then
+		logger -t ADBLOCK Successfully retrieved ad list
+	else
+		logger -t ADBLOCK Retrieve remote ad list failed. Check connection
+	fi
 
 	#Add black list, if non-empty
 	logger -t ADBLOCK Adding entries from black.list

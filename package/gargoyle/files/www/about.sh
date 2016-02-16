@@ -38,7 +38,7 @@
 
 <fieldset>
 	<legend class="sectionheader"><%~ LSect %></legend>
-	<p>Gargoyle is copyright &copy; 2008, 2009-2013 by Eric Bishop</p>
+	<p>Gargoyle is copyright &copy; 2008-2016 by Eric Bishop</p>
 
 	<p>Gargoyle is free software; you can redistribute it and/or modify it under the terms of the 
 	<a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License version 2.0</a>
