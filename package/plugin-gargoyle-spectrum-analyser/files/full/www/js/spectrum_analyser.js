@@ -33,16 +33,20 @@ function initialiseAll()
 	var inames = [];
 	//First, we should adjust the drop down list for the interfaces. We should identify which ones are 2.4 and 5ghz as well.
 	interfaces = parseInterfaces(wifiLines);
-	for(var x = 0; x < 2; x++)
+	if(interfaces != -1)
 	{
-		ivalues.push(interfaces[x][0]);
-		inames.push(interfaces[x][1]);
+		for(var x = 0; x < interfaces.length; x++)
+		{
+			ivalues.push(interfaces[x][0]);
+			inames.push(interfaces[x][1]);
+		}
+		setAllowableSelections('interface', ivalues, inames);	//populate the dropdown list
+
+		initialisePlots();
+
+		getWifiData();
 	}
-	setAllowableSelections('interface', ivalues, inames);	//populate the dropdown list
-
-	initialisePlots();
-
-	getWifiData();
+	//otherwise do nothing
 }
 
 
@@ -92,7 +96,7 @@ function changeBand()
 function parseInterfaces(lines)
 {
 	//if we have no interfaces detected, exit
-	if(lines.length == 0) { return []; }
+	if(lines.length == 0) { return -1; }
 
 	//otherwise, populate the data and assign correct frequency band
 	var interfaceData = [];
@@ -103,6 +107,12 @@ function parseInterfaces(lines)
 	{
 		var nextLine = lines[lineIndex];
 		var wlan = nextLine.split(" ");
+
+		var guest  = wlan[0].indexOf("-");
+		if(guest != -1)
+		{
+			continue;
+		}
 
 		var interfaceid = wlan[0];
 		if(wlan[1] > 14)
