@@ -7,5 +7,5 @@ DE=Adblock
 BR=Bloco de anuncios
 PL=Reklamy
 ZH-CN=广告过滤
-RU=Reklamnyy blok
+RU=Блокировщик рекламы
 NO=Ad blokk
