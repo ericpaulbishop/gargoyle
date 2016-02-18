@@ -1,4 +1,4 @@
-﻿/*
+/*
  * UTF-8 (with BOM) German-DE text strings for tor.sh html elements
  */
 
@@ -26,9 +26,9 @@ torS.EnRly="Aktiviert, als Relay";
 torS.BrRPrt="Bridge/Relay Port";
 torS.ObfPrt="Obfsproxy Port";
 torS.MaxRB="Max. Relay Bandbreite";
-torS.PubBrDB="Bridge in Datenbank veröffentlichen";
-torS.PubBr="Bridge Info veröffentlichen";
-torS.NoPub="Bridge Info nicht veröffentlichen";
+torS.PubBrDB="Bridge Info in Datenbank";
+torS.PubBr="veröffentlichen";
+torS.NoPub="nicht veröffentlichen";
 torS.Nick="Name Tor-Knoten (optional)";
 torS.Mail="Kontakt E-Mail / PGP PubKey (optional)";
 torS.VisMsg="Innerhalb von 1-2 Stunden  nach Aktivierung Ihres Relay-Servers, sollte dieser hier sichtbar sein:";
@@ -49,5 +49,5 @@ torS.RootD="Root Laufwerk";
 torS.Free="frei";
 torS.Totl="gesamt";
 torS.AnonTraf="Der gesamte Datenverkehr wird anonymisiert";
-torS.AnonOpt="Der Benutzer kann entscheiden ob der Datenverkehr anonymisiert werden soll";
-torS.TorTraf="Tor Hidden Services (.onion-Adressen) können erreicht werden. Der übrige Datenverkehr wird jedoch nicht anonymisiert.";
+torS.AnonOpt="Der Benutzer kann entscheiden, ob der Datenverkehr anonymisiert werden soll";
+torS.TorTraf="Tor Hidden Services (.onion-Adressen) können erreicht werden. Der übrige Datenverkehr wird nicht anonymisiert.";
