@@ -2,4 +2,3 @@
 
 fallback=Spectrum Analyser
 EN=Spectrum Analyser
-RU=Анализатор спектра
