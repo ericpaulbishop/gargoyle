@@ -3,3 +3,5 @@
 fallback=Spectrum Analyser
 EN=Spectrum Analyser
 PL=Analizator widma
+DE=Spektrumanalysator
+
