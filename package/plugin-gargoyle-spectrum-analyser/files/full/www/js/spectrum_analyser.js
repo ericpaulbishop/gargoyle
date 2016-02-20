@@ -191,6 +191,7 @@ function parseWifiData(rawScanOutput)
 					val = val.replace(/\".*$/g, "");
 					val = val.replace(/^[ ]/g,"");
 					val = val.replace(/ dBm/g,"");
+					val = val.replace(/channel /g,"");
 					vals.push(val);
 				}
 			}
@@ -203,10 +204,15 @@ function parseWifiData(rawScanOutput)
 			var cellLines = cellData.split(/[\r\n]+/);
 
 			var ssid    = getCellValues("SSID", cellLines).shift();
-			var prichannel = getCellValues("primary channel", cellLines).shift();
+			var prichannel = getCellValues("DS Parameter set", cellLines).shift();
 			var secchannel = getCellValues("secondary channel offset", cellLines).shift();
 			var sigStr = getCellValues("signal", cellLines).shift();
 			var vhtwidth = getCellValues("* channel width", cellLines).shift();
+
+			if (! secchannel)
+			{
+				secchannel = "no secondary";
+			}
 
 			if(ssid != null && prichannel != null && secchannel != null && sigStr != null ) 
 			{
