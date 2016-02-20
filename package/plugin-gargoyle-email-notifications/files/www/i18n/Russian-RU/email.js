@@ -1,0 +1,73 @@
+/*
+ * UTF-8 (with BOM) English-EN text strings for email.sh html elements
+ */
+
+email.Time="Настройки времени";
+email.TPer="Периодичность таймера";
+email.DataSettings="Содержимое письма";
+email.NoTm="Отклюить таймер";
+email.Dly="Ежедневно";
+email.Wkd="Будни + Субб./Воскр.";
+email.Wkly="Еженедельно";
+email.TInc="Шаг таймера";
+email.Test="Отправить тестовое письмо";
+email.SmtpSettings="Настройки SMTP";
+email.ServerIP="Адрес сервера:";
+email.ServerPort="Порт сервера:";
+email.Sender="Отправитель:";
+email.Receipment="Получатель:";
+email.Auth="Авторизация SMTP:";
+email.Username="Логин:";
+email.Password="Пароль:";
+email.Emailsettings="Настройки сообщения";
+email.BandwidthInterval="Отображаемый промежуток:";
+email.recentWebsites="Недавно посещённые сайты";
+email.recentSearches="Недавние поисковые запросы";
+email.Logs="Логи";
+email.DHCP="DHCP-аренды";
+email.ARP="Таблица ARP";
+email.Bandwidth="Использование полосы пропускания";
+email.Count="Количество полей:";
+email.Encryption="Шифрование";
+email.Include="Включить следующие данные в отчёт:";
+email.rvel="отобразить";
+email.None="Нет";
+email.minutes="минут";
+email.quarterhours="четверть часов";
+email.hours="часов";
+email.days="дней";
+
+//javscript
+email.Smmy="Краткое описание";
+email.WeekA=["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+email.WDayA=["Воскресенье", "Понедельник-Пятница", "Суббота"];
+email.Warn="Внимание";
+email.NextEv="Расписание вступит в силу при следующем событии.";
+email.SelTM="Выбраный режим таймера";
+email.SumDis="отключен (без расписания).";
+email.SumDly="ежедневный график (каждый день одинаково).";
+email.SumSwS="Воскр./будни/Субб. график (все будни - одинаково).";
+email.SumWky="еженедельный график (отдельное расписание на каждый день с еженедельным повторением).";
+email.SumGo="Письмо будет отправленно";
+email.SumAt="в";
+email.actv="активоровано";
+email.schd="по расписанию";
+email.nscd="без расписания";
+email.STDly="Ежедневно";
+email.STSunday="Воскресенье";
+email.STMonday="Понедельник";
+email.STTuesday="Вторник";
+email.STWednesday="Среда";
+email.STThursday="Четверг";
+email.STFriday="Пятница";
+email.STSaturday="Суббота";
+email.STMonFri="Понедельник-Пятница";
+email.senderError="Адрес отправителя не корректен.";
+email.receiverError="Адрес получателя не корректен.";
+email.portError="Введите корректный номер порта.";
+email.testEmailSuccess="Письмо успешно отправленно.";
+email.testEmailFail="Что-то пошло не так. Ответ:\n";
+email.testEmail="Тестовое письмоо отправляется...";
+email.encryptionTypeError="Выберите тип шифрования.";
+email.noDataSelected="Выберите отправляемые данные.";
+email.countError="Выберите количество отправляемых записей.";
