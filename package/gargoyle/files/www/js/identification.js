@@ -35,12 +35,17 @@ function saveChanges()
 		var gargLogoHostname = document.getElementById("garg_host");
 		gargLogoHostname.replaceChild( document.createTextNode(idtS.DevNm+": " + hostname), gargLogoHostname.firstChild );
 
+		var wirelessSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
+		var country =   document.getElementById("country").value;
+		for(x = 0; x < wirelessSections.length; x++)
+		{
+			uci.set("wireless", wirelessSections[x], "country", country);
+		}
 		
-		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n" + (havePrinterScript ? "\nsh /usr/lib/gargoyle/configure_printer.sh\n" : "")
+		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n" + (havePrinterScript ? "\nsh /usr/lib/gargoyle/configure_printer.sh\n" : "") + "\nwifi\n";
 		
 		
 		//document.getElementById("output").value = commands;
-
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -85,5 +90,41 @@ function resetData()
 	{
 		document.getElementById("domain_container").style.display = "none";
 	}
+	removeAllOptionsFromSelectElement(document.getElementById("country"));
+	for(ctryIndex = 0; ctryIndex < countryCode.length; ctryIndex++)
+	{
+		country = countryCode[ctryIndex];
+		addOptionToSelectElement("country", countryName[country], country);
+	}
+	var wirelessSections = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
+	var selectedCountry = uciOriginal.get("wireless", wirelessSections[0], "country");
+	if(selectedCountry == "")
+	{
+		document.getElementById("country").value = "00";
+	}
+	else
+	{
+		document.getElementById("country").value = selectedCountry;
+	}
+}
 
+function parseCountry(countryLines)
+{
+	countryCode = [];
+	countryName = [];
+	
+	for(lineIndex = 0; lineIndex < countryLines.length; lineIndex++)
+	{
+		line = countryLines[lineIndex];
+		if(!line.match(/^[\t]*#/) && line.length > 0)
+		{
+			splitLine = line.split(/[\t]+/);
+			name = stripQuotes( splitLine.pop() );
+			code = stripQuotes( splitLine.pop() );
+			
+			countryCode.push(code);
+			countryName[code] = name;
+		}
+	}
+	return [countryCode, countryName];
 }

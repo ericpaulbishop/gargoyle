@@ -5,3 +5,5 @@
 idtS.IdSect="Identification";
 idtS.Domn="Domain";
 idtS.DevNm="Device Name";
+idtS.Ctry="Country";
+
