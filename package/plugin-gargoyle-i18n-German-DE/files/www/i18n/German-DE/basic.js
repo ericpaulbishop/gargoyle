@@ -111,7 +111,7 @@ basicS.WlIso="Wireless Client Isolation";
 basicS.DPing="Ping aus dem WAN sperren";
 
 //javascript
-basicS.WaitRb="Bitte warten Sie während die Änderungen angewendet werden und das Gerät neu gestartet wird";
+basicS.WaitRb="Bitte warten Sie, während die Änderungen angewendet werden und das Gerät neu gestartet wird";
 basicS.WDSMAC="Für WDS muss mindestens eine MAC-Adresse angegeben werden";
 basicS.DBand="Dual Band";
 basicS.SpcEr1="FEHLER: Spezifische";
