@@ -3,4 +3,9 @@
 fallback=Spectrum Analyser
 EN=Spectrum Analyser
 PL=Analizator widma
+<<<<<<< HEAD
 RU=Анализатор спектра
+=======
+DE=Spektrumanalysator
+
+>>>>>>> petbrau/master
