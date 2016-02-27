@@ -67,4 +67,4 @@ quotasStr.ESection="Editar Cuota";
 quotasStr.USect="Uso de Ancho de Banda de la Cuota";
 quotasStr.All="Todo";
 quotasStr.Alws="Siempre";
-quotasStr.ColNms=["Equipo(s)", "Activas", "% Total Usado", "% Subida Usado", "% Descarga Usado" ];
+quotasStr.ColNms=["Equipo(s)", "Activas", "Total", "Subida", "Descarga" ];
