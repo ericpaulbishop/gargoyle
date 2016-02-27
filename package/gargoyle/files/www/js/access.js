@@ -76,6 +76,9 @@ function saveChanges()
 		var newLocalSshPort =  document.getElementById("local_ssh_port").value;
 		var remoteAttempts =  document.getElementById("remote_ssh_attempts").disabled ? "" : getSelectedValue("remote_ssh_attempts");
 		var uciPreCommands = [];
+		
+		var oldSshPwdEnabled = uciOriginal.get("dropbear", dropbearSections[0], "PasswordAuth")
+		var sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
 		if(dropbearSections[0] != "global")
 		{
 			for(s=0; s < dropbearSections.length; s++)
@@ -83,7 +86,7 @@ function saveChanges()
 				uciPreCommands.push("uci del dropbear.@dropbear[0]" );
 			}
 			uciPreCommands.push("uci set dropbear.global=dropbear");
-			uciPreCommands.push("uci set dropbear.global.PasswordAuth='on'");
+			uciPreCommands.push("uci set dropbear.global.PasswordAuth='" + sshPwdEnabled + "'");
 			uciPreCommands.push("uci set dropbear.global.Port=" + newLocalSshPort);
 			if(remoteAttempts != "") { uciPreCommands.push("uci set dropbear.global.max_remote_attempts='" + remoteAttempts + "'" ); }
 			uciPreCommands.push("uci commit");
@@ -93,9 +96,13 @@ function saveChanges()
 			//update dropbear uci configuration
 			uci.set("dropbear", "global", "Port", newLocalSshPort);
 			if(remoteAttempts != "") { uci.set("dropbear", "global", "max_remote_attempts",  remoteAttempts ); }
+			uci.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
+
 
 		}
-		restartDropbear = oldLocalSshPort != document.getElementById("local_ssh_port").value; //only restart dropbear if we need to
+ 		//only restart dropbear if we need to
+		restartDropbear =	(oldLocalSshPort != document.getElementById("local_ssh_port").value) ||
+				 	(oldSshPwdEnabled != sshPwdEnabled );
 
 
 		authorizedKeys = new Array();
@@ -161,13 +168,7 @@ function saveChanges()
 			}
 		}
 
-		sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
-		if (sshPwdEnabled.localeCompare(uciOriginal.get("dropbear", "global", "PasswordAuth")) != 0)
-		{
-			uci.set("dropbear", "global", "PasswordAuth", sshPwdEnabled);
-			restartDropbear = true;
-		}
-
+	
 		//password update
 		passwordCommands = "";
 		newPassword = document.getElementById("password1").value;
@@ -373,7 +374,7 @@ function resetData()
 	}
 
 	resetAuthorizedKeysTable();
-	sshPwdEnabled = uciOriginal.get("dropbear", "global", "PasswordAuth") == "on" ? true : false;
+	sshPwdEnabled = uciOriginal.get("dropbear", dropbearSections[0], "PasswordAuth") == "on" ? true : false;
 	document.getElementById("pwd_auth_enabled").checked = sshPwdEnabled;
 	document.getElementById("public_key_file").value = "";
 	document.getElementById('public_key_file').addEventListener('change', readKeyFile, false);
