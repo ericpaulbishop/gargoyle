@@ -29,7 +29,7 @@
 
 		echo "var authorizedKeyMap = new Object();"
 		if [ -e /etc/dropbear/authorized_keys ] ; then
-			cat /etc/dropbear/authorized_keys | awk -F'== ' ' $0 ~ /./ {print "authorizedKeyMap[\""$2"\"]=\""$0"\";"}'
+			cat /etc/dropbear/authorized_keys | awk -F' ' ' $0 ~ /./ {print "authorizedKeyMap[\""$NF"\"]=\""$0"\";"}'
 		fi
 %>
 //-->
@@ -144,8 +144,8 @@
 				</div>
 			</form>
 			<label id='authorized_keys_label' class='leftcolumn' for='authorized_keys_table_container'><%~ SSHKeys %>:</label>
-			<div id='authorized_keys_table_container' class='rightcolumn'></div>
 			<label class='indent'>(<%~ Recmd %>)</label>
+			<div id='authorized_keys_table_container' class='rightcolumn'></div>
 			<iframe id='authorize_ssh_key' name='authorize_ssh_key' src='#' style='display:none'></iframe>
 			<div class='bottom_gap'></div>
 

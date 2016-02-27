@@ -435,27 +435,6 @@ function resetData()
 }
 
 
-function resetAuthorizedKeysTable()
-{
-	keysTableData = new Array();
-	for (var key in authorizedKeyMap)
-	{
-		if (authorizedKeyMap.hasOwnProperty(key))
-		{
-			keysTableData.push([key])
-		}
-	}
-
-	keysTable=createTable([], keysTableData, "authorized_keys_table", true, false, removeKey );
-	tableContainer = document.getElementById('authorized_keys_table_container');
-	if(tableContainer.firstChild != null)
-	{
-		tableContainer.removeChild(tableContainer.firstChild);
-	}
-	tableContainer.appendChild(keysTable);
-}
-
-
 function updateVisibility()
 {
 	localWebProtocol = getSelectedValue("local_web_protocol");
@@ -561,6 +540,29 @@ function getRemoteOptionValueHash()
 }
 
 
+
+function resetAuthorizedKeysTable()
+{
+	keysTableData = new Array();
+	for (var keyName in authorizedKeyMap)
+	{
+		if (authorizedKeyMap.hasOwnProperty(keyName))
+		{
+			keysTableData.push([keyName])
+		}
+	}
+
+	keysTable=createTable([], keysTableData, "authorized_keys_table", true, false, removeKey );
+	tableContainer = document.getElementById('authorized_keys_table_container');
+	if(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer.appendChild(keysTable);
+}
+
+
+
 function removeKey(table, row)
 {
 	var key = row.childNodes[0].firstChild.data;
@@ -572,14 +574,16 @@ function removeKey(table, row)
 function addKey()
 {
 	var file_contents = document.getElementById('file_contents').value;
-	var key = file_contents.match(/[\S]*[\s]*[^=]+==[\s]+.*/)[0];
-	if(key.length == 0)
+	var splitKey = file_contents.split(/[\t ]+/);
+	if(splitKey.length < 2)
 	{
 		alert(accessStr.SSHInvalidKey);
 	}
 	else
 	{
-		var key_name = key.split("== ")[1];
+		var key = splitKey[0] + " " + splitKey[1];		
+		var key_name = splitKey[2];
+
 		authorizedKeyMap[key_name]=key;
 		resetAuthorizedKeysTable()
 	}
