@@ -424,10 +424,21 @@ function resetData()
 		}
 	}
 
+	//clear public ssh key fields
+
+	document.getElementById('public_key_file').value = '';
+	document.getElementById('public_key_name').value = '';
+	document.getElementById('file_contents').value = '';
+
+
+
 	//clear password fields
 	document.getElementById("password1").value = "";
 	document.getElementById("password2").value = "";
 
+
+
+	
 
 	//enable/disable proper fields
 	updateVisibility();
@@ -548,11 +559,24 @@ function resetAuthorizedKeysTable()
 	{
 		if (authorizedKeyMap.hasOwnProperty(keyName))
 		{
-			keysTableData.push([keyName])
+			var keyLine = authorizedKeyMap[keyName]
+			var splitKey = keyLine.split(/[\t ]+/);
+			var keyAbbrev = ""
+			var keyName = ""
+			if(splitKey.length > 1)
+			{
+				var keyData = splitKey[1]
+				keyAbbrev = keyData.substr(0,5) + "... " + keyData.substr( keyData.length-6 ,5)
+			}
+			if(splitKey.length > 2)
+			{
+				keyName = splitKey[2]
+			}
+			keysTableData.push([keyAbbrev,keyName])
 		}
 	}
 
-	keysTable=createTable([], keysTableData, "authorized_keys_table", true, false, removeKey );
+	keysTable=createTable(['',''], keysTableData, "authorized_keys_table", true, false, removeKey );
 	tableContainer = document.getElementById('authorized_keys_table_container');
 	if(tableContainer.firstChild != null)
 	{
@@ -565,7 +589,7 @@ function resetAuthorizedKeysTable()
 
 function removeKey(table, row)
 {
-	var key = row.childNodes[0].firstChild.data;
+	var key = row.childNodes[1].firstChild.data;
 	delete authorizedKeyMap[key];
 	resetAuthorizedKeysTable();
 }
@@ -575,18 +599,29 @@ function addKey()
 {
 	var file_contents = document.getElementById('file_contents').value;
 	var splitKey = file_contents.split(/[\t ]+/);
-	if(splitKey.length < 2)
+	var keyName = document.getElementById('public_key_name').value
+	if(keyName.length == 0 && splitKey.length > 2)
+	{
+		keyName = splitKey[2];
+	}
+	keyName = keyName.replace(/^[\r\n\t ]+/g, "");
+	keyName = keyName.replace(/[\r\n\t ]+$/g, "");
+	keyName = keyName.replace(/[\r\n\t ]+/g, "_")
+	if(splitKey.length < 2 || keyName.length == 0)
 	{
 		alert(accessStr.SSHInvalidKey);
 	}
 	else
 	{
-		var key = splitKey[0] + " " + splitKey[1];		
-		var key_name = splitKey[2];
-
-		authorizedKeyMap[key_name]=key;
+		var key = splitKey[0] + " " + splitKey[1] + " " + keyName
+		authorizedKeyMap[keyName]=key;
 		resetAuthorizedKeysTable()
+		document.getElementById('public_key_file').value = '';
+		document.getElementById('public_key_name').value = '';
+		document.getElementById('file_contents').value = '';
+
 	}
+	
 }
 
 

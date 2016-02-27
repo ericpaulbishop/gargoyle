@@ -25,6 +25,7 @@ accessStr.ConfirmPass="Confirm Password";
 accessStr.SSHEnablePwd="Enable password authetication for ssh access";
 accessStr.SSHKeys="Authorized Keys";
 accessStr.SSHExistKey="Upload SSH public-key";
+accessStr.SSHName="SSH Key Name";
 accessStr.SSHHelp1="SSH Keys are the recommended secure alternative to password authentication.";
 accessStr.SSHHelp2="It is strongly recommended that you setup a SSH key-pair and <u>disable password access before you enable remote SSH access</u>.";
 accessStr.SSHHelp3="You may use an existing SSH key-pair or create a new key-pair.";
