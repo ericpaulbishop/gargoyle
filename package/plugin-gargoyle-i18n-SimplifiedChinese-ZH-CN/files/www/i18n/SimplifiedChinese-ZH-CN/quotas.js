@@ -67,4 +67,4 @@ quotasStr.ESection="编辑配额";
 quotasStr.USect="流量配额使用情况";
 quotasStr.All="所有";
 quotasStr.Alws="总是";
-quotasStr.ColNms=["配额对象","生效时间","已用总量％","已用下载％","已用上传％"];
+quotasStr.ColNms=["配额对象","生效时间","总量","下载","上传"];
