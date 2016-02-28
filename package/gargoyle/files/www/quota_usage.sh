@@ -25,7 +25,11 @@
 			<option value="hostname"><%~ DspHn %></option>
 			<option value="ip"><%~ DspHIP %></option>
 		</select>
-
+		<select id="data_display" >
+			<option value="pcts"><%~ DspPct %></option>
+			<option value="usds"><%~ DspUsd %></option>
+			<option value="lims"><%~ DspLim %></option>
+		</select>
 		<div id="quota_table_container"></div>
 	</fieldset>
 </form>

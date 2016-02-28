@@ -93,7 +93,7 @@ basicS.AcPtID="Access Point SSID";
 basicS.GNet="Gast Netz";
 basicS.GNetID="Gast Netz SSID:";
 basicS.GNet24ID="Gast Netz 2.4GHz SSID:";
-basicS.GNet5ID="Guest Netz 5GHz SSID:";
+basicS.GNet5ID="Gast Netz 5GHz SSID:";
 basicS.F24GHzOnly="Aktiviert (nur 2.4GHz)";
 basicS.F5GHzOnly="Aktiviert (nur 5GHz)";
 basicS.Clnt="Client";
@@ -111,7 +111,7 @@ basicS.WlIso="Wireless Client Isolation";
 basicS.DPing="Ping aus dem WAN sperren";
 
 //javascript
-basicS.WaitRb="Bitte warten Sie während die Änderungen angewendet werden und das Gerät neu gestartet wird";
+basicS.WaitRb="Bitte warten Sie, während die Änderungen angewendet werden und das Gerät neu gestartet wird";
 basicS.WDSMAC="Für WDS muss mindestens eine MAC-Adresse angegeben werden";
 basicS.DBand="Dual Band";
 basicS.SpcEr1="FEHLER: Spezifische";

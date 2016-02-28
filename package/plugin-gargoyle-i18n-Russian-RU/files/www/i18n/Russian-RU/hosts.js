@@ -17,4 +17,4 @@ hostsStr.Signal="Сигнал";
 hostsStr.ActiveConx="Активные TCP подкл.";
 hostsStr.RecentConx="Недавние TCP подкл.";
 hostsStr.UDPConx="UDP подкл.";
-hostsStr.Band="диапазона";
+hostsStr.Band="Диапазон";

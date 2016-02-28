@@ -3,7 +3,7 @@
  */
 
 ovpnS.OCfg="OpenVPN Konfiguration";
-ovpnS.ODis="OpenVPN Deaktiviert";
+ovpnS.ODis="OpenVPN deaktiviert";
 ovpnS.OClt="OpenVPN Client";
 ovpnS.OSrv="OpenVPN Server";
 ovpnS.OSts="OpenVPN Status";
@@ -24,11 +24,11 @@ ovpnS.CnoL="Clients haben keinen Zugang zum LAN";
 ovpnS.CredR="Anmeldedaten erneut verwenden";
 ovpnS.CredSC="Die Anmeldedaten sind für jeden Client unterschiedlich";
 ovpnS.CredMC="Die Anmeldedaten können von mehreren Clients verwendet werden";
-ovpnS.CUse="Clienten nutzen das VPN für";
+ovpnS.CUse="Clients nutzen das VPN für";
 ovpnS.ATrff="den gesamten Datenverkehr";
 ovpnS.HTrff="nur für Rechner hinter dem VPN";
-ovpnS.OSAC="OpenVPN Server: Erlaubte Clienten";
-ovpnS.CClnt="Aktuell konfigurierte Clienten";
+ovpnS.OSAC="OpenVPN Server: Erlaubte Clients";
+ovpnS.CClnt="Aktuell konfigurierte Clients";
 ovpnS.ZipCred="Nachdem die Client-Konfiguration erstellt wurde, klicken Sie bitte auf Download um die ZIP-Datei mit den nötigen Anmeldeinformationen zu erhalten und speichern diese im OpenVPN Konfigurationsverzeichnis auf Ihrem Computer";
 ovpnS.CfgCred="Konfiguriere neuen Client / Set mit Zugangsdaten";
 ovpnS.ClntN="Client Name";
@@ -103,7 +103,7 @@ ovpnS.uc_TAP_Err="Gargoyle unterstützt keine TAP Konfiguration für OpenVPN";
 ovpnS.uc_conn_Err="Parameter wurden gespeichert, aber OpenVPN konnte Verbindung nicht herstellen. Bitte prüfen Sie die Konfiguration.";
 
 //openvpn_connections.sh
-ovpnS.ConnOC="Verbundene OpenVPN Clienten";
+ovpnS.ConnOC="Verbundene OpenVPN Clients";
 
 //openvpn_connections.js
 ovpnS.ConnFr="Verbunden von";
@@ -113,4 +113,4 @@ ovpnS.NoCConn="Keine Client verbunden";
 ovpnS.NOVPNT="Non-OpenVPN Traffic";
 ovpnS.AllowNOVPNT="Erlaube Datenverkehr ohne OpenVPN";
 ovpnS.BlockNOVPNT="Blockiere Datenverkehr ohne OpenVPN";
-openS.DescNOVPNT="Wenn der gesamte Datenverkehr durch das VPN geleitet werden soll, ist es am besten jeglichen Datenverkehr ausser OpenVPN zu blockieren. In diesem Fall erfolgt kein Rückgriff auf die unverschlüsselte Verbindung, wenn das VPN nicht aufgebaut werden kann. Wenn OpenVPN genutzt wird, um entfernte Klienten anzubinden, ist es sinnvoll auch Nicht-OpenVPN Datenverkehr zu erlauben.";
+openS.DescNOVPNT="Wenn der gesamte Datenverkehr durch das VPN geleitet werden soll, ist es am besten, jeglichen Datenverkehr ausser OpenVPN zu blockieren. In diesem Fall erfolgt kein Ausweichen auf eine unverschlüsselte Verbindung, wenn das VPN nicht aufgebaut werden kann. Wenn OpenVPN genutzt wird, um entfernte Clients anzubinden, ist es sinnvoll auch Nicht-OpenVPN Datenverkehr zu erlauben.";

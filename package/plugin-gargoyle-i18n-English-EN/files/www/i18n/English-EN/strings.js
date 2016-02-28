@@ -56,7 +56,11 @@ UI.HsNm="Hostname";
 UI.HDsp="Host Display";
 UI.DspHn="Display Hostnames";
 UI.DspHIP="Display Host IPs";
-
+UI.DspUsd="Bytes Used";
+UI.DspPct="Percent Used";
+UI.DspLim="Limit";
+UI.Recmd="Recommended";
+UI.SRecmd="<b>Recommended</b>";
 UI.never="never";
 UI.disabled="disabled";
 UI.both="both";

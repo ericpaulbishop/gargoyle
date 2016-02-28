@@ -66,4 +66,4 @@ quotasStr.ESection="Endre Kvote";
 quotasStr.USect="Båndbredde Kvote Bruk";
 quotasStr.All="Alt";
 quotasStr.Alws="Alltid";
-quotasStr.ColNms=["Klient(er)", "Aktive", "% Total Brukt", "% Ned Brukt", "% Opp Brukt" ];
+quotasStr.ColNms=["Klient(er)", "Aktive", "Total", "Ned", "Opp" ];
