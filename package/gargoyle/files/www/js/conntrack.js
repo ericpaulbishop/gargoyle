@@ -136,13 +136,15 @@ function updateConnectionTable()
 							localPort = srcPort;
 							WanIp = srcIp2;
 							WanPort = srcPort2;
-						} else {
+						} else if (dstIp == currentWanIp) {
 							downloadBytes = bytes;
 							uploadBytes = bytes2;
 							localIp = srcIp2;
 							localPort = srcPort2;
 							WanIp = dstIp2;
 							WanPort = dstPort2;
+						} else {
+							// filter out LAN-LAN connections
 						}
 
 						var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
