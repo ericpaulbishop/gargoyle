@@ -56,7 +56,11 @@ UI.HsNm="Nazwa urządzenia";
 UI.HDsp="Wyświetlanie";
 UI.DspHn="Nazwa urządzenia";
 UI.DspHIP="Adres IP urządzenia";
-
+UI.DspUsd="Zużycie bajtów";
+UI.DspPct="Procentowe wykorzystanie";
+UI.DspLim="Limit";
+UI.Recmd="Zalecane";
+UI.SRecmd="<b>Zalecane</b>";
 UI.never="nigdy";
 UI.disabled="wyłączone";
 UI.both="oba";
