@@ -290,7 +290,7 @@ function proofreadAll()
 	}
 	if(ak.length == 0 && (!document.getElementById("pwd_auth_enabled").checked))
 	{
-		errors.push("Cannot disable SSH passwords without setting private key(s)");
+		errors.push(accessStr.CnntDsblPwd);
 	}
 
 
