@@ -1,9 +1,9 @@
---- /dev/null	2015-07-12 18:46:53.001433637 -0400
-+++ cc/target/linux/generic/patches-3.18/690-imq.patch	2015-08-16 22:23:22.381010302 -0400
-@@ -0,0 +1,2011 @@
-+--- /dev/null	2015-07-12 18:46:53.001433637 -0400
-++++ linux-3.18.18/drivers/net/imq.c	2015-08-16 21:36:53.077561926 -0400
-+@@ -0,0 +1,1267 @@
+--- /dev/null	2016-02-02 18:32:54.001863721 -0500
++++ b/target/linux/generic/patches-3.18/690-imq.patch	2016-02-27 15:29:07.875566599 -0500
+@@ -0,0 +1,2000 @@
++--- /dev/null	2016-02-02 18:32:54.001863721 -0500
+++++ b/drivers/net/imq.c	2016-02-27 15:25:18.043368407 -0500
++@@ -0,0 +1,1256 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -603,6 +603,7 @@
 ++	rcu_read_lock_bh();
 ++
 ++	/* Multi-queue selection */
+++	skb->destructor = &imq_skb_destructor;
 ++	orig_queue_index = skb_get_queue_mapping(skb);
 ++	txq = imq_select_queue(dev, skb);
 ++
@@ -625,8 +626,6 @@
 ++		bool validate;		
 ++
 ++		kfree_skb(skb_shared); /* decrease reference count by one */
-++
-++		skb->destructor = &imq_skb_destructor;
 ++
 ++		skb_popd = qdisc_dequeue_skb(q, &validate);
 ++
@@ -674,16 +673,6 @@
 ++
 ++		retval = 0;
 ++		goto out;
-++	} else {
-++		skb_restore_cb(skb_shared); /* restore skb->cb */
-++		skb->nf_queue_entry = NULL;
-++		/*
-++		 * qdisc dropped packet and decreased skb reference count of
-++		 * skb, so we don't really want to and try refree as that would
-++		 * actually destroy the skb.
-++		 */
-++		spin_unlock(root_lock);
-++		goto packet_not_eaten_by_imq_dev;
 ++	}
 ++
 ++packet_not_eaten_by_imq_dev:

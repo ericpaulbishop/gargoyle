@@ -529,7 +529,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 		<div id="lan_dns_options_container">
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='lan_dns_altroot' style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-				<label for="lan_dns_altroot" id="lan_dns_altroot_label" style="vertical-align:middle">&nbsp;&nbsp;<%~ Allow %> <a href="http://www.dot-bit.org">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
+				<label for="lan_dns_altroot" id="lan_dns_altroot_label" style="vertical-align:middle">&nbsp;&nbsp;<%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
 
 			</span>
 			<span style="clear:both;"></span>

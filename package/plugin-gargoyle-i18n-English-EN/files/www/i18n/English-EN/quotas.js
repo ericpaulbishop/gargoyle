@@ -67,4 +67,4 @@ quotasStr.ESection="Edit Quota";
 quotasStr.USect="Bandwidth Quota Usage";
 quotasStr.All="All";
 quotasStr.Alws="Always";
-quotasStr.ColNms=["Host(s)", "Active", "% Total Used", "% Down Used", "% Up Used" ];
+quotasStr.ColNms=["Host(s)", "Active", "Total", "Down", "Up" ];
