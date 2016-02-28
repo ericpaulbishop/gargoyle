@@ -33,7 +33,7 @@ accessStr.SSHHelp3a="SSH dla Linuksa i Mac zwykle przechowuje klucze w katalogu 
 accessStr.SSHHelp3b="Windows utrzymuje prywatne klucze w <code>C:\Documents and Settings\mylogin\Application Data\SSH\UserKeys\</code> ";
 accessStr.SSHHelp4="<b>Klucz prywatny</b> powienien być przechowywany w bezpiecznym miejscu. Tylko <b>klucz publiczny</b> (<i>gargoyle.pub</i>) powinien być przesłany do Gargoyle. Gargoyle akceptuje wiele kluczy publicznych.";
 accessStr.SSHInvalidKey="Błędny klucz\nupewnij się że plik zawiera poprawny klucz publiczny SSH.";
-accessStr.CnntDsblPwd="Nie można wyłączyć uwierzytelniania hasłem bez ustawiania kluczy";
+accessStr.CnntDsblPwd="Nie można wyłączyć uwierzytelniania hasłem bez ustawienia kluczy";
 
 //javascript
 accessStr.PasswordsDiffer="Hasło nie może być potwierdzone. Podane hasła nie zgadzają się.";
