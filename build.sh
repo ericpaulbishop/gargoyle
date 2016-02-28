@@ -349,16 +349,18 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	echo "fetching openwrt source"
 	rm -rf "$branch_name" "$branch_id"
 	if [ "$branch_is_trunk" = "1" ] ; then 
-		git clone  git://openwrt.org/openwrt.git "$openwrt_src_dir"
+		git clone  git://git.openwrt.org/openwrt.git "$openwrt_src_dir"
 	else
-		git clone  git://openwrt.org/$branch_id/openwrt.git "$openwrt_src_dir"
+		git clone  git://git.openwrt.org/$branch_id/openwrt.git "$openwrt_src_dir"
 	fi
 	if [ ! -d "$openwrt_src_dir" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
-	cd "$openwrt_src_dir"
-	git checkout "$openwrt_commit"	
+	if [ -n "$openwrt_commit" ] ; then
+		cd "$openwrt_src_dir"
+		git checkout "$openwrt_commit"
+	fi
 
 	cd "$top_dir" 
 	mv "$branch_id" "$openwrt_src_dir"
@@ -473,7 +475,7 @@ for target in $targets ; do
 	if [ "$target" = "custom" ] ; then
 		if [ ! -d "$openwrt_package_dir" ] ; then
 			
-			git clone git://openwrt.org/packages.git "$openwrt_package_dir" 
+			git clone git://git.openwrt.org/packages.git "$openwrt_package_dir"
 	
 			cd "$openwrt_package_dir"
 			for gp in $gargoyle_packages ; do
