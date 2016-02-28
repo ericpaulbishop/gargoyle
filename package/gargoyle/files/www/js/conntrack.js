@@ -127,16 +127,6 @@ function updateConnectionTable()
 						var dstPort2 = (line.match(/dport=([^ \t]*)[\t ]+.*dport=([^ \t]*)[\t ]+/))[2];
 						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
 
-						var i = currentLanIp.lastIndexOf('.')
-
-						//filter connections to and from the router
-						if (srcIp.substr(0,i) == dstIp.substr(0,i))
-						{
-							//filter out
-						}
-						else
-						{
-
 						//Connections are weird in that they list src/dest while we are interested in upload/download.
 						//Based on the location of the router WanIP in the connection record we can determine traffic direction
 						if (dstIp2 == currentWanIp) {
@@ -172,7 +162,6 @@ function updateConnectionTable()
 						}
 						tableRow.push(l7proto);
 						tableData.push(tableRow);
-					}
 					}
 					catch(e){}
 				}
