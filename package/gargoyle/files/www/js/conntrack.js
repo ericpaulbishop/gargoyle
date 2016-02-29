@@ -7,6 +7,8 @@
  */
 var connTS=new Object(); //part of i18n
 
+var TSort_Data = new Array('connection_table', 's', 's', 'm', 's', 's');
+
 var updateInProgress;
 var timeSinceUpdate;
 
@@ -206,6 +208,7 @@ function updateConnectionTable()
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
+        		reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
 
 				updateInProgress = false;
 			}

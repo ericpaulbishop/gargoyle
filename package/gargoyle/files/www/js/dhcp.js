@@ -7,6 +7,7 @@
  */
 
 var dhcpS=new Object(); //part of i18n
+var TSort_Data = new Array ('static_ip_table', 's', 's', 'p', '', '');
 
 function saveChanges()
 {
@@ -80,8 +81,13 @@ function saveChanges()
 		{
 			if(newBlockMismatches)
 			{
+<<<<<<< HEAD
+				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
+				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
+=======
 				uci.set("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments", "1");
 				firewallCommands.push("uci set firewall.@defaults[0].enforce_dhcp_assignments=1");
+>>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 			}
 			else
 			{
@@ -391,7 +397,10 @@ function editStatic()
 		catch(e){}
 	}
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -402,7 +411,6 @@ function editStatic()
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-
 
 	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
 
