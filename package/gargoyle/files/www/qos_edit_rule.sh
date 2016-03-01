@@ -16,6 +16,7 @@
 			<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
 		</div>
 		<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+		<span id='source_group_container'></span>
 	</div>
 	<div>
 		<div class='leftcolumn'>
@@ -30,6 +31,7 @@
 			<label id="dest_ip_label" for='dest_ip'><%~ DstIP %>:</label>
 		</div>
 		<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+		<span id='dest_group_container'></span>
 	</div>
 	<div>
 		<div class='leftcolumn'>

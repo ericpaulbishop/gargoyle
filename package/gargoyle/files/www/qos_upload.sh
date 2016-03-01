@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "firewall" -p "qosupload" -c "internal.css" -j "qos.js table.js" -z "qos.js" qos_gargoyle firewall gargoyle -i qos_gargoyle
+	gargoyle_header_footer -h -s "firewall" -p "qosupload" -c "internal.css" -j "qos.js table.js" -z "qos.js" qos_gargoyle firewall gargoyle dhcp -i qos_gargoyle
 %>
 
 <script>
@@ -65,10 +65,15 @@
 		<div class="indent">
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
-					<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
+					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedFields(this,["source_ip","group"], ["",""])' />
+					<label id="source_ip_label" for='source_ip'><%~ SrcIPor %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRangeOrGroup(this)' size='17' maxlength='31' />
+				<span id="source_group_container">
+					<select id="group" disabled onchange="groupSelected('source_ip')">
+						<option value=""><%~ SelGrp %></option>
+					</select>
+				</span>
 			</div>
 			<div>
 				<div class='leftcolumn'>

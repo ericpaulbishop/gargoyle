@@ -1572,3 +1572,24 @@ td.bandwidth_table_column_4
 	text-align:right;
 	border:1px solid #000;
 }
+
+td.device_table_column_1
+{
+	text-align:left;
+}
+
+td.device_table_column_2
+{
+	text-align:center;
+    width:10em;
+}
+
+td.group_table_column_1
+{
+	text-align:left;
+}
+
+td.group_table_column_2
+{
+	text-align:left;
+}

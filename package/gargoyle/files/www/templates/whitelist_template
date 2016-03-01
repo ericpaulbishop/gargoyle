@@ -13,11 +13,16 @@
 <div id="exception_applies_to_container">
 	<div class="widerightcolumnonly" id="exception_applies_to_table_container"></div>
 	<div class="widerightcolumnonly">
-		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)'/>
+		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsMacsOrGroups(this)'/>
 		<input type="button" class="default_button" id="exception_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'/>
 	</div>
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
+		<span id="exception_group_container">
+			<select id="group_exception" onchange='groupException()'>
+				<option value=""><%~ SelGrp %></option>
+			</select>
+		</span>
 	</div>
 </div>
 <div>
@@ -112,7 +117,7 @@
 	<div>
 		<span class='narrowleftcolumn'>
 			<label class='rightcolumn' id="exception_transport_protocol_label" for='exception_transport_protocol'><%~ TrProto %>:</label>
-		</span>	
+		</span>
 		<select class="middlecolumn" id="exception_transport_protocol">
 			<option value="both"><%~ PmAll %></option>
 			<option value="tcp"><%~ PmTCP %></option>

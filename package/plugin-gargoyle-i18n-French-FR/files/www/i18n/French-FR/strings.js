@@ -56,6 +56,7 @@ UI.HsNm="Nom hôte";
 UI.HDsp="Affichage hôte";
 UI.DspHn="Afficher les noms d&apos;hôte";
 UI.DspHIP="Afficher les IP des hôtes";
+UI.SelGrp="Groupe";
 
 UI.never="jamais";
 UI.disabled="désactivé";

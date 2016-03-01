@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "firewall" -p "qosdownload" -c "internal.css" -j "qos.js table.js" -z "qos.js" qos_gargoyle firewall gargoyle -i qos_gargoyle
+	gargoyle_header_footer -h -s "firewall" -p "qosdownload" -c "internal.css" -j "qos.js table.js" -z "qos.js" qos_gargoyle firewall gargoyle dhcp -i qos_gargoyle
 %>
 
 
@@ -36,7 +36,7 @@
 			<label id='qos_enabled_label' for='qos_enabled'><%~ DEnable %></label>
 		</div>
 		<div class="indent">
-			<p><%~ QoSAbout %> 
+			<p><%~ QoSAbout %>
 			</p>
 		</div>
 		<div class="internal_divider"></div>
@@ -80,10 +80,15 @@
 			</div>
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_dest_ip' onclick='enableAssociatedField(this,"dest_ip", "")' />
-					<label id="dest_ip_label" for='dest_ip'><%~ DstIP %>:</label>
+					<input type='checkbox'  id='use_dest_ip' onclick='enableAssociatedFields(this,["dest_ip","group"], ["",""])' />
+					<label id="dest_ip_label" for='dest_ip'><%~ DstIPor %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRangeOrGroup(this)' size='17' maxlength='31' />
+				<span id="dest_group_container">
+					<select id="group" disabled onchange="groupSelected('dest_ip')">
+						<option value=""><%~ SelGrp %></option>
+					</select>
+				</span>
 			</div>
 			<div>
 				<div class='leftcolumn'>
@@ -279,7 +284,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_ptarget_ip' onclick='enableAssociatedField(this, "ptarget_ip", currentWanGateway)'/>&nbsp;&nbsp;
 				<label for='ptarget_ip' id='ptarget_ip_label'><%~ ACC_Pt %>:</label>
-				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' /> 
+				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</span>
 		</div>
 
@@ -287,7 +292,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_auto_pinglimit' onclick='enableAssociatedField(this, "pinglimit", 85)'/>&nbsp;&nbsp;
 				<label for='pinglimit' id='pinglimit_label'><%~ ACC_con %>:</label>
-				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' /> 
+				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' />
 			</span>
 		</div>
 

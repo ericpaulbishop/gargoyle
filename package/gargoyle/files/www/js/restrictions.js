@@ -5,7 +5,7 @@ var pkg = "firewall";
 function saveChanges()
 {
 	setControlsEnabled(false, true);
-	
+
 	var enabledRuleFound = false;
 	var runCommands = [];
 
@@ -24,11 +24,11 @@ function saveChanges()
 		for(ruleIndex =0; ruleIndex < ruleData.length; ruleIndex++)
 		{
 			var check = ruleData[ruleIndex][1];
-			enabledRuleFound = enabledRuleFound || check.checked; 
+			enabledRuleFound = enabledRuleFound || check.checked;
 			uci.set(pkg, check.id, "enabled", check.checked ? "1" : "0");
 		}
 
-		
+
 		//delete all sections of type in uciOriginal & remove them from uciOriginal
 		var originalSections = uciOriginal.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
 		var sectionIndex = 0;
@@ -41,7 +41,7 @@ function saveChanges()
 				deleteSectionCommands.push("uci del " + pkg + "." + originalSections[sectionIndex]);
 			}
 		}
-	
+
 		//create/initialize  sections in uci
 		var newSections = uci.getAllSectionsOfType(pkg, ruleTypes[typeIndex]);
 		for(sectionIndex=0; sectionIndex < newSections.length; sectionIndex++)
@@ -51,7 +51,7 @@ function saveChanges()
 	}
 	deleteSectionCommands.push("uci commit");
 	createSectionCommands.push("uci commit");
-	
+
 
 	var commands = deleteSectionCommands.join("\n") + "\n" + createSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + runCommands.join("\n") + "\n" + "sh /usr/lib/gargoyle/restart_firewall.sh";
 
@@ -59,10 +59,10 @@ function saveChanges()
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
-		{	
+		{
 			uciOriginal = uci.clone();
 			resetData();
-			setControlsEnabled(true);	
+			setControlsEnabled(true);
 			//alert(req.responseText);
 		}
 	}
@@ -91,25 +91,25 @@ function resetData()
 			{
 				var description = uciOriginal.get(pkg, sections[sectionIndex], "description");
 				description = description == "" ? sections[sectionIndex] : description;
-				
+
 				var enabledStr =   uciOriginal.get(pkg, sections[sectionIndex], "enabled");
 				var enabledBool =  (enabledStr == "" || enabledStr == "1" || enabledStr == "true") ;
 				var enabledCheck = createEnabledCheckbox(enabledBool);
 				enabledCheck.id = sections[sectionIndex]; //save section id as checkbox name (yeah, it's kind of sneaky...)
-				
+
 				checkElements.push(enabledCheck);
 				areChecked.push(enabledBool);
-	
+
 				ruleTableData.push([description, enabledCheck, createEditButton(enabledBool)]);
 			}
 		}
-		
+
 		var firstColumn = ruleType == "restriction_rule" ? restStr.RDesc : restStr.ESect;
 		columnNames=[firstColumn, UI.Enabled, ""];
 		ruleTable = createTable(columnNames, ruleTableData, rulePrefix + "table", true, false, removeRuleCallback);
-		
+
 		tableContainer = document.getElementById(rulePrefix + 'table_container');
-		
+
 		if(tableContainer.firstChild != null)
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
@@ -126,6 +126,23 @@ function resetData()
 		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
 		setVisibility(document, rulePrefix);
 	}
+	resetGroupOptions("group");
+	resetGroupOptions("group_exception");
+	document.getElementById("rule_applies_to_addr").value="";
+	document.getElementById("exception_applies_to_addr").value="";
+}
+
+
+function groupRestriction()
+{
+	document.getElementById("rule_applies_to_addr").value = getSelectedValue("group");
+	setSelectedValue("group", "");
+}
+
+function groupException()
+{
+	document.getElementById("exception_applies_to_addr").value = getSelectedValue("group_exception");
+	setSelectedValue("group_exception", "");
 }
 
 
@@ -141,7 +158,7 @@ function addNewRule(ruleType, rulePrefix)
 		var tableContainer = document.getElementById(rulePrefix + 'table_container');
 		var table = tableContainer.firstChild;
 		var tableData = getTableDataArray(table);
-		
+
 		var newIndex = tableData.length+1;
 		var newId = rulePrefix + "" + newIndex;
 		while( uci.get(pkg, newId, "") != "" )
@@ -149,7 +166,7 @@ function addNewRule(ruleType, rulePrefix)
 			newIndex++;
 			newId = rulePrefix + "" + newIndex;
 		}
-		
+
 		setUciFromDocument(document, newId, ruleType, rulePrefix);
 
 		var description = uci.get(pkg, newId, "description");
@@ -157,8 +174,8 @@ function addNewRule(ruleType, rulePrefix)
 
 		var enabledCheck = createEnabledCheckbox(true);
 		enabledCheck.id = newId; //save section id as checkbox name (yeah, it's kind of sneaky...)
-		
-		addTableRow(table, [description, enabledCheck, createEditButton(true)], true, false, removeRuleCallback);	
+
+		addTableRow(table, [description, enabledCheck, createEditButton(true)], true, false, removeRuleCallback);
 
 		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
 
@@ -169,8 +186,8 @@ function addNewRule(ruleType, rulePrefix)
 function setVisibility(controlDocument, rulePrefix)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
-	
+
+
 	setInvisibleIfAnyChecked([rulePrefix + "all_access"], rulePrefix + "resources", "block", controlDocument);
 	setInvisibleIfAnyChecked([rulePrefix + "all_day"], rulePrefix + "hours_active_container", "block", controlDocument);
 	setInvisibleIfAnyChecked([rulePrefix + "every_day"], rulePrefix + "days_active", "block", controlDocument);
@@ -227,7 +244,7 @@ function setInvisibleIfIdMatches(selectId, invisibleOptionValue, associatedEleme
 	controlDocument = controlDocument == null ? document : controlDocument;
 	defaultDisplayMode = defaultDisplayMode == null ? "restriction_rule" : defaultDisplayMode;
 	var visElement = controlDocument.getElementById(associatedElementId);
-	
+
 	if(getSelectedValue(selectId, controlDocument) == invisibleOptionValue && visElement != null)
 	{
 		visElement.style.display = "none";
@@ -254,7 +271,7 @@ function createEditButton(enabled, ruleType, rulePrefix)
 	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editRule;
-	
+
 	editButton.className = enabled ? "default_button" : "default_button_disabled" ;
 	editButton.disabled  = enabled ? false : true;
 
@@ -304,7 +321,7 @@ function editRule()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -318,7 +335,7 @@ function editRule()
 
 
 	editRuleWindow = window.open(editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
-	
+
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
 	saveButton.value = UI.CApplyChanges;
@@ -328,7 +345,7 @@ function editRule()
 
 	editRuleSectionId = editRow.childNodes[1].firstChild.id;
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(editRuleWindow.document != null)
@@ -337,7 +354,7 @@ function editRule()
 			{
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editRuleWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-		
+
 				setDocumentFromUci(editRuleWindow.document, uci, editRuleSectionId, editRuleType, editRulePrefix);
 				setVisibility(editRuleWindow.document, editRulePrefix);
 
@@ -362,13 +379,14 @@ function editRule()
 						}
 						editRuleWindow.close();
 					}
-					
+
 				}
 				editRuleWindow.moveTo(xCoor,yCoor);
 				editRuleWindow.focus();
 				updateDone = true;
-				
+
 			}
+			resetGroupOptions("group", editRuleWindow.document);
 		}
 		if(!updateDone)
 		{
@@ -383,7 +401,7 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
 	var newAddrs = controlDocument.getElementById(textId).value;
-	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
+	var valid = macsValid ?  validateMultipleIpsMacsOrGroups(newAddrs) : validateMultipleIpsorGroups(newAddrs);
 	if(valid == 0)
 	{
 		var tableContainer = controlDocument.getElementById(tableContainerId);
@@ -391,12 +409,12 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 		newAddrs = newAddrs.replace(/^[\t ]*/, "");
 		newAddrs = newAddrs.replace(/[\t ]*$/, "");
 		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
-		
+
 		while(addrs.length > 0)
 		{
 			addTableRow(table, [ addrs.shift() ], true, false);
 		}
-		
+
 		if(tableContainer.childNodes.length == 0)
 		{
 			tableContainer.appendChild(table);
@@ -412,7 +430,7 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tableId)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	var newUrl = controlDocument.getElementById(textId).value;
 	var urlType = getSelectedValue(selectId, controlDocument);
 	var valid = validateUrl(newUrl, selectId, controlDocument);
@@ -454,65 +472,9 @@ function validateRule(controlDocument, rulePrefix)
 		visibilityIds[2] = rulePrefix + "resources";
 		visibilityIds[3] = rulePrefix + "resources";
 	}
-	
+
 	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
 }
-function validateMultipleIps(ips)
-{
-	ips = ips.replace(/^[\t ]+/g, "");
-	ips = ips.replace(/[\t ]+$/g, "");
-	var splitIps = ips.split(/[\t ]*,[\t ]*/);
-	var valid = splitIps.length > 0 ? 0 : 1;
-	while(valid == 0 && splitIps.length > 0)
-	{
-		var nextIp = splitIps.pop();
-		if(nextIp.match(/-/))
-		{
-			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else
-		{
-			valid = validateIpRange(nextIp);
-		}
-	}
-	return valid;
-}
-function proofreadMultipleIps(input)
-{
-	proofreadText(input, validateMultipleIps, 0);
-}
-function proofreadMultipleIpsOrMacs(input)
-{
-	proofreadText(input, validateMultipleIpsOrMacs, 0);
-}
-function validateMultipleIpsOrMacs(addresses)
-{
-	var addr = addresses.replace(/^[\t ]+/g, "");
-	addr = addr.replace(/[\t ]+$/g, "");
-	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
-	var valid = splitAddr.length > 0 ? 0 : 1;
-	while(valid == 0 && splitAddr.length > 0)
-	{
-		var nextAddr = splitAddr.pop();
-		if(nextAddr.match(/-/))
-		{
-			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else if(nextAddr.match(/:/))
-		{
-			valid = validateMac(nextAddr);
-		}
-		else
-		{
-			valid = validateIpRange(nextAddr);
-		}
-	}
-	return valid;
-
-}
-
 function validateMultiplePorts(portStr)
 {
 	portStr = portStr.replace(/^[\t ]+/g, "");
@@ -548,7 +510,7 @@ function proofreadUrl(input)
 function createUrlSpan(urlStr, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	var splitUrl = [];
 	while(urlStr.length > 0)
 	{
@@ -556,7 +518,7 @@ function createUrlSpan(urlStr, controlDocument)
 		urlStr = urlStr.substr(30);
 		splitUrl.push(urlStr.length > 0 ? next + "-" : next);
 	}
-	
+
 	var urlSpan = controlDocument.createElement('span');
 	while(splitUrl.length > 0)
 	{
@@ -593,7 +555,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	controlDocument = controlDocument == null ? document : controlDocument;
 
 	var description = sourceUci.get(pkg, sectionId, "description");
-	description = description == "" ? sectionId : description;	
+	description = description == "" ? sectionId : description;
 	controlDocument.getElementById(rulePrefix + "name").value = description;
 
 	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
@@ -618,7 +580,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	{
 		days = dayStr.split(/,/);
 	}
-	
+
 	var everyDay = (daysAndHours == "");
 	var dayIndex=0;
 	for(dayIndex = 0; dayIndex < allDays.length; dayIndex++)
@@ -650,7 +612,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	app_proto_type = app_proto == "" ? "all" : app_proto_type;
 	setSelectedValue(rulePrefix + "app_protocol_type", app_proto_type, controlDocument);
 	setSelectedValue(rulePrefix + "app_protocol", app_proto, controlDocument);
-	
+
 
 
 
@@ -680,7 +642,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 		}
 	}
 	setSelectedValue(rulePrefix + "url_type", urlMatchType, controlDocument);
-	
+
 	var urlTableContainer = controlDocument.getElementById(rulePrefix + "url_match_table_container");
 	if(urlTableContainer.childNodes.length > 0)
 	{
@@ -711,7 +673,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 
 
 	controlDocument.getElementById(rulePrefix + "url_match").value = "";
-	
+
 	var allResourcesBlocked = true;
 	var resourceTypeIds = ["remote_ip_type", "remote_port_type", "local_port_type", "transport_protocol", "app_protocol_type", "url_type" ];
 	for(typeIndex=0; typeIndex < resourceTypeIds.length; typeIndex++)
@@ -740,13 +702,12 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 	if(tableContainer.childNodes.length > 0)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
-	}	
+	}
 	if(optionValue != "")
 	{
 		optionValue = optionValue.replace(/^[\t ]*/, "");
 		optionValue = optionValue.replace(/[\t ]*$/, "");
 		var ips = optionValue.split(/[\t ]*,[\t ]*/);
-
 
 		var table = createTable([""], [], tableId, true, false, null, null, controlDocument);
 		while(ips.length > 0)
@@ -754,7 +715,7 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 			addTableRow(table, [ ips.shift() ], true, false, null, null, controlDocument);
 		}
 		tableContainer.appendChild(table);
-		
+
 		controlDocument.getElementById(textId).value = "";
 	}
 }
@@ -777,17 +738,17 @@ function setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, opt
 
 function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 {
-	// note: we assume error checking has already been done 
+	// note: we assume error checking has already been done
 	uci.removeSection(pkg, sectionId);
 	uci.set(pkg, sectionId, "", ruleType);
 	uci.set(pkg, sectionId, "is_ingress", "0");
 
 
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	uci.set(pkg, sectionId, "", ruleType);
 	uci.set(pkg, sectionId, "description", controlDocument.getElementById(rulePrefix + "name").value);
-	
+
 	setFromIpTable(controlDocument, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to");
 
 	var daysActive = controlDocument.getElementById(rulePrefix + "days_active");
@@ -795,7 +756,7 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 	{
 		var daysActive = [];
 		var dayIds = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-		
+
 		for(dayIndex =0; dayIndex < dayIds.length; dayIndex++)
 		{
 			if(controlDocument.getElementById(rulePrefix + dayIds[dayIndex]).checked)
@@ -816,7 +777,7 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 		setFromIpTable(controlDocument, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
 		setIfVisible(controlDocument, pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
 		setIfVisible(controlDocument, pkg, sectionId, "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port_type");
-		
+
 		uci.set(pkg, sectionId, "proto", getSelectedValue(rulePrefix + "transport_protocol", controlDocument));
 
 		var appProtocolType = getSelectedValue(rulePrefix + "app_protocol_type", controlDocument);

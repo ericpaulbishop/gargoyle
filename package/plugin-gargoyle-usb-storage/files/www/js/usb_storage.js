@@ -1115,7 +1115,7 @@ function setDocumentFromShareData(controlDocument, shareData)
 	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", controlDocument);
 	if(nfsAccessIps instanceof Array)
 	{
-		addAddressStringToTable(controlDocument,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
+		addAddressStringToTable(controlDocument,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, false, true, 250)
 	}
 
 	//update user select element

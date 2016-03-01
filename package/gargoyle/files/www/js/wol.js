@@ -18,26 +18,39 @@ function initWolTable()
 	initializeDescriptionVisibility(uciOriginal, "wol_help"); // set description visibility
 	uciOriginal.removeSection("gargoyle", "help"); // necessary, or we overwrite the help settings when we save
 
-	arpLines.shift(); // skip header
+  var hosts = uciOriginal.getAllSectionsOfType("dhcp", "host");
 	var lineIndex = 0;
+	for(lineIndex=0; lineIndex < hosts.length; lineIndex++)
+	{
+		var host = hosts[lineIndex];
+    var ip = uciOriginal.get("dhcp", host, "ip");
+    var mac = uciOriginal.get("dhcp", host, "mac");
+		dataList.push( [ host, ip, mac, createWakeUpButton() ] );
+    ipToHostAndMac[ip] = 1;
+  }
+
+	arpLines.shift(); // skip header
 	for(lineIndex=0; lineIndex < arpLines.length; lineIndex++)
 	{
 		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = splitLine[3].toUpperCase();
 		var ip = splitLine[0];
-		dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
-		ipToHostAndMac[ip] = 1;
+		if(ipToHostAndMac[ip] == null)
+		{
+		  var mac = splitLine[3].toUpperCase();
+		  dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
+		  ipToHostAndMac[ip] = 1;
+    }
 	}
 
 	for(lineIndex=0; lineIndex < dhcpLeaseLines.length; lineIndex++)
 	{
 		var leaseLine = dhcpLeaseLines[lineIndex];
 		var splitLease = leaseLine.split(/[\t ]+/);
-		var mac = splitLease[1].toUpperCase();
 		var ip = splitLease[2];
 		if(ipToHostAndMac[ip] == null)
 		{
+		  var mac = splitLease[1].toUpperCase();
 			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
 			ipToHostAndMac[ip] = 1;
 		}
@@ -46,10 +59,10 @@ function initWolTable()
 	for(lineIndex=0; lineIndex < etherData.length; lineIndex++)
 	{
 		var ether = etherData[lineIndex];
-		var mac = ether[0].toUpperCase();
 		var ip = ether[1];
 		if(ipToHostAndMac[ip] == null)
 		{
+		  var mac = ether[0].toUpperCase();
 			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
 			ipToHostAndMac[ip] = 1;
 		}
