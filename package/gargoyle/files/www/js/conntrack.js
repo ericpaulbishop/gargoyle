@@ -208,7 +208,7 @@ function updateConnectionTable()
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
-        		reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
+				reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
 
 				updateInProgress = false;
 			}

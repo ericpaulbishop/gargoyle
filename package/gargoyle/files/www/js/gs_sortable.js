@@ -30,44 +30,57 @@ function TSort_StoreDef () {
 
 function tsInitOnload ()
 {
-	//	If TSort_All is not initialized - do it now (simulate old behavior)
-	if	(TSort_All == null)
+	// If TSort_All is not initialized - do it now (simulate old behavior)
+	if(TSort_All == null)
+	{
 		tsRegister();
-
+	}
 	for (var id in TSort_All)
 	{
 		tsSetTable (id);
 		tsInit();
 	}
-	if	(window.onload_sort_table)
+	if(window.onload_sort_table)
+	{
 		window.onload_sort_table();
+	}
 }
 
 function tsInit()
 {
 
-	if	(TSort_Data.push == null)
+	if (TSort_Data.push == null)
+	{
 		return;
+	}
 	var table_id = TSort_Data[0];
 	var table = document.getElementById(table_id);
+	if(table == null)
+	{
+		return;
+	}
 	// Find thead
 	var thead = table.getElementsByTagName('thead')[0];
-	if	(thead == null)
+	if(thead == null)
 	{
 		alert ('Cannot find THEAD tag!');
 		return;
 	}
 	var tr = thead.getElementsByTagName('tr');
 	var cols, i, node, len;
-	if	(tr.length > 1)
+	if(tr.length > 1)
 	{
 		var	cols0 = tr[0].getElementsByTagName('th');
-		if	(cols0.length == 0)
+		if (cols0.length == 0)
+		{
 			cols0 = tr[0].getElementsByTagName('td');
+		}
 		var cols1;
-		var	cols1 = tr[1].getElementsByTagName('th');
-		if	(cols1.length == 0)
+		var cols1 = tr[1].getElementsByTagName('th');
+		if(cols1.length == 0)
+		{
 			cols1 = tr[1].getElementsByTagName('td');
+		}
 		cols = new Array ();
 		var j0, j1, n;
 		len = cols0.length;
@@ -75,7 +88,7 @@ function tsInit()
 		{
 			node = cols0[j0];
 			n = node.colSpan;
-			if	(n > 1)
+			if (n > 1)
 			{
 				while (n > 0)
 				{
@@ -85,7 +98,7 @@ function tsInit()
 			}
 			else
 			{
-				if	(node.rowSpan == 1)
+				if (node.rowSpan == 1)
 					j1++;
 				cols.push (node);
 			}
@@ -94,20 +107,24 @@ function tsInit()
 	else
 	{
 		cols = tr[0].getElementsByTagName('th');
-		if	(cols.length == 0)
+		if(cols.length == 0)
+		{
 			cols = tr[0].getElementsByTagName('td');
+		}
 	}
 	len = cols.length;
 	for (var i = 0; i < len; i++)
 	{
-		if	(i >= TSort_Data.length - 1)
+		if(i >= TSort_Data.length - 1)
+		{
 			break;
+		}
 		node = cols[i];
 		var sorting = TSort_Data[i + 1].toLowerCase();
-		if	(sorting == null)  sorting = '';
+		if (sorting == null)  { sorting = ''; }
 		TSort_Store.sorting.push(sorting);
-
-		if	((sorting != null)&&(sorting != ''))
+		
+		if((sorting != null)&&(sorting != ''))
 		{
 //			node.tsort_col_id = i;
 //			node.tsort_table_id = table_id;
@@ -121,7 +138,7 @@ function tsInit()
 
 	// Get body data
 	var tbody = table.getElementsByTagName('tbody')[0];
-	if	(tbody == null)	return;
+	if(tbody == null) { return; }
 	// Get TR rows
 	var rows = tbody.getElementsByTagName('tr');
 	var date = new Date ();
@@ -137,53 +154,57 @@ function tsInit()
 			text = cols[j].innerHTML.replace(/^\s+/, '');
 			text = text.replace(/\s+$/, '');
 			var sorting = TSort_Store.sorting[j];
-			if	(sorting == 'h')
+			if (sorting == 'h')
 			{
 				text = text.replace(/<[^>]+>/g, '');
 				text = text.toLowerCase();
 			}
-			else if	(sorting == 's')
+			else if (sorting == 's')
+			{
 				text = text.toLowerCase();
+			}
 			else if (sorting == 'i')
 			{
 				text = parseInt(text);
-				if	(isNaN(text))	text = 0;
+				if (isNaN(text))	text = 0;
 			}
 			else if (sorting == 'n')
 			{
 				text = text.replace(/(\d)\,(?=\d\d\d)/g, "$1");
 				text = parseInt(text);
-				if	(isNaN(text))	text = 0;
+				if(isNaN(text)) { text = 0; }
 			}
 			else if (sorting == 'c')
 			{
 				text = text.replace(/^\$/, '');
 				text = text.replace(/(\d)\,(?=\d\d\d)/g, "$1");
 				text = parseFloat(text);
-				if	(isNaN(text))	text = 0;
+				if (isNaN(text))	text = 0;
 			}
 			else if (sorting == 'f')
 			{
 				text = parseFloat(text);
-				if	(isNaN(text))	text = 0;
+				if (isNaN(text))	text = 0;
 			}
 			else if (sorting == 'g')
 			{
 				text = text.replace(/(\d)\,(?=\d\d\d)/g, "$1");
 				text = parseFloat(text);
-				if	(isNaN(text))	text = 0;
+				if (isNaN(text))	text = 0;
 			}
 			else if (sorting == 'd')
 			{
-				if	(text.match(/^\d\d\d\d\-\d\d?\-\d\d?(?: \d\d?:\d\d?:\d\d?)?$/))
+				if (text.match(/^\d\d\d\d\-\d\d?\-\d\d?(?: \d\d?:\d\d?:\d\d?)?$/))
 				{
 					a = text.split (/[\s\-:]/);
-					text = (a[3] == null)?
-						Date.UTC(a[0], a[1] - 1, a[2],    0,    0,    0, 0):
+					text = (a[3] == null) ?
+						Date.UTC(a[0], a[1] - 1, a[2],    0,    0,    0, 0) :
 						Date.UTC(a[0], a[1] - 1, a[2], a[3], a[4], a[5], 0);
 				}
 				else
+				{
 					text = Date.parse(text);
+				}
 			}
 			else if (sorting == 'p')
 			{
@@ -191,7 +212,7 @@ function tsInit()
 				text = text.replace(/\.(?=\d\d(\.|$))/g, "0");
 				text = text.replace(/\./g, "");
 				text = parseInt(text);
-				if	(isNaN(text))	text = 0;
+				if (isNaN(text))	text = 0;
 			}
 			else if (sorting == 'm')
 			{
@@ -221,7 +242,8 @@ function tsInit()
 				else if (metric[1] == "k" )
 				{
 					text = float * 1000
-				} else
+				}
+				else
 				{
 					text = float;
 				}
@@ -233,11 +255,11 @@ function tsInit()
 	}
 	TSort_Store.initialized = 1;
 
-	if	(TSort_Store.cookie)
+	if(TSort_Store.cookie)
 	{
 		var allc = document.cookie;
 		i = allc.indexOf (TSort_Store.cookie + '=');
-		if	(i != -1)
+		if(i != -1)
 		{
 			i += TSort_Store.cookie.length + 1;
 			len = allc.indexOf (";", i);
@@ -248,61 +270,73 @@ function tsInit()
 	}
 
 
-	var	initial = TSort_Store.initial;
-	if	(initial != null)
+	var initial = TSort_Store.initial;
+	if (initial != null)
 	{
 		var itype = typeof initial;
-		if	((itype == 'number')||(itype == 'string'))
+		if ((itype == 'number')||(itype == 'string'))
+		{
 			tsDraw(initial);
+		}
 		else
 		{
 			for (i = initial.length - 1; i >= 0; i--)
+			{
 				tsDraw(initial[i]);
+			}
 		}
 	}
 }
 
 function tsDraw(p_id, p_table)
 {
-	if	(p_table != null)
+	if(p_table != null)
+	{
 		tsSetTable (p_table);
 
-	if	((TSort_Store == null)||(TSort_Store.initialized == 0))
+	}
+	if((TSort_Store == null)||(TSort_Store.initialized == 0))
+	{
 		return;
+	}
 
 	var i = 0;
 	var sort_keys = TSort_Store.sort_keys;
 	var id;
 	var new_order = '';
-	if	(p_id != null)
+	if(p_id != null)
 	{
-		if	(typeof p_id == 'number')
+		if(typeof p_id == 'number')
+		{
 			id = p_id;
-		else	if	((typeof p_id == 'string')&&(p_id.match(/^\d+[ADU]$/i)))
+		}
+		else if ((typeof p_id == 'string')&&(p_id.match(/^\d+[ADU]$/i)))
 		{
 			id = p_id.replace(/^(\d+)[ADU]$/i, "$1");
 			new_order = p_id.replace(/^\d+([ADU])$/i, "$1").toUpperCase();
 		}
 	}
-	if	(id == null)
+	if (id == null)
 	{
 		id = this.tsort_col_id;
-		if	((p_table == null)&&(this.tsort_table_id != null))
+		if ((p_table == null)&&(this.tsort_table_id != null))
+		{
 			tsSetTable (this.tsort_table_id);
+		}
 	}
 	var table_id = TSort_Data[0];
 
 	var order = TSort_Store.sort_state[id];
-	if	(new_order == 'U')
+	if (new_order == 'U')
 	{
-		if	(order != null)
+		if (order != null)
 		{
 			TSort_Store.sort_state[id] = null;
 			obj = document.getElementById ('TS_' + id + '_' + table_id);
-			if	(obj != null)	obj.innerHTML = '';
+			if (obj != null)	obj.innerHTML = '';
 		}
 	}
-	else if	(new_order != '')
+	else if (new_order != '')
 	{
 		TSort_Store.sort_state[id] = (new_order == 'A')? true: false;
 		//	Add column number to the sort keys array
@@ -311,7 +345,7 @@ function tsDraw(p_id, p_table)
 	}
 	else
 	{
-		if	((order == null)||(order == true))
+		if((order == null)||(order == true))
 		{
 			TSort_Store.sort_state[id] = (order == null)? true: false;
 			//	Add column number to the sort keys array
@@ -322,7 +356,7 @@ function tsDraw(p_id, p_table)
 		{
 			TSort_Store.sort_state[id] = null;
 			obj = document.getElementById ('TS_' + id + '_' + table_id);
-			if	(obj != null)	obj.innerHTML = '';
+			if (obj != null)	obj.innerHTML = '';
 		}
 	}
 
@@ -331,7 +365,7 @@ function tsDraw(p_id, p_table)
 	//	array (i = 0) or remove duplicate column number if present (i = 1).
 	while (i < len)
 	{
-		if	(sort_keys[i] == id)
+		if(sort_keys[i] == id)
 		{
 			sort_keys.splice(i, 1);
 			len--;
@@ -339,11 +373,11 @@ function tsDraw(p_id, p_table)
 		}
 		i++;
 	}
-	if	(len > 3)
+	if (len > 3)
 	{
 		i = sort_keys.pop();
 		obj = document.getElementById ('TS_' + i + '_' + table_id);
-		if	(obj != null)	obj.innerHTML = '';
+		if (obj != null)	obj.innerHTML = '';
 		TSort_Store.sort_state[i] = null;
 	}
 
@@ -354,7 +388,7 @@ function tsDraw(p_id, p_table)
 	rows.sort(tsSort);
 	len = rows.length;
 	var classes = TSort_Store.classes;
-	if	(classes == null)
+	if(classes == null)
 	{
 		for (i = 0; i < len; i++)
 			tbody.appendChild(rows[i]);
@@ -368,7 +402,7 @@ function tsDraw(p_id, p_table)
 		{
 			row = rows[i];
 			row.className = classes[j++];
-			if	(j >= cl_len)  j = 0;
+			if (j >= cl_len)  { j = 0; }
 			tbody.appendChild(row);
 		}
 	}
@@ -380,7 +414,7 @@ function tsDraw(p_id, p_table)
 	{
 		id = sort_keys[i];
 		obj = document.getElementById ('TS_' + id + '_' + table_id);
-		if	(obj == null)  continue;
+		if(obj == null)  { continue; }
 		state = (TSort_Store.sort_state[id])? 0: 1;
 		icon = TSort_Store.icons[state];
 		obj.innerHTML = (icon.match(/</))? icon:
@@ -388,7 +422,7 @@ function tsDraw(p_id, p_table)
 		sorting.push(id + ((state)? 'D': 'A'));
 	}
 
-	if	(TSort_Store.cookie)
+	if (TSort_Store.cookie)
 	{
 		//	Store the contents of "sorting" array into a cookie for 30 days
 		var date = new Date();
@@ -416,11 +450,15 @@ function tsSort(a, b)
 
 		var v_a = data_a[id];
 		var v_b = data_b[id];
-		if	(v_a == v_b)  continue;
-		if	((type == 'i')||(type == 'f')||(type == 'd'))
+		if (v_a == v_b)  { continue; }
+		if((type == 'i')||(type == 'f')||(type == 'd'))
+		{
 			result = v_a - v_b;
+		}
 		else
+		{
 			result = (v_a < v_b)? -1: 1;
+		}
 		order = TSort_Store.sort_state[id];
 		return (order)? result: 0 - result;
 	}
@@ -430,43 +468,47 @@ function tsSort(a, b)
 
 function tsRegister()
 {
-	if	(TSort_All == null)
+	if(TSort_All == null)
+	{
 		TSort_All = new Object();
-
+	}
 	var ts_obj = new TSort_StoreDef();
 	ts_obj.sort_data = TSort_Data;
 	TSort_Data = null;
-	if	(typeof TSort_Classes != 'undefined')
+	if (typeof TSort_Classes != 'undefined')
 	{
 		ts_obj.classes = TSort_Classes;
 		TSort_Classes = null;
 	}
-	if	(typeof TSort_Initial != 'undefined')
+	if (typeof TSort_Initial != 'undefined')
 	{
 		ts_obj.initial = TSort_Initial;
 		TSort_Initial = null;
 	}
-	if	(typeof TSort_Cookie != 'undefined')
+	if (typeof TSort_Cookie != 'undefined')
 	{
 		ts_obj.cookie = TSort_Cookie;
 		TSort_Cookie = null;
 	}
-	if	(typeof TSort_Icons != 'undefined')
+	if (typeof TSort_Icons != 'undefined')
 	{
 		ts_obj.icons = TSort_Icons;
 		TSort_Icons = null;
 	}
-	if	(ts_obj.icons == null)
+	if (ts_obj.icons == null)
+	{
 		ts_obj.icons = new Array ("\u2193", "\u2191");
-
-	if	(ts_obj.sort_data != null)
+	}
+	if (ts_obj.sort_data != null)
+	{
 		TSort_All[ts_obj.sort_data[0]] = ts_obj;
+	}
 }
 
-function	tsSetTable (p_id)
+function tsSetTable (p_id)
 {
 	TSort_Store = TSort_All[p_id];
-	if	(TSort_Store == null)
+	if (TSort_Store == null)
 	{
 		alert ("Cannot set table '" + p_id + "' - table is not registered");
 		return;
@@ -474,14 +516,20 @@ function	tsSetTable (p_id)
 	TSort_Data = TSort_Store.sort_data;
 }
 
-if	(window.addEventListener)
+if (window.addEventListener)
+{
 	window.addEventListener("load", tsInitOnload, false);
+}
 else if (window.attachEvent)
+{
 	window.attachEvent ("onload", tsInitOnload);
+}
 else
 {
 	if  ((window.onload_sort_table == null)&&(window.onload != null))
+	{
 		window.onload_sort_table = window.onload;
+	}
 	// Assign new onload function
 	window.onload = tsInitOnload;
 }
