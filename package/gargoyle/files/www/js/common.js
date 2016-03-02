@@ -8,6 +8,7 @@
 
 var UI=new Object(); //part of i18n
 var TiZ=new Object(); //i18n timezones
+var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
 
 window.onresize = function onresize()
 {
@@ -2931,6 +2932,7 @@ function ObjLen(an_obj)
 	return len
 }
 
+
 function groupHosts(group)
 {
 	var groupHosts = [];
@@ -2995,4 +2997,15 @@ function resetGroupOptions(selectId, controlDocument)
 			selectElement.disabled = false;
 		}
 	}
+}
+
+function reregisterTableSort()
+{
+    TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+    var args = Array.prototype.slice.call(arguments);
+    TSort_Data = args;
+    TSort_Initial = '0A';
+    tsRegister();
+    tsSetTable (args[0]);
+    tsInit();
 }

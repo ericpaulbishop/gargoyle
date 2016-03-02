@@ -7,6 +7,7 @@
  */
 
 var usbSStr=new Object(); //part of i18n
+var TSort_Data = new Array ('share_table', 's', 's', 's', 's');
 
 /*
  * mountPoint refers to the blkid mount point

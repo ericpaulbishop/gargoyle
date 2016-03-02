@@ -7,6 +7,8 @@
  */
 var connTS=new Object(); //part of i18n
 
+var TSort_Data = new Array('connection_table', 's', 's', 'm', 's', 's');
+
 var updateInProgress;
 var timeSinceUpdate;
 
@@ -127,6 +129,8 @@ function updateConnectionTable()
 						var dstPort2 = (line.match(/dport=([^ \t]*)[\t ]+.*dport=([^ \t]*)[\t ]+/))[2];
 						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
 
+						var wan_connection = true;
+
 						//Connections are weird in that they list src/dest while we are interested in upload/download.
 						//Based on the location of the router WanIP in the connection record we can determine traffic direction
 						if (dstIp2 == currentWanIp) {
@@ -143,27 +147,30 @@ function updateConnectionTable()
 							localPort = srcPort2;
 							WanIp = dstIp2;
 							WanPort = dstPort2;
-						} else {
-							// filter out LAN-LAN connections
+						} else {	// filter out LAN-LAN connections
+							wan_connection = false;
 						}
 
-						var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
+						if (wan_connection)
+						{
+							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
 								protocol,
 								textListToSpanElement([ getHostDisplay(WanIp) + ":" + WanPort, getHostDisplay(localIp) + ":" + localPort]),
 								textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 								];
-						if(qosEnabled)
-						{
-							var getQosName = function(mask, mark)
+							if(qosEnabled)
 							{
-								var section = mask == "" ? "" : markToQosClass[ (mask & mark) ];
-								var name = uciOriginal.get("qos_gargoyle", section, "name");
-								return name == "" ? "NA" : name;
+								var getQosName = function(mask, mark)
+								{
+									var section = mask == "" ? "" : markToQosClass[ (mask & mark) ];
+									var name = uciOriginal.get("qos_gargoyle", section, "name");
+									return name == "" ? "NA" : name;
+								}
+								tableRow.push( textListToSpanElement([getQosName(qosUpMask, connmark), getQosName(qosDownMask, connmark)]) );
 							}
-							tableRow.push( textListToSpanElement([getQosName(qosUpMask, connmark), getQosName(qosDownMask, connmark)]) );
+							tableRow.push(l7proto);
+							tableData.push(tableRow);
 						}
-						tableRow.push(l7proto);
-						tableData.push(tableRow);
 					}
 					catch(e){}
 				}
@@ -201,6 +208,7 @@ function updateConnectionTable()
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
+				reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
 
 				updateInProgress = false;
 			}

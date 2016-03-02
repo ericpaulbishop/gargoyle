@@ -8,6 +8,8 @@
 
 var quotasStr=new Object(); //part of i18n
 
+var TSort_Data = new Array ('quota_table', 's', 's', 'm', '');
+
 var pkg = "firewall";
 var changedIds = [];
 var rowCheckIndex = 3;
@@ -164,7 +166,6 @@ function resetData()
 	setDocumentFromUci(document, new UCIContainer(), "");
 
 	resetGroupOptions("group");
-
 	setVisibility(document);
 }
 
@@ -1191,7 +1192,6 @@ function editQuota()
 
 	var editRow=this.parentNode.parentNode;
 	var editId = editRow.childNodes[rowCheckIndex].firstChild.id;
-
 	var editIp;
 
 	var editSection = "";
@@ -1252,7 +1252,6 @@ function editQuota()
 							{
 								changedIds[newId] = 1;
 							}
-
 
 							setElementAtColumn(hostsToTableSpan(newIp), 0);
 							editRow.childNodes[rowCheckIndex].firstChild.id = newId;

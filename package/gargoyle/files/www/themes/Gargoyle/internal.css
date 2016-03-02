@@ -237,6 +237,11 @@ table
 	border-collapse:collapse
 }
 
+thead
+{
+    text-align:center;
+}
+
 tr.table_row_add
 {
 	text-align:center;

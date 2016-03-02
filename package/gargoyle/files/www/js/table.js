@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
@@ -10,16 +10,18 @@
 function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	var newTable = controlDocument.createElement('table');
+	var thead = controlDocument.createElement('thead');
+	newTable.appendChild(thead);
 	var tableBody = controlDocument.createElement('tbody');
 	newTable.appendChild(tableBody);
 	newTable.id=tableId;
 
 	var row = controlDocument.createElement('tr');
 	row.className='header_row';
-	tableBody.appendChild(row);
-	
+	thead.appendChild(row);
+
 	var columnIndex;
 	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
 	{
@@ -61,7 +63,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 			row.appendChild(header);
 		}
 	}
-	
+
 	if(rowData != null)
 	{
 		for (rowIndex in rowData)
@@ -78,13 +80,13 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	rowRemoveCallback = rowRemoveCallback == null ? function(){} : rowRemoveCallback;
 	rowMoveCallback = rowMoveCallback == null ? function(){} : rowMoveCallback;
 
 
 	row = controlDocument.createElement('tr');
-	tableBody=table.firstChild;
+	tableBody=table.tBodies[0];
 	numRows= tableBody.rows.length;
 	tableBody.appendChild(row);
 
@@ -118,7 +120,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cellContent = createInput("button", controlDocument);
 		cellContent.value = UI.Remove;
 		cellContent.className="default_button";
-		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); }; 
+		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
 		cell.appendChild(cellContent);
@@ -140,7 +142,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cellContent = createInput("button", controlDocument);
 		cellContent.value = String.fromCharCode(8595);
 		cellContent.className="default_button";
-		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); }; 
+		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
 		cell.appendChild(cellContent);
@@ -166,7 +168,7 @@ function moveThisCellsRowUp(button)
 {
 	row=button.parentNode.parentNode;
 	tableBody=row.parentNode;
-	
+
 	allRows =tableBody.childNodes;
 	rowIndex = 1;
 	while(rowIndex < allRows.length && allRows[rowIndex] != row ) { rowIndex++; }
@@ -183,7 +185,7 @@ function moveThisCellsRowDown(button)
 {
 	row=button.parentNode.parentNode;
 	tableBody=row.parentNode;
-	
+
 	allRows =tableBody.childNodes;
 	rowIndex = 1;
 	while(rowIndex < allRows.length && allRows[rowIndex] != row ) { rowIndex++; }
@@ -202,9 +204,9 @@ function moveThisCellsRowDown(button)
 
 function getTableDataArray(table, rowsAreRemovable, rowsAreMovable)
 {
-			
+
 	numEmptyCells = (rowsAreRemovable ? 1 : 0) + (rowsAreMovable ? 2 : 0);
-	
+
 	data = new Array();
 	rows = table.rows;
 	rowIndex = 0;
@@ -255,7 +257,7 @@ function setRowClasses(table, enabled)
 		{
 			rows[rowIndex].className = rowIndex % 2 == 0 ? 'disabled_even' : 'disabled_odd';
 		}
-		
+
 		cells = rows[rowIndex].childNodes;
 		for(cellIndex = 0; cellIndex < cells.length; cellIndex++)
 		{
@@ -265,7 +267,7 @@ function setRowClasses(table, enabled)
 				cellContent.disabled = (enabled == false);
 				cellContent.className = (enabled == false) ? "default_button_disabled" : "default_button";
 			}
-		}		
+		}
 		rowIndex++;
 	}
 	tableSanityCheck(table);

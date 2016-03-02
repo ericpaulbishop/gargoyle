@@ -7,6 +7,7 @@
  */
 
 var dhcpS=new Object(); //part of i18n
+var TSort_Data = new Array ('static_ip_table', 's', 's', 'p', '', '');
 
 function saveChanges()
 {

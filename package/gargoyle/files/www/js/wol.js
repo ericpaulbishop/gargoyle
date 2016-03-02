@@ -8,6 +8,8 @@
 
 var wolS=new Object(); //part of i18n
 
+var TSort_Data = new Array ('wol_table', 's', 'p', 's');
+
 function initWolTable()
 {
 	var dataList = [];
