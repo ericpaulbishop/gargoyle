@@ -6,13 +6,13 @@
 						<th></th>
 					</tr>
 					<tr class='table_row_add'>
-						<td><input type='text' id='add_host' size='15' placeholder="a-zA-Z0-9_" onkeyup='proofreadUCI(this)'/></td>
+						<td><input type='text' id='add_host' size='15' onkeyup='proofreadUCI(this)'/></td>
 						<td><input type='text' id='add_mac' size='32' onkeyup='proofreadMultipleMacs(this)'/></td>
 						<td><input type='text' id='add_ip' size='12' onkeyup='proofreadIp(this)' maxLength='15'/></td>
 						<td><input type='button' id='add_device_button' value="<%~ Add %>" class='default_button' onclick='addDevice()'/></td>
 					</tr>
 					<tr>
-						<td></td>
+						<td><em>Only: A-Za-z0-9_</em></td>
 						<td>
 							<select id="mac_list" onchange="macSelected()" >
 								<option value="none"><%~ SelM %></option>
