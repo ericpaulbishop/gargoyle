@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-i18n-German-DE
-PKG_VERSION:=20160221
-PKG_RELEASE:=1
+PKG_VERSION:=1.0.1
+PKG_RELEASE:=0
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
