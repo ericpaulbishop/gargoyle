@@ -113,4 +113,4 @@ ovpnS.NoCConn="Aucun client connecté";
 ovpnS.NOVPNT="Trafic non-OpenVPN";
 ovpnS.AllowNOVPNT="Autoriser le trafic non-OpenVPN";
 ovpnS.BlockNOVPNT="Bloquer tout le trafic non-OpenVPN";
-openS.DescNOVPNT="Si vous voulez que tout le trafic passe à travers le VPN, il est préférable de bloquer tout le trafic non-OpenVPN. Dans ce cas, si OpenVPN a un problème, le trafic ne se reportera pas sur le lien non chiffré. Cependant, si vous utilisez OpenVPN seulement pour accéder à quelques clients distants, vous devriez autoriser le trafic non-OpenVPN.";
+ovpnS.DescNOVPNT="Si vous voulez que tout le trafic passe à travers le VPN, il est préférable de bloquer tout le trafic non-OpenVPN. Dans ce cas, si OpenVPN a un problème, le trafic ne se reportera pas sur le lien non chiffré. Cependant, si vous utilisez OpenVPN seulement pour accéder à quelques clients distants, vous devriez autoriser le trafic non-OpenVPN.";
