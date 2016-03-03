@@ -543,7 +543,7 @@ enforce_dhcp_assignments()
 			ip=$(echo $p | sed 's/^.*\^//g')
 			if [ -n "$ip" ] && [ -n "$mac" ] ; then
 				iptables -t filter -A lease_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
-				iptables -t filter -A lease_mismatch_check  -s  "$ip"  ! -m mac --mac-source  "$mac"  -j REJECT
+				iptables -t filter -A lease_mismatch_check  -s  "$ip"  -m mac ! --mac-source  "$mac"  -j REJECT
 			fi
 		done
 		iptables -t filter -I delegate_forward -j lease_mismatch_check
