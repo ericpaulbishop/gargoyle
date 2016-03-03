@@ -73,6 +73,10 @@ function setUpgradeFormat()
 	{
 		setChildText("upgrade_text", upS.mvebu);
 	}
+	else if(platform == "ramips")
+	{
+		setChildText("upgrade_text", upS.ar71xxT);
+	}
 	else
 	{
 		setChildText("upgrade_text", upS.othrT);
