@@ -81,13 +81,8 @@ function saveChanges()
 		{
 			if(newBlockMismatches)
 			{
-<<<<<<< HEAD
-				uci.set("firewall", firewallDefaultSections[0], "block_static_ip_mismatches", "1");
-				firewallCommands.push("uci set firewall.@defaults[0].block_static_ip_mismatches=1");
-=======
 				uci.set("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments", "1");
 				firewallCommands.push("uci set firewall.@defaults[0].enforce_dhcp_assignments=1");
->>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 			}
 			else
 			{
