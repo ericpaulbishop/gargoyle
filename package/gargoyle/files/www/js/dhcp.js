@@ -392,10 +392,6 @@ function editStatic()
 		catch(e){}
 	}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> ee7a7061b0cb083cdb0b46d52a83dc357c242de1
 	try
 	{
 		xCoor = window.screenX + 225;
