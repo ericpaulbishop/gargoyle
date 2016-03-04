@@ -15,9 +15,9 @@
  		) > prerm; \
  		chmod 0755 postinst prerm; \
  		$($(1)_COMMANDS) \
---- a/package/base-files/files/lib/functions.sh	2016-03-04 19:27:59.995482000 +1100
-+++ b/package/base-files/files/lib/functions.sh	2016-03-04 19:55:48.599482000 +1100
-@@ -164,20 +164,34 @@
+--- a/package/base-files/files/lib/functions.sh	2016-03-04 12:12:00.606479043 -0500
++++ b/package/base-files/files/lib/functions.sh	2016-03-04 12:11:10.931304343 -0500
+@@ -164,19 +164,40 @@
  }
  
  default_prerm() {
@@ -35,10 +35,14 @@
  	done
  }
  
++
++
++
  default_postinst() {
--	local pkgname rusers ret
--	ret=0
+-	local pkgname rusers
++
 +	local pkgname pkg_postinst pkg_conmtrol pkg_list rusers
++
 +
  	pkgname=$(basename ${1%.*})
 -	rusers=$(grep "Require-User:" ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control)
@@ -51,22 +55,20 @@
 +		pkg_control="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control"
 +		pkg_list="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list"
 +	fi
-+
-+
-+	[ -f "$pkg_postinst" ] && . "$pkg_postinst"
-+
++	
 +	rusers=$(grep "Require-User:" "${pkg_control}")
++	
++	[ -f "$pkg_postinst" ] &&  . "$pkg_postinst" 
++	
++	
  	[ -n "$rusers" ] && {
  		local user group uid gid
  		for a in $(echo $rusers | sed "s/Require-User://g"); do
-@@ -216,13 +230,9 @@
+@@ -215,10 +236,9 @@
  		done
  	}
  
--	if [ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ]; then
--		( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
--		ret=$?
--	fi
+-	[ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ] && ( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
  	[ -n "${IPKG_INSTROOT}" ] || rm -f /tmp/luci-indexcache 2>/dev/null
  
 -	[ "$PKG_UPGRADE" = "1" ] || for i in `cat ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list | grep "^/etc/init.d/"`; do
@@ -74,3 +76,4 @@
  		[ -n "${IPKG_INSTROOT}" ] && $(which bash) ${IPKG_INSTROOT}/etc/rc.common ${IPKG_INSTROOT}$i enable; \
  		[ -n "${IPKG_INSTROOT}" ] || {
  			$i enable
+
