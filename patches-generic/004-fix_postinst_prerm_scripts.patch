@@ -41,7 +41,7 @@
  default_postinst() {
 -	local pkgname rusers
 +
-+	local pkgname pkg_postinst pkg_conmtrol pkg_list rusers
++	local pkgname pkg_postinst pkg_control pkg_list rusers
 +
 +
  	pkgname=$(basename ${1%.*})
