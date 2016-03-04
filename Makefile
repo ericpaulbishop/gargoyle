@@ -13,7 +13,7 @@ DISTRIBUTION=false
 
 ALL:
 	( \
-		targets=`ls targets | sed 's/custom//g' | sed 's/ramips//g' ` ;\
+		targets=`ls targets | sed 's/custom//g' ` ;\
 		if [ -d "Distribution" ] ; then rm -rf "Distribution" ; fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
