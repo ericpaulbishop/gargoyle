@@ -15,9 +15,9 @@
  		) > prerm; \
  		chmod 0755 postinst prerm; \
  		$($(1)_COMMANDS) \
---- a/package/base-files/files/lib/functions.sh	2015-09-26 14:19:37.141768778 -0400
-+++ b/package/base-files/files/lib/functions.sh	2015-09-28 13:22:48.025747618 -0400
-@@ -164,19 +164,34 @@
+--- a/package/base-files/files/lib/functions.sh	2016-03-04 19:27:59.995482000 +1100
++++ b/package/base-files/files/lib/functions.sh	2016-03-04 19:55:48.599482000 +1100
+@@ -164,20 +164,34 @@
  }
  
  default_prerm() {
@@ -28,7 +28,7 @@
 +	local pkg_prerm pkg_list
 +	pkg_prerm="${1}-pkg"
 +	pkg_list=$( echo "${1}" | sed 's/prerm$/list/g')
-+	[ -f "$pkg_prerm" ] &&  . "$pkg_prerm" 
++	[ -f "$pkg_prerm" ] && . "$pkg_prerm"
 +	for i in `cat "$pkg_list" | grep "^/etc/init.d/"`; do
  		$i disable
  		$i stop
@@ -36,12 +36,13 @@
  }
  
  default_postinst() {
--	local pkgname rusers
-+	local pkgname pkg_postinst pkg_control pkg_list rusers
-+	
+-	local pkgname rusers ret
+-	ret=0
++	local pkgname pkg_postinst pkg_conmtrol pkg_list rusers
++
  	pkgname=$(basename ${1%.*})
 -	rusers=$(grep "Require-User:" ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control)
-+	
++
 +	pkg_postinst="${1}"-pkg
 +	pkg_control=$( echo "${1}" | sed 's/postinst$/control/g')
 +	pkg_list=$( echo "${1}" | sed 's/postinst$/list/g')
@@ -52,17 +53,20 @@
 +	fi
 +
 +
-+	[ -f "$pkg_postinst" ] &&  . "$pkg_postinst" 
-+	
++	[ -f "$pkg_postinst" ] && . "$pkg_postinst"
++
 +	rusers=$(grep "Require-User:" "${pkg_control}")
  	[ -n "$rusers" ] && {
  		local user group uid gid
  		for a in $(echo $rusers | sed "s/Require-User://g"); do
-@@ -215,10 +230,9 @@
+@@ -216,13 +230,9 @@
  		done
  	}
  
--	[ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ] && ( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
+-	if [ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ]; then
+-		( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
+-		ret=$?
+-	fi
  	[ -n "${IPKG_INSTROOT}" ] || rm -f /tmp/luci-indexcache 2>/dev/null
  
 -	[ "$PKG_UPGRADE" = "1" ] || for i in `cat ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list | grep "^/etc/init.d/"`; do
