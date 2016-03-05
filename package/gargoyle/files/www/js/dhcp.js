@@ -127,12 +127,15 @@ function saveChanges()
 			for(dIndex=0; dIndex < devices.length; dIndex++)
 			{
 				var host = devices[dIndex];
-				var macs = macMap[host].split(" ");
-				for (mIndex=0; mIndex < macs.length; mIndex++)
+				if(macMap.hasOwnProperty(host))
 				{
-					uci.set("dhcp", group, "mac", macs[mIndex]);
+					var macs = macMap[host].split(" ");
+					for (mIndex=0; mIndex < macs.length; mIndex++)
+					{
+						uci.set("dhcp", group, "mac", macs[mIndex]);
+					}
+					uci.set("dhcp", host, "group", group);
 				}
-				uci.set("dhcp", host, "group", group);
 			}
 
 			// create ipset
