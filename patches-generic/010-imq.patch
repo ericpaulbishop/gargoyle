@@ -1,9 +1,9 @@
 --- /dev/null	2016-02-02 18:32:54.001863721 -0500
 +++ b/target/linux/generic/patches-3.18/690-imq.patch	2016-02-27 15:29:07.875566599 -0500
-@@ -0,0 +1,2000 @@
+@@ -0,0 +1,2006 @@
 +--- /dev/null	2016-02-02 18:32:54.001863721 -0500
 ++++ b/drivers/net/imq.c	2016-02-27 15:25:18.043368407 -0500
-+@@ -0,0 +1,1256 @@
++@@ -0,0 +1,1262 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -110,7 +110,7 @@
 ++static struct net_device *imq_devs_cache[IMQ_MAX_DEVS];
 ++
 ++#define IMQ_MAX_QUEUES 32
-++static int numqueues = 1;
+++static int numqueues = 0;
 ++static u32 imq_hashrnd;
 ++static int imq_dev_accurate_stats = 1;
 ++
@@ -1147,6 +1147,12 @@
 ++		return -EINVAL;
 ++	}
 ++
+++	if (!numqueues) {
+++		numqueues = num_online_cpus();
+++		pr_info("IMQ: No specify the numqueues. Use the cores number %d as numqueuues\n",
+++			numqueues);
+++	}
+++
 ++	if (numqueues < 1 || numqueues > IMQ_MAX_QUEUES) {
 ++		pr_err("IMQ: numqueues has to be betweed 1 and %u\n",
 ++		       IMQ_MAX_QUEUES);
@@ -1252,7 +1258,7 @@
 ++module_param(hook_tables, charp, 0);
 ++
 ++MODULE_PARM_DESC(numdevs, "number of IMQ devices (how many imq* devices will be created)");
-++MODULE_PARM_DESC(numqueues, "number of queues per IMQ device");
+++MODULE_PARM_DESC(numqueues, "number of queues per IMQ device. Use cores number if no specify");
 ++MODULE_PARM_DESC(imq_dev_accurate_stats, "Notify if need the accurate imq device stats");
 ++MODULE_PARM_DESC(hook_chains, "netfilter chains in which to insert hooks to IMQ");
 ++MODULE_PARM_DESC(hook_tables, "netfilter tables after which to insert hooks to IMQ");
@@ -1419,7 +1425,7 @@
 ++
 +--- a/include/linux/netdevice.h
 ++++ b/include/linux/netdevice.h
-+@@ -3172,6 +3172,18 @@ static inline void netif_tx_unlock_bh(struct net_device *dev)
++@@ -3180,6 +3180,18 @@ static inline void netif_tx_unlock_bh(struct net_device *dev)
 + 	}						\
 + }
 + 
