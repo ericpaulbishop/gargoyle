@@ -128,5 +128,5 @@ basicS.NoDv="No devices found";
 basicS.WANIntr="WAN Interface";
 basicS.Mo3gQMI="USB Modem (QMI)";
 basicS.Mo3gNCM="USB Modem (NCM)";
-basicS.Mo3gHiLink="USB Modem (HiLink)";
+basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
 basicS.Dfult="Default";

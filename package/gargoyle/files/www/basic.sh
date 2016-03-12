@@ -59,16 +59,12 @@
 		echo "hasNCM = true;"
 	fi
 
-	cdcif=$(grep -Hi "cdc ethernet control" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
+	cdcif=$(egrep -Hi "(cdc ethernet control|rndis communications control)" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
 	if [ -z "$cdcif" ]; then
 		echo "cdcif = \"\";"
 	else
 		echo "cdcif = \"$cdcif\";"
 	fi
-
-	#echo "var interfaces = new Array();"
-	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
-
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
