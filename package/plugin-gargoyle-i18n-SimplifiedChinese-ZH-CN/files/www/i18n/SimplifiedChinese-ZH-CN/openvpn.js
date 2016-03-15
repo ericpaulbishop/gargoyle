@@ -113,4 +113,4 @@ ovpnS.NoCConn="无客户端连接";
 ovpnS.NOVPNT="不经过OpenVPN的通信";
 ovpnS.AllowNOVPNT="允许所有不经过OpenVPN的通信";
 ovpnS.BlockNOVPNT="阻止所有不经过OpenVPN的通信";
-openS.DescNOVPNT="如果你想所有通信都经过VPN，最好是阻止所有不经过OpenVPN的通信，然后当OpenVPN连接失效时通信才不会回到默认的未加密的链路上。当然，如果你只是使用OpenVPN去访问一些远程客户端，你应该允许不经过OpenVPN的通信（PS：不经过OpenVPN的通信即指只未经加密、不安全的通信）";
+ovpnS.DescNOVPNT="如果你想所有通信都经过VPN，最好是阻止所有不经过OpenVPN的通信，然后当OpenVPN连接失效时通信才不会回到默认的未加密的链路上。当然，如果你只是使用OpenVPN去访问一些远程客户端，你应该允许不经过OpenVPN的通信（PS：不经过OpenVPN的通信即指只未经加密、不安全的通信）";

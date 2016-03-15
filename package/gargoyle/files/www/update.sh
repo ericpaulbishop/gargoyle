@@ -16,6 +16,7 @@
 	is_atheros=$(cat /proc/cpuinfo | grep "system type" | grep "Atheros AR[1-6]")
 	is_ar71xx=$(cat /proc/cpuinfo  | grep "system type" | grep "Atheros AR[7-9]")
 	is_mvebu=$(cat /proc/cpuinfo   | grep Armada)
+	is_ramips=$(cat /proc/cpuinfo | grep Ralink)
 	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ] ; then
 		echo "var platform=\"broadcom\";"
 	elif [ -n "$is_atheros" ] ; then
@@ -24,6 +25,8 @@
 		echo "var platform=\"ar71xx\";"
 	elif [ -n "$is_mvebu" ] ; then
 		echo "var platform=\"mvebu\";"
+	elif [ -n "$is_ramips" ] ; then
+		echo "var platform=\"ramips\";"
 	else
 		echo "var platform=\"x86\";"
 	fi

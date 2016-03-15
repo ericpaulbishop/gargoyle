@@ -517,7 +517,7 @@ initialize_quota_qos()
 enforce_dhcp_assignments()
 {
 	enforce_assignments=$(uci get firewall.@defaults[0].enforce_dhcp_assignments 2> /dev/null)
-	delete_chain_from_table lease_mismatch_check filter
+	delete_chain_from_table "filter" "lease_mismatch_check"
 
 	local pairs1
 	local pairs2
@@ -543,7 +543,7 @@ enforce_dhcp_assignments()
 			ip=$(echo $p | sed 's/^.*\^//g')
 			if [ -n "$ip" ] && [ -n "$mac" ] ; then
 				iptables -t filter -A lease_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
-				iptables -t filter -A lease_mismatch_check  -s  "$ip"  ! -m mac --mac-source  "$mac"  -j REJECT
+				iptables -t filter -A lease_mismatch_check  -s  "$ip"  -m mac ! --mac-source  "$mac"  -j REJECT
 			fi
 		done
 		iptables -t filter -I delegate_forward -j lease_mismatch_check

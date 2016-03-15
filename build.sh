@@ -118,7 +118,7 @@ EOF
 	echo '------------------------------------------------------------------' >> "$banner_file_path"
 
 	#save openwrt variables for rebuild
-	echo "$openwrt_revision" > "$revision_save_dir/OPENWRT_REVISION"
+	echo "$openwrt_commit" > "$revision_save_dir/OPENWRT_REVISION"
 	echo "$openwrt_branch"  > "$revision_save_dir/OPENWRT_BRANCH"
 
 }

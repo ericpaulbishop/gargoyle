@@ -37,7 +37,7 @@
 		echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
 	fi
 
-	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
+	has_usb_tty=$( ls /dev/ttyUSB* /dev/ttyACM* 2>/dev/null )
 	if [ -z "$has_usb_tty" ] ; then
 		echo "var hasUSB = false;"
 	else

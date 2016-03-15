@@ -113,4 +113,4 @@ ovpnS.NoCConn="Brak połączonych klientów";
 ovpnS.NOVPNT="Ruch poza VPN";
 ovpnS.AllowNOVPNT="Akceptuj";
 ovpnS.BlockNOVPNT="Blokuj";
-openS.DescNOVPNT="Jeżeli cały ruch ma przechodzić przez VPN, najlepiej jest blokować inny ruch, dzięki czemu jeżeli nie będzie działał tunel OpenVPN to nie będzie ruchu niezaszyfrowanego. Jeżeli OpenVPN używany jest tylko do dostępu do zdalnych zasobów, inny ruch może być akceptowalny.";
+ovpnS.DescNOVPNT="Jeżeli cały ruch ma przechodzić przez VPN, najlepiej jest blokować inny ruch, dzięki czemu jeżeli nie będzie działał tunel OpenVPN to nie będzie ruchu niezaszyfrowanego. Jeżeli OpenVPN używany jest tylko do dostępu do zdalnych zasobów, inny ruch może być akceptowalny.";

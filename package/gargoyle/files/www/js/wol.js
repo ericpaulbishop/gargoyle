@@ -5,8 +5,10 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
- 
+
 var wolS=new Object(); //part of i18n
+
+var TSort_Data = new Array ('wol_table', 's', 'p', 's');
 
 function initWolTable()
 {

@@ -13,6 +13,9 @@ if [ -e /lib/ar71xx.sh ]; then
 elif [ -e /lib/mvebu.sh ]; then
 	. /lib/mvebu.sh
 	board=$(mvebu_board_name)
+elif [ -e /lib/ramips.sh ]; then
+	. /lib/ramips.sh
+	board=$(ramips_board_name)
 fi
 
 # PORTS="LAN1 LAN2 LAN3 LAN4"
@@ -47,6 +50,13 @@ wndr3700 | \
 wrt160nl | \
 wzr-hp-g300nh)
 	PORTS="3 2 1 0";;
+mpr-a2)
+	PORTS="0";;
+rut5xx)
+	PORTS="3 2 1";;
+px4885 | \
+wt3020)
+	PORTS="4";;
 *)
 	PORTS="";;
 esac
