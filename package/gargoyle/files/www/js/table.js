@@ -12,20 +12,19 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	controlDocument = controlDocument == null ? document : controlDocument;
 
 	var newTable = controlDocument.createElement('table');
-	var thead = controlDocument.createElement('thead');
-	newTable.appendChild(thead);
+	var tableHead = newTable.createTHead();
 	var tableBody = controlDocument.createElement('tbody');
 	newTable.appendChild(tableBody);
 	newTable.id=tableId;
+	newTable.className='table';
 
-	var row = controlDocument.createElement('tr');
+	var row = tableHead.insertRow();
 	row.className='header_row';
-	thead.appendChild(row);
 
 	var columnIndex;
 	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
 	{
-		var header = controlDocument.createElement('th');
+		var header = row.insertCell();
 		if( typeof(columnNames[columnIndex]) == 'string' )
 		{
 			var splitText = (columnNames[columnIndex]).replace(/\&amp;/g, '&').split(/\n/)
@@ -44,23 +43,20 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 			header.appendChild( columnNames[columnIndex] )
 		}
 		headerContent = typeof(columnNames[columnIndex]) == 'string' ? controlDocument.createTextNode(columnNames[columnIndex]) : columnNames[columnIndex];
-		row.appendChild(header);
 	}
 	if(rowsAreRemovable)
 	{
-		var header = controlDocument.createElement('th');
+		var header = row.insertCell();
 		headerContent = controlDocument.createTextNode('');
 		header.appendChild(headerContent);
-		row.appendChild(header);
 	}
 	if(rowsAreMovable)
 	{
 		for(i=1; i<2; i++)
 		{
-			var header = controlDocument.createElement('th');
+			var header = row.insertCell();
 			headerContent = controlDocument.createTextNode('');
 			header.appendChild(headerContent);
-			row.appendChild(header);
 		}
 	}
 
@@ -71,7 +67,6 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 			addTableRow(newTable, rowData[rowIndex], rowsAreRemovable, rowsAreMovable, rowRemoveCallback, rowMoveCallback);
 		}
 	}
-
 	tableSanityCheck(newTable);
 	return newTable;
 }
@@ -84,16 +79,14 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	rowRemoveCallback = rowRemoveCallback == null ? function(){} : rowRemoveCallback;
 	rowMoveCallback = rowMoveCallback == null ? function(){} : rowMoveCallback;
 
-
-	row = controlDocument.createElement('tr');
-	tableBody=table.tBodies[0];
-	numRows= tableBody.rows.length;
-	tableBody.appendChild(row);
+	tableBody = table.lastChild;
+	row = tableBody.insertRow();
+	numRows = tableBody.rows.length;
 
 	cellIndex = 1;
 	while(cellIndex <= rowData.length)
 	{
-		cell = controlDocument.createElement('td');
+		cell = row.insertCell();
 		if(typeof(rowData[cellIndex-1]) == 'string')
 		{
 			var splitText = (rowData[cellIndex-1]).split(/\n/)
@@ -160,7 +153,7 @@ function removeThisCellsRow(button)
 {
 	row=button.parentNode.parentNode;
 	tableBody= row.parentNode;
-	tableBody.removeChild(row);
+	tableBody.deleteRow(row);
 
 	setRowClasses(tableBody.parentNode, true);
 }
