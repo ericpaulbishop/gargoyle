@@ -11,68 +11,57 @@
 <fieldset id="edit_container">
 	<legend class="sectionheader"><%~ qos.QESrvClass %></legend>
 
-	<div>
-		<label class='leftcolumn' id="class_name_label" for='class_name' ><%~ QESrvName %>:</label>
-		<input class='rightcolumn' type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)"  size='12' maxlength='10' />
+	<div class='form-group form-inline'>
+		<label id="class_name_label" for='class_name' ><%~ QESrvName %>:</label>
+		<input class='form-control' type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)"  size='12' maxlength='10' />
 	</div>
 
-	<div>
-		<label class='leftcolumn' id="percent_bandwidth_label" for='percent_bandwidth' ><%~ PerBandCap %>:</label>
-		<span class='rightcolumn'>
-			<input type='text' id='percent_bandwidth' onkeyup="proofreadNumericRange(this,1,100)" size='5' maxlength='3' /><em>%</em>
-		</span>
+	<div class='form-group form-inline'>
+		<label id="percent_bandwidth_label" for='percent_bandwidth' ><%~ PerBandCap %>:</label>
+		<input type='text' id='percent_bandwidth' class='form-control' onkeyup="proofreadNumericRange(this,1,100)" size='5' maxlength='3' /><em>%</em>
 	</div>
 
-	<div class='nocolumn'><%~ BandMin %>:</div>
-	<div class='indent'>
-	<div class='nocolumn'>
-			<input type='radio' name="min_radio" id='min_radio1' onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
+	<div><%~ BandMin %>:</div>
+
+	<div>
+		<div class='form-group form-inline'>
+			<input type='radio' name="min_radio" id='min_radio1' class='form-control' onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
 			<label for='min_radio1'><%~ BandMinNo %></label>
 		</div>
-		<div>
-			<span class='leftcolumn'>
-				<input type='radio' name="min_radio" id="min_radio2" onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
+		<div class='form-group form-inline'>
+				<input type='radio' name="min_radio" class='form-control' id="min_radio2" onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
 				<label id="min_bandwidth_label" for='min_radio2'><%~ BandMin %>:</label>
-			</span>
-			<span class='rightcolumn'>
-				<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+				<input type='text' class='form-control' id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
 				<em><%~ Kbs %></em>
-			</span>
 		</div>
 	</div>
 
-	<br>
-	<div class='nocolumn'><%~ BandMax %>:</div>
-	<div class='indent'>
-		<div class='nocolumn'>
-			<input type='radio' name="max_radio" id='max_radio1' onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
+	<br/>
+	<div><%~ BandMax %>:</div>
+	<div>
+		<div class='form-group form-inline'>
+			<input type='radio' name="max_radio" class='form-control' id='max_radio1' onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
 			<label for='max_radio1'><%~ BandMaxNo %></label>
 		</div>
-		<div>
-			<span class='leftcolumn'>
-				<input type='radio' name="max_radio" id="max_radio2" onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
-				<label id="max_bandwidth_label" for='max_radio2'><%~ BandMax %>:</label>
-			</span>
-			<span class='rightcolumn'>
-				<input type='text' class="rightcolumn" id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
-				<em><%~ Kbs %></em>
-			</span>
+		<div class='form-group form-inline'>
+			<input type='radio' name="max_radio" class='form-control' id="max_radio2" onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
+			<label id="max_bandwidth_label" for='max_radio2'><%~ BandMax %>:</label>
+			<input type='text' class='form-control' id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+			<em><%~ Kbs %></em>
 		</div>
 	</div>
 
 	<div id='rttdiv'>
 	<br>
-	<div class='nocolumn'><%~ MinRTT %>:</div>
-	<div class='indent'>
-		<div class='nocolumn'>
-			<input type='radio' name="rtt_radio" id='rtt_radio1'/>
+	<div><%~ MinRTT %>:</div>
+	<div>
+		<div class='form-group form-inline'>
+			<input type='radio' class='form-control' name="rtt_radio" id='rtt_radio1'/>
 			<label for='rtt_radio1'><%~ ActRTT %></label>
 		</div>
-		<div>
-			<span class='leftcolumn'>
-				<input type='radio' name="rtt_radio" id="rtt_radio2" />
+		<div class='form-group form-inline'>
+				<input type='radio' class='form-control' name="rtt_radio" id="rtt_radio2" />
 				<label for='rtt_radio2'><%~ OptiWAN %></label>
-			</span>
 		</div>
 	</div></div>
 

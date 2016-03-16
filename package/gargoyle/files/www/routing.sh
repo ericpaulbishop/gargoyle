@@ -36,7 +36,7 @@
 		<div id='static_route_add_heading_container'>
 			<label class='nocolumn' id='staticroute_add_heading_label' style='text-decoration:underline'><%~ ASRte %>:</label>
 		</div>
-		<div class='bottom_gap'>
+		<div class='form-group form-inline'>
 			<div id='static_route_add_container'>
 				<%in templates/static_route_template %>
 			</div>
@@ -45,7 +45,7 @@
 		<div id='static_route_table_heading_container'>
 			<span class='nocolumn'><%~ CSRSect %>:</span>
 		</div>
-		<div class='indent'>
+		<div class='form-group form-inline'>
 			<div id='static_route_table_container' class="bottom_gap"></div>
 		</div>
 	</fieldset>
@@ -55,8 +55,8 @@
 	</div>
 
 	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>
 </form>

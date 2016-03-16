@@ -48,32 +48,32 @@
 	<button id="reboot_button" class="btn btn-default btn-lg" onclick='reboot()'><%~ Reboot %></button
 </fieldset>
 <fieldset>
-	<div class="form-group">
+	<div class='form-group form-inline'>
 		<legend class="sectionheader"><%~ SchRb %></legend>
-		<select class="leftcolumn form-control" id="sched_reboot" onchange="setVisibility()">
+		<select class="form-control" id="sched_reboot" onchange="setVisibility()">
 			<option value="none"><%~ NoSch %></option>
 			<option value="scheduled"><%~ RbSch %></option>
-			</select>
+		</select>
 	</div>
 
 	<div id="schedule_reboot_container" class="indent">
-		<div class="form-group">
-			<label class="narrowleftcolumn" for="reboot_interval"><%~ WillR %>:</label>
-			<select class="widerightcolumn form-control" id="reboot_interval" onchange="setVisibility()">
+		<div class='form-group form-inline'>
+			<label for="reboot_interval"><%~ WillR %>:</label>
+			<select class="form-control" id="reboot_interval" onchange="setVisibility()">
 				<option value="day"><%~ EDay %></option>
 				<option value="week"><%~ EWek %></option>
 				<option value="month"><%~ EMnh %></option>
 			</select>
 		</div>
 
-		<div id="reboot_day_container" class="form-group">
-			<label class='narrowleftcolumn' id="reboot_day_label" for='reboot_day'><%~ RDay %>:</label>
-			<select class="widerightcolumn form-control" id='reboot_day' style='width:125px'></select>
+		<div id="reboot_day_container" class='form-group form-inline'>
+			<label id="reboot_day_label" for='reboot_day'><%~ RDay %>:</label>
+			<select class="form-control" id='reboot_day'></select>
 		</div>
 
-		<div id="reboot_hour_container" class="form-group">
-			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
-			<select class="widerightcolumn form-control" id='reboot_hour' style='width:125px'>
+		<div id="reboot_hour_container" class='form-group form-inline'>
+			<label id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
+			<select class="form-control" id='reboot_hour'>
 				<% otime '\t\t\t\t' %>
 			</select>
 		</div>

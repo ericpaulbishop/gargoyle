@@ -39,7 +39,7 @@
 			<%in templates/quotas_template %>
 
 			<div>
-				<input type="button" id="add_quota_button" class="default_button" value="<%~ AddQuota %>" onclick="addNewQuota()" />
+				<button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button>
 			</div>
 		</div>
 
@@ -51,8 +51,8 @@
 
 	</fieldset>
 	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 
 	<span id="update_container" ><%~ WaitSettings %></span>

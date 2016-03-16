@@ -32,9 +32,9 @@
 	<fieldset>
 		<legend class="sectionheader"><%~ bandwidth.DOpSect %></legend>
 
-		<div class="form-group">
-			<label class="leftcolumn" for='time_frame' id='time_frame_label'><%~ DTFrm %>:</label>
-			<select class="rightcolumn form-control" id="time_frame" onchange="resetTimeFrame()">
+		<div class='form-group form-inline'>
+			<label for='time_frame' id='time_frame_label'><%~ DTFrm %>:</label>
+			<select class="form-control" id="time_frame" onchange="resetTimeFrame()">
 				<option value="bdist1"><%~ minutes %></option>
 				<option value="bdist2"><%~ qhour %></option>
 				<option value="bdist3"><%~ hours %></option>
@@ -43,14 +43,14 @@
 			</select>
 		</div>
 
-		<div class="form-group">
-			<label class="leftcolumn" for='time_interval' id='time_interval_label'><%~ DtbI %>:</label>
-			<select class="rightcolumn form-control" id="time_interval" onchange="resetDisplayInterval()"></select>
+		<div class='form-group form-inline'>
+			<label for='time_interval' id='time_interval_label'><%~ DtbI %>:</label>
+			<select class="form-control" id="time_interval" onchange="resetDisplayInterval()"></select>
 		</div>
 
-		<div class="form-group">
-			<label class="leftcolumn" for='host_display' id='time_interval_label'><%~ HDsp %>:</label>
-			<select class="rightcolumn form-control" id="host_display" onchange="resetTimeFrame()">
+		<div class='form-group form-inline'>
+			<label for='host_display' id='time_interval_label'><%~ HDsp %>:</label>
+			<select class="form-control" id="host_display" onchange="resetTimeFrame()">
 				<option value="hostname"><%~ DspHn %></option>
 				<option value="ip"><%~ DspHIP %></option>
 			</select>

@@ -103,24 +103,24 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 	</fieldset>
 
-	<fieldset id="bridge_fieldset">
+	<fieldset id="bridge_fieldset" class="form-inline">
 		<legend class="sectionheader"><%~ DvWBrg %></legend>
-		<div id='bridge_ip_container' class='form-group'>
+		<div id='bridge_ip_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='bridge_ip' id='bridge_ip_label'><%~ BrIP %>:</label>
 			<input type='text' class='rightcolumn form-control' name='bridge_ip' id='bridge_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 			<em><%~ BrNote %></em>
 		</div>
-		<div id='bridge_mask_container' class='form-group'>
+		<div id='bridge_mask_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='bridge_mask' id='bridge_mask_label'><%~ SMsk %>:</label>
 			<input type='text' class='rightcolumn form-control' name='bridge_mask' id='bridge_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 			<em><%~ SMNote %></em>
 		</div>
-		<div id='bridge_gateway_container' class='form-group'>
+		<div id='bridge_gateway_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='bridge_gateway' id='bridge_gateway_label'><%~ GwIP %>:</label>
 			<input type='text' class='rightcolumn form-control' name='bridge_gateway' id='bridge_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id='bridge_wan_port_to_lan_container' class='form-group'>
+		<div id='bridge_wan_port_to_lan_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='bridge_wan_port_to_lan' id='bridge_wan_port_to_lan_label'><%~ WanEP %>:</label>
 			<select class='rightcolumn form-control' id='bridge_wan_port_to_lan' onchange='setBridgeVisibility()'>
 				<option value='disable'><%~ Dsbl %></option>
@@ -128,7 +128,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id="bridge_dns_source_container" class='form-group'>
+		<div id='bridge_dns_source_container' class='form-group form-inline'>
 			<span class="leftcolumn">
 				<label id='bridge_dns_source_label' for='bridge_dns_source'><%~ DnsSvs %>:</label>
 			</span>
@@ -137,7 +137,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value="custom"><%~ CustDNS %></option>
 			</select>
 		</div>
-		<div id='bridge_dns_custom_container' class='form-group'>
+		<div id='bridge_dns_custom_container' class='form-group form-inline'>
 			<span class='rightcolumnonly'>
 				<input type='text' id='add_bridge_dns' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 				<button class="default_button btn btn-default" id="add_bridge_dns_button" onclick='addDns("bridge")'><%~ Add %></button>
@@ -148,14 +148,14 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div class='internal_divider'></div>
 
-		<div id='bridge_mode_container' class='form-group'>
+		<div id='bridge_mode_container' class='form-group form-inline'>
 			<select class='nocolumn form-control' id='bridge_mode' onchange='setBridgeVisibility()'>
 				<option value='client_bridge'><%~ BrClient %></option>
 				<option value='wds'><%~ BrWDS %></option>
 			</select>
 		</div>
-		<div class="indent form-group">
-			<div id='bridge_repeater_container' class='form-group'>
+		<div class='form-group form-inline'>
+			<div id='bridge_repeater_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_repeater' id='bridge_repeater_label'><%~ Rptr %>:</label>
 				<select class='rightcolumn form-control' id='bridge_repeater' onchange='setBridgeVisibility()'>
 					<option value='enabled'><%~ RptrE %></option>
@@ -163,7 +163,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</select>
 			</div>
 
-			<div id='bridge_hwmode_container' class='form-group'>
+			<div id='bridge_hwmode_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_hwmode' id='bridge_hwmode_label'><%~ BrOpr %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_hwmode form-control' onchange='setHwMode(this)'>
@@ -174,7 +174,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					</select>
 				</span>
 			</div>
-			<div id='bridge_channel_width_container' class='form-group'>
+			<div id='bridge_channel_width_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_channel_width' id='bridge_channel_width_label'><%~ ChWdth %>:</label>
 				<span class='rightcolumn'>
 				<select id='bridge_channel_width form-control' onchange='setChannelWidth(this, "G")'>
@@ -185,7 +185,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 
-			<div id='bridge_txpower_container' class='form-group'>
+			<div id='bridge_txpower_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_max_txpower' id='bridge_txpower_label'><%~ TrPwr %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_max_txpower' class='form-control' onchange='updateTxPower("bridge_max_txpower","bridge_txpower", "G")'>
@@ -198,7 +198,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 
-			<div id='bridge_channel_width_5ghz_container' class='form-group'>
+			<div id='bridge_channel_width_5ghz_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_channel_width_5ghz' id='bridge_channel_width_5ghz_label'><%~ ChWdth %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_channel_width_5ghz' class='form-control' onchange='setChannelWidth(this, "A")'>
@@ -208,7 +208,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					</select>
 				</span>
 			</div>
-			<div id='bridge_txpower_5ghz_container' class='form-group'>
+			<div id='bridge_txpower_5ghz_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_max_txpower_5ghz' id='bridge_txpower_5ghz_label'><%~ TrPwr %>:</label>
 				<span class='rightcolumn'>
 					<select id='bridge_max_txpower_5ghz' class='form-control' onchange='updateTxPower("bridge_max_txpower_5ghz","bridge_txpower_5ghz", "A")'>
@@ -221,29 +221,29 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</span>
 			</div>
 
-			<div id='bridge_list_ssid_container' class='form-group'>
+			<div id='bridge_list_ssid_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_list_ssid' id='bridge_list_ssid_label'><%~ Join %>:</label>
 				<span class="rightcolumn">
 					<select id="bridge_list_ssid" class='form-control' style='width:180px;max-width:180px' onchange='setSsidVisibility(this.id)' ><option value="custom"><%~ Other %></option></select>
 					<button class='default_button btn btn-default' id='bridge_rescan_button' onclick='scanWifi("bridge_custom_ssid")'><%~ RScn %></button>
 				</span>
 			</div>
-			<div id='bridge_custom_ssid_container' class='form-group'>
+			<div id='bridge_custom_ssid_container' class='form-group form-inline'>
 				<input type='text' class='rightcolumnonly form-control' id='bridge_custom_ssid' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
-			<div id='bridge_ssid_container' class='form-group'>
+			<div id='bridge_ssid_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_ssid' id='bridge_ssid_label'><%~ Join %>:</label>
 				<span class='rightcolumn'>
 					<input style="float:left;" type='text' id='bridge_ssid' class='form-control' size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 					<button style="float:left;" class='default_button btn btn-default' id='bridge_scan_button' onclick='scanWifi("bridge_ssid")'><%~ Scan %></button>
 				</span>
 			</div>
-			<div id='bridge_broadcast_ssid_container' class='form-group'>
+			<div id='bridge_broadcast_ssid_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_broadcast_ssid' id='bridge_broadcast_ssid_label'><%~ Bcst %>:</label>
 				<input class='rightcolumn form-control' type='text' id='bridge_broadcast_ssid'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			</div>
 
-			<div id='bridge_channel_container' class='form-group'>
+			<div id='bridge_channel_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_channel' id='bridge_channel_label'><%~ WChn %>:</label>
 					<select class='rightcolumn form-control' id='bridge_channel' onchange='setChannel(this)'>
 					<option value='auto'><%~ auto %></option>
@@ -264,17 +264,17 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				</select>
 			</div>
 
-			<div id='bridge_channel_5ghz_container' class='form-group'>
+			<div id='bridge_channel_5ghz_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_channel_5ghz' id='bridge_channel_5ghz_label'><%~ WChn %>:</label>
 				<select class='rightcolumn form-control' id='bridge_channel_5ghz' onchange='setChannel(this)' ></select>
 			</div>
 
-			<div id='bridge_fixed_channel_container' class='form-group'>
+			<div id='bridge_fixed_channel_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_fixed_channel' id='bridge_fixed_channel_label'><%~ WChn %>:</label>
 				<span class='rightcolumn' id='bridge_fixed_channel'>&nbsp;</span>
 			</div>
 
-			<div id='bridge_encryption_container' class='form-group'>
+			<div id='bridge_encryption_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_encryption' id='bridge_encryption_label'><%~ Encr %>:</label>
 				<select class='rightcolumn form-control' id='bridge_encryption' onchange='setBridgeVisibility()'>
 					<option value='none'><%~ None %></option>
@@ -283,27 +283,27 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<option value='wep'>WEP</option>
 				</select>
 			</div>
-			<div id='bridge_fixed_encryption_container' class='form-group'>
+			<div id='bridge_fixed_encryption_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_fixed_encryption' id='bridge_fixed_encryption_label'><%~ Encr %>:</label>
 				<span class='rightcolumn' id='bridge_fixed_encryption'>&nbsp;</span>
 			</div>
 
-			<div id='bridge_pass_container' class='form-group'>
+			<div id='bridge_pass_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'><%~ Pswd %>:</label>
 				<input type='password' class='form-control' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
 			</div>
-			<div id='bridge_wep_container' class='form-group'>
+			<div id='bridge_wep_container' class='form-group form-inline'>
 				<div style="display:block;">
 					<label class='leftcolumn' for='bridge_wep' id='bridge_wep_label' ><%~ HexK %>:</label>
 					<input type='text' id='bridge_wep' class='form-control' size='30' maxLength='26' onkeyup='proofreadWep(this)'/>
 				</div>
 			</div>
 
-			<div id='bridge_wifi_mac_container' class='form-group'>
+			<div id='bridge_wifi_mac_container' class='form-group form-inline'>
 				<label class='leftcolumn' id='bridge_wifi_mac_label'><%~ DevMAC %>:</label>
 				<span class='rightcolumn' id='bridge_wifi_mac'> </span>
 			</div>
-			<div id='bridge_wds_container' class='form-group'>
+			<div id='bridge_wds_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_wds_label' id='bridge_wds_label'><%~ OWDS %>:</label>
 				<span class='rightcolumn'>
 					<input type='text' id='add_bridge_wds_mac' onkeyup='proofreadMac(this)' size='20' maxlength='17' />
@@ -318,7 +318,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	<fieldset id="wan_fieldset">
 		<legend class="sectionheader"><%~ WANSec %></legend>
 
-		<div id='wan_protocol_container' class='form-group'>
+		<div id='wan_protocol_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_protocol'><%~ Cnct %>:</label>
 			<select class='rightcolumn form-control' id='wan_protocol' onchange='setGlobalVisibility()'>
 				<option value='dhcp_wired'>DHCP (<%~ Wird %>)</option>
@@ -335,11 +335,11 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
 
 
-		<div id='wan_dhcp_ip_container' class='form-group'>
+		<div id='wan_dhcp_ip_container' class='form-group form-inline'>
 			<label class='leftcolumn'><%~ CurrIP %>:</label>
 			<span class='rightcolumn' id='dhcp_ip'></span>
 		</div>
-		<div id='wan_dhcp_expires_container' class='form-group'>
+		<div id='wan_dhcp_expires_container' class='form-group form-inline'>
 			<label class='leftcolumn'><%~ CLsExp %>:</label>
 			<span class='rightcolumn'>
 				<span id="dhcp_expires"></span>
@@ -351,22 +351,22 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		<div id='wan_pppoe_user_container' class='form-group'>
+		<div id='wan_pppoe_user_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_user' id='wan_pppoe_user_label'><%~ UNam %>:</label>
 			<input type='text' class='rightcolumn form-control' id='wan_pppoe_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_pppoe_pass_container' class='form-group'>
+		<div id='wan_pppoe_pass_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_pass' id='wan_pppoe_pass_label'><%~ Pswd %>:</label>
 			<input type='password' class='rightcolumn form-control' id='wan_pppoe_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_pppoe_reconnect_mode_container' class='form-group'>
+		<div id='wan_pppoe_reconnect_mode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_mode'><%~ RMod %>:</label>
 			<select class='rightcolumn form-control' id='wan_pppoe_reconnect_mode' onchange='setWanVisibility()'>
 				<option value='demand'><%~ CDmd %></option>
 				<option value='keepalive'><%~ KAlv %></option>
 			</select>
 		</div>
-		<div id='wan_pppoe_max_idle_container' class='form-group'>
+		<div id='wan_pppoe_max_idle_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_max_idle' id='wan_pppoe_max_idle_label'><%~ MIdl %>:</label>
 			<div class='rightcolumn'>
 				<input type='text' class='rightcolumn form-control' id='wan_pppoe_max_idle' onkeyup='proofreadNumeric(this)' size='20' maxlength='4' />
@@ -374,14 +374,14 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		<div id='wan_pppoe_reconnect_pings_container' class='form-group'>
+		<div id='wan_pppoe_reconnect_pings_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_reconnect_pings' id='wan_pppoe_reconnect_pings_label'><%~ FPngs %>:</label>
 			<div class='rightcolumn'>
 				<input type='text' id='wan_pppoe_reconnect_pings' class='form-control' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
 			</div>
 		</div>
 
-		<div id='wan_pppoe_interval_container' class='form-group'>
+		<div id='wan_pppoe_interval_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_pppoe_interval' id='wan_pppoe_interval_label'><%~ PngI %>:</label>
 			<div class='rightcolumn'>
 				<input type='text' id='wan_pppoe_interval' class='form-control' onkeyup='proofreadNumeric(this)'  size='20' maxlength='4' />
@@ -389,20 +389,20 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 		</div>
 
-		<div id='wan_static_ip_container' class='form-group'>
+		<div id='wan_static_ip_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_static_ip' id='wan_static_ip_label'><%~ StIP %>:</label>
 			<input type='text' class='rightcolumn form-control' name='wan_static_ip' id='wan_static_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
-		<div id='wan_static_mask_container' class='form-group'>
+		<div id='wan_static_mask_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_static_mask' id='wan_static_mask_label'><%~ SMsk %>:</label>
 			<input type='text' class='rightcolumn form-control' name='wan_static_mask' id='wan_static_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
-		<div id='wan_static_gateway_container' class='form-group'>
+		<div id='wan_static_gateway_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_static_gateway' id='wan_static_gateway_label'><%~ Gtwy %>:</label>
 			<input type='text' class='rightcolumn form-control' name='wan_static_gateway' id='wan_static_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id='wan_3g_service_container' class='form-group'>
+		<div id='wan_3g_service_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_service'><%~ Srvc %>:</label>
 			<select class='rightcolumn form-control' id='wan_3g_service' onchange="updateService()">
 				<option value='cdma'>CDMA/EV-DO</option>
@@ -413,7 +413,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value='gprs_only'><%~ S2GOnly %></option>
 			</select>
 		</div>
-		<div id='wan_3g_device_container' class='form-group'>
+		<div id='wan_3g_device_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_device' id='wan_3g_device_label'><%~ Dvic %>:</label>
 			<span class='rightcolumn'>
 				<select id="wan_3g_list_device" class='form-control' onchange='set3GDevice(this.value)'></select>
@@ -421,35 +421,35 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<button class="default_button btn btn-default" id='wan_3g_scan_button' onclick='scan3GDevice("wan_3g_list_device")'><%~ Scan %></button>
 			</span>
 		</div>
-		<div id='wan_3g_pincode_container' class='form-group'>
+		<div id='wan_3g_pincode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_pincode' id='wan_3g_pincode_label'><%~ Pncd %>:</label>
 			<input type='text' class='rightcolumn form-control' id='wan_3g_pincode'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
 		</div>
 
-		<div id='wan_3g_isp_container' class='form-group'>
+		<div id='wan_3g_isp_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_isp'><%~ MISP %>:</label>
 			<select class='rightcolumn form-control' id='wan_3g_isp' onchange='updateApnDetails()'>
 			<option value='custom'><%~ Cstm %></option>
 			</select>
 		</div>
 
-		<div id='wan_3g_apn_container'class='form-group'>
+		<div id='wan_3g_apn_container'class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_apn' id='wan_3g_apn_label'>APN:</label>
 			<input type='text' class='rightcolumn form-control' id='wan_3g_apn'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 		</div>
-		<div id='wan_3g_user_container' class='form-group'>
+		<div id='wan_3g_user_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_user' id='wan_3g_user_label'><%~ UNam %>:</label>
 			<input type='text' class='rightcolumn form-control' id='wan_3g_user'  size='20' onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
 		</div>
-		<div id='wan_3g_pass_container' class='form-group'>
+		<div id='wan_3g_pass_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_3g_pass' id='wan_3g_pass_label'><%~ Pswd %>:</label>
 			<input type='text' class='rightcolumn form-control' id='wan_3g_pass'  size='20'  onkeyup='proofreadLengthRange(this,1,999)'/>
 			<em>(<%~ optl %>)</em>
 		</div>
 
-		<div id='wan_port_to_lan_container' class='form-group'>
+		<div id='wan_port_to_lan_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wan_port_to_lan' id='wan_port_to_lan_label'><%~ WanEP %>:</label>
 			<select class='rightcolumn form-control' id='wan_port_to_lan'>
 				<option value='disable'><%~ Dsbl %></option>
@@ -457,7 +457,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wan_mac_container' class='form-group'>
+		<div id='wan_mac_container' class='form-group form-inline'>
 			<span class='leftcolumn'>
 				<label for='wan_use_mac' id='wan_mac_label'><%~ CustMAC %>:</label>
 			</span>
@@ -466,7 +466,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input type='text' name='wan_mac' id='wan_mac' class='form-control' onkeyup='proofreadMac(this)' size='20' maxlength='17'/>
 			</span>
 		</div>
-		<div id='wan_mtu_container' class='form-group'>
+		<div id='wan_mtu_container' class='form-group form-inline'>
 			<span class='leftcolumn'>
 				<label for='wan_use_mtu' id='wan_mtu_label'><%~ CustMTU %>:</label>
 			</span>
@@ -475,7 +475,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<input type='text' name='wan_mtu' id='wan_mtu' class='form-control' onkeyup='proofreadNumeric(this)' size='20' maxlength='4'/>
 			</span>
 		</div>
-		<div id='wan_ping_container' class='form-group'>
+		<div id='wan_ping_container' class='form-group form-inline'>
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='drop_wan_ping' class='form-control'/>
 				<label for='drop_wan_ping' id='wan_ping_label'>&nbsp;&nbsp;<%~ DPing %></label>
@@ -487,20 +487,20 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	<fieldset id="lan_fieldset">
 		<legend class="sectionheader"><%~ LANSec %></legend>
 
-		<div id='lan_ip_container' class='form-group'>
+		<div id='lan_ip_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='lan_ip' id='lan_ip_label'><%~ RtrIP %>:</label>
 			<input type='text' class='rightcolumn form-control' name='lan_ip' id='lan_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
-		<div id='lan_mask_container' class='form-group'>
+		<div id='lan_mask_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='lan_mask' id='lan_mask_label'><%~ SMsk %>:</label>
 			<input type='text' class='rightcolumn form-control' name='lan_mask' id='lan_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' />
 		</div>
-		<div id='lan_gateway_container' class='form-group'>
+		<div id='lan_gateway_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='lan_gateway' id='lan_gateway_label'><%~ Gtwy %>:</label>
 			<input type='text' class='rightcolumn form-control' name='lan_gateway' id='lan_gateway' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
 		</div>
 
-		<div id="lan_dns_source_container" class='form-group'>
+		<div id="lan_dns_source_container" class='form-group form-inline'>
 			<span class="leftcolumn">
 				<label id='lan_dns_source_label' for='lan_dns_source'><%~ DnsSvs %>:</label>
 			</span>
@@ -511,7 +511,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 				<option value="custom"><%~ CstDSrv %></option>
 			</select>
 		</div>
-		<div id="lan_dns_custom_container" class='form-group'>
+		<div id="lan_dns_custom_container" class='form-group form-inline'>
 			<span class='rightcolumnonly'>
 				<input type='text' id='add_lan_dns' class='form-control' onkeyup='proofreadIp(this)' size='20' maxlength='17' />
 				<button class="default_button btn btn-default" id="add_lan_dns_button" onclick='addDns("lan")'><%~ Add %></button>
@@ -519,7 +519,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<span style="clear:both"></span>
 			<div class="rightcolumnonly"><div id="lan_dns_table_container"></div></div>
 		</div>
-		<div id="lan_dns_options_container" class='form-group'>
+		<div id="lan_dns_options_container" class='form-group form-inline'>
 			<span class='rightcolumnonly'>
 				<input type='checkbox' id='lan_dns_altroot' class="form-control"/>
 				<label for="lan_dns_altroot" id="lan_dns_altroot_label">&nbsp;&nbsp;<%~ Allow %> <a href="http://www.dot-bit.org">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
@@ -536,7 +536,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 	<fieldset id="wifi_fieldset">
 		<legend class="sectionheader"><%~ Wrlss %></legend>
 
-		<div id='wifi_mode_container' class='form-group'>
+		<div id='wifi_mode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_mode' id='wifi_mode_label'><%~ WlMod %>:</label>
 			<select class='rightcolumn form-control' id='wifi_mode'  onchange='setWifiVisibility()'>
 				<option value='ap'><%~ AcPt %> (AP)</option>
@@ -548,7 +548,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
-		<div id='wifi_hwmode_container' class='form-group'>
+		<div id='wifi_hwmode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'><%~ OpMod %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_hwmode' class='form-control' onchange='setHwMode(this)'>
@@ -560,7 +560,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-		<div id='wifi_channel_width_container' class='form-group'>
+		<div id='wifi_channel_width_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'><%~ ChWdth %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width' class='form-control' onchange='setChannelWidth(this, "G")'>
@@ -571,7 +571,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-		<div id='wifi_txpower_container' class='form-group'>
+		<div id='wifi_txpower_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'><%~ TrPwr %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_max_txpower' class='form-control' onchange='updateTxPower("wifi_max_txpower","wifi_txpower", "G")'>
@@ -584,7 +584,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-		<div id='wifi_channel_width_5ghz_container' class='form-group'>
+		<div id='wifi_channel_width_5ghz_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_channel_width_5ghz' id='wifi_channel_width_5ghz_label'>5GHz <%~ ChWdth %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width_5ghz' class='form-control' onchange='setChannelWidth(this, "A")'>
@@ -595,7 +595,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-		<div id='wifi_txpower_5ghz_container' class='form-group'>
+		<div id='wifi_txpower_5ghz_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_max_txpower_5ghz' id='wifi_txpower_5ghz_label'>5GHz <%~ TrPwr %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_max_txpower_5ghz' class='form-control' onchange='updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")'>
@@ -608,7 +608,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-		<div id="mac_enabled_container" class='form-group'>
+		<div id="mac_enabled_container" class='form-group form-inline'>
 			<label class="leftcolumn" for='mac_filter_enabled'><%~ WlFltr %>:</label>
 			<select class="rightcolumn form-control" id='mac_filter_enabled' onchange='setWifiVisibility()' >
 				<option value='disabled'><%~ Disabled %></option>
@@ -619,7 +619,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<div class="rightcolumnonly">
 				<em><%~ FltrInfo %></em>
 			</div>
-			<div class='form-group'>
+			<div class='form-group form-inline'>
 				<label class='leftcolumn' for='mac_filter_policy'><%~ MACFiPo %>:</label>
 				<select class='rightcolumn form-control' id='mac_filter_policy'>
 					<option value='allow'><%~ AllwMAC %></option>
@@ -637,7 +637,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='internal_divider1' class='internal_divider'></div>
 
-		<div id='wifi_list_ssid2_container' class='form-group'>
+		<div id='wifi_list_ssid2_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_list_ssid2' id='wifi_list_ssid2_label'><%~ Join %>:</label>
 			<span class="rightcolumn">
 				<select id="wifi_list_ssid2" class='form-control' onchange='setSsidVisibility(this.id)' ><option value="custom"><%~ Other %></option></select>
@@ -829,7 +829,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 
 		<div id='internal_divider3' class='internal_divider'></div>
 
-		<div id='wifi_guest_mode_container' class='form-group'>
+		<div id='wifi_guest_mode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_guest_mode'><%~ GNet %>:</label>
 			<select class='rightcolumn form-control' id='wifi_guest_mode' onchange='setWifiVisibility()' >
 				<option value='disabled'><%~ Disabled %></option>
@@ -838,13 +838,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 		</div>
                 <div id='wifi_guest_container'>
 
-		<div id='wifi_guest_ssid1_container' class='form-group'>
+		<div id='wifi_guest_ssid1_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_guest_ssid1' id='wifi_guest_ssid1_label'><%~ GNetID %>:</label>
 			<input type='text' id='wifi_guest_ssid1' class='form-control' size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		        <input type='text' id='wifi_guest_mac_g' style='display: none'/>
 		</div>
 
-		<div id='wifi_guest_ssid1a_container' class='form-group'>
+		<div id='wifi_guest_ssid1a_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_guest_ssid1a' id='wifi_guest_ssid1a_label'><%~ GNet5ID %></label>
 			<input type='text' id='wifi_guest_ssid1a' class='form-control' size='20' onkeyup='proofreadLengthRange(this,1,999)'/><br/>
 		        <input type='text' id='wifi_guest_mac_a' style='display: none'/>

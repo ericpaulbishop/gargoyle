@@ -11,10 +11,8 @@
 
 <fieldset id="backup_section">
 	<legend class="sectionheader"><%~ backup.CurrC %></legend>
-	<div class='form-group'>
-		<span class='leftcolumn'>
-			<button id="backup_button" class="default_button btn btn-default" onclick="getBackup()"><%~ GetBackup %></button>
-		</span>
+	<div class='form-group form-inline'>
+		<button id="backup_button" class="btn btn-info" onclick="getBackup()"><%~ GetBackup %></button>
 	</div>
 </fieldset>
 
@@ -22,17 +20,15 @@
 	<legend class="sectionheader"><%~ RestC %></legend>
 
 		<form id='restore_form' enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
-		<div class='form-group'>
-			<label class='leftcolumn'><%~ SelOF %>:</label>
-			<input class='rightcolumn form-control' type="file" id="restore_file" name="restore_file" />
-			<input id='restore_hash' name="hash" type='hidden' value='' />
-			</div>
+		<div class='form-group form-inline'>
+			<label><%~ SelOF %>:</label>
+			<input type="file" id="restore_file" class="form-control" name="restore_file" />
+			<input id='restore_hash' name="hash" type='hidden' value=''/>
+		</div>
 		</form>
 
-	<div class='form-group'>
-		<span class='leftcolumn'>
-			<button id="restore_button" class="default_button btn btn-default" onclick="doRestore()"/><%~ RestoreConfig %></button>
-		</span>
+	<div class='form-group form-inline'>
+		<button id="restore_button" class="btn btn-warning" onclick="doRestore()"/><%~ RestoreConfig %></button>
 	</div>
 	<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe>
 
@@ -41,12 +37,10 @@
 <fieldset id="restore_original_section">
 	<legend class="sectionheader"><%~ DfltC %></legend>
 	<form id='restore_original_form' enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
-			<input id='restore_original_hash' name="hash" type='hidden' value='' />
+			<input id='restore_original_hash' name="hash" type='hidden' value=''/>
 	</form>
-	<div class="form-group">
-		<span class='leftcolumn'>
-			<button id="restore_original_button" class="btn btn-default" onclick="doDefaultRestore()"><%~ RestoreDefault %></button>
-		</span>
+	<div class='form-group form-inline'>
+		<button id="restore_original_button" class="btn btn-danger" onclick="doDefaultRestore()"><%~ RestoreDefault %></button>
 	</div>
 	<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe>
 </fieldset>

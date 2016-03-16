@@ -14,7 +14,7 @@
 <%
 	echo 'var monitorNames = new Array();'
 	mnames=$(cat /tmp/bw_backup/do_bw_backup.sh  | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
-	for m in $mnames ; do 
+	for m in $mnames ; do
 		echo "monitorNames.push(\"$m\");"
 	done
 %>
@@ -36,14 +36,13 @@
 	<fieldset id="upload_container">
 		<legend class="sectionheader"><%~ qos.UBSect %></legend>
 		<div>
-			<label class="leftcolumn" for="up_timeframe"><%~ uTFrm %>:</label>
-			<select class="rightcolumn" id="up_timeframe" onchange="setQosTimeframes()">
+			<label for="up_timeframe"><%~ uTFrm %>:</label>
+			<select class="form-control" id="up_timeframe" onchange="setQosTimeframes()">
 				<option value="1"><%~ minutes %></option>
 				<option value="2"><%~ bandwidth.qhour %></option>
 				<option value="3"><%~ hours %></option>
 				<option value="4"><%~ days %></option>
 				<option value="5"><%~ mnths %></option>
-
 			</select>
 		</div>
 		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
@@ -51,9 +50,9 @@
 
 	<fieldset id="download_container">
 		<legend class="sectionheader"><%~ DBSect %></legend>
-		<div>
-		<label class="leftcolumn" for="down_timeframe"><%~ dTFrm %>:</label>
-			<select class="rightcolumn" id="down_timeframe" onchange="setQosTimeframes()">
+		<div class='form-group form-inline'>
+			<label for="down_timeframe"><%~ dTFrm %>:</label>
+			<select class='form-control' id="down_timeframe" onchange="setQosTimeframes()">
 				<option value="1"><%~ minutes %></option>
 				<option value="2"><%~ qhour %></option>
 				<option value="3"><%~ hours %></option>

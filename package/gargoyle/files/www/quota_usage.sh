@@ -19,9 +19,9 @@
 </script>
 
 <form>
-	<fieldset>
+	<fieldset class="form-group form-inline">
 		<legend class="sectionheader"><%~ quotas.USect %></legend>
-		<select id="host_display" >
+		<select id="host_display" class="form-control">
 			<option value="hostname"><%~ DspHn %></option>
 			<option value="ip"><%~ DspHIP %></option>
 		</select>

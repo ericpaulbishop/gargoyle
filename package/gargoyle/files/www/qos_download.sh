@@ -31,23 +31,22 @@
 	<fieldset>
 		<legend class="sectionheader"><%~ qos.DRSection %></legend>
 
-		<div id='qos_enabled_container' class='nocolumn'>
-			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
+		<div id='qos_enabled_container' class='form-group form-inline'>
+			<input type='checkbox' id='qos_enabled' class='form-control' onclick="setQosEnabled()" />
 			<label id='qos_enabled_label' for='qos_enabled'><%~ DEnable %></label>
 		</div>
-		<div class="indent">
-			<p><%~ QoSAbout %> 
-			</p>
+		<div class='form-group form-inline'>
+			<p><%~ QoSAbout %></p>
 		</div>
 		<div class="internal_divider"></div>
 
 		<div id='qos_rule_table_container' class="bottom_gap"></div>
-		<div>
-			<label class="leftcolumn" id="default_class_label" for="default_class"><%~ ServClass %>:</label>
-			<select class="rightcolumn" id="default_class"></select>
+		<div class='form-group form-inline'>
+			<label id="default_class_label" for="default_class"><%~ ServClass %>:</label>
+			<select class="form-control" id="default_class"></select>
 		</div>
 
-		<div id="qos_down_1" class="indent">
+		<div id="qos_down_1" class='form-group form-inline'>
 			<span id='qos_down_1_txt'>
 				<p><%~ PackAbout %></p>
 
@@ -57,53 +56,52 @@
 			<a onclick='setDescriptionVisibility("qos_down_1")'  id="qos_down_1_ref" href="#qos_down_1"><%~ Hide %></a>
 		</div>
 
-
 		<div class="internal_divider">
 			<p>
 		</div>
 
 		<div><strong><%~ AddNewClassRule %>:</strong></div>
-		<div class="indent">
+		<div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
+				<div>
+					<input type='checkbox' id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
 					<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_port' onclick='enableAssociatedField(this,"source_port", "")'/>
+				<div>
+					<input type='checkbox' id='use_source_port' onclick='enableAssociatedField(this,"source_port", "")'/>
 					<label id="source_port_label" for='source_port'><%~ SrcPort %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='source_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
+				<input class='form-control' type='text' id='source_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_dest_ip' onclick='enableAssociatedField(this,"dest_ip", "")' />
+				<div>
+					<input type='checkbox' id='use_dest_ip' onclick='enableAssociatedField(this,"dest_ip", "")' />
 					<label id="dest_ip_label" for='dest_ip'><%~ DstIP %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_dest_port' onclick='enableAssociatedField(this,"dest_port", "")'  />
+				<div>
+					<input type='checkbox' id='use_dest_port' onclick='enableAssociatedField(this,"dest_port", "")'  />
 					<label id="dest_port_label" for='dest_port'><%~ DstPort %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='dest_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
 			</div>
 
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_max_pktsize' onclick='enableAssociatedField(this,"max_pktsize", "")'  />
+				<div class='form-group form-inline'>
+					<input type='checkbox' id='use_max_pktsize' onclick='enableAssociatedField(this,"max_pktsize", "")'  />
 					<label id="max_pktsize_label" for='max_pktsize'><%~ MaxPktLen %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='max_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
 				<em><%~ byt %></em>
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_min_pktsize' onclick='enableAssociatedField(this,"min_pktsize", "")'  />
+				<div>
+					<input type='checkbox' id='use_min_pktsize' onclick='enableAssociatedField(this,"min_pktsize", "")'  />
 					<label id="min_pktsize_label" for='min_pktsize'><%~ MinPktLen %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
@@ -111,11 +109,11 @@
 			</div>
 
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_transport_protocol' onclick='enableAssociatedField(this,"transport_protocol", "")'  />
+				<div>
+					<input type='checkbox' id='use_transport_protocol' onclick='enableAssociatedField(this,"transport_protocol", "")'  />
 					<label id="transport_protocol_label" for='transport_protocol'><%~ TrProto %>:</label>
 				</div>
-				<select class='rightcolumn' id="transport_protocol"/>
+				<select class='form-control' id="transport_protocol"/>
 					<option value="TCP">TCP</option>
 					<option value="UDP">UDP</option>
 					<option value="ICMP">ICMP</option>
@@ -124,11 +122,11 @@
 			</div>
 
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_connbytes_kb' onclick='enableAssociatedField(this,"connbytes_kb", "")'  />
+				<div>
+					<input type='checkbox' id='use_connbytes_kb' onclick='enableAssociatedField(this,"connbytes_kb", "")'  />
 					<label id="connbytes_kb_label" for='connbytes_kb'><%~ Conreach %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='connbytes_kb' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='28' />
+				<input class='form-control' type='text' id='connbytes_kb' onkeyup='proofreadNumericRange(this,0,4194303)' size='17' maxlength='28' />
 				<em><%~ KBy %></em>
 			</div>
 
@@ -137,7 +135,7 @@
 					<input type='checkbox'  id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />
 					<label id="app_protocol_label" for='app_protocol'><%~ AppProto %>:</label>
 				</div>
-				<select class='rightcolumn' id="app_protocol">
+				<select class='form-control' id="app_protocol">
 				<%
 				sed -e "s/#.*//" -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
 				%>
@@ -279,7 +277,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_ptarget_ip' onclick='enableAssociatedField(this, "ptarget_ip", currentWanGateway)'/>&nbsp;&nbsp;
 				<label for='ptarget_ip' id='ptarget_ip_label'><%~ ACC_Pt %>:</label>
-				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' /> 
+				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</span>
 		</div>
 
@@ -287,7 +285,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_auto_pinglimit' onclick='enableAssociatedField(this, "pinglimit", 85)'/>&nbsp;&nbsp;
 				<label for='pinglimit' id='pinglimit_label'><%~ ACC_con %>:</label>
-				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' /> 
+				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' />
 			</span>
 		</div>
 

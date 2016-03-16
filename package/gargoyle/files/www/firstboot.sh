@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -c "internal.css" -j "firstboot.js" -z "firstboot.js" system 
+	gargoyle_header_footer -h -c "internal.css" -j "firstboot.js" -z "firstboot.js" system
 %>
 
 <script>
@@ -28,21 +28,21 @@
 <fieldset>
 	<legend class="sectionheader"><%~ firstboot.ISSect %></legend>
 	<p><strong><%~ npass %>:</strong></p>
-	<div>
-		<label class='leftcolumn' for='password1' id='password1_label'><%~ NPass %>:</label>
-		<input type='password' class='rightcolumn' id='password1'  size='25' />
+	<div class='form-group form-inline'>
+		<label for='password1' id='password1_label'><%~ NPass %>:</label>
+		<input type='password' class='form-control' id='password1'  size='25' />
 	</div>
-	<div>
-		<label class='leftcolumn' for='password2' id='password2_label'><%~ CPass %>:</label>
-		<input type='password' class='rightcolumn' id='password2'  size='25' />
+	<div class='form-group form-inline'>
+		<label for='password2' id='password2_label'><%~ CPass %>:</label>
+		<input type='password' class='form-control' id='password2'  size='25' />
 	</div>
 	<p><strong><%~ Stz %>:</strong></p>
-	<div>
-		<select class='nocolumn' id='timezone'></select>
+	<div class='form-group form-inline'>
+		<select class='form-control' id='timezone'></select>
 		<br/>
 	</div>
 	<br/>
-	<input class="default_button" type="button" value="<%~ SSet %>" onclick="setInitialSettings()" />
+	<button class="btn btn-primary" onclick="setInitialSettings()" /><%~ SSet %><button>
 </fieldset>
 
 <script>

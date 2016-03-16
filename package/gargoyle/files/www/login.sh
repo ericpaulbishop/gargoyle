@@ -68,7 +68,7 @@ var passInvalid = false;
 
 <fieldset class="form-inline">
 	<legend class="sectionheader"><%~ login.LSect %></legend>
-	<span class="leftcolumn">
+	<span>
 		<p>
 			<strong>
 				<span id="login_status"></span>
@@ -76,12 +76,11 @@ var passInvalid = false;
 		</p>
 	</span>
 
-	<div class="form-group">
+	<div class='form-group form-inline'>
 		<label class="sr-only" for='password' id='password_label'><%~ EAdmP %></label>
 		<input class="form-control" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' placeholder="<%~ EAdmP %>"/>
+		<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
 	</div>
-
-	<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
 
 </fieldset>
 <fieldset id="local_quotas" style="display:none">

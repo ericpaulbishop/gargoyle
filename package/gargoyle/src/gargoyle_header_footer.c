@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         char* js_includes = "";
         char* langstr_js_includes = "";
         char* title = "Gargoyle Router Management Utility";
-        char* desc = "Router<br/>Management<br/>Utility";
+        char* desc = "Router Management Utility";
         char* dname = "Device Name";
         char* wait_txt = "Please Wait While Settings Are Applied";
         char** package_variables_to_load = NULL;
@@ -322,18 +322,15 @@ int main(int argc, char **argv)
                        "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
                        "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
                 printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/dashboard.css\">\n", theme_root, theme);
                 int css_index, js_index, lstr_js_index;
 
-                //older versions of gargoyle don't have some CSS classes, so this fixes compatibility with old themes
-                printf("\t<style>\n"
-                       "\tul ul{ display:none; } ul li.active>ul{ display:inline;}ul ul>a{ display:inline; padding:0; color:#000; cursor:default; }ul ul>li:hover{ color:#000; cursor:default; }ul ul>a:visited{ color:#000; cursor:default; }ul ul>a:active{ color:#000; cursor:default; }nav>li.active>a{ background-color: #eee;}\n"
-                       "\t</style>\n");
                 for(css_index=0; all_css[css_index] != NULL; css_index++)
                 {
                         printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
                 }
+                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
+                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/dashboard.css\">\n", theme_root, theme);
+                printf("<style>ul ul   { display:none; }ul li.active>ul  { display:inline;}ul ul>a   { display:inline; padding:0; color:#000; cursor:default; }ul ul>li:hover   { color:#000; cursor:default; }ul ul>a:visited   { color:#000; cursor:default; }ul ul>a:active   { color:#000; cursor:default; }nav>li.active>a {background-color: #eee;</style>");
                 for(js_index=0; all_js[js_index] != NULL; js_index++)
                 {
                         printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
@@ -376,26 +373,53 @@ int main(int argc, char **argv)
 
                         printf("\t\t</div>\n"
                                "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-                               "\t</div>\n"
-                               "\t<div class=\"row-offcanvas full-height\">\n"
-                               "\t<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
+                               "\t</div>\n");
 
-                        printf("<div id=\"content\" class=\"col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-push-2 col-md-push-2 col-lg-push-2 full-height\">\n"
-                               "\t<div id=\"topnavbar\" class=\"navbar navbar-default\">\n"
-                               "\t<div class=\"container-fluid\">\n"
-                               "\t<div class=\"navbar-header\">\n"
-                               "\t<a class=\"btn btn-default sidebar-toggle navbar-toggle\"><i class=\"fa fa-exchange\"></i></a>\n"
-                               "\t</div>\n"
-                               "\t<a class=\"navbar-brand\">%s</a>\n", translation_strings == NULL ? desc : translation_strings[1]);
+                        printf("<div class=\"row-offcanvas full-height\">"
+                               "<div id=\"wrapper\" class=\"container-fluid full-height\">"
+                               "<div class=\"row full-height\">");
 
-                        printf("</div>\n"
-                               "\t</div>\n"
-                               "\t<div class=\"row\">\n"
-                               "\t<div class=\"col-xs-12\">\n"
-                               "\t<div class=\"row\">\n"
-                               "\t<div class=\"col-lg-8\">\n"
-                               "\t<div class=\"widget\">\n"
-                               "\t<div class=\"widget-body\">\n");
+                        printf("<div id=\"content\" class=\"col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-push-2 col-md-push-2 col-lg-push-2 full-height\">"
+                               "<div id=\"topnavbar\" class=\"navbar navbar-default\">"
+                               "<div class=\"container-fluid\">"
+                               "<div class=\"navbar-header\">"
+                               "<button class=\"btn btn-default sidebar-toggle navbar-toggle\">"
+                               "<span class=\"sr-only\">Toggle navigation</span>"
+                               "<span class=\"icon-bar\"></span>"
+                               "<span class=\"icon-bar\"></span>"
+                               "<span class=\"icon-bar\"></span>"
+                               "</button>"
+                               // "<a class=\"btn btn-default navbar-toggle\""
+                               //         "data-toggle=\"collapse\""
+                               //         "data-target=\"#content-navbar-collapse\">"
+                               //     "<i class=\"fa fa-bars\"></i>"
+                               // "</a>"
+                               "</div>"
+                               "<a class=\"navbar-brand\">Gargoyle Router Management Utility</a>"
+                               //"<a class=\"navbar-brand\">%s</a>\n", translation_strings == NULL ? desc : translation_strings[1]);
+                               // "<div id=\"content-navbar-collapse\" class=\"collapse navbar-collapse\">"
+                               //     "<ul class=\"nav navbar-nav navbar-right\">"
+                               //         "<li class=\"dropdown\">"
+                               //             "<a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">"
+                               //                 "<i class=\"fa fa-2x fa-user\"></i>"
+                               //                 "<span class=\"caret\"></span>"
+                               //             "</a>"
+                               //             "<ul class=\"dropdown-menu\" role=\"menu\">"
+                               //                 "<li><a href=\"#\">Admin</a></li>"
+                               //                 "<li class=\"divider\"></li>"
+                               //                 "<li><a href=\"#\">Logout</a></li>"
+                               //             "</ul>"
+                               //         "</li>"
+                               //     "</ul>"
+                               // "</div>"
+                               "</div>"
+                               "</div>"
+
+                               "<div class=\"row\">"
+                               "<div class=\"col-xs-12\">"
+                               "<div class=\"row\">"
+                               "<div class=\"col-lg-6\">"
+                               "<div class=\"widget\">");
                 }
 
                 printf("<script>\n"
@@ -497,21 +521,21 @@ int main(int argc, char **argv)
                 }
 
 
-                printf("</div>\n"                                //widget-body
-                       "</div>\n"                                //widget
-                       "</div>\n"                                //col-lg-8
-                       "</div>\n"                                //row
-                       "</div>\n"                                //col-xs-12
-                       "</div>\n"                                //row
-                       "</div>\n");                              //content
+                printf("</div>"
+                       "</div>"
+                       "</div>"
+                       "</div>"
+                       "</div>"
+                       "</div>");              //row main
 
-                printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
-                       "<ul class=\"nav sidebar\">\n"
-                       "<li class=\"sidebar-header\">\n"
-                       "<span>Gargoyle</span>\n"
-                       "<img src=\"%s/Gargoyle/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\">\n", theme_root);
-                //printf("<span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
-                printf("</li><!-- sidebar-header end-->\n");
+                printf("<div id=\"sidebar\" class=\"col-xm-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">"
+                       "<nav>"
+                       "<ul class=\"sidebar\">"
+                       "<li class=\"sidebar-header\">"
+                       "<span class=\"title\">Gargoyle</span><br/>"
+                       "<img src=\"%s/Gargoyle/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\">", theme_root);
+                printf("<br/><span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
+                printf("</li><!-- sidebar-header end-->");
 
                 int first_section=1;
                 int prev_section_selected=0;
@@ -534,8 +558,8 @@ int main(int argc, char **argv)
                                 }
                                 else
                                 {
-                                        printf("<li class=\"sidebar-item active\"><a onClick=\"return true\">%s</a>\n", section_display);
-                                        printf("<ul class=\"sidebar-list active\">");
+                                        printf("<li class=\"sidebar-item active\"><a onClick=\"return true\">%s<span class=\"sr-only\">(current)</span></a>", section_display);
+                                        printf("<ul class=\"sidebar-list\">");
                                         priority_queue_node *next_section_page;
                                         while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
                                         {
@@ -553,7 +577,7 @@ int main(int argc, char **argv)
                                                 if(strcmp(next_section_page->id, selected_page)==0)
                                                 {
 
-                                                        printf("<li class=\"sidebar-item active\">%s</li>\n", page_display);
+                                                        printf("<li class=\"sidebar-item active\">%s</li>", page_display);
                                                 }
                                                 else
                                                 {
@@ -562,12 +586,12 @@ int main(int argc, char **argv)
                                                         if(strcmp(bin_root, ".") == 0)
                                                         {
                                                                 printf("<li class=\"sidebar-item\"> <!-- sidebar-list item 1 -->"
-                                                                       "<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
+                                                                       "<a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
                                                         }
                                                         else
                                                         {
                                                                 printf("<li class=\"sidebar-item\"><!-- sidebar-list item 2 -->"
-                                                                       "<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
+                                                                       "<a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
                                                         }
                                                         free(bin_slash);
                                                         free(page_slash);
@@ -668,34 +692,32 @@ int main(int argc, char **argv)
                         }
                         first_section = 0;
                 }
-                // if(prev_section_selected ==1 )
-                // {
-                //         printf("\t\t\t\t\t<div class=\"nav_selected_divider_end2\"></div>\n");
-                // }
-                // else
-                // {
-                //         printf("\t\t\t\t\t<div class=\"nav_unselected_divider_end2\"></div>\n");
-                // }
 
-                printf("<li class=\"sidebar-footer\"\n>"
-                       "<div class=\"col-xs-6\"\n>"
-                       "<a href=\"/logout.sh\">Logout</a>\n"
-                       "</div>\n"
-                       "<div class=\"col-xs-6\">\n"
-                       "<a href=\"https://www.gargoyle-router.com/\" target=\"_blank\">Support</a>\n"
-                       "</div>\n"
-                       "</li>\n"                        //sidebar-footer
-                       "</ul>\n"                        //sidebar
-                       "</div>\n");                     //sidebar
-                printf("\t<script src=\"%s/Gargoyle/jquery-1.11.3.min.js\"></script>\n", theme_root);
-                printf("\t<script src=\"%s/Gargoyle/bootstrap.min.js\"></script>\n", theme_root);
-                printf("\t<script>"
-                       "$(\".sidebar-toggle\").on(\"click\", function () {"
+                printf("</ul>"                        //sidebar
+                       "<nav>"
+                       "<div class=\"sidebar-footer\">"
+                       "<div class=\"col-xs-6\">"
+                       "<a href=\"/logout.sh\">Logout</a>"
+                       "</div>"
+                       "<div class=\"col-xs-6\">"
+                       "<a href=\"https://www.gargoyle-router.com/\" target=\"_blank\">Support</a>"
+                       "</div>"
+                       "</div>"                      //sidebar-footer
+                       "</div>");                    //sidebar content end
+
+                printf("</div>"                      //row
+                       "</div>"                      //wrapper
+                       "</div>");                    //container-fluid
+
+                printf("<script src=\"%s/Gargoyle/jquery-1.11.3.min.js\"></script>", theme_root);
+                printf("<script src=\"%s/Gargoyle/bootstrap.min.js\"></script>", theme_root);
+                printf("<script>"
+                       "$(\".sidebar-toggle\").on(\"click\", function() {"
                        "$(\".row-offcanvas\").toggleClass(\"active\");"
                        "});"
                        "</script>");
-                printf("</body>\n"
-                       "</html>\n");
+                printf("</body>"
+                       "</html>");
                 free_null_terminated_string_array(translation_strings);
         }
 

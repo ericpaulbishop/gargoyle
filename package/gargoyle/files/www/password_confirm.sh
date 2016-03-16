@@ -12,13 +12,13 @@
 	<legend class="sectionheader"><%~ CPass %></legend>
 
 	<div style="clear:both;display:block">
-		<span class="nocolumn" id="confirm_text"></span>
+		<span id="confirm_text"></span>
 	</div>
 
 	<div id="spacer_div" style="display:block; margin:8px;">&nbsp;</div>
 
 	<div style="clear:both">
-		<span class="nocolumn"><input type="password" id="password" /></span>
+		<span><input type="password" id="password" class="form-control"/></span>
 	</div>
 </fieldset>
 <div id="bottom_button_container"></div>

@@ -16,21 +16,21 @@
 %>
 </script>
 
-<form class="form-horizontal">
+<form>
 	<fieldset>
 		<legend class="sectionheader"><%~ ident.IdSect %></legend>
-		<div class="form-group">
-			<label class='narrowleftcolumn sr-only' for='hostname' id='hostname_label'><%~ HsNm %></label>
-			<input type='text' class='rightcolumn form-control' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' placeholder='<%~ HsNm %>'/>
+		<div class='form-group form-inline'>
+			<label class='sr-only' for='hostname' id='hostname_label'><%~ HsNm %></label>
+			<input type='text' class='form-control' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' placeholder='<%~ HsNm %>'/>
 		</div>
-		<div id="domain_container" class="form-group">
-			<label class='narrowleftcolumn sr-only' for='domain' id='domain_label'><%~ Domn %></label>
-			<input type='text' class='rightcolumn form-control' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' placeholder='<%~ Domn %>'/>
+		<div id="domain_container" class='form-group form-inline'>
+			<label class='sr-only' for='domain' id='domain_label'><%~ Domn %></label>
+			<input type='text' class='form-control' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' placeholder='<%~ Domn %>'/>
 		</div>
 
 	</fieldset>
-	<div id="bottom_button_container" class="form-group">
-		<button id="save_button" class="btn btn-default" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<div id="bottom_button_container" class='form-group form-inline'>
+		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
 		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>

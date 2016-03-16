@@ -13,30 +13,33 @@
 
 	<div>
 		<div>
-			<label class='leftcolumn' for='ddns_provider' id='ddns_provider_label'><%~ SvPro %>:</label>
-			<span class='rightcolumn' id="ddns_provider_text" ></span>
+			<label for='ddns_provider' id='ddns_provider_label'><%~ SvPro %>:</label>
+			<span id="ddns_provider_text" ></span>
 		</div>
 	</div>
 
 	<div id="ddns_variable_container"></div>
 
 	<div>
-		<div>
-			<label class='leftcolumn' for='ddns_check' id='ddns_check_label'><%~ ChItv %>:</label>
-			<input type='text' class='rightcolumn' id='ddns_check'  size='8' onkeyup='proofreadNumeric(this)'/>
+
+		<div class='form-group form-inline'>
+			<label for='ddns_check' id='ddns_check_label'><%~ ChItv %>:</label>
+			<input type='text' class='form-control' id='ddns_check' size='8' onkeyup='proofreadNumeric(this)'/>
 			<em><%~ minutes %></em>
-			<div class='indent'>
+			<div>
 				<p><%~ HelpCI %></p>
 			</div>
 		</div>
-		<div>
-			<label class='leftcolumn' for='ddns_force' id='ddns_force_label'><%~ FUItv %>:</label>
-			<input type='text' class='rightcolumn' id='ddns_force'  size='8' onkeyup='proofreadNumeric(this)'/>
+
+		<div class='form-group form-inline'>
+			<label for='ddns_force' id='ddns_force_label'><%~ FUItv %>:</label>
+			<input type='text' class='form-control' id='ddns_force' size='8' onkeyup='proofreadNumeric(this)'/>
 			<em><%~ days %></em>
-			<div class='indent'>
+			<div>
 				<p><%~ HelpFI %></p>
 			</div>
 		</div>
+
 	</div>
 
 </fieldset>

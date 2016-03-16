@@ -30,23 +30,23 @@
 	<fieldset>
 		<legend class="sectionheader"><%~ qos.URSection %></legend>
 
-		<div id='qos_enabled_container' class='nocolumn'>
-			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
+		<div id='qos_enabled_container' class='form-group form-inline'>
+			<input type='checkbox' id='qos_enabled' class='form-control' onclick="setQosEnabled()" />
 			<label id='qos_enabled_label' for='qos_enabled'><%~ UEnable %></label>
 		</div>
 
-		<div class="indent">
+		<div >
 			<p><%~ QoSAbout %></p>
 		</div>
 		<div class="internal_divider"></div>
 
 		<div id='qos_rule_table_container' class="bottom_gap"></div>
-		<div>
-			<label class="leftcolumn" id="default_class_label" for="default_class"><%~ ServClass %>:</label>
-			<select class="rightcolumn" id="default_class"></select>
+		<div class="form-group form-inline">
+			<label id="default_class_label" for="default_class"><%~ ServClass %>:</label>
+			<select class="form-control" id="default_class"></select>
 		</div>
 
-		<div id="qos_up_1" class="indent">
+		<div id="qos_up_1" >
 			<span id='qos_up_1_txt'>
 				<p><%~ PackAbout %></p>
 
@@ -62,17 +62,17 @@
 		</div>
 
 		<div><strong><%~ AddNewClassRule %>:</strong></div>
-		<div class="indent">
-			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
+		<div>
+			<div class="form-group form-inline">
+				<div>
+					<input type='checkbox' class='form-control' id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
 					<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='form-control' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_port' onclick='enableAssociatedField(this,"source_port", "")'/>
+				<div class="form-group form-inline">
+					<input type='checkbox' id='use_source_port' class='form-control' onclick='enableAssociatedField(this,"source_port", "")'/>
 					<label id="source_port_label" for='source_port'><%~ SrcPort %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='source_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
@@ -168,7 +168,7 @@
 
 		</div>
 
-		<div id="qos_up_2" class="indent">
+		<div id="qos_up_2" >
 			<span id='qos_up_2_txt'>
 				<p><%~ USCAbout %></p>
 
@@ -186,7 +186,7 @@
 		<div class="internal_divider"></div>
 
 		<div><strong><%~ AddNewServiceRule %>:</strong></div>
-		<div class="indent">
+		<div >
 
 			<div>
 				<label class='leftcolumn' id="class_name_label" for='class_name'><%~ SrvClassName %>:</label>

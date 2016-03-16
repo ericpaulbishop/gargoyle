@@ -30,7 +30,7 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader"><%~ bandwidth.GOpSect %></legend>
-		<div class='form-group'>
+		<div class='form-group form-inline'>
 			<label for='plot_time_frame' id='time_frame_label'><%~ TFrm %>:</label>
 			<select id="plot_time_frame" class='form-control' onchange="resetPlots()">
 				<option value="1">15 <%~ minutes %></option>
@@ -42,25 +42,25 @@
 		</div>
 
 		<div id="control_column_container">
-			<div id="plot1_control_column" class='form-group'>
+			<div id="plot1_control_column" class='form-group form-inline'>
 				<div><span  id="plot1_title"><%~ Plot %> 1</span></div>
 				<div><select id="plot1_type" class="form-control" onchange="resetPlots()" ><option value="total"><%~ TBdw %></option></select></div>
 				<div><select id="plot1_id" class="form-control" onchange="resetPlots()"></select></div>
 
 			</div>
-			<div id="plot2_control_column" class='form-group'>
+			<div id="plot2_control_column" class='form-group form-inline'>
 				<div><span   id="plot2_title"><%~ Plot %> 2</span></div>
 				<div><select id="plot2_type" class="form-control" onchange="resetPlots()" ><option value="none"><%~ None %></option></select></div>
 				<div><select id="plot2_id" class="form-control" onchange="resetPlots()"></select></div>
 			</div>
-			<div id="plot3_control_column" class='form-group'>
+			<div id="plot3_control_column" class='form-group form-inline'>
 				<div><span   id="plot3_title"><%~ Plot %> 3</span></div>
 				<div><select id="plot3_type" class="form-control" onchange="resetPlots()"><option value="none"><%~ None %></option></select></div>
 				<div><select id="plot3_id" class="form-control" onchange="resetPlots()"></select></div>
 			</div>
 		</div>
 
-		<div class='form-group'>
+		<div class='form-group form-inline'>
 			<input type="checkbox" id="use_high_res_15m" class="form-control" onclick="highResChanged()">&nbsp;
 			<label id="use_high_res_15m_label" for="use_high_res_15m"><%~ HRInf %></label>
 			<br/>
@@ -85,9 +85,9 @@
 	</fieldset>
 	<fieldset id="total_bandwidth_use">
 		<legend class="sectionheader"><%~ BUTab %></legend>
-		<div class='form-group'>
-			<label for='table_time_frame' class="narrowleftcolumn" id='table_time_frame_label'><%~ DspI %>:</label>
-			<select id="table_time_frame" class="rightcolumn form-control" onchange="resetPlots()">
+		<div class='form-group form-inline'>
+			<label for='table_time_frame' id='table_time_frame_label'><%~ DspI %>:</label>
+			<select id="table_time_frame" class="form-control" onchange="resetPlots()">
 				<option value="1"><%~ minutes %></option>
 				<option value="2"><%~ qhour %></option>
 				<option value="3"><%~ hours %></option>
@@ -95,19 +95,19 @@
 				<option value="5"><%~ mnths %></option>
 			</select>
 		</div>
-		<div class='form-group'>
-			<label for='table_type' class="narrowleftcolumn" id='total_type_label'><%~ DspT %>:</label>
-			<select id="table_type" class="rightcolumn form-control" onchange="resetPlots()">
+		<div class='form-group form-inline'>
+			<label for='table_type' id='total_type_label'><%~ DspT %>:</label>
+			<select id="table_type" class="form-control" onchange="resetPlots()">
 				<option value="total"><%~ TBdw %></option>
 			</select>
 		</div>
-		<div id="table_id_container" style="display:none" class='form-group'>
-			<label for='table_id' class="narrowleftcolumn" id='total_id_label'><%~ DspID %>:</label>
-			<select id="table_id" class="rightcolumn form-control" onchange="resetPlots()"></select>
+		<div id="table_id_container" style="display:none" class='form-group form-inline'>
+			<label for='table_id' id='total_id_label'><%~ DspID %>:</label>
+			<select id="table_id" class="form-control" onchange="resetPlots()"></select>
 		</div>
-		<div class="bottom_gap form-group">
-			<label for='table_units' class="narrowleftcolumn" id='table_units_label'><%~ TbUnt %>:</label>
-			<select id="table_units" class="rightcolumn form-control" onchange="resetPlots()">
+		<div class="bottom_gap form-group form-inline">
+			<label for='table_units' id='table_units_label'><%~ TbUnt %>:</label>
+			<select id="table_units" class="form-control" onchange="resetPlots()">
 				<option value="mixed"><%~ AutoM %></option>
 				<option value="KBytes"><%~ KBy %></option>
 				<option value="MBytes"><%~ MBy %></option>
@@ -119,7 +119,7 @@
 		<div id="bandwidth_table_container"></div>
 
 		<div>
-			<button id='delete_data_button' class='btn btn-warning btn-lg' onclick='deleteData();'><%~ DelD %></button>
+			<button id='delete_data_button' class='btn btn-danger btn-lg' onclick='deleteData();'><%~ DelD %></button>
 		</div>
 
 	</fieldset>

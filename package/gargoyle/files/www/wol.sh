@@ -36,13 +36,9 @@ var arpLines;
 
 	<div id="wol_table_container"></div>
 
-	<p></p>
-
 	<div id="wol_help">
 		<span id="wol_help_txt">
-
-		<p><%~ WLHelp %></p>
-
+		<%~ WLHelp %>
 		</span>
 		<a id="wol_help_ref" onclick='setDescriptionVisibility("wol_help")' href="#wol_help"><%~ Hide %></a>
 	</div>

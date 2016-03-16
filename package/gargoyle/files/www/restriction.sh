@@ -26,7 +26,7 @@
 			<%in templates/restriction_template %>
 
 			<div>
-				<input type="button" id="add_restriction_button" class="default_button" value="<%~ ANRule %>" onclick='addNewRule("restriction_rule", "rule_")' />
+				<button id="add_restriction_button" class="btn btn-default" onclick='addNewRule("restriction_rule", "rule_")'><%~ ANRule %></button>
 			</div>
 		</div>
 

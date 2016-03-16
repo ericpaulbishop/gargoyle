@@ -44,22 +44,22 @@
 		<div class="internal_divider"></div>
 
 		<div>
-			<span class='leftcolumn'><%~ CGV %>:</span><span id="gargoyle_version" class='rightcolumn'></span>
+			<span><%~ CGV %>:</span><span id="gargoyle_version"></span>
 		</div>
 
 		<div class="internal_divider"></div>
 
 		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade" class="form-horizontal">
 
-			<div id="upgrade_file1_container" class="form-group">
-				<label id="upgrade_label" class='leftcolumn' for="upgrade_file"><%~ SelF %>:</label>
-				<input class='rightcolumn form-control' type="file" id="upgrade_file" name="upgrade_file"/>
+			<div id="upgrade_file1_container" class='form-group form-inline'>
+				<label id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
+				<input class='form-control' type="file" id="upgrade_file" name="upgrade_file"/>
 				<br/>
-				<em><span id="upgrade_text" class="rightcolumnonly"></span></em>
+				<em><span id="upgrade_text"></span></em>
 			</div>
-			<div id="upgrade_preserve_container" class="form-group">
-				<span class="rightcolumnonly">
-					<input type="checkbox" id="upgrade_preserve" class="form-control" name="upgrade_preserve"/>
+			<div id="upgrade_preserve_container" class='form-group form-inline'>
+				<span>
+					<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve"/>
 					<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
 				</span>
 			</div>

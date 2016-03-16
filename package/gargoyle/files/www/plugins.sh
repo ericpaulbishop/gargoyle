@@ -30,7 +30,7 @@
 	pkg_info=$(gpkg info -v 'Install-Destination,Required-Size,Required-Depends,Description,Will-Fit,User-Installed' -d plugin_root -o 'js' -r /^plugin\-gargoyle/)
 	gpkg dest-info -o 'js'
 	if [ -n "$pkg_info" ] ; then
-		printf "%s\n" "$pkg_info" 
+		printf "%s\n" "$pkg_info"
 	fi
 
 	echo "var pluginSources = [];"
@@ -47,55 +47,51 @@
 	<fieldset id="plugin_options">
 		<legend class="sectionheader"><%~ plugins.PgOpt %></legend>
 
-		<div>
-			<span class="narrowleftcolumn"><%~ PRoot %>:</span>
-			<span id="plugin_root_static" class="widerightcolumn">/plugin_root</span>
-			<input type="text" id="plugin_root_text" class="widerightcolumn" style="display:none" />
+		<div class='form-group form-inline'>
+			<span><%~ PRoot %>:</span>
+			<span id="plugin_root_static">/plugin_root</span>
+			<input type="text" id="plugin_root_text" style="display:none" />
 		</div>
-		<div>
-			<span id="plugin_root_drive_static" class="widerightcolumnonly" for="plugin_root_drive_select"><%~ RDrv %></span>
-			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
+
+		<div class='form-group form-inline'>
+			<span id="plugin_root_drive_static" for="plugin_root_drive_select"><%~ RDrv %></span>
+			<select id="plugin_root_drive_select" class="form-control" onchange="updatePluginRootDisplay()" style="display:none"></select>
 		</div>
+
 		<div id="plugin_root_change_container" style="display:none" >
-			<span class="widerightcolumnonly" >
-				<input type="button" class="default_button" value="<%~ Chroot %>" onclick="changePluginRoot()" />
-			</span>
+				<button class="btn btn-warning" value="<%~ Chroot %>" onclick="changePluginRoot()" /></button>
 		</div>
 		<br/>
 
-		<div>
-			<span class="leftcolumn"><%~ PgSrc %>:</span>
+		<div class='form-group form-inline'>
+			<span><%~ PgSrc %>:</span>
 		</div>
-		<div id="package_source_table_container" style="margin-left:5px;" ></div>
-		<div class="indent">
-			<div>
-				<label class="narrowleftcolumn" for="add_source_name"><%~ ANam %>:</label>
-				<input type="text" class="widerightcolumn" id="add_source_name" onkeyup="proofreadSourceName(this)" style="width:325px;"/>
+		<div id="package_source_table_container"></div>
+			<div class='form-group form-inline'>
+				<label for="add_source_name"><%~ ANam %>:</label>
+				<input type="text" class="form-control" id="add_source_name" onkeyup="proofreadSourceName(this)"/>
 			</div>
-			<div>
-				<label class="narrowleftcolumn" for="add_source_url"><%~ Aurl %>:</label>
-				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
+			<div class='form-group form-inline'>
+				<label for="add_source_url"><%~ Aurl %>:</label>
+				<input type="text" class="form-control" id="add_source_url"/>
 			</div>
-
-			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="<%~ APSrc %>" onclick="addPluginSource()" /></span>
-
-		</div>
+			<button class="btn btn-info" id="add_source_button" onclick="addPluginSource()" /><%~ APSrc %></button>
 	</fieldset>
 
 	<fieldset id="plugin_list">
 		<legend class="sectionheader"><%~ PList %></legend>
 		<div id="bottom_button_container">
-			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
+			<button id="update_button" class="btn btn-info" onclick='updatePackagesList()' /><%~ RfshP %></button>
 		</div>
-		<span id="wan-warn" style="color:red;display:none"><%~ NoWan %></span>
+		<span id="wan-warn" style="display:none" class="warning"><%~ NoWan %></span>
 		<div>
-			<div id="languages_table_container" style="margin-left:5px" ></div>
-		</div>
-		<div>
-			<div id="themes_table_container" style="margin-left:5px" ></div>
+			<div id="languages_table_container"></div>
 		</div>
 		<div>
-			<div id="packages_table_container" style="margin-left:5px" ></div>
+			<div id="themes_table_container"></div>
+		</div>
+		<div>
+			<div id="packages_table_container"></div>
 		</div>
 		<div id="no_packages" style='display:none;'>
 			<%~ NoPkg %>

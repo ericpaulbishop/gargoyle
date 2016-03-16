@@ -170,7 +170,7 @@
 		<input type='checkbox' id='quota_thu'/><label for="quota_thu"><%~ Thu %></label>
 		<input type='checkbox' id='quota_fri'/><label for="quota_fri"><%~ Fri %></label>
 		<input type='checkbox' id='quota_sat'/><label for="quota_sat"><%~ Sat %></label>
-	</span>	
+	</span>
 	<span id="active_hours_container">
 		<input class="widerightcolumnonly" type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
 		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>

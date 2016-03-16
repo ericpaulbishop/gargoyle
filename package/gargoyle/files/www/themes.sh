@@ -24,8 +24,8 @@
 <form>
 	<fieldset>
 		<legend class="sectionheader"><%~ themes.TMSect %></legend>
-		<div class='indent'>
-		<div id="themes_table_container"></div>
+		<div class='form-group form-inline'>
+			<div id="themes_table_container"></div>
 		</div>
 	</fieldset>
 
