@@ -2143,7 +2143,7 @@ CONFIG_PACKAGE_ip=y
 # CONFIG_PACKAGE_ip-bridge is not set
 # CONFIG_PACKAGE_ip-full is not set
 # CONFIG_PACKAGE_lldpd is not set
-# CONFIG_PACKAGE_relayd is not set
+CONFIG_PACKAGE_relayd=y
 # CONFIG_PACKAGE_ss is not set
 CONFIG_PACKAGE_tc=y
 

@@ -76,54 +76,6 @@
  
  define Package/ebtables-utils/install
 --- /dev/null	2014-11-19 03:51:59.087785361 -0500
-+++ b/package/network/utils/ebtables/files/20-client_bridge	2014-11-26 08:13:56.810379020 -0500
-@@ -0,0 +1,45 @@
-+######################################################################
-+# Client bridge hotplug script (/etc/hotplug.d/net/20-client_bridge)
-+# Copyright Eric Bishop, 2009 eric@gargoyle-router.com 
-+# Created for Gargoyle, www.gargoyle-router.com
-+#
-+#This is free software licensed under the terms of the GNU GPL v2.0
-+# 
-+# You must have the arpnat ebtables module for this to work
-+######################################################################
-+is_wifi_if=$(echo $INTERFACE | grep -e ath -e wlan)
-+if [ -n "$is_wifi_if" ] ; then
-+	if [ "$ACTION" = "add" -o "$ACTION" = "register" ] ; then
-+		sleep 2
-+		managed=$(iwinfo $INTERFACE info 2>/dev/null | grep "Mode: *Client")
-+		if [ -n "$managed" ] ; then
-+			sta_section=$(uci show wireless | sed "s/'//g" | grep "mode=sta$" | sed 's/\.mode=sta$//g' )			
-+			if [ -n "$sta_section" ] ; then
-+				client_bridge=$(uci get "$sta_section.client_bridge")
-+				if [ "$client_bridge" = "1" ] ; then
-+					
-+					if_mac=$(ifconfig "$INTERFACE" | grep HWaddr | awk ' { print $5 } ' )	
-+					ifconfig br-lan hw ether $if_mac
-+					
-+					ebtables -t nat -F PREROUTING
-+					ebtables -t nat -F POSTROUTING
-+					ebtables -t broute -F BROUTING
-+				
-+					ebtables -t nat -A PREROUTING  --in-interface  $INTERFACE -j arpnat --arpnat-target ACCEPT
-+					ebtables -t nat -A POSTROUTING --out-interface $INTERFACE -j arpnat --arpnat-target ACCEPT
-+					ebtables -t broute -A BROUTING --in-interface  $INTERFACE --protocol 0x888e -j DROP
-+					
-+					mkdir -p /tmp/client_bridge
-+					touch "/tmp/client_bridge/$INTERFACE"
-+				fi
-+			fi
-+		fi
-+	fi
-+	if [ "$ACTION" = "remove" -o "$ACTION" = "register" ] ; then
-+		if [ -e "/tmp/client_bridge/$INTERFACE" ] ; then
-+			ebtables -t nat -F PREROUTING
-+			ebtables -t nat -F POSTROUTING
-+			ebtables -t broute -F BROUTING
-+		fi			
-+	fi
-+fi
---- /dev/null	2014-11-19 03:51:59.087785361 -0500
 +++ b/package/network/utils/ebtables/patches/100-arpnat.patch	2014-11-26 08:09:37.330591710 -0500
 @@ -0,0 +1,143 @@
 +--- ebtables-v2.0.10-4-bak/include/linux/netfilter_bridge/ebt_nat.h	2011-12-15 15:02:48.000000000 -0500
