@@ -64,17 +64,6 @@
  # CONFIG_BRIDGE_VLAN_FILTERING is not set
  # CONFIG_BROADCOM_PHY is not set
  CONFIG_BROKEN_ON_SMP=y
---- a/package/network/utils/ebtables/Makefile	2014-11-08 12:48:51.656427958 -0500
-+++ b/package/network/utils/ebtables/Makefile	2014-11-30 10:27:31.675960717 -0500
-@@ -59,6 +59,8 @@
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/extensions/*.so $(1)/usr/lib/ebtables/
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ebtables $(1)/usr/sbin/
-+	$(INSTALL_DIR) $(1)/etc/hotplug.d/net/
-+	$(INSTALL_BIN) ./files/20-client_bridge $(1)/etc/hotplug.d/net/20-client_bridge
- endef
- 
- define Package/ebtables-utils/install
 --- /dev/null	2014-11-19 03:51:59.087785361 -0500
 +++ b/package/network/utils/ebtables/patches/100-arpnat.patch	2014-11-26 08:09:37.330591710 -0500
 @@ -0,0 +1,143 @@
