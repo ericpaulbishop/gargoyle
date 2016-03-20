@@ -517,7 +517,7 @@ initialize_quota_qos()
 enforce_dhcp_assignments()
 {
 	enforce_assignments=$(uci get firewall.@defaults[0].enforce_dhcp_assignments 2> /dev/null)
-	delete_chain_from_table lease_mismatch_check filter
+	delete_chain_from_table "filter" "lease_mismatch_check"
 
 	local pairs1
 	local pairs2
