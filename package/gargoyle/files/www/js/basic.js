@@ -3114,10 +3114,10 @@ function setHwMode(selectCtl)
 	//we should also store any existing channel selection and attempt to reapply it (if still valid)
 	channelG=getSelectedValue('wifi_channel1');
 	channelA=getSelectedValue('wifi_channel1_5ghz');
-	setChannelWidth(Object(wifi_channel_width),"G");
-	setChannelWidth(Object(wifi_channel_width_5ghz),"A");
-	setChannelWidth(Object(bridge_channel_width),"G");
-	setChannelWidth(Object(bridge_channel_width_5ghz),"A");
+	setChannelWidth(document.getElementById("wifi_channel_width"),"G");
+	setChannelWidth(document.getElementById("wifi_channel_width_5ghz"),"A");
+	setChannelWidth(document.getElementById("bridge_channel_width"),"G");
+	setChannelWidth(document.getElementById("bridge_channel_width_5ghz"),"A");
 	setSelectedValue('wifi_channel1',channelG);
 	setSelectedValue('wifi_channel1_5ghz',channelA);
 	
