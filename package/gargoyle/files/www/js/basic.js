@@ -118,7 +118,15 @@ function saveChanges()
 		uci.removeSection("network", "wwan");
 		uciCompare.removeSection("network", "wwan");
 		uci.set("dhcp", "lan", "ignore", "0");
-		uci.set("firewall", "lan", "network", "lan");
+		var lanzone = uci.getAllSectionsOfType("firewall","zone");
+		for(x = 0; x < lanzone.length; x++)
+		{
+			var name = uci.get("firewall",lanzone[x],"name");
+			if(name == "lan")
+			{
+				uci.set("firewall",lanzone[x],"network","lan");
+			}
+		}
 			
 		if( document.getElementById("global_gateway").checked )
 		{
@@ -686,7 +694,15 @@ function saveChanges()
 				
 				uci.set("dhcp", "lan", "ignore", "1");
 				
-				uci.set("firewall", "lan", "network", "lan wwan");
+				var lanzone = uci.getAllSectionsOfType("firewall","zone");
+				for(x = 0; x < lanzone.length; x++)
+				{
+					var name = uci.get("firewall",lanzone[x],"name");
+					if(name == "lan")
+					{
+						uci.set("firewall", lanzone[x], "network", "lan wwan");
+					}
+				}
 			}
 			
 			var ssid ="";
