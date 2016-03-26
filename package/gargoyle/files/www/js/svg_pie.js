@@ -10,9 +10,20 @@ var selectedId = null;
 var unselectedColors = [];
 var selectedColors = [];
 
+// color and font parity for themes
+var themeColor = "black";
+var themeFontFamily = "serif";
+
 function init(evt)
 {
 	svgDoc = evt.target.ownerDocument;
+
+	// might not need to actually check for this, because IE < 9 doesn't support SVG ?
+	if (window.getComputedStyle) {
+		var bodyStyle = window.getComputedStyle(window.parent.document.body);
+		themeColor = bodyStyle.color;
+		themeFontFamily = bodyStyle.fontFamily;
+	}
 
 	/*
 	var percentages = [ 25, 10, 8, 55, 2];
@@ -49,7 +60,7 @@ function setPieChartData(data, labels)
 		labelRect.setAttribute("y", nextLabelY);
 		labelRect.setAttribute("width", labelBoxWidth);
 		labelRect.setAttribute("height", labelBoxWidth);
-		labelRect.setAttribute("stroke", "black");
+		labelRect.setAttribute("stroke", themeColor);
 		labelRect.setAttribute("stroke-width", "1");
 		labelRect.setAttribute("id", "color_" + labelIndex);
 		labelRect.setAttribute("fill",  unselectedColor);
@@ -57,8 +68,9 @@ function setPieChartData(data, labels)
 		labelText = svgDoc.createElementNS(svgNs, "text");
 		labelText.setAttribute("x", labelX+25);
 		labelText.setAttribute("y", nextLabelY+labelBoxWidth);
+		labelText.setAttribute("fill", themeColor);
 		labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.66) + "px");
-		labelText.setAttribute("font-family", "serif");
+		labelText.setAttribute("font-family", themeFontFamily);
 		labelText.appendChild( svgDoc.createTextNode( labels[labelIndex] ));
 		labelText.setAttribute("id", "label_" + labelIndex);
 
@@ -136,7 +148,7 @@ function setPieChartData(data, labels)
 			newPath.setAttribute("stroke-linejoin", "round");
 		}
 		newPath.setAttribute("fill", unselectedColors[dataIndex]);
-		newPath.setAttribute("stroke", "black");
+		newPath.setAttribute("stroke", themeColor);
 		newPath.setAttribute("stroke-width", "1");
 		newPath.setAttribute("id", "slice_" + dataIndex);
 		if(selectedId == dataIndex)
@@ -192,6 +204,7 @@ function piePieceSelected()
 	pieContainer.removeChild(slice);
 	pieContainer.appendChild(slice);
 }
+
 function piePieceDeselected()
 {
 	id = this.id.match(/_(.*)$/)[1];
@@ -207,7 +220,6 @@ function piePieceDeselected()
 	pieContainer = svgDoc.getElementById("pie_container");
 	pieContainer.removeChild(slice);
 	pieContainer.appendChild(slice);
-
 }
 
 function getSelectedRgb(unselectedRgb)
