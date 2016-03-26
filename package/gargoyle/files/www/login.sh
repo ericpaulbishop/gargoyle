@@ -16,9 +16,9 @@
 		firstboot=$( uci get gargoyle.global.is_first_boot 2>/dev/null )
 		echo "Status: 302 Found" 
 		if [ "$firstboot" = "1" ] ; then
-			echo "Location: firstboot.sh"
+			echo "Location: /firstboot.sh"
 		else
-			echo "Location: overview.sh"
+			echo "Location: /overview.sh"
 		fi
 		echo ""
 		echo ""
