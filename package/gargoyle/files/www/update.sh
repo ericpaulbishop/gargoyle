@@ -14,7 +14,7 @@
 <%
 	is_brcm=$(cat /proc/cpuinfo | grep Broadcom)
 	is_atheros=$(cat /proc/cpuinfo | grep "system type" | grep "Atheros AR[1-6]")
-	is_ar71xx=$(cat /proc/cpuinfo  | grep "system type" | grep "Atheros AR[7-9]")
+	is_ar71xx=$(cat /proc/cpuinfo  | grep "system type" | egrep "Atheros (AR|QCA)[7-9]")
 	is_mvebu=$(cat /proc/cpuinfo   | grep Armada)
 	is_ramips=$(cat /proc/cpuinfo | grep Ralink)
 	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ] ; then
