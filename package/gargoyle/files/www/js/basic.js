@@ -234,10 +234,12 @@ function saveChanges()
 						uci.set('wireless', apgncfg, 'disassoc_low_ack', '0');
 						uci.set('wireless', apgncfg, 'is_guest_network', '1');
 
-						var mac = document.getElementById("wifi_guest_mac_g").value;
-						mac = mac == "" ? getRandomMac() : mac;
-						uci.set("wireless", apgncfg, 'macaddr', mac);
-
+						if (!distribTarget.match(/ramips/))
+						{
+							var mac = document.getElementById("wifi_guest_mac_g").value;
+							mac = mac == "" ? getRandomMac() : mac;
+							uci.set("wireless", apgncfg, 'macaddr', mac);
+						}
 
 
 						preCommands = preCommands + "uci set wireless." + apgncfg + "='wifi-iface' \n";

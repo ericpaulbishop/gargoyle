@@ -146,6 +146,8 @@ else
 	echo "var AwifiAC = false;" >> "$out_file"
 fi
 
+awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release >> "$out_file"
+
 # cache default interfaces if we haven't already
 # this script is run on first boot by hotplug, so
 # this will make sure the defaults get cached right
