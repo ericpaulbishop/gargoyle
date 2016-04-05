@@ -6,4 +6,11 @@ before_install:
  # http://docs.travis-ci.com/user/database-setup/#MySQL
  - sudo /etc/init.d/mysql stop
  - sudo /etc/init.d/postgresql stop
-install: make VERBOSE=0 ar71xx.usb
+##install: make VERBOSE=0 ar71xx.usb
+deploy:
+  - provider: releases
+  - api_key: "GITHUB OAUTH TOKEN"
+  - file: "FILE TO UPLOAD"
+  - skip_cleanup: true
+on:
+  - tags: true
