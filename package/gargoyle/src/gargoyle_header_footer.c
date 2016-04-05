@@ -312,8 +312,6 @@ int main(int argc, char **argv)
                         }
                 }
 
-
-
                 printf("<!DOCTYPE html>\n"
                        "<head>\n"
                        "\t<meta charset=\"utf-8\">\n"
@@ -323,14 +321,10 @@ int main(int argc, char **argv)
                        "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
                 printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
                 int css_index, js_index, lstr_js_index;
-
                 for(css_index=0; all_css[css_index] != NULL; css_index++)
                 {
                         printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
                 }
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/dashboard.css\">\n", theme_root, theme);
-                printf("<style>ul ul   { display:none; }ul li.active>ul  { display:inline;}ul ul>a   { display:inline; padding:0; color:#000; cursor:default; }ul ul>li:hover   { color:#000; cursor:default; }ul ul>a:visited   { color:#000; cursor:default; }ul ul>a:active   { color:#000; cursor:default; }nav>li.active>a {background-color: #eee;</style>");
                 for(js_index=0; all_js[js_index] != NULL; js_index++)
                 {
                         printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
@@ -358,6 +352,8 @@ int main(int argc, char **argv)
                         }
                 }
 #endif
+                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
+                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/theme.css\">\n", theme_root, theme);
                 printf("</head>\n"
                        "<body>\n");
 
@@ -373,53 +369,27 @@ int main(int argc, char **argv)
 
                         printf("\t\t</div>\n"
                                "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
-                               "\t</div>\n");
+                               "\t</div>\n"
+                               "\t<div id=\"row-offcanvas\" class=\"row-offcanvas full-height\">\n"
+                               "\t<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
 
-                        printf("<div class=\"row-offcanvas full-height\">"
-                               "<div id=\"wrapper\" class=\"container-fluid full-height\">"
-                               "<div class=\"row full-height\">");
+                        printf("<div id=\"content\" class=\"col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-push-2 col-md-push-2 col-lg-push-2 full-height\">\n"
+                               "\t<div id=\"topnavbar\" class=\"navbar navbar-default\">\n"
+                               "\t<div class=\"container-fluid\">\n"
+                               "\t<div class=\"navbar-header\">\n"
+                               "\t<button type=\"button\" class=\"btn btn-default sidebar-toggle navbar-toggle\" onclick=\"sidebar()\">\n"
+                               "\t<span class=\"sr-only\">Toggle navigation</span>\n"
+                               "\t<span class=\"icon-bar\"></span>\n"
+                               "\t<span class=\"icon-bar\"></span>\n"
+                               "\t<span class=\"icon-bar\"></span>\n"
+                               "\t</button>"
+                               "\t<span class=\"navbar-brand\">%s</span>\n", translation_strings == NULL ? desc : translation_strings[1]);
 
-                        printf("<div id=\"content\" class=\"col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-push-2 col-md-push-2 col-lg-push-2 full-height\">"
-                               "<div id=\"topnavbar\" class=\"navbar navbar-default\">"
-                               "<div class=\"container-fluid\">"
-                               "<div class=\"navbar-header\">"
-                               "<button class=\"btn btn-default sidebar-toggle navbar-toggle\">"
-                               "<span class=\"sr-only\">Toggle navigation</span>"
-                               "<span class=\"icon-bar\"></span>"
-                               "<span class=\"icon-bar\"></span>"
-                               "<span class=\"icon-bar\"></span>"
-                               "</button>"
-                               // "<a class=\"btn btn-default navbar-toggle\""
-                               //         "data-toggle=\"collapse\""
-                               //         "data-target=\"#content-navbar-collapse\">"
-                               //     "<i class=\"fa fa-bars\"></i>"
-                               // "</a>"
-                               "</div>"
-                               "<a class=\"navbar-brand\">Gargoyle Router Management Utility</a>"
-                               //"<a class=\"navbar-brand\">%s</a>\n", translation_strings == NULL ? desc : translation_strings[1]);
-                               // "<div id=\"content-navbar-collapse\" class=\"collapse navbar-collapse\">"
-                               //     "<ul class=\"nav navbar-nav navbar-right\">"
-                               //         "<li class=\"dropdown\">"
-                               //             "<a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">"
-                               //                 "<i class=\"fa fa-2x fa-user\"></i>"
-                               //                 "<span class=\"caret\"></span>"
-                               //             "</a>"
-                               //             "<ul class=\"dropdown-menu\" role=\"menu\">"
-                               //                 "<li><a href=\"#\">Admin</a></li>"
-                               //                 "<li class=\"divider\"></li>"
-                               //                 "<li><a href=\"#\">Logout</a></li>"
-                               //             "</ul>"
-                               //         "</li>"
-                               //     "</ul>"
-                               // "</div>"
-                               "</div>"
-                               "</div>"
-
-                               "<div class=\"row\">"
-                               "<div class=\"col-xs-12\">"
-                               "<div class=\"row\">"
-                               "<div class=\"col-lg-6\">"
-                               "<div class=\"widget\">");
+                        printf("\t</div>\n"//navbar-header end
+                               "\t</div>\n"//container-fluid end
+                               "\t</div>\n"//topnavbar end
+                               "\t<div class=\"row\">\n"
+                               "\t<div class=\"col-lg-12\">\n");
                 }
 
                 printf("<script>\n"
@@ -475,6 +445,10 @@ int main(int argc, char **argv)
                                 }
                         }
                 }
+                if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme") == UCI_OK)
+                {
+                        theme=get_option_value_string(uci_to_option(e));
+                }
                 if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
                 {
                         web_root=get_option_value_string(uci_to_option(e));
@@ -520,22 +494,17 @@ int main(int argc, char **argv)
                         }
                 }
 
+                printf("</div>\n"                                //col-lg-12
+                       "</div>\n"                                //row
+                       "</div>\n");                              //content
 
-                printf("</div>"
-                       "</div>"
-                       "</div>"
-                       "</div>"
-                       "</div>"
-                       "</div>");              //row main
-
-                printf("<div id=\"sidebar\" class=\"col-xm-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">"
-                       "<nav>"
-                       "<ul class=\"sidebar\">"
-                       "<li class=\"sidebar-header\">"
-                       "<span class=\"title\">Gargoyle</span><br/>"
-                       "<img src=\"%s/Gargoyle/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\">", theme_root);
-                printf("<br/><span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
-                printf("</li><!-- sidebar-header end-->");
+                printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
+                       "<div class=\"sidebar-header\">\n"
+                       "<span>Gargoyle</span><br/>\n"
+                       "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root, theme);
+                printf("<span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
+                printf("</div>\n"
+                       "<ul class=\"nav sidebar\">\n");//<!-- sidebar-header end-->
 
                 int first_section=1;
                 int prev_section_selected=0;
@@ -551,15 +520,15 @@ int main(int argc, char **argv)
                         }
                         if(strcmp(selected_section, next_section->id) == 0)
                         {
-                                printf("<!-- sidebar first else -->");
+                                //<!-- sidebar first else -->
                                 if(peek_priority_queue_node(section_pages) == NULL)
                                 {
                                         printf("<li class=\"sidebar-item active\">%s</li>\n", section_display);
                                 }
                                 else
                                 {
-                                        printf("<li class=\"sidebar-item active\"><a onClick=\"return true\">%s<span class=\"sr-only\">(current)</span></a>", section_display);
-                                        printf("<ul class=\"sidebar-list\">");
+                                        printf("<li class=\"sidebar-item active\"><a onclick=\"return true\">%s</a>\n", section_display);
+                                        printf("<ul class=\"sidebar-list active\">");
                                         priority_queue_node *next_section_page;
                                         while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
                                         {
@@ -577,7 +546,7 @@ int main(int argc, char **argv)
                                                 if(strcmp(next_section_page->id, selected_page)==0)
                                                 {
 
-                                                        printf("<li class=\"sidebar-item active\">%s</li>", page_display);
+                                                        printf("<li class=\"sidebar-item active\">%s</li>\n", page_display);
                                                 }
                                                 else
                                                 {
@@ -585,13 +554,13 @@ int main(int argc, char **argv)
                                                         char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
                                                         if(strcmp(bin_root, ".") == 0)
                                                         {
-                                                                printf("<li class=\"sidebar-item\"> <!-- sidebar-list item 1 -->"
-                                                                       "<a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
+                                                                printf("<li class=\"sidebar-item\">"//<!-- sidebar-list item 1 -->
+                                                                       "<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
                                                         }
                                                         else
                                                         {
-                                                                printf("<li class=\"sidebar-item\"><!-- sidebar-list item 2 -->"
-                                                                       "<a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
+                                                                printf("<li class=\"sidebar-item\">"//<!-- sidebar-list item 2 -->
+                                                                       "<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
                                                         }
                                                         free(bin_slash);
                                                         free(page_slash);
@@ -599,14 +568,14 @@ int main(int argc, char **argv)
                                                 }
                                                 free(lookup);
                                         }
-                                        printf("</ul><!-- sidebar-list active-->\n");
+                                        printf("</ul>\n");//<!-- sidebar-list active-->
                                         printf("</li>\n");
                                 }
                                 prev_section_selected=1;
                         }
                         else
                         {
-                                printf("<!-- sidebar second else -->\n");
+                                //<!-- sidebar second else -->
                                 priority_queue_node *next_section_page;
                                 char* next_section_script = "";
                                 if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
@@ -631,13 +600,13 @@ int main(int argc, char **argv)
                                 char* script_slash = next_section_script[0] == '/' ? strdup("") : strdup("/");
                                 if(strcmp(bin_root, ".") == 0)
                                 {
-                                        printf("<li class=\"sidebar-item\"> <!-- sidebar-list item 1 -->"
-                                               "<a href=\"%s%s\" onClick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
+                                        printf("<li class=\"sidebar-item\">"//<!-- sidebar-list item 1 -->
+                                               "<a href=\"%s%s\" onclick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
                                 }
                                 else
                                 {
-                                        printf("<li class=\"sidebar-item\"> <!-- sidebar-list item 2 -->"
-                                               "<a href=\"%s%s%s%s\" onClick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+                                        printf("<li class=\"sidebar-item\">"//<!-- sidebar-list item 2 -->
+                                               "<a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
                                 }
 
                                 int empty_section = 0;
@@ -647,7 +616,7 @@ int main(int argc, char **argv)
                                 }
                                 if (empty_section == 0)
                                 {
-                                        printf("<ul class=\"sidebar-list\"><!-- sidebar-list 2nd list -->\n");
+                                        printf("<ul class=\"sidebar-list\">\n");//<!-- sidebar-list 2nd list -->
                                 }
                                 while(next_section_page != NULL)
                                 {
@@ -666,15 +635,15 @@ int main(int argc, char **argv)
                                         char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
                                         if(strcmp(bin_root, ".") == 0)
                                         {
-                                                printf("<li class=\"sidebar-item\"><!-- sidebar-list 2nd list item 1 -->"
+                                                printf("<li class=\"sidebar-item\">"//<!-- sidebar-list 2nd list item 1 -->
                                                        "<a href=\"%s%s\">%s</a>\n", page_slash, page_script, page_display);
-                                                printf("</li><!-- sidebar-item 2nd list item 1 end-->");
+                                                printf("</li>");//<!-- sidebar-item 2nd list item 1 end-->
                                         }
                                         else
                                         {
-                                                printf("<li class=\"sidebar-item\"><!-- sidebar-list 2nd list item 2 -->"
+                                                printf("<li class=\"sidebar-item\">"//<!-- sidebar-list 2nd list item 2 -->
                                                        "<a href=\"%s%s%s%s\">%s</a>\n", bin_slash, bin_root, page_slash, page_script, page_display);
-                                                printf("</li><!-- sidebar-list 2nd list item 2 end-->");
+                                                printf("</li>\n");//<!-- sidebar-list 2nd list item 2 end-->
                                         }
                                         free(bin_slash);
                                         free(page_slash);
@@ -683,41 +652,32 @@ int main(int argc, char **argv)
                                 }
                                 if (empty_section == 0)
                                 {
-                                        printf("</ul></li><!-- sidebar-list 2nd list end-->\n");
+                                        printf("</ul></li>\n");//<!-- sidebar-list 2nd list end-->
                                 }
-
-                                //printf("</li>\n");
-                                //printf("</ul>\n");
                                 prev_section_selected=0;
                         }
                         first_section = 0;
                 }
 
-                printf("</ul>"                        //sidebar
-                       "<nav>"
-                       "<div class=\"sidebar-footer\">"
-                       "<div class=\"col-xs-6\">"
-                       "<a href=\"/logout.sh\">Logout</a>"
-                       "</div>"
-                       "<div class=\"col-xs-6\">"
-                       "<a href=\"https://www.gargoyle-router.com/\" target=\"_blank\">Support</a>"
-                       "</div>"
-                       "</div>"                      //sidebar-footer
-                       "</div>");                    //sidebar content end
+                printf("</ul>\n"//sidebar end
+                       "<div class=\"sidebar-footer\"\n>"
+                       "<div class=\"col-xs-6\"\n>"
+                       "<a href=\"/logout.sh\">Logout</a>\n"
+                       "</div>\n"
+                       "<div class=\"col-xs-6\">\n"
+                       "<a href=\"https://www.gargoyle-router.com/\" target=\"_blank\">Support</a>\n"
+                       "</div>\n"
+                       "</div>\n"//sidebar-footer
+                       "</div>\n");//sidebar
 
-                printf("</div>"                      //row
-                       "</div>"                      //wrapper
-                       "</div>");                    //container-fluid
-
-                printf("<script src=\"%s/Gargoyle/jquery-1.11.3.min.js\"></script>", theme_root);
-                printf("<script src=\"%s/Gargoyle/bootstrap.min.js\"></script>", theme_root);
-                printf("<script>"
-                       "$(\".sidebar-toggle\").on(\"click\", function() {"
-                       "$(\".row-offcanvas\").toggleClass(\"active\");"
-                       "});"
-                       "</script>");
-                printf("</body>"
-                       "</html>");
+                printf("<script>\n"
+                       "function sidebar(){var row = document.getElementById(\"row-offcanvas\");"
+                       "if(row.className == \"row-offcanvas full-height active\"){"
+                       "row.className = \"row-offcanvas full-height\";}"
+                       "else{row.className = \"row-offcanvas full-height active\";}}"
+                       "</script>\n");
+                printf("</body>\n"
+                       "</html>\n");
                 free_null_terminated_string_array(translation_strings);
         }
 

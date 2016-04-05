@@ -43,20 +43,34 @@
 %>
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ reboot.RbSect %></legend>
-	<button id="reboot_button" class="btn btn-default btn-lg" onclick='reboot()'><%~ Reboot %></button
-</fieldset>
-<fieldset>
-	<div class='form-group form-inline'>
-		<legend class="sectionheader"><%~ SchRb %></legend>
-		<select class="form-control" id="sched_reboot" onchange="setVisibility()">
-			<option value="none"><%~ NoSch %></option>
-			<option value="scheduled"><%~ RbSch %></option>
-		</select>
-	</div>
+<h1 class="page-header">Reboot</h1>
+<div class="row">
+<div class="col-lg-4">
 
-	<div id="schedule_reboot_container" class="indent">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ reboot.RbSect %></h3>
+		</div>
+		<div class="panel-body">
+			<button id="reboot_button" class="btn btn-default btn-lg" onclick='reboot()'><%~ Reboot %></button>
+		</div>
+</div>
+</div>
+
+<div class="col-lg-4">
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ SchRb %></h3>
+		</div>
+		<div class="panel-body">
+			<div class='form-group form-inline'>
+				<select class="form-control" id="sched_reboot" onchange="setVisibility()">
+					<option value="none"><%~ NoSch %></option>
+					<option value="scheduled"><%~ RbSch %></option>
+				</select>
+			</div>
+
+	<div id="schedule_reboot_container">
 		<div class='form-group form-inline'>
 			<label for="reboot_interval"><%~ WillR %>:</label>
 			<select class="form-control" id="reboot_interval" onchange="setVisibility()">
@@ -78,7 +92,12 @@
 			</select>
 		</div>
 	</div>
-</fieldset>
+	</div>
+</div>
+</div>
+</div>
+
+
 <div id="bottom_button_container">
 	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>

@@ -22,15 +22,24 @@
 </script>
 
 <form>
-	<fieldset>
-		<legend class="sectionheader"><%~ themes.TMSect %></legend>
+	<h1 class="page-header">Themes</h1>
+<div class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ themes.TMSect %></h3>
+		</div>
+			<div class="panel-body">
 		<div class='form-group form-inline'>
 			<div id="themes_table_container"></div>
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+<span id="update_container" ><%~ WaitSettings %></span>
 
 <script>
 <!--

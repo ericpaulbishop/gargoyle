@@ -30,9 +30,12 @@ var arpLines;
 %>
 //-->
 </script>
+<h1 class="page-header"><%~ wol.WLSect %></h1>
+<div id="wol_data" class="row">
 
-<fieldset id="wol_data">
-	<legend class="sectionheader"><%~ wol.WLSect %></legend>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
 	<div id="wol_table_container"></div>
 
@@ -42,7 +45,10 @@ var arpLines;
 		</span>
 		<a id="wol_help_ref" onclick='setDescriptionVisibility("wol_help")' href="#wol_help"><%~ Hide %></a>
 	</div>
-</fieldset>
+</div>
+</div>
+</div>
+</div>
 
 <script>
 <!--

@@ -25,16 +25,20 @@
 //-->
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ firstboot.ISSect %></legend>
+<h1 class="page-header"><%~ firstboot.ISSect %></h1>
+<div class="row">
+
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
 	<p><strong><%~ npass %>:</strong></p>
 	<div class='form-group form-inline'>
 		<label for='password1' id='password1_label'><%~ NPass %>:</label>
-		<input type='password' class='form-control' id='password1'  size='25' />
+		<input type='password' class='form-control' id='password1' size='25' />
 	</div>
 	<div class='form-group form-inline'>
 		<label for='password2' id='password2_label'><%~ CPass %>:</label>
-		<input type='password' class='form-control' id='password2'  size='25' />
+		<input type='password' class='form-control' id='password2' size='25' />
 	</div>
 	<p><strong><%~ Stz %>:</strong></p>
 	<div class='form-group form-inline'>
@@ -43,7 +47,10 @@
 	</div>
 	<br/>
 	<button class="btn btn-primary" onclick="setInitialSettings()" /><%~ SSet %><button>
-</fieldset>
+</div>
+</div>
+</div>
+</div>
 
 <script>
 <!--

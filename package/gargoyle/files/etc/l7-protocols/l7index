@@ -26,4 +26,5 @@ smtp SMTP E-Mail
 ssh SSH Secure Shell
 ssl SSL Secure Socket
 vnc VNC
+viber Viber
 rtp VoIP Audio

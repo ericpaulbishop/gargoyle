@@ -25,9 +25,12 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ time.Section %></legend>
+<h1 class="page-header"><%~ time.Section %></h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
 		<div class='form-group form-inline'>
 			<label id='current_time_label' for='current_time'><%~ CurrTime %>:&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -83,13 +86,15 @@
 					<div><input type='text' class='form-control' id="server2" size="35" /></div>
 					<div><input type='text' class='form-control' id="server3" size="35" /></div>
 				</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 	<div id='bottom_button_container'>
 		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
 		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

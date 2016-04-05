@@ -32,10 +32,19 @@
 		margin-bottom:10px;
 	}
 </style>
-<form>
-	<fieldset id="upload_container">
-		<legend class="sectionheader"><%~ qos.UBSect %></legend>
-		<div>
+<h1 class="page-header">QoS Distribution</h1>
+<div id="upload_container" class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ qos.UBSect %></h3>
+			</div>
+			<div class="panel-body">
+
+			<div class="row">
+			<div class="col-lg-4">
+			<div class='form-group form-inline'>
 			<label for="up_timeframe"><%~ uTFrm %>:</label>
 			<select class="form-control" id="up_timeframe" onchange="setQosTimeframes()">
 				<option value="1"><%~ minutes %></option>
@@ -45,12 +54,29 @@
 				<option value="5"><%~ mnths %></option>
 			</select>
 		</div>
-		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	</fieldset>
+		</div>
 
-	<fieldset id="download_container">
-		<legend class="sectionheader"><%~ DBSect %></legend>
-		<div class='form-group form-inline'>
+			<div class="col-lg-8">
+				<embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+			</div>
+		</div>
+
+	</div>
+</div>
+</div>
+</div>
+
+<div id="download_container" class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ DBSect %></h3>
+			</div>
+			<div class="panel-body">
+			<div class="row">
+			<div class="col-lg-4">
+			<div class='form-group form-inline'>
 			<label for="down_timeframe"><%~ dTFrm %>:</label>
 			<select class='form-control' id="down_timeframe" onchange="setQosTimeframes()">
 				<option value="1"><%~ minutes %></option>
@@ -59,11 +85,18 @@
 				<option value="4"><%~ days %></option>
 				<option value="5"><%~ mnths %></option>
 			</select>
-		</div>
-		<div><embed id="download_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	</fieldset>
+			</div>
+			</div>
 
-</form>
+			<div class="col-lg-8">
+				<embed id="download_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+			</div>
+		</div>
+
+	</div>
+</div>
+</div>
+</div>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

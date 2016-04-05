@@ -89,3 +89,30 @@ body {
   padding-left: 14px;
   padding-right: 14px;
 }
+ul ul {
+  display: none;
+}
+ul li.active>ul {
+  display: inline;
+}
+ul ul>a {
+  display: inline;
+  padding: 0;
+  color: #000;
+  cursor: default;
+}
+ul ul>li:hover {
+  color: #000;
+  cursor: default;
+}
+ul ul>a:visited {
+  color: #000;
+  cursor: default;
+}
+ul ul>a:active {
+  color: #000;
+  cursor: default;
+}
+nav>li.active>a {
+  background-color: #eee;
+}

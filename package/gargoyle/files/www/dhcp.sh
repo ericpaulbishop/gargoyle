@@ -56,9 +56,13 @@ for (etherIndex in etherData)
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader">DHCP</legend>
+
+<h1 class="page-header">DHCP</h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
 		<div id='dhcp_enabled_container'>
 			<div class='form-group form-inline'>
@@ -89,10 +93,19 @@ for (etherIndex in etherData)
 			<em>(<%~ hours %>)</em>
 		</div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
-		<legend class="sectionheader"><%~ SIPs %></legend>
+<div class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SIPs %></h3>
+			</div>
+			<div class="panel-body">
 
 		<div id='block_mismatches_container' class='form-group form-inline'>
 			<div>
@@ -124,7 +137,10 @@ for (etherIndex in etherData)
 			<div id='staticip_table_container' class="bottom_gap"></div>
 		</div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<div id="firefox3_bug_correct" style="display:none">
 		<input type='text' value='firefox3_bug' />
@@ -134,7 +150,6 @@ for (etherIndex in etherData)
 	  <button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
 	  <button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>
 	</div>
-</form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

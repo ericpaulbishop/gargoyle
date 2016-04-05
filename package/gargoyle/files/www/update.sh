@@ -34,22 +34,22 @@
 //-->
 </script>
 
-<fieldset id="upgrade_section">
-	<legend class="sectionheader"><%~ update.UpFrm %></legend>
-	<div>
-		<div>
-			<p><%~ Warn %></p>
-		</div>
+<h1 class="page-header"><%~ update.UpFrm %></h1>
+<div id="upgrade_section" class="row">
 
-		<div class="internal_divider"></div>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="alert alert-warning" role="alert"><%~ Warn %></div>
+						<div class="alert alert-info" role="alert"><span><%~ CGV %>:</span><span id="gargoyle_version"></span></div>
+					</div>
+				</div>
 
-		<div>
-			<span><%~ CGV %>:</span><span id="gargoyle_version"></span>
-		</div>
-
-		<div class="internal_divider"></div>
-
-		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade" class="form-horizontal">
+		<div class="row">
+		<div class="col-lg-4">
+		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
 
 			<div id="upgrade_file1_container" class='form-group form-inline'>
 				<label id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
@@ -69,8 +69,12 @@
 
 			<button id="upgrade_button" class="btn btn-default" onclick="doUpgrade()"><%~ Upgrade %></button>
 		</form>
-
+		</div>
 	</div>
+		</div>
+	</div>
+</div>
+</div>
 
 	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
 

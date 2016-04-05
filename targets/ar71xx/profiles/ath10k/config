@@ -1999,7 +1999,7 @@ CONFIG_PACKAGE_kmod-video-videobuf2=m
 CONFIG_PACKAGE_kmod-ath=y
 # CONFIG_ATH_USER_REGD is not set
 # CONFIG_PACKAGE_ATH_DEBUG is not set
-# CONFIG_PACKAGE_ATH_DFS is not set
+CONFIG_PACKAGE_ATH_DFS=y
 CONFIG_PACKAGE_kmod-ath10k=y 
 CONFIG_PACKAGE_kmod-ath5k=m
 CONFIG_PACKAGE_kmod-ath9k=y
@@ -2623,3 +2623,5 @@ CONFIG_PACKAGE_usb-modeswitch=y
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_whereis is not set
+CONFIG_PACKAGE_kmod-ipt-layer7=y
+CONFIG_PACKAGE_iptables-mod-layer7=y

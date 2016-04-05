@@ -26,9 +26,15 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ ddns.DYSect %></legend>
+<h1 class="page-header"></h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ddns.DYSect %></h3>
+			</div>
+			<div class="panel-body">
 
 		<span id="add_ddns_label"><p><%~ AddDy %>:</p></span>
 
@@ -39,9 +45,7 @@
 			</div>
 		</div>
 
-		<div id="ddns_variable_container">
-
-		</div>
+		<div id='ddns_variable_container'></div>
 
 		<div>
 
@@ -77,7 +81,10 @@
 
 		<div id="ddns_table_container"></div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 	<div id="bottom_button_container">
 		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
 		<button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>

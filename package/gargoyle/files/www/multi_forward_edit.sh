@@ -13,7 +13,10 @@
 
 	<%in templates/multi_forward_template %>
 
-</fieldset>
+</div>
+</div>
+</div>
+</div>
 <div id="bottom_button_container"></div>
 
 </body>

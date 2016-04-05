@@ -24,17 +24,32 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ routing.ARSect %></legend>
-		<div id="active_route_table_container"></div>
-	</fieldset>
+<h1 class="page-header">Routing</h1>
+<div class="row">
 
-	<fieldset>
-		<legend class="sectionheader"><%~ SRSect %></legend>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ routing.ARSect %></h3>
+		</div>
+			<div class="panel-body">
+		<div id="active_route_table_container"></div>
+	</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ SRSect %></h3>
+		</div>
+			<div class="panel-body">
 
 		<div id='static_route_add_heading_container'>
-			<label class='nocolumn' id='staticroute_add_heading_label' style='text-decoration:underline'><%~ ASRte %>:</label>
+			<label id='staticroute_add_heading_label' style='text-decoration:underline'><%~ ASRte %>:</label>
 		</div>
 		<div class='form-group form-inline'>
 			<div id='static_route_add_container'>
@@ -43,12 +58,15 @@
 		</div>
 
 		<div id='static_route_table_heading_container'>
-			<span class='nocolumn'><%~ CSRSect %>:</span>
+			<span><%~ CSRSect %>:</span>
 		</div>
 		<div class='form-group form-inline'>
 			<div id='static_route_table_container' class="bottom_gap"></div>
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<div id="firefox3_bug_correct" style="display:none">
 		<input type='text' value='firefox3_bug' />
@@ -59,7 +77,7 @@
 		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->

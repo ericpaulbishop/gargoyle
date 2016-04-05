@@ -23,11 +23,18 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ webmon.PrSect %></legend>
+<h1 class="page-header">Web Monitor</h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ webmon.PrSect %></h3>
+		</div>
+			<div class="panel-body">
+
 		<div class='form-group form-inline'>
-			<input type='checkbox' id='webmon_enabled' class='form-control' onclick="setWebmonEnabled()" />
+			<input type='checkbox' id='webmon_enabled' class='' onclick="setWebmonEnabled()" />
 			<label id='webmon_enabled_label' for='webmon_enabled'><%~ EMon %></label>
 		</div>
 		<div>
@@ -64,9 +71,18 @@
 			<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 			<button id="clear_history" class="btn btn-danger" onclick='clearHistory()'/><%~ Clear %></button>
 		</div>
-	</fieldset>
-	<fieldset>
-		<legend class="sectionheader"><%~ RctSt %></legend>
+	</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ RctSt %></h3>
+		</div>
+			<div class="panel-body">
 		<div class='form-group form-inline'>
 			<select id="domain_host_display" class='form-group form-inline' onchange="updateMonitorTable()">
 				<option value="hostname"><%~ DspHn %></option>
@@ -75,10 +91,19 @@
 		</div>
 
 		<div id="webmon_domain_table_container"></div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
-		<legend class="sectionheader"><%~ RctSr %></legend>
+<div class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ RctSr %></h3>
+		</div>
+			<div class="panel-body">
 		<div class='form-group form-inline'>
 			<select id="search_host_display" class="form-control" onchange="updateMonitorTable()">
 				<option value="hostname"><%~ DspHn %></option>
@@ -87,10 +112,19 @@
 		</div>
 
 		<div id="webmon_search_table_container"></div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset id="download_web_usage_data" >
-		<legend class="sectionheader"><%~ DlWD %></legend>
+<div id="download_web_usage_data" class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ DlWD %></h3>
+		</div>
+			<div class="panel-body">
 		<div class='form-group form-inline'>
 			<span style='text-decoration:underline'><%~ cmsep %>:</span>
 			<br/>
@@ -101,8 +135,10 @@
 				<button id='download_domain_button' class='btn btn-info btn-lg' onclick='window.location="webmon_domains.csv";'/><%~ VSit %></button>
 				<button id='download_search_button' class='btn btn-info btn-lg' onclick='window.location="webmon_searches.csv";' /><%~ SRqst %></button>
 		</div>
-	</fieldset>
-</form>
+	</div>
+</div>
+</div>
+</div>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

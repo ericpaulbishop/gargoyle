@@ -17,3 +17,4 @@ hostsStr.Signal="Signal";
 hostsStr.ActiveConx="Active TCP Cxns";
 hostsStr.RecentConx="Recent TCP Cxns";
 hostsStr.UDPConx="UDP Cxns";
+hostsStr.Band="Band";

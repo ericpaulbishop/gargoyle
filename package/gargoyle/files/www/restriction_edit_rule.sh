@@ -15,7 +15,10 @@
 		<%in templates/restriction_template %>
 	</div>
 	
-</fieldset>
+</div>
+</div>
+</div>
+</div>
 <div id="bottom_button_container"></div>
 
 </body>

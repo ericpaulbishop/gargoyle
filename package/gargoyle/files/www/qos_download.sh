@@ -28,8 +28,15 @@
 </script>
 
 <form>
-	<fieldset>
-		<legend class="sectionheader"><%~ qos.DRSection %></legend>
+	<h1 class="page-header"></h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ qos.DRSection %></h3>
+			</div>
 
 		<div id='qos_enabled_container' class='form-group form-inline'>
 			<input type='checkbox' id='qos_enabled' class='form-control' onclick="setQosEnabled()" />
@@ -62,41 +69,41 @@
 
 		<div><strong><%~ AddNewClassRule %>:</strong></div>
 		<div>
-			<div>
+			<div class='form-group form-inline'>
 				<div>
 					<input type='checkbox' id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
 					<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='form-control' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
-			<div>
+			<div class='form-group form-inline'>
 				<div>
 					<input type='checkbox' id='use_source_port' onclick='enableAssociatedField(this,"source_port", "")'/>
 					<label id="source_port_label" for='source_port'><%~ SrcPort %>:</label>
 				</div>
 				<input class='form-control' type='text' id='source_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
 			</div>
-			<div>
+			<div class='form-group form-inline'>
 				<div>
 					<input type='checkbox' id='use_dest_ip' onclick='enableAssociatedField(this,"dest_ip", "")' />
 					<label id="dest_ip_label" for='dest_ip'><%~ DstIP %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='dest_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='form-control' type='text' id='dest_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
-			<div>
+			<div class='form-group form-inline'>
 				<div>
 					<input type='checkbox' id='use_dest_port' onclick='enableAssociatedField(this,"dest_port", "")'  />
 					<label id="dest_port_label" for='dest_port'><%~ DstPort %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='dest_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
+				<input class='form-control' type='text' id='dest_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
 			</div>
 
-			<div>
-				<div class='form-group form-inline'>
+			<div class='form-group form-inline'>
+				<div>
 					<input type='checkbox' id='use_max_pktsize' onclick='enableAssociatedField(this,"max_pktsize", "")'  />
 					<label id="max_pktsize_label" for='max_pktsize'><%~ MaxPktLen %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='max_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
+				<input class='form-control' type='text' id='max_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
 				<em><%~ byt %></em>
 			</div>
 			<div>
@@ -104,7 +111,7 @@
 					<input type='checkbox' id='use_min_pktsize' onclick='enableAssociatedField(this,"min_pktsize", "")'  />
 					<label id="min_pktsize_label" for='min_pktsize'><%~ MinPktLen %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
+				<input class='form-control' type='text' id='min_pktsize' onkeyup='proofreadNumericRange(this,1,1500)' size='17' maxlength='4' />
 				<em><%~ byt %></em>
 			</div>
 
@@ -132,7 +139,7 @@
 
 			<div>
 				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />
+					<input type='checkbox' id='use_app_protocol' onclick='enableAssociatedField(this,"app_protocol", "")' />
 					<label id="app_protocol_label" for='app_protocol'><%~ AppProto %>:</label>
 				</div>
 				<select class='form-control' id="app_protocol">
@@ -143,28 +150,37 @@
 			</div>
 
 			<div>
-				<label class='leftcolumn' id="classification_label" for='classification' ><%~ SetClass %>:</label>
-				<select class='rightcolumn' id="classification">
+				<label id="classification_label" for='classification' ><%~ SetClass %>:</label>
+				<select id="classification">
 				</select>
 			</div>
 
 
 			<div id="add_rule_container">
-				<input type="button" id="add_rule_button" class="default_button" value="<%~ AddRule %>" onclick="addClassificationRule()" />
+				<button id="add_rule_button" class="btn btn-default" onclick="addClassificationRule()" ><%~ AddRule %></button>
 			</div>
 	</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
 
-		<legend class="sectionheader"><%~ DCSection %></legend>
+<div class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ DCSection %></h3>
+		</div>
+			<div class="panel-body">
+
 		<div id='qos_class_table_container' class="bottom_gap"></div>
 
 		<div>
-			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth"><%~ DTotBand %>:</label>
-			<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+			<label id="total_bandwidth_label" for="total_bandwidth"><%~ DTotBand %>:</label>
+			<input type="text" id="total_bandwidth" onkeyup="proofreadNumeric(this)" size='10' maxlength='10' />
 			<em><%~ Kbs %></em>
-
 		</div>
 
 		<div id="qos_down_2" class="indent">
@@ -196,8 +212,8 @@
 		<div class="indent">
 
 			<div>
-				<label class='leftcolumn' id="class_name_label" for='class_name'><%~ SrvClassName %>:</label>
-				<input class='rightcolumn' type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)" size='12' maxlength='10' />
+				<label id="class_name_label" for='class_name'><%~ SrvClassName %>:</label>
+				<input type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)" size='12' maxlength='10' />
 			</div>
 
 			<div>
@@ -259,14 +275,23 @@
 			</div>
 
 			<div id="add_class_container">
-				<input type="button" id="add_class_button" class="default_button" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
+				<button id="add_class_button" class="btn btn-default" onclick="addServiceClass()" ><%~ AddSvcCls %></button>
 			</div>
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
 
-		<legend class="sectionheader"><%~ DACCSect %></legend>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ DACCSect %></h3>
+		</div>
+			<div class="panel-body">
 
 		<div id='qos_monitor_container' class='nocolumn'>
 			<input type='checkbox' id='qos_monenabled' onclick="setQosEnabled()"/>
@@ -299,7 +324,7 @@
 		<div class="internal_divider"></div>
 
 		<div class="indent">
-		<table>
+		<table class="table table-responsive">
 		<tr><td><strong><%~ ACC_Stat %></strong></td></tr>
 		<tr><td><span id='qstate'></span></td></tr>
 		<tr><td><span id='qllimit'></span></td></tr>
@@ -314,7 +339,7 @@
 
 		<div id="qos_down_4" class="indent">
 			<span id='qos_down_4_txt'>
-				<table>
+				<table class="table table-responsive">
 				<tr><td><strong>Status Help</strong></td></tr>
 				<tr><td>CHECK</td><td><%~ ACC_L_Ck %></td></tr>
 				<tr><td>INIT</td><td><%~ ACC_L_In %></td></tr>
@@ -334,14 +359,17 @@
 			<a onclick='setDescriptionVisibility("qos_down_4")'  id="qos_down_4_ref" href="#qos_down_4"><%~ Hide %></a>
 		</div>
 
-	</fieldset>
-
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
+</div>
+</div>
+
+<div id="bottom_button_container">
+	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
+</div>
+<span id="update_container" ><%~ WaitSettings %></span>
+
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

@@ -26,11 +26,16 @@
 %>
 //-->
 </script>
+<h1 class="page-header"><%~ conntrack.CCSect %></h1>
+<div class="row">
 
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
-<form class="form-horizontal">
-	<fieldset>
-		<legend class="sectionheader"><%~ conntrack.CCSect %></legend>
+			<div class="row">
+
+				<div class="col-lg-4">
 
 		<div class='form-group form-inline'>
 			<label for="refresh_rate"><%~ RRate %>:</label>
@@ -59,12 +64,21 @@
 			</select>
 		</div>
 
-		<div id="connection_table_container"></div>
-		<div style="width:375px">
-			<p><%~ CnWarn %></p>
+		</div></div>
+
+		<div class="row">
+
+			<div class="col-lg-12">
+				<div class="alert alert-warning" role="alert"><%~ CnWarn %></div>
+					<div id="connection_table_container"></div>
+			</div>
 		</div>
-	</fieldset>
-</form>
+
+	</div>
+</div>
+</div>
+</div>
+
 
 <script>
 <!--

@@ -26,9 +26,16 @@ var currentTime;
 %>
 //-->
 </script>
+<h1 class="page-header">Hosts</h1>
+<div class="row">
 
-<fieldset class='form-group form-inline'>
-	<legend><%~ hosts.RefreshR %></legend>
+<div class="col-lg-4">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ hosts.RefreshR %></h3>
+	</div>
+	<div class="panel-body">
+<div class='form-group form-inline'>
 	<select id="refresh_rate" class="form-control">
 		<option value="2000">2 <%~ seconds %></option>
 		<option value="10000">10 <%~ seconds %></option>
@@ -38,19 +45,59 @@ var currentTime;
 	</select>
 	<br/>
 	<p><em><%~ RInfo %></em></p>
-</fieldset>
-<fieldset id="dhcp_data" class='form-group form-inline'>
-	<legend class="sectionHeader"><%~ CurrLeases %></legend>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="row">
+<div class="col-lg-12">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ CurrLeases %></h3>
+	</div>
+<div class="panel-body">
+<div id="dhcp_data" class='form-group form-inline'>
 	<div id="lease_table_container"></div>
-</fieldset>
-<fieldset id="wifi_data" class='form-group form-inline'>
-	<legend class="sectionheader"><%~ ConWifiHosts %></legend>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-lg-12">
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ ConWifiHosts %></h3>
+	</div>
+<div class="panel-body">
+<div id="wifi_data" class='form-group form-inline'>
 	<div id="wifi_table_container"></div>
-</fieldset>
-<fieldset id="active_data" class='form-group form-inline'>
-	<legend class="sectionheader"><%~ ActiveHosts %></legend>
+	</div>
+	</div>
+	</div>
+	</div>
+	</div>
+
+<div class="row">
+<div class="col-lg-12">
+<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ ActiveHosts %></h3>
+		</div>
+<div class="panel-body">
+<div id="active_data" class='form-group form-inline'>
 	<div id="active_table_container"></div>
-</fieldset>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
 
 <script>
 <!--

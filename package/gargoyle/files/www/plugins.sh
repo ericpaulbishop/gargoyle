@@ -39,14 +39,23 @@
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
+    du -s $plugin_root_dest | awk '{ print "var pluginRootSize="$1*1000";" }' 2>/dev/null
 %>
 
 </script>
-<form>
+<h1 class="page-header">Plugins</h1>
+<div id="plugin_options" class="row">
 
-	<fieldset id="plugin_options">
-		<legend class="sectionheader"><%~ plugins.PgOpt %></legend>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ plugins.PgOpt %></h3>
+			</div>
+			<div class="panel-body">
 
+			<div class="row">
+				<div class="col-lg-4">
+				<div class="alert alert-info" role="alert">
 		<div class='form-group form-inline'>
 			<span><%~ PRoot %>:</span>
 			<span id="plugin_root_static">/plugin_root</span>
@@ -59,13 +68,18 @@
 		</div>
 
 		<div id="plugin_root_change_container" style="display:none" >
-				<button class="btn btn-warning" value="<%~ Chroot %>" onclick="changePluginRoot()" /></button>
+				<button class="btn btn-warning" onclick="changePluginRoot()" /><%~ Chroot %></button>
 		</div>
-		<br/>
 
-		<div class='form-group form-inline'>
-			<span><%~ PgSrc %>:</span>
-		</div>
+</div>
+</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+	<div class='form-group form-inline'>
+		<h3><%~ PgSrc %>:</h3>
+	</div>
 		<div id="package_source_table_container"></div>
 			<div class='form-group form-inline'>
 				<label for="add_source_name"><%~ ANam %>:</label>
@@ -76,29 +90,49 @@
 				<input type="text" class="form-control" id="add_source_url"/>
 			</div>
 			<button class="btn btn-info" id="add_source_button" onclick="addPluginSource()" /><%~ APSrc %></button>
-	</fieldset>
+</div></div>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset id="plugin_list">
-		<legend class="sectionheader"><%~ PList %></legend>
-		<div id="bottom_button_container">
-			<button id="update_button" class="btn btn-info" onclick='updatePackagesList()' /><%~ RfshP %></button>
-		</div>
-		<span id="wan-warn" style="display:none" class="warning"><%~ NoWan %></span>
-		<div>
-			<div id="languages_table_container"></div>
-		</div>
-		<div>
+<div id="plugin_list" class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ PList %></h3>
+			</div>
+			<div class="panel-body">
+				<button id="update_button" class="btn btn-info" onclick='updatePackagesList()' /><%~ RfshP %></button>
+				<br/>
+				<br/>
+				<div id="wan-warn" class="alert alert-warning" role="alert" style="display:none;"><%~ NoWan %></div>
+
+		<div class="row">
+			<div class="col-lg-12">
+				<div id="languages_table_container"></div>
+		</div></div>
+		<div class="row">
+		<div class="col-lg-12">
 			<div id="themes_table_container"></div>
 		</div>
-		<div>
+		</div>
+
+		<div class="row">
+		<div class="col-lg-12">
 			<div id="packages_table_container"></div>
 		</div>
+		</div>
+
 		<div id="no_packages" style='display:none;'>
 			<%~ NoPkg %>
 		</div>
-	</fieldset>
 
-</form>
+	</div>
+</div>
+</div>
+</div>
 
 <script>
 	resetData();

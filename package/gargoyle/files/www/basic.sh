@@ -85,7 +85,11 @@ else
 var txPowerMax= wirelessDriver == "broadcom" ? 31 : (wirelessDriver == "mac80211" ? 20 : 18);
 
 //not perfect, but it this will do for now since only mac80211 drivers are ath9k and b43
+<<<<<<< HEAD
 var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
+=======
+var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
+>>>>>>> refs/remotes/ericpaulbishop/master
 
 //-->
 </script>
@@ -101,7 +105,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<input class='form-control' type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" />
 			<label for="global_bridge"><%~ DvWBrg %></label>
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<fieldset id="bridge_fieldset" class="form-inline">
 		<legend class="sectionheader"><%~ DvWBrg %></legend>
@@ -166,10 +173,19 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			<div id='bridge_hwmode_container' class='form-group form-inline'>
 				<label class='leftcolumn' for='bridge_hwmode' id='bridge_hwmode_label'><%~ BrOpr %>:</label>
 				<span class='rightcolumn'>
+<<<<<<< HEAD
 					<select id='bridge_hwmode form-control' onchange='setHwMode(this)'>
 						<option value='11ng'>N+G+B</option>
 						<option value='11g'>G+B</option>
 						<option value='11b'>B</option>
+=======
+					<select id='bridge_hwmode' onchange='setHwMode(this)'>
+						<option value='11gn'>B+G+N</option>
+						<option value='11g'>B+G</option>
+						<option value='11anac'>A+N+AC</option>
+						<option value='11an'>A+N</option>
+						<option value='11a'>A</option>
+>>>>>>> refs/remotes/ericpaulbishop/master
 						<option value='auto'><%~ auto %></option>
 					</select>
 				</span>
@@ -205,6 +221,9 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 						<option value='HT20'>20MHz</option>
 						<option value='HT40+'>40MHz (<%~ ChAbv %>)</option>
 						<option value='HT40-'>40MHz (<%~ ChBlw %>)</option>
+						<option value='VHT20'>20MHz</option>
+						<option value='VHT40'>40MHz</option>
+						<option value='VHT80'>80MHz</option>
 					</select>
 				</span>
 			</div>
@@ -313,7 +332,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</div>
 
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<fieldset id="wan_fieldset">
 		<legend class="sectionheader"><%~ WANSec %></legend>
@@ -482,7 +504,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<fieldset id="lan_fieldset">
 		<legend class="sectionheader"><%~ LANSec %></legend>
@@ -531,7 +556,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<fieldset id="wifi_fieldset">
 		<legend class="sectionheader"><%~ Wrlss %></legend>
@@ -548,6 +576,7 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 
+<<<<<<< HEAD
 		<div id='wifi_hwmode_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'><%~ OpMod %>:</label>
 			<span class='rightcolumn'>
@@ -556,12 +585,26 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 					<option value='11g'>G+B</option>
 					<option value='11b'>B</option>
 					<option value='auto'><%~ auto %></option>
+=======
+		<div id='wifi_hwmode_container'>
+			<label class='leftcolumn' for='wifi_hwmode' id='wifi_hwmode_label'>2.4GHz <%~ OpMod %>:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_hwmode' onchange='setHwMode(this)'>
+					<option value='disabled'>Disabled</option>
+					<option value='11gn'>B+G+N</option>
+					<option value='11g'>B+G</option>
+>>>>>>> refs/remotes/ericpaulbishop/master
 				</select>
 			</span>
 		</div>
 
+<<<<<<< HEAD
 		<div id='wifi_channel_width_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'><%~ ChWdth %>:</label>
+=======
+		<div id='wifi_channel_width_container' >
+			<label class='leftcolumn' for='wifi_channel_width' id='wifi_channel_width_label'>2.4GHz <%~ ChWdth %>:</label>
+>>>>>>> refs/remotes/ericpaulbishop/master
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width' class='form-control' onchange='setChannelWidth(this, "G")'>
 					<option value='HT20'>20MHz</option>
@@ -571,8 +614,13 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
+<<<<<<< HEAD
 		<div id='wifi_txpower_container' class='form-group form-inline'>
 			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'><%~ TrPwr %>:</label>
+=======
+		<div id='wifi_txpower_container' >
+			<label class='leftcolumn' for='wifi_max_txpower' id='wifi_txpower_label'>2.4GHz <%~ TrPwr %>:</label>
+>>>>>>> refs/remotes/ericpaulbishop/master
 			<span class='rightcolumn'>
 				<select id='wifi_max_txpower' class='form-control' onchange='updateTxPower("wifi_max_txpower","wifi_txpower", "G")'>
 					<option value='max'><%~ Max %></option>
@@ -584,13 +632,32 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</span>
 		</div>
 
+<<<<<<< HEAD
 		<div id='wifi_channel_width_5ghz_container' class='form-group form-inline'>
+=======
+		<div id='wifi_hwmode_5ghz_container'>
+			<label class='leftcolumn' for='wifi_hwmode_5ghz' id='wifi_hwmode_5ghz_label'>5GHz <%~ OpMod %>:</label>
+			<span class='rightcolumn'>
+				<select id='wifi_hwmode_5ghz' onchange='setHwMode(this)'>
+					<option value='disabled'>Disabled</option>
+					<option value='11a'>A</option>
+					<option value='11an'>A+N</option>
+					<option value='11anac'>A+N+AC</option>
+				</select>
+			</span>
+		</div>
+
+		<div id='wifi_channel_width_5ghz_container'>
+>>>>>>> refs/remotes/ericpaulbishop/master
 			<label class='leftcolumn' for='wifi_channel_width_5ghz' id='wifi_channel_width_5ghz_label'>5GHz <%~ ChWdth %>:</label>
 			<span class='rightcolumn'>
 				<select id='wifi_channel_width_5ghz' class='form-control' onchange='setChannelWidth(this, "A")'>
 					<option value='HT20'>20MHz</option>
 					<option value='HT40+'>40MHz (<%~ ChAbv %>)</option>
 					<option value='HT40-'>40MHz (<%~ ChBlw %>)</option>
+					<option value='VHT20'>20MHz</option>
+					<option value='VHT40'>40MHz</option>
+					<option value='VHT80'>80MHz</option>
 				</select>
 			</span>
 		</div>
@@ -894,7 +961,10 @@ var isb43 = wirelessDriver == "mac80211" && (!wifiN) ? true : false ;
 			</select>
 		</div>
 		</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
 	<div id="bottom_button_container">
 		<button id="save_button" class="bottom_button btn btn-default" onclick='saveChanges()' /><%~ SaveChanges %>

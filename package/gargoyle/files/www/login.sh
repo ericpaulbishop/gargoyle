@@ -66,36 +66,53 @@ var passInvalid = false;
 //-->
 </script>
 
-<fieldset class="form-inline">
-	<legend class="sectionheader"><%~ login.LSect %></legend>
-	<span>
-		<p>
-			<strong>
-				<span id="login_status"></span>
-			</strong>
-		</p>
-	</span>
-
-	<div class='form-group form-inline'>
-		<label class="sr-only" for='password' id='password_label'><%~ EAdmP %></label>
-		<input class="form-control" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' placeholder="<%~ EAdmP %>"/>
-		<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
+<h1 class="page-header"><%~ login.LSect %></h1>
+<div id="login_status" class="alert alert-danger" role="alert" style="display:none;"></div>
+<div class="row">
+<div class="col-lg-4">
+<div class="panel panel-primary">
+	<div class="panel-body">
+		<div class='form-inline'>
+			<label class="sr-only" for='password' id='password_label'><%~ EAdmP %></label>
+			<input class="form-control" type='password' onkeyup='proofreadLengthRange(this,1,999)' onkeydown='checkKey(event)' id='password' size='25' placeholder="<%~ EAdmP %>"/>
+			<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
+		</div>
 	</div>
+</div>
+</div>
 
-</fieldset>
-<fieldset id="local_quotas" style="display:none">
-	<legend class="sectionheader"><%~ YQot %></legend>
-</fieldset>
+<div class="col-lg-4">
+<div id="current_time" class="panel panel-primary">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ CTime %></h3>
+	</div>
+	<div class="panel-body">
+		<div id="current_time_date"></div>
+	</div>
+</div>
+</div>
 
-<fieldset id="global_quotas" style="display:none">
-	<legend class="sectionheader"><%~ NQot %></legend>
-</fieldset>
+<div class="col-lg-4">
+<div id="local_quotas" class="panel panel-primary" style="display:none">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ YQot %></h3>
+	</div>
+	<div class="panel-body">
+	</div>
+</div>
+</div>
 
-<fieldset id="current_time" style="display:block">
-	<legend class="sectionheader"><%~ CTime %></legend>
-	<div class="nocolumn" id="current_time_date"></div>
-</fieldset>
+<div class="col-lg-4">
+<div id="global_quotas" class="panel panel-primary" style="display:none">
+	<div class="panel-heading">
+		<h3 class="panel-title"><%~ NQot %></h3>
+	</div>
+	<div class="panel-body">
+	</div>
+</div>
+</div>
 
+</div>
 <%
 	for h in $sh_hooks ; do
 		haserl $h
