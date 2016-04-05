@@ -124,7 +124,9 @@ function saveChanges()
 			var name = uci.get("firewall",lanzone[x],"name");
 			if(name == "lan")
 			{
-				uci.set("firewall",lanzone[x],"network","lan");
+				uci.remove("firewall", lanzone[x], "network")
+				uci.createListOption("firewall", lanzone[x], "network", true)
+				uci.set("firewall", lanzone[x], "network", ["lan"]);
 			}
 		}
 			
@@ -702,7 +704,9 @@ function saveChanges()
 					var name = uci.get("firewall",lanzone[x],"name");
 					if(name == "lan")
 					{
-						uci.set("firewall", lanzone[x], "network", "lan wwan");
+						uci.remove("firewall", lanzone[x], "network")
+						uci.createListOption("firewall", lanzone[x], "network", true)
+						uci.set("firewall", lanzone[x], "network", ["lan" "wwan"]);
 					}
 				}
 			}
