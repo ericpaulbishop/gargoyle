@@ -18,7 +18,7 @@
 		</div>
 		<div class="panel-body">
 
-	<div style="height: 500px; overflow-y: scroll;">
+	<div>
 		<%in templates/whitelist_template %>
 	</div>
 

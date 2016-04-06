@@ -27,19 +27,17 @@
 //-->
 </script>
 
-<form>
-	<h1 class="page-header"></h1>
+<h1 class="page-header">QoS Download</h1>
 <div class="row">
 
-	<div class="col-lg-4">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
-			<div class="panel-body">
-			<div class="panel-heading">
-				<h3 class="panel-title"><%~ qos.DRSection %></h3>
-			</div>
-
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ qos.DRSection %></h3>
+		</div>
+		<div class="panel-body">
 		<div id='qos_enabled_container' class='form-group form-inline'>
-			<input type='checkbox' id='qos_enabled' class='form-control' onclick="setQosEnabled()" />
+			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
 			<label id='qos_enabled_label' for='qos_enabled'><%~ DEnable %></label>
 		</div>
 		<div class='form-group form-inline'>
@@ -63,9 +61,7 @@
 			<a onclick='setDescriptionVisibility("qos_down_1")'  id="qos_down_1_ref" href="#qos_down_1"><%~ Hide %></a>
 		</div>
 
-		<div class="internal_divider">
-			<p>
-		</div>
+		<div class="internal_divider"></div>
 
 		<div><strong><%~ AddNewClassRule %>:</strong></div>
 		<div>
@@ -151,8 +147,7 @@
 
 			<div>
 				<label id="classification_label" for='classification' ><%~ SetClass %>:</label>
-				<select id="classification">
-				</select>
+				<select id="classification" class='form-control'></select>
 			</div>
 
 
@@ -179,7 +174,7 @@
 
 		<div>
 			<label id="total_bandwidth_label" for="total_bandwidth"><%~ DTotBand %>:</label>
-			<input type="text" id="total_bandwidth" onkeyup="proofreadNumeric(this)" size='10' maxlength='10' />
+			<input type="text" id="total_bandwidth" class="form-control" onkeyup="proofreadNumeric(this)" size='10' maxlength='10' />
 			<em><%~ Kbs %></em>
 		</div>
 
@@ -213,20 +208,20 @@
 
 			<div>
 				<label id="class_name_label" for='class_name'><%~ SrvClassName %>:</label>
-				<input type='text' id='class_name' onkeyup="proofreadLengthRange(this,1,10)" size='12' maxlength='10' />
+				<input type='text' id='class_name' class="form-control" onkeyup="proofreadLengthRange(this,1,10)" size='12' maxlength='10' />
 			</div>
 
 			<div>
 				<label class='leftcolumn' id="percent_bandwidth_label" for='percent_bandwidth'><%~ PerBandCap %>:</label>
 				<div class='rightcolumn'>
-					<input type='text' id='percent_bandwidth' onkeyup="proofreadNumericRange(this,1,100)"  size='5' maxlength='3' />
+					<input type='text' id='percent_bandwidth' class="form-control" onkeyup="proofreadNumericRange(this,1,100)"  size='5' maxlength='3' />
 					<em>%</em>
 				</div>
 			</div>
 
-			<div class='nocolumn'><%~ BandMin %>:</div>
+			<div><%~ BandMin %>:</div>
 			<div class='indent'>
-				<div class='nocolumn'>
+				<div>
 					<input type='radio' name="min_radio" id='min_radio1' onclick='enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")' />
 					<label for='min_radio1'><%~ BandMinNo %></label>
 				</div>
@@ -236,15 +231,15 @@
 						<label id="min_bandwidth_label" for='min_radio2'><%~ BandMin %>:</label>
 					</span>
 					<span class='rightcolumn'>
-						<input type='text' class="rightcolumn" id='min_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+						<input type='text' id='min_bandwidth' class="form-control" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
 						<em><%~ Kbs %></em>
 					</span>
 				</div>
 			</div>
 
-			<div class='nocolumn'><%~ BandMax %>:</div>
+			<div><%~ BandMax %>:</div>
 			<div class='indent'>
-				<div class='nocolumn'>
+				<div>
 					<input type='radio' name="max_radio" id='max_radio1' onclick='enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")' />
 					<label for='max_radio1'><%~ BandMaxNo %></label>
 				</div>
@@ -254,15 +249,15 @@
 						<label id="max_bandwidth_label" for='max_radio2'><%~ BandMax %>:</label>
 					</span>
 					<span class='rightcolumn'>
-						<input type='text' class="rightcolumn" id='max_bandwidth' onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
+						<input type='text' id='max_bandwidth' class="form-control" onkeyup="proofreadNumeric(this)"  size='10' maxlength='10' />
 						<em><%~ Kbs %></em>
 					</span>
 				</div>
 			</div>
 
-			<div class='nocolumn'><%~ MinRTT %>:</div>
+			<div><%~ MinRTT %>:</div>
 			<div class='indent'>
-				<div class='nocolumn'>
+				<div>
 					<input type='radio' name="rtt_radio" id='rtt_radio1'/>
 					<label for='max_radio1'><%~ ActRTT %></label>
 				</div>
@@ -286,14 +281,14 @@
 
 <div class="row">
 
-	<div class="col-lg-4">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3 class="panel-title"><%~ DACCSect %></h3>
 		</div>
 			<div class="panel-body">
 
-		<div id='qos_monitor_container' class='nocolumn'>
+		<div id='qos_monitor_container'>
 			<input type='checkbox' id='qos_monenabled' onclick="setQosEnabled()"/>
 			<label id='qos_monenabled_label' for='qos_monenabled'><%~ ACCOn %></label>
 		</div>
@@ -302,7 +297,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_ptarget_ip' onclick='enableAssociatedField(this, "ptarget_ip", currentWanGateway)'/>&nbsp;&nbsp;
 				<label for='ptarget_ip' id='ptarget_ip_label'><%~ ACC_Pt %>:</label>
-				<input type='text' name='ptarget_ip' id='ptarget_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input type='text' name='ptarget_ip' id='ptarget_ip' class='form-control' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</span>
 		</div>
 
@@ -310,7 +305,7 @@
 			<span class='indent'>
 				<input type='checkbox' id='use_auto_pinglimit' onclick='enableAssociatedField(this, "pinglimit", 85)'/>&nbsp;&nbsp;
 				<label for='pinglimit' id='pinglimit_label'><%~ ACC_con %>:</label>
-				<input type='text' name='pinglimit' id='pinglimit' onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' />
+				<input type='text' name='pinglimit' id='pinglimit' class="form-control" onkeyup='proofreadNumericRange(this, 10, 250)' size='4' maxlength='4' />
 			</span>
 		</div>
 

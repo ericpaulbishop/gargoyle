@@ -27,9 +27,7 @@
 //-->
 </script>
 
-
-<form>
-	<h1 class="page-header">Port Forwarding</h1>
+<h1 class="page-header">Port Forwarding</h1>
 <div class="row">
 
 	<div class="col-lg-6">

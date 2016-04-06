@@ -8,8 +8,14 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -m -c "internal.css" -j "qos.js" -z "qos.js"
 %>
-<fieldset id="edit_container">
-	<legend class="sectionheader"><%~ qos.QESrvClass %></legend>
+<div id="edit_container" class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ qos.QESrvClass %></h3>
+		</div>
+		<div class="panel-body">
 
 	<div class='form-group form-inline'>
 		<label id="class_name_label" for='class_name' ><%~ QESrvName %>:</label>

@@ -9,7 +9,7 @@
 	gargoyle_header_footer -m  -c "internal.css" -j "ddns.js" -z "ddns.js"
 %>
 
-<h1 class="page-header">DDNS Service</h1>
+
 <div id="edit_container" class="row">
 
 	<div class="col-lg-4">
@@ -50,3 +50,5 @@
 	</div>
 </div>
 <div id="bottom_button_container"></div>
+</body>
+</html>
