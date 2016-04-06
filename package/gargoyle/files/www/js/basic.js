@@ -706,7 +706,7 @@ function saveChanges()
 					{
 						uci.remove("firewall", lanzone[x], "network")
 						uci.createListOption("firewall", lanzone[x], "network", true)
-						uci.set("firewall", lanzone[x], "network", ["lan" "wwan"]);
+						uci.set("firewall", lanzone[x], "network", ["lan", "wwan"]);
 					}
 				}
 			}
