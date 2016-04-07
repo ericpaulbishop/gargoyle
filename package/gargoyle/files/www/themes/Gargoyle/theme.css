@@ -1,7 +1,6 @@
 li.list-group-item span:last-child {
     float: right;
 }
-
 .list-group-item{overflow-x: auto;}
 html {
   overflow-x: hidden;
@@ -74,10 +73,10 @@ legend {
 }
 li.sidebar-header {
   text-align: center;
+  background-color: #FFF;
 }
 li.sidebar-header span {
   font-size: 20px;
-  color: #FFF;
 }
 li.sidebar-item {
   text-indent: 22px;
