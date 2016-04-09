@@ -65,7 +65,7 @@ function setUpgradeFormat()
 	{
 		setChildText("upgrade_text", upS.brcmT);
 	}
-	else if(distribTarget.match(/ar17xx/))
+	else if(distribTarget.match(/ar71xx/))
 	{
 		setChildText("upgrade_text", upS.ar71xxT);
 	}
