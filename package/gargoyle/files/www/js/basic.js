@@ -124,7 +124,9 @@ function saveChanges()
 			var name = uci.get("firewall",lanzone[x],"name");
 			if(name == "lan")
 			{
-				uci.set("firewall",lanzone[x],"network","lan");
+				uci.remove("firewall", lanzone[x], "network")
+				uci.createListOption("firewall", lanzone[x], "network", true)
+				uci.set("firewall", lanzone[x], "network", ["lan"]);
 			}
 		}
 			
@@ -234,10 +236,12 @@ function saveChanges()
 						uci.set('wireless', apgncfg, 'disassoc_low_ack', '0');
 						uci.set('wireless', apgncfg, 'is_guest_network', '1');
 
-						var mac = document.getElementById("wifi_guest_mac_g").value;
-						mac = mac == "" ? getRandomMac() : mac;
-						uci.set("wireless", apgncfg, 'macaddr', mac);
-
+						if (!distribTarget.match(/ramips/))
+						{
+							var mac = document.getElementById("wifi_guest_mac_g").value;
+							mac = mac == "" ? getRandomMac() : mac;
+							uci.set("wireless", apgncfg, 'macaddr', mac);
+						}
 
 
 						preCommands = preCommands + "uci set wireless." + apgncfg + "='wifi-iface' \n";
@@ -700,7 +704,9 @@ function saveChanges()
 					var name = uci.get("firewall",lanzone[x],"name");
 					if(name == "lan")
 					{
-						uci.set("firewall", lanzone[x], "network", "lan wwan");
+						uci.remove("firewall", lanzone[x], "network")
+						uci.createListOption("firewall", lanzone[x], "network", true)
+						uci.set("firewall", lanzone[x], "network", ["lan", "wwan"]);
 					}
 				}
 			}
