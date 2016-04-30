@@ -1,23 +1,6 @@
---- a/include/package-ipkg.mk	2015-09-26 14:19:37.033770560 -0400
-+++ b/include/package-ipkg.mk	2015-09-28 13:24:46.531803517 -0400
-@@ -197,12 +197,12 @@
- 			echo "#!/bin/sh"; \
- 			echo "[ \"\$$$${IPKG_NO_SCRIPT}\" = \"1\" ] && exit 0"; \
- 			echo ". \$$$${IPKG_INSTROOT}/lib/functions.sh"; \
--			echo "default_postinst \$$$$0 \$$$$@"; \
-+			echo "default_postinst \"\$$$$0\" \$$$$@"; \
- 		) > postinst; \
- 		( \
- 			echo "#!/bin/sh"; \
- 			echo ". \$$$${IPKG_INSTROOT}/lib/functions.sh"; \
--			echo "default_prerm \$$$$0 \$$$$@"; \
-+			echo "default_prerm \"\$$$$0\" \$$$$@"; \
- 		) > prerm; \
- 		chmod 0755 postinst prerm; \
- 		$($(1)_COMMANDS) \
---- a/package/base-files/files/lib/functions.sh	2016-03-04 12:12:00.606479043 -0500
-+++ b/package/base-files/files/lib/functions.sh	2016-03-04 12:11:10.931304343 -0500
-@@ -164,19 +164,40 @@
+--- cc-src/package/base-files/files/lib/functions.sh	2016-04-26 16:36:20.837463952 -0400
++++ ar71xx-src/package/base-files/files/lib/functions.sh	2016-04-26 16:35:10.288889437 -0400
+@@ -164,20 +164,36 @@
  }
  
  default_prerm() {
@@ -25,6 +8,7 @@
 -	name=$(basename ${1%.*})
 -	[ -f /usr/lib/opkg/info/${name}.prerm-pkg ] && . /usr/lib/opkg/info/${name}.prerm-pkg
 -	for i in `cat /usr/lib/opkg/info/${name}.list | grep "^/etc/init.d/"`; do
++
 +	local pkg_prerm pkg_list
 +	pkg_prerm="${1}-pkg"
 +	pkg_list=$( echo "${1}" | sed 's/prerm$/list/g')
@@ -35,15 +19,10 @@
  	done
  }
  
-+
-+
-+
  default_postinst() {
--	local pkgname rusers
-+
-+	local pkgname pkg_postinst pkg_control pkg_list rusers
-+
-+
+-	local pkgname rusers ret
++	local pkgname pkg_postinst pkg_control pkg_list rusers ret
+ 	ret=0
  	pkgname=$(basename ${1%.*})
 -	rusers=$(grep "Require-User:" ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control)
 +
@@ -58,17 +37,23 @@
 +	
 +	rusers=$(grep "Require-User:" "${pkg_control}")
 +	
-+	[ -f "$pkg_postinst" ] &&  . "$pkg_postinst" 
-+	
-+	
++
++
++
  	[ -n "$rusers" ] && {
  		local user group uid gid
  		for a in $(echo $rusers | sed "s/Require-User://g"); do
-@@ -215,10 +236,9 @@
+@@ -216,13 +232,14 @@
  		done
  	}
  
--	[ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ] && ( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
+-	if [ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ]; then
+-		( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
++	if [ -f "$pkg_postinst" ]; then
++		( . "$pkg_postinst" )
+ 		ret=$?
+ 	fi
++
  	[ -n "${IPKG_INSTROOT}" ] || rm -f /tmp/luci-indexcache 2>/dev/null
  
 -	[ "$PKG_UPGRADE" = "1" ] || for i in `cat ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list | grep "^/etc/init.d/"`; do
@@ -76,4 +61,3 @@
  		[ -n "${IPKG_INSTROOT}" ] && $(which bash) ${IPKG_INSTROOT}/etc/rc.common ${IPKG_INSTROOT}$i enable; \
  		[ -n "${IPKG_INSTROOT}" ] || {
  			$i enable
-
