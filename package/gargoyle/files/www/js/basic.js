@@ -612,6 +612,8 @@ function saveChanges()
 			else
 			{
 				uci.set("network", "wan", "proto", getSelectedValue('wan_protocol').replace(/_.*$/g, ""));
+				//Fixes some pppoe issues. To be removed if ipv6 is implemented.
+				uci.set("network", "wan", "ipv6", "0");
 			}
 			if(uci.get('network', 'lan', 'proto') === '')
 			{
