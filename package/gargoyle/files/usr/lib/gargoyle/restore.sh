@@ -106,6 +106,9 @@ old_hqu1=$(uci get "gargoyle.help.qos_up_1")
 old_hqu2=$(uci get "gargoyle.help.qos_up_2")
 old_hqd1=$(uci get "gargoyle.help.qos_down_1")
 old_hqd2=$(uci get "gargoyle.help.qos_down_2")
+# preserve previous time/date format
+old_tformat=$(uci get "gargoyle.global.hour_style")
+old_dformat=$(uci get "gargoyle.global.dateformat")
 cp /tmp/gargoyle.bak /etc/config/gargoyle
 if [ -n "$old_timeout" ] ; then
 	uci set gargoyle.global.session_timeout=$old_timeout
@@ -127,6 +130,12 @@ if [ -n "$old_hqd1" ] ; then
 fi
 if [ -n "$old_hqd2" ] ; then
 	uci set gargoyle.help.qos_down_2=$old_hqd2
+fi
+if [ -n "$old_tformat" ] ; then
+	uci set gargoyle.global.hour_style=$old_tformat
+fi
+if [ -n "$old_dformat" ] ; then
+	uci set gargoyle.global.dateformat=$old_dformat
 fi
 	
 is_bridge=$(echo $(uci show wireless | grep wds) $(uci show wireless | grep client_bridge))
