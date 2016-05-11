@@ -1,9 +1,9 @@
 --- /dev/null	2015-07-12 18:46:53.001433637 -0400
 +++ cc/target/linux/generic/patches-3.18/690-imq.patch	2015-08-16 22:23:22.381010302 -0400
-@@ -0,0 +1,2011 @@
+@@ -0,0 +1,2013 @@
 +--- /dev/null	2015-07-12 18:46:53.001433637 -0400
 ++++ linux-3.18.18/drivers/net/imq.c	2015-08-16 21:36:53.077561926 -0400
-+@@ -0,0 +1,1267 @@
++@@ -0,0 +1,1269 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -601,6 +601,8 @@
 ++
 ++	/* Disables softirqs for lock below */
 ++	rcu_read_lock_bh();
+++
+++	skb->destructor = &imq_skb_destructor;
 ++
 ++	/* Multi-queue selection */
 ++	orig_queue_index = skb_get_queue_mapping(skb);
