@@ -1131,7 +1131,7 @@ function setGlobalVisibility()
 	proto2.push(UI.Disabled);
 	setAllowableSelections('wan_protocol', proto1, proto2);
 
-	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol") == 'none' || getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/) || getSelectedValue("wan_protocol").match(/qmi/))  && (!singleEthernetPort())) ? [1] : [0] )
+	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol") == 'none' || getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/) || getSelectedValue("wan_protocol").match(/ncm/) || getSelectedValue("wan_protocol").match(/qmi/))  && (!singleEthernetPort())) ? [1] : [0] )
 
 	setWanVisibility();
 	setWifiVisibility();
