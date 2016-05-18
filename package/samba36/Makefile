@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=samba
 PKG_VERSION:=3.6.25
-PKG_RELEASE:=1
+PKG_RELEASE:=5
 
 PKG_SOURCE_URL:=http://ftp.samba.org/pub/samba \
 	http://ftp.samba.org/pub/samba/stable
@@ -123,9 +123,15 @@ CONFIGURE_ARGS += \
 
 MAKE_FLAGS += DYNEXP= PICFLAG= MODULES=
 
+define Package/samba36-server/conffiles
+	/etc/config/samba
+	/etc/samba/smb.conf.template
+	/etc/samba/smbpasswd
+endef
+
 define Package/samba36-server/install
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/samba.config $(1)/etc/config/samba
+	$(INSTALL_CONF) ./files/samba.config $(1)/etc/config/samba
 	$(INSTALL_DIR) $(1)/etc/samba
 	$(INSTALL_DATA) ./files/smb.conf.template $(1)/etc/samba
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/lowcase.dat $(1)/etc/samba
@@ -135,9 +141,9 @@ define Package/samba36-server/install
 	$(INSTALL_BIN) ./files/samba.init $(1)/etc/init.d/samba
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_BIN)/samba_multicall $(1)/usr/sbin
-	ln -sf samba_multicall $(1)/usr/sbin/smbd
-	ln -sf samba_multicall $(1)/usr/sbin/nmbd
-	ln -sf samba_multicall $(1)/usr/sbin/smbpasswd
+	$(LN) samba_multicall $(1)/usr/sbin/smbd
+	$(LN) samba_multicall $(1)/usr/sbin/nmbd
+	$(LN) samba_multicall $(1)/usr/sbin/smbpasswd
 endef
 
 define Package/samba36-client/install

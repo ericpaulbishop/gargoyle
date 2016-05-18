@@ -217,7 +217,7 @@ function tsInit()
 			else if (sorting == 'm')
 			{
 				text = text.replace(/,/g, "");
-				metric = text.match(/\d+.?\d+\s?(P|T|G|M|k)/);
+				metric = text.match(/\d+.?\d+\s?(P|T|G|M|k|K)/);
 				float = parseFloat(metric[0]);
 				if (isNaN(float))
 				{
@@ -239,7 +239,7 @@ function tsInit()
 				{
 					text = float * 1000000
 				}
-				else if (metric[1] == "k" )
+				else if (metric[1] == "k" || metric[1] == "K")
 				{
 					text = float * 1000
 				}

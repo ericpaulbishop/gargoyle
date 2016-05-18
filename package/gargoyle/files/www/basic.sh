@@ -37,7 +37,7 @@
 		echo "var timezoneName = \""$(date | sed 's/^.*:...//' | sed 's/ .*$//' )"\";"
 	fi
 
-	has_usb_tty=$( ls /dev/ttyUSB* 2>/dev/null )
+	has_usb_tty=$( ls /dev/ttyUSB* /dev/ttyACM* 2>/dev/null )
 	if [ -z "$has_usb_tty" ] ; then
 		echo "var hasUSB = false;"
 	else
@@ -59,16 +59,13 @@
 		echo "hasNCM = true;"
 	fi
 
-	cdcif=$(grep -Hi "cdc ethernet control" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
+	cdcif=$(egrep -Hi "(cdc ethernet control|rndis communications control)" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
+	[ -z "$cdcif" ] && cdcif=$(ls -l /sys/class/net/*/device/driver | grep cdc_ether | sed 's!.*/sys/class/net/\(.*\)/device/.*!\1!')
 	if [ -z "$cdcif" ]; then
 		echo "cdcif = \"\";"
 	else
 		echo "cdcif = \"$cdcif\";"
 	fi
-
-	#echo "var interfaces = new Array();"
-	#awk -F: '/eth|wwan|usb|hso/ {gsub(/[[:space:]]*/,"",$1);print "interfaces.push([\""$1"\"]);"}' /proc/net/dev
-
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 

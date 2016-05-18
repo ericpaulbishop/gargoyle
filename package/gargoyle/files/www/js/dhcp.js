@@ -777,3 +777,92 @@ function proofreadDhcpForm()
 
 	return errors;
 }
+
+function editStatic()
+{
+	if( typeof(editStaticWindow) != "undefined" )
+	{
+		//opera keeps object around after
+		//window is closed, so we need to deal
+		//with error condition
+		try
+		{
+			editStaticWindow.close();
+		}
+		catch(e){}
+	}
+
+	try
+	{
+		xCoor = window.screenX + 225;
+		yCoor = window.screenY+ 225;
+	}
+	catch(e)
+	{
+		xCoor = window.left + 225;
+		yCoor = window.top + 225;
+	}
+
+	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+
+	saveButton = createInput("button", editStaticWindow.document);
+	closeButton = createInput("button", editStaticWindow.document);
+	saveButton.value = UI.CApplyChanges;
+	saveButton.className = "default_button";
+	closeButton.value = UI.CDiscardChanges;
+	closeButton.className = "default_button";
+
+	editRow=this.parentNode.parentNode;
+
+	runOnEditorLoaded = function ()
+	{
+		updateDone=false;
+		if(editStaticWindow.document != null)
+		{
+			if(editStaticWindow.document.getElementById("bottom_button_container") != null)
+			{
+				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
+				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+
+				//set edit values
+				editStaticWindow.document.getElementById("add_host").value = editRow.childNodes[0].firstChild.data;
+				editStaticWindow.document.getElementById("add_mac").value  = editRow.childNodes[1].firstChild.data;
+				editStaticWindow.document.getElementById("add_ip").value   = editRow.childNodes[2].firstChild.data;
+				editStaticWindow.document.getElementById("add_button").style.display="none";
+				closeButton.onclick = function()
+				{
+					editStaticWindow.close();
+				}
+				saveButton.onclick = function()
+				{
+					// error checking goes here
+					var errors = proofreadStatic(editStaticWindow.document, document, editRow);
+					if(errors.length > 0)
+					{
+						alert(errors.join("\n") + "\n"+dhcpS.upErr);
+					}
+					else
+					{
+						//update document with new data
+						editRow.childNodes[0].firstChild.data = editStaticWindow.document.getElementById("add_host").value;
+						editRow.childNodes[1].firstChild.data = editStaticWindow.document.getElementById("add_mac").value;
+						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_ip").value;
+
+						editStaticWindow.close();
+
+						resetHostnameMacList();
+
+					}
+				}
+				editStaticWindow.moveTo(xCoor,yCoor);
+				editStaticWindow.focus();
+				updateDone = true;
+			}
+		}
+		if(!updateDone)
+		{
+			setTimeout( "runOnEditorLoaded()", 250);
+		}
+	}
+	runOnEditorLoaded();
+}

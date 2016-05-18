@@ -12,24 +12,10 @@
 <script>
 <!--
 <%
-	is_brcm=$(cat /proc/cpuinfo | grep Broadcom)
-	is_atheros=$(cat /proc/cpuinfo | grep "system type" | grep "Atheros AR[1-6]")
-	is_ar71xx=$(cat /proc/cpuinfo  | grep "system type" | grep "Atheros AR[7-9]")
-	is_mvebu=$(cat /proc/cpuinfo   | grep Armada)
-	if [ -n "$is_brcm" ] || [ -e /lib/wifi/broadcom.sh ] ; then
-		echo "var platform=\"broadcom\";"
-	elif [ -n "$is_atheros" ] ; then
-		echo "var platform=\"atheros\";"
-	elif [ -n "$is_ar71xx" ] ; then
-		echo "var platform=\"ar71xx\";"
-	elif [ -n "$is_mvebu" ] ; then
-		echo "var platform=\"mvebu\";"
-	else
-		echo "var platform=\"x86\";"
-	fi
+	awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release
 
 	gargoyle_version=$(cat data/gargoyle_version.txt)
-	echo "var gargoyleVersion=\"$gargoyle_version\""
+	echo "var gargoyleVersion=\"$gargoyle_version\"";
 %>
 //-->
 </script>

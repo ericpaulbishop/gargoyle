@@ -1509,7 +1509,7 @@ CONFIG_PACKAGE_kmod-nls-utf8=y
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
 CONFIG_PACKAGE_kmod-ebtables=y
-# CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
+CONFIG_PACKAGE_kmod-ebtables-ipv4=y
 # CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
 # CONFIG_PACKAGE_kmod-ebtables-watchers is not set
 # CONFIG_PACKAGE_kmod-ip6tables is not set
@@ -1768,7 +1768,7 @@ CONFIG_PACKAGE_kmod-usb-net=y
 # CONFIG_PACKAGE_kmod-usb-net-mcs7830 is not set
 # CONFIG_PACKAGE_kmod-usb-net-pegasus is not set
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
-# CONFIG_PACKAGE_kmod-usb-net-rndis is not set
+CONFIG_PACKAGE_kmod-usb-net-rndis=y
 # CONFIG_PACKAGE_kmod-usb-net-sierrawireless is not set
 # CONFIG_PACKAGE_kmod-usb-net-smsc95xx is not set
 # CONFIG_PACKAGE_kmod-usb-ohci is not set
@@ -2198,7 +2198,7 @@ CONFIG_PACKAGE_p910nd=y
 # CONFIG_PACKAGE_ip-bridge is not set
 CONFIG_PACKAGE_ip-full=y
 # CONFIG_PACKAGE_lldpd is not set
-# CONFIG_PACKAGE_relayd is not set
+CONFIG_PACKAGE_relayd=y
 # CONFIG_PACKAGE_ss is not set
 CONFIG_PACKAGE_tc=y
 
