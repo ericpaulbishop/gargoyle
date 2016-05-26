@@ -6,16 +6,46 @@ BIN=tor
 RUN_D=/var/run
 KEY_D=/etc/tor
 PID_F=$RUN_D/$BIN.pid
-OPID_F=$RUN_D/obfsproxy.pid
-RUN_USER=root
-RUN_GROUP=root
-BOOT="0"
-
-
-
-
-
+OPID_F=$RUN_D/obfsproxy.pid                                                                      
+RUN_USER=tor                                                                                   
+RUN_GROUP=tor                                                                                  
+BOOT="0"                                                                                       
+                                                                                               
+                                                                                               
+                                                                                               
+                                                                                               
+                                                                                               
 OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
+                                                                                               
+init_group()                                                                                   
+{             
+        group="$1"
+        group_exists=$(cat /etc/group | grep ^$group: >/dev/null; echo $?)                 
+                                                                                               
+        if [ $group_exists = 1 ]; then                                                         
+                gid=100                                                          
+                until [ $(cat /etc/group | grep :$gid:$ >/dev/null; echo $?) = 1 ]; do             
+                        let gid+=1                                                             
+                done                                                                           
+                echo "$group:x:$gid:"        2>/dev/null     >> /etc/group                 
+        fi                                                                                     
+}  
+                                                                                           
+                                                                                               
+init_user()                                                                                    
+{             
+        user="$1"             
+				group="$2"                                                                                              
+        user_exists=$(id -u $user > /dev/null 2>&1; echo $?)                               
+        if [ $user_exists = 1 ]; then                                                           
+                gid=$(cat /etc/group | grep $group | cut -d':' -f3)             
+                uid=$gid                                                                       
+                until [ $(cat /etc/passwd | cut -d':' -f3 | grep ^$uid$ > /dev/null; echo $?) = 1 ]; do
+                        let uid+=1                                                             
+                done                                                                           
+                echo "$user:*:$uid:$gid:tor user:/tmp:/bin/false"   2>/dev/null     >> /etc/passwd     
+        fi                                                                                     
+}                        
 
 
 init_dir()
@@ -57,6 +87,9 @@ start()
 		control_port=9051
 	fi
 
+	init_group "$RUN_GROUP"
+	
+	init_user "$RUN_USER" "$RUN_GROUP"
 
 	init_dir "$tor_data_dir" "0700"
 	init_dir "$KEY_D"        "0700"
