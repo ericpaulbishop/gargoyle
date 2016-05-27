@@ -1,0 +1,59 @@
+Internationalization lang.js Guidelines:
+
+• All files are to be UTF-8 with BOM (Byte Order Mark)
+• All object key/property pairs are to end with a '\n' newline; not '\r'
+• body of each property is MAX 4096 bytes (not UTF-8 characters).
+• A single translated.js file of strings is MAX 51200 bytes.
+• File ends with a newline character on its own line.
+
+
+var idS=new Object(); //definition in somepage.js
+idS.SomeSect="This New Section Title"; //a line in a translation.js file
+ |     |                |
+ |     |              value
+ |    key (also called a property in javascript)
+javascript object that stores all the keys/properties
+
+ 
+If you are creating your own page & want to use internationalization:
+  - In your javascript file, have "var yourvariable=new Object();" at the beginning. The translation key-value pairs will be in javascript form. This variable defines the object - the translation file with key-value pairs define the properties of the variable. The key in javascript is called a property. The yourvariable name should be something short but unique. If the variable is not defined, the sourced translation files have to variable to attach their properties to & the page will cause a overview.sh:1 error.
+  - Use the form <%~ yourpagename.descriptive_key %> for the first instance in the haserl yourpage.sh page.
+  - Note the space & the percentage sign. You cannot mix the older <? ?> form with the newer anywhere on the page. Only the newer form is tested.
+  - yourpagename.js will be sourced as the translation file. In the haserl pages, only the first instance of the page used need be present. Subsequent (2nd, 3rd, 100th) instances can skip the full <%~ yourpagename.descritive_key %> form to the shorter <%~ descritive_key %> form.
+  - The javascript variable in yourpagename.js is used only inside javascript. In haserl parsing, the variable must be present, but only the key is used.
+  - The keys must be unique across the files. Typically, only the strings.js & the active page have keys loaded. The haserl <% key %> does not distinguish between UI.Close & somepage.Close - the final Close is the text that will be used. Using unique keys prevents this behavior.
+  - Do not use spaces in the property key, or around the equal sign:
+      minidlna.VFolder="Select a folder for video files"; // correct
+      minidlna. VFolder = "Select a folder for video files" // wrong
+  - You can incorporate common elements (from strings.js) by just using the key: <%~ SaveChanges %> as strings.js will always be loaded.
+  - If you use these characters in your translation, they need to be escaped to the corresponding sequence below:
+	&	<	>	"	'
+	&amp;	&lt;	&gt;	&quot;	&apos;
+  - To use a property object string in your genuine javascript code, use the full object_var.property notation - idS.SomeSect - which javascript will replace
+  - To use a property object string either on the command line or in a shell script, use haserl-style yourpagename.descriptive_key:
+  		/usr/bin/i18n time.hPM
+  		i18n usb_storage.ChPass
+
+---------------------------
+To see if you have duplicate keys a particularly long translation file (this does not work across strings.js & yourpage.js):
+awk -F '=' '{ print $1 }' /path/to/yourpage.js | uniq -d
+
+To compare 2 languages to see if there are missing keys/properties:
+/path/to/gargoyle/i18n-scripts/comparitor.py English-EN Spanish-ES
+
+---------------------------
+To make the haserl webpages & javascript read easier, it is possible to (on a duplicate folder that you will discard later) localize the pages to assist in development. In a duplicate gargoyle folder:
+
+cd path/to/gargoyle_folder && ./i18n-scripts/localize.py 'English-EN' 'English-EN'
+
+- 1st language is the fallback language
+- 2nd language is the active language
+
+If the active language is missing a definition, the fallback language will be sourced; if the fallback language is missing a definition, the key itself will be used.
+---------------------------
+Toubleshooting:
+
+• overview.sh:1		SyntaxError: Unexpected token '<'
+  Caused by a missing/incorect gargoyle_header_footer -z "ident.js" in page.sh top section. The default language "ident.jz" will always be included in the scripts to be included - ensure the file is present. Languages other than fallback language can have pages missing & will not be included, but the fallback must be present.
+• The last line of a translation.js file doesn't get translated in a haserl somepage.sh
+  A translation page must end with a newline character. The haserl translation map splits based on newline characters - if the last newline is missing, it won't be mapped as a key-value pair & haserl won't have a translation for that key.

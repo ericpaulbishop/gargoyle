@@ -274,8 +274,8 @@ static struct iptables_match timerange =
 	#else
 		.version = IPTABLES_VERSION,
 	#endif
-	.size		= IPT_ALIGN(sizeof(struct ipt_timerange_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_timerange_info)),
+	.size		= XT_ALIGN(sizeof(struct ipt_timerange_info)),
+	.userspacesize	= XT_ALIGN(sizeof(struct ipt_timerange_info)),
 	.help		= &help,
 	.parse		= &parse,
 	.final_check	= &final_check,

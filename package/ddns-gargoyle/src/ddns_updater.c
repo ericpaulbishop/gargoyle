@@ -75,6 +75,45 @@
 #define MAX_MSG_LINE 		250
 
 
+#define MAX_LOOKUP_URL_LENGTH	65
+
+int daemon_pid_file;
+
+char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
+							"http://checkmyip.com",
+							"http://www.ipchicken.com",
+							"http://www.tracemyip.org",
+							"http://checkip.dyndns.org",
+							"http://checkip.org", 
+							"http://www.ip-address.org",
+							"http://my-ip-address.com",
+							"http://www.selfseo.com/what_is_my_ip.php",
+							"http://aruljohn.com",
+							"http://www.lawrencegoetz.com/programs/ipinfo/",
+							"http://myipinfo.net",
+							"http://www.ip-1.com/",
+							"http://www.myipnumber.com",
+							"http://www.dslreports.com/whois",
+							"\0"
+							};
+
+#define MAX_USER_AGENT_LENGTH	125
+char user_agents[][MAX_USER_AGENT_LENGTH] = {
+						"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)",        //IE 8, Windows
+						"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.2; .NET CLR 1.1.4322)",  //IE 7, Windows
+						"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0",         //IE 9, Windows
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5", //Chrome, Mac
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.25 (KHTML, like Gecko) Version/6.0 Safari/536.25",       //Safari 6, Mac
+						"\0"
+						};
+
+
+
+
+
+char** default_ip_lookup_urls = NULL;
+
+
 typedef struct
 {
 	char* name;
@@ -132,10 +171,12 @@ int output_requested;
 string_map* load_service_providers(char* filename);
 string_map* load_service_configurations(char* filename, string_map* service_providers);
 char** parse_variable_definition_line(char* line);
-int convert_to_regex(char* str, regex_t* p);
 int get_multiple_for_unit(char* unit);
 
 char* get_local_ip(int ip_source, void* check_parameter);
+char* get_next_url_and_rotate(char **urls);
+void  initialize_default_ip_lookup_urls(void);
+void  free_default_ip_lookup_urls(void);
 char* get_ip_from_url(char* url);
 char* get_interface_ip(char* if_name);
 
@@ -162,6 +203,11 @@ void free_service_config(ddns_service_config* config);
 void free_service_provider(ddns_service_provider* provider);
 void free_update_nodes(update_node** update_nodes, unsigned long num_nodes);
 
+
+int srand_called = 0;
+char* get_random_user_agent(void);
+
+
 int main(int argc, char** argv)
 {
 
@@ -175,6 +221,7 @@ int main(int argc, char** argv)
 	// -u print usage and exit
 	// [SERVICE NAMES]
 	
+	daemon_pid_file = -1;
 	char* config_file = strdup("/etc/ddns_updater.conf");
 	char* service_provider_file = strdup("/etc/ddns_providers.conf");
 	char is_daemon = 0;
@@ -301,6 +348,7 @@ int main(int argc, char** argv)
 		}
 		free_service_configs(service_configs);
 		free_service_providers(service_providers);
+		free_default_ip_lookup_urls();
 	}	
 	else
 	{	
@@ -1070,7 +1118,17 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	closelog();
 
 	//remove pid file
+	if(daemon_pid_file >= 0)
+	{
+		// unlocked variable unused, but we get compilation warnings if we don't store return value
+		int unlocked = -1;
+		unlocked = lockf(daemon_pid_file,F_ULOCK,0);
+		unlocked++; //dummy, prevents compilation warnings
+
+		close(daemon_pid_file);
+	}
 	unlink(PID_PATH);
+
 
 	//cleanup used memory (makes finding TRUE memory leaks with valgrind a lot easier)
 	unsigned long num_destroyed;
@@ -1096,6 +1154,7 @@ void daemonize(char run_in_background) //background variable is useful for debug
 	if(run_in_background != 0)
 	{
 		//fork and end parent process
+		FILE* reopened;
 		int i=fork();
 		if (i != 0)
 		{	
@@ -1119,26 +1178,30 @@ void daemonize(char run_in_background) //background variable is useful for debug
 			close(i);
 		}
 
-		// close standard i/o  
-        	close(STDOUT_FILENO);
-		close(STDIN_FILENO);
-		close(STDERR_FILENO);
+		// close standard i/o 
+		//
+		// reopened file handle doesn't do anything, 
+		// but we get compilation warnings if we don't store/use return values
+		reopened = freopen( "/dev/null", "r", stdin);
+		reopened = freopen( "/dev/null", "w", stdout);
+		reopened = freopen( "/dev/null", "w", stderr);
+		if(reopened){ i++; } //dummy, prevents compilation warnings
 	}
 
 
 	// record pid to lockfile
-	int pid_file= open(PID_PATH,O_RDWR|O_CREAT,0644);
-	if(pid_file<0) // exit if we can't open file
+	daemon_pid_file = open(PID_PATH,O_RDWR|O_CREAT,0644);
+	if(daemon_pid_file<0) // exit if we can't open file
 	{
 		exit(1);
 	}
-	if(lockf(pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
+	if(lockf(daemon_pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
 	{
 		exit(1);
 	}
 	char pid_str[25];
 	sprintf(pid_str,"%d\n",getpid());
-	if( write(pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
+	if( write(daemon_pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
 	{
 		exit(1);
 	}
@@ -1447,7 +1510,7 @@ char* lookup_domain_ip(char* url_str)
 	char* ip = NULL;
 
 	url_request* url = parse_url(url_str, NULL);
-	if(url !=  NULL);
+	if(url !=  NULL)
 	{
 		struct hostent* host;
 		host = gethostbyname(url->hostname);
@@ -1470,32 +1533,107 @@ char* get_local_ip(int ip_source, void* check_parameter)
 	else
 	{
 		char** urls = (char**)check_parameter;
-		
-		//this should probably be loaded from a file -- implement this later
-		char default_urls[][100] = {"http://checkip.dyndns.org", "http://checkip.org", "http://www.whatismyip.com/automation/n09230945.asp" "http://myip.dk/", "http://www.ipchicken.com/", "\0"};
 
-		int url_index;
+		char* next_url;
+		char  first_url[MAX_LOOKUP_URL_LENGTH];
+		int   is_first_lookup;
+		initialize_default_ip_lookup_urls();
+
+
 		if(urls != NULL)
 		{
-			for(url_index=0; urls[url_index] != NULL && ip == NULL; url_index++)
+			is_first_lookup=1;
+			next_url = get_next_url_and_rotate(urls);
+			strcpy(first_url, next_url);
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
-				ip = get_ip_from_url(urls[url_index]);
+				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
+				is_first_lookup = 0;
 			}
 		}
-		for(url_index=0; default_urls[url_index][0] != '\0' && ip == NULL; url_index++)
+		if(ip == NULL)
 		{
-			ip = get_ip_from_url(default_urls[url_index]);
+			is_first_lookup=1;
+			next_url = get_next_url_and_rotate(default_ip_lookup_urls);
+			strcpy(first_url, next_url);
+			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
+			{
+				ip = get_ip_from_url(next_url);
+				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
+				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls); }
+				is_first_lookup = 0;
+			}
 		}
+
 	}
-	
+
 	return ip;
+}
+
+void  initialize_default_ip_lookup_urls(void)
+{
+	if(default_ip_lookup_urls == NULL)
+	{
+		int num_urls;
+		int url_index;
+		for(num_urls=0; default_ip_lookup_url_data[num_urls][0] != '\0'; num_urls++){}
+		default_ip_lookup_urls = (char**)malloc( (num_urls+2)*sizeof(char*) );
+		for(url_index=0; url_index < num_urls+1; url_index++)
+		{
+			default_ip_lookup_urls[url_index] = (char*)malloc( MAX_LOOKUP_URL_LENGTH );
+			strcpy(default_ip_lookup_urls[url_index], default_ip_lookup_url_data[url_index]);
+		}
+		default_ip_lookup_urls[url_index] = NULL;
+	}
+}
+
+void free_default_ip_lookup_urls(void)
+{
+	if(default_ip_lookup_urls != NULL)
+	{
+		free_null_terminated_string_array(default_ip_lookup_urls);
+	}
+}
+
+
+
+char* get_next_url_and_rotate(char **urls)
+{
+	char next[MAX_LOOKUP_URL_LENGTH];
+	int url_index;
+
+
+	strcpy(next, urls[0]);
+	for(url_index=0; urls[url_index+1][0] != '\0' ; url_index++)
+	{
+		strcpy(urls[url_index], urls[url_index+1]);
+	}
+	strcpy(urls[url_index], next);
+	
+
+	return urls[url_index];
+}
+
+char* get_random_user_agent(void)
+{
+	int num_user_agents=0;
+	for(num_user_agents=0; user_agents[num_user_agents][0] != '\0'; num_user_agents++);
+	if(!srand_called)
+	{
+		srand( time(NULL) );
+		srand_called=1;
+	}
+	int ua_num = rand() % num_user_agents;
+	return user_agents[ua_num];
 }
 
 
 char* get_ip_from_url(char* url)
 {
 	char* ip = NULL;
-	http_response* page = get_url(url, NULL);
+	http_response* page = get_url(url, get_random_user_agent() );
 	if(page != NULL)
 	{
 		if(page->data != NULL)
@@ -1974,99 +2112,4 @@ char** parse_variable_definition_line(char* line)
 	return variable_definition;
 }
 
-// requires expression to be surrounded by '/' characters, and deals with escape
-// characters '\/', '\r', '\n', and '\t' when escapes haven't been interpreted 
-// (e.g. after recieving regex string from user)
-//
-// returns 1 on good regex, 0 on bad regex
-int convert_to_regex(char* str, regex_t* p)
-{
-	char* trimmed = trim_flanking_whitespace(strdup(str));
-	int trimmed_length = strlen(trimmed);
-	
-	int valid = 1;
-	//regex must be defined by surrounding '/' characters
-	if(trimmed[0] != '/' || trimmed[trimmed_length-1] != '/')
-	{
-		valid = 0;
-		free(trimmed);
-	}
 
-	char* new = NULL;
-	if(valid == 1)
-	{
-		char* internal = (char*)malloc(trimmed_length*sizeof(char));
-		int internal_length = trimmed_length-2;	
-		memcpy(internal, trimmed+1, internal_length);
-		internal[internal_length] = '\0';
-		free(trimmed);
-
-		new = (char*)malloc(trimmed_length*sizeof(char));
-		int new_index = 0;
-		int internal_index = 0;
-		char previous = '\0';
-		while(internal[internal_index] != '\0' && valid == 1)
-		{
-			char next = internal[internal_index];
-			if(next == '/' && previous != '\\')
-			{
-				valid = 0;
-			}
-			else if((next == 'n' || next == 'r' || next == 't' || next == '/') && previous == '\\')
-			{
-				char previous2 = '\0';
-				if(internal_index >= 2)
-				{
-					previous2 = internal[internal_index-2];
-				}
-
-				new_index = previous2 == '\\' ? new_index : new_index-1;
-				switch(next)
-				{
-					case 'n':
-						new[new_index] = previous2 == '\\' ? next : '\n';
-						break;
-					case 'r':
-						new[new_index] = previous2 == '\\' ? next : '\r';
-						break;
-					case 't':
-						new[new_index] = previous2 == '\\' ? next : '\t';
-						break;
-					case '/':
-						new[new_index] = previous2 == '\\' ? next : '/';
-						break;
-				}
-				previous = '\0';
-				internal_index++;
-				new_index++;
-
-			}
-			else
-			{
-				new[new_index] = next;
-				previous = next;
-				internal_index++;
-				new_index++;
-			}
-		}
-		new[new_index] = '\0';
-		if(previous == '\\')
-		{
-			valid = 0;
-			free(new);
-			new = NULL;
-		}
-		free(internal);
-	}
-	if(valid == 1)
-	{
-		valid = regcomp(p,new,REG_EXTENDED) == 0 ? 1 : 0;
-		if(valid == 0)
-		{
-			regfree(p);
-		}
-		free(new);
-	}
-	
-	return valid;	
-}

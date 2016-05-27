@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Tor only seems to work on routers with 64MB+ memory, only enable if available memory > 32MB
+real_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+swap_mem="$(sed -e '/^SwapTotal: /!d; s#SwapTotal: *##; s# kB##g' /proc/meminfo)"
+total_mem=$(( real_mem + swap_mem ))
+
+start_tor="0"
+if [ "$total_mem" -gt 32000 ] ; then
+	uci set gargoyle.display.connection_tor="Tor"
+	uci set gargoyle.scripts.connection_tor="tor.sh"
+	uci set gargoyle.connection.tor="250"
+	
+	disabled_due_to_memory=$(uci get tor.global.disabled_due_to_memory 2>/dev/null)
+	if [ -n "$disabled_due_to_memory" ] ; then
+		uci set tor.global.enabled="1"
+		uci del tor.global.disabled_due_to_memory
+	fi
+
+	uptime=$( cat /proc/uptime | sed 's/\..*$//g' )
+	if [ "$uptime" -gt 60 ] && [ -n "$disabled_due_to_memory" ]  ; then
+		start_tor="1"
+	fi
+
+else
+	enabled=$(uci get tor.global.enabled 2>/dev/null)
+	if [ "$enabled" != "0" ] ; then
+		uci set tor.global.disabled_due_to_memory="1"
+	fi
+	uci set tor.global.enabled="0"
+	uci del gargoyle.connection.tor="250" >/dev/null 2>&1
+fi
+uci commit
+
+if [ "$start_tor" = "1" ] ; then
+	/etc/init.d/tor start >/dev/null 2>&1
+fi
+
+

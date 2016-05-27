@@ -1,0 +1,173 @@
+--- a/src/main.c	2012-11-22 04:27:43.013477197 -0500
++++ obfsproxy/src/main.c	2012-11-22 04:26:59.584800903 -0500
+@@ -41,6 +41,15 @@
+ #endif
+   "";
+ 
++
++#ifdef HAVE_UNISTD_H 
++
++#include <unistd.h>
++#include <syslog.h>
++#include <fcntl.h>
++
++#endif
++
+ static struct event_base *the_event_base;
+ static struct event *sig_int;
+ static struct event *sig_term;
+@@ -67,6 +76,72 @@
+   return the_obfsproxy_version;
+ }
+ 
++
++#ifdef HAVE_UNISTD_H 
++int is_daemon;
++char daemon_pid[257];
++int daemon_pid_file;
++
++void daemonize(char* pid_path);
++
++void daemonize(char* pid_path)
++{
++
++  //fork and end parent process
++  FILE* fp = NULL;
++  int i=fork();
++  if (i != 0)
++  {  
++    if(i < 0) //exit on fork error
++    {
++      exit(1);
++    }
++    else //this is parent, exit cleanly
++    {
++      exit(0);
++    }
++  }
++
++  /********************************
++  * child continues as a daemon after parent exits
++  ********************************/
++  // obtain a new process group & close all file descriptors 
++  setsid();
++  for(i=getdtablesize();i>=0;--i)
++  {
++    close(i);
++  }
++
++  fp = freopen( "/dev/null", "r", stdin);
++  fp = freopen( "/dev/null", "w", stdout);
++  fp = freopen( "/dev/null", "w", stderr);
++  if(fp) { i++; };
++
++  // record pid to lockfile, if pid is specified
++  if(pid_path[0] != '\0')
++  {
++    daemon_pid_file= open(pid_path,O_RDWR|O_CREAT,0644);
++    if(daemon_pid_file<0) // exit if we can't open file
++    {
++      exit(1);
++    }
++    if(lockf(daemon_pid_file,F_TLOCK,0)<0) // try to lock file, exit if we can't
++    {
++      exit(1);
++    }
++    char pid_str[25];
++    sprintf(pid_str,"%d\n",getpid());
++    if( write(daemon_pid_file,pid_str,strlen(pid_str)) < strlen(pid_str))
++    {
++      exit(1);
++    }
++  }
++
++}
++
++#endif
++
++
+ /**
+    Prints the obfsproxy usage instructions then exits.
+ */
+@@ -81,6 +156,11 @@
+   for (i=0;i<n_supported_protocols;i++)
+     fprintf(stderr,"[%s] ", supported_protocols[i]->name);
+   fprintf(stderr, "\n* obfsproxy_args:\n"
++#ifdef HAVE_UNISTD_H 
++
++          "--daemonize - run as a daemon\n"
++          "--daemonize_with_pid=<file> - run as a daemon, saving process id to <file>\n"
++#endif
+           "--log-file=<file> ~ set logfile\n"
+           "--log-min-severity=warn|notice|info|debug ~ "
+           "set minimum logging severity (default: notice)\n"
+@@ -185,6 +265,12 @@
+   int logsev_set=0;
+   int i=1;
+ 
++#ifdef HAVE_UNISTD_H 
++  is_daemon = 0;
++  daemon_pid[0] = '\0';
++#endif
++
++
+   while (argv[i] &&
+          !strncmp(argv[i],"--",2)) {
+     if (!strncmp(argv[i], "--log-file=", 11)) {
+@@ -216,6 +302,22 @@
+       safe_logging=0;
+     } else if (!strncmp(argv[i], "--managed", 10)) {
+       is_external_proxy=0;
++#ifdef HAVE_UNISTD_H 
++    } else if (!strncmp(argv[i], "--daemonize_with_pid=", 21)) {
++      const char* dparg= (char *)argv[i]+21;
++      int dplen = strlen(dparg);
++      if(dplen <=256)
++      {
++        strcpy(daemon_pid, dparg);
++      }
++      else
++      {
++        printf("Error: pid filename is too long, should be <= 256 characters.");
++      }
++      is_daemon = 1;
++    } else if (!strncmp(argv[i], "--daemonize", 12)) {
++      is_daemon = 1;
++#endif
+     } else if (!strncmp(argv[i], "--version", 10)) {
+       version();
+     } else if (!strncmp(argv[i], "--help", 7)) {
+@@ -327,6 +429,19 @@
+ 
+   if (the_obfsproxy_version)
+     free(the_obfsproxy_version);
++
++
++#ifdef HAVE_UNISTD_H 
++  if(is_daemon == 1 && daemon_pid[0] != '\0')
++  {
++    int lockr = lockf(daemon_pid_file,F_ULOCK,0);
++    close(daemon_pid_file);
++    unlink(daemon_pid);
++    lockr++;
++  }
++#endif
++
++
+ }
+ 
+ /** Entry point */
+@@ -337,6 +452,13 @@
+ 
+   /* Handle optional obfsproxy arguments. */
+   begin = argv + handle_obfsproxy_args(argv);
++
++#ifdef HAVE_UNISTD_H 
++  if(is_daemon) {
++    daemonize(daemon_pid);
++  }
++#endif
++
+   log_notice("Starting (obfsproxy version: %s).", get_version());
+ 
+   if (is_external_proxy) {

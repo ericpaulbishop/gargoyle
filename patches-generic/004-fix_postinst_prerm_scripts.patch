@@ -1,0 +1,63 @@
+--- cc-src/package/base-files/files/lib/functions.sh	2016-04-26 16:36:20.837463952 -0400
++++ ar71xx-src/package/base-files/files/lib/functions.sh	2016-04-26 16:35:10.288889437 -0400
+@@ -164,20 +164,36 @@
+ }
+ 
+ default_prerm() {
+-	local name
+-	name=$(basename ${1%.*})
+-	[ -f /usr/lib/opkg/info/${name}.prerm-pkg ] && . /usr/lib/opkg/info/${name}.prerm-pkg
+-	for i in `cat /usr/lib/opkg/info/${name}.list | grep "^/etc/init.d/"`; do
++
++	local pkg_prerm pkg_list
++	pkg_prerm="${1}-pkg"
++	pkg_list=$( echo "${1}" | sed 's/prerm$/list/g')
++	[ -f "$pkg_prerm" ] && . "$pkg_prerm"
++	for i in `cat "$pkg_list" | grep "^/etc/init.d/"`; do
+ 		$i disable
+ 		$i stop
+ 	done
+ }
+ 
+ default_postinst() {
+-	local pkgname rusers ret
++	local pkgname pkg_postinst pkg_control pkg_list rusers ret
+ 	ret=0
+ 	pkgname=$(basename ${1%.*})
+-	rusers=$(grep "Require-User:" ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control)
++
++	pkg_postinst="${1}"-pkg
++	pkg_control=$( echo "${1}" | sed 's/postinst$/control/g')
++	pkg_list=$( echo "${1}" | sed 's/postinst$/list/g')
++	if [ -n "${IPKG_INSTROOT}" ] ; then
++		pkg_postinst="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg"
++		pkg_control="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control"
++		pkg_list="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list"
++	fi
++	
++	rusers=$(grep "Require-User:" "${pkg_control}")
++	
++
++
++
+ 	[ -n "$rusers" ] && {
+ 		local user group uid gid
+ 		for a in $(echo $rusers | sed "s/Require-User://g"); do
+@@ -216,13 +232,14 @@
+ 		done
+ 	}
+ 
+-	if [ -f ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg ]; then
+-		( . ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg )
++	if [ -f "$pkg_postinst" ]; then
++		( . "$pkg_postinst" )
+ 		ret=$?
+ 	fi
++
+ 	[ -n "${IPKG_INSTROOT}" ] || rm -f /tmp/luci-indexcache 2>/dev/null
+ 
+-	[ "$PKG_UPGRADE" = "1" ] || for i in `cat ${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list | grep "^/etc/init.d/"`; do
++	[ "$PKG_UPGRADE" = "1" ] || for i in `cat "$pkg_list" | grep "^/etc/init.d/"`; do
+ 		[ -n "${IPKG_INSTROOT}" ] && $(which bash) ${IPKG_INSTROOT}/etc/rc.common ${IPKG_INSTROOT}$i enable; \
+ 		[ -n "${IPKG_INSTROOT}" ] || {
+ 			$i enable

@@ -34,7 +34,7 @@ int main (int argc, char **argv)
 	int next_opt;
 	int read;
 	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:b:B:gG")) != -1)
-	{	
+	{
 		switch(next_opt)
 		{
 			case 'p':
@@ -77,7 +77,6 @@ int main (int argc, char **argv)
 			case 'B':
 				read = sscanf(optarg, "%ld", &browser_time);
 				browser_time = read > 0 ? browser_time : 0;
-				break;
 
 				break;
 			case 'g':
@@ -87,7 +86,7 @@ int main (int argc, char **argv)
 		}
 	}
 
-		
+
 	int valid = 0;
 	char* root_hash = get_root_hash();
 	if(root_hash != NULL)
@@ -163,11 +162,11 @@ int main (int argc, char **argv)
 			//if we don't know browser time, don't set cookie expiration (in the browser -- server timeout still implemented), otherwise set it
 			if(browser_time == 0)
 			{
-				printf("echo \"Set-Cookie:hash=%s; path=/\"; echo \"Set-Cookie:exp=%s; path=/\"; ", new_hash, new_exp);
+				printf("echo \"Set-Cookie:hash=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Path=/;\"; ", new_hash, new_exp);
 			}
 			else
 			{
-				printf("echo \"Set-Cookie:hash=%s; expires=%s; path=/\"; echo \"Set-Cookie:exp=%s; expires=%s; path=/\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+				printf("echo \"Set-Cookie:hash=%s; Expires=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Expires=%s; Path=/;\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
 			}
 
 			free(new_hash);
@@ -184,7 +183,7 @@ int main (int argc, char **argv)
 				{
 					sprintf(exp_str, "?expired=1");
 				}
-				printf("echo \"HTTP/1.1 301 Moved Permanently\" ;echo \"Location: %s%s\" ;", redirect, exp_str);
+				printf("echo \"Status: 302 Found\" ;echo \"Location: %s%s\" ; echo \"\" ; ", redirect, exp_str);
 			}
 			else
 			{
@@ -205,10 +204,10 @@ int main (int argc, char **argv)
 	return 0;
 }
 
-char* get_root_hash(void)
+char* get_root_hash_from_file(const char* file)
 {
 	int found = 0;
-	FILE *pw = fopen("/etc/passwd", "r");
+	FILE *pw = fopen(file, "r");
 	char* root_hash = NULL;
 
 	if(pw != NULL)
@@ -235,79 +234,33 @@ char* get_root_hash(void)
 		fclose(pw);
 	}
 	return root_hash;
+
+
 }
 
+char* get_root_hash(void)
+{
+	char* root_hash = get_root_hash_from_file("/etc/shadow");
+	if(root_hash == NULL)
+	{
+		root_hash = get_root_hash_from_file("/etc/passwd");
+	}
+	return root_hash;
+}
 
 char* get_cookie_time(time_t t)
 {
 	struct tm* utc = gmtime(&t);
-	char wday[4];
-	char month[4];
-	switch(utc->tm_wday)
-	{
-		case 0:
-			sprintf(wday, "Sun");
-			break;
-		case 1:
-			sprintf(wday, "Mon");
-			break;
-		case 2:
-			sprintf(wday, "Tue");
-			break;
-		case 3:
-			sprintf(wday, "Wed");
-			break;
-		case 4:
-			sprintf(wday, "Thu");
-			break;
-		case 5:
-			sprintf(wday, "Fri");
-			break;
-		case 6:
-			sprintf(wday, "Sat");
-			break;
-	}
-	switch(utc->tm_mon)
-	{
-		case 0:
-			sprintf(month, "Jan");
-			break;
-		case 1:
-			sprintf(month, "Feb");
-			break;
-		case 2:
-			sprintf(month, "Mar");
-			break;
-		case 3:
-			sprintf(month, "Apr");
-			break;
-		case 4:
-			sprintf(month, "May");
-			break;
-		case 5:
-			sprintf(month, "Jun");
-			break;
-		case 6:
-			sprintf(month, "Jul");
-			break;
-		case 7:
-			sprintf(month, "Aug");
-			break;
-		case 8:
-			sprintf(month, "Sep");
-			break;
-		case 9:
-			sprintf(month, "Oct");
-			break;
-		case 10:
-			sprintf(month, "Nov");
-			break;
 
-		case 11:
-			sprintf(month, "Dec");
-			break;
-	}
+	char *wdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+			  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
 	char utc_str[200];
-	sprintf(utc_str, "%s, %d %s %d %02d:%02d:%02d UTC", wday, utc->tm_mday, month, (utc->tm_year + 1900), utc->tm_hour, utc->tm_min, utc->tm_sec);
+
+	sprintf(utc_str, "%s, %d %s %d %02d:%02d:%02d UTC",
+		wdays[utc->tm_wday], utc->tm_mday, months[utc->tm_mon],
+		(utc->tm_year + 1900), utc->tm_hour, utc->tm_min, utc->tm_sec);
+
 	return strdup(utc_str);
 }

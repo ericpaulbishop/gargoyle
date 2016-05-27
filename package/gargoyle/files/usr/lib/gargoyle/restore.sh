@@ -12,7 +12,7 @@ if [ -z "$restore_password" ] ; then
 	restore_password=0
 fi
 
-echo "Content-type: text/html"
+echo "Content-Type: text/html; charset=utf-8"
 echo ""
 
 echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
@@ -63,9 +63,15 @@ uci commit
 /etc/init.d/webmon_gargoyle stop 2>/dev/null
 /etc/init.d/cron stop 2>/dev/null
 
+# tor eats up memory, stop it before proceeding
+if [ -e /etc/init.d/tor ] ; then
+	/etc/init.d/tor stop 2>/dev/null
+fi
+
+
 mv /etc/config/gargoyle /tmp/gargoyle.bak
 cp /etc/passwd /tmp/passwd
-rm -rf /etc/config/*
+cp /etc/shadow /tmp/shadow
 rm -rf /etc/rc.d/*
 rm -rf /tmp/data/*
 rm -rf /usr/data/*
@@ -73,16 +79,23 @@ rm -rf /etc/crontabs/*
 rm -rf /etc/ethers
 echo "127.0.0.1 localhost." > /etc/hosts  #overwrites old file
 
-tar xzf "$restore_file" -C / 2>error
+have_overlay=$(df | grep "overlay$" 2>/dev/null)
+if [ -n "$have_overlay" ] ; then
+	mkdir -p /tmp/restore/data
+	tar xzf "$restore_file" -C /tmp/restore/data  2>/error
+	cp -r /tmp/restore/data/* /
+else
+	tar xzf "$restore_file" -C / 2>error
+fi
 error=$(cat error)
 
-# make sure http settings are correct for cookie-based auth
-uci set httpd_gargoyle.server.default_page_file="overview.sh" 2>/dev/null
-uci set httpd_gargoyle.server.page_not_found_file="login.sh" 2>/dev/null
-uci set httpd_gargoyle.server.no_password="1" 2>/dev/null
-uci del httpd_gargoyle.server.default_realm_name 2>/dev/null
-uci del httpd_gargoyle.server.default_realm_password_file 2>/dev/null
-uci commit;
+
+# make sure http settings are correct for uhttp
+uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
+use_run_haserl=$(uci get uhttpd.main.interpreter 2>/dev/null | grep "run_haserl")
+if [ "$uhttpd_main_error_page" != "/login.sh" ] || [ -z "$use_run_haserl" ] ; then
+	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
+fi
 
 
 # set proper gargoyle visibility
@@ -93,6 +106,9 @@ old_hqu1=$(uci get "gargoyle.help.qos_up_1")
 old_hqu2=$(uci get "gargoyle.help.qos_up_2")
 old_hqd1=$(uci get "gargoyle.help.qos_down_1")
 old_hqd2=$(uci get "gargoyle.help.qos_down_2")
+# preserve previous time/date format
+old_tformat=$(uci get "gargoyle.global.hour_style")
+old_dformat=$(uci get "gargoyle.global.dateformat")
 cp /tmp/gargoyle.bak /etc/config/gargoyle
 if [ -n "$old_timeout" ] ; then
 	uci set gargoyle.global.session_timeout=$old_timeout
@@ -115,8 +131,20 @@ fi
 if [ -n "$old_hqd2" ] ; then
 	uci set gargoyle.help.qos_down_2=$old_hqd2
 fi
+if [ -n "$old_tformat" ] ; then
+	uci set gargoyle.global.hour_style=$old_tformat
+fi
+if [ -n "$old_dformat" ] ; then
+	uci set gargoyle.global.dateformat=$old_dformat
+fi
 	
 is_bridge=$(echo $(uci show wireless | grep wds) $(uci show wireless | grep client_bridge))
+have_ap=$(echo $(uci show wireless | grep "mode.*ap"))
+if [ -n "$have_ap" ] ; then
+	is_bridge=""
+fi
+
+
 qos_enabled=$(ls /etc/rc.d/*qos_gargoyle* 2>/dev/null)
 quotas_active=""
 all_quotas=$(uci show firewall | grep "=quota$" | sed 's/=.*$//' | sed 's/^.*\.//')
@@ -159,6 +187,19 @@ done; unset qos_gargoyle_connbytes_rule
 
 uci commit
 
+#if tor is around, make sure there is an entry in rc.d -- disabling should be done by uci config
+if [ -e /etc/init.d/tor ] ; then 
+	/etc/init.d/tor enable 
+	total_mem="$(sed -e '/^MemTotal: /!d; s#MemTotal: *##; s# kB##g' /proc/meminfo)"
+	if [ "$total_mem" -gt 32000 ] ; then
+		uci set gargoyle.display.connection_tor="Tor"
+		uci set gargoyle.scripts.connection_tor="tor.sh"
+		uci set gargoyle.connection.tor="250"
+		uci commit
+	fi
+fi
+
+
 #deal with firewall include file path being swapped
 cat /etc/config/firewall | sed 's/\/etc\/parse_remote_accept\.firewall/\/usr\/lib\/gargoyle_firewall_util\/gargoyle_additions\.firewall/g' >/etc/config/firewall.tmp
 mv /etc/config/firewall.tmp /etc/config/firewall
@@ -196,23 +237,16 @@ fi
 
 if [ "$restore_password" != "1" ] ; then
 	cp /tmp/passwd  /etc/passwd 
+	cp /tmp/shadow  /etc/shadow
 elif [ "$restore_file" = "/etc/original_backup/backup.tar.gz" ] ; then
 	uci set gargoyle.global.is_first_boot=1
 	uci commit	
 fi
 
-rm /tmp/passwd
+rm -rf /tmp/passwd
+rm -rf /tmp/shadow
 
-
-#overwrite old date, then restart ntpclient and then bwmon
-#this makes sure that we don't restore crontab that tries
-#to save bwmon save files when rules don't exist, wiping old bwmon data
-date -u  +"%Y.%m.%d-%H:%M:%S" >/usr/data/time_backup
-/etc/init.d/ntpclient restart 2>/dev/null
-/etc/init.d/bwmon_gargoyle start 2>/dev/null
-/etc/init.d/cron start 2>/dev/null
-
-sleep 10
+sleep 3
 rm -rf /tmp/restore_lock_file
 if [ -n "$error" ] ; then
 	echo "<script type=\"text/javascript\">top.restoreFailed();</script>"
@@ -221,3 +255,7 @@ else
 fi
 
 echo "</body></html>"
+
+
+# reboot should be handled by calling function, not this script
+

@@ -1,0 +1,9 @@
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,5 +1,5 @@
+ ACLOCAL_AMFLAGS = -I m4
+-WARNINGS = -Wall -Wwrite-strings -Werror
++WARNINGS = -Wall -Wwrite-strings
+ AM_CPPFLAGS = -I. -I$(srcdir)/src
+ AM_CFLAGS = $(WARNINGS) @libevent_CFLAGS@ @libcrypto_CFLAGS@
+ LDADD = libobfsproxy.a @libevent_LIBS@ @libcrypto_LIBS@ @ws32_LIBS@

@@ -1,0 +1,13 @@
+src/gz %n_base %U/base
+src/gz %n_management %U/management
+src/gz %n_packages %U/packages
+src/gz %n_routing %U/routing
+src/gz %n_telephony %U/telephony
+
+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T/%F
+
+dest root /
+dest ram /tmp
+dest plugin_root /plugin_root
+lists_dir ext /var/opkg-lists
+option overlay_root /overlay

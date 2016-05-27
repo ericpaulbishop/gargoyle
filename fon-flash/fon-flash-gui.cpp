@@ -625,7 +625,7 @@ bool FonFlash::OnInit()
 
 #else
 		wxPasswordEntryDialog* passwordDialog = new wxPasswordEntryDialog(NULL, wxT("No Network devices were detected.\n\nThis may be due to lack of administrative priviledges.\nEnter your password below to attempt to authenticate (via sudo), or press cancel to quit."), wxT("Enter a password"), wxT(""), wxOK | wxCANCEL | wxCENTRE);
-		if(passwordDialog->ShowModal() == wxID_OK);
+		if(passwordDialog->ShowModal() == wxID_OK)
 		{
 			char *password = strdup( passwordDialog->GetValue().ToAscii() );
 

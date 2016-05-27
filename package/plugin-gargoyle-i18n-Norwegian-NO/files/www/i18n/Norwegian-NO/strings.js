@@ -1,0 +1,121 @@
+﻿/*
+ * UTF-8 (with BOM) English-EN text strings for User Interface elements
+ */
+
+UI.SaveChanges="Lagre Endringer";
+UI.Reset="Tilbakestille";
+UI.Clear="Slett Historie";
+UI.Delete="Slett Data";
+UI.DNow="Last Ned Nå";
+UI.Visited="Besøkte Sider";
+UI.Requests="Søkeforespørsel";
+UI.Add="Legg til";
+UI.Remove="Fjern";
+UI.DDNSService="DDNS Tjeneste";
+UI.WakeUp="Våkne Opp";
+UI.NewRule="Legg Til Ny Regel";
+UI.NewQuota="Legg Til Ny Kvote";
+UI.AddRule="Legg Til Regel";
+UI.AddSvcCls="Legg Til Tjeneste Klasse";
+UI.Edit="Endre";
+UI.Select="Velg";
+UI.ChPRoot="Endre Plugin Root";
+UI.AddPSource="Legg Til Plugin Kilde";
+UI.Uninstall="Avinstallere";
+UI.Install="Installer";
+UI.RefreshPlugins="Oppdater Pluginer";
+UI.GetBackup="Lag Sikkerhetskopi Nå";
+UI.RestoreConfig="Gjenopprett Konfigurasjonen Nå";
+UI.RestoreDefault="Gjenopprett Standard Konfigurasjon Nå";
+UI.Upgrade="Oppgrader Nå";
+UI.Reboot="Omstart Nå";
+UI.MoreInfo="Mer Info";
+UI.Hide="Skjul Tekst";
+UI.WaitSettings="Vennligst vent mens nye innstillinger blir aktivert...";
+UI.Wait="Vennligst vent...";
+UI.ErrChanges="Endringer kunne ikke bli aktivert";
+UI.Always="Alltid";
+UI.Disabled="Deaktivert";
+UI.Enabled="Aktivert";
+UI.Sunday="Søndag";
+UI.Monday="Mandag";
+UI.Tuesday="Tirsdag";
+UI.Wednesday="Onsdag";
+UI.Thursday="Torsdag";
+UI.Friday="Fredag";
+UI.Saturday="Lørdag";
+UI.Sun="Søn";
+UI.Mon="Man";
+UI.Tue="Tir";
+UI.Wed="Ons";
+UI.Thu="Tor";
+UI.Fri="Fre";
+UI.Sat="Lør";
+UI.unk="ukjent";
+UI.HsNm="Klientnavn";
+UI.HDsp="Vis Klienter";
+UI.DspHn="Vis Klientnavn";
+UI.DspHIP="Vis Klient IP'er";
+
+UI.never="aldri";
+UI.disabled="deaktivert";
+UI.both="begge";
+UI.seconds="sekunder";
+UI.minutes="minutter";
+UI.hours="timer";
+UI.days="dager";
+UI.second="sekund";
+UI.minute="minutt";
+UI.hour="time";
+UI.day="dag";
+UI.month="måned";
+UI.year="år";
+UI.sc="s"; //abbr for second
+UI.hr="t"; //abbr for hour
+UI.pAM="";
+UI.pPM="";
+UI.hAM="AM";
+UI.hPM="PM";
+
+UI.EMonths=["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Des"];
+
+UI.byt="byte";
+UI.Bu="B";
+UI.KB="kB";
+UI.MB="MB";
+UI.GB="GB";
+UI.TB="TB";
+UI.KB1="kByte";
+UI.MB1="MByte";
+UI.GB1="GByte";
+UI.TB1="TByte";
+UI.KBy="kBytes";
+UI.MBy="MBytes";
+UI.GBy="GBytes";
+UI.TBy="TBytes";
+UI.Kbs="kbits/s";
+UI.KBs="kBytes/s";
+UI.MBs="MBytes/s";
+
+UI.CApplyChanges="Lukk og Aktiver Endringer";
+UI.CDiscardChanges="Lukk og Overse Endringer";
+UI.waitText="Vennligst Vent Mens Innstillingene Blir Aktivert";
+UI.Cancel="Avbryt";
+
+UI.Err="FEIL";
+UI.prfErr="Det er en feil i";
+UI.nex="eksisterer ikke";
+UI.InvAdd="FEIL: Ugyldig Adresse";
+
+UI.CPass="Bekreft Passord";
+UI.OK="OK";
+UI.VPass="Verifiserer Passord...";
+UI.sprt="SSH port";
+UI.wsprt="web server port";
+UI.prdr="port omdirigert til ruter";
+UI.puse="port i bruk av ruter";
+UI.pfwd="port videresendt til";
+UI.conn="tilkoblet";
+
+UI.AJAX="AJAX Nettleser Support Nødvendig";
+UI.AJAXUpg="Vennligst oppgrader til en AJAX kompatibel nettleser og prøv igjen. Nettlesere som f.eks. Firefox 2.0+, Safari and IE 6+.";

@@ -1,0 +1,647 @@
+.\" Process with  groff -man -Tascii haserl.1
+.TH haserl 1 "July 2007"
+.SH NAME
+haserl \- A cgi scripting program for embedded environments
+.SH SYNOPSIS
+.BI "#!/usr/bin/haserl [--shell=" pathspec "] [--upload-dir=" dirspec "] [--upload-handler=" handler "] [--upload-limit=" limit "] [--accept-all] [--accept-none] [--silent] [--debug]"
+
+[ text ] [ <% shell script %> ] [ text ] ... 
+
+.SH DESCRIPTION
+Haserl is a small cgi wrapper that allows "PHP" style cgi programming, 
+but uses a UNIX bash-like shell or Lua  as the programming language. It is 
+very small, so it can be used in embedded environments, or where 
+something like PHP is too big.
+
+It combines three features into a small cgi engine:
+
+.IP 
+It parses POST and GET requests, placing form-elements as 
+name=value 
+pairs into the environment for the CGI script to use.  This is somewhat like 
+the 
+.IR uncgi " wrapper."
+.IP 
+It opens a shell, and translates all text into printable statements.
+All text within <% ... %> constructs are passed verbatim to the shell.
+This is somewhat like
+.RI writing " PHP " "scripts."
+.IP 
+It can optionally be installed to drop its permissions to the owner of the 
+script, giving
+it some of the security features of
+.IR suexec " or " cgiwrapper .
+.SH OPTIONS SUMMARY
+
+This is a summary of the command-line options.  Please see the 
+.B OPTIONS
+section under the long option name for a complete description.
+
+-a  --accept-all
+.br
+-n  --accept-none
+.br
+-d  --debug 
+.br
+-s, --shell
+.br
+-S, --silent
+.br
+-U, --upload-dir
+.br
+-u, --upload-limit
+.br
+-H, --upload-handler
+.br
+
+.SH OPTIONS
+
+.TP
+.BI --accept-all
+The program normally accepts POST data only when the REQUEST_METHOD is POST and only accepts
+data on the URL  data when the REQUEST_METHOD is GET.   This option allows both POST and
+URL data to be accepted regardless of the REQUEST_METHOD.  When this option is set, 
+the REQUEST_METHOD takes precedence (e.g.  if the method is POST, FORM_variables are taken 
+from COOKIE data, GET data, and POST data, in that order.   If the method is GET, FORM_variables
+are taken from COOKIE data, POST data, and GET data.)  The default is not to accept all
+input methods - just the COOKIE data and the REQUEST_METHOD.
+
+.TP
+.BI --accept-none
+If given, haserl will not parse standard input as http content before 
+processing the script.  This is useful if calling a haserl script from 
+another haserl script.
+
+.TP
+.BI --debug
+Instead of executing the script, print out the script that would be executed.  If the environment variable 'REQUEST_METHOD' is set, the data is sent with the plain/text content type.  Otherwise, the shell script is printed verbatim.  
+
+.TP
+.BI --shell= "pathspec " 
+Specify an alternative bash-like shell to use. Defaults to "/bin/sh"
+
+To include shell parameters do not use the --shell=/bin/sh format. Instead, use the alternative format without the "=", as in --shell "/bin/bash --norc". Be sure to quote the option string to protect any special characters.
+
+If compiled with Lua libraries, then the string "lua" is used to use an integrated Lua vm.  This string is case sensitive.  Example:
+.BI --shell= lua
+
+An alternative is "luac".  This causes the haserl and lua parsers to be disabled, and the 
+script is assumed to be a precompiled lua chunk.  See 
+.B LUAC
+below for more information.
+
+.TP
+.BI --silent
+Haserl normally prints an informational message on error conditions.  This 
+suppresses the error message, so that the use of haserl is not advertised.
+
+.TP
+.BI --upload-dir= "dirspec "
+Defaults to "/tmp". All uploaded files are created with temporary filename in this
+directory  
+.BR FORM_xxx " contains the name of the temporary file."  FORM_xxx_name 
+contains the original name of the file, as specified by the client.
+
+.TP
+.BI --upload-handler= "pathspec "
+When specified, file uploads are handled by this handler, rather than written
+to temporary files.  The full pathspec must be given (the PATH is not 
+searched), and the upload-handler is given one command-line parameter:  
+The name of the FIFO on which the upload file
+will be sent.  In addition, the handler may receive 3 environment variables:
+.BR CONTENT_TYPE ", " FILENAME ", and " NAME .
+These reflect the MIME content-disposition headers for the content. Haserl
+will fork the handler for each file uploaded, and will send the contents 
+of the upload file to the specified FIFO.  Haserl will then block until 
+the handler terminates.  This method is for experts only.
+
+.TP
+.BI --upload-limit= "limit  "
+Allow a mime-encoded file up to 
+.I limit KB
+to be uploaded.  The default is 
+.I 0KB
+(no uploads allowed).   
+Note that mime-encoding adds 33% to the size of the data.  
+
+.SH OVERVIEW OF OPERATION
+
+In general, the web server sets up several environment variables, and then uses 
+.I fork 
+or another method to run the CGI script.  If the script uses the 
+.I haserl
+interpreter, the following happens:
+
+.IP 
+If 
+.I haserl
+is installed suid root, then uid/gid is set to the owner of the script.
+
+The environment is scanned for 
+.IR HTTP_COOKIE ,
+which may have been set by the web server.   If it exists, the parsed contents
+are placed in the local environment.
+
+The environment is scanned for 
+.IR REQUEST_METHOD ,
+which was set by the web server.  Based on the request method, standard input 
+is read and parsed.  The parsed contents are placed in the local environment.
+
+The script is tokenized, parsing 
+.I haserl
+code blocks from raw text.  Raw text is converted into "echo" statements, and 
+then all tokens are sent to the sub-shell.
+
+.I haserl
+forks and a sub-shell (typically
+.IR /bin/sh )
+is started. 
+
+All tokens are sent to the STDIN of the sub-shell, with a trailing 
+.B exit
+command.
+
+When the sub-shell terminates, the 
+.I haserl
+interpreter performs final cleanup and then terminates.
+
+
+.SH CLIENT SIDE INPUT
+The 
+.I haserl 
+interpreter will decode data sent via the HTTP_COOKIE environment variable, and the GET or POST method from the client,
+and store them as environment variables that can be accessed by haserl.  
+The name of the variable follows the name given in the source, except that a prefix (
+.IR FORM_ )
+is prepended.  For example, if the client sends "foo=bar", the environment variable is
+.BR FORM_foo  = bar .
+
+For the HTTP_COOKIE method, variables are also stored with the prefix (
+.IR COOKIE_ ) 
+added.  For example, if HTTP_COOKIE includes "foo=bar", the environment variable is
+.BR COOKIE_foo  = bar .
+
+For the GET method, data sent in the form %xx is translated into the characters
+they represent, and variables are also stored with the prefix (
+.IR GET_ ) 
+added.  For example, if QUERY_STRING includes "foo=bar", the environment variable is
+.BR GET_foo  = bar .
+
+For the POST method, variables are also stored with the prefix (
+.IR POST_ ) 
+added.  For example, if the post stream includes "foo=bar", the environment variable is
+.BR POST_foo  = bar .
+
+Also, for the POST method, if the data is sent using 
+.I "multipart/form-data" 
+encoding, the data is automatically decoded.   This is typically used when 
+files are uploaded from a web client using <input type=file>.
+
+.TP
+.B NOTE
+When a file is uploaded to the web server, it is stored in the 
+.I upload-target
+directory. 
+.RI The FORM_variable=  "variable contains the name of the file uploaded"
+(as specified by the client.) The
+.I FORM_variable_name=
+variable contains the name of the file in 
+.I upload-target
+that contains the uploaded content.   To prevent malicious clients from 
+filling up 
+.I upload-target
+on your web server, file uploads are only allowed when the
+.I --upload-limit 
+option is used to specify how large a file can be uploaded.   Haserl automatically
+deletes the temporary file when the script is finished.  To keep the file, move it
+or rename it somewhere in the script.
+
+.P
+If the client sends data 
+.I both
+by POST and GET methods, then 
+.I haserl
+will parse only the data that corresponds with the 
+.I REQUEST_METHOD 
+variable set by the web server, unless the 
+.I accept-all 
+option has been set.   For example, a form called via POST method, but having a 
+URI of some.cgi?foo=bar&otherdata=something will have the POST data parsed, and the 
+.IR foo " and " otherdata
+variables are ignored. 
+
+.P
+If the web server defines a 
+.I HTTP_COOKIE 
+environment variable, the cookie data is parsed.  Cookie data is parsed 
+.I before
+the GET or POST data, so in the event of two variables of the same name, the 
+GET or POST data overwrites the cookie information.
+
+.P
+When multiple instances of the same variable are sent from different sources, the FORM_variable will be set according to the order in which variables are processed.  HTTP_COOKIE is always processed first, followed by the REQUEST_METHOD.  If the accept-all option has been set, then HTTP_COOKIE is processed first, followed by the method not specified by REQUEST_METHOD, followed by the REQUEST_METHOD.  The last instance of the variable will be used to set FORM_variable.  Note that the variables are also separately creates as COOKIE_variable, GET_variable and POST_variable.  This allows the use of overlapping names from each source. 
+
+.P
+When multiple instances of the same variable are sent from the same source, 
+only the last one is saved.  To keep all copies (for multi-selects, for 
+instance), add "[]" to the end of the 
+variable name.  All results will be returned, separated by newlines.   For example,
+host=Enoch&host=Esther&host=Joshua results in "FORM_host=Joshua". 
+host[]=Enoch&host[]Esther&host[]=Joshua results in "FORM_host=Enoch\\nEsther\\nJoshua"
+
+.SH LANGUAGE 
+The following language structures are recognized by 
+.IR haserl .
+
+.TP
+.B "RUN"
+.nf
+<% [shell script] %>
+.sp
+.fi
+Anything enclosed by <% %> tags is sent to the sub-shell for execution.   The 
+text is sent verbatim.
+
+.TP
+.B "INCLUDE"
+.nf
+<%in pathspec %>
+.sp
+.fi
+Include another file verbatim in this script.  The file is included when the script is
+initially parsed.
+
+.TP
+.B "EVAL"
+.nf
+<%= expression %>
+.sp
+.fi
+print the shell expression.  Syntactic sugar for "echo expr".  
+
+.TP
+.B "COMMENT"
+.nf 
+<%# comment %>
+.sp
+.fi
+Comment block.  Anything in a comment block is not parsed.  Comments can be nested and can contain 
+other haserl elements.
+
+.SH EXAMPLES
+.TP
+.B WARNING
+The examples below are simplified to show how to use 
+.IR haserl .
+You should be familiar with basic web scripting security before using 
+.I haserl
+(or any scripting language) in a production environment.
+ 
+.TP
+.B Simple Command
+.nf
+#!/usr/local/bin/haserl
+content-type: text/plain
+.sp
+<%# This is a sample "env" script %>
+<% env %>
+.fi
+
+Prints the results of the
+.I env
+command as a mime-type "text/plain" document. This is the 
+.I haserl
+version of the common 
+.I printenv
+cgi.
+
+.TP
+.B Looping with dynamic output
+.nf
+#!/usr/local/bin/haserl
+Content-type: text/html
+.sp
+<html>
+<body>
+<table border=1><tr>
+<% for a in Red Blue Yellow Cyan; do %>                                                                       
+	<td bgcolor="<% echo -n "$a" %>"><% echo -n "$a" %></td>                                              
+	<% done %>
+</tr></table>
+</body>
+</html>
+.fi
+
+Sends a mime-type "text/html" document to the client, with an html table
+of with elements labeled with the background color.
+
+.TP 
+.B Use Shell defined functions.
+.nf
+#!/usr/local/bin/haserl
+content-type: text/html
+.sp
+<% # define a user function
+   table_element() {
+       echo "<td bgcolor=\\"$1\\">$1</td>"
+    }
+   %>
+<html>
+<body>
+<table border=1><tr>
+<% for a in Red Blue Yellow Cyan; do %>
+	<% table_element $a %>
+ 	<% done %>
+</tr></table>
+</body>
+</html>
+.fi
+
+Same as above, but uses a shell function instead of embedded html.
+
+.TP
+.B Self Referencing CGI with a form
+.nf
+#!/usr/local/bin/haserl
+content-type: text/html
+.sp
+<html><body>
+<h1>Sample Form</h1>
+<form action="<% echo -n $SCRIPT_NAME %>" method="GET">
+<% # Do some basic validation of FORM_textfield
+   # To prevent common web attacks
+   FORM_textfield=$( echo "$FORM_textfield" | sed "s/[^A-Za-z0-9 ]//g" )
+   %>
+<input type=text name=textfield 
+	Value="<% echo -n "$FORM_textfield" | tr a-z A-Z %>" cols=20>
+<input type=submit value=GO>
+</form></html>
+</body>
+.fi
+
+Prints a form.  If the client enters text in the form, the CGI is reloaded (defined by 
+.IR $SCRIPT_NAME )
+and the textfield is sanitized to prevent web attacks, then the form is redisplayed with the text the user entered.  The text is uppercased.
+
+.TP
+.B Uploading a File 
+.nf
+#!/usr/local/bin/haserl --upload-limit=4096 --upload-target=/tmp 
+content-type: text/html
+.sp
+<html><body>
+<form action="<% echo -n $SCRIPT_NAME %>" method=POST enctype="multipart/form-data" >
+<input type=file name=uploadfile>
+<input type=submit value=GO>
+<br>
+<% if test -n "$FORM_uploadfile"; then %>
+        <p>
+        You uploaded a file named <b><% echo -n $FORM_uploadfile_name %></b>, and it was
+        temporarily stored on the server as <i><% echo $FORM_uploadfile %></i>.  The
+        file was <% cat $FORM_uploadfile | wc -c %> bytes long.</p>
+        <% rm -f $FORM_uploadfile %><p>Don't worry, the file has just been deleted
+        from the web server.</p>
+<% else %>
+        You haven't uploaded a file yet.
+<% fi %>
+</form>
+</body></html>
+.fi
+
+Displays a form that allows for file uploading.  This is accomplished by using the 
+.B --upload-limit
+and by setting the form 
+.I enctype
+.RI "to " multipart/form-data.
+If the client sends a file, then some information regarding the file is printed, and then deleted.  Otherwise, the form states that the client has not uploaded a file.
+
+
+
+.SH ENVIRONMENT
+In addition to the environment variables inherited from the web server, the following environment variables are always defined at startup:
+
+.IP HASERLVER
+.I haserl
+version - an informational tag.
+.IP SESSIONID
+A hexadecimal tag that is unique for the life of the CGI (it is generated when the cgi starts; and does not change until another POST or GET query is generated.)
+.IP HASERL_ACCEPT_ALL 
+.RI "If the " --accept-all " flag was set, "  -1 ", otherwise " 0 "."
+.IP HASERL_SHELL
+The name of the shell haserl started to run sub-shell commands in.
+.IP HASERL_UPLOAD_DIR
+The directory haserl will use to store uploaded files.
+.IP HASERL_UPLOAD_LIMIT
+The number of KB that are allowed to be sent from the client to the server.  
+
+.P
+These variables can be modified or overwritten within the script, although the ones starting with
+"HASERL_" are informational only, and do not affect the running script.
+
+.SH SAFETY FEATURES
+There is much literature regarding the dangers of using shell to program CGI scripts.
+.IR haserl " contains " some 
+protections to mitigate this risk.
+
+.TP
+.B Environment Variables
+The code to populate the environment variables is outside the scope of the sub-shell.   It parses on the characters ? and  &, so it is harder for a client to do "injection" attacks.  As an example, 
+.I foo.cgi?a=test;cat /etc/passwd 
+could result in a variable being assigned the value 
+.B test
+and then the results of running 
+.I cat /etc/passwd
+being sent to the client.  
+.I  Haserl
+will assign the variable the complete value:
+.B test;cat /etc/passwd
+
+It is safe to use this "dangerous" variable in shell scripts by enclosing it in quotes; although validation should be done on all input fields.
+
+.TP
+.B Privilege Dropping
+If installed as a suid script, 
+.I haserl
+will set its uid/gid to that of the owner of the script.  This can be used to have a set of CGI scripts that have various privilege.  If the 
+.I haserl
+binary is not installed suid, then the CGI scripts will run with the uid/gid of the web server.
+
+.TP
+.B Reject command line parameters given on the URL
+If the URL does not contain an unencoded "=", then the CGI spec states the options are to be
+used as command-line parameters to the program.  For instance, according to the CGI spec:
+.I http://192.168.0.1/test.cgi?--upload-limit%3d2000&foo%3dbar
+Should set the upload-limit to 2000KB in addition to setting "Foo=bar". 
+To protect against clients enabling their own uploads,
+.I haserl
+rejects any command-line options beyond argv[2].   If invoked as a #! 
+script, the interpreter is argv[0], all command-line options listed in the #! line are 
+combined into argv[1], and the script name is argv[2].
+
+.SH LUA
+
+If compiled with lua support, 
+.B --shell=lua
+will enable lua as the script language instead of bash shell.  The environment variables 
+(SCRIPT_NAME, SERVER_NAME, etc) are placed in the ENV table, and the form variables are 
+placed in the FORM table.  For example, the self-referencing form above can be written like this:
+
+.RS
+.nf
+#!/usr/local/bin/haserl --shell=lua
+content-type: text/html
+.sp
+<html><body>
+<h1>Sample Form</h1>
+<form action="<% io.write(ENV["SCRIPT_NAME"]) %>" method="GET">
+<% # Do some basic validation of FORM_textfield
+   # To prevent common web attacks
+   FORM.textfield=string.gsub(FORM.textfield, "[^%a%d]", "") 
+   %>
+<input type=text name=textfield 
+	Value="<% io.write (string.upper(FORM.textfield)) %>" cols=20>
+<input type=submit value=GO>
+</form></html>
+</body>
+.fi
+.RE
+
+The <%= operator is syntactic sugar for 
+.I io.write (tostring( ... )) 
+So, for example, the Value= line above could be written:
+.B Value="<%= string.upper(FORM.textfield) %>" cols=20>
+
+haserl lua scripts can use the function
+.BI haserl.loadfile( filename )
+to process a target script as a haserl (lua) script.  The function returns a type of "function".
+
+For example,
+
+bar.lsp
+.RS
+.nf
+<% io.write ("Hello World" ) %>
+.sp
+Your message is <%= gvar %>
+.sp
+-- End of Include file --
+.fi
+.RE
+
+foo.haserl
+.RS
+.nf
+#!/usr/local/bin/haserl --shell=lua
+<% m = haserl.loadfile("bar.lsp")
+   gvar = "Run as m()"
+   m()
+
+   gvar = "Load and run in one step"
+   haserl.loadfile("bar.lsp")()
+%>
+.fi
+.RE
+
+Running 
+.I foo
+will produce:
+
+.RS
+.nf
+Hello World
+Your message is Run as m()
+-- End of Include file --
+Hello World
+Your message is Load and run in one step
+-- End of Include file --
+.fi
+.TE
+
+This function makes it possible to have nested haserl server pages - page snippets that are 
+processed by the haserl tokenizer.
+
+.SH LUAC
+
+The
+.I luac
+"shell" is a precompiled lua chunk, so interactive editing and testing of scripts is 
+not possible. However, haserl can be compiled with luac support only, and this allows 
+lua support even in a small memory environment.  All haserl lua features listed above 
+are still available.  (If luac is the only shell built into haserl, the haserl.loadfile is
+disabled, as the haserl parser is not compiled in.)
+
+Here is an example of a trivial script, converted into a luac cgi script:
+
+Given the file test.lua:
+.RS
+.nf
+print ("Content-Type: text/plain\n\n")
+print ("Your UUID for this run is: " .. ENV.SESSIONID)
+.fi
+.RE
+
+It can be compiled with luac:
+.RS
+luac -o test.luac -s test.lua
+.RE
+
+And then the haserl header added to it:
+.RS
+echo '#!/usr/bin/haserl --shell=luac' | cat - test.luac  >luac.cgi
+.RE
+
+Alternatively, it is possible to develop an entire website using the standard lua shell,
+and then have haserl itself preprocess the scripts for the luac compiler as part of a build
+process.  To do this, use --shell=lua, and develop the website.  When ready to build
+the runtime environment, add the --debug line to your lua scripts, and run them outputting
+the results to .lua source files.  For example:
+
+Given the haserl script test.cgi:
+.RS
+.nf
+#!/usr/bin/haserl --shell=lua --debug
+Content-Type: text/plain
+
+Your UUID for this run is <%= ENV.SESSIONID %>
+.fi
+.RE
+
+Precompile, compile, and add the haserl luac header:
+.RS
+.nf
+./test.cgi > test.lua
+luac -s -o test.luac test.lua
+echo '#!/usr/bin/haserl --shell=luac' | cat - test.luac >luac.cgi
+.fi
+.RS
+
+.SH BUGS
+Old versions of haserl used <? ?> as token markers, instead of <% %>.  Haserl
+will fall back to using <? ?> 
+.I if <% does not appear anywhere in the script.
+
+.SH NAME
+The name "haserl" comes from the Bavarian word for "bunny." At first glance it
+may be small and cute, but
+.I haserl 
+is more like the bunny from 
+.IR "Monty Python & The Holy Grail" . 
+In the words of Tim the Wizard, 
+.I That's the most foul, cruel & bad-tempered rodent you ever set eyes on!
+
+Haserl can be thought of the cgi equivalent to 
+.IR netcat .
+Both are small, powerful, and have very little in the way of extra features.  Like 
+.IR netcat ", " haserl
+attempts to do its job with the least amount of extra "fluff".
+
+
+.SH AUTHOR
+Nathan Angelacos <nangel@users.sourceforge.net>  
+
+.SH SEE ALSO
+
+.BR php (http://www.php.net)
+.BR uncgi (http://www.midwinter.com/~koreth/uncgi.html)
+.BR cgiwrapper (http://cgiwrapper.sourceforge.net)
+

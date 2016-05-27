@@ -1,0 +1,77 @@
+#!/usr/bin/perl
+
+my $confPath1 = shift @ARGV;
+my $confPath2 = shift @ARGV;
+
+if ( (not -e $confPath1) || (not -e $confPath2) )
+{
+	print "ERROR: one of the conf files specified is does not exist\n" ;
+	exit;
+}
+
+my $conf1 = loadConf($confPath1);
+my $conf2 = loadConf($confPath2);
+
+
+my @sortedConf1Defs = sort {$a cmp $b} keys %$conf1;
+my @sortedConf2Defs = sort {$a cmp $b} keys %$conf2;
+
+print "\n";
+print "Unique Lines in first config file:\n";
+foreach my $c1Def (@sortedConf1Defs)
+{
+	if(not defined($conf2->{$c1Def}))
+	{
+		print "$c1Def=" . $conf1->{$c1Def} . "\n";
+	}
+}
+print "\n\n";
+
+
+print "Unique Lines in second config file:\n";
+foreach my $c2Def (@sortedConf2Defs)
+{
+	if(not defined($conf1->{$c2Def}))
+	{
+		print "$c2Def=" . $conf2->{$c2Def} . "\n";
+	}
+}
+print "\n\n";
+
+printf("Changed Definitions:\n");
+foreach my $c1Def (@sortedConf1Defs)
+{
+	if(defined($conf2->{$c1Def}) && $conf1->{$c1Def} ne $conf2->{$c1Def} )
+	{
+		print "$c1Def=" . $conf1->{$c1Def} .  " => " . $conf2->{$c1Def}  . "\n";
+	}
+}
+print "\n";
+
+
+
+
+sub loadConf
+{
+	my $confDef = {};
+
+	my $file = shift @_;
+	open CONF, "<$file";
+	while (my $line = <CONF>)
+	{
+		chomp $line;
+		$line =~ s/^[\t ]+//g;
+		$line =~ s/[\t ]*#.*$//g;
+		$line =~ s/[\t ]+$//g;
+		if( $line =~ /=/)
+		{
+			my @splitLine = split(/=/, $line);
+			$confDef->{$splitLine[0]} = $splitLine[1];
+		}
+	}
+	close CONF;
+
+	return $confDef;
+}
+
+

@@ -1,10 +1,12 @@
 /*
- * This program is copyright 2008-2010 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var bndwS=new Object(); //part of i18n
+ 
 var ipMonitorIds;
 var qosUploadMonitorIds;
 var qosDownloadMonitorIds;
@@ -45,6 +47,8 @@ function stopInterval()
 	}
 }
 window.onbeforeunload=stopInterval;
+
+
 
 function trim(str)
 {
@@ -101,6 +105,8 @@ function initializePlotsAndTable()
 
 	var haveQosUpload = false;
 	var haveQosDownload = false;
+	var haveTor = false;
+	var haveOpenvpn = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -133,6 +139,8 @@ function initializePlotsAndTable()
 				definedDownloadClasses[qosClass] = 1;
 			}
 		}
+		haveTor = monId.match(/tor/) ? true : haveTor;
+		haveOpenvpn = monId.match(/openvpn/) ? true : haveOpenvpn;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -140,15 +148,25 @@ function initializePlotsAndTable()
 	{
 		var plotIdName = plotIdNames[idIndex];
 		if(haveQosUpload)
-		{	
-			addOptionToSelectElement(plotIdName, "QoS Upload Class", "qos-upload");
+		{
+			addOptionToSelectElement(plotIdName, "QoS "+bndwS.UpCl, "qos-upload");
 		}
 		if(haveQosDownload)
 		{
-			addOptionToSelectElement(plotIdName, "QoS Download Class", "qos-download");
+			addOptionToSelectElement(plotIdName, "QoS "+bndwS.DlCl, "qos-download");
 		}
-		addOptionToSelectElement(plotIdName, "Hostname", "hostname");
+		if(haveTor)
+		{
+			addOptionToSelectElement(plotIdName, "Tor", "tor");
+		}
+		if(haveOpenvpn)
+		{
+			addOptionToSelectElement(plotIdName, "OpenVPN", "openvpn");
+		}
+
+		addOptionToSelectElement(plotIdName, UI.HsNm, "hostname");
 		addOptionToSelectElement(plotIdName, "IP", "ip");
+
 
 		var plotType = bandwidthSettings.get(plotIdName, "none");
 		setSelectedValue(plotIdName, plotType);
@@ -175,6 +193,8 @@ function getEmbeddedSvgPlotFunction(embeddedId, controlDocument)
 	}
 	return null;
 }
+
+
 function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 {
 	var nameIndex;
@@ -185,7 +205,9 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 
 	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
-	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && (!plotType.match(/openvpn/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+
+
 
 	if(plotType == "total")
 	{
@@ -202,6 +224,14 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 		{
 			plotType = "none"; //forces us to return null
 		}
+	}
+	else if(plotType.match(/tor/))
+	{
+		match1 = graphLowRes ? "tor-lr" + graphTimeFrameIndex : "tor-hr" + graphTimeFrameIndex;
+	}
+	else if(plotType.match(/openvpn/))
+	{
+		match1 = graphLowRes ? "openvpn-lr" + graphTimeFrameIndex : "openvpn-hr" + graphTimeFrameIndex;
 	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
@@ -224,6 +254,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	}
 	return selectedName;
 }
+
 
 function getHostnameList(ipList)
 {
@@ -260,7 +291,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && t != "openvpn" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
@@ -314,7 +345,7 @@ function resetPlots()
 
 			if(!plotsInitializedToDefaults)
 			{
-				if(plotType != "" && plotType != "none" && plotType != "total")
+				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" && plotType != "openvpn" )
 				{
 					var idValue = bandwidthSettings.get(plotIdName, "none");
 					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
@@ -395,27 +426,57 @@ function parseMonitors(outputData)
 		return monitors;
 	}
 
+
 	var lineIndex;
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
-		if(dataLines[lineIndex].length > 0)
+		if(dataLines[lineIndex] != null && dataLines[lineIndex].length > 0)
 		{
-			var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
-			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
-
-			lineIndex++; 
-			var firstTimeStart = dataLines[lineIndex];
-			lineIndex++;
-			var firstTimeEnd = dataLines[lineIndex];
-			lineIndex++; 
-			var lastTimePoint = dataLines[lineIndex];
-			lineIndex++;
-			var points = dataLines[lineIndex].split(",");
-			monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
-			monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+			if(dataLines[lineIndex].match(/ /))
+			{
+				var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
+				var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
+				lineIndex++; 
+				var firstTimeStart = dataLines[lineIndex];
+				lineIndex++;
+				var firstTimeEnd = dataLines[lineIndex];
+				lineIndex++; 
+				var lastTimePoint = dataLines[lineIndex];
+				if(dataLines[lineIndex+1] != null)
+				{
+					if(dataLines[lineIndex+1].match(/,/) || dataLines[lineIndex+1].match(/^[0-9]+$/))
+					{
+						lineIndex++;
+						var points = dataLines[lineIndex].split(",");
+						monitors[monitorId] = monitors[monitorId] == null ? [] : monitors[monitorId];
+						monitors[monitorId][monitorIp] = [points, lastTimePoint, currentTime ];
+						found = 1
+					}
+				}
+			}
 		}
 	}
 	return monitors;
+}
+
+function getDisplayIp(realIp)
+{
+	var dip = realIp
+	if(dip != null && currentWanIp != null && currentLanIp != null && dip != "")
+	{
+		dip = dip == currentWanIp ? currentLanIp : dip;
+	}
+	return dip
+}
+function getRealIp(displayIp)
+{
+	var rip = displayIp
+	if(rip != null && currentWanIp != null && currentLanIp != null && currentWanIp != "" && currentLanIp != "" && rip != "")
+	{
+		rip = rip == currentLanIp ? currentWanIp : rip;
+	}
+	return rip
+
 }
 
 
@@ -488,9 +549,9 @@ function doUpdate()
 								var ip;
 								for (ip in monitorData)
 								{
-									if( ((selectedPlotType == "total" || selectedPlotType.match("qos")) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor") || selectedPlotType.match("openvpn") ) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
 									{
-										ipList.push(ip);
+										ipList.push(getDisplayIp(ip));
 									}
 								}
 								if(ipList.length > 0)
@@ -512,7 +573,9 @@ function doUpdate()
 									{
 										var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 										ip = getSelectedValue(plotIdName);
-										ip = ip == null ? "" : ip;
+										ip = ip == null ? "" : getRealIp(ip);
+										
+										
 										ip = monitorData[ip] != null ? ip : ipList[0];
 										
 									
@@ -532,7 +595,7 @@ function doUpdate()
 										ip = ipList[0];
 									}
 									
-								
+									ip = ip == null ? "" : getRealIp(ip);
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
 									{
@@ -614,25 +677,25 @@ function doUpdate()
 							tablePointSets.unshift(tableTotal);
 						}
 					}
-					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
-					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
-					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes );
+					updateTotalPlot(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
+					updateDownloadPlot(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI );
+					updateUploadPlot(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI );
 
-					
-					if(expandedFunctions["Total"] != null)
+
+					if(expandedFunctions[bndwS.Totl] != null)
 					{
-						var f = expandedFunctions["Total"] ;
-						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
-					}			
-					if(expandedFunctions["Download"] != null)
-					{
-						var f = expandedFunctions["Download"] ;
-						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+						var f = expandedFunctions[bndwS.Totl] ;
+						f(totalPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
 					}
-					if(expandedFunctions["Upload"] != null)
+					if(expandedFunctions[bndwS.Dnld] != null)
 					{
-						var f = expandedFunctions["Upload"] ;
-						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes);
+						var f = expandedFunctions[bndwS.Dnld] ;
+						f(downloadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
+					}
+					if(expandedFunctions[bndwS.Upld] != null)
+					{
+						var f = expandedFunctions[bndwS.Upld] ;
+						f(uploadPointSets, plotNumIntervals, plotIntervalLength, plotLastTimePoint, plotCurrentTimePoint, tzMinutes, UI);
 					}
 
 
@@ -667,7 +730,15 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
-	var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	if((parseInt(interval) == "NaN") && (interval.match(/month/) || interval.match(/day/)))
+	{
+		// When interval is month or day, the transition is always at beginning of day/month, so adding just a few hours will never change the day or month
+		// However, when an hour gets subtracted for DST, there are problems.
+		// So, always add three hours, so when DST shifts an hour back in November date doesn't get pushed back to previous month and wrong month is displayed
+		nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
+	}
+	var monthNames = UI.EMonths;
+	
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
 		var colIndex = 0;
@@ -698,6 +769,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		}
 		else if(interval.match(/month/))
 		{
+			//nextDate.setDate(2) //set second day of month, so when DST shifts hour back in November we don't push it back to previous month
 			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
 			nextDate.setUTCMonth( nextDate.getUTCMonth()-1);
 		}
@@ -722,7 +794,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		timePoint = nextDate.getTime()/1000;
 	}
 
-	var columnNames = ["Time", "Total", "Download", "Upload"];
+	var columnNames = [bndwS.Time, bndwS.Totl, bndwS.Dnld, bndwS.Upld];
 	var bwTable=createTable(columnNames , rowData, "bandwidth_table", false, false);
 	tableContainer = document.getElementById('bandwidth_table_container');
 	if(tableContainer.firstChild != null)
@@ -755,7 +827,7 @@ function expand(name)
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-	expWindow= window.open("bandwidth_expand.sh", name + " Bandwidth Plot", "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expWindow= window.open("bandwidth_expand.sh", name + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)
@@ -772,7 +844,7 @@ function expand(name)
 					expandedFunctions[name] = getEmbeddedSvgPlotFunction("bandwidth_plot", loadWin.document);
 					if(expandedFunctions[name] != null)
 					{
-						plotTitle.appendChild(loadWin.document.createTextNode(name + " Bandwidth Usage"));
+						plotTitle.appendChild(loadWin.document.createTextNode(name + " "+bndwS.BUsag));
 						loadWin.onbeforeunload=function(){ expandedFunctions[name] = null; expandedWindows[name] = null; }
 						loaded = true;
 					}
@@ -790,7 +862,7 @@ function expand(name)
 
 function highResChanged()
 {
-	setControlsEnabled(false, true, "Resetting Graphs...");
+	setControlsEnabled(false, true, bndwS.RstGr);
 
 	var useHighRes15m = document.getElementById("use_high_res_15m").checked;
 	var commands = [];
@@ -803,11 +875,37 @@ function highResChanged()
 	{
 		if(req.readyState == 4)
 		{
-			window.location = window.location;	
+			window.location = window.location;
 			setControlsEnabled(true);
 		}
 	}	
 	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
+}
+
+function deleteData()
+{
+	if (confirm(bndwS.DelAD) == false)
+	{
+		return;
+	}
+
+	setControlsEnabled(false, true, bndwS.DelDW);
+
+	var commands = [];
+	commands.push("/etc/init.d/bwmon_gargoyle stop");
+	commands.push("rm /tmp/data/bwmon/*");
+	commands.push("rm /usr/data/bwmon/*");
+	commands.push("/etc/init.d/bwmon_gargoyle start");
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+		}
+	}
+	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }

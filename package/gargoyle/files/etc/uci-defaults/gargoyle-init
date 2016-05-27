@@ -1,24 +1,147 @@
 #!/bin/sh
 
-# Remove rdate and set hostname to Gargoyle
-uci del system.@rdate[0]                      2>/dev/null
-uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
-uci commit                                    2>/dev/null
-echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+# Save Gargoyle version to UCI
+gargoyle_version=$(cat /www/data/gargoyle_version.txt)
+uci set gargoyle.global.version="$gargoyle_version"
+
+#disable ANI for ath9k (code below does nothing if no ath9k driver present)
+ani_already_disabled=$(cat /etc/rc.local | grep "/sys/kernel/debug/ieee80211/phy0/ath9k/ani")
+if [ -n "$ani_already_disabled" ] ; then
+
+	sed -i '/^exit.*/d' /etc/rc.local
+	sed -i '/\/ani.$/d' /etc/rc.local
+fi
 
 
-# remove init scripts of things that should not be active by default
-/etc/init.d/miniupnpd disable       2>/dev/null
-/etc/init.d/qos_gargoyle disable    2>/dev/null
-/etc/init.d/webmon_gargoyle disable 2>/dev/null
+#make sure we have uhttpd compapatible config
+uhttpd_main_error_page=$(uci get uhttpd.main.error_page 2>/dev/null)
+uhttpd_max_req=$(uci get uhttpd.main.max_requests 2>/dev/null)
+use_run_haserl=$(uci get uhttpd.main.interpreter 2>/dev/null | grep "run_haserl")
 
-# ensure ntpclient is active
-chmod 755 /etc/hotplug.d/iface/20-ntpclient 2>/dev/null
+if [ "$uhttpd_main_error_page" != "/login.sh" ] || [ -z "$use_run_haserl" ] || [ "$uhttpd_max_req" = "3" ] ; then
+	cp /etc/uhttpd.conf.gargoyle /etc/config/uhttpd
+fi
 
 
-#create original backup
-sh /usr/lib/gargoyle/create_backup.sh
-mkdir /etc/original_backup
-cp /tmp/backup/backup.tar.gz /etc/original_backup/backup.tar.gz
+
+
+#button handlers
+cd /etc/rc.button
+for file in * ; do
+	if [ "$file" != "gargoyle_button_handler" ] ; then
+		rm "$file"
+		ln -s "gargoyle_button_handler" "$file"
+	fi
+done
+
+
+settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
+if [ "$settings_not_preserved" == "1" ] ; then
+
+	# Set hostname to Gargoyle
+	uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
+	echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+
+	# disable logging for cron -- it tends to clutter up logs, and it logs all jobs at "error" level, which is wrong
+	uci set system.@system[0].cronloglevel=9
+
+	# Allow resolution of NameCoin and OpenNIC domains by default
+	uci add_list dhcp.@dnsmasq[0].server="/.bit/178.32.31.41"
+	uci add_list dhcp.@dnsmasq[0].server="/.bit/78.47.86.43"
+	for tld in "/.glue/" "/.parody/" "/.dyn/" "/.bbs/" "/.free/" "/.fur/" "/.geek/" "/.gopher/" "/.indy/" "/.ing/" "/.null/" "/.oss/" "/.micro/" ; do
+		for ip in "66.244.95.20" "95.211.32.162" "95.142.171.235" ; do
+			uci add_list dhcp.@dnsmasq[0].server="$tld$ip"
+		done
+	done
+
+	# remove init scripts of things that should not be active by default
+	/etc/init.d/miniupnpd disable       2>/dev/null
+	/etc/init.d/qos_gargoyle disable    2>/dev/null
+	/etc/init.d/webmon_gargoyle disable 2>/dev/null
+
+fi
+
+#
+# firewall includes MUST all have reload=1
+#
+# Some idiot decided firewall hotplug scripts call reload only, which 
+# by default doesn't trigger includes... BUT... hotplug scripts
+# always get called before firewall init script  That means any include 
+# that doesn't have reload=1 never gets called on boot.
+#
+include_index=0
+next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+while [ "$next_include" = "include" ] ; do
+	uci set firewall.@include[$include_index].reload="1"
+	include_index=$(( $include_index+1 ))
+	next_include=$(uci get firewall.@include[$include_index] 2>/dev/null)
+	echo "$include_index"
+done
+
+
+
+# add new busybox ntp system section if necessary
+ntp_section=$(uci get system.ntp 2>/dev/null)
+if [ "$ntp_section" != "timeserver" ] ; then
+	uci del system.ntp 2>/dev/null
+	uci set system.ntp="timeserver"                 2>/dev/null
+	uci add_list system.ntp.server="0.pool.ntp.org" 2>/dev/null
+	uci add_list system.ntp.server="1.pool.ntp.org" 2>/dev/null
+	uci add_list system.ntp.server="2.pool.ntp.org" 2>/dev/null
+fi
+
+# prevent automount by block-mount/fstab
+if [ -e /etc/init.d/usb_storage -a -e /etc/config/fstab ]; then
+	uci set fstab.@global[0].anon_mount=0
+fi
+
+
+#remove gargoyle menu entries that have script entries that have file paths set to files that do not exist
+. /lib/functions.sh
+gargoyle_web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
+config_cb()
+{
+	config_name="$1"
+	section_id="$2"
+	option_cb()
+	{
+		if [ "$config_name" = "display" ] ; then
+			key="$1"
+			script=$(uci get gargoyle.scripts.$key 2>/dev/null)
+			if [ -n "$script" ] ; then
+				if [ ! -e "$gargoyle_web_root/$script" ] ; then
+					section_id=$(echo $key | sed 's/_/\./g')
+					uci delete gargoyle.display.$key
+					uci delete gargoyle.$section_id
+				fi
+			fi
+		fi
+	}
+}
+config_load "gargoyle"
+
+
+
+
+#save changes to uci
+uci commit
+
+#set sysupgrade.conf
+cat << EOF >/etc/sysupgrade.conf
+/etc/passwd
+/etc/shadow
+/etc/config
+/etc/rc.d
+/etc/TZ
+/etc/firewall.user
+/etc/ethers
+/etc/hosts
+/etc/webmon_ips
+/etc/crontabs
+/etc/dropbear
+/tmp/data
+/usr/data
+/etc/tor
+EOF
 
 

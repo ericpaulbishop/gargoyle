@@ -1,10 +1,11 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var qosStr=new Object(); //part of i18n
 
 var uploadClassIds = [];
 var downloadClassIds = [];
@@ -241,12 +242,12 @@ function updatePieCharts()
 						if(sumIsZero)
 						{
 							var percentage = "(" + truncateDecimal( 100*(1/classData.length) ) + "%)";
-							classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1)) + " " + percentage);
+							classLabels.push( className + " - " + parseBytes((classData[nameIndex]-1),null,true) + " " + percentage);
 						}
 						else
 						{
 							var percentage = "(" + truncateDecimal( 100*(classData[nameIndex])/totalSum ) + "%)";
-							classLabels.push( className + " - " + parseBytes(classData[nameIndex]) + " " + percentage);
+							classLabels.push( className + " - " + parseBytes(classData[nameIndex],null,true) + " " + percentage);
 						}
 					}
 					uploadClassData = direction.match("up") ? classData : uploadClassData;
@@ -291,32 +292,6 @@ function parseMonitors(outputData)
 		}
 	}
 	return monitors;
-}
-
-function parseBytes(bytes)
-{
-	var parsed;
-	if(bytes > 1024*1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024*1024)) + "TB";
-	}
-	else if(bytes > 1024*1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024*1024)) + "GB";
-	}
-	else if(bytes > 1024*1024)
-	{
-		parsed = truncateDecimal(bytes/(1024*1024)) + "MB";
-	}
-	else if(bytes > 1024)
-	{
-		parsed = truncateDecimal(bytes/(1024)) + "KB";
-	}
-	else
-	{
-		parsed = bytes + "B";
-	}
-	return parsed;
 }
 
 function truncateDecimal(dec)

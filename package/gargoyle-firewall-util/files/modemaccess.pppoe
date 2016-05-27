@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #This script allows access to the ADSL modem web interface when pppoe is used.
-#For this to work configure your modem in brdige mode with DHCP enabled on the modem.
+#For this to work configure your modem in bridge mode with DHCP enabled on the modem.
 #This will cause the modem to dish an address to the router interface when requested below.
 #
 #Alternatively you can manually set the below variable ROUTER_IP with the IP address 
@@ -35,7 +35,7 @@ esac
 
 #configure the ethernet interface.
 if [ -n "$ROUTER_IP" ] ; then
-	#In manaul mode the user gave us an IP address for our interface
+	#In manual mode the user gave us an IP address for our interface
 	ifconfig $2 $ROUTER_IP netmask 255.255.255.0
 else
 	#In auto mode we first check if we have an ip address already.

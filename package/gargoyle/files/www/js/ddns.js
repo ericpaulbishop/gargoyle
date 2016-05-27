@@ -1,16 +1,17 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
-
+var DyDNS=new Object();
 
 var serviceProviders;
 var uci;
 var newSections;
 var updatedSections;
+var resettingAfterFailedUpdate = false;
 
 function saveChanges()
 {
@@ -53,6 +54,8 @@ function saveChanges()
 
 function saveChangesPart2(response)
 {
+	resettingAfterFailedUpdate=false;
+
 	responseLines=response.split(/[\r\n]+/);
 	names=responseLines[0].split(/[\t ]+/);
 	success=responseLines[1].split(/[\t ]+/);
@@ -72,6 +75,11 @@ function saveChangesPart2(response)
 			{
 				if(failedName == newSections[newIndex])
 				{
+					resettingAfterFailedUpdate=true;
+					// set parameters in form to that of failed section, so they can
+					// be edited/corrected
+					setDocumentFromUci(uci, "ddns_gargoyle", failedName, document);
+
 					found = true;
 					failedDomain = uci.get("ddns_gargoyle", failedName, "domain");
 					failedDomain = failedDomain == "" ? uci.get("ddns_gargoyle", failedName, "service_provider") : failedDomain;
@@ -86,7 +94,7 @@ function saveChangesPart2(response)
 	
 	if(newFailedDomains.length > 0)
 	{
-		alert("Update of new dynamic DNS service configuration(s) failed:\n" + newFailedDomains.join("\n") + "\n\nService(s) could not be updated properly and have therefore been removed.");
+		alert(DyDNS.UpErr1+":\n" + newFailedDomains.join("\n") + "\n\n"+DyDNS.UpErr2);
 	}
 	
 	getUpdateTimeCommands = [];
@@ -134,20 +142,46 @@ function resetData()
 
 
 	// setup providers in add section
-	removeAllOptionsFromSelectElement(document.getElementById("ddns_provider"));
+	// also, make sure freedns.afraid.org is at top of list [ DO NOT CHANGE THIS! ]
+	var providerNames = [];
+	var providerIndex;
+	var foundAfraid = false;
 	for(providerIndex=0; providerIndex < serviceProviders.length; providerIndex++)
 	{
-		var provider = serviceProviders[providerIndex];
-		addOptionToSelectElement("ddns_provider", provider["name"], provider["name"]);
+		var p = serviceProviders[providerIndex]["name"]
+		if(p != "freedns.afraid.org")
+		{
+			providerNames.push( serviceProviders[providerIndex]["name"] );
+		}
+		else
+		{
+			foundAfraid=true;
+		}
 	}
-	
-	setDocumentFromUci( new UCIContainer(), "", "", document);
 
+	providerNames.sort(function(a, b) {
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		return a < b ? -1 : a > b ? 1 : 0
+	});
+	if(foundAfraid)
+	{
+		providerNames.unshift("freedns.afraid.org")
+	}
+	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
+	setSelectedValue("ddns_provider", 'freedns.afraid.org', document);
+
+
+	if(!resettingAfterFailedUpdate)
+	{
+		setDocumentFromUci( new UCIContainer(), "", "", document);
+	}
+	resettingAfterFailedUpdate = false;
 	
 	// setup table of existing domains configured for ddns
 	
 	var sections = uci.getAllSections("ddns_gargoyle");
-	var columnNames=["Domain", "Last Update", "Enabled", "", "" ];
+	var columnNames=DyDNS.cNams;
 	var ddnsTableData = new Array();
 	var ddnsEnabledData = new Array();
 	for (sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
@@ -171,7 +205,10 @@ function resetData()
 		var d = twod(lastDate.getDate());
 		var h = " " + lastDate.getHours() + ":" +  twod(lastDate.getMinutes())  + ":" + twod(lastDate.getSeconds());
 		var lastUpdate = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
-		lastUpdate =  updateTimes[section] == null ? "Never" : lastUpdate;
+		lastUpdate = systemDateFormat == "russia" ? d + "." + m + h : lastUpdate;
+		lastUpdate = systemDateFormat == "argentina" ? d + "/" + m + h : lastUpdate;
+		lastUpdate = systemDateFormat == "iso8601" ? m + "-" + d + h : lastUpdate;
+		lastUpdate =  updateTimes[section] == null ? UI.never : lastUpdate;
 
 
 
@@ -206,7 +243,7 @@ function addDdnsService()
 	var errorList = proofreadServiceProvider(document);
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -231,7 +268,7 @@ function addDdnsService()
 		var enabledCheckbox = createEnabledCheckbox();
 		enabledCheckbox.checked = true;
 		enabledCheckbox.id = section;	
-		var newTableRow =  [domain, "Never", enabledCheckbox, createEditButton(), createForceUpdateButton()];
+		var newTableRow =  [domain, UI.never, enabledCheckbox, createEditButton(), createForceUpdateButton()];
 
 		var ddnsTable = document.getElementById('ddns_table_container').firstChild;
 		addTableRow(ddnsTable, newTableRow, true, false, removeServiceProviderCallback);
@@ -276,7 +313,7 @@ function proofreadServiceProvider(controlDocument)
 	}
 	if(provider == null)
 	{
-		alert("ERROR: specified provider is invalid"); //should never get here, but let's have an error message just in case
+		alert(DyDNS.InvErr); //should never get here, but let's have an error message just in case
 		return;
 	}
 	var variables=provider["variables"];
@@ -360,7 +397,7 @@ function proofreadServiceProvider(controlDocument)
 		}
 		if(domainMatches)
 		{
-			errors.push("Duplicate update specified.");
+			errors.push(DyDNS.DupErr);
 		}
 	}
 
@@ -402,7 +439,7 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 	}
 	if(provider == null)
 	{
-		alert("ERROR: specified provider is invalid"); //should never get here, but let's have an error message just in case
+		alert(DyDNS.InvErr); //should never get here, but let's have an error message just in case
 		return;
 	}
 	var variables=provider["variables"];
@@ -548,7 +585,7 @@ function setProvider(controlDocument)
 			var label = controlDocument.createElement("label");
 			label.className="leftcolumn";
 			label.id=variables[variableIndex] + "_label";
-			label.appendChild( controlDocument.createTextNode(variableNames[variableIndex] + ":" ));
+			label.appendChild( controlDocument.createTextNode( (ObjLen(DyDNS)==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
 			div.appendChild(label);
 			
 			var input;
@@ -564,6 +601,8 @@ function setProvider(controlDocument)
 			input.id = variables[variableIndex];
 			div.appendChild(input);
 			newElements.push(div);
+
+			label.setAttribute("for", input.id);
 		}
 
 		var optionalVariables = provider["optional_variables"];
@@ -596,6 +635,8 @@ function setProvider(controlDocument)
 				span.appendChild(check);
 				span.appendChild(text);
 				div.appendChild(span);
+
+				label.setAttribute("for", check.id);				
 			}
 			else
 			{
@@ -603,6 +644,8 @@ function setProvider(controlDocument)
 				input.className = "rightcolumn";
 				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
+
+				label.setAttribute("for", input.id);				
 			}
 			newElements.push(div);
 		}
@@ -640,7 +683,7 @@ function createEnabledCheckbox()
 function createEditButton()
 {
 	editButton = createInput("button");
-	editButton.value = "Edit";
+	editButton.value = UI.Edit;
 	editButton.className="default_button";
 	editButton.onclick = editServiceTableRow;
 	return editButton;
@@ -649,7 +692,7 @@ function createEditButton()
 function createForceUpdateButton()
 {
 	updateButton = createInput("button");
-	updateButton.value = "Force Update";
+	updateButton.value = DyDNS.ForceU;
 	updateButton.className="default_button";
 	updateButton.onclick = forceUpdateForRow;
 	return updateButton;
@@ -744,7 +787,7 @@ function forceUpdateForRow()
 	}
 	if(needsUpdate) //should check newSections instead (implement later)
 	{
-		alert("This service has been added/modified and therefore you must save your changes before an update can be performed.  Click \"Save Changes\" and try again.");
+		alert(DyDNS.ModErr);
 	}
 	else
 	{
@@ -762,11 +805,11 @@ function forceUpdateForRow()
 				setControlsEnabled(true);
 				if(responseLines[0] == "0")
 				{
-					alert("Update failed.  Ensure your configuration is valid and that you are connected to the internet.");
+					alert(DyDNS.UpFErr);
 				}
 				else
 				{
-					alert("Update successful.");
+					alert(DyDNS.UpOK);
 					updateTimes[section] = responseLines[1];
 					resetData();
 				}
@@ -810,9 +853,9 @@ function editServiceTableRow()
 	
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);
-	saveButton.value = "Close and Apply Changes";
+	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "default_button";
-	closeButton.value = "Close and Discard Changes";
+	closeButton.value = UI.CDiscardChanges;
 	closeButton.className = "default_button";
 
 	//load provider data for this row
@@ -860,15 +903,16 @@ function editServiceTableRow()
 					var errors = proofreadServiceProvider(editServiceWindow.document);
 					if(errors.length == 1)
 					{
-						
-						if(errors[0].match(/Duplicate/) && newDomain == selectedDomain)
+						var dupRegEx=new RegExp(DyDNS.DupErr);
+						//if(errors[0].match(/Duplicate/) && newDomain == selectedDomain)
+						if(errors[0].match(dupRegEx) && newDomain == selectedDomain)
 						{
 							errors = [];
 						}
 					}
 					if(errors.length > 0)
 					{
-						alert(errors.join("\n") + "\n\nCould not update service class.");
+						alert(errors.join("\n") + "\n\n"+DyDNS.UpSrvErr);
 						editServiceWindow.focus();
 					}
 					else

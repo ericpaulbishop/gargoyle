@@ -307,8 +307,8 @@ static struct iptables_match webmon =
 	#else
 		.version = IPTABLES_VERSION,
 	#endif
-	.size		= IPT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.userspacesize	= IPT_ALIGN(sizeof(struct ipt_webmon_info)),
+	.size		= XT_ALIGN(sizeof(struct ipt_webmon_info)),
+	.userspacesize	= XT_ALIGN(sizeof(struct ipt_webmon_info)),
 	.help		= &help,
 	.init           = &webmon_init,
 	.parse		= &parse,
@@ -377,7 +377,7 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 				r.start = (uint32_t)sip.s_addr;
 				r.end   = (uint32_t)eip.s_addr;
 
-				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && ntohl(r.start) < ntohl(r.end) )
+				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && (unsigned long)ntohl(r.start) < (unsigned long)ntohl(r.end) )
 				{
 					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
 					info->num_exclude_ranges = info->num_exclude_ranges + 1;

@@ -1,0 +1,336 @@
+#!/bin/sh /etc/rc.common
+
+START=90
+
+vsftpd_basedir="/tmp/vsftpd"
+vsftpd_conf="$vsftpd_basedir/vsftpd.conf"
+vsftpd_anonymous_root="/tmp/share_home/anonymous"
+
+#####################################################################################################
+#
+# By default vsftpd is configured per-user, with each user having a home directory
+# under which that user has control.  However, ideally we want to be able to specify
+# things based on shared directories, with each user having (or not having) access to
+# a given shared directory.  
+# 
+# So... what we do is give each user a home directory under /tmp/share_home/[user_name]
+# The user root is not writable, but under the user root, we mount (using the bind option)
+# the shares, which may or may not be writable.  We can't just symlink, since we chroot into 
+# the user directory and symlinks don't work when we chroot.  Since the share name is 
+# consistent, and we chroot for each user if we specify the same share for two different
+# users, the url (minus user/pass) is the same, which is exactly what we want.  Also, we
+# can bind directories readonly.  This is useful since if we can't specify directory
+# permissions on a mounted drive, due to the drive being formatted with a non-unix 
+# filesystem, we can still specify readonly mounts.
+#
+###################################################################################################
+
+
+
+
+
+found_share="0"
+got_lock=0
+
+
+
+usb_lock()
+{
+	got_lock=0
+	local timeout=15
+	
+	if [ ! -e /tmp/usb_restart.lock ] ; then
+		touch /tmp/usb_restart.lock
+		got_lock=1
+	fi
+	while [ "$timeout" -gt 0 ] && [ "$got_lock" = "0" ] ; do
+		sleep 1
+		timeout=$(( $timeout - 1 ))
+		if [ ! -e /tmp/usb_restart.lock ] ; then
+			touch /tmp/usb_restart.lock
+			got_lock=1
+		fi
+	done
+
+	echo "$got_lock"
+}
+
+usb_unlock()
+{
+	rm -rf /tmp/usb_restart.lock
+}
+
+
+
+copy_if_diff()
+{
+	new_file="$1"
+	old_file="$2"
+
+	if   [ ! -f "$new_file" ] ; then
+		return
+	elif [ ! -f "$old_file" ] ; then
+		cp "$new_file" "$old_file"
+	else
+		old_md5=$(md5sum "$old_file")
+		old_md5=${old_md5% *}
+		new_md5=$(md5sum "$new_file")
+		new_md5=${new_md5% *}
+		if [ "$old_md5" != "$new_md5" ] ; then
+			cp "$new_file" "$old_file"
+		fi	
+	fi
+}
+
+check_mounted()
+{
+	local timeout=25
+	local found=0
+	if [ -e /tmp/mounted_usb_storage.tab ] ; then found=1 ; fi
+	while [ "$timeout" -gt 0 ] && [ "$found" = "0" ] ; do
+		sleep 1
+		timeout=$(( $timeout - 1 ))
+		if [ -e /tmp/mounted_usb_storage.tab ] ; then found=1 ; fi
+	done
+	echo "$found"
+}
+
+
+mount_share_dir()
+{
+	local username="$1"
+	local share_id="$2"
+	local write="$3"
+	config_get share_dir "$share_id" share_dir
+	if [ -z "$share_dir" ] ; then
+		return
+	fi
+	if [ ! -d "$share_dir" ] ; then
+		return
+	fi
+
+	local share_name
+	local ftp_root
+	config_get share_name "$share_id" "name"
+	if [ -z "$share_name" ] ; then share_name="$share_id" ; fi
+
+	if [ "$username" = "anonymous" ] || [ "$username" = "ftp" ] ; then
+		config_get ftp_root "vsftpd" anonymous_root "$vsftpd_anonymous_root"
+		username="anonymous"
+	else	
+		ftp_root=$(/sbin/uci get share_users.$username.home_dir 2>/dev/null)
+	fi
+	if [ -z "$ftp_root" ] ; then
+		ftp_root="/tmp/share_home/$username"
+	fi
+
+	
+	found_share="1"
+	mkdir -p "$ftp_root/$share_name"  >/dev/null 2>&1
+	chmod 777 "$share_dir" >/dev/null 2>&1
+
+
+	chown "$username"  "$ftp_root/$share_name" >/dev/null 2>&1
+	mount -o bind "$share_dir" "$ftp_root/$share_name" >/dev/null 2>&1
+	if [ "$write" = "no" ] ; then
+		mount -o remount,bind,ro "$ftp_root/$share_name" >/dev/null 2>&1
+	fi
+
+	# we can specify per-user write option in vsftpd config, though generally we won't use it
+	config_get write "$username" write "yes"
+	echo "write_enable=$write" > "$vsftpd_basedir/users/$username"
+
+
+}
+mount_share_rw()
+{
+	mount_share_dir "$1" "$2" "yes"
+}
+mount_share_ro()
+{
+	mount_share_dir "$1" "$2" "no"
+}
+
+mount_share()
+{
+	local share_id="$1"
+	config_list_foreach "$share_id" users_rw mount_share_rw "$share_id"
+	config_list_foreach "$share_id" users_ro mount_share_ro "$share_id"
+	
+}
+
+global()
+{
+	config_get pasv_min_port $1 pasv_min_port
+	config_get pasv_max_port $1 pasv_max_port
+
+	if [ -n "$pasv_min_port" ] && [ -n "$pasv_max_port" ] ; then
+		echo "pasv_min_port=$pasv_min_port" >> "$vsftpd_conf"
+		echo "pasv_max_port=$pasv_max_port" >> "$vsftpd_conf"
+	fi
+
+
+	config_get anonymous $1 anonymous "no"
+	config_get anonymous_write $1 anonymous_write "no"
+	config_get anonymous_root $1 anonymous_root "$vsftpd_anonymous_root"
+
+	local ftp_group_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/group)
+	local ftp_user_num=$(awk -F ":" ' $1 == "ftp" { print $3 }' /etc/passwd)
+	if [ -z "$ftp_group_num" ] ; then
+		ftp_group_num=55
+		local tst=$(awk -F ":" -v groupnum="$ftp_group_num"  ' $3 == groupnum { print "found" }' /etc/group)
+		while [ -n "$tst" ] ; do
+			ftp_group_num=$(($ftp_group_num+1))
+			tst=$(awk -F ":" -v groupnum="$ftp_group_num" ' $3 == groupnum { print "found" }' /etc/group)
+		done
+		echo "ftp:x:$ftp_group_num:" >>/etc/group
+	fi
+	if [ -z "$ftp_user_num" ] ; then
+		ftp_user_num="$ftp_group_num"
+		local tst=$(awk -F ":" -v usernum="$ftp_user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+		while [ -n "$tst" ] ; do
+			ftp_user_num=$(($ftp_user_num+1))
+			tst=$(awk -F ":" -v usernum="$ftp_user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+		done
+		echo "ftp:*:$ftp_user_num:$ftp_group_num:ftp:$anonymous_root:/bin/false" >> /etc/passwd
+	else
+		local tmp_pass_file=$(mktemp)
+		cp /etc/passwd "$tmp_pass_file"
+		escaped_anonymous_root=$( echo "$anonymous_root" | sed 's/\//\\\//g' )
+		sed -i "s/^ftp:.*\$/ftp:\*:$ftp_user_num:$ftp_group_num:ftp:$escaped_anonymous_root:\/bin\/false/g" "$tmp_pass_file"
+		copy_if_diff "$tmp_pass_file" /etc/passwd
+		rm $tmp_pass_file
+	fi
+	
+	if [ -e /etc/shadow ] ; then
+		local have_shadow_ftp=$(grep '^ftp:' /etc/shadow)
+		if [ -z "$have_shadow_ftp" ] ; then
+			echo 'ftp:*:0:0:99999:7:::' >> /etc/shadow
+		fi
+	fi
+
+
+
+	if [ "$anonymous" = "yes" ] ; then
+
+		mkdir -p "$anonymous_root"
+		chmod 555 "$anonymous_root" >/dev/null 2>&1
+
+		echo "anon_root=$anonymous_root" >> "$vsftpd_conf"
+		echo "no_anon_password=yes"      >> "$vsftpd_conf"
+
+
+		if [ "$anonymous_write" = "yes" ]; then
+				echo "write_enable=yes" > $vsftpd_basedir/users/ftp
+		else
+				echo "write_enable=no" > $vsftpd_basedir/users/ftp
+		fi
+		echo "ftp" >> "$vsftpd_basedir/userlist"
+		echo "anonymous" >> "$vsftpd_basedir/userlist"
+	else
+		echo "anonymous_enable=no" >> "$vsftpd_conf"
+	fi
+
+
+}
+
+update_userlist()
+{
+	local username="$1"
+	echo "$username" >> "$vsftpd_basedir/userlist"
+}
+
+create_config()
+{
+	mkdir -p "$vsftpd_basedir"
+	mkdir -p "$vsftpd_basedir/secure_chroot"
+	mkdir -p "$vsftpd_basedir/users/"
+
+	cat /etc/vsftpd.conf.template > "$vsftpd_conf"	
+	rm       "$vsftpd_basedir/users/"*  2>/dev/null
+	rm       "$vsftpd_basedir/userlist" 2>/dev/null
+	touch    "$vsftpd_basedir/userlist"
+
+
+	config_load "share_users"
+	config_foreach update_userlist "user"
+
+
+	config_load "vsftpd"
+	
+}
+
+do_start()
+{
+	create_config
+	config_load "vsftpd"
+	config_foreach global "vsftpd"
+	config_foreach mount_share "share"
+
+	[ -e /etc/vsftpd.conf ] && echo "WARNING: Detected file /etc/vsftpd.conf. It will not be used."
+	if [ "$found_share" != "1" ] ; then
+		echo "WARNING: No shares defined, vsftpd will not be started"
+	else
+		start-stop-daemon  -S -x  /usr/sbin/vsftpd -- "$vsftpd_conf"
+	fi
+}
+
+do_stop() {
+
+	start-stop-daemon -K -x /usr/sbin/vsftpd 
+	sleep 1
+
+	IFS_ORIG="$IFS"
+	IFS_LINEBREAK="$(printf '\n\r')"
+	IFS="$IFS_LINEBREAK"
+	
+	user_share_mounts=$(awk   ' $2 ~ /^\/tmp\/share_home\// || /^\/var\/share_home\//  { print $2 } ' /proc/mounts)
+	for m in $user_share_mounts ; do
+		umount "$m" 2>/dev/null
+		rm -rf "$m" 2>/dev/null
+	done
+	IFS="$IFS_ORIG"
+
+}
+
+
+stop()
+{
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		usb_unlock
+	fi
+}
+
+start()
+{
+	mounted=$(check_mounted)
+	logger "vsftpd init: mounted = $mounted"
+	if [ "$mounted" = "1" ] ; then
+		got_lock=$(usb_lock)
+		logger "vsftpd init: got_lock = $got_lock"
+		if [ "$got_lock" = "1" ] ; then
+			do_start
+			usb_unlock
+		fi
+	else
+		echo "ERROR: No drives attached, no directories to share!"
+	fi
+}
+
+
+restart()
+{
+	mounted=$(check_mounted)
+	got_lock=$(usb_lock)
+	if [ "$got_lock" = "1" ] ; then
+		do_stop
+		if [ "$mounted" = "1" ] ; then
+			do_start
+		fi
+		usb_unlock
+	fi
+}
+
+

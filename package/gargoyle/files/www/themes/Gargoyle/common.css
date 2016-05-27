@@ -1,0 +1,452 @@
+/*
+ * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL.
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
+
+
+html
+{
+	background:url("images/slant_background.jpg") top center repeat;
+	padding:0;
+	margin:0;
+	border:0;
+}
+
+body
+{
+	font-family:verdana, arial, sans-serif;
+	font-size:85%;
+	line-height:1.3em;
+	padding:0;
+	margin:0;
+	border:0;
+	height:100%;
+}
+
+#darken
+{
+	top:0;
+	width:100%;
+	height:100%;
+	overflow:hidden;
+	display:none;
+	background:#000;
+	position:absolute;
+	z-index:2000;
+	opacity:0.75;
+	MozOpacity:0.75;
+	filter:alpha(opacity=75);
+}
+
+#wait_msg
+{
+	display:none;
+	background:transparent url('images/wait_msg_back.png') center center no-repeat;
+	z-index:3000;
+	position:fixed;
+	width:300px;
+	height:150px;
+}
+
+#wait_icon
+{
+	left:135px;
+	top:80px;
+	position:absolute;
+	display:block;
+}
+
+#wait_txt
+{
+	left:10px;
+	top:20px;
+	width:280px;
+	position:relative;
+	display:block;
+	text-align:center;
+	font-size:18px;
+	font-weight:bold;
+	padding-bottom:20px;
+}
+
+.select_free
+{
+	display:none;
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:-1;
+	filter:mask();
+	width:2000px;
+	height:3500px;
+}
+
+#outer_logo
+{
+	position:absolute;
+	display:block;
+	top:0;
+	left:0;
+	width:210px;
+	height:160px;
+	background:url("images/slant_background.jpg") top center repeat;
+	z-index:700;
+}
+
+#inner_logo
+{
+	position:absolute;
+	padding-top:0;
+	margin-top:0;
+	top:0;
+	left:10px;
+	width:200px;
+	height:135px;
+	background:url("images/top-gradient-logo.png") top no-repeat;
+	z-index:800;
+}
+
+#garg_title
+{
+	position:absolute;
+	display:block;
+	top:3px;
+	left:15px;
+	font-family:verdana, arial, sans-serif;
+	font-size:18px;
+	z-index:900;
+	color:#211679;
+}
+
+#garg_desc
+{
+	position:absolute;
+	display:block;
+	left:35px;
+	top:25px;
+	font-family:verdana, arial, sans-serif;
+	font-style:italic;
+	font-size:9px;
+	z-index:900;
+	color:#211679;
+}
+
+#garg_host
+{
+	position:absolute;
+	display:block;
+	left:15px;
+	bottom:10px;
+	font-family:verdana, arial, sans-serif;
+	font-size:10px;
+	z-index:900;
+	color:#211679;
+}
+
+#outer_container
+{
+	display:block;
+	position:absolute;
+	top:0;
+	left:10px;
+	width:800px;
+	z-index:200;
+	margin:0;
+	border:0;
+	padding-bottom:30px;
+	background:url("images/nav_unselected.png") left repeat-y;
+}
+
+#outer_footer
+{
+	display:block;
+	background:url("images/nav_unselected.png") center repeat;
+	position:absolute;
+	width:200px;
+	top:0;
+	left:10px;
+	bottom:0;
+	height:100%;
+	font-size:14pt;
+	z-index:100;
+}
+
+#nav_external_container
+{
+	position:absolute;
+	display:block;
+	top:160px;
+	left:0;
+	width:200px;
+	bottom:0;
+}
+
+#nav_top
+{
+	position:absolute;
+	background:url("images/nav_top_external.png") top left no-repeat;
+	top:0;
+	left:0;
+	height:22px;
+	width:200px;
+	z-index:500;
+}
+
+#nav_internal_container1
+{
+	position:absolute;
+	background:url("images/nav_unselected.png") center repeat;
+	top:8px;
+	width:200px;
+	bottom:0;
+	z-index:250;
+}
+
+#nav_internal_container2
+{
+	background:url("images/nav_unselected.png") center repeat;
+	position:relative;
+	width:200px;
+	top:0;
+	left:0;
+	font-family:verdana, arial, sans-serif;
+	font-size:18px;
+	z-index:300;
+}
+
+#nav_internal_container2 a
+{
+	display:block;
+	padding-left:12px;
+	color:#211679;
+	text-decoration:none;
+	padding-top:12px;
+	padding-bottom:12px;
+}
+
+#nav_internal_container2 a:visited
+{
+	color:#211679;
+}
+
+#nav_internal_container2 a:hover
+{
+	color:#fff;
+	text-decoration:none;
+	cursor:pointer;
+	font-weight:bolder;
+}
+
+.nav_unselected_divider_end1
+{
+	background:url("images/nav_top_unselected_internal.png") top no-repeat;
+	position:absolute;
+	width:200px;
+	height:10px;
+	left:0;
+	z-index:400;
+}
+
+.nav_selected_end1
+{
+	background:url("images/nav_top_selected_internal.png") top center no-repeat;
+	position:relative;
+	width:200px;
+	top:0;
+	padding-top:14px;
+	z-index:400;
+}
+
+.nav_selected_container_end1
+{
+	background:url("images/nav_selected.png") center repeat;
+	position:relative;
+	width:184px;
+	left:8px;
+	padding-left:0;
+	padding-top:0;
+	z-index:500;
+}
+
+.nav_unselected_end1
+{
+	top:0;
+	margin:0;
+	position:relative;
+	display:block;
+	left:8px;
+	width:184px;
+	z-index:0;
+}
+
+.nav_unselected
+{
+	position:relative;
+	display:block;
+	left:8px;
+	width:184px;
+	height:40px;
+	margin:0;
+	padding:0;
+}
+
+.nav_selected
+{
+	background:url("images/nav_selected.png") repeat;
+	display:block;
+	position:relative;
+	width:184px;
+	left:8px;
+}
+
+.nav_selected_container
+{
+	width:184px;
+	top:0;
+}
+
+.selected_header
+{
+	padding-left:12px;
+	font-weight:bolder;
+	text-decoration:underline;
+	color:#000;
+}
+
+.selected_single_header
+{
+	padding-top:6px;
+	padding-bottom:15px;
+	padding-left:12px;
+	font-weight:bolder;
+	color:#000;
+}
+
+#submenu_container
+{
+	padding-top:5px;
+	padding-bottom:15px;
+	padding-left:25px;
+	font-size:9pt;
+}
+
+.submenu_selected
+{
+	color:#000;
+	padding-left:15px;
+	background:url("images/black_carat.png") left no-repeat;
+}
+
+#submenu_container a
+{
+	display:block;
+	padding-top:0;
+	padding-bottom:0;
+	padding-left:15px;
+}
+
+#submenu_container a:hover
+{
+	display:block;
+	background:url("images/blue_carat.png") left no-repeat;
+	padding-left:15px;
+	color:#211679;
+}
+
+.nav_selected_divider1
+{
+	background:url("images/nav_selected_divider_1.png") center top no-repeat;
+	position:relative;
+	width:184px;
+	height:8px;
+	left:8px;
+	overflow:hidden;
+}
+
+.nav_selected_divider2
+{
+	background:url("images/nav_selected_divider_2.png") center top no-repeat;
+	position:relative;
+	width:184px;
+	height:1px;
+	left:8px;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+
+.nav_selected_divider_end2
+{
+	background:url("images/nav_selected_divider_2.png") center top no-repeat;
+	position:relative;
+	width:184px;
+	height:1px;
+	left:8px;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+
+.nav_unselected_divider
+{
+	background:url("images/nav_unselected_divider.png") center top no-repeat;
+	position:relative;
+	width:184px;
+	height:4px;
+	left:8px;
+	overflow:hidden;
+}
+
+.nav_unselected_divider_end2
+{
+	background:url("images/nav_unselected_divider.png") center top no-repeat;
+	position:relative;
+	width:184px;
+	height:4px;
+	left:8px;
+	overflow:hidden;
+}
+
+#main_external_container
+{
+	display:block;
+	position:relative;
+	top:30px;
+	left:230px;
+	width:570px;
+}
+
+#main_top
+{
+	position:absolute;
+	top:0;
+	left:0;
+	height:22px;
+	width:570px;
+	background:url("images/main_top.png") bottom center no-repeat;
+}
+
+#main_bottom
+{
+	position:relative;
+	bottom:0;
+	left:0;
+	height:50px;
+	width:570px;
+	background:url("images/main_bottom.png") top center no-repeat;
+}
+
+#main_internal_container
+{
+	position:relative;
+	display:block;
+	margin-bottom:22px;
+	top:22px;
+	width:542px;
+	padding-left:14px;
+	padding-right:14px;
+	background:url("images/main_internal.png") center repeat;
+}

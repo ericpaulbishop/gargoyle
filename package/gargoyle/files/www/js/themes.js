@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>  
+ * Copyright (c) 2011-2013 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>  
  * and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
@@ -7,11 +7,12 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  *
  */
+var thmS=new Object(); //part of i18n
 
 function createUseButton()
 {
 	var useButton = createInput("button");
-	useButton.value = "Select";
+	useButton.value = UI.Select;
 	useButton.className="default_button";
 	useButton.onclick = useTheme;
 	return useButton;
@@ -19,12 +20,14 @@ function createUseButton()
 
 function resetData()
 {
-	var columnNames = ['Theme', '', ''];
+	var columnNames = [thmS.Thm, '', ''];
 	var TableData = new Array();
+	var theme = uciOriginal.get("gargoyle", "global", "theme");
+	var current = "";
 
 	for (idx=0; idx < themes.length; idx++)
 	{
-		var current = (themes.indexOf(uciOriginal.get("gargoyle", "global", "theme")) == idx)?"*":"";
+		current = (themes[idx] == theme) ? "*" : "";
 		TableData.push([ themes[idx], current, createUseButton() ]);
 	}
 
@@ -49,7 +52,7 @@ function useTheme(row, action)
 
 	commands = cmd.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	setControlsEnabled(false, true, "Please wait...");
+	setControlsEnabled(false, true, UI.WaitSettings);
 
 	var stateChangeFunction = function(req)
 	{

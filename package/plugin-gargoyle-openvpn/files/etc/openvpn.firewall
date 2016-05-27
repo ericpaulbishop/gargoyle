@@ -1,0 +1,265 @@
+#!/bin/sh
+
+if [ -f /tmp/openvpn.firewall.running ] ; then
+	exit
+fi
+touch /tmp/openvpn.firewall.running
+
+
+# constants for openvpn bandwidth moniotoring rules
+
+backup_script_dir="/tmp/bw_backup"
+backup_script="$backup_script_dir/do_openvpn_bw_backup.sh"
+tmp_cron="/tmp/tmp.openvpn.cron"
+
+
+# constants for openvpn bandwidth monitoring rules
+backup_script_dir="/tmp/bw_backup"
+backup_script="$backup_script_dir/do_openvpn_bw_backup.sh"
+tmp_cron="/tmp/tmp.openvpn.cron"
+
+
+minute_s=60
+hour_s=3600
+day_s=86400
+
+#high res intervals
+hr1_interval=2
+hr1_num_intervals=449
+hr1_reset_time=2
+	
+hr2_interval="minute"
+hr2_num_intervals=359
+	
+hr3_interval=$((3*$minute_s))
+hr3_num_intervals=479
+hr3_reset_time=$((3*$minute_s))
+	
+hr4_interval=$((2*$hour_s))
+hr4_num_intervals=359
+hr4_reset_time=$((2*$hour_s))
+
+hr5_interval="day"
+hr5_num_intervals=365
+
+#low res intervals
+lr1_interval="minute"
+lr1_num_intervals=15
+
+lr2_interval=$((15*$minute_s))
+lr2_num_intervals=24
+lr2_reset_time=$((15*$minute_s))
+	
+lr3_interval="hour"
+lr3_num_intervals=24
+
+lr4_interval="day"
+lr4_num_intervals=31
+
+lr5_interval="month"
+lr5_num_intervals=12
+
+
+mon_nums="1 2 3 4 5"
+bw_ids=""
+
+
+bw_restore()
+{
+	bw_id="$1"
+	backup_to_tmp="$2"
+	
+	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
+		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	elif [ -e "/tmp/data/bwmon/$bw_id.bw" ] ; then
+		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	elif [ -e "/usr/data/bwmon/$bw_id" ] ; then
+		bw_convert "/usr/data/bwmon/$bw_id" "/usr/data/bwmon/$bw_id.bw"
+		rm "/usr/data/bwmon/$bw_id"
+		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	elif [ -e "/tmp/data/bwmon/$bw_id" ] ; then
+		bw_convert "/tmp/data/bwmon/$bw_id" "/usr/data/bwmon/$bw_id.bw"
+		rm "/tmp/data/bwmon/$bw_id"
+		bw_set -i "$bw_id" -h -f /tmp/data/bwmon/$bw_id.bw >/dev/null 2>&1
+	fi
+
+	if [ -e "$tmp_cron" ] ; then
+		if [ "$backup_to_tmp" = "1" ] ; then
+			echo "bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
+		else
+			echo "bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
+		fi
+	fi
+}
+
+update_cron()
+{
+	old_md5=$(md5sum /etc/crontabs/root)
+	old_md5=${old_md5% *}
+	new_md5=$(md5sum "$tmp_cron")
+	new_md5=${new_md5% *}
+	if [ "$old_md5" = "$new_md5" ] ; then
+		rm "$tmp_cron"
+	else
+		mv "$tmp_cron" /etc/crontabs/root
+		if pidof crond > /dev/null 2>&1; then
+			/etc/init.d/cron restart
+		fi
+	fi
+}
+
+
+clear_chains()
+{
+	delete_chain_from_table mangle openvpn_down_bw
+	delete_chain_from_table mangle openvpn_up_bw
+
+}
+shutdown()
+{
+	touch /etc/crontabs/root
+
+	if [ -e "$backup_script" ] ; then
+		sh "$backup_script" 2>/dev/null
+		rm -rf "$backup_script"
+	fi
+
+	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_openvpn_ipset > "$tmp_cron"
+	update_cron
+
+	clear_chains
+}
+
+initialize()
+{
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
+	if [ "$enabled" == "1" ] ; then
+		
+		
+		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; } ')
+		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; } ')
+		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		vpn_if=$(uci -P /var/state get network.vpn.ifname 2>/dev/null)
+		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ]  ; then
+
+			# create openvpn bandwidth monitor chains
+			iptables -t mangle -N openvpn_down_bw
+			iptables -t mangle -N openvpn_up_bw
+
+			# add monitoring rules
+			for n in $mon_nums ; do
+				for res in "hr" "lr" ; do
+					interval=$(eval "echo \$$res"$n"_interval")
+					num_intervals=$(eval "echo \$$res"$n"_num_intervals")
+					reset_time=$(eval "echo \$$res"$n"_reset_time")
+					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
+	
+					iptables -t mangle -A openvpn_down_bw  -m bandwidth --id "openvpn-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					iptables -t mangle -A openvpn_up_bw    -m bandwidth --id "openvpn-$res$n-upload-$interval-$num_intervals"   --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					
+					next_ids="openvpn-$res$n-download-$interval-$num_intervals openvpn-$res$n-upload-$interval-$num_intervals"
+					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
+				done
+			done
+
+			iptables -t mangle -I FORWARD -i "$wan_if" -o "$vpn_if" -j openvpn_down_bw
+			iptables -t mangle -I FORWARD -i "$vpn_if" -o "$wan_if" -j openvpn_up_bw
+			
+			iptables -t mangle -A INPUT  -i "$wan_if" -p "$openvpn_proto" --dport "$local_openvpn_port" -j openvpn_down_bw
+			iptables -t mangle -A OUTPUT -o "$wan_if" -p "$openvpn_proto" --sport "$local_openvpn_port" -j openvpn_up_bw
+		
+		
+			# enable backups of bandwidth data 
+			touch /etc/crontabs/root
+			grep -v "$backup_script" /etc/crontabs/root  > "$tmp_cron"
+			echo "0 0,4,8,12,16,20 * * * $backup_script" >> "$tmp_cron"
+
+		
+			mkdir -p "$backup_script_dir"
+			echo "#!/bin/sh" > "$backup_script"
+			chmod 700 "$backup_script"
+		
+	
+			for i in $bw_ids ; do
+				is_hr123=$(echo "$i" | egrep "\-hr\-[123]")
+				is_lr123=$(echo "$i" | egrep "\-lr\-[123]")
+				if [ -n "$is_hr123" ] || [ -n "$is_lr123" ]   ; then
+					bw_restore "$i" 1
+				else
+					bw_restore "$i" 0
+				fi
+			done
+		
+			update_cron
+		fi
+	fi
+}
+
+set_block_nonovpn()
+{
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
+	client_enabled="false"
+	if [ "$enabled" = "1" ] ; then
+		client_enabled=$(uci get openvpn_gargoyle.@client[0].enabled 2>/dev/null)
+	fi
+	delete_chain_from_table filter block_non_openvpn
+	
+	if [ "$client_enabled" = "true" ] ; then
+		do_block=$(uci get openvpn_gargoyle.@client[0].block_non_openvpn 2>/dev/null)
+		
+		
+		if [ "$do_block" = "1" ] || [ "$do_block" = "true" ] ; then
+			wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+			iptables -t filter -N block_non_openvpn
+			iptables -t filter -A block_non_openvpn -d 10.0.0.0/8     -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 172.16.0.0/12  -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 192.168.0.0/16 -j ACCEPT
+			iptables -t filter -A block_non_openvpn -j REJECT
+			iptables -t filter -I zone_lan_forward  -i br-lan -o "$wan_if" -j block_non_openvpn
+		fi
+	fi
+}
+
+set_openvpn_cron_watchdog()
+{
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
+	touch /etc/crontabs/root
+	have_watchdog=$( grep "ifconfig.*tun.*init.*openvpn" /etc/crontabs/root )
+	if [ "$enabled" == "1" ] ; then
+		if [ -z "$have_watchdog" ] ; then
+			echo '* * * * * if [ -z "$(ifconfig | grep tun 2>/dev/null)" ] ; then logger "openvpn stopped, restarting" ; /etc/init.d/openvpn restart ; fi' >> /etc/crontabs/root
+		fi
+	else
+		if [ -n "$have_watchdog" ] ; then
+			cat /etc/crontabs/root | grep -v "ifconfig.*tun.*init.*openvpn" > "$tmp_cron"
+			mv "$tmp_cron" /etc/crontabs/root
+		fi
+	fi
+
+}
+
+
+
+
+RUN_MODE="$1"
+
+
+if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] && [ "$RUN_MODE" != "update_enabled" ] ; then
+	RUN_MODE="restart"
+fi
+
+if [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
+	shutdown
+	initialize
+	set_block_nonovpn
+	set_openvpn_cron_watchdog
+elif [ "$RUN_MODE" = "stop" ] ; then
+	shutdown
+elif [ "$RUN_MODE" = "update_enabled" ] ; then
+	set_block_nonovpn
+	set_openvpn_cron_watchdog
+fi
+
+
+rm /tmp/openvpn.firewall.running
+

@@ -22,7 +22,7 @@ git_branch()
 			if [ -f $g/BISECT_LOG ] ; then
 				r="|BISECTING"
 			fi
-			if [ ! b="$(git symbolic-ref HEAD 2>/dev/null)" ] ; then
+			if  ! b="$(git symbolic-ref HEAD 2>/dev/null)"  ; then
 				b="$(cut -c1-7 $g/HEAD)..."
 			fi
 		fi
@@ -41,7 +41,7 @@ if [ -z "$user" ] ; then
 	exit
 fi
 
-scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
+scp_pub='scp -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes -r'
 ssh_pub='ssh -o StrictHostKeyChecking=no -o PubkeyAuthentication=yes -o BatchMode=yes'
 
 if [ ! -d "images" ] ; then
@@ -60,7 +60,7 @@ if [ -z  "$gargoyle_checkout_branchname" ] ; then
 fi
 mkdir src
 cd src
-git clone git://gargoyle-router.com/gargoyle.git
+git clone git://github.com/ericpaulbishop/gargoyle.git
 cd gargoyle
 git checkout "$gargoyle_checkout_branchname"
 cd ..
@@ -91,7 +91,7 @@ fi
 
 
 #give user a chance to cancel
-echo "Updateing for gargoyle branch = $gargoyle_checkout_branchname"
+echo "Updating for gargoyle branch = $gargoyle_checkout_branchname"
 echo "Updating for version = $version"
 echo "Upcoming major version (for package naming) = $major_version"
 echo ""
@@ -112,11 +112,15 @@ image_dirs=$(ls)
 for i in $image_dirs ; do
 	if [ "$i" != "brcm-2.4" ] ; then
 		echo $i
-	
 		$scp_pub $i/* $user@gargoyle-router.com:gargoyle_site/downloads/images/$i/
+		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$version/$i"
 		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$major_version/$i"
-		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$major_version/$i"
-		$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/gargoyle-$major_version/$i/
+		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$version/$i"
+		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/packages/gargoyle-$major_version"
+		$ssh_pub $user@gargoyle-router.com "cd gargoyle_site/packages/gargoyle-$major_version/ ; ln -s ../gargoyle-$version/$i"
+
+		$scp_pub ../built/$i/* $user@gargoyle-router.com:gargoyle_site/packages/gargoyle-$version/$i/
+
 	fi
 done
 

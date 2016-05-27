@@ -17,10 +17,11 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	wl assoclist | awk '{print "wifiLines.push(\""$0"\");"}'
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo "var wirelessDriver=\"mac80211\";"
-	aps=$( iwconfig 2>/dev/null | grep "Mode:Master" | awk ' { print $1 ; } ' )
+	aps=$( iwinfo | grep ESSID | awk ' { print $1 ; } ' )
 	if [ -n "$aps" ] ; then
 		for ap in $aps ; do
-			iw $ap station dump | awk ' /^Station/ { printf "wifiLines.push(\""$2" " ;} /signal:/ {printf ""$2" "} /rx.*bitrate:/ {print ""$3"\");"}'
+			hf=$( iwinfo $ap i | awk '/Channel:/ {if ($4 > 14) print "5GHz"; else print "2.4GHz";}' )
+			iw $ap station dump | awk ' /^Station/ { printf "wifiLines.push(\""$2" " ;} /signal:/ {printf ""$2" "} /tx.*bitrate:/ {printf ""$3" "} /rx.*bitrate:/ {printf ""$3" "} /autho/ {print "'$hf'\");"}'
 		done
 	fi
 elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
@@ -40,11 +41,10 @@ else
 fi
 
 echo "conntrackLines = new Array();"
-cat /proc/net/ip_conntrack | awk '{print "conntrackLines.push(\""$0"\");"}'
+cat /proc/net/nf_conntrack | awk '{print "conntrackLines.push(\""substr($0,index($0,$3))"\");"}'
 
 echo "arpLines = new Array();"
 cat /proc/net/arp | awk '{print "arpLines.push(\""$0"\");"}'
 
 current_time=$(date +%s)
 echo "currentTime=$current_time;"
-

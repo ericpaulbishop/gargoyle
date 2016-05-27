@@ -1,17 +1,18 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+var connLS=new Object(); //part of i18n
 
 function saveChanges()
 {
 	var errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
 		alert(errorString);
 	}
 	else
@@ -32,10 +33,9 @@ function saveChanges()
 			commands.push("echo \"" + parameterId + "=" + parameterValue + "\" >> /tmp/sysctl.conf.tmp.2");
 			commands.push("mv /tmp/sysctl.conf.tmp.2 /tmp/sysctl.conf.tmp.1");
 		}
-		addParameterCommands("/proc/sys/net/ipv4/ip_conntrack_max", "net.ipv4.ip_conntrack_max", maxConnections);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_max", "net.ipv4.netfilter.ip_conntrack_max", maxConnections);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established", "net.ipv4.netfilter.ip_conntrack_tcp_timeout_established", tcpTimeout);
-		addParameterCommands("/proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout_stream", "net.ipv4.netfilter.ip_conntrack_udp_timeout_stream", udpTimeout);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_max", "net.netfilter.nf_conntrack_max", maxConnections);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established", "net.netfilter.nf_conntrack_tcp_timeout_established", tcpTimeout);
+		addParameterCommands("/proc/sys/net/netfilter/nf_conntrack_udp_timeout_stream", "net.netfilter.nf_conntrack_udp_timeout_stream", udpTimeout);
 		commands.push("mv /tmp/sysctl.conf.tmp.1 /etc/sysctl.conf");	
 
 		var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

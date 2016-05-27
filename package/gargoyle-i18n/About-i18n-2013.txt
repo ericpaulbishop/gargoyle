@@ -1,0 +1,113 @@
+Table of Contents:
+  Criteria
+  Basic terminology
+  How Criteria is fulfilled (aka Checking the Boxes)
+  i18n before an internet connnection
+  How internationalization works
+  Localizing
+  Building an internationalized/localized Gargoyle firmware image
+
+
+
+Thinking about i18n, there were 3 important criteria to me (BashfulBladder):
+
+• setting up a router on the basic.sh page in their native language (new firstboot.sh support)
+• constraining firmware filesize (default firmware comes as single language i18n-aware)
+• allows 4MB routers some level of internationalization (compile-time switch forces a single language)
+
+--------------------------------
+Basic terminology used in this document:
+
+- localized firmware - firmware that once had variables, but a script has substituted strings back for variable names. localized English firmware would look virtually identical to what is available today
+- i18n-switching firmware - firmware that has variables for text strings. Language packages allow changing the UI text strings of the Gargoyle web UI.
+
+---------------------------------
+Checking the Boxes:
+
+Having a firmware image file with 13 languages sounds great. 12 languages that will never be used & suck up space sound crappy. And no single course of action could meet all 3 criteria. So I settled on a combination.
+
+1. Externalize all text strings to external files. menus, html & javascript require different avenues.
+
+2. Compile-time scripts can localize the fully i18n firmware. All-English or All-Spanish... the language pack & the localize.py script reintegrate the strings back in for variables. A localized firmware would be unable to switch to a different language because variables would be missing. Technically, menus *could* be - the uci gargoyle.property acts as a variable, but webpage content would not.
+
+3. For 8MB routers, i18n-switching firmware would be available (don't know about 4MB routers). Language packages would function very much like todays theme packages: install via plugins.sh; switch with something very much like themes.sh
+
+4. To configure a router in the native language, plugins.sh will only work on a configured router (one that has an internet connection). To address this, i18n-switching firmware has firstboot.sh with 2 added sections. A language package can be uploaded to the router & activated OR if an internet connection is present the option to directly download & activate a language package. Configuration is done in the native language.
+
+-------------------------------------
+i18n before an internet connnection
+
+When a user downloads Gargoyle i18n-switching firmware (Gargoyle-EN-intl.bin or whatever) a new option will be provided to the user: selecting a language package like Arabic-AR.ipk at the same time. User flashes the router. English-EN comes as the default language.
+
+firstboot.sh comes up in English. A few new pictograms explain password with a key & [****]; timezones with a map with some timezone lines. The language section I think anyone would recognize as a 'language' section. The Arabic-AR.ipk file is drag&dropped onto the input button. 'Save' uploads the file to the router. A shell script installs & activates the language. firstboot.sh reloads overview.sh
+
+overview.sh & the menu system are now in Arabic. Configuration of the router in basic.sh is done in the native language.
+
+So a user configured their router offline, in their native language & without 13 languages present in the firmware.
+
+----------------------------------
+
+How it works:
+
+There are 'strings of text' that need to be translated. (example: Wifi Settings)
+Those strings are externalized into a separate page; a variable holds the value (example: something.property="Wifi Settings")
+The variable replaces the string in the document: (example: <section>something.property</section>)
+Javascript, html, menus & small other files are handled differently
+Extra translation functions are added to transparently replace the variables with the values on each page
+
+The nuts & bolts of i18n
+
+2 extra persistent global variables are added:
+    uci set gargoyle.global.fallback_lang=English-EN
+    uci set gargoyle.global.language=English-EN
+
+Each page.sh rendered in a browser starts off as basically the middle of a book - where all the juicy stuff happens. It's what makes each page unique, geared toward specific tasks (setting up the router, or OpenVPN). Each page is actually directed to a small program called haserl, which runs more programs. One program haserl runs for virtually every page is gargoyle_header_footer (GHF). GHF provides the menu system of the Gargoyle WebUI & tells the page which javascript pages to load in the header. GHF is called again at the end to 'wrap things up' by providing a footer.
+
+Each page is modified for GHF to take an extra argument - the -z option. This option tells the server to serve up the extra javascript file. The file in the -z option holds all the values for the variables (example: something.property="Wifi Settings"). The file is expressed how javascript expects the file - the browser transparently replaces the value into the javascript. But only the javascript.
+
+The html portion (in the page.sh) is handled by haserl. An extra token was created to provide a gateway to translation services in haserl. haserl scrapes the page looking for tokens: shell scripts, files to include, and the new translation tokens. When it finds of the translation tokes (example: <%~ SaveChanges %>), the languages in gargoyle.global.fallback_lang & gargoyle.global.language have dictionaries built. fallback_lang is the language with every single translation present (typically English). The (active) language may omit values - the missing values will be provided by the fallback_lang. In this way, Arabic doesn't need to translate OpenVPN. These dictionaries are parsed from the strings.js file and a page specific file. The first translation token for a page specific file tells haserl which page to source: <%~ openvpn.something %>. All the values go into both dictionaries. When the active language's dictionary doesn't have a value, the fallback language's dictionary is used. When that fails, the key/property/token is used itself. Then haserl substitutes the value back in for the token.
+
+Some html pages use a template that is sourced by the page.sh & pulled in by haserl. This template is also subject to the haserl translation token form.
+
+Javascript is handled differently. Each former javascript page has a single variable added at the global scope/top level. The variable is just declared - it contains nothing. The translation pages load *after* the javascript page.js - and that is key. When the translation page(s) loads (which are formatted in javascript), the variable is filled with a panoply of strings. This loading process also uses a fallback mechanism: the fallback translation javascript page has its values clobbered by the active language's translation page. Any values the active language doesn't contain are filled by the fallback language's page. Its all handled transparently by the order of the pages loading.
+
+The javascript strings themselves are automatically placed in by the browser's javascript engine. Sometimes the strings themselves enter into the calculus of a page like a Sun-Tue schedule - and extra care needs to be taken to decompose this into a language-neutral router setting. In another case, a page like Dynamic DNS has these variables placed into a file that needs to be eval(uated). Most pages don't cause issues - but the more creative they are, the more issues they cause.
+
+The menu system has its strings set on the flash chip of the router. Each time languages are switched, every page is looked up, translated & written to memory to survive a reboot.
+
+Finally, there are shell script lookups to handle translations (quotas_template & reboot.sh, openvpn_upload_client.sh) for pages where translations are needed as part of the shell script logic. The shell script lookups (via /usr/bin/i18n symlinked to haserl) work through haserl.
+
+The slowest types of lookups are menu names. These rely on pure shell scripts.
+
+----------------------------------
+
+Localizing:
+
+The process of de-internationalization - putting strings back in where variables once were. Once you do this, you loose any ability to switch to a different language. Its like the All-English Gargoyle. Except it may be All-Spanish.
+
+There are 3 reasons why you would want to localize the firmware:
+  * Your 4MB router is really tight on space, and every bit helps. If you only speak Spanish, English is only wasting space.
+  * You are a translator. The script to localize the firmware (localize.py) will find variables that you skipped, or handled erroneously - feedback tells you which variable was not present in the target language.
+  * You are a developer. Finding errors in the translation, or keys that are not present in any language - the localize.py script will tell which which keys rendered to a key & not to a translation string.
+
+----------------------------------
+
+Building Internationalize/Localized Firmware:
+
+The Makefile is set to default to an internationalized build (which allows you to install other language packs & switch between them) with English-EN as the only installed language. No matter what, the scripts are set up to only include 1 language in the firmware.
+
+make ar71xx.usb
+	internationalizded build; defaults to English-EN
+make ar71xx.usb TRANSLATION=internationalize ACTIVE_LANG=Spanish-ES 		internationalized build; UI comes up immediately in Spanish-ES
+make ar71xx.usb TRANSLATION=localize FALLBACK_LANG=English-EN ACTIVE_LANG=Spanish-ES
+	localized build; UI comes up immediately in Spanish-ES; no possibility of switching to another language
+
+-----------------------------------
+IMPORTANT NOTES:
+
+- 3rd party plugins need to store any&all translation values in their own files/www/i18n/* folder
+- Anybody changing the fallback_lang to something other than English should first try to localize the firmware into the target language & see if localize.py finds any errors/missing keys/values.
+- javascript i18n relies on the fallback_lang defining the variable (var thing = new Object) and the fallback properties (thing.savebutton="Save this"); the active language clobbers the property with its own (newer) thing.savebutton-"El botón de Savir" or whatever. The problem is when an overseen javascript element is missed by both. It would either fail rendering the page or be a null string.
+- if the gargoyle_header_footer -z option is used, the fallback_lang must contain that page, otherwise you will get an 'overview.sh:1		SyntaxError: Unexpected token '<'' error
+_ the old haserl token form of <? ?> is obsoleted in favor of the newer <% %> token form. Templates will only be subject to translation if they are are sourced via the <%in path %> form
+- haserl has failed on at least 1 occasion to upload a language file via the form

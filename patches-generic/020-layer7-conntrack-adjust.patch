@@ -1,0 +1,53 @@
+--- /dev/null	2016-01-04 10:13:39.373870211 -0500
++++ b/target/linux/generic/patches-3.18/669-layer7-conntrack-adjust.patch	2016-01-04 23:17:53.105683382 -0500
+@@ -0,0 +1,50 @@
++--- a/net/netfilter/nf_conntrack_core.c	2015-10-28 22:49:46.000000000 -0400
+++++ b/net/netfilter/nf_conntrack_core.c	2016-01-04 23:10:20.653165574 -0500
++@@ -278,6 +278,11 @@
++ {
++ 	struct ct_pcpu *pcpu;
++ 
+++	if(ct->layer7.app_proto)
+++		kfree(ct->layer7.app_proto);
+++	if(ct->layer7.app_data)
+++		kfree(ct->layer7.app_data);
+++
++ 	/* We overload first tuple to link into unconfirmed or dying list.*/
++ 	pcpu = per_cpu_ptr(nf_ct_net(ct)->ct.pcpu_lists, ct->cpu);
++ 
++--- a/net/netfilter/nf_conntrack_standalone.c	2016-01-04 23:04:26.746984868 -0500
+++++ b/net/netfilter/nf_conntrack_standalone.c	2016-01-04 23:12:31.723010621 -0500
++@@ -241,6 +241,11 @@
++ 	if (ct_show_delta_time(s, ct))
++ 		goto release;
++ 
+++	if(ct->layer7.app_proto &&
+++		seq_printf(s, "l7proto=%s ", ct->layer7.app_proto))
+++			return -ENOSPC;
+++
+++
++ 	if (seq_printf(s, "use=%u\n", atomic_read(&ct->ct_general.use)))
++ 		goto release;
++ 
++--- a/include/net/netfilter/nf_conntrack.h	2015-10-28 22:49:46.000000000 -0400
+++++ b/include/net/netfilter/nf_conntrack.h	2016-01-04 23:15:18.152260446 -0500
++@@ -112,6 +112,19 @@
++ 	struct net *ct_net;
++ #endif
++ 
+++	struct {
+++		/*
+++		 * e.g. "http". NULL before decision. "unknown" after decision
+++		 * if no match.
+++		 */
+++		char *app_proto;
+++		/*
+++		 * application layer data so far. NULL after match decision.
+++		 */
+++		char *app_data;
+++		unsigned int app_data_len;
+++	} layer7;
+++
++ 	/* Storage reserved for other modules, must be the last member */
++ 	union nf_conntrack_proto proto;
++ };

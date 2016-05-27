@@ -1,18 +1,13 @@
 #!/bin/sh /etc/rc.common
-# Copyright (C) 2006-2008 OpenWrt.org
+# Copyright (C) 2006-2011 OpenWrt.org
 
 START=19
 STOP=19
 
-NAME=portmap
-PROG=/usr/sbin/$NAME
-DEFAULT=/etc/default/$NAME
-
 start() {
-	[ -f $DEFAULT ] && . $DEFAULT
-	start-stop-daemon -q -S -x $PROG -- $OPTIONS
+	service_start /usr/sbin/portmap
 }
 
 stop() {
-	start-stop-daemon -q -K -x $PROG -- $OPTIONS
+	service_stop /usr/sbin/portmap
 }

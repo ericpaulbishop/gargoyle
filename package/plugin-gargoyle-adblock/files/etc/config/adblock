@@ -1,0 +1,7 @@
+config adblock 'config'
+	option enabled '0'
+	option trans '0'
+	option exempt '0'
+	option exstart '192.168.1.1'
+	option exend '192.168.1.255'
+	option endpoint4 '0.0.0.0'

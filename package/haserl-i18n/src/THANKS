@@ -1,0 +1,34 @@
+Haserl THANKS file
+
+Haserl was written by Nathan Angelacos.  
+
+It was the result of work done by Cameron Banta and David Krause, who 
+wrote a web-configuration engine using AWK scripts.
+
+Natanael Copa assisted with the autoconf scripts, as well as general 
+support of the project.
+
+Arne Bernin submitted the first patch to make the shell variables
+survive code blocks.  His comments and ideas got the whole sub-shell
+thing going.
+
+Erich Titl helped with some of the configure automake checks.
+
+Vladislav Moskovets suggested the include directive.
+
+Andreas Brodmann provided the incentive to add lua support.
+
+Robin Haberkorn supplied the luac (precompiled lua) support, and then
+did so a second time after the entire source tree was reformatted. 
+
+Diego Santa Cruz from spinetix.com provided fixes to some really
+annoying (and sporadic) deadlocks with IE, thttpd, POST requests.  
+
+Scott did the COOKIE_, POST_, GET_ parsing (he's also responsible for 
+the bash extensions)
+
+Mark Blythe identified differences between BSD/OSX and Linux shell 
+handling of #! scripts, and how argv[1] looks.  Then he supplied the
+fix.
+
+Peter Korsgaard found a buffer overflow error in http array handling.

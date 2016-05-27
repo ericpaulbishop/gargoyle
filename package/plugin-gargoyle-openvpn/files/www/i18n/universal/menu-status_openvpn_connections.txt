@@ -1,0 +1,10 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=OpenVPN Status
+EN=OpenVPN Status
+ES=Estado de OpenVPN
+DE=OpenVPN Status
+PL=Status OpenVPN
+ZH-CN=OpenVPN状态
+RU=Статус OpenVPN
+NO=OpenVPN Status

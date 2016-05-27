@@ -38,33 +38,24 @@
 
 #include "webmon_deps/tree_map.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-	#define ipt_register_match      xt_register_match
-	#define ipt_unregister_match    xt_unregister_match
-#endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
-	#include <linux/ktime.h>
-#endif
+#include <linux/ktime.h>
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
-	#include <linux/ip.h>
-#else
-	#define skb_network_header(skb) (skb)->nh.raw 
-#endif
+#include <linux/ip.h>
+#include <linux/netfilter/x_tables.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,27)
-	#include <linux/netfilter/x_tables.h>
-#endif
-
-#define STRIP "%d.%d.%d.%d"
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Monitor URL in HTTP Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
-
+#define NIPQUAD(addr) \
+	((unsigned char *)&addr)[0], \
+	((unsigned char *)&addr)[1], \
+	((unsigned char *)&addr)[2], \
+	((unsigned char *)&addr)[3]
+#define STRIP "%u.%u.%u.%u"
 
 typedef struct qn
 {
@@ -92,7 +83,7 @@ static queue* recent_searches = NULL;
 static int max_domain_queue_length   = 5;
 static int max_search_queue_length   = 5;
 
-static spinlock_t webmon_lock = SPIN_LOCK_UNLOCKED;
+static spinlock_t webmon_lock = __SPIN_LOCK_UNLOCKED(webmon_lock);;
 
 
 static void update_queue_node_time(queue_node* update_node, queue* full_queue)
@@ -250,35 +241,34 @@ char *strnistr(const char *s, const char *find, size_t slen)
  */
 int within_edit_distance(char *s1, char *s2, int max_edit)
 {
-	if(s1 == NULL || s2 == NULL)
+	int ret = 0;
+	if(s1 != NULL && s2 != NULL)
 	{
-		return 0;
-	}
-
-	int edit1 = strlen(s1);
-	int edit2 = strlen(s2);
-	char* s1sp = s1;
-	char* s2sp = s2;
-	char* s1ep = s1 + (edit1-1);
-	char* s2ep = s2 + (edit2-1);
-	while(*s1sp != '\0' && *s2sp != '\0' && *s1sp == *s2sp)
-	{
-		s1sp++;
-		s2sp++;
-		edit1--;
-		edit2--;
-	}
+		int edit1 = strlen(s1);
+		int edit2 = strlen(s2);
+		char* s1sp = s1;
+		char* s2sp = s2;
+		char* s1ep = s1 + (edit1-1);
+		char* s2ep = s2 + (edit2-1);
+		while(*s1sp != '\0' && *s2sp != '\0' && *s1sp == *s2sp)
+		{
+			s1sp++;
+			s2sp++;
+			edit1--;
+			edit2--;
+		}
 	
-	/* if either is zero we got to the end of one of the strings */
-	while(s1ep > s1sp && s2ep > s2sp && *s1ep == *s2ep)
-	{
-		s1ep--;
-		s2ep--;
-		edit1--;
-		edit2--;
+		/* if either is zero we got to the end of one of the strings */
+		while(s1ep > s1sp && s2ep > s2sp && *s1ep == *s2ep)
+		{
+			s1ep--;
+			s2ep--;
+			edit1--;
+			edit2--;
+		}
+		ret =  edit1 <= max_edit && edit2 <= max_edit ? 1 : 0;
 	}
-
-	return edit1 <= max_edit && edit2 <= max_edit ? 1 : 0;
+	return ret;
 }
 
 
@@ -546,9 +536,10 @@ static void webmon_proc_stop(struct seq_file *seq, void *v)
 
 static int webmon_proc_domain_show(struct seq_file *s, void *v)
 {
+	queue_node* next_node;
 	spin_lock_bh(&webmon_lock);
 
-	queue_node* next_node = recent_domains->last;
+	next_node = recent_domains->last;
 	while(next_node != NULL)
 	{
 		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
@@ -561,9 +552,10 @@ static int webmon_proc_domain_show(struct seq_file *s, void *v)
 
 static int webmon_proc_search_show(struct seq_file *s, void *v)
 {
+	queue_node* next_node;
 	spin_lock_bh(&webmon_lock);
 
-	queue_node* next_node = recent_searches->last;
+	next_node = recent_searches->last;
 	while(next_node != NULL)
 	{
 		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
@@ -744,41 +736,11 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-		static bool 
-	#else
-		static int
-	#endif
-	match(		const struct sk_buff *skb,
-			const struct net_device *in,
-			const struct net_device *out,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const struct xt_match *match,
-			#endif
-			const void *matchinfo,
-			int offset,
-			#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				unsigned int protoff,
-			#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-				const void *hdr,
-				u_int16_t datalen,
-			#endif
-			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,23)
-				bool *hotdrop
-			#else
-				int *hotdrop
-			#endif	
-			)
-#else
-	static bool match(const struct sk_buff *skb, const struct xt_match_param *par)
-#endif
+
+static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)matchinfo;
-	#else
-		const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)(par->matchinfo);
-	#endif
+
+	const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)(par->matchinfo);
 
 	
 	struct iphdr* iph;
@@ -834,7 +796,7 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
 					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-					if( ntohl( r.start) >= ntohl(iph->saddr) && ntohl(r.end) <= ntohl(iph->saddr) )
+					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}
@@ -987,6 +949,11 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 							search_part = strstr(path, "/ws/results/Web/");
 							search_part = search_part == NULL ? search_part : search_part+16;
 						}
+						else if(strstr(domain, "thepiratebay.") != NULL)
+						{
+							search_part = strstr(path, "/search/");
+							search_part = search_part == NULL ? search_part : search_part+8;
+						}
 
 						
 						if(search_part != NULL)
@@ -1096,34 +1063,10 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-	static bool
-	#else
-	static int
-	#endif
-	checkentry(	const char *tablename,
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
-				const void *ip,
-				const struct xt_match *match,
-	#else
-				const struct ipt_ip *ip,
-	#endif
-				void *matchinfo,
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
-		    		unsigned int matchsize,
-	#endif
-				unsigned int hook_mask
-				)
-#else
-	static bool checkentry(const struct xt_mtchk_param *par)
-#endif
+static int checkentry(const struct xt_mtchk_param *par)
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		struct ipt_webmon_info *info = (struct ipt_webmon_info*)matchinfo;
-	#else
-		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
-	#endif
+
+	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
 
 
 	spin_lock_bh(&webmon_lock);
@@ -1149,26 +1092,12 @@ static struct nf_sockopt_ops ipt_webmon_sockopts =
 	}
 	spin_unlock_bh(&webmon_lock);
 	
-	return 1;
+	return 0;
 }
 
-static void destroy(	
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-			void* matchinfo,
-			unsigned int matchinfosize
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-			const struct xt_match *match,
-			void* matchinfo
-#else
-			const struct xt_mtdtor_param *par
-#endif
-		)
+static void destroy( const struct xt_mtdtor_param *par )
 {
-	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-		struct ipt_webmon_info *info = (struct ipt_webmon_info*)matchinfo;
-	#else
-		struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
-	#endif
+	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
 
 	spin_lock_bh(&webmon_lock);
 	*(info->ref_count) = *(info->ref_count) - 1;
@@ -1180,31 +1109,26 @@ static void destroy(
 
 }
 
-static struct ipt_match webmon_match = 
+static struct xt_match webmon_match __read_mostly  = 
 {
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-	{ NULL, NULL },
-	"webmon",
-	&match,
-	&checkentry,
-	&destroy,
-	THIS_MODULE
-#endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
+
 	.name		= "webmon",
 	.match		= &match,
 	.family		= AF_INET,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
 	.matchsize	= sizeof(struct ipt_webmon_info),
-#endif
 	.checkentry	= &checkentry,
 	.destroy	= &destroy,
 	.me		= THIS_MODULE,
-#endif
 };
 
 static int __init init(void)
 {
+
+	#ifdef CONFIG_PROC_FS
+		struct proc_dir_entry *proc_webmon_recent_domains;
+		struct proc_dir_entry *proc_webmon_recent_searches;
+	#endif
+
 	spin_lock_bh(&webmon_lock);
 
 	recent_domains = (queue*)malloc(sizeof(queue));
@@ -1222,16 +1146,8 @@ static int __init init(void)
 
 
 	#ifdef CONFIG_PROC_FS
-		struct proc_dir_entry *proc_webmon_recent_domains  = create_proc_entry("webmon_recent_domains", 0, NULL);
-		struct proc_dir_entry *proc_webmon_recent_searches = create_proc_entry("webmon_recent_searches", 0, NULL);
-		if(proc_webmon_recent_domains)
-		{
-			proc_webmon_recent_domains->proc_fops = &webmon_proc_domain_fops;
-		}
-		if(proc_webmon_recent_searches)
-		{
-			proc_webmon_recent_searches->proc_fops = &webmon_proc_search_fops;
-		}
+		proc_create("webmon_recent_domains",  0, NULL, &webmon_proc_domain_fops);
+		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
 	#endif
 	
 	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)
@@ -1242,7 +1158,7 @@ static int __init init(void)
 	}
 	spin_unlock_bh(&webmon_lock);
 
-	return ipt_register_match(&webmon_match);
+	return xt_register_match(&webmon_match);
 }
 
 static void __exit fini(void)
@@ -1258,7 +1174,7 @@ static void __exit fini(void)
 		remove_proc_entry("webmon_recent_searches", NULL);
 	#endif
 	nf_unregister_sockopt(&ipt_webmon_sockopts);
-	ipt_unregister_match(&webmon_match);
+	xt_unregister_match(&webmon_match);
 	destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_map(search_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_queue(recent_domains);

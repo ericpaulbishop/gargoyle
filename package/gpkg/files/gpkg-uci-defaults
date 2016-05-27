@@ -1,0 +1,33 @@
+#!/bin/sh
+
+gpkg_conf_template="/etc/opkg.gpkg.tmp"
+
+if [ ! -f /etc/opkg.conf ] ; then
+	cp $gpkg_conf_template /etc/opkg.conf
+	rm $gpkg_conf_template
+else
+	local plugin_root="/plugin_root"
+	local escaped_plugin_root=$(echo "$plugin_root" | sed 's/\//\\\//g' )
+	local have_plugin_root=$(cat /etc/opkg.conf | grep "dest.*$escaped_plugin_root" )
+	if [ -z "$have_plugin_root" ] ; then
+		echo "dest plugin_root $plugin_root" >>/etc/opkg.conf
+	fi
+
+	openwrt_branch=$(cat /etc/openwrt_release | grep DISTRIB_CODENAME | sed   's/^[^\"]*\"//g; s/\".*$//g')
+	new_openwrt_branch_def=$( cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*$openwrt_branch[\t ]")
+	new_gargoyle_branch_def=$(cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*gargoyle[\t ]")
+	if [ -n "$new_openwrt_branch_def" ] && [ -n  "$new_gargoyle_branch_def" ] ; then
+		sed -i '/src\/gz[\t ]*'"$openwrt_branch"'[\t ]/d'  /etc/opkg.conf
+		sed -i '/src\/gz[\t ]*gargoyle[\t ]/d'             /etc/opkg.conf
+		echo "$new_openwrt_branch_def"                  >> /etc/opkg.conf
+		echo "$new_gargoyle_branch_def"                 >> /etc/opkg.conf
+	fi
+
+
+	rm $gpkg_conf_template
+fi
+
+if [ ! -e /bin/opkg ] ; then
+	ln -s /usr/bin/gpkg /bin/opkg
+fi
+

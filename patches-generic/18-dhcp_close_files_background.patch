@@ -1,9 +1,0 @@
---- backfire-src/package/base-files/files/lib/network/config.sh	2010-12-23 17:39:23.000000000 -0500
-+++ brcm-2.4-src/package/base-files/files/lib/network/config.sh	2010-12-23 20:52:57.000000000 -0500
-@@ -368,5 +368,5 @@
- 				${vendorid:+-V $vendorid} \
- 				-b -p "$pidfile" $broadcast \
--				${dhcpopts:- -O rootpath -R &}
-+				${dhcpopts:- -O rootpath -R >&- <&- 2>&- &}
- 		;;
- 		none)

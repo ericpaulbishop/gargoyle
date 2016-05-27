@@ -15,7 +15,7 @@ define Package/gargoyle-firewall-util
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall initialization
-	DEPENDS:=+libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack +iptables-mod-conntrack-extra +iptables-mod-nat +iptables-mod-nat-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl
+	DEPENDS:=+ebtables +libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack-extra +iptables-mod-nat-extra +iptables-mod-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +kmod-gre +kmod-pptp +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -45,7 +45,7 @@ endef
 
 define Package/gargoyle-firewall-util/postinst
 	included=$$(cat $${IPKG_INSTROOT}/etc/config/firewall | grep 'gargoyle_additions.firewall'  )
-	if [ -z "$$included" ] ; then printf "config include\n\toption path /usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall\n\n" >> $${IPKG_INSTROOT}/etc/config/firewall ; fi
+	if [ -z "$$included" ] ; then printf "config include\n\toption type script\n\toption path /usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall\n\toption family IPv4\n\toption reload 1\n\n" >> $${IPKG_INSTROOT}/etc/config/firewall ; fi
 endef
 
 define Package/gargoyle-firewall-util/install

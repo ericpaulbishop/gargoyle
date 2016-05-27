@@ -1,0 +1,11 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=WiFi Schedule
+EN=WiFi Schedule
+ES=Horario para WiFi
+DE=WLAN Zeitschaltung
+BR=Horario para WiFi
+PL=Harmonogram Wi-Fi
+ZH-CN=WIFI计划
+RU=График работы WiFi
+NO=WiFi Tidsplan

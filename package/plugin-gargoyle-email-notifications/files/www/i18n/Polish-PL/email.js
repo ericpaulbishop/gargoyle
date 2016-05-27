@@ -1,0 +1,73 @@
+﻿/*
+ * UTF-8 (with BOM) Polish-PL text strings for email.sh html elements
+ */
+
+email.Time="Ustawienia harmonogramu";
+email.TPer="Okres harmonogramu";
+email.DataSettings="Zawartość wiadomości";
+email.NoTm="Wyłączony";
+email.Dly="Codzienny";
+email.Wkd="Dzień powszechny + sobota/niedziela";
+email.Wkly="Tygodniowy";
+email.TInc="Rozdzielczość";
+email.Test="Wyślij wiadomość testową";
+email.SmtpSettings="Ustawienia serwera pocztowego";
+email.ServerIP="Adres serwera:";
+email.ServerPort="Port serwera:";
+email.Sender="Nadawca:";
+email.Recipient="Odbiorca:";
+email.Auth="Uwierzytelnianie:";
+email.Username="Nazwa użytkownika:";
+email.Password="Hasło:";
+email.Emailsettings="Ustawienia wiadomości";
+email.BandwidthInterval="Przedziały czasowe:";
+email.recentWebsites="Najczęściej odwiedzane";
+email.recentSearches="Najczęściej wyszukiwane";
+email.Logs="Logi";
+email.DHCP="Dzierżawy DHCP";
+email.ARP="Tablica ARP";
+email.Bandwidth="Zużycie pasma";
+email.Count="Liczba pozycji:";
+email.Encryption="Szyfrowanie";
+email.Include="Dołącz następujące elementy do wiadomości:";
+email.rvel="pokaż";
+email.None="Brak";
+email.minutes="min.";
+email.quarterhours="kwadr.";
+email.hours="godz.";
+email.days="dni";
+
+//javscript
+email.Smmy="Podsumowanie";
+email.WeekA=["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
+email.WDayA=["Niedziela", "Poniedziałek - Piątek", "Sobota"];
+email.Warn="Uwaga";
+email.NextEv="Harmonogram będzie obowiązywać od następnego zdarzenia.";
+email.SelTM="Wybrany harmonogram";
+email.SumDis="wyłączony (brak harmonogramu).";
+email.SumDly="codzienny (każdego dnia taki sam).";
+email.SumSwS="dzień powszedni/sobota/niedziela (każdy dzień powszedni taki sam).";
+email.SumWky="tygodniowy (oddzielny dla każdego dnia tygodnia; każdy tydzień taki sam).";
+email.SumGo="Wiadomość zostanie wysłana";
+email.SumAt="o";
+email.actv="włączony";
+email.schd="harmonogram";
+email.nscd="bez harmonogramu";
+email.STDly="codziennie";
+email.STSunday="w niedzielę";
+email.STMonday="w poniedziałek";
+email.STTuesday="we wtorek";
+email.STWednesday="w środę";
+email.STThursday="w czwartek";
+email.STFriday="w piątek";
+email.STSaturday="w sobotę";
+email.STMonFri="od poniedziałku do piątku";
+email.senderError="Adres nadawcy nie jest właściwy.";
+email.receiverError="Adres odbiorcy nie jest właściwy.";
+email.portError="Wprowadź poprawny numer portu.";
+email.testEmailSuccess="Wiadomość została wysłana.";
+email.testEmailFail="Coś poszło nie tak, wynik:\n";
+email.testEmail="Wysyłanie wiadomości testowej...";
+email.encryptionTypeError="Wybierz typ szyfrowania.";
+email.noDataSelected="Wybierz zakres danych do wysłania.";
+email.countError="Wprowadź ilość pozycji.";

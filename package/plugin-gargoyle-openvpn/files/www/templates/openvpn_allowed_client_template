@@ -1,0 +1,46 @@
+<div id='openvpn_allowed_client_name_container'>
+	<label class='narrowleftcolumn' for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'><%~ openvpn.ClntN %>:</label>
+	<input type='text' class='rightcolumn' name='openvpn_allowed_client_name' id='openvpn_allowed_client_name' size='30' />
+</div>
+
+<div id='openvpn_allowed_client_ip_container'>
+	<label class='narrowleftcolumn' for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'><%~ ClntIP %>:</label>
+	<input type='text' class='rightcolumn' ip='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip' size='30' maxlength='15' />
+</div>
+
+<div id="openvpn_allowed_client_remote_container">
+	<label class="narrowleftcolumn" id='openvpn_allowed_client_remote_label' for='openvpn_allowed_client_remote'><%~ ClntConn %>:</label>
+	<select class='rightcolumn' id="openvpn_allowed_client_remote" onchange='setAllowedClientVisibility( document )' ></select>
+</div>
+<div id="openvpn_allowed_client_remote_custom_container">
+	<span class='widerightcolumnonly'>
+		<input type='text' id='openvpn_allowed_client_remote_custom' size='30' />
+	</span>
+	<span style="clear:both"></span>
+</div>
+
+<div id="openvpn_allowed_client_have_subnet_container">
+	<label class="narrowleftcolumn" id='openvpn_allowed_client_have_subnet_label' for='openvpn_allowed_client_have_subnet'><%~ ClntSubN %>:</label>
+	<select class='rightcolumn' id="openvpn_allowed_client_have_subnet" onchange='setAllowedClientVisibility( document )' >
+		<option value="false"><%~ NoSub %></option>
+		<option value="true"><%~ RtSub %></option>
+	</select>
+</div>
+<div id="openvpn_allowed_client_subnet_ip_container">
+	<span class="widerightcolumnonly">
+		<input type='text' class="rightcolumn" id='openvpn_allowed_client_subnet_ip' size='20' maxlength='15' />&nbsp;<em><%~ SubIP %></em>
+	</span>
+	<span style="clear:both"></span>
+</div>
+<div id="openvpn_allowed_client_subnet_mask_container">
+	<span class="widerightcolumnonly">
+		<input type='text' class="rightcolumn"  id='openvpn_allowed_client_subnet_mask' size='20' maxlength='15' />&nbsp;<em><%~ SubM %></em>
+	</span>
+	<span style="clear:both"></span>
+</div>
+
+<input style="display:none" id="openvpn_allowed_client_initial_id" />
+<input style="display:none" id="openvpn_allowed_client_default_id" />
+
+
+

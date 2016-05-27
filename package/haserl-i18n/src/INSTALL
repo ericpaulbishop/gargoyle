@@ -1,0 +1,36 @@
+To build this package, you will need the autoconf/automake tools.
+
+BUILDING FROM SVN SOURCES
+--------------------------
+aclocal && autoheader && automake -a && autoconf 
+
+
+BUILDING HASERL (without lua)
+-----------------------------
+./configure
+make
+make install
+
+You might need to be root to do the 'make install'.
+
+
+BUILDING WITH EMBEDDED LUA VM
+-----------------------------
+If lua 5.1.x dev libraries are already installed, then
+
+./configure --with-lua
+make
+make install
+
+If you don't have the lua 5.1.x dev libraries, or you have 
+a different version than 5.1.x, then:
+
+tar zxvf lua-5.1.1.tar.gz
+cd lua-5.1.1
+make generic | make posix | make linux | ...
+mkdir /tmp/lua
+cp src/* /tmp/lua
+cd <haserl path>
+./configure --with-lua=/tmp/lua --with-lua-headers=/tmp/lua
+make
+

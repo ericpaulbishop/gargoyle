@@ -20,10 +20,10 @@ int main(int argc, char** argv)
 	}
 	char* in_file = argv[1];
 	char* out_file = argv[2];
-	
+
 	uint64_t interval = 0;
 	unsigned char is_const;
-	if(strstr(in_file, "-15m") != NULL )		
+	if(strstr(in_file, "-15m") != NULL)
 	{
 		interval=2;
 		is_const=1;
@@ -50,6 +50,10 @@ int main(int argc, char** argv)
 		FILE* output = fopen(out_file, "wb");
 		if(input == NULL || output == NULL)
 		{
+			/* We leak a possible FILE struct for input if
+			 * opening in_file suceeded, but out_file didn't
+			 * because we are terminating the program and Linux
+			 * recovers from this. */
 			fprintf(stderr, "ERROR: could not open file(s) for reading/writing\n");
 			return 1;
 		}
@@ -61,14 +65,14 @@ int main(int argc, char** argv)
 		uint64_t recent_end;
 		unsigned char bw_bits;
 		list* node_list = initialize_list();
-		
+
 		fread(&last_backup, sizeof(time_t), 1, input);
 		fread(&accumulator, sizeof(int64_t), 1, input);
-		fread(&oldest_start, sizeof(time_t), 1, input);	
-		fread(&oldest_end, sizeof(time_t), 1, input);	
-		fread(&recent_end, sizeof(time_t), 1, input);	
+		fread(&oldest_start, sizeof(time_t), 1, input);
+		fread(&oldest_end, sizeof(time_t), 1, input);
+		fread(&recent_end, sizeof(time_t), 1, input);
 		fread(&bw_bits, sizeof(unsigned char), 1, input);
-		
+
 		int64_t bandwidth_64 = 0;
 		int32_t bandwidth_32 = 0;
 		void* bw_pointer= bw_bits == 32 ? (void*)&bandwidth_32 : (void*)&bandwidth_64;
@@ -93,7 +97,7 @@ int main(int argc, char** argv)
 		uint64_t *last_bw = (uint64_t*)malloc(sizeof(uint64_t));
 		*last_bw = accumulator;
 		push_list(node_list, last_bw);
-	
+
 
 		uint32_t num_ips = 1;
 		uint32_t ip = 0;

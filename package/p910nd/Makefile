@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2009-2011 OpenWrt.org
+# Copyright (C) 2009-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,12 +8,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=p910nd
-PKG_VERSION:=0.95
-PKG_RELEASE:=1
+PKG_VERSION:=0.97
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=@SF/p910nd
-PKG_MD5SUM:=c7ac6afdf7730ac8387a8e87198d4491
+PKG_LICENSE:=GPLv2
+PKG_LICENSE_FILES:=COPYING
+PKG_MD5SUM:=69461a6c54dca0b13ecad5b83864b43e
+PKG_MAINTAINER:=Philipp Kerling <pkerling@casix.org>
 
 PKG_INSTALL:=1
 
@@ -22,6 +25,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/p910nd
   SECTION:=net
   CATEGORY:=Network
+  SUBMENU:=Printing
   TITLE:=A small non-spooling printer server
   URL:=http://p910nd.sourceforge.net
 endef
@@ -45,11 +49,11 @@ MAKE_FLAGS += \
 
 define Package/p910nd/install
 	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/$(PKG_NAME) $(1)/usr/sbin/
+	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/p910nd $(1)/usr/sbin/
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DATA) ./files/$(PKG_NAME).conf $(1)/etc/config/$(PKG_NAME)
+	$(INSTALL_DATA) ./files/p910nd.config $(1)/etc/config/p910nd
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/$(PKG_NAME).init $(1)/etc/init.d/$(PKG_NAME)
+	$(INSTALL_BIN) ./files/p910nd.init $(1)/etc/init.d/p910nd
 endef
 
 $(eval $(call BuildPackage,p910nd))

@@ -1,12 +1,14 @@
+var torLS=new Object(); //part of i18n
+
 function setTorData()
 {
-	if(torEnabled == "2")
+	if(torEnabled == "1" && torClientMode == "2")
 	{
 		document.getElementById("tor_fields").style.display="block";
 
 		torIsActive = torIsActive == "" ? false: true;
-		setChildText("tor_status", (torIsActive ? "Enabled" : "Disabled"), (torIsActive ? "#27c650" : "#949494"), torIsActive)
-		document.getElementById("set_tor_button").value = torIsActive ? "Disable Tor For Your IP" : "Enable Tor For Your IP";
+		setChildText("tor_status", (torIsActive ? UI.Enabled : UI.Disabled), (torIsActive ? "#27c650" : "#949494"), torIsActive)
+		document.getElementById("set_tor_button").value = torIsActive ? torLS.tDisa : torLS.tEnab;
 	}
 	else
 	{
@@ -16,7 +18,7 @@ function setTorData()
 
 function updateTorStatus()
 {
-	setControlsEnabled(false, true, "Please Wait...")
+	setControlsEnabled(false, true, UI.WaitSettings)
 
 	var stateChangeFunction = function(req)
 	{
@@ -25,21 +27,21 @@ function updateTorStatus()
 
 			if(req.responseText.match(/^bad_ip/))
 			{
-				alert("ERROR: Your IP was not assigned by the DHCP server and is not configured as a known static IP\n\nTor configuration prohibited");
+				alert(torLS.IPErr);
 			}
 			else if(req.responseText.match(/^tor_per_ip_disabled/))
 			{
 				//should never get here
-				alert("ERROR: Tor Per-IP matching disabled\n\nTor configuration prohibited")
+				alert(torLS.EqErr)
 			}
 			else if(req.responseText.match(/^success_disabled/))
 			{
-				alert("Tor Successfully Disabled for your IP")
+				alert(torLS.EnabMsg)
 				torIsActive = false;
 			}
 			else if(req.responseText.match(/^success_enabled/))
 			{
-				alert("Tor Successfully Enabled for your IP")
+				alert(torLS.DisbMsg)
 				torIsActive = true;
 			}
 			setTorData()

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+uci set gargoyle.display.connection_openvpn="OpenVPN"
+uci set gargoyle.scripts.connection_openvpn="openvpn.sh"
+uci set gargoyle.connection.openvpn="225"
+
+status_menu_name="OpenVPN Status"
+[ -x /usr/bin/i18n-menu ] && {
+	translation=$(i18n-menu gargoyle.display.status_openvpn_connections)
+	[ -n "$translation" ] && status_menu_name="$translation"
+}
+uci set gargoyle.scripts.status_openvpn_connections="openvpn_connections.sh"
+uci set gargoyle.display.status_openvpn_connections="$status_menu_name"
+
+uci set openvpn.custom_config.script_security="3"
+uci set openvpn.custom_config.up="/etc/openvpn.up"
+uci set openvpn.custom_config.down="/etc/openvpn.down"
+
+uci set firewall.openvpn_include_file=include
+uci set firewall.openvpn_include_file.path='/etc/openvpn.firewall'
+uci set firewall.openvpn_include_file.reload='1'
+
+uci commit

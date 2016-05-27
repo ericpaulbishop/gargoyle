@@ -1,0 +1,8 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Webcam
+EN=Webcam
+PL=Webcam
+RU=Вебкамера
+NO=Webcam
+ZH-CN=网络摄像头

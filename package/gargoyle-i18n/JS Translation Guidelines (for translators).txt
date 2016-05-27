@@ -1,0 +1,47 @@
+It is easiest to just duplicate the English-EN folder & start translating:
+
+• the foldername: substitute your language for the folder name. Use the English language name: Russian-RS not Русско-RS
+
+• obtain ISO 639-1 language codes (for after the hyphen '-') from here:
+http://www.loc.gov/standards/iso639-2/php/code_list.php
+
+• the Makefile is to remain in English, but replace the multiple instances of English-ES with Yourlang-YL; the description should be translated into the target language. The description will appear in the plugins.sh & language tables at firstboot.
+• the 20+ individual translation files + the menus.txt file
+• each plugin-gargoyle-* may have a files/www/menu*.txt file for a language to add its translation
+
+---------------------------------------
+
+When converting English to the target language in the pagename.js files:
+
+- If you use these characters in your translation, they need to be escaped to the corresponding sequence below:
+	&	<	>	"	'
+	&amp;	&lt;	&gt;	&quot;	&apos;
+- Some text may contain html control characters like newline (\n) or paragraph elements (<p>,</p>) which should be preserved in the translation.
+
+- If the English text cannot be translated or is good enough for the target language (WAN IP for example), you can delete line (pageS.WIP="WAN IP"). The fallback language (typically English) will be used. If that is not present, the key itself (WIP) will be used.
+
+-----------------------------------------
+
+To see how your translations work within Gargoyle 1.5.11 & later:
+
+- open a ssh session to the router first: ssh root@192.168.1.1
+- make the required folders the first time: mkdir /www/i18n/YourLang-LG
+
+Then you can copy the files over where they need to be:
+
+- scp /path//on/your/computer/to/package/YourLang-LG/somefile.js root@192.168.1.1:/www/i18n/YourLang-LG
+
+Finally in the web browser activate that language in System->Language
+Reload the target webpage
+
+-----------------------------------------
+
+Technical details:
+
+• All files are to be UTF-8 with BOM (Byte Order Mark)
+• All lines are to end with unix style line endings
+• All files are to end with a single newline character on its own line
+• body of each property is MAX 4096 bytes (not UTF-8 characters).
+• A single translated.js file of strings is MAX 51200 bytes.
+
+Note: Windows Notepad application is not suitable

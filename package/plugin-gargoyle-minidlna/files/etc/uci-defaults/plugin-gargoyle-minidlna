@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#disable minidlna if we just installed the plugin and it didn't exist before
+plugin_exists=$(uci get gargoyle.system.minidlna 2>/dev/null)
+if [ -z "$plugin_exists" ] ; then
+	uci set minidlna.config.enabled="0"
+	uci commit minidlna
+fi
+
+uci set gargoyle.display.system_minidlna='DLNA'
+uci set gargoyle.scripts.system_minidlna='minidlna.sh'
+uci set gargoyle.system.minidlna='352'
+uci commit gargoyle

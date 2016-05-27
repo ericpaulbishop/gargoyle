@@ -1,5 +1,5 @@
 /*
- *  Copyright © 2008-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -18,25 +18,6 @@
 
 
 #include "ewget.h"
-
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdarg.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-
-#include <sys/errno.h>
-#include <sys/select.h>
-#include <fcntl.h>
-#include <signal.h>
 
 #ifdef USE_ERICS_TOOLS
 	#include "erics_tools.h"
@@ -77,6 +58,10 @@ static char* safe_strdup(const char* str)
 
 
 
+static unsigned long __ewget_timeout_seconds  = EWGET_DEFAULT_TIMEOUT_SECONDS;
+static unsigned long __ewget_read_buffer_size = EWGET_DEFAULT_READ_BUFFER_SIZE;
+
+
 
 static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -106,17 +91,30 @@ static void destroy_connection_http(void* connection_data);
 
 /* functions for actually performing http request */
 static char* create_http_request(url_request* url);
-static http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int));
+static void get_http_response(	void* connection_data, 
+				int (*read_connection)(void*, char*, int), 
+				http_response *reply, 
+				FILE* header_stream, 
+				FILE* body_stream, 
+				FILE* combined_stream);
 static http_response* retrieve_http(	url_request *url, 
-				void* (*initialize_connection)(char*, int), 
-				int (*read_connection)(void*, char*, int),
-				int (*write_connection)(void*, char*, int),
-				void (*destroy_connection)(void*)
-				);
+					void* (*initialize_connection)(char*, int), 
+					int (*read_connection)(void*, char*, int),
+					int (*write_connection)(void*, char*, int),
+					void (*destroy_connection)(void*),
+					FILE* header_stream,
+					FILE* body_stream,
+					FILE* combined_stream,
+					int alloc_response,
+					int* ret_val
+					);
+
+
 
 
 /* alarm variable and signal handler for timeout */
 static int alarm_socket = -1;
+static int alarm_socket_closed=0;
 static void alarm_triggered(int sig); 
 
 
@@ -173,19 +171,51 @@ http_response* get_url(char* url_str, char* user_agent)
 http_response* get_url_request(url_request* url)
 {
 	http_response *reply = NULL;
+	int dummy_ret;
 	if(url->protocol == HTTP_PROTO)
 	{
-		reply = retrieve_http(url, initialize_connection_http, read_http, write_http, destroy_connection_http);
+		reply = retrieve_http(url, initialize_connection_http, read_http, write_http, destroy_connection_http, NULL, NULL, NULL, 1, &dummy_ret);
 	}
 	#ifdef HAVE_SSL
 		if(url->protocol == HTTPS_PROTO)
 		{
-			reply = retrieve_http(url, initialize_connection_https, read_https, write_https, destroy_connection_https);
+			reply = retrieve_http(url, initialize_connection_https, read_https, write_https, destroy_connection_https, NULL, NULL, NULL, 1, &dummy_ret);
 		}
 	#endif
 
 	return reply;
 }
+
+
+int write_url_to_stream(char* url_str, char* user_agent, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+{
+	int ret;
+	url_request* url = parse_url(url_str, user_agent);
+	ret = write_url_request_to_stream(url, header_stream, body_stream, combined_stream);
+	free_url_request(url);
+	return ret;
+}
+
+int write_url_request_to_stream(url_request* url, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+{
+	int ret = 1;
+	if(url->protocol == HTTP_PROTO)
+	{
+		retrieve_http(url, initialize_connection_http, read_http, write_http, destroy_connection_http, header_stream, body_stream, combined_stream, 0, &ret);
+	}
+	#ifdef HAVE_SSL
+		if(url->protocol == HTTPS_PROTO)
+		{
+			retrieve_http(url, initialize_connection_https, read_https, write_https, destroy_connection_https, header_stream, body_stream, combined_stream, 0, &ret);
+		}
+	#endif
+
+	return ret;
+
+}
+
+
+
 
 void free_http_response(http_response* page)
 {
@@ -301,16 +331,18 @@ url_request* parse_url(char* url, char* user_agent)
 		 * this will be included directly in GET request
 		 * this dynamicaly allocates memory , remember to free url at end
 		 */
-		url = escape_chars_to_hex(remainder, escape_chars);
-		remainder = url;
-		
 		port_begin = char_index(remainder, ':');
-		if(port_begin >= 0 && port_begin < path_begin)
+		
+		
+		
+		if(port_begin >= 0 && port_begin < path_begin )
 		{
-			new_url->hostname = (char*)malloc((port_begin+1)*sizeof(char));
-			memcpy(new_url->hostname, remainder, port_begin);
-			(new_url->hostname)[port_begin] = '\0';
-			
+			char* raw_host = (char*)malloc((port_begin+1)*sizeof(char));
+			memcpy(raw_host, remainder, port_begin);
+			raw_host[port_begin] = '\0';
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			free(raw_host);
+
 			if(path_begin-port_begin-1 <= 5)
 			{
 				int read;
@@ -329,11 +361,17 @@ url_request* parse_url(char* url, char* user_agent)
 		}
 		else
 		{
-			new_url->hostname = (char*)malloc((path_begin+1)*sizeof(char));
-			memcpy(new_url->hostname, remainder, path_begin);
-			(new_url->hostname)[path_begin] = '\0';
+			char* raw_host = (char*)malloc((path_begin+1)*sizeof(char));
+			memcpy(raw_host, remainder, path_begin);
+			raw_host[path_begin] = '\0';
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			free(raw_host);
 		}
+		
 		remainder = remainder + path_begin;
+		url = escape_chars_to_hex(remainder, escape_chars);
+		remainder = url;
+		
 		
 		if(remainder[0] != '/')
 		{
@@ -347,6 +385,7 @@ url_request* parse_url(char* url, char* user_agent)
 			new_url->path = strdup(remainder);
 		}
 		free(url); /* free memory allocated from escaping characters */
+	
 	}
 	return new_url;
 }
@@ -378,6 +417,25 @@ void free_url_request(url_request* url)
 		}
 		free(url);
 	}
+}
+
+
+
+void set_ewget_read_buffer_size(unsigned long size)
+{
+	__ewget_read_buffer_size = size;
+}
+void set_ewget_timeout_seconds(unsigned long seconds)
+{
+	__ewget_timeout_seconds  = seconds;
+}
+unsigned long get_ewget_read_buffer_size(void)
+{
+	return __ewget_read_buffer_size;
+}
+unsigned long get_ewget_timeout_seconds(void)
+{
+	return __ewget_timeout_seconds;
 }
 
 
@@ -437,6 +495,7 @@ static void alarm_triggered(int sig)
 	{
 		close(alarm_socket);
 		alarm_socket = -1;
+		alarm_socket_closed = 1;
 	}
 }
 
@@ -447,11 +506,16 @@ static http_response* retrieve_http(	url_request *url,
 					void* (*initialize_connection)(char*, int), 
 					int (*read_connection)(void*, char*, int),
 					int (*write_connection)(void*, char*, int),
-					void (*destroy_connection)(void*)
+					void (*destroy_connection)(void*),
+					FILE* header_stream,
+					FILE* body_stream,
+					FILE* combined_stream,
+					int alloc_response,
+					int* ret_val
 					)
 {
 	http_response *reply = NULL;
-
+	*ret_val  = 1;
 	if(url->hostname != NULL && url->port >= 0 && url->path != NULL)
 	{
 		
@@ -464,7 +528,14 @@ static http_response* retrieve_http(	url_request *url,
 			int test = write_connection(connection_data, request, strlen(request));
 			if(test == strlen(request))
 			{
-				reply = get_http_response(connection_data, read_connection);
+				if(alloc_response)
+				{
+					reply = (http_response*)malloc(sizeof(http_response));
+					reply->data = NULL;
+					reply->header = NULL;
+				}
+				*ret_val = 0;
+				get_http_response(connection_data, read_connection, reply, header_stream, body_stream, combined_stream);
 			}
 			free(request);
 			destroy_connection(connection_data);
@@ -472,6 +543,10 @@ static http_response* retrieve_http(	url_request *url,
 	}
 	return reply;
 }
+
+
+
+
 
 static char* create_http_request(url_request* url)
 {
@@ -531,12 +606,166 @@ static char* create_http_request(url_request* url)
 	return req_str1;
 }
 
+
+static void get_http_response(void* connection_data, int (*read_connection)(void*, char*, int), http_response *reply, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+{
+	unsigned long  read_buffer_size = __ewget_read_buffer_size ;
+	int bytes_read;
+	int header_bytes_read = 0;
+	int body_bytes_read = 0;
+	int reading_header=1;
+	char* read_buffer = (char*)malloc((read_buffer_size+1)*sizeof(char));
+	char last_two_bytes_of_old_read_buffer[3] = { '\0', '\0', '\0' }; 
+	
+
+	if(reply != NULL)
+	{
+		if(reply->header != NULL) { free(reply->header); }
+		if(reply->data   != NULL) { free(reply->data);   }
+		reply->header  = NULL;
+		reply->data    = NULL;
+		reply->is_text = 0;
+		reply->length  = 0;
+	}
+
+
+	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
+	bytes_read = bytes_read < 0 ? 0 : bytes_read;
+	read_buffer[bytes_read] = '\0'; /* facilitates header string processing */
+	while(bytes_read > 0)
+	{
+		int header_length = 0;
+		char* body_start = read_buffer;
+		if(reading_header)
+		{
+			char* cr_end = NULL;
+			char* lf_end = NULL;
+
+			/* set cr_end and lf_end */
+			if(cr_end == NULL && lf_end == NULL && last_two_bytes_of_old_read_buffer[0] == '\n' && last_two_bytes_of_old_read_buffer[1] == '\r')
+			{
+				cr_end = read_buffer[0] == '\n' ? read_buffer+1 : cr_end;
+			}
+			if(cr_end == NULL && lf_end == NULL && last_two_bytes_of_old_read_buffer[1] == '\n')
+			{
+				cr_end = read_buffer[0] == '\r' && read_buffer[1] == '\n' ? read_buffer+2 : cr_end;
+				lf_end = read_buffer[0] == '\n' ? read_buffer+1 : lf_end;
+			}
+			if(cr_end == NULL && lf_end == NULL)
+			{
+				cr_end = strstr(read_buffer, "\n\r\n");
+				lf_end = strstr(read_buffer, "\n\n");
+				cr_end = cr_end != NULL ? cr_end+3 : cr_end;
+				lf_end = lf_end != NULL ? lf_end+2 : lf_end;
+			}
+
+			
+			/* determine header_length given cr_end and lf_end */	
+			if(cr_end != NULL && lf_end != NULL)
+			{
+				body_start = cr_end < lf_end ? cr_end : lf_end;
+			}
+			else
+			{
+				body_start = cr_end != NULL ? cr_end : lf_end;
+			}
+			header_length = body_start != NULL ? (int)(body_start - read_buffer) : bytes_read;
+
+
+			/* write header data to streams and/or http response*/
+			if(header_stream != NULL)
+			{
+				fwrite(read_buffer, 1, header_length, header_stream);
+			}
+			if(combined_stream != NULL)
+			{
+				fwrite(read_buffer, 1, header_length, combined_stream);
+			}
+			if(reply != NULL)
+			{
+				char* header = (char*)malloc((header_bytes_read+header_length+1)*sizeof(char));
+				char* content_start;
+				if(header_bytes_read > 0)
+				{
+					memcpy(header, reply->header, header_bytes_read);
+					free(reply->header);
+				}
+				memcpy(header+header_bytes_read, read_buffer, header_length);
+				header[header_bytes_read+header_length] = '\0';
+				reply->header = strdup(header);
+				
+
+				header_bytes_read = header_bytes_read + header_length;
+
+
+				to_lowercase(header);
+				content_start = strstr(header, "content-type:");
+				if(content_start != NULL)
+				{
+					int content_end = char_index(content_start, '\n');
+					char *content = (char*)malloc((content_end+1)*sizeof(char));
+					memcpy(content, content_start, content_end);
+					content[content_end] = '\0';
+					reply->is_text = strstr(content, "text") == NULL ? 0 : 1;
+					free(content);
+				}
+				free(header);
+
+			}
+
+			/* if end of header detected, update for that */
+			if(body_start != NULL)
+			{
+				reading_header = 0;
+			}
+		}
+
+		/* write body data to streams(s) and/or http response */
+		if(!reading_header)
+		{
+			int body_length = bytes_read - header_length;
+			if(body_stream != NULL)
+			{
+				fwrite(body_start, 1, body_length, body_stream);
+			}
+			if(combined_stream != NULL)
+			{
+				fwrite(body_start, 1, body_length, combined_stream);
+			}
+			if(reply != NULL)
+			{
+				char* body = (char*)malloc((body_bytes_read+body_length)*sizeof(char));
+				if(body_bytes_read > 0)
+				{
+					memcpy(body, reply->data, body_bytes_read);
+					free(reply->data);
+				}
+				memcpy(body+body_bytes_read, body_start, body_length);
+				body_bytes_read = body_bytes_read + body_length;
+				reply->data = body;
+				reply->length = body_bytes_read;
+			}
+		}
+		
+		last_two_bytes_of_old_read_buffer[0] = bytes_read == 1 ? '\0' : read_buffer[bytes_read-2];
+		last_two_bytes_of_old_read_buffer[1] = read_buffer[bytes_read-1];
+
+		bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
+		bytes_read = bytes_read < 0 ? 0 : bytes_read;
+		read_buffer[bytes_read] = '\0'; /* facilitates header string processing */
+	}
+	free(read_buffer);
+
+}
+
+/*
+
 static http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int))
 {
 
 
 	char* http_data = NULL;
-	int read_buffer_size = 1024;
+	int read_buffer_size = DEFAULT_READ_BUFFER_SIZE;
 	char* read_buffer = (char*)malloc((read_buffer_size+1)*sizeof(char));
 	int total_bytes_read = 0;
 	int bytes_read;
@@ -550,7 +779,7 @@ static http_response* get_http_response(void* connection_data, int (*read_connec
 
 	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
 	bytes_read = bytes_read < 0 ? 0 : bytes_read;
-	read_buffer[bytes_read] = '\0'; /* facilitates string processing */
+	read_buffer[bytes_read] = '\0'; // facilitates string processing 
 	while(bytes_read > 0)
 	{
 		int updated_header = 0;
@@ -625,7 +854,7 @@ static http_response* get_http_response(void* connection_data, int (*read_connec
 		}
 		bytes_read=read_connection(connection_data, read_buffer, read_buffer_size);
 		bytes_read = bytes_read < 0 ? 0 : bytes_read;
-		read_buffer[bytes_read] = '\0'; /* facilitates string processing */
+		read_buffer[bytes_read] = '\0'; // facilitates string processing 
 	}
 	if(http_data == NULL)
 	{
@@ -639,7 +868,7 @@ static http_response* get_http_response(void* connection_data, int (*read_connec
 	return reply;
 }
 
-
+*/
 
 
 static int char_index(char* str, int ch)
@@ -657,6 +886,8 @@ static int tcp_connect(char* hostname, int port)
 	struct sockaddr_in address;
 	long arg = 0;
 	int connection;
+
+
 
 	if(hostname == NULL)
 	{
@@ -703,7 +934,7 @@ static int tcp_connect(char* hostname, int port)
 			struct timeval tv;
 			int valopt;
 			
-      			tv.tv_sec = EWGET_TIMEOUT_SECONDS; 
+      			tv.tv_sec = __ewget_timeout_seconds; 
 			tv.tv_usec = 0; 
 			FD_ZERO(&myset); 
 			FD_SET(sockfd, &myset); 
@@ -976,7 +1207,15 @@ char* dynamic_strcat(int num_strs, ...)
 static void* initialize_connection_http(char* host, int port)
 {
 	int *socket = (int*)malloc(sizeof(int));
+	
+	/*
+	* as soon as we open, or attempt to open a connection
+	* indicate that the latest connection has not had
+	* a timeout/close triggered on it
+	*/
+	alarm_socket_closed = 0;
 	*socket	= tcp_connect(host, port);
+
 	if(*socket >= 0)
 	{	
 		return socket;
@@ -987,6 +1226,7 @@ static void* initialize_connection_http(char* host, int port)
 		return NULL;
 	}
 }
+
 static int read_http(void* connection_data, char* read_buffer, int read_length)
 {
 	int* socket = (int*)connection_data;
@@ -994,7 +1234,7 @@ static int read_http(void* connection_data, char* read_buffer, int read_length)
 
 	alarm_socket = *socket;	
 	signal(SIGALRM, alarm_triggered );
-	alarm(EWGET_TIMEOUT_SECONDS);
+	alarm(__ewget_timeout_seconds);
 	bytes_read = read(*socket, read_buffer, read_length);
 	alarm(0);
 
@@ -1012,8 +1252,12 @@ static void destroy_connection_http(void* connection_data)
 	if(connection_data != NULL)
 	{
 		int* socket = (int*)connection_data;
-		close(*socket);
+		if(alarm_socket_closed == 0)
+		{
+			close(*socket);
+		}
 		free(socket);
+		alarm_socket_closed = 0;
 	}
 }
 
@@ -1022,7 +1266,16 @@ static void destroy_connection_http(void* connection_data)
 static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
-	int socket = tcp_connect(host, port);
+	int socket;
+
+	/*
+	* as soon as we open, or attempt to open a connection
+	* indicate that the latest connection has not had
+	* a timeout/close triggered on it
+	*/
+	alarm_socket_closed = 0;
+	socket = tcp_connect(host, port);
+
 	if(socket >= 0)
 	{
 		int initialized = -1;
@@ -1113,7 +1366,7 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );
-	alarm(EWGET_TIMEOUT_SECONDS);
+	alarm(__ewget_timeout_seconds);
 	bytes_read = SSL_read(cd->ssl, read_buffer, read_length);
 	alarm(0);
 
@@ -1131,7 +1384,12 @@ static void destroy_connection_https(void* connection_data)
 	if(connection_data != NULL)
 	{
 		ssl_connection_data *cd = (ssl_connection_data*)connection_data;
-		close(cd->socket);
+		if(alarm_socket_closed == 0)
+		{
+			close(cd->socket);
+		}
+		alarm_socket_closed = 0;
+		
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
 		free(cd);

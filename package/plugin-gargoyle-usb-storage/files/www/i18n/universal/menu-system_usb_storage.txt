@@ -1,0 +1,10 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=USB Storage
+EN=USB Storage
+ES=Almacenaje de USB
+DE=USB Speicher
+PL=Nośniki USB
+ZH-CN=USB存储
+RU=USB-устройства хранения данных
+NO=USB Lagring

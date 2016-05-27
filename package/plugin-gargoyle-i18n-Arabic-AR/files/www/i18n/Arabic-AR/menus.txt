@@ -1,0 +1,9 @@
+#!/bin/sh
+
+gargoyle_display_firewall="جدار حماية"
+gargoyle_display_status="حالة"
+gargoyle_display_status_overview="نظرة عامة"
+gargoyle_display_connection_basic="الأساسية"
+gargoyle_display_system="نظام"
+gargoyle_display_system_about="حول"
+gargoyle_display_logout="مخرج"

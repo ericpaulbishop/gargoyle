@@ -1,10 +1,12 @@
 /*
- * This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
+ * This program is copyright Â© 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
  * version 2.0 with a special clarification/exception that permits adapting the program to 
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL. 
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+
+var timeStr=new Object(); //part of i18n; currently unused
 
 var previousTimezoneDefinition = "PST8PDT,M3.2.0/2,M11.1.0/2";
 
@@ -14,50 +16,45 @@ function saveChanges()
 	errorList = proofreadAll();
 	if(errorList.length > 0)
 	{
-		errorString = errorList.join("\n") + "\n\nChanges could not be applied.";
+		errorString = errorList.join("\n") + "\n\n" + UI.ErrChanges;
 		alert(errorString);
 	}
 	else
 	{
 		setControlsEnabled(false, true);
 		
-		sectionDeleteCommands = [];
-		ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
-		for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
-		{
-			sectionDeleteCommands.push("uci del ntpclient." + ntpServerSections[sectionIndex]);
-			uciOriginal.removeSection("ntpclient", ntpServerSections[sectionIndex]);
-		}
-		sectionDeleteCommands.push("uci commit");
-
-		uci = uciOriginal.clone();	
+		uci = uciOriginal.clone();
+		var newServers = [];
 		for(sectionIndex=0; sectionIndex < 3; sectionIndex++)
 		{
-			serverName = document.getElementById("server" + (sectionIndex+1)).value;
-			if(serverName != "")
+			var server = document.getElementById("server" + (sectionIndex+1)).value;
+			if(server != "")
 			{
-				sectionName = "cfg" + (sectionIndex+1);
-				uci.set("ntpclient", sectionName, "", "ntpserver");
-				uci.set("ntpclient", sectionName, "port", "123");
-				uci.set("ntpclient", sectionName, "hostname", document.getElementById("server" + (sectionIndex+1)).value);
+				newServers.push(server);
 			}
 		}
-	
-		//update timezone and update frequency
+		uci.createListOption("system", "ntp", "server", true)
+		uci.set("system", "ntp", "server", newServers, false)
+		
+		//update timezone
 		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
-		var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-		uci.set("ntpclient", ntpClientSections[0], "interval", getSelectedValue("update_frequency"));
 
 		//update date format
-		var systemDateFormat = getSelectedValue("date_format"); 
+		var systemDateFormat = getSelectedValue("date_format");
 		uci.set("gargoyle", "global", "dateformat", getSelectedValue("date_format"));
+		
+		//update time format
+		uci.set("gargoyle", "global", "hour_style", getSelectedValue("time_format"));
 
 		//update command to output date
 		var formatStrings=[];
-		formatStrings["iso"] = "\"+%Y/%m/%d %H:%M %Z\"";
+		formatStrings["iso"]       = "\"+%Y/%m/%d %H:%M %Z\"";
+		formatStrings["iso8601"]   = "\"+%Y-%m-%d %H:%M %Z\"";
 		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
-		formatStrings["usa"] = "\"+%d/%m/%y %H:%M %Z\"";
+		formatStrings["usa"]       = "\"+%m/%d/%y %H:%M %Z\"";
+		formatStrings["russia"]    = "\"+%d.%m.%Y %H:%M %Z\"";
+		formatStrings["argentina"] = "\"+%d/%m/%Y %H:%M %Z\"";
 		var outputDateCommand = "";
 		if(getSelectedValue("timezone").match(/UTC/))
 		{
@@ -88,13 +85,13 @@ function saveChanges()
 			uciOriginal.removeSection("system", systemSections[0]);
 			uci.removeSection("system", systemSections[0]);
 		}
-		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' >/etc/TZ\n";
+		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' | sed \"s/'//g\" >/etc/TZ\n";
 		
 
 
 
-		commands = sectionDeleteCommands.join("\n") + "\n" + systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "ACTION=ifup /etc/hotplug.d/iface/20-ntpclient\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand;
-		//document.getElementById("output").value = commands;	
+		commands = systemCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + setTimezoneCommand + "\n" + "/etc/init.d/sysntpd restart\n/usr/bin/set_kernel_timezone\n" +  outputDateCommand + " ;\ntouch /etc/banner ;\n"
+		//document.getElementById("output").value = commands;
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
@@ -133,7 +130,7 @@ function proofreadAll()
 
 function resetData()
 {
-	setChildText("current_time", currentTime);
+	setChildText("current_time", cnv_LocaleTime(currentTime));
 	
 	timezoneList = timezoneData[0];
 	timezoneDefinitions = timezoneData[2];
@@ -154,25 +151,25 @@ function resetData()
 	previousTimezoneDefinition = currentTimezone;
 
 
-	var ntpClientSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpclient");
-	var updateFrequency = uciOriginal.get("ntpclient", ntpClientSections[0], "interval");
 	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
-	setSelectedValue("update_frequency", "43200"); //set default value
-	setSelectedValue("update_frequency", updateFrequency); //set value loaded from config
 	setSelectedValue("date_format", "usa"); //set default value for date
 	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
+	
+	var sysTimeFmt = uciOriginal.get("gargoyle",  "global", "hour_style");
+	setSelectedValue("time_format", 12);
+	setSelectedValue("time_format", sysTimeFmt);
 
-
-	var ntpServerSections = uciOriginal.getAllSectionsOfType("ntpclient", "ntpserver");
-	var tzServers = [];
-	for(sectionIndex=0; sectionIndex < ntpServerSections.length; sectionIndex++)
+	var tzServers = uciOriginal.get("system", "ntp", "server");
+	var tzServers = tzServers == null || tzServers == "" ? [] : tzServers
+	while(tzServers.length > 3)
 	{
-		server = uciOriginal.get("ntpclient", ntpServerSections[sectionIndex], "hostname");
-		if(server != "" && sectionIndex < 3)
-		{
-			tzServers.push(server );
-			document.getElementById("server" + (1+sectionIndex)).value = server;
-		}
+		tzServers.pop();
+	}
+
+	var sectionIndex;
+	for(sectionIndex=0 ; sectionIndex < tzServers.length ; sectionIndex++)
+	{
+		document.getElementById("server" + (1+sectionIndex)).value = tzServers[sectionIndex];
 	}
 
 	currentRegion = "custom";
@@ -184,7 +181,11 @@ function resetData()
 		{
 			validRegion = false;
 			nextRegion = tzServers[serverIndex].match(/[0-9]+\.([^\.]+)\.pool\.ntp\.org/);
-			if(nextRegion)
+			if(nextRegion == null && tzServers[serverIndex].match(/[0-9]+\.pool\.ntp\.org/)  )
+			{
+				nextRegion = ["", "global"]
+			}
+			if(nextRegion != null)
 			{
 				if(nextRegion[1] == testRegion || testRegion == "")
 				{
@@ -227,7 +228,7 @@ function timezoneChanged()
 
 function updateServerList()
 {
-	region=getSelectedValue("region");
+	var region=getSelectedValue("region");
 	for(serverIndex=1; serverIndex <= 3; serverIndex++)
 	{
 		if(region == "custom")
@@ -236,7 +237,8 @@ function updateServerList()
 		}
 		else
 		{
-			setElementEnabled( document.getElementById("server" + serverIndex), false, (3-serverIndex) + "." + region + ".pool.ntp.org");	
+			var regionServer = ((3-serverIndex) + "." + region + ".pool.ntp.org").replace(/\.global\./, ".")
+			setElementEnabled( document.getElementById("server" + serverIndex), false, regionServer);	
 		}
 	}	
 }

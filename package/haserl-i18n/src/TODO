@@ -1,0 +1,18 @@
+15 Feb 2008
+* multiselect needs to return an array of values.  PHP handles it like this:
+  if the variable is foo[] then an array is returned.  If the variable name
+  in the form is foo, then the last value is returned.  For shell, make it
+  a \n delimited array, so that you can do for a in $foo; do  (bb ash doesnt
+  support real arrays.)  Lua could though. (Scott) - DONE - but lua is newline
+  terminated, not as a table.
+25 Jan 2008
+* change sliding_buffer into a circular buffer to reduce mem moves.
+* turn haserl core into a busybox applet
+20 Nov 2007
+* Add option to separate FORM into COOKIE, GET, POST tables (DONE - Scott)
+* Make it easier for people like Scott to make new haserl tags
+* Release a 0.10.0 or 1.0.0 version already
+12 Jul 2007
+* combine all the llist stuff into one generic library. (save space)
+6 Feb 2007
+* Investigate fastcgi for the lua version of haserl

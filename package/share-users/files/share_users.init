@@ -1,0 +1,149 @@
+#!/bin/sh /etc/rc.common
+
+START=25
+
+cur_user_list="/etc/share_user_list"
+
+do_lock()
+{
+	got_lock=0
+	local timeout=15
+	if [ ! -e /tmp/share_users.lock ] ; then
+		touch /tmp/share_users.lock
+		got_lock=1
+	fi
+	echo "$got_lock"
+}
+
+do_unlock()
+{
+	rm -rf /tmp/share_users.lock
+}
+
+
+clear_old_users()
+{
+	cur_users=$(cat "$cur_user_list")
+	for u in $cur_users ; do
+		utest=$(/sbin/uci get share_users.$u)
+		if [ "$utest" != "user" ] ; then
+			for f in "/etc/passwd" "/etc/group" "/etc/shadow" "/etc/samba/smbpasswd" ; do
+				if [ -e "$f" ] ; then
+					sed -i "/^$u:*/d" "$f"
+				fi
+			done
+			sed -i "/^$u\$/d" "$cur_user_list"
+		fi
+	done
+}
+
+update_user()
+{
+	username="$1"
+	config_get password "$username" password
+	config_get password_salt "$username" password_salt
+	config_get password_sha1 "$username" password_sha1
+	config_get home_dir      "$username" home_dir	
+
+	if [ -z "$home_dir" ] ; then
+		home_dir="/tmp/share_home/$username"
+	fi
+	if [ ! -d "$home_dir" ] ; then
+		rm -rf     "$home_dir"
+		mkdir -p   "$home_dir"
+		chown root "$home_dir"
+		chmod 555  "$home_dir"
+	fi
+
+	if [ "$username" = "ftp" ] || [ "$username" = "anonymous" ] || [ "$username" = "root" ] || [ "$username" = "daemon" ] || [ "$username" = "network" ] || [ "$username" = "nobody" ] ; then
+		echo "ERROR: Username '$username' is not allowed"
+		return
+	fi
+
+
+	local is_cur_user=$(grep "^$username\$" "$cur_user_list")
+	if [ -z "$is_cur_user" ] ; then
+		echo "$username" >> "$cur_user_list"
+	fi
+
+
+	if [ -n "$password" ] ; then
+		if [ -z "$password_salt" ] ; then
+			random_digit=$(</dev/urandom tr -dc 1-9 | head -c 1)
+			length=$(( 20 + $random_digit ))
+			password_salt=$(</dev/urandom tr -dc A-Za-z0-9 | head -c $length)
+		fi
+
+		local new_sha1=$(printf "$password_salt$password" | sha1sum)
+		new_sha1=${new_sha1% *}
+		if [ "$new_sha1" != "$password_sha1" ] ; then
+			
+			local user_num=$( awk -F ":" -v username="$username" ' $1 == username { print $3 }' /etc/passwd)
+			local group_num=$(awk -F ":" -v username="$username" ' $1 == username { print $4 }' /etc/passwd)
+
+
+			for f in "/etc/passwd" "/etc/group" "/etc/shadow" ; do
+				if [ -e "$f" ] ; then
+					sed -i "/^$username:*/d" "$f"
+				fi
+			done
+
+			
+			if [ -z "$group_num" ] ; then
+				group_num=1000
+				local tst=$(awk -F ":" -v groupnum="$group_num" ' $3 == groupnum { print "found" }' /etc/group)
+				while [ -n "$tst" ] ; do
+					group_num=$(($group_num+1))
+					tst=$(awk -F ":" -v groupnum="$group_num" ' $3 == groupnum { print "found" }' /etc/group)
+				done
+			fi
+			echo "$username:x:$group_num:" >> /etc/group
+			if [ -e /etc/shadow ] ; then
+				echo "$username:*:0:0:99999:7:::" >> /etc/shadow
+			fi
+			
+			if [ -z "$user_num" ] ; then
+				local user_num="$group_num"
+				local tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+				while [ -n "$tst" ] ; do
+					user_num=$(($user_num+1))
+					tst=$(awk -F ":" -v usernum="$user_num" ' $3 == usernum { print "found" }' /etc/passwd )
+				done
+			fi
+			echo "$username:x:$user_num:$group_num:$username:$home_dir:/bin/false" >> /etc/passwd
+
+			uci_set    "share_users" "$username" password_salt "$password_salt"
+			uci_set    "share_users" "$username" password_sha1 "$new_sha1"
+
+			(echo "$password" ; echo "$password") | passwd "$username" >/dev/null 2>&1
+			if [ -e /usr/sbin/smbpasswd ] ; then
+				touch /etc/samba/smbpasswd
+				printf "$password\n$password\n" | /usr/sbin/smbpasswd -a -s "$username"
+			fi
+		fi
+		uci_remove "share_users" "$username" password
+		uci_commit
+	fi
+	local cur_home_dir=$( awk -F ":" -v username="$username" ' $1 == username { print $6 }' /etc/passwd )
+	if [ "$cur_home_dir" != "$home_dir" ] ; then
+		local home_line=$(grep "^$username:" /etc/passwd)
+		home_line=${home_line%:*:/bin/false}
+		home_line="$home_line:$home_dir:/bin/false"
+		sed -i "/^$username:*/d" /etc/passwd
+		echo "$home_line" >> /etc/passwd
+	fi
+
+}
+
+start()
+{
+	got_lock=$(do_lock)
+	if [ "$got_lock" = "1" ] ; then
+		touch "$cur_user_list"
+		clear_old_users
+		config_load "share_users"
+		config_foreach update_user "user"
+		do_unlock
+	fi
+}
+

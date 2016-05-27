@@ -302,6 +302,7 @@ static void parse_returned_ip_data(	void *out_data,
 					)
 {
 	uint32_t ip = *( (uint32_t*)(in_buffer + *in_index) );
+    ip_bw_kernel_data_item* ip_bw_data = (ip_bw_kernel_data*)(in_buffer + *in_index);
 	if(get_history == 0)
 	{
 		(((ip_bw*)out_data)[*out_index]).ip = ip;
@@ -311,28 +312,26 @@ static void parse_returned_ip_data(	void *out_data,
 	}
 	else
 	{
-			ip_bw_history history = ((ip_bw_history*)out_data)[*out_index];
-			history.reset_interval = reset_interval;
-			history.reset_time = reset_time;
-			history.is_constant_interval = is_constant_interval;
+			ip_bw_history *history = ((ip_bw_history*)out_data) + *out_index;
+			history->reset_interval = reset_interval;
+			history->reset_time = reset_time;
+			history->is_constant_interval = is_constant_interval;
 
-			history.ip = ip;
-			history.num_nodes = *( (uint32_t*)(in_buffer + *in_index+4));
-			history.first_start = (time_t) *( (uint64_t*)(in_buffer + *in_index+8));
-			history.first_end   = (time_t) *( (uint64_t*)(in_buffer + *in_index+16));
-			history.last_end    = (time_t) *( (uint64_t*)(in_buffer + *in_index+24));
-			*in_index = *in_index + 32;
+            history->ip = ip_bw_data->ip;
+			history->num_nodes = ip_bw_data->num_nodes;
+			history->first_start = ip_bw_data->first_start;
+			history->first_end   = ip_bw_data->first_end;
+			history->last_end    = ip_bw_data->last_end;
 
-
-			history.history_bws =  (uint64_t*)malloc( (history.num_nodes+1)*sizeof(uint64_t) );
+			history->history_bws =  (uint64_t*)malloc( (history->num_nodes+1)*sizeof(uint64_t) );
 			
 			/* read bws */
 			int node_index = 0;
-			while(node_index < history.num_nodes)
+            *in_index += 32;
+            for (node_index = 0; node_index < history->num_nodes; node_index++)
 			{
-				(history.history_bws)[node_index] =  *( (uint64_t*)(in_buffer + *in_index) );
-				*in_index = *in_index + 8;
-				node_index++;
+                *in_index += 8;
+				(history->history_bws)[node_index] =  ip_bw_data->ipbw_data[node_index];
 			}
 
 
@@ -351,11 +350,9 @@ static void parse_returned_ip_data(	void *out_data,
 			time_t now;
 			time(&now);
 			int current_minutes_west = get_minutes_west(now);
-			history.first_start = history.first_start + (60*(get_minutes_west(history.first_start)-current_minutes_west));
-			history.first_end = history.first_end + (60*(get_minutes_west(history.first_end)-current_minutes_west));
-			history.last_end = history.last_end + (60*(get_minutes_west(history.last_end)-current_minutes_west));
-
-			((ip_bw_history*)out_data)[*out_index] = history;
+			history->first_start = history->first_start + (60*(get_minutes_west(history->first_start)-current_minutes_west));
+			history->first_end = history->first_end + (60*(get_minutes_west(history->first_end)-current_minutes_west));
+			history->last_end = history->last_end + (60*(get_minutes_west(history->last_end)-current_minutes_west));
 	}
 	*out_index = *out_index + 1;
 }
@@ -367,7 +364,8 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	memset(buf, '\0',  BANDWIDTH_QUERY_LENGTH);
 	int done = 0;
-	
+    ip_bw_kernel_data* ip_bw_data = (ip_bw_kernel_data*)(buf);
+
 	*data = NULL;
 	*num_ips = 0;
 
@@ -415,14 +413,13 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 		}
 		else
 		{
-			uint32_t total_ips                 = *( (uint32_t*)(buf+1) );
+			uint32_t total_ips                 = ip_bw_data->ip_total;
 			/*uint32_t next_ip_index             = *( (uint32_t*)(buf+5) ); //unused */
-			uint32_t response_ips              = *( (uint32_t*)(buf+9) );
-			time_t reset_interval              = (time_t) *( (uint64_t*)(buf+13) );
-			time_t reset_time                  = (time_t) *( (uint64_t*)(buf+21) );
-			unsigned char is_constant_interval = *( (unsigned char*)(buf+29) );
+			uint32_t response_ips              = ip_bw_data->ip_num;
+			time_t reset_interval              = ip_bw_data->reset_interval;
+			time_t reset_time                  = ip_bw_data->reset_time;
+			unsigned char is_constant_interval = ip_bw_data->reset_is_constant_interval;
 			
-
 			if(!data_initialized)
 			{
 				*num_ips = total_ips;
@@ -1168,80 +1165,92 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 	for(history_index=0; history_index < num_histories; history_index++)
 	{
 		ip_bw_history history = histories[history_index];
-		char *ip_str = NULL;
-		time_t *times = NULL;
-		if(history.ip != 0)
-		{
-			struct in_addr ipaddr;
-			ipaddr.s_addr = history.ip;
-			ip_str = strdup(inet_ntoa(ipaddr));
-		}
-		else
-		{
-			ip_str = strdup("COMBINED");
-		}
 		
-		
-		if(output_type == 'm' || output_type == 'h')
+		int history_initialized = 1;
+		if( history.first_start == 0 && history.first_end == 0 && history.last_end == 0)
 		{
-			fprintf(out, "%s %-15s\n", id, ip_str);
+			history_initialized = 0;
 		}
 
-		if(output_type == 'm')
+		if(history_initialized)
 		{
-			printf("%ld\n", history.first_start);
-			printf("%ld\n", history.first_end);
-			printf("%ld\n", history.last_end);
-		}
-		else
-		{
-			times = get_interval_starts_for_history(history);
-		}
+			char *ip_str = NULL;
+			time_t *times = NULL;
 
-		int hindex = 0;
-		for(hindex=0; hindex < history.num_nodes; hindex++)
-		{
-			uint64_t bw = (history.history_bws)[hindex];
+
+			if(history.ip != 0)
+			{
+				struct in_addr ipaddr;
+				ipaddr.s_addr = history.ip;
+				ip_str = strdup(inet_ntoa(ipaddr));
+			}
+			else
+			{
+				ip_str = strdup("COMBINED");
+			}
+		
+		
+			if(output_type == 'm' || output_type == 'h')
+			{
+				fprintf(out, "%s %-15s\n", id, ip_str);
+			}
+
 			if(output_type == 'm')
 			{
-				if(hindex != 0) { printf(","); };
-				printf("%lld", (unsigned long long int)bw);
+				printf("%ld\n", history.first_start);
+				printf("%ld\n", history.first_end);
+				printf("%ld\n", history.last_end);
 			}
-			else if(times != NULL)
+			else
 			{
-				time_t start = times[hindex];
-				time_t end = hindex+1 < history.num_nodes ? times[hindex+1] : 0 ;
+				times = get_interval_starts_for_history(history);
+			}
 
-				char* start_str = strdup(asctime(localtime(&start)));
-				char* end_str = end == 0 ? strdup("(Now)") : strdup(asctime(localtime(&end)));
-				char* nl = strchr(start_str, '\n');
-				if(nl != NULL)
+			int hindex = 0;
+			for(hindex=0; hindex < history.num_nodes; hindex++)
+			{
+				uint64_t bw = (history.history_bws)[hindex];
+				if(output_type == 'm')
 				{
-					*nl = '\0';
+					if(hindex != 0) { printf(","); };
+					printf("%lld", (unsigned long long int)bw);
 				}
-				nl = strchr(end_str, '\n');
-				if(nl != NULL)
+				else if(times != NULL)
 				{
-					*nl = '\0';
-				}
-
-				if(output_type == 'h')
-				{
-					fprintf(out, "%lld\t%s\t%s\n", (unsigned long long int)bw, start_str, end_str);
-				}
-				else
-				{
-					fprintf(out, "%s,%s,%ld,%ld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
-				}
+					time_t start = times[hindex];
+					time_t end = hindex+1 < history.num_nodes ? times[hindex+1] : 0 ;
+	
+					char* start_str = strdup(asctime(localtime(&start)));
+					char* end_str = end == 0 ? strdup("(Now)") : strdup(asctime(localtime(&end)));
+					char* nl = strchr(start_str, '\n');
+					if(nl != NULL)
+					{
+						*nl = '\0';
+					}
+					nl = strchr(end_str, '\n');
+					if(nl != NULL)
+					{
+						*nl = '\0';
+					}
+	
+					if(output_type == 'h')
+					{
+						fprintf(out, "%lld\t%s\t%s\n", (unsigned long long int)bw, start_str, end_str);
+					}
+					else
+					{
+						fprintf(out, "%s,%s,%ld,%ld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
+					}
 				
 	
-				free(start_str);
-				free(end_str);
+					free(start_str);
+					free(end_str);
+				}
 			}
+			fprintf(out, "\n");
+			if(times != NULL) { free(times); };
+			if(ip_str != NULL) { free(ip_str); };
 		}
-		fprintf(out, "\n");
-		if(times != NULL) { free(times); };
-		if(ip_str != NULL) { free(ip_str); };
 	}
 }
 

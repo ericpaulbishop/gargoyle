@@ -3,7 +3,7 @@ config global global
 	option bin_root		'.'
 	option js_root		'js'
 	option theme_root	'themes'
-	option theme		'default'
+	option theme		'Gargoyle'
 	option common_css	'common.css'
 	option common_js	'common.js'
 	option require_web_password	'1'
@@ -37,6 +37,7 @@ config display display
 	option system_access		'Router Access'
 	option system_ident		'Identification'
 	option system_time		'Time'
+	option system_plugins		'Plugins'
 	option system_backup		'Backup / Restore'
 	option system_update		'Update Firmware'
 	option system_reboot		'Reboot'
@@ -66,6 +67,7 @@ config scripts scripts
 	option system_access		'access.sh'
 	option system_ident		'identification.sh'
 	option system_time		'time.sh'
+	option system_plugins		'plugins.sh'
 	option system_backup		'backup.sh'
 	option system_update		'update.sh'
 	option system_reboot		'reboot.sh'
@@ -99,6 +101,7 @@ config 400 system
 	option access	'100'
 	option ident	'200'
 	option time	'300'
+	option plugins  '312'
 	option backup	'400'
 	option update	'500'
 	option reboot	'600'
@@ -114,8 +117,4 @@ config bandwidth_display bandwidth_display
 
 config help help
 	option ddns_1		1
-	option qos_up_1		1
-	option qos_up_2		1
-	option qos_down_1	1
-	option qos_down_2	1
 

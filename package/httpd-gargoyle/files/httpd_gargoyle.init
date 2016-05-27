@@ -25,7 +25,12 @@ start()
 	fi
 
 	# Generate /etc/httpd_gargoyle.password from root password
-	pass_str=$(awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' /etc/passwd 2>/dev/null )
+	pass_str=""
+	if [ -e /etc/shadow ] ; then
+		pass_str=$(awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' /etc/shadow 2>/dev/null )
+	else
+		pass_str=$(awk 'BEGIN {FS=":"} $0~/^root\:/ { print $2 }' /etc/passwd 2>/dev/null )
+	fi
 	tmp_path="/tmp/httpd_gargoyle.password" 
 	real_path="/etc/httpd_gargoyle.password" 
 	echo "admin:$pass_str" >  "$tmp_path"

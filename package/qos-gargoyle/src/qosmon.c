@@ -33,8 +33,8 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
-#include "SNAPSHOT.h"
 #include "utils.h"
 #include "tc_util.h"
 #include "tc_common.h"
@@ -47,12 +47,31 @@
 #include <ncurses.h>
 #endif
 
-#define MAXPACKET   100 /* max packet size */
-#define BACKGROUND  3   /* Detact and run in the background */
+
+#define MAXPACKET   100   /* max packet size */
+#define BACKGROUND  3     /* Detact and run in the background */
+#define ADDENTITLEMENT 4
 
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN  64
 #endif
+
+//The number of arguments needed for two of our kernel calls changed
+//in iproute2 after v2.6.29 (not sure when).  We will use the new define
+//RTNL_FAMILY_MAX to tell us that we are linking against a version of iproute2 
+//after then and define dump_filter and talk accordingly.
+#ifdef RTNL_FAMILY_MAX
+#define dump_filter(a,b,c) rtnl_dump_filter(a,b,c)
+#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e)
+#else
+#define dump_filter(a,b,c) rtnl_dump_filter(a,b,c,NULL,NULL)
+#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e,NULL,NULL)
+#endif
+
+
+/* use_names is required when linking to tc_util.o */
+bool use_names = false;
+
 
 u_char  packet[MAXPACKET];
 int pingflags, options;
@@ -69,13 +88,15 @@ struct sockaddr_in whereto;/* Who to ping */
 int datalen=64-8;   /* How much data */
 
 const char usage[] =
+"Gargoyle active congestion controller version 2.2\n\n"
 "Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
 "              bandwidth  - The maximum download speed the WAN link will support in kbps.\n"
 "              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
-"                     -b  - Run in the background\n";
+"                     -b  - Run in the background\n"
+"                     -a  - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n";
 
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
@@ -97,9 +118,12 @@ int rawfltime;              //Trip time in milliseconds
 struct CLASS_STATS {
    int        ID;          //Class leaf ID
    __u64      bytes;       //Work bytes last query
+   u_char     rtclass;     //True if class is realtime.
    u_char     backlog;     //Number of packets waiting
-   u_char     actflg;      //True when the class is considered active
+   u_char     actflg;      //True if class is active.
    long int   cbw_flt;     //Class bandwidth subject to filter. (bps)
+   long int   cbw_flt_rt;  //Class realtime bandwidth subject to filter. (bps)
+   long       bwtime;      //Timestamp of last byte reading.
 };
 
 #define STATCNT 30
@@ -110,23 +134,27 @@ u_char errorflg;
 u_char firstflg=1;       //First pass flag
 
 u_char DCA;              //Number of download classes active
+u_char RTDCA;            //Number of realtime download classes active
 u_char pingon=0;         //Set to one when pinger becomes active.
-int    pinglimit=0;      //Maximum ping time to allow before reacting. 
+int    pinglimit=0;      //MinRTT mode ping time. 
+int    pinglimit_cl=0;   //Ping limit entered on the commandline.
+int    plimit;           //Currently enforce ping limit
 
 float BWTC;              //Time constant of the bandwidth filter
 int DBW_UL;              //This the absolute limit of the link passed in as a parameter.
 int dbw_ul;              //This is the last value of the limit sent to the kernel.
 int new_dbw_ul;          //The new link limit proposed by the state machine.
+int saved_active_limit;  //The new link limit last known to work with active mode.
+int saved_realtime_limit;//The new link limit last known to work with realtime mode.
 long int dbw_fil;        //Filtered total download load (bps).
 
 #define QMON_CHK   0
 #define QMON_INIT  1
-#define QMON_WATCH 2
-#define QMON_WAIT  3
-#define QMON_FREE  4
-#define QMON_CHILL 5
-#define QMON_EXIT  6
-char *statename[]= {"CHECK","INIT","WATCH","WAIT","FREE","CHILL","DISABLED"};
+#define QMON_ACTIVE 2
+#define QMON_REALTIME 3
+#define QMON_IDLE  4
+#define QMON_EXIT  5
+char *statename[]= {"CHECK","INIT","ACTIVE","MINRTT","IDLE","DISABLED"};
 unsigned char qstate=QMON_CHK;
 
 u_short cnt_mismatch=0;
@@ -138,6 +166,11 @@ char sigterm=0;          //Set when we get a signal to terminal
 int sel_err=0;           //Last error code returned by select
 
 #define DAEMON_NAME "qosmon"
+
+#ifndef DEVICE
+#define DEVICE "imq0"
+#endif
+
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
@@ -289,7 +322,6 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 {
     struct ip *ip;
     struct icmp *icp;
-    long *lp = (long *) packet;
     struct timeval tv;
     struct timeval *tp;
     int hlen,triptime;
@@ -304,7 +336,7 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
         tip.s_addr = ntohl(*(uint32_t *) &from->sin_addr);
         return 0;
     }
-    cc -= hlen;
+
     icp = (struct icmp *)(buf + hlen);
     if( icp->icmp_type != ICMP_ECHOREPLY )  {
         tip.s_addr = ntohl(*(uint32_t *) &from->sin_addr);
@@ -335,7 +367,6 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 
 }
 
-
 //These variables referenced but not used by the tc code we link to.
 int filter_ifindex;
 int use_iec = 0;
@@ -349,8 +380,9 @@ int print_class(const struct sockaddr_nl *who,
     int len = n->nlmsg_len;
     struct rtattr * tb[TCA_MAX+1];
     int leafid;
-    long long work;
-    int actflg;
+    u_char actflg=0;
+    unsigned long long work=0;
+    struct timespec newtime;
 
     if (n->nlmsg_type != RTM_NEWTCLASS && n->nlmsg_type != RTM_DELTCLASS) {
         fprintf(stderr, "Not a class\n");
@@ -364,6 +396,7 @@ int print_class(const struct sockaddr_nl *who,
 
     memset(tb, 0, sizeof(tb));
     parse_rtattr(tb, TCA_MAX, TCA_RTA(t), len);
+    clock_gettime(CLOCK_MONOTONIC,&newtime);
 
     if (tb[TCA_KIND] == NULL) {
         fprintf(stderr, "print_class: NULL kind\n");
@@ -405,7 +438,8 @@ int print_class(const struct sockaddr_nl *who,
     }  
  
     //Pickup some hfsc basic stats
-    if (tb[TCA_STATS]) {
+    if (tb[TCA_STATS2]) {
+
         struct tc_stats st;
 
         /* handle case where kernel returns more/less than we know about */
@@ -413,6 +447,28 @@ int print_class(const struct sockaddr_nl *who,
         memcpy(&st, RTA_DATA(tb[TCA_STATS]), MIN(RTA_PAYLOAD(tb[TCA_STATS]), sizeof(st)));
         work = st.bytes;
         classptr->backlog = st.qlen;
+
+		/*Checkout if this class will trigger realtime mode by looking to see if either
+		  the realtime or fair service curves are two part. */
+		if (firstflg) {
+
+			struct tc_service_curve *sc = NULL;
+			struct rtattr *tbs[TCA_STATS_MAX + 1];
+
+			classptr->rtclass=0;
+			parse_rtattr_nested(tbs, TCA_HFSC_MAX, tb[TCA_OPTIONS]);
+			if (tbs[TCA_HFSC_RSC] && (RTA_PAYLOAD(tbs[TCA_HFSC_RSC]) >= sizeof(*sc))) {
+				sc = RTA_DATA(tbs[TCA_HFSC_RSC]);
+				classptr->rtclass |= (sc && sc->m1);
+    	    }
+
+			if (tbs[TCA_HFSC_FSC] && (RTA_PAYLOAD(tbs[TCA_HFSC_FSC]) >= sizeof(*sc))) {
+				sc = RTA_DATA(tbs[TCA_HFSC_FSC]);
+				classptr->rtclass |= (sc && sc->m1);
+    	    }
+
+		}
+
     } else {
         errorflg=1;
         return 0;
@@ -420,19 +476,28 @@ int print_class(const struct sockaddr_nl *who,
 
          
     //Avoid a big jolt on the first pass.
-    if (firstflg) classptr->bytes = work;
+    if (firstflg) {
+		classptr->bytes = work;
+	}
 
     //Update the filtered bandwidth based on what happened unless a rollover occured.
-    actflg=0;
     if (work >= classptr->bytes) {
         long int bw;
-        bw = (work - classptr->bytes)*8000/period;  //bps per second x 1000 here
+        long bperiod;
+
+        //Calculate an accurate time period for the bps calculation.
+        bperiod=(newtime.tv_nsec-classptr->bwtime)/1000000;
+        if (bperiod<period/2) bperiod=period;
+        bw = (work - classptr->bytes)*8000/bperiod;  //bps per second x 1000 here
 
         //Convert back to bps as part of the filter calculation 
         classptr->cbw_flt=(bw-classptr->cbw_flt)*BWTC/1000+classptr->cbw_flt;
 
         //A class is considered active if its BW exceeds 4000bps 
-        if ((leafid != -1) && (classptr->cbw_flt > 4000)) {DCA++;actflg=1;}
+        if ((leafid != -1) && (classptr->cbw_flt > 4000)) {
+            DCA++;actflg=1;
+            if (classptr->rtclass) RTDCA++;
+        }
 
         //Calculate the total link load by adding up all the classes.
         if (leafid == -1) {
@@ -443,6 +508,7 @@ int print_class(const struct sockaddr_nl *who,
 
     }
 
+    classptr->bwtime=newtime.tv_nsec;
     classptr->bytes = work;
     classptr->actflg = actflg;
 
@@ -456,7 +522,7 @@ int class_list(char *d)
 {
     struct tcmsg t;
 
-    DCA =0;
+    RTDCA=DCA =0;
     memset(&t, 0, sizeof(t));
     t.tcm_family = AF_UNSPEC;
 
@@ -475,7 +541,7 @@ int class_list(char *d)
         return 1;
     }
 
-    if (rtnl_dump_filter(&rth, print_class, stdout, NULL, NULL) < 0) {
+    if (dump_filter(&rth, print_class, stdout) < 0) {
         fprintf(stderr, "Dump terminated\n");
         return 1;
     }
@@ -487,7 +553,7 @@ int class_list(char *d)
 /*
  *       tc_class_modify
  *
- * This function changes the upper limit rate of the imq0 class to match
+ * This function changes the upper limit rate of the 'DEVICE' class to match
  * the rate passed in as the sole parameter.  This is the throttle means
  * we will use to maintian the QoS performance as the link becomes saturated.
  *
@@ -552,13 +618,13 @@ int tc_class_modify(__u32 rate)
     //Communicate our change to the kernel.
     ll_init_map(&rth);
 
-    if ((req.t.tcm_ifindex = ll_name_to_index("imq0")) == 0) {
-            fprintf(stderr, "Cannot find device imq0\n");
+    if ((req.t.tcm_ifindex = ll_name_to_index(DEVICE)) == 0) {
+            fprintf(stderr, "Cannot find device %s\n",DEVICE);
             return 1;
     }
 
 
-    if (rtnl_talk(&rth, &req.n, 0, 0, NULL, NULL, NULL) < 0)
+    if (talk(&rth, &req.n, 0, 0, NULL) < 0)
         return 2;
 
     return 0;
@@ -577,7 +643,7 @@ void update_status( FILE* fd )
     char nstr[10];
     int dbw;
 
-    //Link includes the ping traffic when the pinger is on.
+    //Link load includes the ping traffic when the pinger is on.
     if (pingon) dbw = dbw_fil + 64 * 8 * 1000/period;
            else dbw = dbw_fil; 
 
@@ -594,7 +660,7 @@ void update_status( FILE* fd )
         fprintf(fd,"Ping: off\n");
 
     fprintf(fd,"Filtered ping: %d (ms)\n",fil_triptime/1000);
-    fprintf(fd,"Ping time limit: %d (ms)\n",pinglimit/1000);
+    fprintf(fd,"Ping time limit: %d (ms) [%d/%d]\n",plimit/1000,pinglimit/1000,(pinglimit+135*pinglimit_cl/100)/1000);
     fprintf(fd,"Classes Active: %u\n",DCA);
 
     fprintf(fd,"Errors: (mismatch,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
@@ -602,7 +668,7 @@ void update_status( FILE* fd )
 
     i=0;
     while ((i++<STATCNT) && (cptr->ID != 0)) {
-        fprintf(fd,"ID %4X, Active %u, Backlog %u, BW bps (filtered): %d\n",
+        fprintf(fd,"ID %4X, Active %u, Backlog %u, BW bps (filtered): %ld\n",
               (short unsigned) cptr->ID,
               cptr->actflg,
               cptr->backlog,
@@ -625,23 +691,25 @@ void update_status( FILE* fd )
         strcpy(nstr,"*");
     }
 
-    printw("ping (%s/%d) DCA=%d, plim=%d, state=%s\n",nstr,fil_triptime/1000,
-		DCA,pinglimit/1000,statename[qstate]);
+    printw("ping (%s/%d) DCA=%d, RTDCA=%d, plim=%d, plim2=%d, state=%s\n",nstr,fil_triptime/1000,
+		DCA,RTDCA,pinglimit/1000,plimit/1000,statename[qstate]);
     printw("Link Limit=%6d, Fair Limit=%6d, Current Load=%6d (kbps)\n", 
 		dbw_ul/1000,new_dbw_ul/1000,dbw/1000);
+    printw("Saved Active Limit=%6d, Saved Realtime Limit=%6d\n",saved_active_limit/1000,saved_realtime_limit/1000);
     printw("pings sent=%d, pings received=%d\n", 
 		ntransmitted,nreceived);
 
-    printw("Defined classes for imq0\n"); 
+    printw("Defined classes for %s\n",DEVICE); 
     printw("Errors: (mismatches,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
     cptr=dnstats;
     i=0; 
     while ((i++<STATCNT) && (cptr->ID != 0)) {
-        printw("ID %4X, Active %u, Backlog %u, BW (filtered kbps): %d\n",
+        printw("ID %4X, Active %u, Realtime %u. Backlog %u, BW (filtered kbps): %ld\n",
               (short unsigned) cptr->ID,
               cptr->actflg,
+			  cptr->rtclass,
               cptr->backlog,
-              (int) cptr->cbw_flt/1000);
+              cptr->cbw_flt/1000);
         cptr++;
     }
 
@@ -660,6 +728,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in *to = &whereto;
     int on = 1;
     struct protoent *proto;
+    float err;
+
 
     argc--, av++;
     while (argc > 0 && *av[0] == '-') {
@@ -668,6 +738,9 @@ int main(int argc, char *argv[])
                 pingflags |= BACKGROUND;
                 break;
 
+            case 'a':
+                pingflags |= ADDENTITLEMENT;
+                break;
         }
         argc--, av++;
     }
@@ -678,8 +751,8 @@ int main(int argc, char *argv[])
 
 #ifdef ONLYBG
     if (!(pingflags & BACKGROUND)) {
-        fprintf(stderr, "Must use the -b switch\n", av[0]);
-        exit(1);        
+        fprintf(stderr, "Must use the -b switch\n");
+        exit(1);
     }
 #endif
 
@@ -687,7 +760,7 @@ int main(int argc, char *argv[])
     period = atoi( av[0] );
     if ((period > 2000) || (period < 100)) {
         fprintf(stderr, "Invalid ping interval '%s'\n", av[0]);
-        exit(1);        
+        exit(1);
     }
 
     bzero((char *)&whereto, sizeof(whereto) );
@@ -712,15 +785,15 @@ int main(int argc, char *argv[])
     DBW_UL = atoi( av[2] );
     if ((DBW_UL < 100) || (DBW_UL >= INT_MAX/1000)) {
         fprintf(stderr, "Invalid download bandwidth '%s'\n", av[2]);
-        exit(1);        
+        exit(1);
     }
 
     //Convert kbps to bps.
     dbw_ul = DBW_UL = DBW_UL*1000;
 
-    //The fourth optional parameter is the pinglimit in ms.
+    //The fourth optional parameter is the ping limit in ms.
     if (argc == 4) {
-        pinglimit = atoi( av[3] )*1000;
+        pinglimit_cl = pinglimit = atoi( av[3] )*1000;
     }
 
 
@@ -732,7 +805,8 @@ int main(int argc, char *argv[])
     }
 
     // where alpha = Sample_Period / (TC + Sample_Period)
-    alpha = (period*1000. / (3000. + period)); 
+    // TC needs to be not less than 3 times the sample period
+    alpha = (period*1000. / (period*4 + period)); 
 
     //Class bandwidth filter time constants  
     BWTC= (period*1000. / (7500. + period));
@@ -744,12 +818,12 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //Make sure the imq0 device is present and that we can scan it.
+    //Make sure the device is present and that we can scan it.
     classptr=dnstats;
     errorflg=0;       
-    class_list("imq0");
+    class_list(DEVICE);
     if (errorflg) {
-        fprintf(stderr, "Cannot scan ingress device imq0\n");
+        fprintf(stderr, "Cannot scan ingress device %s\n",DEVICE);
         exit(1);
     }
 
@@ -840,7 +914,7 @@ int main(int argc, char *argv[])
     memset((void *)&dnstats,0,sizeof(dnstats));
 
     //Initialize the fair linklimit to a reasonable number.
-    new_dbw_ul= DBW_UL * .9;
+    saved_realtime_limit=saved_active_limit=new_dbw_ul= DBW_UL * .9;
 
     while (!sigterm) {
         int len = sizeof (packet);
@@ -883,7 +957,7 @@ int main(int argc, char *argv[])
         cc=classcnt;
         classcnt=0;
         errorflg=0;       
-        class_list("imq0");
+        class_list(DEVICE);
 
         //If there was an error or the number of classes changed then reset everything
         if (errorflg || (!firstflg && (cc !=classcnt))) {
@@ -912,17 +986,19 @@ int main(int argc, char *argv[])
                 //If we get two pings go ahead and lower the link speed.
                 if (nreceived >= 2) {
 
-                    //If the pinglimit was entered on the command line go
-                    //directly to the WATCH state otherwise automatically
-                    //determine an appropriate ping limit.
-                    if (pinglimit) {
-                        dbw_ul=0;  //Forces an update in QMON_WATCH
+                    //If the pinglimit was entered on the command line 
+                    //without the add flag then go directly to the 
+                    //IDLE state otherwise automatically determine an appropriate 
+                    //ping limit.
+                    if ((pinglimit) && !(pingflags & ADDENTITLEMENT)) {
+                        dbw_ul=0;                     //Forces an update
+                        tc_class_modify(new_dbw_ul); 
                         fil_triptime = rawfltime*1000;
-                        qstate=QMON_WATCH;
+                        qstate=QMON_IDLE;
                      } else {
-                         tc_class_modify(DBW_UL/8);
-                         nreceived=0;
-                         qstate=QMON_INIT;
+                        tc_class_modify(1000);  //Unload the link for the measurement.
+                        nreceived=0;
+                        qstate=QMON_INIT;
                      }
                 } 
                 break; 
@@ -931,82 +1007,163 @@ int main(int argc, char *argv[])
             // link.  We do this by making pings and using the filter response after
             // throttling all traffic in the link.
             case QMON_INIT:
-                //Wait for seconds then re-initialize the filter.
-                if (nreceived < (7000/period)+1) fil_triptime = rawfltime*1000;
+                //Filter starts at ten seconds and runs until 15 seconds.
+                //For the first ten seconds we initialize the filter to the last ping time we saw.
+                //After the seventh second we start filtering.
+                if (nreceived < (10000/period)+1) fil_triptime = rawfltime*1000;
 
-                //After 12 seconds we have measured our ping response entitlement.
-                //Move on to the watch state. 
-                if (nreceived > (12000/period)+1) {
-                    qstate=QMON_WATCH;
-                    dbw_ul=0;  //Forces an update in QMON_WATCH
+                //After 15 seconds we have measured our ping response entitlement.
+                //Move on to the active state. 
+                if (nreceived > (15000/period)+1) {
+                    qstate=QMON_IDLE;
+                    tc_class_modify(new_dbw_ul);  //Restore reasonable bandwidth
 
-                    //For simplicity just use a multiple on the measure ping time.
-                    pinglimit = fil_triptime*2.5;
-                    if (pinglimit < 35) pinglimit=35;
+                    //If the user specified no limit then the RTT ping limit computed from what was
+                    //entered on the command line.
+                    if (pingflags & ADDENTITLEMENT) {
+                        //Add what the user specified to the 110% of the measure ping time.
+                        pinglimit += (fil_triptime*1.1);
+                    } else {
+                        //Without the '-a' flag we just use 200% of measure ping time.  
+                        //This works OK in my system but I have no evidence that it will work in other systems.
+                        pinglimit = fil_triptime*2.0;
+                    }
+
+                    //Sanity Checks
+                    if (pinglimit < 10000) pinglimit=10000;
+                    if (pinglimit > 800000) pinglimit=800000;
                 }
                 break;
 
-            // In the WATCH state we observe ping times as long as the
-            // link remains active.  While we are observing we adjust the 
-            // link upper limit speed to maintain a reasonable ping.
-            // Once the amount of data we are recieving dies down we enter the WAIT state
-            case QMON_WATCH:
-                pingon=1;
-
-                //Ping times too long then ramp down at 3%/sec 
-                //Repond in this direction quickly to restore performance fast.
-                if (fil_triptime > pinglimit) {
-                   new_dbw_ul = new_dbw_ul * (1.0 - .03*period/1000);
-                   if (new_dbw_ul < DBW_UL*.2) new_dbw_ul=DBW_UL*.2;
-                }
-
-                //Ping times acceptable then ramp up at .5%/sec 
-                //Try to creep up on the limit to avoid oscillation.
-                //Only increase the download bw if the link load indicates its needed.
-                if ((fil_triptime < 0.7 * pinglimit) && (dbw_fil > new_dbw_ul * .95)) {
-                   new_dbw_ul = new_dbw_ul * (1.0 + .005*period/1000);
-                   if (new_dbw_ul > DBW_UL*.9) new_dbw_ul=DBW_UL*.9;
-                }
-
-                //Modify parent download limit as needed.
-                if (abs(dbw_ul-new_dbw_ul) > 0.01*DBW_UL) tc_class_modify(new_dbw_ul);
-
-                if ((dbw_fil < 0.25 * new_dbw_ul) || (DCA <= 1) )qstate=QMON_WAIT;
-                break;
-                    
-            // In the wait state we have a nearly idle link or only one class active.
+            // In the wait state we have a nearly idle link.
             // In these cases it is not necessary to monitor delay times so the active
             // ping is disabled.
-            case QMON_WAIT:
+            case QMON_IDLE:
                 pingon=0;
-                if ((DCA > 1) && (dbw_fil > 0.3 * new_dbw_ul)) qstate=QMON_WATCH;
-                else if ((DCA == 1) && (dbw_fil > 0.75 * new_dbw_ul)) {
-                    qstate=QMON_FREE;
-                    tc_class_modify(DBW_UL);
-                }
-                break;
-                      
-            // In the free state we are relaxing the upper limit on the link because
-            // only once class is active and we want to maximize our throughput.
-            // If a second class becomes active we need to return to the watch state
-            // and enforce the upper limit that we last observed to maintain our ping
-            // times.
-            case QMON_FREE:
-                if (DCA>1) {
-                    qstate=QMON_CHILL;
-                    tc_class_modify(new_dbw_ul);
-                    chill=(2000/period)+1;
-                }
-                break;
 
-            //Coming out of the FREE state we need to give some time for the downlink
-            //to respond to our class_modify before we begin monitoring again
-            case QMON_CHILL:
-                if (chill-- <= 0) {
-                    qstate=QMON_WATCH;
-                    pingon=1;
-                } 
+                //This limit should be the same as the dynamic range or we could get stuck
+                //in the IDLE state. 
+                if (dbw_fil < 0.15 * DBW_UL) break;
+
+            // In the ACTIVE & REALTIME states we observe ping times as long as the
+            // link remains active.  While we are observing we adjust the 
+            // link upper limit speed to maintain the specified pinglimit.
+            // If the amount of data we are recieving dies down we enter the WAIT state
+            case QMON_ACTIVE:
+            case QMON_REALTIME:
+                pingon=1;
+
+                //Save the bandwidth limit for each mode.
+                if (qstate == QMON_REALTIME) saved_realtime_limit = new_dbw_ul;
+                if (qstate == QMON_ACTIVE) saved_active_limit = new_dbw_ul;
+
+                //The pinglimit we will use depends on if any realtime classes are active
+                //or not.  In realtime mode we only allow 'pinglimit' round trip times which
+                //makes our pings low but also lowers our throughput.  The automatic measurement 
+                //above set pinglimit to the average RTT of the ping assuming it has to wait on
+                //average for 2/3 of an single MTU sized packet to transmit.  The means on 
+                //average there is nothing in the buffer but a packet is transmitting.
+
+                //When not in realtime mode the stradegy is that we allow enough packets in the queue
+                //to fully utilize the downlink.
+
+                //We are talking about a queue controlled by the ISP so we don't know much about it.
+                //We make an assumption that the queue is long enough to allow full utilization of the link.
+                //This should be the case and often the queue is much longer than needed (bufferbloat).  
+                //When not in realtime mode we can allow this buffer to fill but we don't want it to overflow 
+                //because it will then drop packets which will cause our QoS to breakdown.  So we want it to fill
+                //just enough to promote full link utilization.
+
+                //The classical optimum queue size would be equal to the bandwidth * RTT and the 
+                //additional time it will take our ping to pass through such a queue turns out to be the RTT. 
+                //But Barman et all, Globecomm2004 indicates that only 20-30% of this is really needed.  
+                //
+                //When we measured an RTT above that was to the ISPs gateway so we do not really know what the average 
+                //RTT time to other IPs on the internet.  And since not all hosts respond the same anyway I doubt there
+                //is consistant RTT that we could use.
+				//	
+                //For ACTIVE mode on a 925kbps/450kbps link I measure the following 
+                //relationship between ping limit and throughput with large packets downloading.
+                //
+                //Ping Limit   Throughput   Percent
+                // 612ms       918kbps      100 
+                // 525ms       915kbps      99.6
+                // 437ms       898kbps      97.8
+                // 350ms       875kbps      95.3 
+                // 262ms       862kbps      93.8 
+                //  81ms       870kbps      94.7
+                //  60ms       680kbps      69.8
+                //  50ms       630kbps      68.6
+                //  40ms       490kbps      53.3      
+                //
+                //The 1500 byte packet time is 1500*10/925kbps download and 1500*10/425kbps upload for a total
+                //RTT of around 48ms.  Idle ping times on this link are around 35ms.
+                //
+                //These results indicate that on my link not much is gained by increasing beyond 81ms.  This is pretty much
+                //the MINRTT mode computed with the -a switch.  Still other links may be different so I suspect that
+                //switching to active mode will benefit some people.
+                //
+                //The statedgy I will use for the ACTIVE mode limit will be to add an additional 135% packet delay over
+                //what we have in RTT mode.  The packet delay was entered on the command line or zero if nothing was entered.
+
+                //I hope that this will work well for a broad range of users from satellite links with RTTs of 1 second or more
+                //or users with hot connections that have small queue upstream of them.
+
+                if ((RTDCA == 0) && (pingflags & ADDENTITLEMENT)) {
+                    plimit=135*pinglimit_cl/100+pinglimit;
+
+                    //When switching into active mode for the first time initialize the bandwidth
+                    //limit to the last value that was known to work.
+                    if (qstate != QMON_ACTIVE) {
+                        qstate=QMON_ACTIVE;
+                        new_dbw_ul=saved_active_limit;
+                        tc_class_modify(new_dbw_ul);
+                    }
+
+                } else {
+                    plimit = pinglimit;
+
+                    //When switching into realtime mode for the first time initialize the bandwidth
+                    //limit to the last value that was known to work.
+                    if (qstate != QMON_REALTIME) {
+                        qstate=QMON_REALTIME;
+                        new_dbw_ul=saved_realtime_limit;
+                        tc_class_modify(new_dbw_ul);
+                    }
+
+                }
+
+                //When the downlink falls below 10% utilization we turn off the pinger.
+                if (dbw_fil < 0.1 * DBW_UL) qstate=QMON_IDLE;
+
+                //Compute the ping error
+                err = fil_triptime - plimit;
+
+                //Negative error means we might be able to increase the link limit.
+                if (err < 0) {
+
+                   //Do not increase the bandwidth until we reach 85% of the current limit.
+                   if  (dbw_fil < dbw_ul * 0.85) break;
+
+                   //Increase slowly (0.4%/sec).  err is negative here.  
+                   new_dbw_ul = new_dbw_ul * (1.0 - 0.004*err*(float)period/(float)plimit/1000.0);
+                   if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
+
+                } else {
+
+                   if (err > 2*plimit) err=2*plimit;
+
+                   new_dbw_ul = new_dbw_ul * (1.0 - 0.005*err*(float)period/(float)plimit/1000.0);
+
+                   //Dynamic range is 1/.15 or 6.67 : 1.  
+                   if (new_dbw_ul < DBW_UL*.15) new_dbw_ul=DBW_UL*.15;
+                }   
+
+                //Modify parent download limit as needed.
+                tc_class_modify(new_dbw_ul);
                 break;
+                    
+                      
         }
 
         update_status(statusfd);
