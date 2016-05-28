@@ -124,7 +124,7 @@ start()
 			dns_port=9053
 		fi
 	
-		OPTIONS="$OPTIONS  --Log '$loglevel syslog' --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+		OPTIONS="$OPTIONS  --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 		
 		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
 		if [ -n "$client_listen_ip" ] ; then
