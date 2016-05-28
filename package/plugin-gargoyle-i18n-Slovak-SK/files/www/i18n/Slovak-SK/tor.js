@@ -40,7 +40,7 @@ torS.CacheWarn="Tor zachytáva veľké množstvo dát, typicky 5-50MB. Prenos a 
 //javascript
 torS.ConProb="UPOZORNENIE: Tor je aktívny, ale môžu byť problémy s pripojením -- skontrolujte vaše pripojenie";
 torS.ObPeBErr="Server Obfsproxy port nemôže byť rovnaký ako port most/prenos";
-torS.RPeWSErr="Server prenos Port nemôže byť rovnaký ako port webservera smerovača;
+torS.RPeWSErr="Server prenos Port nemôže byť rovnaký ako port webservera smerovača";
 torS.ObPeWSErr="Server Obfsproxy Port nemôže byť rovnaký port webservera smerovača";
 torS.RPeSSHErr="Server Relay Port nemôže byť rovnaký ako port SSH smerovača";
 torS.ObPeSSHErr="Server Obfsproxy Port nemôže byť rovnaký ako port SSH smerovača";
