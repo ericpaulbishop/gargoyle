@@ -67,7 +67,7 @@ function initialisePlots()
 
 	//dummy code to setup a blank canvas before we populate any data
 	var spect = d3.select("#spectrum_plot"), 
-		WIDTH = 500, 
+		WIDTH = 500,
 		HEIGHT = 400, 
 		MARGINS = 
 		{ 
@@ -209,9 +209,14 @@ function parseWifiData(rawScanOutput)
 			var sigStr = getCellValues("signal", cellLines).shift();
 			var vhtwidth = getCellValues("* channel width", cellLines).shift();
 
+			//if we don't get a primary channel then the network isn't following the standard. attempt to retrieve it from the HT operation data. If we can't find this section then toss it out.
+			if (! prichannel)
+			{
+				var prichannel = getCellValues("* primary channel", cellLines).shift();
+			}
 			if (! secchannel)
 			{
-				secchannel = "no secondary";
+				secchannel = "no secondary";	//if we don't get a result for the secondary channel, set it to this so we don't error
 			}
 
 			if(ssid != null && prichannel != null && secchannel != null && sigStr != null ) 
@@ -374,7 +379,7 @@ function plotall(plotdata)
 		.entries(plotdata);				//break the data up into "keys" based on SSID which _should_ be unique (once i stuff around with them)
 	
 	var spect = d3.select("#spectrum_plot"), 
-		WIDTH = 500, 
+		WIDTH = 500,
 		HEIGHT = 400, 
 		MARGINS = 
 		{ 

@@ -2,6 +2,6 @@
 
 fallback=Spectrum Analyser
 EN=Spectrum Analyser
+DE=Spektrumanalysator
 PL=Analizator widma
 RU=Анализатор спектра
-DE=Spektrumanalysator
