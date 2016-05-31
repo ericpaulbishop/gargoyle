@@ -58,12 +58,12 @@ function resetData()
 	
 	setChildText("load_avg", loadAvg);
 	
-	if(show_TEMP == 1)
+	if(temps[0] == 1)
 	{
 		document.getElementById("temp_container").style.display = "block";
-		setChildText("temp_cpu", tempcpu);
-		setChildText("temp_mem", tempmem);
-		setChildText("temp_wifi", tempwifi);
+		setChildText("temp_cpu", temps[1]);
+		setChildText("temp_mem", temps[2]);
+		setChildText("temp_wifi", temps[3]);
 	}
 	else
 	{

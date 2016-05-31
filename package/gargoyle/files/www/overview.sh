@@ -84,29 +84,8 @@
 	fi
 	echo "var csq='$CSQ';"
 	
-	tmodel=$(cat /tmp/sysinfo/model)
-	case "$tmodel" in
-	"Linksys WRT1900AC")
-		TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon2/temp1_input);
-		TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
-		TEMPWIFI=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp2_input);
-		show_temp=1;;
-	"Linksys WRT1900ACv2" | \
-	"Linksys WRT1200AC")
-		TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
-		TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp2_input);
-		TEMPWIFI=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp1_input);
-		show_temp=1;;
-	*)
-		TEMPCPU="-";
-		TEMPMEM="-";
-		TEMPWIFI="-";
-		show_temp=0;;
-	esac
-	echo "var tempcpu='$TEMPCPU';"
-	echo "var tempmem='$TEMPMEM';"
-	echo "var tempwifi='$TEMPWIFI';"
-	echo "var show_TEMP='$show_temp';"
+	echo "var temps = new Array();"
+	/usr/lib/gargoyle/tempinfo.sh
 %>
 //-->
 </script>
