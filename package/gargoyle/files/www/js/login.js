@@ -69,18 +69,24 @@ function checkKey(e)
 function setStatusAndQuotas()
 {
 	setChildText("current_time_date", cnv_LocaleTime(currentTime));
-
+	var login_status = document.getElementById("login_status");
 	if(sessionExpired)
 	{
 		setChildText("login_status", logS.SExp, "red");
+		login_status.style.display = "";
+    		login_status.className = "alert alert-danger";
 	}
 	else if(passInvalid)
 	{
 		setChildText("login_status", logS.InvP, "red");
+		login_status.style.display = "";
+    		login_status.className = "alert alert-danger";
 	}
 	else if(loggedOut)
 	{
 		setChildText("login_status", logS.LOut, "black");
+		login_status.style.display = "";
+    		login_status.className = "alert alert-info";
 	}
 	else
 	{
@@ -292,5 +298,6 @@ function timeParamsToLines(timeParameters)
 	}
 	return textList;
 }
+
 
 
