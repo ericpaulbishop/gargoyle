@@ -67,5 +67,4 @@ quotasStr.ESection="Edycja limitu";
 quotasStr.USect="Wykorzystanie limitów";
 quotasStr.All="Wszystkie";
 quotasStr.Alws="Zawsze";
-quotasStr.ColNms=["Urządzenie", "Aktywny", "% łącznego zużycia", "% zużycia pobierania", "% zużycia wysyłania" ];
-
+quotasStr.ColNms=["Urządzenie", "Aktywny", "łącznego", "pobierania", "wysyłania" ];

@@ -22,9 +22,20 @@ var orderedNames = [];
 var numVisible = 0;
 var numPies = 0;
 
+// color and font parity for themes
+var themeColor = "black";
+var themeFontFamily = "serif";
+
 function init(evt)
 {
 	svgDoc = evt.target.ownerDocument;
+
+	// might not need to actually check for this, because IE < 9 doesn't support SVG ?
+	if (window.getComputedStyle) {
+		var bodyStyle = window.getComputedStyle(window.parent.document.body);
+		themeColor = bodyStyle.color;
+		themeFontFamily = bodyStyle.fontFamily;
+	}
 }
 
 function addPercentsToLabel(labelBase, pieValues, pieTotals)
@@ -214,8 +225,9 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 		var titleText = svgDoc.createElementNS(svgNs, "text");
 		titleText.setAttribute("x", centerX-radius);
 		titleText.setAttribute("y", centerY-radius-titleOffset );
+		titleText.setAttribute("fill", themeColor);
 		titleText.setAttribute("font-size", titleHeight + "px");
-		titleText.setAttribute("font-family", "serif");
+		titleText.setAttribute("font-family", themeFontFamily);
 		titleText.setAttribute("font-weight", "bold");
 		titleText.appendChild( svgDoc.createTextNode( pieNames[pieIndex] ));
 		titleText.setAttribute("id", "pie_title_" + pieIndex);
@@ -274,7 +286,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 					}
 			
 					newPath.setAttribute("fill", unselectedColor);
-					newPath.setAttribute("stroke", "black");
+					newPath.setAttribute("stroke", themeColor);
 					newPath.setAttribute("stroke-width", regularStrokeWidth);
 					newPath.setAttribute("id", "slice_" + pieIndex + "_" + dataIndex);
 					if(selectedId == dataIndex)
@@ -326,7 +338,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 		labelRect.setAttribute("y", nextLabelY);
 		labelRect.setAttribute("width", labelBoxWidth);
 		labelRect.setAttribute("height", labelBoxWidth);
-		labelRect.setAttribute("stroke", "black");
+		labelRect.setAttribute("stroke", themeColor);
 		labelRect.setAttribute("stroke-width", regularStrokeWidth);
 		labelRect.setAttribute("id", "color_" + labelIndex);
 		labelRect.setAttribute("fill",  unselectedColor);
@@ -334,8 +346,9 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 		var labelText = svgDoc.createElementNS(svgNs, "text");
 		labelText.setAttribute("x", labelX+(labelBoxWidth*1.25));
 		labelText.setAttribute("y", nextLabelY+(labelBoxWidth*.85) );
+		labelText.setAttribute("fill", themeColor);
 		labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.70) + "px");
-		labelText.setAttribute("font-family", "serif");
+		labelText.setAttribute("font-family", themeFontFamily);
 		labelText.appendChild( svgDoc.createTextNode( labelStr ));
 		labelText.setAttribute("id", "label_" + labelIndex);
 		labelText.setAttribute("font-weight", "normal");
@@ -415,6 +428,7 @@ function piePieceSelected()
 		}
 	}
 }
+
 function piePieceDeselected()
 {
 	id = this.id.match(/_([^_]*)$/)[1];

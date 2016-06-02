@@ -2,25 +2,25 @@
  * UTF-8 (with BOM) German-DE text strings for adblock.sh html elements
  */
 
-ablock.Adblock="Anzeigenblock";
-ablock.ADBLOCKEn="Aktivieren Adblock";
-ablock.ADBLOCKupdate="Aktualisierung Blockliste";
-ablock.ADBLOCKLstrn="Letzte Ausführung";
-ablock.ADBLOCKTrans="Versuchen, blockiert Anzeigen verbergen";
-ablock.ADBLOCKHelp="Diese Option versucht, die Anzeigen mit einem kleinen transparenten Pixel vorgestellt ersetzen. Dies kann manchmal <i>manchmal</i> stoppen das hässliche 'Seite nicht gefunden' Fehler, die Sie anstelle von Anzeigen zu sehen.</p><p>Doch mit aktivierter Option, in einigen seltenen Fällen Anzeigen wird zeigen, wie Sie Ihren Router anmelden Bildschirm statt. Dies ist nicht ein Phishing-Versuch, nur ein Nebenprodukt der Aktivierung dieser Einstellung.";
-ablock.ADBLOCKExempts="IP angebot anfang";
-ablock.ADBLOCKExemptf="IP angebot fertig";
-ablock.ADBLOCKExemptEn="Aktivieren ad Befreiung für Kunden";
-ablock.ERRrange="Entweder ist der Anfang oder das Ende der Freistellungsbereich leer ist. Wenn Sie nur 1 IP befreien, dann benutze ihn sowohl als Anfang und Ende des Bereichs.";
+ablock.Adblock="Adblock";
+ablock.ADBLOCKEn="Aktiviere Adblock";
+ablock.ADBLOCKupdate="Aktualisiere Blockliste";
+ablock.ADBLOCKLstrn="Letzte Aktualisierung";
+ablock.ADBLOCKTrans="Blockierte Anzeigen verbergen";
+ablock.ADBLOCKHelp="Diese Option versucht, die Werbung durch ein kleines transparentes Pixel zu ersetzen. Dies verhindert <i>manchmal</i> die Meldung 'Server nicht gefunden', die statt des Werbebanners angezeigt wird.</p><p>Mit dieser Option, wird jedoch in einigen seltenen Fällen, die Login-Seite Ihres Routers angezeigt. Dies ist keine Phishing-Attacke, sondern lediglich ein Nebenprodukt der Aktivierung dieser Funktion.";
+ablock.ADBLOCKExempts="IP-Bereich Anfang";
+ablock.ADBLOCKExemptf="IP-Bereich Ende";
+ablock.ADBLOCKExemptEn="Ausnahmebereich aktivieren";
+ablock.ERRrange="Anfang oder das Ende des IP-Bereichs ist leer. Möchten Sie die Ausnahme nur für eine IP-Adresse festlegen, tragen Sie diese sowohl in das Anfangs-, als auch in das Ende-Feld, des Adressbereichs ein.";
 ablock.ADBLOCKBlocklist="Blockliste Suchergebnisse";
 ablock.ADBLOCKWhitelist="weiße Liste";
-ablock.ADBLOCKSearch="Suche nach Blockliste";
+ablock.ADBLOCKSearch="Suche in Blockliste";
 ablock.ADBLOCKBlacklist="schwarze Liste";
 ablock.ADBLOCKBlackdel="Löschen";
 ablock.ADBLOCKBlackadd="Hinzufügen";
 ablock.ADBLOCKCounter="Zeige";
-ablock.ADBLOCKSearchtoobig="Die Suche ergab mehr als 10000 Treffer. Nicht in der Lage, um alle Ergebnisse zu zeigen.";
-ablock.ADBLOCKWhitebig="Ihr Adressbuch verfügt über mehr als 10.000 Einträge. Nicht in der Lage, ganze Liste anzuzeigen.";
-ablock.ADBLOCKBlackbig="Ihr Blacklist verfügt über mehr als 10.000 Einträge. Nicht in der Lage, ganze Liste anzuzeigen.";
-ablock.ADBLOCKHelp2="In diesem Abschnitt können Sie die Einzelteile von der Blockliste hinzufügen und entfernen.</p><p>Sie können die Elemente der Blockliste, indem Sie sie in das Feld ein und klicken Sie auf Hinzufügen <i>Hinzufügen</i>. Sie können Elemente aus der Blockliste, indem Sie sie dann ihre Übertragung mit Hilfe der auf der weißen Liste zu entfernen <i>übertragen</i> Taste. Sie können Elemente aus der schwarze oder weiße Liste mit der Lösch <i>löschen</i> Schaltflächen.</p><p>Die Sperrliste können sehr groß sein, und das Display kann nur 10000 Artikel zeigen auf einmal. Sie können ein Element bei der Suche nach es, indem Sie in das Feld und mit dem zu finden <i>Suche</i> Taste.</p><p>Alle Boxen können Sie mehr als ein Element zu einem Zeitpunkt zu wählen.";
+ablock.ADBLOCKSearchtoobig="Die Suche ergab mehr als 10000 Treffer. Es können nicht alle Ergebnisse angezeigt werden.";
+ablock.ADBLOCKWhitebig="Ihr weiße Liste verfügt über mehr als 10.000 Einträge. Die Liste kann nicht vollständig angezeigt werden.";
+ablock.ADBLOCKBlackbig="Ihr schwarze Liste verfügt über mehr als 10.000 Einträge. Die Liste kann nicht vollständig angezeigt werden.";
+ablock.ADBLOCKHelp2="In diesem Abschnitt können Sie Elemete der Blockliste hinzufügen oder entfernen.</p><p>Sie können die Elemente hinzufügen, indem Sie diese in das Eingabefeld eingeben und auf <i>Hinzufügen</i> klicken. Sie können Elemente aus der Blockliste entfernen, indem Sie diese markieren und durch drücken der kleinen Pfeil-Taste, der weißen Liste hinzufügen. Sie können Elemente aus der schwarzen oder weißen Liste mit der Schaltfäche <i>Löschen</i> entfernen.</p><p>Die Listen können sehr groß sein, jedoch können nur 10000 Elemente angezeigt werden. Sie können nach einer blockierten Adresse suchen, indem Sie den Suchbegriff in das Leerfeld unterhalb der Blockliste eingeben und auf <i>Suche in Blockliste</i> drücken.</p><p>Alle Anzeigebereiche erlauben die Auswahl von mehreren Elementen.";
 

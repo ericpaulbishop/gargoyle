@@ -8,6 +8,7 @@
 
 var UI=new Object(); //part of i18n
 var TiZ=new Object(); //i18n timezones
+var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
 
 window.onresize = function onresize()
 {
@@ -981,12 +982,12 @@ function setElementEnabled(element, enabled, defaultValue)
 		element.disabled=false;
 		if(element.type == "text" || element.type == "textarea")
 		{
-			//element.style.color="#000000";
-			element.className="form-control";
+			element.style.color="#000000";
+			element.className="" ;
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
-			element.className="form-control";
+			element.className="";
 		}
 		else if(element.type == "button")
 		{
@@ -1000,19 +1001,18 @@ function setElementEnabled(element, enabled, defaultValue)
 		if(element.type == "text" || element.type == "textarea")
 		{
 			element.value=defaultValue;
-			//element.style.color="#AAAAAA";
-			element.className="form-control disabled";
+			element.style.color="#AAAAAA";
+			element.className="text_disabled";
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
 			setSelectedValue(element.id, defaultValue, element.ownerDocument);
-			element.className="form-control disabled";
+			element.className="select_disabled";
 		}
 		else if(element.type == "button")
 		{
-			//var activeClassName = element.className.replace(/_button.*$/, "_button");
-			//element.className= activeClassName + "//";
-			element.className="form-control disabled";
+			var activeClassName = element.className.replace(/_button.*$/, "_button");
+			element.className= activeClassName + "_disabled";
 		}
 		else if(element.type == "file")
 		{
@@ -2781,4 +2781,16 @@ function ObjLen(an_obj) {
 		len++;
 	}
 	return len
+}
+
+
+function reregisterTableSort()
+{
+    TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+    var args = Array.prototype.slice.call(arguments);
+    TSort_Data = args;
+    TSort_Initial = '0A';
+    tsRegister();
+    tsSetTable (args[0]);
+    tsInit();
 }

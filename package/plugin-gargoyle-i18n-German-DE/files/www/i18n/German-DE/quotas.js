@@ -67,4 +67,4 @@ quotasStr.ESection="Kontigente editieren";
 quotasStr.USect="Kontigentnutzung";
 quotasStr.All="Alle";
 quotasStr.Alws="Immer";
-quotasStr.ColNms=["Rechner", "Aktive", "% Total genutzt", "% Down genutzt", "% Up genutzt" ];
+quotasStr.ColNms=["Rechner", "Aktive", "Total", "Down", "Up" ];

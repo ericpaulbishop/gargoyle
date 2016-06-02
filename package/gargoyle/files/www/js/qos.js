@@ -167,7 +167,7 @@ function saveChanges()
 			rulePriority = (ruleIndex+1)*100;
 			ruleId = direction + "_rule_" + rulePriority;
 
-			if (ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[0].style.color=="red")
+			if (ruleTable.rows[ruleIndex+1].childNodes[0].style.color=="red")
 			{
 				classId = classIds[getSelectedText("default_class")];
 			}
@@ -348,6 +348,8 @@ function bpsToKbpsString(bps)
 
 }
 
+
+
 function update_classtable()
 {
 	var table = document.getElementById('qos_class_table_container').firstChild;
@@ -364,10 +366,9 @@ function update_classtable()
 		}
 	}
 	
-	var tableRows=table.firstChild;
         var rowIndex;
         for (rowIndex=1; rowIndex <= classTable.length; rowIndex++) {
-	     var row = tableRows.childNodes[rowIndex];
+	     var row = table.rows[rowIndex];
 
              //Search for the matching class
              for (classIndex=0; classIndex < classTable.length; classIndex++)
@@ -389,6 +390,11 @@ function update_classtable()
         }
 
 }
+
+
+
+
+
 
 function resetData()
 {
@@ -788,9 +794,11 @@ function removeServiceClassCallback(table, row)
 {
 	//if someone just tried to remove the last row, dont let them
 	//since we need to have at least one service class
-	if(table.firstChild.childNodes.length == 1)
+	if(table.rows.length == 1)
 	{
-		table.firstChild.appendChild(row);
+		tableBody=table.tBodies[0];
+		tableBody.appendChild(row);
+		table.style.display="block";
 		alert(qosStr.RemSCErr);
 	}
 	else
@@ -808,8 +816,8 @@ function removeServiceClassCallback(table, row)
 		{
 			if(ruleTableData[ruleIndex][1] == removedClassName)
 			{
-				ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[0].style.color="red";
-				ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[1].style.color="red";
+				ruleTable.rows[ruleIndex+1].childNodes[0].style.color="red";
+				ruleTable.rows[ruleIndex+1].childNodes[1].style.color="red";
 			}
 		}
 	}
@@ -1160,12 +1168,12 @@ function editClassTableRow()
 							{
 								if(ruleTableData[ruleIndex][1] == oldClassName)
 								{
-									ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[1].firstChild.data = newClassName;
+									ruleTable.rows[ruleIndex+1].childNodes[1].firstChild.data = newClassName;
 								}
 								if(ruleTableData[ruleIndex][1] == newClassName)
 								{
-									ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[0].style.color = "black";
-									ruleTable.firstChild.childNodes[ruleIndex+1].childNodes[1].style.color = "black";
+									ruleTable.rows[ruleIndex+1].childNodes[0].style.color = "black";
+									ruleTable.rows[ruleIndex+1].childNodes[1].style.color = "black";
 								}
 							}
 						}

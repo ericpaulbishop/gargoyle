@@ -60,22 +60,30 @@ function failureByBootloader()
 
 function setUpgradeFormat()
 {
-	document.getElementById("upgrade_arch").value = (platform == "broadcom") ? "brcm" : "not_brcm";
-	if(platform == "broadcom")
+	document.getElementById("upgrade_arch").value = distribTarget.match(/brcm47xx/) ? "brcm" : "not_brcm";
+	if(distribTarget.match(/brcm47xx/))
 	{
 		setChildText("upgrade_text", upS.brcmT);
 	}
-	else if(platform == "ar71xx")
+	else if(distribTarget.match(/ar71xx/))
 	{
 		setChildText("upgrade_text", upS.ar71xxT);
 	}
-	else if(platform == "mvebu")
+	else if(distribTarget.match(/mvebu/))
 	{
 		setChildText("upgrade_text", upS.mvebu);
 	}
-	else
+	else if(distribTarget.match(/ramips/))
+	{
+		setChildText("upgrade_text", upS.ar71xxT);
+	}
+	else if(distribTarget.match(/ath25/))
 	{
 		setChildText("upgrade_text", upS.othrT);
+	}
+	else
+	{
+		setChildText("upgrade_text", "");
 	}
 
 	setChildText("gargoyle_version", gargoyleVersion);

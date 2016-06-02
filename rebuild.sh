@@ -99,7 +99,7 @@ create_gargoyle_banner()
 	fi
 
 	local top_line=$(printf "| %-26s| %-35s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
-	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt commit $openwrt_revision")
 	local bottom_line=$(printf "| %-26s| %-35s|" "Built $date" "Target  $target/$profile")
 
 	cat << 'EOF' >"$banner_file_path"
@@ -204,7 +204,6 @@ distrib_init ()
 	fi
 	#git log --since=5/16/2013 $(git log -1 --pretty=format:%h) --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/changelog.txt"
 	git log $(git log $(git describe --abbrev=0 --tags)..$(git log -1 --pretty=format:%h) --no-merges --pretty=format:"%h%x09%ad%x09%s" --date=short)..$(git log -1 --pretty=format:%h) --no-merges --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/Gargoyle changelog.txt"
-	svn log -r "$rnum":36425 svn://svn.openwrt.org/openwrt/branches/attitude_adjustment/ > "$top_dir/Distribution/OpenWrt changelog.txt"
 	cp -fR "$top_dir/LICENSES" "$top_dir/Distribution/"
 }
 
@@ -434,7 +433,8 @@ for target in $targets ; do
 		find . -name ".*sw*" | xargs rm -rf
 		
 		branch_name=$(cat "OPENWRT_BRANCH")
-		rnum=$(cat "OPENWRT_REVISION")
+		openwrt_commit=$(cat "OPENWRT_REVISION")
+		openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 
 	
 		#if version name specified, set gargoyle official version parameter in gargoyle package
@@ -445,7 +445,7 @@ for target in $targets ; do
 		
 		#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "${openwrt_abbrev_commit}" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
 			make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
@@ -542,7 +542,7 @@ for target in $targets ; do
 			
 
 			openwrt_target=$(get_target_from_config "./.config")
-			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
 
 			echo ""
 			echo ""	
@@ -616,4 +616,3 @@ for target in $targets ; do
 		cd "$top_dir"
 	fi
 done
-

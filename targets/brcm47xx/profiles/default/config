@@ -1268,18 +1268,22 @@ CONFIG_PACKAGE_plugin-gargoyle-adblock=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-French-FR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Slovak-SK=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
 CONFIG_PACKAGE_plugin-gargoyle-initd=m
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 # CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
+CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
@@ -1519,7 +1523,7 @@ CONFIG_PACKAGE_kmod-lib-textsearch=y
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
 CONFIG_PACKAGE_kmod-ebtables=y
-# CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
+CONFIG_PACKAGE_kmod-ebtables-ipv4=y
 # CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
 # CONFIG_PACKAGE_kmod-ebtables-watchers is not set
 # CONFIG_PACKAGE_kmod-ip6tables is not set
@@ -1582,7 +1586,7 @@ CONFIG_PACKAGE_kmod-nf-ipt=y
 CONFIG_PACKAGE_kmod-nf-nat=y
 # CONFIG_PACKAGE_kmod-nf-nat6 is not set
 CONFIG_PACKAGE_kmod-nf-nathelper=y
-# CONFIG_PACKAGE_kmod-nf-nathelper-extra is not set
+CONFIG_PACKAGE_kmod-nf-nathelper-extra=y
 CONFIG_PACKAGE_kmod-nfnetlink=y
 # CONFIG_PACKAGE_kmod-nfnetlink-log is not set
 # CONFIG_PACKAGE_kmod-nfnetlink-queue is not set
@@ -2136,7 +2140,7 @@ CONFIG_PACKAGE_miniupnpd=y
 # CONFIG_PACKAGE_ip-bridge is not set
 CONFIG_PACKAGE_ip-full=y
 # CONFIG_PACKAGE_lldpd is not set
-# CONFIG_PACKAGE_relayd is not set
+CONFIG_PACKAGE_relayd=y
 # CONFIG_PACKAGE_ss is not set
 CONFIG_PACKAGE_tc=y
 

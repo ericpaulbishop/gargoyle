@@ -499,12 +499,12 @@ int main(int argc, char **argv)
                        "</div>\n");                              //content
 
                 printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
-                       "<div class=\"sidebar-header\">\n"
+                       "<ul class=\"nav sidebar\">\n"
+                       "<li class=\"sidebar-header\">\n"//sidebar header begin
                        "<span>Gargoyle</span><br/>\n"
                        "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root, theme);
                 printf("<span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
-                printf("</div>\n"
-                       "<ul class=\"nav sidebar\">\n");//<!-- sidebar-header end-->
+                printf("</li>\n");//<!-- sidebar-header end-->
 
                 int first_section=1;
                 int prev_section_selected=0;

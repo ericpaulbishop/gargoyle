@@ -7,6 +7,7 @@
  */
 
 var dhcpS=new Object(); //part of i18n
+var TSort_Data = new Array ('static_ip_table', 's', 's', 'p', '', '');
 
 function saveChanges()
 {
@@ -391,7 +392,6 @@ function editStatic()
 		catch(e){}
 	}
 
-
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -402,7 +402,6 @@ function editStatic()
 		xCoor = window.left + 225;
 		yCoor = window.top + 225;
 	}
-
 
 	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
 
