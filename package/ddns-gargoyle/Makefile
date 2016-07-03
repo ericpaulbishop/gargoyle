@@ -14,7 +14,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ddns-gargoyle
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+libcyassl +libericstools +ewget
+	DEPENDS:=+libericstools +ewget
 	TITLE:=Dynamic DNS daemon for use with Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
@@ -39,8 +39,7 @@ define Build/Compile
 		STAGING_DIR="$(STAGING_DIR)" \
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
-		USE_CYASSL="1" \
-		USE_CYASSL_INCLUDE_DIR="1" \
+		USE_OPENSSL="0" \
 		STATIC_LIBS="0"
 endef
 

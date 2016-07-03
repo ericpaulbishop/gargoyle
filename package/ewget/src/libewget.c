@@ -188,20 +188,21 @@ static void alarm_triggered(int sig);
 		};
 
 
-	
-		typedef int SSL_CTX;
 		typedef ssl_context SSL;
+		typedef struct pctx
+		{
+			int socket;
+			x509_crt ssl_client_cert;
+			pk_context key;
+			ssl_session ssl_client_session;
 
-		/*
-		#define SSL_write ssl_write
-		#define SSL_read  ssl_read
-		#define SSL_free  ssl_free
-		*/
+		} SSL_CTX;
 		
+		static void SSL_free( SSL* ssl ) { ssl_free(ssl); free(ssl); }
+		static void SSL_CTX_free(SSL_CTX* ctx) { free(ctx) ; }
+
 		static int SSL_read( SSL* ssl, char *buf, size_t len ) { return ssl_read(ssl, (unsigned char*)buf, len); }
 		static int SSL_write( SSL* ssl, char *buf, size_t len ) { return ssl_write(ssl, (unsigned char*)buf, len); }
-		static void SSL_free( SSL* ssl ) { ssl_free(ssl); }
-		static void SSL_CTX_free(SSL_CTX* ctx) { return ; }		
 
 	#endif
 	
@@ -215,7 +216,6 @@ static void alarm_triggered(int sig);
 	typedef struct
 	{
 		int socket;
-		int* socket_ptr;
 		SSL* ssl;
 		SSL_CTX* ctx;
 	} ssl_connection_data;
@@ -1366,7 +1366,6 @@ static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
 	int socket;
-	int* socket_ptr = NULL;
 
 	/*
 	* as soon as we open, or attempt to open a connection
@@ -1405,20 +1404,28 @@ static void* initialize_connection_https(char* host, int port)
 			{
 				ssl = (SSL*)malloc(sizeof(SSL));
 				memset(ssl, 0, sizeof(SSL));
-	
-
-				ssl_set_endpoint(ssl, SSL_IS_CLIENT);
-				ssl_set_authmode(ssl, SSL_VERIFY_NONE);
-				ssl_set_rng(ssl, ewget_urandom, NULL);
-				ssl_set_ciphersuites(ssl, default_ciphersuites);
-				ssl_session_reset(ssl);
-
-				socket_ptr = (int*)malloc(sizeof(int));
-				*socket_ptr = socket;
-				ssl_set_bio(ssl, net_recv, socket_ptr, net_send, socket_ptr);
 				
-				initialized = ssl_handshake(ssl);
+				ctx = (SSL_CTX*)malloc(sizeof(SSL_CTX));	
+				memset(ctx, 0, sizeof(SSL_CTX));
+				pk_init(&ctx->key);
+
+
+
+				if(ssl_init(ssl) == 0)
+				{
+					ssl_set_endpoint(ssl, SSL_IS_CLIENT);
+					ssl_set_authmode(ssl, SSL_VERIFY_NONE);
+					ssl_set_rng(ssl, ewget_urandom, NULL);
+					ssl_set_own_cert(ssl, &(ctx->ssl_client_cert), &(ctx->key)); 
+					ssl_set_ciphersuites(ssl, default_ciphersuites);
+
+					ctx->socket = socket;
+					ssl_set_bio(ssl, net_recv, &(ctx->socket), net_send, &(ctx->socket));
 				
+					ssl_session_reset(ssl);
+					initialized = ssl_handshake(ssl);
+					
+				}
 			}
 		#endif
 
@@ -1465,7 +1472,6 @@ static void* initialize_connection_https(char* host, int port)
 		{
 			connection_data = (ssl_connection_data*)malloc(sizeof(ssl_connection_data));
 			connection_data->socket = socket;
-			connection_data->socket_ptr = socket_ptr;
 			connection_data->ssl = ssl;
 			connection_data->ctx = ctx;
 		}
@@ -1477,10 +1483,6 @@ static void* initialize_connection_https(char* host, int port)
 			#ifdef USE_MATRIXSSL
 				matrixSslClose();
 			#endif
-			if(socket_ptr != NULL)
-			{
-				free(socket_ptr);
-			}
 
 		}
 	}
@@ -1492,6 +1494,7 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	int bytes_read = -1;
+	
 
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );
@@ -1521,10 +1524,6 @@ static void destroy_connection_https(void* connection_data)
 		
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
-		if(cd->socket_ptr != NULL)
-		{
-			free(cd->socket_ptr);
-		}
 		free(cd);
 		#ifdef USE_MATRIXSSL
 			matrixSslClose();
