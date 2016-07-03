@@ -7,15 +7,39 @@ RUN_D=/var/run
 KEY_D=/etc/tor
 PID_F=$RUN_D/$BIN.pid
 OPID_F=$RUN_D/obfsproxy.pid
-RUN_USER=root
-RUN_GROUP=root
+RUN_USER=tor
+RUN_GROUP=tor
 BOOT="0"
-
-
-
-
-
 OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
+
+init_group()
+{
+	group="$1"
+	group_exists=$(cat /etc/group | grep ^$group: >/dev/null; echo $?)
+
+	if [ $group_exists = 1 ]; then
+		gid=100
+		until [ $(cat /etc/group | grep :$gid:$ >/dev/null; echo $?) = 1 ]; do
+			let gid+=1
+		done
+		echo "$group:x:$gid:"        2>/dev/null     >> /etc/group
+	fi
+}
+
+init_user()
+{
+	user="$1"
+	group="$2"
+	user_exists=$(id -u $user > /dev/null 2>&1; echo $?)
+	if [ $user_exists = 1 ]; then
+		gid=$(cat /etc/group | grep $group | cut -d':' -f3)
+		uid=$gid
+		until [ $(cat /etc/passwd | cut -d':' -f3 | grep ^$uid$ > /dev/null; echo $?) = 1 ]; do
+			let uid+=1
+		done
+		echo "$user:*:$uid:$gid:tor user:/tmp:/bin/false"   2>/dev/null     >> /etc/passwd
+	fi
+}
 
 
 init_dir()
@@ -47,8 +71,6 @@ start()
 		tor_data_dir="/var/tor"
 	fi
 
-
-
 	if [ "$enabled" = "0" ] || [ "$client_mode$relay_mode" = "00" ] ; then
 		exit
 	fi
@@ -57,14 +79,15 @@ start()
 		control_port=9051
 	fi
 
+	init_group "$RUN_GROUP"
+
+	init_user "$RUN_USER" "$RUN_GROUP"
 
 	init_dir "$tor_data_dir" "0700"
 	init_dir "$KEY_D"        "0700"
 	init_dir "$RUN_D"        "0755"
 	[ -h "$tor_data_dir/keys" ] || ( rm -rf "$tor_data_dir/keys" && ln -s "$KEY_D" "$tor_data_dir/keys" )
 	[ -f "$PID_F" ] || ( touch "$PID_F" && chown $RUN_USER:$RUN_GROUP "$PID_F" )
-
-
 
 	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --ControlPort $control_port --DataDirectory '$tor_data_dir' "
 	if [ -n "$client_mode" ] && [ "$client_mode" != "0" ] ; then
@@ -79,8 +102,8 @@ start()
 			uci set tor.client.hidden_service_subnet="$hidden_service_subnet"
 			uci set tor.client.hidden_service_mask_bits="$hidden_service_mask_bits"
 			uci commit
-		fi	
-	
+		fi
+
 		if [ -z "$client_zone" ] ; then
 			client_zone="lan"
 		fi
@@ -90,8 +113,8 @@ start()
 		if [ -z "$dns_port" ] ; then
 			dns_port=9053
 		fi
-	
-		OPTIONS="$OPTIONS  --Log '$loglevel syslog' --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+
+		OPTIONS="$OPTIONS  --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 		
 		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
 		if [ -n "$client_listen_ip" ] ; then
@@ -112,7 +135,7 @@ start()
 
 	relay_options=""
 	if [ "$relay_mode" != "0" ] && [ -n "$relay_mode" ] ; then
-		
+
 		relay_port=$(uci get tor.relay.relay_port)
 		max_bw_rate_kb=$(uci get tor.relay.max_bw_rate_kb)
 		max_bw_burst_kb=$(uci get tor.relay.max_bw_burst_kb)
@@ -122,7 +145,7 @@ start()
 		publish=$(uci get tor.relay.publish )
 
 		relay_ip=0.0.0.0
-				
+
 		relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
 		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
@@ -143,18 +166,17 @@ start()
 		if [ -n "$publish" ] ; then
 			relay_options=" $relay_options --PublishServerDescriptor $publish "
 		fi
-		
+
 		relay_options=" $relay_options --RelayBandwidthRate '$max_bw_rate_kb KB' --MaxAdvertisedBandwidth '$max_bw_rate_kb KB' --Exitpolicy 'reject *:*' "
 	else
 		relay_options=" --ClientOnly 1"
 	fi
-	
-	eval "$BIN $OPTIONS $relay_options"
 
+	eval "$BIN $OPTIONS $relay_options"
 
 	if [ "$BOOT" = "0" ] ; then
 		sh /etc/tor.firewall
-	fi	
+	fi
 }
 
 stop()
@@ -182,4 +204,3 @@ restart()
 	sleep 1
 	start
 }
-

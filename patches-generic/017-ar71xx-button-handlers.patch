@@ -1,6 +1,6 @@
---- /dev/null
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	
-@@ -0,0 +1,63 @@
+--- /dev/null	1970-01-01 01:00:00.000000000 +0100
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/gargoyle_button_handlers	2016-06-20 10:32:24.000000000 +0200
+@@ -0,0 +1,65 @@
 +#!/bin/sh
 +#
 +# Copyright (C) 2010 OpenWrt.org
@@ -9,6 +9,7 @@
 +. /lib/ar71xx.sh
 +
 +is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
++is_tplink_wr841_v9_v10_v11=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-WR841N\/ND v9")
 +is_wrt160nl=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WRT160NL")
 +is_netgear=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "WNDR3700")
 +is_ubntrspro=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "RouterStation Pro")
@@ -16,11 +17,12 @@
 +is_dlink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep -i "DIR.8[23]5")
 +is_hornet=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep -i "ALFA.*Hornet")
 +
++[ -n "$is_tplink_wr841_v9_v10_v11" ] && keycode='rfkill' || keycode='wps'
 +
 +if [ -n "$is_tplink" ] || [ -n "$is_wrt160nl" ] || [ -n "$is_netgear" ] || [ -n "$is_buffalo_wzr" ] || [ -n "$is_dlink" ] ; then
 +	uci batch <<EOF
 +set system.reboot_button=button
-+set system.reboot_button.button='wps'
++set system.reboot_button.button='$keycode'
 +set system.reboot_button.action='released'
 +set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
 +set system.reboot_button.min='3'
@@ -28,7 +30,7 @@
 +set system.reset_button=button
 +set system.reset_button.button='reset'
 +set system.reset_button.action='released'
-+set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot -y; reboot ;'
 +set system.reset_button.min='3'
 +set system.reset_button.max='90'
 +commit system
@@ -46,7 +48,7 @@
 +set system.reset_button=button
 +set system.reset_button.button='reset'
 +set system.reset_button.action='released'
-+set system.reset_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot -y; reboot ;'
 +set system.reset_button.min='13'
 +set system.reset_button.max='33'
 +commit system
@@ -58,7 +60,7 @@
 +set system.bottom_red_button=button
 +set system.bottom_red_button.button='reset'
 +set system.bottom_red_button.action='released'
-+set system.bottom_red_button.handler='logger restore defaults ; /sbin/firstboot ; reboot ;'
++set system.bottom_red_button.handler='logger restore defaults ; /sbin/firstboot -y; reboot ;'
 +set system.bottom_red_button.min='3'
 +set system.bottom_red_button.max='90'
 +commit system
