@@ -30,7 +30,7 @@ endef
 
 
 define Package/ewget/description
-  embedded wget and http client library with ssl support (via cyassl)
+  embedded wget and http client library with ssl support (via polarssl)
 endef
 
 
