@@ -28,27 +28,31 @@
 %>
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ connlimits.CLSect %></legend>
-	<div>
-		<label class='narrowleftcolumn' for='max_connections' id='max_connections_label'><%~ MaxC %>:</label>
-		<input type='text' class='rightcolumn' onkeyup='proofreadNumericRange(this,1,16384)' id='max_connections' size='10' maxlength='5' />
+<h1 class="page-header"><%~ connlimits.CLSect %></h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
+	<div class='form-group form-inline'>
+		<label for='max_connections' id='max_connections_label'><%~ MaxC %>:</label>
+		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,16384)' id='max_connections' size='10' maxlength='5' />
 		<em>(<%~ max %> 16384)</em>
 	</div>
-	<div>
-		<label class='narrowleftcolumn' for='tcp_timeout' id='tcp_timeout_label'><%~ TTout %>:</label>
-		<input type='text' class='rightcolumn' onkeyup='proofreadNumericRange(this,1,3600)' id='tcp_timeout' size='10' maxlength='4' />
+	<div class='form-group form-inline'>
+		<label for='tcp_timeout' id='tcp_timeout_label'><%~ TTout %>:</label>
+		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,3600)' id='tcp_timeout' size='10' maxlength='4' />
 		<em><%~ seconds %> (<%~ max %> 3600)</em>
 	</div>
-	<div>
-		<label class='narrowleftcolumn' for='udp_timeout' id='udp_timeout_label'><%~ UTout %>:</label>
-		<input type='text' class='rightcolumn' onkeyup='proofreadNumericRange(this,1,3600)' id='udp_timeout' size='10' maxlength='4' />
+	<div class='form-group form-inline'>
+		<label for='udp_timeout' id='udp_timeout_label'><%~ UTout %>:</label>
+		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,3600)' id='udp_timeout' size='10' maxlength='4' />
 		<em><%~ seconds %> (<%~ max %> 3600)</em>
 	</div>
-</fieldset>
+</div></div></div></div>
 <div id="bottom_button_container">
-	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->

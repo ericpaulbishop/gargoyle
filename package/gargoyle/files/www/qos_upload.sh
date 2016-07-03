@@ -26,53 +26,57 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ qos.URSection %></legend>
+<h1 class="page-header">QoS Upload</h1>
+<div class="row">
 
-		<div id='qos_enabled_container' class='nocolumn'>
-			<input type='checkbox' id='qos_enabled' onclick="setQosEnabled()" />
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ qos.URSection %></h3>
+		</div>
+			<div class="panel-body">
+
+		<div id='qos_enabled_container' class='form-group form-inline'>
+			<input type='checkbox' id='qos_enabled' class='form-control' onclick="setQosEnabled()" />
 			<label id='qos_enabled_label' for='qos_enabled'><%~ UEnable %></label>
 		</div>
 
-		<div class="indent">
+		<div>
 			<p><%~ QoSAbout %></p>
 		</div>
 		<div class="internal_divider"></div>
 
 		<div id='qos_rule_table_container' class="bottom_gap"></div>
-		<div>
-			<label class="leftcolumn" id="default_class_label" for="default_class"><%~ ServClass %>:</label>
-			<select class="rightcolumn" id="default_class"></select>
+		<div class="form-group form-inline">
+			<label id="default_class_label" for="default_class"><%~ ServClass %>:</label>
+			<select class="form-control" id="default_class"></select>
 		</div>
 
-		<div id="qos_up_1" class="indent">
+		<div id="qos_up_1" >
 			<span id='qos_up_1_txt'>
 				<p><%~ PackAbout %></p>
 
 				<p><%~ DefServClassAbout %></p>
 
 			</span>
-			<a onclick='setDescriptionVisibility("qos_up_1")'  id="qos_up_1_ref" href="#qos_up_1"><%~ Hide %></a>
+			<a onclick='setDescriptionVisibility("qos_up_1")' id="qos_up_1_ref" href="#qos_up_1"><%~ Hide %></a>
 		</div>
 
 
-		<div class="internal_divider">
-			<p>
-		</div>
+		<div class="internal_divider"></div>
 
 		<div><strong><%~ AddNewClassRule %>:</strong></div>
-		<div class="indent">
-			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
+		<div>
+			<div class="form-group form-inline">
+				<div>
+					<input type='checkbox' class='form-control' id='use_source_ip' onclick='enableAssociatedField(this,"source_ip", "")' />
 					<label id="source_ip_label" for='source_ip'><%~ SrcIP %>:</label>
 				</div>
-				<input class='rightcolumn' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
+				<input class='form-control' type='text' id='source_ip' onkeyup='proofreadIpRange(this)' size='17' maxlength='31' />
 			</div>
 			<div>
-				<div class='leftcolumn'>
-					<input type='checkbox'  id='use_source_port' onclick='enableAssociatedField(this,"source_port", "")'/>
+				<div class="form-group form-inline">
+					<input type='checkbox' id='use_source_port' class='form-control' onclick='enableAssociatedField(this,"source_port", "")'/>
 					<label id="source_port_label" for='source_port'><%~ SrcPort %>:</label>
 				</div>
 				<input class='rightcolumn' type='text' id='source_port' onkeyup='proofreadPortOrPortRange(this)' size='17' maxlength='11' />
@@ -146,19 +150,27 @@
 
 			<div>
 				<label class='leftcolumn' id="classification_label" for='classification' ><%~ SetClass %>:</label>
-				<select class='rightcolumn' id="classification">
-				</select>
+				<select class='rightcolumn' id="classification"></select>
 			</div>
 
 			<div id="add_rule_container">
-				<input type="button" id="add_rule_button" class="default_button" value="<%~ AddRule %>" onclick="addClassificationRule()" />
+				<button id="add_rule_button" class="btn btn-default" onclick="addClassificationRule()" ><%~ AddRule %></button>
 			</div>
 	</div>
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
+<div class="row">
 
-		<legend class="sectionheader"><%~ UCSection %></legend>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ UCSection %></h3>
+		</div>
+			<div class="panel-body">
+
 		<div id='qos_class_table_container' class="bottom_gap"></div>
 
 		<div>
@@ -168,7 +180,7 @@
 
 		</div>
 
-		<div id="qos_up_2" class="indent">
+		<div id="qos_up_2" >
 			<span id='qos_up_2_txt'>
 				<p><%~ USCAbout %></p>
 
@@ -186,7 +198,7 @@
 		<div class="internal_divider"></div>
 
 		<div><strong><%~ AddNewServiceRule %>:</strong></div>
-		<div class="indent">
+		<div >
 
 			<div>
 				<label class='leftcolumn' id="class_name_label" for='class_name'><%~ SrvClassName %>:</label>
@@ -240,14 +252,17 @@
 				<input type="button" id="add_class_button" class="default_button" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
 			</div>
 		</div>
-	</fieldset>
-
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
+</div>
+</div>
+
+<div id="bottom_button_container" class='form-group form-inline'>
+	<button id="save_button" class="btn btn-info" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick='resetData()'/><%~ Reset %></button>
+</div>
+<span id="update_container"><%~ WaitSettings %></span>
+
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 

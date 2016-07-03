@@ -10,12 +10,19 @@
 %>
 
 
-<fieldset>
-	<legend class="sectionheader"><%~ AJAX %></legend>
+<h1 class="page-header"><%~ AJAX %></h1>
+<div class="row">
 
-	<p><%~ AJAXUpg %></p>
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
-</fieldset>
+				<p><%~ AJAXUpg %></p>
+
+			</div>
+		</div>
+	</div>
+</div>
 <%
 	gargoyle_header_footer -f -s "" -p ""
 %>

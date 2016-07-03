@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	echo "Status: 302 Found" 
+	echo "Status: 302 Found"
 	echo "Set-Cookie:hash=loggedout;"
 	echo "Location: login.sh?logout=1"
 	echo ""

@@ -21,16 +21,22 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ themes.TMSect %></legend>
-		<div class='indent'>
-		<div id="themes_table_container"></div>
-		</div>
-	</fieldset>
+<h1 class="page-header">Themes</h1>
+<div class="row">
 
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ themes.TMSect %></h3>
+		</div>
+			<div class="panel-body">
+				<div id="themes_table_container"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<span id="update_container" ><%~ WaitSettings %></span>
 
 <script>
 <!--

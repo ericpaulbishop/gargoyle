@@ -26,15 +26,20 @@
 %>
 //-->
 </script>
+<h1 class="page-header"><%~ conntrack.CCSect %></h1>
+<div class="row">
 
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ conntrack.CCSect %></legend>
+			<div class="row">
 
-		<div>
-			<label for="refresh_rate" class="narrowleftcolumn"><%~ RRate %>:</label>
-			<select id="refresh_rate" class="rightcolumn" >
+				<div class="col-lg-4">
+
+		<div class='form-group form-inline'>
+			<label for="refresh_rate"><%~ RRate %>:</label>
+			<select id="refresh_rate" class="form-control">
 				<option value="2000">2 <%~ seconds %></option>
 				<option value="10000">10 <%~ seconds %></option>
 				<option value="30000">30 <%~ seconds %></option>
@@ -42,29 +47,38 @@
 				<option value="never"><%~ never %></option>
 			</select>
 		</div>
-		<div>
-			<label for="bw_units" class="narrowleftcolumn" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
-			<select id="bw_units" class="rightcolumn">
+		<div class='form-group form-inline'>
+			<label for="bw_units" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
+			<select id="bw_units" class="form-control">
 				<option value="mixed"><%~ AtMxd %></option>
 				<option value="KBytes"><%~ KBy %></option>
 				<option value="MBytes"><%~ MBy %></option>
 				<option value="GBytes"><%~ GBy %></option>
 			</select>
 		</div>
-		<div>
-			<label for="host_display" class="narrowleftcolumn" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
-			<select id="host_display" class="rightcolumn">
+		<div class='form-group form-inline'>
+			<label for="host_display" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
+			<select id="host_display" class="form-control">
 				<option value="hostname"><%~ DspHn %></option>
 				<option value="ip"><%~ DspHIP %></option>
 			</select>
 		</div>
 
-		<div id="connection_table_container"></div>
-		<div style="width:375px">
-			<p><%~ CnWarn %></p>
+		</div></div>
+
+		<div class="row">
+
+			<div class="col-lg-12">
+				<div class="alert alert-warning" role="alert"><%~ CnWarn %></div>
+					<div id="connection_table_container"></div>
+			</div>
 		</div>
-	</fieldset>
-</form>
+
+	</div>
+</div>
+</div>
+</div>
+
 
 <script>
 <!--

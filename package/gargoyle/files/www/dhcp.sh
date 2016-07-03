@@ -56,79 +56,100 @@ for (etherIndex in etherData)
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader">DHCP</legend>
+
+<h1 class="page-header">DHCP</h1>
+<div class="row">
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
 		<div id='dhcp_enabled_container'>
-			<div class='nocolumn'>
+			<div class='form-group form-inline'>
 				<input type='checkbox' id='dhcp_enabled' onclick="setEnabled(this.checked)" />
 				<label id='dhcp_enabled_label' for='dhcp_enabled'><%~ dhcp.SrvE %></label>
 			</div>
 		</div>
 
-		<div id='dhcp_range_container'>
-			<label class='nocolumn' for='dhcp_start'><%~ Drng %>:</label>
+		<div id='dhcp_range_container' class='form-group form-inline'>
+			<label for='dhcp_start'><%~ Drng %>:</label>
 		</div>
-		<div id='dhcp_start_container' class='indent'>
-			<label class='leftcolumn' for='dhcp_start' id='dhcp_start_label'><%~ Strt %>:</label>
+
+		<div id='dhcp_start_container' class='form-group form-inline'>
+			<label for='dhcp_start' id='dhcp_start_label'><%~ Strt %>:</label>
 			<span class='rightcolumn'><% echo -n "$subnet" %></span>
-			<input type='text' class='rightcolumn' id='dhcp_start' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
+			<input type='text' class='form-control' id='dhcp_start' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
 		</div>
-		<div id='dhcp_end_container' class='indent'>
-			<label class='leftcolumn' for='dhcp_end' id='dhcp_end_label'><%~ End %>:</label>
+
+		<div id='dhcp_end_container' class='form-group form-inline'>
+			<label for='dhcp_end' id='dhcp_end_label'><%~ End %>:</label>
 			<span class='rightcolumn'><% echo -n "$subnet" %></span>
-			<input type='text' class='rightcolumn' id='dhcp_end' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
+			<input type='text' class='form-control' id='dhcp_end' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
 		</div>
-		<div id='dhcp_lease_container'>
-			<label class='leftcolumn' for='dhcp_lease' id='dhcp_lease_label'><%~ LsTm %>:</label>
-			<input type='text' class='rightcolumnindent' onkeyup='proofreadNumeric(this)' id='dhcp_lease' size='5' maxlength='4' />
+
+		<div id='dhcp_lease_container' class='form-group form-inline'>
+			<label for='dhcp_lease' id='dhcp_lease_label'><%~ LsTm %>:</label>
+			<input type='text' class='form-control' onkeyup='proofreadNumeric(this)' id='dhcp_lease' size='5' maxlength='4' />
 			<em>(<%~ hours %>)</em>
 		</div>
 
-	</fieldset>
+	</div>
+</div>
+</div>
+</div>
 
-	<fieldset>
-		<legend class="sectionheader"><%~ SIPs %></legend>
+<div class="row">
 
-		<div id='block_mismatches_container'>
-			<div class='nocolumn'>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SIPs %></h3>
+			</div>
+			<div class="panel-body">
+
+		<div id='block_mismatches_container' class='form-group form-inline'>
+			<div>
 				<input type='checkbox' id='block_mismatches' />
 				<label id='block_mismatch_label' for='block_mismatches'><%~ BlckM %></label>
 			</div>
 		</div>
 
-		<div id='staticip_add_heading_container'>
+		<div id='staticip_add_heading_container' class='form-group form-inline'>
 			<label class='nocolumn' id='staticip_add_heading_label' style='text-decoration:underline'><%~ AdSIP %>:</label>
 		</div>
-		<div class='bottom_gap'>
+
+		<div class='form-group form-inline'>
 			<div id='staticip_add_container'>
 				<%in templates/static_ip_template %>
 			</div>
 			<div>
-				<select id="static_from_connected" onchange="staticFromConnected()" >
+				<select id="static_from_connected" class="form-control" onchange="staticFromConnected()">
 					<option value="none"><%~ SelH %></option>
 				</select>
 			</div>
 		</div>
 
-		<div id='staticip_table_heading_container'>
+		<div id='staticip_table_heading_container' class='form-group form-inline'>
 			<span class='nocolumn'><%~ AsSIP %>:</span>
 		</div>
-		<div class='indent'>
+
+		<div class='form-group form-inline'>
 			<div id='staticip_table_container' class="bottom_gap"></div>
 		</div>
-	</fieldset>
+
+	</div>
+</div>
+</div>
+</div>
 
 	<div id="firefox3_bug_correct" style="display:none">
 		<input type='text' value='firefox3_bug' />
 	</div>
 
 	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+	  <button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+	  <button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>
 	</div>
-</form>
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
