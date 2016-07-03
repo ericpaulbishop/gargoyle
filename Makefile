@@ -4,6 +4,7 @@ FULL_BUILD=false
 CUSTOM_TEMPLATE=ar71xx
 CUSTOM_TARGET=ar71xx
 JS_COMPRESS=true
+CSS_COMPRESS=true
 TRANSLATION=internationalize
 FALLBACK_LANG=English-EN
 ACTIVE_LANG=English-EN
@@ -17,9 +18,9 @@ ALL:
 		if [ -d "Distribution" ] ; then rm -rf "Distribution" ; fi ;\
 		for t in $$targets ; do \
 			if [ ! -d "$$t-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)";\
+				bash build.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "" "" "$(JS_COMPRESS)" "$(CSS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)";\
 			else \
-				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)" ;\
+				bash rebuild.sh "$$t" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$(CSS_COMPRESS)" "" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)" ;\
 			fi ;\
 		done ;\
 	)
@@ -28,17 +29,18 @@ ALL:
 distclean: 
 	rm -rf ./*-src
 	rm -rf ./compressed_javascript
+	rm -rf ./compressed_css
 	rm -rf ./package-prepare
 	rm -rf ./built
 	rm -rf ./images
 	rm -rf ./downloaded
-	rm -rf ./node
-	rm -rf ./UglifyJS
+	rm -rf ./minifiers
 
 
 clean:
 	rm -rf ./*-src
 	rm -rf ./compressed_javascript
+	rm -rf ./compressed_css
 	rm -rf ./package-prepare
 	rm -rf ./built
 	rm -rf ./images
@@ -61,9 +63,9 @@ cleanup:
 		if [ -n "$$profile" ] && [ ! -d "targets/$${target}/profiles/$${profile}" ] ; then echo "ERROR: Specified Target Profile Does Not Exist" ; exit ; fi ; \
 		if [ -d "Distribution" ] ; then rm -rf "Distribution" ; fi ;\
 		if [ ! -d "$${target}-src" ] || [ "$(FULL_BUILD)" = "1" -o "$(FULL_BUILD)" = "true" -o "$(FULL_BUILD)" = "TRUE" ] ; then \
-			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TARGET)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)"; \
+			bash build.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(CUSTOM_TARGET)" "$(CUSTOM_TEMPLATE)" "$(JS_COMPRESS)" "$(CSS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)"; \
 		else \
-			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)"; \
+			bash rebuild.sh "$$target" "$(GARGOYLE_VERSION)" "$(V)" "$(JS_COMPRESS)" "$(CSS_COMPRESS)" "$$profile" "$(TRANSLATION)" "$(FALLBACK_LANG)" "$(ACTIVE_LANG)" "$(BUILD_THREADS)" "$(DISTRIBUTION)"; \
 		fi ; \
 	)
 

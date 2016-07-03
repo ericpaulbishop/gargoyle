@@ -9,6 +9,7 @@ set_constant_variables()
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
+	compress_css_dir="$top_dir/compressed_css"
 
 	#script for building netfilter patches
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
@@ -21,21 +22,6 @@ set_constant_variables()
 
 }
 
-
-set_constant_variables()
-{
-	#working directories
-	scriptpath="$(readlink -f "$0")"
-	top_dir="${scriptpath%/${0##*/}}"
-	targets_dir="$top_dir/targets"
-	patches_dir="$top_dir/patches-generic"
-	compress_js_dir="$top_dir/compressed_javascript"
-	
-	#script for building netfilter patches
-	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
-
-
-}
 
 set_version_variables()
 {
@@ -155,6 +141,36 @@ do_js_compress()
 	cd "$top_dir"
 }
 
+do_css_compress()
+{
+	echo "Compressing CSS files..."
+	uglifycss_arg1="$1"
+	uglifycss_arg2="$2"
+
+	rm -rf "$compress_css_dir"
+	mkdir "$compress_css_dir"
+	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
+	for cssdir in $(find "${top_dir}/package-prepare" -path "*/www/themes/Gargoyle") ; do
+		pkg_rel_path=$(echo $cssdir | sed "s/$escaped_package_dir//g");
+		mkdir -p "$compress_css_dir/$pkg_rel_path"
+		cp "$cssdir/"*.css "$compress_css_dir/$pkg_rel_path/"
+		cd "$compress_css_dir/$pkg_rel_path/"
+
+		for cssf in *.css ; do
+			if [ -n "$uglifycss_arg2" ] ; then
+				"$uglifycss_arg1" "$uglifycss_arg2" "$cssf" > "$cssf.cmp"
+			else
+				"$uglifycss_arg1" "$cssf" > "$cssf.cmp"
+			fi
+			mv "$cssf.cmp" "$cssf"
+		done
+	done
+	cp -r "$compress_css_dir"/* "$top_dir/package-prepare/"
+
+	cd "$top_dir"
+	echo "Done!"
+}
+
 distrib_copy_arch_ind_ipk()
 {
 	local tgt="$1"
@@ -229,12 +245,13 @@ targets="$1"
 full_gargoyle_version="$2"
 verbosity="$3"
 js_compress="$4"
-specified_profile="$5"
-translation_type="$6"
-fallback_lang="$7"
-active_lang="$8"
-num_build_threads="$9"
-distribution="${10}"
+css_compress="$5"
+specified_profile="$6"
+translation_type="$7"
+fallback_lang="$8"
+active_lang="$9"
+num_build_threads="$10"
+distribution="${11}"
 
 
 
@@ -281,55 +298,87 @@ fi
 }
 
 
-#compress javascript
+#compress javascript AND css
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
 
-	cd "$top_dir"
-
-	uglify_test=$( echo 'var abc = 1;' | uglifyjs  2>/dev/null )
-	if [ "$uglify_test" != 'var abc=1' ] &&  [ "$uglify_test" != 'var abc=1;' ]  ; then
+	cd "$top_dir/minifiers/node_modules/.bin"
 		
-		node_bin="$top_dir/node/node"
-		uglifyjs_bin="$top_dir/UglifyJS/bin/uglifyjs"
-		if [ ! -e "$node_bin" ] && [ ! -e "$uglifyjs_bin" ] ; then
-			echo ""
-			echo "**************************************************************************"
-			echo "**  uglifyjs is not installed globally, attempting to build it          **"
-			echo "**************************************************************************"
-			echo ""
-
-			#node
-			git clone git://github.com/joyent/node.git
-			cd node
-			git checkout v0.11.14
-			./configure 
-			make
-			cd "$top_dir"
-
-
-			#uglifyjs
-			git clone git://github.com/mishoo/UglifyJS.git
-			cd UglifyJS/bin
-			git checkout v1.3.5
-			cd "$top_dir"
-		fi
-		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
-		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
-			js_compress="true"
-			do_js_compress "$node_bin" "$uglifyjs_bin"
-	
-		else
-			js_compress="false"
-			echo ""
-			echo "**************************************************************************"
-			echo "**  WARNING: Cannot compress javascript -- uglifyjs could not be built  **"
-			echo "**************************************************************************"
-			echo ""
-		fi
+	npm_test=$( npm -v 2>/dev/null )
+	if [ -z "$npm_test" ] ; then
+		echo ""
+		echo "**************************************************************************"
+		echo "** npm is not installed! cannot install uglifyjs & uglifycss without it **"
+		echo "**************************************************************************"
+		echo ""
 	else
-		js_compress="true"
-		do_js_compress "uglifyjs"
+		echo "npm ok!"
 	fi
+	node_test=$( nodejs -v 2>/dev/null )
+	if [ -z "$node_test" ] ; then
+		echo ""
+		echo "**************************************************************************"
+		echo "**  nodejs is not installed! cannot run uglifyjs & uglifycss without it **"
+		echo "**************************************************************************"
+		echo ""
+	else
+		echo "node ok!"
+	fi
+	uglifyjs_bin="$top_dir/minifiers/node_modules/.bin/uglifyjs"
+	if [ ! -e "$uglifyjs_bin" ] ; then
+		echo ""
+		echo "**************************************************************************"
+		echo "**  UglifyJS2 is not installed, attempting to install from npm          **"
+		echo "**************************************************************************"
+		echo ""
+
+		cd "$top_dir"
+		npm install uglify-js --prefix minifiers > /dev/null 2>&1
+	else
+		echo "uglifyjs ok!"
+	fi
+	cd "$top_dir/minifiers/node_modules/.bin"
+	uglify_test=$( echo 'var abc = 1;' | nodejs "$uglifyjs_bin"  2>/dev/null )
+	if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
+		js_compress="true"
+		do_js_compress "nodejs" "$uglifyjs_bin"
+	else
+		js_compress="false"
+		echo ""
+		echo "**************************************************************************"
+		echo "** WARNING: Cannot compress javascript, uglifyjs could not be installed **"
+		echo "**************************************************************************"
+		echo ""
+	fi
+	if [ "$css_compress" = "true" ] || [ "$css_compress" = "TRUE" ] || [ "$css_compress" = "1" ] ; then
+		uglifycss_bin="$top_dir/minifiers/node_modules/.bin/uglifycss"
+		if [ ! -e "$uglifycss_bin" ] ; then
+			echo ""
+			echo "**************************************************************************"
+			echo "**  UglifyCSS is not installed, attempting to install from npm          **"
+			echo "**************************************************************************"
+			echo ""
+
+			cd "$top_dir"
+			npm install uglifycss -q --prefix minifiers > /dev/null 2>&1
+		else
+			echo "uglifycss ok!"
+		fi
+	
+		cd "$top_dir/minifiers/node_modules/.bin"
+		uglify_test=$( echo -e '#test {\nabc: 1;\ndef: 1;\n}' | nodejs "$uglifycss_bin"  2>/dev/null )
+		if [ "$uglify_test" = '#test{abc:1;def:1}' ] ; then
+			css_compress="true"
+			do_css_compress "nodejs" "$uglifycss_bin"
+		else
+			css_compress="false"
+			echo ""
+			echo "**************************************************************************"
+			echo "** WARNING: Cannot compress css, uglifycss could not be installed       **"
+			echo "**************************************************************************"
+			echo ""
+		fi
+	fi
+
 	cd "$top_dir"
 fi
 
