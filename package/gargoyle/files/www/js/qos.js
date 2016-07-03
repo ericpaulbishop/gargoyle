@@ -5,7 +5,7 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
- 
+
 var qosStr=new Object; // part of i18n
 
 function saveChanges()
@@ -152,7 +152,7 @@ function saveChanges()
 				uci.set("qos_gargoyle", classId, "max_bandwidth", maxBandwidth);
 			}
 
-			if (classData[classIndex][4] == qosStr.YES) 
+			if (classData[classIndex][4] == qosStr.YES)
 			{
 				uci.set("qos_gargoyle",classId,"minRTT","Yes");
 			}
@@ -171,7 +171,7 @@ function saveChanges()
 			{
 				classId = classIds[getSelectedText("default_class")];
 			}
-			else 
+			else
 			{
 				classId = classIds[ ruleData[ruleIndex][1] ];
 			}
@@ -283,7 +283,7 @@ function init_classtable()
 		totalPercent = totalPercent + parseInt(uciOriginal.get("qos_gargoyle", classSections[classIndex], "percent_bandwidth"));
 	}
 
-        //This array setup such that classIndex+1 = the classno (ie dclass_x, where x=classno) 
+        //This array setup such that classIndex+1 = the classno (ie dclass_x, where x=classno)
 	for (classIndex=0; classIndex < classSections.length; classIndex++)
 	{
 		var classSection = classSections[classIndex];
@@ -338,7 +338,7 @@ function bpsToKbpsString(bps)
 	else if (bpsn < 1)
 	{
 		kbps = bpsn.toFixed(1) + '';
-	} 
+	}
 	else
 	{
 		kbps = bpsn.toFixed(0) + '';
@@ -365,7 +365,7 @@ function update_classtable()
 			dynamic_update = false;
 		}
 	}
-	
+
         var rowIndex;
         for (rowIndex=1; rowIndex <= classTable.length; rowIndex++) {
 	     var row = table.rows[rowIndex];
@@ -407,7 +407,7 @@ function resetData()
 		initializeDescriptionVisibility(uciOriginal, "qos_down_3");
 		initializeDescriptionVisibility(uciOriginal, "qos_down_4");
 	}
-	
+
 	uciOriginal.removeSection("gargoyle", "help"); //necessary, or we over-write the help settings when we save
 
 
@@ -470,7 +470,7 @@ function resetData()
 		}
 
 		classification = uciOriginal.get("qos_gargoyle", ruleSection, "class");
-		idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1; 
+		idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1;
 		ruleTableData.push( [ruleText, classTable[idx].Name, createRuleTableEditButton()] );
 	}
 
@@ -541,7 +541,7 @@ function resetData()
 		{
 			//Run updateqosmon once to clear away any old data.
 			setTimeout("updateqosmon()", 100);
-		} 
+		}
 	}
 
 	//The default screen updater.
@@ -828,7 +828,7 @@ function createRuleTableEditButton()
 {
 	editRuleButton = createInput("button");
 	editRuleButton.value = UI.Edit;
-	editRuleButton.className="default_button";
+	editRuleButton.className="btn btn-default";
 	editRuleButton.onclick = editRuleTableRow;
 
 	return editRuleButton;
@@ -876,9 +876,9 @@ function editRuleTableRow()
 		closeButton = editRuleWindow.createElement('<input type="button" />');
 	}
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 
 	editRuleWindowRow=this.parentNode.parentNode;
@@ -1003,7 +1003,7 @@ function createClassTableEditButton(rowIndex)
 {
 	editClassButton = createInput("button");
 	editClassButton.value = UI.Edit;
-	editClassButton.className="default_button";
+	editClassButton.className="btn btn-default";
 	editClassButton.onclick = editClassTableRow;
 	editClassButton.id = "" + rowIndex;
 
@@ -1055,9 +1055,9 @@ function editClassTableRow()
 	}
 
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	editClassWindowRow=this.parentNode.parentNode;
 	runOnClassEditorLoaded = function ()
@@ -1071,15 +1071,15 @@ function editClassTableRow()
 
 				if (direction == "upload") {editClassWindow.document.getElementById('rttdiv').style.display = 'none';}
 
-				/* Watch the window in case the user just closes without using one of the buttons. 
+				/* Watch the window in case the user just closes without using one of the buttons.
 				   in which case we must re-enable the class bandwidth updater */
-				var timer = setInterval(function() {   
-				    if(editClassWindow.closed) {  
-				        clearInterval(timer);  
-				        updateInProgress = false; 
-					 dynamic_update=true; 
-				    }  
-				}, 700);  
+				var timer = setInterval(function() {
+				    if(editClassWindow.closed) {
+				        clearInterval(timer);
+				        updateInProgress = false;
+					 dynamic_update=true;
+				    }
+				}, 700);
 
 
 				editClassWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
@@ -1121,7 +1121,7 @@ function editClassTableRow()
 
 				closeButton.onclick = function()
 				{
-					clearInterval(timer);  
+					clearInterval(timer);
 					editClassWindow.close();
 				}
 
@@ -1177,7 +1177,7 @@ function editClassTableRow()
 								}
 							}
 						}
-						
+
 						var rowData = classTable[ editClassWindowRow.childNodes[6].firstChild.id ];
 						rowData.Name    = editClassWindow.document.getElementById("class_name").value ;
 						rowData.Percent = editClassWindow.document.getElementById("percent_bandwidth").value ;
@@ -1192,7 +1192,7 @@ function editClassTableRow()
 						editClassWindowRow.childNodes[4].firstChild.data = rowData.MinRTT;
 
 						updateInProgress = false;
-						clearInterval(timer);  
+						clearInterval(timer);
 						editClassWindow.close();
 					}
 				}
@@ -1259,8 +1259,8 @@ function updatetc()
 		}
 		else
 		{
-			/* 
-			 * NOTE: This NEEDS to be "currentWanName" variable NOT "currentWanIf" Variable!!! 
+			/*
+			 * NOTE: This NEEDS to be "currentWanName" variable NOT "currentWanIf" Variable!!!
 			 * If this doesn't work the problem is in gargoyle_header_footer utility, not here
 			 */
 			commands = commands + currentWanName;
@@ -1282,7 +1282,7 @@ function updatetc()
 				{
 					for(i = 0; i < lines.length; i++)
 					{
-                                        //Here the minor number of the qdisc ID is equal to class number+1 or index+2  
+                                        //Here the minor number of the qdisc ID is equal to class number+1 or index+2
 					var idx=parseInt(lines[i].match(/hfsc\s1:([0-9]+)/)[1])-2;
 					var lastbytes;
 
@@ -1327,7 +1327,7 @@ function updateqosmon()
 			if(req.readyState == 4)
 			{
 				var lines = req.responseText.split("\n");
-                             
+
 				if (lines[0].substr(0,6) == "State:")
 				{
 					document.getElementById("qstate").innerHTML = lines[0];
@@ -1342,7 +1342,7 @@ function updateqosmon()
 
 					for (i=0; i<lines.length; i++)
 					{
-                         
+
 					var leafID = lines[i].match(/ID\s+([0-9A-F]+)/)[1];
 					var j;
 
@@ -1354,7 +1354,7 @@ function updateqosmon()
 					if (j < classTable.length)
 					{
 					    classTable[j].bps = parseInt(lines[i].match(/ID\s+[0-9A-F]+.*:\s([0-9]+)/)[1]);
-					} 
+					}
 
 
 	     			}
@@ -1376,5 +1376,3 @@ function updateqosmon()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
-

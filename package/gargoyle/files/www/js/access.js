@@ -58,7 +58,7 @@ function saveChanges()
 			uci.set("firewall", id, "proto", "tcp");
 			uci.set("firewall", id, "zone", "wan");
 			firewallSectionCommands.push("uci set firewall." + id + "=remote_accept");
-		}
+		};
 		if(document.getElementById("remote_https_port_container").style.display != "none")
 		{
 			addAccept( document.getElementById("local_https_port").value, document.getElementById("remote_https_port").value);
@@ -76,8 +76,8 @@ function saveChanges()
 		var newLocalSshPort =  document.getElementById("local_ssh_port").value;
 		var remoteAttempts =  document.getElementById("remote_ssh_attempts").disabled ? "" : getSelectedValue("remote_ssh_attempts");
 		var uciPreCommands = [];
-		
-		var oldSshPwdEnabled = uciOriginal.get("dropbear", dropbearSections[0], "PasswordAuth")
+
+		var oldSshPwdEnabled = uciOriginal.get("dropbear", dropbearSections[0], "PasswordAuth");
 		var sshPwdEnabled = document.getElementById("pwd_auth_enabled").checked ? "on" : "off";
 		if(dropbearSections[0] != "global")
 		{
@@ -168,7 +168,7 @@ function saveChanges()
 			}
 		}
 
-	
+
 		//password update
 		passwordCommands = "";
 		newPassword = document.getElementById("password1").value;
@@ -439,7 +439,7 @@ function resetData()
 
 
 
-	
+
 
 	//enable/disable proper fields
 	updateVisibility();
@@ -622,7 +622,7 @@ function addKey()
 		document.getElementById('file_contents').value = '';
 
 	}
-	
+
 }
 
 

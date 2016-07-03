@@ -1,6 +1,6 @@
 /*
-	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL 
-	version 2.0. 
+	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL
+	version 2.0.
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 */
 
@@ -159,10 +159,10 @@ function setPieChartData(data, labels)
 		newPath.onmouseover=piePieceSelected;
 		newPath.onmouseout=piePieceDeselected;
 		pieChartPaths.push(newPath);
-		
+
 		previousX = x;
 		previousY = y;
-		radiansPlotted = angle;	
+		radiansPlotted = angle;
 		nextColorIncrement = nextColorIncrement + colorIncrement;
 	}
 
@@ -195,11 +195,11 @@ function piePieceSelected()
 	svgDoc.getElementById("color_" + id).setAttribute("stroke-width", 3);
 	svgDoc.getElementById("color_" + id).setAttribute("fill", selectedColors[id]);
 	svgDoc.getElementById("label_" + id).setAttribute("font-weight", "bolder");
-	
+
 	slice = svgDoc.getElementById("slice_" + id);
 	slice.setAttribute("stroke-width", "3");
 	slice.setAttribute("fill", selectedColors[id]);
-	
+
 	pieContainer = svgDoc.getElementById("pie_container");
 	pieContainer.removeChild(slice);
 	pieContainer.appendChild(slice);
@@ -212,11 +212,11 @@ function piePieceDeselected()
 	svgDoc.getElementById("color_" + id).setAttribute("stroke-width", "1");
 	svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColors[id]);
 	svgDoc.getElementById("label_" + id).setAttribute("font-weight", "normal");
-	
+
 	slice = svgDoc.getElementById("slice_" + id);
 	slice.setAttribute("stroke-width", "1");
 	slice.setAttribute("fill", unselectedColors[id]);
-	
+
 	pieContainer = svgDoc.getElementById("pie_container");
 	pieContainer.removeChild(slice);
 	pieContainer.appendChild(slice);
@@ -238,7 +238,7 @@ function getSelectedRgb(unselectedRgb)
 // takes R,G,B, array & increment size (in degrees of the color wheel), returns rgb array
 //
 // Note: you can't iteratively call this function because, given different starting points
-// the function may increment in different directions.  Best to pick a single starting point 
+// the function may increment in different directions.  Best to pick a single starting point
 // and then iteratively increase the increment to call function with
 function incrementColor(rgb, increment)
 {
@@ -253,7 +253,7 @@ function incrementColor(rgb, increment)
 	increment = increment % 360;
 	fullTurnDistance = 6*difference;
 	incrementDistance = increment*fullTurnDistance/360;
-	
+
 	newRgb= [ rgb[0], rgb[1], rgb[2] ];
 	lowIndex = indices[0];
 	middleIndex = indices[1];
@@ -274,7 +274,7 @@ function incrementColor(rgb, increment)
 			subtractIncrement = incrementDistance < difference ? incrementDistance : difference ;
 			newRgb[highIndex] = newRgb[highIndex] - subtractIncrement;
 			incrementDistance = incrementDistance - subtractIncrement;
-			
+
 			oldHighIndex = highIndex;
 			highIndex = middleIndex;
 			middleIndex = lowIndex;

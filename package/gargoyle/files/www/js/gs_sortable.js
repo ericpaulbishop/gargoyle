@@ -123,7 +123,7 @@ function tsInit()
 		var sorting = TSort_Data[i + 1].toLowerCase();
 		if (sorting == null)  { sorting = ''; }
 		TSort_Store.sorting.push(sorting);
-		
+
 		if((sorting != null)&&(sorting != ''))
 		{
 //			node.tsort_col_id = i;

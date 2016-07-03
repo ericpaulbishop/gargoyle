@@ -1,6 +1,6 @@
 /*
-	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL 
-	version 2.0. 
+	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL
+	version 2.0.
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 */
 
@@ -59,14 +59,14 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 		return [];
 	}
 	rankIndex = parseInt(rankIndex);
-	maxIndividualNames = parseInt(maxIndividualNames);	
+	maxIndividualNames = parseInt(maxIndividualNames);
 
 	if(!initialized){ recomputeColorsAndVisible = true; }
-	
+
 	var numIndividuals = individualNames.length;
 	numPies = values.length;
-	
-	
+
+
 	//sort individualNames based on values[rankIndex]
 	var nameIndices = [];
 	var ni = 0;
@@ -127,7 +127,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 	}
 
 	// we already have a list of sorted name indices
-	// so.. go through the list in order, 
+	// so.. go through the list in order,
 	// if it's an "other" name, add values to other sum(s)
 	// otherwise it add it to ordered names, and add necessary
 	// values to orderedValues
@@ -185,7 +185,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 	}
 	var buffer =  Math.floor((totalHeight-(radius*2*numPies))/(2*numPies));
 	var titleHeight = Math.ceil(buffer*.80);
-	var titleOffset = Math.ceil(buffer*.30);	
+	var titleOffset = Math.ceil(buffer*.30);
 	var regularStrokeWidth=Math.ceil(.0015*totalHeight);
 
 
@@ -244,7 +244,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 		{
 			for(dataIndex=0; dataIndex < data.length; dataIndex++) { data[dataIndex] = 1; dataSum++; }
 		}
-		
+
 		pieTotals.push(dataSum);
 		for(colorIndex=0; colorIndex < colorIndexToOrderedIndex.length; colorIndex++)
 		{
@@ -253,11 +253,11 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 			if(idValueList != null)
 			{
 				idValueList.push( data[dataIndex] );
-			
+
 				var sliceName = orderedNames[dataIndex] != null ? orderedNames[dataIndex] : "others" ;
 				var unselectedColor = sliceName == "others" ? unselectedColors[unselectedColors.length-1] : visibleIndividuals[sliceName][0];
 				var selectedColor = sliceName == "others" ? selectedColors[selectedColors.length-1] : visibleIndividuals[sliceName][1];
-		
+
 				if(parseFloat(data[dataIndex]) != 0)
 				{
 					var angle = radiansPlotted + ((2 * Math.PI * parseFloat(data[dataIndex]))/dataSum);
@@ -274,8 +274,8 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 					var newPath = svgDoc.createElementNS(svgNs, "path");
 					newPath.setAttribute("d", defaultPathData );
 					newPath.setAttribute("stroke-linejoin", "round");
-					
-					
+
+
 					//special case where we have one slice occupying the whole pie
 					if( data[dataIndex] == dataSum  )
 					{
@@ -284,7 +284,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 						newPath.setAttribute("cx", centerX);
 						newPath.setAttribute("cy", centerY);
 					}
-			
+
 					newPath.setAttribute("fill", unselectedColor);
 					newPath.setAttribute("stroke", themeColor);
 					newPath.setAttribute("stroke-width", regularStrokeWidth);
@@ -294,13 +294,13 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 						newPath.setAttribute("stroke-width", 2*regularStrokeWidth);
 						newPath.setAttribute("fill", selectedColor);
 					}
-			
+
 					newPath.onmouseover=piePieceSelected;
 					newPath.onmouseout=piePieceDeselected;
 					pieChartPaths.push(newPath);
 					previousX = x;
 					previousY = y;
-					radiansPlotted = angle;	
+					radiansPlotted = angle;
 				}
 			}
 		}
@@ -316,15 +316,15 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 	for(labelIndex = 0; labelIndex < orderedLabels.length; labelIndex++)
 	{
 		var labelName = orderedNames[labelIndex] != null ? orderedNames[labelIndex] : "others" ;
-		
+
 		adjustLabelFunction = adjustLabelFunction == null ? addPercentsToLabel : adjustLabelFunction;
 		var baseLabel = orderedLabels[labelIndex];
 		if(baseLabel == null)
 		{
-			baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";	
+			baseLabel = (labelIndex > 0 && labelIndex == orderedLabels.length-1) ? "Others" : "Unknown";
 		}
 		var labelStr = adjustLabelFunction(baseLabel, idValues[labelIndex], pieTotals);
-		
+
 		var unselectedColor = unselectedColors[unselectedColors.length-1];
 		var selectedColor = selectedColors[selectedColors.length-1];
 		if(labelName != "others")
@@ -375,7 +375,7 @@ function setPieChartData(individualNames, pieNames, individualLabels, values, ra
 	while(pieContainer.firstChild != null)
 	{
 		pieContainer.removeChild(pieContainer.firstChild);
-	}	
+	}
 	while(pieChartLabels.length > 0)
 	{
 		pieContainer.appendChild(pieChartLabels.shift());
@@ -395,7 +395,7 @@ function piePieceSelected()
 	var totalHeight = (bottomCoor-topCoor)+1;
 	var regularStroke = Math.ceil(.0015*totalHeight);
 	var selectedStroke = 2*regularStroke;
-	
+
 	if(id == selectedId) { return; }
 	selectedId = id;
 
@@ -422,7 +422,7 @@ function piePieceSelected()
 		{
 			slice.setAttribute("stroke-width", selectedStroke);
 			slice.setAttribute("fill", selectedColor);
-	
+
 			pieContainer.removeChild(slice);
 			pieContainer.appendChild(slice);
 		}
@@ -443,14 +443,14 @@ function piePieceDeselected()
 
 	svgDoc.getElementById("color_" + id).setAttribute("stroke-width", regularStroke);
 	svgDoc.getElementById("color_" + id).setAttribute("fill", unselectedColor);
-	
+
 	var lab  = svgDoc.getElementById("label_" + id);
 	var oldText = lab.firstChild.data;
 	lab.setAttribute("font-weight", "normal");
 	lab.removeChild (lab.firstChild);
 	lab.appendChild ( svgDoc.createTextNode(oldText) );
 
-	
+
 	var pieContainer = svgDoc.getElementById("pie_container");
 
 	var pieIndex;
@@ -461,7 +461,7 @@ function piePieceDeselected()
 		{
 			slice.setAttribute("stroke-width", regularStroke);
 			slice.setAttribute("fill", unselectedColor);
-	
+
 			pieContainer.removeChild(slice);
 			pieContainer.appendChild(slice);
 		}
@@ -484,7 +484,7 @@ function getSelectedRgb(unselectedRgb)
 // takes R,G,B, array & increment size (in degrees of the color wheel), returns rgb array
 //
 // Note: you can't iteratively call this function because, given different starting points
-// the function may increment in different directions.  Best to pick a single starting point 
+// the function may increment in different directions.  Best to pick a single starting point
 // and then iteratively increase the increment to call function with
 function incrementColor(rgb, increment)
 {
@@ -499,7 +499,7 @@ function incrementColor(rgb, increment)
 	increment = increment % 360;
 	fullTurnDistance = 6*difference;
 	incrementDistance = increment*fullTurnDistance/360;
-	
+
 	newRgb= [ rgb[0], rgb[1], rgb[2] ];
 	lowIndex = indices[0];
 	middleIndex = indices[1];
@@ -520,7 +520,7 @@ function incrementColor(rgb, increment)
 			subtractIncrement = incrementDistance < difference ? incrementDistance : difference ;
 			newRgb[highIndex] = newRgb[highIndex] - subtractIncrement;
 			incrementDistance = incrementDistance - subtractIncrement;
-			
+
 			oldHighIndex = highIndex;
 			highIndex = middleIndex;
 			middleIndex = lowIndex;

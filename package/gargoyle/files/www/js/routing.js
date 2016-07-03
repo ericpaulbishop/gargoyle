@@ -5,7 +5,7 @@ var toggleReload = false;
 function saveChanges()
 {
 	setControlsEnabled(false, true, UI.waitText);
-	
+
 	var removeCommands = [];
 	var oldSections = uciOriginal.getAllSectionsOfType("network", "route");
 	while(oldSections.length > 0)
@@ -35,7 +35,7 @@ function saveChanges()
 		uci.set("network", routeId, "gateway", gateway);
 		if(netmask != ""){ uci.set("network", routeId, "netmask", netmask); }
 	}
-	
+
 	commands = removeCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal)  +  "\nsh /usr/lib/gargoyle/restart_network.sh ;\n";
 ;
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -52,7 +52,7 @@ function saveChanges()
 	{
 		toggleReload = true;
 		setTimeout( "testReboot()", 5*1000);  //try again after 12 seconds
-		document.getElementById("reboot_test").src = testLocation; 
+		document.getElementById("reboot_test").src = testLocation;
 	}
 	setTimeout( "testReboot()", 15*1000);  //start testing after 15 seconds
 	setTimeout( "reloadPage()", 240*1000); //after 4 minutes, try to reload anyway
@@ -66,7 +66,7 @@ function reloadPage()
 		//IE calls onload even when page isn't loaded -- it just times out and calls it anyway
 		//We can test if it's loaded for real by looking at the (IE only) readyState property
 		//For Browsers NOT designed by dysfunctional cretins whose mothers were a pack of sewer-dwelling, shit-eating rodents,
-		//well, for THOSE browsers, readyState (and therefore reloadState) should be null 
+		//well, for THOSE browsers, readyState (and therefore reloadState) should be null
 		var reloadState = document.getElementById("reboot_test").readyState;
 		if( typeof(reloadState) == "undefined" || reloadState == null || reloadState == "complete")
 		{
@@ -82,7 +82,7 @@ function resetData()
 {
 	routingData.shift();
 	routingData.shift();
-	
+
 	var activeRouteTableData = [];
 	while(routingData.length > 0)
 	{
@@ -105,7 +105,7 @@ function resetData()
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var activeRouteTable = createTable([rtgS.Dstn, rtgS.ItfN, rtgS.Gtwy, rtgS.Mtrc], activeRouteTableData, "active_route_table", false, false);	
+	var activeRouteTable = createTable([rtgS.Dstn, rtgS.ItfN, rtgS.Gtwy, rtgS.Mtrc], activeRouteTableData, "active_route_table", false, false);
 	tableContainer.appendChild( activeRouteTable );
 
 
@@ -115,22 +115,22 @@ function resetData()
 	{
 		var section = routeSections.shift();
 		var dest    = uciOriginal.get("network", section, "target");
-		var mask    = uciOriginal.get("network", section, "netmask");		
-		var iface   = uciOriginal.get("network", section, "interface");	
+		var mask    = uciOriginal.get("network", section, "netmask");
+		var iface   = uciOriginal.get("network", section, "interface");
 		var gateway = uciOriginal.get("network", section, "gateway");
 		gateway = gateway == "0.0.0.0" ? "*" : gateway ;
 
 		dest = mask == "" ? dest : dest + "/" + mask;
 		dest = dest == "0.0.0.0" || dest == "0.0.0.0/0.0.0.0" ? "default" : dest
-		staticRouteTableData.push( [ dest, iface, gateway, createEditButton() ] );			
+		staticRouteTableData.push( [ dest, iface, gateway, createEditButton() ] );
 	}
-	
+
 	tableContainer = document.getElementById("static_route_table_container");
 	if(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
-	var staticRouteTable = createTable([rtgS.Dstn, rtgS.Itfc, rtgS.Gtwy, ""], staticRouteTableData , "static_route_table", true, false);	
+	var staticRouteTable = createTable([rtgS.Dstn, rtgS.Itfc, rtgS.Gtwy, ""], staticRouteTableData , "static_route_table", true, false);
 	tableContainer.appendChild( staticRouteTable );
 
 }
@@ -140,7 +140,7 @@ function createEditButton()
 {
 	var editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editStaticRoute;
 	return editButton;
 }
@@ -191,7 +191,7 @@ function proofreadRouteIp(input)
 function proofreadStaticRoute(controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	
+
 	addIds=['add_dest', 'add_gateway'];
 	labelIds= ['add_dest_label', 'add_gateway_label'];
 	functions = [validateRouteIp, validateGatewayIp];
@@ -265,7 +265,7 @@ function editStaticRoute()
 		catch(e){}
 	}
 
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -279,17 +279,17 @@ function editStaticRoute()
 
 
 	editStaticWindow = window.open("static_route_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
-	
+
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
 
-	runOnEditorLoaded = function () 
+	runOnEditorLoaded = function ()
 	{
 		updateDone=false;
 		if(editStaticWindow.document != null)
@@ -298,7 +298,7 @@ function editStaticRoute()
 			{
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
+
 				//set edit values
 				var oldDst = editRow.childNodes[0].firstChild.data;
 				var oldGw  = editRow.childNodes[2].firstChild.data;
@@ -331,7 +331,7 @@ function editStaticRoute()
 						editRow.childNodes[0].firstChild.data = newDst;
 						editRow.childNodes[1].firstChild.data = getSelectedValue("add_iface", editStaticWindow.document);
 						editRow.childNodes[2].firstChild.data = newGw;
-						
+
 						editStaticWindow.close();
 					}
 				}
@@ -347,5 +347,3 @@ function editStaticRoute()
 	}
 	runOnEditorLoaded();
 }
-
-

@@ -2426,9 +2426,9 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	var cancelButton = createInput("button", confirmWindow.document);
 
 	okButton.value         = UI.OK;
-	okButton.className     = "default_button";
+	okButton.className     = "btn btn-default";
 	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "default_button";
+	cancelButton.className = "btn btn-default";
 
 
 	runOnEditorLoaded = function ()
@@ -2756,7 +2756,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	{
 		b           = createInput("button", document);
 		b.value     = buttonNameList[bIndex];
-		b.className = "default_button"
+		b.className = "btn btn-default"
 		b.onclick   = function()
 		{
 			document.getElementById("wait_msg").removeChild(queryFieldset)

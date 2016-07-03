@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var rbS = new Object(); //part of i18n
@@ -12,7 +12,7 @@ var toggleReload = false;
 function reboot()
 {
 	setControlsEnabled(false, true, rbS.SysR);
-	
+
 	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
@@ -29,7 +29,7 @@ function reboot()
 	{
 		toggleReload = true;
 		setTimeout( "testReboot()", 5*1000);  //try again after 5 seconds
-		document.getElementById("reboot_test").src = testLocation; 
+		document.getElementById("reboot_test").src = testLocation;
 	}
 	setTimeout( "testReboot()", 25*1000);  //start testing after 15 seconds
 	setTimeout( "reloadPage()", 240*1000); //after 4 minutes, try to reload anyway
@@ -43,7 +43,7 @@ function reloadPage()
 		//IE calls onload even when page isn't loaded -- it just times out and calls it anyway
 		//We can test if it's loaded for real by looking at the (IE only) readyState property
 		//For Browsers NOT designed by dysfunctional cretins whose mothers were a pack of sewer-dwelling, shit-eating rodents,
-		//well, for THOSE browsers, readyState (and therefore reloadState) should be null 
+		//well, for THOSE browsers, readyState (and therefore reloadState) should be null
 		var reloadState = document.getElementById("reboot_test").readyState;
 		if( typeof(reloadState) == "undefined" || reloadState == null || reloadState == "complete")
 		{
@@ -62,7 +62,7 @@ function saveChanges()
 	{
 		var rebootInterval = getSelectedValue("reboot_interval");
 		var day = getSelectedValue("reboot_day");
-		
+
 		var hour = getSelectedValue("reboot_hour");
 		var weekday = rebootInterval == "week" ? day : "*";
 		var monthday = rebootInterval == "month" ? (day - -1) : "*";
@@ -105,13 +105,13 @@ function resetData()
 		var weekday  = parseInt(cronParts[4]) + "";
 		var monthday = (parseInt(cronParts[2]) - 1) + "";
 		var day = "";
-		
+
 		hour     = hour == "NaN" ? "0" : hour;
 		weekday  = weekday  == "NaN" ? "*" : weekday;
 		monthday = monthday == "NaN" ? "*" : monthday;
 		day = weekday  != "*" ? weekday  : day;
 		day = monthday != "*" ? monthday : day;
-		
+
 		var rebootInterval = weekday == "*" && monthday == "*" ? "hour" : "";
 		rebootInterval = weekday != "*" && monthday == "*" ? "week" : rebootInterval;
 		rebootInterval = weekday == "*" && monthday != "*" ? "month" : rebootInterval;
@@ -127,7 +127,7 @@ function resetData()
 		setSelectedValue("sched_reboot", "none");
 		setVisibility();
 	}
-	
+
 }
 function setVisibility()
 {
@@ -135,8 +135,8 @@ function setVisibility()
 	var rebootInterval = getSelectedValue("reboot_interval");
 	if(rebootInterval == "month")
 	{
-		var vals = [];	
-		var names = [];	
+		var vals = [];
+		var names = [];
 		var day=1;
 		for(day=1; day <= 28; day++)
 		{
@@ -174,4 +174,3 @@ function setVisibility()
 	setInvisibleIfIdMatches("reboot_interval", ["day"], "reboot_day_container");
 	setInvisibleIfIdMatches("sched_reboot", ["none"], "schedule_reboot_container");
 }
-

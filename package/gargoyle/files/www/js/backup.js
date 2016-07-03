@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var bkS=new Object(); //part of i18n
@@ -39,7 +39,7 @@ function doRestore()
 		{
 			document.getElementById('restore_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 			document.getElementById('restore_form').submit();
-			setControlsEnabled(false, true, bkS.UpingC);	
+			setControlsEnabled(false, true, bkS.UpingC);
 		}
 	}
 }
@@ -50,7 +50,7 @@ function doDefaultRestore()
 	{
 		document.getElementById('restore_original_hash').value = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
 		document.getElementById('restore_original_form').submit();
-		setControlsEnabled(false, true, bkS.LdOrig);	
+		setControlsEnabled(false, true, bkS.LdOrig);
 	}
 
 }
@@ -63,7 +63,7 @@ function restoreFailed()
 function restoreSuccessful(lanIp)
 {
 	setControlsEnabled(false, true, UI.waitText)
-	
+
 	globalLanIp = lanIp;
 
 	var param = getParameterDefinition("commands", "sh /usr/lib/gargoyle/reboot.sh ;\n" )  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -109,7 +109,7 @@ function reloadPage()
 		//IE calls onload even when page isn't loaded -- it just times out and calls it anyway
 		//We can test if it's loaded for real by looking at the (IE only) readyState property
 		//For Browsers NOT designed by dysfunctional cretins whose mothers were a pack of sewer-dwelling, shit-eating rodents,
-		//well, for THOSE browsers, readyState (and therefore reloadState) should be null 
+		//well, for THOSE browsers, readyState (and therefore reloadState) should be null
 		var reloadState = document.getElementById("reboot_test").readyState;
 		if( typeof(reloadState) == "undefined" || reloadState == null || reloadState == "complete")
 		{
@@ -120,4 +120,3 @@ function reloadPage()
 		}
 	}
 }
-

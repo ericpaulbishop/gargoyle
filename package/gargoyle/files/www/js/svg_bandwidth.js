@@ -1,6 +1,6 @@
 /*
-	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL 
-	version 2.0. 
+	This program is copyright 2008,2009,2013 Eric Bishop and is distributed under the terms of the GNU GPL
+	version 2.0.
 	See http://gargoyle-router.com/faq.html#qfoss for more information
 */
 
@@ -22,7 +22,7 @@ function init(evt)
 	leftCoor=1;
 	rightCoor=800;
 	bottomCoor=600;
-	
+
 	var graphRightCoor=Math.floor(rightCoor*85/100);
 	var graphBottomCoor=Math.floor(bottomCoor*85/100);
 	var graphHeight = (graphBottomCoor-topCoor)+1;
@@ -50,7 +50,7 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 	leftCoor=1;
 	rightCoor=800;
 	bottomCoor=600;
-	
+
 	numDisplayIntervals = parseInt(numDisplayIntervals);
 	lastIntervalStart = parseInt(lastIntervalStart);
 	lastTime = parseInt(lastTime);
@@ -70,7 +70,7 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 	borderEl.setAttribute("stroke", "black");
 	borderEl.setAttribute("stroke-width", minStrokeWidth )
 
-	
+
 	var maxLastIntervalSeconds = getNextTick(intervalLength, 1, lastIntervalStart, 1) - lastIntervalStart;
 	var lastIntervalSeconds = lastTime-lastIntervalStart;
 	var intervalLengths = [ lastIntervalSeconds ];
@@ -82,7 +82,7 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 		intervalLengths.unshift( firstIntervalStart - previousTime );
 		firstIntervalStart = previousTime;
 	}
-	
+
 	//convert everything into bytes/s and get max
 	//this solves problem of last interval being different length
 	//as well as problem when dealing with months -- they aren't all the same length!
@@ -124,7 +124,7 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 			var intervalIndex;
 			for(intervalIndex=0; intervalIndex < intervalLengths.length; intervalIndex++)
 			{
-				
+
 				var nextY = adjPoints[intervalIndex];
 				nextY = nextY == null ? adjPoints[intervalIndex-1] : nextY;
 				var yOffset = Math.floor(graphHeight*nextY/graphYMax);
@@ -216,16 +216,16 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 	{
 		yTimeUnit=UI.sc; //bytes/s
 	}
-	else if(xTickUnit == "hour") 
+	else if(xTickUnit == "hour")
 	{
 		yTimeUnit=UI.sc;  //bytes/s
 	}
-	else if(xTickUnit == "day") 
+	else if(xTickUnit == "day")
 	{
 		rateMultiple=rateMultiple/(60*60);
 		yTimeUnit=UI.hr; //bytes/hr
 	}
-	else if(xTickUnit == "month") 
+	else if(xTickUnit == "month")
 	{
 		rateMultiple=rateMultiple/(60*60*24);
 		yTimeUnit=UI.day; //bytes/day
@@ -342,7 +342,7 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 	function getMajorTickMultiple( unitSeconds )
 	{
 		var m=1;
-		while( minTotalIntervalLength/(m*unitSeconds) > 6 ) { m++; } 
+		while( minTotalIntervalLength/(m*unitSeconds) > 6 ) { m++; }
 		return m;
 	}
 	if( minTotalIntervalLength < 4*60*60 )
@@ -373,7 +373,7 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 	}
 	if(majorTickMultiple >= 3)
 	{
-		minorTickMultiple = Math.floor(majorTickMultiple/3); 
+		minorTickMultiple = Math.floor(majorTickMultiple/3);
 	}
 
 	var graphHeight = graphBottom-graphTop;
@@ -387,7 +387,7 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 	}
 	svgDoc.getElementById("x-minor-ticks").setAttribute("d", minorPathString);
 	svgDoc.getElementById("x-minor-ticks").setAttribute("stroke-width", minStrokeWidth );
-	
+
 
 	majorPathString= "";
 	tickNum = 1;
@@ -526,7 +526,7 @@ function getNextTick(unit, multiple, currentTime, incrementDirection)
 		nextDate.setUTCHours(0);
 		nextDate.setUTCDate(1);
 		nextDate.setUTCMonth(0);
-		
+
 		incFunction = function(nextDate)
 		{
 			var incDate = new Date();
@@ -549,7 +549,7 @@ function getNextTick(unit, multiple, currentTime, incrementDirection)
 
 	//var increment =  multiple*(incDate.getTime()-nextDate.getTime());
 
-	var iter = 0;	
+	var iter = 0;
 	while(	(nextDate.getTime() <= currentDate.getTime() && incrementDirection > 0) ||
 		(nextDate.getTime() >= currentDate.getTime() && incrementDirection < 0)
 		)
@@ -569,7 +569,7 @@ function getNextTick(unit, multiple, currentTime, incrementDirection)
 				nextDate = incFunction(nextDate);
 			}
 		}
-		
+
 		iter++;
 		if(iter > (50+multiple))
 		{

@@ -1098,10 +1098,10 @@ function createEditButton(enabled)
 {
 	editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editQuota;
 
-	editButton.className = enabled ? "default_button" : "default_button_disabled" ;
+	editButton.className = enabled ? "btn btn-default" : "btn btn-default disabled" ;
 	editButton.disabled  = enabled ? false : true;
 
 	return editButton;
@@ -1112,7 +1112,7 @@ function setRowEnabled()
 	enabledRow=this.parentNode.parentNode;
 
 	enabledRow.childNodes[rowCheckIndex+1].firstChild.disabled  = this.checked ? false : true;
-	enabledRow.childNodes[rowCheckIndex+1].firstChild.className = this.checked ? "default_button" : "default_button_disabled" ;
+	enabledRow.childNodes[rowCheckIndex+1].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
 
 	var idStr = this.id;
 	var ids = idStr.split(/\./);
@@ -1171,9 +1171,9 @@ function editQuota()
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	var editRow=this.parentNode.parentNode;
 	var editId          = editRow.childNodes[rowCheckIndex].firstChild.id;

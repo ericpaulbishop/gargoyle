@@ -123,7 +123,7 @@ function createEditButton()
 {
 	var editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editStatic;
 	return editButton;
 }
@@ -408,9 +408,9 @@ function editStatic()
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
 

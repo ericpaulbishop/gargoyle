@@ -55,9 +55,9 @@ function resetData()
 	{
 		document.getElementById("swap_container").style.display = "none";
 	}
-	
+
 	setChildText("load_avg", loadAvg);
-	
+
 	if(temps[0] == 1)
 	{
 		document.getElementById("temp_container").style.display = "block";
@@ -69,7 +69,7 @@ function resetData()
 	{
 		document.getElementById("temp_container").style.display = "none";
 	}
-	
+
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
@@ -111,7 +111,7 @@ function resetData()
 			leftSpan.className="leftcolumn";
 			leftSpan.appendChild( document.createTextNode("invisible") );
 			leftSpan.style.visibility="hidden";
-			rightSpan.className="rightcolumn";	
+			rightSpan.className="rightcolumn";
 			rightSpan.appendChild( document.createTextNode(wanDnsList.shift()) );
 
 			document.getElementById("wan_dns_container").appendChild(brk);

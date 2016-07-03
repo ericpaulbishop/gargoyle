@@ -16,26 +16,27 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	newTable.appendChild(thead);
 	var tableBody = controlDocument.createElement('tbody');
 	newTable.appendChild(tableBody);
-	newTable.id=tableId;
+	newTable.id = tableId;
+	newTable.className = "table table-striped table-bordered";
 
 	var row = controlDocument.createElement('tr');
-	row.className='header_row';
+	row.className = 'header_row';
 	thead.appendChild(row);
 
 	var columnIndex;
-	for(columnIndex=0; columnIndex < columnNames.length; columnIndex++)
+	for ( columnIndex=0; columnIndex < columnNames.length; columnIndex++ )
 	{
 		var header = controlDocument.createElement('th');
-		if( typeof(columnNames[columnIndex]) == 'string' )
+		if(typeof(columnNames[columnIndex]) == 'string')
 		{
-			var splitText = (columnNames[columnIndex]).replace(/\&amp;/g, '&').split(/\n/)
+			var splitText = (columnNames[columnIndex]).replace(/\&amp;/g, '&').split(/\n/);
 			while(splitText.length > 0)
 			{
-				var next = splitText.shift()
-				header.appendChild(  controlDocument.createTextNode(next)  )
+				var next = splitText.shift();
+				header.appendChild(  controlDocument.createTextNode(next)  );
 				if(splitText.length >0)
 				{
-					header.appendChild( controlDocument.createElement('br')  )
+					header.appendChild( controlDocument.createElement('br')  );
 				}
 			}
 		}
@@ -119,7 +120,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	{
 		cellContent = createInput("button", controlDocument);
 		cellContent.value = UI.Remove;
-		cellContent.className="default_button";
+		cellContent.className="btn btn-default";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -131,7 +132,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	{
 		cellContent = createInput("button", controlDocument);
 		cellContent.value = String.fromCharCode(8593);
-		cellContent.className="default_button";
+		cellContent.className="btn btn-default";
 		cellContent.onclick= function() { moveThisCellsRowUp(this); rowMoveCallback(this, "up"); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -141,7 +142,7 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 
 		cellContent = createInput("button", controlDocument);
 		cellContent.value = String.fromCharCode(8595);
-		cellContent.className="default_button";
+		cellContent.className="btn btn-default";
 		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -244,7 +245,7 @@ function getTableDataArray(table, rowsAreRemovable, rowsAreMovable)
 function setRowClasses(table, enabled)
 {
 	rows = table.rows;
-	rows[0].className = enabled==true ? 'header_row' : 'disabled_header_row';
+	rows[0].className = enabled==true ? 'header_row' : 'disabled header_row';
 
 	rowIndex = 1;
 	while(rowIndex < rows.length)
@@ -255,7 +256,7 @@ function setRowClasses(table, enabled)
 		}
 		else
 		{
-			rows[rowIndex].className = rowIndex % 2 == 0 ? 'disabled_even' : 'disabled_odd';
+			rows[rowIndex].className = rowIndex % 2 == 0 ? 'disabled even' : 'disabled odd';
 		}
 
 		cells = rows[rowIndex].childNodes;
@@ -265,7 +266,7 @@ function setRowClasses(table, enabled)
 			if(cellContent.type == "button" )
 			{
 				cellContent.disabled = (enabled == false);
-				cellContent.className = (enabled == false) ? "default_button_disabled" : "default_button";
+				cellContent.className = (enabled == false) ? "btn btn-default disabled" : "btn btn-default";
 			}
 		}
 		rowIndex++;
@@ -279,5 +280,5 @@ function tableSanityCheck(table)
 {
 	// If there are no rows of data (just a header)
 	// then hide the whole thing until data is added
-	table.style.display = (table.rows.length < 2) ? "none" : "block";
+	table.style.display = (table.rows.length < 2) ? "none" : "";
 }
