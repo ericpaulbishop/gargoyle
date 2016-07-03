@@ -133,6 +133,79 @@ static void alarm_triggered(int sig);
 		#endif
 	#endif
 	
+	#ifdef USE_POLARSSL	
+	
+		#include <polarssl/net.h>
+		#include <polarssl/ssl.h>
+		#include <polarssl/certs.h>
+		#include <polarssl/x509.h>
+		#include <polarssl/rsa.h>
+		#include <polarssl/error.h>
+		#include <polarssl/version.h>
+		#include <polarssl/entropy.h>
+
+
+		static const int default_ciphersuites[] =
+		{
+			#if defined(POLARSSL_AES_C)
+			#if defined(POLARSSL_SHA2_C)
+			    TLS_RSA_WITH_AES_256_CBC_SHA256,
+			#endif /* POLARSSL_SHA2_C */
+			#if defined(POLARSSL_GCM_C) && defined(POLARSSL_SHA4_C)
+			    TLS_RSA_WITH_AES_256_GCM_SHA384,
+			#endif /* POLARSSL_SHA2_C */
+			    TLS_RSA_WITH_AES_256_CBC_SHA,
+			#endif
+			#if defined(POLARSSL_CAMELLIA_C)
+			#if defined(POLARSSL_SHA2_C)
+			    TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256,
+			#endif /* POLARSSL_SHA2_C */
+			    TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+			#endif
+			#if defined(POLARSSL_AES_C)
+			#if defined(POLARSSL_SHA2_C)
+			    TLS_RSA_WITH_AES_128_CBC_SHA256,
+			#endif /* POLARSSL_SHA2_C */
+			#if defined(POLARSSL_GCM_C) && defined(POLARSSL_SHA2_C)
+			    TLS_RSA_WITH_AES_128_GCM_SHA256,
+			#endif /* POLARSSL_SHA2_C */
+			    TLS_RSA_WITH_AES_128_CBC_SHA,
+			#endif
+			#if defined(POLARSSL_CAMELLIA_C)
+			#if defined(POLARSSL_SHA2_C)
+			    TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+			#endif /* POLARSSL_SHA2_C */
+			    TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
+			#endif
+			#if defined(POLARSSL_DES_C)
+			    TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+			#endif
+			#if defined(POLARSSL_ARC4_C)
+			    TLS_RSA_WITH_RC4_128_SHA,
+			    TLS_RSA_WITH_RC4_128_MD5,
+			#endif
+			    0
+		};
+
+
+	
+		typedef int SSL_CTX;
+		typedef ssl_context SSL;
+
+		/*
+		#define SSL_write ssl_write
+		#define SSL_read  ssl_read
+		#define SSL_free  ssl_free
+		*/
+		
+		static int SSL_read( SSL* ssl, char *buf, size_t len ) { return ssl_read(ssl, (unsigned char*)buf, len); }
+		static int SSL_write( SSL* ssl, char *buf, size_t len ) { return ssl_write(ssl, (unsigned char*)buf, len); }
+		static void SSL_free( SSL* ssl ) { ssl_free(ssl); }
+		static void SSL_CTX_free(SSL_CTX* ctx) { return ; }		
+
+	#endif
+	
+
 	#ifdef USE_MATRIXSSL
 		#include "matrixssl_helper.h"
 		typedef sslKeys_t SSL_CTX;
@@ -142,6 +215,7 @@ static void alarm_triggered(int sig);
 	typedef struct
 	{
 		int socket;
+		int* socket_ptr;
 		SSL* ssl;
 		SSL_CTX* ctx;
 	} ssl_connection_data;
@@ -1263,10 +1337,36 @@ static void destroy_connection_http(void* connection_data)
 
 #ifdef HAVE_SSL
 
+static int urandom_fd = -1;
+static int ewget_urandom_init(void)
+{
+	if (urandom_fd > -1)
+	{
+		return 1;
+	}
+
+	urandom_fd = open("/dev/urandom", O_RDONLY);
+	if (urandom_fd < 0)
+	{
+		return -1;
+	}
+
+	return 1;
+}
+static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
+{
+	if (read(urandom_fd, out, len) < 0)
+		return POLARSSL_ERR_ENTROPY_SOURCE_FAILED;
+
+	return 0;
+}
+
+
 static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
 	int socket;
+	int* socket_ptr = NULL;
 
 	/*
 	* as soon as we open, or attempt to open a connection
@@ -1280,7 +1380,7 @@ static void* initialize_connection_https(char* host, int port)
 	{
 		int initialized = -1;
 		SSL* ssl = NULL;
-		SSL_CTX *ctx = NULL;
+		SSL_CTX* ctx = NULL;
 		#ifdef USE_OPENSSL
 			const SSL_METHOD* meth;
 			SSL_library_init();
@@ -1299,6 +1399,30 @@ static void* initialize_connection_https(char* host, int port)
 			}
 			/* would check cert here if we were doing it */
 		#endif
+
+		#ifdef USE_POLARSSL
+			if(ewget_urandom_init() > 0)
+			{
+				ssl = (SSL*)malloc(sizeof(SSL));
+				memset(ssl, 0, sizeof(SSL));
+	
+
+				ssl_set_endpoint(ssl, SSL_IS_CLIENT);
+				ssl_set_authmode(ssl, SSL_VERIFY_NONE);
+				ssl_set_rng(ssl, ewget_urandom, NULL);
+				ssl_set_ciphersuites(ssl, default_ciphersuites);
+				ssl_session_reset(ssl);
+
+				socket_ptr = (int*)malloc(sizeof(int));
+				*socket_ptr = socket;
+				ssl_set_bio(ssl, net_recv, socket_ptr, net_send, socket_ptr);
+				
+				initialized = ssl_handshake(ssl);
+				
+			}
+		#endif
+
+
 
 		#ifdef USE_CYASSL
 			SSL_METHOD*  method  = 0;
@@ -1341,6 +1465,7 @@ static void* initialize_connection_https(char* host, int port)
 		{
 			connection_data = (ssl_connection_data*)malloc(sizeof(ssl_connection_data));
 			connection_data->socket = socket;
+			connection_data->socket_ptr = socket_ptr;
 			connection_data->ssl = ssl;
 			connection_data->ctx = ctx;
 		}
@@ -1352,6 +1477,10 @@ static void* initialize_connection_https(char* host, int port)
 			#ifdef USE_MATRIXSSL
 				matrixSslClose();
 			#endif
+			if(socket_ptr != NULL)
+			{
+				free(socket_ptr);
+			}
 
 		}
 	}
@@ -1392,6 +1521,10 @@ static void destroy_connection_https(void* connection_data)
 		
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
+		if(cd->socket_ptr != NULL)
+		{
+			free(cd->socket_ptr);
+		}
 		free(cd);
 		#ifdef USE_MATRIXSSL
 			matrixSslClose();
