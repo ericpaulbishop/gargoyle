@@ -1927,7 +1927,7 @@ CONFIG_PACKAGE_libxtables=y
 #
 # CONFIG_PACKAGE_libcyassl is not set
 # CONFIG_PACKAGE_libopenssl is not set
-# CONFIG_PACKAGE_libpolarssl is not set
+CONFIG_PACKAGE_libpolarssl=y
 
 #
 # database
