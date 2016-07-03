@@ -6,44 +6,37 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-
-button *
-{
-        border:none !important;
+.indent {
+  margin-left: 25px;
 }
-
-input,
-input *
-{
-        outline:none !important;
+.wideleftcolumn {
+  float: left;
+  margin: 0 5px 0 5px
 }
-
-button::-moz-focus-outer,
-::-moz-focus-inner
-{
-        border:none!important;
+.internal_divider {
+  margin: 20px 0 20px 5px;
+  border: 1px solid #888AB8;
 }
-
-
-a
-{
-	color:#211679;
+.internal_divider, .farrightcolumnonly, .wideleftcolumn, .indent, #plot1_control_column, #plot2_control_column, #plot3_control_column, .bandwidth_title_text {
+  display: block;
 }
-
-a:visited
-{
-	color:#a400b3;
+.bottom_gap {
+  margin-bottom: 30px;
 }
-
-a:active
-{
-	outline:none;
+.aligned_check_label, .aligned_check {
+  vertical-align: middle;
 }
-
-a:focus
-{
-	outline:none;
+.aligned_check {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
+<<<<<<< HEAD
+.contributer {
+  font-size: 115%;
+  font-weight: bold;
+  text-decoration: underline;
+=======
 
 legend
 {
@@ -51,127 +44,78 @@ legend
 	font-size:18px;
 	font-weight:bold;
 	color:#888AB8;
+>>>>>>> parent of 03fe424... added bootstrap
 }
-
-fieldset
-{
-	width:500px;
-	margin:10px;
-	padding:10px;
-	border:1px;
-	border-style:solid;
-	border-color:#888AB8;
-	font-family:verdana, arial, sans-serif;
-	font-size:10px;
+p {
+  margin: 1em 0;
 }
-
-fieldset div
-{
-	display:block;
-	margin-top:5px;
-	margin-bottom:5px;
-	clear:left;
+table {
+  border-spacing: 0;
+  border-collapse: collapse
 }
-
-fieldset input
-{
-	font-family:verdana, arial, sans-serif;
-	font-size:10px;
+tr.table_row_add, tr.table_row_header, tr.table_row_header_disabled, th {
+  text-align: center;
 }
-
-fieldset select
-{
-	font-family:verdana, arial, sans-serif;
-	font-size:10px;
+tr.table_row_header, tr.table_row_header_disabled {
+  border-bottom: 1px solid #000;
 }
-
-fieldset label
-{
-	font-family:verdana, arial, sans-serif;
-	font-size:10px;
+th {
+  font-weight: normal;
+  font-style: italic;
 }
-
-.leftcolumn
-{
-	display:block;
-	float:left;
-	clear:left;
-	width:200px;
-	margin-left:5px;
-	margin-right:5px;
+th, td {
+  padding: 0 5px;
 }
-
-.rightcolumn
-{
-	display:inline;
+input.text_error {
+  color: #f00;
 }
-
-.rightcolumnonly
-{
-	display:block;
-	margin-left:210px;
+input.text_disabled, select.select_disabled {
+  color: #aaa;
 }
-
-.rightcolumnindent
-{
-	display:inline;
-	margin-left:25px;
-
+#update_container, #bottom_button_container {
+  margin: 10px 0 0 10px;
 }
-
-.nocolumn
-{
-	display:block;
-	float:left;
-	margin-left:5px;
-	margin-right:5px;
+#update_container {
+  display: none;
 }
-
-.narrowleftcolumn
-{
-	display:block;
-	float:left;
-	clear:left;
-	width:125px;
-	margin-left:5px;
-	margin-right:5px;
+#plot1_title, #plot2_title, #plot3_title {
+  font-weight: bold;
+  text-decoration: underline;
 }
-
-.widerightcolumnonly
-{
-	display:block;
-	margin-left:135px;
+#plot1_title {
+  color: blue;
 }
-
-.middlecolumn
-{
-	display:block;
-	float:left;
-	width:110px;
-	margin-right:10px;
-	margin-bottom:5px;
+#plot2_title {
+  color: red;
 }
-
-.indent
-{
-	display:block;
-	margin-left:25px;
+#plot3_title {
+  color: green;
 }
-
-.wideleftcolumn
-{
-	display:block;
-	float:left;
-	width:250px;
-	margin-left:5px;
-	margin-right:5px;
+.pseudo_link {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+  font-style: italic;
 }
-
-.farrightcolumnonly
-{
-	display:block;
-	margin-left:260px;
+.bandwidth_title_text {
+  font-family: verdana, arial, sans-serif;
+  margin-left: 0;
+  margin-bottom: 5px;
+  float: left;
+  text-align: left;
+  font-size: 14px;
+  color: #000;
 }
+<<<<<<< HEAD
+.plot_header {
+  font-family: verdana, arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #888AB8;
+  margin-left: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+=======
 
 .internal_divider
 {
@@ -235,11 +179,6 @@ table
 {
 	border-spacing:0;
 	border-collapse:collapse
-}
-
-thead
-{
-    text-align:center;
 }
 
 tr.table_row_add
@@ -1364,32 +1303,19 @@ td.wifi_table_column_2
 
 td.wifi_table_column_3
 {
+	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
 }
 
 td.wifi_table_column_4
 {
-	border-right:1px solid #000;
 	border-top:1px solid #000;
 	border-bottom:1px solid #000;
+	text-align:right;
 }
 
 td.wifi_table_column_5
-{
-	border-top:1px solid #000;
-	border-bottom:1px solid #000;
-	text-align:right;
-}
-
-td.wifi_table_column_6
-{
-	border-top:1px solid #000;
-	border-bottom:1px solid #000;
-	text-align:right;
-}
-
-td.wifi_table_column_7
 {
 	border-right:1px solid #000;
 	border-top:1px solid #000;
@@ -1571,4 +1497,5 @@ td.bandwidth_table_column_4
 {
 	text-align:right;
 	border:1px solid #000;
+>>>>>>> parent of 03fe424... added bootstrap
 }

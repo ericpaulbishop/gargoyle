@@ -5,6 +5,119 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
+<<<<<<< HEAD
+
+#darken {
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: none;
+  background: #000;
+  position: absolute;
+  z-index: 2000;
+  opacity: 0.75;
+  MozOpacity: 0.75;
+  filter: alpha(opacity=75);
+}
+#wait_msg {
+  display: none;
+  background: transparent url('images/wait_msg_back.png') center center no-repeat;
+  z-index: 3000;
+  position: fixed;
+  width: 300px;
+  height: 150px;
+}
+#wait_icon {
+  left: 135px;
+  top: 80px;
+  position: absolute;
+  display: block;
+}
+#wait_txt {
+  left: 10px;
+  top: 20px;
+  width: 280px;
+  position: relative;
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  padding-bottom: 20px;
+}
+.select_free {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  filter: mask();
+  width: 2000px;
+  height: 3500px;
+}
+body {
+  font-family: verdana, arial, sans-serif;
+}
+#main_external_container {
+  display: block;
+  position: relative;
+  top: 30px;
+  left: 230px;
+  background-color: #FFF;
+  border-color: rgb(182, 186, 241);
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-right-width: 2px;
+  border-radius: 15px 15px 0 0;
+}
+#main_top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 22px;
+}
+#main_bottom {
+  position: relative;
+  bottom: 0;
+  left: 0;
+  height: 50px;
+}
+#main_internal_container {
+  position: relative;
+  display: block;
+  margin-bottom: 22px;
+  top: 22px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+ul ul {
+  display: none;
+}
+ul li.active>ul {
+  display: inline;
+}
+ul ul>a {
+  display: inline;
+  padding: 0;
+  color: #000;
+  cursor: default;
+}
+ul ul>li:hover {
+  color: #000;
+  cursor: default;
+}
+ul ul>a:visited {
+  color: #000;
+  cursor: default;
+}
+ul ul>a:active {
+  color: #000;
+  cursor: default;
+}
+nav>li.active>a {
+  background-color: #eee;
+}
+=======
 
 
 html
@@ -450,3 +563,4 @@ body
 	padding-right:14px;
 	background:url("images/main_internal.png") center repeat;
 }
+>>>>>>> parent of 03fe424... added bootstrap
