@@ -139,6 +139,46 @@
 					<option value="unlimited"><%~ Unlimited %></option>
 				</select>
 			</div>
+
+			<div style='display: block;' id='internal_divider1' class='internal_divider'></div>
+			<div class='form-group form-inline' id='pwd_enabled_container'>
+				<input type='checkbox' id='pwd_auth_enabled' />
+				<label id='pwd_auth_label' for='pwd_auth_enabled'><%~ SSHEnablePwd %></label>
+			</div>
+
+			<div style='display: block;' id='internal_divider2' class='internal_divider'></div>
+
+			<div class='form-group form-inline' id='authorized_keys_container'>
+
+				<label for='add_key' id='add_key_label'><%~ SSHExistKey %>:</label>
+				<input type='file' id='public_key_file' name='public_key_file' class='form-control' />
+				<input id='file_contents' name='file_contents' type='hidden' value='' />
+			</div>
+			<div class='form-group form-inline' id='key_name_container'>
+				<label><%~ SSHName %>:</label>
+				<input type='text' id='public_key_name' name='public_key_name' value='' class="form-control" />
+
+				<input type='button' class='default_button' id='add_key' name='add_key' value='<%~ Add %>' onclick='addKey()'/>
+			</div>
+			<div class='form-group form-inline' id='authorised_keys_table_container'>
+				<label id='authorized_keys_label' class='leftcolumnonly' for='authorized_keys_table_container'><%~ SSHKeys %>:</label>
+				<div id='authorized_keys_table_container' class='indent'></div>
+
+				<div id="ssh_help" class="indent">
+					<span id='ssh_help_txt' style='display:none'>
+						<p><%~ SSHHelp1 %></p>
+						<p><%~ SSHHelp2 %></p>
+						<p><%~ SSHHelp3 %></p>
+						<ul>
+							<li><%~ SSHHelp3a %></li>
+							<li><%~ SSHHelp3b %></li>
+						</ul>
+						<p><%~ SSHHelp4 %></p>
+					</span>
+					<a onclick='setDescriptionVisibility("ssh_help")'  id="ssh_help_ref" href="#ssh_help"><%~ MoreInfo %></a>
+				</div>
+			</div>
+
 		</div>
 	</div>
 	</div>

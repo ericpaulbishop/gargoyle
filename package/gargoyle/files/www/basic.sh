@@ -60,6 +60,7 @@
 	fi
 
 	cdcif=$(egrep -Hi "(cdc ethernet control|rndis communications control)" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
+	[ -z "$cdcif" ] && cdcif=$(ls -l /sys/class/net/*/device/driver | grep cdc_ether | sed 's!.*/sys/class/net/\(.*\)/device/.*!\1!')
 	if [ -z "$cdcif" ]; then
 		echo "cdcif = \"\";"
 	else
@@ -625,7 +626,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 		</div>
 
 		<div id='wifi_hwmode_5ghz_container'>
-			<labelfor='wifi_hwmode_5ghz' id='wifi_hwmode_5ghz_label'>5GHz <%~ OpMod %>:</label>
+			<label for='wifi_hwmode_5ghz' id='wifi_hwmode_5ghz_label'>5GHz <%~ OpMod %>:</label>
 			<span>
 				<select id='wifi_hwmode_5ghz' class='form-control' onchange='setHwMode(this)'>
 					<option value='disabled'>Disabled</option>

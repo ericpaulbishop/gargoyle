@@ -31,12 +31,12 @@
   margin: 0;
   overflow: hidden;
 }
-<<<<<<< HEAD
+
 .contributer {
   font-size: 115%;
   font-weight: bold;
   text-decoration: underline;
-=======
+}
 
 legend
 {
@@ -44,8 +44,8 @@ legend
 	font-size:18px;
 	font-weight:bold;
 	color:#888AB8;
->>>>>>> parent of 03fe424... added bootstrap
 }
+
 p {
   margin: 1em 0;
 }
@@ -106,7 +106,7 @@ input.text_disabled, select.select_disabled {
   font-size: 14px;
   color: #000;
 }
-<<<<<<< HEAD
+
 .plot_header {
   font-family: verdana, arial, sans-serif;
   font-size: 18px;
@@ -115,7 +115,7 @@ input.text_disabled, select.select_disabled {
   margin-left: 20px;
   margin-top: 10px;
   margin-bottom: 10px;
-=======
+}
 
 .internal_divider
 {
@@ -1497,5 +1497,4 @@ td.bandwidth_table_column_4
 {
 	text-align:right;
 	border:1px solid #000;
->>>>>>> parent of 03fe424... added bootstrap
 }

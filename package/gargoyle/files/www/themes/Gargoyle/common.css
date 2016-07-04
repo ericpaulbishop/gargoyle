@@ -5,7 +5,6 @@
  * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
-<<<<<<< HEAD
 
 #darken {
   top: 0;
@@ -117,7 +116,6 @@ ul ul>a:active {
 nav>li.active>a {
   background-color: #eee;
 }
-=======
 
 
 html
@@ -563,4 +561,3 @@ body
 	padding-right:14px;
 	background:url("images/main_internal.png") center repeat;
 }
->>>>>>> parent of 03fe424... added bootstrap
