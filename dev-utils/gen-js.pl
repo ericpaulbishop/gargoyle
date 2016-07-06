@@ -21,8 +21,8 @@ my $typeOrder = [ "images", "fon-flash", "src" ];
 my $typeNames = {"src"=>"Source Code", "images"=>"Firmware Images", "fon-flash"=>"FonFlash"};
 my $typeMatches={"src"=>"src", "fon-flash"=>"fon" };
 
-my $archOrder = [ "ar71xx", "mvebu", "alix", "brcm47xx", "atheros",  ];
-my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "alix"=>"Alix/X86" };
+my $archOrder = [ "ar71xx", "mvebu", "ramips", "alix", "brcm47xx", "atheros",  ];
+my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "ramips" => "MediaTek/Ralink ramips", "alix"=>"Alix/X86" };
 my $targetOrder = 
 { 
 	"atheros"=>
