@@ -53,6 +53,7 @@ my $targetOrder =
 		"wrt150n-squashfs.bin",
 		"wrt300n_v1-squashfs.bin",
 		"wrt300n_v11-squashfs.bin",
+		"wrt310n-v1-squashfs.bin",
 		"wrt350n_v1-squashfs.bin",
 		"wr850g-squashfs.bin",
 		"we800g-squashfs.bin",
@@ -61,7 +62,9 @@ my $targetOrder =
 		"ps1208mfg-squashfs.bin",
 		"wgt634u-squashfs.bin",
 		"wnr834b_v2-squashfs.chk",
-		"wrt610n_v1-squashfs.bin"
+		"wrt610n_v1-squashfs.bin",
+		"wrt610n-v2-squashfs.bin",
+		"e3000-v1-squashfs.bin"
 
 		],
 	"ar71xx"=>
@@ -246,6 +249,10 @@ my $targetOrder =
 		"tl-wr841n-v8-squashfs-sysupgrade.bin",
 		"tl-wr841n-v9-squashfs-factory.bin",
 		"tl-wr841n-v9-squashfs-sysupgrade.bin",
+		"tl-wr841n-v10-squashfs-factory.bin",
+		"tl-wr841n-v10-squashfs-sysupgrade.bin",
+		"tl-wr841n-v11-squashfs-factory.bin",
+		"tl-wr841n-v11-squashfs-sysupgrade.bin",
 		"tl-wr842n-v1-squashfs-factory.bin",
 		"tl-wr842n-v1-squashfs-sysupgrade.bin",
 		"tl-wr941nd-v2-squashfs-factory.bin",
@@ -356,8 +363,25 @@ my $targetOrder =
 		"linksys-cobra-squashfs-factory.img",
 		"linksys-cobra-squashfs-sysupgrade.tar",
 		"linksys-mamba-squashfs-factory.img",
-		"linksys-mamba-squashfs-sysupgrade.tar"
+		"linksys-mamba-squashfs-sysupgrade.tar",
+		"linksys-shelby-squashfs-factory.img",
+		"linksys-shelby-squashfs-sysupgrade.tar"
+
 		],
+	"ramips"=>
+		[ 
+		"wt3020-8M-squashfs-factory.bin",
+		"wt3020-8M-squashfs-sysupgrade.bin",
+		"xiaomi-miwifi-mini-squashfs-sysupgrade.bin",
+		"fonera20n-squashfs-factory.bin",
+		"fonera20n-squashfs-sysupgrade.bin",
+		"mpr-a2-squashfs-sysupgrade.bin",
+		"px4885-8M-squashfs-sysupgrade.bin",
+		"vocore-squashfs-sysupgrade.bin",
+		"wt1520-8M-squashfs-factory.bin",
+		"wt1520-8M-squashfs-sysupgrade.bin"
+		],
+
 	"alix"=> 
 		[ 
 		"combined.jffs2.128k.img",
