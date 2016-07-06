@@ -112,6 +112,7 @@ image_dirs=$(ls)
 for i in $image_dirs ; do
 	if [ "$i" != "brcm-2.4" ] ; then
 		echo $i
+		$ssh_pub $user@gargoyle-router.com "mkdir -p gargoyle_site/downloads/images/$i"
 		$scp_pub $i/* $user@gargoyle-router.com:gargoyle_site/downloads/images/$i/
 		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$version/$i"
 		$ssh_pub $user@gargoyle-router.com "rm -rf   gargoyle_site/packages/gargoyle-$major_version/$i"
