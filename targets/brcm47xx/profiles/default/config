@@ -1959,7 +1959,7 @@ CONFIG_PACKAGE_libericstools=y
 # CONFIG_PACKAGE_libiconv is not set
 # CONFIG_PACKAGE_libiconv-full is not set
 # CONFIG_PACKAGE_libid3tag is not set
-# CONFIG_PACKAGE_libintl is not set
+CONFIG_PACKAGE_libintl=m
 # CONFIG_PACKAGE_libintl-full is not set
 # CONFIG_PACKAGE_libiw is not set
 CONFIG_PACKAGE_libiwinfo=y
