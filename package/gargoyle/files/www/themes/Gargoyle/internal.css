@@ -6,6 +6,10 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
+span#update-container {
+  display: none;
+}
+
 .indent {
   margin-left: 25px;
 }
@@ -30,6 +34,10 @@
   padding: 0;
   margin: 0;
   overflow: hidden;
+}
+
+#content {
+  -webkit-overflow-scrolling: touch;
 }
 
 .contributer {
