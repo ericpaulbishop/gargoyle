@@ -1337,6 +1337,8 @@ static void destroy_connection_http(void* connection_data)
 
 #ifdef HAVE_SSL
 
+#ifdef USE_POLARSSL
+
 static int urandom_fd = -1;
 static int ewget_urandom_init(void)
 {
@@ -1360,6 +1362,7 @@ static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 
 	return 0;
 }
+#endif
 
 
 static void* initialize_connection_https(char* host, int port)
