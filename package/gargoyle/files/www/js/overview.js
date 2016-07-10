@@ -106,17 +106,11 @@ function resetData()
 		while(wanDnsList.length > 0)
 		{
 			var brk = document.createElement("br");
-			var leftSpan = document.createElement("span");
 			var rightSpan = document.createElement("span");
-			leftSpan.className="leftcolumn";
-			leftSpan.appendChild( document.createTextNode("invisible") );
-			leftSpan.style.visibility="hidden";
-			rightSpan.className="rightcolumn";
 			rightSpan.appendChild( document.createTextNode(wanDnsList.shift()) );
 
-			document.getElementById("wan_dns_container").appendChild(brk);
-			document.getElementById("wan_dns_container").appendChild(leftSpan);
-			document.getElementById("wan_dns_container").appendChild(rightSpan);
+			document.getElementById("wan_dns").appendChild(brk);
+			document.getElementById("wan_dns").appendChild(rightSpan);
 		}
 
 		if(uciOriginal.get("network", "wan", "proto") != "pppoe")

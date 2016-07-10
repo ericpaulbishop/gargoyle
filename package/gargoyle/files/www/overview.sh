@@ -106,11 +106,11 @@
 			<li class="list-group-item"><span class="list-group-item-title"><%~ MemU %>:</span><span id="memory"></span></li>
 			<li id="swap_container" class="list-group-item"><span class="list-group-item-title"><%~ SwMemU %>:</span><span id="swap"></span></li>
 			<li class="list-group-item"><span class="list-group-item-title"><%~ Conns %>:</span><span id="connections"></span></li>
-			<li class="list-group-item"><span class="list-group-item-title"><%~ CPUAvg %>:</span><span id="load_avg"></span><div>(1/5/15 <%~ minutes %>)</div></li>
+			<li class="list-group-item"><span class="list-group-item-title"><%~ CPUAvg %>:</span><span><span id="load_avg"></span><span>&nbsp;(1/5/15 <%~ minutes %>)</span></span></li>
 			<li id="temp_container" class="list-group-item">
-				<div><%~ TEMPcpu %>:<span id="temp_cpu"></span><span>&nbsp;&nbsp;&deg;C</span></div>
-				<div><%~ TEMPmem %>:<span id="temp_mem"></span><span>&nbsp;&nbsp;&deg;C</span></div>
-				<div><%~ TEMPwifi %>:<span id="temp_wifi"></span><span>&nbsp;&nbsp;&deg;C</span></div>
+				<div><%~ TEMPcpu %>:<span><span id="temp_cpu"></span><span>&nbsp;&deg;C</span></span></div>
+				<div><%~ TEMPmem %>:<span><span id="temp_mem"></span><span>&nbsp;&deg;C</span></span></div>
+				<div><%~ TEMPwifi %>:<span><span id="temp_wifi"></span><span>&nbsp;&deg;C</span></span></div>
 			</li>
 		</ul>
 	</div>
