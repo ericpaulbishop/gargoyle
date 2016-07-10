@@ -52,7 +52,7 @@
 			<input id='upgrade_hash' name="hash" type='hidden' value='' />
 			<input id='upgrade_arch' name="arch" type='hidden' value='' />
 
-			<button id="upgrade_button" class="btn btn-default" onclick="doUpgrade()"><%~ Upgrade %></button>
+			<button id="upgrade_button" class="btn btn-primary" onclick="doUpgrade()"><%~ Upgrade %></button>
 		</form>
 		</div>
 	</div>

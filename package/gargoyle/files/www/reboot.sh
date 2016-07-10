@@ -52,7 +52,7 @@
 			<h3 class="panel-title"><%~ reboot.RbSect %></h3>
 		</div>
 		<div class="panel-body">
-			<button id="reboot_button" class="btn btn-default btn-lg" onclick='reboot()'><%~ Reboot %></button>
+			<button id="reboot_button" class="btn btn-danger btn-lg" onclick='reboot()'><%~ Reboot %></button>
 		</div>
 </div>
 </div>
