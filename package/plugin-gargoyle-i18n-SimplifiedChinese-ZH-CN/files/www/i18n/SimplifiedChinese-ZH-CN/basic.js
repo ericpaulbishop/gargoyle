@@ -126,6 +126,9 @@ basicS.ScnMo="正在扫描移动设备";
 basicS.NoDv="没有找到设备";
 
 basicS.WANIntr="WAN接口";
-basicS.Mo3gQMI="LTE (QMI)";
-basicS.Dfult="默认"
+
+basicS.Mo3gQMI="USB Modem (QMI)";
+basicS.Mo3gNCM="USB Modem (NCM)";
+basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
+basicS.Dfult="默认";
 
