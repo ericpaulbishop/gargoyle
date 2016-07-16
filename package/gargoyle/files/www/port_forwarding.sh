@@ -119,7 +119,7 @@
 
 				<div id="upnp_help" class="form-group form-inline">
 					<span id="upnp_help_txt"><%~ UPHelp %></span>
-					<a id="upnp_help_ref" onclick="setDescriptionVisibility("upnp_help")" href="#upnp_help"><%~ Hide %></a>
+					<a id="upnp_help_ref" onclick="setDescriptionVisibility('upnp_help')" href="#upnp_help"><%~ Hide %></a>
 				</div>
 			</div>
 

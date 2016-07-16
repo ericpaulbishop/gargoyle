@@ -33,12 +33,12 @@
 
 				<div>
 					<div class="form-group form-inline">
-						<input type="radio" name="min_radio" id="min_radio1" class="form-control" onclick="enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")" />
+						<input type="radio" name="min_radio" id="min_radio1" class="form-control" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
 						<label for="min_radio1"><%~ BandMinNo %></label>
 					</div>
 
 					<div class="form-group form-inline">
-							<input type="radio" name="min_radio" class="form-control" id="min_radio2" onclick="enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")" />
+							<input type="radio" name="min_radio" class="form-control" id="min_radio2" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
 							<label id="min_bandwidth_label" for="min_radio2"><%~ BandMin %>:</label>
 							<input type="text" class="form-control" id="min_bandwidth" onkeyup="proofreadNumeric(this)"  size="10" maxlength="10" />
 							<em><%~ Kbs %></em>
@@ -49,12 +49,12 @@
 				<div><%~ BandMax %>:</div>
 				<div>
 					<div class="form-group form-inline">
-						<input type="radio" name="max_radio" class="form-control" id="max_radio1" onclick="enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")" />
+						<input type="radio" name="max_radio" class="form-control" id="max_radio1" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />
 						<label for="max_radio1"><%~ BandMaxNo %></label>
 					</div>
 
 					<div class="form-group form-inline">
-						<input type="radio" name="max_radio" class="form-control" id="max_radio2" onclick="enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")" />
+						<input type="radio" name="max_radio" class="form-control" id="max_radio2" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />'
 						<label id="max_bandwidth_label" for="max_radio2"><%~ BandMax %>:</label>
 						<input type="text" class="form-control" id="max_bandwidth" onkeyup="proofreadNumeric(this)"  size="10" maxlength="10" />
 						<em><%~ Kbs %></em>

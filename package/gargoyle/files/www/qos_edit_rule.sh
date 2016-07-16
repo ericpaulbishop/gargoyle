@@ -92,7 +92,7 @@
 
 				<div>
 					<div class="leftcolumn">
-						<input type="checkbox" id="use_app_protocol" onclick="enableAssociatedField(this,"app_protocol", "")" />
+						<input type="checkbox" id="use_app_protocol" onclick="enableAssociatedField(this,'app_protocol', '')" />
 						<label id="app_protocol_label" for="app_protocol"><%~ AppProto %>:</label>
 					</div>
 					<select id="app_protocol" class="form-control">

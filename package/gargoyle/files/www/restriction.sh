@@ -32,9 +32,13 @@
 				<div>
 					<%in templates/restriction_template %>
 					<div>
-						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule("restriction_rule", "rule_")"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
 					</div>
 				</div>
+
+				<div id="internal_divider1" class="internal_divider"></div>
+				<span id="current_rule_label" style="text-decoration:underline" ><%~ CRestr %>:</span>
+				<div id="rule_table_container"></div>
 			</div>
 
 		</div>
@@ -58,7 +62,7 @@
 					<%in templates/whitelist_template %>
 
 					<div>
-						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule("whitelist_rule", "exception_")"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
 					</div>
 				</div>
 

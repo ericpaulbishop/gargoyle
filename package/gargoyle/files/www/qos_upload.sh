@@ -59,7 +59,7 @@
 				<p><%~ DefServClassAbout %></p>
 
 			</span>
-			<a onclick="setDescriptionVisibility("qos_up_1")" id="qos_up_1_ref" href="#qos_up_1"><%~ Hide %></a>
+			<a onclick="setDescriptionVisibility('qos_up_1')" id="qos_up_1_ref" href="#qos_up_1"><%~ Hide %></a>
 		</div>
 
 
@@ -69,28 +69,28 @@
 		<div>
 			<div class="form-group form-inline">
 				<div>
-					<input type="checkbox" class="form-control" id="use_source_ip" onclick="enableAssociatedField(this,"source_ip", "")" />
+					<input type="checkbox" class="form-control" id="use_source_ip" onclick="enableAssociatedField(this,'source_ip', '')" />
 					<label id="source_ip_label" for="source_ip"><%~ SrcIP %>:</label>
 				</div>
 				<input class="form-control" type="text" id="source_ip" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" />
 			</div>
 			<div>
 				<div class="form-group form-inline">
-					<input type="checkbox" id="use_source_port" class="form-control" onclick="enableAssociatedField(this,"source_port", "")"/>
+					<input type="checkbox" id="use_source_port" class="form-control" onclick="enableAssociatedField(this,'source_port', '')"/>
 					<label id="source_port_label" for="source_port"><%~ SrcPort %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="source_port" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" />
 			</div>
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_dest_ip" onclick="enableAssociatedField(this,"dest_ip", "")" />
+					<input type="checkbox"  id="use_dest_ip" onclick="enableAssociatedField(this,'dest_ip', '')" />
 					<label id="dest_ip_label" for="dest_ip"><%~ DstIP %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="dest_ip" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" />
 			</div>
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_dest_port" onclick="enableAssociatedField(this,"dest_port", "")"  />
+					<input type="checkbox"  id="use_dest_port" onclick="enableAssociatedField(this,'dest_port', '')"  />
 					<label id="dest_port_label" for="dest_port"><%~ DstPort %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="dest_port" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" />
@@ -98,7 +98,7 @@
 
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_max_pktsize" onclick="enableAssociatedField(this,"max_pktsize", "")"  />
+					<input type="checkbox"  id="use_max_pktsize" onclick="enableAssociatedField(this,'max_pktsize', '')"  />
 					<label id="max_pktsize_label" for="max_pktsize"><%~ MaxPktLen %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="max_pktsize" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" />
@@ -106,7 +106,7 @@
 			</div>
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_min_pktsize" onclick="enableAssociatedField(this,"min_pktsize", "")"  />
+					<input type="checkbox"  id="use_min_pktsize" onclick="enableAssociatedField(this,'min_pktsize', '')"  />
 					<label id="min_pktsize_label" for="min_pktsize"><%~ MinPktLen %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="min_pktsize" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" />
@@ -116,7 +116,7 @@
 
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_transport_protocol" onclick="enableAssociatedField(this,"transport_protocol", "")"  />
+					<input type="checkbox"  id="use_transport_protocol" onclick="enableAssociatedField(this,'transport_protocol', '')"  />
 					<label id="transport_protocol_label" for="transport_protocol"><%~ TrProto %>:</label>
 				</div>
 				<select class="rightcolumn" id="transport_protocol"/>
@@ -129,7 +129,7 @@
 
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_connbytes_kb" onclick="enableAssociatedField(this,"connbytes_kb", "")"  />
+					<input type="checkbox"  id="use_connbytes_kb" onclick="enableAssociatedField(this,'connbytes_kb', '')"  />
 					<label id="connbytes_kb_label" for="connbytes_kb"><%~ Conreach %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="connbytes_kb" onkeyup="proofreadNumericRange(this,0,4194303)" size="17" maxlength="28" />
@@ -138,7 +138,7 @@
 
 			<div>
 				<div class="leftcolumn">
-					<input type="checkbox"  id="use_app_protocol" onclick="enableAssociatedField(this,"app_protocol", "")" />
+					<input type="checkbox"  id="use_app_protocol" onclick="enableAssociatedField(this,'app_protocol', '')" />
 					<label id="app_protocol_label" for="app_protocol"><%~ AppProto %>:</label>
 				</div>
 				<select class="rightcolumn" id="app_protocol">
@@ -192,7 +192,7 @@
 
 				<p><%~ UTotBandAbout %></p>
 			</span>
-			<a onclick="setDescriptionVisibility("qos_up_2")"  id="qos_up_2_ref" href="#qos_up_2"><%~ Hide %></a>
+			<a onclick="setDescriptionVisibility('qos_up_2')"  id="qos_up_2_ref" href="#qos_up_2"><%~ Hide %></a>
 		</div>
 
 		<div class="internal_divider"></div>
@@ -215,12 +215,12 @@
 			<div class="nocolumn"><%~ BandMin %>:</div>
 			<div class="indent">
 				<div class="nocolumn">
-					<input type="radio" name="min_radio" id="min_radio1" onclick="enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")" />
+					<input type="radio" name="min_radio" id="min_radio1" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
 					<label for="min_radio1"><%~ BandMinNo %></label>
 				</div>
 				<div>
 					<span class="leftcolumn">
-						<input type="radio" name="min_radio" id="min_radio2" onclick="enableAssociatedField(document.getElementById("min_radio2"),"min_bandwidth", "")" />
+						<input type="radio" name="min_radio" id="min_radio2" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
 						<label id="min_bandwidth_label" for="min_radio2"><%~ BandMin %>:</label>
 					</span>
 					<span class="rightcolumn">
@@ -233,12 +233,12 @@
 			<div class="nocolumn"><%~ BandMax %>:</div>
 			<div class="indent">
 				<div class="nocolumn">
-					<input type="radio" name="max_radio" id="max_radio1" onclick="enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")" />
+					<input type="radio" name="max_radio" id="max_radio1" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />
 					<label for="max_radio1"><%~ BandMaxNo %></label>
 				</div>
 				<div>
 					<span class="leftcolumn">
-						<input type="radio" name="max_radio" id="max_radio2" onclick="enableAssociatedField(document.getElementById("max_radio2"),"max_bandwidth", "")" />
+						<input type="radio" name="max_radio" id="max_radio2" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />
 						<label id="max_bandwidth_label" for="max_radio2"><%~ BandMax %>:</label>
 					</span>
 					<span class="rightcolumn">

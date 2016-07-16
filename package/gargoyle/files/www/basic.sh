@@ -493,7 +493,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_mac_container" class="form-group">
 					<div class="form-inline">
-						<input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, "wan_mac", defaultWanMac)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/>&nbsp;&nbsp;
 						<label for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
 					</div>
 					<div>
@@ -503,7 +503,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_mtu_container" class="form-group">
 					<div class="form-inline">
-						<input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, "wan_mtu", 1500)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/>&nbsp;&nbsp;
 						<label for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
 					</div>
 					<div>

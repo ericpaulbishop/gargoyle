@@ -42,7 +42,7 @@
 				<span id="add_quota_label" style="text-decoration:underline" ><%~ AddQuota %>:</span>
 				<div>
 					<%in templates/quotas_template %>
-				<div>
+				</div>
 				<button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button>
 			</div>
 

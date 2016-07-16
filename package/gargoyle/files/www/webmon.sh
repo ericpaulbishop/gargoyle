@@ -60,7 +60,7 @@
 					<div id="add_ip_container">
 						<div class="form-group form-inline">
 							<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
-							<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, "add_ip", "ip_table_container", "ip_table", false, 3, 1, 250)" /><%~ Add %></button>
+							<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" /><%~ Add %></button>
 							<br/>
 							<em><%~ SpcIP %></em>
 						</div>
