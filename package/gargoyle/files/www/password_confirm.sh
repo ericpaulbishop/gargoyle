@@ -13,24 +13,30 @@
 
 	<div class="col-lg-4">
 		<div class="panel panel-default">
+
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CPass %></h3>
 			</div>
+
 			<div class="panel-body">
-	<div style="clear:both;display:block">
-		<span id="confirm_text"></span>
+				<div style="clear:both;display:block">
+					<span id="confirm_text"></span>
+				</div>
+
+				<div id="spacer_div" style="display:block; margin:8px;">&nbsp;</div>
+
+				<div style="clear:both">
+					<span>
+						<input type="password" id="password" class="form-control"/>
+					</span>
+				</div>
+
+				<div id="bottom_button_container"></div>
+			</div>
+
+		</div>
 	</div>
 
-	<div id="spacer_div" style="display:block; margin:8px;">&nbsp;</div>
-
-	<div style="clear:both">
-		<span><input type="password" id="password" class="form-control"/></span>
-	</div>
-	<div id="bottom_button_container"></div>
-</div>
-</div>
-
-</div>
 </div>
 
 </body>

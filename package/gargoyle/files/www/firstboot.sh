@@ -31,25 +31,33 @@
 	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-body">
-	<p><strong><%~ npass %>:</strong></p>
-	<div class='form-group form-inline'>
-		<label for='password1' id='password1_label'><%~ NPass %>:</label>
-		<input type='password' class='form-control' id='password1' size='25' />
+
+				<p><strong><%~ npass %>:</strong></p>
+
+				<div class="form-group form-inline">
+					<label for="password1" id="password1_label"><%~ NPass %>:</label>
+					<input type="password" id="password1" class="form-control" size="25" />
+				</div>
+
+				<div class="form-group form-inline">
+					<label for="password2" id="password2_label"><%~ CPass %>:</label>
+					<input type="password" id="password2" class="form-control" size="25" />
+				</div>
+
+				<p><strong><%~ Stz %>:</strong></p>
+
+				<div class="form-group form-inline">
+					<select class="form-control" id="timezone"></select>
+					<br/>
+				</div>
+
+				<br/>
+				<button class="btn btn-primary" onclick="setInitialSettings()" /><%~ SSet %><button>
+
+			</div>
+		</div>
 	</div>
-	<div class='form-group form-inline'>
-		<label for='password2' id='password2_label'><%~ CPass %>:</label>
-		<input type='password' class='form-control' id='password2' size='25' />
-	</div>
-	<p><strong><%~ Stz %>:</strong></p>
-	<div class='form-group form-inline'>
-		<select class='form-control' id='timezone'></select>
-		<br/>
-	</div>
-	<br/>
-	<button class="btn btn-primary" onclick="setInitialSettings()" /><%~ SSet %><button>
-</div>
-</div>
-</div>
+	
 </div>
 
 <script>
@@ -70,7 +78,7 @@ var currentTimezone = uciOriginal.get("system", systemSections[0], "timezone");
 currentTimezone = currentTimezone == "UTC" ? "UTC0" : currentTimezone;
 setSelectedValue("timezone", currentTimezone); //set value from config
 
-document.getElementById('password1').focus();
+document.getElementById("password1").focus();
 
 //-->
 </script>
@@ -78,3 +86,4 @@ document.getElementById('password1').focus();
 <%
 	gargoyle_header_footer -f
 %>
+

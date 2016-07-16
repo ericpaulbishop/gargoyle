@@ -39,25 +39,25 @@
 		<span id="add_ddns_label"><p><%~ AddDy %>:</p></span>
 
 		<div>
-			<div class='form-group form-inline'>
-				<label for='ddns_provider' id='ddns_provider_label'><%~ SvPro %>:</label>
-				<select class='form-control' id="ddns_provider" onchange="setProvider()"></select>
+			<div class="form-group form-inline">
+				<label for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
+				<select class="form-control" id="ddns_provider" onchange="setProvider()"></select>
 			</div>
 		</div>
 
-		<div id='ddns_variable_container'></div>
+		<div id="ddns_variable_container"></div>
 
 		<div>
 
-			<div class='form-group form-inline'>
-				<label for='ddns_check' id='ddns_check_label'><%~ ChItv %>:</label>
-				<input type='text' class='form-control' id='ddns_check'  size='8' onkeyup='proofreadNumeric(this)'/>
+			<div class="form-group form-inline">
+				<label for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
+				<input type="text" class="form-control" id="ddns_check"  size="8" onkeyup="proofreadNumeric(this)"/>
 				<em><%~ minutes %></em>
 			</div>
 
-			<div class='form-group form-inline'>
-				<label for='ddns_force' id='ddns_force_label'><%~ FUItv %>:</label>
-				<input type='text' class='form-control' id='ddns_force'  size='8' onkeyup='proofreadNumeric(this)'/>
+			<div class="form-group form-inline">
+				<label for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
+				<input type="text" class="form-control" id="ddns_force"  size="8" onkeyup="proofreadNumeric(this)"/>
 				<em><%~ days %></em>
 			</div>
 
@@ -66,16 +66,16 @@
 			</div>
 
 			<div>
-				<span id='ddns_1_txt'>
+				<span id="ddns_1_txt">
 					<p><%~ HelpCI %></p>
 					<p><%~ HelpFI %></p>
 				</span>
-				<a onclick='setDescriptionVisibility("ddns_1")'  id="ddns_1_ref" href="#ddns_1"><%~ Hide %></a>
+				<a onclick="setDescriptionVisibility('ddns_1')"  id="ddns_1_ref" href="#ddns_1"><%~ Hide %></a>
 			</div>
 
 		</div>
 
-		<div id='internal_divider1' class='internal_divider'></div>
+		<div id="internal_divider1" class="internal_divider"></div>
 
 		<span id="add_ddns_label"><p><%~ DYSect %>:</p></span>
 
@@ -86,14 +86,14 @@
 </div>
 </div>
 	<div id="bottom_button_container">
-		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>
+		<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-danger" onclick="resetData()"><%~ Reset %></button>
 	</div>
 
 	<span id="update_container" ><%~ WaitSettings %></span>
 </form>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

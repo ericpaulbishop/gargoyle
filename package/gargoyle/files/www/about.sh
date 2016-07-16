@@ -11,8 +11,10 @@
 
 <h1 class="page-header"><%~ about.CSect %></h1>
 <div class="row">
+
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+
 			<div class="panel-body">
 				<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> <%~ EBishop %></p>
 
@@ -36,8 +38,10 @@
 
 				<p><%~ openwrt %> (<a href="http://openwrt.org">openwrt.org</a>).</p>
 			</div>
+
 		</div>
 	</div>
+
 </div>
 
 <h1 class="page-header"><%~ LSect %></h1>
@@ -45,6 +49,7 @@
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+
 			<div class="panel-body">
 				<h3>Gargoyle is copyright &copy; 2008-2016 by Eric Bishop</h3>
 
@@ -79,8 +84,10 @@
 				GNU General Public License for more details.</p>
 
 			</div>
+
 		</div>
 	</div>
+
 </div>
 <%
 	gargoyle_header_footer -f -s "system" -p "about"

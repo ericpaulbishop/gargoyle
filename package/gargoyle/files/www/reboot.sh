@@ -45,67 +45,73 @@
 
 <h1 class="page-header">Reboot</h1>
 <div class="row">
-<div class="col-lg-4">
 
+	<div class="col-lg-4">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ reboot.RbSect %></h3>
-		</div>
-		<div class="panel-body">
-			<button id="reboot_button" class="btn btn-danger btn-lg" onclick='reboot()'><%~ Reboot %></button>
-		</div>
-</div>
-</div>
 
-<div class="col-lg-4">
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ SchRb %></h3>
-		</div>
-		<div class="panel-body">
-			<div class='form-group form-inline'>
-				<select class="form-control" id="sched_reboot" onchange="setVisibility()">
-					<option value="none"><%~ NoSch %></option>
-					<option value="scheduled"><%~ RbSch %></option>
-				</select>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ reboot.RbSect %></h3>
 			</div>
 
-	<div id="schedule_reboot_container">
-		<div class='form-group form-inline'>
-			<label for="reboot_interval"><%~ WillR %>:</label>
-			<select class="form-control" id="reboot_interval" onchange="setVisibility()">
-				<option value="day"><%~ EDay %></option>
-				<option value="week"><%~ EWek %></option>
-				<option value="month"><%~ EMnh %></option>
-			</select>
-		</div>
-
-		<div id="reboot_day_container" class='form-group form-inline'>
-			<label id="reboot_day_label" for='reboot_day'><%~ RDay %>:</label>
-			<select class="form-control" id='reboot_day'></select>
-		</div>
-
-		<div id="reboot_hour_container" class='form-group form-inline'>
-			<label id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
-			<select class="form-control" id='reboot_hour'>
-				<% otime '\t\t\t\t' %>
-			</select>
+			<div class="panel-body">
+				<button id="reboot_button" class="btn btn-danger btn-lg" onclick="reboot()"><%~ Reboot %></button>
+			</div>
 		</div>
 	</div>
-	</div>
-</div>
-</div>
-</div>
 
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SchRb %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="form-group form-inline">
+					<select id="sched_reboot" class="form-control" onchange="setVisibility()">
+						<option value="none"><%~ NoSch %></option>
+						<option value="scheduled"><%~ RbSch %></option>
+					</select>
+				</div>
+
+				<div id="schedule_reboot_container">
+					<div class="form-group form-inline">
+						<label for="reboot_interval"><%~ WillR %>:</label>
+						<select id="reboot_interval" class="form-control" onchange="setVisibility()">
+							<option value="day"><%~ EDay %></option>
+							<option value="week"><%~ EWek %></option>
+							<option value="month"><%~ EMnh %></option>
+						</select>
+					</div>
+
+					<div id="reboot_day_container" class="form-group form-inline">
+						<label id="reboot_day_label" for="reboot_day"><%~ RDay %>:</label>
+						<select id="reboot_day" class="form-control"></select>
+					</div>
+
+					<div id="reboot_hour_container" class="form-group form-inline">
+						<label id="reboot_hour_label" for="reboot_hour"><%~ RHr %>:</label>
+						<select id="reboot_hour" class="form-control">
+							<% otime "\t\t\t\t" %>
+						</select>
+					</div>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+</div>
 
 <div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
+	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
 </div>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 	resetData();

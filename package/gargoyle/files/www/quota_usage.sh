@@ -22,25 +22,25 @@
 <div class="row">
 
 	<div class="panel panel-default">
-	<div class="panel-body">
+		<div class="panel-body">
 
-	<div class="col-lg-4">
-	<div class="form-group form-inline">
-		<select id="host_display" class="form-control">
-			<option value="hostname"><%~ DspHn %></option>
-			<option value="ip"><%~ DspHIP %></option>
-		</select>
+			<div class="col-lg-4">
+				<div class="form-group form-inline">
+					<select id="host_display" class="form-control">
+						<option value="hostname"><%~ DspHn %></option>
+						<option value="ip"><%~ DspHIP %></option>
+					</select>
+				</div>
+			</div>
+
+			<div class="col-lg-12">
+				<div id="quota_table_container"></div>
+			</div>
+
+		</div>
 	</div>
-</div>
-
-<div class="col-lg-12">
-	<div id="quota_table_container"></div>
-</div>
 
 </div>
-</div>
-</div>
-
 
 <script>
 <!--

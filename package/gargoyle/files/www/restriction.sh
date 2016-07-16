@@ -22,69 +22,63 @@
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ restrictions.ARSect %></h3>
-		</div>
-			<div class="panel-body">
 
-		<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
-
-		<div>
-			<%in templates/restriction_template %>
-
-			<div>
-				<button id="add_restriction_button" class="btn btn-default" onclick='addNewRule("restriction_rule", "rule_")'><%~ ANRule %></button>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ restrictions.ARSect %></h3>
 			</div>
+
+			<div class="panel-body">
+				<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
+				<div>
+					<%in templates/restriction_template %>
+					<div>
+						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule("restriction_rule", "rule_")"><%~ ANRule %></button>
+					</div>
+				</div>
+			</div>
+
 		</div>
-
-		<div id='internal_divider1' class='internal_divider'></div>
-
-		<span id="current_rule_label" style="text-decoration:underline" ><%~ CRestr %>:</span>
-
-		<div id="rule_table_container"></div>
-
 	</div>
-</div>
-</div>
+
 </div>
 
 <div class="row">
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ EWSect %></h3>
-		</div>
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ EWSect %></h3>
+			</div>
 			<div class="panel-body">
 
-		<span id="add_exception_label" style="text-decoration:underline" ><%~ NExcp %>:</span>
+				<span id="add_exception_label" style="text-decoration:underline" ><%~ NExcp %>:</span>
 
-		<div>
-			<%in templates/whitelist_template %>
+				<div>
+					<%in templates/whitelist_template %>
 
-			<div>
-				<button id="add_restriction_button" class="btn btn-default" onclick='addNewRule("whitelist_rule", "exception_")'><%~ ANRule %></button>
+					<div>
+						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule("whitelist_rule", "exception_")"><%~ ANRule %></button>
+					</div>
+				</div>
+
+				<div id="internal_divider1" class="internal_divider"></div>
+				<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
+				<div id="exception_table_container"></div>
 			</div>
+
 		</div>
-
-		<div id='internal_divider1' class='internal_divider'></div>
-
-		<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
-
-		<div id="exception_table_container"></div>
-
 	</div>
-</div>
-</div>
-</div>
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
+
 </div>
 
+<div id="bottom_button_container">
+	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+</div>
 <span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

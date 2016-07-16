@@ -15,31 +15,37 @@
 	if [ -e /usr/lib/gargoyle/configure_printer.sh ] ; then echo "havePrinterScript=true;" ; fi
 %>
 </script>
+
 <h1 class="page-header"><%~ ident.IdSect %></h1>
 <div class="row">
+
 	<div class="col-lg-4">
 		<div class="panel panel-default">
+
 			<div class="panel-body">
-		<div class='form-group form-inline'>
-			<label for='hostname' id='hostname_label'><%~ HsNm %></label>
-			<input type='text' class='form-control' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25'/>
+				<div class="form-group form-inline">
+					<label for="hostname" id="hostname_label"><%~ HsNm %></label>
+					<input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/>
+				</div>
+				
+				<div id="domain_container" class="form-group form-inline">
+					<label for="domain" id="domain_label"><%~ Domn %></label>
+					<input type="text" id="domain" class="form-control" onkeyup="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/>
+				</div>
+			</div>
+
 		</div>
-		<div id="domain_container" class='form-group form-inline'>
-			<label for='domain' id='domain_label'><%~ Domn %></label>
-			<input type='text' class='form-control' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100'/>
-		</div>
-		</div>
-		</div>
-		</div>
+	</div>
+
 </div>
-	<div id="bottom_button_container" class='form-group form-inline'>
-		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
+	<div id="bottom_button_container" class="form-group form-inline">
+		<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
 	</div>
 	<span id="update_container" ><%~ WaitSettings %></span>
 
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

@@ -34,28 +34,28 @@
 	<div class="col-lg-4">
 		<div class="panel panel-default">
 			<div class="panel-body">
-	<div class='form-group form-inline'>
-		<label for='max_connections' id='max_connections_label'><%~ MaxC %>:</label>
-		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,16384)' id='max_connections' size='10' maxlength='5' />
+	<div class="form-group form-inline">
+		<label for="max_connections" id="max_connections_label"><%~ MaxC %>:</label>
+		<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,16384)" id="max_connections" size="10" maxlength="5" />
 		<em>(<%~ max %> 16384)</em>
 	</div>
-	<div class='form-group form-inline'>
-		<label for='tcp_timeout' id='tcp_timeout_label'><%~ TTout %>:</label>
-		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,3600)' id='tcp_timeout' size='10' maxlength='4' />
+	<div class="form-group form-inline">
+		<label for="tcp_timeout" id="tcp_timeout_label"><%~ TTout %>:</label>
+		<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,3600)" id="tcp_timeout" size="10" maxlength="4" />
 		<em><%~ seconds %> (<%~ max %> 3600)</em>
 	</div>
-	<div class='form-group form-inline'>
-		<label for='udp_timeout' id='udp_timeout_label'><%~ UTout %>:</label>
-		<input type='text' class='form-control' onkeyup='proofreadNumericRange(this,1,3600)' id='udp_timeout' size='10' maxlength='4' />
+	<div class="form-group form-inline">
+		<label for="udp_timeout" id="udp_timeout_label"><%~ UTout %>:</label>
+		<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,3600)" id="udp_timeout" size="10" maxlength="4" />
 		<em><%~ seconds %> (<%~ max %> 3600)</em>
 	</div>
 </div></div></div></div>
 <div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger" onclick='resetData()'><%~ Reset %></button>
+	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

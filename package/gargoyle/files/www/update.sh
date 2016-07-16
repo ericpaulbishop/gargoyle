@@ -24,44 +24,54 @@
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+
 			<div class="panel-body">
 				<div class="row">
+
 					<div class="col-lg-12">
-						<div class="alert alert-warning" role="alert"><%~ Warn %></div>
-						<div class="alert alert-info" role="alert"><span><%~ CGV %>:</span><span id="gargoyle_version"></span></div>
+						<div class="alert alert-warning" role="alert">
+							<%~ Warn %>
+						</div>
+						<div class="alert alert-info" role="alert">
+							<span><%~ CGV %>:</span>
+							<span id="gargoyle_version"></span>
+						</div>
 					</div>
+
 				</div>
 
-		<div class="row">
-		<div class="col-lg-4">
-		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+				<div class="row">
+					<div class="col-lg-4">
+						<form id="upgrade_form" enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+							<div id="upgrade_file1_container" class="form-group form-inline">
+								<label id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
+								<input class="form-control" type="file" id="upgrade_file" name="upgrade_file"/>
+								<br/>
+								<em><span id="upgrade_text"></span></em>
+							</div>
 
-			<div id="upgrade_file1_container" class='form-group form-inline'>
-				<label id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
-				<input class='form-control' type="file" id="upgrade_file" name="upgrade_file"/>
-				<br/>
-				<em><span id="upgrade_text"></span></em>
+							<div id="upgrade_preserve_container" class="form-group form-inline">
+								<span>
+									<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve"/>
+									<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
+								</span>
+							</div>
+
+							<input id="upgrade_hash" name="hash" type="hidden" value="" />
+							<input id="upgrade_arch" name="arch" type="hidden" value="" />
+
+							<button id="upgrade_button" class="btn btn-primary" onclick="doUpgrade()"><%~ Upgrade %></button>
+						</form>
+					</div>
+
+				</div>
 			</div>
-			<div id="upgrade_preserve_container" class='form-group form-inline'>
-				<span>
-					<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve"/>
-					<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
-				</span>
-			</div>
 
-			<input id='upgrade_hash' name="hash" type='hidden' value='' />
-			<input id='upgrade_arch' name="arch" type='hidden' value='' />
-
-			<button id="upgrade_button" class="btn btn-primary" onclick="doUpgrade()"><%~ Upgrade %></button>
-		</form>
 		</div>
 	</div>
-		</div>
-	</div>
-</div>
-</div>
 
-	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
+</div>
+<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
 
 <script>
 <!--

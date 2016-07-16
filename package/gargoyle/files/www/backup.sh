@@ -17,7 +17,7 @@
 				<h3 class="panel-title"><%~ backup.CurrC %></h3>
 			</div>
 			<div id="backup_section" class="panel-body">
-				<div class='form-group form-inline'>
+				<div class="form-group form-inline">
 					<button id="backup_button" class="btn btn-info" onclick="getBackup()"><%~ GetBackup %></button>
 				</div>
 			</div>
@@ -30,14 +30,14 @@
 				<h3 class="panel-title"><%~ RestC %></h3>
 			</div>
 			<div id="restore_section" class="panel-body">
-				<form id='restore_form' enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
-					<div class='form-group form-inline'>
+				<form id="restore_form" enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
+					<div class="form-group form-inline">
 						<label><%~ SelOF %>:</label>
 						<input type="file" id="restore_file" class="form-control" name="restore_file" />
-						<input id='restore_hash' name="hash" type='hidden' value=''/>
+						<input id="restore_hash" name="hash" type="hidden" value=""/>
 					</div>
 				</form>
-				<div class='form-group form-inline'>
+				<div class="form-group form-inline">
 					<button id="restore_button" class="btn btn-warning" onclick="doRestore()"/><%~ RestoreConfig %></button>
 				</div>
 				<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe>
@@ -51,10 +51,10 @@
 				<h3 class="panel-title"><%~ DfltC %></h3>
 			</div>
 			<div id="restore_original_section" class="panel-body">
-				<form id='restore_original_form' enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
-					<input id='restore_original_hash' name="hash" type='hidden' value=''/>
+				<form id="restore_original_form" enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
+					<input id="restore_original_hash" name="hash" type="hidden" value=""/>
 				</form>
-				<div class='form-group form-inline'>
+				<div class="form-group form-inline">
 					<button id="restore_original_button" class="btn btn-danger" onclick="doDefaultRestore()"><%~ RestoreDefault %></button>
 				</div>
 				<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe>
@@ -67,3 +67,4 @@
 <%
 	gargoyle_header_footer -f -s "system" -p "backup"
 %>
+

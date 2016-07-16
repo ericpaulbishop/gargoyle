@@ -12,16 +12,16 @@
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ dhcp.ESIP %></h3>
-		</div>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ dhcp.ESIP %></h3>
+			</div>
+
 			<div class="panel-body">
+				<%in templates/static_ip_template %>
+			</div>
+		</div>
+	</div>
 
-	<%in templates/static_ip_template %>
-
-</div>
-</div>
-</div>
 </div>
 <div id="bottom_button_container"></div>
 

@@ -28,119 +28,135 @@
 
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ webmon.PrSect %></h3>
-		</div>
-			<div class="panel-body">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ webmon.PrSect %></h3>
+			</div>
 
-		<div class='form-group form-inline'>
-			<input type='checkbox' id='webmon_enabled' class='' onclick="setWebmonEnabled()" />
-			<label id='webmon_enabled_label' for='webmon_enabled'><%~ EMon %></label>
-		</div>
-		<div>
-			<div class='form-group form-inline'>
-				<label for='num_domains' id='num_domains_label'><%~ NumSt %>:</label>
-				<input type='text' class='form-control' id='num_domains' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
-			</div>
-			<div class='form-group form-inline'>
-				<label for='num_searches' id='num_searches_label'><%~ NumSr %>:</label>
-				<input type='text' class='form-control' id='num_searches' onkeyup='proofreadNumericRange(this,1,9999)' size='6' maxlength='4' />
-			</div>
-			<div class='form-group form-inline'>
-				<select id="include_exclude" class="form-control" onchange="setIncludeExclude()">
-					<option value="all"><%~ MnAH %></option>
-					<option value="include"><%~ MnOnly %></option>
-					<option value="exclude"><%~ MnExcl %></option>
-				</select>
-			</div>
-			<div id="add_ip_container">
-				<div class='form-group form-inline'>
-					<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' size='30' />
-					<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" /><%~ Add %></button>
-					<br/>
-					<em><%~ SpcIP %></em>
+			<div class="panel-body">
+				<div class="form-group form-inline">
+					<input type="checkbox" id="webmon_enabled" class="" onclick="setWebmonEnabled()" />
+					<label id="webmon_enabled_label" for="webmon_enabled"><%~ EMon %></label>
 				</div>
-				<div id="ip_table_container"></div>
+
+				<div>
+					<div class="form-group form-inline">
+						<label for="num_domains" id="num_domains_label"><%~ NumSt %>:</label>
+						<input type="text" class="form-control" id="num_domains" onkeyup="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" />
+					</div>
+
+					<div class="form-group form-inline">
+						<label for="num_searches" id="num_searches_label"><%~ NumSr %>:</label>
+						<input type="text" class="form-control" id="num_searches" onkeyup="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" />
+					</div>
+
+					<div class="form-group form-inline">
+						<select id="include_exclude" class="form-control" onchange="setIncludeExclude()">
+							<option value="all"><%~ MnAH %></option>
+							<option value="include"><%~ MnOnly %></option>
+							<option value="exclude"><%~ MnExcl %></option>
+						</select>
+					</div>
+
+					<div id="add_ip_container">
+						<div class="form-group form-inline">
+							<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
+							<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, "add_ip", "ip_table_container", "ip_table", false, 3, 1, 250)" /><%~ Add %></button>
+							<br/>
+							<em><%~ SpcIP %></em>
+						</div>
+						<div id="ip_table_container"></div>
+					</div>
+				</div>
+
+				<div class="internal_divider"></div>
+
+				<div id="bottom_button_container">
+					<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+					<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+					<button id="clear_history" class="btn btn-danger" onclick="clearHistory()"/><%~ Clear %></button>
+				</div>
 			</div>
-		</div>
 
-		<div class="internal_divider"></div>
-
-		<div id="bottom_button_container">
-			<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-			<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
-			<button id="clear_history" class="btn btn-danger" onclick='clearHistory()'/><%~ Clear %></button>
 		</div>
 	</div>
-</div>
-</div>
-</div>
 
-<div class="row">
-	<div class="col-lg-12">
-		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ RctSt %></h3>
-		</div>
-			<div class="panel-body">
-		<div class='form-group form-inline'>
-			<select id="domain_host_display" class='form-group form-inline' onchange="updateMonitorTable()">
-				<option value="hostname"><%~ DspHn %></option>
-				<option value="ip"><%~ DspHIP %></option>
-			</select>
-		</div>
-
-		<div id="webmon_domain_table_container"></div>
-	</div>
-</div>
-</div>
 </div>
 
 <div class="row">
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ RctSr %></h3>
-		</div>
-			<div class="panel-body">
-		<div class='form-group form-inline'>
-			<select id="search_host_display" class="form-control" onchange="updateMonitorTable()">
-				<option value="hostname"><%~ DspHn %></option>
-				<option value="ip"><%~ DspHIP %></option>
-			</select>
-		</div>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ RctSt %></h3>
+			</div>
 
-		<div id="webmon_search_table_container"></div>
+			<div class="panel-body">
+				<div class="form-group form-inline">
+					<select id="domain_host_display" class="form-group form-inline" onchange="updateMonitorTable()">
+						<option value="hostname"><%~ DspHn %></option>
+						<option value="ip"><%~ DspHIP %></option>
+					</select>
+				</div>
+
+				<div id="webmon_domain_table_container"></div>
+			</div>
+
+		</div>
 	</div>
+
 </div>
-</div>
+
+<div class="row">
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ RctSr %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="form-group form-inline">
+					<select id="search_host_display" class="form-control" onchange="updateMonitorTable()">
+						<option value="hostname"><%~ DspHn %></option>
+						<option value="ip"><%~ DspHIP %></option>
+					</select>
+				</div>
+
+				<div id="webmon_search_table_container"></div>
+			</div>
+
+		</div>
+	</div>
+
 </div>
 
 <div id="download_web_usage_data" class="row">
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ DlWD %></h3>
-		</div>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ DlWD %></h3>
+			</div>
+
 			<div class="panel-body">
-		<div class='form-group form-inline'>
-			<span style='text-decoration:underline'><%~ cmsep %>:</span>
-			<br/>
-			<em><%~ dForm %></em>
-			<br/>
-		</div>
-		<div>
-				<button id='download_domain_button' class='btn btn-info btn-lg' onclick='window.location="webmon_domains.csv";'/><%~ VSit %></button>
-				<button id='download_search_button' class='btn btn-info btn-lg' onclick='window.location="webmon_searches.csv";' /><%~ SRqst %></button>
+				<div class="form-group form-inline">
+					<span style="text-decoration:underline"><%~ cmsep %>:</span>
+					<br/>
+					<em><%~ dForm %></em>
+					<br/>
+				</div>
+
+				<div>
+					<button id="download_domain_button" class="btn btn-info btn-lg" onclick="window.location='webmon_domains.csv';"/><%~ VSit %></button>
+					<button id="download_search_button" class="btn btn-info btn-lg" onclick="window.location='webmon_searches.csv';"/><%~ SRqst %></button>
+				</div>
+			</div>
+
 		</div>
 	</div>
-</div>
-</div>
-</div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+</div>
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

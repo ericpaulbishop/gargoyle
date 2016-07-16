@@ -35,19 +35,21 @@ var arpLines;
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+
 			<div class="panel-body">
+				<div id="wol_table_container"></div>
 
-	<div id="wol_table_container"></div>
+				<div id="wol_help">
+					<span id="wol_help_txt">
+						<%~ WLHelp %>
+					</span>
+					<a id="wol_help_ref" onclick="setDescriptionVisibility('wol_help')" href="#wol_help"><%~ Hide %></a>
+				</div>
+			</div>
 
-	<div id="wol_help">
-		<span id="wol_help_txt">
-		<%~ WLHelp %>
-		</span>
-		<a id="wol_help_ref" onclick='setDescriptionVisibility("wol_help")' href="#wol_help"><%~ Hide %></a>
+		</div>
 	</div>
-</div>
-</div>
-</div>
+
 </div>
 
 <script>

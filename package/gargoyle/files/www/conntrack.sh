@@ -37,7 +37,7 @@
 
 				<div class="col-lg-4">
 
-		<div class='form-group form-inline'>
+		<div class="form-group form-inline">
 			<label for="refresh_rate"><%~ RRate %>:</label>
 			<select id="refresh_rate" class="form-control">
 				<option value="2000">2 <%~ seconds %></option>
@@ -47,7 +47,7 @@
 				<option value="never"><%~ never %></option>
 			</select>
 		</div>
-		<div class='form-group form-inline'>
+		<div class="form-group form-inline">
 			<label for="bw_units" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
 			<select id="bw_units" class="form-control">
 				<option value="mixed"><%~ AtMxd %></option>
@@ -56,7 +56,7 @@
 				<option value="GBytes"><%~ GBy %></option>
 			</select>
 		</div>
-		<div class='form-group form-inline'>
+		<div class="form-group form-inline">
 			<label for="host_display" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
 			<select id="host_display" class="form-control">
 				<option value="hostname"><%~ DspHn %></option>

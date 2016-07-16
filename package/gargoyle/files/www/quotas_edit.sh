@@ -25,18 +25,20 @@
 
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ quotas.ESection %></h3>
-		</div>
-			<div class="panel-body">
 
-	<div style="height: 500px; overflow-y: scroll;">
-		<%in templates/quotas_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ quotas.ESection %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div style="height: 500px; overflow-y: scroll;">
+					<%in templates/quotas_template %>
+				</div>
+			</div>
+
+		</div>
 	</div>
 
-</div>
-</div>
-</div>
 </div>
 <div id="bottom_button_container"></div>
 

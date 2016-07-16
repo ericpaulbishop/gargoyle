@@ -32,117 +32,131 @@
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ port.PISect %></h3>
-		</div>
-			<div class="panel-body">
 
-		<div id='portf_add_heading_container' class='form-group form-inline'>
-			<label id='portf_add_heading_label'><%~ ForIPort %>:</label>
-		</div>
-		<div class='form-group form-inline'>
-			<div id='portf_add_container'>
-				<%in templates/single_forward_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ port.PISect %></h3>
 			</div>
-		</div>
 
-		<div id='portf_table_container' class="table-responsive"></div>
+			<div class="panel-body">
+				<div id="portf_add_heading_container" class="form-group form-inline">
+					<label id="portf_add_heading_label"><%~ ForIPort %>:</label>
+				</div>
+
+				<div class="form-group form-inline">
+					<div id="portf_add_container">
+						<%in templates/single_forward_template %>
+					</div>
+				</div>
+
+				<div id="portf_table_container" class="table-responsive"></div>
+			</div>
+
+		</div>
 	</div>
-</div>
-</div>
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ PRSect %></h3>
-		</div>
-			<div class="panel-body">
-		<div id='portfrange_add_heading_container' class='form-group form-inline'>
-			<label id='portf_add_heading_label'><%~ ForRPort %>:</label>
-		</div>
 
-		<div class='form-group form-inline'>
-			<div id='portfrange_add_container'>
-				<%in templates/multi_forward_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ PRSect %></h3>
 			</div>
-		</div>
 
-		<div id='portfrange_table_container' class="table-responsive"></div>
+			<div class="panel-body">
+				<div id="portfrange_add_heading_container" class="form-group form-inline">
+					<label id="portf_add_heading_label"><%~ ForRPort %>:</label>
+				</div>
+
+				<div class="form-group form-inline">
+					<div id="portfrange_add_container">
+						<%in templates/multi_forward_template %>
+					</div>
+				</div>
+
+				<div id="portfrange_table_container" class="table-responsive"></div>
+			</div>
+
+		</div>
 	</div>
-</div>
-</div>
+
 </div>
 
 <div class="row">
-<div id="upnp_fieldset" class="col-lg-4">
-	<div class="panel panel-default">
-	<div class="panel-heading">
-		<h3 class="panel-title"><%~ UP_NAT %></h3>
+
+	<div id="upnp_fieldset" class="col-lg-4">
+		<div class="panel panel-default">
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ UP_NAT %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="upnp_enabled_container" class="form-group form-inline">
+					<input type="checkbox" id="upnp_enabled" class="form-control" onclick="setUpnpEnabled()" />
+					<label id="upnp_enabled_label" for="upnp_enabled"><%~ UPNAT_En %></label>
+				</div>
+
+				<div id="upnp_table_heading_container" class="form-group form-inline">
+					<span><%~ APFor %>:</span>
+				</div>
+
+				<br/>
+
+				<div class="form-group form-inline">
+					<div id="upnp_table_container" class="bottom_gap"></div>
+				</div>
+
+				<div id="upnp_up_container" class="form-group form-inline">
+					<label for="upnp_up" id="upnp_up_label"><%~ USpd %>:</label>
+					<input type="text" id="upnp_up" class="form-control" onkeyup="proofreadNumeric(this)" size="5" maxlength="5" />
+					<em><%~ KBs %></em>
+				</div>
+
+				<div id="upnp_down_container" class="form-group form-inline">
+					<label for="upnp_down" id="upnp_down_label"><%~ DSpd %>:</label>
+					<input type="text" id="upnp_down" class="form-control" onkeyup="proofreadNumeric(this)" size="5" maxlength="5" />
+					<em><%~ KBs %></em>
+				</div>
+
+				<div id="upnp_help" class="form-group form-inline">
+					<span id="upnp_help_txt"><%~ UPHelp %></span>
+					<a id="upnp_help_ref" onclick="setDescriptionVisibility("upnp_help")" href="#upnp_help"><%~ Hide %></a>
+				</div>
+			</div>
+
+		</div>
 	</div>
-	<div class="panel-body">
-
-	<div id='upnp_enabled_container' class='form-group form-inline'>
-		<input type='checkbox' id='upnp_enabled' class="form-control" onclick="setUpnpEnabled()" />
-		<label id='upnp_enabled_label' for='upnp_enabled'><%~ UPNAT_En %></label>
-	</div>
-
-	<div id='upnp_table_heading_container' class='form-group form-inline'>
-		<span><%~ APFor %>:</span>
-	</div>
-
-	<br/>
-
-	<div class='form-group form-inline'>
-		<div id='upnp_table_container' class="bottom_gap"></div>
-	</div>
-
-	<div id='upnp_up_container' class='form-group form-inline'>
-		<label for='upnp_up' id='upnp_up_label'><%~ USpd %>:</label>
-		<input type='text' id='upnp_up' class='form-control' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-		<em><%~ KBs %></em>
-	</div>
-
-	<div id='upnp_down_container' class='form-group form-inline'>
-		<label for='upnp_down' id='upnp_down_label'><%~ DSpd %>:</label>
-		<input type='text' id='upnp_down' class='form-control' onkeyup='proofreadNumeric(this)' size='5' maxlength='5' />
-		<em><%~ KBs %></em>
-	</div>
-
-	<div id="upnp_help" class='form-group form-inline'>
-		<span id='upnp_help_txt'><%~ UPHelp %></span>
-		<a id="upnp_help_ref" onclick='setDescriptionVisibility("upnp_help")' href="#upnp_help"><%~ Hide %></a>
-	</div>
-
-</div>
-</div>
-</div>
 
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ DMZ %></h3>
-		</div>
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ DMZ %></h3>
+			</div>
+
 			<div class="panel-body">
-		<div id='dmz_enabled_container' class='form-group form-inline'>
-			<input type='checkbox' id='dmz_enabled' class='form-control' onclick="setDmzEnabled()" />
-			<label id='dmz_enabled_label' for='dmz_enabled'><%~ UseDMZ %></label>
-		</div>
-		<div id="dmz_ip_container" class='form-group form-inline'>
-			<label for='dmz_ip' id='dmz_ip_label'><%~ DMZIP %>:</label>
-			<input type='text' class='form-control' name='dmz_ip' id='dmz_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' />
+				<div id="dmz_enabled_container" class="form-group form-inline">
+					<input type="checkbox" id="dmz_enabled" class="form-control" onclick="setDmzEnabled()" />
+					<label id="dmz_enabled_label" for="dmz_enabled"><%~ UseDMZ %></label>
+				</div>
+
+				<div id="dmz_ip_container" class="form-group form-inline">
+					<label for="dmz_ip" id="dmz_ip_label"><%~ DMZIP %>:</label>
+					<input type="text" class="form-control" name="dmz_ip" id="dmz_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+				</div>
+			</div>
+
 		</div>
 	</div>
-</div>
-</div>
+
 </div>
 
-	<div id="bottom_button_container">
-		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
-	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
+<div id="bottom_button_container">
+	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

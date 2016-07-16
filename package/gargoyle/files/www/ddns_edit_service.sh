@@ -19,25 +19,25 @@
 			</div>
 			<div class="panel-body">
 				<div>
-					<label for='ddns_provider' id='ddns_provider_label'><%~ SvPro %>:</label>
+					<label for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
 					<span id="ddns_provider_text"></span>
 				</div>
 
 				<div id="ddns_variable_container"></div>
 
 				<div>
-					<div class='form-group form-inline'>
-						<label for='ddns_check' id='ddns_check_label'><%~ ChItv %>:</label>
-						<input type='text' class='form-control' id='ddns_check' size='8' onkeyup='proofreadNumeric(this)'/>
+					<div class="form-group form-inline">
+						<label for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
+						<input type="text" class="form-control" id="ddns_check" size="8" onkeyup="proofreadNumeric(this)"/>
 						<em><%~ minutes %></em>
 						<div>
 							<p><%~ HelpCI %></p>
 						</div>
 					</div>
 
-					<div class='form-group form-inline'>
-						<label for='ddns_force' id='ddns_force_label'><%~ FUItv %>:</label>
-						<input type='text' class='form-control' id='ddns_force' size='8' onkeyup='proofreadNumeric(this)'/>
+					<div class="form-group form-inline">
+						<label for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
+						<input type="text" class="form-control" id="ddns_force" size="8" onkeyup="proofreadNumeric(this)"/>
 						<em><%~ days %></em>
 						<div>
 							<p><%~ HelpFI %></p>

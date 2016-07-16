@@ -13,18 +13,20 @@
 
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ restrictions.EESect %></h3>
-		</div>
-		<div class="panel-body">
 
-	<div>
-		<%in templates/whitelist_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ restrictions.EESect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div>
+					<%in templates/whitelist_template %>
+				</div>
+			</div>
+
+		</div>
 	</div>
 
-</div>
-</div>
-</div>
 </div>
 <div id="bottom_button_container"></div>
 

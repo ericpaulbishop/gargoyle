@@ -12,18 +12,20 @@
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ restrictions.ERSect %></h3>
-		</div>
-			<div class="panel-body">
 
-	<div>
-		<%in templates/restriction_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ restrictions.ERSect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div>
+					<%in templates/restriction_template %>
+				</div>
+			</div>
+
+		</div>
 	</div>
 
-</div>
-</div>
-</div>
 </div>
 <div id="bottom_button_container"></div>
 

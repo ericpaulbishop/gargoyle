@@ -29,58 +29,67 @@
 
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ routing.ARSect %></h3>
-		</div>
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ routing.ARSect %></h3>
+			</div>
+
 			<div class="panel-body">
-		<div id="active_route_table_container"></div>
+				<div id="active_route_table_container"></div>
+			</div>
+
+		</div>
 	</div>
-</div>
-</div>
+
 </div>
 
 <div class="row">
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title"><%~ SRSect %></h3>
-		</div>
-			<div class="panel-body">
 
-		<div id='static_route_add_heading_container'>
-			<label id='staticroute_add_heading_label' style='text-decoration:underline'><%~ ASRte %>:</label>
-		</div>
-		<div class='form-group form-inline'>
-			<div id='static_route_add_container'>
-				<%in templates/static_route_template %>
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SRSect %></h3>
 			</div>
-		</div>
 
-		<div id='static_route_table_heading_container'>
-			<span><%~ CSRSect %>:</span>
-		</div>
-		<div class='form-group form-inline'>
-			<div id='static_route_table_container' class="bottom_gap"></div>
+			<div class="panel-body">
+				<div id="static_route_add_heading_container">
+					<label id="staticroute_add_heading_label" style="text-decoration:underline"><%~ ASRte %>:</label>
+				</div>
+
+				<div class="form-group form-inline">
+					<div id="static_route_add_container">
+						<%in templates/static_route_template %>
+					</div>
+				</div>
+
+				<div id="static_route_table_heading_container">
+					<span><%~ CSRSect %>:</span>
+				</div>
+
+				<div class="form-group form-inline">
+					<div id="static_route_table_container" class="bottom_gap"></div>
+				</div>
+			</div>
+
 		</div>
 	</div>
-</div>
-</div>
+
 </div>
 
-	<div id="firefox3_bug_correct" style="display:none">
-		<input type='text' value='firefox3_bug' />
-	</div>
+<div id="firefox3_bug_correct" style="display:none">
+	<input type="text" value="firefox3_bug" />
+</div>
 
-	<div id="bottom_button_container">
-		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
-	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
+<div id="bottom_button_container">
+	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container" ><%~ WaitSettings %></span>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

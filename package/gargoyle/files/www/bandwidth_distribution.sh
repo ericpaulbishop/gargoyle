@@ -38,8 +38,8 @@
 
 			<div class="panel-body">
 
-				<div class='form-group form-inline'>
-					<label for='time_frame' id='time_frame_label'><%~ DTFrm %>:</label>
+				<div class="form-group form-inline">
+					<label for="time_frame" id="time_frame_label"><%~ DTFrm %>:</label>
 					<select class="form-control" id="time_frame" onchange="resetTimeFrame()">
 						<option value="bdist1"><%~ minutes %></option>
 						<option value="bdist2"><%~ qhour %></option>
@@ -49,13 +49,13 @@
 					</select>
 				</div>
 
-				<div class='form-group form-inline'>
-					<label for='time_interval' id='time_interval_label'><%~ DtbI %>:</label>
+				<div class="form-group form-inline">
+					<label for="time_interval" id="time_interval_label"><%~ DtbI %>:</label>
 					<select class="form-control" id="time_interval" onchange="resetDisplayInterval()"></select>
 				</div>
 
-				<div class='form-group form-inline'>
-					<label for='host_display' id='time_interval_label'><%~ HDsp %>:</label>
+				<div class="form-group form-inline">
+					<label for="host_display" id="time_interval_label"><%~ HDsp %>:</label>
 					<select class="form-control" id="host_display" onchange="resetTimeFrame()">
 						<option value="hostname"><%~ DspHn %></option>
 						<option value="ip"><%~ DspHIP %></option>
@@ -76,7 +76,7 @@
 		<h3 class="panel-title"><%~ BDst %>:</h3>
 	</div>
 	<div class="panel-body">
-		<embed id="pie_chart" src="multi_pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+		<embed id="pie_chart" src="multi_pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed>
 	</div>
 </div>
 </div>
@@ -98,7 +98,7 @@
 
 </div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--
