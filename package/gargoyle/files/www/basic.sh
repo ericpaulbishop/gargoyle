@@ -186,7 +186,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="bridge_channel_width_container" class="form-group">
 					<label for="bridge_channel_width" id="bridge_channel_width_label"><%~ ChWdth %>:</label>
-					<select id="bridge_channel_width" class="form-control" onchange="setChannelWidth(this, "G")">
+					<select id="bridge_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
 						<option value="HT20">20MHz</option>
 						<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
 						<option value="HT40-">40Mhz (<%~ ChBlw %>)</option>
@@ -617,7 +617,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_channel_width_container" class="form-group">
 					<label for="wifi_channel_width" id="wifi_channel_width_label">2.4GHz <%~ ChWdth %>:</label>
 					<span>
-						<select id="wifi_channel_width" class="form-control" onchange="setChannelWidth(this, "G")">
+						<select id="wifi_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
 							<option value="HT20">20MHz</option>
 							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
 							<option value="HT40-">40MHz (<%~ ChBlw %>)</option>
@@ -653,7 +653,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_channel_width_5ghz_container" class="form-group">
 					<label for="wifi_channel_width_5ghz" id="wifi_channel_width_5ghz_label">5GHz <%~ ChWdth %>:</label>
 					<span>
-						<select id="wifi_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, "A")">
+						<select id="wifi_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
 							<option value="HT20">20MHz</option>
 							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
 							<option value="HT40-">40MHz (<%~ ChBlw %>)</option>
