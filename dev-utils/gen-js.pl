@@ -38,7 +38,6 @@ my $targetOrder =
 		"ubnt5-squashfs.bin",
 		"np25g-squashfs.bin",
 		"wpe53g-squashfs.bin"
-
 		], 
 	"brcm47xx"=>
 		[
@@ -56,6 +55,7 @@ my $targetOrder =
 		"wrt310n-v1-squashfs.bin",
 		"wrt350n-v1-squashfs.bin",
 		"wrt610n-v1-squashfs.bin",
+		"wrt610n-v2-squashfs.bin",
 		"wr850g-squashfs.bin",
 		"we800g-squashfs.bin",
 		"wa840g-squashfs.bin",
@@ -63,10 +63,7 @@ my $targetOrder =
 		"ps1208mfg-squashfs.bin",
 		"wgt634u-squashfs.bin",
 		"wnr834b_v2-squashfs.chk",
-		"wrt610n_v1-squashfs.bin",
-		"wrt610n-v2-squashfs.bin",
 		"e3000-v1-squashfs.bin"
-
 		],
 	"ar71xx"=>
 		[
@@ -371,7 +368,6 @@ my $targetOrder =
 		"linksys-mamba-squashfs-sysupgrade.tar",
 		"linksys-shelby-squashfs-factory.img",
 		"linksys-shelby-squashfs-sysupgrade.tar"
-
 		],
 	"ramips"=>
 		[ 
@@ -386,13 +382,11 @@ my $targetOrder =
 		"wt1520-8M-squashfs-factory.bin",
 		"wt1520-8M-squashfs-sysupgrade.bin"
 		],
-
 	"alix"=> 
 		[ 
-		"combined.jffs2.128k.img",
+		"combined.jffs2.128k.img"
 		]
 };
-
 
 
 open STDERR, '>/dev/null';
