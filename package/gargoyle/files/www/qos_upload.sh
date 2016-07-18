@@ -37,7 +37,7 @@
 			<div class="panel-body">
 
 		<div id="qos_enabled_container" class="form-group form-inline">
-			<input type="checkbox" id="qos_enabled" class="form-control" onclick="setQosEnabled()" />
+			<input type="checkbox" id="qos_enabled" onclick="setQosEnabled()" />
 			<label id="qos_enabled_label" for="qos_enabled"><%~ UEnable %></label>
 		</div>
 
@@ -69,14 +69,14 @@
 		<div>
 			<div class="form-group form-inline">
 				<div>
-					<input type="checkbox" class="form-control" id="use_source_ip" onclick="enableAssociatedField(this,'source_ip', '')" />
+					<input type="checkbox" id="use_source_ip" onclick="enableAssociatedField(this,'source_ip', '')" />
 					<label id="source_ip_label" for="source_ip"><%~ SrcIP %>:</label>
 				</div>
 				<input class="form-control" type="text" id="source_ip" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" />
 			</div>
 			<div>
 				<div class="form-group form-inline">
-					<input type="checkbox" id="use_source_port" class="form-control" onclick="enableAssociatedField(this,'source_port', '')"/>
+					<input type="checkbox" id="use_source_port" onclick="enableAssociatedField(this,'source_port', '')"/>
 					<label id="source_port_label" for="source_port"><%~ SrcPort %>:</label>
 				</div>
 				<input class="rightcolumn" type="text" id="source_port" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" />
@@ -274,4 +274,3 @@
 <%
 	gargoyle_header_footer -f -s "firewall" -p "qosupload"
 %>
-

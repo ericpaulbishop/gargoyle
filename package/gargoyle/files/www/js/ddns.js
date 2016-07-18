@@ -592,12 +592,12 @@ function setProvider(controlDocument)
 			if(allBooleanVariables[ variables[variableIndex] ] != 1)
 			{
 				input = createInput("text", controlDocument);
+				input.className = "form-control";
 			}
 			else
 			{
 				input = createInput("checkbox", controlDocument);
 			}
-			input.className = "form-control";
 			input.id = variables[variableIndex];
 			div.appendChild(input);
 			newElements.push(div);
@@ -622,8 +622,8 @@ function setProvider(controlDocument)
 				span.className = "rightcolumn";
 
 				var check = createInput("checkbox", controlDocument);
-				check.className="form-control";
 				var text  = createInput("text", controlDocument);
+				text.className="form-control";
 				check.id = optionalVariables[variableIndex] + "_enabled";
 				text.id  = optionalVariables[variableIndex];
 				check.onclick= function()
@@ -640,7 +640,6 @@ function setProvider(controlDocument)
 			else
 			{
 				var input = createInput("checkbox", controlDocument);
-				input.className = "form-control";
 				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
 

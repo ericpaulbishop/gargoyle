@@ -22,8 +22,8 @@
 </div>
 <div>
 	<label class='narrowleftcolumn' for='exception_all_day' id='exception_schedule_label'><%~ Schd %>:</label>
-	<input type='checkbox' id='exception_all_day' onclick='setVisibility(document,"exception_")' class='form-control' /><label for="exception_all_day"><%~ ADay %></label>
-	<input type='checkbox' id='exception_every_day' onclick='setVisibility(document,"exception_")' class='form-control' /><label for="exception_every_day"><%~ EDay %></label>&nbsp;&nbsp;
+	<input type='checkbox' id='exception_all_day' onclick='setVisibility(document,"exception_")' /><label for="exception_all_day"><%~ ADay %></label>
+	<input type='checkbox' id='exception_every_day' onclick='setVisibility(document,"exception_")' /><label for="exception_every_day"><%~ EDay %></label>&nbsp;&nbsp;
 	<select id='exception_schedule_repeats' onchange='setVisibility(document,"exception_")' class='form-control'>
 		<option value='daily'><%~ DSchd %></option>
 		<option value='weekly'><%~ WSchd %></option>
@@ -31,13 +31,13 @@
 </div>
 <div id="exception_days_active" class="indent">
 	<label class="narrowleftcolumn"><%~ DActv %>:</label>
-	<input type='checkbox' id='exception_sun' class='form-control' /><label for="exception_sun"><%~ Sun %></label>
-	<input type='checkbox' id='exception_mon' class='form-control' /><label for="exception_mon"><%~ Mon %></label>
-	<input type='checkbox' id='exception_tue' class='form-control' /><label for="exception_tue"><%~ Tue %></label>
-	<input type='checkbox' id='exception_wed' class='form-control' /><label for="exception_wed"><%~ Wed %></label>
-	<input type='checkbox' id='exception_thu' class='form-control' /><label for="exception_thu"><%~ Thu %></label>
-	<input type='checkbox' id='exception_fri' class='form-control' /><label for="exception_fri"><%~ Fri %></label>
-	<input type='checkbox' id='exception_sat' class='form-control' /><label for="exception_sat"><%~ Sat %></label>
+	<input type='checkbox' id='exception_sun' /><label for="exception_sun"><%~ Sun %></label>
+	<input type='checkbox' id='exception_mon' /><label for="exception_mon"><%~ Mon %></label>
+	<input type='checkbox' id='exception_tue' /><label for="exception_tue"><%~ Tue %></label>
+	<input type='checkbox' id='exception_wed' /><label for="exception_wed"><%~ Wed %></label>
+	<input type='checkbox' id='exception_thu' /><label for="exception_thu"><%~ Thu %></label>
+	<input type='checkbox' id='exception_fri' /><label for="exception_fri"><%~ Fri %></label>
+	<input type='checkbox' id='exception_sat' /><label for="exception_sat"><%~ Sat %></label>
 </div>
 <div id="exception_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='exception_hours_active' id='exception_hours_active_label'><%~ HActv %>:</label>
@@ -60,7 +60,7 @@
 
 <div>
 	<label class='narrowleftcolumn' for='exception_all_access' id='exception_all_access_label'><%~ PRsrc %>:</label>
-	<input type='checkbox' id='exception_all_access' onclick='setVisibility(document,"exception_")' class='form-control' /><label for="exception_all_access"><%~ NetAcc %></label>
+	<input type='checkbox' id='exception_all_access' onclick='setVisibility(document,"exception_")' /><label for="exception_all_access"><%~ NetAcc %></label>
 </div>
 
 <div class="indent" id="exception_resources">
@@ -112,7 +112,7 @@
 	<div>
 		<span class='narrowleftcolumn'>
 			<label class='rightcolumn' id="exception_transport_protocol_label" for='exception_transport_protocol'><%~ TrProto %>:</label>
-		</span>	
+		</span>
 		<select class='form-control' id="exception_transport_protocol">
 			<option value="both"><%~ PmAll %></option>
 			<option value="tcp"><%~ PmTCP %></option>

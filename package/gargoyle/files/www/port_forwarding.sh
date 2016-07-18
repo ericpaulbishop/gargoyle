@@ -91,7 +91,7 @@
 
 			<div class="panel-body">
 				<div id="upnp_enabled_container" class="form-group form-inline">
-					<input type="checkbox" id="upnp_enabled" class="form-control" onclick="setUpnpEnabled()" />
+					<input type="checkbox" id="upnp_enabled" onclick="setUpnpEnabled()" />
 					<label id="upnp_enabled_label" for="upnp_enabled"><%~ UPNAT_En %></label>
 				</div>
 
@@ -135,7 +135,7 @@
 
 			<div class="panel-body">
 				<div id="dmz_enabled_container" class="form-group form-inline">
-					<input type="checkbox" id="dmz_enabled" class="form-control" onclick="setDmzEnabled()" />
+					<input type="checkbox" id="dmz_enabled" onclick="setDmzEnabled()" />
 					<label id="dmz_enabled_label" for="dmz_enabled"><%~ UseDMZ %></label>
 				</div>
 
