@@ -11,10 +11,10 @@ if [ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] ; then
 	hostname=$(uci get system.@system[0].hostname)
 	if [ -n "$if_ip" ] && [ -n "$hostname" ] ; then
 		hostname=$(echo "$hostname" | sed 's/[^0-9a-zA-Z]/_/g')
-		entry_exists=$(cat /etc/hosts | sed 's/\t/    /g' | grep " $hostname\$" | grep "$if_ip")
+		entry_exists=$(cat /etc/hosts | sed 's/\t/    /g' | grep " # SELF HOSTNAME. " | grep "^\<$if_ip\>[[:blank:]]\+\<$hostname\>")
 		if [ -z "$entry_exists" ] ; then
-			echo "127.0.0.1    localhost" > /tmp/new.hosts.tmp
-			echo "$if_ip    $hostname" >> /tmp/new.hosts.tmp
+			cat /etc/hosts | sed 's/\t/    /g' | grep -v " # SELF HOSTNAME. " > /tmp/new.hosts.tmp
+			echo "$if_ip    $hostname # SELF HOSTNAME. DO NOT EDIT OR REMOVE THIS COMMENT!" >> /tmp/new.hosts.tmp
 			mv /tmp/new.hosts.tmp /etc/hosts
 			dnsmasq_enabled=$(ls /etc/rc.d/*dnsmasq 2>/dev/null)
 			if [ -n "$dnsmasq_enabled" ] ; then
