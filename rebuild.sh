@@ -150,7 +150,7 @@ do_css_compress()
 	rm -rf "$compress_css_dir"
 	mkdir "$compress_css_dir"
 	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
-	for cssdir in $(find "${top_dir}/package-prepare" -path "*/www/themes/Gargoyle") ; do
+	for cssdir in $(find "${top_dir}/package-prepare" -maxdepth 5 -path "*/www/themes/*") ; do
 		pkg_rel_path=$(echo $cssdir | sed "s/$escaped_package_dir//g");
 		mkdir -p "$compress_css_dir/$pkg_rel_path"
 		cp "$cssdir/"*.css "$compress_css_dir/$pkg_rel_path/"
