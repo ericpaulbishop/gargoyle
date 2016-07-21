@@ -250,7 +250,7 @@ specified_profile="$6"
 translation_type="$7"
 fallback_lang="$8"
 active_lang="$9"
-num_build_threads="$10"
+num_build_threads="${10}"
 distribution="${11}"
 
 

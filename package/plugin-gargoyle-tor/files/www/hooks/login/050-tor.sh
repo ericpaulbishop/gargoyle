@@ -11,14 +11,30 @@
 	echo "var torIsActive = \"$tor_is_active\";"
 %>
 </script>
-<fieldset id="tor_fields" style="display:none">
-	<legend class="sectionheader">Tor</legend>
-	<div>
-		<span class="leftcolumn" id='tor_status_label'><%~ 050-tor.tIP %>:</span>
-		<span class="rightcolumn" id='tor_status' style="font-weight:bold;"></span>
-	</div>
-	<div>
-		<span class="leftcolumn"><input id="set_tor_button" class="default_button" type="button" value="<%~ tEnab %>" onclick="updateTorStatus()" /></span>
-	</div>
-</fieldset>
+<div id="tor_fields" style="display:none" class="row">
 
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+
+			<div class="panel-heading">
+				<h3 class="panel-title">Tor</h3>
+			</div>
+
+			<div class="panel-body">
+
+				<div>
+					<span id='tor_status_label'><%~ 050-tor.tIP %>:</span>
+					<span id='tor_status' style="font-weight:bold;"></span>
+				</div>
+				<div>
+					<span>
+						<button id="set_tor_button" class="btn btn-default" onclick="updateTorStatus()"><%~ tEnab %></button>
+					</span>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+</div>
