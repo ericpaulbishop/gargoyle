@@ -1399,7 +1399,7 @@ CONFIG_PACKAGE_plugin-gargoyle-initd=m
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 # CONFIG_PACKAGE_plugin-gargoyle-minidlna is not set
 # CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
-CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=y
+CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
