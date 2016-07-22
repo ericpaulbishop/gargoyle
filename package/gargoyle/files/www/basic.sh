@@ -521,9 +521,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			</div>
 		</div>
 	</div>
-</div>
-
-<div class="row">
 
 	<div id="lan_fieldset" class="col-lg-4">
 		<div class="panel panel-default">
