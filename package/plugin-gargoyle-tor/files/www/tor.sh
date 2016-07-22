@@ -31,7 +31,6 @@
 			<div class="panel-body">
 
 				<div id='tor_client_mode_container' class="form-group">
-					<label for='tor_client_mode' id='tor_client_mode_label'><%~ TorC %>:</label>
 					<select class="form-control" id="tor_client_mode" onchange='setTorVisibility()' >
 						<option value="2"><%~ EnByHost %></option>
 						<option value="1"><%~ EnAll %></option>
@@ -92,7 +91,6 @@
 			<div class="panel-body">
 
 				<div id='tor_relay_mode_container' class="form-group">
-					<label for='tor_relay_mode' id='tor_relay_mode_label'><%~ TorS %>:</label>
 					<select class="form-control" id="tor_relay_mode" onchange='setTorVisibility()' >
 						<option value="1"><%~ EnBr %></option>
 						<option value="3"><%~ EnBrO %></option>
@@ -157,15 +155,15 @@
 
 			<div class="panel-body">
 
-				<div>
+				<div class="form-group">
 					<span><%~ TDDir %>:</span>
 					<span id="tor_dir_ramdisk_static">/var/tor</span>
 					<span id="tor_dir_root_static">/usr/lib/tor</span>
 					<input type="text" id="tor_dir_text" style="display:none" />
 				</div>
-				<div>
+				<div class="form-group">
 					<span><%~ TDDrv %>:</span>
-					<select id="tor_dir_drive_select" onchange="setTorVisibility()"></select>
+					<select id="tor_dir_drive_select" onchange="setTorVisibility()" class="form-control"></select>
 				</div>
 				<div>
 					<div>
