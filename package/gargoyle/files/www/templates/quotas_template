@@ -162,14 +162,14 @@
 </div>
 <div id="quota_active_controls_container">
 	<span id="active_days_container" class="widerightcolumnonly" style="margin-top:10px;margin-bottom:10px;">
-		<input type='checkbox' id='quota_sun' class='form-control' /><label for="quota_sun"><%~ Sun %></label>
-		<input type='checkbox' id='quota_mon' class='form-control' /><label for="quota_mon"><%~ Mon %></label>
-		<input type='checkbox' id='quota_tue' class='form-control' /><label for="quota_tue"><%~ Tue %></label>
-		<input type='checkbox' id='quota_wed' class='form-control' /><label for="quota_wed"><%~ Wed %></label>
-		<input type='checkbox' id='quota_thu' class='form-control' /><label for="quota_thu"><%~ Thu %></label>
-		<input type='checkbox' id='quota_fri' class='form-control' /><label for="quota_fri"><%~ Fri %></label>
-		<input type='checkbox' id='quota_sat' class='form-control' /><label for="quota_sat"><%~ Sat %></label>
-	</span>	
+		<input type='checkbox' id='quota_sun' /><label for="quota_sun"><%~ Sun %></label>
+		<input type='checkbox' id='quota_mon' /><label for="quota_mon"><%~ Mon %></label>
+		<input type='checkbox' id='quota_tue' /><label for="quota_tue"><%~ Tue %></label>
+		<input type='checkbox' id='quota_wed' /><label for="quota_wed"><%~ Wed %></label>
+		<input type='checkbox' id='quota_thu' /><label for="quota_thu"><%~ Thu %></label>
+		<input type='checkbox' id='quota_fri' /><label for="quota_fri"><%~ Fri %></label>
+		<input type='checkbox' id='quota_sat' /><label for="quota_sat"><%~ Sat %></label>
+	</span>
 	<span id="active_hours_container">
 		<input class='form-control' type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
 		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>

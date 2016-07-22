@@ -22,8 +22,8 @@
 </div>
 <div>
 	<label class='narrowleftcolumn' for='rule_all_day' id='rule_schedule_label'><%~ Schd %>:</label>
-	<input type='checkbox' id='rule_all_day' onclick='setVisibility(document,"rule_")' class='form-control' /><label for="rule_all_day"><%~ ADay %></label>
-	<input type='checkbox' id='rule_every_day' onclick='setVisibility(document,"rule_")' class='form-control' /><label for="rule_every_day"><%~ EDay %></label>&nbsp;&nbsp;
+	<input type='checkbox' id='rule_all_day' onclick='setVisibility(document,"rule_")' /><label for="rule_all_day"><%~ ADay %></label>
+	<input type='checkbox' id='rule_every_day' onclick='setVisibility(document,"rule_")' /><label for="rule_every_day"><%~ EDay %></label>&nbsp;&nbsp;
 	<select id='rule_schedule_repeats' onchange='setVisibility(document,"rule_")' class='form-control'>
 		<option value='daily'><%~ DSchd %></option>
 		<option value='weekly'><%~ WSchd %></option>
@@ -31,13 +31,13 @@
 </div>
 <div id="rule_days_active" class="indent">
 	<label class="narrowleftcolumn"><%~ DActv %>:</label>
-	<input type='checkbox' id='rule_sun' class='form-control' /><label for="rule_sun"><%~ Sun %></label>
-	<input type='checkbox' id='rule_mon' class='form-control' /><label for="rule_mon"><%~ Mon %></label>
-	<input type='checkbox' id='rule_tue' class='form-control' /><label for="rule_tue"><%~ Tue %></label>
-	<input type='checkbox' id='rule_wed' class='form-control' /><label for="rule_wed"><%~ Wed %></label>
-	<input type='checkbox' id='rule_thu' class='form-control' /><label for="rule_thu"><%~ Thu %></label>
-	<input type='checkbox' id='rule_fri' class='form-control' /><label for="rule_fri"><%~ Fri %></label>
-	<input type='checkbox' id='rule_sat' class='form-control' /><label for="rule_sat"><%~ Sat %></label>
+	<input type='checkbox' id='rule_sun' /><label for="rule_sun"><%~ Sun %></label>
+	<input type='checkbox' id='rule_mon' /><label for="rule_mon"><%~ Mon %></label>
+	<input type='checkbox' id='rule_tue' /><label for="rule_tue"><%~ Tue %></label>
+	<input type='checkbox' id='rule_wed' /><label for="rule_wed"><%~ Wed %></label>
+	<input type='checkbox' id='rule_thu' /><label for="rule_thu"><%~ Thu %></label>
+	<input type='checkbox' id='rule_fri' /><label for="rule_fri"><%~ Fri %></label>
+	<input type='checkbox' id='rule_sat' /><label for="rule_sat"><%~ Sat %></label>
 </div>
 <div id="rule_hours_active_container" class="indent">
 	<label class='narrowleftcolumn' for='rule_hours_active' id='rule_hours_active_label'><%~ HActv %>:</label>
@@ -60,7 +60,7 @@
 
 <div>
 	<label class='narrowleftcolumn' for='rule_all_access' id='rule_all_access_label'><%~ RRsrc %>:</label>
-	<input type='checkbox' id='rule_all_access' onclick='setVisibility(document,"rule_")' class='form-control' /><label for="rule_all_access"><%~ NetAcc %></label>
+	<input type='checkbox' id='rule_all_access' onclick='setVisibility(document,"rule_")' /><label for="rule_all_access"><%~ NetAcc %></label>
 </div>
 
 <div class="indent" id="rule_resources">
@@ -113,7 +113,7 @@
 	<div>
 		<span class='narrowleftcolumn'>
 			<label class='rightcolumn' id="rule_transport_protocol_label" for='rule_transport_protocol'><%~ TrProto %>:</label>
-		</span>	
+		</span>
 		<select class='form-control' id="rule_transport_protocol">
 			<option value="both"><%~ BlAll %></option>
 			<option value="tcp"><%~ BlTCP %></option>
