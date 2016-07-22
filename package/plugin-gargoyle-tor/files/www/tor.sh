@@ -30,7 +30,7 @@
 
 			<div class="panel-body">
 
-				<div id='tor_client_mode_container' class="form-control">
+				<div id='tor_client_mode_container' class="form-group">
 					<label for='tor_client_mode' id='tor_client_mode_label'><%~ TorC %>:</label>
 					<select class="form-control" id="tor_client_mode" onchange='setTorVisibility()' >
 						<option value="2"><%~ EnByHost %></option>
@@ -38,12 +38,10 @@
 						<option value="3"><%~ HidAcc %></option>
 						<option value="0"><%~ Disabled %></option>
 					</select>
-					<br/>
 					<em><span id="mode_description"></span></em>
-					<br/>
 				</div>
 
-				<div id='tor_client_connect_container' class="form-control">
+				<div id='tor_client_connect_container' class="form-group">
 					<label for='tor_client_connect' id='tor_client_mode_label'><%~ ConVia %>:</label>
 					<select class="form-control" id="tor_client_connect" onchange='setTorVisibility()' >
 						<option value="relay"><%~ TRly %></option>
@@ -52,17 +50,17 @@
 					</select>
 				</div>
 				<div class="indent">
-					<div id='tor_client_bridge_ip_container' class="form-control">
+					<div id='tor_client_bridge_ip_container' class="form-group">
 						<label for='tor_client_bridge_ip' id='tor_client_bridge_ip_label'><%~ BrIP %>:</label>
 						<input type="text" class="form-control" id='tor_client_bridge_ip' onkeyup='proofreadIp(this)'/>
 					</div>
-					<div id='tor_client_bridge_port_container' class="form-control">
+					<div id='tor_client_bridge_port_container' class="form-group">
 						<label for='tor_client_bridge_port' id='tor_client_bridge_port_label'><%~ BrPrt %>:</label>
 						<input type="text" class="form-control" id='tor_client_bridge_port' onkeyup='proofreadPort(this)'/>
 					</div>
 				</div>
 
-				<div id='tor_other_proto_container' class="form-control">
+				<div id='tor_other_proto_container' class="form-group">
 					<label for='tor_other_proto' id='tor_other_proto_label'><%~ OProto %>:</label>
 					<select class="form-control" id="tor_other_proto">
 						<option value="0"><%~ Ignr %></option>
@@ -70,11 +68,11 @@
 					</select>
 				</div>
 
-				<div id='tor_hidden_subnet_container' class="form-control">
+				<div id='tor_hidden_subnet_container' class="form-group">
 					<label for='tor_hidden_subnet' id='tor_hidden_subnet_label'><%~ HSSub %>:</label>
 					<input type="text" class="form-control" id='tor_hidden_subnet' onkeyup='proofreadIp(this)' />
 				</div>
-				<div id='tor_hidden_mask_container' class="form-control">
+				<div id='tor_hidden_mask_container' class="form-group">
 					<label for='tor_hidden_mask' id='tor_hidden_mask_label'><%~ HSMsk %>:</label>
 					<input type="text" class="form-control" id='tor_hidden_mask' onkeyup='proofreadMask(this)' />
 				</div>
@@ -97,7 +95,7 @@
 
 			<div class="panel-body">
 
-				<div id='tor_relay_mode_container' class="form-control">
+				<div id='tor_relay_mode_container' class="form-group">
 					<label for='tor_relay_mode' id='tor_relay_mode_label'><%~ TorS %>:</label>
 					<select class="form-control" id="tor_relay_mode" onchange='setTorVisibility()' >
 						<option value="1"><%~ EnBr %></option>
@@ -105,27 +103,25 @@
 						<option value="2"><%~ EnRly %></option>
 						<option value="0"><%~ Disabled %></option>
 					</select>
-					<br/>
 					<em><span id="mode_description"></span></em>
-					<br/>
 				</div>
 
-				<div id='tor_relay_port_container' class="form-control">
+				<div id='tor_relay_port_container' class="form-group">
 					<label for='tor_relay_port' id='tor_relay_port_label'><%~ BrRPrt %>:</label>
 					<input type="text" class="form-control" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' />
 				</div>
 
-				<div id='tor_obfsproxy_port_container' class="form-control">
+				<div id='tor_obfsproxy_port_container' class="form-group">
 					<label for='tor_obfsproxy_port' id='tor_obfsproxy_port_label'><%~ ObfPrt %>:</label>
 					<input type="text" class="form-control" id='tor_obfsproxy_port' size='9' onkeyup='proofreadPort(this)' />
 				</div>
 
-				<div id='tor_relay_max_bw_container' class="form-control">
+				<div id='tor_relay_max_bw_container' class="form-group">
 					<label for='tor_relay_max_bw' id='tor_relay_max_bw_label'><%~ MaxRB %>:</label>
 					<span><input type="text" class="form-control" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;<%~ KBs %></em></span>
 				</div>
 
-				<div id='tor_relay_publish_container' class="form-control">
+				<div id='tor_relay_publish_container' class="form-group">
 					<label for='tor_relay_publish' id='tor_relay_publish_label'><%~ PubBrDB %>:</label>
 					<select class="form-control" id="tor_relay_publish">
 						<option value="1"><%~ PubBr %></option>
@@ -133,17 +129,17 @@
 					</select>
 				</div>
 
-				<div id='tor_relay_nickname_container' class="form-control">
+				<div id='tor_relay_nickname_container' class="form-group">
 					<label for='tor_relay_nickname' id='tor_relay_nickname_label'><%~ Nick %>:</label>
 					<input type="text" class="form-control" id='tor_relay_nickname' />
 				</div>
 
-				<div id='tor_relay_contact_container' class="form-control">
+				<div id='tor_relay_contact_container' class="form-group">
 					<label for='tor_relay_contact' id='tor_relay_contact_label'><%~ Mail %>:</label>
 					<textarea class="form-control" id='tor_relay_contact' ></textarea>
 				</div>
 
-				<div id='tor_relay_status_link_container' class="form-control">
+				<div id='tor_relay_status_link_container' class="form-group">
 					<span class='nocolum'><%~ VisMsg %> <a href="http://torstatus.blutmagie.de/"><%~ GlbMsg %></a></span>
 				</div>
 
