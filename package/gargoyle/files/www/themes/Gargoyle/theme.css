@@ -157,7 +157,7 @@ ul.sidebar .sidebar-list a {
 ul.sidebar {
   position: absolute;
   top: 0;
-  bottom: 45px;
+  bottom: 0;
   padding: 0;
   margin: 0;
   list-style: none;
