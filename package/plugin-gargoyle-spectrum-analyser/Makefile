@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin_gargoyle_spectrum_analyser
-PKG_VERSION:=20160531
-PKG_RELEASE:=1.0.4
+PKG_VERSION:=20160723
+PKG_RELEASE:=1.1.0
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
