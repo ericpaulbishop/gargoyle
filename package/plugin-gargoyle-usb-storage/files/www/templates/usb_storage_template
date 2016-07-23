@@ -1,94 +1,93 @@
-<div id="share_disk_container">
-	<label class="leftcolumn" id="share_disk_label" for="share_disk"><%~ usb_storage.Disk %>:</label>
-	<select class='form-control' id="share_disk"></select>
-	<span class="rightcolumn" id="share_disk_text"></span>
+<div id="share_disk_container" class="form-group">
+	<label id="share_disk_label" for="share_disk"><%~ usb_storage.Disk %>:</label>
+	<select class="form-control" id="share_disk"></select>
+	<span id="share_disk_text"></span>
 </div>
 
-<div id="share_dir_container">
-	<label class="leftcolumn" id="share_dir_label" for="share_dir"><%~ SDir %>:</label>
-	<input type='text' id='share_dir'  size='30' class='form-control' />
+<div id="share_dir_container" class="form-group">
+	<label id="share_dir_label" for="share_dir"><%~ SDir %>:</label>
+	<input type='text' id='share_dir' size='30' class="form-control" />
 </div>
-<div id="share_name_container">
-	<label class="leftcolumn" id="share_name_label" for="share_name"><%~ SNam %>:</label>
-	<input type="text" class='form-control' id="share_name" size='30' onkeyup="setSharePaths(this.ownerDocument)" />
+
+<div id="share_name_container" class="form-group">
+	<label id="share_name_label" for="share_name"><%~ SNam %>:</label>
+	<input type="text" class="form-control" id="share_name" size='30' onkeyup="setSharePaths(this.ownerDocument)" />
 </div>
-<div id="share_specificity_container">
-	<label class="leftcolumn" id="share_name_label" for="share_specificity"><%~ SAppl %>:</label>
-	<select class='form-control' id="share_specificity">
+
+<div id="share_specificity_container" class="form-group">
+	<label id="share_name_label" for="share_specificity"><%~ SAppl %>:</label>
+	<select class="form-control" id="share_specificity">
 		<option value="dev"><%~ SPart %></option>
 		<option value="blkid"><%~ SDriv %></option>
 	</select>
 </div>
 
-<div id="select_share_type_container" style="margin-bottom:20px;" >
-	<label class="leftcolumn" id="share_type_label" for="share_type"><%~ STyp %>:</label>
-	<span class='rightcolumn'>
-		<input type='checkbox' id='share_type_cifs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" class='form-control' />
+<div id="select_share_type_container" class="form-group">
+	<label id="share_type_label" for="share_type"><%~ STyp %>:</label>
+	<span class="form-control">
+		<input type='checkbox' id='share_type_cifs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)"/>
 		<label for="share_type_cifs" class="aligned_check_label">CIFS</label>&nbsp;
-		<input type='checkbox' id='share_type_ftp' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" class='form-control' />
+		<input type='checkbox' id='share_type_ftp' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)"/>
 		<label for="share_type_ftp" class="aligned_check_label">FTP</label>&nbsp;
-		<input type='checkbox' id='share_type_nfs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)" class='form-control' />
+		<input type='checkbox' id='share_type_nfs' class="aligned_check" onclick="setShareTypeVisibility(this.ownerDocument)"/>
 		<label for="share_type_nfs" class="aligned_check_label">NFS</label>
 	</span>
 	<br/>
 </div>
 
-<div id="anonymous_access_container">
-	<label class="leftcolumn" id="anonymous_access_label" for="anonymous_access"><%~ FAAcc %>:</label>
-	<select class='form-control' id="anonymous_access">
+<div id="anonymous_access_container" class="form-group">
+	<label id="anonymous_access_label" for="anonymous_access"><%~ FAAcc %>:</label>
+	<select class="form-control" id="anonymous_access">
 		<option value="none"><%~ ANon %></option>
 		<option value="ro"><%~ AROn %></option>
 		<option value="rw"><%~ ARWr %></option>
 	</select>
 </div>
-<div id="user_access_container" style="margin-bottom:20px;" >
-	<div>
-		<label class="leftcolumn" id="user_access_label" for="user_access"><%~ FAUsr %>:</label>
 
-		<span class="rightcolumn">
-			<select id="user_access" class='form-control'></select>
-			<select id="user_access_type" class='form-control'>
-				<option value="R/O"><%~ AROn %></option>
-				<option value="R/W"><%~ ARWr %></option>
-			</select>
-			<input type="button" class="btn btn-default" id="add_user_access" value="<%~ Add %>" onclick='addUserAccess()' />
-		</span>
-	</div>
-	<div class="rightcolumnonly" id="user_access_table_container"></div>
+<div id="user_access_container" class="form-group">
+	<label id="user_access_label" for="user_access"><%~ FAUsr %>:</label>
+	<select id="user_access" class="form-control"></select>
+	<select id="user_access_type" class="form-control">
+		<option value="R/O"><%~ AROn %></option>
+		<option value="R/W"><%~ ARWr %></option>
+	</select>
+	<button class="btn btn-default" id="add_user_access" onclick='addUserAccess()'><%~ Add %></button>
+	<div id="user_access_table_container"></div>
 </div>
 
-<div id="nfs_access_container">
-	<label class="leftcolumn" id="nfs_access_label" for="nfs_access"><%~ NAcc %>:</label>
-	<select class='form-control' id="nfs_access">
+<div id="nfs_access_container" class="form-group">
+	<label id="nfs_access_label" for="nfs_access"><%~ NAcc %>:</label>
+	<select class="form-control" id="nfs_access">
 		<option value="ro"><%~ AROn %></option>
 		<option value="rw"><%~ ARWr %></option>
 	</select>
 </div>
-<div id="nfs_policy_container">
-	<label id="nfs_policy_label" class="leftcolumn" for="nfs_policy"><%~ NAccPo %>:</label>
-	<select class='form-control' id="nfs_policy" onchange="setShareTypeVisibility()" >
+
+<div id="nfs_policy_container" class="form-group">
+	<label id="nfs_policy_label" for="nfs_policy"><%~ NAccPo %>:</label>
+	<select class="form-control" id="nfs_policy" onchange="setShareTypeVisibility()" >
 		<option value="share"><%~ AnonAcc %></option>
 		<option value="ip"><%~ OnlyIPs %></option>
 	</select>
 </div>
-<div id="nfs_ip_container" >
-	<div class="rightcolumnonly">
-		<input type='text' id='nfs_ip'  size='30' onkeyup='proofreadIpRange(this)' class='form-control' />
-		<input type="button" class="btn btn-default" id="add_nfs_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)' />
-	</div>
-	<div class="rightcolumnonly">
+
+<div id="nfs_ip_container" class="form-group" >
+	<input type='text' id='nfs_ip' size='30' onkeyup='proofreadIpRange(this)' class="form-control" />
+	<button class="btn btn-default" id="add_nfs_ip" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)'><%~ Add %></button>
+	<div>
 		<em><%~ IPSub %></em>
 	</div>
-	<div class="rightcolumnonly" id="nfs_ip_table_container"></div>
+	<div id="nfs_ip_table_container" class="form-group"></div>
 </div>
 
 <div id="nfs_spacer" style="margin-bottom:20px"></div>
 
-<div id="ftp_path_container">
-	<label class="leftcolumn" id="ftp_path_label" for="ftp_path"><%~ FPath %>:</label>
-	<span class="rightcolumn" id="ftp_path"></span>
+<div id="ftp_path_container" class="form-group">
+	<label id="ftp_path_label" for="ftp_path"><%~ FPath %>:</label>
+	<span id="ftp_path"></span>
 </div>
-<div id="nfs_path_container">
-	<label class="leftcolumn" id="nfs_path_label" for="nfs_path"><%~ NPath %>:</label>
-	<span class="rightcolumn" id="nfs_path"></span>
+
+<div id="nfs_path_container" class="form-group">
+	<label id="nfs_path_label" for="nfs_path"><%~ NPath %>:</label>
+	<span id="nfs_path"></span>
 </div>

@@ -9,23 +9,38 @@
 	gargoyle_header_footer -m  -c "internal.css"
 %>
 
-<fieldset id="edit_container">
-	<legend class="sectionheader"><%~ usb_storage.ChUPass %></legend>
+<div id="edit_container" class="row">
 
-	<div style="clear:both;display:block">
-		<label class="leftcolumn" for="share_user_text"><%~ User %>:</label>
-		<span class="rightcolumn" id="share_user_text"></span>
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ usb_storage.ChUPass %></h3>
+			</div>
+
+			<div class="panel-body">
+
+				<div style="clear:both;display:block">
+					<label for="share_user_text"><%~ User %>:</label>
+					<span class="rightcolumn" id="share_user_text"></span>
+				</div>
+
+				<div style="clear:both">
+					<label for="new_password"><%~ NPass %>:</label>
+					<input class="form-control" type="password" id="new_password" />
+				</div>
+
+				<div style="clear:both">
+					<label for="new_password_confirm"><%~ ChPass %>:</label>
+					<input class="form-control" type="password" id="new_password_confirm" />
+				</div>
+
+			</div>
+
+		</div>
 	</div>
 
-	<div style="clear:both">
-		<label class="leftcolumn" for="new_password"><%~ NPass %>:</label>
-		<input class="rightcolumn" type="password" id="new_password" />
-	</div>
-	<div style="clear:both">
-		<label class="leftcolumn" for="new_password_confirm"><%~ ChPass %>:</label>
-		<input class="rightcolumn" type="password" id="new_password_confirm" />
-	</div>
-</fieldset>
+</div>
 <div id="bottom_button_container"></div>
 
 </body>
