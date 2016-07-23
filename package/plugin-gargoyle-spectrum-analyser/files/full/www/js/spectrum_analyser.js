@@ -130,7 +130,9 @@ function getWifiData()
 			if(parsedWifiData == -1)
 			{
 				alert(spectrum.Noscan);
-				plotall(parsedWifiData);
+				d3.select("svg").remove();
+				plotdata = [];
+				window.removeEventListener("resize", plotall);//plotall(parsedWifiData);
 			}
 			else
 			{
@@ -342,6 +344,10 @@ function getfreqData(channel,info)
 
 function plotall()
 {
+	if(plotdata.length == 0)
+	{
+		return -1;
+	}
 	var MARGINS = {}, HEIGHT, WIDTH, LEGENDOFFSET;
 
 	LEGENDOFFSET = 30;
