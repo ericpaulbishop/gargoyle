@@ -12,6 +12,7 @@ var freq_low;
 var freq_high;
 var detected;
 var band;
+var plotdata = [];
 
 // Xband = [[channel #],[centre freq],[low freq],[high freq]]
 var gband = [
@@ -64,27 +65,6 @@ function initialisePlots()
 		freq_low = 5.165;	//technically 5.170, but 5.165 graphs better
 		freq_high = 5.840;	//technically 5.835, but 5.840 graphs better
 	}
-
-	//dummy code to setup a blank canvas before we populate any data
-	var spect = d3.select("#spectrum_plot"), 
-		WIDTH = 500,
-		HEIGHT = 400, 
-		MARGINS = 
-		{ 
-			top: 20, 
-			right: 10, 
-			bottom: 50, 
-			left: 30
-		},
-		xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([freq_low,freq_high]),
-		yScale = d3.scale.linear().range([HEIGHT - MARGINS.bottom, MARGINS.top]).domain([-100,0]),
-		xAxis = d3.svg.axis().scale(xScale),
-		yAxis = d3.svg.axis().scale(yScale);
-
-	spect.selectAll(".axis").remove();	//kill the old axes
-	spect.selectAll("path").remove();	//kill the old lines
-	spect.selectAll("rect").remove();	//kill the old legend
-	spect.selectAll("text").remove();	//kill the old legend text
 }
 
 function changeBand()
@@ -256,7 +236,7 @@ function parseWifiData(rawScanOutput)
 
 function generateGraphData(detected)
 {
-	var plotdata = [];
+	//var plotdata = [];
 	var freqoffset = 0.001;	//for making the graphs look pretty
 	var htoffset = 4;	//for 802.11n channels
 	var vhtoffset = 12;	//for 802.11ac channels
@@ -341,7 +321,8 @@ function generateGraphData(detected)
 		plotdata = -1;
 	}
 	
-	plotall(plotdata);
+	plotall();
+	window.addEventListener('resize', plotall);
 }
 
 function getfreqData(channel,info)
@@ -359,8 +340,25 @@ function getfreqData(channel,info)
 	}
 }
 
-function plotall(plotdata)
+function plotall()
 {
+	var MARGINS = {}, HEIGHT, WIDTH, LEGENDOFFSET;
+
+	LEGENDOFFSET = 30;
+
+	function updateDimensions(winWidth)
+	{
+		MARGINS.top = 20;
+		MARGINS.right = 10;
+		MARGINS.left = 45;
+		MARGINS.bottom = 50;
+
+		WIDTH  = winWidth - MARGINS.left - MARGINS.right;
+		HEIGHT = winWidth*0.8 - MARGINS.top - MARGINS.bottom;
+	}
+
+	d3.select("svg").remove();
+
 	var maxsig = -150;		//set the maximum signal level obsurdly low first
 	for (x = 0; x < plotdata.length; x++)		//then test for values higher than it until we find the highest
 	{
@@ -377,27 +375,22 @@ function plotall(plotdata)
 	var dataGroup = d3.nest()
 		.key(function(d) { return d.ssid; })
 		.entries(plotdata);				//break the data up into "keys" based on SSID which _should_ be unique (once i stuff around with them)
-	
-	var spect = d3.select("#spectrum_plot"), 
-		WIDTH = 500,
-		HEIGHT = 400, 
-		MARGINS = 
-		{ 
-			top: 20, 
-			right: 10, 
-			bottom: 50, 
-			left: 30
-		},
+
+	var chartcontainerwidth = document.getElementById("spectrum_plot").offsetWidth;
+	updateDimensions(chartcontainerwidth);
+
+	var spect = d3.select("#spectrum_plot").append("svg"), 
 		lSpace = WIDTH/dataGroup.length;	//set aside some space for the legend
 		xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([freq_low,freq_high]),	//xscale width and range
-		yScale = d3.scale.linear().range([HEIGHT - MARGINS.bottom, MARGINS.top]).domain([-100,maxsig]),			//yscale height and range
+		yScale = d3.scale.linear().range([HEIGHT - MARGINS.bottom, MARGINS.top + LEGENDOFFSET]).domain([-100,maxsig]),			//yscale height and range
 		xAxis = d3.svg.axis().scale(xScale),
 		yAxis = d3.svg.axis().scale(yScale);
+
+	spect
+		.attr("width", WIDTH + MARGINS.right + MARGINS.left)
+		.attr("height", HEIGHT + MARGINS.top + MARGINS.bottom);
 		
-	spect.selectAll(".axis").remove();	//kill the old axes
-	spect.selectAll("path").remove();	//kill the old lines
-	spect.selectAll("rect").remove();	//kill the old legend
-	spect.selectAll("text").remove();	//kill the old legend text
+	
 	
 	xAxis = d3.svg.axis("xaxis")
 		.scale(xScale)
@@ -412,14 +405,14 @@ function plotall(plotdata)
 	{
 		spect.append("svg:g")
 		.attr("class","axis")
-		.attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+		.attr("transform", "translate(0," + (HEIGHT - LEGENDOFFSET - MARGINS.bottom) + ")")
 		.call(xAxis);
 	}
 	else		//because channel numbers are bigger here, we need to rotate the labels or we run out of room.
 	{
 		spect.append("svg:g")
 		.attr("class","axis")
-		.attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+		.attr("transform", "translate(0," + (HEIGHT - LEGENDOFFSET - MARGINS.bottom) + ")")
 		.call(xAxis)
 		.selectAll("text")	
             .style("text-anchor", "end")
@@ -429,7 +422,7 @@ function plotall(plotdata)
 	}
 	spect.append("svg:g")
 		.attr("class","axis")
-		.attr("transform", "translate(" + (MARGINS.left) + ",0)")
+		.attr("transform", "translate(" + (MARGINS.left) + "," + (-LEGENDOFFSET) + ")")
 		.call(yAxis);		//draw both axes
 		
 	var lineGen = d3.svg.line()
@@ -447,13 +440,14 @@ function plotall(plotdata)
 			.attr('d', lineGen(d.values))
 			.attr('stroke', randcolour)
 			.attr('stroke-width', 2)
-			.attr('fill', 'none');			//draw each line
+			.attr('fill', 'none')
+			.attr("transform", "translate(0," + (-LEGENDOFFSET) + ")");			//draw each line
 		
 		spect.append('rect')
 			.attr('width', legendmarkersize)
 			.attr('height', legendmarkersize)
 			.attr("x", (lSpace / 2) + i * lSpace)		//evenly space little squares based on number of data points
-			.attr("y", HEIGHT-legendmarkersize)
+			.attr("y", HEIGHT-legendmarkersize-LEGENDOFFSET)
 			.style('fill', randcolour)				//fill them the same colour as the line
 			.style('stroke', randcolour)
 			.on("mouseover", function() {
@@ -471,7 +465,7 @@ function plotall(plotdata)
 		spect.append("text")
 			.style("fill", "black")
 			.style("text-anchor", "end")
-			.attr("transform", "translate(" + ((lSpace / 2) + i * lSpace + (legendmarkersize / 2)) + "," + (HEIGHT+legendmarkersize) + ") rotate(-65)")
+			.attr("transform", "translate(" + ((lSpace / 2) + i * lSpace + (legendmarkersize / 2)) + "," + (HEIGHT-LEGENDOFFSET+legendmarkersize) + ") rotate(-65)")
 			.text(d.key);	//write the text under the coloured rectangles. looks pretty. going to be a problem if someone uses an SSID of length 32 though.
 	});
 	

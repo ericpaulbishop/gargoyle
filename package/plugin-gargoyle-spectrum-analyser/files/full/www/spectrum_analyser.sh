@@ -37,16 +37,24 @@
 	}
 </style>
 
-<fieldset id="spectrum-fieldset">
-	<legend class="sectionheader"><%~ spectrum.Analyser %></legend>
-	
-	<select id="interface" onchange="changeBand()">
-		<option value="wlan0">wlan0 2.4GHz</option>
-		<option value="wlan1">wlan1 5GHz</option>
-	</select>
-	<br/>
-	<svg id="spectrum_plot" width="500" height="500"></svg>
-</fieldset>
+<h1 class="page-header"><%~ spectrum.Analyser %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="form-group">
+					<select id="interface" onchange="changeBand()" class="form-control">
+						<option value="wlan0">wlan0 2.4GHz</option>
+						<option value="wlan1">wlan1 5GHz</option>
+					</select>
+				</div>
+				<br/>
+				<div id="spectrum_plot">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
