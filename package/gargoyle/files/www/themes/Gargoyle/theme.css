@@ -389,7 +389,7 @@ nav>li.active>a {
     padding-left: 0;
     padding-right: 0;
 }
-.btn:not(.btn-default) {
+.btn:not(.btn-default), #bottom_button_container > .btn {
   background: #8B9AF3;
   background: -webkit-linear-gradient(#C8D0FE, #FFFFFF);
   background: -o-linear-gradient(#C8D0FE, #FFFFFF);
@@ -399,7 +399,7 @@ nav>li.active>a {
   color: #121660;
   font-weight: bold;
 }
-.btn:hover:not(.btn-default) {
+.btn:hover:not(.btn-default), #bottom_button_container > .btn:hover {
   background: #8B9AF3;
   background: -webkit-linear-gradient(#FFFFFF, #C8D0FE);
   background: -o-linear-gradient(#FFFFFF, #C8D0FE);
@@ -412,9 +412,10 @@ nav>li.active>a {
 #bottom_button_container {
   background: #FFFFFF;
   width: 100%;
-  height: 60px;
+  height: auto;
   text-align: center;
   padding-top: 10px;
+  padding-bottom: 10px;
   margin-left: 0px;
   border-radius: 5px;
 }
