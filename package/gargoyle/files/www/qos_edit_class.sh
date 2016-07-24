@@ -63,15 +63,15 @@
 
 				<div id="rttdiv">
 				<br>
-				<div><%~ MinRTT %>:</div>
-				<div>
+				<div><label><%~ MinRTT %>:</label></div>
+				<div class="indent">
 					<div class="form-group form-inline">
-						<input type="radio" class="form-control" name="rtt_radio" id="rtt_radio1"/>
+						<input type="radio" name="rtt_radio" id="rtt_radio1"/>
 						<label for="rtt_radio1"><%~ ActRTT %></label>
 					</div>
 
 					<div class="form-group form-inline">
-							<input type="radio" class="form-control" name="rtt_radio" id="rtt_radio2" />
+							<input type="radio" name="rtt_radio" id="rtt_radio2" />
 							<label for="rtt_radio2"><%~ OptiWAN %></label>
 					</div>
 				</div>
