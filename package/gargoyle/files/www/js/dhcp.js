@@ -135,7 +135,7 @@ function resetData()
 	for(rowIndex=0; rowIndex < staticIpTableData.length ; rowIndex++)
 	{
 		var rowData = staticIpTableData[rowIndex];
-		rowData.push(createEditButton());
+		if(rowData.length<4){rowData.push(createEditButton());}
 		staticIpTableData[rowIndex] = rowData;
 	}
 	columnNames=[UI.HsNm, 'MAC', 'IP', ''];
