@@ -157,7 +157,7 @@
 			<div class="form-group form-inline" id="key_name_container">
 				<label><%~ SSHName %>:</label>
 				<input type="text" id="public_key_name" name="public_key_name" value="" class="form-control" />
-				<input type="button" class="default_button" id="add_key" name="add_key" value="<%~ Add %>" onclick="addKey()"/>
+				<button class="btn btn-default" id="add_key" name="add_key" onclick="addKey()"><%~ Add %></button>
 			</div>
 
 			<div class="form-group form-inline" id="authorised_keys_table_container">

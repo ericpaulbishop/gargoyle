@@ -31,7 +31,7 @@
 				</div>
 
 				<div class="form-group">
-					<input type ="button" value="<%~ ADBLOCKupdate %>" id="adblock_update" class="btn btn-default" onclick='adblockUpdate()' />
+					<button id="adblock_update" class="btn btn-default" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button>
 					<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
 					<label id="adblock_lastrunval"></label>
 				</div>
@@ -81,11 +81,11 @@
 				</div>
 				<div class="form-group">
 					<select id="adblock_blocklist_list" multiple class="form-control"></select>
-					<input id="adblock_transfer_button" class="btn btn-warning" type="button" value="-->" onclick="transferwhiteList();" />
+					<input type="button" value="-->" id="adblock_transfer_button" class="btn btn-warning" onclick="transferwhiteList();" />
 				</div>
 				<div class="form-group">
 					<input id="adblock_blocklist_search" class="form-control" type="text" />
-					<input type="button" value='<%~ ADBLOCKSearch %>' class="btn btn-primary" onclick="searchBlocklist();" />
+					<button class="btn btn-primary" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
 				</div>
 				<div id="adblock_help2" class="indent">
 					<span id="adblock_help2_txt">
@@ -104,7 +104,7 @@
 			<div class="panel-body">
 				<div class="form-group">
 					<select id="adblock_whitelist_list" multiple class="form-control"></select>
-					<input id="adblock_whitelist_delete_button" class="btn btn-danger" type="button" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_whitelist_list);" />
+					<button id="adblock_whitelist_delete_button" class="btn btn-danger" onclick="deleteList(adblock_whitelist_list);"><%~ ADBLOCKBlackdel %></button>
 				</div>
 			</div>
 		</div>
@@ -117,13 +117,13 @@
 			<div class="panel-body">
 				<div class="form-group">
 					<select id="adblock_blacklist_list" multiple class="form-control"></select>
-					<input id="adblock_blacklist_delete_button" type="button" class="btn btn-danger" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_blacklist_list);" />
+					<button id="adblock_blacklist_delete_button" class="btn btn-danger" onclick="deleteList(adblock_blacklist_list);"><%~ ADBLOCKBlackdel %></button>
 				</div>
 				<div>
 					<input id="adblock_blacklist_add" class="form-control" type="text" />
 				</div>
 				<div>
-					<input type="button" class="btn btn-primary" value='<%~ ADBLOCKBlackadd %>' onclick="addBlacklist();" />
+					<button class="btn btn-primary" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
 				</div>
 			</div>
 		</div>
@@ -133,8 +133,8 @@
 	
 
 <div id="bottom_button_container">
-	<input type="button" value='<%~ SaveChanges %>' id="save_button" class="btn btn-primary" onclick='saveChanges()' />
-	<input type="button" value='<%~ Reset %>' id="reset_button" class="btn btn-warning" onclick='resetData()' />
+	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <script>

@@ -28,7 +28,7 @@
 <h1 class="page-header"><%~ time.Section %></h1>
 <div class="row">
 
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
 
 			<div class="panel-body">
