@@ -30,11 +30,12 @@ start()
 	theme_root=${theme_root:-themes}
 	common_css=$(uci get gargoyle.global.common_css 2>/dev/null)
 	common_css=${common_css:-common.css}
+	theme_css="theme.css"
 
 	got_lock=$(usb_lock)
 	if [ "$got_lock" = "1" ] ; then
 
-		set -- $(find "${webroot}"/"${theme_root}"/ -name "${common_css}")
+		set -- $(find "${webroot}"/"${theme_root}"/ -name "${theme_css}")
 		num_themes="$#"
 
 		if [ -z "${gdisplay}" ] && [ "${num_themes}" -gt 1 ] ; then
@@ -57,8 +58,8 @@ start()
 	
 		#if current theme doesn't exist anymore switch back to default
 		selected_theme=$(uci get gargoyle.global.theme  2>/dev/null)
-		if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}"/"${common_css}"  ] ; then
-			if [ -e "${webroot}"/"${theme_root}"/"Gargoyle"/"${common_css}" ] ; then
+		if [ ! -e "${webroot}"/"${theme_root}"/"${selected_theme}"/"${theme_css}"  ] ; then
+			if [ -e "${webroot}"/"${theme_root}"/"Gargoyle"/"${theme_css}" ] ; then
 				#should always have default theme, but check above to make sure
 				uci set gargoyle.global.theme=Gargoyle
 				uci commit gargoyle

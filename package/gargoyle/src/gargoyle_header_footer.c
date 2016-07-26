@@ -187,6 +187,7 @@ int main(int argc, char **argv)
                 char* gargoyle_version = "default";
                 char* fallback_lang = "";
                 char* active_lang = "";
+		char* test_theme = "";
                 char** translation_strings = NULL;
 
                 if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
@@ -319,11 +320,29 @@ int main(int argc, char **argv)
                        "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
                        "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
                        "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
-                printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
+                test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/favicon.png");
+		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+		{
+			printf("\t<link rel=\"shortcut icon\" href=\"%s/%s/images/favicon.png\"/>\n", theme_root, theme);
+		}
+		else
+		{
+			printf("\t<link rel=\"shortcut icon\" href=\"%s/Gargoyle/images/favicon.png\"/>\n", theme_root);
+		}
                 int css_index, js_index, lstr_js_index;
                 for(css_index=0; all_css[css_index] != NULL; css_index++)
                 {
-                        printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			test_theme = dynamic_strcat(6, web_root, theme_root, "/", theme, "/", all_css[css_index]);
+			//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+			if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+			{
+				printf("\t<link rel=\"stylesheet\" href=\"%s/%s/%s?%s\"/>\n", theme_root, theme, all_css[css_index], gargoyle_version);
+			}
+			else
+			{
+				printf("\t<link rel=\"stylesheet\" href=\"%s/Gargoyle/%s?%s\"/>\n", theme_root, all_css[css_index], gargoyle_version);
+			}
                 }
                 for(js_index=0; all_js[js_index] != NULL; js_index++)
                 {
@@ -352,8 +371,18 @@ int main(int argc, char **argv)
                         }
                 }
 #endif
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css\">\n", theme_root, theme);
-                printf("\t<link rel=\"stylesheet\" href=\"%s/%s/theme.css\">\n", theme_root, theme);
+                test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/bootstrap.min.css");
+		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+		{
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css?%s\">\n", theme_root, theme, gargoyle_version);
+		}
+		else
+		{
+			printf("\t<link rel=\"stylesheet\" href=\"%s/Gargoyle/bootstrap.min.css?%s\">\n", theme_root, gargoyle_version);
+		}
+                //We won't test if this theme.css doesn't exist because each theme must now at a minimum include this file
+		printf("\t<link rel=\"stylesheet\" href=\"%s/%s/theme.css?%s\">\n", theme_root, theme, gargoyle_version);
                 printf("</head>\n"
                        "<body>\n");
 
@@ -364,8 +393,17 @@ int main(int argc, char **argv)
                                "\t\t<div id=\"wait_txt\">\n"
                                "\t\t\t%s\n"
                                "\t\t</div>\n"
-                               "\t\t<div id=\"wait_icon\">\n"
-                               "\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", translation_strings == NULL ? wait_txt : translation_strings[3], theme_root, theme);
+                               "\t\t<div id=\"wait_icon\">\n", translation_strings == NULL ? wait_txt : translation_strings[3]);
+                        test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/wait_icon.gif");
+			//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+			if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+			{
+				printf("\t\t\t<img src=\"%s/%s/images/wait_icon.gif\"/>\n", theme_root, theme);
+			}
+			else
+			{
+				printf("\t\t\t<img src=\"%s/Gargoyle/images/wait_icon.gif\"/>\n", theme_root);
+			}
 
                         printf("\t\t</div>\n"
                                "\t\t<iframe id=\"m_iframe\" class=\"select_free\"></iframe>\n"
@@ -427,6 +465,7 @@ int main(int argc, char **argv)
                 char* hostname = "";
                 char* fallback_lang = "";
                 char* active_lang = "";
+		char* test_theme = "";
                 char** translation_strings = NULL;
                 char** all_lstr_js;
                 char whitespace_separators[] = { '\t', ' ' };
@@ -501,8 +540,17 @@ int main(int argc, char **argv)
                 printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
                        "<ul class=\"nav sidebar\">\n"
                        "<li class=\"sidebar-header\">\n"//sidebar header begin
-                       "<span>Gargoyle</span><br/>\n"
-                       "<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root, theme);
+                       "<span>Gargoyle</span><br/>\n");
+			test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/gargoyle-logo.png");
+			//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+			if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+			{
+				printf("<img src=\"%s/%s/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root, theme);
+			}
+			else
+			{
+				printf("<img src=\"%s/Gargoyle/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root);
+			}
                 printf("<span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
                 printf("</li>\n");//<!-- sidebar-header end-->
 
