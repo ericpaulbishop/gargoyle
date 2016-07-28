@@ -1488,7 +1488,7 @@ CONFIG_PACKAGE_kmod-input-core=y
 # LED modules
 #
 # CONFIG_PACKAGE_kmod-leds-gpio is not set
-# CONFIG_PACKAGE_kmod-leds-pca963x is not set
+CONFIG_PACKAGE_kmod-leds-pca963x=y
 CONFIG_PACKAGE_kmod-leds-tlc59116=y
 # CONFIG_PACKAGE_kmod-ledtrig-default-on is not set
 # CONFIG_PACKAGE_kmod-ledtrig-gpio is not set
