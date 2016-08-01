@@ -293,7 +293,9 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 			<div id='bridge_pass_container'>
 				<label class='leftcolumn' for='bridge_pass' id='bridge_pass_label'><%~ Pswd %>:</label>
-				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/><br/>
+				<input type='password' id='bridge_pass' size='20' onkeyup='proofreadLengthRange(this,8,999)'/>&nbsp;&nbsp;
+				<input type='checkbox' id='show_bridge_pass' onclick='togglePass("bridge_pass")'/>
+				<label for='show_bridge_pass' id='show_bridge_pass_label' class='rightcolumn'><%~ rvel %></label><br/>
 			</div>
 			<div id='bridge_wep_container'>
 				<div style="display:block;">

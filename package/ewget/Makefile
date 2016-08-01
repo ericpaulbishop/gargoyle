@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ewget
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+libericstools +libcyassl
+	DEPENDS:=+libericstools +libpolarssl
 	TITLE:=embedded wget
 	URL:=http://www.gargoyle-router.com
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
@@ -30,7 +30,7 @@ endef
 
 
 define Package/ewget/description
-  embedded wget and http client library with ssl support (via cyassl)
+  embedded wget and http client library with ssl support (via polarssl)
 endef
 
 
@@ -50,8 +50,7 @@ define Build/Compile
 		STAGING_DIR="$(STAGING_DIR)" \
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
-		USE_CYASSL="1" \
-		USE_CYASSL_INCLUDE_DIR="1" \
+		USE_POLARSSL="1" \
 		USE_ERICSTOOLS="1" \
 		all
 	
@@ -66,7 +65,6 @@ define Build/Compile
 		STAGING_DIR="$(STAGING_DIR)" \
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
-		USE_CYASSL="1" \
 		all
 endef
 

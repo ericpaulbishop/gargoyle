@@ -6,7 +6,7 @@ PARTNUM=${PART##mtd}
 DIR=$(mktemp -d)
 mount -t jffs2 /dev/mtdblock$PARTNUM $DIR
 if [ $? = "0" ]; then
-	uci -c $DIR/etc/config batch << EOF
+	uci -c $DIR/upper/etc/config batch << EOF
 		del fstab.@mount[0].target
 		del fstab.@mount[0].uuid
 		set fstab.@mount[0].enabled=0

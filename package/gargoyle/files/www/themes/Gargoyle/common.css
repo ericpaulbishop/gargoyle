@@ -6,7 +6,6 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-
 html
 {
 	background:url("images/slant_background.jpg") top center repeat;
@@ -277,7 +276,7 @@ body
 	margin:0;
 	position:relative;
 	display:block;
-	left:8px;
+	left:0;
 	width:184px;
 	z-index:0;
 }

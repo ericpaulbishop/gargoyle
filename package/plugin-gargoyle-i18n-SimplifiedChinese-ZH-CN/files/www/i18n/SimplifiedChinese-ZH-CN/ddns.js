@@ -31,4 +31,4 @@ DyDNS.Pssw="密码";
 DyDNS.Eml="E-mail";
 DyDNS.Key="Key";
 DyDNS.AKey="API Key";
-DyDNS.Tokn="令牌";
+DyDNS.Tokn="Token";

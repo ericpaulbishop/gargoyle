@@ -13,6 +13,7 @@ pgS.APSrc="添加插件源";
 pgS.PList="插件列表";
 pgS.NoPkg="找不到插件包，请刷新插件包列表。";
 pgS.RfshP="刷新插件";
+pgS.NoWan="需要连接到Intelnet连接才能刷新插件。";
 
 //javascript
 pgS.NInst="未安装";
@@ -38,3 +39,7 @@ pgS.Name="名称";
 pgS.Langs="语言包";
 pgS.Thems="主题";
 pgS.Pkgs="插件包";
+pgS.NoSpace="空间不足";
+pgS.PlgSz="已安装的插件";
+pgS.FreeSp="剩余空间";
+pgS.Rslv="请卸载一些插件然后再试一次，\n或者选择其它位置。";
