@@ -21,8 +21,8 @@ my $typeOrder = [ "images", "fon-flash", "src" ];
 my $typeNames = {"src"=>"Source Code", "images"=>"Firmware Images", "fon-flash"=>"FonFlash"};
 my $typeMatches={"src"=>"src", "fon-flash"=>"fon" };
 
-my $archOrder = [ "ar71xx", "mvebu", "alix", "brcm47xx", "atheros",  ];
-my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "alix"=>"Alix/X86" };
+my $archOrder = [ "ar71xx", "mvebu", "ramips", "alix", "brcm47xx", "atheros",  ];
+my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "ramips" => "MediaTek/Ralink ramips", "alix"=>"Alix/X86" };
 my $targetOrder = 
 { 
 	"atheros"=>
@@ -38,7 +38,6 @@ my $targetOrder =
 		"ubnt5-squashfs.bin",
 		"np25g-squashfs.bin",
 		"wpe53g-squashfs.bin"
-
 		], 
 	"brcm47xx"=>
 		[
@@ -52,8 +51,11 @@ my $targetOrder =
 		"wrt54g3gv2-vf-squashfs.bin",
 		"wrt150n-squashfs.bin",
 		"wrt300n_v1-squashfs.bin",
-		"wrt300n_v11-squashfs.bin",
-		"wrt350n_v1-squashfs.bin",
+		"wrt300n-v1.1-squashfs.bin",
+		"wrt310n-v1-squashfs.bin",
+		"wrt350n-v1-squashfs.bin",
+		"wrt610n-v1-squashfs.bin",
+		"wrt610n-v2-squashfs.bin",
 		"wr850g-squashfs.bin",
 		"we800g-squashfs.bin",
 		"wa840g-squashfs.bin",
@@ -61,8 +63,7 @@ my $targetOrder =
 		"ps1208mfg-squashfs.bin",
 		"wgt634u-squashfs.bin",
 		"wnr834b_v2-squashfs.chk",
-		"wrt610n_v1-squashfs.bin"
-
+		"e3000-v1-squashfs.bin"
 		],
 	"ar71xx"=>
 		[
@@ -118,8 +119,8 @@ my $targetOrder =
 		"gargoyle-pocket-router-v2-rootfs-squashfs.bin",
 		"gargoyle-pocket-router-v2-squashfs-sysupgrade.bin",
 		"gl_ar150-squashfs-sysupgrade.bin",
-		"gl-inet-v1-squashfs-factory.bin",
-		"gl-inet-v1-squashfs-sysupgrade.bin",
+		"gl-inet-6416A-v1-squashfs-factory.bin",
+		"gl-inet-6416A-v1-squashfs-sysupgrade.bin",
 		"hornet-ub-squashfs-factory.bin",
 		"hornet-ub-squashfs-sysupgrade.bin",
 		"ja76pf2-kernel.bin",
@@ -176,8 +177,8 @@ my $targetOrder =
 		"tl-mr3420-v2-squashfs-sysupgrade.bin",
 		"tl-wa701n-v1-squashfs-factory.bin",
 		"tl-wa701n-v1-squashfs-sysupgrade.bin",
-		"tl-wa701nd-v1-squashfs-factory.bin",
-		"tl-wa701nd-v1-squashfs-sysupgrade.bin",
+		"tl-wa701nd-v2-squashfs-factory.bin",
+		"tl-wa701nd-v2-squashfs-sysupgrade.bin",
 		"tl-wa730rev1-squashfs-factory.bin",
 		"tl-wa730rev1-squashfs-sysupgrade.bin",
 		"tl-wa750re-v1-squashfs-factory.bin",
@@ -214,6 +215,8 @@ my $targetOrder =
 		"tl-wr1043nd-v1-squashfs-sysupgrade.bin",
 		"tl-wr1043nd-v2-squashfs-factory.bin",
 		"tl-wr1043nd-v2-squashfs-sysupgrade.bin",
+		"tl-wr1043nd-v3-squashfs-factory.bin",
+		"tl-wr1043nd-v3-squashfs-sysupgrade.bin",
 		"tl-wr2543-v1-squashfs-factory.bin",
 		"tl-wr2543-v1-squashfs-sysupgrade.bin",
 		"tl-wr703n-v1-squashfs-factory.bin",
@@ -246,8 +249,14 @@ my $targetOrder =
 		"tl-wr841n-v8-squashfs-sysupgrade.bin",
 		"tl-wr841n-v9-squashfs-factory.bin",
 		"tl-wr841n-v9-squashfs-sysupgrade.bin",
+		"tl-wr841n-v10-squashfs-factory.bin",
+		"tl-wr841n-v10-squashfs-sysupgrade.bin",
+		"tl-wr841n-v11-squashfs-factory.bin",
+		"tl-wr841n-v11-squashfs-sysupgrade.bin",
 		"tl-wr842n-v1-squashfs-factory.bin",
 		"tl-wr842n-v1-squashfs-sysupgrade.bin",
+		"tl-wr842n-v2-squashfs-factory.bin",
+		"tl-wr842n-v2-squashfs-sysupgrade.bin",
 		"tl-wr941nd-v2-squashfs-factory.bin",
 		"tl-wr941nd-v2-squashfs-sysupgrade.bin",
 		"tl-wr941nd-v3-squashfs-factory.bin",
@@ -356,14 +365,28 @@ my $targetOrder =
 		"linksys-cobra-squashfs-factory.img",
 		"linksys-cobra-squashfs-sysupgrade.tar",
 		"linksys-mamba-squashfs-factory.img",
-		"linksys-mamba-squashfs-sysupgrade.tar"
+		"linksys-mamba-squashfs-sysupgrade.tar",
+		"linksys-shelby-squashfs-factory.img",
+		"linksys-shelby-squashfs-sysupgrade.tar"
+		],
+	"ramips"=>
+		[ 
+		"wt3020-8M-squashfs-factory.bin",
+		"wt3020-8M-squashfs-sysupgrade.bin",
+		"xiaomi-miwifi-mini-squashfs-sysupgrade.bin",
+		"fonera20n-squashfs-factory.bin",
+		"fonera20n-squashfs-sysupgrade.bin",
+		"mpr-a2-squashfs-sysupgrade.bin",
+		"px4885-8M-squashfs-sysupgrade.bin",
+		"vocore-squashfs-sysupgrade.bin",
+		"wt1520-8M-squashfs-factory.bin",
+		"wt1520-8M-squashfs-sysupgrade.bin"
 		],
 	"alix"=> 
 		[ 
-		"combined.jffs2.128k.img",
+		"combined.jffs2.128k.img"
 		]
 };
-
 
 
 open STDERR, '>/dev/null';

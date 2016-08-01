@@ -1489,7 +1489,7 @@ CONFIG_PACKAGE_kmod-input-core=y
 # LED modules
 #
 # CONFIG_PACKAGE_kmod-leds-gpio is not set
-# CONFIG_PACKAGE_kmod-leds-pca963x is not set
+CONFIG_PACKAGE_kmod-leds-pca963x=y
 CONFIG_PACKAGE_kmod-leds-tlc59116=y
 # CONFIG_PACKAGE_kmod-ledtrig-default-on is not set
 # CONFIG_PACKAGE_kmod-ledtrig-gpio is not set
@@ -2011,7 +2011,7 @@ CONFIG_PACKAGE_libxtables=y
 #
 # SSL
 #
-CONFIG_PACKAGE_libcyassl=y
+# CONFIG_PACKAGE_libcyassl is not set
 CONFIG_PACKAGE_libopenssl=y
 
 #
@@ -2021,7 +2021,7 @@ CONFIG_OPENSSL_WITH_EC=y
 # CONFIG_OPENSSL_WITH_EC2M is not set
 # CONFIG_OPENSSL_WITH_SSL3 is not set
 # CONFIG_OPENSSL_ENGINE_CRYPTO is not set
-# CONFIG_PACKAGE_libpolarssl is not set
+CONFIG_PACKAGE_libpolarssl=y
 
 #
 # database
@@ -2095,9 +2095,9 @@ CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuclient is not set
 CONFIG_PACKAGE_libusb-1.0=y
 # CONFIG_PACKAGE_libusb-compat is not set
-CONFIG_PACKAGE_libustream-cyassl=y
+# CONFIG_PACKAGE_libustream-cyassl is not set
 # CONFIG_PACKAGE_libustream-openssl is not set
-# CONFIG_PACKAGE_libustream-polarssl is not set
+CONFIG_PACKAGE_libustream-polarssl=y
 CONFIG_PACKAGE_libuuid=y
 CONFIG_PACKAGE_libvorbis=y
 CONFIG_PACKAGE_libwrap=y
@@ -2333,8 +2333,8 @@ CONFIG_PACKAGE_uhttpd=y
 # CONFIG_PACKAGE_uhttpd_debug is not set
 # CONFIG_PACKAGE_uhttpd-mod-lua is not set
 CONFIG_PACKAGE_uhttpd-mod-tls=y
-# CONFIG_PACKAGE_uhttpd-mod-tls_polarssl is not set
-CONFIG_PACKAGE_uhttpd-mod-tls_cyassl=y
+CONFIG_PACKAGE_uhttpd-mod-tls_polarssl=y
+# CONFIG_PACKAGE_uhttpd-mod-tls_cyassl is not set
 # CONFIG_PACKAGE_uhttpd-mod-tls_openssl is not set
 # CONFIG_PACKAGE_uhttpd-mod-ubus is not set
 # CONFIG_PACKAGE_6in4 is not set

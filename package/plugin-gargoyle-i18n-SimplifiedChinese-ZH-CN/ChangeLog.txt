@@ -1,6 +1,13 @@
 ChangeLog:
 
 ==================================================
+Version: 1.0.7-21060711
+Release time: 10:15 2016-07-11 UTC+8
+Changes:
+
+i18n/SimplifiedChinese: add missing translation, bump version
+
+==================================================
 Version: 1.0.6-20150810
 Release time: 15:30 2015-08-10 UTC+8
 Changes:

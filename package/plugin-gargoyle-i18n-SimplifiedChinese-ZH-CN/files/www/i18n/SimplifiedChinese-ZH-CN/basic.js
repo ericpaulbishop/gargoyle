@@ -11,7 +11,7 @@ basicS.GwIP="AP/网关IP";
 basicS.StIP="静态IP";
 basicS.CurrIP="当前IP";
 basicS.RtrIP="路由器IP";
-basicS.BrNote="（必须是在AP的子网内）";
+basicS.BrNote="（它不能在AP的子网）";
 basicS.SMsk="子网掩码";
 basicS.SMNote="（与AP的掩码一致）";
 basicS.WanEP="WAN口";
@@ -126,5 +126,9 @@ basicS.ScnMo="正在扫描移动设备";
 basicS.NoDv="没有找到设备";
 
 basicS.WANIntr="WAN接口";
-basicS.Mo3gQMI="LTE (QMI)";
-basicS.Dfult="默认"
+
+basicS.Mo3gQMI="USB Modem (QMI)";
+basicS.Mo3gNCM="USB Modem (NCM)";
+basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
+basicS.Dfult="默认";
+

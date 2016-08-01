@@ -4,9 +4,6 @@
 -ap83-kernel.bin
 -ap83-rootfs-squashfs.bin
 -ap83-squashfs-sysupgrade.bin
--dir-600-a1-squashfs-
--dir-615-c1-squashfs-
--dir-825-b1-squashfs-
 -dlrtdev01-squashfs-
 -tl-mr10u-v1-squashfs-
 -tl-mr11u-v1-squashfs-
@@ -67,7 +64,6 @@
 -ubnt-airrouter-squashfs-
 -ubnt-bullet-m-squashfs-
 -ubnt-ls-sr71-squashfs-
--ubnt-unifi-squashfs-
 -ubnt-nano-m-squashfs-
 -ubnt-rocket-m-squashfs-
 -ubdev01-squashfs-

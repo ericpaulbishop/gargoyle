@@ -307,6 +307,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_pass_container" class="form-group">
 					<label for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
 					<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>
+					<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" />
+					<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
 					<br/>
 				</div>
 

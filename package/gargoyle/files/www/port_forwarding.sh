@@ -19,7 +19,7 @@
 		echo "var upnpdEnabled = false;"
 	fi
 	if [ -z "$upnp_config_enabled" ] ; then
-		echo var haveUpnpd = false;
+		echo "var haveUpnpd = false;"
 	else
 		echo "var haveUpnpd = true;"
 	fi
