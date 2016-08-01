@@ -26,6 +26,7 @@ var webcams = [];
 //-->
 </script>
 
+<h1 class="page-header"><%~ webcam.WebC %></h1>
 <div id="nowebcam" class="row">
 
 	<div class="col-lg-6">

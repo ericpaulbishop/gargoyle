@@ -26,6 +26,7 @@
 
 </script>
 
+<h1 class="page-header"><%~ print.Attch %></h1>
 <div class="row">
 
 	<div class="col-lg-6">

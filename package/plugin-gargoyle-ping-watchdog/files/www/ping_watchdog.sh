@@ -54,7 +54,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for='failure_action' id='failure_action_label' class="form-control"><%~ Actn %>:</label>
+					<label for='failure_action' id='failure_action_label'><%~ Actn %>:</label>
 					<select id='failure_action' class="form-control" onchange='showScript(this.value);'>
 						<option value='wan'><%~ WRcon %></option>
 						<option value='reboot'><%~ Rbot %></option>

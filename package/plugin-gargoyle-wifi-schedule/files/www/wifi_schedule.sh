@@ -35,6 +35,7 @@ for (tab_idx in cron_data) {
 
 </style>
 
+<h1 class="page-header"><%~ wifi_schedule.Wisch %></h1>
 <div id="wifi_schedule" class="row">
 
 	<div class="col-lg-6">

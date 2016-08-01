@@ -35,18 +35,23 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ initd.Services %></legend>
-		<div id="initd_table_container"></div>
-	</fieldset>
+<h1 class="page-header"><%~ initd.Services %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div id="initd_table_container"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
 
 	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
+		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
 	</div>
 
-</form>
 
 <script>
 <!--

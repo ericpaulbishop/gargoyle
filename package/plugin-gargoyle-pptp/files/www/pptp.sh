@@ -16,6 +16,7 @@
 	var uci = uciOriginal.clone();
 </script>
 
+<h1 class="page-header"><%~ pptp.PCfg %></h1>
 <div class="row">
 
 	<div id="pptp_config_fieldset" class="col-lg-6">

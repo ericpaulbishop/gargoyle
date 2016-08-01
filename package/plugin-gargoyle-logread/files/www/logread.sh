@@ -10,13 +10,21 @@
 
 %>
 
-<fieldset id="logread">
-	<legend class="sectionheader"><%~ logread.SLogs %></legend>
-	<textarea style="width:100%" rows=30 id='output'></textarea>
-</fieldset>
+<h1 class="page-header"><%~ logread.SLogs %></h1>
+<div class=row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="form-group">
+					<textarea class="form-control" rows=30 id='output'></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <div id="bottom_button_container">
-	<input type='button' value='<%~ Rfsh %>' id="refresh_button" class="bottom_button" onclick='resetData()' />
+	<button id="refresh_button" class="btn btn-primary" onclick='resetData()'><%~ Rfsh %></button>
 </div>
 
 <script>

@@ -75,7 +75,7 @@ function createStartButton()
 {
 	var startButton = createInput("button");
 	startButton.value = "Start";
-	startButton.className="default_button";
+	startButton.className="btn btn-primary";
 	startButton.onclick = startService;
 	return startButton;
 }
@@ -84,7 +84,7 @@ function createResetButton()
 {
 	var restartButton = createInput("button");
 	restartButton.value = "Restart";
-	restartButton.className="default_button";
+	restartButton.className="btn btn-warning";
 	restartButton.onclick = restartService;
 	return restartButton;
 }
@@ -93,7 +93,7 @@ function createStopButton()
 {
 	var stopButton = createInput("button");
 	stopButton.value = "Stop";
-	stopButton.className="default_button";
+	stopButton.className="btn btn-danger";
 	stopButton.onclick = stopService;
 	return stopButton;
 }
