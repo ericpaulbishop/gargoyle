@@ -86,7 +86,7 @@ var passInvalid = false;
 	</div>
 
 	<div class="col-lg-4">
-		<div id="current_time" class="panel panel-primary">
+		<div id="current_time" class="panel panel-info">
 
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CTime %></h3>
@@ -100,7 +100,22 @@ var passInvalid = false;
 	</div>
 
 	<div class="col-lg-4">
-		<div id="local_quotas" class="panel panel-primary" style="display:none">
+		<div id="current_ip" class="panel panel-info">
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ CIP %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="current_connected_ip"><%~ CIPs %><div id="current_connect_ip"></div></div>
+			</div>
+
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-lg-4">
+		<div id="local_quotas" class="panel panel-info" style="display:none">
 
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ YQot %></h3>
@@ -112,7 +127,7 @@ var passInvalid = false;
 	</div>
 
 	<div class="col-lg-4">
-		<div id="global_quotas" class="panel panel-primary" style="display:none">
+		<div id="global_quotas" class="panel panel-info" style="display:none">
 
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ NQot %></h3>
@@ -134,6 +149,7 @@ var passInvalid = false;
 <!--
 	document.getElementById('password').focus();
 	setStatusAndQuotas();
+	document.getElementById("current_connect_ip").innerHTML=connectedIp;
 //-->
 </script>
 

@@ -423,7 +423,3 @@ nav>li.active>a {
   background: #F2F2F2;
   border-radius: 5px;
 }
-#current_time>.panel-heading {
-  background: #FFFFFF;
-  color: #000000;
-}
