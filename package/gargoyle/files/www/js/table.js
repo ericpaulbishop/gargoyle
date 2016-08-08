@@ -56,7 +56,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 	}
 	if(rowsAreMovable)
 	{
-		for(i=1; i<2; i++)
+		for(i=0; i<2; i++)
 		{
 			var header = controlDocument.createElement('th');
 			headerContent = controlDocument.createTextNode('');
@@ -171,9 +171,9 @@ function moveThisCellsRowUp(button)
 	tableBody=row.parentNode;
 
 	allRows =tableBody.childNodes;
-	rowIndex = 1;
+	rowIndex = 0;
 	while(rowIndex < allRows.length && allRows[rowIndex] != row ) { rowIndex++; }
-	if(rowIndex > 1)
+	if(rowIndex > 0)
 	{
 		tmp = allRows[rowIndex];
 		tableBody.removeChild(allRows[rowIndex]);
@@ -188,7 +188,7 @@ function moveThisCellsRowDown(button)
 	tableBody=row.parentNode;
 
 	allRows =tableBody.childNodes;
-	rowIndex = 1;
+	rowIndex = 0;
 	while(rowIndex < allRows.length && allRows[rowIndex] != row ) { rowIndex++; }
 	if(rowIndex < allRows.length-1 && allRows.length > 2 )
 	{

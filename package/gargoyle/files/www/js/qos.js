@@ -267,6 +267,7 @@ function init_classtable()
 {
 	classTable = new Array();
 	var classTableData = new Array();
+	var tempclassData = [];
 
 	var directionClass = direction + "_class";
 	var classSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionClass);
@@ -301,19 +302,31 @@ function init_classtable()
 		classRow.MaxBW = classRow.MaxBW != "" && classRow.MaxBW > 0 ? classRow.MaxBW : qosStr.NOLIMIT;
 		classRow.MinRTT = classRow.MinRTT == "Yes" ? qosStr.YES : "";
 
+		tempclassData = [classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)]
+		if(direction == "download")
+		{
+			tempclassData.splice(4,0,classRow.MinRTT);
+		}
+		else
+		{
+			delete classRow.MinRTT;
+		}
 		classTable.push(classRow);
-		classTableData.push([classRow.Name, classRow.Percent + "%", classRow.MinBW, classRow.MaxBW, classRow.MinRTT, bpsToKbpsString(classRow.bps), createClassTableEditButton(classIndex)] );
-
+		classTableData.push(tempclassData);
 
 		addOptionToSelectElement("default_class", classRow.Name, classRow.Name, null);
 		addOptionToSelectElement("classification",classRow.Name, classRow.Name, null);
 		defaultClassName = uciOriginal.get("qos_gargoyle", direction, "default_class") == classSection ? classRow.Name : defaultClassName;
 	}
 
+	var classTableColumns = [qosStr.SrvClassName, qosStr.pBdW, qosStr.mBdW+" (kbps)", qosStr.MBdW+" (kbps)", qosStr.qLd+" (kbps)", ""];
 	var MinRTT="";
-	if (direction == "download") {MinRTT = "Min RTT";}
+	if (direction == "download")
+	{
+		MinRTT = "Min RTT";
+		classTableColumns.splice(4,0,MinRTT);
+	}
 
-	var classTableColumns = [qosStr.SrvClassName, qosStr.pBdW, qosStr.mBdW+" (kbps)", qosStr.MBdW+" (kbps)", MinRTT, qosStr.qLd+" (kbps)"];
 	var HTMLclassTable=createTable(classTableColumns, classTableData, "qos_class_table", true, false, removeServiceClassCallback);
 	var classTableContainer = document.getElementById('qos_class_table_container');
 	if(classTableContainer.firstChild != null)
@@ -374,7 +387,8 @@ function update_classtable()
              for (classIndex=0; classIndex < classTable.length; classIndex++)
              {
  		var rowData = classTable[classIndex];
-                var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, rowData.MinRTT, bpsToKbpsString(rowData.bps) ];
+                var newDataList = [ rowData.Name, rowData.Percent + "%", rowData.MinBW, rowData.MaxBW, bpsToKbpsString(rowData.bps) ];
+		if(direction == "download") {newDataList.splice(4,0,rowData.MinRTT); }
 
                 //If found then update the data
                 if (rowData.Name == row.childNodes[0].firstChild.data) {

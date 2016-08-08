@@ -249,7 +249,7 @@
 			</div>
 
 			<div id="add_class_container">
-				<input type="button" id="add_class_button" class="default_button" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
+				<input type="button" id="add_class_button" class="btn btn-default" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
 			</div>
 		</div>
 	</div>
