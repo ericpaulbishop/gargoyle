@@ -121,7 +121,7 @@ li.sidebar-item a {
   background: #ffffff;
   color: #000000;
   font-size: 14px;
-  line-height: 40px;
+  line-height: 20px;
   display: block;
   float: left;
   text-decoration: none;
@@ -202,14 +202,14 @@ ul.sidebar .sidebar-title {
   text-transform: uppercase;
 }
 ul.sidebar .sidebar-list {
-  height: 40px;
+  height: 20px;
   list-style-type: none;
   padding: 0;
 }
 ul.sidebar .sidebar-list a {
   text-indent: 25px;
   font-size: 14px;
-  line-height: 40px;
+  line-height: 20px;
 }
 ul.sidebar .sidebar-list a:hover {
   text-indent: 39px;
