@@ -249,7 +249,7 @@
 			</div>
 
 			<div id="add_class_container">
-				<input type="button" id="add_class_button" class="btn btn-default" value="<%~ AddSvcCls %>" onclick="addServiceClass()" />
+				<button id="add_class_button" class="btn btn-default" onclick="addServiceClass()"><%~ AddSvcCls %></button>
 			</div>
 		</div>
 	</div>
@@ -259,7 +259,7 @@
 
 <div id="bottom_button_container" class="form-group form-inline">
 	<button id="save_button" class="btn btn-info" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="resetData()"/><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container"><%~ WaitSettings %></span>
 
