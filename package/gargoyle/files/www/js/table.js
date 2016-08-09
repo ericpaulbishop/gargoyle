@@ -190,7 +190,7 @@ function moveThisCellsRowDown(button)
 	allRows =tableBody.childNodes;
 	rowIndex = 0;
 	while(rowIndex < allRows.length && allRows[rowIndex] != row ) { rowIndex++; }
-	if(rowIndex < allRows.length-1 && allRows.length > 2 )
+	if(rowIndex < allRows.length-1 && allRows.length > 1 )
 	{
 		tmp = allRows[rowIndex+1];
 		tableBody.removeChild(allRows[rowIndex+1]);
