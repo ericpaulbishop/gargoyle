@@ -291,28 +291,6 @@ int main(int argc, char **argv)
                 }
 #endif
 
-                if(uci_load(ctx, "system", &p) != UCI_OK)
-                {
-                        printf("ERROR: no system package defined!\n");
-                        return 0;
-                }
-                char* hostname = "";
-                uci_foreach_element( &p->sections, e)
-                {
-                        struct uci_section *section = uci_to_section(e);
-                        if(strcmp(section->type,"system")==0)
-                        {
-                                struct uci_element *e2;
-                                uci_foreach_element(&section->options, e2)
-                                {
-                                        if(strcmp(e2->name,"hostname")==0)
-                                        {
-                                                hostname = get_option_value_string(uci_to_option(e2));
-                                        }
-                                }
-                        }
-                }
-
                 printf("<!DOCTYPE html>\n"
                        "<head>\n"
                        "\t<meta charset=\"utf-8\">\n"
@@ -453,7 +431,7 @@ int main(int argc, char **argv)
         }
         else if(display_type == FOOTER)
         {
-                if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
+                if(uci_load(ctx, "system", &p) != UCI_OK)
                 {
                         printf("ERROR: no gargoyle package defined!\n");
                         return 0;
@@ -483,6 +461,11 @@ int main(int argc, char **argv)
                                         }
                                 }
                         }
+                }
+		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
+                {
+                        printf("ERROR: no gargoyle package defined!\n");
+                        return 0;
                 }
                 if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme") == UCI_OK)
                 {
