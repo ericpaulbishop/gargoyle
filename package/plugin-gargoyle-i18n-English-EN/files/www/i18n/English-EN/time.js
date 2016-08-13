@@ -64,3 +64,4 @@ TiZ.UTCm10="Guam, Russia";
 TiZ.UTCm11="Solomon Islands";
 TiZ.UTCm12="Fiji";
 TiZ.NZST="New Zealand";
+TiZ.IRST="Iran";
