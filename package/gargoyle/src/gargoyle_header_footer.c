@@ -523,7 +523,7 @@ int main(int argc, char **argv)
                 printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
                        "<ul class=\"nav sidebar\">\n"
                        "<li class=\"sidebar-header\">\n"//sidebar header begin
-                       "<span>Gargoyle</span><br/>\n");
+                       "<span id=\"garg_title\">Gargoyle</span><br/>\n");
 			test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/gargoyle-logo.png");
 			//if the theme includes this file, use it, otherwise fallback to default gargoyle file
 			if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
@@ -534,7 +534,7 @@ int main(int argc, char **argv)
 			{
 				printf("<img src=\"%s/Gargoyle/images/gargoyle-logo.png\" class=\"avatar\" alt=\"Gargoyle Logo\"><br/>\n", theme_root);
 			}
-                printf("<span>%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
+                printf("<span id=\"garg_host\">%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
                 printf("</li>\n");//<!-- sidebar-header end-->
 
                 int first_section=1;

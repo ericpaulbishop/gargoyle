@@ -107,6 +107,9 @@ h1.page-header {
 li.sidebar-header span {
   font-size: 20px;
 }
+li.sidebar-header span#garg_host {
+  font-size: 10px;
+}
 li.sidebar-item {
   text-indent: 22px;
   line-height: 40px;
