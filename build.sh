@@ -315,7 +315,7 @@ fi
 #compress javascript AND css
 if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress" = "1" ] ; then
 
-	cd "$top_dir/minifiers/node_modules/.bin"
+	cd "$top_dir/minifiers/node_modules/.bin" 2>/dev/null
 
 	npm_test=$( npm -v 2>/dev/null )
 	nodeglobal=$npm_test
