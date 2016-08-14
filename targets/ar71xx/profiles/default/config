@@ -215,6 +215,7 @@ CONFIG_DEFAULT_kmod-usb-ohci=y
 CONFIG_DEFAULT_kmod-usb2=y
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
+CONFIG_DEFAULT_logd=y
 CONFIG_DEFAULT_mtd=y
 CONFIG_DEFAULT_netifd=y
 CONFIG_DEFAULT_odhcp6c=y
@@ -1342,6 +1343,7 @@ CONFIG_PACKAGE_jsonfilter=y
 # CONFIG_PACKAGE_libatomic is not set
 CONFIG_PACKAGE_libc=y
 CONFIG_PACKAGE_libgcc=y
+CONFIG_PACKAGE_logd=y
 CONFIG_PACKAGE_libpthread=m
 CONFIG_PACKAGE_librt=m
 # CONFIG_PACKAGE_libstdcpp is not set
