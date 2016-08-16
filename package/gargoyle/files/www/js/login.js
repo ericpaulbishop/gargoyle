@@ -156,7 +156,7 @@ function clearFieldset(fieldsetId)
 		while(fieldsetEl.firstChild != null)
 		{
 			var rmEl = fieldsetEl.firstChild;
-			sectionHeader = rmEl.className == "sectionheader" ? rmEl : sectionHeader;
+			sectionHeader = rmEl.className == "panel-heading" || rmEl.className == "panel-title" ? rmEl : sectionHeader;
 			fieldsetEl.removeChild(rmEl);
 		}
 		if(sectionHeader != null)
@@ -183,6 +183,7 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 
 
 	var parentDiv = document.createElement("div");
+	parentDiv.className="panel-body";
 	if(quotaNumber > 0)
 	{
 		var nameSpan = document.createElement("span");

@@ -20,23 +20,22 @@
 
 <h1 class="page-header"><%~ quotas.USect %></h1>
 <div class="row">
-
-	<div class="panel panel-default">
-		<div class="panel-body">
-
-			<div class="col-lg-4">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
 				<div class="form-group form-inline">
 					<select id="host_display" class="form-control">
 						<option value="hostname"><%~ DspHn %></option>
 						<option value="ip"><%~ DspHIP %></option>
 					</select>
+					<select id="data_display" class="form-control">
+						<option value="pcts"><%~ DspPct %></option>
+						<option value="usds"><%~ DspUsd %></option>
+						<option value="lims"><%~ DspLim %></option>
+					</select>
 				</div>
-			</div>
-
-			<div class="col-lg-12">
 				<div id="quota_table_container"></div>
 			</div>
-
 		</div>
 	</div>
 
