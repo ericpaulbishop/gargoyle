@@ -2356,7 +2356,7 @@ CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
 # CONFIG_PACKAGE_uclient-fetch is not set
-# CONFIG_PACKAGE_umbim is not set
+CONFIG_PACKAGE_umbim=y
 CONFIG_PACKAGE_uqmi=y
 # CONFIG_PACKAGE_wget-default is not set
 # CONFIG_PACKAGE_wget-matrixssl is not set

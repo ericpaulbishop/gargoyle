@@ -59,6 +59,13 @@
 		echo "hasNCM = true;"
 	fi
 
+	has_mbim=$( grep cdc_mbim /sys/kernel/debug/usb/devices 2>/dev/null)
+	if [ -z "$has_mbim" ] ; then
+		echo "hasMBIM = false;"
+	else
+		echo "hasMBIM = true;"
+	fi
+
 	cdcif=$(egrep -Hi "(cdc ethernet control|rndis communications control)" /sys/class/net/*/device/interface 2>/dev/null | cut -f5 -d/)
 	[ -z "$cdcif" ] && cdcif=$(ls -l /sys/class/net/*/device/driver | grep cdc_ether | sed 's!.*/sys/class/net/\(.*\)/device/.*!\1!')
 	if [ -z "$cdcif" ]; then
@@ -334,6 +341,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<option value='3g'><%~ Mo3g %></option>
 				<option value='qmi'><%~ Mo3gQMI %></option>
 				<option value='ncm'><%~ Mo3gNCM %></option>
+				<option value='mbim'><%~ Mo3gMBIM %></option>
 				<option value='dhcp_cdc'><%~ Mo3gHiLink %></option>
 				<option value='none'><%~ Disabled %></option>
 			</select>
