@@ -43,7 +43,7 @@
 				</div>
 
 				<div class="form-group form-inline">
-					<div id="portf_add_container">
+					<div id="portf_add_container" class="table-responsive">
 						<%in templates/single_forward_template %>
 					</div>
 				</div>
@@ -67,7 +67,7 @@
 				</div>
 
 				<div class="form-group form-inline">
-					<div id="portfrange_add_container">
+					<div id="portfrange_add_container" class="table-responsive">
 						<%in templates/multi_forward_template %>
 					</div>
 				</div>
@@ -102,7 +102,7 @@
 				<br/>
 
 				<div class="form-group form-inline">
-					<div id="upnp_table_container" class="bottom_gap"></div>
+					<div id="upnp_table_container" class="bottom_gap table-responsive"></div>
 				</div>
 
 				<div id="upnp_up_container" class="form-group form-inline">

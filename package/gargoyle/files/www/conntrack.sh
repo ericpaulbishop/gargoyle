@@ -70,7 +70,7 @@
 
 			<div class="col-lg-12">
 				<div class="alert alert-warning" role="alert"><%~ CnWarn %></div>
-					<div id="connection_table_container"></div>
+					<div id="connection_table_container" class="table-responsive"></div>
 			</div>
 		</div>
 

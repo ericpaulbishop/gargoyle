@@ -210,7 +210,7 @@
 						</option>
 					</select>
 				</div>
-				<div id="bandwidth_table_container"></div>
+				<div id="bandwidth_table_container" class="table-responsive"></div>
 				<div>
 					<button id="delete_data_button" class="btn btn-danger btn-lg" onclick="deleteData();">
 						<%~ DelD %>

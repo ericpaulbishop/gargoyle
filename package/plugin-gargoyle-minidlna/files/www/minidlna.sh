@@ -79,7 +79,7 @@
 					<span style="text-decoration:underline;"><%~ DLNAFolders %>:</span>
 				</div>
 
-				<div id="media_table_container"></div>
+				<div id="media_table_container" class="table-responsive"></div>
 			</div>
 		</div>
 	</div>

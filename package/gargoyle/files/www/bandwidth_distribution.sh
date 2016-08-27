@@ -91,7 +91,7 @@
 		<h3 class="panel-title"><%~ BDtbl %></h3>
 	</div>
 	<div class="panel-body">
-		<div id="bandwidth_distribution_table_container"></div>
+		<div id="bandwidth_distribution_table_container" class="table-responsive"></div>
 	</div>
 </div>
 </div>

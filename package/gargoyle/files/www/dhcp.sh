@@ -134,7 +134,7 @@ for (etherIndex in etherData)
 		</div>
 
 		<div class="form-group form-inline">
-			<div id="staticip_table_container" class="bottom_gap"></div>
+			<div id="staticip_table_container" class="bottom_gap table-responsive"></div>
 		</div>
 
 	</div>

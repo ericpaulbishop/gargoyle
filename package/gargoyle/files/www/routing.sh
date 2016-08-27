@@ -35,7 +35,7 @@
 			</div>
 
 			<div class="panel-body">
-				<div id="active_route_table_container"></div>
+				<div id="active_route_table_container" class="table-responsive"></div>
 			</div>
 
 		</div>
@@ -68,7 +68,7 @@
 				</div>
 
 				<div class="form-group form-inline">
-					<div id="static_route_table_container" class="bottom_gap"></div>
+					<div id="static_route_table_container" class="bottom_gap table-responsive"></div>
 				</div>
 			</div>
 

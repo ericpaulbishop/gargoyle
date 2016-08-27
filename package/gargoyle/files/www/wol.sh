@@ -37,7 +37,7 @@ var arpLines;
 		<div class="panel panel-default">
 
 			<div class="panel-body">
-				<div id="wol_table_container"></div>
+				<div id="wol_table_container" class="table-responsive"></div>
 
 				<div id="wol_help">
 					<span id="wol_help_txt">

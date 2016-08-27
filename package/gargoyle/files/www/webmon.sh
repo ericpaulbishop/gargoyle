@@ -64,7 +64,7 @@
 							<br/>
 							<em><%~ SpcIP %></em>
 						</div>
-						<div id="ip_table_container"></div>
+						<div id="ip_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 
@@ -98,7 +98,7 @@
 					</select>
 				</div>
 
-				<div id="webmon_domain_table_container"></div>
+				<div id="webmon_domain_table_container" class="table-responsive"></div>
 			</div>
 
 		</div>
@@ -122,7 +122,7 @@
 					</select>
 				</div>
 
-				<div id="webmon_search_table_container"></div>
+				<div id="webmon_search_table_container" class="table-responsive"></div>
 			</div>
 
 		</div>

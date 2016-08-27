@@ -38,7 +38,7 @@
 
 				<div id="internal_divider1" class="internal_divider"></div>
 				<span id="current_rule_label" style="text-decoration:underline" ><%~ CRestr %>:</span>
-				<div id="rule_table_container"></div>
+				<div id="rule_table_container" class="table-responsive"></div>
 			</div>
 
 		</div>
@@ -64,7 +64,7 @@
 
 				<div id="internal_divider1" class="internal_divider"></div>
 				<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
-				<div id="exception_table_container"></div>
+				<div id="exception_table_container" class="table-responsive"></div>
 			</div>
 
 		</div>

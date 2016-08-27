@@ -79,7 +79,7 @@
 
 		<span id="add_ddns_label"><p><%~ DYSect %>:</p></span>
 
-		<div id="ddns_table_container"></div>
+		<div id="ddns_table_container" class="table-responsive"></div>
 
 	</div>
 </div>

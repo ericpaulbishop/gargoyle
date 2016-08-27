@@ -88,7 +88,7 @@
 							<h3><%~ PgSrc %>:</h3>
 						</div>
 
-						<div id="package_source_table_container"></div>
+						<div id="package_source_table_container" class="table-responsive"></div>
 
 						<div class="form-group form-inline">
 							<label for="add_source_name"><%~ ANam %>:</label>
@@ -129,19 +129,19 @@
 
 				<div class="row">
 					<div class="col-lg-12">
-						<div id="languages_table_container"></div>
+						<div id="languages_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 
 				<div class="row">
 					<div class="col-lg-12">
-						<div id="themes_table_container"></div>
+						<div id="themes_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 
 				<div class="row">
 					<div class="col-lg-12">
-						<div id="packages_table_container"></div>
+						<div id="packages_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 

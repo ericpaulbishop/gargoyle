@@ -67,7 +67,7 @@ var currentTime;
 
 			<div class="panel-body">
 				<div id="dhcp_data" class="form-group form-inline">
-					<div id="lease_table_container"></div>
+					<div id="lease_table_container" class="table-responsive"></div>
 				</div>
 			</div>
 
@@ -87,7 +87,7 @@ var currentTime;
 
 			<div class="panel-body">
 				<div id="wifi_data" class="form-group form-inline">
-					<div id="wifi_table_container"></div>
+					<div id="wifi_table_container" class="table-responsive"></div>
 				</div>
 			</div>
 
@@ -107,7 +107,7 @@ var currentTime;
 
 			<div class="panel-body">
 				<div id="active_data" class="form-group form-inline">
-					<div id="active_table_container"></div>
+					<div id="active_table_container" class="table-responsive"></div>
 				</div>
 			</div>
 

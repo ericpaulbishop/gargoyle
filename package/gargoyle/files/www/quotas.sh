@@ -50,7 +50,7 @@
 
 			<span id="active_quotas_label" style="text-decoration:underline" ><%~ ActivQuotas %>:</span>
 
-			<div id="quota_table_container"></div>
+			<div id="quota_table_container" class="table-responsive"></div>
 
 		</div>
 	</div>

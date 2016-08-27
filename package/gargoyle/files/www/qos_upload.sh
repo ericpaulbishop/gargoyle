@@ -46,7 +46,7 @@
 		</div>
 		<div class="internal_divider"></div>
 
-		<div id="qos_rule_table_container" class="bottom_gap"></div>
+		<div id="qos_rule_table_container" class="bottom_gap table_responsive"></div>
 		<div class="form-group form-inline">
 			<label id="default_class_label" for="default_class"><%~ ServClass %>:</label>
 			<select class="form-control" id="default_class"></select>
@@ -171,7 +171,7 @@
 		</div>
 			<div class="panel-body">
 
-		<div id="qos_class_table_container" class="bottom_gap"></div>
+		<div id="qos_class_table_container" class="bottom_gap table-responsive"></div>
 
 		<div>
 			<label class="leftcolumn" id="total_bandwidth_label" for="total_bandwidth"><%~ UTotBand %>:</label>

@@ -162,7 +162,7 @@
 
 			<div class="form-group form-inline" id="authorised_keys_table_container">
 				<label id="authorized_keys_label" class="leftcolumnonly" for="authorized_keys_table_container"><%~ SSHKeys %>:</label>
-				<div id="authorized_keys_table_container" class="indent"></div>
+				<div id="authorized_keys_table_container" class="indent table-responsive"></div>
 				<div id="ssh_help" class="indent">
 					<span id="ssh_help_txt" style="display:none">
 						<p><%~ SSHHelp1 %></p>

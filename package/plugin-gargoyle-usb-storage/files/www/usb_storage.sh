@@ -116,7 +116,7 @@
 					<button id="add_user" class="btn btn-default" onclick="addUser()"><%~ AddU %></button>
 				</div>
 
-				<div style="margin-bottom:20px;" id="user_table_container" class="form-group">
+				<div style="margin-bottom:20px;" id="user_table_container" class="form-group table-responsive">
 				</div>
 
 				<div id="sharing_add_heading_container" class="form-group">
@@ -134,7 +134,7 @@
 				<div id="sharing_current_heading_container" class="form-group">
 					<span><%~ CShare %>:</span>
 				</div>
-				<div id="sharing_mount_table_container" class="form-group"></div>
+				<div id="sharing_mount_table_container" class="form-group table-responsive"></div>
 
 				<div class="internal_divider"></div>
 
