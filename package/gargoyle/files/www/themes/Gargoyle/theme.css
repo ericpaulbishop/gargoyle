@@ -77,7 +77,7 @@ legend {
 .sidebar-item.active>a, .sidebar-item>a:hover{
   background-color: #FFFFFF;
   color: #000000;
-  text-indent: 22px;
+  text-indent: 7.3%;
   line-height: 40px;
   display: block;
   float: left;
@@ -111,14 +111,14 @@ li.sidebar-header span#garg_host {
   font-size: 10px;
 }
 li.sidebar-item {
-  text-indent: 22px;
+  text-indent: 7.3%;
   line-height: 40px;
 }
 li.sidebar-item a {
   border-bottom: 1px solid #b2b2b2;
 }
 .sidebar-item.active .sidebar-item{
-  text-indent: 39px;
+  text-indent: 13%;
 }
 .sidebar-item.active .sidebar-item.active {
   background: #ffffff;
@@ -135,7 +135,7 @@ li.sidebar-item a {
   content: "> ";
 }
 .sidebar-item.active .sidebar-item a{
-    text-indent: 42px;
+  text-indent: 14%;
   border: none;
 }
 ul.sidebar .sidebar-header a, ul.sidebar .sidebar-list a:hover {
@@ -199,7 +199,7 @@ ul.sidebar .sidebar-header .menu-icon {
 }
 ul.sidebar .sidebar-title {
   font-size: 12px;
-  text-indent: 20px;
+  text-indent: 6.6%;
   height: 35px;
   line-height: 40px;
   text-transform: uppercase;
@@ -210,12 +210,12 @@ ul.sidebar .sidebar-list {
   padding: 0;
 }
 ul.sidebar .sidebar-list a {
-  text-indent: 25px;
+  text-indent: 8.3%;
   font-size: 14px;
   line-height: 20px;
 }
 ul.sidebar .sidebar-list a:hover {
-  text-indent: 39px;
+  text-indent: 13%;
 }
 ul.sidebar .sidebar-list .menu-icon {
   float: right;
@@ -224,7 +224,7 @@ ul.sidebar .sidebar-list .menu-icon {
   width: 70px;
 }
 ul.sidebar .sidebar-list a:hover .menu-icon {
-  text-indent: 25px;
+  text-indent: 8.3%;
 }
 ul ul {
   display: none;
@@ -292,6 +292,7 @@ nav>li.active>a {
 }
 .navbar-brand {
   padding-top: 20px;
+  display: none;
 }
 @media screen and (max-width: 767px) {
   .navbar-brand {
