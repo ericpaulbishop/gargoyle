@@ -121,68 +121,68 @@ then
 	#Bandwidth usage
 	echo -e "<br><h1>Bandwidth usage:</h1><br>" >> /tmp/email-log.txt
 	config=$(uci get email.@email[0].bandwidthInterval)
-	cat /tmp/bw_backup/do_bw_backup.sh | grep bw_get | sed 's/.*bw_get/bw_get/' | sed 's/\-f .*/-t/g' | grep $config > /tmp/tmp.bw.sh
+	cat /tmp/bw_backup/do_bw_backup.sh | grep bw_get | sed 's/.*bw_get/bw_get/' | sed 's/\-f .*/-t/g' | grep $config | grep "bdist" > /tmp/tmp.bw.sh
 	sh  /tmp/tmp.bw.sh | sed 's/^[^\-]*\-//g' |  sed 's/\-/,/g' | sed '/^\s*$/d' > /tmp/work.tmp
 	rm /tmp/tmp.bw.sh
 	while read line           
 	do           
-		direction=$(echo $line | cut -f1 -d,)
-		time=$(echo $line | cut -f5 -d,)
-		data=$(echo $line | cut -f7 -d,)
 		type=$(echo $line | cut -f4 -d,)
 		if [ "$type" == "COMBINED" ]; then
-			if [ "$time" != "0" ]; then
+			end_time=$(echo $line | cut -f6 -d,)
+			if [ "$end_time" != "0" ]; then
+				direction=$(echo $line | cut -f1 -d,)
+				data=$(echo $line | cut -f7 -d,)
 				if [ "$direction" == "download" ]; then
-					converttime=$(date -d @$time);
+					converttime=$(date -d @$(echo $line | cut -f5 -d,));
 					if [ "$config" == "day" ]; then
-						echo $(echo $converttime | cut -f2,3 -d " ") >> /tmp/emailtime.tmp
+						echo "$end_time,$(echo $converttime | cut -f2,3 -d " ")" >> /tmp/emailtime.tmp
 					else
-						echo $(echo $converttime | cut -f4 -d " " | cut -f1-2 -d:) >> /tmp/emailtime.tmp
+						echo "$end_time,$(echo $converttime | cut -f4 -d " " | cut -f1-2 -d:)" >> /tmp/emailtime.tmp
 					fi
-					echo $data >> /tmp/emaildownload.tmp
+					echo "$end_time,$data" >> /tmp/emaildownload.tmp
 				else
-					echo $data >> /tmp/emailupload.tmp
+					echo "$end_time,$data" >> /tmp/emailupload.tmp
 				fi
 			fi
 		fi
 	done < /tmp/work.tmp
 	rm /tmp/work.tmp
 	echo "<table $tablestyle><tr><th $thstyle>Time</th><th $thstyle>Download</th><th $thstyle>Upload</th></tr>" >> /tmp/email-log.txt
-	lines=1
 	while read line           
 	do
-		upload=$(head -n $lines /tmp/emailupload.tmp | tail -1)
+		epochtime=$(echo $line | cut -f1 -d,);
+		time=$(echo $line | cut -f2 -d,);
+		upload=$(cat /tmp/emailupload.tmp | grep $epochtime | cut -f2 -d,)
 		if [[ $upload -gt $((1024*1024*1024*1024)) ]]; then
-			upload=$(printf $(($upload/1024/1024/1024/1024)) && printf "TBytes")
+			upload=$(awk "BEGIN {printf \"%.2f\",$upload/1024/1024/1024/1024}" && printf " TB")
 		elif [[ $upload -gt $((1024*1024*1024)) ]]; then
-			upload=$(printf $(($upload/1024/1024/1024)) && printf "GBytes")
+			upload=$(awk "BEGIN {printf \"%.2f\",$upload/1024/1024/1024}" && printf " GB")
 		elif [[ $upload -gt $((1024*1024)) ]]; then
-			upload=$(printf $(($upload/1024/1024)) && printf "MBytes")
+			upload=$(awk "BEGIN {printf \"%.2f\",$upload/1024/1024}" && printf " MB")
 		elif [[ $upload -gt $((1024)) ]]; then
-			upload=$(printf $(($upload/1024)) && printf "KBytes")
+			upload=$(awk "BEGIN {printf \"%.2f\",$upload/1024}" && printf " KB")
 		else
-			upload=$(printf "$upload Bytes")
+			upload=$(printf "$upload B")
 		fi
-		download=$(head -n $lines /tmp/emaildownload.tmp | tail -1)
+		download=$(cat /tmp/emaildownload.tmp | grep $epochtime | cut -f2 -d,)
 		if [[ $download -gt $((1024*1024*1024*1024)) ]]; then
-			download=$(printf $(($download/1024/1024/1024/1024)) && printf "TBytes")
+			download=$(awk "BEGIN {printf \"%.2f\",$download/1024/1024/1024/1024}" && printf " TB")
 		elif [[ $download -gt $((1024*1024*1024)) ]]; then
-			download=$(printf $(($download/1024/1024/1024)) && printf "GBytes")
+			download=$(awk "BEGIN {printf \"%.2f\",$download/1024/1024/1024}" && printf " GB")
 		elif [[ $download -gt $((1024*1024)) ]]; then
-			download=$(printf $(($download/1024/1024)) && printf "MBytes")
+			download=$(awk "BEGIN {printf \"%.2f\",$download/1024/1024}" && printf " MB")
 		elif [[ $download -gt $((1024)) ]]; then
-			download=$(printf $(($download/1024)) && printf "KBytes")
+			download=$(awk "BEGIN {printf \"%.2f\",$download/1024}" && printf " KB")
 		else
-			download=$(printf "$download Bytes")
+			download=$(printf "$download B")
 		fi
-		echo "<tr><td $tdstyle>$line</td><td $tdstyle>$download</td><td $tdstyle>$upload</td></tr>" >> /tmp/bandwidth.tmp
-		lines=$((lines+1))
+		echo "<tr><td $tdstyle>$time</td><td $tdstyle>$download</td><td $tdstyle>$upload</td></tr>" >> /tmp/bandwidth.tmp
 	done < /tmp/emailtime.tmp 
 	cat /tmp/bandwidth.tmp | tail -n $count >> /tmp/email-log.txt
-	rm /tmp/bandwidth.tmp
-	rm /tmp/emailtime.tmp
 	rm /tmp/emaildownload.tmp
 	rm /tmp/emailupload.tmp
+	rm /tmp/emailtime.tmp
+	rm /tmp/bandwidth.tmp
 	echo "</table>" >> /tmp/email-log.txt
 fi
 

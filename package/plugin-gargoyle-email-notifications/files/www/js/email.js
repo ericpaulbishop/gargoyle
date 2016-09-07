@@ -758,16 +758,16 @@ function getData(){
 			if(i == 5){
 				var interval = document.getElementById("bandwidthIntervalSelect").value;
 				switch(interval){
-					case "minutes":
+					case email.minutes:
 						data['interval'] = "minute";
 						break;
-					case "quarter hours":
-						data['interval'] = "180";
+					case email.quarterhours:
+						data['interval'] = "900";
 						break;
-					case "hours":
+					case email.hours:
 						data['interval'] = "hour";
 						break;
-					case "days":
+					case email.days:
 						data['interval'] = "day";
 						break
 					default:
@@ -858,9 +858,9 @@ function testMail() {
     if (data['auth']) {
 		if(!data['encryption']){
 			//Authentication enabled and encryption disabled
-			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+' '+data['receiver']+'" > /etc/msmtprc && ';
+			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
 		}else{
-			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ntls on"+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+' '+data['receiver']+'" > /etc/msmtprc && ';
+			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ntls on"+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
 		}
 		command = command + body + 'sendmail '+data['receiver']+' --syslog --tls-trust-file '+data['certpath']+' --timeout 30 && rm /etc/msmtprc && mv /tmp/msmtprc.tmp /etc/msmtprc';
     } else {
@@ -939,16 +939,16 @@ function LoadData() {
 					var interval = uciOriginal.get("email", selector[0], "bandwidthInterval");
 					switch(interval){
 						case "minute":
-							document.getElementById("bandwidthIntervalSelect").value = "minutes";
+							document.getElementById("bandwidthIntervalSelect").value = email.minutes;
 							break;
-						case "180":
-							document.getElementById("bandwidthIntervalSelect").value = "quarter hours";
+						case "900":
+							document.getElementById("bandwidthIntervalSelect").value = email.quarterhours;
 							break;
 						case "hour":
-							document.getElementById("bandwidthIntervalSelect").value = "hours";
+							document.getElementById("bandwidthIntervalSelect").value = email.hours;
 							break;
 						case "day":
-							document.getElementById("bandwidthIntervalSelect").value = "days";
+							document.getElementById("bandwidthIntervalSelect").value = email.days;
 							break;
 						default:
 							break;
