@@ -1584,7 +1584,7 @@ CONFIG_PACKAGE_kmod-input-core=m
 # CONFIG_PACKAGE_kmod-input-gpio-keys-polled is not set
 # CONFIG_PACKAGE_kmod-input-joydev is not set
 # CONFIG_PACKAGE_kmod-input-matrixkmap is not set
-# CONFIG_PACKAGE_kmod-input-polldev is not set
+CONFIG_PACKAGE_kmod-input-polldev=y
 # CONFIG_PACKAGE_kmod-input-uinput is not set
 
 #
