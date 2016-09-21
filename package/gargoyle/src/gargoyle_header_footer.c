@@ -389,7 +389,7 @@ int main(int argc, char **argv)
                                "\t<div id=\"row-offcanvas\" class=\"row-offcanvas full-height\">\n"
                                "\t<div id=\"wrapper\" class=\"container-fluid full-height\">\n");
 
-                        printf("<div id=\"content\" class=\"col-xs-12 col-sm-10 col-md-10 col-lg-10 col-sm-push-2 col-md-push-2 col-lg-push-2 full-height\">\n"
+                        printf("<div id=\"content\" class=\"col-xs-12 col-md-10 col-lg-10 col-md-push-2 col-lg-push-2 full-height\">\n"
                                "\t<div id=\"topnavbar\" class=\"navbar navbar-default\">\n"
                                "\t<div class=\"container-fluid\">\n"
                                "\t<div class=\"navbar-header\">\n"
@@ -520,7 +520,7 @@ int main(int argc, char **argv)
                        "</div>\n"                                //row
                        "</div>\n");                              //content
 
-                printf("<div id=\"sidebar\" class=\"col-xs-12 col-sm-2 col-md-2 col-lg-2 col-sm-pull-10 col-md-pull-10 col-lg-pull-10 full-height\">\n"
+                printf("<div id=\"sidebar\" class=\"col-xs-12 col-md-2 col-lg-2 col-md-pull-10 col-lg-pull-10 full-height\">\n"
                        "<ul class=\"nav sidebar\">\n"
                        "<li class=\"sidebar-header\">\n"//sidebar header begin
                        "<span id=\"garg_title\">Gargoyle</span><br/>\n");
