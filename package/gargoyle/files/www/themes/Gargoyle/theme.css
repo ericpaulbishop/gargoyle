@@ -96,7 +96,7 @@ legend {
   text-decoration: underline;
   width: 100%;
 }
-.sidebar-item>a:hover {
+.sidebar-item>a:hover, .sidebar-item.active>a:hover {
   padding-left: 7.3%;
 }
 li.sidebar-header {
