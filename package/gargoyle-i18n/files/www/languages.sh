@@ -22,17 +22,22 @@
 //-->
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ i18n.LMSect %></legend>
-	
-	<span class='narrowleftcolumn'>
-		<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
-	</span>
-	<span class='widerightcolumn' style="display:block; clear:right; margin-right:100px" >
-		<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Språk / Dil / γλώσσα / Язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
-	</span>
-	<div id="lang_table_container"></div>
-</fieldset>
+<h1 class="page-header"><%~ i18n.LMSect %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<span>
+					<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
+				</span>
+				<span style="display:block; clear:right; margin-right:100px" >
+					<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Språk / Dil / γλώσσα / Язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
+				</span>
+				<div id="lang_table_container"></div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--
