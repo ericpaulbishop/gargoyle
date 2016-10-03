@@ -116,18 +116,10 @@ h1.page-header {
   text-indent: 10px;
 }
 .page-header {
-  background:#fff;
-  border-radius:5px;
+  background: #FFFFFF;
+  border-radius: 5px;
   margin-top: 20px;
   padding: 10px 0 10px;
-}
-@media (min-width: 992px) {
-  div#topnavbar {
-    display: none;
-  }
-  .page-header {
-    margin-top:10px;
-  }
 }
 li.sidebar-header span {
   font-size: 20px;
@@ -347,6 +339,12 @@ nav>li.active>a {
 @media screen and (min-width: 992px) {
   .navbar-right {
     margin-right: -30px;
+  }
+  div#topnavbar {
+    display: none;
+  }
+  .page-header {
+    margin-top: 10px;
   }
 }
 #row-offcanvas > .container-fluid {
