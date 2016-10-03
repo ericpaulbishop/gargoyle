@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Kvoter";
 quotasStr.Section="Båndbredde Kvoter";
 quotasStr.AddQuota="Legg Til Ny Kvote";
 quotasStr.ActivQuotas="Aktive Kvoter";

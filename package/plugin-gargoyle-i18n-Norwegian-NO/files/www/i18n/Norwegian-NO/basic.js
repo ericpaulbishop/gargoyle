@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for basic.sh html elements
  */
 
+basicS.mBasic="Grunnleggende";
 basicS.DCfgSect="Enhetskonfigurasjon";
 basicS.CfgDev="Konfigurere Enhet Som";
 basicS.DvGtwy="Gateway (Standard)";

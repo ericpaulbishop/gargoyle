@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Plugins";
 pgS.PgOpt="Plugin Alternativer";
 pgS.PRoot="Plugin Root";
 pgS.RDrv="Root Enhet";
