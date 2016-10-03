@@ -26,7 +26,7 @@
 %>
 //-->
 </script>
-<h1 class="page-header">Bandwidth Distribution</h1>
+<h1 class="page-header"><%~ bandwidth.BDst %></h1>
 <div class="row">
 
 	<div class="col-lg-4">
