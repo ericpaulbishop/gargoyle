@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Quotas";
 quotasStr.Section="Bandwidth Quotas";
 quotasStr.AddQuota="Add New Quota";
 quotasStr.ActivQuotas="Active Quotas";

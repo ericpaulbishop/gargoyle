@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for restrictions.sh html elements
  */
 
+restStr.mRestrict="Restrictions";
 restStr.ARSect="Access Restrictions";
 restStr.NRRule="New Restriction Rule";
 restStr.ANRule="Add New Rule";
