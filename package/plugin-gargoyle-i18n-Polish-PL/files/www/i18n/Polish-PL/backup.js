@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for backup.sh html elements
  */
 
+bkS.mBackup="Kopia konfiguracji";
 bkS.CurrC="Kopia bezpieczeństwa bieżącej konfiguracji";
 bkS.RestC="Przywrócenie starej konfiguracji";
 bkS.DfltC="Przywrócenie domyślnej konfiguracji";

@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Polish-PL text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Urządzenie";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Wi-Fi";
+ovwS.mTime="Czas";
+ovwS.mServices="Usługi";
+ovwS.mBridge="Most";
 ovwS.Sts="Status";
 ovwS.DNam="Nazwa urządzenia";
 ovwS.GVer="Wersja Gargoyle";

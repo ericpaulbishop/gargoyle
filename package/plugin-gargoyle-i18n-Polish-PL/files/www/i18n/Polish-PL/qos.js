@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Polish-PL text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS (pobieranie)";
+qosStr.mQUl="QoS (wysyłanie)";
 qosStr.URSection="QoS (wysyłanie) - Reguły klasyfikacji";
 qosStr.DRSection="QoS (pobieranie) - Reguły klasyfikacji";
 qosStr.UCSection="QoS (wysyłanie) - Klasy usług";
@@ -103,6 +105,7 @@ qosStr.ZERO="zero";
 qosStr.YES="Yes";
 
 //qos_distribution.sh
+qosStr.mQOS="Podział QoS";
 qosStr.UBSect="QoS - Podział pasma wysyłania";
 qosStr.DBSect="QoS - Podział pasma pobierania";
 qosStr.uTFrm="Przedział czasowy";

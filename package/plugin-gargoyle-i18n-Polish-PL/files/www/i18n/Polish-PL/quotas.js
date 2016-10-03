@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Limity transferu";
 quotasStr.Section="Limity transferu";
 quotasStr.AddQuota="Nowy limit";
 quotasStr.ActivQuotas="Aktywne limity";

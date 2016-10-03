@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for restrictions.sh html elements
  */
 
+restStr.mRestrict="Ograniczenia";
 restStr.ARSect="Ograniczenia dostępu";
 restStr.NRRule="Reguła ograniczenia";
 restStr.ANRule="Dodaj nową regułę";

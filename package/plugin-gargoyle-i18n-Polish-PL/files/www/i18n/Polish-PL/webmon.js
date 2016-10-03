@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Monitor sieci";
 webmS.PrSect="Preferencje Monitora sieci";
 webmS.EMon="Włącz Monitor sieci";
 webmS.NumSt="Liczba zapisanych witryn";

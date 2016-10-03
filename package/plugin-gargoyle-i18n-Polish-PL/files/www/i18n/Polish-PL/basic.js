@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for basic.sh html elements
  */
 
+basicS.mBasic="Podstawowa";
 basicS.DCfgSect="Konfiguracja urządzenia";
 basicS.CfgDev="Urządzenie pracuje jako";
 basicS.DvGtwy="Brama sieciowa (domyślnie)";

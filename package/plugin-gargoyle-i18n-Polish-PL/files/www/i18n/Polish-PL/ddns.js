@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for ddns.sh html elements
  */
 
+DyDNS.mDDNS="Dynamiczny DNS";
 DyDNS.DYSect="Usługi Dynamiczny DNS";
 DyDNS.AddDy="Usługa Dynamiczny DNS";
 DyDNS.SvPro="Operator usługi";
