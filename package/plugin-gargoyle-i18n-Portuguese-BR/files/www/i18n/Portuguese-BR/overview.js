@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Portuguese-BR text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Dispositivo";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Wireless";
+ovwS.mTime="Tempo";
+ovwS.mServices="Servi&ccedil;os";
+ovwS.mBridge="Bridge";
 ovwS.Sts="Status";
 ovwS.DNam="Nome do Dispositivo";
 ovwS.GVer="Vers&atilde;o do Gargoyle";
@@ -32,7 +39,7 @@ ovwS.W3GSS="WAN (3G) For&ccedil;a do Sinal";
 ovwS.WlMod="Modo de Wireless";
 ovwS.WlMAdd="Endere&ccedil;o MAC da Wireless";
 ovwS.APID="SSID do Access Point";
-ovwS.F5GID="SSID do Access Point 5 GHz";
+ovwS.F5GID="SSID do Access Point 5GHz";
 ovwS.IDJoin="SSID Conectado pelo cliente";
 ovwS.QUp="QoS Upload";
 ovwS.QDwn="QoS Download";
@@ -43,6 +50,6 @@ ovwS.Clnt="Clientw";
 ovwS.Gtwy="Gateway";
 ovwS.WBrgR="Wireless Bridge/Repetidor";
 ovwS.Discon="Disconectado";
-ovwS.T2p4GID="SSID do Access Point 2.4 GHz";
+ovwS.T2p4GID="SSID do Access Point 2.4GHz";
 ovwS.ClBr="Cliente Bridge";
 ovwS.Port="Porta";
