@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) German-DE text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS Download";
+qosStr.mQUl="QoS Upload";
 qosStr.URSection="QoS (Upload) -- Klassifizierungsregeln";
 qosStr.DRSection="QoS (Download) -- Klassifizierungsregeln";
 qosStr.UCSection="QoS (Upload) -- Serviceklasse";
@@ -103,6 +105,7 @@ qosStr.ZERO="null";
 qosStr.YES="Ja";
 
 //qos_distribution.sh
+qosStr.mQOS="QoS Distribution";
 qosStr.UBSect="QoS Upload Bandbreitenverteilung";
 qosStr.DBSect="QoS Download Bandbreitenverteilung";
 qosStr.uTFrm="Upload Zeitraum";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for access.sh html elements
  */
 
+accessStr.mAccess="Router Zugriff";
 accessStr.Section="Web Zugriff";
 accessStr.WebProtocol="Web Admin Protokoll";
 accessStr.LocalPort="Lokaler HTTP Port";

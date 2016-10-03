@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for basic.sh html elements
  */
 
+basicS.mBasic="Grundeinstellung";
 basicS.DCfgSect="Gerätekonfiguration";
 basicS.CfgDev="Gerät konfigurieren als";
 basicS.DvGtwy="Gateway (Default)";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="USB Speicher";
 usbSStr.SDisk="Freigegebene Laufwerke";
 usbSStr.Nomdsk="Kein eingebundenes USB-Laufwerk gefunden.";
 usbSStr.WFTP="Erlaube den Zugang per FTP vom WAN-Anschluss";

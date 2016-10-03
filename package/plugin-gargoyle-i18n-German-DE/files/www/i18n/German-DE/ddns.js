@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for ddns.sh html elements
  */
 
+DyDNS.mDDNS="Dynamic DNS";
 DyDNS.DYSect="Dynamic DNS Services";
 DyDNS.AddDy="Dynamic DNS Service hinzufügen";
 DyDNS.SvPro="Dienstanbieter";

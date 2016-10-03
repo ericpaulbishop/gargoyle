@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Webnutzung";
 webmS.PrSect="Webüberwachung konfigurieren";
 webmS.EMon="Webüberwachung aktivieren";
 webmS.NumSt="Anzahl zu speichernde Seiten";
