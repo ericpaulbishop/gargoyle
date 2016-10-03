@@ -97,7 +97,7 @@
 		<div id="device_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">Device</h3>
+				<h3 class="panel-title"><%~ overview.mDevice %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -125,7 +125,7 @@
 		<div id="wan_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">WAN</h3>
+				<h3 class="panel-title"><%~ overview.mWAN %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -147,7 +147,7 @@
 		<div id="lan_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">LAN</h3>
+				<h3 class="panel-title"><%~ overview.mLAN %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -170,7 +170,7 @@
 		<div id="wifi_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">Wireless</h3>
+				<h3 class="panel-title"><%~ overview.mWireless %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -209,7 +209,7 @@
 		<div id="time_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">Time</h3>
+				<h3 class="panel-title"><%~ overview.mTime %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -233,7 +233,7 @@
 		<div id="bridge_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">Bridge</h3>
+				<h3 class="panel-title"><%~ overview.mBridge %></h3>
 			</div>
 
 			<div class="panel-body">
@@ -281,7 +281,7 @@
 		<div id="services_container" class="panel panel-default">
 
 			<div class="panel-heading">
-				<h3 class="panel-title">Services</h3>
+				<h3 class="panel-title"><%~ overview.mServices %></h3>
 			</div>
 
 			<div class="panel-body">

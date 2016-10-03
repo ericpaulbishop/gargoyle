@@ -8,7 +8,7 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "backup" -c "internal.css" -j "backup.js" -z "backup.js" network
 %>
-<h1 class="page-header">Backup / Restore</h1>
+<h1 class="page-header"><%~ backup.mBackup %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

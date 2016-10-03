@@ -43,7 +43,7 @@
 %>
 </script>
 
-<h1 class="page-header">Reboot</h1>
+<h1 class="page-header"><%~ reboot.RbSect %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

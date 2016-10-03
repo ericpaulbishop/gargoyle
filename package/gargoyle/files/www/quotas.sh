@@ -28,7 +28,7 @@
 //-->
 </script>
 
-<h1 class="page-header">Quotas</h1>
+<h1 class="page-header"><%~ quotas.mQuotas %></h1>
 <div class="row">
 
 	<div class="col-lg-6">

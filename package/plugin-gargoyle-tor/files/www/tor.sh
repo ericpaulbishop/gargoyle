@@ -18,7 +18,7 @@
 %>
 </script>
 
-<h1 class="page-header">TOR</h1>
+<h1 class="page-header"><%~ tor.mTor %></h1>
 <div class="row">
 
 	<div class="col-lg-6">

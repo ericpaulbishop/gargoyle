@@ -21,7 +21,7 @@
 //-->
 </script>
 
-<h1 class="page-header">Themes</h1>
+<h1 class="page-header"><%~ themes.mTheme %></h1>
 <div class="row">
 
 	<div class="col-lg-12">

@@ -87,7 +87,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 //-->
 </script>
 
-<h1 class="page-header">Basic</h1>
+<h1 class="page-header"><%~ basic.mBasic %></h1>
 <div class="row">
 
 	<div id="config_fieldset" class="col-lg-4">

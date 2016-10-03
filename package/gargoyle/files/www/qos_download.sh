@@ -27,7 +27,7 @@
 //-->
 </script>
 
-<h1 class="page-header">QoS Download</h1>
+<h1 class="page-header"><%~ qos.mQDl %></h1>
 <div class="row">
 
 	<div class="col-lg-12">

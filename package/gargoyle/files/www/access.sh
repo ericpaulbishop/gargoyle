@@ -34,7 +34,7 @@
 %>
 //-->
 </script>
-<h1 class="page-header">Router Access</h1>
+<h1 class="page-header"><%~ access.mAccess %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

@@ -24,7 +24,7 @@
 //-->
 </script>
 
-<h1 class="page-header">Routing</h1>
+<h1 class="page-header"><%~ routing.mRoutes %></h1>
 <div class="row">
 
 	<div class="col-lg-12">

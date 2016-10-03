@@ -26,7 +26,7 @@
 //-->
 </script>
 
-<h1 class="page-header">DDNS</h1>
+<h1 class="page-header"><%~ ddns.mDDNS %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

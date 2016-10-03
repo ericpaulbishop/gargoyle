@@ -26,7 +26,7 @@ var currentTime;
 %>
 //-->
 </script>
-<h1 class="page-header">Hosts</h1>
+<h1 class="page-header"><%~ hosts.mHosts %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

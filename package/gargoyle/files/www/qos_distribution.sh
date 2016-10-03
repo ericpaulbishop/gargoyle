@@ -33,7 +33,7 @@
 	}
 </style>
 
-<h1 class="page-header">QoS Distribution</h1>
+<h1 class="page-header"><%~ qos.mQOS %></h1>
 <div id="upload_container" class="row">
 
 	<div class="col-lg-12">

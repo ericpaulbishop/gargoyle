@@ -23,7 +23,7 @@
 //-->
 </script>
 
-<h1 class="page-header">Web Monitor</h1>
+<h1 class="page-header"><%~ webmon.mWMon %></h1>
 <div class="row">
 
 	<div class="col-lg-4">

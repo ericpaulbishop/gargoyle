@@ -52,7 +52,7 @@
 				</div>
 
 				<br/>
-				<button class="btn btn-primary" onclick="setInitialSettings()" /><%~ SSet %><button>
+				<button class="btn btn-primary" onclick="setInitialSettings()"><%~ SSet %></button>
 
 			</div>
 		</div>

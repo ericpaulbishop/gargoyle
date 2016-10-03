@@ -44,7 +44,7 @@
 
 </script>
 
-<h1 class="page-header">Plugins</h1>
+<h1 class="page-header"><%~ plugins.mPlugins %></h1>
 <div id="plugin_options" class="row">
 
 	<div class="col-lg-12">

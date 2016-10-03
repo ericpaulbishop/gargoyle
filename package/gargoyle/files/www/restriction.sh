@@ -17,7 +17,7 @@
 </script>
 
 
-<h1 class="page-header">Restrictions</h1>
+<h1 class="page-header"><%~ restrictions.mRestrict %></h1>
 <div class="row">
 
 	<div class="col-lg-6">

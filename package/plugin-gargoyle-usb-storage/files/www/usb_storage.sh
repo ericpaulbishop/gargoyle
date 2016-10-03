@@ -48,7 +48,7 @@
 //-->
 </script>
 
-<h1 class="page-header">USB Storage</h1>
+<h1 class="page-header"><%~ usb_storage.mUSB %></h1>
 <div id="no_disks" style="display:none;" class="row">
 
 	<div class="col-lg-6">
