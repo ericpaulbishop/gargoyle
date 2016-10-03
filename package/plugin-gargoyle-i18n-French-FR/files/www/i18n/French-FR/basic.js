@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for basic.sh html elements
  */
 
+basicS.mBasic="Base";
 basicS.DCfgSect="Configuration de l&apos;appareil";
 basicS.CfgDev="Configurer cet appareil comme";
 basicS.DvGtwy="Passerelle (défaut)";

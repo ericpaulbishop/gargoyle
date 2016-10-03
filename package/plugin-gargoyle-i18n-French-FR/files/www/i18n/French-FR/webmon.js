@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Utilisation Web";
 webmS.PrSect="Préférences Surveillance Web";
 webmS.EMon="Activer le suivi de l&apos;utilisation Web";
 webmS.NumSt="Nombre de sites à journaliser";

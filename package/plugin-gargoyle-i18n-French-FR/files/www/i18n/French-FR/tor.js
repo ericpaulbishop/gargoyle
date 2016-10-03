@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Client d&apos;anonymisation Tor";
 torS.TorC="Client Tor";
 torS.EnByHost="Activé, lancé par chaque hôte";
