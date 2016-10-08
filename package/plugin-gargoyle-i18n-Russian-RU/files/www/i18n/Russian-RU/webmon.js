@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Мониторинг Интернета";
 webmS.PrSect="Настройки мониторинга Интернета";
 webmS.EMon="Включить мониторинг";
 webmS.NumSt="Количество сохраняемых адресов сайтов";

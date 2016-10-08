@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Клиент анонимайзера Tor";
 torS.TorC="Клиент Tor";
 torS.EnByHost="Включен, переключается для каждого хоста в отдельности";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for access.sh html elements
  */
 
+accessStr.mAccess="Настройки доступа";
 accessStr.Section="Веб-администрирование";
 accessStr.WebProtocol="Протокол веб-администрирования";
 accessStr.LocalPort="Локальный порт HTTP";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for basic.sh html elements
  */
 
+basicS.mBasic="Основные настройки";
 basicS.DCfgSect="Настройки устройства";
 basicS.CfgDev="Режим работы устройства";
 basicS.DvGtwy="Шлюз (по-умолчанию)";

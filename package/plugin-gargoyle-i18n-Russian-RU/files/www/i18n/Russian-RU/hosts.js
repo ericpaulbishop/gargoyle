@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Подключенные хосты";
 hostsStr.RefreshR="Частота обновления";
 hostsStr.RInfo="Указывает, как часто обновляется информация на этой странице";
 hostsStr.CurrLeases="Присвоенные DHCP адреса";

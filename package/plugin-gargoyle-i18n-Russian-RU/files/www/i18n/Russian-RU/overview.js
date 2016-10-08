@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Russian-RU text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Yстройствo";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="беспроводной";
+ovwS.mTime="Время";
+ovwS.mServices="Сервисы";
+ovwS.mBridge="мост";
 ovwS.Sts="Состояние устройства";
 ovwS.DNam="Имя устройства";
 ovwS.GVer="Версия Gargoyle";

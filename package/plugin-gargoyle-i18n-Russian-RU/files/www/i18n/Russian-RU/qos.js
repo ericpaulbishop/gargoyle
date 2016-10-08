@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Russian-RU text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS (входящий)";
+qosStr.mQUl="QoS (исходящий)";
 qosStr.URSection="QoS (исходящий) -- правила классификации";
 qosStr.DRSection="QoS (входящий) -- правила классификации";
 qosStr.UCSection="QoS (исходящий) -- классы сервисов";
@@ -103,6 +105,7 @@ qosStr.ZERO="нулевая";
 qosStr.YES="Да";
 
 //qos_distribution.sh
+qosStr.mQOS="Распределение QoS";
 qosStr.UBSect="Распределение пропускной способности исходящего QoS";
 qosStr.DBSect="Распределение пропускной способности входящего QoS";
 qosStr.uTFrm="Временной отрезок графика для исходящего направления";

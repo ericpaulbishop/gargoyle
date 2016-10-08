@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for ddns.sh html elements
  */
 
+DyDNS.mDDNS="Динамический DNS";
 DyDNS.DYSect="Настройка услуг динамического DNS";
 DyDNS.AddDy="Добавить сервис динамического DNS";
 DyDNS.SvPro="Провайдер услуги";

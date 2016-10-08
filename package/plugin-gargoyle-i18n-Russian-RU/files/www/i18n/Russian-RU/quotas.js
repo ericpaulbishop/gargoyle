@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Квоты";
 quotasStr.Section="Квоты пропускной способности";
 quotasStr.AddQuota="Добавить новую квоту";
 quotasStr.ActivQuotas="Активные квоты";
