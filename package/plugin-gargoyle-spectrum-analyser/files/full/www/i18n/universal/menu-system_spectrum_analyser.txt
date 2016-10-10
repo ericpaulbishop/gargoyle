@@ -5,3 +5,4 @@ EN=Spectrum Analyser
 DE=Spektrumanalysator
 PL=Analizator widma
 RU=Анализатор спектра
+BR=Analisador de Espectro
