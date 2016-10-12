@@ -6,3 +6,4 @@ PL=Webcam
 RU=Вебкамера
 NO=Webcam
 ZH-CN=网络摄像头
+BR=Câmera USB

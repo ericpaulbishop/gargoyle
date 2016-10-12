@@ -7,3 +7,4 @@ PL=Logi systemowe
 RU=Системные журналы
 NO=System Logger
 ZH-CN=系统日志
+BR=Logs do Sistema
