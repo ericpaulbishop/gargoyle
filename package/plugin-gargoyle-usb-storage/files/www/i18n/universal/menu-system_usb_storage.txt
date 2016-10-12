@@ -8,3 +8,4 @@ PL=Nośniki USB
 ZH-CN=USB存储
 RU=USB-устройства хранения данных
 NO=USB Lagring
+BR=Armazenamento USB

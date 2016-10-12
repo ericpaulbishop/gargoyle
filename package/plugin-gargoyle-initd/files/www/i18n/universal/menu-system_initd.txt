@@ -5,3 +5,4 @@ PL=Usługi
 RU=Сервисы
 NO=Tjenester
 ZH-CN=服务
+BR=Serviços
