@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS（下载）";
+qosStr.mQUl="QoS（上传）";
 qosStr.URSection="QoS（上传）－分类规则";
 qosStr.DRSection="QoS（下载）－分类规则";
 qosStr.UCSection="QoS（上传）－服务类型";
@@ -103,6 +105,7 @@ qosStr.ZERO="零";
 qosStr.YES="是";
 
 //qos_distribution.sh
+qosStr.mQOS="QoS分布";
 qosStr.UBSect="QoS上传流量分布";
 qosStr.DBSect="QoS下载流量分布";
 qosStr.uTFrm="上传流量分布周期";

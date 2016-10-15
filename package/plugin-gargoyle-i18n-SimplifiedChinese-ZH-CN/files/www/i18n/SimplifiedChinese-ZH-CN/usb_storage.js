@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="USB存储";
 usbSStr.SDisk="共享磁盘";
 usbSStr.Nomdsk="没有检测到挂载的USB磁盘";
 usbSStr.WFTP="允许从WAN端访问FTP";

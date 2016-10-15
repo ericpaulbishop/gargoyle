@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for basic.sh html elements
  */
 
+basicS.mBasic="基本设置";
 basicS.DCfgSect="设备配置";
 basicS.CfgDev="将设备设置为";
 basicS.DvGtwy="网关（默认）";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Web监视";
 webmS.PrSect="Web监视首选项";
 webmS.EMon="启用Web使用监视";
 webmS.NumSt="保存网址记录的数量";

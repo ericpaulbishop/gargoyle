@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for ddns.sh html elements
  */
 
+DyDNS.mDDNS="动态域名";
 DyDNS.DYSect="动态DNS服务";
 DyDNS.AddDy="添加动态DNS服务";
 DyDNS.SvPro="服务提供商";

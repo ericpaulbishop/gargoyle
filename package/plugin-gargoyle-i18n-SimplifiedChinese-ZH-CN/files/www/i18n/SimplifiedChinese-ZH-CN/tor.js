@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Tor匿名客户端";
 torS.TorC="Tor客户端";
 torS.EnByHost="启用，每个主机自行切换";

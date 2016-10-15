@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for restrictions.sh html elements
  */
 
+restStr.mRestrict="访问限制";
 restStr.ARSect="访问限制";
 restStr.NRRule="新建限制规则";
 restStr.ANRule="添加新规则";

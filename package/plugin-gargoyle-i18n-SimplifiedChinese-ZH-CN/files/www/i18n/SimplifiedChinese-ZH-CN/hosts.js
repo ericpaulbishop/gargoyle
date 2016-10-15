@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="连接主机";
 hostsStr.RefreshR="刷新频率";
 hostsStr.RInfo="该参数指定该页面上的数据重新加载的频率";
 hostsStr.CurrLeases="当前DHCP租约";

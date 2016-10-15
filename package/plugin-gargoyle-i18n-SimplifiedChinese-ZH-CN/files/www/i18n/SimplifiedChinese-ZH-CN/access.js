@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for access.sh html elements
  */
 
+accessStr.mAccess="路由器访问设置";
 accessStr.Section="Web访问";
 accessStr.WebProtocol="Web管理协议";
 accessStr.LocalPort="内网HTTP端口";
