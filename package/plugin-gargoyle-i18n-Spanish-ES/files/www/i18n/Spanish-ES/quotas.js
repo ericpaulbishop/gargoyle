@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Cuotas";
 quotasStr.Section="Cuotas de Ancho de Banda";
 quotasStr.AddQuota="Añadir Nueva Cuota";
 quotasStr.ActivQuotas="Cuotas Activas";

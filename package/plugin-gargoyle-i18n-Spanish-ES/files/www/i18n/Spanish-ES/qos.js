@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Spanish-ES text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS (Descarga)";
+qosStr.mQUl="QoS (Subida)";
 qosStr.URSection="QoS (Subida) -- Reglas de Clasificación";
 qosStr.DRSection="QoS (Descarga) -- Reglas de Clasificación";
 qosStr.UCSection="QoS (Subida) -- Clases de Servicios";
@@ -103,6 +105,7 @@ qosStr.ZERO="cero";
 qosStr.YES="Sí";
 
 //qos_distribution.sh
+qosStr.mQOS="Distribución de QoS";
 qosStr.UBSect="Distribución del Ancho de Banda para QoS de Subida";
 qosStr.DBSect="Distribución del Ancho de Banda para QoS de Descarga";
 qosStr.uTFrm="Intervalo de Tiempo de Subida";

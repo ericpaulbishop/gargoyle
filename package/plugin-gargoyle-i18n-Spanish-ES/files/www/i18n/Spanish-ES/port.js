@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="Redirección de Puertos";
 prtS.PISect="Redirección Individual de Puerto";
 prtS.PRSect="Redirección de un Rango de Puertos";
 prtS.ForIPort="Redireccionar Puertos Individuales desde WAN a LAN";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="Almacenaje de USB";
 usbSStr.SDisk="Discos Compartidos";
 usbSStr.Nomdsk="No se detectaron discos USB montados";
 usbSStr.WFTP="Permitir el acceso a FTP desde WAN";

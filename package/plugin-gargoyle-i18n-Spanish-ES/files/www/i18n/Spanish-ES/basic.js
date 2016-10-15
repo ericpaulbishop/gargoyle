@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for basic.sh html elements
  */
 
+basicS.mBasic="Básico";
 basicS.DCfgSect="Configuración del Dispositivo";
 basicS.CfgDev="Configurar el dispositivo como";
 basicS.DvGtwy="Puerta de Enlace (Por Defecto)";

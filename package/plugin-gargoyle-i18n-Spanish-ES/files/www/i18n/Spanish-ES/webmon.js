@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Uso de Web";
 webmS.PrSect="Preferencias del Monitor Web";
 webmS.EMon="Activar Monitor de Uso Web";
 webmS.NumSt="Número de Sitios a Guardar";
