@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Pripojení hostitelia";
 hostsStr.RefreshR="Obnovovacia frekvencia";
 hostsStr.RInfo="Táto určuje, ako často sa znovu načítajú údaje na tejto stránke";
 hostsStr.CurrLeases="Aktuálne prenájmy DHCP";

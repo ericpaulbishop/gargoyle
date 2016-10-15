@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for basic.sh html elements
  */
 
+basicS.mBasic="Základy";
 basicS.DCfgSect="Konfigurácia zariadenia";
 basicS.CfgDev="Konfigurovať zariadenie ako";
 basicS.DvGtwy="Brána (štandardné)";

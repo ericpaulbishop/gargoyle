@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for ddns.sh html elements
  */
 
+DyDNS.mDDNS="Dynamická DNS";
 DyDNS.DYSect="Služby dynamickej DNS";
 DyDNS.AddDy="Pridať službu dynamickej DNS";
 DyDNS.SvPro="Poskytovateľ služby";

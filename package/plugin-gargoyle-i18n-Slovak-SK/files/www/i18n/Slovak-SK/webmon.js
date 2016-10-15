@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+webmS.mWMon="VyuŸívanie Web-u";
 webmS.PrSect="Nastavenie Web monitora";
 webmS.EMon="Povoliť monitor využitia webu";
 webmS.NumSt="Počet stránok na uloženie";

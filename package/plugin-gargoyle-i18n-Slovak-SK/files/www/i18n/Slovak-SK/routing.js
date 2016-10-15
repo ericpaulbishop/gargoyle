@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+rtgS.mRoutes="Smerovanie";
 rtgS.ARSect="Aktívne smerovania";
 rtgS.SRSect="Statické smerovania";
 rtgS.ASRte="Pridať statické smerovanie";

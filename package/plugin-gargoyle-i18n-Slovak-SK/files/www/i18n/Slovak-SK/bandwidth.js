@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="VyuŸitie ¹írky pásma";
 bndwS.GOpSect="Možnosti zobrazenia grafu šírky pásma";
 bndwS.TFrm="Časový rámec";
 bndwS.year="rok";

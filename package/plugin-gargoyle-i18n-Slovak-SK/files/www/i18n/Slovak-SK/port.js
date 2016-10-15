@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="Presmerovanie portov";
 prtS.PISect="Presmerovnie individuálneho portu";
 prtS.PRSect="Presmerovnie rozsahu portov";
 prtS.ForIPort="Presmerovnie individuálnych portov z WAN do LAN";
