@@ -8,7 +8,7 @@ fbS.NPass="Nova senha";
 fbS.Stz="Selecione o Fuso Horário";
 fbS.Sla="Selecione o Idioma";
 fbS.SSet="Salvar Configurações";
-fbS.ULngF="Enviar Arquivo de Idioma";
+fbS.ULngF="Enviar Pacote de Idioma";
 
 //javascript
 fbS.nopsErr="ERRO: Você deve especificar uma senha.";
