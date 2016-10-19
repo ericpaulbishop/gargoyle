@@ -1,0 +1,13 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Email
+EN=Email Notifications
+ES=Notificación por Correo Electrónico
+DE=Benachrichtigung E-mail
+FR=Courriel de notification
+BR=Notificações por E-mail
+PL=Powiadomienie E-mail
+SK=oznámenia e-mailom
+RU=электронная почта
+NO=Varsel E-post
+ZH-CN=电子邮件
