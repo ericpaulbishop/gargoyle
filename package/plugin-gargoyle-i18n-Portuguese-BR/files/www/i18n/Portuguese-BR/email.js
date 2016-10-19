@@ -1,0 +1,73 @@
+﻿/*
+ * UTF-8 (with BOM) Portuguese-BR text strings for email.sh html elements
+ */
+
+email.Time="Configuração de Agendamento";
+email.TPer="Tipo de Agendamento";
+email.DataSettings="Conteúdo do E-mail";
+email.NoTm="Desabilitado";
+email.Dly="Diário";
+email.Wkd="Dias da Semana + Sáb/Dom";
+email.Wkly="Semanal";
+email.TInc="Incremento de Minutos";
+email.Test="Enviar E-mail de Teste";
+email.SmtpSettings="Configuração SMTP";
+email.ServerIP="Endereço do Servidor:";
+email.ServerPort="Porta do Servidor:";
+email.Sender="Remetente:";
+email.Receipment="Destinatário:";
+email.Auth="Autenticação SMTP:";
+email.Username="Nome de Usuário:";
+email.Password="Senha:";
+email.Emailsettings="Configuração de E-mail";
+email.BandwidthInterval="Intervalo de Tempo:";
+email.recentWebsites="Sites Acessados Recentemente";
+email.recentSearches="Termos de Busca Recentes";
+email.Logs="Logs do Sistema";
+email.DHCP="Concessões de DHCP";
+email.ARP="Tabela ARP";
+email.Bandwidth="Consumo de Banda";
+email.Count="Quantidade de Campos:";
+email.Encryption="Criptografia:";
+email.Include="Incluir no relatório as seguintes informações:";
+email.rvel="Mostrar Senha";
+email.None="Nenhum";
+email.minutes="minutos";
+email.quarterhours="15 minutos";
+email.hours="horas";
+email.days="dias";
+
+//javscript
+email.Smmy="Sumário";
+email.WeekA=["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+email.WDayA=["Domingo", "Segunda-Sexta", "Sábado"];
+email.Warn="Aviso";
+email.NextEv="O agendamento funcionará a partir do próximo evento.";
+email.SelTM="Agendamento selecionado";
+email.SumDis="desabilitado (nenhum agendamento).";
+email.SumDly="agendamento diário (todos os dias são iguais).";
+email.SumSwS="agendamento Domingo/Dias da Semana/Sábado (todos os dias da semana são iguais).";
+email.SumWky="agendamento semanal (agendamento separado para cada dia da semana; todas as semanas são iguais).";
+email.SumGo="O e-mail será enviado";
+email.SumAt="às";
+email.actv="Habilitada";
+email.schd="agendado";
+email.nscd="não agendado";
+email.STDly="Diariamente";
+email.STSunday="Domingo";
+email.STMonday="Segunda-feira";
+email.STTuesday="Terça-feira";
+email.STWednesday="Quarta-feira";
+email.STThursday="Quinta-feira";
+email.STFriday="Sexta-feira";
+email.STSaturday="Sábado";
+email.STMonFri="Segunda-Sexta";
+email.senderError="E-mail do remetente é inválido.";
+email.receiverError="E-mail do destinatário é inválido.";
+email.portError="Digite a porta correta.";
+email.testEmailSuccess="E-mail enviado com sucesso.";
+email.testEmailFail="Erro ao enviar e-mail. Mensagem: ";
+email.testEmail="Enviando e-mail de teste…";
+email.encryptionTypeError="Escolha o tipo de criptografia.";
+email.noDataSelected="Escolha a informação que deseja inserir.";
+email.countError="Digite a quantidade de informações que deseja inserir.";
