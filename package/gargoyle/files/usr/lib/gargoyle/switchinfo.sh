@@ -47,6 +47,10 @@ tl-wr1043nd-v2 | \
 wndr4300)
         PORTS="4 3 2 1";;
 armada-xp-linksys-mamba | \
+armada-385-linksys-caiman | \
+armada-385-linksys-cobra | \
+armada-385-linksys-shelby | \
+armada-385-linksys-rango | \
 wndr3700 | \
 wrt160nl | \
 wzr-hp-g300nh)
