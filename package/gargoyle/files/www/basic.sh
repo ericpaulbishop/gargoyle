@@ -90,7 +90,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 <h1 class="page-header"><%~ basic.mBasic %></h1>
 <div class="row">
 
-	<div id="config_fieldset" class="col-lg-4">
+	<div id="config_fieldset" class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ basic.DCfgSect %></h3>
@@ -109,7 +109,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 	</div>
 
 
-	<div id="bridge_fieldset" class="col-lg-4">
+	<div id="bridge_fieldset" class="col-md-8">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ DvWBrg %></h3>
@@ -338,193 +338,199 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 	</div>
 
 
-	<div id="wan_fieldset" class="col-lg-4">
+	<div id="wan_fieldset" class="col-md-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ WANSec %></h3>
 			</div>
 
 			<div class="panel-body">
-				<div id="wan_protocol_container" class="form-group">
-					<label for="wan_protocol"><%~ Cnct %>:</label>
-					<select class="form-control" id="wan_protocol" onchange="setGlobalVisibility()">
-						<option value="dhcp_wired">DHCP (<%~ Wird %>)</option>
-						<option value="pppoe_wired">PPPoE (<%~ Wird %>)</option>
-						<option value="static_wired"><%~ StIP %> (<%~ Wird %>)</option>
-						<option value="dhcp_wireless">DHCP (<%~ Wrlss %>)</option>
-						<option value="static_wireless"><%~ StIP %> (<%~ Wrlss %>)</option>
-						<option value="3g"><%~ Mo3g %></option>
-						<option value="qmi"><%~ Mo3gQMI %></option>
-						<option value="ncm"><%~ Mo3gNCM %></option>
-						<option value="dhcp_cdc"><%~ Mo3gHiLink %></option>
-						<option value="none"><%~ Disabled %></option>
-					</select>
+				<div id="wan_protocol_container" class="row form-group" >
+					<label for="wan_protocol" class="col-xs-5" ><%~ Cnct %>:</label>
+					<span class="col-xs-7">
+						<select id="wan_protocol" onchange="setGlobalVisibility()">
+							<option value="dhcp_wired">DHCP (<%~ Wird %>)</option>
+							<option value="pppoe_wired">PPPoE (<%~ Wird %>)</option>
+							<option value="static_wired"><%~ StIP %> (<%~ Wird %>)</option>
+							<option value="dhcp_wireless">DHCP (<%~ Wrlss %>)</option>
+							<option value="static_wireless"><%~ StIP %> (<%~ Wrlss %>)</option>
+							<option value="3g"><%~ Mo3g %></option>
+							<option value="qmi"><%~ Mo3gQMI %></option>
+							<option value="ncm"><%~ Mo3gNCM %></option>
+							<option value="dhcp_cdc"><%~ Mo3gHiLink %></option>
+							<option value="none"><%~ Disabled %></option>
+						</select>
+					</span>
 				</div>
 
 
-				<div id="wan_dhcp_ip_container" class="form-group">
-					<label><%~ CurrIP %>:</label>
-					<span id="dhcp_ip"></span>
+				<div id="wan_dhcp_ip_container" class="row form-group">
+					<label class="col-xs-5" ><%~ CurrIP %>:</label>
+					<span class="col-xs-7" id="dhcp_ip"></span>
 				</div>
 
-				<div id="wan_dhcp_expires_container" class="form-group">
-					<label><%~ CLsExp %>:</label>
-					<div>
-						<span id="dhcp_expires"></span>
-					</div>
-					<div class="rightcolumnonly">
+				<div id="wan_dhcp_expires_container" class="row form-group">
+					<label  class="col-xs-5" ><%~ CLsExp %>:</label>
+					<span class="col-xs-3" id="dhcp_expires"></span>
+			
+					<div  class="col-xs-4">
 						<button id="dhcp_renew_button" class="btn btn-default" onclick="renewDhcpLease()"><%~ Renew %></button>
 						<button id="dhcp_release_button" class="btn btn-default" onclick="releaseDhcpLease()"><%~ Rleas %></button>
 					</div>
 				</div>
 
-				<div id="wan_pppoe_user_container" class="form-group">
-					<label for="wan_pppoe_user" id="wan_pppoe_user_label"><%~ UNam %>:</label>
-					<input type="text" class="form-control" id="wan_pppoe_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+				<div id="wan_pppoe_user_container" class="row form-group">
+					<label class="col-xs-5" for="wan_pppoe_user" id="wan_pppoe_user_label"><%~ UNam %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" id="wan_pppoe_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
 				</div>
 
-				<div id="wan_pppoe_pass_container" class="form-group">
-					<label for="wan_pppoe_pass" id="wan_pppoe_pass_label"><%~ Pswd %>:</label>
-					<input type="password" class="form-control" id="wan_pppoe_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+				<div id="wan_pppoe_pass_container" class="row form-group">
+					<label class="col-xs-5" for="wan_pppoe_pass" id="wan_pppoe_pass_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7"><input type="password" class="form-control" id="wan_pppoe_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
 				</div>
 
-				<div id="wan_pppoe_reconnect_mode_container" class="form-group">
-					<label for="wan_pppoe_reconnect_mode"><%~ RMod %>:</label>
-					<select class="form-control" id="wan_pppoe_reconnect_mode" onchange="setWanVisibility()">
-						<option value="demand"><%~ CDmd %></option>
-						<option value="keepalive"><%~ KAlv %></option>
-					</select>
+				<div id="wan_pppoe_reconnect_mode_container" class="row form-group">
+					<label class="col-xs-5" for="wan_pppoe_reconnect_mode"><%~ RMod %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wan_pppoe_reconnect_mode" onchange="setWanVisibility()">
+							<option value="demand"><%~ CDmd %></option>
+							<option value="keepalive"><%~ KAlv %></option>
+						</select>
+					</span>
 				</div>
 
-				<div id="wan_pppoe_max_idle_container" >
-					<label for="wan_pppoe_max_idle" id="wan_pppoe_max_idle_label"><%~ MIdl %>:</label>
-					<div>
+				<div id="wan_pppoe_max_idle_container" class="row form-group" >
+					<label class="col-xs-5" for="wan_pppoe_max_idle" id="wan_pppoe_max_idle_label"><%~ MIdl %>:</label>
+					<span class="col-xs-7">
 						<input type="text" class="form-control" id="wan_pppoe_max_idle" onkeyup="proofreadNumeric(this)" size="20" maxlength="4" />
 						<em>(<%~ minutes %>)</em>
-					</div>
+					</span>
 				</div>
 
-				<div id="wan_pppoe_reconnect_pings_container" class="form-group">
-					<label for="wan_pppoe_reconnect_pings" id="wan_pppoe_reconnect_pings_label"><%~ FPngs %>:</label>
-					<div>
+				<div id="wan_pppoe_reconnect_pings_container" class="row form-group">
+					<label class="col-xs-5" for="wan_pppoe_reconnect_pings" id="wan_pppoe_reconnect_pings_label"><%~ FPngs %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="wan_pppoe_reconnect_pings" onkeyup="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
-					</div>
+					</span>
 				</div>
 
-				<div id="wan_pppoe_interval_container" class="form-group">
-					<label for="wan_pppoe_interval" id="wan_pppoe_interval_label"><%~ PngI %>:</label>
-					<div>
+				<div id="wan_pppoe_interval_container" class="row form-group">
+					<label class="col-xs-5" for="wan_pppoe_interval" id="wan_pppoe_interval_label"><%~ PngI %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="wan_pppoe_interval" onkeyup="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
 						<em>(<%~ seconds %>)</em>
-					</div>
+					</span>
 				</div>
 
-				<div id="wan_static_ip_container" class="form-group">
-					<label for="wan_static_ip" id="wan_static_ip_label"><%~ StIP %>:</label>
-					<input type="text" class="form-control" name="wan_static_ip" id="wan_static_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+				<div id="wan_static_ip_container" class="row form-group">
+					<label class="col-xs-5" for="wan_static_ip" id="wan_static_ip_label"><%~ StIP %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_ip" id="wan_static_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="wan_static_mask_container" class="form-group">
-					<label for="wan_static_mask" id="wan_static_mask_label"><%~ SMsk %>:</label>
-					<input type="text" class="form-control" name="wan_static_mask" id="wan_static_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
+				<div id="wan_static_mask_container" class="row form-group">
+					<label class="col-xs-5" for="wan_static_mask" id="wan_static_mask_label"><%~ SMsk %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_mask" id="wan_static_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="wan_static_gateway_container" class="form-group">
-					<label for="wan_static_gateway" id="wan_static_gateway_label"><%~ Gtwy %>:</label>
-					<input type="text" class="form-control" name="wan_static_gateway" id="wan_static_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+				<div id="wan_static_gateway_container" class="row form-group">
+					<label class="col-xs-5" for="wan_static_gateway" id="wan_static_gateway_label"><%~ Gtwy %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_gateway" id="wan_static_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="wan_3g_service_container" class="form-group">
-					<label for="wan_3g_service"><%~ Srvc %>:</label>
-					<select class="form-control" id="wan_3g_service" onchange="updateService()">
-						<option value="cdma">CDMA/EV-DO</option>
-						<option value="umts"><%~ S4G3G2G %></option>
-						<option value="umts_pref"><%~ S3GPrfr %></option>
-						<option value="gprs_pref"><%~ S2GPrfr %></option>
-						<option value="umts_only"><%~ S3GOnly %></option>
-						<option value="gprs_only"><%~ S2GOnly %></option>
-					</select>
+				<div id="wan_3g_service_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_service"><%~ Srvc %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wan_3g_service" onchange="updateService()">
+							<option value="cdma">CDMA/EV-DO</option>
+							<option value="umts"><%~ S4G3G2G %></option>
+							<option value="umts_pref"><%~ S3GPrfr %></option>
+							<option value="gprs_pref"><%~ S2GPrfr %></option>
+							<option value="umts_only"><%~ S3GOnly %></option>
+							<option value="gprs_only"><%~ S2GOnly %></option>
+						</select>
+					</span>
 				</div>
 
-				<div id="wan_3g_device_container" class="form-group">
-					<label for="wan_3g_device" id="wan_3g_device_label"><%~ Dvic %>:</label>
-					<span>
+				<div id="wan_3g_device_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_device" id="wan_3g_device_label"><%~ Dvic %>:</label>
+					<span class="col-xs-7">
 						<select id="wan_3g_list_device" onchange="set3GDevice(this.value)"></select>
 						<input style="float:left;" type="text" class="form-control" id="wan_3g_device" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 						<button style="float:left;" class="btn btn-default" id="wan_3g_scan_button" onclick="scan3GDevice('wan_3g_list_device')"><%~ Scan %></button>
 					</span>
 				</div>
 
-				<div id="wan_3g_pincode_container" class="form-group">
-					<label for="wan_3g_pincode" id="wan_3g_pincode_label"><%~ Pncd %>:</label>
-					<input type="text" class="form-control" id="wan_3g_pincode"  size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
-					<em>(<%~ optl %>)</em>
+				<div id="wan_3g_pincode_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_pincode" id="wan_3g_pincode_label"><%~ Pncd %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="wan_3g_pincode"  size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<em>(<%~ optl %>)</em>
+					</span>
 				</div>
 
-				<div id="wan_3g_isp_container" class="form-group">
-					<label for="wan_3g_isp"><%~ MISP %>:</label>
-					<select class="form-control" id="wan_3g_isp" onchange="updateApnDetails()">
-						<option value="custom"><%~ Cstm %></option>
-					</select>
+				<div id="wan_3g_isp_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_isp"><%~ MISP %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wan_3g_isp" onchange="updateApnDetails()">
+							<option value="custom"><%~ Cstm %></option>
+						</select>
+					</span>
 				</div>
 
-				<div id="wan_3g_apn_container" class="form-group">
-					<label for="wan_3g_apn" id="wan_3g_apn_label">APN:</label>
-					<input type="text" class="form-control" id="wan_3g_apn" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+				<div id="wan_3g_apn_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_apn" id="wan_3g_apn_label">APN:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" id="wan_3g_apn" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
 				</div>
 
-				<div id="wan_3g_user_container" class="form-group">
-					<label for="wan_3g_user" id="wan_3g_user_label"><%~ UNam %>:</label>
-					<input type="text" class="form-control" id="wan_3g_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
-					<em>(<%~ optl %>)</em>
+				<div id="wan_3g_user_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_user" id="wan_3g_user_label"><%~ UNam %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="wan_3g_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<em>(<%~ optl %>)</em>
+					</span>
 				</div>
 
-				<div id="wan_3g_pass_container" class="form-group">
-					<label for="wan_3g_pass" id="wan_3g_pass_label"><%~ Pswd %>:</label>
-					<input type="text" class="form-control" id="wan_3g_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
-					<em>(<%~ optl %>)</em>
+				<div id="wan_3g_pass_container" class="row form-group">
+					<label class="col-xs-5" for="wan_3g_pass" id="wan_3g_pass_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="wan_3g_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<em>(<%~ optl %>)</em>
+					</span>
 				</div>
 
-				<div id="wan_port_to_lan_container" class="form-group">
-					<label for="wan_port_to_lan" id="wan_port_to_lan_label"><%~ WanEP %>:</label>
-					<select class="form-control" id="wan_port_to_lan">
-						<option value="disable"><%~ Dsbl %></option>
-						<option value="bridge"><%~ BrLAN %></option>
-					</select>
+				<div id="wan_port_to_lan_container" class="row form-group">
+					<label class="col-xs-5" for="wan_port_to_lan" id="wan_port_to_lan_label"><%~ WanEP %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wan_port_to_lan">
+							<option value="disable"><%~ Dsbl %></option>
+							<option value="bridge"><%~ BrLAN %></option>
+						</select>
+					</span>
 				</div>
 
-				<div id="wan_mac_container" class="form-group">
-					<div class="form-inline">
-						<input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/>&nbsp;&nbsp;
-						<label for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
-					</div>
-					<div>
-						<input type="text" name="wan_mac" id="wan_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
-					</div>
+				<div id="wan_mac_container" class="row form-group">
+					
+					<span class="col-xs-1"><input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/></span>
+					<label class="col-xs-4 short-left-pad" for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
+					<span class="col-xs-7"><input type="text" name="wan_mac" id="wan_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/></span>
 				</div>
 
-				<div id="wan_mtu_container" class="form-group">
-					<div class="form-inline">
-						<input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/>&nbsp;&nbsp;
-						<label for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
-					</div>
-					<div>
-						<input type="text" name="wan_mtu" id="wan_mtu" class="form-control" onkeyup="proofreadNumeric(this)" size="20" maxlength="4"/>
-					</div>
+				<div id="wan_mtu_container" class="row form-group">
+					<span class="col-xs-1"><input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/></span>
+					<label class="col-xs-4 short-left-pad" for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
+					<span class="col-xs-7"><input type="text" name="wan_mtu" id="wan_mtu" class="form-control" onkeyup="proofreadNumeric(this)" size="20" maxlength="4"/></span>
 				</div>
 
-				<div id="wan_ping_container" class="form-group">
-					<div class="form-inline">
-						<input type="checkbox" id="drop_wan_ping"/>
-						<label for="drop_wan_ping" id="wan_ping_label">&nbsp;&nbsp;<%~ DPing %></label>
-					</div>
+				<div id="wan_ping_container" class="row form-group">
+					<span class="col-xs-1"><input type="checkbox" id="drop_wan_ping"/></span>
+					<label class="col-xs-4 short-left-pad" for="drop_wan_ping" id="wan_ping_label"><%~ DPing %></label>
 				</div>
 
 			</div>
 		</div>
 	</div>
 
-	<div id="lan_fieldset" class="col-lg-4">
+	<div id="lan_fieldset" class="col-md-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ LANSec %></h3>
