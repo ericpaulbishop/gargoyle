@@ -98,11 +98,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			<div class="panel-body">
 				<label style="text-decoration:underline"><%~ CfgDev %>:</label>
 				<div class="row indent">
-					<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" />
-					<label for="global_gateway"><%~ DvGtwy %></label>
-					<br/>
-					<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" />
-					<label for="global_bridge"><%~ DvWBrg %></label>
+					<span class="col-xs-12">
+						<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" />
+						<label for="global_gateway"><%~ DvGtwy %></label>
+					</span>
+					<span class="col-xs-12">
+						<input type="radio" id="global_bridge" name="global_configuration" value="bridge" onclick="setBridgeVisibility()" />
+						<label for="global_bridge"><%~ DvWBrg %></label>
+					</span>
 				</div>
 			</div>
 		</div>
