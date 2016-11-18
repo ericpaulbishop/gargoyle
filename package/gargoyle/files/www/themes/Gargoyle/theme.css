@@ -394,12 +394,14 @@ input
 {
 	font-size:12px;
 	padding:2px;
+	display:inline;
 }
 select
 {
 	font-size:12px;
 	padding:2px;
 	width:auto;
+	display:inline;
 }
 .form-group
 {
@@ -410,15 +412,21 @@ select
 	padding:2px;
 	font-size:12px;
 	width:auto;
+	display:inline;
 }
 .btn
 {
 	padding:2px;
 	font-size:12px;
+	display:inline;
 
 }
 .short-left-pad
 {
 	padding-left:2px;
 }
-
+.second_row_right_column
+{
+	margin-top:4px;
+	margin-bottom:8px;
+}

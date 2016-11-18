@@ -109,7 +109,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 	</div>
 
 
-	<div id="bridge_fieldset" class="col-md-8">
+	<div id="bridge_fieldset" class="col-md-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ DvWBrg %></h3>
@@ -348,7 +348,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_protocol_container" class="row form-group" >
 					<label for="wan_protocol" class="col-xs-5" ><%~ Cnct %>:</label>
 					<span class="col-xs-7">
-						<select id="wan_protocol" onchange="setGlobalVisibility()">
+						<select id="wan_protocol"  class="form-control" onchange="setGlobalVisibility()">
 							<option value="dhcp_wired">DHCP (<%~ Wird %>)</option>
 							<option value="pppoe_wired">PPPoE (<%~ Wird %>)</option>
 							<option value="static_wired"><%~ StIP %> (<%~ Wird %>)</option>
@@ -371,12 +371,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_dhcp_expires_container" class="row form-group">
 					<label  class="col-xs-5" ><%~ CLsExp %>:</label>
-					<span class="col-xs-3" id="dhcp_expires"></span>
-			
-					<div  class="col-xs-4">
-						<button id="dhcp_renew_button" class="btn btn-default" onclick="renewDhcpLease()"><%~ Renew %></button>
-						<button id="dhcp_release_button" class="btn btn-default" onclick="releaseDhcpLease()"><%~ Rleas %></button>
-					</div>
+					<span class="col-xs-7">
+						<div id="dhcp_expires"></div>
+						<div class="second_row_right_column">	
+							<button id="dhcp_renew_button" class="btn btn-default" onclick="renewDhcpLease()"><%~ Renew %></button>
+							<button id="dhcp_release_button" class="btn btn-default" onclick="releaseDhcpLease()"><%~ Rleas %></button>
+
+						</div>
+					</span>
 				</div>
 
 				<div id="wan_pppoe_user_container" class="row form-group">
@@ -523,7 +525,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_ping_container" class="row form-group">
 					<span class="col-xs-1"><input type="checkbox" id="drop_wan_ping"/></span>
-					<label class="col-xs-4 short-left-pad" for="drop_wan_ping" id="wan_ping_label"><%~ DPing %></label>
+					<label class="col-xs-11 short-left-pad" for="drop_wan_ping" id="wan_ping_label"><%~ DPing %></label>
 				</div>
 
 			</div>
@@ -537,48 +539,49 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			</div>
 			<div class="panel-body">
 
-				<div id="lan_ip_container" class="form-group">
-					<label for="lan_ip" id="lan_ip_label"><%~ RtrIP %>:</label>
-					<input type="text" class="form-control" name="lan_ip" id="lan_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+				<div id="lan_ip_container" class="row form-group">
+					<label  class="col-xs-5" for="lan_ip" id="lan_ip_label"><%~ RtrIP %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip" id="lan_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="lan_mask_container" class="form-group">
-					<label for="lan_mask" id="lan_mask_label"><%~ SMsk %>:</label>
-					<input type="text" class="form-control" name="lan_mask" id="lan_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
+				<div id="lan_mask_container" class="row form-group">
+					<label  class="col-xs-5" for="lan_mask" id="lan_mask_label"><%~ SMsk %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_mask" id="lan_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="lan_gateway_container" class="form-group">
-					<label for="lan_gateway" id="lan_gateway_label"><%~ Gtwy %>:</label>
-					<input type="text" class="form-control" name="lan_gateway" id="lan_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+				<div id="lan_gateway_container" class="row form-group">
+					<label  class="col-xs-5" for="lan_gateway" id="lan_gateway_label"><%~ Gtwy %>:</label>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_gateway" id="lan_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
-				<div id="lan_dns_source_container" class="form-group">
-					<label id="lan_dns_source_label" for="lan_dns_source"><%~ DnsSvs %>:</label>
-					<select class="form-control" id="lan_dns_source" onchange="setDnsSource(this)">
-						<option value="isp"><%~ DfltDNS %></option>
-						<option value="opendns"><%~ OpnSrvs %></option>
-						<option value="google"><%~ GooSrvs %></option>
-						<option value="custom"><%~ CstDSrv %></option>
-					</select>
+				<div id="lan_dns_source_container" class="row form-group">
+					<label  class="col-xs-5" id="lan_dns_source_label" for="lan_dns_source"><%~ DnsSvs %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="lan_dns_source" onchange="setDnsSource(this)">
+							<option value="isp"><%~ DfltDNS %></option>
+							<option value="opendns"><%~ OpnSrvs %></option>
+							<option value="google"><%~ GooSrvs %></option>
+							<option value="custom"><%~ CstDSrv %></option>
+						</select>
+						<div id="lan_dns_custom_container" class="second_row_right_column">
+							<input  type="text" id="add_lan_dns" class="form-control" onkeyup="proofreadIp(this)" size="20" maxlength="17" />
+							<button class="btn btn-default" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
+							<div id="lan_dns_table_container" class="form-group second_row_right_column"></div>
+						</div>
+					</span>
 				</div>
 
-				<div id="lan_dns_custom_container" class="form-group">
-					<div class="form-inline">
-						<input type="text" id="add_lan_dns" class="form-control" onkeyup="proofreadIp(this)" size="20" maxlength="17" />
-						<button class="btn btn-default" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
+
+				<div id="lan_dns_options_container">
+				
+					<div class="row form-group">
+						<span class="col-xs-1"><input type="checkbox" id="lan_dns_altroot" /></span>
+						<label class="col-xs-11 short-left-pad" for="lan_dns_altroot" id="lan_dns_altroot_label" ><%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
 					</div>
-					<div id="lan_dns_table_container" class="form-group"></div>
-				</div>
 
-				<div id="lan_dns_options_container" class="form-group">
-					<div class="form-inline">
-						<input type="checkbox" id="lan_dns_altroot" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-						<label for="lan_dns_altroot" id="lan_dns_altroot_label" style="vertical-align:middle">&nbsp;&nbsp;<%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
-					</div>
-
-					<div class="form-inline">
-						<input type="checkbox" id="lan_dns_force" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;"/>
-						<label for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle">&nbsp;&nbsp;<%~ RtrDNS %></label>
+					<div class="row form-group">
+						<span class="col-xs-1"><input type="checkbox" id="lan_dns_force"/></span>
+						<label class="col-xs-11 short-left-pad" for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle"><%~ RtrDNS %></label>
 					</div>
 				</div>
 
