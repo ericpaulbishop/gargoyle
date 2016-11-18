@@ -97,7 +97,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			</div>
 			<div class="panel-body">
 				<label style="text-decoration:underline"><%~ CfgDev %>:</label>
-				<div class="indent">
+				<div class="row indent">
 					<input type="radio" id="global_gateway" name="global_configuration" value="gateway" onclick="setBridgeVisibility()" />
 					<label for="global_gateway"><%~ DvGtwy %></label>
 					<br/>
@@ -116,24 +116,24 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			</div>
 
 			<div class="panel-body">
-				<div id="bridge_ip_container" class="form-group">
+				<div id="bridge_ip_container" class="row form-group">
 					<label for="bridge_ip" id="bridge_ip_label"><%~ BrIP %>:</label>
 					<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
 					<em><%~ BrNote %></em>
 				</div>
 
-				<div id="bridge_mask_container" class="form-group">
+				<div id="bridge_mask_container" class="row form-group">
 					<label for="bridge_mask" id="bridge_mask_label"><%~ SMsk %>:</label>
 					<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
 					<em><%~ SMNote %></em>
 				</div>
 
-				<div id="bridge_gateway_container" class="form-group">
+				<div id="bridge_gateway_container" class="row form-group">
 					<label for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
 					<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
 				</div>
 
-				<div id="bridge_wan_port_to_lan_container" class="form-group">
+				<div id="bridge_wan_port_to_lan_container" class="row form-group">
 					<label for="bridge_wan_port_to_lan" id="bridge_wan_port_to_lan_label"><%~ WanEP %>:</label>
 					<select class="form-control" id="bridge_wan_port_to_lan" onchange="setBridgeVisibility()">
 						<option value="disable"><%~ Dsbl %></option>
@@ -141,7 +141,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_dns_source_container" class="form-group">
+				<div id="bridge_dns_source_container" class="row form-group">
 					<label id="bridge_dns_source_label" for="bridge_dns_source"><%~ DnsSvs %>:</label>
 					<select class="form-control" id="bridge_dns_source" onchange="setDnsSource(this)">
 						<option value="gateway"><%~ GwDNS %></option>
@@ -149,22 +149,22 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_dns_custom_container" class="form-group">
+				<div id="bridge_dns_custom_container" class="row form-group">
 					<input type="text" id="add_bridge_dns" onkeyup="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
 					<button class="btn btn-default" id="add_bridge_dns_button" onclick="addDns('bridge')"><%~ Add %></button>
-					<div id="bridge_dns_table_container" class="form-group"></div>
+					<div id="bridge_dns_table_container" class="row form-group"></div>
 				</div>
 
 				<div class="internal_divider"></div>
 
-				<div id="bridge_mode_container" class="form-group">
+				<div id="bridge_mode_container" class="row form-group">
 					<select id="bridge_mode" class="form-control" onchange="setBridgeVisibility()">
 						<option value="client_bridge"><%~ BrClient %></option>
 						<option value="wds"><%~ BrWDS %></option>
 					</select>
 				</div>
 
-				<div id="bridge_repeater_container" class="form-group">
+				<div id="bridge_repeater_container" class="row form-group">
 					<label for="bridge_repeater" id="bridge_repeater_label"><%~ Rptr %>:</label>
 					<select class="form-control" id="bridge_repeater" onchange="setBridgeVisibility()">
 						<option value="enabled"><%~ RptrE %></option>
@@ -172,7 +172,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_hwmode_container" class="form-group">
+				<div id="bridge_hwmode_container" class="row form-group">
 					<label for="bridge_hwmode" id="bridge_hwmode_label"><%~ BrOpr %>:</label>
 					<select id="bridge_hwmode" class="form-control" onchange="setHwMode(this)">
 						<option value="11gn">B+G+N</option>
@@ -184,7 +184,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_channel_width_container" class="form-group">
+				<div id="bridge_channel_width_container" class="row form-group">
 					<label for="bridge_channel_width" id="bridge_channel_width_label"><%~ ChWdth %>:</label>
 					<select id="bridge_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
 						<option value="HT20">20MHz</option>
@@ -193,7 +193,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_txpower_container" class="form-group">
+				<div id="bridge_txpower_container" class="row form-group">
 					<label for="bridge_max_txpower" id="bridge_txpower_label"><%~ TrPwr %>:</label>
 					<select id="bridge_max_txpower" class="form-control" onchange="updateTxPower('bridge_max_txpower','bridge_txpower', 'G')">
 						<option value="max"><%~ Max %></option>
@@ -206,7 +206,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</em>
 				</div>
 
-				<div id="bridge_channel_width_5ghz_container" class="form-group">
+				<div id="bridge_channel_width_5ghz_container" class="row form-group">
 					<label for="bridge_channel_width_5ghz" id="bridge_channel_width_5ghz_label"><%~ ChWdth %>:</label>
 					<select id="bridge_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
 						<option value="HT20">20MHz</option>
@@ -218,7 +218,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_txpower_5ghz_container" class="form-group">
+				<div id="bridge_txpower_5ghz_container" class="row form-group">
 					<label for="bridge_max_txpower_5ghz" id="bridge_txpower_5ghz_label"><%~ TrPwr %>:</label>
 					<span>
 						<select id="bridge_max_txpower_5ghz" class="form-control" onchange="updateTxPower('bridge_max_txpower_5ghz','bridge_txpower_5ghz', 'A')">
@@ -231,7 +231,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="bridge_list_ssid_container" class="form-group">
+				<div id="bridge_list_ssid_container" class="row form-group">
 					<label for="bridge_list_ssid" id="bridge_list_ssid_label"><%~ Join %>:</label>
 					<span class="rightcolumn">
 						<select id="bridge_list_ssid" style="width:180px;max-width:180px" onchange="setSsidVisibility(this.id)" >
@@ -241,11 +241,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="bridge_custom_ssid_container" class="form-group">
+				<div id="bridge_custom_ssid_container" class="row form-group">
 					<input type="text" class="form-control" id="bridge_custom_ssid" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 				</div>
 
-				<div id="bridge_ssid_container" class="form-group">
+				<div id="bridge_ssid_container" class="row form-group">
 					<label for="bridge_ssid" id="bridge_ssid_label"><%~ Join %>:</label>
 					<div class="form-inline">
 						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
@@ -253,12 +253,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</div>
 				</div>
 
-				<div id="bridge_broadcast_ssid_container" class="form-group">
+				<div id="bridge_broadcast_ssid_container" class="row form-group">
 					<label for="bridge_broadcast_ssid" id="bridge_broadcast_ssid_label"><%~ Bcst %>:</label>
 					<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 				</div>
 
-				<div id="bridge_channel_container" class="form-group">
+				<div id="bridge_channel_container" class="row form-group">
 					<label for="bridge_channel" id="bridge_channel_label"><%~ WChn %>:</label>
 						<select id="bridge_channel" lass="form-control" onchange="setChannel(this)">
 						<option value="auto"><%~ auto %></option>
@@ -279,17 +279,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="bridge_channel_5ghz_container" class="form-group">
+				<div id="bridge_channel_5ghz_container" class="row form-group">
 					<label for="bridge_channel_5ghz" id="bridge_channel_5ghz_label"><%~ WChn %>:</label>
 					<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
 				</div>
 
-				<div id="bridge_fixed_channel_container" class="form-group">
+				<div id="bridge_fixed_channel_container" class="row form-group">
 					<label for="bridge_fixed_channel" id="bridge_fixed_channel_label"><%~ WChn %>:</label>
 					<span id="bridge_fixed_channel">&nbsp;</span>
 				</div>
 
-				<div id="bridge_encryption_container" class="form-group">
+				<div id="bridge_encryption_container" class="row form-group">
 					<label for="bridge_encryption" id="bridge_encryption_label"><%~ Encr %>:</label>
 					<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility()">
 						<option value="none"><%~ None %></option>
@@ -304,7 +304,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span id="bridge_fixed_encryption">&nbsp;</span>
 				</div>
 
-				<div id="bridge_pass_container" class="form-group">
+				<div id="bridge_pass_container" class="row form-group">
 					<label for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
 					<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>
 					<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" />
@@ -312,24 +312,24 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<br/>
 				</div>
 
-				<div id="bridge_wep_container" class="form-group">
+				<div id="bridge_wep_container" class="row form-group">
 						<label for="bridge_wep" id="bridge_wep_label" ><%~ HexK %>:</label>
 						<input type="text" id="bridge_wep" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
 				</div>
 
-				<div id="bridge_wifi_mac_container" class="form-group">
+				<div id="bridge_wifi_mac_container" class="row form-group">
 					<label id="bridge_wifi_mac_label"><%~ DevMAC %>:</label>
 					<span id="bridge_wifi_mac"></span>
 				</div>
 
-				<div id="bridge_wds_container" class="form-group">
+				<div id="bridge_wds_container" class="row form-group">
 					<label for="bridge_wds_label" id="bridge_wds_label"><%~ OWDS %>:</label>
 					<div>
 						<input type="text" id="add_bridge_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default" id="add_bridge_wds_mac_button" onclick="addMacToWds('bridge')"><%~ Add %></button>
 					</div>
 					<div class="rightcolumnonly">
-						<div id="bridge_wds_mac_table_container" class="form-group"></div>
+						<div id="bridge_wds_mac_table_container" class="row form-group"></div>
 					</div>
 				</div>
 
@@ -591,16 +591,16 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 </div>
 
 <div id="wifi_fieldset" class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ Wrlss %></h3>
 			</div>
 
-			<div class="panel-body">
-				<div id="wifi_mode_container" class="form-group">
-					<label for="wifi_mode" id="wifi_mode_label"><%~ WlMod %>:</label>
+			<div class="panel-body row">
+			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+				<div id="wifi_mode_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_mode" id="wifi_mode_label"><%~ WlMod %>:</label>
 					<select id="wifi_mode" class="form-control" onchange="setWifiVisibility()">
 						<option value="ap"><%~ AcPt %> (AP)</option>
 						<option value="ap+wds">AP+WDS</option>
@@ -611,8 +611,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_hwmode_container" class="form-group">
-					<label for="wifi_hwmode" id="wifi_hwmode_label">2.4GHz <%~ OpMod %>:</label>
+				<div id="wifi_hwmode_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_hwmode" id="wifi_hwmode_label">2.4GHz <%~ OpMod %>:</label>
 					<span>
 						<select id="wifi_hwmode" class="form-control" onchange="setHwMode(this)">
 							<option value="disabled">Disabled</option>
@@ -622,8 +622,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_channel_width_container" class="form-group">
-					<label for="wifi_channel_width" id="wifi_channel_width_label">2.4GHz <%~ ChWdth %>:</label>
+				<div id="wifi_channel_width_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_channel_width" id="wifi_channel_width_label">2.4GHz <%~ ChWdth %>:</label>
 					<span>
 						<select id="wifi_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
 							<option value="HT20">20MHz</option>
@@ -633,8 +633,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_txpower_container" class="form-group">
-					<label for="wifi_max_txpower" id="wifi_txpower_label">2.4GHz <%~ TrPwr %>:</label>
+				<div id="wifi_txpower_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_max_txpower" id="wifi_txpower_label">2.4GHz <%~ TrPwr %>:</label>
 					<span>
 						<select id="wifi_max_txpower" class="form-control" onchange="updateTxPower('wifi_max_txpower','wifi_txpower', 'G')">
 							<option value="max"><%~ Max %></option>
@@ -646,8 +646,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_hwmode_5ghz_container" class="form-group">
-					<label for="wifi_hwmode_5ghz" id="wifi_hwmode_5ghz_label">5GHz <%~ OpMod %>:</label>
+				<div id="wifi_hwmode_5ghz_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_hwmode_5ghz" id="wifi_hwmode_5ghz_label">5GHz <%~ OpMod %>:</label>
 					<span>
 						<select id="wifi_hwmode_5ghz" class="form-control" onchange="setHwMode(this)">
 							<option value="disabled">Disabled</option>
@@ -658,8 +658,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_channel_width_5ghz_container" class="form-group">
-					<label for="wifi_channel_width_5ghz" id="wifi_channel_width_5ghz_label">5GHz <%~ ChWdth %>:</label>
+				<div id="wifi_channel_width_5ghz_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_channel_width_5ghz" id="wifi_channel_width_5ghz_label">5GHz <%~ ChWdth %>:</label>
 					<span>
 						<select id="wifi_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
 							<option value="HT20">20MHz</option>
@@ -672,8 +672,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_txpower_5ghz_container" class="form-group">
-					<label for="wifi_max_txpower_5ghz" id="wifi_txpower_5ghz_label">5GHz <%~ TrPwr %>:</label>
+				<div id="wifi_txpower_5ghz_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_max_txpower_5ghz" id="wifi_txpower_5ghz_label">5GHz <%~ TrPwr %>:</label>
 					<span>
 						<select id="wifi_max_txpower_5ghz" class="form-control" onchange="updateTxPower('wifi_max_txpower_5ghz','wifi_txpower_5ghz', 'A')">
 							<option value="max"><%~ Max %></option>
@@ -685,20 +685,20 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="mac_enabled_container" class="form-group">
-					<label for="mac_filter_enabled"><%~ WlFltr %>:</label>
+				<div id="mac_enabled_container" class="row form-group">
+					<label class="col-xs-5" for="mac_filter_enabled"><%~ WlFltr %>:</label>
 					<select class="form-control" id="mac_filter_enabled" onchange="setWifiVisibility()" >
 						<option value="disabled"><%~ Disabled %></option>
 						<option value="enabled"><%~ Enabled %></option>
 					</select>
 				</div>
 
-				<div id="mac_filter_container" class="form-group">
+				<div id="mac_filter_container" class="row form-group">
 					<div class="rightcolumnonly">
 						<em><%~ FltrInfo %></em>
 					</div>
 					<div>
-						<label for="mac_filter_policy"><%~ MACFiPo %>:</label>
+						<label class="col-xs-5" for="mac_filter_policy"><%~ MACFiPo %>:</label>
 						<select class="form-control" id="mac_filter_policy">
 							<option value="allow"><%~ AllwMAC %></option>
 							<option value="deny" ><%~ DnyMAC %></option>
@@ -710,13 +710,13 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<button class="btn btn-default" id="add_mac_button" onclick="addMacToFilter()"><%~ Add %></button>
 						</div>
 					</div>
-					<div id="mac_table_container" class="form-group"></div>
+					<div id="mac_table_container" class="row form-group"></div>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
 
-				<div id="wifi_list_ssid2_container" class="form-group">
-					<label for="wifi_list_ssid2" id="wifi_list_ssid2_label"><%~ Join %>:</label>
+				<div id="wifi_list_ssid2_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_list_ssid2" id="wifi_list_ssid2_label"><%~ Join %>:</label>
 					<span class="rightcolumn">
 						<select id="wifi_list_ssid2" onchange="setSsidVisibility(this.id)">
 							<option value="custom"><%~ Other %></option>
@@ -725,11 +725,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_custom_ssid2_container" class="form-group">
+				<div id="wifi_custom_ssid2_container" class="row form-group">
 					<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 				</div>
 
-				<div id="wifi_ssid2_container" class="form-group">
+				<div id="wifi_ssid2_container" class="row form-group">
 					<label for="wifi_ssid2" id="wifi_ssid2_label">SSID:</label>
 					<span>
 						<input type="text" id="wifi_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
@@ -737,7 +737,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
-				<div id="wifi_client_band_container" class="indent">
+				<div id="wifi_client_band_container" class="row indent">
 					<label for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
 					<select id="wifi_client_band" class="form-control" onchange="setHwMode(document.getElementById('wifi_hwmode'))">
 						<option value="2.4">2.4 GHz</option>
@@ -745,7 +745,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_channel2_container" class="indent">
+				<div id="wifi_channel2_container" class="row indent">
 					<label for="wifi_channel2" id="wifi_channel2_label"><%~ WChn %>:</label>
 					<select id="wifi_channel2" class="form-control" onchange="setChannel(this)" >
 						<option value="auto"><%~ auto %></option>
@@ -766,17 +766,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_fixed_channel2_container" class="indent">
+				<div id="wifi_fixed_channel2_container" class="row indent">
 					<label for="wifi_fixed_channel2" id="wifi_fixed_channel2_label"><%~ WChn %>:</label>
 					<span id="wifi_fixed_channel2">&nbsp;</span>
 				</div>
 
-				<div id="wifi_channel2_5ghz_container" class="indent">
+				<div id="wifi_channel2_5ghz_container" class="row indent">
 					<label for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
 					<select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select>
 				</div>
 
-				<div id="wifi_encryption2_container" class="indent">
+				<div id="wifi_encryption2_container" class="row indent">
 					<label for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
 					<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
 						<option value="none"><%~ None %></option>
@@ -786,19 +786,19 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_fixed_encryption2_container" class="indent">
+				<div id="wifi_fixed_encryption2_container" class="row indent">
 					<label for="wifi_fixed_encryption2" id="wifi_fixed_encryption2_label"><%~ Encr %>:</label>
 					<span id="wifi_fixed_encryption2">&nbsp;</span>
 				</div>
 
-				<div id="wifi_pass2_container" class="indent">
+				<div id="wifi_pass2_container" class="row indent">
 					<label for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
 					<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
 					<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
 					<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
 				</div>
 
-				<div id="wifi_wep2_container" class="indent">
+				<div id="wifi_wep2_container" class="row indent">
 					<div>
 						<label for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
 						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
@@ -807,17 +807,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="internal_divider2" class="internal_divider"></div>
 
-				<div id="wifi_ssid1_container" class="form-group">
+				<div id="wifi_ssid1_container" class="row form-group">
 					<label for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
 					<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
 				</div>
 
-				<div id="wifi_ssid1a_container" class="form-group">
+				<div id="wifi_ssid1a_container" class="row form-group">
 					<label for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
 					<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
 				</div>
 
-				<div id="wifi_channel1_container" class="indent">
+				<div id="wifi_channel1_container" class="row indent">
 					<label for="wifi_channel1" id="wifi_channel1_label"><%~ WChn %>:</label>
 					<select id="wifi_channel1" class="form-control" onchange="setChannel(this)" >
 						<option value="auto"><%~ auto %></option>
@@ -838,17 +838,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_fixed_channel1_container" class="indent">
+				<div id="wifi_fixed_channel1_container" class="row indent">
 					<label for="wifi_fixed_channel1" id="wifi_fixed_channel1_label"><%~ WChn %>:</label>
 					<span id="wifi_fixed_channel1">&nbsp;</span>
 				</div>
 
-				<div id="wifi_channel1_5ghz_container" class="indent">
+				<div id="wifi_channel1_5ghz_container" class="row indent">
 					<label for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
 					<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
 				</div>
 
-				<div id="wifi_encryption1_container" class="indent">
+				<div id="wifi_encryption1_container" class="row indent">
 					<label for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
 					<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
 						<option value="none"><%~ None %></option>
@@ -860,14 +860,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_pass1_container" class="indent">
+				<div id="wifi_pass1_container" class="row indent">
 					<label for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
 					<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
 					<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
 					<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
 				</div>
 
-				<div id="wifi_wep1_container" class="indent">
+				<div id="wifi_wep1_container" class="row indent">
 					<div style="display:block;">
 						<label for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
 						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
@@ -880,17 +880,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</div>
 				</div>
 
-				<div id="wifi_server1_container" class="indent">
+				<div id="wifi_server1_container" class="row indent">
 					<label for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
 					<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/><br/>
 				</div>
 
-				<div id="wifi_port1_container" class="indent">
+				<div id="wifi_port1_container" class="row indent">
 					<label for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
 					<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
 				</div>
 
-				<div id="wifi_hidden_container" class="indent">
+				<div id="wifi_hidden_container" class="row indent">
 					<label id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
 					<select id="wifi_hidden" class="form-control">
 						<option value="disabled"><%~ Disabled %></option>
@@ -898,7 +898,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_isolate_container" class="indent">
+				<div id="wifi_isolate_container" class="row indent">
 					<label id="wifi_isolate_label" for="wifi_isolate"><%~ WlIso %>:</label>
 					<select id="wifi_isolate" class="form-control">
 						<option value="disabled"><%~ Disabled %></option>
@@ -906,23 +906,23 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_mac_container" class="indent">
+				<div id="wifi_mac_container" class="row indent">
 					<label id="wifi_mac_label"><%~ DevMAC %>:</label>
 					<span id="wifi_mac"></span>
 				</div>
 
-				<div id="wifi_wds_container" class="indent">
+				<div id="wifi_wds_container" class="row indent">
 					<label for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
 					<span>
 						<input type="text" id="add_wifi_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default" id="add_wifi_wds_mac_button" onclick="addMacToWds('wifi')"><%~ Add %></button>
 					</span>
-					<div id="wifi_wds_mac_table_container" class="form-group"></div>
+					<div id="wifi_wds_mac_table_container" class="row form-group"></div>
 				</div>
 
 				<div id="internal_divider3" class="internal_divider"></div>
 
-				<div id="wifi_guest_mode_container" class="form-group">
+				<div id="wifi_guest_mode_container" class="row form-group">
 					<label for="wifi_guest_mode"><%~ GNet %>:</label>
 					<select id="wifi_guest_mode" class="form-control" onchange="setWifiVisibility()" >
 						<option value="disabled"><%~ Disabled %></option>
@@ -930,21 +930,21 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</select>
 				</div>
 
-				<div id="wifi_guest_container" class="form-group">
+				<div id="wifi_guest_container" class="row form-group">
 
-					<div id="wifi_guest_ssid1_container" class="form-group">
+					<div id="wifi_guest_ssid1_container" class="row form-group">
 						<label for="wifi_guest_ssid1" id="wifi_guest_ssid1_label"><%~ GNetID %>:</label>
 						<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
 					  <input type="text" id="wifi_guest_mac_g" class="form-control" style="display: none"/>
 					</div>
 
-					<div id="wifi_guest_ssid1a_container" class="form-group">
+					<div id="wifi_guest_ssid1a_container" class="row form-group">
 						<label for="wifi_guest_ssid1a" id="wifi_guest_ssid1a_label"><%~ GNet5ID %></label>
 						<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
 					  <input type="text" id="wifi_guest_mac_a" class="form-control" style="display: none"/>
 					</div>
 
-					<div id="wifi_guest_encryption1_container" class="indent">
+					<div id="wifi_guest_encryption1_container" class="row indent">
 						<label for="wifi_guest_encryption1" id="wifi_guest_encryption1_label"><%~ Encr %>:</label>
 						<select class="form-control" id="wifi_guest_encryption1" onchange="setWifiVisibility()">
 							<option value="none"><%~ None %></option>
@@ -954,14 +954,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 					</div>
 
-					<div id="wifi_guest_pass1_container" class="indent">
+					<div id="wifi_guest_pass1_container" class="row indent">
 						<label for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
 						<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')"/>
 						<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
 					</div>
 
-					<div id="wifi_guest_wep1_container" class="indent">
+					<div id="wifi_guest_wep1_container" class="row indent">
 						<div class="form-group form-inline">
 							<label for="wifi_guest_wep1" id="wifi_guest_wep1_label"><%~ HexK %>:</label>
 							<input type="text" id="wifi_guest_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
@@ -974,7 +974,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</div>
 					</div>
 
-					<div id="wifi_guest_hidden_container" class="indent">
+					<div id="wifi_guest_hidden_container" class="row indent">
 						<label id="wifi_guest_hidden_label" for="wifi_guest_hidden"><%~ BcsID %>:</label>
 						<select class="form-control" id="wifi_guest_hidden" >
 							<option value="disabled"><%~ Disabled %></option>
@@ -982,7 +982,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 					</div>
 
-					<div id="wifi_guest_isolate_container" class="indent">
+					<div id="wifi_guest_isolate_container" class="row indent">
 						<label id="wifi_guest_isolate_label" for="wifi_guest_isolate"><%~ WlIso %>:</label>
 						<select id="wifi_guest_isolate" class="form-control">
 							<option value="disabled"><%~ Disabled %></option>
@@ -994,6 +994,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 			</div>
 		</div>
+	</div>
 	</div>
 </div>
 
