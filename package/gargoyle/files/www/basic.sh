@@ -604,19 +604,21 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
 				<div id="wifi_mode_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_mode" id="wifi_mode_label"><%~ WlMod %>:</label>
-					<select id="wifi_mode" class="form-control" onchange="setWifiVisibility()">
-						<option value="ap"><%~ AcPt %> (AP)</option>
-						<option value="ap+wds">AP+WDS</option>
-						<option value="sta"><%~ Clnt %></option>
-						<option value="ap+sta"><%~ Clnt %>+AP</option>
-						<option value="adhoc">Ad Hoc</option>
-						<option value="disabled"><%~ Disabled %></option>
-					</select>
+					<span class="col-xs-7" >
+						<select id="wifi_mode" class="form-control" onchange="setWifiVisibility()">
+							<option value="ap"><%~ AcPt %> (AP)</option>
+							<option value="ap+wds">AP+WDS</option>
+							<option value="sta"><%~ Clnt %></option>
+							<option value="ap+sta"><%~ Clnt %>+AP</option>
+							<option value="adhoc">Ad Hoc</option>
+							<option value="disabled"><%~ Disabled %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_hwmode_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_hwmode" id="wifi_hwmode_label">2.4GHz <%~ OpMod %>:</label>
-					<span>
+					<span class="col-xs-7">
 						<select id="wifi_hwmode" class="form-control" onchange="setHwMode(this)">
 							<option value="disabled">Disabled</option>
 							<option value="11gn">B+G+N</option>
@@ -627,7 +629,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_channel_width_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_channel_width" id="wifi_channel_width_label">2.4GHz <%~ ChWdth %>:</label>
-					<span>
+					<span class="col-xs-7">
 						<select id="wifi_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
 							<option value="HT20">20MHz</option>
 							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
@@ -638,7 +640,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_txpower_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_max_txpower" id="wifi_txpower_label">2.4GHz <%~ TrPwr %>:</label>
-					<span>
+					<span class="col-xs-7">
 						<select id="wifi_max_txpower" class="form-control" onchange="updateTxPower('wifi_max_txpower','wifi_txpower', 'G')">
 							<option value="max"><%~ Max %></option>
 							<option value="custom"><%~ Cstm %></option>
@@ -651,7 +653,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_hwmode_5ghz_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_hwmode_5ghz" id="wifi_hwmode_5ghz_label">5GHz <%~ OpMod %>:</label>
-					<span>
+					<span class="col-xs-7">
 						<select id="wifi_hwmode_5ghz" class="form-control" onchange="setHwMode(this)">
 							<option value="disabled">Disabled</option>
 							<option value="11a">A</option>
@@ -663,7 +665,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_channel_width_5ghz_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_channel_width_5ghz" id="wifi_channel_width_5ghz_label">5GHz <%~ ChWdth %>:</label>
-					<span>
+					<span  class="col-xs-7">
 						<select id="wifi_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
 							<option value="HT20">20MHz</option>
 							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
@@ -677,7 +679,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_txpower_5ghz_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_max_txpower_5ghz" id="wifi_txpower_5ghz_label">5GHz <%~ TrPwr %>:</label>
-					<span>
+					<span  class="col-xs-7">
 						<select id="wifi_max_txpower_5ghz" class="form-control" onchange="updateTxPower('wifi_max_txpower_5ghz','wifi_txpower_5ghz', 'A')">
 							<option value="max"><%~ Max %></option>
 							<option value="custom"><%~ Cstm %></option>
@@ -690,30 +692,29 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="mac_enabled_container" class="row form-group">
 					<label class="col-xs-5" for="mac_filter_enabled"><%~ WlFltr %>:</label>
-					<select class="form-control" id="mac_filter_enabled" onchange="setWifiVisibility()" >
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
+					<span class="col-xs-7">
+						<select class="form-control" id="mac_filter_enabled" onchange="setWifiVisibility()" >
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="mac_filter_container" class="row form-group">
-					<div class="rightcolumnonly">
-						<em><%~ FltrInfo %></em>
-					</div>
-					<div>
-						<label class="col-xs-5" for="mac_filter_policy"><%~ MACFiPo %>:</label>
+					<label class="col-xs-5" for="mac_filter_policy"><%~ MACFiPo %>:</label>
+					<div class="col-xs-7">
 						<select class="form-control" id="mac_filter_policy">
 							<option value="allow"><%~ AllwMAC %></option>
 							<option value="deny" ><%~ DnyMAC %></option>
 						</select>
-					</div>
-					<div class="rightcolumnonly">
-						<div>
+						<div class="second_row_right_column"><em><%~ FltrInfo %></em></div>
+						<div class="second_row_right_column">
 							<input type="text" id="add_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
 							<button class="btn btn-default" id="add_mac_button" onclick="addMacToFilter()"><%~ Add %></button>
 						</div>
+						<div id="mac_table_container" class="form-group second_row_right_column"></div>
+
 					</div>
-					<div id="mac_table_container" class="row form-group"></div>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
