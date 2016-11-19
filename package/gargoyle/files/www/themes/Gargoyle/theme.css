@@ -403,6 +403,10 @@ select
 	width:auto;
 	display:inline;
 }
+button
+{
+	display:inline;
+}
 .form-group
 {
 	margin-bottom:8px;

@@ -721,32 +721,35 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wifi_list_ssid2_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_list_ssid2" id="wifi_list_ssid2_label"><%~ Join %>:</label>
-					<span class="rightcolumn">
-						<select id="wifi_list_ssid2" onchange="setSsidVisibility(this.id)">
+					<span  class="col-xs-7">
+						<select id="wifi_list_ssid2"  class="form-control" onchange="setSsidVisibility(this.id)">
 							<option value="custom"><%~ Other %></option>
 						</select>
 						<button class="btn btn-default" id="wifi_rescan_button" onclick="scanWifi('wifi_custom_ssid2')"><%~ RScn %></button>
+						<div id="wifi_custom_ssid2_container" class="second_row_right_column" >
+							<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						</div>
+
 					</span>
 				</div>
 
-				<div id="wifi_custom_ssid2_container" class="row form-group">
-					<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
-				</div>
 
 				<div id="wifi_ssid2_container" class="row form-group">
-					<label for="wifi_ssid2" id="wifi_ssid2_label">SSID:</label>
-					<span>
+					<label  class="col-xs-5" for="wifi_ssid2" id="wifi_ssid2_label">SSID:</label>
+					<span class="col-xs-7">
 						<input type="text" id="wifi_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 						<button class="btn btn-default" id="wifi_scan_button" onclick="scanWifi('wifi_ssid2')"><%~ Scan %></button>
 					</span>
 				</div>
 
 				<div id="wifi_client_band_container" class="row indent">
-					<label for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
-					<select id="wifi_client_band" class="form-control" onchange="setHwMode(document.getElementById('wifi_hwmode'))">
-						<option value="2.4">2.4 GHz</option>
-						<option value="5">5 GHz</option>
-					</select>
+					<label  class="col-xs-5" for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_client_band" class="form-control" onchange="setHwMode(document.getElementById('wifi_hwmode'))">
+							<option value="2.4">2.4 GHz</option>
+							<option value="5">5 GHz</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_channel2_container" class="row indent">
