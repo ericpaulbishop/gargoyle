@@ -6,7 +6,7 @@ rtgS.mRoutes="Roteamento";
 rtgS.ARSect="Rotas Ativas";
 rtgS.SRSect="Rotas Estáticas";
 rtgS.ASRte="Adicionar Nova Rota";
-rtgS.CSRSect="Rotas Estáticas Cadastradas";
+rtgS.CSRSect="Rotas Estáticas Definidas";
 rtgS.ESSect="Editar Rota";
 
 //javascript & template
