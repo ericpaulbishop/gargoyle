@@ -15,6 +15,7 @@ html, body, .full-height {
 }
 body {
   background: #939598;
+  font-size:12px;
 }
 #content {
   background: #8B9AF3;
@@ -384,4 +385,57 @@ nav>li.active>a {
 #login_status.alert {
   background: #F2F2F2;
   border-radius: 5px;
+}
+label
+{
+	font-weight:normal;
+}
+input
+{
+	font-size:12px;
+	padding:2px;
+	display:inline;
+}
+select
+{
+	font-size:12px;
+	padding:2px;
+	width:auto;
+	display:inline;
+}
+button
+{
+	display:inline;
+}
+.form-group
+{
+	margin-bottom:8px;
+}
+.form-control
+{
+	padding:2px;
+	font-size:12px;
+	width:auto;
+	display:inline;
+}
+.btn
+{
+	padding:2px;
+	font-size:12px;
+	display:inline;
+
+}
+.short-left-pad
+{
+	padding-left:2px;
+}
+.second_row_right_column
+{
+	margin-top:4px;
+	margin-bottom:8px;
+}
+.indent
+{
+	margin-left:15px;
+	display:block;
 }
