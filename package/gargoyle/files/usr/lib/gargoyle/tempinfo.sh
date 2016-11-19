@@ -5,7 +5,7 @@
 tmodel=$(cat /tmp/sysinfo/model)
 show_temp=1
 
-# temps array -> "show_temps CPU RAM WIFI"
+# javascript temps array -> "show_temps CPU RAM WIFI"
 
 case "$tmodel" in
 "Linksys WRT1900AC")
