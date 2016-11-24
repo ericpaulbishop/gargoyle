@@ -14,6 +14,10 @@ var currentLanIp;
 
 var googleDns = ["8.8.8.8", "8.8.4.4" ];
 var openDns = ["208.67.222.222", "208.67.220.220" ];
+var openDnsFS = ["208.67.222.123", "208.67.220.123" ];
+var nortonCSA = ["199.85.126.10", "199.85.127.10" ];
+var nortonCSB = ["199.85.126.20", "199.85.127.20" ];
+var nortonCSC = ["199.85.126.30", "199.85.127.30" ];
 
 var ncDns  = [ "178.32.31.41", "106.187.47.17", "176.58.118.172" ]
 var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
@@ -878,6 +882,22 @@ function saveChanges()
 			{
 				dnsList = openDns;
 			}
+			else if(dnsSource == "opendnsfs" && notBridge )
+			{
+				dnsList = openDnsFS;
+			}
+			else if(dnsSource == "nortoncsa" && notBridge )
+			{
+				dnsList = nortonCSA;
+			}
+			else if(dnsSource == "nortoncsb" && notBridge )
+			{
+				dnsList = nortonCSB;
+			}
+			else if(dnsSource == "nortoncsc" && notBridge )
+			{
+				dnsList = nortonCSC;
+			}
 			else //custom
 			{
 				var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
@@ -1732,7 +1752,22 @@ function resetData()
 	{
 		dnsType = "opendns";
 	}
-
+	else if( dnsTableData.join(",") == openDnsFS.join(",") || dnsTableData.join(",") == openDnsFS.reverse().join(",") )
+	{
+		dnsType = "opendnsfs";
+	}
+	else if( dnsTableData.join(",") == nortonCSA.join(",") || dnsTableData.join(",") == nortonCSA.reverse().join(",") )
+	{
+		dnsType = "nortoncsa";
+	}
+	else if( dnsTableData.join(",") == nortonCSB.join(",") || dnsTableData.join(",") == nortonCSB.reverse().join(",") )
+	{
+		dnsType = "nortoncsb";
+	}
+	else if( dnsTableData.join(",") == nortonCSC.join(",") || dnsTableData.join(",") == nortonCSC.reverse().join(",") )
+	{
+		dnsType = "nortoncsc";
+	}
 	else if( dnsTableData.join(",") == googleDns.join(",") || dnsTableData.join(",") == googleDns.reverse().join(",") )
 	{
 		dnsType = "google";
