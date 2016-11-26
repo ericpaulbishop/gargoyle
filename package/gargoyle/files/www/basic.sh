@@ -743,7 +743,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_client_band_container" class="row indent">
-					<label  class="col-xs-5" for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
+					<label class="col-xs-5" for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
 					<span class="col-xs-7">
 						<select id="wifi_client_band" class="form-control" onchange="setHwMode(document.getElementById('wifi_hwmode'))">
 							<option value="2.4">2.4 GHz</option>
@@ -753,49 +753,53 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_channel2_container" class="row indent">
-					<label for="wifi_channel2" id="wifi_channel2_label"><%~ WChn %>:</label>
-					<select id="wifi_channel2" class="form-control" onchange="setChannel(this)" >
-						<option value="auto"><%~ auto %></option>
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-					</select>
+					<label  class="col-xs-5" for="wifi_channel2" id="wifi_channel2_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_channel2" class="form-control" onchange="setChannel(this)" >
+							<option value="auto"><%~ auto %></option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_fixed_channel2_container" class="row indent">
-					<label for="wifi_fixed_channel2" id="wifi_fixed_channel2_label"><%~ WChn %>:</label>
-					<span id="wifi_fixed_channel2">&nbsp;</span>
+					<label class="col-xs-5"  for="wifi_fixed_channel2" id="wifi_fixed_channel2_label"><%~ WChn %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_channel2">&nbsp;</span>
 				</div>
 
 				<div id="wifi_channel2_5ghz_container" class="row indent">
-					<label for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
-					<select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select>
+					<label class="col-xs-5" for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select></span>
 				</div>
 
 				<div id="wifi_encryption2_container" class="row indent">
-					<label for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
-					<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
-						<option value="none"><%~ None %></option>
-						<option value="psk2">WPA2 PSK</option>
-						<option value="psk">WPA PSK</option>
-						<option value="wep">WEP</option>
-					</select>
+					<label class="col-xs-5" for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
+							<option value="none"><%~ None %></option>
+							<option value="psk2">WPA2 PSK</option>
+							<option value="psk">WPA PSK</option>
+							<option value="wep">WEP</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_fixed_encryption2_container" class="row indent">
-					<label for="wifi_fixed_encryption2" id="wifi_fixed_encryption2_label"><%~ Encr %>:</label>
-					<span id="wifi_fixed_encryption2">&nbsp;</span>
+					<label class="col-xs-5" for="wifi_fixed_encryption2" id="wifi_fixed_encryption2_label"><%~ Encr %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_encryption2">&nbsp;</span>
 				</div>
 
 				<div id="wifi_pass2_container" class="row indent">
