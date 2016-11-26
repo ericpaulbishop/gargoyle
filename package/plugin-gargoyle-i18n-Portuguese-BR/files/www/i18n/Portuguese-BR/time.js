@@ -3,7 +3,7 @@
  */
 
 timeStr.Section="Horário do Sistema";
-timeStr.CurrTime="Data &amp; Hora Atual";
+timeStr.CurrTime="Data/Hora Atual";
 timeStr.TimeZone="Fuso Horário";
 timeStr.DateForm="Formatação da Data";
 timeStr.TimeForm="Formatação da Hora";
