@@ -815,138 +815,158 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_pass2_container" class="row indent">
-					<label for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
-					<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-					<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
-					<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
+					<label class="col-xs-5" for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7">
+						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
+						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
+					</span>
 				</div>
 
 				<div id="wifi_wep2_container" class="row indent">
-					<div>
-						<label for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
+					<label class="col-xs-5" for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
-					</div>
+					</span>
 				</div>
 
 				<div id="internal_divider2" class="internal_divider"></div>
 
 				<div id="wifi_ssid1_container" class="row form-group">
-					<label for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
-					<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+					<label class="col-xs-5" for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+					</span>
 				</div>
 
 				<div id="wifi_ssid1a_container" class="row form-group">
-					<label for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
-					<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+					<label class="col-xs-5" for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
+					<span class="col-xs-7">
+						<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+					</span>
 				</div>
 
 				<div id="wifi_channel1_container" class="row indent">
-					<label for="wifi_channel1" id="wifi_channel1_label"><%~ WChn %>:</label>
-					<select id="wifi_channel1" class="form-control" onchange="setChannel(this)" >
-						<option value="auto"><%~ auto %></option>
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-					</select>
+					<label class="col-xs-5" for="wifi_channel1" id="wifi_channel1_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_channel1" class="form-control" onchange="setChannel(this)" >
+							<option value="auto"><%~ auto %></option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_fixed_channel1_container" class="row indent">
-					<label for="wifi_fixed_channel1" id="wifi_fixed_channel1_label"><%~ WChn %>:</label>
-					<span id="wifi_fixed_channel1">&nbsp;</span>
+					<label class="col-xs-5" for="wifi_fixed_channel1" id="wifi_fixed_channel1_label"><%~ WChn %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_channel1">&nbsp;</span>
 				</div>
 
 				<div id="wifi_channel1_5ghz_container" class="row indent">
-					<label for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
-					<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
+					<label class="col-xs-5" for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
+					<span class="col-xs-7" >
+						<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
+					</span>
 				</div>
 
 				<div id="wifi_encryption1_container" class="row indent">
-					<label for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
-					<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
-						<option value="none"><%~ None %></option>
-						<option value="psk2">WPA2 PSK</option>
-						<option value="psk">WPA PSK</option>
-						<option value="wep">WEP</option>
-						<option value="wpa">WPA RADIUS</option>
-						<option value="wpa2">WPA2 RADIUS</option>
-					</select>
+					<label class="col-xs-5" for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
+							<option value="none"><%~ None %></option>
+							<option value="psk2">WPA2 PSK</option>
+							<option value="psk">WPA PSK</option>
+							<option value="wep">WEP</option>
+							<option value="wpa">WPA RADIUS</option>
+							<option value="wpa2">WPA2 RADIUS</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_pass1_container" class="row indent">
-					<label for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
-					<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-					<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
-					<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
+					<label class="col-xs-5" for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7" >
+						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
+						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
+					</span>
 				</div>
 
 				<div id="wifi_wep1_container" class="row indent">
-					<div style="display:block;">
-						<label for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
+					<label class="col-xs-5" for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
+					<span class="col-xs-7" >
 						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
-					</div>
-					<div>
-						<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
-					</div>
-					<div>
-						<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
-					</div>
+						<div class="second_row_right_column">	
+							<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
+							<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
+						</div>
+					</span>
 				</div>
 
 				<div id="wifi_server1_container" class="row indent">
-					<label for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
-					<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/><br/>
+					<label class="col-xs-5" for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
+					<span class="col-xs-7" >
+						<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/>
+					</span>
 				</div>
 
 				<div id="wifi_port1_container" class="row indent">
-					<label for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
-					<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
+					<label class="col-xs-5" for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
+					<span class="col-xs-7" >
+						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
+					</span>
 				</div>
 
 				<div id="wifi_hidden_container" class="row indent">
-					<label id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
-					<select id="wifi_hidden" class="form-control">
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
+					<label  class="col-xs-5" id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_hidden" class="form-control">
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_isolate_container" class="row indent">
-					<label id="wifi_isolate_label" for="wifi_isolate"><%~ WlIso %>:</label>
-					<select id="wifi_isolate" class="form-control">
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
+					<label  class="col-xs-5" id="wifi_isolate_label" for="wifi_isolate"><%~ WlIso %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_isolate" class="form-control">
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_mac_container" class="row indent">
-					<label id="wifi_mac_label"><%~ DevMAC %>:</label>
-					<span id="wifi_mac"></span>
+					<label  class="col-xs-5" id="wifi_mac_label"><%~ DevMAC %>:</label>
+					<span  class="col-xs-7" id="wifi_mac"></span>
 				</div>
 
 				<div id="wifi_wds_container" class="row indent">
-					<label for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
-					<span>
+					<label  class="col-xs-5" for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="add_wifi_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default" id="add_wifi_wds_mac_button" onclick="addMacToWds('wifi')"><%~ Add %></button>
+						<div id="wifi_wds_mac_table_container" class="second_row_right_column form-group"></div>
 					</span>
-					<div id="wifi_wds_mac_table_container" class="row form-group"></div>
 				</div>
 
 				<div id="internal_divider3" class="internal_divider"></div>
 
 				<div id="wifi_guest_mode_container" class="row form-group">
-					<label for="wifi_guest_mode"><%~ GNet %>:</label>
+					<label  class="col-xs-5" for="wifi_guest_mode"><%~ GNet %>:</label>
 					<select id="wifi_guest_mode" class="form-control" onchange="setWifiVisibility()" >
 						<option value="disabled"><%~ Disabled %></option>
 						<option value="enabled"><%~ Enabled %></option>
