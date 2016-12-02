@@ -530,3 +530,33 @@ button
 	margin-left:15px;
 	display:block;
 }
+.form-group-sm select.form-control
+{
+	height: 25px;
+	line-height: 25px;
+}
+.form-group-lg select.form-control
+{
+	height: 25px;
+	line-height: 25px;
+}
+select.form-control 
+{
+	height: 25px;
+	line-height: 25px;
+}
+.form-group-sm input.form-control 
+{
+	height: 25px;
+	line-height: 25px;
+}
+.form-group-lg input.form-control 
+{
+	height: 25px;
+	line-height: 25px;
+}
+input.form-control 
+{
+	height: 25px;
+	line-height: 25px;
+}
