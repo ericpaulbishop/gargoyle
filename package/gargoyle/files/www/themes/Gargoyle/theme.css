@@ -38,10 +38,7 @@ body
 }
 fieldset
 {
-	margin-bottom: 10px;
-	margin-top: 10px;
-	margin-right: 0px;
-	margin-left: 10px;
+	margin: 10px;
 	padding: 10px;
 }
 legend 
