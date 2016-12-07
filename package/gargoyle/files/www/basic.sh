@@ -127,110 +127,134 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 			<div class="panel-body">
 				<div id="bridge_ip_container" class="row form-group">
-					<label for="bridge_ip" id="bridge_ip_label"><%~ BrIP %>:</label>
-					<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
-					<em><%~ BrNote %></em>
+					<label class="col-xs-5" for="bridge_ip" id="bridge_ip_label"><%~ BrIP %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+						<em><%~ BrNote %></em>
+					</span>
 				</div>
 
 				<div id="bridge_mask_container" class="row form-group">
-					<label for="bridge_mask" id="bridge_mask_label"><%~ SMsk %>:</label>
-					<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
-					<em><%~ SMNote %></em>
+					<label class="col-xs-5" for="bridge_mask" id="bridge_mask_label"><%~ SMsk %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
+						<em><%~ SMNote %></em>
+					</span>
 				</div>
 
 				<div id="bridge_gateway_container" class="row form-group">
-					<label for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
-					<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+					<label class="col-xs-5" for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+					</span>
 				</div>
 
 				<div id="bridge_wan_port_to_lan_container" class="row form-group">
-					<label for="bridge_wan_port_to_lan" id="bridge_wan_port_to_lan_label"><%~ WanEP %>:</label>
-					<select class="form-control" id="bridge_wan_port_to_lan" onchange="setBridgeVisibility()">
-						<option value="disable"><%~ Dsbl %></option>
-						<option value="bridge"><%~ BrLAN %></option>
-					</select>
+					<label class="col-xs-5" for="bridge_wan_port_to_lan" id="bridge_wan_port_to_lan_label"><%~ WanEP %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="bridge_wan_port_to_lan" onchange="setBridgeVisibility()">
+							<option value="disable"><%~ Dsbl %></option>
+							<option value="bridge"><%~ BrLAN %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_dns_source_container" class="row form-group">
-					<label id="bridge_dns_source_label" for="bridge_dns_source"><%~ DnsSvs %>:</label>
-					<select class="form-control" id="bridge_dns_source" onchange="setDnsSource(this)">
-						<option value="gateway"><%~ GwDNS %></option>
-						<option value="custom"><%~ CustDNS %></option>
-					</select>
-				</div>
-
-				<div id="bridge_dns_custom_container" class="row form-group">
-					<input type="text" id="add_bridge_dns" onkeyup="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
-					<button class="btn btn-default" id="add_bridge_dns_button" onclick="addDns('bridge')"><%~ Add %></button>
-					<div id="bridge_dns_table_container" class="row form-group"></div>
+					<label class="col-xs-5" id="bridge_dns_source_label" for="bridge_dns_source"><%~ DnsSvs %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="bridge_dns_source" onchange="setDnsSource(this)">
+							<option value="gateway"><%~ GwDNS %></option>
+							<option value="custom"><%~ CustDNS %></option>
+						</select>
+						<span id="bridge_dns_custom_container">
+							<div class="second_row_right_column">
+								<input type="text" id="add_bridge_dns" onkeyup="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
+								<button class="btn btn-default" id="add_bridge_dns_button" onclick="addDns('bridge')"><%~ Add %></button>
+							</div>
+							<div id="bridge_dns_table_container" class="second_row_right_column form-group"></div>
+						</span>
+					</span>
 				</div>
 
 				<div class="internal_divider"></div>
 
 				<div id="bridge_mode_container" class="row form-group">
-					<select id="bridge_mode" class="form-control" onchange="setBridgeVisibility()">
-						<option value="client_bridge"><%~ BrClient %></option>
-						<option value="wds"><%~ BrWDS %></option>
-					</select>
+					<span class="col-xs-12">
+						<select id="bridge_mode" class="form-control" onchange="setBridgeVisibility()">
+							<option value="client_bridge"><%~ BrClient %></option>
+							<option value="wds"><%~ BrWDS %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_repeater_container" class="row form-group">
-					<label for="bridge_repeater" id="bridge_repeater_label"><%~ Rptr %>:</label>
-					<select class="form-control" id="bridge_repeater" onchange="setBridgeVisibility()">
-						<option value="enabled"><%~ RptrE %></option>
-						<option value="disabled"><%~ RptrD %></option>
-					</select>
+					<label class="col-xs-5" for="bridge_repeater" id="bridge_repeater_label"><%~ Rptr %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="bridge_repeater" onchange="setBridgeVisibility()">
+							<option value="enabled"><%~ RptrE %></option>
+							<option value="disabled"><%~ RptrD %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_hwmode_container" class="row form-group">
-					<label for="bridge_hwmode" id="bridge_hwmode_label"><%~ BrOpr %>:</label>
-					<select id="bridge_hwmode" class="form-control" onchange="setHwMode(this)">
-						<option value="11gn">B+G+N</option>
-						<option value="11g">B+G</option>
-						<option value="11anac">A+N+AC</option>
-						<option value="11an">A+N</option>
-						<option value="11a">A</option>
-						<option value="auto"><%~ auto %></option>
-					</select>
+					<label class="col-xs-5" for="bridge_hwmode" id="bridge_hwmode_label"><%~ BrOpr %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_hwmode" class="form-control" onchange="setHwMode(this)">
+							<option value="11gn">B+G+N</option>
+							<option value="11g">B+G</option>
+							<option value="11anac">A+N+AC</option>
+							<option value="11an">A+N</option>
+							<option value="11a">A</option>
+							<option value="auto"><%~ auto %></option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_channel_width_container" class="row form-group">
-					<label for="bridge_channel_width" id="bridge_channel_width_label"><%~ ChWdth %>:</label>
-					<select id="bridge_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
-						<option value="HT20">20MHz</option>
-						<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
-						<option value="HT40-">40Mhz (<%~ ChBlw %>)</option>
-					</select>
+					<label class="col-xs-5" for="bridge_channel_width" id="bridge_channel_width_label"><%~ ChWdth %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_channel_width" class="form-control" onchange="setChannelWidth(this, 'G')">
+							<option value="HT20">20MHz</option>
+							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
+							<option value="HT40-">40Mhz (<%~ ChBlw %>)</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_txpower_container" class="row form-group">
-					<label for="bridge_max_txpower" id="bridge_txpower_label"><%~ TrPwr %>:</label>
-					<select id="bridge_max_txpower" class="form-control" onchange="updateTxPower('bridge_max_txpower','bridge_txpower', 'G')">
-						<option value="max"><%~ Max %></option>
-						<option value="custom"><%~ Cstm %></option>
-					</select>
+					<label class="col-xs-5" for="bridge_max_txpower" id="bridge_txpower_label"><%~ TrPwr %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_max_txpower" class="form-control" onchange="updateTxPower('bridge_max_txpower','bridge_txpower', 'G')">
+							<option value="max"><%~ Max %></option>
+							<option value="custom"><%~ Cstm %></option>
+						</select>
 						&nbsp;
-					<input type="text" id="bridge_txpower" class="form-control" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10" />
-					<em>
-						<span id="bridge_dbm">dBm</span>
-					</em>
+						<input type="text" id="bridge_txpower" class="form-control" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10" />
+						<em>
+							<span id="bridge_dbm">dBm</span>
+						</em>
+					</span>
 				</div>
 
 				<div id="bridge_channel_width_5ghz_container" class="row form-group">
-					<label for="bridge_channel_width_5ghz" id="bridge_channel_width_5ghz_label"><%~ ChWdth %>:</label>
-					<select id="bridge_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
-						<option value="HT20">20MHz</option>
-						<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
-						<option value="HT40-">40MHz (<%~ ChBlw %>)</option>
-						<option value="VHT20">20MHz</option>
-						<option value="VHT40">40MHz</option>
-						<option value="VHT80">80MHz</option>
-					</select>
+					<label class="col-xs-5" for="bridge_channel_width_5ghz" id="bridge_channel_width_5ghz_label"><%~ ChWdth %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_channel_width_5ghz" class="form-control" onchange="setChannelWidth(this, 'A')">
+							<option value="HT20">20MHz</option>
+							<option value="HT40+">40MHz (<%~ ChAbv %>)</option>
+							<option value="HT40-">40MHz (<%~ ChBlw %>)</option>
+							<option value="VHT20">20MHz</option>
+							<option value="VHT40">40MHz</option>
+							<option value="VHT80">80MHz</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_txpower_5ghz_container" class="row form-group">
-					<label for="bridge_max_txpower_5ghz" id="bridge_txpower_5ghz_label"><%~ TrPwr %>:</label>
-					<span>
+					<label class="col-xs-5" for="bridge_max_txpower_5ghz" id="bridge_txpower_5ghz_label"><%~ TrPwr %>:</label>
+					<span class="col-xs-7">
+
 						<select id="bridge_max_txpower_5ghz" class="form-control" onchange="updateTxPower('bridge_max_txpower_5ghz','bridge_txpower_5ghz', 'A')">
 							<option value="max"><%~ Max %></option>
 							<option value="custom"><%~ Cstm %></option>
@@ -242,105 +266,115 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="bridge_list_ssid_container" class="row form-group">
-					<label for="bridge_list_ssid" id="bridge_list_ssid_label"><%~ Join %>:</label>
-					<span class="rightcolumn">
+					<label class="col-xs-5" for="bridge_list_ssid" id="bridge_list_ssid_label"><%~ Join %>:</label>
+					<span class="col-xs-7">
 						<select id="bridge_list_ssid" style="width:180px;max-width:180px" onchange="setSsidVisibility(this.id)" >
 							<option value="custom"><%~ Other %></option>
 						</select>
 						<button class="btn btn-default" id="bridge_rescan_button" onclick="scanWifi('bridge_custom_ssid')"><%~ RScn %></button>
+						<div id="bridge_custom_ssid_container" class="second_row_right_column form-group">
+							<input type="text" class="form-control" id="bridge_custom_ssid" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						</div>
+
 					</span>
 				</div>
 
-				<div id="bridge_custom_ssid_container" class="row form-group">
-					<input type="text" class="form-control" id="bridge_custom_ssid" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
-				</div>
 
 				<div id="bridge_ssid_container" class="row form-group">
-					<label for="bridge_ssid" id="bridge_ssid_label"><%~ Join %>:</label>
-					<div class="form-inline">
+					<label class="col-xs-5" for="bridge_ssid" id="bridge_ssid_label"><%~ Join %>:</label>
+					<span class="col-xs-7">
 						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 						<button style="float:left;" class="btn btn-default" id="bridge_scan_button" onclick="scanWifi('bridge_ssid')"><%~ Scan %></button>
-					</div>
+					</span>
 				</div>
 
 				<div id="bridge_broadcast_ssid_container" class="row form-group">
-					<label for="bridge_broadcast_ssid" id="bridge_broadcast_ssid_label"><%~ Bcst %>:</label>
-					<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+					<label class="col-xs-5" for="bridge_broadcast_ssid" id="bridge_broadcast_ssid_label"><%~ Bcst %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+					</span>
 				</div>
 
 				<div id="bridge_channel_container" class="row form-group">
-					<label for="bridge_channel" id="bridge_channel_label"><%~ WChn %>:</label>
+					<label class="col-xs-5" for="bridge_channel" id="bridge_channel_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
 						<select id="bridge_channel" lass="form-control" onchange="setChannel(this)">
-						<option value="auto"><%~ auto %></option>
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-					</select>
+							<option value="auto"><%~ auto %></option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="bridge_channel_5ghz_container" class="row form-group">
-					<label for="bridge_channel_5ghz" id="bridge_channel_5ghz_label"><%~ WChn %>:</label>
-					<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
+					<label class="col-xs-5" for="bridge_channel_5ghz" id="bridge_channel_5ghz_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
+					</span>
 				</div>
 
 				<div id="bridge_fixed_channel_container" class="row form-group">
-					<label for="bridge_fixed_channel" id="bridge_fixed_channel_label"><%~ WChn %>:</label>
-					<span id="bridge_fixed_channel">&nbsp;</span>
+					<label class="col-xs-5" for="bridge_fixed_channel" id="bridge_fixed_channel_label"><%~ WChn %>:</label>
+					<span class="col-xs-7" id="bridge_fixed_channel">&nbsp;</span>
 				</div>
 
 				<div id="bridge_encryption_container" class="row form-group">
-					<label for="bridge_encryption" id="bridge_encryption_label"><%~ Encr %>:</label>
-					<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility()">
-						<option value="none"><%~ None %></option>
-						<option value="psk2">WPA2 PSK</option>
-						<option value="psk">WPA PSK</option>
-						<option value="wep">WEP</option>
-					</select>
+					<label class="col-xs-5" for="bridge_encryption" id="bridge_encryption_label"><%~ Encr %>:</label>
+					<span class="col-xs-7">
+						<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility()">
+							<option value="none"><%~ None %></option>
+							<option value="psk2">WPA2 PSK</option>
+							<option value="psk">WPA PSK</option>
+							<option value="wep">WEP</option>
+						</select>
+					</span>
 				</div>
 
-				<div id="bridge_fixed_encryption_container" >
-					<label for="bridge_fixed_encryption" id="bridge_fixed_encryption_label"><%~ Encr %>:</label>
-					<span id="bridge_fixed_encryption">&nbsp;</span>
+				<div id="bridge_fixed_encryption_container"  class="row form-group">
+					<label class="col-xs-5" for="bridge_fixed_encryption" id="bridge_fixed_encryption_label"><%~ Encr %>:</label>
+					<span class="col-xs-7" id="bridge_fixed_encryption">&nbsp;</span>
 				</div>
 
 				<div id="bridge_pass_container" class="row form-group">
-					<label for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
-					<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>
-					<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" />
-					<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
-					<br/>
+					<label class="col-xs-5" for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7">
+						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>
+						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" />
+						<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
+					</span>
 				</div>
 
 				<div id="bridge_wep_container" class="row form-group">
-						<label for="bridge_wep" id="bridge_wep_label" ><%~ HexK %>:</label>
+					<label class="col-xs-5" for="bridge_wep" id="bridge_wep_label" ><%~ HexK %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="bridge_wep" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+					</span>
 				</div>
 
 				<div id="bridge_wifi_mac_container" class="row form-group">
-					<label id="bridge_wifi_mac_label"><%~ DevMAC %>:</label>
-					<span id="bridge_wifi_mac"></span>
+					<label class="col-xs-5" id="bridge_wifi_mac_label"><%~ DevMAC %>:</label>
+					<span class="col-xs-7" id="bridge_wifi_mac"></span>
 				</div>
 
 				<div id="bridge_wds_container" class="row form-group">
-					<label for="bridge_wds_label" id="bridge_wds_label"><%~ OWDS %>:</label>
-					<div>
+					<label class="col-xs-5"  for="bridge_wds_label" id="bridge_wds_label"><%~ OWDS %>:</label>
+					<span class="col-xs-7">
 						<input type="text" id="add_bridge_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default" id="add_bridge_wds_mac_button" onclick="addMacToWds('bridge')"><%~ Add %></button>
-					</div>
-					<div class="rightcolumnonly">
-						<div id="bridge_wds_mac_table_container" class="row form-group"></div>
-					</div>
+						<div id="bridge_wds_mac_table_container" class="second_row_right_column form-group"></div>
+					</span>
 				</div>
 
 			</div>
@@ -572,6 +606,10 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="isp"><%~ DfltDNS %></option>
 							<option value="opendns"><%~ OpnSrvs %></option>
 							<option value="google"><%~ GooSrvs %></option>
+							<option value="opendnsfs"><%~ OpnSrvsFS %></option>
+							<option value="nortoncsa"><%~ NrtnCSA %></option>
+							<option value="nortoncsb"><%~ NrtnCSB %></option>
+							<option value="nortoncsc"><%~ NrtnCSC %></option>
 							<option value="custom"><%~ CstDSrv %></option>
 						</select>
 						<div id="lan_dns_custom_container" class="second_row_right_column">
@@ -751,7 +789,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_client_band_container" class="row indent">
-					<label  class="col-xs-5" for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
+					<label class="col-xs-5" for="wifi_client_band" id="wifi_client_band_label"><%~ WlBnd %>:</label>
 					<span class="col-xs-7">
 						<select id="wifi_client_band" class="form-control" onchange="setHwMode(document.getElementById('wifi_hwmode'))">
 							<option value="2.4">2.4 GHz</option>
@@ -761,248 +799,284 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_channel2_container" class="row indent">
-					<label for="wifi_channel2" id="wifi_channel2_label"><%~ WChn %>:</label>
-					<select id="wifi_channel2" class="form-control" onchange="setChannel(this)" >
-						<option value="auto"><%~ auto %></option>
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-					</select>
+					<label  class="col-xs-5" for="wifi_channel2" id="wifi_channel2_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_channel2" class="form-control" onchange="setChannel(this)" >
+							<option value="auto"><%~ auto %></option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+						</select>
+					</span>
 				</div>
 
 				<div id="wifi_fixed_channel2_container" class="row indent">
-					<label for="wifi_fixed_channel2" id="wifi_fixed_channel2_label"><%~ WChn %>:</label>
-					<span id="wifi_fixed_channel2">&nbsp;</span>
+					<label class="col-xs-5"  for="wifi_fixed_channel2" id="wifi_fixed_channel2_label"><%~ WChn %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_channel2">&nbsp;</span>
 				</div>
 
 				<div id="wifi_channel2_5ghz_container" class="row indent">
-					<label for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
-					<select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select>
+					<label class="col-xs-5" for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select></span>
 				</div>
 
 				<div id="wifi_encryption2_container" class="row indent">
-					<label for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
-					<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
-						<option value="none"><%~ None %></option>
-						<option value="psk2">WPA2 PSK</option>
-						<option value="psk">WPA PSK</option>
-						<option value="wep">WEP</option>
-					</select>
-				</div>
-
-				<div id="wifi_fixed_encryption2_container" class="row indent">
-					<label for="wifi_fixed_encryption2" id="wifi_fixed_encryption2_label"><%~ Encr %>:</label>
-					<span id="wifi_fixed_encryption2">&nbsp;</span>
-				</div>
-
-				<div id="wifi_pass2_container" class="row indent">
-					<label for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
-					<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-					<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
-					<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
-				</div>
-
-				<div id="wifi_wep2_container" class="row indent">
-					<div>
-						<label for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
-						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
-					</div>
-				</div>
-
-				<div id="internal_divider2" class="internal_divider"></div>
-
-				<div id="wifi_ssid1_container" class="row form-group">
-					<label for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
-					<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
-				</div>
-
-				<div id="wifi_ssid1a_container" class="row form-group">
-					<label for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
-					<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
-				</div>
-
-				<div id="wifi_channel1_container" class="row indent">
-					<label for="wifi_channel1" id="wifi_channel1_label"><%~ WChn %>:</label>
-					<select id="wifi_channel1" class="form-control" onchange="setChannel(this)" >
-						<option value="auto"><%~ auto %></option>
-						<option value="1">1</option>
-						<option value="2">2</option>
-						<option value="3">3</option>
-						<option value="4">4</option>
-						<option value="5">5</option>
-						<option value="6">6</option>
-						<option value="7">7</option>
-						<option value="8">8</option>
-						<option value="9">9</option>
-						<option value="10">10</option>
-						<option value="11">11</option>
-						<option value="12">12</option>
-						<option value="13">13</option>
-						<option value="14">14</option>
-					</select>
-				</div>
-
-				<div id="wifi_fixed_channel1_container" class="row indent">
-					<label for="wifi_fixed_channel1" id="wifi_fixed_channel1_label"><%~ WChn %>:</label>
-					<span id="wifi_fixed_channel1">&nbsp;</span>
-				</div>
-
-				<div id="wifi_channel1_5ghz_container" class="row indent">
-					<label for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
-					<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
-				</div>
-
-				<div id="wifi_encryption1_container" class="row indent">
-					<label for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
-					<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
-						<option value="none"><%~ None %></option>
-						<option value="psk2">WPA2 PSK</option>
-						<option value="psk">WPA PSK</option>
-						<option value="wep">WEP</option>
-						<option value="wpa">WPA RADIUS</option>
-						<option value="wpa2">WPA2 RADIUS</option>
-					</select>
-				</div>
-
-				<div id="wifi_pass1_container" class="row indent">
-					<label for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
-					<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-					<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
-					<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
-				</div>
-
-				<div id="wifi_wep1_container" class="row indent">
-					<div style="display:block;">
-						<label for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
-						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
-					</div>
-					<div>
-						<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
-					</div>
-					<div>
-						<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
-					</div>
-				</div>
-
-				<div id="wifi_server1_container" class="row indent">
-					<label for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
-					<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/><br/>
-				</div>
-
-				<div id="wifi_port1_container" class="row indent">
-					<label for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
-					<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
-				</div>
-
-				<div id="wifi_hidden_container" class="row indent">
-					<label id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
-					<select id="wifi_hidden" class="form-control">
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
-				</div>
-
-				<div id="wifi_isolate_container" class="row indent">
-					<label id="wifi_isolate_label" for="wifi_isolate"><%~ WlIso %>:</label>
-					<select id="wifi_isolate" class="form-control">
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
-				</div>
-
-				<div id="wifi_mac_container" class="row indent">
-					<label id="wifi_mac_label"><%~ DevMAC %>:</label>
-					<span id="wifi_mac"></span>
-				</div>
-
-				<div id="wifi_wds_container" class="row indent">
-					<label for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
-					<span>
-						<input type="text" id="add_wifi_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
-						<button class="btn btn-default" id="add_wifi_wds_mac_button" onclick="addMacToWds('wifi')"><%~ Add %></button>
-					</span>
-					<div id="wifi_wds_mac_table_container" class="row form-group"></div>
-				</div>
-
-				<div id="internal_divider3" class="internal_divider"></div>
-
-				<div id="wifi_guest_mode_container" class="row form-group">
-					<label for="wifi_guest_mode"><%~ GNet %>:</label>
-					<select id="wifi_guest_mode" class="form-control" onchange="setWifiVisibility()" >
-						<option value="disabled"><%~ Disabled %></option>
-						<option value="enabled"><%~ Enabled %></option>
-					</select>
-				</div>
-
-				<div id="wifi_guest_container" class="row form-group">
-
-					<div id="wifi_guest_ssid1_container" class="row form-group">
-						<label for="wifi_guest_ssid1" id="wifi_guest_ssid1_label"><%~ GNetID %>:</label>
-						<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
-					  <input type="text" id="wifi_guest_mac_g" class="form-control" style="display: none"/>
-					</div>
-
-					<div id="wifi_guest_ssid1a_container" class="row form-group">
-						<label for="wifi_guest_ssid1a" id="wifi_guest_ssid1a_label"><%~ GNet5ID %></label>
-						<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
-					  <input type="text" id="wifi_guest_mac_a" class="form-control" style="display: none"/>
-					</div>
-
-					<div id="wifi_guest_encryption1_container" class="row indent">
-						<label for="wifi_guest_encryption1" id="wifi_guest_encryption1_label"><%~ Encr %>:</label>
-						<select class="form-control" id="wifi_guest_encryption1" onchange="setWifiVisibility()">
+					<label class="col-xs-5" for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
 							<option value="none"><%~ None %></option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
 							<option value="wep">WEP</option>
 						</select>
+					</span>
+				</div>
+
+				<div id="wifi_fixed_encryption2_container" class="row indent">
+					<label class="col-xs-5" for="wifi_fixed_encryption2" id="wifi_fixed_encryption2_label"><%~ Encr %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_encryption2">&nbsp;</span>
+				</div>
+
+				<div id="wifi_pass2_container" class="row indent">
+					<label class="col-xs-5" for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7">
+						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
+						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
+					</span>
+				</div>
+
+				<div id="wifi_wep2_container" class="row indent">
+					<label class="col-xs-5" for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+					</span>
+				</div>
+
+				<div id="internal_divider2" class="internal_divider"></div>
+
+				<div id="wifi_ssid1_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+					</span>
+				</div>
+
+				<div id="wifi_ssid1a_container" class="row form-group">
+					<label class="col-xs-5" for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
+					<span class="col-xs-7">
+						<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+					</span>
+				</div>
+
+				<div id="wifi_channel1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_channel1" id="wifi_channel1_label"><%~ WChn %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_channel1" class="form-control" onchange="setChannel(this)" >
+							<option value="auto"><%~ auto %></option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+							<option value="9">9</option>
+							<option value="10">10</option>
+							<option value="11">11</option>
+							<option value="12">12</option>
+							<option value="13">13</option>
+							<option value="14">14</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_fixed_channel1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_fixed_channel1" id="wifi_fixed_channel1_label"><%~ WChn %>:</label>
+					<span class="col-xs-7" id="wifi_fixed_channel1">&nbsp;</span>
+				</div>
+
+				<div id="wifi_channel1_5ghz_container" class="row indent">
+					<label class="col-xs-5" for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
+					<span class="col-xs-7" >
+						<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
+					</span>
+				</div>
+
+				<div id="wifi_encryption1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
+							<option value="none"><%~ None %></option>
+							<option value="psk2">WPA2 PSK</option>
+							<option value="psk">WPA PSK</option>
+							<option value="wep">WEP</option>
+							<option value="wpa">WPA RADIUS</option>
+							<option value="wpa2">WPA2 RADIUS</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_pass1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
+					<span class="col-xs-7" >
+						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
+						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
+					</span>
+				</div>
+
+				<div id="wifi_wep1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
+					<span class="col-xs-7" >
+						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+						<div class="second_row_right_column">	
+							<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
+							<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
+						</div>
+					</span>
+				</div>
+
+				<div id="wifi_server1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
+					<span class="col-xs-7" >
+						<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/>
+					</span>
+				</div>
+
+				<div id="wifi_port1_container" class="row indent">
+					<label class="col-xs-5" for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
+					<span class="col-xs-7" >
+						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
+					</span>
+				</div>
+
+				<div id="wifi_hidden_container" class="row indent">
+					<label  class="col-xs-5" id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_hidden" class="form-control">
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_isolate_container" class="row indent">
+					<label  class="col-xs-5" id="wifi_isolate_label" for="wifi_isolate"><%~ WlIso %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_isolate" class="form-control">
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_mac_container" class="row indent">
+					<label  class="col-xs-5" id="wifi_mac_label"><%~ DevMAC %>:</label>
+					<span  class="col-xs-7" id="wifi_mac"></span>
+				</div>
+
+				<div id="wifi_wds_container" class="row indent">
+					<label  class="col-xs-5" for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="add_wifi_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
+						<button class="btn btn-default" id="add_wifi_wds_mac_button" onclick="addMacToWds('wifi')"><%~ Add %></button>
+						<div id="wifi_wds_mac_table_container" class="second_row_right_column form-group"></div>
+					</span>
+				</div>
+
+				<div id="internal_divider3" class="internal_divider"></div>
+
+				<div id="wifi_guest_mode_container" class="row form-group">
+					<label  class="col-xs-5" for="wifi_guest_mode"><%~ GNet %>:</label>
+					<span class="col-xs-7">
+						<select id="wifi_guest_mode" class="form-control" onchange="setWifiVisibility()" >
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_guest_container" >
+
+					<div id="wifi_guest_ssid1_container" class="row form-group">
+						<label class="col-xs-5" for="wifi_guest_ssid1" id="wifi_guest_ssid1_label"><%~ GNetID %>:</label>
+						<span class="col-xs-7">
+							<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_mac_g" class="form-control" style="display: none"/>
+						</span>
+					</div>
+
+					<div id="wifi_guest_ssid1a_container" class="row form-group">
+						<label class="col-xs-5" for="wifi_guest_ssid1a" id="wifi_guest_ssid1a_label"><%~ GNet5ID %></label>
+						<span class="col-xs-7">
+							<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_mac_a" class="form-control" style="display: none"/>
+						</span>
+					</div>
+
+					<div id="wifi_guest_encryption1_container" class="row indent">
+						<label class="col-xs-5" for="wifi_guest_encryption1" id="wifi_guest_encryption1_label"><%~ Encr %>:</label>
+						<span class="col-xs-7">
+							<select class="form-control" id="wifi_guest_encryption1" onchange="setWifiVisibility()">
+								<option value="none"><%~ None %></option>
+								<option value="psk2">WPA2 PSK</option>
+								<option value="psk">WPA PSK</option>
+								<option value="wep">WEP</option>
+							</select>
+						</span>
 					</div>
 
 					<div id="wifi_guest_pass1_container" class="row indent">
-						<label for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
-						<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-						<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')"/>
-						<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
+						<label class="col-xs-5" for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
+						<span class="col-xs-7">
+							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
+							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')"/>
+							<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
+						</span>
 					</div>
 
 					<div id="wifi_guest_wep1_container" class="row indent">
-						<div class="form-group form-inline">
-							<label for="wifi_guest_wep1" id="wifi_guest_wep1_label"><%~ HexK %>:</label>
+						<label class="col-xs-5" for="wifi_guest_wep1" id="wifi_guest_wep1_label"><%~ HexK %>:</label>
+						<span class="col-xs-7">
 							<input type="text" id="wifi_guest_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
-						</div>
-						<div>
-							<button class="btn btn-default" id="guestwep1gen40" onclick="setToWepKey('wifi_guest_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
-						</div>
-						<div>
-							<button class="btn btn-default" id="guestwep1gen104" onclick="setToWepKey('wifi_guest_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
-						</div>
+							<div class="second_row_right_column form-group">
+								<button class="btn btn-default" id="guestwep1gen40" onclick="setToWepKey('wifi_guest_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
+								<button class="btn btn-default" id="guestwep1gen104" onclick="setToWepKey('wifi_guest_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
+							</div>
+						</span>
 					</div>
 
 					<div id="wifi_guest_hidden_container" class="row indent">
-						<label id="wifi_guest_hidden_label" for="wifi_guest_hidden"><%~ BcsID %>:</label>
-						<select class="form-control" id="wifi_guest_hidden" >
-							<option value="disabled"><%~ Disabled %></option>
-							<option value="enabled"><%~ Enabled %></option>
-						</select>
+						<label class="col-xs-5"  id="wifi_guest_hidden_label" for="wifi_guest_hidden"><%~ BcsID %>:</label>
+						<span class="col-xs-7">
+							<select class="form-control" id="wifi_guest_hidden" >
+								<option value="disabled"><%~ Disabled %></option>
+								<option value="enabled"><%~ Enabled %></option>
+							</select>
+						</span>
 					</div>
 
 					<div id="wifi_guest_isolate_container" class="row indent">
-						<label id="wifi_guest_isolate_label" for="wifi_guest_isolate"><%~ WlIso %>:</label>
-						<select id="wifi_guest_isolate" class="form-control">
-							<option value="disabled"><%~ Disabled %></option>
-							<option value="enabled"><%~ Enabled %></option>
-						</select>
+						<label class="col-xs-5"  id="wifi_guest_isolate_label" for="wifi_guest_isolate"><%~ WlIso %>:</label>
+						<span class="col-xs-7">
+							<select id="wifi_guest_isolate" class="form-control">
+								<option value="disabled"><%~ Disabled %></option>
+								<option value="enabled"><%~ Enabled %></option>
+							</select>
+						</span>
 					</div>
 
 				</div>
