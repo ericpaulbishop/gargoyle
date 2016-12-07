@@ -70,24 +70,22 @@ var passInvalid = false;
 <div id="login_status" class="alert alert-danger" role="alert" style="display:none;"></div>
 
 <div class="row">
-
 	<div class="col-lg-4">
 		<div class="panel panel-primary">
-
 			<div class="panel-body">
-				<div class="form-inline">
+				<div class="row form-group">
 					<label class="sr-only" for="password" id="password_label"><%~ EAdmP %></label>
-					<input id="password" class="form-control" type="password" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25" placeholder="<%~ EAdmP %>"/>
-					<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
+					<span class="col-xs-12">
+						<input id="password" class="form-control" type="password" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25" placeholder="<%~ EAdmP %>"/>
+						<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
+					</span>
 				</div>
 			</div>
-
 		</div>
 	</div>
 
 	<div class="col-lg-4">
 		<div id="current_time" class="panel panel-info">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CTime %></h3>
 			</div>
@@ -95,13 +93,11 @@ var passInvalid = false;
 			<div class="panel-body">
 				<div id="current_time_date"></div>
 			</div>
-
 		</div>
 	</div>
 
 	<div class="col-lg-4">
 		<div id="current_ip" class="panel panel-info">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CIP %></h3>
 			</div>
@@ -109,35 +105,27 @@ var passInvalid = false;
 			<div class="panel-body">
 				<div id="current_connected_ip"><%~ CIPs %><div id="current_connect_ip"></div></div>
 			</div>
-
 		</div>
 	</div>
 </div>
 <div class="row">
 	<div class="col-lg-4">
 		<div id="local_quotas" class="panel panel-info" style="display:none">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ YQot %></h3>
 			</div>
-
 			<div class="panel-body"></div>
-
 		</div>
 	</div>
 
 	<div class="col-lg-4">
 		<div id="global_quotas" class="panel panel-info" style="display:none">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ NQot %></h3>
 			</div>
-
 			<div class="panel-body"></div>
-
 		</div>
 	</div>
-
 </div>
 <%
 	for h in $sh_hooks ; do

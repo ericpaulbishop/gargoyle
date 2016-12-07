@@ -28,39 +28,35 @@ var currentTime;
 </script>
 <h1 class="page-header"><%~ hosts.mHosts %></h1>
 <div class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ hosts.RefreshR %></h3>
 			</div>
 
 			<div class="panel-body">
-				<div class="form-group form-inline">
-					<select id="refresh_rate" class="form-control">
-						<option value="2000">2 <%~ seconds %></option>
-						<option value="10000">10 <%~ seconds %></option>
-						<option value="30000">30 <%~ seconds %></option>
-						<option value="60000">60 <%~ seconds %></option>
-						<option value="never"><%~ never %></option>
-					</select>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<select id="refresh_rate" class="form-control">
+							<option value="2000">2 <%~ seconds %></option>
+							<option value="10000">10 <%~ seconds %></option>
+							<option value="30000">30 <%~ seconds %></option>
+							<option value="60000">60 <%~ seconds %></option>
+							<option value="never"><%~ never %></option>
+						</select>
+					</span>
 					<br/>
-					<p><em><%~ RInfo %></em></p>
+					<span class="col-xs-12"><p><em><%~ RInfo %></em></p></span>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 
 <div class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CurrLeases %></h3>
 			</div>
@@ -70,17 +66,13 @@ var currentTime;
 					<div id="lease_table_container" class="table-responsive"></div>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ConWifiHosts %></h3>
 			</div>
@@ -90,17 +82,13 @@ var currentTime;
 					<div id="wifi_table_container" class="table-responsive"></div>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ActiveHosts %></h3>
 			</div>
@@ -110,10 +98,8 @@ var currentTime;
 					<div id="active_table_container" class="table-responsive"></div>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <script>

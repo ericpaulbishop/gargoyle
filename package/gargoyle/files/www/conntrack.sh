@@ -28,55 +28,49 @@
 </script>
 <h1 class="page-header"><%~ conntrack.CCSect %></h1>
 <div class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
-
-			<div class="row">
-
-				<div class="col-lg-4">
-
-		<div class="form-group form-inline">
-			<label for="refresh_rate"><%~ RRate %>:</label>
-			<select id="refresh_rate" class="form-control">
-				<option value="2000">2 <%~ seconds %></option>
-				<option value="10000">10 <%~ seconds %></option>
-				<option value="30000">30 <%~ seconds %></option>
-				<option value="60000">60 <%~ seconds %></option>
-				<option value="never"><%~ never %></option>
-			</select>
-		</div>
-		<div class="form-group form-inline">
-			<label for="bw_units" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
-			<select id="bw_units" class="form-control">
-				<option value="mixed"><%~ AtMxd %></option>
-				<option value="KBytes"><%~ KBy %></option>
-				<option value="MBytes"><%~ MBy %></option>
-				<option value="GBytes"><%~ GBy %></option>
-			</select>
-		</div>
-		<div class="form-group form-inline">
-			<label for="host_display" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
-			<select id="host_display" class="form-control">
-				<option value="hostname"><%~ DspHn %></option>
-				<option value="ip"><%~ DspHIP %></option>
-			</select>
-		</div>
-
-		</div></div>
-
-		<div class="row">
-
-			<div class="col-lg-12">
-				<div class="alert alert-warning" role="alert"><%~ CnWarn %></div>
-					<div id="connection_table_container" class="table-responsive"></div>
+				<div class="row form-group">
+					<label class="col-xs-5" for="refresh_rate"><%~ RRate %>:</label>
+					<span class="col-xs-7">
+						<select id="refresh_rate" class="form-control">
+							<option value="2000">2 <%~ seconds %></option>
+							<option value="10000">10 <%~ seconds %></option>
+							<option value="30000">30 <%~ seconds %></option>
+							<option value="60000">60 <%~ seconds %></option>
+							<option value="never"><%~ never %></option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" for="bw_units" onchange="updateConnectionTable()"><%~ BUnt %>:</label>
+					<span class="col-xs-7">
+						<select id="bw_units" class="form-control">
+							<option value="mixed"><%~ AtMxd %></option>
+							<option value="KBytes"><%~ KBy %></option>
+							<option value="MBytes"><%~ MBy %></option>
+							<option value="GBytes"><%~ GBy %></option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" for="host_display" onchange="updateConnectionTable()"><%~ HDsp %>:</label>
+					<span class="col-xs-7">
+						<select id="host_display" class="form-control">
+							<option value="hostname"><%~ DspHn %></option>
+							<option value="ip"><%~ DspHIP %></option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<div class="alert alert-warning" role="alert"><%~ CnWarn %></div>
+					<div id="connection_table_container" class="table-responsive col-xs-12"></div>
+				</div>
 			</div>
-		</div>
 
+		</div>
 	</div>
-</div>
-</div>
 </div>
 
 

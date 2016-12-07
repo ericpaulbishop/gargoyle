@@ -46,100 +46,89 @@
 
 <h1 class="page-header"><%~ plugins.mPlugins %></h1>
 <div id="plugin_options" class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ plugins.PgOpt %></h3>
 			</div>
 
 			<div class="panel-body">
-
 				<div class="row">
-
-					<div class="col-lg-4">
+					<div class="col-lg-6">
 						<div class="alert alert-info" role="alert">
-
-							<div class="form-group form-inline">
-								<span><%~ PRoot %>:</span>
-								<span id="plugin_root_static">/plugin_root</span>
-								<input type="text" id="plugin_root_text" style="display:none" />
+							<div class="row form-group">
+								<span class="col-xs-5"><%~ PRoot %>:</span>
+								<span class="col-xs-7" id="plugin_root_static">/plugin_root</span>
+								<span class="col-xs-7"><input type="text" id="plugin_root_text" style="display:none" /></span>
 							</div>
 
-							<div class="form-group form-inline">
-								<span id="plugin_root_drive_static" for="plugin_root_drive_select"><%~ RDrv %></span>
-								<select id="plugin_root_drive_select" class="form-control" onchange="updatePluginRootDisplay()" style="display:none"></select>
+							<div class="row form-group">
+								<span class="col-xs-12" id="plugin_root_drive_static" for="plugin_root_drive_select"><%~ RDrv %></span>
+								<span class="col-xs-12"><select id="plugin_root_drive_select" class="form-control" onchange="updatePluginRootDisplay()" style="display:none"></select></span>
 							</div>
 
-							<div id="plugin_root_change_container" style="display:none" >
-									<button class="btn btn-warning" onclick="changePluginRoot()" /><%~ Chroot %></button>
+							<div id="plugin_root_change_container" class="row form-group" style="display:none" >
+								<span class="col-xs-12"><button class="btn btn-warning" onclick="changePluginRoot()" /><%~ Chroot %></button></span>
 							</div>
-
 						</div>
 					</div>
-
 				</div>
 
 				<div class="row">
-
 					<div class="col-lg-12">
-						<div class="form-group form-inline">
-							<h3><%~ PgSrc %>:</h3>
+						<div class="row form-group">
+							<h3 class="col-xs-12"><%~ PgSrc %>:</h3>
 						</div>
 
 						<div id="package_source_table_container" class="table-responsive"></div>
 
-						<div class="form-group form-inline">
-							<label for="add_source_name"><%~ ANam %>:</label>
-							<input type="text" id="add_source_name" class="form-control" onkeyup="proofreadSourceName(this)"/>
+						<div class="row form-group">
+							<label class="col-xs-5" for="add_source_name"><%~ ANam %>:</label>
+							<span class="col-xs-7"><input type="text" id="add_source_name" class="form-control" onkeyup="proofreadSourceName(this)"/></span>
 						</div>
 
-						<div class="form-group form-inline">
-							<label for="add_source_url"><%~ Aurl %>:</label>
-							<input type="text" id="add_source_url" class="form-control" />
+						<div class="row form-group">
+							<label class="col-xs-5" for="add_source_url"><%~ Aurl %>:</label>
+							<span class="col-xs-7"><input type="text" id="add_source_url" class="form-control" /></span>
 						</div>
 
 						<button id="add_source_button" class="btn btn-info" onclick="addPluginSource()" /><%~ APSrc %></button>
 					</div>
-
 				</div>
-
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div id="plugin_list" class="row">
-
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ PList %></h3>
 			</div>
 
 			<div class="panel-body">
-				<button id="update_button" class="btn btn-info" onclick="updatePackagesList()" /><%~ RfshP %></button>
-				<br/>
-				<br/>
-				<div id="wan-warn" class="alert alert-warning" role="alert" style="display:none;"><%~ NoWan %></div>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="update_button" class="btn btn-info btn-lg" onclick="updatePackagesList()" /><%~ RfshP %></button></span>
+				</div>
 
-				<div class="row">
+				<div class="row form-group">
+					<span id="wan-warn" class="alert alert-warning" role="alert" style="display:none;"><%~ NoWan %></span>
+				</div>
+
+				<div class="row form-group">
 					<div class="col-lg-12">
 						<div id="languages_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 
-				<div class="row">
+				<div class="row form-group">
 					<div class="col-lg-12">
 						<div id="themes_table_container" class="table-responsive"></div>
 					</div>
 				</div>
 
-				<div class="row">
+				<div class="row form-group">
 					<div class="col-lg-12">
 						<div id="packages_table_container" class="table-responsive"></div>
 					</div>
@@ -149,10 +138,8 @@
 					<%~ NoPkg %>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <script>

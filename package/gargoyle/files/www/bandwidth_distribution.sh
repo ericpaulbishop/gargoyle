@@ -28,42 +28,41 @@
 </script>
 <h1 class="page-header"><%~ bandwidth.BDst %></h1>
 <div class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ bandwidth.DOpSect %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div class="form-group form-inline">
-					<label for="time_frame" id="time_frame_label"><%~ DTFrm %>:</label>
-					<select class="form-control" id="time_frame" onchange="resetTimeFrame()">
-						<option value="bdist1"><%~ minutes %></option>
-						<option value="bdist2"><%~ qhour %></option>
-						<option value="bdist3"><%~ hours %></option>
-						<option value="bdist4"><%~ days %></option>
-						<option value="bdist5"><%~ mnths %></option>
-					</select>
+				<div class="row form-group">
+					<label class="col-xs-5" for="time_frame" id="time_frame_label"><%~ DTFrm %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="time_frame" onchange="resetTimeFrame()">
+							<option value="bdist1"><%~ minutes %></option>
+							<option value="bdist2"><%~ qhour %></option>
+							<option value="bdist3"><%~ hours %></option>
+							<option value="bdist4"><%~ days %></option>
+							<option value="bdist5"><%~ mnths %></option>
+						</select>
+					</span>
 				</div>
 
-				<div class="form-group form-inline">
-					<label for="time_interval" id="time_interval_label"><%~ DtbI %>:</label>
-					<select class="form-control" id="time_interval" onchange="resetDisplayInterval()"></select>
+				<div class="row form-group">
+					<label class="col-xs-5" for="time_interval" id="time_interval_label"><%~ DtbI %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="time_interval" onchange="resetDisplayInterval()"></select></span>
 				</div>
 
-				<div class="form-group form-inline">
-					<label for="host_display" id="time_interval_label"><%~ HDsp %>:</label>
-					<select class="form-control" id="host_display" onchange="resetTimeFrame()">
-						<option value="hostname"><%~ DspHn %></option>
-						<option value="ip"><%~ DspHIP %></option>
-					</select>
+				<div class="row form-group">
+					<label class="col-xs-5" for="host_display" id="time_interval_label"><%~ HDsp %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="host_display" onchange="resetTimeFrame()">
+							<option value="hostname"><%~ DspHn %></option>
+							<option value="ip"><%~ DspHIP %></option>
+						</select>
+					</span>
 				</div>
-
 			</div>
-
 		</div>
 	</div>
 </div>
@@ -71,14 +70,14 @@
 <div class="row">
 
 <div class="col-lg-12">
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h3 class="panel-title"><%~ BDst %>:</h3>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ BDst %>:</h3>
+		</div>
+		<div class="panel-body">
+			<embed id="pie_chart" src="multi_pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed>
+		</div>
 	</div>
-	<div class="panel-body">
-		<embed id="pie_chart" src="multi_pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed>
-	</div>
-</div>
 </div>
 
 </div>
@@ -86,14 +85,14 @@
 <div class="row">
 
 <div class="col-lg-12">
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<h3 class="panel-title"><%~ BDtbl %></h3>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title"><%~ BDtbl %></h3>
+		</div>
+		<div class="panel-body">
+			<div id="bandwidth_distribution_table_container" class="table-responsive"></div>
+		</div>
 	</div>
-	<div class="panel-body">
-		<div id="bandwidth_distribution_table_container" class="table-responsive"></div>
-	</div>
-</div>
 </div>
 
 </div>

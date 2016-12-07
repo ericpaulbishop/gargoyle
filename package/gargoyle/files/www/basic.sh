@@ -1087,9 +1087,9 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 	</div>
 </div>
 
-<div id="bottom_button_container" class="form-group">
-	<button id="save_button" class="btn btn-info" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="resetData()"/><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-info btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"/><%~ Reset %></button>
 </div>
 <iframe id="reboot_test" onload="reloadPage()" style="display:none"></iframe>
 

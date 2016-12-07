@@ -10,10 +10,8 @@
 %>
 
 <div id="edit_container" class="row">
-
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ port.PESect %>
 			</div>
@@ -21,10 +19,8 @@
 			<div class="panel-body">
 				<%in templates/multi_forward_template %>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 <div id="bottom_button_container"></div>
 

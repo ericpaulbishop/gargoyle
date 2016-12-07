@@ -21,24 +21,19 @@ fi
 %>
 </script>
 
+<h1 class="page-header"><%~ openvpn.ConnOC %></h1>
 <div class="row">
-
 	<div id="openvpn_server_fieldset" class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"<%~ openvpn.ConnOC %></h3>
 			</div>
 
 			<div class="panel-body">
-
 				<div id="openvpn_connection_table_container"></div>
-
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <script>

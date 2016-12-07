@@ -22,55 +22,59 @@
 
 <h1 class="page-header"><%~ minidlna.DLNA %></h1>
 <div id="dlna" class="row">
-	<div class="col-lg-5">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<div class="form-group">
-					<input id="dlna_enable" type="checkbox" />
-					<label id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
+				<div class="row form-group">
+					<span class="col-xs-1"><input id="dlna_enable" type="checkbox" /></span>
+					<label class="col-xs-11" id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
 				</div>
 
-				<div class="form-group">
-					<button id="status_button" class="btn btn-default" onclick='statusDlna()'><%~ StatDLNA %></button>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="status_button" class="btn btn-default" onclick='statusDlna()'><%~ StatDLNA %></button></span>
 				</div>
-				<div class="form-group">
-					<button id="rescan_button" class="btn btn-default" onclick='rescanMedia()'><%~ RescanDLNA %></button>
-				</div>
-
-				<div class="form-group">
-					<label id="dlna_name_label" for="dlna_name"><%~ DLNASName %>:</label>
-					<input id="dlna_name" type="text" size='30' class="form-control" />
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="rescan_button" class="btn btn-default" onclick='rescanMedia()'><%~ RescanDLNA %></button></span>
 				</div>
 
-				<div class="form-group">
-					<label id="dlna_strict_label" for="dlna_strict"><%~ DLNAStr %>:</label>
-					<input id="dlna_strict" type="checkbox" />
+				<div class="row form-group">
+					<label class="col-xs-5" id="dlna_name_label" for="dlna_name"><%~ DLNASName %>:</label>
+					<span class="col-xs-7"><input id="dlna_name" type="text" size='30' class="form-control" /></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-1"><input id="dlna_strict" type="checkbox" /></span>
+					<label class="col-xs-11" id="dlna_strict_label" for="dlna_strict"><%~ DLNAStr %>:</label>
 				</div>
 
 				<div class="internal_divider"></div>
 
 				<div class="form-group">
-					<div class="form-group">
-						<label id="media_type_label" for="media_type"><%~ DLNAMType %>:</label>
-						<select id="media_type" class="form-control">
-							<option value=""><%~ DLNAAll %></a>
-							<option value="A"><%~ DLNAA %></a>
-							<option value="V"><%~ DLNAV %></a>
-							<option value="P"><%~ DLNAI %></a>
-						</select>
+					<div class="row form-group">
+						<label class="col-xs-5" id="media_type_label" for="media_type"><%~ DLNAMType %>:</label>
+						<span class="col-xs-7">
+							<select id="media_type" class="form-control">
+								<option value=""><%~ DLNAAll %></a>
+								<option value="A"><%~ DLNAA %></a>
+								<option value="V"><%~ DLNAV %></a>
+								<option value="P"><%~ DLNAI %></a>
+							</select>
+						</span>
 					</div>
 
-					<div class="form-group">
-						<label id="drive_select_label" for="drive_select"><%~ DLNADrive %>:</label>
-						<select id="drive_select" class="form-control"></select>
+					<div class="row form-group">
+						<label class="col-xs-5" id="drive_select_label" for="drive_select"><%~ DLNADrive %>:</label>
+						<span class="col-xs-7"><select id="drive_select" class="form-control"></select></span>
 					</div>
 
-					<div class="form-group">
-						<label id="media_dir_label" for="media_dir"><%~ DLNAMFolder %>:</label>
-						<input type="text" id="media_dir" class="form-control" size='30'/>
+					<div class="row form-group">
+						<label class="col-xs-5" id="media_dir_label" for="media_dir"><%~ DLNAMFolder %>:</label>
+						<span class="col-xs-7"><input type="text" id="media_dir" class="form-control" size='30'/></span>
 					</div>
 
-					<button id="add_share_button" class="btn btn-default" onclick="addNewMediaDir()"><%~ Add %></button>
+					<div class="row form-group">
+						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default" onclick="addNewMediaDir()"><%~ Add %></button></span>
+					</div>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -85,9 +89,9 @@
 	</div>
 </div>
 
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <script>

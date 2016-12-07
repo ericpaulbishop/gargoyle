@@ -11,38 +11,39 @@
 
 
 <div id="edit_container" class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ddns.EDSect %></h3>
 			</div>
 			<div class="panel-body">
-				<div>
-					<label for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
-					<span id="ddns_provider_text"></span>
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
+					<span class="col-xs-7" id="ddns_provider_text"></span>
 				</div>
 
 				<div id="ddns_variable_container"></div>
 
-				<div>
-					<div class="form-group form-inline">
-						<label for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
+					<span class="col-xs-7">
 						<input type="text" class="form-control" id="ddns_check" size="8" onkeyup="proofreadNumeric(this)"/>
 						<em><%~ minutes %></em>
-						<div>
-							<p><%~ HelpCI %></p>
-						</div>
-					</div>
+					</span>
+					<span class="col-xs-12">
+						<p><%~ HelpCI %></p>
+					</span>
+				</div>
 
-					<div class="form-group form-inline">
-						<label for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
+					<span class="col-xs-7">
 						<input type="text" class="form-control" id="ddns_force" size="8" onkeyup="proofreadNumeric(this)"/>
 						<em><%~ days %></em>
-						<div>
-							<p><%~ HelpFI %></p>
-						</div>
-					</div>
+					</span>
+					<span class="col-xs-12">
+						<p><%~ HelpFI %></p>
+					</span>
 				</div>
 
 			</div>

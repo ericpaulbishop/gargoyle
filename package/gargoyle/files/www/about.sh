@@ -61,21 +61,21 @@
 				</p>
 
 				<pre>
-				The GNU General Public License (GPL) is vague as to what constitutes &ldquo;mere aggregation&rdquo; under
-				section 2, and what contitutes a work &ldquo;based on the Program.&rdquo;  In the special case in which the Program
-				is modified for the purpose of configuring other (potentially GPL-incompatible) software, the combination of the
-				Program and this other software shall be considered "mere aggregation" if and only if the ONLY interaction
-				between the Program and the other software being configured takes place via CGI (Common Gateway Interface) scripts
-				and/or programs.  However, these CGI scripts/programs as well  as any other additions and modifications necessary
-				for the configuration of the other software shall be considered &ldquo;based on the Program&rdquo; for the purposes
-				of this license.  Further, if any portion of the Program is used as part of an interface that can be rendered via a web browser,
-				all portions of that interface that can be rendered via a web browser (including, but not limited to, javascript,
-				svg/ecmascript, css, html, and shell/perl/php/other cgi scripts) shall be considered &ldquo;based on the Program.&rdquo;
+The GNU General Public License (GPL) is vague as to what constitutes &ldquo;mere aggregation&rdquo; under
+section 2, and what contitutes a work &ldquo;based on the Program.&rdquo;  In the special case in which the Program
+is modified for the purpose of configuring other (potentially GPL-incompatible) software, the combination of the
+Program and this other software shall be considered "mere aggregation" if and only if the ONLY interaction
+between the Program and the other software being configured takes place via CGI (Common Gateway Interface) scripts
+and/or programs.  However, these CGI scripts/programs as well  as any other additions and modifications necessary
+for the configuration of the other software shall be considered &ldquo;based on the Program&rdquo; for the purposes
+of this license.  Further, if any portion of the Program is used as part of an interface that can be rendered via a web browser,
+all portions of that interface that can be rendered via a web browser (including, but not limited to, javascript,
+svg/ecmascript, css, html, and shell/perl/php/other cgi scripts) shall be considered &ldquo;based on the Program.&rdquo;
 
-				This clarification/exception shall apply to the license of all derived works, and must appear in all relevant
-				documentation.  If you choose to release your modification to the Program under a later version of the GPL that
-				directly contridicts this clarification/exception, this clarification/exception shall supersede any contradictory
-				language in that version.
+This clarification/exception shall apply to the license of all derived works, and must appear in all relevant
+documentation.  If you choose to release your modification to the Program under a later version of the GPL that
+directly contridicts this clarification/exception, this clarification/exception shall supersede any contradictory
+language in that version.
 				</pre>
 
 				<p>This program is distributed in the hope that it will be useful,

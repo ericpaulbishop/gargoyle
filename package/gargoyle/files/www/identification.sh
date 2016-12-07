@@ -18,31 +18,28 @@
 
 <h1 class="page-header"><%~ ident.IdSect %></h1>
 <div class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-body">
-				<div class="form-group form-inline">
-					<label for="hostname" id="hostname_label"><%~ HsNm %></label>
-					<input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/>
+				<div class="row form-group">
+					<label class="col-xs-5" for="hostname" id="hostname_label"><%~ HsNm %></label>
+					<span class="col-xs-7"><input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/></span>
 				</div>
 				
-				<div id="domain_container" class="form-group form-inline">
-					<label for="domain" id="domain_label"><%~ Domn %></label>
-					<input type="text" id="domain" class="form-control" onkeyup="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/>
+				<div id="domain_container" class="row form-group">
+					<label class="col-xs-5" for="domain" id="domain_label"><%~ Domn %></label>
+					<span class="col-xs-7"><input type="text" id="domain" class="form-control" onkeyup="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/></span>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
-	<div id="bottom_button_container" class="form-group form-inline">
-		<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
-	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container"><%~ WaitSettings %></span>
 
 
 <!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->

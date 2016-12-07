@@ -1,5 +1,5 @@
 /*
- * This program is copyright � 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
+ * This program is copyright ? 2008-2011 Eric Bishop and is distributed under the terms of the GNU GPL
  * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
  * itself remain covered by the GPL.
@@ -130,6 +130,10 @@ input.text_disabled, select.select_disabled {
     border-bottom: 0;
     border-style: solid;
     border-color: #888ab8
+}
+.divider_full {
+    width: auto;
+    margin: 20px 5px 20px 5px;
 }
 .bottom_gap {
     margin-bottom: 30px

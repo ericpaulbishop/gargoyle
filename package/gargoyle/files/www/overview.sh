@@ -92,10 +92,8 @@
 
 <h1 class="page-header"><%~ overview.Sts %></h1>
 <div class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div id="device_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mDevice %></h3>
 			</div>
@@ -117,13 +115,11 @@
 					</li>
 				</ul>
 			</div>
-
 		</div>
 	</div>
 
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div id="wan_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mWAN %></h3>
 			</div>
@@ -139,13 +135,13 @@
 					<li id="wan_3g_container" class="list-group-item"><span class="list-group-item-title"><%~ W3GSS %>:</span><span id="wan_3g"></span></li>
 				</ul>
 			</div>
-
 		</div>
 	</div>
+</div>
 
-	<div class="col-lg-4">
+<div class="row">
+	<div class="col-lg-6">
 		<div id="lan_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mLAN %></h3>
 			</div>
@@ -158,17 +154,11 @@
 				</ul>
 				<div id="ports_table_container" class="table-responsive"></div>
 			</div>
-
 		</div>
 	</div>
 
-</div>
-
-<div class="row">
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div id="wifi_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mWireless %></h3>
 			</div>
@@ -201,37 +191,11 @@
 					</li>
 				</ul>
 			</div>
-
 		</div>
 	</div>
 
-	<div class="col-lg-4">
-		<div id="time_container" class="panel panel-default">
-
-			<div class="panel-heading">
-				<h3 class="panel-title"><%~ overview.mTime %></h3>
-			</div>
-
-			<div class="panel-body">
-				<ul class="list-group">
-					<li class="list-group-item">
-						<span class="list-group-item-title"><%~ Uptm %>:</span>
-						<span id="uptime"></span>
-					</li>
-
-					<li class="list-group-item">
-						<span class="list-group-item-title"><%~ CDaT %>:</span>
-						<span id="current_time"></span>
-					</li>
-				</ul>
-			</div>
-
-		</div>
-	</div>
-
-	<div class="col-lg-4">
+	<div class="col-lg-6">
 		<div id="bridge_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mBridge %></h3>
 			</div>
@@ -269,17 +233,35 @@
 					</li>
 				</ul>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div class="row">
+	<div class="col-lg-6">
+		<div id="time_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mTime %></h3>
+			</div>
 
-	<div class="col-lg-4">
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ Uptm %>:</span>
+						<span id="uptime"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ CDaT %>:</span>
+						<span id="current_time"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
 		<div id="services_container" class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ overview.mServices %></h3>
 			</div>
@@ -297,7 +279,6 @@
 					</li>
 				</ul>
 			</div>
-
 		</div>
 	</div>
 

@@ -460,16 +460,12 @@ nav>li.active>a
 	color: #121660;
 	font-weight: bold;
 }
-#bottom_button_container 
+#bottom_button_container
 {
-	background: #FFFFFF;
-	width: 100%;
-	height: auto;
 	text-align: center;
 	padding-top: 10px;
 	padding-bottom: 10px;
 	margin-left: 0px;
-	border-radius: 5px;
 }
 #login_status.alert 
 {
@@ -557,4 +553,12 @@ input.form-control
 {
 	height: 25px;
 	line-height: 25px;
+}
+.btn-lg
+{
+	padding:6px 12px;
+}
+.navbar-toggle
+{
+	padding:9px 10px;
 }
