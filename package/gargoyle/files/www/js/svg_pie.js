@@ -10,6 +10,11 @@ var selectedId = null;
 var unselectedColors = [];
 var selectedColors = [];
 
+var topCoor=1;
+var leftCoor=1;
+var bottomCoor=1600;
+var rightCoor=1600;
+
 // color and font parity for themes
 var themeColor = "black";
 var themeFontFamily = "serif";
@@ -39,12 +44,20 @@ function setPieChartData(data, labels)
 		return;
 	}
 
+	var totalHeight = (bottomCoor-topCoor)+1;
+	var radius = Math.ceil(((rightCoor-leftCoor)+1)/4); //diameter should never be bigger than 1/2 width
+	var buffer =  Math.floor((totalHeight-(radius*2))/(2))/2;
+	var titleOffset = Math.ceil(buffer*.30);
+	//var titleOffset = 0;
+	centerX=rightCoor-(radius+buffer);
+	centerY=(radius+buffer);
+
 	//first construct labels;
 	pieChartLabels = [];
-	labelX = 1;
-	nextLabelY=25;
-	labelYIncrement=30;
-	labelBoxWidth=15;
+	labelX = 0.005*totalHeight;
+	nextLabelY=buffer-titleOffset;
+	labelYIncrement=Math.floor(0.07*totalHeight);
+	labelBoxWidth=Math.floor(0.03*totalHeight);
 	colorIncrement = Math.ceil(360/data.length);
 	color = [255,0,0];
 	nextColorIncrement = 0;
@@ -66,8 +79,8 @@ function setPieChartData(data, labels)
 		labelRect.setAttribute("fill",  unselectedColor);
 
 		labelText = svgDoc.createElementNS(svgNs, "text");
-		labelText.setAttribute("x", labelX+25);
-		labelText.setAttribute("y", nextLabelY+labelBoxWidth);
+		labelText.setAttribute("x", labelX+(labelBoxWidth*1.25));
+		labelText.setAttribute("y", nextLabelY+(labelBoxWidth*0.85));
 		labelText.setAttribute("fill", themeColor);
 		labelText.setAttribute("font-size", Math.floor(labelBoxWidth*.66) + "px");
 		labelText.setAttribute("font-family", themeFontFamily);
@@ -94,9 +107,6 @@ function setPieChartData(data, labels)
 	}
 
 	//now construct pie slices
-	centerX=325;
-	centerY=150;
-	radius=125;
 	dataSum = 0;
 	for(dataIndex=0; dataIndex < data.length; dataIndex++)
 	{

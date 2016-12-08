@@ -34,8 +34,8 @@
 </style>
 
 <h1 class="page-header"><%~ qos.mQOS %></h1>
-<div id="upload_container" class="row">
-	<div class="col-lg-12">
+<div class="row">
+	<div id="upload_container" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ qos.UBSect %></h3>
@@ -56,15 +56,13 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-12"><embed id="upload_pie" style="width:475px; height:400px;" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
+					<span class="col-xs-12"><embed id="upload_pie" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div id="download_container" class="row">
-	<div class="col-lg-12">
+	<div id="download_container" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ DBSect %></h3>
@@ -85,7 +83,7 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-12"><embed id="download_pie" style="width:475px; height:400px;" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
+					<span class="col-xs-12"><embed id="download_pie" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
 				</div>
 			</div>
 		</div>
