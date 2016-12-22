@@ -10,7 +10,6 @@
 
 %>
 
-
 <script>
 <!--
 <%
@@ -30,36 +29,35 @@
 
 <h1 class="page-header"><%~ quotas.mQuotas %></h1>
 <div class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ quotas.Section %></h3>
 			</div>
 
 			<div class="panel-body">
-				<span id="add_quota_label" style="text-decoration:underline" ><%~ AddQuota %>:</span>
-				<div>
-					<%in templates/quotas_template %>
+				<div class="row form-group">
+					<span class="col-xs-12" id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</span>
+					<div>
+						<%in templates/quotas_template %>
+					</div>
+					<span class="col-xs-12"><button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button></span>
 				</div>
-				<button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button>
+
+				<div id="internal_divider1" class="internal_divider"></div>
+
+				<div class="row form-group">
+					<span class="col-xs-12" id="active_quotas_label" style="text-decoration:underline"><%~ ActivQuotas %>:</span>
+				</div>
+				<div id="quota_table_container" class="table-responsive"></div>
 			</div>
-
-			<div id="internal_divider1" class="internal_divider"></div>
-
-			<span id="active_quotas_label" style="text-decoration:underline" ><%~ ActivQuotas %>:</span>
-
-			<div id="quota_table_container" class="table-responsive"></div>
-
 		</div>
 	</div>
-
 </div>
 
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container" ><%~ WaitSettings %></span>
 

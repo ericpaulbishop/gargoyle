@@ -10,7 +10,6 @@
 %>
 <h1 class="page-header"><%~ backup.mBackup %></h1>
 <div class="row">
-
 	<div class="col-lg-4">
 		<div class="panel panel-default">
 			<div class="panel-heading">

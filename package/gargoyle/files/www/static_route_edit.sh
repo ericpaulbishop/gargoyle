@@ -9,7 +9,6 @@
 	gargoyle_header_footer -m  -c "internal.css" -j "routing.js table.js" -z "routing.js"
 %>
 <div id="edit_container" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -21,9 +20,9 @@
 			</div>
 		</div>
 	</div>
-
 </div>
-<div id="bottom_button_container"></div>
+
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

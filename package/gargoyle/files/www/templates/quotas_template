@@ -26,10 +26,8 @@
 %>
 
 <div>
-	<span class='narrowleftcolumn'>
-		<label id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
-	</span>
-	<span class='widerightcolumn'>
+	<label class="col-xs-5" id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
+	<span class="col-xs-7">
 		<select id="applies_to_type" onchange='setVisibility()' class='form-control'>
 			<option value="all"><%~ QLocalNet %></option>
 			<option value="only"><%~ QOnlyHosts %></option>
@@ -39,24 +37,26 @@
 		<br/>
 	</span>
 	<div id="quota_ip_container">
-		<div id="quota_ip_table_container" class="widerightcolumnonly" style="padding-left:5px;margin-top:0px;margin-bottom:0px;"></div>
-		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:0px">
-			<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;" class='form-control' />
-			<input type="button" class="btn btn-default" id="add_ip_button" value="<%~ Add %>" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'/>
+		<div class="col-xs-offset-5 col-xs-7" id="quota_ip_table_container" style="margin-top:0px;margin-bottom:0px;"></div>
+		<div style="padding:0px;margin-top:0px;margin-bottom:0px">
+			<span class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;" class='form-control' />
+				<input type="button" class="btn btn-default" id="add_ip_button" value="<%~ Add %>" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'/>
+			</span>
 		</div>
-		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:5px;"><em><%~ IPorRange %></em></div>
+		<div style="padding:0px;margin-top:0px;margin-bottom:5px;">
+			<span class="col-xs-offset-5 col-xs-7"><em><%~ IPorRange %></em></span>
+		</div>
 	</div>
 </div>
 
 <div>
-	<span class='narrowleftcolumn'>
-		<label id="max_up_label" for='max_up_type'><%~ MaxUp %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id="max_up_type" style='width:125px' onchange='setVisibility()' class='form-control' >
+	<label class="col-xs-5" id="max_up_label" for='max_up_type'><%~ MaxUp %>:</label>
+	<span class="col-xs-7">
+		<select id="max_up_type" onchange='setVisibility()' class='form-control' >
 			<option value="unlimited"><%~ Unlimited %></option>
 			<option value="limited"><%~ Limited %></option>
-		</select>&nbsp;
+		</select>
 		<span id="max_up_container">
 			<input type='text' id='max_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
 			<select id="max_up_unit" class='form-control'>
@@ -67,15 +67,14 @@
 		</span>
 	</span>
 </div>
+
 <div>
-	<span class='narrowleftcolumn'>
-		<label id="max_down_label" for='max_down_type'><%~ MaxDown %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id="max_down_type" style='width:125px' onchange='setVisibility()' class='form-control'>
+	<label class="col-xs-5" id="max_down_label" for='max_down_type'><%~ MaxDown %>:</label>
+	<span class="col-xs-7">
+		<select id="max_down_type" onchange='setVisibility()' class='form-control'>
 			<option value="unlimited"><%~ Unlimited %></option>
 			<option value="limited"><%~ Limited %></option>
-		</select>&nbsp;
+		</select>
 		<span id="max_down_container">
 			<input type='text' id='max_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
 			<select id="max_down_unit" class='form-control'>
@@ -87,15 +86,14 @@
 		</span>
 	</span>
 </div>
+
 <div>
-	<span class='narrowleftcolumn'>
-		<label id="max_combined_label" for='max_combined_type'><%~ MaxUpDown %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id="max_combined_type" style='width:125px' onchange='setVisibility()' class='form-control'>
+	<label class="col-xs-5" id="max_combined_label" for='max_combined_type'><%~ MaxUpDown %>:</label>
+	<span class="col-xs-7">
+		<select id="max_combined_type" onchange='setVisibility()' class='form-control'>
 			<option value="unlimited"><%~ Unlimited %></option>
 			<option value="limited"><%~ Limited %></option>
-		</select>&nbsp;
+		</select>
 		<span id="max_combined_container">
 			<input type='text' id='max_combined' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
 			<select id="max_combined_unit" class='form-control'>
@@ -107,12 +105,11 @@
 		</span>
 	</span>
 </div>
+
 <div>
-	<span class='narrowleftcolumn'>
-		<label id="quota_reset_label" for='quota_reset'><%~ QResets %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id="quota_reset" style='width:125px' onchange='setVisibility()' class='form-control'>
+	<label class="col-xs-5" id="quota_reset_label" for='quota_reset'><%~ QResets %>:</label>
+	<span class="col-xs-7">
+		<select id="quota_reset" onchange='setVisibility()' class='form-control'>
 			<option value="hour"><%~ EvHour %></option>
 			<option value="day"><%~ EvDay %></option>
 			<option value="week"><%~ EvWeek %></option>
@@ -122,36 +119,30 @@
 </div>
 
 <div id="quota_day_container">
-	<span class='narrowleftcolumn'>
-		<label id="quota_day_label" for='quota_day'><%~ ResetDay %>:</label>
-	</span>
-	<span class="widerightcolumn">
-		<select id='quota_day' style='width:125px' class='form-control'></select>
+	<label class="col-xs-5" id="quota_day_label" for='quota_day'><%~ ResetDay %>:</label>
+	<span class="col-xs-7">
+		<select id='quota_day' class='form-control'></select>
 	</span>
 </div>
 
 <div id="quota_hour_container">
-	<span class='narrowleftcolumn'>
-		<label id="quota_hour_label" for='quota_hour'><%~ ResetHour %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id='quota_hour' style='width:125px' class='form-control'>
+	<label class="col-xs-5" id="quota_hour_label" for='quota_hour'><%~ ResetHour %>:</label>
+	<span class="col-xs-7">
+		<select id='quota_hour' class='form-control'>
 			<% otime '\t\t\t' %>
 		</select>
 	</span>
 </div>
 
 <div id="quota_active_container">
-	<span class='narrowleftcolumn'>
-		<label id="quota_active_label" for='quota_active'><%~ QuotaActive %>:</label>
-	</span>
-	<span class='widerightcolumn'>
-		<select id='quota_active' style='width:125px' onchange='setVisibility()' class='form-control'>
+	<label class="col-xs-5" id="quota_active_label" for='quota_active'><%~ QuotaActive %>:</label>
+	<span class="col-xs-7">
+		<select id='quota_active' onchange='setVisibility()' class='form-control'>
 			<option value="always"><%~ Always %></option>
 			<option value="only"><%~ Only %></option>
 			<option value="except"><%~ AllExcept %></option>
 		</select>
-		&nbsp;&nbsp;
+
 		<select id='quota_active_type' onchange='setVisibility()' class='form-control'>
 			<option value="hours"><%~ TheseHours %></option>
 			<option value="days"><%~ TheseDays %></option>
@@ -160,8 +151,9 @@
 		</select>
 	</span>
 </div>
+
 <div id="quota_active_controls_container">
-	<span id="active_days_container" class="widerightcolumnonly" style="margin-top:10px;margin-bottom:10px;">
+	<span id="active_days_container" class="col-xs-offset-5 col-xs-7" style="margin-top:10px;margin-bottom:10px;">
 		<input type='checkbox' id='quota_sun' /><label for="quota_sun"><%~ Sun %></label>
 		<input type='checkbox' id='quota_mon' /><label for="quota_mon"><%~ Mon %></label>
 		<input type='checkbox' id='quota_tue' /><label for="quota_tue"><%~ Tue %></label>
@@ -170,37 +162,39 @@
 		<input type='checkbox' id='quota_fri' /><label for="quota_fri"><%~ Fri %></label>
 		<input type='checkbox' id='quota_sat' /><label for="quota_sat"><%~ Sat %></label>
 	</span>
-	<span id="active_hours_container">
+
+	<span class="col-xs-offset-5 col-xs-7" id="active_hours_container">
 		<input class='form-control' type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
-		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>
+		<span id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>
 	</span>
-	<span id="active_weekly_container">
+
+	<span class="col-xs-offset-5 col-xs-7" id="active_weekly_container">
 		<input class='form-control' type='text' id='active_weekly' onkeyup='proofreadWeeklyRange(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
-		<span class="widerightcolumnonly" id="weekly_example" style="margin-top:0px;padding-top:0px;"><em><%~ Sample %></em></span>
+		<span id="weekly_example" style="margin-top:0px;padding-top:0px;"><em><%~ Sample %></em></span>
 	</span>
 </div>
+
 <div id="quota_exceeded_container">
-	<span class='narrowleftcolumn'>
-		<label id="quota_exceeded_label" for='quota_exceeded'><%~ Exceed %>:</label>
-	</span>
-	<span class='widerightcolumn'>
+	<label class="col-xs-5" id="quota_exceeded_label" for='quota_exceeded'><%~ Exceed %>:</label>
+	<span class="col-xs-7">
 		<select id='quota_exceeded' onchange='setVisibility()' class='form-control'>
 			<option value="hard_cutoff"><%~ ShutdownNet %></option>
 			<option value="throttle"><%~ Throttle %></option>
 		</select>
 	</span>
 </div>
+
 <div id="quota_only_qos_container">
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
-		<label style="float:left;width:100px;"><%~ UpLimit %>: </label>
+	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
+		<label><%~ UpLimit %>: </label>
 		<input type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
 		<select id="quota_qos_up_unit" class='form-control'>
 			<option value="KBytes/s"><%~ KBs %></option>
 			<option value="MBytes/s"><%~ MBs %></option>
 		</select>
 	</span>
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
-		<label style="float:left;width:100px;"><%~ DownLimit %>: </label>
+	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
+		<label><%~ DownLimit %>: </label>
 		<input type='text' id='quota_qos_down' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
 		<select id="quota_qos_down_unit" class='form-control'>
 			<option value="KBytes/s"><%~ KBs %></option>
@@ -208,13 +202,14 @@
 		</select>
 	</span>
 </div>
+
 <div id="quota_full_qos_container">
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
-		<label style="float:left;width:100px;" for="quota_full_qos_up_class"><%~ UpClass %>: </label>
+	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
+		<label for="quota_full_qos_up_class"><%~ UpClass %>: </label>
 		<select id="quota_full_qos_up_class" class='form-control'></select>
 	</span>
-	<span class='widerightcolumnonly' style="margin-top:1px;margin-bottom:1px;">
-		<label style="float:left;width:100px;" for="quota_full_qos_down_class"><%~ DownClass %>: </label>
+	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
+		<label for="quota_full_qos_down_class"><%~ DownClass %>: </label>
 		<select id="quota_full_qos_down_class" class='form-control'></select>
 	</span>
 </div>

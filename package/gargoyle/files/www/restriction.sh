@@ -16,65 +16,55 @@
 //-->
 </script>
 
-
 <h1 class="page-header"><%~ restrictions.mRestrict %></h1>
 <div class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ restrictions.ARSect %></h3>
 			</div>
 
 			<div class="panel-body">
 				<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
-				<div>
+				<div class="row form-group">
 					<%in templates/restriction_template %>
-					<div>
+					<span class="col-xs-12">
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
-					</div>
+					</span>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
-				<span id="current_rule_label" style="text-decoration:underline" ><%~ CRestr %>:</span>
+				<span id="current_rule_label" style="text-decoration:underline"><%~ CRestr %>:</span>
 				<div id="rule_table_container" class="table-responsive"></div>
 			</div>
-
 		</div>
 	</div>
 
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ EWSect %></h3>
 			</div>
 			<div class="panel-body">
-
-				<span id="add_exception_label" style="text-decoration:underline" ><%~ NExcp %>:</span>
-
-				<div>
+				<span id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</span>
+				<div class="row form-group">
 					<%in templates/whitelist_template %>
-
-					<div>
+					<span class="col-xs-12">
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
-					</div>
+					</span>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
 				<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
 				<div id="exception_table_container" class="table-responsive"></div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container" ><%~ WaitSettings %></span>
 

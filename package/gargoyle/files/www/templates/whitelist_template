@@ -1,174 +1,184 @@
 <div>
-	<label class='narrowleftcolumn' for='exception_name' id='exception_name_label'><%~ restrictions.ESect %>:</label>
-	<input type='text' class='form-control' id='exception_name' size='30'/>
+	<label class='col-xs-5' for='exception_name' id='exception_name_label'><%~ restrictions.ESect %>:</label>
+	<span class="col-xs-7"><input type='text' class='form-control' id='exception_name' size='30'/></span>
 </div>
+
 <div>
-	<label class='narrowleftcolumn' for='exception_applies_to' id='exception_applies_to_label'><%~ EAppl %>:</label>
-	<select class='form-control' id='exception_applies_to' onchange='setVisibility(document,"exception_")'>
-		<option value='all'><%~ AHsts %></option>
-		<option value='except'><%~ EHsts %></option>
-		<option value='only'><%~ OHsts %></option>
-	</select>
+	<label class='col-xs-5' for='exception_applies_to' id='exception_applies_to_label'><%~ EAppl %>:</label>
+	<span class="col-xs-7">
+		<select class='form-control' id='exception_applies_to' onchange='setVisibility(document,"exception_")'>
+			<option value='all'><%~ AHsts %></option>
+			<option value='except'><%~ EHsts %></option>
+			<option value='only'><%~ OHsts %></option>
+		</select>
+	</span>
 </div>
+
 <div id="exception_applies_to_container">
-	<div class="widerightcolumnonly" id="exception_applies_to_table_container"></div>
-	<div class="widerightcolumnonly">
+	<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
+	<div class="col-xs-offset-5 col-xs-7">
 		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
 		<input type="button" class="btn btn-default" id="exception_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'/>
 	</div>
-	<div class="widerightcolumnonly">
+	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ HstAddr %></em>
 	</div>
 </div>
+
 <div>
-	<label class='narrowleftcolumn' for='exception_all_day' id='exception_schedule_label'><%~ Schd %>:</label>
-	<input type='checkbox' id='exception_all_day' onclick='setVisibility(document,"exception_")' /><label for="exception_all_day"><%~ ADay %></label>
-	<input type='checkbox' id='exception_every_day' onclick='setVisibility(document,"exception_")' /><label for="exception_every_day"><%~ EDay %></label>&nbsp;&nbsp;
-	<select id='exception_schedule_repeats' onchange='setVisibility(document,"exception_")' class='form-control'>
-		<option value='daily'><%~ DSchd %></option>
-		<option value='weekly'><%~ WSchd %></option>
-	</select>&nbsp;&nbsp;
+	<label class='col-xs-5' for='exception_all_day' id='exception_schedule_label'><%~ Schd %>:</label>
+	<span class="col-xs-7">
+		<input type='checkbox' id='exception_all_day' onclick='setVisibility(document,"exception_")' /><label for="exception_all_day"><%~ ADay %></label>
+		<input type='checkbox' id='exception_every_day' onclick='setVisibility(document,"exception_")' /><label for="exception_every_day"><%~ EDay %></label>&nbsp;&nbsp;
+		<select id='exception_schedule_repeats' onchange='setVisibility(document,"exception_")' class='form-control'>
+			<option value='daily'><%~ DSchd %></option>
+			<option value='weekly'><%~ WSchd %></option>
+		</select>
+	</span>
 </div>
+
 <div id="exception_days_active" class="indent">
-	<label class="narrowleftcolumn"><%~ DActv %>:</label>
-	<input type='checkbox' id='exception_sun' /><label for="exception_sun"><%~ Sun %></label>
-	<input type='checkbox' id='exception_mon' /><label for="exception_mon"><%~ Mon %></label>
-	<input type='checkbox' id='exception_tue' /><label for="exception_tue"><%~ Tue %></label>
-	<input type='checkbox' id='exception_wed' /><label for="exception_wed"><%~ Wed %></label>
-	<input type='checkbox' id='exception_thu' /><label for="exception_thu"><%~ Thu %></label>
-	<input type='checkbox' id='exception_fri' /><label for="exception_fri"><%~ Fri %></label>
-	<input type='checkbox' id='exception_sat' /><label for="exception_sat"><%~ Sat %></label>
+	<label class="col-xs-5"><%~ DActv %>:</label>
+	<span class="col-xs-7">
+		<input type='checkbox' id='exception_sun' /><label for="exception_sun"><%~ Sun %></label>
+		<input type='checkbox' id='exception_mon' /><label for="exception_mon"><%~ Mon %></label>
+		<input type='checkbox' id='exception_tue' /><label for="exception_tue"><%~ Tue %></label>
+		<input type='checkbox' id='exception_wed' /><label for="exception_wed"><%~ Wed %></label>
+		<input type='checkbox' id='exception_thu' /><label for="exception_thu"><%~ Thu %></label>
+		<input type='checkbox' id='exception_fri' /><label for="exception_fri"><%~ Fri %></label>
+		<input type='checkbox' id='exception_sat' /><label for="exception_sat"><%~ Sat %></label>
+	</span>
 </div>
+
 <div id="exception_hours_active_container" class="indent">
-	<label class='narrowleftcolumn' for='exception_hours_active' id='exception_hours_active_label'><%~ HActv %>:</label>
-	<input type='text' id='exception_hours_active' size='30' onkeyup='proofreadHours(this)' class='form-control' />
-	<br/>
-	<div class="widerightcolumnonly">
+	<label class='col-xs-5' for='exception_hours_active' id='exception_hours_active_label'><%~ HActv %>:</label>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_hours_active' size='30' onkeyup='proofreadHours(this)' class='form-control' /></span>
+	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ SSample %> 00:30-13:15, 14:00-15:00</em>
 	</div>
 </div>
 
-
 <div id="exception_days_and_hours_active_container" class="indent">
-	<label class='narrowleftcolumn' for='exception_days_and_hours_active' id='exception_days_and_hours_active_label'><%~ DHActv %>:</label>
-	<input type='text' id='exception_days_and_hours_active' size='30' onkeyup='proofreadWeeklyRange(this)' class='form-control' />
-	<br/>
-	<div class="widerightcolumnonly">
+	<label class='col-xs-5' for='exception_days_and_hours_active' id='exception_days_and_hours_active_label'><%~ DHActv %>:</label>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_days_and_hours_active' size='30' onkeyup='proofreadWeeklyRange(this)' class='form-control' /></span>
+	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ Sample %></em>
 	</div>
 </div>
 
 <div>
-	<label class='narrowleftcolumn' for='exception_all_access' id='exception_all_access_label'><%~ PRsrc %>:</label>
-	<input type='checkbox' id='exception_all_access' onclick='setVisibility(document,"exception_")' /><label for="exception_all_access"><%~ NetAcc %></label>
+	<label class='col-xs-5' for='exception_all_access' id='exception_all_access_label'><%~ PRsrc %>:</label>
+	<span class="col-xs-7"><input type='checkbox' id='exception_all_access' onclick='setVisibility(document,"exception_")' /><label for="exception_all_access"><%~ NetAcc %></label></span>
 </div>
 
 <div class="indent" id="exception_resources">
 	<div>
-		<span class='narrowleftcolumn'>
-			<label id="exception_remote_ip_label" for='exception_remote_ip'><%~ RemIP %>:</label>
+		<label class="col-xs-5" id="exception_remote_ip_label" for='exception_remote_ip'><%~ RemIP %>:</label>
+		<span class="col-xs-7">
+			<select class='form-control' id='exception_remote_ip_type' onchange='setVisibility(document,"exception_")'>
+				<option value="all"><%~ PmAll %></option>
+				<option value="only"><%~ PmOny %></option>
+				<option value="except"><%~ PmExc %></option>
+			</select>
 		</span>
-		<select class='form-control' id='exception_remote_ip_type' onchange='setVisibility(document,"exception_")'>
-			<option value="all"><%~ PmAll %></option>
-			<option value="only"><%~ PmOny %></option>
-			<option value="except"><%~ PmExc %></option>
-		</select>
 	</div>
 	<div id="exception_remote_ip_container">
-		<div class="widerightcolumnonly" id="exception_remote_ip_table_container"></div>
-		<div class="widerightcolumnonly">
+		<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
+		<div class="col-xs-offset-5 col-xs-7">
 			<input type='text' id='exception_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
 			<input type="button" class="btn btn-default" id="exception_add_remote_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'/>
 		</div>
 	</div>
 
 	<div>
-		<span class='narrowleftcolumn'>
-			<label id="exception_remote_port_label" for='exception_remote_port'><%~ RemPrt %>:</label>
+		<label class="col-xs-5" id="exception_remote_port_label" for='exception_remote_port'><%~ RemPrt %>:</label>
+		<span class="col-xs-7">
+			<select class='form-control' id="exception_remote_port_type" onchange='setVisibility(document,"exception_")'>
+				<option value="all"><%~ PmAll %></option>
+				<option value="only"><%~ PmOny %></option>
+				<option value="except"><%~ PmExc %></option>
+			</select>
 		</span>
-		<select class='form-control' id="exception_remote_port_type" onchange='setVisibility(document,"exception_")'>
-			<option value="all"><%~ PmAll %></option>
-			<option value="only"><%~ PmOny %></option>
-			<option value="except"><%~ PmExc %></option>
-		</select>
-		<span class='rightcolumn'>
+		<span class='col-xs-offset-5 col-xs-7'>
 			<input type='text' id='exception_remote_port' onkeyup='proofreadMultiplePorts(this)' size='20' class='form-control' />
 		</span>
 	</div>
 	<div>
-		<span class='narrowleftcolumn'>
-			<label id="exception_local_port_label" for='exception_local_port'><%~ LclPrt %>:</label>
+		<label class="col-xs-5" id="exception_local_port_label" for='exception_local_port'><%~ LclPrt %>:</label>
+		<span class="col-xs-7">
+			<select class='form-control' id="exception_local_port_type" onchange='setVisibility(document,"exception_")'>
+				<option value="all"><%~ PmAll %></option>
+				<option value="only"><%~ PmOny %></option>
+				<option value="except"><%~ PmExc %></option>
+			</select>
 		</span>
-		<select class='form-control' id="exception_local_port_type" onchange='setVisibility(document,"exception_")'>
-			<option value="all"><%~ PmAll %></option>
-			<option value="only"><%~ PmOny %></option>
-			<option value="except"><%~ PmExc %></option>
-		</select>
-		<span>
+		<span class="col-xs-offset-5 col-xs-7">
 			<input class='form-control' type='text' id='exception_local_port' onkeyup='proofreadMultiplePorts(this)' size='20'/>
 		</span>
 	</div>
 
 	<div>
-		<span class='narrowleftcolumn'>
-			<label class='rightcolumn' id="exception_transport_protocol_label" for='exception_transport_protocol'><%~ TrProto %>:</label>
+		<label class='col-xs-5' id="exception_transport_protocol_label" for='exception_transport_protocol'><%~ TrProto %>:</label>
+		<span class="col-xs-7">
+			<select class='form-control' id="exception_transport_protocol">
+				<option value="both"><%~ PmAll %></option>
+				<option value="tcp"><%~ PmTCP %></option>
+				<option value="udp"><%~ PmUDP %></option>
+			</select>
 		</span>
-		<select class='form-control' id="exception_transport_protocol">
-			<option value="both"><%~ PmAll %></option>
-			<option value="tcp"><%~ PmTCP %></option>
-			<option value="udp"><%~ PmUDP %></option>
-		</select>
 	</div>
 	<div>
-		<span class='narrowleftcolumn'>
-			<label id="exception_app_protocol_label" for='exception_app_protocol'><%~ ApProto %>:</label>
+		<label class="col-xs-5" id="exception_app_protocol_label" for='exception_app_protocol'><%~ ApProto %>:</label>
+		<span class="col-xs-7">
+			<select id="exception_app_protocol_type" class='form-control' onchange='setVisibility(document,"exception_")'>
+				<option value="all"><%~ PmAll %></option>
+				<option value="only"><%~ PmOny %></option>
+				<option value="except"><%~ PmExc %></option>
+			</select>
 		</span>
-		<select id="exception_app_protocol_type" class='form-control' onchange='setVisibility(document,"exception_")'>
-			<option value="all"><%~ PmAll %></option>
-			<option value="only"><%~ PmOny %></option>
-			<option value="except"><%~ PmExc %></option>
-		</select>
 
-		<select class='form-control' id="exception_app_protocol">
-			<option value='aim '>AIM</option>
-			<option value='bittorrent '>BitTorrent</option>
-			<option value='dns '>DNS</option>
-			<option value='edonkey '>eDonkey</option>
-			<option value='fasttrack '>FastTrack</option>
-			<option value='ftp '>FTP</option>
-			<option value='gnutella '>Gnutella</option>
-			<option value='http '>HTTP</option>
-			<option value='httpaudio '>HTTP Audio</option>
-			<option value='httpvideo '>HTTP Video</option>
-			<option value='ident '>Ident</option>
-			<option value='imap '>IMAP E-Mail</option>
-			<option value='irc '>IRC</option>
-			<option value='jabber '>Jabber</option>
-			<option value='msnmessenger '>MSN Messenger</option>
-			<option value='ntp '>NTP</option>
-			<option value='pop3 '>POP3</option>
-			<option value='skypeout '>Skype Out Calls</option>
-			<option value='skypetoskype '>Skype to Skype</option>
-			<option value='smtp '>SMTP E-Mail</option>
-			<option value='ssh '>SSH Secure Shell</option>
-			<option value='ssl '>SSL Secure Socket</option>
-			<option value='vnc '>VNC</option>
-			<option value='rtp '>VoIP Audio</option>
-		</select>
+		<span class="col-xs-offset-5 col-xs-7">
+			<select class='form-control' id="exception_app_protocol">
+				<option value='aim '>AIM</option>
+				<option value='bittorrent '>BitTorrent</option>
+				<option value='dns '>DNS</option>
+				<option value='edonkey '>eDonkey</option>
+				<option value='fasttrack '>FastTrack</option>
+				<option value='ftp '>FTP</option>
+				<option value='gnutella '>Gnutella</option>
+				<option value='http '>HTTP</option>
+				<option value='httpaudio '>HTTP Audio</option>
+				<option value='httpvideo '>HTTP Video</option>
+				<option value='ident '>Ident</option>
+				<option value='imap '>IMAP E-Mail</option>
+				<option value='irc '>IRC</option>
+				<option value='jabber '>Jabber</option>
+				<option value='msnmessenger '>MSN Messenger</option>
+				<option value='ntp '>NTP</option>
+				<option value='pop3 '>POP3</option>
+				<option value='skypeout '>Skype Out Calls</option>
+				<option value='skypetoskype '>Skype to Skype</option>
+				<option value='smtp '>SMTP E-Mail</option>
+				<option value='ssh '>SSH Secure Shell</option>
+				<option value='ssl '>SSL Secure Socket</option>
+				<option value='vnc '>VNC</option>
+				<option value='rtp '>VoIP Audio</option>
+			</select>
+		</span>
 	</div>
 	<div>
-		<span class='narrowleftcolumn'>
-			<label id="exception_url_label" for='exception_url_type'><%~ WebURL %>:</label>
+		<label class="col-xs-5" id="exception_url_label" for='exception_url_type'><%~ WebURL %>:</label>
+		<span class="col-xs-7">
+			<select id="exception_url_type" class='form-control' onchange='setVisibility(document,"exception_")'>
+				<option value="all"><%~ PmAll %></option>
+				<option value="only"><%~ PmOny %></option>
+				<option value="except"><%~ PmExc %></option>
+			</select>
 		</span>
-		<select id="exception_url_type" class='form-control' onchange='setVisibility(document,"exception_")'>
-			<option value="all"><%~ PmAll %></option>
-			<option value="only"><%~ PmOny %></option>
-			<option value="except"><%~ PmExc %></option>
-		</select>
 	</div>
 	<div id="exception_url_match_list">
-		<div id="exception_url_match_table_container"></div>
-		<div>
+		<div id="exception_url_match_table_container" class="col-xs-12"></div>
+		<div class="col-xs-offset-5 col-xs-7">
 			<select id="exception_url_match_type" class='form-control'>
 				<option value="url_exact"><%~ FUExt %>:</option>
 				<option value="url_contains"><%~ FUCnt %>:</option>

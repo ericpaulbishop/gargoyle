@@ -23,8 +23,7 @@
 
 <h1 class="page-header"><%~ themes.mTheme %></h1>
 <div class="row">
-
-	<div class="col-lg-12">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ themes.TMSect %></h3>
@@ -35,8 +34,8 @@
 			</div>
 		</div>
 	</div>
-
 </div>
+
 <span id="update_container" ><%~ WaitSettings %></span>
 
 <script>

@@ -10,38 +10,32 @@
 %>
 
 <div id="edit_container" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ usb_storage.ChUPass %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div style="clear:both;display:block">
-					<label for="share_user_text"><%~ User %>:</label>
-					<span class="rightcolumn" id="share_user_text"></span>
+				<div class="row from-group" style="clear:both;display:block">
+					<label class="col-xs-5" for="share_user_text"><%~ User %>:</label>
+					<span class="col-xs-7" id="share_user_text"></span>
 				</div>
 
-				<div style="clear:both">
-					<label for="new_password"><%~ NPass %>:</label>
-					<input class="form-control" type="password" id="new_password" />
+				<div class="row from-group" style="clear:both">
+					<label class="col-xs-5" for="new_password"><%~ NPass %>:</label>
+					<span class="col-xs-7"><input class="form-control" type="password" id="new_password" /></span>
 				</div>
 
-				<div style="clear:both">
-					<label for="new_password_confirm"><%~ ChPass %>:</label>
-					<input class="form-control" type="password" id="new_password_confirm" />
+				<div class="row from-group" style="clear:both">
+					<label class="col-xs-5" for="new_password_confirm"><%~ ChPass %>:</label>
+					<span class="col-xs-7"><input class="form-control" type="password" id="new_password_confirm" /></span>
 				</div>
-
 			</div>
-
 		</div>
 	</div>
-
 </div>
-<div id="bottom_button_container"></div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

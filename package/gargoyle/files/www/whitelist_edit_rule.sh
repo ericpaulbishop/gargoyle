@@ -10,10 +10,8 @@
 %>
 
 <div id="edit_container" class="row">
-
 	<div class="col-lg-4">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ restrictions.EESect %></h3>
 			</div>
@@ -23,12 +21,10 @@
 					<%in templates/whitelist_template %>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
-<div id="bottom_button_container"></div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

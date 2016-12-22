@@ -11,11 +11,14 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
-	#these modes are invalid now, removed.
 
-	#check the high throughput capabilities. eventually we will have to detect 160MHz also. cross that bridge later.
-	wifiN=$(iwinfo $wifi_dev h | grep HT20) || $(iwinfo $wifi_dev h | grep HT40)
-	wifiAC=$(iwinfo $wifi_dev h | grep VHT20) || $(iwinfo $wifi_dev h | grep VHT40)|| $(iwinfo $wifi_dev h | grep VHT80)
+	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
+	wifiAC=$(iwinfo $wifi_dev h | sed 's/\bHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
+	if [ "$wifiAC" ] ; then
+		maxAC=$(echo $wifiAC | awk -F " VHT" '{print $NF}')
+	else
+		maxAC="0"
+	fi
 
 	#802.11ac should only be able to operate on the "A" device
 	
@@ -33,8 +36,9 @@ print_mac80211_channels_for_wifi_dev()
 			echo "var AwifiAC = false;" >> "$out"
 		fi
 		if [ "$dualband" == false ] ; then
-			echo "var GwifiN = false;" >> "$out_file"
+			echo "var GwifiN = false;" >> "$out"
 		fi
+		echo "var maxACwidth = \"$maxAC\" ;" >> "$out"
 	else
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
@@ -44,11 +48,10 @@ print_mac80211_channels_for_wifi_dev()
 			echo "var GwifiN = false;" >> "$out"
 		fi
 		if [ "$dualband" == false ] ; then
-			echo "var AwifiN = false;" >> "$out_file"
-			echo "var AwifiAC = false;" >> "$out_file"
+			echo "var AwifiN = false;" >> "$out"
+			echo "var AwifiAC = false;" >> "$out"
 		fi
 	fi
-	
 	
 	# we are about to screen-scrape iw output, which the tool specifically says we should NOT do
 	# however, as far as I can tell there is no other way to get max txpower for each channel
@@ -106,6 +109,7 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var GwifiN = false;" >> "$out_file"
 	echo "var AwifiN = false;" >> "$out_file"
 	echo "var AwifiAC = false;" >> "$out_file"
+	echo "var dualBandWireless=false;" >> "$out_file"
 elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
@@ -139,11 +143,13 @@ elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
 	echo "var GwifiN = false;" >> "$out_file"
 	echo "var AwifiN = false;" >> "$out_file"
 	echo "var AwifiAC = false;" >> "$out_file"
+	echo "var dualBandWireless=false;" >> "$out_file"
 else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
 	echo "var GwifiN = false;" >> "$out_file"
 	echo "var AwifiN = false;" >> "$out_file"
 	echo "var AwifiAC = false;" >> "$out_file"
+	echo "var dualBandWireless=false;" >> "$out_file"
 fi
 
 awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release >> "$out_file"

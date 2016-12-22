@@ -247,6 +247,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT20">20MHz</option>
 							<option value="VHT40">40MHz</option>
 							<option value="VHT80">80MHz</option>
+							<option value="VHT160">160MHz</option>
 						</select>
 					</span>
 				</div>
@@ -719,6 +720,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT20">20MHz</option>
 							<option value="VHT40">40MHz</option>
 							<option value="VHT80">80MHz</option>
+							<option value="VHT160">160MHz</option>
 						</select>
 					</span>
 				</div>

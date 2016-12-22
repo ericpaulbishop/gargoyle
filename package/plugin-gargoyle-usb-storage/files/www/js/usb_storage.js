@@ -480,9 +480,9 @@ function editUser()
 	var cancelButton = createInput("button", editUserWindow.document);
 
 	okButton.value         = usbSStr.ChPass;
-	okButton.className     = "default_button";
+	okButton.className     = "btn btn-default";
 	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "default_button";
+	cancelButton.className = "btn btn-default";
 
 
 	editShareUserRow=this.parentNode.parentNode;
@@ -1227,7 +1227,7 @@ function createEditButton( editFunction )
 {
 	editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editFunction;
 	editButton.disabled  = false ;
 
@@ -1252,9 +1252,6 @@ function removeShareCallback(table, row)
 
 	setSharePaths();
 }
-
-
-
 
 function editShare()
 {
@@ -1372,17 +1369,6 @@ function editShare()
 	}
 	runOnEditorLoaded();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 function unmountAllUsb()
 {

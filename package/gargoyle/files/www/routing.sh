@@ -26,10 +26,8 @@
 
 <h1 class="page-header"><%~ routing.mRoutes %></h1>
 <div class="row">
-
-	<div class="col-lg-12">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ routing.ARSect %></h3>
 			</div>
@@ -37,17 +35,13 @@
 			<div class="panel-body">
 				<div id="active_route_table_container" class="table-responsive"></div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ SRSect %></h3>
 			</div>
@@ -57,8 +51,8 @@
 					<label id="staticroute_add_heading_label" style="text-decoration:underline"><%~ ASRte %>:</label>
 				</div>
 
-				<div class="form-group form-inline">
-					<div id="static_route_add_container">
+				<div class="row form-group">
+					<div id="static_route_add_container" class="col-xs-12">
 						<%in templates/static_route_template %>
 					</div>
 				</div>
@@ -67,23 +61,21 @@
 					<span><%~ CSRSect %>:</span>
 				</div>
 
-				<div class="form-group form-inline">
-					<div id="static_route_table_container" class="bottom_gap table-responsive"></div>
+				<div class="row form-group">
+					<div id="static_route_table_container" class="col-xs-12 bottom_gap table-responsive"></div>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div id="firefox3_bug_correct" style="display:none">
 	<input type="text" value="firefox3_bug" />
 </div>
 
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container" ><%~ WaitSettings %></span>
 

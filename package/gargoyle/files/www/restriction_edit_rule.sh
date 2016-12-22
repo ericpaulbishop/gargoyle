@@ -9,10 +9,8 @@
 	gargoyle_header_footer -m  -c "internal.css" -j "restrictions.js table.js" -z "restrictions.js"
 %>
 <div id="edit_container" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ restrictions.ERSect %></h3>
 			</div>
@@ -22,12 +20,10 @@
 					<%in templates/restriction_template %>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
-<div id="bottom_button_container"></div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

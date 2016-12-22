@@ -2706,7 +2706,7 @@ function setChannelWidth(selectCtl, band)
 	var chw =  getSelectedValue(selectCtl.id)
 	var hplus = chw =='HT40+';
 	var h40 = (chw == 'HT40+' || chw == 'HT40-');
-	var vht = (chw == 'VHT20' || chw == 'VHT40' || chw == 'VHT80');
+	var vht = (chw == 'VHT20' || chw == 'VHT40' || chw == 'VHT80' || chw == 'VHT160');
 	if(band == "G")
 	{
 		setSelectedValue("wifi_channel_width", getSelectedValue(selectCtl.id));
@@ -2751,6 +2751,7 @@ function setChannelWidth(selectCtl, band)
 			aChannels = []
 			var valid40 = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
 			var valid80 = [36, 52, 100, 116, 132, 149]
+			var valid160 = [36, 100]
 			if(chw == 'VHT40')
 			{
 				var validTest  = arrToHash(valid40)
@@ -2763,6 +2764,15 @@ function setChannelWidth(selectCtl, band)
 			else if(chw == 'VHT80')
 			{
 				var validTest  = arrToHash(valid80)
+				for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
+				{
+					var ch = origAChan[chanIndex]
+					if(validTest[ch] == 1) { aChannels.push(ch); }
+				}
+			}
+			else if(chw == 'VHT160')
+			{
+				var validTest  = arrToHash(valid160)
 				for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
 				{
 					var ch = origAChan[chanIndex]
@@ -3000,7 +3010,14 @@ function setHwMode(selectCtl)
 	}
 	else
 	{
-		setAllowableSelections('wifi_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+		if(maxACwidth == "80")
+		{
+			setAllowableSelections('wifi_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+		}
+		else
+		{
+			setAllowableSelections('wifi_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80', 'VHT160'], ['20MHz', '40MHz', '80MHz', '160MHz']);
+		}
 	}
 
 	//now check for bridge also.
@@ -3022,7 +3039,14 @@ function setHwMode(selectCtl)
 	}
 	else
 	{
-		setAllowableSelections('bridge_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+		if(maxACwidth == "80")
+		{
+			setAllowableSelections('bridge_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80'], ['20MHz', '40MHz', '80MHz']);
+		}
+		else
+		{
+			setAllowableSelections('bridge_channel_width_5ghz', ['VHT20', 'VHT40', 'VHT80', 'VHT160'], ['20MHz', '40MHz', '80MHz', '160MHz']);
+		}
 	}
 
 

@@ -191,9 +191,9 @@
 
 				<div class="row form-group" id="authorised_keys_table_container">
 					<label id="authorized_keys_label" class="col-xs-5" for="authorized_keys_table_container"><%~ SSHKeys %>:</label>
-					<div id="authorized_keys_table_container" class="indent table-responsive"></div>
-					<div id="ssh_help" class="indent">
-						<span id="ssh_help_txt" style="display:none">
+					<div id="authorized_keys_table_container" class="col-xs-7 table-responsive"></div>
+					<div id="ssh_help">
+						<span class="col-xs-12" id="ssh_help_txt" style="display:none">
 							<p><%~ SSHHelp1 %></p>
 							<p><%~ SSHHelp2 %></p>
 							<p><%~ SSHHelp3 %></p>
@@ -203,7 +203,7 @@
 							</ul>
 							<p><%~ SSHHelp4 %></p>
 						</span>
-						<a onclick="setDescriptionVisibility('ssh_help')"  id="ssh_help_ref" href="#ssh_help"><%~ MoreInfo %></a>
+						<span class="col-xs-12"><a onclick="setDescriptionVisibility('ssh_help')"  id="ssh_help_ref" href="#ssh_help"><%~ MoreInfo %></a></span>
 					</div>
 				</div>
 			</div>
