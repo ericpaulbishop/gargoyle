@@ -37,55 +37,55 @@ for (tab_idx in cron_data) {
 
 <h1 class="page-header"><%~ wifi_schedule.Wisch %></h1>
 <div id="wifi_schedule" class="row">
-
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ wifi_schedule.Wisch %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div id="wlan_stat" class="form-group">
-					<label><%~ Rstat %>:</label>
-					<span id="wlan_status"></span>
+				<div id="wlan_stat" class="row form-group">
+					<label class="col-xs-5"><%~ Rstat %>:</label>
+					<span class="col-xs-7" id="wlan_status"></span>
 				</div>
 
-				<div id="wifi_action" class="form-group">
-					<label><%~ StStR %></label>
-					<span>
-						<button class="btn btn-default" id="wifi_up_button" onclick='GetWifiUpdate("up")'><%~ RadOn %></button>
-						<button class="btn btn-default" id="wifi_down_button" onclick='GetWifiUpdate("down")'><%~ RadOf %></button>
+				<div id="wifi_action" class="row form-group">
+					<label class="col-xs-5"><%~ StStR %></label>
+					<span class="col-xs-7">
+						<button class="btn btn-primary" id="wifi_up_button" onclick='GetWifiUpdate("up")'><%~ RadOn %></button>
+						<button class="btn btn-danger" id="wifi_down_button" onclick='GetWifiUpdate("down")'><%~ RadOf %></button>
 					</span>
 				</div>
 
 				<div class="internal_divider"></div>
 
-				<div class="form-group">
-					<label for="timer_mode"><%~ TPer %>:</label>
-					<select id="timer_mode" class="form-control" onchange="SetTimerMode(this.value)">
-						<option selected="" value="0"><%~ NoTm %></option>
-						<option value="1"><%~ Dly %></option>
-						<option value="3"><%~ Wkd %></option>
-						<option value="7"><%~ Wkly %></option>
-					</select>
-					<br/>
-					<br/>
-					<div id="div_timer_increment" class="form-group" style="display:none;">
-						<label for="timer_increment"><%~ TInc %>:</label>
-						<select id="timer_increment" class="form-control" onchange="SetTimerIncrement(this)">
-							<option value="5">5 <%~ minutes %></option>
-							<option value="10">10 <%~ minutes %></option>
-							<option selected="" value="15">15 <%~ minutes %></option>
-							<option value="30">30 <%~ minutes %></option>
-							<option value="60">60 <%~ minutes %></option>
+				<div class="row form-group">
+					<label class="col-xs-5" for="timer_mode"><%~ TPer %>:</label>
+					<span class="col-xs-7">
+						<select id="timer_mode" class="form-control" onchange="SetTimerMode(this.value)">
+							<option selected="" value="0"><%~ NoTm %></option>
+							<option value="1"><%~ Dly %></option>
+							<option value="3"><%~ Wkd %></option>
+							<option value="7"><%~ Wkly %></option>
 						</select>
+					</span>
+
+					<div id="div_timer_increment" class="form-group" style="display:none;">
+						<label class="col-xs-5" for="timer_increment"><%~ TInc %>:</label>
+						<span class="col-xs-7">
+							<select id="timer_increment" class="form-control" onchange="SetTimerIncrement(this)">
+								<option value="5">5 <%~ minutes %></option>
+								<option value="10">10 <%~ minutes %></option>
+								<option selected="" value="15">15 <%~ minutes %></option>
+								<option value="30">30 <%~ minutes %></option>
+								<option value="60">60 <%~ minutes %></option>
+							</select>
+						</span>
 					</div>
 				</div>
 
-			  <div id="tabs">
-					<ul id="tab_ulist">
+			  	<div class="form-group" id="tabs">
+					<ul class="nav nav-tabs" id="tab_ulist">
 					  <li id="tab_li_1" style="display:none;"></li>
 					  <li id="tab_li_2" style="display:none;"></li>
 					  <li id="tab_li_3" style="display:none;"></li>
@@ -129,17 +129,14 @@ for (tab_idx in cron_data) {
 				<div id="summary_container">
 					<span id='summary_txt'></span>
 				</div>
-
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-warning" onclick="SetTimerMode(0)"><%~ Reset %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="SetTimerMode(0)"><%~ Reset %></button>
 </div>
 
 <script>

@@ -11,20 +11,20 @@
 %>
 
 <h1 class="page-header"><%~ logread.SLogs %></h1>
-<div class=row">
+<div class="row">
 	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<div class="form-group">
-					<textarea class="form-control" rows=30 id='output'></textarea>
+				<div class="row form-group">
+					<span class="col-xs-12"><textarea class="form-control" rows=30 id='output' style="width:100%;"></textarea></span>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 
-<div id="bottom_button_container">
-	<button id="refresh_button" class="btn btn-primary" onclick='resetData()'><%~ Rfsh %></button>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="refresh_button" class="btn btn-primary btn-lg" onclick='resetData()'><%~ Rfsh %></button>
 </div>
 
 <script>

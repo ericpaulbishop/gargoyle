@@ -11,69 +11,70 @@
 
 <h1 class="page-header"><%~ ping.Pdog %></h1>
 <div id="log" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-body">
-				<div class="form-group">
-					<input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/>
-					<label for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+				<div class="row form-group">
+					<span class="col-xs-1"><input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/></span>
+					<label class="col-xs-11" for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
 				</div>
 
-				<div class="form-group">
-					<label for='address_to_ping' id='address_to_ping_label'><%~ PgIP %>:</label>
-					<div class="form-group">
+				<div class="row form-group">
+					<label class="col-xs-5" for='address_to_ping' id='address_to_ping_label'><%~ PgIP %>:</label>
+					<span class="col-xs-7">
 						<input type='text' id='address_to_ping' class="form-control" size='20' onkeyup='proofreadIp(this)'/>
-						<p class="help-block"><%~ IPAd %></p>
-					</div>
+						<em class="help-block"><%~ IPAd %></em>
+					</span>
 				</div>
 
-				<div class="form-group">
-					<label for='ping_interval' id='ping_interval_label'><%~ Intv %>:</label>
-					<div class="form-group">
+				<div class="row form-group">
+					<label class="col-xs-5" for='ping_interval' id='ping_interval_label'><%~ Intv %>:</label>
+					<span class="col-xs-7">
 						<input type='text' id='ping_interval' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,59)'/>
-						<p class="help-block">1 - 59 <%~ minutes %></p>
-					</div>
+						<em class="help-block">1 - 59 <%~ minutes %></em>
+					</span>
 				</div>
 
-				<div class="form-group">
-					<label for='startup_delay' id='startup_delay_label'><%~ StDly %>:</label>
-					<div class="form-group">
+				<div class="row form-group">
+					<label class="col-xs-5" for='startup_delay' id='startup_delay_label'><%~ StDly %>:</label>
+					<span class="col-xs-7">
 						<input type='text' id='startup_delay' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,999)'/>
-						<p class="help-block">1 - 999 <%~ seconds %></p>
-					</div>
+						<em class="help-block">1 - 999 <%~ seconds %></em>
+					</span>
 				</div>
 
-				<div class="form-group">
-					<label for='failure_count' id='failure_count_label'><%~ FlCnt %>:</label>
-					<div class="form-group">
+				<div class="row form-group">
+					<label class="col-xs-5" for='failure_count' id='failure_count_label'><%~ FlCnt %>:</label>
+					<span class="col-xs-7">
 						<input type='text' id='failure_count' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,10)'/>
-						<p class="help-block">1 - 10</p>
-					</div>
+						<em class="help-block">1 - 10</em>
+					</span>
 				</div>
 
-				<div class="form-group">
-					<label for='failure_action' id='failure_action_label'><%~ Actn %>:</label>
-					<select id='failure_action' class="form-control" onchange='showScript(this.value);'>
-						<option value='wan'><%~ WRcon %></option>
-						<option value='reboot'><%~ Rbot %></option>
-						<option value='custom'><%~ Rscp %></option>
-					</select>
-					<div id='custom_script' class="form-group" style='display: none;'>
-						<label for='script' id='script_label'><%~ Scpt %>:</label>
-						<input type='text' class="form-control" id='script' size='30'/>
-					</div>
+				<div class="row form-group">
+					<label class="col-xs-5" for='failure_action' id='failure_action_label'><%~ Actn %>:</label>
+					<span class="col-xs-7">
+						<select id='failure_action' class="form-control" onchange='showScript(this.value);'>
+							<option value='wan'><%~ WRcon %></option>
+							<option value='reboot'><%~ Rbot %></option>
+							<option value='custom'><%~ Rscp %></option>
+						</select>
+					</span>
+					<span class="row form-group">
+						<div id='custom_script' class="indent" style='display: none;'>
+							<label class="col-xs-5" for='script' id='script_label'><%~ Scpt %>:</label>
+							<span class="col-xs-7"><input type='text' class="form-control" id='script' size='30'/></span>
+						</div>
+					</span>
 				</div>
 			</div>
-
 		</div>
 	</div>
-
 </div>
-<div id="bottom_button_container">
-	<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger" onclick="resetData()"><%~ Reset %></button>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container"><%~ WaitSettings %></span>
 

@@ -50,10 +50,8 @@
 
 <h1 class="page-header"><%~ usb_storage.mUSB %></h1>
 <div id="no_disks" style="display:none;" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ usb_storage.SDisk %></h3>
 			</div>
@@ -61,178 +59,163 @@
 			<div class="panel-body">
 				<em><span><%~ Nomdsk %></span></em>
 			</div>
-
 		</div>
 	</div>
-
 </div>
 
 <div id="shared_disks" class="row">
-
 	<div class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ SDisk %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div id='ftp_wan_access_container'>
-					<input class="aligned_check" type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()'/>&nbsp;
-					<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_access'><%~ WFTP %></label>
+				<div id='ftp_wan_access_container' class="row form-group">
+					<span class="col-xs-1"><input type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()'/></span>
+					<label class="col-xs-11" id='ftp_wan_access_label' for='ftp_wan_access'><%~ WFTP %></label>
 				</div>
 
-				<div id='ftp_pasv_container'>
-					<input class="aligned_check" type='checkbox' id='ftp_wan_pasv' onclick='updateWanFtpVisibility()'/>&nbsp;
-					<label class="aligned_check_label" id='ftp_wan_access_label' for='ftp_wan_pasv'><%~ WpFTP %></label>&nbsp;
-					<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_min_port'>&nbsp;-&nbsp;
-					<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_max_port'>
+				<div id='ftp_pasv_container' class="row form-group">
+					<span class="col-xs-1"><input type='checkbox' id='ftp_wan_pasv' onclick='updateWanFtpVisibility()'/></span>
+					<span class="col-xs-11">
+						<label id='ftp_wan_access_label' for='ftp_wan_pasv'><%~ WpFTP %></label>&nbsp;
+						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_min_port' />&nbsp;-&nbsp;
+						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_max_port' />
+					</span>
 				</div>
 
 				<div id="ftp_wan_spacer" style="height:15px;"></div>
 
-				<div id="cifs_workgroup_container" class="form-group" style="margin-bottom:20px;">
-					<label id="cifs_workgroup_label" for="cifs_workgroup"><%~ CFWkg %>:</label>
-					<input id="cifs_workgroup" class="form-control" type="text" size='30'/>
+				<div id="cifs_workgroup_container" class="row form-group" style="margin-bottom:20px;">
+					<label class="col-xs-5" id="cifs_workgroup_label" for="cifs_workgroup"><%~ CFWkg %>:</label>
+					<span class="col-xs-7"><input id="cifs_workgroup" class="form-control" type="text" size='30'/></span>
 				</div>
 
-				<div id="user_container" class="form-group">
-					<label id="cifs_user_label"><%~ CFUsr %>:</label>
-					<span id="user_container" class="form-group">
-					<label id="user_label" for="new_user"><%~ NewU %>:</label>
-					<input id="new_user" class="form-control" type="text"/>
+				<div id="user_container" class="row form-group">
+					<label class="col-xs-12" id="cifs_user_label"><%~ CFUsr %>:</label>
+					<label class="col-xs-5" id="user_label" for="new_user"><%~ NewU %>:</label>
+					<span class="col-xs-7"><input id="new_user" class="form-control" type="text"/></span>
 				</div>
 
-				<div id="user_pass_container" class="form-group">
-					<label id="user_pass_label" for="user_pass"><%~ Pasw %>:</label>
-					<input id="user_pass" class="form-control" type="password"/>
+				<div id="user_pass_container" class="row form-group">
+					<label class="col-xs-5" id="user_pass_label" for="user_pass"><%~ Pasw %>:</label>
+					<span class="col-xs-7"><input id="user_pass" class="form-control" type="password"/></span>
 				</div>
-				<div id="user_pass_confirm_container" class="form-group">
-					<label id="user_pass_confirm_label" for="user_pass_confirm"><%~ CfPass %>:</label>
-					<input id="user_pass_confirm" class="form-control" type="password"/>
+				<div id="user_pass_confirm_container" class="row form-group">
+					<label class="col-xs-5" id="user_pass_confirm_label" for="user_pass_confirm"><%~ CfPass %>:</label>
+					<span class="col-xs-7"><input id="user_pass_confirm" class="form-control" type="password"/></span>
 				</div>
-				<div id="user_pass_container" class="form-group">
-					<button id="add_user" class="btn btn-default" onclick="addUser()"><%~ AddU %></button>
-				</div>
-
-				<div style="margin-bottom:20px;" id="user_table_container" class="form-group table-responsive">
+				<div id="user_pass_container" class="row form-group">
+					<span class="col-xs-12"><button id="add_user" class="btn btn-default" onclick="addUser()"><%~ AddU %></button></span>
 				</div>
 
-				<div id="sharing_add_heading_container" class="form-group">
-					<span><%~ ADir %>:</span>
+				<div style="margin-bottom:20px;" class="row form-group">
+					<div id="user_table_container" class="col-xs-offset-5 col-xs-7"></div>
 				</div>
 
-				<div id="sharing_add_controls_container" class="form-group">
+				<div id="sharing_add_heading_container" class="row form-group">
+					<span class="col-xs-12" style="text-decoration:underline"><%~ ADir %>:</span>
+				</div>
+
+				<div id="sharing_add_controls_container" class="row form-group">
 					<%in templates/usb_storage_template %>
-						<div>
-							<button id="add_share_button" class="btn btn-default" onclick="addNewShare()"><%~ ADsk %></button>
-						</div>
+					<span class="col-xs-12">
+						<button id="add_share_button" class="btn btn-default" onclick="addNewShare()"><%~ ADsk %></button>
+					</span>
 				</div>
 				<div class="internal_divider"></div>
 
-				<div id="sharing_current_heading_container" class="form-group">
-					<span><%~ CShare %>:</span>
+				<div id="sharing_current_heading_container" class="row form-group">
+					<span class="col-xs-12" style="text-decoration:underline"><%~ CShare %>:</span>
 				</div>
-				<div id="sharing_mount_table_container" class="form-group table-responsive"></div>
+				<div id="sharing_mount_table_container" class="table-responsive"></div>
 
 				<div class="internal_divider"></div>
 
-				<button id="save_button" class="btn btn-primary" onclick="saveChanges()"><%~ SaveChanges %></button>
-				<button id="reset_button" class="btn btn-warning" onclick="resetData()"><%~ Reset %></button>
+				<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+				<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div id="disk_unmount" class="row">
-
-	<div class="col-lg-6">
+	<div id="disk_unmount" class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ Umnt %></h3>
 			</div>
 
 			<div class="panel-body">
-				<div>
-					<button id="unmount_usb_button" class="btn btn-default" onclick="unmountAllUsb()"><%~ UmntB %></button>
-					<em><%~ UmntWarn %></em>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="unmount_usb_button" class="btn btn-warning btn-lg" onclick="unmountAllUsb()"><%~ UmntB %></button></span>
+					<span class="col-xs-12 alert alert-warning"><em><%~ UmntWarn %></em></span>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div id="disk_format" class="row">
-
-	<div class="col-lg-6">
+	<div id="disk_format" class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ FDisk %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div id="no_unmounted_drives">
-					<em><span><%~ NoUmntDev %></span></em>
+				<div id="no_unmounted_drives" class="row form-group">
+					<em><span class="col-xs-12"><%~ NoUmntDev %></span></em>
 				</div>
 
-				<div id="format_warning">
-					<em><span><%~ FmtWarn %></span></em>
+				<div id="format_warning" class="row form-group">
+					<em><span class="col-xs-12 alert alert-danger"><%~ FmtWarn %></span></em>
 				</div>
 
-				<div id="format_disk_select_container" class="form-group">
-					<label id="format_disk_select_label" for="format_disk_select"><%~ DskForm %>:</label>
-					<select class="form-control" id="format_disk_select"></select>
+				<div id="format_disk_select_container" class="row form-group">
+					<label class="col-xs-5" id="format_disk_select_label" for="format_disk_select"><%~ DskForm %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="format_disk_select"></select></span>
 					<br/>
-					<span id="format_warning"></span>
+					<span class="col-xs-12" id="format_warning"></span>
 				</div>
 
-				<div id="swap_percent_container" class="form-group">
-					<label id="swap_percent_label" for="swap_percent"><%~ PSwap %>:</label>
-					<input id="swap_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)"/>%&nbsp;&nbsp;<em><span id="swap_size"></span></em>
-				</div>
-
-				<div id="storage_percent_container" class="form-group">
-					<label id="storage_percent_label" for="storage_percent"><%~ PStor %>:</label>
-					<input id="storage_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)"/>%&nbsp;&nbsp;<em><span id="storage_size"></span></em>
-				</div>
-
-				<div id="extroot_container" class="form-group">
-					<span>
-						<input type="checkbox" id="extroot" name="extroot"/>
-						<label id="extroot_label" for="extroot" style="vertical-align:middle"><%~ MExtr %></label>
+				<div id="swap_percent_container" class="row form-group">
+					<label class="col-xs-5" id="swap_percent_label" for="swap_percent"><%~ PSwap %>:</label>
+					<span class="col-xs-7">
+						<input id="swap_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)" /><em><span id="swap_size"></span></em>
 					</span>
-					<div>
+				</div>
+
+				<div id="storage_percent_container" class="row form-group">
+					<label class="col-xs-5" id="storage_percent_label" for="storage_percent"><%~ PStor %>:</label>
+					<span class="col-xs-7">
+						<input id="storage_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)" /><em><span id="storage_size"></span></em>
+					</span>
+				</div>
+
+				<div id="extroot_container" class="row form-group">
+					<span class="col-xs-1"><input type="checkbox" id="extroot" name="extroot"/></span>
+					<label class="col-xs-11" id="extroot_label" for="extroot" style="vertical-align:middle"><%~ MExtr %></label>
+					<div class="col-xs-12 alert alert-warning">
 						<em><%~ ExtrWarn %></em>
 					</div>
 				</div>
 
-				<div id="usb_format_button_container" class="form-group">
-					<button id="usb_format_button" class="btn btn-default" onclick="formatDiskRequested()"><%~ FmtNow %></button>
+				<div id="usb_format_button_container" class="row form-group">
+					<span class="col-xs-12"><button id="usb_format_button" class="btn btn-danger btn-lg" onclick="formatDiskRequested()"><%~ FmtNow %></button></span>
 				</div>
-
 			</div>
 		</div>
 	</div>
-</div>
 
-<div id="extroot_fieldset" style="display:none;" class="row">
-
-	<div class="col-lg-6">
+	<div id="extroot_fieldset" style="display:none;" class="col-lg-6">
 		<div class="panel panel-default">
-
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ExtrS %></h3>
 			</div>
 
 			<div class="panel-body">
-
-				<button id="extroot_button" class="btn btn-default" onclick="disableExtroot();"><%~ ExtrOff %></button>
-				<em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em>
-
+				<div class="row form-group">
+					<button id="extroot_button" class="btn btn-default" onclick="disableExtroot();"><%~ ExtrOff %></button>
+					<em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em>
+				</div>
 			</div>
 		</div>
 	</div>

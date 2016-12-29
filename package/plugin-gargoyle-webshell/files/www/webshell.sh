@@ -14,11 +14,13 @@
 	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<div class="form-group">
-					<label for='cmd' id='cmd_label'><%~ Cmd %>:</label>
-					<input id="cmd" class="form-control" onkeydown='checkKey(event)' type="text" size='80'/>
-					<button class='btn btn-default' id='cmd_button' onclick='runCmd()'><%~ Exe %></button>
-					<div class="alert alert-warning"><em><%~ CmdWarn %></em></div>
+				<div class="row form-group">
+					<label class="col-xs-5" for='cmd' id='cmd_label'><%~ Cmd %>:</label>
+					<span class="col-xs-7">
+						<input id="cmd" class="form-control" onkeydown='checkKey(event)' type="text" size='80'/>
+						<button class='btn btn-primary' id='cmd_button' onclick='runCmd()'><%~ Exe %></button>
+					</span>
+					<div class="col-xs-12 alert alert-warning"><em><%~ CmdWarn %></em></div>
 				</div>
 				<textarea style="width:100%" rows=30 id='output'></textarea>
 			</div>

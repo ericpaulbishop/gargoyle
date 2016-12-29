@@ -46,11 +46,10 @@
 	</div>
 </div>
 
-
-	<div id="bottom_button_container">
-		<button id="save_button" class="btn btn-primary" onclick='saveChanges()'><%~ SaveChanges %></button>
-		<button id="reset_button" class="btn btn-warning" onclick='resetData()'><%~ Reset %></button>
-	</div>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick='resetData()'><%~ Reset %></button>
+</div>
 
 
 <script>

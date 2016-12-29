@@ -1285,9 +1285,9 @@ function editShare()
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
+	saveButton.className = "btn btn-default btn-lg";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "btn btn-default";
+	closeButton.className = "btn btn-default btn-lg";
 
 	editRow=this.parentNode.parentNode;
 	editName=editRow.childNodes[0].firstChild.data;
