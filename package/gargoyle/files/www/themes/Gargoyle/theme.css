@@ -538,6 +538,7 @@ select.form-control
 {
 	height: 25px;
 	line-height: 25px;
+	max-width: 100%;
 }
 .form-group-sm input.form-control 
 {
@@ -553,6 +554,7 @@ input.form-control
 {
 	height: 25px;
 	line-height: 25px;
+	max-width: 100%;
 }
 .btn-lg
 {
