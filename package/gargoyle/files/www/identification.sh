@@ -13,6 +13,11 @@
 	var havePrinterScript=false;
 <%
 	if [ -e /usr/lib/gargoyle/configure_printer.sh ] ; then echo "havePrinterScript=true;" ; fi
+	echo "var countryLines = new Array();"
+	if [ -e ./data/countrylist.txt ] ; then
+		awk '{gsub(/"/, "\\\""); print "countryLines.push(\""$0"\");"}' ./data/countrylist.txt
+	fi
+	echo "var countryData = parseCountry(countryLines);"
 %>
 </script>
 
@@ -26,6 +31,11 @@
 		<div id="domain_container">
 			<label class='narrowleftcolumn' for='domain' id='domain_label'><%~ Domn %>:</label>
 			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
+		</div>
+		<br />
+		<div id="country_container">
+			<label class='narrowleftcolumn' for='country' id='country_label'><%~ Ctry %>:</label>
+			<select id="country" class="rightcolumn"></select>
 		</div>
 
 	</fieldset>
