@@ -1,0 +1,16 @@
+--- a/package/network/services/dnsmasq/files/dnsmasq.init
++++ b/package/network/services/dnsmasq/files/dnsmasq.init
+@@ -363,7 +363,9 @@ dhcp_mac_add() {
+ 	config_get mac "$cfg" mac
+ 	[ -n "$mac" ] || return 0
+ 
+-	xappend "--dhcp-mac=$networkid,$mac"
++	for o in $mac; do
++		xappend "--dhcp-mac=$networkid,$mac"
++	done
+ 
+ 	dhcp_option_add "$cfg" "$networkid"
+ }
+-- 
+2.5.0
+

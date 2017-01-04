@@ -23,3 +23,15 @@ dhcpS.dsubErr="La plage DHCP spécifiée est en dehors du sous-réseau LAN.";
 dhcpS.dipErr="La plage DHCP spécifiée content l&apos;IP du LAN.";
 dhcpS.upErr="Impossible de mettre à jour l&apos;IP statique.";
 dhcpS.AErr="Impossible d&apos;ajouter une colonne.";
+
+dhcpS.KnDev="Equipements connus";
+dhcpS.AdKnDev="Ajouter un équipement connu";
+dhcpS.AdGp="Ajouter un groupe";
+dhcpS.GpNm="Nom du groupe";
+dhcpS.DevNm="Nom de l&apos;équipement";
+dhcpS.DevNms="Noms des équipements";
+dhcpS.EdKnDev="Editer l&apos;équipement";
+dhcpS.DevGp="Groupes d&apos;équipement";
+dhcpS.SelM="Inclure l&apos;adresse MAC";
+dhcpS.SelD="Inclure l&apos;équipement";
+dhcpS.StcIP="IP statique";

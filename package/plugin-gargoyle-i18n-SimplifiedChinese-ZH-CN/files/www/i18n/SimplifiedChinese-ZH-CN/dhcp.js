@@ -23,3 +23,15 @@ dhcpS.dsubErr="指定的DHCP范围超出LAN子网。";
 dhcpS.dipErr="指定DHCP范围包含当前的LAN IP。";
 dhcpS.upErr="无法更新静态IP。";
 dhcpS.AErr="无法添加行。";
+
+dhcpS.KnDev=“已知设备”;
+dhcpS.AdKnDev=“添加已知设备”;
+dhcpS.AdGp=“添加组”;
+dhcpS.GpNm=“组名”;
+dhcpS.DevNm=“设备名称”;
+dhcpS.DevNms=“设备名称”;
+dhcpS.EdInDex=“编辑设备”;
+dhcpS.DevGp=“设备组”;
+dhcpS.SelM=“包括MAC”;
+dhcpS.SelD=“包括设备”;
+dhcpS.StcIP=“静态IP”;

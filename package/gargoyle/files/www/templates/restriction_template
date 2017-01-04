@@ -13,11 +13,16 @@
 <div id="rule_applies_to_container">
 	<div class="widerightcolumnonly" id="rule_applies_to_table_container"></div>
 	<div class="widerightcolumnonly">
-		<input type='text' id='rule_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)'/>
+		<input type='text' id='rule_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsMacsOrGroups(this)'/>
 		<input type="button" class="default_button" id="rule_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'/>
 	</div>
 	<div class="widerightcolumnonly">
 		<em><%~ HstAddr %></em>
+		<span id="restriction_group_container">
+			<select id="group" onchange='groupRestriction()'>
+				<option value=""><%~ SelGrp %></option>
+			</select>
+		</span>
 	</div>
 </div>
 <div>
@@ -113,7 +118,7 @@
 	<div>
 		<span class='narrowleftcolumn'>
 			<label class='rightcolumn' id="rule_transport_protocol_label" for='rule_transport_protocol'><%~ TrProto %>:</label>
-		</span>	
+		</span>
 		<select class="middlecolumn" id="rule_transport_protocol">
 			<option value="both"><%~ BlAll %></option>
 			<option value="tcp"><%~ BlTCP %></option>

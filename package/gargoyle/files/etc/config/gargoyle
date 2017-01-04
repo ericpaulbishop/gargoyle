@@ -117,4 +117,3 @@ config bandwidth_display bandwidth_display
 
 config help help
 	option ddns_1		1
-

@@ -1,0 +1,21 @@
+<table>
+  <tr class='table_row_add_header'>
+    <th><label id='add_group_label' for='add_group'><%~ GpNm %></label></th>
+    <th><label id='add_known_device_label' for='add_known_device'><%~ DevNms %></label></th>
+    <th></th>
+  </tr>
+  <tr class='table_row_add'>
+    <td><input type='text' id='add_group' size='15' placeholder="a-zA-Z0-9-_.:" onkeyup='proofreadGroup(this)'/></td>
+    <td><input type='text' id='add_device' size='50' onkeyup='proofreadMultipleUCIs(this)'/></td>
+    <td><input type='button' id='add_device_to_group_button' value="<%~ Add %>" class='default_button' onclick='addDeviceToGroup()'/></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>
+        <select id="device_list" onchange="deviceSelected()" >
+            <option value="none"><%~ SelD %></option>
+        </select>
+    </td>
+    <td></td>
+  </tr>
+</table>

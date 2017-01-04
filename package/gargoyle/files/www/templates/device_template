@@ -1,0 +1,23 @@
+				<table>
+					<tr class='table_row_add_header'>
+						<th><label id='add_host_label' for='add_host'><%~ DevNm %></label></th>
+						<th><label id='add_mac_label' for='add_mac'>MACs</label></th>
+						<th><label id='add_ip_label' for='add_ip'><%~ StcIP %></label></th>
+						<th></th>
+					</tr>
+					<tr class='table_row_add'>
+						<td><input type='text' id='add_host' size='15' placeholder="a-zA-Z0-9_" onkeyup='proofreadUCI(this)'/></td>
+						<td><input type='text' id='add_mac' size='32' onkeyup='proofreadMultipleMacs(this)'/></td>
+						<td><input type='text' id='add_ip' size='12' onkeyup='proofreadIp(this)' maxLength='15'/></td>
+						<td><input type='button' id='add_device_button' value="<%~ Add %>" class='default_button' onclick='addDevice()'/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td>
+							<select id="mac_list" onchange="macSelected()" >
+								<option value="none"><%~ SelM %></option>
+							</select>
+						</td>
+						<td></td>
+					</tr>
+				</table>

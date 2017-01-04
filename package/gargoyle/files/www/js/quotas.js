@@ -121,7 +121,7 @@ function resetData()
 	changedIds = [];
 	for(sectionIndex = 0; sectionIndex < quotaSections.length; sectionIndex++)
 	{
-		var ip = uciOriginal.get(pkg, quotaSections[sectionIndex], "ip").toUpperCase();
+		var ip = uciOriginal.get(pkg, quotaSections[sectionIndex], "ip");
 		var id = uciOriginal.get(pkg, quotaSections[sectionIndex], "id");
 		if(id == "")
 		{
@@ -142,7 +142,7 @@ function resetData()
 		checkElements.push(enabledCheck);
 		areChecked.push(enabled);
 
-		quotaTableData.push( [ ipToTableSpan(ip), timeParamsToTableSpan(timeParameters), limitStr, enabledCheck, createEditButton(enabled) ] );
+		quotaTableData.push( [ hostsToTableSpan(ip), timeParamsToTableSpan(timeParameters), limitStr, enabledCheck, createEditButton(enabled) ] );
 	}
 
 
@@ -165,25 +165,34 @@ function resetData()
 
 	setDocumentFromUci(document, new UCIContainer(), "");
 
+	resetGroupOptions("group");
 	setVisibility(document);
 }
 
-function ipToTableSpan(ip)
+
+function groupSelected()
 {
-	var ipStr = ip;
-	if(ipStr == "ALL_OTHERS_INDIVIDUAL")
+	document.getElementById("add_ip").value = getSelectedValue("group");
+	setSelectedValue("group", "");
+}
+
+
+function hostsToTableSpan(hosts)
+{
+	var hostsStr = hosts;
+	if(hostsStr == "ALL_OTHERS_INDIVIDUAL")
 	{
-		ipStr=quotasStr.OthersOne;
+		hostsStr=quotasStr.OthersOne;
 	}
-	else if(ipStr == "ALL_OTHERS_COMBINED")
+	else if(hostsStr == "ALL_OTHERS_COMBINED")
 	{
-		ipStr=quotasStr.OthersAll;
+		hostsStr=quotasStr.OthersAll;
 	}
-	else if(ipStr == "ALL" || ipStr == "")
+	else if(hostsStr == "ALL" || hostsStr == "")
 	{
-		ipStr=quotasStr.All;
+		hostsStr=quotasStr.All;
 	}
-	return textListToSpanElement(ipStr.split(/[\t ]*,[\t ]*/), true, document);
+	return textListToSpanElement(hostsStr.split(/[\t ]*,[\t ]*/), true, document);
 }
 
 function timeParamsToTableSpan(timeParameters)
@@ -228,6 +237,7 @@ function getIdFromIp(ip)
 {
 	id = ip == "" ? "ALL" : ip.replace(/[\t, ]+.*$/, "");
 	id = id.replace(/\//, "_");
+	id = id.toUpperCase();
 
 	var idPrefix = id;
 	var found = true;
@@ -314,11 +324,16 @@ function setDocumentIp(ip, controlDocument)
 	{
 		setSelectedValue("applies_to_type", "others_individual", controlDocument);
 	}
+	else if (uci.get("dhcp", ip).length > 0)
+	{
+		setSelectedValue("applies_to_type", "only", controlDocument);
+		controlDocument.getElementById("add_ip").value = ip;
+	}
 	else
 	{
 		setSelectedValue("applies_to_type", "only", controlDocument);
 		controlDocument.getElementById("add_ip").value = ip;
-		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false,250);
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false, false,250);
 		if(!valid)
 		{
 			controlDocument.getElementById("add_ip").value = "";
@@ -352,7 +367,7 @@ function addNewQuota()
 		var ip = getIpFromDocument(document);
 		var timeParameters = getTimeParametersFromUci(uci, "quota_" + quotaNum);
 		var limitStr = getLimitStrFromUci(pkg, "quota_" + quotaNum);
-		addTableRow(table, [ ipToTableSpan(ip), timeParamsToTableSpan(timeParameters), limitStr, enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);
+		addTableRow(table, [ hostsToTableSpan(ip), timeParamsToTableSpan(timeParameters), limitStr, enabledCheck, createEditButton(true)], true, false, removeQuotaCallback);
 
 		setDocumentFromUci(document, new UCIContainer(), "");
 
@@ -663,7 +678,7 @@ function validateQuota(controlDocument, originalQuotaId, originalQuotaIp)
 	//add any ips in add_ip box, if it is visible and isn't empty
 	if(errors.length == 0 && getSelectedValue("applies_to_type", controlDocument) == "only" && controlDocument.getElementById("add_ip").value != "")
 	{
-		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false,250);
+		var valid = addAddressesToTable(controlDocument,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, true, false,250);
 		if(!valid)
 		{
 			errors.push("\"" + controlDocument.getElementById("add_ip").value  + "\" is not a valid IP or IP range");
@@ -1176,8 +1191,7 @@ function editQuota()
 	closeButton.className = "default_button";
 
 	var editRow=this.parentNode.parentNode;
-	var editId          = editRow.childNodes[rowCheckIndex].firstChild.id;
-
+	var editId = editRow.childNodes[rowCheckIndex].firstChild.id;
 	var editIp;
 
 	var editSection = "";
@@ -1239,8 +1253,7 @@ function editQuota()
 								changedIds[newId] = 1;
 							}
 
-
-							setElementAtColumn(ipToTableSpan(newIp), 0);
+							setElementAtColumn(hostsToTableSpan(newIp), 0);
 							editRow.childNodes[rowCheckIndex].firstChild.id = newId;
 						}
 						setElementAtColumn(timeParamsToTableSpan(getTimeParametersFromUci(uci, editSection, 1)), 1);
@@ -1254,6 +1267,7 @@ function editQuota()
 				updateDone = true;
 
 			}
+			resetGroupOptions("group", editQuotaWindow.document);
 		}
 		if(!updateDone)
 		{

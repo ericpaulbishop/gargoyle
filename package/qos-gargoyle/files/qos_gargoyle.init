@@ -137,6 +137,15 @@ apply_all_rules()
 	local need_proto
 	local tmp_proto
 
+	local groups="";
+	local hosts=$(uci show dhcp 2>>//dev/null | grep '=host' | sed s/dhcp.// | sed s/=host// | awk '{ print $1 ; } ')
+	for host in $hosts; do
+		group=$(uci get dhcp.$host.group 2>>//dev/null)
+		if [ "${#group}" -gt 0 ] & [ "${groups/$group}" = "$groups" ]; then
+			groups="$groups $group"
+		fi
+	done
+
 	# add filter rules
 	rule_list=$(load_and_sort_all_config_sections "$config_file_name" "$rule_type" "test_order")
 	for rule in $rule_list ; do
@@ -154,20 +163,24 @@ apply_all_rules()
 			option_value=$(eval echo \$$option)
 			case "$option" in
 				source)
-					if [ "$3" = "qos_egress" ] ; then
-						if [ "$option_value" = "$local_ip" ] || [ "$option_value" = "$wan_ip" ]; then
+					if [ "${groups/$option_value}" != "$groups" ]; then
+						match_str="$match_str -m set --match-set $option_value src"
+					else
+						if [ "$3" = "qos_egress" ] && [ "$option_value" = "$local_ip" ]; then
 							option_value="$wan_ip"
 						fi
+						match_str="$match_str -s $option_value"
 					fi
-					match_str="$match_str -s $option_value"
 				;;
 				destination)
-					if [ "$3" = "qos_ingress" ] ; then
-						if [ "$option_value" = "$local_ip" ] || [ "$option_value" = "$wan_ip" ]; then
+					if [ "${groups/$option_value}" != "$groups" ]; then
+						match_str="$match_str -m set --match-set $option_value dst"
+					else
+						if [ "$3" = "qos_ingress" ] && [ "$option_value" = "$local_ip" ] ; then
 							option_value="$wan_ip"
 						fi
+						match_str="$match_str -d $option_value"
 					fi
-					match_str="$match_str -d $option_value"
 				;;
 				srcport)
 					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
@@ -332,7 +345,7 @@ initialize_qos()
 	else
 		total_upload_bandwidth=-1
 	fi
-	
+
 	upload_default_class="$default_class"
 
 	if [ $total_upload_bandwidth -ge 0 ] ; then
@@ -408,7 +421,7 @@ initialize_qos()
 
 			#tbw is the Delay x Bandwidth product in bytes per second.  We do not actually know the packet
 			#delay so we make an estimate of 150ms here and hope for the best.  max_bandwidth is in kbps
-			#we multiply 150ms by 1000 below so the units work out.			
+			#we multiply 150ms by 1000 below so the units work out.
 			tbw=$(($max_bandwidth*150/8));
 			if [ "$tbw" -lt 3000 ] ; then
 				tbw=3000
@@ -419,11 +432,11 @@ initialize_qos()
 			#and the 'nfct-src' on the upload side and 'dst' on the download side.  I found a nice man page here
 			#https://arndtroide.homelinux.org/cgi-bin/man/man2html?tc-sfq+8
 			$echo_on
-			
+
 			#Add the leaf class
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#Add the qdisc to the leaf class, assuming average packet at 500 bytes.
-			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/500)) $sfq_depth divisor 256  
+			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/500)) $sfq_depth divisor 256
 			#Add a filter to the root class to direct packets to this leaf class according to the conntrack mark
 			tc filter add dev $qos_interface parent 1:0 protocol ip handle $next_classid fw flowid 1:$next_class_index
 			#Add a filter to the leaf class to define flows as being the source IP address.
@@ -511,7 +524,7 @@ initialize_qos()
 			if [ -z "$max_bandwidth" ] ; then
 				max_bandwidth="-1"
 			fi
-            
+
 			classdef="$percent_bandwidth $max_bandwidth $min_bandwidth $minRTT"
 			eval $dclass_name=\"\$classdef\"  #"#comment quote here so formatting in editor isn't FUBAR
 		done
@@ -535,8 +548,8 @@ initialize_qos()
 
 			#The Gargoyle ACC switches from optimum WAN utilization mode to minimum RTT mode
 			#when it detects a class has become active that includes a two part service curve.
-			#So to trigger this behaviour we create two parts curves when minRTT is set. 
-            
+			#So to trigger this behaviour we create two parts curves when minRTT is set.
+
 			minRTT=$( echo $dclass_def | awk ' {print $4}' )
 			if [ "$minRTT" == "Yes" ] ; then
 				ll_str=" ls m1 ${m2}Mbit d 20ms m2 ${m2}Mbit"
@@ -572,7 +585,7 @@ initialize_qos()
 			$echo_on
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
 			#Assume average download packet size is 1000 bytes.
-			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/1000)) $sfq_depth divisor 256  
+			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/1000)) $sfq_depth divisor 256
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 256 map key dst and 0xff
 			$echo_off
@@ -635,20 +648,20 @@ initialize_qos()
 				if [ -z "$ptarget_ip" ] ; then
 					#ip of potential gateway
 					target=$(echo "$t" | awk '{ print $1 ; }')
-					target_is_local=$(echo "$target" | grep -E '^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|0\.0\.0\.0|127\.|255\.)') 
+					target_is_local=$(echo "$target" | grep -E '^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|0\.0\.0\.0|127\.|255\.)')
 
 
 					# round or rather ceil() time up to nearest millisecond since bash doesn't like working with decimals
 					time=$(echo "$t" | awk ' { print $3 ; }' | sed 's/\..*$//g')
 					time=$(( $time + 1 ))
-	
+
 					if [ -z "$target_is_local" ] || [ "$time" -gt 5 ] ; then
 						ptarget_ip="$target"
 					fi
 				fi
 			done
 			IFS="$old_ifs"
-			
+
 			#in case ping target is still not defined use default gateway
 			if [ -z "$ptarget_ip" ] ; then
 				ptarget_ip=$(gargoyle_header_footer -i gargoyle | sed -n 's/.*currentWanGateway.*"\(.*\)".*/\1/p')
@@ -656,7 +669,7 @@ initialize_qos()
 		fi
 
 
-		
+
 		#Ping responses for the ping target never go to the IMQ device.
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
 
@@ -700,7 +713,7 @@ define_interface()
 		wait_sec=$(($wait_sec - 1))
 	done
 
-	#The interface name will depend on if pppoe is used or not.  If pppoe is used then 
+	#The interface name will depend on if pppoe is used or not.  If pppoe is used then
 	#the name we are looking for is in network.wan.ifname.  If there is nothing there
 	#use the device named by network.wan.device
 
@@ -756,7 +769,7 @@ start()
 	#This script is called by a hotplug event.  If the WAN comes
 	#up fast we could end up trying to run qos_gargoyle while the
 	#boot is still in progress which causes issues in low memory
-	#routers.  To avoid this we check to see if rcS is still running 
+	#routers.  To avoid this we check to see if rcS is still running
 	#or not.  If it is we wait until it completes or 60 seconds.
 	cnt=0
 	while ps | grep '[//]rcS S boot' >/dev/null
@@ -810,7 +823,7 @@ show()
 	tc -s class show dev imq0
 	tc -s filter show dev imq0
 	tc -s filter show dev imq0 parent 2:
-	
+
 
 }
 
@@ -819,4 +832,3 @@ boot()
 	#Do nothing during init.  Start is called by hotplug.
 	return
 }
-

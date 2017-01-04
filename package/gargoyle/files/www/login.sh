@@ -9,12 +9,12 @@
 	valid=$( eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" ) | grep "Set-Cookie" )
 	require=$(uci get gargoyle.global.require_web_password)
 	if [ "$require" = "0" ] ; then
-		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) ) 
+		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) )
 		valid="1"
 	fi
 	if [ -n "$valid" ] ; then
 		firstboot=$( uci get gargoyle.global.is_first_boot 2>/dev/null )
-		echo "Status: 302 Found" 
+		echo "Status: 302 Found"
 		if [ "$firstboot" = "1" ] ; then
 			echo "Location: /firstboot.sh"
 		else
@@ -39,7 +39,7 @@
 	fi
 
 
-	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "$js $lang_js" gargoyle
+	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "$js $lang_js" gargoyle dhcp
 %>
 
 
@@ -62,6 +62,12 @@ var passInvalid = false;
 	print_quotas
 
 	. /usr/lib/gargoyle/current_time.sh
+
+	echo "";
+	echo "var leaseData = new Array();";
+	if [ -e /tmp/dhcp.leases ] ; then
+		awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};' /tmp/dhcp.leases
+	fi
 %>
 //-->
 </script>

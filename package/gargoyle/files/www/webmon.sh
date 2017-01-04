@@ -49,7 +49,7 @@
 			<div class='indent' id="add_ip_container">
 				<div>
 					<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' size='30' />
-					<input type="button" class="default_button" id="add_ip_button" value="<%~ Add %>" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" />
+					<input type="button" class="default_button" id="add_ip_button" value="<%~ Add %>" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, false, 1, 250)" />
 					<br/>
 					<em><%~ SpcIP %></em>
 				</div>

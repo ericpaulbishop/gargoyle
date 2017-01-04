@@ -41,11 +41,18 @@
 	<div id="quota_ip_container">
 		<div id="quota_ip_table_container" class="widerightcolumnonly" style="padding-left:5px;margin-top:0px;margin-bottom:0px;"></div>
 		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:0px">
-			<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;"/>
+			<input type='text' id='add_ip' onkeyup='proofreadMultipleIpsOrGroups(this)' style="width:250px;"/>
 			&nbsp;
-			<input type="button" class="default_button" id="add_ip_button" value="<%~ Add %>" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'/>
+			<input type="button" class="default_button" id="add_ip_button" value="<%~ Add %>" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,true,250)'/>
 		</div>
-		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:5px;"><em><%~ IPorRange %></em></div>
+		<div class="widerightcolumnonly" style="padding:0px;margin-top:0px;margin-bottom:5px;">
+		<em><%~ IPorRange %></em>
+		<span id="quota_group_container">
+			<select id="group" onchange='groupSelected()'>
+				<option value=""><%~ SelGrp %></option>
+			</select>
+		</span>
+		</div>
 	</div>
 </div>
 
@@ -170,7 +177,7 @@
 		<input type='checkbox' id='quota_thu'/><label for="quota_thu"><%~ Thu %></label>
 		<input type='checkbox' id='quota_fri'/><label for="quota_fri"><%~ Fri %></label>
 		<input type='checkbox' id='quota_sat'/><label for="quota_sat"><%~ Sat %></label>
-	</span>	
+	</span>
 	<span id="active_hours_container">
 		<input class="widerightcolumnonly" type='text' id='active_hours' onkeyup='proofreadHours(this)' style="width:250px;margin-bottom:5px;margin-top:5px;"/>
 		<span class="widerightcolumnonly" id="hours_example" style="margin-top:0px;padding-top:0px;"><em><%~ SSample %> 02:00-04:00,11:35-13:25</em></span>
