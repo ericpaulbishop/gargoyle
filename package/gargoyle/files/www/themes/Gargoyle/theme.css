@@ -538,6 +538,7 @@ select.form-control
 {
 	height: 25px;
 	line-height: 25px;
+	max-width: 100%;
 }
 .form-group-sm input.form-control 
 {
@@ -553,6 +554,7 @@ input.form-control
 {
 	height: 25px;
 	line-height: 25px;
+	max-width: 100%;
 }
 .btn-lg
 {
@@ -565,4 +567,16 @@ input.form-control
 body
 {
 	background: #8B9AF3;
+}
+.table-striped>tbody>tr:nth-of-type(even)
+{
+	background-color: #f9f9f9;
+}
+.table-striped>tbody>tr:nth-of-type(odd)
+{
+	background-color: #dadaff;
+}
+.bandwidth_title_text
+{
+	color: inherit;
 }
