@@ -44,7 +44,7 @@
 				</div>
 				<div class="internal_divider"></div>
 
-				<div id="qos_rule_table_container" class="bottom_gap table_responsive"></div>
+				<div id="qos_rule_table_container" class="bottom_gap table-responsive"></div>
 				<div class="row form-group">
 					<label class="col-xs-5" id="default_class_label" for="default_class"><%~ ServClass %>:</label>
 					<span class="col-xs-7"><select class="form-control" id="default_class"></select></span>

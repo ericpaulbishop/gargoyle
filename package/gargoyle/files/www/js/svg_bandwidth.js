@@ -12,6 +12,10 @@ var rightCoor=800;
 var bottomCoor=600;
 var minStrokeWidth=1;
 
+// color and font parity for themes
+var themeColor = "black";
+var themeFontFamily = "serif";
+
 
 var tzMinutes = 0;
 
@@ -22,6 +26,14 @@ function init(evt)
 	leftCoor=1;
 	rightCoor=800;
 	bottomCoor=600;
+
+	// might not need to actually check for this, because IE < 9 doesn't support SVG ?
+	if (window.getComputedStyle)
+	{
+		var bodyStyle = window.getComputedStyle(window.parent.document.body);
+		themeColor = bodyStyle.color;
+		themeFontFamily = bodyStyle.fontFamily;
+	}
 
 	var graphRightCoor=Math.floor(rightCoor*85/100);
 	var graphBottomCoor=Math.floor(bottomCoor*85/100);
@@ -67,7 +79,7 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 	var borderEl = svgDoc.getElementById("graph-border");
 	borderEl.setAttribute("width", graphRightCoor);
 	borderEl.setAttribute("height", graphBottomCoor);
-	borderEl.setAttribute("stroke", "black");
+	borderEl.setAttribute("stroke", themeColor);
 	borderEl.setAttribute("stroke-width", minStrokeWidth )
 
 
@@ -297,6 +309,8 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 	yUnitEl = svgDoc.getElementById("y-units")
 	yUnitEl.firstChild.data = " "
 	yUnitEl.firstChild.data = unit
+	yUnitEl.setAttribute("font-family", themeFontFamily);
+	yUnitEl.setAttribute("fill", themeColor);
 
 	nextTick=0;
 	tickNum=1;
@@ -314,7 +328,9 @@ function createYTicks(xTickUnit, maxPoint, graphLeft, graphRight, graphTop, grap
 		labelElement.style.display = "block";
 		labelElement.setAttribute("x", graphRight+ (.02*graphHeight)   );
 		labelElement.setAttribute("y", yCoor);
-		labelElement.setAttribute("font-size", (.05*graphHeight) + "px" )
+		labelElement.setAttribute("font-size", (.05*graphHeight) + "px" );
+		labelElement.setAttribute("font-family", themeFontFamily);
+		labelElement.setAttribute("fill", themeColor);
 		labelElement.firstChild.data = ""; //safari shits itself if label doesn't change
 		labelElement.firstChild.data = tickLabel;
 
@@ -418,7 +434,9 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 		labelElement.style.display = "block";
 		labelElement.setAttribute("x", xCoor);
 		labelElement.setAttribute("y", graphBottom + Math.ceil(.07*(graphBottom-graphTop))  );
-		labelElement.setAttribute("font-size", Math.ceil(.05*graphHeight) + "px" )
+		labelElement.setAttribute("font-size", Math.ceil(.05*graphHeight) + "px" );
+		labelElement.setAttribute("font-family", themeFontFamily);
+		labelElement.setAttribute("fill", themeColor);
 		labelElement.firstChild.data = ""; //safari shits itself if label doesn't change
 		labelElement.firstChild.data = tickLabel;
 
@@ -435,6 +453,7 @@ function createXTicks(numDisplayIntervals, intervalSeconds, firstTime, lastTime,
 	}
 	svgDoc.getElementById("x-major-ticks").setAttribute("d", majorPathString);
 	svgDoc.getElementById("x-major-ticks").setAttribute("stroke-width", minStrokeWidth );
+	svgDoc.getElementById("x-major-ticks").setAttribute("stroke", themeColor);
 
 	return timeUnit;
 }

@@ -60,7 +60,7 @@
 									<option value="total"><%~ TBdw %></option>
 								</select>
 							</span>
-							<select id="plot1_id" class="form-control" onchange="resetPlots()"></select>
+							<span class="col-xs-offset-5 col-xs-7"><select id="plot1_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
@@ -72,7 +72,7 @@
 									<option value="none"><%~ None %></option>
 								</select>
 							</span>
-							<select id="plot2_id" class="form-control" onchange="resetPlots()"></select>
+							<span class="col-xs-offset-5 col-xs-7"><select id="plot2_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
@@ -84,7 +84,7 @@
 									<option value="none"><%~ None %></option>
 								</select>
 							</span>
-							<select id="plot3_id" class="form-control" onchange="resetPlots()"></select>
+							<span class="col-xs-offset-5 col-xs-7"><select id="plot3_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
