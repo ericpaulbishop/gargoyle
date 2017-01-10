@@ -28,32 +28,34 @@
 <h1 class="page-header"><%~ firstboot.ISSect %></h1>
 <div class="row">
 
-	<div class="col-lg-4">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
 
 				<p><strong><%~ npass %>:</strong></p>
 
-				<div class="form-group form-inline">
-					<label for="password1" id="password1_label"><%~ NPass %>:</label>
-					<input type="password" id="password1" class="form-control" size="25" />
+
+				<div class="row form-group">
+					<label class="col-xs-4 col-md-3 col-lg-2" for="password1" id="password1_label"><%~ NPass %>:</label>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password1" class="form-control" size="25" /></span>
 				</div>
 
-				<div class="form-group form-inline">
-					<label for="password2" id="password2_label"><%~ CPass %>:</label>
-					<input type="password" id="password2" class="form-control" size="25" />
+				<div class="row form-group">
+					<label class="col-xs-4 col-md-3 col-lg-2" for="password2" id="password2_label"><%~ CPass %>:</label>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password2" class="form-control" size="25" /></span>
 				</div>
 
 				<p><strong><%~ Stz %>:</strong></p>
 
-				<div class="form-group form-inline">
-					<select class="form-control" id="timezone"></select>
+				<div class="row form-group">
+					<span class="col-xs-12"><select class="form-control" id="timezone"></select></span>
 					<br/>
 				</div>
+
 			</div>
 		</div>
 	</div>
-	<div class="col-lg-5">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<p><strong><%~ Sla %>:</strong></p>
@@ -88,11 +90,12 @@
 						<iframe id="get_lfile" style="display: none;" src="#" name="get_lfile"></iframe>
 					</div>
 				</div>
-				<br />
-				<button class="btn btn-primary" onclick="setInitialSettings()"><%~ SSet %></button>
 			</div>
 		</div>
 	</div>
+</div>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-info btn-lg" onclick="setInitialSettings()"><%~ SSet %></button>
 </div>
 
 <script>
