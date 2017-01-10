@@ -28,7 +28,7 @@
 </script>
 <h1 class="page-header"><%~ bandwidth.BDst %></h1>
 <div class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ bandwidth.DOpSect %></h3>
@@ -69,7 +69,7 @@
 
 <div class="row">
 
-<div class="col-lg-6">
+<div class="col-lg-12">
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3 class="panel-title"><%~ BDst %>:</h3>

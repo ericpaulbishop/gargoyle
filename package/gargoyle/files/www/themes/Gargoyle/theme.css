@@ -506,9 +506,17 @@ button
 }
 .btn
 {
-	padding:2px;
-	font-size:11px;
+	padding:4px 6px;
+	font-size:12px;
 	display:inline;
+
+	background: #8B9AF3;
+	background: -webkit-linear-gradient(#C8D0FE, #FFFFFF);
+	background: -o-linear-gradient(#C8D0FE, #FFFFFF);
+	background: -moz-linear-gradient(#C8D0FE, #FFFFFF);
+	background: linear-gradient(#C8D0FE, #FFFFFF);
+	color: #121660;
+
 }
 .short-left-pad
 {
@@ -558,7 +566,10 @@ input.form-control
 }
 .btn-lg
 {
-	padding:6px 12px;
+	padding:10px 16px;
+	font-size:22px;
+	border-radius: 6px;
+
 }
 .navbar-toggle
 {

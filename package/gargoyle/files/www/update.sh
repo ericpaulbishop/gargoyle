@@ -44,14 +44,16 @@
 								<label class="col-xs-5" id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
 								<span class="col-xs-7">
 									<input type="file" id="upgrade_file" name="upgrade_file"/>
+									<br/>
 									<em><span id="upgrade_text"></span></em>
+									<br/>
+									<br/>
+									<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" />&nbsp;<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
+									<br/>
+									<br/>
 								</span>
 							</div>
 
-							<div id="upgrade_preserve_container" class="row form-group">
-								<span class="col-xs-1"><input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" /></span>
-								<label class="col-xs-11" id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
-							</div>
 
 							<input id="upgrade_hash" name="hash" type="hidden" value="" />
 							<input id="upgrade_arch" name="arch" type="hidden" value="" />

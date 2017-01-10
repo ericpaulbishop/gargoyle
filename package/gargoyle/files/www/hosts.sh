@@ -28,7 +28,7 @@ var currentTime;
 </script>
 <h1 class="page-header"><%~ hosts.mHosts %></h1>
 <div class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ hosts.RefreshR %></h3>

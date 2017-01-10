@@ -25,7 +25,7 @@
 
 <h1 class="page-header"><%~ webmon.mWMon %></h1>
 <div class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ webmon.PrSect %></h3>
@@ -127,7 +127,7 @@
 </div>
 
 <div id="download_web_usage_data" class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ DlWD %></h3>
