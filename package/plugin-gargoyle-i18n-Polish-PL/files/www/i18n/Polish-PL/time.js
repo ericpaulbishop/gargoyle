@@ -1,4 +1,3 @@
-
 ﻿/*
  * UTF-8 (with BOM) Polish-PL text strings for time.sh html elements
  */
