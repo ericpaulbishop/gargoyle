@@ -153,7 +153,9 @@
 			</div>
 		</div>
 	</div>
+</div>
 
+<div class="row">
 	<div id="disk_format" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -213,8 +215,8 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<button id="extroot_button" class="btn btn-default" onclick="disableExtroot();"><%~ ExtrOff %></button>
-					<em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em>
+					<span class="col-xs-12"><button id="extroot_button" class="btn btn-danger btn-lg" onclick="disableExtroot();"><%~ ExtrOff %></button></span>
+					<span class="col-xs-12 alert alert-warning"><em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em></span>
 				</div>
 			</div>
 		</div>
