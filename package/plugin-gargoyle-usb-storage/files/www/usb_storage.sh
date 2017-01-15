@@ -214,11 +214,9 @@
 			</div>
 
 			<div class="panel-body">
-				<div class="form-group">
-					<button id="extroot_button" class="btn btn-danger btn-lg" onclick="disableExtroot();"><%~ ExtrOff %></button>
-					<br />
-					<br />
-					<em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="extroot_button" class="btn btn-danger btn-lg" onclick="disableExtroot();"><%~ ExtrOff %></button></span>
+					<span class="col-xs-12 alert alert-warning"><em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em></span>
 				</div>
 			</div>
 		</div>
