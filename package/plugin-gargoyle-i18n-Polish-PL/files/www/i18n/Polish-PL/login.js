@@ -7,6 +7,8 @@ logS.EAdmP="Hasło";
 logS.YQot="Twój limit";
 logS.NQot="Limit dla całej sieci";
 logS.CTime="Bieżąca data i czas";
+logS.CIP="Adres IP";
+logS.CIPs="Aktualne połączenie z:";
 
 //javascript
 logS.passErr="BŁĄD: należy wprowadzić hasło";
