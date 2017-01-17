@@ -734,7 +734,9 @@ function addServiceClass()
 		newRowData.push( classRow.Percent );
 		newRowData.push( classRow.MaxBW );
 		newRowData.push( classRow.MinBW );
-		newRowData.push( classRow.MinRTT );
+		if (direction == "download") {
+			newRowData.push( classRow.MinRTT );
+		}
 		newRowData.push( "*" );
 		newRowData.push( createClassTableEditButton(classTable.length-1) );
 
