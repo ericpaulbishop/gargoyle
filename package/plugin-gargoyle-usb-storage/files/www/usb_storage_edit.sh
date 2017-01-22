@@ -20,7 +20,7 @@
 
 			<div class="panel-body">
 
-				<div style="height: 500px; overflow-y: scroll;">
+				<div>
 					<%in templates/usb_storage_template %>
 				</div>
 
@@ -28,7 +28,7 @@
 		</div>
 	</div>
 </div>
-<div id="bottom_button_container"></div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

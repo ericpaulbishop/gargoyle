@@ -403,7 +403,7 @@ function editStatic()
 		yCoor = window.top + 225;
 	}
 
-	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
 
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);

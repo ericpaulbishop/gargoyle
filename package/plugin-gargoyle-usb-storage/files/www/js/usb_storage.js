@@ -475,7 +475,7 @@ function editUser()
 	}
 
 
-	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=300,left=" + xCoor + ",top=" + yCoor );
+	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=230,left=" + xCoor + ",top=" + yCoor );
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 
@@ -1280,7 +1280,7 @@ function editShare()
 	}
 
 
-	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=650,height=600,left=" + xCoor + ",top=" + yCoor );
 
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
