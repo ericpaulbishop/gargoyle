@@ -1194,7 +1194,7 @@ function editClassTableRow()
 							}
 						}
 
-						var rowData = classTable[ editClassWindowRow.childNodes[6].firstChild.id ];
+						var rowData = classTable[ editClassWindowRow.childNodes[5 + (direction == "download" ? 1:0)].firstChild.id ];
 						rowData.Name    = editClassWindow.document.getElementById("class_name").value ;
 						rowData.Percent = editClassWindow.document.getElementById("percent_bandwidth").value ;
 						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? qosStr.ZERO : editClassWindow.document.getElementById("min_bandwidth").value;
