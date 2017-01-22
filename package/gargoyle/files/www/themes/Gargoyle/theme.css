@@ -1,6 +1,7 @@
 li.list-group-item span:last-child 
 {
 	float: right;
+	text-align: right;
 }
 .list-group-item 
 {
