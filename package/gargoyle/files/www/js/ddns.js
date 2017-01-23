@@ -850,7 +850,7 @@ function editServiceTableRow()
 	}
 
 	//editServiceWindow is global so we can close it above if it is left open
-	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=500,left=" + xCoor + ",top=" + yCoor );
+	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=510,left=" + xCoor + ",top=" + yCoor );
 
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);

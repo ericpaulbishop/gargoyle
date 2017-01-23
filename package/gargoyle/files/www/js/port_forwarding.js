@@ -649,7 +649,7 @@ function editForward(isSingle, triggerElement)
 
 
 	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
-	editForwardWindow = window.open(editLocation, "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	editForwardWindow = window.open(editLocation, "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
 
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);

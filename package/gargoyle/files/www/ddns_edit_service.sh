@@ -50,6 +50,6 @@
 		</div>
 	</div>
 </div>
-<div id="bottom_button_container"></div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 </body>
 </html>
