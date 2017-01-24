@@ -1,6 +1,13 @@
 ChangeLog:
 
 ==================================================
+Version: 1.0.8-20170124
+Release time: 17:32 2017-01-24 UTC+8
+Changes:
+
+i18n/SimplifiedChinese: Add login page translation
+
+==================================================
 Version: 1.0.7-21060711
 Release time: 10:15 2016-07-11 UTC+8
 Changes:
