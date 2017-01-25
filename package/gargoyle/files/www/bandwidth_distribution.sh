@@ -75,7 +75,7 @@
 			<h3 class="panel-title"><%~ BDst %>:</h3>
 		</div>
 		<div class="panel-body">
-			<span class="col-xs-12"><embed id="pie_chart" src="multi_pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
+			<span class="col-lg-8 col-xs-12"><embed id="pie_chart" src="multi_pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
 		</div>
 	</div>
 </div>

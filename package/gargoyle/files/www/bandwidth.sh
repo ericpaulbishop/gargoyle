@@ -103,17 +103,17 @@
 
 				<div id="bandwidth_graphs" class="row">
 					<h1 class="page-header"><%~ BGrSect %></h1>
-					<div class="col-lg-4">
-						<div class="col-lg-12">
+					<div class="col-lg-4 col-md-12 col-sm-8 col-xs-12">
+						<div class="col-lg-12 col-md-6 col-xs-12">
 							<span class="bandwidth_title_text"><strong><%~ Dnld %></strong> (<span onclick="expand('<%~ Dnld %>')" class="pseudo_link"><%~ expd %></span>)</span>
 							<embed id="download_plot" style="margin-left:0px; margin-right:5px; float:left; width:100%; height:100%;" src="bandwidth.svg" type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/" />
 						</div>
-						<div class="col-lg-12">
+						<div class="col-lg-12 col-md-6 col-xs-12">
 							<span class="bandwidth_title_text"><strong><%~ Upld %></strong> (<span onclick="expand('<%~ Upld %>')" class="pseudo_link"><%~ expd %></span>)</span>
 							<embed id="upload_plot" style="margin-left:0px; margin-right:5px; float:left; width:100%; height:100%;" src="bandwidth.svg" type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/" />
 						</div>
 					</div>
-					<div class="col-lg-8">
+					<div class="col-lg-8 col-xs-12">
 						<span class="bandwidth_title_text"><strong><%~ Totl %></strong> (<span onclick="expand('<%~ Totl %>')" class="pseudo_link"><%~ expd %></span>)</span>
 						<br/>
 						<embed id="total_plot" style="width:100%; height:100%;" src="bandwidth.svg" type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/" />
