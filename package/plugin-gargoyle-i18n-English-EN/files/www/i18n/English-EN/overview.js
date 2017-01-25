@@ -21,6 +21,7 @@ ovwS.CPUAvg="CPU Load Averages";
 ovwS.Uptm="Uptime";
 ovwS.CDaT="Current Date &amp; Time";
 ovwS.BrIPA="Bridge IP Address";
+ovwS.BrRIP="Relay IP Address";
 ovwS.BrNMsk="Bridge Netmask";
 ovwS.BrMAdd="Bridge MAC Address";
 ovwS.LGtwy="LAN Gateway IP";

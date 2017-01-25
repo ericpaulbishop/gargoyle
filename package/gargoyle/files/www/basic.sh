@@ -134,18 +134,18 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
+				<div id="bridge_gateway_container" class="row form-group">
+					<label class="col-xs-5" for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+					</span>
+				</div>
+
 				<div id="bridge_mask_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_mask" id="bridge_mask_label"><%~ SMsk %>:</label>
 					<span class="col-xs-7">
 						<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
 						<em><%~ SMNote %></em>
-					</span>
-				</div>
-
-				<div id="bridge_gateway_container" class="row form-group">
-					<label class="col-xs-5" for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
-					<span class="col-xs-7">
-						<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
 					</span>
 				</div>
 
@@ -299,7 +299,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_channel_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_channel" id="bridge_channel_label"><%~ WChn %>:</label>
 					<span class="col-xs-7">
-						<select id="bridge_channel" lass="form-control" onchange="setChannel(this)">
+						<select id="bridge_channel" class="form-control" onchange="setChannel(this)">
 							<option value="auto"><%~ auto %></option>
 							<option value="1">1</option>
 							<option value="2">2</option>

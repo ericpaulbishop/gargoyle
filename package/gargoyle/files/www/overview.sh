@@ -203,23 +203,28 @@
 			<div class="panel-body">
 				<ul class="list-group">
 					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ BrRIP %>:</span>
+						<span id="bridge_relay_ip"></span>
+					</li>
+
+					<li class="list-group-item">
 						<span class="list-group-item-title"><%~ BrIPA %>:</span>
 						<span id="bridge_ip"></span>
 					</li>
 
 					<li class="list-group-item">
-						<span class="list-group-item-title"><%~ BrNMsk %>:</span>
+						<span class="list-group-item-title"><%~ LGtwy %>:</span>
+						<span id="bridge_gateway"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ LNmsk %>:</span>
 						<span id="bridge_mask"></span>
 					</li>
 
 					<li class="list-group-item">
 						<span class="list-group-item-title"><%~ BrMAdd %></span>
 						<span id="bridge_mac"></span>
-					</li>
-
-					<li class="list-group-item">
-						<span class="list-group-item-title"><%~ LGtwy %>:</span>
-						<span id="bridge_gateway"></span>
 					</li>
 
 					<li class="list-group-item">

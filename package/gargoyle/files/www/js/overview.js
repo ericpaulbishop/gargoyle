@@ -228,6 +228,7 @@ function resetData()
 		setChildText("bridge_gateway", uciOriginal.get("network", "lan", "gateway") );
 		setChildText("bridge_mode", uciOriginal.get("wireless", bridgeSection, "client_bridge") == "1" ? ovwS.ClBr : "WDS");
 		setChildText("bridge_ssid", uciOriginal.get("wireless", bridgeSection, "ssid") );
+		setChildText("bridge_relay_ip", uciOriginal.get("network", "bridgecfg", "ipaddr"));
 	}
 
 	setChildText("qos_upload", qosUploadStatus);
