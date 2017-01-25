@@ -7,6 +7,8 @@ logS.EAdmP="输入管理员密码";
 logS.YQot="你的配额";
 logS.NQot="整个网络的配额";
 logS.CTime="当前日期和时间";
+logS.CIP="IP 地址";
+logS.CIPs="当前设备连接地址:";
 
 //javascript
 logS.passErr="错误：你必须输入密码";
