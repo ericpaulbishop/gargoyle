@@ -2794,3 +2794,14 @@ function reregisterTableSort()
     tsSetTable (args[0]);
     tsInit();
 }
+
+//Part of the new popups in GUI. Pass the parent element containing the "popup span"
+function togglePopup(popElement)
+{
+	var descendant = popElement.getElementsByTagName("span");
+	if (descendant.length != 1)
+	{
+		return null;
+	}
+	descendant[0].classList.toggle("show");
+}

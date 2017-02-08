@@ -163,6 +163,16 @@
 				</div>
 
 				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_comment_rule" onclick="enableAssociatedField(this,'comment_rule', '')"  />
+						<label id="comment_rule_label" for="use_comment_rule"><%~ Comment %>:</label>
+					</span>
+					<span class="col-xs-7">
+						<input class="form-control" type="text" id="comment_rule" size="17" maxlength="25" />
+					</span>
+				</div>
+
+				<div class="row form-group">
 					<label class="col-xs-5" id="classification_label" for="classification" ><%~ SetClass %>:</label>
 					<span class="col-xs-7"><select id="classification" class="form-control"></select></span>
 				</div>
