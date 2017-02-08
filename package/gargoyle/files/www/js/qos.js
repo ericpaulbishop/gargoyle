@@ -180,9 +180,10 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes_kb"];
+			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes_kb", "comment"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
+			matchCriteria.splice(-1, 0, ruleData[ruleIndex][2].lastChild.innerHTML);
 			for(criteriaIndex = 0; criteriaIndex < optionList.length; criteriaIndex++)
 			{
 				if  (matchCriteria[criteriaIndex] != "")
@@ -437,7 +438,7 @@ function resetData()
 	update_classtable();
 
 	var ruleSections = uciOriginal.getAllSectionsOfType("qos_gargoyle", directionRule);
-	ruleTableColumns = [qosStr.MatchC, qosStr.Classn, ""];
+	ruleTableColumns = [qosStr.MatchC, qosStr.Classn, qosStr.Comment, ""];
 	ruleTableData = new Array();
 	rulePriorities = [];
 	for(ruleIndex = 0; ruleIndex < ruleSections.length; ruleIndex++)
@@ -485,7 +486,8 @@ function resetData()
 
 		classification = uciOriginal.get("qos_gargoyle", ruleSection, "class");
 		idx = parseInt(classification.match(/class_([0-9]+)/)[1])-1;
-		ruleTableData.push( [ruleText, classTable[idx].Name, createRuleTableEditButton()] );
+		commentStr = uciOriginal.get("qos_gargoyle", ruleSection, "comment");
+		ruleTableData.push( [ruleText, classTable[idx].Name, createRuleTableCommentButton(commentStr), createRuleTableEditButton()] );
 	}
 
 	//sort rules
@@ -654,9 +656,10 @@ function addClassificationRule()
 			}
 		}
 		classification = document.getElementById("classification").options[document.getElementById("classification").selectedIndex].text;
-
+		control = document.getElementById("comment_rule");
+		commentStr = control.value;
 		ruleTable = document.getElementById('qos_rule_table_container').firstChild;
-		addTableRow(ruleTable,[ruleText,classification, createRuleTableEditButton()],true,true);
+		addTableRow(ruleTable,[ruleText,classification, createRuleTableCommentButton(commentStr), createRuleTableEditButton()],true,true);
 
 		resetRuleControls();
 	}
@@ -664,11 +667,12 @@ function addClassificationRule()
 
 function proofreadClassificationRule(controlDocument)
 {
-	addRuleIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+	addRuleIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
+	validateBlank = function(text){ return (text == "" ? 1: 0); };
 	alwaysValid = function(text){return 0;};
-	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid ];
+	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid, validateBlank ];
 	labelIds = new Array();
 	returnCodes = new Array();
 	toggledMatchCriteria = 0;
@@ -692,7 +696,7 @@ function proofreadClassificationRule(controlDocument)
 
 function resetRuleControls()
 {
-	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol","connbytes_kb", "app_protocol"];
+	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol","connbytes_kb", "app_protocol", "comment_rule"];
 	document.getElementById("classification").selectedIndex = document.getElementById("default_class").selectedIndex;
 
 	for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
@@ -877,7 +881,7 @@ function editRuleTableRow()
 	}
 
 
-	editRuleWindow = window.open("qos_edit_rule.sh", "test", "width=560,height=500,left=" + xCoor + ",top=" + yCoor );
+	editRuleWindow = window.open("qos_edit_rule.sh", "test", "width=560,height=530,left=" + xCoor + ",top=" + yCoor );
 	try
 	{
 
@@ -898,6 +902,10 @@ function editRuleTableRow()
 
 
 	editRuleWindowRow=this.parentNode.parentNode;
+	if( editRuleWindowRow.children[2].firstChild.lastChild.className.includes("show") )
+	{
+		togglePopup(editRuleWindowRow.children[2].firstChild);
+	}
 
 	// we cant run setup functions until edit window is done loading and there
 	// is no sleep function in javascript, so we implement a recursive solution using
@@ -921,9 +929,10 @@ function editRuleTableRow()
 					addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, editRuleWindow.document);
 				}
 
-				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
 
 				criteria = parseRuleMatchCriteria(editRuleWindowRow.firstChild.firstChild.data);
+				criteria.push(editRuleWindowRow.children[2].firstChild.lastChild.innerHTML);	//ugly hack to use existing functionality. look here if things start to go funny
 				for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
 				{
 					ruleControlId=ruleControlIds[ruleControlIndex];
@@ -996,6 +1005,9 @@ function editRuleTableRow()
 						editRuleWindowRow.childNodes[0].style.color = "black";
 						editRuleWindowRow.childNodes[1].firstChild.data = classification;
 						editRuleWindowRow.childNodes[1].style.color = "black";
+						control = editRuleWindow.document.getElementById("comment_rule");
+						editRuleWindowRow.childNodes[2].firstChild.lastChild.innerHTML = control.value;	//additional ugly hacks
+						editRuleWindowRow.childNodes[2].firstChild.firstChild.disabled = control.disabled;
 
 						editRuleWindow.close();
 					}
@@ -1013,6 +1025,36 @@ function editRuleTableRow()
 
 	runOnRuleEditorLoaded();
 }
+
+function createRuleTableCommentButton(commentStr)
+{
+	commentRuleSpan = document.createElement("span");
+	commentRuleSpan.className="popup";
+
+	commentRuleButton = createInput("button");
+	commentRuleButton.value = "?";
+	commentRuleButton.className="btn btn-default";
+	commentRuleButton.onclick = doRuleTableComment;
+	if (commentStr == "")
+	{
+		commentRuleButton.disabled = true;
+	}
+
+	commentSpan = document.createElement("span");
+	commentSpan.className="popuptext";
+	commentSpan.innerHTML=commentStr;
+
+	commentRuleSpan.appendChild(commentRuleButton);
+	commentRuleSpan.appendChild(commentSpan);
+
+	return commentRuleSpan;
+}
+
+function doRuleTableComment()
+{
+	togglePopup(this.parentElement);
+}
+
 
 
 function createClassTableEditButton(rowIndex)
