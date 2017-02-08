@@ -1008,6 +1008,7 @@ function editRuleTableRow()
 						control = editRuleWindow.document.getElementById("comment_rule");
 						editRuleWindowRow.childNodes[2].firstChild.lastChild.innerHTML = control.value;	//additional ugly hacks
 						editRuleWindowRow.childNodes[2].firstChild.firstChild.disabled = control.disabled;
+						editRuleWindowRow.childNodes[2].firstChild.firstChild.value    = control.disabled ? "N/A" : "?";
 
 						editRuleWindow.close();
 					}
@@ -1038,6 +1039,7 @@ function createRuleTableCommentButton(commentStr)
 	if (commentStr == "")
 	{
 		commentRuleButton.disabled = true;
+		commentRuleButton.value = "N/A"
 	}
 
 	commentSpan = document.createElement("span");
