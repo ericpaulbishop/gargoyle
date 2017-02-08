@@ -80,6 +80,7 @@ qosStr.QERulClass="Edit QoS Classification Rule";
 //javascript
 qosStr.MatchC="Match Criteria";
 qosStr.Classn="Classification";
+qosStr.Comment="Comment";
 qosStr.Src="Source";
 qosStr.SrcP="Source Port";
 qosStr.Dst="Destination";
