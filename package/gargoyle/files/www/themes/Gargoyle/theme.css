@@ -124,10 +124,12 @@ legend
 	text-decoration: underline;
 	width: 100%;
 }
+/*
 .sidebar-item>a:hover, .sidebar-item.active>a:hover 
 {
 	padding-left: 7.3%;
 }
+*/
 li.sidebar-header 
 {
 	text-align: center;
@@ -168,19 +170,17 @@ li.sidebar-item
 }
 li.sidebar-item a 
 {
-
 	border-bottom: 1px solid #b2b2b2;
 }
 li.sidebar-item>a:hover 
 {
-	padding-left: 13%;
 	text-decoration: underline;
 }
 .sidebar-item.active .sidebar-item.active 
 {
 	background: #ffffff;
 	color: #000000;
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 20px;
 	display: block;
 	float: left;
@@ -188,17 +188,20 @@ li.sidebar-item>a:hover
 	width: 100%;
 	font-weight: bold;
 	text-indent: 0;
-	padding-left: 13%;
+	padding-left: 27px;
 }
 .sidebar-item.active .sidebar-item.active:before 
 {
 	content: "> ";
+	width:5%;
 }
 .sidebar-item.active .sidebar-item a
 {
-	padding-left: 13%;
+	font-size:12px;
+	padding-left: 37px;
 	text-indent: 0;
 	border: none;
+	font-weight:normal;
 }
 ul.sidebar .sidebar-header a, ul.sidebar .sidebar-list a:hover 
 {
@@ -210,7 +213,8 @@ ul.sidebar .sidebar-title
 }
 ul.sidebar .sidebar-list a:hover 
 {
-	color: #757575;
+	/* color: #757575; */
+	font-weight:bold;
 }
 ul.sidebar .sidebar-list a 
 {
@@ -292,9 +296,10 @@ ul.sidebar .sidebar-list a
 }
 ul.sidebar .sidebar-list a:hover 
 {
-	padding-left: 18%;
+	padding-left: 37px;
 	text-decoration: underline;
 }
+
 ul.sidebar .sidebar-list .menu-icon 
 {
 	float: right;
