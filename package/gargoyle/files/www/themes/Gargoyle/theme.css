@@ -122,14 +122,21 @@ legend
 	display: block;
 	float: left;
 	text-decoration: underline;
+	font-weight:bold;
+	width: 100%;
+	border-bottom:1px solid #ffffff;
+}
+.sidebar-item.active>a:hover
+{
+	background-color: #FFFFFF;
+	color: #000000;
+	line-height: 40px;
+	display: block;
+	float: left;
+	text-decoration: underline;
+	font-weight:bold;
 	width: 100%;
 }
-/*
-.sidebar-item>a:hover, .sidebar-item.active>a:hover 
-{
-	padding-left: 7.3%;
-}
-*/
 li.sidebar-header 
 {
 	text-align: center;
@@ -156,13 +163,22 @@ h1.page-header
 	margin-top: 20px;
 	padding: 10px 0 10px;
 }
-li.sidebar-header span 
+li.sidebar-header span#garg_title
 {
+	color: #121660;
 	font-size: 20px;
+	font-weight:bold;
+	float:left;
+	height: 1.3em;
+	margin-left:10px;
+	display:block;
 }
 li.sidebar-header span#garg_host 
 {
+	color: #121660;
 	font-size:11px;
+	display:block;
+	height:2em;
 }
 li.sidebar-item 
 {
@@ -174,7 +190,7 @@ li.sidebar-item a
 }
 li.sidebar-item>a:hover 
 {
-	text-decoration: underline;
+	font-weight:bold;
 }
 .sidebar-item.active .sidebar-item.active 
 {
@@ -257,7 +273,7 @@ ul.sidebar li a
 	text-decoration: none;
 	width: 100%;
 	font-size: 20px;
-	font-weight: bold;
+	font-weight: normal;
 	padding: initial;
 	padding-left: 7.3%;
 }
