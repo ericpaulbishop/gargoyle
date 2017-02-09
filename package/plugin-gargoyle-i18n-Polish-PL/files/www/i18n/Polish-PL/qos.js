@@ -80,6 +80,7 @@ qosStr.QERulClass="QoS - Edycja reguły klasyfikacji";
 //javascript
 qosStr.MatchC="Reguła";
 qosStr.Classn="Klasyfikacja";
+qosStr.Comment="Komentarz";
 qosStr.Src="Adres IP źródłowy";
 qosStr.SrcP="Port źródłowy";
 qosStr.Dst="Adres IP docelowy";
