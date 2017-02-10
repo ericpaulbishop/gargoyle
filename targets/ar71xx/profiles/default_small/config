@@ -210,12 +210,11 @@ CONFIG_DEFAULT_kmod-ath9k=y
 CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_DEFAULT_kmod-ledtrig-usbdev=y
 CONFIG_DEFAULT_kmod-nf-nathelper=y
-CONFIG_DEFAULT_kmod-usb-core=y
-CONFIG_DEFAULT_kmod-usb-ohci=y
-CONFIG_DEFAULT_kmod-usb2=y
+# CONFIG_DEFAULT_kmod-usb-core is not set
+# CONFIG_DEFAULT_kmod-usb-ohci is not set
+# CONFIG_DEFAULT_kmod-usb2 is not set
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
-CONFIG_DEFAULT_logd=y
 CONFIG_DEFAULT_mtd=y
 CONFIG_DEFAULT_netifd=y
 CONFIG_DEFAULT_odhcp6c=y
@@ -336,7 +335,7 @@ CONFIG_KERNEL_RELAY=y
 # CONFIG_USE_STRIP is not set
 CONFIG_USE_SSTRIP=y
 CONFIG_STRIP_KERNEL_EXPORTS=y
-# CONFIG_USE_MKLIBS is not set
+CONFIG_USE_MKLIBS=y
 CONFIG_USE_UCLIBCXX=y
 # CONFIG_USE_LIBSTDCXX is not set
 
@@ -1343,7 +1342,6 @@ CONFIG_PACKAGE_jsonfilter=y
 # CONFIG_PACKAGE_libatomic is not set
 CONFIG_PACKAGE_libc=y
 CONFIG_PACKAGE_libgcc=y
-CONFIG_PACKAGE_logd=y
 CONFIG_PACKAGE_libpthread=m
 CONFIG_PACKAGE_librt=m
 # CONFIG_PACKAGE_libstdcpp is not set
@@ -1383,7 +1381,6 @@ CONFIG_PACKAGE_usign=y
 #
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
-CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
@@ -1400,13 +1397,12 @@ CONFIG_PACKAGE_plugin-gargoyle-i18n-Slovak-SK=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
 CONFIG_PACKAGE_plugin-gargoyle-initd=m
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
-CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
-CONFIG_PACKAGE_plugin-gargoyle-openvpn=m
+# CONFIG_PACKAGE_plugin-gargoyle-minidlna is not set
+# CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
@@ -1414,10 +1410,10 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-CONFIG_PACKAGE_plugin-gargoyle-tor=m
-CONFIG_PACKAGE_plugin-gargoyle-usb-printer=m
-CONFIG_PACKAGE_plugin-gargoyle-usb-storage=m
-CONFIG_PACKAGE_plugin-gargoyle-webcam=m
+# CONFIG_PACKAGE_plugin-gargoyle-tor is not set
+# CONFIG_PACKAGE_plugin-gargoyle-usb-printer is not set
+# CONFIG_PACKAGE_plugin-gargoyle-usb-storage is not set
+# CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
 CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 
@@ -1460,7 +1456,7 @@ CONFIG_PACKAGE_uboot-ar71xx-nbg460n_550n_550nh=y
 # CONFIG_PACKAGE_kmod-md-mod is not set
 # CONFIG_PACKAGE_kmod-nbd is not set
 # CONFIG_PACKAGE_kmod-scsi-cdrom is not set
-CONFIG_PACKAGE_kmod-scsi-core=m
+# CONFIG_PACKAGE_kmod-scsi-core is not set
 # CONFIG_PACKAGE_kmod-scsi-generic is not set
 
 #
@@ -1521,25 +1517,25 @@ CONFIG_PACKAGE_kmod-crypto-sha1=y
 # CONFIG_PACKAGE_kmod-fs-cifs is not set
 # CONFIG_PACKAGE_kmod-fs-configfs is not set
 # CONFIG_PACKAGE_kmod-fs-cramfs is not set
-CONFIG_PACKAGE_kmod-fs-exportfs=m
-CONFIG_PACKAGE_kmod-fs-ext4=m
+# CONFIG_PACKAGE_kmod-fs-exportfs is not set
+# CONFIG_PACKAGE_kmod-fs-ext4 is not set
 # CONFIG_PACKAGE_kmod-fs-f2fs is not set
 # CONFIG_PACKAGE_kmod-fs-fscache is not set
 # CONFIG_PACKAGE_kmod-fs-hfs is not set
-CONFIG_PACKAGE_kmod-fs-hfsplus=m
+# CONFIG_PACKAGE_kmod-fs-hfsplus is not set
 # CONFIG_PACKAGE_kmod-fs-isofs is not set
 # CONFIG_PACKAGE_kmod-fs-jfs is not set
 # CONFIG_PACKAGE_kmod-fs-minix is not set
-CONFIG_PACKAGE_kmod-fs-msdos=m
-CONFIG_PACKAGE_kmod-fs-nfs=m
-CONFIG_PACKAGE_kmod-fs-nfs-common=m
-CONFIG_PACKAGE_kmod-fs-nfsd=m
+# CONFIG_PACKAGE_kmod-fs-msdos is not set
+# CONFIG_PACKAGE_kmod-fs-nfs is not set
+# CONFIG_PACKAGE_kmod-fs-nfs-common is not set
+# CONFIG_PACKAGE_kmod-fs-nfsd is not set
 # CONFIG_PACKAGE_kmod-fs-ntfs is not set
 # CONFIG_PACKAGE_kmod-fs-reiserfs is not set
 # CONFIG_PACKAGE_kmod-fs-udf is not set
-CONFIG_PACKAGE_kmod-fs-vfat=m
+# CONFIG_PACKAGE_kmod-fs-vfat is not set
 # CONFIG_PACKAGE_kmod-fs-xfs is not set
-CONFIG_PACKAGE_kmod-fuse=m
+# CONFIG_PACKAGE_kmod-fuse is not set
 
 #
 # FireWire support
@@ -1594,7 +1590,7 @@ CONFIG_PACKAGE_kmod-input-core=m
 # CONFIG_PACKAGE_kmod-ledtrig-oneshot is not set
 # CONFIG_PACKAGE_kmod-ledtrig-timer is not set
 # CONFIG_PACKAGE_kmod-ledtrig-transient is not set
-CONFIG_PACKAGE_kmod-ledtrig-usbdev=m
+# CONFIG_PACKAGE_kmod-ledtrig-usbdev is not set
 
 #
 # Libraries
@@ -1870,19 +1866,19 @@ CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
 #
 # USB Support
 #
-CONFIG_PACKAGE_kmod-usb-acm=m
+# CONFIG_PACKAGE_kmod-usb-acm is not set
 # CONFIG_PACKAGE_kmod-usb-atm is not set
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
-CONFIG_PACKAGE_kmod-usb-core=m
+# CONFIG_PACKAGE_kmod-usb-core is not set
 # CONFIG_PACKAGE_kmod-usb-dwc2 is not set
 # CONFIG_PACKAGE_kmod-usb-dwc3 is not set
 # CONFIG_PACKAGE_kmod-usb-hid is not set
-CONFIG_PACKAGE_kmod-usb-net=m
+# CONFIG_PACKAGE_kmod-usb-net is not set
 # CONFIG_PACKAGE_kmod-usb-net-asix is not set
 # CONFIG_PACKAGE_kmod-usb-net-asix-ax88179 is not set
 # CONFIG_PACKAGE_kmod-usb-net-cdc-eem is not set
 # CONFIG_PACKAGE_kmod-usb-net-cdc-ether is not set
-CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=m
+# CONFIG_PACKAGE_kmod-usb-net-cdc-mbim is not set
 # CONFIG_PACKAGE_kmod-usb-net-cdc-ncm is not set
 # CONFIG_PACKAGE_kmod-usb-net-cdc-subset is not set
 # CONFIG_PACKAGE_kmod-usb-net-dm9601-ether is not set
@@ -1893,14 +1889,14 @@ CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=m
 # CONFIG_PACKAGE_kmod-usb-net-kaweth is not set
 # CONFIG_PACKAGE_kmod-usb-net-mcs7830 is not set
 # CONFIG_PACKAGE_kmod-usb-net-pegasus is not set
-CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=m
-CONFIG_PACKAGE_kmod-usb-net-rndis=m
+# CONFIG_PACKAGE_kmod-usb-net-qmi-wwan is not set
+# CONFIG_PACKAGE_kmod-usb-net-rndis is not set
 # CONFIG_PACKAGE_kmod-usb-net-sierrawireless is not set
 # CONFIG_PACKAGE_kmod-usb-net-smsc95xx is not set
-CONFIG_PACKAGE_kmod-usb-ohci=m
+# CONFIG_PACKAGE_kmod-usb-ohci is not set
 # CONFIG_PACKAGE_kmod-usb-ohci-pci is not set
-CONFIG_PACKAGE_kmod-usb-printer=m
-CONFIG_PACKAGE_kmod-usb-serial=m
+# CONFIG_PACKAGE_kmod-usb-printer is not set
+# CONFIG_PACKAGE_kmod-usb-serial is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
 # CONFIG_PACKAGE_kmod-usb-serial-belkin is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ch341 is not set
@@ -1912,21 +1908,21 @@ CONFIG_PACKAGE_kmod-usb-serial=m
 # CONFIG_PACKAGE_kmod-usb-serial-keyspan is not set
 # CONFIG_PACKAGE_kmod-usb-serial-mct is not set
 # CONFIG_PACKAGE_kmod-usb-serial-mos7720 is not set
-CONFIG_PACKAGE_kmod-usb-serial-option=m
+# CONFIG_PACKAGE_kmod-usb-serial-option is not set
 # CONFIG_PACKAGE_kmod-usb-serial-oti6858 is not set
 # CONFIG_PACKAGE_kmod-usb-serial-pl2303 is not set
-CONFIG_PACKAGE_kmod-usb-serial-qualcomm=m
-CONFIG_PACKAGE_kmod-usb-serial-sierrawireless=m
+# CONFIG_PACKAGE_kmod-usb-serial-qualcomm is not set
+# CONFIG_PACKAGE_kmod-usb-serial-sierrawireless is not set
 # CONFIG_PACKAGE_kmod-usb-serial-simple is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ti-usb is not set
 # CONFIG_PACKAGE_kmod-usb-serial-visor is not set
-CONFIG_PACKAGE_kmod-usb-serial-wwan=m
-CONFIG_PACKAGE_kmod-usb-storage=m
-CONFIG_PACKAGE_kmod-usb-storage-extras=m
+# CONFIG_PACKAGE_kmod-usb-serial-wwan is not set
+# CONFIG_PACKAGE_kmod-usb-storage is not set
+# CONFIG_PACKAGE_kmod-usb-storage-extras is not set
 # CONFIG_PACKAGE_kmod-usb-uhci is not set
-CONFIG_PACKAGE_kmod-usb-wdm=m
+# CONFIG_PACKAGE_kmod-usb-wdm is not set
 # CONFIG_PACKAGE_kmod-usb-yealink is not set
-CONFIG_PACKAGE_kmod-usb2=m
+# CONFIG_PACKAGE_kmod-usb2 is not set
 # CONFIG_PACKAGE_kmod-usb2-pci is not set
 # CONFIG_PACKAGE_kmod-usb3 is not set
 # CONFIG_PACKAGE_kmod-usbip is not set
@@ -1937,9 +1933,9 @@ CONFIG_PACKAGE_kmod-usb2=m
 #
 # Video Support
 #
-CONFIG_PACKAGE_kmod-video-core=m
+# CONFIG_PACKAGE_kmod-video-core is not set
 # CONFIG_PACKAGE_kmod-video-cpia2 is not set
-CONFIG_PACKAGE_kmod-video-gspca-core=m
+# CONFIG_PACKAGE_kmod-video-gspca-core is not set
 # CONFIG_PACKAGE_kmod-video-gspca-conex is not set
 # CONFIG_PACKAGE_kmod-video-gspca-etoms is not set
 # CONFIG_PACKAGE_kmod-video-gspca-finepix is not set
@@ -1950,7 +1946,7 @@ CONFIG_PACKAGE_kmod-video-gspca-core=m
 # CONFIG_PACKAGE_kmod-video-gspca-mars is not set
 # CONFIG_PACKAGE_kmod-video-gspca-mr97310a is not set
 # CONFIG_PACKAGE_kmod-video-gspca-ov519 is not set
-CONFIG_PACKAGE_kmod-video-gspca-ov534=m
+# CONFIG_PACKAGE_kmod-video-gspca-ov534 is not set
 # CONFIG_PACKAGE_kmod-video-gspca-ov534-9 is not set
 # CONFIG_PACKAGE_kmod-video-gspca-pac207 is not set
 # CONFIG_PACKAGE_kmod-video-gspca-pac7311 is not set
@@ -1972,10 +1968,10 @@ CONFIG_PACKAGE_kmod-video-gspca-ov534=m
 # CONFIG_PACKAGE_kmod-video-gspca-t613 is not set
 # CONFIG_PACKAGE_kmod-video-gspca-tv8532 is not set
 # CONFIG_PACKAGE_kmod-video-gspca-vc032x is not set
-CONFIG_PACKAGE_kmod-video-gspca-zc3xx=m
+# CONFIG_PACKAGE_kmod-video-gspca-zc3xx is not set
 # CONFIG_PACKAGE_kmod-video-pwc is not set
-CONFIG_PACKAGE_kmod-video-uvc=m
-CONFIG_PACKAGE_kmod-video-videobuf2=m
+# CONFIG_PACKAGE_kmod-video-uvc is not set
+# CONFIG_PACKAGE_kmod-video-videobuf2 is not set
 
 #
 # Virtualization Support
@@ -2468,7 +2464,7 @@ CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
 # CONFIG_PACKAGE_uclient-fetch is not set
-CONFIG_PACKAGE_umbim=m
+# CONFIG_PACKAGE_umbim is not set
 CONFIG_PACKAGE_uqmi=m
 # CONFIG_PACKAGE_vsc7385-ucode-ap83 is not set
 # CONFIG_PACKAGE_vsc7385-ucode-pb44 is not set
@@ -2622,8 +2618,9 @@ CONFIG_PACKAGE_ipset=m
 CONFIG_PACKAGE_kmod-dma-buf=m
 CONFIG_PACKAGE_kmod-ipt-ipset=m
 CONFIG_PACKAGE_kmod-nf-nathelper-extra=y
-CONFIG_PACKAGE_kmod-usb-net-cdc-ether=m
-CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=m
-CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=m
-CONFIG_PACKAGE_kmod-usb-net-sierrawireless=m
+# CONFIG_PACKAGE_kmod-usb-net-cdc-ether is not set
+# CONFIG_PACKAGE_kmod-usb-net-cdc-ncm is not set
+# CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm is not set
+# CONFIG_PACKAGE_kmod-usb-net-sierrawireless is not set
 CONFIG_PACKAGE_wwan=m
+
