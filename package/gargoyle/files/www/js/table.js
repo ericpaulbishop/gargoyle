@@ -42,7 +42,7 @@ function createTable(columnNames, rowData, tableId, rowsAreRemovable, rowsAreMov
 		}
 		else
 		{
-			header.appendChild( columnNames[columnIndex] )
+			header.appendChild( columnNames[columnIndex] );
 		}
 		headerContent = typeof(columnNames[columnIndex]) == 'string' ? controlDocument.createTextNode(columnNames[columnIndex]) : columnNames[columnIndex];
 		row.appendChild(header);
@@ -97,14 +97,14 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cell = controlDocument.createElement('td');
 		if(typeof(rowData[cellIndex-1]) == 'string')
 		{
-			var splitText = (rowData[cellIndex-1]).split(/\n/)
+			var splitText = (rowData[cellIndex-1]).split(/\n/);
 			while(splitText.length > 0)
 			{
-				var next = splitText.shift()
-				cell.appendChild(  controlDocument.createTextNode(next)  )
+				var next = splitText.shift();
+				cell.appendChild(  controlDocument.createTextNode(next)  );
 				if(splitText.length >0)
 				{
-					cell.appendChild( controlDocument.createElement('br')  )
+					cell.appendChild( controlDocument.createElement('br')  );
 				}
 			}
 		}
