@@ -140,6 +140,9 @@ for (tab_idx in cron_data) {
 					<span class="col-xs-12"><input type='checkbox' name='content' /><%~ email.ARP %></span>
 				</div>
 				<div class="row form-group">
+					<span class="col-xs-12"><input type='checkbox' name='content'  onclick="intervalVisibility(this)"/><%~ email.Bandwidth %></span>
+				</div>
+				<div class="row form-group">
 					<label class="col-xs-5" id="bandwidthIntervalLabel"><%~ email.BandwidthInterval %></label>
 					<span class="col-xs-7">
 						<select id="bandwidthIntervalSelect" class="form-control" disabled>
