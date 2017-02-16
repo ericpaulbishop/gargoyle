@@ -502,7 +502,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_3g_device_container" class="row form-group">
 					<label class="col-xs-5" for="wan_3g_device" id="wan_3g_device_label"><%~ Dvic %>:</label>
 					<span class="col-xs-7">
-						<select id="wan_3g_list_device" onchange="set3GDevice(this.value)"></select>
+						<select style="display:none;float:left;max-width:180px" id="wan_3g_list_device" onchange="set3GDevice(this.value)"></select>
 						<input style="float:left;" type="text" class="form-control" id="wan_3g_device" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
 						<button style="float:left;" class="btn btn-default" id="wan_3g_scan_button" onclick="scan3GDevice('wan_3g_list_device')"><%~ Scan %></button>
 					</span>
