@@ -2,5 +2,5 @@
 
 uci set gargoyle.display.system_email_notifications='Email'
 uci set gargoyle.scripts.system_email_notifications='email.sh'
-uci set gargoyle.system.email='380'
+uci set gargoyle.system.email_notifications='380'
 uci commit
