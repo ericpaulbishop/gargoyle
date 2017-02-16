@@ -770,7 +770,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_list_ssid2_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_list_ssid2" id="wifi_list_ssid2_label"><%~ Join %>:</label>
 					<span  class="col-xs-7">
-						<select id="wifi_list_ssid2"  class="form-control" onchange="setSsidVisibility(this.id)">
+						<select id="wifi_list_ssid2"  style="max-width:50%" class="form-control" onchange="setSsidVisibility(this.id)">
 							<option value="custom"><%~ Other %></option>
 						</select>
 						<button class="btn btn-default" id="wifi_rescan_button" onclick="scanWifi('wifi_custom_ssid2')"><%~ RScn %></button>
