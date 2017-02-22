@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="Маршрутизация";
 rtgS.ARSect="Активные маршруты";
 rtgS.SRSect="Статические маршруты";
 rtgS.ASRte="Добавить маршрут";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+usbSStr.mUSB="USB Skladovanie";
 usbSStr.SDisk="Zdieľané disky";
 usbSStr.Nomdsk="Neboli zistené žiadne namontované USB disky";
 usbSStr.WFTP="Povoliť prístup k FTP z WAN";

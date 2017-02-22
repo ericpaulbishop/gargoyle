@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="Nośniki USB";
 usbSStr.SDisk="Współdzielenie dysków";
 usbSStr.Nomdsk="Nie wykryto żadnego zamontowanego nośnika USB";
 usbSStr.WFTP="Włącz zdalny dostęp do FTP z WAN";

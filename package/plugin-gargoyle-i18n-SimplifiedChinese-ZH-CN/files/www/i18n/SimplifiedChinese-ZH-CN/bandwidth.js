@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="流量统计";
 bndwS.GOpSect="流量统计图显示选项";
 bndwS.TFrm="时间周期";
 bndwS.year="年";

@@ -30,23 +30,27 @@ var arpLines;
 %>
 //-->
 </script>
+<h1 class="page-header"><%~ wol.WLSect %></h1>
+<div id="wol_data" class="row">
 
-<fieldset id="wol_data">
-	<legend class="sectionheader"><%~ wol.WLSect %></legend>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
 
-	<div id="wol_table_container"></div>
+			<div class="panel-body">
+				<div id="wol_table_container" class="table-responsive"></div>
 
-	<p></p>
+				<div id="wol_help">
+					<span id="wol_help_txt">
+						<%~ WLHelp %>
+					</span>
+					<a id="wol_help_ref" onclick="setDescriptionVisibility('wol_help')" href="#wol_help"><%~ Hide %></a>
+				</div>
+			</div>
 
-	<div id="wol_help">
-		<span id="wol_help_txt">
-
-		<p><%~ WLHelp %></p>
-
-		</span>
-		<a id="wol_help_ref" onclick='setDescriptionVisibility("wol_help")' href="#wol_help"><%~ Hide %></a>
+		</div>
 	</div>
-</fieldset>
+
+</div>
 
 <script>
 <!--

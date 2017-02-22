@@ -18,21 +18,32 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ quotas.USect %></legend>
-		<select id="host_display" >
-			<option value="hostname"><%~ DspHn %></option>
-			<option value="ip"><%~ DspHIP %></option>
-		</select>
-		<select id="data_display" >
-			<option value="pcts"><%~ DspPct %></option>
-			<option value="usds"><%~ DspUsd %></option>
-			<option value="lims"><%~ DspLim %></option>
-		</select>
-		<div id="quota_table_container"></div>
-	</fieldset>
-</form>
+<h1 class="page-header"><%~ quotas.USect %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<select id="host_display" class="form-control">
+							<option value="hostname"><%~ DspHn %></option>
+							<option value="ip"><%~ DspHIP %></option>
+						</select>
+					</span>
+					<span class="col-xs-12">
+						<select id="data_display" class="form-control">
+							<option value="pcts"><%~ DspPct %></option>
+							<option value="usds"><%~ DspUsd %></option>
+							<option value="lims"><%~ DspLim %></option>
+						</select>
+					</span>
+				</div>
+				<div id="quota_table_container" class=="table-responsive"></div>
+			</div>
+		</div>
+	</div>
+
+</div>
 
 <script>
 <!--

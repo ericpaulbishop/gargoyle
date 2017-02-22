@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for backup.sh html elements
  */
 
+bkS.mBackup="Sauver / Restaurer";
 bkS.CurrC="Sauver configuration actuelle";
 bkS.RestC="Restaurer ancienne configuration";
 bkS.DfltC="Restaurer configuration par défaut";

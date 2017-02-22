@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Añadir";
 pgS.PgOpt="Opciones de complementos";
 pgS.PRoot="Raíz de complementos";
 pgS.RDrv="Unidad de Disco Raíz";

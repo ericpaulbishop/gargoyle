@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for basic.sh html elements
  */
 
+basicS.mBasic="Grunnleggende";
 basicS.DCfgSect="Enhetskonfigurasjon";
 basicS.CfgDev="Konfigurere Enhet Som";
 basicS.DvGtwy="Gateway (Standard)";
@@ -80,6 +81,10 @@ basicS.CustMTU="Bruk Egendefinert MTU";
 basicS.LANSec="Lokal Nettverk/LAN";
 basicS.DfltDNS="Standard DNS Servere som er Spesifisert av ISP";
 basicS.OpnSrvs="OpenDNS Servere";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Google DNS Servere";
 basicS.Srvr="Server";
 basicS.SrvPt="Server Port";

@@ -721,8 +721,8 @@ function createAllowedClientControls(haveDownload)
 
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButton = haveDownload ? createButton(ovpnS.Dload, "default_button", downloadAc, false) : createButton(ovpnS.Dload, "default_button_disabled", function(){ return; }, true ) ;
-	var editButton     = createButton(UI.Edit,     "default_button", editAc, false)
+	var downloadButton = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAc, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+	var editButton     = createButton(UI.Edit,     "btn btn-default", editAc, false)
 
 	return [enabledCheck, downloadButton, editButton]
 }
@@ -1285,9 +1285,9 @@ function editAc()
 	var saveButton = createInput("button", editAcWindow.document);
 	var closeButton = createInput("button", editAcWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default btn-lg";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-default btn-lg";
 
 	var editRow=this.parentNode.parentNode;
 	var editId = editRow.childNodes[1].firstChild.id;

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for backup.sh html elements
  */
 
+bkS.mBackup="Sik.kopi / Gjen.opr.";
 bkS.CurrC="Sikkerhetskopier Nåværende Konfigurasjon";
 bkS.RestC="Gjenopprett en Tidligere Konfigurasjon";
 bkS.DfltC="Gjenopprett Standard Konfigurasjon";

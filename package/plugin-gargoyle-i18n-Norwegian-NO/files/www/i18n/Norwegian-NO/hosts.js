@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Tilkoblede Klienter";
 hostsStr.RefreshR="Oppdateringsfrekvens";
 hostsStr.RInfo="Dette angir hvor ofte denne siden oppdateres";
 hostsStr.CurrLeases="Gjeldene DHCP Leier";

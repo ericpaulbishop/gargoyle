@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="Port Videresending";
 prtS.PISect="Individuell Port Videresending";
 prtS.PRSect="Port Område Videresending";
 prtS.ForIPort="Videresende Individuelle Porter Fra WAN til LAN";

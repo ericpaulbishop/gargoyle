@@ -475,14 +475,14 @@ function editUser()
 	}
 
 
-	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=300,left=" + xCoor + ",top=" + yCoor );
+	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=230,left=" + xCoor + ",top=" + yCoor );
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 
 	okButton.value         = usbSStr.ChPass;
-	okButton.className     = "default_button";
+	okButton.className     = "btn btn-default";
 	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "default_button";
+	cancelButton.className = "btn btn-default";
 
 
 	editShareUserRow=this.parentNode.parentNode;
@@ -1227,7 +1227,7 @@ function createEditButton( editFunction )
 {
 	editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editFunction;
 	editButton.disabled  = false ;
 
@@ -1252,9 +1252,6 @@ function removeShareCallback(table, row)
 
 	setSharePaths();
 }
-
-
-
 
 function editShare()
 {
@@ -1283,14 +1280,14 @@ function editShare()
 	}
 
 
-	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=650,height=600,left=" + xCoor + ",top=" + yCoor );
 
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default btn-lg";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-default btn-lg";
 
 	editRow=this.parentNode.parentNode;
 	editName=editRow.childNodes[0].firstChild.data;
@@ -1372,17 +1369,6 @@ function editShare()
 	}
 	runOnEditorLoaded();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 function unmountAllUsb()
 {

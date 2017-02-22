@@ -25,82 +25,81 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ time.Section %></legend>
-
-		<div>
-			<label id='current_time_label' for='current_time'><%~ CurrTime %>:&nbsp;&nbsp;&nbsp;&nbsp;</label>
-			<span id="current_time"></span>
-		</div>
-
-		<div class="internal_divider"></div>
-
-		<div>
-			<label class='nocolumn' id='timezone_label' for='timezone'><%~ TimeZone %>:</label>
-		</div>
-		<div class="indent">
-			<div><select class='nocolumn' id='timezone' onchange="timezoneChanged()"></select></div>
-		</div>
-
-		<div>
-			<label class='nocolumn' id='timezone_label' for='date_format'><%~ DateForm %>:</label>
-		</div>
-		<div class="indent">
-			<div>
-				<select class='nocolumn' id='date_format'>
-					<option value="usa">mm/dd/yy</option>
-					<option value="russia">dd.mm.yyyy</option>
-					<option value="australia">dd/mm/yy</option>
-					<option value="argentina">dd/mm/yyyy</option>
-					<option value="iso">yyyy/mm/dd</option>
-					<option value="iso8601">yyyy-mm-dd</option>
-				</select>
-			</div>
-		</div>
-		
-		<div>
-			<label class='nocolumn' id='timezone_label' for='time_format'><%~ TimeForm %>:</label>
-			<div class="indent">
-				<select class='nocolumn' id='time_format'>
-					<option value=12>12 <%~ hour %></option>
-					<option value=24>24 <%~ hour %></option>
-				</select>
-			</div>
-		</div>
-
-		<div>
-			<label class='leftcolumn' id='region_label' for='region'><%~ TServers %>:</label>
-			<div class="indent">
-				<div>
-					<select class='leftcolumn' id='region' onchange='updateServerList()'>
-						<option value="global"><%~ Global %></option>
-						<option value="us"><%~ US %></option>
-						<option value="north-america"><%~ NA %></option>
-						<option value="south-america"><%~ SA %></option>
-						<option value="europe"><%~ EU %></option>
-						<option value="africa"><%~ Af %></option>
-						<option value="asia"><%~ As %></option>
-						<option value="oceania"><%~ Oc %></option>
-						<option value="custom"><%~ Cust %></option>
-					</select>
+<h1 class="page-header"><%~ time.Section %></h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" id="current_time_label" for="current_time"><%~ CurrTime %>:</label>
+					<span class="col-xs-7" id="current_time"></span>
 				</div>
-				<div class="indent">
-					<div><input type='text' class='leftcolumn' id="server1" size="35" /></div>
-					<div><input type='text' class='leftcolumn' id="server2" size="35" /></div>
-					<div><input type='text' class='leftcolumn' id="server3" size="35" /></div>
+
+				<div class="internal_divider"></div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="timezone_label" for="timezone"><%~ TimeZone %>:</label>
+					<span class="col-xs-7"><select id="timezone" class="form-control" onchange="timezoneChanged()"></select></span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="timezone_label" for="date_format"><%~ DateForm %>:</label>
+					<span class="col-xs-7">
+						<select id="date_format" class="form-control">
+							<option value="usa">mm/dd/yy</option>
+							<option value="russia">dd.mm.yyyy</option>
+							<option value="australia">dd/mm/yy</option>
+							<option value="argentina">dd/mm/yyyy</option>
+							<option value="iso">yyyy/mm/dd</option>
+							<option value="iso8601">yyyy-mm-dd</option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="timezone_label" for="time_format"><%~ TimeForm %>:</label>
+					<span class="col-xs-7">
+						<select id="time_format" class="form-control">
+							<option value=12>12 <%~ hour %></option>
+							<option value=24>24 <%~ hour %></option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="region_label" for="region"><%~ TServers %>:</label>
+					<span class="col-xs-7">
+						<select id="region" class="form-control" onchange="updateServerList()">
+							<option value="global"><%~ Global %></option>
+							<option value="us"><%~ US %></option>
+							<option value="north-america"><%~ NA %></option>
+							<option value="south-america"><%~ SA %></option>
+							<option value="europe"><%~ EU %></option>
+							<option value="africa"><%~ Af %></option>
+							<option value="asia"><%~ As %></option>
+							<option value="oceania"><%~ Oc %></option>
+							<option value="custom"><%~ Cust %></option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-offset-5 col-xs-7"><input type="text" id="server1" class="form-control" size="35" /></span>
+					<span class="col-xs-offset-5 col-xs-7"><input type="text" id="server2" class="form-control" size="35" /></span>
+					<span class="col-xs-offset-5 col-xs-7"><input type="text" id="server3" class="form-control" size="35" /></span>
 				</div>
 			</div>
 		</div>
-	</fieldset>
-	<div id="bottom_button_container">
-		<input type='button' value="<%~ SaveChanges %>" id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value="<%~ Reset %>" id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container" ><%~ WaitSettings %></span>
+
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

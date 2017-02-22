@@ -13,52 +13,62 @@
 <!--
 <%
 	awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release
-
 	gargoyle_version=$(cat data/gargoyle_version.txt)
 	echo "var gargoyleVersion=\"$gargoyle_version\"";
 %>
 //-->
 </script>
 
-<fieldset id="upgrade_section">
-	<legend class="sectionheader"><%~ update.UpFrm %></legend>
-	<div>
-		<div>
-			<p><%~ Warn %></p>
-		</div>
+<h1 class="page-header"><%~ update.UpFrm %></h1>
+<div id="upgrade_section" class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div class="alert alert-warning" role="alert">
+							<%~ Warn %>
+						</div>
+						<div class="alert alert-info" role="alert">
+							<span><%~ CGV %>:</span>
+							<span id="gargoyle_version"></span>
+						</div>
+					</div>
 
-		<div class="internal_divider"></div>
+				</div>
 
-		<div>
-			<span class='leftcolumn'><%~ CGV %>:</span><span id="gargoyle_version" class='rightcolumn'></span>
-		</div>
+				<div class="row form-group">
+					<div class="col-lg-4">
+						<form id="upgrade_form" enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+							<div id="upgrade_file1_container" class="row form-group">
+								<label class="col-xs-5" id="upgrade_label" for="upgrade_file"><%~ SelF %>:</label>
+								<span class="col-xs-7">
+									<input type="file" id="upgrade_file" name="upgrade_file"/>
+									<br/>
+									<em><span id="upgrade_text"></span></em>
+									<br/>
+									<br/>
+									<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" />&nbsp;<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
+									<br/>
+									<br/>
+								</span>
+							</div>
 
-		<div class="internal_divider"></div>
 
-		<form id='upgrade_form' enctype="multipart/form-data" method="post" action="utility/do_upgrade.sh" target="do_upgrade">
+							<input id="upgrade_hash" name="hash" type="hidden" value="" />
+							<input id="upgrade_arch" name="arch" type="hidden" value="" />
 
-			<div id="upgrade_file1_container">
-				<label id="upgrade_label" class='leftcolumn' for="upgrade_file"><%~ SelF %>:</label>
-				<input class='rightcolumn' type="file" id="upgrade_file" name="upgrade_file" />
-				<br/>
-				<em><span id="upgrade_text" class="rightcolumnonly"></span></em>
+							<div class="row form-group">
+								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-primary btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
+							</div>
+						</form>
+					</div>
+				</div>
 			</div>
-			<div id="upgrade_preserve_container">
-				<span class="rightcolumnonly">
-					<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" style="padding:0;margin:0px;vertical-align:middle;overflow:hidden;" />
-					<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
-				</span>
-			</div>
-
-			<input id='upgrade_hash' name="hash" type='hidden' value='' />
-			<input id='upgrade_arch' name="arch" type='hidden' value='' />
-		</form>
+		</div>
 	</div>
-	<div>
-		<input id="upgrade_button" type='button' class="default_button" value="<%~ Upgrade %>" onclick="doUpgrade()" style="margin-left:0px;"/>
-	</div>
-
-	<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe> 
+</div>
+<iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
 
 <script>
 <!--
@@ -67,5 +77,5 @@
 </script>
 
 <%
-	gargoyle_header_footer -f -s "system" -p "update" 
+	gargoyle_header_footer -f -s "system" -p "update"
 %>

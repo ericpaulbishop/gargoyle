@@ -55,9 +55,9 @@ function resetData()
 	{
 		document.getElementById("swap_container").style.display = "none";
 	}
-	
+
 	setChildText("load_avg", loadAvg);
-	
+
 	if(temps[0] == 1)
 	{
 		document.getElementById("temp_container").style.display = "block";
@@ -69,7 +69,7 @@ function resetData()
 	{
 		document.getElementById("temp_container").style.display = "none";
 	}
-	
+
 	setChildText("connections", curConn + "/" + maxConn);
 
 	setChildText("uptime", secondsToString(uptimeSeconds));
@@ -106,17 +106,11 @@ function resetData()
 		while(wanDnsList.length > 0)
 		{
 			var brk = document.createElement("br");
-			var leftSpan = document.createElement("span");
 			var rightSpan = document.createElement("span");
-			leftSpan.className="leftcolumn";
-			leftSpan.appendChild( document.createTextNode("invisible") );
-			leftSpan.style.visibility="hidden";
-			rightSpan.className="rightcolumn";	
 			rightSpan.appendChild( document.createTextNode(wanDnsList.shift()) );
 
-			document.getElementById("wan_dns_container").appendChild(brk);
-			document.getElementById("wan_dns_container").appendChild(leftSpan);
-			document.getElementById("wan_dns_container").appendChild(rightSpan);
+			document.getElementById("wan_dns").appendChild(brk);
+			document.getElementById("wan_dns").appendChild(rightSpan);
 		}
 
 		if(uciOriginal.get("network", "wan", "proto") != "pppoe")
@@ -234,6 +228,7 @@ function resetData()
 		setChildText("bridge_gateway", uciOriginal.get("network", "lan", "gateway") );
 		setChildText("bridge_mode", uciOriginal.get("wireless", bridgeSection, "client_bridge") == "1" ? ovwS.ClBr : "WDS");
 		setChildText("bridge_ssid", uciOriginal.get("wireless", bridgeSection, "ssid") );
+		setChildText("bridge_relay_ip", uciOriginal.get("network", "bridgecfg", "ipaddr"));
 	}
 
 	setChildText("qos_upload", qosUploadStatus);

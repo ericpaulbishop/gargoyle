@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) English-EN text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS Nedlasting";
+qosStr.mQUl="QoS Opplasting";
 qosStr.URSection="QoS (Opplasting) -- Klassifisering Regler";
 qosStr.DRSection="QoS (Nedlasting) -- Klassifisering Regler";
 qosStr.UCSection="QoS (Opplasting) -- Tjeneste Klasser";
@@ -103,6 +105,7 @@ qosStr.ZERO="null";
 qosStr.YES="Ja";
 
 //qos_distribution.sh
+qosStr.mQOS="QoS Fordeling";
 qosStr.UBSect="QoS Opplasting Båndbredde Fordeling";
 qosStr.DBSect="QoS Nedlasting Båndbredde Fordeling";
 qosStr.uTFrm="Opplasting Tidsramme";

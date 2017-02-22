@@ -7,6 +7,8 @@ logS.EAdmP="Enter Admin Password";
 logS.YQot="Your Quota";
 logS.NQot="Entire Network Quota";
 logS.CTime="Current Date &amp; Time";
+logS.CIP="IP Address";
+logS.CIPs="You are currently connected from:";
 
 //javascript
 logS.passErr="ERROR: You must enter a password";

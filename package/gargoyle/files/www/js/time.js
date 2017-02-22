@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
@@ -22,7 +22,7 @@ function saveChanges()
 	else
 	{
 		setControlsEnabled(false, true);
-		
+
 		uci = uciOriginal.clone();
 		var newServers = [];
 		for(sectionIndex=0; sectionIndex < 3; sectionIndex++)
@@ -35,7 +35,7 @@ function saveChanges()
 		}
 		uci.createListOption("system", "ntp", "server", true)
 		uci.set("system", "ntp", "server", newServers, false)
-		
+
 		//update timezone
 		var systemSections = uciOriginal.getAllSectionsOfType("system", "system");
 		var systemOptions = uciOriginal.getAllOptionsInSection("system", systemSections[0]);
@@ -43,7 +43,7 @@ function saveChanges()
 		//update date format
 		var systemDateFormat = getSelectedValue("date_format");
 		uci.set("gargoyle", "global", "dateformat", getSelectedValue("date_format"));
-		
+
 		//update time format
 		uci.set("gargoyle", "global", "hour_style", getSelectedValue("time_format"));
 
@@ -73,7 +73,7 @@ function saveChanges()
 			systemCommands.push("uci commit");
 			systemCommands.push("uci set system.system=system");
 			systemCommands.push("uci commit");
-		}	
+		}
 		uci.set("system", "system", "", "system");
 		var sysIndex=0;
 		for(sysIndex=0; sysIndex < systemOptions.length; sysIndex++)
@@ -86,7 +86,7 @@ function saveChanges()
 			uci.removeSection("system", systemSections[0]);
 		}
 		var setTimezoneCommand = "uci show system | grep timezone | sed 's/^.*=//g' | sed \"s/'//g\" >/etc/TZ\n";
-		
+
 
 
 
@@ -110,7 +110,7 @@ function saveChanges()
 						currentTime=responseText[ responseText.length-1];
 					}
 				}
-				
+
 				uciOriginal = uci.clone();
 				resetData();
 				setControlsEnabled(true);
@@ -131,7 +131,7 @@ function proofreadAll()
 function resetData()
 {
 	setChildText("current_time", cnv_LocaleTime(currentTime));
-	
+
 	timezoneList = timezoneData[0];
 	timezoneDefinitions = timezoneData[2];
 
@@ -154,7 +154,7 @@ function resetData()
 	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 	setSelectedValue("date_format", "usa"); //set default value for date
 	setSelectedValue("date_format", systemDateFormat); //set value loaded value from config
-	
+
 	var sysTimeFmt = uciOriginal.get("gargoyle",  "global", "hour_style");
 	setSelectedValue("time_format", 12);
 	setSelectedValue("time_format", sysTimeFmt);
@@ -203,7 +203,7 @@ function resetData()
 			document.getElementById("server" + (1+sectionIndex)).value = (2-serverIndex) + ".pool.ntp.org"
 		}
 	}
-	
+
 	setSelectedValue("region", "custom"); // set default value
 	setSelectedValue("region", currentRegion); //set value from config
 
@@ -238,8 +238,7 @@ function updateServerList()
 		else
 		{
 			var regionServer = ((3-serverIndex) + "." + region + ".pool.ntp.org").replace(/\.global\./, ".")
-			setElementEnabled( document.getElementById("server" + serverIndex), false, regionServer);	
+			setElementEnabled( document.getElementById("server" + serverIndex), false, regionServer);
 		}
-	}	
+	}
 }
-

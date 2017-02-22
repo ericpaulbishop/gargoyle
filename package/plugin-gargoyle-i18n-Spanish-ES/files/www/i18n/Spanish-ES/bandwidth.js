@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Distribución del Ancho de Banda";
 bndwS.GOpSect="Opciones de Visualización de Gráficos del Ancho de Banda";
 bndwS.TFrm="Intervalo de Tiempo";
 bndwS.Plot="Gráfico";

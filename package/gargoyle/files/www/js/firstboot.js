@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var fbS=new Object(); //part of i18n
@@ -23,7 +23,7 @@ function setInitialSettings()
 	{
 
 		setControlsEnabled(false, true);
-		
+
 		var saveCommands = "";
 		var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
 		var escapedPassword = p1.replace(/'/, "'\"'\"'");
@@ -35,14 +35,14 @@ function setInitialSettings()
 		saveCommands = saveCommands + "\n/etc/init.d/sysntpd restart >/dev/null 2>&1\n/usr/bin/set_kernel_timezone >/dev/null 2>&1\n";
 		saveCommands = saveCommands + "\ntouch /etc/banner  >/dev/null 2>&1\n";
 		saveCommands = saveCommands + "\neval $( gargoyle_session_validator -g -a \"" + httpUserAgent + "\" -i \"" + remoteAddr +"\" -b " + browserSecondsUtc + " )";
-		
+
 		var param = getParameterDefinition("commands", saveCommands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
 		{
 			if(req.readyState == 4)
 			{
-				
+
 				var hashCookie = "";
 				var expCookie  = "";
 				var responseLines = req.responseText.split(/[\r\n]+/);
@@ -58,10 +58,10 @@ function setInitialSettings()
 						expCookie = responseLines[rIndex].replace(/^.*exp=/, "").replace(/\";.*$/, "");
 					}
 				}
-				
+
 				document.cookie="hash=" + hashCookie;
 				document.cookie="exp="  + expCookie;
-			
+
 				currentProtocol = location.href.match(/^https:/) ? "https" : "http";
 				window.location= currentProtocol + "://" + window.location.host + "/basic.sh";
 			}
@@ -69,6 +69,3 @@ function setInitialSettings()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
-
-

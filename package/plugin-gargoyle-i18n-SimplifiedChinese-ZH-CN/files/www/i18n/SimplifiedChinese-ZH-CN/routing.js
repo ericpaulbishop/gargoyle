@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="路由设置";
 rtgS.ARSect="活动的路由";
 rtgS.SRSect="静态路由";
 rtgS.ASRte="添加静态路由";

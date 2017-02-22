@@ -1,12 +1,12 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var bndwS=new Object(); //part of i18n
- 
+
 var ipMonitorIds;
 var qosUploadMonitorIds;
 var qosDownloadMonitorIds;
@@ -63,7 +63,7 @@ function trim(str)
 function BandwidthCookieContainer()
 {
 	this.prefix = "gargoyle.bandwidth_display.";
-	
+
 	this.set = function(key, value)
 	{
 		var expires = new Date( new Date().getTime() + ( 86400 * 100 * 1000 /*100 days in mills*/) );
@@ -117,7 +117,7 @@ function initializePlotsAndTable()
 			var isQosDownload = monId.match(/down/);
 			haveQosUpload =   haveQosUpload   || isQosUpload;
 			haveQosDownload = haveQosDownload || isQosDownload;
-		
+
 			var splitId = monId.split("-");
 			splitId.shift();
 			splitId.shift();
@@ -125,7 +125,7 @@ function initializePlotsAndTable()
 			splitId.pop();
 			var qosClass = splitId.join("-");
 			var qosName = uciOriginal.get("qos_gargoyle", qosClass, "name");
-			
+
 			if(isQosUpload && definedUploadClasses[qosClass] == null)
 			{
 				qosUploadClasses.push(qosClass);
@@ -199,7 +199,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 {
 	var nameIndex;
 	var selectedName = null;
-	
+
 	var match1 = "";
 	var match2 = "";
 
@@ -237,7 +237,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	{
 		match1 = "bdist" + graphTimeFrameIndex;
 	}
-	
+
 	if(plotType != "none")
 	{
 		for(nameIndex=0;nameIndex < monitorNames.length && selectedName == null; nameIndex++)
@@ -245,7 +245,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 			var name = monitorNames[nameIndex];
 			if(	((name.match("up") && isUp) || (name.match("down") && !isUp)) &&
 				(match1 == "" || name.match(match1)) &&
-				(match2 == "" || name.match(match2)) 
+				(match2 == "" || name.match(match2))
 			)
 			{
 				selectedName = name;
@@ -356,7 +356,7 @@ function resetPlots()
 					plotId = idValue;
 				}
 			}
-			
+
 			if(plotNum != 4)
 			{
 				uploadMonitors[plotNum-1]  = getMonitorId(true, graphTimeFrameIndex, plotType, plotId, graphLowRes);
@@ -376,7 +376,7 @@ function resetPlots()
 			}
 		}
 		plotsInitializedToDefaults = true;
-		
+
 		updateInProgress = false;
 		if(oldUploadMonitors != uploadMonitors.join("\n") || oldDownloadMonitors != downloadMonitors.join("\n") || oldTableUploadMonitor != tableUploadMonitor || oldTableDownloadMonitor != tableDownloadMonitor )
 		{
@@ -436,11 +436,11 @@ function parseMonitors(outputData)
 			{
 				var monitorId = (dataLines[lineIndex].split(/[\t ]+/))[0];
 				var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
-				lineIndex++; 
+				lineIndex++;
 				var firstTimeStart = dataLines[lineIndex];
 				lineIndex++;
 				var firstTimeEnd = dataLines[lineIndex];
-				lineIndex++; 
+				lineIndex++;
 				var lastTimePoint = dataLines[lineIndex];
 				if(dataLines[lineIndex+1] != null)
 				{
@@ -495,7 +495,7 @@ function doUpdate()
 			{
 				try{ clearTimeout(updateTimeoutId); }catch(e){}
 				updateReq = null;
-				
+
 				if(  req.responseText.length > 0 && (!req.responseText.match(/ERROR/)) )
 				{
 
@@ -512,8 +512,8 @@ function doUpdate()
 					var plotLastTimePoint = Math.floor( (new Date()).getTime()/1000 );
 					var plotCurrentTimePoint = plotLastTimePoint;
 					var tableLastTimePoint = plotLastTimePoint;
-					
-					
+
+
 					for(monitorIndex=0; monitorIndex < 4; monitorIndex++)
 					{
 						var ipsInitialized = false;
@@ -535,7 +535,7 @@ function doUpdate()
 								monitorName = dirIndex == 0 ? tableDownloadMonitor : tableUploadMonitor;
 							}
 							monitorName = monitorName == null ? "" : monitorName;
-							
+
 							var plotTypeName = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_type" : "table_type";
 							var selectedPlotType = getSelectedValue(plotTypeName);
 							var monitorData = monitorName == "" ? null : monitors[monitorName];
@@ -574,11 +574,11 @@ function doUpdate()
 										var plotIdName   = monitorIndex < 3 ? "plot" + (monitorIndex+1) + "_id"   : "table_id";
 										ip = getSelectedValue(plotIdName);
 										ip = ip == null ? "" : getRealIp(ip);
-										
-										
+
+
 										ip = monitorData[ip] != null ? ip : ipList[0];
-										
-									
+
+
 										//if new ip list differs from allowable selections, update
 										if(selectedPlotType == "hostname")
 										{
@@ -594,7 +594,7 @@ function doUpdate()
 									{
 										ip = ipList[0];
 									}
-									
+
 									ip = ip == null ? "" : getRealIp(ip);
 									var points = monitorData[ip][0]
 									if(monitorIndex < 3)
@@ -707,7 +707,7 @@ function doUpdate()
 		}
 		var timeoutFun = function()
 		{
-			updateInProgress = false; 
+			updateInProgress = false;
 		}
 		updateReq = runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
 		updateTimeoutId = setTimeout(timeoutFun, 5000);
@@ -716,8 +716,8 @@ function doUpdate()
 
 function twod(num)
 {
-	var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; 
-	return nstr; 
+	var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr;
+	return nstr;
 }
 
 
@@ -738,7 +738,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
 	}
 	var monthNames = UI.EMonths;
-	
+
 	for(rowIndex=0; rowIndex < (tablePointSets[0]).length; rowIndex++)
 	{
 		var colIndex = 0;
@@ -816,7 +816,7 @@ function expand(name)
 		try { expWindow.close(); } catch(e){}
 		expWindow = null;
 	}
-	
+
 	try
 	{
 		xCoor = window.screenX + 225;
@@ -878,7 +878,7 @@ function highResChanged()
 			window.location = window.location;
 			setControlsEnabled(true);
 		}
-	}	
+	}
 	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 

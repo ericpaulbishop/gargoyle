@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="Stockage USB";
 usbSStr.SDisk="Disques partagés";
 usbSStr.Nomdsk="Pas de montage de disque(s) USB détecté(s)";
 usbSStr.WFTP="Autoriser l&apos;accès WAN au FTP";

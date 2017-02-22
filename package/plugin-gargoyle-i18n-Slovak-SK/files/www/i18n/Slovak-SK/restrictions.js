@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+restStr.mRestrict="Obmedzenia";
 restStr.ARSect="Obmedzenia prístupu";
 restStr.NRRule="Nové pravidlo obmedzenia";
 restStr.ANRule="Pridať nové pravidlo";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="流量配额";
 quotasStr.Section="流量配额";
 quotasStr.AddQuota="添加新配额";
 quotasStr.ActivQuotas="生效的配额";

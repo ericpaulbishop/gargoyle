@@ -25,62 +25,78 @@
 //-->
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ firstboot.ISSect %></legend>
-	<p><strong><%~ npass %>:</strong></p>
-	<div>
-		<label class='leftcolumn' for='password1' id='password1_label'><%~ NPass %>:</label>
-		<input type='password' class='rightcolumn' id='password1'  size='25' />
-	</div>
-	<div>
-		<label class='leftcolumn' for='password2' id='password2_label'><%~ CPass %>:</label>
-		<input type='password' class='rightcolumn' id='password2'  size='25' />
-	</div>
-	<p><strong><%~ Stz %>:</strong></p>
-	<div>
-		<select class='nocolumn' id='timezone'></select>
-		<br/>
-	</div>
-	<br/>
-	<p><strong><%~ Sla %>:</strong></p>
-	<div>
-		<div id='lang_container' >
-			<span class='narrowleftcolumn'>
-				<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
-			</span>
-			<span class='widerightcolumn' style="display:block; clear:right; margin-right:100px" >
-				<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
-			</span>
+<h1 class="page-header"><%~ firstboot.ISSect %></h1>
+<div class="row">
 
-			<div id="lang_table_container"></div>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
 
-			<form id="lfile_form" action="utility/do_fb_lang.sh" method="post" enctype="multipart/form-data" target="get_lfile">
-				<div>
-					<span class="leftcolumn">&nbsp;</span>
-					<span class="rightcolumn">
-						<label><%~ ULngF %>:</label>
-					</span>
+				<p><strong><%~ npass %>:</strong></p>
+
+
+				<div class="row form-group">
+					<label class="col-xs-4 col-md-3 col-lg-2" for="password1" id="password1_label"><%~ NPass %>:</label>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password1" class="form-control" size="25" /></span>
 				</div>
-				<div>
-					<span class="leftcolumn">&nbsp;</span>
-					<span class="rightcolumn">
-						<input id="lfile" type="file" name="lfile" />
-					</span>
+
+				<div class="row form-group">
+					<label class="col-xs-4 col-md-3 col-lg-2" for="password2" id="password2_label"><%~ CPass %>:</label>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password2" class="form-control" size="25" /></span>
 				</div>
-				<div>
-					<span class="leftcolumn">&nbsp;</span>
-					<span class="rightcolumn">
-					<input class="default_button" type="button" onclick="do_get_lfile()" id="upload_lang_button" value="Upload ⇧" />
-					</span>
+
+				<p><strong><%~ Stz %>:</strong></p>
+
+				<div class="row form-group">
+					<span class="col-xs-12"><select class="form-control" id="timezone"></select></span>
+					<br/>
 				</div>
-				<input id="lfile_fname" type="hidden" name="fname" value="" />
-				<input id="lfile_hash" type="hidden" name="hash" value="" />
-			</form>
-			<iframe id="get_lfile" style="display: none;" src="#" name="get_lfile"></iframe>
+
+			</div>
 		</div>
 	</div>
-	<input class="default_button" type="button" value="<%~ SSet %>" onclick="setInitialSettings()" />
-</fieldset>
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<p><strong><%~ Sla %>:</strong></p>
+				<div>
+					<div id='lang_container'>
+						<span>
+							<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />
+						</span>
+						<span style="display:block; clear:right; margin-right:100px" >
+							<strong><em>Language / Lengua / Lingua / Langue / Język / Kieli / Sprache / Dil / γλώσσα / язык / زبان / שפה / لغة / भाषा / ภาษา / 언어 / 語</em></strong>
+						</span>
+
+						<div id="lang_table_container"></div>
+
+						<form id="lfile_form" action="utility/do_fb_lang.sh" method="post" enctype="multipart/form-data" target="get_lfile" class="form-group">
+							<div class="form-group">
+								<span>
+									<label><%~ ULngF %>:</label>
+								</span>
+								<span>
+									<input id="lfile" type="file" name="lfile" />
+								</span>
+							</div>
+							<div>
+								<span>
+									<button id="upload_lang_button" class="btn btn-primary" onclick="do_get_lfile()">Upload ⇧</button>
+								</span>
+							</div>
+							<input id="lfile_fname" type="hidden" name="fname" value="" />
+							<input id="lfile_hash" type="hidden" name="hash" value="" />
+						</form>
+						<iframe id="get_lfile" style="display: none;" src="#" name="get_lfile"></iframe>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-info btn-lg" onclick="setInitialSettings()"><%~ SSet %></button>
+</div>
 
 <script>
 <!--

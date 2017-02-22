@@ -24,34 +24,83 @@ var currentTime;
 	echo "currentWanIp=\"$wan_ip\";"
 	echo "currentLanIp=\"$lan_ip\";"
 %>
-
 //-->
 </script>
+<h1 class="page-header"><%~ hosts.mHosts %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ hosts.RefreshR %></h3>
+			</div>
 
-<fieldset>
-	<legend><%~ hosts.RefreshR %></legend>
-	<select id="refresh_rate">
-		<option value="2000">2 <%~ seconds %></option>
-		<option value="10000">10 <%~ seconds %></option>
-		<option value="30000">30 <%~ seconds %></option>
-		<option value="60000">60 <%~ seconds %></option>
-		<option value="never"><%~ never %></option>
-	</select>
-	<br/>
-	<p><em><%~ RInfo %></em></p>
-</fieldset>
-<fieldset id="dhcp_data">
-	<legend class="sectionHeader"><%~ CurrLeases %></legend>
-	<div id="lease_table_container"></div>
-</fieldset>
-<fieldset id="wifi_data">
-	<legend class="sectionheader"><%~ ConWifiHosts %></legend>
-	<div id="wifi_table_container"></div>
-</fieldset>
-<fieldset id="active_data">
-	<legend class="sectionheader"><%~ ActiveHosts %></legend>
-	<div id="active_table_container"></div>
-</fieldset>
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<select id="refresh_rate" class="form-control">
+							<option value="2000">2 <%~ seconds %></option>
+							<option value="10000">10 <%~ seconds %></option>
+							<option value="30000">30 <%~ seconds %></option>
+							<option value="60000">60 <%~ seconds %></option>
+							<option value="never"><%~ never %></option>
+						</select>
+					</span>
+					<br/>
+					<span class="col-xs-12"><p><em><%~ RInfo %></em></p></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ CurrLeases %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="dhcp_data" class="form-group form-inline">
+					<div id="lease_table_container" class="table-responsive"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ConWifiHosts %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="wifi_data" class="form-group form-inline">
+					<div id="wifi_table_container" class="table-responsive"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ActiveHosts %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="active_data" class="form-group form-inline">
+					<div id="active_table_container" class="table-responsive"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--

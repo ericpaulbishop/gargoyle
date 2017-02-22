@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Dodatki";
 pgS.PgOpt="Opcje dodatków";
 pgS.PRoot="Folder główny dodatków";
 pgS.RDrv="Pamięć wewnętrzna";

@@ -305,7 +305,7 @@ function resetData()
 		else
 		{
 			remove = createInput("button");
-			remove.className = "default_button"
+			remove.className = "btn btn-default"
 			remove.value=UI.Remove
 			remove.onclick = removePluginSource;
 		}
@@ -337,14 +337,14 @@ function resetData()
 			enabledCheckbox.checked = pkgData["Install-Destination"] == notInstalledVal ? false : true;
 
 			var button = createInput("button");
-			button.className="default_button";
+			button.className="btn btn-default";
 			if (enabledCheckbox.checked)
 			{
 				button.value = UI.Uninstall;
 				if( pkgData["Install-Destination"] == "root" )
 				{
 					button.disabled = true;
-					button.className = "default_button_disabled"
+					button.className = "btn btn-default disabled"
 				}
 				else
 				{
@@ -361,7 +361,7 @@ function resetData()
 				else
 				{
 					button.disabled = true;
-					button.className = "default_button_disabled"
+					button.className = "btn btn-default disabled"
 				}
 			}
 

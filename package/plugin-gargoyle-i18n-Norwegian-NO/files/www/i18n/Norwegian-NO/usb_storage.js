@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="USB Lagring";
 usbSStr.SDisk="Delte Disker";
 usbSStr.Nomdsk="Ingen monterte USB disker oppdaget";
 usbSStr.WFTP="Tillat Tilgang til FTP fra WAN";

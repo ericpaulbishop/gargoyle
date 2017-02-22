@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="插件管理";
 pgS.PgOpt="插件选项";
 pgS.PRoot="插件根目录";
 pgS.RDrv="根驱动器";

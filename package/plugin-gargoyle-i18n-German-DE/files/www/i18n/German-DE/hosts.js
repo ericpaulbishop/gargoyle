@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Verbundene Rechner";
 hostsStr.RefreshR="Aktualisierungsrate";
 hostsStr.RInfo="Gibt an, wie oft die Seite aktualisiert wird.";
 hostsStr.CurrLeases="Aktuelle DHCP Zuweisungen";

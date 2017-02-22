@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for restrictions.sh html elements
  */
 
+restStr.mRestrict="Запреты";
 restStr.ARSect="Ограничения доступа";
 restStr.NRRule="Новое ограничение";
 restStr.ANRule="Добавить новое правило";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for basic.sh html elements
  */
 
+basicS.mBasic="Base";
 basicS.DCfgSect="Configuration de l&apos;appareil";
 basicS.CfgDev="Configurer cet appareil comme";
 basicS.DvGtwy="Passerelle (défaut)";
@@ -80,6 +81,10 @@ basicS.CustMTU="Utiliser MTU personnalisé";
 basicS.LANSec="Réseau local/LAN";
 basicS.DfltDNS="DNS par défaut spécifiés par l&apos;ISP";
 basicS.OpnSrvs="DNS OpenDNS";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="DNS Google";
 basicS.Srvr="Serveur";
 basicS.SrvPt="Port serveur";

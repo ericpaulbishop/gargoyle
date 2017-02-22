@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Plugins (greffons)";
 pgS.PgOpt="Options des plugins";
 pgS.PRoot="Racine des plugins";
 pgS.RDrv="Lecteur racine";

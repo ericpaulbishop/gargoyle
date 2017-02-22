@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="Transfert de port";
 prtS.PISect="Transfert de port individuel";
 prtS.PRSect="Transfert d&apos;une plage de port";
 prtS.ForIPort="Transfère des ports individuels du WAN vers le LAN";

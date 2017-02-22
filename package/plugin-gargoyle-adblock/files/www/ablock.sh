@@ -14,109 +14,133 @@
 	echo "var blocklistlines = new Array();"
 	cat /plugin_root/adblock/block.hosts | awk '{print "blocklistlines.push(\""$2"\");"}'
 	echo "var blacklistlines = new Array();"
-	cat /plugin_root/adblock/black.list | awk '{print "blacklistlines.push(\""$0"\");"}'
+	cat /usr/lib/adblock/black.list | awk '{print "blacklistlines.push(\""$0"\");"}'
 	echo "var whitelistlines = new Array();"
-	cat /plugin_root/adblock/white.list | awk '{print "whitelistlines.push(\""$0"\");"}'
+	cat /usr/lib/adblock/white.list | awk '{print "whitelistlines.push(\""$0"\");"}'
 %>
 </script>
 
-<fieldset id="adblock-fieldset">
-	<legend class="sectionheader"><%~ ablock.Adblock %></legend>
+<h1 class="page-header"><%~ ablock.Adblock %></h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-1"><input id="adblock_enable" type="checkbox" /></span>
+					<label class="col-xs-11" id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+				</div>
 
-	<div class="nocolumn">
-		<input id="adblock_enable" type="checkbox" />
-		<label id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+				<div class="row form-group">
+					<span class="col-xs-offset-5 col-xs-7"><button id="adblock_update" class="btn btn-primary" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button></span>
+					<span class="col-xs-offset-5 col-xs-7">
+						<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
+						<label id="adblock_lastrunval"></label>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label id="adblock_transparent_label" class="col-xs-5" for="adblock_transparent"><%~ ADBLOCKTrans %>:</label>
+					<span class="col-xs-7"><input id="adblock_transparent" type="checkbox" /></span>
+				</div>
+
+				<div id="adblock_help" class="row">
+					<span class="col-xs-12" id="adblock_help_txt">
+						<p><%~ ADBLOCKHelp %></p>
+					</span>
+					<span class="col-xs-12"><a id="adblock_help_ref" onclick='setDescriptionVisibility("adblock_help")' href="#adblock_help"><%~ Hide %></a></span>
+				</div>
+
+				<div class="internal_divider"></div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="adblock_exempten_label" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
+					<span class="col-xs-7"><input id="adblock_exempten" type="checkbox" /></span>
+				</div>
+
+				<div class="form-group">
+					<div class="row form-group">
+						<label class="col-xs-5" id="adblock_exempt_labels" for="adblock_exempts"><%~ ADBLOCKExempts %>:</label>
+						<span class="col-xs-7"><input id="adblock_exempts" class="form-control" type="text" size='15' /></span>
+					</div>
+
+					<div class="row form-group">
+						<label class="col-xs-5" id="adblock_exempt_labelf" for="adblock_exemptf"><%~ ADBLOCKExemptf %>:</label>
+						<span class="col-xs-7"><input id="adblock_exemptf" class="form-control" type="text" size='15' /></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row" id="list_gui">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ADBLOCKBlocklist %></h3>
+			</div>
+			<div class="panel-body">
+				<div class="row form-group">
+					<label id="adblock_displayed_count" class="col-xs-12">-</label>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-10"><select id="adblock_blocklist_list" multiple class="form-control" style="min-height:300px;width:100%;"></select></span>
+					<span class="col-xs-2"><input type="button" value="-->" id="adblock_transfer_button" class="btn btn-warning btn-lg" onclick="transferwhiteList();" /></span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<input id="adblock_blocklist_search" class="form-control" type="text" />
+						<button class="btn btn-primary" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
+					</span>
+				</div>
+				<div id="adblock_help2" class="row">
+					<span class="col-xs-12" id="adblock_help2_txt">
+						<p><%~ ADBLOCKHelp2 %></p>
+					</span>
+					<span class="col-xs-12"><a id="adblock_help2_ref" onclick='setDescriptionVisibility("adblock_help2")' href="#adblock_help2"><%~ Hide %></a></span>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div class="rightcolumnonly">
-		<input type ="button" value="<%~ ADBLOCKupdate %>" id="adblock_update" class="default_button" onclick='adblockUpdate()' />
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ADBLOCKWhitelist %></h3>
+			</div>
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-10"><select id="adblock_whitelist_list" multiple class="form-control" style="min-height:100px;width:100%;"></select></span>
+					<span class="col-xs-2"><button id="adblock_whitelist_delete_button" class="btn btn-danger" onclick="deleteList(adblock_whitelist_list);"><%~ ADBLOCKBlackdel %></button></span>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div class="rightcolumnonly">
-		<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
-		<label id="adblock_lastrunval"></label>
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ADBLOCKBlacklist %></h3>
+			</div>
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-10"><select id="adblock_blacklist_list" multiple class="form-control" style="min-height:100px;width:100%;"></select></span>
+					<span class="col-xs-2"><button id="adblock_blacklist_delete_button" class="btn btn-danger" onclick="deleteList(adblock_blacklist_list);"><%~ ADBLOCKBlackdel %></button></span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<input id="adblock_blacklist_add" class="form-control" type="text" />
+						<button class="btn btn-primary" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
+					</span>
+				</div>
+			</div>
+		</div>
 	</div>
-
-	<div>
-		<label id="adblock_transparent_label" class="leftcolumn" for="adblock_transparent"><%~ ADBLOCKTrans %>:</label>
-		<input id="adblock_transparent" class="rightcolumn" type="checkbox" />
-	</div>
-
-	<div id="adblock_help" class="indent">
-	<span id="adblock_help_txt">
-
-	<p><%~ ADBLOCKHelp %></p>
-
-	</span>
-	<a id="adblock_help_ref" onclick='setDescriptionVisibility("adblock_help")' href="#adblock_help"><%~ Hide %></a>
-
-	</div>
-
-	<div class="internal_divider"></div>
-
-	<div>
-		<label id="adblock_exempten_label" class="leftcolumn" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
-		<input id="adblock_exempten" class="rightcolumn" type="checkbox" />
-	</div>
-	<div>
-		<label class="leftcolumn" id="adblock_exempt_labels" for="adblock_exempts"><%~ ADBLOCKExempts %>:</label>
-		<input id="adblock_exempts" class="rightcolumn" type="text" size='15' />
-	</div>
-	<div>
-		<label class="leftcolumn" id="adblock_exempt_labelf" for="adblock_exemptf"><%~ ADBLOCKExemptf %>:</label>
-		<input id="adblock_exemptf" class="rightcolumn" type="text" size='15' />
-	</div>
+</div>
 	
-	<div id="list_gui">
-	<div class="internal_divider"></div>
-	<div>
-		<label id="adblock_blocklist_label" class="leftcolumn" for="adblock_blocklist"><%~ ADBLOCKBlocklist %></label>
-		<label id="adblock_whitelist_label" class="rightcolumn" style="padding-left: 30px;" for="adblock_whitelist"><%~ ADBLOCKWhitelist %></label>
-	</div>
-	<div>
-		<label id="adblock_displayed_count" class="leftcolumn">-</label>
-	</div>
-	<div>
-		<select id="adblock_blocklist_list" multiple class="leftcolumn" style="width: 200px; height: 150px;"></select>
-		<input id="adblock_transfer_button" type="button" value="-->" onclick="transferwhiteList();" />
-		<select id="adblock_whitelist_list" multiple style="width: 200px; height: 150px;"></select>
-		<input id="adblock_whitelist_delete_button" class="rightcolumn" type="button" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_whitelist_list);" />
-	</div>
-	<div>
-		<input id="adblock_blocklist_search" class="leftcolumn" type="text" />
-	</div>
-	<div>
-		<input type="button" value='<%~ ADBLOCKSearch %>' class="leftcolumn" onclick="searchBlocklist();" />
-	</div>
-	<div>
-		<label id="adblock_blacklist_label" class="leftcolumn" style="margin-top: 10px; margin-bottom: 5px;" for="adblock_blacklist"><%~ ADBLOCKBlacklist %></label>
-	</div>
-	<div>
-		<select id="adblock_blacklist_list" multiple class="leftcolumn" style="width: 200px; height: 150px;"></select>
-		<input id="adblock_blacklist_delete_button" type="button" class="rightcolumn" value='<%~ ADBLOCKBlackdel %>' onclick="deleteList(adblock_blacklist_list);" />
-	</div>
-	<div>
-		<input id="adblock_blacklist_add" class="leftcolumn" type="text" />
-	</div>
-	<div>
-		<input type="button" class="leftcolumn" value='<%~ ADBLOCKBlackadd %>' onclick="addBlacklist();" />
-	</div>
-	<div id="adblock_help2" class="indent">
-	<span id="adblock_help2_txt">
-
-	<p><%~ ADBLOCKHelp2 %></p>
-
-	</span>
-	<a id="adblock_help2_ref" onclick='setDescriptionVisibility("adblock_help2")' href="#adblock_help2"><%~ Hide %></a>
-
-	</div>
-	</div>
-	
-</fieldset>
-
-<div id="bottom_button_container">
-	<input type="button" value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type="button" value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()' />
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <script>

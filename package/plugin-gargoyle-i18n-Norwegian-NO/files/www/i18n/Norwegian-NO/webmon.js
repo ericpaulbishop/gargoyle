@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for webmon.sh html elements
  */
 
+webmS.mWMon="Web Bruk";
 webmS.PrSect="Web Overvåking Innstillinger";
 webmS.EMon="Aktiver Web Forbruk Overvåking";
 webmS.NumSt="Antall Sider å Lagre";

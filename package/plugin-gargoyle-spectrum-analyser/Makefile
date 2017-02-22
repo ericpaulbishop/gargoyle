@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin_gargoyle_spectrum_analyser
-PKG_VERSION:=20160531
-PKG_RELEASE:=1.0.4
+PKG_VERSION:=20160918
+PKG_RELEASE:=1.2.0
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -53,14 +53,14 @@ define Package/plugin-gargoyle-spectrum-analyser/postinst
 if [ -z "$${IPKG_INSTROOT}" ]; then
 	menu_name="Spectrum Analyser"
 	[ -n `which i18n` ] && {
-		mn=$$(i18n-menu gargoyle.display.system_spect_analyser)
+		mn=$$(i18n-menu gargoyle.display.system_spectrum_analyser)
 		if [ -n "$$mn" ] ; then
 			menu_name="$$mn"
 		fi
 	}
-	uci set gargoyle.display.system_spect_analyser="$$menu_name"
-	uci set gargoyle.scripts.system_spect_analyser='spectrum_analyser.sh'
-	uci set gargoyle.system.spect_analyser='355'
+	uci set gargoyle.display.system_spectrum_analyser="$$menu_name"
+	uci set gargoyle.scripts.system_spectrum_analyser='spectrum_analyser.sh'
+	uci set gargoyle.system.spectrum_analyser='355'
 	uci commit gargoyle
 fi
 endef
@@ -69,9 +69,9 @@ define Package/plugin-gargoyle-spectrum-analyser/postrm
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	uci del gargoyle.display.system_spect_analyser
-	uci del gargoyle.scripts.system_spect_analyser
-	uci del gargoyle.system.spect_analyser
+	uci del gargoyle.display.system_spectrum_analyser
+	uci del gargoyle.scripts.system_spectrum_analyser
+	uci del gargoyle.system.spectrum_analyser
 	uci commit gargoyle
 fi
 endef

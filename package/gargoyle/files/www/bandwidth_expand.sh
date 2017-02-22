@@ -9,7 +9,7 @@
 	gargoyle_header_footer -m -c "internal.css" -j gargoyle_header_footer -m -c "internal.css"
 %>
 	<strong><span id="plot_title" style="margin-left:10px;"></span></strong>
-	<embed id="bandwidth_plot" style="margin-left:10px; margin-right:10px; width:800px; height:600px;" src="bandwidth.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed>
+	<embed id="bandwidth_plot" style="margin-left:10px; margin-right:10px; width:800px; height:600px;" src="bandwidth.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed>
 
 </body>
 </html>

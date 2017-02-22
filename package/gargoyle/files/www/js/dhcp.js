@@ -123,7 +123,7 @@ function createEditButton()
 {
 	var editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editStatic;
 	return editButton;
 }
@@ -135,7 +135,7 @@ function resetData()
 	for(rowIndex=0; rowIndex < staticIpTableData.length ; rowIndex++)
 	{
 		var rowData = staticIpTableData[rowIndex];
-		rowData.push(createEditButton());
+		if(rowData.length<4){rowData.push(createEditButton());}
 		staticIpTableData[rowIndex] = rowData;
 	}
 	columnNames=[UI.HsNm, 'MAC', 'IP', ''];
@@ -403,14 +403,14 @@ function editStatic()
 		yCoor = window.top + 225;
 	}
 
-	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
 
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
 

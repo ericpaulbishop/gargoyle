@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for backup.sh html elements
  */
 
+bkS.mBackup="Sicherung / Wiederherstellung";
 bkS.CurrC="Aktuelle Konfiguration sichern";
 bkS.RestC="Konfiguration wiederherstellen";
 bkS.DfltC="Defaultkonfiguration wiederherstellen";

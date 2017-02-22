@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for basic.sh html elements
  */
 
+basicS.mBasic="基本设置";
 basicS.DCfgSect="设备配置";
 basicS.CfgDev="将设备设置为";
 basicS.DvGtwy="网关（默认）";
@@ -80,6 +81,10 @@ basicS.CustMTU="使用自定义的MTU";
 basicS.LANSec="本地网络/LAN";
 basicS.DfltDNS="使用ISP指定的默认DNS服务器";
 basicS.OpnSrvs="OpenDNS服务器";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="谷歌DNS服务器";
 basicS.Srvr="服务器";
 basicS.SrvPt="服务器端口";

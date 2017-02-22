@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Doplnky";
 pgS.PgOpt="Možnosti doplnku";
 pgS.PRoot="Root doplnku";
 pgS.RDrv="Root disk";

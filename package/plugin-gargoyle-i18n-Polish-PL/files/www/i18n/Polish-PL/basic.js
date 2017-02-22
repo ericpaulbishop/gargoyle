@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for basic.sh html elements
  */
 
+basicS.mBasic="Podstawowa";
 basicS.DCfgSect="Konfiguracja urządzenia";
 basicS.CfgDev="Urządzenie pracuje jako";
 basicS.DvGtwy="Brama sieciowa (domyślnie)";
@@ -80,6 +81,10 @@ basicS.CustMTU="Użyj innego MTU";
 basicS.LANSec="Sieć lokalna / LAN";
 basicS.DfltDNS="Domyślne serwery DNS od ISP";
 basicS.OpnSrvs="OpenDNS";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Google";
 basicS.Srvr="serwer";
 basicS.SrvPt="Port serwera";
@@ -128,5 +133,6 @@ basicS.NoDv="Nie znaleziono urządzeń";
 basicS.WANIntr="Interfejs WAN";
 basicS.Mo3gQMI="Modem USB (QMI)";
 basicS.Mo3gNCM="Modem USB (NCM)";
+basicS.Mo3gMBIM="Modem USB (MBIM)";
 basicS.Mo3gHiLink="Modem USB (HiLink, RNDIS)";
 basicS.Dfult="Domyślny";

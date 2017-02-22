@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Klient Tor";
 torS.TorC="Klient Tor";
 torS.EnByHost="Ustawiony oddzielnie dla każdego adresu IP";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for backup.sh html elements
  */
 
+bkS.mBackup="备份与恢复";
 bkS.CurrC="备份当前配置";
 bkS.RestC="恢复旧的配置";
 bkS.DfltC="恢复默认配置";

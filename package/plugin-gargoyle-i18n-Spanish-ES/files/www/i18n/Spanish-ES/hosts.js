@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Equipos Conectados";
 hostsStr.RefreshR="Frecuencia de actualización";
 hostsStr.RInfo="Este valor especifica la frecuencia con la que se actualizan los datos en esta página";
 hostsStr.CurrLeases="Asignaciones DHCP Actuales";

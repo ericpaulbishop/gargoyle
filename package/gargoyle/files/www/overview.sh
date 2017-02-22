@@ -83,157 +83,211 @@
 		CSQ="-";
 	fi
 	echo "var csq='$CSQ';"
-	
+
 	echo "var temps = new Array();"
 	/usr/lib/gargoyle/tempinfo.sh
 %>
 //-->
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ overview.Sts %></legend>
+<h1 class="page-header"><%~ overview.Sts %></h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div id="device_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mDevice %></h3>
+			</div>
 
-	<div id="device_container">
-		<div>
-			<span class='leftcolumn'><%~ DNam %>:</span><span id="device_name" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ GVer %>:</span><span id="gargoyle_version" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ Modl %>:</span><span id="device_model" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ DevC %>:</span><span id="device_config" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ MemU %>:</span><span id="memory" class='rightcolumn'></span>
-		</div>
-		<div id="swap_container">
-			<span class='leftcolumn'><%~ SwMemU %>:</span><span id="swap" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ Conns %>:</span><span id="connections" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ CPUAvg %>:</span><span id="load_avg" class='rightcolumn'></span><span>&nbsp;&nbsp;(1/5/15 <%~ minutes %>)</span>
-		</div>
-		<div id="temp_container">
-		<div>
-			<span class='leftcolumn'><%~ TEMPcpu %>:</span><span id="temp_cpu" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ TEMPmem %>:</span><span id="temp_mem" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ TEMPwifi %>:</span><span id="temp_wifi" class='rightcolumn'></span><span>&nbsp;&nbsp;&deg;C</span>
-		</div>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="time_container">
-		<div>
-			<span class='leftcolumn'><%~ Uptm %>:</span><span id="uptime" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ CDaT %>:</span><span id="current_time" class='rightcolumn'></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="bridge_container">
-		<div>
-			<span class='leftcolumn'><%~ BrIPA %>:</span><span id="bridge_ip" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ BrNMsk %>:</span><span id="bridge_mask" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ BrMAdd %>:</span><span id="bridge_mac" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ LGtwy %>:</span><span id="bridge_gateway" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ Cvia %>:</span><span id="bridge_mode" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ BrID %>:</span><span id="bridge_ssid" class='rightcolumn'></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="wan_container">
-		<div>
-			<span class='leftcolumn'><%~ WIPA %>:</span><span id="wan_ip" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ WNmsk %>:</span><span id="wan_mask" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ WMAdd %>:</span><span id="wan_mac" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ WGtwy %>:</span><span id="wan_gateway" class='rightcolumn'></span>
-		</div>
-		<div id="wan_dns_container">
-			<span class='leftcolumn'><%~ WDNS %>:</span><span id="wan_dns" class='rightcolumn'></span>
-		</div>
-		<div id="wan_pppoe_container">
-			<span class='leftcolumn'><%~ WUptm %>:</span><span id="wan_pppoe_uptime" class='rightcolumn'></span>
-		</div>
-		<div id="wan_3g_container">
-			<span class='leftcolumn'><%~ W3GSS %>:</span><span id="wan_3g" class='rightcolumn'></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="lan_container">
-		<div>
-			<span class='leftcolumn'><%~ LIPA %>:</span><span id="lan_ip" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ LNmsk %>:</span><span id="lan_mask" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ LMAdd %>:</span><span id="lan_mac" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class="rightcolumnonly"><div id="ports_table_container"></div></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="wifi_container">
-		<div>
-			<span class='leftcolumn'><%~ WlMod %>:</span><span id="wireless_mode" class='rightcolumn'></span>
-		</div>
-		<div id="wireless_mac_div">
-			<span class='leftcolumn'><%~ WlMAdd %>:</span><span id="wireless_mac" class='rightcolumn'></span>
-		</div>
-		<div id="wireless_apssid_div">
-			<span class='leftcolumn' id="wireless_apssid_label"><%~ APID %>:</span><span id="wireless_apssid" class='rightcolumn'></span>
-		</div>
-		<div id="wireless_apssid_5ghz_div">
-			<span class='leftcolumn' id="wireless_apssid_5ghz_label"><%~ F5GID %>:</span><span id="wireless_apssid_5ghz" class='rightcolumn'></span>
-		</div>
-		<div id="wireless_otherssid_div">
-			<span class='leftcolumn' id="wireless_otherssid_label"><%~ IDJoin %>:</span><span id="wireless_otherssid" class='rightcolumn'></span>
-		</div>
-		<div class="internal_divider"></div>
-	</div>
-
-	<div id="services_container">
-		<div>
-			<span class='leftcolumn'><%~ QUp %>:</span><span id="qos_upload" class='rightcolumn'></span>
-		</div>
-		<div>
-			<span class='leftcolumn'><%~ QDwn %>:</span><span id="qos_download" class='rightcolumn'></span>
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item"><span class="list-group-item-title"><%~ DNam %>:</span><span id="device_name"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ GVer %>:</span><span id="gargoyle_version"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ Modl %>:</span><span id="device_model"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ DevC %>:</span><span id="device_config"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ MemU %>:</span><span id="memory"></span></li>
+					<li id="swap_container" class="list-group-item"><span class="list-group-item-title"><%~ SwMemU %>:</span><span id="swap"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ Conns %>:</span><span id="connections"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ CPUAvg %>:</span><span><span id="load_avg"></span><span>&nbsp;(1/5/15 <%~ minutes %>)</span></span></li>
+					<li id="temp_container" class="list-group-item">
+						<div><%~ TEMPcpu %>:<span><span id="temp_cpu"></span><span>&nbsp;&deg;C</span></span></div>
+						<div><%~ TEMPmem %>:<span><span id="temp_mem"></span><span>&nbsp;&deg;C</span></span></div>
+						<div><%~ TEMPwifi %>:<span><span id="temp_wifi"></span><span>&nbsp;&deg;C</span></span></div>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</div>
 
-</fieldset>
+	<div class="col-lg-6">
+		<div id="wan_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mWAN %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item"><span class="list-group-item-title"><%~ WIPA %>:</span><span id="wan_ip"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ WNmsk %>:</span><span id="wan_mask"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ WMAdd %>:</span><span id="wan_mac"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ WGtwy %>:</span><span id="wan_gateway"></span></li>
+					<li id="wan_dns_container" class="list-group-item"><span class="list-group-item-title"><%~ WDNS %>:</span><span id="wan_dns"></span></li>
+					<li id="wan_pppoe_container"class="list-group-item"><span class="list-group-item-title"><%~ WUptm %>:</span><span id="wan_pppoe_uptime"></span></li>
+					<li id="wan_3g_container" class="list-group-item"><span class="list-group-item-title"><%~ W3GSS %>:</span><span id="wan_3g"></span></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-6">
+		<div id="lan_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mLAN %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item"><span class="list-group-item-title"><%~ LIPA %>:</span><span id="lan_ip"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ LNmsk %>:</span><span id="lan_mask"></span></li>
+					<li class="list-group-item"><span class="list-group-item-title"><%~ LMAdd %>:</span><span id="lan_mac"></span></li>
+				</ul>
+				<div id="ports_table_container" class="table-responsive"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
+		<div id="wifi_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mWireless %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ WlMod %>:</span>
+						<span id="wireless_mode"></span>
+					</li>
+
+					<li id="wireless_mac_div" class="list-group-item">
+						<span class="list-group-item-title"><%~ WlMAdd %>:</span>
+						<span id="wireless_mac"></span>
+					</li>
+
+					<li id="wireless_apssid_div" class="list-group-item">
+						<span id="wireless_apssid_label" class="list-group-item-title"><%~ APID %>:</span>
+						<span id="wireless_apssid"></span>
+					</li>
+
+					<li id="wireless_apssid_5ghz_div" class="list-group-item">
+						<span id="wireless_apssid_5ghz_label" class="list-group-item-title"><%~ F5GID %>:</span>
+						<span id="wireless_apssid_5ghz"></span>
+					</li>
+
+					<li id="wireless_otherssid_div" class="list-group-item">
+						<span class="list-group-item-title"><%~ IDJoin %>:</span>
+						<span id="wireless_otherssid"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
+		<div id="bridge_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mBridge %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ BrRIP %>:</span>
+						<span id="bridge_relay_ip"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ BrIPA %>:</span>
+						<span id="bridge_ip"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ LGtwy %>:</span>
+						<span id="bridge_gateway"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ LNmsk %>:</span>
+						<span id="bridge_mask"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ BrMAdd %></span>
+						<span id="bridge_mac"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ Cvia %>:</span>
+						<span id="bridge_mode"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ BrID %>:</span>
+						<span id="bridge_ssid"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-6">
+		<div id="time_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mTime %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ Uptm %>:</span>
+						<span id="uptime"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ CDaT %>:</span>
+						<span id="current_time"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
+		<div id="services_container" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ overview.mServices %></h3>
+			</div>
+
+			<div class="panel-body">
+				<ul class="list-group">
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ QUp %>:</span>
+						<span id="qos_upload"></span>
+					</li>
+
+					<li class="list-group-item">
+						<span class="list-group-item-title"><%~ QDwn %>:</span>
+						<span id="qos_download"></span>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+</div>
 
 <script>
 <!--

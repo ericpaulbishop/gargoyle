@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for access.sh html elements
  */
 
+accessStr.mAccess="Acceso al Enrutador";
 accessStr.Section="Acceso a la Interfaz Web";
 accessStr.WebProtocol="Protocolo para la Administración Web";
 accessStr.LocalPort="Puerto HTTP Local";

@@ -8,10 +8,10 @@
 -->
 <script xlink:href="js/svg_bandwidth.js"/>
 
-<rect id='graph-border' x='1' y='1' width='450' height='300' fill='none' stroke='white' stroke-width='1px' shape-rendering="crispEdges"/>
+<rect id="graph-border" x="1" y="1" width="450" height="300" fill="none" stroke="white" stroke-width="1px" shape-rendering="crispEdges"/>
 
-<path id="x-minor-ticks" stroke='gray' fill='none' stroke-width="1px" opacity=".5" shape-rendering="crispEdges"/>
-<path id="x-major-ticks" stroke='black' fill='none' stroke-width="2px" opacity="1" shape-rendering="crispEdges"/>
+<path id="x-minor-ticks" stroke="gray" fill="none" stroke-width="1px" opacity=".5" shape-rendering="crispEdges"/>
+<path id="x-major-ticks" stroke="black" fill="none" stroke-width="2px" opacity="1" shape-rendering="crispEdges"/>
 <text id="major-xtick-label1" text-anchor="middle" font-family="serif" font-size="14px">.</text>
 <text id="major-xtick-label2" text-anchor="middle" font-family="serif" font-size="14px">.</text>
 <text id="major-xtick-label3" text-anchor="middle" font-family="serif" font-size="14px">.</text>
@@ -23,7 +23,7 @@
 <text id="major-xtick-label9" text-anchor="middle" font-family="serif" font-size="14px">.</text>
 <text id="major-xtick-label10" text-anchor="middle" font-family="serif" font-size="14px">.</text>
 
-<path id="yticks" stroke='gray' fill='none' stroke-width="1px" opacity=".5" shape-rendering="crispEdges"/>
+<path id="yticks" stroke="gray" fill="none" stroke-width="1px" opacity=".5" shape-rendering="crispEdges"/>
 <text id="ytick-label1" font-family="serif" font-size="14px">.</text>
 <text id="ytick-label2" font-family="serif" font-size="14px">.</text>
 <text id="ytick-label3" font-family="serif" font-size="14px">.</text>
@@ -36,8 +36,8 @@
 <use xlink:href="#y-unit-path" fill="none" opacity="0"/>
 <text font-family="serif" font-size="18px" id="y-unit-container"><textPath id="y-units" xlink:href="#y-unit-path">MByte / day</textPath></text>
 
-<polyline id="plot1" stroke-width="1px" stroke='blue' fill="blue" opacity=".75" fill-opacity=".25"/>
-<polyline id="plot2" stroke-width="1px" stroke='red' fill="red" opacity=".75" fill-opacity=".25"/>
-<polyline id="plot3" stroke-width="1px" stroke='green' fill="green" opacity=".75" fill-opacity=".25"/>
+<polyline id="plot1" stroke-width="1px" stroke="blue" fill="blue" opacity=".75" fill-opacity=".25"/>
+<polyline id="plot2" stroke-width="1px" stroke="red" fill="red" opacity=".75" fill-opacity=".25"/>
+<polyline id="plot3" stroke-width="1px" stroke="green" fill="green" opacity=".75" fill-opacity=".25"/>
 
 </svg>

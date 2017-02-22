@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Slovak-SK text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS (sťahovanie)";
+qosStr.mQUl="QoS (nahrávanie)";
 qosStr.URSection="QoS (nahrávanie) -- klasifikačné pravidlá";
 qosStr.DRSection="QoS (sťahovanie) -- klasifikačné pravidlá";
 qosStr.UCSection="QoS (nahrávanie) -- servisné triedy";
@@ -103,6 +105,7 @@ qosStr.ZERO="nula";
 qosStr.YES="Áno";
 
 //qos_distribution.sh
+qosStr.mQOS="Distribúcia QoS";
 qosStr.UBSect="QoS rozdelenie šírky pásma pre nahrávanie";
 qosStr.DBSect="QoS rozdelenie šírky pásma pre sťahovanie";
 qosStr.uTFrm="Časový rámec pre nahrávanie";

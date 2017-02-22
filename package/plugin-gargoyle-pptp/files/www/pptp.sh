@@ -16,49 +16,66 @@
 	var uci = uciOriginal.clone();
 </script>
 
-<fieldset id="pptp_config_fieldset">
-	<legend class="sectionheader"><%~ pptp.PCfg %></legend>
-	<div id= "pptp_config_container">
-		<label class='leftcolumn' for='pptp_config' id='pptp_config_label'><%~ PCfg %>:</label>
-		<select class='rightcolumn' id='pptp_config' onchange='setpptpVisibility()'>
-			<option value='disabled'><%~ PDis %></option>
-			<option value='client'><%~ PClt %></option>
-		</select>
+<h1 class="page-header"><%~ pptp.PCfg %></h1>
+<div class="row">
+	<div id="pptp_config_fieldset" class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ pptp.PCfg %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="pptp_config_container" class="row form-group">
+					<label class="col-xs-5" for='pptp_config' id='pptp_config_label'><%~ PCfg %>:</label>
+					<span class="col-xs-7">
+						<select id='pptp_config' class="form-control" onchange='setpptpVisibility()'>
+							<option value='disabled'><%~ PDis %></option>
+							<option value='client'><%~ PClt %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id='pptp_config_status_container' class="row form-group" style="display:none">
+					<span class="col-xs-5"><%~ PSts %>:</span>
+					<span class="col-xs-7" id='pptp_config_status'></span>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div id='pptp_config_status_container' style="display:none" >
-		<span class='leftcolumn'><%~ PSts %>:</span>
-		<span class='rightcolumn' id='pptp_config_status'></span>
+	<div id="pptp_client_fieldset" class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ PClt %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="pptp_reconnect_button" class="btn btn-primary" onclick="pptpReconnect()"><%~ ReCnt %></span>
+				</div>
+
+				<div id='pptp_server_container' class="row form-group">
+					<label class="col-xs-5" for='pptp_server' id='pptp_server_label'><%~ PHostNm %>:</label>
+					<span class="col-xs-7"><input type='text' name='pptp_server' id='pptp_server' class="form-control" size='20' maxlength='50' /></span>
+				</div>
+
+				<div id='pptp_user_container' class="row form-group">
+					<label class="col-xs-5" for='pptp_username' id='pptp_username_label'><%~ PUser %>:</label>
+					<span class="col-xs-7"><input type='text' id='pptp_username' class="form-control" size='20' maxlength='50'/></span>
+				</div>
+
+				<div id='pptp_password_container' class="row form-group">
+					<label class="col-xs-5" for='pptp_password' id='pptp_password_label'><%~ PPass %>:</label>
+					<span class="col-xs-7"><input type='text' id='pptp_password' class="form-control" size='20' maxlength='50'/></span>
+				</div>
+			</div>
+		</div>
 	</div>
-</fieldset>
+</div>
 
-<fieldset id="pptp_client_fieldset">
-	<legend class="sectionheader"><%~ PClt %></legend>
-
-	<div class='rightcolumnonly' style="margin-bottom:15px">
-		<input type='button' id="pptp_reconnect_button" value="<%~ ReCnt %>" class="default_button" onclick="pptpReconnect()" />
-	</div>
-
-	<div id='pptp_server_container'>
-		<label class='leftcolumn' for='pptp_server' id='pptp_server_label'><%~ PHostNm %>:</label>
-		<input type='text' class='rightcolumn' name='pptp_server' id='pptp_server' size='20' maxlength='50' />
-	</div>
-
-	<div id='pptp_user_container'>
-		<label class='leftcolumn' for='pptp_username' id='pptp_username_label'><%~ PUser %>:</label>
-		<input type='text' id='pptp_username'  size='20' maxlength='50'/>
-	</div>
-
-	<div id='pptp_password_container'>
-		<label class='leftcolumn' for='pptp_password' id='pptp_password_label'><%~ PPass %>:</label>
-		<input type='text' id='pptp_password'  size='20' maxlength='50'/>
-	</div>
-
-</fieldset>
-
-<div id="bottom_button_container">
-	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
 <script>

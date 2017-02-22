@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for plugins.sh html elements
  */
 
+pgS.mPlugins="Plugins";
 pgS.PgOpt="Plugin Optionen";
 pgS.PRoot="Plugin Root";
 pgS.RDrv="Root Laufwerk";

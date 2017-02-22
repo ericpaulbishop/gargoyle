@@ -6,44 +6,65 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "backup" -c "internal.css" -j "backup.js" -z "backup.js" network 
+	gargoyle_header_footer -h -s "system" -p "backup" -c "internal.css" -j "backup.js" -z "backup.js" network
 %>
-
-<fieldset  id="backup_section">
-	<legend class="sectionheader"><%~ backup.CurrC %></legend>
-	<div>
-		<span class='leftcolumn'><input id="backup_button" type='button' class="default_button" value="<%~ GetBackup %>" onclick="getBackup()"/></span>
+<h1 class="page-header"><%~ backup.mBackup %></h1>
+<div class="row">
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ backup.CurrC %></h3>
+			</div>
+			<div id="backup_section" class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="backup_button" class="btn btn-info btn-lg" onclick="getBackup()"><%~ GetBackup %></button></span>
+				</div>
+			</div>
+		</div>
 	</div>
-</fieldset>
 
-<fieldset id="restore_section">
-	<legend class="sectionheader"><%~ RestC %></legend>
-	<div>
-		<form id='restore_form' enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
-			<label class='leftcolumn'><%~ SelOF %>:</label>
-			<input class='rightcolumn' type="file" id="restore_file" name="restore_file" />
-			<input id='restore_hash' name="hash" type='hidden' value='' />
-		</form>
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ RestC %></h3>
+			</div>
+			<div id="restore_section" class="panel-body">
+				<form id="restore_form" enctype="multipart/form-data" method="post" action="utility/do_restore.sh" target="do_restore">
+					<div class="row form-group">
+						<label class="col-xs-5"><%~ SelOF %>:</label>
+						<span class="col-xs-7"><input type="file" id="restore_file" name="restore_file" /></span>
+						<input id="restore_hash" name="hash" type="hidden" value=""/>
+					</div>
+					<br />
+				</form>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="restore_button" class="btn btn-warning btn-lg" onclick="doRestore()"><%~ RestoreConfig %></button></span>
+				</div>
+				<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe>
+			</div>
+		</div>
 	</div>
-	<div>
-		<span class='leftcolumn'><input id="restore_button" type='button' class="default_button" value="<%~ RestoreConfig %>" onclick="doRestore()"/></span>
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ DfltC %></h3>
+			</div>
+			<div id="restore_original_section" class="panel-body">
+				<form id="restore_original_form" enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
+					<input id="restore_original_hash" name="hash" type="hidden" value=""/>
+				</form>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="restore_original_button" class="btn btn-danger btn-lg" onclick="doDefaultRestore()"><%~ RestoreDefault %></button></span>
+				</div>
+				<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe>
+			</div>
+		</div>
 	</div>
-	<iframe id="do_restore" name="do_restore" src="#" style="display:none"></iframe> 
 
-</fieldset>
-
-<fieldset id="restore_original_section">
-	<legend class="sectionheader"><%~ DfltC %></legend>
-	<form id='restore_original_form' enctype="multipart/form-data" method="post" action="utility/do_restore_original.sh" target="do_restore_original">
-			<input id='restore_original_hash' name="hash" type='hidden' value='' />
-	</form>
-	<div>
-		<span class='leftcolumn'><input id="restore_original_button" type='button' class="default_button" value="<%~ RestoreDefault %>" onclick="doDefaultRestore()"/></span>
-	</div>
-	<iframe id="do_restore_original" name="do_restore_original" src="#" style="display:none"></iframe>
-</fieldset>
-<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
-
+	<iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
+</div>
 <%
 	gargoyle_header_footer -f -s "system" -p "backup"
 %>
+

@@ -9,15 +9,26 @@
 	gargoyle_header_footer -m  -c "internal.css" -j "usb_storage.js table.js" -z "usb_storage.js" network
 %>
 
-<fieldset id="edit_container">
-	<legend class="sectionheader"><%~ usb_storage.EshDS %></legend>
+<div id="edit_container" class="row">
 
-	<div style="height: 500px; overflow-y: scroll;">
-		<%in templates/usb_storage_template %>
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ usb_storage.EshDS %></h3>
+			</div>
+
+			<div class="panel-body">
+
+				<div>
+					<%in templates/usb_storage_template %>
+				</div>
+
+			</div>
+		</div>
 	</div>
-
-</fieldset>
-<div id="bottom_button_container"></div>
+</div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Bandwidth Usage";
 bndwS.GOpSect="Bandwidth Graph Display Options";
 bndwS.TFrm="Time Frame";
 bndwS.year="year";

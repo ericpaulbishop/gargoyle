@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="Переадресация портов";
 prtS.PISect="Перенаправление портов";
 prtS.PRSect="Перенаправление диапазона портов";
 prtS.ForIPort="Индивидуальное перенаправление портов из внешней во внутренюю сеть";

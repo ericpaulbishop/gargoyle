@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for port_forwarding(single,multi).sh html elements
  */
 
+prtS.mPFwding="端口转发";
 prtS.PISect="单个端口转发";
 prtS.PRSect="端口范围转发";
 prtS.ForIPort="从WAN端到LAN端转发单个端口";

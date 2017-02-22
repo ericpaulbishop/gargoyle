@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="Trasy";
 rtgS.ARSect="Aktywne trasy";
 rtgS.SRSect="Statyczne trasy";
 rtgS.ASRte="Statyczna trasa";

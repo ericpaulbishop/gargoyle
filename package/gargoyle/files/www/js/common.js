@@ -983,11 +983,11 @@ function setElementEnabled(element, enabled, defaultValue)
 		if(element.type == "text" || element.type == "textarea")
 		{
 			element.style.color="#000000";
-			element.className="" ;
+			element.className="form-control" ;
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
-			element.className="";
+			element.className="form-control";
 		}
 		else if(element.type == "button")
 		{
@@ -1002,17 +1002,17 @@ function setElementEnabled(element, enabled, defaultValue)
 		{
 			element.value=defaultValue;
 			element.style.color="#AAAAAA";
-			element.className="text_disabled";
+			element.className="form-control disabled";
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
 		{
 			setSelectedValue(element.id, defaultValue, element.ownerDocument);
-			element.className="select_disabled";
+			element.className="form-control disabled";
 		}
 		else if(element.type == "button")
 		{
 			var activeClassName = element.className.replace(/_button.*$/, "_button");
-			element.className= activeClassName + "_disabled";
+			element.className= activeClassName + " disabled";
 		}
 		else if(element.type == "file")
 		{
@@ -2426,9 +2426,9 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	var cancelButton = createInput("button", confirmWindow.document);
 
 	okButton.value         = UI.OK;
-	okButton.className     = "default_button";
+	okButton.className     = "btn btn-default";
 	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "default_button";
+	cancelButton.className = "btn btn-default";
 
 
 	runOnEditorLoaded = function ()
@@ -2756,7 +2756,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	{
 		b           = createInput("button", document);
 		b.value     = buttonNameList[bIndex];
-		b.className = "default_button"
+		b.className = "btn btn-default"
 		b.onclick   = function()
 		{
 			document.getElementById("wait_msg").removeChild(queryFieldset)
@@ -2793,4 +2793,15 @@ function reregisterTableSort()
     tsRegister();
     tsSetTable (args[0]);
     tsInit();
+}
+
+//Part of the new popups in GUI. Pass the parent element containing the "popup span"
+function togglePopup(popElement)
+{
+	var descendant = popElement.getElementsByTagName("span");
+	if (descendant.length != 1)
+	{
+		return null;
+	}
+	descendant[0].classList.toggle("show");
 }

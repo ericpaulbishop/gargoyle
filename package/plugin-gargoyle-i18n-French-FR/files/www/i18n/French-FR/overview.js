@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) French-FR text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Dispositif";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="WIFI";
+ovwS.mTime="Temps";
+ovwS.mServices="Prestations de Service";
+ovwS.mBridge="Bridge";
 ovwS.Sts="Statut";
 ovwS.DNam="Nom du matériel";
 ovwS.GVer="Version de Gargoyle";

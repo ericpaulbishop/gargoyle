@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for backup.sh html elements
  */
 
+bkS.mBackup="Zálohovanie / Obnova";
 bkS.CurrC="Zálohovanie aktuálnej konfigurácie";
 bkS.RestC="Obnovenie zo zálohovanej konfigurácia";
 bkS.DfltC="Obnovenie predvolenej konfigurácie";

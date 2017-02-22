@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for basic.sh html elements
  */
 
+basicS.mBasic="Основные настройки";
 basicS.DCfgSect="Настройки устройства";
 basicS.CfgDev="Режим работы устройства";
 basicS.DvGtwy="Шлюз (по-умолчанию)";
@@ -80,6 +81,10 @@ basicS.CustMTU="Пользовательское значение MTU";
 basicS.LANSec="Внутреняя сеть";
 basicS.DfltDNS="Адреса DNS-серверов предоставленные провайдером";
 basicS.OpnSrvs="Сервера OpenDNS";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Сервера Google DNS";
 basicS.Srvr="Сервер";
 basicS.SrvPt="Порт сервера";

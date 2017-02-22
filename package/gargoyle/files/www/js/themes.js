@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011-2013 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>  
- * and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * Copyright (c) 2011-2013 Eric Bishop and Cezary Jackiewicz <cezary@eko.one.pl>
+ * and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  *
  */
@@ -13,7 +13,7 @@ function createUseButton()
 {
 	var useButton = createInput("button");
 	useButton.value = UI.Select;
-	useButton.className="default_button";
+	useButton.className="btn btn-default";
 	useButton.onclick = useTheme;
 	return useButton;
 }

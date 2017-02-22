@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for basic.sh html elements
  */
 
+basicS.mBasic="Základy";
 basicS.DCfgSect="Konfigurácia zariadenia";
 basicS.CfgDev="Konfigurovať zariadenie ako";
 basicS.DvGtwy="Brána (štandardné)";
@@ -80,6 +81,10 @@ basicS.CustMTU="Použiť užívateľskú MTU";
 basicS.LANSec="Miestna Sieť / LAN";
 basicS.DfltDNS="Predvolené DNS servery od ISP";
 basicS.OpnSrvs="OpenDNS servery";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Google DNS servery";
 basicS.Srvr="Server";
 basicS.SrvPt="Server Port";

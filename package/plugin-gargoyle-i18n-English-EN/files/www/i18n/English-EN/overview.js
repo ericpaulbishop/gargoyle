@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) English-EN text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Device";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Wireless";
+ovwS.mTime="Time";
+ovwS.mServices="Services";
+ovwS.mBridge="Bridge";
 ovwS.Sts="Status";
 ovwS.DNam="Device Name";
 ovwS.GVer="Gargoyle Version";
@@ -14,6 +21,7 @@ ovwS.CPUAvg="CPU Load Averages";
 ovwS.Uptm="Uptime";
 ovwS.CDaT="Current Date &amp; Time";
 ovwS.BrIPA="Bridge IP Address";
+ovwS.BrRIP="Relay IP Address";
 ovwS.BrNMsk="Bridge Netmask";
 ovwS.BrMAdd="Bridge MAC Address";
 ovwS.LGtwy="LAN Gateway IP";
@@ -46,6 +54,6 @@ ovwS.Clnt="Client";
 ovwS.Gtwy="Gateway";
 ovwS.WBrgR="Wireless Bridge/Repeater";
 ovwS.Discon="Disconnected";
-ovwS.T2p4GID="2.4 GHz Access Point SSID";
+ovwS.T2p4GID="2.4GHz Access Point SSID";
 ovwS.ClBr="Client Bridge";
 ovwS.Port="Port";

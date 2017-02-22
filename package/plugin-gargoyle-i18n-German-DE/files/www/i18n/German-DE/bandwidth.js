@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Bandbreitennutzung";
 bndwS.GOpSect="Anzeigeoptionen für die genutzte Bandbreite.";
 bndwS.TFrm="Zeitrahmen";
 bndwS.year="Jahr";

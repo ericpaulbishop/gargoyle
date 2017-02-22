@@ -19,70 +19,79 @@
 %>
 //-->
 </script>
-<fieldset id="dlna">
-	<legend class="sectionheader"><%~ minidlna.DLNA %></legend>
 
-	<div class="nocolumn">
-		<input id="dlna_enable" type="checkbox" />
-		<label id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
+<h1 class="page-header"><%~ minidlna.DLNA %></h1>
+<div id="dlna" class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-1"><input id="dlna_enable" type="checkbox" /></span>
+					<label class="col-xs-11" id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="status_button" class="btn btn-default" onclick='statusDlna()'><%~ StatDLNA %></button></span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="rescan_button" class="btn btn-default" onclick='rescanMedia()'><%~ RescanDLNA %></button></span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="dlna_name_label" for="dlna_name"><%~ DLNASName %>:</label>
+					<span class="col-xs-7"><input id="dlna_name" type="text" size='30' class="form-control" /></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-1"><input id="dlna_strict" type="checkbox" /></span>
+					<label class="col-xs-11" id="dlna_strict_label" for="dlna_strict"><%~ DLNAStr %>:</label>
+				</div>
+
+				<div class="internal_divider"></div>
+
+				<div class="form-group">
+					<div class="row form-group">
+						<label class="col-xs-5" id="media_type_label" for="media_type"><%~ DLNAMType %>:</label>
+						<span class="col-xs-7">
+							<select id="media_type" class="form-control">
+								<option value=""><%~ DLNAAll %></a>
+								<option value="A"><%~ DLNAA %></a>
+								<option value="V"><%~ DLNAV %></a>
+								<option value="P"><%~ DLNAI %></a>
+							</select>
+						</span>
+					</div>
+
+					<div class="row form-group">
+						<label class="col-xs-5" id="drive_select_label" for="drive_select"><%~ DLNADrive %>:</label>
+						<span class="col-xs-7"><select id="drive_select" class="form-control"></select></span>
+					</div>
+
+					<div class="row form-group">
+						<label class="col-xs-5" id="media_dir_label" for="media_dir"><%~ DLNAMFolder %>:</label>
+						<span class="col-xs-7"><input type="text" id="media_dir" class="form-control" size='30'/></span>
+					</div>
+
+					<div class="row form-group">
+						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default" onclick="addNewMediaDir()"><%~ Add %></button></span>
+					</div>
+				</div>
+
+				<div class="internal_divider"></div>
+
+				<div id="sharing_current_heading_container">
+					<span style="text-decoration:underline;"><%~ DLNAFolders %>:</span>
+				</div>
+
+				<div id="media_table_container" class="table-responsive"></div>
+			</div>
+		</div>
 	</div>
+</div>
 
-	<div class="rightcolumnonly">
-		<input type='button' value="<%~ StatDLNA %>" id="status_button" class="default_button" onclick='statusDlna()' />
-	</div>
-	<div class="rightcolumnonly">
-		<input type='button' value="<%~ RescanDLNA %>" id="rescan_button" class="default_button" onclick='rescanMedia()' />
-	</div>
-
-	<div>
-		<label id="dlna_name_label" class="leftcolumn" for="dlna_name"><%~ DLNASName %>:</label>
-		<input id="dlna_name" class="rightcolumn" type="text" size='30' />
-	</div>
-
-	<div>
-		<label id="dlna_strict_label" class="leftcolumn" for="dlna_strict"><%~ DLNAStr %>:</label>
-		<input id="dlna_strict" class="rightcolumn" type="checkbox" />
-	</div>
-
-	<div class="internal_divider"></div>
-
-	<div>
-		<label class="leftcolumn" id="media_type_label" for="media_type"><%~ DLNAMType %>:</label>
-		<select id="media_type" class="rightcolumn">
-		<option value=""><%~ DLNAAll %></a>
-		<option value="A"><%~ DLNAA %></a>
-		<option value="V"><%~ DLNAV %></a>
-		<option value="P"><%~ DLNAI %></a>
-		</select>
-	</div>
-
-	<div>
-		<label class="leftcolumn" id="drive_select_label" for="drive_select"><%~ DLNADrive %>:</label>
-		<select id="drive_select" class="rightcolumn"></select>
-	</div>
-
-	<div>
-		<label class="leftcolumn" id="media_dir_label" for="media_dir"><%~ DLNAMFolder %>:</label>
-		<input type="text" id="media_dir" class="rightcolumn" size='30'/>
-	</div>
-
-	<div>
-		<input type="button" id="add_share_button" class="default_button" value='<%~ Add %>' onclick="addNewMediaDir()" />
-	</div>
-
-	<div class="internal_divider"></div>
-
-	<div id="sharing_current_heading_container">
-		<span class="nocolumn" style="text-decoration:underline;"><%~ DLNAFolders %>:</span>
-	</div>
-
-	<div id="media_table_container"></div>
-
-</fieldset>
-
-<div id="bottom_button_container">
-	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick='saveChanges()'><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick='resetData()'><%~ Reset %></button>
 </div>
 
 <script>

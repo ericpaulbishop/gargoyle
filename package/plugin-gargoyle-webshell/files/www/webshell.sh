@@ -9,16 +9,24 @@
 	gargoyle_header_footer -h -s "system" -p "webshell" -c "internal.css" -j "webshell.js"
 %>
 
-<fieldset id="webshell">
-	<legend class="sectionheader"><%~ webshell.Webs %></legend>
-	<label class='leftcolumn' for='cmd' id='cmd_label'><%~ Cmd %>:</label>
-	<span class="rightcolumn">
-		<input id="cmd" class="rightcolumn" onkeydown='checkKey(event)' type="text" size='80'/>
-		<input type='button' class='default_button' id='cmd_button' value='<%~ Exe %>' onclick='runCmd()' />
-	</span>
-	<span class="nocolumn"><em><%~ CmdWarn %></em></span>
-	<textarea style="width:100%" rows=30 id='output'></textarea>
-</fieldset>
+<h1 class="page-header"><%~ webshell.Webs %></h1>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" for='cmd' id='cmd_label'><%~ Cmd %>:</label>
+					<span class="col-xs-7">
+						<input id="cmd" class="form-control" onkeydown='checkKey(event)' type="text" size='80'/>
+						<button class='btn btn-primary' id='cmd_button' onclick='runCmd()'><%~ Exe %></button>
+					</span>
+					<div class="col-xs-12 alert alert-warning"><em><%~ CmdWarn %></em></div>
+				</div>
+				<textarea style="width:100%" rows=30 id='output'></textarea>
+			</div>
+		</div>
+	</div>
+</div>
 
 <%
 	gargoyle_header_footer -f -s "system" -p "webshell"

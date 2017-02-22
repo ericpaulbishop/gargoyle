@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for USB Storage html elements
  */
 
+usbSStr.mUSB="USB-устройства хранения данных";
 usbSStr.SDisk="Общие диски";
 usbSStr.Nomdsk="Не обнаружено присоеденённых USB-дисков";
 usbSStr.WFTP="Разрешить доступ к FTP из внешней сети";

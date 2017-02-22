@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for plugins.sh html elements
  */
 
+pgS.mPlguins="Дополнительные модули";
 pgS.PgOpt="Настройки дополнительных модулей";
 pgS.PRoot="Корневой каталог для плагинов";
 pgS.RDrv="Корневой диск";

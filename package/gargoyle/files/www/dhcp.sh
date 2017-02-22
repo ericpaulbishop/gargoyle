@@ -56,81 +56,101 @@ for (etherIndex in etherData)
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader">DHCP</legend>
 
-		<div id='dhcp_enabled_container'>
-			<div class='nocolumn'>
-				<input type='checkbox' id='dhcp_enabled' onclick="setEnabled(this.checked)" />
-				<label id='dhcp_enabled_label' for='dhcp_enabled'><%~ dhcp.SrvE %></label>
+<h1 class="page-header">DHCP</h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group" id="dhcp_enabled_container">
+					<span class="col-xs-1"><input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" /></span>
+					<label class="col-xs-11" id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
+				</div>
+
+				<div id="dhcp_range_container" class="row form-group">
+					<label class="col-xs-12" style="text-decoration:underline" for="dhcp_start"><%~ Drng %>:</label>
+				</div>
+
+				<div id="dhcp_start_container" class="row form-group">
+					<label class="col-xs-5" for="dhcp_start" id="dhcp_start_label"><%~ Strt %>:</label>
+					<span class="col-xs-7">
+						<% echo -n "$subnet" %>
+						<input type="text" class="form-control" id="dhcp_start" onkeyup="proofreadNumeric(this)" size="5" maxlength="3" />
+					</span>
+				</div>
+
+				<div id="dhcp_end_container" class="row form-group">
+					<label class="col-xs-5" for="dhcp_end" id="dhcp_end_label"><%~ End %>:</label>
+					<span class="col-xs-7">
+						<% echo -n "$subnet" %>
+						<input type="text" class="form-control" id="dhcp_end" onkeyup="proofreadNumeric(this)" size="5" maxlength="3" />
+					</span>
+				</div>
+
+				<div id="dhcp_lease_container" class="row form-group">
+					<label class="col-xs-5" for="dhcp_lease" id="dhcp_lease_label"><%~ LsTm %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" onkeyup="proofreadNumeric(this)" id="dhcp_lease" size="5" maxlength="4" />
+						<em>(<%~ hours %>)</em>
+					</span>
+				</div>
+
 			</div>
 		</div>
-
-		<div id='dhcp_range_container'>
-			<label class='nocolumn' for='dhcp_start'><%~ Drng %>:</label>
-		</div>
-		<div id='dhcp_start_container' class='indent'>
-			<label class='leftcolumn' for='dhcp_start' id='dhcp_start_label'><%~ Strt %>:</label>
-			<span class='rightcolumn'><% echo -n "$subnet" %></span>
-			<input type='text' class='rightcolumn' id='dhcp_start' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
-		</div>
-		<div id='dhcp_end_container' class='indent'>
-			<label class='leftcolumn' for='dhcp_end' id='dhcp_end_label'><%~ End %>:</label>
-			<span class='rightcolumn'><% echo -n "$subnet" %></span>
-			<input type='text' class='rightcolumn' id='dhcp_end' onkeyup='proofreadNumeric(this)' size='5' maxlength='3' />
-		</div>
-		<div id='dhcp_lease_container'>
-			<label class='leftcolumn' for='dhcp_lease' id='dhcp_lease_label'><%~ LsTm %>:</label>
-			<input type='text' class='rightcolumnindent' onkeyup='proofreadNumeric(this)' id='dhcp_lease' size='5' maxlength='4' />
-			<em>(<%~ hours %>)</em>
-		</div>
-
-	</fieldset>
-
-	<fieldset>
-		<legend class="sectionheader"><%~ SIPs %></legend>
-
-		<div id='block_mismatches_container'>
-			<div class='nocolumn'>
-				<input type='checkbox' id='block_mismatches' />
-				<label id='block_mismatch_label' for='block_mismatches'><%~ BlckM %></label>
-			</div>
-		</div>
-
-		<div id='staticip_add_heading_container'>
-			<label class='nocolumn' id='staticip_add_heading_label' style='text-decoration:underline'><%~ AdSIP %>:</label>
-		</div>
-		<div class='bottom_gap'>
-			<div id='staticip_add_container'>
-				<%in templates/static_ip_template %>
-			</div>
-			<div>
-				<select id="static_from_connected" onchange="staticFromConnected()" >
-					<option value="none"><%~ SelH %></option>
-				</select>
-			</div>
-		</div>
-
-		<div id='staticip_table_heading_container'>
-			<span class='nocolumn'><%~ AsSIP %>:</span>
-		</div>
-		<div class='indent'>
-			<div id='staticip_table_container' class="bottom_gap"></div>
-		</div>
-	</fieldset>
-
-	<div id="firefox3_bug_correct" style="display:none">
-		<input type='text' value='firefox3_bug' />
 	</div>
+</div>
 
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+<div class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SIPs %></h3>
+			</div>
+			<div class="panel-body">
+				<div id="block_mismatches_container" class="row form-group">
+					<span class="col-xs-1"><input type="checkbox" id="block_mismatches" /></span>
+					<label class="col-xs-11" id="block_mismatch_label" for="block_mismatches"><%~ BlckM %></label>
+				</div>
+
+				<div id="staticip_add_heading_container" class="row form-group">
+					<label class="col-xs-12" id="staticip_add_heading_label" style="text-decoration:underline"><%~ AdSIP %>:</label>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-xs-12 table-responsive" id="staticip_add_container">
+						<%in templates/static_ip_template %>
+					</div>
+					<div>
+						<span class="col-xs-12">
+							<select id="static_from_connected" class="form-control" onchange="staticFromConnected()">
+								<option value="none"><%~ SelH %></option>
+							</select>
+						</span>
+					</div>
+				</div>
+
+				<div id="staticip_table_heading_container" class="row form-group">
+					<span class="col-xs-12" style="text-decoration:underline"><%~ AsSIP %>:</span>
+				</div>
+
+				<div class="row form-group">
+					<div id="staticip_table_container" class="table-responsive col-xs-12"></div>
+				</div>
+			</div>
+		</div>
 	</div>
-</form>
+</div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<div id="firefox3_bug_correct" style="display:none">
+	<input type="text" value="firefox3_bug" />
+</div>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

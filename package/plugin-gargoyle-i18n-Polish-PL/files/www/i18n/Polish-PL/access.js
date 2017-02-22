@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for access.sh html elements
  */
 
+accessStr.mAccess="Dostęp do routera";
 accessStr.Section="Dostęp do panelu";
 accessStr.WebProtocol="Protokół dostępu";
 accessStr.LocalPort="Lokalny port HTTP";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Использование полосы пропускания";
 bndwS.GOpSect="Настройки отображения графиков";
 bndwS.TFrm="Временной отрезок";
 bndwS.year="год";

@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Spanish-ES text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Dispositivo";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Inalámbrico";
+ovwS.mTime="Hora";
+ovwS.mServices="Servicios";
+ovwS.mBridge="Puente";
 ovwS.Sts="Estado";
 ovwS.DNam="Nombre del Dispositivo";
 ovwS.GVer="Versión de Gargoyle";
@@ -32,7 +39,7 @@ ovwS.W3GSS="Fuerza de la Señal de WAN (3G)";
 ovwS.WlMod="Modo Inalámbrico";
 ovwS.WlMAdd="Dirección MAC Inalámbrica";
 ovwS.APID="SSID del Punto de Acceso";
-ovwS.F5GID="SSID del Punto de Acceso de 5 GHz";
+ovwS.F5GID="SSID del Punto de Acceso de 5GHz";
 ovwS.IDJoin="Cliente Unido a SSID";
 ovwS.QUp="QoS de Subida";
 ovwS.QDwn="QoS de Descarga";
@@ -43,6 +50,6 @@ ovwS.Clnt="Cliente";
 ovwS.Gtwy="Puerta de Enlace";
 ovwS.WBrgR="Puente Inalámbrico/Repetidor";
 ovwS.Discon="Desconectado";
-ovwS.T2p4GID="SSID del Punto de Acceso de 2.4 GHz";
+ovwS.T2p4GID="SSID del Punto de Acceso de 2.4GHz";
 ovwS.ClBr="Puente Cliente";
 ovwS.Port="Puerto";

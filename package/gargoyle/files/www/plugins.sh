@@ -43,71 +43,107 @@
 %>
 
 </script>
-<form>
 
-	<fieldset id="plugin_options">
-		<legend class="sectionheader"><%~ plugins.PgOpt %></legend>
-
-		<div>
-			<span class="narrowleftcolumn"><%~ PRoot %>:</span>
-			<span id="plugin_root_static" class="widerightcolumn">/plugin_root</span>
-			<input type="text" id="plugin_root_text" class="widerightcolumn" style="display:none" />
-		</div>
-		<div>
-			<span id="plugin_root_drive_static" class="widerightcolumnonly" for="plugin_root_drive_select"><%~ RDrv %></span>
-			<select id="plugin_root_drive_select" class="widerightcolumnonly" onchange="updatePluginRootDisplay()" style="display:none"></select>
-		</div>
-		<div id="plugin_root_change_container" style="display:none" >
-			<span class="widerightcolumnonly" >
-				<input type="button" class="default_button" value="<%~ Chroot %>" onclick="changePluginRoot()" />
-			</span>
-		</div>
-		<br/>
-
-		<div>
-			<span class="leftcolumn"><%~ PgSrc %>:</span>
-		</div>
-		<div id="package_source_table_container" style="margin-left:5px;" ></div>
-		<div class="indent">
-			<div>
-				<label class="narrowleftcolumn" for="add_source_name"><%~ ANam %>:</label>
-				<input type="text" class="widerightcolumn" id="add_source_name" onkeyup="proofreadSourceName(this)" style="width:325px;"/>
-			</div>
-			<div>
-				<label class="narrowleftcolumn" for="add_source_url"><%~ Aurl %>:</label>
-				<input type="text" class="widerightcolumn" id="add_source_url" style="width:325px;"/>
+<h1 class="page-header"><%~ plugins.mPlugins %></h1>
+<div id="plugin_options" class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ plugins.PgOpt %></h3>
 			</div>
 
-			<span class="leftcolumn"><input type="button" class="default_button" id="add_source_button" value="<%~ APSrc %>" onclick="addPluginSource()" /></span>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-lg-6">
+						<div class="alert alert-info" role="alert">
+							<div class="row form-group">
+								<span class="col-xs-5"><%~ PRoot %>:</span>
+								<span class="col-xs-7" id="plugin_root_static">/plugin_root</span>
+								<span class="col-xs-7"><input type="text" id="plugin_root_text" style="display:none" /></span>
+							</div>
 
-		</div>
-	</fieldset>
+							<div class="row form-group">
+								<span class="col-xs-12" id="plugin_root_drive_static" for="plugin_root_drive_select"><%~ RDrv %></span>
+								<span class="col-xs-12"><select id="plugin_root_drive_select" class="form-control" onchange="updatePluginRootDisplay()" style="display:none"></select></span>
+							</div>
 
-	<fieldset id="plugin_list">
-		<legend class="sectionheader"><%~ PList %></legend>
-		<div id="bottom_button_container">
-			<input type='button' value='<%~ RfshP %>' id="update_button" class="bottom_button" onclick='updatePackagesList()' />
-		</div>
-		<span id="wan-warn" style="color:red;display:none"><%~ NoWan %></span>
-		<div>
-			<div id="languages_table_container" style="margin-left:5px" ></div>
-		</div>
-		<div>
-			<div id="themes_table_container" style="margin-left:5px" ></div>
-		</div>
-		<div>
-			<div id="packages_table_container" style="margin-left:5px" ></div>
-		</div>
-		<div id="no_packages" style='display:none;'>
-			<%~ NoPkg %>
-		</div>
-	</fieldset>
+							<div id="plugin_root_change_container" class="row form-group" style="display:none" >
+								<span class="col-xs-12"><button class="btn btn-warning" onclick="changePluginRoot()" /><%~ Chroot %></button></span>
+							</div>
+						</div>
+					</div>
+				</div>
 
-</form>
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="row form-group">
+							<h3 class="col-xs-12"><%~ PgSrc %>:</h3>
+						</div>
+
+						<div id="package_source_table_container" class="table-responsive"></div>
+
+						<div class="row form-group">
+							<label class="col-xs-5" for="add_source_name"><%~ ANam %>:</label>
+							<span class="col-xs-7"><input type="text" id="add_source_name" class="form-control" onkeyup="proofreadSourceName(this)"/></span>
+						</div>
+
+						<div class="row form-group">
+							<label class="col-xs-5" for="add_source_url"><%~ Aurl %>:</label>
+							<span class="col-xs-7"><input type="text" id="add_source_url" class="form-control" /></span>
+						</div>
+
+						<button id="add_source_button" class="btn btn-info" onclick="addPluginSource()" /><%~ APSrc %></button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="plugin_list" class="row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ PList %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12"><button id="update_button" class="btn btn-info btn-lg" onclick="updatePackagesList()" /><%~ RfshP %></button></span>
+				</div>
+
+				<div class="row form-group">
+					<span id="wan-warn" class="alert alert-warning" role="alert" style="display:none;"><%~ NoWan %></span>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div id="languages_table_container" class="table-responsive"></div>
+					</div>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div id="themes_table_container" class="table-responsive"></div>
+					</div>
+				</div>
+
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div id="packages_table_container" class="table-responsive"></div>
+					</div>
+				</div>
+
+				<div id="no_packages" style="display:none;">
+					<%~ NoPkg %>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 	resetData();
-
 </script>
 
 <%

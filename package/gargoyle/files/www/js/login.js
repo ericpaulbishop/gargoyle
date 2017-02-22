@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008,2009-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var logS=new Object(); //part of i18n
@@ -17,7 +17,7 @@ function doLogin()
 	else
 	{
 		setControlsEnabled(false, true, logS.Lging);
-		
+
 		sessionExpired=false;
 		passInvalid=false;
 		loggedOut=false;
@@ -41,13 +41,13 @@ function doLogin()
 						var cookie = cookieLines[cIndex].replace(/^.*ookie:/, "").replace(/\";.*$/, "");
 						if(cookie.match(/=/))
 						{
-							document.cookie=cookie;	
+							document.cookie=cookie;
 						}
 					}
 					window.location.href = window.location.href;
 				}
 				setControlsEnabled(true);
-					
+
 			}
 		}
 		runAjax("POST", "/utility/get_password_cookie.sh", param, stateChangeFunction);
@@ -73,14 +73,20 @@ function setStatusAndQuotas()
 	if(sessionExpired)
 	{
 		setChildText("login_status", logS.SExp, "red");
+		login_status.style.display = "";
+		login_status.className = "alert alert-danger";
 	}
 	else if(passInvalid)
 	{
 		setChildText("login_status", logS.InvP, "red");
+		login_status.style.display = "";
+		login_status.className = "alert alert-danger";
 	}
 	else if(loggedOut)
 	{
 		setChildText("login_status", logS.LOut, "black");
+		login_status.style.display = "";
+		login_status.className = "alert alert-danger";
 	}
 	else
 	{
@@ -150,7 +156,7 @@ function clearFieldset(fieldsetId)
 		while(fieldsetEl.firstChild != null)
 		{
 			var rmEl = fieldsetEl.firstChild;
-			sectionHeader = rmEl.className == "sectionheader" ? rmEl : sectionHeader;
+			sectionHeader = rmEl.className == "panel-heading" || rmEl.className == "panel-title" ? rmEl : sectionHeader;
 			fieldsetEl.removeChild(rmEl);
 		}
 		if(sectionHeader != null)
@@ -175,8 +181,9 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 	var pct = quotaPercents[quotaId][ip];
 	var lim = quotaLimits[quotaId][ip];
 
-	
+
 	var parentDiv = document.createElement("div");
+	parentDiv.className="panel-body";
 	if(quotaNumber > 0)
 	{
 		var nameSpan = document.createElement("span");
@@ -191,7 +198,7 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 		var timeSpan = document.createElement("span");
 		var timeActiveSpan = document.createElement("span");
 		var timeParamSpan = document.createElement("span");
-		
+
 		timeActiveSpan.appendChild(document.createTextNode("Active " + (quotaTimes[quotaId][3] == "only" ? "Only:" : "All Times Except:")));
 		timeActiveSpan.style.fontSize = normalFontParams[2];
 		timeActiveSpan.style.marginLeft="25px";
@@ -199,7 +206,7 @@ function createQuotaDiv(quotaId, fieldsetIp, quotaNumber, normalFontParams, used
 		timeActiveSpan.style.width="150px";
 		timeActiveSpan.style.cssFloat="left";
 		timeActiveSpan.style.styleFloat="left";
-		
+
 		timeParamSpan.appendChild(document.createTextNode(timeLines.shift()));
 		timeParamSpan.style.fontSize = normalFontParams[2];
 		timeParamSpan.style.marginLeft = "25px";
@@ -271,8 +278,8 @@ function timeParamsToLines(timeParameters)
        	var days = timeParameters[1];
 	var weekly = timeParameters[2];
 	var active = timeParameters[3];
-	
-	
+
+
 	var textList = [];
 	if(active == "always")
 	{
@@ -292,5 +299,3 @@ function timeParamsToLines(timeParameters)
 	}
 	return textList;
 }
-
-

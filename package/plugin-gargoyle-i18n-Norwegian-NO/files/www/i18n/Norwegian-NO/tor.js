@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Tor Anonymisering Klient";
 torS.TorC="Tor Klient";
 torS.EnByHost="Aktivert, Slått På Av Hver Klient";

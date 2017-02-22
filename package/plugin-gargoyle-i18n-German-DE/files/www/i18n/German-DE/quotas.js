@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) German-DE text strings for quotas.sh/quota_usage.sh html elements
  */
 
+quotasStr.mQuotas="Kontingente";
 quotasStr.Section="Bandbreitenkontigente";
 quotasStr.AddQuota="Neues Kontigent hinzufügen";
 quotasStr.ActivQuotas="Aktive Kontigente";

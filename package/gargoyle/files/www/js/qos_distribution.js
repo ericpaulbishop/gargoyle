@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008,2009 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var qosStr=new Object(); //part of i18n
@@ -33,7 +33,7 @@ function getEmbeddedSvgSetFunction(embeddedId)
 
 function initializePieCharts()
 {
-	
+
 	uploadClassIds = [];
 	downloadClassIds = [];
 	uploadClassNames = [];
@@ -48,7 +48,7 @@ function initializePieCharts()
 		{
 			var isQosUpload = monId.match(/up/);
 			var isQosDownload = monId.match(/down/);
-		
+
 			var splitId = monId.split("-");
 			splitId.shift();
 			splitId.shift();
@@ -56,7 +56,7 @@ function initializePieCharts()
 			splitId.pop();
 			var qosClass = splitId.join("-");
 			var qosName = uciOriginal.get("qos_gargoyle", qosClass, "name");
-			
+
 			if(isQosUpload && definedUploadClasses[qosClass] == null)
 			{
 				uploadClassIds.push(qosClass);
@@ -83,8 +83,8 @@ function initializePieCharts()
 	{
 		document.getElementById("download_container").style.display="none";
 	}
-	
-	
+
+
 	setTimeout(initializePies, 150); //for some reason Opera 10.50 craps out if we try to load plot functions immediately
 	setInterval( 'updatePieCharts()', 2000);
 }
@@ -97,7 +97,7 @@ function initializePies()
 	}
 	if(setDownloadPie == null)
 	{
-		setDownloadPie = getEmbeddedSvgSetFunction("download_pie");	
+		setDownloadPie = getEmbeddedSvgSetFunction("download_pie");
 	}
 	if(setUploadPie == null || setDownloadPie == null)
 	{
@@ -115,9 +115,9 @@ function initializePies()
 
 function setQosTimeframes()
 {
-	if( 	(!updateInProgress) && 
-		(setUploadPie != null || uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") == "") && 
-		(setDownloadPie != null || uciOriginal.get("qos_gargoyle", "download", "total_bandwidth") == "") 
+	if( 	(!updateInProgress) &&
+		(setUploadPie != null || uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") == "") &&
+		(setDownloadPie != null || uciOriginal.get("qos_gargoyle", "download", "total_bandwidth") == "")
 	)
 	{
 		updatePieCharts();
@@ -128,7 +128,7 @@ function setQosTimeframes()
 		if(setUploadPie == null || setDownloadPie == null)
 		{
 			setUploadPie = getEmbeddedSvgSetFunction("upload_pie");
-			setDownloadPie = getEmbeddedSvgSetFunction("download_pie");	
+			setDownloadPie = getEmbeddedSvgSetFunction("download_pie");
 		}
 	}
 }
@@ -136,7 +136,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 {
 	var nameIndex;
 	var selectedName = null;
-	
+
 	var match1 = "";
 	var match2 = "";
 
@@ -153,7 +153,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 	{
 		match1 = "bdist" + graphTimeFrameIndex;
 	}
-	
+
 	if(plotType != "none")
 	{
 		for(nameIndex=0;nameIndex < monitorNames.length && selectedName == null; nameIndex++)
@@ -161,7 +161,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphNonTotal
 			var name = monitorNames[nameIndex];
 			if(	((name.match("up") && isUp) || (name.match("down") && !isUp)) &&
 				(match1 == "" || name.match(match1)) &&
-				(match2 == "" || name.match(match2)) 
+				(match2 == "" || name.match(match2))
 			)
 			{
 				selectedName = name;
@@ -177,7 +177,7 @@ function updatePieCharts()
 	if(!updateInProgress)
 	{
 		updateInProgress=true;
-		
+
 		var directions = ["up", "down" ];
 		var monitorQueryNames = [];
 		for(directionIndex = 0; directionIndex < directions.length; directionIndex++)
@@ -205,7 +205,7 @@ function updatePieCharts()
 				var downloadClassLabels = [];
 				for(directionIndex = 0; directionIndex < directions.length; directionIndex++)
 				{
-					var direction = directions[directionIndex];	
+					var direction = directions[directionIndex];
 					var classData = [];
 					var totalSum = 0;
 					var classLabels = [];
@@ -228,7 +228,7 @@ function updatePieCharts()
 					var sumIsZero = totalSum == 0 ? true : false;
 					if(sumIsZero)
 					{
-						var classIndex; 
+						var classIndex;
 						for(classIndex=0; classIndex < classData.length; classIndex++)
 						{
 							classData[classIndex] = 1;
@@ -255,7 +255,7 @@ function updatePieCharts()
 					downloadClassData = direction.match("down") ? classData : downloadClassData;
 					downloadClassLabels = direction.match("down") ? classLabels : downloadClassLabels;
 				}
-				
+
 				if(uploadClassData.length > 0 && setUploadPie != null && uciOriginal.get("qos_gargoyle", "upload", "total_bandwidth") != "")
 				{
 					setUploadPie(uploadClassData, uploadClassLabels);
@@ -264,7 +264,7 @@ function updatePieCharts()
 				{
 					setDownloadPie(downloadClassData, downloadClassLabels);
 				}
-				updateInProgress = false;	
+				updateInProgress = false;
 			}
 		}
 		runAjax("POST", "utility/load_bandwidth.sh", param, stateChangeFunction);
@@ -275,14 +275,14 @@ function parseMonitors(outputData)
 {
 	var monitors = new Array();
 	var dataLines = outputData.split("\n");
-	var currentDate = parseInt(dataLines.shift());	
+	var currentDate = parseInt(dataLines.shift());
 	for(lineIndex=0; lineIndex < dataLines.length; lineIndex++)
 	{
 		if(dataLines[lineIndex].length > 0)
 		{
 			monitorName = dataLines[lineIndex];
 			monitorName = monitorName.replace(/[\t ]+.*$/, "");
-			lineIndex++; 
+			lineIndex++;
 			lineIndex++; //ignore first interval start
 			lineIndex++; //ignore first interval end
 			lastTimePoint = dataLines[lineIndex];
@@ -299,6 +299,3 @@ function truncateDecimal(dec)
 	result = "" + ((Math.ceil(dec*10))/10);
 	return result;
 }
-
-
-

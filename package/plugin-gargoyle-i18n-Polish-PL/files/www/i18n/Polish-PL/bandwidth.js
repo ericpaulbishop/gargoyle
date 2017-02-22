@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Zużycie pasma";
 bndwS.GOpSect="Opcje wyświetlania wykresu zużycia";
 bndwS.TFrm="Przedział czasowy";
 bndwS.year="rok";

@@ -43,51 +43,75 @@
 %>
 </script>
 
-<fieldset>
-	<legend class="sectionheader"><%~ reboot.RbSect %></legend>
-	<center><input type='button' value='<%~ Reboot %>' id="reboot_button" class="big_button" onclick='reboot()' /></center>
+<h1 class="page-header"><%~ reboot.RbSect %></h1>
+<div class="row">
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ reboot.RbSect %></h3>
+			</div>
 
-</fieldset>
-<fieldset>
-	<legend class="sectionheader"><%~ SchRb %></legend>
-	<select class="leftcolumn" id="sched_reboot" onchange="setVisibility()">
-		<option value="none"><%~ NoSch %></option>
-		<option value="scheduled"><%~ RbSch %></option>
-	</select>
-	<br/>
-
-	<div id="schedule_reboot_container" class="indent">
-		<div>
-			<label class="narrowleftcolumn" for="reboot_interval"><%~ WillR %>:</label>
-			<select class="widerightcolumn" id="reboot_interval" onchange="setVisibility()">
-				<option value="day"><%~ EDay %></option>
-				<option value="week"><%~ EWek %></option>
-				<option value="month"><%~ EMnh %></option>
-			</select>
-		</div>
-
-		<div id="reboot_day_container">
-			<label class='narrowleftcolumn' id="reboot_day_label" for='reboot_day'><%~ RDay %>:</label>
-			<select class="widerightcolumn" id='reboot_day' style='width:125px'></select>
-		</div>
-
-		<div id="reboot_hour_container">
-			<label class="narrowleftcolumn" id="reboot_hour_label" for='reboot_hour'><%~ RHr %>:</label>
-
-			<select class="widerightcolumn" id='reboot_hour' style='width:125px'>
-				<% otime '\t\t\t\t' %>
-			</select>
+			<div class="panel-body">
+				<button id="reboot_button" class="btn btn-danger btn-lg" onclick="reboot()"><%~ Reboot %></button>
+			</div>
 		</div>
 	</div>
-</fieldset>
-<div id="bottom_button_container">
-	<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-	<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SchRb %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<select id="sched_reboot" class="form-control" onchange="setVisibility()">
+							<option value="none"><%~ NoSch %></option>
+							<option value="scheduled"><%~ RbSch %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id="schedule_reboot_container">
+					<div class="row form-group">
+						<label class="col-xs-5" for="reboot_interval"><%~ WillR %>:</label>
+						<span class="col-xs-7">
+							<select id="reboot_interval" class="form-control" onchange="setVisibility()">
+								<option value="day"><%~ EDay %></option>
+								<option value="week"><%~ EWek %></option>
+								<option value="month"><%~ EMnh %></option>
+							</select>
+						</span>
+					</div>
+
+					<div id="reboot_day_container" class="row form-group">
+						<label class="col-xs-5" id="reboot_day_label" for="reboot_day"><%~ RDay %>:</label>
+						<span class="col-xs-7"><select id="reboot_day" class="form-control"></select></span>
+					</div>
+
+					<div id="reboot_hour_container" class="row form-group">
+						<label class="col-xs-5" id="reboot_hour_label" for="reboot_hour"><%~ RHr %>:</label>
+						<span class="col-xs-7">
+							<select id="reboot_hour" class="form-control">
+								<% otime "\t\t\t\t" %>
+							</select>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 	resetData();

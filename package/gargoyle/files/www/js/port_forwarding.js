@@ -616,7 +616,7 @@ function createEditButton(isSingle)
 {
 	var editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = isSingle ? function(){ editForward(true, this); } : function(){ editForward(false, this); } ;
 	return editButton;
 }
@@ -649,14 +649,14 @@ function editForward(isSingle, triggerElement)
 
 
 	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
-	editForwardWindow = window.open(editLocation, "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	editForwardWindow = window.open(editLocation, "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
 
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	editRow=triggerElement.parentNode.parentNode;
 

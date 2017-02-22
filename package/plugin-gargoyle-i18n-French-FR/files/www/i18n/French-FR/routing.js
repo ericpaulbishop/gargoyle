@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="Routage";
 rtgS.ARSect="Routes actives";
 rtgS.SRSect="Routes statiques";
 rtgS.ASRte="Ajouter route statique";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for backup.sh html elements
  */
 
+bkS.mBackup="Резервная копия / Восстановление";
 bkS.CurrC="Сохранить текущие настройки";
 bkS.RestC="Восстановить сохранённые настройки";
 bkS.DfltC="Восстановить настройки по-умолчанию";

@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="Enrutamiento";
 rtgS.ARSect="Rutas Activas";
 rtgS.SRSect="Rutas Estáticas";
 rtgS.ASRte="Agregar Ruta Estática";

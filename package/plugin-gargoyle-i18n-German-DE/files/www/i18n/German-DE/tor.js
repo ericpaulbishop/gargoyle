@@ -1,7 +1,8 @@
-/*
+﻿/*
  * UTF-8 (with BOM) German-DE text strings for tor.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Tor Anonymisierungs-Client";
 torS.TorC="Tor Client";
 torS.EnByHost="Aktiviert, für jeden Host einzeln wählbar";

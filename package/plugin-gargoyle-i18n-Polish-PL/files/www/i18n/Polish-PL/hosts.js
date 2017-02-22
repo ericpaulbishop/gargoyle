@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Połączone urządzenia";
 hostsStr.RefreshR="Czas odświeżania";
 hostsStr.RInfo="Określa jak często dane na tej stronie są odświeżane";
 hostsStr.CurrLeases="Bieżące dzierżawy DHCP";

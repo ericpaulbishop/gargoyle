@@ -14,7 +14,7 @@
 <%
 	echo 'var monitorNames = new Array();'
 	mnames=$(cat /tmp/bw_backup/do_bw_backup.sh  | egrep "bw_get" | sed 's/^.*\-i \"//g' | sed 's/\".*$//g')
-	for m in $mnames ; do 
+	for m in $mnames ; do
 		echo "monitorNames.push(\"$m\");"
 	done
 %>
@@ -32,41 +32,65 @@
 		margin-bottom:10px;
 	}
 </style>
-<form>
-	<fieldset id="upload_container">
-		<legend class="sectionheader"><%~ qos.UBSect %></legend>
-		<div>
-			<label class="leftcolumn" for="up_timeframe"><%~ uTFrm %>:</label>
-			<select class="rightcolumn" id="up_timeframe" onchange="setQosTimeframes()">
-				<option value="1"><%~ minutes %></option>
-				<option value="2"><%~ bandwidth.qhour %></option>
-				<option value="3"><%~ hours %></option>
-				<option value="4"><%~ days %></option>
-				<option value="5"><%~ mnths %></option>
 
-			</select>
+<h1 class="page-header"><%~ qos.mQOS %></h1>
+<div class="row">
+	<div id="upload_container" class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ qos.UBSect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" for="up_timeframe"><%~ uTFrm %>:</label>
+					<span class="col-xs-7">
+						<select id="up_timeframe" class="form-control" onchange="setQosTimeframes()">
+							<option value="1"><%~ minutes %></option>
+							<option value="2"><%~ bandwidth.qhour %></option>
+							<option value="3"><%~ hours %></option>
+							<option value="4"><%~ days %></option>
+							<option value="5"><%~ mnths %></option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-12"><embed id="upload_pie" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
+				</div>
+			</div>
 		</div>
-		<div><embed id="upload_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	</fieldset>
+	</div>
 
-	<fieldset id="download_container">
-		<legend class="sectionheader"><%~ DBSect %></legend>
-		<div>
-		<label class="leftcolumn" for="down_timeframe"><%~ dTFrm %>:</label>
-			<select class="rightcolumn" id="down_timeframe" onchange="setQosTimeframes()">
-				<option value="1"><%~ minutes %></option>
-				<option value="2"><%~ qhour %></option>
-				<option value="3"><%~ hours %></option>
-				<option value="4"><%~ days %></option>
-				<option value="5"><%~ mnths %></option>
-			</select>
+	<div id="download_container" class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ DBSect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" for="down_timeframe"><%~ dTFrm %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="down_timeframe" onchange="setQosTimeframes()">
+							<option value="1"><%~ minutes %></option>
+							<option value="2"><%~ qhour %></option>
+							<option value="3"><%~ hours %></option>
+							<option value="4"><%~ days %></option>
+							<option value="5"><%~ mnths %></option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-12"><embed id="download_pie" src="pie.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed></span>
+				</div>
+			</div>
 		</div>
-		<div><embed id="download_pie" style="margin-left:10px; width:475px; height:400px;" src="pie.svg"  type='image/svg+xml' pluginspage='http://www.adobe.com/svg/viewer/install/'></embed></div>
-	</fieldset>
+	</div>
+</div>
 
-</form>
-
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

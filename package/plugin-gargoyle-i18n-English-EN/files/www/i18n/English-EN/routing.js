@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for routing.sh html elements
  */
 
+rtgS.mRoutes="Routing";
 rtgS.ARSect="Active Routes";
 rtgS.SRSect="Static Routes";
 rtgS.ASRte="Add Static Route";

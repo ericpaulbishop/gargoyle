@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) German-DE text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Gerät";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="WLAN";
+ovwS.mTime="Zeit";
+ovwS.mServices="Dienstleistungen";
+ovwS.mBridge="Bridge";
 ovwS.Sts="Status";
 ovwS.DNam="Gerätename";
 ovwS.GVer="Gargoyle Version";
@@ -43,6 +50,6 @@ ovwS.Clnt="Client";
 ovwS.Gtwy="Gateway";
 ovwS.WBrgR="Wlan Bridge/Repeater";
 ovwS.Discon="Nicht verbunden";
-ovwS.T2p4GID="2.4 GHz Access Point SSID";
+ovwS.T2p4GID="2.4GHz Access Point SSID";
 ovwS.ClBr="Client Bridge";
 ovwS.Port="Port";

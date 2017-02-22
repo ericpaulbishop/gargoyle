@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) English-EN text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Enhet";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Trådløst";
+ovwS.mTime="Tid";
+ovwS.mServices="Tjenester";
+ovwS.mBridge="Bro";
 ovwS.Sts="Status";
 ovwS.DNam="Enhetsnavn";
 ovwS.GVer="Gargoyle Versjon";
@@ -43,6 +50,6 @@ ovwS.Clnt="Klient";
 ovwS.Gtwy="Gateway";
 ovwS.WBrgR="Trådløs Bro/Repeater";
 ovwS.Discon="Frakoblet";
-ovwS.T2p4GID="2.4 GHz Aksesspunkt SSID";
+ovwS.T2p4GID="2.4GHz Aksesspunkt SSID";
 ovwS.ClBr="Klient Bro";
 ovwS.Port="Port";

@@ -13,13 +13,13 @@ define Package/plugin-gargoyle-i18n-Portuguese-BR
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Portuguese-BR language translations for Gargoyle interface
-	MAINTAINER:=ryok21
+	MAINTAINER:=d3fz
 	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef
 
 define Package/plugin-gargoyle-i18n-Portuguese-BR/description
-	Arquivos de idioma PT-br para interface do Gargoyle
+	Pacote de Idioma PT-BR para Interface Gargoyle
 endef
 
 define Build/Prepare

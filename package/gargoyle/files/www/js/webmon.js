@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
@@ -36,16 +36,16 @@ function saveChanges()
 			clearInterval(webmonUpdater);
 		}
 
-	
+
 		var enabled = document.getElementById("webmon_enabled").checked ;
 		var enabledCommand = "/etc/init.d/webmon_gargoyle " + (enabled ? "enable" : "disable") + "\n";
 		var startStopCommand = "/etc/init.d/webmon_gargoyle stop";
 		uci = uciOriginal.clone();
 		if(enabled)
-		{	
+		{
 			uci.set("webmon_gargoyle", "webmon", "max_domains",  document.getElementById("num_domains").value );
 			uci.set("webmon_gargoyle", "webmon", "max_searches", document.getElementById("num_searches").value );
-			
+
 			var ipTable = document.getElementById('ip_table_container').firstChild;
 			var ipArrayList = getTableDataArray(ipTable, true, false);
 			var ipList = [];
@@ -69,11 +69,11 @@ function saveChanges()
 			}
 			startStopCommand = "/etc/init.d/webmon_gargoyle restart\n";
 		}
-		
-		
-		
 
-		
+
+
+
+
 		commands = uci.getScriptCommands(uciOriginal) + "\n" + enabledCommand  + startStopCommand;
 		//document.getElementById("output").value = commands;
 
@@ -87,13 +87,13 @@ function saveChanges()
 				includeData = [];
 				excludeData = [];
 				var ipTable = document.getElementById('ip_table_container').firstChild;
-				
+
 				uciOriginal = uci.clone();
 
 				setControlsEnabled(true);
 				updateInProgress = false;
 				if(webmonEnabled)
-				{	
+				{
 					updateMonitorTable();
 				}
 				resetData();
@@ -120,14 +120,14 @@ function clearHistory()
 	{
 		commands = commands +  "\n/etc/init.d/webmon_gargoyle start";
 	}
-	
+
 	var stateChangeFunction = function(req)
 	{
 		if(req.readyState == 4)
 		{
 			setControlsEnabled(true);
 			updateInProgress = false;
-			
+
 			var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
 			var ci;
 			for(ci=0; ci < containerNames.length; ci++)
@@ -138,11 +138,11 @@ function clearHistory()
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 			}
-			
+
 			setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
 			setElementEnabled(document.getElementById("search_host_display"), webmonEnabled);
 			if(webmonEnabled)
-			{	
+			{
 				updateMonitorTable();
 			}
 		}
@@ -174,7 +174,7 @@ function getHostDisplay(ip, hostDisplayType)
 function resetData()
 {
 	document.getElementById("webmon_enabled").checked = webmonEnabled;
-	
+
 	var numDomains  = uciOriginal.get("webmon_gargoyle", "webmon", "max_domains");
 	var numSearches = uciOriginal.get("webmon_gargoyle", "webmon", "max_searches");
 	document.getElementById("num_domains").value  = numDomains == ""  ? 300 : numDomains;
@@ -235,7 +235,7 @@ function resetData()
 			clearInterval(webmonUpdater);
 		}
 		webmonUpdater = setInterval("updateMonitorTable()", 10000); //check for updates every 10 seconds
-		
+
 	}
 	setElementEnabled(document.getElementById("domain_host_display"), webmonEnabled);
 	setElementEnabled(document.getElementById("search_host_display"), webmonEnabled);
@@ -260,7 +260,7 @@ function setWebmonEnabled()
 		element.style.color = !enabled ? "#AAAAAA" : "#000000";
 	}
 	var addButton = document.getElementById('add_ip_button');
-	addButton.className = enabled ? "default_button" : "default_button_disabled";
+	addButton.className = enabled ? "btn btn-default" : "btn btn-default disabled";
 	addButton.disabled = !enabled;
 
 	addIpTable = document.getElementById('ip_table_container').firstChild;
@@ -292,7 +292,7 @@ function updateMonitorTable()
 					var searchData = [];
 					var type = "domains";
 					var hostDisplayType = getSelectedValue("domain_host_display");
-					
+
 					var wmIndex=0;
 					while(webmonLines[wmIndex] != "domains" && wmIndex < webmonLines.length ){ wmIndex++; }
 					for(wmIndex++; loadedData && webmonLines[wmIndex] !=  "webmon_done" && wmIndex <  webmonLines.length; wmIndex++)
@@ -308,8 +308,8 @@ function updateMonitorTable()
 							loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
 							var lastVisitDate = new Date();
 							lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
-					
-							var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");	
+
+							var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 							var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
 							var m = twod(lastVisitDate.getMonth()+1);
 							var d = twod(lastVisitDate.getDate());
@@ -319,9 +319,9 @@ function updateMonitorTable()
 							lastVisit = systemDateFormat == "argentina" ? d + "/" + m + h : lastVisit;
 							lastVisit = systemDateFormat == "iso8601" ? m + "-" + d + h : lastVisit;
 
-							var host = getHostDisplay(splitLine[1], hostDisplayType);	
+							var host = getHostDisplay(splitLine[1], hostDisplayType);
 							var value = splitLine[2];
-							
+
 							if(type == "domains")
 							{
 								var domainLink = document.createElement("a");
@@ -345,16 +345,16 @@ function updateMonitorTable()
 							}
 						}
 					}
-				}	
-				
+				}
+
 				//loadedData = loadedData && (webmonLines[webmonLines.length -1].match(/^Success/) != null);
 				if(loadedData)
-				{	
+				{
 					var domainColumns=webmS.dCol;
 					var searchColumns=webmS.sCol;
 					var domainTable = createTable(domainColumns, domainData, "webmon_domain_table", false, false);
 					var searchTable = createTable(searchColumns, searchData, "webmon_search_table", false, false);
-					
+
 					var containerNames = ["webmon_domain_table_container", "webmon_search_table_container"];
 					var ci;
 					for(ci=0; ci < containerNames.length; ci++)
@@ -373,5 +373,3 @@ function updateMonitorTable()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
-
-

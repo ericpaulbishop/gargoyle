@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+torS.mTor="Tor";
 torS.TorAC="Tor Anonymizačný klient";
 torS.TorC="Tor klient";
 torS.EnByHost="Povolený, prepínaný každým hostiteľom";

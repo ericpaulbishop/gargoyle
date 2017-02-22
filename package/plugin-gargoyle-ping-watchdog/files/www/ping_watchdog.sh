@@ -9,61 +9,74 @@
 	gargoyle_header_footer -h -s "connection" -p "ping_watchdog" -c "internal.css" -j "ping_watchdog.js" -z "ping.js"
 %>
 
-<form>
-	<fieldset id="log">
-		<legend class="sectionheader"><%~ ping.Pdog %></legend>
-		<div class="nocolumn">
-			<input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();" />
-			<label for='ping_watchdog_enable' id='ping_watchdog_enable_label' ><%~ EnbP %></label>
-		</div>
-		<div>
-			<label class='leftcolumn' for='address_to_ping' id='address_to_ping_label' ><%~ PgIP %>:</label>
-			<div class='rightcolumn'>
-				<input type='text' id='address_to_ping' size='20' onkeyup='proofreadIp(this)' />
-				<em><%~ IPAd %></em>
-			</div>
-		</div>
-		<div>
-			<label class='leftcolumn' for='ping_interval' id='ping_interval_label' ><%~ Intv %>:</label>
-			<div class='rightcolumn'>
-				<input type='text' id='ping_interval' size='20' onkeyup='proofreadNumericRange(this,1,59)' />
-				<em>1 - 59 <%~ minutes %></em>
-			</div>
-		</div>
-		<div>
-			<label class='leftcolumn' for='startup_delay' id='startup_delay_label' ><%~ StDly %>:</label>
-			<div class='rightcolumn'>
-				<input type='text' id='startup_delay' size='20' onkeyup='proofreadNumericRange(this,1,999)' />
-				<em>1 - 999 <%~ seconds %></em>
-			</div>
-		</div>
-		<div>
-			<label class='leftcolumn' for='failure_count' id='failure_count_label' ><%~ FlCnt %>:</label>
-			<div class='rightcolumn'>
-				<input type='text' id='failure_count' size='20' onkeyup='proofreadNumericRange(this,1,10)' />
-				<em>1 - 10</em>
-			</div>
-		</div>
-		<div>
-			<label class='leftcolumn' for='failure_action' id='failure_action_label' ><%~ Actn %>:</label>
-			<select class='rightcolumn' id='failure_action' onchange='showScript(this.value);' >
-				<option value='wan'><%~ WRcon %></option>
-				<option value='reboot'><%~ Rbot %></option>
-				<option value='custom'><%~ Rscp %></option>
-			</select>
-			<div id='custom_script' style='display: none;'>
-				<label class='leftcolumn' for='script' id='script_label' ><%~ Scpt %>:</label>
-				<input class='rightcolumn' type='text' id='script' size='30' />
-			</div>
-		</div>
+<h1 class="page-header"><%~ ping.Pdog %></h1>
+<div id="log" class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-1"><input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/></span>
+					<label class="col-xs-11" for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+				</div>
 
-	</fieldset>
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
+				<div class="row form-group">
+					<label class="col-xs-5" for='address_to_ping' id='address_to_ping_label'><%~ PgIP %>:</label>
+					<span class="col-xs-7">
+						<input type='text' id='address_to_ping' class="form-control" size='20' onkeyup='proofreadIp(this)'/>
+						<em class="help-block"><%~ IPAd %></em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for='ping_interval' id='ping_interval_label'><%~ Intv %>:</label>
+					<span class="col-xs-7">
+						<input type='text' id='ping_interval' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,59)'/>
+						<em class="help-block">1 - 59 <%~ minutes %></em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for='startup_delay' id='startup_delay_label'><%~ StDly %>:</label>
+					<span class="col-xs-7">
+						<input type='text' id='startup_delay' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,999)'/>
+						<em class="help-block">1 - 999 <%~ seconds %></em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for='failure_count' id='failure_count_label'><%~ FlCnt %>:</label>
+					<span class="col-xs-7">
+						<input type='text' id='failure_count' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,10)'/>
+						<em class="help-block">1 - 10</em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for='failure_action' id='failure_action_label'><%~ Actn %>:</label>
+					<span class="col-xs-7">
+						<select id='failure_action' class="form-control" onchange='showScript(this.value);'>
+							<option value='wan'><%~ WRcon %></option>
+							<option value='reboot'><%~ Rbot %></option>
+							<option value='custom'><%~ Rscp %></option>
+						</select>
+					</span>
+					<span class="row form-group">
+						<div id='custom_script' class="indent" style='display: none;'>
+							<label class="col-xs-5" for='script' id='script_label'><%~ Scpt %>:</label>
+							<span class="col-xs-7"><input type='text' class="form-control" id='script' size='30'/></span>
+						</div>
+					</span>
+				</div>
+			</div>
+		</div>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container"><%~ WaitSettings %></span>
 
 <script>
 <!--

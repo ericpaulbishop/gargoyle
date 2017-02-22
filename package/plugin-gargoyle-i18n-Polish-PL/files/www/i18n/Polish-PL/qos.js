@@ -2,6 +2,8 @@
  * UTF-8 (with BOM) Polish-PL text strings for qos_(upload|download|edit_class|edit_rule).sh html elements
  */
 
+qosStr.mQDl="QoS (pobieranie)";
+qosStr.mQUl="QoS (wysyłanie)";
 qosStr.URSection="QoS (wysyłanie) - Reguły klasyfikacji";
 qosStr.DRSection="QoS (pobieranie) - Reguły klasyfikacji";
 qosStr.UCSection="QoS (wysyłanie) - Klasy usług";
@@ -78,6 +80,7 @@ qosStr.QERulClass="QoS - Edycja reguły klasyfikacji";
 //javascript
 qosStr.MatchC="Reguła";
 qosStr.Classn="Klasyfikacja";
+qosStr.Comment="Komentarz";
 qosStr.Src="Adres IP źródłowy";
 qosStr.SrcP="Port źródłowy";
 qosStr.Dst="Adres IP docelowy";
@@ -103,6 +106,7 @@ qosStr.ZERO="zero";
 qosStr.YES="Yes";
 
 //qos_distribution.sh
+qosStr.mQOS="Podział QoS";
 qosStr.UBSect="QoS - Podział pasma wysyłania";
 qosStr.DBSect="QoS - Podział pasma pobierania";
 qosStr.uTFrm="Przedział czasowy";

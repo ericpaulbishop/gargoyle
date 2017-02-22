@@ -16,27 +16,33 @@
 %>
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ ident.IdSect %></legend>
-		<div>
-			<label class='narrowleftcolumn' for='hostname' id='hostname_label'><%~ HsNm %>:</label>
-			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='hostname' size='35' maxlength='25' />
+<h1 class="page-header"><%~ ident.IdSect %></h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" for="hostname" id="hostname_label"><%~ HsNm %></label>
+					<span class="col-xs-7"><input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/></span>
+				</div>
+				
+				<div id="domain_container" class="row form-group">
+					<label class="col-xs-5" for="domain" id="domain_label"><%~ Domn %></label>
+					<span class="col-xs-7"><input type="text" id="domain" class="form-control" onkeyup="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/></span>
+				</div>
+			</div>
 		</div>
-		<div id="domain_container">
-			<label class='narrowleftcolumn' for='domain' id='domain_label'><%~ Domn %>:</label>
-			<input type='text' class='rightcolumn' onkeyup='proofreadLengthRange(this,1,999)' id='domain' size='35' maxlength='100' />
-		</div>
-
-	</fieldset>
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button" onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button" onclick='resetData()'/>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container"><%~ WaitSettings %></span>
+
+
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

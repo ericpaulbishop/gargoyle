@@ -112,8 +112,8 @@ function populateLists(params)
 	
 	params.push("logger -t ADBLOCK Modifying black/white lists from GUI");
 	
-	params.push("sort -u /tmp/blacklist > /plugin_root/adblock/black.list");
-	params.push("sort -u /tmp/whitelist > /plugin_root/adblock/white.list");
+	params.push("sort -u /tmp/blacklist > /plugin_root/usr/lib/adblock/black.list");
+	params.push("sort -u /tmp/whitelist > /plugin_root/usr/lib/adblock/white.list");
 	params.push("rm -f /tmp/blacklist");
 	params.push("rm -f /tmp/whitelist");
 	
@@ -126,7 +126,7 @@ function adblockUpdate()
 	
 	populateLists(Commands);
 	
-	Commands.push("sh /plugin_root/adblock/runadblock.sh");
+	Commands.push("sh /usr/lib/adblock/runadblock.sh");
 	
 
 	setControlsEnabled(false, true, UI.WaitSettings);
@@ -256,11 +256,11 @@ function saveChanges()
 		{
 			populateLists(Commands);
 		}
-		Commands.push("sh /plugin_root/adblock/runadblock.sh -enable");
+		Commands.push("sh /usr/lib/adblock/runadblock.sh -enable");
 	}
 	else
 	{
-		Commands.push("sh /plugin_root/adblock/runadblock.sh -disable");
+		Commands.push("sh /usr/lib/adblock/runadblock.sh -disable");
 	}
 	var commands = uci.getScriptCommands(uciOriginal) + "\n" + Commands.join("\n");
 

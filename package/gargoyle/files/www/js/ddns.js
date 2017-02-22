@@ -1,8 +1,8 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 var DyDNS=new Object();
@@ -16,7 +16,7 @@ var resettingAfterFailedUpdate = false;
 function saveChanges()
 {
 	setControlsEnabled(false, true);
-	
+
 	//completely re-build config data
 	deleteCommands = [];
 	sections = uciOriginal.getAllSections("ddns_gargoyle");
@@ -26,19 +26,19 @@ function saveChanges()
 	}
 	deleteCommands.push("uci commit");
 
-	
 
-		
+
+
 	createCommands = uci.getScriptCommands(new UCIContainer());
 	testCommands = ["/etc/init.d/ddns_gargoyle stop", "/etc/init.d/ddns_gargoyle test_config"];
 
 
-	
+
 	commands =  deleteCommands.join("\n") + "\n" + createCommands + "\n" + testCommands.join("\n");
 	//document.getElementById("output").value = commands;
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
-	
+
 
 	var stateChangeFunction = function(req)
 	{
@@ -47,7 +47,7 @@ function saveChanges()
 			saveChangesPart2(req.responseText);
 		}
 	}
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);	
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 }
 
@@ -60,10 +60,10 @@ function saveChangesPart2(response)
 	names=responseLines[0].split(/[\t ]+/);
 	success=responseLines[1].split(/[\t ]+/);
 
-	
+
 	newFailedDomains = [];
 	deleteCommands = [];
-	
+
 	//if config didn't change success.length == 0, and we won't run this loop
 	for(nameIndex=0; nameIndex < names.length && names.length == success.length; nameIndex++)
 	{
@@ -91,12 +91,12 @@ function saveChangesPart2(response)
 		}
 	}
 	deleteCommands.push("uci commit");
-	
+
 	if(newFailedDomains.length > 0)
 	{
 		alert(DyDNS.UpErr1+":\n" + newFailedDomains.join("\n") + "\n\n"+DyDNS.UpErr2);
 	}
-	
+
 	getUpdateTimeCommands = [];
 	sections = uci.getAllSections("ddns_gargoyle");
 	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
@@ -116,7 +116,7 @@ function saveChangesPart2(response)
 			for(responseIndex=0; responseIndex < responseLines.length-1; responseIndex++)
 			{
 				lineParts=responseLines[responseIndex].split(/[\t ]+/);
-				updateTimes[ lineParts[0] ] = lineParts[1];	
+				updateTimes[ lineParts[0] ] = lineParts[1];
 			}
 
 			uciOriginal = uci.clone();
@@ -177,9 +177,9 @@ function resetData()
 		setDocumentFromUci( new UCIContainer(), "", "", document);
 	}
 	resettingAfterFailedUpdate = false;
-	
+
 	// setup table of existing domains configured for ddns
-	
+
 	var sections = uci.getAllSections("ddns_gargoyle");
 	var columnNames=DyDNS.cNams;
 	var ddnsTableData = new Array();
@@ -196,8 +196,8 @@ function resetData()
 		{
 			lastDate.setTime(1000*updateTimes[section]);
 		}
-		
-		
+
+
 		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
 
@@ -216,9 +216,9 @@ function resetData()
 		enabledCheckbox.checked = uciOriginal.get("ddns_gargoyle", section, "enabled") == "1" ? true : false;
 		enabledCheckbox.id = section;
 		ddnsTableData.push( [domain, lastUpdate, enabledCheckbox, createEditButton(), createForceUpdateButton()]);
-	
+
 		ddnsTableData[ ddnsTableData.length-1][4].disabled = enabledCheckbox.checked ? false : true;
-		ddnsTableData[ ddnsTableData.length-1][4].className = enabledCheckbox.checked ? "default_button" : "default_button_disabled" ;
+		ddnsTableData[ ddnsTableData.length-1][4].className = enabledCheckbox.checked ? "btn btn-default" : "btn btn-default disabled" ;
 		ddnsEnabledData.push(enabledCheckbox.checked);
  	}
 	var ddnsTable=createTable(columnNames, ddnsTableData, "ddns_table", true, false, removeServiceProviderCallback);
@@ -257,17 +257,17 @@ function addDdnsService()
 		}
 		var section = "ddns_" + sectionNum;
 		var providerName = getSelectedValue("ddns_provider");
-		
+
 		setUciFromDocument(uci, "ddns_gargoyle", section, document);
-	
+
 
 		var domain = uci.get("ddns_gargoyle", section, "domain");
 		domain = domain == "" ? providerName : domain;
 		domain = domain.length > 20 ? domain.substr(0,17) + "..." : domain;
-		
+
 		var enabledCheckbox = createEnabledCheckbox();
 		enabledCheckbox.checked = true;
-		enabledCheckbox.id = section;	
+		enabledCheckbox.id = section;
 		var newTableRow =  [domain, UI.never, enabledCheckbox, createEditButton(), createForceUpdateButton()];
 
 		var ddnsTable = document.getElementById('ddns_table_container').firstChild;
@@ -372,7 +372,7 @@ function proofreadServiceProvider(controlDocument)
 			}
 		}
 	}
-	
+
 
 
 	//verify domain name is not duplicate
@@ -422,7 +422,7 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 		providerName = getSelectedValue("ddns_provider", controlDocument);
 	}
 
-	dstUci.removeSection("ddns_gargoyle", section); 
+	dstUci.removeSection("ddns_gargoyle", section);
 	dstUci.set("ddns_gargoyle", section, "", "service");
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
@@ -431,7 +431,7 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
 	dstUci.set("ddns_gargoyle", section, "check_interval", controlDocument.getElementById("ddns_check").value );
 	dstUci.set("ddns_gargoyle", section, "check_unit", "minutes");
-		
+
 	var provider = null;
 	for(providerIndex=0; providerIndex < serviceProviders.length && provider == null; providerIndex++)
 	{
@@ -487,7 +487,7 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 
 	var providerName = srcUci.get(pkg, section, "service_provider");
 	if(controlDocument.getElementById("ddns_provider_text") != null)
-	{	
+	{
 		controlDocument.getElementById("ddns_provider_text").appendChild( controlDocument.createTextNode(providerName));
 	}
 	else
@@ -570,7 +570,7 @@ function setProvider(controlDocument)
 		var variables = provider["variables"];
 		var variableNames = provider["variable_names"];
 		var newElements = new Array();
-		
+
 		var allBooleanVariables = [];
 		var variableIndex=0;
 		for(variableIndex=0; variableIndex < provider["boolean_variables"].length; variableIndex++)
@@ -581,25 +581,28 @@ function setProvider(controlDocument)
 		for(variableIndex = 0; variableIndex < variables.length; variableIndex++)
 		{
 			var div= controlDocument.createElement("div");
-			
+			div.className="row form-group";
 			var label = controlDocument.createElement("label");
-			label.className="leftcolumn";
+			label.className="col-xs-5";
 			label.id=variables[variableIndex] + "_label";
 			label.appendChild( controlDocument.createTextNode( (ObjLen(DyDNS)==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
 			div.appendChild(label);
-			
+			var span = controlDocument.createElement("span");
+			span.className="col-xs-7"
+
 			var input;
 			if(allBooleanVariables[ variables[variableIndex] ] != 1)
 			{
 				input = createInput("text", controlDocument);
+				input.className = "form-control";
 			}
 			else
 			{
 				input = createInput("checkbox", controlDocument);
 			}
-			input.className = "rightcolumn";
 			input.id = variables[variableIndex];
-			div.appendChild(input);
+			span.appendChild(input);
+			div.appendChild(span);
 			newElements.push(div);
 
 			label.setAttribute("for", input.id);
@@ -610,7 +613,7 @@ function setProvider(controlDocument)
 		for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
 		{
 			var div= controlDocument.createElement("div");
-			
+
 			var label = controlDocument.createElement("label");
 			label.className="leftcolumn";
 			label.id=optionalVariables[variableIndex] + "_label";
@@ -620,14 +623,13 @@ function setProvider(controlDocument)
 			{
 				var span = controlDocument.createElement("span");
 				span.className = "rightcolumn";
-				
+
 				var check = createInput("checkbox", controlDocument);
-				check.style.position="relative";
-				check.style.top="3px";
 				var text  = createInput("text", controlDocument);
+				text.className="form-control";
 				check.id = optionalVariables[variableIndex] + "_enabled";
 				text.id  = optionalVariables[variableIndex];
-				check.onclick= function() 
+				check.onclick= function()
 				{
 					var textId = this.id.replace("_enabled", "");
 			     		setElementEnabled( controlDocument.getElementById(textId), this.checked, "");
@@ -636,21 +638,20 @@ function setProvider(controlDocument)
 				span.appendChild(text);
 				div.appendChild(span);
 
-				label.setAttribute("for", check.id);				
+				label.setAttribute("for", check.id);
 			}
 			else
 			{
 				var input = createInput("checkbox", controlDocument);
-				input.className = "rightcolumn";
 				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
 
-				label.setAttribute("for", input.id);				
+				label.setAttribute("for", input.id);
 			}
 			newElements.push(div);
 		}
 
-		
+
 		container = controlDocument.getElementById("ddns_variable_container");
 		while(container.childNodes.length > 0)
 		{
@@ -684,7 +685,7 @@ function createEditButton()
 {
 	editButton = createInput("button");
 	editButton.value = UI.Edit;
-	editButton.className="default_button";
+	editButton.className="btn btn-default";
 	editButton.onclick = editServiceTableRow;
 	return editButton;
 }
@@ -693,7 +694,7 @@ function createForceUpdateButton()
 {
 	updateButton = createInput("button");
 	updateButton.value = DyDNS.ForceU;
-	updateButton.className="default_button";
+	updateButton.className="btn btn-default";
 	updateButton.onclick = forceUpdateForRow;
 	return updateButton;
 }
@@ -705,7 +706,7 @@ function setRowEnabled()
 	var enabledDomain = enabledRow.firstChild.firstChild.data;
 
 	enabledRow.childNodes[4].firstChild.disabled   = this.checked ? false : true;
-	enabledRow.childNodes[4].firstChild.className = this.checked ? "default_button" : "default_button_disabled" ;
+	enabledRow.childNodes[4].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
 
 	var section = enabledRow.childNodes[2].firstChild.id;
 	uci.set("ddns_gargoyle", section, "enabled", enabled);
@@ -849,14 +850,14 @@ function editServiceTableRow()
 	}
 
 	//editServiceWindow is global so we can close it above if it is left open
-	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=500,left=" + xCoor + ",top=" + yCoor );
-	
+	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=510,left=" + xCoor + ",top=" + yCoor );
+
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);
 	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "default_button";
+	saveButton.className = "btn btn-default";
 	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "default_button";
+	closeButton.className = "btn btn-warning";
 
 	//load provider data for this row
 	var editServiceWindowRow=this.parentNode.parentNode;
@@ -874,7 +875,7 @@ function editServiceTableRow()
 	var providerVariables = provider["variables"];
 	var providerVariableNames = provider["variable_names"];
 
-	runOnServiceEditorLoaded = function () 
+	runOnServiceEditorLoaded = function ()
 	{
 		update_done=false;
 		if(editServiceWindow.document != null)
@@ -883,17 +884,17 @@ function editServiceTableRow()
 			{
 				editServiceWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
 				editServiceWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-			
+
 
 				setDocumentFromUci(uci, "ddns_gargoyle", section, editServiceWindow.document);
-								
-				
-			
+
+
+
 				closeButton.onclick = function()
 				{
 					editServiceWindow.close();
-				}	
-				
+				}
+
 				saveButton.onclick = function()
 				{
 					var newDomain = editServiceWindow.document.getElementById("domain") != null ?
@@ -917,7 +918,7 @@ function editServiceTableRow()
 					}
 					else
 					{
-						var truncatedDomain = newDomain.length > 20 ? newDomain.substr(0,17) + "..." : newDomain;	
+						var truncatedDomain = newDomain.length > 20 ? newDomain.substr(0,17) + "..." : newDomain;
 						editServiceWindowRow.firstChild.firstChild.data = truncatedDomain;
 						setUciFromDocument(uci, "ddns_gargoyle", section, editServiceWindow.document);
 						updatedSections.push(section);
@@ -925,7 +926,7 @@ function editServiceTableRow()
 
 					}
 				}
-				
+
 				editServiceWindow.moveTo(xCoor,yCoor);
 				editServiceWindow.focus();
 				update_done = true;
@@ -936,7 +937,7 @@ function editServiceTableRow()
 			setTimeout( "runOnServiceEditorLoaded()", 250);
 		}
 	}
-	
+
 	runOnServiceEditorLoaded();
 }
 
@@ -965,4 +966,3 @@ function getMultipleFromUnit(unit)
 	}
 	return multiple;
 }
-

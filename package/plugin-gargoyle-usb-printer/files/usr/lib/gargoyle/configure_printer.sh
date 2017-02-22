@@ -63,6 +63,11 @@ if [ -z "$printer" ] ; then
 	printer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*SerialNumber=//g' | sed 's/ .:.*$//g'| head -n1)
 	if [ -n "$printer" ] ; then
 		printer="Unknown Printer with S/N $printer"
+	else
+		printer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*Vendor=/Vendor=/g' | sed 's/ .:.*$//g'| head -n1)
+		if [ -n "$printer" ] ; then
+			printer="Unknown Printer $printer"
+		fi
 	fi
 fi
 

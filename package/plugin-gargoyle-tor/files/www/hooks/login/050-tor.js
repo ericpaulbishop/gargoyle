@@ -52,4 +52,3 @@ function updateTorStatus()
 }
 
 addLoadFunction(setTorData);
-

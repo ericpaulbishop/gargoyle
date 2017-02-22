@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Spanish-ES text strings for backup.sh html elements
  */
 
+bkS.mBackup="Copia de Seguridad / Restaurar";
 bkS.CurrC="Realizar Copia de Seguridad de la Configuración Actual";
 bkS.RestC="Restaurar Configuración Antigua";
 bkS.DfltC="Restaurar Configuración por Defecto";

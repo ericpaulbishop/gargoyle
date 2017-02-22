@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for basic.sh html elements
  */
 
+basicS.mBasic="Basic";
 basicS.DCfgSect="Device Configuration";
 basicS.CfgDev="Configure Device As";
 basicS.DvGtwy="Gateway (Default)";
@@ -78,8 +79,12 @@ basicS.MISP="Mobile ISP";
 basicS.CustMAC="Use Custom MAC Address";
 basicS.CustMTU="Use Custom MTU";
 basicS.LANSec="Local Network / LAN";
-basicS.DfltDNS="Default DNS Servers Specified by ISP";
+basicS.DfltDNS="Default Servers Specified by ISP";
 basicS.OpnSrvs="OpenDNS Servers";
+basicS.OpnSrvsFS="OpenDNS FamilyShield";
+basicS.NrtnCSA="Norton ConnectSafe A";
+basicS.NrtnCSB="Norton ConnectSafe B";
+basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Google DNS Servers";
 basicS.Srvr="Server";
 basicS.SrvPt="Server Port";
@@ -128,5 +133,6 @@ basicS.NoDv="No devices found";
 basicS.WANIntr="WAN Interface";
 basicS.Mo3gQMI="USB Modem (QMI)";
 basicS.Mo3gNCM="USB Modem (NCM)";
+basicS.Mo3gMBIM="USB Modem (MBIM)";
 basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
 basicS.Dfult="Default";

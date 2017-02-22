@@ -75,7 +75,7 @@ function createStartButton()
 {
 	var startButton = createInput("button");
 	startButton.value = "Start";
-	startButton.className="default_button";
+	startButton.className="btn btn-primary";
 	startButton.onclick = startService;
 	return startButton;
 }
@@ -84,7 +84,7 @@ function createResetButton()
 {
 	var restartButton = createInput("button");
 	restartButton.value = "Restart";
-	restartButton.className="default_button";
+	restartButton.className="btn btn-warning";
 	restartButton.onclick = restartService;
 	return restartButton;
 }
@@ -93,7 +93,7 @@ function createStopButton()
 {
 	var stopButton = createInput("button");
 	stopButton.value = "Stop";
-	stopButton.className="default_button";
+	stopButton.className="btn btn-danger";
 	stopButton.onclick = stopService;
 	return stopButton;
 }
@@ -108,7 +108,7 @@ function resetData()
 	var initdTableData = new Array();
 	var initdEnabledData = new Array();
 	var serviceIds = new Array();
-	var blockedServices = ['boot','bwmon_gargoyle','create_original_backup','cron','ddns_gargoyle','defconfig','dnsmasq','done','dropbear','firewall','gargoyle_themes','uhttpd','led','miniupnpd','network','plugins','portmap','qos_gargoyle','rcS','set_kernel_timezone','share_users','sysctl','sysntpd','telnet','time_backup','ubus','umount','usb','usb_storage','watchdog','webmon_gargoyle','wol'];
+	var blockedServices = ['boot','bwmon_gargoyle','cron','ddns_gargoyle','dnsmasq','done','dropbear','firewall','fstab','gargoyle_themes','led','log','network','qos_gargoyle','relayd','set_kernel_timezone','share_users','sysctl','sysfixtime','sysntpd','system','telnet','uhttpd','umount','usb_storage','usbmode','webmon_gargoyle','wol'];
 
 	for (servicesIndex=0; servicesIndex < allInitScripts.length; servicesIndex++)
 	{

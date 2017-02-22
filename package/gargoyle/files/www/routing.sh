@@ -24,45 +24,64 @@
 //-->
 </script>
 
-<form>
-	<fieldset>
-		<legend class="sectionheader"><%~ routing.ARSect %></legend>
-		<div id="active_route_table_container"></div>
-	</fieldset>
+<h1 class="page-header"><%~ routing.mRoutes %></h1>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ routing.ARSect %></h3>
+			</div>
 
-	<fieldset>
-		<legend class="sectionheader"><%~ SRSect %></legend>
-
-		<div id='static_route_add_heading_container'>
-			<label class='nocolumn' id='staticroute_add_heading_label' style='text-decoration:underline'><%~ ASRte %>:</label>
-		</div>
-		<div class='bottom_gap'>
-			<div id='static_route_add_container'>
-				<%in templates/static_route_template %>
+			<div class="panel-body">
+				<div id="active_route_table_container" class="table-responsive"></div>
 			</div>
 		</div>
-
-		<div id='static_route_table_heading_container'>
-			<span class='nocolumn'><%~ CSRSect %>:</span>
-		</div>
-		<div class='indent'>
-			<div id='static_route_table_container' class="bottom_gap"></div>
-		</div>
-	</fieldset>
-
-	<div id="firefox3_bug_correct" style="display:none">
-		<input type='text' value='firefox3_bug' />
 	</div>
+</div>
 
-	<div id="bottom_button_container">
-		<input type='button' value='<%~ SaveChanges %>' id="save_button" class="bottom_button"  onclick='saveChanges()' />
-		<input type='button' value='<%~ Reset %>' id="reset_button" class="bottom_button"  onclick='resetData()'/>
+<div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ SRSect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="static_route_add_heading_container">
+					<label id="staticroute_add_heading_label" style="text-decoration:underline"><%~ ASRte %>:</label>
+				</div>
+
+				<div class="row form-group">
+					<div id="static_route_add_container" class="col-xs-12">
+						<%in templates/static_route_template %>
+					</div>
+				</div>
+
+				<div id="static_route_table_heading_container">
+					<span><%~ CSRSect %>:</span>
+				</div>
+
+				<div class="row form-group">
+					<div id="static_route_table_container" class="col-xs-12 bottom_gap table-responsive"></div>
+				</div>
+			</div>
+		</div>
 	</div>
-	<span id="update_container" ><%~ WaitSettings %></span>
-</form>
+</div>
+
+<div id="firefox3_bug_correct" style="display:none">
+	<input type="text" value="firefox3_bug" />
+</div>
+
+<div id="bottom_button_container" class="panel panel-default">
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+<span id="update_container" ><%~ WaitSettings %></span>
+
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
+<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

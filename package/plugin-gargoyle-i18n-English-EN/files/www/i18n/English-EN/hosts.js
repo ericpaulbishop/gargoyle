@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) English-EN text strings for hosts.sh html elements
  */
 
+hostsStr.mHosts="Connected Hosts";
 hostsStr.RefreshR="Refresh Rate";
 hostsStr.RInfo="This specifies how frequently data on this page is reloaded";
 hostsStr.CurrLeases="Current DHCP Leases";

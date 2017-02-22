@@ -26,6 +26,7 @@
 "UTC+02:00 TiZ.STDm2"		"STD-2DST,M3.5.0/2,M10.5.0/2"		"europe"
 "UTC+03:00 TiZ.UTCm3"		"UTC-3"					"asia"
 "UTC+03:00 TiZ.EETm2"		"EET-2EEST-3,M3.5.0/3,M10.5.0/4"	"europe"
+"UTC+03:30 TiZ.IRST"		"IRST-3:30IRDT,80/0,264/0"		"asia"
 "UTC+04:00 TiZ.UTCm4"		"UTC-4"					"europe"
 "UTC+05:00 TiZ.UTCm5"		"UTC-5"					"asia"
 "UTC+05:30 TiZ.UTCm5c3"		"UTC-5:30"				"asia"

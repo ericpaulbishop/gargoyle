@@ -8,7 +8,7 @@
 	# I'd also like to note and thank Mike Bostock for his work on D3.js which is the underlying
 	# graphing library in use for this plugin.
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "spectrum_analyser" -c "internal.css" -j "spectrum_analyser.js" -z "spectrum.js"
+	gargoyle_header_footer -h -s "system" -p "spectrum_analyser" -c "internal.css" -j "table.js spectrum_analyser.js" -z "spectrum.js"
 %>
 
 <script>
@@ -37,21 +37,41 @@
 	}
 </style>
 
-<fieldset id="spectrum-fieldset">
-	<legend class="sectionheader"><%~ spectrum.Analyser %></legend>
-	
-	<select id="interface" onchange="changeBand()">
-		<option value="wlan0">wlan0 2.4GHz</option>
-		<option value="wlan1">wlan1 5GHz</option>
-	</select>
-	<br/>
-	<svg id="spectrum_plot" width="500" height="500"></svg>
-</fieldset>
+<h1 class="page-header"><%~ spectrum.Analyser %></h1>
+<div class="row">
+	<div class="col-lg-8">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="form-group">
+					<select id="interface" onchange="changeBand()" class="form-control">
+						<option value="wlan0">wlan0 2.4GHz</option>
+						<option value="wlan1">wlan1 5GHz</option>
+					</select>
+				</div>
+				<br/>
+				<div id="spectrum_plot">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row" id="table-container-row">
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div id="spectrum_table_container">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 
 
 
 <script>
 <!--
+	document.getElementById("table-container-row").style.display="none";
 	initialiseAll();
 //-->
 </script>

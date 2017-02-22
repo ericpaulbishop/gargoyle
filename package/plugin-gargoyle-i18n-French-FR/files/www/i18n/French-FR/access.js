@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for access.sh html elements
  */
 
+accessStr.mAccess="Administration";
 accessStr.Section="Accès au Web";
 accessStr.WebProtocol="Protocole de l&apos;interface Web";
 accessStr.LocalPort="Port HTTP local";

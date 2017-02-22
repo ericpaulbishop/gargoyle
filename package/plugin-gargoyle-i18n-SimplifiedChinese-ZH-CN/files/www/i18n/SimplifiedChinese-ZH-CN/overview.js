@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Simplified Chinese ZH-CN text strings for overview.sh html elements
  */
 
+ovwS.mDevice="设备";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="无线";
+ovwS.mTime="时间";
+ovwS.mServices="服务";
+ovwS.mBridge="桥";
 ovwS.Sts="状态";
 ovwS.DNam="设备名称";
 ovwS.GVer="石像鬼（Gargoyle）版本";

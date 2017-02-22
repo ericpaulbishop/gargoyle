@@ -1,11 +1,11 @@
 /*
- * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL 
- * version 2.0 with a special clarification/exception that permits adapting the program to 
+ * This program is copyright © 2008-2013 Eric Bishop and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
  * configure proprietary "back end" software provided that all modifications to the web interface
- * itself remain covered by the GPL. 
+ * itself remain covered by the GPL.
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
- 
+
 var bndwS=new Object(); //part of i18n - reused from bandwidth.js
 
 var plotsInitializedToDefaults = false;
@@ -26,17 +26,17 @@ function initializePlotsAndTable()
 }
 
 function initFunction()
-{	
+{
 	pieChart = document.getElementById("pie_chart");
 	if(pieChart != null)
 	{
-		doUpdate(); 
+		doUpdate();
 		setInterval( doUpdate, 2000);
 	}
 	else
 	{
-		setTimeout(initFunction, 50); 
-	} 
+		setTimeout(initFunction, 50);
+	}
 }
 
 
@@ -112,8 +112,8 @@ function doUpdate()
 				if(!req.responseText.match(/ERROR/))
 				{
 					var parsed = parseMonitors(req.responseText);
-					
-					
+
+
 					//calculate max intervals (we make everything this length by adding zeros)
 					//also, get a list of all ids, in case up/down don't have same set of ips
 					var numIntervals = 1;
@@ -131,7 +131,7 @@ function doUpdate()
 							allIds[id] = 1;
 						}
 					}
-					
+
 					idList = [];
 					for (id in allIds)
 					{
@@ -165,7 +165,7 @@ function doUpdate()
 							for(idIndex=0; idIndex < idList.length; idIndex++)
 							{
 								var id = idList[idIndex];
-								id =  id == currentWanIp ? currentLanIp : id ;	
+								id =  id == currentWanIp ? currentLanIp : id ;
 								var value = 0;
 								if(dirData[id] != null)
 								{
@@ -183,19 +183,19 @@ function doUpdate()
 						}
 						nextIntervalData.unshift(combinedData);
 						timeFrameIntervalData.push(nextIntervalData);
-						
-						
-						
+
+
+
 						var monthNames = bndwS.FMonths;
 						var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
-						
+
 						nextDate.setTime(parseInt(nextIntervalStart)*1000);
 						var intervalName = "";
 						if(uploadName.match("minute"))
 						{
 							intervalName = "" + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
 							nextDate.setUTCMinutes( nextDate.getUTCMinutes()-1);
-							
+
 						}
 						else if(uploadName.match("hour"))
 						{
@@ -239,7 +239,7 @@ function doUpdate()
 					if(currentIntervalIndex == null || currentIntervalIndex == 0)
 					{
 						setSelectedValue("time_interval", "0");
-					}	
+					}
 					else
 					{
 						setSelectedText("time_interval", currentIntervalText);
@@ -271,7 +271,7 @@ function resetDisplayInterval()
 		//first, update pie chart
 		var intervalIndex = getSelectedValue("time_interval");
 		intervalIndex = intervalIndex == null ? 0 : intervalIndex;
-		
+
 		var data = timeFrameIntervalData[intervalIndex];
 		var pieTotals = plotFunction(idList, [bndwS.Totl, bndwS.Dnld, bndwS.Upld ], getHostList(idList), data, 0, 9, resetColors);
 		resetColors = false;
@@ -280,9 +280,9 @@ function resetDisplayInterval()
 		var sortedIdIndices = [];
 		var idIndex;
 		for(idIndex=0; idIndex < idList.length; idIndex++) { sortedIdIndices.push(idIndex) };
-		var idSort = function(a,b) { return idList[a] < idList[b] ? 1 : -1; }	
+		var idSort = function(a,b) { return idList[a] < idList[b] ? 1 : -1; }
 		sortedIdIndices.sort( idSort );
-		
+
 		var pieNames = [bndwS.Totl, bndwS.Down, bndwS.Up];
 		var tableRows = [];
 
@@ -302,10 +302,10 @@ function resetDisplayInterval()
 		var sum = [0,0,0];
 		for(idIndex=0; idIndex < sortedIdIndices.length; idIndex++)
 		{
-			var index = sortedIdIndices[idIndex]; 
+			var index = sortedIdIndices[idIndex];
 			var id = idList[ index ];
-			id =  id == currentWanIp ? currentLanIp : id ;	
-			
+			id =  id == currentWanIp ? currentLanIp : id ;
+
 			var tableRow = [getHostDisplay(id)];
 			var pieIndex;
 			var allZero = true;
@@ -325,11 +325,11 @@ function resetDisplayInterval()
 			tableRows.push(tableRow);
 		}
 		tableRows.push([bndwS.Sum,parseBytes(sum[0]),parseBytes(sum[1]),parseBytes(sum[2]),"","",""]);
-		
+
 		var columnNames = [bndwS.Host];
 		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex]); }
 		for(pieIndex=0;pieIndex < pieNames.length; pieIndex++){ columnNames.push(pieNames[pieIndex] + " %"); }
-	
+
 		var distTable=createTable(columnNames, tableRows, "bandwidth_distribution_table", false, false);
 		var tableContainer = document.getElementById('bandwidth_distribution_table_container');
 		if(tableContainer.firstChild != null)
@@ -365,11 +365,11 @@ function parseMonitors(outputData)
 			monitorType = monitorType.match(/download/) ? 0 : 1;
 			var monitorIp = (dataLines[lineIndex].split(/[\t ]+/))[1];
 
-			lineIndex++; 
+			lineIndex++;
 			var firstTimeStart = dataLines[lineIndex];
 			lineIndex++;
 			var firstTimeEnd = dataLines[lineIndex];
-			lineIndex++; 
+			lineIndex++;
 			var lastTimePoint = dataLines[lineIndex];
 			lineIndex++;
 			var points = dataLines[lineIndex].split(",");
@@ -381,4 +381,3 @@ function parseMonitors(outputData)
 	}
 	return monitors;
 }
-

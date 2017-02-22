@@ -26,21 +26,38 @@
 
 </script>
 
-	<fieldset>
-		<legend class="sectionheader"><%~ print.Attch %></legend>
-		<div id="no_printer_div">
-			<p><em><%~ NoPrnt %></em></p>
-		</div>
-		<div id="printer_found_div">
+<h1 class="page-header"><%~ print.Attch %></h1>
+<div id="no_printer_div" class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ print.Attch %></h3>
+			</div>
 
-			<p><strong><span id="printer_id"></span> <%~ ConnU %></strong></p>
-			
-			<p><%~ ConnIP %> <span id="router_ip"></span> <%~ JetProto %></p>
+			<div class="panel-body">
+				<em><%~ NoPrnt %></em>
+			</div>
 		</div>
-		
-	
-	</fieldset>
+	</div>
+</div>
+
+<div id="printer_found_div" class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ print.Attch %></h3>
+			</div>
+
+			<div class="panel-body">
+				<p><strong><span id="printer_id"></span> <%~ ConnU %></strong></p>
+				<p><%~ ConnIP %> <span id="router_ip"></span> <%~ JetProto %></p>
+			</div>
+		</div>
+
+	</div>
+</div>
 
 <%
 	gargoyle_header_footer -f -s "system" -p "printers"
 %>
+

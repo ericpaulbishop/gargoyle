@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) French-FR text strings for bandwidth.sh/bandwidth_distribution.sh html elements
  */
 
+bndwS.mBandwidth="Utilisation de la B/P";
 bndwS.GOpSect="Options du graphe de bande passante";
 bndwS.TFrm="Période de temps";
 bndwS.year="Année";

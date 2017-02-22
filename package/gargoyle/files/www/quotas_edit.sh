@@ -21,16 +21,22 @@
 %>
 //-->
 </script>
+<div id="edit_container" class="row">
+	<div class="col-lg-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ quotas.ESection %></h3>
+			</div>
 
-<fieldset id="edit_container">
-	<legend class="sectionheader"><%~ quotas.ESection %></legend>
-
-	<div style="height: 500px; overflow-y: scroll;">
-		<%in templates/quotas_template %>
+			<div class="panel-body">
+				<div>
+					<%in templates/quotas_template %>
+				</div>
+			</div>
+		</div>
 	</div>
-	
-</fieldset>
-<div id="bottom_button_container"></div>
+</div>
+<div id="bottom_button_container" class="panel panel-default"></div>
 
 </body>
 </html>

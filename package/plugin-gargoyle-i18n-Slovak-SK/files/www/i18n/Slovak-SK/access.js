@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for access.sh html elements
  */
 
+accessStr.mAccess="Prístup k smerovaèu";
 accessStr.Section="Web prístup";
 accessStr.WebProtocol="Web Admin Protokol";
 accessStr.LocalPort="Lokálny HTTP Port";

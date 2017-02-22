@@ -2,6 +2,13 @@
  * UTF-8 (with BOM) Slovak-SK text strings for overview.sh html elements
  */
 
+ovwS.mDevice="Zariadenie";
+ovwS.mWAN="WAN";
+ovwS.mLAN="LAN";
+ovwS.mWireless="Bezdrôtový";
+ovwS.mTime="Čas";
+ovwS.mServices="Služby";
+ovwS.mBridge="Most";
 ovwS.Sts="Stav";
 ovwS.DNam="Názov zariadenia";
 ovwS.GVer="Verzia Gargoyle";
@@ -46,6 +53,6 @@ ovwS.Clnt="Klient";
 ovwS.Gtwy="Brána";
 ovwS.WBrgR="Bezdrôtový most/opakovač";
 ovwS.Discon="Odpojený";
-ovwS.T2p4GID="SSID 2.4 GHz prístupového bodu";
+ovwS.T2p4GID="SSID 2.4GHz prístupového bodu";
 ovwS.ClBr="Klientský most";
 ovwS.Port="Port";

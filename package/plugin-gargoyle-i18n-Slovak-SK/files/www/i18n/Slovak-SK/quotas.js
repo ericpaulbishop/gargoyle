@@ -2,6 +2,7 @@
  * UTF-8 (with BOM) Slovak-SK text strings for wol.sh html elements
  */
 
+quotasStr.mQuotas="Kvóty";
 quotasStr.Section="Kvóty šírky pásma";
 quotasStr.AddQuota="Pridať noú kvótu";
 quotasStr.ActivQuotas="Aktívne kvóty";
