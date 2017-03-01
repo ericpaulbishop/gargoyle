@@ -613,3 +613,75 @@ body
 {
 	color: inherit;
 }
+
+@media (min-width:1200px)
+{
+	.brk-lg
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-md
+	{
+		display:none;
+		clear:none;
+	}
+	.brk-sm
+	{
+		display:none;
+		clear:none;
+	}
+	.brk-xs
+	{
+		display:none;
+		clear:none;
+	}
+
+}
+@media (min-width:992px)
+{
+	.brk-lg
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-md
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-sm
+	{
+		display:none;
+		clear:none;
+	}
+	.brk-xs
+	{
+		display:none;
+		clear:none;
+	}
+}
+@media (min-width:768px)
+{
+	.brk-lg
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-md
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-sm
+	{
+		display:block;
+		clear:both;
+	}
+	.brk-xs
+	{
+		display:none;
+		clear:none;
+	}
+
+}

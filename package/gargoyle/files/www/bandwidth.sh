@@ -35,7 +35,7 @@
 			</div>
 			<div class="panel-body">
 				<div class="row">
-					<div class="col-lg-4">
+					<div class="col-sm-4">
 						<div id="plot_time_column" class="row form-group">
 							<label class="col-xs-5" for="plot_time_frame" id="time_frame_label"><%~ TFrm %>:</label>
 							<span class="col-xs-7">
@@ -52,39 +52,50 @@
 				</div>
 
 				<div class="row">
-					<div class="col-lg-4">
+					<div class="col-sm-4">
 						<div id="plot1_control_column" class="row form-group">
 							<label class="col-xs-5" id="plot1_title"><%~ Plot %> 1</label>
+							<span class="brk-sm"></span>
 							<span class="col-xs-7">
 								<select id="plot1_type" class="form-control" onchange="resetPlots()">
 									<option value="total"><%~ TBdw %></option>
 								</select>
+								<div class="second_row_right_column">
+									<select id="plot1_id" class="form-control" onchange="resetPlots()"></select>
+								</div>
 							</span>
-							<span class="col-xs-offset-5 col-xs-7"><select id="plot1_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
-					<div class="col-lg-4">
+					<div class="col-sm-4">
 						<div id="plot2_control_column" class="row form-group">
 							<label class="col-xs-5" id="plot2_title"><%~ Plot %> 2</label>
+							<span class="brk-sm"></span>
 							<span class="col-xs-7">
 								<select id="plot2_type" class="form-control" onchange="resetPlots()">
 									<option value="none"><%~ None %></option>
 								</select>
+								<div class="second_row_right_column">
+									<select id="plot2_id" class="form-control" onchange="resetPlots()"></select>
+								</div>
+
 							</span>
-							<span class="col-xs-offset-5 col-xs-7"><select id="plot2_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
-					<div class="col-lg-4">
+					<div class="col-sm-4">
 						<div id="plot3_control_column" class="row form-group">
 							<label class="col-xs-5" id="plot3_title"><%~ Plot %> 3</label>
+							<span class="brk-sm"></span>
 							<span class="col-xs-7">
 								<select id="plot3_type" class="form-control" onchange="resetPlots()">
 									<option value="none"><%~ None %></option>
 								</select>
+								<div class="second_row_right_column">
+									<select id="plot3_id" class="form-control" onchange="resetPlots()"></select>
+								</div>
+
 							</span>
-							<span class="col-xs-offset-5 col-xs-7"><select id="plot3_id" class="form-control" onchange="resetPlots()"></select></span>
 						</div>
 					</div>
 
