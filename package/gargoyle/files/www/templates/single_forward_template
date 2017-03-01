@@ -11,7 +11,7 @@
 						<td><input type='text' id='add_desc' size='10' maxLength='32' class='form-control' /></td>
 						<td><select id='add_prot' class='form-control'><option value='<%~ both %>'><%~ both %></option><option value='TCP'>TCP</option><option value='UDP'>UDP</option></select></td>
 						<td><input type='text' id='add_fp' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></td>
-						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></td>
+						<td><input type='text' id='add_ip' size='15' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></td>
 						<td><input type='text' id='add_dp' size='5' onkeyup='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></td>
 
 						<td><input type='button' id='add_button' value='<%~ Add %>' class='btn btn-default' onclick='addPortfRule()'/></td>
