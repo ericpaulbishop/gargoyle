@@ -277,7 +277,7 @@ function saveChanges()
 
 					   	var mac = document.getElementById("wifi_guest_mac_a").value ;
 						mac = mac == "" ? getRandomMac() : mac;
-						uci.set("wireless", apgncfg, 'macaddr', mac);
+						uci.set("wireless", apgnacfg, 'macaddr', mac);
 						preCommands = preCommands + "uci set wireless." + apgnacfg + "='wifi-iface' \n";
 					}
 
