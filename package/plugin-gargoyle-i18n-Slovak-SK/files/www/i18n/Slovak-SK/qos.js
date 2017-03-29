@@ -80,6 +80,7 @@ qosStr.QERulClass="Upraviť QoS klasifikačné pravidlo";
 //javascript
 qosStr.MatchC="Porovnávacie kritérium";
 qosStr.Classn="Klasifikácia";
+qosStr.Comment="Poznámka";
 qosStr.Src="Zdroj";
 qosStr.SrcP="Zdrojový Port";
 qosStr.Dst="Cieľ";
