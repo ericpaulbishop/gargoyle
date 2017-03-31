@@ -61,7 +61,6 @@
 -n150r-squashfs-
 -rnx-n360rt-
 -ubnt-air-gateway-squashfs-
--ubnt-airrouter-squashfs-
 -ubnt-bullet-m-squashfs-
 -ubnt-ls-sr71-squashfs-
 -ubnt-nano-m-squashfs-
