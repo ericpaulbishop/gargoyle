@@ -80,6 +80,7 @@ qosStr.QERulClass="Editar Regla de Clasificación QoS";
 //javascript
 qosStr.MatchC="Criterios de Coincidencia";
 qosStr.Classn="Clasificación";
+qosStr.Comment="Comentario";
 qosStr.Src="Origen";
 qosStr.SrcP="Puerto de Origen";
 qosStr.Dst="Destino";
