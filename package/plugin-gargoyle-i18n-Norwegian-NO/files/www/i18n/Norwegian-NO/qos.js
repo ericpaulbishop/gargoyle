@@ -80,6 +80,7 @@ qosStr.QERulClass="Rediger QoS Klassifisering Regel";
 //javascript
 qosStr.MatchC="Matche Kriteriene";
 qosStr.Classn="Klassifisering";
+qosStr.Comment="Kommentar";
 qosStr.Src="Kilde";
 qosStr.SrcP="Kilde Port";
 qosStr.Dst="Destinasjon";

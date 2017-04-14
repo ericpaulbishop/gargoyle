@@ -80,6 +80,7 @@ qosStr.QERulClass="Editiere QoS Klassifizierungsregeln";
 //javascript
 qosStr.MatchC="Vergleichskriterium";
 qosStr.Classn="Klassifizierung";
+qosStr.Comment="Kommentar";
 qosStr.Src="Quelle";
 qosStr.SrcP="Quellport";
 qosStr.Dst="Ziel";
