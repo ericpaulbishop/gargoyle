@@ -1387,7 +1387,7 @@ function clearOpenvpnKeys()
 	{
 		setControlsEnabled(false, true);
 
-		var commands = "rm -rf /etc/openvpn/* ; ln -s /var/openvpn/current_status /etc/openvpn/current_status ;"
+		var commands = "rm -rf /etc/openvpn/* ; ln -s /var/run/openvpn_status /etc/openvpn/current_status ;"
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 		var stateChangeFunction = function(req)
 		{
