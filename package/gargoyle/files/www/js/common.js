@@ -2805,3 +2805,46 @@ function togglePopup(popElement)
 	}
 	descendant[0].classList.toggle("show");
 }
+
+//Part of collapsible menus scripts
+function uncollapseNavThis(menuElement)
+{
+	var parentSidebar = menuElement.parentElement.parentElement;
+	collapseNavOthers(parentSidebar);
+	menuElement.parentElement.classList.add("active");
+	var siblings = menuElement.parentElement.childNodes;
+	for (var x = 0; x < siblings.length; x++)
+	{
+		if (siblings[x].nodeName == "UL")
+		{
+			siblings[x].classList.add("active");
+		}
+	}
+}
+
+function collapseNavOthers(parentSidebar)
+{
+	var descendant = parentSidebar.childNodes;
+	if (descendant.length < 1)
+	{
+		return null;
+	}
+	else
+	{
+		for(var x = 0; x < descendant.length; x++)
+		{
+			if(descendant[x].nodeName == "LI")
+			{
+				descendant[x].classList.remove("active");
+				var seconddescendant = descendant[x].childNodes;
+				for(var y = 0; y < seconddescendant.length; y++)
+				{
+					if(seconddescendant[y].nodeName == "UL")
+					{
+						seconddescendant[y].classList.remove("active");
+					}
+				}
+			}
+		}
+	}
+}
