@@ -7,6 +7,8 @@ logS.EAdmP="Bitte Passwort eingeben";
 logS.YQot="Ihr Kontigent";
 logS.NQot="Netzwerkkontigent";
 logS.CTime="Aktuelle Zeit";
+logS.CIP="IP Adresse";
+logS.CIPs="Sie sind Aktuell verbunden von:";
 
 //javascript
 logS.passErr="FEHLER: Sie müssen ein Passwort eingeben";
