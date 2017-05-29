@@ -534,6 +534,8 @@ int main(int argc, char **argv)
 		{
 			collapsible_menus=1;
 		}
+		int maj_counter=1;
+		int min_counter=0;
 		int first_section=1;
 		int prev_section_selected=0;
 		priority_queue_node *next_section;
@@ -552,18 +554,18 @@ int main(int argc, char **argv)
 					if(peek_priority_queue_node(section_pages) == NULL)
 					{
 						//ZERO sub-pages for this section
-						printf("\t\t\t\t\t<li class=\"sidebar-item active\">%s</li>\n", section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\">%s</li>\n", maj_counter, min_counter, section_display);
 					}
 					else
 					{
 						//ONE OR MORE sub-pages for this section
 						if(collapsible_menus == 1)
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item active\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item active\"><a onclick=\"return true\">%s</a>\n", section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a onclick=\"return true\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 
 						//Start of sub-page links
@@ -571,6 +573,7 @@ int main(int argc, char **argv)
 						priority_queue_node *next_section_page;
 						while( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 						{
+							min_counter++;
 							char* page_display="";
 							char* page_script="";
 							char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
@@ -585,7 +588,7 @@ int main(int argc, char **argv)
 							if(strcmp(next_section_page->id, selected_page)==0)
 							{
 								//ACTIVE sub-page e.g. "Overview"
-								printf("\t\t\t\t\t\t\t<li class=\"sidebar-item active\">%s</li>\n", page_display);
+								printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\">%s</li>\n", maj_counter, min_counter, page_display);
 							}
 							else
 							{
@@ -595,12 +598,12 @@ int main(int argc, char **argv)
 								if(strcmp(bin_root, ".") == 0)
 								{
 									//DEFAULT web-root
-									printf("\t\t\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, page_slash, page_script, page_display);
 								}
 								else
 								{
 									//CUSTOM web-root
-									printf("\t\t\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, page_slash, page_script, page_display);
 								}
 								free(bin_slash);
 								free(page_slash);
@@ -649,16 +652,16 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
 						}
 					}
 					else
 					{
-						printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", script_slash, next_section_script, section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
 					}
 				}
 				else
@@ -668,16 +671,16 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
 						}
 					}
 					else
 					{
-						printf("\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", bin_slash, bin_root, script_slash, next_section_script, section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
 					}
 				}
 
@@ -690,6 +693,7 @@ int main(int argc, char **argv)
 				{
 					//INACTIVE sub-page e.g. "Overview"
 					//ONE OR MORE sub-pages for this section
+					min_counter++;
 					char* page_display="";
 					char* page_script="";
 					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
@@ -705,13 +709,13 @@ int main(int argc, char **argv)
 					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 					if(strcmp(bin_root, ".") == 0)
 					{	//DEFAULT web-root
-						printf("\t\t\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
 					else
 					{
 						//CUSTOM web-root
-						printf("\t\t\t\t\t\t\t<li class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", bin_slash, bin_root, page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
 					free(bin_slash);
@@ -727,6 +731,8 @@ int main(int argc, char **argv)
 				prev_section_selected=0;
 			}
 			first_section = 0;
+			maj_counter++;
+			min_counter=0;
 		}
 
 		printf("\t\t\t\t</ul>\n"//sidebar end
