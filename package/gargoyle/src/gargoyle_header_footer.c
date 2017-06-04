@@ -561,7 +561,7 @@ int main(int argc, char **argv)
 						//ONE OR MORE sub-pages for this section
 						if(collapsible_menus == 1)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -652,7 +652,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -671,7 +671,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
