@@ -512,7 +512,7 @@ int main(int argc, char **argv)
 			   "\t\t\t</div>\n");                              //content
 
 		printf("\t\t\t<div id=\"sidebar\" class=\"col-xs-12 col-md-2 col-lg-2 col-md-pull-10 col-lg-pull-10 full-height\">\n"
-			   "\t\t\t\t<ul class=\"nav sidebar\">\n"
+			   "\t\t\t\t<ul class=\"nav sidebar\" onmouseover=\"clearTimeout(navTimer)\" onmouseleave=\"navTimer = setTimeout(function(){restoreNavState()},1200)\">\n"
 			   "\t\t\t\t\t<li class=\"sidebar-header\">\n"//sidebar header begin
 			   "\t\t\t\t\t\t<span id=\"garg_title\">Gargoyle</span><br/>\n");
 		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/gargoyle-logo.png");
