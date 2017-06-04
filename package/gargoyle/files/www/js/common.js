@@ -2809,10 +2809,10 @@ function togglePopup(popElement)
 //Part of collapsible menus scripts
 function uncollapseNavThis(menuElement)
 {
-	var parentSidebar = menuElement.parentElement.parentElement;
-	collapseNavOthers(parentSidebar);
-	menuElement.parentElement.classList.add("active");
-	var siblings = menuElement.parentElement.childNodes;
+	var parentNav = menuElement.parentElement;
+	collapseNavOthers(parentNav);
+	parentNav.classList.add("active");
+	var siblings = parentNav.childNodes;
 	for (var x = 0; x < siblings.length; x++)
 	{
 		if (siblings[x].nodeName == "UL")
@@ -2822,27 +2822,24 @@ function uncollapseNavThis(menuElement)
 	}
 }
 
-function collapseNavOthers(parentSidebar)
+function collapseNavOthers(navElement)
 {
-	var descendant = parentSidebar.childNodes;
-	if (descendant.length < 1)
+	var excludedNavID = navElement.id;
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
 	{
-		return null;
-	}
-	else
-	{
-		for(var x = 0; x < descendant.length; x++)
+		elem = document.getElementById(menuState[x][0]);
+		if((elem != null) && (elem.id != excludedNavID) && (elem.id.endsWith("_MIN00")))
 		{
-			if(descendant[x].nodeName == "LI")
+			elem.classList.remove("active");
+			var descendant = elem.childNodes;
+			for(var y = 0; y < descendant.length; y++)
 			{
-				descendant[x].classList.remove("active");
-				var seconddescendant = descendant[x].childNodes;
-				for(var y = 0; y < seconddescendant.length; y++)
+				if(descendant[y].nodeName == "UL")
 				{
-					if(seconddescendant[y].nodeName == "UL")
-					{
-						seconddescendant[y].classList.remove("active");
-					}
+					descendant[y].classList.remove("active");
 				}
 			}
 		}
