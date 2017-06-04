@@ -2893,7 +2893,7 @@ function restoreNavState()
 
 	for(x = 0; x < menuState.length; x++)
 	{
-		elem.document.getElementById(menuState[x][0]);
+		elem = document.getElementById(menuState[x][0]);
 		if(elem != null)
 		{
 			elem.className = menuState[x][1];
