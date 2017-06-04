@@ -751,7 +751,8 @@ int main(int argc, char **argv)
 			   "if(row.className == \"row-offcanvas full-height active\"){"
 			   "row.className = \"row-offcanvas full-height\";}"
 			   "else{row.className = \"row-offcanvas full-height active\";}}\n"
-			   "</script>\n");
+			   "storeNavState();\n"
+			"</script>\n");
 		printf("\t</body>\n"
 			   "</html>\n");
 		free_null_terminated_string_array(translation_strings);
