@@ -9,6 +9,8 @@
 var UI=new Object(); //part of i18n
 var TiZ=new Object(); //i18n timezones
 var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+var menuState = []; //nav Menu State variable
+var navTimer; //timeout for restoring menu
 
 window.onresize = function onresize()
 {
@@ -2809,10 +2811,10 @@ function togglePopup(popElement)
 //Part of collapsible menus scripts
 function uncollapseNavThis(menuElement)
 {
-	var parentSidebar = menuElement.parentElement.parentElement;
-	collapseNavOthers(parentSidebar);
-	menuElement.parentElement.classList.add("active");
-	var siblings = menuElement.parentElement.childNodes;
+	var parentNav = menuElement.parentElement;
+	collapseNavOthers(parentNav);
+	parentNav.classList.add("active");
+	var siblings = parentNav.childNodes;
 	for (var x = 0; x < siblings.length; x++)
 	{
 		if (siblings[x].nodeName == "UL")
@@ -2822,29 +2824,79 @@ function uncollapseNavThis(menuElement)
 	}
 }
 
-function collapseNavOthers(parentSidebar)
+function collapseNavOthers(navElement)
 {
-	var descendant = parentSidebar.childNodes;
-	if (descendant.length < 1)
+	var excludedNavID = navElement.id;
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
 	{
-		return null;
-	}
-	else
-	{
-		for(var x = 0; x < descendant.length; x++)
+		elem = document.getElementById(menuState[x][0]);
+		if((elem != null) && (elem.id != excludedNavID) && (elem.id.endsWith("_MIN00")))
 		{
-			if(descendant[x].nodeName == "LI")
+			elem.classList.remove("active");
+			var descendant = elem.childNodes;
+			for(var y = 0; y < descendant.length; y++)
 			{
-				descendant[x].classList.remove("active");
-				var seconddescendant = descendant[x].childNodes;
-				for(var y = 0; y < seconddescendant.length; y++)
+				if(descendant[y].nodeName == "UL")
 				{
-					if(seconddescendant[y].nodeName == "UL")
-					{
-						seconddescendant[y].classList.remove("active");
-					}
+					descendant[y].classList.remove("active");
 				}
 			}
+		}
+	}
+}
+
+function storeNavState()
+{
+	var selectorStart = "nav_MAJ";
+	var selectorEnd = "_MIN";
+	var x = 1;
+	var y = 0;
+	var selectorStr;
+	var elem;
+	var elemSub;
+
+	function createSelectorString(selectorStart,x,selectorEnd,y)
+	{
+		selectorString = selectorStart + ("0" + x).slice(-2) + selectorEnd + ("0" + y).slice(-2);
+		return selectorString;
+	}
+
+	selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+	elem = document.getElementById(selectorStr);
+	while(elem != null)
+	{
+		menuState.push([elem.id,elem.className])
+		y++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elemSub = document.getElementById(selectorStr);
+		while(elemSub != null)
+		{
+			menuState.push([elemSub.id,elemSub.className])
+			y++;
+			selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+			elemSub = document.getElementById(selectorStr);
+		}
+		y = 0;
+		x++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elem = document.getElementById(selectorStr);
+	}
+}
+
+function restoreNavState()
+{
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
+	{
+		elem = document.getElementById(menuState[x][0]);
+		if(elem != null)
+		{
+			elem.className = menuState[x][1];
 		}
 	}
 }

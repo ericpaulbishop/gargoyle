@@ -512,7 +512,7 @@ int main(int argc, char **argv)
 			   "\t\t\t</div>\n");                              //content
 
 		printf("\t\t\t<div id=\"sidebar\" class=\"col-xs-12 col-md-2 col-lg-2 col-md-pull-10 col-lg-pull-10 full-height\">\n"
-			   "\t\t\t\t<ul class=\"nav sidebar\">\n"
+			   "\t\t\t\t<ul class=\"nav sidebar\" onmouseover=\"clearTimeout(navTimer)\" onmouseleave=\"navTimer = setTimeout(function(){restoreNavState()},1200)\">\n"
 			   "\t\t\t\t\t<li class=\"sidebar-header\">\n"//sidebar header begin
 			   "\t\t\t\t\t\t<span id=\"garg_title\">Gargoyle</span><br/>\n");
 		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/gargoyle-logo.png");
@@ -561,7 +561,7 @@ int main(int argc, char **argv)
 						//ONE OR MORE sub-pages for this section
 						if(collapsible_menus == 1)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -652,7 +652,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -671,7 +671,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onclick=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -751,7 +751,8 @@ int main(int argc, char **argv)
 			   "if(row.className == \"row-offcanvas full-height active\"){"
 			   "row.className = \"row-offcanvas full-height\";}"
 			   "else{row.className = \"row-offcanvas full-height active\";}}\n"
-			   "</script>\n");
+			   "storeNavState();\n"
+			"</script>\n");
 		printf("\t</body>\n"
 			   "</html>\n");
 		free_null_terminated_string_array(translation_strings);
