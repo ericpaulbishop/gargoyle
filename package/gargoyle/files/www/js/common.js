@@ -9,6 +9,8 @@
 var UI=new Object(); //part of i18n
 var TiZ=new Object(); //i18n timezones
 var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+var menuState = []; //nav Menu State variable
+var navTimer; //timeout for restoring menu
 
 window.onresize = function onresize()
 {
