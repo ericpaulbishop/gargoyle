@@ -2845,3 +2845,56 @@ function collapseNavOthers(navElement)
 		}
 	}
 }
+
+function storeNavState()
+{
+	var selectorStart = "nav_MAJ";
+	var selectorEnd = "_MIN";
+	var x = 1;
+	var y = 0;
+	var selectorStr;
+	var elem;
+	var elemSub;
+
+	function createSelectorString(selectorStart,x,selectorEnd,y)
+	{
+		selectorString = selectorStart + ("0" + x).slice(-2) + selectorEnd + ("0" + y).slice(-2);
+		return selectorString;
+	}
+
+	selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+	elem = document.getElementById(selectorStr);
+	while(elem != null)
+	{
+		menuState.push([elem.id,elem.className])
+		y++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elemSub = document.getElementById(selectorStr);
+		while(elemSub != null)
+		{
+			menuState.push([elemSub.id,elemSub.className])
+			y++;
+			selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+			elemSub = document.getElementById(selectorStr);
+		}
+		y = 0;
+		x++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elem = document.getElementById(selectorStr);
+	}
+}
+
+function restoreNavState()
+{
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
+	{
+		elem.document.getElementById(menuState[x][0]);
+		if(elem != null)
+		{
+			elem.className = menuState[x][1];
+		}
+	}
+}
