@@ -294,6 +294,11 @@
 							</span>
 						</div>
 
+						<div id='openvpn_client_cipher_other_container' class="row form-group">
+							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
+							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em></span>
+						</div>
+
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_block_nonovpn' id='openvpn_client_block_nonovpn_label'><%~ NOVPNT %>:</label>
 							<span class="col-xs-7">
@@ -305,34 +310,29 @@
 							<span class="col-xs-12"><em><%~ DescNOVPNT %></em></span>
 						</div>
 
-						<div id='openvpn_client_cipher_other_container' class="row form-group">
-							<input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em>
-							<input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em>
-						</div>
-
 						<div id="openvpn_client_conf_text_container" class="row form-group">
 							<br/>
 							<label class="col-xs-12" for='openvpn_client_conf_text' id='openvpn_client_conf_text_label' style="text-decoration:underline"><%~ OCfg %>:</label>
 							<br/>
 							<span class="col-xs-12"><em><%~ CfgUpd %></em></span>
 							<br/>
-							<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control" id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control textarea-lg" id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 
 						<div id="openvpn_client_ca_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_ca_text' id='openvpn_client_ca_text_label'><%~ CACert %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control" id='openvpn_client_ca_text' name='openvpn_client_ca_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_ca_text' name='openvpn_client_ca_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 						<div id="openvpn_client_cert_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_cert_text' id='openvpn_client_cert_text_label'><%~ CCert %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control" id='openvpn_client_cert_text' name='openvpn_client_cert_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_cert_text' name='openvpn_client_cert_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 						<div id="openvpn_client_key_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_key_text' id='openvpn_client_key_text_label'><%~ CKey %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control" id='openvpn_client_key_text' name='openvpn_client_key_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_key_text' name='openvpn_client_key_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 
 						<div id="openvpn_client_ta_key_text_container">
@@ -351,7 +351,7 @@
 							</div>
 							<div class="row form-group">
 								<label class="col-xs-12" id="openvpn_client_ta_key_text_label" for="openvpn_client_use_ta_key_text"><%~ TAKey %>:</label>
-								<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control" id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text"></textarea></span>
+								<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control textarea-lg" id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text"></textarea></span>
 							</div>
 						</div>
 					</div>

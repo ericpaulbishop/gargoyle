@@ -613,3 +613,8 @@ body
 {
 	color: inherit;
 }
+.textarea-lg
+{
+	width: 100%;
+	min-height: 70px;
+}
