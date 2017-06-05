@@ -613,7 +613,11 @@ body
 {
 	color: inherit;
 }
-
+.textarea-lg
+{
+	width: 100%;
+	min-height: 70px;
+}
 @media (min-width:1200px)
 {
 	.brk-lg
@@ -683,5 +687,4 @@ body
 		display:none;
 		clear:none;
 	}
-
 }
