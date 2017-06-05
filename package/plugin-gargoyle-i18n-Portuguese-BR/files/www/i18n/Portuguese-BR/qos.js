@@ -13,6 +13,7 @@ qosStr.UEnable="Habilitar Qualidade de Serviço (Upload)";
 qosStr.DEnable="Habilitar Qualidade de Serviço (Download)";
 qosStr.UTotBand="Velocidade Total de Upload";
 qosStr.DTotBand="Velocidade Total de Download";
+
 qosStr.USCAbout="Cada classe de upload é definida por três parâmetros: Alocação de Banda durante a saturação do link, Velocidade Mínima e Velocidade Máxima.";
 qosStr.DSCAbout="Cada classe de download é definida por quatro parâmetros: Alocação de Banda durante a saturação do link, Velocidade Mínima, Velocidade Máxima e Otimização MinRTT (minimiza o tempo de resposta).";
 qosStr.UMinBandAbout="<em><b>Velocidade Mínima:</b></em> define a velocidade mínima da banda que será alocada à classe durante a saturação do link. Para aplicações em tempo real, como ligações VoIP ou jogos online, é recomendado configurar uma classe com uma velocidade mínima definida (em kbps), ao invés de alocar uma porcentagem de banda à classe. O QoS irá satisfazer primeiro todas as classes com uma velocidade mínima definida, e somente depois irá alocar a banda disponível para o restante das classes.";
@@ -79,6 +80,7 @@ qosStr.QERulClass="Editar Regra de Classificação";
 //javascript
 qosStr.MatchC="Regras de Tráfego (ordem decrescente)";
 qosStr.Classn="Classe";
+qosStr.Comment="Descrição";
 qosStr.Src="IP de Origem";
 qosStr.SrcP="Porta de Origem";
 qosStr.Dst="IP de Destino";

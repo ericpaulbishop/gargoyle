@@ -80,6 +80,7 @@ qosStr.QERulClass="编辑QoS分类规则";
 //javascript
 qosStr.MatchC="匹配标准";
 qosStr.Classn="分类";
+qosStr.Comment="说明";
 qosStr.Src="来源";
 qosStr.SrcP="来源端口";
 qosStr.Dst="目标";

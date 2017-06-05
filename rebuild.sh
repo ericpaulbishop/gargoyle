@@ -310,6 +310,17 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 
 	npm_test=$( npm -v 2>/dev/null )
 	nodeglobal=$npm_test
+	node_binary="node"
+	node_version=$( "$node_binary" -v 2>/dev/null)
+	if [ -n "$npm_test" ] && [ -z "$node_version" ] ; then
+		node_binary="nodejs"
+		node_version=$( "$node_binary" -v 2>/dev/null)
+	fi
+	if [ -z "$node_version" ] ; then
+		npm_test=""
+		nodeglobal="$npm_test"
+	fi
+
 
 	if [ -z "$npm_test" ] ; then
 		echo ""
@@ -371,6 +382,8 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			echo "**  UglifyJS2 is not installed, attempting to install from npm          **"
 			echo "**************************************************************************"
 			echo ""
+			
+			mkdir -p "$top_dir/minifiers/node_modules/.bin"
 	
 			cd "$top_dir"
 			npm install uglify-js --prefix minifiers > /dev/null 2>&1
@@ -378,10 +391,10 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			echo "uglifyjs ok!"
 		fi
 		cd "$top_dir/minifiers/node_modules/.bin"
-		uglify_test=$( echo 'var abc = 1;' | ${nodeglobal:+nodejs} "$uglifyjs_bin"  2>/dev/null )
+		uglify_test=$( echo 'var abc = 1;' | ${nodeglobal:+$node_binary} "$uglifyjs_bin"  2>/dev/null )
 		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
 			js_compress="true"
-			do_js_compress ${nodeglobal:+"nodejs"} "$uglifyjs_bin"
+			do_js_compress ${nodeglobal:+"$node_binary"} "$uglifyjs_bin"
 		else
 			js_compress="false"
 			echo ""
@@ -406,10 +419,10 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			fi
 
 			cd "$top_dir/minifiers/node_modules/.bin"
-			uglify_test=$( echo -e '#test {\nabc: 1;\ndef: 1;\n}' | ${nodeglobal:+nodejs} "$uglifycss_bin"  2>/dev/null )
+			uglify_test=$( echo -e '#test {\nabc: 1;\ndef: 1;\n}' | ${nodeglobal:+$node_binary} "$uglifycss_bin"  2>/dev/null )
 			if [ "$uglify_test" = '#test{abc:1;def:1}' ] ; then
 				css_compress="true"
-				do_css_compress  ${nodeglobal:+"nodejs"} "$uglifycss_bin"
+				do_css_compress  ${nodeglobal:+"$node_binary"} "$uglifycss_bin"
 			else
 				css_compress="false"
 				echo ""
