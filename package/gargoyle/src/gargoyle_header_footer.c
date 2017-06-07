@@ -512,7 +512,7 @@ int main(int argc, char **argv)
 			   "\t\t\t</div>\n");                              //content
 
 		printf("\t\t\t<div id=\"sidebar\" class=\"col-xs-12 col-md-2 col-lg-2 col-md-pull-10 col-lg-pull-10 full-height\">\n"
-			   "\t\t\t\t<ul class=\"nav sidebar\" onmouseover=\"clearTimeout(navTimer)\" onmouseleave=\"navTimer = setTimeout(function(){restoreNavState()},1200)\">\n"
+			   "\t\t\t\t<ul class=\"nav sidebar\" >\n"
 			   "\t\t\t\t\t<li class=\"sidebar-header\">\n"//sidebar header begin
 			   "\t\t\t\t\t\t<span id=\"garg_title\">Gargoyle</span><br/>\n");
 		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/gargoyle-logo.png");
@@ -558,10 +558,11 @@ int main(int argc, char **argv)
 					}
 					else
 					{
+						char* top_class_added = strdup("sidebar-top-subelement");
 						//ONE OR MORE sub-pages for this section
 						if(collapsible_menus == 1)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -588,7 +589,7 @@ int main(int argc, char **argv)
 							if(strcmp(next_section_page->id, selected_page)==0)
 							{
 								//ACTIVE sub-page e.g. "Overview"
-								printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\">%s</li>\n", maj_counter, min_counter, page_display);
+								printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active %s\">%s</li>\n", maj_counter, min_counter, top_class_added, page_display);
 							}
 							else
 							{
@@ -598,21 +599,25 @@ int main(int argc, char **argv)
 								if(strcmp(bin_root, ".") == 0)
 								{
 									//DEFAULT web-root
-									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
 								}
 								else
 								{
 									//CUSTOM web-root
-									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, top_class_added, page_slash, page_script, page_display);
 								}
 								free(bin_slash);
 								free(page_slash);
 								printf("</li>\n");
 							}
+							free(top_class_added);
+							top_class_added = strdup("");
 							free(lookup);
+					
 						}
 						printf("\t\t\t\t\t\t</ul>\n");//End of sub-page links
 						printf("\t\t\t\t\t</li>\n");//End of MAJOR heading
+						free(top_class_added);
 				}
 				prev_section_selected=1;
 			}
@@ -746,13 +751,6 @@ int main(int argc, char **argv)
 			   "\t\t\t\t</div>\n"//sidebar-footer
 			   "\t\t\t</div>\n");//sidebar
 
-		printf("<script>\n"
-			   "function sidebar(){var row = document.getElementById(\"row-offcanvas\");"
-			   "if(row.className == \"row-offcanvas full-height active\"){"
-			   "row.className = \"row-offcanvas full-height\";}"
-			   "else{row.className = \"row-offcanvas full-height active\";}}\n"
-			   "storeNavState();\n"
-			"</script>\n");
 		printf("\t</body>\n"
 			   "</html>\n");
 		free_null_terminated_string_array(translation_strings);

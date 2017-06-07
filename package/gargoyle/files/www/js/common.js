@@ -2900,3 +2900,67 @@ function restoreNavState()
 		}
 	}
 }
+
+function setNavMouseEvents()
+{
+	var navSidebar = document.getElementById("sidebar").firstChild;
+	navSidebar.onmouseover = function() { clearTimeout(navTimer) ; }
+	navSidebar.onmouseleave = function() { navTimer = setTimeout(restoreNavState,1200) }
+
+
+	var sidebarElements = document.getElementsByClassName("sidebar-item")
+	var i;
+	for(i=0; i< sidebarElements.length; i++)
+	{
+		e = sidebarElements[i];
+		if(e.id.match(/MIN00/) && e.firstChild != null )
+		{
+			if(e.firstChild.href != null && e.firstChild.href.match(/logout\.sh$/))
+			{
+				//do nothing to logout link
+			}
+			else
+			{
+				e.firstChild.onmouseover = function() {}
+				e.firstChild.onclick = function() {
+					var windowWidth = window.innerWidth
+					                  || document.documentElement.clientWidth
+							  || document.body.clientWidth;
+					if( windowWidth <= 991 )
+					{
+						uncollapseNavThis(this);
+					}
+					else
+					{
+						var topId = this.parentNode.id;
+						var topIdPrefix = topId.substr(0, topId.length - 2)
+						var listEl = document.getElementById(topIdPrefix + "01")
+						if(listEl != null && listEl.firstChild != null && listEl.firstChild.href != null)
+						{
+							window.location = listEl.firstChild.href 
+						}
+					}
+					return false  
+				}
+			}
+		}
+	}
+	
+	storeNavState();
+}
+
+function sidebar()
+{
+	var row = document.getElementById("row-offcanvas");
+	if(row.className == "row-offcanvas full-height active")
+	{
+		row.className = "row-offcanvas full-height";
+	}
+	else
+	{
+		row.className = "row-offcanvas full-height active";
+	}
+}
+
+
+addLoadFunction( setNavMouseEvents ) ; 
