@@ -624,6 +624,7 @@ int main(int argc, char **argv)
 			else
 			{
 				//INACTIVE Major heading e.g. "Status"
+				char* top_class_added = strdup("sidebar-top-subelement");
 				priority_queue_node *next_section_page;
 				char* next_section_script = "";
 				if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
@@ -657,7 +658,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -676,7 +677,7 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
@@ -714,18 +715,20 @@ int main(int argc, char **argv)
 					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 					if(strcmp(bin_root, ".") == 0)
 					{	//DEFAULT web-root
-						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
 					else
 					{
 						//CUSTOM web-root
-						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, top_class_added, bin_slash, bin_root, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
 					free(bin_slash);
 					free(page_slash);
 					free(lookup);
+					free(top_class_added);
+					top_class_added = strdup("");
 					next_section_page=shift_priority_queue_node(section_pages);
 				}
 				if (empty_section == 0)
@@ -734,6 +737,7 @@ int main(int argc, char **argv)
 				}
 				printf("\t\t\t\t\t</li>\n");//End of MAJOR heading
 				prev_section_selected=0;
+				free(top_class_added);
 			}
 			first_section = 0;
 			maj_counter++;
