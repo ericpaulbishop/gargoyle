@@ -554,7 +554,7 @@ int main(int argc, char **argv)
 					if(peek_priority_queue_node(section_pages) == NULL)
 					{
 						//ZERO sub-pages for this section
-						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\">%s</li>\n", maj_counter, min_counter, section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item active\">%s</li>\n", maj_counter, min_counter, section_display);
 					}
 					else
 					{
@@ -562,11 +562,11 @@ int main(int argc, char **argv)
 						//ONE OR MORE sub-pages for this section
 						if(collapsible_menus == 1)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item active\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active\"><a onclick=\"return true\">%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item active\"><a onclick=\"return true\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 
 						//Start of sub-page links
@@ -578,6 +578,13 @@ int main(int argc, char **argv)
 							char* page_display="";
 							char* page_script="";
 							char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+							if(section_pages->length == 0)
+							{
+								char* old = top_class_added;
+								char* new = dynamic_strcat(2, top_class_added, " sidebar-bottom-subelement");
+								top_class_added = new;
+								free(old);
+							}
 							if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
 							{
 								page_display = get_option_value_string(uci_to_option(e));
@@ -589,7 +596,7 @@ int main(int argc, char **argv)
 							if(strcmp(next_section_page->id, selected_page)==0)
 							{
 								//ACTIVE sub-page e.g. "Overview"
-								printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item active %s\">%s</li>\n", maj_counter, min_counter, top_class_added, page_display);
+								printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item minor-sidebar-item active %s\">%s</li>\n", maj_counter, min_counter, top_class_added, page_display);
 							}
 							else
 							{
@@ -599,12 +606,12 @@ int main(int argc, char **argv)
 								if(strcmp(bin_root, ".") == 0)
 								{
 									//DEFAULT web-root
-									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item minor-sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
 								}
 								else
 								{
 									//CUSTOM web-root
-									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, top_class_added, page_slash, page_script, page_display);
+									printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item minor-sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, bin_slash, bin_root, top_class_added, page_slash, page_script, page_display);
 								}
 								free(bin_slash);
 								free(page_slash);
@@ -624,9 +631,10 @@ int main(int argc, char **argv)
 			else
 			{
 				//INACTIVE Major heading e.g. "Status"
-				char* top_class_added = strdup("sidebar-top-subelement");
 				priority_queue_node *next_section_page;
 				char* next_section_script = "";
+				char* top_class_added = strdup("sidebar-top-subelement");
+
 				if( (next_section_page=shift_priority_queue_node(section_pages)) != NULL)
 				{
 					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
@@ -658,16 +666,16 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item \"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item \"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
 						}
 					}
 					else
 					{
-						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item \"><a href=\"%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, script_slash, next_section_script, section_display);
 					}
 				}
 				else
@@ -677,16 +685,16 @@ int main(int argc, char **argv)
 					{
 						if (empty_section == 0)
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"#\" >%s</a>\n", maj_counter, min_counter, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item \"><a href=\"#\" onmouseover=\"uncollapseNavThis(this);return false\">%s</a>\n", maj_counter, min_counter, section_display);
 						}
 						else
 						{
-							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
+							printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item \"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
 						}
 					}
 					else
 					{
-						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
+						printf("\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item major-sidebar-item\"><a href=\"%s%s%s%s\" onclick=\"return true\">%s</a>\n", maj_counter, min_counter, bin_slash, bin_root, script_slash, next_section_script, section_display);
 					}
 				}
 
@@ -703,6 +711,14 @@ int main(int argc, char **argv)
 					char* page_display="";
 					char* page_script="";
 					char* lookup = dynamic_strcat(3, next_section->id, "_", next_section_page->id);
+					if(section_pages->length == 0)
+					{
+						char* old = top_class_added;
+						char* new = dynamic_strcat(2, top_class_added, " sidebar-bottom-subelement");
+						top_class_added = new;
+						free(old);
+					}
+
 					if(get_uci_option(ctx, &e, p, "gargoyle", "display", lookup) == UCI_OK)
 					{
 						page_display = get_option_value_string(uci_to_option(e));
@@ -715,20 +731,21 @@ int main(int argc, char **argv)
 					char* page_slash = page_script[0] == '/' ? strdup("") : strdup("/");
 					if(strcmp(bin_root, ".") == 0)
 					{	//DEFAULT web-root
-						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item minor-sidebar-item %s\"><a href=\"%s%s\">%s</a>", maj_counter, min_counter, top_class_added, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
 					else
 					{
 						//CUSTOM web-root
-						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, top_class_added, bin_slash, bin_root, page_slash, page_script, page_display);
+						printf("\t\t\t\t\t\t\t<li id=\"nav_MAJ%02d_MIN%02d\" class=\"sidebar-item minor-sidebar-item %s\"><a href=\"%s%s%s%s\">%s</a>", maj_counter, min_counter, top_class_added, bin_slash, bin_root, page_slash, page_script, page_display);
 						printf("</li>\n");
 					}
+					free(top_class_added);
+					top_class_added = strdup("");
+
 					free(bin_slash);
 					free(page_slash);
 					free(lookup);
-					free(top_class_added);
-					top_class_added = strdup("");
 					next_section_page=shift_priority_queue_node(section_pages);
 				}
 				if (empty_section == 0)
@@ -752,8 +769,11 @@ int main(int argc, char **argv)
 			   "\t\t\t\t\t<div class=\"col-xs-6\">\n"
 			   "\t\t\t\t\t\t<a href=\"https://www.gargoyle-router.com/\" target=\"_blank\">Support</a>\n"
 			   "\t\t\t\t\t</div>\n"
-			   "\t\t\t\t</div>\n"//sidebar-footer
-			   "\t\t\t</div>\n");//sidebar
+			   "\t\t\t\t</div>\n" //sidebar-footer
+			   "\t\t\t</div>\n" //sidebar
+			   "\t\t</div>\n" //wrapper
+			   "\t</div>\n"); //row-offcanvas
+
 
 		printf("\t</body>\n"
 			   "</html>\n");

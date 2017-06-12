@@ -2903,7 +2903,7 @@ function restoreNavState()
 
 function setNavMouseEvents()
 {
-	var navSidebar = document.getElementById("sidebar").firstChild;
+	var navSidebar = document.getElementById("sidebar")
 	navSidebar.onmouseover = function() { clearTimeout(navTimer) ; }
 	navSidebar.onmouseleave = function() { navTimer = setTimeout(restoreNavState,1200) }
 
