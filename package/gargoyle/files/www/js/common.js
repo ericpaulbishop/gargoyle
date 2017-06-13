@@ -2963,4 +2963,3 @@ function sidebar()
 }
 
 
-addLoadFunction( setNavMouseEvents ) ; 

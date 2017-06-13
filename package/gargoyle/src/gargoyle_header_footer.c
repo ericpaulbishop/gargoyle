@@ -164,20 +164,57 @@ int main(int argc, char **argv)
 	struct uci_package *p = NULL;
 	struct uci_element *e = NULL;
 
+	char* web_root = "/www";
+	char* theme_root = "/themes";
+	char* theme = "default";
+
+	int collapsible_menus=0;
+	int theme_js=0;
+	char* test_collapse ;
+	char* test_theme_js ;
+
+	if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
+	{
+		printf("ERROR: no gargoyle package defined!\n");
+		return 0;
+	}
+	if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
+	{
+		web_root=get_option_value_string(uci_to_option(e));
+	}
+	if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
+	{
+		theme_root=get_option_value_string(uci_to_option(e));
+		if(theme_root[0] != '/')
+		{
+			char* tmp = theme_root;
+			theme_root = dynamic_strcat(2, "/", theme_root);
+			free(tmp);
+		}
+	}
+	if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme") == UCI_OK)
+	{
+		theme=get_option_value_string(uci_to_option(e));
+	}
+
+	test_collapse = dynamic_strcat(5, web_root, theme_root, "/", theme, "/collapseMenus.txt");
+	test_theme_js = dynamic_strcat(5, web_root, theme_root, "/", theme, "/theme.js");
+	if (path_exists(test_collapse) == PATH_IS_REGULAR_FILE || path_exists(test_collapse) == PATH_IS_SYMLINK)
+	{
+		collapsible_menus=1;
+	}
+	if (path_exists(test_theme_js) == PATH_IS_REGULAR_FILE || path_exists(test_theme_js) == PATH_IS_SYMLINK)
+	{
+		theme_js=1;
+	}
+
 	if(display_type == HEADER || display_type == MINIMAL_HEADER)
 	{
 		printf("Content-Type: text/html; charset=utf-8\n\n");
 
-		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
-		{
-			printf("ERROR: no gargoyle package defined!\n");
-			return 0;
-		}
 
-		char* theme_root = "/themes";
-		char* theme = "default";
+
 		char* js_root = "js";
-		char* web_root = "/www";
 		char* bin_root = ".";
 		char* gargoyle_version = "default";
 		char* fallback_lang = "";
@@ -185,20 +222,7 @@ int main(int argc, char **argv)
 		char* test_theme = "";
 		char** translation_strings = NULL;
 
-		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme_root") == UCI_OK)
-		{
-			theme_root=get_option_value_string(uci_to_option(e));
-			if(theme_root[0] != '/')
-			{
-				char* tmp = theme_root;
-				theme_root = dynamic_strcat(2, "/", theme_root);
-				free(tmp);
-			}
-		}
-		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme") == UCI_OK)
-		{
-			theme=get_option_value_string(uci_to_option(e));
-		}
+
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "js_root") == UCI_OK)
 		{
 			js_root=get_option_value_string(uci_to_option(e));
@@ -208,10 +232,6 @@ int main(int argc, char **argv)
 				js_root = dynamic_strcat(2, "/", js_root);
 				free(tmp);
 			}
-		}
-		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
-		{
-			web_root=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "bin_root") == UCI_OK)
 		{
@@ -342,6 +362,11 @@ int main(int argc, char **argv)
 			}
 		}
 #endif
+		if(theme_js)
+		{
+			printf("\t<script src=\"%s/%s/theme.js?%s\"></script>\n", theme_root, theme, gargoyle_version);
+		}
+
 		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/bootstrap.min.css");
 		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
 		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
@@ -399,9 +424,11 @@ int main(int argc, char **argv)
 				   "\t\t\t\t\t<div class=\"col-lg-12\">\n");
 		}
 
-		printf("<script>\n"
-			   "<!--\n"
-			   "\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+		printf("<script>\n");
+		printf("\tvar gargoyleBinRoot = \"%s/%s\";\n", web_root, bin_root);
+		printf("\tvar haveCollapsibleMenus = %d;\n", collapsible_menus);
+		printf("\tvar haveThemeJs = %d;\n", theme_js);
+
 
 		if(display_interface_vars == 1)
 		{
@@ -415,27 +442,23 @@ int main(int argc, char **argv)
 		printf("\n\tsetBrowserTimeCookie();\n"
 			   "\n\tvar testAjax = getRequestObj();\n"
 			   "\tif(!testAjax) { window.location = \"no_ajax.sh\"; }\n"
-			   "//-->\n"
 			   "</script>\n"
 			   "\n\n");
 		free_null_terminated_string_array(translation_strings);
 	}
 	else if(display_type == FOOTER)
 	{
+		uci_unload(ctx, p);
 		if(uci_load(ctx, "system", &p) != UCI_OK)
 		{
-				printf("ERROR: no gargoyle package defined!\n");
-				return 0;
+			printf("ERROR: no system package defined!\n");
+			return 0;
 		}
-		char* theme_root = "/themes";
-		char* theme = "default";
-		char* web_root = "/www";
 		char* bin_root = ".";
 		char* hostname = "";
 		char* fallback_lang = "";
 		char* active_lang = "";
 		char* test_theme = "";
-		char* test_collapse = "";
 		char** translation_strings = NULL;
 		char** all_lstr_js;
 		char whitespace_separators[] = { '\t', ' ' };
@@ -454,18 +477,11 @@ int main(int argc, char **argv)
 					}
 			}
 		}
+		uci_unload(ctx, p);
 		if(uci_load(ctx, "gargoyle", &p) != UCI_OK)
 		{
 			printf("ERROR: no gargoyle package defined!\n");
 			return 0;
-		}
-		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "theme") == UCI_OK)
-		{
-			theme=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "web_root") == UCI_OK)
-		{
-			web_root=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(ctx, &e, p, "gargoyle", "global", "bin_root") == UCI_OK)
 		{
@@ -528,12 +544,7 @@ int main(int argc, char **argv)
 		printf("\t\t\t\t\t\t<span id=\"garg_host\">%s: %s</span>\n", translation_strings == NULL ? dname : translation_strings[2], hostname);
 		printf("\t\t\t\t\t</li>\n");//<!-- sidebar-header end-->
 
-		int collapsible_menus=0;
-		test_collapse = dynamic_strcat(5, web_root, theme_root, "/", theme, "/collapseMenus.txt");
-		if (path_exists(test_collapse) == PATH_IS_REGULAR_FILE || path_exists(test_collapse) == PATH_IS_SYMLINK)
-		{
-			collapsible_menus=1;
-		}
+
 		int maj_counter=1;
 		int min_counter=0;
 		int first_section=1;
