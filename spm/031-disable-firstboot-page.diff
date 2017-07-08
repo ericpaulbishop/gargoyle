@@ -1,0 +1,15 @@
+diff --git a/package/gargoyle/files/etc/config/gargoyle b/package/gargoyle/files/etc/config/gargoyle
+index 2be0104..27bb84c 100644
+--- a/package/gargoyle/files/etc/config/gargoyle
++++ b/package/gargoyle/files/etc/config/gargoyle
+@@ -7,8 +7,9 @@ config global global
+ 	option common_css	'common.css'
+ 	option common_js	'common.js'
+ 	option require_web_password	'1'
+-	option is_first_boot		'1'
+ 	option session_timeout		'15'
++	option dateformat 'usa'
++	option hour_style '24'
+ 
+ config display display
+ 	option firewall			'Firewall'

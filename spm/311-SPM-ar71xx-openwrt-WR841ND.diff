@@ -1,0 +1,24 @@
+diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+index 7bec566f3f..a27b2ad18c 100755
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -107,6 +110,7 @@ add network switch
+ set network.@switch[-1].name='$key'
+ set network.@switch[-1].reset='$reset'
+ set network.@switch[-1].enable_vlan='$enable'
++set network.@switch[-1].ports='WLLLL'
+ set network.@switch[-1].blinkrate='$blinkrate'
+ EOF
+ 	[ -n "$cpu_port" ] && {
+diff --git a/package/base-files/files/lib/functions/uci-defaults.sh b/package/base-files/files/lib/functions/uci-defaults.sh
+index 5a8809d68c..0224376df3 100644
+--- a/package/base-files/files/lib/functions/uci-defaults.sh
++++ b/package/base-files/files/lib/functions/uci-defaults.sh
+@@ -258,6 +261,7 @@ add network switch
+ set network.@switch[-1].name='$name'
+ set network.@switch[-1].reset='$reset'
+ set network.@switch[-1].enable_vlan='$enable'
++set network.@switch[-1].ports='WLLLL'
+ EOF
+ }
+ 

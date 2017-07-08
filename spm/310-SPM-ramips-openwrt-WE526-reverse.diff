@@ -1,0 +1,53 @@
+diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+index 7bec566f3f..a27b2ad18c 100755
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -107,6 +110,7 @@ add network switch
+ set network.@switch[-1].name='$key'
+ set network.@switch[-1].reset='$reset'
+ set network.@switch[-1].enable_vlan='$enable'
++set network.@switch[-1].ports='WLLLL'
+ set network.@switch[-1].blinkrate='$blinkrate'
+ EOF
+ 	[ -n "$cpu_port" ] && {
+diff --git a/target/linux/ramips/base-files/etc/board.d/02_network b/target/linux/ramips/base-files/etc/board.d/02_network
+index a78912dbc9..9f9f5d54de 100755
+--- a/target/linux/ramips/base-files/etc/board.d/02_network
++++ b/target/linux/ramips/base-files/etc/board.d/02_network
+@@ -238,8 +238,8 @@ ramips_setup_interfaces()
+ 	wr8305rt)
+ 		ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
+ 		ucidef_add_switch "switch0" "1" "1"
+-		ucidef_add_switch_vlan "switch0" "1" "0 1 2 3 4 6t"
+-		ucidef_add_switch_vlan "switch0" "2" "4 6t"
++		ucidef_add_switch_vlan "switch0" "1" "1 2 3 4 6t"
++		ucidef_add_switch_vlan "switch0" "2" "0 6t"
+ 		;;
+ 
+ 	y1s)
+diff --git a/target/linux/ramips/dts/WR8305RT.dts b/target/linux/ramips/dts/WR8305RT.dts
+index c28e422eea..c87008814a 100644
+--- a/target/linux/ramips/dts/WR8305RT.dts
++++ b/target/linux/ramips/dts/WR8305RT.dts
+@@ -61,7 +64,7 @@
+ 
+ 	ethernet@10100000 {
+ 		mtd-mac-address = <&factory 0x4>;
+-		ralink,port-map = "llllw";
++		ralink,port-map = "wllll";
+ 	};
+ 
+ 	wmac@10180000 {
+diff --git a/target/linux/ramips/dts/mt7620n.dtsi b/target/linux/ramips/dts/mt7620n.dtsi
+index 83ab03ae5d..d8c6f5d6ef 100644
+--- a/target/linux/ramips/dts/mt7620n.dtsi
++++ b/target/linux/ramips/dts/mt7620n.dtsi
+@@ -10,7 +10,7 @@
+ 	};
+ 
+ 	chosen {
+-		bootargs = "console=ttyS0,57600";
++		bootargs = "console=ttyS0,115200";
+ 	};
+ 
+ 	cpuintc: cpuintc@0 {

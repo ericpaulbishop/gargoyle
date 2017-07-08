@@ -1,0 +1,25 @@
+diff --git a/patches-generic/005-passwd.patch b/patches-generic/005-passwd.patch
+index 54a6d894..d8792ab1 100644
+--- a/patches-generic/005-passwd.patch
++++ b/patches-generic/005-passwd.patch
+@@ -1,9 +1,17 @@
+ --- a/package/base-files/files/etc/shadow
+ +++ b/package/base-files/files/etc/shadow
+-@@ -1,5 +1,5 @@
++@@ -1,4 +1,5 @@
+ -root::0:0:99999:7:::
+-+root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::
+++root:$1$PsM6bycH$esmgIpPUjPhSYCtCASne91:0:0:99999:7:::
+++admin:$1$PsM6bycH$esmgIpPUjPhSYCtCASne91:0:0:99999:7:::
+  daemon:*:0:0:99999:7:::
+  ftp:*:0:0:99999:7:::
+  network:*:0:0:99999:7:::
+- nobody:*:0:0:99999:7:::
++--- a/package/base-files/files/etc/passwd
+++++ b/package/base-files/files/etc/passwd
++@@ -1,4 +1,5 @@
++ root:x:0:0:root:/root:/bin/ash
+++admin:x:0:0:adm:/root:/bin/ash
++ daemon:*:1:1:daemon:/var:/bin/false
++ ftp:*:55:55:ftp:/home/ftp:/bin/false
++ network:*:101:101:network:/var:/bin/false

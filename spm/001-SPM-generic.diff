@@ -1,0 +1,70 @@
+diff --git a/package/gargoyle/files/www/basic.sh b/package/gargoyle/files/www/basic.sh
+index 0a69453c..75f613ed 100755
+--- a/package/gargoyle/files/www/basic.sh
++++ b/package/gargoyle/files/www/basic.sh
+@@ -73,6 +73,16 @@
+ 	else
+ 		echo "cdcif = \"$cdcif\";"
+ 	fi
++
++	//WAN Port Management
++	WAN_IFNAME=$(uci get network.wan.ifname)
++	WAN_PORTS=$(uci get network.@switch[0].ports)
++	VLAN1_PORTS=$(uci get network.@switch_vlan[0].ports)
++	VLAN2_PORTS=$(uci get network.@switch_vlan[1].ports)
++	echo "var WAN_IFNAME = \"$WAN_IFNAME\";"
++	echo "var WAN_PORTS = \"$WAN_PORTS\";"
++	echo "var VLAN1_PORTS = \"$VLAN1_PORTS\";"
++	echo "var VLAN2_PORTS = \"$VLAN2_PORTS\";"
+ %>
+ var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
+ 
+diff --git a/package/gargoyle/files/www/js/basic.js b/package/gargoyle/files/www/js/basic.js
+index cce47d4a..18a3cae4 100644
+--- a/package/gargoyle/files/www/js/basic.js
++++ b/package/gargoyle/files/www/js/basic.js
+@@ -163,10 +163,6 @@ function saveChanges()
+ 					uci.remove('network', 'wan', 'ifname');
+ 					uci.set('network', 'wan', 'type', 'bridge');
+ 				}
+-				else if( singleEthernetIsWan() )
+-				{
+-					uci.set('network', 'wan', 'ifname', defaultLanIf);
+-				}
+ 				else if(getSelectedValue("wan_protocol").match(/3g/))
+ 				{
+ 					uci.remove('network', 'wan', 'ifname');
+@@ -197,16 +216,6 @@ function saveChanges()
+ 			{
+ 				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
+ 			}
+-			else if( singleEthernetIsWan() )
+-			{
+-				//just in case wirelessIf does not exist, remove variable first
+-				uci.remove('network', 'lan', 'ifname');
+-				uci.set('network', 'lan', 'ifname', wirelessIfs.length > 0 ? wirelessIfs[0] : "");
+-			}
+-			else
+-			{
+-				uci.set('network', 'lan', 'ifname', defaultLanIf);
+-			}
+ 
+ 			//define new sections, now that we have cleared old ones
+ 			//cfg2 should be AP if we have an AP section, otherwise cfg2 is whatever single mode we are in
+@@ -945,7 +950,7 @@ function saveChanges()
+ 				if(oldLanIp == currentLanIp && (!doReboot))
+ 				{
+ 					uciOriginal = uci.clone();
+-					resetData();
++					window.location.reload(true);
+ 					setControlsEnabled(true);
+ 				}
+ 			}
+@@ -1556,6 +1564,7 @@ function resetData()
+ 	var confIsGateway = !confIsBridge;
+ 	document.getElementById("global_gateway").checked = confIsGateway;
+ 	document.getElementById("global_bridge").checked = confIsBridge;
++	document.getElementById("wan_ports").value = WAN_PORTS;
+ 
+ 	//set bridge variables
+ 	document.getElementById("bridge_ip").value      = uciOriginal.get("network", "lan", "ipaddr");

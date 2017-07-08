@@ -1,0 +1,444 @@
+diff --git a/package/gargoyle/files/www/access.sh b/package/gargoyle/files/www/access.sh
+index bccf6ec..d554658 100755
+--- a/package/gargoyle/files/www/access.sh
++++ b/package/gargoyle/files/www/access.sh
+@@ -31,6 +31,7 @@
+ 		if [ -e /etc/dropbear/authorized_keys ] ; then
+ 			cat /etc/dropbear/authorized_keys | awk -F' ' ' $0 ~ /./ {print "authorizedKeyMap[\""$NF"\"]=\""$0"\";"}'
+ 		fi
++		echo "var username = \"$COOKIE_name\";"
+ %>
+ //-->
+ </script>
+diff --git a/package/gargoyle/files/www/js/access.js b/package/gargoyle/files/www/js/access.js
+index 1cadf14..453e864 100644
+--- a/package/gargoyle/files/www/js/access.js
++++ b/package/gargoyle/files/www/js/access.js
+@@ -175,7 +175,7 @@ function saveChanges()
+ 		if(newPassword != "")
+ 		{
+ 			var escapedPassword = newPassword.replace(/'/, "'\"'\"'");
+-			passwordCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
++			passwordCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd " + username + " \n";
+ 			restartDropbear = true;
+ 		}
+ 
+diff --git a/package/gargoyle/files/www/js/login.js b/package/gargoyle/files/www/js/login.js
+index 8e74956..17792b1 100644
+--- a/package/gargoyle/files/www/js/login.js
++++ b/package/gargoyle/files/www/js/login.js
+@@ -9,10 +9,18 @@ var logS=new Object(); //part of i18n
+ 
+ function doLogin()
+ {
++	var name = document.getElementById("name").value;
+ 	var password = document.getElementById("password").value;
++
++	if(name.length == 0)
++	{
++		alert(logS.nameErr);
++		return false;
++	}
+ 	if(password.length == 0)
+ 	{
+ 		alert(logS.passErr);
++		return false;
+ 	}
+ 	else
+ 	{
+@@ -22,7 +30,7 @@ function doLogin()
+ 		passInvalid=false;
+ 		loggedOut=false;
+ 
+-		var param = getParameterDefinition("password", password);
++		var param = getParameterDefinition("name", name) +"&"+ getParameterDefinition("password", password);
+ 		var stateChangeFunction = function(req)
+ 		{
+ 			if(req.readyState == 4)
+@@ -34,7 +42,7 @@ function doLogin()
+ 				}
+ 				else
+ 				{
+-					var cookieLines=req.responseText.split(/[\n\r]+/);
++					var cookieLines=req.responseText.split(/[\n\r]+/); console.log(cookieLines);
+ 					var cIndex=0;
+ 					for(cIndex=0; cIndex < cookieLines.length; cIndex++)
+ 					{
+diff --git a/package/gargoyle/files/www/login.sh b/package/gargoyle/files/www/login.sh
+index 9426be8..2a709b5 100755
+--- a/package/gargoyle/files/www/login.sh
++++ b/package/gargoyle/files/www/login.sh
+@@ -6,7 +6,7 @@
+ 	# itself remain covered by the GPL.
+ 	# See http://gargoyle-router.com/faq.html#qfoss for more information
+ 
+-	valid=$( eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" ) | grep "Set-Cookie" )
++	valid=$( eval $( gargoyle_session_validator -n "$COOKIE_name" -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" ) | grep "Set-Cookie" )
+ 	require=$(uci get gargoyle.global.require_web_password)
+ 	if [ "$require" = "0" ] ; then
+ 		eval $( gargoyle_session_validator -g -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) ) 
+@@ -74,8 +74,10 @@ var passInvalid = false;
+ 		<div class="panel panel-primary">
+ 			<div class="panel-body">
+ 				<div class="row form-group">
++					<label class="sr-only" for="name" id="name_label"><%~ EAdmN %></label>
+ 					<label class="sr-only" for="password" id="password_label"><%~ EAdmP %></label>
+ 					<span class="col-xs-12">
++						<input id="name" class="form-control" type="text" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25" placeholder="<%~ EAdmN %>"/>
+ 						<input id="password" class="form-control" type="password" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25" placeholder="<%~ EAdmP %>"/>
+ 						<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
+ 					</span>
+@@ -106,7 +110,7 @@ var passInvalid = false;
+ 
+ <script>
+ <!--
+-	document.getElementById('password').focus();
++	document.getElementById('name').focus();
+ 	setStatusAndQuotas();
+ //-->
+ </script>
+diff --git a/package/gargoyle/files/www/firstboot.sh b/package/gargoyle/files/www/firstboot.sh
+index 7f3fcb5..56b5a7c 100755
+--- a/package/gargoyle/files/www/firstboot.sh
++++ b/package/gargoyle/files/www/firstboot.sh
+@@ -20,6 +20,7 @@
+ 		awk '{gsub(/"/, "\\\""); print "timezoneLines.push(\""$0"\");"}' ./data/timezones.txt
+ 	fi
+ 	echo "var timezoneData = parseTimezones(timezoneLines);"
++	echo "var username = \"$COOKIE_name\";"
+ %>
+ 
+ //-->
+diff --git a/package/gargoyle/files/www/js/firstboot.js b/package/gargoyle/files/www/js/firstboot.js
+index 551951c..9c23e73 100644
+--- a/package/gargoyle/files/www/js/firstboot.js
++++ b/package/gargoyle/files/www/js/firstboot.js
+@@ -27,7 +27,7 @@ function setInitialSettings()
+ 		var saveCommands = "";
+ 		var browserSecondsUtc = Math.floor( ( new Date() ).getTime() / 1000 );
+ 		var escapedPassword = p1.replace(/'/, "'\"'\"'");
+-		saveCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd root \n";
++		saveCommands = "(echo \'" + escapedPassword + "' ; sleep 1 ; echo \'" + escapedPassword + "\') | passwd " + username + " \n";
+ 		saveCommands = saveCommands + "\nuci set system.@system[0].timezone=\'" + getSelectedValue("timezone") + "\'\n";
+ 		saveCommands = saveCommands + "\nuci del gargoyle.global.is_first_boot\nuci commit\n";
+ 		saveCommands = saveCommands + "\nuci show system | grep timezone | sed 's/^.*=//g' | sed \"s/'//g\" >/etc/TZ 2>/dev/null\n";
+diff --git a/package/gargoyle/files/www/utility/get_password_cookie.sh b/package/gargoyle/files/www/utility/get_password_cookie.sh
+index 2c70abe..daf0b6e 100755
+--- a/package/gargoyle/files/www/utility/get_password_cookie.sh
++++ b/package/gargoyle/files/www/utility/get_password_cookie.sh
+@@ -12,5 +12,5 @@
+ 	echo ""
+ 	#prevent brute force attacks by forcing this script to take at least 1 second
+ 	sleep 1
+-	eval $( gargoyle_session_validator -p "$POST_password" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" )
++	eval $( gargoyle_session_validator -n "$POST_name" -p "$POST_password" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" )
+ ?>
+diff --git a/package/gargoyle/src/gargoyle_session_validator.c b/package/gargoyle/src/gargoyle_session_validator.c
+index 9736ce2..6f462a3 100644
+--- a/package/gargoyle/src/gargoyle_session_validator.c
++++ b/package/gargoyle/src/gargoyle_session_validator.c
+@@ -1,6 +1,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <stddef.h>
+ #include <unistd.h>
+ #include <pwd.h>
+ #include <stdarg.h>
+@@ -18,6 +19,7 @@ extern char* crypt( const char* key, const char* setting );
+ 
+ char* get_root_hash(void);
+ char* get_cookie_time(time_t t);
++char *name = NULL;
+ 
+ int main (int argc, char **argv)
+ {
+@@ -33,10 +35,14 @@ int main (int argc, char **argv)
+ 
+ 	int next_opt;
+ 	int read;
+-	while((next_opt = getopt(argc, argv, "p:P:c:C:e:E:a:A:i:I:r:R:t:T:b:B:gG")) != -1)
++	while((next_opt = getopt(argc, argv, "n:N:p:P:c:C:e:E:a:A:i:I:r:R:t:T:b:B:gG")) != -1)
+ 	{
+ 		switch(next_opt)
+ 		{
++			case 'n':
++			case 'N':
++				name = strdup(optarg);
++				break;
+ 			case 'p':
+ 			case 'P':
+ 				password = strdup(optarg);
+@@ -86,114 +92,118 @@ int main (int argc, char **argv)
+ 		}
+ 	}
+ 
+-
+ 	int valid = 0;
+-	char* root_hash = get_root_hash();
+-	if(root_hash != NULL)
+-	{
+-		time_t now;
+-		time(&now);
+-		int expired = 0;
++	int expired = 0;
++	time_t now;
++	time(&now);
+ 
+-		if(password != NULL)
+-		{
+-			valid = strcmp( crypt(password, root_hash), root_hash) == 0 ? 1 : 0;
+-		}
+-		else if(cookie_hash != NULL && cookie_exp != NULL && user_agent != NULL && src_ip != NULL)
++	if(cookie_hash != NULL && cookie_exp != NULL && user_agent != NULL && src_ip != NULL)
++	{
++		// first check that session hasn't expired
++		time_t exp_time;
++		int read = sscanf(cookie_exp, "%ld", &exp_time);
++		if(read > 0)
+ 		{
+-			// first check that session hasn't expired
+-			time_t exp_time;
+-			int read = sscanf(cookie_exp, "%ld", &exp_time);
+-			if(read > 0)
++			expired = 1;
++			if(exp_time > now && (exp_time - (timeout_minutes*60) - 2) <= now)
+ 			{
+-				expired = 1;
+-				if(exp_time > now && (exp_time - (timeout_minutes*60) - 2) <= now)
+-				{
+-					expired = 0;
+-				}
++				expired = 0;
+ 			}
++		}
+ 
+-			//now check if hash is valid
+-			char *combined = dynamic_strcat(4, root_hash, cookie_exp, user_agent, src_ip);
+-			char* hashed = get_sha256_hash_hex_str(combined);
+-			if(strcmp(hashed, cookie_hash) == 0)
+-			{
+-				if(expired == 0 && read > 0)
+-				{
+-					valid = 1;
+-				}
+-			}
+-			else
++		//now check if hash is valid
++		char *combined = dynamic_strcat(3, cookie_exp, user_agent, src_ip);
++		char* hashed = get_sha256_hash_hex_str(combined);
++		if(strcmp(hashed, cookie_hash) == 0)
++		{
++			if(expired == 0 && read > 0)
+ 			{
+-				//if hash doesn't match, problem isn't expiration
+-				expired = 0;
++				valid = 1;
+ 			}
+-			free(hashed);
+-			free(combined);
+ 		}
+-		if(unconditionally_generate == 1)
++		else
+ 		{
+-			valid = 1;
++			//if hash doesn't match, problem isn't expiration
++			expired = 0;
+ 		}
+-		if(valid == 1 && src_ip != NULL && user_agent != NULL)
++		free(hashed);
++		free(combined);
++	}
++	else if(password != NULL && name != NULL)
++	{
++		char* root_hash = get_root_hash();
++		if(root_hash != NULL)
+ 		{
+-			//set new cookie with new timout
+-			char* new_hash;
+-			char* combined;
+-			char new_exp[100] = "";
+-			time_t new_exp_t = now+(timeout_minutes*60);
+-			sprintf(new_exp, "%ld", new_exp_t);
+-			char* cookie_exp;
+-		       	if( browser_time > 0 && ((browser_time - now) < (-5*60) || (browser_time - now) > (5*60)) )
+-			{
+-				//set cookie expiration based on browser time if server time & browser time disagree by more than 5 minutes, and browser time is defined
+-				time_t cookie_exp_t = browser_time+(timeout_minutes*60);
+-				cookie_exp = get_cookie_time(cookie_exp_t);
++			valid = strcmp( crypt(password, root_hash), root_hash) == 0 ? 1 : 0;
++		}
++		free(root_hash);
++	}
+ 
+-			}
+-			else
+-			{
+-				//set cookie based on server time
+-				cookie_exp = get_cookie_time(new_exp_t);
+-			}
+-			combined = dynamic_strcat(4, root_hash, new_exp, user_agent, src_ip);
+-			new_hash = get_sha256_hash_hex_str(combined);
+-			
+-			//if we don't know browser time, don't set cookie expiration (in the browser -- server timeout still implemented), otherwise set it
+-			if(browser_time == 0)
+-			{
+-				printf("echo \"Set-Cookie:hash=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Path=/;\"; ", new_hash, new_exp);
+-			}
+-			else
+-			{
+-				printf("echo \"Set-Cookie:hash=%s; Expires=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Expires=%s; Path=/;\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
+-			}
++	if(unconditionally_generate == 1)
++	{
++		valid = 1;
++	}
++	if(valid == 1 && src_ip != NULL && user_agent != NULL)
++	{
++		//set new cookie with new timout
++		char* new_hash;
++		char* combined;
++		char new_exp[100] = "";
++		time_t new_exp_t = now+(timeout_minutes*60);
++		sprintf(new_exp, "%ld", new_exp_t);
++		char* cookie_exp;
++		if( browser_time > 0 && ((browser_time - now) < (-5*60) || (browser_time - now) > (5*60)) )
++		{
++			//set cookie expiration based on browser time if server time & browser time disagree by more than 5 minutes, and browser time is defined
++			time_t cookie_exp_t = browser_time+(timeout_minutes*60);
++			cookie_exp = get_cookie_time(cookie_exp_t);
++		}
++		else
++		{
++			//set cookie based on server time
++			cookie_exp = get_cookie_time(new_exp_t);
++		}
++		combined = dynamic_strcat(3, new_exp, user_agent, src_ip);
++		new_hash = get_sha256_hash_hex_str(combined);
+ 
+-			free(new_hash);
+-			free(combined);
+-			free(cookie_exp);
++		//if we don't know browser time, don't set cookie expiration (in the browser -- server timeout still implemented), otherwise set it
++		if(browser_time == 0)
++		{
++			printf("echo \"Set-Cookie:hash=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Path=/;\"; ", new_hash, new_exp);
+ 		}
+ 		else
+ 		{
+-			if(redirect != NULL)
+-			{
+-				//do redirect to login page
+-				char exp_str[20] = "";
+-				if(expired == 1)
+-				{
+-					sprintf(exp_str, "?expired=1");
+-				}
+-				printf("echo \"Status: 302 Found\" ;echo \"Location: %s%s\" ; echo \"\" ; ", redirect, exp_str);
+-			}
+-			else
++			printf("echo \"Set-Cookie:hash=%s; Expires=%s; Path=/;\"; echo \"Set-Cookie:exp=%s; Expires=%s; Path=/;\"; ", new_hash, cookie_exp, new_exp, cookie_exp);
++		}
++
++		if(password != NULL && name != NULL)
++		{
++			printf("echo \"Set-Cookie:name=%s; Path=/;\"; ", name);
++		}
++		free(new_hash);
++		free(combined);
++		free(cookie_exp);
++	}
++	else
++	{
++		if(redirect != NULL)
++		{
++			//do redirect to login page
++			char exp_str[20] = "";
++			if(expired == 1)
+ 			{
+-				// if we're checking validity of password, don't do redirect, just report invalid
+-				// so this code can be embedded in a plain text response
+-				printf("echo \"invalid\" ;");
++				sprintf(exp_str, "?expired=1");
+ 			}
++			printf("echo \"Status: 302 Found\" ;echo \"Location: %s%s\" ; echo \"\" ; ", redirect, exp_str);
++		}
++		else
++		{
++			// if we're checking validity of password, don't do redirect, just report invalid
++			// so this code can be embedded in a plain text response
++			printf("echo \"invalid\" ;");
+ 		}
+-		free(root_hash);
+ 	}
++
+ 	if(valid == 0)
+ 	{
+ 		//if not valid make sure we die after checking so remainder of page is not displayed
+@@ -206,36 +216,26 @@ int main (int argc, char **argv)
+ 
+ char* get_root_hash_from_file(const char* file)
+ {
+-	int found = 0;
+ 	FILE *pw = fopen(file, "r");
+ 	char* root_hash = NULL;
+ 
+-	if(pw != NULL)
++	if(pw != NULL && name != NULL)
+ 	{
+ 		char line[512];
+-		char* test = fgets(line, 511, pw);
+-		while(test != NULL && !found)
++		char* test;
++		while(fgets(line, 511, pw) != NULL)
+ 		{
+-			if(strlen(test) > 5)
++			test = strtok(line, ":");
++			if(strcmp(test, name) == 0)
+ 			{
+-				test[4] = '\0';
+-				if(strcmp(test, "root") == 0)
+-				{
+-					char* hash_end;
+-					found = 1;
+-					test = test + 5;
+-					hash_end = strchr(test, ':');
+-					*hash_end = '\0';
+-					root_hash = strdup(test);
+-				}
++				test = strtok(NULL, ":");
++				root_hash = strdup(test);
++				break;
+ 			}
+-			test = fgets(line, 511, pw);
+ 		}
+ 		fclose(pw);
+ 	}
+ 	return root_hash;
+-
+-
+ }
+ 
+ char* get_root_hash(void)
+diff --git a/package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/login.js b/package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/login.js
+index 90c06f0..30a0a4f 100644
+--- a/package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/login.js
++++ b/package/plugin-gargoyle-i18n-English-EN/files/www/i18n/English-EN/login.js
+@@ -3,7 +3,8 @@
+  */
+ 
+ logS.LSect="Login";
+-logS.EAdmP="Enter Admin Password";
++logS.EAdmN="User Name";
++logS.EAdmP="Password";
+ logS.YQot="Your Quota";
+ logS.NQot="Entire Network Quota";
+ logS.CTime="Current Date &amp; Time";
+@@ -11,6 +12,7 @@ logS.CIP="IP Address";
+ logS.CIPs="You are currently connected from:";
+ 
+ //javascript
++logS.nameErr="ERROR: You must enter a user name";
+ logS.passErr="ERROR: You must enter a password";
+ logS.Lging="Logging In";
+ logS.SExp="Session Expired";

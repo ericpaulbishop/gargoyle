@@ -1,0 +1,93 @@
+diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+index 7bec566f3f..a27b2ad18c 100755
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -59,7 +59,10 @@ set network.$1.ip6assign='60'
+ EOF
+ 		;;
+ 	wan) uci -q batch <<EOF
+-set network.$1.proto='dhcp'
++set network.$1.proto='pppoe'
++set network.$1.username='new_router'
++set network.$1.password='password'
++set network.$1.keepalive='3 15'
+ delete network.wan6
+ set network.wan6='interface'
+ set network.wan6.ifname='$ifname'
+diff --git a/package/base-files/files/lib/functions/uci-defaults.sh b/package/base-files/files/lib/functions/uci-defaults.sh
+index 5a8809d68c..0224376df3 100644
+--- a/package/base-files/files/lib/functions/uci-defaults.sh
++++ b/package/base-files/files/lib/functions/uci-defaults.sh
+@@ -225,7 +225,10 @@ ucidef_set_interface_wan() {
+ 	uci batch <<EOF
+ set network.wan='interface'
+ set network.wan.ifname='$ifname'
+-set network.wan.proto='dhcp'
++set network.wan.proto='pppoe'
++set network.wan.username='new_router'
++set network.wan.password='password'
++set network.wan.keepalive='3 15'
+ set network.wan6='interface'
+ set network.wan6.ifname='$ifname'
+ set network.wan6.proto='dhcpv6'
+diff --git a/package/base-files/files/etc/config/system b/package/base-files/files/etc/config/system
+index 3dfbfc4fc8..012e5396ec 100644
+--- a/package/base-files/files/etc/config/system
++++ b/package/base-files/files/etc/config/system
+@@ -1,8 +1,9 @@
+ config system
+ 	option hostname	OpenWrt
+-	option timezone	UTC
++	option timezone	'STD-2DST,M3.5.0/2,M10.5.0/2'
+ 
+ config timeserver ntp
++	list server	0.europe.pool.ntp.org
+ 	list server	0.pool.ntp.org
+ 	list server	1.pool.ntp.org
+ 	list server	2.pool.ntp.org
+diff --git a/package/kernel/mac80211/files/lib/wifi/mac80211.sh b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
+index ea229d6c03..c0696bfbc4 100644
+--- a/package/kernel/mac80211/files/lib/wifi/mac80211.sh
++++ b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
+@@ -114,14 +114,14 @@ config wifi-device  radio$devidx
+ 	option hwmode	11${mode_band}
+ $dev_id
+ $ht_capab
+-	# REMOVE THIS LINE TO ENABLE WIFI:
+-	option disabled 1
+ 
+-config wifi-iface
++config wifi-iface ap_g
+ 	option device   radio$devidx
+ 	option network  lan
+ 	option mode     ap
+-	option ssid     OpenWrt
++	option disassoc_low_ack 0
++	option wds 1
++	option ssid     Gargoyle-ISP
+ 	option encryption none
+ 
+ EOF
+diff --git a/package/network/config/firewall/files/firewall.config b/package/network/config/firewall/files/firewall.config
+index 7be01d25b8..e866130b07 100644
+--- a/package/network/config/firewall/files/firewall.config
++++ b/package/network/config/firewall/files/firewall.config
+@@ -172,6 +172,18 @@ config rule
+ 	option proto		udp
+ 	option target		ACCEPT
+ 
++config remote_accept 'ra_443_443'
++	option local_port '443'
++	option remote_port '443'
++	option proto 'tcp'
++	option zone 'wan'
++
++config remote_accept 'ra_80_80'
++	option local_port '80'
++	option remote_port '80'
++	option proto 'tcp'
++	option zone 'wan'
++
+ ### FULL CONFIG SECTIONS
+ #config rule
+ #	option src		lan
