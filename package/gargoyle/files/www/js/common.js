@@ -2915,7 +2915,9 @@ function setNavMouseEvents()
 		e = sidebarElements[i];
 		if(e.id.match(/MIN00/) && e.firstChild != null )
 		{
-			if(e.firstChild.href != null && e.firstChild.href.match(/logout\.sh$/))
+			subId = e.id.replace(/MIN00/, "MIN01")
+			subEl = document.getElementById(subId)
+			if(subEl == null)
 			{
 				//do nothing to logout link
 			}
