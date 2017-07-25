@@ -99,7 +99,8 @@ echo "var isBcm94704 = $isbcm94704;" >> "$out_file"
 echo "var allLanMacs = [];" >> "$out_file"
 brctl showmacs br-lan | grep "yes" | awk ' { print "allLanMacs.push(\"" $2 "\");" } ' >> "$out_file"
 
-
+# determine if this board is a ramips, for which the uci wan macaddr variable must ALWAYS be set
+[ -f /lib/ramips.sh ] && echo "var ramips = 'true';" >> "$out_file"
 
 echo "var wifiDevG=uciWirelessDevs.length > 0 ? uciWirelessDevs[0] : \"\";" >> "$out_file"
 echo "var wifiDevA=\"\";" >> "$out_file"
