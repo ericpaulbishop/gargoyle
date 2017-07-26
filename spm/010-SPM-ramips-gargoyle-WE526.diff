@@ -1,0 +1,55 @@
+diff --git a/package/gargoyle/files/www/basic.sh b/package/gargoyle/files/www/basic.sh
+index 0a69453c..75f613ed 100755
+--- a/package/gargoyle/files/www/basic.sh
++++ b/package/gargoyle/files/www/basic.sh
+@@ -390,6 +400,18 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
+ 			</div>
+ 
+ 			<div class="panel-body">
++				<div class="row form-group" >
++					<label for="wan_protocol" class="col-xs-5" >WAN ports:</label>
++					<span class="col-xs-7">
++						<select class='form-control' name='wan_ports'  id='wan_ports'>
++							<option value="LLLLW">LLLLW</option>
++							<option value="LLLWW">LLLWW</option>
++							<option value="LLWWW">LLWWW</option>
++							<option value="LWWWW">LWWWW</option>
++						</select>
++						<label> <B>W</B> - WAN; <B>L</B> - LAN;</label></label>
++					</span>
++				</div>
+ 				<div id="wan_protocol_container" class="row form-group" >
+ 					<label for="wan_protocol" class="col-xs-5" ><%~ Cnct %>:</label>
+ 					<span class="col-xs-7">
+diff --git a/package/gargoyle/files/www/js/basic.js b/package/gargoyle/files/www/js/basic.js
+index cce47d4a..18a3cae4 100644
+--- a/package/gargoyle/files/www/js/basic.js
++++ b/package/gargoyle/files/www/js/basic.js
+@@ -189,7 +185,26 @@ function saveChanges()
+ 				}
+ 				else
+ 				{
+-					uci.set('network', 'wan', 'ifname', defaultWanIf);
++					if(getSelectedValue("wan_ports").match(/LLLLW/) && (VLAN1_PORTS != "0 1 2 3 6t" || VLAN2_PORTS != "4 6t"))
++					{
++						preCommands = preCommands + "uci set network.@switch[0].ports='LLLLW'\nuci set network.@switch_vlan[0].ports='0 1 2 3 6t'\nuci set network.@switch_vlan[1].ports='4 6t'\n";
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LLLWW/) && (VLAN1_PORTS != "0 1 2 6t" || VLAN2_PORTS != "3 4 6t"))
++					{
++						preCommands = preCommands + "uci set network.@switch[0].ports='LLLWW'\nuci set network.@switch_vlan[0].ports='0 1 2 6t'\nuci set network.@switch_vlan[1].ports='3 4 6t'\n";
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LLWWW/) && (VLAN1_PORTS != "0 1 6t" || VLAN2_PORTS != "2 3 4 6t"))
++					{
++						preCommands = preCommands + "uci set network.@switch[0].ports='LLWWW'\nuci set network.@switch_vlan[0].ports='0 1 6t'\nuci set network.@switch_vlan[1].ports='2 3 4 6t'\n";
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LWWWW/) && (VLAN1_PORTS != "0 6t" || VLAN2_PORTS != "1 2 3 4 6t"))
++					{
++						preCommands = preCommands + "uci set network.@switch[0].ports='LWWWW'\nuci set network.@switch_vlan[0].ports='0 6t'\nuci set network.@switch_vlan[1].ports='1 2 3 4 6t'\n";
++						preCommands = preCommands + "uci commit\n";
++					}
+ 				}
+ 			}
+ 

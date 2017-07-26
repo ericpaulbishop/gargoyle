@@ -1,0 +1,87 @@
+diff --git a/package/gargoyle/files/www/basic.sh b/package/gargoyle/files/www/basic.sh
+index 0a69453c..75f613ed 100755
+--- a/package/gargoyle/files/www/basic.sh
++++ b/package/gargoyle/files/www/basic.sh
+@@ -390,6 +400,18 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
+ 			</div>
+ 
+ 			<div class="panel-body">
++				<div class="row form-group" >
++					<label for="wan_protocol" class="col-xs-5" >WAN ports:</label>
++					<span class="col-xs-7">
++						<select class='form-control' name='wan_ports'  id='wan_ports'>
++							<option value="WLLLL">WLLLL</option>
++							<option value="LWWWW">LWWWW</option>
++							<option value="LLWWW">LLWWW</option>
++							<option value="LLLWW">LLLWW</option>
++						</select>
++						<label> <B>W</B> - WAN; <B>L</B> - LAN;</label></label>
++					</span>
++				</div>
+ 				<div id="wan_protocol_container" class="row form-group" >
+ 					<label for="wan_protocol" class="col-xs-5" ><%~ Cnct %>:</label>
+ 					<span class="col-xs-7">
+diff --git a/package/gargoyle/files/www/js/basic.js b/package/gargoyle/files/www/js/basic.js
+index cce47d4a..18a3cae4 100644
+--- a/package/gargoyle/files/www/js/basic.js
++++ b/package/gargoyle/files/www/js/basic.js
+@@ -189,7 +185,58 @@ function saveChanges()
+ 				}
+ 				else
+ 				{
+-					uci.set('network', 'wan', 'ifname', defaultWanIf);
++					if(getSelectedValue("wan_ports").match(/WLLLL/))
++					{
++						preCommands = preCommands + "uci set network.wan.ifname='eth1'\nuci set network.wan6.ifname='eth1'\nuci set network.lan.ifname='eth0'\n";
++						preCommands = preCommands + "uci set network.@switch[0].ports='WLLLL'\nuci set network.@switch_vlan[0].ports='0 1 2 3 4'\n";
++
++						if(VLAN2_PORTS != "")
++						{
++							preCommands = preCommands + "uci delete network.@switch_vlan[1]\n";
++						}
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LWWWW/))
++					{
++						preCommands = preCommands + "uci set network.wan.ifname='eth0'\nuci set network.wan6.ifname='eth0'\nuci set network.lan.ifname='eth1'\n";
++						preCommands = preCommands + "uci set network.@switch[0].ports='LWWWW'\nuci set network.@switch_vlan[0].ports='0 1 2 3 4'\n";
++
++						if(VLAN2_PORTS != "")
++						{
++							preCommands = preCommands + "uci delete network.@switch_vlan[1]\n";
++						}
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LLWWW/))
++					{
++						preCommands = preCommands + "uci set network.wan.ifname='eth0.1'\nuci set network.wan6.ifname='eth0.1'\nuci set network.lan.ifname='eth1 eth0.2'\n";
++						preCommands = preCommands + "uci set network.@switch[0].ports='LLWWW'\nuci set network.@switch_vlan[0].ports='0t 1 2 3'\n";
++
++						if(VLAN2_PORTS == "")
++						{
++							preCommands = preCommands + "uci add network switch_vlan\nuci set network.@switch_vlan[1].device='switch0'\nuci set network.@switch_vlan[1].vlan='2'\nuci set network.@switch_vlan[1].ports='0t 4'\n";
++						}
++						else if(VLAN2_PORTS != "0t 4")
++						{
++							preCommands = preCommands + "uci set network.@switch_vlan[1].ports='0t 4'\n";
++						}
++						preCommands = preCommands + "uci commit\n";
++					}
++					else if(getSelectedValue("wan_ports").match(/LLLWW/))
++					{
++						preCommands = preCommands + "uci set network.wan.ifname='eth0.1'\nuci set network.wan6.ifname='eth0.1'\nuci set network.lan.ifname='eth1 eth0.2'\n";
++						preCommands = preCommands + "uci set network.@switch[0].ports='LLLWW'\nuci set network.@switch_vlan[0].ports='0t 1 2'\n";
++
++						if(VLAN2_PORTS == "")
++						{
++							preCommands = preCommands + "uci add network switch_vlan\nuci set network.@switch_vlan[1].device='switch0'\nuci set network.@switch_vlan[1].vlan='2'\nuci set network.@switch_vlan[1].ports='0t 3 4'\n";
++						}
++						else if(VLAN2_PORTS != "0t 3 4")
++						{
++							preCommands = preCommands + "uci set network.@switch_vlan[1].ports='0t 3 4'\n";
++						}
++						preCommands = preCommands + "uci commit\n";
++					}
+ 				}
+ 			}
+ 

@@ -1,0 +1,17 @@
+diff --git a/target/linux/ramips/base-files/etc/uci-defaults/gargoyle_button_handlers b/target/linux/ramips/base-files/etc/uci-defaults/gargoyle_button_handlers
+new file mode 100644
+index 0000000000..99daff5621
+--- /dev/null
++++ b/target/linux/ramips/base-files/etc/uci-defaults/gargoyle_button_handlers
+@@ -0,0 +1,11 @@
++#!/bin/sh
++
++uci batch <<EOF
++set system.reset_button=button
++set system.reset_button.button='reset'
++set system.reset_button.action='released'
++set system.reset_button.handler='logger restore defaults ; /sbin/firstboot -y; reboot ;'
++set system.reset_button.min='20'
++set system.reset_button.max='90'
++commit system
++EOF
