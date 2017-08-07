@@ -209,7 +209,7 @@ if [ -z "$error" ] ; then
 	sed -i 's/^[\t ]*ca[\t ].*$/ca    \/etc\/openvpn\/'"${client_name}_ca.crt"'/g'    "${client_name}.conf"
 	sed -i 's/^[\t ]*cert[\t ].*$/cert  \/etc\/openvpn\/'"${client_name}.crt"'/g'     "${client_name}.conf"
 	sed -i 's/^[\t ]*key[\t ].*$/key   \/etc\/openvpn\/'"${client_name}.key"'/g'      "${client_name}.conf"
-	sed -i 's/^[\t ]*status[\t ].*$/status  \/var\/openvpn\/current_status/g'         "${client_name}.conf"
+	sed -i 's/^[\t ]*status[\t ].*$/status  \/var\/run\/openvpn_status/g'         "${client_name}.conf"
 	if [ -f "${client_name}_ta.key" ]  ; then
 		sed -i 's/^[\t ]*tls\-auth[\t ].*$/tls-auth    \/etc\/openvpn\/'"${client_name}_ta.key${ta_direction}"'/g'    "${client_name}.conf"
 	fi

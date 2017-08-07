@@ -9,6 +9,8 @@
 var UI=new Object(); //part of i18n
 var TiZ=new Object(); //i18n timezones
 var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row support
+var menuState = []; //nav Menu State variable
+var navTimer; //timeout for restoring menu
 
 window.onresize = function onresize()
 {
@@ -2805,3 +2807,161 @@ function togglePopup(popElement)
 	}
 	descendant[0].classList.toggle("show");
 }
+
+//Part of collapsible menus scripts
+function uncollapseNavThis(menuElement)
+{
+	var parentNav = menuElement.parentElement;
+	collapseNavOthers(parentNav);
+	parentNav.classList.add("active");
+	var siblings = parentNav.childNodes;
+	for (var x = 0; x < siblings.length; x++)
+	{
+		if (siblings[x].nodeName == "UL")
+		{
+			siblings[x].classList.add("active");
+		}
+	}
+}
+
+function collapseNavOthers(navElement)
+{
+	var excludedNavID = navElement.id;
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
+	{
+		elem = document.getElementById(menuState[x][0]);
+		if((elem != null) && (elem.id != excludedNavID) && (elem.id.endsWith("_MIN00")))
+		{
+			elem.classList.remove("active");
+			var descendant = elem.childNodes;
+			for(var y = 0; y < descendant.length; y++)
+			{
+				if(descendant[y].nodeName == "UL")
+				{
+					descendant[y].classList.remove("active");
+				}
+			}
+		}
+	}
+}
+
+function storeNavState()
+{
+	var selectorStart = "nav_MAJ";
+	var selectorEnd = "_MIN";
+	var x = 1;
+	var y = 0;
+	var selectorStr;
+	var elem;
+	var elemSub;
+
+	function createSelectorString(selectorStart,x,selectorEnd,y)
+	{
+		selectorString = selectorStart + ("0" + x).slice(-2) + selectorEnd + ("0" + y).slice(-2);
+		return selectorString;
+	}
+
+	selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+	elem = document.getElementById(selectorStr);
+	while(elem != null)
+	{
+		menuState.push([elem.id,elem.className])
+		y++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elemSub = document.getElementById(selectorStr);
+		while(elemSub != null)
+		{
+			menuState.push([elemSub.id,elemSub.className])
+			y++;
+			selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+			elemSub = document.getElementById(selectorStr);
+		}
+		y = 0;
+		x++;
+		selectorStr = createSelectorString(selectorStart,x,selectorEnd,y);
+		elem = document.getElementById(selectorStr);
+	}
+}
+
+function restoreNavState()
+{
+	var x = 0;
+	var elem;
+
+	for(x = 0; x < menuState.length; x++)
+	{
+		elem = document.getElementById(menuState[x][0]);
+		if(elem != null)
+		{
+			elem.className = menuState[x][1];
+		}
+	}
+}
+
+function setNavMouseEvents()
+{
+	var navSidebar = document.getElementById("sidebar")
+	navSidebar.onmouseover = function() { clearTimeout(navTimer) ; }
+	navSidebar.onmouseleave = function() { navTimer = setTimeout(restoreNavState,1200) }
+
+
+	var sidebarElements = document.getElementsByClassName("sidebar-item")
+	var i;
+	for(i=0; i< sidebarElements.length; i++)
+	{
+		e = sidebarElements[i];
+		if(e.id.match(/MIN00/) && e.firstChild != null )
+		{
+			subId = e.id.replace(/MIN00/, "MIN01")
+			subEl = document.getElementById(subId)
+			if(subEl == null)
+			{
+				//do nothing to logout link
+			}
+			else
+			{
+				e.firstChild.onmouseover = function() {}
+				e.firstChild.onclick = function() {
+					var windowWidth = window.innerWidth
+					                  || document.documentElement.clientWidth
+							  || document.body.clientWidth;
+					if( windowWidth <= 991 )
+					{
+						uncollapseNavThis(this);
+					}
+					else
+					{
+						var topId = this.parentNode.id;
+						var topIdPrefix = topId.substr(0, topId.length - 2)
+						var listEl = document.getElementById(topIdPrefix + "01")
+						if(listEl != null && listEl.firstChild != null && listEl.firstChild.href != null)
+						{
+							window.location = listEl.firstChild.href 
+						}
+					}
+					return false  
+				}
+			}
+		}
+	}
+	
+	storeNavState();
+}
+
+function sidebar()
+{
+	var row = document.getElementById("row-offcanvas");
+	if(row.className == "row-offcanvas full-height active")
+	{
+		row.className = "row-offcanvas full-height";
+	}
+	else
+	{
+		row.className = "row-offcanvas full-height active";
+	}
+}
+
+

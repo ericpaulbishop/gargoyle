@@ -144,4 +144,37 @@ cat << EOF >/etc/sysupgrade.conf
 /etc/tor
 EOF
 
+#rfkill on GL-AR150
+is_ar150=$( cat /proc/cpuinfo | grep GL_ar150 )
+if [ -n "$is_ar150" ] ; then
+
+	mkdir -p '/etc/hotplug.d/button'
+	cat << 'EOF' > '/etc/hotplug.d/button/00-ar150-rfkill-switch'
+#!/bin/sh
+
+. /lib/functions.sh
+
+local rfkill_state=0
+
+wifi_rfkill_set() {
+	uci set wireless.$1.disabled=$rfkill_state
+}
+
+
+is_ar150=$( cat /proc/cpuinfo | grep GL_ar150 )
+if [ -n "$is_ar150" ] && [ "$BUTTON" = "BTN_8" ] ; then
+	if [ "$ACTION" = "released" ] ; then
+		rfkill_state=1
+		logger "taking down wifi in response to switch"
+	else
+		rfkill_state=0
+		logger "putting up wifi in response to switch"
+	fi
+	config_load wireless
+	config_foreach wifi_rfkill_set wifi-device
+	uci commit wireless
+	wifi up
+fi
+EOF
+fi
 

@@ -39,8 +39,8 @@
 +#include "dev-wmac.h"
 +#include "machtypes.h"
 +
-+#define GL_AR150_GPIO_LED_WLAN		   0
-+#define GL_AR150_GPIO_LED_LAN		   13
++#define GL_AR150_GPIO_LED_POWER	   0
++#define GL_AR150_GPIO_LED_WLAN		   13
 +#define GL_AR150_GPIO_LED_WAN		   15 
 +
 +#define GL_AR150_GPIO_BIN_USB         6
@@ -58,20 +58,20 @@
 +
 +static struct gpio_led gl_ar150_leds_gpio[] __initdata = {
 +	{
-+		.name = "gl_ar150:wlan",
-+		.gpio = GL_AR150_GPIO_LED_WLAN,
++		.name = "gl_ar150:power",
++		.gpio = GL_AR150_GPIO_LED_POWER,
 +		.active_low = 0,
++ 		.default_state = 1,
 +	},
 +	{
-+		.name = "gl_ar150:lan",
-+		.gpio = GL_AR150_GPIO_LED_LAN,
++		.name = "gl_ar150:wlan",
++		.gpio = GL_AR150_GPIO_LED_WLAN,
 +		.active_low = 0,
 +	},
 +	{
 +		.name = "gl_ar150:wan",
 +		.gpio = GL_AR150_GPIO_LED_WAN,
 +		.active_low = 0,
-+ 		.default_state = 1,
 +	},
 +};
 +
@@ -167,12 +167,13 @@
  pb44 |\
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds
-@@ -173,6 +173,10 @@ dlan-pro-1200-ac)
+@@ -173,6 +173,11 @@ dlan-pro-1200-ac)
  	ucidef_set_led_trigger_gpio "plcr" "dLAN" "devolo:error:dlan" "16" "0"
  	;;
  
 +gl_ar150)
-+	ucidef_set_led_wlan "wlan" "WLAN" "gl_ar150:wlan" "phy0tpt"
++	ucidef_set_led_wlan    "wlan" "WLAN" "gl_ar150:wlan" "phy0tpt"
++	ucidef_set_led_netdev  "wan"  "WAN"  "gl_ar150:wan"  "eth1"
 +	;;
 +
  gl-inet)
