@@ -629,11 +629,11 @@ function saveChanges()
 			}
 
 			//preserve wan mac definition even if wan is disabled if this is a bcm94704
-			if(isBcm94704 && (uci.get("network", "wan", "type") != "bridge"))
+			if((isBcm94704 || isRamips) && (uci.get("network", "wan", "type") != "bridge"))
 			{
 				if(uci.get("network", "wan", "macaddr") == "")
 				{
-					uci.set("network", "wan", "macaddr", defaultWanMac);
+					uci.set("network", "wan", "macaddr", defaultWanMac.toLowerCase());
 				}
 			}
 
