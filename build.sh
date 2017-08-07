@@ -25,8 +25,8 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Chaos Calmer"
-	branch_id="15.05"
+	branch_name="LEDE-17.01.2"
+	branch_id="v17.01.2"
 	branch_is_trunk="0"
 	branch_packages_path="packages"
 
@@ -34,7 +34,7 @@ set_version_variables()
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest 
-	openwrt_commit="03d52cfcff87c0e8e09e7a455a6fdefb7138e369"
+	openwrt_commit="2da512ecf4631cd7812283f0931cf6bbf842a313"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
