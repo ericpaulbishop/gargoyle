@@ -5,7 +5,7 @@
  	rm -f $(TARGET_DIR)/usr/lib/opkg/info/*.postinst
  	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
 +	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.control)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),find $(TARGET_DIR)/usr/lib/opkg/info/* -name '*.control' -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf)
  
  build_image: FORCE
  	@echo
@@ -16,7 +16,7 @@
  	rm -f $(TARGET_DIR)/usr/lib/opkg/info/*.postinst
  	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
 +	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.control)
++	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),find $(TARGET_DIR)/usr/lib/opkg/info/* -name '*.control' -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf)
  	$(call mklibs)
  
  PASSOPT=""
