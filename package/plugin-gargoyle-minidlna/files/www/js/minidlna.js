@@ -190,8 +190,8 @@ function saveChanges()
 		if(media.length > 0)
 		{
 			var base = (media[0]).replace(/[\/]+$/g, "").replace(/.*,/, "");
-			uci.set(pkg, sec, "db_dir", base + "/_minidlna");
-			uci.set(pkg, sec, "log_dir", base + "/_minidlna");
+			uci.set(pkg, sec, "db_dir", base + "/.minidlna");
+			uci.set(pkg, sec, "log_dir", base + "/.minidlna");
 			uci.createListOption(pkg, sec, "media_dir", true);
 			uci.set(pkg, sec, "media_dir", media, false)
 		}

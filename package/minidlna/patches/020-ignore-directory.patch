@@ -1,6 +1,6 @@
 --- a/scanner.c
 +++ b/scanner.c
-@@ -794,11 +794,22 @@
+@@ -799,11 +799,22 @@
  		}
  		if( (type == TYPE_DIR) && (access(full_path, R_OK|X_OK) == 0) )
  		{
