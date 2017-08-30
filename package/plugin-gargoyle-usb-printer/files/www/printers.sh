@@ -16,7 +16,7 @@
 	echo "var printerId=\"$printer_id\";"
 	echo "var routerIp=\"$ipaddr\";"
 %>
-	window.onload = function()
+	resetData = function()
 	{
 		document.getElementById("no_printer_div").style.display = printerId == "" ? "block" : "none"
 		document.getElementById("printer_found_div").style.display = printerId == "" ? "none" : "block"
@@ -57,6 +57,11 @@
 	</div>
 </div>
 
+<script>
+<!--
+	resetData();
+//-->
+</script>
 <%
 	gargoyle_header_footer -f -s "system" -p "printers"
 %>
