@@ -4,7 +4,7 @@
 
 UI.SaveChanges="Salvar";
 UI.Reset="Resetar";
-UI.Clear="Limpar Histórico";
+UI.Clear="Apagar Histórico";
 UI.Delete="Apagar Dados";
 UI.DNow="Baixar";
 UI.Visited="Sites Acessados";
@@ -26,7 +26,7 @@ UI.Install="Instalar";
 UI.RefreshPlugins="Atualizar";
 UI.GetBackup="Fazer Backup";
 UI.RestoreConfig="Restaurar Backup";
-UI.RestoreDefault="Redefinir Configurações";
+UI.RestoreDefault="Redefinir Configuração";
 UI.Upgrade="Atualizar Firmware";
 UI.Reboot="Reiniciar";
 UI.MoreInfo="Exibir Informações";
@@ -115,5 +115,5 @@ UI.prdr="porta redirecionada para roteador";
 UI.puse="porta utilizada pelo roteador";
 UI.pfwd="porta redirecionada para";
 UI.conn="conectado";
-UI.AJAX="AJAX Browser Support Needed";
-UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";
+UI.AJAX="Necessário um browser com suporte AJAX";
+UI.AJAXUpg="Favor instalar um browser mais recente. Browsers recomendados: Chrome/Opera/Safari.";

@@ -2,14 +2,14 @@
  * UTF-8 (with BOM) Portuguese-BR text strings for minidlna.sh html elements
  */
 
-dlna.DLNA="Servidor DLNA";
+dlna.DLNA="Servidor de Mídia DLNA";
 dlna.DLNAEn="Habilitar Servidor DLNA";
-dlna.StatDLNA="Status Servidor DLNA";
+dlna.StatDLNA="Status de Mídia";
 dlna.RescanDLNA="Escanear Mídia";
 dlna.DLNASName="Nome do Servidor";
 dlna.DLNAStr="Servidor DLNA Padrão";
 dlna.DLNAMType="Tipo de Mídia";
-dlna.DLNAAll="Todas";
+dlna.DLNAAll="Todos";
 dlna.DLNAA="Músicas";
 dlna.DLNAV="Vídeos";
 dlna.DLNAI="Fotos";

@@ -2,11 +2,11 @@
  * UTF-8 (with BOM) Portuguese-BR text strings for dhcp.sh html elements
  */
 
-dhcpS.SrvE="Servidor DHCP Habilitado";
+dhcpS.SrvE="Habilitar Servidor DHCP";
 dhcpS.Drng="Faixa de DHCP";
 dhcpS.Strt="Início da Faixa";
 dhcpS.End="Fim da Faixa";
-dhcpS.LsTm="Duração de Concessão";
+dhcpS.LsTm="Tempo de Concessão";
 dhcpS.SIPs="Reserva de Endereços IP";
 dhcpS.BlckM="Forçar Atribuições DHCP";
 dhcpS.AdSIP="Adicionar Nova Reserva de IP";
