@@ -5,4 +5,4 @@
 webS.Webs="Shell de Comando";
 webS.Cmd="Comando";
 webS.Exe="Executar";
-webS.CmdWarn="CUIDADO! Não execute nenhum comando interativo ou loop!";
+webS.CmdWarn="<b>CUIDADO!!!</b> Não execute nenhum comando interativo ou loop!";

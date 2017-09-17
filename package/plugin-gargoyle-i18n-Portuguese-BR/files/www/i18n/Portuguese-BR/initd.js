@@ -4,8 +4,8 @@
 
 initdS.Services="Serviços do Sistema";
 initdS.NoServ="Não há nada para atualizar!";
-initdS.ActServ="Atualizar Serviços";
-initdS.ServColumn=['Serviço', 'Auto-start', '', '', ''];
-initdS.ServStart="Iniciar Serviço";
-initdS.ServStop="Parar Serviço";
-initdS.ServRestart="Reiniciar Serviço";
+initdS.ActServ="Atualizando serviços…";
+initdS.ServColumn=['Serviço', 'Auto-Início', '', '', ''];
+initdS.ServStart="Iniciando serviço…";
+initdS.ServStop="Parando serviço…";
+initdS.ServRestart="Reiniciando serviço…";

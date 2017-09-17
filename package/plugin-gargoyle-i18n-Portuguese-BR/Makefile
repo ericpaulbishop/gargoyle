@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-i18n-Portuguese-BR
-PKG_VERSION:=1.0.0
+PKG_VERSION:=20170908
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -19,7 +19,7 @@ define Package/plugin-gargoyle-i18n-Portuguese-BR
 endef
 
 define Package/plugin-gargoyle-i18n-Portuguese-BR/description
-	Pacote de Idioma PT-BR para Interface Gargoyle
+	Pacote de Idioma em Português (Brasil) para Interface Gargoyle
 endef
 
 define Build/Prepare
