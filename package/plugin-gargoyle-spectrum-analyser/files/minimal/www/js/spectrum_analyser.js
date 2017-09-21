@@ -369,7 +369,7 @@ function generateGraphData(detected)
 		var level = detected[3][x];
 		var vhtwidth = detected[4][x];
 		var vhtseg1 = detected[5][x];
-		var vhtseg2 = detected[6][x];
+		var vhtseg2 = (detected[6][x] == 0 ? null:detected[6][x]);
 		var BSSID = detected[7][x].replace(/:/g,"");
 		
 		if(band == "2.4GHz")
@@ -419,10 +419,10 @@ function generateGraphData(detected)
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((channel-(-vhtoffset)),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((channel-(-vhtoffset)),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg1-(0.5*vhtoffset),2)};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg1-(0.5*vhtoffset),2)+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(-0.5*vhtoffset)),3)-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(-0.5*vhtoffset)),3)};
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
@@ -458,10 +458,10 @@ function generateGraphData(detected)
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel-vhtoffset,2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel-vhtoffset,2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg1-(0.5*vhtoffset),2)};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg1-(0.5*vhtoffset),2)+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(-0.5*vhtoffset)),3)-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(-0.5*vhtoffset)),3)};
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
@@ -512,8 +512,8 @@ function generateTableData(detected)
 		var level = detected[3][x];
 		var vhtwidth = detected[4][x];
 		var vhtseg1 = detected[5][x];
-		var vhtseg2 = detected[6][x];
-		var BSSID = detected[7][x];
+		var vhtseg2 = (detected[6][x] == 0 ? null:detected[6][x]);
+		var BSSID = detected[7][x].toUpperCase();
 		var htmode = detected[8][x];
 		var vhtmode = detected[9][x];
 		//var encryption = detected[8][x];
@@ -549,7 +549,7 @@ function generateTableData(detected)
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, channel+"-"+(channel-(-vhtoffset)), "80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
@@ -571,7 +571,7 @@ function generateTableData(detected)
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, channel+"-"+(channel-vhtoffset), "80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
