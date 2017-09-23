@@ -60,7 +60,7 @@
 	<div class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-body">
-				<div id="spectrum_table_container">
+				<div id="spectrum_table_container" class="table-responsive">
 				</div>
 			</div>
 		</div>
