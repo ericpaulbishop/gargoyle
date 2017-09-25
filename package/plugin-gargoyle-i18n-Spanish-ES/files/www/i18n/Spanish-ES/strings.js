@@ -56,7 +56,7 @@ UI.HsNm="Nombre de Equipo";
 UI.HDsp="Visualización de Equipos";
 UI.DspHn="Mostrar Nombres de Equipos";
 UI.DspHIP="Mostrar IPs de Equipos";
-
+UI.DspT="Tipo de Presentación";
 UI.never="nunca";
 UI.disabled="desactivado";
 UI.both="ambos";
