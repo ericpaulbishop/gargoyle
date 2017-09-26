@@ -56,7 +56,7 @@ UI.HsNm="Rechnername";
 UI.HDsp="Rechner";
 UI.DspHn="Zeige Rechnernamen";
 UI.DspHIP="Zeige Rechner IPs";
-
+UI.DspT="Typ";
 UI.never="nie";
 UI.disabled="deaktiviert";
 UI.both="beide";

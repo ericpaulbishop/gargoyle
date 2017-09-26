@@ -56,6 +56,7 @@ UI.HsNm="Názov hostiteľa";
 UI.HDsp="Hostiteľ";
 UI.DspHn="Zobraziť hostiteľov";
 UI.DspHIP="Zobraziť hostiteľské IPs";
+UI.DspT="Druh zobrazenia";
 UI.DspUsd="Použité Byty";
 UI.DspPct="Použité Percento";
 UI.DspLim="Limit";

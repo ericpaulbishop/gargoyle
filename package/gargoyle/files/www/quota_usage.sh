@@ -24,13 +24,17 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12">
+					<label class="col-xs-5 col-sm-3" for="host_display"><%~ HDsp %>:</label>
+					<span class="col-xs-7 col-sm-9">
 						<select id="host_display" class="form-control">
 							<option value="hostname"><%~ DspHn %></option>
 							<option value="ip"><%~ DspHIP %></option>
 						</select>
 					</span>
-					<span class="col-xs-12">
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5 col-sm-3" for="data_display"><%~ DspT %>:</label>
+					<span class="col-xs-7 col-sm-9">
 						<select id="data_display" class="form-control">
 							<option value="pcts"><%~ DspPct %></option>
 							<option value="usds"><%~ DspUsd %></option>
@@ -38,7 +42,12 @@
 						</select>
 					</span>
 				</div>
-				<div id="quota_table_container" class=="table-responsive"></div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<label id="active_quotas_label" style="text-decoration:underline"><%~ ActivQuotas %>:</label>
+						<div id="quota_table_container" class="table-responsive"></div>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>

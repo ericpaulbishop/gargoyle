@@ -56,6 +56,7 @@ UI.HsNm="Hostname";
 UI.HDsp="Tipo de Exibição";
 UI.DspHn="Hostname";
 UI.DspHIP="Endereço IP";
+UI.DspT="Exibição de Dados";
 UI.DspUsd="Bytes Consumidos";
 UI.DspPct="Porcentagem Consumida";
 UI.DspLim="Limite";
