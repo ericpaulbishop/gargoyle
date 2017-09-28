@@ -208,7 +208,7 @@ function timeParamsToTableSpan(timeParameters)
 		else
 		{
 			if(hours != ""){ textList = hours.match(",") ? hours.split(/[\t ]*,[\t ]*/) : [ hours ]; }
-			if(days  != ""){ textList.unshift(days); }
+			if(days  != ""){ textList.unshift(dayToi18n(days)); }
 		}
 		textList.unshift( active == "only" ? quotasStr.Only+":" : quotasStr.AllExcept+":" );
 	}
