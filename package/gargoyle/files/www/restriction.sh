@@ -25,17 +25,21 @@
 			</div>
 
 			<div class="panel-body">
-				<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
 				<div class="row form-group">
-					<%in templates/restriction_template %>
 					<span class="col-xs-12">
+						<label id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</label>
+						<%in templates/restriction_template %>
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
 					</span>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
-				<span id="current_rule_label" style="text-decoration:underline"><%~ CRestr %>:</span>
-				<div id="rule_table_container" class="table-responsive"></div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<label id="current_rule_label" style="text-decoration:underline"><%~ CRestr %>:</label>
+						<div id="rule_table_container" class="table-responsive"></div>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -46,17 +50,21 @@
 				<h3 class="panel-title"><%~ EWSect %></h3>
 			</div>
 			<div class="panel-body">
-				<span id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</span>
 				<div class="row form-group">
-					<%in templates/whitelist_template %>
 					<span class="col-xs-12">
+						<label id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</label>
+						<%in templates/whitelist_template %>
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
 					</span>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
-				<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
-				<div id="exception_table_container" class="table-responsive"></div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<label id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</label>
+						<div id="exception_table_container" class="table-responsive"></div>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -68,7 +76,6 @@
 </div>
 <span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

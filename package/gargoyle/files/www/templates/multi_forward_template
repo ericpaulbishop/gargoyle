@@ -13,7 +13,6 @@
 						<td><input type='text' id='addr_sp' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></td>
 						<td><input type='text' id='addr_ep' size='5' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></td>
 						<td><input type='text' id='addr_ip' size='15' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></td>
-							
-						<td><input type='button' id='addr_button' value='<%~ Add %>' class='btn btn-default' onclick='addPortfRangeRule()'/></td>
+						<td><button type='button' id='addr_button' class='btn btn-default' onclick='addPortfRangeRule()'><%~ Add %></button></td>
 					</tr>
 				</table>
