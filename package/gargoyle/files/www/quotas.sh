@@ -38,7 +38,7 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</label>
+						<span id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</span>
 						<%in templates/quotas_template %>
 						<button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button>
 					</span>

@@ -27,7 +27,7 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</label>
+						<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
 						<%in templates/restriction_template %>
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
 					</span>
@@ -36,7 +36,7 @@
 				<div id="internal_divider1" class="internal_divider"></div>
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="current_rule_label" style="text-decoration:underline"><%~ CRestr %>:</label>
+						<span id="current_rule_label" style="text-decoration:underline"><%~ CRestr %>:</span>
 						<div id="rule_table_container" class="table-responsive"></div>
 					</span>
 				</div>
@@ -52,7 +52,7 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</label>
+						<span id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</span>
 						<%in templates/whitelist_template %>
 						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
 					</span>
@@ -61,7 +61,7 @@
 				<div id="internal_divider1" class="internal_divider"></div>
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</label>
+						<span id="current_exceptions_label" style="text-decoration:underline" ><%~ CExcp %>:</span>
 						<div id="exception_table_container" class="table-responsive"></div>
 					</span>
 				</div>
