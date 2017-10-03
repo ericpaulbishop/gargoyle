@@ -48,7 +48,7 @@
 
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<label id="active_quotas_label" style="text-decoration:underline"><%~ ActivQuotas %>:</label>
+						<span id="active_quotas_label" style="text-decoration:underline"><%~ ActivQuotas %>:</span>
 						<div id="quota_table_container" class="table-responsive"></div>
 					</span>
 				</div>
