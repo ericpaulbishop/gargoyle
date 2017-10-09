@@ -111,7 +111,7 @@ function getTimeParametersFromUci(srcUci, quotaSection)
 		active = hours != "" || days != "" || weekly != "" ? "only" : "always";
 
 	}
-	return [hours,days,weekly,active];
+	return [hours,dayToi18n(days),weekly_i18n(weekly,"uci"),active];
 }
 
 function timeParamsToTableSpan(timeParameters)
@@ -297,4 +297,45 @@ function updateTableData()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 
+}
+
+function dayToi18n(daystrings) { //this is part of i18n; TODO: best to have an uci get language to see if absent to just return daystrings
+	var days=daystrings.split(",");
+	for (var i = 0; i < days.length; i++) {
+		if (days[i] == "sun") { days[i] = UI.Sun; }
+		if (days[i] == "mon") { days[i] = UI.Mon; }
+		if (days[i] == "tue") { days[i] = UI.Tue; }
+		if (days[i] == "wed") { days[i] = UI.Wed; }
+		if (days[i] == "thu") { days[i] = UI.Thu; }
+		if (days[i] == "fri") { days[i] = UI.Fri; }
+		if (days[i] == "sat") { days[i] = UI.Sat; }
+	}
+	return days.join();
+}
+
+function weekly_i18n(weekly_schd, direction) { //this is part of i18n; TODO: best to have an uci get language to see if absent to just return daystrings
+	if (weekly_schd.length < 6) return weekly_schd;
+	var localdays=[UI.Sun, UI.Mon, UI.Tue, UI.Wed, UI.Thu, UI.Fri, UI.Sat];
+	var fwdays=["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	var indays, outdays, splits, idx;
+	var joiner=[];
+
+	if (direction == "uci") {
+		indays=fwdays;
+		outdays=localdays;
+	} else { // from the browser
+		indays=localdays;
+		outdays=fwdays;
+	}
+
+	splits=weekly_schd.split(" ");
+	for (idx=0; idx < splits.length; idx++) {
+		var pos= indays.indexOf(splits[idx]);
+		if (pos >= 0) {
+			joiner[idx]=outdays[pos];
+		} else {
+			joiner[idx]=splits[idx];
+		}
+	}
+	return joiner.join(" ");
 }
