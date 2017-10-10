@@ -1630,7 +1630,7 @@
 + 	}
 + 	return head;
 + }
-++EXPORT_SYMBOL(validate_xmit_skb_list);
+++  
 + 
 + static void qdisc_pkt_len_init(struct sk_buff *skb)
 + {
