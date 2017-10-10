@@ -360,5 +360,5 @@ fi
 #cleanup
 cd ..
 
-#rm -rf nf-patch-build
+rm -rf nf-patch-build
 
