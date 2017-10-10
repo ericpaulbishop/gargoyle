@@ -1,9 +1,9 @@
-<div>
+<div class="row form-group">
 	<label class='col-xs-5' for='exception_name' id='exception_name_label'><%~ restrictions.ESect %>:</label>
 	<span class="col-xs-7"><input type='text' class='form-control' id='exception_name' size='30'/></span>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class='col-xs-5' for='exception_applies_to' id='exception_applies_to_label'><%~ EAppl %>:</label>
 	<span class="col-xs-7">
 		<select class='form-control' id='exception_applies_to' onchange='setVisibility(document,"exception_")'>
@@ -14,18 +14,18 @@
 	</span>
 </div>
 
-<div id="exception_applies_to_container">
+<div id="exception_applies_to_container" class="row form-group">
 	<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
-		<input type="button" class="btn btn-default" id="exception_add_applies_to_addr" value="<%~ Add %>" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'/>
+		<button type="button" class="btn btn-default" id="exception_add_applies_to_addr" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'><%~ Add %></button>
 	</div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ HstAddr %></em>
 	</div>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class='col-xs-5' for='exception_all_day' id='exception_schedule_label'><%~ Schd %>:</label>
 	<span class="col-xs-7">
 		<input type='checkbox' id='exception_all_day' onclick='setVisibility(document,"exception_")' /><label for="exception_all_day"><%~ ADay %></label>
@@ -66,13 +66,13 @@
 	</div>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class='col-xs-5' for='exception_all_access' id='exception_all_access_label'><%~ PRsrc %>:</label>
 	<span class="col-xs-7"><input type='checkbox' id='exception_all_access' onclick='setVisibility(document,"exception_")' /><label for="exception_all_access"><%~ NetAcc %></label></span>
 </div>
 
 <div class="indent" id="exception_resources">
-	<div>
+	<div class="row form-group">
 		<label class="col-xs-5" id="exception_remote_ip_label" for='exception_remote_ip'><%~ RemIP %>:</label>
 		<span class="col-xs-7">
 			<select class='form-control' id='exception_remote_ip_type' onchange='setVisibility(document,"exception_")'>
@@ -82,15 +82,15 @@
 			</select>
 		</span>
 	</div>
-	<div id="exception_remote_ip_container">
+	<div id="exception_remote_ip_container" class="row form-group">
 		<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
 		<div class="col-xs-offset-5 col-xs-7">
 			<input type='text' id='exception_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
-			<input type="button" class="btn btn-default" id="exception_add_remote_ip" value="<%~ Add %>" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'/>
+			<button type="button" class="btn btn-default" id="exception_add_remote_ip" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'><%~ Add %></button>
 		</div>
 	</div>
 
-	<div>
+	<div class="row form-group">
 		<label class="col-xs-5" id="exception_remote_port_label" for='exception_remote_port'><%~ RemPrt %>:</label>
 		<span class="col-xs-7">
 			<select class='form-control' id="exception_remote_port_type" onchange='setVisibility(document,"exception_")'>
@@ -103,7 +103,7 @@
 			<input type='text' id='exception_remote_port' onkeyup='proofreadMultiplePorts(this)' size='20' class='form-control' />
 		</span>
 	</div>
-	<div>
+	<div class="row form-group">
 		<label class="col-xs-5" id="exception_local_port_label" for='exception_local_port'><%~ LclPrt %>:</label>
 		<span class="col-xs-7">
 			<select class='form-control' id="exception_local_port_type" onchange='setVisibility(document,"exception_")'>
@@ -117,7 +117,7 @@
 		</span>
 	</div>
 
-	<div>
+	<div class="row form-group">
 		<label class='col-xs-5' id="exception_transport_protocol_label" for='exception_transport_protocol'><%~ TrProto %>:</label>
 		<span class="col-xs-7">
 			<select class='form-control' id="exception_transport_protocol">
@@ -127,7 +127,7 @@
 			</select>
 		</span>
 	</div>
-	<div>
+	<div class="row form-group">
 		<label class="col-xs-5" id="exception_app_protocol_label" for='exception_app_protocol'><%~ ApProto %>:</label>
 		<span class="col-xs-7">
 			<select id="exception_app_protocol_type" class='form-control' onchange='setVisibility(document,"exception_")'>
@@ -166,7 +166,7 @@
 			</select>
 		</span>
 	</div>
-	<div>
+	<div class="row form-group">
 		<label class="col-xs-5" id="exception_url_label" for='exception_url_type'><%~ WebURL %>:</label>
 		<span class="col-xs-7">
 			<select id="exception_url_type" class='form-control' onchange='setVisibility(document,"exception_")'>
@@ -176,7 +176,7 @@
 			</select>
 		</span>
 	</div>
-	<div id="exception_url_match_list">
+	<div id="exception_url_match_list" class="row form-group">
 		<div id="exception_url_match_table_container" class="col-xs-12"></div>
 		<div class="col-xs-offset-5 col-xs-7">
 			<select id="exception_url_match_type" class='form-control'>
@@ -188,7 +188,7 @@
 				<option value="url_domain_regex"><%~ DmRgx %>:</option>
 			</select>
 			<input type='text' id='exception_url_match' size='30' class='form-control' />
-			<input type="button" class="btn btn-default" id="exception_add_url_match" value="<%~ Add %>" onclick='addUrlToTable(document, "exception_url_match", "exception_url_match_type", "exception_url_match_table_container", "exception_url_match_table")'/>
+			<button type="button" class="btn btn-default" id="exception_add_url_match" onclick='addUrlToTable(document, "exception_url_match", "exception_url_match_type", "exception_url_match_table_container", "exception_url_match_table")'><%~ Add %></button>
 		</div>
 	</div>
 </div>
