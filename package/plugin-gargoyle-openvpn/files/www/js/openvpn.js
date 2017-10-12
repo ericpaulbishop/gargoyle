@@ -483,7 +483,7 @@ function resetData()
 		acTableData.push(rowData)
 	}
 
-	var acTable = createTable([ ovpnS.ClntN, ovpnS.IntIP, UI.Enabled, ovpnS.CfgCredF, ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
+	var acTable = createTable([ ovpnS.ClntN, ovpnS.IntIP, UI.Enabled, ovpnS.CfgCredFM, ovpnS.CfgCredFS, ""], acTableData, "openvpn_allowed_client_table", true, false, removeAcCallback)
 	var tableContainer = document.getElementById("openvpn_allowed_client_table_container");
 	while(tableContainer.firstChild != null)
 	{
@@ -721,10 +721,12 @@ function createAllowedClientControls(haveDownload)
 
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButton = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAc, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+
 	var editButton     = createButton(UI.Edit,     "btn btn-default", editAc, false)
 
-	return [enabledCheck, downloadButton, editButton]
+	return [enabledCheck, downloadButtonMulti, downloadButtonSingle, editButton]
 }
 
 function createButton(text, cssClass, actionFunction, disabled)
@@ -1243,15 +1245,21 @@ function addAc()
 
 }
 
-
-function downloadAc()
+function downloadAcMulti()
 {
 	var downloadRow=this.parentNode.parentNode;
 	var downloadId = downloadRow.childNodes[1].firstChild.id;
-	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId
+	var confType = "multiple-files"
+	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId + "&configtype=" + confType
 }
 
-
+function downloadAcSingle()
+{
+	var downloadRow=this.parentNode.parentNode;
+	var downloadId = downloadRow.childNodes[1].firstChild.id;
+	var confType = "single-ovpn"
+	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId + "&configtype=" + confType
+}
 
 function editAc()
 {
