@@ -398,7 +398,7 @@ dev             tun
 proto           $openvpn_protocol
 status          current_status
 resolv-retry    infinite
-ns-cert-type    server
+remote-cert-tls server
 topology        subnet
 verb            3
 

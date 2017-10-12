@@ -429,8 +429,8 @@ function resetData()
 	var serverKeysize = uciOriginal.get("openvpn_gargoyle", "server", "keysize")
 	if(serverCipher == "")
 	{
-		serverCipher = "BF-CBC"
-		serverKeysize = "128"
+		serverCipher = "AES-256-CBC"
+		serverKeysize = ""
 	}
 	serverCipher = serverKeysize == "" ? serverCipher : serverCipher + ":" + serverKeysize
 
@@ -644,7 +644,7 @@ function updateClientConfigTextFromControls()
 	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
 	var newLines = [];
 	var foundVars = [];
-	var defaultCipher = cipher == "Blowfish-CBC" && keysize == "128" ? true : false;
+	var defaultCipher = cipher == "AES-256-CBC" ? true : false;
 	while(configLines.length >0)
 	{
 		var line = configLines.shift();
