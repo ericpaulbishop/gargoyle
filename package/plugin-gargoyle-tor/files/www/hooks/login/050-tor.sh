@@ -12,29 +12,23 @@
 %>
 </script>
 <div id="tor_fields" style="display:none" class="row">
-
 	<div class="col-lg-6">
-		<div class="panel panel-default">
-
+		<div class="panel panel-info">
 			<div class="panel-heading">
 				<h3 class="panel-title">Tor</h3>
 			</div>
 
 			<div class="panel-body">
-
-				<div>
-					<span id='tor_status_label'><%~ 050-tor.tIP %>:</span>
-					<span id='tor_status' style="font-weight:bold;"></span>
+				<div class="row">
+					<span id="tor_status_label" class="col-xs-5"><%~ 050-tor.tIP %>:</span>
+					<span id="tor_status" class="col-xs-7" style="font-weight:bold;"></span>
 				</div>
-				<div>
-					<span>
+				<div class="row">
+					<span class="col-xs-12">
 						<button id="set_tor_button" class="btn btn-default" onclick="updateTorStatus()"><%~ tEnab %></button>
 					</span>
 				</div>
-
 			</div>
-
 		</div>
 	</div>
-
 </div>
