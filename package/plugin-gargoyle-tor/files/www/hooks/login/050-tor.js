@@ -8,7 +8,7 @@ function setTorData()
 
 		torIsActive = torIsActive == "" ? false: true;
 		setChildText("tor_status", (torIsActive ? UI.Enabled : UI.Disabled), (torIsActive ? "#27c650" : "#949494"), torIsActive)
-		document.getElementById("set_tor_button").value = torIsActive ? torLS.tDisa : torLS.tEnab;
+		document.getElementById("set_tor_button").innerText = torIsActive ? torLS.tDisa : torLS.tEnab;
 	}
 	else
 	{
