@@ -15,7 +15,7 @@ END_RANGE=`uci get adblock.config.exend`
 ENDPOINT_IP4=`uci get adblock.config.endpoint4`
 
 #Change the cron command to what is comfortable, or leave as is
-CRON="0 4 * * 0 sh /usr/lib/adblock/runadblock.sh"
+CRON="0 4 * * 0 sh /plugin_root/usr/lib/adblock/runadblock.sh"
 
 #Check if Tor is enabled
 TOR=`uci get tor.global.enabled`
@@ -115,9 +115,9 @@ update_blocklist()
 
 	#Add black list, if non-empty
 	logger -t ADBLOCK Adding entries from black.list
-	if [ -s "/usr/lib/adblock/black.list" ]
+	if [ -s "/plugin_root/usr/lib/adblock/black.list" ]
 	then
-		awk -v r="$ENDPOINT_IP4" '{ print r,$1 }' /usr/lib/adblock/black.list >> /tmp/block.build.list
+		awk -v r="$ENDPOINT_IP4" '{ print r,$1 }' /plugin_root/usr/lib/adblock/black.list >> /tmp/block.build.list
 	fi
 
 	#Sort the download/black lists
@@ -125,10 +125,10 @@ update_blocklist()
 
 	#Filter (if applicable)
 	logger -t ADBLOCK Removing entries from white.list
-	if [ -s "/usr/lib/adblock/white.list" ]
+	if [ -s "/plugin_root/usr/lib/adblock/white.list" ]
 	then
 		#Filter the blacklist, supressing whitelist matches
-		egrep -v "^[[:space:]]*$" /usr/lib/adblock/white.list | awk '/^[^#]/ {sub(/\r$/,"");print $1}' | grep -vf - /tmp/block.build.before > /plugin_root/adblock/block.hosts
+		egrep -v "^[[:space:]]*$" /plugin_root/usr/lib/adblock/white.list | awk '/^[^#]/ {sub(/\r$/,"");print $1}' | grep -vf - /tmp/block.build.before > /plugin_root/adblock/block.hosts
 	else
 		cat /tmp/block.build.before > /plugin_root/adblock/block.hosts
 	fi
