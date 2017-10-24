@@ -47,7 +47,10 @@ function initialiseAll()
 
 		getWifiData();
 	}
-	//otherwise do nothing
+	else
+	{
+		document.getElementById("interface").disabled = true;	//do nothing and disable interface
+	}
 }
 
 
