@@ -366,6 +366,8 @@ my $targetOrder =
 		"linksys-cobra-squashfs-sysupgrade.tar",
 		"linksys-mamba-squashfs-factory.img",
 		"linksys-mamba-squashfs-sysupgrade.tar",
+		"linksys-rango-squashfs-factory.img",
+		"linksys-rango-squashfs-sysupgrade.tar",
 		"linksys-shelby-squashfs-factory.img",
 		"linksys-shelby-squashfs-sysupgrade.tar"
 		],

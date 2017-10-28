@@ -131,8 +131,10 @@ cd src
 tar cvzf gargoyle_$version-src.tar.gz gargoyle
 rm -rf gargoyle
 $scp_pub gargoyle_$version-src.tar.gz $user@gargoyle-router.com:gargoyle_site/downloads/src/
+cd ..
 
 #update download list
+$scp_pub ../dev-utils/gen-js.pl $user@gargoyle-router.com:gen-js.pl
 $ssh_pub $user@gargoyle-router.com  "./update.sh"
 
 
