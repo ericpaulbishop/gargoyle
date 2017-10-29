@@ -155,8 +155,8 @@ function saveChanges()
 		var httpsCommands = new Array();
 		if(opensslInstalled && (localWebProtocol == "https" || localWebProtocol == "both" || remoteWebProtocol == "https"))
 		{
-			is_default_key = uhttpd_key_md5.localeCompare("0afea33b3c46c423e31383305ec5b1d7") == 0;
-			is_default_crt = uhttpd_crt_md5.localeCompare("1abb57c1829e7cb819c51ecc8602da7e") == 0;
+			is_default_key = uhttpd_key_md5.localeCompare("023ef078ceccc023ca7c2b521a6682fe") == 0;
+			is_default_crt = uhttpd_crt_md5.localeCompare("932613eda838a7d1df15f659abadb094") == 0;
 			if(is_default_key || is_default_crt)
 			{ // generate and install a new private-key and self-signed certificate
 				httpsCommands.push("openssl genpkey -algorithm RSA -out /etc/uhttpd.key -pkeyopt rsa_keygen_bits:2048");
