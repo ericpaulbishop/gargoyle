@@ -20,7 +20,7 @@ set_constant_variables()
 	
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
-	build_date=$(date +"%B %d, %Y")
+	build_date=$(LC_ALL=C date +"%B %d, %Y")
 
 	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
@@ -31,7 +31,7 @@ set_version_variables()
 {
 	#set date here, so it is guaranteed the same for all images
 	#even though build can take several hours
-	build_date=$(date +"%B %d, %Y")
+	build_date=$(LC_ALL=C date +"%B %d, %Y")
 
 	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
