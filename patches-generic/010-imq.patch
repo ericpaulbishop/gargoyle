@@ -1,6 +1,6 @@
---- /dev/null	2015-07-12 18:46:53.001433637 -0400
-+++ cc/target/linux/generic/patches-3.18/690-imq.patch	2015-08-16 22:23:22.381010302 -0400
-@@ -0,0 +1,2013 @@
+--- /dev/null	2017-09-02 14:33:48.061030748 -0400
++++ ar71xx-src/target/linux/generic/patches-3.18/690-imq.patch	2017-10-09 23:03:58.745843367 -0400
+@@ -0,0 +1,2018 @@
 +--- /dev/null	2015-07-12 18:46:53.001433637 -0400
 ++++ linux-3.18.18/drivers/net/imq.c	2015-08-16 21:36:53.077561926 -0400
 +@@ -0,0 +1,1269 @@
@@ -1630,16 +1630,17 @@
 + 	}
 + 	return head;
 + }
-++EXPORT_SYMBOL(validate_xmit_skb_list);
+++  
 + 
 + static void qdisc_pkt_len_init(struct sk_buff *skb)
 + {
 +--- a/net/core/skbuff.c
 ++++ b/net/core/skbuff.c
-+@@ -77,6 +77,79 @@
++@@ -80,6 +80,84 @@
++ int sysctl_max_skb_frags __read_mostly = MAX_SKB_FRAGS;
++ EXPORT_SYMBOL(sysctl_max_skb_frags);
 + 
-+ struct kmem_cache *skbuff_head_cache __read_mostly;
-+ static struct kmem_cache *skbuff_fclone_cache __read_mostly;
+++
 ++#if defined(CONFIG_IMQ) || defined(CONFIG_IMQ_MODULE)
 ++static struct kmem_cache *skbuff_cb_store_cache __read_mostly;
 ++#endif
@@ -1713,9 +1714,13 @@
 ++}
 ++#endif
 ++
-+ 
+++
+++
+++
+++
 + /**
 +  *	skb_panic - private function for out-of-line support
++  *	@skb:	buffer
 +@@ -591,6 +664,28 @@ static void skb_release_head_state(struct sk_buff *skb)
 + 		WARN_ON(in_irq());
 + 		skb->destructor(skb);

@@ -35,7 +35,7 @@ define Package/samba36-server
   CATEGORY:=Network
   TITLE:=Samba 3.6 SMB/CIFS server
   URL:=http://www.samba.org/
-  DEPENDS:=+share-users +USE_EGLIBC:librt
+  DEPENDS:=+USE_GLIBC:librt $(ICONV_DEPENDS)
 endef
 
 define Package/samba36-client
@@ -83,7 +83,10 @@ CONFIGURE_VARS += \
 	samba_cv_have_setreuid=yes \
 	samba_cv_have_setresuid=yes \
 	ac_cv_header_zlib_h=no \
-	samba_cv_zlib_1_2_3=no
+	samba_cv_zlib_1_2_3=no \
+	ac_cv_path_PYTHON="" \
+	ac_cv_path_PYTHON_CONFIG=""
+
 
 CONFIGURE_ARGS += \
 	--exec-prefix=/usr \
@@ -95,6 +98,7 @@ CONFIGURE_ARGS += \
 	--disable-static \
 	--disable-swat \
 	--disable-shared-libs \
+	--with-libiconv="$(ICONV_PREFIX)" \
 	--with-codepagedir=/etc/samba \
 	--with-configdir=/etc/samba \
 	--with-included-iniparser \

@@ -3,7 +3,7 @@
  */
 
 WebC.WebC="Câmera USB";
-WebC.NoWebC="Nenhuma Câmera USB detectada.";
+WebC.NoWebC="Nenhuma Câmera USB detectada";
 WebC.EnWebC="Habilitar Câmera USB";
 WebC.EnRAWebC="Habilitar Acesso Remoto";
 WebC.WebCDev="Dispositivo";

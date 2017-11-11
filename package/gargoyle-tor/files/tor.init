@@ -114,12 +114,14 @@ start()
 			dns_port=9053
 		fi
 
-		OPTIONS="$OPTIONS  --TransPort $trans_port --DNSPort $dns_port --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 		
 		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
 		if [ -n "$client_listen_ip" ] ; then
-			OPTIONS="$OPTIONS --TransListenAddress '$client_listen_ip' --DNSListenAddress '$client_listen_ip' "
+			OPTIONS="$OPTIONS  --TransPort '$client_listen_ip:$trans_port' --DNSPort '$client_listen_ip:$dns_port' "
+		else
+			OPTIONS="$OPTIONS  --TransPort $trans_port --DNSPort $dns_port "
 		fi
+		OPTIONS="$OPTIONS --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 
 		use_bridge_ip=$(uci get tor.client.use_bridge_ip 2>/dev/null)
 		use_bridge_port=$(uci get tor.client.use_bridge_port 2>/dev/null)
@@ -146,7 +148,7 @@ start()
 
 		relay_ip=0.0.0.0
 
-		relay_options=" --ORPort $relay_port --ORListenAddress $relay_ip:$relay_port "
+		relay_options=" --ORPort $relay_ip:$relay_port "
 		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then

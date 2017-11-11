@@ -25,7 +25,7 @@
 	}
 %>
 
-<div>
+<div class="row form-group">
 	<label class="col-xs-5" id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
 	<span class="col-xs-7">
 		<select id="applies_to_type" onchange='setVisibility()' class='form-control'>
@@ -41,7 +41,7 @@
 		<div style="padding:0px;margin-top:0px;margin-bottom:0px">
 			<span class="col-xs-offset-5 col-xs-7">
 				<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;" class='form-control' />
-				<input type="button" class="btn btn-default" id="add_ip_button" value="<%~ Add %>" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'/>
+				<button type="button" class="btn btn-default" id="add_ip_button" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'><%~ Add %></button>
 			</span>
 		</div>
 		<div style="padding:0px;margin-top:0px;margin-bottom:5px;">
@@ -50,7 +50,7 @@
 	</div>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class="col-xs-5" id="max_up_label" for='max_up_type'><%~ MaxUp %>:</label>
 	<span class="col-xs-7">
 		<select id="max_up_type" onchange='setVisibility()' class='form-control' >
@@ -68,7 +68,7 @@
 	</span>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class="col-xs-5" id="max_down_label" for='max_down_type'><%~ MaxDown %>:</label>
 	<span class="col-xs-7">
 		<select id="max_down_type" onchange='setVisibility()' class='form-control'>
@@ -87,7 +87,7 @@
 	</span>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class="col-xs-5" id="max_combined_label" for='max_combined_type'><%~ MaxUpDown %>:</label>
 	<span class="col-xs-7">
 		<select id="max_combined_type" onchange='setVisibility()' class='form-control'>
@@ -106,7 +106,7 @@
 	</span>
 </div>
 
-<div>
+<div class="row form-group">
 	<label class="col-xs-5" id="quota_reset_label" for='quota_reset'><%~ QResets %>:</label>
 	<span class="col-xs-7">
 		<select id="quota_reset" onchange='setVisibility()' class='form-control'>
@@ -118,14 +118,14 @@
 	</span>
 </div>
 
-<div id="quota_day_container">
+<div id="quota_day_container" class="row form-group">
 	<label class="col-xs-5" id="quota_day_label" for='quota_day'><%~ ResetDay %>:</label>
 	<span class="col-xs-7">
 		<select id='quota_day' class='form-control'></select>
 	</span>
 </div>
 
-<div id="quota_hour_container">
+<div id="quota_hour_container" class="row form-group">
 	<label class="col-xs-5" id="quota_hour_label" for='quota_hour'><%~ ResetHour %>:</label>
 	<span class="col-xs-7">
 		<select id='quota_hour' class='form-control'>
@@ -134,7 +134,7 @@
 	</span>
 </div>
 
-<div id="quota_active_container">
+<div id="quota_active_container" class="row form-group">
 	<label class="col-xs-5" id="quota_active_label" for='quota_active'><%~ QuotaActive %>:</label>
 	<span class="col-xs-7">
 		<select id='quota_active' onchange='setVisibility()' class='form-control'>
@@ -152,7 +152,7 @@
 	</span>
 </div>
 
-<div id="quota_active_controls_container">
+<div id="quota_active_controls_container" class="row form-group">
 	<span id="active_days_container" class="col-xs-offset-5 col-xs-7" style="margin-top:10px;margin-bottom:10px;">
 		<input type='checkbox' id='quota_sun' /><label for="quota_sun"><%~ Sun %></label>
 		<input type='checkbox' id='quota_mon' /><label for="quota_mon"><%~ Mon %></label>
@@ -174,7 +174,7 @@
 	</span>
 </div>
 
-<div id="quota_exceeded_container">
+<div id="quota_exceeded_container" class="row form-group">
 	<label class="col-xs-5" id="quota_exceeded_label" for='quota_exceeded'><%~ Exceed %>:</label>
 	<span class="col-xs-7">
 		<select id='quota_exceeded' onchange='setVisibility()' class='form-control'>
@@ -184,7 +184,7 @@
 	</span>
 </div>
 
-<div id="quota_only_qos_container">
+<div id="quota_only_qos_container" class="row form-group">
 	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
 		<label><%~ UpLimit %>: </label>
 		<input type='text' id='quota_qos_up' onkeyup='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
@@ -203,7 +203,7 @@
 	</span>
 </div>
 
-<div id="quota_full_qos_container">
+<div id="quota_full_qos_container" class="row form-group">
 	<span class="col-xs-offset-5 col-xs-7" style="margin-top:1px;margin-bottom:1px;">
 		<label for="quota_full_qos_up_class"><%~ UpClass %>: </label>
 		<select id="quota_full_qos_up_class" class='form-control'></select>

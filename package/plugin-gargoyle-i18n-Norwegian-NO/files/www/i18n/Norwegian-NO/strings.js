@@ -56,7 +56,7 @@ UI.HsNm="Klientnavn";
 UI.HDsp="Vis Klienter";
 UI.DspHn="Vis Klientnavn";
 UI.DspHIP="Vis Klient IP'er";
-
+UI.DspT="Visning Type";
 UI.never="aldri";
 UI.disabled="deaktivert";
 UI.both="begge";

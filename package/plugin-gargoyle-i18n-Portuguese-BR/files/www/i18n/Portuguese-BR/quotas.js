@@ -2,10 +2,10 @@
  * UTF-8 (with BOM) Portuguese-BR text strings for quotas.sh/quota_usage.sh html elements
  */
 
-quotasStr.mQuotas="Limites de Consumo";
-quotasStr.Section="Limites de Consumo";
+quotasStr.mQuotas="Franquias de Dados";
+quotasStr.Section="Limites de Franquia";
 quotasStr.AddQuota="Adicionar Limite";
-quotasStr.ActivQuotas="Limites de Consumo Definidos";
+quotasStr.ActivQuotas="Limites de Franquia Definidos";
 quotasStr.IPs="Endereço IP";
 quotasStr.Active="Ativo";
 quotasStr.Limits="Limites";
@@ -14,17 +14,17 @@ quotasStr.OthersOne="Outros (Individuais)";
 quotasStr.OthersAll="Outros (Combinados)";
 quotasStr.Only="Apenas";
 quotasStr.AllExcept="Todas as Horas, Exceto";
-quotasStr.AddError="Não foi possível adicionar limite de consumo.";
+quotasStr.AddError="Não foi possível adicionar limite de franquia.";
 quotasStr.LD1s="";
 quotasStr.LD2s="";
 quotasStr.LD3s="";
 quotasStr.Digs="";
 quotasStr.IPError="Especifique pelo menos um endereço IP ou intervalo de IP válido.";
 quotasStr.AllUnlimitedError="Máx. Upload, Máx. Download e Máx. Total Up+Down não podem ser todos definidos como Ilimitados.";
-quotasStr.DuplicateRange="O endereço IP ou intervalo de hora já existe, é permitido apenas um endereço IP/intervalo de hora por limite de consumo.";
-quotasStr.OneTimeQuotaError="Só é possível cadastrar apenas um limite de consumo que se aplica a Todos os Clientes sem Limites de Consumo (Combinados).";
-quotasStr.OneNetworkQuotaError="Só é possível cadastrar apenas um limite de consumo que se aplica à Toda Rede Local.";
-quotasStr.QuotaAddError="Não foi possível adicionar limite de consumo.";
+quotasStr.DuplicateRange="O endereço IP ou intervalo de hora já existe, é permitido apenas um endereço IP/intervalo de hora por limite de franquia.";
+quotasStr.OneTimeQuotaError="Só é possível cadastrar apenas um limite de franquia que se aplica a Todos os Clientes sem Limites de Franquia (Combinados).";
+quotasStr.OneNetworkQuotaError="Só é possível cadastrar apenas um limite de franquia que se aplica à Toda Rede Local.";
+quotasStr.QuotaAddError="Não foi possível adicionar limite de franquia.";
 quotasStr.NA="NA"; //Not Applicable abbr
 
 //template
@@ -62,10 +62,10 @@ quotasStr.UpClass="Classe Upload";
 quotasStr.DownClass="Classe Download";
 
 //quota_edit.sh
-quotasStr.ESection="Editar Limite de Consumo";
+quotasStr.ESection="Editar Limite de Franquia";
 
 //quota_usage.sh/js
-quotasStr.USect="Consumo de Limites";
+quotasStr.USect="Consumo de Franquias";
 quotasStr.All="Todos";
 quotasStr.Alws="Sempre";
 quotasStr.ColNms=["Cliente", "Ativo", "Total", "Download", "Upload"];

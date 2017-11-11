@@ -34,13 +34,13 @@ set_version_variables()
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest 
-	openwrt_commit="03d52cfcff87c0e8e09e7a455a6fdefb7138e369"
+	openwrt_commit="216adcfbd06c1349878bb4737901441b59134c76"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
-	build_date=$(date +"%B %d, %Y")
+	build_date=$(LC_ALL=C date +"%B %d, %Y")
 
 	gargoyle_git_revision=$(git log -1 --pretty=format:%h )
 
