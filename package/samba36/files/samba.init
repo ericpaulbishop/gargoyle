@@ -90,6 +90,7 @@ smb_add_share()
 	local read_only
 	local guest_ok
 	local guest_acct
+	local all_comma
 	local create_mask
 	local dir_mask
 	local public
@@ -113,15 +114,15 @@ smb_add_share()
 	config_list_foreach $1 users_rw add_user_to_lists "rw"
 
 	guest_acct=$(grep "guest account" /var/etc/smb.conf | sed 's/\tguest account = //g')
+	if [ "$guest_ok" = "yes" -a -n "$guest_acct" ] ; then
+		if [ -z "$all_user_list" ] ; then all_comma="" ; else all_comma=", " ; fi
+		all_user_list="$all_user_list$all_comma$guest_acct"
+	fi
 
 	[ -z "$name" -o -z "$path" ] && return
 
 	echo -e "\n[$name]\n\tpath = $path" >> /var/etc/smb.conf
-	if [ "$guest_ok" = "yes" -a -n "$guest_acct" ] ; then
-		[ -n "$all_user_list" ] && echo -e "\tvalid users = $all_user_list, $guest_acct" >> /var/etc/smb.conf
-	else
-		[ -n "$all_user_list" ] && echo -e "\tvalid users = $all_user_list" >> /var/etc/smb.conf
-	fi
+	[ -n "$all_user_list" ] && echo -e "\tvalid users = $all_user_list" >> /var/etc/smb.conf
 	[ -n "$rw_user_list" ] && echo -e "\twrite list = $rw_user_list" >> /var/etc/smb.conf
 	[ -n "$ro_user_list" ] && echo -e "\tread list = $ro_user_list" >> /var/etc/smb.conf
 	[ -n "$read_only" ] && echo -e "\tread only = $read_only" >> /var/etc/smb.conf
