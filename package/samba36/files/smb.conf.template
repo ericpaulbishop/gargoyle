@@ -10,7 +10,7 @@
 	domain master = yes
 	encrypt passwords = true
 	enable core files = no
-	guest account = root
+	guest account = nobody
 	guest ok = yes
 	local master = yes
 	load printers = no
