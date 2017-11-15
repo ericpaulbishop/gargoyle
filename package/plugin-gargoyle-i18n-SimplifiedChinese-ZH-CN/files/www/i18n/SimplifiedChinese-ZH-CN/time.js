@@ -64,3 +64,4 @@ TiZ.UTCm10="关岛，俄罗斯";
 TiZ.UTCm11="所罗门群岛";
 TiZ.UTCm12="斐济";
 TiZ.NZST="新西兰";
+TiZ.IRST = "伊朗";
