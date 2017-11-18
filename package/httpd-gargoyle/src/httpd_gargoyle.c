@@ -7,7 +7,7 @@
  * 		  	The original mini_httpd was created by Jef Poscanzer
  * 		  	http://www.acme.com/software/mini_httpd/
  *
- *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright Â© 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -25,7 +25,7 @@
  * This file incorporates work covered by the following copyright and
  * permission notice:
  *
- *	Copyright © 1999,2000 by Jef Poskanzer <jef@acme.com>.
+ *	Copyright Â© 1999,2000 by Jef Poskanzer <jef@acme.com>.
  *	All rights reserved.
  *
  *
@@ -890,6 +890,7 @@ main( int argc, char** argv )
 	** tree.
 	*/
 	if ( logfile != (char*) 0 )
+	    {
 	    if ( strncmp( logfile, cwd, strlen( cwd ) ) == 0 )
 		{
 		(void) strcpy( logfile, &logfile[strlen( cwd ) - 1] );
@@ -903,6 +904,7 @@ main( int argc, char** argv )
 		syslog( LOG_WARNING, "logfile is not within the chroot tree, you will not be able to re-open it" );
 		(void) fprintf( stderr, "%s: logfile is not within the chroot tree, you will not be able to re-open it\n", argv0 );
 		}
+	    }
 	(void) strcpy( cwd, "/" );
 	/* Always chdir to / after a chroot. */
 	if ( chdir( cwd ) < 0 )
