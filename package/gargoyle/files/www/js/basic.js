@@ -18,6 +18,7 @@ var openDnsFS = ["208.67.222.123", "208.67.220.123" ];
 var nortonCSA = ["199.85.126.10", "199.85.127.10" ];
 var nortonCSB = ["199.85.126.20", "199.85.127.20" ];
 var nortonCSC = ["199.85.126.30", "199.85.127.30" ];
+var quad9DNS = ["9.9.9.9" ];
 
 var ncDns  = [ "178.32.31.41", "106.187.47.17", "176.58.118.172" ]
 var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
@@ -898,6 +899,10 @@ function saveChanges()
 			{
 				dnsList = nortonCSC;
 			}
+			else if(dnsSource == "quad9" && notBridge )
+			{
+				dnsList = quad9DNS;
+			}
 			else //custom
 			{
 				var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
@@ -1770,6 +1775,10 @@ function resetData()
 	else if( dnsTableData.join(",") == googleDns.join(",") || dnsTableData.join(",") == googleDns.reverse().join(",") )
 	{
 		dnsType = "google";
+	}
+	else if( dnsTableData.join(",") == quad9DNS.join(",") || dnsTableData.join(",") == quad9DNS.reverse().join(",") )
+	{
+		dnsType = "quad9";
 	}
 	setSelectedValue("lan_dns_source", dnsType);
 	setDnsSource(document.getElementById("lan_dns_source"))
