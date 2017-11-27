@@ -1114,6 +1114,12 @@ function setGlobalVisibility()
 	{
 		currentMode=getSelectedValue('wifi_mode');
 		setAllowableSelections('wifi_mode', ['ap', 'ap+wds', 'adhoc', 'disabled'], [basicS.AcPt+' (AP)', 'AP+WDS', 'Ad Hoc', UI.Disabled]);
+		if(wirelessDriver == "")
+		{
+			removeOptionFromSelectElementByValue("wifi_mode", "ap", document);
+			removeOptionFromSelectElementByValue("wifi_mode", "ap+wds", document);
+			removeOptionFromSelectElementByValue("wifi_mode", "adhoc", document);
+		}
 		if(currentMode == 'ap+sta' || currentMode == 'sta')
 		{
 			setSelectedValue('wifi_mode', 'ap');
@@ -1124,9 +1130,14 @@ function setGlobalVisibility()
 		}
 	}
 
-	var proto1 = ['dhcp_wired', 'pppoe_wired', 'static_wired', 'dhcp_wireless', 'static_wireless'];
-	var proto2 = ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')', 'DHCP ('+basicS.Wrlss+')', basicS.StIP+' ('+basicS.Wrlss+')'];
+	var proto1 = ['dhcp_wired', 'pppoe_wired', 'static_wired'];
+	var proto2 = ['DHCP ('+basicS.Wird+')', 'PPPoE ('+basicS.Wird+')', basicS.StIP+' ('+basicS.Wird+')'];
 
+	if(wirelessDriver)
+	{
+		proto1.push('dhcp_wireless','static_wireless');
+		proto2.push('DHCP ('+basicS.Wrlss+')',basicS.StIP+' ('+basicS.Wrlss+')');
+	}
 	if(hasUSB)
 	{
 		proto1.push('3g');
@@ -1450,6 +1461,11 @@ function setBridgeVisibility()
 	}
 
 
+	//If no wireless, disable bridge/repeater setup
+	if(wirelessDriver == "")
+	{
+		document.getElementById("global_bridge").disabled = true;
+	}
 	setAllowableSelections("bridge_hwmode",allowedbridgemodes2,allowedbridgemodes)
 
 	setHwMode(document.getElementById("bridge_hwmode"))
@@ -2725,6 +2741,10 @@ function parseWifiScan(rawScanOutput)
 
 function setChannelWidth(selectCtl, band)
 {
+	if(wirelessDriver == "")
+	{
+		return;
+	}
 	var chw =  getSelectedValue(selectCtl.id)
 	var hplus = chw =='HT40+';
 	var h40 = (chw == 'HT40+' || chw == 'HT40-');
@@ -2814,6 +2834,10 @@ function getSelectedWifiChannels()
 	var channels = []
 	channels["A"] = ""
 	channels["G"] = ""
+	if(wirelessDriver == "")
+	{
+		return channels;
+	}
 	if(document.getElementById("global_gateway").checked)
 	{
 		var wimode = getSelectedValue("wifi_mode")

@@ -1143,6 +1143,22 @@ function removeOptionFromSelectElement(selectId, optionText, controlDocument)
 	}
 }
 
+function removeOptionFromSelectElementByValue(selectId, optionValue, controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+
+	selectElement = controlDocument.getElementById(selectId);
+	selectionFound = false;
+	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
+	{
+		selectionFound = (selectElement.options[optionIndex].value == optionValue);
+		if(selectionFound)
+		{
+			selectElement.remove(optionIndex);
+		}
+	}
+}
+
 function removeAllOptionsFromSelectElement(selectElement)
 {
 	while(selectElement.length > 0)
@@ -2963,5 +2979,4 @@ function sidebar()
 		row.className = "row-offcanvas full-height active";
 	}
 }
-
 
