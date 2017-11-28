@@ -1963,7 +1963,7 @@ function proofreadText(input, proofFunction, validReturnCode)
 {
 	if(input.disabled != true)
 	{
-		input.style.color = (proofFunction(input.value) == validReturnCode) ? "black" : "red";
+		input.style.color = (proofFunction(input.value) == validReturnCode) ? "" : "red";
 	}
 }
 
