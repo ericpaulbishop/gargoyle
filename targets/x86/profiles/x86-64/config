@@ -44,7 +44,6 @@ CONFIG_TARGET_x86=y
 # CONFIG_TARGET_x86_geode is not set
 # CONFIG_TARGET_x86_kvm_guest is not set
 CONFIG_TARGET_x86_64=y
-# CONFIG_TARGET_x86_geode_Default is not set
 CONFIG_TARGET_x86_64_Default=y
 CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="x86"
@@ -1238,7 +1237,7 @@ CONFIG_PACKAGE_procd=y
 # CONFIG_PROCD_SHOW_BOOT is not set
 # CONFIG_PROCD_ZRAM_TMPFS is not set
 # CONFIG_PACKAGE_qos-scripts is not set
-CONFIG_PACKAGE_resolveip=m
+CONFIG_PACKAGE_resolveip=y
 # CONFIG_PACKAGE_rpcd is not set
 # CONFIG_PACKAGE_sflowovsd is not set
 # CONFIG_PACKAGE_swconfig is not set
@@ -1260,42 +1259,42 @@ CONFIG_PACKAGE_wireless-tools=y
 #
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
-CONFIG_PACKAGE_plugin-gargoyle-adblock=m
-CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
-CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
+CONFIG_PACKAGE_plugin-gargoyle-adblock=y
+CONFIG_PACKAGE_plugin-gargoyle-email-notifications=y
+CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=y
 CONFIG_PACKAGE_plugin-gargoyle-i18n-English-EN=y
-CONFIG_PACKAGE_plugin-gargoyle-i18n-French-FR=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Slovak-SK=m
-CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
+CONFIG_PACKAGE_plugin-gargoyle-i18n-French-FR=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-German-DE=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Norwegian-NO=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Polish-PL=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Portuguese-BR=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Russian-RU=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Slovak-SK=y
+CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=y
 CONFIG_PACKAGE_plugin-gargoyle-initd=y
 CONFIG_PACKAGE_plugin-gargoyle-logread=y
-CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
-CONFIG_PACKAGE_plugin-gargoyle-openvpn=m
+CONFIG_PACKAGE_plugin-gargoyle-minidlna=y
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=y
-CONFIG_PACKAGE_plugin-gargoyle-pptp=m
-CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
-CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
-CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-CONFIG_PACKAGE_plugin-gargoyle-tor=m
-CONFIG_PACKAGE_plugin-gargoyle-usb-printer=m
-CONFIG_PACKAGE_plugin-gargoyle-usb-storage=m
-CONFIG_PACKAGE_plugin-gargoyle-webcam=m
+CONFIG_PACKAGE_plugin-gargoyle-pptp=y
+CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=y
+CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-green=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-light=y
+CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=y
+CONFIG_PACKAGE_plugin-gargoyle-tor=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage=y
+CONFIG_PACKAGE_plugin-gargoyle-webcam=y
 CONFIG_PACKAGE_plugin-gargoyle-webshell=y
-CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
+CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=y
 
 #
 # Pmacct suite
@@ -1367,16 +1366,16 @@ CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
 # CONFIG_PACKAGE_mt7601u-firmware is not set
 # CONFIG_PACKAGE_mwifiex-pcie-firmware is not set
 # CONFIG_PACKAGE_mwl8k-firmware is not set
-# CONFIG_PACKAGE_r8169-firmware is not set
+CONFIG_PACKAGE_r8169-firmware=y
 # CONFIG_PACKAGE_r8188eu-firmware is not set
 # CONFIG_PACKAGE_rt2800-pci-firmware is not set
 # CONFIG_PACKAGE_rt2800-usb-firmware is not set
 # CONFIG_PACKAGE_rt61-pci-firmware is not set
 # CONFIG_PACKAGE_rt73-usb-firmware is not set
-# CONFIG_PACKAGE_rtl8192ce-firmware is not set
-# CONFIG_PACKAGE_rtl8192cu-firmware is not set
-# CONFIG_PACKAGE_rtl8192de-firmware is not set
-# CONFIG_PACKAGE_rtl8192se-firmware is not set
+CONFIG_PACKAGE_rtl8192ce-firmware=y
+CONFIG_PACKAGE_rtl8192cu-firmware=y
+CONFIG_PACKAGE_rtl8192de-firmware=y
+CONFIG_PACKAGE_rtl8192se-firmware=y
 # CONFIG_PACKAGE_wl12xx-firmware is not set
 # CONFIG_PACKAGE_wl18xx-firmware is not set
 
@@ -1420,7 +1419,7 @@ CONFIG_PACKAGE_kmod-crypto-core=y
 # CONFIG_PACKAGE_kmod-crypto-ctr is not set
 # CONFIG_PACKAGE_kmod-crypto-deflate is not set
 # CONFIG_PACKAGE_kmod-crypto-des is not set
-CONFIG_PACKAGE_kmod-crypto-ecb=m
+CONFIG_PACKAGE_kmod-crypto-ecb=y
 # CONFIG_PACKAGE_kmod-crypto-fcrypt is not set
 # CONFIG_PACKAGE_kmod-crypto-gcm is not set
 # CONFIG_PACKAGE_kmod-crypto-gf128 is not set
@@ -1445,7 +1444,7 @@ CONFIG_PACKAGE_kmod-crypto-ocf=y
 CONFIG_PACKAGE_kmod-crypto-pcompress=y
 # CONFIG_PACKAGE_kmod-crypto-rng is not set
 # CONFIG_PACKAGE_kmod-crypto-seqiv is not set
-CONFIG_PACKAGE_kmod-crypto-sha1=m
+CONFIG_PACKAGE_kmod-crypto-sha1=y
 # CONFIG_PACKAGE_kmod-crypto-sha256 is not set
 # CONFIG_PACKAGE_kmod-crypto-test is not set
 # CONFIG_PACKAGE_kmod-crypto-user is not set
@@ -1474,7 +1473,7 @@ CONFIG_PACKAGE_kmod-fs-msdos=y
 CONFIG_PACKAGE_kmod-fs-nfs=y
 CONFIG_PACKAGE_kmod-fs-nfs-common=y
 CONFIG_PACKAGE_kmod-fs-nfsd=y
-# CONFIG_PACKAGE_kmod-fs-ntfs is not set
+CONFIG_PACKAGE_kmod-fs-ntfs=y
 # CONFIG_PACKAGE_kmod-fs-reiserfs is not set
 # CONFIG_PACKAGE_kmod-fs-udf is not set
 CONFIG_PACKAGE_kmod-fs-vfat=y
@@ -1499,10 +1498,10 @@ CONFIG_PACKAGE_kmod-fuse=y
 #
 # Input modules
 #
-# CONFIG_PACKAGE_kmod-hid is not set
-# CONFIG_PACKAGE_kmod-hid-generic is not set
+CONFIG_PACKAGE_kmod-hid=y
+CONFIG_PACKAGE_kmod-hid-generic=y
 CONFIG_PACKAGE_kmod-input-core=y
-# CONFIG_PACKAGE_kmod-input-evdev is not set
+CONFIG_PACKAGE_kmod-input-evdev=y
 # CONFIG_PACKAGE_kmod-input-joydev is not set
 # CONFIG_PACKAGE_kmod-input-matrixkmap is not set
 # CONFIG_PACKAGE_kmod-input-polldev is not set
@@ -1642,8 +1641,8 @@ CONFIG_PACKAGE_kmod-nfnetlink=y
 # Network Devices
 #
 # CONFIG_PACKAGE_kmod-3c59x is not set
-# CONFIG_PACKAGE_kmod-8139cp is not set
-# CONFIG_PACKAGE_kmod-8139too is not set
+CONFIG_PACKAGE_kmod-8139cp=y
+CONFIG_PACKAGE_kmod-8139too=y
 # CONFIG_PACKAGE_kmod-atl1 is not set
 # CONFIG_PACKAGE_kmod-atl1c is not set
 # CONFIG_PACKAGE_kmod-atl1e is not set
@@ -1651,7 +1650,7 @@ CONFIG_PACKAGE_kmod-nfnetlink=y
 # CONFIG_PACKAGE_kmod-b44 is not set
 # CONFIG_PACKAGE_kmod-dm9000 is not set
 # CONFIG_PACKAGE_kmod-dummy is not set
-# CONFIG_PACKAGE_kmod-e100 is not set
+CONFIG_PACKAGE_kmod-e100=y
 CONFIG_PACKAGE_kmod-e1000=y
 CONFIG_PACKAGE_kmod-e1000e=y
 # CONFIG_PACKAGE_kmod-et131x is not set
@@ -1669,7 +1668,7 @@ CONFIG_PACKAGE_kmod-mii=y
 # CONFIG_PACKAGE_kmod-pcnet32 is not set
 # CONFIG_PACKAGE_kmod-phy-broadcom is not set
 # CONFIG_PACKAGE_kmod-r6040 is not set
-# CONFIG_PACKAGE_kmod-r8169 is not set
+CONFIG_PACKAGE_kmod-r8169=y
 # CONFIG_PACKAGE_kmod-sis190 is not set
 # CONFIG_PACKAGE_kmod-sis900 is not set
 # CONFIG_PACKAGE_kmod-skge is not set
@@ -1687,7 +1686,7 @@ CONFIG_PACKAGE_kmod-mii=y
 #
 # Network Support
 #
-# CONFIG_PACKAGE_kmod-8021q is not set
+CONFIG_PACKAGE_kmod-8021q=y
 # CONFIG_PACKAGE_kmod-appletalk is not set
 # CONFIG_PACKAGE_kmod-atm is not set
 # CONFIG_PACKAGE_kmod-ax25 is not set
@@ -1713,7 +1712,7 @@ CONFIG_PACKAGE_kmod-llc=y
 # CONFIG_PACKAGE_kmod-openswan is not set
 # CONFIG_PACKAGE_kmod-pktgen is not set
 CONFIG_PACKAGE_kmod-ppp=y
-CONFIG_PACKAGE_kmod-mppe=m
+CONFIG_PACKAGE_kmod-mppe=y
 # CONFIG_PACKAGE_kmod-ppp-synctty is not set
 # CONFIG_PACKAGE_kmod-pppoa is not set
 CONFIG_PACKAGE_kmod-pppoe=y
@@ -1747,7 +1746,7 @@ CONFIG_PACKAGE_kmod-tun=y
 # CONFIG_PACKAGE_kmod-bluetooth_6lowpan is not set
 CONFIG_PACKAGE_kmod-button-hotplug=y
 # CONFIG_PACKAGE_kmod-echo is not set
-# CONFIG_PACKAGE_kmod-eeprom-93cx6 is not set
+CONFIG_PACKAGE_kmod-eeprom-93cx6=y
 # CONFIG_PACKAGE_kmod-eeprom-at24 is not set
 # CONFIG_PACKAGE_kmod-eeprom-at25 is not set
 # CONFIG_PACKAGE_kmod-gpio-beeper is not set
@@ -1800,7 +1799,7 @@ CONFIG_PACKAGE_kmod-usb-acm=y
 CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-dwc2 is not set
 # CONFIG_PACKAGE_kmod-usb-dwc3 is not set
-# CONFIG_PACKAGE_kmod-usb-hid is not set
+CONFIG_PACKAGE_kmod-usb-hid=y
 CONFIG_PACKAGE_kmod-usb-net=y
 # CONFIG_PACKAGE_kmod-usb-net-asix is not set
 # CONFIG_PACKAGE_kmod-usb-net-asix-ax88179 is not set
@@ -1811,7 +1810,7 @@ CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
 # CONFIG_PACKAGE_kmod-usb-net-cdc-subset is not set
 # CONFIG_PACKAGE_kmod-usb-net-dm9601-ether is not set
 # CONFIG_PACKAGE_kmod-usb-net-hso is not set
-CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=m
+CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=y
 # CONFIG_PACKAGE_kmod-usb-net-ipheth is not set
 # CONFIG_PACKAGE_kmod-usb-net-kalmia is not set
 # CONFIG_PACKAGE_kmod-usb-net-kaweth is not set
@@ -1821,10 +1820,10 @@ CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
 # CONFIG_PACKAGE_kmod-usb-net-rtl8150 is not set
 # CONFIG_PACKAGE_kmod-usb-net-rtl8152 is not set
-CONFIG_PACKAGE_kmod-usb-net-sierrawireless=m
+CONFIG_PACKAGE_kmod-usb-net-sierrawireless=y
 # CONFIG_PACKAGE_kmod-usb-net-smsc95xx is not set
-# CONFIG_PACKAGE_kmod-usb-ohci is not set
-# CONFIG_PACKAGE_kmod-usb-ohci-pci is not set
+CONFIG_PACKAGE_kmod-usb-ohci=y
+CONFIG_PACKAGE_kmod-usb-ohci-pci=y
 CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
@@ -1849,12 +1848,12 @@ CONFIG_PACKAGE_kmod-usb-serial-sierrawireless=y
 CONFIG_PACKAGE_kmod-usb-serial-wwan=y
 CONFIG_PACKAGE_kmod-usb-storage=y
 CONFIG_PACKAGE_kmod-usb-storage-extras=y
-# CONFIG_PACKAGE_kmod-usb-uhci is not set
+CONFIG_PACKAGE_kmod-usb-uhci=y
 CONFIG_PACKAGE_kmod-usb-wdm=y
 # CONFIG_PACKAGE_kmod-usb-yealink is not set
 CONFIG_PACKAGE_kmod-usb2=y
-# CONFIG_PACKAGE_kmod-usb2-pci is not set
-# CONFIG_PACKAGE_kmod-usb3 is not set
+CONFIG_PACKAGE_kmod-usb2-pci=y
+CONFIG_PACKAGE_kmod-usb3=y
 # CONFIG_PACKAGE_kmod-usbip is not set
 # CONFIG_PACKAGE_kmod-usbip-client is not set
 # CONFIG_PACKAGE_kmod-usbip-server is not set
@@ -1923,15 +1922,15 @@ CONFIG_PACKAGE_kmod-video-videobuf2=y
 #
 # Wireless Drivers
 #
-# CONFIG_PACKAGE_ath10k-firmware-qca6174 is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca99x0 is not set
+CONFIG_PACKAGE_ath10k-firmware-qca6174=y
+CONFIG_PACKAGE_ath10k-firmware-qca988x=y
+CONFIG_PACKAGE_ath10k-firmware-qca99x0=y
 # CONFIG_PACKAGE_kmod-adm8211 is not set
 CONFIG_PACKAGE_kmod-ath=y
 # CONFIG_ATH_USER_REGD is not set
 # CONFIG_PACKAGE_ATH_DEBUG is not set
 CONFIG_PACKAGE_ATH_DFS=y
-# CONFIG_PACKAGE_kmod-ath10k is not set
+CONFIG_PACKAGE_kmod-ath10k=y
 CONFIG_PACKAGE_kmod-ath5k=y
 CONFIG_PACKAGE_kmod-ath9k=y
 # CONFIG_ATH9K_SUPPORT_PCOEM is not set
@@ -1986,13 +1985,18 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-rt2x00-lib is not set
 # CONFIG_PACKAGE_kmod-rt61-pci is not set
 # CONFIG_PACKAGE_kmod-rt73-usb is not set
-# CONFIG_PACKAGE_kmod-rtl8180 is not set
-# CONFIG_PACKAGE_kmod-rtl8187 is not set
-# CONFIG_PACKAGE_kmod-rtl8192ce is not set
-# CONFIG_PACKAGE_kmod-rtl8192cu is not set
-# CONFIG_PACKAGE_kmod-rtl8192de is not set
-# CONFIG_PACKAGE_kmod-rtl8192se is not set
-# CONFIG_PACKAGE_kmod-rtl8xxxu is not set
+CONFIG_PACKAGE_kmod-rtl8180=y
+CONFIG_PACKAGE_kmod-rtl8187=y
+CONFIG_PACKAGE_kmod-rtl8192c-common=y
+CONFIG_PACKAGE_kmod-rtl8192ce=y
+CONFIG_PACKAGE_kmod-rtl8192cu=y
+CONFIG_PACKAGE_kmod-rtl8192de=y
+CONFIG_PACKAGE_kmod-rtl8192se=y
+CONFIG_PACKAGE_kmod-rtl8xxxu=y
+CONFIG_PACKAGE_kmod-rtlwifi=y
+# CONFIG_PACKAGE_RTLWIFI_DEBUG is not set
+CONFIG_PACKAGE_kmod-rtlwifi-pci=y
+CONFIG_PACKAGE_kmod-rtlwifi-usb=y
 # CONFIG_PACKAGE_kmod-zd1211rw is not set
 CONFIG_PACKAGE_kmod-dma-buf=y
 
@@ -2125,7 +2129,7 @@ CONFIG_PACKAGE_libpolarssl=y
 CONFIG_PACKAGE_libsqlite3=y
 # CONFIG_PACKAGE_alsa-lib is not set
 # CONFIG_PACKAGE_argp-standalone is not set
-CONFIG_PACKAGE_ca-certificates-combined=m
+CONFIG_PACKAGE_ca-certificates-combined=y
 CONFIG_PACKAGE_libbbtargz=y
 CONFIG_PACKAGE_libblkid=y
 CONFIG_PACKAGE_libblobmsg-json=y
@@ -2211,8 +2215,8 @@ CONFIG_PACKAGE_zlib=y
 # CONFIG_PACKAGE_fetchmail-nossl is not set
 # CONFIG_PACKAGE_imapfilter is not set
 # CONFIG_PACKAGE_mini-sendmail is not set
-CONFIG_PACKAGE_msmtp=m
-CONFIG_PACKAGE_msmtp-nossl=m
+CONFIG_PACKAGE_msmtp=y
+CONFIG_PACKAGE_msmtp-nossl=y
 # CONFIG_PACKAGE_msmtp-queue is not set
 # CONFIG_PACKAGE_nullmailer is not set
 # CONFIG_PACKAGE_procmail is not set
@@ -2848,7 +2852,7 @@ CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
 CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_ppp-mod-pppol2tp is not set
-CONFIG_PACKAGE_ppp-mod-pptp=m
+CONFIG_PACKAGE_ppp-mod-pptp=y
 # CONFIG_PACKAGE_ppp-mod-radius is not set
 # CONFIG_PACKAGE_ppp-multilink is not set
 # CONFIG_PACKAGE_pppdump is not set
@@ -2902,7 +2906,7 @@ CONFIG_PACKAGE_uqmi=y
 # CONFIG_PACKAGE_vnc-reflector is not set
 # CONFIG_PACKAGE_vncrepeater is not set
 # CONFIG_PACKAGE_wdiag is not set
-# CONFIG_PACKAGE_wget-default is not set
+CONFIG_PACKAGE_wget-default=y
 # CONFIG_PACKAGE_wget-matrixssl is not set
 # CONFIG_PACKAGE_wget-nossl is not set
 # CONFIG_PACKAGE_whob is not set
@@ -3020,7 +3024,7 @@ CONFIG_PACKAGE_swap-utils=y
 # CONFIG_PACKAGE_cal is not set
 CONFIG_PACKAGE_comgt=y
 # CONFIG_PACKAGE_comgt-directip is not set
-CONFIG_PACKAGE_comgt-ncm=m
+CONFIG_PACKAGE_comgt-ncm=y
 # CONFIG_PACKAGE_dmesg is not set
 # CONFIG_PACKAGE_dropbearconvert is not set
 # CONFIG_PACKAGE_fbtest is not set
