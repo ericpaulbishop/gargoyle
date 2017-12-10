@@ -157,9 +157,13 @@ start()
 	bdist5_interval="month"
 	bdist5_num_intervals=12
 
+	custom_reset_time=$(uci get gargoyle.bandwidth_display.month_reset_day 2>/dev/null)
+	if [ -z "$custom_reset_time" ] ; then
+		custom_reset_time=0
+	fi
 	bdist6_interval="month"
 	bdist6_num_intervals=12
-	bdist6_reset_time=$(($(uci get gargoyle.bandwidth_display.month_reset_day)*$day_s))
+	bdist6_reset_time=$(($custom_reset_time*$day_s))
 
 	ids=""
 
