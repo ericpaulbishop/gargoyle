@@ -957,7 +957,7 @@ function deleteData()
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
 
-function setCustBWMonVisilbility()
+function setCustBWMonVisibility()
 {
 	var bwcustDisabled = document.getElementById("enable_custom_bwmon").checked == true ? false : true;
 	//document.getElementById("custom_time_frame").disabled = bwcustDisabled;	//Currently always disabled as we only want people to be able to set months

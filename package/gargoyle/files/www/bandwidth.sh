@@ -195,7 +195,7 @@
 			</div>
 			<div id="custom_bwmon_settings" class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="enable_custom_bwmon" onclick="setCustBWMonVisilbility()"></span>
+					<span class="col-xs-1"><input type="checkbox" id="enable_custom_bwmon" onclick="setCustBWMonVisibility()"></span>
 					<label class="col-xs-11" id="enable_custom_bwmon_label" for="enable_custom_bwmon"><%~ EnCustBMon %></label>
 				</div>
 
@@ -211,7 +211,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for="custom_reset_day" id="custom_reset_day_label"><%~ BMonReset %>:</label>
 					<span class="col-xs-7">
-						<select id="custom_reset_day" class="form-control" onchange="setCustBWMonVisilbility()"></select>
+						<select id="custom_reset_day" class="form-control" onchange="setCustBWMonVisibility()"></select>
 					</span>
 				</div>
 
