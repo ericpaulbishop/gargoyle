@@ -565,7 +565,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 		if(num_rules == 1 && !never_single)
 		{
 			parse_type = 1;
-			char* tmp = dynamic_strcat(7, " ", test_prefix1, (is_negation ? " ! " : " "), test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
+			char* tmp = dynamic_strcat(7, (is_negation ? " ! " : " "), test_prefix1, " ", test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
 			dcat_and_free(&tmp, single_check, 1, 1 );
 		}
 		else
