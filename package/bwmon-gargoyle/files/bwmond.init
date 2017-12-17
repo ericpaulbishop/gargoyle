@@ -157,6 +157,14 @@ start()
 	bdist5_interval="month"
 	bdist5_num_intervals=12
 
+	custom_reset_time=$(uci get gargoyle.bandwidth_display.month_reset_day 2>/dev/null)
+	if [ -z "$custom_reset_time" ] ; then
+		custom_reset_time=0
+	fi
+	bdist6_interval="month"
+	bdist6_num_intervals=12
+	bdist6_reset_time=$(($custom_reset_time*$day_s))
+
 	ids=""
 
 
@@ -179,6 +187,10 @@ start()
 	fi
 	
 	mon_nums="1 2 3 4 5"
+	custom_bwmon=$(uci get gargoyle.bandwidth_display.custom_bwmon_enable 2>/dev/null)
+	if [ "$custom_bwmon" = "1" ] ; then
+		mon_nums="$mon_nums 6"
+	fi
 	for n in $mon_nums ; do
 		total_interval=$(eval "echo \$total"$n"_interval")
 		total_num_intervals=$(eval "echo \$total"$n"_num_intervals")
@@ -190,15 +202,16 @@ start()
 		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
 		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 
-		
-		iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-		iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+		if [ $n -lt 6 ] ; then
+			iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
 
-		next_ids="total"$n"-download-$total_interval-$total_num_intervals total"$n"-upload-$total_interval-$total_num_intervals"
-		if [ -z "$ids" ] ; then
-			ids="$next_ids"
-		else
-			ids="$ids $next_ids"
+			next_ids="total"$n"-download-$total_interval-$total_num_intervals total"$n"-upload-$total_interval-$total_num_intervals"
+			if [ -z "$ids" ] ; then
+				ids="$next_ids"
+			else
+				ids="$ids $next_ids"
+			fi
 		fi
 
 		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
@@ -210,7 +223,7 @@ start()
 	done
 
 	if [ "$high_res_15m" = "1" ] ; then
-		mon_nums="0 1 2 3 4 5"
+		mon_nums="0 $mon_nums"
 	fi
 	qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 	if [ -n "$qos_enabled" ] && [ -e /etc/qos_class_marks ] ; then

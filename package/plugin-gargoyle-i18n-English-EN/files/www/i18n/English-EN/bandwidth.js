@@ -31,6 +31,16 @@ bndwS.DSep="Data is comma separated";
 bndwS.DFmt="[Direction],[Interval Length],[Intervals Saved],[IP],[Interval Start],[Interval End],[Bytes Used]";
 bndwS.DNow="Download Now";
 bndwS.expd="expand";
+bndwS.BMonSet="Custom Bandwith Monitor Settings";
+bndwS.EnCustBMon="Enable Custom Bandwith Monitor";
+bndwS.CustBMonWarn="Changing any settings will ERASE previously stored Custom Bandwidth Monitor history. This will NOT affect the history of the default Bandwidth Monitors";
+bndwS.BMonIntvl="Monitor Interval";
+bndwS.BMonReset="Reset Day";
+bndwS.LD1s="st";
+bndwS.LD2s="nd";
+bndwS.LD3s="rd";
+bndwS.Digs="th";
+bndwS.CustBMon="(Custom)";
 
 //javascript
 bndwS.UpCl="Upload Class";
