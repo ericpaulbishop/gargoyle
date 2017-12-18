@@ -1167,9 +1167,9 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 function toggleAcEnabled()
 {
 	var toggleRow=this.parentNode.parentNode;
-	var toggleId = editRow.childNodes[1].firstChild.id;
+	var toggleId = toggleRow.childNodes[1].firstChild.id;
 
-	uci.set("openvpn_gargoyle", id, "enabled", (this.checked? "true" : "false"));
+	uci.set("openvpn_gargoyle", toggleId, "enabled", (this.checked? "true" : "false"));
 }
 
 
