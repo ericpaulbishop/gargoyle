@@ -608,8 +608,8 @@ regenerate_server_and_allowed_clients_from_uci()
 	for current_client in "$OPENVPN_DIR/client_conf/"* ; do
 		if [ -d "$current_client" ] ; then
 			current_client=$(echo $current_client | sed 's/^.*\///g')
-			client_def=$(uci get openvpn_gargoyle.${current_client}.enabled 2>/dev/null)
-			if [ "$client_def" != "true" -a "$client_def" != 1 ] ; then
+			client_def=$(uci get openvpn_gargoyle.${current_client} 2>/dev/null)
+			if [ "$client_def" != "allowed_client" ] ; then
 				remove_allowed_client "$current_client"
 			fi
 		fi
