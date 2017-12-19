@@ -59,15 +59,15 @@ qosStr.ACC_Stat="Congestion Control Status";
 qosStr.ACC_L_Ck="Check to see if the ping target will respond";
 qosStr.ACC_L_In="Estimate a ping limit";
 qosStr.ACC_L_Act="Congestion control active.";
-qosStr.ACC_L_Min="Congestion control active, minRTT class active.";
-qosStr.ACC_L_Id="No Congestion, control idle.";
+qosStr.ACC_L_Min="Congestion control minRTT mode active.";
+qosStr.ACC_L_Id="No Congestion, controller idle.";
 qosStr.ACC_L_Dis="Controller is not enabled";
 qosStr.ACC_L_Lim="The download bandwidth limit currently enforce.";
 qosStr.ACC_L_Fr="The apparent fair download bandwidth limit.";
 qosStr.ACC_L_Ld="The current traffic in the downlink.";
-qosStr.ACC_L_pg="The round trip time of the last ping.";
-qosStr.ACC_L_Flt="The round trip time filtered.";
-qosStr.ACC_L_plim="The point at which the controller will act to maintain fairness.";
+qosStr.ACC_L_pg="The RTT of the last ping.";
+qosStr.ACC_L_Flt="The filtered RTT and the recent maximum RTT.";
+qosStr.ACC_L_plim="The RTT at which the controller will act to maintain fairness. [Active/Min RTT]";
 qosStr.ACC_L_AC="Number of download classes with load over 4kbps.";
 
 //qos_edit_class.sh
