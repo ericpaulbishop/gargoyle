@@ -1,5 +1,5 @@
---- target/linux/x86/generic/config-default	2017-12-19 09:40:01.834062366 +0800
-+++ ./x86.config	2017-12-20 19:27:14.662026800 +0800
+--- a/target/linux/x86/generic/config-default	2017-12-19 09:40:01.834062366 +0800
++++ b/target/linux/x86/generic/config-default	2017-12-20 19:27:14.662026800 +0800
 @@ -1,201 +1,5089 @@
 -# CONFIG_3C515 is not set
 +CONFIG_32BIT=y

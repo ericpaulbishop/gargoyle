@@ -1,5 +1,5 @@
---- target/linux/x86/64/config-default	2017-12-19 09:40:01.822062272 +0800
-+++ ./x86-64.config	2017-12-20 20:17:52.998369349 +0800
+--- a/target/linux/x86/64/config-default	2017-12-19 09:40:01.822062272 +0800
++++ b/target/linux/x86/64/config-default	2017-12-20 20:17:52.998369349 +0800
 @@ -1,216 +1,3241 @@
 +#
 +# Automatically generated file; DO NOT EDIT.
