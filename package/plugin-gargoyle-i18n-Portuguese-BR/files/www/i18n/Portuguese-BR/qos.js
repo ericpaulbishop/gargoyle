@@ -3,7 +3,7 @@
  */
 
 qosStr.mQDl="QoS Download";
-qosStr.mQUl="QoS Upload"; 
+qosStr.mQUl="QoS Upload";
 qosStr.URSection="Regras de Classificação QoS - Upload";
 qosStr.DRSection="Regras de Classificação QoS - Download";
 qosStr.UCSection="Classes de Serviço QoS - Upload";
@@ -62,12 +62,12 @@ qosStr.ACC_L_Act="Controlador ativo.";
 qosStr.ACC_L_Min="Controlador ativo, otimização MinRTT ativa (minimiza o tempo de resposta).";
 qosStr.ACC_L_Id="Sem congestionamento, controlador inativo.";
 qosStr.ACC_L_Dis="Controlador desabilitado.";
-qosStr.ACC_L_Lim="O limite atual do link de download.";
-qosStr.ACC_L_Fr="O limite estimado do link de download.";
-qosStr.ACC_L_Ld="A carga atual do link de download.";
-qosStr.ACC_L_pg="O tempo de resposta do último ping.";
-qosStr.ACC_L_Flt="O tempo de resposta filtrado.";
-qosStr.ACC_L_plim="O ponto no qual o controlador irá atuar para manter a distribuição igualitária da banda disponível.";
+qosStr.ACC_L_Lim="Limite atual do link de download.";
+qosStr.ACC_L_Fr="Limite estimado do link de download.";
+qosStr.ACC_L_Ld="Carga atual do link de download.";
+qosStr.ACC_L_pg="Tempo de resposta do último ping.";
+qosStr.ACC_L_Flt="Tempo de resposta filtrado e tempo de resposta mais alto.";
+qosStr.ACC_L_plim="Tempo de resposta no qual o controlador irá atuar para manter a distribuição igualitária da banda disponível.";
 qosStr.ACC_L_AC="Quantidade de classes de download com carga acima de 4kbps.";
 
 //qos_edit_class.sh

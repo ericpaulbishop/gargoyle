@@ -10,8 +10,8 @@ upS.SelF="Selecione o firmware";
 upS.Prsv="Manter Configurações (<b>não recomendado</b>)";
 
 //javascript
-upS.SelErr="ERRO: Você deve selecionar um arquivo de firmware.";
-upS.Warn2="A atualização de firmware apagará completamente suas configurações, e pode, eventualmente, inutilizar (&quot;brickar&quot;) seu roteador se o arquivo de firmware selecionado for inválido. Deseja continuar ?";
+// upS.SelErr="ERRO: Você deve selecionar um arquivo de firmware.";
+upS.Warn2="A atualização de firmware apagará completamente suas configurações, e pode, eventualmente, inutilizar (\"brickar\") seu roteador se o arquivo de firmware selecionado for inválido. \n\nDeseja continuar?";
 upS.Uping="Enviando firmware…";
 upS.UWait="Atualizando firmware, aguarde…";
 upS.Rbtg="Atualização de firmware concluída com sucesso, reiniciando…";

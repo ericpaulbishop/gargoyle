@@ -8,7 +8,7 @@ ovpnS.OClt="Cliente OpenVPN";
 ovpnS.OSrv="Servidor OpenVPN";
 ovpnS.OSts="Status OpenVPN";
 ovpnS.OClrK="Excluir Todas as Chaves";
-ovpnS.OClrC="Isso apagará permanentemente todas suas chaves antigas, deseja continuar ?"
+ovpnS.OClrC="Isso apagará permanentemente todas suas chaves antigas. \n\nDeseja continuar?"
 ovpnS.OSCfg="Servidor OpenVPN - Configuração";
 ovpnS.OInIP="Endereço IP Interno";
 ovpnS.OIMsk="Máscara de Sub-rede Interna";
@@ -66,7 +66,7 @@ ovpnS.Clnt="Cliente";
 ovpnS.Symm="Omitido (Simétrico)";
 
 //javascript
-ovpnS.CryptoWaitMsg="Essa é a primeira vez que o Servidor OpenVPN é configurado. Isso levará cerca de 5-10 minutos para gerar os parâmetros criptográficos necessários. Deseja continuar ?";
+ovpnS.CryptoWaitMsg="A configuração do Servidor OpenVPN levará cerca de 5-10 minutos para gerar os parâmetros criptográficos necessários. \n\nDeseja continuar?";
 ovpnS.SubMis="Sub-rede de cliente diferente";
 ovpnS.ExpSubN="Sub-rede esperada pelo OpenVPN";
 ovpnS.ActSubN="Sub-rede atualmente configurada";
