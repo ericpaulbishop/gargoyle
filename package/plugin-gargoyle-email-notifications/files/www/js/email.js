@@ -347,9 +347,14 @@ function ShowTab(achor_tab) {
 				tab_li_items[i].style.display = 'none';
 			}
 		}
+		if (tab_li_items[i].nodeName == "LI" & tab_li_items[i].className == "active")
+		{
+			tab_li_items[i].className = "";
+		}
 	}
 	ShowTabField((achor_tab.id).split("tab_ID_")[1]);
 	achor_tab.className = 'selected';
+	document.getElementById(achor_tab.id).parentNode.className = "active";
 }
 
 function SetupTabs(timer_style) {
