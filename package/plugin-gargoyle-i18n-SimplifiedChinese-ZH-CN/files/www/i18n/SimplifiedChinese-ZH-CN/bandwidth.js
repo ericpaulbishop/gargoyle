@@ -31,6 +31,16 @@ bndwS.DSep="数据格式使用逗号分隔（CSV文件）";
 bndwS.DFmt="[数据流向],[区间长度],[保存间隔],[IP],[区间开始],[区间结束],[字节消耗]";
 bndwS.DNow="下载数据";
 bndwS.expd="展开";
+bndwS.BMonSet="自定义流量监视器设置";
+bndwS.EnCustBMon="启用自定义流量监视";
+bndwS.CustBMonWarn="修改任何设置都将丢失之前储存的流量监控历史，但不影响默认的流量监视器";
+bndwS.BMonIntvl="监视器间隔";
+bndwS.BMonReset="重置日期";
+bndwS.LD1s="号";
+bndwS.LD2s="号";
+bndwS.LD3s="号";
+bndwS.Digs="号";
+bndwS.CustBMon="(自定义)";
 
 //javascript
 bndwS.UpCl="上传类";
