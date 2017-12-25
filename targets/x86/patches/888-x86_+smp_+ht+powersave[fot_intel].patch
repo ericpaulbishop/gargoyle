@@ -1,5 +1,5 @@
---- target/linux/x86/generic/config-default	2017-12-25 19:08:00.091028001 +0800
-+++ build_dir/target-i386_i486_uClibc-0.9.33.2/linux-x86_generic/linux-3.18.75/.config	2017-12-25 18:28:04.150020481 +0800
+--- a/target/linux/x86/generic/config-default	2017-12-25 19:08:00.091028001 +0800
++++ b/target/linux/x86/generic/config-default	2017-12-25 18:28:04.150020481 +0800
 @@ -1,201 +1,3753 @@
 -# CONFIG_3C515 is not set
 +#
