@@ -209,7 +209,7 @@ tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
-verify-tls	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
+tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
 $openvpn_client_to_client
 
 $openvpn_duplicate_cn
@@ -518,6 +518,7 @@ update_routes()
 remove_allowed_client()
 {
 	client_id="$1"
+	remove_client_from_userlist "$client_id"
 	rm -rf "$OPENVPN_DIR/client_conf/$current_client"
 	rm -rf "$OPENVPN_DIR/$current_client.crt"
 	rm -rf "$OPENVPN_DIR/route_data/$current_client"
@@ -526,21 +527,21 @@ remove_allowed_client()
 
 remove_client_from_userlist()
 {
-	touch /etc/openvpn/verified-userlist
+	touch "$OPENVPN_DIR/verified-userlist"
 	client_id="$1"
-	client_found=$(grep -wq "^$client_id" /etc/openvpn/verified-userlist)
-	if [ -z $client_found ] ; then
-		grep -wv "^$client_id" /etc/openvpn/verified-userlist > /etc/openvpn/vusrlst-temp
-		mv /etc/openvpn/vusrlst-temp /etc/openvpn/verified-userlist
+	client_found=$(grep -w "^$client_id" "$OPENVPN_DIR/verified-userlist")
+	if [ -n $client_found ] ; then
+		grep -wv "^$client_id" "$OPENVPN_DIR/verified-userlist" > "$OPENVPN_DIR/vusrlst-temp"
+		mv "$OPENVPN_DIR/vusrlst-temp" "$OPENVPN_DIR/verified-userlist"
 	fi
 }
 
 add_client_to_userlist()
 {
-	touch /etc/openvpn/verified-userlist
+	touch "$OPENVPN_DIR/verified-userlist"
 	client_id="$1"
-	client_found=$(grep -wq "^$client_id" /etc/openvpn/verified-userlist)
-	[ -n $client_found ] && echo $client_id >> /etc/openvpn/verified-userlist
+	client_found=$(grep -w "^$client_id" "$OPENVPN_DIR/verified-userlist")
+	[ -z $client_found ] && echo $client_id >> "$OPENVPN_DIR/verified-userlist"
 }
 generate_test_configuration()
 {
