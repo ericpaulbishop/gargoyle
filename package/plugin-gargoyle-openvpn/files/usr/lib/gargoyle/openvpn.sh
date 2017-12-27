@@ -209,6 +209,7 @@ tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
+script-security       2
 tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
 $openvpn_client_to_client
 
