@@ -64,6 +64,7 @@ ovpnS.TAKey="TLS-Auth Key";
 ovpnS.TADir="TLS-Auth Direction";
 ovpnS.Clnt="Client";
 ovpnS.Symm="Omitted (Symmetric)";
+ovpnS.PrefVPNGtwy="Client prefers <i>vpn_gateway</i>";
 
 //javascript
 ovpnS.CryptoWaitMsg="This is the first time you have configured an OpenVPN Server.\n\nIt will take 5-10 minutes to generate the necessary cryptographic parameters.  This is a one-time wait -- updates after this one will be fast.\n\nProceed?";
@@ -80,7 +81,7 @@ ovpnS.GTAPErr="Gargoyle does not support TAP OpenVPN configurations";
 ovpnS.RunC="Running, Connected";
 ovpnS.RunNC="Running, Not Connected";
 ovpnS.RunNot="Not Running";
-ovpnS.IntIP="Internal IP\n(Routed Subnet)";
+ovpnS.IntIP="Internal IP\n(Routed Subnet)\nGateway Address";
 ovpnS.CfgCredFM="Credentials\n&amp; Config Files\n(Multiple)";
 ovpnS.CfgCredFS="Credentials\n&amp; Config Files\n(Single .ovpn)";
 ovpnS.Dload="Download";

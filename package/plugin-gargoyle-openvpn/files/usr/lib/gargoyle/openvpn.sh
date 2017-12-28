@@ -487,8 +487,14 @@ update_routes()
 			# routes for client subnet
 			config_name=$( echo "$route_line" | sed 's/\"$//g' | sed 's/^.*\"//g')
 			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
+				client_ccd_id=$(echo "$client_ccd_file" | sed -n -e 's/^.*ccd\///p')
+				vpn_gwy=$( uci get openvpn_gargoyle.$client_ccd_id.prefer_vpngateway 2&>1)
 				if [ "$random_dir/ccd/$config_name" != "$client_ccd_file" ] ; then
-					echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file" 
+					if [ "$vpn_gwy" == "1" ] ; then
+						echo "push \"route $subnet_ip $subnet_mask vpn_gateway\"" >> "$client_ccd_file"
+					else
+						echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file"
+					fi
 				fi
 			done
 			echo "route $subnet_ip $subnet_mask $openvpn_ip" >> "$random_dir/server.conf"
@@ -496,7 +502,13 @@ update_routes()
 		else
 			# routes for server subnet
 			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
-				echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file" 
+				client_ccd_id=$(echo "$client_ccd_file" | sed -n -e 's/^.*ccd\///p')
+				vpn_gwy=$( uci get openvpn_gargoyle.$client_ccd_id.prefer_vpngateway 2&>1)
+				if [ "$vpn_gwy" == "1" ] ; then
+					echo "push \"route $subnet_ip $subnet_mask vpn_gateway\"" >> "$client_ccd_file"
+				else
+					echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file"
+				fi
 			done
 		fi
 	done
