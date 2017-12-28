@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) English-EN text strings for webshell.sh html elements
+ * UTF-8 (with BOM) English-EN text strings for minidlna.sh html elements
  */
 
 dlna.DLNA="DLNA";

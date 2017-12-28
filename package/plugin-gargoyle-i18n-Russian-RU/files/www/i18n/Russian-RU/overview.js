@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Russian-RU text strings for overview.sh html elements
  */
 
-ovwS.mDevice="Yстройствo";
+ovwS.mDevice="Устройствo";
 ovwS.mWAN="WAN";
 ovwS.mLAN="LAN";
 ovwS.mWireless="беспроводной";
@@ -21,6 +21,7 @@ ovwS.CPUAvg="Средние значения загрузки ЦПУ";
 ovwS.Uptm="Время работы";
 ovwS.CDaT="Текущая дата и время";
 ovwS.BrIPA="IP-адрес моста";
+ovwS.BrRIP="IP-адрес ретранслятора";
 ovwS.BrNMsk="Маска подсети моста";
 ovwS.BrMAdd="MAC-адрес моста";
 ovwS.LGtwy="IP-адрес шлюза локальной сети";
@@ -43,6 +44,9 @@ ovwS.F5GID="Имя (SSID) точки доступа 5ГГц";
 ovwS.IDJoin="Имя (SSID) объедененное с клиентским";
 ovwS.QUp="QoS Отдано";
 ovwS.QDwn="QoS Скачано";
+ovwS.TEMPcpu="Темперература ЦПУ";
+ovwS.TEMPmem="Температура оперативной памяти";
+ovwS.TEMPwifi="Температура Wifi-модуля";
 
 //javascript
 ovwS.AcPt="Точка доступа";

@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=plugin-gargoyle-i18n-Russian-RU
-PKG_VERSION:=1.0.0
+PKG_VERSION:=2017.12.28
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-i18n-Russian-RU
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Русский (RU) язык для веб-интерфейса Gargoyle
-	MAINTAINER:=Wild Rat
+	MAINTAINER:=Wild Rat <santiago.bikers@gmail.com>
 	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef
