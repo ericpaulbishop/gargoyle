@@ -23,6 +23,19 @@ accessStr.Unlimited="Неограниченые";
 accessStr.ChangePass="Изменить пароль администратора";
 accessStr.NewPass="Новый пароль";
 accessStr.ConfirmPass="Подтвердите пароль";
+accessStr.SSHEnablePwd="Включить доступ по паролю через ssh";
+accessStr.SSHKeys="Авторизированные ключи";
+accessStr.SSHExistKey="Загрузить публичный SSH-ключ";
+accessStr.SSHName="Название SSH-ключа";
+accessStr.SSHHelp1="Использование SSH-ключей является более предпочтительной альтернативой парольному доступу.";
+accessStr.SSHHelp2="Настоятельно рекомендуется настроить SSH-ключи и <u>отменить доступ по паролю, прежде чем разрешать внешний доступ к SSH</u>.";
+accessStr.SSHHelp3="Вы можете использовать существующую пару ключей, или создать новую.";
+accessStr.SSHHelp3a="Linux и Mac SSH-клиенты обычно хранят SSH-ключи в <code>~/.ssh/</code> а новая пара ключей может быть сгенерирована командой <code>ssh-keygen -t rsa -b 4096 -f gargoyle</code>";
+accessStr.SSHHelp3b="Windows хранит private-ключи в <code>C:\Documents and Settings\mylogin\Application Data\SSH\UserKeys\</code> ";
+accessStr.SSHHelp4="<b>Private-ключ</b> должен хранится в безопасном месте и иметь резервную копию. Только <b>public-ключ</b> (<i>gargoyle.pub</i>) необходимо загрузить в Gargoyle. В Gargoyle можно загрузить несколько public-ключей.";
+accessStr.SSHInvalidKey="Неправильный ключ\nпожалуйста, убедитесь что файл содержит рабочий SSH public-ключ и повторите попытку.";
+accessStr.CnntDsblPwd="Нельзя отключить пароль SSH не настроив private ключ(и)";
+
 
 //javascript
 accessStr.PasswordsDiffer="Пароль администратора не подтверждён - введённые пароли не совпадают.";

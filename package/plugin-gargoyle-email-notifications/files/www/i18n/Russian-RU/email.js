@@ -1,11 +1,11 @@
 /*
- * UTF-8 (with BOM) English-EN text strings for email.sh html elements
+ * UTF-8 (with BOM) Russian-RU text strings for email.sh html elements
  */
 
 email.Time="Настройки времени";
 email.TPer="Периодичность таймера";
 email.DataSettings="Содержимое письма";
-email.NoTm="Отклюить таймер";
+email.NoTm="Отключить таймер";
 email.Dly="Ежедневно";
 email.Wkd="Будни + Субб./Воскр.";
 email.Wkly="Еженедельно";

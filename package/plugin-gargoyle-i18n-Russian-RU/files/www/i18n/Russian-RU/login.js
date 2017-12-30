@@ -7,6 +7,8 @@ logS.EAdmP="Введите пароль администратора";
 logS.YQot="Ваша квота";
 logS.NQot="Квота всей сети";
 logS.CTime="Дата и время";
+logS.CIP="IP-адрес";
+logS.CIPs="Ваш адрес на данный момент:";
 
 //javascript
 logS.passErr="ОШИБКА: Вы должны ввести пароль";
