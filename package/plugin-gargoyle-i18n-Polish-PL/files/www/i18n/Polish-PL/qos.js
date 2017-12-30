@@ -59,15 +59,15 @@ qosStr.ACC_Stat="Status kontroli zatorów";
 qosStr.ACC_L_Ck="Sprawdzenie odpowiedzi celu pingu.";
 qosStr.ACC_L_In="Oszacowanie limitu pingu.";
 qosStr.ACC_L_Act="Kontrola jest aktywna.";
-qosStr.ACC_L_Min="Kontrola jest aktywna, klasa minRTT jest aktywna.";
+qosStr.ACC_L_Min="Aktywny tryb minRTT kontroli zatorów.";
 qosStr.ACC_L_Id="Brak kontroli, stan oczekiwania.";
 qosStr.ACC_L_Dis="Kontrola nie jest włączona.";
 qosStr.ACC_L_Lim="Pasmo pobierania jest aktualnie wymuszone.";
 qosStr.ACC_L_Fr="Uczciwy podział pasma pobierania.";
 qosStr.ACC_L_Ld="Bieżące obciążenie pobierania.";
-qosStr.ACC_L_pg="Czas ostatniego pinga.";
-qosStr.ACC_L_Flt="Czas pinga oznaczonego jako przefiltrowany.";
-qosStr.ACC_L_plim="Punkt, w którym kontroler będzie działać na rzecz sprawiedliwego podziału.";
+qosStr.ACC_L_pg="RTT ostatniego pinga.";
+qosStr.ACC_L_Flt="RTT pinga oznaczonego jako przefiltrowany i ostatni maksymalny RTT";
+qosStr.ACC_L_plim="RTT, w którym kontroler będzie działać na rzecz sprawiedliwego podziału.";
 qosStr.ACC_L_AC="Liczba aktywnych klas pobierania z obciążeniem powyżej 4kbps.";
 
 //qos_edit_class.sh
