@@ -22,7 +22,7 @@ elif [ $GET_configtype == "single-ovpn" ] ; then
 	else
 		keystring="key-direction $keydirection"
 	fi
-	logger "keystring is $keystring, keydirection is $keydirection"
+
 	cat << EOF > /tmp/vpn.ac.tmp.ovpn
 $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.conf)
 $(echo -e '<ca>')
