@@ -8,6 +8,6 @@ FR=Courriel de notification
 BR=Notificações por E-mail
 PL=Powiadomienie E-mail
 SK=oznámenia e-mailom
-RU=электронная почта
+RU=Уведомления по Email
 NO=Varsel E-post
 ZH-CN=电子邮件
