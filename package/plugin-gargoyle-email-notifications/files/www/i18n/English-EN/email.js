@@ -4,7 +4,7 @@
 
 email.Time="Time settings";
 email.TPer="Timer Period";
-email.DataSettings="Email contents";
+email.Datasettings="Email contents";
 email.NoTm="Disable timer";
 email.Dly="Daily";
 email.Wkd="Weekday + Sat/Sun";
@@ -15,7 +15,7 @@ email.SmtpSettings="SMTP settings";
 email.ServerIP="Server address:";
 email.ServerPort="Server port:";
 email.Sender="Sender:";
-email.Receipment="Receipment:";
+email.Recipient="Receipment:";
 email.Auth="SMTP authentication:";
 email.Username="Username:";
 email.Password="Password:";

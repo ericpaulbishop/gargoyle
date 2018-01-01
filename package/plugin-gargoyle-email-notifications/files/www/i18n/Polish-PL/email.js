@@ -4,7 +4,7 @@
 
 email.Time="Ustawienia harmonogramu";
 email.TPer="Okres harmonogramu";
-email.DataSettings="Zawartość wiadomości";
+email.Datasettings="Zawartość wiadomości";
 email.NoTm="Wyłączony";
 email.Dly="Codzienny";
 email.Wkd="Dzień powszechny + sobota/niedziela";

@@ -1,10 +1,10 @@
-/*
+﻿/*
  * UTF-8 (with BOM) Russian-RU text strings for email.sh html elements
  */
 
 email.Time="Настройки времени";
 email.TPer="Периодичность таймера";
-email.DataSettings="Содержимое письма";
+email.Datasettings="Содержимое письма";
 email.NoTm="Отключить таймер";
 email.Dly="Ежедневно";
 email.Wkd="Будни + Субб./Воскр.";
@@ -15,7 +15,7 @@ email.SmtpSettings="Настройки SMTP";
 email.ServerIP="Адрес сервера:";
 email.ServerPort="Порт сервера:";
 email.Sender="Отправитель:";
-email.Receipment="Получатель:";
+email.Recipient="Получатель:";
 email.Auth="Авторизация SMTP:";
 email.Username="Логин:";
 email.Password="Пароль:";
