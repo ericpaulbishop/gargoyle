@@ -437,7 +437,7 @@ nav>li.active>a
 {
 	color: #8b9af3;
 }
-.panel.panel-default
+.panel.panel-default, .page-header
 {
 	-moz-border-radius: 20px 0px 20px 0px;
 	-webkit-border-radius: 20px 0px 20px 0px;
