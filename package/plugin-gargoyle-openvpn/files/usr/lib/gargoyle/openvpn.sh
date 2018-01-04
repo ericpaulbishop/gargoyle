@@ -211,6 +211,7 @@ topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
 script-security       2
 tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
+crl-verify            $OPENVPN_DIR/crl.pem
 $openvpn_client_to_client
 
 $openvpn_duplicate_cn
@@ -339,20 +340,22 @@ EOF
 		cat << EOF >>vars
 export CA_EXPIRE=$EXPIRATION_MAX
 export KEY_EXPIRE=$EXPIRATION_MAX
-export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
-export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
+export KEY_EMAIL='$openvpn_client_id@$random_domain.com'
+export KEY_EMAIL='$openvpn_client_id@$random_domain.com'
 export KEY_CN='$openvpn_client_id'
 export KEY_NAME='$openvpn_client_id'
 EOF
 		. ./vars
 		./clean-all
-		cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" ./keys/
+		cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" "$OPENVPN_DIR/index.txt" "$OPENVPN_DIR/serial" ./keys/
 
 	
 		./pkitool "$openvpn_client_id"
+		$OPENSSL ca -gencrl -out keys/crl.pem -config "$KEY_CONFIG"
 
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/ta.key" "$client_conf_dir/"
+		cp "keys/index.txt" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
 		
 		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
 			echo "ipaddr    $openvpn_client_local_subnet_ip"    >'network'
@@ -532,10 +535,32 @@ remove_allowed_client()
 {
 	client_id="$1"
 	remove_client_from_userlist "$client_id"
+	revoke_client_certificate "$current_client"
 	rm -rf "$OPENVPN_DIR/client_conf/$current_client"
 	rm -rf "$OPENVPN_DIR/$current_client.crt"
 	rm -rf "$OPENVPN_DIR/route_data/$current_client"
 	rm -rf "$OPENVPN_DIR/ccd/$current_client"
+}
+
+revoke_client_certificate()
+{
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
+	cd "$random_dir"
+	cp -r "$EASY_RSA_PATH/"* .
+	mkdir keys
+	. ./vars
+	./clean-all
+
+	cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" "$OPENVPN_DIR/index.txt" "$OPENVPN_DIR/serial" "$OPENVPN_DIR/client_conf/$1/$1.crt" ./keys/
+
+	./revoke-full $1
+
+	cp "keys/index.txt" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
+
+	cd /tmp
+	rm -rf "$random_dir"
 }
 
 remove_client_from_userlist()
