@@ -214,12 +214,13 @@ function saveChanges()
 
 		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
+		// unless we are adding/removing a client with a routed subnet, then we should give openvpn a kick to push the server routes
 		var openvpnCurrentlyRunning = (tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnConfig == "server"))
 		if(openvpnConfig == "disabled")
 		{
 			commands = "/etc/init.d/openvpn stop ; " + commands
 		}
-		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
+		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle\.[^server].*subnet_ip/) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
 		{
 			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}
