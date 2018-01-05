@@ -70,16 +70,13 @@ var passInvalid = false;
 <div id="login_status" class="alert alert-danger" role="alert" style="display:none;"></div>
 
 <div class="row">
-	<div class="col-lg-8">
+	<div class="col-lg-12">
 		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title"><%~ EAdmP %></h3>
-			</div>
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="sr-only" for="password" id="password_label"><%~ EAdmP %></label>
 					<span class="col-xs-12">
-						<input id="password" class="form-control" type="password" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25"/>
+						<input id="password" class="form-control" type="password" onkeyup="proofreadLengthRange(this,1,999)" onkeydown="checkKey(event)" size="25" placeholder="<%~ EAdmP %>"/>
 						<button class="btn btn-default" onclick="doLogin()" ><%~ LSect %></button>
 					</span>
 				</div>
