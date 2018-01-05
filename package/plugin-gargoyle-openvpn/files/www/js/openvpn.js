@@ -220,7 +220,7 @@ function saveChanges()
 		{
 			commands = "/etc/init.d/openvpn stop ; " + commands
 		}
-		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle\.[^server].*subnet_ip/) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
+		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || commands.match(/uci.*openvpn_gargoyle.*subnet_ip/) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
 		{
 			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}
