@@ -20,7 +20,9 @@
 						<input id="cmd" class="form-control" onkeydown='checkKey(event)' type="text" size='80'/>
 						<button class='btn btn-primary' id='cmd_button' onclick='runCmd()'><%~ Exe %></button>
 					</span>
-					<div class="col-xs-12 alert alert-warning"><em><%~ CmdWarn %></em></div>
+					<span class="col-xs-12"> 
+						<div class=" alert alert-warning"><em><%~ CmdWarn %></em></div>
+					</span>
 				</div>
 				<textarea style="width:100%" rows=30 id='output'></textarea>
 			</div>
