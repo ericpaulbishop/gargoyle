@@ -19,42 +19,42 @@
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_source_ip" onclick="enableAssociatedField(this,'source_ip', '')" />
-						<label id="source_ip_label" for="source_ip"><%~ SrcIP %>:</label>
+						<label id="source_ip_label" for="use_source_ip"><%~ SrcIP %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" id="source_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" /></span>
+					<span class="col-xs-7"><input type="text" id="source_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="source_ip_label"/></span>
 				</div>
 
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_source_port" onclick="enableAssociatedField(this,'source_port', '')"/>
-						<label id="source_port_label" for="source_port"><%~ SrcPort %>:</label>
+						<label id="source_port_label" for="use_source_port"><%~ SrcPort %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" id="source_port" class="form-control" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" /></span>
+					<span class="col-xs-7"><input type="text" id="source_port" class="form-control" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" aria-labelledby="source_port_label"/></span>
 				</div>
 
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_dest_ip" onclick="enableAssociatedField(this,'dest_ip', '')" />
-						<label id="dest_ip_label" for="dest_ip"><%~ DstIP %>:</label>
+						<label id="dest_ip_label" for="use_dest_ip"><%~ DstIP %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" id="dest_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" /></span>
+					<span class="col-xs-7"><input type="text" id="dest_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="dest_ip_label"/></span>
 				</div>
 
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_dest_port" onclick="enableAssociatedField(this,'dest_port', '')" />
-						<label id="dest_port_label" for="dest_port"><%~ DstPort %>:</label>
+						<label id="dest_port_label" for="use_dest_port"><%~ DstPort %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" id="dest_port" class="form-control" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" /></span>
+					<span class="col-xs-7"><input type="text" id="dest_port" class="form-control" onkeyup="proofreadPortOrPortRange(this)" size="17" maxlength="11" aria-labelledby="dest_port_label"/></span>
 				</div>
 
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_max_pktsize" onclick="enableAssociatedField(this,'max_pktsize', '')" />
-						<label id="max_pktsize_label" for="max_pktsize"><%~ MaxPktLen %>:</label>
+						<label id="max_pktsize_label" for="use_max_pktsize"><%~ MaxPktLen %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<input type="text" id="max_pktsize" class="form-control" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" />
+						<input type="text" id="max_pktsize" class="form-control" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" aria-labelledby="max_pktsize_label"/>
 						<em><%~ byt %></em>
 					</span>
 				</div>
@@ -62,10 +62,10 @@
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_min_pktsize" onclick="enableAssociatedField(this,'min_pktsize', '')" />
-						<label id="min_pktsize_label" for="min_pktsize"><%~ MinPktLen %>:</label>
+						<label id="min_pktsize_label" for="use_min_pktsize"><%~ MinPktLen %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<input type="text" id="min_pktsize" class="form-control" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" />
+						<input type="text" id="min_pktsize" class="form-control" onkeyup="proofreadNumericRange(this,1,1500)" size="17" maxlength="4" aria-labelledby="min_pktsize_label"/>
 						<em><%~ byt %></em>
 					</span>
 				</div>
@@ -73,10 +73,10 @@
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_transport_protocol" onclick="enableAssociatedField(this,'transport_protocol', '')" />
-						<label id="transport_protocol_label" for="transport_protocol"><%~ TrProto %>:</label>
+						<label id="transport_protocol_label" for="use_transport_protocol"><%~ TrProto %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<select id="transport_protocol" class="form-control"/>
+						<select id="transport_protocol" class="form-control" aria-labelledby="transport_protocol_label">
 							<option value="TCP">TCP</option>
 							<option value="UDP">UDP</option>
 							<option value="ICMP">ICMP</option>
@@ -88,10 +88,10 @@
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_connbytes_kb" onclick="enableAssociatedField(this,'connbytes_kb', '')" />
-						<label id="connbytes_kb_label" for="connbytes_kb"><%~ Conreach %>:</label>
+						<label id="connbytes_kb_label" for="use_connbytes_kb"><%~ Conreach %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<input type="text" id="connbytes_kb" class="form-control" onkeyup="proofreadNumeric(this)" size="17" maxlength="28" />
+						<input type="text" id="connbytes_kb" class="form-control" onkeyup="proofreadNumeric(this)" size="17" maxlength="28" aria-labelledby="connbytes_kb_label"/>
 						<em><%~ KBy %></em>
 					</span>
 				</div>
@@ -99,10 +99,10 @@
 				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_app_protocol" onclick="enableAssociatedField(this,'app_protocol', '')" />
-						<label id="app_protocol_label" for="app_protocol"><%~ AppProto %>:</label>
+						<label id="app_protocol_label" for="use_app_protocol"><%~ AppProto %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<select id="app_protocol" class="form-control">
+						<select id="app_protocol" class="form-control" aria-labelledby="app_protocol_label">
 						<%
 						sed -e '/^#/ d' -e "s/\([^ ]* \)\(.*\)/<option value='\1'>\2<\/option>/" /etc/l7-protocols/l7index
 						%>
@@ -116,13 +116,13 @@
 						<label id="comment_rule_label" for="use_comment_rule"><%~ Comment %>:</label>
 					</span>
 					<span class="col-xs-7">
-						<input class="form-control" type="text" id="comment_rule" size="17" maxlength="25" />
+						<input class="form-control" type="text" id="comment_rule" size="17" maxlength="25" aria-labelledby="comment_rule_label"/>
 					</span>
 
 				</div>
 
 				<div class="row form-group">
-					<label class="col-xs-5" id="classification_label" for="class_name" ><%~ SetClass %>:</label>
+					<label class="col-xs-5" id="classification_label" for="classification"><%~ SetClass %>:</label>
 					<span class="col-xs-7"><select id="classification" class="form-control"></select></span>
 				</div>
 			</div>
