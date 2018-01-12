@@ -558,20 +558,26 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_mac_container" class="row form-group">
 					
-					<span class="col-xs-1"><input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/></span>
-					<label class="col-xs-4 short-left-pad" for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
+					<span class="col-xs-5">
+						<input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/>
+						<label class="short-left-pad" for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
+					</span>
 					<span class="col-xs-7"><input type="text" name="wan_mac" id="wan_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/></span>
 				</div>
 
 				<div id="wan_mtu_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/></span>
-					<label class="col-xs-4 short-left-pad" for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
+					<span class="col-xs-5">
+						<input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/>
+						<label class="short-left-pad" for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
+					</span>
 					<span class="col-xs-7"><input type="text" name="wan_mtu" id="wan_mtu" class="form-control" onkeyup="proofreadNumeric(this)" size="20" maxlength="4"/></span>
 				</div>
 
 				<div id="wan_ping_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="drop_wan_ping"/></span>
-					<label class="col-xs-11 short-left-pad" for="drop_wan_ping" id="wan_ping_label"><%~ DPing %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="drop_wan_ping"/>
+						<label class="short-left-pad" for="drop_wan_ping" id="wan_ping_label"><%~ DPing %></label>
+					</span>
 				</div>
 
 			</div>
@@ -626,13 +632,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="lan_dns_options_container">
 				
 					<div class="row form-group">
-						<span class="col-xs-1"><input type="checkbox" id="lan_dns_altroot" /></span>
-						<label class="col-xs-11 short-left-pad" for="lan_dns_altroot" id="lan_dns_altroot_label" ><%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
+						<span class="col-xs-12">
+							<input type="checkbox" id="lan_dns_altroot" />
+							<label class="short-left-pad" for="lan_dns_altroot" id="lan_dns_altroot_label" ><%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
+						</span>
 					</div>
 
 					<div class="row form-group">
-						<span class="col-xs-1"><input type="checkbox" id="lan_dns_force"/></span>
-						<label class="col-xs-11 short-left-pad" for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle"><%~ RtrDNS %></label>
+						<span class="col-xs-12">
+							<input type="checkbox" id="lan_dns_force"/>
+							<label class="short-left-pad" for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle"><%~ RtrDNS %></label>
+						</span>
 					</div>
 				</div>
 
