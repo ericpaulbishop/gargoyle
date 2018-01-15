@@ -250,8 +250,10 @@
 						</div>
 						<div id="openvpn_client_ta_key_file_container">
 							<div class="row form-group">
-								<span class="col-xs-1"><input type='checkbox' id='openvpn_client_use_ta_key_file' name='use_ta_key_file' onclick='enableAssociatedField(this, "openvpn_client_ta_key_file", "")' /></span>
-								<label class="col-xs-11" id='openvpn_client_use_ta_key_file_label' for='openvpn_client_use_ta_key_file'><%~ UseTAK %></label>
+								<span class="col-xs-12">
+									<input type='checkbox' id='openvpn_client_use_ta_key_file' name='use_ta_key_file' onclick='enableAssociatedField(this, "openvpn_client_ta_key_file", "")' />
+									<label id='openvpn_client_use_ta_key_file_label' for='openvpn_client_use_ta_key_file'><%~ UseTAK %></label>
+								</span>
 							</div>
 							<div class="row form-group">
 								<label class="col-xs-5" id="openvpn_client_ta_key_file_label" for="openvpn_client_use_ta_key_file"><%~ TAKeyF %>:</label>
@@ -337,8 +339,10 @@
 
 						<div id="openvpn_client_ta_key_text_container">
 							<div class="row form-group">
-								<span class="col-xs-1"><input type='checkbox' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1");updateClientConfigTextFromControls()' /></span>
-								<label class="col-xs-11" id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'><%~ UseTAK %></label>
+								<span class="col-xs-12">
+									<input type='checkbox' id='openvpn_client_use_ta_key_text' name='use_ta_key_text' onclick='enableAssociatedField(this, "openvpn_client_ta_key_text", "");enableAssociatedField(this, "openvpn_client_ta_direction", "1");updateClientConfigTextFromControls()' />
+									<label id='openvpn_client_use_ta_key_text_label' for='openvpn_client_use_ta_key_text'><%~ UseTAK %></label>
+								</span>
 							</div>
 							<div class="row form-group">
 								<label class="col-xs-5" for="openvpn_client_ta_direction"><%~ TADir %>:</label>
