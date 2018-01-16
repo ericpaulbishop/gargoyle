@@ -208,12 +208,16 @@
 			<div class="panel-body">
 				<form id='openvpn_client_form' enctype="multipart/form-data" method="post" action="utility/openvpn_upload_client.sh" target="client_add_target">
 					<div class="row form-group">
-						<span class="col-xs-1"><input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" /></span>
-						<label class="col-xs-11" for="openvpn_client_config_upload"><%~ UpCfgF %></label>
+						<span class="col-xs-12">
+							<input type="radio" id="openvpn_client_config_upload" name="client_config_mode" onclick="setClientVisibility(document)" />
+							<label for="openvpn_client_config_upload"><%~ UpCfgF %></label>
+						</span>
 					</div>
 					<div class="row form-group">
-						<span class="col-xs-1"><input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" /></span>
-						<label class="col-xs-11" for="openvpn_client_config_manual"><%~ CfgMan %></label>
+						<span class="col-xs-12">
+							<input type="radio" id="openvpn_client_config_manual" name="client_config_mode" onclick="setClientVisibility(document)" />
+							<label for="openvpn_client_config_manual"><%~ CfgMan %></label>
+						</span>
 					</div>
 
 					<div id="openvpn_client_file_controls">
