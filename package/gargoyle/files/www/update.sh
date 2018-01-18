@@ -23,7 +23,10 @@
 <div id="upgrade_section" class="row">
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-			<div class="panel-body">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ UpFrm %></h3>
+			</div>
+				<div class="panel-body">
 				<div class="row form-group">
 					<div class="col-lg-12">
 						<div class="alert alert-warning" role="alert">

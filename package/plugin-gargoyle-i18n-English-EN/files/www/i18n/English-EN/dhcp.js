@@ -28,3 +28,4 @@ dhcpS.AltGW="Gateway address";
 dhcpS.leaseERR="Lease time value must be beatwin 0 and 71582788."; 
 dhcpS.rangeGWErr="Alternative default Gateway address can't be 0 or 255 in subnet.";
 dhcpS.leaseGWErr="Specified DHCP range contains alternative Gateway address.";
+dhcpS.DHCPstp="DHCP Configuration";
