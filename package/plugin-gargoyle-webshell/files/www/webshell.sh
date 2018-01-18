@@ -13,7 +13,10 @@
 <div class="row">
 	<div class="col-lg-12">
 		<div class="panel panel-default">
-			<div class="panel-body">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ Webs %></h3>
+			</div>
+				<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for='cmd' id='cmd_label'><%~ Cmd %>:</label>
 					<span class="col-xs-7">
