@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-adblock
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=DNS Adblocking support for Gargoyle
-	MAINTAINER:=Michael Gray
+	MAINTAINER:=Michael Gray <support@lantisproject.com>
 	DEPENDS:=+gargoyle +iptables-mod-nat-extra +iptables-mod-iprange
 	PKGARCH:=all
 endef

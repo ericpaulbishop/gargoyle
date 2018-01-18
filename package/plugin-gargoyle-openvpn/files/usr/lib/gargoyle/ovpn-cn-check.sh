@@ -15,7 +15,7 @@
 #    Written by Robert Penz <robert@penz.name> under the GPL 2
 #    Parts are copied from the verify-cn sample OpenVPN
 #    tls-verify script.
-#    Modified for Gargoyle Web Interface by Michael Gray
+#    Modified for Gargoyle Web Interface by Michael Gray <support@lantisproject.com>
 
 
 [ $# -eq 3 ] || { echo usage: ovpn-cn-check.sh userfile certificate_depth X509_NAME_oneline ; exit 255 ; }
