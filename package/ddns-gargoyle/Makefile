@@ -11,9 +11,13 @@ PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/ddns-gargoyle
+define Package/ddns-gargoyle/Default
 	SECTION:=net
 	CATEGORY:=Network
+endef
+
+define Package/ddns-gargoyle
+	$(call Package/ddns-scripts/Default)
 	DEPENDS:=+libericstools +ewget
 	TITLE:=Dynamic DNS daemon for use with Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
@@ -23,6 +27,18 @@ define Package/ddns-gargoyle/description
 	A highly configurable daemon for performing
 	dynamic dns updates, designed for use with
 	Gargoyle Web Interface
+endef
+
+define Package/plugin-gargoyle-ddns-cloudflare
+	$(call Package/ddns-scripts/Default)
+	TITLE:=Dynamic DNS daemon extension for Cloudflare
+	MAINTAINER:=Michael Gray <support@lantisproject.com>
+	DEPENDS:=+ddns-gargoyle +curl +ca-certificates-combined
+endef
+
+define Package/plugin-gargoyle-ddns-cloudflare/description
+	An extension for ddns-gargoyle to enable
+	cloudflare.com APIv4 support
 endef
 
 define Build/Prepare
@@ -46,10 +62,8 @@ endef
 define Package/ddns-gargoyle/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ddns_updater $(1)/usr/bin/ddns_gargoyle
-	$(CP) ./files/* $(1)/
+	$(CP) ./files/etc $(1)/
 endef
-
-
 
 define Package/ddns-gargoyle/prerm
 	$${IPKG_INSTROOT}/etc/init.d/ddns_gargoyle stop  2>/dev/null
@@ -57,5 +71,16 @@ define Package/ddns-gargoyle/prerm
 	ls >/dev/null 2>&1
 endef
 
+define Package/plugin-gargoyle-ddns-cloudflare/install
+	$(INSTALL_DIR) $(1)/usr/lib/ddns-gargoyle
+	$(CP) ./files/extensions/cloudflare-ddns-helper.sh $(1)/usr/lib/ddns-gargoyle
+endef
+
+define Package/plugin-gargoyle-ddns-cloudflare/prerm
+	$${IPKG_INSTROOT}/etc/init.d/ddns_gargoyle stop  2>/dev/null
+	ls >/dev/null 2>&1
+endef
+
 
 $(eval $(call BuildPackage,ddns-gargoyle))
+$(eval $(call BuildPackage,plugin-gargoyle-ddns-cloudflare))
